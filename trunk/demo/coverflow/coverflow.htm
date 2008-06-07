@@ -1,0 +1,96 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>uupaa.js - uu.module.coverflow test</title>
+<!--[if IE]><script id="xpath.js" type="text/javascript" src="../../lib/xpath.js"></script><![endif]-->
+<!--[if IE]><script id="excanvas.js" type="text/javascript" src="../../lib/excanvas.js"></script><![endif]-->
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
+<style>
+body {
+  background-color: black;
+  color: white;
+}
+#canvas0 {
+  position: absolute;
+  top: 10em;
+  left: 0;
+  z-index: 0;
+}
+img {
+  display: none;
+}
+</style>
+</head>
+<body>
+<a href="../../README.htm">README.htm</a> &gt; uu.module.coverflow.js<br />
+<p>Cover Flowの簡易実装です。<br />
+画像を動的に読み込んだりもしていないので、実際に何ができるわけではありませんが、<br />
+JavaScriptの可能性を見せるデモにはなると思います。</p>
+<p>手持ちのローエンドノートPC + Firefox2用に動作速度を合わせてあるので、Firefox3や高性能PCでは意図した動作とは異なります。</p>
+
+<canvas id="canvas0" width="640" height="320"></canvas>
+<img id="bg0" src="./bg.jpg" alt="" />
+<img id="cover0" src="./SANY0087.jpg" alt="" />
+<img id="cover1" src="./SANY0091.jpg" alt="" />
+<img id="cover2" src="./SANY0093.jpg" alt="" />
+<img id="cover3" src="./SANY0156.jpg" alt="" />
+<img id="cover4" src="./SANY0159.jpg" alt="" />
+<img id="cover5" src="./SANY0169.jpg" alt="" />
+<img id="cover6" src="./SANY0180.jpg" alt="" />
+<img id="cover7" src="./SANY0184.jpg" alt="" />
+<img id="cover8" src="./SANY0187.jpg" alt="" />
+<img id="cover9" src="./SANY0190.jpg" alt="" />
+<img id="cover10" src="./SANY0192.jpg" alt="" />
+<img id="cover11" src="./SANY0204.jpg" alt="" />
+<img id="cover12" src="./SANY0206.jpg" alt="" />
+<img id="cover13" src="./cover0.jpg" alt="" />
+
+<script type="text/javascript">
+
+var cfbtn = false;
+function boot() {
+  var fn1 = function(view) {
+    view.style.color = "white";
+    view.innerHTML = "title: unknown<br />album: unknown";
+  };
+  var fn2 = function(view) {
+    view.style.color = "white";
+    view.innerHTML = "";
+  };
+  var fn3 = function(view) {
+    view.style.color = "red";
+    view.innerHTML = "PLAY...";
+  };
+
+  var cf = new uu.module.coverflow(uu.id("canvas0"), { x: 100, y: 100 }, 160);
+  cf.setContentImage("bg0");
+  cf.load([
+      { id: "cover0",  show: fn1, hide: fn2, exec: fn3 },
+      { id: "cover1",  show: fn1, hide: fn2, exec: fn3 },
+      { id: "cover2",  show: fn1, hide: fn2, exec: fn3 },
+      { id: "cover3",  show: fn1, hide: fn2, exec: fn3 },
+      { id: "cover4",  show: fn1, hide: fn2, exec: fn3 },
+      { id: "cover5",  show: fn1, hide: fn2, exec: fn3 },
+      { id: "cover6",  show: fn1, hide: fn2, exec: fn3 },
+      { id: "cover7",  show: fn1, hide: fn2, exec: fn3 },
+      { id: "cover8",  show: fn1, hide: fn2, exec: fn3 },
+      { id: "cover9",  show: fn1, hide: fn2, exec: fn3 },
+      { id: "cover10", show: fn1, hide: fn2, exec: fn3 },
+      { id: "cover11", show: fn1, hide: fn2, exec: fn3 },
+      { id: "cover12", show: fn1, hide: fn2, exec: fn3 },
+      { id: "cover13", show: fn1, hide: fn2, exec: fn3 }
+  ]);
+  cf.draw();
+}
+uu.module.load("../../", "ui,canvas,coverflow", function() {
+  uu.canvas.ready(boot);
+});
+</script>
+<!--
+<input type="button" value="btn" onclick="window.cfbtn = !!!window.cfbtn" />
+-->
+
+</body>
+</html>

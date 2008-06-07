@@ -1,0 +1,80 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>uupaa.js - uu.image.png24 test</title>
+<!--[if IE]><script type="text/javascript" src="../../lib/xpath.js"></script><![endif]-->
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
+<style>
+body { color: white; background: black url(./prairiedog_bg.jpg) center center; }
+div,img { margin: 5px; }
+.alpha { border: 3px dotted yellow }
+</style>
+</head>
+<body>
+<a href="../../README.htm">README.htm</a> &gt; uu.image.png24.htm
+
+<dl>
+  <dt>uu.image.png24() - IE5.5と6.0で24bit png画像のαチャンネルを透過させる</dt>
+  <dd>IE6ではαチャンネルを持つ24bitのpng画像を表示させると、
+      本来透過されるべき部分がグレーで表示されてしまいます。<br />
+      imageモジュールをロードすると、自動的に透過処理が行われます。<br />
+      自動で透過処理するpng画像は、altまたはsrcに文字列("24b")が含まれているか、class="alpha"を持つものだけです。<br />
+      それ以外のpng画像は自動では処理されません。<br /><br />
+      指定したpng画像を透過させたい場合は、uu.image.png24()を使用します。<br />
+      uu.image.png24はIE5.5とIE6専用の機能です。他のブラウザでは何もしなくても透過します。<br />
+      背景画像に24bit pngを指定し、透過させる方法はありません。
+  </dd>
+</dl>
+<div>
+  <input type="button" value="imageモジュールをロードする uu.module.load('image')" onclick="loadModule()" />
+</div>
+
+
+<div>
+  <div style="border: 1px dotted blue; float: left">
+    24bit png画像です。<br />
+    class="alpha"となっているため、<br />自動で透過処理が行われます。<br />
+    <img id="a" class="alpha aaa bbb" src="./prairiedog.png" alt="" />
+  </div>
+  <div style="border: 1px dotted blue; float: left">
+    24bit png画像です。<br />
+    src(ファイル名)に"24b"があるため、<br />
+    自動で透過処理が行われます。<br />
+    <img src="./prairiedog_24bpp.png" alt="" />
+  </div>
+  <div style="border: 1px dotted blue; float: left">
+    24bit png画像ですが、<br />
+    altやsrcに文字列("24b")が含まれておらず、<br />classに"alpha"も無いため、<br />
+    自動で透過処理が行われません。<br />
+    <img id="manually" src="./prairiedog.png" alt="" />
+    <input id="button2" type="button" value="この画像を透過させる" onclick="force()" style="display: none" />
+  </div>
+  <p style="clear: both"></p>
+  <div style="border: 1px dotted blue; float: left">
+    8bit png画像です。最初から背景が透過されていますが、<br />
+    α成分による透過ができないため、<br />
+    背景との境界線がはっきり見えてしまいます。<br />
+    <img src="./prairiedog_8bpp.png" alt="" />
+  </div>
+</div>
+<script>
+function loadModule() {
+  uu.module.load('../../', 'image',
+    function() {
+      uu.id("button2").style.display = "block"
+    }
+  );
+}
+function force() {
+  uu.image.png24(uu.id("manually")); // 透過させる
+}
+function boot() {
+}
+//uu.module.load("../../", "image", boot);
+uu.window.ready(boot);
+</script>
+
+</body>
+</html>

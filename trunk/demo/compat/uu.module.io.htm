@@ -1,0 +1,62 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>uupaa.js - uu.module.io test</title>
+<!--[if IE]><script type="text/javascript" src="../../lib/xpath.js"></script><![endif]-->
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
+<style type="text/css">
+body { background-color: black; color: white; }
+</style>
+</head>
+<body>
+<a href="../../README.htm">README.htm</a> &gt; uu.module.io.htm<br />
+
+<table>
+<tr>
+  <td>ソース</td><td><input id="source" type="text" value="" style="width: 20em" /></input></td>
+</tr><tr>
+  <td>HTMLToHTMLEntity:<br />　&amp;&lt;&gt; → &amp;amp;&amp;lt;&amp;gt;</td><td id="HTMLToHTMLEntity"></td>
+</tr><tr>
+  <td>HTMLEntityToHTML:<br />　&amp;amp;&amp;lt;&amp;gt; → &amp;&lt;&gt;</td><td id="HTMLEntityToHTML"></td>
+</tr><tr>
+<!--
+  <td>LineBreakToBR:<br />　\r\n → &lt;br /&gt;</td><td id="LineBreakToBR"></td>
+</tr><tr>
+  <td>BRToLineBreak:<br />　&lt;br /&gt; → \r\n</td><td id="BRToLineBreak"></td>
+ -->
+</tr><tr>
+  <td>encodeURLSafe64</td><td id="encodeURLSafe64"></td>
+</tr><tr>
+  <td>decodeURLSafe64</td><td id="decodeURLSafe64"></td>
+</tr><tr>
+  <td>encodeURIComponent</td><td id="encodeURIComponent"></td>
+</tr><tr>
+  <td>decodeURIComponent</td><td id="decodeURIComponent"></td>
+</tr><tr>
+  <td><input type="button" value="encode" onclick="encode()" /></td><td></td>
+</tr>
+</table>
+
+<script type="text/javascript">
+function encode() {
+  var txt = uu.id("source").value;
+  uu.id("HTMLToHTMLEntity").innerText = uu.codec(txt, "HTMLToHTMLEntity");
+  uu.id("HTMLEntityToHTML").innerText = uu.codec(txt, "HTMLEntityToHTML");
+/*
+  uu.id("LineBreakToBR").innerText = uu.codec(txt, "LineBreakToBR");
+  uu.id("BRToLineBreak").innerText = uu.codec(txt, "BRToLineBreak");
+ */
+  uu.id("encodeURLSafe64").innerText = uu.codec(txt, "encodeURLSafe64");
+  uu.id("decodeURLSafe64").innerText = uu.codec(txt, "decodeURLSafe64");
+  uu.id("encodeURIComponent").innerText = uu.codec(txt, "encodeURIComponent");
+  uu.id("decodeURIComponent").innerText = uu.codec(txt, "decodeURIComponent");
+}
+
+function boot() {
+}
+uu.module.load("../../", "io", boot);
+</script>
+</body>
+</html>

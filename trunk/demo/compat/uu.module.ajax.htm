@@ -1,0 +1,67 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>uupaa.js - uu.module.ajax test</title>
+<!--[if IE]><script id="xpath.js" type="text/javascript" src="../../lib/xpath.js"></script><![endif]-->
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
+<style type="text/css">
+body { background-color: black; color: white; }
+.result { color: lightblue }
+.step { color: gray }
+</style>
+</head>
+<body>
+<a href="../../README.htm">README.htm</a> &gt; uu.module.ajax.htm
+<dl>
+  <dt>uu.module.ajax.loadNeo() - 更新チェック付きの非同期リクエスト</dt>
+  <dd>更新チェック付きで非同期リクエストを発行します。GETメソッド専用です。更新されていない場合は304が返ります。</dd>
+  <dt>uu.module.ajax.load() - 非同期リクエスト</dt>
+  <dd>更新チェック無しで非同期リクエストを発行します。GET/POSTメソッド両用です。</dd>
+  <dt>uu.module.ajax.loadSync() - 同期リクエスト</dt>
+  <dd>更新チェック無しで同期リクエストを発行します。GET/POSTメソッド両用です。</dd>
+</dl>
+<p>※ FirefoxやOperaでテストする場合はサーバにuploadする必要があります(クロスドメインはBad Request(400))。<br />
+   SafariやIEは、ローカルでも動作するようです。</p>
+
+
+Request URL: <input type="text" value="http://localhost/ajax.txt" size="64" /><br />
+GET Method:
+<input type="button" value="uu.ajax.loadNeo()" onclick="ajax('loadNeo')" /> |
+<input type="button" value="uu.ajax.load()" onclick="ajax('load')" /> |
+<input type="button" value="uu.ajax.loadSync()" onclick="ajax('loadSync')" /><br />
+POST Method:
+<input type="button" value="uu.ajax.load()" onclick="ajax('load', 'posted data')" /> |
+<input type="button" value="uu.ajax.loadSync()" onclick="ajax('loadSync', 'posted data')" />
+<p id="step0" class="step"></p>
+<p id="step1" class="step"></p>
+<p id="step2" class="step"></p>
+<p id="step3" class="step"></p>
+<p id="step4" class="step"></p>
+
+<script>
+function ajax(method, data) {
+  data = data || "";
+  var stepStr = ["BEGIN", "SEND", "OK", "NG", "END"],
+      requestURL = uu.xpath.snap('//input[@type="text"]', "value")[0],
+      result = [0,1,2,3,4].map(function(v) {
+        var e = uu.id("step" + v);
+        e.innerText = "";
+        return e;
+      });
+  uu.ajax[method](requestURL, function(uid, step, response, status, url, async) {
+    result[step].innerText =
+      uu.sprintf("uid[%s], %s res[%s], code[%d], url[%s] %s",
+                 uid, stepStr[step], response, status, url, async ? "async" : "sync");
+  }, data);
+}
+
+function boot() {
+}
+uu.window.ready(boot);
+
+</script>
+
+</body>
+</html>

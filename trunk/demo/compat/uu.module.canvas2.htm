@@ -1,0 +1,68 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>uupaa.js - uu.module.effect test</title>
+<!--[if IE]><script id="xpath.js" type="text/javascript" src="../../lib/xpath.js"></script><![endif]-->
+<!--[if IE]><script id="excanvas.js" type="text/javascript" src="../../lib/excanvas.js"></script><![endif]-->
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
+</style>
+</head>
+<body>
+<canvas id="hoge" width="300" height="300" style="border: 1px solid blue"></canvas>
+<script>
+function boot() {
+  var canvas = document.getElementById("hoge");
+  var ctx = canvas.getContext("2d");
+  uu.canvas.drawGrid(ctx, function() {
+/*
+    ctx.beginPath();
+    ctx.strokeStyle = "blue";
+    ctx.moveTo(0, 50); ctx.lineTo(300, 50);
+    ctx.moveTo(0, 100); ctx.lineTo(300, 100);
+    ctx.moveTo(0, 150); ctx.lineTo(300, 150);
+    ctx.moveTo(0, 200); ctx.lineTo(300, 200);
+    ctx.moveTo(0, 250); ctx.lineTo(300, 250);
+    ctx.moveTo(0, 300); ctx.lineTo(300, 300);
+    ctx.moveTo(50, 0); ctx.lineTo(50, 300);
+    ctx.moveTo(100, 0); ctx.lineTo(100, 300);
+    ctx.moveTo(150, 0); ctx.lineTo(150, 300);
+    ctx.moveTo(200, 0); ctx.lineTo(200, 300);
+    ctx.moveTo(250, 0); ctx.lineTo(250, 300);
+    ctx.moveTo(300, 0); ctx.lineTo(300, 300);
+    ctx.stroke();
+ */
+
+    // ／
+    ctx.beginPath();
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = "red";
+    ctx.moveTo(0, 200);
+    ctx.lineTo(100, 100);
+    ctx.stroke();
+
+    // ＼
+    ctx.beginPath();
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = "red";
+    ctx.moveTo(100, 100);
+    ctx.lineTo(200, 200);
+    ctx.stroke();
+
+
+    // ⌒
+    ctx.beginPath();
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = "black";
+    ctx.moveTo(0, 200);
+    ctx.arcTo(100, 100, 200, 200, 40);
+    //ctx.lineTo(200, 200);
+    ctx.stroke();
+  });
+}
+uu.module.load("../../", "image,canvas,canvas2");
+uu.canvas.ready(boot);
+</script>
+</body>
+</html>

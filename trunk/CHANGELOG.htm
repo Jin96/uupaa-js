@@ -1,0 +1,102 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<!--[if IE]><script id="xpath.js" type="text/javascript" src="./lib/xpath.js"></script><![endif]-->
+<script id="uupaa.js" type="text/javascript" src="./uupaa.js"></script>
+<title>uupaa.js CHNAGE LOG</title>
+<style type="text/css">
+body {
+  background-color: black; color: whitesmoke;
+  font-family:'メイリオ',Meiryo,'ヒラギノ角ゴ Pro W3','Hiragino Kaku Gothic Pro','ＭＳ Ｐゴシック',sans-serif;
+  margin: 3em; line-height: 1.5;
+}
+a, b { color: lightblue }
+pre { border: 1px solid navy }
+dt { font-weight: bold; color: lightblue }
+.add { color: chartreuse }
+.fix { color: skyblue }
+.del { color: darkgray }
+#total { margin: 0 auto; }
+#total, #total thead th { border: 1px solid gray }
+#total td { text-align: right }
+</style>
+</head>
+<body>
+<a href="./README.htm">README.htm</a> &gt; CHANGELOG.htm
+
+<table id="total">
+  <thead>
+    <tr><th>Version</th><th>追加<br />(add)</th><th>修正<br />(fix)</th><th>削除<br />(del)</th><th>合計<br />(total)</th></tr>
+  </thead>
+  <tbody>
+    <tr><th>0.x</th><td id="add0.x" class="add">-</td>
+                    <td id="fix0.x" class="fix">-</td>
+                    <td id="del0.x" class="del">-</td>
+                    <td id="total.x" class="total">-</td>
+    </tr>
+  </tbody>
+</table>
+<div id="log">
+  <div id="version1.x">
+  </div>
+  <div id="version0.x">
+    <dl>
+      <dt>Version 0.1 2008-06-08</dt>
+      <dd>
+        <ul>
+          <li class="add">uupaa.js (uu.json.load()): 内部で生成したユニークIDを第一引数で返すように機能を追加</li>
+          <li class="add">uupaa.js (uu.ajax.load()): 内部で生成したユニークIDを第一引数で返すように機能を追加, クロスドメイン時の例外を400(Bad Request)として処理。uu.ajax.loadNeo(), uu.ajax.loadSync()も同様</li>
+          <li class="del">uu.module.json.js: 削除し、uupaa.js本体に機能を移動</li>
+          <li class="del">uu.module.ajax.js: 削除し、uupaa.js本体に機能を移動</li>
+          <li class="add">uu.module.perry.js: 追加</li>
+          <li class="del">uupaa.js (Array.hash()): 削除</li>
+          <li class="del">uupaa.js (Array.slight()): 削除</li>
+          <li class="fix">uupaa.js (uu.module._inject()): IEでモジュールのロードに失敗する件を対策。<br />
+              script要素にsrcを設定してからappendChild()を行わないとスクリプトがロードされないため、
+              ユーザエージェントで切り分け。</li>
+          <li class="fix">uupaa.js (uu.module.load()): IE8でモジュールのロードに失敗する件を対策。<br />
+              onreadystatechange()ハンドラ内で、this.readyStateが"complete"ではなく"loaded"になっている。
+              条件に this.readyState === "loaded" を追加。</li>
+          <li>new function() {...}; を (function() {...})(); スタイルに書き直し。</li>
+        </ul>
+      <dd>
+      <dt>Version 0.0 2008-05-20</dt>
+      <dd>
+        <ul>
+          <li>ライセンスをMITに。</li>
+          <li>ウーパールーパーをペットショップで発見, ライブラリの名前は uupaa.js に。</li>
+        </ul>
+      </dd>
+      <dt>Version 0.0 2008-04-01</dt>
+      <dd>
+        <ul>
+          <li>自分用のJavaScriptライブラリ(仮称) 作成開始</li>
+        </ul>
+      <dd>
+    </dl>
+  </div>
+</div>
+<script>
+function boot() {
+  var data = {
+    add: uu.xpath('count(id("version0.x")//li[@class="add"])'),
+    fix: uu.xpath('count(id("version0.x")//li[@class="fix"])'),
+    del: uu.xpath('count(id("version0.x")//li[@class="del"])')
+  };
+  uu.id("add0.x").innerText = data.add;
+  uu.id("fix0.x").innerText = data.fix;
+  uu.id("del0.x").innerText = data.del;
+
+  var total = 0;
+  uu.forEach(data, function(v) {
+    total += v;
+  });
+  uu.id("total.x").innerText = total;
+}
+uu.window.ready(boot);
+</script>
+</body>
+</html>
+

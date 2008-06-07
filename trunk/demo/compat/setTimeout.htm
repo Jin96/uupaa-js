@@ -1,0 +1,34 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Opera9.5beta - setTimeout test</title>
+</head>
+<body>
+<table>
+<tr><th>-</th><th>5sec</th><th>10sec</th><th>20sec</th></tr>
+<tr><th>setTimeout</th><td id="result1"></td><td id="result2"></td><td id="result3"></td></tr>
+<tr><th>setInterval</th><td id="result4"></td><td id="result5"></td><td id="result6"></td></tr>
+</table>
+<script>
+function timeout1() { document.getElementById("result1").innerHTML = "o"; }
+function timeout2() { document.getElementById("result2").innerHTML = "o"; }
+function timeout3() { document.getElementById("result3").innerHTML = "o"; }
+function interval1() { document.getElementById("result4").innerHTML = "o"; }
+function interval2() { document.getElementById("result5").innerHTML = "o"; }
+function interval3() { document.getElementById("result6").innerHTML = "o"; }
+
+window.onload = function() {
+  var tmid1, tmid2, tmid3, tmid4, tmid5, tmid6;
+  tmid1 = window.setTimeout(timeout1, 5000);
+  tmid2 = window.setTimeout(timeout2, 10000);
+  tmid3 = window.setTimeout(timeout3, 20000);
+  tmid4 = window.setInterval(interval1, 5000);
+  tmid5 = window.setInterval(interval2, 10000);
+  tmid6 = window.setInterval(interval3, 20000);
+  window.status = tmid1 + ", " + tmid2 + ", " + tmid3
+}
+</script>
+</body>
+</html>
