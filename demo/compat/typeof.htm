@@ -1,0 +1,65 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>uupaa.js - uu.module.polygon x 8 test</title>
+<!--[if IE]><script id="xpath.js" type="text/javascript" src="../../lib/xpath.js"></script><![endif]-->
+<!--[if IE]><script id="excanvas.js" type="text/javascript" src="../../lib/excanvas.js"></script><![endif]-->
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
+</head>
+<body>
+<a href="../../README.htm">README.htm</a> &gt; typeof.htm
+<table><tr>
+<td>arguments</td><td id="arguments"></td></tr><tr>
+<td>document.getElementsByTagName("canvas")</td><td id="getElementsByTagName"></td></tr><tr>
+<td>document.getElementById("canvas")</td><td id="getElementById"></td></tr><tr>
+</table>
+<canvas id="canvas"></canvas>
+
+<script>
+function isA(mix) { return mix instanceof Array; }
+function isAL(mix) { return "length" in mix; }
+function isU(mix) { return typeof mix === "undefined"; }
+function isF(mix) { return typeof mix === "function"; }
+function isN(mix) { return typeof mix === "number" && isFinite(mix); }
+function isB(mix) { return typeof mix === "boolean"; }
+function isS(mix) { return typeof mix === "string"; }
+function type(id, mix) {
+  var rv = "";
+  if (mix === null) {
+    rv = "null: " + mix;
+  } else if (isN(mix)) {
+    rv = "number:" + mix;
+  } else if (isB(mix)) {
+    rv = "boolean:" + mix;
+  } else if (isS(mix)) {
+    rv = "string:" + mix;
+  } else if (isU(mix)) {
+    rv =  "undefined:" + mix;
+  } else if (isA(mix)) {
+    rv = "array:" + mix;
+  } else if (isF(mix)) {
+    rv = "function:" + mix;
+  } else if (isAL(mix)) {
+    rv = "array like:" + mix;
+  } else {
+    rv = "other:" + mix;
+  }
+  document.getElementById(id).innerText = rv;
+}
+
+function boot() {
+var tag = document.getElementsByTagName("canvas");
+alert(typeof arguments);
+alert(typeof tag);
+
+  type("arguments", arguments);
+  type("getElementsByTagName", document.getElementsByTagName("canvas")); // NodeList
+  type("getElementById", document.getElementById("canvas")); // HTMLElement
+}
+window.onload = boot;
+</script>
+
+</body>
+</html>

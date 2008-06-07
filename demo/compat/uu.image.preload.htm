@@ -1,0 +1,47 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>uupaa.js - uu.image.preload test</title>
+<!--[if IE]><script type="text/javascript" src="../../lib/xpath.js"></script><![endif]-->
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
+<style type="text/css">
+body { color: white; background: black url(prairiedog.png) no-repeat center center; }
+</style>
+</head>
+<body>
+<a href="../../README.htm">README.htm</a> &gt; uu.image.preload.htm
+
+<dl>
+  <dt>uu.image.preload - </dt>
+  <dd>画像をプリロードします。<br />
+      プリロード完了と失敗を正確に把握することができます。<br />
+      canvas系のメソッドを使用する場合は、画像の先読みが必ず必要になります。
+  </dd>
+</dl>
+
+<h3>Loaded:</h3>
+<div id="footprint"></div>
+<h3>Error:</h3>
+<div id="footprint2"></div>
+
+<script type="text/javascript">
+function imageLoaded(code, abs) {
+  var e = (code) ? uu.id("footprint") : uu.id("footprint2");
+//  e.appendChild(document.createTextNode("[" + abs + "]"));
+  e.innerHTML += "<p>[" + abs + "]</p>";
+}
+function boot() {
+  uu.image.preload("prairiedog.png", imageLoaded);
+  uu.image.preload("prairiedog_8bpp.png", imageLoaded);
+  uu.image.preload("prairiedog_24bpp.png", imageLoaded);
+  uu.image.preload("../../uu.module.image.1x1.gif", imageLoaded);
+  uu.image.preload("http://example.com/hoge.gif", imageLoaded); // 存在しない
+}
+uu.module.load("../../", "image", boot);
+
+</script>
+
+</body>
+</html>

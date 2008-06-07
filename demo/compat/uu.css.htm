@@ -1,0 +1,128 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>uupaa.js - uu.css test</title>
+<!--[if IE]><script type="text/javascript" src="../../lib/xpath.js"></script><![endif]-->
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
+<style type="text/css">
+body { color: white; background-color: black; padding-top: 3em; }
+#result1 { background-color: pink; position: absolute; top:0; left:0 }
+#result2 { border: 5px outset blue }
+</style>
+</head>
+<body>
+<a href="../../README.htm">README.htm</a> &gt; uu.css.htm
+
+<dl>
+  <dt>uu.css.get() - 計算済みのスタイル(実際に描画で使用されているスタイル)を取得</dt>
+  <dd>uu.css.get(element) とするとスタイル一式が、<br />
+      uu.css.get(element, "color,fontWeight") とすると、{ color: テキストカラー, fontWeight: 太さ } のhashを取得できます。<br />
+      uu.css.get(element, "opacity") とすると、不透明度の文字列("0.0"～"1.0")を取得できます。<br />
+      opacityには専用のメソッドがあり、uu.css.get.opacity(element) とすると、不透明度の数値(0.0～1.0)をダイレクトに取得できます。
+  </dd>
+  <dt>uu.css.set() - スタイルを設定</dt>
+  <dd>uu.css.set(element, { fontWidth: "bold", color: "blue" })とすることで複数のスタイルを指定できます。<br />
+      スタイル名はJavaScriptCSS名(ハイフンが付かない名前)を指定しますが、<br />
+      第三引数にtrueを指定すると uu.css.set(element, { "background-color": "white" }, true) とCSS名でスタイルを指定することができます。
+      uu.css.set.opacity()もあります。
+  </dd>
+  <dt>uu.css() - クラス名で要素を選択。</dt>
+  <dd>
+      uu.cssは、クラス名で要素を選択する機能です。
+      document.getElementsByClassName()が実装されている環境では、getElementsByClassName()を、<br />
+      未実装ならば、エミュレートします。<br />
+      以下は、<a href="http://www.whatwg.org/specs/web-apps/current-work/#getelementsbyclassname">WHATWG Web Applications 1.0: getElementsByClassName</a>
+      と同じテストです。
+  </dd>
+</dl>
+<div id="result1">背景色とテキストカラーを変更する。ボーダーの設定をボーダーボックスから引継ぐ</div>
+<p></p>
+<div id="result2">ボーダーボックス</div>
+
+<div id="example">
+ <p id="p1" class="aaa bbb"/>
+ <p id="p2" class="aaa ccc"/>
+ <p id="p3" class="bbb ccc"/>
+</div>
+
+<pre>
+&lt;div id="example"&gt;
+ &lt;p id="p1" class="aaa bbb"/&gt;
+ &lt;p id="p2" class="aaa ccc"/&gt;
+ &lt;p id="p3" class="bbb ccc"/&gt;
+&lt;/div&gt;
+
+A call to <input type="button" value="document.getElementById('example').getElementsByClassName('aaa') = p1 and p2 elements" onclick="test1()" />
+  would return a NodeList with the two paragraphs p1 and p2 in it.
+
+A call to <input type="button" value="getElementsByClassName('ccc bbb') = p3 element" onclick="test2()" />
+  would only return one node, however, namely p3.
+
+A call to <input type="button" value="document.getElementById('example').getElementsByClassName('bbb  ccc ') = p3 element" onclick="test3()" />
+  would return the same thing.
+
+A call to <input type="button" value="getElementsByClassName('aaa,bbb') = none" onclick="test4()" />
+  would return no nodes; none of the elements above are in the "aaa,bbb" class.
+</pre>
+
+<script>
+function test1() { // document.getElementById('example').getElementsByClassName('aaa')
+  uu.forEach(uu.css('aaa', uu.id('example')), function(v) {
+    alert(v.id);
+  });
+}
+function test2() { // getElementsByClassName('ccc bbb')
+  uu.forEach(uu.css('ccc bbb'), function(v) {
+    alert(v.id);
+  });
+}
+function test3() { // document.getElementById('example').getElementsByClassName('bbb  ccc ')
+  uu.forEach(uu.css('bbb  ccc ', uu.id('example')), function(v) {
+    alert(v.id);
+  });
+}
+function test4() { // getElementsByClassName('aaa,bbb')
+  uu.forEach(uu.css('aaa,bbb'), function(v) {
+    alert(v.id);
+  });
+}
+</script>
+
+<script>
+function boot() {
+  var e1 = uu.id("result1"), e2 = uu.id("result2");
+  var s2 = uu.css.get(e2);
+
+  uu.delay(function() {
+    uu.effect.fadeout(e1, {
+      fn: function() {
+        uu.css.set(e1, { borderTopColor: s2.borderTopColor,
+                         borderTopWidth: s2.borderTopWidth,
+                         borderTopStyle: s2.borderTopStyle,
+                         borderRightColor: s2.borderRightColor,
+                         borderRightWidth: s2.borderRightWidth,
+                         borderRightStyle: s2.borderRightStyle,
+                         borderBottomColor: s2.borderBottomColor,
+                         borderBottomWidth: s2.borderBottomWidth,
+                         borderBottomStyle: s2.borderBottomStyle,
+                         borderLeftColor: s2.borderLeftColor,
+                         borderLeftWidth: s2.borderLeftWidth,
+                         borderLeftStyle: s2.borderLeftStyle,
+                         backgroundColor: "white",
+                         color: "black"
+                          });
+        uu.delay(function() {
+          uu.effect.fadein(e1);
+        }, 500);
+      }
+    });
+  }, 500);
+}
+uu.module.load("../../", "effect", boot);
+
+</script>
+
+</body>
+</html>

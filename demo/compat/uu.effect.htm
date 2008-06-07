@@ -1,0 +1,120 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>uupaa.js - uu.module.effect test</title>
+<!--[if IE]><script type="text/javascript" src="../../lib/xpath.js"></script><![endif]-->
+<!--[if IE]><script type="text/javascript" src="../../lib/excanvas.js"></script><![endif]-->
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
+<style>
+#box1 {
+  position: relative;
+  top: 0;
+  left: 0;
+  width: 100px;
+  height: 100px;
+  border: 1px gray solid;
+  background-color: black;
+  color: red;
+}
+#table1 {
+  position: relative;
+  top: 0;
+  left: 0;
+  width: 100px;
+  height: 100px;
+  border: 1px olive solid;
+  background-color: yellow;
+  color: red;
+}
+</style>
+</head>
+<body>
+<a href="../../README.htm">README.htm</a> &gt; uu.effect.htm
+
+<dl>
+  <dt>uu.effect() - fade(), fadein(), fadeout()</dt>
+  <dd>フェードアニメーションのサンプルです。<br />
+      fade()は、現在の不透明度により、fadein, fadeout両方の動作(トグル動作)を行います。<br />
+      不透明度の初期値や目標値も指定可能です。またフェード終了時に関数をコールバックすることも可能です。<br />
+      Opera9.5β2は、table,caption,td以外は操作できず、IE6/IE7ではテーブルの各要素のフェードに問題があります(ブラウザ側の問題です)
+  </dd>
+</dl>
+
+<dl>
+  <dt>fade: </dt>
+    <dd>
+      <input type="button" value="100ms" onclick="fade(100)" />
+      <input type="button" value="qucik" onclick="fade('quick')" />
+      <input type="button" value="mid" onclick="fade('mid')" />
+      <input type="button" value="slow" onclick="fade('slow')" />
+      <input type="button" value="quick,0.2～0.8" onclick="fade('quick', 0.2, 0.8)" />
+      <input type="button" value="quick,0.5" onclick="fade('quick', 0.5)" />
+      <input type="button" value="quick,0.8～0.2" onclick="fade('quick', 0.8, 0.2)" />
+    </dd>
+  <dt>fadein: </dt>
+    <dd>
+      <input type="button" value="100ms" onclick="fadein(100)" />
+      <input type="button" value="qucik" onclick="fadein('quick')" />
+      <input type="button" value="mid" onclick="fadein('mid')" />
+      <input type="button" value="slow" onclick="fadein('slow')" />
+      <input type="button" value="mid,0.5" onclick="fadein('mid', 0.5)" />
+    </dd>
+  <dt>fadeout:</dt>
+    <dd>
+      <input type="button" value="100ms" onclick="fadeout(100)" />
+      <input type="button" value="qucik" onclick="fadeout('quick')" />
+      <input type="button" value="mid" onclick="fadeout('mid')" />
+      <input type="button" value="slow" onclick="fadeout('slow')" />
+      <input type="button" value="mid,0.5" onclick="fadeout('mid', 0.5)" />
+    </dd>
+  <dt>sample</dt>
+    <dd>
+      select target: <select id="targetSelect" onchange="getSelectedValue(this)">
+        <option>box1</option>
+        <option>table1</option>
+        <option>table1.caption</option>
+        <option>table1.tfoot</option>
+        <option>table1.thead</option>
+        <option>table1.tbody</option>
+        <option>table1.tbody.tr1</option>
+        <option>table1.tbody.tr1.td1</option>
+        <option>table1.tbody.tr1.td2</option>
+        <option>table1.tbody.tr2</option>
+      </select>
+      <div id="box1">fade box</div>
+      <table id="table1">
+      <caption id="table1.caption">table1.caption</caption>
+      <thead id="table1.thead"><tr><td>thead</td><td>thead</td></tr></thead>
+      <tfoot id="table1.tfoot"><tr><td>tfoot</td><td>tfoot</td></tr></tfoot>
+      <tbody id="table1.tbody">
+        <tr id="table1.tbody.tr1">
+          <td id="table1.tbody.tr1.td1">td1</td>
+          <td id="table1.tbody.tr1.td2">td2</td>
+        </tr>
+        <tr id="table1.tbody.tr2"><td>td3</td><td>td4</td></tr>
+      </tbody>
+      </table>
+    </dd>
+</dl>
+
+
+<script>
+var tgtid = "box1";
+function getSelectedValue(elm) {
+  tgtid = elm.options[elm.selectedIndex].text;
+}
+function fade(speed, begin, end)    { uu.effect.fade(uu.id(tgtid), { speed: speed, begin: begin, end: end});    }
+function fadein(speed, begin, end)  { uu.effect.fadein(uu.id(tgtid), { speed: speed, begin: begin, end: end});  }
+function fadeout(speed, begin, end) { uu.effect.fadeout(uu.id(tgtid), { speed: speed, begin: begin, end: end}); }
+function boot() {
+  getSelectedValue(uu.id("targetSelect"));
+}
+
+uu.module.load("../../", "effect", boot);
+
+</script>
+
+</body>
+</html>

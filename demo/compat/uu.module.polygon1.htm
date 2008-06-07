@@ -1,0 +1,39 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>uupaa.js - uu.module.polygon test</title>
+<!--[if IE]><script id="xpath.js" type="text/javascript" src="../../lib/xpath.js"></script><![endif]-->
+<!--[if IE]><script id="excanvas.js" type="text/javascript" src="../../lib/excanvas.js"></script><![endif]-->
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
+<style>
+#canvas0 {
+  position: absolute;
+  top: 2em;
+  left: 0;
+}
+</style>
+</head>
+<body>
+<a href="../../README.htm">README.htm</a> &gt; uu.module.polygon1.htm
+
+<canvas id="canvas0" width="640" height="480"></canvas>
+
+<script>
+function boot() {
+  var poly = new uu.module.polygon({ fps: 50});
+  poly.add({ highLight: 0x00, color: 0x000000, x: 200, y: 200, zoom: 800 });
+  poly.add({ highLight: 0x40, color: 0x0000cc, x: 200, y: 200, zoom: 600 });
+  poly.draw(uu.id("canvas0").getContext("2d"));
+  uu.delay(function() {
+    poly.draw(uu.id("canvas0").getContext("2d"), true);
+  }, 2000);
+}
+uu.module.load(" ../../", "polygon", function() {
+  uu.canvas.ready(boot);
+});
+</script>
+
+</body>
+</html>

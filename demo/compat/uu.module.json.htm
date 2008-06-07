@@ -1,0 +1,77 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>uupaa.js - uu.module.json test</title>
+<!--[if IE]><script id="xpath.js" type="text/javascript" src="../../lib/xpath.js"></script><![endif]-->
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
+<style type="text/css">
+body { background-color: black; color: white; }
+.result { color: lightblue }
+.step { color: gray }
+</style>
+</head>
+<body>
+<a href="../../README.htm">README.htm</a> &gt; uu.module.json.htm<br />
+
+<h4>uu.json.load() - JSONP(クロスドメイン非同期リクエスト)</h4>
+<p>下記URLにアクセスすると、はてなブックマークから、2008-04-20付けのブログのブックマーク数を取得します。<br />
+Target URL: <input type="text" id="tgtURL" value="http://d.hatena.ne.jp/uupaa/20080420/1208636929" size="64" /><br />
+Request URL: <input type="text" id="reqURL" value="http://b.hatena.ne.jp/entry/json/?url=%s" size="64" /><br />
+GET Method:
+<input type="button" value="uu.json.load()" onclick="jsonp()" />
+<p id="result3" class="result"></p>
+<p id="step0" class="step"></p>
+<p id="step1" class="step"></p>
+<p id="step2" class="step"></p>
+<p id="step3" class="step"></p>
+<p id="step4" class="step"></p>
+
+
+<h4>uu.json.encode() - JSONエンコード</h4>
+<p>JavaScriptオブジェクト({ hoge: "property", huga: 3 })をJSONフォーマット文字列に変換します。<br />(JavaScript Object { hoge: "property", huga: 3 } to JSON formatted string):</p>
+<p id="result1" class="result"></p>
+
+<h4>uu.json.decode() - JSONデコード</h4>
+<p>JSONフォーマット文字列({ "hoge":"property","huga":3 })をJavaScriptオブジェクトに変換します。<br />
+(JSON formatted string to JavaScript Object):</p>
+<p id="result2" class="result"></p>
+
+<script>
+function jsonp() {
+  var stepStr = ["処理開始", "リクエスト開始", "成功", "失敗", "処理終了"],
+      result = [0,1,2,3,4].map(function(v) {
+        var e = uu.id("step" + v);
+        e.innerText = "";
+        return e;
+      });
+  var jsonpURL = uu.sprintf(uu.id("reqURL").value, encodeURIComponent(uu.id("tgtURL").value));
+  uu.json.load(jsonpURL, function(uid, step, response, status, url, async) {
+    result[step].innerText =
+      uu.sprintf("uid[%s], %s res[%s], code[%d], url[%s] %s",
+                 uid, stepStr[step], response, status, url, async ? "async" : "sync");
+    if (step == 2) { // ok
+      uu.id("result3").innerHTML =
+        uu.sprintf("<a href=\"%s\">%s</a>, bookmarks: %d", uu.id("reqURL").value, response.title, response.count);
+    }
+  });
+}
+function boot() {
+  var foo = {};
+  foo.hoge = "property";
+  foo.huga = 3;
+
+  // encode
+  var jsontxt = uu.json.encode(foo);
+  uu.id("result1").innerText = jsontxt.toString();
+
+  // decode
+  var obj = uu.json.decode(jsontxt);
+  uu.id("result2").innerText = uu.sprintf("{ hoge:\"%s\", huga:%d }", obj.hoge, obj.huga);
+}
+uu.window.ready(boot);
+</script>
+
+</body>
+</html>

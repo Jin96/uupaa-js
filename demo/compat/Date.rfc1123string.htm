@@ -1,0 +1,33 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>uupaa.js - Date.toRFC1123String test</title>
+<!--[if IE]><script type="text/javascript" src="../../lib/xpath.js"></script><![endif]-->
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
+<style type="text/css">
+body { color: white; background-color: black; }
+</style>
+</head>
+<body>
+<a href="../../README.htm">README.htm</a> &gt; Date.rfc1123string.htm
+
+<dl>
+  <dt>Date.prototype.toRFC1123String() - </dt>
+  <dd>RFC1123に準拠した日付文字列を返します。<br />
+      Ajaxの"If-Modified-Since"ヘッダの値や、Webサーバと通信する場合に必要になります。
+
+      <p id="result1" style="font-weight: bold"></p>
+  </dd>
+</dl>
+
+<script>
+function boot() {
+  uu.id("result1").innerText = (new Date()).toRFC1123String();
+}
+uu.window.ready(boot);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>uupaa.js - uu.module.perry test</title>
+<!--[if IE]><script id="xpath.js" type="text/javascript" src="../../lib/xpath.js"></script><![endif]-->
+<!--[if IE]><script id="excanvas.js" type="text/javascript" src="../../lib/excanvas.js"></script><![endif]-->
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
+<style type="text/css">
+body { color: white; background-color: black; }
+</style>
+</head>
+<body>
+<a href="../../README.htm">README.htm</a> &gt; uu.module.perry.htm<br />
+
+<h2>ペリーさん</h2>
+<p>ペリーさんは「日本に来たばかりの外国人」をコンセプトに、
+Windows2000以上のOSに標準搭載されているText-To-Speech Engine(ActiveX)を酷使して、
+おしゃべりするジョークモジュールです。</p>
+
+<textarea id="text" cols="100" rows="12">
+やぁ、ペリーだよ。選択したテキストを読みあげるよ。
+
+
+ペットショップで、ちっちゃいウーパールーパーが、こっちを「のほほーん」と見てるんだよ。
+食べ物をハグハグしながら真上にピョコンって飛び上がる可愛らしさは、プライスレス。
+</textarea>
+<input type="button" value="clear" onclick="uu.id('text').value='';" />
+
+<h2>動作環境</h2>
+<p>ペリーさんはActiveX無しでは、おしゃべりできません。あまりオススメしませんがIE以外のブラウザで試して見たい場合は、以下を参考に環境を構築してみてください。</p>
+<dl>
+  <dt>Firefox</dt>
+    <dd>Firefoxで動作させるには、二種類の方法があります。<br />
+        方法1. <a href="https://addons.mozilla.org/ja/firefox/addon/1419">IE Tab</a>をインストールし, 描画エンジンをIEに切り替える。<br />
+        方法2. <a href="http://www.iol.ie/~locka/mozilla/plugin.htm">Mozilla ActiveX Controls</a>にあるFirefox 1.5用のxpiをインストールし(Firefox2でも1.5用のxpiが使えます)、
+         C:\Program Files\Mozilla Firefox\defaults\pref\activex.js に以下の行を追加しFirefoxを再起動します。<br />
+         <pre class="eg">
+           // SAPI.SpVoice
+           pref("capability.policy.default.ClassID.CID96749377-3391-11D2-9EE3-00C04F797396", "AllAccess");
+         </pre>
+         詳細は、<a href="http://www.google.co.jp/search?q=firefox activex xpconnect global hosting_flags">activex xpconnect global hosting_flags</a> で検索してください。</dd>
+  <dt>Opera</dt>
+    <dd><a href="http://www.opera.com/support/search/view/415/">ActiveX support in Opera</a>をインストールすると、Operaの中でIEの描画エンジンが利用可能になります。</dd>
+  <dt>Safari</dt>
+    <dd>多分無理です。</dd>
+</dl>
+
+<h4>使いみちとか</h4>
+<p>社内プレゼンのつかみにノートPCに喋らせてみるとか、<a href="http://www.google.com/search?q=CHAPTA">CHAPTA</a>の代わりに音声で質問して日本人と偽日本人を区別するとか、<br />
+そこはもうアイデア次第なのかなと。
+</p>
+
+
+
+<script>
+// -----------------------------------------
+function ttsIECaret(e) {
+  if (document.selection) {
+    e._caret = document.selection.createRange().duplicate();
+    if (e._caret) {
+      window.status = "selected:" + e._caret.text;
+      uu.perry.say(document.body._caret.text, 3000);
+    }
+  }
+}
+function ttsFirefoxCaret(evt) {
+  var e = evt.target;
+  if (e.selectionStart !== e.selectionEnd) {
+    var str = e.value.substring(e.selectionStart, e.selectionEnd);
+    if (str.length) {
+      window.status = "selected:" + str;
+      uu.perry.say(str, 3000);
+    }
+  }
+}
+function boot() {
+  var e = document.body;
+  if (uu.ua.ie || uu.ua.opera) {
+    e.onkeyup     = function(){ ttsIECaret(e); };
+    e.onclick     = function(){ ttsIECaret(e); };
+    e.ondblclick  = function(){ ttsIECaret(e); };
+    e.onselect    = function(){ ttsIECaret(e); };
+  } else {
+    e.onkeyup     = function(evt){ ttsFirefoxCaret(evt); };
+    e.onclick     = function(evt){ ttsFirefoxCaret(evt); };
+    e.ondblclick  = function(evt){ ttsFirefoxCaret(evt); };
+    e.onselect    = function(evt){ ttsFirefoxCaret(evt); };
+  }
+//  uu.id("text").innerText = voiceArray();
+}
+uu.module.load("../../", "perry", boot);
+</script>
+
+</body>
+</html>
