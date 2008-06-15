@@ -5,7 +5,7 @@
 		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
 		<meta name="generator" content="JsDoc Toolkit" />
 		
-		<title>JsDoc Reference - uu.ui</title>
+		<title>JsDoc Reference - uu.klass</title>
 
 		<style type="text/css">
 			@charset "utf-8";
@@ -275,7 +275,7 @@ ul.inheritsList {
 <!-- ============================== class title ============================ -->
 			<h1 class="classTitle">
 				
-				Class uu.ui
+				Class uu.klass
 			</h1>
 
 <!-- ============================== class summary ========================== -->			
@@ -285,13 +285,13 @@ ul.inheritsList {
 				
 				
 				
-					<br /><i>Defined in: </i> <a href="../symbols/src/trunk_uu.module.ui.js.html">uu.module.ui.js</a>.
+					<br /><i>Defined in: </i> <a href="../symbols/src/trunk_uupaa.js.html">uupaa.js</a>.
 				
 			</p>
 
 <!-- ============================== constructor summary ==================== -->			
 			
-			<table class="summaryTable" cellspacing="0" summary="A summary of the constructor documented in the class uu.ui.">
+			<table class="summaryTable" cellspacing="0" summary="A summary of the constructor documented in the class uu.klass.">
 				<caption>Class Summary</caption>
 				<thead>
 					<tr>
@@ -304,9 +304,9 @@ ul.inheritsList {
 						<td class="attributes">&nbsp;</td>
 						<td class="nameDescription">
 							<div class="fixedFont">
-								<b><a href="../symbols/uu.ui.html#constructor">uu.ui</a></b>()
+								<b><a href="../symbols/uu.klass.html#constructor">uu.klass</a></b>(string, element, string)
 							</div>
-							<div class="description"><b>UI</b></div>
+							<div class="description"><b>uu.klass - CSSのクラス名と一致する要素を列挙(document.getElementsByClassName wrapper)</b>CSSのクラス名と一致する要素を列挙します。</div>
 						</td>
 					</tr>
 				</tbody>
@@ -318,42 +318,6 @@ ul.inheritsList {
 
 <!-- ============================== methods summary ======================== -->
 			
-				
-				
-				<table class="summaryTable" cellspacing="0" summary="A summary of the methods documented in the class uu.ui.">
-					<caption>Method Summary</caption>
-					<thead>
-						<tr>
-							<th scope="col">Method Attributes</th>
-							<th scope="col">Method Name and Description</th>
-						</tr>
-					</thead>
-					<tbody>
-					
-						<tr>
-							<td class="attributes">&lt;static&gt; &nbsp;</td>
-							<td class="nameDescription">
-								<div class="fixedFont">uu.ui.<b><a href="../symbols/uu.ui.html#.inner">inner</a></b>()
-								</div>
-								<div class="description"><b>ブラウザの表示領域に関する情報を取得</b> <dl>   <dt>iw</dt><dd>ブラウザの表示領域の幅 - innerWidth or clientWidth</dd>   <dt>ih</dt><dd>ブラウザの表示領域の高さ - innerHeight or clientHeight</dd>   <dt>sw</dt><dd>ブラウザの表示領域の横スクロール量 - pageXOffset or scrollLeft</dd>   <dt>sh</dt><dd>ブラウザの表示領域の縦スクロール量 - pageYOffset or scrollTop</dd> </dl></div>
-							</td>
-						</tr>
-					
-						<tr>
-							<td class="attributes">&lt;static&gt; &nbsp;</td>
-							<td class="nameDescription">
-								<div class="fixedFont">uu.ui.<b><a href="../symbols/uu.ui.html#.inRect">inRect</a></b>(rect, pos)
-								</div>
-								<div class="description"><b>座標が矩形内にあればtrue</b>座標(マウスカーソル等)が矩形内に含まれている場合にtrueを返します。<pre> rect━┯━━┓   ┃  │    ┃   ┠─pos   ┃   ┃        ┃   ┗━━━━┛</pre></div>
-							</td>
-						</tr>
-					
-					</tbody>
-				</table>
-				
-				
-				
-			
 
 <!-- ============================== constructor details ==================== -->		
 			
@@ -363,11 +327,11 @@ ul.inheritsList {
 				</div>
 				
 				<div class="fixedFont">
-						<b>uu.ui</b>()
+						<b>uu.klass</b>(string, element, string)
 				</div>
 				
 				<div class="description">
-					<b>UI</b>
+					<b>uu.klass - CSSのクラス名と一致する要素を列挙(document.getElementsByClassName wrapper)</b>CSSのクラス名と一致する要素を列挙します。
 					
 				</div>
 				
@@ -375,11 +339,48 @@ ul.inheritsList {
 				
 				
 					
+						<dl class="detailList">
+						<dt class="heading">Parameters:</dt>
+						
+							<dt>
+								 <b>string</b>
+								
+							</dt>
+								<dd>className - クラス名を指定します。</dd>
+						
+							<dt>
+								 <b>element</b>
+								
+							</dt>
+								<dd>[context] - 検索開始位置(コンテキスト)を指定します。デフォルトはdocumentです(全要素の検索)。</dd>
+						
+							<dt>
+								 <b>string</b>
+								
+							</dt>
+								<dd>[tag]     - 指定したtagのみ検索対象とする場合に指定します。<br />                           この引数は、getElementsByClassName()が実装されていないブラウザ(Firefox2,IE6/7/8,Opera9.2x)用です。</dd>
+						
+						</dl>
 					
 					
 					
 					
 					
+						<dl class="detailList">
+						<dt class="heading">Returns:</dt>
+						
+								<dd>NodeList/array   - 検索成功でNodeListまたは要素の配列 [element, ...] を返します。失敗で空のNodeListか配列を返します。<br />                           NodeListまたは配列を返すため、uu.klass().forEach() ではなく、                           uu.forEach(uu.klass())を使用してください。</dd>
+						
+						</dl>
+					
+					
+					
+						<dl class="detailList">
+						<dt class="heading">See:</dt>
+						
+							<dd><a href="http://uupaa-js.googlecode.com/svn/trunk/SELECTOR.htm">セレクタ(Selector)</a></dd>
+						
+						</dl>
 					
 
 			</div>
@@ -390,94 +391,6 @@ ul.inheritsList {
 
 <!-- ============================== method details ========================= -->		
 			
-				<div class="sectionTitle">
-					Method Detail
-				</div>
-				
-					<a name=".inner"> </a>
-					<div class="fixedFont">&lt;static&gt; 
-					
-					
-					<span class="light">uu.ui.</span><b>inner</b>()
-					
-					</div>
-					<div class="description">
-						<b>ブラウザの表示領域に関する情報を取得</b> <dl>   <dt>iw</dt><dd>ブラウザの表示領域の幅 - innerWidth or clientWidth</dd>   <dt>ih</dt><dd>ブラウザの表示領域の高さ - innerHeight or clientHeight</dd>   <dt>sw</dt><dd>ブラウザの表示領域の横スクロール量 - pageXOffset or scrollLeft</dd>   <dt>sh</dt><dd>ブラウザの表示領域の縦スクロール量 - pageYOffset or scrollTop</dd> </dl>
-						
-						
-					</div>
-					
-					
-					
-					
-						
-						
-						
-						
-						
-							<dl class="detailList">
-							<dt class="heading">Returns:</dt>
-							
-								<dd>hash { iw, ih, sw, sh } を返します。<br /></dd>
-							
-							</dl>
-						
-						
-						
-
-					<hr />
-				
-					<a name=".inRect"> </a>
-					<div class="fixedFont">&lt;static&gt; 
-					
-					
-					<span class="light">uu.ui.</span><b>inRect</b>(rect, pos)
-					
-					</div>
-					<div class="description">
-						<b>座標が矩形内にあればtrue</b>座標(マウスカーソル等)が矩形内に含まれている場合にtrueを返します。<pre> rect━┯━━┓   ┃  │    ┃   ┠─pos   ┃   ┃        ┃   ┗━━━━┛</pre>
-						
-						
-					</div>
-					
-					
-					
-					
-						
-							<dl class="detailList">
-							<dt class="heading">Parameters:</dt>
-							
-								<dt>
-									<b>rect</b>
-									
-								</dt>
-								<dd>rect - { x, y, w, h } 要素の座標と大きさを指定します。</dd>
-							
-								<dt>
-									<b>pos</b>
-									
-								</dt>
-								<dd>pos  - { x, y } 点を指定します。</dd>
-							
-							</dl>
-						
-						
-						
-						
-						
-							<dl class="detailList">
-							<dt class="heading">Returns:</dt>
-							
-								<dd>bool         - rect上にposがあればtrueを返します。</dd>
-							
-							</dl>
-						
-						
-						
-
-					
-				
-			
 			
 			<hr />
 		</div>
@@ -485,7 +398,7 @@ ul.inheritsList {
 <!-- ============================== footer ================================= -->
 		<div class="fineprint" style="clear:both">
 			&copy;2008<br />
-			Documentation generated by <a href="http://www.jsdoctoolkit.org/" target="_blank">JsDoc Toolkit</a> 2.0.beta2.3 on Sun Jun 15 2008 16:44:35 GMT+0900 (JST)
+			Documentation generated by <a href="http://www.jsdoctoolkit.org/" target="_blank">JsDoc Toolkit</a> 2.0.beta2.3 on Sun Jun 15 2008 16:44:33 GMT+0900 (JST)
 		</div>
 	</body>
 </html>

@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<!--[if IE]><script id="xpath.js" type="text/javascript" src="./lib/xpath.js"></script><![endif]-->
+<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="./lib/javascript-xpath.js"></script><![endif]-->
 <script id="uupaa.js" type="text/javascript" src="./uupaa.js"></script>
 <title>uupaa.js CHNAGE LOG</title>
 <style type="text/css">
@@ -18,84 +18,224 @@ dt { font-weight: bold; color: lightblue }
 .add { color: chartreuse }
 .fix { color: skyblue }
 .del { color: darkgray }
+.move { color: #555555; }
+.rename { color: #f6f; }
+.retake { color: #f06; }
 #total { margin: 0 auto; }
 #total, #total thead th { border: 1px solid gray }
 #total td { text-align: right }
+#pie {
+  position: fixed; top: 20px; right: 20px;
+  opacity: 0.5;
+}
+#pie:hover {
+  opacity: 1.0;
+}
+.alpha { /* 透過PNG for IE6 */
+  width: 360px;
+  height: 200px;
+}
+li { margin-bottom: 0.5em; }
 </style>
 </head>
 <body>
 <a href="./README.htm">README.htm</a> &gt; CHANGELOG.htm
 
-<table id="total">
-  <thead>
-    <tr><th>Version</th><th>追加<br />(add)</th><th>修正<br />(fix)</th><th>削除<br />(del)</th><th>合計<br />(total)</th></tr>
-  </thead>
-  <tbody>
-    <tr><th>0.x</th><td id="add0.x" class="add">-</td>
-                    <td id="fix0.x" class="fix">-</td>
-                    <td id="del0.x" class="del">-</td>
-                    <td id="total.x" class="total">-</td>
-    </tr>
-  </tbody>
-</table>
+<img id="pie" class="alpha" src="img/uu.module.image.1x1.gif" alt="Changes" />
+
+
 <div id="log">
-  <div id="version1.x">
-  </div>
-  <div id="version0.x">
-    <dl>
-      <dt>Version 0.1 2008-06-08</dt>
-      <dd>
-        <ul>
-          <li class="add">uupaa.js (uu.json.load()): 内部で生成したユニークIDを第一引数で返すように機能を追加</li>
-          <li class="add">uupaa.js (uu.ajax.load()): 内部で生成したユニークIDを第一引数で返すように機能を追加, クロスドメイン時の例外を400(Bad Request)として処理。uu.ajax.loadNeo(), uu.ajax.loadSync()も同様</li>
-          <li class="del">uu.module.json.js: 削除し、uupaa.js本体に機能を移動</li>
-          <li class="del">uu.module.ajax.js: 削除し、uupaa.js本体に機能を移動</li>
-          <li class="add">uu.module.perry.js: 追加</li>
-          <li class="del">uupaa.js (Array.hash()): 削除</li>
-          <li class="del">uupaa.js (Array.slight()): 削除</li>
-          <li class="fix">uupaa.js (uu.module._inject()): IEでモジュールのロードに失敗する件を対策。<br />
-              script要素にsrcを設定してからappendChild()を行わないとスクリプトがロードされないため、
-              ユーザエージェントで切り分け。</li>
-          <li class="fix">uupaa.js (uu.module.load()): IE8でモジュールのロードに失敗する件を対策。<br />
-              onreadystatechange()ハンドラ内で、this.readyStateが"complete"ではなく"loaded"になっている。
-              条件に this.readyState === "loaded" を追加。</li>
-          <li>new function() {...}; を (function() {...})(); スタイルに書き直し。</li>
-        </ul>
-      <dd>
-      <dt>Version 0.0 2008-05-20</dt>
-      <dd>
-        <ul>
-          <li>ライセンスをMITに。</li>
-          <li>ウーパールーパーをペットショップで発見, ライブラリの名前は uupaa.js に。</li>
-        </ul>
-      </dd>
-      <dt>Version 0.0 2008-04-01</dt>
-      <dd>
-        <ul>
-          <li>自分用のJavaScriptライブラリ(仮称) 作成開始</li>
-        </ul>
-      <dd>
-    </dl>
-  </div>
+  <dl>
+<!--
+    <dt id="version1.x title">Version 1.x</dt>
+    <dd id="version1.x data"></dd>
+ -->
+    <dt id="version0.x title">Version 0.x</dt>
+    <dd id="version0.x data">
+      <dl>
+        <dt>Version 0.2 2008-06-xx</dt>
+        <dd>
+          <ol>
+            <li class="add">uupaa.js (uu.css()): CSS3とjQueryのセレクタから要素を選択する機能を追加<br />
+              - Add a function to choose an element among a selector of CSS3 and jQuery.
+            </li>
+            <li class="add">uupaa.js (uu.css.toXPath()): CSS3セレクタをXPathに変換する機能を追加<br />
+              - Add a function to convert a CSS3 selector into XPath.
+            </li>
+            <li class="rename">uupaa.js (uu.css() -> uu.klass())</li>
+            <li class="retake">uupaa.js (uu.attr()): Rewrite</li>
+            <li class="add">uupaa.js (uu.config.verbose): verbose modeの追加<br />
+              - Add verbose mode</li>
+            <li class="retake">uu.module.pmvc.js: Rewrite</li>
+            <li class="add">uu.module.effect.js (uu.effect.xxx()):
+              各エフェクトのparam.fnは二つの引数(elm, cssText)を伴いコールバックするように機能を追加<br />
+              - param.fn was revised it was accompanied with two argument (elm, cssText), and to call back.
+            </li>
+            <li class="add">uu.module.effect.js (uu.effect.move(), scale(), puff(), dromOut(), fold(), shake(), shrink(), glow(), blindUp(), blindDown(), pulsate()):
+                エフェクトを追加。<br />
+              - Add effects.
+            </li>
+            <li class="fix">uu.module.ui.js (uu.ui.element): Firefox2でdocument.getBoxObjectFor()を使わない。<br />
+              - Do not use document.getBoxObjectFor() in Firefox2.
+            </li>
+            <li class="fix">uu.module.image.js (uu.image.png24()): AlphaImageLoaderのsizingMethodをscaleからimageに変更。<br />
+              - AlphaImageLoader::sizingMethod value changed "scale" into "image".
+            </li>
+            <li class="fix">uu.module.image.js (uu.image.png24()): 第二引数(force)を追加。<br />
+              - Add second argument "force".
+            </li>
+            <li class="rename">uu.module.drag.js (uu.module.drag.free.construct, uu.module.drag.limited.construct): 引数(param.msgpump, param.addressee)を(param.msgto, param.msgFilter)に差し替え<br />
+              - Rename arguments(param.msgpump -&gt; param.msgto, param.addressee -&gt; param.msgFilter).
+            </li>
+            <li class="fix">uupaa.js (uu.module.messagePump.set()): 第一引数が"broadcast"なら例外をスローする。<br />
+              - If the first argument is "broadcast", throw exception.
+            </li>
+            <li class="add">uupaa.js (uu.ua(), uu.ua.ver): バージョン番号を取得する方法を追加。<br />
+              - Add a method to acquire version number.
+            </li>
+            <li class="fix">uupaa.js (uu.effect.speed): デフォルトのエフェクト速度を調整。<br />
+              - coordinate effect speed.
+            </li>
+            <li class="rename">uupaa.js (uu.css.add -&gt; uu.css.addClass, uu.css.is -&gt; uu.css.hasClass, uu.css.del -&gt; uu.css.removeClass): メソッド名を変更("is"はECMAScript4の予約語)。<br />
+              - Rename method.("is" is ECMAScript4 reserved keyword)
+            </li>
+            <li class="fix">uupaa.js (uu.toArray): 要素数ゼロの擬似配列に対する扱いを修正。<br />
+              - Handling of for empty FakeArray.
+            </li>
+            <li class="fix">uupaa.js (uu.event.set, uu.event.unset): IEでイベントキャプチャ失敗時のエラーを抑止。<br />
+              - Restrain an event capture failure error for IE.
+            </li>
+            <li class="fix">uupaa.js (uu.css.set.display): 第二引数を有効化。<br />
+              - The second argument activate.
+            </li>
+            <li class="add">uupaa.js (uu.css.get.top(), uu.css.set.top(), uu.css.get.left(), uu.css.set.left(), uu.css.get.width(), uu.css.set.width(), uu.css.get.height(), uu.css.set.height()):
+              top, left, width, heightに対するハンドラを追加。<br />
+              - Add handlers.
+            </li>
+            <li class="fix">uupaa.js (uu.module.load(), uu.module.loadSync()): 再読み込みを禁止。<br />
+              - Prohibit re-loading.
+            </li>
+            <li class="fix">uupaa.js (uu.url.query.add()): key,valueをencodeURIComponentでエンコードする。<br />
+              - Encode key,value in encodeURIComponent.
+            </li>
+            <li class="fix">uupaa.js (uu.url.query()): key,valueをdecodeURIComponentでデコードする。<br />
+              - Decode key,value in decodeURIComponent.
+            </li>
+            <li class="rename">uupaa.js (uu.ajax.loadNeo -> loadIfMod): メソッド名を変更。<br />
+              - Rename.
+            </li>
+            <li class="fix">uupaa.js (uu.toArray()): 非擬似配列に対し空の配列([])を返す。<br />
+              - Return an empty array([]) for a FakeArray(NodeList, arguments, ...).
+            </li>
+          </ol>
+        </dd>
+        <dt>Version 0.1 2008-06-08</dt>
+        <dd>
+          <ol>
+            <li class="add">uupaa.js (uu.json.load()): 内部で生成したユニークIDを第一引数で返すように機能を追加</li>
+            <li class="add">uupaa.js (uu.ajax.load()): 内部で生成したユニークIDを第一引数で返すように機能を追加, クロスドメイン時の例外を400(Bad Request)として処理。uu.ajax.loadNeo(), uu.ajax.loadSync()も同様</li>
+            <li class="move">uu.module.json.js: uupaa.jsに機能を移動しファイルを削除</li>
+            <li class="move">uu.module.ajax.js: uupaa.jsに機能を移動しファイルを削除</li>
+            <li class="add">uu.module.perry.js: 追加</li>
+            <li class="del">uupaa.js (Array.hash()): 削除</li>
+            <li class="del">uupaa.js (Array.slight()): 削除</li>
+            <li class="fix">uupaa.js (uu.module._inject()): IEでモジュールのロードに失敗する件を対策。<br />
+                script要素にsrcを設定してからappendChild()を行わないとスクリプトがロードされないため、
+                ユーザエージェントで切り分け。</li>
+            <li class="fix">uupaa.js (uu.module.load()): IE8でモジュールのロードに失敗する件を対策。<br />
+                onreadystatechange()ハンドラ内で、this.readyStateが"complete"ではなく"loaded"になっている。
+                条件に this.readyState === "loaded" を追加。</li>
+            <li class="fix">new function() {...}; を (function() {...})(); スタイルに書き直し。<br />
+                - Rewritten a style of "new function() {...};" by a style of "(function() {...})();".
+            </li>
+          </ol>
+        <dd>
+        <dt>Version 0.0 2008-05-20</dt>
+        <dd>
+          <ul>
+            <li>ライセンスをMITに。<br />
+                - Choose MIT license</li>
+            <li>ウーパールーパーをペットショップで発見, ライブラリの名前は uupaa.js に。<br />
+                - Discover an Axolotl(called Wooper Rooper in Japan) in a pet shop; the name of the library in uupaa.js.
+            </li>
+          </ul>
+        </dd>
+        <dt>Version 0.0 2008-04-01</dt>
+        <dd>
+          <ul>
+            <li>自分用のJavaScriptライブラリ(名称未定)の作成を開始。<br />
+                - Start the building of a JavaScript library for mine.</li>
+          </ul>
+        <dd>
+      </dl>
+    </dd>
+  </dl>
 </div>
 <script>
-function boot() {
-  var data = {
-    add: uu.xpath('count(id("version0.x")//li[@class="add"])'),
-    fix: uu.xpath('count(id("version0.x")//li[@class="fix"])'),
-    del: uu.xpath('count(id("version0.x")//li[@class="del"])')
-  };
-  uu.id("add0.x").innerText = data.add;
-  uu.id("fix0.x").innerText = data.fix;
-  uu.id("del0.x").innerText = data.del;
-
-  var total = 0;
-  uu.forEach(data, function(v) {
-    total += v;
-  });
-  uu.id("total.x").innerText = total;
+function pie(context, title) {
+  var ary = [
+    uu.xpath('count(descendant::li[@class="add"])', context),
+    uu.xpath('count(descendant::li[@class="fix"])', context),
+    uu.xpath('count(descendant::li[@class="del"])', context),
+    uu.xpath('count(descendant::li[@class="move"])', context),
+    uu.xpath('count(descendant::li[@class="rename"])', context),
+    uu.xpath('count(descendant::li[@class="retake"])', context),
+  ];
+  var total = ary[0] + ary[1] + ary[2] + ary[3] + ary[4];
+  if (!total) { return; }
+  uu.image.preload(
+    uu.sprintf("http://chart.apis.google.com/chart" +
+               "?chs=%dx%d" +                 // width, height
+               "&cht=p3&chtt=%s|%d+Changes" + // 3D pie
+               "&chts=FFFFFF,20" +            // title color, title size
+               "&chl=%s|%s|%s|%s|%s|%s" +     // lable
+               "&chco=%s,%s,%s,%s,%s,%s" +    // color
+               "&chf=bg,s,%s" +               // bg-color
+               "&chd=t:%d,%d,%d,%d,%d,%d",    // data
+      360, 200,
+      title.replace(/ /g, "+"), total,
+      "Add", "Fix", "Delete", "Move", "Rename", "Retake",
+      "7FFF00", "87CEEB", "A9A9A9", "555555", "FF66FF", "FF0066",
+      "00000000",
+      ary[0], ary[1], ary[2], ary[3], ary[4], ary[5]
+    ), draw
+  );
 }
-uu.window.ready(boot);
+function draw(code, url, image) {
+  if (code) {
+    if (uu.ua.ie && uu.ua.ver <= 6) { // IE6以下は自力で透過png
+      uu.id("pie").style.filter = 'progid:DXImageTransform.Microsoft.AlphaImageLoader(src="' + url + '",sizingMethod=crop)';
+    } else {
+      uu.id("pie").src = url;
+    }
+  }
+}
+var context = null;
+function handleEvent(evt) {
+  uu.event.stop(evt);
+
+  var tgt = uu.event.target(evt);
+  var tag = tgt.real.localName || tgt.real.tagName;
+  if (tag.toLowerCase() === "dt") {
+    if (context !== tgt.real) {
+      context = tgt.real;
+      pie(uu.xpath("following-sibling::dd[1]", context)[0],
+          tgt.real.innerText);
+    }
+  }
+}
+function boot() {
+  var he = uu.event.handler(this);
+  uu.event.set(document, "mousemove", handleEvent);
+
+  if (uu.ua.ie && uu.ua.ver <= 6) { // IE6以下は"position: fixed"が無効
+    uu.css.set(uu.id("pie"), { position: "absolute" });
+  }
+  pie(uu.id("version0.x data"), uu.id("version0.x title").innerText);
+}
+uu.module.load("", "image", function() {
+  uu.window.ready(boot);
+});
 </script>
 </body>
 </html>

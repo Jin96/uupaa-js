@@ -136,7 +136,7 @@ if (0) {
   },
   /** <b>イベントハンドラ</b> */
   handleEvent: function(evt) {
-    var type = uu.event.toDOMLv0Type(evt.type);
+    var type = uu.event.type(evt.type);
     switch (type) {
     case "mousedown":   uu.event.stop(evt); this.mousedown(evt);  break;
     case "mousemove":   uu.event.stop(evt); this.mousemove(evt);  break;

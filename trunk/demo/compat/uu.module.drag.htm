@@ -4,7 +4,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>uupaa.js - uu.module.drag test</title>
-<!--[if IE]><script type="text/javascript" src="../../lib/xpath.js"></script><![endif]-->
+<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="../../lib/javascript-xpath.js"></script><![endif]-->
 <script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
 <style>
 body {
@@ -87,7 +87,7 @@ dl {
 </table>
 
 <!-- free drag -->
-<div id="free1" class="freedrag">Free Drag<br />no wheel</div>
+<div id="free1" class="freedrag">Free Drag<br />no resize</div>
 <div id="free2" class="freedrag">Free Drag<br />(+Gost)</div>
 <div id="free3" class="freedrag">Free Drag<br />(+Gost)</div>
 <div id="free4" class="freedrag2">Free Drag2</div>
@@ -98,14 +98,14 @@ function boot() {
   new uu.module.drag.limited();
 
 
-  new uu.module.drag.free(uu.id("free1"), { ghost: false, allow: "mousedown,mousemove,mouseup" });
+  new uu.module.drag.free(uu.id("free1"), { ghost: false, resize: false });
   new uu.module.drag.free(uu.id("free2"), { msgpump: true });
   new uu.module.drag.free(uu.id("free3"));
   new uu.module.drag.free(uu.id("free4"), { ghost: false });
   new uu.module.drag.free(uu.id("free5"), { ghost: false });
 }
 
-uu.module.load("../../", "effect,drag,ui", boot);
+uu.module.load("../../", "ui,effect,drag", boot);
 </script>
 
 </body>

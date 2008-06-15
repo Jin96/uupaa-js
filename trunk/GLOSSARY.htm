@@ -14,14 +14,37 @@ a, b { color: lightblue }
 pre { border: 1px solid navy }
 dt { font-weight: bold; color: lightblue }
 i { font-style: normal; color: gray }
+table, tr, th, td { border: 1px solid gray; }
 </style>
 </head>
 <body>
 <a href="./README.htm">README.htm</a> &gt; GLOSSARY.htm
+<ul>
+  <li><a href="#error">エラー</a> - Error</li>
+  <li><a href="#selector">セレクタ, CSSセレクタ</a> - Selector, CSS Selector</li>
+  <li><a href="#element">要素</a> - Element</li>
+  <li><a href="#attr">属性</a> - Attribute</li>
+  <li><a href="#module">モジュール</a> - Module</li>
+  <li><a href="#sync">同期, 非同期</a> - Sync, ASync</li>
+  <li><a href="#curt-dir">カレントディレクトリ</a> - Current Directory</li>
+  <li><a href="#windowReady">windowReady</a>, <a href="#domReady">domReady</a>, <a href="#canvasReady">canvasReady</a></li>
+  <li><a href="#object-pollution">ネームスペース汚染, prototype汚染</a> - Name Space / prototype pollution</li>
+  <li><a href="#jointed-string">結合文字列</a> - Jointed String</li>
+  <li><a href="#taxing-param">厄介な引数</a> - Taxing Param</li>
+  <li><a href="#cssProp">cssProp</a>, <a href="#css-prop">css-prop</a></li>
+  <li><a href="#computed-style">計算済みのスタイル</a> - Computed Style</li>
+  <li><a href="#type-mix">Mix型</a> - Type "Mix"</li>
+  <li><a href="#type-hash">Hash型, Hashオブジェクト</a> - Type "Hash", "Hash" object</li>
+  <li><a href="#hash-element">Hash要素</a> - "Hash" Element</li>
+  <li><a href="#fake-array">擬似配列</a> - FakeArray</li>
+  <li><a href="#type-this">this型</a> - Type "this"</li>
+  <li><a href="#urlsafe64">URLSafe64</a></li>
+  <li><a href="#canvas-path">[Canvas] パス, サブパス</a> - Path, Sub Path</li>
+</ul>
 <hr />
 <h2>用語集</h2>
 <dl>
-  <dt>エラー, Error<dt>
+  <dt><a name="error">エラー - Error</a><dt>
     <dd>必要なファイルが読み込まれていない場合や、HTMLの記述が間違っている場合に以下のエラー(例外)が発生します。<br />
         <dl>
           <dt>ERR-01: xxxxxx が使用できません。(xxxxxx には機能名が入ります)</dt>
@@ -29,10 +52,10 @@ i { font-style: normal; color: gray }
           </dd>
           <dt>ERR-02: xxxxxxがありません。(xxxxxx には文字列が入ります)</dt>
           <dd>このエラーはxxxxxxが存在しない場合に発生します。<br />
-              <p>ERR-02: id="xpath.js"がありません。<br />
-                → このエラーはXPathをサポートしていないブラウザで、xpath.jsが読み込まれていない場合に発生します。<br />
-                    <b>&lt;script id="xpath.js" src="lib/xpath.js"&gt;&lt;/script&gt;</b> をhead要素に追加してください。<br />
-                    "lib/xpath.js" の部分は実際の設置場所にあわせて変えてください。</p>
+              <p>ERR-02: id="javascript-xpath.js"がありません。<br />
+                → このエラーはXPathをサポートしていないブラウザで、javascript-xpath.jsが読み込まれていない場合に発生します。<br />
+                    <b>&lt;script id="javascript-xpath.js" src="lib/javascript-xpath.js"&gt;&lt;/script&gt;</b> をhead要素に追加してください。<br />
+                    "lib/javascript-xpath.js" の部分は実際の設置場所にあわせて変えてください。</p>
               <p>ERR-02: id="excanvas.js"がありません。<br />
                 → <b>&lt;script id="excanvas.js" src="lib/excanvas.js"&gt;&lt;/script&gt;</b> をhead要素に追加してください。<br />
                     "lib/excanvas.js" の部分は実際の設置場所にあわせて変えてください。</p>
@@ -41,18 +64,23 @@ i { font-style: normal; color: gray }
           </dd>
         </dl>
     </dd>
-  <dt>要素, Element</dt>
+  <dt><a name="selector">セレクタ, CSSセレクタ - Selector, CSS Selector</a></dt>
+    <dd>
+      uupaa.jsは、IDセレクタ, タグ(要素)セレクタ, クラスセレクタ, 属性セレクタ, CSSセレクタ, XPathセレクタで要素を選択することが可能です。またjQuery独自のCSSセレクタにも対応しています。<br />
+      <a href="./SELECTOR.htm">サポートしているセレクタ</a>をご覧ください。
+    </dd>
+  <dt><a name="element">要素</a> - Element</dt>
     <dd>headタグをhead要素とよび、divタグをdiv要素と呼びます。<br />
         &lt;div id="sample" class="dummy" &gt;&lt;/div&gt; とあった場合に、div#sample 要素にアクセスするにはいくつか方法があります。
         <ol>
           <li>uu.id("sample"); としてid文字列からdiv#sample要素を検索</li>
           <li>uu.tag("div"); としてdiv要素をすべて検索し、その中からdiv#sample要素をさらに検索</li>
-          <li>uu.css("dummy"); としてCSSのクラス名("dummy")から検索</li>
+          <li>uu.klass("dummy"); としてCSSのクラス名("dummy")から検索</li>
           <li>uu.xpath('//id("sample")'); としてdiv#sampleを検索</li>
           <li>uu.xpath('//div[@class="sample"]'); としてdiv.dummyを検索</li>
         </ol>
     </dd>
-  <dt>属性, Attribute</dt>
+  <dt><a name="attr">属性</a> - Attribute</dt>
     <dd>&lt;div id="sample" class="dummy" &gt;&lt;/div&gt; とあった場合、id属性の値は"sample", class属性の値は"dummy"となります。<br />
         style属性を持つdiv要素の、style値を全て列挙する場合は以下のようにします。<br />
         <ol>
@@ -60,37 +88,37 @@ i { font-style: normal; color: gray }
           <li>uu.tag("div") + uu.attr("style") という方法もありますが、xpath.snapに比べ10倍以上遅くなります。</li>
         </ol>
     </dd>
-  <dt>モジュール, Module</dt>
+  <dt><a name="module">モジュール</a> - Module</dt>
     <dd>モジュールはプラグインやアドオンとも呼ばれます。<br />
         uupaaはモジュールを必要になったタイミングでロードし、使用することが可能です。<br />
         読み込みには、uu.module.load() か uu.module.loadSync() を使用します。これらには同期,非同期の違いがあります。<br />
         読み込み状況を調べるには、uu.module.isLoaded() を使用します。<br />
         モジュールの中から、さらにモジュールを読み込むことも可能です。<br />
     </dd>
-  <dt>同期, 非同期</dt>
-    <dd>ブラウザの外部にアクセスするメソッドの名前には共通点があり、load が非同期, loadSync は同期です。
+  <dt><a name="sync">同期, 非同期</a> - Sync, ASync</dt>
+    <dd>ブラウザの外部にアクセスするメソッドの名前には共通点があり、load() が非同期アクセス, loadSync() は同期アクセスになります。
     </dd>
-  <dt>カレントディレクトリ<dt>
+  <dt><a name="curt-dir">カレントディレクトリ</a> - Current Directory<dt>
     <dd>uupaa.jsをロードしたHTMLファイルのディレクトリがモジュールロード時のカレントディレクトリになります。<br />
         uupaa.jsのカレントディレクトリは、uu.baseURL() で取得できます。
     </dd>
-  <dt>windowReady</dt>
+  <dt><a name="windowReady">windowReady</a></dt>
     <dd>windowReadyはWebページの表示に必要な全情報が揃った状態のことです。<br />
         windowの全情報が揃ったタイミングで関数を呼び出すには uu.window.ready() に関数を登録します。<br />
         uu.window.ready() は、 window.onload や &lt;body onload="..."&gt; と同様の機能です。
     </dd>
-  <dt>domReady</dt>
+  <dt><a name="domReady">domReady</a></dt>
     <dd>domReadyは文書構造(DOM)の解析が終了した状態のことです。<br />
         DOMの解析終了タイミングで関数を呼び出すには uu.dom.ready() に関数を登録します。<br />
         <i>背景: domReadyはwindowReadyよりも先に成立します。domReadyで画面の構築を開始すると、ビジターのイライラを減らせます。</i></dd>
     </dd>
-  <dt>canvasReady</dt>
+  <dt><a name="canvasReady">canvasReady</a></dt>
     <dd>canvasReadyは、canvasが使用可能な状態のことです。<br />
         canvasが使用可能になったタイミングで関数を呼び出すには uu.canvas.ready() に関数を登録します。<br />
         <i>背景: Firefox2, Safari1.3, Opera9はcanvasをネイティブにサポートしますが。IE6, IE7, IE8はcanvasに対応していません。
         excanvas.jsによりIEでもcanvas要素が使用可能になりますが、excanvas.js内の初期化完了を知る必要があります。</i>
     </dd>
-  <dt>ビルトインオブジェクトの汚染, prototype汚染</dt>
+  <dt><a name="object-pollution">ネームスペース汚染, prototype汚染</a> - Name Space / prototype pollution</dt>
     <dd>JavaScriptは最初から存在するオブジェクト(ビルトインオブジェクト)の拡張が可能です。<br />
         ビルトインオブジェクトを安易に拡張すると、ライブラリ併用時の衝突や、意図しない副作用(Array + for inなど)といったトラブルが発生します。<br />
         以下がuupaa.jsによるオブジェクトの汚染リストです。ライブラリ併用時でも極力衝突が起きないようにしてあります。
@@ -121,20 +149,20 @@ i { font-style: normal; color: gray }
           </ul></dd>
         </dl>
     </dd>
-  <dt>結合文字列, Jointed string</dt>
+  <dt><a name="jointed-string">結合文字列</a> - Jointed String</dt>
     <dd>セパレータで結合されている状態の文字列です。デフォルトのセパレータはカンマ(",")です。<br />
         単に<b>結合文字列</b>とあれば、カンマ結合文字列を意味します。</dd>
-  <dt>厄介な引数, Taxing Param</dt>
+  <dt><a name="taxing-param">厄介な引数</a> - Taxing Param</dt>
     <dd>いくつかの関数は引数に、文字列の配列(["ab","12"])や文字列("ab"), カンマで結合された文字列("ab,12")を渡せます。
         この引数の形式をtaxingと呼びます。Taxingな引数をパースする専門の関数として uu.notax() があります。<br />
         <i>背景: 引数の自由度が高いと便利です。その反面、解釈に手間が掛かる厄介(Taxing)な引数とも言えます。</i></dd>
-  <dt>cssProp</dt>
+  <dt><a name="cssProp">cssProp</a></dt>
     <dd>JavaScriptのCSS2Propertiesで定義されているCSSのプロパティ名(スタイル名)を<b>cssProp</b>と呼びます。<br />例: fontWeight</dd>
-  <dt>css-prop</dt>
+  <dt><a name="css-prop">css-prop</a></dt>
     <dd>CSSで定義されているCSSのプロパティ名(スタイル名)を<b>css-prop</b>と呼びます。<br />例: font-weight<br />
         css-propからcssPropへの変換は、String.camelize()で行います。<br />
         uu.css.get(), uu.css.set()の第三引数にtrueを指定することでも同様の効果が得られます。</dd>
-  <dt>計算済みのスタイル</dt>
+  <dt><a name="computed-style">計算済みのスタイル</a> - Computed Style</dt>
     <dd>document.getComputedStyle()が返す値を<b>計算済みのスタイル</b>と呼びます。<br />
         計算済みのスタイルは、JavaScriptで設定されているelm.styleの値の他に、
         HTMLタグに直接書かれたインラインスタイル(＜tag style="xx: ..."＞)や、
@@ -144,39 +172,39 @@ i { font-style: normal; color: gray }
         color値は、"rgb(red,gree,blue)"や"#FFFFFF"に変換されます。(ブラウザ毎に異なります)<br />
         { fontWeight: "normal" }を設定すると、{ fontWeight: "400" }に変換される場合があります。
     </dd>
-  <dt>mix型</dt>
-    <dd>mix型はあらゆる型(object, hash, number, string, boolean, ...)を意味する説明上の(擬似的な)型です。<br />
-      あらゆる型を受け付ける引数があれば、その引数を<b>mix</b>型と呼びます。</dd>
-  <dt>hash型, hashオブジェクト</dt>
-    <dd>hash型はObject型の別名(alias)です。<br />
-      連想配列的に使用するObject型の変数をhashオブジェクト(または単にhash)と呼びます。</dd>
-  <dt>hash要素</dt>
+  <dt><a name="type-mix">Mix型</a> - Type "Mix"</dt>
+    <dd>Mix型はあらゆる型(object, Hash, number, string, boolean, ...)を意味する説明上の(擬似的な)型です。<br />
+      あらゆる型を受け付ける引数があれば、その引数を<b>Mix</b>型と呼びます。</dd>
+  <dt><a name="type-hash">Hash型, Hashオブジェクト</a> - Type "Hash", "Hash" object</dt>
+    <dd>Hash型はObject型の別名(alias)です。<br />
+      連想配列的に使用するObject型の変数をHashオブジェクト(または単にHash)と呼びます。</dd>
+  <dt><a name="hash-element">Hash要素</a> - "Hash" Element</dt>
     <dd>ArrayはObjectを親に持つため、数字indexの他に、Hash index(文字列index)を持つことができます。<br />
         数字indexだけを持つArrayと、Hash indexを併せ持つArrayは区別して扱う必要があります。<br />
-        Hash indexの要素を、hash要素と呼びます。<br />
+        Hash indexの要素を、Hash要素と呼びます。<br />
         <i>var rv = [1, 2, 3];</i><br />
-        <i>rv["hash"] = "hoge"; // hash要素を追加</i><br />
+        <i>rv["Hash"] = "hoge"; // Hash要素を追加</i><br />
         <i>alert(rv[0]); // "1"</i><br />
-        <i>alert(rv["hash"]); // "hoge"</i><br />
+        <i>alert(rv["Hash"]); // "hoge"</i><br />
         </dd>
-  <dt>擬似配列, Array like hash</dt>
-    <dd>配列ではないのに、lengthプロパティを持つhashを擬似配列と呼びます。<br />
+  <dt><a name="fake-array">擬似配列</a> - FakeArray</dt>
+    <dd>配列ではないのに、lengthプロパティを持つHashを擬似配列と呼びます。<br />
         代表的なものに、argumentsや, NodeList, document.images があります。<br />
         擬似配列の各要素を評価するには uu.forEach() を使い、配列化するには uu.toArray() を使用します。
     </dd>
-  <dt>this型</dt>
+  <dt><a name="type-this">this型</a> - Type "this"</dt>
     <dd>this型はObject型のエリアスです。<br />
       thisを渡すことが可能な引数を、this型の引数と呼びます。<br />
       this型の引数にundefinedを渡すとwindowを渡したことになります。</dd>
-  <dt>URLSafe64<dt>
+  <dt><a name="urlsafe64">URLSafe64</a><dt>
     <dd>RFC3548(The "URL and Filename safe" Base 64 Alphabet)で提唱されているBase64の亜種です。<br />
-        JavaScriptの文字列(UTF-16)をUTF-8に変換を行いさらに、通常のBase64でエンコードを行った後に、<br />
-        URLに含むことができない一部の記号("+", "/", "=")を、安全な記号("-", "_")に差し替えし、<br />
+        JavaScriptの文字列(UTF-16)をUTF-8に変換し、さらに通常のBase64でエンコードを行った後に、
+        URLに含むことができない一部の記号("+", "/", "=")を、安全な記号("-", "_")に差し替えし、
         末尾の"="を除去します。<br />
-        デコードは、省略された末尾の"="を文字列の長さを元に補完し、差し替えた記号を元に戻した後で、<br />
+        デコードは、省略された末尾の"="を文字列の長さを元に補完し、差し替えた記号を元に戻した後で
         Base64としてデコードします。
     </dd>
-  <dt>パス, サブパス<dt>
+  <dt>[Canvas] <a name="canvas-path">パス, サブパス</a> - Path, Sub Path<dt>
     <dd>canvas要素はパスを持ちます。<br />
         複雑な図形も、線や円弧などの単純なサブパスを組み合わせることで描画することができます。<br />
     </dd>

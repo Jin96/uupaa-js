@@ -4,10 +4,10 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>Hello uupaa.js World</title>
-<!--[if IE]><script id="xpath.js" type="text/javascript" src="../../lib/xpath.js"></script><![endif]-->
 <!--[if IE]><script id="excanvas.js" type="text/javascript" src="../../lib/excanvas.js"></script><![endif]-->
+<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="../../lib/javascript-xpath.js"></script><![endif]-->
 <script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
-<style>
+<style type="text/css">
 #canvas, #msg { position: absolute; top: 0; left: 0 }
 #msg { font-weight: bold }
 </style>
@@ -16,18 +16,9 @@
 <a href="../../README.htm">README.htm</a> &gt; HelloWorld.htm
 
 <canvas id="canvas" width="400" height="400"></canvas><p id="msg">Hello Japanese Creator!</p>
-<script>
+<script type="text/javascript">
 function circle() { 
-  var canvas = uu.id("canvas"), msg = uu.id("msg"),
-      ctx = canvas.getContext("2d"),
-      inn = uu.ui.inner(),
-      color = 0xff9999;
-  function alignCenter() {
-    [msg, canvas].forEach(function(v) {
-      uu.css.set(v, { left: (inn.iw - uu.css.get.width(v)) / 2 + "px",
-                      top: (inn.ih - uu.css.get.height(v)) / 2 + "px" });
-    });
-  }
+  var canvas = uu.id("canvas"), ctx = canvas.getContext("2d"), color = 0xff9999;
   function draw() {
     color += 10;
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -36,12 +27,11 @@ function circle() {
     ctx.arc(200, 200, 180, 0, Math.PI * 2, false);
     ctx.fill();
   }
-  function anim() {
-    uu.effect.fade(canvas, { speed: 2000, fn: draw });
-  }
-
-  alignCenter();
-  uu.tm10.set(anim, 2200);
+  uu.effect.move(uu.id("msg"));
+  uu.effect.move(canvas);
+  uu.tm10.set(function() {
+    uu.effect.fade(canvas, { speed: 2000, fn: draw })
+  }, 2200);
 }
 uu.module.load("../../", "ui,effect", function() {
   uu.dom.ready(function() {

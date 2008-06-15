@@ -78,9 +78,10 @@ uu.image.preload = function(url, fn /* = uu.mute */) { // for Firefox3, Safari3.
  * png画像を動的に追加し、透過させたい場合に、この関数をコールします。<br />
  * IE5.5/6.0以外のブラウザでは何もしません。
  *
- * @param array elms - 要素または、要素の配列を指定します。
+ * @param element/array elm - 要素または、要素の配列を指定します。
+ * @param bool [force] - 既に透過済みの画像を再度透過させる場合にtrueを指定します。デフォルトはfalseです。
  */
-uu.image.png24 = function(elms) {};
+uu.image.png24 = function(elm, force /* = false */) {};
 uu.image.png24._file = uu.config.imagePath + "uu.module.image.1x1.gif"; // png24で使用する1x1のgifイメージのファイル名
 uu.image.png24._search = function() {};
 
@@ -103,16 +104,16 @@ uu.image.timeout = 10000; // 10000ms(10s)
  */
 uu.image.delay = 50; // 50ms
 
-if (uu.config.png24 && (/MSIE (5\.5|6\.0)/.test(uu.ua._) && navigator.platform == "Win32")) {
+if (uu.config.png24 && uu.ua.ie && (uu.ua.ver > 5 && uu.ua.ver < 7)) { // 5.5 or 6.0
   // uu.mixで、元のuu.image.png24()のプロパティ(_file,_search等)を引き継いだuu.image.png24()を作り出す
   // 普通に上書きすると、_file,_searchはundefinedになってしまうが、
   // このようにすると、子孫との関係を維持しつつ、親(この場合function)の中身の入れ替えが可能になる。
-  uu.image.png24 = uu.mix(function(elms) {
+  uu.image.png24 = uu.mix(function(elm, force /* = false */) {
     var w, h;
-    (uu.isA(elms) ? elms : [elms]).forEach(function(v) {
-      if (v.uu_png24) { return; } // alert("already");
+    (uu.isA(elm) ? elm : [elm]).forEach(function(v) {
+      if (!(force || false) && v.uu_png24) { return; }
       w = v.width, h = v.height;
-      v.style.filter = 'progid:DXImageTransform.Microsoft.AlphaImageLoader(src="' + v.src + '",sizingMethod=scale)';
+      v.style.filter = 'progid:DXImageTransform.Microsoft.AlphaImageLoader(src="' + v.src + '",sizingMethod=image)';
       uu.mix(v, { src: uu.image.png24._file, width: w, height: h, uu_png24: 1 });
     });
   }, uu.image.png24);
@@ -130,7 +131,7 @@ if (uu.config.png24 && (/MSIE (5\.5|6\.0)/.test(uu.ua._) && navigator.platform =
     var rv = [];
     uu.toArray(uud.images).forEach(function(v) {
       if (v.complete && /.png$/i.test(v.src)) {
-        if ((v.alt && /24b/i.test(v.alt)) || /24b/i.test(v.src) || uu.css.is(v, "alpha")) {
+        if ((v.alt && /24b/i.test(v.alt)) || /24b/i.test(v.src) || uu.css.hasClass(v, "alpha")) {
           rv.push(v);
         }
       }

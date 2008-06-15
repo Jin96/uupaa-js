@@ -1,0 +1,244 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>uupaa.js - Glossary</title>
+<style type="text/css">
+body {
+  background-color: black; color: whitesmoke;
+  font-family:'メイリオ',Meiryo,'ヒラギノ角ゴ Pro W3','Hiragino Kaku Gothic Pro','ＭＳ Ｐゴシック',sans-serif;
+  margin: 3em; line-height: 1.5;
+}
+a, b { color: lightblue }
+pre { border: 1px solid navy }
+dt { font-weight: bold; color: lightblue }
+i {}
+table, tr, th, td { border: 1px solid gray; }
+</style>
+</head>
+<body>
+<a href="./README.htm">README.htm</a> &gt; SELECTOR.htm<br />
+<ul>
+  <li><a href="#id-selector">IDセレクタ</a> - uu.id()</li>
+  <li><a href="#element-selector">タグ(要素)セレクタ</a> - uu.tag()</li>
+  <li><a href="#class-selector">クラスセレクタ</a> - uu.klass()</li>
+  <li><a href="#attr-selector">属性セレクタ</a> - uu.attr()</li>
+  <li><a href="#xpath-selector">XPathセレクタ</a> - uu.xpath()</li>
+  <li><a href="#css-selector">CSSセレクタ</a> - uu.css()</li>
+  <li><a href="#jquery-selector">jQuery独自セレクタ</a> - uu.css()</li>
+  <li><a href="#css123">使用可能なCSSセレクタの一覧</a></li>
+</ul>
+<hr />
+<h2>uupaa.js が サポートしているセレクタ</h2>
+<dl>
+  <dt><a name="id-selector">IDセレクタ - ID Selector</a></li>
+  <dd>
+    <p>uu.id(<i>ID</i>) を使用すると <i>ID</i> と一致するid属性を持つ要素を選択できます。</p>
+    <pre class="eg">
+      &lt;html&gt;&lt;head&gt;&lt;title&gt;ID Selector&lt;/title&gt;
+      &lt;!--[if IE]&gt;&lt;script id="javascript-xpath.js" type="text/javascript" src="./lib/javascript-xpath.js"&gt;&lt;/script&gt;&lt;![endif]--&gt;
+      &lt;script id="uupaa.js" type="text/javascript" src="./uupaa.js"&gt;&lt;/script&gt;
+      &lt;/head&gt;&lt;body&gt;
+      &lt;div id="ID1"&gt;hoge&lt;/div&gt;
+      <b>&lt;div id="ID2"&gt;huga&lt;/div&gt;</b>
+      &lt;script&gt;
+        uu.window.ready(function() {
+          alert(<b>uu.id("ID2")</b>.innerText); // "huga"
+        });
+      &lt;/script&gt;
+      &lt;/body&gt;&lt;/html&gt;
+    </pre>
+  </dd>
+  <dt><a name="element-selector">タグ(要素)セレクタ</a> - Tag/Element Selector</li>
+  <dd>
+    <p>uu.tag(<i>ELEMENT</i>) を使用すると <i>ELEMENT</i> と一致する要素を選択できます。<br />
+       uu.tag("*") とすると、全要素を選択できます。</p>
+    <pre class="eg">
+      &lt;html&gt;&lt;head&gt;&lt;title&gt;Tag/Element Selector&lt;/title&gt;
+      &lt;!--[if IE]&gt;&lt;script id="javascript-xpath.js" type="text/javascript" src="./lib/javascript-xpath.js"&gt;&lt;/script&gt;&lt;![endif]--&gt;
+      &lt;script id="uupaa.js" type="text/javascript" src="./uupaa.js"&gt;&lt;/script&gt;
+      &lt;/head&gt;&lt;body&gt;
+      <b>&lt;div&gt;hoge&lt;/div&gt;</b>
+      <b>&lt;div&gt;huga&lt;/div&gt;</b>
+      &lt;script&gt;
+        uu.window.ready(function() {
+          uu.forEach(<b>uu.tag("div")</b>, function(v) {
+            alert(v.innerText); // "hoge", "huga"
+          });
+        });
+      &lt;/script&gt;
+      &lt;/body&gt;&lt;/html&gt;
+    </pre>
+  </dd>
+  <dt><a name="class-selector">クラスセレクタ</a> - Class Selector</li>
+  <dd>
+    <p>uu.klass(<i>CLASS</i>) を使用すると <i>CLASS</i> と一致するclass属性を持つ要素を選択できます。</p>
+    <pre class="eg">
+      &lt;html&gt;&lt;head&gt;&lt;title&gt;Class Selector&lt;/title&gt;
+      &lt;!--[if IE]&gt;&lt;script id="javascript-xpath.js" type="text/javascript" src="./lib/javascript-xpath.js"&gt;&lt;/script&gt;&lt;![endif]--&gt;
+      &lt;script id="uupaa.js" type="text/javascript" src="./uupaa.js"&gt;&lt;/script&gt;
+      &lt;/head&gt;&lt;body&gt;
+      <b>&lt;div class="note"&gt;hoge&lt;/div&gt;</b>
+      <b>&lt;div class="note"&gt;huga&lt;/div&gt;</b>
+      &lt;script&gt;
+        uu.window.ready(function() {
+          uu.forEach(<b>uu.klass("note")</b>, function(v) {
+            alert(v.innerText); // "hoge", "huga"
+          });
+        });
+      &lt;/script&gt;
+      &lt;/body&gt;&lt;/html&gt;
+    </pre>
+  </dd>
+  <dt><a name="attr-selector">属性セレクタ</a> - Attribute Selector</li>
+  <dd>
+    <p>uu.attr(<i>ATTRIBUTE</i>) を使用すると <i>ATTRIBUTE</i>という属性名を持つ要素を選択できます。<br />
+       uu.attr(<i>ATTRIBUTE</i>, <i>値</i>) とすることで、完全に一致する値を持つ要素の検索も可能です。
+    </p>
+    <pre class="eg">
+      &lt;html&gt;&lt;head&gt;&lt;title&gt;Attr Selector&lt;/title&gt;
+      &lt;!--[if IE]&gt;&lt;script id="javascript-xpath.js" type="text/javascript" src="./lib/javascript-xpath.js"&gt;&lt;/script&gt;&lt;![endif]--&gt;
+      &lt;script id="uupaa.js" type="text/javascript" src="./uupaa.js"&gt;&lt;/script&gt;
+      &lt;/head&gt;&lt;body&gt;
+      <b>&lt;div orgattr="attr"&gt;hoge&lt;/div&gt;</b>
+      <b>&lt;p orgattr="attr"&gt;huga&lt;/p&gt;</b>
+      &lt;script&gt;
+        uu.window.ready(function() {
+          uu.forEach(<b>uu.attr("orgattr")</b>, function(v) {
+            alert(v.innerText); // "hoge", "huga"
+          });
+        });
+      &lt;/script&gt;
+      &lt;/body&gt;&lt;/html&gt;
+    </pre>
+  </dd>
+  <dt><a name="xpath-selector">XPathセレクタ</a> - XPath Selector</li>
+  <dd>
+    <p>uu.xpath(<i>XPath</i>) を使用すると <i>XPath</i>式により要素を詳細に選択できます。<br />
+       uu.xpath.snap(<i>XPath</i>) とすると、XPathのスナップショットを取得することもできます。</p>
+    <pre class="eg">
+      &lt;html&gt;&lt;head&gt;&lt;title&gt;XPath Selector&lt;/title&gt;
+      &lt;!--[if IE]&gt;&lt;script id="javascript-xpath.js" type="text/javascript" src="./lib/javascript-xpath.js"&gt;&lt;/script&gt;&lt;![endif]--&gt;
+      &lt;script id="uupaa.js" type="text/javascript" src="./uupaa.js"&gt;&lt;/script&gt;
+      &lt;/head&gt;&lt;body&gt;
+      &lt;div&gt;hoge&lt;/div&gt;
+      <b>&lt;div&gt;huga&lt;/div&gt;</b>
+      &lt;script&gt;
+        uu.window.ready(function() {
+          uu.forEach(<b>uu.xpath("/html/body/div[2]")</b>, function(v) {
+            alert(v.innerText); // "huga"
+          });
+        });
+      &lt;/script&gt;
+      &lt;/body&gt;&lt;/html&gt;
+    </pre>
+  </dd>
+  <dt><a name="css-selector">CSSセレクタ</a> - CSS Selector</li>
+  <dd>
+    <p>uu.css(<i>SELECTOR</i>) を使用すると CSSセレクタで要素を詳細に選択できます。<br />
+       <a href="#css123">使用可能なCSSセレクタの一覧</a>をご覧ください。</a></p>
+    </p>
+    <pre class="eg">
+      &lt;html&gt;&lt;head&gt;&lt;title&gt;CSS Selector&lt;/title&gt;
+      &lt;!--[if IE]&gt;&lt;script id="javascript-xpath.js" type="text/javascript" src="./lib/javascript-xpath.js"&gt;&lt;/script&gt;&lt;![endif]--&gt;
+      &lt;script id="uupaa.js" type="text/javascript" src="./uupaa.js"&gt;&lt;/script&gt;
+      &lt;/head&gt;&lt;body&gt;
+      &lt;div&gt;hoge&lt;/div&gt;
+      <b>&lt;div&gt;huga&lt;/div&gt;</b>
+      &lt;script&gt;
+        uu.window.ready(function() {
+          uu.forEach(<b>uu.css("div:nth-last-of-type(1)")</b>, function(v) {
+            alert(v.innerText); // "huga"
+          });
+        });
+      &lt;/script&gt;
+      &lt;/body&gt;&lt;/html&gt;
+    </pre>
+  </dd>
+
+
+  <dt><a name="css123">使用可能なCSSセレクタの一覧 - List of the available CSS selectors</a></dt>
+  <dd>
+    <p>uu.css(selector) を使用するとCSSセレクタで要素を選択できます。<br />
+       CSS Level 1, 2, 3 に対応しています。</p>
+    <table>
+    <tr><th>CSS Selector</th><th>戻り値(Return)</th><th>内容</th></tr>
+    <tr><td>*           </td><td>Element(s)</td><td>全ての要素と一致します。 <br />- Universal selector - CSS Level 2</td></tr>
+    <tr><td>#id         </td><td>Element   </td><td>属性idが一致する要素と一致します。<br />[@id="value"]のシンタックスシュガーです。<br />- ID selectors - CSS Level 1</td></tr>
+    <tr><td>.className  </td><td>Element(s)</td><td>属性classと一致する要素と一致します。<br />[@class~="value"]のシンタックスシュガーです。<br />- Class selectors - CSS Level 1</td></tr>
+    <tr><td>E           </td><td>Element(s)</td><td>全ての要素Eと一致します。<br />- Type selectors - CSS Level 1</td></tr>
+    <tr><td>E, F, G     </td><td>Element(s)</td><td>複数のセレクタを一度に指定できます。<br />結果には個々のセレクタの評価結果が返されます。</td></tr>
+    <tr><td>E F         </td><td>Element(s)</td><td>要素Eの子孫の全ての要素Fと一致します。<br />- Descendant combinator - CSS Level 1</td></tr>
+    <tr><td>E > F       </td><td>Element(s)</td><td>要素Eの子供の要素Fと一致します。<br />- Child combinator - CSS Level 2</td></tr>
+    <tr><td>E + F       </td><td>Element   </td><td>要素EとFが兄弟で、要素Eと隣接する要素Fと一致します。<br />- Adjacent sibling combinator - CSS Level 2</td></tr>
+    <tr><td>E ~ F       </td><td>Element(s)</td><td>要素EとFが兄弟で、要素Eの後に存在する要素Fと一致します。<br />- General sibling combinator - CSS Level 3</td></tr>
+    <tr><td>E[A]        </td><td>Element(s)</td><td>属性Aを持つ全ての要素Eと一致します。属性の値は問いません。<br />- Attribute selectors - CSS Level 2</td></tr>
+    <tr><td>E[A="V"]    </td><td>Element(s)</td><td>属性Aの値がVの全ての要素Eと一致します。<br />- Attribute selectors - CSS Level 2</td></tr>
+    <tr><td>E[A~="V"]   </td><td>Element(s)</td><td>属性Aの値がスペース区切りのリストで、<br />リストがVを含む全ての要素Eと一致します。<br />- Attribute selectors - CSS Level 2</td></tr>
+    <tr><td>E[A|="V"]   </td><td>Element(s)</td><td>属性Aの値がハイフン区切りのリストで、<br />"V"または"V-"で始まる単語を含む全ての要素Eと一致します。<br />- Attribute selectors - CSS Level 2</td></tr>
+    <tr><td>E[A^="V"]   </td><td>Element(s)</td><td>属性Aの値がVで始まる全ての要素Eと一致します。<br />- Attribute selectors - CSS Level 3</td></tr>
+    <tr><td>E[A$="V"]   </td><td>Element(s)</td><td>属性Aの値がVで終わる全ての要素Eと一致します。<br />- Attribute selectors - CSS Level 2</td></tr>
+    <tr><td>E[A*="V"]   </td><td>Element(s)</td><td>属性Aの値がVを含む全ての要素Eと一致します。<br />- Attribute selectors - CSS Level 3</td></tr>
+    <tr><td>:root       </td><td>Element   </td><td>ルート要素(HTML)と一致します。<br /> - Structural pseudo-classes - CSS Level 3</td></tr>
+    <tr><td>:nth-child(<a href="#n">n</a>)     </td><td>Element(s)</td><td>先頭から数えて(n番目の | 偶数番目の | 奇数番目の |演算結果と一致する)兄弟要素と一致します。<br /> - Structural pseudo-classes - CSS Level 3</td></tr>
+    <tr><td>:nth-last-child(<a href="#n">n</a>)</td><td>Element(s)</td><td>末尾から数えて(n番目の | 偶数番目の | 奇数番目の |演算結果と一致する)兄弟要素と一致します。<br /> - Structural pseudo-classes - CSS Level 3</td></tr>
+    <tr><td>E:nth-of-type(<a href="#n">n</a>)     </td><td>Element(s)</td><td>E要素と同じ要素名の兄弟を先頭から数えて<br />(n番目の | 偶数番目の | 奇数番目の |演算結果と一致する)兄弟要素と一致します。<br /> - Structural pseudo-classes - CSS Level 3</td></tr>
+    <tr><td>E:nth-last-of-type(<a href="#n">n</a>)</td><td>Element(s)</td><td>E要素と同じ要素名の兄弟を末尾から数えて<br />(n番目の | 偶数番目の | 奇数番目の |演算結果と一致する)兄弟要素と一致します。<br /> - Structural pseudo-classes - CSS Level 3</td></tr>
+    <tr><td>:first-child</td><td>Element</td><td>最初の子要素と一致します。<br /> - Structural pseudo-classes - CSS Level 2</td></tr>
+    <tr><td>:last-child</td><td>Element</td><td>最後の子要素と一致します。<br /> - Structural pseudo-classes - CSS Level 2</td></tr>
+    <tr><td>E:first-of-type</td><td>Element</td><td>E要素と同じ要素名の兄弟で、最初の兄弟と一致します。<br /> - Structural pseudo-classes - CSS Level 3</td></tr>
+    <tr><td>E:last-of-type</td><td>Element</td><td>E要素と同じ要素名の兄弟で、最後の兄弟と一致します。<br /> - Structural pseudo-classes - CSS Level 3</td></tr>
+    <tr><td>:only-child</td><td>Element</td><td>一人っ子と一致します。<br /> - Structural pseudo-classes - CSS Level 3</td></tr>
+    <tr><td>E:only-of-type</td><td>Element</td><td>要素Eの親からみてユニークなEであれば一致します。<br />兄弟にEがいれば一致しません。<br /> - Structural pseudo-classes - CSS Level 3</td></tr>
+    <tr><td>:empty</td><td>Element</td><td>独身(子要素やテキストノードを持たない要素E)と一致します。<br /> - Structural pseudo-classes - CSS Level 3</td></tr>
+    </table>
+    <p>※ 未記載のCSSセレクタは、実装方法で悩んでいるものが多く、要望があれば再検討するつもりです。</p>
+
+    <a name="n"></a>
+    <p>:nth-child(n), :nth-last-child(n), :nth-of-type(n), :nth-last-of-type(n) の n には、
+      <br >"even", "odd", "2n", "2n+1" または "xny" といった文字列や数値を指定可能です。</p>
+    <ul>
+      <li>数値: 先頭/末尾から数えてn番目の兄弟要素と一致します。</li>
+      <li>"even": 先頭/末尾から数えて偶数番目の兄弟要素と一致します。0,2,4...番目の要素は"even"と一致します。</li>
+      <li>"odd": 先頭/末尾から数えて奇数番目の兄弟要素と一致します。1,3,5...番目の要素は"odd"と一致します。</li>
+      <li>"2n": "even"と同じです。</li>
+      <li>"2n+1": "odd"と同じです。</li>
+      <li>"4n+1": 4で割って余りが0の番号を持つ要素を選択します。</li>
+      <li>"4n+2": 4で割って余りが1の番号を持つ要素を選択します。</li>
+      <li>"4n+3": 4で割って余りが2の番号を持つ要素を選択します。</li>
+      <li>"4n+4": 4で割って余りが3の番号を持つ要素を選択します。</li>
+    </ul>
+  </dd>
+  <dt><a name="jquery-selector">jQuery Selectors</a></dt>
+  <dd>
+    <p>uu.css(<i>SELECTOR</i>) は、一部の<a href="http://docs.jquery.com/Selectors">jQuery独自セレクタ</a>にも対応しています。</p>
+    <table>
+    <tr><th>jQuery Selectors</th><th>戻り値(Return)</th><th>内容</th></tr>
+    <tr><td>:first        </td><td>Element</td><td>最初の要素と一致します。</td></tr>
+    <tr><td>:last         </td><td>Element</td><td>最後の要素と一致します。</td></tr>
+    <tr><td>:even         </td><td>Element(s)</td><td>偶数番目の要素と一致します。:nth-child(even)と同じです。</td></tr
+    <tr><td>:odd          </td><td>Element(s)</td><td>奇数番目の要素と一致します。:nth-child(odd)と同じです。</td></tr
+    <tr><td>:eq(index)    </td><td>Element</td><td>ルート要素から検索し、index番目の要素と一致します。:nth-child(index)と同じです。</td></tr>
+    <tr><td>:gt(index)    </td><td>Element(s)</td><td>ルート要素から検索し、index番超の要素と一致します。:gt(4) は5番目以上と一致し4番目は含みません。</td></tr>
+    <tr><td>:lt(index)    </td><td>Element(s)</td><td>ルート要素から検索し、index番未満の要素と一致します。:lt(4) は3番目以下と一致し4番目は含みません。</td></tr>
+    <tr><td>:header       </td><td>Element(s)</td><td>ルート要素から検索し、h1,h2,h3,h4,h5,h6要素と一致します。</td></tr>
+    <tr><td>:contains(text)</td><td>Element(s)</td><td>テキストノードがtextを含んでいる要素と一致します。</td></tr>
+    <tr><td>:parent       </td><td>Element</td><td>親要素から見て、テキストノードを含んでいる全ての子要素と一致します。</td></tr>
+    <tr><td>:input        </td><td>Element(s)</td><td>全てのinput, textarea, select, button要素と一致します。</td></tr>
+    <tr><td>:text         </td><td>Element(s)</td><td>input type="text"の要素と一致します。</td></tr>
+    <tr><td>:password     </td><td>Element(s)</td><td>input type="password"の要素と一致します。</td></tr>
+    <tr><td>:radio        </td><td>Element(s)</td><td>input type="radio"の要素と一致します。</td></tr>
+    <tr><td>:checkbox     </td><td>Element(s)</td><td>input type="checkbox"の要素と一致します。</td></tr>
+    <tr><td>:submit       </td><td>Element(s)</td><td>input type="submit"の要素と一致します。</td></tr>
+    <tr><td>:image        </td><td>Element(s)</td><td>input type="image"の要素と一致します。</td></tr>
+    <tr><td>:reset        </td><td>Element(s)</td><td>input type="reset"の要素と一致します。</td></tr>
+    <tr><td>:button       </td><td>Element(s)</td><td>input type="button"の要素と一致します。</td></tr>
+    <tr><td>:file         </td><td>Element(s)</td><td>input type="file"の要素と一致します。</td></tr>
+    <tr><td>:hidden       </td><td>Element(s)</td><td>input type="hidden"の要素と一致します。<br /><span style="color: red">jQueryとは違い、visibility: hiddenの要素とは一致しません。</span></td></tr>
+    </table>
+  </dd>
+</dl>
+
+</body>
+</html>

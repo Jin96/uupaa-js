@@ -3,8 +3,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<title>uupaa.js - uu.css test</title>
-<!--[if IE]><script type="text/javascript" src="../../lib/xpath.js"></script><![endif]-->
+<title>uupaa.js - uu.css.xxx and uu.klass test</title>
+<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="../../lib/javascript-xpath.js"></script><![endif]-->
 <script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
 <style type="text/css">
 body { color: white; background-color: black; padding-top: 3em; }
@@ -28,9 +28,9 @@ body { color: white; background-color: black; padding-top: 3em; }
       第三引数にtrueを指定すると uu.css.set(element, { "background-color": "white" }, true) とCSS名でスタイルを指定することができます。
       uu.css.set.opacity()もあります。
   </dd>
-  <dt>uu.css() - クラス名で要素を選択。</dt>
+  <dt>uu.klass() - クラス名で要素を選択。</dt>
   <dd>
-      uu.cssは、クラス名で要素を選択する機能です。
+      uu.klassは、クラス名で要素を選択する機能です。
       document.getElementsByClassName()が実装されている環境では、getElementsByClassName()を、<br />
       未実装ならば、エミュレートします。<br />
       以下は、<a href="http://www.whatwg.org/specs/web-apps/current-work/#getelementsbyclassname">WHATWG Web Applications 1.0: getElementsByClassName</a>
@@ -69,22 +69,22 @@ A call to <input type="button" value="getElementsByClassName('aaa,bbb') = none" 
 
 <script>
 function test1() { // document.getElementById('example').getElementsByClassName('aaa')
-  uu.forEach(uu.css('aaa', uu.id('example')), function(v) {
+  uu.forEach(uu.klass('aaa', uu.id('example')), function(v) {
     alert(v.id);
   });
 }
 function test2() { // getElementsByClassName('ccc bbb')
-  uu.forEach(uu.css('ccc bbb'), function(v) {
+  uu.forEach(uu.klass('ccc bbb'), function(v) {
     alert(v.id);
   });
 }
 function test3() { // document.getElementById('example').getElementsByClassName('bbb  ccc ')
-  uu.forEach(uu.css('bbb  ccc ', uu.id('example')), function(v) {
+  uu.forEach(uu.klass('bbb  ccc ', uu.id('example')), function(v) {
     alert(v.id);
   });
 }
 function test4() { // getElementsByClassName('aaa,bbb')
-  uu.forEach(uu.css('aaa,bbb'), function(v) {
+  uu.forEach(uu.klass('aaa,bbb'), function(v) {
     alert(v.id);
   });
 }
