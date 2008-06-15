@@ -5,59 +5,109 @@
  */
 (function() { var /* uud = document, */ uuw = window, uu = uuw.uu;
 
-/** Pluggable MVC - Application Model
+/** <b>Pluggable MVC</b>
+ *
+ * @class
+ */
+uu.module.pmvc = function() {
+};
+
+/** <b>Pluggable MVC - Application Model</b>
  *
  * @class
  */
 uu.module.pmvc.applicationModel = uu.basicClass();
 
-/** Pluggable MVC - Domain Model
+/** <b>Pluggable MVC - Domain Model</b>
  *
  * @class
  */
 uu.module.pmvc.domainModel = uu.basicClass();
 
-/** Pluggable MVC - controller
+/** <b>Pluggable MVC - controller</b>
  *
  * @class
  */
 uu.module.pmvc.controller = uu.basicClass();
 
-/** Pluggable MVC - View
+/** <b>Pluggable MVC - View</b>
  *
  * @class
  */
 uu.module.pmvc.view = uu.basicClass();
 
 uu.forEach({
-  construct: function(id, permit /* = 0x3 */, systemMethod /* = {} */, applicationMethod /* = {} */) {
+  /** @scope uu.module.pmvc.controller */
+
+  /** <b>初期化</b>
+   *
+   * @param string id       - ユニークなID(メッセージ配達用のアドレス)を指定します。
+   */
+  construct: function(id) {
     this.id = id;
-    this.permit = permit || 0x3;
-    this.method.sys = systemMethod || {};
-    this.method.app = applicationMethod || {};
-    (new uu.module.msgpump()).set(this.id, this);
+    this.catalog = { ping: "_ping" }; // msg-name: function-name
+    uu.msgpump.set(this.id, this);
+    this.activate();
   },
-  id: "",
-  permit: 0, // permit message routing: 0x0=deny, 0x1=allow sys msg, 0x2=allow app msg,0x3=both
-  method: { sys:{}, app:{} },
-  /** 処理 */
+  /** <b>メッセージとハンドラの登録</b>
+   *
+   * @param hash handler - hash { msg, function() { ... }, ... } を指定します。
+   *                       msgで指定したメッセージが到着すると、
+   *                       functionで指定した関数が呼ばれます。
+   */
+  regist: function(handler) {
+    var me = this;
+    uu.forEach(handler, function(fn, msg) {
+      me.catalog[msg] = msg; // 実名で登録
+      me[msg] = fn;
+    });
+  },
+  /** <b>エリアスメッセージカタログの登録</b>
+   *
+   * メッセージの別名を登録します。
+   *
+   * @param hash catalog - エリアス(別名)とメッセージ(実体)のカタログです。
+   *                       hash { alias, msg, ... } の形で指定します。
+   *                       aliasで指定したメッセージが到着すると、
+   *                       msgとリンクしているハンドラが呼ばれます。
+   * @throws TypeError "uu.module.pmvc::registArias(catalog) no unsubstantial" 実体が無い
+   */
+  registArias: function(catalog) {
+    var me = this;
+    uu.forEach(catalog, function(msg, alias) {
+      if (!(msg in me.catalog)) { // 実体が無い
+        throw TypeError("uu.module.pmvc::registArias(catalog) no unsubstantial");
+      }
+      me.catalog[alias] = msg; // { msg-name(alias): function-name }
+    });
+  },
+  /** <b>活性化</b>
+   * メッセージの受け取りを開始します。
+   */
+  activate: function() {
+    this.permit = 0x1;
+  },
+  /** <b>不活性化</b>
+   * メッセージの受け取りを停止します。
+   */
+  deactivate: function() {
+    this.permit = 0x0;
+  },
+  /** <b>メッセージの受信とハンドラの呼び出し</b>
+   *
+   * @param string msg   - メッセージの名前を指定します。
+   * @param mix [param1] - 引数を指定します。
+   * @param mix [param2] - 引数を指定します。
+   * @return bool - 呼び出し成功でtrue, 失敗でfalseを返します。
+   */
   procedure: function(msg, param1, param2) {
-    var rv = false;
-    if (!this._beforeHook(msg, param1, param2)) { return false; }
-    rv = this._routing(msg, param1, param2);
-    if (!this._afterHook(msg, param1, param2)) { return false; }
-    return rv;
+    if (!this._hook(msg, param1, param2) || !this.permit) { return false; }
+    if (!(msg in this.catalog)) { return this._unknown(msg, param1, param2); }
+    return this[this.catalog[msg]].call(this, msg, param1, param2);
   },
-  /** メッセージの配送 */
-  _routing: function(msg, param1, param2) {
-    var m = this.method, p = this.permit;
-    if (msg in m.sys) { return (p.sys) ? m.sys[msg].call(this, msg, param1, param2) : false; }
-    if (msg in m.app) { return (p.app) ? m.app[msg].call(this, msg, param1, param2) : false; }
-    return this._unknown(msg, param1, param2);
-  },
-  _beforeHook:  function(msg, param1, param2) { return true; }, // falseでルーティング終了
-  _afterHook:   function(msg, param1, param2) { return true; }, // falseでルーティング終了
-  _unknown:     function(msg, param1, param2) { return true; }  // 未知のメッセージ用ハンドラ
+  _ping:    function(msg, param1, param2) { alert(this.id + " - alive"); },
+  _hook:    function(msg, param1, param2) { return true; }, // falseでルーティング終了
+  _unknown: function(msg, param1, param2) { return true; }  // 未知のメッセージ用ハンドラ
 }, function(v, p) {
   uu.module.pmvc.applicationModel.prototype[p] = v;
   uu.module.pmvc.domainModel.prototype[p] = v;
@@ -65,7 +115,7 @@ uu.forEach({
   uu.module.pmvc.view.prototype[p] = v;
 });
 
-/* activate method */
+/* activate primary instance */
 uu.module.pmvc.activate = function() {
   uu.app    = new uu.module.pmvc.applicationModel("A");
   uu.domain = new uu.module.pmvc.domainModel("D");

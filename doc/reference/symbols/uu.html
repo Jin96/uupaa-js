@@ -156,8 +156,7 @@ ul.inheritsList {
 <!-- ============================== header ================================= -->	
 		<!-- begin static/header.html -->
 		<div id="header">
-<!-- replace abs path -->
-<a href="../../README.htm">README.htm</a> &gt; Reference
+<a href="http://uupaa-js.googlecode.com/svn/trunk/README.htm">README.htm</a> &gt; Reference
 </div>
 
 		<!-- end static/header.html -->
@@ -217,6 +216,8 @@ ul.inheritsList {
 	
 	<li><a href="../symbols/uu.json.html">uu.json</a></li>
 	
+	<li><a href="../symbols/uu.klass.html">uu.klass</a></li>
+	
 	<li><a href="../symbols/uu.mix.html">uu.mix</a></li>
 	
 	<li><a href="../symbols/uu.module.html">uu.module</a></li>
@@ -230,6 +231,8 @@ ul.inheritsList {
 	<li><a href="../symbols/uu.module.drag.limited.html">uu.module.drag.limited</a></li>
 	
 	<li><a href="../symbols/uu.module.drag.zindexer.html">uu.module.drag.zindexer</a></li>
+	
+	<li><a href="../symbols/uu.module.messagePump.html">uu.module.messagePump</a></li>
 	
 	<li><a href="../symbols/uu.module.pmvc.html">uu.module.pmvc</a></li>
 	
@@ -330,7 +333,7 @@ ul.inheritsList {
 								<div class="fixedFont">
 								uu.<b><a href="../symbols/uu.html#.msgpump">msgpump</a></b>
 								</div>
-								<div class="description">メッセージポンプのインスタンス(uu.module.pmvc.messagePump instance)</div>
+								<div class="description">メッセージポンプのインスタンス(uu.module.messagePump instance)</div>
 							</td>
 						</tr>
 					
@@ -511,6 +514,15 @@ ul.inheritsList {
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
+								<div class="fixedFont">uu.<b><a href="../symbols/uu.html#.pushArray">pushArray</a></b>(FakeArray, object)
+								</div>
+								<div class="description"><b>uu.pushArray - 擬似配列をオブジェクトの要素に追加</b>与えられた擬似配列を、オブジェクトの要素に追加します。<br />obj.lengthを追加した要素数に更新します。<pre class="eg"> var hash = {}; uu.pushArray(uu.tag("*"), hash); // hash[0] = html, hash[1] = head, hash[2] = meta, .</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
 								<div class="fixedFont">uu.<b><a href="../symbols/uu.html#.rtrim">rtrim</a></b>(string, regexp/undefined)
 								</div>
 								<div class="description"><b>uu.rtrim - 左側の空白文字を除去</b>文字列の右側から空白文字をトリム(除去)し、新しい文字列を返します。<pre class="eg">uu.rtrim(" hoge "); // " hoge"</pre></div>
@@ -547,9 +559,9 @@ ul.inheritsList {
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">uu.<b><a href="../symbols/uu.html#.toArray">toArray</a></b>(mix)
+								<div class="fixedFont">uu.<b><a href="../symbols/uu.html#.toArray">toArray</a></b>(FakeArray)
 								</div>
-								<div class="description"><b>uu.toArray - 擬似配列を配列化</b>与えられた擬似配列を配列化します。<br />指定可能な擬似配列には以下のようなものがあります。<br />document.images, NodeList, arguments</div>
+								<div class="description"><b>uu.toArray - 擬似配列を配列化</b>与えられた擬似配列を配列化します。<br />擬似配列には以下のようなものがあります。<br />document.images, NodeList, arguments<pre class="eg"> var node = uu.toArray(uu.tag("*"));</pre></div>
 							</td>
 						</tr>
 					
@@ -640,7 +652,7 @@ ul.inheritsList {
 					
 					</div>
 					<div class="description">
-						メッセージポンプのインスタンス(uu.module.pmvc.messagePump instance)
+						メッセージポンプのインスタンス(uu.module.messagePump instance)
 						
 						
 					</div>
@@ -1426,6 +1438,63 @@ ul.inheritsList {
 
 					<hr />
 				
+					<a name=".pushArray"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">uu.</span><b>pushArray</b>(FakeArray, object)
+					
+					</div>
+					<div class="description">
+						<b>uu.pushArray - 擬似配列をオブジェクトの要素に追加</b>与えられた擬似配列を、オブジェクトの要素に追加します。<br />obj.lengthを追加した要素数に更新します。<pre class="eg"> var hash = {}; uu.pushArray(uu.tag("*"), hash); // hash[0] = html, hash[1] = head, hash[2] = meta, ...</pre>
+						
+						
+					</div>
+					
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>FakeArray</b>
+									
+								</dt>
+								<dd>fake - 擬似配列を指定します。</dd>
+							
+								<dt>
+									<b>object</b>
+									
+								</dt>
+								<dd>[obj - オブジェクトを指定します。</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd>object  - fake追加後のオブジェクトを返します。</dd>
+							
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+								<dd><a href="../symbols/uu.html#.toArray">uu.toArray</a> - 擬似配列を配列化</dd>
+							
+							</dl>
+						
+
+					<hr />
+				
 					<a name=".rtrim"> </a>
 					<div class="fixedFont">&lt;static&gt; 
 					
@@ -1634,11 +1703,11 @@ ul.inheritsList {
 					<div class="fixedFont">&lt;static&gt; 
 					
 					
-					<span class="light">uu.</span><b>toArray</b>(mix)
+					<span class="light">uu.</span><b>toArray</b>(FakeArray)
 					
 					</div>
 					<div class="description">
-						<b>uu.toArray - 擬似配列を配列化</b>与えられた擬似配列を配列化します。<br />指定可能な擬似配列には以下のようなものがあります。<br />document.images, NodeList, arguments
+						<b>uu.toArray - 擬似配列を配列化</b>与えられた擬似配列を配列化します。<br />擬似配列には以下のようなものがあります。<br />document.images, NodeList, arguments<pre class="eg"> var node = uu.toArray(uu.tag("*"));</pre>
 						
 						
 					</div>
@@ -1651,10 +1720,10 @@ ul.inheritsList {
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>mix</b>
+									<b>FakeArray</b>
 									
 								</dt>
-								<dd>mix - 擬似配列や配列を指定します。</dd>
+								<dd>fake - 擬似配列を指定します。</dd>
 							
 							</dl>
 						
@@ -1665,7 +1734,7 @@ ul.inheritsList {
 							<dl class="detailList">
 							<dt class="heading">Returns:</dt>
 							
-								<dd>array  - mixがnullなら空の配列([])を返します。<br />                 mixがarrayなら配列をそのまま返します。<br />                 mixが"length"プロパティを持つ擬似配列(arguments, NodeList...)なら配列化してから返します。<br /></dd>
+								<dd>array  - fakeがnullやlengthプロパティを持たないhashが指定された場合は空の配列([])を返します。<br />                 fakeがlengthプロパティを持つ擬似配列なら配列化してから返します。</dd>
 							
 							</dl>
 						
@@ -1887,7 +1956,7 @@ ul.inheritsList {
 <!-- ============================== footer ================================= -->
 		<div class="fineprint" style="clear:both">
 			&copy;2008<br />
-			Documentation generated by <a href="http://www.jsdoctoolkit.org/" target="_blank">JsDoc Toolkit</a> 2.0.beta2.3 on Sun Jun 08 2008 06:37:06 GMT+0900 (JST)
+			Documentation generated by <a href="http://www.jsdoctoolkit.org/" target="_blank">JsDoc Toolkit</a> 2.0.beta2.3 on Sun Jun 15 2008 16:44:31 GMT+0900 (JST)
 		</div>
 	</body>
 </html>

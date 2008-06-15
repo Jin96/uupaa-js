@@ -154,8 +154,7 @@ ul.inheritsList {
 	
 	<body>
 		<div id="header">
-<!-- replace abs path -->
-<a href="../../README.htm">README.htm</a> &gt; Reference
+<a href="http://uupaa-js.googlecode.com/svn/trunk/README.htm">README.htm</a> &gt; Reference
 </div>
 
 		
@@ -212,6 +211,8 @@ ul.inheritsList {
 	
 	<li><a href="symbols/uu.json.html">uu.json</a></li>
 	
+	<li><a href="symbols/uu.klass.html">uu.klass</a></li>
+	
 	<li><a href="symbols/uu.mix.html">uu.mix</a></li>
 	
 	<li><a href="symbols/uu.module.html">uu.module</a></li>
@@ -225,6 +226,8 @@ ul.inheritsList {
 	<li><a href="symbols/uu.module.drag.limited.html">uu.module.drag.limited</a></li>
 	
 	<li><a href="symbols/uu.module.drag.zindexer.html">uu.module.drag.zindexer</a></li>
+	
+	<li><a href="symbols/uu.module.messagePump.html">uu.module.messagePump</a></li>
 	
 	<li><a href="symbols/uu.module.pmvc.html">uu.module.pmvc</a></li>
 	
@@ -342,7 +345,7 @@ ul.inheritsList {
 			<div>
 				<h2><a href="symbols/uu.css.set.html#constructor">uu.css.set</a></h2>
 				
-<b>uu.css.set - スタイルの設定(set style)</b>スタイルを設定します。<br />以下の特別な処理も行います。<dl> <dt>display: hide</dt><dd>要素を隠します。</dd> <dt>display: show</dt><dd>要素を表示します。</dd></dl>
+<b>uu.css.set - スタイルの設定(set style)</b>スタイルを設定します。<br />一部のプロパティでは、特別な値や指定方法が有効です。<dl> <dt>top, left, width, height</dt><dd>値を数値で指定すると末尾に"px"を補完します。</dd> <dt>display</dt><dd>"hide"を指定すると要素を隠します。"show"を指定すると要素を表示します。</dd></dl>
 			</div>
 			<hr />
 			
@@ -411,6 +414,12 @@ ul.inheritsList {
 			<hr />
 			
 			<div>
+				<h2><a href="symbols/uu.klass.html#constructor">uu.klass</a></h2>
+				
+			</div>
+			<hr />
+			
+			<div>
 				<h2><a href="symbols/uu.mix.html#constructor">uu.mix</a></h2>
 				
 <b>uu.mix - ミックス, 継承(mixin, class abstract)</b>baseにflavorとaromaを混ぜ込みbaseを返します。<br />既存のindexがあればflavorやaromaの値で上書きします。
@@ -449,6 +458,12 @@ ul.inheritsList {
 			
 			<div>
 				<h2><a href="symbols/uu.module.drag.zindexer.html#constructor">uu.module.drag.zindexer</a></h2>
+				
+			</div>
+			<hr />
+			
+			<div>
+				<h2><a href="symbols/uu.module.messagePump.html#constructor">uu.module.messagePump</a></h2>
 				
 			</div>
 			<hr />
@@ -524,39 +539,45 @@ ul.inheritsList {
 				
 <b>要素に関する情報を取得</b>
 <pre>
-offsetLeft
-├───┤
-┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-┃
-┃      ┌  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ┐
-┃                      ↑margin-top                      
-┃      │              ↓                              │
-┃        ┏━━━━━━━━━━━━━━━━━━━━━┓  
-┃      │┃■■■■■■↑border-top■■■■■■■■■┃│
-┃        ┃■■■■■■↓■■■■■■■■■■■■■■┃  
-┃      │┃■■┏━━━━━━━━━━━━━━━┓■■┃│
-┃        ┃■■┃      ↑padding-top           ┃■■┃  
-┃      │┃■■┃      ↓                      ┃■■┃│
-┃        ┃■■┃  ┌─Contents─Area───┐  ┃■■┃  
-┃      │┃■■┃  │                      │  ┃■■┃│
-┃        ┃■■┃  │                      │  ┃■■┃  
-┃      │┃■■┃  │                      │  ┃■■┃│
-┃        ┃■■┃  │                      │  ┃■■┃  
-┃      │┃■■┃  │                      │  ┃■■┃│
-┃        ┃■■┃  └───────────┘  ┃■■┃  
-┃      │┃■■┃                              ┃■■┃│
-┃        ┃■■┗━━━━━━━━━━━━━━━┛■■┃  
-┃      │┃■■■■■■■■■■■■■■■■■■■■■┃│
-┃        ┃■■■■■■■■■■■■■■■■■■■■■┃  
-┃      │┗━━━━━━━━━━━━━━━━━━━━━┛│
-┃      └  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ┘
-┃        ├───────offsetWidth-────────┤
+elm.offsetLeft (= elm.style.left + elm.style.marginLeftWidth)
+├────┤
+┏  ━┬━  ━  ━  ━  ━  ━  ━  ━  ━  ━  ━  ━  ━      ┬
+      │                                                        │elm.style.top
+┃    │                                                    ┬  ┴
+      │elm.offsetTop                                       │
+┃    │                                                    │elm.style.marginTopWidth
+      │                                                    │
+┃    ┴  ┏━━━━━━━━━━━━━━━━━━━━━┓┬  ┴  ┬
+          ┃■■■■■■■■■■■■■■■■■■■■■┃│      │elm.style.borderTopWidth
+┃        ┃■■■■■■■■■■■■■■■■■■■■■┃│      │
+          ┃■■┏━━━━━━━━━━━━━━━┓■■┃│  ┬  ┴
+┃        ┃■■┃                              ┃■■┃│  │
+          ┃■■┃                              ┃■■┃│  │elm.style.paddingTopWidth
+┃        ┃■■┃  ┌─Contents─Area───┐  ┃■■┃│  ┴  ┬
+          ┃■■┃  │                      │  ┃■■┃│      │
+┃        ┃■■┃  │                      │  ┃■■┃│      │ elm.clientHeight
+          ┃■■┃  │         elm          │  ┃■■┃│      │  (= elm.style.height)
+┃        ┃■■┃  │                      │  ┃■■┃│      │
+          ┃■■┃  │                      │  ┃■■┃│      │
+┃        ┃■■┃  └───────────┘  ┃■■┃│      ┴
+          ┃■■┃                              ┃■■┃│
+┃        ┃■■┗━━━━━━━━━━━━━━━┛■■┃│elm.offsetHeight
+          ┃■■■■■■■■■■■■■■■■■■■■■┃│   (= elm.style.borderTopWidth
+┃        ┃■■■■■■■■■■■■■■■■■■■■■┃│    + elm.style.borderBottomWidth
+          ┗━━━━━━━━━━━━━━━━━━━━━┛┴    + elm.style.height)
+┃                                                      
+          ├─────────────────────┤
+┃                      elm.offsetWidth (= elm.style.borderLeft + elm.style.borderRight
+                                                                + elm.style.width)
+┃              ├───────────────┤
+                        elm.clientWidth (= elm.style.width)
 ┃      
-┃              ├────clientWidth-─────┤
-┃      
-┃        ├──┤
-┃       clientLeft (Firefox3, 左のマージンとパディングを含まないボーダー幅のピクセル数)
-┃  
+          ├──┤
+┃       elm.clientLeft (= elm.style.borderLeftWidth)
+
+
+Firefox3から、clientLeft, clientTopが利用可能
+
 </pre> <dl>   <dt>x</dt><dd>画面左上からのオフセット幅(スクロール量を含む) - offsetLeftの累計 - ウインドウの原点からの絶対座標</dd>   <dt>y</dt><dd>画面左上からのオフセット高さ(スクロール量を含む) - offsetTopの累計 - ウインドウの原点からの絶対座標</dd>   <dt>w</dt><dd>要素の幅(オフセット幅, 左右のボーダーを含む) - offsetWidth</dd>   <dt>h</dt><dd>要素の高さ(オフセット高さ, 上下のボーダーを含む) - offsetHeight</dd>   <dt>cw</dt><dd>要素の幅(オフセット幅, 左右のボーダーを含まない) - clientWidth</dd>   <dt>ch</dt><dd>要素の高さ(オフセット高さ, 上下のボーダーを含まない) - clientHeight</dd> </dl>
 			</div>
 			<hr />
@@ -590,7 +611,7 @@ offsetLeft
 		</div>
 		<div class="fineprint" style="clear:both">
 			&copy;2008<br />
-			Documentation generated by <a href="http://www.jsdoctoolkit.org/" target="_blankt">JsDoc Toolkit</a> 2.0.beta2.3 on Sun Jun 08 2008 06:37:13 GMT+0900 (JST)
+			Documentation generated by <a href="http://www.jsdoctoolkit.org/" target="_blankt">JsDoc Toolkit</a> 2.0.beta2.3 on Sun Jun 15 2008 16:44:42 GMT+0900 (JST)
 		</div>
 	</body>
 </html>

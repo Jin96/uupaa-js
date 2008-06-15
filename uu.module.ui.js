@@ -47,39 +47,45 @@ if (uu.ua.ie) { // for IE
 /** <b>要素に関する情報を取得</b>
  *
 <pre>
-offsetLeft
-├───┤
-┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-┃
-┃      ┌  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ┐
-┃                      ↑margin-top                      
-┃      │              ↓                              │
-┃        ┏━━━━━━━━━━━━━━━━━━━━━┓  
-┃      │┃■■■■■■↑border-top■■■■■■■■■┃│
-┃        ┃■■■■■■↓■■■■■■■■■■■■■■┃  
-┃      │┃■■┏━━━━━━━━━━━━━━━┓■■┃│
-┃        ┃■■┃      ↑padding-top           ┃■■┃  
-┃      │┃■■┃      ↓                      ┃■■┃│
-┃        ┃■■┃  ┌─Contents─Area───┐  ┃■■┃  
-┃      │┃■■┃  │                      │  ┃■■┃│
-┃        ┃■■┃  │                      │  ┃■■┃  
-┃      │┃■■┃  │                      │  ┃■■┃│
-┃        ┃■■┃  │                      │  ┃■■┃  
-┃      │┃■■┃  │                      │  ┃■■┃│
-┃        ┃■■┃  └───────────┘  ┃■■┃  
-┃      │┃■■┃                              ┃■■┃│
-┃        ┃■■┗━━━━━━━━━━━━━━━┛■■┃  
-┃      │┃■■■■■■■■■■■■■■■■■■■■■┃│
-┃        ┃■■■■■■■■■■■■■■■■■■■■■┃  
-┃      │┗━━━━━━━━━━━━━━━━━━━━━┛│
-┃      └  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ┘
-┃        ├───────offsetWidth-────────┤
+elm.offsetLeft (= elm.style.left + elm.style.marginLeftWidth)
+├────┤
+┏  ━┬━  ━  ━  ━  ━  ━  ━  ━  ━  ━  ━  ━  ━      ┬
+      │                                                        │elm.style.top
+┃    │                                                    ┬  ┴
+      │elm.offsetTop                                       │
+┃    │                                                    │elm.style.marginTopWidth
+      │                                                    │
+┃    ┴  ┏━━━━━━━━━━━━━━━━━━━━━┓┬  ┴  ┬
+          ┃■■■■■■■■■■■■■■■■■■■■■┃│      │elm.style.borderTopWidth
+┃        ┃■■■■■■■■■■■■■■■■■■■■■┃│      │
+          ┃■■┏━━━━━━━━━━━━━━━┓■■┃│  ┬  ┴
+┃        ┃■■┃                              ┃■■┃│  │
+          ┃■■┃                              ┃■■┃│  │elm.style.paddingTopWidth
+┃        ┃■■┃  ┌─Contents─Area───┐  ┃■■┃│  ┴  ┬
+          ┃■■┃  │                      │  ┃■■┃│      │
+┃        ┃■■┃  │                      │  ┃■■┃│      │ elm.clientHeight
+          ┃■■┃  │         elm          │  ┃■■┃│      │  (= elm.style.height)
+┃        ┃■■┃  │                      │  ┃■■┃│      │
+          ┃■■┃  │                      │  ┃■■┃│      │
+┃        ┃■■┃  └───────────┘  ┃■■┃│      ┴
+          ┃■■┃                              ┃■■┃│
+┃        ┃■■┗━━━━━━━━━━━━━━━┛■■┃│elm.offsetHeight
+          ┃■■■■■■■■■■■■■■■■■■■■■┃│   (= elm.style.borderTopWidth
+┃        ┃■■■■■■■■■■■■■■■■■■■■■┃│    + elm.style.borderBottomWidth
+          ┗━━━━━━━━━━━━━━━━━━━━━┛┴    + elm.style.height)
+┃                                                      
+          ├─────────────────────┤
+┃                      elm.offsetWidth (= elm.style.borderLeft + elm.style.borderRight
+                                                                + elm.style.width)
+┃              ├───────────────┤
+                        elm.clientWidth (= elm.style.width)
 ┃      
-┃              ├────clientWidth-─────┤
-┃      
-┃        ├──┤
-┃       clientLeft (Firefox3, 左のマージンとパディングを含まないボーダー幅のピクセル数)
-┃  
+          ├──┤
+┃       elm.clientLeft (= elm.style.borderLeftWidth)
+
+
+Firefox3から、clientLeft, clientTopが利用可能
+
 </pre>
  *
  *  <dl>
@@ -91,10 +97,8 @@ offsetLeft
  *    <dt>ch</dt><dd>要素の高さ(オフセット高さ, 上下のボーダーを含まない) - clientHeight</dd>
  *  </dl>
  *
- * @param   element   elm - 要素を指定します。
- * @return  rect          - { x, y, w, h } を返します。<br />
- *                          x, y: 画面左上からの絶対座標。<br />
- *                          w, h: 要素の幅と高さ
+ * @param element elm - 要素を指定します。
+ * @return rect       - { x, y, w, h, cw, ch } を返します。
  * @namespace
  */
 uu.ui.element = function(elm) {
@@ -108,31 +112,39 @@ uu.ui.element = function(elm) {
            w: elm.offsetWidth, h: elm.offsetHeight,
            cw: elm.clientWidth, ch: elm.clientHeight };
 };
-if ("getBoxObjectFor" in uud) { // for Firefox
-  uu.ui.element = function(elm) {
-    var b = uud.getBoxObjectFor(elm), inn = uu.ui.inner();
-    return { x: inn.sw + b.x, y: inn.sh + b.y,
-             w: b.width, h: b.height,
-             cw: elm.clientWidth, ch: elm.clientHeight };
-  };
-} else if ("getBoundingClientRect" in uud) { // for IE, +Firefox3.0, +Opera9.5β2
+if ("getBoundingClientRect" in uud) { // for IE, +Firefox3.0, +Opera9.5β2
   uu.ui.element = function(elm) {
     var b = elm.getBoundingClientRect(), inn = uu.ui.inner();
     return { x: inn.sw + b.left - 2, y: inn.sh + b.top - 2, // Operaで-2する必要があるかは要確認
              w: elm.offsetWidth, h: elm.offsetHeight,
              cw: elm.clientWidth, ch: elm.clientHeight };
   };
-}
+} /* else if ("getBoxObjectFor" in uud) { // for Firefox2
+  uu.ui.element = function(elm) {
+    var b = uud.getBoxObjectFor(elm), inn = uu.ui.inner();
+    var borderTopWidth = parseInt(uu.css.get(elm, "borderTopWidth"));
+    var borderLeftWidth = parseInt(uu.css.get(elm, "borderLeftWidth"));
+    return { x: inn.sw + b.x - borderTopWidth, y: inn.sh + b.y - borderLeftWidth,
+             w: b.width, h: b.height,
+             cw: elm.clientWidth, ch: elm.clientHeight };
+  };
+} */
 
 /** <b>最寄の基準点からの累計オフセットと要素の大きさを取得</b>
  *
  * 最寄の基準点からの累計オフセットと要素の大きさを取得します。
  * 最寄の基準点とは、position absoluteやrelativeが指定された要素のことです。
  *
- * @param   element   elm - 要素を指定します。
- * @return  rect          - { x, y, w, h } を返します。<br />
- *                          x, y: 最寄の基準点からの累計オフセット値。<br />
- *                          w, h: 要素の幅と高さ
+ *  <dl>
+ *    <dt>x</dt><dd>最寄の基準点からの累計オフセット値</dd>
+ *    <dt>y</dt><dd>最寄の基準点からの累計オフセット値</dd>
+ *    <dt>w</dt><dd>要素の幅(オフセット幅, 左右のボーダーを含む) - offsetWidth</dd>
+ *    <dt>h</dt><dd>要素の高さ(オフセット高さ, 上下のボーダーを含む) - offsetHeight</dd>
+ *    <dt>cw</dt><dd>要素の幅(オフセット幅, 左右のボーダーを含まない) - clientWidth</dd>
+ *    <dt>ch</dt><dd>要素の高さ(オフセット高さ, 上下のボーダーを含まない) - clientHeight</dd>
+ *  </dl>
+ * @param element elm - 要素を指定します。
+ * @return rect       - { x, y, w, h, cw, ch } を返します。<br />
  */
 uu.ui.element.offsetParent = function(elm) {
   var e = elm, x = 0, y = 0, ss;
@@ -141,7 +153,7 @@ uu.ui.element.offsetParent = function(elm) {
     y += e.offsetTop  || 0;
     e = e.offsetParent;
     if (e) {
-      ss = uu.css.get(e, "position");
+      ss = uu.css.get(e, "position"); // position を持つものが基準点となる
       if (ss === "relative" || ss === "absolute") { break; }
     }
   }

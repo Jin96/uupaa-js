@@ -156,8 +156,7 @@ ul.inheritsList {
 <!-- ============================== header ================================= -->	
 		<!-- begin static/header.html -->
 		<div id="header">
-<!-- replace abs path -->
-<a href="../../README.htm">README.htm</a> &gt; Reference
+<a href="http://uupaa-js.googlecode.com/svn/trunk/README.htm">README.htm</a> &gt; Reference
 </div>
 
 		<!-- end static/header.html -->
@@ -217,6 +216,8 @@ ul.inheritsList {
 	
 	<li><a href="../symbols/uu.json.html">uu.json</a></li>
 	
+	<li><a href="../symbols/uu.klass.html">uu.klass</a></li>
+	
 	<li><a href="../symbols/uu.mix.html">uu.mix</a></li>
 	
 	<li><a href="../symbols/uu.module.html">uu.module</a></li>
@@ -230,6 +231,8 @@ ul.inheritsList {
 	<li><a href="../symbols/uu.module.drag.limited.html">uu.module.drag.limited</a></li>
 	
 	<li><a href="../symbols/uu.module.drag.zindexer.html">uu.module.drag.zindexer</a></li>
+	
+	<li><a href="../symbols/uu.module.messagePump.html">uu.module.messagePump</a></li>
 	
 	<li><a href="../symbols/uu.module.pmvc.html">uu.module.pmvc</a></li>
 	
@@ -303,7 +306,7 @@ ul.inheritsList {
 							<div class="fixedFont">
 								<b><a href="../symbols/uu.module.pmvc.controller.html#constructor">uu.module.pmvc.controller</a></b>()
 							</div>
-							<div class="description">Pluggable MVC - controller</div>
+							<div class="description"><b>Pluggable MVC - controller</b></div>
 						</td>
 					</tr>
 				</tbody>
@@ -314,6 +317,78 @@ ul.inheritsList {
 			
 
 <!-- ============================== methods summary ======================== -->
+			
+				
+				
+				<table class="summaryTable" cellspacing="0" summary="A summary of the methods documented in the class uu.module.pmvc.controller.">
+					<caption>Method Summary</caption>
+					<thead>
+						<tr>
+							<th scope="col">Method Attributes</th>
+							<th scope="col">Method Name and Description</th>
+						</tr>
+					</thead>
+					<tbody>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">uu.module.pmvc.controller.<b><a href="../symbols/uu.module.pmvc.controller.html#.activate">activate</a></b>()
+								</div>
+								<div class="description"><b>活性化</b>メッセージの受け取りを開始します。</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">uu.module.pmvc.controller.<b><a href="../symbols/uu.module.pmvc.controller.html#.construct">construct</a></b>(string)
+								</div>
+								<div class="description"><b>初期化</b></div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">uu.module.pmvc.controller.<b><a href="../symbols/uu.module.pmvc.controller.html#.deactivate">deactivate</a></b>()
+								</div>
+								<div class="description"><b>不活性化</b>メッセージの受け取りを停止します。</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">uu.module.pmvc.controller.<b><a href="../symbols/uu.module.pmvc.controller.html#.procedure">procedure</a></b>(string, mix, mix)
+								</div>
+								<div class="description"><b>メッセージの受信とハンドラの呼び出し</b></div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">uu.module.pmvc.controller.<b><a href="../symbols/uu.module.pmvc.controller.html#.regist">regist</a></b>(hash)
+								</div>
+								<div class="description"><b>メッセージとハンドラの登録</b></div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">uu.module.pmvc.controller.<b><a href="../symbols/uu.module.pmvc.controller.html#.registArias">registArias</a></b>(hash)
+								</div>
+								<div class="description"><b>エリアスメッセージカタログの登録</b>メッセージの別名を登録します。</div>
+							</td>
+						</tr>
+					
+					</tbody>
+				</table>
+				
+				
+				
 			
 
 <!-- ============================== constructor details ==================== -->		
@@ -328,7 +403,7 @@ ul.inheritsList {
 				</div>
 				
 				<div class="description">
-					Pluggable MVC - controller
+					<b>Pluggable MVC - controller</b>
 					
 				</div>
 				
@@ -351,6 +426,240 @@ ul.inheritsList {
 
 <!-- ============================== method details ========================= -->		
 			
+				<div class="sectionTitle">
+					Method Detail
+				</div>
+				
+					<a name=".activate"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">uu.module.pmvc.controller.</span><b>activate</b>()
+					
+					</div>
+					<div class="description">
+						<b>活性化</b>メッセージの受け取りを開始します。
+						
+						
+					</div>
+					
+					
+					
+					
+						
+						
+						
+						
+						
+						
+						
+
+					<hr />
+				
+					<a name=".construct"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">uu.module.pmvc.controller.</span><b>construct</b>(string)
+					
+					</div>
+					<div class="description">
+						<b>初期化</b>
+						
+						
+					</div>
+					
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>string</b>
+									
+								</dt>
+								<dd>id       - ユニークなID(メッセージ配達用のアドレス)を指定します。</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+						
+						
+
+					<hr />
+				
+					<a name=".deactivate"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">uu.module.pmvc.controller.</span><b>deactivate</b>()
+					
+					</div>
+					<div class="description">
+						<b>不活性化</b>メッセージの受け取りを停止します。
+						
+						
+					</div>
+					
+					
+					
+					
+						
+						
+						
+						
+						
+						
+						
+
+					<hr />
+				
+					<a name=".procedure"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">uu.module.pmvc.controller.</span><b>procedure</b>(string, mix, mix)
+					
+					</div>
+					<div class="description">
+						<b>メッセージの受信とハンドラの呼び出し</b>
+						
+						
+					</div>
+					
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>string</b>
+									
+								</dt>
+								<dd>msg   - メッセージの名前を指定します。</dd>
+							
+								<dt>
+									<b>mix</b>
+									
+								</dt>
+								<dd>[param1] - 引数を指定します。</dd>
+							
+								<dt>
+									<b>mix</b>
+									
+								</dt>
+								<dd>[param2] - 引数を指定します。</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd>bool - 呼び出し成功でtrue, 失敗でfalseを返します。</dd>
+							
+							</dl>
+						
+						
+						
+
+					<hr />
+				
+					<a name=".regist"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">uu.module.pmvc.controller.</span><b>regist</b>(hash)
+					
+					</div>
+					<div class="description">
+						<b>メッセージとハンドラの登録</b>
+						
+						
+					</div>
+					
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>hash</b>
+									
+								</dt>
+								<dd>handler - hash { msg, function() { ... }, ... } を指定します。                      msgで指定したメッセージが到着すると、                      functionで指定した関数が呼ばれます。</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+						
+						
+
+					<hr />
+				
+					<a name=".registArias"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">uu.module.pmvc.controller.</span><b>registArias</b>(hash)
+					
+					</div>
+					<div class="description">
+						<b>エリアスメッセージカタログの登録</b>メッセージの別名を登録します。
+						
+						
+					</div>
+					
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>hash</b>
+									
+								</dt>
+								<dd>catalog - エリアス(別名)とメッセージ(実体)のカタログです。                      hash { alias, msg, ... } の形で指定します。                      aliasで指定したメッセージが到着すると、                      msgとリンクしているハンドラが呼ばれます。</dd>
+							
+							</dl>
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Throws:</dt>
+							
+								<dt>
+									 <b></b>
+								</dt>
+								<dd>TypeError "uu.module.pmvc::registArias(catalog) no unsubstantial" 実体が無い</dd>
+							
+							</dl>
+						
+						
+						
+						
+
+					
+				
+			
 			
 			<hr />
 		</div>
@@ -358,7 +667,7 @@ ul.inheritsList {
 <!-- ============================== footer ================================= -->
 		<div class="fineprint" style="clear:both">
 			&copy;2008<br />
-			Documentation generated by <a href="http://www.jsdoctoolkit.org/" target="_blank">JsDoc Toolkit</a> 2.0.beta2.3 on Sun Jun 08 2008 06:37:09 GMT+0900 (JST)
+			Documentation generated by <a href="http://www.jsdoctoolkit.org/" target="_blank">JsDoc Toolkit</a> 2.0.beta2.3 on Sun Jun 15 2008 16:44:35 GMT+0900 (JST)
 		</div>
 	</body>
 </html>

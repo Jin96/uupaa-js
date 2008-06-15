@@ -156,8 +156,7 @@ ul.inheritsList {
 <!-- ============================== header ================================= -->	
 		<!-- begin static/header.html -->
 		<div id="header">
-<!-- replace abs path -->
-<a href="../../README.htm">README.htm</a> &gt; Reference
+<a href="http://uupaa-js.googlecode.com/svn/trunk/README.htm">README.htm</a> &gt; Reference
 </div>
 
 		<!-- end static/header.html -->
@@ -217,6 +216,8 @@ ul.inheritsList {
 	
 	<li><a href="../symbols/uu.json.html">uu.json</a></li>
 	
+	<li><a href="../symbols/uu.klass.html">uu.klass</a></li>
+	
 	<li><a href="../symbols/uu.mix.html">uu.mix</a></li>
 	
 	<li><a href="../symbols/uu.module.html">uu.module</a></li>
@@ -230,6 +231,8 @@ ul.inheritsList {
 	<li><a href="../symbols/uu.module.drag.limited.html">uu.module.drag.limited</a></li>
 	
 	<li><a href="../symbols/uu.module.drag.zindexer.html">uu.module.drag.zindexer</a></li>
+	
+	<li><a href="../symbols/uu.module.messagePump.html">uu.module.messagePump</a></li>
 	
 	<li><a href="../symbols/uu.module.pmvc.html">uu.module.pmvc</a></li>
 	
@@ -282,39 +285,45 @@ ul.inheritsList {
 				
 <b>要素に関する情報を取得</b>
 <pre>
-offsetLeft
-├───┤
-┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-┃
-┃      ┌  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ┐
-┃                      ↑margin-top                      
-┃      │              ↓                              │
-┃        ┏━━━━━━━━━━━━━━━━━━━━━┓  
-┃      │┃■■■■■■↑border-top■■■■■■■■■┃│
-┃        ┃■■■■■■↓■■■■■■■■■■■■■■┃  
-┃      │┃■■┏━━━━━━━━━━━━━━━┓■■┃│
-┃        ┃■■┃      ↑padding-top           ┃■■┃  
-┃      │┃■■┃      ↓                      ┃■■┃│
-┃        ┃■■┃  ┌─Contents─Area───┐  ┃■■┃  
-┃      │┃■■┃  │                      │  ┃■■┃│
-┃        ┃■■┃  │                      │  ┃■■┃  
-┃      │┃■■┃  │                      │  ┃■■┃│
-┃        ┃■■┃  │                      │  ┃■■┃  
-┃      │┃■■┃  │                      │  ┃■■┃│
-┃        ┃■■┃  └───────────┘  ┃■■┃  
-┃      │┃■■┃                              ┃■■┃│
-┃        ┃■■┗━━━━━━━━━━━━━━━┛■■┃  
-┃      │┃■■■■■■■■■■■■■■■■■■■■■┃│
-┃        ┃■■■■■■■■■■■■■■■■■■■■■┃  
-┃      │┗━━━━━━━━━━━━━━━━━━━━━┛│
-┃      └  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ┘
-┃        ├───────offsetWidth-────────┤
+elm.offsetLeft (= elm.style.left + elm.style.marginLeftWidth)
+├────┤
+┏  ━┬━  ━  ━  ━  ━  ━  ━  ━  ━  ━  ━  ━  ━      ┬
+      │                                                        │elm.style.top
+┃    │                                                    ┬  ┴
+      │elm.offsetTop                                       │
+┃    │                                                    │elm.style.marginTopWidth
+      │                                                    │
+┃    ┴  ┏━━━━━━━━━━━━━━━━━━━━━┓┬  ┴  ┬
+          ┃■■■■■■■■■■■■■■■■■■■■■┃│      │elm.style.borderTopWidth
+┃        ┃■■■■■■■■■■■■■■■■■■■■■┃│      │
+          ┃■■┏━━━━━━━━━━━━━━━┓■■┃│  ┬  ┴
+┃        ┃■■┃                              ┃■■┃│  │
+          ┃■■┃                              ┃■■┃│  │elm.style.paddingTopWidth
+┃        ┃■■┃  ┌─Contents─Area───┐  ┃■■┃│  ┴  ┬
+          ┃■■┃  │                      │  ┃■■┃│      │
+┃        ┃■■┃  │                      │  ┃■■┃│      │ elm.clientHeight
+          ┃■■┃  │         elm          │  ┃■■┃│      │  (= elm.style.height)
+┃        ┃■■┃  │                      │  ┃■■┃│      │
+          ┃■■┃  │                      │  ┃■■┃│      │
+┃        ┃■■┃  └───────────┘  ┃■■┃│      ┴
+          ┃■■┃                              ┃■■┃│
+┃        ┃■■┗━━━━━━━━━━━━━━━┛■■┃│elm.offsetHeight
+          ┃■■■■■■■■■■■■■■■■■■■■■┃│   (= elm.style.borderTopWidth
+┃        ┃■■■■■■■■■■■■■■■■■■■■■┃│    + elm.style.borderBottomWidth
+          ┗━━━━━━━━━━━━━━━━━━━━━┛┴    + elm.style.height)
+┃                                                      
+          ├─────────────────────┤
+┃                      elm.offsetWidth (= elm.style.borderLeft + elm.style.borderRight
+                                                                + elm.style.width)
+┃              ├───────────────┤
+                        elm.clientWidth (= elm.style.width)
 ┃      
-┃              ├────clientWidth-─────┤
-┃      
-┃        ├──┤
-┃       clientLeft (Firefox3, 左のマージンとパディングを含まないボーダー幅のピクセル数)
-┃  
+          ├──┤
+┃       elm.clientLeft (= elm.style.borderLeftWidth)
+
+
+Firefox3から、clientLeft, clientTopが利用可能
+
 </pre> <dl>   <dt>x</dt><dd>画面左上からのオフセット幅(スクロール量を含む) - offsetLeftの累計 - ウインドウの原点からの絶対座標</dd>   <dt>y</dt><dd>画面左上からのオフセット高さ(スクロール量を含む) - offsetTopの累計 - ウインドウの原点からの絶対座標</dd>   <dt>w</dt><dd>要素の幅(オフセット幅, 左右のボーダーを含む) - offsetWidth</dd>   <dt>h</dt><dd>要素の高さ(オフセット高さ, 上下のボーダーを含む) - offsetHeight</dd>   <dt>cw</dt><dd>要素の幅(オフセット幅, 左右のボーダーを含まない) - clientWidth</dd>   <dt>ch</dt><dd>要素の高さ(オフセット高さ, 上下のボーダーを含まない) - clientHeight</dd> </dl>
 				
 				
@@ -341,39 +350,45 @@ offsetLeft
 							</div>
 							<div class="description"><b>要素に関する情報を取得</b>
 <pre>
-offsetLeft
-├───┤
-┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-┃
-┃      ┌  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ┐
-┃                      ↑margin-top                      
-┃      │              ↓                              │
-┃        ┏━━━━━━━━━━━━━━━━━━━━━┓  
-┃      │┃■■■■■■↑border-top■■■■■■■■■┃│
-┃        ┃■■■■■■↓■■■■■■■■■■■■■■┃  
-┃      │┃■■┏━━━━━━━━━━━━━━━┓■■┃│
-┃        ┃■■┃      ↑padding-top           ┃■■┃  
-┃      │┃■■┃      ↓                      ┃■■┃│
-┃        ┃■■┃  ┌─Contents─Area───┐  ┃■■┃  
-┃      │┃■■┃  │                      │  ┃■■┃│
-┃        ┃■■┃  │                      │  ┃■■┃  
-┃      │┃■■┃  │                      │  ┃■■┃│
-┃        ┃■■┃  │                      │  ┃■■┃  
-┃      │┃■■┃  │                      │  ┃■■┃│
-┃        ┃■■┃  └───────────┘  ┃■■┃  
-┃      │┃■■┃                              ┃■■┃│
-┃        ┃■■┗━━━━━━━━━━━━━━━┛■■┃  
-┃      │┃■■■■■■■■■■■■■■■■■■■■■┃│
-┃        ┃■■■■■■■■■■■■■■■■■■■■■┃  
-┃      │┗━━━━━━━━━━━━━━━━━━━━━┛│
-┃      └  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ┘
-┃        ├───────offsetWidth-────────┤
+elm.offsetLeft (= elm.style.left + elm.style.marginLeftWidth)
+├────┤
+┏  ━┬━  ━  ━  ━  ━  ━  ━  ━  ━  ━  ━  ━  ━      ┬
+      │                                                        │elm.style.top
+┃    │                                                    ┬  ┴
+      │elm.offsetTop                                       │
+┃    │                                                    │elm.style.marginTopWidth
+      │                                                    │
+┃    ┴  ┏━━━━━━━━━━━━━━━━━━━━━┓┬  ┴  ┬
+          ┃■■■■■■■■■■■■■■■■■■■■■┃│      │elm.style.borderTopWidth
+┃        ┃■■■■■■■■■■■■■■■■■■■■■┃│      │
+          ┃■■┏━━━━━━━━━━━━━━━┓■■┃│  ┬  ┴
+┃        ┃■■┃                              ┃■■┃│  │
+          ┃■■┃                              ┃■■┃│  │elm.style.paddingTopWidth
+┃        ┃■■┃  ┌─Contents─Area───┐  ┃■■┃│  ┴  ┬
+          ┃■■┃  │                      │  ┃■■┃│      │
+┃        ┃■■┃  │                      │  ┃■■┃│      │ elm.clientHeight
+          ┃■■┃  │         elm          │  ┃■■┃│      │  (= elm.style.height)
+┃        ┃■■┃  │                      │  ┃■■┃│      │
+          ┃■■┃  │                      │  ┃■■┃│      │
+┃        ┃■■┃  └───────────┘  ┃■■┃│      ┴
+          ┃■■┃                              ┃■■┃│
+┃        ┃■■┗━━━━━━━━━━━━━━━┛■■┃│elm.offsetHeight
+          ┃■■■■■■■■■■■■■■■■■■■■■┃│   (= elm.style.borderTopWidth
+┃        ┃■■■■■■■■■■■■■■■■■■■■■┃│    + elm.style.borderBottomWidth
+          ┗━━━━━━━━━━━━━━━━━━━━━┛┴    + elm.style.height)
+┃                                                      
+          ├─────────────────────┤
+┃                      elm.offsetWidth (= elm.style.borderLeft + elm.style.borderRight
+                                                                + elm.style.width)
+┃              ├───────────────┤
+                        elm.clientWidth (= elm.style.width)
 ┃      
-┃              ├────clientWidth-─────┤
-┃      
-┃        ├──┤
-┃       clientLeft (Firefox3, 左のマージンとパディングを含まないボーダー幅のピクセル数)
-┃  
+          ├──┤
+┃       elm.clientLeft (= elm.style.borderLeftWidth)
+
+
+Firefox3から、clientLeft, clientTopが利用可能
+
 </pre> <dl>   <dt>x</dt><dd>画面左上からのオフセット幅(スクロール量を含む) - offsetLeftの累計 - ウインドウの原点からの絶対座標</dd>   <dt>y</dt><dd>画面左上からのオフセット高さ(スクロール量を含む) - offsetTopの累計 - ウインドウの原点からの絶対座標</dd>   <dt>w</dt><dd>要素の幅(オフセット幅, 左右のボーダーを含む) - offsetWidth</dd>   <dt>h</dt><dd>要素の高さ(オフセット高さ, 上下のボーダーを含む) - offsetHeight</dd>   <dt>cw</dt><dd>要素の幅(オフセット幅, 左右のボーダーを含まない) - clientWidth</dd>   <dt>ch</dt><dd>要素の高さ(オフセット高さ, 上下のボーダーを含まない) - clientHeight</dd> </dl></div>
 						</td>
 					</tr>
@@ -403,7 +418,7 @@ offsetLeft
 							<td class="nameDescription">
 								<div class="fixedFont">uu.ui.element.<b><a href="../symbols/uu.ui.element.html#.offsetParent">offsetParent</a></b>(element)
 								</div>
-								<div class="description"><b>最寄の基準点からの累計オフセットと要素の大きさを取得</b>最寄の基準点からの累計オフセットと要素の大きさを取得します。最寄の基準点とは、position absoluteやrelativeが指定された要素のことです。</div>
+								<div class="description"><b>最寄の基準点からの累計オフセットと要素の大きさを取得</b>最寄の基準点からの累計オフセットと要素の大きさを取得します。最寄の基準点とは、position absoluteやrelativeが指定された要素のことです。 <dl>   <dt>x</dt><dd>最寄の基準点からの累計オフセット値</dd>   <dt>y</dt><dd>最寄の基準点からの累計オフセット値</dd>   <dt>w</dt><dd>要素の幅(オフセット幅, 左右のボーダーを含む) - offsetWidth</dd>   <dt>h</dt><dd>要素の高さ(オフセット高さ, 上下のボーダーを含む) - offsetHeight</dd>   <dt>cw</dt><dd>要素の幅(オフセット幅, 左右のボーダーを含まない) - clientWidth</dd>   <dt>ch</dt><dd>要素の高さ(オフセット高さ, 上下のボーダーを含まない) - clientHeight</dd> </dl></div>
 							</td>
 						</tr>
 					
@@ -446,39 +461,45 @@ offsetLeft
 				<div class="description">
 					<b>要素に関する情報を取得</b>
 <pre>
-offsetLeft
-├───┤
-┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-┃
-┃      ┌  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ┐
-┃                      ↑margin-top                      
-┃      │              ↓                              │
-┃        ┏━━━━━━━━━━━━━━━━━━━━━┓  
-┃      │┃■■■■■■↑border-top■■■■■■■■■┃│
-┃        ┃■■■■■■↓■■■■■■■■■■■■■■┃  
-┃      │┃■■┏━━━━━━━━━━━━━━━┓■■┃│
-┃        ┃■■┃      ↑padding-top           ┃■■┃  
-┃      │┃■■┃      ↓                      ┃■■┃│
-┃        ┃■■┃  ┌─Contents─Area───┐  ┃■■┃  
-┃      │┃■■┃  │                      │  ┃■■┃│
-┃        ┃■■┃  │                      │  ┃■■┃  
-┃      │┃■■┃  │                      │  ┃■■┃│
-┃        ┃■■┃  │                      │  ┃■■┃  
-┃      │┃■■┃  │                      │  ┃■■┃│
-┃        ┃■■┃  └───────────┘  ┃■■┃  
-┃      │┃■■┃                              ┃■■┃│
-┃        ┃■■┗━━━━━━━━━━━━━━━┛■■┃  
-┃      │┃■■■■■■■■■■■■■■■■■■■■■┃│
-┃        ┃■■■■■■■■■■■■■■■■■■■■■┃  
-┃      │┗━━━━━━━━━━━━━━━━━━━━━┛│
-┃      └  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ─  ┘
-┃        ├───────offsetWidth-────────┤
+elm.offsetLeft (= elm.style.left + elm.style.marginLeftWidth)
+├────┤
+┏  ━┬━  ━  ━  ━  ━  ━  ━  ━  ━  ━  ━  ━  ━      ┬
+      │                                                        │elm.style.top
+┃    │                                                    ┬  ┴
+      │elm.offsetTop                                       │
+┃    │                                                    │elm.style.marginTopWidth
+      │                                                    │
+┃    ┴  ┏━━━━━━━━━━━━━━━━━━━━━┓┬  ┴  ┬
+          ┃■■■■■■■■■■■■■■■■■■■■■┃│      │elm.style.borderTopWidth
+┃        ┃■■■■■■■■■■■■■■■■■■■■■┃│      │
+          ┃■■┏━━━━━━━━━━━━━━━┓■■┃│  ┬  ┴
+┃        ┃■■┃                              ┃■■┃│  │
+          ┃■■┃                              ┃■■┃│  │elm.style.paddingTopWidth
+┃        ┃■■┃  ┌─Contents─Area───┐  ┃■■┃│  ┴  ┬
+          ┃■■┃  │                      │  ┃■■┃│      │
+┃        ┃■■┃  │                      │  ┃■■┃│      │ elm.clientHeight
+          ┃■■┃  │         elm          │  ┃■■┃│      │  (= elm.style.height)
+┃        ┃■■┃  │                      │  ┃■■┃│      │
+          ┃■■┃  │                      │  ┃■■┃│      │
+┃        ┃■■┃  └───────────┘  ┃■■┃│      ┴
+          ┃■■┃                              ┃■■┃│
+┃        ┃■■┗━━━━━━━━━━━━━━━┛■■┃│elm.offsetHeight
+          ┃■■■■■■■■■■■■■■■■■■■■■┃│   (= elm.style.borderTopWidth
+┃        ┃■■■■■■■■■■■■■■■■■■■■■┃│    + elm.style.borderBottomWidth
+          ┗━━━━━━━━━━━━━━━━━━━━━┛┴    + elm.style.height)
+┃                                                      
+          ├─────────────────────┤
+┃                      elm.offsetWidth (= elm.style.borderLeft + elm.style.borderRight
+                                                                + elm.style.width)
+┃              ├───────────────┤
+                        elm.clientWidth (= elm.style.width)
 ┃      
-┃              ├────clientWidth-─────┤
-┃      
-┃        ├──┤
-┃       clientLeft (Firefox3, 左のマージンとパディングを含まないボーダー幅のピクセル数)
-┃  
+          ├──┤
+┃       elm.clientLeft (= elm.style.borderLeftWidth)
+
+
+Firefox3から、clientLeft, clientTopが利用可能
+
 </pre> <dl>   <dt>x</dt><dd>画面左上からのオフセット幅(スクロール量を含む) - offsetLeftの累計 - ウインドウの原点からの絶対座標</dd>   <dt>y</dt><dd>画面左上からのオフセット高さ(スクロール量を含む) - offsetTopの累計 - ウインドウの原点からの絶対座標</dd>   <dt>w</dt><dd>要素の幅(オフセット幅, 左右のボーダーを含む) - offsetWidth</dd>   <dt>h</dt><dd>要素の高さ(オフセット高さ, 上下のボーダーを含む) - offsetHeight</dd>   <dt>cw</dt><dd>要素の幅(オフセット幅, 左右のボーダーを含まない) - clientWidth</dd>   <dt>ch</dt><dd>要素の高さ(オフセット高さ, 上下のボーダーを含まない) - clientHeight</dd> </dl>
 					
 				</div>
@@ -505,7 +526,7 @@ offsetLeft
 						<dl class="detailList">
 						<dt class="heading">Returns:</dt>
 						
-								<dd>rect          - { x, y, w, h } を返します。<br />                         x, y: 画面左上からの絶対座標。<br />                         w, h: 要素の幅と高さ</dd>
+								<dd>rect       - { x, y, w, h, cw, ch } を返します。</dd>
 						
 						</dl>
 					
@@ -532,7 +553,7 @@ offsetLeft
 					
 					</div>
 					<div class="description">
-						<b>最寄の基準点からの累計オフセットと要素の大きさを取得</b>最寄の基準点からの累計オフセットと要素の大きさを取得します。最寄の基準点とは、position absoluteやrelativeが指定された要素のことです。
+						<b>最寄の基準点からの累計オフセットと要素の大きさを取得</b>最寄の基準点からの累計オフセットと要素の大きさを取得します。最寄の基準点とは、position absoluteやrelativeが指定された要素のことです。 <dl>   <dt>x</dt><dd>最寄の基準点からの累計オフセット値</dd>   <dt>y</dt><dd>最寄の基準点からの累計オフセット値</dd>   <dt>w</dt><dd>要素の幅(オフセット幅, 左右のボーダーを含む) - offsetWidth</dd>   <dt>h</dt><dd>要素の高さ(オフセット高さ, 上下のボーダーを含む) - offsetHeight</dd>   <dt>cw</dt><dd>要素の幅(オフセット幅, 左右のボーダーを含まない) - clientWidth</dd>   <dt>ch</dt><dd>要素の高さ(オフセット高さ, 上下のボーダーを含まない) - clientHeight</dd> </dl>
 						
 						
 					</div>
@@ -559,7 +580,7 @@ offsetLeft
 							<dl class="detailList">
 							<dt class="heading">Returns:</dt>
 							
-								<dd>rect          - { x, y, w, h } を返します。<br />                         x, y: 最寄の基準点からの累計オフセット値。<br />                         w, h: 要素の幅と高さ</dd>
+								<dd>rect       - { x, y, w, h, cw, ch } を返します。<br /></dd>
 							
 							</dl>
 						
@@ -676,7 +697,7 @@ offsetLeft
 <!-- ============================== footer ================================= -->
 		<div class="fineprint" style="clear:both">
 			&copy;2008<br />
-			Documentation generated by <a href="http://www.jsdoctoolkit.org/" target="_blank">JsDoc Toolkit</a> 2.0.beta2.3 on Sun Jun 08 2008 06:37:11 GMT+0900 (JST)
+			Documentation generated by <a href="http://www.jsdoctoolkit.org/" target="_blank">JsDoc Toolkit</a> 2.0.beta2.3 on Sun Jun 15 2008 16:44:39 GMT+0900 (JST)
 		</div>
 	</body>
 </html>

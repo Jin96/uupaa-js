@@ -4,7 +4,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>uupaa.js - uu.module.ajax test</title>
-<!--[if IE]><script id="xpath.js" type="text/javascript" src="../../lib/xpath.js"></script><![endif]-->
+<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="../../lib/javascript-xpath.js"></script><![endif]-->
 <script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
 <style type="text/css">
 body { background-color: black; color: white; }
@@ -15,7 +15,7 @@ body { background-color: black; color: white; }
 <body>
 <a href="../../README.htm">README.htm</a> &gt; uu.module.ajax.htm
 <dl>
-  <dt>uu.module.ajax.loadNeo() - 更新チェック付きの非同期リクエスト</dt>
+  <dt>uu.module.ajax.loadIfMod() - 更新チェック付きの非同期リクエスト</dt>
   <dd>更新チェック付きで非同期リクエストを発行します。GETメソッド専用です。更新されていない場合は304が返ります。</dd>
   <dt>uu.module.ajax.load() - 非同期リクエスト</dt>
   <dd>更新チェック無しで非同期リクエストを発行します。GET/POSTメソッド両用です。</dd>
@@ -26,9 +26,9 @@ body { background-color: black; color: white; }
    SafariやIEは、ローカルでも動作するようです。</p>
 
 
-Request URL: <input type="text" value="http://localhost/ajax.txt" size="64" /><br />
+Request URL: <input type="text" value="http://uupaa-js.googlecode.com/svn/trunk/demo/compat/HelloAjax.txt" size="64" /><br />
 GET Method:
-<input type="button" value="uu.ajax.loadNeo()" onclick="ajax('loadNeo')" /> |
+<input type="button" value="uu.ajax.loadIfMod()" onclick="ajax('loadIfMod')" /> |
 <input type="button" value="uu.ajax.load()" onclick="ajax('load')" /> |
 <input type="button" value="uu.ajax.loadSync()" onclick="ajax('loadSync')" /><br />
 POST Method:

@@ -156,8 +156,7 @@ ul.inheritsList {
 <!-- ============================== header ================================= -->	
 		<!-- begin static/header.html -->
 		<div id="header">
-<!-- replace abs path -->
-<a href="../../README.htm">README.htm</a> &gt; Reference
+<a href="http://uupaa-js.googlecode.com/svn/trunk/README.htm">README.htm</a> &gt; Reference
 </div>
 
 		<!-- end static/header.html -->
@@ -217,6 +216,8 @@ ul.inheritsList {
 	
 	<li><a href="../symbols/uu.json.html">uu.json</a></li>
 	
+	<li><a href="../symbols/uu.klass.html">uu.klass</a></li>
+	
 	<li><a href="../symbols/uu.mix.html">uu.mix</a></li>
 	
 	<li><a href="../symbols/uu.module.html">uu.module</a></li>
@@ -230,6 +231,8 @@ ul.inheritsList {
 	<li><a href="../symbols/uu.module.drag.limited.html">uu.module.drag.limited</a></li>
 	
 	<li><a href="../symbols/uu.module.drag.zindexer.html">uu.module.drag.zindexer</a></li>
+	
+	<li><a href="../symbols/uu.module.messagePump.html">uu.module.messagePump</a></li>
 	
 	<li><a href="../symbols/uu.module.pmvc.html">uu.module.pmvc</a></li>
 	
@@ -280,7 +283,7 @@ ul.inheritsList {
 				
 			
 				
-<b>uu.css.set - スタイルの設定(set style)</b>スタイルを設定します。<br />以下の特別な処理も行います。<dl> <dt>display: hide</dt><dd>要素を隠します。</dd> <dt>display: show</dt><dd>要素を表示します。</dd></dl>
+<b>uu.css.set - スタイルの設定(set style)</b>スタイルを設定します。<br />一部のプロパティでは、特別な値や指定方法が有効です。<dl> <dt>top, left, width, height</dt><dd>値を数値で指定すると末尾に"px"を補完します。</dd> <dt>display</dt><dd>"hide"を指定すると要素を隠します。"show"を指定すると要素を表示します。</dd></dl>
 				
 				
 					<br /><i>Defined in: </i> <a href="../symbols/src/trunk_uupaa.js.html">uupaa.js</a>.
@@ -304,7 +307,7 @@ ul.inheritsList {
 							<div class="fixedFont">
 								<b><a href="../symbols/uu.css.set.html#constructor">uu.css.set</a></b>(element, hash, bool)
 							</div>
-							<div class="description"><b>uu.css.set - スタイルの設定(set style)</b>スタイルを設定します。<br />以下の特別な処理も行います。<dl> <dt>display: hide</dt><dd>要素を隠します。</dd> <dt>display: show</dt><dd>要素を表示します。</dd></dl></div>
+							<div class="description"><b>uu.css.set - スタイルの設定(set style)</b>スタイルを設定します。<br />一部のプロパティでは、特別な値や指定方法が有効です。<dl> <dt>top, left, width, height</dt><dd>値を数値で指定すると末尾に"px"を補完します。</dd> <dt>display</dt><dd>"hide"を指定すると要素を隠します。"show"を指定すると要素を表示します。</dd></dl></div>
 						</td>
 					</tr>
 				</tbody>
@@ -331,7 +334,7 @@ ul.inheritsList {
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">uu.css.set.<b><a href="../symbols/uu.css.set.html#.display">display</a></b>(element, bool)
+								<div class="fixedFont">uu.css.set.<b><a href="../symbols/uu.css.set.html#.display">display</a></b>(element, string)
 								</div>
 								<div class="description"><b>uu.css.set.display - 表示方法の設定</b>要素の表示/非表示を設定します。<br />このメソッドを使用することで、table要素やインライン要素とdiv要素を同じ方法で操作することができます。</div>
 							</td>
@@ -342,7 +345,16 @@ ul.inheritsList {
 							<td class="nameDescription">
 								<div class="fixedFont">uu.css.set.<b><a href="../symbols/uu.css.set.html#.height">height</a></b>(element, number/string)
 								</div>
-								<div class="description"><b>uu.css.set.height - 高さの設定</b>要素の高さを設定します。</div>
+								<div class="description"><b>uu.css.set.height - 高さの設定</b></div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">uu.css.set.<b><a href="../symbols/uu.css.set.html#.left">left</a></b>(element, number/string)
+								</div>
+								<div class="description"><b>uu.css.get.left - 左からのオフセットを設定</b></div>
 							</td>
 						</tr>
 					
@@ -351,7 +363,16 @@ ul.inheritsList {
 							<td class="nameDescription">
 								<div class="fixedFont">uu.css.set.<b><a href="../symbols/uu.css.set.html#.opacity">opacity</a></b>(element, number/string)
 								</div>
-								<div class="description"><b>uu.css.set.opacity - 不透明度の設定</b>要素の不透明度を設定します。</div>
+								<div class="description"><b>uu.css.set.opacity - 不透明度の設定</b></div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">uu.css.set.<b><a href="../symbols/uu.css.set.html#.top">top</a></b>(element, number/string)
+								</div>
+								<div class="description"><b>uu.css.get.top - 上からのオフセットを設定</b></div>
 							</td>
 						</tr>
 					
@@ -360,7 +381,7 @@ ul.inheritsList {
 							<td class="nameDescription">
 								<div class="fixedFont">uu.css.set.<b><a href="../symbols/uu.css.set.html#.width">width</a></b>(element, number/string)
 								</div>
-								<div class="description"><b>uu.css.set.width - 幅の設定</b>要素の幅を設定します。</div>
+								<div class="description"><b>uu.css.set.width - 幅の設定</b></div>
 							</td>
 						</tr>
 					
@@ -383,7 +404,7 @@ ul.inheritsList {
 				</div>
 				
 				<div class="description">
-					<b>uu.css.set - スタイルの設定(set style)</b>スタイルを設定します。<br />以下の特別な処理も行います。<dl> <dt>display: hide</dt><dd>要素を隠します。</dd> <dt>display: show</dt><dd>要素を表示します。</dd></dl>
+					<b>uu.css.set - スタイルの設定(set style)</b>スタイルを設定します。<br />一部のプロパティでは、特別な値や指定方法が有効です。<dl> <dt>top, left, width, height</dt><dd>値を数値で指定すると末尾に"px"を補完します。</dd> <dt>display</dt><dd>"hide"を指定すると要素を隠します。"show"を指定すると要素を表示します。</dd></dl>
 					
 				</div>
 				
@@ -451,7 +472,7 @@ ul.inheritsList {
 					<div class="fixedFont">&lt;static&gt; 
 					
 					
-					<span class="light">uu.css.set.</span><b>display</b>(element, bool)
+					<span class="light">uu.css.set.</span><b>display</b>(element, string)
 					
 					</div>
 					<div class="description">
@@ -471,28 +492,28 @@ ul.inheritsList {
 									<b>element</b>
 									
 								</dt>
-								<dd>elm    - 表示方法を設定する要素を指定します。</dd>
+								<dd>elm   - 表示方法を設定する要素を指定します。</dd>
 							
 								<dt>
-									<b>bool</b>
+									<b>string</b>
 									
 								</dt>
-								<dd>apper  - 表示(true),非表示(false)を指定します。</dd>
+								<dd>disp  - style.displayに指定可能な値か、"show" または "hide"を指定します。</dd>
 							
 							</dl>
-						
-						
 						
 						
 						
 						
 						
 							<dl class="detailList">
-							<dt class="heading">See:</dt>
+							<dt class="heading">Returns:</dt>
 							
-								<dd><a href="../symbols/uu.css.set.html#constructor">uu.css.set</a></dd>
+								<dd>element      - elmを返します。</dd>
 							
 							</dl>
+						
+						
 						
 
 					<hr />
@@ -505,7 +526,7 @@ ul.inheritsList {
 					
 					</div>
 					<div class="description">
-						<b>uu.css.set.height - 高さの設定</b>要素の高さを設定します。
+						<b>uu.css.set.height - 高さの設定</b>
 						
 						
 					</div>
@@ -527,7 +548,7 @@ ul.inheritsList {
 									<b>number/string</b>
 									
 								</dt>
-								<dd>value - 高さをpx単位の数値または数値の文字列表現で指定します。                             文字列の末尾に"px"をつける必要はありません。                             負の値は指定できません。</dd>
+								<dd>value - 高さを指定します。負の値は指定できません。                             数値で指定すると、末尾に"px"を補完します。</dd>
 							
 							</dl>
 						
@@ -544,14 +565,55 @@ ul.inheritsList {
 						
 						
 						
+
+					<hr />
+				
+					<a name=".left"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">uu.css.set.</span><b>left</b>(element, number/string)
+					
+					</div>
+					<div class="description">
+						<b>uu.css.get.left - 左からのオフセットを設定</b>
+						
+						
+					</div>
+					
+					
+					
+					
+						
 							<dl class="detailList">
-							<dt class="heading">See:</dt>
+							<dt class="heading">Parameters:</dt>
 							
-								<dd><a href="../symbols/uu.css.set.html#constructor">uu.css.set</a> - スタイルの設定</dd>
+								<dt>
+									<b>element</b>
+									
+								</dt>
+								<dd>elm         - オフセットを設定する要素を指定します。</dd>
 							
-								<dd><a href="../symbols/uu.css.get.html#.height">uu.css.get.height</a> - 高さの取得</dd>
+								<dt>
+									<b>number/string</b>
+									
+								</dt>
+								<dd>value - オフセット値を指定します。負の値も指定可能です。                             数値で指定すると、末尾に"px"を補完します。</dd>
 							
 							</dl>
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd>element            - elmを返します。</dd>
+							
+							</dl>
+						
+						
 						
 
 					<hr />
@@ -564,7 +626,7 @@ ul.inheritsList {
 					
 					</div>
 					<div class="description">
-						<b>uu.css.set.opacity - 不透明度の設定</b>要素の不透明度を設定します。
+						<b>uu.css.set.opacity - 不透明度の設定</b>
 						
 						
 					</div>
@@ -603,14 +665,55 @@ ul.inheritsList {
 						
 						
 						
+
+					<hr />
+				
+					<a name=".top"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">uu.css.set.</span><b>top</b>(element, number/string)
+					
+					</div>
+					<div class="description">
+						<b>uu.css.get.top - 上からのオフセットを設定</b>
+						
+						
+					</div>
+					
+					
+					
+					
+						
 							<dl class="detailList">
-							<dt class="heading">See:</dt>
+							<dt class="heading">Parameters:</dt>
 							
-								<dd><a href="../symbols/uu.css.set.html#constructor">uu.css.set</a> - スタイルの設定</dd>
+								<dt>
+									<b>element</b>
+									
+								</dt>
+								<dd>elm         - オフセットを設定する要素を指定します。</dd>
 							
-								<dd><a href="../symbols/uu.css.get.html#.opacity">uu.css.get.opacity</a> - 不透明度の取得</dd>
+								<dt>
+									<b>number/string</b>
+									
+								</dt>
+								<dd>value - オフセット値を指定します。負の値も指定可能です。                             数値で指定すると、末尾に"px"を補完します。</dd>
 							
 							</dl>
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd>element            - elmを返します。</dd>
+							
+							</dl>
+						
+						
 						
 
 					<hr />
@@ -623,7 +726,7 @@ ul.inheritsList {
 					
 					</div>
 					<div class="description">
-						<b>uu.css.set.width - 幅の設定</b>要素の幅を設定します。
+						<b>uu.css.set.width - 幅の設定</b>
 						
 						
 					</div>
@@ -645,7 +748,7 @@ ul.inheritsList {
 									<b>number/string</b>
 									
 								</dt>
-								<dd>value - 幅をpx単位の数値または数値の文字列表現で指定します。                             文字列の末尾に"px"をつける必要はありません。                             負の値は指定できません。</dd>
+								<dd>value - 幅を指定します。負の値は指定できません。                             数値で指定すると、末尾に"px"を補完します。</dd>
 							
 							</dl>
 						
@@ -656,20 +759,11 @@ ul.inheritsList {
 							<dl class="detailList">
 							<dt class="heading">Returns:</dt>
 							
-								<dd>element - elmを返します。</dd>
+								<dd>element            - elmを返します。</dd>
 							
 							</dl>
 						
 						
-						
-							<dl class="detailList">
-							<dt class="heading">See:</dt>
-							
-								<dd><a href="../symbols/uu.css.set.html#constructor">uu.css.set</a> - スタイルの設定</dd>
-							
-								<dd><a href="../symbols/uu.css.get.html#.width">uu.css.get.width</a> - 幅の取得</dd>
-							
-							</dl>
 						
 
 					
@@ -682,7 +776,7 @@ ul.inheritsList {
 <!-- ============================== footer ================================= -->
 		<div class="fineprint" style="clear:both">
 			&copy;2008<br />
-			Documentation generated by <a href="http://www.jsdoctoolkit.org/" target="_blank">JsDoc Toolkit</a> 2.0.beta2.3 on Sun Jun 08 2008 06:37:07 GMT+0900 (JST)
+			Documentation generated by <a href="http://www.jsdoctoolkit.org/" target="_blank">JsDoc Toolkit</a> 2.0.beta2.3 on Sun Jun 15 2008 16:44:33 GMT+0900 (JST)
 		</div>
 	</body>
 </html>

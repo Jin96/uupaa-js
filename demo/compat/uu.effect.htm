@@ -4,14 +4,17 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>uupaa.js - uu.module.effect test</title>
-<!--[if IE]><script type="text/javascript" src="../../lib/xpath.js"></script><![endif]-->
-<!--[if IE]><script type="text/javascript" src="../../lib/excanvas.js"></script><![endif]-->
+<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="../../lib/javascript-xpath.js"></script><![endif]-->
+<!--[if IE]><script id="excanvas.js" type="text/javascript" src="../../lib/excanvas.js"></script><![endif]-->
 <script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
 <style>
+html, body {
+  overflow: hidden;
+}
 #box1 {
-  position: relative;
-  top: 0;
-  left: 0;
+  position: absolute;
+  top: 200px;
+  left: 300px;
   width: 100px;
   height: 100px;
   border: 1px gray solid;
@@ -19,9 +22,9 @@
   color: red;
 }
 #table1 {
-  position: relative;
-  top: 0;
-  left: 0;
+  position: absolute;
+  top: 200px;
+  left: 350px;
   width: 100px;
   height: 100px;
   border: 1px olive solid;
@@ -34,85 +37,176 @@
 <a href="../../README.htm">README.htm</a> &gt; uu.effect.htm
 
 <dl>
-  <dt>uu.effect() - fade(), fadein(), fadeout()</dt>
-  <dd>フェードアニメーションのサンプルです。<br />
-      fade()は、現在の不透明度により、fadein, fadeout両方の動作(トグル動作)を行います。<br />
-      不透明度の初期値や目標値も指定可能です。またフェード終了時に関数をコールバックすることも可能です。<br />
-      Opera9.5β2は、table,caption,td以外は操作できず、IE6/IE7ではテーブルの各要素のフェードに問題があります(ブラウザ側の問題です)
+  <dt>uu.module.effect - エフェクト</dt>
+  <dd>要素を自由な位置にドラッグできます。ホイールでサイズの変更も可能です。<br />
+      ボタンをクリックするとエフェクトが始まります。エフェクトの速度は、[Speed]で調節できます。<br />
+      moveはDirectionで移動方向を指定し動かします。scaleはAnchorで基準となる辺を指定し動かします。
+      <br /><input type="button" value="初期化(reset)" onclick="reset2()" /> でリセットできます。<br />
   </dd>
 </dl>
+<div id="control-panel">
+  <div>
+    Target:
+    <select id="tgt">
+      <option>box1</option>
+      <option>table1</option>
+      <option>table1.caption</option>
+      <option>table1.tfoot</option>
+      <option>table1.thead</option>
+      <option>table1.tbody</option>
+      <option>table1.tbody.tr1</option>
+      <option>table1.tbody.tr1.td1</option>
+      <option>table1.tbody.tr1.td2</option>
+      <option>table1.tbody.tr2</option>
+    </select>
+    <br />
+    Speed:
+    <select id="speed">
+      <option value="100">100ms</option>
+      <option value="quick">quick</option>
+      <option value="fast">fast</option>
+      <option value="mid" selected="selected">mid</option>
+      <option value="slow">slow</option>
+    </select>
+    <br />
+    Direction and Anchor:
+    <select id="da">
+      <option value="0">0:Center</option>
+      <option value="1">1:↑</option>
+      <option value="2">2:／</option>
+      <option value="3">3:→</option>
+      <option value="4">4:＼</option>
+      <option value="5">5:↓</option>
+      <option value="6">6:／</option>
+      <option value="7">7:←</option>
+      <option value="8">8:＼</option>
+    </select>
+  </div>
 
-<dl>
-  <dt>fade: </dt>
-    <dd>
-      <input type="button" value="100ms" onclick="fade(100)" />
-      <input type="button" value="qucik" onclick="fade('quick')" />
-      <input type="button" value="mid" onclick="fade('mid')" />
-      <input type="button" value="slow" onclick="fade('slow')" />
-      <input type="button" value="quick,0.2～0.8" onclick="fade('quick', 0.2, 0.8)" />
-      <input type="button" value="quick,0.5" onclick="fade('quick', 0.5)" />
-      <input type="button" value="quick,0.8～0.2" onclick="fade('quick', 0.8, 0.2)" />
-    </dd>
-  <dt>fadein: </dt>
-    <dd>
-      <input type="button" value="100ms" onclick="fadein(100)" />
-      <input type="button" value="qucik" onclick="fadein('quick')" />
-      <input type="button" value="mid" onclick="fadein('mid')" />
-      <input type="button" value="slow" onclick="fadein('slow')" />
-      <input type="button" value="mid,0.5" onclick="fadein('mid', 0.5)" />
-    </dd>
-  <dt>fadeout:</dt>
-    <dd>
-      <input type="button" value="100ms" onclick="fadeout(100)" />
-      <input type="button" value="qucik" onclick="fadeout('quick')" />
-      <input type="button" value="mid" onclick="fadeout('mid')" />
-      <input type="button" value="slow" onclick="fadeout('slow')" />
-      <input type="button" value="mid,0.5" onclick="fadeout('mid', 0.5)" />
-    </dd>
-  <dt>sample</dt>
-    <dd>
-      select target: <select id="targetSelect" onchange="getSelectedValue(this)">
-        <option>box1</option>
-        <option>table1</option>
-        <option>table1.caption</option>
-        <option>table1.tfoot</option>
-        <option>table1.thead</option>
-        <option>table1.tbody</option>
-        <option>table1.tbody.tr1</option>
-        <option>table1.tbody.tr1.td1</option>
-        <option>table1.tbody.tr1.td2</option>
-        <option>table1.tbody.tr2</option>
-      </select>
-      <div id="box1">fade box</div>
-      <table id="table1">
-      <caption id="table1.caption">table1.caption</caption>
-      <thead id="table1.thead"><tr><td>thead</td><td>thead</td></tr></thead>
-      <tfoot id="table1.tfoot"><tr><td>tfoot</td><td>tfoot</td></tr></tfoot>
-      <tbody id="table1.tbody">
-        <tr id="table1.tbody.tr1">
-          <td id="table1.tbody.tr1.td1">td1</td>
-          <td id="table1.tbody.tr1.td2">td2</td>
-        </tr>
-        <tr id="table1.tbody.tr2"><td>td3</td><td>td4</td></tr>
-      </tbody>
-      </table>
-    </dd>
-</dl>
+  <dl>
+    <dt>Fade in / Fade out:</dt>
+      <dd>
+        <input type="button" value="fade   " onclick="uu.effect.fade(uu.id(get('tgt')), { speed: get('speed'), fn: reset })" />
+        <input type="button" value="fadein " onclick="uu.effect.fadein(uu.id(get('tgt')), { speed: get('speed'), fn: reset })" />
+        <input type="button" value="fadeout" onclick="uu.effect.fadeout(uu.id(get('tgt')), { speed: get('speed'), fn: reset })" />
+        <br />
+        |
+        <input type="button" value="fade 0.2～0.8" onclick="uu.effect.fade(uu.id(get('tgt')), { speed: get('speed'), fn: reset, begin: 0.2, end: 0.8 })" />
+        <input type="button" value="fade 0.8～0.2" onclick="uu.effect.fade(uu.id(get('tgt')), { speed: get('speed'), fn: reset, begin: 0.8, end: 0.2 })" />
+      </dd>
+    <dt>Scale up / Scale down:</dt>
+      <dd>
+        <input type="button" value=" 0 x 0 " onclick="uu.effect.scale(uu.id(get('tgt')), { speed: get('speed'), fn: reset, anchor: getInt('da'), w: 0, h: 0 })" />
+        <input type="button" value="100x100" onclick="uu.effect.scale(uu.id(get('tgt')), { speed: get('speed'), fn: reset, anchor: getInt('da'), w: 100, h: 100 })" />
+        <input type="button" value="200x200" onclick="uu.effect.scale(uu.id(get('tgt')), { speed: get('speed'), fn: reset, anchor: getInt('da'), w: 200, h: 200 })" />
+      </dd>
+    <dt>Move to:</dt>
+      <dd>
+        <input type="button" value="center" onclick="uu.effect.move(uu.id(get('tgt')), { speed: get('speed'), fn: reset })" />
+        <input type="button" value="abs(100,100)" onclick="uu.effect.move(uu.id(get('tgt')), { speed: get('speed'), fn: reset, x: 100, y: 100 })" />
+        <input type="button" value="rel(direction)" onclick="moveDirection(get('tgt'))" />
+      </dd>
+    <dt>Combination Effects:</dt>
+      <dd>
+        Ghost:
+        <input type="button" value="puff" onclick="uu.effect.puff(uu.id(get('tgt')), { speed: get('speed'), fn: reset })" />
+        |
+        <input type="button" value="drop out" onclick="uu.effect.dropOut(uu.id(get('tgt')), { speed: get('speed'), fn: reset })" />
+        <br />
+        Attract:
+        <input type="button" value="shake" onclick="uu.effect.shake(uu.id(get('tgt')), { speed: get('speed'), fn: reset })" />
+        |
+        <input type="button" value="pulsate" onclick="uu.effect.pulsate(uu.id(get('tgt')), { speed: get('speed'), fn: reset })" />
+        |
+        <input type="button" value="fold" onclick="uu.effect.fold(uu.id(get('tgt')), { speed: get('speed'), fn: reset })" />
+        <br />
+        Alias:
+        <input type="button" value="shrink" onclick="uu.effect.shrink(uu.id(get('tgt')), { speed: get('speed'), fn: reset })" />
+        |
+        <input type="button" value="glow" onclick="uu.effect.glow(uu.id(get('tgt')), { speed: get('speed'), fn: reset })" />
+        |
+        <input type="button" value="blindUp" onclick="uu.effect.blindUp(uu.id(get('tgt')), { speed: get('speed'), fn: reset })" />
+        |
+        <input type="button" value="blindDown" onclick="uu.effect.blindDown(uu.id(get('tgt')), { speed: get('speed'), fn: reset })" />
+      </dd>
+  </dl>
+</div>
 
+<div id="box1">box1</div>
+
+<table id="table1">
+<caption id="table1.caption">table1.caption</caption>
+<thead id="table1.thead"><tr><td>thead</td><td>thead</td></tr></thead>
+<tfoot id="table1.tfoot"><tr><td>tfoot</td><td>tfoot</td></tr></tfoot>
+<tbody id="table1.tbody">
+  <tr id="table1.tbody.tr1">
+    <td id="table1.tbody.tr1.td1">td1</td>
+    <td id="table1.tbody.tr1.td2">td2</td>
+  </tr>
+  <tr id="table1.tbody.tr2"><td>td3</td><td>td4</td></tr>
+</tbody>
+</table>
 
 <script>
-var tgtid = "box1";
-function getSelectedValue(elm) {
-  tgtid = elm.options[elm.selectedIndex].text;
+function reset2() {
+  var e = uu.id(get("tgt"));
+  uu.css.set(e, {
+    position: "absolute",
+    top: 300,
+    left: 300,
+    width: 100,
+    height: 100,
+    border: "1px gray solid",
+    opacity: 1.0,
+    display: "show",
+    visibility: "visible"
+  });
 }
-function fade(speed, begin, end)    { uu.effect.fade(uu.id(tgtid), { speed: speed, begin: begin, end: end});    }
-function fadein(speed, begin, end)  { uu.effect.fadein(uu.id(tgtid), { speed: speed, begin: begin, end: end});  }
-function fadeout(speed, begin, end) { uu.effect.fadeout(uu.id(tgtid), { speed: speed, begin: begin, end: end}); }
+function moveDirection(id) {
+  var dir = getInt('da');
+  var move = [[0,0],[0,-100],[100,-100],[100,0],[100,100],[0,100],[-100,100],[-100,0],[-100,-100]];
+  uu.effect.move(uu.id(id), { speed: get('speed'), fn: reset, x: move[dir][0], y: move[dir][1], rel: true });
+}
+function reset(elm, cssText) {
+//  elm.style.cssText = cssText;
+}
+function get(id) {
+  var elm = uu.id(id), idx = elm.selectedIndex;
+  return elm.options[idx].value || elm.options[idx].text;
+}
+function getInt(id) {
+  return parseInt(get(id));
+}
 function boot() {
-  getSelectedValue(uu.id("targetSelect"));
-}
+  // メッセージポンプ
+  uu.module.pmvc.activate();
 
-uu.module.load("../../", "effect", boot);
+  uu.ctrl.regist({
+    mousedown: function(msg, param1, param2) {
+      if (param1.element.id === "box1") {
+        uu.id("tgt").selectedIndex = 0;
+      } else if (param1.element.id === "table1") {
+        uu.id("tgt").selectedIndex = 1;
+      }
+    },
+    mousemove: function(msg, param1, param2) {
+//      window.status = "mousemove";
+    },
+    mouseup: function(msg, param1, param2) {
+//      window.status = "mouseup";
+    }
+  });
+  // メッセージフィルタ
+  function msgFilter(msg) {
+    return (msg === "mousedown" || msg === "mouseup") ? true : false;
+  }
+
+  // ドラッガブル
+  // "C" = uu.ctrl
+  new uu.module.drag.free(uu.id("box1"),   { msgto: "C", msgFilter: msgFilter });
+  new uu.module.drag.free(uu.id("table1"), { msgto: "C", msgFilter: msgFilter });
+}
+uu.module.load("../../", "ui,effect,drag,pmvc", boot);
 
 </script>
 

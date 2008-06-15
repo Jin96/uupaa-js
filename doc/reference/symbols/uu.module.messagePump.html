@@ -5,7 +5,7 @@
 		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
 		<meta name="generator" content="JsDoc Toolkit" />
 		
-		<title>JsDoc Reference - uu.ajax</title>
+		<title>JsDoc Reference - uu.module.messagePump</title>
 
 		<style type="text/css">
 			@charset "utf-8";
@@ -275,7 +275,7 @@ ul.inheritsList {
 <!-- ============================== class title ============================ -->
 			<h1 class="classTitle">
 				
-				Class uu.ajax
+				Class uu.module.messagePump
 			</h1>
 
 <!-- ============================== class summary ========================== -->			
@@ -291,7 +291,7 @@ ul.inheritsList {
 
 <!-- ============================== constructor summary ==================== -->			
 			
-			<table class="summaryTable" cellspacing="0" summary="A summary of the constructor documented in the class uu.ajax.">
+			<table class="summaryTable" cellspacing="0" summary="A summary of the constructor documented in the class uu.module.messagePump.">
 				<caption>Class Summary</caption>
 				<thead>
 					<tr>
@@ -304,9 +304,9 @@ ul.inheritsList {
 						<td class="attributes">&nbsp;</td>
 						<td class="nameDescription">
 							<div class="fixedFont">
-								<b><a href="../symbols/uu.ajax.html#constructor">uu.ajax</a></b>()
+								<b><a href="../symbols/uu.module.messagePump.html#constructor">uu.module.messagePump</a></b>()
 							</div>
-							<div class="description"><b>Ajax</b></div>
+							<div class="description">Message Pump Module.</div>
 						</td>
 					</tr>
 				</tbody>
@@ -320,7 +320,7 @@ ul.inheritsList {
 			
 				
 				
-				<table class="summaryTable" cellspacing="0" summary="A summary of the methods documented in the class uu.ajax.">
+				<table class="summaryTable" cellspacing="0" summary="A summary of the methods documented in the class uu.module.messagePump.">
 					<caption>Method Summary</caption>
 					<thead>
 						<tr>
@@ -331,38 +331,38 @@ ul.inheritsList {
 					<tbody>
 					
 						<tr>
-							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">uu.ajax.<b><a href="../symbols/uu.ajax.html#.already">already</a></b>()
+								<div class="fixedFont"><b><a href="../symbols/uu.module.messagePump.html#construct">construct</a></b>()
 								</div>
-								<div class="description"><b>uu.ajax.already - Ajax使用可能でtrue</b></div>
+								<div class="description"></div>
 							</td>
 						</tr>
 					
 						<tr>
-							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">uu.ajax.<b><a href="../symbols/uu.ajax.html#.load">load</a></b>(string, function, string)
+								<div class="fixedFont"><b><a href="../symbols/uu.module.messagePump.html#post">post</a></b>(string, string, mix, mix)
 								</div>
-								<div class="description"><b>uu.ajax.load - 非同期ロード[Ajax async request]</b>Ajaxで非同期にデータを取得します。 <table> <tr><th>step番号</th><th>内容</th></tr> <tr><td>0</td><td>BEGIN: 処理開始     </td></tr> <tr><td>1</td><td>SEND: リクエスト開始</td></tr> <tr><td>2</td><td>OK: 成功            </td></tr> <tr><td>3</td><td>NG: 失敗            </td></tr> <tr><td>4</td><td>END: 処理終了       </td></tr> </table>各ステップで、fn(step番号, response, status, url, async)を呼び出します。<br />responseには空文字列またはレスポンス文字列が格納されます(OKのみ)。<br />statusには0またはステータスコードが格納されます(OKとNGのみ)。<br />asyncは常にtrueになります。<br /></div>
+								<div class="description"><b>メッセージの非同期送信</b>メッセージを非同期送信します。param1,param2にはどのような引数でも渡せます。</div>
 							</td>
 						</tr>
 					
 						<tr>
-							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">uu.ajax.<b><a href="../symbols/uu.ajax.html#.loadIfMod">loadIfMod</a></b>(string, function)
+								<div class="fixedFont"><b><a href="../symbols/uu.module.messagePump.html#send">send</a></b>(string, string, mix, mix)
 								</div>
-								<div class="description"><b>uu.ajax.loadIfMod - 更新チェック付き非同期ロード[Ajax async request with new-arrival check]</b>Ajaxで非同期にデータを取得します。<br />loadIfMod()は、POSTメソッドが使用できません。<br /> <table> <tr><th>step番号</th><th>内容</th></tr> <tr><td>0</td><td>BEGIN: 処理開始     </td></tr> <tr><td>1</td><td>SEND: リクエスト開始</td></tr> <tr><td>2</td><td>OK: 成功            </td></tr> <tr><td>3</td><td>NG: 失敗            </td></tr> <tr><td>4</td><td>END: 処理終了       </td></tr> </table>各ステップで、fn(ユニークID, step番号, response, status, url, async)を呼び出します。<br />responseには空文字列またはレスポンス文字列が格納されます(OKのみ)。<br />statusには0またはステータスコードが格納されます(OKとNGのみ)。<br />asyncは常にtrueになります。<br />過去に同じURLをリクエストしており、サーバ上のファイルが未更新ならfn(NG, "", 304, url, true)を返します。<br /></div>
+								<div class="description"><b>メッセージの同期送信</b>メッセージを送信し送信結果を返します。param1,param2にはどのような引数でも渡せます。</div>
 							</td>
 						</tr>
 					
 						<tr>
-							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">uu.ajax.<b><a href="../symbols/uu.ajax.html#.loadSync">loadSync</a></b>(string, function, string)
+								<div class="fixedFont"><b><a href="../symbols/uu.module.messagePump.html#set">set</a></b>(string, object)
 								</div>
-								<div class="description"><b>uu.ajax.loadSync - 同期ロード[Ajax sync request]</b>Ajaxでデータを取得します。<br />同期リクエストなのでタイムアウトしません。 <table> <tr><th>step番号</th><th>内容</th></tr> <tr><td>0</td><td>BEGIN: 処理開始     </td></tr> <tr><td>1</td><td>SEND: リクエスト開始</td></tr> <tr><td>2</td><td>OK: 成功            </td></tr> <tr><td>3</td><td>NG: 失敗            </td></tr> <tr><td>4</td><td>END: 処理終了       </td></tr> </table>各ステップで、fn(ユニークID, step番号, response, status, url, async)を呼び出します。<br />responseには空文字列またはレスポンス文字列が格納されます(OKのみ)。<br />statusには0またはステータスコードが格納されます(OKとNGのみ)。<br />asyncは常にfalseになります。<br /></div>
+								<div class="description"><b>メッセージの送信先を登録</b></div>
 							</td>
 						</tr>
 					
@@ -381,11 +381,11 @@ ul.inheritsList {
 				</div>
 				
 				<div class="fixedFont">
-						<b>uu.ajax</b>()
+						<b>uu.module.messagePump</b>()
 				</div>
 				
 				<div class="description">
-					<b>Ajax</b>
+					Message Pump Module.
 					
 				</div>
 				
@@ -412,15 +412,15 @@ ul.inheritsList {
 					Method Detail
 				</div>
 				
-					<a name=".already"> </a>
-					<div class="fixedFont">&lt;static&gt; 
+					<a name="construct"> </a>
+					<div class="fixedFont">
 					
 					
-					<span class="light">uu.ajax.</span><b>already</b>()
+					<b>construct</b>()
 					
 					</div>
 					<div class="description">
-						<b>uu.ajax.already - Ajax使用可能でtrue</b>
+						
 						
 						
 					</div>
@@ -428,6 +428,123 @@ ul.inheritsList {
 					
 					
 					
+						
+						
+						
+						
+						
+						
+						
+
+					<hr />
+				
+					<a name="post"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>post</b>(string, string, mix, mix)
+					
+					</div>
+					<div class="description">
+						<b>メッセージの非同期送信</b>メッセージを非同期送信します。param1,param2にはどのような引数でも渡せます。
+						
+						
+					</div>
+					
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>string</b>
+									
+								</dt>
+								<dd>tid      - ターゲットID(送信先ID)の指定です。                          有効なIDを指定するとユニキャストします。                          無効なIDや"broadcast"を指定するとブロードキャストします。</dd>
+							
+								<dt>
+									<b>string</b>
+									
+								</dt>
+								<dd>msg      - メッセージを指定します。</dd>
+							
+								<dt>
+									<b>mix</b>
+									
+								</dt>
+								<dd>[param1] - 1つめのパラメタの指定です。デフォルトはundefinedです。</dd>
+							
+								<dt>
+									<b>mix</b>
+									
+								</dt>
+								<dd>[param2] - 2つめのパラメタの指定です。デフォルトはundefinedです。</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+								<dd><a href="#set">uu.module.messagePump.set</a> - メッセージの送信先を登録</dd>
+							
+							</dl>
+						
+
+					<hr />
+				
+					<a name="send"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>send</b>(string, string, mix, mix)
+					
+					</div>
+					<div class="description">
+						<b>メッセージの同期送信</b>メッセージを送信し送信結果を返します。param1,param2にはどのような引数でも渡せます。
+						
+						
+					</div>
+					
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>string</b>
+									
+								</dt>
+								<dd>tid      - ターゲットID(送信先ID)の指定です。                          有効なIDを指定するとユニキャストします。                          無効なIDや"broadcast"を指定するとブロードキャストします。</dd>
+							
+								<dt>
+									<b>string</b>
+									
+								</dt>
+								<dd>msg      - メッセージを指定します。</dd>
+							
+								<dt>
+									<b>mix</b>
+									
+								</dt>
+								<dd>[param1] - 1つめのパラメタの指定です。デフォルトはundefinedです。</dd>
+							
+								<dt>
+									<b>mix</b>
+									
+								</dt>
+								<dd>[param2] - 2つめのパラメタの指定です。デフォルトはundefinedです。</dd>
+							
+							</dl>
 						
 						
 						
@@ -436,24 +553,31 @@ ul.inheritsList {
 							<dl class="detailList">
 							<dt class="heading">Returns:</dt>
 							
-								<dd>bool Ajax使用可能でtrueを返します。</dd>
+								<dd>array/mix       - 送信先.procedure()の実行結果の配列を返します。</dd>
 							
 							</dl>
 						
 						
 						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+								<dd><a href="#set">uu.module.messagePump.set</a> - メッセージの送信先を登録</dd>
+							
+							</dl>
+						
 
 					<hr />
 				
-					<a name=".load"> </a>
-					<div class="fixedFont">&lt;static&gt; 
+					<a name="set"> </a>
+					<div class="fixedFont">
 					
 					
-					<span class="light">uu.ajax.</span><b>load</b>(string, function, string)
+					<b>set</b>(string, object)
 					
 					</div>
 					<div class="description">
-						<b>uu.ajax.load - 非同期ロード[Ajax async request]</b>Ajaxで非同期にデータを取得します。 <table> <tr><th>step番号</th><th>内容</th></tr> <tr><td>0</td><td>BEGIN: 処理開始     </td></tr> <tr><td>1</td><td>SEND: リクエスト開始</td></tr> <tr><td>2</td><td>OK: 成功            </td></tr> <tr><td>3</td><td>NG: 失敗            </td></tr> <tr><td>4</td><td>END: 処理終了       </td></tr> </table>各ステップで、fn(step番号, response, status, url, async)を呼び出します。<br />responseには空文字列またはレスポンス文字列が格納されます(OKのみ)。<br />statusには0またはステータスコードが格納されます(OKとNGのみ)。<br />asyncは常にtrueになります。<br />
+						<b>メッセージの送信先を登録</b>
 						
 						
 					</div>
@@ -469,24 +593,28 @@ ul.inheritsList {
 									<b>string</b>
 									
 								</dt>
-								<dd>url    - リクエストURLを指定します。</dd>
+								<dd>tid - ターゲットID(送信先ID)を指定します。"broadcast"は指定できません。</dd>
 							
 								<dt>
-									<b>function</b>
+									<b>object</b>
 									
 								</dt>
-								<dd>[fn]   - リクエスト終了で呼び出す関数を指定します。デフォルトはundefinedです。</dd>
-							
-								<dt>
-									<b>string</b>
-									
-								</dt>
-								<dd>[data] - encodeURIComponent済みの key = value のペアを渡します。                         dataに文字列を指定するとpostメソッドを使用します。デフォルトはnullです。</dd>
+								<dd>obj - インスタンスを指定します。</dd>
 							
 							</dl>
 						
 						
 						
+						
+							<dl class="detailList">
+							<dt class="heading">Throws:</dt>
+							
+								<dt>
+									 <b></b>
+								</dt>
+								<dd>TypeError "uu.module.messagePump(tid)"  引数が無効</dd>
+							
+							</dl>
 						
 						
 						
@@ -494,135 +622,9 @@ ul.inheritsList {
 							<dl class="detailList">
 							<dt class="heading">See:</dt>
 							
-								<dd><a href="#.timeout">uu.ajax.timeout</a> - タイムアウト時間の指定</dd>
+								<dd><a href="#send">uu.module.messagePump.send</a> - メッセージの同期送信</dd>
 							
-								<dd><a href="#.already">uu.ajax.already</a> - Ajax使用可能でtrue</dd>
-							
-								<dd><a href="#.loadIfMod">uu.ajax.loadIfMod</a> - 更新チェック付き非同期ロード</dd>
-							
-								<dd><a href="#.load">uu.ajax.load</a> - 非同期ロード</dd>
-							
-								<dd><a href="#.loadSync">uu.ajax.loadSync</a> - 同期ロード</dd>
-							
-							</dl>
-						
-
-					<hr />
-				
-					<a name=".loadIfMod"> </a>
-					<div class="fixedFont">&lt;static&gt; 
-					
-					
-					<span class="light">uu.ajax.</span><b>loadIfMod</b>(string, function)
-					
-					</div>
-					<div class="description">
-						<b>uu.ajax.loadIfMod - 更新チェック付き非同期ロード[Ajax async request with new-arrival check]</b>Ajaxで非同期にデータを取得します。<br />loadIfMod()は、POSTメソッドが使用できません。<br /> <table> <tr><th>step番号</th><th>内容</th></tr> <tr><td>0</td><td>BEGIN: 処理開始     </td></tr> <tr><td>1</td><td>SEND: リクエスト開始</td></tr> <tr><td>2</td><td>OK: 成功            </td></tr> <tr><td>3</td><td>NG: 失敗            </td></tr> <tr><td>4</td><td>END: 処理終了       </td></tr> </table>各ステップで、fn(ユニークID, step番号, response, status, url, async)を呼び出します。<br />responseには空文字列またはレスポンス文字列が格納されます(OKのみ)。<br />statusには0またはステータスコードが格納されます(OKとNGのみ)。<br />asyncは常にtrueになります。<br />過去に同じURLをリクエストしており、サーバ上のファイルが未更新ならfn(NG, "", 304, url, true)を返します。<br />
-						
-						
-					</div>
-					
-					
-					
-					
-						
-							<dl class="detailList">
-							<dt class="heading">Parameters:</dt>
-							
-								<dt>
-									<b>string</b>
-									
-								</dt>
-								<dd>url - リクエストURLを指定します。</dd>
-							
-								<dt>
-									<b>function</b>
-									
-								</dt>
-								<dd>[fn] - 各stepで呼び出す関数を指定します。デフォルトはundefinedです。</dd>
-							
-							</dl>
-						
-						
-						
-						
-						
-						
-						
-							<dl class="detailList">
-							<dt class="heading">See:</dt>
-							
-								<dd><a href="#.timeout">uu.ajax.timeout</a> - タイムアウト時間の指定</dd>
-							
-								<dd><a href="#.already">uu.ajax.already</a> - Ajax使用可能でtrue</dd>
-							
-								<dd><a href="#.loadIfMod">uu.ajax.loadIfMod</a> - 更新チェック付き非同期ロード</dd>
-							
-								<dd><a href="#.load">uu.ajax.load</a> - 非同期ロード</dd>
-							
-								<dd><a href="#.loadSync">uu.ajax.loadSync</a> - 同期ロード</dd>
-							
-							</dl>
-						
-
-					<hr />
-				
-					<a name=".loadSync"> </a>
-					<div class="fixedFont">&lt;static&gt; 
-					
-					
-					<span class="light">uu.ajax.</span><b>loadSync</b>(string, function, string)
-					
-					</div>
-					<div class="description">
-						<b>uu.ajax.loadSync - 同期ロード[Ajax sync request]</b>Ajaxでデータを取得します。<br />同期リクエストなのでタイムアウトしません。 <table> <tr><th>step番号</th><th>内容</th></tr> <tr><td>0</td><td>BEGIN: 処理開始     </td></tr> <tr><td>1</td><td>SEND: リクエスト開始</td></tr> <tr><td>2</td><td>OK: 成功            </td></tr> <tr><td>3</td><td>NG: 失敗            </td></tr> <tr><td>4</td><td>END: 処理終了       </td></tr> </table>各ステップで、fn(ユニークID, step番号, response, status, url, async)を呼び出します。<br />responseには空文字列またはレスポンス文字列が格納されます(OKのみ)。<br />statusには0またはステータスコードが格納されます(OKとNGのみ)。<br />asyncは常にfalseになります。<br />
-						
-						
-					</div>
-					
-					
-					
-					
-						
-							<dl class="detailList">
-							<dt class="heading">Parameters:</dt>
-							
-								<dt>
-									<b>string</b>
-									
-								</dt>
-								<dd>url    - リクエストURLを指定します。</dd>
-							
-								<dt>
-									<b>function</b>
-									
-								</dt>
-								<dd>[fn]   - リクエスト終了で呼び出す関数を指定します。デフォルトはundefinedです。</dd>
-							
-								<dt>
-									<b>string</b>
-									
-								</dt>
-								<dd>[data] - encodeURIComponent済みの key = value のペアを渡します。                         dataに文字列を指定するとpostメソッドを使用します。デフォルトはnullです。</dd>
-							
-							</dl>
-						
-						
-						
-						
-						
-						
-						
-							<dl class="detailList">
-							<dt class="heading">See:</dt>
-							
-								<dd><a href="#.already">uu.ajax.already</a> - Ajax使用可能でtrue</dd>
-							
-								<dd><a href="#.loadIfMod">uu.ajax.loadIfMod</a> - 更新チェック付き非同期ロード</dd>
-							
-								<dd><a href="#.load">uu.ajax.load</a> - 非同期ロード</dd>
-							
-								<dd><a href="#.loadSync">uu.ajax.loadSync</a> - 同期ロード</dd>
+								<dd><a href="#post">uu.module.messagePump.post</a> - メッセージの非同期送信</dd>
 							
 							</dl>
 						
@@ -637,7 +639,7 @@ ul.inheritsList {
 <!-- ============================== footer ================================= -->
 		<div class="fineprint" style="clear:both">
 			&copy;2008<br />
-			Documentation generated by <a href="http://www.jsdoctoolkit.org/" target="_blank">JsDoc Toolkit</a> 2.0.beta2.3 on Sun Jun 15 2008 16:44:32 GMT+0900 (JST)
+			Documentation generated by <a href="http://www.jsdoctoolkit.org/" target="_blank">JsDoc Toolkit</a> 2.0.beta2.3 on Sun Jun 15 2008 16:44:35 GMT+0900 (JST)
 		</div>
 	</body>
 </html>

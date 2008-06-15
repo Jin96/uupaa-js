@@ -1,13 +1,8 @@
 /** uupaa.js - JavaScript Library for Japanese creator
  *
- * for
- *  Internet Explorer 6+
- *  Firefox 2+
- *  Safari 3+
- *  Opera 9+
- *
  * @author Takao Obara
  * @license uupaa.js is licensed under the terms and conditions of the MIT licence.
+ * @see http://code.google.com/p/uupaa-js/
  */
 
 ////////////////////////////////////////////////////////////
@@ -20,15 +15,15 @@ var uu = function() {
 };
 uu._impl = function() {}; // As you like
 
-uu.version = [0, 1]; // [major, release, revision]
+uu.version = [0, 2]; // [major, release, revision]
 
 ////////////////////////////////////////////////////////////
 (function() { var uud = document, uuw = window; // alias
 
 uud.head = uud.getElementsByTagName("head")[0]; // alias - document.head
 
-if (!uud.evaluate && !uud.getElementById("xpath.js")) { // need document.evaluate()
-  throw Error('ERR-02: <script src="{{path}}/xpath.js"> not exist');
+if (!uud.evaluate && !uud.getElementById("javascript-xpath.js")) { // need document.evaluate()
+  throw Error('ERR-02: <script src="{{path}}/javascript-xpath.js"> not exist');
 }
 if (!uud.getElementById("uupaa.js")) { // need <script id="uupaa.js" src="uupaa.js"></script>
   throw Error('ERR-02: <script id="uupaa.js" src="{{path}}/uupaa.js"> not exist');
@@ -85,7 +80,8 @@ uu.mix.param = function(base, flavor, aroma /* = undefined */) {
  * 既存のindexの値をflavorやaromaの値で上書きします。<br />
  *
  * uu.mix.propsはメソッドとlengthプロパティを混ぜません。
- * この特徴はメソッドフィルターとしても使用できます。
+ * この特徴は、mixinする必要のないメソッドや、
+ * 混乱の元となる"length"プロパティをそぎ落とすフィルターとしても使用できます。
  *
  * @param hash/array base    - ベース要素の指定です。
  * @param hash/array flavor  - baseに混ぜ込む要素の指定です。
@@ -119,9 +115,8 @@ uu.mix.props = function(base, flavor, aroma /* = undefined */) {
  */
 uu.forEach = function(mix, fn, me /* = undefined */) {
   if (mix.forEach) { return mix.forEach(fn, me); } // call native forEach function
-//if (mix instanceof NodeList) {};
   var i, sz;
-  if ("length" in mix) { // Array or Array like hash(has length property)
+  if ("length" in mix) { // Array or FakeArray(has length property)
     for (i = 0, sz = mix.length; i < sz; ++i) {
       (i in mix) && fn.call(me, mix[i], i, mix);
     }
@@ -139,21 +134,16 @@ uu.forEach = function(mix, fn, me /* = undefined */) {
  * IDと一致する要素を検索します。
  *
  * @param string id        - IDを指定します。
- * @param bool   [force]   - キャッシュを使わずに検索する場合にtrueを指定します。<br />
+ * @param bool   [noCache] - キャッシュを使わずに検索する場合にtrueを指定します。<br />
  *                           falseを指定するとキャッシュを使用する可能性があり、
  *                           その要素が既に存在しなかったり、IDが別の要素で使いまわされている可能性もあります。<br />
  *                           デフォルトはfalseです。
  * @return null/element    - 検索成功で要素の参照を返します。失敗でnullを返します。
- * @see uu.id - IDを検索
- * @see uu.tag - タグを検索
- * @see uu.css - CSSのクラス名を検索
- * @see uu.attr - 属性の列挙
- * @see uu.xpath - XPathで検索
- * @see uu.xpath.snap - XPathの検索結果をスナップ
+ * @see <a href="http://uupaa-js.googlecode.com/svn/trunk/SELECTOR.htm">セレクタ(Selector)</a>
  * @namespace
  */
-uu.id = function(id, force /* = false */) {
-  return (force || false) ? uud.getElementById(id) :
+uu.id = function(id, noCache /* = false */) {
+  return (noCache || false) ? uud.getElementById(id) :
          (uu.id._cache[id] || (uu.id._cache[id] = uud.getElementById(id)));
 };
 uu.id._cache = {};
@@ -175,24 +165,31 @@ uu.id._cache = {};
  *  <dt>"std"</dt><dd>DTDを指定したスタンダードモードでブラウザが描画している場合にtrue</dd>
  *  <dt>"domrange"</dt><dd>DOM Level2 Range Moduleが使用可能でtrue</dd>
  *  <dt>"display:table"</dt><dd>Safari3, Firefox2, Opera9, IE8ならtrue, それ以外ならfalse</dd>
+ *  <dt>"ver"</dt><dd>ブラウザ(描画エンジン)のバージョン番号, 値と意味はブラウザの種類で異なる</dd>
  * </dl>
  *
  * @param string name - ブラウザ名, ブラウザの描画エンジン名, 機能名の指定です。<br />
  *                      大小文字を区別しません。
  * @return bool/string - nameで指定したブラウザで動作しているか、機能が使用可能な場合にtrueを返します。
  *                       nameを省略した場合は、ユーザエージェント文字列を返します。
+ *                       verを指定するとバージョン番号を返します。
  * @class
  */
 uu.ua = function(name /* = "" */) {
-  var e = arguments.callee, r;
+  var e = arguments.callee;
   name = (name || "_").toLowerCase();
   if (name in e) { return e[name]; }
   switch (name) {
-  case "display:table": 
-    if (!uu.ua.ie) { return true; }
-    r = uu.ua._.match(/MSIE ([\w\.]+);/);
-    if (parseFloat(r[1]) > 7.0) { return true; }
-    break;
+  case "display:table":
+    return (!uu.ua.ie || uu.ua.ver >= 8);
+  case "ver":
+    if (!uu.ua.ver) {
+      uu.ua.ver = (uu.ua.ie)     ? parseFloat(uu.ua._.match(/MSIE ([\d]\.[\d][\w]?)/)[1])
+                : (uu.ua.webkit) ? parseFloat(uu.ua._.match(/WebKit\/(\d+(?:\.\d+)*)/)[1])
+                : (uu.ua.gecko)  ? parseFloat(uu.ua._.match(/Gecko\/(\d{8})/)[1])
+                : (uu.ua.opera)  ? opera.version() : 0;
+    }
+    return uu.ua.ver;
   }
   return false;
 };
@@ -205,6 +202,7 @@ uu.ua.ipod    = uu.ua._.indexOf('iPod') >= 0 || uu.ua._.indexOf('iPhone') >= 0; 
 uu.ua.wii     = !!(uuw.opera && uuw.opera.wiiremote);             // is Wii Internet channel
 uu.ua.std     = uud.compatMode && uud.compatMode == 'CSS1Compat'; // is Standard Mode
 uu.ua.domrange = uud.implementation.hasFeature("Range", "2.0");   // is DOM Level2 Range Module
+uu.ua.ver     = uu.ua("ver");
 
 ////////////////////////////////////////////////////////////
 /** <b>Module</b>
@@ -254,12 +252,14 @@ uu.module.isLoaded = function(name) {
  * 2. パラレルにロードするためユーザの待機時間が最小になりますが、ロード順は保障されません。<br />
  * 3. タイムアウトしません。
  *
+ * 既にロード済みのモジュールを指定すると、即座にfnを呼び出します。
+ *
  * @param taxing [path] - 検索パスの指定です。絶対URLや相対パスを指定します。<br />
  *                        空文字列を指定すると、uu.config.modulePathで指定されたURLを検索パスとして使用します。<br />
  *                        デフォルトは空文字列("")です。<br />
  * @param taxing module - モジュールの指定です。
  * @param function [fn] - ロード完了後にコールバックするメソッドを指定します。デフォルトはundefinedです。
- * @throws Error      "uu.module.load({module}) failed"  ロード失敗
+ * @throws Error          "uu.module.load({module}) failed"  ロード失敗
  * @see uu.config.modulePath モジュール検索パスの指定
  * @see uu.module.loadSync - 同期ロード
  * @see uu.module.isLoaded - モジュール読込済みでtrueを返す
@@ -269,6 +269,8 @@ uu.module.load = function(path /* = "" */, module, fn /* = undefined */) {
   var src = uu.module._buildURL(path || uu.config.modulePath, module),
       mods = uu.indexes(src), run = 0;
   fn = fn || uu.mute;
+
+  if (uu.module.isLoaded(module)) { fn(); return; } // already loaded
 
   (!mods.length) ? fn() :
     uu.forEach(src, function(v, i) {
@@ -312,13 +314,15 @@ uu.module.load = function(path /* = "" */, module, fn /* = undefined */) {
  * 複数の検索パスをうまく組み合わせると、本番系が接続しにくい場合に、
  * 自動的に予備系のサーバからスクリプトをロードするといった動作の指定が可能になります。<br />
  *
+ * 既にロード済みのモジュールを指定すると、即座にfnを呼び出します。
+ *
  * @param taxing [path] - 検索パスの指定です。絶対URLや相対パスを指定します。<br />
  *                        空文字列を指定すると、uu.config.modulePathで指定されたURLを検索パスとして使用します。<br />
  *                        デフォルトは空文字列("")です。<br />
  * @param taxing module - モジュールの指定です。
  * @param function [fn] - ロード完了後にコールバックするメソッドを指定します。デフォルトはundefinedです。
- * @throws Error     "uu.module.load({module}) timeout" タイムアウト
- * @throws Error     "uu.module.load({module}) failed"  ロード失敗
+ * @throws Error          "uu.module.load({module}) timeout" タイムアウト
+ * @throws Error          "uu.module.load({module}) failed"  ロード失敗
  * @see uu.config.modulePath - モジュール検索パスの指定
  * @see uu.module.timeout - タイムアウト時間の指定
  * @see uu.module.delay - 遅延時間の指定
@@ -330,6 +334,8 @@ uu.module.loadSync = function(path /* = "" */, module, fn /* = undefined */) {
   var last, src = uu.module._buildURL(path || uu.config.modulePath, module),
       tick = 0, order = [], node;
   fn = fn || uu.mute;
+
+  if (uu.module.isLoaded(module)) { fn(); return; } // already loaded
 
   (!(order = uu.indexes(src)).length) ? fn() : (
     last = order.shift(),
@@ -458,43 +464,50 @@ uu.url.path = function(str) {
 };
 /** <b>uu.url.query - クエリ文字列をhashで取得</b>
  *
- * URLのクエリ文字列(key1=value1&key2=value2, ...)をパースしhash({ key1: "value1", key2: "value2" })を返します。
+ * URLのクエリ文字列(key1=value1&key2=value2, ...)をパースし、
+ * hash({ key1: "value1", key2: "value2" })を返します。<br /><br />
  *
- * <pre class="eg">uu.url.query("key1=value1&key2=value2"); // "./path"</pre>
+ * encodeURIComponent()でエンコードされている文字列を適切にデコードします。
  *
- * @param string str - クエリ文字列を含んだURLを指定します。
+ * <pre class="eg">
+    var url = uu.url.query.add("", "key", "a:?="); // "?key=a%3A%3F%3D"
+    var rv  = uu.url.query(url, true);
+ * </pre>
+ *
+ * @param string qstr - クエリ文字列を指定します。
  * @return hash - hashを返します。
  * @namespace
  */
-uu.url.query = function(str) {
-  var rv = {};
-  str.replace(/(?:([\w]+)\=([\w]+))/g, function(m, k, v) {
-    return rv[k] = v;
-  });
+uu.url.query = function(qstr) {
+  var rv = {}, F = uuw.decodeURIComponent;
+  function decode(match, key, value) { return rv[F(key)] = F(value); }
+  qstr.replace(/^.*\?/, "").replace(/(?:([^\=]+)\=([^\&]+))/g, decode); // "?"の左側を切り落とし "key=value"で切り分ける
   return rv;
 };
 /** <b>uu.url.query.add - クエリ文字列を追加</b>
  *
- * URL文字列の末尾にクエリ文字列("?key1=value1&key2=value2, ...)を追加します。
+ * URL文字列の末尾にクエリ文字列("?key1=value1&key2=value2, ...)を追加します。<br /><br />
+ *
+ * key,valueをencodeURIComponent()で適切にエンコードします。
  *
  * <pre class="eg">
- * // "http://www.example.com/?key1=value1&key2=value2"
- * uu.url.query.add("http://www.example.com/", { key1: "value1", key2: "value2" });
- *
- * // "http://www.example.com/?key3=value3"
- * uu.url.query.add("http://www.example.com/", "key3", "value3");
+   // "http://www.example.com/?key1=value1&key2=value2"
+   uu.url.query.add("http://www.example.com/", { key1: "value1", key2: "value2" });
+   
+   // "http://www.example.com/?key3=value3"
+   uu.url.query.add("http://www.example.com/", "key3", "value3");
  * </pre>
  *
- * @param string str - URLを指定します。
- * @param string/hash key - keyを指定します。hash{ key, value }も指定可能です。
- * @param string value - valueを指定します。keyにhashを指定した場合はこの引数は無視されます。
+ * @param string url - URLを指定します。
+ * @param string/hash key - keyを指定します。hash{ key1: value1, key2: value2, ... }も指定可能です。
+ * @param string [value] - valueを指定します。keyにhashを指定した場合はこの引数は無視されます。
  * @return string - クエリ文字列を追加したURL文字列を返します。
  */
-uu.url.query.add = function(str, key, value) {
-  var rv = [];
-  function addPair(v, k) { rv.push(k + "=" + v); }
-  (uu.isS(key)) ? addPair(value, key) : uu.forEach(key, addPair);
-  return str + (str.lastIndexOf("?") === -1 ? "?" : "&") + rv.join("&");
+uu.url.query.add = function(url, key, value) {
+  var rv = [], F = uuw.encodeURIComponent;
+  function pair(value, key) { rv.push(F(key) + "=" + F(value)); }
+  (uu.isS(key)) ? pair(value, key) : uu.forEach(key, pair);
+  return url + (url.lastIndexOf("?") === -1 ? "?" : "&") + rv.join("&");
 };
 
 ////////////////////////////////////////////////////////////
@@ -524,33 +537,33 @@ uu.js.exec = function(code) {
 };
 
 ////////////////////////////////////////////////////////////
-/** <b>uu.attr - 属性と一致する要素を列挙(document.getElementsByAttribute wrapper)</b>
+/** <b>uu.attr - 属性を持ち値が一致する要素を列挙(document.getElementsByAttribute wrapper)</b>
  *
- * 属性(アトリビュート)と一致する要素を列挙します。
+ * 属性(アトリビュート)を持ち、値が一致する要素を列挙します。<br />
+ * valueと完全に一致する値を持つ要素を列挙します。
  *
  * @param string  attr      - 属性名を指定します。
- * @param mix     [value]   - 値を指定します。"*"(ワイルドカード)を指定すると、値に関係なく属性を列挙します。<br />
+ * @param string  [value]   - 検索する属性値を指定します。アスタリスク("*")を指定すると値による絞込みをしません。<br />
  *                            デフォルトは"*"です。
- * @param element [context] - 検索の絞込みを行うコンテキストを指定します。デフォルトはdocumentです。
+ * @param element [context] - 検索開始位置(コンテキスト)を指定します。デフォルトはdocumentです。
  * @param string  [tag]     - getElementsByAttribute()が実装されていないブラウザで、
  *                            tagに指定したタグのみを検索対象とします。
  *                            検索対象を限定することで速度を稼ぎます。
  * @return NodeList/array - 検索成功でNodeListまたは要素の配列 [element, ...] を返します。失敗で空のNodeListか配列を返します。<br />
  *                          NodeListまたは配列を返すため、uu.attr().forEach() ではなく、
  *                          uu.forEach(uu.attr())を使用してください。
- * @see uu.id - IDを検索
- * @see uu.tag - タグを検索
- * @see uu.css - CSSのクラス名を検索
- * @see uu.attr - 属性の列挙
- * @see uu.attr.get - 属性の取得
- * @see uu.attr.set - 属性の設定
- * @see uu.xpath - XPathで検索
- * @see uu.xpath.snap - XPathの検索結果をスナップ
+ * @see <a href="http://uupaa-js.googlecode.com/svn/trunk/SELECTOR.htm">セレクタ(Selector)</a>
  * @class
  */
 uu.attr = function(attr, value /* = "*" */, context /* = document */, tag /* = undefined */) {
-  return (context || uud).getElementsByAttribute(attr, value);
+  return (context || uud).getElementsByAttribute(attr, value || "*");
 };
+if (!uud.getElementsByAttribute) {
+  uu.attr = function(attr, value /* = "" */, context /* = document */, tag /* = undefined */) {
+    var x = function(n, v) { return (v === "*") ? ("@" + n) : ("@" + v + "=\"" + n + "\""); };
+    return uu.xpath.snap('.//' + (tag || '*') + '[' + x(attr, value || "*") + ']', "", context || uud, false);
+  };
+}
 
 /** <b>uu.attr.get - 属性の取得(document.getAttribute warpper)</b>
  *
@@ -598,97 +611,125 @@ uu.attr.set = function(elm, hash) {
   });
   return elm;
 };
-if (!uud.getElementsByAttribute) {
-  uu.attr = function(attr, value /* = "*" */, context /* = document */, tag /* = undefined */) {
-    var x = function(n, v) { return (v === "*") ? ("@" + n + "=" + v) : ("@" + n); };
-    return uu.xpath.snap('.//' + (tag || '*') + '[' + x(attr, value || "*") + ']', "", context || uud, false);
-  };
-}
 
 ////////////////////////////////////////////////////////////
-/** <b>uu.css - CSSのクラス名と一致する要素を列挙(document.getElementsByClassName wrapper)</b>
+/** <b>uu.klass - CSSのクラス名と一致する要素を列挙(document.getElementsByClassName wrapper)</b>
  *
  * CSSのクラス名と一致する要素を列挙します。
  *
  * @param string  className - クラス名を指定します。
- * @param element [context] - 検索の絞込みを行うコンテキストを指定します。デフォルトはdocumentです(全要素の検索)。
+ * @param element [context] - 検索開始位置(コンテキスト)を指定します。デフォルトはdocumentです(全要素の検索)。
  * @param string  [tag]     - 指定したtagのみ検索対象とする場合に指定します。<br />
  *                            この引数は、getElementsByClassName()が実装されていないブラウザ(Firefox2,IE6/7/8,Opera9.2x)用です。
  * @return NodeList/array   - 検索成功でNodeListまたは要素の配列 [element, ...] を返します。失敗で空のNodeListか配列を返します。<br />
- *                            NodeListまたは配列を返すため、uu.css().forEach() ではなく、
- *                            uu.forEach(uu.css())を使用してください。
- * @see uu.id - IDを検索
- * @see uu.tag - タグを検索
- * @see uu.css - CSSのクラス名を検索
- * @see uu.css.get - スタイルの取得
- * @see uu.css.set - スタイルの設定
- * @see uu.attr - 属性の列挙
- * @see uu.xpath - XPathで検索
- * @see uu.xpath.snap - XPathの検索結果をスナップ
+ *                            NodeListまたは配列を返すため、uu.klass().forEach() ではなく、
+ *                            uu.forEach(uu.klass())を使用してください。
+ * @see <a href="http://uupaa-js.googlecode.com/svn/trunk/SELECTOR.htm">セレクタ(Selector)</a>
  * @class
  */
-uu.css = function(className, context /* = document */, tag /* = undefined */) { // for Firefox, Safari, Opera9.5
+uu.klass = function(className, context /* = document */, tag /* = undefined */) { // for Firefox3, Safari3, Opera9.5
   return (context || uud).getElementsByClassName(className);
 };
 if (!uud.getElementsByClassName) { // for Firefox2, IE6/7/8, Opera9.2x
-  uu.css = function(className, context /* = document */, tag /* = undefined */) {
+  uu.klass = function(className, context /* = document */, tag /* = undefined */) {
     function x(cn) { return 'contains(concat(" ",@class," ")," ' + cn + ' ")'; }
     var c = className, rule = (c.indexOf(' ') >= 0) ? c.match(/\w+/g).map(x).join(" and ") : x(c);
     return uu.xpath.snap('.//' + (tag || '*') + '[' + rule + ']', "", context || uud, false);
   };
 }
 
-/** <b>classNameを追加</b>
+/** <b>uu.css - CSS3のセレクタと一致する要素を列挙</b>
+ *
+ * CSS3のセレクタと一致する要素を列挙します。<br />
+ * この関数は内部でCSS3セレクタをXPathに変換します。<br /><br />
+ * uu.config.verboseがtrueで、生成したXPathにエラーがある場合は例外をスローします。
+ *
+ * <pre class="eg">
+ *  <div class="header">div.header</div>
+ *  <a href="http://www.example.com/" title="CSS3 selector to XPath">CSS3 selector to XPath</a>
+ *
+ *  uu.css('div.header, a[title*="CSS3"]').forEach(function(v) {
+ *    v.style.backgroundColor = "gold";
+ *  });
+ * </pre>
+ *
+ * @param string css3selector - CSS3セレクタを指定します。
+ * @return array              - 検索成功で要素の配列 [element, ...] を返します。失敗で空の配列を返します。
+ * @throws TypeError "uu.css(...)" 使用できないセレクタを指定したか、不正なXPathに変換された
+ * @see <a href="http://uupaa-js.googlecode.com/svn/trunk/SELECTOR.htm">使用可能なセレクタ(Selector)</a>
+ * @class
+ */
+uu.css = function(css3selector) {
+  var rv = [], xpath, elm, i = 0;
+  try {
+    xpath = uu.css.toXPath(css3selector);
+    if (xpath) {
+      elm = document.evaluate(xpath, document, null, 7, null);
+      if (elm && "snapshotLength" in elm) {
+        for (; i < elm.snapshotLength; ++i) {
+          rv.push(elm.snapshotItem(i));
+        }
+      }
+    }
+  } catch(e) {
+    if (uu.config.verbose) {
+      throw TypeError("uu.css(" + css3selector + ") -> " + xpath);
+    }
+  }
+  return rv;
+};
+
+/** <b>uu.css.addClass - classNameを追加</b>
  *
  * 要素のclassNameにクラスを追加します。
  *
  * <pre class="eg">
- * uu.forEach(uu.css("alpha"), function(v) {
- *   uu.css.add(v, "beta,hoge,huga,piyo"); // まとめて追加
+ * uu.forEach(uu.klass("alpha"), function(v) {
+ *   uu.css.addClass(v, "beta,hoge,huga,piyo"); // まとめて追加
  * });
  * </pre>
  *
  * @param element elm - 要素を指定します。
  * @param taxing  tax - クラス名を指定します。
- * @see <a href="#is">uu.css.is</a> - classNameがあればtrue
- * @see <a href="#del">uu.css.del</a> - classNameを削除
+ * @see <a href="#hasClass">uu.css.hasClass</a> - classNameがあればtrue
+ * @see <a href="#removeClass">uu.css.removeClass</a> - classNameを削除
  */
-uu.css.add = function(elm, tax) {
+uu.css.addClass = function(elm, tax) {
   var rv = [];
   uu.notax(tax).forEach(function(v) { rv.push(" " + v); });
   elm.className = uu.rtrim(elm.className) + rv.join("");
 };
 
-/** <b>classNameがあればtrue</b>
+/** <b>uu.css.hasClass - classNameがあればtrue</b>
  *
  * 要素のclassNameにnameが含まれていればtrueを返します。
  *
  * @param element elm  - 要素を指定します。
  * @param string  name - クラス名を指定します。
  * @return bool        - classNameにnameが含まれていればtrueを返します。
- * @see <a href="#add">uu.css.add</a> - classNameを追加
- * @see <a href="#del">uu.css.del</a> - classNameを削除
+ * @see <a href="#addClass">uu.css.addClass</a> - classNameを追加
+ * @see <a href="#removeClass">uu.css.removeClass</a> - classNameを削除
  */
-uu.css.is = function(elm, name) {
+uu.css.hasClass = function(elm, name) {
   return (elm.className + " ").indexOf(name + " ") !== -1;
 };
 
-/** <b>classNameを削除</b>
+/** <b>uu.css.removeClass - classNameを削除</b>
  *
  * 要素のclassNameから、nameを削除します。
  *
  * <pre class="eg">
- * uu.forEach(uu.css("alpha"), function(v) {
- *   uu.css.del(v, "beta"); // 削除は１つずつ
+ * uu.forEach(uu.klass("alpha"), function(v) {
+ *   uu.css.removeClass(v, "beta"); // 削除は１つずつ
  * });
  * </pre>
  *
  * @param element elm - 要素を指定します。
  * @param string  name - クラス名を指定します。
- * @see <a href="#add">uu.css.add</a> - classNameを追加
- * @see <a href="#is">uu.css.is</a> - classNameがあればtrue
+ * @see <a href="#addClass">uu.css.addClass</a> - classNameを追加
+ * @see <a href="#hasClass">uu.css.hasClass</a> - classNameがあればtrue
  */
-uu.css.del = function(elm, name) {
+uu.css.removeClass = function(elm, name) {
   var e = elm.className + " ", re = RegExp(name + " ");
   if (re.test(e)) {
     elm.className = e.replace(re, "");
@@ -725,13 +766,13 @@ uu.css.cssProp = function() {
  * この関数はpseudo elementをサポートしません。
  *
  * @param element       elm       - スタイルを取得する要素を指定します。
- * @param taxing        [cssProp] - cssPropまたはcss-propを指定します。
- *                                  省略も可能で、省略するとCSS2Propertiesオブジェクトを返します。
+ * @param taxing        [cssProp] - cssPropまたはcss-propを指定します。省略できます。
  * @param bool          [cure]    - cssPropにcss-prop形式("font-weight")の名前を指定した場合はtrueにします。
  *                                  デフォルトはfalseです。
  * @return hash/string            - cssPropに複数の要素を指定している場合は hash { cssProp: 計算済みのスタイル, ... }を返します。
  *                                  cssPropが単一の要素なら、計算済みのスタイルを文字列で返します。
  *                                  cssPropで指定したスタイルプロパティが存在しない場合は、その要素の値は空文字列("")になります。
+ *                                  cssPropを省略した場合は、スタイルのスナップショット(CSS2Propertiesオブジェクト)を返します。
  * @see uu.css.set - スタイルの設定
  * @namespace
  */
@@ -740,7 +781,6 @@ uu.css.get = function(elm, cssProp /* = undefined */, cure /* = false */) {
   var hash, rv = uu.ua.ie ? elm.currentStyle : uud.defaultView.getComputedStyle(elm, "");
   function prop(v) {                        return (v in rv) ? rv[v] : ""; }
   function Prop(v) { v = uu.css.cssProp(v); return (v in rv) ? rv[v] : ""; }
-//return !cssProp ? rv : uu.notax(cssProp).slight(cure || false ? Prop : prop);
   if (!cssProp) { return rv; }
   cssProp = uu.notax(cssProp);
   if (cssProp.length === 0) { return ""; }
@@ -753,10 +793,10 @@ uu.css.get = function(elm, cssProp /* = undefined */, cure /* = false */) {
 /** <b>uu.css.set - スタイルの設定(set style)</b>
  *
  * スタイルを設定します。<br />
- * 以下の特別な処理も行います。
+ * 一部のプロパティでは、特別な値や指定方法が有効です。
  * <dl>
- *  <dt>display: hide</dt><dd>要素を隠します。</dd>
- *  <dt>display: show</dt><dd>要素を表示します。</dd>
+ *  <dt>top, left, width, height</dt><dd>値を数値で指定すると末尾に"px"を補完します。</dd>
+ *  <dt>display</dt><dd>"hide"を指定すると要素を隠します。"show"を指定すると要素を表示します。</dd>
  * </dl>
  *
  * @param element       elm       - スタイルを設定する要素を指定します。
@@ -770,142 +810,146 @@ uu.css.get = function(elm, cssProp /* = undefined */, cure /* = false */) {
  */
 uu.css.set = function(elm, hash, cure /* = false */) {
   cure = cure || false;
-  uu.forEach(hash, function(v, i) { // v = 0.5, i = "opacity"
-    if (!uu.css.set._chain.some(function(fn) {
-      return fn(elm, v, i);
-    })) {
-      try {
-        elm.style[cure ? uu.css.cssProp(i) : i] = v;
-      } catch(e) {}
+  uu.css.set._chain.forEach(function(v) { // 特別な値や設定を持つものを先に処理しループを軽くする
+    if (v in hash) {
+      uu.css.set[v](elm, hash[v]);
+      delete hash[v];
     }
+  });
+  uu.forEach(hash, function(v, i) {
+    try {
+      elm.style[cure ? uu.css.cssProp(i) : i] = v;
+    } catch(e) {}
   });
   return elm;
 };
-uu.css.set._opacityHandler = function(elm, v, i) {
-  return (i === "opacity") ? (uu.css.set.opacity(elm, v), true) : false;
-};
-uu.css.set._displayHandler = function(elm, v, i) {
-  return (i === "display" && (v === "show" || v === "hide")) ? (uu.css.set.display(elm, v === "show"), true) : false;
-};
-uu.css.set._chain = [uu.css.set._opacityHandler, uu.css.set._displayHandler]; // ChainOfResponsibility
+uu.css.set._chain = ["opacity", "top", "left", "width", "height", "display"];
 
 /** <b>uu.css.get.opacity - 不透明度の取得</b>
- *
- * 要素の不透明度を取得します。
- *
  * @param element elm - スタイルを取得する要素を指定します。
  * @return number - 不透明度を数値で返します。
- * @see uu.css.get - スタイルの取得
- * @see uu.css.set.opacity - 不透明度の設定
  */
 uu.css.get.opacity = function(elm) {
   return parseFloat(uud.defaultView.getComputedStyle(elm, "").opacity);
 };
-
 /** <b>uu.css.set.opacity - 不透明度の設定</b>
- *
- * 要素の不透明度を設定します。
- *
  * @param element elm           - スタイルを設定する要素を指定します。
  * @param number/string opacity - 不透明度を数値または数値の文字列表現で指定します。
  *                                指定可能な値は0.0から1.0の値です。
  * @return element - elmを返します。
- * @see uu.css.set - スタイルの設定
- * @see uu.css.get.opacity - 不透明度の取得
  */
 uu.css.set.opacity = function(elm, opacity) {
   elm.style.opacity = parseFloat(opacity); // .toFixed(6);
   return elm;
 };
-
+/** <b>uu.css.get.top - 上からのオフセットを取得</b>
+ * @param element elm - オフセットを取得する要素を指定します。
+ * @return number     - オフセットをpx単位の数値で返します。
+ */
+uu.css.get.top = function(elm) {
+  return parseFloat(uud.defaultView.getComputedStyle(elm, "").top);
+};
+/** <b>uu.css.get.top - 上からのオフセットを設定</b>
+ * @param element elm         - オフセットを設定する要素を指定します。
+ * @param number/string value - オフセット値を指定します。負の値も指定可能です。
+ *                              数値で指定すると、末尾に"px"を補完します。
+ * @return element            - elmを返します。
+ */
+uu.css.set.top = function(elm, value) {
+  elm.style.top = (typeof value === "number") ? parseInt(value) + "px" : value;
+  return elm;
+};
+/** <b>uu.css.get.left - 左からのオフセットを取得</b>
+ * @param element elm - オフセットを取得する要素を指定します。
+ * @return number     - オフセットをpx単位の数値で返します。
+ */
+uu.css.get.left = function(elm) {
+  return parseFloat(uud.defaultView.getComputedStyle(elm, "").left);
+};
+/** <b>uu.css.get.left - 左からのオフセットを設定</b>
+ * @param element elm         - オフセットを設定する要素を指定します。
+ * @param number/string value - オフセット値を指定します。負の値も指定可能です。
+ *                              数値で指定すると、末尾に"px"を補完します。
+ * @return element            - elmを返します。
+ */
+uu.css.set.left = function(elm, value) {
+  elm.style.left = (typeof value === "number") ? parseInt(value) + "px" : value;
+  return elm;
+};
 /** <b>uu.css.get.width - 幅の取得</b>
- *
- * 要素の幅を取得します。
- *
- * @param element elm         - 幅を取得する要素を指定します。
- * @return number             - 幅をpx単位の数値で返します。
- * @see uu.css.get - スタイルの取得
- * @see uu.css.set.width - 幅の設定
+ * @param element elm - 幅を取得する要素を指定します。
+ * @return number     - 幅をpx単位の数値で返します。
  */
 uu.css.get.width = function(elm) {
   return parseFloat(uud.defaultView.getComputedStyle(elm, "").width);
 };
-
 /** <b>uu.css.set.width - 幅の設定</b>
- *
- * 要素の幅を設定します。
- *
  * @param element       elm   - 幅を設定する要素を指定します。
- * @param number/string value - 幅をpx単位の数値または数値の文字列表現で指定します。
- *                              文字列の末尾に"px"をつける必要はありません。
- *                              負の値は指定できません。
- * @return element - elmを返します。
- * @see uu.css.set - スタイルの設定
- * @see uu.css.get.width - 幅の取得
+ * @param number/string value - 幅を指定します。負の値は指定できません。
+ *                              数値で指定すると、末尾に"px"を補完します。
+ * @return element            - elmを返します。
  */
 uu.css.set.width = function(elm, value) {
-  elm.style.width = parseFloat(value) + "px";
+  try {
+    elm.style.width = (typeof value === "number") ? parseInt(value) + "px" : value;
+  } catch(e) {
+    elm.style.width = "0px";
+  }
   return elm;
 };
-
 /** <b>uu.css.get.height - 高さの取得</b>
- *
- * 要素の高さを取得します。
- *
- * @param element       elm   - 高さを取得する要素を指定します。
- * @return number             - 高さをpx単位の数値で返します。
- * @see uu.css.get - スタイルの取得
- * @see uu.css.set.height - 高さの設定
+ * @param element elm - 高さを取得する要素を指定します。
+ * @return number     - 高さをpx単位の数値で返します。
  */
 uu.css.get.height = function(elm) {
   return parseFloat(uud.defaultView.getComputedStyle(elm, "").height);
 };
-
 /** <b>uu.css.set.height - 高さの設定</b>
- *
- * 要素の高さを設定します。
- *
  * @param element       elm   - 高さを設定する要素を指定します。
- * @param number/string value - 高さをpx単位の数値または数値の文字列表現で指定します。
- *                              文字列の末尾に"px"をつける必要はありません。
- *                              負の値は指定できません。
+ * @param number/string value - 高さを指定します。負の値は指定できません。
+ *                              数値で指定すると、末尾に"px"を補完します。
  * @return element            - elmを返します。
- * @see uu.css.set - スタイルの設定
- * @see uu.css.get.height - 高さの取得
  */
 uu.css.set.height = function(elm, value) {
-  elm.style.height = parseFloat(value) + "px";
+  try {
+    elm.style.height = (typeof value === "number") ? parseInt(value) + "px" : value;
+  } catch(e) {
+    elm.style.height = "0px";
+  }
   return elm;
 };
-
 /** <b>uu.css.set.display - 表示方法の設定</b>
  *
  * 要素の表示/非表示を設定します。<br />
  * このメソッドを使用することで、table要素やインライン要素とdiv要素を同じ方法で操作することができます。
  *
- * @param element       elm    - 表示方法を設定する要素を指定します。
- * @param bool          apper  - 表示(true),非表示(false)を指定します。
- * @see uu.css.set
+ * @param element elm   - 表示方法を設定する要素を指定します。
+ * @param string  disp  - style.displayに指定可能な値か、"show" または "hide"を指定します。
+ * @return element      - elmを返します。
  */
-uu.css.set.display = function(elm, apper) { // for Firefox, Opera, Safari
-  var me = arguments.callee, ss = uu.ua.ie ? elm.currentStyle : uud.defaultView.getComputedStyle(elm, ""),
-      tag = elm.tagName.toLowerCase();
-
-  if (ss["display"] === "none") {
-    if (me._block.indexOf(tag + ",") !== -1) {
-      elm.style.display = "block";
-    } else {
-      elm.style.display = (tag in me._unique) ? me._unique[tag] : "inline";
-    }
-  } else {
-    elm.style.display = "none";
+uu.css.set.display = function(elm, disp) { // for IE, Firefox, Opera, Safari
+  var rv = (disp === "hide") ? "none" : disp, me, tag;
+  if (disp === "show") {
+    me = arguments.callee, tag = elm.tagName.toLowerCase();
+    rv = (me._skip.indexOf(tag + ",") !== -1) ? "" :
+         (me._block.indexOf(tag + ",") !== -1) ? "block" :
+         (tag in me._unique) ? me._unique[tag] : "inline";
   }
+  elm.style.display = rv;
+  return elm;
 };
-// XHTML1.x only
+// XHTML1.x Elements only
+uu.css.set.display._skip = ""; // display: が指定できない属性の一覧
 uu.css.set.display._block = "p,div,dl,ul,ol,form,address,blockquote,h1,h2,h3,h4,h5,h6,fieldset,hr,pre,";
 uu.css.set.display._unique = { table: "table", caption: "table-caption", tr: "table-row", td: "table-cell",
                                th: "table-cell", tbody: "table-row-group", thead: "table-header-group",
                                tfoot: "table-footer-group", col: "table-column", colgroup: "table-column-group" };
+// display: tableが機能しないブラウザ(IE6,7)用の処理
+if (!uu.ua("display:table")) {
+  uu.css.set.display._skip = "table,caption,tr,td,th,tbody,thead,tfoot,col,colgroup,";
+  uu.css.set.display._unique = {};
+}
+
 if (uu.ua.ie) {
   uu.css.get.opacity = function(elm) {
     return (elm.filters.alpha) ? parseFloat(elm.style.opacity) : 1.0;
@@ -915,6 +959,12 @@ if (uu.ua.ie) {
     if (elm.filters.alpha) { elm.filters.alpha.opacity = parseFloat(opacity) * 100; }
                       else { elm.style.filter += " alpha(opacity=" + (parseFloat(opacity) * 100) + ")"; }
   };
+  uu.css.get.top = function(elm) {
+    return parseFloat(elm.currentStyle.top);
+  };
+  uu.css.get.left = function(elm) {
+    return parseFloat(elm.currentStyle.left);
+  };
   uu.css.get.width = function(elm) {
     var rv = elm.currentStyle.width;
     return (rv === "auto") ? elm.clientWidth : parseFloat(rv); // IEは計算せずに"auto"を返してくる
@@ -923,12 +973,163 @@ if (uu.ua.ie) {
     var rv = elm.currentStyle.height;
     return (rv === "auto") ? elm.clientHeight : parseFloat(rv); // IEは計算せずに"auto"を返してくる
   };
-  // IE7以下では display: table は機能しないので仕方なくブロック要素として扱う, IE8からは機能する
-  if (uu.ua("display:table")) {
-    uu.css.set.display._block += "table,caption,tr,td,th,tbody,thead,tfoot,col,colgroup,";
-    uu.css.set.display._unique = {};
-  }
 }
+
+/** <b>uu.css.toXPath - CSS3セレクタをXPathに変換</b>
+ *
+ * CSS3のセレクタ(一部除く)をXPathに変換します。<br />
+ * 対応状況は用語集を確認してください。<br /><br />
+ *
+ * CSS3の擬似クラス(:enabled, :disabled, :checked)に対応していない理由。<br />
+ *
+ * &lt;input id="element" type="checkbox" checked="checked" /&gt;はHTMLパース時に、<br />
+ * 1. JavaScriptのプロパティとしての element.checked がtrueに設定される。<br />
+ * 2. element.setAttribute("checked", "checked"); 相当の処理が行われる。<br />
+ *
+ * チェックボックスをクリックすると、<br />
+ * 1. JavaScriptのプロパティとしての element.checked がtrueかfalseに設定される。<br />
+ * 2. element.setAttribute("checked", 現在の値); 相当の処理は行われない。<br />
+ *
+ * XPathの@(attribute::)はsetAttribute()で設定された値に反応するため、画面の見た目と、XPathで選択される要素が異なってしまう。
+ *
+ * @param string css3selectors - CSS3のセレクタを指定します。
+ * @return string - 成功でXPathのロケーションパスを返します。
+ *                  変換失敗で空文字列("")を返します。
+ * @see http://www.w3.org/TR/css3-selectors/
+ */
+uu.css.toXPath = function(css3selectors) {
+  return css3selectors.split(",").map(uu.css.toXPath._impl).join(" | ");
+}
+uu.css.toXPath._impl = function(sel) {
+  var rv = ["//", "*"], exp = uu.css.toXPath._impl._regexp, index = 1, last = null, m, m2;
+
+  function reset(E) { rv.length = 0, rv.push(E), index = 0; }
+  function nth(str) { return (!isNaN(str)) ? /*(*/ (")=" + parseInt(str) + "-1") :
+                             (str === "even" || str === "2n")   ? /*(*/ ")mod 2=1" :
+                             (str === "odd"  || str === "2n+1") ? /*(*/ ")mod 2=0" :
+                             (exp["xn+y"].test(str)) ? str.replace(exp["xn+y"], /*(*/ "+ $2)mod $1=1") :    // 4n + 1
+                             (exp.xn.test(str))      ? str.replace(exp.xn,      /*(*/ ")mod $1=1") : /*(*/ ")"; } // 3n
+  while (sel.length && sel != last) {
+    last = sel = uu.trim(sel);
+    if (!sel.length) { break; }
+
+    // Element phase: E.className, E#id
+    m = sel.match(exp.ELM);
+    if (m) {
+      switch (m[1]) {
+      case ".": rv.push('[contains(concat(" ",@class," ")," ' + m[2] + ' ")]'); break;
+      case "#": rv.push('[@id="' + m[2] + '"]'); break;
+      default:  rv[index] = m[2];
+      }
+      sel = sel.substring(m[0].length);
+    }
+    // Attr phase: E[A], E[A=V], E[A~=V], E[A$=V], E[A*=V], E[A|=V]
+    m = sel.match(exp.ATTR1);
+    if (m) {
+      (m[2] in uu.css.toXPath._impl._attr) && rv.push(uu.sprintf(uu.css.toXPath._impl._attr[m[2]], m[1], m[4]));
+      sel = sel.substring(m[0].length);
+    } else {
+      m = sel.match(exp.ATTR2);
+      if (m) {
+        rv.push("[@" + m[1] + "]");
+        sel = sel.substring(m[0].length);
+      }
+    }
+    // Attr phase: E:not(selector) - sorry. not impl.
+
+    // Pseudo-classes and Pseudo-elements phase:
+    m = sel.match(exp.PSEUDO);
+    while (m) {
+      switch (m[1]) {
+      case "root":          rv.push("*[not(parent::*)]"); break;
+      case "first-child":   rv.push("[not(preceding-sibling::*)]"); break;
+      case "last-child":    rv.push("[not(following-sibling::*)]"); break;
+      case "only-child":    rv.push("[count(parent::*/child::*)=1]"); break;
+/* 非対応 - これらはuu.pseudo.xxxメソッドとして実装する
+      case "animated":      break;
+      case "checked":       rv.push('[@checked and (@checked="true" or @checked="checked")]'); break;
+      case "selected":      break;
+      case "hidden":        rv.push('input[@type="hidden"]'); break; // style.display="none" や style.visibility="hidden" には非対応
+      case "visible":       break;
+ */
+      case "enabled":       rv.push('[not(@disabled)]'); break;
+      case "disabled":      rv.push('[@disabled="disabled"]'); break;
+      case "nth-child":       rv.push(uu.sprintf("[(count(preceding-sibling::*)%1$s]", nth(m[2]))); break; // )
+      case "nth-last-child":  rv.push(uu.sprintf("[(count(following-sibling::*)%1$s]", nth(m[2]))); break; // )
+      case "nth-of-type":     rv.push(uu.sprintf("[(count(preceding-sibling::%2$s)%1$s]", nth(m[2]), rv[index])); break; // )
+      case "nth-last-of-type":rv.push(uu.sprintf("[(count(following-sibling::%2$s)%1$s]", nth(m[2]), rv[index])); break; // )
+      case "first-of-type":   rv.push(uu.sprintf("[(not(preceding-sibling::%2$s)%1$s]", nth(m[2]), rv[index])); break; // )
+      case "last-of-type":    rv.push(uu.sprintf("[(not(following-sibling::%2$s)%1$s]", nth(m[2]), rv[index])); break; // )
+      case "only-of-type":    rv.push(uu.sprintf("[count(parent::*/child::%s)=1]",rv[index])); break;
+      // ---
+      case "first":         rv.push("[1]"); break;
+      case "last":          rv.push("[last()]"); break;
+      case "even":          rv.push("[(count(preceding-sibling::*))mod 2=0]"); break;
+      case "odd":           rv.push("[(count(preceding-sibling::*))mod 2=1]"); break;
+      case "eq":            reset(uu.sprintf("/descendant::%s[%d]", rv[index], parseInt(m[2]) + 1)); break;
+      case "gt":            reset(uu.sprintf("/descendant::%s[position() > %d]", rv[index], parseInt(m[2]) + 1)); break;
+      case "lt":            reset(uu.sprintf("/descendant::%s[position() < %d]", rv[index], parseInt(m[2]) + 1)); break;
+      case "header":        reset(uu.sprintf("//*[self::h1 or self::h2 or self::h3 or self::h4 or self::h5 or self::h6]")); break;
+      case "contains":      rv.push(uu.sprintf("[contains(string(), %s)]", m[2])); break;
+      case "empty":         rv.push("[not(*) and not(text())]"); break;
+      case "parent":        rv.push("[text()]"); break;
+      case "input":         rv.push("*[self::input or self::textarea or self::select or self::button]"); break;
+      case "text":          rv.push('input[@type="text"]'); break;
+      case "password":      rv.push('input[@type="password"]'); break;
+      case "radio":         rv.push('input[@type="radio"]'); break;
+      case "checkbox":      rv.push('input[@type="checkbox"]'); break;
+      case "submit":        rv.push('input[@type="submit"]'); break;
+      case "image":         rv.push('input[@type="image"]'); break;
+      case "reset":         rv.push('input[@type="reset"]'); break;
+      case "button":        rv.push('*[self::input[@type="button"] or self::button]'); break;
+      case "file":          rv.push('input[@type="file"]'); break;
+      }
+      sel = sel.substring(m[0].length);
+      m = sel.match(exp.PSEUDO); // 書き方が冗長なのはstrictにするため
+    }
+    // Combinator phase: E F, E > F, E + F, E ~ F
+    m = sel.match(exp.COMBO1);
+    if (m) {
+      if (m[1] === "+") { // E + F のケースでは、Fを先読みする必要がある
+        sel = sel.substring(m[0].length);
+        m2 = sel.match(exp.COMBO2);
+        if (m2) {
+          rv.push('/following-sibling::*[1][self::' + m2[1] +']'); // とりあえ's
+          sel = sel.substring(m2[0].length);
+        }
+      } else {
+        switch (m[1]) {
+        case ">": rv.push("/"); break;
+        case "~": rv.push("/following-sibling::"); break;
+        default:  rv.push("//"); break;
+        }
+        index = rv.length;
+        rv.push("*");
+        sel = sel.substring(m[0].length);
+      }
+    }
+  }
+  return rv.join("");
+}
+uu.css.toXPath._impl._regexp = {
+  ELM:                /^([\.\#]?)([a-z0-9\*\_\-]*)/i,     // E
+  ATTR1:              /^\[\s*([^\~\^\$\*\|\=\s]+)\s*([\~\^\$\*\|]?=)\s*(['"])([^"']*)\3\s*\]/, // E[A=V]
+  ATTR2:              /^\[\s*([^\]]*)\s*\]/,              // E[A]
+  COMBO1:             /^(?:\s*([\>\+\~\s]))/,             // E F, E > F, E + F, E ~ F
+  COMBO2:             /^\s*([a-z0-9\*\_\-]+)/i,           // E + F の F用
+  PSEUDO:             /^\:([\w-]+)(?:\((.*)\))?/i,        // :nth-child(n)
+  "2n+1":             /2n\+1/,                            // :nth-child(2n+1)
+  "xn+y":             /([\d]+)n\+([\d]+)/,                // :nth-child(xn+y)
+  xn:                 /([\d]+)n/                          // :nth-child(xn)
+};
+uu.css.toXPath._impl._attr = {
+  "=":                '[@%1$s="%2$s"]',
+  "~=":               '[contains(concat(" ",@%1$s," ")," %2$s ")]',
+  "^=":               '[starts-with(@%1$s,"%2$s")]',
+  "$=":               '[substring(@%1$s,string-length(@%1$s)-string-length("%2$s")+1)="%2$s"]',
+  "*=":               '[contains(@%1$s,"%2$s")]',
+  "|=":               '[@%1$s="%2$s" or starts-with(@%1$s,"%2$s-")]'
+};
 
 ////////////////////////////////////////////////////////////
 /** <b>uu.tag - タグ名と一致する要素を列挙(document.getElementsByTagName wrapper)</b>
@@ -943,16 +1144,11 @@ if (uu.ua.ie) {
  *
  * @param string  tagName   - タグ名を指定します。
  *                            "*"(ワイルドカード)を指定すると、全てのタグを検索します。
- * @param element [context] - 検索の絞込みを行う場合にコンテキストを指定します。デフォルトはdocumentです。
+ * @param element [context] - 検索開始位置(コンテキスト)を指定します。デフォルトはdocumentです。
  * @return NodeList/array     検索成功でNodeListまたは要素の配列 [element, ...] を返します。失敗で空のNodeListか配列を返します。<br />
  *                            NodeListまたは配列を返すため、uu.tag().forEach() ではなく、
  *                            uu.forEach(uu.tag())を使用してください。
- * @see uu.id - IDを検索
- * @see uu.tag - タグを検索
- * @see uu.css - CSSのクラス名を検索
- * @see uu.attr - 属性の列挙
- * @see uu.xpath - XPathで検索
- * @see uu.xpath.snap - XPathの検索結果をスナップ
+ * @see <a href="http://uupaa-js.googlecode.com/svn/trunk/SELECTOR.htm">セレクタ(Selector)</a>
  * @class
  */
 uu.tag = function(tagName, context /* = document */) {
@@ -965,31 +1161,21 @@ uu.tag = function(tagName, context /* = document */) {
  * XPath式で要素を検索します。
  *
  * @param string  expr      - XPathの評価式(ロケーションパス)を指定します。
- * @param element [context] - コンテキストを限定する場合に指定します。デフォルトはdocumentです。
+ * @param element [context] - 検索開始位置(コンテキスト)を指定します。デフォルトはdocumentです。
  *                            コンテキストを指定した場合は、exprに"//"ではなく"./"で始まる文字列を指定します。
- * @return mix              - 評価結果を返します。
- * @see uu.id - IDを検索
- * @see uu.tag - タグを検索
- * @see uu.css - CSSのクラス名を検索
- * @see uu.attr - 属性の列挙
- * @see uu.xpath - XPathで検索
- * @see uu.xpath.snap - XPathの検索結果をスナップ
+ * @return mix              - 評価結果を返します。評価に失敗するとnullを返します。
+ * @see <a href="http://uupaa-js.googlecode.com/svn/trunk/SELECTOR.htm">セレクタ(Selector)</a>
  * @class
  */
 uu.xpath = function(expr, context /* = document */) {
-  var rv, i, xr = XPathResult, r = uud.evaluate(expr, context || uud, null, xr.ANY_TYPE, null);
+  var rv = [], i, r = uud.evaluate(expr, context || uud, null, 0, null); // ANY_TYPE = 0
   switch (r.resultType) {
-  case xr.NUMBER_TYPE: rv = r.numberValue; break;
-  case xr.STRING_TYPE: rv = r.stringValue; break;
-  case xr.BOOLEAN_TYPE: rv = r.booleanValue; break;
-  case xr.UNORDERED_NODE_ITERATOR_TYPE:
-    rv = [];
-    i = r.iterateNext();
-    while (i) {
-      rv[rv.length] = i;
-      i = r.iterateNext();
-    }
-    break;
+  case 1: rv = r.numberValue; break;  // NUMBER_TYPE = 1
+  case 2: rv = r.stringValue; break;  // STRING_TYPE = 2
+  case 3: rv = r.booleanValue; break; // BOOLEAN_TYPE = 3
+  case 4: i = r.iterateNext();
+          while (i) { rv.push(i); i = r.iterateNext(); } // コードが冗長なのはstrictにするため
+          break; // UNORDERED_NODE_ITERATOR_TYPE = 4
   }
   return rv;
 };
@@ -1020,22 +1206,17 @@ uu.xpath = function(expr, context /* = document */) {
  *
  * @param string  expr      - XPathの評価式(ロケーションパス)を指定します。
  * @param string  [attr]    - 取得する属性を指定します。デフォルトは空文字列です。
- * @param element [context] - コンテキストを限定する場合に指定します。デフォルトはdocumentです。
+ * @param element [context] - 検索開始位置(コンテキスト)を指定します。デフォルトはdocumentです。
  *                            コンテキストを指定した場合は、exprに"//"ではなく"./"で始まる文字列を指定します。
  * @param bool    [sort]    - ソートする場合にtrue,ソートしない場合にfalseを指定します。省略可能でデフォルトはtrueです。<br />
  * @return array            - attrを指定した場合は、列挙した要素の属性値だけからなる配列 [値, 値, ...]を返します。<br />
  *                            attrを指定しない場合は、要素の参照の配列を返します。<br />
  *                            返される値は、ある時点のスナップショットです(ライブではない)
- * @see uu.id - IDを検索
- * @see uu.tag - タグを検索
- * @see uu.css - CSSのクラス名を検索
- * @see uu.attr - 属性の列挙
- * @see uu.xpath - XPathで検索
- * @see uu.xpath.snap - XPathの検索結果をスナップ
+ * @see <a href="http://uupaa-js.googlecode.com/svn/trunk/SELECTOR.htm">セレクタ(Selector)</a>
  */
 uu.xpath.snap = function(expr, attr /* = "" */, context /* = document */, sort /* = true */) {
-  var rv = [], e, n = uud.evaluate(expr, context || uud, null, sort ? 7 : 6, null), i = 0;
   attr = attr || "";
+  var rv = [], e, i = 0, n = uud.evaluate(expr, context || uud, null, sort ? 7 : 6, null);
   if (attr.length) {
     for (; i < n.snapshotLength; ++i) {
       e = n.snapshotItem(i);
@@ -1091,7 +1272,7 @@ uu.event.handler = function(me) { return me; };
  */
 uu.event.set = function(elm, type, fn, capture /* = false */) {
   if (uu.isU(fn)) { throw TypeError("uu.event.set(fn)"); }
-  function impl(name) { elm.addEventListener(uu.event.toDOMType(name), fn, capture || false); }
+  function impl(name) { elm.addEventListener(uu.event.type.toDOM(name), fn, capture || false); }
   uu.notax(type).forEach(impl);
 };
 
@@ -1110,7 +1291,7 @@ uu.event.set = function(elm, type, fn, capture /* = false */) {
  */
 uu.event.unset = function(elm, type, fn, capture /* = false */) {
   if (uu.isU(fn)) { throw TypeError("uu.event.set(fn)"); }
-  function impl(name) { elm.removeEventListener(uu.event.toDOMType(name), fn, capture || false); }
+  function impl(name) { elm.removeEventListener(uu.event.type.toDOM(name), fn, capture || false); }
   uu.notax(type).forEach(impl);
 };
 
@@ -1147,34 +1328,31 @@ uu.event.target = function(evt) { // for Firefox, Safari, Opera
   return { real: evt.target, curt: evt.currentTarget, rel: evt.relatedTarget };
 };
 
-/** <b>uu.event.toDOMType - 非DOMイベント名をDOMイベントタイプに変換</b>
+/** <b>uu.event.type - イベント名をDOM Level 0イベントタイプに変換</b>
  *
  * @private
  * @param string  type  - イベントタイプを指定します。
  * @return string       - 変換後のイベントタイプを返します。
  */
-uu.event.toDOMType = function(type) { return type; };
-if (uu.ua.gecko) { // for Firefox
-  uu.event.toDOMType = function(type) {
-    switch (type) {
-    case "mousewheel": type = "DOMMouseScroll"; break;
-    }
-    return type;
-  };
-}
-/** <b>uu.event.toDOMLv0Type - イベント名をDOM Level0 イベントタイプに変換</b>
- *
- * @private
- * @param string  type  - イベントタイプを指定します。
- * @return string       - 変換後のイベントタイプを返します。
- */
-uu.event.toDOMLv0Type = function(type) {
+uu.event.type = function(type) {
   switch (type) {
   case "onlosecapture": type = "mouseup"; break;
   case "DOMMouseScroll": type = "mousewheel"; break;
   }
   return type;
 };
+/** <b>uu.event.type.toDOM - 非DOMイベント名をDOMイベントタイプに変換</b>
+ *
+ * @private
+ * @param string  type  - イベントタイプを指定します。
+ * @return string       - 変換後のイベントタイプを返します。
+ */
+uu.event.type.toDOM = function(type) { return type; };
+if (uu.ua.gecko) { // for Firefox
+  uu.event.type.toDOM = function(type) {
+    return (type === "mousewheel") ? "DOMMouseScroll" : type;
+  };
+}
 
 if (uu.ua.ie) { // for IE
   // 第一引数で渡されるthis(me)を保持し、this.handleEvent.call(this, event) を実現するクロージャ
@@ -1183,21 +1361,24 @@ if (uu.ua.ie) { // for IE
   };
   uu.event.set = function(elm, type, fn, capture /* = false */) {
     type = uu.notax(type);
-    if (capture || false) { elm.setCapture();                 // キャプチャ開始
-                            type.unshift("onlosecapture"); }  // キャプチャロスト時にコールされるイベントハンドラを先頭に挿入
+    if ((capture || false) && ("setCapture" in elm)) {
+      elm.setCapture();                 // キャプチャ開始
+      type.unshift("onlosecapture");    // キャプチャロスト時にコールされるイベントハンドラを先頭に挿入
+    }
     function impl(name) { elm.attachEvent("on" + name, fn); }
     type.forEach(impl);
   };
   uu.event.unset = function(elm, type, fn, capture /* = false */) {
     type = uu.notax(type);
-    if (capture || false) { type.unshift("onlosecapture");    // uu.event.set()で自動挿入したイベントハンドラをここでも
-                            elm.releaseCapture();          }  // キャプチャ終了
+    if ((capture || false) && ("releaseCapture" in elm)) {
+      type.unshift("onlosecapture");    // uu.event.set()で自動挿入したイベントハンドラをここでも
+      elm.releaseCapture();             // キャプチャ終了
+    }
     function impl(name) { elm.detachEvent("on" + name, fn); }
     type.forEach(impl);
   };
   uu.event.stop = function(evt, cancelDefault /* = true */) {
     evt.cancelBubble = true;
-//  if (uu.defArg(cancelDefault, true)) { evt.returnValue = false; }
     if (uu.isU(cancelDefault) || cancelDefault) { evt.returnValue = false; }
   };
   uu.event.target = function(evt) {
@@ -1248,7 +1429,6 @@ uu.dom.ready = function(fn) {
     if (uu.ua.gecko || uu.ua.opera) {
       uud.addEventListener("DOMContentLoaded", uu.dom.ready._impl, false);
     } else if (uu.ua.ie && uud.readyState) {
-//    uud.write('<script type="text/javascript" defer="defer" src="//:" onreadystatechange="window.status=this.readyState; (this.readyState==\'complete\')&&uu&&uu.dom.ready._impl()"></script>');
       uud.write('<script type="text/javascript" defer="defer" src="//:" onreadystatechange="(this.readyState==\'loaded\'||this.readyState==\'complete\')&&uu&&uu.dom.ready._impl()"></script>');
     } else if (uu.ua.webkit && uud.readyState) {
       uuw.setTimeout(function() {
@@ -1454,7 +1634,7 @@ uu.ajax.already = function() {
  *                          dataに文字列を指定するとpostメソッドを使用します。デフォルトはnullです。
  * @see <a href="#.timeout">uu.ajax.timeout</a> - タイムアウト時間の指定
  * @see <a href="#.already">uu.ajax.already</a> - Ajax使用可能でtrue
- * @see <a href="#.loadNeo">uu.ajax.loadNeo</a> - 更新チェック付き非同期ロード
+ * @see <a href="#.loadIfMod">uu.ajax.loadIfMod</a> - 更新チェック付き非同期ロード
  * @see <a href="#.load">uu.ajax.load</a> - 非同期ロード
  * @see <a href="#.loadSync">uu.ajax.loadSync</a> - 同期ロード
  */
@@ -1463,10 +1643,10 @@ uu.ajax.load = function(url, fn /* = undefined */, data /* = null */) {
   uu.ajax.load._impl(url, fn || uu.mute, data || null, false);
 };
 
-/** <b>uu.ajax.loadNeo - 更新チェック付き非同期ロード[Ajax async request with new-arrival check]</b>
+/** <b>uu.ajax.loadIfMod - 更新チェック付き非同期ロード[Ajax async request with new-arrival check]</b>
  *
  * Ajaxで非同期にデータを取得します。<br />
- * loadNeo()は、POSTメソッドが使用できません。<br />
+ * loadIfMod()は、POSTメソッドが使用できません。<br />
  *
  *  <table>
  *  <tr><th>step番号</th><th>内容</th></tr>
@@ -1487,12 +1667,12 @@ uu.ajax.load = function(url, fn /* = undefined */, data /* = null */) {
  * @param function [fn] - 各stepで呼び出す関数を指定します。デフォルトはundefinedです。
  * @see <a href="#.timeout">uu.ajax.timeout</a> - タイムアウト時間の指定
  * @see <a href="#.already">uu.ajax.already</a> - Ajax使用可能でtrue
- * @see <a href="#.loadNeo">uu.ajax.loadNeo</a> - 更新チェック付き非同期ロード
+ * @see <a href="#.loadIfMod">uu.ajax.loadIfMod</a> - 更新チェック付き非同期ロード
  * @see <a href="#.load">uu.ajax.load</a> - 非同期ロード
  * @see <a href="#.loadSync">uu.ajax.loadSync</a> - 同期ロード
  */
-uu.ajax.loadNeo = function(url, fn /* = undefined */) {
-  if (!url) { throw TypeError("uu.ajax.loadNeo(url)"); }
+uu.ajax.loadIfMod = function(url, fn /* = undefined */) {
+  if (!url) { throw TypeError("uu.ajax.loadIfMod(url)"); }
   uu.ajax.load._impl(url, fn || uu.mute, null, true);
 },
 
@@ -1520,7 +1700,7 @@ uu.ajax.loadNeo = function(url, fn /* = undefined */) {
  * @param string   [data] - encodeURIComponent済みの key = value のペアを渡します。
  *                          dataに文字列を指定するとpostメソッドを使用します。デフォルトはnullです。
  * @see <a href="#.already">uu.ajax.already</a> - Ajax使用可能でtrue
- * @see <a href="#.loadNeo">uu.ajax.loadNeo</a> - 更新チェック付き非同期ロード
+ * @see <a href="#.loadIfMod">uu.ajax.loadIfMod</a> - 更新チェック付き非同期ロード
  * @see <a href="#.load">uu.ajax.load</a> - 非同期ロード
  * @see <a href="#.loadSync">uu.ajax.loadSync</a> - 同期ロード
  */
@@ -1569,7 +1749,7 @@ uu.ajax.load.timeout = 0; // 0ms
  * 
  * @type hash
  * @see <a href="#.load">uu.ajax.load</a> - 非同期ロード
- * @see <a href="#.loadNeo">uu.ajax.loadNeo</a> - 更新チェック付き非同期ロード
+ * @see <a href="#.loadIfMod">uu.ajax.loadIfMod</a> - 更新チェック付き非同期ロード
  * @see <a href="#.loadSync">uu.ajax.loadSync</a> - 同期ロード
  */
 uu.ajax.load.header = { "X-Requested-With": "XMLHttpRequest" };
@@ -1720,7 +1900,7 @@ uu.json.load = function(url, fn /* = undefined */) {
 uu.json.encode = function(mix) {
   var rv = [], re = /[\\"\x00-\x1F\u0080-\uFFFF]/g,
       esc = { "\b": "\\b", "\t": "\\t", "\n": "\\n", "\f": "\\f", "\r": "\\r", '"':  '\\"', "\\": "\\\\" };
-  function isAL(mix) { return typeof mix === "object" && "length" in mix; } // array like
+  function isFake(mix) { return typeof mix === "object" && "length" in mix; } // FakeArray
   function U(v) { if (v in esc) { return esc[v]; }
                   return "\\u" + ("0000" + v.charCodeAt(0).toString(16)).slice(-4); }
   function F(mix) {
@@ -1728,7 +1908,7 @@ uu.json.encode = function(mix) {
     if (mix === null)                     { rv[z] = "null"; }
     else if (uu.isB(mix) || uu.isN(mix))  { rv[z] = mix.toString(); }
     else if (uu.isS(mix))                 { rv[z] = '"' + mix.replace(re, U) + '"'; }
-    else if (uu.isA(mix) || isAL(mix))    { rv[z] = "[";
+    else if (uu.isA(mix) || isFake(mix))  { rv[z] = "[";
                                             for (sz = mix.length; i < sz; ++i) { F(mix[i]);
                                                                                  rv[rv.length] = ","; }
                                             rv[rv.length - (i ? 1 : 0)] = "]"; }
@@ -2054,8 +2234,9 @@ uu.forEach({
    * @see <a href="#ltrim">uu.ltrim</a> - 左側の空白文字を除去
    */
   trim: function(str, reg /* = undefined */) {
-    return str.replace(RegExp(!reg ? "^[\\s]+" : "^[" + reg + "]+", "g"), "")
-              .replace(RegExp(!reg ? "[\\s]+$" : "[" + reg + "]+$", "g"), "");
+    return (!reg) ? str.replace(/^[\s]*|[\s]*$/g, "") :
+                    str.replace(RegExp("^[" + reg + "]+", "g"), "")
+                       .replace(RegExp("[" + reg + "]+$", "g"), "");
   },
   /** <b>uu.indexes - array/hashのindexを列挙し配列を返す</b>
    *
@@ -2128,20 +2309,46 @@ uu.forEach({
   /** <b>uu.toArray - 擬似配列を配列化</b>
    *
    * 与えられた擬似配列を配列化します。<br />
-   * 指定可能な擬似配列には以下のようなものがあります。<br />
+   *
+   * 擬似配列には以下のようなものがあります。<br />
    * document.images, NodeList, arguments
    *
-   * @param mix mix - 擬似配列や配列を指定します。
-   * @return array  - mixがnullなら空の配列([])を返します。<br />
-   *                  mixがarrayなら配列をそのまま返します。<br />
-   *                  mixが"length"プロパティを持つ擬似配列(arguments, NodeList...)なら配列化してから返します。<br />
+   * <pre class="eg">
+   *  var node = uu.toArray(uu.tag("*"));
+   * </pre>
+   *
+   * @param FakeArray fake - 擬似配列を指定します。
+   * @return array  - fakeがnullやlengthプロパティを持たないhashが指定された場合は空の配列([])を返します。<br />
+   *                  fakeがlengthプロパティを持つ擬似配列なら配列化してから返します。
    * @see <a href="http://d.hatena.ne.jp/uupaa/20080602">uupaa開発日記</a>
    */
-  toArray: function(mix) {
-    if (mix === null) { return []; }
-    var rv = new Array(mix.length || 0), i = 0, sz = rv.length;
-    for (; i < sz; ++i) { rv[i] = mix[i]; }
+  toArray: function(fake) {
+    if (fake === null || !("length" in fake) || !fake.length) { return []; }
+    var rv = Array(fake.length), i = 0, sz = rv.length;
+    for (; i < sz; ++i) { rv[i] = fake[i]; }
     return rv;
+  },
+  /** <b>uu.pushArray - 擬似配列をオブジェクトの要素に追加</b>
+   *
+   * 与えられた擬似配列を、オブジェクトの要素に追加します。<br />
+   * obj.lengthを追加した要素数に更新します。
+   *
+   * <pre class="eg">
+   *  var hash = {};
+   *  uu.pushArray(uu.tag("*"), hash); // hash[0] = html, hash[1] = head, hash[2] = meta, ...
+   * </pre>
+   *
+   * @param FakeArray fake - 擬似配列を指定します。
+   * @param object    [obj - オブジェクトを指定します。
+   * @return object  - fake追加後のオブジェクトを返します。
+   * @see uu.toArray - 擬似配列を配列化
+   */
+  pushArray: function(fake, obj) {
+    if (fake === null || !("length" in fake) || !fake.length) { obj.length = 0; return obj; }
+    var i = 0, sz = fake.length;
+    for (; i < sz; ++i) { obj[i] = fake[i]; }
+    obj.length = sz;
+    return obj;
   },
   /** <b>uu.diet - コンパクト化(Memory compaction)</b>
    *
@@ -2633,7 +2840,7 @@ uu.module.virtualTimer.prototype = {
     var me = this;
     return uuw.setInterval(function() {
       var i = 0, sz = me.data.length, t = me.tick += me.baseClock, d;
-      if (me.lock) {
+      if (me.lock) { // Memory Compaction
         // 予定時刻(next > 0)があるものだけをme.dataに残す
         me.data = me.data.filter(function(v) { return !!v.next; });
         me.lock = 0; // unlock
@@ -2657,15 +2864,15 @@ uu.module.virtualTimer.prototype = {
 uu.tm10 = new uu.module.virtualTimer(10); // instantiate
 
 ////////////////////////////////////////////////////////////
-/** Pluggable MVC Pattern, Message Pump Part.
+/** Message Pump Module.
  *
  * @class
  */
-uu.module.pmvc = function() {
+uu.module.messagePump = function() {
 };
 
-uu.module.pmvc.messagePump = uu.singletonClass();
-uu.module.pmvc.messagePump.prototype = {
+uu.module.messagePump = uu.singletonClass();
+uu.module.messagePump.prototype = {
   construct: function() {
     var me = this;
     this.reg = {}; // registered object { tid: instance, ... }
@@ -2682,26 +2889,28 @@ uu.module.pmvc.messagePump.prototype = {
   },
   /** <b>メッセージの送信先を登録</b>
    *
-   * @param string  tid - ターゲットID(送信先ID)を指定します。
+   * @param string  tid - ターゲットID(送信先ID)を指定します。"broadcast"は指定できません。
    * @param object  obj - インスタンスを指定します。
-   * @see <a href="#send">uu.module.pmvc.messagePump.send</a> - メッセージの同期送信
-   * @see <a href="#post">uu.module.pmvc.messagePump.post</a> - メッセージの非同期送信
+   * @see <a href="#send">uu.module.messagePump.send</a> - メッセージの同期送信
+   * @see <a href="#post">uu.module.messagePump.post</a> - メッセージの非同期送信
+   * @throws TypeError "uu.module.messagePump(tid)"  引数が無効
    */
   set: function(tid, obj) {
+    if (tid === "broadcast") { throw TypeError("uu.module.messagePump(tid)"); }
     this.reg[tid] = obj;
   },
   /** <b>メッセージの同期送信</b>
    *
    * メッセージを送信し送信結果を返します。param1,param2にはどのような引数でも渡せます。
    *
-   * @param  string/null  tid    - ターゲットID(送信先ID)の指定です。
-   *                               有効なIDを指定するとユニキャストします。
-   *                               無効なIDやnullを指定するとブロードキャストします。
-   * @param  string       msg    - メッセージを指定します。
-   * @param  mix          param1 - 1つめのパラメタの指定です。デフォルトはundefinedです。
-   * @param  mix          param2 - 2つめのパラメタの指定です。デフォルトはundefinedです。
-   * @return array/mix           - 送信先.procedure()の実行結果の配列を返します。
-   * @see <a href="#set">uu.module.pmvc.messagePump.set</a> - メッセージの送信先を登録
+   * @param  string tid      - ターゲットID(送信先ID)の指定です。
+   *                           有効なIDを指定するとユニキャストします。
+   *                           無効なIDや"broadcast"を指定するとブロードキャストします。
+   * @param  string msg      - メッセージを指定します。
+   * @param  mix    [param1] - 1つめのパラメタの指定です。デフォルトはundefinedです。
+   * @param  mix    [param2] - 2つめのパラメタの指定です。デフォルトはundefinedです。
+   * @return array/mix       - 送信先.procedure()の実行結果の配列を返します。
+   * @see <a href="#set">uu.module.messagePump.set</a> - メッセージの送信先を登録
    */
   send: function(tid, msg, param1 /* = undefined */, param2 /* = undefined */) {
     var rv = [];
@@ -2716,13 +2925,13 @@ uu.module.pmvc.messagePump.prototype = {
    *
    * メッセージを非同期送信します。param1,param2にはどのような引数でも渡せます。
    *
-   * @param  string/null  tid    - ターゲットID(送信先ID)の指定です。
-   *                               有効なIDを指定するとユニキャストします。
-   *                               無効なIDやnullを指定するとブロードキャストします。
-   * @param  string       msg    - メッセージを指定します。
-   * @param  mix          param1 - 1つめのパラメタの指定です。デフォルトはundefinedです。
-   * @param  mix          param2 - 2つめのパラメタの指定です。デフォルトはundefinedです。
-   * @see <a href="#set">uu.module.pmvc.messagePump.set</a> - メッセージの送信先を登録
+   * @param  string tid      - ターゲットID(送信先ID)の指定です。
+   *                           有効なIDを指定するとユニキャストします。
+   *                           無効なIDや"broadcast"を指定するとブロードキャストします。
+   * @param  string msg      - メッセージを指定します。
+   * @param  mix    [param1] - 1つめのパラメタの指定です。デフォルトはundefinedです。
+   * @param  mix    [param2] - 2つめのパラメタの指定です。デフォルトはundefinedです。
+   * @see <a href="#set">uu.module.messagePump.set</a> - メッセージの送信先を登録
    */
   post: function(tid, msg, param1 /* = undefined */, param2 /* = undefined */) {
     if (tid && tid in this.reg) { // unicast
@@ -2733,11 +2942,11 @@ uu.module.pmvc.messagePump.prototype = {
     this.vtm.resume(-1);
   }
 };
-/** メッセージポンプのインスタンス(uu.module.pmvc.messagePump instance)
+/** メッセージポンプのインスタンス(uu.module.messagePump instance)
  *
  * @type object
  */
-uu.msgpump = new uu.module.pmvc.messagePump(); // instantiate
+uu.msgpump = new uu.module.messagePump(); // instantiate
 
 ////////////////////////////////////////////////////////////
 // init & config
@@ -2773,6 +2982,7 @@ uu.config._parseQuery = function() {
   function toBool(val) { return (val === "false" || val === "0") ? false : true; }
   uu.mix(uu.config, {
     debug:      rv.debug      ? toBool(rv.debug) : uu.config.debug,
+    verbose:    rv.verbose    ? toBool(rv.verbose):uu.config.verbose,
     png24:      rv.png24      ? toBool(rv.png24) : uu.config.png24,
     imagePath:  rv.imagePath  ? rv.imagePath     : uu.config.imagePath,
     modulePath: rv.modulePath ? rv.modulePath    : uu.config.modulePath
@@ -2784,6 +2994,12 @@ uu.config._parseQuery = function() {
  * @type bool
  */
 uu.config.debug = true;
+
+/** <b>uu.config.verbose - おしゃべりモードのON/OFF(verbose mode)</b>
+ *
+ * @type bool
+ */
+uu.config.verbose = false;
 
 /** <b>uu.config.png24 - 24bit png画像の有効/無効(24bit alpha channel png image)</b>
  * 24bit png画像をサポートする場合はtrueにします。デフォルトはtrueです。

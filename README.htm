@@ -25,6 +25,9 @@ i { font-style: normal; color: gray }
    | <a href="#demo">デモ(DEMO)</a> |
    <a href="./CHANGELOG.htm">更新履歴(ChangeLog)</a> | <a href="./LICENSE.htm">ライセンス(License)</a> |
    <a href="./GLOSSARY.htm">用語集(Glossary)</a> | <a href="./doc/reference/index.html">リファレンス(Reference)</a> |
+   <a href="./SELECTOR.htm">セレクタ(Selector)</a> |
+
+
 </p>
 
 <p>uupaa.jsは、日本人クリエーター向けのJavaScriptライブラリです。クロスブラウザ対応です。</p>
@@ -37,15 +40,13 @@ i { font-style: normal; color: gray }
 <tr><td>
 <ol>
   <li>MITライセンスのオープンソースです。</li>
-  <li>日本語のドキュメントが豊富。<br />これからの人にやさしい。</li>
-  <li>モジュールのデマンドロードに対応しています。</li>
-  <li>カバーフローやポリゴン, Text-To-Speechなど、<br />
+  <li>豊富な日本語ドキュメント。これからの人にやさしい。</li>
+  <li>モジュールのオンデマンドロード, MVC, singleton等々、<br />
+      クリティカルな機能を提供します。</li>
+  <li>Cover Flowやポリゴン, Text-To-Speechなど、<br />
       他には無い特別な機能があります。</li>
   <li>canvasによるフロントエンドにフォーカスしています(いきます)。</li>
-  <li>大規模開発も考慮し、プラガブルMVCやシングルトンクラスなどが利用可能。<br />
-      メッセージポンプで楽しましょう。</li>
-  <li></li>
-
+  <li><a href="./SELECTOR.htm">セレクタ</a>が豊富です。<br />XPath, CSS3セレクタ, jQueryの独自セレクタも使用可能です。</li>
 </ol>
 </td><td>
 <ol>
@@ -62,7 +63,7 @@ i { font-style: normal; color: gray }
 <h2>サポートブラウザ</h2>
 <ul>
  <li>Internet Explorer 6+ <i>(IE5.5でも動くかもしれないが未検証のためサポート外)</i></li>
- <li>Safari3+ <i>(Macで動かしたことがないのと、Safari2のバグにどう対処すればよいのかが良くわからないのでサポート外)</i></li>
+ <li>Safari3+ <i>(Safari2のバグに対処できていないためサポート外)</i></li>
  <li>Opera9+ <i>(canvasやXPathなどが使用できないためOpera8以下はサポート外)</i></li>
  <li>Firefox2+ <i>(Firefox1.5系以下は未検証のためサポート外)</i></li>
 </ul>
@@ -70,10 +71,10 @@ i { font-style: normal; color: gray }
 
 <h2>導入方法</h2>
 
-<p>IEでuupaa.jsを使用したサイトを動かすためには、
+<p>uupaa.jsを使用したページをIEで動かすためには、
   <a href="http://coderepos.org/share/wiki/JavaScript-XPath">JavaScript-XPath</a>と
   <a href="http://excanvas.sourceforge.net/">ExplorerCanvas</a>が必要になります。</p>
-<p>これらは同梱していませんので、配布元からダウンロードを行い、以下の例を参考に配置してください。</p>
+<p>これらは非同梱です。配布元からダウンロードし、例を参考に配置してください。</p>
 
 <h3>ファイルの配置例</h3>
 <p>http://www.example.com/js/ 以下にuupaa.jsを設置する例です。</p>
@@ -92,7 +93,7 @@ i { font-style: normal; color: gray }
       <li>uu.module.ui.js <i>- (UI, キーボード, マウス, 座標系モジュール)</i></li>
       <li>lib/ <i>- (外部ライブラリ用ディレクトリ)</i></li>
       <ul>
-        <li><b>xpath.js</b> <i>- (JavaScript-XPath)</i></li>
+        <li><b>javascript-xpath.js</b> <i>- (JavaScript-XPath)</i></li>
         <li><b>excanvas.js</b> <i>- (ExplorerCanvas)</i></li>
       </ul>
       <li>img/ <i>- (画像,CSS用ディレクトリ)</i></li>
@@ -116,28 +117,21 @@ i { font-style: normal; color: gray }
 &lt;head&gt;
 &lt;meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /&gt;
 &lt;title&gt;Hello uupaa.js World&lt;/title&gt;
-&lt;!--[if IE]&gt;&lt;script id="xpath.js" type="text/javascript" src="../../lib/xpath.js"&gt;&lt;/script&gt;&lt;![endif]--&gt;
+&lt;!--[if IE]&gt;&lt;script id="javascript-xpath.js" type="text/javascript" src="../../lib/javascript-xpath.js"&gt;&lt;/script&gt;&lt;![endif]--&gt;
 &lt;!--[if IE]&gt;&lt;script id="excanvas.js" type="text/javascript" src="../../lib/excanvas.js"&gt;&lt;/script&gt;&lt;![endif]--&gt;
 &lt;script id="uupaa.js" type="text/javascript" src="../../uupaa.js"&gt;&lt;/script&gt;
-&lt;style&gt;
+&lt;style type="text/css"&gt;
 #canvas, #msg { position: absolute; top: 0; left: 0 }
 #msg { font-weight: bold }
 &lt;/style&gt;
 &lt;/head&gt;
 &lt;body&gt;
+&lt;a href="../../README.htm"&gt;README.htm&lt;/a&gt; &amp;gt; HelloWorld.htm
+
 &lt;canvas id="canvas" width="400" height="400"&gt;&lt;/canvas&gt;&lt;p id="msg"&gt;Hello Japanese Creator!&lt;/p&gt;
-&lt;script&gt;
+&lt;script type="text/javascript"&gt;
 function circle() { 
-  var canvas = uu.id("canvas"), msg = uu.id("msg"),
-      ctx = canvas.getContext("2d"),
-      inn = uu.ui.inner(),
-      color = 0xff9999;
-  function alignCenter() {
-    [msg, canvas].forEach(function(v) {
-      uu.css.set(v, { left: (inn.iw - uu.css.get.width(v)) / 2 + "px",
-                      top: (inn.ih - uu.css.get.height(v)) / 2 + "px" });
-    });
-  }
+  var canvas = uu.id("canvas"), ctx = canvas.getContext("2d"), color = 0xff9999;
   function draw() {
     color += 10;
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -146,11 +140,11 @@ function circle() {
     ctx.arc(200, 200, 180, 0, Math.PI * 2, false);
     ctx.fill();
   }
-  function anim() {
-    uu.effect.fade(canvas, { speed: 2000, fn: draw });
-  }
-  alignCenter();
-  uu.tm10.set(anim, 2200);
+  uu.effect.move(uu.id("msg"));
+  uu.effect.move(canvas);
+  uu.tm10.set(function() {
+    uu.effect.fade(canvas, { speed: 2000, fn: draw })
+  }, 2200);
 }
 uu.module.load("../../", "ui,effect", function() {
   uu.dom.ready(function() {
@@ -161,8 +155,8 @@ uu.module.load("../../", "ui,effect", function() {
 &lt;/body&gt;
 &lt;/html&gt;
 </pre>
-<i>IEでは、xpath.jsやexcanvas.jsをuupaa.jsの前に読み込んでください。読込に失敗するとエラーが発生したりcanvasが使用不能になります。
-   他のブラウザではこれらのライブラリは不要です。</i>
+<i>IEでは、javascript-xpath.js と excanvas.js を uupaa.js の前に読み込んでください。<br />
+   Firefox2, Safari3, Opera9ではブラウザではこれらのライブラリは不要です。</i>
 
 <h2><a name="demo">デモ</a></h2>
 <p>簡単なデモを用意しました。これ以外にも動作確認用のhtmlが demo/compat/ にあります(作りかけのものも混じっています)。</p>
@@ -171,7 +165,7 @@ uu.module.load("../../", "ui,effect", function() {
       <a href="demo/compat/uu.module.json.htm">JSONP</a></li>
   <li><a href="demo/compat/ready.htm">window.ready, dom.ready, canvas.ready</a>,
       <a href="demo/compat/uu.image.preload.htm">image.preload(画像の先読み)</a></li>
-  <li><a href="demo/compat/uu.effect.htm">エフェクト(Fadeのみ)</a></li>
+  <li><a href="demo/compat/uu.effect.htm">エフェクト</a> - Version 0.2で11個のエフェクトを追加しました</li>
   <li><a href="demo/compat/uu.image.png24.htm">透過PNG(IE5.5/IE6.0専用)</a></li>
   <li><a href="demo/compat/uu.module.drag.htm">ドラッグ &amp; ドロップ</a></li>
   <li><a href="demo/compat/uu.module.polygon1.htm">キューブ</a>, 
@@ -183,16 +177,12 @@ uu.module.load("../../", "ui,effect", function() {
 
 <h2>今後の予定</h2>
 <p>canvasを使用したUIモジュールをリリースする予定です。</p>
-<!--
-<p>Mac OS XのDocを実現するモジュールをリリースする予定です。</p>
-<p>jQueryのようなメソッドチェーン式のインターフェースを持つモジュールをリリースする予定です。</p>
- -->
 <p>その他、ニーズの多い機能を中心に機能強化を行っていきます。</p>
 
 <h2>コードの歩き方</h2>
 <p>ソースコードを読まれる方は、
-  <a href="./GLOSSARY.htm">用語集</a>や、<a href="./doc/reference/index.html">リファレンス</a>もご覧ください。</p>
-<p>ソースコードのコメントについては順次拡充していく予定です。</p>
+  <a href="./SELECTOR.htm">セレクタ</a>、
+  <a href="./GLOSSARY.htm">用語集</a>、<a href="./doc/reference/index.html">リファレンス</a>を参考にしてください。</p>
 
 </body>
 </html>

@@ -4,7 +4,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>uupaa.js - uu.module.virtualTimer test</title>
-<!--[if IE]><script id="xpath.js" type="text/javascript" src="../../lib/xpath.js"></script><![endif]-->
+<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="../../lib/javascript-xpath.js"></script><![endif]-->
 <!--[if IE]><script id="excanvas.js" type="text/javascript" src="../../lib/excanvas.js"></script><![endif]-->
 <script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
 <style type="text/css">
@@ -97,7 +97,7 @@ function countup() {
 
 // 既存のcubeを削除
 function deleteCube() {
-  uu.forEach(uu.css("cube"), function(v) {
+  uu.forEach(uu.klass("cube"), function(v) {
     if ("vtid" in v) {
       vtm10.suspend(v.vtid);
     } else if ("itid" in v) {

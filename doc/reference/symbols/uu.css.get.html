@@ -156,8 +156,7 @@ ul.inheritsList {
 <!-- ============================== header ================================= -->	
 		<!-- begin static/header.html -->
 		<div id="header">
-<!-- replace abs path -->
-<a href="../../README.htm">README.htm</a> &gt; Reference
+<a href="http://uupaa-js.googlecode.com/svn/trunk/README.htm">README.htm</a> &gt; Reference
 </div>
 
 		<!-- end static/header.html -->
@@ -217,6 +216,8 @@ ul.inheritsList {
 	
 	<li><a href="../symbols/uu.json.html">uu.json</a></li>
 	
+	<li><a href="../symbols/uu.klass.html">uu.klass</a></li>
+	
 	<li><a href="../symbols/uu.mix.html">uu.mix</a></li>
 	
 	<li><a href="../symbols/uu.module.html">uu.module</a></li>
@@ -230,6 +231,8 @@ ul.inheritsList {
 	<li><a href="../symbols/uu.module.drag.limited.html">uu.module.drag.limited</a></li>
 	
 	<li><a href="../symbols/uu.module.drag.zindexer.html">uu.module.drag.zindexer</a></li>
+	
+	<li><a href="../symbols/uu.module.messagePump.html">uu.module.messagePump</a></li>
 	
 	<li><a href="../symbols/uu.module.pmvc.html">uu.module.pmvc</a></li>
 	
@@ -333,7 +336,16 @@ ul.inheritsList {
 							<td class="nameDescription">
 								<div class="fixedFont">uu.css.get.<b><a href="../symbols/uu.css.get.html#.height">height</a></b>(element)
 								</div>
-								<div class="description"><b>uu.css.get.height - 高さの取得</b>要素の高さを取得します。</div>
+								<div class="description"><b>uu.css.get.height - 高さの取得</b></div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">uu.css.get.<b><a href="../symbols/uu.css.get.html#.left">left</a></b>(element)
+								</div>
+								<div class="description"><b>uu.css.get.left - 左からのオフセットを取得</b></div>
 							</td>
 						</tr>
 					
@@ -342,7 +354,16 @@ ul.inheritsList {
 							<td class="nameDescription">
 								<div class="fixedFont">uu.css.get.<b><a href="../symbols/uu.css.get.html#.opacity">opacity</a></b>(element)
 								</div>
-								<div class="description"><b>uu.css.get.opacity - 不透明度の取得</b>要素の不透明度を取得します。</div>
+								<div class="description"><b>uu.css.get.opacity - 不透明度の取得</b></div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">uu.css.get.<b><a href="../symbols/uu.css.get.html#.top">top</a></b>(element)
+								</div>
+								<div class="description"><b>uu.css.get.top - 上からのオフセットを取得</b></div>
 							</td>
 						</tr>
 					
@@ -351,7 +372,7 @@ ul.inheritsList {
 							<td class="nameDescription">
 								<div class="fixedFont">uu.css.get.<b><a href="../symbols/uu.css.get.html#.width">width</a></b>(element)
 								</div>
-								<div class="description"><b>uu.css.get.width - 幅の取得</b>要素の幅を取得します。</div>
+								<div class="description"><b>uu.css.get.width - 幅の取得</b></div>
 							</td>
 						</tr>
 					
@@ -395,7 +416,7 @@ ul.inheritsList {
 								 <b>taxing</b>
 								
 							</dt>
-								<dd>[cssProp] - cssPropまたはcss-propを指定します。                                 省略も可能で、省略するとCSS2Propertiesオブジェクトを返します。</dd>
+								<dd>[cssProp] - cssPropまたはcss-propを指定します。省略できます。</dd>
 						
 							<dt>
 								 <b>bool</b>
@@ -412,7 +433,7 @@ ul.inheritsList {
 						<dl class="detailList">
 						<dt class="heading">Returns:</dt>
 						
-								<dd>hash/string            - cssPropに複数の要素を指定している場合は hash { cssProp: 計算済みのスタイル, ... }を返します。                                 cssPropが単一の要素なら、計算済みのスタイルを文字列で返します。                                 cssPropで指定したスタイルプロパティが存在しない場合は、その要素の値は空文字列("")になります。</dd>
+								<dd>hash/string            - cssPropに複数の要素を指定している場合は hash { cssProp: 計算済みのスタイル, ... }を返します。                                 cssPropが単一の要素なら、計算済みのスタイルを文字列で返します。                                 cssPropで指定したスタイルプロパティが存在しない場合は、その要素の値は空文字列("")になります。                                 cssPropを省略した場合は、スタイルのスナップショット(CSS2Propertiesオブジェクト)を返します。</dd>
 						
 						</dl>
 					
@@ -446,7 +467,7 @@ ul.inheritsList {
 					
 					</div>
 					<div class="description">
-						<b>uu.css.get.height - 高さの取得</b>要素の高さを取得します。
+						<b>uu.css.get.height - 高さの取得</b>
 						
 						
 					</div>
@@ -462,7 +483,7 @@ ul.inheritsList {
 									<b>element</b>
 									
 								</dt>
-								<dd>elm   - 高さを取得する要素を指定します。</dd>
+								<dd>elm - 高さを取得する要素を指定します。</dd>
 							
 							</dl>
 						
@@ -473,20 +494,55 @@ ul.inheritsList {
 							<dl class="detailList">
 							<dt class="heading">Returns:</dt>
 							
-								<dd>number             - 高さをpx単位の数値で返します。</dd>
+								<dd>number     - 高さをpx単位の数値で返します。</dd>
 							
 							</dl>
+						
+						
+						
+
+					<hr />
+				
+					<a name=".left"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">uu.css.get.</span><b>left</b>(element)
+					
+					</div>
+					<div class="description">
+						<b>uu.css.get.left - 左からのオフセットを取得</b>
+						
+						
+					</div>
+					
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>element</b>
+									
+								</dt>
+								<dd>elm - オフセットを取得する要素を指定します。</dd>
+							
+							</dl>
+						
+						
 						
 						
 						
 							<dl class="detailList">
-							<dt class="heading">See:</dt>
+							<dt class="heading">Returns:</dt>
 							
-								<dd><a href="../symbols/uu.css.get.html#constructor">uu.css.get</a> - スタイルの取得</dd>
-							
-								<dd><a href="../symbols/uu.css.set.html#.height">uu.css.set.height</a> - 高さの設定</dd>
+								<dd>number     - オフセットをpx単位の数値で返します。</dd>
 							
 							</dl>
+						
+						
 						
 
 					<hr />
@@ -499,7 +555,7 @@ ul.inheritsList {
 					
 					</div>
 					<div class="description">
-						<b>uu.css.get.opacity - 不透明度の取得</b>要素の不透明度を取得します。
+						<b>uu.css.get.opacity - 不透明度の取得</b>
 						
 						
 					</div>
@@ -532,27 +588,18 @@ ul.inheritsList {
 						
 						
 						
-							<dl class="detailList">
-							<dt class="heading">See:</dt>
-							
-								<dd><a href="../symbols/uu.css.get.html#constructor">uu.css.get</a> - スタイルの取得</dd>
-							
-								<dd><a href="../symbols/uu.css.set.html#.opacity">uu.css.set.opacity</a> - 不透明度の設定</dd>
-							
-							</dl>
-						
 
 					<hr />
 				
-					<a name=".width"> </a>
+					<a name=".top"> </a>
 					<div class="fixedFont">&lt;static&gt; 
 					
 					
-					<span class="light">uu.css.get.</span><b>width</b>(element)
+					<span class="light">uu.css.get.</span><b>top</b>(element)
 					
 					</div>
 					<div class="description">
-						<b>uu.css.get.width - 幅の取得</b>要素の幅を取得します。
+						<b>uu.css.get.top - 上からのオフセットを取得</b>
 						
 						
 					</div>
@@ -568,7 +615,7 @@ ul.inheritsList {
 									<b>element</b>
 									
 								</dt>
-								<dd>elm         - 幅を取得する要素を指定します。</dd>
+								<dd>elm - オフセットを取得する要素を指定します。</dd>
 							
 							</dl>
 						
@@ -579,20 +626,55 @@ ul.inheritsList {
 							<dl class="detailList">
 							<dt class="heading">Returns:</dt>
 							
-								<dd>number             - 幅をpx単位の数値で返します。</dd>
+								<dd>number     - オフセットをpx単位の数値で返します。</dd>
 							
 							</dl>
+						
+						
+						
+
+					<hr />
+				
+					<a name=".width"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">uu.css.get.</span><b>width</b>(element)
+					
+					</div>
+					<div class="description">
+						<b>uu.css.get.width - 幅の取得</b>
+						
+						
+					</div>
+					
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>element</b>
+									
+								</dt>
+								<dd>elm - 幅を取得する要素を指定します。</dd>
+							
+							</dl>
+						
+						
 						
 						
 						
 							<dl class="detailList">
-							<dt class="heading">See:</dt>
+							<dt class="heading">Returns:</dt>
 							
-								<dd><a href="../symbols/uu.css.get.html#constructor">uu.css.get</a> - スタイルの取得</dd>
-							
-								<dd><a href="../symbols/uu.css.set.html#.width">uu.css.set.width</a> - 幅の設定</dd>
+								<dd>number     - 幅をpx単位の数値で返します。</dd>
 							
 							</dl>
+						
+						
 						
 
 					
@@ -605,7 +687,7 @@ ul.inheritsList {
 <!-- ============================== footer ================================= -->
 		<div class="fineprint" style="clear:both">
 			&copy;2008<br />
-			Documentation generated by <a href="http://www.jsdoctoolkit.org/" target="_blank">JsDoc Toolkit</a> 2.0.beta2.3 on Sun Jun 08 2008 06:37:07 GMT+0900 (JST)
+			Documentation generated by <a href="http://www.jsdoctoolkit.org/" target="_blank">JsDoc Toolkit</a> 2.0.beta2.3 on Sun Jun 15 2008 16:44:33 GMT+0900 (JST)
 		</div>
 	</body>
 </html>
