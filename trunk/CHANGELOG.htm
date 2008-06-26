@@ -69,6 +69,8 @@ li { margin-bottom: 0.5em; }
         <dt>Version 0.3 2008-06-27 / Document, Document, Document</dt>
         <dd>
           <ol>
+            <li class="fix">uupaa.js (uu.ajax.load._impl): デグレード(タイムアウト後の二重呼び出し, 更新チェック失敗)を回復<br />
+               - Recovery degrade(duplicate running after the time-out, fail in a loadIfMod check).</li>
             <li class="add">uu.module.jqss.js: jQueryの構文をエミュレートするモジュールを追加(仮実装)<br />
                - Add jQuery SyntaxSugar module.</li>
             <li class="rename">uupaa.js : "typeof mix === 'undefined'" を "mix === void 0" スタイルに書き直し。<br />

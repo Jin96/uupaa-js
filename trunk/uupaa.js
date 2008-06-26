@@ -1020,14 +1020,14 @@ uu.ajax.loadIfMod = function(url, fn /* = undefined */) {
 
 // 非同期通信
 uu.ajax.load._impl = function(url, fn, data, ifMod) {
-  var rq = uu.request, cf = rq.callbackFilter, uid = uu.uniqueID("ajax"),
+  var rq = uu.request, cf = rq.callbackFilter, uid = uu.uniqueID("ajax"), run = 0,
       xhr = uuw.XMLHttpRequest ? new XMLHttpRequest()
           : uuw.ActiveXObject  ? new ActiveXObject('Microsoft.XMLHTTP') : null;
   if (!xhr) { fail(); return; }
   function H(v, k) { ("setRequestHeader" in xhr) && xhr.setRequestHeader(k, v); } // Opera8にはsetRequestHeader()メソッドが無い
   function lastMod() { var rv = xhr.getResponseHeader("Last-Modified");
                        return (rv) ? Date.parse(rv) : 0; };
-  function fail(state) { (cf & 4) && fn(uid, 4, "", state || 400, url, 1); } // 400 "Bad Request"
+  function fail(state) { (cf & 4 && !run++) && fn(uid, 4, "", state || 400, url, 1); } // 400 "Bad Request"
   function toRFC1123String(tm) { // HTTP/1.1準拠の日付文字列( "Thu, 01 Jan 1970 00:00:00 GMT" )を生成
     if (!uu.ua.ie) { return (new Date(tm)).toUTCString(); }
     var rv = (new Date(tm)).toUTCString().replace(/UTC/, "GMT");
@@ -1037,8 +1037,8 @@ uu.ajax.load._impl = function(url, fn, data, ifMod) {
   xhr.onreadystatechange = function() {
     if (xhr.readyState !== 4) { return; }
     if (xhr.status !== 200) { fail(xhr.status); return; } // 304 too
-    (cf & 2) && fn(uid, 2, xhr.responseText, 200, url, 1);
-    (ifMod) && (rq._cache[url] = lastMod);
+    (cf & 2 && !run++) && fn(uid, 2, xhr.responseText, 200, url, 1);
+    (ifMod) && (rq._cache[url] = lastMod());
   };
 
   try {
