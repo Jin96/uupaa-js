@@ -4,9 +4,8 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>uupaa.js - uu.module.coverflow test</title>
-<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="../../lib/javascript-xpath.js"></script><![endif]-->
-<!--[if IE]><script id="excanvas.js" type="text/javascript" src="../../lib/excanvas.js"></script><![endif]-->
-<script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
+<!--[if IE]><script id="excanvas.js" type="text/javascript" src="http://pigs.sourceforge.jp/excanvas.js"></script><![endif]-->
+<script type="text/javascript" src="../../uupaa.js"></script>
 <style>
 body {
   background-color: black;
@@ -85,7 +84,7 @@ function boot() {
   ]);
   cf.draw();
 }
-uu.module.load("../../", "ui,canvas,coverflow", function() {
+uu.module.load("", "ui,canvas,coverflow", function() {
   uu.canvas.ready(boot);
 });
 </script>

@@ -1,0 +1,46 @@
+<html><head><title>Pseudo Selector</title>
+<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="../../lib/javascript-xpath.js"></script><![endif]-->
+<script type="text/javascript" src="../../uupaa.js"></script>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<style>
+#frame { position: absolute; top: 100px; left: 100px;
+         width: 28em; height: 8em; border: 1px solid gray; }
+</style></head><body><a href="../../README.htm">README</a> &gt; <a href="../../SELECTOR.htm#pseudo-selector">SELECTOR</a> &gt; uu.css.pseudo<br />
+<div id="frame">
+  <input id="checkbox1" type="checkbox" value="1" onclick="review()" />
+    <label for="checkbox1">checkbox1</label>
+  <p id="screen"></p>
+</div>
+<div>
+  <input type="button" value="change" onclick="change()" />
+  <input type="button" value="set" onclick="set()" />
+  <input type="button" value="remove" onclick="remove()" />
+</div>
+<script>
+window.onload = function() { review(); }
+function elm() { return document.getElementById("checkbox1"); }
+function change() {
+  var e = elm();
+  e.checked = !e.checked;
+  review();
+}
+function set() {
+  elm().setAttribute("checked", "checked");
+  review();
+}
+function remove() {
+  elm().removeAttribute("checked");
+  review();
+}
+function review() {
+  var e = elm(), rv = [];
+  rv.push("elm.checked = ", (e.checked) ? "true" : false, "<br />",
+          "elm.getAttribute(\"checked\") = ", e.getAttribute("checked"), "<br />");
+  if (e.hasAttribute) {
+    rv.push("e.hasAttribute(\"checked\") = ", e.hasAttribute("checked"));
+  } else {
+    rv.push("e.hasAttribute = function undefined");
+  }
+  document.getElementById("screen").innerHTML = rv.join("");
+}
+</script></body></html>

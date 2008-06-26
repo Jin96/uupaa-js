@@ -33,13 +33,13 @@
 <span class='linenumber'> 26</span>  * beginとendを省略すると、現在の不透明度が0.5以上ならfadeoutし、0.5未満ならfadeinします。&lt;br />
 <span class='linenumber'> 27</span>  * 要素が非表示になっている場合は、まず可視状態にしてからアニメーションを行います。
 <span class='linenumber'> 28</span>  *
-<span class='linenumber'> 29</span>  * @param element         elm           - 要素を指定します。
-<span class='linenumber'> 30</span>  * @param hash            [param]       - パラメタの指定です。
-<span class='linenumber'> 31</span>  * @param number/string   [param.speed] - 描画完了までの時間を、ms単位の数値か、
+<span class='linenumber'> 29</span>  * @param Element         elm           - 要素を指定します。
+<span class='linenumber'> 30</span>  * @param Hash            [param]       - パラメタの指定です。
+<span class='linenumber'> 31</span>  * @param Number/String   [param.speed] - 描画完了までの時間を、ms単位の数値か、
 <span class='linenumber'> 32</span>  *                                        文字列("now", "quick", "fast", "mid", "slow")で指定します。デフォルトは"mid"です。
-<span class='linenumber'> 33</span>  * @param function        [param.fn]    - エフェクト完了でコールバックするメソッドを指定します。省略可能です。
-<span class='linenumber'> 34</span>  * @param number          [param.begin] - 初期不透明度を指定します。デフォルトは現在の不透明度です。
-<span class='linenumber'> 35</span>  * @param number          [param.end]   - 目標とする不透明度を指定します。デフォルトは0.0(完全な透明)または1.0(完全な不透明)です。
+<span class='linenumber'> 33</span>  * @param Function        [param.fn]    - エフェクト完了でコールバックするメソッドを指定します。省略可能です。
+<span class='linenumber'> 34</span>  * @param Number          [param.begin] - 初期不透明度を指定します。デフォルトは現在の不透明度です。
+<span class='linenumber'> 35</span>  * @param Number          [param.end]   - 目標とする不透明度を指定します。デフォルトは0.0(完全な透明)または1.0(完全な不透明)です。
 <span class='linenumber'> 36</span>  */</span><span class="WHIT">
 <span class='linenumber'> 37</span> </span><span class="NAME">uu.effect.fade</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">elm</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">param</span><span class="WHIT"> </span><span class="COMM">/* = { speed: "mid", fn: undefined, begin: current-opacity, end: undefined } */</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
 <span class='linenumber'> 38</span> </span><span class="WHIT">  </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">cssText</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">elm.style.cssText</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">curt</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">pa</span><span class="PUNC">;</span><span class="WHIT">
@@ -58,13 +58,13 @@
 <span class='linenumber'> 51</span>  * beginとendを省略すると、完全に透明な状態から完全に不透明な状態にアニメーションします。&lt;br />
 <span class='linenumber'> 52</span>  * 要素が非表示になっている場合は、まず可視状態にしてからアニメーションを行います。
 <span class='linenumber'> 53</span>  *
-<span class='linenumber'> 54</span>  * @param element         elm           - 要素を指定します。
-<span class='linenumber'> 55</span>  * @param hash            [param]       - パラメタの指定です。
-<span class='linenumber'> 56</span>  * @param number/string   [param.speed] - 描画完了までの時間を、ms単位の数値か、
+<span class='linenumber'> 54</span>  * @param Element         elm           - 要素を指定します。
+<span class='linenumber'> 55</span>  * @param Hash            [param]       - パラメタの指定です。
+<span class='linenumber'> 56</span>  * @param Number/String   [param.speed] - 描画完了までの時間を、ms単位の数値か、
 <span class='linenumber'> 57</span>  *                                        文字列("now", "quick", "fast", "mid", "slow")で指定します。デフォルトは"mid"です。
-<span class='linenumber'> 58</span>  * @param function        [param.fn]    - エフェクト完了でコールバックするメソッドを指定します。省略可能です。
-<span class='linenumber'> 59</span>  * @param number          [param.begin] - 初期不透明度を指定します。デフォルトは現在の不透明度です。
-<span class='linenumber'> 60</span>  * @param number          [param.end]   - 目標とする不透明度を指定します。デフォルトは1.0(完全な不透明)です。
+<span class='linenumber'> 58</span>  * @param Function        [param.fn]    - エフェクト完了でコールバックするメソッドを指定します。省略可能です。
+<span class='linenumber'> 59</span>  * @param Number          [param.begin] - 初期不透明度を指定します。デフォルトは現在の不透明度です。
+<span class='linenumber'> 60</span>  * @param Number          [param.end]   - 目標とする不透明度を指定します。デフォルトは1.0(完全な不透明)です。
 <span class='linenumber'> 61</span>  */</span><span class="WHIT">
 <span class='linenumber'> 62</span> </span><span class="NAME">uu.effect.fadein</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">elm</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">param</span><span class="WHIT"> </span><span class="COMM">/* = { speed: "mid", fn: undefined, begin: current-opacity, end: 1.0 } */</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
 <span class='linenumber'> 63</span> </span><span class="WHIT">  </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">cssText</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">elm.style.cssText</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">curt</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">pa</span><span class="PUNC">;</span><span class="WHIT">
@@ -95,13 +95,13 @@
 <span class='linenumber'> 88</span>  * beginとendを省略すると、完全に不透明な状態から完全に透明な状態にアニメーションします。&lt;br />
 <span class='linenumber'> 89</span>  * 要素が非表示になっている場合は、まず可視状態にしてからアニメーションを行います。
 <span class='linenumber'> 90</span>  *
-<span class='linenumber'> 91</span>  * @param element         elm           - 要素を指定します。
-<span class='linenumber'> 92</span>  * @param hash            [param]       - パラメタの指定です。
-<span class='linenumber'> 93</span>  * @param number/string   [param.speed] - 描画完了までの時間を、ms単位の数値か、
+<span class='linenumber'> 91</span>  * @param Element         elm           - 要素を指定します。
+<span class='linenumber'> 92</span>  * @param Hash            [param]       - パラメタの指定です。
+<span class='linenumber'> 93</span>  * @param Number/String   [param.speed] - 描画完了までの時間を、ms単位の数値か、
 <span class='linenumber'> 94</span>  *                                        文字列("now", "quick", "fast", "mid", "slow")で指定します。デフォルトは"mid"です。
-<span class='linenumber'> 95</span>  * @param function        [param.fn]    - エフェクト完了でコールバックするメソッドを指定します。省略可能です。
-<span class='linenumber'> 96</span>  * @param number          [param.begin] - 初期不透明度を指定します。デフォルトは現在の不透明度です。
-<span class='linenumber'> 97</span>  * @param number          [param.end]   - 目標とする不透明度を指定します。デフォルトは0.0(完全な透明)です。
+<span class='linenumber'> 95</span>  * @param Function        [param.fn]    - エフェクト完了でコールバックするメソッドを指定します。省略可能です。
+<span class='linenumber'> 96</span>  * @param Number          [param.begin] - 初期不透明度を指定します。デフォルトは現在の不透明度です。
+<span class='linenumber'> 97</span>  * @param Number          [param.end]   - 目標とする不透明度を指定します。デフォルトは0.0(完全な透明)です。
 <span class='linenumber'> 98</span>  */</span><span class="WHIT">
 <span class='linenumber'> 99</span> </span><span class="NAME">uu.effect.fadeout</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">elm</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">param</span><span class="WHIT"> </span><span class="COMM">/* = { speed: "mid", fn: undefined, begin: current-opacity, end: 0.0 } */</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
 <span class='linenumber'>100</span> </span><span class="WHIT">  </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">cssText</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">elm.style.cssText</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">curt</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">pa</span><span class="PUNC">;</span><span class="WHIT">
@@ -131,14 +131,14 @@
 <span class='linenumber'>124</span>  * 要素を移動します。&lt;br />
 <span class='linenumber'>125</span>  * x,y,relを省略すると、画面の中央に移動します。
 <span class='linenumber'>126</span>  *
-<span class='linenumber'>127</span>  * @param element         elm             - 要素を指定します。
-<span class='linenumber'>128</span>  * @param hash            [param]         - パラメタの指定です。
-<span class='linenumber'>129</span>  * @param number/string   [param.speed]   - 描画完了までの時間を、ms単位の数値か、
+<span class='linenumber'>127</span>  * @param Element         elm             - 要素を指定します。
+<span class='linenumber'>128</span>  * @param Hash            [param]         - パラメタの指定です。
+<span class='linenumber'>129</span>  * @param Number/String   [param.speed]   - 描画完了までの時間を、ms単位の数値か、
 <span class='linenumber'>130</span>  *                                          文字列("now", "quick", "fast", "mid", "slow")で指定します。デフォルトは"mid"です。
-<span class='linenumber'>131</span>  * @param function        [param.fn]      - エフェクト完了でコールバックするメソッドを指定します。省略可能です。
-<span class='linenumber'>132</span>  * @param number          [param.x]       - left: 目標位置を絶対座標(px単位)で指定します。省略すると現在のx座標から動きません。
-<span class='linenumber'>133</span>  * @param number          [param.y]       - top: 目標位置を絶対座標(px単位)で指定します。省略すると現在のy座標から動きません。
-<span class='linenumber'>134</span>  * @param number          [param.rel]     - x,yを相対座標として評価する場合にtrueを指定します。デフォルトはfalse(絶対座標指定)です。
+<span class='linenumber'>131</span>  * @param Function        [param.fn]      - エフェクト完了でコールバックするメソッドを指定します。省略可能です。
+<span class='linenumber'>132</span>  * @param Number          [param.x]       - left: 目標位置を絶対座標(px単位)で指定します。省略すると現在のx座標から動きません。
+<span class='linenumber'>133</span>  * @param Number          [param.y]       - top: 目標位置を絶対座標(px単位)で指定します。省略すると現在のy座標から動きません。
+<span class='linenumber'>134</span>  * @param Number          [param.rel]     - x,yを相対座標として評価する場合にtrueを指定します。デフォルトはfalse(絶対座標指定)です。
 <span class='linenumber'>135</span>  *                                          rel=true,x=100,y=100とすると、現在を基準とした+100px,+100pxの位置に要素が移動します。
 <span class='linenumber'>136</span>  */</span><span class="WHIT">
 <span class='linenumber'>137</span> </span><span class="NAME">uu.effect.move</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">elm</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">param</span><span class="WHIT"> </span><span class="COMM">/* = { speed: "mid", fn: undefined, x: current-left, y: current-top, rel: false } */</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
@@ -196,14 +196,14 @@
 <span class='linenumber'>189</span>  *  6---5---4
 <span class='linenumber'>190</span>  * &lt;/pre>
 <span class='linenumber'>191</span>  *
-<span class='linenumber'>192</span>  * @param element         elm             - 要素を指定します。
-<span class='linenumber'>193</span>  * @param hash            [param]         - パラメタの指定です。
-<span class='linenumber'>194</span>  * @param number/string   [param.speed]   - 描画完了までの時間を、ms単位の数値か、
+<span class='linenumber'>192</span>  * @param Element         elm             - 要素を指定します。
+<span class='linenumber'>193</span>  * @param Hash            [param]         - パラメタの指定です。
+<span class='linenumber'>194</span>  * @param Number/String   [param.speed]   - 描画完了までの時間を、ms単位の数値か、
 <span class='linenumber'>195</span>  *                                          文字列("now", "quick", "fast", "mid", "slow")で指定します。デフォルトは"mid"です。
-<span class='linenumber'>196</span>  * @param function        [param.fn]      - エフェクト完了でコールバックするメソッドを指定します。省略可能です。
-<span class='linenumber'>197</span>  * @param number          [param.anchor]  - アンカーを0～8の数値( 0[中心], 1[北]～8[北西] )で指定します。デフォルトは0です。
-<span class='linenumber'>198</span>  * @param number          [param.w]       - width: 幅の目標値をpx単位で指定します。省略すると現在の幅を使用します。
-<span class='linenumber'>199</span>  * @param number          [param.h]       - height: 高さの目標値をpx単位で指定します。省略すると現在の高さを使用します。
+<span class='linenumber'>196</span>  * @param Function        [param.fn]      - エフェクト完了でコールバックするメソッドを指定します。省略可能です。
+<span class='linenumber'>197</span>  * @param Number          [param.anchor]  - アンカーを0～8の数値( 0[中心], 1[北]～8[北西] )で指定します。デフォルトは0です。
+<span class='linenumber'>198</span>  * @param Number          [param.w]       - width: 幅の目標値をpx単位で指定します。省略すると現在の幅を使用します。
+<span class='linenumber'>199</span>  * @param Number          [param.h]       - height: 高さの目標値をpx単位で指定します。省略すると現在の高さを使用します。
 <span class='linenumber'>200</span>  */</span><span class="WHIT">
 <span class='linenumber'>201</span> </span><span class="NAME">uu.effect.scale</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">elm</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">param</span><span class="WHIT"> </span><span class="COMM">/* = { speed: "mid", fn: undefined, anchor: 0, w: current-width, h: current-height } */</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
 <span class='linenumber'>202</span> </span><span class="WHIT">  </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">cssText</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">elm.style.cssText</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">curt</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">pa</span><span class="PUNC">;</span><span class="WHIT">
@@ -257,11 +257,11 @@
 <span class='linenumber'>250</span>  *
 <span class='linenumber'>251</span>  * 要素のサイズを拡大しながら透明度を高くします。fadeout + scaleのコンビネーションです。&lt;br />
 <span class='linenumber'>252</span>  *
-<span class='linenumber'>253</span>  * @param element         elm             - 要素を指定します。
-<span class='linenumber'>254</span>  * @param hash            [param]         - パラメタの指定です。
-<span class='linenumber'>255</span>  * @param number/string   [param.speed]   - 描画完了までの時間を、ms単位の数値か、
+<span class='linenumber'>253</span>  * @param Element         elm             - 要素を指定します。
+<span class='linenumber'>254</span>  * @param Hash            [param]         - パラメタの指定です。
+<span class='linenumber'>255</span>  * @param Number/String   [param.speed]   - 描画完了までの時間を、ms単位の数値か、
 <span class='linenumber'>256</span>  *                                          文字列("now", "quick", "fast", "mid", "slow")で指定します。デフォルトは"mid"です。
-<span class='linenumber'>257</span>  * @param function        [param.fn]      - エフェクト完了でコールバックするメソッドを指定します。省略可能です。
+<span class='linenumber'>257</span>  * @param Function        [param.fn]      - エフェクト完了でコールバックするメソッドを指定します。省略可能です。
 <span class='linenumber'>258</span>  */</span><span class="WHIT">
 <span class='linenumber'>259</span> </span><span class="NAME">uu.effect.puff</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">elm</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">param</span><span class="WHIT"> </span><span class="COMM">/* = { speed: "mid", fn: undefined } */</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
 <span class='linenumber'>260</span> </span><span class="WHIT">  </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">cssText</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">elm.style.cssText</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">pa</span><span class="PUNC">;</span><span class="WHIT">
@@ -282,11 +282,11 @@
 <span class='linenumber'>275</span>  *
 <span class='linenumber'>276</span>  * 要素を落下させながら透明度を高くします。fadeout + moveのコンビネーションです。&lt;br /</span><span class="PUNC">></span><span class="WHIT">
 <span class='linenumber'>277</span> </span><span class="WHIT"> </span><span class="PUNC">*</span><span class="WHIT">
-<span class='linenumber'>278</span> </span><span class="WHIT"> </span><span class="PUNC">*</span><span class="WHIT"> </span><span class="TOKN">@</span><span class="NAME">param</span><span class="WHIT"> </span><span class="NAME">element</span><span class="WHIT">         </span><span class="NAME">elm</span><span class="WHIT">             </span><span class="PUNC">-</span><span class="WHIT"> </span><span class="TOKN">要</span><span class="TOKN">素</span><span class="TOKN">を</span><span class="TOKN">指</span><span class="TOKN">定</span><span class="TOKN">し</span><span class="TOKN">ま</span><span class="TOKN">す</span><span class="TOKN">。</span><span class="WHIT">
-<span class='linenumber'>279</span> </span><span class="WHIT"> </span><span class="PUNC">*</span><span class="WHIT"> </span><span class="TOKN">@</span><span class="NAME">param</span><span class="WHIT"> </span><span class="NAME">hash</span><span class="WHIT">            </span><span class="PUNC">[</span><span class="NAME">param</span><span class="PUNC">]</span><span class="WHIT">         </span><span class="PUNC">-</span><span class="WHIT"> </span><span class="TOKN">パ</span><span class="TOKN">ラ</span><span class="TOKN">メ</span><span class="TOKN">タ</span><span class="TOKN">の</span><span class="TOKN">指</span><span class="TOKN">定</span><span class="TOKN">で</span><span class="TOKN">す</span><span class="TOKN">。</span><span class="WHIT">
-<span class='linenumber'>280</span> </span><span class="WHIT"> </span><span class="PUNC">*</span><span class="WHIT"> </span><span class="TOKN">@</span><span class="NAME">param</span><span class="WHIT"> </span><span class="NAME">number</span><span class="PUNC">/</span><span class="NAME">string</span><span class="WHIT">   </span><span class="PUNC">[</span><span class="NAME">param.speed</span><span class="PUNC">]</span><span class="WHIT">   </span><span class="PUNC">-</span><span class="WHIT"> </span><span class="TOKN">描</span><span class="TOKN">画</span><span class="TOKN">完</span><span class="TOKN">了</span><span class="TOKN">ま</span><span class="TOKN">で</span><span class="TOKN">の</span><span class="TOKN">時</span><span class="TOKN">間</span><span class="TOKN">を</span><span class="TOKN">、</span><span class="NAME">ms</span><span class="TOKN">単</span><span class="TOKN">位</span><span class="TOKN">の</span><span class="TOKN">数</span><span class="TOKN">値</span><span class="TOKN">か</span><span class="TOKN">、</span><span class="WHIT">
+<span class='linenumber'>278</span> </span><span class="WHIT"> </span><span class="PUNC">*</span><span class="WHIT"> </span><span class="TOKN">@</span><span class="NAME">param</span><span class="WHIT"> </span><span class="NAME">Element</span><span class="WHIT">         </span><span class="NAME">elm</span><span class="WHIT">             </span><span class="PUNC">-</span><span class="WHIT"> </span><span class="TOKN">要</span><span class="TOKN">素</span><span class="TOKN">を</span><span class="TOKN">指</span><span class="TOKN">定</span><span class="TOKN">し</span><span class="TOKN">ま</span><span class="TOKN">す</span><span class="TOKN">。</span><span class="WHIT">
+<span class='linenumber'>279</span> </span><span class="WHIT"> </span><span class="PUNC">*</span><span class="WHIT"> </span><span class="TOKN">@</span><span class="NAME">param</span><span class="WHIT"> </span><span class="NAME">Hash</span><span class="WHIT">            </span><span class="PUNC">[</span><span class="NAME">param</span><span class="PUNC">]</span><span class="WHIT">         </span><span class="PUNC">-</span><span class="WHIT"> </span><span class="TOKN">パ</span><span class="TOKN">ラ</span><span class="TOKN">メ</span><span class="TOKN">タ</span><span class="TOKN">の</span><span class="TOKN">指</span><span class="TOKN">定</span><span class="TOKN">で</span><span class="TOKN">す</span><span class="TOKN">。</span><span class="WHIT">
+<span class='linenumber'>280</span> </span><span class="WHIT"> </span><span class="PUNC">*</span><span class="WHIT"> </span><span class="TOKN">@</span><span class="NAME">param</span><span class="WHIT"> </span><span class="NAME">Number</span><span class="PUNC">/</span><span class="NAME">String</span><span class="WHIT">   </span><span class="PUNC">[</span><span class="NAME">param.speed</span><span class="PUNC">]</span><span class="WHIT">   </span><span class="PUNC">-</span><span class="WHIT"> </span><span class="TOKN">描</span><span class="TOKN">画</span><span class="TOKN">完</span><span class="TOKN">了</span><span class="TOKN">ま</span><span class="TOKN">で</span><span class="TOKN">の</span><span class="TOKN">時</span><span class="TOKN">間</span><span class="TOKN">を</span><span class="TOKN">、</span><span class="NAME">ms</span><span class="TOKN">単</span><span class="TOKN">位</span><span class="TOKN">の</span><span class="TOKN">数</span><span class="TOKN">値</span><span class="TOKN">か</span><span class="TOKN">、</span><span class="WHIT">
 <span class='linenumber'>281</span> </span><span class="WHIT"> </span><span class="PUNC">*</span><span class="WHIT">                                          </span><span class="TOKN">文</span><span class="TOKN">字</span><span class="TOKN">列</span><span class="PUNC">(</span><span class="STRN">"now"</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="STRN">"quick"</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="STRN">"fast"</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="STRN">"mid"</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="STRN">"slow"</span><span class="PUNC">)</span><span class="TOKN">で</span><span class="TOKN">指</span><span class="TOKN">定</span><span class="TOKN">し</span><span class="TOKN">ま</span><span class="TOKN">す</span><span class="TOKN">。</span><span class="TOKN">デ</span><span class="TOKN">フ</span><span class="TOKN">ォ</span><span class="TOKN">ル</span><span class="TOKN">ト</span><span class="TOKN">は</span><span class="STRN">"mid"</span><span class="TOKN">で</span><span class="TOKN">す</span><span class="TOKN">。</span><span class="WHIT">
-<span class='linenumber'>282</span> </span><span class="WHIT"> </span><span class="PUNC">*</span><span class="WHIT"> </span><span class="TOKN">@</span><span class="NAME">param</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="WHIT">        </span><span class="PUNC">[</span><span class="NAME">param.fn</span><span class="PUNC">]</span><span class="WHIT">      </span><span class="PUNC">-</span><span class="WHIT"> </span><span class="TOKN">エ</span><span class="TOKN">フ</span><span class="TOKN">ェ</span><span class="TOKN">ク</span><span class="TOKN">ト</span><span class="TOKN">完</span><span class="TOKN">了</span><span class="TOKN">で</span><span class="TOKN">コ</span><span class="TOKN">ー</span><span class="TOKN">ル</span><span class="TOKN">バ</span><span class="TOKN">ッ</span><span class="TOKN">ク</span><span class="TOKN">す</span><span class="TOKN">る</span><span class="TOKN">メ</span><span class="TOKN">ソ</span><span class="TOKN">ッ</span><span class="TOKN">ド</span><span class="TOKN">を</span><span class="TOKN">指</span><span class="TOKN">定</span><span class="TOKN">し</span><span class="TOKN">ま</span><span class="TOKN">す</span><span class="TOKN">。</span><span class="TOKN">省</span><span class="TOKN">略</span><span class="TOKN">可</span><span class="TOKN">能</span><span class="TOKN">で</span><span class="TOKN">す</span><span class="TOKN">。</span><span class="WHIT">
+<span class='linenumber'>282</span> </span><span class="WHIT"> </span><span class="PUNC">*</span><span class="WHIT"> </span><span class="TOKN">@</span><span class="NAME">param</span><span class="WHIT"> </span><span class="NAME">Function</span><span class="WHIT">        </span><span class="PUNC">[</span><span class="NAME">param.fn</span><span class="PUNC">]</span><span class="WHIT">      </span><span class="PUNC">-</span><span class="WHIT"> </span><span class="TOKN">エ</span><span class="TOKN">フ</span><span class="TOKN">ェ</span><span class="TOKN">ク</span><span class="TOKN">ト</span><span class="TOKN">完</span><span class="TOKN">了</span><span class="TOKN">で</span><span class="TOKN">コ</span><span class="TOKN">ー</span><span class="TOKN">ル</span><span class="TOKN">バ</span><span class="TOKN">ッ</span><span class="TOKN">ク</span><span class="TOKN">す</span><span class="TOKN">る</span><span class="TOKN">メ</span><span class="TOKN">ソ</span><span class="TOKN">ッ</span><span class="TOKN">ド</span><span class="TOKN">を</span><span class="TOKN">指</span><span class="TOKN">定</span><span class="TOKN">し</span><span class="TOKN">ま</span><span class="TOKN">す</span><span class="TOKN">。</span><span class="TOKN">省</span><span class="TOKN">略</span><span class="TOKN">可</span><span class="TOKN">能</span><span class="TOKN">で</span><span class="TOKN">す</span><span class="TOKN">。</span><span class="WHIT">
 <span class='linenumber'>283</span> </span><span class="WHIT"> </span><span class="PUNC">*</span><span class="REGX">/
 <span class='linenumber'>284</span> uu.effect.dropOut = function(elm, param /</span><span class="PUNC">*</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT"> </span><span class="NAME">speed</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="STRN">"mid"</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">fn</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">undefined</span><span class="WHIT"> </span><span class="PUNC">}</span><span class="WHIT"> </span><span class="PUNC">*</span><span class="REGX">/) {
 <span class='linenumber'>285</span>   var cssText = elm.style.cssText, pa;
@@ -307,11 +307,11 @@
 <span class='linenumber'>300</span>  *
 <span class='linenumber'>301</span>  * 左上を基準に高さを縮め、20pxで幅を縮め、最後は0x0にします。scaleのコンビネーションです。&lt;br />
 <span class='linenumber'>302</span>  *
-<span class='linenumber'>303</span>  * @param element         elm             - 要素を指定します。
-<span class='linenumber'>304</span>  * @param hash            [param]         - パラメタの指定です。
-<span class='linenumber'>305</span>  * @param number/string   [param.speed]   - 描画完了までの時間を、ms単位の数値か、
+<span class='linenumber'>303</span>  * @param Element         elm             - 要素を指定します。
+<span class='linenumber'>304</span>  * @param Hash            [param]         - パラメタの指定です。
+<span class='linenumber'>305</span>  * @param Number/String   [param.speed]   - 描画完了までの時間を、ms単位の数値か、
 <span class='linenumber'>306</span>  *                                          文字列("now", "quick", "fast", "mid", "slow")で指定します。デフォルトは"mid"です。
-<span class='linenumber'>307</span>  * @param function        [param.fn]      - エフェクト完了でコールバックするメソッドを指定します。省略可能です。
+<span class='linenumber'>307</span>  * @param Function        [param.fn]      - エフェクト完了でコールバックするメソッドを指定します。省略可能です。
 <span class='linenumber'>308</span>  */</span><span class="WHIT">
 <span class='linenumber'>309</span> </span><span class="NAME">uu.effect.fold</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">elm</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">param</span><span class="WHIT"> </span><span class="COMM">/* = { speed: "mid", fn: undefined } */</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
 <span class='linenumber'>310</span> </span><span class="WHIT">  </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">cssText</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">elm.style.cssText</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">pa</span><span class="PUNC">;</span><span class="WHIT">
@@ -336,11 +336,11 @@
 <span class='linenumber'>329</span>  *
 <span class='linenumber'>330</span>  * 左右に揺らぎます。moveのコンビネーションです。&lt;br />
 <span class='linenumber'>331</span>  *
-<span class='linenumber'>332</span>  * @param element         elm             - 要素を指定します。
-<span class='linenumber'>333</span>  * @param hash            [param]         - パラメタの指定です。
-<span class='linenumber'>334</span>  * @param number/string   [param.speed]   - 描画完了までの時間を、ms単位の数値か、
+<span class='linenumber'>332</span>  * @param Element         elm             - 要素を指定します。
+<span class='linenumber'>333</span>  * @param Hash            [param]         - パラメタの指定です。
+<span class='linenumber'>334</span>  * @param Number/String   [param.speed]   - 描画完了までの時間を、ms単位の数値か、
 <span class='linenumber'>335</span>  *                                          文字列("now", "quick", "fast", "mid", "slow")で指定します。デフォルトは"mid"です。
-<span class='linenumber'>336</span>  * @param function        [param.fn]      - エフェクト完了でコールバックするメソッドを指定します。省略可能です。
+<span class='linenumber'>336</span>  * @param Function        [param.fn]      - エフェクト完了でコールバックするメソッドを指定します。省略可能です。
 <span class='linenumber'>337</span>  */</span><span class="WHIT">
 <span class='linenumber'>338</span> </span><span class="NAME">uu.effect.shake</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">elm</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">param</span><span class="WHIT"> </span><span class="COMM">/* = { speed: "mid", fn: undefined } */</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
 <span class='linenumber'>339</span> </span><span class="WHIT">  </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">cssText</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">elm.style.cssText</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">pa</span><span class="PUNC">;</span><span class="WHIT">
@@ -365,11 +365,11 @@
 <span class='linenumber'>358</span>  *
 <span class='linenumber'>359</span>  * 要素の中央に向かって縮小します、最後は0x0にします。scaleのエリアスです。&lt;br />
 <span class='linenumber'>360</span>  *
-<span class='linenumber'>361</span>  * @param element         elm             - 要素を指定します。
-<span class='linenumber'>362</span>  * @param hash            [param]         - パラメタの指定です。
-<span class='linenumber'>363</span>  * @param number/string   [param.speed]   - 描画完了までの時間を、ms単位の数値か、
+<span class='linenumber'>361</span>  * @param Element         elm             - 要素を指定します。
+<span class='linenumber'>362</span>  * @param Hash            [param]         - パラメタの指定です。
+<span class='linenumber'>363</span>  * @param Number/String   [param.speed]   - 描画完了までの時間を、ms単位の数値か、
 <span class='linenumber'>364</span>  *                                          文字列("now", "quick", "fast", "mid", "slow")で指定します。デフォルトは"mid"です。
-<span class='linenumber'>365</span>  * @param function        [param.fn]      - エフェクト完了でコールバックするメソッドを指定します。省略可能です。
+<span class='linenumber'>365</span>  * @param Function        [param.fn]      - エフェクト完了でコールバックするメソッドを指定します。省略可能です。
 <span class='linenumber'>366</span>  */</span><span class="WHIT">
 <span class='linenumber'>367</span> </span><span class="NAME">uu.effect.shrink</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">elm</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">param</span><span class="WHIT"> </span><span class="COMM">/* = { speed: "mid", fn: undefined } */</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
 <span class='linenumber'>368</span> </span><span class="WHIT">  </span><span class="NAME">uu.effect.scale</span><span class="PUNC">(</span><span class="NAME">elm</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT"> </span><span class="NAME">speed</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">param.speed</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">fn</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">param.fn</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">anchor</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NUMB">0</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">w</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NUMB">0</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">h</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NUMB">0</span><span class="WHIT"> </span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
@@ -379,11 +379,11 @@
 <span class='linenumber'>372</span>  *
 <span class='linenumber'>373</span>  * 要素の中央から登場します。scaleのエリアスです。&lt;br />
 <span class='linenumber'>374</span>  *
-<span class='linenumber'>375</span>  * @param element         elm             - 要素を指定します。
-<span class='linenumber'>376</span>  * @param hash            [param]         - パラメタの指定です。
-<span class='linenumber'>377</span>  * @param number/string   [param.speed]   - 描画完了までの時間を、ms単位の数値か、
+<span class='linenumber'>375</span>  * @param Element         elm             - 要素を指定します。
+<span class='linenumber'>376</span>  * @param Hash            [param]         - パラメタの指定です。
+<span class='linenumber'>377</span>  * @param Number/String   [param.speed]   - 描画完了までの時間を、ms単位の数値か、
 <span class='linenumber'>378</span>  *                                          文字列("now", "quick", "fast", "mid", "slow")で指定します。デフォルトは"mid"です。
-<span class='linenumber'>379</span>  * @param function        [param.fn]      - エフェクト完了でコールバックするメソッドを指定します。省略可能です。
+<span class='linenumber'>379</span>  * @param Function        [param.fn]      - エフェクト完了でコールバックするメソッドを指定します。省略可能です。
 <span class='linenumber'>380</span>  */</span><span class="WHIT">
 <span class='linenumber'>381</span> </span><span class="NAME">uu.effect.glow</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">elm</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">param</span><span class="WHIT"> </span><span class="COMM">/* = { speed: "mid", fn: undefined } */</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
 <span class='linenumber'>382</span> </span><span class="WHIT">  </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">cssText</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">elm.style.cssText</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">pa</span><span class="PUNC">;</span><span class="WHIT">
@@ -411,11 +411,11 @@
 <span class='linenumber'>404</span>  * エフェクトが完了すると、要素を見えない状態(display: "hide", visibility: "hidden")にしてから、
 <span class='linenumber'>405</span>  * 元のサイズに戻します。
 <span class='linenumber'>406</span>  *
-<span class='linenumber'>407</span>  * @param element         elm             - 要素を指定します。
-<span class='linenumber'>408</span>  * @param hash            [param]         - パラメタの指定です。
-<span class='linenumber'>409</span>  * @param number/string   [param.speed]   - 描画完了までの時間を、ms単位の数値か、
+<span class='linenumber'>407</span>  * @param Element         elm             - 要素を指定します。
+<span class='linenumber'>408</span>  * @param Hash            [param]         - パラメタの指定です。
+<span class='linenumber'>409</span>  * @param Number/String   [param.speed]   - 描画完了までの時間を、ms単位の数値か、
 <span class='linenumber'>410</span>  *                                          文字列("now", "quick", "fast", "mid", "slow")で指定します。デフォルトは"mid"です。
-<span class='linenumber'>411</span>  * @param function        [param.fn]      - エフェクト完了でコールバックするメソッドを指定します。省略可能です。
+<span class='linenumber'>411</span>  * @param Function        [param.fn]      - エフェクト完了でコールバックするメソッドを指定します。省略可能です。
 <span class='linenumber'>412</span>  */</span><span class="WHIT">
 <span class='linenumber'>413</span> </span><span class="NAME">uu.effect.blindUp</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">elm</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">param</span><span class="WHIT"> </span><span class="COMM">/* = { speed: "mid", fn: undefined } */</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
 <span class='linenumber'>414</span> </span><span class="WHIT">  </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">cssText</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">elm.style.cssText</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">pa</span><span class="PUNC">;</span><span class="WHIT">
@@ -438,11 +438,11 @@
 <span class='linenumber'>431</span>  *
 <span class='linenumber'>432</span>  * 上辺を固定し高さを増やします。scaleのコンビネーションです。&lt;br />
 <span class='linenumber'>433</span>  *
-<span class='linenumber'>434</span>  * @param element         elm             - 要素を指定します。
-<span class='linenumber'>435</span>  * @param hash            [param]         - パラメタの指定です。
-<span class='linenumber'>436</span>  * @param number/string   [param.speed]   - 描画完了までの時間を、ms単位の数値か、
+<span class='linenumber'>434</span>  * @param Element         elm             - 要素を指定します。
+<span class='linenumber'>435</span>  * @param Hash            [param]         - パラメタの指定です。
+<span class='linenumber'>436</span>  * @param Number/String   [param.speed]   - 描画完了までの時間を、ms単位の数値か、
 <span class='linenumber'>437</span>  *                                          文字列("now", "quick", "fast", "mid", "slow")で指定します。デフォルトは"mid"です。
-<span class='linenumber'>438</span>  * @param function        [param.fn]      - エフェクト完了でコールバックするメソッドを指定します。省略可能です。
+<span class='linenumber'>438</span>  * @param Function        [param.fn]      - エフェクト完了でコールバックするメソッドを指定します。省略可能です。
 <span class='linenumber'>439</span>  */</span><span class="WHIT">
 <span class='linenumber'>440</span> </span><span class="NAME">uu.effect.blindDown</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">elm</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">param</span><span class="WHIT"> </span><span class="COMM">/* = { speed: "mid", fn: undefined } */</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
 <span class='linenumber'>441</span> </span><span class="WHIT">  </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">cssText</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">elm.style.cssText</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">pa</span><span class="PUNC">;</span><span class="WHIT">
@@ -466,11 +466,11 @@
 <span class='linenumber'>459</span>  *
 <span class='linenumber'>460</span>  * 不透明度を上下させ点滅しているように見せます。fadeのコンビネーションです。&lt;br />
 <span class='linenumber'>461</span>  *
-<span class='linenumber'>462</span>  * @param element         elm             - 要素を指定します。
-<span class='linenumber'>463</span>  * @param hash            [param]         - パラメタの指定です。
-<span class='linenumber'>464</span>  * @param number/string   [param.speed]   - 描画完了までの時間を、ms単位の数値か、
+<span class='linenumber'>462</span>  * @param Element         elm             - 要素を指定します。
+<span class='linenumber'>463</span>  * @param Hash            [param]         - パラメタの指定です。
+<span class='linenumber'>464</span>  * @param Number/String   [param.speed]   - 描画完了までの時間を、ms単位の数値か、
 <span class='linenumber'>465</span>  *                                          文字列("now", "quick", "fast", "mid", "slow")で指定します。デフォルトは"mid"です。
-<span class='linenumber'>466</span>  * @param function        [param.fn]      - エフェクト完了でコールバックするメソッドを指定します。省略可能です。
+<span class='linenumber'>466</span>  * @param Function        [param.fn]      - エフェクト完了でコールバックするメソッドを指定します。省略可能です。
 <span class='linenumber'>467</span>  */</span><span class="WHIT">
 <span class='linenumber'>468</span> </span><span class="NAME">uu.effect.pulsate</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">elm</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">param</span><span class="WHIT"> </span><span class="COMM">/* = { speed: "mid", fn: undefined } */</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
 <span class='linenumber'>469</span> </span><span class="WHIT">  </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">cssText</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">elm.style.cssText</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">pa</span><span class="PUNC">;</span><span class="WHIT">
@@ -513,9 +513,9 @@
 <span class='linenumber'>506</span>  * 各ステップで、fn(step番号)を呼び出します。&lt;br />
 <span class='linenumber'>507</span>  * before,effect,afterの各ステップでfalseを返すとendに移行します。&lt;br />
 <span class='linenumber'>508</span>  *
-<span class='linenumber'>509</span>  * @param element         elm     - 要素を指定します。
-<span class='linenumber'>510</span>  * @param number          speed   - 速度の指定です。単位はmsです。
-<span class='linenumber'>511</span>  * @param function        fn      - コールバック関数を指定します。
+<span class='linenumber'>509</span>  * @param Element         elm     - 要素を指定します。
+<span class='linenumber'>510</span>  * @param Number          speed   - 速度の指定です。単位はmsです。
+<span class='linenumber'>511</span>  * @param Function        fn      - コールバック関数を指定します。
 <span class='linenumber'>512</span>  */</span><span class="WHIT">
 <span class='linenumber'>513</span> </span><span class="NAME">uu.effect._frame</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">elm</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">delay</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">fn</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
 <span class='linenumber'>514</span> </span><span class="WHIT">  </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">run</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NUMB">0</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">vtid</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NUMB">0</span><span class="PUNC">;</span><span class="WHIT">

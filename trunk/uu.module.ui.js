@@ -14,7 +14,7 @@ uu.module.ui = {};
 uu.ui = function() {
 };
 
-/** <b>ブラウザの表示領域に関する情報を取得</b>
+/** <b>ブラウザの表示領域に関する情報を取得 - Get information of view area of the browser</b>
  *
  *  <dl>
  *    <dt>iw</dt><dd>ブラウザの表示領域の幅 - innerWidth or clientWidth</dd>
@@ -22,7 +22,7 @@ uu.ui = function() {
  *    <dt>sw</dt><dd>ブラウザの表示領域の横スクロール量 - pageXOffset or scrollLeft</dd>
  *    <dt>sh</dt><dd>ブラウザの表示領域の縦スクロール量 - pageYOffset or scrollTop</dd>
  *  </dl>
- * @return hash { iw, ih, sw, sh } を返します。<br />
+ * @return Hash { iw, ih, sw, sh } を返します。<br />
  */
 uu.ui.inner = function() {
   return { iw: uuw.innerWidth, ih: uuw.innerHeight,
@@ -36,7 +36,7 @@ if (uu.ua.ie) { // for IE
                sw: e.scrollLeft, sh: e.scrollTop };
     };
   } else {
-    uu.ui.inner.scroll = function() {
+    uu.ui.inner = function() {
       var e = uud.body;
       return { iw: e.clientWidth, ih: e.clientHeight,
                sw: e.scrollLeft, sh: e.scrollTop };
@@ -44,7 +44,7 @@ if (uu.ua.ie) { // for IE
   }
 }
 
-/** <b>要素に関する情報を取得</b>
+/** <b>要素に関する情報を取得 - Get information of element</b>
  *
 <pre>
 elm.offsetLeft (= elm.style.left + elm.style.marginLeftWidth)
@@ -97,7 +97,7 @@ Firefox3から、clientLeft, clientTopが利用可能
  *    <dt>ch</dt><dd>要素の高さ(オフセット高さ, 上下のボーダーを含まない) - clientHeight</dd>
  *  </dl>
  *
- * @param element elm - 要素を指定します。
+ * @param Element elm - 要素を指定します。
  * @return rect       - { x, y, w, h, cw, ch } を返します。
  * @namespace
  */
@@ -143,7 +143,7 @@ if ("getBoundingClientRect" in uud) { // for IE, +Firefox3.0, +Opera9.5β2
  *    <dt>cw</dt><dd>要素の幅(オフセット幅, 左右のボーダーを含まない) - clientWidth</dd>
  *    <dt>ch</dt><dd>要素の高さ(オフセット高さ, 上下のボーダーを含まない) - clientHeight</dd>
  *  </dl>
- * @param element elm - 要素を指定します。
+ * @param Element elm - 要素を指定します。
  * @return rect       - { x, y, w, h, cw, ch } を返します。<br />
  */
 uu.ui.element.offsetParent = function(elm) {
@@ -162,7 +162,7 @@ uu.ui.element.offsetParent = function(elm) {
            cw: elm.clientWidth, ch: elm.clientHeight };
 };
 
-/** <b>絶対座標化</b>
+/** <b>絶対座標化 - Absolute positioning</b>
  *
  * 要素の現在位置を保持したまま絶対座標化します。
  *
@@ -178,7 +178,7 @@ uu.ui.element.toAbsolute = function(elm, style /* = undefined */) {
   return elm;
 };
 
-/** <b>静的座標化</b>
+/** <b>静的座標化 - Static positioning</b>
  *
  * @param   element   elm     - 要素を指定します。
  * @param   hash      [style] - 追加するスタイルを { 名前: 値, ... }の形式で指定します。
@@ -216,7 +216,7 @@ uu.ui.inRect = function(rect, pos) {
 /** @namespace */
 uu.event.key = function() {
 };
-/** <b>キーの状態を取得</b>
+/** <b>キーの状態を取得 - Get key state</b>
  *
  *  <dl>
  *    <dt>shift</dt><dd>shiftキー押下でtrue</dd>
@@ -225,7 +225,7 @@ uu.event.key = function() {
  *    <dt>key</dt><dd>押下したキーコード</dd>
  *  </dl>
  *
- * @return hash - { shift, ctrl, alt, key } を返します。<br />
+ * @return Hash - { shift, ctrl, alt, key } を返します。<br />
  */
 uu.event.key.state = function(evt) {
   return { shift: evt.shiftKey, ctrl: evt.ctrlKey, alt: evt.altKey,
@@ -235,14 +235,14 @@ uu.event.key.state = function(evt) {
 /** @namespace */
 uu.event.mouse = function() {
 };
-/** <b>マウスの座標情報を取得</b>
+/** <b>マウス座標を取得 - Get mouse position</b>
  *
  *  <dl>
  *    <dt>x</dt><dd>画面左上からのオフセット幅(スクロール量を含む)</dd>
  *    <dt>y</dt><dd>画面左上からのオフセット幅(スクロール量を含む)</dd>
  *  </dl>
  *
- * @return hash - { x, y } を返します。
+ * @return Hash - { x, y } を返します。
  * @see <a href="#posEx">uu.event.mouse.posEx()</a> - マウスの拡張座標情報を取得
  */
 uu.event.mouse.pos = function(evt) { // Firefox2, Safari3, Opera9
@@ -255,7 +255,7 @@ if (uu.ua.ie) { // IE
   };
 }
 
-/** <b>マウスの拡張座標情報を取得</b>
+/** <b>マウスの拡張座標情報を取得 - Get mouse position++</b>
  *
  *  <dl>
  *    <dt>x</dt><dd>画面左上からのオフセット幅(スクロール量を含む)</dd>
@@ -266,7 +266,7 @@ if (uu.ua.ie) { // IE
  *    <dt>oy</dt><dd>最寄の要素の左上からの相対座標</dd>
  *  </dl>
  *
- * @return hash - { x, y, cx, cy, ox, oy } を返します。
+ * @return Hash - { x, y, cx, cy, ox, oy } を返します。
  * @see <a href="#pos">uu.event.mouse.pos()</a> - マウスの座標情報を取得
  */
 uu.event.mouse.posEx = function(evt) { // Firefox2, Safari3
@@ -296,7 +296,7 @@ if (uu.ua.opera) { // Opera
  * 以下の状態を含むhashを返します。<br />
  * x, y: ページ座標(絶対座標)と、マウスカーソルが乗っている要素の原点(左上)とのオフセット値
  *
- * @return hash - { x, y } を返します。
+ * @return Hash - { x, y } を返します。
  */
 uu.event.mouse.offsetElement = function(evt, elm) {
   var mpos = uu.event.mouse.pos(evt);
@@ -336,6 +336,40 @@ uu.event.mouse.state = function(evt) {
     rv.wheel = parseInt(evt.detail ? (evt.detail / 3) : (evt.wheelDelta / -120));
   }
   return rv;
+};
+
+/** <b>uu.event.mouse.hover - ホバーイベントハンドラの設定 - Set hover event hander</b>
+ *
+ * マウスオーバー,マウスアウトイベントをトリガーに動作する関数を登録します。
+ *
+ * @param Element elm         - イベントを設定する要素を指定します。
+ * @param Function mouseover  - マウスオーバー時に呼ばれる関数を指定します。
+ * @param Function mouseout   - マウスアウト時に呼ばれる関数を指定します。
+ * @see <a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#event">event</a>
+ */
+/*
+uu.event.hover = function(elm, mouseover, mouseout) {
+  uu.event.set(elm, "mouseover", mouseover);
+  uu.event.set(elm, "mouseout", mouseout);
+};
+ */
+
+/** <b>uu.event.mouse.clicks - クリックイベントハンドラの設定 - Set click event handler</b>
+ *
+ * マウスクリックをトリガーに動作する関数を登録します。<br />
+ * fnはいくつでも指定可能で、複数の関数を登録すると、turn around(toggle) 動作を行います。
+ *
+ * @param Element elm  - イベントを設定する要素を指定します。
+ * @param Function fn  - クリック時に呼ばれる関数を指定します。
+ */
+uu.event.clicks = function(elm, fn, toggles /* = 2 */) {
+  elm.uuClicks = { idx: 0, max: toggles || 2, fn: fn };
+  uu.event.set(elm, "click", uu.event.clicks._impl);
+};
+uu.event.clicks._impl = function(evt) {
+  (uu.ua.ie) ? (evt.returnValue = false) : evt.preventDefault();
+  var v = uu.event.target(evt).real.uuClicks;
+  v.fn((++v.idx >= v.max) ? (v.idx = 0) : v.idx);
 };
 
 })(); // end (function())()

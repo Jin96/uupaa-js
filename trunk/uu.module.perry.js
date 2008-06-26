@@ -57,8 +57,8 @@ uu.perry.addDict = function(hash, type /* = "kanji" */) {
 uu.perry._delayTimerID = -1;
 
 /** 発声
- * @param string text - テキストを指定します。
- * @param number [delay] - 遅延時間を指定します。単位はmsです。デフォルトは0です。
+ * @param String text - テキストを指定します。
+ * @param Number [delay] - 遅延時間を指定します。単位はmsです。デフォルトは0です。
  */
 uu.perry.say = function(text, delay) {
   if (uu.perry._delayTimerID !== -1) {

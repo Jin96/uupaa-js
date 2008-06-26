@@ -1,0 +1,36 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>uu.css - test</title>
+<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="../../lib/javascript-xpath.js"></script><![endif]-->
+<script type="text/javascript" src="../../uupaa.js"></script>
+  <style>
+  body { font-size: 10px; font-family: Arial; } 
+  h1, h2 { margin: 3px 0; }
+  </style>
+</head>
+<body>
+<a href="../../README.htm">README</a> &gt; 
+<a href="../../SELECTOR.htm#pseudo-selector">SELECTOR</a><br />
+<a href="./selector.htm">uu.css.pseudo</a> | <a href="./css.htm">uu.css</a> | <a href="./form.htm">uu.css(form)</a>
+<hr />
+<p>jQueryとの動作の違いを確認するため、テスト用のスクリプトは<a href="http://docs.jquery.com/Selectors/header">jQueryのAPI Reference</a>を参考にしています。</p>
+  <h1>Header 1</h1>
+  <p>Contents 1</p>
+  <h2>Header 2</h2>
+  <p>Contents 2</p>
+<script>uu.window.ready(function() {
+  uu.css(":header").forEach(function(v) {
+    uu.css.set(v, { background: "#CCC", color: "blue" });
+  });
+})
+</script>
+<pre>
+  uu.css(":header").forEach(function(v) {
+    uu.css.set(v, { background: "#CCC", color: "blue" });
+  });
+</pre>
+</body>
+</html>

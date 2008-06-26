@@ -4,13 +4,13 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>uupaa.js - uu.module.virtualTimer test</title>
-<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="../../lib/javascript-xpath.js"></script><![endif]-->
-<!--[if IE]><script id="excanvas.js" type="text/javascript" src="../../lib/excanvas.js"></script><![endif]-->
-<script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
+<script type="text/javascript" src="../../uupaa.js"></script>
+<script type="text/javascript" src="../../uu.module.ui.js"></script>
 <style type="text/css">
 body {
   background-color: black; color: white;
 }
+a, b { color: lightblue }
 .cube {
   position: absolute; top: 0; left: 0;
   width: 50px; height: 50px;
@@ -21,70 +21,71 @@ body {
 </style>
 </head>
 <body>
-<a href="../../README.htm">README.htm</a> &gt; uu.module.virtualTimer.htm<br />
+<a href="../../README.htm#demo">README.htm</a> &gt; uu.module.virtualTimer.htm<br />
+<div id="cage"></div>
 
-
+<h3>uu.module.virtualTimer - 仮想タイマー</h3>
 <dl>
-  <dt>仮想タイマー - デモ</dt>
-  <dd><input type="button" value="カウントアップ開始/停止" onclick="countup()" />|
-      <input type="button" value="virtualTimer()" onclick="virtualTimer(counter1)" />|
-      <input type="button" value="window.setInterval()" onclick="window_setInterval(counter1)" />|
-      <input type="button" value="window.setTimeout()" onclick="window_setTimeout(counter1)" /><br />
-      <p>
-      uu.module.virtualTimer:  <span id="result2">1</span><br />
-      setInterval:  <span id="result3">1</span><br />
-      setTimeout:  <span id="result4">1</span><br />
-      </p>
-      <p>画面上に1～1000個のオブジェクトを登場させ、それぞれを個別のタイマーで動かすデモです。<br />
-      カウンターの値がオブジェクト数になります(スペックが低いPCではあまり表示させないほうが身のためです)。
+  <dt>精度</dt>
+  <dd><p>仮想タイマーはsetIntervalと同じ精度です。setTimeoutは高負荷時に精度が落ちます。</p>
+      <input type="button" value="カウントアップ開始/停止" onclick="countup()" />
+      virtualTimer:  <span id="result2">1</span>, 
+      setInterval:  <span id="result3">1</span>, 
+      setTimeout:  <span id="result4">1</span>
+  </dd>
+  <dt>大量のオブジェクトを操作</dt>
+  <dd><p>画面上に100 又は 400個のオブジェクトを登場させ、タイマーで動かします。<br />
+         setIntervalとsetTimeoutは、100個または400個のタイマーオブジェクトを必要としますが、
+         virtualTimerは全てを1個のタイマーで動かします。</p>
+      virtualTimer: <input type="button" value="100" onclick="virtualTimer(100)" /> |
+      <input type="button" value="400" onclick="virtualTimer(400)" />, 
+      setInterval: <input type="button" value="100" onclick="window_setInterval(100)" /> |
+      <input type="button" value="400" onclick="window_setInterval(400)" />, 
+      setTimeout: <input type="button" value="100" onclick="window_setTimeout(100)" /> |
+      <input type="button" value="400" onclick="window_setTimeout(400)" />
       </p>
   </dd>
-  <dt>低負荷</dt>
-  <dd><p>setIntervalやsetTimeoutで多数のタイマーを同時に使用するとかなり低速になる場合がありますが、<br />
-      uu.module.virtualTimerはCPU負荷も低く遅延も少なめです。</p></dd>
-  <dt>高機能</dt>
-  <dd><p>インターバルを自由に変化させることが可能です。<br />
-      以下の例では、一定時間(0ms, 100ms, 200ms, 300ms)で"Hello"を追加し、10ms毎にドット(".")を追加表示します。</p>
+  <dt>高機能, 低負荷, 高速</dt>
+  <dd><p>setIntervalやsetTimeoutで多数のタイマーを同時に使用すると、かなり低速になる場合がありますが、
+      virtualTimerはCPU負荷も低く遅延も少なめです。</p>
+      <p>virtualTimerは、インターバル間隔を自由に変化させることが可能です。
+      以下は、一定時間(0ms, 100ms, 200ms, 300ms)で"Hello"を追加し、10ms毎にドット(".")を追加する例です。</p>
       <p id="result1"></p>
       以下の機能もあります。<br />
-      uu.module.virtualTimer.suspend() - 一時停止, 一括停止<br />
-      uu.module.virtualTimer.resume() - 再開, 再起動<br />
-      uu.module.virtualTimer.set.loop() - ループ回数の変更<br />
-      uu.module.virtualTimer.diet() - ガベージコレクション(タイマーを止めずにメモリをお掃除)
+      virtualTimer.suspend() - 一時停止, 一括停止<br />
+      virtualTimer.resume() - 再開, 再起動<br />
+      virtualTimer.set.loop() - ループ回数の変更<br />
+      virtualTimer.diet() - ガベージコレクション(タイマーを止めずにメモリをお掃除)
   </dd>
 </dl>
 
 <script type="text/javascript">
+var vtm10 = new uu.module.virtualTimer(10); // 仮想タイマー生成
+var inn = { iw: 800, ih: 600 }; // ブラウザの表示領域
+var cubes = [];
 
-var sw, sh; // ウインドウの内側のサイズ
 function boot() {
   var fn1 = function() { uu.id("result1").innerText += "Hello"; };
   var delay = function(n) { return n * 100; }; // create delay value
   uu.tm10.set(fn1, delay, 4);
 
   var fn2 = function() { uu.id("result1").innerText += "."; };
-  uu.tm10.set(fn2, 10, 100); // 100回ドットを打ったら停止
+  uu.tm10.set(fn2, 10, 100); // 10msごとに、200回ドットを打ったら停止
 
-  sw = window.innerWidth, sh = window.innerHeight;
-  if (uu.ua.ie) {
-    if (uu.ua.std) {
-      sw = document.documentElement.clientWidth, sh = document.documentElement.clientHeight;
-    } else {
-      sw = document.body.clientWidth, sh = document.body.clientHeight;
-    }
-  }
+  inn = uu.ui.inner();
 }
 
 var countStart = false, vtid = 0, itid = 0, toid = 0;
-var counter1 = 1, counter2 = 1, counter3 = 1;
+var counter = [1, 1, 1];
+
 function countup() {
   if (!countStart) {
-    counter1 = counter2 = counter3 = 1;
+    counter = [1, 1, 1];
     countStart = true;
-    var fn3 = function() { uu.id("result2").innerText = counter1++; };
-    var fn4 = function() { uu.id("result3").innerText = counter2++; };
-    var fn5 = function() { uu.id("result4").innerText = counter3++; toid = setTimeout(arguments.callee, 10); };
-    vtid = uu.tm10.set(fn3, 10, 1000); // 1000回カウントアップで停止
+    var fn3 = function() { uu.id("result2").innerText = counter[0]++; };
+    var fn4 = function() { uu.id("result3").innerText = counter[1]++; };
+    var fn5 = function() { uu.id("result4").innerText = counter[2]++; toid = setTimeout(arguments.callee, 10); };
+    vtid = uu.tm10.set(fn3, 10, 1000); // 1000カウントで停止
     itid = setInterval(fn4, 10);
     toid = setTimeout(fn5, 10);
   } else {
@@ -95,9 +96,54 @@ function countup() {
   }
 }
 
-// 既存のcubeを削除
-function deleteCube() {
-  uu.forEach(uu.klass("cube"), function(v) {
+function virtualTimer(size) {
+  var i = 0, p = uu.id("cage");
+  deleteCube(cubes);
+
+  for (; i < size; ++i) { cubes.push(createCube(p)); }
+  cubes.forEach(function(v) {
+    v.vtid = vtm10.set(function() { move(v); }, 10);
+  });
+}
+function window_setInterval(size) {
+  var i = 0, p = uu.id("cage");
+  deleteCube(cubes);
+
+  for (; i < size; ++i) { cubes.push(createCube(p)); }
+  cubes.forEach(function(v) {
+    v.itid = setInterval(function() { move(v); }, 10);
+  });
+}
+function window_setTimeout(size) {
+  var i = 0, p = uu.id("cage");
+  deleteCube(cubes);
+
+  for (; i < size; ++i) { cubes.push(createCube(p)); }
+  cubes.forEach(function(v) {
+    v.toid = setTimeout(function() {
+      move(v);
+      v.toid = setTimeout(arguments.callee, 10);
+    }, 10);
+  });
+}
+function createCube(parent) {
+  var e = parent.appendChild(document.createElement("div"));
+  uu.klass.add(e, "cube");
+  e.dx = Math.round(Math.random() * 100) / 10;
+  e.dy = Math.round(Math.random() * 100) / 10;
+//uu.css.set(e, { backgroundColor: (Math.round(Math.random() * 165813750) / 10).toRGBString(),
+  uu.css.set(e, { backgroundColor: toRGBString(Math.round(Math.random() * 165813750) / 10),
+                  top: 0, left: 0 });
+  return e;
+}
+function toRGBString(num) {
+  var v = num.valueOf(), rv = [(v >> 16) & 0xff, (v >> 8) & 0xff, v & 0xff];
+  return "rgb(" + rv.join(",") + ")";
+}
+
+function deleteCube(cubes) {
+  uu.id("cage").innerHTML = "";
+  cubes.forEach(function(v) {
     if ("vtid" in v) {
       vtm10.suspend(v.vtid);
     } else if ("itid" in v) {
@@ -105,67 +151,16 @@ function deleteCube() {
     } else if ("toid" in v) {
       clearTimeout(v.toid);
     }
-    document.body.removeChild(v);
   });
   vtm10.diet();
-}
-
-var vtm10 = new uu.module.virtualTimer(10); // instantiate
-function virtualTimer(size) {
-  deleteCube();
-
-  var i = 0, cube = [];
-  for (; i < size; ++i) {
-    cube.push(createCube());
-  }
-  cube.forEach(function(v) {
-    v.vtid = vtm10.set(function() { move(v); }, 10);
-  });
-}
-function window_setInterval(size) {
-  deleteCube();
-
-  var i = 0, cube = [];
-  for (; i < size; ++i) {
-    cube.push(createCube());
-  }
-  cube.forEach(function(v) {
-    v.itid = setInterval(function() { move(v); }, 10);
-  });
-}
-function window_setTimeout(size) {
-  deleteCube();
-
-  var i = 0, cube = [];
-  for (; i < size; ++i) {
-    cube.push(createCube());
-  }
-  cube.forEach(function(v) {
-    v.toid = setTimeout(function() {
-      move(v);
-      v.toid = setTimeout(arguments.callee, 10);
-    }, 10);
-  });
 }
 
 function move(elm) {
   var tx = parseFloat(elm.style.left) + elm.dx;
   var ty = parseFloat(elm.style.top)  + elm.dy;
-  if (tx < 0 || tx + 60 > sw) { elm.dx = -elm.dx; }
-  if (ty < 0 || ty + 60 > sh) { elm.dy = -elm.dy; }
-  elm.style.left = tx + "px";
-  elm.style.top  = ty + "px";
-}
-function createCube() {
-  var rv = document.body.appendChild(document.createElement("div"));
-  rv.id = uu.uniqueID("cube");
-  rv.className = "cube";
-  rv.dx = Math.round(Math.random() * 100) / 10;
-  rv.dy = Math.round(Math.random() * 100) / 10;
-  rv.style.backgroundColor = (Math.round(Math.random() * 165813750) / 10).toRGBString();
-  rv.style.top = "0px";
-  rv.style.left = "0px";
-  return rv;
+  if (tx < 0 || tx + 70 > inn.iw) { elm.dx = -elm.dx; } // 70 = 50px + 20px
+  if (ty < 0 || ty + 70 > inn.ih) { elm.dy = -elm.dy; } // 70 = 50px + 20px
+  uu.css.set(elm, { left: tx, top: ty });
 }
 
 uu.window.ready(function() {

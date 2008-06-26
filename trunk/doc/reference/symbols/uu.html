@@ -156,7 +156,21 @@ ul.inheritsList {
 <!-- ============================== header ================================= -->	
 		<!-- begin static/header.html -->
 		<div id="header">
-<a href="http://uupaa-js.googlecode.com/svn/trunk/README.htm">README.htm</a> &gt; Reference
+<a href="http://uupaa-js.googlecode.com/svn/trunk/README.htm">README</a> &gt; API Reference
+<p>
+   | <a href="http://code.google.com/p/uupaa-js/">Project Home(Google Code)</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/README.htm#demo">DEMO</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/CHANGELOG.htm">ChangeLog</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/LICENSE.htm">License</a> |<br />
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm">Document</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/SELECTOR.htm">Selector</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/MODULE.htm">Module</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/GLOSSARY.htm">Glossary</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/doc/reference/index.html">API Reference</a>
+   |
+</p>
+
+<hr />
 </div>
 
 		<!-- end static/header.html -->
@@ -174,10 +188,6 @@ ul.inheritsList {
 	
 	<li><a href="../symbols/Array.html">Array</a></li>
 	
-	<li><a href="../symbols/Date.html">Date</a></li>
-	
-	<li><a href="../symbols/Number.html">Number</a></li>
-	
 	<li><a href="../symbols/uu.html">uu</a></li>
 	
 	<li><a href="../symbols/uu.ajax.html">uu.ajax</a></li>
@@ -192,10 +202,6 @@ ul.inheritsList {
 	
 	<li><a href="../symbols/uu.css.html">uu.css</a></li>
 	
-	<li><a href="../symbols/uu.css.get.html">uu.css.get</a></li>
-	
-	<li><a href="../symbols/uu.css.set.html">uu.css.set</a></li>
-	
 	<li><a href="../symbols/uu.dom.html">uu.dom</a></li>
 	
 	<li><a href="../symbols/uu.effect.html">uu.effect</a></li>
@@ -206,13 +212,7 @@ ul.inheritsList {
 	
 	<li><a href="../symbols/uu.event.mouse.html">uu.event.mouse</a></li>
 	
-	<li><a href="../symbols/uu.forEach.html">uu.forEach</a></li>
-	
-	<li><a href="../symbols/uu.id.html">uu.id</a></li>
-	
 	<li><a href="../symbols/uu.image.html">uu.image</a></li>
-	
-	<li><a href="../symbols/uu.js.html">uu.js</a></li>
 	
 	<li><a href="../symbols/uu.json.html">uu.json</a></li>
 	
@@ -234,6 +234,8 @@ ul.inheritsList {
 	
 	<li><a href="../symbols/uu.module.messagePump.html">uu.module.messagePump</a></li>
 	
+	<li><a href="../symbols/uu.module.perf.html">uu.module.perf</a></li>
+	
 	<li><a href="../symbols/uu.module.pmvc.html">uu.module.pmvc</a></li>
 	
 	<li><a href="../symbols/uu.module.pmvc.applicationModel.html">uu.module.pmvc.applicationModel</a></li>
@@ -250,6 +252,8 @@ ul.inheritsList {
 	
 	<li><a href="../symbols/uu.perry.html">uu.perry</a></li>
 	
+	<li><a href="../symbols/uu.request.html">uu.request</a></li>
+	
 	<li><a href="../symbols/uu.tag.html">uu.tag</a></li>
 	
 	<li><a href="../symbols/uu.ua.html">uu.ua</a></li>
@@ -259,8 +263,6 @@ ul.inheritsList {
 	<li><a href="../symbols/uu.ui.element.html">uu.ui.element</a></li>
 	
 	<li><a href="../symbols/uu.url.html">uu.url</a></li>
-	
-	<li><a href="../symbols/uu.url.query.html">uu.url.query</a></li>
 	
 	<li><a href="../symbols/uu.window.html">uu.window</a></li>
 	
@@ -306,7 +308,7 @@ ul.inheritsList {
 							<div class="fixedFont">
 								<b><a href="../symbols/uu.html#constructor">uu</a></b>()
 							</div>
-							<div class="description"><b>uupaa.js core definition</b></div>
+							<div class="description">uupaa.js core definition</div>
 						</td>
 					</tr>
 				</tbody>
@@ -314,34 +316,6 @@ ul.inheritsList {
 			
 
 <!-- ============================== properties summary ===================== -->
-			
-				
-				
-				<table class="summaryTable" cellspacing="0" summary="A summary of the fields documented in the class uu.">
-					<caption>Field Summary</caption>
-					<thead>
-						<tr>
-							<th scope="col">Field Attributes</th>
-							<th scope="col">Field Name and Description</th>
-						</tr>
-					</thead>
-					<tbody>
-					
-						<tr>
-							<td class="attributes">&lt;static&gt; &nbsp;</td>
-							<td class="nameDescription">
-								<div class="fixedFont">
-								uu.<b><a href="../symbols/uu.html#.msgpump">msgpump</a></b>
-								</div>
-								<div class="description">メッセージポンプのインスタンス(uu.module.messagePump instance)</div>
-							</td>
-						</tr>
-					
-					</tbody>
-				</table>
-				
-				
-				
 			
 
 <!-- ============================== methods summary ======================== -->
@@ -361,72 +335,90 @@ ul.inheritsList {
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">uu.<b><a href="../symbols/uu.html#.abstractClass">abstractClass</a></b>(_)
+								<div class="fixedFont">uu.<b><a href="../symbols/uu.html#.delay">delay</a></b>(fn, delay)
 								</div>
-								<div class="description"><b>uu.abstractClass - 委譲用のクラスの雛形を生成</b>委譲用クラスの雛形を生成するクロージャを返します。<br />このメソッドは、コンストラクタとデストラクタを自動で呼び出しません。<br />委譲元で処理する必要があります。</div>
+								<div class="description">uu.delay - 遅延評価 - Lazy evaluation</div>
 							</td>
 						</tr>
 					
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">uu.<b><a href="../symbols/uu.html#.assert">assert</a></b>()
+								<div class="fixedFont">uu.<b><a href="../symbols/uu.html#.die">die</a></b>(type, p1, p2)
 								</div>
-								<div class="description"><b>uu.assert - C言語スタイルのアサーション(C style assert)</b></div>
+								<div class="description">Critical error handler</div>
 							</td>
 						</tr>
 					
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">uu.<b><a href="../symbols/uu.html#.baseURL">baseURL</a></b>()
+								<div class="fixedFont">uu.<b><a href="../symbols/uu.html#.diet">diet</a></b>(mix)
 								</div>
-								<div class="description"><b>uu.baseURL - ベースURLの取得</b>ベースURL(uupaa.jsを読み込んだHTMLのパス)を返します。<br />結果はキャッシュされ、次回以降はキャッシュを返します。</div>
+								<div class="description">uu.diet - Hash/Arrayのコンパクト化 - Hash/Array memory compaction</div>
 							</td>
 						</tr>
 					
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">uu.<b><a href="../symbols/uu.html#.basicClass">basicClass</a></b>(_)
+								<div class="fixedFont">uu.<b><a href="../symbols/uu.html#.echo">echo</a></b>(arg)
 								</div>
-								<div class="description"><b>uu.basicClass - クラスの雛形を生成</b>クラスの雛形を生成するクロージャを返します。<br />newされたタイミングで、コンストラクタを自動で呼び出し、uu.window.unready()にデストラクタを登録します。</div>
+								<div class="description"></div>
 							</td>
 						</tr>
 					
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">uu.<b><a href="../symbols/uu.html#.delay">delay</a></b>(function, number)
+								<div class="fixedFont">uu.<b><a href="../symbols/uu.html#.filter">filter</a></b>(mix, fn, me)
 								</div>
-								<div class="description"><b>uu.delay - 遅延評価</b></div>
+								<div class="description">uu.filter - 全要素を評価し、結果が真の要素を配列で返す - Object iteration</div>
 							</td>
 						</tr>
 					
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">uu.<b><a href="../symbols/uu.html#.diet">diet</a></b>(hash/array)
+								<div class="fixedFont">uu.<b><a href="../symbols/uu.html#.first">first</a></b>(mix, missHit)
 								</div>
-								<div class="description"><b>uu.diet - コンパクト化(Memory compaction)</b>mixが配列なら、数字indexを持つ要素のうち、値がnull/undefinedの要素や、hash要素を除いた新しい配列を返します。<br />mixがhashなら、数字/hash indexを持つ要素のうち、値がnull/undefinedの要素を除いた新しいhashを返します。<br /><pre class="eg">var array = [null, undefined, 3], hash = { a: null, b: undefined, c: 50 };array["hash_index"] = "hash";hash[0] = "hash";uu.diet(array); // [3]uu.diet(hash); // { c: 50, 0: "hash" }</pre></div>
+								<div class="description">uu.first - Hash/配列/擬似配列の先頭の要素の値を取得 - First Element of the Hash/Array/FakeArray</div>
 							</td>
 						</tr>
 					
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">uu.<b><a href="../symbols/uu.html#.echo">echo</a></b>(dummy)
+								<div class="fixedFont">uu.<b><a href="../symbols/uu.html#.forEach">forEach</a></b>(mix, fn, me)
 								</div>
-								<div class="description"><b>uu.mute - ダミー関数</b>何もしないダミー関数です。第一引数をそのまま返します。</div>
+								<div class="description">uu.forEach - 全要素を評価 - for each</div>
 							</td>
 						</tr>
 					
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">uu.<b><a href="../symbols/uu.html#.indexes">indexes</a></b>(hash/array)
+								<div class="fixedFont">uu.<b><a href="../symbols/uu.html#.id">id</a></b>(id, noCache)
 								</div>
-								<div class="description"><b>uu.indexes - array/hashのindexを列挙し配列を返す</b>mixがarrayなら、indexを列挙し配列を返します。hash要素(文字列のindexを持つ要素)は除外します。<br />mixがhashなら、数値/文字両方のindexを列挙し配列を返します。<br />要素数(length)の取得にも利用できます。<pre class="eg">var array = [74, 50, 50], hash = { a: 74, b: 50, c: 50 };array["hash_index"] = "hash";hash[0] = "hash";delete array[0];uu.indexes(array); // [undefined, 1, 2]uu.indexes(hash); // ["a", "b", "c", 0]</pre></div>
+								<div class="description">IDセレクタ - ID Selector</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">uu.<b><a href="../symbols/uu.html#.indexes">indexes</a></b>(mix)
+								</div>
+								<div class="description">uu.indexes - Hash/配列/擬似配列のindexを列挙し配列を返す - Enumerate the index of the Hash/Array/FakeArray and return an Array</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">uu.<b><a href="../symbols/uu.html#.inspect">inspect</a></b>(mix)
+								</div>
+								<div class="description">uu.inspect - オブジェクトを人間用に加工し出力する - Humanize output, Object Reflection</div>
 							</td>
 						</tr>
 					
@@ -435,7 +427,7 @@ ul.inheritsList {
 							<td class="nameDescription">
 								<div class="fixedFont">uu.<b><a href="../symbols/uu.html#.isA">isA</a></b>(mix)
 								</div>
-								<div class="description"><b>uu.isA - 配列ならtrue(is Array)</b></div>
+								<div class="description"></div>
 							</td>
 						</tr>
 					
@@ -444,7 +436,7 @@ ul.inheritsList {
 							<td class="nameDescription">
 								<div class="fixedFont">uu.<b><a href="../symbols/uu.html#.isB">isB</a></b>(mix)
 								</div>
-								<div class="description"><b>uu.isB - 真偽値ならtrue(is Boolean)</b></div>
+								<div class="description"></div>
 							</td>
 						</tr>
 					
@@ -453,7 +445,7 @@ ul.inheritsList {
 							<td class="nameDescription">
 								<div class="fixedFont">uu.<b><a href="../symbols/uu.html#.isF">isF</a></b>(mix)
 								</div>
-								<div class="description"><b>uu.isF - 関数ならtrue(is Function)</b></div>
+								<div class="description"></div>
 							</td>
 						</tr>
 					
@@ -462,7 +454,7 @@ ul.inheritsList {
 							<td class="nameDescription">
 								<div class="fixedFont">uu.<b><a href="../symbols/uu.html#.isN">isN</a></b>(mix)
 								</div>
-								<div class="description"><b>uu.isN - 数値ならtrue(is Number)</b></div>
+								<div class="description"></div>
 							</td>
 						</tr>
 					
@@ -471,7 +463,7 @@ ul.inheritsList {
 							<td class="nameDescription">
 								<div class="fixedFont">uu.<b><a href="../symbols/uu.html#.isS">isS</a></b>(mix)
 								</div>
-								<div class="description"><b>uu.isS - 文字列ならtrue(is String)</b></div>
+								<div class="description"></div>
 							</td>
 						</tr>
 					
@@ -480,16 +472,16 @@ ul.inheritsList {
 							<td class="nameDescription">
 								<div class="fixedFont">uu.<b><a href="../symbols/uu.html#.isU">isU</a></b>(mix)
 								</div>
-								<div class="description"><b>uu.isU - undefinedならtrue(is Undefined)</b></div>
+								<div class="description"></div>
 							</td>
 						</tr>
 					
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">uu.<b><a href="../symbols/uu.html#.ltrim">ltrim</a></b>(string, regexp/undefined)
+								<div class="fixedFont">uu.<b><a href="../symbols/uu.html#.log">log</a></b>(mix)
 								</div>
-								<div class="description"><b>uu.ltrim - 左側の空白文字を除去</b>文字列の左側から空白文字をトリム(除去)し、新しい文字列を返します。<pre class="eg">uu.ltrim(" hoge "); // "hoge "</pre></div>
+								<div class="description">uu.log - ログ出力 - Logging</div>
 							</td>
 						</tr>
 					
@@ -498,106 +490,97 @@ ul.inheritsList {
 							<td class="nameDescription">
 								<div class="fixedFont">uu.<b><a href="../symbols/uu.html#.mute">mute</a></b>()
 								</div>
-								<div class="description"><b>uu.mute - ダミー関数</b>何もしないダミー関数です。</div>
+								<div class="description"></div>
 							</td>
 						</tr>
 					
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">uu.<b><a href="../symbols/uu.html#.notax">notax</a></b>(taxing, hash, string, function, bool)
+								<div class="fixedFont">uu.<b><a href="../symbols/uu.html#.no">no</a></b>()
 								</div>
-								<div class="description"><b>uu.notax - 結合文字列, 文字列の配列, 文字列を受け取り、配列を返す</b>taxingをパースしfnで評価した配列を返します。<pre class="eg">var a = "a, b,C,d ";uu.notax(a,"", function(str) { return str.toLowerCase(); }); // ["a","b","c","d"]</pre></div>
+								<div class="description"></div>
 							</td>
 						</tr>
 					
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">uu.<b><a href="../symbols/uu.html#.pushArray">pushArray</a></b>(FakeArray, object)
+								<div class="fixedFont">uu.<b><a href="../symbols/uu.html#.notax">notax</a></b>(tax, param)
 								</div>
-								<div class="description"><b>uu.pushArray - 擬似配列をオブジェクトの要素に追加</b>与えられた擬似配列を、オブジェクトの要素に追加します。<br />obj.lengthを追加した要素数に更新します。<pre class="eg"> var hash = {}; uu.pushArray(uu.tag("*"), hash); // hash[0] = html, hash[1] = head, hash[2] = meta, .</div>
+								<div class="description">uu.notax - 結合文字列, 文字列の配列, 文字列を受け取り、配列を返す - No taxing</div>
 							</td>
 						</tr>
 					
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">uu.<b><a href="../symbols/uu.html#.rtrim">rtrim</a></b>(string, regexp/undefined)
+								<div class="fixedFont">uu.<b><a href="../symbols/uu.html#.pair">pair</a></b>(key, value)
 								</div>
-								<div class="description"><b>uu.rtrim - 左側の空白文字を除去</b>文字列の右側から空白文字をトリム(除去)し、新しい文字列を返します。<pre class="eg">uu.rtrim(" hoge "); // " hoge"</pre></div>
+								<div class="description">uu.pair - Hash{ key, value }を生成 - Make Hash from key and value</div>
 							</td>
 						</tr>
 					
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">uu.<b><a href="../symbols/uu.html#.singletonClass">singletonClass</a></b>(_)
+								<div class="fixedFont">uu.<b><a href="../symbols/uu.html#.size">size</a></b>(mix)
 								</div>
-								<div class="description"><b>uu.singletonClass - シングルトンクラスの雛形を生成</b>シングルトンクラス(インスタンスを一つしか生成できないクラス)の雛形を生成するクロージャを返します。<br />newされたタイミングで、コンストラクタを自動で呼び出し、uu.window.unready()にデストラクタを登録します。</div>
+								<div class="description">uu.size - Hash/配列/擬似配列の要素数を返す - Length of the Hash/Array/FakeArray</div>
 							</td>
 						</tr>
 					
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">uu.<b><a href="../symbols/uu.html#.sprintf">sprintf</a></b>(string, mix)
+								<div class="fixedFont">uu.<b><a href="../symbols/uu.html#.sprintf">sprintf</a></b>(format)
 								</div>
-								<div class="description"><b>uu.sprintf - フォーマットされた文字列を生成する(Create formatted string)</b>sprintf相当の関数です。<br />format: %[arg-index$][flag][width][.precision][size]type <br /><pre>arg-index: 引数の呼び出しと再利用, i18n対応(PHP - sprintf準拠)     数値: 数値とダラー("$")により引数を0から始まる番号で呼び出すことができます。flag: 出力方法を指定します。   以下をサポートします。     "#": typeがo,x,Xなら文字列の先頭に"0","0x","0X"を追加します。   以下は非サポートです。     "-": 左詰で出力します。(非サポート)     "+": 数値の前に符号を追加します。(非サポート)     空白: 数値が負なら"-"を、それ以外なら空白を出力します。(非サポート)width: 出力する最小文字数か数値の最低桁数を指定します。   以下をサポートします。     数値: 数値により最低限表示する桁数を指定できます。0で非表示になります。           数値や文字列の桁あわせに使用します。   以下は非サポートです。     "*": 引数で幅を指定します。(非サポート)precision: 出力する最大文字数か小数点以下の桁数を指定します。   以下をサポートします。     数値: 数値で、小数点以下の桁数や文字列の長さを指定できます。           precisionの前にはドット(".</div>
+								<div class="description">uu.sprintf</div>
 							</td>
 						</tr>
 					
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">uu.<b><a href="../symbols/uu.html#.staticClass">staticClass</a></b>(_)
+								<div class="fixedFont">uu.<b><a href="../symbols/uu.html#.toArray">toArray</a></b>(fake, idx)
 								</div>
-								<div class="description"><b>uu.staticClass - public staticなクラスの雛形を生成</b>静的クラス(常に存在し、newしなくても使用できるメソッドを持つクラス)の雛形を生成するクロージャを返します。<br /></div>
+								<div class="description">uu.toArray - 擬似配列を配列化 - Make Array from FakeArray</div>
 							</td>
 						</tr>
 					
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">uu.<b><a href="../symbols/uu.html#.toArray">toArray</a></b>(FakeArray)
+								<div class="fixedFont">uu.<b><a href="../symbols/uu.html#.toHash">toHash</a></b>(ary)
 								</div>
-								<div class="description"><b>uu.toArray - 擬似配列を配列化</b>与えられた擬似配列を配列化します。<br />擬似配列には以下のようなものがあります。<br />document.images, NodeList, arguments<pre class="eg"> var node = uu.toArray(uu.tag("*"));</pre></div>
+								<div class="description">uu.toHash - 配列をHash化 - Make Hash from Array</div>
 							</td>
 						</tr>
 					
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">uu.<b><a href="../symbols/uu.html#.toHash">toHash</a></b>(array)
+								<div class="fixedFont">uu.<b><a href="../symbols/uu.html#.trim">trim</a></b>(str)
 								</div>
-								<div class="description"><b>配列をhash化</b>配列をhash化します。<br />同じindexはひとつにまとめられ、関数オブジェクトは除外します。<pre class="eg"> var ary = [undefined, null, 1, 1, "hoge", function(){} ]; ary["hash_index"] = "lost value"; var b = uu.toHash(ary); // { undefined: undefined, null: null, 1: 1, hoge: "hoge" }</pre></div>
+								<div class="description">uu.trim - 両側から空白文字を除去 - Trim both(left and right)</div>
 							</td>
 						</tr>
 					
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">uu.<b><a href="../symbols/uu.html#.trim">trim</a></b>(string, regexp/undefined)
+								<div class="fixedFont">uu.<b><a href="../symbols/uu.html#.uniqueID">uniqueID</a></b>(prefix)
 								</div>
-								<div class="description"><b>uu.trim - 両側から空白文字を除去</b>文字列の両側から空白文字をトリム(除去)し、新しい文字列を返します。<pre class="eg">uu.trim(" hoge "); // "hoge"</pre></div>
+								<div class="description">uu.uniqueID - ユニークIDの生成 - Generate unique ID</div>
 							</td>
 						</tr>
 					
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">uu.<b><a href="../symbols/uu.html#.uniqueID">uniqueID</a></b>(string)
+								<div class="fixedFont">uu.<b><a href="../symbols/uu.html#.values">values</a></b>(mix)
 								</div>
-								<div class="description"><b>uu.uniqueID - ユニークIDの生成(generate unique id)</b></div>
-							</td>
-						</tr>
-					
-						<tr>
-							<td class="attributes">&lt;static&gt; &nbsp;</td>
-							<td class="nameDescription">
-								<div class="fixedFont">uu.<b><a href="../symbols/uu.html#.values">values</a></b>(hash/array)
-								</div>
-								<div class="description"><b>uu.values - array/hashの値を列挙し配列を返す</b>mixがarrayなら、値を列挙し配列を返します。hash要素(文字列のindexを持つ要素)は除外します。<br />mixがhashなら、数値/文字両方のindexを持つ値を列挙し配列を返します。<br />要素数(length)の取得にも利用できます。<pre class="eg">var array = [74, 50, 50], hash = { a: 74, b: 50, c: 50 };array["hash_index"] = "hash";hash[0] = "hash";delete array[0];uu.values(array); // [50, 50]uu.values(hash); // [74, 50, 50, "hash"]</pre></div>
+								<div class="description">uu.values - Hash/配列/擬似配列の値を列挙し配列を返す - Enumerate the value of the Hash/Array/FakeArray and return an Array</div>
 							</td>
 						</tr>
 					
@@ -620,7 +603,7 @@ ul.inheritsList {
 				</div>
 				
 				<div class="description">
-					<b>uupaa.js core definition</b>
+					uupaa.js core definition
 					
 				</div>
 				
@@ -640,34 +623,6 @@ ul.inheritsList {
 
 <!-- ============================== field details ========================== -->		
 			
-				<div class="sectionTitle">
-					Field Detail
-				</div>
-				
-					<a name=".msgpump"> </a>
-					<div class="fixedFont">&lt;static&gt; 
-					
-					<span class="light">{object}</span>
-					<span class="light">uu.</span><b>msgpump</b>
-					
-					</div>
-					<div class="description">
-						メッセージポンプのインスタンス(uu.module.messagePump instance)
-						
-						
-					</div>
-					
-					
-				
-					
-						
-						
-						
-						
-
-					
-				
-			
 
 <!-- ============================== method details ========================= -->		
 			
@@ -675,15 +630,15 @@ ul.inheritsList {
 					Method Detail
 				</div>
 				
-					<a name=".abstractClass"> </a>
+					<a name=".delay"> </a>
 					<div class="fixedFont">&lt;static&gt; 
 					
 					
-					<span class="light">uu.</span><b>abstractClass</b>(_)
+					<span class="light">uu.</span><b>delay</b>(fn, delay)
 					
 					</div>
 					<div class="description">
-						<b>uu.abstractClass - 委譲用のクラスの雛形を生成</b>委譲用クラスの雛形を生成するクロージャを返します。<br />このメソッドは、コンストラクタとデストラクタを自動で呼び出しません。<br />委譲元で処理する必要があります。
+						uu.delay - 遅延評価 - Lazy evaluation
 						
 						
 					</div>
@@ -696,45 +651,18 @@ ul.inheritsList {
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>_</b>
+									<b>fn</b>
+									
+								</dt>
+								<dd></dd>
+							
+								<dt>
+									<b>delay</b>
 									
 								</dt>
 								<dd></dd>
 							
 							</dl>
-						
-						
-						
-						
-						
-							<dl class="detailList">
-							<dt class="heading">Returns:</dt>
-							
-								<dd>function - クラスの雛形を生成するクロージャを返します。</dd>
-							
-							</dl>
-						
-						
-						
-
-					<hr />
-				
-					<a name=".assert"> </a>
-					<div class="fixedFont">&lt;static&gt; 
-					
-					
-					<span class="light">uu.</span><b>assert</b>()
-					
-					</div>
-					<div class="description">
-						<b>uu.assert - C言語スタイルのアサーション(C style assert)</b>
-						
-						
-					</div>
-					
-					
-					
-					
 						
 						
 						
@@ -745,55 +673,22 @@ ul.inheritsList {
 							<dl class="detailList">
 							<dt class="heading">See:</dt>
 							
-								<dd>uu.module.debug.js</dd>
+								<dd><a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.delay">uu.delay</a></dd>
 							
 							</dl>
 						
 
 					<hr />
 				
-					<a name=".baseURL"> </a>
+					<a name=".die"> </a>
 					<div class="fixedFont">&lt;static&gt; 
 					
 					
-					<span class="light">uu.</span><b>baseURL</b>()
+					<span class="light">uu.</span><b>die</b>(type, p1, p2)
 					
 					</div>
 					<div class="description">
-						<b>uu.baseURL - ベースURLの取得</b>ベースURL(uupaa.jsを読み込んだHTMLのパス)を返します。<br />結果はキャッシュされ、次回以降はキャッシュを返します。
-						
-						
-					</div>
-					
-					
-					
-					
-						
-						
-						
-						
-						
-							<dl class="detailList">
-							<dt class="heading">Returns:</dt>
-							
-								<dd>string - ベースURLを返します。</dd>
-							
-							</dl>
-						
-						
-						
-
-					<hr />
-				
-					<a name=".basicClass"> </a>
-					<div class="fixedFont">&lt;static&gt; 
-					
-					
-					<span class="light">uu.</span><b>basicClass</b>(_)
-					
-					</div>
-					<div class="description">
-						<b>uu.basicClass - クラスの雛形を生成</b>クラスの雛形を生成するクロージャを返します。<br />newされたタイミングで、コンストラクタを自動で呼び出し、uu.window.unready()にデストラクタを登録します。
+						Critical error handler
 						
 						
 					</div>
@@ -806,7 +701,19 @@ ul.inheritsList {
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>_</b>
+									<b>type</b>
+									
+								</dt>
+								<dd></dd>
+							
+								<dt>
+									<b>p1</b>
+									
+								</dt>
+								<dd></dd>
+							
+								<dt>
+									<b>p2</b>
 									
 								</dt>
 								<dd></dd>
@@ -816,63 +723,6 @@ ul.inheritsList {
 						
 						
 						
-						
-							<dl class="detailList">
-							<dt class="heading">Returns:</dt>
-							
-								<dd>function - クラスの雛形を生成するクロージャを返します。</dd>
-							
-							</dl>
-						
-						
-						
-
-					<hr />
-				
-					<a name=".delay"> </a>
-					<div class="fixedFont">&lt;static&gt; 
-					
-					
-					<span class="light">uu.</span><b>delay</b>(function, number)
-					
-					</div>
-					<div class="description">
-						<b>uu.delay - 遅延評価</b>
-						
-						
-					</div>
-					
-					
-					
-					
-						
-							<dl class="detailList">
-							<dt class="heading">Parameters:</dt>
-							
-								<dt>
-									<b>function</b>
-									
-								</dt>
-								<dd>fn      - 遅延評価する関数を指定します。</dd>
-							
-								<dt>
-									<b>number</b>
-									
-								</dt>
-								<dd>[delay] - 遅延時間をms単位で指定します。デフォルトは0です。</dd>
-							
-							</dl>
-						
-						
-						
-						
-						
-							<dl class="detailList">
-							<dt class="heading">Returns:</dt>
-							
-								<dd>number          - タイマーIDを返します。</dd>
-							
-							</dl>
 						
 						
 						
@@ -883,11 +733,11 @@ ul.inheritsList {
 					<div class="fixedFont">&lt;static&gt; 
 					
 					
-					<span class="light">uu.</span><b>diet</b>(hash/array)
+					<span class="light">uu.</span><b>diet</b>(mix)
 					
 					</div>
 					<div class="description">
-						<b>uu.diet - コンパクト化(Memory compaction)</b>mixが配列なら、数字indexを持つ要素のうち、値がnull/undefinedの要素や、hash要素を除いた新しい配列を返します。<br />mixがhashなら、数字/hash indexを持つ要素のうち、値がnull/undefinedの要素を除いた新しいhashを返します。<br /><pre class="eg">var array = [null, undefined, 3], hash = { a: null, b: undefined, c: 50 };array["hash_index"] = "hash";hash[0] = "hash";uu.diet(array); // [3]uu.diet(hash); // { c: 50, 0: "hash" }</pre>
+						uu.diet - Hash/Arrayのコンパクト化 - Hash/Array memory compaction
 						
 						
 					</div>
@@ -900,25 +750,25 @@ ul.inheritsList {
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>hash/array</b>
+									<b>mix</b>
 									
 								</dt>
-								<dd>mix - hashか配列を指定します。</dd>
+								<dd></dd>
 							
 							</dl>
+						
+						
 						
 						
 						
 						
 						
 							<dl class="detailList">
-							<dt class="heading">Returns:</dt>
+							<dt class="heading">See:</dt>
 							
-								<dd>hash/array - 有効な要素のみを持つ新しい配列かhashを返します。<br />                     有効な要素がなければ、空の配列([])かhash({})を返します。</dd>
+								<dd><a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.diet">uu.diet</a></dd>
 							
 							</dl>
-						
-						
 						
 
 					<hr />
@@ -927,11 +777,11 @@ ul.inheritsList {
 					<div class="fixedFont">&lt;static&gt; 
 					
 					
-					<span class="light">uu.</span><b>echo</b>(dummy)
+					<span class="light">uu.</span><b>echo</b>(arg)
 					
 					</div>
 					<div class="description">
-						<b>uu.mute - ダミー関数</b>何もしないダミー関数です。第一引数をそのまま返します。
+						
 						
 						
 					</div>
@@ -944,7 +794,7 @@ ul.inheritsList {
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>dummy</b>
+									<b>arg</b>
 									
 								</dt>
 								<dd></dd>
@@ -960,15 +810,15 @@ ul.inheritsList {
 
 					<hr />
 				
-					<a name=".indexes"> </a>
+					<a name=".filter"> </a>
 					<div class="fixedFont">&lt;static&gt; 
 					
 					
-					<span class="light">uu.</span><b>indexes</b>(hash/array)
+					<span class="light">uu.</span><b>filter</b>(mix, fn, me)
 					
 					</div>
 					<div class="description">
-						<b>uu.indexes - array/hashのindexを列挙し配列を返す</b>mixがarrayなら、indexを列挙し配列を返します。hash要素(文字列のindexを持つ要素)は除外します。<br />mixがhashなら、数値/文字両方のindexを列挙し配列を返します。<br />要素数(length)の取得にも利用できます。<pre class="eg">var array = [74, 50, 50], hash = { a: 74, b: 50, c: 50 };array["hash_index"] = "hash";hash[0] = "hash";delete array[0];uu.indexes(array); // [undefined, 1, 2]uu.indexes(hash); // ["a", "b", "c", 0]</pre>
+						uu.filter - 全要素を評価し、結果が真の要素を配列で返す - Object iteration
 						
 						
 					</div>
@@ -981,30 +831,279 @@ ul.inheritsList {
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>hash/array</b>
+									<b>mix</b>
 									
 								</dt>
-								<dd>mix - 検索対象の要素を指定します。</dd>
+								<dd></dd>
+							
+								<dt>
+									<b>fn</b>
+									
+								</dt>
+								<dd></dd>
+							
+								<dt>
+									<b>me</b>
+									
+								</dt>
+								<dd></dd>
 							
 							</dl>
 						
 						
 						
 						
-						
-							<dl class="detailList">
-							<dt class="heading">Returns:</dt>
-							
-								<dd>array         - hash/arrayのindexを列挙した配列を返します。                        有効な要素がなければ、空の配列([])を返します。</dd>
-							
-							</dl>
 						
 						
 						
 							<dl class="detailList">
 							<dt class="heading">See:</dt>
 							
-								<dd><a href="#values">uu.values</a> - array/hashの値を列挙</dd>
+								<dd><a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.filter">uu.filter</a></dd>
+							
+							</dl>
+						
+
+					<hr />
+				
+					<a name=".first"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">uu.</span><b>first</b>(mix, missHit)
+					
+					</div>
+					<div class="description">
+						uu.first - Hash/配列/擬似配列の先頭の要素の値を取得 - First Element of the Hash/Array/FakeArray
+						
+						
+					</div>
+					
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>mix</b>
+									
+								</dt>
+								<dd></dd>
+							
+								<dt>
+									<b>missHit</b>
+									
+								</dt>
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+								<dd><a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.first">uu.first</a></dd>
+							
+							</dl>
+						
+
+					<hr />
+				
+					<a name=".forEach"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">uu.</span><b>forEach</b>(mix, fn, me)
+					
+					</div>
+					<div class="description">
+						uu.forEach - 全要素を評価 - for each
+						
+						
+					</div>
+					
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>mix</b>
+									
+								</dt>
+								<dd></dd>
+							
+								<dt>
+									<b>fn</b>
+									
+								</dt>
+								<dd></dd>
+							
+								<dt>
+									<b>me</b>
+									
+								</dt>
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+								<dd><a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.forEach">uu.forEach</a></dd>
+							
+							</dl>
+						
+
+					<hr />
+				
+					<a name=".id"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">uu.</span><b>id</b>(id, noCache)
+					
+					</div>
+					<div class="description">
+						IDセレクタ - ID Selector
+						
+						
+					</div>
+					
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>id</b>
+									
+								</dt>
+								<dd></dd>
+							
+								<dt>
+									<b>noCache</b>
+									
+								</dt>
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+								<dd><a href="http://uupaa-js.googlecode.com/svn/trunk/SELECTOR.htm#id-selector">ID Selector</a></dd>
+							
+							</dl>
+						
+
+					<hr />
+				
+					<a name=".indexes"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">uu.</span><b>indexes</b>(mix)
+					
+					</div>
+					<div class="description">
+						uu.indexes - Hash/配列/擬似配列のindexを列挙し配列を返す - Enumerate the index of the Hash/Array/FakeArray and return an Array
+						
+						
+					</div>
+					
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>mix</b>
+									
+								</dt>
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+								<dd><a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.indexes">uu.indexes</a></dd>
+							
+							</dl>
+						
+
+					<hr />
+				
+					<a name=".inspect"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">uu.</span><b>inspect</b>(mix)
+					
+					</div>
+					<div class="description">
+						uu.inspect - オブジェクトを人間用に加工し出力する - Humanize output, Object Reflection
+						
+						
+					</div>
+					
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>mix</b>
+									
+								</dt>
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+								<dd><a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.inspect">uu.inspect</a></dd>
 							
 							</dl>
 						
@@ -1019,7 +1118,7 @@ ul.inheritsList {
 					
 					</div>
 					<div class="description">
-						<b>uu.isA - 配列ならtrue(is Array)</b>
+						
 						
 						
 					</div>
@@ -1035,20 +1134,13 @@ ul.inheritsList {
 									<b>mix</b>
 									
 								</dt>
-								<dd>mix - 検査する変数を指定します。</dd>
+								<dd></dd>
 							
 							</dl>
 						
 						
 						
 						
-						
-							<dl class="detailList">
-							<dt class="heading">Returns:</dt>
-							
-								<dd>bool - mixが配列ならtrueを返します。</dd>
-							
-							</dl>
 						
 						
 						
@@ -1063,7 +1155,7 @@ ul.inheritsList {
 					
 					</div>
 					<div class="description">
-						<b>uu.isB - 真偽値ならtrue(is Boolean)</b>
+						
 						
 						
 					</div>
@@ -1079,20 +1171,13 @@ ul.inheritsList {
 									<b>mix</b>
 									
 								</dt>
-								<dd>mix - 検査する変数を指定します。</dd>
+								<dd></dd>
 							
 							</dl>
 						
 						
 						
 						
-						
-							<dl class="detailList">
-							<dt class="heading">Returns:</dt>
-							
-								<dd>bool - mixがbooleanならtrueを返します。</dd>
-							
-							</dl>
 						
 						
 						
@@ -1107,7 +1192,7 @@ ul.inheritsList {
 					
 					</div>
 					<div class="description">
-						<b>uu.isF - 関数ならtrue(is Function)</b>
+						
 						
 						
 					</div>
@@ -1123,20 +1208,13 @@ ul.inheritsList {
 									<b>mix</b>
 									
 								</dt>
-								<dd>mix - 検査する変数を指定します。</dd>
+								<dd></dd>
 							
 							</dl>
 						
 						
 						
 						
-						
-							<dl class="detailList">
-							<dt class="heading">Returns:</dt>
-							
-								<dd>bool - mixがfunctionならtrueを返します。</dd>
-							
-							</dl>
 						
 						
 						
@@ -1151,7 +1229,7 @@ ul.inheritsList {
 					
 					</div>
 					<div class="description">
-						<b>uu.isN - 数値ならtrue(is Number)</b>
+						
 						
 						
 					</div>
@@ -1167,20 +1245,13 @@ ul.inheritsList {
 									<b>mix</b>
 									
 								</dt>
-								<dd>mix - 検査する変数を指定します。</dd>
+								<dd></dd>
 							
 							</dl>
 						
 						
 						
 						
-						
-							<dl class="detailList">
-							<dt class="heading">Returns:</dt>
-							
-								<dd>bool - mixがnumberならtrueを返します。</dd>
-							
-							</dl>
 						
 						
 						
@@ -1195,7 +1266,7 @@ ul.inheritsList {
 					
 					</div>
 					<div class="description">
-						<b>uu.isS - 文字列ならtrue(is String)</b>
+						
 						
 						
 					</div>
@@ -1211,20 +1282,13 @@ ul.inheritsList {
 									<b>mix</b>
 									
 								</dt>
-								<dd>mix - 検査する変数を指定します。</dd>
+								<dd></dd>
 							
 							</dl>
 						
 						
 						
 						
-						
-							<dl class="detailList">
-							<dt class="heading">Returns:</dt>
-							
-								<dd>bool - mixがstringならtrueを返します。</dd>
-							
-							</dl>
 						
 						
 						
@@ -1239,7 +1303,7 @@ ul.inheritsList {
 					
 					</div>
 					<div class="description">
-						<b>uu.isU - undefinedならtrue(is Undefined)</b>
+						
 						
 						
 					</div>
@@ -1255,35 +1319,28 @@ ul.inheritsList {
 									<b>mix</b>
 									
 								</dt>
-								<dd>mix - 検査する変数を指定します。</dd>
+								<dd></dd>
 							
 							</dl>
 						
 						
 						
 						
-						
-							<dl class="detailList">
-							<dt class="heading">Returns:</dt>
-							
-								<dd>bool - mixがundefinedならtrueを返します。</dd>
-							
-							</dl>
 						
 						
 						
 
 					<hr />
 				
-					<a name=".ltrim"> </a>
+					<a name=".log"> </a>
 					<div class="fixedFont">&lt;static&gt; 
 					
 					
-					<span class="light">uu.</span><b>ltrim</b>(string, regexp/undefined)
+					<span class="light">uu.</span><b>log</b>(mix)
 					
 					</div>
 					<div class="description">
-						<b>uu.ltrim - 左側の空白文字を除去</b>文字列の左側から空白文字をトリム(除去)し、新しい文字列を返します。<pre class="eg">uu.ltrim(" hoge "); // "hoge "</pre>
+						uu.log - ログ出力 - Logging
 						
 						
 					</div>
@@ -1296,38 +1353,23 @@ ul.inheritsList {
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>string</b>
+									<b>mix</b>
 									
 								</dt>
-								<dd>str - 文字列を指定します。</dd>
-							
-								<dt>
-									<b>regexp/undefined</b>
-									
-								</dt>
-								<dd>reg - 文字列の左側からトリミングする文字の集合を正規表現オブジェクトで指定します。                              省略時は、NULL("\0"),空白(" "),タブ("\t"),改行("\n"),垂直タブ("\v"),復帰("\d")をトリミングします。</dd>
+								<dd></dd>
 							
 							</dl>
 						
 						
 						
 						
-						
-							<dl class="detailList">
-							<dt class="heading">Returns:</dt>
-							
-								<dd>string - トリム後の文字列を返します。</dd>
-							
-							</dl>
 						
 						
 						
 							<dl class="detailList">
 							<dt class="heading">See:</dt>
 							
-								<dd><a href="#rtrim">uu.rtrim</a> - 右側の空白文字を除去</dd>
-							
-								<dd><a href="#trim">uu.trim</a> - 両側の空白文字を除去</dd>
+								<dd><a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.log">uu.log</a></dd>
 							
 							</dl>
 						
@@ -1342,7 +1384,33 @@ ul.inheritsList {
 					
 					</div>
 					<div class="description">
-						<b>uu.mute - ダミー関数</b>何もしないダミー関数です。
+						
+						
+						
+					</div>
+					
+					
+					
+					
+						
+						
+						
+						
+						
+						
+						
+
+					<hr />
+				
+					<a name=".no"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">uu.</span><b>no</b>()
+					
+					</div>
+					<div class="description">
+						
 						
 						
 					</div>
@@ -1364,11 +1432,11 @@ ul.inheritsList {
 					<div class="fixedFont">&lt;static&gt; 
 					
 					
-					<span class="light">uu.</span><b>notax</b>(taxing, hash, string, function, bool)
+					<span class="light">uu.</span><b>notax</b>(tax, param)
 					
 					</div>
 					<div class="description">
-						<b>uu.notax - 結合文字列, 文字列の配列, 文字列を受け取り、配列を返す</b>taxingをパースしfnで評価した配列を返します。<pre class="eg">var a = "a, b,C,d ";uu.notax(a,"", function(str) { return str.toLowerCase(); }); // ["a","b","c","d"]</pre>
+						uu.notax - 結合文字列, 文字列の配列, 文字列を受け取り、配列を返す - No taxing
 						
 						
 					</div>
@@ -1381,201 +1449,13 @@ ul.inheritsList {
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>taxing</b>
+									<b>tax</b>
 									
 								</dt>
-								<dd>tax           - セパレータで区切られた文字列,文字列の配列 または 文字列を指定します。</dd>
+								<dd></dd>
 							
 								<dt>
-									<b>hash</b>
-									
-								</dt>
-								<dd>[param]       - パラメタを指定します。</dd>
-							
-								<dt>
-									<b>string</b>
-									
-								</dt>
-								<dd>[param.sep]   - セパレータを指定します。デフォルトはカンマ(",")です。</dd>
-							
-								<dt>
-									<b>function</b>
-									
-								</dt>
-								<dd>[param.fn]    - 各要素を評価する関数を指定します。デフォルトはundefinedです。</dd>
-							
-								<dt>
-									<b>bool</b>
-									
-								</dt>
-								<dd>[param.trim]  - カンマ結合文字列の各要素の左右の空白文字をトリムする場合はtrueを指定します。デフォルトはtrueです。                                 taxが文字列や、配列で指定されている場合はトリムしません。</dd>
-							
-							</dl>
-						
-						
-						
-						
-							<dl class="detailList">
-							<dt class="heading">Throws:</dt>
-							
-								<dt>
-									 <b></b>
-								</dt>
-								<dd>TypeError  "uu.notax(tax) bad arg"  引数が文字列でも配列でもない</dd>
-							
-							</dl>
-						
-						
-							<dl class="detailList">
-							<dt class="heading">Returns:</dt>
-							
-								<dd>array      - taxが結合文字列なら、各要素に分割、左右の空白をトリム後に配列化して返します。                     taxが文字列なら、taxを唯一の要素とする配列を返します。                     taxが配列ならtaxをそのまま返します。</dd>
-							
-							</dl>
-						
-						
-						
-
-					<hr />
-				
-					<a name=".pushArray"> </a>
-					<div class="fixedFont">&lt;static&gt; 
-					
-					
-					<span class="light">uu.</span><b>pushArray</b>(FakeArray, object)
-					
-					</div>
-					<div class="description">
-						<b>uu.pushArray - 擬似配列をオブジェクトの要素に追加</b>与えられた擬似配列を、オブジェクトの要素に追加します。<br />obj.lengthを追加した要素数に更新します。<pre class="eg"> var hash = {}; uu.pushArray(uu.tag("*"), hash); // hash[0] = html, hash[1] = head, hash[2] = meta, ...</pre>
-						
-						
-					</div>
-					
-					
-					
-					
-						
-							<dl class="detailList">
-							<dt class="heading">Parameters:</dt>
-							
-								<dt>
-									<b>FakeArray</b>
-									
-								</dt>
-								<dd>fake - 擬似配列を指定します。</dd>
-							
-								<dt>
-									<b>object</b>
-									
-								</dt>
-								<dd>[obj - オブジェクトを指定します。</dd>
-							
-							</dl>
-						
-						
-						
-						
-						
-							<dl class="detailList">
-							<dt class="heading">Returns:</dt>
-							
-								<dd>object  - fake追加後のオブジェクトを返します。</dd>
-							
-							</dl>
-						
-						
-						
-							<dl class="detailList">
-							<dt class="heading">See:</dt>
-							
-								<dd><a href="../symbols/uu.html#.toArray">uu.toArray</a> - 擬似配列を配列化</dd>
-							
-							</dl>
-						
-
-					<hr />
-				
-					<a name=".rtrim"> </a>
-					<div class="fixedFont">&lt;static&gt; 
-					
-					
-					<span class="light">uu.</span><b>rtrim</b>(string, regexp/undefined)
-					
-					</div>
-					<div class="description">
-						<b>uu.rtrim - 左側の空白文字を除去</b>文字列の右側から空白文字をトリム(除去)し、新しい文字列を返します。<pre class="eg">uu.rtrim(" hoge "); // " hoge"</pre>
-						
-						
-					</div>
-					
-					
-					
-					
-						
-							<dl class="detailList">
-							<dt class="heading">Parameters:</dt>
-							
-								<dt>
-									<b>string</b>
-									
-								</dt>
-								<dd>str - 文字列を指定します。</dd>
-							
-								<dt>
-									<b>regexp/undefined</b>
-									
-								</dt>
-								<dd>reg - 文字列の右側からトリミングする文字の集合を正規表現オブジェクトで指定します。                              省略時は、NULL("\0"),空白(" "),タブ("\t"),改行("\n"),垂直タブ("\v"),復帰("\d")をトリミングします。</dd>
-							
-							</dl>
-						
-						
-						
-						
-						
-							<dl class="detailList">
-							<dt class="heading">Returns:</dt>
-							
-								<dd>string - トリム後の文字列を返します。</dd>
-							
-							</dl>
-						
-						
-						
-							<dl class="detailList">
-							<dt class="heading">See:</dt>
-							
-								<dd><a href="#ltrim">uu.ltrim</a> - 左側の空白文字を除去</dd>
-							
-								<dd><a href="#trim">uu.trim</a> - 両側の空白文字を除去</dd>
-							
-							</dl>
-						
-
-					<hr />
-				
-					<a name=".singletonClass"> </a>
-					<div class="fixedFont">&lt;static&gt; 
-					
-					
-					<span class="light">uu.</span><b>singletonClass</b>(_)
-					
-					</div>
-					<div class="description">
-						<b>uu.singletonClass - シングルトンクラスの雛形を生成</b>シングルトンクラス(インスタンスを一つしか生成できないクラス)の雛形を生成するクロージャを返します。<br />newされたタイミングで、コンストラクタを自動で呼び出し、uu.window.unready()にデストラクタを登録します。
-						
-						
-					</div>
-					
-					
-					
-					
-						
-							<dl class="detailList">
-							<dt class="heading">Parameters:</dt>
-							
-								<dt>
-									<b>_</b>
+									<b>param</b>
 									
 								</dt>
 								<dd></dd>
@@ -1586,14 +1466,108 @@ ul.inheritsList {
 						
 						
 						
+						
+						
 							<dl class="detailList">
-							<dt class="heading">Returns:</dt>
+							<dt class="heading">See:</dt>
 							
-								<dd>function - クラスの雛形を生成するクロージャを返します。</dd>
+								<dd><a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.notax">uu.notax</a></dd>
+							
+							</dl>
+						
+
+					<hr />
+				
+					<a name=".pair"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">uu.</span><b>pair</b>(key, value)
+					
+					</div>
+					<div class="description">
+						uu.pair - Hash{ key, value }を生成 - Make Hash from key and value
+						
+						
+					</div>
+					
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>key</b>
+									
+								</dt>
+								<dd></dd>
+							
+								<dt>
+									<b>value</b>
+									
+								</dt>
+								<dd></dd>
 							
 							</dl>
 						
 						
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+								<dd><a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.pair">uu.pair</a></dd>
+							
+							</dl>
+						
+
+					<hr />
+				
+					<a name=".size"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">uu.</span><b>size</b>(mix)
+					
+					</div>
+					<div class="description">
+						uu.size - Hash/配列/擬似配列の要素数を返す - Length of the Hash/Array/FakeArray
+						
+						
+					</div>
+					
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>mix</b>
+									
+								</dt>
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+								<dd><a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.size">uu.size</a></dd>
+							
+							</dl>
 						
 
 					<hr />
@@ -1602,11 +1576,11 @@ ul.inheritsList {
 					<div class="fixedFont">&lt;static&gt; 
 					
 					
-					<span class="light">uu.</span><b>sprintf</b>(string, mix)
+					<span class="light">uu.</span><b>sprintf</b>(format)
 					
 					</div>
 					<div class="description">
-						<b>uu.sprintf - フォーマットされた文字列を生成する(Create formatted string)</b>sprintf相当の関数です。<br />format: %[arg-index$][flag][width][.precision][size]type <br /><pre>arg-index: 引数の呼び出しと再利用, i18n対応(PHP - sprintf準拠)     数値: 数値とダラー("$")により引数を0から始まる番号で呼び出すことができます。flag: 出力方法を指定します。   以下をサポートします。     "#": typeがo,x,Xなら文字列の先頭に"0","0x","0X"を追加します。   以下は非サポートです。     "-": 左詰で出力します。(非サポート)     "+": 数値の前に符号を追加します。(非サポート)     空白: 数値が負なら"-"を、それ以外なら空白を出力します。(非サポート)width: 出力する最小文字数か数値の最低桁数を指定します。   以下をサポートします。     数値: 数値により最低限表示する桁数を指定できます。0で非表示になります。           数値や文字列の桁あわせに使用します。   以下は非サポートです。     "*": 引数で幅を指定します。(非サポート)precision: 出力する最大文字数か小数点以下の桁数を指定します。   以下をサポートします。     数値: 数値で、小数点以下の桁数や文字列の長さを指定できます。           precisionの前にはドット(".")が必要です。           typeがfなら小数点以下の桁数を指定します。             浮動小数点値は丸められる場合があります。0で小数点以下は非表示になります。           typeがsなら文字列の長さを指定します。             指定した長さ以上の文字は切り捨てられます。0で文字列全体が非表示になります。   以下は非サポートです。     "*": 引数で精度を指定します。(非サポート)size: デフォルト引数のサイズを指定します。   以下は非サポートです。     "l": long型に変更します。type: 変数の型を指定します。   以下をサポートします。     "d": 符号付き10進数値(signed decimal number)     "u": 符号無し10進数値(unsigned decimal number)     "o": 符号無し8進数値(unsigned octet number)     "x": 符号無し16進数値[小文字](unsigned hex number[lower case])     "X": 符号無し16進数値[大文字](unsigned hex number[upper case])     "f": 浮動小数点([-]dddd.dddd)(floating-point number)     "c": 文字の数値表現(the character with that ASCII value)     "s": 文字列(string)     "%": パーセント記号("%")そのものを出力   以下は非サポートです。"egEG"は"f"で代用してください。     "i": 符号付き8進数値(signed octet number)     "e": 浮動小数点([-]d.dddde[+/-]dddd)     "g": 浮動小数点("f","e"の結果でより短い方を出力する)     "E": 浮動小数点([-]d.ddddE[+/-]dddd)     "G": 浮動小数点("f","E"の結果でより短い方を出力する)     "n": 出力済みの文字数     "p": ポインタ</pre>
+						uu.sprintf
 						
 						
 					</div>
@@ -1619,64 +1593,7 @@ ul.inheritsList {
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>string</b>
-									
-								</dt>
-								<dd>format  - フォーマット文字列を指定します。</dd>
-							
-								<dt>
-									<b>mix</b>
-									
-								</dt>
-								<dd>args__  - sprintfに与える引数を指定します。引数は可変個です。</dd>
-							
-							</dl>
-						
-						
-						
-						
-						
-							<dl class="detailList">
-							<dt class="heading">Returns:</dt>
-							
-								<dd>string         - フォーマットした文字列を返します。</dd>
-							
-							</dl>
-						
-						
-						
-							<dl class="detailList">
-							<dt class="heading">See:</dt>
-							
-								<dd><a href="http://jp2.php.net/manual/ja/function.sprintf.php">sprintf - PHP</a></dd>
-							
-							</dl>
-						
-
-					<hr />
-				
-					<a name=".staticClass"> </a>
-					<div class="fixedFont">&lt;static&gt; 
-					
-					
-					<span class="light">uu.</span><b>staticClass</b>(_)
-					
-					</div>
-					<div class="description">
-						<b>uu.staticClass - public staticなクラスの雛形を生成</b>静的クラス(常に存在し、newしなくても使用できるメソッドを持つクラス)の雛形を生成するクロージャを返します。<br />
-						
-						
-					</div>
-					
-					
-					
-					
-						
-							<dl class="detailList">
-							<dt class="heading">Parameters:</dt>
-							
-								<dt>
-									<b>_</b>
+									<b>format</b>
 									
 								</dt>
 								<dd></dd>
@@ -1687,14 +1604,14 @@ ul.inheritsList {
 						
 						
 						
+						
+						
 							<dl class="detailList">
-							<dt class="heading">Returns:</dt>
+							<dt class="heading">See:</dt>
 							
-								<dd>function - クラスの雛形を生成するクロージャを返します。</dd>
+								<dd><a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.sprintf">uu.sprintf</a></dd>
 							
 							</dl>
-						
-						
 						
 
 					<hr />
@@ -1703,11 +1620,11 @@ ul.inheritsList {
 					<div class="fixedFont">&lt;static&gt; 
 					
 					
-					<span class="light">uu.</span><b>toArray</b>(FakeArray)
+					<span class="light">uu.</span><b>toArray</b>(fake, idx)
 					
 					</div>
 					<div class="description">
-						<b>uu.toArray - 擬似配列を配列化</b>与えられた擬似配列を配列化します。<br />擬似配列には以下のようなものがあります。<br />document.images, NodeList, arguments<pre class="eg"> var node = uu.toArray(uu.tag("*"));</pre>
+						uu.toArray - 擬似配列を配列化 - Make Array from FakeArray
 						
 						
 					</div>
@@ -1720,30 +1637,29 @@ ul.inheritsList {
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>FakeArray</b>
+									<b>fake</b>
 									
 								</dt>
-								<dd>fake - 擬似配列を指定します。</dd>
+								<dd></dd>
+							
+								<dt>
+									<b>idx</b>
+									
+								</dt>
+								<dd></dd>
 							
 							</dl>
 						
 						
 						
 						
-						
-							<dl class="detailList">
-							<dt class="heading">Returns:</dt>
-							
-								<dd>array  - fakeがnullやlengthプロパティを持たないhashが指定された場合は空の配列([])を返します。<br />                 fakeがlengthプロパティを持つ擬似配列なら配列化してから返します。</dd>
-							
-							</dl>
 						
 						
 						
 							<dl class="detailList">
 							<dt class="heading">See:</dt>
 							
-								<dd><a href="http://d.hatena.ne.jp/uupaa/20080602">uupaa開発日記</a></dd>
+								<dd><a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.toArray">uu.toArray</a></dd>
 							
 							</dl>
 						
@@ -1754,11 +1670,11 @@ ul.inheritsList {
 					<div class="fixedFont">&lt;static&gt; 
 					
 					
-					<span class="light">uu.</span><b>toHash</b>(array)
+					<span class="light">uu.</span><b>toHash</b>(ary)
 					
 					</div>
 					<div class="description">
-						<b>配列をhash化</b>配列をhash化します。<br />同じindexはひとつにまとめられ、関数オブジェクトは除外します。<pre class="eg"> var ary = [undefined, null, 1, 1, "hoge", function(){} ]; ary["hash_index"] = "lost value"; var b = uu.toHash(ary); // { undefined: undefined, null: null, 1: 1, hoge: "hoge" }</pre>
+						uu.toHash - 配列をHash化 - Make Hash from Array
 						
 						
 					</div>
@@ -1771,25 +1687,25 @@ ul.inheritsList {
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>array</b>
+									<b>ary</b>
 									
 								</dt>
-								<dd>ary - hash化する配列を指定します。</dd>
+								<dd></dd>
 							
 							</dl>
+						
+						
 						
 						
 						
 						
 						
 							<dl class="detailList">
-							<dt class="heading">Returns:</dt>
+							<dt class="heading">See:</dt>
 							
-								<dd>hash     - hash化した配列を返します。</dd>
+								<dd><a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.toHash">uu.toHash</a></dd>
 							
 							</dl>
-						
-						
 						
 
 					<hr />
@@ -1798,11 +1714,11 @@ ul.inheritsList {
 					<div class="fixedFont">&lt;static&gt; 
 					
 					
-					<span class="light">uu.</span><b>trim</b>(string, regexp/undefined)
+					<span class="light">uu.</span><b>trim</b>(str)
 					
 					</div>
 					<div class="description">
-						<b>uu.trim - 両側から空白文字を除去</b>文字列の両側から空白文字をトリム(除去)し、新しい文字列を返します。<pre class="eg">uu.trim(" hoge "); // "hoge"</pre>
+						uu.trim - 両側から空白文字を除去 - Trim both(left and right)
 						
 						
 					</div>
@@ -1815,38 +1731,23 @@ ul.inheritsList {
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>string</b>
+									<b>str</b>
 									
 								</dt>
-								<dd>str - 文字列を指定します。</dd>
-							
-								<dt>
-									<b>regexp/undefined</b>
-									
-								</dt>
-								<dd>reg - 文字列の左右からトリミングする文字の集合を正規表現オブジェクトで指定します。                              省略時は、NULL("\0"),空白(" "),タブ("\t"),改行("\n"),垂直タブ("\v"),復帰("\d")をトリミングします。</dd>
+								<dd></dd>
 							
 							</dl>
 						
 						
 						
 						
-						
-							<dl class="detailList">
-							<dt class="heading">Returns:</dt>
-							
-								<dd>string - トリム後の文字列を返します。</dd>
-							
-							</dl>
 						
 						
 						
 							<dl class="detailList">
 							<dt class="heading">See:</dt>
 							
-								<dd><a href="#rtrim">uu.rtrim</a> - 右側の空白文字を除去</dd>
-							
-								<dd><a href="#ltrim">uu.ltrim</a> - 左側の空白文字を除去</dd>
+								<dd><a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.trim">uu.trim</a></dd>
 							
 							</dl>
 						
@@ -1857,11 +1758,11 @@ ul.inheritsList {
 					<div class="fixedFont">&lt;static&gt; 
 					
 					
-					<span class="light">uu.</span><b>uniqueID</b>(string)
+					<span class="light">uu.</span><b>uniqueID</b>(prefix)
 					
 					</div>
 					<div class="description">
-						<b>uu.uniqueID - ユニークIDの生成(generate unique id)</b>
+						uu.uniqueID - ユニークIDの生成 - Generate unique ID
 						
 						
 					</div>
@@ -1874,25 +1775,25 @@ ul.inheritsList {
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>string</b>
+									<b>prefix</b>
 									
 								</dt>
-								<dd>[prefix] - プリフィクスを指定します。デフォルトは"uu"です。</dd>
+								<dd></dd>
 							
 							</dl>
+						
+						
 						
 						
 						
 						
 						
 							<dl class="detailList">
-							<dt class="heading">Returns:</dt>
+							<dt class="heading">See:</dt>
 							
-								<dd>string         - プリフィクス + ユニークナンバー で構成される文字列を返します。</dd>
+								<dd><a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.uniqueID">uu.uniqueID</a></dd>
 							
 							</dl>
-						
-						
 						
 
 					<hr />
@@ -1901,11 +1802,11 @@ ul.inheritsList {
 					<div class="fixedFont">&lt;static&gt; 
 					
 					
-					<span class="light">uu.</span><b>values</b>(hash/array)
+					<span class="light">uu.</span><b>values</b>(mix)
 					
 					</div>
 					<div class="description">
-						<b>uu.values - array/hashの値を列挙し配列を返す</b>mixがarrayなら、値を列挙し配列を返します。hash要素(文字列のindexを持つ要素)は除外します。<br />mixがhashなら、数値/文字両方のindexを持つ値を列挙し配列を返します。<br />要素数(length)の取得にも利用できます。<pre class="eg">var array = [74, 50, 50], hash = { a: 74, b: 50, c: 50 };array["hash_index"] = "hash";hash[0] = "hash";delete array[0];uu.values(array); // [50, 50]uu.values(hash); // [74, 50, 50, "hash"]</pre>
+						uu.values - Hash/配列/擬似配列の値を列挙し配列を返す - Enumerate the value of the Hash/Array/FakeArray and return an Array
 						
 						
 					</div>
@@ -1918,30 +1819,23 @@ ul.inheritsList {
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>hash/array</b>
+									<b>mix</b>
 									
 								</dt>
-								<dd>mix - 検索対象の要素を指定します。</dd>
+								<dd></dd>
 							
 							</dl>
 						
 						
 						
 						
-						
-							<dl class="detailList">
-							<dt class="heading">Returns:</dt>
-							
-								<dd>array         - hash/arrayの値を列挙した配列を返します。                        有効な要素がなければ、空の配列([])を返します。</dd>
-							
-							</dl>
 						
 						
 						
 							<dl class="detailList">
 							<dt class="heading">See:</dt>
 							
-								<dd><a href="#indexes">uu.indexes</a> - array/hashのindexを列挙</dd>
+								<dd><a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.values">uu.values</a></dd>
 							
 							</dl>
 						
@@ -1956,7 +1850,7 @@ ul.inheritsList {
 <!-- ============================== footer ================================= -->
 		<div class="fineprint" style="clear:both">
 			&copy;2008<br />
-			Documentation generated by <a href="http://www.jsdoctoolkit.org/" target="_blank">JsDoc Toolkit</a> 2.0.beta2.3 on Sun Jun 15 2008 16:44:31 GMT+0900 (JST)
+			Documentation generated by <a href="http://www.jsdoctoolkit.org/" target="_blank">JsDoc Toolkit</a> 2.0.beta2.3 on Fri Jun 27 2008 02:25:11 GMT+0900 (JST)
 		</div>
 	</body>
 </html>

@@ -1,0 +1,135 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>uu.css - test</title>
+<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="../../lib/javascript-xpath.js"></script><![endif]-->
+<script type="text/javascript" src="../../uupaa.js"></script>
+
+<style type="text/css">
+body {
+  background-color: black; color: whitesmoke;
+  font-family:'メイリオ',Meiryo,'ヒラギノ角ゴ Pro W3','Hiragino Kaku Gothic Pro','ＭＳ Ｐゴシック',sans-serif;
+  margin: 2em; line-height: 1.5;
+}
+a[href] { color: lightblue }
+b { color: gold }
+pre { padding: 1em; border: 1px dashed navy; overflow: auto; color: ghostwhite; }
+dt { margin-top: 1em; font-weight: bold; color: lightblue }
+i {}
+table, tr, th, td { border: 1px solid gray; }
+p.test a { background-color: orange; }
+</style>
+</head>
+<body lang="ja">
+<a href="../../README.htm">README</a> &gt; 
+<a href="../../SELECTOR.htm#css-selector">SELECTOR</a><br />
+<a href="./selector.htm">uu.css.pseudo</a> | <a href="./css.htm">uu.css</a> | <a href="./form.htm">uu.css(form)</a>
+
+<dl>
+  <dt>uu.css - jQuery独自セレクタで要素を選択</dt>
+  <dd><a href="http://docs.jquery.com/Selectors">jQueryが独自にサポートしている属性セレクタ</a>のテストです。</dd>
+</dl>
+  <hr />
+  <input type="button" value="Run" onclick="test3(false)" />
+  <h3>CSS Selector from jQuery</h3>
+  <code>#test4-01 :input</code>
+  <div id="test4-01">
+    <input type="text" value="input type=text" />
+    <input type="password" value="input type=password" />
+    <input type="radio" value="input type=radio" style="width: 3em; margin: 1em; padding: 1em" />
+    <input type="checkbox" value="input type=checkbox" style="width: 3em; margin: 1em; padding: 1em" />
+    <input type="submit" value="input type=submit" />
+    <input type="image" value="input type=image" src="../../img/uu.module.canvas.grid.gif" style="padding: 1em" />
+    <input type="reset" value="input type=reset" />
+    <input type="button" value="input type=button" />
+    <input type="file" value="input type=file" />
+    <input type="hidden" value="input type=hidden" />
+    <textarea>text area</textarea>
+    <select></select>
+    <button>button</button>
+  </div>
+<hr />
+  <code>#test4-02 :text</code>
+  <div id="test4-02">
+    <input type="text" value="input type=text" />
+  </div>
+<hr />
+  <code>#test4-03 :password</code>
+  <div id="test4-03">
+    <input type="password" value="input type=password" />
+    <input type="password" value="input type=password" />
+  </div>
+<hr />
+  <code>#test4-04 :radio</code>
+  <div id="test4-04">
+    <input type="radio" value="input type=radio" style="width: 3em; margin: 1em; padding: 1em" />
+    <input type="radio" value="input type=radio" style="width: 3em; margin: 1em; padding: 1em" />
+  </div>
+<hr />
+  <code>#test4-05 :checkbox</code>
+  <div id="test4-05">
+    <input type="checkbox" value="input type=checkbox" style="width: 3em; margin: 1em; padding: 1em" />
+    <input type="checkbox" value="input type=checkbox" style="width: 3em; margin: 1em; padding: 1em" />
+  </div>
+<hr />
+  <code>#test4-06 :submit</code>
+  <div id="test4-06">
+    <input type="submit" value="input type=submit" />
+    <input type="submit" value="input type=submit" />
+  </div>
+<hr />
+  <code>#test4-07 :image</code>
+  <div id="test4-07">
+    <input type="image" value="input type=image" src="../../img/uu.module.canvas.grid.gif" style="padding: 1em" />
+    <input type="image" value="input type=image" src="../../img/uu.module.canvas.grid.gif" style="padding: 1em" />
+  </div>
+<hr />
+  <code>#test4-08 :reset</code>
+  <div id="test4-08">
+    <input type="reset" value="input type=reset" />
+    <input type="reset" value="input type=reset" />
+  </div>
+<hr />
+  <code>#test4-09 :button</code>
+  <div id="test4-09">
+    <input type="button" value="input type=button" />
+    <input type="button" value="input type=button" />
+    <button>button</button>
+    <button>button</button>
+  </div>
+<hr />
+  <code>#test4-10 :file</code>
+  <div id="test4-10">
+    <input type="file" value="input type=file" />
+    <input type="file" value="input type=file" />
+  </div>
+
+<!--
+  <code>#test4-11 :hidden, #test4-11 p</code>
+  <div id="test4-11">
+    <p>input hidden ～</p>
+    <input type="hidden" value="input type=hidden" />
+    <input type="hidden" value="input type=hidden" />
+    <p>～ input hidden</p>
+  </div>
+ -->
+
+  <p id="screen"></p>
+
+<script type="text/javascript">
+function test3(verbose) {
+  var selector;
+  uu.forEach(uu.tag("code"), function (v) {
+    selector = v.innerText;
+    uu.config.verbose = (verbose) ? true : false;
+    uu.css(selector).forEach(function(v2) {
+      uu.css.set(v2, { backgroundColor: "mediumspringgreen", outline: "2px solid green" });
+    });
+  });
+};
+</script>
+
+</body>
+</html>

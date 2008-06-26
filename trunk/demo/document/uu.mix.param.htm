@@ -1,0 +1,16 @@
+<html><head><title>Object mixin</title>
+<script type="text/javascript" src="../../uupaa.js"></script>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head><body><a href="../../README.htm">README</a> &gt; <a href="../../DOCUMENT.htm#uu.mix.param">DOCUMENT</a> &gt; uu.mix.param<br />
+<div id="result"></div>
+<script>
+  uu.window.ready(function() {
+    var base = uu.mix.param({ a: 0 }, { a: "a", b: 1 });
+    uu.log(base); // { a: 0, b: 1 }
+  });
+</script>
+<pre>
+    var base = uu.mix.param({ a: 0 }, { a: "a", b: 1 });
+    uu.log(base); // { a: 0, b: 1 }
+</pre>
+</body></html>

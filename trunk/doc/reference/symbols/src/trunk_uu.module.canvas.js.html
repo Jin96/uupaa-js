@@ -19,14 +19,14 @@
 <span class='linenumber'> 12</span>  * キャンバス要素を動的に生成します。
 <span class='linenumber'> 13</span>  * キャンバスはposition: absolute, display: noneの状態で生成されます。
 <span class='linenumber'> 14</span>  *
-<span class='linenumber'> 15</span>  * @param number  width             - canvasの幅をpx単位で指定します。デフォルトは300です。
-<span class='linenumber'> 16</span>  * @param number  height            - canvasの高さをpx単位で指定します。デフォルトは300です。
-<span class='linenumber'> 17</span>  * @param hash    [style]           - スタイルの指定です。
-<span class='linenumber'> 18</span>  * @param number  [style.left]      - canvasのx座標をpx単位で指定します。デフォルトは0です。
-<span class='linenumber'> 19</span>  * @param number  [style.top]       - canvasのy座標をpx単位で指定します。デフォルトは0です。
-<span class='linenumber'> 20</span>  * @param number  [style.display]   - canvasの表示方法(display)を指定します。デフォルトは"none"です。
-<span class='linenumber'> 21</span>  * @param number  [style.position]  - canvasの配置(position)を指定します。デフォルトは"absolute"です。
-<span class='linenumber'> 22</span>  * @return element                  - 生成したcanvas要素を返します。
+<span class='linenumber'> 15</span>  * @param Number  width             - canvasの幅をpx単位で指定します。デフォルトは300です。
+<span class='linenumber'> 16</span>  * @param Number  height            - canvasの高さをpx単位で指定します。デフォルトは300です。
+<span class='linenumber'> 17</span>  * @param Hash    [style]           - スタイルの指定です。
+<span class='linenumber'> 18</span>  * @param Number  [style.left]      - canvasのx座標をpx単位で指定します。デフォルトは0です。
+<span class='linenumber'> 19</span>  * @param Number  [style.top]       - canvasのy座標をpx単位で指定します。デフォルトは0です。
+<span class='linenumber'> 20</span>  * @param Number  [style.display]   - canvasの表示方法(display)を指定します。デフォルトは"none"です。
+<span class='linenumber'> 21</span>  * @param Number  [style.position]  - canvasの配置(position)を指定します。デフォルトは"absolute"です。
+<span class='linenumber'> 22</span>  * @return Element                  - 生成したcanvas要素を返します。
 <span class='linenumber'> 23</span>  */</span><span class="WHIT">
 <span class='linenumber'> 24</span> </span><span class="NAME">uu.canvas.create</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">width</span><span class="WHIT"> </span><span class="COMM">/* = 300 */</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">height</span><span class="WHIT"> </span><span class="COMM">/* = 300 */</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">style</span><span class="WHIT"> </span><span class="COMM">/* = { x: 0, y: 0, w: 300, h: 300, display: "none", position: "absolute" } */</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
 <span class='linenumber'> 25</span> </span><span class="WHIT">  </span><span class="NAME">style</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">uu.mix.param</span><span class="PUNC">(</span><span class="NAME">style</span><span class="WHIT"> </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="PUNC">}</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT"> </span><span class="NAME">left</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NUMB">0</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">top</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NUMB">0</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">display</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="STRN">"none"</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">position</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="STRN">"absolute"</span><span class="WHIT"> </span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
@@ -63,9 +63,9 @@
 <span class='linenumber'> 56</span>  * &lt;/pre>
 <span class='linenumber'> 57</span>  *
 <span class='linenumber'> 58</span>  * @param context2d ctx   - 2d contextを指定します。
-<span class='linenumber'> 59</span>  * @param function  fn    - 描画完了で呼び出す関数を指定します。デフォルトはundefinedです。
-<span class='linenumber'> 60</span>  * @param number    size  - グリッドサイズを指定します。単位はpxです。デフォルトは64です。
-<span class='linenumber'> 61</span>  * @param string    color - 色を指定します。デフォルトは"gray"です。
+<span class='linenumber'> 59</span>  * @param Function  fn    - 描画完了で呼び出す関数を指定します。デフォルトはundefinedです。
+<span class='linenumber'> 60</span>  * @param Number    size  - グリッドサイズを指定します。単位はpxです。デフォルトは64です。
+<span class='linenumber'> 61</span>  * @param String    color - 色を指定します。デフォルトは"gray"です。
 <span class='linenumber'> 62</span>  */</span><span class="WHIT">
 <span class='linenumber'> 63</span> </span><span class="NAME">uu.canvas.drawGrid</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">ctx</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">fn</span><span class="WHIT"> </span><span class="COMM">/* = undefined */</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">size</span><span class="WHIT"> </span><span class="COMM">/* = 64 */</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">color</span><span class="WHIT"> </span><span class="COMM">/* = "gray" */</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
 <span class='linenumber'> 64</span> </span><span class="WHIT">  </span><span class="NAME">fn</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">fn</span><span class="WHIT"> </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="NAME">uu.mute</span><span class="PUNC">;</span><span class="WHIT">

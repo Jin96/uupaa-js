@@ -4,16 +4,16 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>uupaa.js - uu.module.ajax test</title>
-<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="../../lib/javascript-xpath.js"></script><![endif]-->
-<script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
+<script type="text/javascript" src="../../uupaa.js"></script>
 <style type="text/css">
 body { background-color: black; color: white; }
+a, b { color: lightblue }
 .result { color: lightblue }
 .step { color: gray }
 </style>
 </head>
 <body>
-<a href="../../README.htm">README.htm</a> &gt; uu.module.ajax.htm
+<a href="../../README.htm#demo">README.htm</a> &gt; uu.module.ajax.htm
 <dl>
   <dt>uu.module.ajax.loadIfMod() - 更新チェック付きの非同期リクエスト</dt>
   <dd>更新チェック付きで非同期リクエストを発行します。GETメソッド専用です。更新されていない場合は304が返ります。</dd>
@@ -22,11 +22,11 @@ body { background-color: black; color: white; }
   <dt>uu.module.ajax.loadSync() - 同期リクエスト</dt>
   <dd>更新チェック無しで同期リクエストを発行します。GET/POSTメソッド両用です。</dd>
 </dl>
-<p>※ FirefoxやOperaでテストする場合はサーバにuploadする必要があります(クロスドメインはBad Request(400))。<br />
-   SafariやIEは、ローカルでも動作するようです。</p>
+<p>※ FirefoxやOperaでテストする場合はこのファイルをサーバにuploadする必要があります(クロスドメインはBad Request(400))。<br />
+   SafariやIEは、ローカルファイルの状態でも動作するようです。</p>
 
 
-Request URL: <input type="text" value="http://uupaa-js.googlecode.com/svn/trunk/demo/compat/HelloAjax.txt" size="64" /><br />
+Request URL: <input id="url" type="text" value="http://uupaa-js.googlecode.com/svn/trunk/demo/compat/HelloAjax.txt" size="64" /><br />
 GET Method:
 <input type="button" value="uu.ajax.loadIfMod()" onclick="ajax('loadIfMod')" /> |
 <input type="button" value="uu.ajax.load()" onclick="ajax('load')" /> |
@@ -34,24 +34,31 @@ GET Method:
 POST Method:
 <input type="button" value="uu.ajax.load()" onclick="ajax('load', 'posted data')" /> |
 <input type="button" value="uu.ajax.loadSync()" onclick="ajax('loadSync', 'posted data')" />
-<p id="step0" class="step"></p>
 <p id="step1" class="step"></p>
 <p id="step2" class="step"></p>
-<p id="step3" class="step"></p>
 <p id="step4" class="step"></p>
+Callback Filter:<br />
+<input type="checkbox" value="1" />SEND<br />
+<input type="checkbox" value="2" checked="checked" />OK<br />
+<input type="checkbox" value="4" />NG<br />
 
 <script>
 function ajax(method, data) {
   data = data || "";
-  var stepStr = ["BEGIN", "SEND", "OK", "NG", "END"],
-      requestURL = uu.xpath.snap('//input[@type="text"]', "value")[0],
-      result = [0,1,2,3,4].map(function(v) {
-        var e = uu.id("step" + v);
-        e.innerText = "";
-        return e;
-      });
+  var stepStr = { 1: "SEND", 2: "OK", 4: "NG" },
+      requestURL = uu.id("url"), val = 0;
+
+  [1,2,4].map(function(v) {
+    uu.id("step" + v).innerText = "";
+  });
+
+  uu.css.pseudo(":checked").forEach(function(v) {
+    val += parseInt(v.value);
+  });
+  uu.request.callbackFilter = val;
+
   uu.ajax[method](requestURL, function(uid, step, response, status, url, async) {
-    result[step].innerText =
+    uu.id("step" + step).innerText =
       uu.sprintf("uid[%s], %s res[%s], code[%d], url[%s] %s",
                  uid, stepStr[step], response, status, url, async ? "async" : "sync");
   }, data);

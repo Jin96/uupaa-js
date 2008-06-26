@@ -1,0 +1,57 @@
+<html><head><title>CSS</title>
+<script type="text/javascript" src="../../uupaa.js"></script>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head><body><a href="../../README.htm">README</a> &gt; <a href="../../DOCUMENT.htm#uu.css.set">DOCUMENT</a> &gt; uu.css.set<br />
+<style type="text/css">
+#result1 { background-color: pink; position: absolute; top: 200px; left: 200px }
+#result2 { border: 5px outset blue }
+</style>
+<div id="result1">change bg-color and text-color. border style copied BorderBox</div>
+<div id="result2">BorderBox</div>
+<script>
+function boot() {
+  var elm1 = uu.id("result1"), elm2 = uu.id("result2");
+  var cssProp = "borderTopColor,    borderTopWidth,     borderTopStyle,     " +
+                "borderRightColor,  borderRightWidth,   borderRightStyle,   " +
+                "borderBottomColor, borderBottomWidth,  borderBottomStyle,  " +
+                "borderLeftColor,   borderLeftWidth,    borderLeftStyle     ";
+  var style2 = uu.css.get(elm2, cssProp); // border系のスタイルを抽出
+
+  uu.delay(function() {
+    uu.effect.fadeout(elm1, {
+      fn: function() {
+        uu.css.set(elm1, style2); // elm1にborder:系のスタイルを適用する
+        uu.css.set(elm1, { backgroundColor: "white", color: "black" });
+        uu.delay(function() {
+          uu.effect.fadein(elm1);
+        }, 500);
+      }
+    });
+  }, 500);
+}
+uu.module.load("", "effect", boot);
+</script>
+<pre>
+&lt;div id="result1"&gt;change bg-color and text-color. border style copied BorderBox&lt;/div&gt;
+&lt;div id="result2"&gt;BorderBox&lt;/div&gt;
+
+  var elm1 = uu.id("result1"), elm2 = uu.id("result2");
+  var cssProp = "borderTopColor,    borderTopWidth,     borderTopStyle,     " +
+                "borderRightColor,  borderRightWidth,   borderRightStyle,   " +
+                "borderBottomColor, borderBottomWidth,  borderBottomStyle,  " +
+                "borderLeftColor,   borderLeftWidth,    borderLeftStyle     ";
+  var style2 = uu.css.get(elm2, cssProp); // border系のスタイルを抽出
+
+  uu.delay(function() {
+    uu.effect.fadeout(elm1, {
+      fn: function() {
+        uu.css.set(elm1, style2); // elm1にborder:系のスタイルを適用する
+        uu.css.set(elm1, { backgroundColor: "white", color: "black" });
+        uu.delay(function() {
+          uu.effect.fadein(elm1);
+        }, 500);
+      }
+    });
+  }, 500);
+</pre>
+</body></html>

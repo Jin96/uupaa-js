@@ -4,12 +4,12 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>uupaa.js - uu.module.drag test</title>
-<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="../../lib/javascript-xpath.js"></script><![endif]-->
-<script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
+<script type="text/javascript" src="../../uupaa.js"></script>
 <style>
 body {
   background: black url(./illusion.jpg) repeat-y 100% 100%;
 }
+a, b { color: lightblue }
 dl {
   background-color: white;
 }
@@ -51,7 +51,7 @@ dl {
 </style>
 </head>
 <body>
-<a href="../../README.htm">README.htm</a> &gt; uu.module.drag.htm
+<a href="../../README.htm#demo">README.htm</a> &gt; uu.module.drag.htm
 
 <dl>
   <dt>uu.module.drag.free() - フリーカーソルのドラッグアンドドロップ</dt>
@@ -105,7 +105,7 @@ function boot() {
   new uu.module.drag.free(uu.id("free5"), { ghost: false });
 }
 
-uu.module.load("../../", "ui,effect,drag", boot);
+uu.module.load("", "ui,effect,drag", boot);
 </script>
 
 </body>

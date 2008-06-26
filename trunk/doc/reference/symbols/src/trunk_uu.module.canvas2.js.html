@@ -22,7 +22,7 @@
 <span class='linenumber'> 15</span>  * 検証が終わっていないので、このモジュールは使用しないでください
 <span class='linenumber'> 16</span>  * @class
 <span class='linenumber'> 17</span>  */</span><span class="WHIT">
-<span class='linenumber'> 18</span> </span><span class="NAME">uu.module.context2dDebug</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">uu.basicClass</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='linenumber'> 18</span> </span><span class="NAME">uu.module.context2dDebug</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">uu.klass.generic</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
 <span class='linenumber'> 19</span> </span><span class="NAME">uu.module.context2dDebug.prototype</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
 <span class='linenumber'> 20</span> 
 <span class='linenumber'> 21</span> </span><span class="WHIT">  </span><span class="COMM">/** &lt;b>uu.module.context2dDebug.construct - 初期化&lt;/b>
@@ -63,7 +63,7 @@
 <span class='linenumber'> 56</span>    *    &lt;dt>cmdHistoryLength&lt;/dt>&lt;dd>コマンド履歴数&lt;/dd>
 <span class='linenumber'> 57</span>    *  &lt;/dl>
 <span class='linenumber'> 58</span>    *
-<span class='linenumber'> 59</span>    * @return hash - hash { canvas, context, w, h, mix, alpha, pos, stackSize } を返します。
+<span class='linenumber'> 59</span>    * @return Hash - hash { canvas, context, w, h, mix, alpha, pos, stackSize } を返します。
 <span class='linenumber'> 60</span>    * @see &lt;a href="context.reset()">context.reset()&lt;/a> - コンテキストの初期化
 <span class='linenumber'> 61</span>    */</span><span class="WHIT">
 <span class='linenumber'> 62</span> </span><span class="WHIT">  </span><span class="NAME">info</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
@@ -134,8 +134,8 @@
 <span class='linenumber'>127</span>    *    &lt;dt>image/png&lt;/dt>&lt;dd>png画像, Firefox2+,Safari3+,Opera9+で使用可能&lt;/dd>
 <span class='linenumber'>128</span>    *    &lt;dt>image/jpeg&lt;/dt>&lt;dd>jpg画像, Firefox2+,Safari3+で使用可能&lt;/dd>
 <span class='linenumber'>129</span>    *  &lt;/dl>
-<span class='linenumber'>130</span>    * @param string type - 画像フォーマットを文字列で指定します。デフォルトは "image/png" です。
-<span class='linenumber'>131</span>    * @return string - data: URIを返します。返された文字列はimg要素のsrcに指定可能です。
+<span class='linenumber'>130</span>    * @param String type - 画像フォーマットを文字列で指定します。デフォルトは "image/png" です。
+<span class='linenumber'>131</span>    * @return String - data: URIを返します。返された文字列はimg要素のsrcに指定可能です。
 <span class='linenumber'>132</span>    */</span><span class="WHIT">
 <span class='linenumber'>133</span> </span><span class="WHIT">  </span><span class="NAME">toDataURL</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">type</span><span class="WHIT"> </span><span class="COMM">/* = "image/png" */</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
 <span class='linenumber'>134</span> </span><span class="WHIT">    </span><span class="NAME">this.ctx.canvas.toDataURL</span><span class="PUNC">(</span><span class="NAME">type</span><span class="WHIT"> </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="STRN">"image/png"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
@@ -165,7 +165,7 @@
 <span class='linenumber'>158</span> </span><span class="WHIT">  </span><span class="PUNC">}</span><span class="PUNC">,</span><span class="WHIT">
 <span class='linenumber'>159</span> </span><span class="WHIT">  </span><span class="COMM">/** &lt;b>uu.module.context2dDebug.begin - コマンドの再生&lt;/b>
 <span class='linenumber'>160</span>    *
-<span class='linenumber'>161</span>    * @param function fn - 1step毎にコールバックする関数を指定します。デフォルトはundefinedです。
+<span class='linenumber'>161</span>    * @param Function fn - 1step毎にコールバックする関数を指定します。デフォルトはundefinedです。
 <span class='linenumber'>162</span>    * @see &lt;a href="#recode">uu.module.context2dDebug.recode()&lt;/a> - コマンドの記録
 <span class='linenumber'>163</span>    */</span><span class="WHIT">
 <span class='linenumber'>164</span> </span><span class="WHIT">  </span><span class="NAME">play</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">fn</span><span class="WHIT"> </span><span class="COMM">/* = undefined */</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
@@ -216,7 +216,7 @@
 <span class='linenumber'>209</span> </span><span class="WHIT">  </span><span class="PUNC">}</span><span class="PUNC">,</span><span class="WHIT">
 <span class='linenumber'>210</span> </span><span class="WHIT">  </span><span class="COMM">/** &lt;b>uu.module.context2dDebug.begin - アルファブレンドの値を指定&lt;/b>
 <span class='linenumber'>211</span>    *
-<span class='linenumber'>212</span>    * @param number alpha - アルファブレンド値を0.0～1.0の値で指定します。不透明度(opacity)と同様です。
+<span class='linenumber'>212</span>    * @param Number alpha - アルファブレンド値を0.0～1.0の値で指定します。不透明度(opacity)と同様です。
 <span class='linenumber'>213</span>    * @return this - thisを返します。
 <span class='linenumber'>214</span>    */</span><span class="WHIT">
 <span class='linenumber'>215</span> </span><span class="WHIT">  </span><span class="NAME">alpha</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">alpha</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
@@ -226,10 +226,10 @@
 <span class='linenumber'>219</span> </span><span class="WHIT">  </span><span class="COMM">/** &lt;b>uu.module.context2dDebug.begin - クリア&lt;/b>
 <span class='linenumber'>220</span>    * 指定した範囲をクリアします。引数を全て省略すると全体をクリアします。
 <span class='linenumber'>221</span>    *
-<span class='linenumber'>222</span>    * @param number [x] - x座標を指定します。
-<span class='linenumber'>223</span>    * @param number [y] - y座標を指定します。
-<span class='linenumber'>224</span>    * @param number [w] - 幅を指定します。負の値も指定可能です。
-<span class='linenumber'>225</span>    * @param number [h] - 高さを指定します。負の値も指定可能です。
+<span class='linenumber'>222</span>    * @param Number [x] - x座標を指定します。
+<span class='linenumber'>223</span>    * @param Number [y] - y座標を指定します。
+<span class='linenumber'>224</span>    * @param Number [w] - 幅を指定します。負の値も指定可能です。
+<span class='linenumber'>225</span>    * @param Number [h] - 高さを指定します。負の値も指定可能です。
 <span class='linenumber'>226</span>    * @return this - thisを返します。
 <span class='linenumber'>227</span>    */</span><span class="WHIT">
 <span class='linenumber'>228</span> </span><span class="WHIT">  </span><span class="NAME">clear</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">x</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">y</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">w</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">h</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
@@ -252,8 +252,8 @@
 <span class='linenumber'>245</span>    *     stroke();            // サブパスを描画
 <span class='linenumber'>246</span>    * &lt;/pre>
 <span class='linenumber'>247</span>    *
-<span class='linenumber'>248</span>    * @param number [x] - 移動先のx絶対座標を指定します。デフォルトはundefinedです。
-<span class='linenumber'>249</span>    * @param number [y] - 移動先のy絶対座標を指定します。デフォルトはundefinedです。
+<span class='linenumber'>248</span>    * @param Number [x] - 移動先のx絶対座標を指定します。デフォルトはundefinedです。
+<span class='linenumber'>249</span>    * @param Number [y] - 移動先のy絶対座標を指定します。デフォルトはundefinedです。
 <span class='linenumber'>250</span>    * @return this - thisを返します。
 <span class='linenumber'>251</span>    * @see &lt;a href="#begin">uu.module.context2dDebug.begin()&lt;/a> - サブパスの初期化と開始
 <span class='linenumber'>252</span>    * @see &lt;a href="#close">uu.module.context2dDebug.close()&lt;/a> - 現在のサブパスを閉じ、新しいサブパスを開始
@@ -272,8 +272,8 @@
 <span class='linenumber'>265</span>    * カレントのサブパスを閉じ、新しいサブパスを開始します。&lt;br />
 <span class='linenumber'>266</span>    * x,y座標が指定されている場合は、その座標まで移動しサブパスの出発点とします。
 <span class='linenumber'>267</span>    *
-<span class='linenumber'>268</span>    * @param number [x] - 移動先のx座標を指定します。デフォルトはundefinedです。
-<span class='linenumber'>269</span>    * @param number [y] - 移動先のy座標を指定します。デフォルトはundefinedです。
+<span class='linenumber'>268</span>    * @param Number [x] - 移動先のx座標を指定します。デフォルトはundefinedです。
+<span class='linenumber'>269</span>    * @param Number [y] - 移動先のy座標を指定します。デフォルトはundefinedです。
 <span class='linenumber'>270</span>    * @return this - thisを返します。
 <span class='linenumber'>271</span>    * @see &lt;a href="#begin">uu.module.context2dDebug.begin()&lt;/a> - サブパスの初期化と開始
 <span class='linenumber'>272</span>    * @see &lt;a href="#close">uu.module.context2dDebug.close()&lt;/a> - 現在のサブパスを閉じ、新しいサブパスを開始
@@ -292,8 +292,8 @@
 <span class='linenumber'>285</span>    * カレントのサブパスを移動させます。&lt;br />
 <span class='linenumber'>286</span>    * move()で移動すると、線として描画されません。
 <span class='linenumber'>287</span>    *
-<span class='linenumber'>288</span>    * @param number x - 移動先のx座標を指定します。
-<span class='linenumber'>289</span>    * @param number y - 移動先のy座標を指定します。
+<span class='linenumber'>288</span>    * @param Number x - 移動先のx座標を指定します。
+<span class='linenumber'>289</span>    * @param Number y - 移動先のy座標を指定します。
 <span class='linenumber'>290</span>    * @return this - thisを返します。
 <span class='linenumber'>291</span>    * @see &lt;a href="#begin">uu.module.context2dDebug.begin()&lt;/a> - サブパスの初期化と開始
 <span class='linenumber'>292</span>    * @see &lt;a href="#close">uu.module.context2dDebug.close()&lt;/a> - 現在のサブパスを閉じ、新しいサブパスを開始
@@ -313,9 +313,9 @@
 <span class='linenumber'>306</span>    * line()で移動するとstoroke()で線が描画されます。&lt;br />
 <span class='linenumber'>307</span>    * サブパスが存在しない場合は、何もしません。
 <span class='linenumber'>308</span>    *
-<span class='linenumber'>309</span>    * @param array point - 移動先のx,y座標を指定します。&lt;br />
+<span class='linenumber'>309</span>    * @param Array point - 移動先のx,y座標を指定します。&lt;br />
 <span class='linenumber'>310</span>    *                      [x1, y1, x2, y2, ... ] 形式で複数の頂点を指定できます。
-<span class='linenumber'>311</span>    * @param hash [style] - ラインスタイルを指定します。デフォルトはundefinedです。
+<span class='linenumber'>311</span>    * @param Hash [style] - ラインスタイルを指定します。デフォルトはundefinedです。
 <span class='linenumber'>312</span>    * @return this - thisを返します。
 <span class='linenumber'>313</span>    * @see &lt;a href="#begin">uu.module.context2dDebug.begin()&lt;/a> - サブパスの初期化と開始
 <span class='linenumber'>314</span>    * @see &lt;a href="#close">uu.module.context2dDebug.close()&lt;/a> - 現在のサブパスを閉じ、新しいサブパスを開始
@@ -352,10 +352,10 @@
 <span class='linenumber'>345</span>    *     stroke();                              // サブパスを描画
 <span class='linenumber'>346</span>    * &lt;/pre>
 <span class='linenumber'>347</span>    *
-<span class='linenumber'>348</span>    * @param array point - 移動先のx,y座標を指定します。&lt;br />
+<span class='linenumber'>348</span>    * @param Array point - 移動先のx,y座標を指定します。&lt;br />
 <span class='linenumber'>349</span>    *                      [x1, y1, x2, y2, ... ] 形式で複数の頂点を指定できます。
-<span class='linenumber'>350</span>    * @param number [r] - 半径を指定します。デフォルトは100です。
-<span class='linenumber'>351</span>    * @param hash [style] - ラインスタイルを指定します。デフォルトはundefinedです。
+<span class='linenumber'>350</span>    * @param Number [r] - 半径を指定します。デフォルトは100です。
+<span class='linenumber'>351</span>    * @param Hash [style] - ラインスタイルを指定します。デフォルトはundefinedです。
 <span class='linenumber'>352</span>    * @return this - thisを返します。
 <span class='linenumber'>353</span>    * @see &lt;a href="#begin">uu.module.context2dDebug.begin()&lt;/a> - サブパスの初期化と開始
 <span class='linenumber'>354</span>    * @see &lt;a href="#close">uu.module.context2dDebug.close()&lt;/a> - 現在のサブパスを閉じ、新しいサブパスを開始
@@ -379,7 +379,7 @@
 <span class='linenumber'>372</span>    *
 <span class='linenumber'>373</span>    * wireにtrueを指定すると、サブパスに沿ってワイヤーを描画します。
 <span class='linenumber'>374</span>    *
-<span class='linenumber'>375</span>    * @param number/bool [wire] - ワイヤーを描画する場合はtrueか1を指定します。塗りつぶす場合はfalseか0を指定します。
+<span class='linenumber'>375</span>    * @param Number/Boolean [wire] - ワイヤーを描画する場合はtrueか1を指定します。塗りつぶす場合はfalseか0を指定します。
 <span class='linenumber'>376</span>    *                             デフォルトは0です。
 <span class='linenumber'>377</span>    * @param fillStyle/strokeStyle [style] - フィルスタイル(塗りつぶし用)または、
 <span class='linenumber'>378</span>    *                                        ストロークスタイル(ワイヤー用)を指定します。
@@ -410,11 +410,11 @@
 <span class='linenumber'>403</span>    *
 <span class='linenumber'>404</span>    * 未確認: すでにサブパスが存在する場合は破棄される? それとも一旦閉じられそのまま存続する?
 <span class='linenumber'>405</span>    *
-<span class='linenumber'>406</span>    * @param number x - 移動先のx座標を指定します。
-<span class='linenumber'>407</span>    * @param number y - 移動先のy座標を指定します。
-<span class='linenumber'>408</span>    * @param number w - 幅を指定します。
-<span class='linenumber'>409</span>    * @param number h - 高さを指定します。
-<span class='linenumber'>410</span>    * @param hash [style] - ラインスタイルを指定します。デフォルトはundefinedです。
+<span class='linenumber'>406</span>    * @param Number x - 移動先のx座標を指定します。
+<span class='linenumber'>407</span>    * @param Number y - 移動先のy座標を指定します。
+<span class='linenumber'>408</span>    * @param Number w - 幅を指定します。
+<span class='linenumber'>409</span>    * @param Number h - 高さを指定します。
+<span class='linenumber'>410</span>    * @param Hash [style] - ラインスタイルを指定します。デフォルトはundefinedです。
 <span class='linenumber'>411</span>    * @return this - thisを返します。
 <span class='linenumber'>412</span>    * @see &lt;a href="#begin">uu.module.context2dDebug.begin()&lt;/a> - サブパスの初期化と開始
 <span class='linenumber'>413</span>    * @see &lt;a href="#close">uu.module.context2dDebug.close()&lt;/a> - 現在のサブパスを閉じ、新しいサブパスを開始
@@ -433,14 +433,14 @@
 <span class='linenumber'>426</span>    * (x,y)を中心とする円弧状のサブパスを作成します。&lt;br />
 <span class='linenumber'>427</span>    * 既にサブパスが存在する場合は、円弧の始点まで直線のパスが自動的に追加されます。&lt;br />
 <span class='linenumber'>428</span>    *
-<span class='linenumber'>429</span>    * @param number x - 円弧の中心を指定します。
-<span class='linenumber'>430</span>    * @param number y - 円弧の中心を指定します。
-<span class='linenumber'>431</span>    * @param hash [style] - ラインスタイルを指定します。デフォルトはundefinedです。
-<span class='linenumber'>432</span>    * @param hash [param] - パラメタを指定します。
-<span class='linenumber'>433</span>    * @param number [param.r] - 半径を指定します。デフォルトは100です。
-<span class='linenumber'>434</span>    * @param number [param.a0] - 開始角度を0～359の数値で指定します。デフォルトは0です。
-<span class='linenumber'>435</span>    * @param number [param.a1] - 終了角度を0～359の数値で指定します。デフォルトは359です。
-<span class='linenumber'>436</span>    * @param number [param.clock] - 時計周りにパスを設定する場合はtrueを、反時計回りならfalseを指定します。
+<span class='linenumber'>429</span>    * @param Number x - 円弧の中心を指定します。
+<span class='linenumber'>430</span>    * @param Number y - 円弧の中心を指定します。
+<span class='linenumber'>431</span>    * @param Hash [style] - ラインスタイルを指定します。デフォルトはundefinedです。
+<span class='linenumber'>432</span>    * @param Hash [param] - パラメタを指定します。
+<span class='linenumber'>433</span>    * @param Number [param.r] - 半径を指定します。デフォルトは100です。
+<span class='linenumber'>434</span>    * @param Number [param.a0] - 開始角度を0～359の数値で指定します。デフォルトは0です。
+<span class='linenumber'>435</span>    * @param Number [param.a1] - 終了角度を0～359の数値で指定します。デフォルトは359です。
+<span class='linenumber'>436</span>    * @param Number [param.clock] - 時計周りにパスを設定する場合はtrueを、反時計回りならfalseを指定します。
 <span class='linenumber'>437</span>    * @return this - thisを返します。
 <span class='linenumber'>438</span>    * @see &lt;a href="#begin">uu.module.context2dDebug.begin()&lt;/a> - サブパスの初期化と開始
 <span class='linenumber'>439</span>    * @see &lt;a href="#close">uu.module.context2dDebug.close()&lt;/a> - 現在のサブパスを閉じ、新しいサブパスを開始
@@ -460,13 +460,13 @@
 <span class='linenumber'>453</span>    * x,y座標にパスを移動します。&lt;br />
 <span class='linenumber'>454</span>    * サブパスが存在しない場合は、何もしません。
 <span class='linenumber'>455</span>    *
-<span class='linenumber'>456</span>    * @param array point - 制御点と移動先のx,y座標を指定します。&lt;br />
+<span class='linenumber'>456</span>    * @param Array point - 制御点と移動先のx,y座標を指定します。&lt;br />
 <span class='linenumber'>457</span>    *                      ベジェ曲線なら、[cp1x, cp1y, cp2x, cp2y, x, y ] 形式で座標を指定します。&lt;br />
 <span class='linenumber'>458</span>    *                      二次曲線なら、[cp1x, cp1y, x, y ] 形式で座標を指定します。
-<span class='linenumber'>459</span>    * @param number/bool [bezier] - ベジェ曲線を使用するならtrueか1を指定します。
-<span class='linenumber'>460</span>    *                               二次曲線を使用するならfalseか0を指定します。&lt;br />
-<span class='linenumber'>461</span>    *                               デフォルトは1です。
-<span class='linenumber'>462</span>    * @param hash [style] - ラインスタイルを指定します。デフォルトはundefinedです。
+<span class='linenumber'>459</span>    * @param Number/Boolean [bezier] - ベジェ曲線を使用するならtrueか1を指定します。
+<span class='linenumber'>460</span>    *                                  二次曲線を使用するならfalseか0を指定します。&lt;br />
+<span class='linenumber'>461</span>    *                                  デフォルトは1です。
+<span class='linenumber'>462</span>    * @param Hash [style] - ラインスタイルを指定します。デフォルトはundefinedです。
 <span class='linenumber'>463</span>    * @return this - thisを返します。
 <span class='linenumber'>464</span>    */</span><span class="WHIT">
 <span class='linenumber'>465</span> </span><span class="WHIT">  </span><span class="NAME">curve</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">point</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">bezier</span><span class="WHIT"> </span><span class="COMM">/* = 1 */</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">style</span><span class="WHIT"> </span><span class="COMM">/* = undefined */</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
@@ -493,12 +493,12 @@
 <span class='linenumber'>486</span>    * このメソッドは、move + line + fill or storoke のコンビニエンスメソッドとも言えますが、
 <span class='linenumber'>487</span>    * 既存のサブパスにはなんら影響を及ぼしません。&lt;br />
 <span class='linenumber'>488</span>    *
-<span class='linenumber'>489</span>    * @param number x - 移動先のx座標を指定します。
-<span class='linenumber'>490</span>    * @param number y - 移動先のy座標を指定します。
-<span class='linenumber'>491</span>    * @param number w - 幅を指定します。
-<span class='linenumber'>492</span>    * @param number h - 高さを指定します。
-<span class='linenumber'>493</span>    * @param number/bool [wire] - ワイヤーを描画する場合はtrueか1を指定します。塗りつぶす場合はfalseか0を指定します。
-<span class='linenumber'>494</span>    *                             デフォルトは0です。
+<span class='linenumber'>489</span>    * @param Number x - 移動先のx座標を指定します。
+<span class='linenumber'>490</span>    * @param Number y - 移動先のy座標を指定します。
+<span class='linenumber'>491</span>    * @param Number w - 幅を指定します。
+<span class='linenumber'>492</span>    * @param Number h - 高さを指定します。
+<span class='linenumber'>493</span>    * @param Number/Boolean [wire] - ワイヤーを描画する場合はtrueか1を指定します。塗りつぶす場合はfalseか0を指定します。
+<span class='linenumber'>494</span>    *                                デフォルトは0です。
 <span class='linenumber'>495</span>    * @param fillStyle/storokeStyle [style] - フィルスタイルまたはストロークスタイルを指定します。デフォルトはundefinedです。
 <span class='linenumber'>496</span>    * @return this - thisを返します。
 <span class='linenumber'>497</span>    * @see &lt;a href="#begin">uu.module.context2dDebug.begin()&lt;/a> - サブパスの初期化と開始
@@ -520,8 +520,8 @@
 <span class='linenumber'>513</span>    *
 <span class='linenumber'>514</span>    * 拡大縮小率(スケール)を設定します。
 <span class='linenumber'>515</span>    *
-<span class='linenumber'>516</span>    * @param number x - 水平方向のzoom値を指定します。2で2倍になり、0.5で1/2になります。
-<span class='linenumber'>517</span>    * @param number y - 垂直方向のzoom値を指定します。2で2倍になり、0.5で1/2になります。
+<span class='linenumber'>516</span>    * @param Number x - 水平方向のzoom値を指定します。2で2倍になり、0.5で1/2になります。
+<span class='linenumber'>517</span>    * @param Number y - 垂直方向のzoom値を指定します。2で2倍になり、0.5で1/2になります。
 <span class='linenumber'>518</span>    * @return this - thisを返します。
 <span class='linenumber'>519</span>    */</span><span class="WHIT">
 <span class='linenumber'>520</span> </span><span class="WHIT">  </span><span class="NAME">zoom</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">x</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">y</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
@@ -535,8 +535,8 @@
 <span class='linenumber'>528</span>    *
 <span class='linenumber'>529</span>    * 原点をずらします。scale(1,1)の時、オフセット値1は1pxに相当します。
 <span class='linenumber'>530</span>    *
-<span class='linenumber'>531</span>    * @param number x - 水平方向のオフセット値を指定します。
-<span class='linenumber'>532</span>    * @param number y - 垂直方向のオフセット値を指定します。
+<span class='linenumber'>531</span>    * @param Number x - 水平方向のオフセット値を指定します。
+<span class='linenumber'>532</span>    * @param Number y - 垂直方向のオフセット値を指定します。
 <span class='linenumber'>533</span>    * @return this - thisを返します。
 <span class='linenumber'>534</span>    */</span><span class="WHIT">
 <span class='linenumber'>535</span> </span><span class="WHIT">  </span><span class="NAME">offset</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">x</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">y</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
@@ -550,7 +550,7 @@
 <span class='linenumber'>543</span>    *
 <span class='linenumber'>544</span>    * キャンバス(コンテキスト)を回転させます。
 <span class='linenumber'>545</span>    *
-<span class='linenumber'>546</span>    * @param number angle - 回転を度数(0～359)で指定します。0が正位置です。
+<span class='linenumber'>546</span>    * @param Number angle - 回転を度数(0～359)で指定します。0が正位置です。
 <span class='linenumber'>547</span>    * @return this - thisを返します。
 <span class='linenumber'>548</span>    */</span><span class="WHIT">
 <span class='linenumber'>549</span> </span><span class="WHIT">  </span><span class="NAME">rotate</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">angle</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
@@ -565,13 +565,13 @@
 <span class='linenumber'>558</span>    *
 <span class='linenumber'>559</span>    * グラデーションを作成します。
 <span class='linenumber'>560</span>    *
-<span class='linenumber'>561</span>    * @param array point - 始点(x0,y0)と終点(x1,y1)の座標を指定します。&lt;br />
+<span class='linenumber'>561</span>    * @param Array point - 始点(x0,y0)と終点(x1,y1)の座標を指定します。&lt;br />
 <span class='linenumber'>562</span>    *                      線形グラデーションでは、[x0, y0, x1, y1] の形式で指定します。&lt;br />
 <span class='linenumber'>563</span>    *                      円形グラデーションでは、[x0, y0, r0, x1, y1, r1] の形式で指定します。&lt;br />
-<span class='linenumber'>564</span>    * @param bool/number [line] - 線形グラデーションを作成する場合はtrueか1を指定します。
+<span class='linenumber'>564</span>    * @param Boolean/Number [line] - 線形グラデーションを作成する場合はtrueか1を指定します。
 <span class='linenumber'>565</span>    *                             falseか0を指定すると、円形グラデーションになります。
 <span class='linenumber'>566</span>    *                             デフォルトは1です。
-<span class='linenumber'>567</span>    * @param array colorStop - グラデーションカラーの変化点を指定します。&lt;br />
+<span class='linenumber'>567</span>    * @param Array colorStop - グラデーションカラーの変化点を指定します。&lt;br />
 <span class='linenumber'>568</span>    *                          offsetには0.0～1.0の値を、colorには色を指定します。&lt;br />
 <span class='linenumber'>569</span>    *                          [offset0, color0, offset1, color1, ...]の形式で指定します。&lt;br />
 <span class='linenumber'>570</span>    *                          デフォルトはundefinedです。
@@ -580,7 +580,7 @@
 <span class='linenumber'>573</span> </span><span class="WHIT">  </span><span class="NAME">gradation</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">point</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">line</span><span class="WHIT"> </span><span class="COMM">/* = 1 */</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">colorStop</span><span class="WHIT"> </span><span class="COMM">/* = undefined */</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
 <span class='linenumber'>574</span> </span><span class="WHIT">    </span><span class="NAME">this._cmdRec</span><span class="PUNC">(</span><span class="STRN">"gradation"</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">point</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">line</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">colorStop</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
 <span class='linenumber'>575</span> </span><span class="WHIT">    </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">rv</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">i</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NUMB">0</span><span class="PUNC">;</span><span class="WHIT">
-<span class='linenumber'>576</span> </span><span class="WHIT">    </span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">line</span><span class="WHIT"> </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">line</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="STRN">"undefined"</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='linenumber'>576</span> </span><span class="WHIT">    </span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">line</span><span class="WHIT"> </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="NAME">line</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="KEYW">void</span><span class="WHIT"> </span><span class="NUMB">0</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
 <span class='linenumber'>577</span> </span><span class="WHIT">      </span><span class="NAME">rv</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">this.ctx.createLinearGradient</span><span class="PUNC">(</span><span class="NAME">point</span><span class="PUNC">[</span><span class="NUMB">0</span><span class="PUNC">]</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">point</span><span class="PUNC">[</span><span class="NUMB">1</span><span class="PUNC">]</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">point</span><span class="PUNC">[</span><span class="NUMB">2</span><span class="PUNC">]</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">point</span><span class="PUNC">[</span><span class="NUMB">3</span><span class="PUNC">]</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
 <span class='linenumber'>578</span> </span><span class="WHIT">    </span><span class="PUNC">}</span><span class="WHIT"> </span><span class="KEYW">else</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
 <span class='linenumber'>579</span> </span><span class="WHIT">      </span><span class="NAME">rv</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">this.ctx.createRadialGradient</span><span class="PUNC">(</span><span class="NAME">point</span><span class="PUNC">[</span><span class="NUMB">0</span><span class="PUNC">]</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">point</span><span class="PUNC">[</span><span class="NUMB">1</span><span class="PUNC">]</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">point</span><span class="PUNC">[</span><span class="NUMB">2</span><span class="PUNC">]</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">point</span><span class="PUNC">[</span><span class="NUMB">3</span><span class="PUNC">]</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">point</span><span class="PUNC">[</span><span class="NUMB">4</span><span class="PUNC">]</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">point</span><span class="PUNC">[</span><span class="NUMB">5</span><span class="PUNC">]</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
@@ -605,8 +605,8 @@
 <span class='linenumber'>598</span> </span><span class="WHIT">  </span><span class="PUNC">}</span><span class="PUNC">,</span><span class="WHIT">
 <span class='linenumber'>599</span> </span><span class="WHIT">  </span><span class="COMM">/** &lt;b>create gradation set&lt;/b>
 <span class='linenumber'>600</span>    *
-<span class='linenumber'>601</span>    * @param string name
-<span class='linenumber'>602</span>    * @param array  params
+<span class='linenumber'>601</span>    * @param String name
+<span class='linenumber'>602</span>    * @param Array  params
 <span class='linenumber'>603</span>    * 
 <span class='linenumber'>604</span>    */</span><span class="WHIT">
 <span class='linenumber'>605</span> </span><span class="WHIT">  </span><span class="NAME">PRESET_GRADATION_REFRECTION_IMAGE</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NUMB">0</span><span class="PUNC">,</span><span class="WHIT">
@@ -619,7 +619,7 @@
 <span class='linenumber'>612</span> </span><span class="WHIT">  </span><span class="PUNC">}</span><span class="PUNC">,</span><span class="WHIT">
 <span class='linenumber'>613</span> </span><span class="WHIT">  </span><span class="COMM">/* ok keep */</span><span class="WHIT">
 <span class='linenumber'>614</span> </span><span class="WHIT">  </span><span class="NAME">drawReflectImage</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">img</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">x</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">y</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">w</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">h</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">reflectionGradation</span><span class="WHIT"> </span><span class="COMM">/* = undefined */</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
-<span class='linenumber'>615</span> </span><span class="WHIT">    </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">gra</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">reflectionGradation</span><span class="WHIT"> </span><span class="PUNC">!==</span><span class="WHIT"> </span><span class="STRN">"undefined"</span><span class="PUNC">)</span><span class="WHIT">
+<span class='linenumber'>615</span> </span><span class="WHIT">    </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">gra</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">reflectionGradation</span><span class="WHIT"> </span><span class="PUNC">!==</span><span class="WHIT"> </span><span class="KEYW">void</span><span class="WHIT"> </span><span class="NUMB">0</span><span class="PUNC">)</span><span class="WHIT">
 <span class='linenumber'>616</span> </span><span class="WHIT">            </span><span class="PUNC">?</span><span class="WHIT"> </span><span class="NAME">reflectionGradation</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">this.createPresetGradation</span><span class="PUNC">(</span><span class="NAME">this.PRESET_GRADATION_REFRECTION_IMAGE</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="PUNC">[</span><span class="NAME">h</span><span class="PUNC">]</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
 <span class='linenumber'>617</span> </span><span class="COMM">//    this.clear(0, 0, w, h * 2);</span><span class="WHIT">
 <span class='linenumber'>618</span> </span><span class="WHIT">    </span><span class="NAME">this.push</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">translate</span><span class="PUNC">(</span><span class="NUMB">0</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">h</span><span class="WHIT"> </span><span class="PUNC">*</span><span class="WHIT"> </span><span class="NUMB">2</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">scale</span><span class="PUNC">(</span><span class="NUMB">1</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="PUNC">-</span><span class="NUMB">1</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">drawImage</span><span class="PUNC">(</span><span class="NAME">img</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">x</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">y</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
@@ -630,7 +630,7 @@
 <span class='linenumber'>623</span> </span><span class="WHIT">  </span><span class="COMM">/* 早いけど、背景が黒じゃなきゃダメ */</span><span class="WHIT">
 <span class='linenumber'>624</span> </span><span class="WHIT">  </span><span class="NAME">drawQuickReflectScaledImage</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">img</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">x</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">y</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">w</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">h</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">scale</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">reflectionHeight</span><span class="WHIT"> </span><span class="COMM">/* = 50 */</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">reflectionGradation</span><span class="WHIT"> </span><span class="COMM">/* = undefined */</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
 <span class='linenumber'>625</span> </span><span class="WHIT">    </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="COMM">// rh = reflectionHeight || 50,</span><span class="WHIT">
-<span class='linenumber'>626</span> </span><span class="WHIT">        </span><span class="NAME">gra</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">reflectionGradation</span><span class="WHIT"> </span><span class="PUNC">!==</span><span class="WHIT"> </span><span class="STRN">"undefined"</span><span class="PUNC">)</span><span class="WHIT">
+<span class='linenumber'>626</span> </span><span class="WHIT">        </span><span class="NAME">gra</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">reflectionGradation</span><span class="WHIT"> </span><span class="PUNC">!==</span><span class="WHIT"> </span><span class="KEYW">void</span><span class="WHIT"> </span><span class="NUMB">0</span><span class="PUNC">)</span><span class="WHIT">
 <span class='linenumber'>627</span> </span><span class="WHIT">            </span><span class="PUNC">?</span><span class="WHIT"> </span><span class="NAME">reflectionGradation</span><span class="WHIT">
 <span class='linenumber'>628</span> </span><span class="WHIT">            </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">this.createPresetGradation</span><span class="PUNC">(</span><span class="NAME">this.PRESET_GRADATION_REFRECTION_IMAGE</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="PUNC">[</span><span class="NAME">h</span><span class="PUNC">]</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
 <span class='linenumber'>629</span> 

@@ -156,7 +156,21 @@ ul.inheritsList {
 <!-- ============================== header ================================= -->	
 		<!-- begin static/header.html -->
 		<div id="header">
-<a href="http://uupaa-js.googlecode.com/svn/trunk/README.htm">README.htm</a> &gt; Reference
+<a href="http://uupaa-js.googlecode.com/svn/trunk/README.htm">README</a> &gt; API Reference
+<p>
+   | <a href="http://code.google.com/p/uupaa-js/">Project Home(Google Code)</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/README.htm#demo">DEMO</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/CHANGELOG.htm">ChangeLog</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/LICENSE.htm">License</a> |<br />
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm">Document</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/SELECTOR.htm">Selector</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/MODULE.htm">Module</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/GLOSSARY.htm">Glossary</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/doc/reference/index.html">API Reference</a>
+   |
+</p>
+
+<hr />
 </div>
 
 		<!-- end static/header.html -->
@@ -174,10 +188,6 @@ ul.inheritsList {
 	
 	<li><a href="../symbols/Array.html">Array</a></li>
 	
-	<li><a href="../symbols/Date.html">Date</a></li>
-	
-	<li><a href="../symbols/Number.html">Number</a></li>
-	
 	<li><a href="../symbols/uu.html">uu</a></li>
 	
 	<li><a href="../symbols/uu.ajax.html">uu.ajax</a></li>
@@ -192,10 +202,6 @@ ul.inheritsList {
 	
 	<li><a href="../symbols/uu.css.html">uu.css</a></li>
 	
-	<li><a href="../symbols/uu.css.get.html">uu.css.get</a></li>
-	
-	<li><a href="../symbols/uu.css.set.html">uu.css.set</a></li>
-	
 	<li><a href="../symbols/uu.dom.html">uu.dom</a></li>
 	
 	<li><a href="../symbols/uu.effect.html">uu.effect</a></li>
@@ -206,13 +212,7 @@ ul.inheritsList {
 	
 	<li><a href="../symbols/uu.event.mouse.html">uu.event.mouse</a></li>
 	
-	<li><a href="../symbols/uu.forEach.html">uu.forEach</a></li>
-	
-	<li><a href="../symbols/uu.id.html">uu.id</a></li>
-	
 	<li><a href="../symbols/uu.image.html">uu.image</a></li>
-	
-	<li><a href="../symbols/uu.js.html">uu.js</a></li>
 	
 	<li><a href="../symbols/uu.json.html">uu.json</a></li>
 	
@@ -234,6 +234,8 @@ ul.inheritsList {
 	
 	<li><a href="../symbols/uu.module.messagePump.html">uu.module.messagePump</a></li>
 	
+	<li><a href="../symbols/uu.module.perf.html">uu.module.perf</a></li>
+	
 	<li><a href="../symbols/uu.module.pmvc.html">uu.module.pmvc</a></li>
 	
 	<li><a href="../symbols/uu.module.pmvc.applicationModel.html">uu.module.pmvc.applicationModel</a></li>
@@ -250,6 +252,8 @@ ul.inheritsList {
 	
 	<li><a href="../symbols/uu.perry.html">uu.perry</a></li>
 	
+	<li><a href="../symbols/uu.request.html">uu.request</a></li>
+	
 	<li><a href="../symbols/uu.tag.html">uu.tag</a></li>
 	
 	<li><a href="../symbols/uu.ua.html">uu.ua</a></li>
@@ -259,8 +263,6 @@ ul.inheritsList {
 	<li><a href="../symbols/uu.ui.element.html">uu.ui.element</a></li>
 	
 	<li><a href="../symbols/uu.url.html">uu.url</a></li>
-	
-	<li><a href="../symbols/uu.url.query.html">uu.url.query</a></li>
 	
 	<li><a href="../symbols/uu.window.html">uu.window</a></li>
 	
@@ -283,7 +285,7 @@ ul.inheritsList {
 				
 			
 				
-<b>要素に関する情報を取得</b>
+<b>要素に関する情報を取得 - Get information of element</b>
 <pre>
 elm.offsetLeft (= elm.style.left + elm.style.marginLeftWidth)
 ├────┤
@@ -346,9 +348,9 @@ Firefox3から、clientLeft, clientTopが利用可能
 						<td class="attributes">&nbsp;</td>
 						<td class="nameDescription">
 							<div class="fixedFont">
-								<b><a href="../symbols/uu.ui.element.html#constructor">uu.ui.element</a></b>(element)
+								<b><a href="../symbols/uu.ui.element.html#constructor">uu.ui.element</a></b>(Element)
 							</div>
-							<div class="description"><b>要素に関する情報を取得</b>
+							<div class="description"><b>要素に関する情報を取得 - Get information of element</b>
 <pre>
 elm.offsetLeft (= elm.style.left + elm.style.marginLeftWidth)
 ├────┤
@@ -416,7 +418,7 @@ Firefox3から、clientLeft, clientTopが利用可能
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">uu.ui.element.<b><a href="../symbols/uu.ui.element.html#.offsetParent">offsetParent</a></b>(element)
+								<div class="fixedFont">uu.ui.element.<b><a href="../symbols/uu.ui.element.html#.offsetParent">offsetParent</a></b>(Element)
 								</div>
 								<div class="description"><b>最寄の基準点からの累計オフセットと要素の大きさを取得</b>最寄の基準点からの累計オフセットと要素の大きさを取得します。最寄の基準点とは、position absoluteやrelativeが指定された要素のことです。 <dl>   <dt>x</dt><dd>最寄の基準点からの累計オフセット値</dd>   <dt>y</dt><dd>最寄の基準点からの累計オフセット値</dd>   <dt>w</dt><dd>要素の幅(オフセット幅, 左右のボーダーを含む) - offsetWidth</dd>   <dt>h</dt><dd>要素の高さ(オフセット高さ, 上下のボーダーを含む) - offsetHeight</dd>   <dt>cw</dt><dd>要素の幅(オフセット幅, 左右のボーダーを含まない) - clientWidth</dd>   <dt>ch</dt><dd>要素の高さ(オフセット高さ, 上下のボーダーを含まない) - clientHeight</dd> </dl></div>
 							</td>
@@ -427,7 +429,7 @@ Firefox3から、clientLeft, clientTopが利用可能
 							<td class="nameDescription">
 								<div class="fixedFont">uu.ui.element.<b><a href="../symbols/uu.ui.element.html#.toAbsolute">toAbsolute</a></b>(element, hash)
 								</div>
-								<div class="description"><b>絶対座標化</b>要素の現在位置を保持したまま絶対座標化します。</div>
+								<div class="description"><b>絶対座標化 - Absolute positioning</b>要素の現在位置を保持したまま絶対座標化します。</div>
 							</td>
 						</tr>
 					
@@ -436,7 +438,7 @@ Firefox3から、clientLeft, clientTopが利用可能
 							<td class="nameDescription">
 								<div class="fixedFont">uu.ui.element.<b><a href="../symbols/uu.ui.element.html#.toStatic">toStatic</a></b>(element, hash)
 								</div>
-								<div class="description"><b>静的座標化</b></div>
+								<div class="description"><b>静的座標化 - Static positioning</b></div>
 							</td>
 						</tr>
 					
@@ -455,11 +457,11 @@ Firefox3から、clientLeft, clientTopが利用可能
 				</div>
 				
 				<div class="fixedFont">
-						<b>uu.ui.element</b>(element)
+						<b>uu.ui.element</b>(Element)
 				</div>
 				
 				<div class="description">
-					<b>要素に関する情報を取得</b>
+					<b>要素に関する情報を取得 - Get information of element</b>
 <pre>
 elm.offsetLeft (= elm.style.left + elm.style.marginLeftWidth)
 ├────┤
@@ -512,7 +514,7 @@ Firefox3から、clientLeft, clientTopが利用可能
 						<dt class="heading">Parameters:</dt>
 						
 							<dt>
-								 <b>element</b>
+								 <b>Element</b>
 								
 							</dt>
 								<dd>elm - 要素を指定します。</dd>
@@ -549,7 +551,7 @@ Firefox3から、clientLeft, clientTopが利用可能
 					<div class="fixedFont">&lt;static&gt; 
 					
 					
-					<span class="light">uu.ui.element.</span><b>offsetParent</b>(element)
+					<span class="light">uu.ui.element.</span><b>offsetParent</b>(Element)
 					
 					</div>
 					<div class="description">
@@ -566,7 +568,7 @@ Firefox3から、clientLeft, clientTopが利用可能
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>element</b>
+									<b>Element</b>
 									
 								</dt>
 								<dd>elm - 要素を指定します。</dd>
@@ -597,7 +599,7 @@ Firefox3から、clientLeft, clientTopが利用可能
 					
 					</div>
 					<div class="description">
-						<b>絶対座標化</b>要素の現在位置を保持したまま絶対座標化します。
+						<b>絶対座標化 - Absolute positioning</b>要素の現在位置を保持したまま絶対座標化します。
 						
 						
 					</div>
@@ -647,7 +649,7 @@ Firefox3から、clientLeft, clientTopが利用可能
 					
 					</div>
 					<div class="description">
-						<b>静的座標化</b>
+						<b>静的座標化 - Static positioning</b>
 						
 						
 					</div>
@@ -697,7 +699,7 @@ Firefox3から、clientLeft, clientTopが利用可能
 <!-- ============================== footer ================================= -->
 		<div class="fineprint" style="clear:both">
 			&copy;2008<br />
-			Documentation generated by <a href="http://www.jsdoctoolkit.org/" target="_blank">JsDoc Toolkit</a> 2.0.beta2.3 on Sun Jun 15 2008 16:44:39 GMT+0900 (JST)
+			Documentation generated by <a href="http://www.jsdoctoolkit.org/" target="_blank">JsDoc Toolkit</a> 2.0.beta2.3 on Fri Jun 27 2008 02:25:17 GMT+0900 (JST)
 		</div>
 	</body>
 </html>

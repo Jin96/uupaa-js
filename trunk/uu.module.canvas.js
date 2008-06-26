@@ -12,14 +12,14 @@ uu.module.canvas = {};
  * キャンバス要素を動的に生成します。
  * キャンバスはposition: absolute, display: noneの状態で生成されます。
  *
- * @param number  width             - canvasの幅をpx単位で指定します。デフォルトは300です。
- * @param number  height            - canvasの高さをpx単位で指定します。デフォルトは300です。
- * @param hash    [style]           - スタイルの指定です。
- * @param number  [style.left]      - canvasのx座標をpx単位で指定します。デフォルトは0です。
- * @param number  [style.top]       - canvasのy座標をpx単位で指定します。デフォルトは0です。
- * @param number  [style.display]   - canvasの表示方法(display)を指定します。デフォルトは"none"です。
- * @param number  [style.position]  - canvasの配置(position)を指定します。デフォルトは"absolute"です。
- * @return element                  - 生成したcanvas要素を返します。
+ * @param Number  width             - canvasの幅をpx単位で指定します。デフォルトは300です。
+ * @param Number  height            - canvasの高さをpx単位で指定します。デフォルトは300です。
+ * @param Hash    [style]           - スタイルの指定です。
+ * @param Number  [style.left]      - canvasのx座標をpx単位で指定します。デフォルトは0です。
+ * @param Number  [style.top]       - canvasのy座標をpx単位で指定します。デフォルトは0です。
+ * @param Number  [style.display]   - canvasの表示方法(display)を指定します。デフォルトは"none"です。
+ * @param Number  [style.position]  - canvasの配置(position)を指定します。デフォルトは"absolute"です。
+ * @return Element                  - 生成したcanvas要素を返します。
  */
 uu.canvas.create = function(width /* = 300 */, height /* = 300 */, style /* = { x: 0, y: 0, w: 300, h: 300, display: "none", position: "absolute" } */) {
   style = uu.mix.param(style || {}, { left: 0, top: 0, display: "none", position: "absolute" });
@@ -56,9 +56,9 @@ uu.canvas.context = function(elm, type /* = "2d" */) {
  * </pre>
  *
  * @param context2d ctx   - 2d contextを指定します。
- * @param function  fn    - 描画完了で呼び出す関数を指定します。デフォルトはundefinedです。
- * @param number    size  - グリッドサイズを指定します。単位はpxです。デフォルトは64です。
- * @param string    color - 色を指定します。デフォルトは"gray"です。
+ * @param Function  fn    - 描画完了で呼び出す関数を指定します。デフォルトはundefinedです。
+ * @param Number    size  - グリッドサイズを指定します。単位はpxです。デフォルトは64です。
+ * @param String    color - 色を指定します。デフォルトは"gray"です。
  */
 uu.canvas.drawGrid = function(ctx, fn /* = undefined */, size /* = 64 */, color /* = "gray" */) {
   fn = fn || uu.mute;

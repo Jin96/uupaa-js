@@ -1,0 +1,30 @@
+<html><head><title>Object iteration</title>
+<script type="text/javascript" src="../../uupaa.js"></script>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head><body><a href="../../README.htm">README</a> &gt; <a href="../../DOCUMENT.htm#uu.forEach">DOCUMENT</a> &gt; uu.forEach<br />
+<div id="result"></div>
+<script>
+  uu.window.ready(function() {
+    uu.forEach({ a: "a", b: 1 }, function(v, i) {
+      uu.log(i + ":" + v); // "a:a", "b:1"
+    });
+    uu.forEach(["a", 1], function(v, i) {
+      uu.log(i + ":" + v); // "0:a", "1:1"
+    });
+    uu.forEach(uu.tag("*"), function(v, i) {
+      uu.log(i + ":" + v); // "0:[object HTMLHtmlElement]", "1:[object HTMLHeadElement]", ...
+    });
+  });
+</script>
+<pre>
+    uu.forEach({ a: "a", b: 1 }, function(v, i) {
+      uu.log(i + ":" + v); // "a:a", "b:1"
+    });
+    uu.forEach(["a", 1], function(v, i) {
+      uu.log(i + ":" + v); // "0:a", "1:1"
+    });
+    uu.forEach(uu.tag("*"), function(v, i) {
+      uu.log(i + ":" + v); // "0:[object HTMLHtmlElement]", "1:[object HTMLHeadElement]", ...
+    });
+</pre>
+</body></html>

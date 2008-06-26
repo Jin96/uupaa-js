@@ -21,7 +21,7 @@
 <span class='linenumber'> 14</span> </span><span class="NAME">uu.ui</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
 <span class='linenumber'> 15</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
 <span class='linenumber'> 16</span> 
-<span class='linenumber'> 17</span> </span><span class="COMM">/** &lt;b>ブラウザの表示領域に関する情報を取得&lt;/b>
+<span class='linenumber'> 17</span> </span><span class="COMM">/** &lt;b>ブラウザの表示領域に関する情報を取得 - Get information of view area of the browser&lt;/b>
 <span class='linenumber'> 18</span>  *
 <span class='linenumber'> 19</span>  *  &lt;dl>
 <span class='linenumber'> 20</span>  *    &lt;dt>iw&lt;/dt>&lt;dd>ブラウザの表示領域の幅 - innerWidth or clientWidth&lt;/dd>
@@ -29,7 +29,7 @@
 <span class='linenumber'> 22</span>  *    &lt;dt>sw&lt;/dt>&lt;dd>ブラウザの表示領域の横スクロール量 - pageXOffset or scrollLeft&lt;/dd>
 <span class='linenumber'> 23</span>  *    &lt;dt>sh&lt;/dt>&lt;dd>ブラウザの表示領域の縦スクロール量 - pageYOffset or scrollTop&lt;/dd>
 <span class='linenumber'> 24</span>  *  &lt;/dl>
-<span class='linenumber'> 25</span>  * @return hash { iw, ih, sw, sh } を返します。&lt;br />
+<span class='linenumber'> 25</span>  * @return Hash { iw, ih, sw, sh } を返します。&lt;br />
 <span class='linenumber'> 26</span>  */</span><span class="WHIT">
 <span class='linenumber'> 27</span> </span><span class="NAME">uu.ui.inner</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
 <span class='linenumber'> 28</span> </span><span class="WHIT">  </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT"> </span><span class="NAME">iw</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">uuw.innerWidth</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">ih</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">uuw.innerHeight</span><span class="PUNC">,</span><span class="WHIT">
@@ -43,7 +43,7 @@
 <span class='linenumber'> 36</span> </span><span class="WHIT">               </span><span class="NAME">sw</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">e.scrollLeft</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">sh</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">e.scrollTop</span><span class="WHIT"> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
 <span class='linenumber'> 37</span> </span><span class="WHIT">    </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
 <span class='linenumber'> 38</span> </span><span class="WHIT">  </span><span class="PUNC">}</span><span class="WHIT"> </span><span class="KEYW">else</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
-<span class='linenumber'> 39</span> </span><span class="WHIT">    </span><span class="NAME">uu.ui.inner.scroll</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='linenumber'> 39</span> </span><span class="WHIT">    </span><span class="NAME">uu.ui.inner</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
 <span class='linenumber'> 40</span> </span><span class="WHIT">      </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">e</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">uud.body</span><span class="PUNC">;</span><span class="WHIT">
 <span class='linenumber'> 41</span> </span><span class="WHIT">      </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT"> </span><span class="NAME">iw</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">e.clientWidth</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">ih</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">e.clientHeight</span><span class="PUNC">,</span><span class="WHIT">
 <span class='linenumber'> 42</span> </span><span class="WHIT">               </span><span class="NAME">sw</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">e.scrollLeft</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">sh</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">e.scrollTop</span><span class="WHIT"> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
@@ -51,7 +51,7 @@
 <span class='linenumber'> 44</span> </span><span class="WHIT">  </span><span class="PUNC">}</span><span class="WHIT">
 <span class='linenumber'> 45</span> </span><span class="PUNC">}</span><span class="WHIT">
 <span class='linenumber'> 46</span> 
-<span class='linenumber'> 47</span> </span><span class="COMM">/** &lt;b>要素に関する情報を取得&lt;/b>
+<span class='linenumber'> 47</span> </span><span class="COMM">/** &lt;b>要素に関する情報を取得 - Get information of element&lt;/b>
 <span class='linenumber'> 48</span>  *
 <span class='linenumber'> 49</span> &lt;pre>
 <span class='linenumber'> 50</span> elm.offsetLeft (= elm.style.left + elm.style.marginLeftWidth)
@@ -104,7 +104,7 @@
 <span class='linenumber'> 97</span>  *    &lt;dt>ch&lt;/dt>&lt;dd>要素の高さ(オフセット高さ, 上下のボーダーを含まない) - clientHeight&lt;/dd>
 <span class='linenumber'> 98</span>  *  &lt;/dl>
 <span class='linenumber'> 99</span>  *
-<span class='linenumber'>100</span>  * @param element elm - 要素を指定します。
+<span class='linenumber'>100</span>  * @param Element elm - 要素を指定します。
 <span class='linenumber'>101</span>  * @return rect       - { x, y, w, h, cw, ch } を返します。
 <span class='linenumber'>102</span>  * @namespace
 <span class='linenumber'>103</span>  */</span><span class="WHIT">
@@ -150,7 +150,7 @@
 <span class='linenumber'>143</span>  *    &lt;dt>cw&lt;/dt>&lt;dd>要素の幅(オフセット幅, 左右のボーダーを含まない) - clientWidth&lt;/dd>
 <span class='linenumber'>144</span>  *    &lt;dt>ch&lt;/dt>&lt;dd>要素の高さ(オフセット高さ, 上下のボーダーを含まない) - clientHeight&lt;/dd>
 <span class='linenumber'>145</span>  *  &lt;/dl>
-<span class='linenumber'>146</span>  * @param element elm - 要素を指定します。
+<span class='linenumber'>146</span>  * @param Element elm - 要素を指定します。
 <span class='linenumber'>147</span>  * @return rect       - { x, y, w, h, cw, ch } を返します。&lt;br />
 <span class='linenumber'>148</span>  */</span><span class="WHIT">
 <span class='linenumber'>149</span> </span><span class="NAME">uu.ui.element.offsetParent</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">elm</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
@@ -169,7 +169,7 @@
 <span class='linenumber'>162</span> </span><span class="WHIT">           </span><span class="NAME">cw</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">elm.clientWidth</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">ch</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">elm.clientHeight</span><span class="WHIT"> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
 <span class='linenumber'>163</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
 <span class='linenumber'>164</span> 
-<span class='linenumber'>165</span> </span><span class="COMM">/** &lt;b>絶対座標化&lt;/b>
+<span class='linenumber'>165</span> </span><span class="COMM">/** &lt;b>絶対座標化 - Absolute positioning&lt;/b>
 <span class='linenumber'>166</span>  *
 <span class='linenumber'>167</span>  * 要素の現在位置を保持したまま絶対座標化します。
 <span class='linenumber'>168</span>  *
@@ -185,7 +185,7 @@
 <span class='linenumber'>178</span> </span><span class="WHIT">  </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">elm</span><span class="PUNC">;</span><span class="WHIT">
 <span class='linenumber'>179</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
 <span class='linenumber'>180</span> 
-<span class='linenumber'>181</span> </span><span class="COMM">/** &lt;b>静的座標化&lt;/b>
+<span class='linenumber'>181</span> </span><span class="COMM">/** &lt;b>静的座標化 - Static positioning&lt;/b>
 <span class='linenumber'>182</span>  *
 <span class='linenumber'>183</span>  * @param   element   elm     - 要素を指定します。
 <span class='linenumber'>184</span>  * @param   hash      [style] - 追加するスタイルを { 名前: 値, ... }の形式で指定します。
@@ -223,7 +223,7 @@
 <span class='linenumber'>216</span> </span><span class="COMM">/** @namespace */</span><span class="WHIT">
 <span class='linenumber'>217</span> </span><span class="NAME">uu.event.key</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
 <span class='linenumber'>218</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
-<span class='linenumber'>219</span> </span><span class="COMM">/** &lt;b>キーの状態を取得&lt;/b>
+<span class='linenumber'>219</span> </span><span class="COMM">/** &lt;b>キーの状態を取得 - Get key state&lt;/b>
 <span class='linenumber'>220</span>  *
 <span class='linenumber'>221</span>  *  &lt;dl>
 <span class='linenumber'>222</span>  *    &lt;dt>shift&lt;/dt>&lt;dd>shiftキー押下でtrue&lt;/dd>
@@ -232,7 +232,7 @@
 <span class='linenumber'>225</span>  *    &lt;dt>key&lt;/dt>&lt;dd>押下したキーコード&lt;/dd>
 <span class='linenumber'>226</span>  *  &lt;/dl>
 <span class='linenumber'>227</span>  *
-<span class='linenumber'>228</span>  * @return hash - { shift, ctrl, alt, key } を返します。&lt;br />
+<span class='linenumber'>228</span>  * @return Hash - { shift, ctrl, alt, key } を返します。&lt;br />
 <span class='linenumber'>229</span>  */</span><span class="WHIT">
 <span class='linenumber'>230</span> </span><span class="NAME">uu.event.key.state</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">evt</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
 <span class='linenumber'>231</span> </span><span class="WHIT">  </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT"> </span><span class="NAME">shift</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">evt.shiftKey</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">ctrl</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">evt.ctrlKey</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">alt</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">evt.altKey</span><span class="PUNC">,</span><span class="WHIT">
@@ -242,14 +242,14 @@
 <span class='linenumber'>235</span> </span><span class="COMM">/** @namespace */</span><span class="WHIT">
 <span class='linenumber'>236</span> </span><span class="NAME">uu.event.mouse</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
 <span class='linenumber'>237</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
-<span class='linenumber'>238</span> </span><span class="COMM">/** &lt;b>マウスの座標情報を取得&lt;/b>
+<span class='linenumber'>238</span> </span><span class="COMM">/** &lt;b>マウス座標を取得 - Get mouse position&lt;/b>
 <span class='linenumber'>239</span>  *
 <span class='linenumber'>240</span>  *  &lt;dl>
 <span class='linenumber'>241</span>  *    &lt;dt>x&lt;/dt>&lt;dd>画面左上からのオフセット幅(スクロール量を含む)&lt;/dd>
 <span class='linenumber'>242</span>  *    &lt;dt>y&lt;/dt>&lt;dd>画面左上からのオフセット幅(スクロール量を含む)&lt;/dd>
 <span class='linenumber'>243</span>  *  &lt;/dl>
 <span class='linenumber'>244</span>  *
-<span class='linenumber'>245</span>  * @return hash - { x, y } を返します。
+<span class='linenumber'>245</span>  * @return Hash - { x, y } を返します。
 <span class='linenumber'>246</span>  * @see &lt;a href="#posEx">uu.event.mouse.posEx()&lt;/a> - マウスの拡張座標情報を取得
 <span class='linenumber'>247</span>  */</span><span class="WHIT">
 <span class='linenumber'>248</span> </span><span class="NAME">uu.event.mouse.pos</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">evt</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT"> </span><span class="COMM">// Firefox2, Safari3, Opera9</span><span class="WHIT">
@@ -262,7 +262,7 @@
 <span class='linenumber'>255</span> </span><span class="WHIT">  </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
 <span class='linenumber'>256</span> </span><span class="PUNC">}</span><span class="WHIT">
 <span class='linenumber'>257</span> 
-<span class='linenumber'>258</span> </span><span class="COMM">/** &lt;b>マウスの拡張座標情報を取得&lt;/b>
+<span class='linenumber'>258</span> </span><span class="COMM">/** &lt;b>マウスの拡張座標情報を取得 - Get mouse position++&lt;/b>
 <span class='linenumber'>259</span>  *
 <span class='linenumber'>260</span>  *  &lt;dl>
 <span class='linenumber'>261</span>  *    &lt;dt>x&lt;/dt>&lt;dd>画面左上からのオフセット幅(スクロール量を含む)&lt;/dd>
@@ -273,7 +273,7 @@
 <span class='linenumber'>266</span>  *    &lt;dt>oy&lt;/dt>&lt;dd>最寄の要素の左上からの相対座標&lt;/dd>
 <span class='linenumber'>267</span>  *  &lt;/dl>
 <span class='linenumber'>268</span>  *
-<span class='linenumber'>269</span>  * @return hash - { x, y, cx, cy, ox, oy } を返します。
+<span class='linenumber'>269</span>  * @return Hash - { x, y, cx, cy, ox, oy } を返します。
 <span class='linenumber'>270</span>  * @see &lt;a href="#pos">uu.event.mouse.pos()&lt;/a> - マウスの座標情報を取得
 <span class='linenumber'>271</span>  */</span><span class="WHIT">
 <span class='linenumber'>272</span> </span><span class="NAME">uu.event.mouse.posEx</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">evt</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT"> </span><span class="COMM">// Firefox2, Safari3</span><span class="WHIT">
@@ -303,7 +303,7 @@
 <span class='linenumber'>296</span>  * 以下の状態を含むhashを返します。&lt;br />
 <span class='linenumber'>297</span>  * x, y: ページ座標(絶対座標)と、マウスカーソルが乗っている要素の原点(左上)とのオフセット値
 <span class='linenumber'>298</span>  *
-<span class='linenumber'>299</span>  * @return hash - { x, y } を返します。
+<span class='linenumber'>299</span>  * @return Hash - { x, y } を返します。
 <span class='linenumber'>300</span>  */</span><span class="WHIT">
 <span class='linenumber'>301</span> </span><span class="NAME">uu.event.mouse.offsetElement</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">evt</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">elm</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
 <span class='linenumber'>302</span> </span><span class="WHIT">  </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">mpos</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">uu.event.mouse.pos</span><span class="PUNC">(</span><span class="NAME">evt</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
@@ -345,5 +345,39 @@
 <span class='linenumber'>338</span> </span><span class="WHIT">  </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">rv</span><span class="PUNC">;</span><span class="WHIT">
 <span class='linenumber'>339</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
 <span class='linenumber'>340</span> 
-<span class='linenumber'>341</span> </span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT"> </span><span class="COMM">// end (function())()</span><span class="WHIT">
-<span class='linenumber'>342</span> </span></pre></body></html>
+<span class='linenumber'>341</span> </span><span class="COMM">/** &lt;b>uu.event.mouse.hover - ホバーイベントハンドラの設定 - Set hover event hander&lt;/b>
+<span class='linenumber'>342</span>  *
+<span class='linenumber'>343</span>  * マウスオーバー,マウスアウトイベントをトリガーに動作する関数を登録します。
+<span class='linenumber'>344</span>  *
+<span class='linenumber'>345</span>  * @param Element elm         - イベントを設定する要素を指定します。
+<span class='linenumber'>346</span>  * @param Function mouseover  - マウスオーバー時に呼ばれる関数を指定します。
+<span class='linenumber'>347</span>  * @param Function mouseout   - マウスアウト時に呼ばれる関数を指定します。
+<span class='linenumber'>348</span>  * @see &lt;a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#event">event&lt;/a>
+<span class='linenumber'>349</span>  */</span><span class="WHIT">
+<span class='linenumber'>350</span> </span><span class="COMM">/*
+<span class='linenumber'>351</span> uu.event.hover = function(elm, mouseover, mouseout) {
+<span class='linenumber'>352</span>   uu.event.set(elm, "mouseover", mouseover);
+<span class='linenumber'>353</span>   uu.event.set(elm, "mouseout", mouseout);
+<span class='linenumber'>354</span> };
+<span class='linenumber'>355</span>  */</span><span class="WHIT">
+<span class='linenumber'>356</span> 
+<span class='linenumber'>357</span> </span><span class="COMM">/** &lt;b>uu.event.mouse.clicks - クリックイベントハンドラの設定 - Set click event handler&lt;/b>
+<span class='linenumber'>358</span>  *
+<span class='linenumber'>359</span>  * マウスクリックをトリガーに動作する関数を登録します。&lt;br />
+<span class='linenumber'>360</span>  * fnはいくつでも指定可能で、複数の関数を登録すると、turn around(toggle) 動作を行います。
+<span class='linenumber'>361</span>  *
+<span class='linenumber'>362</span>  * @param Element elm  - イベントを設定する要素を指定します。
+<span class='linenumber'>363</span>  * @param Function fn  - クリック時に呼ばれる関数を指定します。
+<span class='linenumber'>364</span>  */</span><span class="WHIT">
+<span class='linenumber'>365</span> </span><span class="NAME">uu.event.clicks</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">elm</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">fn</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">toggles</span><span class="WHIT"> </span><span class="COMM">/* = 2 */</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='linenumber'>366</span> </span><span class="WHIT">  </span><span class="NAME">elm.uuClicks</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT"> </span><span class="NAME">idx</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NUMB">0</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">max</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">toggles</span><span class="WHIT"> </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="NUMB">2</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">fn</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">fn</span><span class="WHIT"> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='linenumber'>367</span> </span><span class="WHIT">  </span><span class="NAME">uu.event.set</span><span class="PUNC">(</span><span class="NAME">elm</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="STRN">"click"</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">uu.event.clicks._impl</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='linenumber'>368</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='linenumber'>369</span> </span><span class="NAME">uu.event.clicks._impl</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">evt</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='linenumber'>370</span> </span><span class="WHIT">  </span><span class="PUNC">(</span><span class="NAME">uu.ua.ie</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">?</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">evt.returnValue</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">false</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">evt.preventDefault</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='linenumber'>371</span> </span><span class="WHIT">  </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">v</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">uu.event.target</span><span class="PUNC">(</span><span class="NAME">evt</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">real.uuClicks</span><span class="PUNC">;</span><span class="WHIT">
+<span class='linenumber'>372</span> </span><span class="WHIT">  </span><span class="NAME">v.fn</span><span class="PUNC">(</span><span class="PUNC">(</span><span class="PUNC">++</span><span class="NAME">v.idx</span><span class="WHIT"> </span><span class="PUNC">>=</span><span class="WHIT"> </span><span class="NAME">v.max</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">?</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">v.idx</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NUMB">0</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">v.idx</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='linenumber'>373</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='linenumber'>374</span> 
+<span class='linenumber'>375</span> </span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT"> </span><span class="COMM">// end (function())()</span><span class="WHIT">
+<span class='linenumber'>376</span> </span></pre></body></html>

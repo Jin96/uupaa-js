@@ -4,14 +4,14 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>uupaa.js - uu.image.preload test</title>
-<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="../../lib/javascript-xpath.js"></script><![endif]-->
-<script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
+<script type="text/javascript" src="../../uupaa.js"></script>
 <style type="text/css">
 body { color: white; background: black url(prairiedog.png) no-repeat center center; }
+a, b { color: lightblue }
 </style>
 </head>
 <body>
-<a href="../../README.htm">README.htm</a> &gt; uu.image.preload.htm
+<a href="../../README.htm#demo">README.htm</a> &gt; uu.image.preload.htm
 
 <dl>
   <dt>uu.image.preload - </dt>
@@ -39,7 +39,7 @@ function boot() {
   uu.image.preload("../../uu.module.image.1x1.gif", imageLoaded);
   uu.image.preload("http://example.com/hoge.gif", imageLoaded); // 存在しない
 }
-uu.module.load("../../", "image", boot);
+uu.module.load("", "image", boot);
 
 </script>
 

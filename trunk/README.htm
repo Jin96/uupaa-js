@@ -3,32 +3,34 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<title>uupaa.js - Read me</title>
+<title>uupaa.js - ReadMe</title>
 <style type="text/css">
 body {
   background-color: black; color: whitesmoke;
   font-family:'メイリオ',Meiryo,'ヒラギノ角ゴ Pro W3','Hiragino Kaku Gothic Pro','ＭＳ Ｐゴシック',sans-serif;
-  margin: 3em; line-height: 1.5;
+  margin: 2em; line-height: 1.5;
 }
 a, b { color: lightblue }
 pre { border: 1px solid navy }
-dt { font-weight: bold; color: lightblue }
+dt { margin-top: 1em; font-weight: bold; color: lightblue }
 i { font-style: normal; color: gray }
 </style>
 </head>
 <body>
-
-<h1>uupaa.js</h1>
-
 <p>
-   | <a href="http://code.google.com/p/uupaa-js/">Home(Google Code)</a> |<br />
-   | <a href="#demo">デモ(DEMO)</a> |
-   <a href="./CHANGELOG.htm">更新履歴(ChangeLog)</a> | <a href="./LICENSE.htm">ライセンス(License)</a> |
-   <a href="./GLOSSARY.htm">用語集(Glossary)</a> | <a href="./doc/reference/index.html">リファレンス(Reference)</a> |
-   <a href="./SELECTOR.htm">セレクタ(Selector)</a> |
-
-
+   | <a href="http://code.google.com/p/uupaa-js/">Project Home(Google Code)</a>
+   | <a href="./README.htm#demo">DEMO</a>
+   | <a href="./CHANGELOG.htm">ChangeLog</a>
+   | <a href="./LICENSE.htm">License</a> |<br />
+   | <a href="./DOCUMENT.htm">Document</a>
+   | <a href="./SELECTOR.htm">Selector</a>
+   | <a href="./MODULE.htm">Module</a>
+   | <a href="./GLOSSARY.htm">Glossary</a>
+   | <a href="./doc/reference/index.html">API Reference</a>
+   |
 </p>
+<hr />
+<h1>uupaa.js</h1>
 
 <p>uupaa.jsは、日本人クリエーター向けのJavaScriptライブラリです。クロスブラウザ対応です。</p>
 <p>uupaa.jsは生まれたばかりで、まだ実績がありません。<br />
@@ -55,7 +57,9 @@ i { font-style: normal; color: gray }
   <li>ドキュメント周りがまだまだです。</li>
   <li>デバッグ支援用の機能がまだまだです。</li>
   <li>from周りのサポートが全く実装されていません。</li>
-  <li>プログレスバーやスライダー等のウィジェットが全く実装されていません。</li>
+  <li><strike>プログレスバーやスライダー等のウィジェットが全く実装されていません。</strike><br />
+      jQueryの機能をエミュレートするuu.module.jqssにより、<br />jQueryのプラグインが一部動作するようになりました。
+      </li>
 </ol>
 </td></tr>
 </table>
@@ -91,18 +95,18 @@ i { font-style: normal; color: gray }
       <li>uu.module.pmvc.js <i>- (Pluggable MVCモジュール)</i></li>
       <li>uu.module.polygon.js <i>- (ポリゴンモジュール)</i></li>
       <li>uu.module.ui.js <i>- (UI, キーボード, マウス, 座標系モジュール)</i></li>
+      <li>demo/ <i>- (デモ/テスト用ディレクトリ)</i></li>
+      <li>doc/ <i>- (ドキュメント, リファレンス用ディレクトリ)</i></li>
+      <li>img/ <i>- (画像,CSS用ディレクトリ)</i></li>
       <li>lib/ <i>- (外部ライブラリ用ディレクトリ)</i></li>
       <ul>
-        <li><b>javascript-xpath.js</b> <i>- (JavaScript-XPath)</i></li>
-        <li><b>excanvas.js</b> <i>- (ExplorerCanvas)</i></li>
+        <li><b>javascript-xpath.js</b> <i>- (JavaScript-XPath) - IEで必要</i></li>
+        <li><b>excanvas.js</b> <i>- (ExplorerCanvas) - IEで必要</i></li>
       </ul>
-      <li>img/ <i>- (画像,CSS用ディレクトリ)</i></li>
-      <li>doc/ <i>- (ドキュメント, リファレンス用ディレクトリ)</i></li>
-      <li>demo/ <i>- (デモ用ディレクトリ)</i></li>
-      <li>mini/ <i>- (圧縮済みファイル設置用ディレクトリ)</i></li>
+      <li>mini/ <i>- (圧縮済みファイル用ディレクトリ)</i></li>
       <ul>
         <li>uupaa.js <i>- (圧縮済みのuupaa.js)</i></li>
-        <li>uu.module.ajax.js <i>- (圧縮済みのuu.module.ajax.js)</i></li>
+        <li>uu.module.effect.js <i>- (圧縮済みのuu.module.effect.js)</i></li>
         <li>...</li>
       </ul>
     </ul>
@@ -117,9 +121,8 @@ i { font-style: normal; color: gray }
 &lt;head&gt;
 &lt;meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /&gt;
 &lt;title&gt;Hello uupaa.js World&lt;/title&gt;
-&lt;!--[if IE]&gt;&lt;script id="javascript-xpath.js" type="text/javascript" src="../../lib/javascript-xpath.js"&gt;&lt;/script&gt;&lt;![endif]--&gt;
 &lt;!--[if IE]&gt;&lt;script id="excanvas.js" type="text/javascript" src="../../lib/excanvas.js"&gt;&lt;/script&gt;&lt;![endif]--&gt;
-&lt;script id="uupaa.js" type="text/javascript" src="../../uupaa.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="../../uupaa.js"&gt;&lt;/script&gt;
 &lt;style type="text/css"&gt;
 #canvas, #msg { position: absolute; top: 0; left: 0 }
 #msg { font-weight: bold }
@@ -146,7 +149,7 @@ function circle() {
     uu.effect.fade(canvas, { speed: 2000, fn: draw })
   }, 2200);
 }
-uu.module.load("../../", "ui,effect", function() {
+uu.module.load("", "ui,effect", function() {
   uu.dom.ready(function() {
     uu.canvas.ready(circle);
   });
@@ -155,9 +158,6 @@ uu.module.load("../../", "ui,effect", function() {
 &lt;/body&gt;
 &lt;/html&gt;
 </pre>
-<i>IEでは、javascript-xpath.js と excanvas.js を uupaa.js の前に読み込んでください。<br />
-   Firefox2, Safari3, Opera9ではブラウザではこれらのライブラリは不要です。</i>
-
 <h2><a name="demo">デモ</a></h2>
 <p>簡単なデモを用意しました。これ以外にも動作確認用のhtmlが demo/compat/ にあります(作りかけのものも混じっています)。</p>
 <ul>

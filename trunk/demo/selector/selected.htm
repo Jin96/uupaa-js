@@ -1,0 +1,55 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>uu.css.pseudo - test</title>
+<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="../../lib/javascript-xpath.js"></script><![endif]-->
+<script type="text/javascript" src="../../uupaa.js"></script>
+  <style>
+  div { color:red; }
+  </style>
+</head>
+<body>
+<a href="../../README.htm">README</a> &gt; 
+<a href="../../SELECTOR.htm#pseudo-selector">SELECTOR</a><br />
+<a href="./selector.htm">uu.css.pseudo</a> | <a href="./css.htm">uu.css</a> | <a href="./form.htm">uu.css(form)</a>
+<hr />
+<p>jQueryとの動作の違いを確認するため、テスト用のスクリプトは<a href="http://docs.jquery.com/Selectors/selected">jQueryのAPI Reference</a>を参考にしています。</p>
+  <select name="garden" multiple="multiple">
+    <option>Flowers</option>
+    <option selected="selected">Shrubs</option>
+    <option>Trees</option>
+    <option selected="selected">Bushes</option>
+    <option>Grass</option>
+    <option>Dirt</option>
+  </select>
+  <div></div>
+<script>
+uu.dom.ready(function() {
+  uu.css("select").forEach(function(v) {
+    v.onchange = function() {
+      var str = "";
+      uu.css.pseudo(":selected").forEach(function(vv) {
+        str += vv.innerText + " ";
+      });
+      uu.tag("div")[0].innerText = str;
+    };
+    v.onchange();
+  });
+});
+</script>
+<pre>
+  uu.css("select").forEach(function(v) {
+    v.onchange = function() {
+      var str = "";
+      uu.css.pseudo(":selected").forEach(function(vv) {
+        str += vv.innerText + " ";
+      });
+      uu.tag("div")[0].innerText = str;
+    };
+    v.onchange();
+  });
+</pre>
+</body>
+</html>

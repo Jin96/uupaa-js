@@ -1,0 +1,27 @@
+<html><head><title>Tag/Element Selector</title>
+<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="../../lib/javascript-xpath.js"></script><![endif]-->
+<script type="text/javascript" src="../../uupaa.js"></script>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<style>#result { background-color: lime; }</style>
+</head><body><a href="../../README.htm">README</a> &gt; <a href="../../SELECTOR.htm#element-selector">SELECTOR</a> &gt; uu.tag<br />
+<div>
+  <p>hoge</p>
+  <p>huga</p>
+</div>
+<div id="result"></div>
+<script>
+  uu.window.ready(function() {
+    uu.forEach(uu.tag("p"), function(v) {
+      uu.log(v.innerText); // "hoge", "huga"
+    });
+  });
+</script>
+<pre>
+  &lt;p&gt;hoge&lt;/p&gt;
+  &lt;p&gt;huga&lt;/p&gt;
+
+    uu.forEach(uu.tag("p"), function(v) {
+      uu.log(v.innerText); // "hoge", "huga"
+    });
+</pre>
+</body></html>

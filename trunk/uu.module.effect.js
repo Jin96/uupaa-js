@@ -26,13 +26,13 @@ uu.effect._vtm = new uu.module.virtualTimer(10); // instantiate
  * beginとendを省略すると、現在の不透明度が0.5以上ならfadeoutし、0.5未満ならfadeinします。<br />
  * 要素が非表示になっている場合は、まず可視状態にしてからアニメーションを行います。
  *
- * @param element         elm           - 要素を指定します。
- * @param hash            [param]       - パラメタの指定です。
- * @param number/string   [param.speed] - 描画完了までの時間を、ms単位の数値か、
+ * @param Element         elm           - 要素を指定します。
+ * @param Hash            [param]       - パラメタの指定です。
+ * @param Number/String   [param.speed] - 描画完了までの時間を、ms単位の数値か、
  *                                        文字列("now", "quick", "fast", "mid", "slow")で指定します。デフォルトは"mid"です。
- * @param function        [param.fn]    - エフェクト完了でコールバックするメソッドを指定します。省略可能です。
- * @param number          [param.begin] - 初期不透明度を指定します。デフォルトは現在の不透明度です。
- * @param number          [param.end]   - 目標とする不透明度を指定します。デフォルトは0.0(完全な透明)または1.0(完全な不透明)です。
+ * @param Function        [param.fn]    - エフェクト完了でコールバックするメソッドを指定します。省略可能です。
+ * @param Number          [param.begin] - 初期不透明度を指定します。デフォルトは現在の不透明度です。
+ * @param Number          [param.end]   - 目標とする不透明度を指定します。デフォルトは0.0(完全な透明)または1.0(完全な不透明)です。
  */
 uu.effect.fade = function(elm, param /* = { speed: "mid", fn: undefined, begin: current-opacity, end: undefined } */) {
   var cssText = elm.style.cssText, curt, pa;
@@ -51,13 +51,13 @@ uu.effect.fade = function(elm, param /* = { speed: "mid", fn: undefined, begin: 
  * beginとendを省略すると、完全に透明な状態から完全に不透明な状態にアニメーションします。<br />
  * 要素が非表示になっている場合は、まず可視状態にしてからアニメーションを行います。
  *
- * @param element         elm           - 要素を指定します。
- * @param hash            [param]       - パラメタの指定です。
- * @param number/string   [param.speed] - 描画完了までの時間を、ms単位の数値か、
+ * @param Element         elm           - 要素を指定します。
+ * @param Hash            [param]       - パラメタの指定です。
+ * @param Number/String   [param.speed] - 描画完了までの時間を、ms単位の数値か、
  *                                        文字列("now", "quick", "fast", "mid", "slow")で指定します。デフォルトは"mid"です。
- * @param function        [param.fn]    - エフェクト完了でコールバックするメソッドを指定します。省略可能です。
- * @param number          [param.begin] - 初期不透明度を指定します。デフォルトは現在の不透明度です。
- * @param number          [param.end]   - 目標とする不透明度を指定します。デフォルトは1.0(完全な不透明)です。
+ * @param Function        [param.fn]    - エフェクト完了でコールバックするメソッドを指定します。省略可能です。
+ * @param Number          [param.begin] - 初期不透明度を指定します。デフォルトは現在の不透明度です。
+ * @param Number          [param.end]   - 目標とする不透明度を指定します。デフォルトは1.0(完全な不透明)です。
  */
 uu.effect.fadein = function(elm, param /* = { speed: "mid", fn: undefined, begin: current-opacity, end: 1.0 } */) {
   var cssText = elm.style.cssText, curt, pa;
@@ -88,13 +88,13 @@ uu.effect.fadein._impl = function(elm, cssText, speed, fn, begin, end) {
  * beginとendを省略すると、完全に不透明な状態から完全に透明な状態にアニメーションします。<br />
  * 要素が非表示になっている場合は、まず可視状態にしてからアニメーションを行います。
  *
- * @param element         elm           - 要素を指定します。
- * @param hash            [param]       - パラメタの指定です。
- * @param number/string   [param.speed] - 描画完了までの時間を、ms単位の数値か、
+ * @param Element         elm           - 要素を指定します。
+ * @param Hash            [param]       - パラメタの指定です。
+ * @param Number/String   [param.speed] - 描画完了までの時間を、ms単位の数値か、
  *                                        文字列("now", "quick", "fast", "mid", "slow")で指定します。デフォルトは"mid"です。
- * @param function        [param.fn]    - エフェクト完了でコールバックするメソッドを指定します。省略可能です。
- * @param number          [param.begin] - 初期不透明度を指定します。デフォルトは現在の不透明度です。
- * @param number          [param.end]   - 目標とする不透明度を指定します。デフォルトは0.0(完全な透明)です。
+ * @param Function        [param.fn]    - エフェクト完了でコールバックするメソッドを指定します。省略可能です。
+ * @param Number          [param.begin] - 初期不透明度を指定します。デフォルトは現在の不透明度です。
+ * @param Number          [param.end]   - 目標とする不透明度を指定します。デフォルトは0.0(完全な透明)です。
  */
 uu.effect.fadeout = function(elm, param /* = { speed: "mid", fn: undefined, begin: current-opacity, end: 0.0 } */) {
   var cssText = elm.style.cssText, curt, pa;
@@ -124,14 +124,14 @@ uu.effect.fadeout._impl = function(elm, cssText, speed, fn, begin, end) {
  * 要素を移動します。<br />
  * x,y,relを省略すると、画面の中央に移動します。
  *
- * @param element         elm             - 要素を指定します。
- * @param hash            [param]         - パラメタの指定です。
- * @param number/string   [param.speed]   - 描画完了までの時間を、ms単位の数値か、
+ * @param Element         elm             - 要素を指定します。
+ * @param Hash            [param]         - パラメタの指定です。
+ * @param Number/String   [param.speed]   - 描画完了までの時間を、ms単位の数値か、
  *                                          文字列("now", "quick", "fast", "mid", "slow")で指定します。デフォルトは"mid"です。
- * @param function        [param.fn]      - エフェクト完了でコールバックするメソッドを指定します。省略可能です。
- * @param number          [param.x]       - left: 目標位置を絶対座標(px単位)で指定します。省略すると現在のx座標から動きません。
- * @param number          [param.y]       - top: 目標位置を絶対座標(px単位)で指定します。省略すると現在のy座標から動きません。
- * @param number          [param.rel]     - x,yを相対座標として評価する場合にtrueを指定します。デフォルトはfalse(絶対座標指定)です。
+ * @param Function        [param.fn]      - エフェクト完了でコールバックするメソッドを指定します。省略可能です。
+ * @param Number          [param.x]       - left: 目標位置を絶対座標(px単位)で指定します。省略すると現在のx座標から動きません。
+ * @param Number          [param.y]       - top: 目標位置を絶対座標(px単位)で指定します。省略すると現在のy座標から動きません。
+ * @param Number          [param.rel]     - x,yを相対座標として評価する場合にtrueを指定します。デフォルトはfalse(絶対座標指定)です。
  *                                          rel=true,x=100,y=100とすると、現在を基準とした+100px,+100pxの位置に要素が移動します。
  */
 uu.effect.move = function(elm, param /* = { speed: "mid", fn: undefined, x: current-left, y: current-top, rel: false } */) {
@@ -189,14 +189,14 @@ uu.effect.move._impl = function(elm, cssText, speed, fn, x, y) { // x, yは絶�
  *  6---5---4
  * </pre>
  *
- * @param element         elm             - 要素を指定します。
- * @param hash            [param]         - パラメタの指定です。
- * @param number/string   [param.speed]   - 描画完了までの時間を、ms単位の数値か、
+ * @param Element         elm             - 要素を指定します。
+ * @param Hash            [param]         - パラメタの指定です。
+ * @param Number/String   [param.speed]   - 描画完了までの時間を、ms単位の数値か、
  *                                          文字列("now", "quick", "fast", "mid", "slow")で指定します。デフォルトは"mid"です。
- * @param function        [param.fn]      - エフェクト完了でコールバックするメソッドを指定します。省略可能です。
- * @param number          [param.anchor]  - アンカーを0～8の数値( 0[中心], 1[北]～8[北西] )で指定します。デフォルトは0です。
- * @param number          [param.w]       - width: 幅の目標値をpx単位で指定します。省略すると現在の幅を使用します。
- * @param number          [param.h]       - height: 高さの目標値をpx単位で指定します。省略すると現在の高さを使用します。
+ * @param Function        [param.fn]      - エフェクト完了でコールバックするメソッドを指定します。省略可能です。
+ * @param Number          [param.anchor]  - アンカーを0～8の数値( 0[中心], 1[北]～8[北西] )で指定します。デフォルトは0です。
+ * @param Number          [param.w]       - width: 幅の目標値をpx単位で指定します。省略すると現在の幅を使用します。
+ * @param Number          [param.h]       - height: 高さの目標値をpx単位で指定します。省略すると現在の高さを使用します。
  */
 uu.effect.scale = function(elm, param /* = { speed: "mid", fn: undefined, anchor: 0, w: current-width, h: current-height } */) {
   var cssText = elm.style.cssText, curt, pa;
@@ -250,11 +250,11 @@ uu.effect.scale._impl = function(elm, cssText, speed, fn, anchor, w, h) {
  *
  * 要素のサイズを拡大しながら透明度を高くします。fadeout + scaleのコンビネーションです。<br />
  *
- * @param element         elm             - 要素を指定します。
- * @param hash            [param]         - パラメタの指定です。
- * @param number/string   [param.speed]   - 描画完了までの時間を、ms単位の数値か、
+ * @param Element         elm             - 要素を指定します。
+ * @param Hash            [param]         - パラメタの指定です。
+ * @param Number/String   [param.speed]   - 描画完了までの時間を、ms単位の数値か、
  *                                          文字列("now", "quick", "fast", "mid", "slow")で指定します。デフォルトは"mid"です。
- * @param function        [param.fn]      - エフェクト完了でコールバックするメソッドを指定します。省略可能です。
+ * @param Function        [param.fn]      - エフェクト完了でコールバックするメソッドを指定します。省略可能です。
  */
 uu.effect.puff = function(elm, param /* = { speed: "mid", fn: undefined } */) {
   var cssText = elm.style.cssText, pa;
@@ -275,11 +275,11 @@ uu.effect.puff._impl = function(elm, cssText, speed, fn) {
  *
  * 要素を落下させながら透明度を高くします。fadeout + moveのコンビネーションです。<br />
  *
- * @param element         elm             - 要素を指定します。
- * @param hash            [param]         - パラメタの指定です。
- * @param number/string   [param.speed]   - 描画完了までの時間を、ms単位の数値か、
+ * @param Element         elm             - 要素を指定します。
+ * @param Hash            [param]         - パラメタの指定です。
+ * @param Number/String   [param.speed]   - 描画完了までの時間を、ms単位の数値か、
  *                                          文字列("now", "quick", "fast", "mid", "slow")で指定します。デフォルトは"mid"です。
- * @param function        [param.fn]      - エフェクト完了でコールバックするメソッドを指定します。省略可能です。
+ * @param Function        [param.fn]      - エフェクト完了でコールバックするメソッドを指定します。省略可能です。
  */
 uu.effect.dropOut = function(elm, param /* = { speed: "mid", fn: undefined } */) {
   var cssText = elm.style.cssText, pa;
@@ -300,11 +300,11 @@ uu.effect.dropOut._impl = function(elm, cssText, speed, fn) {
  *
  * 左上を基準に高さを縮め、20pxで幅を縮め、最後は0x0にします。scaleのコンビネーションです。<br />
  *
- * @param element         elm             - 要素を指定します。
- * @param hash            [param]         - パラメタの指定です。
- * @param number/string   [param.speed]   - 描画完了までの時間を、ms単位の数値か、
+ * @param Element         elm             - 要素を指定します。
+ * @param Hash            [param]         - パラメタの指定です。
+ * @param Number/String   [param.speed]   - 描画完了までの時間を、ms単位の数値か、
  *                                          文字列("now", "quick", "fast", "mid", "slow")で指定します。デフォルトは"mid"です。
- * @param function        [param.fn]      - エフェクト完了でコールバックするメソッドを指定します。省略可能です。
+ * @param Function        [param.fn]      - エフェクト完了でコールバックするメソッドを指定します。省略可能です。
  */
 uu.effect.fold = function(elm, param /* = { speed: "mid", fn: undefined } */) {
   var cssText = elm.style.cssText, pa;
@@ -329,11 +329,11 @@ uu.effect.fold._impl = function(elm, cssText, speed, fn) {
  *
  * 左右に揺らぎます。moveのコンビネーションです。<br />
  *
- * @param element         elm             - 要素を指定します。
- * @param hash            [param]         - パラメタの指定です。
- * @param number/string   [param.speed]   - 描画完了までの時間を、ms単位の数値か、
+ * @param Element         elm             - 要素を指定します。
+ * @param Hash            [param]         - パラメタの指定です。
+ * @param Number/String   [param.speed]   - 描画完了までの時間を、ms単位の数値か、
  *                                          文字列("now", "quick", "fast", "mid", "slow")で指定します。デフォルトは"mid"です。
- * @param function        [param.fn]      - エフェクト完了でコールバックするメソッドを指定します。省略可能です。
+ * @param Function        [param.fn]      - エフェクト完了でコールバックするメソッドを指定します。省略可能です。
  */
 uu.effect.shake = function(elm, param /* = { speed: "mid", fn: undefined } */) {
   var cssText = elm.style.cssText, pa;
@@ -358,11 +358,11 @@ uu.effect.shake._impl = function(elm, cssText, speed, fn) {
  *
  * 要素の中央に向かって縮小します、最後は0x0にします。scaleのエリアスです。<br />
  *
- * @param element         elm             - 要素を指定します。
- * @param hash            [param]         - パラメタの指定です。
- * @param number/string   [param.speed]   - 描画完了までの時間を、ms単位の数値か、
+ * @param Element         elm             - 要素を指定します。
+ * @param Hash            [param]         - パラメタの指定です。
+ * @param Number/String   [param.speed]   - 描画完了までの時間を、ms単位の数値か、
  *                                          文字列("now", "quick", "fast", "mid", "slow")で指定します。デフォルトは"mid"です。
- * @param function        [param.fn]      - エフェクト完了でコールバックするメソッドを指定します。省略可能です。
+ * @param Function        [param.fn]      - エフェクト完了でコールバックするメソッドを指定します。省略可能です。
  */
 uu.effect.shrink = function(elm, param /* = { speed: "mid", fn: undefined } */) {
   uu.effect.scale(elm, { speed: param.speed, fn: param.fn, anchor: 0, w: 0, h: 0 });
@@ -372,11 +372,11 @@ uu.effect.shrink = function(elm, param /* = { speed: "mid", fn: undefined } */) 
  *
  * 要素の中央から登場します。scaleのエリアスです。<br />
  *
- * @param element         elm             - 要素を指定します。
- * @param hash            [param]         - パラメタの指定です。
- * @param number/string   [param.speed]   - 描画完了までの時間を、ms単位の数値か、
+ * @param Element         elm             - 要素を指定します。
+ * @param Hash            [param]         - パラメタの指定です。
+ * @param Number/String   [param.speed]   - 描画完了までの時間を、ms単位の数値か、
  *                                          文字列("now", "quick", "fast", "mid", "slow")で指定します。デフォルトは"mid"です。
- * @param function        [param.fn]      - エフェクト完了でコールバックするメソッドを指定します。省略可能です。
+ * @param Function        [param.fn]      - エフェクト完了でコールバックするメソッドを指定します。省略可能です。
  */
 uu.effect.glow = function(elm, param /* = { speed: "mid", fn: undefined } */) {
   var cssText = elm.style.cssText, pa;
@@ -404,11 +404,11 @@ uu.effect.glow._impl = function(elm, cssText, speed, fn) {
  * エフェクトが完了すると、要素を見えない状態(display: "hide", visibility: "hidden")にしてから、
  * 元のサイズに戻します。
  *
- * @param element         elm             - 要素を指定します。
- * @param hash            [param]         - パラメタの指定です。
- * @param number/string   [param.speed]   - 描画完了までの時間を、ms単位の数値か、
+ * @param Element         elm             - 要素を指定します。
+ * @param Hash            [param]         - パラメタの指定です。
+ * @param Number/String   [param.speed]   - 描画完了までの時間を、ms単位の数値か、
  *                                          文字列("now", "quick", "fast", "mid", "slow")で指定します。デフォルトは"mid"です。
- * @param function        [param.fn]      - エフェクト完了でコールバックするメソッドを指定します。省略可能です。
+ * @param Function        [param.fn]      - エフェクト完了でコールバックするメソッドを指定します。省略可能です。
  */
 uu.effect.blindUp = function(elm, param /* = { speed: "mid", fn: undefined } */) {
   var cssText = elm.style.cssText, pa;
@@ -431,11 +431,11 @@ uu.effect.blindUp._impl = function(elm, cssText, speed, fn) {
  *
  * 上辺を固定し高さを増やします。scaleのコンビネーションです。<br />
  *
- * @param element         elm             - 要素を指定します。
- * @param hash            [param]         - パラメタの指定です。
- * @param number/string   [param.speed]   - 描画完了までの時間を、ms単位の数値か、
+ * @param Element         elm             - 要素を指定します。
+ * @param Hash            [param]         - パラメタの指定です。
+ * @param Number/String   [param.speed]   - 描画完了までの時間を、ms単位の数値か、
  *                                          文字列("now", "quick", "fast", "mid", "slow")で指定します。デフォルトは"mid"です。
- * @param function        [param.fn]      - エフェクト完了でコールバックするメソッドを指定します。省略可能です。
+ * @param Function        [param.fn]      - エフェクト完了でコールバックするメソッドを指定します。省略可能です。
  */
 uu.effect.blindDown = function(elm, param /* = { speed: "mid", fn: undefined } */) {
   var cssText = elm.style.cssText, pa;
@@ -459,11 +459,11 @@ uu.effect.blindDown._impl = function(elm, cssText, speed, fn) {
  *
  * 不透明度を上下させ点滅しているように見せます。fadeのコンビネーションです。<br />
  *
- * @param element         elm             - 要素を指定します。
- * @param hash            [param]         - パラメタの指定です。
- * @param number/string   [param.speed]   - 描画完了までの時間を、ms単位の数値か、
+ * @param Element         elm             - 要素を指定します。
+ * @param Hash            [param]         - パラメタの指定です。
+ * @param Number/String   [param.speed]   - 描画完了までの時間を、ms単位の数値か、
  *                                          文字列("now", "quick", "fast", "mid", "slow")で指定します。デフォルトは"mid"です。
- * @param function        [param.fn]      - エフェクト完了でコールバックするメソッドを指定します。省略可能です。
+ * @param Function        [param.fn]      - エフェクト完了でコールバックするメソッドを指定します。省略可能です。
  */
 uu.effect.pulsate = function(elm, param /* = { speed: "mid", fn: undefined } */) {
   var cssText = elm.style.cssText, pa;
@@ -506,9 +506,9 @@ uu.effect.pulsate._impl = function(elm, cssText, speed, fn) {
  * 各ステップで、fn(step番号)を呼び出します。<br />
  * before,effect,afterの各ステップでfalseを返すとendに移行します。<br />
  *
- * @param element         elm     - 要素を指定します。
- * @param number          speed   - 速度の指定です。単位はmsです。
- * @param function        fn      - コールバック関数を指定します。
+ * @param Element         elm     - 要素を指定します。
+ * @param Number          speed   - 速度の指定です。単位はmsです。
+ * @param Function        fn      - コールバック関数を指定します。
  */
 uu.effect._frame = function(elm, delay, fn) {
   var run = 0, vtid = 0;

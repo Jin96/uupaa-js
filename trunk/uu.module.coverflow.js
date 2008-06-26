@@ -5,7 +5,7 @@
  */
 (function() { var uud = document, uuw = window, uu = uuw.uu;
 
-uu.module.coverflow = uu.basicClass();
+uu.module.coverflow = uu.klass.generic();
 uu.module.coverflow.prototype = {
   construct: function(elm, padding, coverWidth /* = 160px */) {
     this.coverWidth = coverWidth || 160;
@@ -14,7 +14,7 @@ uu.module.coverflow.prototype = {
     this.ctx = elm.getContext("2d");
 
     // regularize
-    if (typeof elm.style.zIndex === "undefined") {
+    if (elm.style.zIndex === void 0) {
       elm.style.zIndex = 0;
     }
 
@@ -151,7 +151,7 @@ if (0) {
   },
   /** load image and informations 
    *
-   * @param array data  [{id: id, fn: viewerFunc}, ...]
+   * @param Array data  [{id: id, fn: viewerFunc}, ...]
    */
   load: function(data) {
     var me = this;
@@ -333,14 +333,14 @@ if (0) {
 };
 
 /** a cover */
-uu.module.cover = uu.basicClass();
+uu.module.cover = uu.klass.generic();
 uu.module.cover.prototype = {
   /** initialize
    *
-   * @param object  param   { id: id, show: show, hide: hide, exec: exec }
+   * @param Object  param   { id: id, show: show, hide: hide, exec: exec }
    * @param canvas  ctxTmp  temporary canvas context
    * @param canvas  ctxRef  reflection canvas context
-   * @param object  grada   gradation object by createLinearGradient()
+   * @param Object  grada   gradation object by createLinearGradient()
    */
   construct: function(param, ctxTmp, ctxRef, grada) {
     var e = uu.id(param.id);
@@ -383,7 +383,7 @@ uu.module.cover.prototype = {
    *
    * @param canvas    ctx     drawing target canvas
    * @param rect      rect    copy rect {x, y, w, h}
-   * @param number    frame   frame no
+   * @param Number    frame   frame no
    *                          0: RightDown(5 degree)
    *                          1: RightDown(15 degree)
    *                          2: RightDown(30 degree)
@@ -391,8 +391,8 @@ uu.module.cover.prototype = {
    *                          4: RightUp(30 degree)
    *                          5: RightUp(15 degree)
    *                          6: RightUp(5 degree)
-   * @param number    alpha   alpha
-   * @param bool      reflect true: with reflection, false: without reflection
+   * @param Number    alpha   alpha
+   * @param Boolean   reflect true: with reflection, false: without reflection
    */
   draw: function(ctx, rect, frame, alpha) {
     ctx.globalAlpha = alpha;
@@ -462,11 +462,11 @@ uu.module.cover.prototype = {
 };
 
 /** a content */
-uu.module.coverContent = uu.basicClass();
+uu.module.coverContent = uu.klass.generic();
 uu.module.coverContent.prototype = {
   /** initialize
    *
-   * @param object  elm
+   * @param Object  elm
    * @param canvas  ctxTmp  temporary canvas context
    */
   construct: function(elm, ctxTmp) {
@@ -497,7 +497,7 @@ uu.module.coverContent.prototype = {
    *
    * @param canvas    ctx     drawing target canvas
    * @param rect      rect    copy rect {x, y, w, h}
-   * @param number    frame   frame no
+   * @param Number    frame   frame no
    *                          0: RightDown(5 degree)
    *                          1: RightDown(15 degree)
    *                          2: RightDown(30 degree)
@@ -505,8 +505,8 @@ uu.module.coverContent.prototype = {
    *                          4: RightUp(30 degree)
    *                          5: RightUp(15 degree)
    *                          6: RightUp(5 degree)
-   * @param number    alpha   alpha
-   * @param bool      reflect true: with reflection, false: without reflection
+   * @param Number    alpha   alpha
+   * @param Boolean   reflect true: with reflection, false: without reflection
    */
   draw: function(ctx, rect, frame, alpha) {
     ctx.globalAlpha = alpha;

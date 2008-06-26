@@ -20,11 +20,13 @@ uu.module.io = {};
  *  <dt>decodeURLSafe64</dt><dd>URLSafe64 to String</dd>
  *  <dt>encodeURIComponent</dt><dd>encodeURIComponent</dd>
  *  <dt>decodeURIComponent</dt><dd>decodeURIComponent</dd>
+ *  <dt>encodeJSON</dt><dd>encodeJSON</dd>
+ *  <dt>decodeJSON</dt><dd>decodeJSON</dd>
  * </dl>
  *
- * @param string str        - 文字列を指定します。
- * @param string codecName  - コーデック名を指定します。
- * @return string           - 指定されたコーデックで変換後の文字列を返します。
+ * @param String str        - 文字列を指定します。
+ * @param String codecName  - コーデック名を指定します。
+ * @return String           - 指定されたコーデックで変換後の文字列を返します。
  *                            不正なコーデック名を指定するとstrをそのまま返します。
  * @class
  */
@@ -75,6 +77,58 @@ uu.codec.decodeURIComponent = function(str) {
     rv = uuw.decodeURIComponent(str);
   } catch (e) {}
   return rv;
+};
+
+/** <b>uu.codec.encodeJSON - JSONエンコード(Object to JSON String)</b>
+ *
+ * JavaScriptオブジェクトをJSONデータにエンコードします。<br />
+ * fnを指定するとJSONの仕様違反となる型(RegExpやfunctionなど)に関して、fn(rv, mix) をコールします。
+ * fnがtrueを返せば処理を続行し、falseを返せば処理を中断し、例外をスローします。
+ *
+ * @param Hash/Mix mix  - jsonエンコードする要素を指定します。
+ * @param Function [fn] - JSONの仕様にない型を処理する関数を指定します。fnがfalseを返すと例外をスローします。
+ *                        デフォルトはuu.noです。
+ * @return String       - jsonエンコード済みの文字列を返します。
+ * @throws TypeError "dirty" 無効なデータ(JSONフォーマットに変換不能)
+ */
+uu.codec.encodeJSON = function(mix, fn /* = uu.no */) {
+  fn = fn || uu.no;
+  var rv = [], re = /[\\"\x00-\x1F\u0080-\uFFFF]/g,
+      esc = { "\b": "\\b", "\t": "\\t", "\n": "\\n", "\f": "\\f", "\r": "\\r", '"':  '\\"', "\\": "\\\\" };
+  function isFake(mix) { return typeof mix === "object" && "length" in mix; } // FakeArray
+  function U(v) { if (v in esc) { return esc[v]; }
+                  return "\\u" + ("0000" + v.charCodeAt(0).toString(16)).slice(-4); }
+  function F(mix) {
+    var i = 0, z = rv.length, sz;
+    if (mix === null)                     { rv[z] = "null"; }
+    else if (uu.isB(mix) || uu.isN(mix))  { rv[z] = mix.toString(); }
+    else if (uu.isS(mix))                 { rv[z] = '"' + mix.replace(re, U) + '"'; }
+    else if (uu.isA(mix) || isFake(mix))  { rv[z] = "[";
+                                            for (sz = mix.length; i < sz; ++i) { F(mix[i]);
+                                                                                 rv[rv.length] = ","; }
+                                            rv[rv.length - (i ? 1 : 0)] = "]"; }
+    else if (typeof mix === "object")     { rv[z] = "{";
+                                            for (i in mix) { rv[rv.length] = '"' + i.replace(re, U) + '":';
+                                                             F(mix[i]);
+                                                             rv[rv.length] = ","; }
+                                            rv[rv.length - (i ? 1 : 0)] = "}"; }
+    else {
+      if (!fn(rv, mix)) { throw TypeError("dirty"); }
+    }
+  };
+  F(mix);
+  return rv.join("");
+};
+
+/** <b>uu.codec.decodeJSON - JSONデコード(JSON String to Object)</b>
+ *
+ * @param String str - jsonエンコード済みの文字列を返します。
+ * @return Hash/Mix  - jsonデコードされた要素を指定します。
+ * @see <a href="#.encode">uu.json.encode</a> - JSONエンコード
+ */
+uu.codec.decodeJSON = function(str) {
+  return !(/[^,:{}\[\]0-9.\-+Eaeflnr-u \n\r\t]/.test(str.replace(/"(\\.|[^"\\])*"/g, ""))) &&
+         eval("(" + str + ")");
 };
 
 // --------------------------------------------------------
@@ -183,21 +237,21 @@ uu.codec._Base64ToBin = function(b64) {
 
 /** <b>Cookie Module</b>
  *
- * 検証が終わっていないので、Cookie Modeulは使用しないでください
+ * 検証が終わっていないので、Cookie Moduleは使用しないでください
  * @class
  */
-uu.module.cookie = uu.basicClass();
+uu.module.cookie = uu.klass.generic();
 uu.module.cookie.prototype = {
   secure: !!(uuw.location.protocol === "https:"),
   enable: !!(uuw.navigator.cookieEnabled),
 
   /** <b>初期化</b>
    *
-   * @param hash    param         { domain, path, expire } を指定します。
+   * @param Hash    param         { domain, path, expire } を指定します。
    *                              デフォルトは{ domain: "", path: "/", expire: 0 }です。
-   * @param string  param.domain  cookieを適用するドメインを指定します。
-   * @param string  param.path    cookieを適用するパスを指定します。
-   * @param string  param.expire  有効期限を秒数で指定します。
+   * @param String  param.domain  cookieを適用するドメインを指定します。
+   * @param String  param.path    cookieを適用するパスを指定します。
+   * @param String  param.expire  有効期限を秒数で指定します。
    *                              0以下の値を指定するとブラウザを閉じたタイミングでcookieは削除されます。
    */
   construct: function(param /* = { domain: "", path: "/", expire: 0 } */) {

@@ -1,0 +1,46 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>uu.css.pseudo - test</title>
+<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="../../lib/javascript-xpath.js"></script><![endif]-->
+<script type="text/javascript" src="../../uupaa.js"></script>
+  <style>
+  div { color:red; }
+  </style>
+</head>
+<body>
+<a href="../../README.htm">README.htm</a> &gt; <a href="./selector.htm">selector.htm</a> &gt; checked.htm<br />
+<hr />
+<p>jQueryとの動作の違いを確認するため、テスト用のスクリプトは<a href="http://docs.jquery.com/Selectors/checked">jQueryのAPI Reference</a>を参考にしています。</p>
+  <form>
+    <input type="checkbox" name="newsletter" checked="checked" value="Hourly" />
+    <input type="checkbox" name="newsletter" value="Daily" />
+    <input type="checkbox" name="newsletter" value="Weekly" />
+    <input type="checkbox" name="newsletter" checked="checked" value="Monthly" />
+    <input type="checkbox" name="newsletter" value="Yearly" />
+  </form>
+  <div></div>
+<script>
+function countChecked(evt) {
+  var n = uu.css.pseudo(":checked").length;
+  uu.tag("div")[0].innerText = (n + (n == 1 ? " is" : " are") + " checked!");
+}
+uu.window.ready(function() {
+  uu.css(":checkbox").forEach(function(v) {
+    uu.event.set(v, "click", countChecked);
+  });
+});
+</script>
+<pre>
+  function countChecked(evt) {
+    var n = uu.css.pseudo(":checked").length;
+    uu.tag("div")[0].innerText = (n + (n == 1 ? " is" : " are") + " checked!");
+  }
+  uu.css(":checkbox").forEach(function(v) {
+    uu.event.set(v, "click", countChecked);
+  });
+</pre>
+</body>
+</html>

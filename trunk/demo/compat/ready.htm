@@ -4,9 +4,8 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>uupaa.js - uu.dom.ready, uu.window.ready, uu.canvas.ready uu.image.preload test</title>
-<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="../../lib/javascript-xpath.js"></script><![endif]-->
-<!--[if IE]><script id="excanvas.js" type="text/javascript" src="../../lib/excanvas.js"></script><![endif]-->
-<script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
+<!--[if IE]><script id="excanvas.js" type="text/javascript" src="http://pigs.sourceforge.jp/excanvas.js"></script><![endif]-->
+<script type="text/javascript" src="../../uupaa.js"></script>
 <style>
 body {
   background-color: white;
@@ -19,7 +18,7 @@ canvas {
 </style>
 </head>
 <body>
-<a href="../../README.htm">README.htm</a> &gt; ready.htm
+<a href="../../README.htm#demo">README.htm</a> &gt; ready.htm
 
 <canvas id="canvas0" width="800" height="600"></canvas>
 <table>
@@ -80,7 +79,7 @@ function doodle() { // 落書き
 uu.dom.ready([domReady, uu.mute]);
 uu.window.ready(winReady);
 uu.canvas.ready([cvsReady, doodle]);
-uu.module.load("../../", "ui,effect,image", function() {
+uu.module.load("", "ui,effect,image", function() {
   uu.image.preload("http://maps.google.co.jp/intl/ja_jp/images/maps_results_logo.gif",
     function(code, url) {
 //      uu.tag("img").forEach(function(v) {

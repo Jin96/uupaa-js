@@ -11,12 +11,12 @@
  *
  * @class
  */
-uu.module.polygon = uu.basicClass();
+uu.module.polygon = uu.klass.generic();
 uu.module.polygon.prototype = {
   /** <b>uu.module.polygon.construct - 初期化</b>
    *
-   * @param hash    [param]       - パラメタを指定します。
-   * @param number  [param.fps]   - 1秒間に表示するフレーム数の指定です。
+   * @param Hash    [param]       - パラメタを指定します。
+   * @param Number  [param.fps]   - 1秒間に表示するフレーム数の指定です。
    *                                フレーム数を多くすると滑らかになりますが負荷も増えます。
    *                                25を指定すると約40msで1回描画します。
    *                                デフォルトは50です(20msで1回描画)。
@@ -29,15 +29,15 @@ uu.module.polygon.prototype = {
   },
   /** <b>uu.module.polygon.add - ポリゴンの追加</b>
    *
-   * @param hash    [param]           - パラメタの指定です。
-   * @param number  [param.highLight] - ハイライトの強さを0x0～0xffで指定します。デフォルトは0x40です。
-   * @param number  [param.color]     - ポリゴンの色を指定します。0xff0000で赤, 0x00ff00で緑, 0x0000ffで青になります。デフォルトは0x000000(黒)です。
-   * @param number  [param.opacity]   - 不透明度を0.0～1.0の値で指定します。デフォルトは1.0(完全な不透明)です。
-   * @param number  [param.x]         - ポリゴンのx座標を指定します。デフォルトは0です。
-   * @param number  [param.y]         - ポリゴンのy座標を指定します。デフォルトは0です。
-   * @param number  [param.zoom]      - ポリゴンの拡大倍率を数値で指定します。デフォルトは600です。
-   * @param number  [param.phi]       - 縦軸の回転速度を指定します。デフォルトは0.03141592653589793(Math.PI / 100)です。
-   * @param number  [param.theta]     - 横軸の回転速度を指定します。デフォルトは0.1570796326794897(Math.PI / 80)です。
+   * @param Hash    [param]           - パラメタの指定です。
+   * @param Number  [param.highLight] - ハイライトの強さを0x0～0xffで指定します。デフォルトは0x40です。
+   * @param Number  [param.color]     - ポリゴンの色を指定します。0xff0000で赤, 0x00ff00で緑, 0x0000ffで青になります。デフォルトは0x000000(黒)です。
+   * @param Number  [param.opacity]   - 不透明度を0.0～1.0の値で指定します。デフォルトは1.0(完全な不透明)です。
+   * @param Number  [param.x]         - ポリゴンのx座標を指定します。デフォルトは0です。
+   * @param Number  [param.y]         - ポリゴンのy座標を指定します。デフォルトは0です。
+   * @param Number  [param.zoom]      - ポリゴンの拡大倍率を数値で指定します。デフォルトは600です。
+   * @param Number  [param.phi]       - 縦軸の回転速度を指定します。デフォルトは0.03141592653589793(Math.PI / 100)です。
+   * @param Number  [param.theta]     - 横軸の回転速度を指定します。デフォルトは0.1570796326794897(Math.PI / 80)です。
    */
   add: function(param /* = {} */) {
     param = uu.mix.param(param || {}, { highLight: 0x40, color: 0x000000, opacity: 1.0, x: 0, y: 0, zoom: 600, 
@@ -59,7 +59,7 @@ uu.module.polygon.prototype = {
   /** <b>uu.module.polygon.draw - 描画</b>
    *
    * @param context2d ctx   - 描画先の2dコンテキストを指定します。
-   * @param bool      [run] - 連続描画する場合にtrueを指定します。falseを指定すると1度だけ描画します。
+   * @param Boolean   [run] - 連続描画する場合にtrueを指定します。falseを指定すると1度だけ描画します。
    *                          デフォルトはfalseです。
    */
   draw: function(ctx, run /* = false */) {
