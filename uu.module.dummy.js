@@ -1,6 +1,6 @@
 /** <b>Dummy Module</b>
  *
- * @author Takao Obara
+ * @author --Your Name--
  * @license uupaa.js is licensed under the terms and conditions of the MIT licence.
  */
 (function() { var /* uud = document, */ uuw = window, uu = uuw.uu;

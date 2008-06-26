@@ -1,0 +1,20 @@
+<html><head><title>Array iteration</title>
+<script type="text/javascript" src="../../uupaa.js"></script>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head><body><a href="../../README.htm">README</a> &gt; <a href="../../DOCUMENT.htm#Array.map">DOCUMENT</a> &gt; Array.map<br />
+<div id="result"></div>
+<script>
+  uu.window.ready(function() {
+    var rv = [1, 2, 4].map(function(v, i) {
+      return i * v;
+    });
+    uu.log(rv); // [0, 2, 8]
+  });
+</script>
+<pre>
+    var rv = [1, 2, 4].map(function(v, i) {
+      return i * v;
+    });
+    uu.log(rv); // [0, 2, 8]
+</pre>
+</body></html>

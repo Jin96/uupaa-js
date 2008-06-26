@@ -4,9 +4,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>uupaa.js - uu.dom.ready, uu.window.ready, uu.canvas.ready uu.image.preload test</title>
-<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="../../lib/javascript-xpath.js"></script><![endif]-->
-<!--[if IE]><script id="excanvas.js" type="text/javascript" src="../../lib/excanvas.js"></script><![endif]-->
-<script id="uupaa.js" type="text/javascript" src="../../mini/uupaa.js"></script>
+<script type="text/javascript" src="../../mini/uupaa.js"></script>
 <style>
 </style>
 </head>
@@ -19,7 +17,7 @@
 function boot() {
   uu.xpath("/html/body/p[1]")[0].innerText = "uu.module.load(mini) complete!";
 }
-uu.module.load("../../mini/", "ui,effect,drag,image,io,pmvc,canvas,canvas2,polygon,perry", function() {
+uu.module.load("./mini/", "ui,effect,drag,image,io,pmvc,canvas,canvas2,polygon,perry", function() {
   uu.dom.ready(boot);
 });
 </script>

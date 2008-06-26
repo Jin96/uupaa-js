@@ -107,7 +107,7 @@ function boot() {
     }
 
     var b2 = uu.ui.element(uu.id("box2"));
-    window.status = "box2: x[%d],y[%d],w[%d],h[%d],cw[%d],ch[%d]".sprintf(b2.x, b2.y, b2.w, b2.h, b2.cw, b2.ch);
+    window.status = uu.sprintf("box2: x[%d],y[%d],w[%d],h[%d],cw[%d],ch[%d]", b2.x, b2.y, b2.w, b2.h, b2.cw, b2.ch);
 
     addNode("'box2'.offsetWidth", uu.id("box2").offsetWidth);
     addNode("'box2'.offsetHeight", uu.id("box2").offsetHeight);
@@ -128,6 +128,6 @@ function boot() {
 //  } catch(e) {}
 }
 
-uu.module.load("../../", "ui", function() {
+uu.module.load("", "ui", function() {
   uu.window.ready(boot);
 });

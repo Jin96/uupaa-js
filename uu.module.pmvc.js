@@ -16,32 +16,32 @@ uu.module.pmvc = function() {
  *
  * @class
  */
-uu.module.pmvc.applicationModel = uu.basicClass();
+uu.module.pmvc.applicationModel = uu.klass.generic();
 
 /** <b>Pluggable MVC - Domain Model</b>
  *
  * @class
  */
-uu.module.pmvc.domainModel = uu.basicClass();
+uu.module.pmvc.domainModel = uu.klass.generic();
 
-/** <b>Pluggable MVC - controller</b>
+/** <b>Pluggable MVC - Controller</b>
  *
  * @class
  */
-uu.module.pmvc.controller = uu.basicClass();
+uu.module.pmvc.controller = uu.klass.generic();
 
 /** <b>Pluggable MVC - View</b>
  *
  * @class
  */
-uu.module.pmvc.view = uu.basicClass();
+uu.module.pmvc.view = uu.klass.generic();
 
 uu.forEach({
   /** @scope uu.module.pmvc.controller */
 
   /** <b>初期化</b>
    *
-   * @param string id       - ユニークなID(メッセージ配達用のアドレス)を指定します。
+   * @param String id       - ユニークなID(メッセージ配達用のアドレス)を指定します。
    */
   construct: function(id) {
     this.id = id;
@@ -51,7 +51,7 @@ uu.forEach({
   },
   /** <b>メッセージとハンドラの登録</b>
    *
-   * @param hash handler - hash { msg, function() { ... }, ... } を指定します。
+   * @param Hash handler - hash { msg, function() { ... }, ... } を指定します。
    *                       msgで指定したメッセージが到着すると、
    *                       functionで指定した関数が呼ばれます。
    */
@@ -66,7 +66,7 @@ uu.forEach({
    *
    * メッセージの別名を登録します。
    *
-   * @param hash catalog - エリアス(別名)とメッセージ(実体)のカタログです。
+   * @param Hash catalog - エリアス(別名)とメッセージ(実体)のカタログです。
    *                       hash { alias, msg, ... } の形で指定します。
    *                       aliasで指定したメッセージが到着すると、
    *                       msgとリンクしているハンドラが呼ばれます。
@@ -95,10 +95,10 @@ uu.forEach({
   },
   /** <b>メッセージの受信とハンドラの呼び出し</b>
    *
-   * @param string msg   - メッセージの名前を指定します。
-   * @param mix [param1] - 引数を指定します。
-   * @param mix [param2] - 引数を指定します。
-   * @return bool - 呼び出し成功でtrue, 失敗でfalseを返します。
+   * @param String msg   - メッセージの名前を指定します。
+   * @param Mix [param1] - 引数を指定します。
+   * @param Mix [param2] - 引数を指定します。
+   * @return Boolean - 呼び出し成功でtrue, 失敗でfalseを返します。
    */
   procedure: function(msg, param1, param2) {
     if (!this._hook(msg, param1, param2) || !this.permit) { return false; }
@@ -115,7 +115,8 @@ uu.forEach({
   uu.module.pmvc.view.prototype[p] = v;
 });
 
-/* activate primary instance */
+/** プライマリインスタンスのアクティベート - Activate primary instance
+ */
 uu.module.pmvc.activate = function() {
   uu.app    = new uu.module.pmvc.applicationModel("A");
   uu.domain = new uu.module.pmvc.domainModel("D");

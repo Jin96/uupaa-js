@@ -156,7 +156,21 @@ ul.inheritsList {
 <!-- ============================== header ================================= -->	
 		<!-- begin static/header.html -->
 		<div id="header">
-<a href="http://uupaa-js.googlecode.com/svn/trunk/README.htm">README.htm</a> &gt; Reference
+<a href="http://uupaa-js.googlecode.com/svn/trunk/README.htm">README</a> &gt; API Reference
+<p>
+   | <a href="http://code.google.com/p/uupaa-js/">Project Home(Google Code)</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/README.htm#demo">DEMO</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/CHANGELOG.htm">ChangeLog</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/LICENSE.htm">License</a> |<br />
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm">Document</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/SELECTOR.htm">Selector</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/MODULE.htm">Module</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/GLOSSARY.htm">Glossary</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/doc/reference/index.html">API Reference</a>
+   |
+</p>
+
+<hr />
 </div>
 
 		<!-- end static/header.html -->
@@ -174,10 +188,6 @@ ul.inheritsList {
 	
 	<li><a href="../symbols/Array.html">Array</a></li>
 	
-	<li><a href="../symbols/Date.html">Date</a></li>
-	
-	<li><a href="../symbols/Number.html">Number</a></li>
-	
 	<li><a href="../symbols/uu.html">uu</a></li>
 	
 	<li><a href="../symbols/uu.ajax.html">uu.ajax</a></li>
@@ -192,10 +202,6 @@ ul.inheritsList {
 	
 	<li><a href="../symbols/uu.css.html">uu.css</a></li>
 	
-	<li><a href="../symbols/uu.css.get.html">uu.css.get</a></li>
-	
-	<li><a href="../symbols/uu.css.set.html">uu.css.set</a></li>
-	
 	<li><a href="../symbols/uu.dom.html">uu.dom</a></li>
 	
 	<li><a href="../symbols/uu.effect.html">uu.effect</a></li>
@@ -206,13 +212,7 @@ ul.inheritsList {
 	
 	<li><a href="../symbols/uu.event.mouse.html">uu.event.mouse</a></li>
 	
-	<li><a href="../symbols/uu.forEach.html">uu.forEach</a></li>
-	
-	<li><a href="../symbols/uu.id.html">uu.id</a></li>
-	
 	<li><a href="../symbols/uu.image.html">uu.image</a></li>
-	
-	<li><a href="../symbols/uu.js.html">uu.js</a></li>
 	
 	<li><a href="../symbols/uu.json.html">uu.json</a></li>
 	
@@ -234,6 +234,8 @@ ul.inheritsList {
 	
 	<li><a href="../symbols/uu.module.messagePump.html">uu.module.messagePump</a></li>
 	
+	<li><a href="../symbols/uu.module.perf.html">uu.module.perf</a></li>
+	
 	<li><a href="../symbols/uu.module.pmvc.html">uu.module.pmvc</a></li>
 	
 	<li><a href="../symbols/uu.module.pmvc.applicationModel.html">uu.module.pmvc.applicationModel</a></li>
@@ -250,6 +252,8 @@ ul.inheritsList {
 	
 	<li><a href="../symbols/uu.perry.html">uu.perry</a></li>
 	
+	<li><a href="../symbols/uu.request.html">uu.request</a></li>
+	
 	<li><a href="../symbols/uu.tag.html">uu.tag</a></li>
 	
 	<li><a href="../symbols/uu.ua.html">uu.ua</a></li>
@@ -259,8 +263,6 @@ ul.inheritsList {
 	<li><a href="../symbols/uu.ui.element.html">uu.ui.element</a></li>
 	
 	<li><a href="../symbols/uu.url.html">uu.url</a></li>
-	
-	<li><a href="../symbols/uu.url.query.html">uu.url.query</a></li>
 	
 	<li><a href="../symbols/uu.window.html">uu.window</a></li>
 	
@@ -361,7 +363,7 @@ ul.inheritsList {
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">uu.effect.<b><a href="../symbols/uu.effect.html#.blindDown">blindDown</a></b>(element, hash, number/string, function)
+								<div class="fixedFont">uu.effect.<b><a href="../symbols/uu.effect.html#.blindDown">blindDown</a></b>(Element, Hash, Number/String, Function)
 								</div>
 								<div class="description"><b>uu.effect.blindDown - ブラインドダウン</b>上辺を固定し高さを増やします。scaleのコンビネーションです。<br /></div>
 							</td>
@@ -370,7 +372,7 @@ ul.inheritsList {
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">uu.effect.<b><a href="../symbols/uu.effect.html#.blindUp">blindUp</a></b>(element, hash, number/string, function)
+								<div class="fixedFont">uu.effect.<b><a href="../symbols/uu.effect.html#.blindUp">blindUp</a></b>(Element, Hash, Number/String, Function)
 								</div>
 								<div class="description"><b>uu.effect.blindUp - ブラインドアップ</b>上辺を固定し高さを減らします。scaleのコンビネーションです。<br />エフェクトが完了すると、要素を見えない状態(display: "hide", visibility: "hidden")にしてから、元のサイズに戻します。</div>
 							</td>
@@ -379,7 +381,7 @@ ul.inheritsList {
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">uu.effect.<b><a href="../symbols/uu.effect.html#.dropOut">dropOut</a></b>(element, hash, number/string, function)
+								<div class="fixedFont">uu.effect.<b><a href="../symbols/uu.effect.html#.dropOut">dropOut</a></b>(Element, Hash, Number/String, Function)
 								</div>
 								<div class="description"><b>uu.effect.dropOut - ドロップアウト</b>要素を落下させながら透明度を高くします。fadeout + moveのコンビネーションです。<br /></div>
 							</td>
@@ -388,7 +390,7 @@ ul.inheritsList {
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">uu.effect.<b><a href="../symbols/uu.effect.html#.fade">fade</a></b>(element, hash, number/string, function, number, number)
+								<div class="fixedFont">uu.effect.<b><a href="../symbols/uu.effect.html#.fade">fade</a></b>(Element, Hash, Number/String, Function, Number, Number)
 								</div>
 								<div class="description"><b>uu.effect.fade - fade, フェードイン/フェードアウト</b>指定された不透明度になるようにアニメーションします。<br />beginとendを省略すると、現在の不透明度が0.5以上ならfadeoutし、0.5未満ならfadeinします。<br />要素が非表示になっている場合は、まず可視状態にしてからアニメーションを行います。</div>
 							</td>
@@ -397,7 +399,7 @@ ul.inheritsList {
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">uu.effect.<b><a href="../symbols/uu.effect.html#.fadein">fadein</a></b>(element, hash, number/string, function, number, number)
+								<div class="fixedFont">uu.effect.<b><a href="../symbols/uu.effect.html#.fadein">fadein</a></b>(Element, Hash, Number/String, Function, Number, Number)
 								</div>
 								<div class="description"><b>uu.effect.fadein - fadein, フェードイン</b>指定された不透明度になるようにアニメーションします。<br />beginとendを省略すると、完全に透明な状態から完全に不透明な状態にアニメーションします。<br />要素が非表示になっている場合は、まず可視状態にしてからアニメーションを行います。</div>
 							</td>
@@ -406,7 +408,7 @@ ul.inheritsList {
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">uu.effect.<b><a href="../symbols/uu.effect.html#.fadeout">fadeout</a></b>(element, hash, number/string, function, number, number)
+								<div class="fixedFont">uu.effect.<b><a href="../symbols/uu.effect.html#.fadeout">fadeout</a></b>(Element, Hash, Number/String, Function, Number, Number)
 								</div>
 								<div class="description"><b>uu.effect.fadeout - fadeout, フェードアウト</b>指定された不透明度になるようにアニメーションします。<br />beginとendを省略すると、完全に不透明な状態から完全に透明な状態にアニメーションします。<br />要素が非表示になっている場合は、まず可視状態にしてからアニメーションを行います。</div>
 							</td>
@@ -415,7 +417,7 @@ ul.inheritsList {
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">uu.effect.<b><a href="../symbols/uu.effect.html#.fold">fold</a></b>(element, hash, number/string, function)
+								<div class="fixedFont">uu.effect.<b><a href="../symbols/uu.effect.html#.fold">fold</a></b>(Element, Hash, Number/String, Function)
 								</div>
 								<div class="description"><b>uu.effect.fold - 折りたたむ</b>左上を基準に高さを縮め、20pxで幅を縮め、最後は0x0にします。scaleのコンビネーションです。<br /></div>
 							</td>
@@ -424,7 +426,7 @@ ul.inheritsList {
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">uu.effect.<b><a href="../symbols/uu.effect.html#.glow">glow</a></b>(element, hash, number/string, function)
+								<div class="fixedFont">uu.effect.<b><a href="../symbols/uu.effect.html#.glow">glow</a></b>(Element, Hash, Number/String, Function)
 								</div>
 								<div class="description"><b>uu.effect.glow - 中心から登場</b>要素の中央から登場します。scaleのエリアスです。<br /></div>
 							</td>
@@ -433,7 +435,7 @@ ul.inheritsList {
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">uu.effect.<b><a href="../symbols/uu.effect.html#.move">move</a></b>(element, hash, number/string, function, number, number, number)
+								<div class="fixedFont">uu.effect.<b><a href="../symbols/uu.effect.html#.move">move</a></b>(Element, Hash, Number/String, Function, Number, Number, Number)
 								</div>
 								<div class="description"><b>uu.effect.move - 移動</b>要素を移動します。<br />x,y,relを省略すると、画面の中央に移動します。</div>
 							</td>
@@ -442,7 +444,7 @@ ul.inheritsList {
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">uu.effect.<b><a href="../symbols/uu.effect.html#.puff">puff</a></b>(element, hash, number/string, function)
+								<div class="fixedFont">uu.effect.<b><a href="../symbols/uu.effect.html#.puff">puff</a></b>(Element, Hash, Number/String, Function)
 								</div>
 								<div class="description"><b>uu.effect.puff - ぱふ</b>要素のサイズを拡大しながら透明度を高くします。fadeout + scaleのコンビネーションです。<br /></div>
 							</td>
@@ -451,7 +453,7 @@ ul.inheritsList {
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">uu.effect.<b><a href="../symbols/uu.effect.html#.pulsate">pulsate</a></b>(element, hash, number/string, function)
+								<div class="fixedFont">uu.effect.<b><a href="../symbols/uu.effect.html#.pulsate">pulsate</a></b>(Element, Hash, Number/String, Function)
 								</div>
 								<div class="description"><b>uu.effect.pulsate - 点滅</b>不透明度を上下させ点滅しているように見せます。fadeのコンビネーションです。<br /></div>
 							</td>
@@ -460,7 +462,7 @@ ul.inheritsList {
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">uu.effect.<b><a href="../symbols/uu.effect.html#.scale">scale</a></b>(element, hash, number/string, function, number, number, number)
+								<div class="fixedFont">uu.effect.<b><a href="../symbols/uu.effect.html#.scale">scale</a></b>(Element, Hash, Number/String, Function, Number, Number, Number)
 								</div>
 								<div class="description"><b>uu.effect.scale - スケールアップ/ダウン</b>要素を拡大/縮小します。<br />アンカーにより拡大縮小の基点を指定できます。<br />要素の現在のサイズより目標が大きければ拡大し、小さければ縮小します。現在のサイズと目標値が同じなら何もしません。<pre class="eg"> 8---1---2 |       | 7   0   3   アンカー(anchor)の指定 |       | 6---5---4</pre></div>
 							</td>
@@ -469,7 +471,7 @@ ul.inheritsList {
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">uu.effect.<b><a href="../symbols/uu.effect.html#.shake">shake</a></b>(element, hash, number/string, function)
+								<div class="fixedFont">uu.effect.<b><a href="../symbols/uu.effect.html#.shake">shake</a></b>(Element, Hash, Number/String, Function)
 								</div>
 								<div class="description"><b>uu.effect.shake - 揺らぎ</b>左右に揺らぎます。moveのコンビネーションです。<br /></div>
 							</td>
@@ -478,7 +480,7 @@ ul.inheritsList {
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">uu.effect.<b><a href="../symbols/uu.effect.html#.shrink">shrink</a></b>(element, hash, number/string, function)
+								<div class="fixedFont">uu.effect.<b><a href="../symbols/uu.effect.html#.shrink">shrink</a></b>(Element, Hash, Number/String, Function)
 								</div>
 								<div class="description"><b>uu.effect.shrink - シュリンク</b>要素の中央に向かって縮小します、最後は0x0にします。scaleのエリアスです。<br /></div>
 							</td>
@@ -562,7 +564,7 @@ ul.inheritsList {
 					<div class="fixedFont">&lt;static&gt; 
 					
 					
-					<span class="light">uu.effect.</span><b>blindDown</b>(element, hash, number/string, function)
+					<span class="light">uu.effect.</span><b>blindDown</b>(Element, Hash, Number/String, Function)
 					
 					</div>
 					<div class="description">
@@ -579,25 +581,25 @@ ul.inheritsList {
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>element</b>
+									<b>Element</b>
 									
 								</dt>
 								<dd>elm             - 要素を指定します。</dd>
 							
 								<dt>
-									<b>hash</b>
+									<b>Hash</b>
 									
 								</dt>
 								<dd>[param]         - パラメタの指定です。</dd>
 							
 								<dt>
-									<b>number/string</b>
+									<b>Number/String</b>
 									
 								</dt>
 								<dd>[param.speed]   - 描画完了までの時間を、ms単位の数値か、                                         文字列("now", "quick", "fast", "mid", "slow")で指定します。デフォルトは"mid"です。</dd>
 							
 								<dt>
-									<b>function</b>
+									<b>Function</b>
 									
 								</dt>
 								<dd>[param.fn]      - エフェクト完了でコールバックするメソッドを指定します。省略可能です。</dd>
@@ -617,7 +619,7 @@ ul.inheritsList {
 					<div class="fixedFont">&lt;static&gt; 
 					
 					
-					<span class="light">uu.effect.</span><b>blindUp</b>(element, hash, number/string, function)
+					<span class="light">uu.effect.</span><b>blindUp</b>(Element, Hash, Number/String, Function)
 					
 					</div>
 					<div class="description">
@@ -634,25 +636,25 @@ ul.inheritsList {
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>element</b>
+									<b>Element</b>
 									
 								</dt>
 								<dd>elm             - 要素を指定します。</dd>
 							
 								<dt>
-									<b>hash</b>
+									<b>Hash</b>
 									
 								</dt>
 								<dd>[param]         - パラメタの指定です。</dd>
 							
 								<dt>
-									<b>number/string</b>
+									<b>Number/String</b>
 									
 								</dt>
 								<dd>[param.speed]   - 描画完了までの時間を、ms単位の数値か、                                         文字列("now", "quick", "fast", "mid", "slow")で指定します。デフォルトは"mid"です。</dd>
 							
 								<dt>
-									<b>function</b>
+									<b>Function</b>
 									
 								</dt>
 								<dd>[param.fn]      - エフェクト完了でコールバックするメソッドを指定します。省略可能です。</dd>
@@ -672,7 +674,7 @@ ul.inheritsList {
 					<div class="fixedFont">&lt;static&gt; 
 					
 					
-					<span class="light">uu.effect.</span><b>dropOut</b>(element, hash, number/string, function)
+					<span class="light">uu.effect.</span><b>dropOut</b>(Element, Hash, Number/String, Function)
 					
 					</div>
 					<div class="description">
@@ -689,25 +691,25 @@ ul.inheritsList {
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>element</b>
+									<b>Element</b>
 									
 								</dt>
 								<dd>elm             - 要素を指定します。</dd>
 							
 								<dt>
-									<b>hash</b>
+									<b>Hash</b>
 									
 								</dt>
 								<dd>[param]         - パラメタの指定です。</dd>
 							
 								<dt>
-									<b>number/string</b>
+									<b>Number/String</b>
 									
 								</dt>
 								<dd>[param.speed]   - 描画完了までの時間を、ms単位の数値か、                                         文字列("now", "quick", "fast", "mid", "slow")で指定します。デフォルトは"mid"です。</dd>
 							
 								<dt>
-									<b>function</b>
+									<b>Function</b>
 									
 								</dt>
 								<dd>[param.fn]      - エフェクト完了でコールバックするメソッドを指定します。省略可能です。</dd>
@@ -727,7 +729,7 @@ ul.inheritsList {
 					<div class="fixedFont">&lt;static&gt; 
 					
 					
-					<span class="light">uu.effect.</span><b>fade</b>(element, hash, number/string, function, number, number)
+					<span class="light">uu.effect.</span><b>fade</b>(Element, Hash, Number/String, Function, Number, Number)
 					
 					</div>
 					<div class="description">
@@ -744,37 +746,37 @@ ul.inheritsList {
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>element</b>
+									<b>Element</b>
 									
 								</dt>
 								<dd>elm           - 要素を指定します。</dd>
 							
 								<dt>
-									<b>hash</b>
+									<b>Hash</b>
 									
 								</dt>
 								<dd>[param]       - パラメタの指定です。</dd>
 							
 								<dt>
-									<b>number/string</b>
+									<b>Number/String</b>
 									
 								</dt>
 								<dd>[param.speed] - 描画完了までの時間を、ms単位の数値か、                                       文字列("now", "quick", "fast", "mid", "slow")で指定します。デフォルトは"mid"です。</dd>
 							
 								<dt>
-									<b>function</b>
+									<b>Function</b>
 									
 								</dt>
 								<dd>[param.fn]    - エフェクト完了でコールバックするメソッドを指定します。省略可能です。</dd>
 							
 								<dt>
-									<b>number</b>
+									<b>Number</b>
 									
 								</dt>
 								<dd>[param.begin] - 初期不透明度を指定します。デフォルトは現在の不透明度です。</dd>
 							
 								<dt>
-									<b>number</b>
+									<b>Number</b>
 									
 								</dt>
 								<dd>[param.end]   - 目標とする不透明度を指定します。デフォルトは0.0(完全な透明)または1.0(完全な不透明)です。</dd>
@@ -794,7 +796,7 @@ ul.inheritsList {
 					<div class="fixedFont">&lt;static&gt; 
 					
 					
-					<span class="light">uu.effect.</span><b>fadein</b>(element, hash, number/string, function, number, number)
+					<span class="light">uu.effect.</span><b>fadein</b>(Element, Hash, Number/String, Function, Number, Number)
 					
 					</div>
 					<div class="description">
@@ -811,37 +813,37 @@ ul.inheritsList {
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>element</b>
+									<b>Element</b>
 									
 								</dt>
 								<dd>elm           - 要素を指定します。</dd>
 							
 								<dt>
-									<b>hash</b>
+									<b>Hash</b>
 									
 								</dt>
 								<dd>[param]       - パラメタの指定です。</dd>
 							
 								<dt>
-									<b>number/string</b>
+									<b>Number/String</b>
 									
 								</dt>
 								<dd>[param.speed] - 描画完了までの時間を、ms単位の数値か、                                       文字列("now", "quick", "fast", "mid", "slow")で指定します。デフォルトは"mid"です。</dd>
 							
 								<dt>
-									<b>function</b>
+									<b>Function</b>
 									
 								</dt>
 								<dd>[param.fn]    - エフェクト完了でコールバックするメソッドを指定します。省略可能です。</dd>
 							
 								<dt>
-									<b>number</b>
+									<b>Number</b>
 									
 								</dt>
 								<dd>[param.begin] - 初期不透明度を指定します。デフォルトは現在の不透明度です。</dd>
 							
 								<dt>
-									<b>number</b>
+									<b>Number</b>
 									
 								</dt>
 								<dd>[param.end]   - 目標とする不透明度を指定します。デフォルトは1.0(完全な不透明)です。</dd>
@@ -861,7 +863,7 @@ ul.inheritsList {
 					<div class="fixedFont">&lt;static&gt; 
 					
 					
-					<span class="light">uu.effect.</span><b>fadeout</b>(element, hash, number/string, function, number, number)
+					<span class="light">uu.effect.</span><b>fadeout</b>(Element, Hash, Number/String, Function, Number, Number)
 					
 					</div>
 					<div class="description">
@@ -878,37 +880,37 @@ ul.inheritsList {
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>element</b>
+									<b>Element</b>
 									
 								</dt>
 								<dd>elm           - 要素を指定します。</dd>
 							
 								<dt>
-									<b>hash</b>
+									<b>Hash</b>
 									
 								</dt>
 								<dd>[param]       - パラメタの指定です。</dd>
 							
 								<dt>
-									<b>number/string</b>
+									<b>Number/String</b>
 									
 								</dt>
 								<dd>[param.speed] - 描画完了までの時間を、ms単位の数値か、                                       文字列("now", "quick", "fast", "mid", "slow")で指定します。デフォルトは"mid"です。</dd>
 							
 								<dt>
-									<b>function</b>
+									<b>Function</b>
 									
 								</dt>
 								<dd>[param.fn]    - エフェクト完了でコールバックするメソッドを指定します。省略可能です。</dd>
 							
 								<dt>
-									<b>number</b>
+									<b>Number</b>
 									
 								</dt>
 								<dd>[param.begin] - 初期不透明度を指定します。デフォルトは現在の不透明度です。</dd>
 							
 								<dt>
-									<b>number</b>
+									<b>Number</b>
 									
 								</dt>
 								<dd>[param.end]   - 目標とする不透明度を指定します。デフォルトは0.0(完全な透明)です。</dd>
@@ -928,7 +930,7 @@ ul.inheritsList {
 					<div class="fixedFont">&lt;static&gt; 
 					
 					
-					<span class="light">uu.effect.</span><b>fold</b>(element, hash, number/string, function)
+					<span class="light">uu.effect.</span><b>fold</b>(Element, Hash, Number/String, Function)
 					
 					</div>
 					<div class="description">
@@ -945,25 +947,25 @@ ul.inheritsList {
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>element</b>
+									<b>Element</b>
 									
 								</dt>
 								<dd>elm             - 要素を指定します。</dd>
 							
 								<dt>
-									<b>hash</b>
+									<b>Hash</b>
 									
 								</dt>
 								<dd>[param]         - パラメタの指定です。</dd>
 							
 								<dt>
-									<b>number/string</b>
+									<b>Number/String</b>
 									
 								</dt>
 								<dd>[param.speed]   - 描画完了までの時間を、ms単位の数値か、                                         文字列("now", "quick", "fast", "mid", "slow")で指定します。デフォルトは"mid"です。</dd>
 							
 								<dt>
-									<b>function</b>
+									<b>Function</b>
 									
 								</dt>
 								<dd>[param.fn]      - エフェクト完了でコールバックするメソッドを指定します。省略可能です。</dd>
@@ -983,7 +985,7 @@ ul.inheritsList {
 					<div class="fixedFont">&lt;static&gt; 
 					
 					
-					<span class="light">uu.effect.</span><b>glow</b>(element, hash, number/string, function)
+					<span class="light">uu.effect.</span><b>glow</b>(Element, Hash, Number/String, Function)
 					
 					</div>
 					<div class="description">
@@ -1000,25 +1002,25 @@ ul.inheritsList {
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>element</b>
+									<b>Element</b>
 									
 								</dt>
 								<dd>elm             - 要素を指定します。</dd>
 							
 								<dt>
-									<b>hash</b>
+									<b>Hash</b>
 									
 								</dt>
 								<dd>[param]         - パラメタの指定です。</dd>
 							
 								<dt>
-									<b>number/string</b>
+									<b>Number/String</b>
 									
 								</dt>
 								<dd>[param.speed]   - 描画完了までの時間を、ms単位の数値か、                                         文字列("now", "quick", "fast", "mid", "slow")で指定します。デフォルトは"mid"です。</dd>
 							
 								<dt>
-									<b>function</b>
+									<b>Function</b>
 									
 								</dt>
 								<dd>[param.fn]      - エフェクト完了でコールバックするメソッドを指定します。省略可能です。</dd>
@@ -1038,7 +1040,7 @@ ul.inheritsList {
 					<div class="fixedFont">&lt;static&gt; 
 					
 					
-					<span class="light">uu.effect.</span><b>move</b>(element, hash, number/string, function, number, number, number)
+					<span class="light">uu.effect.</span><b>move</b>(Element, Hash, Number/String, Function, Number, Number, Number)
 					
 					</div>
 					<div class="description">
@@ -1055,43 +1057,43 @@ ul.inheritsList {
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>element</b>
+									<b>Element</b>
 									
 								</dt>
 								<dd>elm             - 要素を指定します。</dd>
 							
 								<dt>
-									<b>hash</b>
+									<b>Hash</b>
 									
 								</dt>
 								<dd>[param]         - パラメタの指定です。</dd>
 							
 								<dt>
-									<b>number/string</b>
+									<b>Number/String</b>
 									
 								</dt>
 								<dd>[param.speed]   - 描画完了までの時間を、ms単位の数値か、                                         文字列("now", "quick", "fast", "mid", "slow")で指定します。デフォルトは"mid"です。</dd>
 							
 								<dt>
-									<b>function</b>
+									<b>Function</b>
 									
 								</dt>
 								<dd>[param.fn]      - エフェクト完了でコールバックするメソッドを指定します。省略可能です。</dd>
 							
 								<dt>
-									<b>number</b>
+									<b>Number</b>
 									
 								</dt>
 								<dd>[param.x]       - left: 目標位置を絶対座標(px単位)で指定します。省略すると現在のx座標から動きません。</dd>
 							
 								<dt>
-									<b>number</b>
+									<b>Number</b>
 									
 								</dt>
 								<dd>[param.y]       - top: 目標位置を絶対座標(px単位)で指定します。省略すると現在のy座標から動きません。</dd>
 							
 								<dt>
-									<b>number</b>
+									<b>Number</b>
 									
 								</dt>
 								<dd>[param.rel]     - x,yを相対座標として評価する場合にtrueを指定します。デフォルトはfalse(絶対座標指定)です。                                         rel=true,x=100,y=100とすると、現在を基準とした+100px,+100pxの位置に要素が移動します。</dd>
@@ -1111,7 +1113,7 @@ ul.inheritsList {
 					<div class="fixedFont">&lt;static&gt; 
 					
 					
-					<span class="light">uu.effect.</span><b>puff</b>(element, hash, number/string, function)
+					<span class="light">uu.effect.</span><b>puff</b>(Element, Hash, Number/String, Function)
 					
 					</div>
 					<div class="description">
@@ -1128,25 +1130,25 @@ ul.inheritsList {
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>element</b>
+									<b>Element</b>
 									
 								</dt>
 								<dd>elm             - 要素を指定します。</dd>
 							
 								<dt>
-									<b>hash</b>
+									<b>Hash</b>
 									
 								</dt>
 								<dd>[param]         - パラメタの指定です。</dd>
 							
 								<dt>
-									<b>number/string</b>
+									<b>Number/String</b>
 									
 								</dt>
 								<dd>[param.speed]   - 描画完了までの時間を、ms単位の数値か、                                         文字列("now", "quick", "fast", "mid", "slow")で指定します。デフォルトは"mid"です。</dd>
 							
 								<dt>
-									<b>function</b>
+									<b>Function</b>
 									
 								</dt>
 								<dd>[param.fn]      - エフェクト完了でコールバックするメソッドを指定します。省略可能です。</dd>
@@ -1166,7 +1168,7 @@ ul.inheritsList {
 					<div class="fixedFont">&lt;static&gt; 
 					
 					
-					<span class="light">uu.effect.</span><b>pulsate</b>(element, hash, number/string, function)
+					<span class="light">uu.effect.</span><b>pulsate</b>(Element, Hash, Number/String, Function)
 					
 					</div>
 					<div class="description">
@@ -1183,25 +1185,25 @@ ul.inheritsList {
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>element</b>
+									<b>Element</b>
 									
 								</dt>
 								<dd>elm             - 要素を指定します。</dd>
 							
 								<dt>
-									<b>hash</b>
+									<b>Hash</b>
 									
 								</dt>
 								<dd>[param]         - パラメタの指定です。</dd>
 							
 								<dt>
-									<b>number/string</b>
+									<b>Number/String</b>
 									
 								</dt>
 								<dd>[param.speed]   - 描画完了までの時間を、ms単位の数値か、                                         文字列("now", "quick", "fast", "mid", "slow")で指定します。デフォルトは"mid"です。</dd>
 							
 								<dt>
-									<b>function</b>
+									<b>Function</b>
 									
 								</dt>
 								<dd>[param.fn]      - エフェクト完了でコールバックするメソッドを指定します。省略可能です。</dd>
@@ -1221,7 +1223,7 @@ ul.inheritsList {
 					<div class="fixedFont">&lt;static&gt; 
 					
 					
-					<span class="light">uu.effect.</span><b>scale</b>(element, hash, number/string, function, number, number, number)
+					<span class="light">uu.effect.</span><b>scale</b>(Element, Hash, Number/String, Function, Number, Number, Number)
 					
 					</div>
 					<div class="description">
@@ -1238,43 +1240,43 @@ ul.inheritsList {
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>element</b>
+									<b>Element</b>
 									
 								</dt>
 								<dd>elm             - 要素を指定します。</dd>
 							
 								<dt>
-									<b>hash</b>
+									<b>Hash</b>
 									
 								</dt>
 								<dd>[param]         - パラメタの指定です。</dd>
 							
 								<dt>
-									<b>number/string</b>
+									<b>Number/String</b>
 									
 								</dt>
 								<dd>[param.speed]   - 描画完了までの時間を、ms単位の数値か、                                         文字列("now", "quick", "fast", "mid", "slow")で指定します。デフォルトは"mid"です。</dd>
 							
 								<dt>
-									<b>function</b>
+									<b>Function</b>
 									
 								</dt>
 								<dd>[param.fn]      - エフェクト完了でコールバックするメソッドを指定します。省略可能です。</dd>
 							
 								<dt>
-									<b>number</b>
+									<b>Number</b>
 									
 								</dt>
 								<dd>[param.anchor]  - アンカーを0～8の数値( 0[中心], 1[北]～8[北西] )で指定します。デフォルトは0です。</dd>
 							
 								<dt>
-									<b>number</b>
+									<b>Number</b>
 									
 								</dt>
 								<dd>[param.w]       - width: 幅の目標値をpx単位で指定します。省略すると現在の幅を使用します。</dd>
 							
 								<dt>
-									<b>number</b>
+									<b>Number</b>
 									
 								</dt>
 								<dd>[param.h]       - height: 高さの目標値をpx単位で指定します。省略すると現在の高さを使用します。</dd>
@@ -1294,7 +1296,7 @@ ul.inheritsList {
 					<div class="fixedFont">&lt;static&gt; 
 					
 					
-					<span class="light">uu.effect.</span><b>shake</b>(element, hash, number/string, function)
+					<span class="light">uu.effect.</span><b>shake</b>(Element, Hash, Number/String, Function)
 					
 					</div>
 					<div class="description">
@@ -1311,25 +1313,25 @@ ul.inheritsList {
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>element</b>
+									<b>Element</b>
 									
 								</dt>
 								<dd>elm             - 要素を指定します。</dd>
 							
 								<dt>
-									<b>hash</b>
+									<b>Hash</b>
 									
 								</dt>
 								<dd>[param]         - パラメタの指定です。</dd>
 							
 								<dt>
-									<b>number/string</b>
+									<b>Number/String</b>
 									
 								</dt>
 								<dd>[param.speed]   - 描画完了までの時間を、ms単位の数値か、                                         文字列("now", "quick", "fast", "mid", "slow")で指定します。デフォルトは"mid"です。</dd>
 							
 								<dt>
-									<b>function</b>
+									<b>Function</b>
 									
 								</dt>
 								<dd>[param.fn]      - エフェクト完了でコールバックするメソッドを指定します。省略可能です。</dd>
@@ -1349,7 +1351,7 @@ ul.inheritsList {
 					<div class="fixedFont">&lt;static&gt; 
 					
 					
-					<span class="light">uu.effect.</span><b>shrink</b>(element, hash, number/string, function)
+					<span class="light">uu.effect.</span><b>shrink</b>(Element, Hash, Number/String, Function)
 					
 					</div>
 					<div class="description">
@@ -1366,25 +1368,25 @@ ul.inheritsList {
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>element</b>
+									<b>Element</b>
 									
 								</dt>
 								<dd>elm             - 要素を指定します。</dd>
 							
 								<dt>
-									<b>hash</b>
+									<b>Hash</b>
 									
 								</dt>
 								<dd>[param]         - パラメタの指定です。</dd>
 							
 								<dt>
-									<b>number/string</b>
+									<b>Number/String</b>
 									
 								</dt>
 								<dd>[param.speed]   - 描画完了までの時間を、ms単位の数値か、                                         文字列("now", "quick", "fast", "mid", "slow")で指定します。デフォルトは"mid"です。</dd>
 							
 								<dt>
-									<b>function</b>
+									<b>Function</b>
 									
 								</dt>
 								<dd>[param.fn]      - エフェクト完了でコールバックするメソッドを指定します。省略可能です。</dd>
@@ -1408,7 +1410,7 @@ ul.inheritsList {
 <!-- ============================== footer ================================= -->
 		<div class="fineprint" style="clear:both">
 			&copy;2008<br />
-			Documentation generated by <a href="http://www.jsdoctoolkit.org/" target="_blank">JsDoc Toolkit</a> 2.0.beta2.3 on Sun Jun 15 2008 16:44:33 GMT+0900 (JST)
+			Documentation generated by <a href="http://www.jsdoctoolkit.org/" target="_blank">JsDoc Toolkit</a> 2.0.beta2.3 on Fri Jun 27 2008 02:25:12 GMT+0900 (JST)
 		</div>
 	</body>
 </html>

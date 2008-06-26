@@ -156,7 +156,21 @@ ul.inheritsList {
 <!-- ============================== header ================================= -->	
 		<!-- begin static/header.html -->
 		<div id="header">
-<a href="http://uupaa-js.googlecode.com/svn/trunk/README.htm">README.htm</a> &gt; Reference
+<a href="http://uupaa-js.googlecode.com/svn/trunk/README.htm">README</a> &gt; API Reference
+<p>
+   | <a href="http://code.google.com/p/uupaa-js/">Project Home(Google Code)</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/README.htm#demo">DEMO</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/CHANGELOG.htm">ChangeLog</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/LICENSE.htm">License</a> |<br />
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm">Document</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/SELECTOR.htm">Selector</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/MODULE.htm">Module</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/GLOSSARY.htm">Glossary</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/doc/reference/index.html">API Reference</a>
+   |
+</p>
+
+<hr />
 </div>
 
 		<!-- end static/header.html -->
@@ -174,10 +188,6 @@ ul.inheritsList {
 	
 	<li><a href="../symbols/Array.html">Array</a></li>
 	
-	<li><a href="../symbols/Date.html">Date</a></li>
-	
-	<li><a href="../symbols/Number.html">Number</a></li>
-	
 	<li><a href="../symbols/uu.html">uu</a></li>
 	
 	<li><a href="../symbols/uu.ajax.html">uu.ajax</a></li>
@@ -192,10 +202,6 @@ ul.inheritsList {
 	
 	<li><a href="../symbols/uu.css.html">uu.css</a></li>
 	
-	<li><a href="../symbols/uu.css.get.html">uu.css.get</a></li>
-	
-	<li><a href="../symbols/uu.css.set.html">uu.css.set</a></li>
-	
 	<li><a href="../symbols/uu.dom.html">uu.dom</a></li>
 	
 	<li><a href="../symbols/uu.effect.html">uu.effect</a></li>
@@ -206,13 +212,7 @@ ul.inheritsList {
 	
 	<li><a href="../symbols/uu.event.mouse.html">uu.event.mouse</a></li>
 	
-	<li><a href="../symbols/uu.forEach.html">uu.forEach</a></li>
-	
-	<li><a href="../symbols/uu.id.html">uu.id</a></li>
-	
 	<li><a href="../symbols/uu.image.html">uu.image</a></li>
-	
-	<li><a href="../symbols/uu.js.html">uu.js</a></li>
 	
 	<li><a href="../symbols/uu.json.html">uu.json</a></li>
 	
@@ -234,6 +234,8 @@ ul.inheritsList {
 	
 	<li><a href="../symbols/uu.module.messagePump.html">uu.module.messagePump</a></li>
 	
+	<li><a href="../symbols/uu.module.perf.html">uu.module.perf</a></li>
+	
 	<li><a href="../symbols/uu.module.pmvc.html">uu.module.pmvc</a></li>
 	
 	<li><a href="../symbols/uu.module.pmvc.applicationModel.html">uu.module.pmvc.applicationModel</a></li>
@@ -250,6 +252,8 @@ ul.inheritsList {
 	
 	<li><a href="../symbols/uu.perry.html">uu.perry</a></li>
 	
+	<li><a href="../symbols/uu.request.html">uu.request</a></li>
+	
 	<li><a href="../symbols/uu.tag.html">uu.tag</a></li>
 	
 	<li><a href="../symbols/uu.ua.html">uu.ua</a></li>
@@ -259,8 +263,6 @@ ul.inheritsList {
 	<li><a href="../symbols/uu.ui.element.html">uu.ui.element</a></li>
 	
 	<li><a href="../symbols/uu.url.html">uu.url</a></li>
-	
-	<li><a href="../symbols/uu.url.query.html">uu.url.query</a></li>
 	
 	<li><a href="../symbols/uu.window.html">uu.window</a></li>
 	
@@ -306,7 +308,7 @@ ul.inheritsList {
 							<div class="fixedFont">
 								<b><a href="../symbols/uu.module.html#constructor">uu.module</a></b>()
 							</div>
-							<div class="description"><b>Module</b></div>
+							<div class="description">Module</div>
 						</td>
 					</tr>
 				</tbody>
@@ -331,19 +333,9 @@ ul.inheritsList {
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
 								<div class="fixedFont">
-								uu.module.<b><a href="../symbols/uu.module.html#.delay">delay</a></b>
-								</div>
-								<div class="description"><b>uu.module.delay - 遅延時間</b>uu.module.loadSync()で使用する遅延時間の指定です。<br />10以上の数値を指定します。単位はmsです。デフォルトは50です。</div>
-							</td>
-						</tr>
-					
-						<tr>
-							<td class="attributes">&lt;static&gt; &nbsp;</td>
-							<td class="nameDescription">
-								<div class="fixedFont">
 								uu.module.<b><a href="../symbols/uu.module.html#.timeout">timeout</a></b>
 								</div>
-								<div class="description"><b>uu.module.timeout - タイムアウト時間</b>uu.module.loadSync()で使用するタイムアウト時間を指定します。<br />1以上の数値を指定します。単位はmsです。デフォルトは500です。</div>
+								<div class="description">uu.module.timeout - タイムアウト時間の指定</div>
 							</td>
 						</tr>
 					
@@ -380,27 +372,27 @@ ul.inheritsList {
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">uu.module.<b><a href="../symbols/uu.module.html#.isLoaded">isLoaded</a></b>(taxing)
+								<div class="fixedFont">uu.module.<b><a href="../symbols/uu.module.html#.isLoaded">isLoaded</a></b>(module)
 								</div>
-								<div class="description"><b>uu.module.isLoaded - モジュールをロード済みならtrue</b></div>
+								<div class="description">uu.module.isLoaded - モジュールの読み込み確認 - is Module Loaded</div>
 							</td>
 						</tr>
 					
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">uu.module.<b><a href="../symbols/uu.module.html#.load">load</a></b>(taxing, taxing, function)
+								<div class="fixedFont">uu.module.<b><a href="../symbols/uu.module.html#.load">load</a></b>(path, module, fn)
 								</div>
-								<div class="description"><b>uu.module.load - モジュールの非同期ロード(load module[Async])</b>モジュールを順番にロードし、全モジュールのロード完了で、fn() をコールします。<br />uu.module.loadSync()との違いは以下になります。<br />1.</div>
+								<div class="description">uu.module.load - モジュールの読み込み - Load Module</div>
 							</td>
 						</tr>
 					
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">uu.module.<b><a href="../symbols/uu.module.html#.loadSync">loadSync</a></b>(taxing, taxing, function)
+								<div class="fixedFont">uu.module.<b><a href="../symbols/uu.module.html#.loadSync">loadSync</a></b>(path, module, fn)
 								</div>
-								<div class="description"><b>uu.module.loadSync -モジュールの同期ロード(load module[Sync])</b>モジュールを順番にロードし、全モジュールのロード完了で、fn() をコールします。<br />モジュールの検索パス(path)は複数指定可能です。<br />最初に指定した検索パスからモジュールをロードできない場合は、検索パスがあるかぎり順次試行します。<br />全検索パスを試行してもロードできない場合は例外を発生させます。<br />検索パスの指定を省略すると、uu.config.modulePathで指定されたURLを検索パスとして使用します。<br /><pre class="eg">// http://example.com/ 以下から ui,dragモジュールのロードを試み、失敗した場合は、// http://example.net/latest/ 以下からモジュールのロードを試みる。uu.module.loadSync("http://example.com/,http://example.net/latest/", "ui,drag");</pre>複数の検索パスをうまく組み合わせると、本番系が接続しにくい場合に、自動的に予備系のサーバからスクリプトをロードするといった動作の指定が可能になります。<br />既にロード済みのモジュールを指定すると、即座にfnを呼び出します。</div>
+								<div class="description">uu.module.loadSync -モジュールの同期読み込み - Load Module(Synchronized)</div>
 							</td>
 						</tr>
 					
@@ -423,7 +415,7 @@ ul.inheritsList {
 				</div>
 				
 				<div class="description">
-					<b>Module</b>
+					Module
 					
 				</div>
 				
@@ -436,6 +428,13 @@ ul.inheritsList {
 					
 					
 					
+					
+						<dl class="detailList">
+						<dt class="heading">See:</dt>
+						
+							<dd><a href="http://uupaa-js.googlecode.com/svn/trunk/MODULE.htm#uu.module">uu.module</a></dd>
+						
+						</dl>
 					
 
 			</div>
@@ -447,45 +446,15 @@ ul.inheritsList {
 					Field Detail
 				</div>
 				
-					<a name=".delay"> </a>
-					<div class="fixedFont">&lt;static&gt; 
-					
-					<span class="light">{number}</span>
-					<span class="light">uu.module.</span><b>delay</b>
-					
-					</div>
-					<div class="description">
-						<b>uu.module.delay - 遅延時間</b>uu.module.loadSync()で使用する遅延時間の指定です。<br />10以上の数値を指定します。単位はmsです。デフォルトは50です。
-						
-						
-					</div>
-					
-					
-				
-					
-						
-						
-						
-							<dl class="detailList">
-							<dt class="heading">See:</dt>
-							
-							<dd><a href="../symbols/uu.module.html#.loadSync">uu.module.loadSync</a></dd>
-							
-							</dl>
-						
-						
-
-					<hr />
-				
 					<a name=".timeout"> </a>
 					<div class="fixedFont">&lt;static&gt; 
 					
-					<span class="light">{number}</span>
+					
 					<span class="light">uu.module.</span><b>timeout</b>
 					
 					</div>
 					<div class="description">
-						<b>uu.module.timeout - タイムアウト時間</b>uu.module.loadSync()で使用するタイムアウト時間を指定します。<br />1以上の数値を指定します。単位はmsです。デフォルトは500です。
+						uu.module.timeout - タイムアウト時間の指定
 						
 						
 					</div>
@@ -499,7 +468,7 @@ ul.inheritsList {
 							<dl class="detailList">
 							<dt class="heading">See:</dt>
 							
-							<dd><a href="../symbols/uu.module.html#.loadSync">uu.module.loadSync</a></dd>
+							<dd><a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.module.timeout">uu.module.timeout</a></dd>
 							
 							</dl>
 						
@@ -548,11 +517,11 @@ ul.inheritsList {
 					<div class="fixedFont">&lt;static&gt; 
 					
 					
-					<span class="light">uu.module.</span><b>isLoaded</b>(taxing)
+					<span class="light">uu.module.</span><b>isLoaded</b>(module)
 					
 					</div>
 					<div class="description">
-						<b>uu.module.isLoaded - モジュールをロード済みならtrue</b>
+						uu.module.isLoaded - モジュールの読み込み確認 - is Module Loaded
 						
 						
 					</div>
@@ -565,25 +534,25 @@ ul.inheritsList {
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>taxing</b>
+									<b>module</b>
 									
 								</dt>
-								<dd>name - モジュール名を指定します。</dd>
+								<dd></dd>
 							
 							</dl>
+						
+						
 						
 						
 						
 						
 						
 							<dl class="detailList">
-							<dt class="heading">Returns:</dt>
+							<dt class="heading">See:</dt>
 							
-								<dd>bool - モジュールロード済みでtrueを返します。<br />               複数モジュール指定時は、全モジュールロード済みでtrueを返します。</dd>
+								<dd><a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.module.isLoaded">uu.module.isLoaded</a></dd>
 							
 							</dl>
-						
-						
 						
 
 					<hr />
@@ -592,11 +561,11 @@ ul.inheritsList {
 					<div class="fixedFont">&lt;static&gt; 
 					
 					
-					<span class="light">uu.module.</span><b>load</b>(taxing, taxing, function)
+					<span class="light">uu.module.</span><b>load</b>(path, module, fn)
 					
 					</div>
 					<div class="description">
-						<b>uu.module.load - モジュールの非同期ロード(load module[Async])</b>モジュールを順番にロードし、全モジュールのロード完了で、fn() をコールします。<br />uu.module.loadSync()との違いは以下になります。<br />1. uu.module.loadSync()はシリアル(順番)にロードしますが、uu.module.load()はパラレル(同時)にロードします。<br />2. パラレルにロードするためユーザの待機時間が最小になりますが、ロード順は保障されません。<br />3. タイムアウトしません。既にロード済みのモジュールを指定すると、即座にfnを呼び出します。
+						uu.module.load - モジュールの読み込み - Load Module
 						
 						
 					</div>
@@ -609,37 +578,27 @@ ul.inheritsList {
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>taxing</b>
+									<b>path</b>
 									
 								</dt>
-								<dd>[path] - 検索パスの指定です。絶対URLや相対パスを指定します。<br />                       空文字列を指定すると、uu.config.modulePathで指定されたURLを検索パスとして使用します。<br />                       デフォルトは空文字列("")です。<br /></dd>
+								<dd></dd>
 							
 								<dt>
-									<b>taxing</b>
+									<b>module</b>
 									
 								</dt>
-								<dd>module - モジュールの指定です。</dd>
+								<dd></dd>
 							
 								<dt>
-									<b>function</b>
+									<b>fn</b>
 									
 								</dt>
-								<dd>[fn] - ロード完了後にコールバックするメソッドを指定します。デフォルトはundefinedです。</dd>
+								<dd></dd>
 							
 							</dl>
 						
 						
 						
-						
-							<dl class="detailList">
-							<dt class="heading">Throws:</dt>
-							
-								<dt>
-									 <b></b>
-								</dt>
-								<dd>Error          "uu.module.load({module}) failed"  ロード失敗</dd>
-							
-							</dl>
 						
 						
 						
@@ -647,13 +606,7 @@ ul.inheritsList {
 							<dl class="detailList">
 							<dt class="heading">See:</dt>
 							
-								<dd><a href="../symbols/uu.config.html#.modulePath">uu.config.modulePath</a> モジュール検索パスの指定</dd>
-							
-								<dd><a href="../symbols/uu.module.html#.loadSync">uu.module.loadSync</a> - 同期ロード</dd>
-							
-								<dd><a href="../symbols/uu.module.html#.isLoaded">uu.module.isLoaded</a> - モジュール読込済みでtrueを返す</dd>
-							
-								<dd><a href="../symbols/uu.html#.baseURL">uu.baseURL</a> - uupaa.jsのカレントパスを返す</dd>
+								<dd><a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.module.load">uu.module.load</a></dd>
 							
 							</dl>
 						
@@ -664,11 +617,11 @@ ul.inheritsList {
 					<div class="fixedFont">&lt;static&gt; 
 					
 					
-					<span class="light">uu.module.</span><b>loadSync</b>(taxing, taxing, function)
+					<span class="light">uu.module.</span><b>loadSync</b>(path, module, fn)
 					
 					</div>
 					<div class="description">
-						<b>uu.module.loadSync -モジュールの同期ロード(load module[Sync])</b>モジュールを順番にロードし、全モジュールのロード完了で、fn() をコールします。<br />モジュールの検索パス(path)は複数指定可能です。<br />最初に指定した検索パスからモジュールをロードできない場合は、検索パスがあるかぎり順次試行します。<br />全検索パスを試行してもロードできない場合は例外を発生させます。<br />検索パスの指定を省略すると、uu.config.modulePathで指定されたURLを検索パスとして使用します。<br /><pre class="eg">// http://example.com/ 以下から ui,dragモジュールのロードを試み、失敗した場合は、// http://example.net/latest/ 以下からモジュールのロードを試みる。uu.module.loadSync("http://example.com/,http://example.net/latest/", "ui,drag");</pre>複数の検索パスをうまく組み合わせると、本番系が接続しにくい場合に、自動的に予備系のサーバからスクリプトをロードするといった動作の指定が可能になります。<br />既にロード済みのモジュールを指定すると、即座にfnを呼び出します。
+						uu.module.loadSync -モジュールの同期読み込み - Load Module(Synchronized)
 						
 						
 					</div>
@@ -681,42 +634,27 @@ ul.inheritsList {
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>taxing</b>
+									<b>path</b>
 									
 								</dt>
-								<dd>[path] - 検索パスの指定です。絶対URLや相対パスを指定します。<br />                       空文字列を指定すると、uu.config.modulePathで指定されたURLを検索パスとして使用します。<br />                       デフォルトは空文字列("")です。<br /></dd>
+								<dd></dd>
 							
 								<dt>
-									<b>taxing</b>
+									<b>module</b>
 									
 								</dt>
-								<dd>module - モジュールの指定です。</dd>
+								<dd></dd>
 							
 								<dt>
-									<b>function</b>
+									<b>fn</b>
 									
 								</dt>
-								<dd>[fn] - ロード完了後にコールバックするメソッドを指定します。デフォルトはundefinedです。</dd>
+								<dd></dd>
 							
 							</dl>
 						
 						
 						
-						
-							<dl class="detailList">
-							<dt class="heading">Throws:</dt>
-							
-								<dt>
-									 <b></b>
-								</dt>
-								<dd>Error          "uu.module.load({module}) timeout" タイムアウト</dd>
-							
-								<dt>
-									 <b></b>
-								</dt>
-								<dd>Error          "uu.module.load({module}) failed"  ロード失敗</dd>
-							
-							</dl>
 						
 						
 						
@@ -724,17 +662,7 @@ ul.inheritsList {
 							<dl class="detailList">
 							<dt class="heading">See:</dt>
 							
-								<dd><a href="../symbols/uu.config.html#.modulePath">uu.config.modulePath</a> - モジュール検索パスの指定</dd>
-							
-								<dd><a href="../symbols/uu.module.html#.timeout">uu.module.timeout</a> - タイムアウト時間の指定</dd>
-							
-								<dd><a href="../symbols/uu.module.html#.delay">uu.module.delay</a> - 遅延時間の指定</dd>
-							
-								<dd><a href="../symbols/uu.module.html#.load">uu.module.load</a> - 非同期ロード</dd>
-							
-								<dd><a href="../symbols/uu.module.html#.isLoaded">uu.module.isLoaded</a> - モジュール読込済みでtrueを返す</dd>
-							
-								<dd><a href="../symbols/uu.html#.baseURL">uu.baseURL</a> - uupaa.jsのカレントパスを返す</dd>
+								<dd><a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.module.loadSync">uu.module.loadSync</a></dd>
 							
 							</dl>
 						
@@ -749,7 +677,7 @@ ul.inheritsList {
 <!-- ============================== footer ================================= -->
 		<div class="fineprint" style="clear:both">
 			&copy;2008<br />
-			Documentation generated by <a href="http://www.jsdoctoolkit.org/" target="_blank">JsDoc Toolkit</a> 2.0.beta2.3 on Sun Jun 15 2008 16:44:34 GMT+0900 (JST)
+			Documentation generated by <a href="http://www.jsdoctoolkit.org/" target="_blank">JsDoc Toolkit</a> 2.0.beta2.3 on Fri Jun 27 2008 02:25:12 GMT+0900 (JST)
 		</div>
 	</body>
 </html>

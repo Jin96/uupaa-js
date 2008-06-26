@@ -156,7 +156,21 @@ ul.inheritsList {
 <!-- ============================== header ================================= -->	
 		<!-- begin static/header.html -->
 		<div id="header">
-<a href="http://uupaa-js.googlecode.com/svn/trunk/README.htm">README.htm</a> &gt; Reference
+<a href="http://uupaa-js.googlecode.com/svn/trunk/README.htm">README</a> &gt; API Reference
+<p>
+   | <a href="http://code.google.com/p/uupaa-js/">Project Home(Google Code)</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/README.htm#demo">DEMO</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/CHANGELOG.htm">ChangeLog</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/LICENSE.htm">License</a> |<br />
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm">Document</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/SELECTOR.htm">Selector</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/MODULE.htm">Module</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/GLOSSARY.htm">Glossary</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/doc/reference/index.html">API Reference</a>
+   |
+</p>
+
+<hr />
 </div>
 
 		<!-- end static/header.html -->
@@ -174,10 +188,6 @@ ul.inheritsList {
 	
 	<li><a href="../symbols/Array.html">Array</a></li>
 	
-	<li><a href="../symbols/Date.html">Date</a></li>
-	
-	<li><a href="../symbols/Number.html">Number</a></li>
-	
 	<li><a href="../symbols/uu.html">uu</a></li>
 	
 	<li><a href="../symbols/uu.ajax.html">uu.ajax</a></li>
@@ -192,10 +202,6 @@ ul.inheritsList {
 	
 	<li><a href="../symbols/uu.css.html">uu.css</a></li>
 	
-	<li><a href="../symbols/uu.css.get.html">uu.css.get</a></li>
-	
-	<li><a href="../symbols/uu.css.set.html">uu.css.set</a></li>
-	
 	<li><a href="../symbols/uu.dom.html">uu.dom</a></li>
 	
 	<li><a href="../symbols/uu.effect.html">uu.effect</a></li>
@@ -206,13 +212,7 @@ ul.inheritsList {
 	
 	<li><a href="../symbols/uu.event.mouse.html">uu.event.mouse</a></li>
 	
-	<li><a href="../symbols/uu.forEach.html">uu.forEach</a></li>
-	
-	<li><a href="../symbols/uu.id.html">uu.id</a></li>
-	
 	<li><a href="../symbols/uu.image.html">uu.image</a></li>
-	
-	<li><a href="../symbols/uu.js.html">uu.js</a></li>
 	
 	<li><a href="../symbols/uu.json.html">uu.json</a></li>
 	
@@ -234,6 +234,8 @@ ul.inheritsList {
 	
 	<li><a href="../symbols/uu.module.messagePump.html">uu.module.messagePump</a></li>
 	
+	<li><a href="../symbols/uu.module.perf.html">uu.module.perf</a></li>
+	
 	<li><a href="../symbols/uu.module.pmvc.html">uu.module.pmvc</a></li>
 	
 	<li><a href="../symbols/uu.module.pmvc.applicationModel.html">uu.module.pmvc.applicationModel</a></li>
@@ -250,6 +252,8 @@ ul.inheritsList {
 	
 	<li><a href="../symbols/uu.perry.html">uu.perry</a></li>
 	
+	<li><a href="../symbols/uu.request.html">uu.request</a></li>
+	
 	<li><a href="../symbols/uu.tag.html">uu.tag</a></li>
 	
 	<li><a href="../symbols/uu.ua.html">uu.ua</a></li>
@@ -259,8 +263,6 @@ ul.inheritsList {
 	<li><a href="../symbols/uu.ui.element.html">uu.ui.element</a></li>
 	
 	<li><a href="../symbols/uu.url.html">uu.url</a></li>
-	
-	<li><a href="../symbols/uu.url.query.html">uu.url.query</a></li>
 	
 	<li><a href="../symbols/uu.window.html">uu.window</a></li>
 	
@@ -304,9 +306,9 @@ ul.inheritsList {
 						<td class="attributes">&nbsp;</td>
 						<td class="nameDescription">
 							<div class="fixedFont">
-								<b><a href="../symbols/uu.klass.html#constructor">uu.klass</a></b>(string, element, string)
+								<b><a href="../symbols/uu.klass.html#constructor">uu.klass</a></b>(className, context, tag)
 							</div>
-							<div class="description"><b>uu.klass - CSSのクラス名と一致する要素を列挙(document.getElementsByClassName wrapper)</b>CSSのクラス名と一致する要素を列挙します。</div>
+							<div class="description">クラスセレクタ - Class Selector</div>
 						</td>
 					</tr>
 				</tbody>
@@ -318,6 +320,78 @@ ul.inheritsList {
 
 <!-- ============================== methods summary ======================== -->
 			
+				
+				
+				<table class="summaryTable" cellspacing="0" summary="A summary of the methods documented in the class uu.klass.">
+					<caption>Method Summary</caption>
+					<thead>
+						<tr>
+							<th scope="col">Method Attributes</th>
+							<th scope="col">Method Name and Description</th>
+						</tr>
+					</thead>
+					<tbody>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">uu.klass.<b><a href="../symbols/uu.klass.html#.add">add</a></b>(elm, className)
+								</div>
+								<div class="description">uu.klass.add - classNameプロパティにクラス名を追加 - Add className property</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">uu.klass.<b><a href="../symbols/uu.klass.html#.generic">generic</a></b>(_)
+								</div>
+								<div class="description">uu.klass.generic - 汎用クラスの雛形を生成 - Create generic class</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">uu.klass.<b><a href="../symbols/uu.klass.html#.has">has</a></b>(elm, className)
+								</div>
+								<div class="description">uu.klass.has - クラス名の存在確認 - Has className</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">uu.klass.<b><a href="../symbols/uu.klass.html#.remove">remove</a></b>(elm, className)
+								</div>
+								<div class="description">uu.klass.remove - classNameプロパティからクラス名を削除 - Remove className property</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">uu.klass.<b><a href="../symbols/uu.klass.html#.singleton">singleton</a></b>(_)
+								</div>
+								<div class="description">uu.klass.singleton - シングルトンクラスの雛形を生成 - Create singleton class</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">uu.klass.<b><a href="../symbols/uu.klass.html#.toggle">toggle</a></b>(elm, className)
+								</div>
+								<div class="description">uu.klass.toggle - classNameプロパティにクラス名を追加または削除する - Add className property or remove</div>
+							</td>
+						</tr>
+					
+					</tbody>
+				</table>
+				
+				
+				
+			
 
 <!-- ============================== constructor details ==================== -->		
 			
@@ -327,11 +401,11 @@ ul.inheritsList {
 				</div>
 				
 				<div class="fixedFont">
-						<b>uu.klass</b>(string, element, string)
+						<b>uu.klass</b>(className, context, tag)
 				</div>
 				
 				<div class="description">
-					<b>uu.klass - CSSのクラス名と一致する要素を列挙(document.getElementsByClassName wrapper)</b>CSSのクラス名と一致する要素を列挙します。
+					クラスセレクタ - Class Selector
 					
 				</div>
 				
@@ -343,42 +417,35 @@ ul.inheritsList {
 						<dt class="heading">Parameters:</dt>
 						
 							<dt>
-								 <b>string</b>
+								 <b>className</b>
 								
 							</dt>
-								<dd>className - クラス名を指定します。</dd>
+								<dd></dd>
 						
 							<dt>
-								 <b>element</b>
+								 <b>context</b>
 								
 							</dt>
-								<dd>[context] - 検索開始位置(コンテキスト)を指定します。デフォルトはdocumentです(全要素の検索)。</dd>
+								<dd></dd>
 						
 							<dt>
-								 <b>string</b>
+								 <b>tag</b>
 								
 							</dt>
-								<dd>[tag]     - 指定したtagのみ検索対象とする場合に指定します。<br />                           この引数は、getElementsByClassName()が実装されていないブラウザ(Firefox2,IE6/7/8,Opera9.2x)用です。</dd>
+								<dd></dd>
 						
 						</dl>
 					
 					
 					
 					
-					
-						<dl class="detailList">
-						<dt class="heading">Returns:</dt>
-						
-								<dd>NodeList/array   - 検索成功でNodeListまたは要素の配列 [element, ...] を返します。失敗で空のNodeListか配列を返します。<br />                           NodeListまたは配列を返すため、uu.klass().forEach() ではなく、                           uu.forEach(uu.klass())を使用してください。</dd>
-						
-						</dl>
 					
 					
 					
 						<dl class="detailList">
 						<dt class="heading">See:</dt>
 						
-							<dd><a href="http://uupaa-js.googlecode.com/svn/trunk/SELECTOR.htm">セレクタ(Selector)</a></dd>
+							<dd><a href="http://uupaa-js.googlecode.com/svn/trunk/SELECTOR.htm#class-selector">Class Selector</a></dd>
 						
 						</dl>
 					
@@ -391,6 +458,299 @@ ul.inheritsList {
 
 <!-- ============================== method details ========================= -->		
 			
+				<div class="sectionTitle">
+					Method Detail
+				</div>
+				
+					<a name=".add"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">uu.klass.</span><b>add</b>(elm, className)
+					
+					</div>
+					<div class="description">
+						uu.klass.add - classNameプロパティにクラス名を追加 - Add className property
+						
+						
+					</div>
+					
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>elm</b>
+									
+								</dt>
+								<dd></dd>
+							
+								<dt>
+									<b>className</b>
+									
+								</dt>
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+								<dd><a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.klass.add">uu.klass.add</a></dd>
+							
+							</dl>
+						
+
+					<hr />
+				
+					<a name=".generic"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">uu.klass.</span><b>generic</b>(_)
+					
+					</div>
+					<div class="description">
+						uu.klass.generic - 汎用クラスの雛形を生成 - Create generic class
+						
+						
+					</div>
+					
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>_</b>
+									
+								</dt>
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+								<dd><a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.klass.generic">Create generic class</a></dd>
+							
+							</dl>
+						
+
+					<hr />
+				
+					<a name=".has"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">uu.klass.</span><b>has</b>(elm, className)
+					
+					</div>
+					<div class="description">
+						uu.klass.has - クラス名の存在確認 - Has className
+						
+						
+					</div>
+					
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>elm</b>
+									
+								</dt>
+								<dd></dd>
+							
+								<dt>
+									<b>className</b>
+									
+								</dt>
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+								<dd><a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.klass.has">uu.klass.has</a></dd>
+							
+							</dl>
+						
+
+					<hr />
+				
+					<a name=".remove"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">uu.klass.</span><b>remove</b>(elm, className)
+					
+					</div>
+					<div class="description">
+						uu.klass.remove - classNameプロパティからクラス名を削除 - Remove className property
+						
+						
+					</div>
+					
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>elm</b>
+									
+								</dt>
+								<dd></dd>
+							
+								<dt>
+									<b>className</b>
+									
+								</dt>
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+								<dd><a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.klass.remove">uu.klass.remove</a></dd>
+							
+							</dl>
+						
+
+					<hr />
+				
+					<a name=".singleton"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">uu.klass.</span><b>singleton</b>(_)
+					
+					</div>
+					<div class="description">
+						uu.klass.singleton - シングルトンクラスの雛形を生成 - Create singleton class
+						
+						
+					</div>
+					
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>_</b>
+									
+								</dt>
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+								<dd><a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.klass.singleton">Create singleton class</a></dd>
+							
+							</dl>
+						
+
+					<hr />
+				
+					<a name=".toggle"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">uu.klass.</span><b>toggle</b>(elm, className)
+					
+					</div>
+					<div class="description">
+						uu.klass.toggle - classNameプロパティにクラス名を追加または削除する - Add className property or remove
+						
+						
+					</div>
+					
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>elm</b>
+									
+								</dt>
+								<dd></dd>
+							
+								<dt>
+									<b>className</b>
+									
+								</dt>
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+								<dd><a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.klass.toggle">uu.klass.toggle</a></dd>
+							
+							</dl>
+						
+
+					
+				
+			
 			
 			<hr />
 		</div>
@@ -398,7 +758,7 @@ ul.inheritsList {
 <!-- ============================== footer ================================= -->
 		<div class="fineprint" style="clear:both">
 			&copy;2008<br />
-			Documentation generated by <a href="http://www.jsdoctoolkit.org/" target="_blank">JsDoc Toolkit</a> 2.0.beta2.3 on Sun Jun 15 2008 16:44:33 GMT+0900 (JST)
+			Documentation generated by <a href="http://www.jsdoctoolkit.org/" target="_blank">JsDoc Toolkit</a> 2.0.beta2.3 on Fri Jun 27 2008 02:25:12 GMT+0900 (JST)
 		</div>
 	</body>
 </html>

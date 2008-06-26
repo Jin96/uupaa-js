@@ -12,19 +12,19 @@ uu.module.drag = function() {
  *
  * @class
  */
-uu.module.drag.free = uu.basicClass();
+uu.module.drag.free = uu.klass.generic();
 uu.module.drag.free.prototype = {
   /** <b>初期化</b>
    *
-   * @param element   elm               - ドラッグする要素を指定します。
-   * @param hash      [param]           - パラメタの指定です。
-   * @param bool      [param.ghost]     - ゴーストエフェクト(fade)を使用する場合にtrueにします。デフォルトはtrueです。
-   * @param string    [param.msgto]     - メッセージの受取先を指定します。""を指定するとメッセージを送信しません。
-   *                                    "broadcast"を指定するとブロードキャストになります。デフォルトは""です。
-   * @param function  [param.msgFilter] - 送信するメッセージを絞り込むフィルターを指定します。
+   * @param Element   elm               - ドラッグする要素を指定します。
+   * @param Hash      [param]           - パラメタの指定です。
+   * @param Boolean   [param.ghost]     - ゴーストエフェクト(fade)を使用する場合にtrueにします。デフォルトはtrueです。
+   * @param String    [param.msgto]     - メッセージの受取先を指定します。""を指定するとメッセージを送信しません。
+   *                                      "broadcast"を指定するとブロードキャストになります。デフォルトは""です。
+   * @param Function  [param.msgFilter] - 送信するメッセージを絞り込むフィルターを指定します。
    *                                      msgFilter(メッセージ名) の形で呼ばれ、falseに評価される値を返すとメッセージは送信されません。
    *                                      デフォルトはundefinedです。
-   * @param bool      [param.resize]    - ホイールでリサイズする場合にtrueにします。<br />
+   * @param Boolean   [param.resize]    - ホイールでリサイズする場合にtrueにします。<br />
    *                                      デフォルトは、trueです。
    */
   construct: function(elm, param /* = {} */) {
@@ -116,20 +116,20 @@ uu.module.drag.free.prototype = {
  *
  * @class
  */
-uu.module.drag.limited = uu.basicClass();
+uu.module.drag.limited = uu.klass.generic();
 uu.module.drag.limited.prototype = {
   /** <b>ドラッグ可能要素の列挙とイベントハンドラのアサイン</b>
    *
-   * @param hash      [param]       - パラメタの指定です。
-   * @param bool      [param.ghost] - ゴーストエフェクト(fade)を使用する場合にtrueにします。デフォルトはtrueです。
-   * @param string    [param.msgto] - メッセージの受取先を指定します。""を指定するとメッセージを送信しません。
+   * @param Hash      [param]       - パラメタの指定です。
+   * @param Boolean   [param.ghost] - ゴーストエフェクト(fade)を使用する場合にtrueにします。デフォルトはtrueです。
+   * @param String    [param.msgto] - メッセージの受取先を指定します。""を指定するとメッセージを送信しません。
    *                                  "broadcast"を指定するとブロードキャストになります。デフォルトは""です。
-   * @param function  [param.msgFilter] - 送信するメッセージを絞り込むフィルターを指定します。
+   * @param Function  [param.msgFilter] - 送信するメッセージを絞り込むフィルターを指定します。
    *                                      msgFilter(メッセージ名) の形で呼ばれ、falseに評価される値を返すとメッセージは送信されません。
    *                                      デフォルトはundefinedです。
-   * @param bool      [param.resize]    - ホイールでリサイズする場合にtrueにします。<br />
+   * @param Boolean   [param.resize]    - ホイールでリサイズする場合にtrueにします。<br />
    *                                      デフォルトは、trueです。
-   * @param bool      [param.dropAllowColor] - ドロップ可能な要素の背景色の指定です。デフォルトは"bisque"です。
+   * @param Boolean   [param.dropAllowColor] - ドロップ可能な要素の背景色の指定です。デフォルトは"bisque"です。
    */
   construct: function(param /* = {} */) {
     var me = this;
@@ -141,8 +141,8 @@ uu.module.drag.limited.prototype = {
       _x: 0, _y: 0
     });
 
-    this.draggable = uu.xpath.snap('//div[@class="draggable"]');
-    this.droppable = uu.xpath.snap('//div[@class="droppable"]');
+    this.draggable = uu.toArray(uu.klass("draggable", 0, "div"));
+    this.droppable = uu.toArray(uu.klass("droppable", 0, "div"));
     this.zindexer = new uu.module.drag.zindexer(); // instantiate
     // ドラッグ可能要素にマウスカーソルとイベントハンドラを設定する
     me.hr = uu.event.handler(me);
@@ -232,7 +232,7 @@ uu.module.drag.limited.prototype = {
   /** ドロップ時のアクション: */
   drop: function(droppable, draggable) {
     // 先客がいるならドロップ失敗
-    if (!uu.xpath('count(./div[@class="draggable"])', droppable)) {
+    if (!uu.klass("draggable", droppable, "div").length) {
       if (droppable.hasChildNodes()) {
         droppable.insertBefore(draggable, droppable.firstChild); // droppable.lastChild
       } else {
@@ -261,7 +261,7 @@ uu.module.drag.limited.prototype = {
  *
  * @class
  */
-uu.module.drag.zindexer = uu.singletonClass();
+uu.module.drag.zindexer = uu.klass.singleton();
 uu.module.drag.zindexer.prototype = {
   /** <b>初期化</b> */
   construct: function() {
@@ -271,7 +271,7 @@ uu.module.drag.zindexer.prototype = {
   },
   /** <b>IDの登録と適切なz-indexの設定</b>
    *
-   * @param string id       z-indexを管理する要素のIDを指定します。
+   * @param String id       z-indexを管理する要素のIDを指定します。
    */
   set: function(id) {
     if (id in this.obj) {
@@ -283,7 +283,7 @@ uu.module.drag.zindexer.prototype = {
   },
   /** <b>IDの抹消</b>
    * 
-   * @param string id       set()で登録済みのIDを指定します。
+   * @param String id       set()で登録済みのIDを指定します。
    */
   unset: function(id) {
     if (!(id in this.obj)) {
@@ -295,7 +295,7 @@ uu.module.drag.zindexer.prototype = {
   },
   /** <b>ドラッグ開始通知</b>
    *
-   * @param string id       set()で登録済みのIDを指定します。
+   * @param String id       set()で登録済みのIDを指定します。
    */
   beginDrag: function(id) {
     if (!(id in this.obj)) {
@@ -315,7 +315,7 @@ uu.module.drag.zindexer.prototype = {
   },
   /** <b>ドラッグ終了通知</b>
    *
-   * @param string id       set()で登録済みのIDを指定します。
+   * @param String id - set()で登録済みのIDを指定します。
    */
   endDrag: function(id, opacity) {
     if (!(id in this.obj)) {
@@ -329,7 +329,7 @@ uu.module.drag.zindexer.prototype = {
 /* Drag and Drop skeleton code
  *
  * <code>
- *  uu.module.example = uu.basicClass();
+ *  uu.module.example = uu.klass.generic();
  *  uu.module.example.prototype = {
  *    construct: function(elm) {
  *      this.elm = elm;

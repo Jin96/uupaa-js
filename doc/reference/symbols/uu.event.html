@@ -156,7 +156,21 @@ ul.inheritsList {
 <!-- ============================== header ================================= -->	
 		<!-- begin static/header.html -->
 		<div id="header">
-<a href="http://uupaa-js.googlecode.com/svn/trunk/README.htm">README.htm</a> &gt; Reference
+<a href="http://uupaa-js.googlecode.com/svn/trunk/README.htm">README</a> &gt; API Reference
+<p>
+   | <a href="http://code.google.com/p/uupaa-js/">Project Home(Google Code)</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/README.htm#demo">DEMO</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/CHANGELOG.htm">ChangeLog</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/LICENSE.htm">License</a> |<br />
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm">Document</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/SELECTOR.htm">Selector</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/MODULE.htm">Module</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/GLOSSARY.htm">Glossary</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/doc/reference/index.html">API Reference</a>
+   |
+</p>
+
+<hr />
 </div>
 
 		<!-- end static/header.html -->
@@ -174,10 +188,6 @@ ul.inheritsList {
 	
 	<li><a href="../symbols/Array.html">Array</a></li>
 	
-	<li><a href="../symbols/Date.html">Date</a></li>
-	
-	<li><a href="../symbols/Number.html">Number</a></li>
-	
 	<li><a href="../symbols/uu.html">uu</a></li>
 	
 	<li><a href="../symbols/uu.ajax.html">uu.ajax</a></li>
@@ -192,10 +202,6 @@ ul.inheritsList {
 	
 	<li><a href="../symbols/uu.css.html">uu.css</a></li>
 	
-	<li><a href="../symbols/uu.css.get.html">uu.css.get</a></li>
-	
-	<li><a href="../symbols/uu.css.set.html">uu.css.set</a></li>
-	
 	<li><a href="../symbols/uu.dom.html">uu.dom</a></li>
 	
 	<li><a href="../symbols/uu.effect.html">uu.effect</a></li>
@@ -206,13 +212,7 @@ ul.inheritsList {
 	
 	<li><a href="../symbols/uu.event.mouse.html">uu.event.mouse</a></li>
 	
-	<li><a href="../symbols/uu.forEach.html">uu.forEach</a></li>
-	
-	<li><a href="../symbols/uu.id.html">uu.id</a></li>
-	
 	<li><a href="../symbols/uu.image.html">uu.image</a></li>
-	
-	<li><a href="../symbols/uu.js.html">uu.js</a></li>
 	
 	<li><a href="../symbols/uu.json.html">uu.json</a></li>
 	
@@ -234,6 +234,8 @@ ul.inheritsList {
 	
 	<li><a href="../symbols/uu.module.messagePump.html">uu.module.messagePump</a></li>
 	
+	<li><a href="../symbols/uu.module.perf.html">uu.module.perf</a></li>
+	
 	<li><a href="../symbols/uu.module.pmvc.html">uu.module.pmvc</a></li>
 	
 	<li><a href="../symbols/uu.module.pmvc.applicationModel.html">uu.module.pmvc.applicationModel</a></li>
@@ -250,6 +252,8 @@ ul.inheritsList {
 	
 	<li><a href="../symbols/uu.perry.html">uu.perry</a></li>
 	
+	<li><a href="../symbols/uu.request.html">uu.request</a></li>
+	
 	<li><a href="../symbols/uu.tag.html">uu.tag</a></li>
 	
 	<li><a href="../symbols/uu.ua.html">uu.ua</a></li>
@@ -259,8 +263,6 @@ ul.inheritsList {
 	<li><a href="../symbols/uu.ui.element.html">uu.ui.element</a></li>
 	
 	<li><a href="../symbols/uu.url.html">uu.url</a></li>
-	
-	<li><a href="../symbols/uu.url.query.html">uu.url.query</a></li>
 	
 	<li><a href="../symbols/uu.window.html">uu.window</a></li>
 	
@@ -306,7 +308,7 @@ ul.inheritsList {
 							<div class="fixedFont">
 								<b><a href="../symbols/uu.event.html#constructor">uu.event</a></b>()
 							</div>
-							<div class="description"><b>Event</b></div>
+							<div class="description">Event</div>
 						</td>
 					</tr>
 				</tbody>
@@ -333,45 +335,63 @@ ul.inheritsList {
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">uu.event.<b><a href="../symbols/uu.event.html#.handler">handler</a></b>(this)
+								<div class="fixedFont">uu.event.<b><a href="../symbols/uu.event.html#.clicks">clicks</a></b>(Element, Function, toggles)
 								</div>
-								<div class="description"><b>uu.event.handler - uu.event.set()用の引数を生成</b></div>
+								<div class="description"><b>uu.event.mouse.clicks - クリックイベントハンドラの設定 - Set click event handler</b>マウスクリックをトリガーに動作する関数を登録します。<br />fnはいくつでも指定可能で、複数の関数を登録すると、turn around(toggle) 動作を行います。</div>
 							</td>
 						</tr>
 					
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">uu.event.<b><a href="../symbols/uu.event.html#.set">set</a></b>(element, taxing, function, bool)
+								<div class="fixedFont">uu.event.<b><a href="../symbols/uu.event.html#.handler">handler</a></b>(me)
 								</div>
-								<div class="description"><b>uu.event.set - イベントハンドラの設定(addEventListener wrapper)</b>イベントハンドラを設定します。<br />イベントハンドラを解除するには、uu.event.set()と同じ引数をuu.event.unset()で指定します。<br />一時的なオブジェクト(匿名のfunction()等)をfnに指定すると、uu.event.unset()でイベントを解除できなくなりますので注意してください。</div>
+								<div class="description">uu.event.handler - デフォルトイベントハンドラの生成 - Create default event handler</div>
 							</td>
 						</tr>
 					
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">uu.event.<b><a href="../symbols/uu.event.html#.stop">stop</a></b>(event, bool)
+								<div class="fixedFont">uu.event.<b><a href="../symbols/uu.event.html#.set">set</a></b>(elm, type, fn, capture)
 								</div>
-								<div class="description"><b>uu.event.stop - イベントの停止(stopPropagation and preventDefault wrapper)</b>イベントのバブルアップ(伝播)と、可能ならデフォルトの動作を抑止します。</div>
+								<div class="description">uu.event.set - イベントハンドラの設定 - Add event hander</div>
 							</td>
 						</tr>
 					
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">uu.event.<b><a href="../symbols/uu.event.html#.target">target</a></b>(event)
+								<div class="fixedFont">uu.event.<b><a href="../symbols/uu.event.html#.stop">stop</a></b>(evt, cancel)
 								</div>
-								<div class="description"><b>uu.event.target - イベント発生元のノードを取得</b>イベント発生元を特定する情報を返します。 <dl>   <dt>real</dt><dd>イベント発生源のノード</dd>   <dt>curt</dt><dd>現在処理中のノード(キャプチャリング/バブリング中)のカレントノード(Firefox, Safari, Opera)</dd>   <dt>rel</dt><dd>realの対ノード<br />       realでmouseover発生時に、relにmouseoutした要素が格納される、<br />       realでmouseout発生時は、relにmouseoverした要素が格納される。</dd> </dl></div>
+								<div class="description">uu.event.stop - イベントの抑止 - stop-propagation and prevent-default</div>
 							</td>
 						</tr>
 					
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">uu.event.<b><a href="../symbols/uu.event.html#.unset">unset</a></b>(element, taxing, object, bool)
+								<div class="fixedFont">uu.event.<b><a href="../symbols/uu.event.html#.target">target</a></b>(evt)
 								</div>
-								<div class="description"><b>uu.event.unset - イベントハンドラの解除(removeEventListener wrapper)</b>イベントハンドラを解除します。<br />イベントハンドラを解除するには、uu.event.set()と同じ引数を指定します。</div>
+								<div class="description">uu.event.target - イベント発生源の情報を取得 - Detect event target</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">uu.event.<b><a href="../symbols/uu.event.html#.type">type</a></b>(type)
+								</div>
+								<div class="description">uu.event.type - DOMイベントタイプをDOM Level 0イベントタイプに変換</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">uu.event.<b><a href="../symbols/uu.event.html#.unset">unset</a></b>(elm, type, fn, capture)
+								</div>
+								<div class="description">uu.event.unset - イベントハンドラの解除 - Remove event hander</div>
 							</td>
 						</tr>
 					
@@ -394,7 +414,7 @@ ul.inheritsList {
 				</div>
 				
 				<div class="description">
-					<b>Event</b>
+					Event
 					
 				</div>
 				
@@ -407,6 +427,13 @@ ul.inheritsList {
 					
 					
 					
+					
+						<dl class="detailList">
+						<dt class="heading">See:</dt>
+						
+							<dd><a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#event">event</a></dd>
+						
+						</dl>
 					
 
 			</div>
@@ -421,15 +448,18 @@ ul.inheritsList {
 					Method Detail
 				</div>
 				
-					<a name=".handler"> </a>
+					<a name=".clicks"> </a>
 					<div class="fixedFont">&lt;static&gt; 
 					
 					
-					<span class="light">uu.event.</span><b>handler</b>(this)
+					<span class="light">uu.event.</span><b>clicks</b>(Element, Function, toggles)
 					
 					</div>
 					<div class="description">
-						<b>uu.event.handler - uu.event.set()用の引数を生成</b>
+						<b>uu.event.mouse.clicks - クリックイベントハンドラの設定 - Set click event handler</b>マウスクリックをトリガーに動作する関数を登録します。<br />fnはいくつでも指定可能で、複数の関数を登録すると、turn around(toggle) 動作を行います。
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/trunk_uu.module.ui.js.html">uu.module.ui.js</a>.
 						
 						
 					</div>
@@ -442,34 +472,72 @@ ul.inheritsList {
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>this</b>
+									<b>Element</b>
 									
 								</dt>
-								<dd>me    thisを指定します。</dd>
+								<dd>elm  - イベントを設定する要素を指定します。</dd>
+							
+								<dt>
+									<b>Function</b>
+									
+								</dt>
+								<dd>fn  - クリック時に呼ばれる関数を指定します。</dd>
+							
+								<dt>
+									<b>toggles</b>
+									
+								</dt>
+								<dd></dd>
 							
 							</dl>
 						
 						
 						
 						
+						
+						
+						
+
+					<hr />
+				
+					<a name=".handler"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">uu.event.</span><b>handler</b>(me)
+					
+					</div>
+					<div class="description">
+						uu.event.handler - デフォルトイベントハンドラの生成 - Create default event handler
+						
+						
+					</div>
+					
+					
+					
+					
 						
 							<dl class="detailList">
-							<dt class="heading">Returns:</dt>
+							<dt class="heading">Parameters:</dt>
 							
-								<dd>object       uu.event.set()用のオブジェクトを返します。</dd>
+								<dt>
+									<b>me</b>
+									
+								</dt>
+								<dd></dd>
 							
 							</dl>
+						
+						
+						
+						
 						
 						
 						
 							<dl class="detailList">
 							<dt class="heading">See:</dt>
 							
-								<dd><a href="../symbols/uu.event.html#.set">uu.event.set</a> - イベントハンドラの設定</dd>
-							
-								<dd><a href="../symbols/uu.event.html#.unset">uu.event.unset</a> - イベントハンドラの解除</dd>
-							
-								<dd>JavaScript第5版 420p</dd>
+								<dd><a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.event.hander">uu.event.handler</a></dd>
 							
 							</dl>
 						
@@ -480,11 +548,11 @@ ul.inheritsList {
 					<div class="fixedFont">&lt;static&gt; 
 					
 					
-					<span class="light">uu.event.</span><b>set</b>(element, taxing, function, bool)
+					<span class="light">uu.event.</span><b>set</b>(elm, type, fn, capture)
 					
 					</div>
 					<div class="description">
-						<b>uu.event.set - イベントハンドラの設定(addEventListener wrapper)</b>イベントハンドラを設定します。<br />イベントハンドラを解除するには、uu.event.set()と同じ引数をuu.event.unset()で指定します。<br />一時的なオブジェクト(匿名のfunction()等)をfnに指定すると、uu.event.unset()でイベントを解除できなくなりますので注意してください。
+						uu.event.set - イベントハンドラの設定 - Add event hander
 						
 						
 					</div>
@@ -497,28 +565,28 @@ ul.inheritsList {
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>element</b>
+									<b>elm</b>
 									
 								</dt>
-								<dd>elm       - イベントを設定する要素を指定します。</dd>
+								<dd></dd>
 							
 								<dt>
-									<b>taxing</b>
+									<b>type</b>
 									
 								</dt>
-								<dd>type      - イベントタイプを指定します。</dd>
+								<dd></dd>
 							
 								<dt>
-									<b>function</b>
+									<b>fn</b>
 									
 								</dt>
-								<dd>fn        - uu.event.handler()の戻り値か関数を指定します。</dd>
+								<dd></dd>
 							
 								<dt>
-									<b>bool</b>
+									<b>capture</b>
 									
 								</dt>
-								<dd>[capture] - イベントをキャプチャーする場合はtrueを指定します。                                                 通常のイベントハンドラを登録する場合はfalseを指定します。</dd>
+								<dd></dd>
 							
 							</dl>
 						
@@ -531,9 +599,7 @@ ul.inheritsList {
 							<dl class="detailList">
 							<dt class="heading">See:</dt>
 							
-								<dd><a href="../symbols/uu.event.html#.handler">uu.event.handler</a> - uu.event.set()用の引数を生成</dd>
-							
-								<dd><a href="../symbols/uu.event.html#.unset">uu.event.unset</a> - イベントハンドラの解除</dd>
+								<dd><a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.event.set">uu.event.set</a></dd>
 							
 							</dl>
 						
@@ -544,11 +610,11 @@ ul.inheritsList {
 					<div class="fixedFont">&lt;static&gt; 
 					
 					
-					<span class="light">uu.event.</span><b>stop</b>(event, bool)
+					<span class="light">uu.event.</span><b>stop</b>(evt, cancel)
 					
 					</div>
 					<div class="description">
-						<b>uu.event.stop - イベントの停止(stopPropagation and preventDefault wrapper)</b>イベントのバブルアップ(伝播)と、可能ならデフォルトの動作を抑止します。
+						uu.event.stop - イベントの抑止 - stop-propagation and prevent-default
 						
 						
 					</div>
@@ -561,115 +627,16 @@ ul.inheritsList {
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>event</b>
+									<b>evt</b>
 									
 								</dt>
-								<dd>evt       - イベントオブジェクトを指定します。</dd>
+								<dd></dd>
 							
 								<dt>
-									<b>bool</b>
+									<b>cancel</b>
 									
 								</dt>
-								<dd>[cancel]  - ブラウザが実装しているデフォルトの動作をキャンセルする場合にtrueを指定します。                         キャンセルできない場合は無視されます。</dd>
-							
-							</dl>
-						
-						
-						
-						
-						
-						
-						
-
-					<hr />
-				
-					<a name=".target"> </a>
-					<div class="fixedFont">&lt;static&gt; 
-					
-					
-					<span class="light">uu.event.</span><b>target</b>(event)
-					
-					</div>
-					<div class="description">
-						<b>uu.event.target - イベント発生元のノードを取得</b>イベント発生元を特定する情報を返します。 <dl>   <dt>real</dt><dd>イベント発生源のノード</dd>   <dt>curt</dt><dd>現在処理中のノード(キャプチャリング/バブリング中)のカレントノード(Firefox, Safari, Opera)</dd>   <dt>rel</dt><dd>realの対ノード<br />       realでmouseover発生時に、relにmouseoutした要素が格納される、<br />       realでmouseout発生時は、relにmouseoverした要素が格納される。</dd> </dl>
-						
-						
-					</div>
-					
-					
-					
-					
-						
-							<dl class="detailList">
-							<dt class="heading">Parameters:</dt>
-							
-								<dt>
-									<b>event</b>
-									
-								</dt>
-								<dd>evt       - イベントオブジェクトを指定します。</dd>
-							
-							</dl>
-						
-						
-						
-						
-						
-							<dl class="detailList">
-							<dt class="heading">Returns:</dt>
-							
-								<dd>hash           - hash({ real, curt, rel }) を返します。</dd>
-							
-							</dl>
-						
-						
-						
-
-					<hr />
-				
-					<a name=".unset"> </a>
-					<div class="fixedFont">&lt;static&gt; 
-					
-					
-					<span class="light">uu.event.</span><b>unset</b>(element, taxing, object, bool)
-					
-					</div>
-					<div class="description">
-						<b>uu.event.unset - イベントハンドラの解除(removeEventListener wrapper)</b>イベントハンドラを解除します。<br />イベントハンドラを解除するには、uu.event.set()と同じ引数を指定します。
-						
-						
-					</div>
-					
-					
-					
-					
-						
-							<dl class="detailList">
-							<dt class="heading">Parameters:</dt>
-							
-								<dt>
-									<b>element</b>
-									
-								</dt>
-								<dd>elm       - イベントを解除する要素を指定します。</dd>
-							
-								<dt>
-									<b>taxing</b>
-									
-								</dt>
-								<dd>type      - イベントタイプを指定します。</dd>
-							
-								<dt>
-									<b>object</b>
-									
-								</dt>
-								<dd>fn        - uu.handleEvent()の戻り値か関数を指定します。</dd>
-							
-								<dt>
-									<b>bool</b>
-									
-								</dt>
-								<dd>[capture] - キャプチャーを解除する場合はtrueを指定します。                               通常のイベントハンドラを解除する場合はfalseを指定します。</dd>
+								<dd></dd>
 							
 							</dl>
 						
@@ -682,9 +649,157 @@ ul.inheritsList {
 							<dl class="detailList">
 							<dt class="heading">See:</dt>
 							
-								<dd><a href="../symbols/uu.event.html#.handler">uu.event.handler</a> - uu.event.set()用の引数を生成</dd>
+								<dd><a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.event.stop">uu.event.stop</a></dd>
 							
-								<dd><a href="../symbols/uu.event.html#.set">uu.event.set</a> - イベントハンドラの設定</dd>
+							</dl>
+						
+
+					<hr />
+				
+					<a name=".target"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">uu.event.</span><b>target</b>(evt)
+					
+					</div>
+					<div class="description">
+						uu.event.target - イベント発生源の情報を取得 - Detect event target
+						
+						
+					</div>
+					
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>evt</b>
+									
+								</dt>
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+								<dd><a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.event.target">uu.event.target</a></dd>
+							
+							</dl>
+						
+
+					<hr />
+				
+					<a name=".type"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">uu.event.</span><b>type</b>(type)
+					
+					</div>
+					<div class="description">
+						uu.event.type - DOMイベントタイプをDOM Level 0イベントタイプに変換
+						
+						
+					</div>
+					
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>type</b>
+									
+								</dt>
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+								<dd><a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.event.type">uu.event.type</a></dd>
+							
+							</dl>
+						
+
+					<hr />
+				
+					<a name=".unset"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">uu.event.</span><b>unset</b>(elm, type, fn, capture)
+					
+					</div>
+					<div class="description">
+						uu.event.unset - イベントハンドラの解除 - Remove event hander
+						
+						
+					</div>
+					
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>elm</b>
+									
+								</dt>
+								<dd></dd>
+							
+								<dt>
+									<b>type</b>
+									
+								</dt>
+								<dd></dd>
+							
+								<dt>
+									<b>fn</b>
+									
+								</dt>
+								<dd></dd>
+							
+								<dt>
+									<b>capture</b>
+									
+								</dt>
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+								<dd><a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.event.unset">uu.event.unset</a></dd>
 							
 							</dl>
 						
@@ -699,7 +814,7 @@ ul.inheritsList {
 <!-- ============================== footer ================================= -->
 		<div class="fineprint" style="clear:both">
 			&copy;2008<br />
-			Documentation generated by <a href="http://www.jsdoctoolkit.org/" target="_blank">JsDoc Toolkit</a> 2.0.beta2.3 on Sun Jun 15 2008 16:44:33 GMT+0900 (JST)
+			Documentation generated by <a href="http://www.jsdoctoolkit.org/" target="_blank">JsDoc Toolkit</a> 2.0.beta2.3 on Fri Jun 27 2008 02:25:12 GMT+0900 (JST)
 		</div>
 	</body>
 </html>

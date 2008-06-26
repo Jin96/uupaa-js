@@ -15,7 +15,7 @@ uu.module.canvas2 = {};
  * 検証が終わっていないので、このモジュールは使用しないでください
  * @class
  */
-uu.module.context2dDebug = uu.basicClass();
+uu.module.context2dDebug = uu.klass.generic();
 uu.module.context2dDebug.prototype = {
 
   /** <b>uu.module.context2dDebug.construct - 初期化</b>
@@ -56,7 +56,7 @@ uu.module.context2dDebug.prototype = {
    *    <dt>cmdHistoryLength</dt><dd>コマンド履歴数</dd>
    *  </dl>
    *
-   * @return hash - hash { canvas, context, w, h, mix, alpha, pos, stackSize } を返します。
+   * @return Hash - hash { canvas, context, w, h, mix, alpha, pos, stackSize } を返します。
    * @see <a href="context.reset()">context.reset()</a> - コンテキストの初期化
    */
   info: function() {
@@ -127,8 +127,8 @@ uu.module.context2dDebug.prototype = {
    *    <dt>image/png</dt><dd>png画像, Firefox2+,Safari3+,Opera9+で使用可能</dd>
    *    <dt>image/jpeg</dt><dd>jpg画像, Firefox2+,Safari3+で使用可能</dd>
    *  </dl>
-   * @param string type - 画像フォーマットを文字列で指定します。デフォルトは "image/png" です。
-   * @return string - data: URIを返します。返された文字列はimg要素のsrcに指定可能です。
+   * @param String type - 画像フォーマットを文字列で指定します。デフォルトは "image/png" です。
+   * @return String - data: URIを返します。返された文字列はimg要素のsrcに指定可能です。
    */
   toDataURL: function(type /* = "image/png" */) {
     this.ctx.canvas.toDataURL(type || "image/png");
@@ -158,7 +158,7 @@ uu.module.context2dDebug.prototype = {
   },
   /** <b>uu.module.context2dDebug.begin - コマンドの再生</b>
    *
-   * @param function fn - 1step毎にコールバックする関数を指定します。デフォルトはundefinedです。
+   * @param Function fn - 1step毎にコールバックする関数を指定します。デフォルトはundefinedです。
    * @see <a href="#recode">uu.module.context2dDebug.recode()</a> - コマンドの記録
    */
   play: function(fn /* = undefined */) {
@@ -209,7 +209,7 @@ uu.module.context2dDebug.prototype = {
   },
   /** <b>uu.module.context2dDebug.begin - アルファブレンドの値を指定</b>
    *
-   * @param number alpha - アルファブレンド値を0.0～1.0の値で指定します。不透明度(opacity)と同様です。
+   * @param Number alpha - アルファブレンド値を0.0～1.0の値で指定します。不透明度(opacity)と同様です。
    * @return this - thisを返します。
    */
   alpha: function(alpha) {
@@ -219,10 +219,10 @@ uu.module.context2dDebug.prototype = {
   /** <b>uu.module.context2dDebug.begin - クリア</b>
    * 指定した範囲をクリアします。引数を全て省略すると全体をクリアします。
    *
-   * @param number [x] - x座標を指定します。
-   * @param number [y] - y座標を指定します。
-   * @param number [w] - 幅を指定します。負の値も指定可能です。
-   * @param number [h] - 高さを指定します。負の値も指定可能です。
+   * @param Number [x] - x座標を指定します。
+   * @param Number [y] - y座標を指定します。
+   * @param Number [w] - 幅を指定します。負の値も指定可能です。
+   * @param Number [h] - 高さを指定します。負の値も指定可能です。
    * @return this - thisを返します。
    */
   clear: function(x, y, w, h) {
@@ -245,8 +245,8 @@ uu.module.context2dDebug.prototype = {
    *     stroke();            // サブパスを描画
    * </pre>
    *
-   * @param number [x] - 移動先のx絶対座標を指定します。デフォルトはundefinedです。
-   * @param number [y] - 移動先のy絶対座標を指定します。デフォルトはundefinedです。
+   * @param Number [x] - 移動先のx絶対座標を指定します。デフォルトはundefinedです。
+   * @param Number [y] - 移動先のy絶対座標を指定します。デフォルトはundefinedです。
    * @return this - thisを返します。
    * @see <a href="#begin">uu.module.context2dDebug.begin()</a> - サブパスの初期化と開始
    * @see <a href="#close">uu.module.context2dDebug.close()</a> - 現在のサブパスを閉じ、新しいサブパスを開始
@@ -265,8 +265,8 @@ uu.module.context2dDebug.prototype = {
    * カレントのサブパスを閉じ、新しいサブパスを開始します。<br />
    * x,y座標が指定されている場合は、その座標まで移動しサブパスの出発点とします。
    *
-   * @param number [x] - 移動先のx座標を指定します。デフォルトはundefinedです。
-   * @param number [y] - 移動先のy座標を指定します。デフォルトはundefinedです。
+   * @param Number [x] - 移動先のx座標を指定します。デフォルトはundefinedです。
+   * @param Number [y] - 移動先のy座標を指定します。デフォルトはundefinedです。
    * @return this - thisを返します。
    * @see <a href="#begin">uu.module.context2dDebug.begin()</a> - サブパスの初期化と開始
    * @see <a href="#close">uu.module.context2dDebug.close()</a> - 現在のサブパスを閉じ、新しいサブパスを開始
@@ -285,8 +285,8 @@ uu.module.context2dDebug.prototype = {
    * カレントのサブパスを移動させます。<br />
    * move()で移動すると、線として描画されません。
    *
-   * @param number x - 移動先のx座標を指定します。
-   * @param number y - 移動先のy座標を指定します。
+   * @param Number x - 移動先のx座標を指定します。
+   * @param Number y - 移動先のy座標を指定します。
    * @return this - thisを返します。
    * @see <a href="#begin">uu.module.context2dDebug.begin()</a> - サブパスの初期化と開始
    * @see <a href="#close">uu.module.context2dDebug.close()</a> - 現在のサブパスを閉じ、新しいサブパスを開始
@@ -306,9 +306,9 @@ uu.module.context2dDebug.prototype = {
    * line()で移動するとstoroke()で線が描画されます。<br />
    * サブパスが存在しない場合は、何もしません。
    *
-   * @param array point - 移動先のx,y座標を指定します。<br />
+   * @param Array point - 移動先のx,y座標を指定します。<br />
    *                      [x1, y1, x2, y2, ... ] 形式で複数の頂点を指定できます。
-   * @param hash [style] - ラインスタイルを指定します。デフォルトはundefinedです。
+   * @param Hash [style] - ラインスタイルを指定します。デフォルトはundefinedです。
    * @return this - thisを返します。
    * @see <a href="#begin">uu.module.context2dDebug.begin()</a> - サブパスの初期化と開始
    * @see <a href="#close">uu.module.context2dDebug.close()</a> - 現在のサブパスを閉じ、新しいサブパスを開始
@@ -345,10 +345,10 @@ uu.module.context2dDebug.prototype = {
    *     stroke();                              // サブパスを描画
    * </pre>
    *
-   * @param array point - 移動先のx,y座標を指定します。<br />
+   * @param Array point - 移動先のx,y座標を指定します。<br />
    *                      [x1, y1, x2, y2, ... ] 形式で複数の頂点を指定できます。
-   * @param number [r] - 半径を指定します。デフォルトは100です。
-   * @param hash [style] - ラインスタイルを指定します。デフォルトはundefinedです。
+   * @param Number [r] - 半径を指定します。デフォルトは100です。
+   * @param Hash [style] - ラインスタイルを指定します。デフォルトはundefinedです。
    * @return this - thisを返します。
    * @see <a href="#begin">uu.module.context2dDebug.begin()</a> - サブパスの初期化と開始
    * @see <a href="#close">uu.module.context2dDebug.close()</a> - 現在のサブパスを閉じ、新しいサブパスを開始
@@ -372,7 +372,7 @@ uu.module.context2dDebug.prototype = {
    *
    * wireにtrueを指定すると、サブパスに沿ってワイヤーを描画します。
    *
-   * @param number/bool [wire] - ワイヤーを描画する場合はtrueか1を指定します。塗りつぶす場合はfalseか0を指定します。
+   * @param Number/Boolean [wire] - ワイヤーを描画する場合はtrueか1を指定します。塗りつぶす場合はfalseか0を指定します。
    *                             デフォルトは0です。
    * @param fillStyle/strokeStyle [style] - フィルスタイル(塗りつぶし用)または、
    *                                        ストロークスタイル(ワイヤー用)を指定します。
@@ -403,11 +403,11 @@ uu.module.context2dDebug.prototype = {
    *
    * 未確認: すでにサブパスが存在する場合は破棄される? それとも一旦閉じられそのまま存続する?
    *
-   * @param number x - 移動先のx座標を指定します。
-   * @param number y - 移動先のy座標を指定します。
-   * @param number w - 幅を指定します。
-   * @param number h - 高さを指定します。
-   * @param hash [style] - ラインスタイルを指定します。デフォルトはundefinedです。
+   * @param Number x - 移動先のx座標を指定します。
+   * @param Number y - 移動先のy座標を指定します。
+   * @param Number w - 幅を指定します。
+   * @param Number h - 高さを指定します。
+   * @param Hash [style] - ラインスタイルを指定します。デフォルトはundefinedです。
    * @return this - thisを返します。
    * @see <a href="#begin">uu.module.context2dDebug.begin()</a> - サブパスの初期化と開始
    * @see <a href="#close">uu.module.context2dDebug.close()</a> - 現在のサブパスを閉じ、新しいサブパスを開始
@@ -426,14 +426,14 @@ uu.module.context2dDebug.prototype = {
    * (x,y)を中心とする円弧状のサブパスを作成します。<br />
    * 既にサブパスが存在する場合は、円弧の始点まで直線のパスが自動的に追加されます。<br />
    *
-   * @param number x - 円弧の中心を指定します。
-   * @param number y - 円弧の中心を指定します。
-   * @param hash [style] - ラインスタイルを指定します。デフォルトはundefinedです。
-   * @param hash [param] - パラメタを指定します。
-   * @param number [param.r] - 半径を指定します。デフォルトは100です。
-   * @param number [param.a0] - 開始角度を0～359の数値で指定します。デフォルトは0です。
-   * @param number [param.a1] - 終了角度を0～359の数値で指定します。デフォルトは359です。
-   * @param number [param.clock] - 時計周りにパスを設定する場合はtrueを、反時計回りならfalseを指定します。
+   * @param Number x - 円弧の中心を指定します。
+   * @param Number y - 円弧の中心を指定します。
+   * @param Hash [style] - ラインスタイルを指定します。デフォルトはundefinedです。
+   * @param Hash [param] - パラメタを指定します。
+   * @param Number [param.r] - 半径を指定します。デフォルトは100です。
+   * @param Number [param.a0] - 開始角度を0～359の数値で指定します。デフォルトは0です。
+   * @param Number [param.a1] - 終了角度を0～359の数値で指定します。デフォルトは359です。
+   * @param Number [param.clock] - 時計周りにパスを設定する場合はtrueを、反時計回りならfalseを指定します。
    * @return this - thisを返します。
    * @see <a href="#begin">uu.module.context2dDebug.begin()</a> - サブパスの初期化と開始
    * @see <a href="#close">uu.module.context2dDebug.close()</a> - 現在のサブパスを閉じ、新しいサブパスを開始
@@ -453,13 +453,13 @@ uu.module.context2dDebug.prototype = {
    * x,y座標にパスを移動します。<br />
    * サブパスが存在しない場合は、何もしません。
    *
-   * @param array point - 制御点と移動先のx,y座標を指定します。<br />
+   * @param Array point - 制御点と移動先のx,y座標を指定します。<br />
    *                      ベジェ曲線なら、[cp1x, cp1y, cp2x, cp2y, x, y ] 形式で座標を指定します。<br />
    *                      二次曲線なら、[cp1x, cp1y, x, y ] 形式で座標を指定します。
-   * @param number/bool [bezier] - ベジェ曲線を使用するならtrueか1を指定します。
-   *                               二次曲線を使用するならfalseか0を指定します。<br />
-   *                               デフォルトは1です。
-   * @param hash [style] - ラインスタイルを指定します。デフォルトはundefinedです。
+   * @param Number/Boolean [bezier] - ベジェ曲線を使用するならtrueか1を指定します。
+   *                                  二次曲線を使用するならfalseか0を指定します。<br />
+   *                                  デフォルトは1です。
+   * @param Hash [style] - ラインスタイルを指定します。デフォルトはundefinedです。
    * @return this - thisを返します。
    */
   curve: function(point, bezier /* = 1 */, style /* = undefined */) {
@@ -486,12 +486,12 @@ uu.module.context2dDebug.prototype = {
    * このメソッドは、move + line + fill or storoke のコンビニエンスメソッドとも言えますが、
    * 既存のサブパスにはなんら影響を及ぼしません。<br />
    *
-   * @param number x - 移動先のx座標を指定します。
-   * @param number y - 移動先のy座標を指定します。
-   * @param number w - 幅を指定します。
-   * @param number h - 高さを指定します。
-   * @param number/bool [wire] - ワイヤーを描画する場合はtrueか1を指定します。塗りつぶす場合はfalseか0を指定します。
-   *                             デフォルトは0です。
+   * @param Number x - 移動先のx座標を指定します。
+   * @param Number y - 移動先のy座標を指定します。
+   * @param Number w - 幅を指定します。
+   * @param Number h - 高さを指定します。
+   * @param Number/Boolean [wire] - ワイヤーを描画する場合はtrueか1を指定します。塗りつぶす場合はfalseか0を指定します。
+   *                                デフォルトは0です。
    * @param fillStyle/storokeStyle [style] - フィルスタイルまたはストロークスタイルを指定します。デフォルトはundefinedです。
    * @return this - thisを返します。
    * @see <a href="#begin">uu.module.context2dDebug.begin()</a> - サブパスの初期化と開始
@@ -513,8 +513,8 @@ uu.module.context2dDebug.prototype = {
    *
    * 拡大縮小率(スケール)を設定します。
    *
-   * @param number x - 水平方向のzoom値を指定します。2で2倍になり、0.5で1/2になります。
-   * @param number y - 垂直方向のzoom値を指定します。2で2倍になり、0.5で1/2になります。
+   * @param Number x - 水平方向のzoom値を指定します。2で2倍になり、0.5で1/2になります。
+   * @param Number y - 垂直方向のzoom値を指定します。2で2倍になり、0.5で1/2になります。
    * @return this - thisを返します。
    */
   zoom: function(x, y) {
@@ -528,8 +528,8 @@ uu.module.context2dDebug.prototype = {
    *
    * 原点をずらします。scale(1,1)の時、オフセット値1は1pxに相当します。
    *
-   * @param number x - 水平方向のオフセット値を指定します。
-   * @param number y - 垂直方向のオフセット値を指定します。
+   * @param Number x - 水平方向のオフセット値を指定します。
+   * @param Number y - 垂直方向のオフセット値を指定します。
    * @return this - thisを返します。
    */
   offset: function(x, y) {
@@ -543,7 +543,7 @@ uu.module.context2dDebug.prototype = {
    *
    * キャンバス(コンテキスト)を回転させます。
    *
-   * @param number angle - 回転を度数(0～359)で指定します。0が正位置です。
+   * @param Number angle - 回転を度数(0～359)で指定します。0が正位置です。
    * @return this - thisを返します。
    */
   rotate: function(angle) {
@@ -558,13 +558,13 @@ uu.module.context2dDebug.prototype = {
    *
    * グラデーションを作成します。
    *
-   * @param array point - 始点(x0,y0)と終点(x1,y1)の座標を指定します。<br />
+   * @param Array point - 始点(x0,y0)と終点(x1,y1)の座標を指定します。<br />
    *                      線形グラデーションでは、[x0, y0, x1, y1] の形式で指定します。<br />
    *                      円形グラデーションでは、[x0, y0, r0, x1, y1, r1] の形式で指定します。<br />
-   * @param bool/number [line] - 線形グラデーションを作成する場合はtrueか1を指定します。
+   * @param Boolean/Number [line] - 線形グラデーションを作成する場合はtrueか1を指定します。
    *                             falseか0を指定すると、円形グラデーションになります。
    *                             デフォルトは1です。
-   * @param array colorStop - グラデーションカラーの変化点を指定します。<br />
+   * @param Array colorStop - グラデーションカラーの変化点を指定します。<br />
    *                          offsetには0.0～1.0の値を、colorには色を指定します。<br />
    *                          [offset0, color0, offset1, color1, ...]の形式で指定します。<br />
    *                          デフォルトはundefinedです。
@@ -573,7 +573,7 @@ uu.module.context2dDebug.prototype = {
   gradation: function(point, line /* = 1 */, colorStop /* = undefined */) {
     this._cmdRec("gradation", point, line, colorStop);
     var rv, i = 0;
-    if (line || typeof line === "undefined") {
+    if (line || line === void 0) {
       rv = this.ctx.createLinearGradient(point[0], point[1], point[2], point[3]);
     } else {
       rv = this.ctx.createRadialGradient(point[0], point[1], point[2], point[3], point[4], point[5]);
@@ -598,8 +598,8 @@ uu.module.context2dDebug.prototype = {
   },
   /** <b>create gradation set</b>
    *
-   * @param string name
-   * @param array  params
+   * @param String name
+   * @param Array  params
    * 
    */
   PRESET_GRADATION_REFRECTION_IMAGE: 0,
@@ -612,7 +612,7 @@ uu.module.context2dDebug.prototype = {
   },
   /* ok keep */
   drawReflectImage: function(img, x, y, w, h, reflectionGradation /* = undefined */) {
-    var gra = (typeof reflectionGradation !== "undefined")
+    var gra = (reflectionGradation !== void 0)
             ? reflectionGradation : this.createPresetGradation(this.PRESET_GRADATION_REFRECTION_IMAGE, [h]);
 //    this.clear(0, 0, w, h * 2);
     this.push().translate(0, h * 2).scale(1, -1).drawImage(img, x, y);
@@ -623,7 +623,7 @@ uu.module.context2dDebug.prototype = {
   /* 早いけど、背景が黒じゃなきゃダメ */
   drawQuickReflectScaledImage: function(img, x, y, w, h, scale, reflectionHeight /* = 50 */, reflectionGradation /* = undefined */) {
     var // rh = reflectionHeight || 50,
-        gra = (typeof reflectionGradation !== "undefined")
+        gra = (reflectionGradation !== void 0)
             ? reflectionGradation
             : this.createPresetGradation(this.PRESET_GRADATION_REFRECTION_IMAGE, [h]);
 

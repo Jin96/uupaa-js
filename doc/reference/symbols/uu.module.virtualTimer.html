@@ -156,7 +156,21 @@ ul.inheritsList {
 <!-- ============================== header ================================= -->	
 		<!-- begin static/header.html -->
 		<div id="header">
-<a href="http://uupaa-js.googlecode.com/svn/trunk/README.htm">README.htm</a> &gt; Reference
+<a href="http://uupaa-js.googlecode.com/svn/trunk/README.htm">README</a> &gt; API Reference
+<p>
+   | <a href="http://code.google.com/p/uupaa-js/">Project Home(Google Code)</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/README.htm#demo">DEMO</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/CHANGELOG.htm">ChangeLog</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/LICENSE.htm">License</a> |<br />
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm">Document</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/SELECTOR.htm">Selector</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/MODULE.htm">Module</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/GLOSSARY.htm">Glossary</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/doc/reference/index.html">API Reference</a>
+   |
+</p>
+
+<hr />
 </div>
 
 		<!-- end static/header.html -->
@@ -174,10 +188,6 @@ ul.inheritsList {
 	
 	<li><a href="../symbols/Array.html">Array</a></li>
 	
-	<li><a href="../symbols/Date.html">Date</a></li>
-	
-	<li><a href="../symbols/Number.html">Number</a></li>
-	
 	<li><a href="../symbols/uu.html">uu</a></li>
 	
 	<li><a href="../symbols/uu.ajax.html">uu.ajax</a></li>
@@ -192,10 +202,6 @@ ul.inheritsList {
 	
 	<li><a href="../symbols/uu.css.html">uu.css</a></li>
 	
-	<li><a href="../symbols/uu.css.get.html">uu.css.get</a></li>
-	
-	<li><a href="../symbols/uu.css.set.html">uu.css.set</a></li>
-	
 	<li><a href="../symbols/uu.dom.html">uu.dom</a></li>
 	
 	<li><a href="../symbols/uu.effect.html">uu.effect</a></li>
@@ -206,13 +212,7 @@ ul.inheritsList {
 	
 	<li><a href="../symbols/uu.event.mouse.html">uu.event.mouse</a></li>
 	
-	<li><a href="../symbols/uu.forEach.html">uu.forEach</a></li>
-	
-	<li><a href="../symbols/uu.id.html">uu.id</a></li>
-	
 	<li><a href="../symbols/uu.image.html">uu.image</a></li>
-	
-	<li><a href="../symbols/uu.js.html">uu.js</a></li>
 	
 	<li><a href="../symbols/uu.json.html">uu.json</a></li>
 	
@@ -234,6 +234,8 @@ ul.inheritsList {
 	
 	<li><a href="../symbols/uu.module.messagePump.html">uu.module.messagePump</a></li>
 	
+	<li><a href="../symbols/uu.module.perf.html">uu.module.perf</a></li>
+	
 	<li><a href="../symbols/uu.module.pmvc.html">uu.module.pmvc</a></li>
 	
 	<li><a href="../symbols/uu.module.pmvc.applicationModel.html">uu.module.pmvc.applicationModel</a></li>
@@ -250,6 +252,8 @@ ul.inheritsList {
 	
 	<li><a href="../symbols/uu.perry.html">uu.perry</a></li>
 	
+	<li><a href="../symbols/uu.request.html">uu.request</a></li>
+	
 	<li><a href="../symbols/uu.tag.html">uu.tag</a></li>
 	
 	<li><a href="../symbols/uu.ua.html">uu.ua</a></li>
@@ -259,8 +263,6 @@ ul.inheritsList {
 	<li><a href="../symbols/uu.ui.element.html">uu.ui.element</a></li>
 	
 	<li><a href="../symbols/uu.url.html">uu.url</a></li>
-	
-	<li><a href="../symbols/uu.url.query.html">uu.url.query</a></li>
 	
 	<li><a href="../symbols/uu.window.html">uu.window</a></li>
 	
@@ -306,7 +308,7 @@ ul.inheritsList {
 							<div class="fixedFont">
 								<b><a href="../symbols/uu.module.virtualTimer.html#constructor">uu.module.virtualTimer</a></b>()
 							</div>
-							<div class="description"><b>Quick Timer</b>ベースとなるタイマーで時刻を刻み、その上で複数の仮想タイマーを動作させることで、コンテキストスイッチを減らし、100個以上のタイマーを高速に動作させることができる高機能タイマーです。<br />一時停止、再開、ループ回数の指定、遅延時間の動的な指定が可能です。<br />タイマーの精度は、setIntervalやsetTimeoutよりは落ちます(そもそもそれらも正確ではありません)。<br />タイマー周期は約27万年分ほどあるのでオーバーフローの心配はありません。</div>
+							<div class="description">仮想タイマーモジュール - Virtual Timer Module</div>
 						</td>
 					</tr>
 				</tbody>
@@ -333,9 +335,9 @@ ul.inheritsList {
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont"><b><a href="../symbols/uu.module.virtualTimer.html#construct">construct</a></b>(number)
+								<div class="fixedFont"><b><a href="../symbols/uu.module.virtualTimer.html#construct">construct</a></b>(baseClock)
 								</div>
-								<div class="description"><b>uu.module.virtualTimer.construct - 初期化</b></div>
+								<div class="description">uu.module.virtualTimer.construct - 初期化</div>
 							</td>
 						</tr>
 					
@@ -344,7 +346,7 @@ ul.inheritsList {
 							<td class="nameDescription">
 								<div class="fixedFont"><b><a href="../symbols/uu.module.virtualTimer.html#destruct">destruct</a></b>()
 								</div>
-								<div class="description"><b>uu.module.virtualTimer.destruct - 後始末</b></div>
+								<div class="description">uu.module.virtualTimer.destruct - 後始末</div>
 							</td>
 						</tr>
 					
@@ -353,43 +355,43 @@ ul.inheritsList {
 							<td class="nameDescription">
 								<div class="fixedFont"><b><a href="../symbols/uu.module.virtualTimer.html#diet">diet</a></b>()
 								</div>
-								<div class="description"><b>uu.module.virtualTimer.diet - Memory Compaction</b>不要になった仮想タイマーの情報を削除します。処理中でもベースタイマーは停止しませんが、仮想タイマーは数baseClock分遅延します。</div>
+								<div class="description">uu.module.virtualTimer.diet - Memory Compaction</div>
 							</td>
 						</tr>
 					
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont"><b><a href="../symbols/uu.module.virtualTimer.html#resetLoop">resetLoop</a></b>(number, number)
+								<div class="fixedFont"><b><a href="../symbols/uu.module.virtualTimer.html#resume">resume</a></b>(vtid)
 								</div>
-								<div class="description"><b>uu.module.virtualTimer.resetLoop - 仮想タイマーのループ回数を再設定</b>loop = 0なら、vtidで指定したタイマーを無限ループ化します。<br />loop > 0なら、vtidの現在のループ数に追加します。<br />仮想タイマーが停止中なら再始動させます。</div>
+								<div class="description">uu.module.virtualTimer.resume - タイマーの開始と再開</div>
 							</td>
 						</tr>
 					
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont"><b><a href="../symbols/uu.module.virtualTimer.html#resume">resume</a></b>(number)
+								<div class="fixedFont"><b><a href="../symbols/uu.module.virtualTimer.html#set">set</a></b>(fn, delay, loop)
 								</div>
-								<div class="description"><b>uu.module.virtualTimer.resume - タイマーの開始(再開)</b>ベースタイマーと仮想タイマーの開始(再開)を行います。<br />ベースタイマー停止中に仮想タイマーを再開させると、ベースタイマーの再始動も行います。</div>
+								<div class="description">uu.module.virtualTimer.set - 仮想タイマーの登録</div>
 							</td>
 						</tr>
 					
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont"><b><a href="../symbols/uu.module.virtualTimer.html#set">set</a></b>(function/string, number/function, number)
+								<div class="fixedFont"><b><a href="../symbols/uu.module.virtualTimer.html#setLoop">setLoop</a></b>(vtid, loop)
 								</div>
-								<div class="description"><b>uu.module.virtualTimer.set - 仮想タイマーの登録</b>仮想タイマーを追加します。<br />ベースタイマーが停止している状態ならベースタイマーを再始動させます。</div>
+								<div class="description">uu.module.virtualTimer.setLoop - 登録済みの仮想タイマーのループ回数を再設定</div>
 							</td>
 						</tr>
 					
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont"><b><a href="../symbols/uu.module.virtualTimer.html#suspend">suspend</a></b>(number)
+								<div class="fixedFont"><b><a href="../symbols/uu.module.virtualTimer.html#suspend">suspend</a></b>(vtid)
 								</div>
-								<div class="description"><b>uu.module.virtualTimer.suspend - タイマーの停止(一時停止)</b>ベースタイマーと仮想タイマーの停止(一時停止)を行います。</div>
+								<div class="description">uu.module.virtualTimer.suspend - タイマーの停止と一時停止</div>
 							</td>
 						</tr>
 					
@@ -412,7 +414,7 @@ ul.inheritsList {
 				</div>
 				
 				<div class="description">
-					<b>Quick Timer</b>ベースとなるタイマーで時刻を刻み、その上で複数の仮想タイマーを動作させることで、コンテキストスイッチを減らし、100個以上のタイマーを高速に動作させることができる高機能タイマーです。<br />一時停止、再開、ループ回数の指定、遅延時間の動的な指定が可能です。<br />タイマーの精度は、setIntervalやsetTimeoutよりは落ちます(そもそもそれらも正確ではありません)。<br />タイマー周期は約27万年分ほどあるのでオーバーフローの心配はありません。
+					仮想タイマーモジュール - Virtual Timer Module
 					
 				</div>
 				
@@ -425,6 +427,13 @@ ul.inheritsList {
 					
 					
 					
+					
+						<dl class="detailList">
+						<dt class="heading">See:</dt>
+						
+							<dd><a href="http://uupaa-js.googlecode.com/svn/trunk/MODULE.htm#uu.module.virtualTimer">Virtual Timer</a></dd>
+						
+						</dl>
 					
 
 			</div>
@@ -443,11 +452,11 @@ ul.inheritsList {
 					<div class="fixedFont">
 					
 					
-					<b>construct</b>(number)
+					<b>construct</b>(baseClock)
 					
 					</div>
 					<div class="description">
-						<b>uu.module.virtualTimer.construct - 初期化</b>
+						uu.module.virtualTimer.construct - 初期化
 						
 						
 					</div>
@@ -460,10 +469,10 @@ ul.inheritsList {
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>number</b>
+									<b>baseClock</b>
 									
 								</dt>
-								<dd>[baseClock] - ベースクロックの指定です。単位はmsで、デフォルトは10です。</dd>
+								<dd></dd>
 							
 							</dl>
 						
@@ -472,6 +481,13 @@ ul.inheritsList {
 						
 						
 						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+								<dd><a href="http://uupaa-js.googlecode.com/svn/trunk/MODULE.htm#uu.module.virtualTimer">uu.module.virtualTimer</a></dd>
+							
+							</dl>
 						
 
 					<hr />
@@ -484,7 +500,7 @@ ul.inheritsList {
 					
 					</div>
 					<div class="description">
-						<b>uu.module.virtualTimer.destruct - 後始末</b>
+						uu.module.virtualTimer.destruct - 後始末
 						
 						
 					</div>
@@ -498,6 +514,13 @@ ul.inheritsList {
 						
 						
 						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+								<dd><a href="http://uupaa-js.googlecode.com/svn/trunk/MODULE.htm#uu.module.virtualTimer">uu.module.virtualTimer</a></dd>
+							
+							</dl>
 						
 
 					<hr />
@@ -510,7 +533,7 @@ ul.inheritsList {
 					
 					</div>
 					<div class="description">
-						<b>uu.module.virtualTimer.diet - Memory Compaction</b>不要になった仮想タイマーの情報を削除します。処理中でもベースタイマーは停止しませんが、仮想タイマーは数baseClock分遅延します。
+						uu.module.virtualTimer.diet - Memory Compaction
 						
 						
 					</div>
@@ -518,49 +541,6 @@ ul.inheritsList {
 					
 					
 					
-						
-						
-						
-						
-						
-						
-						
-
-					<hr />
-				
-					<a name="resetLoop"> </a>
-					<div class="fixedFont">
-					
-					
-					<b>resetLoop</b>(number, number)
-					
-					</div>
-					<div class="description">
-						<b>uu.module.virtualTimer.resetLoop - 仮想タイマーのループ回数を再設定</b>loop = 0なら、vtidで指定したタイマーを無限ループ化します。<br />loop > 0なら、vtidの現在のループ数に追加します。<br />仮想タイマーが停止中なら再始動させます。
-						
-						
-					</div>
-					
-					
-					
-					
-						
-							<dl class="detailList">
-							<dt class="heading">Parameters:</dt>
-							
-								<dt>
-									<b>number</b>
-									
-								</dt>
-								<dd>vtid - set()が返すvtidを指定します。</dd>
-							
-								<dt>
-									<b>number</b>
-									
-								</dt>
-								<dd>[loop] - ループ数の指定です。0以上の値を指定します。デフォルトは0です。</dd>
-							
-							</dl>
 						
 						
 						
@@ -571,7 +551,7 @@ ul.inheritsList {
 							<dl class="detailList">
 							<dt class="heading">See:</dt>
 							
-								<dd><a href="#set">uu.module.virtualTimer.set</a> - 仮想タイマーの登録</dd>
+								<dd><a href="http://uupaa-js.googlecode.com/svn/trunk/MODULE.htm#uu.module.virtualTimer.diet">uu.module.virtualTimer.diet</a></dd>
 							
 							</dl>
 						
@@ -582,11 +562,11 @@ ul.inheritsList {
 					<div class="fixedFont">
 					
 					
-					<b>resume</b>(number)
+					<b>resume</b>(vtid)
 					
 					</div>
 					<div class="description">
-						<b>uu.module.virtualTimer.resume - タイマーの開始(再開)</b>ベースタイマーと仮想タイマーの開始(再開)を行います。<br />ベースタイマー停止中に仮想タイマーを再開させると、ベースタイマーの再始動も行います。
+						uu.module.virtualTimer.resume - タイマーの開始と再開
 						
 						
 					</div>
@@ -599,10 +579,10 @@ ul.inheritsList {
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>number</b>
+									<b>vtid</b>
 									
 								</dt>
-								<dd>[vtid] - vtidを指定すると仮想タイマーを開始します。<br />                        -1を指定するとベースタイマーを開始します。<br />                        デフォルトは-1です。</dd>
+								<dd></dd>
 							
 							</dl>
 						
@@ -615,7 +595,7 @@ ul.inheritsList {
 							<dl class="detailList">
 							<dt class="heading">See:</dt>
 							
-								<dd><a href="#suspend">uu.module.virtualTimer.suspend</a> - タイマーの停止(一時停止)</dd>
+								<dd><a href="http://uupaa-js.googlecode.com/svn/trunk/MODULE.htm#uu.module.virtualTimer.resume">uu.module.virtualTimer.resume</a></dd>
 							
 							</dl>
 						
@@ -626,11 +606,11 @@ ul.inheritsList {
 					<div class="fixedFont">
 					
 					
-					<b>set</b>(function/string, number/function, number)
+					<b>set</b>(fn, delay, loop)
 					
 					</div>
 					<div class="description">
-						<b>uu.module.virtualTimer.set - 仮想タイマーの登録</b>仮想タイマーを追加します。<br />ベースタイマーが停止している状態ならベースタイマーを再始動させます。
+						uu.module.virtualTimer.set - 仮想タイマーの登録
 						
 						
 					</div>
@@ -643,42 +623,85 @@ ul.inheritsList {
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>function/string</b>
+									<b>fn</b>
 									
 								</dt>
-								<dd>fn     - 遅延評価関数を指定します。文字列化した関数も指定可能です。                                  デフォルトはuu.muteです。</dd>
+								<dd></dd>
 							
 								<dt>
-									<b>number/function</b>
+									<b>delay</b>
 									
 								</dt>
-								<dd>delay  - 遅延時間を指定します。単位はmsです。<br />                                  デフォルトは10です。<br />                                  遅延時間を返す関数を指定することもできます。                                  delayに関数を指定した場合は、delay(呼び出し回数)の形でコールバックします。                                  呼び出し回数は0以上の整数になります。</dd>
+								<dd></dd>
 							
 								<dt>
-									<b>number</b>
+									<b>loop</b>
 									
 								</dt>
-								<dd>[loop] - 評価回数を指定します。0なら無限, 1なら1回, 100なら100回評価します。</dd>
+								<dd></dd>
 							
 							</dl>
 						
 						
 						
 						
-						
-							<dl class="detailList">
-							<dt class="heading">Returns:</dt>
-							
-								<dd>number                  - unset()で使用するvtidを返します。</dd>
-							
-							</dl>
 						
 						
 						
 							<dl class="detailList">
 							<dt class="heading">See:</dt>
 							
-								<dd><a href="#resetLoop">uu.module.virtualTimer.resetLoop</a> - 仮想タイマーのループ回数を再設定</dd>
+								<dd><a href="http://uupaa-js.googlecode.com/svn/trunk/MODULE.htm#uu.module.virtualTimer.set">uu.module.virtualTimer.set</a></dd>
+							
+							</dl>
+						
+
+					<hr />
+				
+					<a name="setLoop"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>setLoop</b>(vtid, loop)
+					
+					</div>
+					<div class="description">
+						uu.module.virtualTimer.setLoop - 登録済みの仮想タイマーのループ回数を再設定
+						
+						
+					</div>
+					
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>vtid</b>
+									
+								</dt>
+								<dd></dd>
+							
+								<dt>
+									<b>loop</b>
+									
+								</dt>
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+								<dd><a href="http://uupaa-js.googlecode.com/svn/trunk/MODULE.htm#uu.module.virtualTimer.setLoop">uu.module.virtualTimer.setLoop</a></dd>
 							
 							</dl>
 						
@@ -689,11 +712,11 @@ ul.inheritsList {
 					<div class="fixedFont">
 					
 					
-					<b>suspend</b>(number)
+					<b>suspend</b>(vtid)
 					
 					</div>
 					<div class="description">
-						<b>uu.module.virtualTimer.suspend - タイマーの停止(一時停止)</b>ベースタイマーと仮想タイマーの停止(一時停止)を行います。
+						uu.module.virtualTimer.suspend - タイマーの停止と一時停止
 						
 						
 					</div>
@@ -706,10 +729,10 @@ ul.inheritsList {
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>number</b>
+									<b>vtid</b>
 									
 								</dt>
-								<dd>[vtid] - vtidを指定すると仮想タイマーを停止します。<br />                        -1を指定するとベースタイマーを停止します。<br />                        デフォルトは-1です。</dd>
+								<dd></dd>
 							
 							</dl>
 						
@@ -722,7 +745,7 @@ ul.inheritsList {
 							<dl class="detailList">
 							<dt class="heading">See:</dt>
 							
-								<dd><a href="#resume">uu.module.virtualTimer.resume</a> - タイマーの開始(再開)</dd>
+								<dd><a href="http://uupaa-js.googlecode.com/svn/trunk/MODULE.htm#uu.module.virtualTimer.suspend">uu.module.virtualTimer.suspend</a></dd>
 							
 							</dl>
 						
@@ -737,7 +760,7 @@ ul.inheritsList {
 <!-- ============================== footer ================================= -->
 		<div class="fineprint" style="clear:both">
 			&copy;2008<br />
-			Documentation generated by <a href="http://www.jsdoctoolkit.org/" target="_blank">JsDoc Toolkit</a> 2.0.beta2.3 on Sun Jun 15 2008 16:44:35 GMT+0900 (JST)
+			Documentation generated by <a href="http://www.jsdoctoolkit.org/" target="_blank">JsDoc Toolkit</a> 2.0.beta2.3 on Fri Jun 27 2008 02:25:13 GMT+0900 (JST)
 		</div>
 	</body>
 </html>

@@ -1,0 +1,44 @@
+<html><head><title>Attr Selector</title>
+<script type="text/javascript" src="../../uupaa.js"></script>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<style>#result { background-color: lime; }</style>
+</head><body><a href="../../README.htm">README</a> &gt; <a href="../../SELECTOR.htm#attr-selector">SELECTOR</a> &gt; uu.attr<br />
+<div>
+  <div orgattr="aa-attr">hoge</div>
+  <p orgattr="bb-attr">huga</p>
+</div>
+<div id="result"></div>
+<script>
+  uu.window.ready(function() {
+    uu.forEach(uu.attr('p[@orgattr*="attr"]'), function(v) {
+      uu.log(v.tagName); // "p"
+    });
+    uu.forEach(uu.attr('*[@orgattr$="attr"]'), function(v) {
+      uu.log(v.innerText); // "hoge", "huga"
+    });
+    uu.forEach(uu.attr('orgattr$="attr"'), function(v) {
+      uu.log(v.tagName); // "div", "p"
+    });
+    uu.forEach(uu.attr("orgattr"), function(v) {
+      uu.log(v.innerText); // "hoge", "huga"
+    });
+  });
+</script>
+<pre>
+  &lt;div orgattr="aa-attr"&gt;hoge&lt;/div&gt;
+  &lt;p orgattr="bb-attr"&gt;huga&lt;/p&gt;
+
+    uu.forEach(uu.attr('p[@orgattr*="attr"]'), function(v) {
+      uu.log(v.tagName); // "p"
+    });
+    uu.forEach(uu.attr('*[@orgattr$="attr"]'), function(v) {
+      uu.log(v.innerText); // "hoge", "huga"
+    });
+    uu.forEach(uu.attr('orgattr$="attr"'), function(v) {
+      uu.log(v.tagName); // "div", "p"
+    });
+    uu.forEach(uu.attr("orgattr"), function(v) {
+      uu.log(v.innerText); // "hoge", "huga"
+    });
+</pre>
+</body></html>

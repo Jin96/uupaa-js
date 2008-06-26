@@ -4,9 +4,8 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>uupaa.js - uu.module.polygon test</title>
-<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="../../lib/javascript-xpath.js"></script><![endif]-->
-<!--[if IE]><script id="excanvas.js" type="text/javascript" src="../../lib/excanvas.js"></script><![endif]-->
-<script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
+<!--[if IE]><script id="excanvas.js" type="text/javascript" src="http://pigs.sourceforge.jp/excanvas.js"></script><![endif]-->
+<script type="text/javascript" src="../../uupaa.js"></script>
 <style>
 #canvas0 {
   position: absolute;
@@ -16,7 +15,7 @@
 </style>
 </head>
 <body>
-<a href="../../README.htm">README.htm</a> &gt; uu.module.polygon1.htm
+<a href="../../README.htm#demo">README.htm</a> &gt; uu.module.polygon1.htm
 
 <canvas id="canvas0" width="640" height="480"></canvas>
 
@@ -30,7 +29,7 @@ function boot() {
     poly.draw(uu.id("canvas0").getContext("2d"), true);
   }, 2000);
 }
-uu.module.load(" ../../", "polygon", function() {
+uu.module.load("", "polygon", function() {
   uu.canvas.ready(boot);
 });
 </script>

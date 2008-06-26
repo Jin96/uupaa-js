@@ -1,0 +1,1598 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>uupaa.js - Document</title>
+<style type="text/css">
+body {
+  background-color: black; color: whitesmoke;
+  font-family:'メイリオ',Meiryo,'ヒラギノ角ゴ Pro W3','Hiragino Kaku Gothic Pro','ＭＳ Ｐゴシック',sans-serif;
+  margin: 2em; line-height: 1.5;
+}
+a[href] { color: lightblue }
+b { color: gold }
+pre { padding: 1em; border: 1px dashed navy; overflow: auto; color: ghostwhite; }
+dt { margin-top: 1em; font-weight: bold; color: lightblue }
+i {}
+table, tr, th, td { border: 1px solid gray; }
+</style>
+</head>
+<body>
+<p>
+   | <a href="http://code.google.com/p/uupaa-js/">Project Home(Google Code)</a>
+   | <a href="./README.htm#demo">DEMO</a>
+   | <a href="./CHANGELOG.htm">ChangeLog</a>
+   | <a href="./LICENSE.htm">License</a> |<br />
+   | <a href="./DOCUMENT.htm">Document</a>
+   | <a href="./SELECTOR.htm">Selector</a>
+   | <a href="./MODULE.htm">Module</a>
+   | <a href="./GLOSSARY.htm">Glossary</a>
+   | <a href="./doc/reference/index.html">API Reference</a>
+   |
+</p>
+<a href="./README.htm">README</a> &gt; DOCUMENT<br />
+<hr />
+<ul>
+  <li><a href="#beginning">はじめに</a> - Introduction</li>
+<!--
+  <li><a href="#design-concept">設計コンセプト</a> - Design concept</li>
+ -->
+  <li><a href="#mixin">ミックスイン</a> - Mixin</li>
+  <ul>
+    <li><a href="#uu.mix">uu.mix</a> - オブジェクトのミックスイン - Object mixin</li>
+    <li><a href="#uu.mix.param">uu.mix.param</a> - パラメタのミックスイン - Object mixin for parameters</li>
+    <li><a href="#uu.mix.prefix">uu.mix.prefix</a> - prefix付きのミックスイン - Object mixin with/without prefix</li>
+  </ul>
+
+  <li><a href="#iteration">イテレーション</a> - Iteration</li>
+  <ul>
+    <li><a href="#uu.forEach">uu.forEach</a> - 全要素を評価 - Object iteration</li>
+    <li><a href="#uu.filter">uu.filter</a> - 全要素を評価し、結果が真の要素をArrayで返す - Object iteration</li>
+    <li><a href="#Array.forEach">Array.forEach</a> - 全要素を評価し結果を返さない - Array iteration</li>
+    <li><a href="#Array.filter">Array.filter</a> - 全要素を評価し結果が真の要素をArrayで返す - Array iteration</li>
+    <li><a href="#Array.every">Array.every</a> - 全要素を評価し全て真ならtrueを返す - Array iteration</li>
+    <li><a href="#Array.some">Array.some</a> - 全要素を評価し全て偽ならfalseを返す - Array iteration</li>
+    <li><a href="#Array.map">Array.map</a> - 全要素を評価しArrayを返す - Array iteration</li>
+  </ul>
+  <li><a href="#klass">クラス</a> - Class</li>
+  <ul>
+    <li>The OOP "Class"</li>
+    <ul>
+      <li><a href="#uu.klass.generic">uu.klass.generic</a> - 汎用クラスの雛形を生成 - Create generic class</li>
+      <li><a href="#uu.klass.singleton">uu.klass.singleton</a> - シングルトンクラスの雛形を生成 - Create singleton class</li>
+    </ul>
+    <li>The CSS "Class"</li>
+    <ul>
+      <li><a href="#uu.klass.add">uu.klass.add</a> - classNameプロパティにクラス名を追加 - Add className property</li>
+      <li><a href="#uu.klass.has">uu.klass.has</a> - クラス名の存在確認 - Has className</li>
+      <li><a href="#uu.klass.remove">uu.klass.remove</a> - classNameプロパティからクラス名を削除 - Remove className property</li>
+      <li><a href="#uu.klass.toggle">uu.klass.toggle</a> - classNameプロパティにクラス名を追加または削除する - Add className property or remove</li>
+    </ul>
+  </ul>
+  <li><a href="#request">リクエスト</a> - Request</li>
+  <ul>
+    <li><a href="#uu.ajax.load">uu.ajax.load</a> - 非同期通信 - Ajax async request</li>
+    <li><a href="#uu.ajax.loadIfMod">uu.ajax.loadIfMod</a> - 更新チェック付き非同期通信 - Ajax async request with new-arrival check</li>
+    <li><a href="#uu.ajax.loadSync">uu.ajax.loadSync</a>  - 同期通信 - Ajax sync request</li>
+    <li><a href="#uu.json.load">uu.json.load</a> - 非同期通信 - JSONP async request</li>
+    <li><a href="#uu.ajax.load.callback">コールバック</a> - Callback</li>
+  </ul>
+  <li><a href="#event">イベント</a> - Event</li>
+  <ul>
+    <li><a href="#uu.event.handler">uu.event.handler</a> - デフォルトイベントハンドラの生成 - Create default event handler</li>
+    <li><a href="#uu.event.set">uu.event.set</a> - イベントハンドラの設定 - Add event hander</li>
+    <li><a href="#uu.event.unset">uu.event.unset</a> - イベントハンドラの解除 - Remove event handler</li>
+    <li><a href="#uu.event.stop">uu.event.stop</a> - イベントの抑止 - stopPropagation and preventDefault</li>
+    <li><a href="#uu.event.target">uu.event.target</a> - イベント発生源の情報を取得 - Detect event target</li>
+    <li><a href="#uu.event.type">uu.event.type</a> - DOMイベントタイプをDOM Level 0イベントタイプに変換</li>
+    <li><a href="#uu.event.type.toDOM">uu.event.type.toDOM</a> - DOM Level 0イベントタイプをDOMイベントタイプに変換</li>
+  </ul>
+  <li><a href="#timer">タイマー</a> - Timer</li>
+  <ul>
+    <li><a href="#uu.delay">uu.delay</a> - 遅延評価 - Lazy evaluation</li>
+  </ul>
+  <li><a href="#ready">Ready</a></li>
+  <ul>
+    <li><a href="#uu.dom.ready">uu.dom.ready</a> - DomReadyイベントハンドラの設定 - DomReady event handler</li>
+    <li><a href="#uu.dom.already">uu.dom.already</a> - DomReady状態の取得 - DomReady state</li>
+    <li><a href="#uu.window.ready">uu.window.ready</a> - WindowReadyイベントハンドラの設定 - WindowReady event handler</li>
+    <li><a href="#uu.window.already">uu.window.already</a> - WindowReady状態の取得 - WindowReady state</li>
+    <li><a href="#uu.window.unready">uu.window.unready</a> - WindowUnreadyイベントハンドラの設定 - WindowUnready event handler</li>
+    <li><a href="#uu.window.unalready">uu.window.unalready</a> - WindowUnready状態の取得 - WindowUnready state</li>
+    <li><a href="#uu.canvas.ready">uu.canvas.ready</a> - CanvasReadyイベントハンドラの設定 - CanvasReady event handler</li>
+    <li><a href="#uu.canvas.already">uu.canvas.already</a> - CanvasReady状態の取得 - CanvasReady state</li>
+    <li><a href="#uu.ajax.already">uu.ajax.already</a> - Ajaxの状態(使用可能/不能)の取得 - Ajax ready state</li>
+    <li><a href="#uu.json.already">uu.json.already</a> - JSONPの状態(使用可能/不能)の取得 - JSONP ready state</li>
+  </ul>
+  <li><a href="#attr">属性</a> - Attribute</li>
+  <ul>
+    <li><a href="#uu.attr.get">uu.attr.get</a> - 属性の取得 - Get attribute</li>
+    <li><a href="#uu.attr.set">uu.attr.set</a> - 属性の設定 - Set attribute</li>
+  </ul>
+  <li><a href="#css">CSS</a></li>
+  <ul>
+    <li><a href="#uu.css.get">uu.css.get</a> - 計算済みのスタイルを取得 - document.defaultView.getComputedStyle wrapper</li>
+    <li><a href="#uu.css.set">uu.css.set</a> - スタイルの設定 - Set style</li>
+    <li><a href="#uu.css.get.opacity">uu.css.get.opacity</a>, <a href="#uu.css.set.opacity">uu.css.set.opacity</a> - 不透明度の取得と設定 - Opacity getter / setter</li>
+    <li><a href="#uu.css.get.display">uu.css.get.display</a>, <a href="#uu.css.set.display">uu.css.set.display</a> - displayの取得と設定 - Display getter / setter</li>
+    <li><a href="#uu.css.get.xxx">uu.css.get.left</a>, <a href="#uu.css.set.xxx">uu.css.set.left</a> - 要素のx座標の取得と設定 - Element position left getter / setter</li>
+    <li><a href="#uu.css.get.xxx">uu.css.get.top</a>, <a href="#uu.css.set.xxx">uu.css.set.top</a> - 要素のy座標の取得と設定 - Element position top getter / setter</li>
+    <li><a href="#uu.css.get.xxx">uu.css.get.width</a>, <a href="#uu.css.set.xxx">uu.css.set.width</a> - 要素の幅の取得と設定 - Element width getter / setter</li>
+    <li><a href="#uu.css.get.xxx">uu.css.get.height</a>, <a href="#uu.css.set.xxx">uu.css.set.height</a> - 要素の高さ取得と設定 - Element height getter / setter</li>
+    <li><a href="#uu.css.cssProp">uu.css.cssProp</a> - "css-prop"を"cssProp"に変換 - Convert "css-prop" into "cssProp"</li>
+  </ul>
+
+  <li><a href="#utility">ユーティリティ</a> - Utility</li>
+  <ul>
+    <li><a href="#Array.indexOf">Array.indexOf</a> - Arrayの先頭から値を検索し最初のindexを返す。無ければ-1を返す</li>
+    <li><a href="#Array.lastIndexOf">Array.lastIndexOf</a> - Arrayの後方から値を検索し最初のindexを返す。無ければ-1を返す</li>
+    <li><a href="#uu.sprintf">uu.sprintf</a> - sprintf</li>
+    <li><a href="#uu.trim">uu.trim</a> - 両側から空白文字を除去 - Trim both(left and right)</li>
+    <li><a href="#uu.isU">uu.isU</a>,
+        <a href="#uu.isA">uu.isA</a>,
+        <a href="#uu.isF">uu.isF</a>,
+        <a href="#uu.isN">uu.isN</a>,
+        <a href="#uu.isB">uu.isB</a>,
+        <a href="#uu.isS">uu.isS</a> - 型の判断 - Is Undefined/Array/Function/Number/Boolean/String</li>
+    <li><a href="#uu.notax">uu.notax</a> - 結合文字列, Array化されている文字列, 文字列を受け取り、Arrayを返す - No taxing</li>
+    <li><a href="#uu.pair">uu.pair</a> - Hash{ key, value }を生成 - Make Hash from key and value</li>
+    <li><a href="#uu.toHash">uu.toHash</a> - ArrayをHash化 - Make Hash from Array</li>
+    <li><a href="#uu.toArray">uu.toArray</a> - FakeArrayをArray化 - Make Array from FakeArray</li>
+    <li><a href="#uu.indexes">uu.indexes</a> - Hash/Array/FakeArrayのindexを列挙しArrayを返す - Enumerate the index of the Hash/Array/FakeArray and return an Array</li>
+    <li><a href="#uu.values">uu.values</a> - Hash/Array/FakeArrayの値を列挙しArrayを返す - Enumerate the value of the Hash/Array/FakeArray and return an Array</li>
+    <li><a href="#uu.size">uu.size</a> Length of the Hash/Array/FakeArray</li>
+    <li><a href="#uu.first">uu.first - Hash/Array/FakeArrayの先頭の要素の値を取得 - First Element of the Hash/Array/FakeArray</li>
+    <li><a href="#uu.diet">uu.diet - Hash/Arrayのコンパクト化 - Hash/Array memory compaction</li>
+    <li><a href="#uu.uniqueID">uu.uniqueID - ユニークIDの生成 - Generate unique ID</li>
+  </ul>
+  <li><a href="#url">URL</a></li>
+  <ul>
+    <li><a href="#uu.url.base">uu.url.base</a> - ベースディレクトリの取得 - Base Directory</li>
+    <li><a href="#uu.url.abs">uu.url.base</a> - 相対パスを絶対パスに変換 - Convert relative path into a absolute pass</li>
+    <li><a href="#uu.url.fileName">uu.url.fileName</a> - パスからファイル名を取得 - File name by path string</li>
+    <li><a href="#uu.url.dir">uu.url.dir</a> - パスからディレクトリを取得 - Directory by path string</li>
+    <li><a href="#uu.url.query">uu.url.query</a> - クエリストリングをパース - Parse QueryString</li>
+    <li><a href="#uu.url.query.add">uu.url.query.add</a> - クエリストリングを追加 - Add QueryString</li>
+  </ul>
+  <li><a href="#ua">ブラウザの判別とブラウザが保持する機能の判別</a> - Detect User-Agent, Browser Functions and DOM Functions</li>
+  <ul>
+    <li><a href="#uu.ua">uu.ua</a> - ブラウザの判別と、機能の有効/無効情報を取得 - Detect and Search</li>
+  </ul>
+  <li><a href="#config">設定</a> - Configuration</li>
+  <ul>
+    <li><a href="#uu.config.debug">uu.config.debug</a> - デバッグモード - Debug Mode</li>
+    <li><a href="#uu.config.png24">uu.config.png24</a> - 24bit αチャネルpng画像のサポート - Support 24bit alpha channel png image</li>
+    <li><a href="#uu.config.backCompat">uu.config.backCompat</a> - 後方互換モード - Backward compatibility mode</li>
+    <li><a href="#uu.config.imagePath">uu.config.imagePath</a> - 画像検索パス - Image search path</li>
+    <li><a href="#uu.config.modulePath">uu.config.modulePath</a> - モジュール検索パス - Module search path</li>
+    <li><a href="#uu.config">QueryStringによる設定の変更</a> - Change of the setting by QueryString</li>
+  </ul>
+  <li><a href="#debug">デバッグ</a> - Debug</li>
+  <ul>
+    <li><a href="#uu.inspect">uu.inspect</a> - オブジェクトを人間用に加工し出力する - Humanize output, Object Reflection</li>
+    <li><a href="#uu.log">uu.log</a> - ログ出力 - Logging</li>
+  </ul>
+</ul>
+
+<hr />
+<h2><a name="beginning">はじめに</a> - Introduction</h2>
+<p>uupaa.js は、ブラウザとJavaScriptで何かを表現したい人向けの、クロスブラウザなJavaScriptライブラリです。<br />
+   「アイデアを形にするまでのタイムラグを極力減らす」。これが uupaa.js の最大の目標です。</p>
+<p>uupaa.jsには、以下のドキュメントがあります。</p>
+<ol>
+  <li><a href="./DOCUMENT.htm#beginning">ドキュメント</a> - このページです。uupaa.jsのコア機能について書かれています。</li>
+  <li><a href="./SELECTOR.htm">セレクタ</a> - HTML要素の選択と絞込みについて書かれています。</li>
+  <li><a href="./MODULE.htm">モジュール</a> - コアの機能を拡張するモジュールについて書かれています。</li>
+  <li><a href="./GLOSSARY.htm">用語集</a> - 独自の用語を纏めた用語集です。</li>
+  <li><a href="./README.htm#demo">デモ</a> - 動くものを見て、改造するのが一番の近道です。</li>
+  <li><a href="./doc/reference/index.html">APIリファレンス</a> - ソースコードから自動生成したリファレンスです。</li>
+</ol>
+<p>これらのドキュメントで情報を補完しながら読み進めてください。<br />
+   ソースコードもあなたの理解を助ける最良の資料の一つとなるでしょう。
+</p>
+
+<!--
+<hr />
+<h2><a name="design-concept">設計コンセプト</a> - Design concept</h2>
+<p>JavaScriptは他の言語とは一風変わった設計思想(パラダイム)が必要となる言語です。<br />
+   このユニークな言語を深く理解し活用するために、uupaa.jsには以下の設計コンセプト(コーディングルール)があります。
+</p>
+<ul>
+  <li><b>グローバルネームスペースを汚染しない。</b><br />
+      <a href="./GLOSSARY.htm#pollution">グローバルネームスペースの汚染</a>は最小限にすべきです。<br />
+      他のライブラリとの共存を意識すべきであり、<br />
+      「便利だから」という理由で既存のオブジェクトを拡張するのは禁止です。</li>
+  <li><b>不必要なnewを避ける。</b><br />
+      newせずに済むならそのほうがよいのです。<br />
+      ほとんどのケースでは、Array([])と<a href="./GLOSSARY.htm#type-hash">Hash</a>({})があれば十分で、<br />
+      毎回のように new Hash({index, value, ...}) とするのは、リソースの無駄遣いです。</li>
+  <li><b>不必要なI/Fを追加しない。</b><br />
+      ニーズの低い機能(20%)は提供せずに、誰もが必要とする機能(80%)だけを提供すべきです。<br />
+      機能AがBとCに分解でき、BとCそれぞれが有用なら、BとCだけを提供し、
+      B + C = A の存在をドキュメントに記載すべきです。
+      </li>
+  <li><b>継承で頑張るのは無駄。最初から委譲を使う。</b><br />
+      多くのモダンな言語や動的な型を持つ言語において、委譲は継承よりもフレキシブルです。<br />
+      特に、継承をJavaScriptで無理矢理エミュレートするのではなく、最初から委譲を念頭に設計すべきです。
+  </li>
+  <li><b>ドキュメントファースト。</b><br />
+      良いドキュメントが付随するコードには価値があり、ドキュメントの無いコードはゴミです。<br />
+      uupaa.jsには(現在のところ)英語のドキュメントが存在しないため、英語圏の人達からは無価値な物に見えることでしょう。</li>
+  <li><b>ブラウザ依存のコードは分離。</b><br />
+      ブラウザ依存のコードが複数行にまたがる場合は、別関数として分離すべきです。例: uu.event.set</li>
+  <li><b>for, while, ifの { } は必須, 末尾のセミコロン(";")の省略は禁止。</b><br />
+      {}の省略はデメリットが多く、宗教戦争の火種にもなります。<br />
+      行末のセミコロン(";")を省略すると、圧縮済みのスクリプトが動作しないケースがあるため禁止します。
+</ul>
+-->
+
+<hr />
+<h2><a name="mixin">Object/Hash/Arrayの混合</a> - Mixin</h2>
+<p>オブジェクトに別のオブジェクトを混ぜ込みます。</p>
+<p>uu.mix は様々な局面で役立ちます。</p>
+<ol>
+  <li>インスタンスにオブジェクト(データやメソッド)を混ぜ込み、インスタンスの機能を拡張できます(Mixin)。</li>
+  <li>Hashに別のHashを混ぜ込み、データの追加と更新ができます。</li>
+  <li>デフォルト引数の解決や補完ができます(uu.mix.param)。</li>
+</ol>
+<hr />
+<dl>
+<!-- -->
+  <dt><a name="uu.mix">uu.mix</a> - オブジェクトのミックスイン - Object mixin</dt>
+  <dd>
+    <p>uu.mix(<i>base</i>, <i>flavor</i>, <i>aroma</i> = undefined) は、
+       <i>base</i>に<i>flavor</i>と<i>aroma</i>を混ぜ込み、<i>base</i>を返します。</p>
+    <p>baseとflavor, baseとaromaに同じindexがある場合は、baseの値をflavorやaromaの値で上書きします。</p>
+    <pre>
+ @param Hash/Array base    - ベース要素の指定です。
+ @param Hash/Array flavor  - baseに混ぜ込む要素の指定です。
+ @param Hash/Array [aroma] - baseに混ぜ込む要素の指定です。デフォルトはundefinedです。
+ @return Hash/Array - ミックス後のbaseを返します。
+    </pre>
+    <p>uu.mixはオブジェクトの継承や、Hashの結合で活躍します。</p>
+    <a href="demo/document/uu.mix.htm">Run</a>
+    <pre class="eg">
+var base = <b>uu.mix</b>({ a: 0 }, { a: "a", b: 1 }); // { a: 0 } が { a: "a" } で上書きされる
+uu.log(base); // { a: "a", b: 1 };
+    </pre>
+  </dd>
+<!-- -->
+  <dt><a name="uu.mix.param">uu.mix.param</a> - パラメタのミックスイン - Object mixin for parameters</dt>
+  <dd>
+    <p>uu.mix.param(<i>base</i>, <i>flavor</i>, <i>aroma</i> = undefined) は、
+       <i>base</i>に<i>flavor</i>と<i>aroma</i>を混ぜ込み、<i>base</i>を返します。</p>
+    <p>baseとflavor, baseとaromaに同じindexがある場合は、baseの値をflavorやaromaの値で上書きしません。</p>
+    <pre>
+ @param Hash/Array base    - ベース要素の指定です。
+ @param Hash/Array flavor  - baseに混ぜ込む要素の指定です。
+ @param Hash/Array [aroma] - baseに混ぜ込む要素の指定です。デフォルトはundefinedです。
+ @return Hash/Array - ミックス後のbaseを返します。
+    </pre>
+    <p>uu.mix.param()はデフォルトパラメタの結合処理で活躍します。例: uu.module.drag.free.construct</p>
+    <a href="demo/document/uu.mix.param.htm">Run</a>
+    <pre class="eg">
+var base = <b>uu.mix.param</b>({ a: 0 }, { a: "a", b: 1 }); // { a: 0 } が { a: "a" } で上書きされない
+uu.log(base); // { a: 0, b: 1 }
+    </pre>
+  </dd>
+<!-- -->
+  <dt><a name="uu.mix.prefix">uu.mix.prefix</a> - prefix付きのミックスイン - Object mixin with/without prefix</dt>
+  <dd>
+    <p>uu.mix.prefix(<i>base</i>, <i>flavor</i>, <i>prefix</i> = "", <i>add</i> = true) は、
+       <i>base</i>に<i>flavor</i>を混ぜ込み、<i>base</i>を返します。</p>
+    <p><i>prefix</i>には、flavorをbaseに混ぜ込む際に、インデックス名に追加/削除するプリフィクス文字列を指定します。
+       <i>add</i>にtrueを指定するとprefixの追加、falseを指定するとprefixの削除になります。</p>
+    <pre>
+ @param Hash/Array base     - ベース要素の指定です。
+ @param Hash/Array flavor   - baseに混ぜ込む要素の指定です。
+ @param Hash/Array [prefix] - flavorをbaseに混ぜ込む際に、
+                              インデックス名に追加/削除するプリフィクス文字列を指定します。デフォルトは空文字列("")です。
+ @param Boolean add         - prefixを追加する場合にtrueを指定し、prefixを削除する場合にfalseを指定します。デフォルトはtrueです。
+ @return Hash/Array         - ミックス後のbaseを返します。
+    </pre>
+    <a href="demo/document/uu.mix.prefix.htm">Run</a>
+    <pre class="eg">
+var hash = { a: 0 };
+<b>uu.mix.prefix</b>(hash, { a: "a", b: 1 }, "_prefix_", true);
+uu.log(hash); // { a: 0, _prefix_a: "a", _prefix_b: 1 };
+
+var reduce = <b>uu.mix.prefix</b>({}, hash, "_prefix_", false);
+uu.log(reduce); // { a: "a", b: 1 };
+    </pre>
+  </dd>
+</dl>
+
+<hr />
+<h2><a name="iteration">オブジェクト/Hash/Array/FakeArrayのイテレーション</a> - Iteration</h2>
+<p>オブジェクトの各要素を評価します。<br />
+   for (;;) ループや、for ( in ) ループは、もう不要です。
+</p>
+<hr />
+<dl>
+<!-- -->
+  <dt><a name="uu.forEach">uu.forEach</a> - 全要素を評価 - Object iteration</dt>
+  <dd>
+    <p>uu.forEach(<i>mix</i>, <i>fn</i>, <i>me</i> = undefined) は、<i>mix</i>の各要素に対し、<i>fn</i>.call(<i>me, 要素の値, index, mix</i>); を実行します。</p>
+    <p><a href="#Array.forEach">Array.forEach</a> は Array専用ですが、uu.forEachは、<a href="./GLOSSARY.htm#type-hash">Hash</a>, Array, <a href="./GLOSSARY.htm#FakeArray">FakeArray</a>に使用可能です。</p>
+    <pre>
+ @param Hash/Array/FakeArray mix - Hash, Array, FakeArrayを指定します。
+ @param Function fn   - 各要素を評価する関数を指定します。
+ @param this     [me] - fn実行時のthisを指定します。デフォルトはundefinedです。
+ @return Mix          - mixを返します。
+    </pre>
+    <a href="demo/document/uu.forEach.htm">Run</a>
+    <pre class="eg">
+<b>uu.forEach</b>({ a: "a", b: 1 }, function(v, i) {
+  uu.log(i + ":" + v); // "a:a", "b:1"
+});
+<b>uu.forEach</b>(["a", 1], function(v, i) {
+  uu.log(i + ":" + v); // "0:a", "1:1"
+});
+<b>uu.forEach</b>(uu.tag("*"), function(v, i) {
+  uu.log(i + ":" + v); // "0:[object HTMLHtmlElement]", "1:[object HTMLHeadElement]", ...
+});
+    </pre>
+  </dd>
+<!-- -->
+  <dt><a name="uu.filter">uu.filter</a> - 全要素を評価し、結果が真の要素をArrayで返す - Object iteration</dt>
+  <dd>
+    <p>uu.filter(<i>mix</i>, <i>fn</i>, <i>me</i>) は、
+       mixの各要素に対し、<i>fn</i>.call(<i>me, 要素の値, index, mix</i>); を実行し、結果が真の要素をArrayで返します。</p>
+    <p><a href="#Array.filter">Array.filter</a> は Array専用ですが、uu.filterは、<a href="./GLOSSARY.htm#type-hash">Hash</a>, Array, <a href="./GLOSSARY.htm#FakeArray">FakeArray</a>に使用可能です。</p>
+    <pre>
+ @param Hash/Array/FakeArray mix - Hash, Array, FakeArrayを指定します。
+ @param Function fn   - 各要素を評価する関数を指定します。
+ @param this     [me] - thisオブジェクトを指定します。デフォルトはundefinedです。
+ @return Array        - Array([ 要素, ... ])を返します。
+    </pre>
+    <a href="demo/document/uu.filter.htm">Run</a>
+    <pre class="eg">
+var rv = <b>uu.filter</b>(["a", 2, "3"], uu.isS);
+uu.log(rv); // ["a", "3"]
+
+rv = <b>uu.filter</b>({ a: "a", b: 2, c: "3" }, uu.isS);
+uu.log(rv); // [ a: "a", c: "3" ]
+
+rv = <b>uu.filter</b>(uu.tag("*"), function(v) {
+  return (v.tagName === "HTML" || v.tagName === "BODY");
+});
+uu.log(rv.length); // 2
+    </pre>
+  </dd>
+<!-- -->
+  <dt><a name="Array.forEach">Array.forEach - Arrayのイテレーション - 全要素を評価し結果を返さない</a> - Array iteration</dt>
+  <dd>
+    <p>Array.forEach(<i>fn</i>, <i>me</i> = undefined) は、Arrayの各要素に対し、<i>fn.call(me, 要素の値, 数値index, this)</i> を実行します。</p>
+    <p>Array.forEachは<a href="http://developer.mozilla.org/ja/docs/Core_JavaScript_1.5_Reference:Global_Objects:Array:forEach">JavaScript1.5</a>の機能です。Firefox2+<!--, Opera9, Safari3-->では、Array.forEachがネイティブに実装されているため高速に動作します。</p>
+    <pre>
+ @param Function  fn   - 各要素を評価する関数を指定します。
+ @param this      [me] - thisオブジェクトを指定します。デフォルトはundefinedです。
+    </pre>
+    <a href="demo/document/Array.forEach.htm">Run</a>
+    <pre class="eg">
+<b>["a", 1].forEach</b>(function(v, i) {
+  uu.log(i + ":" + v); // "0:a", "1:1"
+});
+    </pre>
+  </dd>
+<!-- -->
+  <dt><a name="Array.filter">Array.filter - Arrayのイテレーション - 全要素を評価し結果が真の要素をArrayで返す</a> - Array iteration</dt>
+  <dd>
+    <p>Array.filter(<i>fn</i>, <i>me</i> = undefined) は、Arrayの各要素に対し、<i>fn.call(me, 要素の値, 数値index, this)</i> を実行し、結果が真の要素をArrayで返します。</p>
+    <p>Array.filterは<a href="http://developer.mozilla.org/ja/docs/Core_JavaScript_1.5_Reference:Global_Objects:Array:filter">JavaScript1.5</a>の機能です。Firefox2+<!--, Opera9, Safari3-->では、Array.filterがネイティブに実装されているため高速に動作します。</p>
+    <pre>
+ @param Function  fn   - 各要素を評価する関数を指定します。
+ @param this      [me] - thisオブジェクトを指定します。デフォルトはundefinedです。
+ @return Array         - Array([ 要素, ... ])を返します。
+    </pre>
+    <a href="demo/document/Array.filter.htm">Run</a>
+    <pre class="eg">
+var rv = <b>["a", 2, "3"].filter</b>(function(v, i) {
+  return uu.isS(v); // typeof v === "string" と同じ
+});
+uu.log(rv); // ["a", "3"]
+    </pre>
+  </dd>
+<!-- -->
+  <dt><a name="Array.every">Array.every - Arrayのイテレーション - 全要素を評価し全て真ならtrueを返す</a> - Array iteration</dt>
+  <dd>
+    <p>Array.filter(<i>fn</i>, <i>me</i> = undefined) は、Arrayの各要素に対し、<i>fn.call(me, 要素の値, 数値index, this)</i> を実行し、結果が偽ならループを中断しfalseを返します。結果が全て真ならtrueを返します。</p>
+    <p>Array.filterは<a href="http://developer.mozilla.org/ja/docs/Core_JavaScript_1.5_Reference:Global_Objects:Array:every">JavaScript1.5</a>の機能です。Firefox2+<!--, Opera9, Safari3-->では、Array.filterがネイティブに実装されているため高速に動作します。</p>
+    <pre>
+ @param Function  fn   - 各要素を評価する関数を指定します。
+ @param this      [me] - thisオブジェクトを指定します。デフォルトはundefinedです。
+ @return Boolean       - 全て真ならtrue, 偽があればfalseを返します。
+    </pre>
+    <a href="demo/document/Array.every.htm">Run</a>
+    <pre class="eg">
+var rv = <b>["a", 2, "3"].every</b>(function(v, i) {
+  return uu.isS(v); // typeof v === "string" と同じ
+});
+uu.log(rv); // false (数値要素(2)が含まれているためfalse)
+    </pre>
+  </dd>
+<!-- -->
+  <dt><a name="Array.some">Array.some - Arrayのイテレーション - 全要素を評価し全て偽ならfalseを返す</a> - Array iteration</dt>
+  <dd>
+    <p>Array.some(<i>fn</i>, <i>me</i> = undefined) は、Arrayの各要素に対し、<i>fn.call(me, 要素の値, 数値index, this)</i> を実行し、結果が真ならループを中断しtrueを返します。結果が全て偽ならfalseを返します。</p>
+    <p>Array.someは<a href="http://developer.mozilla.org/ja/docs/Core_JavaScript_1.5_Reference:Global_Objects:Array:some">JavaScript1.5</a>の機能です。Firefox2+<!--, Opera9, Safari3-->では、Array.someがネイティブに実装されているため高速に動作します。</p>
+    <pre>
+ @param Function  fn   - 各要素を評価する関数を指定します。
+ @param this      [me] - thisオブジェクトを指定します。デフォルトはundefinedです。
+ @return Boolean       - 全て偽ならfalse, 真があればtrueを返します。
+    </pre>
+    <a href="demo/document/Array.some.htm">Run</a>
+    <pre class="eg">
+var rv = <b>[1, 2, 3].some</b>(function(v, i) {
+  return uu.isS(v); // typeof v === "string" と同じ
+});
+uu.log(rv); // false (全要素は数値なのでfalse)
+    </pre>
+  </dd>
+<!-- -->
+  <dt><a name="Array.map">Array.map - Arrayのイテレーション - 全要素を評価しArrayを返す</a> - Array iteration</dt>
+  <dd>
+    <p>Array.map(<i>fn</i>, <i>me</i> = undefined) は、Arrayの各要素に対し、<i>fn.call(me, 要素の値, 数値index, this)</i> を実行し、結果をArrayで返します。</p>
+    <p>Array.mapは<a href="http://developer.mozilla.org/ja/docs/Core_JavaScript_1.5_Reference:Global_Objects:Array:map">JavaScript1.5</a>の機能です。Firefox2+<!--, Opera9, Safari3-->では、Array.someがネイティブに実装されているため高速に動作します。</p>
+    <pre>
+ @param Function  fn   - 各要素を評価する関数を指定します。
+ @param this      [me] - thisオブジェクトを指定します。デフォルトはundefinedです。
+ @return Array         - 結果をArrayで返します。
+    </pre>
+    <a href="demo/document/Array.map.htm">Run</a>
+    <pre class="eg">
+var rv = <b>[1, 2, 4].map</b>(function(v, i) {
+  return i * v;
+});
+uu.log(rv); // [0, 2, 8]
+    </pre>
+  </dd>
+</dl>
+
+<hr />
+<h2><a name="klass">クラス</a> - Class</h2>
+<p>uu.klassは、OOPのクラスと、CSSのクラスについて機能を提供します。</p>
+<p>OOPのクラスについては、オブジェクト指向的な"クラス"をJavaScriptでも使えるようにします。</p>
+<p>CSSのクラスについては、クラス名の取り扱いを簡単にします。</p>
+<hr />
+<dl>
+<!-- -->
+  <dt><a name="uu.klass.generic">uu.klass.generic - 汎用クラスの雛形を生成</a> - Create generic class</dt>
+  <dd>
+    <p>uu.klass.generic(<i>...</i>) は、汎用クラスの雛形を生成します。</p>
+    <p>以下のように記述し、new myClass() を実行すると、myClass.prototype.construct() を自動的に呼び出します。
+       初期化に必要な引数も渡せます。</p>
+    <pre>
+ @param Mix [...] - constructに渡す引数をいくつでも指定できます。
+ @return Function - 汎用クラスの雛形を生成するクロージャを返します。
+    </pre>
+    <a href="demo/document/uu.klass.generic.htm">Run</a>
+    <pre class="eg">
+var myClass = <b>uu.klass.generic</b>();
+myClass.prototype = {
+  <b>construct</b>: function(var1, var2 /*, ... */) {
+    // 初期化
+    this.privateVar1 = var1;
+    this.privateVar2 = var2;
+  },
+  myMethod: function() {
+    return this.privateVar1 * this.privateVar2;
+  }
+};
+var my = <b>new</b> myClass(10, 20); // 自動的に construct() を実行する。
+uu.log(my.myMethod()); // "200"
+    </pre>
+  </dd>
+<!-- -->
+  <dt><a name="uu.klass.singleton">uu.klass.singleton - シングルトンクラスの雛形を生成</a> - Create singleton class</dt>
+  <dd>
+    <p>uu.klass.singleton(<i>...</i>) は、シングルトンクラスの雛形を生成します。</p>
+    <p>シングルトンクラスは何度newしても、いつも同じ(一つ)のインスタンスを示します。<br />
+       一つ存在すれば十分なものや、newする度に新しく生成できてしまうとまずいものはシングルトンクラスにします。</p>
+    <p>以下のように記述し、new myClass() を実行すると、myClass.prototype.construct() を自動的に呼び出します。
+       初期化に必要な引数も渡せます。</p>
+    <p>また、destruct() を定義しておくと、ページ遷移の時に myClass.prototype.destruct() を自動的に呼び出します。</p>
+    <pre>
+ @param Mix [...] - constructに渡す引数をいくつでも指定できます。
+ @return Function - 汎用クラスの雛形を生成するクロージャを返します。
+    </pre>
+    <a href="demo/document/uu.klass.singleton.htm">Run</a>
+    <pre class="eg">
+function Run() {
+  var myClass = <b>uu.klass.singleton</b>();
+  myClass.prototype = {
+    <b>construct</b>: function(url /* = "" */, msg1 /* = "" */, msg2 /* = "" */ /*, ... */) {
+      // 初期化用メソッド
+      uu.mix(this, { url: url || "", msg1: msg1 || "", msg2: msg2 || "" }); // 引数の補完と、this.xxx = xxx の実行
+//      uu.ajax.load(this.url + "?" + this.msg1);
+    },
+    <b>destruct</b>: function() {
+      // 後処理用メソッド
+//      uu.ajax.load(this.url + "?" + this.msg2);
+    },
+    myMethod: function() {
+      return [this.msg1, this.msg2];
+    }
+  };
+  var my = <b>new</b> myClass(uu.id("url").value, "hello", "bye-bye"); // 自動的に construct() を実行する。
+  uu.log(my.myMethod()[0]); // "hello"
+
+  var my2 = <b>new</b> myClass(); // 二度目のnewなので construct() は呼ばれず、引数を指定しても無意味となる
+  uu.log(my.myMethod()[1]); // "bye-bye"
+
+  uu.log(<b>my === my2</b>); // "true"  myとmy2は同じもの(シングルトン)
+
+  if (window.confirm("jump to http://www.example.com/")) {
+    window.location.href = "http://www.example.com/"; // ページ遷移が発生するため、自動的に destruct() を1度だけ実行する。
+  }
+}
+    </pre>
+  </dd>
+<!-- -->
+  <dt><a name="uu.klass.add">uu.klass.add</a> - classNameプロパティにクラス名を追加 - Add className property</dt>
+  <dd>
+    <p>uu.klass.add(<i>elm</i>, <i>className</i>) は
+       <i>elm</i>要素のclassNameプロパティの値に<i>className</i>を追加します。</p>
+    <pre>
+ @param Element elm - 要素を指定します。
+ @param Taxing  className - クラス名を指定します。
+    </pre>
+    <pre class="eg">
+uu.forEach(uu.klass("alpha"), function(v) {
+  <b>uu.klass.add</b>(v, ["beta", "hoge", "huga", "piyo"]); // まとめて追加
+});
+uu.forEach(uu.klass("alpha"), function(v) {
+  <b>uu.klass.add</b>(v, "beta,hoge,huga,piyo"); // これでも良い
+});
+uu.forEach(uu.klass("alpha"), function(v) {
+  <b>uu.klass.add</b>(v, "beta hoge huga piyo"); // 最速
+});
+    </pre>
+  </dd>
+<!-- -->
+  <dt><a name="uu.klass.has">uu.klass.has</a> - クラス名の存在確認 - Has className</dt>
+  <dd>
+    <p>uu.klass.has(<i>elm</i>, <i>className</i>) は
+       <i>elm</i>要素のclassNameプロパティの値に<i>className</i>が含まれていればtrueを返します。</p>
+    <pre>
+ @param Element elm       - 要素を指定します。
+ @param String  className - クラス名を指定します。
+ @return Boolean          - 要素のclassNameプロパティの値に引数で指定したclassNameが含まれていればtrueを返します。
+    </pre>
+    <pre class="eg">
+var e = document.body.appendChild(createElement("div"));
+e.className = "hoge";
+
+uu.log(<b>uu.klass.has</b>(e, "hoge")); // true
+    </pre>
+  </dd>
+<!-- -->
+  <dt><a name="uu.klass.remove">uu.klass.remove</a> - classNameプロパティからクラス名を削除 - Remove className property</dt>
+  <dd>
+    <p>uu.klass.remove(<i>elm</i>, <i>className</i>) は
+       <i>elm</i>要素のclassNameプロパティの値から<i>className</i>を削除します。</p>
+    <p>該当する値が存在しなければ何もしません。</p>
+    <pre>
+ @param Element elm       - 要素を指定します。
+ @param String  className - クラス名を指定します。
+    </pre>
+    <pre class="eg">
+uu.forEach(uu.klass("alpha"), function(v) {
+  <b>uu.klass.remove</b>(v, "beta"); // 削除は１つずつ
+});
+    </pre>
+  </dd>
+<!-- -->
+  <dt><a name="uu.klass.toggle">uu.klass.toggle</a> - classNameプロパティにクラス名を追加または削除する - Add className property or remove</dt>
+  <dd>
+    <p>uu.klass.toggle(<i>elm</i>, <i>className</i>) は
+       <i>elm</i>要素のclassNameプロパティの値に、<i>className</i>を追加します。すでに存在する場合は削除します。</p>
+    <pre>
+ @param Element elm       - 要素を指定します。
+ @param String  className - クラス名を指定します。
+    </pre>
+    <pre class="eg">
+uu.forEach(uu.klass("alpha"), function(v) {
+  <b>uu.klass.remove</b>(v, "beta"); // 削除は１つずつ
+});
+    </pre>
+  </dd>
+
+
+
+
+</dl>
+
+<hr />
+<h2><a name="request">リクエスト</a> - Request</h2>
+<p>Webサーバにリクエストを発行します。
+   uu.xxx.load()が非同期リクエスト(Async request)、uu.xxx.loadSync()が同期リクエスト(Sync request)です。
+   同期リクエストはサーバからレスポンスがあるまで、JavaScriptの動作が停止します。</p>
+<table>
+<tr><th>Function</th><th>リクエスト<br />(Request)</th><th>メソッド<br />(Method)</th><th>タイムアウト<br />(Timeout)</th><th>独自ヘッダの追加<br />(Add Original Headers)</th><th>更新チェック<br />(Update check)</th></tr>
+<tr><td>uu.ajax.load</td><td>Async</td><td>GET, POST</td><td>○</td><td>○</td><td>×</td></tr>
+<tr><td>uu.ajax.loadIfMod</td><td>Async</td><td>GET</td><td>○</td><td>○</td><td>○</td></tr>
+<tr><td>uu.ajax.loadSync</td><td>Sync</td><td>GET, POST</td><td>×</td><td>○</td><td>×</td></tr>
+<tr><td>uu.json.load</td><td>Async</td><td>GET</td><td>○</td><td>×</td><td>×</td></tr>
+</table>
+<p>タイムアウト機能を使用する場合は、uu.request.timeout に10000(10秒)～50000(50秒)を指定します。単位はmsです。0を指定するとタイムアウトしません。デフォルトは10000(10秒)です。</p>
+<p>通信ヘッダを追加するには、uu.request.header に項目を設定します。</p>
+
+<hr />
+<dl>
+<!-- -->
+  <dt><a name="uu.ajax.load">uu.ajax.load</a> - 非同期通信 - Ajax async request</dt>
+  <dd><p>uu.ajax.load(<i>url</i>, <i>fn</i> = undefined, <i>data</i> = undefined) は、Webサーバと非同期に通信を行います。</p>
+      <p><i>url</i>にはリクエストURLを、<i>fn</i>には各ステップ毎に<a href="#uu.ajax.load.callback">コールバック</a>する関数を、
+         データを送信する場合は<i>data</i>にencodeURIComponentでエンコード済みの文字列を指定します。</p>
+      <pre>
+ @param String   url    - リクエストURLを指定します。
+ @param Function [fn]   - 各ステップ毎にコールバックする関数を指定します。デフォルトはundefinedです。
+ @param String   [data] - データを送信する場合に、encodeURIComponentでエンコード済みの文字列を指定します。
+                          dataを指定するとPOSTメソッドを使用し、指定しないとGETメソッドを使用します。
+                          デフォルトはundefinedです。
+      </pre>
+  </dd>
+<!-- -->
+  <dt><a name="uu.ajax.loadIfMod">uu.ajax.loadIfMod</a> - 更新チェック付き非同期通信 - Ajax async request with new-arrival check</dt>
+  <dd><p>uu.ajax.loadIfMod(<i>url</i>, <i>fn</i> = undefined) は、Webサーバと非同期に通信を行います。</p>
+      <p>前回通信を行った際のURLと、その更新日時を保存しており、データが更新されていない場合はstatusに304を返します。</p>
+      <pre>
+ @param String   url - リクエストURLを指定します。
+ @param Function [fn] - 各ステップ毎にコールバックする関数を指定します。デフォルトはundefinedです。
+      </pre>
+  </dd>
+<!-- -->
+  <dt><a name="uu.ajax.loadSync">uu.ajax.loadSync</a> - 同期通信 - Ajax sync request</dt>
+  <dd><p>uu.ajax.loadSync(<i>url</i>, <i>fn</i> = undefined, <i>data</i> = undefined) は、Webサーバと同期通信を行います。</p>
+      <p>同期通信はサーバからのレスポンスがあるまで待機し続けます(ブラウザが固まったように見えます)。</p>
+      <pre>
+ @param String   url    - リクエストURLを指定します。
+ @param Function [fn]   - 各ステップ毎にコールバックする関数を指定します。デフォルトはundefinedです。
+ @param String   [data] - データを送信する場合に、encodeURIComponentでエンコード済みの文字列を指定します。
+                          dataを指定するとPOSTメソッドを使用し、指定しないとGETメソッドを使用します。
+                          デフォルトはundefinedです。
+      </pre>
+  </dd>
+<!-- -->
+  <dt><a name="uu.json.load">uu.json.load</a> - 非同期通信 - JSONP async request</dt>
+  <dd><p>uu.json.load(<i>url</i>, <i>fn</i> = undefined) は、Webサーバと非同期に通信を行います。</p>
+      <p><i>url</i>にはリクエストURLを、<i>fn</i>には
+          各ステップ毎に<a href="#uu.ajax.load.callback">コールバック</a>する関数を指定します。</p>
+      <pre>
+ @param String   url  - リクエストURLを指定します。
+ @param Function [fn] - 各stepで呼び出す関数を指定します。デフォルトはundefinedです。
+      </pre>
+  </dd>
+<!-- -->
+  <dt><a name="uu.ajax.load.callback">コールバック</a> - Callback</dt>
+  <dd><p>uu.ajax.load, uu.ajax.loadIfMod, uu.ajax.loadSync, uu.json.load は、
+      通信の各段階で <i>fn</i>(<i>step</i>, <i>response</i>, <i>status</i>, <i>url</i>, <i>async</i>) の形で
+      コールバックします。(fnを省略するとコールバックしません)</p>
+      <i>response</i>にはレスポンステキストが、
+      <i>status</i>にはWebサーバが返すステータスコードか、uuppa.js側が設定したステータスコードが格納されます。
+      <i>async</i>は非同期通信(load,loadIfMod)で1, 同期通信(loadSync)で0になります。</p>
+      <table>
+      <tr><th>状況                  </th><th>step</th><th>response</th><th>status</th><th>url</th><th>async</th></tr>
+      <tr><td>リクエスト開始 - SEND </td><td>1   </td><td>""      </td><td>0</td><td>request URL</td><td>1 or 0</td></tr>
+      <tr><td>成功 - OK             </td><td>2   </td><td><i>response text</i></td><td>200</td><td>request URL</td><td>1 or 0</td></tr>
+      <tr><td>失敗 - NG             </td><td>4   </td><td>""      </td><td>200以外の数値</td><td>request URL</td><td>1 or 0</td></tr>
+      </table>
+      <p>コールバックするstepを限定することも可能です。<br />OKとNGだけを知りたい場合は、
+         uu.request.callbackFilter に 6 を設定します( 6 = 2 + 4 )。<br />
+         デフォルトは 2 です。</p>
+      <a href="demo/compat/uu.module.ajax.htm">Run</a>
+  </dd>
+</dl>
+
+
+<hr />
+<h2><a name="event">イベント</a> - Event</h2>
+<p>イベントの取り扱いを簡単にします。</p>
+<hr />
+<dl>
+<!-- -->
+  <dt><a name="uu.event.handler">uu.event.handler</a> - デフォルトイベントハンドラの生成 - Create default event handler</dt>
+  <dd><p>uu.event.handler(<i>me</i>) は、uu.event.set用のイベントハンドラを生成します。</p>
+      <pre>
+ @param this me - thisを指定します。
+ @return Object - イベントハンドラを返します。uu.event.set の引数として使用可能です。
+      </pre>
+      <p>uupaa.jsは、DOM標準のイベントのマネージメント方法を採用しています。この"handleEvent"という名前はDOMで定義されている名前です(変更できません)。
+         JavaScript第5版 420pを参考にしてください。</p>
+      <p>handleEventメソッドは、クラスメソッドとして定義しておくと、イベント発生時に自動的に呼び出されます。</p>
+
+      <pre class="eg">
+// handleEvent メソッドをクラスに追加します。
+var myClass = uu.klass.generic();
+myClass.prototype = {
+  <b>handleEvent</b>: function(evt) {
+  }
+};
+      </pre>
+      <p>以下はクリックイベントを受け取る実装例です。</p>
+      <a href="demo/document/uu.event.handler.htm">Run</a>
+      <pre class="eg">
+var myClass = uu.klass.singleton();
+myClass.prototype = {
+  construct: function(element) {
+    this.element = element;
+    <b>this.hr</b> = <b>uu.event.handler</b>(this);             // デフォルトイベントハンドラ(this.handleEvent)を生成
+    <b>uu.event.set</b>(this.element, "click", <b>this.hr</b>); // イベントハンドラを設定
+  },
+  destruct: function() {
+    <b>uu.event.unset</b>(this.element, "click", <b>this.hr</b>); // constructで設定したイベントハンドラを開放
+  },
+  handleEvent: function(evt) {      // 第一引数にイベントオブジェクトが渡される
+    var tgt = <b>uu.event.target</b>(evt); // イベントが発生した要素は、tgt.real で取得可能
+    <b>uu.event.stop</b>(evt);             // イベントの伝播とデフォルト動作を抑止
+    var mpos = uu.event.mouse.pos(evt); // クリック時のマウス座標を取得
+    uu.id("result").innerText = uu.sprintf("CLICK: x:[%d], y:[%d]", mpos.x, mpos.y);
+  }
+};
+var my = new myClass(uu.id("clicktarget"));
+      </pre>
+      <p>以下のようにすることでグローバルネームスペース(windowオブジェクト)に、作成したイベントハンドラを指定することもできます。</p>
+      <a href="demo/document/uu.event.handler2.htm">Run</a>
+      <pre class="eg">
+<b>window.myHandleEvent</b> = function(evt) { // この場合のメソッド名は "handleEvent" 以外でもOK
+  uu.log("click");
+  var tgt = uu.event.target(evt);
+  uu.log(tgt.real.id);
+};
+<b>uu.event.set</b>(document, "click", <b>window.myHandleEvent</b>);
+      </pre>
+  </dd>
+<!-- -->
+  <dt><a name="uu.event.set">uu.event.set</a> - イベントハンドラの設定 - Add event hander</dt>
+  <dd><p>uu.event.set(<i>elm</i>, <i>type</i>, <i>fn</i>, <i>capture</i> = false) はイベントを設定します。
+      <pre>
+ @param Element  elm       - イベントを設定する要素を指定します。
+ @param Taxing   type      - イベントタイプを指定します。
+ @param Function fn        - イベント成立時にコールバックする関数を指定します。
+                             通常は、uu.event.handler の戻り値を指定します。
+ @param Boolean  [capture] - イベントをキャプチャーする場合はtrueを指定します。
+                             通常のイベントを登録する場合はfalseを指定します。
+      </pre>
+  </dd>
+<!-- -->
+  <dt><a name="uu.event.unset">uu.event.unset</a> - イベントハンドラの解除 - Remove event handler</dt>
+  <dd><p>uu.event.unset(<i>elm</i>, <i>type</i>, <i>fn</i>, <i>capture</i> = false) はイベントを解除します。
+      引数は、uu.event.set でイベントを登録する際に指定したものとまったく同じものを指定します。</p>
+      <pre>
+ @param Element  elm       - イベントを解除する要素を指定します。
+ @param Taxing   type      - イベントタイプを指定します。
+ @param Function fn        - イベント成立時にコールバックする関数を指定します。
+                             通常は、uu.event.handler の戻り値を指定します。
+ @param Boolean  [capture] - イベントをキャプチャーする場合はtrueを指定します。
+                             通常のイベントを解除する場合はfalseを指定します。
+      </pre>
+  </dd>
+<!-- -->
+  <dt><a name="uu.event.stop">uu.event.stop</a> - イベントの抑止 - stopPropagation and preventDefault</dt>
+  <dd><p>uu.event.stop(<i>evt</i>, <i>cancel</i> = true) は
+      イベントのバブルアップ(伝播)と、可能ならデフォルトの動作を抑止します。</p>
+      <pre>
+ @param event evt        - イベントオブジェクトを指定します。
+ @param Boolean [cancel] - ブラウザが実装しているデフォルトの動作をキャンセルする場合にtrueを指定します。
+                           キャンセルできない場合は無視されます。
+      </pre>
+  </dd>
+<!-- -->
+  <dt><a name="uu.event.target">uu.event.target</a> - イベント発生源の情報を取得 - Detect event target</dt>
+  <dd><p>uu.event.target(<i>evt</i>) は イベント発生源に関する情報を取得します。</p>
+      <pre>
+ @param event evt - イベントオブジェクトを指定します。
+ @return Hash     - Hash({ real, curt, hover }) を返します。
+      </pre>
+      <dl>
+        <dt>real</dt><dd>イベント発生源のノード</dd>
+        <dt>curt</dt><dd>現在処理中のノード(キャプチャリング/バブリング中)のカレントノード(Firefox, Safari, Opera)</dd>
+        <dt>hover</dt><dd>マウスhover用の情報<br />
+            realでmouseoverが発生した場合は、hoverにmouseoutした要素が格納される。<br />
+            realでmouseoutが発生した場合は、hoverにmouseoverした要素が格納される。</dd>
+      </dl>
+  </dd>
+<!-- -->
+  <dt><a name="uu.event.type">uu.event.type</a> - DOMイベントタイプをDOM Level 0イベントタイプに変換</dt>
+  <dd><p>uu.event.type(<i>type</i>) は DOMイベントタイプをDOM Level 0イベントタイプに変換します。</p>
+      <p>モジュール作者向けの機能です。</p>
+      <pre>
+ @param String type - DOMイベントタイプを指定します。
+ @return String     - 変換後のイベントタイプを返します。
+      </pre>
+      <table>
+      <tr><th>Browser</th><th>Before</th><th>After</th></tr>
+      <tr><td>ALL</td><td>onlosecapture</td><td>mouseup</td></tr>
+      <tr><td>ALL</td><td>DOMMouseScroll</td><td>mousewheel</td></tr>
+      </table>
+  </dd>
+<!-- -->
+  <dt><a name="uu.event.type.toDOM">uu.event.type.toDOM</a> - DOM Level 0イベントタイプをDOMイベントタイプに変換</dt>
+  <dd><p>uu.event.type.toDOM(<i>type</i>) は DOM Level 0イベントタイプをDOMイベントタイプに変換します。</p>
+      <p>モジュール作者向けの機能です。</p>
+      <pre>
+ @param String type - DOM Level 0イベントタイプを指定します。
+ @return String     - 変換後のイベントタイプを返します。
+      </pre>
+      <table>
+      <tr><th>Browser</th><th>Before</th><th>After</th></tr>
+      <tr><td>Firefox</td><td>mousewheel</td><td>DOMMouseScroll</td></tr>
+      </table>
+  </dd>
+</dl>
+
+<hr />
+<h2><a name="timer">タイマー</a> - Timer</h2>
+<p>タイマーの制御や遅延実行を簡単にします。</p>
+<p><a href="./MODULE.htm#uu.module.virtualTimer">uu.module.virtualTimer</a>もあります。
+<hr />
+<dl>
+  <dt><a name="uu.delay">uu.delay</a> - 遅延評価 - Lazy evaluation</dt>
+  <dd><p>uu.delay(<i>fn</i>, <i>delay</i> = 0)は、<i>delay</i>時間経過後に、<i>fn</i>を呼び出します。
+      <pre>
+ @param Function fn      - 遅延評価する関数を指定します。
+ @param Number   [delay] - 遅延時間をms単位で指定します。デフォルトは0です。
+ @return Number          - タイマーIDを返します。
+      </pre>
+  </dd>
+</dl>
+
+
+<hr />
+<h2><a name="ready">Ready</a></h2>
+<p>機能が使えるようになったタイミングで関数をコールバックします。</p>
+<hr />
+<dl>
+<!-- -->
+  <dt><a name="uu.dom.ready">uu.dom.ready</a> - DOM Readyイベントハンドラの設定 - DOM ready event handler</dt>
+  <dd><p>uu.dom.ready(<i>fn</i>) は <a href="./GLOSSARY.htm#DomReady">DomReady状態</a>になると呼ばれる関数(<i>fn</i>)を登録します。
+      既にその状態ならば即座に<i>fn</i>をコールします。</p>
+      <p>document.DOMContentLoadedをサポートしていないブラウザ(IE, Safari)では、イベントをエミュレートします。</p>
+      <pre>
+ @param Function/array fn - コールバック関数を指定します。関数のArrayも指定可能です。
+      </pre>
+  </dd>
+<!-- -->
+  <dt><a name="uu.dom.already">uu.dom.already</a> - DOM Ready状態の取得 - DOM ready state</dt>
+  <dd><p>uu.dom.already() は <a href="./GLOSSARY.htm#DomReady">DomReady状態</a>でtrueを返します。</p>
+      <pre>
+ @return Boolean - DOMが使用可能な状態ならtrueを返します。
+      </pre>
+  </dd>
+<!-- -->
+  <dt><a name="uu.window.ready">uu.window.ready</a> - Window Readyイベントハンドラの設定 - Window ready event handler</dt>
+  <dd><p>uu.window.ready(<i>fn</i>) は
+      <a href="./GLOSSARY.htm#WindowReady">WindowReady状態</a>になると呼ばれる関数<i>fn</i>を登録します。
+      既にその状態ならば即座に<i>fn</i>をコールします。</p>
+      <pre>
+ @param Function/array fn - コールバック関数を指定します。関数のArrayも指定可能です。
+      </pre>
+  </dd>
+<!-- -->
+  <dt><a name="uu.window.already">uu.window.already</a> - Window Ready状態の取得 - Window ready state</dt>
+  <dd><p>uu.window.already() は <a href="./GLOSSARY.htm#WindowReady">WindowReady状態</a>でtrueを返します。</p>
+      <pre>
+ @return Boolean - Webページの表示に必要な全情報が揃った状態でtrueを返します。
+      </pre>
+  </dd>
+<!-- -->
+  <dt><a name="uu.window.unready">uu.window.unready</a> - Window Unreadyイベントハンドラの設定 - Window unready event handler</dt>
+  <dd><p>uu.window.unready(<i>fn</i>, <i>me</i> = undefined) は
+      <a href="./GLOSSARY.htm#WindowUnready">WindowUnready状態</a>になると呼ばれる関数<i>fn</i>を登録します。</p>
+      <p>可能ならばwindow.beforeunloadイベントを補足しますが、ブラウザが対応していない場合は、
+         window.unloadイベントを使用します。</p>
+      <p>セキュアなブラウザ(Firefox等)では、fn()実行中でポップアップウインドウを表示しようとしても、ブラウザに阻止されます。</p>
+      <pre>
+ @param Function/array fn   - コールバック関数を指定します。関数のArrayも指定可能です。
+ @param this           [me] - fn実行時のthisを指定します。デフォルトはundefinedです。
+      </pre>
+  </dd>
+<!-- -->
+  <dt><a name="uu.window.unalready">uu.window.unalready</a> - Window Unready状態の取得 - Window unready state</dt>
+  <dd><p>uu.window.unalready() は <a href="./GLOSSARY.htm#WindowUnready">WindowUnready状態</a>でtrueを返します。</p>
+      <pre>
+ @return Boolean - Webページがunloadする直前にtrueを返します。
+      </pre>
+  </dd>
+<!-- -->
+  <dt><a name="uu.canvas.ready">uu.canvas.ready</a> - CanvasReadyイベントハンドラの設定 - CanvasReady event handler</dt>
+  <dd><p>uu.canvas.ready(<i>fn</i>) は
+      <a href="./GLOSSARY.htm#CanvasReady">CanvasReady状態</a>になると呼ばれる関数<i>fn</i>を登録します。
+      既にその状態ならば即座に<i>fn</i>をコールします。</p>
+      <pre>
+ @param Function/Function-Array fn - コールバック関数を指定します。関数のArrayも指定可能です。
+      </pre>
+  </dd>
+<!-- -->
+  <dt><a name="uu.canvas.already">uu.canvas.already</a> - CanvasReady状態の取得 - CanvasReady state</dt>
+  <dd><p>uu.canvas.already() は <a href="./GLOSSARY.htm#CanvasReady">CanvasReady状態</a>でtrueを返します。</p>
+      <pre>
+ @return Boolean - canvas使用可能でtrueを返します。
+      </pre>
+  </dd>
+<!-- -->
+  <dt><a name="uu.ajax.already">uu.ajax.already</a> - Ajaxの状態(使用可能/不能)の取得 - Ajax ready state</dt>
+  <dd><p>uu.ajax.already() は Ajaxが使用可能な状態でtrueを返します。</p>
+      <pre>
+ @return Boolean - Ajax使用可能でtrueを返します。
+      </pre>
+  </dd>
+<!-- -->
+  <dt><a name="uu.json.already">uu.json.already</a> - JSONPの状態(使用可能/不能)の取得 - JSONP ready state</dt>
+  <dd><p>uu.json.already() は JSONPが使用可能な状態でtrueを返します。</p>
+      <pre>
+ @return Boolean - JSONP使用可能でtrueを返します。
+      </pre>
+  </dd>
+</dl>
+
+
+
+<hr />
+<h2><a name="attr">属性</a> - Attribute</h2>
+<p>uu.attrは属性の取り扱いを簡単にします。</p>
+<hr />
+<dl>
+<!-- -->
+  <dt><a name="uu.attr.get">uu.attr.get - 属性の取得</a> - Get attribute</dt>
+  <dd>
+    <p>uu.attr.get(<i>elm</i>, <i>attr</i>) は、
+       <i>elm</i>要素の<i>attr</i>属性の値を取得します。</p>
+    <p>setAttributeで設定された独自の属性があればそちらを取得しますが、
+       Elementノードに同名の属性値があればそちらを優先します。</p>
+    <pre>
+ @param Element elm  - 属性を取得する要素を指定します。
+ @param Taxing  attr - 属性名の指定です。
+ @return Hash/String - attrに複数の属性名を指定すると Hash({ attr: value })を返します。
+                       attrに属性名を1つだけ指定すると 属性値 を文字列で返します。
+                       存在しない属性名を指定すると、その要素の戻り値は空文字列("")になります。
+    </pre>
+  </dd>
+<!-- -->
+  <dt><a name="uu.attr.set">uu.attr.set - 属性の設定</a> - Set attribute</dt>
+  <dd>
+    <p>uu.attr.set(<i>elm</i>, <i>attr</i>) は、
+       <i>elm</i>要素の<i>attr</i>属性の値を設定します。</p>
+    <pre>
+ @param Element elm  - 属性を設定する要素を指定します。
+ @param Hash    attr - { attribute-name: value, ...} を指定します。
+    </pre>
+  </dd>
+</dl>
+
+
+
+<hr />
+<h2><a name="utility">ユーティリティ</a> - Utility</h2>
+<p>型の相互変換や、検索, 使用頻度の高い文字列操作関数などを提供します。</p>
+<hr />
+<dl>
+<!-- -->
+  <dt><a name="Array.indexOf">Array.indexOf</a> - Arrayの先頭から値を検索し最初のindexを返す。無ければ-1を返す</dt>
+  <dd><p>Array.prototype.indexOf(<i>value</i>, <i>index</i> = 0) は
+         JavaScript 1.5準拠のメソッドで、
+         Arrayの先頭から値を検索し最初のindexを返します。<br />該当する値が無ければ-1を返します。</p>
+      <pre>
+ @param Mix     value   - 検索する値を指定します。検索は===演算子で比較します。
+ @param Number  [index] - 検索を開始するindexを指定します。負の値はArrayの末尾からのオフセットとみなします。デフォルトは0です。
+ @return Number - 検索成功で0以上の値を返します。失敗で-1を返します。
+ @see <a href="http://developer.mozilla.org/ja/docs/Core_JavaScript_1.5_Reference:Global_Objects:Array:indexOf">Array:indexOf</a> - Arrayの末尾から値を検索 - MDC
+      </pre>
+      <pre class="eg">
+var rv = [0, 1, 1, 2];
+rv["HashIndex"] = "HashIndex";
+<b>rv.indexOf</b>(1);       // 1
+<b>rv.indexOf</b>(1, -2);   // 2
+<b>rv.indexOf</b>("1");     // -1
+<b>rv.indexOf</b>("HashIndex");  // -1 見つからない
+      </pre>
+  </dd>
+<!-- -->
+  <dt><a name="Array.lastIndexOf">Array.lastIndexOf</a> - Arrayの後方から値を検索し最初のindexを返す。無ければ-1を返す</dt>
+  <dd><p>Array.prototype.lastIndexOf(<i>value</i>, <i>index</i> = 0) は
+         JavaScript 1.5準拠のメソッドで、
+         Arrayの後方から値を検索し最初のindexを返します。<br />該当する値が無ければ-1を返します。</p>
+      <pre>
+ @param Mix     value   - 検索する値を指定します。検索は===演算子で比較します。
+ @param Number  [index] - 検索を開始するindexを指定します。負の値はArrayの末尾からのオフセットとみなします。デフォルトは0です。
+ @return Number - 検索成功で0以上の値を返します。失敗で-1を返します。
+ @see <a href="http://developer.mozilla.org/ja/docs/Core_JavaScript_1.5_Reference:Global_Objects:Array:lastIndexOf">Array:lastIndexOf</a> - Arrayの先頭から値を検索 - MDC
+      </pre>
+      <pre class="eg">
+var rv = [0, 1, 1, 2];
+rv["HashIndex"] = "HashIndex";
+<b>rv.lastIndexOf</b>(1);       // 2
+<b>rv.lastIndexOf</b>(1, -2);   // 2
+<b>rv.lastIndexOf</b>("1")      // -1
+<b>rv.lastIndexOf</b>("HashIndex");  // -1 見つからない
+      </pre>
+  </dd>
+<!-- -->
+  <dt><a name="uu.sprintf">uu.sprintf</a> - sprintf</dt>
+  <dd><p>uu.sprintf(<i>format</i>, <i>...</i>) は 標準のsprintfに、<a href="http://jp2.php.net/manual/ja/function.sprintf.php">PHPのi18n対応機能</a>を追加したものです。</p>
+    <pre>
+ @param String  format - フォーマット文字列を指定します。
+ @param Mix     [...]  - sprintfに与える引数を指定します。引数は可変個です。
+ @return String        - 整形済みの文字列を返します。
+    </pre>
+    <p><i>format</i>(書式)は、%[<i>arg-index</i>$][<i>flag</i>][<i>width</i>][.<i>precision</i>][<i>size</i>]<i>type</i> となります。</p>
+    <table>
+    <tr><th>書式指定フィールド</th><th>指定</th><th>機能</th></tr>
+    <tr><td><i>arg-index</i></td><td>数値</td><td>数値とダラー("$")により引数を0から始まる番号で呼び出すことができます。</td></tr>
+    <tr><td><i>flag</i></td><td>#</td><td>typeがo,x,Xなら文字列の先頭に"0","0x","0X"を追加します。</td></tr>
+    <tr><td><i>width</i></td><td>数値</td><td>数値により最低限表示する桁数を指定できます。0で非表示になります。<br />数値や文字列の桁あわせに使用します。</td></tr>
+    <tr><td><i>width</i></td><td>*</td><td>引数で幅を指定します。</td></tr>
+    <tr><td><i>precision</i></td><td>数値</td><td>小数点以下の桁数や文字列の長さを指定できます。<br />
+                                           typeがfなら小数点以下の桁数を指定します。<br />
+                                           浮動小数点値は丸められる場合があります。0で小数点以下は非表示になります。<br />
+                                           typeがsなら文字列の長さを指定します。<br />
+                                           指定した長さ以上の文字は切り捨てられます。0で文字列全体が非表示になります。</td></tr>
+    <tr><td><i>size</i></td><td>数値</td><td> --- 指定を無視します --- </td></tr>
+    <tr><td><i>type</i></td><td>d</td><td>符号付き10進数値(signed decimal number)として出力します。</td></tr>
+    <tr><td><i>type</i></td><td>u</td><td>符号無し10進数値(unsigned decimal number)として出力します。</td></tr>
+    <tr><td><i>type</i></td><td>o</td><td>符号無し8進数値(unsigned octet number)として出力します。</td></tr>
+    <tr><td><i>type</i></td><td>x</td><td>符号無し16進数値[小文字](unsigned hex number[lower case])として出力します。</td></tr>
+    <tr><td><i>type</i></td><td>X</td><td>符号無し16進数値[大文字](unsigned hex number[upper case])として出力します。</td></tr>
+    <tr><td><i>type</i></td><td>f</td><td>浮動小数点([-]dddd.dddd)(floating-point number)として出力します。</td></tr>
+    <tr><td><i>type</i></td><td>c</td><td>文字の数値表現(the character with that ASCII value)として出力します。</td></tr>
+    <tr><td><i>type</i></td><td>s</td><td>文字列(string)として出力します。</td></tr>
+    <tr><td><i>type</i></td><td>%</td><td>パーセント記号("%")そのものを出力します。</td></tr>
+    </table>
+    <p>以下の書式は使用できません。</p>
+    <table>
+    <tr><th>書式指定フィールド</th><th>指定</th><th>機能</th></tr>
+    <tr><td><i>flag</i></td><td>-</td><td>左詰で出力します。</td></tr>
+    <tr><td><i>flag</i></td><td>+</td><td>数値の前に符号を追加します。</td></tr>
+    <tr><td><i>flag</i></td><td>空白</td><td>数値が負なら"-"を、それ以外なら空白を出力します。</td></tr>
+    <tr><td><i>precision</i></td><td>*</td><td>引数で精度を指定します。</td></tr>
+    <tr><td><i>size</i></td><td>l</td><td>long型に変更します。</td></tr>
+    <tr><td><i>type</i></td><td>i</td><td>符号付き8進数値(signed octet number)として出力します。</td></tr>
+    <tr><td><i>type</i></td><td>e</td><td>浮動小数点([-]d.dddde[+/-]dddd)として出力します。 - "f"で代用してください</td></tr>
+    <tr><td><i>type</i></td><td>g</td><td>浮動小数点("f","e"の結果でより短い方を出力する)として出力します。 - "f"で代用してください</td></tr>
+    <tr><td><i>type</i></td><td>E</td><td>浮動小数点([-]d.ddddE[+/-]dddd)として出力します。 - "f"で代用してください</td></tr>
+    <tr><td><i>type</i></td><td>G</td><td>浮動小数点("f","E"の結果でより短い方を出力する)として出力します。 - "f"で代用してください</td></tr>
+    <tr><td><i>type</i></td><td>n</td><td>出力済みの文字数を出力します。</td></tr>
+    <tr><td><i>type</i></td><td>p</td><td>ポインタとして処理します。</td></tr>
+    </table>
+    <p><a href="demo/compat/uu.sprintf.htm">Run</a></p>
+  </dd>
+<!-- -->
+  <dt><a name="uu.trim">uu.trim</a> - 両側から空白文字を除去 - Trim both(left and right)</dt>
+  <dd><p>uu.trim(<i>str</i>) は 文字列(<i>str</i>)の左右から空白文字を除去します。
+      空白文字には、NULL("\0"),空白(" "),タブ("\t"),改行("\n"),垂直タブ("\v"),復帰("\d")が含まれます。</p>
+    <pre>
+ @param String str - 文字列を指定します。
+ @return String - トリム後の文字列を返します。
+    </pre>
+    <pre class="eg">
+<b>uu.trim</b>(" hoge "); // "hoge"
+    </pre>
+  </dd>
+<!-- -->
+  <dt><a name="uu.isU">uu.isU</a> - is Undefined</dt>
+  <dd><p>Undefined型ならtrueを返します。</p>
+  </dd>
+<!-- -->
+  <dt><a name="uu.isA">uu.isA</a> - is Array</dt>
+  <dd><p>Array型ならtrueを返します。</p>
+  </dd>
+<!-- -->
+  <dt><a name="uu.isF">uu.isF</a> - is Function</dt>
+  <dd><p>Function型ならtrueを返します。</p>
+  </dd>
+<!-- -->
+  <dt><a name="uu.isN">uu.isN</a> - is Number</dt>
+  <dd><p>Number型ならtrueを返します。</p>
+  </dd>
+<!-- -->
+  <dt><a name="uu.isB">uu.isB</a> - is Boolean</dt>
+  <dd><p>Boolean型ならtrueを返します。</p>
+  </dd>
+<!-- -->
+  <dt><a name="uu.isS">uu.isS</a> - is String</dt>
+  <dd><p>String型ならtrueを返します。</p>
+  </dd>
+<!-- -->
+  <dt><a name="uu.notax">uu.notax</a> - 結合文字列, Array化された文字列, 文字列を受け取り、Arrayを返す - No taxing</dt>
+  <dd><p>uu.notax(<i>tax</i>, <i>param</i> = { sep: ",", fn: undefined, trim: true }) は
+      <a href="./GLOSSARY.htm#taxing-param">Taxing型</a>の変数をパースし、各要素を(もし指定されていれば)<i>fn</i>で評価したArrayを返します。</p>
+    <pre>
+ @param Taxing    tax           - セパレータで区切られた文字列,文字列のArray または 文字列を指定します。
+ @param Hash      [param]       - パラメタを指定します。
+ @param String    [param.sep]   - セパレータを指定します。デフォルトはカンマ(",")です。
+ @param Function  [param.fn]    - 各要素を評価する関数を指定します。デフォルトはundefinedです。
+ @param Boolean   [param.trim]  - カンマ結合文字列の各要素の左右の空白文字をトリムする場合はtrueを指定します。デフォルトはtrueです。
+                                  taxが文字列や、Arrayで指定されている場合はトリムしません。
+ @return StringArray            - taxが結合文字列(" a , b ")なら、各要素をセパレタで分割、左右の空白をトリムし StringArray( [ "a", "b" ]) を返します。
+                                  taxが文字列("ab")なら、taxを唯一の要素とする StringArray( [ "ab" ] ) を返します。
+                                  taxがStringArray( [ "a", "b" ] )ならtaxをそのまま返します。
+ @throws TypeError  "uu.notax(tax) bad arg"  引数が文字列でもArrayでもない
+
+    </pre>
+    <pre class="eg">
+function toLower(str) { return str.toLowerCase(); }
+function toUpper(str) { return str.toUpperCase(); }
+var rv = <b>uu.notax</b>("a, b,C,d ", { fn: toLower });
+uu.log(rv); // ["a", "b", "c", "d"]
+
+var rv = <b>uu.notax</b>(["a", "b", "c", "d"], { fn: toUpper });
+uu.log(rv); // ["A", "B", "C", "D"]
+
+var rv = <b>uu.notax</b>("abcd");
+uu.log(rv); // ["abcd"]
+
+var rv = <b>uu.notax</b>("html/body/div[1]", { sep: "/" });
+uu.log(rv); // ["html", "body", "div[1]"]
+    </pre>
+  </dd>
+<!-- -->
+  <dt><a name="uu.pair">uu.pair</a> - Hash{ key, value }を生成 - Make Hash from key and value</dt>
+  <dd><p>uu.pair(<i>key</i>, <i>value</i>) は Hash({ <i>key</i>: <i>value</i> })を返します。</p>
+    <pre>
+ @param String/Number key - インデックスを指定します。
+ @param Mix value - 値を指定します。
+ @return Hash     - Hashを返します。
+    </pre>
+    <pre class="eg">
+uu.log(uu.pair("key", "value")); // { key: "value" }
+    </pre>
+  </dd>
+<!-- -->
+  <dt><a name="uu.toHash">uu.toHash</a> - ArrayをHash化 - Make Hash from Array</dt>
+  <dd><p>uu.toHash(<i>ary</i>) は <i>ary</i>をHashに変換します。</p>
+      <p>変換するのは数値indexの要素のみで、文字列indexと関数オブジェクト(および"length"プロパティ)は無視します。</p>
+      <p>重複する数値indexは1つに纏められます。</p>
+    <pre>
+ @param Array ary - Hash化するArrayを指定します。
+ @return Hash     - Hash化したArrayを返します。
+    </pre>
+    <a href="demo/document/uu.toHash.htm">Run</a>
+    <pre class="eg">
+var ary = [undefined, null, 1, 1, "hoge", function(){} ];
+ary["hash_index"] = "lost value";
+var b = <b>uu.toHash</b>(ary);
+uu.log(b); // { undefined: undefined, null: null, 1: 1, hoge: "hoge" }
+    </pre>
+  </dd>
+<!-- -->
+  <dt><a name="uu.toArray">uu.toArray</a> - FakeArrayをArray化 - Make Array from FakeArray</dt>
+  <dd><p>uu.toArray(<i>fake</i>, <i>idx</i> = 0) は <i>fake</i>(<a href="./GLOSSARY.htm#FakeArray">FakeArray</a>)の<i>idx</i>番目以降を、Array化します。</p>
+      <p>この関数はFakeArrayのArray化を行います。HashやオブジェクトのArray化は、uu.indexes や uu.values を使用してください。</p>
+    <pre>
+ @param FakeArray fake - FakeArrayを指定します。
+ @param Number [idx]   - 切り出し開始位置を指定します。デフォルトは0です。
+                         FakeArrayの長さ以上の値を指定すると、空のArrayを返します。
+ @return Array         - fakeがnullやlengthプロパティを持たないHashなら空のArray([])を返します。<br />
+                         fakeがlengthプロパティを持つFakeArrayならArray化したものを返します。
+ @see <a href="http://d.hatena.ne.jp/uupaa/20080602">uupaaの開発日記</a>
+    </pre>
+    <a href="demo/document/uu.toArray.htm">Run</a>
+    <pre class="eg">
+<b>uu.toArray</b>(uu.tag("*")).forEach(function(v, i) {
+  uu.log(v.tagName); //  "HTML" "HEAD" "TITLE" "SCRIPT" "SCRIPT" "META" "STYLE" "BODY" "A" "A" "SCRIPT" "PRE"
+});
+    </pre>
+  </dd>
+
+<!-- -->
+  <dt><a name="uu.indexes">uu.indexes - Hash/Array/FakeArrayのindexを列挙しArrayを返す - Enumerate the index of the Hash/Array/FakeArray and return an Array</dt>
+  <dd><p>uu.indexes(<i>mix</i>) は
+      <i>mix</i>がArrayなら、ArrayIndexのみを列挙しArrayを返します。<br />
+      <i>mix</i>がHashなら、HashIndexとArrayIndexを列挙しArrayを返します。</p>
+    <pre>
+ @param Hash/Array/FakeArray mix - Hash/Array/FakeArrayを指定します。
+ @return Array                   - 要素の値ではなくindexを列挙したArrayを返します。有効な要素がなければ、空のArray([])を返します。
+    </pre>
+    <pre class="eg">
+var array = [74, 50, 50], hash = { a: 74, b: 50, c: 50 };
+array["hash_index"] = "hash";
+hash[0] = "hash";
+delete array[0];
+uu.indexes(array); // [undefined, 1, 2]
+uu.indexes(hash); // ["a", "b", "c", 0]
+    </pre>
+  </dd>
+<!-- -->
+  <dt><a name="uu.values">uu.values - Hash/Array/FakeArrayの値を列挙しArrayを返す - Enumerate the value of the Hash/Array/FakeArray and return an Array</dt>
+  <dd><p>uu.values(<i>mix</i>) は
+      <i>mix</i>がArrayなら、ArrayIndexの値のみを列挙しArrayを返します。<br />
+      <i>mix</i>がHashなら、HashIndexとArrayIndexの値を列挙しArrayを返します。</p>
+    <pre>
+ @param Hash/Array/FakeArray mix - Hash/Array/FakeArrayを指定します。
+ @return Array                   - 要素の値だけを列挙しArrayを返します。有効な要素がなければ、空のArray([])を返します。
+    </pre>
+    <pre class="eg">
+var array = [74, 50, 50], hash = { a: 74, b: 50, c: 50 };
+array["hash_index"] = "hash";
+hash[0] = "hash";
+delete array[0];
+uu.values(array); // [50, 50]
+uu.values(hash); // [74, 50, 50, "hash"]
+    </pre>
+  </dd>
+<!-- -->
+  <dt><a name="uu.size">uu.size - Hash/Array/FakeArrayの要素数を返す - Length of the Hash/Array/FakeArray</dt>
+  <dd><p>uu.size(<i>mix</i>) は <i>mix</i>の要素数を返します。</p>
+    <pre>
+ @param Hash/Array/FakeArray mix - Hash/Array/FakeArrayを指定します。
+ @return Number - 要素数を返します。有効な要素がなければ0を返します。
+    </pre>
+  </dd>
+<!-- -->
+  <dt><a name="uu.first">uu.first - Hash/Array/FakeArrayの先頭の要素の値を取得 - First Element of the Hash/Array/FakeArray</dt>
+  <dd><p>uu.first(<i>mix</i>, <i>missHit</i> = undefined) は <i>mix</i>の先頭の要素を返します。</p>
+    <pre>
+ @param Hash/Array/FakeArray mix - Hash/Array/FakeArrayを指定します。
+ @param Mix [missHit] - 有効な要素が存在しない場合に返す値を指定します。デフォルトはundefinedです。
+ @return Mix - 先頭の要素の値を返します。有効な要素が無ければmissHitを返します。
+    </pre>
+  </dd>
+<!-- -->
+  <dt><a name="uu.diet">uu.diet - Hash/Arrayのコンパクト化 - Hash/Array memory compaction</dt>
+  <dd><p>uu.diet(<i>mix</i>) は <i>mix</i>から値がundefined, nullの要素を削除したArrayを生成します。</p>
+      <p><i>mix</i>がArrayなら、HashIndexと、値がundefinedとnullの要素を削除した新しいArrayを返します。<br />
+         <i>mix</i>がHashなら、HashIndexとArrayIndexの要素のうち、値がundefinedとnullの要素を削除した新しいHashを返します。</p>
+    <pre>
+ @param Hash/Array mix - Hash/Arrayを指定します。
+ @return Hash/Array - 有効な要素のみを持つ新しいArrayかHashを返します。
+                      有効な要素がなければ、空のArray([])かHash({})を返します。
+    </pre>
+    <pre class="eg">
+var array = [null, undefined, 3], hash = { a: null, b: undefined, c: 50 };
+array["hash_index"] = "hash";
+hash[0] = "hash";
+<b>uu.diet</b>(array); // [3]
+<b>uu.diet</b>(hash); // { c: 50, 0: "hash" }
+    </pre>
+  </dd>
+
+<!-- -->
+  <dt><a name="uu.uniqueID">uu.uniqueID - ユニークIDの生成 - Generate unique ID</dt>
+  <dd><p>uu.uniqueID(<i>prefix</i> = "uu") は ユニークな数字(通し番号)に<i>prefix</i>を追加した文字列を返します。</p>
+    <pre>
+ @param String [prefix] - プリフィクスを指定します。デフォルトは"uu"です。
+ @return String         - プリフィクス + ユニークナンバー で構成される文字列を返します。
+    </pre>
+  </dd>
+</dl>
+
+<hr />
+<h2><a name="css">CSS</a> - CSS</h2>
+<p>スタイル情報の取り扱いを簡単にします。</p>
+<hr />
+<dl>
+<!-- -->
+  <dt><a name="uu.css.get">uu.css.get</a> - 計算済みのスタイルを取得 - document.defaultView.getComputedStyle wrapper</dt>
+  <dd><p>uu.css.get(<i>elm</i>, <i>cssProp</i> = undefined)は、要素(<i>elm</i>)に適用されている計算済みのスタイルを取得します。<br />
+      <i>cssProp</i>を省略すると全てのスタイル情報をHashで返します。
+      <i>cssProp</i>にプロパティを一つ指定すると値を文字列で返します。
+      プロパティを複数指定すると結果をHashで返します。</p>
+      <p>uu.config.backCompat=trueなら、css-prop形式("font-weight")のスタイル名も指定可能になります。</p>
+      <p>この関数ではpseudo elementを取得できません。</p>
+      <table>
+      <tr><th>cssProp</th><th>戻り値の型<br />(Result type)</th><th>戻り値<br />(Returns)</th></tr>
+      <tr><td>指定しない</td><td>CSS2Properties<br />(read only)</td><td>elmのスタイル情報<br />{ 0: undefined, MozApperrance: "none", ... }</td></tr>
+      <tr><td>"backgroundColor"</td><td>string</td><td>rgb(51, 102, 153)</td></tr>
+      <tr><td>["background-color", "float"]</td><td>Hash</td><td>{ backgroundColor: "rgb(51, 102, 153)", cssFloat: "left" }</td></tr>
+      <tr><td>"border, outline, width, height"</td><td>Hash</td><td>{ border: "", height: "200px", outline: "", width: "320px" }</td></tr>
+      <tr><td>"float,opacity"</td><td>Hash</td><td>IEの場合は { styleFloat: "left", opacity: "0.5" }<br />
+                                                   IE以外は、{ cssFloat: "left", opacity: "0.5" }</td></tr>
+      </table>
+      <p>戻り値は、<a href="./GLOSSARY.htm#cssProp">cssProp</a>形式で、単位付の文字列(例: "200px")になります。</p>
+      <pre>
+ @param Element elm      - スタイルを取得する要素を指定します。
+ @param Taxing [cssProp] - cssProp形式のプロパティ名("fontWeight")を指定します。省略できます。
+                           uu.config.backCompat=trueなら、css-prop形式("font-weight")のプロパティ名も指定可能になります。
+ @return Hash/String - cssPropに複数の要素を指定している場合は Hash { cssProp形式のプロパティ名: 計算済みのスタイル, ... }を返します。
+                       cssPropが単一の要素なら、計算済みのスタイルを文字列で返します。
+                       cssPropで指定したプロパティが存在しない場合は、その要素の値は空文字列("")になります。
+                       cssPropを省略した場合は、全てのスタイル情報を持つ特別なオブジェクト(CSS2Properties)を返します。
+      </pre>
+      <a href="demo/document/uu.css.get.htm">Run</a>
+      <pre class="eg">
+var elm = uu.id("target");
+var rv1 = <b>uu.css.get</b>(elm); // { 0: undefined, 1: undefined, 2: undefined, MozApperrance: "none", ... length: 109 }
+var rv2 = <b>uu.css.get</b>(elm, "backgroundColor"); // "rgb(51, 102, 153)";
+var rv3 = <b>uu.css.get</b>(elm, ["background-color", "float"], true); // { backgroundColor: "rgb(51, 102, 153)", cssFloat: "left" }
+uu.log(rv3["styleFloat"] || rv3["cssFloat"]); // "left"
+var rv4 = <b>uu.css.get</b>(elm, "border, outline, width, height"); // { border: "", height: "200px", outline: "", width: "320px" }
+var rv5 = <b>uu.css.get</b>(elm, ["width", "height"]); // { height: "200px", width: "320px" }
+      </pre>
+  </dd>
+<!-- -->
+  <dt><a name="uu.css.set">uu.css.set</a> - スタイルの設定 - Set style</dt>
+  <dd><p>uu.css.set(<i>elm</i>, <i>cssPropHash</i>)は、
+      要素<i>elm</i>に<i>cssPropHash</i>({ <a href="./GLOSSARY.htm#cssProp"><i>cssProp</i></a>: <i>value</i>, ... })で
+      指定されたスタイルを設定します。</p>
+      <p>uu.config.backCompat=trueなら、css-prop形式("font-weight")のスタイル名も指定可能になります。</p>
+      <p><i>value</i>には単位付きの文字列を指定します。一部のスタイルは数値や特別な値を指定できます。</p>
+      <table>
+      <caption>数値や特別な値を指定可能なスタイル名の一覧</caption>
+      <tr><th>cssProp name</th><th>value(type)</th><th>補足</th></tr>
+      <tr><td>top</td><td>number</td><td>数値指定も可能。その場合は"px"単位の値として解釈する</td></tr>
+      <tr><td>left</td><td>number</td><td>数値指定も可能。その場合は"px"単位の値として解釈する</td></tr>
+      <tr><td>width</td><td>number</td><td>数値指定も可能。その場合は"px"単位の値として解釈する</td></tr>
+      <tr><td>height</td><td>number</td><td>数値指定も可能。その場合は"px"単位の値として解釈する</td></tr>
+      <tr><td>display</td><td>"hide"</td><td>要素を隠す</td></tr>
+      <tr><td>display</td><td>"show"</td><td>要素を表示する</td></tr>
+      <tr><td>opacity</td><td>number</td><td>不透明度を0.0から1.0の値で指定可能</td></tr>
+      </table>
+      <pre>
+ @param Element elm         - スタイルを設定する要素を指定します。
+ @param Hash    cssPropHash - { cssProp: value, ...} を指定します。
+                              uu.config.backCompat=trueなら { "css-prop": value, ... } 形式の名前も指定可能になります。
+      </pre>
+      <a href="demo/document/uu.css.set.htm">Run</a>
+      <pre class="eg">
+&lt;div id="result1"&gt;change bg-color and text-color. border style copied BorderBox&lt;/div&gt;
+&lt;div id="result2"&gt;BorderBox&lt;/div&gt;
+&lt;script&gt;
+function boot() {
+  var elm1 = uu.id("result1"), elm2 = uu.id("result2");
+  var cssProp = "borderTopColor,    borderTopWidth,     borderTopStyle,     " +
+                "borderRightColor,  borderRightWidth,   borderRightStyle,   " +
+                "borderBottomColor, borderBottomWidth,  borderBottomStyle,  " +
+                "borderLeftColor,   borderLeftWidth,    borderLeftStyle     ";
+  var style2 = <b>uu.css.get</b>(elm2, cssProp); // border系のスタイルを抽出
+
+  uu.delay(function() {
+    uu.effect.fadeout(elm1, {
+      fn: function() {
+        <b>uu.css.set</b>(elm1, style2); // elm1にborder:系のスタイルを適用する
+        <b>uu.css.set</b>(elm1, { backgroundColor: "white", color: "black" });
+        uu.delay(function() {
+          uu.effect.fadein(elm1);
+        }, 500);
+      }
+    });
+  }, 500);
+}
+&lt;/script&gt;
+      </pre>
+  </dd>
+<!-- -->
+  <dt><a name="uu.css.get.opacity">uu.css.get.opacity</a> - 不透明度の取得 - opacity getter</dt>
+  <dd><p>uu.css.get.opacity(<i>elm</i>)は、不透明度を0.0～1.0の数値で取得します。</p>
+  </dd>
+<!-- -->
+  <dt><a name="uu.css.set.opacity">uu.css.set.opacity</a> - 不透明度の設定 - opacity setter</dt>
+  <dd><p>uu.css.set.opacity(<i>elm</i>, <i>opa</i>)は、不透明度を0.0～1.0の数値で指定します。0.0で完全に透明になります。</p>
+  </dd>
+<!-- -->
+  <dt><a name="uu.css.get.display">uu.css.get.display</a> - 表示方法の取得 - display getter</dt>
+  <dd><p>uu.css.get.display(<i>elm</i>)は、要素の表示方法を取得します。</p>
+  </dd>
+<!-- -->
+  <dt><a name="uu.css.set.display">uu.css.set.display</a> - 表示方法の設定 - display setter</dt>
+  <dd><p>uu.css.set.display(<i>elm</i>, <i>disp</i>)は、要素の表示方法を指定します。
+      指定可能な値は"none", "block", ... などのCSSで定義されている文字列の他に、"show", "hide"を指定できます。<br />
+      "show"は要素を表示し、"hide"は要素を隠します。</p>
+      <p>"show", "hide"を指定することで、table要素やインライン要素と、div要素を同じ方法で操作することができます。</p>
+  </dd>
+<!-- -->
+  <dt><a name="uu.css.get.xxx">uu.css.get.top,<br />uu.css.get.left,<br />uu.css.get.width,<br />uu.css.get.height</a> - 要素の座標とサイズを取得 - element position and element size getter</dt>
+  <dd><p>要素の座標やサイズを単位記号付きの文字列で取得します。</p>
+  </dd>
+<!-- -->
+  <dt><a name="uu.css.set.xxx">uu.css.set.top,<br />uu.css.set.left,<br />uu.css.set.width,<br />uu.css.set.height</a> - 要素の座標とサイズを設定 - element position and element size setter</dt>
+  <dd><p>要素の座標やサイズを単位記号付きの文字列で設定します。数値による指定も可能で、その場合は px 単位の値として扱います。</p>
+      <p>width, height にマイナス値を指定すると"0px"が指定されたものとして扱います。</p>
+  </dd>
+<!-- -->
+  <dt><a name="uu.css.cssProp">uu.css.cssProp</a> - "css-prop"を"cssProp"に変換 - convert "css-prop" style into "cssProp" style</dt>
+  <dd><p>uu.css.cssProp(<i>css_prop</i>)は、
+      <a href="./GLOSSARY.htm#css-prop">"css-prop"<a/>スタイルのCSSプロパティ名<i>css_prop</i>を
+      <a href="./GLOSSARY.htm#cssProp">"cssProp"</a>スタイルに変換します。</p>
+      <p>JavaScriptの予約語の変換も行います。</p>
+      <pre>
+ @param String css_prop - "css-prop"形式のCSSプロパティ名を指定します。
+ @return String - 変換後の文字列を返します。
+      </pre>
+      <pre class="eg">
+uu.css.cssProp("float"); // "cssFloat"
+uu.css.cssProp("font-weight"); // "fontWeight"
+      </pre>
+  </dd>
+</dl>
+
+<hr />
+<h2><a name="url">URLの操作</a> - URL manipulator</h2>
+<p>URLの取り扱いを簡単にします。</p>
+<hr />
+<dl>
+<!-- -->
+  <dt><a name="uu.url.base">uu.url.base</a> - ベースディレクトリの取得 - Base Directory</dt>
+  <dd><p>uu.url.base() は
+         ベースディレクトリ(uupaa.jsが設置されているディレクトリパス)を返します。</p>
+      <pre>
+ @return String - ベースディレクトリを返します。
+      </pre>
+  </dd>
+<!-- -->
+  <dt><a name="uu.url.abs">uu.url.base</a> - 相対パスを絶対パスに変換 - Convert relative path into a absolute pass</dt>
+  <dd><p>uu.url.abs(<i>relPath</i>) は
+         相対パス(<i>relPath</i>)を絶対パスに変換します。</p>
+      <pre>
+ @param String relPath - 相対パスを指定します。
+ @return String - 絶対パスを返します。
+      </pre>
+  </dd>
+<!-- -->
+  <dt><a name="uu.url.fileName">uu.url.fileName</a> - パスからファイル名を取得 - File name by path string</dt>
+  <dd><p>uu.url.fileName(<i>path</i>) は
+         <i>path</i>からファイル名を取得します。</p>
+      <pre>
+ @param String path - パスを指定します。
+ @return String - パスに含まれているファイル名を返します。
+                  ファイル名が見つからなければ空文字列("")を返します。
+      </pre>
+      <pre class="eg">
+uu.url.fileName("./path/file.ext"); // "file.ext"
+      </pre>
+  </dd>
+<!-- -->
+  <dt><a name="uu.url.dir">uu.url.dir</a> - パスからディレクトリを取得 - Directory by path string</dt>
+  <dd><p>uu.url.dir(<i>path</i>) は
+         <i>path</i>からディレクトリを取得します。</p>
+      <pre>
+ @param String path - パスを指定します。
+ @return String - パスに含まれているディレクトリを返します。
+                  ディレクトリが見つからなければ空文字列("")を返します。
+      </pre>
+      <pre class="eg">
+uu.url.dir("./path/file.ext"); "./path"
+      </pre>
+  </dd>
+<!-- -->
+  <dt><a name="uu.url.query">uu.url.query</a> - クエリストリングをパース - Parse QueryString</dt>
+  <dd><p>uu.url.query(<i>qstr</i>) は
+         クエリストリング<i>qstr</i>をパースしHashを返します。</p>
+      <p>encodeURIComponent()でエンコードされている文字列を適切にデコードします。</p>
+      <pre>
+ @param String qstr - クエリストリングを指定します。
+ @return Hash - パースした結果を返します。
+      </pre>
+      <pre class="eg">
+var qstr = uu.url.query("key1=value1&key2=value2"); // { key1: "value1", key2: "value2" }
+
+var url = uu.url.query.add("", "key", "a:?="); // "?key=a%3A%3F%3D"
+var rv  = uu.url.query(url);
+      </pre>
+  </dd>
+<!-- -->
+  <dt><a name="uu.url.query.add">uu.url.query.add</a> - クエリストリングを追加 - Add QueryString</dt>
+  <dd><p>uu.url.query.add(<i>url</i>, <i>key</i>, value</i>) は
+         <i>url</i>の末尾に、<i>key</i>=<i>value</i>を追加します。</p>
+      <p><i>key</i>, <i>value</i>をencodeURIComponent()で適切にエンコードします。</p>
+      <pre>
+ @param String url - URLを指定します。
+ @param String/Hash key - keyを指定します。Hash({ key1: value1, key2: value2, ... })も指定可能です。
+ @param String [value] - valueを指定します。keyにHashを指定した場合は、この引数を無視します。
+ @return String - クエリストリングを追加したurlを返します。
+      </pre>
+      <pre class="eg">
+var url = "http://www.example.com/";
+uu.url.query.add(url, { key1: "value1", key2: "value2" }); // "http://www.example.com/?key1=value1&key2=value2"
+uu.url.query.add(url, "key3", "value3"); // "http://www.example.com/?key1=value1&key2=value2&key3=value3"
+      </pre>
+  </dd>
+
+</dl>
+
+
+
+
+
+
+<hr />
+<h2><a name="ua">ブラウザの判別とブラウザが保持する機能の判別</a> - Detect User-Agent, Browser Functions and DOM Functions</h2>
+<p>ブラウザ依存コードや、各種動作条件の判別に必要な情報を提供します。</p>
+<hr />
+<dl>
+  <dt><a name="uu.ua">uu.ua</a> - ブラウザの判別と、機能の有効/無効情報を取得 - Detect and Search</dt>
+  <dd><p>uu.ua(<i>info</i> = "")は、ブラウザの判別と、機能の有効/無効情報を返します。
+      <pre>
+ @param String info - ブラウザ名, ブラウザの描画エンジン名, 機能名の指定です。
+                      大小文字を区別しません。
+ @return Boolean/String - infoで指定したブラウザで動作しているか、機能が使用可能な場合にtrueを返します。
+                          infoを省略した場合は、ユーザエージェント文字列を返します。
+                          versionを指定するとバージョン番号を返します。
+      </pre>
+      <table>
+      <caption>infoに指定可能な文字列と戻り値の一覧</caption>
+      <tr><th><i>info</i></th><th>戻り値(Return)</th></tr>
+      <tr><td>空文字列("")</td><td>ユーザエージェント文字列を返す</td></tr>
+      <tr><td>"opara"</td><td>Operaならtrue</td></tr>
+      <tr><td>"ie"</td><td>Internet Explorerならtrue</td></tr>
+      <tr><td>"gecko"</td><td>Gecko(Firefox等)ならtrue</td></tr>
+      <tr><td>"webkit"</td><td>Webkit(Safari等)ならtrue</td></tr>
+      <tr><td>"ipod"</td><td>iPod/iPhone(Safari)ならtrue</td></tr>
+      <tr><td>"wii"</td><td>Wii Internet channelならtrue</td></tr>
+      <tr><td>"std"</td><td>描画モードがスタンダードモードならtrue, IE6ではDTDを指定するとtrueになる</td></tr>
+      <tr><td>"domrange"</td><td>DOM Level2 Range Moduleが使用可能ならtrue</td></tr>
+      <tr><td>"display:table"</td><td>Safari3, Firefox2, Opera9, IE8ならtrue, それ以外ならfalse</td></tr>
+      <tr><td>"version"</td><td>ブラウザ(描画エンジン)のバージョン番号, 値とその意味はブラウザの種類で異なる</td></tr>
+      <tr><td></td><td>IE6 = 6.0, IE7 = 7.0, IE8 = 8.0</td></tr>
+      <tr><td></td><td>Opera9.5 = 10048 などのOperaのビルド番号</td></tr>
+      <tr><td></td><td>Firefox2 = 20080404 などのGeckoに関係する日付</td></tr>
+      <tr><td></td><td>Safari3.1 = 525.13 などのWebkitに関係する番号</td></tr>
+      </table>
+  </dd>
+</dl>
+
+<hr />
+<h2><a name="config">設定</a> - Configuration</h2>
+<p>各種設定を行います。</p>
+<hr />
+<dl>
+  <dt><a name="uu.config.debug">uu.config.debug</a> - デバッグモード - Debug Mode</dt>
+  <dd>trueを指定するとデバッグ用の情報を出力します。falseにすると出力を抑止します。デフォルトはtrueです。</dd>
+
+  <dt><a name="uu.config.png24">uu.config.png24</a> - 24bit αチャネルpng画像のサポート - Support 24bit alpha channel png image</dt>
+  <dd>24bit αチャネルpng画像をIE5.5, IE6で自動的に透過表示させる場合にtrueを指定します。デフォルトはtrueです。</dd>
+
+  <dt><a name="uu.config.backCompat">uu.config.backCompat</a> - 後方互換モード - Backward compatibility mode</dt>
+  <dd><p>trueを指定すると後方互換モードになります。デフォルトはfalseです。</p>
+    <p>後方互換モードは以下の関数に影響を与えます。
+    <table>
+    <tr><th>Function</th><th>backCompat</th><th>動作</th></tr>
+    <tr><td><a href="#uu.css.get">uu.css.get</a></td><td>false</td><td><a href="./GLOSSARY.htm#cssProp">cssProp</a>形式のスタイル名のみ使用可能になります。高速です。</td></tr>
+    <tr><td></td><td>true</td><td><a href="./GLOSSARY.htm#css-prop">css-prop</a>形式のスタイル名と<a href="./GLOSSARY.htm#cssProp">cssProp</a>形式のスタイル名の両方が使用可能になります。
+                                            <br />速度が犠牲になります。
+                                            <br />この動作は、jQueryの仕様を意識したものです。</td></tr>
+    <tr><td><a href="#uu.css.set">uu.css.set</a></td><td>false</td><td><a href="./GLOSSARY.htm#cssProp">cssProp</a>形式のスタイル名のみ使用可能になります。高速です。</td></tr>
+    <tr><td></td><td>true</td><td><a href="./GLOSSARY.htm#css-prop">css-prop</a>形式のスタイル名と<a href="./GLOSSARY.htm#cssProp">cssProp</a>形式のスタイル名の両方が使用可能になります。
+                                            <br />速度が犠牲になります。
+                                            <br />この動作は、jQueryの仕様を意識したものです。</td></tr>
+    </table>
+  </dd>
+  <dt><a name="uu.config.imagePath">uu.config.imagePath</a> - 画像検索パス - Image search path</dt>
+  <dd>uupaa.jsが使用する画像の検索パスを指定します。デフォルトは uu.url.base() + "img/" です。
+      パスには、末尾がスラッシュ("/")で終わる絶対パスを指定してください。
+  </dd>
+  <dt><a name="uu.config.modulePath">uu.config.modulePath</a> - モジュール検索パス - Module search path</dt>
+  <dd>モジュールの検索パスを指定します。デフォルトは "./,./mini/" です。
+      パスには、末尾がスラッシュ("/")で終わる絶対パスか相対パスを指定してください。カンマ区切りで複数のパスを指定できます。
+  </dd>
+
+  <dt><a name="uu.config">QueryStringによる設定の変更</a> - Change of the setting by QueryString</dt>
+  <dd><p>&lt;script id="uupaa.js" src="uupaa.js?key=value&amp;..."&gt; とすると、設定値をQueryStringから優先的に取り込みます。</p>
+      <p>"false"や"0"はfalseになります。"true"や"1"を指定するとtrueになります。</p>
+      <pre>
+&lt;script <b>id="uupaa.js"</b> src="uupaa.js<b>?debug=false&amp;png24=0</b>"&gt;
+
+uu.config.debug = false
+uu.config.png24 = false
+      </pre>
+      <p>文字列は以下のように指定します。</p>
+      <pre>
+&lt;script <b>id="uupaa.js"</b> src="uupaa.js?<b>modulePath=http://uupaa-js.googlecode.com/svn/trunk/mini/uu.module.effect.js,../mini/</b>"&gt;
+
+uu.config.modulePath = "http://uupaa-js.googlecode.com/svn/trunk/mini/uu.module.effect.js,../mini/"
+      </pre>
+  </dd>
+</dl>
+
+<hr />
+<h2><a name="debug">debug</a></h2>
+<p>デバッグ用の機能を提供します。</p>
+<hr />
+<dl>
+<!-- -->
+  <dt><a name="uu.inspect">uu.inspect</a> - オブジェクトを人間用に加工し出力する - Humanize output, Object Reflection</dt>
+  <dd><p>uu.inspect(<i>mix</i>) は <i>mix</i>を人間が見てわかるような形に加工します。</p>
+  </dd>
+<!-- -->
+  <dt><a name="uu.log">uu.log</a> - ログ出力 - Logging</dt>
+  <dd><p>uu.log(<i>mix</i>) は <i>mix</i>を画面に出力します。</p>
+      <p>出力先は、uu.log.id で変更可能です。デフォルトは id="uuLog" の要素に出力します。<br />
+         出力先が存在しない場合は、document.bodyに要素を追加し、ログを出力します。</p>
+      <p>ログを出力できないタイミング(uu.window.already===false)なら、出力内容を一旦プールし、
+         次回 uu.log が呼ばれたタイミングで出力します。</p>
+  </dd>
+</dl>
+
+</body>
+</html>

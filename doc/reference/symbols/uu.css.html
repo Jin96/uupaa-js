@@ -156,7 +156,21 @@ ul.inheritsList {
 <!-- ============================== header ================================= -->	
 		<!-- begin static/header.html -->
 		<div id="header">
-<a href="http://uupaa-js.googlecode.com/svn/trunk/README.htm">README.htm</a> &gt; Reference
+<a href="http://uupaa-js.googlecode.com/svn/trunk/README.htm">README</a> &gt; API Reference
+<p>
+   | <a href="http://code.google.com/p/uupaa-js/">Project Home(Google Code)</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/README.htm#demo">DEMO</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/CHANGELOG.htm">ChangeLog</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/LICENSE.htm">License</a> |<br />
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm">Document</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/SELECTOR.htm">Selector</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/MODULE.htm">Module</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/GLOSSARY.htm">Glossary</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/doc/reference/index.html">API Reference</a>
+   |
+</p>
+
+<hr />
 </div>
 
 		<!-- end static/header.html -->
@@ -174,10 +188,6 @@ ul.inheritsList {
 	
 	<li><a href="../symbols/Array.html">Array</a></li>
 	
-	<li><a href="../symbols/Date.html">Date</a></li>
-	
-	<li><a href="../symbols/Number.html">Number</a></li>
-	
 	<li><a href="../symbols/uu.html">uu</a></li>
 	
 	<li><a href="../symbols/uu.ajax.html">uu.ajax</a></li>
@@ -192,10 +202,6 @@ ul.inheritsList {
 	
 	<li><a href="../symbols/uu.css.html">uu.css</a></li>
 	
-	<li><a href="../symbols/uu.css.get.html">uu.css.get</a></li>
-	
-	<li><a href="../symbols/uu.css.set.html">uu.css.set</a></li>
-	
 	<li><a href="../symbols/uu.dom.html">uu.dom</a></li>
 	
 	<li><a href="../symbols/uu.effect.html">uu.effect</a></li>
@@ -206,13 +212,7 @@ ul.inheritsList {
 	
 	<li><a href="../symbols/uu.event.mouse.html">uu.event.mouse</a></li>
 	
-	<li><a href="../symbols/uu.forEach.html">uu.forEach</a></li>
-	
-	<li><a href="../symbols/uu.id.html">uu.id</a></li>
-	
 	<li><a href="../symbols/uu.image.html">uu.image</a></li>
-	
-	<li><a href="../symbols/uu.js.html">uu.js</a></li>
 	
 	<li><a href="../symbols/uu.json.html">uu.json</a></li>
 	
@@ -234,6 +234,8 @@ ul.inheritsList {
 	
 	<li><a href="../symbols/uu.module.messagePump.html">uu.module.messagePump</a></li>
 	
+	<li><a href="../symbols/uu.module.perf.html">uu.module.perf</a></li>
+	
 	<li><a href="../symbols/uu.module.pmvc.html">uu.module.pmvc</a></li>
 	
 	<li><a href="../symbols/uu.module.pmvc.applicationModel.html">uu.module.pmvc.applicationModel</a></li>
@@ -250,6 +252,8 @@ ul.inheritsList {
 	
 	<li><a href="../symbols/uu.perry.html">uu.perry</a></li>
 	
+	<li><a href="../symbols/uu.request.html">uu.request</a></li>
+	
 	<li><a href="../symbols/uu.tag.html">uu.tag</a></li>
 	
 	<li><a href="../symbols/uu.ua.html">uu.ua</a></li>
@@ -259,8 +263,6 @@ ul.inheritsList {
 	<li><a href="../symbols/uu.ui.element.html">uu.ui.element</a></li>
 	
 	<li><a href="../symbols/uu.url.html">uu.url</a></li>
-	
-	<li><a href="../symbols/uu.url.query.html">uu.url.query</a></li>
 	
 	<li><a href="../symbols/uu.window.html">uu.window</a></li>
 	
@@ -304,9 +306,9 @@ ul.inheritsList {
 						<td class="attributes">&nbsp;</td>
 						<td class="nameDescription">
 							<div class="fixedFont">
-								<b><a href="../symbols/uu.css.html#constructor">uu.css</a></b>(string)
+								<b><a href="../symbols/uu.css.html#constructor">uu.css</a></b>(css3selector, context)
 							</div>
-							<div class="description"><b>uu.css - CSS3のセレクタと一致する要素を列挙</b>CSS3のセレクタと一致する要素を列挙します。<br />この関数は内部でCSS3セレクタをXPathに変換します。<br /><br />uu.config.verboseがtrueで、生成したXPathにエラーがある場合は例外をスローします。<pre class="eg"> <div class="header">div.header</div> <a href="http://www.example.com/" title="CSS3 selector to XPath">CSS3 selector to XPath</a> uu.css('div.header, a[title*="CSS3"]').forEach(function(v) {   v.style.backgroundColor = "gold"; });</pre></div>
+							<div class="description">CSSセレクタ - CSS Selector</div>
 						</td>
 					</tr>
 				</tbody>
@@ -333,45 +335,45 @@ ul.inheritsList {
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">uu.css.<b><a href="../symbols/uu.css.html#.addClass">addClass</a></b>(element, taxing)
+								<div class="fixedFont">uu.css.<b><a href="../symbols/uu.css.html#.cssProp">cssProp</a></b>(css_prop)
 								</div>
-								<div class="description"><b>uu.css.addClass - classNameを追加</b>要素のclassNameにクラスを追加します。<pre class="eg">uu.forEach(uu.klass("alpha"), function(v) {  uu.css.addClass(v, "beta,hoge,huga,piyo"); // まとめて追加});</pre></div>
+								<div class="description">uu.css.cssProp - "css-prop"を"cssProp"に変換 - convert "css-prop" style into "cssProp" style</div>
 							</td>
 						</tr>
 					
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">uu.css.<b><a href="../symbols/uu.css.html#.cssProp">cssProp</a></b>(string)
+								<div class="fixedFont">uu.css.<b><a href="../symbols/uu.css.html#.get">get</a></b>(elm, cssProp)
 								</div>
-								<div class="description"><b>uu.css.cssProp - css-propをcssPropに変換</b>css-prop("z-index")を、cssProp("zIndex")に変換した新しい文字列を返します。<br />JavaScriptの予約語の変換も行います。例: "float" → "cssFloat"<pre class="eg">uu.css.cssProp("float"); // "cssFloat"uu.css.cssProp("font-weight"); // "fontWeight"</pre></div>
+								<div class="description">uu.css.get - 計算済みのスタイルを取得 - document.defaultView.getComputedStyle wrapper</div>
 							</td>
 						</tr>
 					
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">uu.css.<b><a href="../symbols/uu.css.html#.hasClass">hasClass</a></b>(element, string)
+								<div class="fixedFont">uu.css.<b><a href="../symbols/uu.css.html#.pseudo">pseudo</a></b>(pseudoSelector, context, tag)
 								</div>
-								<div class="description"><b>uu.css.hasClass - classNameがあればtrue</b>要素のclassNameにnameが含まれていればtrueを返します。</div>
+								<div class="description">擬似セレクタ - uu.css.pseudo</div>
 							</td>
 						</tr>
 					
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">uu.css.<b><a href="../symbols/uu.css.html#.removeClass">removeClass</a></b>(element, string)
+								<div class="fixedFont">uu.css.<b><a href="../symbols/uu.css.html#.set">set</a></b>(elm, cssPropHash)
 								</div>
-								<div class="description"><b>uu.css.removeClass - classNameを削除</b>要素のclassNameから、nameを削除します。<pre class="eg">uu.forEach(uu.klass("alpha"), function(v) {  uu.css.removeClass(v, "beta"); // 削除は１つずつ});</pre></div>
+								<div class="description">uu.css.set - スタイルの設定 - Set style</div>
 							</td>
 						</tr>
 					
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">uu.css.<b><a href="../symbols/uu.css.html#.toXPath">toXPath</a></b>(string)
+								<div class="fixedFont">uu.css.<b><a href="../symbols/uu.css.html#.toXPath">toXPath</a></b>(css3selectors)
 								</div>
-								<div class="description"><b>uu.css.toXPath - CSS3セレクタをXPathに変換</b>CSS3のセレクタ(一部除く)をXPathに変換します。<br />対応状況は用語集を確認してください。<br /><br />CSS3の擬似クラス(:enabled, :disabled, :checked)に対応していない理由。<br />&lt;input id="element" type="checkbox" checked="checked" /&gt;はHTMLパース時に、<br />1.</div>
+								<div class="description">uu.css.toXPath - CSS3セレクタをXPathに変換 - Convert CSS3 selector into XPath</div>
 							</td>
 						</tr>
 					
@@ -390,11 +392,11 @@ ul.inheritsList {
 				</div>
 				
 				<div class="fixedFont">
-						<b>uu.css</b>(string)
+						<b>uu.css</b>(css3selector, context)
 				</div>
 				
 				<div class="description">
-					<b>uu.css - CSS3のセレクタと一致する要素を列挙</b>CSS3のセレクタと一致する要素を列挙します。<br />この関数は内部でCSS3セレクタをXPathに変換します。<br /><br />uu.config.verboseがtrueで、生成したXPathにエラーがある場合は例外をスローします。<pre class="eg"> <div class="header">div.header</div> <a href="http://www.example.com/" title="CSS3 selector to XPath">CSS3 selector to XPath</a> uu.css('div.header, a[title*="CSS3"]').forEach(function(v) {   v.style.backgroundColor = "gold"; });</pre>
+					CSSセレクタ - CSS Selector
 					
 				</div>
 				
@@ -406,40 +408,29 @@ ul.inheritsList {
 						<dt class="heading">Parameters:</dt>
 						
 							<dt>
-								 <b>string</b>
+								 <b>css3selector</b>
 								
 							</dt>
-								<dd>css3selector - CSS3セレクタを指定します。</dd>
-						
-						</dl>
-					
-					
-					
-					
-						<dl class="detailList">
-						<dt class="heading">Throws:</dt>
+								<dd></dd>
 						
 							<dt>
-								 <b></b>
+								 <b>context</b>
+								
 							</dt>
-								<dd>TypeError "uu.css(...)" 使用できないセレクタを指定したか、不正なXPathに変換された</dd>
+								<dd></dd>
 						
 						</dl>
 					
 					
-						<dl class="detailList">
-						<dt class="heading">Returns:</dt>
-						
-								<dd>array              - 検索成功で要素の配列 [element, ...] を返します。失敗で空の配列を返します。</dd>
-						
-						</dl>
+					
+					
 					
 					
 					
 						<dl class="detailList">
 						<dt class="heading">See:</dt>
 						
-							<dd><a href="http://uupaa-js.googlecode.com/svn/trunk/SELECTOR.htm">使用可能なセレクタ(Selector)</a></dd>
+							<dd><a href="http://uupaa-js.googlecode.com/svn/trunk/SELECTOR.htm#css-selector">CSS Selector</a></dd>
 						
 						</dl>
 					
@@ -456,67 +447,15 @@ ul.inheritsList {
 					Method Detail
 				</div>
 				
-					<a name=".addClass"> </a>
-					<div class="fixedFont">&lt;static&gt; 
-					
-					
-					<span class="light">uu.css.</span><b>addClass</b>(element, taxing)
-					
-					</div>
-					<div class="description">
-						<b>uu.css.addClass - classNameを追加</b>要素のclassNameにクラスを追加します。<pre class="eg">uu.forEach(uu.klass("alpha"), function(v) {  uu.css.addClass(v, "beta,hoge,huga,piyo"); // まとめて追加});</pre>
-						
-						
-					</div>
-					
-					
-					
-					
-						
-							<dl class="detailList">
-							<dt class="heading">Parameters:</dt>
-							
-								<dt>
-									<b>element</b>
-									
-								</dt>
-								<dd>elm - 要素を指定します。</dd>
-							
-								<dt>
-									<b>taxing</b>
-									
-								</dt>
-								<dd>tax - クラス名を指定します。</dd>
-							
-							</dl>
-						
-						
-						
-						
-						
-						
-						
-							<dl class="detailList">
-							<dt class="heading">See:</dt>
-							
-								<dd><a href="#hasClass">uu.css.hasClass</a> - classNameがあればtrue</dd>
-							
-								<dd><a href="#removeClass">uu.css.removeClass</a> - classNameを削除</dd>
-							
-							</dl>
-						
-
-					<hr />
-				
 					<a name=".cssProp"> </a>
 					<div class="fixedFont">&lt;static&gt; 
 					
 					
-					<span class="light">uu.css.</span><b>cssProp</b>(string)
+					<span class="light">uu.css.</span><b>cssProp</b>(css_prop)
 					
 					</div>
 					<div class="description">
-						<b>uu.css.cssProp - css-propをcssPropに変換</b>css-prop("z-index")を、cssProp("zIndex")に変換した新しい文字列を返します。<br />JavaScriptの予約語の変換も行います。例: "float" → "cssFloat"<pre class="eg">uu.css.cssProp("float"); // "cssFloat"uu.css.cssProp("font-weight"); // "fontWeight"</pre>
+						uu.css.cssProp - "css-prop"を"cssProp"に変換 - convert "css-prop" style into "cssProp" style
 						
 						
 					</div>
@@ -529,45 +468,38 @@ ul.inheritsList {
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>string</b>
+									<b>css_prop</b>
 									
 								</dt>
-								<dd>css - css-propを指定します。</dd>
+								<dd></dd>
 							
 							</dl>
 						
 						
 						
 						
-						
-							<dl class="detailList">
-							<dt class="heading">Returns:</dt>
-							
-								<dd>string - 変換後の文字列を返します。</dd>
-							
-							</dl>
 						
 						
 						
 							<dl class="detailList">
 							<dt class="heading">See:</dt>
 							
-								<dd><a href="#camelize">String.camelize</a> - キャメライズ</dd>
+								<dd><a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.css.cssProp">uu.css.cssProp</a></dd>
 							
 							</dl>
 						
 
 					<hr />
 				
-					<a name=".hasClass"> </a>
+					<a name=".get"> </a>
 					<div class="fixedFont">&lt;static&gt; 
 					
 					
-					<span class="light">uu.css.</span><b>hasClass</b>(element, string)
+					<span class="light">uu.css.</span><b>get</b>(elm, cssProp)
 					
 					</div>
 					<div class="description">
-						<b>uu.css.hasClass - classNameがあればtrue</b>要素のclassNameにnameが含まれていればtrueを返します。
+						uu.css.get - 計算済みのスタイルを取得 - document.defaultView.getComputedStyle wrapper
 						
 						
 					</div>
@@ -580,53 +512,44 @@ ul.inheritsList {
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>element</b>
+									<b>elm</b>
 									
 								</dt>
-								<dd>elm  - 要素を指定します。</dd>
+								<dd></dd>
 							
 								<dt>
-									<b>string</b>
+									<b>cssProp</b>
 									
 								</dt>
-								<dd>name - クラス名を指定します。</dd>
+								<dd></dd>
 							
 							</dl>
 						
 						
 						
 						
-						
-							<dl class="detailList">
-							<dt class="heading">Returns:</dt>
-							
-								<dd>bool        - classNameにnameが含まれていればtrueを返します。</dd>
-							
-							</dl>
 						
 						
 						
 							<dl class="detailList">
 							<dt class="heading">See:</dt>
 							
-								<dd><a href="#addClass">uu.css.addClass</a> - classNameを追加</dd>
-							
-								<dd><a href="#removeClass">uu.css.removeClass</a> - classNameを削除</dd>
+								<dd><a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.css.get">uu.css.get</a></dd>
 							
 							</dl>
 						
 
 					<hr />
 				
-					<a name=".removeClass"> </a>
+					<a name=".pseudo"> </a>
 					<div class="fixedFont">&lt;static&gt; 
 					
 					
-					<span class="light">uu.css.</span><b>removeClass</b>(element, string)
+					<span class="light">uu.css.</span><b>pseudo</b>(pseudoSelector, context, tag)
 					
 					</div>
 					<div class="description">
-						<b>uu.css.removeClass - classNameを削除</b>要素のclassNameから、nameを削除します。<pre class="eg">uu.forEach(uu.klass("alpha"), function(v) {  uu.css.removeClass(v, "beta"); // 削除は１つずつ});</pre>
+						擬似セレクタ - uu.css.pseudo
 						
 						
 					</div>
@@ -639,16 +562,22 @@ ul.inheritsList {
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>element</b>
+									<b>pseudoSelector</b>
 									
 								</dt>
-								<dd>elm - 要素を指定します。</dd>
+								<dd></dd>
 							
 								<dt>
-									<b>string</b>
+									<b>context</b>
 									
 								</dt>
-								<dd>name - クラス名を指定します。</dd>
+								<dd></dd>
+							
+								<dt>
+									<b>tag</b>
+									
+								</dt>
+								<dd></dd>
 							
 							</dl>
 						
@@ -661,9 +590,57 @@ ul.inheritsList {
 							<dl class="detailList">
 							<dt class="heading">See:</dt>
 							
-								<dd><a href="#addClass">uu.css.addClass</a> - classNameを追加</dd>
+								<dd><a href="http://uupaa-js.googlecode.com/svn/trunk/SELECTOR.htm#pseudo-selector">Pseudo Selector</a></dd>
 							
-								<dd><a href="#hasClass">uu.css.hasClass</a> - classNameがあればtrue</dd>
+							</dl>
+						
+
+					<hr />
+				
+					<a name=".set"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">uu.css.</span><b>set</b>(elm, cssPropHash)
+					
+					</div>
+					<div class="description">
+						uu.css.set - スタイルの設定 - Set style
+						
+						
+					</div>
+					
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>elm</b>
+									
+								</dt>
+								<dd></dd>
+							
+								<dt>
+									<b>cssPropHash</b>
+									
+								</dt>
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+								<dd><a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.css.set">uu.css.set</a></dd>
 							
 							</dl>
 						
@@ -674,11 +651,11 @@ ul.inheritsList {
 					<div class="fixedFont">&lt;static&gt; 
 					
 					
-					<span class="light">uu.css.</span><b>toXPath</b>(string)
+					<span class="light">uu.css.</span><b>toXPath</b>(css3selectors)
 					
 					</div>
 					<div class="description">
-						<b>uu.css.toXPath - CSS3セレクタをXPathに変換</b>CSS3のセレクタ(一部除く)をXPathに変換します。<br />対応状況は用語集を確認してください。<br /><br />CSS3の擬似クラス(:enabled, :disabled, :checked)に対応していない理由。<br />&lt;input id="element" type="checkbox" checked="checked" /&gt;はHTMLパース時に、<br />1. JavaScriptのプロパティとしての element.checked がtrueに設定される。<br />2. element.setAttribute("checked", "checked"); 相当の処理が行われる。<br />チェックボックスをクリックすると、<br />1. JavaScriptのプロパティとしての element.checked がtrueかfalseに設定される。<br />2. element.setAttribute("checked", 現在の値); 相当の処理は行われない。<br />XPathの@(attribute::)はsetAttribute()で設定された値に反応するため、画面の見た目と、XPathで選択される要素が異なってしまう。
+						uu.css.toXPath - CSS3セレクタをXPathに変換 - Convert CSS3 selector into XPath
 						
 						
 					</div>
@@ -691,30 +668,23 @@ ul.inheritsList {
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>string</b>
+									<b>css3selectors</b>
 									
 								</dt>
-								<dd>css3selectors - CSS3のセレクタを指定します。</dd>
+								<dd></dd>
 							
 							</dl>
 						
 						
 						
 						
-						
-							<dl class="detailList">
-							<dt class="heading">Returns:</dt>
-							
-								<dd>string - 成功でXPathのロケーションパスを返します。                 変換失敗で空文字列("")を返します。</dd>
-							
-							</dl>
 						
 						
 						
 							<dl class="detailList">
 							<dt class="heading">See:</dt>
 							
-								<dd>http://www.w3.org/TR/css3-selectors/</dd>
+								<dd><a href="http://uupaa-js.googlecode.com/svn/trunk/SELECTOR.htm#uu.css.XPath">uu.css.toXPath</a></dd>
 							
 							</dl>
 						
@@ -729,7 +699,7 @@ ul.inheritsList {
 <!-- ============================== footer ================================= -->
 		<div class="fineprint" style="clear:both">
 			&copy;2008<br />
-			Documentation generated by <a href="http://www.jsdoctoolkit.org/" target="_blank">JsDoc Toolkit</a> 2.0.beta2.3 on Sun Jun 15 2008 16:44:33 GMT+0900 (JST)
+			Documentation generated by <a href="http://www.jsdoctoolkit.org/" target="_blank">JsDoc Toolkit</a> 2.0.beta2.3 on Fri Jun 27 2008 02:25:12 GMT+0900 (JST)
 		</div>
 	</body>
 </html>

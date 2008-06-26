@@ -14,17 +14,19 @@ uu.module.image = {};
 uu.image = function() {
 };
 
-/** <b>画像をロード済みならtrue</b>
+/** <b>画像のロード済み確認 - Is image loaded</b>
  *
- * @param string url - 画像のURLを指定します。絶対URLを指定します。
- * @return bool      - ロード済みでtrueを返します。
+ * 画像をロード済み(すぐに使用可能な状態)ならtrueを返します。
+ *
+ * @param String url - 画像のURLを指定します。絶対URLを指定します。
+ * @return Boolean   - ロード済みでtrueを返します。
  */
 uu.image.isLoaded = function(url) {
   function judge(node) { return node.complete && node.src === url; }
   return uu.toArray(uud.images).some(judge);
 };
 
-/** <b>画像をプリロードする(preload image)</b>
+/** <b>画像のプリロード - Preload image</b>
  *
  * 画像を非同期にロードします。
  * リクエスト終了でfn(code, url, image要素)をコールします。<br />
@@ -35,8 +37,8 @@ uu.image.isLoaded = function(url) {
  * 既に画像が使用可能になっている状態(uu.image.isLoaded()==true)で呼ばれた場合は、
  * 即座に関数を実行します。
  *
- * @param string   url - 画像のパスの指定です。絶対URLや相対パスを指定します。
- * @param function fn  - リクエスト終了で呼び出す関数を指定します。デフォルトはuu.muteです。
+ * @param String   url - 画像のパスの指定です。絶対URLや相対パスを指定します。
+ * @param Function fn  - リクエスト終了で呼び出す関数を指定します。デフォルトはuu.muteです。
  * @see <a href="#timeout">uu.image.timeout</a> - タイムアウト時間の指定
  * @see <a href="#delay">uu.image.delay</a> - 遅延時間の指定
  * @see <a href="http://d.hatena.ne.jp/uupaa/20080413/1208067631">uupaa開発日記</a>
@@ -73,19 +75,19 @@ uu.image.preload = function(url, fn /* = uu.mute */) { // for Firefox3, Safari3.
   }
 };
 
-/** <b>IEで24bitのαブレンドを使用可能にする(24bit png image alpha blend for IE)</b>
+/** <b>24bitのαチャネルを処理する - 24bit alpha channel png image</b>
  *
  * png画像を動的に追加し、透過させたい場合に、この関数をコールします。<br />
  * IE5.5/6.0以外のブラウザでは何もしません。
  *
- * @param element/array elm - 要素または、要素の配列を指定します。
- * @param bool [force] - 既に透過済みの画像を再度透過させる場合にtrueを指定します。デフォルトはfalseです。
+ * @param Element/Array elm - 要素または、要素の配列を指定します。
+ * @param Boolean [force]   - 既に透過済みの画像を再度透過させる場合にtrueを指定します。デフォルトはfalseです。
  */
 uu.image.png24 = function(elm, force /* = false */) {};
 uu.image.png24._file = uu.config.imagePath + "uu.module.image.1x1.gif"; // png24で使用する1x1のgifイメージのファイル名
 uu.image.png24._search = function() {};
 
-/** <b>タイムアウト時間</b>
+/** <b>タイムアウト時間 - Timeout</b>
  * uu.image.load()で使用するタイムアウト時間を指定します。
  * 1以上の数値を指定します。単位はmsです。
  * デフォルトは10000です。
@@ -95,7 +97,7 @@ uu.image.png24._search = function() {};
  */
 uu.image.timeout = 10000; // 10000ms(10s)
 
-/** <b>遅延時間</b>
+/** <b>遅延時間 - Delay</b>
  * uu.image.load()で使用する遅延時間の指定です。
  * 10以上の数値を指定します。単位はmsです。デフォルトは50です。
  *
@@ -104,7 +106,7 @@ uu.image.timeout = 10000; // 10000ms(10s)
  */
 uu.image.delay = 50; // 50ms
 
-if (uu.config.png24 && uu.ua.ie && (uu.ua.ver > 5 && uu.ua.ver < 7)) { // 5.5 or 6.0
+if (uu.config.png24 && uu.ua.ie && (uu.ua.version > 5 && uu.ua.version < 7)) { // 5.5 or 6.0
   // uu.mixで、元のuu.image.png24()のプロパティ(_file,_search等)を引き継いだuu.image.png24()を作り出す
   // 普通に上書きすると、_file,_searchはundefinedになってしまうが、
   // このようにすると、子孫との関係を維持しつつ、親(この場合function)の中身の入れ替えが可能になる。
@@ -124,14 +126,14 @@ if (uu.config.png24 && uu.ua.ie && (uu.ua.ver > 5 && uu.ua.ver < 7)) { // 5.5 or
    *    条件1. ".png"拡張子(大/小文字は無視)<br />
    *    条件2. alt,srcの文字列の一部が"24b"または"24B"か、classに"alpha"が含まれている<br />
    *
-   * @return array    img要素の配列を返します。要素が見つからない場合は[]を返します。
+   * @return Array    img要素の配列を返します。要素が見つからない場合は[]を返します。
    * @private
    */
   uu.image.png24._search = function() {
     var rv = [];
     uu.toArray(uud.images).forEach(function(v) {
       if (v.complete && /.png$/i.test(v.src)) {
-        if ((v.alt && /24b/i.test(v.alt)) || /24b/i.test(v.src) || uu.css.hasClass(v, "alpha")) {
+        if ((v.alt && /24b/i.test(v.alt)) || /24b/i.test(v.src) || uu.klass.has(v, "alpha")) {
           rv.push(v);
         }
       }

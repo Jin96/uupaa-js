@@ -19,19 +19,19 @@
 <span class='linenumber'> 12</span>  *
 <span class='linenumber'> 13</span>  * @class
 <span class='linenumber'> 14</span>  */</span><span class="WHIT">
-<span class='linenumber'> 15</span> </span><span class="NAME">uu.module.drag.free</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">uu.basicClass</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='linenumber'> 15</span> </span><span class="NAME">uu.module.drag.free</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">uu.klass.generic</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
 <span class='linenumber'> 16</span> </span><span class="NAME">uu.module.drag.free.prototype</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
 <span class='linenumber'> 17</span> </span><span class="WHIT">  </span><span class="COMM">/** &lt;b>初期化&lt;/b>
 <span class='linenumber'> 18</span>    *
-<span class='linenumber'> 19</span>    * @param element   elm               - ドラッグする要素を指定します。
-<span class='linenumber'> 20</span>    * @param hash      [param]           - パラメタの指定です。
-<span class='linenumber'> 21</span>    * @param bool      [param.ghost]     - ゴーストエフェクト(fade)を使用する場合にtrueにします。デフォルトはtrueです。
-<span class='linenumber'> 22</span>    * @param string    [param.msgto]     - メッセージの受取先を指定します。""を指定するとメッセージを送信しません。
-<span class='linenumber'> 23</span>    *                                    "broadcast"を指定するとブロードキャストになります。デフォルトは""です。
-<span class='linenumber'> 24</span>    * @param function  [param.msgFilter] - 送信するメッセージを絞り込むフィルターを指定します。
+<span class='linenumber'> 19</span>    * @param Element   elm               - ドラッグする要素を指定します。
+<span class='linenumber'> 20</span>    * @param Hash      [param]           - パラメタの指定です。
+<span class='linenumber'> 21</span>    * @param Boolean   [param.ghost]     - ゴーストエフェクト(fade)を使用する場合にtrueにします。デフォルトはtrueです。
+<span class='linenumber'> 22</span>    * @param String    [param.msgto]     - メッセージの受取先を指定します。""を指定するとメッセージを送信しません。
+<span class='linenumber'> 23</span>    *                                      "broadcast"を指定するとブロードキャストになります。デフォルトは""です。
+<span class='linenumber'> 24</span>    * @param Function  [param.msgFilter] - 送信するメッセージを絞り込むフィルターを指定します。
 <span class='linenumber'> 25</span>    *                                      msgFilter(メッセージ名) の形で呼ばれ、falseに評価される値を返すとメッセージは送信されません。
 <span class='linenumber'> 26</span>    *                                      デフォルトはundefinedです。
-<span class='linenumber'> 27</span>    * @param bool      [param.resize]    - ホイールでリサイズする場合にtrueにします。&lt;br />
+<span class='linenumber'> 27</span>    * @param Boolean   [param.resize]    - ホイールでリサイズする場合にtrueにします。&lt;br />
 <span class='linenumber'> 28</span>    *                                      デフォルトは、trueです。
 <span class='linenumber'> 29</span>    */</span><span class="WHIT">
 <span class='linenumber'> 30</span> </span><span class="WHIT">  </span><span class="NAME">construct</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">elm</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">param</span><span class="WHIT"> </span><span class="COMM">/* = {} */</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
@@ -123,20 +123,20 @@
 <span class='linenumber'>116</span>  *
 <span class='linenumber'>117</span>  * @class
 <span class='linenumber'>118</span>  */</span><span class="WHIT">
-<span class='linenumber'>119</span> </span><span class="NAME">uu.module.drag.limited</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">uu.basicClass</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='linenumber'>119</span> </span><span class="NAME">uu.module.drag.limited</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">uu.klass.generic</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
 <span class='linenumber'>120</span> </span><span class="NAME">uu.module.drag.limited.prototype</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
 <span class='linenumber'>121</span> </span><span class="WHIT">  </span><span class="COMM">/** &lt;b>ドラッグ可能要素の列挙とイベントハンドラのアサイン&lt;/b>
 <span class='linenumber'>122</span>    *
-<span class='linenumber'>123</span>    * @param hash      [param]       - パラメタの指定です。
-<span class='linenumber'>124</span>    * @param bool      [param.ghost] - ゴーストエフェクト(fade)を使用する場合にtrueにします。デフォルトはtrueです。
-<span class='linenumber'>125</span>    * @param string    [param.msgto] - メッセージの受取先を指定します。""を指定するとメッセージを送信しません。
+<span class='linenumber'>123</span>    * @param Hash      [param]       - パラメタの指定です。
+<span class='linenumber'>124</span>    * @param Boolean   [param.ghost] - ゴーストエフェクト(fade)を使用する場合にtrueにします。デフォルトはtrueです。
+<span class='linenumber'>125</span>    * @param String    [param.msgto] - メッセージの受取先を指定します。""を指定するとメッセージを送信しません。
 <span class='linenumber'>126</span>    *                                  "broadcast"を指定するとブロードキャストになります。デフォルトは""です。
-<span class='linenumber'>127</span>    * @param function  [param.msgFilter] - 送信するメッセージを絞り込むフィルターを指定します。
+<span class='linenumber'>127</span>    * @param Function  [param.msgFilter] - 送信するメッセージを絞り込むフィルターを指定します。
 <span class='linenumber'>128</span>    *                                      msgFilter(メッセージ名) の形で呼ばれ、falseに評価される値を返すとメッセージは送信されません。
 <span class='linenumber'>129</span>    *                                      デフォルトはundefinedです。
-<span class='linenumber'>130</span>    * @param bool      [param.resize]    - ホイールでリサイズする場合にtrueにします。&lt;br />
+<span class='linenumber'>130</span>    * @param Boolean   [param.resize]    - ホイールでリサイズする場合にtrueにします。&lt;br />
 <span class='linenumber'>131</span>    *                                      デフォルトは、trueです。
-<span class='linenumber'>132</span>    * @param bool      [param.dropAllowColor] - ドロップ可能な要素の背景色の指定です。デフォルトは"bisque"です。
+<span class='linenumber'>132</span>    * @param Boolean   [param.dropAllowColor] - ドロップ可能な要素の背景色の指定です。デフォルトは"bisque"です。
 <span class='linenumber'>133</span>    */</span><span class="WHIT">
 <span class='linenumber'>134</span> </span><span class="WHIT">  </span><span class="NAME">construct</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">param</span><span class="WHIT"> </span><span class="COMM">/* = {} */</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
 <span class='linenumber'>135</span> </span><span class="WHIT">    </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">me</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">this</span><span class="PUNC">;</span><span class="WHIT">
@@ -148,8 +148,8 @@
 <span class='linenumber'>141</span> </span><span class="WHIT">      </span><span class="NAME">_x</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NUMB">0</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">_y</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NUMB">0</span><span class="WHIT">
 <span class='linenumber'>142</span> </span><span class="WHIT">    </span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
 <span class='linenumber'>143</span> 
-<span class='linenumber'>144</span> </span><span class="WHIT">    </span><span class="NAME">this.draggable</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">uu.xpath.snap</span><span class="PUNC">(</span><span class="STRN">'//div[@class="draggable"]'</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='linenumber'>145</span> </span><span class="WHIT">    </span><span class="NAME">this.droppable</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">uu.xpath.snap</span><span class="PUNC">(</span><span class="STRN">'//div[@class="droppable"]'</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='linenumber'>144</span> </span><span class="WHIT">    </span><span class="NAME">this.draggable</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">uu.toArray</span><span class="PUNC">(</span><span class="NAME">uu.klass</span><span class="PUNC">(</span><span class="STRN">"draggable"</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NUMB">0</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="STRN">"div"</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='linenumber'>145</span> </span><span class="WHIT">    </span><span class="NAME">this.droppable</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">uu.toArray</span><span class="PUNC">(</span><span class="NAME">uu.klass</span><span class="PUNC">(</span><span class="STRN">"droppable"</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NUMB">0</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="STRN">"div"</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
 <span class='linenumber'>146</span> </span><span class="WHIT">    </span><span class="NAME">this.zindexer</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">uu.module.drag.zindexer</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT"> </span><span class="COMM">// instantiate</span><span class="WHIT">
 <span class='linenumber'>147</span> </span><span class="WHIT">    </span><span class="COMM">// ドラッグ可能要素にマウスカーソルとイベントハンドラを設定する</span><span class="WHIT">
 <span class='linenumber'>148</span> </span><span class="WHIT">    </span><span class="NAME">me.hr</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">uu.event.handler</span><span class="PUNC">(</span><span class="NAME">me</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
@@ -239,7 +239,7 @@
 <span class='linenumber'>232</span> </span><span class="WHIT">  </span><span class="COMM">/** ドロップ時のアクション: */</span><span class="WHIT">
 <span class='linenumber'>233</span> </span><span class="WHIT">  </span><span class="NAME">drop</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">droppable</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">draggable</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
 <span class='linenumber'>234</span> </span><span class="WHIT">    </span><span class="COMM">// 先客がいるならドロップ失敗</span><span class="WHIT">
-<span class='linenumber'>235</span> </span><span class="WHIT">    </span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">uu.xpath</span><span class="PUNC">(</span><span class="STRN">'count(./div[@class="draggable"])'</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">droppable</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='linenumber'>235</span> </span><span class="WHIT">    </span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">uu.klass</span><span class="PUNC">(</span><span class="STRN">"draggable"</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">droppable</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="STRN">"div"</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">length</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
 <span class='linenumber'>236</span> </span><span class="WHIT">      </span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">droppable.hasChildNodes</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
 <span class='linenumber'>237</span> </span><span class="WHIT">        </span><span class="NAME">droppable.insertBefore</span><span class="PUNC">(</span><span class="NAME">draggable</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">droppable.firstChild</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT"> </span><span class="COMM">// droppable.lastChild</span><span class="WHIT">
 <span class='linenumber'>238</span> </span><span class="WHIT">      </span><span class="PUNC">}</span><span class="WHIT"> </span><span class="KEYW">else</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
@@ -268,7 +268,7 @@
 <span class='linenumber'>261</span>  *
 <span class='linenumber'>262</span>  * @class
 <span class='linenumber'>263</span>  */</span><span class="WHIT">
-<span class='linenumber'>264</span> </span><span class="NAME">uu.module.drag.zindexer</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">uu.singletonClass</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='linenumber'>264</span> </span><span class="NAME">uu.module.drag.zindexer</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">uu.klass.singleton</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
 <span class='linenumber'>265</span> </span><span class="NAME">uu.module.drag.zindexer.prototype</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
 <span class='linenumber'>266</span> </span><span class="WHIT">  </span><span class="COMM">/** &lt;b>初期化&lt;/b> */</span><span class="WHIT">
 <span class='linenumber'>267</span> </span><span class="WHIT">  </span><span class="NAME">construct</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
@@ -278,7 +278,7 @@
 <span class='linenumber'>271</span> </span><span class="WHIT">  </span><span class="PUNC">}</span><span class="PUNC">,</span><span class="WHIT">
 <span class='linenumber'>272</span> </span><span class="WHIT">  </span><span class="COMM">/** &lt;b>IDの登録と適切なz-indexの設定&lt;/b>
 <span class='linenumber'>273</span>    *
-<span class='linenumber'>274</span>    * @param string id       z-indexを管理する要素のIDを指定します。
+<span class='linenumber'>274</span>    * @param String id       z-indexを管理する要素のIDを指定します。
 <span class='linenumber'>275</span>    */</span><span class="WHIT">
 <span class='linenumber'>276</span> </span><span class="WHIT">  </span><span class="NAME">set</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">id</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
 <span class='linenumber'>277</span> </span><span class="WHIT">    </span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">id</span><span class="WHIT"> </span><span class="KEYW">in</span><span class="WHIT"> </span><span class="NAME">this.obj</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
@@ -290,7 +290,7 @@
 <span class='linenumber'>283</span> </span><span class="WHIT">  </span><span class="PUNC">}</span><span class="PUNC">,</span><span class="WHIT">
 <span class='linenumber'>284</span> </span><span class="WHIT">  </span><span class="COMM">/** &lt;b>IDの抹消&lt;/b>
 <span class='linenumber'>285</span>    * 
-<span class='linenumber'>286</span>    * @param string id       set()で登録済みのIDを指定します。
+<span class='linenumber'>286</span>    * @param String id       set()で登録済みのIDを指定します。
 <span class='linenumber'>287</span>    */</span><span class="WHIT">
 <span class='linenumber'>288</span> </span><span class="WHIT">  </span><span class="NAME">unset</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">id</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
 <span class='linenumber'>289</span> </span><span class="WHIT">    </span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="PUNC">!</span><span class="PUNC">(</span><span class="NAME">id</span><span class="WHIT"> </span><span class="KEYW">in</span><span class="WHIT"> </span><span class="NAME">this.obj</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
@@ -302,7 +302,7 @@
 <span class='linenumber'>295</span> </span><span class="WHIT">  </span><span class="PUNC">}</span><span class="PUNC">,</span><span class="WHIT">
 <span class='linenumber'>296</span> </span><span class="WHIT">  </span><span class="COMM">/** &lt;b>ドラッグ開始通知&lt;/b>
 <span class='linenumber'>297</span>    *
-<span class='linenumber'>298</span>    * @param string id       set()で登録済みのIDを指定します。
+<span class='linenumber'>298</span>    * @param String id       set()で登録済みのIDを指定します。
 <span class='linenumber'>299</span>    */</span><span class="WHIT">
 <span class='linenumber'>300</span> </span><span class="WHIT">  </span><span class="NAME">beginDrag</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">id</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
 <span class='linenumber'>301</span> </span><span class="WHIT">    </span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="PUNC">!</span><span class="PUNC">(</span><span class="NAME">id</span><span class="WHIT"> </span><span class="KEYW">in</span><span class="WHIT"> </span><span class="NAME">this.obj</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
@@ -322,7 +322,7 @@
 <span class='linenumber'>315</span> </span><span class="WHIT">  </span><span class="PUNC">}</span><span class="PUNC">,</span><span class="WHIT">
 <span class='linenumber'>316</span> </span><span class="WHIT">  </span><span class="COMM">/** &lt;b>ドラッグ終了通知&lt;/b>
 <span class='linenumber'>317</span>    *
-<span class='linenumber'>318</span>    * @param string id       set()で登録済みのIDを指定します。
+<span class='linenumber'>318</span>    * @param String id - set()で登録済みのIDを指定します。
 <span class='linenumber'>319</span>    */</span><span class="WHIT">
 <span class='linenumber'>320</span> </span><span class="WHIT">  </span><span class="NAME">endDrag</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">id</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">opacity</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
 <span class='linenumber'>321</span> </span><span class="WHIT">    </span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="PUNC">!</span><span class="PUNC">(</span><span class="NAME">id</span><span class="WHIT"> </span><span class="KEYW">in</span><span class="WHIT"> </span><span class="NAME">this.obj</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
@@ -336,7 +336,7 @@
 <span class='linenumber'>329</span> </span><span class="COMM">/* Drag and Drop skeleton code
 <span class='linenumber'>330</span>  *
 <span class='linenumber'>331</span>  * &lt;code>
-<span class='linenumber'>332</span>  *  uu.module.example = uu.basicClass();
+<span class='linenumber'>332</span>  *  uu.module.example = uu.klass.generic();
 <span class='linenumber'>333</span>  *  uu.module.example.prototype = {
 <span class='linenumber'>334</span>  *    construct: function(elm) {
 <span class='linenumber'>335</span>  *      this.elm = elm;

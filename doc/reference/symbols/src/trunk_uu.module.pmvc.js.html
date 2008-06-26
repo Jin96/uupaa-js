@@ -23,32 +23,32 @@
 <span class='linenumber'> 16</span>  *
 <span class='linenumber'> 17</span>  * @class
 <span class='linenumber'> 18</span>  */</span><span class="WHIT">
-<span class='linenumber'> 19</span> </span><span class="NAME">uu.module.pmvc.applicationModel</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">uu.basicClass</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='linenumber'> 19</span> </span><span class="NAME">uu.module.pmvc.applicationModel</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">uu.klass.generic</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
 <span class='linenumber'> 20</span> 
 <span class='linenumber'> 21</span> </span><span class="COMM">/** &lt;b>Pluggable MVC - Domain Model&lt;/b>
 <span class='linenumber'> 22</span>  *
 <span class='linenumber'> 23</span>  * @class
 <span class='linenumber'> 24</span>  */</span><span class="WHIT">
-<span class='linenumber'> 25</span> </span><span class="NAME">uu.module.pmvc.domainModel</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">uu.basicClass</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='linenumber'> 25</span> </span><span class="NAME">uu.module.pmvc.domainModel</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">uu.klass.generic</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
 <span class='linenumber'> 26</span> 
-<span class='linenumber'> 27</span> </span><span class="COMM">/** &lt;b>Pluggable MVC - controller&lt;/b>
+<span class='linenumber'> 27</span> </span><span class="COMM">/** &lt;b>Pluggable MVC - Controller&lt;/b>
 <span class='linenumber'> 28</span>  *
 <span class='linenumber'> 29</span>  * @class
 <span class='linenumber'> 30</span>  */</span><span class="WHIT">
-<span class='linenumber'> 31</span> </span><span class="NAME">uu.module.pmvc.controller</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">uu.basicClass</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='linenumber'> 31</span> </span><span class="NAME">uu.module.pmvc.controller</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">uu.klass.generic</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
 <span class='linenumber'> 32</span> 
 <span class='linenumber'> 33</span> </span><span class="COMM">/** &lt;b>Pluggable MVC - View&lt;/b>
 <span class='linenumber'> 34</span>  *
 <span class='linenumber'> 35</span>  * @class
 <span class='linenumber'> 36</span>  */</span><span class="WHIT">
-<span class='linenumber'> 37</span> </span><span class="NAME">uu.module.pmvc.view</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">uu.basicClass</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='linenumber'> 37</span> </span><span class="NAME">uu.module.pmvc.view</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">uu.klass.generic</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
 <span class='linenumber'> 38</span> 
 <span class='linenumber'> 39</span> </span><span class="NAME">uu.forEach</span><span class="PUNC">(</span><span class="PUNC">{</span><span class="WHIT">
 <span class='linenumber'> 40</span> </span><span class="WHIT">  </span><span class="COMM">/** @scope uu.module.pmvc.controller */</span><span class="WHIT">
 <span class='linenumber'> 41</span> 
 <span class='linenumber'> 42</span> </span><span class="WHIT">  </span><span class="COMM">/** &lt;b>初期化&lt;/b>
 <span class='linenumber'> 43</span>    *
-<span class='linenumber'> 44</span>    * @param string id       - ユニークなID(メッセージ配達用のアドレス)を指定します。
+<span class='linenumber'> 44</span>    * @param String id       - ユニークなID(メッセージ配達用のアドレス)を指定します。
 <span class='linenumber'> 45</span>    */</span><span class="WHIT">
 <span class='linenumber'> 46</span> </span><span class="WHIT">  </span><span class="NAME">construct</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">id</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
 <span class='linenumber'> 47</span> </span><span class="WHIT">    </span><span class="NAME">this.id</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">id</span><span class="PUNC">;</span><span class="WHIT">
@@ -58,7 +58,7 @@
 <span class='linenumber'> 51</span> </span><span class="WHIT">  </span><span class="PUNC">}</span><span class="PUNC">,</span><span class="WHIT">
 <span class='linenumber'> 52</span> </span><span class="WHIT">  </span><span class="COMM">/** &lt;b>メッセージとハンドラの登録&lt;/b>
 <span class='linenumber'> 53</span>    *
-<span class='linenumber'> 54</span>    * @param hash handler - hash { msg, function() { ... }, ... } を指定します。
+<span class='linenumber'> 54</span>    * @param Hash handler - hash { msg, function() { ... }, ... } を指定します。
 <span class='linenumber'> 55</span>    *                       msgで指定したメッセージが到着すると、
 <span class='linenumber'> 56</span>    *                       functionで指定した関数が呼ばれます。
 <span class='linenumber'> 57</span>    */</span><span class="WHIT">
@@ -73,7 +73,7 @@
 <span class='linenumber'> 66</span>    *
 <span class='linenumber'> 67</span>    * メッセージの別名を登録します。
 <span class='linenumber'> 68</span>    *
-<span class='linenumber'> 69</span>    * @param hash catalog - エリアス(別名)とメッセージ(実体)のカタログです。
+<span class='linenumber'> 69</span>    * @param Hash catalog - エリアス(別名)とメッセージ(実体)のカタログです。
 <span class='linenumber'> 70</span>    *                       hash { alias, msg, ... } の形で指定します。
 <span class='linenumber'> 71</span>    *                       aliasで指定したメッセージが到着すると、
 <span class='linenumber'> 72</span>    *                       msgとリンクしているハンドラが呼ばれます。
@@ -102,10 +102,10 @@
 <span class='linenumber'> 95</span> </span><span class="WHIT">  </span><span class="PUNC">}</span><span class="PUNC">,</span><span class="WHIT">
 <span class='linenumber'> 96</span> </span><span class="WHIT">  </span><span class="COMM">/** &lt;b>メッセージの受信とハンドラの呼び出し&lt;/b>
 <span class='linenumber'> 97</span>    *
-<span class='linenumber'> 98</span>    * @param string msg   - メッセージの名前を指定します。
-<span class='linenumber'> 99</span>    * @param mix [param1] - 引数を指定します。
-<span class='linenumber'>100</span>    * @param mix [param2] - 引数を指定します。
-<span class='linenumber'>101</span>    * @return bool - 呼び出し成功でtrue, 失敗でfalseを返します。
+<span class='linenumber'> 98</span>    * @param String msg   - メッセージの名前を指定します。
+<span class='linenumber'> 99</span>    * @param Mix [param1] - 引数を指定します。
+<span class='linenumber'>100</span>    * @param Mix [param2] - 引数を指定します。
+<span class='linenumber'>101</span>    * @return Boolean - 呼び出し成功でtrue, 失敗でfalseを返します。
 <span class='linenumber'>102</span>    */</span><span class="WHIT">
 <span class='linenumber'>103</span> </span><span class="WHIT">  </span><span class="NAME">procedure</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">msg</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">param1</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">param2</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
 <span class='linenumber'>104</span> </span><span class="WHIT">    </span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">this._hook</span><span class="PUNC">(</span><span class="NAME">msg</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">param1</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">param2</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="PUNC">!</span><span class="NAME">this.permit</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT"> </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="KEYW">false</span><span class="PUNC">;</span><span class="WHIT"> </span><span class="PUNC">}</span><span class="WHIT">
@@ -122,13 +122,14 @@
 <span class='linenumber'>115</span> </span><span class="WHIT">  </span><span class="NAME">uu.module.pmvc.view.prototype</span><span class="PUNC">[</span><span class="NAME">p</span><span class="PUNC">]</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">v</span><span class="PUNC">;</span><span class="WHIT">
 <span class='linenumber'>116</span> </span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
 <span class='linenumber'>117</span> 
-<span class='linenumber'>118</span> </span><span class="COMM">/* activate primary instance */</span><span class="WHIT">
-<span class='linenumber'>119</span> </span><span class="NAME">uu.module.pmvc.activate</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
-<span class='linenumber'>120</span> </span><span class="WHIT">  </span><span class="NAME">uu.app</span><span class="WHIT">    </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">uu.module.pmvc.applicationModel</span><span class="PUNC">(</span><span class="STRN">"A"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='linenumber'>121</span> </span><span class="WHIT">  </span><span class="NAME">uu.domain</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">uu.module.pmvc.domainModel</span><span class="PUNC">(</span><span class="STRN">"D"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='linenumber'>122</span> </span><span class="WHIT">  </span><span class="NAME">uu.view</span><span class="WHIT">   </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">uu.module.pmvc.view</span><span class="PUNC">(</span><span class="STRN">"V"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='linenumber'>123</span> </span><span class="WHIT">  </span><span class="NAME">uu.ctrl</span><span class="WHIT">   </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">uu.module.pmvc.controller</span><span class="PUNC">(</span><span class="STRN">"C"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='linenumber'>124</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
-<span class='linenumber'>125</span> 
-<span class='linenumber'>126</span> </span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT"> </span><span class="COMM">// end (function())()</span><span class="WHIT">
-<span class='linenumber'>127</span> </span></pre></body></html>
+<span class='linenumber'>118</span> </span><span class="COMM">/** プライマリインスタンスのアクティベート - Activate primary instance
+<span class='linenumber'>119</span>  */</span><span class="WHIT">
+<span class='linenumber'>120</span> </span><span class="NAME">uu.module.pmvc.activate</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='linenumber'>121</span> </span><span class="WHIT">  </span><span class="NAME">uu.app</span><span class="WHIT">    </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">uu.module.pmvc.applicationModel</span><span class="PUNC">(</span><span class="STRN">"A"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='linenumber'>122</span> </span><span class="WHIT">  </span><span class="NAME">uu.domain</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">uu.module.pmvc.domainModel</span><span class="PUNC">(</span><span class="STRN">"D"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='linenumber'>123</span> </span><span class="WHIT">  </span><span class="NAME">uu.view</span><span class="WHIT">   </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">uu.module.pmvc.view</span><span class="PUNC">(</span><span class="STRN">"V"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='linenumber'>124</span> </span><span class="WHIT">  </span><span class="NAME">uu.ctrl</span><span class="WHIT">   </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">uu.module.pmvc.controller</span><span class="PUNC">(</span><span class="STRN">"C"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='linenumber'>125</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='linenumber'>126</span> 
+<span class='linenumber'>127</span> </span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT"> </span><span class="COMM">// end (function())()</span><span class="WHIT">
+<span class='linenumber'>128</span> </span></pre></body></html>

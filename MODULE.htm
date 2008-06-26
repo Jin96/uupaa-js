@@ -1,0 +1,358 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>uupaa.js - Module</title>
+<style type="text/css">
+body {
+  background-color: black; color: whitesmoke;
+  font-family:'メイリオ',Meiryo,'ヒラギノ角ゴ Pro W3','Hiragino Kaku Gothic Pro','ＭＳ Ｐゴシック',sans-serif;
+  margin: 2em; line-height: 1.5;
+}
+a[href] { color: lightblue }
+b { color: gold }
+pre { padding: 1em; border: 1px dashed navy; overflow: auto; color: ghostwhite; }
+dt { margin-top: 1em; font-weight: bold; color: lightblue }
+i {}
+table, tr, th, td { border: 1px solid gray; }
+</style>
+</head>
+<body>
+<p>
+   | <a href="http://code.google.com/p/uupaa-js/">Project Home(Google Code)</a>
+   | <a href="./README.htm#demo">DEMO</a>
+   | <a href="./CHANGELOG.htm">ChangeLog</a>
+   | <a href="./LICENSE.htm">License</a> |<br />
+   | <a href="./DOCUMENT.htm">Document</a>
+   | <a href="./SELECTOR.htm">Selector</a>
+   | <a href="./MODULE.htm">Module</a>
+   | <a href="./GLOSSARY.htm">Glossary</a>
+   | <a href="./doc/reference/index.html">API Reference</a>
+   |
+</p>
+<a href="./README.htm">README</a> &gt; MODULE<br />
+<hr />
+<ul>
+  <li><a href="#module">モジュール</a> - Module</li>
+  <ul>
+    <li><a href="#uu.module.isLoaded">uu.module.isLoaded</a> - モジュールの読み込み確認 - Is module loaded</li>
+    <li><a href="#uu.module.load">uu.module.load</a> - モジュールの読み込み - Load module</li>
+    <li><a href="#uu.module.loadSync">uu.module.loadSync</a> - モジュールの同期読み込み - Load module(Synchronized)</li>
+    <li><a href="#uu.module.timeout">uu.module.timeout</a> - モジュールのタイムアウト時間 - Module timeout</li>
+  </ul>
+<!--
+  <li><a href="#image">Image</a></li>
+  <ul>
+    <li><a href="#uu.image.isLoaded">uu.image.isLoaded</a> - 画像のロード済み確認 - Is image loaded</li>
+    <li><a href="#uu.image.preload">uu.image.preload</a> - 画像のプリロード - Preload image</li>
+  </ul>
+ -->
+<!--
+  <li><a href="#ui">UI</a> - ユーザーインターフェース - User Interface</li>
+  <ul>
+    <li><a href="#uu.ui.inner">uu.ui.inner</a> - ブラウザの表示領域に関する情報を取得 - Get information of view area of the browser</li>
+    <li><a href="#uu.ui.element">uu.ui.element</a> - 要素に関する情報を取得 - Get information of element</li>
+    <li><a href="#uu.ui.element.offsetParent">uu.ui.element.offsetParent</a> - 最寄の基準点からの累計オフセットと要素の大きさを取得</li>
+    <li><a href="#uu.ui.element.toAbsolute">uu.ui.element.toAbsolute</a> - 絶対座標化 - Absolute positioning</li>
+    <li><a href="#uu.ui.element.toStatic">uu.ui.element.toStatic</a> - 静的座標化 - Static positioning</li>
+    <li><a href="#uu.ui.inRect">uu.ui.inRect</a> - 座標が矩形内にあればtrue</li>
+    <li><a href="#uu.event.key.state">uu.event.key.state</a> - キーの状態を取得 - Get key state</li>
+    <li><a href="#uu.event.mouse.pos">uu.event.mouse.pos</a> - マウス座標を取得 - Get mouse position</li>
+    <li><a href="#uu.event.mouse.posEx">uu.event.mouse.posEx</a> - マウスの拡張座標情報を取得 - Get mouse position++</li>
+    <li><a href="#uu.event.mouse.state">uu.event.mouse.state</a> - マウスクリック, ホイールの状態を取得</li>
+    <li><a href="#uu.event.hover">uu.event.hover</a> - ホバーイベントハンドラの設定 - Set hover event hander</li>
+    <li><a href="#uu.event.clicks">uu.event.clicks</a> - クリックイベントハンドラの設定 - Set click event handler</li>
+  </ul>
+ -->
+<!--
+  <li><a href="#effect">エフェクト</a> - Effect</li>
+  <ul>
+  </ul>
+ -->
+  <li><a href="#timer">タイマー</a> - Timer</li>
+  <ul>
+    <li><a href="#uu.module.virtualTimer">uu.module.virtualTimer</a> - Virtual Timer</li>
+    <ul>
+      <li><a href="#uu.module.virtualTimer.set">uu.module.virtualTimer.set</a> - 仮想タイマーの登録</li>
+      <li><a href="#uu.module.virtualTimer.setLoop">uu.module.virtualTimer.setLoop</a> - 登録済みの仮想タイマーのループ回数を再設定</li>
+      <li><a href="#uu.module.virtualTimer.resume">uu.module.virtualTimer.resume</a> - タイマーの開始と再開</li>
+      <li><a href="#uu.module.virtualTimer.suspend">uu.module.virtualTimer.suspend</a> - タイマーの停止と一時停止</li>
+      <li><a href="#uu.module.virtualTimer.diet">uu.module.virtualTimer.diet</a> - Memory Compaction</li>
+    </ul>
+  </ul>
+  <li><a href="#mvc">MVC</a> - Model View Controller</li>
+  <ul>
+    <li><a href="#uu.module.messagePump">uu.module.messagePump</a> - Message Pump</li>
+    <ul>
+      <li><a href="#uu.module.messagePump.set">uu.module.messagePump.set</a> - メッセージの送信先を登録</li>
+      <li><a href="#uu.module.messagePump.send">uu.module.messagePump.send</a> - メッセージの同期送信</li>
+      <li><a href="#uu.module.messagePump.post">uu.module.messagePump.post</a> - メッセージの非同期送信</li>
+    </ul>
+  </ul>
+  <li><a href="#performance">パフォーマンス</a> - performance</li>
+  <ul>
+    <li><a href="#uu.module.perf">uu.module.perf</a> - perf</li>
+    <ul>
+      <li><a href="#uu.module.perf.run">uu.module.perf.run</a> - 測定</li>
+      <li><a href="#uu.module.perf.dump">uu.module.perf.dump</a> - ダンプ</li>
+      <li><a href="#uu.module.perf.average">uu.module.perf.average</a> - 平均値</li>
+    </ul>
+  </ul>
+<!--
+  <li><a href="#type-and-format">型とフォーマット</a> - Type and Format</li>
+  <ul>
+    <li><a href="#uu.codec">uu.codec</a> - 各種コーデック - Codec</li>
+  </ul>
+ -->
+</ul>
+
+<hr />
+<h2><a name="module">モジュール</a> - Module</h2>
+<p>機能単位で分割されているモジュール(JavaScriptファイル)を読み込むことで、uupaa.jsの機能を拡張できます。<br />
+   uu.moduleは、モジュールの読み込み機能を提供します。</p>
+<hr />
+<dl>
+<!-- -->
+  <dt><a name="uu.module.isLoaded">uu.module.isLoaded</a> - モジュールの読み込み確認 - is Module Loaded</dt>
+  <dd><p>uu.module.isLoaded(<i>module</i>) は、<i>module</i>に指定した全てのモジュールが読み込み済みならtrueを返します。</p>
+      <pre>
+ @param Taxing module - モジュール名を指定します。
+ @return Boolean      - モジュールロード済みでtrueを返します。
+                        複数モジュール指定時は、全モジュールロード済みでtrueを返します。
+      </pre>
+  </dd>
+<!-- -->
+  <dt><a name="uu.module.load">uu.module.load</a> - モジュールの読み込み - Load Module</dt>
+  <dd><p>uu.module.load(<i>path</i>, <i>module</i>, <i>fn</i>) は、
+         <i>module</i>を<i>path</i>で指定されたディレクトリから読み込みます。
+         全モジュールの読み込み完了で <i>fn</i>() をコールします。</p>
+      <p><i>module</i>にはモジュール名をTaxing型の値で指定します。
+         <i>path</i>にはモジュールを検索するパスをTaxing型の値で指定します。
+         複数のパスを指定すると、各パスで読み込みが可能か順番に試行します。
+         全てのパスから読み込めないモジュールがある場合は、例外を発生させ処理を終了します。
+         <i>path</i>を省略すると、検索パスとしてuu.config.modulePathの値を使用します。</p>
+      <p><i>path</i>に相対パスを指定すると、uupaa.js が設置されているディレクトリを基準としてモジュールを読み込みます。</p>
+      <pre>
+ @param Taxing [path] - 検索パスの指定です。絶対URLや相対パスを指定します。
+                        空文字列を指定すると、uu.config.modulePathで指定されたURLを検索パスとして使用します。
+                        デフォルトは空文字列("")です。
+ @param Taxing module - モジュールの指定です。
+ @param Function [fn] - ロード完了後にコールバックするメソッドを指定します。デフォルトはundefinedです。
+ @throws Error          "uu.module.load({module}) failed"  ロード失敗
+      </pre>
+
+      <pre class="eg">
+// http://example.com/ 以下から ui, effect, dragモジュールのロードを試み、失敗した場合は、
+// http://example.net/latest/ 以下からモジュールのロードを試みる。
+uu.module.load("http://example.com/, http://example.net/latest/", "ui,effect,drag");
+      </pre>
+      <p>複数の検索パスをうまく組み合わせると、本番系が接続しにくい場合に、
+         自動的に予備系のサーバからスクリプトをロードするといった動作の指定が可能になります。</p>
+      <p>既にロード済みのモジュールを再度読み込もうとすると、その指示は無視され、即座に fn() をコールします。</p>
+      <p>uu.module.loadは非同期に読み込みを行うため高速にモジュールを読み込むことができますが、
+         読み込み順は完全には保障されず、タイムアウトもしません。</p>
+  </dd>
+<!-- -->
+  <dt><a name="uu.module.loadSync">uu.module.loadSync</a> - モジュールの同期読み込み - Load Module(Synchronized)</dt>
+  <dd><p>uu.module.loadSync(<i>path</i>, <i>module</i>, <i>fn</i>) は、
+         uu.module.loadの同期ロード版です。</p>
+      <p>uu.module.loadSyncはモジュールを順番に(ひとつずつ)読み込むため低速ですが読み込み順が保障されます。
+         一定時間以内に読み込みが完了しないとタイムアウトします。
+         uu.module.timeoutの値を変更するとタイムアウト時間を変更できます。</p>
+      <p><i>path</i>に相対パスを指定すると、uupaa.js が設置されているディレクトリを基準としてモジュールを読み込みます。</p>
+      <pre>
+ @param Taxing [path] - 検索パスの指定です。絶対URLや相対パスを指定します。
+                        空文字列を指定すると、uu.config.modulePathで指定されたURLを検索パスとして使用します。
+                        デフォルトは空文字列("")です。
+ @param Taxing module - モジュールの指定です。
+ @param Function [fn] - ロード完了後にコールバックするメソッドを指定します。デフォルトはundefinedです。
+ @throws Error          "uu.module.load({module}) timeout" タイムアウト
+ @throws Error          "uu.module.load({module}) failed"  ロード失敗
+      </pre>
+  </dd>
+<!-- -->
+  <dt><a name="uu.module.timeout">uu.module.timeout</a> - モジュールのタイムアウト時間 - Module timeout</dt>
+  <dd><p>uu.module.timeout は、uu.module.loadSyncで使用するタイムアウト時間を指定します。
+      1以上の数値を指定します。単位はmsです。デフォルトは500です。</p>
+  </dd>
+<!-- -->
+</dl>
+
+<hr />
+<h2><a name="timer">タイマー</a> - Timer</h2>
+<p>JavaScript標準のタイマーよりも、高性能なタイマーを提供します。</p>
+<hr />
+<dl>
+<!-- -->
+  <dt><a name="uu.module.virtualTimer">uu.module.virtualTimer</a> - Virtual Timer</dt>
+  <dd><p>
+          ベースとなるタイマーで時刻を刻み、
+          その上で複数の仮想タイマーを動作させることで、コンテキストスイッチを減らし、
+          100個以上のタイマーを高速に動作させることができる高機能タイマーです。<br />
+          一時停止、再開、ループ回数の指定、遅延時間の動的な指定が可能です。<br />
+
+          タイマーの精度はwindow.setIntervalと同等です。<br />
+          タイマーの周期は約27万年分ほどです。連続使用によるオーバーフローの心配はありません。
+      </p>
+    <dl>
+<!-- -->
+      <dt><a name="uu.module.virtualTimer.set">uu.module.virtualTimer.set</a> - 仮想タイマーの登録</dt>
+      <dd><p>uu.module.virtualTimer.set(<i>fn</i>, <i>delay</i> = 10, <i>loop</i> = 0) は、
+          <i>delay</i>時間経過後に、<i>fn</i>を<i>loop</i>回呼び出すように設定します。設定に成功すると仮想タイマーID(<i>vtid</i>)を返します。</p>
+<pre>
+ @param Function/String   fn     - 遅延評価関数を指定します。文字列化した関数も指定可能です。
+                                   デフォルトはuu.muteです。
+ @param Number/Function   delay  - 遅延時間を指定します。単位はmsです。
+                                   デフォルトは10です。
+                                   遅延時間を返す関数を指定することもできます。
+                                   delayに関数を指定した場合は、delay(呼び出し回数)の形でコールバックし、
+                                   返される値をdelay時間として評価します。
+                                   呼び出し回数は0以上の整数になります。
+ @param Number            [loop] - 評価回数を指定します。0なら無限, 1なら1回, 100なら100回評価します。
+ @return Number                  - unset()で使用するvtidを返します。
+</pre>
+
+          <p><i>delay</i>にはms単位の数値か関数を指定可能です。関数を指定すると <i>delay</i>(呼び出し回数) の形で
+             コールバックし、返される値をdelay時間として評価します。呼び出し回数は0から始まります。</p>
+          <p><i>loop</i>には呼び出し回数を指定します。0を指定すると無限に呼び出し、100を指定すると100回だけループします。</p>
+          <p>ベースタイマーが停止している状態ならベースタイマーを再始動させます。</p>
+      </dd>
+<!-- -->
+      <dt><a name="uu.module.virtualTimer.setLoop">uu.module.virtualTimer.setLoop</a> - 登録済みの仮想タイマーのループ回数を再設定</dt>
+      <dd><p>uu.module.virtualTimer.set(<i>vtid</i>, <i>loop</i> = 0) は、
+          登録済みの仮想タイマー(<i>vtid</i>)の<i>loop</i>回数を再設定します。</p>
+<pre>
+ @param Number  vtid - set()が返すvtidを指定します。
+ @param Number  [loop] - ループ数の指定です。0以上の値を指定します。デフォルトは0です。
+</pre>
+          <p>loop = 0なら、vtidで指定したタイマーを無限ループ化します。<br />
+             loop > 0なら、vtidの現在のループ数に追加します。<br />
+             仮想タイマーが停止中なら再始動させます。</p>
+      </dd>
+<!-- -->
+      <dt><a name="uu.module.virtualTimer.resume">uu.module.virtualTimer.resume</a> - タイマーの開始と再開</dt>
+      <dd><p>uu.module.virtualTimer.resume(<i>vtid</i> = -1) は、
+            ベースタイマーと仮想タイマーの開始を行います。</p>
+<pre>
+ @param Number  [vtid] - vtidを指定すると仮想タイマーを開始します。
+                         -1を指定するとベースタイマーを開始します。
+                         デフォルトは-1です。
+</pre>
+          <p>ベースタイマー停止中に仮想タイマーを再開させると、ベースタイマーの再始動も行います。</p>
+      </dd>
+<!-- -->
+      <dt><a name="uu.module.virtualTimer.suspend">uu.module.virtualTimer.suspend</a> - タイマーの停止と一時停止</dt>
+      <dd><p>uu.module.virtualTimer.suspend(<i>vtid</i> = -1) は、
+          ベースタイマーと仮想タイマーの停止(一時停止)を行います。</p>
+<pre>
+ @param Number  [vtid] - vtidを指定すると仮想タイマーを停止します。
+                         -1を指定するとベースタイマーを停止します。
+                         デフォルトは-1です。
+</pre>
+      </dd>
+<!-- -->
+      <dt><a name="uu.module.virtualTimer.diet">uu.module.virtualTimer.diet</a> - Memory Compaction</dt>
+      <dd><p>uu.module.virtualTimer.diet() は、
+          不要になった仮想タイマーの情報を削除します。</p>
+          <p>処理中でもベースタイマーは停止しませんが、
+             仮想タイマーは1baseClockから数baseClock分遅延する可能性があります。</p>
+      </dd>
+    </dl>
+  </dd>
+</dl>
+
+<hr />
+<h2><a name="mvc">MVC</a> - Model View Controller</h2>
+<p>MVCパターンの実装を提供します。</p>
+<hr />
+<dl>
+<!-- -->
+  <dt><a name="uu.module.messagePump">uu.module.messagePump</a> - Message Pump</dt>
+  <dd><p>
+          MVCパターンの中心となる、メッセージポンプ(デリバー)の実装です。
+      </p>
+    <dl>
+<!-- -->
+      <dt><a name="uu.module.messagePump.set">uu.module.messagePump.set</a> - メッセージの送信先を登録</dt>
+      <dd><p>uu.module.messagePump.set(<i>tid</i>, <i>obj</i>) は、
+          メッセージの送信先を登録します。</p>
+<pre>
+ @param String tid - ターゲットID(送信先ID)を指定します。"broadcast"は指定できません。
+ @param Object obj - インスタンスを指定します。
+ @throws TypeError "uu.module.messagePump(tid)"  無効な引数を指定した
+</pre>
+      </dd>
+<!-- -->
+      <dt><a name="uu.module.messagePump.send">uu.module.messagePump.send</a> - メッセージの同期送信</dt>
+      <dd><p>uu.module.messagePump.set.send(<i>tid</i>, <i>msg</i>, <i>param1</i> = undefined, <i>param2</i> = undefined) は、
+          メッセージを送信し送信結果を返します。param1,param2にはどのような引数でも渡せます。</p>
+<pre>
+ @param String tid   - ターゲットID(送信先ID)の指定です。
+                       有効なIDを指定するとユニキャストします。
+                       無効なIDや"broadcast"を指定するとブロードキャストします。
+ @param String msg   - メッセージを指定します。
+ @param Mix [param1] - 1つめのパラメタの指定です。デフォルトはundefinedです。
+ @param Mix [param2] - 2つめのパラメタの指定です。デフォルトはundefinedです。
+ @return Array/Mix   - 送信先.procedure()の実行結果の配列を返します。
+</pre>
+      </dd>
+<!-- -->
+      <dt><a name="uu.module.messagePump.post">uu.module.messagePump.post</a> - メッセージの非同期送信</dt>
+      <dd><p>uu.module.messagePump.set.post(<i>tid</i>, <i>msg</i>, <i>param1</i> = undefined, <i>param2</i> = undefined) は、
+          メッセージを非同期送信します。param1,param2にはどのような引数でも渡せます。戻り値はありません。</p>
+<pre>
+ @param String tid   - ターゲットID(送信先ID)の指定です。
+                       有効なIDを指定するとユニキャストします。
+                       無効なIDや"broadcast"を指定するとブロードキャストします。
+ @param String msg   - メッセージを指定します。
+ @param Mix [param1] - 1つめのパラメタの指定です。デフォルトはundefinedです。
+ @param Mix [param2] - 2つめのパラメタの指定です。デフォルトはundefinedです。
+</pre>
+      </dd>
+    </dl>
+  </dd>
+</dl>
+
+<hr />
+<h2><a name="performance">パフォーマンス</a> - performance</h2>
+<p>パフォーマンス測定用の機能を提供します。</p>
+<hr />
+<dl>
+<!-- -->
+  <dt><a name="uu.module.perf">uu.module.perf</a> - perf</dt>
+  <dd><p>
+          パフォーマンス測定用の機能を提供します。
+      </p>
+    <dl>
+<!-- -->
+      <dt><a name="uu.module.perf.run">uu.module.perf.run</a> - 測定</dt>
+      <dd><p>uu.module.perf.run(<i>fn</i>, <i>times</i> = 1) は、
+          <i>fn</i>を<i>times</i>回実行し実行時間を記録します。以前の実行結果はクリアします。</p>
+<pre>
+ @param Function fn - 関数を指定します。
+ @param Number times - 実行回数を指定します。デフォルトは1です。
+</pre>
+      </dd>
+<!-- -->
+      <dt><a name="uu.module.perf.dump">uu.module.perf.dump</a> - ダンプ</dt>
+      <dd><p>uu.module.perf.dump() は、
+          記録してある実行時間をArrayで返します。</p>
+<pre>
+ @return Array - 実行時間のArray( [1回目, 2回目, 3回目, ...] )を返します。
+</pre>
+      </dd>
+<!-- -->
+      <dt><a name="uu.module.perf.average">uu.module.perf.average</a> - 平均値</dt>
+      <dd><p>uu.module.perf.average() は、
+          実行時間の平均値を返します。</p>
+<pre>
+ @return Number - 実行時間の平均値を返します。
+</pre>
+      </dd>
+    </dl>
+  </dd>
+</dl>
+
+</body>
+</html>

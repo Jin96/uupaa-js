@@ -1,0 +1,26 @@
+<html><head><title>event</title>
+<script type="text/javascript" src="../../uupaa.js"></script>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head><body><a href="../../README.htm">README</a> &gt; <a href="../../DOCUMENT.htm#uu.event.handler">DOCUMENT</a> &gt; uu.event.handler
+<div id="clicktarget" style="border: 1px solid red">clicktarget<br />click this here</div>
+<div id="result"></div>
+<script>
+function boot() {
+  window.myHandleEvent = function(evt) { // この場合は、好きな名前にできる
+    uu.log("click");
+    var tgt = uu.event.target(evt);
+    uu.log(tgt.real.id);
+  };
+  uu.event.set(document, "click", window.myHandleEvent);
+}
+uu.window.ready(boot);
+</script>
+<pre>
+  window.myHandleEvent = function(evt) { // この場合は、好きな名前にできる
+    uu.log("click");
+    var tgt = uu.event.target(evt);
+    uu.log(tgt.real.id);
+  };
+  uu.event.set(document, "click", window.myHandleEvent);
+</pre>
+</body></html>

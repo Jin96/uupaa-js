@@ -156,7 +156,21 @@ ul.inheritsList {
 <!-- ============================== header ================================= -->	
 		<!-- begin static/header.html -->
 		<div id="header">
-<a href="http://uupaa-js.googlecode.com/svn/trunk/README.htm">README.htm</a> &gt; Reference
+<a href="http://uupaa-js.googlecode.com/svn/trunk/README.htm">README</a> &gt; Reference |
+<p>
+   | <a href="http://code.google.com/p/uupaa-js/">Project Home(Google Code)</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/README.htm#demo">DEMO</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/CHANGELOG.htm">ChangeLog</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/LICENSE.htm">License</a> |<br />
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm">Document</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/SELECTOR.htm">Selector</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/MODULE.htm">Module</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/GLOSSARY.htm">Glossary</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/doc/reference/index.html">API Reference</a>
+   |
+</p>
+
+<hr />
 </div>
 
 		<!-- end static/header.html -->
@@ -173,8 +187,6 @@ ul.inheritsList {
 	<li><i><a href="../symbols/_global_.html">_global_</a></i></li>
 	
 	<li><a href="../symbols/Array.html">Array</a></li>
-	
-	<li><a href="../symbols/Date.html">Date</a></li>
 	
 	<li><a href="../symbols/Number.html">Number</a></li>
 	
@@ -250,6 +262,8 @@ ul.inheritsList {
 	
 	<li><a href="../symbols/uu.perry.html">uu.perry</a></li>
 	
+	<li><a href="../symbols/uu.request.html">uu.request</a></li>
+	
 	<li><a href="../symbols/uu.tag.html">uu.tag</a></li>
 	
 	<li><a href="../symbols/uu.ua.html">uu.ua</a></li>
@@ -283,7 +297,7 @@ ul.inheritsList {
 				
 			
 				
-<b>uu.css.get - スタイルの取得(document.defaultView.getComputedStyle wrapper)</b>要素に適用されている計算済みのスタイルを取得します。<br />この関数はpseudo elementをサポートしません。
+<b>uu.css.get - 計算済みのスタイルを取得 - document.defaultView.getComputedStyle wrapper</b>要素に適用されている計算済みのスタイルを取得します。<br />この関数はpseudo elementをサポートしません。<br /><br />uu.css.get(elm, "float,xxx", true)とすると、IEでは { styleFloat: ..., xxx: ... }を返し、他のブラウザでは { cssFloat: ..., xxx: ... }を返します。
 				
 				
 					<br /><i>Defined in: </i> <a href="../symbols/src/trunk_uupaa.js.html">uupaa.js</a>.
@@ -305,9 +319,9 @@ ul.inheritsList {
 						<td class="attributes">&nbsp;</td>
 						<td class="nameDescription">
 							<div class="fixedFont">
-								<b><a href="../symbols/uu.css.get.html#constructor">uu.css.get</a></b>(element, taxing, bool)
+								<b><a href="../symbols/uu.css.get.html#constructor">uu.css.get</a></b>(element, taxing)
 							</div>
-							<div class="description"><b>uu.css.get - スタイルの取得(document.defaultView.getComputedStyle wrapper)</b>要素に適用されている計算済みのスタイルを取得します。<br />この関数はpseudo elementをサポートしません。</div>
+							<div class="description"><b>uu.css.get - 計算済みのスタイルを取得 - document.defaultView.getComputedStyle wrapper</b>要素に適用されている計算済みのスタイルを取得します。<br />この関数はpseudo elementをサポートしません。<br /><br />uu.css.get(elm, "float,xxx", true)とすると、IEでは { styleFloat: .</div>
 						</td>
 					</tr>
 				</tbody>
@@ -319,69 +333,6 @@ ul.inheritsList {
 
 <!-- ============================== methods summary ======================== -->
 			
-				
-				
-				<table class="summaryTable" cellspacing="0" summary="A summary of the methods documented in the class uu.css.get.">
-					<caption>Method Summary</caption>
-					<thead>
-						<tr>
-							<th scope="col">Method Attributes</th>
-							<th scope="col">Method Name and Description</th>
-						</tr>
-					</thead>
-					<tbody>
-					
-						<tr>
-							<td class="attributes">&lt;static&gt; &nbsp;</td>
-							<td class="nameDescription">
-								<div class="fixedFont">uu.css.get.<b><a href="../symbols/uu.css.get.html#.height">height</a></b>(element)
-								</div>
-								<div class="description"><b>uu.css.get.height - 高さの取得</b></div>
-							</td>
-						</tr>
-					
-						<tr>
-							<td class="attributes">&lt;static&gt; &nbsp;</td>
-							<td class="nameDescription">
-								<div class="fixedFont">uu.css.get.<b><a href="../symbols/uu.css.get.html#.left">left</a></b>(element)
-								</div>
-								<div class="description"><b>uu.css.get.left - 左からのオフセットを取得</b></div>
-							</td>
-						</tr>
-					
-						<tr>
-							<td class="attributes">&lt;static&gt; &nbsp;</td>
-							<td class="nameDescription">
-								<div class="fixedFont">uu.css.get.<b><a href="../symbols/uu.css.get.html#.opacity">opacity</a></b>(element)
-								</div>
-								<div class="description"><b>uu.css.get.opacity - 不透明度の取得</b></div>
-							</td>
-						</tr>
-					
-						<tr>
-							<td class="attributes">&lt;static&gt; &nbsp;</td>
-							<td class="nameDescription">
-								<div class="fixedFont">uu.css.get.<b><a href="../symbols/uu.css.get.html#.top">top</a></b>(element)
-								</div>
-								<div class="description"><b>uu.css.get.top - 上からのオフセットを取得</b></div>
-							</td>
-						</tr>
-					
-						<tr>
-							<td class="attributes">&lt;static&gt; &nbsp;</td>
-							<td class="nameDescription">
-								<div class="fixedFont">uu.css.get.<b><a href="../symbols/uu.css.get.html#.width">width</a></b>(element)
-								</div>
-								<div class="description"><b>uu.css.get.width - 幅の取得</b></div>
-							</td>
-						</tr>
-					
-					</tbody>
-				</table>
-				
-				
-				
-			
 
 <!-- ============================== constructor details ==================== -->		
 			
@@ -391,11 +342,11 @@ ul.inheritsList {
 				</div>
 				
 				<div class="fixedFont">
-						<b>uu.css.get</b>(element, taxing, bool)
+						<b>uu.css.get</b>(element, taxing)
 				</div>
 				
 				<div class="description">
-					<b>uu.css.get - スタイルの取得(document.defaultView.getComputedStyle wrapper)</b>要素に適用されている計算済みのスタイルを取得します。<br />この関数はpseudo elementをサポートしません。
+					<b>uu.css.get - 計算済みのスタイルを取得 - document.defaultView.getComputedStyle wrapper</b>要素に適用されている計算済みのスタイルを取得します。<br />この関数はpseudo elementをサポートしません。<br /><br />uu.css.get(elm, "float,xxx", true)とすると、IEでは { styleFloat: ..., xxx: ... }を返し、他のブラウザでは { cssFloat: ..., xxx: ... }を返します。
 					
 				</div>
 				
@@ -410,19 +361,13 @@ ul.inheritsList {
 								 <b>element</b>
 								
 							</dt>
-								<dd>elm       - スタイルを取得する要素を指定します。</dd>
+								<dd>elm      - スタイルを取得する要素を指定します。</dd>
 						
 							<dt>
 								 <b>taxing</b>
 								
 							</dt>
-								<dd>[cssProp] - cssPropまたはcss-propを指定します。省略できます。</dd>
-						
-							<dt>
-								 <b>bool</b>
-								
-							</dt>
-								<dd>[cure]    - cssPropにcss-prop形式("font-weight")の名前を指定した場合はtrueにします。                                 デフォルトはfalseです。</dd>
+								<dd>[cssProp] - cssProp("fontWeight")を指定します。省略できます。<br />                          uu.config.backCompat=trueなら、css-prop形式("font-weight")の名前も指定可能になります。</dd>
 						
 						</dl>
 					
@@ -433,7 +378,7 @@ ul.inheritsList {
 						<dl class="detailList">
 						<dt class="heading">Returns:</dt>
 						
-								<dd>hash/string            - cssPropに複数の要素を指定している場合は hash { cssProp: 計算済みのスタイル, ... }を返します。                                 cssPropが単一の要素なら、計算済みのスタイルを文字列で返します。                                 cssPropで指定したスタイルプロパティが存在しない場合は、その要素の値は空文字列("")になります。                                 cssPropを省略した場合は、スタイルのスナップショット(CSS2Propertiesオブジェクト)を返します。</dd>
+								<dd>hash/string - cssPropに複数の要素を指定している場合は hash { cssProp: 計算済みのスタイル, ... }を返します。                      cssPropが単一の要素なら、計算済みのスタイルを文字列で返します。                      cssPropで指定したスタイルプロパティが存在しない場合は、その要素の値は空文字列("")になります。                      cssPropを省略した場合は、スタイルのスナップショット(CSS2Propertiesオブジェクト)を返します。</dd>
 						
 						</dl>
 					
@@ -442,7 +387,7 @@ ul.inheritsList {
 						<dl class="detailList">
 						<dt class="heading">See:</dt>
 						
-							<dd><a href="../symbols/uu.css.set.html#constructor">uu.css.set</a> - スタイルの設定</dd>
+							<dd><a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.css.get">計算済みのスタイルを取得</a></dd>
 						
 						</dl>
 					
@@ -455,231 +400,6 @@ ul.inheritsList {
 
 <!-- ============================== method details ========================= -->		
 			
-				<div class="sectionTitle">
-					Method Detail
-				</div>
-				
-					<a name=".height"> </a>
-					<div class="fixedFont">&lt;static&gt; 
-					
-					
-					<span class="light">uu.css.get.</span><b>height</b>(element)
-					
-					</div>
-					<div class="description">
-						<b>uu.css.get.height - 高さの取得</b>
-						
-						
-					</div>
-					
-					
-					
-					
-						
-							<dl class="detailList">
-							<dt class="heading">Parameters:</dt>
-							
-								<dt>
-									<b>element</b>
-									
-								</dt>
-								<dd>elm - 高さを取得する要素を指定します。</dd>
-							
-							</dl>
-						
-						
-						
-						
-						
-							<dl class="detailList">
-							<dt class="heading">Returns:</dt>
-							
-								<dd>number     - 高さをpx単位の数値で返します。</dd>
-							
-							</dl>
-						
-						
-						
-
-					<hr />
-				
-					<a name=".left"> </a>
-					<div class="fixedFont">&lt;static&gt; 
-					
-					
-					<span class="light">uu.css.get.</span><b>left</b>(element)
-					
-					</div>
-					<div class="description">
-						<b>uu.css.get.left - 左からのオフセットを取得</b>
-						
-						
-					</div>
-					
-					
-					
-					
-						
-							<dl class="detailList">
-							<dt class="heading">Parameters:</dt>
-							
-								<dt>
-									<b>element</b>
-									
-								</dt>
-								<dd>elm - オフセットを取得する要素を指定します。</dd>
-							
-							</dl>
-						
-						
-						
-						
-						
-							<dl class="detailList">
-							<dt class="heading">Returns:</dt>
-							
-								<dd>number     - オフセットをpx単位の数値で返します。</dd>
-							
-							</dl>
-						
-						
-						
-
-					<hr />
-				
-					<a name=".opacity"> </a>
-					<div class="fixedFont">&lt;static&gt; 
-					
-					
-					<span class="light">uu.css.get.</span><b>opacity</b>(element)
-					
-					</div>
-					<div class="description">
-						<b>uu.css.get.opacity - 不透明度の取得</b>
-						
-						
-					</div>
-					
-					
-					
-					
-						
-							<dl class="detailList">
-							<dt class="heading">Parameters:</dt>
-							
-								<dt>
-									<b>element</b>
-									
-								</dt>
-								<dd>elm - スタイルを取得する要素を指定します。</dd>
-							
-							</dl>
-						
-						
-						
-						
-						
-							<dl class="detailList">
-							<dt class="heading">Returns:</dt>
-							
-								<dd>number - 不透明度を数値で返します。</dd>
-							
-							</dl>
-						
-						
-						
-
-					<hr />
-				
-					<a name=".top"> </a>
-					<div class="fixedFont">&lt;static&gt; 
-					
-					
-					<span class="light">uu.css.get.</span><b>top</b>(element)
-					
-					</div>
-					<div class="description">
-						<b>uu.css.get.top - 上からのオフセットを取得</b>
-						
-						
-					</div>
-					
-					
-					
-					
-						
-							<dl class="detailList">
-							<dt class="heading">Parameters:</dt>
-							
-								<dt>
-									<b>element</b>
-									
-								</dt>
-								<dd>elm - オフセットを取得する要素を指定します。</dd>
-							
-							</dl>
-						
-						
-						
-						
-						
-							<dl class="detailList">
-							<dt class="heading">Returns:</dt>
-							
-								<dd>number     - オフセットをpx単位の数値で返します。</dd>
-							
-							</dl>
-						
-						
-						
-
-					<hr />
-				
-					<a name=".width"> </a>
-					<div class="fixedFont">&lt;static&gt; 
-					
-					
-					<span class="light">uu.css.get.</span><b>width</b>(element)
-					
-					</div>
-					<div class="description">
-						<b>uu.css.get.width - 幅の取得</b>
-						
-						
-					</div>
-					
-					
-					
-					
-						
-							<dl class="detailList">
-							<dt class="heading">Parameters:</dt>
-							
-								<dt>
-									<b>element</b>
-									
-								</dt>
-								<dd>elm - 幅を取得する要素を指定します。</dd>
-							
-							</dl>
-						
-						
-						
-						
-						
-							<dl class="detailList">
-							<dt class="heading">Returns:</dt>
-							
-								<dd>number     - 幅をpx単位の数値で返します。</dd>
-							
-							</dl>
-						
-						
-						
-
-					
-				
-			
 			
 			<hr />
 		</div>
@@ -687,7 +407,7 @@ ul.inheritsList {
 <!-- ============================== footer ================================= -->
 		<div class="fineprint" style="clear:both">
 			&copy;2008<br />
-			Documentation generated by <a href="http://www.jsdoctoolkit.org/" target="_blank">JsDoc Toolkit</a> 2.0.beta2.3 on Sun Jun 15 2008 16:44:33 GMT+0900 (JST)
+			Documentation generated by <a href="http://www.jsdoctoolkit.org/" target="_blank">JsDoc Toolkit</a> 2.0.beta2.3 on Tue Jun 24 2008 00:27:59 GMT+0900 (JST)
 		</div>
 	</body>
 </html>

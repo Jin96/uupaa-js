@@ -156,7 +156,21 @@ ul.inheritsList {
 <!-- ============================== header ================================= -->	
 		<!-- begin static/header.html -->
 		<div id="header">
-<a href="http://uupaa-js.googlecode.com/svn/trunk/README.htm">README.htm</a> &gt; Reference
+<a href="http://uupaa-js.googlecode.com/svn/trunk/README.htm">README</a> &gt; API Reference
+<p>
+   | <a href="http://code.google.com/p/uupaa-js/">Project Home(Google Code)</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/README.htm#demo">DEMO</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/CHANGELOG.htm">ChangeLog</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/LICENSE.htm">License</a> |<br />
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm">Document</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/SELECTOR.htm">Selector</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/MODULE.htm">Module</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/GLOSSARY.htm">Glossary</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/doc/reference/index.html">API Reference</a>
+   |
+</p>
+
+<hr />
 </div>
 
 		<!-- end static/header.html -->
@@ -174,10 +188,6 @@ ul.inheritsList {
 	
 	<li><a href="../symbols/Array.html">Array</a></li>
 	
-	<li><a href="../symbols/Date.html">Date</a></li>
-	
-	<li><a href="../symbols/Number.html">Number</a></li>
-	
 	<li><a href="../symbols/uu.html">uu</a></li>
 	
 	<li><a href="../symbols/uu.ajax.html">uu.ajax</a></li>
@@ -192,10 +202,6 @@ ul.inheritsList {
 	
 	<li><a href="../symbols/uu.css.html">uu.css</a></li>
 	
-	<li><a href="../symbols/uu.css.get.html">uu.css.get</a></li>
-	
-	<li><a href="../symbols/uu.css.set.html">uu.css.set</a></li>
-	
 	<li><a href="../symbols/uu.dom.html">uu.dom</a></li>
 	
 	<li><a href="../symbols/uu.effect.html">uu.effect</a></li>
@@ -206,13 +212,7 @@ ul.inheritsList {
 	
 	<li><a href="../symbols/uu.event.mouse.html">uu.event.mouse</a></li>
 	
-	<li><a href="../symbols/uu.forEach.html">uu.forEach</a></li>
-	
-	<li><a href="../symbols/uu.id.html">uu.id</a></li>
-	
 	<li><a href="../symbols/uu.image.html">uu.image</a></li>
-	
-	<li><a href="../symbols/uu.js.html">uu.js</a></li>
 	
 	<li><a href="../symbols/uu.json.html">uu.json</a></li>
 	
@@ -234,6 +234,8 @@ ul.inheritsList {
 	
 	<li><a href="../symbols/uu.module.messagePump.html">uu.module.messagePump</a></li>
 	
+	<li><a href="../symbols/uu.module.perf.html">uu.module.perf</a></li>
+	
 	<li><a href="../symbols/uu.module.pmvc.html">uu.module.pmvc</a></li>
 	
 	<li><a href="../symbols/uu.module.pmvc.applicationModel.html">uu.module.pmvc.applicationModel</a></li>
@@ -250,6 +252,8 @@ ul.inheritsList {
 	
 	<li><a href="../symbols/uu.perry.html">uu.perry</a></li>
 	
+	<li><a href="../symbols/uu.request.html">uu.request</a></li>
+	
 	<li><a href="../symbols/uu.tag.html">uu.tag</a></li>
 	
 	<li><a href="../symbols/uu.ua.html">uu.ua</a></li>
@@ -259,8 +263,6 @@ ul.inheritsList {
 	<li><a href="../symbols/uu.ui.element.html">uu.ui.element</a></li>
 	
 	<li><a href="../symbols/uu.url.html">uu.url</a></li>
-	
-	<li><a href="../symbols/uu.url.query.html">uu.url.query</a></li>
 	
 	<li><a href="../symbols/uu.window.html">uu.window</a></li>
 	
@@ -333,7 +335,7 @@ ul.inheritsList {
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont"><b><a href="../symbols/uu.module.drag.limited.html#construct">construct</a></b>(hash, bool, string, function, bool, bool)
+								<div class="fixedFont"><b><a href="../symbols/uu.module.drag.limited.html#construct">construct</a></b>(Hash, Boolean, String, Function, Boolean, Boolean)
 								</div>
 								<div class="description"><b>ドラッグ可能要素の列挙とイベントハンドラのアサイン</b></div>
 							</td>
@@ -461,7 +463,7 @@ ul.inheritsList {
 					<div class="fixedFont">
 					
 					
-					<b>construct</b>(hash, bool, string, function, bool, bool)
+					<b>construct</b>(Hash, Boolean, String, Function, Boolean, Boolean)
 					
 					</div>
 					<div class="description">
@@ -478,37 +480,37 @@ ul.inheritsList {
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>hash</b>
+									<b>Hash</b>
 									
 								</dt>
 								<dd>[param]       - パラメタの指定です。</dd>
 							
 								<dt>
-									<b>bool</b>
+									<b>Boolean</b>
 									
 								</dt>
 								<dd>[param.ghost] - ゴーストエフェクト(fade)を使用する場合にtrueにします。デフォルトはtrueです。</dd>
 							
 								<dt>
-									<b>string</b>
+									<b>String</b>
 									
 								</dt>
 								<dd>[param.msgto] - メッセージの受取先を指定します。""を指定するとメッセージを送信しません。                                 "broadcast"を指定するとブロードキャストになります。デフォルトは""です。</dd>
 							
 								<dt>
-									<b>function</b>
+									<b>Function</b>
 									
 								</dt>
 								<dd>[param.msgFilter] - 送信するメッセージを絞り込むフィルターを指定します。                                     msgFilter(メッセージ名) の形で呼ばれ、falseに評価される値を返すとメッセージは送信されません。                                     デフォルトはundefinedです。</dd>
 							
 								<dt>
-									<b>bool</b>
+									<b>Boolean</b>
 									
 								</dt>
 								<dd>[param.resize]    - ホイールでリサイズする場合にtrueにします。<br />                                     デフォルトは、trueです。</dd>
 							
 								<dt>
-									<b>bool</b>
+									<b>Boolean</b>
 									
 								</dt>
 								<dd>[param.dropAllowColor] - ドロップ可能な要素の背景色の指定です。デフォルトは"bisque"です。</dd>
@@ -823,7 +825,7 @@ ul.inheritsList {
 <!-- ============================== footer ================================= -->
 		<div class="fineprint" style="clear:both">
 			&copy;2008<br />
-			Documentation generated by <a href="http://www.jsdoctoolkit.org/" target="_blank">JsDoc Toolkit</a> 2.0.beta2.3 on Sun Jun 15 2008 16:44:35 GMT+0900 (JST)
+			Documentation generated by <a href="http://www.jsdoctoolkit.org/" target="_blank">JsDoc Toolkit</a> 2.0.beta2.3 on Fri Jun 27 2008 02:25:13 GMT+0900 (JST)
 		</div>
 	</body>
 </html>

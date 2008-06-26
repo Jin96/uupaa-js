@@ -5,8 +5,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>Hello uupaa.js World</title>
 <!--[if IE]><script id="excanvas.js" type="text/javascript" src="../../lib/excanvas.js"></script><![endif]-->
-<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="../../lib/javascript-xpath.js"></script><![endif]-->
-<script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
+<script type="text/javascript" src="../../uupaa.js"></script>
 <style type="text/css">
 #canvas, #msg { position: absolute; top: 0; left: 0 }
 #msg { font-weight: bold }
@@ -33,7 +32,7 @@ function circle() {
     uu.effect.fade(canvas, { speed: 2000, fn: draw })
   }, 2200);
 }
-uu.module.load("../../", "ui,effect", function() {
+uu.module.load("", "ui,effect", function() {
   uu.dom.ready(function() {
     uu.canvas.ready(circle);
   });

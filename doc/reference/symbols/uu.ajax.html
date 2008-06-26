@@ -156,7 +156,21 @@ ul.inheritsList {
 <!-- ============================== header ================================= -->	
 		<!-- begin static/header.html -->
 		<div id="header">
-<a href="http://uupaa-js.googlecode.com/svn/trunk/README.htm">README.htm</a> &gt; Reference
+<a href="http://uupaa-js.googlecode.com/svn/trunk/README.htm">README</a> &gt; API Reference
+<p>
+   | <a href="http://code.google.com/p/uupaa-js/">Project Home(Google Code)</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/README.htm#demo">DEMO</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/CHANGELOG.htm">ChangeLog</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/LICENSE.htm">License</a> |<br />
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm">Document</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/SELECTOR.htm">Selector</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/MODULE.htm">Module</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/GLOSSARY.htm">Glossary</a>
+   | <a href="http://uupaa-js.googlecode.com/svn/trunk/doc/reference/index.html">API Reference</a>
+   |
+</p>
+
+<hr />
 </div>
 
 		<!-- end static/header.html -->
@@ -174,10 +188,6 @@ ul.inheritsList {
 	
 	<li><a href="../symbols/Array.html">Array</a></li>
 	
-	<li><a href="../symbols/Date.html">Date</a></li>
-	
-	<li><a href="../symbols/Number.html">Number</a></li>
-	
 	<li><a href="../symbols/uu.html">uu</a></li>
 	
 	<li><a href="../symbols/uu.ajax.html">uu.ajax</a></li>
@@ -192,10 +202,6 @@ ul.inheritsList {
 	
 	<li><a href="../symbols/uu.css.html">uu.css</a></li>
 	
-	<li><a href="../symbols/uu.css.get.html">uu.css.get</a></li>
-	
-	<li><a href="../symbols/uu.css.set.html">uu.css.set</a></li>
-	
 	<li><a href="../symbols/uu.dom.html">uu.dom</a></li>
 	
 	<li><a href="../symbols/uu.effect.html">uu.effect</a></li>
@@ -206,13 +212,7 @@ ul.inheritsList {
 	
 	<li><a href="../symbols/uu.event.mouse.html">uu.event.mouse</a></li>
 	
-	<li><a href="../symbols/uu.forEach.html">uu.forEach</a></li>
-	
-	<li><a href="../symbols/uu.id.html">uu.id</a></li>
-	
 	<li><a href="../symbols/uu.image.html">uu.image</a></li>
-	
-	<li><a href="../symbols/uu.js.html">uu.js</a></li>
 	
 	<li><a href="../symbols/uu.json.html">uu.json</a></li>
 	
@@ -234,6 +234,8 @@ ul.inheritsList {
 	
 	<li><a href="../symbols/uu.module.messagePump.html">uu.module.messagePump</a></li>
 	
+	<li><a href="../symbols/uu.module.perf.html">uu.module.perf</a></li>
+	
 	<li><a href="../symbols/uu.module.pmvc.html">uu.module.pmvc</a></li>
 	
 	<li><a href="../symbols/uu.module.pmvc.applicationModel.html">uu.module.pmvc.applicationModel</a></li>
@@ -250,6 +252,8 @@ ul.inheritsList {
 	
 	<li><a href="../symbols/uu.perry.html">uu.perry</a></li>
 	
+	<li><a href="../symbols/uu.request.html">uu.request</a></li>
+	
 	<li><a href="../symbols/uu.tag.html">uu.tag</a></li>
 	
 	<li><a href="../symbols/uu.ua.html">uu.ua</a></li>
@@ -259,8 +263,6 @@ ul.inheritsList {
 	<li><a href="../symbols/uu.ui.element.html">uu.ui.element</a></li>
 	
 	<li><a href="../symbols/uu.url.html">uu.url</a></li>
-	
-	<li><a href="../symbols/uu.url.query.html">uu.url.query</a></li>
 	
 	<li><a href="../symbols/uu.window.html">uu.window</a></li>
 	
@@ -306,7 +308,7 @@ ul.inheritsList {
 							<div class="fixedFont">
 								<b><a href="../symbols/uu.ajax.html#constructor">uu.ajax</a></b>()
 							</div>
-							<div class="description"><b>Ajax</b></div>
+							<div class="description">Ajax</div>
 						</td>
 					</tr>
 				</tbody>
@@ -335,34 +337,34 @@ ul.inheritsList {
 							<td class="nameDescription">
 								<div class="fixedFont">uu.ajax.<b><a href="../symbols/uu.ajax.html#.already">already</a></b>()
 								</div>
-								<div class="description"><b>uu.ajax.already - Ajax使用可能でtrue</b></div>
+								<div class="description">uu.ajax.already - Ajaxの状態(使用可能/不能)の取得 - Ajax ready state</div>
 							</td>
 						</tr>
 					
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">uu.ajax.<b><a href="../symbols/uu.ajax.html#.load">load</a></b>(string, function, string)
+								<div class="fixedFont">uu.ajax.<b><a href="../symbols/uu.ajax.html#.load">load</a></b>(url, fn, data)
 								</div>
-								<div class="description"><b>uu.ajax.load - 非同期ロード[Ajax async request]</b>Ajaxで非同期にデータを取得します。 <table> <tr><th>step番号</th><th>内容</th></tr> <tr><td>0</td><td>BEGIN: 処理開始     </td></tr> <tr><td>1</td><td>SEND: リクエスト開始</td></tr> <tr><td>2</td><td>OK: 成功            </td></tr> <tr><td>3</td><td>NG: 失敗            </td></tr> <tr><td>4</td><td>END: 処理終了       </td></tr> </table>各ステップで、fn(step番号, response, status, url, async)を呼び出します。<br />responseには空文字列またはレスポンス文字列が格納されます(OKのみ)。<br />statusには0またはステータスコードが格納されます(OKとNGのみ)。<br />asyncは常にtrueになります。<br /></div>
+								<div class="description">uu.ajax.load - 非同期通信 - Ajax async request</div>
 							</td>
 						</tr>
 					
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">uu.ajax.<b><a href="../symbols/uu.ajax.html#.loadIfMod">loadIfMod</a></b>(string, function)
+								<div class="fixedFont">uu.ajax.<b><a href="../symbols/uu.ajax.html#.loadIfMod">loadIfMod</a></b>(url, fn)
 								</div>
-								<div class="description"><b>uu.ajax.loadIfMod - 更新チェック付き非同期ロード[Ajax async request with new-arrival check]</b>Ajaxで非同期にデータを取得します。<br />loadIfMod()は、POSTメソッドが使用できません。<br /> <table> <tr><th>step番号</th><th>内容</th></tr> <tr><td>0</td><td>BEGIN: 処理開始     </td></tr> <tr><td>1</td><td>SEND: リクエスト開始</td></tr> <tr><td>2</td><td>OK: 成功            </td></tr> <tr><td>3</td><td>NG: 失敗            </td></tr> <tr><td>4</td><td>END: 処理終了       </td></tr> </table>各ステップで、fn(ユニークID, step番号, response, status, url, async)を呼び出します。<br />responseには空文字列またはレスポンス文字列が格納されます(OKのみ)。<br />statusには0またはステータスコードが格納されます(OKとNGのみ)。<br />asyncは常にtrueになります。<br />過去に同じURLをリクエストしており、サーバ上のファイルが未更新ならfn(NG, "", 304, url, true)を返します。<br /></div>
+								<div class="description">uu.ajax.loadIfMod - 更新チェック付き非同期通信 - Ajax async request with new-arrival check</div>
 							</td>
 						</tr>
 					
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">uu.ajax.<b><a href="../symbols/uu.ajax.html#.loadSync">loadSync</a></b>(string, function, string)
+								<div class="fixedFont">uu.ajax.<b><a href="../symbols/uu.ajax.html#.loadSync">loadSync</a></b>(url, fn, data)
 								</div>
-								<div class="description"><b>uu.ajax.loadSync - 同期ロード[Ajax sync request]</b>Ajaxでデータを取得します。<br />同期リクエストなのでタイムアウトしません。 <table> <tr><th>step番号</th><th>内容</th></tr> <tr><td>0</td><td>BEGIN: 処理開始     </td></tr> <tr><td>1</td><td>SEND: リクエスト開始</td></tr> <tr><td>2</td><td>OK: 成功            </td></tr> <tr><td>3</td><td>NG: 失敗            </td></tr> <tr><td>4</td><td>END: 処理終了       </td></tr> </table>各ステップで、fn(ユニークID, step番号, response, status, url, async)を呼び出します。<br />responseには空文字列またはレスポンス文字列が格納されます(OKのみ)。<br />statusには0またはステータスコードが格納されます(OKとNGのみ)。<br />asyncは常にfalseになります。<br /></div>
+								<div class="description">uu.ajax.loadSync - 同期通信 - Ajax sync request</div>
 							</td>
 						</tr>
 					
@@ -385,7 +387,7 @@ ul.inheritsList {
 				</div>
 				
 				<div class="description">
-					<b>Ajax</b>
+					Ajax
 					
 				</div>
 				
@@ -420,7 +422,7 @@ ul.inheritsList {
 					
 					</div>
 					<div class="description">
-						<b>uu.ajax.already - Ajax使用可能でtrue</b>
+						uu.ajax.already - Ajaxの状態(使用可能/不能)の取得 - Ajax ready state
 						
 						
 					</div>
@@ -433,14 +435,14 @@ ul.inheritsList {
 						
 						
 						
+						
+						
 							<dl class="detailList">
-							<dt class="heading">Returns:</dt>
+							<dt class="heading">See:</dt>
 							
-								<dd>bool Ajax使用可能でtrueを返します。</dd>
+								<dd><a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.ajax.already">uu.ajax.already</a></dd>
 							
 							</dl>
-						
-						
 						
 
 					<hr />
@@ -449,11 +451,11 @@ ul.inheritsList {
 					<div class="fixedFont">&lt;static&gt; 
 					
 					
-					<span class="light">uu.ajax.</span><b>load</b>(string, function, string)
+					<span class="light">uu.ajax.</span><b>load</b>(url, fn, data)
 					
 					</div>
 					<div class="description">
-						<b>uu.ajax.load - 非同期ロード[Ajax async request]</b>Ajaxで非同期にデータを取得します。 <table> <tr><th>step番号</th><th>内容</th></tr> <tr><td>0</td><td>BEGIN: 処理開始     </td></tr> <tr><td>1</td><td>SEND: リクエスト開始</td></tr> <tr><td>2</td><td>OK: 成功            </td></tr> <tr><td>3</td><td>NG: 失敗            </td></tr> <tr><td>4</td><td>END: 処理終了       </td></tr> </table>各ステップで、fn(step番号, response, status, url, async)を呼び出します。<br />responseには空文字列またはレスポンス文字列が格納されます(OKのみ)。<br />statusには0またはステータスコードが格納されます(OKとNGのみ)。<br />asyncは常にtrueになります。<br />
+						uu.ajax.load - 非同期通信 - Ajax async request
 						
 						
 					</div>
@@ -466,22 +468,22 @@ ul.inheritsList {
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>string</b>
+									<b>url</b>
 									
 								</dt>
-								<dd>url    - リクエストURLを指定します。</dd>
+								<dd></dd>
 							
 								<dt>
-									<b>function</b>
+									<b>fn</b>
 									
 								</dt>
-								<dd>[fn]   - リクエスト終了で呼び出す関数を指定します。デフォルトはundefinedです。</dd>
+								<dd></dd>
 							
 								<dt>
-									<b>string</b>
+									<b>data</b>
 									
 								</dt>
-								<dd>[data] - encodeURIComponent済みの key = value のペアを渡します。                         dataに文字列を指定するとpostメソッドを使用します。デフォルトはnullです。</dd>
+								<dd></dd>
 							
 							</dl>
 						
@@ -494,15 +496,7 @@ ul.inheritsList {
 							<dl class="detailList">
 							<dt class="heading">See:</dt>
 							
-								<dd><a href="#.timeout">uu.ajax.timeout</a> - タイムアウト時間の指定</dd>
-							
-								<dd><a href="#.already">uu.ajax.already</a> - Ajax使用可能でtrue</dd>
-							
-								<dd><a href="#.loadIfMod">uu.ajax.loadIfMod</a> - 更新チェック付き非同期ロード</dd>
-							
-								<dd><a href="#.load">uu.ajax.load</a> - 非同期ロード</dd>
-							
-								<dd><a href="#.loadSync">uu.ajax.loadSync</a> - 同期ロード</dd>
+								<dd><a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.ajax.load">uu.ajax.load</a></dd>
 							
 							</dl>
 						
@@ -513,11 +507,11 @@ ul.inheritsList {
 					<div class="fixedFont">&lt;static&gt; 
 					
 					
-					<span class="light">uu.ajax.</span><b>loadIfMod</b>(string, function)
+					<span class="light">uu.ajax.</span><b>loadIfMod</b>(url, fn)
 					
 					</div>
 					<div class="description">
-						<b>uu.ajax.loadIfMod - 更新チェック付き非同期ロード[Ajax async request with new-arrival check]</b>Ajaxで非同期にデータを取得します。<br />loadIfMod()は、POSTメソッドが使用できません。<br /> <table> <tr><th>step番号</th><th>内容</th></tr> <tr><td>0</td><td>BEGIN: 処理開始     </td></tr> <tr><td>1</td><td>SEND: リクエスト開始</td></tr> <tr><td>2</td><td>OK: 成功            </td></tr> <tr><td>3</td><td>NG: 失敗            </td></tr> <tr><td>4</td><td>END: 処理終了       </td></tr> </table>各ステップで、fn(ユニークID, step番号, response, status, url, async)を呼び出します。<br />responseには空文字列またはレスポンス文字列が格納されます(OKのみ)。<br />statusには0またはステータスコードが格納されます(OKとNGのみ)。<br />asyncは常にtrueになります。<br />過去に同じURLをリクエストしており、サーバ上のファイルが未更新ならfn(NG, "", 304, url, true)を返します。<br />
+						uu.ajax.loadIfMod - 更新チェック付き非同期通信 - Ajax async request with new-arrival check
 						
 						
 					</div>
@@ -530,16 +524,16 @@ ul.inheritsList {
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>string</b>
+									<b>url</b>
 									
 								</dt>
-								<dd>url - リクエストURLを指定します。</dd>
+								<dd></dd>
 							
 								<dt>
-									<b>function</b>
+									<b>fn</b>
 									
 								</dt>
-								<dd>[fn] - 各stepで呼び出す関数を指定します。デフォルトはundefinedです。</dd>
+								<dd></dd>
 							
 							</dl>
 						
@@ -552,15 +546,7 @@ ul.inheritsList {
 							<dl class="detailList">
 							<dt class="heading">See:</dt>
 							
-								<dd><a href="#.timeout">uu.ajax.timeout</a> - タイムアウト時間の指定</dd>
-							
-								<dd><a href="#.already">uu.ajax.already</a> - Ajax使用可能でtrue</dd>
-							
-								<dd><a href="#.loadIfMod">uu.ajax.loadIfMod</a> - 更新チェック付き非同期ロード</dd>
-							
-								<dd><a href="#.load">uu.ajax.load</a> - 非同期ロード</dd>
-							
-								<dd><a href="#.loadSync">uu.ajax.loadSync</a> - 同期ロード</dd>
+								<dd><a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.ajax.loadIfMod">uu.ajax.loadIfMod</a></dd>
 							
 							</dl>
 						
@@ -571,11 +557,11 @@ ul.inheritsList {
 					<div class="fixedFont">&lt;static&gt; 
 					
 					
-					<span class="light">uu.ajax.</span><b>loadSync</b>(string, function, string)
+					<span class="light">uu.ajax.</span><b>loadSync</b>(url, fn, data)
 					
 					</div>
 					<div class="description">
-						<b>uu.ajax.loadSync - 同期ロード[Ajax sync request]</b>Ajaxでデータを取得します。<br />同期リクエストなのでタイムアウトしません。 <table> <tr><th>step番号</th><th>内容</th></tr> <tr><td>0</td><td>BEGIN: 処理開始     </td></tr> <tr><td>1</td><td>SEND: リクエスト開始</td></tr> <tr><td>2</td><td>OK: 成功            </td></tr> <tr><td>3</td><td>NG: 失敗            </td></tr> <tr><td>4</td><td>END: 処理終了       </td></tr> </table>各ステップで、fn(ユニークID, step番号, response, status, url, async)を呼び出します。<br />responseには空文字列またはレスポンス文字列が格納されます(OKのみ)。<br />statusには0またはステータスコードが格納されます(OKとNGのみ)。<br />asyncは常にfalseになります。<br />
+						uu.ajax.loadSync - 同期通信 - Ajax sync request
 						
 						
 					</div>
@@ -588,22 +574,22 @@ ul.inheritsList {
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>string</b>
+									<b>url</b>
 									
 								</dt>
-								<dd>url    - リクエストURLを指定します。</dd>
+								<dd></dd>
 							
 								<dt>
-									<b>function</b>
+									<b>fn</b>
 									
 								</dt>
-								<dd>[fn]   - リクエスト終了で呼び出す関数を指定します。デフォルトはundefinedです。</dd>
+								<dd></dd>
 							
 								<dt>
-									<b>string</b>
+									<b>data</b>
 									
 								</dt>
-								<dd>[data] - encodeURIComponent済みの key = value のペアを渡します。                         dataに文字列を指定するとpostメソッドを使用します。デフォルトはnullです。</dd>
+								<dd></dd>
 							
 							</dl>
 						
@@ -616,13 +602,7 @@ ul.inheritsList {
 							<dl class="detailList">
 							<dt class="heading">See:</dt>
 							
-								<dd><a href="#.already">uu.ajax.already</a> - Ajax使用可能でtrue</dd>
-							
-								<dd><a href="#.loadIfMod">uu.ajax.loadIfMod</a> - 更新チェック付き非同期ロード</dd>
-							
-								<dd><a href="#.load">uu.ajax.load</a> - 非同期ロード</dd>
-							
-								<dd><a href="#.loadSync">uu.ajax.loadSync</a> - 同期ロード</dd>
+								<dd><a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.ajax.loadSync">uu.ajax.loadSync</a></dd>
 							
 							</dl>
 						
@@ -637,7 +617,7 @@ ul.inheritsList {
 <!-- ============================== footer ================================= -->
 		<div class="fineprint" style="clear:both">
 			&copy;2008<br />
-			Documentation generated by <a href="http://www.jsdoctoolkit.org/" target="_blank">JsDoc Toolkit</a> 2.0.beta2.3 on Sun Jun 15 2008 16:44:32 GMT+0900 (JST)
+			Documentation generated by <a href="http://www.jsdoctoolkit.org/" target="_blank">JsDoc Toolkit</a> 2.0.beta2.3 on Fri Jun 27 2008 02:25:11 GMT+0900 (JST)
 		</div>
 	</body>
 </html>
