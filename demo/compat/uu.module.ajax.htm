@@ -46,7 +46,7 @@ Callback Filter:<br />
 function ajax(method, data) {
   data = data || "";
   var stepStr = { 1: "SEND", 2: "OK", 4: "NG" },
-      requestURL = uu.id("url"), val = 0;
+      requestURL = uu.id("url").value, val = 0;
 
   [1,2,4].map(function(v) {
     uu.id("step" + v).innerText = "";
