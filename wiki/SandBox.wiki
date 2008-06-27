@@ -1,4 +1,4 @@
-#summary One-sentence summary of this page.
+#summary お砂場です。まずはここで練習してください。
 
 = Introduction =
 
