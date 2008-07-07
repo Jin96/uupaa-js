@@ -5,6 +5,7 @@ body {
   font-family:'メイリオ',Meiryo,'ヒラギノ角ゴ Pro W3','Hiragino Kaku Gothic Pro','ＭＳ Ｐゴシック',sans-serif;
   margin: 2em; line-height: 1.5;
 }
+a { color: lightblue }
 a[href] { color: lightblue }
 b { color: gold }
 pre { padding: 1em; border: 1px dashed navy; overflow: auto; color: ghostwhite; }
