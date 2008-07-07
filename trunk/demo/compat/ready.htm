@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<title>uupaa.js - uu.dom.ready, uu.window.ready, uu.canvas.ready uu.image.preload test</title>
+<title>uupaa.js - uu.dom.ready, uu.window.ready, uu.canvas.ready uu.module.image.preload test</title>
 <!--[if IE]><script id="excanvas.js" type="text/javascript" src="http://pigs.sourceforge.jp/excanvas.js"></script><![endif]-->
 <script type="text/javascript" src="../../uupaa.js"></script>
 <style>
@@ -45,10 +45,10 @@ canvas {
   <dd>canvasが使用可能(uu.canvas.already()がtrueを返す状態)になったら、
       画面中央にモスグリーンの円を描画します。</dd>
 
-  <dt>uu.image.preload() -</dt>
+  <dt>uu.module.image.preload() -</dt>
   <dd>画像のプリロードが完了で、地図画像をフェードアウト、ロゴをフェードインさせます。<br />
       canvasで画像を使用する際は画像をプリロードしておかないとエラーが発生します。<br />
-      uu.image.preloadはcanvas用途の他に、ロールオーバー画像のプリロードとしても使用できます。
+      uu.module.image.preloadはcanvas用途の他に、ロールオーバー画像のプリロードとしても使用できます。
   </dd>
 </dl>
 </div>
@@ -80,7 +80,7 @@ uu.dom.ready([domReady, uu.mute]);
 uu.window.ready(winReady);
 uu.canvas.ready([cvsReady, doodle]);
 uu.module.load("", "ui,effect,image", function() {
-  uu.image.preload("http://maps.google.co.jp/intl/ja_jp/images/maps_results_logo.gif",
+  uu.module.image.preload("http://maps.google.co.jp/intl/ja_jp/images/maps_results_logo.gif",
     function(code, url) {
 //      uu.tag("img").forEach(function(v) {
       uu.forEach(uu.tag("img"), function(v) {

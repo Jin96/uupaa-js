@@ -4,19 +4,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>uupaa.js - Document</title>
-<style type="text/css">
-body {
-  background-color: black; color: whitesmoke;
-  font-family:'メイリオ',Meiryo,'ヒラギノ角ゴ Pro W3','Hiragino Kaku Gothic Pro','ＭＳ Ｐゴシック',sans-serif;
-  margin: 2em; line-height: 1.5;
-}
-a[href] { color: lightblue }
-b { color: gold }
-pre { padding: 1em; border: 1px dashed navy; overflow: auto; color: ghostwhite; }
-dt { margin-top: 1em; font-weight: bold; color: lightblue }
-i {}
-table, tr, th, td { border: 1px solid gray; }
-</style>
+<style type="text/css">@import url(./README.css);</style>
 </head>
 <body>
 <p>
@@ -76,12 +64,15 @@ table, tr, th, td { border: 1px solid gray; }
     <li><a href="#uu.ajax.loadIfMod">uu.ajax.loadIfMod</a> - 更新チェック付き非同期通信 - Ajax async request with new-arrival check</li>
     <li><a href="#uu.ajax.loadSync">uu.ajax.loadSync</a>  - 同期通信 - Ajax sync request</li>
     <li><a href="#uu.json.load">uu.json.load</a> - 非同期通信 - JSONP async request</li>
-    <li><a href="#uu.ajax.load.callback">コールバック</a> - Callback</li>
+<!--
+    <li><a href="#uu.script.load">uu.script.load</a> - スクリプトの読み込み - Load Script</li>
+ -->
+    <li><a href="#uu.request.callback">コールバック</a> - Callback</li>
   </ul>
   <li><a href="#event">イベント</a> - Event</li>
   <ul>
     <li><a href="#uu.event.handler">uu.event.handler</a> - デフォルトイベントハンドラの生成 - Create default event handler</li>
-    <li><a href="#uu.event.set">uu.event.set</a> - イベントハンドラの設定 - Add event hander</li>
+    <li><a href="#uu.event.set">uu.event.set</a> - イベントハンドラの設定 - Add event handler</li>
     <li><a href="#uu.event.unset">uu.event.unset</a> - イベントハンドラの解除 - Remove event handler</li>
     <li><a href="#uu.event.stop">uu.event.stop</a> - イベントの抑止 - stopPropagation and preventDefault</li>
     <li><a href="#uu.event.target">uu.event.target</a> - イベント発生源の情報を取得 - Detect event target</li>
@@ -157,7 +148,7 @@ table, tr, th, td { border: 1px solid gray; }
   </ul>
   <li><a href="#ua">ブラウザの判別とブラウザが保持する機能の判別</a> - Detect User-Agent, Browser Functions and DOM Functions</li>
   <ul>
-    <li><a href="#uu.ua">uu.ua</a> - ブラウザの判別と、機能の有効/無効情報を取得 - Detect and Search</li>
+    <li><a href="#uu.ua">uu.ua</a> - ブラウザの判別と機能の判別 - Detect User-Agent and Functions</li>
   </ul>
   <li><a href="#config">設定</a> - Configuration</li>
   <ul>
@@ -167,11 +158,6 @@ table, tr, th, td { border: 1px solid gray; }
     <li><a href="#uu.config.imagePath">uu.config.imagePath</a> - 画像検索パス - Image search path</li>
     <li><a href="#uu.config.modulePath">uu.config.modulePath</a> - モジュール検索パス - Module search path</li>
     <li><a href="#uu.config">QueryStringによる設定の変更</a> - Change of the setting by QueryString</li>
-  </ul>
-  <li><a href="#debug">デバッグ</a> - Debug</li>
-  <ul>
-    <li><a href="#uu.inspect">uu.inspect</a> - オブジェクトを人間用に加工し出力する - Humanize output, Object Reflection</li>
-    <li><a href="#uu.log">uu.log</a> - ログ出力 - Logging</li>
   </ul>
 </ul>
 
@@ -208,17 +194,17 @@ table, tr, th, td { border: 1px solid gray; }
       ほとんどのケースでは、Array([])と<a href="./GLOSSARY.htm#type-hash">Hash</a>({})があれば十分で、<br />
       毎回のように new Hash({index, value, ...}) とするのは、リソースの無駄遣いです。</li>
   <li><b>不必要なI/Fを追加しない。</b><br />
-      ニーズの低い機能(20%)は提供せずに、誰もが必要とする機能(80%)だけを提供すべきです。<br />
       機能AがBとCに分解でき、BとCそれぞれが有用なら、BとCだけを提供し、
-      B + C = A の存在をドキュメントに記載すべきです。
+      B + C = A の存在をドキュメントに記載すべきです。<br />
+      誰もが必要とする80%の機能を提供すべきであり、不要なオプションをフル装備する必要はありません。<br />
+      ニッチなニーズへは有料で対応するのが望ましく、そして、その成果をコミュニティにフィードバックすべきです。
       </li>
   <li><b>継承で頑張るのは無駄。最初から委譲を使う。</b><br />
       多くのモダンな言語や動的な型を持つ言語において、委譲は継承よりもフレキシブルです。<br />
       特に、継承をJavaScriptで無理矢理エミュレートするのではなく、最初から委譲を念頭に設計すべきです。
   </li>
   <li><b>ドキュメントファースト。</b><br />
-      良いドキュメントが付随するコードには価値があり、ドキュメントの無いコードはゴミです。<br />
-      uupaa.jsには(現在のところ)英語のドキュメントが存在しないため、英語圏の人達からは無価値な物に見えることでしょう。</li>
+      良いドキュメントが付随するコードには価値があり、ドキュメントの無いコードはゴミです。
   <li><b>ブラウザ依存のコードは分離。</b><br />
       ブラウザ依存のコードが複数行にまたがる場合は、別関数として分離すべきです。例: uu.event.set</li>
   <li><b>for, while, ifの { } は必須, 末尾のセミコロン(";")の省略は禁止。</b><br />
@@ -598,10 +584,6 @@ uu.forEach(uu.klass("alpha"), function(v) {
 });
     </pre>
   </dd>
-
-
-
-
 </dl>
 
 <hr />
@@ -610,11 +592,14 @@ uu.forEach(uu.klass("alpha"), function(v) {
    uu.xxx.load()が非同期リクエスト(Async request)、uu.xxx.loadSync()が同期リクエスト(Sync request)です。
    同期リクエストはサーバからレスポンスがあるまで、JavaScriptの動作が停止します。</p>
 <table>
-<tr><th>Function</th><th>リクエスト<br />(Request)</th><th>メソッド<br />(Method)</th><th>タイムアウト<br />(Timeout)</th><th>独自ヘッダの追加<br />(Add Original Headers)</th><th>更新チェック<br />(Update check)</th></tr>
-<tr><td>uu.ajax.load</td><td>Async</td><td>GET, POST</td><td>○</td><td>○</td><td>×</td></tr>
-<tr><td>uu.ajax.loadIfMod</td><td>Async</td><td>GET</td><td>○</td><td>○</td><td>○</td></tr>
-<tr><td>uu.ajax.loadSync</td><td>Sync</td><td>GET, POST</td><td>×</td><td>○</td><td>×</td></tr>
-<tr><td>uu.json.load</td><td>Async</td><td>GET</td><td>○</td><td>×</td><td>×</td></tr>
+<tr><th>Function</th><th>クロスドメイン<br />(Cross Domain)</th><th>リクエスト<br />(Request)</th><th>メソッド<br />(Method)</th><th>タイムアウト<br />(Timeout)</th><th>独自ヘッダの追加<br />(Add Original Headers)</th><th>更新チェック<br />(Update check)</th></tr>
+<tr><td><a href="#uu.ajax.load">uu.ajax.load</a></td><td>×</td><td>Async</td><td>GET, POST</td><td>○</td><td>○</td><td>×</td></tr>
+<tr><td><a href="#uu.ajax.loadIfMod">uu.ajax.loadIfMod</a></td><td>×</td><td>Async</td><td>GET</td><td>○</td><td>○</td><td>○</td></tr>
+<tr><td><a href="#uu.ajax.loadSync">uu.ajax.loadSync</a></td><td>×</td><td>Sync</td><td>GET, POST</td><td>×</td><td>○</td><td>×</td></tr>
+<tr><td><a href="#uu.json.load">uu.json.load</a></td><td>○</td><td>Async</td><td>GET</td><td>○</td><td>×</td><td>×</td></tr>
+<!--
+<tr><td><a href="#uu.script.load">uu.script.load</a></td><td>×</td><td>Async</td><td>GET</td><td>○</td><td>○</td><td>×</td></tr>
+ -->
 </table>
 <p>タイムアウト機能を使用する場合は、uu.request.timeout に10000(10秒)～50000(50秒)を指定します。単位はmsです。0を指定するとタイムアウトしません。デフォルトは10000(10秒)です。</p>
 <p>通信ヘッダを追加するには、uu.request.header に項目を設定します。</p>
@@ -624,14 +609,16 @@ uu.forEach(uu.klass("alpha"), function(v) {
 <!-- -->
   <dt><a name="uu.ajax.load">uu.ajax.load</a> - 非同期通信 - Ajax async request</dt>
   <dd><p>uu.ajax.load(<i>url</i>, <i>fn</i> = undefined, <i>data</i> = undefined) は、Webサーバと非同期に通信を行います。</p>
-      <p><i>url</i>にはリクエストURLを、<i>fn</i>には各ステップ毎に<a href="#uu.ajax.load.callback">コールバック</a>する関数を、
+      <p><i>url</i>にはリクエストURLを、<i>fn</i>には各ステップ毎に<a href="#uu.request.callback">コールバック</a>する関数を、
          データを送信する場合は<i>data</i>にencodeURIComponentでエンコード済みの文字列を指定します。</p>
       <pre>
  @param String   url    - リクエストURLを指定します。
- @param Function [fn]   - 各ステップ毎にコールバックする関数を指定します。デフォルトはundefinedです。
+ @param Function [fn]   - 各ステップ毎にコールバックする関数を指定します。デフォルトはundefinedです。fnを省略するとコールバックしません。
  @param String   [data] - データを送信する場合に、encodeURIComponentでエンコード済みの文字列を指定します。
                           dataを指定するとPOSTメソッドを使用し、指定しないとGETメソッドを使用します。
                           デフォルトはundefinedです。
+ @param Number   [callbackFilter] - <a href="#uu.request.callback">コールバック</a>するステップを限定する場合に指定します。
+                          省略すると、uu.request.callbackFilter の値を使用します。
       </pre>
   </dd>
 <!-- -->
@@ -640,7 +627,9 @@ uu.forEach(uu.klass("alpha"), function(v) {
       <p>前回通信を行った際のURLと、その更新日時を保存しており、データが更新されていない場合はstatusに304を返します。</p>
       <pre>
  @param String   url - リクエストURLを指定します。
- @param Function [fn] - 各ステップ毎にコールバックする関数を指定します。デフォルトはundefinedです。
+ @param Function [fn] - 各ステップ毎にコールバックする関数を指定します。デフォルトはundefinedです。fnを省略するとコールバックしません。
+ @param Number   [callbackFilter] - <a href="#uu.request.callback">コールバック</a>するステップを限定する場合に指定します。
+                          省略すると、uu.request.callbackFilter の値を使用します。
       </pre>
   </dd>
 <!-- -->
@@ -649,39 +638,83 @@ uu.forEach(uu.klass("alpha"), function(v) {
       <p>同期通信はサーバからのレスポンスがあるまで待機し続けます(ブラウザが固まったように見えます)。</p>
       <pre>
  @param String   url    - リクエストURLを指定します。
- @param Function [fn]   - 各ステップ毎にコールバックする関数を指定します。デフォルトはundefinedです。
+ @param Function [fn]   - 各ステップ毎にコールバックする関数を指定します。デフォルトはundefinedです。fnを省略するとコールバックしません。
  @param String   [data] - データを送信する場合に、encodeURIComponentでエンコード済みの文字列を指定します。
                           dataを指定するとPOSTメソッドを使用し、指定しないとGETメソッドを使用します。
                           デフォルトはundefinedです。
+ @param Number   [callbackFilter] - <a href="#uu.request.callback">コールバック</a>するステップを限定する場合に指定します。
+                          省略すると、uu.request.callbackFilter の値を使用します。
       </pre>
   </dd>
 <!-- -->
   <dt><a name="uu.json.load">uu.json.load</a> - 非同期通信 - JSONP async request</dt>
   <dd><p>uu.json.load(<i>url</i>, <i>fn</i> = undefined) は、Webサーバと非同期に通信を行います。</p>
       <p><i>url</i>にはリクエストURLを、<i>fn</i>には
-          各ステップ毎に<a href="#uu.ajax.load.callback">コールバック</a>する関数を指定します。</p>
+          各ステップ毎に<a href="#uu.request.callback">コールバック</a>する関数を指定します。</p>
       <pre>
  @param String   url  - リクエストURLを指定します。
- @param Function [fn] - 各stepで呼び出す関数を指定します。デフォルトはundefinedです。
+ @param Function [fn] - 各stepで呼び出す関数を指定します。デフォルトはundefinedです。fnを省略するとコールバックしません。
+ @param Number   [callbackFilter] - <a href="#uu.request.callback">コールバック</a>するステップを限定する場合に指定します。
+                          省略すると、uu.request.callbackFilter の値を使用します。
       </pre>
   </dd>
 <!-- -->
-  <dt><a name="uu.ajax.load.callback">コールバック</a> - Callback</dt>
-  <dd><p>uu.ajax.load, uu.ajax.loadIfMod, uu.ajax.loadSync, uu.json.load は、
-      通信の各段階で <i>fn</i>(<i>step</i>, <i>response</i>, <i>status</i>, <i>url</i>, <i>async</i>) の形で
-      コールバックします。(fnを省略するとコールバックしません)</p>
+<!--
+  <dt><a name="uu.script.load">uu.script.load</a> - スクリプトの読み込み - Load Script</dt>
+  <dd><p>uu.script.load(type = "text/x-uu-form", fn = undefined, callbackFilter = undefined) は、
+      &lt;script type="<i>type</i>"&gt;&lt;/script&gt;や&lt;script type="<i>type</i>" src="..."&gt;&lt;/script&gt;からJavaScriptを取り込みます。</p>
+      <p><i>type</i>には、script要素に通常指定しない文字列(つまり"text/javascript"以外の文字列)を指定します(例: "text/x-uu-form" や "text/x-my-script"など)。
+         <i>fn</i>には各ステップ毎に<a href="#uu.request.callback">コールバック</a>する関数を指定します。</p>
+      <pre>
+ @param String [type] - script要素のtype属性を指定します。デフォルトは "text/x-uu-form"です。
+ @param Function [fn] - 1つのscript要素の読み込みが終わるたびに呼ばれる関数を指定します。デフォルトはundefinedです。
+                        fn(uid, step, response, status, url, async, element)の形でコールバックします。
+                        responseにはJavaScriptのオブジェクトが格納されます。
+                        elementには、script要素が格納されます。
+                        src属性で指定されたファイルを外部からロードする場合は、uu.ajax.load関数を使用します。
+      </pre>
+      <a href="demo/document/uu.script.load.htm">Run</a>
+      <pre class="eg">
+&lt;script type="text/x-uu-form"&gt;
+{
+  id: "unknown",
+  data: { type: "checkbox", value="hoge", checked="checked", label: "check here", align: "left" }
+}
+&lt;/script&gt;
+&lt;script type="text/x-uu-form" src="uu.script.load.txt"&gt;&lt;/script&gt;
+
+&lt;script&gt;
+  <b>uu.script.load</b>("text/x-uu-form", function(uid, step, response, status, url, async, element) {
+    if (step === 2) {
+      uu.log("OK", response); // "OK", {id: "unknown", data: {type: "checkbox", value: "hoge", checked: "checked", label: "check here", align: "left"}}
+    } else {
+      uu.log("NG"); // srcに存在しないファイルが指定された
+    }
+  }, 6); // OK + NG
+&lt;/script&gt;
+      </pre>
+  </dd>
+-->
+<!-- -->
+  <dt><a name="uu.request.callback">コールバック</a> - CallBack</dt>
+  <dd><p>uu.ajax.load, uu.ajax.loadIfMod, uu.ajax.loadSync, uu.json.load, uu.request.script は、
+      通信の各段階で <i>fn</i>(<i>uid</i>, <i>step</i>, <i>response</i>, <i>status</i>, <i>url</i>, <i>async</i>, <i>more arg, ...</i>) の形で
+      コールバックします。</p>
+      <i>uid</i>にはユニークなID(文字列)が、
       <i>response</i>にはレスポンステキストが、
-      <i>status</i>にはWebサーバが返すステータスコードか、uuppa.js側が設定したステータスコードが格納されます。
+      <i>status</i>にはWebサーバが返すステータスコードかuuppa.js側が設定したステータスコードが格納されます。
       <i>async</i>は非同期通信(load,loadIfMod)で1, 同期通信(loadSync)で0になります。</p>
+      <i>more arg, ...</i>が渡される場合もあります。
       <table>
       <tr><th>状況                  </th><th>step</th><th>response</th><th>status</th><th>url</th><th>async</th></tr>
       <tr><td>リクエスト開始 - SEND </td><td>1   </td><td>""      </td><td>0</td><td>request URL</td><td>1 or 0</td></tr>
       <tr><td>成功 - OK             </td><td>2   </td><td><i>response text</i></td><td>200</td><td>request URL</td><td>1 or 0</td></tr>
       <tr><td>失敗 - NG             </td><td>4   </td><td>""      </td><td>200以外の数値</td><td>request URL</td><td>1 or 0</td></tr>
       </table>
-      <p>コールバックするstepを限定することも可能です。<br />OKとNGだけを知りたい場合は、
-         uu.request.callbackFilter に 6 を設定します( 6 = 2 + 4 )。<br />
-         デフォルトは 2 です。</p>
+      <p>引数callbackFilterに1～7の値を指定すると、コールバックするstepを限定することも可能です。<br />OKとNGだけを知りたい場合は、
+         callbackFilter に 6 を設定します( 6 = 2 + 4 )。</p>
+      <p>引数callbackFilterを指定しないと、uu.request.callbackFilter の値を使用します。<br />
+         uu.request.callbackFilterのデフォルトは 2 です。</p>
       <a href="demo/compat/uu.module.ajax.htm">Run</a>
   </dd>
 </dl>
@@ -745,8 +778,10 @@ var my = new myClass(uu.id("clicktarget"));
       </pre>
   </dd>
 <!-- -->
-  <dt><a name="uu.event.set">uu.event.set</a> - イベントハンドラの設定 - Add event hander</dt>
+  <dt><a name="uu.event.set">uu.event.set</a> - イベントハンドラの設定 - Add event handler</dt>
   <dd><p>uu.event.set(<i>elm</i>, <i>type</i>, <i>fn</i>, <i>capture</i> = false) はイベントを設定します。
+      <p><i>elm</i>に、同じパラメタ(<i>type</i>, <i>fn</i>, <i>capture</i>)でイベントを二重登録しようとしても、2回目以降は無視します。
+         <br />この動作はaddEventListener()の動作です。attachEventは二重登録可能ですが抑止してあります。</p>
       <pre>
  @param Element  elm       - イベントを設定する要素を指定します。
  @param Taxing   type      - イベントタイプを指定します。
@@ -949,16 +984,30 @@ var my = new myClass(uu.id("clicktarget"));
                        attrに属性名を1つだけ指定すると 属性値 を文字列で返します。
                        存在しない属性名を指定すると、その要素の戻り値は空文字列("")になります。
     </pre>
+    <table>
+    <tr><th>Expression</th><th>Returns</th><th>Note</th></tr>
+    <tr><td>uu.attr.get(<i>elm</i>, "title,href")<br />
+            uu.attr.get(<i>elm</i>, ["title","href"])</td><td>{ title: "the title", href: "http://..." }</td><td>複数の属性名を指定するとHashを返す</td></tr>
+    <tr><td>uu.attr.get(<i>elm</i>, "title")</td><td>"the title"</td><td>属性名を一つだけ指定すると文字列を返す</td></tr>
+    <tr><td>uu.attr.get(<i>elm</i>, "abcde")</td><td>""</td><td>存在しない属性名を指定すると空文字列("")を返す</td></tr>
+    <tr><td>uu.attr.get(<i>elm</i>, "title,abcde")</td><td>{ title: "the title", abcde: "" }</td><td>存在しない属性名の値は空文字列("")になる</td></tr>
+    </table>
   </dd>
 <!-- -->
   <dt><a name="uu.attr.set">uu.attr.set - 属性の設定</a> - Set attribute</dt>
   <dd>
-    <p>uu.attr.set(<i>elm</i>, <i>attr</i>) は、
-       <i>elm</i>要素の<i>attr</i>属性の値を設定します。</p>
+    <p>uu.attr.set(<i>elm</i>, <i>hash</i>) は、
+       <i>elm</i>要素の<i>attr</i>属性に値<i>value</i>を設定します。</p>
     <pre>
  @param Element elm  - 属性を設定する要素を指定します。
- @param Hash    attr - { attribute-name: value, ...} を指定します。
+ @param Hash    hash - { attr: value, ...} を指定します。
     </pre>
+    <table>
+    <tr><th>Expression</th><th>Note</th></tr>
+    <tr><td>uu.attr.set(<i>elm</i>, <a href="#uu.pair">uu.pair</a>("title", "hoge"))<br />
+            uu.attr.set(<i>elm</i>, { title: "hoge" })</td><td>{ title: "hoge" }を設定</td></tr>
+    <tr><td>uu.attr.set(<i>elm</i>, { title: "hoge" href: "http://..."} )</td><td>{ title: "hoge", href: "http://..." }を設定</td></tr>
+    </table>
   </dd>
 </dl>
 
@@ -972,7 +1021,7 @@ var my = new myClass(uu.id("clicktarget"));
 <!-- -->
   <dt><a name="Array.indexOf">Array.indexOf</a> - Arrayの先頭から値を検索し最初のindexを返す。無ければ-1を返す</dt>
   <dd><p>Array.prototype.indexOf(<i>value</i>, <i>index</i> = 0) は
-         JavaScript 1.5準拠のメソッドで、
+         JavaScript 1.6準拠のメソッドで、
          Arrayの先頭から値を検索し最初のindexを返します。<br />該当する値が無ければ-1を返します。</p>
       <pre>
  @param Mix     value   - 検索する値を指定します。検索は===演算子で比較します。
@@ -992,7 +1041,7 @@ rv["HashIndex"] = "HashIndex";
 <!-- -->
   <dt><a name="Array.lastIndexOf">Array.lastIndexOf</a> - Arrayの後方から値を検索し最初のindexを返す。無ければ-1を返す</dt>
   <dd><p>Array.prototype.lastIndexOf(<i>value</i>, <i>index</i> = 0) は
-         JavaScript 1.5準拠のメソッドで、
+         JavaScript 1.6準拠のメソッドで、
          Arrayの後方から値を検索し最初のindexを返します。<br />該当する値が無ければ-1を返します。</p>
       <pre>
  @param Mix     value   - 検索する値を指定します。検索は===演算子で比較します。
@@ -1131,12 +1180,12 @@ uu.log(rv); // ["html", "body", "div[1]"]
   <dt><a name="uu.pair">uu.pair</a> - Hash{ key, value }を生成 - Make Hash from key and value</dt>
   <dd><p>uu.pair(<i>key</i>, <i>value</i>) は Hash({ <i>key</i>: <i>value</i> })を返します。</p>
     <pre>
- @param String/Number key - インデックスを指定します。
+ @param Mix key - キーを数値か文字列で指定します。Elementやnullなども指定可能です。
  @param Mix value - 値を指定します。
  @return Hash     - Hashを返します。
     </pre>
     <pre class="eg">
-uu.log(uu.pair("key", "value")); // { key: "value" }
+uu.log(<b>uu.pair</b>("key", "value")); // { key: "value" }
     </pre>
   </dd>
 <!-- -->
@@ -1491,7 +1540,7 @@ uu.url.query.add(url, "key3", "value3"); // "http://www.example.com/?key1=value1
 <p>ブラウザ依存コードや、各種動作条件の判別に必要な情報を提供します。</p>
 <hr />
 <dl>
-  <dt><a name="uu.ua">uu.ua</a> - ブラウザの判別と、機能の有効/無効情報を取得 - Detect and Search</dt>
+  <dt><a name="uu.ua">uu.ua</a> - ブラウザの判別と機能の判別 - Detect User-Agent and Functions</dt>
   <dd><p>uu.ua(<i>info</i> = "")は、ブラウザの判別と、機能の有効/無効情報を返します。
       <pre>
  @param String info - ブラウザ名, ブラウザの描画エンジン名, 機能名の指定です。
@@ -1572,25 +1621,6 @@ uu.config.png24 = false
 
 uu.config.modulePath = "http://uupaa-js.googlecode.com/svn/trunk/mini/uu.module.effect.js,../mini/"
       </pre>
-  </dd>
-</dl>
-
-<hr />
-<h2><a name="debug">debug</a></h2>
-<p>デバッグ用の機能を提供します。</p>
-<hr />
-<dl>
-<!-- -->
-  <dt><a name="uu.inspect">uu.inspect</a> - オブジェクトを人間用に加工し出力する - Humanize output, Object Reflection</dt>
-  <dd><p>uu.inspect(<i>mix</i>) は <i>mix</i>を人間が見てわかるような形に加工します。</p>
-  </dd>
-<!-- -->
-  <dt><a name="uu.log">uu.log</a> - ログ出力 - Logging</dt>
-  <dd><p>uu.log(<i>mix</i>) は <i>mix</i>を画面に出力します。</p>
-      <p>出力先は、uu.log.id で変更可能です。デフォルトは id="uuLog" の要素に出力します。<br />
-         出力先が存在しない場合は、document.bodyに要素を追加し、ログを出力します。</p>
-      <p>ログを出力できないタイミング(uu.window.already===false)なら、出力内容を一旦プールし、
-         次回 uu.log が呼ばれたタイミングで出力します。</p>
   </dd>
 </dl>
 

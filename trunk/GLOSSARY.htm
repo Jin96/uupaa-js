@@ -4,18 +4,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>uupaa.js - Glossary</title>
-<style type="text/css">
-body {
-  background-color: black; color: whitesmoke;
-  font-family:'メイリオ',Meiryo,'ヒラギノ角ゴ Pro W3','Hiragino Kaku Gothic Pro','ＭＳ Ｐゴシック',sans-serif;
-  margin: 2em; line-height: 1.5;
-}
-a, b { color: lightblue }
-pre { border: 1px solid navy }
-dt { margin-top: 1em; font-weight: bold; color: lightblue }
-i { font-style: normal; color: gray }
-table, tr, th, td { border: 1px solid gray; }
-</style>
+<style type="text/css">@import url(./README.css);</style>
 </head>
 <body>
 <p>
@@ -157,29 +146,66 @@ table, tr, th, td { border: 1px solid gray; }
         excanvas.jsによりIEでもcanvas要素が使用可能になりますが、excanvas.js内の初期化完了を知る必要があります。</i>
     </dd>
   <dt><a name="pollution">グローバルネームスペース汚染, prototype汚染</a> - Global name space pollution, Prototype object pollution</dt>
-    <dd><p>JavaScriptは最初から存在するオブジェクト(ビルトインオブジェクト)の拡張が可能です。<br />
-        ビルトインオブジェクトを安易に拡張すると、ライブラリ併用時の衝突や、意図しない副作用(Array + for inなど)といったトラブルが発生します。</p>
-        <p>以下がuupaa.jsによるグローバルネームスペースの汚染リストです。<br />
+    <dd><p>JavaScriptは最初から存在するオブジェクト(ビルトインオブジェクト)の拡張が可能です。</p>
+        <pre>
+// Numberオブジェクトを拡張し「奇数ならtrueを返す」メソッドを追加する
+Number.prototype.odd = function() {
+  return !!(this.valueOf() % 2);
+}
+        </pre>
+        <p>これはJavaScriptの魅力の1つでありOOP的な観点からも有益に見えるものですが、これには落とし穴があり、
+           安易な拡張を繰り返すと、ライブラリ併用時の衝突や、Array + for inループで拡張された(意図しない)プロパティが列挙される等の、強烈な副作用が露呈します。</p>
+        <p>やりすぎた拡張は「プロトタイプ汚染」と呼ばれます。JavaScriptの拡張性は汚染とのトレードオフなのです。</p>
+        <p>グローバルネームスペースとは、window.xxx のことです。
+          <br />ブラウザ環境下ではトップレベルオブジェクトはwindowになるため、安易にグローバル変数を追加するとwindowを汚染します。</p>
+        <pre>
+// ブラウザ上で動作するJavaScriptでは、var hoge = 1; は、window.hoge = 1; と同じ
+&lt;script&gt;
+var hoge = 1;
+alert(hoge === window.hoge); // true
+&lt;/script&gt;
+        </pre>
+        <p>小さなライブラリをいくつも組み合わせてサイトを構築すると、グローバルネームスペースが汚染され、ライブラリの衝突が発生するケースがあります。
+           <br />特に、window.$ や window.$$ などは、多くのライブラリが似て非なる実装を行っているため、簡単に衝突します。</p>
+        <p>以下がuupaa.jsによるグローバルネームスペースの汚染とprototypeの拡張リストです。<br />
            ライブラリ併用時でも極力衝突が起きないように配慮してあります。</p>
         <dl>
-          <dt>window(Global Object)</dt><dd><ul><li>uu()</li></ul></dd>
-          <dt>Array.prototype</dt><dd><ul>
-            <a href="./DOCUMENT.htm#Array.indexOf"><li>indexOf()<i></a> - (JavaScript 1.5準拠)</i></li>
-            <a href="./DOCUMENT.htm#Array.lastIndexOf"><li>lastIndexOf()<i></a> - (JavaScript 1.5準拠)</i></li>
-            <a href="./DOCUMENT.htm#Array.forEach"><li>forEach()<i></a> - (JavaScript 1.5準拠)</i></li>
-            <a href="./DOCUMENT.htm#Array.filter"><li>filter()<i></a> - (JavaScript 1.5準拠)</i></li>
-            <a href="./DOCUMENT.htm#Array.every"><li>every()<i></a> - (JavaScript 1.5準拠)</i></li>
-            <a href="./DOCUMENT.htm#Array.some"><li>some()<i></a> - (JavaScript 1.5準拠)</i></li>
-            <a href="./DOCUMENT.htm#Array.map"><li>map()<i></a> - (JavaScript 1.5準拠)</i></li>
-          </ul></dd>
-          <dt>Math</dt><dd><ul>
-            <li>RADIAN <i>- ラジアン (Math.PI / 180)</i></li>
-          </ul></dd>
-          <dt>HTMLElement.prototype (Firefoxのみ)</dt><dd><ul>
-            <li>outerHTML <i>- Firefox2+ でouterHTMLを使用可能にするsetter</i></li>
-            <li>innerText <i>- Firefox2+ でinnerTextを使用可能にするsetter</i></li>
-            <li>innerText <i>- Firefox2+ でinnerTextを使用可能にするgetter</i></li>
-          </ul></dd>
+          <dt>window(Global Object)</dt>
+            <dd>
+              <ul>
+                  <li>uu - uupaa.js用ネームスペース</li>
+                  <li>UU - uupaa.jsの定数格納用ネームスペース</li>
+              </ul>
+            </dd>
+          <dt>Array.prototype</dt>
+            <dd>
+              <p>これらはECMA-262標準のメソッドを、非モダンブラウザに拡張するものなので、プロトタイプを汚染しない。</p>
+              <ul>
+                <li><a href="./DOCUMENT.htm#Array.indexOf">indexOf</a><i> - (JavaScript 1.6準拠)</i></li>
+                <li><a href="./DOCUMENT.htm#Array.lastIndexOf">lastIndexOf</a><i> - (JavaScript 1.6準拠)</i></li>
+                <li><a href="./DOCUMENT.htm#Array.forEach">forEach</a><i> - (JavaScript 1.5準拠)</i></li>
+                <li><a href="./DOCUMENT.htm#Array.filter">filter</a><i> - (JavaScript 1.5準拠)</i></li>
+                <li><a href="./DOCUMENT.htm#Array.every">every</a><i> - (JavaScript 1.5準拠)</i></li>
+                <li><a href="./DOCUMENT.htm#Array.some">some</a><i> - (JavaScript 1.5準拠)</i></li>
+                <li><a href="./DOCUMENT.htm#Array.map">map</a><i> - (JavaScript 1.5準拠)</i></li>
+              </ul>
+            </dd>
+          <dt>Math</dt>
+            <dd>
+              <p>定数の追加なのでプロトタイプを汚染しない。</p>
+              <ul>
+                <li>RADIAN <i>- ラジアン (Math.PI / 180)</i></li>
+              </ul>
+            </dd>
+          <dt>HTMLElement.prototype</dt>
+            <dd>
+              <p>これらはFirefox以外のブラウザで既に実装されているIE独自の拡張機能をFirefoxにも導入し、クロスブラウザを達成するために必要な拡張なので汚染ではない。</p>
+              <ul>
+                <li>outerHTML <i>- Firefox2+ でouterHTMLを使用可能にするsetter</i></li>
+                <li>innerText <i>- Firefox2+ でinnerTextを使用可能にするsetter</i></li>
+                <li>innerText <i>- Firefox2+ でinnerTextを使用可能にするgetter</i></li>
+              </ul>
+            </dd>
         </dl>
     </dd>
   <dt><a name="jointed-string">結合文字列</a> - Jointed String</dt>
@@ -222,9 +248,18 @@ table, tr, th, td { border: 1px solid gray; }
         <i>alert(rv["Hash"]); // "hoge"</i><br />
         </dd>
   <dt><a name="HashIndex">HashIndex</a></dt>
-    <dd>HashIndexは文字列をキーとするIndexのことです。</dd>
+    <dd><p>HashIndexは文字列をキーとするIndexのことです。</p>
+        <p>
+        var hash = { key: "value" }; // hash.key は HashIndex です。<br />
+        var ary = ["value"];<br />ary["key"] = "value"; // ary.key も HashIndex です。
+        </p>
+    </dd>
   <dt><a name="ArrayIndex">ArrayIndex</a></dt>
-    <dd>数字をキーとするとIndexを特別にArrayIndexと呼ぶ場合があります。ArrayIndexはHashIndexの対語です。</dd>
+    <dd><p>数字をキーとするIndexを特別にArrayIndexと呼ぶ場合があります。ArrayIndexはHashIndexの対語です。</p>
+        <p>
+        var ary = ["value"];<br />ary[0] = "value"; // ary[0] は ArrayIndex です。
+        </p>
+    </dd>
   <dt><a name="FakeArray">FakeArray</a></dt>
     <dd>Arrayではないのに、lengthプロパティを持つHashをFakeArray(擬似配列)と呼びます。<br />
         代表的なものに、argumentsや, NodeList, document.images があります。<br />

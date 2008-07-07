@@ -1,11 +1,11 @@
-/** jQuery SyntaxSugar Module
+/** jQuery like SyntaxSugar Module
  *
  * @author Takao Obara
  * @license uupaa.js is licensed under the terms and conditions of the MIT licence.
  */
 (function() { var uud = document, uuw = window, uu = uuw.uu;
 
-/** jQuery SyntaxSugar
+/** jQuery like SyntaxSugar
  *
  * @class
  */
@@ -131,11 +131,6 @@ uu.mix(uu.module.jqss.prototype, {
     if (uu.isS(key) && value === void 0) { return uu.attr.get(this.elm[0], key); }
     if (uu.isS(key) && uu.isS(value)) { key = uu.pair(key, value); }
     this.elm.forEach(function(e) { uu.attr.set(e, key); });
-    return this;
-  },
-  /** DOM - Attrは削除していない */
-  removeAttr: function(key) {
-    this.elm.forEach(function(e) { uu.attr.get(e, ""); });
     return this;
   },
   addClass: function(className) {

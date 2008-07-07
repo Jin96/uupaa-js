@@ -4,19 +4,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>uupaa.js - Module</title>
-<style type="text/css">
-body {
-  background-color: black; color: whitesmoke;
-  font-family:'メイリオ',Meiryo,'ヒラギノ角ゴ Pro W3','Hiragino Kaku Gothic Pro','ＭＳ Ｐゴシック',sans-serif;
-  margin: 2em; line-height: 1.5;
-}
-a[href] { color: lightblue }
-b { color: gold }
-pre { padding: 1em; border: 1px dashed navy; overflow: auto; color: ghostwhite; }
-dt { margin-top: 1em; font-weight: bold; color: lightblue }
-i {}
-table, tr, th, td { border: 1px solid gray; }
-</style>
+<style type="text/css">@import url(./README.css);</style>
 </head>
 <body>
 <p>
@@ -44,8 +32,8 @@ table, tr, th, td { border: 1px solid gray; }
 <!--
   <li><a href="#image">Image</a></li>
   <ul>
-    <li><a href="#uu.image.isLoaded">uu.image.isLoaded</a> - 画像のロード済み確認 - Is image loaded</li>
-    <li><a href="#uu.image.preload">uu.image.preload</a> - 画像のプリロード - Preload image</li>
+    <li><a href="#uu.module.image.isLoaded">uu.module.image.isLoaded</a> - 画像のロード済み確認 - Is image loaded</li>
+    <li><a href="#uu.module.image.preload">uu.module.image.preload</a> - 画像のプリロード - Preload image</li>
   </ul>
  -->
 <!--
@@ -61,7 +49,7 @@ table, tr, th, td { border: 1px solid gray; }
     <li><a href="#uu.event.mouse.pos">uu.event.mouse.pos</a> - マウス座標を取得 - Get mouse position</li>
     <li><a href="#uu.event.mouse.posEx">uu.event.mouse.posEx</a> - マウスの拡張座標情報を取得 - Get mouse position++</li>
     <li><a href="#uu.event.mouse.state">uu.event.mouse.state</a> - マウスクリック, ホイールの状態を取得</li>
-    <li><a href="#uu.event.hover">uu.event.hover</a> - ホバーイベントハンドラの設定 - Set hover event hander</li>
+    <li><a href="#uu.event.hover">uu.event.hover</a> - ホバーイベントハンドラの設定 - Set hover event handler</li>
     <li><a href="#uu.event.clicks">uu.event.clicks</a> - クリックイベントハンドラの設定 - Set click event handler</li>
   </ul>
  -->
@@ -90,6 +78,12 @@ table, tr, th, td { border: 1px solid gray; }
       <li><a href="#uu.module.messagePump.post">uu.module.messagePump.post</a> - メッセージの非同期送信</li>
     </ul>
   </ul>
+<!--
+  <li><a href="#type-and-format">型とフォーマット</a> - Type and Format</li>
+  <ul>
+    <li><a href="#uu.codec">uu.codec</a> - 各種コーデック - Codec</li>
+  </ul>
+ -->
   <li><a href="#performance">パフォーマンス</a> - performance</li>
   <ul>
     <li><a href="#uu.module.perf">uu.module.perf</a> - perf</li>
@@ -99,12 +93,12 @@ table, tr, th, td { border: 1px solid gray; }
       <li><a href="#uu.module.perf.average">uu.module.perf.average</a> - 平均値</li>
     </ul>
   </ul>
-<!--
-  <li><a href="#type-and-format">型とフォーマット</a> - Type and Format</li>
+
+  <li><a href="#log">ログ</a> - Log</li>
   <ul>
-    <li><a href="#uu.codec">uu.codec</a> - 各種コーデック - Codec</li>
+    <li><a href="#uu.module.log2.log">uu.module.log2.log</a> - ログ出力 - Logging</li>
+    <li><a href="#uu.module.log2.inspect">uu.module.log2.inspect</a> - オブジェクトを人間用に加工し出力する - Humanize output, Object Reflection</li>
   </ul>
- -->
 </ul>
 
 <hr />
@@ -182,6 +176,7 @@ uu.module.load("http://example.com/, http://example.net/latest/", "ui,effect,dra
 <hr />
 <h2><a name="timer">タイマー</a> - Timer</h2>
 <p>JavaScript標準のタイマーよりも、高性能なタイマーを提供します。</p>
+<p>この機能はuupaa.jsに組み込まれているため、モジュールを必要としません。</p>
 <hr />
 <dl>
 <!-- -->
@@ -265,6 +260,7 @@ uu.module.load("http://example.com/, http://example.net/latest/", "ui,effect,dra
 <hr />
 <h2><a name="mvc">MVC</a> - Model View Controller</h2>
 <p>MVCパターンの実装を提供します。</p>
+<p>この機能を使用するには、uu.module.pmvc.js をロードします。</p>
 <hr />
 <dl>
 <!-- -->
@@ -317,6 +313,7 @@ uu.module.load("http://example.com/, http://example.net/latest/", "ui,effect,dra
 <hr />
 <h2><a name="performance">パフォーマンス</a> - performance</h2>
 <p>パフォーマンス測定用の機能を提供します。</p>
+<p>この機能を使用するには、uu.module.perflog.js をロードします。</p>
 <hr />
 <dl>
 <!-- -->
@@ -351,6 +348,28 @@ uu.module.load("http://example.com/, http://example.net/latest/", "ui,effect,dra
 </pre>
       </dd>
     </dl>
+  </dd>
+</dl>
+
+<hr />
+<h2><a name="log">Log</a></h2>
+<p>ログ機能を提供します。</p>
+<p>この機能を使用するには、uu.module.perflog.js をロードします。</p>
+<hr />
+<dl>
+<!-- -->
+  <dt><a name="uu.module.log2.log">uu.module.log2.log</a> - ログ出力 - Logging</dt>
+  <dd><p>uu.module.log2.log(<i>fmt</i>, <i>mix</i>, ...) は sprintfの書式で<i>mix</i>を画面に出力します。</p>
+      <p>出力先は、uu.log.id で変更可能です。デフォルトは id="uuLog" の要素に出力します。<br />
+         出力先が存在しない場合は、document.bodyに要素を追加し、ログを出力します。</p>
+      <p>ログを出力できないタイミング(uu.window.already===false)なら、出力内容を一旦プールし、
+         次回 uu.log が呼ばれたタイミングで出力します。</p>
+      <p>通常は、uu.log(fmt, mix ...) と記述することで、uu.module.log2.log の機能が使えます。</p>
+  </dd>
+<!-- -->
+  <dt><a name="uu.module.log2.inspect">uu.module.log2.inspect</a> - オブジェクトを人間用に加工し出力する - Humanize output, Object Reflection</dt>
+  <dd><p>uu.module.log2.inspect(<i>mix</i>, ...) は <i>mix</i>を人間が見てわかるような形に加工します。</p>
+      <p>通常は、uu.log.dir(mix ...) と記述することで、uu.module.log2.inspect の機能が使えます。</p>
   </dd>
 </dl>
 

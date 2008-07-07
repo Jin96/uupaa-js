@@ -5,23 +5,42 @@
  * @see <a href="http://code.google.com/p/uupaa-js/">Home(Google Code)</a>
  * @see <a href="http://uupaa-js.googlecode.com/svn/trunk/README.htm">README</a>
  */
-/** uupaa.js core definition
- *
+
+/** Core
  * @class
  */
-var uu = function() {
-  return uu._impl.apply(this, arguments);
-};
-uu._impl = function() {}; // As you like
+var uu, UU;
 
-uu.version = [0, 3]; // [major, release]
+uu = function() { return uu._impl.apply(this, arguments); };
+uu._impl = function() { /* As you like */ };
+
+/** Module
+ * @see <a href="http://uupaa-js.googlecode.com/svn/trunk/MODULE.htm#uu.module">uu.module</a>
+ * @class
+ */
+uu.module = function() { return uu._impl.apply(this, arguments); };
+uu.module._impl = function() { /* not impl */ };
+
+UU = {
+  VERSION:  [0, 4], // [major, release]
+  F:        1,  // UU.F  - first sibling(nodeの最初の兄弟) node.parentNode.insertBefore(elm, node.parentNode.firstChild)
+  L:        2,  // UU.L  - last sibling(nodeの最後の兄弟)  node.parentNode.appendChild(elm)
+  FC:       11, // UU.FC - first child(nodeの最初の子)     node.insertBefore(elm, node.firstChild)
+  LC:       12, // UU.LC - last child(nodeの最後の子)      node.appendChild(elm)
+  // --- for msgpump ---
+  // custom event
+  MSG_EVENT_DOM_MANIP:    0x0101,       // DOM Manipulation(追加,削除,変更)が発生
+  MSG_EVENT_FONT_RESIZE:  0x0102        // Font Resizeイベントが発生
+};
 
 // -----------------------------------
 (function() {
-// arguments alias
-var uud = document, uuw = window, // alias
-    uucs = uud.uniqueID ? 0 : uud.defaultView.getComputedStyle, // alias
-    uuhd = uud.getElementsByTagName("head")[0]; // <head>
+// alias
+var uud = document, uuw = window, uum = uu.module,
+    uucs = uud.uniqueID ? 0 : uud.defaultView.getComputedStyle,
+    uuhd = uud.getElementsByTagName("head")[0], // <head>
+    uuap = Array.prototype, uust = uuw.setTimeout,
+    uupi = uuw.parseInt, uupf = uuw.parseFloat;
 
 /** uu.mix - オブジェクトのミックスイン - Object mixin
  * @class
@@ -67,7 +86,7 @@ uu.mix.prefix = function(base, flavor, prefix /* = "" */, add /* = true */) {
  */
 uu.forEach = function(mix, fn, me /* = undefined */) {
   if (mix.forEach) { mix.forEach(fn, me); return mix; } // call native forEach function
-  if ("length" in mix) { Array.prototype.forEach.call(mix, fn, me); return mix; } // FakeArray
+  if ("length" in mix) { uuap.forEach.call(mix, fn, me); return mix; } // FakeArray
   for (var i in mix) {
     mix.hasOwnProperty(i) && fn.call(me, mix[i], i, mix);
   }
@@ -79,7 +98,7 @@ uu.forEach = function(mix, fn, me /* = undefined */) {
  */
 uu.filter = function(mix, fn, me /* = undefined */) {
   if (mix.filter) { return mix.filter(fn, me); } // call native filter function
-  if ("length" in mix) { return Array.prototype.filter.call(mix, fn, me); } // FakeArray
+  if ("length" in mix) { return uuap.filter.call(mix, fn, me); } // FakeArray
   var rv = [], i, v;
   for (i in mix) {
     if (mix.hasOwnProperty(i)) {
@@ -90,7 +109,7 @@ uu.filter = function(mix, fn, me /* = undefined */) {
   return rv;
 };
 
-/** ブラウザの判別とブラウザが保持する機能の判別 - Detect User-Agent, Browser Functions and DOM Functions
+/** ブラウザの判別と機能の判別 - Detect User-Agent and Functions
  * @class
  * @see <a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.ua">uu.ua</a>
  */
@@ -102,9 +121,9 @@ uu.ua = function(info /* = "" */) {
     return (!me.ie || me.version >= 8);
   case "version":
     if (!me.version) {
-      me.version = (me.ie)     ? parseFloat(me._.match(/MSIE ([\d]\.[\d][\w]?)/)[1])
-                 : (me.webkit) ? parseFloat(me._.match(/WebKit\/(\d+(?:\.\d+)*)/)[1])
-                 : (me.gecko)  ? parseFloat(me._.match(/Gecko\/(\d{8})/)[1])
+      me.version = (me.ie)     ? uupf(me._.match(/MSIE ([\d]\.[\d][\w]?)/)[1])
+                 : (me.webkit) ? uupf(me._.match(/WebKit\/(\d+(?:\.\d+)*)/)[1])
+                 : (me.gecko)  ? uupf(me._.match(/Gecko\/(\d{8})/)[1])
                  : (me.opera)  ? opera.version() : 0;
     }
     return me.version;
@@ -171,6 +190,8 @@ uu.klass.singleton = function(_) {
       me.instance = this; // keep instance
       this.construct && this.construct.apply(this, arguments);
       this.destruct && uu.window.unready(this.destruct, this);
+    } else {
+      this.stabled && this.stabled.apply(this, arguments); // 2度目以降はstabledメソッドをcall(もしあれば)
     }
     return me.instance;
   };
@@ -258,9 +279,9 @@ uu.attr.get = function(elm, attr) {
 /** uu.attr.set - 属性の設定 - Set attribute
  * @see <a href="http://uupaa-js.googlecode.com/svn/trunk/SELECTOR.htm#uu.attr.set">Set attribute</a>
  */
-uu.attr.set = function(elm, attr) {
+uu.attr.set = function(elm, hash) {
   function F(v, i) { elm[i] = v; }
-  uu.forEach(attr, F);
+  uu.forEach(hash, F);
 };
 
 /** uu.xpath - XPathセレクタ - XPath Selector
@@ -313,7 +334,7 @@ uu.css = function(css3selector, context /* = document */) {
         return rv;
       }
     }
-  } catch(e) { uu.config.debug && uu.die("css3", css3selector, xpath); }
+  } catch(e) { uu.config.debug && uu.die("uu.css", "css3selector", css3selector + " -> " + xpath); }
   return [];
 };
 
@@ -369,20 +390,21 @@ uu.css.set = function(elm, cssPropHash) {
 uu.css.set._chain = ["opacity", "top", "left", "width", "height", "display"];
 
 uu.mix(uu.css.get, {
-  opacity:function(elm) { return parseFloat(uucs(elm, "").opacity); },  // 不透明度を数値(0.0～1.0)で取得
-  top:    function(elm) { return parseFloat(uucs(elm, "").top); },      // topを数値で取得(単位:px)
-  left:   function(elm) { return parseFloat(uucs(elm, "").left); },     // leftを数値で取得(単位:px)
-  width:  function(elm) { return parseFloat(uucs(elm, "").width); },    // widthを数値で取得(単位:px)
-  height: function(elm) { return parseFloat(uucs(elm, "").height); },   // heightを数値で取得(単位:px)
-  display:function(elm) { return uucs(elm).display; }
+  opacity:function(elm) { return uupf(uucs(elm, "").opacity); },  // 不透明度を数値(0.0～1.0)で取得
+  top:    function(elm) { return uupf(uucs(elm, "").top); },      // topを数値で取得(単位:px)
+  left:   function(elm) { return uupf(uucs(elm, "").left); },     // leftを数値で取得(単位:px)
+  width:  function(elm) { return uupf(uucs(elm, "").width); },    // widthを数値で取得(単位:px)
+  height: function(elm) { return uupf(uucs(elm, "").height); },   // heightを数値で取得(単位:px)
+  display:function(elm) { return uucs(elm).display; },
+  toPixel:function(elm, val, cssProp /* = "" */) { return val; }
 });
 uu.mix(uu.css.set, {
-  opacity:function(elm, opa) { elm.style.opacity = parseFloat(opa); }, // 不透明度の設定(0.0～1.0)
-  top:    function(elm, num) { elm.style.top  = (typeof num === "number") ? parseInt(num) + "px" : num; }, // topを数値で指定(単位:px)
-  left:   function(elm, num) { elm.style.left = (typeof num === "number") ? parseInt(num) + "px" : num; }, // leftを数値で指定(単位:px)
-  width:  function(elm, num) { try { elm.style.width  = (typeof num === "number") ? parseInt(num) + "px" : num; } // widthを数値で指定(単位:px)
+  opacity:function(elm, opa) { elm.style.opacity = uupf(opa); }, // 不透明度の設定(0.0～1.0)
+  top:    function(elm, num) { elm.style.top  = (typeof num === "number") ? uupi(num) + "px" : num; }, // topを数値で指定(単位:px)
+  left:   function(elm, num) { elm.style.left = (typeof num === "number") ? uupi(num) + "px" : num; }, // leftを数値で指定(単位:px)
+  width:  function(elm, num) { try { elm.style.width  = (typeof num === "number") ? uupi(num) + "px" : num; } // widthを数値で指定(単位:px)
                                catch(e) { elm.style.width = "0px"; } },
-  height: function(elm, num) { try { elm.style.height = (typeof num === "number") ? parseInt(num) + "px" : num; } // heightを数値で指定(単位:px)
+  height: function(elm, num) { try { elm.style.height = (typeof num === "number") ? uupi(num) + "px" : num; } // heightを数値で指定(単位:px)
                                catch(e) { elm.style.height = "0px"; } }
 });
 
@@ -400,6 +422,14 @@ uu.css.set.display = function(elm, disp) { // for IE, Firefox, Opera, Safari
   elm.style.display = rv;
   return elm;
 };
+/** uu.css.isBlock - ブロック要素でtrue - is block element
+ * table要素はfalse
+ * @see
+ */
+uu.css.isBlock = function(elm) {
+  return (uu.css.set.display._block.indexOf(elm.tagName.toLowerCase() + ",") !== -1);
+};
+
 // XHTML1.x Elements only
 uu.css.set.display._skip = ""; // display: が指定できない属性の一覧
 uu.css.set.display._block = "p,div,dl,ul,ol,form,address,blockquote,h1,h2,h3,h4,h5,h6,fieldset,hr,pre,";
@@ -414,19 +444,37 @@ if (!uu.ua("display:table")) {
 
 if (uu.ua.ie) {
   uu.mix(uu.css.get, {
-    opacity:function(elm) { return (elm.filters.alpha) ? parseFloat(elm.style.opacity) : 1.0; }, // 不透明度を数値(0.0～1.0)で取得
-    top:    function(elm) { return parseFloat(elm.currentStyle.top); },         // topを数値で取得(単位:px)
-    left:   function(elm) { return parseFloat(elm.currentStyle.left); },        // leftを数値で取得(単位:px)
-    width:  function(elm) { var rv = elm.currentStyle.width;                    // widthを数値で取得(単位:px)
-                            return (rv === "auto") ? elm.clientWidth : parseFloat(rv); },   // IEは計算せずに"auto"を返してくる
-    height: function(elm) { var rv = elm.currentStyle.height;                   // heightを数値で取得(単位:px)
-                            return (rv === "auto") ? elm.clientHeight : parseFloat(rv); },  // IEは計算せずに"auto"を返してくる
+    opacity:function(elm) { return (elm.filters.alpha) ? uupf(elm.style.opacity) : 1.0; }, // 不透明度を数値(0.0～1.0)で取得
+    top:    function(elm) { return uu.css.get.toPixel(elm, elm.currentStyle.top); },  // topを数値で取得(単位:px)
+    left:   function(elm) { return uu.css.get.toPixel(elm, elm.currentStyle.left); }, // leftを数値で取得(単位:px)
+    width:  function(elm) { if (elm.currentStyle.width !== "auto") { return elm.clientWidth; }  // widthを数値で取得(単位:px)
+                            var r = elm.getBoundingClientRect();                                // IEはCSSで明示されていない項目に対し"auto"を返してくるので、自前で計算が必要
+                            return r.right - r.left; },
+    height: function(elm) { if (elm.currentStyle.width !== "auto") { return elm.clientHeight; } // heightを数値で取得(単位:px)
+                            var r = elm.getBoundingClientRect();
+                            return r.bottom - r.top; },
     display:function(elm) { return elm.currentStyle.display; }
   });
+  uu.css.get.toPixel = function(elm, val, cssProp /* = "" */) { // px単位に変換する
+    if (!val) { return 0; }
+    if (!isNaN(val) || val.lastIndexOf("px") !== -1) { return uupf(val); } // 3,"3","3px" なら 3 を返す
+    if (val === "auto") {
+      switch (cssProp || "") {
+      case "width":   return elm.clientWidth;
+      case "height":  return elm.clientHeight;
+      }
+    }
+    // trick: @see http://d.hatena.ne.jp/uupaa/20080628
+    var rv, s = elm.style, r = elm.runtimeStyle, sx = s.left, rx = r.left;
+    r.left = elm.currentStyle.left; // style="left: currentStyle.left !important"
+    s.left = val, rv = s.pixelLeft; // stealthily set, and get pixel value(no redraw)
+    s.left = sx, r.left = rx;       // restore style
+    return rv;
+  };
   uu.css.set.opacity = function(elm, opa) {
-    elm.style.opacity = parseFloat(opa); // uu.css.get.opacity()で値を取得できるようにしておく
-    if (elm.filters.alpha) { elm.filters.alpha.opacity = parseFloat(opa) * 100; }
-                      else { elm.style.filter += " alpha(opacity=" + (parseFloat(opa) * 100) + ")"; }
+    elm.style.opacity = uupf(opa); // uu.css.get.opacity()で値を取得できるようにしておく
+    if (elm.filters.alpha) { elm.filters.alpha.opacity = uupf(opa) * 100; }
+                      else { elm.style.filter += " alpha(opacity=" + (uupf(opa) * 100) + ")"; }
   };
 }
 
@@ -447,13 +495,13 @@ uu.css.cssProp = function(css_prop) {
  * @see <a href="http://uupaa-js.googlecode.com/svn/trunk/SELECTOR.htm#uu.css.XPath">uu.css.toXPath</a>
  */
 uu.css.toXPath = function(css3selectors) {
-  return css3selectors.split(",").map(uu.css.toXPath._impl).join(" | ");
+  return css3selectors.split(",").map(uu.css.toXPath._impl).join(" | "); // Selectors group をパイプ("|")で連結
 }
 uu.css.toXPath._impl = function(sel) {
   var rv = [".//", "*"], exp = uu.css.toXPath._impl._regexp, index = 1, last = null, m, m2;
 
   function reset(E) { rv.length = 0, rv.push(E), index = 0; }
-  function nth(str) { return (!isNaN(str)) ? /*(*/ (")=" + parseInt(str) + "-1") :
+  function nth(str) { return (!isNaN(str)) ? /*(*/ (")=" + uupi(str) + "-1") :
                              (str === "even" || str === "2n")   ? /*(*/ ")mod 2=1" :
                              (str === "odd"  || str === "2n+1") ? /*(*/ ")mod 2=0" :
                              (exp["xn+y"].test(str)) ? str.replace(exp["xn+y"], /*(*/ "+ $2)mod $1=1") : // 4n + 1
@@ -506,9 +554,9 @@ uu.css.toXPath._impl = function(sel) {
       case "last":          rv.push("[last()]"); break;
       case "even":          rv.push("[(count(preceding-sibling::*))mod 2=0]"); break;
       case "odd":           rv.push("[(count(preceding-sibling::*))mod 2=1]"); break;
-      case "eq":            reset(uu.sprintf("/descendant::%s[%d]", rv[index], parseInt(m[2]) + 1)); break;
-      case "gt":            reset(uu.sprintf("/descendant::%s[position() > %d]", rv[index], parseInt(m[2]) + 1)); break;
-      case "lt":            reset(uu.sprintf("/descendant::%s[position() < %d]", rv[index], parseInt(m[2]) + 1)); break;
+      case "eq":            reset(uu.sprintf("/descendant::%s[%d]", rv[index], uupi(m[2]) + 1)); break;
+      case "gt":            reset(uu.sprintf("/descendant::%s[position() > %d]", rv[index], uupi(m[2]) + 1)); break;
+      case "lt":            reset(uu.sprintf("/descendant::%s[position() < %d]", rv[index], uupi(m[2]) + 1)); break;
       case "header":        reset(uu.sprintf("//*[self::h1 or self::h2 or self::h3 or self::h4 or self::h5 or self::h6]")); break;
       case "contains":      rv.push(uu.sprintf("[contains(string(), %s)]", m[2])); break;
       case "empty":         rv.push("[not(*) and not(text())]"); break;
@@ -572,19 +620,12 @@ uu.css.toXPath._impl._attr = {
   "|=": '[@%1$s="%2$s" or starts-with(@%1$s,"%2$s-")]'
 };
 
-/** Module
- * @see <a href="http://uupaa-js.googlecode.com/svn/trunk/MODULE.htm#uu.module">uu.module</a>
- * @class
- */
-uu.module = function() {
-};
-
 /** uu.module.isLoaded - モジュールの読み込み確認 - is Module Loaded
  * @see <a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.module.isLoaded">uu.module.isLoaded</a>
  */
 uu.module.isLoaded = function(module) {
   return uu.notax(module).every(function(v) {
-    return v in uu.module;
+    return v in uum;
   });
 };
 
@@ -592,30 +633,30 @@ uu.module.isLoaded = function(module) {
  * @see <a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.module.load">uu.module.load</a>
  */
 uu.module.load = function(path /* = "" */, module, fn /* = undefined */) {
-  var src = uu.module._buildURL(path || uu.config.modulePath, module),
+  var src = uum._buildURL(path || uu.config.modulePath, module),
       mods = uu.indexes(src), run = 0;
   fn = fn || uu.mute;
 
-  if (uu.module.isLoaded(module) || !mods.length) { fn(); return; }
+  if (uum.isLoaded(module) || !mods.length) { fn(); return; }
 
   uu.forEach(src, function(v, i) {
     if (uu.ua.ie) {
-      uu.module._inject(i, v, {
+      uum._inject(i, v, {
         onreadystatechange: function() {
           // IE6は"complete"のみ、IE8では"loaded"
           if (this.readyState === "complete" || this.readyState === "loaded") {
-            if (!uu.module.isLoaded(this.uuModule)) { // file not found.
-              uu.module._reload(this);
-            } else if (uu.module.isLoaded(mods)) {
+            if (!uum.isLoaded(this.uuModule)) { // file not found.
+              uum._reload(this);
+            } else if (uum.isLoaded(mods)) {
               run++ ? 0 : fn();
             }
           }
         }
       });
     } else {
-      uu.module._inject(i, v, {
-        onload:  function() { if (uu.module.isLoaded(mods)) { run++ ? 0 : fn(); } },
-        onerror: function() { uu.module._reload(this); }
+      uum._inject(i, v, {
+        onload:  function() { if (uum.isLoaded(mods)) { run++ ? 0 : fn(); } },
+        onerror: function() { uum._reload(this); }
       });
     }
   });
@@ -625,27 +666,27 @@ uu.module.load = function(path /* = "" */, module, fn /* = undefined */) {
  * @see <a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.module.loadSync">uu.module.loadSync</a>
  */
 uu.module.loadSync = function(path /* = "" */, module, fn /* = undefined */) {
-  var last, src = uu.module._buildURL(path || uu.config.modulePath, module),
+  var last, src = uum._buildURL(path || uu.config.modulePath, module),
       tick = 0, order = [], node;
   fn = fn || uu.mute;
 
-  if (uu.module.isLoaded(module)) { fn(); return; } // already loaded
+  if (uum.isLoaded(module)) { fn(); return; } // already loaded
 
   (!(order = uu.indexes(src)).length) ? fn() : (
     last = order.shift(),
-    node = uu.module._inject(last, src[last]),
-    uuw.setTimeout(function() {
-      if ((tick += 50) > uu.module.timeout) {
-        node = uu.module._reload(node, false);
+    node = uum._inject(last, src[last]),
+    uust(function() {
+      if ((tick += 50) > uum.timeout) {
+        node = uum._reload(node, false);
         tick = 0;
       }
-      if (uu.module.isLoaded(last)) {
+      if (uum.isLoaded(last)) {
         if (!order.length) { fn(); return; } // complete
         last = order.shift();
-        node = uu.module._inject(last, src[last]);
+        node = uum._inject(last, src[last]);
         tick = 0;
       }
-      uuw.setTimeout(arguments.callee, 50);
+      uust(arguments.callee, 50);
     }, 0)
   );
 };
@@ -674,9 +715,9 @@ uu.module._buildURL = function(path, module) {
 // uu.module._reload - script要素の差し替え(reload)
 uu.module._reload = function(node, async /* = true */) {
   var n = uuhd.removeChild(node), next, e;
-  !n.uuList.length && uu.die("module", node.uuModule);
+  !n.uuList.length && uu.die("uu.module._reload", "node", node.uuModule);
   next = n.uuList.shift();
-  e = uu.mix(uu.request._jsCreate(n.id), { uuModule: n.uuModule, uuList: n.uuList });
+  e = uu.mix(uu.script.create(n.id), { uuModule: n.uuModule, uuList: n.uuList });
   if (async === void 0 || async) {
     uu.mix(e, uu.ua.ie ? { onreadystatechange: n.onreadystatechange } :
                          { onload: n.onload, onerror: n.onerror });
@@ -688,7 +729,7 @@ uu.module._reload = function(node, async /* = true */) {
 // uu.module._inject - script要素の差し込み
 uu.module._inject = function(name, list, hash) {
   var src = list.shift(),
-      e = uu.mix(uu.request._jsCreate("uu.module." + name + ".js"), { uuModule: name, uuList: list });
+      e = uu.mix(uu.script.create("uu.module." + name + ".js"), { uuModule: name, uuList: list });
   uu.mix(e, hash || {});
   // IE6/7/8は、script要素にsrcを設定してからappendChild()を行わないとスクリプトがロードされない
   // これは (new Image()).src のケースとは挙動が異なる。
@@ -702,34 +743,37 @@ uu.module._inject = function(name, list, hash) {
  * @see <a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#event">event</a>
  * @class
  */
-uu.event = function() {
-};
+uu.event = function() {};
 
 /** uu.event.handler - デフォルトイベントハンドラの生成 - Create default event handler
- * @see <a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.event.hander">uu.event.handler</a>
+ * @see <a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.event.handler">uu.event.handler</a>
  */
-uu.event.handler = function(me) {
-  return me;
-};
+uu.event.handler = function(me) { return me; };
 
-/** uu.event.set - イベントハンドラの設定 - Add event hander
+/** uu.event.set - イベントハンドラの設定 - Add event handler
  * @see <a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.event.set">uu.event.set</a>
  */
 uu.event.set = function(elm, type, fn, capture /* = false */) {
-  type = uu.notax(type);
-  (elm === void 0 || !type.length || fn === void 0) && uu.die("event_set");
-  function impl(name) { elm.addEventListener(uu.event.type.toDOM(name), fn, capture || false); }
-  type.forEach(impl);
+  type = uu.notax(type), capture = capture || false;
+  (elm === void 0 || !type.length || fn === void 0) && uu.die("uu.event.set", "elm or type or fn", "empty");
+  type.forEach(function(_type) {
+    _type = uu.event.type.toDOM(_type);
+    elm.uuEventID = uu.event.db.insert(elm, _type, fn, capture); // 独自の属性uuEventIDを追加
+    elm.addEventListener(_type, fn, capture);
+  });
 };
 
-/** uu.event.unset - イベントハンドラの解除 - Remove event hander
+/** uu.event.unset - イベントハンドラの解除 - Remove event handler
  * @see <a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.event.unset">uu.event.unset</a>
  */
 uu.event.unset = function(elm, type, fn, capture /* = false */) {
-  type = uu.notax(type);
-  (elm === void 0 || !type.length || fn === void 0) && uu.die("event_unset");
-  function impl(name) { elm.removeEventListener(uu.event.type.toDOM(name), fn, capture || false); }
-  type.forEach(impl);
+  type = uu.notax(type), capture = capture || false;
+  (elm === void 0 || !type.length || fn === void 0) && uu.die("uu.event.unset", "elm or type or fn", "empty");
+  type.forEach(function(_type) {
+    _type = uu.event.type.toDOM(_type)
+    uu.event.db.remove(elm.uuEventID); // uu.event.setで登録されていなければここでエラーにする
+    elm.removeEventListener(_type, fn, capture);
+  });
 };
 
 /** uu.event.stop - イベントの抑止 - stop-propagation and prevent-default
@@ -774,22 +818,29 @@ if (uu.ua.ie) { // for IE
     return function(e) { me.handleEvent(e); };
   };
   uu.event.set = function(elm, type, fn, capture /* = false */) {
-    type = uu.notax(type);
-    if ((capture || false) && ("setCapture" in elm)) {
+/* ▼▼▼▼▼ */
+// 同じイベントが登録済みなら二重登録を抑止する
+/* ▲▲▲▲▲ */
+    type = uu.notax(type), capture = capture || false;
+    if (capture && ("setCapture" in elm)) {
       elm.setCapture();                 // キャプチャ開始
       type.unshift("onlosecapture");    // キャプチャロスト時にコールされるイベントハンドラを先頭に挿入
     }
-    function impl(name) { elm.attachEvent("on" + name, fn); }
-    type.forEach(impl);
+    type.forEach(function(_type) {
+      elm.uuEventID = uu.event.db.insert(elm, _type, fn, capture); // 独自の属性uuEventIDを追加
+      elm.attachEvent("on" + _type, fn);
+    });
   };
   uu.event.unset = function(elm, type, fn, capture /* = false */) {
-    type = uu.notax(type);
-    if ((capture || false) && ("releaseCapture" in elm)) {
+    type = uu.notax(type), capture = capture || false;
+    if (capture && ("releaseCapture" in elm)) {
       type.unshift("onlosecapture");    // uu.event.set()で自動挿入したイベントハンドラをここでも
       elm.releaseCapture();             // キャプチャ終了
     }
-    function impl(name) { elm.detachEvent("on" + name, fn); }
-    type.forEach(impl);
+    type.forEach(function(_type) {
+      uu.event.db.remove(elm.uuEventID); // uu.event.setで登録されていなければここでエラーにする
+      elm.detachEvent("on" + _type, fn);
+    });
   };
   uu.event.stop = function(evt, cancelDefault /* = true */) {
     evt.cancelBubble = true;
@@ -801,17 +852,27 @@ if (uu.ua.ie) { // for IE
   };
 }
 
+// event database
+uu.event.db = function() {};
+uu.event.db.eid = {}; // eid:  { eid1:  [elm, type, fn, capture], eid2: [...], ... }  // event idをキーとしたデータ構造
+uu.event.db.insert = function(elm, type, fn, capture) {
+  var eid = uu.uniqueID("event"); // create event id
+  uu.event.db.eid[eid] = [elm, type, fn, capture];
+  return eid;
+};
+uu.event.db.remove = function(eid) {
+  if (eid in uu.event.db.eid) { delete uu.event.db.eid[eid]; }
+};
+
 /** DOM
  * @class
  */
-uu.dom = function() {
-};
+uu.dom = function() {};
+
 /** uu.dom.already - DOM Ready状態の取得 - DOM ready state
  * @see <a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.dom.already">uu.dom.already</a>
  */
-uu.dom.already = function() {
-  return !!uu.dom.ready._run;
-};
+uu.dom.already = function() { return !!uu.dom.ready._run; };
 
 /** uu.dom.ready - DOM Readyイベントハンドラの設定 - DOM ready event handler
  * @see <a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.dom.ready">uu.dom.ready</a>
@@ -827,8 +888,8 @@ uu.dom.ready = function(fn) {
     } else if (uu.ua.ie && uud.readyState) {
       uud.write('<script type="text/javascript" defer="defer" src="//:" onreadystatechange="(this.readyState==\'loaded\'||this.readyState==\'complete\')&&uu&&uu.dom.ready._impl()"></script>');
     } else if (uu.ua.webkit && uud.readyState) {
-      uuw.setTimeout(function() {
-        (/loaded|complete/.test(uud.readyState)) ? uu.dom.ready._impl() : uuw.setTimeout(arguments.callee, 0);
+      uust(function() {
+        (/loaded|complete/.test(uud.readyState)) ? uu.dom.ready._impl() : uust(arguments.callee, 0);
       }, 0);
     } else {
       uu.window.ready(uu.dom.ready._impl); // レガシーブラウザならwindow.onloadで代用(for legacy browser)
@@ -854,25 +915,27 @@ uu.dom.cutdown = function(context /* = document */) {
   return rv;
 };
 
+/** HTMLタグ(&lt;div ...&gt;&lt;/div&gt;)をDocumentFragmentに変換する */
+uu.dom.substance = function(html) {
+  var ph = uud.body.appendChild(uud.createElement("div")); // placeholder
+  ph.innerHTML = html;
+  return uu.dom.cutdown(ph);
+};
+
 /** Window
  * @class
  */
-uu.window = function() {
-};
+uu.window = function() {};
 
 /** uu.window.already - Window Ready状態の取得 - Window ready state
  * @see <a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.window.already">uu.window.already</a>
  */
-uu.window.already = function() {
-  return !!uu.window.ready._run;
-};
+uu.window.already = function() { return !!uu.window.ready._run; };
 
 /** uu.window.unalready - Window Unready状態の取得 - Window unready state
  * @see <a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.window.unalready">uu.window.unalready</a>
  */
-uu.window.unalready = function() {
-  return !!uu.window.unready._run;
-};
+uu.window.unalready = function() { return !!uu.window.unready._run; };
 
 /** uu.window.ready - Window Readyイベントハンドラの設定 - Window ready event handler
  * @see <a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.window.ready">uu.window.ready</a>
@@ -913,15 +976,12 @@ uu.window.unready._impl = function() { // uu.window.unready()の実処理部
 /** canvas
  * @class
  */
-uu.canvas = function() {
-};
+uu.canvas = function() {};
 
 /** uu.canvas.already - CanvasReady状態の取得 - CanvasReady state
  * @see <a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.canvas.already">uu.canvas.already</a>
  */
-uu.canvas.already = function() {
-  return !!uu.canvas.ready._run;
-};
+uu.canvas.already = function() { return !!uu.canvas.ready._run; };
 
 /** uu.canvas.ready - CanvasReadyイベントハンドラの設定 - CanvasReady event handler
  * @see <a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.canvas.ready">uu.canvas.ready</a>
@@ -939,13 +999,13 @@ uu.canvas.ready = function(fn) {
     if (uu.ua.gecko || uu.ua.webkit /*|| uu.ua.opera */) {
       e._impl();
     } else if (uu.ua.opera) { // Opera9.5xからcanvasの初期化タイミングが不安定になったため
-      uuw.setTimeout(function() {
-        judge() ? e._impl() : uuw.setTimeout(arguments.callee, 100); // 100ms
+      uust(function() {
+        judge() ? e._impl() : uust(arguments.callee, 100); // 100ms
       }, 0);
     } else if (uu.ua.ie) {
       uu.window.ready(function() {
-        uuw.setTimeout(function() {
-          judge() ? e._impl() : uuw.setTimeout(arguments.callee, 100); // 100ms
+        uust(function() {
+          judge() ? e._impl() : uust(arguments.callee, 100); // 100ms
         }, 0);
       });
     }
@@ -962,10 +1022,10 @@ uu.canvas.ready._impl = function() { // uu.canvas.ready()の実処理部
  * @see <a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#request">Request</a>
  * @class
  */
-uu.request = function() {
-};
+uu.request = function() {};
+
 uu.mix(uu.request, {
-  callbackFilter: 0x2,  // コールバックフィルター
+  callbackFilter: 0x2,  // コールバックフィルタのデフォルト値
   timeout: 10000,       // タイムアウト時間(単位:ms)の指定, 0でタイムアウトしない
   header: {             // 送信ヘッダの指定
     "X-Requested-With": "XMLHttpRequest"
@@ -976,51 +1036,80 @@ uu.mix(uu.request, {
   _suicide: 60000       // uu.json.load - JSONP リソース開放待機時間, timeoutより大きな値を指定
 });
 
-// uu.request._jsCreate - script要素の生成
+uu.script = function() {};
+
+/** uu.script.load - スクリプトの読み込み - Load Script
+ * @see <a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.script.load">uu.script.load</a>
+ */
+//uu.script.load = function(type /* = "text/x-uu-form" */, fn /* = undefined */, callbackFilter /* = undefined */) {
+/*
+  type = type || "text/x-uu-form", fn = fn || uu.mute;
+  var uid = uu.uniqueID("scriptLoad"), cf = callbackFilter || uu.request.callbackFilter;
+  uu.attr('script[@type="' + type + '"]').forEach(function(v) {
+    if (!v.src) { // sync
+      v.data = uum.evaljs(v.text.replace(/[\n]/mg, ""));
+      (cf & 1) && fn(uid, 1, "",       0, "", 0);
+      (cf & 2) && fn(uid, 2, v.data, 200, "", 0, v); // eval後のデータを渡す
+    } else { // async
+      v.data = v.text = "";
+      uu.ajax.load(v.src, function(uid, step, text) {
+        switch (step) {
+        case 1: (cf & 1) && fn(uid, 1, "",     0,   "", 0); break;
+        case 2: v.text = text, v.data = uum.evaljs(v.text.replace(/[\n]/mg, ""));
+                (cf & 2) && fn(uid, 2, v.data, 200, "", 0, v); break; // responseにeval後のデータを渡す
+        case 4: (cf & 4) && fn(uid, 4, v.data, 200, "", 0, v); break;
+        }
+      }, 0, 7); // callbackFilter = SEND + OK + NG
+    }
+  });
+};
+ */
+
+// uu.script.create - script要素の生成
 // @return Element - 生成したscript要素を返します。
-uu.request._jsCreate = function(id /* = "" */) {
+uu.script.create = function(id /* = "" */) {
   return uu.mix(document.createElement("script"), {
     type: "text/javascript", charset: "utf-8", id: id || ""
   });
 };
-// uu.request._jsExec - JavaScript文字列をグローバルネームスペースで評価
+// uu.script.exec - JavaScript文字列をグローバルネームスペースで評価
 // @return Element - head要素から削除したscript要素を返します。
-uu.request._jsExec = function(code) {
-  return uuhd.removeChild(uuhd.appendChild(uu.mix(uu.request._jsCreate(), { text: code })));
+uu.script.exec = function(code) {
+  return uuhd.removeChild(uuhd.appendChild(uu.mix(uu.script.create(), { text: code })));
 };
 
 /** Ajax
  * @class
  */
-uu.ajax = function() {
-};
+uu.ajax = function() {};
 
 /** uu.ajax.already - Ajaxの状態(使用可能/不能)の取得 - Ajax ready state
  * @see <a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.ajax.already">uu.ajax.already</a>
  */
-uu.ajax.already = function() {
-  return uuw.XMLHttpRequest || uuw.ActiveXObject;
-};
+uu.ajax.already = function() { return uuw.XMLHttpRequest || uuw.ActiveXObject; };
 
 /** uu.ajax.load - 非同期通信 - Ajax async request
  * @see <a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.ajax.load">uu.ajax.load</a>
  */
-uu.ajax.load = function(url, fn /* = undefined */, data /* = undefined */) {
-  !url && uu.die("ajax_load");
-  uu.ajax.load._impl(url, fn || uu.mute, data || null, false);
+uu.ajax.load = function(url, fn /* = undefined */, data /* = undefined */, callbackFilter /* = undefined */) {
+  !url && uu.die("uu.ajax.load", "url", url);
+  url = uu.url.abs(url);
+  uu.ajax.load._impl(url, fn || uu.mute, data || null, false, callbackFilter);
 };
 
 /** uu.ajax.loadIfMod - 更新チェック付き非同期通信 - Ajax async request with new-arrival check
  * @see <a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.ajax.loadIfMod">uu.ajax.loadIfMod</a>
  */
-uu.ajax.loadIfMod = function(url, fn /* = undefined */) {
-  !url && uu.die("ajax_loadIfMod");
-  uu.ajax.load._impl(url, fn || uu.mute, null, true);
+uu.ajax.loadIfMod = function(url, fn /* = undefined */, callbackFilter /* = undefined */) {
+  !url && uu.die("uu.ajax.loadIfMod", "url", url);
+  url = uu.url.abs(url);
+  uu.ajax.load._impl(url, fn || uu.mute, null, true, callbackFilter);
 },
 
 // 非同期通信
-uu.ajax.load._impl = function(url, fn, data, ifMod) {
-  var rq = uu.request, cf = rq.callbackFilter, uid = uu.uniqueID("ajax"), run = 0,
+uu.ajax.load._impl = function(url, fn, data, ifMod, callbackFilter) {
+  var rq = uu.request, cf = callbackFilter || rq.callbackFilter, uid = uu.uniqueID("ajax"), run = 0,
+      filescheme = url.indexOf("file://") !== -1, // file スキームでtrue
       xhr = uuw.XMLHttpRequest ? new XMLHttpRequest()
           : uuw.ActiveXObject  ? new ActiveXObject('Microsoft.XMLHTTP') : null;
   if (!xhr) { fail(); return; }
@@ -1036,9 +1125,13 @@ uu.ajax.load._impl = function(url, fn, data, ifMod) {
 
   xhr.onreadystatechange = function() {
     if (xhr.readyState !== 4) { return; }
-    if (xhr.status !== 200) { fail(xhr.status); return; } // 304 too
-    (cf & 2 && !run++) && fn(uid, 2, xhr.responseText, 200, url, 1);
-    (ifMod) && (rq._cache[url] = lastMod());
+    // fileスキームでは成功時にstatusが0になる(Firefox2,Safari3,Opera9.5,IE6)
+    if (xhr.status === 200 || filescheme && !xhr.status) {
+      (cf & 2 && !run++) && fn(uid, 2, xhr.responseText, 200, url, 1);
+      (ifMod) && (rq._cache[url] = lastMod());
+      return;
+    }
+    fail(xhr.status); // 304 too
   };
 
   try {
@@ -1056,10 +1149,11 @@ uu.ajax.load._impl = function(url, fn, data, ifMod) {
 /** uu.ajax.loadSync - 同期通信 - Ajax sync request
  * @see <a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.ajax.loadSync">uu.ajax.loadSync</a>
  */
-uu.ajax.loadSync = function(url, fn /* = undefined */, data /* = undefined */) {
-  !url && uu.die("ajax_loadSync");
-  fn = fn || uu.mute, data = data || null;
-  var rq = uu.request, cf = rq.callbackFilter, uid = uu.uniqueID("ajax"),
+uu.ajax.loadSync = function(url, fn /* = undefined */, data /* = undefined */, callbackFilter /* = undefined */) {
+  !url && uu.die("uu.ajax.loadSync", "url", url);
+  url = uu.url.abs(url), fn = fn || uu.mute, data = data || null;
+  var rq = uu.request, cf = callbackFilter || rq.callbackFilter, uid = uu.uniqueID("ajax"),
+      filescheme = url.indexOf("file://") !== -1, // file スキームでtrue
       xhr = uuw.XMLHttpRequest ? new XMLHttpRequest()
           : uuw.ActiveXObject  ? new ActiveXObject('Microsoft.XMLHTTP') : null;
   function H(v, k) { ("setRequestHeader" in xhr) && xhr.setRequestHeader(k, v); } // Opera8にはsetRequestHeader()メソッドが無い
@@ -1075,34 +1169,35 @@ uu.ajax.loadSync = function(url, fn /* = undefined */, data /* = undefined */) {
   data && H("application/x-www-form-urlencoded", "Content-Type");
   (cf & 1) && fn(uid, 1, "", 0, url, 0);
   xhr.send(data);
-  if (xhr.status === 200) { (cf & 2) && fn(uid, 2, xhr.responseText, 200, url, 0); }
-                     else { fail(xhr.status); }
+  // fileスキームでは成功時にstatusが0になる(Firefox2,Safari3,Opera9.5,IE6)
+  if (xhr.status === 200 || filescheme && !xhr.status) {
+    (cf & 2) && fn(uid, 2, xhr.responseText, 200, url, 0);
+  } else {
+    fail(xhr.status);
+  }
 };
 
 /** JSON
  * @class
  */
-uu.json = function() {
-};
+uu.json = function() {};
 
 /** uu.json.already - JSONPの状態(使用可能/不能)の取得 - JSONP ready state
  * @see <a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.json.already">uu.json.already</a>
  */
-uu.json.already = function() {
-  return true;
-};
+uu.json.already = function() { return true; };
 
 /** uu.json.load - 非同期通信 - JSONP async request
  * @see <a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.json.load">uu.json.load</a>
  */
-uu.json.load = function(url, fn /* = undefined */) {
-  !url && uu.die("json_load");
-  fn = fn || uu.mute;
-  var rq = uu.request, cf = rq.callbackFilter, uid = uu.uniqueID("jsonp"),
+uu.json.load = function(url, fn /* = undefined */, callbackFilter /* = undefined */) {
+  !url && uu.die("uu.json.load", "url", url);
+  url = uu.url.abs(url), fn = fn || uu.mute;
+  var rq = uu.request, cf = callbackFilter || rq.callbackFilter, uid = uu.uniqueID("jsonp"),
       node, rurl = uu.url.query.add(url, rq.jsonpFn, "uu.request._fn." + uid);
   function fail(state) { (cf & 4) && fn(uid, 4, "", state || 400, url, 1); } // 400 "Bad Request"
 
-  uuhd.appendChild(node = uu.request._jsCreate(uid));
+  uuhd.appendChild(node = uu.script.create(uid));
   node._run = 0;
 
   rq._fn[uid] = function(json, state) {
@@ -1125,8 +1220,7 @@ uu.json.load = function(url, fn /* = undefined */) {
 /** URL
  * @class
  */
-uu.url = function() {
-};
+uu.url = function() {};
 
 /** uu.url.base - ベースディレクトリの取得 - Base Directory
  * @see <a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.url.base">uu.url.base</a>
@@ -1195,19 +1289,20 @@ uu.mix.param(uu, { /** @scope uu */
    * @see <a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.sprintf">uu.sprintf</a>
    */
   sprintf: function(format /*, ... */) {
-    var av = arguments, next = 1, idx = 0, pi = parseInt;
-    function uns(v) { return (v >= 0) ? v : v % 0x100000000 + 0x100000000; }; // to unsigned
+    var av = arguments, next = 1, idx = 0, pi = uupi, pf = uupf;
+    function A(idx) { return (av[idx] === void 0) ? "undefined" : av[idx]; } // "undefined" trap
+    function uns(v) { return (v >= 0) ? v : v % 0x100000000 + 0x100000000; } // to unsigned
     function fmt(word, ai, flag, width, prec, size, type, str, v) { // size, strは未使用, vは常にundefined
-      idx = ai ? parseInt(ai) : next++;
+      idx = ai ? pi(ai) : next++;
       switch (type) {
-      case "d": v = pi(av[idx]).toString(); break;
-      case "u": v = pi(av[idx]); if (!isNaN(v)) { v = uns(v).toString(); } break;
-      case "o": v = pi(av[idx]); if (!isNaN(v)) { v = (flag ? "0"  : "") + uns(v).toString(8); } break;
-      case "x": v = pi(av[idx]); if (!isNaN(v)) { v = (flag ? "0x" : "") + uns(v).toString(16); } break;
-      case "X": v = pi(av[idx]); if (!isNaN(v)) { v = (flag ? "0X" : "") + uns(v).toString(16).toUpperCase(); } break;
-      case "f": v = parseFloat(av[idx]).toFixed(prec); break;
-      case "c": width = 0; v = av[idx]; v = (typeof v === "number") ? String.fromCharCode(v) : NaN; break;
-      case "s": width = 0; v = av[idx].toString(); if (prec) { v = v.substring(0, prec); } break;
+      case "d": v = pi(A(idx)).toString(); break;
+      case "u": v = pi(A(idx)); if (!isNaN(v)) { v = uns(v).toString(); } break;
+      case "o": v = pi(A(idx)); if (!isNaN(v)) { v = (flag ? "0"  : "") + uns(v).toString(8); } break;
+      case "x": v = pi(A(idx)); if (!isNaN(v)) { v = (flag ? "0x" : "") + uns(v).toString(16); } break;
+      case "X": v = pi(A(idx)); if (!isNaN(v)) { v = (flag ? "0X" : "") + uns(v).toString(16).toUpperCase(); } break;
+      case "f": v = pf(A(idx)).toFixed(prec); break;
+      case "c": width = 0; v = A(idx); v = (typeof v === "number") ? String.fromCharCode(v) : NaN; break;
+      case "s": width = 0; v = A(idx).toString(); if (prec) { v = v.substring(0, prec); } break;
       case "%": v = "%"; break;
       }
       if (isNaN(v)) { v = v.toString(); }
@@ -1340,10 +1435,11 @@ uu.mix.param(uu, { /** @scope uu */
    * @see <a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.delay">uu.delay</a>
    */
   delay: function(fn, delay /* = 0ms */) {
-    return uuw.setTimeout(fn, delay || 0);
+    return uust(fn, delay || 0);
   },
   isU:  function(mix) { return mix === void 0; },
   isA:  function(mix) { return mix instanceof Array; },
+  isE:  function(mix) { return !!mix.nodeType; }, // mix instanceof Node
   isF:  function(mix) { return typeof mix === "function"; },
   isN:  function(mix) { return typeof mix === "number" && isFinite(mix); },
   isB:  function(mix) { return typeof mix === "boolean"; },
@@ -1351,45 +1447,17 @@ uu.mix.param(uu, { /** @scope uu */
   no:   function()    { return false; },
   mute: function()    { },
   echo: function(arg) { return arg; },
-  /** uu.inspect - オブジェクトを人間用に加工し出力する - Humanize output, Object Reflection
-   * @see <a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.inspect">uu.inspect</a>
-   */
-  inspect: function(mix) {
-    var rv = [], i;
-    if (mix === null) { return "null"; }
-    if (mix === void 0) { return "undefined"; }
-    if (uu.isB(mix) || uu.isN(mix)) { return mix.toString(); }
-    if (uu.isS(mix)) { return '"' + mix + '"'; }
-    if (uu.isF(mix)) { i = mix.toString(); // {{
-                       return i.replace(/function\s*([^\(]*)\([^}]*}/, "$1(){}"); } // ))
-    if (uu.isA(mix)) { for (i = 0; i < mix.length; ++i) { rv.push(uu.inspect(mix[i])); }
-                       return "[" + rv.join(", ") + "]"; }
-    for (i in mix) { rv.push(i + ": " + uu.inspect(mix[i])); } // Object / FakeArray
-    return "{" + rv.join(", ") + "}";
-  },
-  /** uu.log - ログ出力 - Logging
-   * @see <a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#uu.log">uu.log</a>
-   */
-  log: function(mix) {
-    var e = uu.id(uu.log.id), i = 0, sz = arguments.length;
-    for (; i < sz; ++i) {
-      uu.log.stock.push(uu.inspect(arguments[i]));
-    }
-    if (!e && uu.window.already()) {
-      e = uu.mix(uud.body.appendChild(uud.createElement("div")), { id: uu.log.id });
-      uu.css.set(e, uu.log.style);
-    }
-    if (uu.log.stock.length && uu.window.already()) {
-      e.innerHTML += uu.log.joint + uu.log.stock.join(", ");
-      uu.log.stock.length = 0;
-    }
+  log:  function(fmt /*, arg, ... */) {
+    uu.ua.gecko && console.log.apply(this, arguments);
   }
 });
 uu.uniqueID._count = 0;
-uu.mix(uu.log, { id: "uuLog", joint: "<br />", style: { backgroundColor: "lime" }, stock: [] });
+uu.log.debug = uu.log.info = uu.log.warn = uu.log.error = uu.log;
+uu.log.dir = function() { uu.ua.gecko && console.dir.apply(this, arguments); };
+uu.log.clear = function() {};
 
 // Array extend
-uu.mix.param(Array.prototype, { /** @scope Array.prototype */
+uu.mix.param(uuap, { /** @scope Array.prototype */
   /** Array.forEach - 全要素をfnで評価する
    * @see <a href="http://uupaa-js.googlecode.com/svn/trunk/DOCUMENT.htm#Array.forEach">Array.forEach</a>
    */
@@ -1602,7 +1670,7 @@ uu.module.virtualTimer.prototype = {
   }
 };
 // 汎用仮想タイマーのインスタンス
-uu.tm10 = new uu.module.virtualTimer(10); // instantiate
+uu.tm10 = new uum.virtualTimer(10); // instantiate
 
 /** Message Pump Module
  * @see <a href="http://uupaa-js.googlecode.com/svn/trunk/MODULE.htm#uu.module.messagePump">Message Pump</a>
@@ -1617,13 +1685,13 @@ uu.module.messagePump.prototype = {
     var me = this;
     this.reg = {}; // registered object { tid: instance, ... }
     this.msg = []; // stocked message [ [ id, msg, param1, param2], ... ]
-    this.vtm = new uu.module.virtualTimer(10); // 仮想タイマーを生成
+    this.vtm = new uum.virtualTimer(10); // 仮想タイマーを生成
     this.vtid = this.vtm.set(function() {
       if (!me.msg.length) {
         me.vtm.suspend(-1);
       } else {
         var e = me.msg.shift();
-        (e[0] in me.reg) && me.reg[e[0]].procedure(e[1], e[2], e[3]);
+        (e[0] in me.reg) && me.reg[e[0]].procedure(e[1], e[2], e[3]); // (msg, param1, param2)
       }
     }, 10);
   },
@@ -1631,7 +1699,7 @@ uu.module.messagePump.prototype = {
    * @see <a href="http://uupaa-js.googlecode.com/svn/trunk/MODULE.htm#uu.module.messagePump.set"uu.module.messagePump.set</a>
    */
   set: function(tid, obj) {
-    (tid === "broadcast") && uu.die("msgpump_set");
+    if (tid === "broadcast") { return; } // ignore
     this.reg[tid] = obj;
   },
   /** uu.module.messagePump.send - メッセージの同期送信
@@ -1653,117 +1721,64 @@ uu.module.messagePump.prototype = {
     if (tid && tid in this.reg) { // unicast
       this.msg.push([tid, msg, param1, param2]);
     } else { // broadcast
-      uu.forEach(this.reg, function(v, i) { this.msg.push([i, msg, param1, param2]); });
+      var me = this;
+      uu.forEach(this.reg, function(v, i) { me.msg.push([i, msg, param1, param2]); });
     }
     this.vtm.resume(-1);
   }
 };
 // メッセージポンプのインスタンス - uu.module.messagePump instance */
-uu.msgpump = new uu.module.messagePump(); // instantiate
-
-/** パフォーマンスモジュール - Performance Module
- * @see <a href="http://uupaa-js.googlecode.com/svn/trunk/MODULE.htm#uu.module.perf">performance</a>
- * @class
- */
-uu.module.perf = uu.klass.generic();
-uu.module.perf.prototype = {
-  diff: [],
-  /** uu.module.perf.construct - 初期化
-   * @see <a href="http://uupaa-js.googlecode.com/svn/trunk/MODULE.htm#uu.module.perf.construct">uu.module.perf.construct</a>
-   */
-  construct: function() {},
-  /** uu.module.perf.run - 測定
-   * @see <a href="http://uupaa-js.googlecode.com/svn/trunk/MODULE.htm#uu.module.perf.run">uu.module.perf.run</a>
-   */
-  run: function(fn, times /* = 1 */) {
-    this.diff.length = 0;
-    var rv, i = 0, sz = times || 1;
-    for (; i < sz; ++i) {
-      rv = (new Date()).getTime();
-      fn();
-      this.diff.push((new Date()).getTime() - rv);
-    }
-  },
-  /** uu.module.perf.dump - ダンプ
-   * @see <a href="http://uupaa-js.googlecode.com/svn/trunk/MODULE.htm#uu.module.perf.dump">uu.module.perf.dump</a>
-   */
-  dump: function() {
-    return this.diff;
-  },
-  /** uu.module.perf.average - 平均値
-   * @see <a href="http://uupaa-js.googlecode.com/svn/trunk/MODULE.htm#uu.module.perf.average">uu.module.perf.average</a>
-   */
-  average: function() {
-    if (!this.diff.length) { return 0; }
-    var rv = 0;
-    this.diff.forEach(function(v) { rv += v; });
-    return rv / this.diff.length;
-  }
-};
+uu.msgpump = new uum.messagePump(); // instantiate
 
 /** コンフィギュレーション - Configuration
  * @class
  */
-uu.config = function() {
-};
+uu.config = function() {};
+
 uu.mix(uu.config, {
   debug:      true,                   // uu.config.debug - デバッグモードのON/OFF(debug mode)
-  png24:      true,                   // uu.config.png24 - 24bit αチャネルpng画像のサポート - Support 24bit alpha channel png image
   backCompat: false,                  // 後方互換を持たせる場合にtrueにします。
   imagePath:  uu.url.base() + "img/", // uu.config.imagePath - 画像検索パス - Image search path
+//  imagePath:  "http://uupaa-js.googlecode.com/svn/trunk/img/", // uu.config.imagePath - 画像検索パス - Image search path
   modulePath: "./,./mini/",           // uu.config.modulePath - モジュール検索パス - Module search path
+//  modulePath: "http://uupaa-js.googlecode.com/svn/trunk/,http://uupaa-js.googlecode.com/svn/trunk/mini/",
+                                      // uu.config.modulePath - モジュール検索パス - Module search path
   load:       ""                      // uu.config.load - 自動でロードするモジュールの指定
 });
-/** <b>uu.config.parseQuery - クエリ文字列に指定された設定項目を取り込む</b> */
+/** <b>uu.config._parseQuery - クエリ文字列に指定された設定項目を取り込む</b> */
 uu.config._parseQuery = function() {
-  var rv = {}, pos, e = uu.id("uupaa.js"); // idで検索するため、id指定は必須
+  var rv = {}, pos, cf = uu.config, e = uu.id("uupaa.js"); // idで検索するため、id指定は必須
   if (!e) { return; } // <script id="uupaa.js"> not found
   pos = e.src.indexOf("?");
   if (pos !== -1) {
     rv = uu.url.query(e.src.slice(pos + 1));
   }
   function toBool(val) { return (val === "false" || val === "0") ? false : true; }
-  uu.mix(uu.config, {
-    debug:      rv.debug      ? toBool(rv.debug)      : uu.config.debug,
-    png24:      rv.png24      ? toBool(rv.png24)      : uu.config.png24,
-    backCompat: rv.backCompat ? toBool(rv.backCompat) : uu.config.backCompat,
-    imagePath:  rv.imagePath  ? rv.imagePath          : uu.config.imagePath,
-    modulePath: rv.modulePath ? rv.modulePath         : uu.config.modulePath,
-    load:       rv.load       ? rv.load               : uu.config.load
+  uu.mix(cf, {
+    debug:      rv.debug      ? toBool(rv.debug)      : cf.debug,
+    backCompat: rv.backCompat ? toBool(rv.backCompat) : cf.backCompat,
+    imagePath:  rv.imagePath  ? rv.imagePath          : cf.imagePath,
+    modulePath: rv.modulePath ? rv.modulePath         : cf.modulePath,
+    load:       rv.load       ? rv.load               : cf.load
   });
 };
-
 /** Critical error handler
  */
 uu.die = function(type, p1, p2) {
-  if (type in uu.die._typeError) {
-    throw TypeError(uu.sprintf(uu.die._typeError[type], p1, p2));
-  } else if (type in uu.die._error) {
+  if (type in uu.die._error) {
     throw Error(uu.sprintf(uu.die._error[type], p1, p2));
   }
-  throw Error(uu.sprintf("unknown error"));
+  throw TypeError(uu.sprintf("Invalid argument: function [%s], arg-name [%s] is [%s]", type, p1, p2));
 }
 uu.die._error = { // throw Error(...)
-  xpath:          'ERR-02: <script src="{{path}}/javascript-xpath.js"> not exist',
-  canvas:         'ERR-02: <script id="excanvas.js" src="{{path}}/excanvas.js"> not exist',
-  unknown:        "unknown error"
-};
-uu.die._typeError = { // throw TypeError(...)
-  css3:           "uu.css(%1$s) -> %2$s",
-  module:         "uu.module.load(%1$s) failed",
-  event_set:      "uu.event.set()",
-  event_unset:    "uu.event.unset()",
-  ajax_load:      "uu.ajax.load(url)",
-  ajax_loadIfMod: "uu.ajax.loadIfMod(url)",
-  ajax_loadSync:  "uu.ajax.loadSync(url)",
-  json_load:      "uu.json.load(url)",
-  msgpump_set:    "uu.module.messagePump(tid)"
+  xpath:  'ERR-02: <script src="{{path}}/javascript-xpath.js"> not exist',
+  canvas: 'ERR-02: <script id="excanvas.js" src="{{path}}/excanvas.js"> not exist'
 };
 
 // init
 uu.dom.ready(uu.mute);    // dummy handler
 uu.window.ready(uu.mute); // dummy handler
 uu.config._parseQuery();
-uu.config.load.length && uu.module.load("", uu.config.load); // auto load
+uu.config.load.length && uum.load("", uu.config.load); // auto load
 
 })(); // end (function())()

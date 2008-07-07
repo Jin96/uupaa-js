@@ -4,7 +4,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>Hello uupaa.js World</title>
-<!--[if IE]><script id="excanvas.js" type="text/javascript" src="../../lib/excanvas.js"></script><![endif]-->
+<!--[if IE]><script id="excanvas.js" type="text/javascript" src="http://pigs.sourceforge.jp/excanvas.js"></script><![endif]-->
 <script type="text/javascript" src="../../uupaa.js"></script>
 <style type="text/css">
 #canvas, #msg { position: absolute; top: 0; left: 0 }
@@ -12,14 +12,15 @@
 </style>
 </head>
 <body>
-<a href="../../README.htm">README.htm</a> &gt; HelloWorld.htm
+<a href="../../README.htm">README</a> &gt; HelloWorld
 
 <canvas id="canvas" width="400" height="400"></canvas><p id="msg">Hello Japanese Creator!</p>
 <script type="text/javascript">
-function circle() { 
-  var canvas = uu.id("canvas"), ctx = canvas.getContext("2d"), color = 0xff9999;
+function boot() { 
+  var canvas = uu.id("canvas"), ctx = canvas.getContext("2d"),
+      color = new uu.module.color(0xff9999);
   function draw() {
-    color += 10;
+    color.add(0x10);
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     ctx.beginPath();
     ctx.fillStyle = color.toRGBString();
@@ -32,9 +33,9 @@ function circle() {
     uu.effect.fade(canvas, { speed: 2000, fn: draw })
   }, 2200);
 }
-uu.module.load("", "ui,effect", function() {
+uu.module.load("", "io,ui,effect", function() {
   uu.dom.ready(function() {
-    uu.canvas.ready(circle);
+    uu.canvas.ready(boot);
   });
 });
 </script>
