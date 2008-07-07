@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="./lib/javascript-xpath.js"></script><![endif]-->
+<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="http://pigs.sourceforge.jp/javascript-xpath.js"></script><![endif]-->
 <script id="uupaa.js" type="text/javascript" src="./uupaa.js"></script>
 <title>uupaa.js - Change Log</title>
 <style type="text/css">
@@ -31,10 +31,13 @@ dt { margin-top: 1em; font-weight: bold; color: lightblue }
 #pie:hover {
   opacity: 1.0;
 }
-.alpha { /* 透過PNG for IE6 */
+/* 透過PNG for IE6 */
+/*
+.alpha {
   width: 360px;
   height: 200px;
 }
+ */
 li { margin-bottom: 0.5em; }
 </style>
 </head>
@@ -54,7 +57,7 @@ li { margin-bottom: 0.5em; }
 <a href="./README.htm">README</a> &gt; CHANGELOG
 <hr />
 
-<img id="pie" class="alpha" src="img/uu.module.image.1x1.gif" alt="Changes" />
+<img id="pie" class="alpha" src="http://uupaa-js.googlecode.com/svn/trunk/img/b1.gif" alt="Changes" />
 
 
 <div id="log">
@@ -66,150 +69,293 @@ li { margin-bottom: 0.5em; }
     <dt id="version0.x title">Version 0.x</dt>
     <dd id="version0.x data">
       <dl>
+        <dt>Version 0.4 2008-07-07 / TANABATA</dt>
+        <dd>
+          <ol>
+            <li class="add">uupaa.js (uu.css.get.toPixel):
+                <br />px単位に変換する関数を追加(IE用)
+                <br />- Add a function to convert into a px unit(for IE).
+            </li>
+            <li class="add">uupaa.js (uu.event.db, uu.event.db.insert, uu.event.db.remove, uu.event.set, uu.event.unset):
+                <br />event管理用の関数を追加
+                <br />- Add a function for event management.
+            </li>
+            <li class="rename">uupaa.js (uu.request._jsCreate -&gt; uu.script.create, uu.request._jsExec -&gt; uu.script.exec):
+                <br />Rename functions.
+            </li>
+            <li class="add">uupaa.js (uu.script.load):
+                <br />スクリプト読み込み用の関数を追加
+                <br />- Add a function for Script Loading.
+            </li>
+            <li class="add">uupaa.js (uu.ajax.load, uu.ajax.loadIfMod, uu.ajax.load._impl, uu.ajax.loadSync, uu.json.load):
+                <br />引数(callbackFilter)を追加
+                <br />- Add an argument(callbackFilter).
+            </li>
+            <li class="fix">uupaa.js (uu.ajax.load, uu.ajax.loadIfMod, uu.ajax.load._impl, uu.ajax.loadSync):
+                <br />fileスキームの扱いを改善(xhr.status == 0 を 200 として扱う)
+                <br />- Improve handling of the file scheme(treat xhr.status == 0 as 200).
+            </li>
+            <li class="add">uu.module.evaljs.js:
+                <br />evalモジュールを追加
+                <br />- Add an eval module.
+            </li>
+            <li class="add">uu.module.perflog.js:
+                <br />パフォーマンス測定, Logモジュールを追加
+                <br />- Add a performance and log module.
+            </li>
+            <li class="add">uupaa.js (uu.isE):
+                <br />引数がElementならtrueを返す関数を追加
+                <br />- Add function isElement.
+            </li>
+            <li class="fix">uupaa.js (uu.inspect, uu.inspect._impl, uu.inspect._toXPath):
+                <br />Nodeの階層をXPathで表現するように修正, 深すぎるネストなら処理を中断するように改善。
+                <br />- Express a hierarchy of Node in XPath. Stop processing in a deep nest.
+             </li>
+            <li class="add">uupaa.js (uu.klass.singleton):
+                <br />2回目以降のインスタンス生成時に、stabled関数が定義されているなら呼び出す
+                <br />- Function "stabled" is defined, at the time of instance generation after the second time, call it.
+            </li>
+            <li class="add">uupaa.js (uu.css.isBlock):
+                <br />ブロック要素ならtrueを返す関数を追加
+                <br />- Add function, block element is true.
+            </li>
+            <li class="fix">uupaa.js (uu.css.get.width, uu.css.get.height):
+                <br />IEで値が"auto"なら、getBoundingClientRect()からサイズを求める
+                <br />- If a value is "auto", query size from getBoundingClientRect() in IE.
+            </li>
+            <li class="add">uu.module.io.js (uu.module.color):
+                <br />クラス追加
+                <br />- Add Class.
+            </li>
+            <li class="add">uu.module.tip.js:
+                <br />jQuery風のメソッドチェーンを実現するモジュールを追加, 
+                <br />- Add Module, Implementation of the jQuery-like method chain.
+            </li>
+            <li class="add">uu.module.ieboost.js:
+                <br />IE6の機能強化用モジュールを追加, Support min-width, max-width, min-height, max-height, opacity, png alpha blend...
+                <br />- Add Module, Module for functional enhancements of IE6.
+            </li>
+          </ol>
+        </dd>
         <dt>Version 0.3 2008-06-27 / Document, Document, Document</dt>
         <dd>
           <ol>
-            <li class="fix">uupaa.js (uu.ajax.load._impl): デグレード(タイムアウト後の二重呼び出し, 更新チェック失敗)を回復<br />
-               - Recovery degrade(duplicate running after the time-out, fail in a loadIfMod check).</li>
-            <li class="add">uu.module.jqss.js: jQueryの構文をエミュレートするモジュールを追加(仮実装)<br />
-               - Add jQuery SyntaxSugar module.</li>
-            <li class="rename">uupaa.js : "typeof mix === 'undefined'" を "mix === void 0" スタイルに書き直し。<br />
-                - Rewritten a style of "typeof mix === 'undefined'" by a style of "mix === void 0".
-            <li class="retake">uupaa.js (uu.attr): CSS属性セレクタに対応<br /> - Supports CSS attribute selector.</li>
-            <li class="add">DOCUMENT.htm, MODULE.htm, SELECTOR.htm: ドキュメントを追加<br /> - Add document.</li>
-            <li class="add">uupaa.js (uu.mix.prefix): prefix追加/削除付きのmixinを追加<br />
-              - Add mixin function for addition and deletion of the prefix.</li>
-            <li class="fix">uupaa.js (Array.prototype.forEach): JavaScript1.5仕様にあわせ、戻り値を返さないように修正。<br />
-              - To JavaScript1.5 specifications, Revise it not to give back a return value.</li>
+            <li class="fix">uupaa.js (uu.ajax.load._impl):
+                <br />デグレード(タイムアウト後の二重呼び出し, 更新チェック失敗)を回復
+                <br />- Recovery degrade(duplicate running after the time-out, fail in a loadIfMod check).
+            </li>
+            <li class="add">uu.module.jqss.js:
+                <br />jQueryの構文をエミュレートするモジュールを追加(仮実装)
+                <br />- Add jQuery SyntaxSugar module.
+            </li>
+            <li class="rename">uupaa.js :
+                <br />"typeof mix === 'undefined'" を "mix === void 0" スタイルに書き直し。
+                <br />- Rewritten a style of "typeof mix === 'undefined'" by a style of "mix === void 0".
+            </li>
+            <li class="retake">uupaa.js (uu.attr):
+                <br />CSS属性セレクタに対応
+                <br /> - Supports CSS attribute selector.
+            </li>
+            <li class="add">DOCUMENT.htm, MODULE.htm, SELECTOR.htm:
+                <br />ドキュメントを追加
+                <br /> - Add document.
+            </li>
+            <li class="add">uupaa.js (uu.mix.prefix):
+                <br />prefix追加/削除付きのmixinを追加
+                <br />- Add mixin function for addition and deletion of the prefix.
+            </li>
+            <li class="fix">uupaa.js (Array.prototype.forEach):
+                <br />JavaScript1.5仕様にあわせ、戻り値を返さないように修正。
+                <br />- To JavaScript1.5 specifications, Revise it not to give back a return value.
+            </li>
             <li class="add">uupaa.js (uu.mix.prefix, uu.filter, uu.request, uu.first, uu.size, uu.inspect,
-                                      uu.log, uu.module.perf, uu.die, uu.config.backCompat): Add Functions.</li>
+                                      uu.log, uu.module.perf, uu.die, uu.config.backCompat):
+                <br />Add Functions.
+            </li>
             <li class="del">uupaa.js (uu.mix.props, uu.abstractClass, uu.staticClass, uu.ltrim, uu.rtrim,
                                       uu.assert, uu.pushArray, Date.prototype.toRFC1123String,
                                       Number.prototype.toRGBString, Number.prototype.toRGBAString,
-                                      uu.config.verbose): Delete Functions.</li>
-            <li class="rename">uupaa.js (uu.baseURL -> uu.url.base, uu.css.addClass -> uu.klass.add,
-                                         uu.css.hasClass -> uu.klass.has, uu.css.removeClass -> uu.klass.remove,
-                                         uu.baseClass -> uu.klass.generic, uu.singletonClass -> uu.klass.singleton,
-                                         uu.js.create -> uu.request._jsCreate, uu.js.exex -> uu.request._jsExec,
-                                         uu.ua.ver -> uu.ua.version): Rename Functions.</li>
-            <li class="fix">uupaa.js (uu.window.unready): window.beforeunload イベントをハンドリングする(Firefox2+, Safari3+, IE6+)<br />
-              - Handle a window.beforeunload event for Firefox2+, Safari3+ and IE6+.</li>
+                                      uu.config.verbose):
+                <br />Delete Functions.
+            </li>
+            <li class="rename">uupaa.js (uu.baseURL -&gt; uu.url.base, uu.css.addClass -&gt; uu.klass.add,
+                                         uu.css.hasClass -&gt; uu.klass.has, uu.css.removeClass -&gt; uu.klass.remove,
+                                         uu.baseClass -&gt; uu.klass.generic, uu.singletonClass -&gt; uu.klass.singleton,
+                                         uu.js.create -&gt; uu.request._jsCreate, uu.js.exex -&gt; uu.request._jsExec,
+                                         uu.ua.ver -&gt; uu.ua.version):
+                <br />Rename Functions.
+            </li>
+            <li class="fix">uupaa.js (uu.window.unready):
+                <br />window.beforeunload イベントをハンドリングする(Firefox2+, Safari3+, IE6+)
+                <br />- Handle a window.beforeunload event for Firefox2+, Safari3+ and IE6+.
+            </li>
           </ol>
         </dd>
         <dt>Version 0.2 2008-06-15 / CSS3 + jQuery Selector support</dt>
         <dd>
           <ol>
-            <li class="add">SELECTOR.htm: セレクタのドキュメントを追加<br /> - Add Selectors document.</li>
-            <li class="add">uupaa.js (uu.css()): CSS3とjQueryのセレクタから要素を選択する機能を追加<br />
-              - Add a function to choose an element among a selector of CSS3 and jQuery.
+            <li class="add">SELECTOR.htm:
+                <br />セレクタのドキュメントを追加
+                <br /> - Add Selectors document.
             </li>
-            <li class="add">uupaa.js (uu.css.toXPath()): CSS3セレクタをXPathに変換する機能を追加<br />
-              - Add a function to convert a CSS3 selector into XPath.
+            <li class="add">uupaa.js (uu.css):
+                <br />CSS3とjQueryのセレクタから要素を選択する機能を追加
+                <br />- Add a function to choose an element among a selector of CSS3 and jQuery.
             </li>
-            <li class="rename">uupaa.js (uu.css() -> uu.klass()): Rename Function.</li>
-            <li class="retake">uupaa.js (uu.attr()): Rewrite.</li>
-            <li class="add">uupaa.js (uu.config.verbose): verbose modeの追加<br />
-              - Add verbose mode.</li>
-            <li class="retake">uu.module.pmvc.js: Rewrite.</li>
-            <li class="add">uu.module.effect.js (uu.effect.xxx()):
-              各エフェクトのparam.fnは二つの引数(elm, cssText)を伴いコールバックするように機能を追加<br />
-              - param.fn was revised it was accompanied with two argument (elm, cssText), and to call back.
+            <li class="add">uupaa.js (uu.css.toXPath):
+                <br />CSS3セレクタをXPathに変換する機能を追加
+                <br />- Add a function to convert a CSS3 selector into XPath.
             </li>
-            <li class="add">uu.module.effect.js (uu.effect.move(), scale(), puff(), dromOut(), fold(), shake(), shrink(), glow(), blindUp(), blindDown(), pulsate()):
-                エフェクトを追加。<br />
-              - Add effects.
+            <li class="rename">uupaa.js (uu.css -> uu.klass):
+                <br />Rename Function.
             </li>
-            <li class="fix">uu.module.ui.js (uu.ui.element): Firefox2でdocument.getBoxObjectFor()を使わない。<br />
-              - Do not use document.getBoxObjectFor() in Firefox2.
+            <li class="retake">uupaa.js (uu.attr):
+                <br />Rewrite.
             </li>
-            <li class="fix">uu.module.image.js (uu.image.png24()): AlphaImageLoaderのsizingMethodをscaleからimageに変更。<br />
-              - AlphaImageLoader::sizingMethod value changed "scale" into "image".
+            <li class="add">uupaa.js (uu.config.verbose):
+                <br />verbose modeの追加
+                <br />- Add verbose mode.
             </li>
-            <li class="fix">uu.module.image.js (uu.image.png24()): 第二引数(force)を追加。<br />
-              - Add second argument "force".
+            <li class="retake">uu.module.pmvc.js:
+                <br />Rewrite.
             </li>
-            <li class="rename">uu.module.drag.js (uu.module.drag.free.construct, uu.module.drag.limited.construct): 引数(param.msgpump, param.addressee)を(param.msgto, param.msgFilter)に差し替え<br />
-              - Rename arguments(param.msgpump -&gt; param.msgto, param.addressee -&gt; param.msgFilter).
+            <li class="add">uu.module.effect.js (uu.effect.xxx):
+                <br />各エフェクトのparam.fnは二つの引数(elm, cssText)を伴いコールバックするように機能を追加
+                <br />- param.fn was revised it was accompanied with two argument (elm, cssText), and to call back.
             </li>
-            <li class="fix">uupaa.js (uu.module.messagePump.set()): 第一引数が"broadcast"なら例外をスローする。<br />
-              - If the first argument is "broadcast", throw exception.
+            <li class="add">uu.module.effect.js (uu.effect.move, scale, puff, dromOut, fold, shake, shrink, glow, blindUp, blindDown, pulsate):
+                <br />エフェクトを追加。
+                <br />- Add effects.
             </li>
-            <li class="add">uupaa.js (uu.ua(), uu.ua.ver): バージョン番号を取得する方法を追加。<br />
-              - Add a method to acquire version number.
+            <li class="fix">uu.module.ui.js (uu.ui.element):
+                <br />Firefox2でdocument.getBoxObjectFor()を使わない。
+                <br />- Do not use document.getBoxObjectFor() in Firefox2.
             </li>
-            <li class="fix">uupaa.js (uu.effect.speed): デフォルトのエフェクト速度を調整。<br />
-              - coordinate effect speed.
+            <li class="fix">uu.module.image.js (uu.image.png24):
+                <br />AlphaImageLoaderのsizingMethodをscaleからimageに変更。
+                <br />- AlphaImageLoader::sizingMethod value changed "scale" into "image".
             </li>
-            <li class="rename">uupaa.js (uu.css.add -&gt; uu.css.addClass, uu.css.is -&gt; uu.css.hasClass, uu.css.del -&gt; uu.css.removeClass): メソッド名を変更("is"はECMAScript4の予約語)。<br />
-              - Rename method.("is" is ECMAScript4 reserved keyword).
+            <li class="fix">uu.module.image.js (uu.image.png24):
+                <br />第二引数(force)を追加。
+                <br />- Add second argument "force".
             </li>
-            <li class="fix">uupaa.js (uu.toArray): 要素数ゼロの擬似配列に対する扱いを修正。<br />
-              - Handling of for empty FakeArray.
+            <li class="rename">uu.module.drag.js (uu.module.drag.free.construct, uu.module.drag.limited.construct):
+                <br />引数(param.msgpump, param.addressee)を(param.msgto, param.msgFilter)に差し替え
+                <br />- Rename arguments(param.msgpump -&gt; param.msgto, param.addressee -&gt; param.msgFilter).
             </li>
-            <li class="fix">uupaa.js (uu.event.set, uu.event.unset): IEでイベントキャプチャ失敗時のエラーを抑止。<br />
-              - Restrain an event capture failure error for IE.
+            <li class="fix">uupaa.js (uu.module.messagePump.set):
+                <br />第一引数が"broadcast"なら例外をスローする。
+                <br />- If the first argument is "broadcast", throw exception.
             </li>
-            <li class="fix">uupaa.js (uu.css.set.display): 第二引数を有効化。<br />
-              - The second argument activate.
+            <li class="add">uupaa.js (uu.ua(), uu.ua.ver):
+                <br />バージョン番号を取得する方法を追加。
+                <br />- Add a method to acquire version number.
             </li>
-            <li class="add">uupaa.js (uu.css.get.top(), uu.css.set.top(), uu.css.get.left(), uu.css.set.left(), uu.css.get.width(), uu.css.set.width(), uu.css.get.height(), uu.css.set.height()):
-              top, left, width, heightに対するハンドラを追加。<br />
-              - Add handlers.
+            <li class="fix">uupaa.js (uu.effect.speed):
+                <br />デフォルトのエフェクト速度を調整。
+                <br />- coordinate effect speed.
             </li>
-            <li class="fix">uupaa.js (uu.module.load(), uu.module.loadSync()): 再読み込みを禁止。<br />
-              - Prohibit re-loading.
+            <li class="rename">uupaa.js (uu.css.add -&gt; uu.css.addClass, uu.css.is -&gt; uu.css.hasClass, uu.css.del -&gt; uu.css.removeClass):
+                <br />関数名を変更("is"はECMAScript4の予約語)。
+                <br />- Rename functions.("is" is ECMAScript4 reserved keyword).
             </li>
-            <li class="fix">uupaa.js (uu.url.query.add()): key,valueをencodeURIComponentでエンコードする。<br />
-              - Encode key,value in encodeURIComponent.
+            <li class="fix">uupaa.js (uu.toArray):
+                <br />要素数ゼロの擬似配列に対する扱いを修正。
+                <br />- Handling of for empty FakeArray.
             </li>
-            <li class="fix">uupaa.js (uu.url.query()): key,valueをdecodeURIComponentでデコードする。<br />
-              - Decode key,value in decodeURIComponent.
+            <li class="fix">uupaa.js (uu.event.set, uu.event.unset):
+                <br />IEでイベントキャプチャ失敗時のエラーを抑止。
+                <br />- Restrain an event capture failure error for IE.
             </li>
-            <li class="rename">uupaa.js (uu.ajax.loadNeo -> loadIfMod): メソッド名を変更。<br />
-              - Rename.
+            <li class="fix">uupaa.js (uu.css.set.display):
+                <br />第二引数を有効化。
+                <br />- The second argument activate.
             </li>
-            <li class="fix">uupaa.js (uu.toArray()): 非擬似配列に対し空の配列([])を返す。<br />
-              - Return an empty array([]) for a FakeArray(NodeList, arguments, ...).
+            <li class="add">uupaa.js (uu.css.get.top, uu.css.set.top, uu.css.get.left, uu.css.set.left, uu.css.get.width, uu.css.set.width, uu.css.get.height, uu.css.set.height):
+                <br />top, left, width, heightに対するハンドラを追加。
+                <br />- Add handlers.
+            </li>
+            <li class="fix">uupaa.js (uu.module.load, uu.module.loadSync):
+                <br />再読み込みを禁止。
+                <br />- Prohibit re-loading.
+            </li>
+            <li class="fix">uupaa.js (uu.url.query.add):
+                <br />key,valueをencodeURIComponentでエンコードする。
+                <br />- Encode key,value in encodeURIComponent.
+            </li>
+            <li class="fix">uupaa.js (uu.url.query):
+                <br />key,valueをdecodeURIComponentでデコードする。
+                <br />- Decode key,value in decodeURIComponent.
+            </li>
+            <li class="rename">uupaa.js (uu.ajax.loadNeo -> loadIfMod):
+                <br />関数名を変更。
+                <br />- Rename function.
+            </li>
+            <li class="fix">uupaa.js (uu.toArray):
+                <br />非擬似配列に対し空の配列([])を返す。
+                <br />- Return an empty array([]) for a FakeArray(NodeList, arguments, ...).
             </li>
           </ol>
         </dd>
         <dt>Version 0.1 2008-06-08 / First release</dt>
         <dd>
           <ol>
-            <li class="add">uupaa.js (uu.json.load()): 内部で生成したユニークIDを第一引数で返すように機能を追加</li>
-            <li class="add">uupaa.js (uu.ajax.load()): 内部で生成したユニークIDを第一引数で返すように機能を追加, クロスドメイン時の例外を400(Bad Request)として処理。uu.ajax.loadNeo(), uu.ajax.loadSync()も同様</li>
-            <li class="move">uu.module.json.js: uupaa.jsに機能を移動しファイルを削除<br />
-                - Move Function, and delete module.</li>
-            <li class="move">uu.module.ajax.js: uupaa.jsに機能を移動しファイルを削除<br />
-                - Move Function, and delete module.</li>
-            <li class="add">uu.module.perry.js: Add Module</li>
-            <li class="del">uupaa.js (Array.hash(), Array.slight()): Delete Functions</li>
-            <li class="fix">uupaa.js (uu.module._inject()): IEでモジュールのロードに失敗する件を対策。<br />
-                script要素にsrcを設定してからappendChild()を行わないとスクリプトがロードされないため、
-                ユーザエージェントで切り分け。</li>
-            <li class="fix">uupaa.js (uu.module.load()): IE8でモジュールのロードに失敗する件を対策。<br />
-                onreadystatechange()ハンドラ内で、this.readyStateが"complete"ではなく"loaded"になっている。
-                条件に this.readyState === "loaded" を追加。</li>
-            <li class="fix">new function() {...}; を (function() {...})(); スタイルに書き直し。<br />
-                - Rewritten a style of "new function() {...};" by a style of "(function() {...})();".
+            <li class="add">uupaa.js (uu.json.load, uu.ajax.load):
+                <br />内部で生成したユニークIDを第一引数で返すように機能を追加
+                <br />Return an argument for the first unique ID that generated inside.
+            </li>
+            <li class="add">uupaa.js (uu.ajax.load, uu.ajax.loadNeo, uu.ajax.loadSync):
+                <br />クロスドメインエラーを400(Bad Request)として処理。
+                <br />- Handle a cross domain error for 400(= Bad Request).
+            </li>
+            <li class="move">uu.module.json.js:
+                <br />uupaa.jsに機能を移動しファイルを削除
+                <br />- Move Function, and delete module.
+            </li>
+            <li class="move">uu.module.ajax.js:
+                <br />uupaa.jsに機能を移動しファイルを削除
+                <br />- Move Function, and delete module.
+            </li>
+            <li class="add">uu.module.perry.js:
+                <br />Add Module.
+            </li>
+            <li class="del">uupaa.js (Array.hash, Array.slight):
+                <br />Delete functions.
+            </li>
+            <li class="fix">uupaa.js (uu.module._inject):
+                <br />IEでモジュールのロードに失敗する件を対策。
+                      script要素のsrcに値を設定した後に、appendChild()を行わないとロードされないため、ユーザエージェントで処理を切り分ける。
+                <br />- IE is not loaded by src of a script element after having set a value unless perform appendChild()
+            </li>
+            <li class="fix">uupaa.js (uu.module.load):
+                <br />IE8でモジュールのロードに失敗する件を対策。
+                      onreadystatechange()ハンドラ内で、this.readyStateが"complete"ではなく"loaded"になっている。
+                      条件に this.readyState === "loaded" を追加。
+                <br />- IE8 this.readyState is not "complete"(was "loaded"). completion condition was changed.
+            </li>
+            <li class="fix">ALL Sources (ALL Functions):
+                <br />new function() {...}; を (function() {...})(); スタイルに書き直し。
+                <br />- Rewritten a style of "new function() {...};" by a style of "(function() {...})();".
             </li>
           </ol>
         <dd>
         <dt>Version 0.0 2008-05-20 / Departure</dt>
         <dd>
           <ul>
-            <li>ライセンスをMITに。<br />
-                - Choose MIT license</li>
-            <li>ウーパールーパーをペットショップで発見, ライブラリの名前は uupaa.js に。<br />
-                - Discover an Axolotl(called Wooper Rooper in Japan) in a pet shop; the name of the library in uupaa.js.
+            <li>ライセンスをMITに。
+                <br />- Choose MIT license
+            </li>
+            <li>ウーパールーパーをペットショップで発見, ライブラリの名前は uupaa.js に。
+                <br />- Discover an Axolotl(called Wooper Rooper in Japan) in a pet shop; the name of the library in uupaa.js.
             </li>
           </ul>
         </dd>
         <dt>Version 0.0 2008-04-01 / Beginning</dt>
         <dd>
           <ul>
-            <li>自分用のJavaScriptライブラリ(名称未定)の作成を開始。<br />
-                - Start the building of a JavaScript library for mine.</li>
+            <li>自分用のJavaScriptライブラリ(名称未定)の作成を開始。
+                <br />- Start the building of a JavaScript library for mine.
+            </li>
           </ul>
         <dd>
       </dl>
@@ -228,7 +374,7 @@ function pie(context, title) {
   ];
   var total = ary[0] + ary[1] + ary[2] + ary[3] + ary[4] + ary[5];
   if (!total) { return; }
-  uu.image.preload(
+  uu.module.image.preload(
     uu.sprintf("http://chart.apis.google.com/chart" +
                "?chs=%dx%d" +                 // width, height
                "&cht=p3&chtt=%s|%d+Changes" + // 3D pie
@@ -274,7 +420,7 @@ function boot() {
   uu.event.set(document, "mousemove", handleEvent);
 
   if (uu.ua.ie && uu.ua.version <= 6) { // IE6以下は"position: fixed"が無効
-    uu.css.set(uu.id("pie"), { position: "absolute" });
+    uu.css.set(uu.id("pie"), { position: "absolute", width: "360px", height: "200px" });
   }
   pie(uu.id("version0.x data"), uu.id("version0.x title").innerText);
 }

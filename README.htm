@@ -4,17 +4,9 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>uupaa.js - ReadMe</title>
-<style type="text/css">
-body {
-  background-color: black; color: whitesmoke;
-  font-family:'メイリオ',Meiryo,'ヒラギノ角ゴ Pro W3','Hiragino Kaku Gothic Pro','ＭＳ Ｐゴシック',sans-serif;
-  margin: 2em; line-height: 1.5;
-}
-a, b { color: lightblue }
-pre { border: 1px solid navy }
-dt { margin-top: 1em; font-weight: bold; color: lightblue }
-i { font-style: normal; color: gray }
-</style>
+<style type="text/css">@import url(./README.css);</style>
+<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="http://pigs.sourceforge.jp/javascript-xpath.js"></script><![endif]-->
+<script id="uupaa.js" type="text/javascript" src="./uupaa.js?load=perflog,image,ieboost,tip"></script>
 </head>
 <body>
 <p>
@@ -37,6 +29,7 @@ i { font-style: normal; color: gray }
    jQuery や Prototype.js ユーザからみれば「あれも無い。これも無い」といった状態です。<br />
    “選択肢が増えるのは悪くない”と思える方は、一度<a href="#demo">デモ</a>をご覧になってください。</p>
 
+<p><a href="./FEATURE.htm">機能比較 - (Feature comparison) ...</a></p>
 <table>
 <tr><th><h2>アピールポイント</h2></th><th><h2>ウィークポイント</h2></th></tr>
 <tr><td>
@@ -56,10 +49,6 @@ i { font-style: normal; color: gray }
   <li>とても流動的な状態です。<br />メソッド名の変更など、痛い修正が十分にありえます。</li>
   <li>ドキュメント周りがまだまだです。</li>
   <li>デバッグ支援用の機能がまだまだです。</li>
-  <li>from周りのサポートが全く実装されていません。</li>
-  <li><strike>プログレスバーやスライダー等のウィジェットが全く実装されていません。</strike><br />
-      jQueryの機能をエミュレートするuu.module.jqssにより、<br />jQueryのプラグインが一部動作するようになりました。
-      </li>
 </ol>
 </td></tr>
 </table>
@@ -71,7 +60,7 @@ i { font-style: normal; color: gray }
  <li>Opera9+ <i>(canvasやXPathなどが使用できないためOpera8以下はサポート外)</i></li>
  <li>Firefox2+ <i>(Firefox1.5系以下は未検証のためサポート外)</i></li>
 </ul>
-<p>Opera9.5β2, Firefox3β5, Internet Explorer 8β1 でも動作を確認しています。<i>(IE8βには未実装の機能があり、その影響でいくつかのデモは動きません)</i></p>
+<p>Opera9.5, Firefox3, Internet Explorer 8β1 でも動作を確認しています。<i>(IE8βには未実装の機能があり、その影響でいくつかのデモは動きません)</i></p>
 
 <h2>導入方法</h2>
 
@@ -113,7 +102,7 @@ i { font-style: normal; color: gray }
   </ul>
 </ul>
 
-<h3>シンプルな例 - <a href="demo/compat/HelloWorld.htm">HelloWorld.htm</a></h3>
+<h3>シンプルな例 - <a href="demo/compat/HelloWorld.htm">Run...</a></h3>
 <pre>
 &lt;!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"&gt;
@@ -129,14 +118,15 @@ i { font-style: normal; color: gray }
 &lt;/style&gt;
 &lt;/head&gt;
 &lt;body&gt;
-&lt;a href="../../README.htm"&gt;README.htm&lt;/a&gt; &amp;gt; HelloWorld.htm
+&lt;a href="../../README.htm"&gt;README&lt;/a&gt; &amp;gt; HelloWorld
 
 &lt;canvas id="canvas" width="400" height="400"&gt;&lt;/canvas&gt;&lt;p id="msg"&gt;Hello Japanese Creator!&lt;/p&gt;
 &lt;script type="text/javascript"&gt;
-function circle() { 
-  var canvas = uu.id("canvas"), ctx = canvas.getContext("2d"), color = 0xff9999;
+function boot() { 
+  var canvas = uu.id("canvas"), ctx = canvas.getContext("2d"),
+      color = new uu.module.color(0xff9999);
   function draw() {
-    color += 10;
+    color.add(0x10);
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     ctx.beginPath();
     ctx.fillStyle = color.toRGBString();
@@ -149,9 +139,9 @@ function circle() {
     uu.effect.fade(canvas, { speed: 2000, fn: draw })
   }, 2200);
 }
-uu.module.load("", "ui,effect", function() {
+uu.module.load("", "io,ui,effect", function() {
   uu.dom.ready(function() {
-    uu.canvas.ready(circle);
+    uu.canvas.ready(boot);
   });
 });
 &lt;/script&gt;
@@ -163,10 +153,8 @@ uu.module.load("", "ui,effect", function() {
 <ul>
   <li><a href="demo/compat/uu.module.ajax.htm">Ajax</a>,
       <a href="demo/compat/uu.module.json.htm">JSONP</a></li>
-  <li><a href="demo/compat/ready.htm">window.ready, dom.ready, canvas.ready</a>,
       <a href="demo/compat/uu.image.preload.htm">image.preload(画像の先読み)</a></li>
   <li><a href="demo/compat/uu.effect.htm">エフェクト</a> - Version 0.2で11個のエフェクトを追加しました</li>
-  <li><a href="demo/compat/uu.image.png24.htm">透過PNG(IE5.5/IE6.0専用)</a></li>
   <li><a href="demo/compat/uu.module.drag.htm">ドラッグ &amp; ドロップ</a></li>
   <li><a href="demo/compat/uu.module.polygon1.htm">キューブ</a>, 
       <a href="demo/compat/uu.module.polygon8.htm">キューブ8個</a></li>
@@ -184,6 +172,13 @@ uu.module.load("", "ui,effect", function() {
   <a href="./SELECTOR.htm">セレクタ</a>、
   <a href="./GLOSSARY.htm">用語集</a>、<a href="./doc/reference/index.html">リファレンス</a>を参考にしてください。</p>
 
+<script type="text/javascript">
+function boot() {
+  uu('a[href]:contains("Run")').setCSS({ border: "4px outset silver", backgroundColor: "silver", color: "black" });
+  uu('a[href]:contains("Feature")').setCSS({ border: "4px outset silver", backgroundColor: "silver", color: "black" });
+}
+uu.window.ready(boot);
+</script>
 </body>
 </html>
 

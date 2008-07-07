@@ -1,0 +1,166 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>uupaa.js - Feature Comparison</title>
+<style type="text/css">@import url(./README.css);</style>
+<style>
+table { color: black; background: #EFEFEF; }
+tr.category { background-color: #BDBDBD; }
+td a[href] { color: blue; }
+.alpha {}
+.alphapngbg { background: url(http://uupaa-js.googlecode.com/svn/trunk/demo/compat/prairiedog_24bpp.png) skyblue; }
+.maxmin1, .maxmin2 {
+  margin: 0; padding: 0;
+  display: inline-block; border: 1px dashed skyblue; max-width: 8em; height: 5em;
+}
+.maxmin1 { float: left; }
+</style>
+<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="http://pigs.sourceforge.jp/javascript-xpath.js"></script><![endif]-->
+<script id="uupaa.js" type="text/javascript" src="./uupaa.js"></script>
+</head>
+<body>
+<p>
+   | <a href="http://code.google.com/p/uupaa-js/">Project Home(Google Code)</a>
+   | <a href="./README.htm#demo">DEMO</a>
+   | <a href="./CHANGELOG.htm">ChangeLog</a>
+   | <a href="./LICENSE.htm">License</a> |<br />
+   | <a href="./DOCUMENT.htm">Document</a>
+   | <a href="./SELECTOR.htm">Selector</a>
+   | <a href="./MODULE.htm">Module</a>
+   | <a href="./GLOSSARY.htm">Glossary</a>
+   | <a href="./doc/reference/index.html">API Reference</a>
+   |
+</p>
+<a href="./README.htm">README</a> &gt; FEATURE
+<hr />
+<div>
+<p>著名なライブラリとの機能比較です。</p>
+</div>
+<table>
+<tr class="category"><th>デザインの自由度向上につながる<br />機能強化ポイント</th><th>uupaa.js</th><th>jQuery</th><th>Prototype.js</th><th>備考</th></tr>
+<tr><th>CSS Property</th><th>　</th><th>　</th><th>　</th><th>　</th></tr>
+<tr><td>min-width:<br />
+        max-width:<br />
+        min-height:<br />
+        max-height:<br />
+        (IE6でリキッドデザイン)</td>
+        <td>○<br />
+          <div class="maxmin1">max-width: 8em; height: 5em;</div>
+          <div class="maxmin2">max-width: 8em; height: 5em;</div>
+        </td><td>不明</td><td>不明</td><td>minmax.js<br />uu.module.ieboost.js<br />IE7.js</td></tr>
+<tr><td>opacity:<br />(IE6でGhostエフェクト)</td><td>○
+  <img style="opacity: 0.8" src="img/uu.module.canvas.grid.gif" alt="" />
+  <img style="opacity: 0.5" src="img/uu.module.canvas.grid.gif" alt="" />
+  <img style="opacity: 0.2" src="img/uu.module.canvas.grid.gif" alt="" />
+  </td><td>不明</td><td>不明</td><td>uu.module.ieboost.js<br />IE8.js</td></tr>
+<tr><th>png画像の透過</th><th>　</th><th>　</th><th>　</th><th>　</th></tr>
+<tr><td>&lt;img src="*.png"&gt;を透過<br />背景のpng画像を透過<br />
+        (IE6でモダンデザイン)</td><td class="alphapngbg">○</td><td>○</td><td>不明</td><td>uu.module.ieboost.js<br />jquery.pngfix.js<br />IE7.js</td></tr>
+
+<tr class="category"><th>要素の操作性向上につながる<br />機能強化ポイント</th><th>uupaa.js</th><th>jQuery</th><th>Prototype.js</th><th>備考</th></tr>
+<tr><th>セレクタ</th><th>　</th><th>　</th><th>　</th><th>　</th></tr>
+<tr><td>ID, Tag, Class Selector</td><td>○</td><td>○</td><td>○</td><td>　</td></tr>
+<tr><td>Attribute, Pseudo Selector</td><td>○</td><td>○</td><td>△</td><td>　</td></tr>
+<tr><td>CSS1～CSS3 Selector</td><td>△(:not 未実装)</td><td>○</td><td>○</td><td>　</td></tr>
+<tr><td>XPath Selector</td><td>○</td><td>△(一部のみ)</td><td>○</td><td>JavaScript-XPath(IE)</td></tr>
+<tr><td>jQuery独自 Selector</td><td>○</td><td>○</td><td>×</td><td>　</td></tr>
+<tr><th>セレクタ実行後の操作性の違い</th><th>　</th><th>　</th><th>　</th><th>　</th></tr>
+<tr><td>要素をそのまま返す
+        <br />個々の要素を操作する
+        </td><td>○</td><td>×</td><td>×</td><td>　</td></tr>
+<tr><td>要素をラップ(強化)したObjectを要素数分返す
+        <br />個々のObjectを操作する
+        </td><td>×</td><td>×</td><td>○</td><td>　</td></tr>
+<tr><td>選択した要素を抱え込んだObjectを1つ返す
+        <br />ユーザはObjectが提供するメソッドを呼び出す
+        </td><td>○</td><td>○</td><td>×</td><td>uu.module.tip.js</td></tr>
+
+<tr class="category"><th>生産性/可読性向上につながる<br />機能強化ポイント</th><th>uupaa.js</th><th>jQuery</th><th>Prototype.js</th><th>備考</th></tr>
+<tr><th>文法</th><th>　</th><th>　</th><th>　</th><th>　</th></tr>
+<tr><td>メソッドチェーンによる簡潔な記述</td><td>△(実装中)</td><td>○</td><td>×</td><td>uu.module.tip.js</td></tr>
+<tr><th>ECMA-262(最新のJavaScript)への準拠</th><th>　</th><th>　</th><th>　</th><th>　</th></tr>
+<tr><td>Array.indexOf, lastIndexOf<br />(IE6+,Safari3+,Opera9+)</td><td>○</td><td>×</td><td>×</td><td>　</td></tr>
+<tr><td>Array.forEach, filter, every, some, map<br />(IE6+,Safari3+,Opera9+)</td><td>○</td><td>×</td><td>×</td><td>　</td></tr>
+<tr><th>IE独自プロパティの実装</th><th>　</th><th>　</th><th>　</th><th>　</th></tr>
+<tr><td>HTMLElement.outerHTML (setter)<br />
+        HTMLElement.innerText (setter/getter)<br />(Firefox2+)</td><td>○</td><td>×</td><td>×</td><td>　</td></tr>
+
+<tr class="category"><th>大規模/分散開発向けの<br />機能強化ポイント</th><th>uupaa.js</th><th>jQuery</th><th>Prototype.js</th><th>備考</th></tr>
+<tr><th>拡張性</th><th>　</th><th>　</th><th>　</th><th>　</th></tr>
+<tr><td>モジュール(プラグイン)による拡張性</td><td>○</td><td>○</td><td>△(Object.extend)</td><td>　</td></tr>
+<tr><td>モジュールのオンデマンドロード</td><td>○</td><td>×</td><td>×</td><td>　</td></tr>
+<tr><td>サードパーティー製モジュールの数</td><td>×</td><td>○</td><td>○</td><td>　</td></tr>
+
+<tr><th>モダンな設計</th><th>　</th><th>　</th><th>　</th><th>　</th></tr>
+<tr><td>OOP指向の"クラス"を導入</td><td>○</td><td>×</td><td>○</td><td>　</td></tr>
+<tr><td>クラスの拡張に対する考え方</td><td>委譲とmixin</td><td>×</td><td>継承とabstract</td><td>　</td></tr>
+<tr><td>デザインパターンの実装<br />
+        MVC,メッセージポンプ,シングルトン</td><td>○</td><td>×</td><td>×</td><td>　</td></tr>
+<tr><td>テンプレートエンジンの実装</td><td>×(未実装)</td><td>×</td><td>×</td><td>　</td></tr>
+<tr><th>デバッグ支援</th><th>　</th><th>　</th><th>　</th><th>　</th></tr>
+<tr><td>デバッグ機能の実装</td><td>△(ログのみ)</td><td>×</td><td>△(サードパーティ)</td><td>MochiKit</td></tr>
+<tr><th>リソース低減に対する取り組み</th><th>　</th><th>　</th><th>　</th><th>　</th></tr>
+<tr><td>メモリ使用量の抑止</td><td>○</td><td>×(newを多用)</td><td>△(Prototype拡張)</td><td>　</td></tr>
+<tr><td>高機能/低負荷タイマー</td><td>○</td><td>×</td><td>×</td><td>　</td></tr>
+
+<tr class="category"><th>コラボレーションにつながる<br />機能強化ポイント</th><th>uupaa.js</th><th>jQuery</th><th>Prototype.js</th><th>備考</th></tr>
+<tr><th>Ajax</th><th>　</th><th>　</th><th>　</th><th>　</th></tr>
+<tr><td>同期/非同期リクエスト(Ajax)</td><td>○</td><td>○</td><td>○</td><td>　</td></tr>
+<tr><td>更新チェック付きリクエスト(Ajax)</td><td>○</td><td>○</td><td>△(面倒)</td><td>　</td></tr>
+<tr><td>非同期リクエスト(JSONP)</td><td>○</td><td>○</td><td>△(面倒)</td><td>　</td></tr>
+
+<tr class="category"><th>表現力向上につながる<br />機能強化ポイント</th><th>uupaa.js</th><th>jQuery</th><th>Prototype.js</th><th>備考</th></tr>
+<tr><th>Widget</th><th>　</th><th>　</th><th>　</th><th>　</th></tr>
+<tr><td>リッチなフォームコントロール</td><td>×</td><td>○</td><td>○</td><td>○=サードパーティー製</td></tr>
+<tr><td>タブ, アコーディオン等のコントロール</td><td>×</td><td>○</td><td>○</td><td>○=サードパーティー製</td></tr>
+
+<tr><th>UI</th><th>　</th><th>　</th><th>　</th><th>　</th></tr>
+<tr><td>エフェクト(アニメーション)</td><td>○</td><td>○</td><td>△(script.aculo.us)</td><td>uu.module.effect.js</td></tr>
+<tr><td>ドラッグ&amp;ドロップ</td><td>○</td><td>△(jQuery.UI)</td><td>△(script.aculo.us)</td><td>uu.module.drag.js<br />△=画面端で引っ掛かる(IE)</td></tr>
+<tr><td>canvas</td><td>○</td><td>×</td><td>×</td><td>excanvas.js(IE)</td></tr>
+
+<tr><th>ビジターの待ち時間を短縮(直帰率改善)</th><th>　</th><th>　</th><th>　</th><th>　</th></tr>
+<tr><td>画像のプリロード</td><td>○</td><td>×</td><td>×</td><td>uu.module.image.js</td></tr>
+<tr><td>DOMContentLoaded
+        <br />DOM使用可能タイミングの把握</td><td>○</td><td>○</td><td>○</td><td>　</td></tr>
+
+<tr class="category"><th>導入によるデメリット</th><th>uupaa.js</th><th>jQuery</th><th>Prototype.js</th><th>備考</th></tr>
+<tr><th>汚染</th><th>　</th><th>　</th><th>　</th><th>　</th></tr>
+<tr><td><a href="./GLOSSARY.htm#pollution">プロトタイプ汚染</a></td><td>汚染しない</td><td>汚染しない</td><td>汚染する</td><td>　</td></tr>
+<tr><td><a href="./GLOSSARY.htm#pollution">グローバルネームスペース汚染</a></td><td>最小限<br />(uuとUU)</td><td>最小限<br />(jQueryと$)</td><td>汚染する</td><td>　</td></tr>
+<tr><td>他のライブラリとの衝突</td><td>衝突しない</td><td>$が衝突する</td><td>$と$$が衝突する</td><td>　</td></tr>
+
+<tr class="category"><th>ドキュメント</th><th>uupaa.js</th><th>jQuery</th><th>Prototype.js</th><th>備考</th></tr>
+<tr><th>利用方法に関するもの</th><th>　</th><th>　</th><th>　</th><th>　</th></tr>
+<tr><td>初心者向けの読み物, ブログエントリ</td><td>×</td><td>○</td><td>○</td><td>　</td></tr>
+<tr><td>動作サンプル</td><td>△(公式のみ)</td><td>○</td><td>○</td><td>　</td></tr>
+<tr><td>リファレンス/まとめサイト</td><td>×(公式のみ)</td><td>○</td><td>○</td><td>　</td></tr>
+<tr><td>書籍</td><td>×</td><td>3～4冊</td><td>たくさん</td><td>　</td></tr>
+<tr><td>知名度(by Google)</td><td>678件</td><td>7,820,000件</td><td>2,120,000件</td><td>　</td></tr>
+
+<tr class="category"><th>プロジェクトの形態</th><th>uupaa.js</th><th>jQuery</th><th>Prototype.js</th><th>備考</th></tr>
+<tr><td>ライセンス</td><td>MIT</td><td>MIT and GPL</td><td>MIT</td><td>　</td></tr>
+<tr><td>ホスト先</td><td><a href="http://code.google.com/p/uupaa-js/">Google Code uupaa-js</a></td>
+                     <td><a href="http://jquery.com/">jquery.com</a></td>
+                     <td><a href="http://www.prototypejs.org/">prototypejs.org</a></td><td>　</td></tr>
+</table>
+<p>更新日: 2008-06-30</p>
+<script>
+function boot() {
+  var url = "http://uupaa-js.googlecode.com/svn/trunk/"
+  uu('td:contains("IE")'      ).insert('<img src="' + url + 'img/i32.png" alt="" class="alpha" />', UU.LC);
+  uu('td:contains("Firefox")' ).insert('<img src="' + url + 'img/f32.png" alt="" class="alpha" />', UU.LC);
+  uu('td:contains("Opera")'   ).insert('<img src="' + url + 'img/o32.png" alt="" class="alpha" />', UU.LC);
+  uu('td:contains("Safari")'  ).insert('<img src="' + url + 'img/s32.png" alt="" class="alpha" />', UU.LC);
+};
+// uu.module.load("", "ui,tip,perflog,image,ieboost", function() {
+uu.module.load("", "ui,tip,perflog,ieboost", function() {
+  uu.window.ready(boot);
+});
+</script>
+
+</body>
+</html>
+

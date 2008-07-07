@@ -76,7 +76,7 @@ function boot() {
   var obj = uu.codec.decodeJSON(jsontxt);
   uu.id("result2").innerText = uu.sprintf("{ hoge:\"%s\", huga:%d }", obj.hoge, obj.huga);
 }
-uu.module.load("", "io", function() {
+uu.module.load("", "io,evaljs", function() {
   uu.window.ready(boot);
 });
 </script>

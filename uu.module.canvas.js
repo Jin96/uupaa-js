@@ -66,7 +66,7 @@ uu.canvas.drawGrid = function(ctx, fn /* = undefined */, size /* = 64 */, color 
   color = color || "gray";
   var x, y, url = uu.config.imagePath + "uu.module.canvas.grid.gif";
 
-  uu.image.preload(url, function(code, _url, _img) {
+  uu.module.image.preload(url, function(code, _url, _img) {
     if (code && !uu.ua.ie) {
       ctx.beginPath();
       ctx.fillStyle = ctx.createPattern(_img, "");

@@ -3,7 +3,7 @@
  * @author Takao Obara
  * @license uupaa.js is licensed under the terms and conditions of the MIT licence.
  */
-(function() { var uud = document, uuw = window, uu = uuw.uu;
+(function() { var uud = document, uuw = window, uu = uuw.uu, UU = uuw.UU;
 
 uu.module.ui = {};
 
@@ -99,6 +99,7 @@ Firefox3から、clientLeft, clientTopが利用可能
  *
  * @param Element elm - 要素を指定します。
  * @return rect       - { x, y, w, h, cw, ch } を返します。
+ * @see <a href="http://msdn.microsoft.com/ja-jp/library/cc392317.aspx">IE独自のBox Model</a>
  * @namespace
  */
 uu.ui.element = function(elm) {
@@ -285,7 +286,7 @@ if (uu.ua.opera) { // Opera
     var inn = uu.ui.inner();
     return { x: evt.clientX + inn.sw, y: evt.clientY + inn.sh,
              cx: evt.clientX, cy: evt.clientY,
-             ox: evt.offsetX, oy: evt.offsetY };
+             ox: evt.offsetX, oy: evt.offsetY }; // evt.x, evt.y でも代用可能かもしれない
   };
 }
 
@@ -338,7 +339,7 @@ uu.event.mouse.state = function(evt) {
   return rv;
 };
 
-/** <b>uu.event.mouse.hover - ホバーイベントハンドラの設定 - Set hover event hander</b>
+/** <b>uu.event.mouse.hover - ホバーイベントハンドラの設定 - Set hover event handler</b>
  *
  * マウスオーバー,マウスアウトイベントをトリガーに動作する関数を登録します。
  *
@@ -370,6 +371,51 @@ uu.event.clicks._impl = function(evt) {
   (uu.ua.ie) ? (evt.returnValue = false) : evt.preventDefault();
   var v = uu.event.target(evt).real.uuClicks;
   v.fn((++v.idx >= v.max) ? (v.idx = 0) : v.idx);
+};
+
+/** <b>Custom Event Module </b>
+ *
+ * @class
+ */
+uu.event.custom = function() {};
+
+/** <b>Font Resize Custom Event Module </b>
+ *
+ * フォントリサイズ擬似イベントをハンドリングするための要素(スパイ)を生成し
+ * 変化があったらMSG_EVENT_FONT_RESIZEをブロードキャストする
+ *
+ * フォントリサイズイベントは、
+ * 1. CTRL + ホイール
+ * 2. [メニュー]-[表示]-[文字のサイズ]
+ * のいずれかの操作で発生する
+ *
+ * @class
+ */
+uu.event.custom.fontResize = uu.klass.singleton();
+uu.event.custom.fontResize.prototype = {
+  construct: function(delay /* = 1000 */) {
+    this.delay = delay || 1000;
+
+    this.spy = document.createElement("div");
+    uu.css.set(this.spy, {
+      className: "spy", position: "absolute", fontSize: "large",
+      visibility: "hidden", height: "1em", top: "-10em", left: "-10em" // spyは画面外で待機
+    });
+    uud.body.appendChild(this.spy);
+    this.spyHeight = this.spy.offsetHeight; // 元の高さを保存
+
+    // フォントリサイズを監視
+    // spyの高さ変化 → メッセージをポスト
+    var me = this;
+    function PEEK() {
+      var h = me.spy.offsetHeight;
+      if (me.spyHeight !== h) {
+        me.spyHeight = h;
+        uu.msgpump.post(0, UU.MSG_EVENT_FONT_RESIZE);
+      }
+    }
+    uu.tm10.set(PEEK, this.delay);
+  }
 };
 
 })(); // end (function())()
