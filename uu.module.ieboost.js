@@ -231,44 +231,40 @@ uu.module.ieboost.alphapng = uu.klass.generic();
 uu.module.ieboost.alphapng.prototype = {
   construct: function() {
     var me = this;
-    this.alpha = { size: 0, gif: uu.config.imagePath + "b1.gif",
+    this.alpha = { gif: uu.config.imagePath + "b1.gif",
                    progid: "progid:DXImageTransform.Microsoft.AlphaImageLoader" };
     // imageモジュール未ロードなら1pxの透明gifを使わない方法でalphapngを実行する
     if (uu.module.isLoaded("image")) {
       uu.module.image.preload(this.alpha.gif, function(code) {
         if (code) { // gif画像のプリロード成功でマークアップと透過を行う
-//alert("<img>");
-          me.alpha.size = me.markup();
-          me.trans();
+          me.trans(me.markup());
         }
       });
     } else {
-//alert("<span>");
       // <img> を <span> に置換する方法に切り替える
       this.alpha.gif = "";
-      this.alpha.size = this.markup();
-      this.trans2();
+      this.trans2(me.markup());
     }
   },
   // 定期的に呼ばれ、必要に応じて透過処理を行う
   fix: function() {
-    if (uud.images.length !== this.alpha.size) { // 画像数に変化あり
-      this.alpha.size = this.markup(); // 再マークアップ
-      this.alpha.gif ? this.trans() : this.trans2();
+    var ary = this.markup(); // 再マークアップ
+    if (ary.length) {
+      this.alpha.gif ? this.trans(ary) : this.trans2(ary);
     }
   },
-  trans: function() { // <img>の画像を1x1.gifに差し替え、背景を設定する
+  trans: function(ary) { // <img>の画像を1x1.gifに差し替え、背景を設定する
     var me = this, w, h;
-    uu.forEach(uud.images, function(e) {
+    ary.forEach(function(e) {
       if (!e.uuAlphaPNG || e.uuAlphaPNG !== 1) { return; } // 処理対象外
       w = e.width, h = e.height;
       e.style.filter = me.alpha.progid + '(src="' + e.src + '",sizingMethod="image")';
       uu.mix(e, { src: me.alpha.gif, width: w, height: h, uuAlphaPNG: 2 }); // 処理済みとしてマーク
     });
   },
-  trans2: function() { // <img>を<span>で偽装し、spanに背景を設定する
+  trans2: function(ary) { // <img>を<span>で偽装し、spanに背景を設定する
     var me = this, ph;
-    uu.forEach(uud.images, function(e) {
+    ary.forEach(function(e) {
       if (!e.uuAlphaPNG || e.uuAlphaPNG !== 1) { return; } // 処理対象外
       ph = uud.createElement("span");
       ph.id               = e.id;
@@ -287,17 +283,19 @@ uu.module.ieboost.alphapng.prototype = {
     });
   },
   markup: function() {
-    uu.forEach(uud.images, function(e) {
+    var rv = [];
+    uu.forEach(uu.tag("img"), function(e) {
       if (!e.uuAlphaPNG) { // 未処理
         e.uuAlphaPNG = 3; // 一旦透過対象外としてマーク
         if (e.complete && /.png$/i.test(e.src)) {
           if (/trans|alpha/i.test(e.src + " " + e.className)) {
             e.uuAlphaPNG = 1; // 透過対象としてマーク
+            rv.push(e);
           }
         }
       }
     });
-    return uud.images.length;
+    return rv;
   }
 };
 
