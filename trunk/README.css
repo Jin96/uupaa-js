@@ -13,22 +13,3 @@ dt { margin-top: 1em; font-weight: bold; color: lightblue }
 li { margin-bottom: 0.5em; }
 i {}
 table, tr, th, td { border: 1px solid gray; }
-
-/** for pie chart {{{ */
-.add { color: chartreuse }
-.fix { color: skyblue }
-.del { color: darkgray }
-.move { color: #555555; }
-.rename { color: #f6f; }
-.retake { color: #f06; }
-#total { margin: 0 auto; }
-#total, #total thead th { border: 1px solid gray }
-#total td { text-align: right }
-#pie {
-  position: fixed; top: 20px; right: 20px;
-  opacity: 0.5;
-}
-#pie:hover {
-  opacity: 1.0;
-}
-/** }}} */
