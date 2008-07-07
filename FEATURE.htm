@@ -6,11 +6,16 @@
 <title>uupaa.js - Feature Comparison</title>
 <style type="text/css">@import url(./README.css);</style>
 <style>
+/*
 table { color: black; background: #EFEFEF; }
 tr.category { background-color: #BDBDBD; }
+ */
+/*
 td a[href] { color: blue; }
-.alpha {}
-.alphapngbg { background: url(http://uupaa-js.googlecode.com/svn/trunk/demo/compat/prairiedog_24bpp.png) skyblue; }
+ */
+tr.category { background-color: #1F1F1F; }
+.icon_ie, .icon_firefox, .icon_opera, .icon_safari { opacity: 0.2 }
+.alphapngbg { background: url(http://uupaa-js.googlecode.com/svn/trunk/demo/compat/prairiedog_24bpp.png); }
 .maxmin1, .maxmin2 {
   margin: 0; padding: 0;
   display: inline-block; border: 1px dashed skyblue; max-width: 8em; height: 5em;
@@ -66,16 +71,16 @@ td a[href] { color: blue; }
 <tr><td>CSS1～CSS3 Selector</td><td>△(:not 未実装)</td><td>○</td><td>○</td><td>　</td></tr>
 <tr><td>XPath Selector</td><td>○</td><td>△(一部のみ)</td><td>○</td><td>JavaScript-XPath(IE)</td></tr>
 <tr><td>jQuery独自 Selector</td><td>○</td><td>○</td><td>×</td><td>　</td></tr>
-<tr><th>セレクタ実行後の操作性の違い</th><th>　</th><th>　</th><th>　</th><th>　</th></tr>
-<tr><td>要素をそのまま返す
-        <br />個々の要素を操作する
+<tr><th>検索実行後の要素の扱い</th><th>　</th><th>　</th><th>　</th><th>　</th></tr>
+<tr><td>NodeList(または配列)を返す
+        <br />関数によりNodeListを操作する
         </td><td>○</td><td>×</td><td>×</td><td>　</td></tr>
-<tr><td>要素をラップ(強化)したObjectを要素数分返す
+<tr><td>NodeListをラップ(強化)したObjectを返す
         <br />個々のObjectを操作する
         </td><td>×</td><td>×</td><td>○</td><td>　</td></tr>
-<tr><td>選択した要素を抱え込んだObjectを1つ返す
-        <br />ユーザはObjectが提供するメソッドを呼び出す
-        </td><td>○</td><td>○</td><td>×</td><td>uu.module.tip.js</td></tr>
+<tr><td>NodeListを管理するObjectを1つ返す
+        <br />Object経由で要素を操作する
+        </td><td>○<br />(uu Object)</td><td>○<br />(jQuery Object)</td><td>×</td><td>uu.module.tip.js</td></tr>
 
 <tr class="category"><th>生産性/可読性向上につながる<br />機能強化ポイント</th><th>uupaa.js</th><th>jQuery</th><th>Prototype.js</th><th>備考</th></tr>
 <tr><th>文法</th><th>　</th><th>　</th><th>　</th><th>　</th></tr>
@@ -89,9 +94,10 @@ td a[href] { color: blue; }
 
 <tr class="category"><th>大規模/分散開発向けの<br />機能強化ポイント</th><th>uupaa.js</th><th>jQuery</th><th>Prototype.js</th><th>備考</th></tr>
 <tr><th>拡張性</th><th>　</th><th>　</th><th>　</th><th>　</th></tr>
-<tr><td>モジュール(プラグイン)による拡張性</td><td>○</td><td>○</td><td>△(Object.extend)</td><td>　</td></tr>
+<tr><td>モジュール(プラグイン)による拡張性</td><td>○</td><td>○</td><td>△(Object.extend)</td><td>Dojo</td></tr>
 <tr><td>モジュールのオンデマンドロード</td><td>○</td><td>×</td><td>×</td><td>　</td></tr>
 <tr><td>サードパーティー製モジュールの数</td><td>×</td><td>○</td><td>○</td><td>　</td></tr>
+<tr><td>i18n</td><td>△</td><td>不明</td><td>不明</td><td>Dojo</td></tr>
 
 <tr><th>モダンな設計</th><th>　</th><th>　</th><th>　</th><th>　</th></tr>
 <tr><td>OOP指向の"クラス"を導入</td><td>○</td><td>×</td><td>○</td><td>　</td></tr>
@@ -118,7 +124,7 @@ td a[href] { color: blue; }
 
 <tr><th>UI</th><th>　</th><th>　</th><th>　</th><th>　</th></tr>
 <tr><td>エフェクト(アニメーション)</td><td>○</td><td>○</td><td>△(script.aculo.us)</td><td>uu.module.effect.js</td></tr>
-<tr><td>ドラッグ&amp;ドロップ</td><td>○</td><td>△(jQuery.UI)</td><td>△(script.aculo.us)</td><td>uu.module.drag.js<br />△=画面端で引っ掛かる(IE)</td></tr>
+<tr><td>ドラッグ&amp;ドロップ</td><td>○</td><td>○(jQuery.UI)</td><td>○(script.aculo.us)</td><td>uu.module.drag.js</td></tr>
 <tr><td>canvas</td><td>○</td><td>×</td><td>×</td><td>excanvas.js(IE)</td></tr>
 
 <tr><th>ビジターの待ち時間を短縮(直帰率改善)</th><th>　</th><th>　</th><th>　</th><th>　</th></tr>
@@ -149,11 +155,13 @@ td a[href] { color: blue; }
 <p>更新日: 2008-06-30</p>
 <script>
 function boot() {
+/*
   var url = "http://uupaa-js.googlecode.com/svn/trunk/"
-  uu('td:contains("IE")'      ).insert('<img src="' + url + 'img/i32.png" alt="" class="alpha" />', UU.LC);
-  uu('td:contains("Firefox")' ).insert('<img src="' + url + 'img/f32.png" alt="" class="alpha" />', UU.LC);
-  uu('td:contains("Opera")'   ).insert('<img src="' + url + 'img/o32.png" alt="" class="alpha" />', UU.LC);
-  uu('td:contains("Safari")'  ).insert('<img src="' + url + 'img/s32.png" alt="" class="alpha" />', UU.LC);
+  uu('td:contains("IE")'      ).insert('<img src="' + url + 'img/i32.png" alt="" class="alpha icon_ie" />', UU.LC);
+  uu('td:contains("Firefox")' ).insert('<img src="' + url + 'img/f32.png" alt="" class="alpha icon_firefox" />', UU.LC);
+  uu('td:contains("Opera")'   ).insert('<img src="' + url + 'img/o32.png" alt="" class="alpha icon_opera" />', UU.LC);
+  uu('td:contains("Safari")'  ).insert('<img src="' + url + 'img/s32.png" alt="" class="alpha icon_safari" />', UU.LC);
+ */
 };
 // uu.module.load("", "ui,tip,perflog,image,ieboost", function() {
 uu.module.load("", "ui,tip,perflog,ieboost", function() {
