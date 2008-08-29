@@ -3,8 +3,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<title>uupaa.js - uu.module.ajax test</title>
-<script type="text/javascript" src="../../uupaa.js"></script>
+<title>uupaa.js - uu.ajax test</title>
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?module=dev"></script>
 <style type="text/css">
 body { background-color: black; color: white; }
 a, b { color: lightblue }
@@ -13,13 +13,13 @@ a, b { color: lightblue }
 </style>
 </head>
 <body>
-<a href="../../README.htm#demo">README.htm</a> &gt; uu.module.ajax.htm
+<a href="../../README.htm#demo">README</a> &gt; <a href="../../DOCUMENT.htm#uu.ajax">DOCUMENT</a> &gt; uu.ajax.htm
 <dl>
-  <dt>uu.module.ajax.loadIfMod() - 更新チェック付きの非同期リクエスト</dt>
+  <dt>uu.ajax.loadIfMod() - 更新チェック付きの非同期リクエスト</dt>
   <dd>更新チェック付きで非同期リクエストを発行します。GETメソッド専用です。更新されていない場合は304が返ります。</dd>
-  <dt>uu.module.ajax.load() - 非同期リクエスト</dt>
+  <dt>uu.ajax.load() - 非同期リクエスト</dt>
   <dd>更新チェック無しで非同期リクエストを発行します。GET/POSTメソッド両用です。</dd>
-  <dt>uu.module.ajax.loadSync() - 同期リクエスト</dt>
+  <dt>uu.ajax.loadSync() - 同期リクエスト</dt>
   <dd>更新チェック無しで同期リクエストを発行します。GET/POSTメソッド両用です。</dd>
 </dl>
 <p>※ FirefoxやOperaでテストする場合はこのファイルをサーバにuploadする必要があります(クロスドメインはBad Request(400))。<br />
@@ -29,18 +29,18 @@ a, b { color: lightblue }
 Request URL: <input id="url" type="text" value="http://uupaa-js.googlecode.com/svn/trunk/demo/compat/HelloAjax.txt" size="64" /><br />
 GET Method:
 <input type="button" value="uu.ajax.loadIfMod()" onclick="ajax('loadIfMod')" /> |
-<input type="button" value="uu.ajax.load()" onclick="ajax('load')" /> |
+<input type="button" value="uu.ajax()" onclick="ajax('load')" /> |
 <input type="button" value="uu.ajax.loadSync()" onclick="ajax('loadSync')" /><br />
 POST Method:
-<input type="button" value="uu.ajax.load()" onclick="ajax('load', 'posted data')" /> |
+<input type="button" value="uu.ajax()" onclick="ajax('load', 'posted data')" /> |
 <input type="button" value="uu.ajax.loadSync()" onclick="ajax('loadSync', 'posted data')" />
 <p id="step1" class="step"></p>
 <p id="step2" class="step"></p>
 <p id="step4" class="step"></p>
 Callback Filter:<br />
-<input type="checkbox" value="1" />SEND<br />
+<input type="checkbox" value="1" checked="checked" />SEND<br />
 <input type="checkbox" value="2" checked="checked" />OK<br />
-<input type="checkbox" value="4" />NG<br />
+<input type="checkbox" value="4" checked="checked" />NG<br />
 
 <script>
 function ajax(method, data) {
@@ -52,12 +52,18 @@ function ajax(method, data) {
     uu.id("step" + v).innerText = "";
   });
 
-  uu.css.pseudo(":checked").forEach(function(v) {
+  uu.pseudo(":checked").forEach(function(v) {
     val += parseInt(v.value);
   });
   uu.request.callbackFilter = val;
 
-  uu.ajax[method](requestURL, function(uid, step, response, status, url, async) {
+  switch (method) {
+  case "load":      method = uu.ajax; break;
+  case "loadIfMod": method = uu.ajax.loadIfMod; break;
+  case "loadSync":  method = uu.ajax.loadSync; break;
+  }
+
+  method(requestURL, function(uid, step, response, status, url, async) {
     uu.id("step" + step).innerText =
       uu.sprintf("uid[%s], %s res[%s], code[%d], url[%s] %s",
                  uid, stepStr[step], response, status, url, async ? "async" : "sync");
@@ -66,7 +72,7 @@ function ajax(method, data) {
 
 function boot() {
 }
-uu.window.ready(boot);
+uu.ready(boot);
 
 </script>
 

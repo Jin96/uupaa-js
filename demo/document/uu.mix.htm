@@ -1,13 +1,13 @@
 <html><head><title>Object mixin</title>
-<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?load=perflog"></script>
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?module=dev"></script>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 </head><body><a href="../../README.htm">README</a> &gt; <a href="../../DOCUMENT.htm#uu.mix">DOCUMENT</a> &gt; uu.mix<br />
 <div id="result"></div>
 <script>
-  uu.window.ready(function() {
+  uu.ready(function() {
     var base = uu.mix({ a: 0 }, { a: "a", b: 1 });
     uu.log(base); // { a: "a", b: 1 };
-  });
+  }, "W");
 </script>
 <pre>
     var base = uu.mix({ a: 0 }, { a: "a", b: 1 });

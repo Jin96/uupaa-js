@@ -1,7 +1,9 @@
-/** <b>I/O Cover Flow Module</b>
+/** Cover Flow Module
  *
- * @author Takao Obara
+ * @author Takao Obara <com.gmail@js.uupaa>
  * @license uupaa.js is licensed under the terms and conditions of the MIT licence.
+ * @see <a href="http://code.google.com/p/uupaa-js/">Home(Google Code)</a>
+ * @see <a href="http://uupaa-js.googlecode.com/svn/trunk/README.htm">README</a>
  */
 (function() { var uud = document, uuw = window, uu = uuw.uu;
 
@@ -29,8 +31,8 @@ uu.module.coverflow.prototype = {
     this.ui.style.width     = this.ctx.canvas.width + "px";
     this.ui.style.height    = this.ctx.canvas.height + "px";
     this.ui.style.zIndex    = elm.style.zIndex + 2;
-if (0) {
-    this.ui.style.border = "1px solid white";
+if (1) {
+    this.ui.style.border = "1px solid pink"; // ui=pink
 }
     uud.body.insertBefore(this.ui, elm);
 
@@ -48,9 +50,26 @@ if (0) {
     uud.body.insertBefore(this.view, elm);
 
     // create temporary canvas
+/*
     this.ctxTmp     = uu.canvas.context(uud.body.appendChild(uu.canvas.create(this.coverWidth, this.coverWidth)));
     this.ctxContTmp = uu.canvas.context(uud.body.appendChild(uu.canvas.create(this.coverWidth, this.coverWidth)));
     this.ctxRef     = uu.canvas.context(uud.body.appendChild(uu.canvas.create(this.coverWidth, this.coverWidth)));
+ */
+    var e1          = uud.body.appendChild(uud.createElement("canvas"));
+    e1.width        = this.coverWidth;
+    e1.height       = this.coverWidth;
+    this.ctxTmp     = (new uu.module.canvas2d(e1)).ctx;
+
+    var e2          = uud.body.appendChild(uud.createElement("canvas"));
+    e2.width        = this.coverWidth;
+    e2.height       = this.coverWidth;
+    this.ctxContTmp = (new uu.module.canvas2d(e2)).ctx;
+
+    var e3          = uud.body.appendChild(uud.createElement("canvas"));
+    e3.width        = this.coverWidth;
+    e3.height       = this.coverWidth;
+    this.ctxRef     = (new uu.module.canvas2d(e3)).ctx;
+
     this.grada      = this.__createLinearGradient(this.ctxRef, this.coverWidth);
 
     this.cvobj = [];
@@ -83,16 +102,17 @@ if (0) {
     this.animeOffset = [0, -60, -40, -20, 0, 20, 40, 60, 0];
 
     // addEventListener, removeEventListener
-    this.he = uu.event.handler(this);
+////    this.he = uu.event.handler(this);
 //  uu.event.set(this.ui, "mousewheel,mousedown,click,dblclick", this.he);
-    uu.event.set(this.ui, "mousewheel,mousedown,click", this.he);
-    uu.event.set(uud, "mousemove,mouseup", this.he);
+////    uu.event.set(this.ui, "mousewheel,mousedown,click", this.he);
+    uu.event.set(this, this.ui, "mousewheel,mousedown,click");
+    uu.event.set(this, uud, "mousemove,mouseup");
 
     // boing boing + pata pata anime
     var me = this;
     var redraw = false;
 //    uuw.setTimeout(function() {
-    uu.tm10.set(function onTimer() {
+    uu.vtmHighSpeed.set(function onTimer() {
       // anime
       var redraw = false;
 
@@ -131,12 +151,12 @@ if (0) {
         }
       }
 //      uuw.setTimeout(arguments.callee, 10);
-    }, 10, 0);
+    }, 10);
 //    }, 10);
   },
   /** <b>イベントハンドラ</b> */
   handleEvent: function(evt) {
-    var type = uu.event.type(evt.type);
+    var type = uu.event.toType(evt);
     switch (type) {
     case "mousedown":   uu.event.stop(evt); this.mousedown(evt);  break;
     case "mousemove":   uu.event.stop(evt); this.mousemove(evt);  break;
@@ -214,14 +234,14 @@ if (0) {
     if (uuw.cfbtn) { alert(uuw.status); }
   },
   mousedown: function(evt) {
-    var mpos = uu.event.mouse.pos(evt);
+    var mpos = uu.event.mousePos(evt);
     // keep offset
     this.dragInfo = { dragging: true, x: mpos.x - parseInt(this.ui.style.left),
                                       y: mpos.y - parseInt(this.ui.style.top) };
   },
   mousemove: function(evt) {
     if (!this.dragInfo.dragging) { return; }
-    var mpos = uu.event.mouse.pos(evt);
+    var mpos = uu.event.mousePos(evt);
 
     this.cvox = parseInt(mpos.x - this.dragInfo.x - this.padding.x); // move cover offset
 
@@ -235,7 +255,7 @@ if (0) {
     this.dragInfo.dragging = false;
   },
   mousewheel: function(evt) {
-    var mstate = uu.event.mouse.state(evt);
+    var mstate = uu.event.mouseState(evt);
     if (mstate.wheel > 0) {
       this.move(1, Math.round(mstate.wheel));
     } else if (mstate.wheel < 0) {
@@ -265,7 +285,7 @@ if (0) {
   },
   click: function(evt) {
     if (this.center.anime == 7) {
-      switch (this.inHitRect(uu.event.mouse.pos(evt))) {
+      switch (this.inHitRect(uu.event.mousePos(evt))) {
       case 1: // center clickで実行
           this.cvobj[this.cvid].execContent(this.view);
           break;
@@ -275,7 +295,7 @@ if (0) {
           break;
       }
     } else {
-      var hit = this.inHitRect(uu.event.mouse.pos(evt)), loop = 0;
+      var hit = this.inHitRect(uu.event.mousePos(evt)), loop = 0;
       if (hit >= 0) {
         loop = this.cvid - 4 + hit;
         if (loop != this.cvid) {
@@ -365,7 +385,14 @@ uu.module.cover.prototype = {
     ];
 //    this.ctx = this.__createBankCanvas();
     // create bank canvas
+/*
     this.ctx = uu.canvas.context(uud.body.appendChild(uu.canvas.create(this.param.coverWidth * 7, this.param.coverWidth * 2)));
+ */
+
+    var e1          = uud.body.appendChild(uud.createElement("canvas"));
+    e1.width        = this.param.coverWidth * 7;
+    e1.height       = this.param.coverWidth * 2;
+    this.ctx        = (new uu.module.canvas2d(e1)).ctx;
 
     var me = this;
     this.frameData.forEach(function(v) { me.__createFrame(v); });
@@ -487,7 +514,14 @@ uu.module.coverContent.prototype = {
     ];
 //    this.ctx = this.__createBankCanvas();
     // create bank canvas
+/*
     this.ctx = uu.canvas.context(uud.body.appendChild(uu.canvas.create(this.param.coverWidth * 7, this.param.coverWidth * 2)));
+ */
+    var e1          = uud.body.appendChild(uud.createElement("canvas"));
+    e1.width        = this.param.coverWidth * 7;
+    e1.height       = this.param.coverWidth * 2;
+    this.ctx        = (new uu.module.canvas2d(e1)).ctx;
+
 
 
     var me = this;

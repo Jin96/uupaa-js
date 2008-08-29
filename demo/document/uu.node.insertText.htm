@@ -1,0 +1,56 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>uupaa.js - uu.node.insert test</title>
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?module=dev"></script>
+<style>
+span { background-color: #eee; }
+div { border: 1px solid black; padding: 1em; margin: 1em; }
+p { color: gold; }
+</style>
+</head>
+<body>
+<a href="../../README.htm">README</a> &gt; <a href="../../DOCUMENT.htm#uu.node.insertText">DOCUMENT</a> &gt; uu.node.insertText<br /><br />
+
+<input type="button" value="uu.node.insertText('hoge', uu.id('girl4'), UU.FIRST)" onclick="FIRST()" /><br />
+<input type="button" value="uu.node.insertText('hoge', uu.id('girl4'), UU.PREV)" onclick="PREV()" /><br />
+<input type="button" value="uu.node.insertText('hoge', uu.id('girl4'), UU.FIRST_CHILD)" onclick="FIRST_CHILD()" /><br />
+<input type="button" value="uu.node.insertText('hoge', uu.id('girl4'), UU.LAST_CHILD)" onclick="LAST_CHILD()" /><br />
+<input type="button" value="uu.node.insertText('hoge', uu.id('girl4'), UU.NEXT)" onclick="NEXT()" /><br />
+<input type="button" value="uu.node.insertText('hoge', uu.id('girl4'), UU.LAST)" onclick="LAST()" /><br />
+<input type="button" value="Show Current DOM Tree" onclick="show()" />
+
+  <div id="parentNode1">
+    <div id="girl1">girl1</div>
+    <div id="girl2">girl2</div>
+    <div id="girl3">girl3</div>
+    <div id="girl4">girl4
+      <div id="girl4_boy1">girl4_boy1</div>
+      <div id="girl4_boy2">girl4_boy2</div>
+      <div id="girl4_boy3">girl4_boy3</div>
+    </div>
+    <div id="girl5">girl5</div>
+    <div id="girl6">girl6</div>
+    <div id="girl7">girl7</div>
+  </div>
+
+<script>
+function FIRST() { uu.node.insertText("hoge", uu.id("girl4"), UU.FIRST); }
+function PREV() { uu.node.insertText("hoge", uu.id("girl4"), UU.PREV); }
+function FIRST_CHILD() { uu.node.insertText("hoge", uu.id("girl4"), UU.FIRST_CHILD); }
+function LAST_CHILD() { uu.node.insertText("hoge", uu.id("girl4"), UU.LAST_CHILD); }
+function NEXT() { uu.node.insertText("hoge", uu.id("girl4"), UU.NEXT); }
+function LAST() { uu.node.insertText("hoge", uu.id("girl4"), UU.LAST); }
+function show() {
+  var d = window.open().document;
+  d.write("<xmp>" + document.getElementById("parentNode1").outerHTML + "</xmp>");
+  d.close();
+}
+
+uu.ready(function() {
+});
+</script>
+</body>
+</html>

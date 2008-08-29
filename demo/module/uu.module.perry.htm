@@ -11,7 +11,7 @@ a, b { color: lightblue }
 </style>
 </head>
 <body>
-<a href="../../README.htm#demo">README.htm</a> &gt; uu.module.perry.htm<br />
+<a href="../../README.htm#dev">README</a> &gt; uu.module.perry.htm<br />
 
 <h2>ペリーさん</h2>
 <p>ペリーさんは「日本に来たばかりの外国人」をコンセプトに、
@@ -28,7 +28,7 @@ Windows2000以上のOSに標準搭載されているText-To-Speech Engine(Active
 <input type="button" value="clear" onclick="uu.id('text').value='';" />
 
 <h2>動作環境</h2>
-<p>ペリーさんはActiveX無しでは、おしゃべりできません。あまりオススメしませんがIE以外のブラウザで試して見たい場合は、以下を参考に環境を構築してみてください。</p>
+<p>ペリーさんはActiveX無しでは、おしゃべりできません。あまりオススメしませんがIE以外のブラウザで試してみたい場合は、以下を参考に環境を構築してみてください。</p>
 <dl>
   <dt>Firefox</dt>
     <dd>Firefoxで動作させるには、二種類の方法があります。<br />
@@ -89,7 +89,7 @@ function boot() {
   }
 //  uu.id("text").innerText = voiceArray();
 }
-uu.module.load("", "perry", boot);
+uu.module("", "perry", boot);
 </script>
 
 </body>

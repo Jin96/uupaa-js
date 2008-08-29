@@ -1,0 +1,79 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>uupaa.js - uu.module.widget.window test</title>
+<!--[if IE]><script id="excanvas.js" type="text/javascript" src="http://pigs.sourceforge.jp/excanvas.js"></script><![endif]-->
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?module=dev,canvas,drag,widget,skin.plasticity,skin.plasticityAngle"></script>
+<style>
+html, body {
+  overflow: hidden;
+  height: 100%; /* IEbugFix */
+  background-color: black;
+  color: white;
+}
+</style>
+</head>
+<body>
+<a href="../../README.htm#demo">README</a> &gt; <a href="../../MODULE.htm#uu.module.widget.window">MODULE</a> &gt; uu.module.widget.window.htm
+
+<script>
+var msg = {};
+function boot() {
+  msg = {
+    uid: uu.uid("hogehoge"),
+    msgbox: function(msg, p1, p2) {
+      switch(msg) {
+      case "UPDATE":
+      case UU.MSG_RESIZE_WINDOW: // post(p1 = { rect, wuid })
+        var parts = new uu.module.canvasPartsFactory();
+      //  exp.bodyRect
+        p1.bodyCanvas.width = p1.bodyRect.w;
+        p1.bodyCanvas.height = p1.bodyRect.h;
+
+        parts.button(p1.bodyCanvas2d, "JELLYBEAN", "PEACH", { x: (p1.bodyRect.w - 100) / 2, y: p1.bodyRect.h - 50 });
+        break;
+      }
+    }
+  };
+  uu.msg.set(msg);
+
+  uu.viewport.setVirtualPadding({ top: 20, left: 20, right: 20, bottom: 20 });
+
+  var winmng = new uu.module.window.manager();
+  winmng.setDefaultParam({ skin: "plasticityAngle", rect: { x: 100, y: 100, w: 200, h: 200 } });
+  winmng.setDefaultSkinParam({ bodyStyle: "none" });
+
+  //
+  var wuid = {};
+  var rect = { x:  50, y: 50, w: 200, h: 200 };
+
+  wuid.line  = winmng.createWindow({ title: "Hello",    rect: uu.mix({}, rect), fn: update },
+                                   { boneColor: "lime" });
+  rect.x += 200;
+  wuid.pink  = winmng.createWindow({ title: "uuppa.js",    rect: uu.mix({}, rect), fn: update },
+                                   { boneColor: "pink", titleColor: "violet" });
+  rect.x += 200;
+  wuid.black = winmng.createWindow({ title: "widget", rect: uu.mix({}, rect), fn: update },
+                                   { boneColor: "black", titleColor: "silver" });
+  rect.x += 200;
+  wuid.black = winmng.createWindow({ title: "window",    rect: uu.mix({}, rect), fn: update },
+                                   { boneColor: "black", titleColor: "silver", bodyStyle: "auto" });
+}
+function update(status, exp) {
+  if (status !== 200) { return; }
+
+//  uu.event.set(exp.bodyNode, "click", F);
+  uu.msg.post(msg, "UPDATE", exp);
+}
+function F(evt) {
+//  alert("ff");
+}
+
+uu.ready(boot, "WC");
+
+</script>
+
+</body>
+</html>

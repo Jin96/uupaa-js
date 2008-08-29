@@ -36,33 +36,86 @@ function boot() {
             "\nuu.sprintf(\"[%c],[%c],[%c]\", -123, 123, \"hoge\")            -> " + uu.sprintf("[%c],[%c],[%c]", -123, 123, "hoge") +
             "\nuu.sprintf(\"[%s],[%s]\", \"hoge\", \"piyo\")                    -> " + uu.sprintf("[%s],[%s]", "hoge", "piyo") +
             "\nuu.sprintf(\"[%%],[%-],[%]\")                                -> " + uu.sprintf("[%%],[%-],[%]") +
-            "\n---width and precision--------------1234567890---" +
-            "\nuu.sprintf(\"[%#5d]\", -123)      -> " + uu.sprintf("[%#5d]", -123) +
-            "\nuu.sprintf(\"[%#5u]\", -123)      -> " + uu.sprintf("[%#5u]", -123) +
-            "\nuu.sprintf(\"[%#5o]\", -123)      -> " + uu.sprintf("[%#5o]", -123) +
-            "\nuu.sprintf(\"[%#5x]\", -123)      -> " + uu.sprintf("[%#5x]", -123) +
-            "\nuu.sprintf(\"[%#5X]\", -123)      -> " + uu.sprintf("[%#5X]", -123) +
-            "\nuu.sprintf(\"[%#5X]\", \"hoge\")    -> " + uu.sprintf("[%#5X]", "hoge") +
-            "\nuu.sprintf(\"[%#5f]\", -123.45)   -> " + uu.sprintf("[%#5f]", -123.45) +
-            "\nuu.sprintf(\"[%#5.1f]\", -123.45) -> " + uu.sprintf("[%#5.1f]", -123.45) +
-            "\nuu.sprintf(\"[%#5c]\", -123)      -> " + uu.sprintf("[%#5c]", -123) +
-            "\nuu.sprintf(\"[%#5s]\", -123)      -> " + uu.sprintf("[%#5s]", -123) +
-            "\nuu.sprintf(\"[%#5.2s]\", -123)    -> " + uu.sprintf("[%#5.2s]", -123) +
+            "\n--- flag(#) - add(0, 0x, 0X) ------1234567890---" +
+            "\nuu.sprintf(\"[%#d]\", -123)      -> " + uu.sprintf("[%#d]", -123) +
+            "\nuu.sprintf(\"[%#u]\", -123)      -> " + uu.sprintf("[%#u]", -123) +
+            "\nuu.sprintf(\"[%#o]\", -123)      -> " + uu.sprintf("[%#o]", -123) +
+            "\nuu.sprintf(\"[%#x]\", -123)      -> " + uu.sprintf("[%#x]", -123) +
+            "\nuu.sprintf(\"[%#X]\", -123)      -> " + uu.sprintf("[%#X]", -123) +
+            "\nuu.sprintf(\"[%#X]\", \"hoge\")    -> " + uu.sprintf("[%#X]", "hoge") +
+            "\nuu.sprintf(\"[%#f]\", -123.45)   -> " + uu.sprintf("[%#f]", -123.45) +
+            "\nuu.sprintf(\"[%#.1f]\", -123.45) -> " + uu.sprintf("[%#.1f]", -123.45) +
+            "\nuu.sprintf(\"[%#c]\", -123)      -> " + uu.sprintf("[%#c]", -123) +
+            "\nuu.sprintf(\"[%#s]\", -123)      -> " + uu.sprintf("[%#s]", -123) +
+            "\nuu.sprintf(\"[%#.2s]\", -123)    -> " + uu.sprintf("[%#.2s]", -123) +
+            "\n--- flag(0) - zero padding ---------1234567890---" +
+            "\nuu.sprintf(\"[%05d]\",       0)   -> " + uu.sprintf("[%05d]",  0) +
+            "\nuu.sprintf(\"[%05d]\",       1)   -> " + uu.sprintf("[%05d]",  1) +
+            "\nuu.sprintf(\"[%05d]\",      12)   -> " + uu.sprintf("[%05d]",  12) +
+            "\nuu.sprintf(\"[%05d]\",     123)   -> " + uu.sprintf("[%05d]",  123) +
+            "\nuu.sprintf(\"[%05d]\",    1234)   -> " + uu.sprintf("[%05d]",  1234) +
+            "\nuu.sprintf(\"[%05d]\",   12345)   -> " + uu.sprintf("[%05d]",  12345) +
+            "\nuu.sprintf(\"[%05d]\",  123456)   -> " + uu.sprintf("[%05d]",  123456) +
+            "\nuu.sprintf(\"[%05d]\", 1234567)   -> " + uu.sprintf("[%05d]",  1234567) +
+            "\nuu.sprintf(\"[%05d]\",      -0)   -> " + uu.sprintf("[%05d]", -0) +
+            "\nuu.sprintf(\"[%05d]\",      -1)   -> " + uu.sprintf("[%05d]", -1) +
+            "\nuu.sprintf(\"[%05d]\",     -12)   -> " + uu.sprintf("[%05d]", -12) +
+            "\nuu.sprintf(\"[%05d]\",    -123)   -> " + uu.sprintf("[%05d]", -123) +
+            "\nuu.sprintf(\"[%05d]\",   -1234)   -> " + uu.sprintf("[%05d]", -1234) +
+            "\nuu.sprintf(\"[%05d]\",  -12345)   -> " + uu.sprintf("[%05d]", -12345) +
+            "\nuu.sprintf(\"[%05d]\", -123456)   -> " + uu.sprintf("[%05d]", -123456) +
+            "\nuu.sprintf(\"[%05d]\",-1234567)   -> " + uu.sprintf("[%05d]", -1234567) +
+            "\nuu.sprintf(\"[%05u]\",       0)   -> " + uu.sprintf("[%05u]",  0) +
+            "\nuu.sprintf(\"[%05u]\",       1)   -> " + uu.sprintf("[%05u]",  1) +
+            "\nuu.sprintf(\"[%05u]\",      12)   -> " + uu.sprintf("[%05u]",  12) +
+            "\nuu.sprintf(\"[%05u]\",     123)   -> " + uu.sprintf("[%05u]",  123) +
+            "\nuu.sprintf(\"[%05u]\",    1234)   -> " + uu.sprintf("[%05u]",  1234) +
+            "\nuu.sprintf(\"[%05u]\",   12345)   -> " + uu.sprintf("[%05u]",  12345) +
+            "\nuu.sprintf(\"[%05u]\",  123456)   -> " + uu.sprintf("[%05u]",  123456) +
+            "\nuu.sprintf(\"[%05u]\", 1234567)   -> " + uu.sprintf("[%05u]",  1234567) +
+            "\nuu.sprintf(\"[%05u]\",      -0)   -> " + uu.sprintf("[%05u]", -0) +
+            "\nuu.sprintf(\"[%05u]\",      -1)   -> " + uu.sprintf("[%05u]", -1) +
+            "\nuu.sprintf(\"[%05u]\",     -12)   -> " + uu.sprintf("[%05u]", -12) +
+            "\nuu.sprintf(\"[%05u]\",    -123)   -> " + uu.sprintf("[%05u]", -123) +
+            "\nuu.sprintf(\"[%05u]\",   -1234)   -> " + uu.sprintf("[%05u]", -1234) +
+            "\nuu.sprintf(\"[%05u]\",  -12345)   -> " + uu.sprintf("[%05u]", -12345) +
+            "\nuu.sprintf(\"[%05u]\", -123456)   -> " + uu.sprintf("[%05u]", -123456) +
+            "\nuu.sprintf(\"[%05u]\",-1234567)   -> " + uu.sprintf("[%05u]", -1234567) +
+            "\nuu.sprintf(\"[%05o]\", -123)      -> " + uu.sprintf("[%05o]", -123) +
+            "\nuu.sprintf(\"[%05x]\", -123)      -> " + uu.sprintf("[%05x]", -123) +
+            "\nuu.sprintf(\"[%05X]\", -123)      -> " + uu.sprintf("[%05X]", -123) +
+            "\nuu.sprintf(\"[%05X]\", \"hoge\")    -> " + uu.sprintf("[%05X]", "hoge") +
+            "\nuu.sprintf(\"[%05f]\", -123.45)   -> " + uu.sprintf("[%05f]", -123.45) +
+            "\nuu.sprintf(\"[%05.1f]\", -123.45) -> " + uu.sprintf("[%05.1f]", -123.45) +
+            "\nuu.sprintf(\"[%05c]\", -123)      -> " + uu.sprintf("[%05c]", -123) +
+            "\nuu.sprintf(\"[%05s]\", -123)      -> " + uu.sprintf("[%05s]", -123) +
+            "\nuu.sprintf(\"[%05.2s]\", -123)    -> " + uu.sprintf("[%05.2s]", -123) +
+            "\n---width and precision-------------1234567890---" +
+            "\nuu.sprintf(\"[%5d]\", 0.123)     -> " + uu.sprintf("[%5d]", 0.123) +
+            "\nuu.sprintf(\"[%5d]\", 0.9999999) -> " + uu.sprintf("[%5d]", 0.9999999) +
+            "\nuu.sprintf(\"[%5d]\", -123)      -> " + uu.sprintf("[%5d]", -123) +
+            "\nuu.sprintf(\"[%5f]\", -123.45)   -> " + uu.sprintf("[%5f]", -123.45) +
+            "\nuu.sprintf(\"[%5.1f]\", -123.45) -> " + uu.sprintf("[%5.1f]", -123.45) +
+            "\nuu.sprintf(\"[%5c]\", -123)      -> " + uu.sprintf("[%5c]", -123) +
+            "\nuu.sprintf(\"[%5s]\", -123)      -> " + uu.sprintf("[%5s]", -123) +
+            "\nuu.sprintf(\"[%5.2s]\", -123)    -> " + uu.sprintf("[%5.2s]", -123) +
             "\n---i18n argument numbering/swapping---" +
             "\nuu.sprintf(\"The [%2$s] contains [%1$#5x] monkeys\", 5, \"tree\")" +
             "\n　　↓" +
             "\n" + uu.sprintf("The [%2$s] contains [%1$#5x] monkeys", 5, "tree") +
             "" +
-            "\n\nuu.sprintf(\"The [%2$s] contains [%1$d] monkeys. That\'s a nice [%2$s] full of [%1$d] monkeys.\", 5, \"tree\")" +
+            "\n\n---\n" +
+            "uu.sprintf(\"The [%2$s] contains [%1$d] monkeys. That\'s a nice [%2$s] full of [%1$d] monkeys.\", 5, \"tree\")" +
             "\n　　↓" +
             "\n" + uu.sprintf("The [%2$s] contains [%1$d] monkeys. That\'s a nice [%2$s] full of [%1$d] monkeys.", 5, "tree") +
             "" +
-            "\n\nuu.sprintf(\"[%d][%4$s][%3$d][%s][%d][%s]\", 1, \"2\", 3, \"4\")" +
+            "\n\n---\n" +
+            "uu.sprintf(\"[%d][%4$s][%3$d][%s][%d][%s]\", 1, \"2\", 3, \"4\")" +
             "\n　　↓" +
             "\n" + uu.sprintf("[%d][%4$s][%3$d][%s][%d][%s]", 1, "2", 3, "4") +
             "";
 }
-uu.dom.ready(boot);
+uu.ready(boot, "D");
 </script>
 </body>
 </html>

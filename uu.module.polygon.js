@@ -1,7 +1,9 @@
 /** <b>Polygon Module</b>
  *
- * @author Takao Obara
+ * @author Takao Obara <com.gmail@js.uupaa>
  * @license uupaa.js is licensed under the terms and conditions of the MIT licence.
+ * @see <a href="http://code.google.com/p/uupaa-js/">Home(Google Code)</a>
+ * @see <a href="http://uupaa-js.googlecode.com/svn/trunk/README.htm">README</a>
  */
 (function() { var /* uud = document, */ uuw = window, uu = uuw.uu;
 
@@ -42,7 +44,7 @@ uu.module.polygon.prototype = {
   add: function(param /* = {} */) {
     param = uu.mix.param(param || {}, { highLight: 0x40, color: 0x000000, opacity: 1.0, x: 0, y: 0, zoom: 600, 
                                         phi: Math.PI / 100, theta: Math.PI / 80 });
-    var data = [[], [], [], [], [], []], 
+    var data = [[], [], [], [], [], []], // 6 = cube
         i = 0, v1, v2;
     for (; i < 5; ++i) {
       v1 = (!i) ? 0 : Math.SQRT2 * Math.cos((0.5 * i - 0.25) * Math.PI);
@@ -91,41 +93,64 @@ uu.module.polygon.prototype = {
         vY = [-cosT * cosP, -cosT * sinP,  sinT],
         vZ = [-sinT * cosP, -sinT * sinP, -cosT],
         info = [],
-        x, y, z, i, j, light, surface; // 2D bitmap surface
+        x, y, z, i, j, light, surface, // 2D bitmap surface
+        // alias
+        sz1, sz2, r1, r2,
+        pazoom = param.zoom, pax = param.x, pay = param.y,
+        pacolor = param.color, pahighLight = param.highLight,
+        paopacity = param.opacity;
 
-    for (i = 0; i < d.length; ++i) {
-      surface = [0, -(vZ[0] * d[i][0][0] +
-                      vZ[1] * d[i][0][1] +
-                      vZ[2] * d[i][0][2])];
-      for (j = 1; j < d[i].length; ++j) {
-        z = vZ[0] * d[i][j][0] +
-            vZ[1] * d[i][j][1] +
-            vZ[2] * d[i][j][2];
-        surface.push([vX[0] * d[i][j][0] +
-                      vX[1] * d[i][j][1] +
-                      vX[2] * d[i][j][2],
-                      vY[0] * d[i][j][0] +
-                      vY[1] * d[i][j][1] +
-                      vY[2] * d[i][j][2], z]);
+    for (i = 0, sz1 = d.length; i < sz1; ++i) {
+      r1 = d[i][0];
+      surface = [0, -(vZ[0] * r1[0] +
+                      vZ[1] * r1[1] +
+                      vZ[2] * r1[2])];
+      for (j = 1, sz2 = d[i].length; j < sz2; ++j) {
+        r2 = d[i][j];
+        z = vZ[0] * r2[0] + vZ[1] * r2[1] + vZ[2] * r2[2];
+        surface.push([vX[0] * r2[0] + vX[1] * r2[1] + vX[2] * r2[2],
+                      vY[0] * r2[0] + vY[1] * r2[1] + vY[2] * r2[2], z]);
         surface[0] += z;
       }
       info.push(surface);
     }
     info.sort(this._sort);
 
-    for (i = 0; i < info.length; ++i) {
-      info[i].shift();
+/*
+    for (i = 0, sz1 = info.length; i < sz1; ++i) {
+      info[i].shift(); // もっとも奥に配置される(影になり見えない)面を捨てる(描画する必要がないため)
       light = info[i].shift();
-      if (light >= 0) {
-        for (j = 0; j < info[i].length; ++j) {
-          x = param.zoom * info[i][j][0] / (10 + info[i][j][2]);
-          y = param.zoom * info[i][j][1] / (10 + info[i][j][2]);
+      if (light >= 0.1) {
+        for (j = 0, sz2 = info[i].length; j < sz2; ++j) {
+          x = pazoom * info[i][j][0] / (10 + info[i][j][2]);
+          y = pazoom * info[i][j][1] / (10 + info[i][j][2]);
           if (!j) {
             ctx.beginPath();
-            ctx.moveTo(param.x + x, param.y + -y);
-            ctx.fillStyle = this._rgba(param.color, parseInt(light * param.highLight), param.opacity);
+            ctx.moveTo(pax + x, pay + -y);
+            ctx.fillStyle = this._rgba(pacolor, parseInt(light * pahighLight), paopacity);
           } else {
-            ctx.lineTo(param.x + x, param.y + -y);
+            ctx.lineTo(pax + x, pay + -y);
+          }
+        }
+        ctx.closePath();
+        ctx.fill();
+      }
+    }
+ */
+    for (i = 0, sz1 = info.length; i < sz1; ++i) {
+      light = info[i][1];
+      if (light >= 0.1) {
+        for (j = 2, sz2 = info[i].length; j < sz2; ++j) {
+          r1 = info[i][j];
+          r2 = r1[2] + 10;
+          x = pazoom * r1[0] / r2;
+          y = pazoom * r1[1] / r2;
+          if (j === 2) {
+            ctx.beginPath();
+            ctx.moveTo(pax + x, pay + -y);
+            ctx.fillStyle = this._rgba(pacolor, parseInt(light * pahighLight), paopacity);
+          } else {
+            ctx.lineTo(pax + x, pay + -y);
           }
         }
         ctx.closePath();
@@ -135,7 +160,7 @@ uu.module.polygon.prototype = {
   },
   _sort: function(a, b) {
     if (a[0] === b[0]) { return 0; }
-    return a[0] < b[0] ? 1: -1;
+    return a[0] < b[0] ? 1 : -1;
   },
   _rgba: function(color, bright, opacity) {
     var rv = [Math.min(((color >> 16) & 0xff) + bright, 255),

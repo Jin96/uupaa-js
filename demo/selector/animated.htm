@@ -1,0 +1,48 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>uu.pseudo - test</title>
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?module=dev"></script>
+  <style>
+  div { background-color: yellow; border: 1px solid #aaa; width: 80px; height: 80px; margin: 5px; float: left; }
+  div.colored { background-color: green; }
+  </style>
+</head>
+<body>
+<a href="../../README.htm">README</a> &gt; 
+<a href="../../SELECTOR.htm#uu.pseudo">SELECTOR</a><br />
+<a href="./selector.htm">uu.pseudo</a> | <a href="./css.htm">uu.css</a> | <a href="./form.htm">uu.css(form)</a>
+<hr />
+<p>jQueryとの動作の違いを確認するため、テスト用のスクリプトは<a href="http://docs.jquery.com/Selectors/animated">jQueryのAPI Reference</a>を参考にしています。</p>
+  <button id="run">Run</button>
+  <div></div>
+  <div id="mover"></div>
+  <div></div>
+<script>
+function F(evt) {
+  uu.pseudo(":animated").forEach(function(v) {
+    uu.klass.toggle(v, "colored");
+  });
+}
+function anim() {
+  var e = uu.id("mover"), run = 0;
+  function loop() {
+    switch (++run % 2) {
+    case 0: uu.effect.slideDown(e, { fn: loop }); break;
+    case 1: uu.effect.slideUp(e, { fn: loop }); break;
+    }
+  }
+  uu.effect.slideDown(e, { fn: loop });
+}
+uu.ready(function() {
+  uu.effect.setDefaultSpeed("slow");
+  uu.event.set(F, uu.id("run"), "click");
+  anim();
+});
+</script>
+<pre>
+</pre>
+</body>
+</html>

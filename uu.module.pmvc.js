@@ -1,7 +1,9 @@
 /** <b>Pluggable MVC Module</b>
  *
- * @author Takao Obara
+ * @author Takao Obara <com.gmail@js.uupaa>
  * @license uupaa.js is licensed under the terms and conditions of the MIT licence.
+ * @see <a href="http://code.google.com/p/uupaa-js/">Home(Google Code)</a>
+ * @see <a href="http://uupaa-js.googlecode.com/svn/trunk/README.htm">README</a>
  */
 (function() { var /* uud = document, */ uuw = window, uu = uuw.uu;
 
@@ -16,25 +18,25 @@ uu.module.pmvc = function() {
  *
  * @class
  */
-uu.module.pmvc.applicationModel = uu.klass.generic();
+uu.module.pmvc.applicationModel = uu.klass.kiss();
 
 /** <b>Pluggable MVC - Domain Model</b>
  *
  * @class
  */
-uu.module.pmvc.domainModel = uu.klass.generic();
+uu.module.pmvc.domainModel = uu.klass.kiss();
 
 /** <b>Pluggable MVC - Controller</b>
  *
  * @class
  */
-uu.module.pmvc.controller = uu.klass.generic();
+uu.module.pmvc.controller = uu.klass.kiss();
 
 /** <b>Pluggable MVC - View</b>
  *
  * @class
  */
-uu.module.pmvc.view = uu.klass.generic();
+uu.module.pmvc.view = uu.klass.kiss();
 
 uu.forEach({
   /** @scope uu.module.pmvc.controller */
@@ -43,10 +45,10 @@ uu.forEach({
    *
    * @param String id       - ユニークなID(メッセージ配達用のアドレス)を指定します。
    */
-  construct: function(id) {
-    this.id = id;
+  construct: function(uid) {
+    this.uid = uid;     // 与えられたUIDで…
+    uu.msg.set(this);   // ...メッセージボックスを登録
     this.catalog = { ping: "_ping" }; // msg-name: function-name
-    uu.msgpump.set(this.id, this);
     this.activate();
   },
   /** <b>メッセージとハンドラの登録</b>
@@ -96,18 +98,18 @@ uu.forEach({
   /** <b>メッセージの受信とハンドラの呼び出し</b>
    *
    * @param String msg   - メッセージの名前を指定します。
-   * @param Mix [param1] - 引数を指定します。
-   * @param Mix [param2] - 引数を指定します。
+   * @param Mix [p1] - 引数を指定します。
+   * @param Mix [p2] - 引数を指定します。
    * @return Boolean - 呼び出し成功でtrue, 失敗でfalseを返します。
    */
-  procedure: function(msg, param1, param2) {
-    if (!this._hook(msg, param1, param2) || !this.permit) { return false; }
-    if (!(msg in this.catalog)) { return this._unknown(msg, param1, param2); }
-    return this[this.catalog[msg]].call(this, msg, param1, param2);
+  msgbox: function(msg, p1, p2) {
+    if (!this._hook(msg, p1, p2) || !this.permit) { return false; }
+    if (!(msg in this.catalog)) { return this._unknown(msg, p1, p2); }
+    return this[this.catalog[msg]].call(this, msg, p1, p2);
   },
-  _ping:    function(msg, param1, param2) { alert(this.id + " - alive"); },
-  _hook:    function(msg, param1, param2) { return true; }, // falseでルーティング終了
-  _unknown: function(msg, param1, param2) { return true; }  // 未知のメッセージ用ハンドラ
+  _ping:    function(msg, p1, p2) { alert(this.id + " - alive"); },
+  _hook:    function(msg, p1, p2) { return true; }, // falseでルーティング終了
+  _unknown: function(msg, p1, p2) { return true; }  // 未知のメッセージ用ハンドラ
 }, function(v, p) {
   uu.module.pmvc.applicationModel.prototype[p] = v;
   uu.module.pmvc.domainModel.prototype[p] = v;
@@ -118,10 +120,10 @@ uu.forEach({
 /** プライマリインスタンスのアクティベート - Activate primary instance
  */
 uu.module.pmvc.activate = function() {
-  uu.app    = new uu.module.pmvc.applicationModel("A");
-  uu.domain = new uu.module.pmvc.domainModel("D");
-  uu.view   = new uu.module.pmvc.view("V");
-  uu.ctrl   = new uu.module.pmvc.controller("C");
+  uu.app    = new uu.module.pmvc.applicationModel("A"); // uid="A"
+  uu.domain = new uu.module.pmvc.domainModel("D");      // uid="D"
+  uu.view   = new uu.module.pmvc.view("V");             // uid="V"
+  uu.ctrl   = new uu.module.pmvc.controller("C");       // uid="C"
 };
 
 })(); // end (function())()

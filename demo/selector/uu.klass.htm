@@ -1,27 +1,31 @@
-<html><head><title>Class Selector</title>
-<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="http://pigs.sourceforge.jp/javascript-xpath.js"></script><![endif]-->
-<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?load=perflog"></script>
+<html><head><title>uupaa.js - uu.klass test</title>
+<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="./lib/javascript-xpath.js"></script><![endif]-->
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?module=dev"></script>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <style>#result { background-color: lime; }</style>
-</head><body><a href="../../README.htm">README</a> &gt; <a href="../../SELECTOR.htm#class-selector">SELECTOR</a> &gt; uu.klass<br />
+</head><body><a href="../../README.htm">README</a> &gt; <a href="../../SELECTOR.htm#uu.klass">SELECTOR</a> &gt; uu.klass<br />
 <div>
-  <div class="death note">hoge</div>
-  <div class="note">huga</div>
+  <div class="white note">white</div>
+  <div class="death note">death</div>
+  <div class="super note">super</div>
+  <div class="note">note</div>
 </div>
 <div id="result"></div>
 <script>
-  uu.window.ready(function() {
-    uu.forEach(uu.klass("note"), function(v) {
-      uu.log(v.innerText); // "hoge", "huga"
+  uu.ready(function() {
+    uu.klass("note death").forEach(function(v) {
+      uu.log(v.innerText); // "death"
     });
   });
 </script>
 <pre>
-  &lt;div class="death note"&gt;hoge&lt;/div&gt;
-  &lt;div class="note"&gt;huga&lt;/div&gt;
+  &lt;div class="white note"&gt;white&lt;/div&gt;
+  &lt;div class="death note"&gt;death&lt;/div&gt;
+  &lt;div class="super note"&gt;super&lt;/div&gt;
+  &lt;div class="note"&gt;note&lt;/div&gt;
 
-    uu.forEach(uu.klass("note"), function(v) {
-      uu.log(v.innerText); // "hoge", "huga"
+    uu.klass("note death").forEach(function(v) {
+      uu.log(v.innerText); // "death"
     });
 </pre>
 </body></html>

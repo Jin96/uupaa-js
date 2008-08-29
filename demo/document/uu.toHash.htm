@@ -1,15 +1,15 @@
 <html><head><title>uu.toHash</title>
-<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?load=perflog"></script>
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?module=dev"></script>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 </head><body><a href="../../README.htm">README</a> &gt; <a href="../../DOCUMENT.htm#uu.toHash">DOCUMENT</a> &gt; uu.toHash<br />
 <div id="result"></div>
 <script>
-  uu.window.ready(function() {
+  uu.ready(function() {
     var ary = [undefined, null, 1, 1, "hoge", function(){} ];
     ary["hash_index"] = "lost value";
     var b = uu.toHash(ary);
     uu.log(b); // { undefined: undefined, null: null, 1: 1, hoge: "hoge" }
-  });
+  }, "W");
 </script>
 <pre>
     var ary = [undefined, null, 1, 1, "hoge", function(){} ];

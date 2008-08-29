@@ -1,0 +1,50 @@
+<html><head><title>Class</title>
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?module=dev"></script>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head><body><a href="../../README.htm">README</a> &gt; <a href="../../DOCUMENT.htm#uu.klass.singleton">DOCUMENT</a> &gt; uu.klass.singleton<br />
+<div id="result"></div>
+<script>
+uu.ready(function() {
+  var A = uu.klass.singleton();
+  A.prototype = {
+    construct: function() {}
+  };
+  var B = uu.klass.singleton();
+  B.prototype = {
+    construct: function() {}
+  };
+
+  var a   = new A();
+  var a2  = new A();
+  var b   = new B();
+  var b2  = new B();
+
+  uu.log("<br />a === a2 %s", a === a2);
+  uu.log("<br />b === b2 %s", b === b2);
+  uu.log("<br />a === b  %s", a === b);
+  uu.log("<br />a.uid[%s], a2.uid[%s]", a.uid, a2.uid);
+  uu.log("<br />b.uid[%s], b2.uid[%s]", b.uid, b2.uid);
+});
+</script>
+<pre>
+  var A = uu.klass.singleton();
+  A.prototype = {
+    construct: function() {}
+  };
+  var B = uu.klass.singleton();
+  B.prototype = {
+    construct: function() {}
+  };
+
+  var a   = new A();
+  var a2  = new A();
+  var b   = new B();
+  var b2  = new B();
+
+  uu.log("a === a2 %s", a === a2);
+  uu.log("b === b2 %s", b === b2);
+  uu.log("a === b  %s", a === b);
+  uu.log("a.uid[%s], a2.uid[%s]", a.uid, a2.uid);
+  uu.log("b.uid[%s], b2.uid[%s]", b.uid, b2.uid);
+</pre>
+</body></html>

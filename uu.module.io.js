@@ -1,52 +1,15 @@
-/** <b>I/O Module</b>
+/** I/O Module
  *
- * @author Takao Obara
+ * @author Takao Obara <com.gmail@js.uupaa>
  * @license uupaa.js is licensed under the terms and conditions of the MIT licence.
+ * @see <a href="http://code.google.com/p/uupaa-js/">Home(Google Code)</a>
+ * @see <a href="http://uupaa-js.googlecode.com/svn/trunk/README.htm">README</a>
  */
 (function() { var uud = document, uuw = window, uu = uuw.uu;
 
 uu.module.io = {};
 
-/** <b>Color Module</b>
- *
- * @class
- */
-uu.module.color = uu.klass.generic();
-uu.module.color.prototype = {
-  construct: function(color) {
-    this.color = color;
-  },
-  add: function(rgb) {
-    this.color += rgb;
-  },
-  /** <b>uu.module.color.toRGBString - カラー値から色指定用文字列を生成 - create color string for rgb function</b>
-   *
-   * カラー値から、rgb関数用の文字列( "rgb(255,255,255)" )を生成します。
-   * 
-   * <pre class="eg">0xff9999.toRGBString(); // "rgb(255,153,153)"</pre>
-   *
-   * @return string - "rgb(red,green,blue)" フォーマットの色指定用文字列を返します。
-   */
-  toRGBString: function() {
-    var v = this.color, rv = [(v >> 16) & 0xff, (v >> 8) & 0xff, v & 0xff];
-    return "rgb(" + rv.join(",") + ")";
-  },
-  /** <b>uu.module.color.toRGBAString - カラー値から色指定用文字列を生成 -Create color string for rgba function</b>
-   *
-   * カラー値から、rgba関数用の文字列( "rgba(255,255,255,1.0)" )を生成します。
-   * 
-   * <pre class="eg">0xff9999.toRGBAString(0.4); // "rgba(255,153,153,0.4)"</pre>
-   *
-   * @param number alpha - 不透明度を指定します。0.0～1.0の値を指定可能です。デフォルトは1.0です。
-   * @return string - "rgba(red,green,blue,alpha)" フォーマットの色指定用文字列を返します。
-   */
-  toRGBAString: function(alpha /* = 1.0 */) {
-    var v = this.color, rv = [(v >> 16) & 0xff, (v >> 8) & 0xff, v & 0xff, alpha || 1.0];
-    return "rgba(" + rv.join(",") + ")";
-  }
-};
-
-/** <b>Codec module</b>
+/** Codec
  *
  * 文字, 文字コードの変換を行います。以下の名前を指定します。
  *
@@ -134,7 +97,7 @@ uu.codec.encodeJSON = function(mix, fn /* = uu.no */) {
   fn = fn || uu.no;
   var rv = [], re = /[\\"\x00-\x1F\u0080-\uFFFF]/g,
       esc = { "\b": "\\b", "\t": "\\t", "\n": "\\n", "\f": "\\f", "\r": "\\r", '"':  '\\"', "\\": "\\\\" };
-  function isFake(mix) { return typeof mix === "object" && "length" in mix; } // FakeArray
+  function isFake(mix) { return typeof mix === "object" && uu.isFA(mix); } // FakeArray
   function U(v) { if (v in esc) { return esc[v]; }
                   return "\\u" + ("0000" + v.charCodeAt(0).toString(16)).slice(-4); }
   function F(mix) {

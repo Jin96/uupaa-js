@@ -1,5 +1,5 @@
 <html><head><title>CSS</title>
-<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?load=perflog"></script>
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?module=dev"></script>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 </head><body><a href="../../README.htm">README</a> &gt; <a href="../../DOCUMENT.htm#uu.css.set">DOCUMENT</a> &gt; uu.css.set<br />
 <style type="text/css">
@@ -18,18 +18,20 @@ function boot() {
   var style2 = uu.css.get(elm2, cssProp); // border系のスタイルを抽出
 
   uu.delay(function() {
-    uu.effect.fadeout(elm1, {
+    uu.effect.fade(elm1, {
+      begin: 1,
+      end: 0,
       fn: function() {
         uu.css.set(elm1, style2); // elm1にborder:系のスタイルを適用する
         uu.css.set(elm1, { backgroundColor: "white", color: "black" });
         uu.delay(function() {
-          uu.effect.fadein(elm1);
+          uu.effect.fade(elm1, { begin: 0, end: 1 });
         }, 500);
       }
     });
   }, 500);
 }
-uu.module.load("", "effect", boot);
+uu.module("", "effect", boot);
 </script>
 <pre>
 &lt;div id="result1"&gt;change bg-color and text-color. border style copied BorderBox&lt;/div&gt;
@@ -43,12 +45,14 @@ uu.module.load("", "effect", boot);
   var style2 = uu.css.get(elm2, cssProp); // border系のスタイルを抽出
 
   uu.delay(function() {
-    uu.effect.fadeout(elm1, {
+    uu.effect.fade(elm1, {
+      begin: 1,
+      end: 0,
       fn: function() {
         uu.css.set(elm1, style2); // elm1にborder:系のスタイルを適用する
         uu.css.set(elm1, { backgroundColor: "white", color: "black" });
         uu.delay(function() {
-          uu.effect.fadein(elm1);
+          uu.effect.fade(elm1, { begin: 0, end: 1 });
         }, 500);
       }
     });

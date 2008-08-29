@@ -4,8 +4,8 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>uu.css - test</title>
-<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="http://pigs.sourceforge.jp/javascript-xpath.js"></script><![endif]-->
-<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?load=perflog"></script>
+<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="./lib/javascript-xpath.js"></script><![endif]-->
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?module=dev"></script>
   <style>
   span { color:#008; }
   span.sogreen { color:green; font-weight: bolder; }
@@ -13,8 +13,8 @@
 </head>
 <body>
 <a href="../../README.htm">README</a> &gt; 
-<a href="../../SELECTOR.htm#pseudo-selector">SELECTOR</a><br />
-<a href="./selector.htm">uu.css.pseudo</a> | <a href="./css.htm">uu.css</a> | <a href="./form.htm">uu.css(form)</a>
+<a href="../../SELECTOR.htm#uu.pseudo">SELECTOR</a><br />
+<a href="./selector.htm">uu.pseudo</a> | <a href="./css.htm">uu.css</a> | <a href="./form.htm">uu.css(form)</a>
 <hr />
 <p>jQueryとの動作の違いを確認するため、テスト用のスクリプトは<a href="http://docs.jquery.com/Selectors/firstChild">jQueryのAPI Reference</a>を参考にしています。</p>
   <div>
@@ -31,22 +31,22 @@
 function handleEvent(evt) {
   var tgt = uu.event.target(evt);
   if (evt.type === "mouseover") {
-    uu.klass.add(tgt.real, "sogreen");
+    uu.klass.add(tgt.target, "sogreen");
   } else if (evt.type === "mouseout") {
-    uu.klass.remove(tgt.real, "sogreen");
+    uu.klass.remove(tgt.target, "sogreen");
   }
 }
-uu.window.ready(function() {
+uu.ready(function() {
   uu.css("div span:first-child").forEach(function(v) {
     uu.css.set(v, { textDecoration: "underline" })
-    uu.event.set(v, "hover", window.handleEvent);
+    uu.event.set(handleEvent, v, "hover");
   });
 });
 </script>
 <pre>
   uu.css("div span:first-child").forEach(function(v) {
     uu.css.set(v, { textDecoration: "underline" })
-    uu.event.set(v, "hover", window.handleEvent);
+    uu.event.set(handleEvent, v, "hover");
   });
 </pre>
 </body>

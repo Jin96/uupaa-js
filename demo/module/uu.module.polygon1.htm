@@ -15,7 +15,7 @@
 </style>
 </head>
 <body>
-<a href="../../README.htm#demo">README.htm</a> &gt; uu.module.polygon1.htm
+<a href="../../README.htm#demo">README</a> &gt; <a href="../../MODULE.htm#uu.module.polygon">MODULE</a> &gt; uu.module.polygon1.htm
 
 <canvas id="canvas0" width="640" height="480"></canvas>
 
@@ -29,8 +29,8 @@ function boot() {
     poly.draw(uu.id("canvas0").getContext("2d"), true);
   }, 2000);
 }
-uu.module.load("", "polygon", function() {
-  uu.canvas.ready(boot);
+uu.module("", "polygon", function() {
+  uu.ready(boot, "C");
 });
 </script>
 

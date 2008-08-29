@@ -106,7 +106,7 @@ function boot() {
       addNode("'box2'.getBoundingClientRect()", "left,top,right,bottom = [" + rv.left + "," + rv.top + "," + rv.right + "," + rv.bottom + "]");
     }
 
-    var b2 = uu.ui.element(uu.id("box2"));
+    var b2 = uu.element.rect(uu.id("box2"));
     window.status = uu.sprintf("box2: x[%d],y[%d],w[%d],h[%d],cw[%d],ch[%d]", b2.x, b2.y, b2.w, b2.h, b2.cw, b2.ch);
 
     addNode("'box2'.offsetWidth", uu.id("box2").offsetWidth);
@@ -128,6 +128,4 @@ function boot() {
 //  } catch(e) {}
 }
 
-uu.module.load("", "ui", function() {
-  uu.window.ready(boot);
-});
+uu.ready(boot, "D");

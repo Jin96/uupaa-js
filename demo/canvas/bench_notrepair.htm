@@ -1,0 +1,199 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>uupaa.js - canvas bench</title>
+<!--[if IE]><script id="excanvas.js" type="text/javascript" src="../../lib/excanvas.js"></script><![endif]-->
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?module=dev,canvas,ieboost&repair=0"></script>
+
+<style type="text/css">
+body { height: 100%; background-color: white; }
+#canvas { position: absolute; top: 150px; left: 0px; outline: 1px solid skyblue; }
+</style>
+</head>
+<body>
+<div>
+  <a href="../../README.htm">README</a> &gt; canvas bench <span style="color: red">(excanvas.js not repair)</span>
+  <br />
+  <input type="button" onclick="clearcanvas()" value="clear" /><br />
+  <input type="button" onclick="colorstroke(30)" value="TEST1: color stroke(30)" />
+  <input type="button" onclick="colorfill(30)" value="TEST2: color fill(30)" />
+  <input type="button" onclick="patternstroke(30)" value="TEST3: pattern stroke(30)" />
+  <input type="button" onclick="patternfill(30)" value="TEST4: pattern fill(30)" />
+  <img id="icon" src="../../img/i32.png" alt="IE" />
+  <br />
+
+  <input type="button" onclick="radialstroke(30)" value="TEST5: radial stroke(30)" />
+  <input type="button" onclick="radialfill(30)" value="TEST6: radial fill(30)" />
+  <input type="button" onclick="linearstroke(30)" value="TEST7: linear stroke(30)" />
+  <input type="button" onclick="linearfill(30)" value="TEST8: linear fill(30)" />
+
+  <canvas id="canvas" width="1000" height="1000"></canvas>
+
+</div>
+
+<script>
+var bench = uu.klass.kiss();
+bench.prototype = {
+  construct:
+            function() {
+              this.can = uu.id("canvas"),
+              this.c2d = new uu.module.canvas2d(this.can),
+              this.c2d.setStyle({ alpha: 0.2, width: 5, color: "violet" });
+            },
+  clear:    function() {
+              this.c2d.clear();
+            },
+  random:
+            function() {
+              return { x: Math.random() * this.c2d.ctx.canvas.width  | 0,
+                       y: Math.random() * this.c2d.ctx.canvas.height | 0,
+                       r: (Math.random() * 100 | 0) + 100 };
+            },
+  image:    function() {
+            },
+  setStyle: function(name,x, y, r) {
+              switch (name) {
+              case "colorStroke":   this.c2d.setStyle({ stroke: "rgba(40%, 50%, 60%, 0.4)"   }); break;
+              case "colorFill":     this.c2d.setStyle({ fill:   "rgba(40%, 50%, 60%, 0.4)"   }); break;
+              case "patternStroke": this.c2d.setStyle({ stroke: this.c2d.pattern(uu.id("icon")) }); break;
+              case "patternFill":   this.c2d.setStyle({ fill:   this.c2d.pattern(uu.id("icon")) }); break;
+              case "radialStroke":  this.c2d.setStyle({ stroke: this.c2d.gradation([x, y, r / 2, x, y, r],
+                                                                                [0.0, "red", 0.4, "violet", 1.0, "white"]) }); break;
+              case "radialFill":    this.c2d.setStyle({ fill:   this.c2d.gradation([x, y, r / 2, x, y, r],
+                                                                                [0.0, "red", 0.4, "violet", 1.0, "white"]) }); break;
+              case "linearStroke":  this.c2d.setStyle({ stroke: this.c2d.gradation([x, y, x + 140, y + 140],
+                                                                                [0.0, "orange", 0.5, "violet", 0.7, "gold", 1.0, "white"]) }); break;
+              case "linearFill":    this.c2d.setStyle({ fill:   this.c2d.gradation([x, y, x + 140, y + 70],
+                                                                                [0.0, "orange", 0.5, "violet", 0.7, "gold", 1.0, "pink"]) }); break;
+              }
+            },
+  colorStroke:
+            function() {
+              var rnd = this.random();
+              this.c2d.begin().box(rnd.x, rnd.y, 140, 140, 20, 1).close();
+            },
+  colorFill:
+            function() {
+              var rnd = this.random();
+              this.c2d.begin().box(rnd.x, rnd.y, 140, 140, 20).close();
+            },
+  patternStroke:
+            function() {
+              var rnd = this.random();
+              this.c2d.begin().box(rnd.x, rnd.y, 140, 140, 20, 1).close();
+            },
+  patternFill:
+            function() {
+              var rnd = this.random();
+              this.c2d.setStyle({ color: uu.css.get(document.body, "backgroundColor") });
+              this.c2d.begin().box(rnd.x, rnd.y, 140, 140, 20).close();
+              this.c2d.setStyle({ color: "violet" });
+            },
+// ----
+  radialStroke:
+            function() {
+              var rnd = this.random();
+              this.setStyle("radialStroke", rnd.x, rnd.y, rnd.r);
+              this.c2d.oval(rnd.x, rnd.y, 0, 0, 200, 1);
+            },
+  radialFill:
+            function() {
+              var rnd = this.random();
+              this.setStyle("radialFill", rnd.x, rnd.y, rnd.r);
+              this.c2d.oval(rnd.x, rnd.y, 0, 0, 200);
+            },
+  linearStroke:
+            function() {
+              var rnd = this.random();
+              this.setStyle("linearStroke", rnd.x, rnd.y);
+              this.c2d.begin().box(rnd.x, rnd.y, 140, 140, 20, 1).close();
+            },
+  linearFill:
+            function() {
+              var rnd = this.random();
+              this.setStyle("linearFill", rnd.x, rnd.y);
+              this.c2d.begin().box(rnd.x, rnd.y, 140, 140, 20).close();
+            }
+};
+
+function clearcanvas() {
+  var obj = new bench();
+  obj.clear();
+}
+function colorstroke(times) {
+  var obj = new bench();
+  var perf = new uu.module.perf();
+  obj.setStyle("colorStroke");
+  perf.run(times, obj, obj.colorStroke);
+  var r = perf.report();
+  uu.log("TEST1: total[%8.2f]ms, avg[%6.2f]ms, times[%d]", r.total, r.avg, r.dump.length);
+}
+function colorfill(times) {
+  var obj = new bench();
+  var perf = new uu.module.perf();
+  obj.setStyle("colorFill");
+  perf.run(times, obj, obj.colorFill);
+  var r = perf.report();
+  uu.log("TEST2: total[%8.2f]ms, avg[%6.2f]ms, times[%d]", r.total, r.avg, r.dump.length);
+}
+function patternstroke(times) {
+  var obj = new bench();
+  var perf = new uu.module.perf();
+  obj.setStyle("patternStroke");
+  perf.run(times, obj, obj.patternStroke);
+  var r = perf.report();
+  uu.log("TEST3: total[%8.2f]ms, avg[%6.2f]ms, times[%d]", r.total, r.avg, r.dump.length);
+}
+function patternfill(times) {
+  var obj = new bench();
+  var perf = new uu.module.perf();
+  obj.setStyle("patternFill");
+  perf.run(times, obj, obj.patternFill);
+  var r = perf.report();
+  uu.log("TEST4: total[%8.2f]ms, avg[%6.2f]ms, times[%d]", r.total, r.avg, r.dump.length);
+}
+function radialstroke(times) {
+  var obj = new bench();
+  var perf = new uu.module.perf();
+//  obj.setStyle("radialStroke");
+  perf.run(times, obj, obj.radialStroke);
+  var r = perf.report();
+  uu.log("TEST5: total[%8.2f]ms, avg[%6.2f]ms, times[%d]", r.total, r.avg, r.dump.length);
+}
+function radialfill(times) {
+  var obj = new bench();
+  var perf = new uu.module.perf();
+//  obj.setStyle("radialFill");
+  perf.run(times, obj, obj.radialFill);
+  var r = perf.report();
+  uu.log("TEST6: total[%8.2f]ms, avg[%6.2f]ms, times[%d]", r.total, r.avg, r.dump.length);
+}
+function linearstroke(times) {
+  var obj = new bench();
+  var perf = new uu.module.perf();
+//  obj.setStyle("linearStroke");
+  perf.run(times, obj, obj.linearStroke);
+  var r = perf.report();
+  uu.log("TEST7: total[%8.2f]ms, avg[%6.2f]ms, times[%d]", r.total, r.avg, r.dump.length);
+}
+function linearfill(times) {
+  var obj = new bench();
+  var perf = new uu.module.perf();
+//  obj.setStyle("linearFill");
+  perf.run(times, obj, obj.linearFill);
+  var r = perf.report();
+  uu.log("TEST8: total[%8.2f]ms, avg[%6.2f]ms, times[%d]", r.total, r.avg, r.dump.length);
+}
+
+function boot() {
+  if (uu.ua.ie && !(uu.config.repair & 0x1)) {
+    var e = uu.attr('input[@value*="TEST4"]');
+    e[0].disabled = true;
+  }
+}
+uu.ready(boot, "WC");
+</script>
+</body>
+</html>

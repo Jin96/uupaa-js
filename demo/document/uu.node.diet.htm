@@ -1,0 +1,71 @@
+<html><head><title>uu.node.diet</title>
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?module=dev"></script>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head><body><a href="../../README.htm">README</a> &gt; <a href="../../DOCUMENT.htm#uu.node.diet">DOCUMENT</a> &gt; uu.node.diet<br />
+<div id="root" style="background-color: yellow">div node 1-1
+  <ol>
+    <li>li node 2-1</li>
+    <li>li node 2-2<!-- comment node 2-2-1 --></li>
+    <li>li node 2-3</li>
+    <li>li node 2-4<!-- comment node 2-4-1 --></li>
+  </ol>
+  <!-- comment node 3-1 -->
+  <!-- comment node 4-1 -->
+</div>
+<input type="button" value="diet()" onclick="diet(uu.id('root'), 0)" />
+<input type="button" value="diet(depth=1)" onclick="diet(uu.id('root'), 1)" />
+<input type="button" value="diet(depth=99)" onclick="diet(uu.id('root'), 99)" />
+<input type="button" value="Show Current DOM Tree" onclick="show()" />
+
+
+<div id="result"></div>
+
+<script>
+function show() {
+  var d = window.open().document;
+  d.write("<xmp>" + document.getElementById("root").outerHTML + "</xmp>");
+  d.close();
+}
+function enumBlankNode(elm) {
+  var rv = [], i, sz, re = /\S/;
+  F(elm);
+  return rv;
+  function F(elm) {
+    var i = 0, e;
+    for (i = elm.childNodes.length; i-- > 0;) {
+      e = elm.childNodes[i];
+      switch (e.nodeType) {
+      case 1: F(e); break; // element node
+      case 3: if (re.test(e.nodeValue)) { break; } // blank text node?
+      case 8: rv.push(e); break; // comment node
+      }
+    }
+  }
+}
+uu.ready(function() {
+//    uu.log("element node(in #root) length[%d].", uu.node(uu.id("root"), 1).length);
+//    uu.log("before blank node(in #root) length[%d].", enumBlankNode(uu.id("root"), 1).length);
+  uu.log("<br />element nodes(in #root) length[%d].", uu.nodeType(1, uu.id("root"), 99).length);
+  uu.log("<br />current blank nodes(in #root) length[%d].", enumBlankNode(uu.id("root")).length);
+});
+function diet(node, depth) {
+  uu.node.diet(node, depth);
+  uu.log("<br />diet done.");
+  var blankNode = enumBlankNode(uu.id("root"));
+  uu.log("<br />current blank nodes length[%d].", blankNode.length);
+  uu.log.inspect(2, blankNode);
+}
+</script>
+<pre>
+&lt;div id="root" style="background-color: yellow"&gt;div node 1-1
+  &lt;ol&gt;
+    &lt;li&gt;li node 2-1&lt;/li&gt;
+    &lt;li&gt;li node 2-2&lt;!-- comment node 2-2-1 --&gt;&lt;/li&gt;
+    &lt;li&gt;li node 2-3&lt;/li&gt;
+    &lt;li&gt;li node 2-4&lt;!-- comment node 2-4-1 --&gt;&lt;/li&gt;
+  &lt;/ol&gt;
+  &lt;!-- comment node 3-1 --&gt;
+  &lt;!-- comment node 4-1 --&gt;
+&lt;/div&gt;
+</pre>
+</body></html>

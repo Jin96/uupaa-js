@@ -1,6 +1,6 @@
 @charset "UTF-8";
 
-body {
+html {
   background-color: black; color: whitesmoke;
   font-family:'メイリオ',Meiryo,'ヒラギノ角ゴ Pro W3','Hiragino Kaku Gothic Pro','ＭＳ Ｐゴシック',sans-serif;
   margin: 2em; line-height: 1.5;
@@ -8,8 +8,19 @@ body {
 a { color: lightblue }
 a[href] { color: lightblue }
 b { color: gold }
-pre { padding: 1em; border: 1px dashed navy; overflow: auto; color: ghostwhite; }
+pre {
+  padding: 1em; border: 1px dashed navy; overflow: auto; color: ghostwhite;
+  font-family: 'ＭＳ ゴシック',monospace;
+}
 dt { margin-top: 1em; font-weight: bold; color: lightblue }
 li { margin-bottom: 0.5em; }
+.undocumented { background-color: gray; color: black; }
 i {}
+del { color: gray; font-size: small; }
 table, tr, th, td { border: 1px solid gray; }
+caption { padding-top: 1em; }
+.run, a.run {
+  border: 4px outset silver;
+  color: black;
+  background-color: silver;
+}
