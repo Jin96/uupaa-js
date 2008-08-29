@@ -1,5 +1,5 @@
-<html><head><title>event</title>
-<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?module=dev"></script>
+<html><head><title>uupaa.js - uu.event.closure</title>
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <style>#result { background-color: lime; }</style>
 </head><body><a href="../../README.htm">README</a> &gt; <a href="../../DOCUMENT.htm#uu.event.closure">DOCUMENT</a> &gt; uu.event.handler
@@ -25,7 +25,9 @@ function boot() {
   };
   var my = new MyClass(uu.id("clicktarget"));
 }
-uu.ready(boot);
+uu.module("", "dev", function() {
+  uu.ready(boot);
+});
 </script>
 <pre>
   var MyClass = uu.klass.generic();

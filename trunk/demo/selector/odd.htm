@@ -3,9 +3,9 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<title>uu.css - test</title>
-<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="./lib/javascript-xpath.js"></script><![endif]-->
-<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?module=dev"></script>
+<title>uupaa.js uu.css(odd) - test</title>
+<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="../../lib/javascript-xpath.js"></script><![endif]-->
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
   <style>
   table { background:#f3f7f5; }
   </style>
@@ -23,11 +23,13 @@
     <tr><td>Row with Index #3</td></tr>
   </table>
 <script>
-uu.ready(function() {
-  uu.css("tr:odd").forEach(function(v) {
-    uu.css.set(v, { backgroundColor: "#bbbbff" });
-  });
-}, "W");
+uu.module("", "dev", function() {
+  uu.ready(function() {
+    uu.css("tr:odd").forEach(function(v) {
+      uu.css.set(v, { backgroundColor: "#bbbbff" });
+    });
+  }, "W");
+});
 </script>
 <pre>
   uu.css("tr:odd").forEach(function(v) {

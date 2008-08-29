@@ -1,6 +1,6 @@
-<html><head><title>uupaa.js uu.css test</title>
-<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="./lib/javascript-xpath.js"></script><![endif]-->
-<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?module=dev"></script>
+<html><head><title>uupaa.js - uu.css(nth-last-of-type) test</title>
+<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="../../lib/javascript-xpath.js"></script><![endif]-->
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 </head><body><a href="../../README.htm">README</a> &gt; <a href="../../SELECTOR.htm#uu.css">SELECTOR</a> &gt; uu.css<br />
 <div>
@@ -9,11 +9,13 @@
 </div>
 <div id="result"></div>
 <script>
+uu.module("", "dev", function() {
   uu.ready(function() {
     uu.css("p:nth-last-of-type(1)").forEach(function(v) {
       uu.log(v.innerText); // "huga"
     });
   }, "W");
+});
 </script>
 <pre>
   &lt;p&gt;hoge&lt;/p&gt;

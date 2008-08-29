@@ -4,8 +4,8 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>uu.pseudo - test</title>
-<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="./lib/javascript-xpath.js"></script><![endif]-->
-<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?module=dev"></script>
+<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="../../lib/javascript-xpath.js"></script><![endif]-->
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
   <style>
   div { color:red; }
   </style>
@@ -27,11 +27,13 @@ function countChecked(evt) {
   var n = uu.pseudo(":checked").length;
   uu.id("result").innerText = (n + (n == 1 ? " is" : " are") + " checked!");
 }
-uu.ready(function() {
-  uu.css(":checkbox").forEach(function(v) {
-    uu.event.set(countChecked, v, "click");
-  });
-}, "W");
+uu.module("", "dev", function() {
+  uu.ready(function() {
+    uu.css(":checkbox").forEach(function(v) {
+      uu.event.set(countChecked, v, "click");
+    });
+  }, "W");
+});
 </script>
 <pre>
   function countChecked(evt) {

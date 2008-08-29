@@ -4,8 +4,8 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>uu.css - test</title>
-<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="./lib/javascript-xpath.js"></script><![endif]-->
-<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?module=dev"></script>
+<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="../../lib/javascript-xpath.js"></script><![endif]-->
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
   <style>
   td { color:blue; font-weight:bold; }
   </style>
@@ -21,11 +21,14 @@
     <tr><td>Row 2</td></tr>
     <tr><td>Row 3</td></tr>
   </table>
-<script>uu.ready(function() {
-  uu.css("tr:first").forEach(function(v) {
-    uu.css.set(v, { fontStyle: "italic" });
-  });
-}, "W");
+<script>
+uu.module("", "dev", function() {
+  uu.ready(function() {
+    uu.css("tr:first").forEach(function(v) {
+      uu.css.set(v, { fontStyle: "italic" });
+    });
+  }, "W");
+});
 </script>
 <pre>
   uu.css("tr:first").forEach(function(v) {

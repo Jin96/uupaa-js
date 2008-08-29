@@ -4,8 +4,8 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>uu.css - test</title>
-<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="./lib/javascript-xpath.js"></script><![endif]-->
-<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?module=dev"></script>
+<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="../../lib/javascript-xpath.js"></script><![endif]-->
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
   <style>
   td { text-align:center; }
   </style>
@@ -22,12 +22,14 @@
     <tr><td></td><td>TD#5</td></tr>
   </table>
 <script>
-uu.ready(function() {
-  uu.css("td:empty").forEach(function(v) {
-    v.innerText = "Was empty!";
-    uu.css.set(v, { background: "rgb(255,220,200)" });
-  });
-}, "W");
+uu.module("", "dev", function() {
+  uu.ready(function() {
+    uu.css("td:empty").forEach(function(v) {
+      v.innerText = "Was empty!";
+      uu.css.set(v, { background: "rgb(255,220,200)" });
+    });
+  }, "W");
+});
 </script>
 <pre>
   uu.css("td:empty").forEach(function(v) {

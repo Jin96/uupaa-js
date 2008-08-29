@@ -512,8 +512,10 @@ uu.module.window.layout.prototype = {
 
               // IE Quirks Mode
               if (uu.ua.ie && !uu.ua.std) {
+/* ▼▼
                 w += 4; // border-width-left + border-width-right
                 h += 4; // border-width-top + border-width-bottom
+ */
               }
 
               // resize limit
@@ -558,8 +560,10 @@ uu.module.window.layout.prototype = {
 
               // IE Quirks Mode
               if (uu.ua.ie && !uu.ua.std) {
+/* ▼▼
                 rect.w += 2; // border-width-right
                 rect.h += 2; // border-width-bottom
+ */
               }
               uu.msg.send(this._fdc.layout, "*L_RESIZE", rect);
             },

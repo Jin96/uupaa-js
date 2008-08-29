@@ -1,15 +1,17 @@
-<html><head><title>Array iteration</title>
-<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?module=dev"></script>
+<html><head><title>uupaa.js Array.some test</title>
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 </head><body><a href="../../README.htm">README</a> &gt; <a href="../../DOCUMENT.htm#Array.some">DOCUMENT</a> &gt; Array.some<br />
 <div id="result"></div>
 <script>
+uu.module("", "dev", function() {
   uu.ready(function() {
     var rv = [1, 2, 3].some(function(v, i) {
       return uu.isS(v); // typeof v === "string" と同じ
     });
     uu.log(rv); // false (全要素は数値なのでfalse)
   }, "W");
+});
 </script>
 <pre>
     var rv = [1, 2, 3].some(function(v, i) {

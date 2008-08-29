@@ -4,6 +4,7 @@
 </head><body><a href="../../README.htm">README</a> &gt; <a href="../../MODULE.htm#uu.module.messagePump">MODULE</a> &gt; uu.module.messagePump<br />
 <div id="result"></div>
 <script>
+uu.module("", "dev", function() {
   uu.ready(function() {
 
     // uu.klass.generic, uu.klass.singleton 以外の方法でメッセージを受け取れるオブジェクトを生成する
@@ -25,6 +26,7 @@
     uu.msg.post(0, "Hello"); // alert("Hello") x 2
 
   }, "W");
+});
 </script>
 <pre>
     // uu.klass.generic, uu.klass.singleton 以外の方法でメッセージを受け取れるオブジェクトを生成する

@@ -1,9 +1,10 @@
-<html><head><title>Class</title>
-<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?module=dev"></script>
+<html><head><title>uupaa.js - uu.klass.kiss test</title>
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 </head><body><a href="../../README.htm">README</a> &gt; <a href="../../DOCUMENT.htm#uu.klass.kiss">DOCUMENT</a> &gt; uu.klass.kiss<br />
 <div id="result"></div>
 <script>
+uu.module("", "dev", function() {
   uu.ready(function() {
     var myClass = uu.klass.kiss();
     myClass.prototype = {
@@ -19,6 +20,7 @@
     var my = new myClass(10, 20); // 自動的に construct() を実行する。
     uu.log("%d", my.myMethod()); // "200"
   }, "W");
+});
 </script>
 <pre>
     var myClass = uu.klass.kiss();

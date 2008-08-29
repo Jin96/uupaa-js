@@ -4,8 +4,8 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>uu.css - test</title>
-<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="./lib/javascript-xpath.js"></script><![endif]-->
-<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?module=dev"></script>
+<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="../../lib/javascript-xpath.js"></script><![endif]-->
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
   <style>
   </style>
 </head>
@@ -20,11 +20,14 @@
     <tr><td>TD #3</td><td>TD #4</td><td>TD #5</td></tr>
     <tr><td>TD #6</td><td>TD #7</td><td>TD #8</td></tr>
   </table>
-<script>uu.ready(function() {
-  uu.css("td:eq(2)").forEach(function(v) {
-    uu.css.set(v, { color: "red" });
-  });
-}, "W");
+<script>
+uu.module("", "dev", function() {
+  uu.ready(function() {
+    uu.css("td:eq(2)").forEach(function(v) {
+      uu.css.set(v, { color: "red" });
+    });
+  }, "W");
+});
 </script>
 <pre>
   uu.css("td:eq(2)").forEach(function(v) {

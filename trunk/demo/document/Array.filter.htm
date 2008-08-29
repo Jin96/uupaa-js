@@ -1,15 +1,17 @@
-<html><head><title>Array iteration</title>
-<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?module=dev"></script>
+<html><head><title>uupaa.js Array.filter test</title>
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 </head><body><a href="../../README.htm">README</a> &gt; <a href="../../DOCUMENT.htm#Array.filter">DOCUMENT</a> &gt; Array.filter<br />
 <div id="result"></div>
 <script>
+uu.module("", "dev", function() {
   uu.ready(function() {
     var rv = ["a", 2, "3"].filter(function(v, i) {
       return uu.isS(v); // typeof v === "string" と同じ
     });
     uu.log(rv); // ["a", "3"]
   }, "W");
+});
 </script>
 <pre>
     var rv = ["a", 2, "3"].filter(function(v, i) {

@@ -4,8 +4,8 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>uu.pseudo - test</title>
-<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="./lib/javascript-xpath.js"></script><![endif]-->
-<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?module=dev"></script>
+<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="../../lib/javascript-xpath.js"></script><![endif]-->
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
   <style>
   </style>
 </head>
@@ -20,11 +20,13 @@
     <input name="id" />
   </form>
 <script>
-uu.ready(function() {
-  uu.pseudo(":enabled", null, "input").forEach(function(v) {
-    v.value = "this is it";
-  });
-}, "W");
+uu.module("", "dev", function() {
+  uu.ready(function() {
+    uu.pseudo(":enabled", null, "input").forEach(function(v) {
+      v.value = "this is it";
+    });
+  }, "W");
+});
 </script>
 <pre>
   uu.pseudo(":enabled", null, "input").forEach(function(v) {

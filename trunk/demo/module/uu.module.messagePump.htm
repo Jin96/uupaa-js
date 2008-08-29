@@ -1,9 +1,10 @@
 <html><head><title>uupaa.js - uu.module.messagePump test</title>
-<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?module=dev"></script>
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 </head><body><a href="../../README.htm">README</a> &gt; <a href="../../MODULE.htm#uu.module.messagePump.post">MODULE</a> &gt; uu.module.messagePump<br />
 <div id="result"></div>
 <script>
+uu.module("", "dev", function() {
   uu.ready(function() {
     var XFile = uu.klass.generic();
     XFile.prototype = {
@@ -24,6 +25,7 @@
     uu.msg.post([agent2, agent3], "Samantha was abducted",
                                         { from: "Mulder"      }); // モルダーが(自分以外の人に)いつものご乱心
   }, "W");
+});
 </script>
 <pre>
     var XFile = uu.klass.generic();
