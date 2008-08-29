@@ -1,0 +1,48 @@
+<html><head><title>uupaa.js - uu.module.messagePump test</title>
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head><body><a href="../../README.htm">README</a> &gt; <a href="../../MODULE.htm#uu.module.messagePump">MODULE</a> &gt; uu.module.messagePump<br />
+<div id="result"></div>
+<script>
+  uu.ready(function() {
+
+    // uu.klass.generic, uu.klass.singleton 以外の方法でメッセージを受け取れるオブジェクトを生成する
+    receiverObject1 = {
+      uid: uu.uid(), // 例: "uniqueID1"
+      msgbox: function(msg, p1, p2) {
+        alert(msg);
+      }
+    };
+    receiverObject2 = {
+      uid: uu.uid(), // 例: "uniqueID2"
+      msgbox: function(msg, p1, p2) {
+        alert(msg);
+      }
+    };
+    uu.msg.set(receiverObject1);
+    uu.msg.set(receiverObject2);
+
+    uu.msg.post(0, "Hello"); // alert("Hello") x 2
+
+  }, "W");
+</script>
+<pre>
+    // uu.klass.generic, uu.klass.singleton 以外の方法でメッセージを受け取れるオブジェクトを生成する
+    receiverObject1 = {
+      uid: uu.uid(), // 例: "uniqueID1"
+      msgbox: function(msg, p1, p2) {
+        alert(msg);
+      }
+    };
+    receiverObject2 = {
+      uid: uu.uid(), // 例: "uniqueID2"
+      msgbox: function(msg, p1, p2) {
+        alert(msg);
+      }
+    };
+    uu.msg.set(receiverObject1);
+    uu.msg.set(receiverObject2);
+
+    uu.msg.post(0, "Hello"); // alert("Hello") x 2
+</pre>
+</body></html>

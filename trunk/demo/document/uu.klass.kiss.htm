@@ -1,0 +1,38 @@
+<html><head><title>Class</title>
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?module=dev"></script>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head><body><a href="../../README.htm">README</a> &gt; <a href="../../DOCUMENT.htm#uu.klass.kiss">DOCUMENT</a> &gt; uu.klass.kiss<br />
+<div id="result"></div>
+<script>
+  uu.ready(function() {
+    var myClass = uu.klass.kiss();
+    myClass.prototype = {
+      construct: function(var1, var2 /*, ... */) {
+        // 初期化
+        this.privateVar1 = var1;
+        this.privateVar2 = var2;
+      },
+      myMethod: function() {
+        return this.privateVar1 * this.privateVar2;
+      }
+    };
+    var my = new myClass(10, 20); // 自動的に construct() を実行する。
+    uu.log("%d", my.myMethod()); // "200"
+  }, "W");
+</script>
+<pre>
+    var myClass = uu.klass.kiss();
+    myClass.prototype = {
+      construct: function(var1, var2 /*, ... */) {
+        // 初期化
+        this.privateVar1 = var1;
+        this.privateVar2 = var2;
+      },
+      myMethod: function() {
+        return this.privateVar1 * this.privateVar2;
+      }
+    };
+    var my = new myClass(10, 20); // 自動的に construct() を実行する。
+    uu.log("%d", my.myMethod()); // "200"
+</pre>
+</body></html>

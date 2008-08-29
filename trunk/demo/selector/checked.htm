@@ -3,9 +3,9 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<title>uu.css.pseudo - test</title>
-<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="http://pigs.sourceforge.jp/javascript-xpath.js"></script><![endif]-->
-<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?load=perflog"></script>
+<title>uu.pseudo - test</title>
+<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="./lib/javascript-xpath.js"></script><![endif]-->
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?module=dev"></script>
   <style>
   div { color:red; }
   </style>
@@ -21,25 +21,25 @@
     <input type="checkbox" name="newsletter" checked="checked" value="Monthly" />
     <input type="checkbox" name="newsletter" value="Yearly" />
   </form>
-  <div></div>
+  <div id="result"></div>
 <script>
 function countChecked(evt) {
-  var n = uu.css.pseudo(":checked").length;
-  uu.tag("div")[0].innerText = (n + (n == 1 ? " is" : " are") + " checked!");
+  var n = uu.pseudo(":checked").length;
+  uu.id("result").innerText = (n + (n == 1 ? " is" : " are") + " checked!");
 }
-uu.window.ready(function() {
+uu.ready(function() {
   uu.css(":checkbox").forEach(function(v) {
-    uu.event.set(v, "click", countChecked);
+    uu.event.set(countChecked, v, "click");
   });
-});
+}, "W");
 </script>
 <pre>
   function countChecked(evt) {
-    var n = uu.css.pseudo(":checked").length;
-    uu.tag("div")[0].innerText = (n + (n == 1 ? " is" : " are") + " checked!");
+    var n = uu.pseudo(":checked").length;
+    uu.id("result").innerText = (n + (n == 1 ? " is" : " are") + " checked!");
   }
   uu.css(":checkbox").forEach(function(v) {
-    uu.event.set(v, "click", countChecked);
+    uu.event.set(countChecked, v, "click");
   });
 </pre>
 </body>

@@ -5,8 +5,6 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>uupaa.js - ReadMe</title>
 <style type="text/css">@import url(./README.css);</style>
-<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="http://pigs.sourceforge.jp/javascript-xpath.js"></script><![endif]-->
-<script id="uupaa.js" type="text/javascript" src="./uupaa.js?load=perflog,image,ieboost,tip"></script>
 </head>
 <body>
 <p>
@@ -14,22 +12,37 @@
    | <a href="./README.htm#demo">DEMO</a>
    | <a href="./CHANGELOG.htm">ChangeLog</a>
    | <a href="./LICENSE.htm">License</a> |<br />
+   | <a href="./INDEX.htm">Index</a>
    | <a href="./DOCUMENT.htm">Document</a>
    | <a href="./SELECTOR.htm">Selector</a>
    | <a href="./MODULE.htm">Module</a>
    | <a href="./GLOSSARY.htm">Glossary</a>
-   | <a href="./doc/reference/index.html">API Reference</a>
    |
 </p>
 <hr />
 <h1>uupaa.js</h1>
 
-<p>uupaa.jsは、日本人クリエーター向けのJavaScriptライブラリです。クロスブラウザ対応です。</p>
-<p>uupaa.jsは生まれたばかりで、まだ実績がありません。<br />
-   jQuery や Prototype.js ユーザからみれば「あれも無い。これも無い」といった状態です。<br />
-   “選択肢が増えるのは悪くない”と思える方は、一度<a href="#demo">デモ</a>をご覧になってください。</p>
+<p>uupaa.jsは、日本生まれのコンパクトでクロスブラウザなJavaScriptライブラリです。</p>
+<p>“ライブラリの選択肢が増えるのは悪くない”と思える方は、一度<a href="#demo">デモ</a>をご覧になってください。</p>
 
-<p><a href="./FEATURE.htm">機能比較 - (Feature comparison) ...</a></p>
+<p><a href="./FEATURE.htm" class="run">Feature comparison - 機能比較...</a></p>
+
+
+<h2><a name="demo">DEMO - デモ</a></h2>
+<p>簡単なデモを用意しました。これ以外にも動作確認用のhtmlが demo/ にあります(作りかけのものも混じっています)。</p>
+<ul>
+  <li>Effect: <a href="demo/module/uu.module.effect.htm">基本エフェクト</a></li>
+<!--
+  <li><a href="demo/module/uu.image.preload.htm">image.preload(画像の先読み)</a></li>
+ -->
+  <li>UI: <a href="demo/module/uu.module.drag.htm">Drag &amp; Drop - ドラッグ &amp; ドロップ</a></li>
+  <li>3D:  <a href="demo/module/uu.module.polygon1.htm">Cube - キューブ</a>, 
+      <a href="demo/module/uu.module.polygon8.htm">Cube x 8 - キューブ8個</a></li>
+  <li>Timer: <a href="demo/module/uu.module.virtualTimer.htm">Virtual Timer - 仮想タイマー</a></li>
+  <li>Request: <a href="demo/document/uu.ajax.htm">Ajax</a>,
+      <a href="demo/document/uu.jsonp.htm">JSONP</a></li>
+</ul>
+
 <table>
 <tr><th><h2>アピールポイント</h2></th><th><h2>ウィークポイント</h2></th></tr>
 <tr><td>
@@ -40,145 +53,74 @@
       クリティカルな機能を提供します。</li>
   <li>Cover Flowやポリゴン, Text-To-Speechなど、<br />
       他には無い特別な機能があります。</li>
-  <li>canvasによるフロントエンドにフォーカスしています(いきます)。</li>
+  <li><a href="demo/canvas/demo.htm">IEでもしっかりcanvasが使えます。</a></li>
   <li><a href="./SELECTOR.htm">セレクタ</a>が豊富です。<br />XPath, CSS3セレクタ, jQueryの独自セレクタも使用可能です。</li>
+  <li><a href="./demo/widget/uu.module.widget.window.htm">カジュアルで軽量なUI</a>が(近い将来)使えます。</li>
 </ol>
 </td><td>
 <ol>
   <li>実績がありません。</li>
-  <li>とても流動的な状態です。<br />メソッド名の変更など、痛い修正が十分にありえます。</li>
-  <li>ドキュメント周りがまだまだです。</li>
-  <li>デバッグ支援用の機能がまだまだです。</li>
+  <li>一部のモジュールのドキュメントがまだ存在しません。</li>
 </ol>
 </td></tr>
 </table>
 
-<h2>サポートブラウザ</h2>
+<h2>Support Browser - サポートブラウザ</h2>
 <ul>
  <li>Internet Explorer 6+ <i>(IE5.5でも動くかもしれないが未検証のためサポート外)</i></li>
- <li>Safari3+ <i>(Safari2のバグに対処できていないためサポート外)</i></li>
+ <li>Safari3+ <i>(Safari2はサポート外)</i></li>
  <li>Opera9+ <i>(canvasやXPathなどが使用できないためOpera8以下はサポート外)</i></li>
  <li>Firefox2+ <i>(Firefox1.5系以下は未検証のためサポート外)</i></li>
 </ul>
 <p>Opera9.5, Firefox3, Internet Explorer 8β1 でも動作を確認しています。<i>(IE8βには未実装の機能があり、その影響でいくつかのデモは動きません)</i></p>
 
-<h2>導入方法</h2>
+<h2>Installation - 導入方法</h2>
 
 <p>uupaa.jsを使用したページをIEで動かすためには、
   <a href="http://coderepos.org/share/wiki/JavaScript-XPath">JavaScript-XPath</a>と
   <a href="http://excanvas.sourceforge.net/">ExplorerCanvas</a>が必要になります。</p>
-<p>これらは非同梱です。配布元からダウンロードし、例を参考に配置してください。</p>
+<p>JavaScript-XPathは /lib/javascript-xpath.js として uupaa.js に同梱されていますが、
+  ExplorerCanvasは非同梱です。配布元からダウンロードし、例を参考に配置してください。</p>
 
-<h3>ファイルの配置例</h3>
+<h3>Folder tree - ファイルの配置例</h3>
 <p>http://www.example.com/js/ 以下にuupaa.jsを設置する例です。</p>
 
 <ul>
-  <li>http://www.example.com/</li>
-  <ul>
-    <li>js/</li>
+  <li>http://www.example.com/
     <ul>
-      <li>uupaa.js</li>
-      <li>uu.module.drag.js <i>- (ドラッグ&amp;ドロップモジュール)</i></li>
-      <li>uu.module.effect.js <i>- (エフェクトモジュール)</i></li>
-      <li>uu.module.image.js <i>- (イメージモジュール)</i></li>
-      <li>uu.module.pmvc.js <i>- (Pluggable MVCモジュール)</i></li>
-      <li>uu.module.polygon.js <i>- (ポリゴンモジュール)</i></li>
-      <li>uu.module.ui.js <i>- (UI, キーボード, マウス, 座標系モジュール)</i></li>
-      <li>demo/ <i>- (デモ/テスト用ディレクトリ)</i></li>
-      <li>doc/ <i>- (ドキュメント, リファレンス用ディレクトリ)</i></li>
-      <li>img/ <i>- (画像,CSS用ディレクトリ)</i></li>
-      <li>lib/ <i>- (外部ライブラリ用ディレクトリ)</i></li>
-      <ul>
-        <li><b>javascript-xpath.js</b> <i>- (JavaScript-XPath) - IEで必要</i></li>
-        <li><b>excanvas.js</b> <i>- (ExplorerCanvas) - IEで必要</i></li>
-      </ul>
-      <li>mini/ <i>- (圧縮済みファイル用ディレクトリ)</i></li>
-      <ul>
-        <li>uupaa.js <i>- (圧縮済みのuupaa.js)</i></li>
-        <li>uu.module.effect.js <i>- (圧縮済みのuu.module.effect.js)</i></li>
-        <li>...</li>
-      </ul>
+      <li>js/
+        <ul>
+          <li>uupaa.js</li>
+          <li>uu.module.drag.js <i>- (ドラッグ&amp;ドロップモジュール)</i></li>
+          <li>uu.module.xxx.js ...</li>
+          <li>demo/ <i>- (デモ/テスト用ディレクトリ)</i></li>
+          <li>img/ <i>- (画像,CSS用ディレクトリ)</i></li>
+          <li>lib/ <i>- (外部ライブラリ用ディレクトリ)</i>
+            <ul>
+              <li><b>javascript-xpath.js</b> <i>- (JavaScript-XPath) - IEで必要</i></li>
+              <li><b>excanvas.js</b> <i>- (ExplorerCanvas) - IEで必要</i></li>
+            </ul>
+          </li>
+          <li>mini/ <i>- (圧縮済みファイル用ディレクトリ)</i>
+            <ul>
+              <li>uupaa.js <i>- (圧縮済みのuupaa.js)</i></li>
+              <li>uu.module.xxx.js ...</li>
+            </ul>
+          </li>
+        </ul>
+      </li>
     </ul>
-  </ul>
+  </li>
 </ul>
 
-<h3>シンプルな例 - <a href="demo/compat/HelloWorld.htm">Run...</a></h3>
-<pre>
-&lt;!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"&gt;
-&lt;html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja"&gt;
-&lt;head&gt;
-&lt;meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /&gt;
-&lt;title&gt;Hello uupaa.js World&lt;/title&gt;
-&lt;!--[if IE]&gt;&lt;script id="excanvas.js" type="text/javascript" src="../../lib/excanvas.js"&gt;&lt;/script&gt;&lt;![endif]--&gt;
-&lt;script type="text/javascript" src="../../uupaa.js"&gt;&lt;/script&gt;
-&lt;style type="text/css"&gt;
-#canvas, #msg { position: absolute; top: 0; left: 0 }
-#msg { font-weight: bold }
-&lt;/style&gt;
-&lt;/head&gt;
-&lt;body&gt;
-&lt;a href="../../README.htm"&gt;README&lt;/a&gt; &amp;gt; HelloWorld
-
-&lt;canvas id="canvas" width="400" height="400"&gt;&lt;/canvas&gt;&lt;p id="msg"&gt;Hello Japanese Creator!&lt;/p&gt;
-&lt;script type="text/javascript"&gt;
-function boot() { 
-  var canvas = uu.id("canvas"), ctx = canvas.getContext("2d"),
-      color = new uu.module.color(0xff9999);
-  function draw() {
-    color.add(0x10);
-    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    ctx.beginPath();
-    ctx.fillStyle = color.toRGBString();
-    ctx.arc(200, 200, 180, 0, Math.PI * 2, false);
-    ctx.fill();
-  }
-  uu.effect.move(uu.id("msg"));
-  uu.effect.move(canvas);
-  uu.tm10.set(function() {
-    uu.effect.fade(canvas, { speed: 2000, fn: draw })
-  }, 2200);
-}
-uu.module.load("", "io,ui,effect", function() {
-  uu.dom.ready(function() {
-    uu.canvas.ready(boot);
-  });
-});
-&lt;/script&gt;
-&lt;/body&gt;
-&lt;/html&gt;
-</pre>
-<h2><a name="demo">デモ</a></h2>
-<p>簡単なデモを用意しました。これ以外にも動作確認用のhtmlが demo/compat/ にあります(作りかけのものも混じっています)。</p>
+<h2><a name="dev">Coming Soon - 開発中の機能など</a></h2>
 <ul>
-  <li><a href="demo/compat/uu.module.ajax.htm">Ajax</a>,
-      <a href="demo/compat/uu.module.json.htm">JSONP</a></li>
-      <a href="demo/compat/uu.image.preload.htm">image.preload(画像の先読み)</a></li>
-  <li><a href="demo/compat/uu.effect.htm">エフェクト</a> - Version 0.2で11個のエフェクトを追加しました</li>
-  <li><a href="demo/compat/uu.module.drag.htm">ドラッグ &amp; ドロップ</a></li>
-  <li><a href="demo/compat/uu.module.polygon1.htm">キューブ</a>, 
-      <a href="demo/compat/uu.module.polygon8.htm">キューブ8個</a></li>
-  <li><a href="demo/compat/uu.module.virtualTimer.htm">仮想タイマー</a></li>
+  <li><a href="demo/widget/uu.module.widget.window.htm">Window GUI(基礎部分のみ)</a></li>
+  <li><a href="demo/canvas/rot_img.htm">画像のZ軸回転エフェクト(IEのみで動作)</a></li>
+  <li><a href="demo/canvas/bench.htm">Canvas bench</a></li>
   <li><a href="demo/coverflow/coverflow.htm">Cover Flow(作りかけ)</a>(Firefox2のみ)</li>
-  <li><a href="demo/compat/uu.module.perry.htm">ペリーさん(作りかけ)</a>(IE or Firefox + IETabユーザのみ)</li>
+  <li><a href="demo/module/uu.module.perry.htm">ペリーさん(作りかけ)</a>(IE or Firefox + IETabユーザのみ)</li>
 </ul>
-
-<h2>今後の予定</h2>
-<p>canvasを使用したUIモジュールをリリースする予定です。</p>
-<p>その他、ニーズの多い機能を中心に機能強化を行っていきます。</p>
-
-<h2>コードの歩き方</h2>
-<p>ソースコードを読まれる方は、
-  <a href="./SELECTOR.htm">セレクタ</a>、
-  <a href="./GLOSSARY.htm">用語集</a>、<a href="./doc/reference/index.html">リファレンス</a>を参考にしてください。</p>
-
-<script type="text/javascript">
-function boot() {
-  uu('a[href]:contains("Run")').setCSS({ border: "4px outset silver", backgroundColor: "silver", color: "black" });
-  uu('a[href]:contains("Feature")').setCSS({ border: "4px outset silver", backgroundColor: "silver", color: "black" });
-}
-uu.window.ready(boot);
-</script>
 </body>
 </html>
 

@@ -5,39 +5,74 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>Hello uupaa.js World</title>
 <!--[if IE]><script id="excanvas.js" type="text/javascript" src="http://pigs.sourceforge.jp/excanvas.js"></script><![endif]-->
-<script type="text/javascript" src="../../uupaa.js"></script>
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?module=dev,canvas,ieboost"></script>
+
+<!-- using firebug lite offline -->
+<!--
+  <script language="javascript" type="text/javascript" src="../../lib/pi.js"></script>
+  <script language="javascript" type="text/javascript" src="../../lib/firebug-lite.js"></script>
+ -->
+
+
 <style type="text/css">
 #canvas, #msg { position: absolute; top: 0; left: 0 }
 #msg { font-weight: bold }
 </style>
 </head>
 <body>
+<!--
 <a href="../../README.htm">README</a> &gt; HelloWorld
+ -->
+<img id="safari" class="alpha" src="../../img/s32.png" alt="Safari" />
+<g_vml_:roundrect style="height:100;left:300;top:300;width:200" fillcolor="red" arcsize="5%"></g_vml_:roundrect>'
 
-<canvas id="canvas" width="400" height="400"></canvas><p id="msg">Hello Japanese Creator!</p>
+<canvas id="canvas" width="400" height="400"></canvas>
+<!-- <p id="msg">Hello Casual Creator!</p> -->
 <script type="text/javascript">
 function boot() { 
-  var canvas = uu.id("canvas"), ctx = canvas.getContext("2d"),
-      color = new uu.module.color(0xff9999);
+  var e = uu.id("canvas"),
+      c2d = new uu.module.canvas2d(e),
+      color = uu.color.hash("violet");
   function draw() {
-    color.add(0x10);
-    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    ctx.beginPath();
-    ctx.fillStyle = color.toRGBString();
-    ctx.arc(200, 200, 180, 0, Math.PI * 2, false);
-    ctx.fill();
+    color = uu.color.ratio(color, -10, 0, 0);
+    c2d.setStyle("alpha", 0.3);
+
+    // radial
+    c2d.setStyle({ fill: c2d.gradation([200, 200, 90, 200, 200, 180],
+                                    [0.0, "red", 0.4, uu.color.rgba(color), 1.0, "white"]),
+                color: "pink",
+                width: 5 });
+    c2d.clear().oval(200, 200, 0, 0, 200); // 1 is wire
+
+
+    // linear
+    c2d.setStyle({ fill: c2d.gradation([0, 0, 140, 140],
+                                    [0.0, "red", 0.3, "green", 0.5, "blue", 1.0, "white"]) });
+    c2d.begin().box(0, 0, 140, 140, 20).close();
+
+    // pattern
+    c2d.setStyle({ fill: c2d.pattern(uu.id("safari")) });
+    c2d.begin().box(150, 0, 140, 140, 20).close();
+
+    // color fill
+    c2d.setStyle({ fill: "rgba(40%, 50%, 60%, 0.4)" });
+    c2d.begin().box(0, 150, 140, 140, 20).close();
+
+    // color stroke
+    c2d.setStyle({ stroke: "rgba(40%, 50%, 60%, 0.4)" });
+    c2d.begin().box(150, 150, 140, 140, 20, 1).close();
+
   }
+/*
   uu.effect.move(uu.id("msg"));
-  uu.effect.move(canvas);
-  uu.tm10.set(function() {
-    uu.effect.fade(canvas, { speed: 2000, fn: draw })
+  uu.effect.move(e);
+  uu.vtmHighSpeed.set(function() {
+    uu.effect.fade(e, { speed: 2000, fn: draw })
   }, 2200);
+ */
+  draw();
 }
-uu.module.load("", "io,ui,effect", function() {
-  uu.dom.ready(function() {
-    uu.canvas.ready(boot);
-  });
-});
+uu.ready(boot, "WC");
 </script>
 </body>
 </html>

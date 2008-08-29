@@ -1,0 +1,540 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>uupaa.js - Index</title>
+<script id="uupaa.js" type="text/javascript" src="./uupaa.js?module=dev"></script>
+<style type="text/css">@import url(./README.css);</style>
+</head>
+<body>
+<p>
+   | <a href="http://code.google.com/p/uupaa-js/">Project Home(Google Code)</a>
+   | <a href="./README.htm#demo">DEMO</a>
+   | <a href="./CHANGELOG.htm">ChangeLog</a>
+   | <a href="./LICENSE.htm">License</a> |<br />
+   | <a href="./INDEX.htm">Index</a>
+   | <a href="./DOCUMENT.htm">Document</a>
+   | <a href="./SELECTOR.htm">Selector</a>
+   | <a href="./MODULE.htm">Module</a>
+   | <a href="./GLOSSARY.htm">Glossary</a>
+   |
+</p>
+<a href="./README.htm">README</a> &gt; INDEX<br />
+<hr />
+
+<h1>Index</h1>
+
+<script type="text/javascript">
+var index = {
+  "uupaa.js::Core": {
+    "UU": { en: "Constant Values" },
+    "uu": { en: "Core" },
+    "uu.mix": { en: "Object mixin", ja: "オブジェクトのミックスイン" },
+    "uu.mix.param": { en: "Object mixin for parameters", ja: "パラメタのミックスイン" }
+  },
+  "uupaa.js::Detect": {
+    "uu.ua": { en: "Detect User-Agent and Functions", ja: "ブラウザと機能の判別" },
+    "uu.ua.opera": { type: "Boolean", en: "is Opera" },
+    "uu.ua.ie": { type: "Boolean", en: "is Internet Explorer" },
+    "uu.ua.gecko": { type: "Boolean", en: "is Gecko(Firefox, Camino)" },
+    "uu.ua.webkit": { type: "Boolean", en: "is WebKit(Safari, Konqueror)" },
+    "uu.ua.ipod": { type: "Boolean", en: "is iPod/iPhone(Safari)" },
+    "uu.ua.wii": { type: "Boolean", en: "is Wii Internet channel" },
+    "uu.ua.air": { type: "Boolean", en: "is Adobe AIR" },
+    "uu.ua.std": { type: "Boolean", en: "is Standard Mode, false is Quirks Mode" },
+    "uu.ua.domrange": { type: "Boolean", en: "is DOM Level2 Range Module" },
+    "uu.ua.version": { type: "Number", en: "Version number" },
+    "uu.ua.ie6": { type: "Boolean", en: "is Internet Explorer Version 6" },
+    "uu.ua.ie8": { type: "Boolean", en: "is Internet Explorer Version 8" },
+    "uu.ua.firefox3": { type: "Boolean", en: "is Firefox Version 3" },
+    "uu.ua.kestrel": { type: "Boolean", en: "is Opera Version 9.5" }
+  },
+  "uupaa.js::Iterator": {
+    "uu.forEach": { en: "Executes a provided function once per hash element", ja: "全要素を評価" },
+    "uu.filter": { en: "Creates a new hash with all elements that pass the test implemented by the provided function", ja: "全要素を評価し、結果が真の要素を配列で返す" },
+    "Array.prototype.forEach": { en: "Executes a provided function once per array element", ja: "全要素をfnで評価する" },
+    "Array.prototype.filter": { en: "Creates a new array with all elements that pass the test implemented by the provided function", ja: "全要素を評価し、結果が真の要素を配列で返す" },
+    "Array.prototype.every": { en: "Tests whether all elements in the array pass the test implemented by the provided function", ja: "全要素を評価し、全て真ならtrue,偽があればループを中断しfalseを返す" },
+    "Array.prototype.some": { en: "Tests whether some element in the array passes the test implemented by the provided function", ja: "全要素を評価し、全て偽ならfalse,真があればループを中断しtrueを返す" },
+    "Array.prototype.map": { en: "Creates a new array with the results of calling a provided function on every element in this array", ja: "全要素を評価し配列を返す" }
+  },
+  "uupaa.js::Selector": {
+    "uu.id": { en: "ID Selector", ja: "IDセレクタ", link: "SELECTOR.htm" },
+    "uu.tag": { en: "Tag/Element Selector", ja: "タグ(要素)セレクタ", link: "SELECTOR.htm" },
+    "uu.klass": { en: "Class Selector", ja: "クラスセレクタ", link: "SELECTOR.htm" },
+    "uu.attr": { en: "Attribute Selector", ja: "属性セレクタ", link: "SELECTOR.htm" },
+    "uu.xpath": { en: "XPath Selector", ja: "XPathセレクタ", link: "SELECTOR.htm" },
+    "uu.xsnap": { en: "XPath Selector on snapshot", ja: "XPathスナップショット", link: "SELECTOR.htm" },
+    "uu.css": { en: "CSS Selector", ja: "CSSセレクタ", link: "SELECTOR.htm" },
+    "uu.pseudo": { en: "Pseudo Selector", ja: "擬似セレクタ", link: "SELECTOR.htm" },
+    "uu.nodeType": { en: "NodeType Selector", ja: "ノードタイプセレクタ", link: "SELECTOR.htm" },
+    "uu.textNode": { en: "Text node Selector", ja: "TextNodeセレクタ", link: "SELECTOR.htm" },
+    "uu.toXPath": { en: "Convert CSS3 selector into XPath", ja: "CSS3セレクタをXPathに変換", link: "SELECTOR.htm" },
+    "List_of_CSS_Selectors": { en: "List of the available CSS selectors", ja: "uu.css で使用可能なCSSセレクタの一覧", type: "List", link: "SELECTOR.htm" },
+    "List_of_jQuery_Selectors": { en: "List of the available jQuery selectors", ja: "uu.css で使用可能なjQuery独自セレクタの一覧", type: "List", link: "SELECTOR.htm" },
+    "List_of_Pseudo_Selectors": { en: "List of the available pseudo selectors", ja: "uu.pseudo で使用可能な擬似セレクタの一覧", type: "List", link: "SELECTOR.htm" }
+  },
+  "uupaa.js::Node": {
+    "uu.node.insert": { en: "Insert ELEMENET_NODE or HTMLString", ja: "ELEMENT_NODEまたはHTML文字列をノード化し挿入" },
+    "uu.node.insertText": { en: "Insert TEXT_NODE or TextString", ja: "TEXT_NODE または テキスト文字列をノード化し挿入" },
+    "uu.node.replace": { en: "Replace oldNode with node", ja: "nodeとoldNodeを入れ替える" },
+    "uu.node.remove": { en: "Remove node", ja: "nodeを取り除く" },
+    "uu.node.diet": { en: "Removes CRLF/WhiteSpace/Comment node", ja: "空白と改行だけのテキストノードとコメントノードを再帰的に除去する" },
+    "uu.node.cutdown": { en: "Cut all nodes less than context and return DocumentFragment", ja: "context以下の全ノードを切り取り、DocumentFragmentを返す" },
+    "uu.node.substance": { en: "Convert HTMLString into DocumentFragment", ja: "HTMLStringをDocumentFragmentに変換する" }
+  },
+  "uupaa.js::OOP Class": {
+    "uu.klass.kiss": { en: "Create class. Keep It Simple, Stupid", ja: "シンプルなクラスの雛形を生成" },
+    "uu.klass.generic": { en: "Create generic class", ja: "汎用クラスの雛形を生成" },
+    "uu.klass.singleton": { en: "Create singleton class", ja: "シングルトンクラスの雛形を生成" }
+  },
+  "uupaa.js::CSS Class": {
+    "uu.klass.has": { en: "Has className", ja: "classNameの存在確認" },
+    "uu.klass.add": { en: "Add className property", ja: "classNameプロパティにクラス名を追加" },
+    "uu.klass.remove": { en: "Remove className property", ja: "classNameプロパティからクラス名を削除" },
+    "uu.klass.toggle": { en: "Add className property or remove", ja: "classNameプロパティにクラス名を追加または削除する" },
+    "uu.klass.setWidgetChainedClassName": { en: "Coming Soon" },
+    "uu.klass.unsetWidgetChainedClassName": { en: "Coming Soon" },
+    "uu.klass.evalWidgetChainedClassName": { en: "Evaluate className", ja: "classNameを評価する" }
+  },
+  "uupaa.js::Attribute": {
+    "uu.attr.get": { en: "Get attribute", ja: "属性を取得" },
+    "uu.attr.set": { en: "Set attribute", ja: "属性を設定" }
+  },
+  "uupaa.js::CSS": {
+    "uu.css.get": { en: "document.defaultView.getComputedStyle wrapper", ja: "計算済みのスタイルを取得" },
+    "uu.css.rect": { en: "Get RectHash( { x: left, y: top, w: width, h: height } ) (value of px unit)" },
+    "uu.css.opacity": { en: "Get opacity value(from 0.0 to 1.0)", ja: "不透明度を数値(0.0～1.0)で取得" },
+    "uu.css.backgroundImage": { en: "Get background-image URL", ja: "背景画像のURLを取得" },
+    "uu.css.set": { en: "Set style", ja: "スタイルを設定" },
+    "uu.css.setRect": { en: "Set RectHash( { x: left, y: top, w: width, h: height } )" },
+    "uu.css.setOpacity": { en: "Set opacity value(from 0.0 to 1.0)", ja: "不透明度を設定(0.0～1.0)" },
+    "uu.css.setBackgroundImage": { en: "Set background-image URL", ja: "背景画像のURLを設定" },
+    "uu.css.show": { en: "Show element", ja: "要素を表示" },
+    "uu.css.hide": { en: "Hide element", ja: "要素を隠す" },
+    "uu.css.rebound": { en: "Move element in inside of screen after having made it visible in outside of screen", ja: "画面外で可視化し、画面内に戻す" },
+    "uu.css.isBlock": { en: "is block element", ja: "ブロック要素ならtrue" },
+    "uu.css.toPixel": { en: "Unit into px", ja: "px単位に変換" },
+    "uu.css.measure": { en: "Measure em and pt, and return pixel value", ja: "em, ptを測定しpixel値を返す" },
+    "uu.css.insertRule": { en: "Insert CSS ruls", ja: "CSSルールを追加" },
+    "uu.css.deleteRule": { en: "Delete CSS ruls" },
+    "uu.css.createStyleSheet": { en: "Create StyleSheet" }
+  },
+  "uupaa.js::Element": {
+    "uu.element.rect": { en: "Get element rect(abs)", ja: "要素の絶対位置とサイズを取得" },
+    "uu.element.offsetFromParentHasLayout": { en: "Get offset from ParentHasLayout element", ja: "ParentHasLayout要素からのオフセットを取得" },
+    "uu.element.offsetFromAncestor": { en: "Get offset from ancestor element", ja: "先祖要素(ancestor)からのオフセットを取得" },
+    "uu.element.toAbsolute": { en: "Absolute positioning", ja: "絶対座標化" },
+    "uu.element.toStatic": { en: "Static positioning", ja: "静的座標化" },
+    "uu.element.fromPoint": { en: "Coming Soon" }
+  },
+  "uupaa.js::ViewPort": {
+    "uu.viewport.rect": { en: "Get view-port rect(browser inner size)", ja: "ブラウザの表示領域の位置とサイズを取得" },
+    "uu.viewport.setVirtualPadding": { en: "Set PaddingHash( { top, right, bottom, left } )" }
+  },
+  "uupaa.js::Module": {
+    "uu.module": { en: "Load Module", ja: "モジュールの読み込み", link: "DOCUMENT.htm" },
+    "uu.module.already": { en: "Module already loaded", ja: "モジュールの読み込み確認", link: "DOCUMENT.htm" },
+    "uu.module.loadSync": { en: "Load Module(Synchronized)", ja: "モジュールの同期読み込み", link: "DOCUMENT.htm" },
+    "uu.module.loadSyncTimeout": { type: "Number", en: "loadSync timeout", link: "DOCUMENT.htm" }
+  },
+  "uupaa.js::Event": {
+    "uu.event.closure": { en: "Create event closure", ja: "イベントクロージャを生成" },
+    "uu.event.target": { en: "Detect event target", ja: "イベント発生源を取得" },
+    "uu.event.set": { en: "Add event handler", ja: "イベントハンドラを設定" },
+    "uu.event.unset": { en: "Remove event handler", ja: "イベントハンドラを解除" },
+    "uu.event.toggle": { en: "Toggle event handler", ja: "イベントハンドラを設定または解除" },
+    "uu.event.stop": { en: "Execute stop-propagation and prevent-default", ja: "イベントの抑止" },
+    "uu.event.toType": { en: "Convert DOM Lv0 event type", ja: "DOM Lv0イベントタイプに変換" },
+    "uu.event.toDOMType": { en: "Convert DOM event type", ja: "DOMイベントタイプに変換" },
+    "uu.event.keyState": { en: "Get key state", ja: "キーの状態を取得" },
+    "uu.event.mousePos": { en: "Get mouse position", ja: "マウス座標を取得" },
+    "uu.event.mouseState": { en: "Get mouse click and wheel state", ja: "マウスクリック, ホイールの状態を取得" },
+    "uu.event.clicks": { en: "Set click event handler", ja: "クリックイベントハンドラを設定" }
+  },
+  "uupaa.js::Ready": {
+    "uu.ready": { en: "Ready event handler", ja: "Readyイベントハンドラを設定" },
+    "uu.ready.already": { en: "Ready state", ja: "Ready状態の確認" }
+  },
+  "uupaa.js::Request": {
+    "uu.request.callbackFilter": { type: "Number", en: "Default value of the callback filter", ja: "コールバックフィルタのデフォルト値" },
+    "uu.request.timeout": { type: "Number", en: "Request timeout(zero does not do timeout)", ja: "タイムアウト時間(単位:ms)(0でタイムアウトしない)" },
+    "uu.request.header": { type: "StringHash", en: "Request Header", ja: "リクエストヘッダ" },
+    "uu.request.jsonpFn": { type: "String", en: 'JSONP callback function name(default: "callback")', ja: "JSONPコールバック関数名" },
+    "uu.ajax": { en: "Ajax async request", ja: "非同期リクエスト" },
+    "uu.ajax.loadIfMod": { en: "Ajax async request with new-arrival check", ja: "更新チェック付き非同期リクエスト" },
+    "uu.jsonp": { en: "JSONP async request", ja: "非同期リクエスト" },
+    "uu.script.create": { en: "Create script element", ja: "script要素の生成" },
+    "uu.script.exec": { en: "Evel Script", ja: "JavaScript文字列をグローバルネームスペースで評価" }
+  },
+  "uupaa.js::Utility": {
+    "uu.uid": { en: "Generate unique ID", ja: "ユニークIDの生成" },
+    "uu.sprintf": {},
+    "uu.trim": { en: "Trim both(left and right)", ja: "文字列の両端の空白文字を除去" },
+    "uu.notax": { en: "Receive JointedString, StringArray and String, return an Array", ja: "結合文字列, 文字列の配列, 文字列を受け取り、配列を返す" },
+    "uu.toPair": { en: "Make Hash( { key: value } ) from key and value", ja: "key, value から Hash( { key: value } )を生成" },
+    "uu.toHash": { en: "Make Hash from Array and FakeArray", ja: "配列,擬似配列をHash化" },
+    "uu.toArray": { en: "Make Array from FakeArray", ja: "擬似配列を配列化" },
+    "uu.indexes": { en: "Enumerate the index of the Hash/Array/FakeArray and return an Array", ja: "Hash/配列/擬似配列のindexを列挙し配列を返す" },
+    "uu.values": { en: "Enumerate the value of the Hash/Array/FakeArray and return an Array", ja: "Hash/配列/擬似配列の値を列挙し配列を返す" },
+    "uu.converse": { en: "Return Hash which replaced value with key of Hash", ja: "Hashのkeyとvalueを入れ替えたHashを返す" },
+    "uu.size": { en: "Length of the Hash/Array/FakeArray", ja: "Hash/配列/擬似配列の要素数を返す" },
+    "uu.first": { en: "First Element of the Hash/Array/FakeArray", ja: "Hash/配列/擬似配列の先頭の要素の値を取得" },
+    "uu.last": { en: "Last Element of the Hash/Array/FakeArray", ja: "Hash/配列/擬似配列の最後の要素の値を取得" },
+    "uu.slim": { en: "Remove equivalent value", ja: "配列から重複する値を除去した新しい配列を生成する" },
+    "uu.diet": { en: "Hash/Array memory compaction", ja: "Hash/Arrayのコンパクト化" },
+    "uu.inRect": { en: "Rectangular coordinate", ja: "矩形内(rect)の座標(pos)ならtrue" },
+    "uu.delay": { en: "Lazy evaluation", ja: "遅延評価" },
+    "uu.time": { en: "Get current time", ja: "現在時刻を取得" },
+    "uu.isU": { en: "is Undefind" },
+    "uu.isA": { en: "is Array" },
+    "uu.isE": { en: "is Element(is Node)" },
+    "uu.isF": { en: "is Function" },
+    "uu.isN": { en: "is Number" },
+    "uu.isB": { en: "is Boolean" },
+    "uu.isS": { en: "is String" },
+    "uu.die": { en: "Critical error handler" },
+    "uu.no": { en: "Every return false" },
+    "uu.echo": { en: "Every return first argument" },
+    "uu.mute": { en: "Every return undefined" }
+  },
+  "uupaa.js::Log": {
+    "uu.log": { en: "firebug::console.log like logger" },
+    "uu.log.debug": { en: "firebug::console.debug like logger" },
+    "uu.log.error": { en: "firebug::console.error like logger" },
+    "uu.log.warn": { en: "firebug::console.warn like logger" },
+    "uu.log.info": { en: "firebug::console.info like logger" },
+    "uu.log.dir": { en: "firebug::console.dir like logger" },
+    "uu.log.clear": { en: "firebug::console.clear like" }
+  },
+  "uupaa.js::CrossBrowser": {
+    "Array.prototype.indexOf": { en: "Returns the first index at which a given element can be found in the array, or -1 if it is not present", ja: "配列の先頭から値を検索し最初のindexを返す。無ければ-1を返す" },
+    "Array.prototype.lastIndexOf": { en: "Returns the last index at which a given element can be found in the array, or -1 if it is not present. The array is searched backwards, starting at fromIndex", ja: "配列の後方から値を検索し最初のindexを返す。無ければ-1を返す" },
+    "HTMLElement.prototype.outerHTML": { type: "Getter/Setter", en: "IE like property" },
+    "HTMLElement.prototype.innerText": { type: "Getter/Setter", en: "IE like property" }
+  },
+  "uupaa.js::SystemGlobalInstance": {
+    "uu.url": { en: "= new uu.module.url()" },
+    "uu.vtmHighSpeed": { en: "= new uu.module.virtualTimer(10)" },
+    "uu.vtmMidSpeed": { en: "= new uu.module.virtualTimer(100)" },
+    "uu.vtmLowSpeed": { en: "= new uu.module.virtualTimer(250)" },
+    "uu.msg": { en: "= new uu.module.messagePump()" },
+    "uu.customEvent": { en: "= new uu.module.customEvent()" },
+    "uu.imageset": { en: "= new uu.module.imageset()" },
+    "uu.color": { en: "= new uu.module.color()" },
+    "uu.effect": { en: "= new uu.module.effect()" },
+    "uu.agent": { en: "= new uu.module.agent()" },
+    "uu.config": { en: "= new uu.module.config()" }
+  },
+  "uupaa.js::Module::URL": {
+    "uu.module.url.base": { en: "Get base URL" },
+    "uu.module.url.abs": { en: "Get absolute URL", ja: "絶対URL化" },
+    "uu.module.url.dir": { en: "Extract scheme and directory part from URL", ja: "URLからスキームとディレクトリを取り出す" },
+    "uu.module.url.fileName": { en: "Extract file-name and extension part from URL", ja: "URLからファイル名と拡張子を取り出す" },
+    "uu.module.url.query": { en: "Parse QueryString", ja: "QueryStringのパース" },
+    "uu.module.url.addQuery": { en: "Add QueryString", ja: "クエリストリングを追加" }
+  },
+  "uupaa.js::Module::VirtualTimer": {
+    "uu.module.virtualTimer.set": { en: "Regist VirtualTimer", ja: "仮想タイマーを登録" },
+    "uu.module.virtualTimer.unset": { en: "Unregist VirtualTimer", ja: "仮想タイマーを抹消" },
+    "uu.module.virtualTimer.extend": { en: "Extend VirtualTimer loop count", ja: "仮想タイマーのループ数を延長" },
+    "uu.module.virtualTimer.resume": { en: " Resume BaseTimer or VirtualTimer", ja: "ベースタイマー/仮想タイマーを再スタート" },
+    "uu.module.virtualTimer.suspend": { en: "Suspend BaseTimer or VirtualTimer", ja: "ベースタイマー/仮想タイマーを一時停止" },
+    "uu.module.virtualTimer.diet": { en: "Memory Compaction", ja: "リソースを開放" }
+  },
+  "uupaa.js::Module::MessagePump": {
+    "uu.module.messagePump.set": { en: "Register the destination of the message", ja: "メッセージの送信先を登録" },
+    "uu.module.messagePump.send": { en: "Send a message synchronously", ja: "メッセージを同期送信" },
+    "uu.module.messagePump.post": { en: "Send a message asynchronously", ja: "メッセージを非同期送信" }
+  },
+  "uupaa.js::Module::CustomEvent": {
+    "uu.module.customEvent": {}
+  },
+  "uupaa.js::Module::Image": {
+    "uu.module.image.load": { en: "Preload image", ja: "画像のプリロード" },
+    "uu.module.image.already": { en: "ImageReady state", ja: "ImageReady状態の確認" },
+    "uu.module.image.browserCached": { en: "ImageReady state(confirm browser cash)", ja: "ImageReady状態の確認(ブラウザキャッシュを確認)" },
+    "uu.module.image.loading": { en: "Number of the files loading", ja: "読み込んでいる最中のファイル数を取得" },
+    "uu.module.image.item": { en: "Loaded image object", ja: "読み込み済みの画像オブジェクトを取得" }
+  },
+  "uupaa.js::Module::Agent": {
+    "uu.module.agent.msgbox": {}
+  },
+  "uupaa.js::Module::ImageSet": {
+    "uu.module.imageset": {}
+  },
+  "uupaa.js::Module::Color": {
+    "uu.module.color.zero": { type: "RGBAHash", en: "Transparent black( { r: 0, g: 0, b: 0, a: 0 } )", ja: "透明な黒" },
+    "uu.module.color.black": { type: "RGBAHash", en: "Black( { r: 0, g: 0, b: 0, a: 1 } )" },
+    "uu.module.color.white": { type: "RGBAHash", en: "White( { r: 255, g: 255, b: 255, a: 1 } )" },
+    "uu.module.color.hash": { en: "Parse color and return RGBAHash", ja: "色をパースしRGBAHashを返す" },
+    "uu.module.color.coffee": { en: 'return "#ffffff" style color' },
+    "uu.module.color.rgb": { en: 'return "rgb(0,0,0)" style color' },
+    "uu.module.color.rgba": { en: 'return "rgba(0,0,0,0)" style color' },
+    "uu.module.color.complementary": { en: "return complementary-colors", ja: "補色を返す" },
+    "uu.module.color.rgba2hsva": { en: "Convert RGBAHash to HSVAHash", ja: "RGBAHashをHSVAHashに変換" },
+    "uu.module.color.hsva2rgba": { en: "Convert HSVAHash to RGBAHash", ja: "HSVAHashをRGBAHashに変換" },
+    "uu.module.color.ratio": { en: "Set Hue, Saturation and Value", ja: "色相(H), 彩度(S), 明度(V)を設定" }
+  },
+  "uupaa.js::Module::Effect": {
+    "uu.module.effect.setDefaultSpeed": {},
+    "uu.module.effect.diet": {},
+    "uu.module.effect.fade": {},
+    "uu.module.effect.fadein": {},
+    "uu.module.effect.fadeout": {},
+    "uu.module.effect.move": {},
+    "uu.module.effect.scale": {},
+    "uu.module.effect.bullet": {},
+    "uu.module.effect.puff": {},
+    "uu.module.effect.fold": {},
+    "uu.module.effect.shake": {},
+    "uu.module.effect.shrink": {},
+    "uu.module.effect.glow": {},
+    "uu.module.effect.slideUp": {},
+    "uu.module.effect.slideDown": {},
+    "uu.module.effect.pulsate": {},
+    "uu.module.effect.dropOut": {}
+  },
+  "uupaa.js::Module::FriendlyDataContainer": {
+  },
+  "uupaa.js::Module::Skin": {
+  },
+  "uupaa.js::Module::Configuration": {
+    "uu.module.config.importFromQueryString": {},
+    "uu.module.config.load": {}
+  },
+  "uu.module.dev.js::Module::Performance": {
+    "uu.module.perf.run": {},
+    "uu.module.perf.report": {}
+  },
+  "uu.module.dev.js::Module::Log": {
+    "uu.module.log2.construct": {},
+    "uu.module.log2.msgbox": { en: "CLEAR, STYLE, SORT, FILTER" },
+    "uu.module.log2.log": {},
+    "uu.module.log2.inspect": {}
+  },
+  "uu.module.canvas2d.js::Module::2D canvas": {
+    "uu.module.canvas2d.construct": {},
+    "uu.module.canvas2d.clear": {},
+    "uu.module.canvas2d.scale": {},
+    "uu.module.canvas2d.translate": {},
+    "uu.module.canvas2d.rotate": {},
+    "uu.module.canvas2d.setStyle": {},
+    "uu.module.canvas2d.style": {},
+    "uu.module.canvas2d.begin": {},
+    "uu.module.canvas2d.move": {},
+    "uu.module.canvas2d.line": {},
+    "uu.module.canvas2d.arc": {},
+    "uu.module.canvas2d.curve": {},
+    "uu.module.canvas2d.clip": {},
+    "uu.module.canvas2d.stroke": {},
+    "uu.module.canvas2d.fill": {},
+//    "uu.module.canvas2d.text": {},
+    "uu.module.canvas2d.close": {},
+    "uu.module.canvas2d.inPath": {},
+    "uu.module.canvas2d.box": {},
+    "uu.module.canvas2d.poly": {},
+    "uu.module.canvas2d.metabo": {},
+    "uu.module.canvas2d.oval": {},
+    "uu.module.canvas2d.gradation": {},
+    "uu.module.canvas2d.pattern": {},
+    "uu.module.canvas2d.image": {},
+    "uu.module.canvas2d.grid": {}
+  },
+  "uu.module.drag.js::Module::Drag and Drop": {
+    "uu.module.drag.save": {},
+    "uu.module.drag.move": {}
+  },
+  "uu.module.drag.js::Module::Drag and Drop(Free)": {
+    "uu.module.drag.free.construct": {},
+    "uu.module.drag.free.handleEvent": {}
+  },
+  "uu.module.drag.js::Module::Drag and Drop(Limited)": {
+    "uu.module.drag.limited.construct": {},
+    "uu.module.drag.limited.handleEvent": {}
+  },
+  "uu.module.drag.js::Module::z-index Management": {
+    "uu.module.drag.zindexer.set": {},
+    "uu.module.drag.zindexer.unset": {},
+    "uu.module.drag.zindexer.beginDrag": {},
+    "uu.module.drag.zindexer.endDrag": {},
+    "uu.module.drag.zindexer.top": {}
+  },
+  "uu.module.drag.js::Module::The SHIM": {
+    "uu.module.drag.shim.construct": {},
+    "uu.module.drag.shim.enable": {},
+    "uu.module.drag.shim.display": {},
+    "uu.module.drag.shim.setRect": {},
+    "uu.module.drag.shim.purge": {}
+  },
+  "uu.module.ieboost.js::Module::IE Boost": {
+    "uu.module.ieboost.construct": {},
+    "uu.module.ieboost.handleEvent": {},
+    "uu.module.ieboost.msgbox": {}
+  },
+  "uu.module.io.js::Module::Codec": {
+    "uu.codec": {},
+    "uu.codec.URLBase64": { type: "Boolean" },
+    "uu.codec.HTMLToHTMLEntity": {},
+    "uu.codec.HTMLEntityToHTML": {},
+    "uu.codec.LineBreakToBR": {},
+    "uu.codec.BRToLineBreak": {},
+    "uu.codec.encodeURLSafe64": {},
+    "uu.codec.decodeURLSafe64": {},
+    "uu.codec.encodeURIComponent": {},
+    "uu.codec.decodeURIComponent": {},
+    "uu.codec.encodeJSON": {},
+    "uu.codec.decodeJSON": {}
+  },
+  "uu.module.skin.plasticity.js::Module::Window Skin": {
+    "uu.module.skin.plasticity.window.msgbox": {}
+  },
+  "uu.module.skin.plasticityAngle.js::Module::Window Skin": {
+    "uu.module.skin.plasticityAngle.window.msgbox": {}
+  },
+  "uu.module.widget.js::Module::Window Manager": {
+    "uu.module.window.manager.createWindow": {},
+    "uu.module.window.manager.createDialog": {},
+//  "uu.module.window.manager.createModalDialog": {},
+//  "uu.module.window.manager.isExist": {},
+    "uu.module.window.manager.msgbox": {}
+  },
+  "uu.module.widget.js::Module::Window Initializer": {
+    "uu.module.window.initializer.construct": {},
+    "uu.module.window.initializer.msgbox": {}
+  },
+  "uu.module.widget.js::Module::Window Node": {
+    "uu.module.window.node.msgbox": {},
+    "uu.module.window.node.exportData": {}
+  },
+  "uu.module.widget.js::Module::Window Layout": {
+    "uu.module.window.layout.handleEvent": {},
+    "uu.module.window.layout.msgbox": {}
+  },
+  "uu.module.widget.js::Module::Parts Factory": {
+    "uu.module.canvasPartsFactory.button": {},
+    "uu.module.canvasPartsFactory.addStyle": {},
+    "uu.module.canvasPartsFactory.getStyle": {},
+    "uu.module.canvasPartsFactory.metaboGlossy": {},
+    "uu.module.canvasPartsFactory.angleGlossy": {}
+  },
+  Glossary: {
+    Pollution: { en: "Global name space pollution, Prototype object pollution", ja: "グローバルネームスペース汚染, prototype汚染", type: "Keyword", link: "GLOSSARY.htm" },
+    Selector: { en: "Selector", ja: "セレクタ", type: "Keyword", link: "GLOSSARY.htm" },
+    SyntaxSugar: { en: "Syntax sugar", ja: "シンタックスシュガー", type: "Keyword", link: "GLOSSARY.htm" },
+    Element: { en: "Element", ja: "要素", type: "Keyword", link: "GLOSSARY.htm" },
+    Attribute: { en: "Attribute", ja: "属性", type: "Keyword", link: "GLOSSARY.htm" },
+    NodeType: { en: "NodeType", ja: "ノードタイプ", type: "Keyword", link: "GLOSSARY.htm" },
+    Module: { en: "Module", ja: "モジュール", type: "Keyword", link: "GLOSSARY.htm" },
+    Class: { en: "OOP Class, CSS Class", ja: "OOPクラス と CSSクラス", type: "Keyword", link: "GLOSSARY.htm" },
+    WindowReady: { en: "WindowReady", type: "Keyword", link: "GLOSSARY.htm" },
+    WindowUnready: { en: "WindowUnready", type: "Keyword", link: "GLOSSARY.htm" },
+    DomReady: { en: "DomReady", type: "Keyword", link: "GLOSSARY.htm" },
+    CanvasReady: { en: "CanvasReady", type: "Keyword", link: "GLOSSARY.htm" },
+    AjaxReady: { en: "AjaxReady", type: "Keyword", link: "GLOSSARY.htm" },
+    JSONPReady: { en: "JSONPReady", type: "Keyword", link: "GLOSSARY.htm" },
+    ImageReady: { en: "ImageReady", type: "Keyword", link: "GLOSSARY.htm" },
+    JointedString: { en: "Jointed String", ja: "結合文字列", type: "Keyword", link: "GLOSSARY.htm" },
+    cssProp: { en: "cssProp, css-prop", type: "Keyword", link: "GLOSSARY.htm" },
+    ComputedStyle: { en: "ComputedStyle", ja: "計算済みのスタイル", type: "Keyword", link: "GLOSSARY.htm" },
+    ParentHasLayout: { en: "Parent has Layout", ja: "レイアウト上の親要素", type: "Keyword", link: "GLOSSARY.htm" },
+    TypeTaxing: { en: 'Type "Taxing"', ja: "Taxing型, 厄介な引数", type: "Keyword", link: "GLOSSARY.htm" },
+    TypeThis: { en: 'Type "this"', ja: "this型", type: "Keyword", link: "GLOSSARY.htm" },
+    TypeMix: { en: 'Type "Mix"', ja: "Mix型", type: "Keyword", link: "GLOSSARY.htm" },
+    TypeHash: { en: 'Type "Hash"', ja: "Hash型", type: "Keyword", link: "GLOSSARY.htm" },
+    FakeArray: { en: "FakeArray", ja: "擬似配列", type: "Keyword", link: "GLOSSARY.htm" },
+    StringArray: { en: "StringArray", type: "Keyword", link: "GLOSSARY.htm" },
+    FunctionArray: { en: "FunctionArray", type: "Keyword", link: "GLOSSARY.htm" },
+    ElementArray: { en: "ElementArray", type: "Keyword", link: "GLOSSARY.htm" },
+    RectHash: { en: "RectHash", type: "Keyword", link: "GLOSSARY.htm" },
+    RGBAHash: { en: "RGBAHash", type: "Keyword", link: "GLOSSARY.htm" },
+    HSVAHash: { en: "HSVAHash", type: "Keyword", link: "GLOSSARY.htm" },
+    Unicast: { en: "Unicast", ja: "ユニキャスト", type: "Keyword", link: "GLOSSARY.htm" },
+    Multicast: { en: "Multicast", ja: "マルチキャスト", type: "Keyword", link: "GLOSSARY.htm" },
+    Broadcast: { en: "Broadcast", ja: "ブロードキャスト", type: "Keyword", link: "GLOSSARY.htm" },
+    URLSafe64: { en: "URLSafe64", type: "Keyword", link: "GLOSSARY.htm" }
+  },
+  Oriented: {
+    "Why_Not_OmniSelector": { en: "Why not omni-selector?", ja: "なぜ包括的(万能)なセレクタが無いのか?", type: "Note", link: "DOCUMENT.htm" },
+    "Dependence_to_XPath_Library": { en: "About dependence to the XPath library", ja: "XPathライブラリへの依存について", type: "Note", link: "DOCUMENT.htm" }
+  }
+};
+function getLang() {
+  var lang = (navigator.language || navigator.browserLanguage || "en").replace(/\-.*$/, "");
+  if (/file:/.test(uu.url.dir(uu.url.base()))) { return "all"; }
+  return lang; // "en" or "ja"
+}
+function getShortSectionName(name) {
+  var ary;
+  if (name.indexOf("::") === -1) {
+    name = "::" + name;
+  }
+  ary = name.split("::");
+  return uu.last(ary, "NONE").replace(/[ \-\+\*\!]/g, "_");
+}
+function makeSectionLink(sections) {
+  var rv = [], chop = 0;
+//  sections.sort();
+  sections.forEach(function(v) {
+    rv.push(uu.sprintf('| <a href="#%s">%s</a> ', v, v));
+    if (++chop % 6 === 0) {
+      rv.push("<br />");
+    }
+  });
+  return rv.join("");
+}
+function boot() {
+  var lang = getLang();
+  var rv = [], sections = [];
+  var link, type, subject, shortSectionName;
+  var joint;
+  var count = 0;
+  uu.forEach(index, function(item, title) {
+    shortSectionName = getShortSectionName(title);
+    sections.push(shortSectionName);
+    rv.push(uu.sprintf('<h2><a name="%s">%s</a></h2>', shortSectionName, title));
+    rv.push("<ul>");
+    link = /Module/i.test(title) ? "MODULE.htm" : "DOCUMENT.htm";
+    type = "Function";
+
+    // joint
+    joint = " - ";
+    if (shortSectionName === "SystemGlobalInstance") {
+      joint = " ";
+    }
+
+
+    uu.forEach(item, function(v, i) {
+
+      // --- subject ---
+      subject = "";
+      switch (lang) {
+      case "en":  if ("en" in v) { subject = joint + v.en; break; }
+      case "ja":  if ("ja" in v) { subject = joint + v.ja; break; }
+                  if ("en" in v) { subject = joint + v.en; break; }
+                  break;
+      case "all": if ("en" in v) { subject =  joint + v.en; }
+                  if ("ja" in v) { subject += joint + v.ja; }
+                  break;
+      }
+      rv.push(uu.sprintf('<li>%s: <a href="./%s#%s">%s</a>%s</li>',
+                          ("type" in v) ? v.type : type,
+                          ("link" in v) ? v.link : link,
+                          i,
+                          i,
+                          subject));
+      ++count;
+    });
+    rv.push("</ul>");
+  });
+
+  uu.node.insert(makeSectionLink(sections));
+  uu.node.insert(rv.join(""));
+  uu.node.insert(uu.sprintf("<hr /><p>%d indexes</p>", count));
+}
+uu.ready(boot);
+</script>
+
+</body>
+</html>

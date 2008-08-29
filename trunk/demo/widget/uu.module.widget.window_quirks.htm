@@ -1,0 +1,81 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>uupaa.js - uu.module.widget.window test</title>
+<!--[if IE]><script id="excanvas.js" type="text/javascript" src="http://pigs.sourceforge.jp/excanvas.js"></script><![endif]-->
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?module=dev,canvas,widget,drag"></script>
+<style>
+html {
+  background: pink url(../../img/uu.module.canvas.grid.gif);
+  height: 100%; /* bug fix ie6 std-mode */
+}
+</style>
+</head>
+<body>
+<div>
+<a href="../../README.htm#demo">README</a> &gt; <a href="../../FEATURE.htm">FEATURE</a> &gt; uu.module.widget.window_quirks.htm<br />
+<a href="./uu.module.widget.window.htm">Standard Mode</a>
+</div>
+<div>
+SKIN:
+<select id="skin">
+  <option value="random">random</option>
+  <option value="plasticity">plasticity</option>
+  <option value="plasticityAngle">plasticityAngle</option>
+</select>
+<input type="button" value="create" onclick="createWindow()" />
+</div>
+<p>Windowに組み込むことのできる、タブ, スプリッター, スライダー, ツリー等のWidgetの開発も始まっています。</p>
+
+<script>
+function createWindow() {
+  var mng = new uu.module.window.manager("mac");
+  var e = uu.id("skin");
+
+  switch (e.options[e.selectedIndex].value) {
+  case "plasticity":
+//    new uu.module.window({ skin: "plasticity" });
+    mng.createWindow({ skin: "plasticity" });
+    break;
+  case "plasticityAngle":
+//    new uu.module.window({ skin: "plasticityAngle" });
+    mng.createWindow({ title: "window - no anim", skin: "plasticityAngle", minimizeAnimation: false });
+    break;
+  case "random":
+    var boneColor = uu.color.hash(Math.random() * 0xffffff);
+    var boneRadius = Math.random() * 10;
+    var boneShadow = Math.random() * 10;
+    mng.createWindow({ skin: "plasticityAngle",
+                           title: uu.sprintf("Color: %s, Radius: %d, Shadow: %d",
+                                             uu.color.coffee(boneColor), boneRadius, boneShadow) },
+                         { titleColor: uu.color.coffee(uu.color.complementary(boneColor)),
+                           boneColor: boneColor,
+                           boneRadius: boneRadius,
+                           boneShadow: boneShadow });
+    break;
+  }
+}
+function init(status, exp) {
+  switch (status) {
+  case 200:
+    uu.node.insert('<input type="button" value="hello" onclick="alert(\'Hello Rich WebApplication\')" />', exp.bodyNode);
+    break;
+  case 400:
+    alert("init fail");
+    break;
+  }
+}
+function boot() {
+  var mng = new uu.module.window.manager();
+  mng.createDialog({ skin: "plasticity", title: "MARIO - Unresizable Dialog",
+                     resizable: false, fn: init },
+                   { boneRadius: 20, boneColor: "red", bodyStyle: "none" });
+  mng.createWindow({ skin: "plasticity", title: "LUIGI" }, { boneColor: "lime", bodyStyle: "none" });
+}
+uu.module.loadSync("", "skin.plasticity,skin.plasticityAngle", function() {
+  uu.ready(boot);
+});
+</script>
+
+</body>
+</html>

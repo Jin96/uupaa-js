@@ -1,53 +1,49 @@
 <html><head><title>event</title>
-<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?load=perflog"></script>
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?module=dev"></script>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <style>#result { background-color: lime; }</style>
-</head><body><a href="../../README.htm">README</a> &gt; <a href="../../DOCUMENT.htm#uu.event.handler">DOCUMENT</a> &gt; uu.event.handler
+</head><body><a href="../../README.htm">README</a> &gt; <a href="../../DOCUMENT.htm#uu.event.closure">DOCUMENT</a> &gt; uu.event.handler
 <div id="clicktarget" style="border: 1px solid red">clicktarget<br />click this here</div>
 <div id="result"></div>
 <script>
 function boot() {
-  var myClass = uu.klass.singleton();
-  myClass.prototype = {
+  var MyClass = uu.klass.generic();
+  MyClass.prototype = {
     construct: function(element) {
       this.element = element;
-      this.hr = uu.event.handler(this);             // デフォルトイベントハンドラ(this.handleEvent)を生成
-      uu.event.set(this.element, "click", this.hr); // イベントハンドラを設定
+      uu.event.set(this, this.element, "click"); // イベントハンドラを設定
     },
     destruct: function() {
-      uu.event.unset(this.element, "click", this.hr); // constructで設定したイベントハンドラを開放
+      uu.event.unset(this, this.element, "click"); // constructで設定したイベントハンドラを開放
     },
     handleEvent: function(evt) {      // 第一引数にイベントオブジェクトが渡される
-      var tgt = uu.event.target(evt); // イベントが発生した要素は、tgt.real で取得可能
+      var tgt = uu.event.target(evt); // イベントが発生した要素は、tgt.target で取得可能
       uu.event.stop(evt);             // イベントの伝播とデフォルト動作を抑止
-      var mpos = uu.event.mouse.pos(evt); // クリック時のマウス座標を取得
+      var mpos = uu.event.mousePos(evt); // クリック時のマウス座標を取得
       uu.id("result").innerText = uu.sprintf("CLICK: x:[%d], y:[%d]", mpos.x, mpos.y);
     }
   };
-  var my = new myClass(uu.id("clicktarget"));
+  var my = new MyClass(uu.id("clicktarget"));
 }
-uu.module.load("", "ui", boot);
+uu.ready(boot);
 </script>
 <pre>
-function boot() {
-  var myClass = uu.klass.singleton();
-  myClass.prototype = {
+  var MyClass = uu.klass.generic();
+  MyClass.prototype = {
     construct: function(element) {
       this.element = element;
-      this.hr = uu.event.handler(this);             // デフォルトイベントハンドラ(this.handleEvent)を生成
-      uu.event.set(this.element, "click", this.hr); // イベントハンドラを設定
+      uu.event.set(this, this.element, "click"); // イベントハンドラを設定
     },
     destruct: function() {
-      uu.event.unset(this.element, "click", this.hr); // constructで設定したイベントハンドラを開放
+      uu.event.unset(this, this.element, "click"); // constructで設定したイベントハンドラを開放
     },
     handleEvent: function(evt) {      // 第一引数にイベントオブジェクトが渡される
-      var tgt = uu.event.target(evt); // イベントが発生した要素は、tgt.real で取得可能
+      var tgt = uu.event.target(evt); // イベントが発生した要素は、tgt.target で取得可能
       uu.event.stop(evt);             // イベントの伝播とデフォルト動作を抑止
-      var mpos = uu.event.mouse.pos(evt); // クリック時のマウス座標を取得
+      var mpos = uu.event.mousePos(evt); // クリック時のマウス座標を取得
       uu.id("result").innerText = uu.sprintf("CLICK: x:[%d], y:[%d]", mpos.x, mpos.y);
     }
   };
-  var my = new myClass(uu.id("clicktarget"));
-}
+  var my = new MyClass(uu.id("clicktarget"));
 </pre>
 </body></html>

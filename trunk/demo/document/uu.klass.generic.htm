@@ -1,38 +1,46 @@
 <html><head><title>Class</title>
-<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?load=perflog"></script>
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?module=dev"></script>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 </head><body><a href="../../README.htm">README</a> &gt; <a href="../../DOCUMENT.htm#uu.klass.generic">DOCUMENT</a> &gt; uu.klass.generic<br />
 <div id="result"></div>
 <script>
-  uu.window.ready(function() {
-    var myClass = uu.klass.generic();
-    myClass.prototype = {
-      construct: function(var1, var2 /*, ... */) {
-        // 初期化
-        this.privateVar1 = var1;
-        this.privateVar2 = var2;
+  uu.ready(function() {
+    var XFile = uu.klass.generic();
+    XFile.prototype = {
+      construct: function(agent) {
+        this.agent = agent;
       },
-      myMethod: function() {
-        return this.privateVar1 * this.privateVar2;
+      msgbox: function(msg, p1, p2) {
+        uu.log("%s say, I accepted a message [%s], from %s", this.agent, msg, p1.from);
       }
     };
-    var my = new myClass(10, 20); // 自動的に construct() を実行する。
-    uu.log(my.myMethod()); // "200"
-  });
+    var agent1 = new XFile("Agent Mulder");
+    var agent2 = new XFile("Agent Scully");
+    var agent3 = new XFile("Smoking Man");
+
+    uu.msg.post(agent1, "Hello Mulder", { from: "Scully" }); // スカリーからモルダーにご挨拶
+    uu.msg.post(0,      "Hi All", { from: "Mulder" }); // モルダーが(自分も含め)みんなにご挨拶
+    uu.msg.send(agent1, "...", { from: "Smoking Man" }); // スモーキングマンがモルダーだけにお返事
+    uu.msg.post([agent2, agent3], "Samantha was abducted", { from: "Mulder" }); // モルダーが(自分以外の人に)いつものアレを言う
+  }, "W");
 </script>
 <pre>
-    var myClass = uu.klass.generic();
-    myClass.prototype = {
-      construct: function(var1, var2 /*, ... */) {
-        // 初期化
-        this.privateVar1 = var1;
-        this.privateVar2 = var2;
+    var XFile = uu.klass.generic();
+    XFile.prototype = {
+      construct: function(agent) {
+        this.agent = agent;
       },
-      myMethod: function() {
-        return this.privateVar1 * this.privateVar2;
+      msgbox: function(msg, p1, p2) {
+        uu.log("%s say, I accepted a message [%s], from %s", this.agent, msg, p1.from);
       }
     };
-    var my = new myClass(10, 20); // 自動的に construct() を実行する。
-    uu.log(my.myMethod()); // "200"
+    var agent1 = new XFile("Agent Mulder");
+    var agent2 = new XFile("Agent Scully");
+    var agent3 = new XFile("Smoking Man");
+
+    uu.msg.post(agent1, "Hello Mulder", { from: "Scully" }); // スカリーからモルダーにご挨拶
+    uu.msg.post(0,      "Hi All", { from: "Mulder" }); // モルダーが(自分も含め)みんなにご挨拶
+    uu.msg.send(agent1, "...", { from: "Smoking Man" }); // スモーキングマンがモルダーだけにお返事
+    uu.msg.post([agent2, agent3], "Samantha was abducted", { from: "Mulder" }); // モルダーが(自分以外の人に)いつものアレを言う
 </pre>
 </body></html>

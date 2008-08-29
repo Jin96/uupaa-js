@@ -5,7 +5,6 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>uupaa.js - uu.module.virtualTimer test</title>
 <script type="text/javascript" src="../../uupaa.js"></script>
-<script type="text/javascript" src="../../uu.module.ui.js"></script>
 <style type="text/css">
 body {
   background-color: black; color: white;
@@ -21,7 +20,7 @@ a, b { color: lightblue }
 </style>
 </head>
 <body>
-<a href="../../README.htm#demo">README.htm</a> &gt; uu.module.virtualTimer.htm<br />
+<a href="../../README.htm#demo">README</a> &gt; <a href="../../MODULE.htm#uu.module.virtualTimer">MODULE</a> &gt; uu.module.virtualTimer.htm<br />
 <div id="cage"></div>
 
 <h3>uu.module.virtualTimer - 仮想タイマー</h3>
@@ -61,18 +60,18 @@ a, b { color: lightblue }
 
 <script type="text/javascript">
 var vtm10 = new uu.module.virtualTimer(10); // 仮想タイマー生成
-var inn = { iw: 800, ih: 600 }; // ブラウザの表示領域
+var vp = { x: 0, y: 0, w: 800, h: 600 }; // ブラウザの表示領域
 var cubes = [];
 
 function boot() {
   var fn1 = function() { uu.id("result1").innerText += "Hello"; };
   var delay = function(n) { return n * 100; }; // create delay value
-  uu.tm10.set(fn1, delay, 4);
+  uu.vtmHighSpeed.set(fn1, delay, 4, "demo");
 
   var fn2 = function() { uu.id("result1").innerText += "."; };
-  uu.tm10.set(fn2, 10, 100); // 10msごとに、200回ドットを打ったら停止
+  uu.vtmHighSpeed.set(fn2, 10, 100); // 10msごとに、200回ドットを打ったら停止
 
-  inn = uu.ui.inner();
+  vp = uu.viewport.rect();
 }
 
 var countStart = false, vtid = 0, itid = 0, toid = 0;
@@ -85,11 +84,11 @@ function countup() {
     var fn3 = function() { uu.id("result2").innerText = counter[0]++; };
     var fn4 = function() { uu.id("result3").innerText = counter[1]++; };
     var fn5 = function() { uu.id("result4").innerText = counter[2]++; toid = setTimeout(arguments.callee, 10); };
-    vtid = uu.tm10.set(fn3, 10, 1000); // 1000カウントで停止
+    vtid = uu.vtmHighSpeed.set(fn3, 10, 1000); // 1000カウントで停止
     itid = setInterval(fn4, 10);
     toid = setTimeout(fn5, 10);
   } else {
-    uu.tm10.suspend(vtid);
+    uu.vtmHighSpeed.suspend(vtid);
     if (itid) { clearInterval(itid); }
     if (toid) { clearTimeout(toid); }
     countStart = false;
@@ -132,8 +131,8 @@ function createCube(parent) {
   e.dx = Math.round(Math.random() * 100) / 10;
   e.dy = Math.round(Math.random() * 100) / 10;
 //uu.css.set(e, { backgroundColor: (Math.round(Math.random() * 165813750) / 10).toRGBString(),
-  uu.css.set(e, { backgroundColor: toRGBString(Math.round(Math.random() * 165813750) / 10),
-                  top: 0, left: 0 });
+  uu.css.set(e, { backgroundColor: toRGBString(Math.round(Math.random() * 165813750) / 10) });
+  uu.css.setRect(e, { x: 0, y: 0 });
   return e;
 }
 function toRGBString(num) {
@@ -158,14 +157,14 @@ function deleteCube(cubes) {
 function move(elm) {
   var tx = parseFloat(elm.style.left) + elm.dx;
   var ty = parseFloat(elm.style.top)  + elm.dy;
-  if (tx < 0 || tx + 70 > inn.iw) { elm.dx = -elm.dx; } // 70 = 50px + 20px
-  if (ty < 0 || ty + 70 > inn.ih) { elm.dy = -elm.dy; } // 70 = 50px + 20px
-  uu.css.set(elm, { left: tx, top: ty });
+  if (tx < 0 || tx + 70 > vp.w) { elm.dx = -elm.dx; } // 70 = 50px + 20px
+  if (ty < 0 || ty + 70 > vp.h) { elm.dy = -elm.dy; } // 70 = 50px + 20px
+  uu.css.setRect(elm, { x: tx, y: ty });
 }
 
-uu.window.ready(function() {
+uu.ready(function() {
   uu.delay(boot, 1000);
-});
+}, "W");
 
 </script>
 </body>

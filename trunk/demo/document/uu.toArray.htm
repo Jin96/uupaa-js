@@ -1,16 +1,16 @@
 <html><head><title>uu.toArray</title>
-<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?load=perflog"></script>
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?module=dev"></script>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 </head><body><a href="../../README.htm">README</a> &gt; <a href="../../DOCUMENT.htm#uu.toArray">DOCUMENT</a> &gt; uu.toArray
 <script>
-  uu.window.ready(function() {
-    uu.toArray(uu.tag("*")).forEach(function(v, i) {
+  uu.ready(function() {
+    uu.toArray(document.getElementsByTagName("*")).forEach(function(v) {
       uu.log(v.tagName); //  "HTML" "HEAD" "TITLE" "SCRIPT" "SCRIPT" "META" "STYLE" "BODY" "A" "A" "SCRIPT" "PRE"
     });
-  });
+  }, "W");
 </script>
 <pre>
-    uu.toArray(uu.tag("*")).forEach(function(v, i) {
+    uu.toArray(document.getElementsByTagName("*")).forEach(function(v) {
       uu.log(v.tagName); //  "HTML" "HEAD" "TITLE" "SCRIPT" "SCRIPT" "META" "STYLE" "BODY" "A" "A" "SCRIPT" "PRE"
     });
 </pre>

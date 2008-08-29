@@ -4,26 +4,26 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>uu.css - test</title>
-<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="http://pigs.sourceforge.jp/javascript-xpath.js"></script><![endif]-->
-<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?load=perflog"></script>
+<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="./lib/javascript-xpath.js"></script><![endif]-->
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?module=dev"></script>
   <style>
   </style>
 </head>
 <body>
 <a href="../../README.htm">README</a> &gt; 
-<a href="../../SELECTOR.htm#pseudo-selector">SELECTOR</a><br />
-<a href="./selector.htm">uu.css.pseudo</a> | <a href="./css.htm">uu.css</a> | <a href="./form.htm">uu.css(form)</a>
+<a href="../../SELECTOR.htm#uu.pseudo">SELECTOR</a><br />
+<a href="./selector.htm">uu.pseudo</a> | <a href="./css.htm">uu.css</a> | <a href="./form.htm">uu.css(form)</a>
 <hr />
 <p>jQueryとの動作の違いを確認するため、テスト用のスクリプトは<a href="http://docs.jquery.com/Selectors/contains">jQueryのAPI Reference</a>を参考にしています。</p>
   <div>John Resig</div>
   <div>George Martin</div>
   <div>Malcom John Sinclair</div>
   <div>J. Ohn</div>
-<script>uu.window.ready(function() {
+<script>uu.ready(function() {
   uu.css('div:contains("John")').forEach(function(v) {
     uu.css.set(v, { textDecoration: "underline" });
   });
-})
+}, "W");
 </script>
 <pre>
   uu.css('div:contains("John")').forEach(function(v) {

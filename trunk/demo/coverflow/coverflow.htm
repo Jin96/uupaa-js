@@ -5,7 +5,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>uupaa.js - uu.module.coverflow test</title>
 <!--[if IE]><script id="excanvas.js" type="text/javascript" src="http://pigs.sourceforge.jp/excanvas.js"></script><![endif]-->
-<script type="text/javascript" src="../../uupaa.js"></script>
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?module=dev,canvas,coverflow"></script>
 <style>
 body {
   background-color: black;
@@ -23,11 +23,11 @@ img {
 </style>
 </head>
 <body>
-<a href="../../README.htm">README.htm</a> &gt; uu.module.coverflow.js<br />
+<a href="../../README.htm#dev">README</a> &gt; uu.module.coverflow.js<br />
 <p>Cover Flowの簡易実装です。<br />
 画像を動的に読み込んだりもしていないので、実際に何ができるわけではありませんが、<br />
 JavaScriptの可能性を見せるデモにはなると思います。</p>
-<p>手持ちのローエンドノートPC + Firefox2用に動作速度を合わせてあるので、Firefox3や高性能PCでは意図した動作とは異なります。</p>
+<p>DELLやHPで購入可能な5万円台のローエンドノートPC + Firefox2用に動作速度を合わせてあるので、Firefox3や高性能PCでは意図した動作とは異なります。</p>
 <p>10秒ほど待っても何も表示されない場合は画像の読み込みに失敗している可能性があります。<br />リロードで解決できる場合があります。</p>
 
 <canvas id="canvas0" width="640" height="320"></canvas>
@@ -50,7 +50,31 @@ JavaScriptの可能性を見せるデモにはなると思います。</p>
 <script type="text/javascript">
 
 var cfbtn = false;
+
+var msgobj = {
+  uid: uu.uid(),
+  msgbox: function(msg, p1, p2) {
+    switch (msg) {
+    case "PRELOAD_IMAGE_OK":
+      boot();
+      break;
+    case "PRELOAD_IMAGE_NG":
+      alert("Sorry fail boot.");
+      break;
+    }
+  }
+};
+
+function preload() {
+  uu.msg.set(msgobj);
+  uu.msg.post(uu.imageset, "PRELOAD_IMAGE", msgobj.uid,
+    ["./bg.jpg", "./SANY0087.jpg", "./SANY0091.jpg", "./SANY0093.jpg", "./SANY0156.jpg",
+     "./SANY0159.jpg", "./SANY0169.jpg", "./SANY0180.jpg", "./SANY0184.jpg",
+     "./SANY0187.jpg", "./SANY0190.jpg", "./SANY0192.jpg", "./SANY0204.jpg",
+     "./SANY0206.jpg", "./cover0.jpg"]);
+}
 function boot() {
+// alert("boot");
   var fn1 = function(view) {
     view.style.color = "white";
     view.innerHTML = "title: unknown<br />album: unknown";
@@ -84,9 +108,8 @@ function boot() {
   ]);
   cf.draw();
 }
-uu.module.load("", "ui,canvas,coverflow", function() {
-  uu.canvas.ready(boot);
-});
+uu.ready(preload, "WC");
+//uu.canvas.ready(boot);
 </script>
 <!--
 <input type="button" value="btn" onclick="window.cfbtn = !!!window.cfbtn" />

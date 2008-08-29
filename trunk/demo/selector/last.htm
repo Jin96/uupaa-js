@@ -4,16 +4,16 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>uu.css - test</title>
-<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="http://pigs.sourceforge.jp/javascript-xpath.js"></script><![endif]-->
-<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?load=perflog"></script>
+<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="./lib/javascript-xpath.js"></script><![endif]-->
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?module=dev"></script>
   <style>
   td { color:blue; font-weight:bold; }
   </style>
 </head>
 <body>
 <a href="../../README.htm">README</a> &gt; 
-<a href="../../SELECTOR.htm#pseudo-selector">SELECTOR</a><br />
-<a href="./selector.htm">uu.css.pseudo</a> | <a href="./css.htm">uu.css</a> | <a href="./form.htm">uu.css(form)</a>
+<a href="../../SELECTOR.htm#uu.pseudo">SELECTOR</a><br />
+<a href="./selector.htm">uu.pseudo</a> | <a href="./css.htm">uu.css</a> | <a href="./form.htm">uu.css(form)</a>
 <hr />
 <p>jQueryとの動作の違いを確認するため、テスト用のスクリプトは<a href="http://docs.jquery.com/Selectors/last">jQueryのAPI Reference</a>を参考にしています。</p>
   <table>
@@ -21,11 +21,12 @@
     <tr><td>Middle Row</td></tr>
     <tr><td>Last Row</td></tr>
   </table>
-<script>uu.window.ready(function() {
+<script>
+uu.ready(function() {
   uu.css("tr:last").forEach(function(v) {
     uu.css.set(v, { backgroundColor: "yellow", fontWeight: "bolder" });
   });
-})
+}, "W");
 </script>
 <pre>
   uu.css("tr:last").forEach(function(v) {

@@ -15,7 +15,7 @@
 </style>
 </head>
 <body>
-<a href="../../README.htm#demo">README.htm</a> &gt; uu.module.polygon8.htm
+<a href="../../README.htm#demo">README</a> &gt; <a href="../../MODULE.htm#uu.module.polygon">MODULE</a> &gt; uu.module.polygon8.htm
 
 <canvas id="canvas0" width="640" height="480"></canvas>
 
@@ -25,20 +25,19 @@ function boot() {
   poly.add({ highLight: 0x00, x: 100, y: 100, zoom: 300 });
   poly.add({ color: 0x000066, x: 200, y: 100, zoom: 300 });
   poly.add({ color: 0x0000cc, x: 300, y: 100, zoom: 300 });
-  poly.add({ color: 0x006600, x: 200, y: 200, zoom: 300 });
-  poly.add({ color: 0x00cc00, x: 300, y: 200, zoom: 300 });
+  poly.add({ color: 0x006600, x: 300, y: 200, zoom: 300 });
+  poly.add({ color: 0x00cc00, x: 300, y: 300, zoom: 300 });
   poly.add({ color: 0x660000, x: 200, y: 300, zoom: 300 });
-  poly.add({ color: 0xcc0000, x: 300, y: 300, zoom: 300 });
-  poly.add({ color: 0xcccccc, x: 400, y: 300, zoom: 300 });
+  poly.add({ color: 0xcc0000, x: 100, y: 300, zoom: 300 });
+  poly.add({ color: 0xcccccc, x: 100, y: 200, zoom: 300 });
 //  poly.draw(uu.id("canvas0").getContext("2d"), true);
   poly.draw(uu.id("canvas0").getContext("2d"));
   uu.delay(function() {
     poly.draw(uu.id("canvas0").getContext("2d"), true);
   }, 2000);
 }
-uu.module.load("", "polygon", function() {
-  uu.canvas.ready(boot);
-//uu.window.ready(boot);
+uu.module("", "polygon", function() {
+  uu.ready(boot, "C");
 });
 </script>
 

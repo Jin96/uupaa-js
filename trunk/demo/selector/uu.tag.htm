@@ -1,27 +1,45 @@
-<html><head><title>Tag/Element Selector</title>
-<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="http://pigs.sourceforge.jp/javascript-xpath.js"></script><![endif]-->
-<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?load=perflog"></script>
+<html><head><title>uupaa.js - uu.tag test</title>
+<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="./lib/javascript-xpath.js"></script><![endif]-->
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?module=dev"></script>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <style>#result { background-color: lime; }</style>
-</head><body><a href="../../README.htm">README</a> &gt; <a href="../../SELECTOR.htm#element-selector">SELECTOR</a> &gt; uu.tag<br />
+</head><body><a href="../../README.htm">README</a> &gt; <a href="../../SELECTOR.htm#uu.tag">SELECTOR</a> &gt; uu.tag<br />
 <div>
   <p>hoge</p>
   <p>huga</p>
 </div>
+<div id="example">
+  <div id="p1" class="aaa bbb">p1</div>
+  <div id="p2" class="aaa ccc">p2</div>
+  <div id="p3" class="bbb ccc">p3</div>
+</div>
 <div id="result"></div>
 <script>
-  uu.window.ready(function() {
-    uu.forEach(uu.tag("p"), function(v) {
+  uu.ready(function() {
+    uu.tag("p").forEach(function(v) {
       uu.log(v.innerText); // "hoge", "huga"
+    });
+    uu.tag("div", uu.id("example")).forEach(function(v) {
+      uu.log(v.id); // p1, p2, p3
     });
   });
 </script>
 <pre>
+&lt;div&gt;
   &lt;p&gt;hoge&lt;/p&gt;
   &lt;p&gt;huga&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id="example"&gt;
+  &lt;div id="p1" class="aaa bbb"&gt;p1&lt;/div&gt;
+  &lt;div id="p2" class="aaa ccc"&gt;p2&lt;/div&gt;
+  &lt;div id="p3" class="bbb ccc"&gt;p3&lt;/div&gt;
+&lt;/div&gt;
 
-    uu.forEach(uu.tag("p"), function(v) {
+    uu.tag("p").forEach(function(v) {
       uu.log(v.innerText); // "hoge", "huga"
+    });
+    uu.tag("div", uu.id("example")).forEach(function(v) {
+      uu.log(v.id); // p1, p2, p3
     });
 </pre>
 </body></html>

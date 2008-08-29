@@ -1,5 +1,5 @@
 <html><head><title>Class</title>
-<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?load=perflog"></script>
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?module=dev"></script>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 </head><body><a href="../../README.htm">README</a> &gt; <a href="../../DOCUMENT.htm#uu.klass.singleton">DOCUMENT</a> &gt; uu.klass.singleton<br />
 Enter Request URL: <input id="url" type="text" size="60" value="http://www.example.com/" /><br />
@@ -12,11 +12,14 @@ function Run() {
     construct: function(url /* = "" */, msg1 /* = "" */, msg2 /* = "" */ /*, ... */) {
       // 初期化用メソッド
       uu.mix(this, { url: url || "", msg1: msg1 || "", msg2: msg2 || "" }); // 引数の補完と、this.xxx = xxx の実行
-//      uu.ajax.load(this.url + "?" + this.msg1);
+//      uu.ajax(this.url + "?" + this.msg1);
+    },
+    stabled: function(url /* = "" */, msg1 /* = "" */, msg2 /* = "" */ /*, ... */) {
+      uu.log("call stabled");
     },
     destruct: function() {
       // 後処理用メソッド
-//      uu.ajax.load(this.url + "?" + this.msg2);
+//      uu.ajax(this.url + "?" + this.msg2);
     },
     myMethod: function() {
       return [this.msg1, this.msg2];
@@ -25,7 +28,7 @@ function Run() {
   var my = new myClass(uu.id("url").value, "hello", "bye-bye"); // 自動的に construct() を実行する。
   uu.log(my.myMethod()[0]); // "hello"
 
-  var my2 = new myClass(); // 二度目のnewなので construct() は呼ばれず、引数を指定しても無意味となる
+  var my2 = new myClass(); // 二度目のnewなので construct() は呼ばれず、代わりに stabled が呼ばれる。
   uu.log(my.myMethod()[1]); // "bye-bye"
 
   uu.log(my === my2); // "true"  myとmy2は同じもの(シングルトン)
@@ -42,11 +45,14 @@ function Run() {
     construct: function(url /* = "" */, msg1 /* = "" */, msg2 /* = "" */ /*, ... */) {
       // 初期化用メソッド
       uu.mix(this, { url: url || "", msg1: msg1 || "", msg2: msg2 || "" }); // 引数の補完と、this.xxx = xxx の実行
-//      uu.ajax.load(this.url + "?" + this.msg1);
+//      uu.ajax(this.url + "?" + this.msg1);
+    },
+    stabled: function(url /* = "" */, msg1 /* = "" */, msg2 /* = "" */ /*, ... */) {
+      uu.log("call stabled");
     },
     destruct: function() {
       // 後処理用メソッド
-//      uu.ajax.load(this.url + "?" + this.msg2);
+//      uu.ajax(this.url + "?" + this.msg2);
     },
     myMethod: function() {
       return [this.msg1, this.msg2];
@@ -55,7 +61,7 @@ function Run() {
   var my = new myClass(uu.id("url").value, "hello", "bye-bye"); // 自動的に construct() を実行する。
   uu.log(my.myMethod()[0]); // "hello"
 
-  var my2 = new myClass(); // 二度目のnewなので construct() は呼ばれず、引数を指定しても無意味となる
+  var my2 = new myClass(); // 二度目のnewなので construct() は呼ばれず、代わりに stabled が呼ばれる。
   uu.log(my.myMethod()[1]); // "bye-bye"
 
   uu.log(my === my2); // "true"  myとmy2は同じもの(シングルトン)

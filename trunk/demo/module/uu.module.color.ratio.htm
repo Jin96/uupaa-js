@@ -1,0 +1,82 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>uupaa.js - uu.module.color.ratio - test</title>
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?module=dev"></script>
+</head>
+<body>
+<p>
+  <a href="../../README.htm#demo">README</a> &gt; <a href="../../MODULE.htm#uu.module.color.ratio">MODULE</a> &gt; uu.module.color.ratio.htm 
+</p>
+<div>
+  <div id="down20" style="position: absolute; left: 0; width: 100px; height: 100px; background-color: pink">down20</div>
+  <div id="down10" style="position: absolute; left: 100px; width: 100px; height: 100px; background-color: pink">down10</div>
+  <div id="base" style="position: absolute; left: 200px; width: 100px; height: 100px; background-color: pink">base</div>
+  <div id="up10" style="position: absolute; left: 300px; width: 100px; height: 100px; background-color: pink">up10</div>
+  <div id="up20" style="position: absolute; left: 400px; width: 100px; height: 100px; background-color: pink">up20</div>
+</div>
+<script>
+function boot() {
+  var ns = uu.color;
+  var rgba    = ns.hash("chocolate"); // color
+  var hsva    = ns.rgba2hsva(rgba);
+  var v20down = ns.ratio(hsva, 0, 0, -20);
+  var v10down = ns.ratio(hsva, 0, 0, -10);
+  var v10up   = ns.ratio(hsva, 0, 0, 10);
+  var v20up   = ns.ratio(hsva, 0, 0, 20);
+  var rgba20down = ns.hsva2rgba(v20down);
+  var rgba10down = ns.hsva2rgba(v10down);
+  var rgba10up   = ns.hsva2rgba(v10up);
+  var rgba20up   = ns.hsva2rgba(v20up);
+  var rgba3      = ns.hsva2rgba(hsva);
+
+  uu.log("<br />rgb          -> %.2f, %.2f, %.2f", rgba.r, rgba.g, rgba.b);
+  uu.log("<br />hsv          -> %.2f, %.2f, %.2f", hsva.h, hsva.s, hsva.v);
+  uu.log("<br />hsv: v20up   -> %.2f, %.2f, %.2f", v20up.h, v20up.s, v20up.v);
+  uu.log("<br />hsv: v10up   -> %.2f, %.2f, %.2f", v10up.h, v10up.s, v10up.v);
+  uu.log("<br />hsv: base    -> %.2f, %.2f, %.2f", hsva.h, hsva.s, hsva.v);
+  uu.log("<br />hsv: v10down -> %.2f, %.2f, %.2f", v10down.h, v10down.s, v10down.v);
+  uu.log("<br />hsv: v20down -> %.2f, %.2f, %.2f", v20down.h, v20down.s, v20down.v);
+  uu.log("<br />hsv -> rgba  -> %.2f, %.2f, %.2f", rgba.r, rgba.g, rgba.b);
+
+  uu.id("down20").style.backgroundColor = ns.rgb(rgba20down);
+  uu.id("down10").style.backgroundColor = ns.rgb(rgba10down);
+  uu.id("base").style.backgroundColor = ns.rgb(rgba);
+  uu.id("up10").style.backgroundColor = ns.rgb(rgba10up);
+  uu.id("up20").style.backgroundColor = ns.rgb(rgba20up);
+}
+uu.ready(boot);
+</script>
+<pre style="position: absolute; top: 200px;">
+  var ns = uu.color;
+  var rgba    = ns.hash("chocolate"); // color
+  var hsva    = ns.rgba2hsva(rgba);
+  var v20down = ns.ratio(hsva, 0, 0, -20);
+  var v10down = ns.ratio(hsva, 0, 0, -10);
+  var v10up   = ns.ratio(hsva, 0, 0, 10);
+  var v20up   = ns.ratio(hsva, 0, 0, 20);
+  var rgba20down = ns.hsva2rgba(v20down);
+  var rgba10down = ns.hsva2rgba(v10down);
+  var rgba10up   = ns.hsva2rgba(v10up);
+  var rgba20up   = ns.hsva2rgba(v20up);
+  var rgba3      = ns.hsva2rgba(hsva);
+
+  uu.log("&lt;br /&gt;rgb          -&gt; %.2f, %.2f, %.2f", rgba.r, rgba.g, rgba.b);
+  uu.log("&lt;br /&gt;hsv          -&gt; %.2f, %.2f, %.2f", hsva.h, hsva.s, hsva.v);
+  uu.log("&lt;br /&gt;hsv: v20up   -&gt; %.2f, %.2f, %.2f", v20up.h, v20up.s, v20up.v);
+  uu.log("&lt;br /&gt;hsv: v10up   -&gt; %.2f, %.2f, %.2f", v10up.h, v10up.s, v10up.v);
+  uu.log("&lt;br /&gt;hsv: base    -&gt; %.2f, %.2f, %.2f", hsva.h, hsva.s, hsva.v);
+  uu.log("&lt;br /&gt;hsv: v10down -&gt; %.2f, %.2f, %.2f", v10down.h, v10down.s, v10down.v);
+  uu.log("&lt;br /&gt;hsv: v20down -&gt; %.2f, %.2f, %.2f", v20down.h, v20down.s, v20down.v);
+  uu.log("&lt;br /&gt;hsv -&gt; rgba  -&gt; %.2f, %.2f, %.2f", rgba.r, rgba.g, rgba.b);
+
+  uu.id("down20").style.backgroundColor = ns.rgb(rgba20down);
+  uu.id("down10").style.backgroundColor = ns.rgb(rgba10down);
+  uu.id("base").style.backgroundColor = ns.rgb(rgba);
+  uu.id("up10").style.backgroundColor = ns.rgb(rgba10up);
+  uu.id("up20").style.backgroundColor = ns.rgb(rgba20up);
+</pre>
+</body>
+</html>
