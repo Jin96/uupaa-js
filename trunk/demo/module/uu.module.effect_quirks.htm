@@ -3,7 +3,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>uupaa.js - uu.module.effect - Quirks Mode test</title>
 <!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="./lib/javascript-xpath.js"></script><![endif]-->
-<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?module=dev,effect+,drag"></script>
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
 <style>
 html {
   overflow: hidden; height: 100%;
@@ -158,7 +158,9 @@ function runScale(elm) {
   }
   uu.effect.scale(elm, { fn: loop, anchor: 0, w: 200, h: 200, keep: 1 });
 }
-uu.ready(boot);
+uu.module("", "dev,effect+,drag", function() {
+  uu.ready(boot);
+});
 </script>
 </body>
 </html>
