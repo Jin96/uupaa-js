@@ -5,7 +5,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>uupaa.js - canvas bench</title>
 <!--[if IE]><script id="excanvas.js" type="text/javascript" src="http://pigs.sourceforge.jp/excanvas.js"></script><![endif]-->
-<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?module=dev,canvas,ieboost"></script>
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
 
 <style type="text/css">
 body { height: 100%; background-color: white; }
@@ -203,7 +203,9 @@ function boot() {
     }
   }, 2000);
 }
-uu.ready(boot, "WC");
+uu.module("", "dev,canvas,ieboost", function() {
+  uu.ready(boot, "WC");
+});
 </script>
 </body>
 </html>

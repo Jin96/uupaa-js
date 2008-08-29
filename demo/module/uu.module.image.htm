@@ -4,7 +4,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>uupaa.js - uu.module.image test</title>
-<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?module=dev,ieboost"></script>
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
 <style type="text/css">
 body { color: white; background-color: black; }
 .screen { background-image: url(../compat/prairiedog.png); }
@@ -41,7 +41,9 @@ function boot() {
   img.load("../../b1.gif", F, 7); // 存在しない
   img.load("http://example.com/hoge.gif", F, 7); // 存在しない
 }
-uu.ready(boot);
+uu.module("", "dev,ieboost", function() {
+  uu.ready(boot);
+});
 </script>
 </body>
 </html>

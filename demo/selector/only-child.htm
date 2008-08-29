@@ -3,9 +3,9 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<title>uu.css - test</title>
-<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="./lib/javascript-xpath.js"></script><![endif]-->
-<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?module=dev"></script>
+<title>uupaa.js - uu.css(only-child) test</title>
+<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="../../lib/javascript-xpath.js"></script><![endif]-->
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
   <style>
   div { width:100px; height:80px; margin:5px; float:left; background:#b9e }
   </style>
@@ -37,12 +37,14 @@
 <br style="clear: both" />
 
 <script>
-uu.ready(function() {
-  uu.css("div button:only-child").forEach(function(v) {
-    v.innerText = "Alone";
-    uu.css.set(v, { border: "2px blue solid" })
-  });
-}, "W");
+uu.module("", "dev", function() {
+  uu.ready(function() {
+    uu.css("div button:only-child").forEach(function(v) {
+      v.innerText = "Alone";
+      uu.css.set(v, { border: "2px blue solid" })
+    });
+  }, "W");
+});
 </script>
 <pre>
   uu.css("div button:only-child").forEach(function(v) {

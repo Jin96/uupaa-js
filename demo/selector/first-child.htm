@@ -4,8 +4,8 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>uu.css - test</title>
-<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="./lib/javascript-xpath.js"></script><![endif]-->
-<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?module=dev"></script>
+<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="../../lib/javascript-xpath.js"></script><![endif]-->
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
   <style>
   span { color:#008; }
   span.sogreen { color:green; font-weight: bolder; }
@@ -36,10 +36,12 @@ function handleEvent(evt) {
     uu.klass.remove(tgt.target, "sogreen");
   }
 }
-uu.ready(function() {
-  uu.css("div span:first-child").forEach(function(v) {
-    uu.css.set(v, { textDecoration: "underline" })
-    uu.event.set(handleEvent, v, "hover");
+uu.module("", "dev", function() {
+  uu.ready(function() {
+    uu.css("div span:first-child").forEach(function(v) {
+      uu.css.set(v, { textDecoration: "underline" })
+      uu.event.set(handleEvent, v, "hover");
+    });
   });
 });
 </script>

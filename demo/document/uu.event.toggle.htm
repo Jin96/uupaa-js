@@ -3,25 +3,27 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<title>minimum draggable</title>
-<script id="uupaa.js" src="../../uupaa.js?module=drag"></script>
+<title>uupaa.js - uu.event.toggle test</title>
+<script id="uupaa.js" src="../../uupaa.js"></script>
 <style>#drag { background: pink; }</style>
 </head><body><a href="../../README.htm">README</a> &gt; <a href="../../DOCUMENT.htm#uu.event.toggle">DOCUMENT</a> &gt; uu.event.toggle<br />
 
 <div id="drag">draggable</div>
 <script>
-uu.ready(function() {
-  var elm = uu.id("drag");
-  uu.event.set(F, elm, "mousedown");
-  uu.element.toAbsolute(elm);
-  function F(evt) {
-    uu.event.stop(evt);
-    switch (uu.event.toType(evt)) {
-    case "mousemove": uu.module.drag.move(elm, evt); break;
-    case "mousedown": uu.module.drag.save(elm, evt);
-    case "mouseup":   uu.event.toggle(F, uu.ua.ie ? elm : document, "mousemove,mouseup", true);
+uu.module("", "drag", function() {
+  uu.ready(function() {
+    var elm = uu.id("drag");
+    uu.event.set(F, elm, "mousedown");
+    uu.element.toAbsolute(elm);
+    function F(evt) {
+      uu.event.stop(evt);
+      switch (uu.event.toType(evt)) {
+      case "mousemove": uu.module.drag.move(elm, evt); break;
+      case "mousedown": uu.module.drag.save(elm, evt);
+      case "mouseup":   uu.event.toggle(F, uu.ua.ie ? elm : document, "mousemove,mouseup", true);
+      }
     }
-  }
+  });
 });
 </script>
 <pre>

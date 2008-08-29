@@ -4,7 +4,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>uupaa.js - Index</title>
-<script id="uupaa.js" type="text/javascript" src="./uupaa.js?module=dev"></script>
+<script id="uupaa.js" type="text/javascript" src="./uupaa.js"></script>
 <style type="text/css">@import url(./README.css);</style>
 </head>
 <body>
@@ -533,7 +533,9 @@ function boot() {
   uu.node.insert(rv.join(""));
   uu.node.insert(uu.sprintf("<hr /><p>%d indexes</p>", count));
 }
-uu.ready(boot);
+uu.module("", "dev", function() {
+  uu.ready(boot);
+});
 </script>
 
 </body>

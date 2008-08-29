@@ -3,9 +3,9 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<title>uu.css - test</title>
-<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="./lib/javascript-xpath.js"></script><![endif]-->
-<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?module=dev"></script>
+<title>uupaa.js uu.css(nth-child) test</title>
+<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="../../lib/javascript-xpath.js"></script><![endif]-->
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
   <style>
   div { float:left; }
   span { color:blue; }
@@ -39,11 +39,13 @@
   </div>
 <br style="clear: both" />
 <script>
-uu.ready(function() {
-  uu.css("ul li:nth-child(2)").forEach(function(v) {
-    v.innerHTML += "<span> - 2nd!</span>";
-  });
-}, "W");
+uu.module("", "dev", function() {
+  uu.ready(function() {
+    uu.css("ul li:nth-child(2)").forEach(function(v) {
+      v.innerHTML += "<span> - 2nd!</span>";
+    });
+  }, "W");
+});
 </script>
 <pre>
   uu.css("ul li:nth-child(2)").forEach(function(v) {

@@ -1,5 +1,5 @@
-<html><head><title>uu.node.diet</title>
-<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?module=dev"></script>
+<html><head><title>uupaa.js - uu.node.diet test</title>
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 </head><body><a href="../../README.htm">README</a> &gt; <a href="../../DOCUMENT.htm#uu.node.diet">DOCUMENT</a> &gt; uu.node.diet<br />
 <div id="root" style="background-color: yellow">div node 1-1
@@ -42,11 +42,13 @@ function enumBlankNode(elm) {
     }
   }
 }
-uu.ready(function() {
-//    uu.log("element node(in #root) length[%d].", uu.node(uu.id("root"), 1).length);
-//    uu.log("before blank node(in #root) length[%d].", enumBlankNode(uu.id("root"), 1).length);
-  uu.log("<br />element nodes(in #root) length[%d].", uu.nodeType(1, uu.id("root"), 99).length);
-  uu.log("<br />current blank nodes(in #root) length[%d].", enumBlankNode(uu.id("root")).length);
+uu.module("", "dev", function() {
+  uu.ready(function() {
+  //    uu.log("element node(in #root) length[%d].", uu.node(uu.id("root"), 1).length);
+  //    uu.log("before blank node(in #root) length[%d].", enumBlankNode(uu.id("root"), 1).length);
+    uu.log("<br />element nodes(in #root) length[%d].", uu.nodeType(1, uu.id("root"), 99).length);
+    uu.log("<br />current blank nodes(in #root) length[%d].", enumBlankNode(uu.id("root")).length);
+  });
 });
 function diet(node, depth) {
   uu.node.diet(node, depth);

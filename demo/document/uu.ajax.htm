@@ -4,7 +4,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>uupaa.js - uu.ajax test</title>
-<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?module=dev"></script>
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
 <style type="text/css">
 body { background-color: black; color: white; }
 a, b { color: lightblue }
@@ -72,7 +72,9 @@ function ajax(method, data) {
 
 function boot() {
 }
-uu.ready(boot);
+uu.module("", "dev", function() {
+  uu.ready(boot);
+});
 
 </script>
 

@@ -4,7 +4,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>uu.pseudo - test</title>
-<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?module=dev"></script>
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
   <style>
   div { background-color: yellow; border: 1px solid #aaa; width: 80px; height: 80px; margin: 5px; float: left; }
   div.colored { background-color: green; }
@@ -36,10 +36,12 @@ function anim() {
   }
   uu.effect.slideDown(e, { fn: loop });
 }
-uu.ready(function() {
-  uu.effect.setDefaultSpeed("slow");
-  uu.event.set(F, uu.id("run"), "click");
-  anim();
+uu.module("", "dev", function() {
+  uu.ready(function() {
+    uu.effect.setDefaultSpeed("slow");
+    uu.event.set(F, uu.id("run"), "click");
+    anim();
+  });
 });
 </script>
 <pre>

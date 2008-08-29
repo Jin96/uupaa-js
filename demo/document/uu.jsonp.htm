@@ -4,7 +4,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>uupaa.js - uu.jsonp test</title>
-<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?module=io,evaljs"></script>
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
 <style type="text/css">
 body { background-color: black; color: white; }
 a, b { color: lightblue }
@@ -76,7 +76,9 @@ function boot() {
   var obj = uu.codec.decodeJSON(jsontxt);
   uu.id("result2").innerText = uu.sprintf("{ hoge:\"%s\", huga:%d }", obj.hoge, obj.huga);
 }
-uu.ready(boot);
+uu.module("", "io,evaljs", function() {
+  uu.ready(boot);
+});
 </script>
 </body>
 </html>

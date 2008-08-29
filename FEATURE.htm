@@ -6,13 +6,6 @@
 <title>uupaa.js - Feature Comparison</title>
 <style type="text/css">@import url(./README.css);</style>
 <style type="text/css">
-/*
-table { color: black; background: #EFEFEF; }
-tr.category { background-color: #BDBDBD; }
- */
-/*
-td a[href] { color: blue; }
- */
 tr.category { background-color: #1F1F1F; }
 .icon_ie, .icon_firefox, .icon_opera, .icon_safari { opacity: 0.2 }
 #alphapngbg { background: url(http://uupaa-js.googlecode.com/svn/trunk/demo/compat/prairiedog_24bpp.png); }
@@ -23,7 +16,7 @@ tr.category { background-color: #1F1F1F; }
 .maxmin1 { float: left; }
 </style>
 <!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="./lib/javascript-xpath.js"></script><![endif]-->
-<script id="uupaa.js" type="text/javascript" src="./uupaa.js?module=dev,ieboost"></script>
+<script id="uupaa.js" type="text/javascript" src="./uupaa.js"></script>
 </head>
 <body>
 <p>
@@ -171,7 +164,9 @@ tr.category { background-color: #1F1F1F; }
 <script type="text/javascript">
 function boot() {
 }
-uu.ready(boot, "W");
+uu.module("", "dev,ieboost", function() {
+  uu.ready(boot, "W");
+});
 
 /*
   "uupaa.js": {

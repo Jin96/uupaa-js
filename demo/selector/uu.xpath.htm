@@ -1,6 +1,6 @@
 <html><head><title>uupaa.js - uu.xpath test</title>
-<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="./lib/javascript-xpath.js"></script><![endif]-->
-<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?module=dev"></script>
+<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="../../lib/javascript-xpath.js"></script><![endif]-->
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 </head><body><a href="../../README.htm">README</a> &gt; <a href="../../SELECTOR.htm#uu.xpath">SELECTOR</a> &gt; uu.xpath<br />
 <div>
@@ -9,11 +9,13 @@
 </div>
 <div id="result"></div>
 <script>
+uu.module("", "dev", function() {
   uu.ready(function() {
     uu.forEach(uu.xpath("/html/body/div/p[2]"), function(v) {
       uu.log(v.innerText); // "huga"
     });
   }, "W");
+});
 </script>
 <pre>
   &lt;p&gt;hoge&lt;/p&gt;

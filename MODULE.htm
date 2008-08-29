@@ -6,7 +6,7 @@
 <title>uupaa.js - Module</title>
 <style type="text/css">@import url(./README.css);</style>
 <!--[if IE]><script id="excanvas.js" type="text/javascript" src="http://pigs.sourceforge.jp/excanvas.js"></script><![endif]-->
-<script id="uupaa.js" type="text/javascript" src="./uupaa.js?module=canvas"></script>
+<script id="uupaa.js" type="text/javascript" src="./uupaa.js"></script>
 </head>
 <body>
 <p>
@@ -1038,7 +1038,9 @@ function boot() {
     c2d.image(dest, 0, 0).setStyle("mix", v).image(src, 40, 40);
   });
 }
-uu.ready(boot, "WC");
+uu.module("", "canvas", function() {
+  uu.ready(boot, "WC");
+});
 </script>
 
 

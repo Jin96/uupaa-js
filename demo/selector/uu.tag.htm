@@ -1,6 +1,6 @@
 <html><head><title>uupaa.js - uu.tag test</title>
-<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="./lib/javascript-xpath.js"></script><![endif]-->
-<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?module=dev"></script>
+<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="../../lib/javascript-xpath.js"></script><![endif]-->
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <style>#result { background-color: lime; }</style>
 </head><body><a href="../../README.htm">README</a> &gt; <a href="../../SELECTOR.htm#uu.tag">SELECTOR</a> &gt; uu.tag<br />
@@ -15,6 +15,7 @@
 </div>
 <div id="result"></div>
 <script>
+uu.module("", "dev", function() {
   uu.ready(function() {
     uu.tag("p").forEach(function(v) {
       uu.log(v.innerText); // "hoge", "huga"
@@ -23,6 +24,7 @@
       uu.log(v.id); // p1, p2, p3
     });
   });
+});
 </script>
 <pre>
 &lt;div&gt;
