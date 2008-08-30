@@ -796,7 +796,7 @@ uu.mix(uu.css, {
               }
               rv = index || ss.rules.length;
               rule = rule.replace(/[\{\}]/g, "");
-              ss.addRule(rule.substring(0, pos), rule.substring(pos), rv);
+              ss.addRule(uu.trim(rule.substring(0, pos)), uu.trim(rule.substring(pos)), rv); // IE8β2対策(空白を含む文字列は拒否される)
               return rv; // return inserted index,
             },
   // uu.css.deleteRule - Delete CSS ruls

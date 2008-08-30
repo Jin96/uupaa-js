@@ -20,7 +20,7 @@ uu.module.ieboost.prototype = {
               var pa = this._param;
 
               // IEのバージョンによる機能の不活性化
-              if (uu.ua.version > 6 && uu.ua.version < 5.5) {
+              if (uu.ua.version > 6 || uu.ua.version < 5.5) {
                 pa.maxmin   = false; // IE5.5～6.0以外ならmaxmin不活性
                 pa.alphapng = false; // IE5.5～6.0以外ならalphapng不活性
               }

@@ -100,6 +100,7 @@ uu.mix(uu.module.effect.prototype, {
               ox = parseInt(cs.marginLeft) + parseInt(cs.paddingLeft) + parseInt(cs.borderLeftWidth);
               oy = parseInt(cs.marginTop)  + parseInt(cs.paddingTop)  + parseInt(cs.borderTopWidth);
 
+              DRAW(0, 0); // 前回の描画が残らないようにリセット
               uu.css.setRect(c2d.ctx.canvas, { x: rect.x + ox + - 4, y: rect.y + oy });
               uu.css.show(c2d.ctx.canvas);
 
