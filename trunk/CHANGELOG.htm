@@ -58,6 +58,11 @@ li { margin-bottom: 0.5em; }
         <dt>Version 0.5 2008-08-31 / Unofficial excanvas.js (ver 0.3) implement</dt>
         <dd>
           <ol>
+            <li class="fix">uupaa.js (<a href="./DOCUMENT.htm#uu.css.insertRule">uu.css.insertRule</a>):
+                <br />- IE8beta2: addRule("div ", " color: red") -&gt; addRule(uu.trim("div "), uu.trim(" color: red"))
+                <br />- need uu.trim().
+            </li>
+
             <li class="fix">uu.module.effect+.js (<a href="./MODULE.htm#uu.module.effect+.wave">uu.module.effect+.wave</a>):
             </li>
             <li class="add">uu.module.effect+.js (<a href="./MODULE.htm#uu.module.effect+.sunset">uu.module.effect+.sunset</a>):
