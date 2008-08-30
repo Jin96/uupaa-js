@@ -18,6 +18,14 @@ html {
   color: white;
   text-align: center;
 }
+.box2 {
+  position: absolute;
+  outline: 0px silver solid;
+  background-color: gray;
+  color: white;
+  text-align: center;
+}
+
 .margin5 { margin: 5px; }
 .padding5 { padding: 5px; }
 .border5 { border: 5px dotted red; }
@@ -37,6 +45,7 @@ html {
 #pulsate  { top: 400px; left: 250px; }
 #dropOut  { top: 400px; left: 400px; }
 #wave     { top: 400px; left: 550px; }
+#sunset   { top: 400px; left: 700px; }
 
 #static   { position: static; top: 0; left: 0; }
 #static2  { position: static; top: auto; left: auto; }
@@ -45,7 +54,8 @@ html {
 </head>
 <body>
 <div>
-  <a href="../../README.htm#demo">README</a> &gt; <a href="../../MODULE.htm#uu.module.effect">MODULE</a> &gt; uu.module.effect.htm 
+  <a href="../../README.htm#demo">README</a> &gt; <a href="../../MODULE.htm#uu.module.effect">MODULE</a> &gt; uu.module.effect.htm |
+  <a href="http://d.hatena.ne.jp/uupaa/20080830/1220070361">Windows + Safari3で画像が反転する</a>
   <br />
   <a href="./uu.module.effect.htm">Standard Mode</a>
 </div>
@@ -62,6 +72,8 @@ html {
     <input type="button" value="fast" onclick="setSpeed('fast')" />
     <input type="button" value="mid" onclick="setSpeed('mid')" />
     <input type="button" value="slow" onclick="setSpeed('slow')" />
+    Diet:
+    <input type="button" value="diet" onclick="diet()" />
   </div>
 </div>
 
@@ -79,7 +91,9 @@ html {
   <div id="slideDown" class="box" onclick="!this.uuEffectRunning && uu.effect.slideDown(this, { keep: 1, revert: 1 })">slideDown</div>
   <div id="pulsate" class="box" onclick="!this.uuEffectRunning && uu.effect.pulsate(this, { keep: 1, revert: 1 })">pulsate</div>
   <div id="dropOut" class="box" onclick="!this.uuEffectRunning && uu.effect.dropOut(this, { keep: 1, revert: 1 })">dropOut</div>
-  <img id="wave" src="cover0.jpg" class="box" onclick="!this.uuEffectRunning && uu.effect.wave(this, { keep: 1, revert: 1 })" />
+
+  <img id="wave" src="cover0.jpg" class="box2" onclick="!this.uuEffectRunning && uu.effect.wave(this, { keep: 1, revert: 1 })" />
+  <img id="sunset" src="sunset0.jpg" class="box2" onclick="!this.uuEffectRunning && uu.effect.sunset(this, { keep: 1, revert: 1 })" />
 <!--
   <div id="static" class="box">static</div>
   <div id="static2" class="box">static2</div>
@@ -92,11 +106,22 @@ html {
 function boot() {
   ["fade", "move", "scale", "bullet", "puff", "fold", "shake",
    "shrink", "glow", "slideUp", "slideDown", "pulsate", "dropOut",
-   "wave"].forEach(function(v) {
+   "wave", "sunset"].forEach(function(v) {
     if (uu.id(v)) {
       new uu.module.drag.free(uu.id(v), { ghost: false, shim: false });
     }
   });
+  // pre create wave data
+  uu.delay(function() {
+    uu.effect.createWaveResource(uu.id("sunset"), false);
+  }, 100);
+  uu.delay(function() {
+    uu.effect.createWaveResource(uu.id("wave"), true); // scanline
+  }, 100);
+
+}
+function diet() {
+  uu.effect.diet();
 }
 function toggleMargin() {
   uu.xsnap('id("target")/div', document.body).forEach(function(v) {
@@ -158,7 +183,7 @@ function runScale(elm) {
   }
   uu.effect.scale(elm, { fn: loop, anchor: 0, w: 200, h: 200, keep: 1 });
 }
-uu.module("", "dev,effect+,drag", function() {
+uu.module("", "dev,effect+,drag,canvas", function() {
   uu.ready(boot);
 });
 </script>

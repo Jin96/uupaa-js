@@ -29,12 +29,11 @@
 
 
 <h2><a name="demo">DEMO - デモ</a></h2>
-<p>簡単なデモを用意しました。これ以外にも動作確認用のhtmlが demo/ にあります(作りかけのものも混じっています)。</p>
+<p>簡単なデモを用意しました。これ以外にも動作確認用のhtmlが demo/ にあります(開発中のものも混じっています)。</p>
 <ul>
-  <li>Effect: <a href="demo/module/uu.module.effect.htm">基本エフェクト</a></li>
-<!--
-  <li><a href="demo/module/uu.image.preload.htm">image.preload(画像の先読み)</a></li>
- -->
+  <li>Effect: <a href="demo/module/uu.module.effect.htm">エフェクト</a></li>
+  <li>Window: <a href="demo/widget/uu.module.widget.window.htm">CanvasによるWindowの基礎実装</a></li>
+  <li>Unofficial excanvas.js (ver 0.3): <a href="demo/canvas/bench.htm">Canvas Bench</a></li>
   <li>UI: <a href="demo/module/uu.module.drag.htm">Drag &amp; Drop - ドラッグ &amp; ドロップ</a></li>
   <li>3D:  <a href="demo/module/uu.module.polygon1.htm">Cube - キューブ</a>, 
       <a href="demo/module/uu.module.polygon8.htm">Cube x 8 - キューブ8個</a></li>
@@ -53,35 +52,48 @@
       クリティカルな機能を提供します。</li>
   <li>Cover Flowやポリゴン, Text-To-Speechなど、<br />
       他には無い特別な機能があります。</li>
-  <li><a href="demo/canvas/demo.htm">IEでもしっかりcanvasが使えます。</a></li>
+  <li>excanvas.js を改良する機能を併せ持つため、<br /><a href="demo/canvas/demo.htm">IEでもしっかりcanvasが使えます。</a></li>
   <li><a href="./SELECTOR.htm">セレクタ</a>が豊富です。<br />XPath, CSS3セレクタ, jQueryの独自セレクタも使用可能です。</li>
-  <li><a href="./demo/widget/uu.module.widget.window.htm">カジュアルで軽量なUI</a>が(近い将来)使えます。</li>
+  <li><a href="./demo/widget/uu.module.widget.window.htm">カジュアルで軽量なUI</a>が(近い将来)使えます。
+      <br />WidgetやUIコントロール部分の共同開発者を絶賛募集中です。</li>
 </ol>
 </td><td>
 <ol>
-  <li>実績がありません。</li>
+  <li>実績がありません。寂しい限りです。</li>
   <li>一部のモジュールのドキュメントがまだ存在しません。</li>
 </ol>
 </td></tr>
 </table>
 
+<hr />
 <h2>Support Browser - サポートブラウザ</h2>
 <ul>
- <li>Internet Explorer 6+ <i>(IE5.5でも動くかもしれないが未検証のためサポート外)</i></li>
- <li>Safari3+ <i>(Safari2はサポート外)</i></li>
- <li>Opera9+ <i>(canvasやXPathなどが使用できないためOpera8以下はサポート外)</i></li>
- <li>Firefox2+ <i>(Firefox1.5系以下は未検証のためサポート外)</i></li>
+ <li>Internet Explorer 6+ <i>(IE5.5 でも動くかもしれないが未検証のためサポート外)</i></li>
+ <li>Safari3+ <i>(Safari2 はサポート外)</i></li>
+ <li>Opera9+ <i>(canvas や XPath などが使用できないため Opera8 以下はサポート外)</i></li>
+ <li>Firefox2+ <i>(Firefox1.5 系以下は未検証のためサポート外)</i></li>
 </ul>
-<p>Opera9.5, Firefox3, Internet Explorer 8β1 でも動作を確認しています。<i>(IE8βには未実装の機能があり、その影響でいくつかのデモは動きません)</i></p>
+<p>Opera9.5, Firefox3, Internet Explorer 8β2 でも動作を確認しています。
+  <br /><i>(IE8βには未実装の機能があり、その影響でいくつかのデモは動きません)</i></p>
 
+<hr />
 <h2>Installation - 導入方法</h2>
-
 <p>uupaa.jsを使用したページをIEで動かすためには、
-  <a href="http://coderepos.org/share/wiki/JavaScript-XPath">JavaScript-XPath</a>と
-  <a href="http://excanvas.sourceforge.net/">ExplorerCanvas</a>が必要になります。</p>
-<p>JavaScript-XPathは /lib/javascript-xpath.js として uupaa.js に同梱されていますが、
-  ExplorerCanvasは非同梱です。配布元からダウンロードし、例を参考に配置してください。</p>
+  <a href="http://coderepos.org/share/wiki/JavaScript-XPath">JavaScript-XPath</a> と 
+  <a href="http://excanvas.sourceforge.net/">ExplorerCanvas</a> が必要になります。</p>
+<p>JavaScript-XPath の非圧縮版を<a href="http://d.hatena.ne.jp/amachang/">作者様(id: amachang)</a>のご好意により、
+  <br /> /lib/javascript-xpath.js として uupaa.js に同梱しています。</p>
+<p>ExplorerCanvas は非同梱です。配布元からダウンロードし例を参考に配置してください。</p>
 
+<p>uupaa.js は uupaa.js 単体で動作可能なライブラリです。
+   <br />uupaa.js を拡張する<a href="./DOCUMENT.htm#uu.module">モジュールを追加で読み込む</a>と、様々な機能が使用可能になります。
+   <br />miniディレクトリ以下に圧縮版の uupaa.js もあります。</p>
+<p>最新版は、
+  <a href="http://uupaa-js.googlecode.com/">http://uupaa-js.googlecode.com/</a> または、
+  <a href="http://uupaa-js.googlecode.com/svn/trunk/">http://uupaa-js.googlecode.com/svn/trunk/</a> からダウンロードできます。
+</p>
+
+<hr />
 <h3>Folder tree - ファイルの配置例</h3>
 <p>http://www.example.com/js/ 以下にuupaa.jsを設置する例です。</p>
 
@@ -90,7 +102,7 @@
     <ul>
       <li>js/
         <ul>
-          <li>uupaa.js</li>
+          <li>uupaa.js</li> 
           <li>uu.module.drag.js <i>- (ドラッグ&amp;ドロップモジュール)</i></li>
           <li>uu.module.xxx.js ...</li>
           <li>demo/ <i>- (デモ/テスト用ディレクトリ)</i></li>
@@ -112,12 +124,12 @@
     </ul>
   </li>
 </ul>
+<p>上記の例では、モジュールを相対パスで読み込む際の基準ディレクトリは、http://www.example.com/js/ になります。</p>
 
+<hr />
 <h2><a name="dev">Coming Soon - 開発中の機能など</a></h2>
 <ul>
-  <li><a href="demo/widget/uu.module.widget.window.htm">Window GUI(基礎部分のみ)</a></li>
   <li><a href="demo/canvas/rot_img.htm">画像のZ軸回転エフェクト(IEのみで動作)</a></li>
-  <li><a href="demo/canvas/bench.htm">Canvas bench</a></li>
   <li><a href="demo/coverflow/coverflow.htm">Cover Flow(作りかけ)</a>(Firefox2のみ)</li>
   <li><a href="demo/module/uu.module.perry.htm">ペリーさん(作りかけ)</a>(IE or Firefox + IETabユーザのみ)</li>
 </ul>

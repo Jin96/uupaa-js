@@ -22,7 +22,7 @@
 </p>
 <a href="./README.htm">README</a> &gt; <a href="./INDEX.htm">INDEX</a> &gt; DOCUMENT<br />
 <hr />
-<h2><a name="mixin">Mixin</a> - Object/Hash/Arrayの混合</h2>
+<h2><a name="Mixin">Mixin</a> - Object/Hash/Arrayの混合</h2>
 <p>オブジェクトに別のオブジェクトを混ぜ込みます。</p>
 <p>uu.mix は様々な局面で役立ちます。</p>
 <ol>
@@ -74,7 +74,7 @@ uu.log(base); // { a: 0, b: 1 }
 
 
 <hr />
-<h2><a name="ua">Detect User-Agent and Functions</a> - ブラウザと機能の判別</h2>
+<h2><a name="UA">Detect User-Agent and Functions</a> - ブラウザと機能の判別</h2>
 <p>ブラウザの判別や、微調整に必要な情報を提供します。</p>
 <hr />
 <dl>
@@ -124,7 +124,7 @@ uu.log(base); // { a: 0, b: 1 }
 </dl>
 
 <hr />
-<h2><a name="iteration">Iteration</a> - オブジェクト/Hash/Array/FakeArrayのイテレーション</h2>
+<h2><a name="Iteration">Iteration</a> - オブジェクト/Hash/Array/FakeArrayのイテレーション</h2>
 <p>Array/Hash/FakeArrayの各要素を取り出し評価します。</p>
 <hr />
 <dl>
@@ -285,7 +285,7 @@ uu.log(rv); // [0, 2, 8]
 <h2><a name="Node">Node</a></h2>
 <p>ノードの取り扱いを簡単にします。</p>
 <p>
-<a href="#uu.node.insert">uu.node.insert</a>や<a href="#uu.node.insertText">uu.dom.insertText</a>では、基準ノード(context)と位置(pos)により挿入する位置が決まります。
+<a href="#uu.node.insert">uu.node.insert</a> や <a href="#uu.node.insertText">uu.dom.insertText</a> では、基準ノード(context)と位置(pos)により挿入する位置が決まります。
 </p>
 <pre style="line-height: 1">
   /DOCUMENT_NODE (root)
@@ -296,19 +296,19 @@ uu.log(rv); // [0, 2, 8]
   :  |  |
      :  +- /parentNode - <b>context</b>の親
      :  |  |
-        :  +- /FirstSibling   (親から見て長女) - <b>UU.FIRST</b>
+        :  +- /FirstSibling   (親から見て長女) - pos = <b>UU.FIRST</b>
         :  +- /SecondSibling  (親から見て次女)
-           +- /ThirdSibling   (親から見て三女) - <b>UU.PREV</b>
+           +- /ThirdSibling   (親から見て三女) - pos = <b>UU.PREV</b>
            | 
            +- /FourthSibling  (親から見て四女) - <b>context</b> - 基準ノード
            |  |
-           |  +- /FirstChild  (親から見て四女の長男) - <b>UU.FIRST_CHILD</b>
+           |  +- /FirstChild  (親から見て四女の長男) - pos = <b>UU.FIRST_CHILD</b>
            |  +- /SecondChild (親から見て四女の次男)
-           |  +- /ThirdChild  (親から見て四女の三男) - <b>UU.LAST_CHILD</b>
+           |  +- /ThirdChild  (親から見て四女の三男) - pos = <b>UU.LAST_CHILD</b>
            | 
-           +- /FifthSibling   (親から見て五女) - <b>UU.NEXT</b>
+           +- /FifthSibling   (親から見て五女) - pos = <b>UU.NEXT</b>
            +- /SixthSibling   (親から見て六女)
-           +- /SeventhSibling (親から見て七女) - <b>UU.LAST</b>
+           +- /SeventhSibling (親から見て七女) - pos = <b>UU.LAST</b>
 </pre>
 <hr />
 <dl>
@@ -586,13 +586,13 @@ uu.msg.post(x1, "...", { from: "Smoking Man" }); // モルダーにお返事
 
     <p>uu.klass.singleton は、<a href="#uu.klass.generic">uu.klass.generic</a>の特徴を受け継ぎ、さらに以下の特別な機能を持っています。</p>
     <ol>
-      <li>destructメソッド を定義しておくと、ページ遷移の時に myClass.prototype.destruct を自動的に呼び出します。</li>
-      <li>constructメソッド を定義しておくと、1度目の new で construct メソッドを呼び出します。</li>
-      <li>stabledメソッド を定義しておくと、2度目以降の new で stabled メソッドを呼び出します。</li>
+      <li>destruct メソッド を定義しておくと、ページ遷移の時に destruct メソッドを自動的に呼び出します。</li>
+      <li>construct メソッド を定義しておくと、1度目の new で construct メソッドを呼び出します。</li>
+      <li>stabled メソッド を定義しておくと、2度目以降の new で stabled メソッドを呼び出します。</li>
     </ol>
     <pre>
  @param <a href="./GLOSSARY.htm#TypeMix">Mix</a> [...] - constructに渡す引数をいくつでも指定できます。
- @return Function - 汎用クラスの雛形を生成するクロージャを返します。
+ @return Function - singletonクラスの雛形を生成するクロージャを返します。
     </pre>
     <a href="demo/document/uu.klass.singleton.htm" class="run">Run</a>
     <pre class="eg">
@@ -675,10 +675,7 @@ uu.log(<b>uu.klass.has</b>(e, "hoge")); // true
     </pre>
     <pre class="eg">
 uu.forEach(uu.klass("alpha"), function(v) {
-  <b>uu.klass.add</b>(v, ["beta", "hoge", "huga", "piyo"]); // まとめて追加
-});
-uu.forEach(uu.klass("alpha"), function(v) {
-  <b>uu.klass.add</b>(v, "beta,hoge,huga,piyo"); // これでも良い
+  <b>uu.klass.add</b>(v, "beta");
 });
     </pre>
   </dd>
@@ -699,7 +696,7 @@ uu.forEach(uu.klass("alpha"), function(v) {
     </pre>
     <pre class="eg">
 uu.forEach(uu.klass("alpha"), function(v) {
-  <b>uu.klass.remove</b>(v, "beta"); // 削除は１つずつ
+  <b>uu.klass.remove</b>(v, "beta");
 });
     </pre>
   </dd>
@@ -775,7 +772,7 @@ DummyClass.prototype = {
 
 
 <hr />
-<h2><a name="attr">Attribute</a></h2>
+<h2><a name="Attribute">Attribute</a></h2>
 <p>属性の取り扱いを簡単にします。</p>
 <hr />
 <dl>
@@ -829,7 +826,7 @@ DummyClass.prototype = {
 
 
 <hr />
-<h2><a name="css">CSS</a></h2>
+<h2><a name="CSS">CSS</a></h2>
 <p>スタイル情報の取り扱いを簡単にします。</p>
 <hr />
 <dl>
@@ -1364,9 +1361,9 @@ elm.clientHeight = 14px = 4(padding) + 10(height)
          <i>module</i>を<i>path</i>で指定されたディレクトリから読み込みます。
          全モジュールの読み込み完了で <i>fn</i>() をコールします。</p>
       <p><i>path</i>に複数のパスを指定すると、各パスで読み込みが可能か順番に試行します。
-         全てのパスを試行し、それでも読み込めないモジュールがある場合は、例外を発生させ処理を終了します。
-         <i>path</i>を省略すると、検索パスとして<a href="./MODULE.htm#uu.module.config.modulePath">uu.module.config.modulePath</a> の値を使用します。</p>
-      <p><i>path</i>に相対パスを指定すると、uupaa.js が設置されているディレクトリを基準としてモジュールを読み込みます。</p>
+         <br />全てのパスを試行し、それでも読み込めないモジュールがある場合は例外を発生させ処理を終了します。
+         <br /><i>path</i>を省略すると、検索パスとして<a href="./MODULE.htm#uu.module.config.modulePath">uu.module.config.modulePath</a> の値を使用します。</p>
+      <p><i>path</i>に相対パスを指定すると、 uupaa.js が設置されているディレクトリを基準としてモジュールを読み込みます。</p>
       <pre>
  @param <a href="./GLOSSARY.htm#TypeTaxing">Taxing</a> [path] - 検索パスの指定です。絶対URLや相対パスを指定します。
                         空文字列を指定すると、<a href="./MODULE.htm#uu.module.config.modulePath">uu.module.config.modulePath</a> で指定されたURLを検索パスとして使用します。
@@ -1435,7 +1432,7 @@ uu.module("http://example.com/, http://example.net/latest/", "ui,effect,drag");
 
 
 <hr />
-<h2><a name="event">Event</a></h2>
+<h2><a name="Event">Event</a></h2>
 <p>イベントの取り扱いを簡単にします。</p>
 <hr />
 <dl>
@@ -1661,25 +1658,26 @@ function F(evt) {
 
 
 <hr />
-<h2><a name="ready">Ready</a></h2>
-<p>機能が使用可能(または使用不能)になったタイミングで関数をコールバックします。</p>
+<h2><a name="Ready">Ready</a></h2>
+<p>機能が使用可能("U"なら使用不能)になったタイミングで関数をコールバックします。</p>
 <table>
-<tr><th>Expression</th><th>Function/State</th><th></th></tr>
-<tr><td>uu.ready(<i>fn</i>, "D")</td><td><a href="./GLOSSARY.htm#DomReady">DomReady</a></td><td></td></tr>
-<tr><td>uu.ready(<i>fn</i>, "W")</td><td><a href="./GLOSSARY.htm#WindowReady">WindowReady</a></td><td></td></tr>
-<tr><td>uu.ready(<i>fn</i>, "C")</td><td><a href="./GLOSSARY.htm#CanvasReady">CanvasReady</a></td><td></td></tr>
-<tr><td>uu.ready(<i>fn</i>, "DC")</td><td>DomReady + CanvasReady</td><td>DomReadyかつCanvasReadyでコールバック</td></tr>
-<tr><td>uu.ready(<i>fn</i>, "WC")</td><td>WindowReady + CanvasReady</td><td>WindowReadyかつCanvasReadyでコールバック</td></tr>
-<tr><td>uu.ready(<i>fn</i>, "U")</td><td><a href="./GLOSSARY.htm#WindowUnready">WindowUnready</a></td><td></td></tr>
-<tr><td>uu.ready(<i>fn</i>, "A")</td><td><a href="./GLOSSARY.htm#AjaxReady">AjaxReady</a></td><td></td></tr>
-<tr><td>uu.ready(<i>fn</i>, "J")</td><td><a href="./GLOSSARY.htm#JSONPReady">JSONPReady</a></td><td></td></tr>
+<tr><th>Expression</th><th>Function/State</th><th>Combination</th></tr>
+<tr><td>uu.ready(<i>fn</i>, "D")</td><td><a href="./GLOSSARY.htm#DomReady">DomReady</a></td><td>　</td></tr>
+<tr><td>uu.ready(<i>fn</i>, "W")</td><td><a href="./GLOSSARY.htm#WindowReady">WindowReady</a></td><td>　</td></tr>
+<tr><td>uu.ready(<i>fn</i>, "C")</td><td><a href="./GLOSSARY.htm#CanvasReady">CanvasReady</a></td><td>　</td></tr>
+<tr><td>uu.ready(<i>fn</i>, "DC")</td><td>DomReady + CanvasReady</td><td>DomReady かつ CanvasReady なら条件成立</td></tr>
+<tr><td>uu.ready(<i>fn</i>, "WC")</td><td>WindowReady + CanvasReady</td><td>WindowReady かつ CanvasReady なら条件成立</td></tr>
+<tr><td>uu.ready(<i>fn</i>, "U")</td><td><a href="./GLOSSARY.htm#WindowUnready">WindowUnready</a></td><td>　</td></tr>
+<tr><td>uu.ready(<i>fn</i>, "A")</td><td><a href="./GLOSSARY.htm#AjaxReady">AjaxReady</a></td><td>　</td></tr>
+<tr><td>uu.ready(<i>fn</i>, "J")</td><td><a href="./GLOSSARY.htm#JSONPReady">JSONPReady</a></td><td>　</td></tr>
 </table>
+<p>類似機能に、<a href="./MODULE.htm#uu.module.imageset">uu.module.imageset</a> が提供する <a href="./GLOSSARY.htm#ImageReady">ImageReady</a> があります。
 <hr />
 <dl>
 <!-- -->
   <dt><a name="uu.ready">uu.ready</a> - Ready event handler - Readyイベントハンドラを設定</dt>
   <dd><p>uu.ready(<i>fn</i>, <i>id</i> = "D") は <i>id</i>で指定した機能が使用可能な状態(Ready状態)になると呼ばれる関数(<i>fn</i>)を登録します。
-      既にその状態ならば即座に<i>fn</i>をコールします。</p>
+      <br />状態成立後に呼ばれた場合は、即座に <i>fn</i> をコールバックします。</p>
       <pre>
  @param Function fn - コールバック関数を指定します。
  @param String [id] - 機能をidで指定します。指定可能なidは、"D", "W", "C", "DC", "WC", "U", "A", "J" です。
@@ -1880,7 +1878,7 @@ function F(evt) {
 
 
 <hr />
-<h2><a name="utility">Utility</a></h2>
+<h2><a name="Utility">Utility</a></h2>
 <p>型の相互変換や、検索, 使用頻度の高い文字列操作関数などを提供します。</p>
 <hr />
 <dl>
@@ -2406,8 +2404,8 @@ rv["HashIndex"] = "HashIndex";
      <br />近い将来を見据え、携帯端末やネットブック上で動作するJavaScriptが実用的な速度を出すためには、
      <br />配列を配列のまま扱うことこそが、資源効率と実行速度を両立するベターな方法と考えます(現時点では)。
   </p>
-  <p>Web2.0的な使い方では、万能で遅いセレクタでも必要十分なケースがほとんどだと思います。
-     <br />Web3.0に突入したときに、そのようなアプローチが生き残れるかは不明です。
+  <p>PC上で動くJavaScriptライブラリをベースとしたWeb2.0的な用法においては、富豪的な実装で十分でしょう。
+     <br />Web3.0に突入したときに、そのようなアプローチが実用に耐えるかは不明です。
      <br />必要な道具は用意しました。後はパズルを解いてください。
   </p>
 </div>
