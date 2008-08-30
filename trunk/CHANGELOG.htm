@@ -55,51 +55,72 @@ li { margin-bottom: 0.5em; }
     <dt id="version0.x-title">Version 0.x</dt>
     <dd id="version0.x-data">
       <dl>
-        <dt>Version 0.5 2008-08-30 / New catch-phrase「JavaScript Library for Casual Creator」</dt>
+        <dt>Version 0.5 2008-08-31 / Unofficial excanvas.js (ver 0.3) implement</dt>
         <dd>
           <ol>
-            <li class="add">uupaa.js (uu.css):
-                <ja><br />- 高速化: CSS3セレクタをXPathに変換した結果をキャッシュするようにした</ja>
-                <ja><br />- Speedup: Cash of result that converted into XPath from CSS3 selector</ja>
+            <li class="fix">uu.module.effect+.js (<a href="./MODULE.htm#uu.module.effect+.wave">uu.module.effect+.wave</a>):
             </li>
-            <li class="rename">uupaa.js (uu.event.handler to uu.event.closure):
+            <li class="add">uu.module.effect+.js (<a href="./MODULE.htm#uu.module.effect+.sunset">uu.module.effect+.sunset</a>):
+            </li>
+            <li class="add">uupaa.js (<a href="./SELECTOR.htm#uu.css">uu.css</a>):
+                <ja><br />- 高速化: CSS3セレクタをXPathに変換した結果をキャッシュするようにした。</ja>
+                <en><br />- Speedup: Cash of result that converted into XPath from CSS3 selector.</en>
+            </li>
+            <li class="rename">uupaa.js (uu.event.handler to <a href="./DOCUMENT.htm#uu.event.closure">uu.event.closure</a>):
+                <br />- Rename function.
             </li>
             <li class="add">uupaa.js (<a href="./DOCUMENT.htm#uu.isFA">uu.isFA</a>):
-                <ja><br />- FakeArrayを判定する関数を追加。</ja>
-                <en><br />- Add a function to judge FakeArray.</en>
+                <ja><br />- <a href="./GLOSSARY.htm#FakeArray">FakeArray</a>を判定する関数を追加。</ja>
+                <en><br />- Add a function to judge <a href="./GLOSSARY.htm#FakeArray">FakeArray</a>.</en>
             </li>
-            <li class="add">uupaa.js (uu.css.show, uu.css.hide, uu.css.rebound, <a href="./DOCUMENT.htm#uu.last">uu.last</a>):
+            <li class="add">uupaa.js (<a href="./DOCUMENT.htm#uu.css.show">uu.css.show</a>,
+                                      <a href="./DOCUMENT.htm#uu.css.hide">uu.css.hide</a>,
+                                      <a href="./DOCUMENT.htm#uu.css.rebound">uu.css.rebound</a>,
+                                      <a href="./DOCUMENT.htm#uu.css.rect">uu.css.rect</a>,
+                                      <a href="./DOCUMENT.htm#uu.css.setRect">uu.css.setRect</a>,
+                                      <a href="./DOCUMENT.htm#uu.last">uu.last</a>,
+                                      <a href="./SELECTOR.htm#uu.nodeType">uu.nodeType</a>,
+                                      <a href="./SELECTOR.htm#uu.textNode">uu.textNode</a>,
+                                      <a href="./DOCUMENT.htm#uu.event.toggle">uu.event.toggle</a>,
+                                      <a href="./DOCUMENT.htm#uu.node.diet">uu.node.diet</a>,
+                                      <a href="./DOCUMENT.htm#uu.uu.converse">uu.uu.converse</a>):
+                <br />- Add functions.
             </li>
-            <li class="fix">uupaa.js (uu.id):
+
             </li>
-            <li class="del">uu.module.ui.js, uu.module.effect.js, uu.module.jqss.js, uu.module.tip.js
+            <li class="fix">uupaa.js (<a href="./SELECTOR.htm#uu.id">uu.id</a>):
+                <ja><br />- 引数cacheを削除</ja>
+                <en><br />- Delete argument(cache).</en>
             </li>
-            <li class="fix">uupaa.js (uu.klass):
+            <li class="del">uu.module.ui.js, uu.module.effect.js, uu.module.jqss.js, uu.module.tip.js, uu.module.image.js
+                <br />- Delete files.
             </li>
-            <li class="fix">uupaa.js (uu.tag, uu.klass):
-                <ja><br />- 戻り値をNodeListからElementArrayに変更。
-                <en><br />- Changed a return value-type in ElementArray by NodeList.
+            <li class="fix">uupaa.js (<a href="./SELECTOR.htm#uu.tag">uu.tag</a>, <a href="./SELECTOR.htm#uu.klass">uu.klass</a>):
+                <ja><br />- 戻り値をNodeListからElementArrayに変更。</ja>
+                <en><br />- Changed a return value-type in ElementArray by NodeList.</en>
             </li>
             <li class="del">uupaa.js (uu.css.cssProp):
             </li>
-            <li class="rename">uupaa.js (uu.uniqueID to uu.uid):
-            </li>
-            <li class="add">uupaa.js (uu.converse):
+            <li class="rename">uupaa.js (uu.uniqueID to <a href="./DOCUMENT.htm#uu.uid">uu.uid</a>):
+                <ja><br />- uu.uniqueID() から uu.uid() に名前を変更。</ja>
+                <en><br />- Rename function uu.uniqueID to uu.uid.</en>
+
             </li>
             <li class="move">uu.module.ui.js (uu.ui.inRect into uupaa.js::uu.inRect):
             </li>
-            <li class="add">uupaa.js (uu.config.debug, uu.config.repair):
-                <ja><br />- uu.config.debug に 0x2 を指定すると FirebugLite1.2 を組み込む。
-                            uu.config.repair に 0x1 を指定すると、excanvas.js を自動修正する。</ja>
-                <en><br />- Add the function that FirebugLite1.2 starts automatically when appoint 0x2 to uu.config.debug,
-                            A cord revising excanvas.js is applied to when appoint 0x1 in uu.config.repair.</en>
+            <li class="add">uupaa.js (<a href="./MODULE.htm#uu.module.config.debug">uu.module.config.debug</a>,
+                                      <a href="./MODULE.htm#uu.module.config.repair">uu.module.config.repair</a>):
+                <ja><br />- uu.module.config.debug に 0x2 を指定すると FirebugLite1.2 を組み込む。
+                            uu.module.config.repair に 0x1 を指定すると、excanvas.js を自動修正する。</ja>
+                <en><br />- Add the function that FirebugLite1.2 starts automatically when appoint 0x2 to uu.module.config.debug,
+                            A cord revising excanvas.js is applied to when appoint 0x1 in uu.module.config.repair.</en>
             </li>
             <li class="add">uu.module.canvas.js (CanvasRenderingContext2D.prototype):
                 <ja><br />- excanvas.js を修正するコードを追加, 線形グラデーションの実装, 円形グラデーションの実装,パターンの実装,高速化,拡大/縮小の品質向上,CSS Level3の色指定をサポート。</ja>
                 <en><br />- Add a cord revising excanvas.js and support implementation of linear gradation, implementation of circular gradation, implementation of a pattern, speedup, quality improvement of enlarged / reduction, color appointment of CSS Level3.</en>
             </li>
             <li class="retake">uu.module.dev.js (<a href="./MODULE.htm#uu.module.perf">uu.module.perf</a>):
-                <ja><br />- average, dumpメソッドを削除し、reportメソッドを追加。runメソッドの引数を拡張</ja>
+                <ja><br />- average, dumpメソッドを削除し、reportメソッドを追加。runメソッドの引数を拡張。</ja>
                 <en><br />- Delete a average amd dump method, Add a report method.Expand the argument of the run method.</en>
             </li>
             <li class="add">uupaa.js (<a href="./DOCUMENT.htm#uu.css.insertRule">uu.css.insertRule</a>):
@@ -113,23 +134,20 @@ li { margin-bottom: 0.5em; }
                 <ja><br />- Node操作関数を追加, ノード指定用識別子(UU.PREV, UU.NEXT)を追加。</ja>
                 <en><br />- Add Node manipulator, and Node location specifier(UU.PREV, UU.NEXT).</en>
             </li>
-            <li class="retake">uu.module.canvas.js (<a href="./CANVAS.htm#uu.module.canvas2d">uu.module.canvas2d</a>, 
-                                                    <a href="./CANVAS.htm#uu.module.rgba">uu.module.rgba</a>, 
-                                                    <a href="./CANVAS.htm#uu.module.color">uu.module.color</a>):
+            <li class="retake">uu.module.canvas.js (<a href="./MODULE.htm#uu.module.canvas2d">uu.module.canvas2d</a>, 
+                                                    <a href="./MODULE.htm#uu.module.color">uu.module.color</a>):
                 <ja><br />- canvasモジュールの再実装,
-                            <br />色を扱うモジュールを追加,
                             <br />RGBA,HSVネームスペースとWeb named color(131色)を扱うモジュールを追加。</ja>
                 <en><br />- Re-implementation of the canvas class.
-                            <br />Add a module handling a color.
                             <br />Add a module handling a RGBA + HSV + WebNamedColor(131 colors) namespace.</en>
             </li>
-            <li class="del">uupaa.js (<a href="./MODULE.htm#uu.module.config.png24">uu.module.config.png24</a>):
+            <li class="del">uupaa.js (uu.module.config.png24):
                 <ja><br />- uu.module.ieboost.js に機能を統合。</ja>
                 <en><br />- Integrated function with uu.module.ieboost.js.</en>
             </li>
-            <li class="fix">uupaa.js (<a href="./MODULE.htm#uu.module.msgpump.set">uu.module.msgpump.set</a>, 
-                                      <a href="./MODULE.htm#uu.module.msgpump.send">uu.module.msgpump.send</a>, 
-                                      <a href="./MODULE.htm#uu.module.msgpump.post">uu.module.msgpump.post</a>):
+            <li class="fix">uupaa.js (<a href="./MODULE.htm#uu.module.messagePump.set">uu.module.messagePump.set</a>, 
+                                      <a href="./MODULE.htm#uu.module.messagePump.send">uu.module.messagePump.send</a>, 
+                                      <a href="./MODULE.htm#uu.module.messagePump.post">uu.module.messagePump.post</a>):
                 <ja><br />- uidプロパティを持つオブジェクトを指定可能とした。</ja>
                 <en><br />- Accept Object with an uid property.</en>
             </li>
@@ -145,9 +163,6 @@ li { margin-bottom: 0.5em; }
             <li class="retake">uupaa.js (<a href="./DOCUMENT.htm#uu.ready">uu.ready</a>):
                 <ja><br />- 複合条件の成立を待てるようにした。(DomReady + CanvasReady など)</ja>
                 <en><br />- Able to wait for the conclusion of compound condition. (e.g. DomReady + CanvasReady)</en>
-            </li>
-            <li class="add">uupaa.js (<a href="./DOCUMENT.htm#uu.event.toggle">uu.event.toggle</a>):
-                <br />- Add function.
             </li>
             <li class="add">uupaa.js (<a href="./DOCUMENT.htm#uu.klass.generic">uu.klass.generic</a>,
                                       <a href="./DOCUMENT.htm#uu.klass.singleton">uu.klass.singleton</a>):
@@ -165,53 +180,47 @@ li { margin-bottom: 0.5em; }
                 <br />- support "0" flag
                 <br />&gt;&gt;<a href="http://d.hatena.ne.jp/uupaa/20080301">[JavaScript][uupaa.js] JavaScriptでsprintf</a>
             </li>
-            <li class="add">uupaa.js (<a href="./DOCUMENT.htm#uu.toPixel">uu.css.toPixel</a>, uu.css.measure, uu.css.get.em, uu.css.get.pt):
-                <ja><br />- px単位の値を取得する関数を追加</ja>
-                <en><br />- Add a function to convert into a px unit.</en>
+            <li class="add">uupaa.js (<a href="./DOCUMENT.htm#uu.css.toPixel">uu.css.toPixel</a>,
+                                      <a href="./DOCUMENT.htm#uu.css.measure">uu.css.measure</a>):
+                <ja><br />- pt, emをem単位で取得する関数を追加</ja>
+                <en><br />- Add a function to pt and em convert into a px unit.</en>
             </li>
-            <li class="add">uu.module.drag.js (uu.module.drag.shim):
+            <li class="add">uu.module.drag.js (<a href="./MODULE.htm#uu.module.drag.shim">uu.module.drag.shim</a>):
                 <br />- <ja>IE6のバグ(select要素がz-indexを無視する)を改善するトリック(shim)を実装</ja>
                 <br />- <en>Support the "shim" trick for IE6</en>
                 <br />&gt;&gt;<a href="http://dotnetjunkies.com/weblog/jking/archive/2003/07/21/488.aspx">How to cover an IE windowed control (Select Box, ActiveX Object, etc.) with a DHTML layer.(Joe King)</a>
                 <br />&gt;&gt;<a href="http://support.microsoft.com/default.aspx?scid=http://support.microsoft.com:80/support/kb/articles/q177/3/78.asp&amp;NoWebContent=1">INFO: How the Z-index Attribute Works for HTML Elements.(MicroSoft)</a>
             </li>
-            <li class="add">uupaa.js (uu.css.rect, uu.css.setRect):
-                <br />- Add functions.
-            </li>
             <li class="fix">uupaa.js (<a href="./DOCUMENT.htm#uu.event.toType">uu.event.toType</a>):
                 <br />- 第一引き数の型をStringからeventに変更。
                 <br />- Change first argument type(String to event).
-            </li>
-
-            <li class="add">uupaa.js (<a href="./SELECTOR.htm#node-selector">uu.node</a>, <a href="./SELECTOR.htm#text-node-selector">uu.text</a>, <a href="./DOCUMENT.htm#uu.node.diet">uu.node.diet</a>):
-                <br />- Add functions.
-            </li>
-            <li class="del">uu.module.image.js
-                <br />- Delete file.
             </li>
             <li class="fix">uu.module.drag.js (uu.module.drag.free::mousewheel,
                                                uu.module.drag.limited::mousewheel)
                 <ja><br />- widthやheightが"auto"の場合でも正しく動作するよう修正。</ja>
                 <en><br />- Fixed that width and height worked even in the case of "auto" definitely.</en>
             </li>
-            <li class="add">uu.module.ui.js (uu.module.drag.save, uu.module.drag.move, uu.module.drag.free::mousedown, mousemove, uu.module.drag.limited::mousedown, mousemove)
+            <li class="add">uu.module.drag.js (<a href="./MODULE.htm#uu.module.drag.save">uu.module.drag.save</a>,
+                                               <a href="./MODULE.htm#uu.module.drag.move">uu.module.drag.move</a>):
                 <ja><br />- マウスドラッグ用のコンビニ関数を追加</ja>
                 <en><br />- Add two convenience functions for mouse drag.</en>
             </li>
             <li class="rename">uu.module.perflog.js -&gt; uu.module.dev.js
+                <br />- Rename file.
             </li>
             <li class="rename">uupaa.js (uu.module.load -&gt; uu.module, 
                                          uu.module.isLoaded -&gt; uu.module.already):
+                <br />- Rename functions.
             </li>
-            <li class="retake">uupaa.js (uu.url -&gt; uu.module.url, uu.config -&gt; uu.module.config):
+            <li class="retake">uupaa.js (uu.url -&gt; <a href="./MODULE.htm#uu.module.url">uu.module.url</a>,
+                                         uu.config -&gt; <a href="./MODULE.htm#uu.module.config">uu.module.config</a>):
                 <ja><br />- モジュール化</ja>
                 <en><br />- Modularization.</en>
             </li>
-            <li class="retake">uupaa.js (uu.module.virtualTimer):
+            <li class="retake">uupaa.js (<a href="./MODULE.htm#uu.module.virtualTimer">uu.module.virtualTimer</a>):
                 <br />- Retake.
             </li>
-            <li class="retake">uupaa.js (uu.event.db, uu.event.db.set, uu.event.db.unset, uu.event.db.find,
-                                        uu.event.set, uu.event.unset):
+            <li class="retake">uupaa.js (<a href="./DOCUMENT.htm#uu.event.set">uu.event.set</a>):
                 <ja><br />- イベントの二重登録を抑止</ja>
                 <en><br />- Restrain the duplicate registration of the event.</en>
             </li>

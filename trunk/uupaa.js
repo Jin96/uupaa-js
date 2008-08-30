@@ -1374,7 +1374,7 @@ uu.mix(uu, {
               case "C":  (uu.ua.ie || uu.ua.opera) ? me._canvas(fn, id) : me._done("C"); break;
               case "DC": me(function() { uu.vtmHighSpeed.set(0, DELAY, -1, "DC"); }, "D"); break;
               case "WC": me(function() { uu.vtmHighSpeed.set(0, DELAY, -1, "WC"); }, "W"); break;
-              case "U":  uu.event.set( function() { me._done("U"); }, uuw, "beforeunload,unload"); break;
+              case "U":  uu.event.set(function() { me._done("U"); }, uuw, "beforeunload,unload"); break;
               case "A":  (uuw.XMLHttpRequest || uuw.ActiveXObject) && me._done("A"); break;
               case "J":  me._done("J"); break;
               }
@@ -1861,9 +1861,7 @@ uu.module.virtualTimer.prototype = {
             },
   // uu.module.virtualTimer.extend - Extend VirtualTimer loop count - 仮想タイマーのループ数を延長
   extend:   function(vtid, loop /* = -1 */) {
-//▼
               loop = loop || -1;
-//▲
               if (!(vtid in this.db) || this.db[vtid].unset) { return; }
               var db = this.db[vtid];
               // loop < 0で無限ループ化, loop >= 0で有限ループ化
@@ -1872,9 +1870,7 @@ uu.module.virtualTimer.prototype = {
             },
   // uu.module.virtualTimer.resume - Resume BaseTimer or VirtualTimer - ベースタイマー/仮想タイマーを再スタート
   resume:   function(vtid /* = -1 */) {
-//▼
               vtid = vtid || -1;
-//▲
               if (vtid < 0) {
                 if (this.baseTimerID === -1) {
                   this.tick = uu.time(); // refresh tick count
@@ -1889,9 +1885,7 @@ uu.module.virtualTimer.prototype = {
             },
   // uu.module.virtualTimer.suspend - Suspend BaseTimer or VirtualTimer - ベースタイマー/仮想タイマーを一時停止
   suspend:  function(vtid /* = -1 */) {
-//▼
               vtid = vtid || -1;
-//▲
               if (vtid < 0) {
                 (this.baseTimerID !== -1) && uuw.clearInterval(this.baseTimerID);
                 this.baseTimerID = -1; // stop base timer
@@ -2391,6 +2385,8 @@ uu.module.effect.prototype = {
             function() {
               this._vtm = new uu.module.virtualTimer(10);
               this._defaultSpeed = this.speed.mid;
+              // リソースを抱えている要素と開放用関数の一覧
+              this._hasResourceElement = [ /* [Element: deleteResourceFunction], ... */ ];
             },
   setDefaultSpeed:
             function(speed) {
@@ -2399,6 +2395,10 @@ uu.module.effect.prototype = {
   // リソースの開放
   diet:     function() {
               this._vtm.diet();
+              this._hasResourceElement.forEach(function(v) {
+                v[1](v[0]);
+              });
+              this._hasResourceElement = [];
             },
   fade:     function(elm, param /* = { speed, fn, begin: 1, end: 0, keep: false, revert: false } */) {
               var pp = this._prepare(elm, uu.mix.param(param || {}, { begin: 1, end: 0 }));
@@ -2537,7 +2537,7 @@ uu.module.effect.prototype = {
             },
   dropOut:  function(elm, param /* = { speed, fn, keep: false, revert: false } */) {
               var R = this._revert, pp = this._prepare(elm, param), run = 0, rect = uu.css.show(elm, 1);
-              function next() { (++run === 2) && (R(elm, pp.revert), pp.fn(elm, pp.cssText)); }
+              function next() { (++run === 2) && (R(elm, pp.revert), pp.fn(elm)); }
               this._move(elm, 0, pp.speed, next, rect.x, rect.y + 200);
               this._fade(elm, 0, uumr(pp.speed / 4), next, uu.css.opacity(elm), 0);
             },
@@ -2737,7 +2737,7 @@ uu.msg          = new uu.module.messagePump();
 uu.customEvent  = new uu.module.customEvent();
 uu.agent        = new uu.module.agent();
 uu.imageset     = new uu.module.imageset();
-uu.color        = new uu.module.color();            // color dict.
+uu.color        = new uu.module.color();
 uu.effect       = new uu.module.effect();
 uu.config       = new uu.module.config();
 

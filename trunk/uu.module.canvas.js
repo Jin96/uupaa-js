@@ -300,7 +300,7 @@ uu.module.canvas2d.prototype = {
             },
   // uu.module.canvas2d.pattern - pattern
   pattern:  function(image /* image or canvas */, pattern /* = "repeat" */) {
-              return this.ctx.createPattern(image, pattern || "repeat");
+              return this.ctx.createPattern(image, (pattern === void 0) ? "repeat" : pattern);
             },
   // uu.module.canvas2d.image - image
   image:    function(image, sx, sy, sw, sh, dx, dy, dw, dh) {
@@ -351,6 +351,9 @@ uu.module.canvas2d.prototype = {
 };
 
 if (!uu.ua.ie || !(uu.config.repair & 0x1)) {
+  return;
+}
+if (!("CanvasRenderingContext2D" in window)) {
   return;
 }
 // excanvas.js(version 0.2) Hack

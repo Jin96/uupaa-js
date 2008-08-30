@@ -674,6 +674,29 @@ uu.id("up20").style.backgroundColor = ns.rgb(rgba20up);
 <p>通常は、システム全体で共用するグローバルなインスタンス(<a href="./DOCUMENT.htm#uu.effect">uu.effect</a>)を使用し、
    特別な場合に、uu.module.effect をインスタンス化してください。</p>
 <a href="./demo/module/uu.module.effect.htm" class="run">DEMO</a>
+<ul>
+  <li><a name="uu.module.effect.setDefaultSpeed">uu.module.effect.setDefaultSpeed</a> - </li>
+  <li><a name="uu.module.effect.diet">uu.module.effect.diet</a> - Memory Compaction - リソースを開放</li>
+  <li><a name="uu.module.effect.fade">uu.module.effect.fade</a> - Fadein, Fadeout - フェードイン, フェードアウト</li>
+  <li><a name="uu.module.effect.move">uu.module.effect.move</a> - Move - 移動</li>
+  <li><a name="uu.module.effect.scale">uu.module.effect.scale</a> - Scale - アンカー付きのリサイズ</li>
+  <li><a name="uu.module.effect.bullet">uu.module.effect.bullet</a> - Bullet - 弾丸</li>
+  <li><a name="uu.module.effect.puff">uu.module.effect.puff</a> - Puff - 拡大しながら消える</li>
+  <li><a name="uu.module.effect.fold">uu.module.effect.fold</a> - Fold - 折りたたむ</li>
+  <li><a name="uu.module.effect.shake">uu.module.effect.shake</a> - Shake - 左右に揺さぶる</li>
+  <li><a name="uu.module.effect.shrink">uu.module.effect.shrink</a> - Shrink - 中心に向かって縮小する</li>
+  <li><a name="uu.module.effect.glow">uu.module.effect.glow</a> - Glow - だんだん大きくなる</li>
+  <li><a name="uu.module.effect.slideUp">uu.module.effect.slideUp</a> - Slide up - 上に折りたたむ</li>
+  <li><a name="uu.module.effect.slideDown">uu.module.effect.slideDown</a> - Slide down - 下に広げる</li>
+  <li><a name="uu.module.effect.pulsate">uu.module.effect.pulsate</a> - Pulsate - 点滅</li>
+  <li><a name="uu.module.effect.dropOut">uu.module.effect.dropOut</a> - Drop out - 落下しながら消える</li>
+  <li><a name="uu.module.effect+.wave">uu.module.effect+.wave</a> - Wave - 陽炎</li>
+  <li><a name="uu.module.effect+.sunset">uu.module.effect+.sunset</a> - Sunset - 沈む夕日</li>
+  <li><a name="uu.module.effect+.createWaveResource">uu.module.effect+.createWaveResource</a> - Precreate Wave, Sunset raster data - Wave, Sunset用のラスターデータを事前に作成</li>
+</ul>
+
+
+
 
 <hr />
 <h2><a name="uu.module.fdc">Friendly Data Container</a></h2>
@@ -739,7 +762,7 @@ uu.id("up20").style.backgroundColor = ns.rgb(rgba20up);
             <br />複数指定不可, パスの末尾に"/"が必要
             <br />例: "imagePath=http://excample.com/static/image/"
             </td></tr>
-      <tr><td><a href="uu.module.config.repair">repair</a></td>
+      <tr><td><a name="uu.module.config.repair">repair</a></td>
           <td>Number</td>
           <td>0x1</td>
           <td>AutoRepairMode(自動修復モード)
@@ -748,7 +771,7 @@ uu.id("up20").style.backgroundColor = ns.rgb(rgba20up);
             <br />これらの値を組み合わせて指定する
             <br />例: "repair=1"
             </td></tr>
-      <tr><td><a href="uu.module.config.debug">debug</a></td>
+      <tr><td><a name="uu.module.config.debug">debug</a></td>
           <td>Number</td>
           <td>0x0</td>
           <td>DebugMode(デバッグモード)
@@ -869,7 +892,7 @@ uu.id("up20").style.backgroundColor = ns.rgb(rgba20up);
 
 
 <hr />
-<h2><a name="canvas2d">2D Canvas</a></h2>
+<h2><a name="uu.module.canvas2d">2D Canvas</a></h2>
 <p>canvasの取り扱いを簡単にします。</p>
 <a href="./demo/canvas/demo.htm" class="run">DEMO</a>
 <hr />
