@@ -1353,6 +1353,24 @@ elm.clientHeight = 14px = 4(padding) + 10(height)
 <h2><a name="Module">Module</a></h2>
 <p>機能単位で分割されているモジュール(JavaScriptファイル)を読み込むことで、uupaa.jsの機能を拡張できます。<br />
    uu.moduleは、モジュールを動的に読み込み、機能を拡張する手段を提供します。</p>
+<p>モジュール名は任意です。ファイル名に使用可能な文字と記号( []()+-!., )などもモジュール名に使用可能です。</p>
+<p>読み込まれるモジュールは、自らの名前を、uu.module[モジュール名] = {} として定義する必要があります。
+   <br />定義し忘れるとモジュールの読み込み失敗やタイムアウトエラーが発生します。
+</p>
+<pre class="eg">
+  uu.module.<b><i>moduleName</i></b> = {};                      // 基本形
+  uu.module.<i>moduleName</i> = <b>function</b>( ... ) { ... }; // 関数オブジェクトもOK
+  uu.module[<b>"<i>effect+</i>"</b>] = {};                      // 記号を使う場合は ["モジュール名"] とする
+  uu.module[<b>"<i>skin.plasticityAngle</i>"</b>] = {};       // ドットでネームスペースを切ることも可能
+</pre>
+<p>以下が最小構成のモジュールの例です。これは uu.module.dummy.js として提供されています。</p>
+<pre class="eg">
+(function() { var /* uud = document, */ uuw = window, uu = uuw.uu;
+
+<b>uu.module.dummy</b> = {};
+
+})(); // end (function())()
+</pre>
 <hr />
 <dl>
 <!-- -->
@@ -1375,18 +1393,17 @@ elm.clientHeight = 14px = 4(padding) + 10(height)
       </pre>
 
       <pre class="eg">
-// http://example.com/ 以下から ui, effect, dragモジュールのロードを試み、失敗した場合は、
+// http://example.com/ 以下から effect, dragモジュールのロードを試み、失敗したモジュールだけは、
 // http://example.net/latest/ 以下からモジュールのロードを試みる。
-uu.module("http://example.com/, http://example.net/latest/", "ui,effect,drag");
+uu.module("http://example.com/, http://example.net/latest/", "effect,drag");
       </pre>
       <p>複数の検索パスをうまく組み合わせると、本番系が接続しにくい場合に、
          自動的に予備系のサーバからスクリプトをロードするといった動作の指定が可能になります。</p>
       <p>既にロード済みのモジュールを再度読み込もうとすると、その指示は無視され、即座に fn() をコールします。</p>
       <p>uu.moduleは非同期に読み込みを行うため高速にモジュールを読み込むことができますが、
-         読み込み順は完全には保障されず、タイムアウトもしません。</p>
-      <p>読み込み順が保障されないため、Safari3等でエラーが出る場合があります。
-         <br />そのような場合は、<a href="#uu.module.loadSync">uu.module.loadSync</a>で
-         読み込み順に依存しているモジュールを読み込むようにします。</p>
+         読み込み順はブラウザに依存します。タイムアウトもしません。</p>
+      <p>読み込み順が保障されないため、順依存なモジュールでエラーが発生する場合があります。
+         <br />そのような場合は、<a href="#uu.module.loadSync">uu.module.loadSync</a>を使用します。</p>
       <p>uu.module()の代りに、&lt;script id="uupaa.js" src="uupaa.js<b>?module=...</b>"&gt; とすることで、
          <a href="./MODULE.htm#uu.module.config.load">モジュールを自動的に読み込む</a>こともできます。</p>
   </dd>
@@ -1403,9 +1420,13 @@ uu.module("http://example.com/, http://example.net/latest/", "ui,effect,drag");
   <dt><a name="uu.module.loadSync">uu.module.loadSync</a> - Load Module(Synchronized) - モジュールの同期読み込み</dt>
   <dd><p>uu.module.loadSync(<i>path</i> = "", <i>module</i>, <i>fn</i> = undefined) は、
          <a href="#uu.module">uu.module</a>の同期ロード版です。</p>
-      <p>uu.module.loadSyncはモジュールを順番に(ひとつずつ)読み込むため低速ですが読み込み順が保障されます。
-         一定時間以内に読み込みが完了しないとタイムアウトします。
+      <p>uu.module.loadSyncはモジュールを順番に(ひとつずつ)読み込むため、完了までの時間は伸びますが、読み込み順が保障されます。
+         <br />読み込み順を保障する必要の無いモジュールと、保障する必要のあるモジュールに分け、
+         <br />必要の無いモジュールは <a href="#uu.module">uu.module</a>で読み込み、必要があるモジュールはuu.module.loadSync を使用します。
+         <br />一定時間以内に読み込みが完了しないとタイムアウトします。
          <a href="#uu.module.timeout">uu.module.timeout</a>の値を変更するとタイムアウト時間を変更できます。</p>
+      <p>既にロード済みのモジュールを再度読み込もうとすると、その指示は無視され、即座に fn() をコールします。</p>
+
       <pre>
  @param <a href="./GLOSSARY.htm#TypeTaxing">Taxing</a> [path] - 検索パスの指定です。絶対URLや相対パスを指定します。
                         空文字列を指定すると、<a href="./MODULE.htm#uu.module.config.modulePath">uu.module.config.modulePath</a> で指定されたURLを検索パスとして使用します。

@@ -842,13 +842,13 @@ uu.id("up20").style.backgroundColor = ns.rgb(rgba20up);
 <dl>
 <!-- -->
   <dt><a name="uu.module.perf.run">uu.module.perf.run</a> - 測定</dt>
-  <dd><p>uu.module.perf.run(times = 1, me = undefined, fn, args) は、
+  <dd><p>uu.module.perf.run(times = 1, me = undefined, fn, args = undefined) は、
       <i>fn</i>を<i>times</i>回実行し実行時間を記録します。以前の実行結果はクリアします。</p>
 <pre>
- @param Number         times - 実行回数を指定します。デフォルトは1です。
- @param this           me    - thisオブジェクトを指定します。デフォルトはundefinedです。
- @param Function       fn    - 関数を指定します。
- @param ArgumentsArray args  - fnに渡す引数を配列( [ arg, ...] )で指定します。省略可能です。
+ @param Number         [times] - 実行回数を指定します。デフォルトは1です。
+ @param this           [me]    - thisオブジェクトを指定します。デフォルトはundefinedです。
+ @param Function       fn      - 測定対象の関数を指定します。
+ @param ArgumentsArray [args]  - fnに渡す引数を配列( [ arg, ...] )で指定します。省略可能です。
 </pre>
   </dd>
 <!-- -->
