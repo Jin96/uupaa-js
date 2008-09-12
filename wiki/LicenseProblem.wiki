@@ -1,4 +1,4 @@
-# excanvas.js と uupaa.js のライセンスについて
+#summary excanvas.js と uupaa.js のライセンスについて
 
 = uupaa.js  =
   * 経緯 http://d.hatena.ne.jp/uupaa/20080908#c1220995370
