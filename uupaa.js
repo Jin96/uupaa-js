@@ -2442,10 +2442,12 @@ uu.module.config.prototype = {
               this.imagePath  = this.imagePath.replace(/\{BASE\}/g, this.basePath);
             },
   // uu.module.config.load
-  load:     function() {
+  load:     function(boost /* = true */) {
               // --- load module ---
               var ary = uu.notax(this.module);
-              (uu.ua.ie && ary.indexOf("ieboost") === -1) && ary.push("ieboost"); // force load ieboost
+              if (boost === void 0 || boost) {
+                (uu.ua.ie && ary.indexOf("ieboost") === -1) && ary.push("ieboost"); // force load ieboost
+              }
               ary.length && uu.module("", ary.join(","));
               // --- load FirebugLite ---
               (!uu.ua.gecko && this.debug & 0x2) && this._loadFirebugLite();
