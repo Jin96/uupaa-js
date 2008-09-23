@@ -5,11 +5,10 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>uupaa.js - uu.module.widget.window test</title>
 <!--[if IE]><script id="excanvas.js" type="text/javascript" src="http://pigs.sourceforge.jp/excanvas.js"></script><![endif]-->
-<script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?module=dev,canvas,drag,widget,skin.plasticity,skin.plasticityAngle"></script>
 <style>
 html {
   background: pink url(../../img/uu.module.canvas.grid.gif);
-  height: 100%; /* bug fix ie6 std-mode */
 }
 </style>
 </head>
@@ -79,9 +78,12 @@ function boot() {
   mng.createWindow({ skin: "plasticityAngle", title: "CHOCO" }, { boneColor: "#6f151b", bodyStyle: "auto", titleColor: "black" });
   mng.createWindow({ skin: "plasticityAngle", title: "MELON" }, { boneColor: "#cdee75", bodyStyle: "auto", titleColor: "orange" });
 }
+/*
 uu.module("", "dev,canvas,drag,widget,skin.plasticity,skin.plasticityAngle", function() {
   uu.ready(boot, "WC");
 });
+ */
+uu.ready(boot, "MWC");
 </script>
 
 </body>

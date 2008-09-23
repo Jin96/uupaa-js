@@ -1,0 +1,25 @@
+<html><head><title>uupaa.js - uu.ready test</title>
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head><body><a href="../../README.htm">README</a> &gt; <a href="../../DOCUMENT.htm#uu.ready">DOCUMENT</a> &gt; uu.ready<br />
+<div id="result"></div>
+<script>
+    receiverObject1 = {
+      uid: uu.uid(),
+      msgbox: function(msg, p1, p2) {
+        uu.id("result").innerHTML += p1;
+//        window.status += p1;
+      }
+    };
+    uu.msg.set(receiverObject1);
+
+uu.module.loadSync("", "dev,canvas,drag,widget,skin.plasticity,skin.plasticityAngle");
+uu.ready(function() {
+  if (!uu.ready.already("M")) {
+    alert("not ready M");
+  }
+  uu.log("OK");
+//  window.status = "ok";
+});
+</script>
+</body></html>

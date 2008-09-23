@@ -1,40 +1,44 @@
 <html><head><title>uupaa.js - uu.css.get test</title>
-<script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?module=dev"></script>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <style>#target { background-color: #369; color: #999; width: 20em; float: left; }</style>
 </head><body><a href="../../README.htm">README</a> &gt; <a href="../../DOCUMENT.htm#uu.css.get">DOCUMENT</a> &gt; uu.css.get<br />
 <div id="target" style="height: 200px">this</div>
 <br style="clear: both" />
 <script>
-uu.module("", "dev", function() {
-  uu.ready(function() {
-    var elm = uu.id("target");
+uu.ready(function() {
+  var elm = uu.id("target");
 
-    uu.config.backCompat = true; // cssPropに加え、css-prop形式のプロパティ名("background-color")を使用可能にする(処理が重くなる)
-    var rv1 = uu.css.get(elm, ["background-color", "float"]); // { backgroundColor: "rgb(51, 102, 153)", cssFloat: "left" }
-    uu.log(rv1["styleFloat"] || rv1["cssFloat"]); // "left"
+  var rv1 = uu.css.get(elm, ["backgroundColor", "float"]); // { backgroundColor: "rgb(51, 102, 153)", cssFloat: "left" }
+  uu.log(rv1["styleFloat"] || rv1["cssFloat"]); // "left"
 
-    uu.config.backCompat = false; // cssProp形式のプロパティ名("backgroundColor")のみ使用可能に戻す(処理が早くなる)
-    var rv2 = uu.css.get(elm, "backgroundColor"); // "rgb(51, 102, 153)";
-    uu.log(rv2);
-    var rv3 = uu.css.get(elm, "border, outline, width, height"); // { border: "", height: "200px", outline: "", width: "320px" }
-    uu.log(rv3);
-    var rv4 = uu.css.get(elm, ["width", "height"]); // { height: "200px", width: "320px" }
-    uu.log(rv4);
+  var rv2 = uu.css.get(elm, "backgroundColor"); // "rgb(51, 102, 153)";
+  uu.log(rv2);
+  var rv3 = uu.css.get(elm, "border, outline, width, height"); // { border: "", height: "200px", outline: "", width: "320px" }
+  uu.log(rv3);
+  var rv4 = uu.css.get(elm, ["width", "height"]); // { height: "200px", width: "320px" }
+  uu.log(rv4);
 
-    // elmの全プロパティを列挙
-    var all = uu.css.get(elm); // { 0: undefined, 1: undefined, 2: undefined, MozApperrance: "none", ... length: 109 }
-    uu.log(all);
-  }, "W");
+  // elmの全プロパティを列挙
+  var all = uu.css.get(elm); // { 0: undefined, 1: undefined, 2: undefined, MozApperrance: "none", ... length: 109 }
+  uu.log(all);
 });
 </script>
 <pre>
-    var elm = uu.id("target");
-    var rv1 = uu.css.get(elm); // { 0: undefined, 1: undefined, 2: undefined, MozApperrance: "none", ... length: 109 }
-    var rv2 = uu.css.get(elm, "backgroundColor"); // "rgb(51, 102, 153)";
-    var rv3 = uu.css.get(elm, ["background-color", "float"], true); // { backgroundColor: "rgb(51, 102, 153)", cssFloat: "left" }
-    uu.log(rv3["styleFloat"] || rv3["cssFloat"]); // "left"
-    var rv4 = uu.css.get(elm, "border, outline, width, height"); // { border: "", height: "200px", outline: "", width: "320px" }
-    var rv5 = uu.css.get(elm, ["width", "height"]); // { height: "200px", width: "320px" }
+  var elm = uu.id("target");
+
+  var rv1 = uu.css.get(elm, ["backgroundColor", "float"]); // { backgroundColor: "rgb(51, 102, 153)", cssFloat: "left" }
+  uu.log(rv1["styleFloat"] || rv1["cssFloat"]); // "left"
+
+  var rv2 = uu.css.get(elm, "backgroundColor"); // "rgb(51, 102, 153)";
+  uu.log(rv2);
+  var rv3 = uu.css.get(elm, "border, outline, width, height"); // { border: "", height: "200px", outline: "", width: "320px" }
+  uu.log(rv3);
+  var rv4 = uu.css.get(elm, ["width", "height"]); // { height: "200px", width: "320px" }
+  uu.log(rv4);
+
+  // elmの全プロパティを列挙
+  var all = uu.css.get(elm); // { 0: undefined, 1: undefined, 2: undefined, MozApperrance: "none", ... length: 109 }
+  uu.log(all);
 </pre>
 </body></html>

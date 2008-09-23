@@ -1,12 +1,13 @@
-<html>
+<html id="html">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>uupaa.js - uu.module.effect - Quirks Mode test</title>
+<!--[if IE]><script id="excanvas.js" type="text/javascript" src="http://pigs.sourceforge.jp/excanvas.js"></script><![endif]-->
 <!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="../../lib/javascript-xpath.js"></script><![endif]-->
 <script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
 <style>
 html {
-  overflow: hidden; height: 100%;
+  overflow: hidden;
   background-color: black; color: white;
 }
 .box {
@@ -52,15 +53,20 @@ html {
 #fixed    { position: fixed; top: 0px; left: 600px; }
 </style>
 </head>
-<body>
+<body id="body">
 <div>
   <a href="../../README.htm#demo">README</a> &gt; <a href="../../MODULE.htm#uu.module.effect">MODULE</a> &gt; uu.module.effect.htm |
   <a href="http://d.hatena.ne.jp/uupaa/20080830/1220070361">Windows + Safari3で画像が反転する</a>
   <br />
-  <a href="./uu.module.effect.htm">Standard Mode</a>
+  <a href="./uu.module.effect.htm">to Standard Mode...</a>
 </div>
 <div>
   <div>
+<!--
+    ViewPort offset:
+    <input type="button" value="html" onclick="toggleViewPortHTML()" />
+    <input type="button" value="body" onclick="toggleViewPortBODY()" /> |
+ -->
     Style:
     <input type="button" value="margin" onclick="toggleMargin()" />
     <input type="button" value="padding" onclick="togglePadding()" />
@@ -123,11 +129,19 @@ function boot() {
 function diet() {
   uu.effect.diet();
 }
+function toggleViewPortHTML() {
+  uu.klass.toggle(uu.id("html"), "margin5");
+  uu.klass.toggle(uu.id("body"), "margin5");
+}
+function toggleViewPortBODY() {
+  uu.klass.toggle(uu.id("html"), "padding5");
+  uu.klass.toggle(uu.id("body"), "padding5");
+}
 function toggleMargin() {
-  uu.xsnap('id("target")/div', document.body).forEach(function(v) {
+  uu.xpath('id("target")/div', document.body).forEach(function(v) {
     uu.klass.toggle(v, "margin5");
   });
-  uu.xsnap('id("target")/img', document.body).forEach(function(v) {
+  uu.xpath('id("target")/img', document.body).forEach(function(v) {
     uu.klass.toggle(v, "margin5");
   });
 }

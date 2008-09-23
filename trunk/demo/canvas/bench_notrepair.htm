@@ -5,7 +5,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>uupaa.js - canvas bench</title>
 <!--[if IE]><script id="excanvas.js" type="text/javascript" src="../../lib/excanvas.js"></script><![endif]-->
-<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?module=dev,canvas,ieboost&repair=0"></script>
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?module=dev,canvas&repair=0"></script>
 
 <style type="text/css">
 body { height: 100%; background-color: white; }
@@ -16,18 +16,20 @@ body { height: 100%; background-color: white; }
 <div>
   <a href="../../README.htm#demo">README</a> &gt; canvas bench <span style="color: red">(excanvas.js not repair)</span>
   <br />
-  <input type="button" onclick="clearcanvas()" value="clear" /><br />
-  <input type="button" onclick="colorstroke(30)" value="TEST1: color stroke(30)" />
-  <input type="button" onclick="colorfill(30)" value="TEST2: color fill(30)" />
-  <input type="button" onclick="patternstroke(30)" value="TEST3: pattern stroke(30)" />
-  <input type="button" onclick="patternfill(30)" value="TEST4: pattern fill(30)" />
+  <a href="./bench.htm">to Unofficial excanvas.js (ver 0.3) mode...</a>
+  <br />
+  <input type="button" onclick="clearcanvas()" value="clear canvas" /><br />
+  <input type="button" onclick="colorstroke(1, 30)" value="TEST1: color stroke(30)" />
+  <input type="button" onclick="colorfill(1, 30)" value="TEST2: color fill(30)" />
+  <input type="button" onclick="patternstroke(1, 30)" value="TEST3: pattern stroke(30)" />
+  <input type="button" onclick="patternfill(1, 30)" value="TEST4: pattern fill(30)" />
   <img id="icon" src="../../img/i32.png" alt="IE" />
   <br />
 
-  <input type="button" onclick="radialstroke(30)" value="TEST5: radial stroke(30)" />
-  <input type="button" onclick="radialfill(30)" value="TEST6: radial fill(30)" />
-  <input type="button" onclick="linearstroke(30)" value="TEST7: linear stroke(30)" />
-  <input type="button" onclick="linearfill(30)" value="TEST8: linear fill(30)" />
+  <input type="button" onclick="radialstroke(1, 30)" value="TEST5: radial stroke(30)" />
+  <input type="button" onclick="radialfill(1, 30)" value="TEST6: radial fill(30)" />
+  <input type="button" onclick="linearstroke(1, 30)" value="TEST7: linear stroke(30)" />
+  <input type="button" onclick="linearfill(1, 30)" value="TEST8: linear fill(30)" />
 
   <canvas id="canvas" width="1000" height="1000"></canvas>
 
@@ -53,7 +55,8 @@ bench.prototype = {
             },
   image:    function() {
             },
-  setStyle: function(name,x, y, r) {
+  stockedStyle:
+            function(name,x, y, r) {
               switch (name) {
               case "colorStroke":   this.c2d.setStyle({ stroke: "rgba(40%, 50%, 60%, 0.4)"   }); break;
               case "colorFill":     this.c2d.setStyle({ fill:   "rgba(40%, 50%, 60%, 0.4)"   }); break;
@@ -95,25 +98,25 @@ bench.prototype = {
   radialStroke:
             function() {
               var rnd = this.random();
-              this.setStyle("radialStroke", rnd.x, rnd.y, rnd.r);
+              this.stockedStyle("radialStroke", rnd.x, rnd.y, rnd.r);
               this.c2d.oval(rnd.x, rnd.y, 0, 0, 200, 1);
             },
   radialFill:
             function() {
               var rnd = this.random();
-              this.setStyle("radialFill", rnd.x, rnd.y, rnd.r);
+              this.stockedStyle("radialFill", rnd.x, rnd.y, rnd.r);
               this.c2d.oval(rnd.x, rnd.y, 0, 0, 200);
             },
   linearStroke:
             function() {
               var rnd = this.random();
-              this.setStyle("linearStroke", rnd.x, rnd.y);
+              this.stockedStyle("linearStroke", rnd.x, rnd.y);
               this.c2d.begin().box(rnd.x, rnd.y, 140, 140, 20, 1).close();
             },
   linearFill:
             function() {
               var rnd = this.random();
-              this.setStyle("linearFill", rnd.x, rnd.y);
+              this.stockedStyle("linearFill", rnd.x, rnd.y);
               this.c2d.begin().box(rnd.x, rnd.y, 140, 140, 20).close();
             }
 };
@@ -122,69 +125,69 @@ function clearcanvas() {
   var obj = new bench();
   obj.clear();
 }
-function colorstroke(times) {
+function colorstroke(loop, set) {
   var obj = new bench();
   var perf = new uu.module.perf();
-  obj.setStyle("colorStroke");
-  perf.run(times, obj, obj.colorStroke);
+  obj.stockedStyle("colorStroke");
+  perf.run(function() { obj.colorStroke(); }, loop, set);
   var r = perf.report();
-  uu.log("TEST1: total[%8.2f]ms, avg[%6.2f]ms, times[%d]", r.total, r.avg, r.dump.length);
+  uu.log("<br />TEST1: total[%8.2f]ms, avg[%6.2f]ms, set[%d]", r.total, r.avg, r.dump.length);
 }
-function colorfill(times) {
+function colorfill(loop, set) {
   var obj = new bench();
   var perf = new uu.module.perf();
-  obj.setStyle("colorFill");
-  perf.run(times, obj, obj.colorFill);
+  obj.stockedStyle("colorFill");
+  perf.run(function() { obj.colorFill(); }, loop, set);
   var r = perf.report();
-  uu.log("TEST2: total[%8.2f]ms, avg[%6.2f]ms, times[%d]", r.total, r.avg, r.dump.length);
+  uu.log("TEST2: total[%8.2f]ms, avg[%6.2f]ms, set[%d]", r.total, r.avg, r.dump.length);
 }
-function patternstroke(times) {
+function patternstroke(loop, set) {
   var obj = new bench();
   var perf = new uu.module.perf();
-  obj.setStyle("patternStroke");
-  perf.run(times, obj, obj.patternStroke);
+  obj.stockedStyle("patternStroke");
+  perf.run(function() { obj.patternStroke(); }, loop, set);
   var r = perf.report();
-  uu.log("TEST3: total[%8.2f]ms, avg[%6.2f]ms, times[%d]", r.total, r.avg, r.dump.length);
+  uu.log("TEST3: total[%8.2f]ms, avg[%6.2f]ms, set[%d]", r.total, r.avg, r.dump.length);
 }
-function patternfill(times) {
+function patternfill(loop, set) {
   var obj = new bench();
   var perf = new uu.module.perf();
-  obj.setStyle("patternFill");
-  perf.run(times, obj, obj.patternFill);
+  obj.stockedStyle("patternFill");
+  perf.run(function() { obj.patternFill(); }, loop, set);
   var r = perf.report();
-  uu.log("TEST4: total[%8.2f]ms, avg[%6.2f]ms, times[%d]", r.total, r.avg, r.dump.length);
+  uu.log("TEST4: total[%8.2f]ms, avg[%6.2f]ms, set[%d]", r.total, r.avg, r.dump.length);
 }
-function radialstroke(times) {
+function radialstroke(loop, set) {
   var obj = new bench();
   var perf = new uu.module.perf();
-//  obj.setStyle("radialStroke");
-  perf.run(times, obj, obj.radialStroke);
+//  obj.stockedStyle("radialStroke");
+  perf.run(function() { obj.radialStroke(); }, loop, set);
   var r = perf.report();
-  uu.log("TEST5: total[%8.2f]ms, avg[%6.2f]ms, times[%d]", r.total, r.avg, r.dump.length);
+  uu.log("TEST5: total[%8.2f]ms, avg[%6.2f]ms, set[%d]", r.total, r.avg, r.dump.length);
 }
-function radialfill(times) {
+function radialfill(loop, set) {
   var obj = new bench();
   var perf = new uu.module.perf();
-//  obj.setStyle("radialFill");
-  perf.run(times, obj, obj.radialFill);
+//  obj.stockedStyle("radialFill");
+  perf.run(function() { obj.radialFill(); }, loop, set);
   var r = perf.report();
-  uu.log("TEST6: total[%8.2f]ms, avg[%6.2f]ms, times[%d]", r.total, r.avg, r.dump.length);
+  uu.log("TEST6: total[%8.2f]ms, avg[%6.2f]ms, set[%d]", r.total, r.avg, r.dump.length);
 }
-function linearstroke(times) {
+function linearstroke(loop, set) {
   var obj = new bench();
   var perf = new uu.module.perf();
-//  obj.setStyle("linearStroke");
-  perf.run(times, obj, obj.linearStroke);
+//  obj.stockedStyle("linearStroke");
+  perf.run(function() { obj.linearStroke(); }, loop, set);
   var r = perf.report();
-  uu.log("TEST7: total[%8.2f]ms, avg[%6.2f]ms, times[%d]", r.total, r.avg, r.dump.length);
+  uu.log("TEST7: total[%8.2f]ms, avg[%6.2f]ms, set[%d]", r.total, r.avg, r.dump.length);
 }
-function linearfill(times) {
+function linearfill(loop, set) {
   var obj = new bench();
   var perf = new uu.module.perf();
-//  obj.setStyle("linearFill");
-  perf.run(times, obj, obj.linearFill);
+//  obj.stockedStyle("linearFill");
+  perf.run(function() { obj.linearFill(); }, loop, set);
   var r = perf.report();
-  uu.log("TEST8: total[%8.2f]ms, avg[%6.2f]ms, times[%d]", r.total, r.avg, r.dump.length);
+  uu.log("TEST8: total[%8.2f]ms, avg[%6.2f]ms, set[%d]", r.total, r.avg, r.dump.length);
 }
 
 function boot() {
@@ -192,8 +195,18 @@ function boot() {
     var e = uu.attr('input[@value*="TEST4"]');
     e[0].disabled = true;
   }
+  var i = 0;
+  uu.vtmLowSpeed.set(function() {
+    ++i;
+    switch (i % 4) {
+    case 1:  uu.id("icon").src = "../../img/f32.png"; break;
+    case 2:  uu.id("icon").src = "../../img/o32.png"; break;
+    case 3:  uu.id("icon").src = "../../img/s32.png"; break;
+    default: uu.id("icon").src = "../../img/i32.png"; break;
 }
-uu.ready(boot, "WC");
+  }, 2000);
+}
+uu.ready(boot, "MWC");
 </script>
 </body>
 </html>

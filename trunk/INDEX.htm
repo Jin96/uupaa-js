@@ -22,9 +22,6 @@
 </p>
 <a href="./README.htm">README</a> &gt; INDEX<br />
 <hr />
-
-<h1>Index</h1>
-
 <script type="text/javascript">
 var index = {
   "uupaa.js::Core": {
@@ -48,7 +45,9 @@ var index = {
     "uu.ua.ie6": { type: "Boolean", en: "is Internet Explorer Version 6" },
     "uu.ua.ie8": { type: "Boolean", en: "is Internet Explorer Version 8" },
     "uu.ua.firefox3": { type: "Boolean", en: "is Firefox Version 3" },
-    "uu.ua.kestrel": { type: "Boolean", en: "is Opera Version 9.5" }
+    "uu.ua.opera95": { type: "Boolean", en: "is Opera Version 9.5" },
+    "uu.ua.v8": { type: "Boolean", en: "is Google Chrome" },
+    "uu.ua.minclock": { type: "Number", en: "minimum base clock" }
   },
   "uupaa.js::Iterator": {
     "uu.forEach": { en: "Executes a provided function once per hash element", ja: "全要素を評価" },
@@ -65,15 +64,10 @@ var index = {
     "uu.klass": { en: "Class Selector", ja: "クラスセレクタ", link: "SELECTOR.htm" },
     "uu.attr": { en: "Attribute Selector", ja: "属性セレクタ", link: "SELECTOR.htm" },
     "uu.xpath": { en: "XPath Selector", ja: "XPathセレクタ", link: "SELECTOR.htm" },
-    "uu.xsnap": { en: "XPath Selector on snapshot", ja: "XPathスナップショット", link: "SELECTOR.htm" },
     "uu.css": { en: "CSS Selector", ja: "CSSセレクタ", link: "SELECTOR.htm" },
-    "uu.pseudo": { en: "Pseudo Selector", ja: "擬似セレクタ", link: "SELECTOR.htm" },
     "uu.nodeType": { en: "NodeType Selector", ja: "ノードタイプセレクタ", link: "SELECTOR.htm" },
     "uu.textNode": { en: "Text node Selector", ja: "TextNodeセレクタ", link: "SELECTOR.htm" },
-    "uu.toXPath": { en: "Convert CSS3 selector into XPath", ja: "CSS3セレクタをXPathに変換", link: "SELECTOR.htm" },
-    "List_of_CSS_Selectors": { en: "List of the available CSS selectors", ja: "uu.css で使用可能なCSSセレクタの一覧", type: "List", link: "SELECTOR.htm" },
-    "List_of_jQuery_Selectors": { en: "List of the available jQuery selectors", ja: "uu.css で使用可能なjQuery独自セレクタの一覧", type: "List", link: "SELECTOR.htm" },
-    "List_of_Pseudo_Selectors": { en: "List of the available pseudo selectors", ja: "uu.pseudo で使用可能な擬似セレクタの一覧", type: "List", link: "SELECTOR.htm" }
+    "List_of_CSS_Selectors": { en: "List of the available CSS selectors", ja: "uu.css で使用可能なCSSセレクタの一覧", type: "List", link: "SELECTOR.htm" }
   },
   "uupaa.js::Node": {
     "uu.node.insert": { en: "Insert ELEMENET_NODE or HTMLString", ja: "ELEMENT_NODEまたはHTML文字列をノード化し挿入" },
@@ -82,7 +76,9 @@ var index = {
     "uu.node.remove": { en: "Remove node", ja: "nodeを取り除く" },
     "uu.node.diet": { en: "Removes CRLF/WhiteSpace/Comment node", ja: "空白と改行だけのテキストノードとコメントノードを再帰的に除去する" },
     "uu.node.cutdown": { en: "Cut all nodes less than context and return DocumentFragment", ja: "context以下の全ノードを切り取り、DocumentFragmentを返す" },
-    "uu.node.substance": { en: "Convert HTMLString into DocumentFragment", ja: "HTMLStringをDocumentFragmentに変換する" }
+    "uu.node.substance": { en: "Convert HTMLString into DocumentFragment", ja: "HTMLStringをDocumentFragmentに変換する" },
+    "uu.node.pos": { en: "Get ELEMENT_NODE node position", ja: "ノードが何番目のELEMENT_NODEかを返す" },
+    "uu.node.count": { en: "Count the number of ELEMENET_NODE", ja: "ELEMENET_NODEをカウントする" }
   },
   "uupaa.js::OOP Class": {
     "uu.klass.kiss": { en: "Create class. Keep It Simple, Stupid", ja: "シンプルなクラスの雛形を生成" },
@@ -119,7 +115,9 @@ var index = {
     "uu.css.measure": { en: "Measure em and pt, and return pixel value", ja: "em, ptを測定しpixel値を返す" },
     "uu.css.insertRule": { en: "Insert CSS ruls", ja: "CSSルールを追加" },
     "uu.css.deleteRule": { en: "Delete CSS ruls" },
-    "uu.css.createStyleSheet": { en: "Create StyleSheet" }
+    "uu.css.createStyleSheet": { en: "Create StyleSheet" },
+    "uu.css.unselectable": { en: "Elemenet unselectable", ja: "要素を選択禁止にする" },
+    "uu.css.recalc": { en: "Recalc element style", ja: "スタイルを再評価する" }
   },
   "uupaa.js::Element": {
     "uu.element.rect": { en: "Get element rect(abs)", ja: "要素の絶対位置とサイズを取得" },
@@ -216,7 +214,7 @@ var index = {
   },
   "uupaa.js::SystemGlobalInstance": {
     "uu.url": { en: "= new uu.module.url()" },
-    "uu.vtmHighSpeed": { en: "= new uu.module.virtualTimer(10)" },
+    "uu.vtmHighSpeed": { en: "= new uu.module.virtualTimer(uu.ua.minclock)" },
     "uu.vtmMidSpeed": { en: "= new uu.module.virtualTimer(100)" },
     "uu.vtmLowSpeed": { en: "= new uu.module.virtualTimer(250)" },
     "uu.msg": { en: "= new uu.module.messagePump()" },
@@ -275,7 +273,7 @@ var index = {
     "uu.module.color.complementary": { en: "return complementary-colors", ja: "補色を返す" },
     "uu.module.color.rgba2hsva": { en: "Convert RGBAHash to HSVAHash", ja: "RGBAHashをHSVAHashに変換" },
     "uu.module.color.hsva2rgba": { en: "Convert HSVAHash to RGBAHash", ja: "HSVAHashをRGBAHashに変換" },
-    "uu.module.color.ratio": { en: "Set Hue, Saturation and Value", ja: "色相(H), 彩度(S), 明度(V)を設定" }
+    "uu.module.color.ratio": { en: "Arrangement Hue, Saturation and Value", ja: "色相(H), 彩度(S), 明度(V)をアレンジ" }
   },
   "uupaa.js::Module::Effect": {
     "uu.module.effect.setDefaultSpeed": { en: "Set default speed", ja: "デフォルト速度を設定" },
@@ -362,31 +360,45 @@ var index = {
     "uu.module.drag.zindexer.endDrag": {},
     "uu.module.drag.zindexer.top": {}
   },
-  "uu.module.drag.js::Module::The SHIM": {
-    "uu.module.drag.shim.construct": {},
-    "uu.module.drag.shim.enable": {},
-    "uu.module.drag.shim.display": {},
-    "uu.module.drag.shim.setRect": {},
-    "uu.module.drag.shim.purge": {}
-  },
   "uu.module.ieboost.js::Module::IE Boost": {
     "uu.module.ieboost.construct": {},
     "uu.module.ieboost.handleEvent": {},
     "uu.module.ieboost.msgbox": {}
   },
+  "uu.module.ieboost.js::Module::The SHIM": {
+    "uu.module.ieboost.shim.construct": {},
+    "uu.module.ieboost.shim.enable": {},
+    "uu.module.ieboost.shim.display": {},
+    "uu.module.ieboost.shim.setRect": {},
+    "uu.module.ieboost.shim.purge": {}
+  },
   "uu.module.io.js::Module::Codec": {
-    "uu.codec": {},
-    "uu.codec.URLBase64": { type: "Boolean" },
-    "uu.codec.HTMLToHTMLEntity": {},
-    "uu.codec.HTMLEntityToHTML": {},
-    "uu.codec.LineBreakToBR": {},
-    "uu.codec.BRToLineBreak": {},
-    "uu.codec.encodeURLSafe64": {},
-    "uu.codec.decodeURLSafe64": {},
-    "uu.codec.encodeURIComponent": {},
-    "uu.codec.decodeURIComponent": {},
-    "uu.codec.encodeJSON": {},
-    "uu.codec.decodeJSON": {}
+    "uu.module.codec": {},
+    "uu.module.codec.base64.encode": {},
+    "uu.module.codec.base64.decode": {},
+    "uu.module.codec.json.encode": {},
+    "uu.module.codec.json.decode": {},
+    "uu.module.codec.htmlEntity.encode": {},
+    "uu.module.codec.htmlEntity.decode": {},
+    "uu.module.codec.lineBreak.encode": {},
+    "uu.module.codec.lineBreak.decode": {},
+    "uu.module.codec.utf8.encode": {},
+    "uu.module.codec.utf8.decode": {},
+    "uu.module.codec.text.encode": {},
+    "uu.module.codec.text.decode": {}
+  },
+  "uu.module.datascheme.js::Module::DataScheme": {
+    "uu.module.datascheme": {},
+    "uu.module.datascheme.spacer": { type: "String" },
+    "uu.module.datascheme.dataURI.decode": {},
+    "uu.module.datascheme.hex.decode": {},
+    "uu.module.datascheme.base64.decode": {},
+    "uu.module.datascheme.lzw.decode": {},
+    "uu.module.datascheme.gif.dim": {},
+    "uu.module.datascheme.gif.decode": {},
+    "uu.module.datascheme.drawPixel.drawCanvas": {},
+    "uu.module.datascheme.drawPixel.drawDOM": {},
+    "uu.module.datascheme.drawPixel.detectDimension": {}
   },
   "uu.module.skin.plasticity.js::Module::Window Skin": {
     "uu.module.skin.plasticity.window.msgbox": {}
@@ -432,6 +444,7 @@ var index = {
     WindowReady: { en: "WindowReady", type: "Keyword", link: "GLOSSARY.htm" },
     WindowUnready: { en: "WindowUnready", type: "Keyword", link: "GLOSSARY.htm" },
     DomReady: { en: "DomReady", type: "Keyword", link: "GLOSSARY.htm" },
+    ModuleReady: { en: "ModuleReady", type: "Keyword", link: "GLOSSARY.htm" },
     CanvasReady: { en: "CanvasReady", type: "Keyword", link: "GLOSSARY.htm" },
     AjaxReady: { en: "AjaxReady", type: "Keyword", link: "GLOSSARY.htm" },
     JSONPReady: { en: "JSONPReady", type: "Keyword", link: "GLOSSARY.htm" },
@@ -494,6 +507,7 @@ function boot() {
   uu.forEach(index, function(item, title) {
     shortSectionName = getShortSectionName(title);
     sections.push(shortSectionName);
+    rv.push("<hr />");
     rv.push(uu.sprintf('<h2><a name="%s">%s</a></h2>', shortSectionName, title));
     rv.push("<ul>");
     link = /Module/i.test(title) ? "MODULE.htm" : "DOCUMENT.htm";

@@ -169,7 +169,7 @@ uu.module.window.initializer.prototype = {
                 this._build();
                 this._defaultStyle();
                 // shimの初期化には、ドキュメントツリーにアサイン済みの要素が必要
-                this._fdc.shim  = (uu.ua.ie6) ? new uu.module.drag.shim(this._fdc.bone, 1) : 0;
+                this._fdc.shim  = (uu.ua.ie6) ? new uu.module.ieboost.shim(this._fdc.bone, 1) : 0;
 
                 uu.msg.post(this._fdc.node,   "IN_INIT");
                 uu.msg.post(this._fdc.layout, "IL_INIT");
@@ -239,13 +239,7 @@ uu.module.window.initializer.prototype = {
                   uu.css.set(this._fdc.bodyCanvas, { position: "absolute", overflow: "hidden" });
 
               // タイトルを選択禁止に
-              if (uu.ua.ie || uu.ua.opera) {
-                this._fdc.title.unselectable = "on";
-              } else if (uu.ua.gecko) {
-                this._fdc.title.style["-moz-user-select"] = "none";
-              } else if (uu.ua.webkit) {
-                this._fdc.title.style["-webkit-user-select"] = "none";
-              }
+              uu.css.unselectable(this._fdc.title);
             }
 };
 

@@ -5,7 +5,7 @@
  * @see <a href="http://code.google.com/p/uupaa-js/">Home(Google Code)</a>
  * @see <a href="http://uupaa-js.googlecode.com/svn/trunk/README.htm">README</a>
  */
-(function() { var uud = document, uuw = window, uu = uuw.uu, UU = uuw.UU;
+(function() { var uud = document, uuw = window, uu = uuw.uu;
 
 /** IE Boost
  *
@@ -14,25 +14,46 @@
 uu.module.ieboost = uu.klass.singleton();
 uu.module.ieboost.prototype = {
   construct:
-            function(param /* = { maxmin: true, alphapng: true, opacity: true } */) {
-              this._param = uu.mix.param(param || {}, { maxmin: true, alphapng: true, opacity: true });
+            function(param /* = { maxmin: true, alphapng: true, opacity: true,
+                                  datascheme: true, positionFixed: true, positionAbsolute: true } */) {
+              this._param = uu.mix.param(param || {}, {
+                maxmin: true, alphapng: true, opacity: true, datascheme: true,
+                positionFixed: true, positionAbsolute: true
+              });
               uu.event.set(this, uuw, "resize");
               var pa = this._param;
 
               // IEのバージョンによる機能の不活性化
-              if (uu.ua.version > 6 || uu.ua.version < 5.5) {
-                pa.maxmin   = false; // IE5.5～6.0以外ならmaxmin不活性
-                pa.alphapng = false; // IE5.5～6.0以外ならalphapng不活性
-              }
-              // モジュールの有無による機能の活性/不活性化
-              if (uu.module.already("ui")) {
-                // uiモジュールロード済みでfontResizeイベントを活性化
-                uu.msg.post(uu.customEvent, "SET", "FONT_RESIZE", this.uid); // resize font ハンドラの登録
+              switch (uu.ua.version) {
+              case 8:
+                pa.datascheme       = false; // IE8+でDataScheme不活性化
+                pa.maxmin           = false; // IE7+でmaxmin不活性
+                pa.alphapng         = false; // IE7+でalphapng不活性
+                pa.positionFixed    = false; // IE7+でpositionFixed不活性
+                pa.positionAbsolute = false; // IE7+でpositionAbsolute不活性
+                break;
+              case 7:
+                pa.maxmin           = false; // IE7+でmaxmin不活性
+                pa.alphapng         = false; // IE7+でalphapng不活性
+                pa.positionFixed    = false; // IE7+でpositionFixed不活性
+                pa.positionAbsolute = false; // IE7+でpositionAbsolute不活性
+                break
+              case 6:
+                !uu.ua.std && (pa.positionAbsolute = false); // IE6でQuirksモードならpositionAbsolute不活性
+                break;
               }
 
-              this._maxmin   = pa.maxmin   ? new uu.module.ieboost.maxmin()   : 0;
-              this._alphapng = pa.alphapng ? new uu.module.ieboost.alphapng() : 0;
-              this._opacity  = pa.opacity  ? new uu.module.ieboost.opacity()  : 0;
+              if (!uu.module.already("datascheme")) {
+                pa.datascheme = false;
+              }
+              uu.msg.post(uu.customEvent, "SET", "FONT_RESIZE", this.uid); // resize font ハンドラの登録
+
+              this._maxmin      = pa.maxmin           ? new uu.module.ieboost.maxmin()   : 0;
+              this._alphapng    = pa.alphapng         ? new uu.module.ieboost.alphapng() : 0;
+              this._opacity     = pa.opacity          ? new uu.module.ieboost.opacity()  : 0;
+              this._datascheme  = pa.datascheme       ? new uu.module.ieboost.datascheme() : 0;
+              this._posfix      = pa.positionFixed    ? new uu.module.ieboost.positionFixed() : 0;
+              this._posabs      = pa.positionAbsolute ? new uu.module.ieboost.positionAbsolute() : 0;
 
               if (pa.maxmin) {
                 // ポーリングで変化チェック
@@ -46,16 +67,21 @@ uu.module.ieboost.prototype = {
               switch (type) {
               case "resize": // window resize event
                 this._maxmin && this._maxmin.draw();
+                this._posfix && this._posfix.recalc();
                 break;
               }
             },
   msgbox:   function(msg, p1, p2) {
               switch (msg) {
-              case UU.MSG_EVENT_DOM_MANIP:
+              case "recalc":
                 this._maxmin && this._maxmin.recalc();
+                this._opacity && this._opacity.recalc();
+                this._posfix && this._posfix.markup();
+                this._posabs && this._posabs.recalc();
                 break;
-              case "FONT_RESIZE":
+              case "FONT_RESIZE": // from customEvent
                 this._maxmin && this._maxmin.recalc();
+                this._posfix && this._posfix.recalc();
                 break;
               }
               return 0;
@@ -158,9 +184,9 @@ uu.module.ieboost.maxmin.prototype = {
               h = elm.clientHeight;
               if (!MIN() && !MAX()) { s.height = mm.height; }
             },
-  // (min|max)-(height|width)の対象となる要素を列挙
+  // min-height, max-height, min-width, max-width 適用対象を列挙
   // 動的に要素を追加したりCSSを変更するような用法なら、その都度このメソッドを呼ぶ必要があるかもしれない
-  // CSS2の仕様上ブロックレベル要素(-table)のみ
+  // CSS2の仕様上ブロックレベル要素のみに適用する(table要素は除外)
   _markup:  function() {
               var rv = [], cs, mm, w, h, r, rect;
               function F(elm, val, name) { // CSS2の仕様書にあるルールを参考に色々と
@@ -230,14 +256,14 @@ uu.module.ieboost.maxmin.prototype = {
 uu.module.ieboost.alphapng = uu.klass.kiss();
 uu.module.ieboost.alphapng.prototype = {
   construct:
-            function(usegif) {
+            function() {
               uu.css.insertRule("img { behavior: expression(uu.module.ieboost.alphapng._expression(this)) }");
               uu.css.insertRule(".png { behavior: expression(uu.module.ieboost.alphapng._expression(this)) }");
               uu.css.insertRule("input { behavior: expression(uu.module.ieboost.alphapng._expression(this)) }");
               uu.css.insertRule(".alpha { behavior: expression(uu.module.ieboost.alphapng._expression(this)) }");
             }
 };
-uu.mix(uu.module.ieboost.alphapng, {
+uu.mix(uu.module.ieboost.alphapng, { // prototypeではなく、クラスメソッドを追加する
   _expression:
             function(elm) {
               var path = uu.config.imagePath, spacer = "b32.png", reg = RegExp(spacer),
@@ -249,7 +275,7 @@ uu.mix(uu.module.ieboost.alphapng, {
                   if (reg.test(elm.src)) {
                     break; // nop
                   }
-                  elm.uupaa_ieboost_alphapngsrc = elm.src;
+                  elm.uuIEBoostAlphapngSrc = elm.src;
 
                   w = elm.width;
                   h = elm.height;
@@ -259,17 +285,19 @@ uu.mix(uu.module.ieboost.alphapng, {
                   elm.src = path + spacer;
                   elm.width = w; // hasLayout = true
                   elm.height = h;
-
                   ++run;
                 } else {
                   // <img src="*.png">  ->  <img src="*.gif">
-                  if (!reg.test(elm.src)) {
-                    elm.uupaa_ieboost_alphapngsrc = elm.src;
+                  // 内部的に使用しているpngファイル(b32.png)と、DataSchmeは除外する
+                  if (!reg.test(elm.src) && !(/^data:/.test(elm.src))) {
+                    elm.uuIEBoostAlphapngSrc = elm.src;
 
                     // disable filter and make it original size
                     uu.module.ieboost.alphapng._unsetAlphaLoader(elm);
                     elm.style.width = "auto";
                     elm.style.height = "auto";
+                    // ここでDataSchemeを持つ要素のwidth,heightが上書されてしまうと
+                    // ieboost.datascheme の処理に支障がでる
                   }
                 }
                 break;
@@ -279,7 +307,7 @@ uu.mix(uu.module.ieboost.alphapng, {
                   if (reg.test(elm.src)) {
                     break; // nop
                   }
-                  elm.uupaa_ieboost_alphapngsrc = elm.src;
+                  elm.uuIEBoostAlphapngSrc = elm.src;
 
                   uu.module.ieboost.alphapng._setAlphaLoader(elm, elm.src, "image");
 
@@ -290,7 +318,7 @@ uu.mix(uu.module.ieboost.alphapng, {
                 } else {
                   // <input type="image" src="*.png">  ->  <input type="image" src="*.gif">
                   if (!reg.test(elm.src)) {
-                    elm.uupaa_ieboost_alphapngsrc = elm.src;
+                    elm.uuIEBoostAlphapngSrc = elm.src;
 
                     // disable filter
                     uu.module.ieboost.alphapng._unsetAlphaLoader(elm);
@@ -323,9 +351,9 @@ uu.mix(uu.module.ieboost.alphapng, {
                 uu.module.ieboost.alphapng._bugfix(elm);
               }
               // attach spy and purge behavior
-              if (!("uupaa_ieboost_alphapngspy" in elm)) {
+              if (!("uuIEBoostAlphapngSpy" in elm)) {
                 elm.attachEvent("onpropertychange", uu.module.ieboost.alphapng._onpropertychange);
-                elm.uupaa_ieboost_alphapngspy = 1;
+                elm.uuIEBoostAlphapngSpy = 1;
               }
               elm.style.behavior = "none";
             },
@@ -395,6 +423,9 @@ uu.module.ieboost.opacity.prototype = {
   // 条件2. 値が妥当な範囲(0.0～1.0)
   construct:
             function() {
+              this.recalc();
+            },
+  recalc:   function() {
               var val, opa;
               uu.forEach(uu.tag("*", uud.body), function(e) {
                 opa = e.style.opacity || e.currentStyle.opacity;
@@ -404,18 +435,216 @@ uu.module.ieboost.opacity.prototype = {
                     uu.css.setOpacity(e, val);
                   }
                 }
-
               });
             }
 };
 
+/** Data Scheme(DataURI) for IE5 - IE7
+ *
+ * @class
+ */
+uu.module.ieboost.datascheme = uu.klass.kiss();
+uu.module.ieboost.datascheme.prototype = {
+  construct:
+            function() {
+              this._obj = new uu.module.datascheme(48, 48, 0, 0); // MAX DIM(48 x 48), no canvas, delay 200ms
+            }
+};
+
+/** position: fixed for IE6
+ *
+ * @class
+ */
+uu.module.ieboost.positionFixed = uu.klass.kiss();
+uu.module.ieboost.positionFixed.prototype = {
+  construct:
+            function() {
+              this._recalc = []; // reclacで再計算する要素, em単位指定 or bottom
+              uu.ua.std ? uu.css.insertRule(".positionfixed { behavior: expression(uu.module.ieboost.positionFixed._expression(this)) }")
+                        : uu.css.insertRule(".positionfixed { behavior: expression(uu.module.ieboost.positionFixed._expressionQuirks(this)) }");
+              this.markup();
+            },
+  // フォントリサイズでpx値を再計算する
+  recalc:   function() {
+              var badElm = [];
+              this._recalc.forEach(function(v, i) {
+                if (!v || v.nodeType !== 1) { badElm.push(i); return; } // 不正な要素のindexをマーク
+
+                if (!v || !("uuIEBoostPositionFixed" in v)) { return; }
+                var cs = v.currentStyle, vp;
+                if (v.uuIEBoostPositionFixed.top) { // top:
+                  if (v.uuIEBoostPositionFixed.value.lastIndexOf("em") > -1) {
+                    v.uuIEBoostPositionFixed.px = uu.css.toPixel(v, cs["paddingTop"]) + parseFloat(v.uuIEBoostPositionFixed.value) * uu.css.measure().em;
+                  }
+                } else { // bottom:
+                  vp = uu.viewport.rect(), rect = uu.element.rect(v);
+                  if (v.uuIEBoostPositionFixed.value.lastIndexOf("em") > -1) {
+                    v.uuIEBoostPositionFixed.px = vp.h - rect.oh - (parseFloat(v.uuIEBoostPositionFixed.value) * uu.css.measure().em);
+                  } else { // em以外でwindow resizeやfont resizeが発生した
+                    v.uuIEBoostPositionFixed.px = vp.h - rect.oh - uu.css.toPixel(v, v.uuIEBoostPositionFixed.value);
+                  }
+                }
+              });
+              if (this._recalc.length) {
+                // すばやく再描画するため、古の呪文を使う
+                // http://www.microsoft.com/japan/msdn/columns/dude/dude061198.aspx
+                uud.recalc(1);
+              }
+              // 既に存在しない要素を掃除する
+              if (badElm.length) {
+                badElm.forEach(function(v) { // v = 不正な要素のindex
+                  delete this._recalc[v];
+                });
+                uu.diet(this._recalc);
+              }
+            },
+  markup:  function() {
+              var me = this, tag = uu.tag("*"), html, vp, rect;
+
+              // 1. position: fixed の要素を列挙する, 
+              // 2. topの値をelm.uuIEBoostPositionFixedに退避する
+              // 3. positionfixedクラスを追加する
+              tag.forEach(function(v) {
+                if (!v || v.nodeType !== 1) { return; }
+
+                var cs = v.currentStyle, top, bottom;
+                if (cs["position"] === "fixed" && !("uuIEBoostPositionFixed" in v)) {
+                  top = cs["top"] || v.style.top || 0;
+                  bottom = cs["bottom"] || v.style.bottom || 0;
+
+                  if (top !== "auto") { // case top:
+                    if (uu.isS(top) && top.lastIndexOf("em") > -1) { me._recalc.push(v); } // em単位で指定された要素を記録する
+                    v.uuIEBoostPositionFixed = {
+                      top: 1,
+                      value: top,
+                      px: uu.css.toPixel(v, cs["paddingTop"]) + uu.css.toPixel(v, top)
+                    };
+//v.style.border = "5px solid blue";
+
+                  } else { // case bottom:
+                    vp = uu.viewport.rect();
+                    rect = uu.element.rect(v);
+                    me._recalc.push(v);
+                    v.uuIEBoostPositionFixed = {
+                      top: 0,
+                      value: bottom,
+                      px: vp.h - rect.oh - uu.css.toPixel(v, bottom)
+                    };
+                  }
+                  uu.klass.toggle(v, "positionfixed");
+                  v.style.position = "absolute";
+                }
+              });
+              // スクロールをスムーズにするため、html, body { background-attachment: fixed } を設定する
+              if (tag.length) {
+                if (uu.css.backgroundImage(uud.body) === "none") {
+                  uu.css.setBackgroundImage(uud.body, "none");
+                }
+                uud.body.style.backgroundAttachment = "fixed";
+
+                html = uu.tag("html")[0];
+                if (uu.css.backgroundImage(html) === "none") {
+                  uu.css.setBackgroundImage(html, "none");
+                }
+                html.style.backgroundAttachment = "fixed";
+              }
+            }
+};
+uu.mix(uu.module.ieboost.positionFixed, { // prototypeではなく、クラスメソッドを追加する
+  _expression:
+            function(elm) {
+              elm.style.top = (document.documentElement.scrollTop + elm.uuIEBoostPositionFixed.px) + "px";
+            },
+  _expressionQuirks:
+            function(elm) {
+              elm.style.top = (document.body.scrollTop + elm.uuIEBoostPositionFixed.px) + "px";
+            }
+});
+
+/** position: absolute bug(cannot select text) fix for IE6 Standard mode
+ *
+ * @class
+ */
+uu.module.ieboost.positionAbsolute = uu.klass.kiss();
+uu.module.ieboost.positionAbsolute.prototype = {
+  construct:
+            function() {
+              this._find = 0;
+              this.recalc();
+            },
+  recalc:   function() {
+              if (this._find) { return; }
+              var abs = 0, ss, tag = uu.tag("*", uud.body), i = 0, sz = tag.length;
+              for (; i < sz; ++i) {
+                ss = tag[i].currentStyle || tag[i].style;
+                if (ss.position === "absolute") { // found  position: absolute
+                  ++abs;
+                  break;
+                }
+              }
+              if (abs) {
+                uud.body.style.height = "100%";
+                uu.tag("html")[0].style.height = "100%";
+                ++this._find;
+              }
+            }
+};
+
+/** THE SHIM(bugfix: selectbox stays in the top(ignore z-index)) for IE6
+ *  IEで一部の要素(select等)がz-indexを無視して最上位に居座るバグをFix
+ *
+ * @class
+ */
+//// uu.module.drag.shim = uu.klass.kiss();
+uu.module.ieboost.shim = uu.klass.kiss();
+uu.module.ieboost.shim.prototype = {
+  construct:
+            function(elm, transparent /* = false */) {
+              this.elm = elm;
+              this.shim = 0;
+              if (uu.ua.ie6) { // IE6 only
+                this.shim = uud.createElement('<iframe scrolling="no" frameborder="0" style="position:absolute;top:0;left:0"></iframe>');
+                elm.parentNode.appendChild(this.shim); // sibl
+                uu.css.setRect(this.shim, uu.css.rect(elm));
+                if (transparent) {
+                  this.shim.style.filter += " alpha(opacity=0)";
+                }
+              }
+            },
+  enable:   function() {
+              return !!this.shim;
+            },
+  display:  function(disp) {
+              this.shim.style.display = disp ? "" : "none";
+            },
+  setRect:  function(rect) {
+              if (!this.shim) { return; }
+              uu.css.setRect(this.shim, rect);
+            },
+  purge:    function() {
+              if (!this.shim) { return; }
+              this.elm.parentNode.removeChild(this.shim);
+              this.shim = 0;
+            }
+};
+
+
+
 uu.ieboost = 0;
 
-if (uu.ua.ie) {
-  uu.ready(function() {
-    uu.ieboost = new uu.module.ieboost();
-  });
-}
+if (!uu.ua.ie) { return; }
+
+uu.ready(function() {
+  uu.ieboost = new uu.module.ieboost();
+////  alert("ieboost ready");
+}, "D");
+
+uu.mix(uu.css, {
+  // uu.css.recalc - Recalc element style - スタイルを再評価する
+  recalc:   function(elm /* = undefined */) {
+              uu.msg.post(uu.ieboost, "recalc", elm || 0);
+            }
+});
 
 })(); // end (function())()
 

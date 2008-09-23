@@ -23,6 +23,22 @@
 </p>
 <a href="./README.htm">README</a> &gt; <a href="./INDEX.htm">INDEX</a> &gt; MODULE<br />
 <hr />
+<a href="#uu.module.url">URL</a> |
+<a href="#uu.module.virtualTimer">VirtualTimer</a> |
+<a href="#uu.module.messagePump">MessagePump</a> |
+<a href="#uu.module.customEvent">CustomEvent</a> |
+<a href="#uu.module.agent">Agent</a> |
+<a href="#uu.module.image">Image</a> |
+<a href="#uu.module.imageset">ImageSet</a> |
+<a href="#uu.module.color">Color</a> |
+<a href="#uu.module.effect">Effect</a> |
+<a href="#uu.module.fdc">Friendly Data Container</a> |
+<a href="#uu.module.skin">Skin</a> |
+<a href="#uu.module.config">Configuration</a> |
+<a href="#uu.module.perf">Performance</a> |
+<a href="#uu.module.log2">Log</a> |
+<a href="#uu.module.canvas2d">2D Canvas</a> |
+<hr />
 <h2><a name="uu.module.url">URL manipulator</a> - URLの操作</h2>
 <p>URLの取り扱いを簡単にします。</p>
 <p>uu.module.url は、最初から uupaa.js に組み込まれているモジュールです。</p>
@@ -616,9 +632,9 @@ var agent3 = new XFile("Smoking Man");
       </pre>
   </dd>
 <!-- -->
-  <dt><a name="uu.module.color.ratio">uu.module.color.ratio</a> - Set Hue, Saturation and Value - 色相(H), 彩度(S), 明度(V)を設定</dt>
+  <dt><a name="uu.module.color.ratio">uu.module.color.ratio</a> - Arrangement Hue, Saturation and Value - 色相(H), 彩度(S), 明度(V)をアレンジ</dt>
   <dd><p>uu.module.color.ratio(<i>hash</i>, h = 0, s = 0, v = 0) は
-         Hue(色相), Saturation(彩度), Value(明度:brightness)を設定します。
+         Hue(色相), Saturation(彩度), Value(明度:brightness)をアレンジします。
          <br />指定する値は絶対値ではなく増減値です。</p>
       <p><i>h</i> は、0～360までの色空間を持っており、360と0は連続した色空間として扱われます。
          <br />それに対し、<i>s</i> と <i>v</i> は連続した空間として扱われず、
@@ -793,31 +809,6 @@ uu.id("up20").style.backgroundColor = ns.rgb(rgba20up);
           <td><a href="./SELECTOR.htm#uu.id">uu.id</a> の検索結果を
               <br />0: キャッシュしない(低速)
               <br />1: キャッシュする(高速)</td></tr>
-      <tr><td><a name="uu.module.config.cacheXPath">cacheXPath</a></td>
-          <td>Number</td>
-          <td>1</td>
-          <td><a href="./SELECTOR.htm#uu.css">uu.css</a> が生成するXPath式を
-              <br />0: キャッシュしない(低速)
-              <br />1: キャッシュする(高速)</td></tr>
-      <tr><td><a name="uu.module.config.backCompat">backCompat</a></td>
-          <td>Number</td>
-          <td>0</td>
-          <td>BackwardCompatibilityMode(後方互換モード)を
-            <br />0: 使用しない(高速)
-            <br />1: 使用する(低速)
-            </td></tr>
-      </table>
-      <table>
-      <caption>backCompatの影響範囲</caption>
-      <tr><th>影響を受ける機能</th>
-          <th>backCompat = 0</th>
-          <th>backCompat = 1</th></tr>
-      <tr><td><a href="./DOCUMENT.htm#uu.css.get">uu.css.get</a></td>
-                    <td><a href="./GLOSSARY.htm#cssProp">cssProp</a>形式のスタイル名が使用可能</td>
-                    <td><a href="./GLOSSARY.htm#cssProp">cssProp</a>と<a href="./GLOSSARY.htm#cssProp">css-prop</a>形式のスタイル名が使用可能</td></tr>
-      <tr><td><a href="./DOCUMENT.htm#uu.css.set">uu.css.set</a></td>
-                    <td><a href="./GLOSSARY.htm#cssProp">cssProp</a>形式のスタイル名が使用可能</td>
-                    <td><a href="./GLOSSARY.htm#cssProp">cssProp</a>と<a href="./GLOSSARY.htm#cssProp">css-prop</a>形式のスタイル名が使用可能</td></tr>
       </table>
   </dd>
 </dl>
@@ -842,26 +833,27 @@ uu.id("up20").style.backgroundColor = ns.rgb(rgba20up);
 <dl>
 <!-- -->
   <dt><a name="uu.module.perf.run">uu.module.perf.run</a> - 測定</dt>
-  <dd><p>uu.module.perf.run(times = 1, me = undefined, fn, args = undefined) は、
-      <i>fn</i>を<i>times</i>回実行し実行時間を記録します。以前の実行結果はクリアします。</p>
+  <dd><p>uu.module.perf.run(<i>fn</i>, <i>loop</i> = 1, <i>set</i> = 1) は、
+      <i>fn</i> を <i>loop</i> 回実行し実行時間を記録します。また <i>set</i> で指定された回数だけ 実行と実行時間の記録 を繰り返します。</p>
+      <p>以前の実行結果は実行前にクリアされます(累積しません)。</p>
 <pre>
- @param Number         [times] - 実行回数を指定します。デフォルトは1です。
- @param this           [me]    - thisオブジェクトを指定します。デフォルトはundefinedです。
- @param Function       fn      - 測定対象の関数を指定します。
- @param ArgumentsArray [args]  - fnに渡す引数を配列( [ arg, ...] )で指定します。省略可能です。
+ @param Function       fn      - 測定対象の関数やメソッドを指定します。
+ @param Number         [loop]  - fnを評価する回数を指定します。デフォルトは1です。
+ @param Number         [set]   - テストを繰り返す回数を指定します。デフォルトは1です。
 </pre>
+      <a href="demo/canvas/bench.htm" class="run">Run</a>
   </dd>
 <!-- -->
   <dt><a name="uu.module.perf.report">uu.module.perf.report</a> - リポート</dt>
-  <dd><p>uu.module.perf.report() は、実行結果の Hash( { total, avg, times, dump } ) を返します。</p>
+  <dd><p>uu.module.perf.report() は、実行結果の Hash( { total, avg, set, dump } ) を返します。</p>
 <pre>
- @return Hash - 実行した結果の情報を Hash( { total, avg, times, dump } )で返します。
+ @return Hash - 実行した結果の情報を Hash( { total, avg, set, dump } )で返します。
 </pre>
       <table>
       <tr><th>key</th><th>value</th><th>value type</th></tr>
       <tr><td>total</td><td>合計時間</td><td>Number</td></tr>
       <tr><td>avg</td><td>平均値(average)</td><td>Number</td></tr>
-      <tr><td>times</td><td>実行回数</td><td>Number</td></tr>
+      <tr><td>set</td><td>テスト回数</td><td>Number</td></tr>
       <tr><td>dump</td><td>各結果</td><td>NumberArray( [ Number, ... ] )</td></tr>
       </table>
   </dd>
@@ -962,7 +954,7 @@ uu.id("up20").style.backgroundColor = ns.rgb(rgba20up);
       </pre>
       <table>
       <tr><th>StyleName</th><th>Short<br />StyleName</th><th>value type</th><th>value</th><th>default value</th></tr>
-      <tr><td>color</td><td></td><td>String</td><td>strokeやfillがグラデーションを描画する能力を持たない環境下で線の描画や塗りつぶしに使用する色を指定
+      <tr><td>color</td><td></td><td>String</td><td>strokeやfillがグラデーションを描画できない場合に、strokeやfillの代替色を指定
                                                     <br /><br />excanvas.jsでstrokeStyleにCanvasGradientやCanvasPatternを指定するとcolorが使用される</td><td>"black"</td></tr>
       <tr><td>fillStyle</td><td>fill</td><td>String<br />CanvasGradient<br />CanvasPattern</td><td>塗りつぶす色,グラデーション,画像パターンを指定</td><td>"black"</td></tr>
       <tr><td>strokeStyle</td><td>stroke</td><td>String<br />CanvasGradient<br />CanvasPattern</td><td>線を描画する色,グラデーション,画像パターンを指定</td><td>"black"</td></tr>

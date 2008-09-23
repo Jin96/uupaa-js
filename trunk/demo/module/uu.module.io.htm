@@ -7,56 +7,164 @@
 <script type="text/javascript" src="../../uupaa.js"></script>
 <style type="text/css">
 body { background-color: black; color: white; }
-a, b { color: lightblue }
 </style>
 </head>
 <body>
-<a href="../../README.htm">README.htm</a> &gt; uu.module.io.htm<br />
+<a href="../../README.htm">README</a> &gt; uu.module.io.htm<br />
+
+<br />
+SampleData:
+<input type="button" value="http://..." onclick="insertText(0)" />
+<input type="button" value="123" onclick="insertText(1)" />
+<input type="button" value="Object(JSON)" onclick="insertText(3)" />
+<input type="button" value="line break" onclick="insertText(4)" />
+<input type="button" value="in Japanese(UTF8)" onclick="insertText(5)" />
+<br />
+<input type="button" value="Hello URLSafe String" onclick="insertText(6)" />
+<input type="button" value="data:image/gif;base64,..." onclick="insertText(7)" />
+<input type="button" value="data:image/gif;,..." onclick="insertText(8)" />
+
+<hr />
+Evaluate:
+<input type="button" value="HTMLEntity" onclick="HTMLEntity()" />
+<input type="button" value="Base64" onclick="Base64()" />
+<input type="button" value="URLSafe64" onclick="URLSafe64()" />
+<input type="button" value="JSON" onclick="JSON()" />
+<input type="button" value="LineBreak" onclick="LineBreak()" />
+<input type="button" value="UTF8" onclick="UTF8()" />
+<input type="button" value="text" onclick="text()" />
+<input type="button" value="DataURI" onclick="DataURI()" />
 
 <table>
-<tr>
-  <td>ソース</td><td><input id="source" type="text" value="" style="width: 20em" /></td>
-</tr><tr>
-  <td>HTMLToHTMLEntity:<br />　&amp;&lt;&gt; → &amp;amp;&amp;lt;&amp;gt;</td><td id="HTMLToHTMLEntity"></td>
-</tr><tr>
-  <td>HTMLEntityToHTML:<br />　&amp;amp;&amp;lt;&amp;gt; → &amp;&lt;&gt;</td><td id="HTMLEntityToHTML"></td>
-</tr><tr>
-<!--
-  <td>LineBreakToBR:<br />　\r\n → &lt;br /&gt;</td><td id="LineBreakToBR"></td>
-</tr><tr>
-  <td>BRToLineBreak:<br />　&lt;br /&gt; → \r\n</td><td id="BRToLineBreak"></td>
- -->
-</tr><tr>
-  <td>encodeURLSafe64</td><td id="encodeURLSafe64"></td>
-</tr><tr>
-  <td>decodeURLSafe64</td><td id="decodeURLSafe64"></td>
-</tr><tr>
-  <td>encodeURIComponent</td><td id="encodeURIComponent"></td>
-</tr><tr>
-  <td>decodeURIComponent</td><td id="decodeURIComponent"></td>
-</tr><tr>
-  <td><input type="button" value="encode" onclick="encode()" /></td><td></td>
-</tr>
+<tr><td><textarea id="source" cols="100" rows="5"></textarea></td></tr>
+<tr><td><textarea id="encode" cols="100" rows="5"></textarea></td></tr>
+<tr><td><textarea id="decode" cols="100" rows="5"></textarea></td></tr>
 </table>
 
+
+<p>HTMLEntity('&amp;', '&lt;', '&gt;' → '&amp;amp;', '&amp;lt;', '&amp;gt;')</p>
+
 <script type="text/javascript">
-function encode() {
-  var txt = uu.id("source").value;
-  uu.id("HTMLToHTMLEntity").innerText = uu.codec(txt, "HTMLToHTMLEntity");
-  uu.id("HTMLEntityToHTML").innerText = uu.codec(txt, "HTMLEntityToHTML");
-/*
-  uu.id("LineBreakToBR").innerText = uu.codec(txt, "LineBreakToBR");
-  uu.id("BRToLineBreak").innerText = uu.codec(txt, "BRToLineBreak");
- */
-  uu.id("encodeURLSafe64").innerText = uu.codec(txt, "encodeURLSafe64");
-  uu.id("decodeURLSafe64").innerText = uu.codec(txt, "decodeURLSafe64");
-  uu.id("encodeURIComponent").innerText = uu.codec(txt, "encodeURIComponent");
-  uu.id("decodeURIComponent").innerText = uu.codec(txt, "decodeURIComponent");
+function insertText(no) {
+  var src = uu.id("source");
+
+  switch (no) {
+  case 0: src.value = '&lt;a href="http://example.com?key=value&amp;key=value#hoge"&gt;HTML Entity&lt;/a&gt;'; break;
+  case 1: src.value = "123"; break;
+  //
+  case 3: src.value = '{"1": {"a": [1,2,3]}}'; break;
+  case 4: src.value = '{r \r} {n \n} {rn \r\n}'; break;
+  case 5: src.value = "こんにちは日本のみなさん"; break;
+  case 6: src.value = "Hello URLSafe String. URLセーフな文字列"; break;
+  case 7: src.value = "data:image/gif;base64,R0lGODlhDgAOANUAAP%2BZAP8A%2F%2Frx4v3Fb%2F6uNf%2FFAPzaqf%2BmD%2F%2F%2F%2F%2F%2FXAP%2B0APzVk%2F60Qvr17f%2BsD%2Fvlw%2F%2BtAP%2FeAPzPgv27VPvivP60Of%2B4D%2F6mIP%2FMAP%2B%2BAP3HeP%2FnAP%2BlCPvr1Pr59%2FzVnP%2BsC%2F%2B8C%2F%2BfCv6yMvvfs%2F%2BxFv%2B1Fv64Sfvq0QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAUUAAEALAAAAAAOAA4AAAZ5wIBwSKF4hsihZ1Q5JpEUk8n49FhHGEzTKvRQPpqKIxJxnCQfSgMlChUSG3JBoTiIBB6JZcNPJApzIgNHHgsgcRFZdQtcAR4Tb38FEBONQlhZGBkQDE5dIgkZDg4QEBeeAQIiJRUPFBUHBw1IHQwkVlYGBKi4nrhCQQA7";
+          break;
+  case 8: src.value = "data:image/gif,GIF89a%0E%00%0E%00%D5%00%00%FF%99%00%FF%00%FF%FA%F1%E2%FD%C5o%FE%AE5%FF%C5%00%FC%DA%A9%FF%A6%0F%FF%FF%FF%FF%D7%00%FF%B4%00%FC%D5%93%FE%B4B%FA%F5%ED%FF%AC%0F%FB%E5%C3%FF%AD%00%FF%DE%00%FC%CF%82%FD%BBT%FB%E2%BC%FE%B49%FF%B8%0F%FE%A6%20%FF%CC%00%FF%BE%00%FD%C7x%FF%E7%00%FF%A5%08%FB%EB%D4%FA%F9%F7%FC%D5%9C%FF%AC%0B%FF%BC%0B%FF%9F%0A%FE%B22%FB%DF%B3%FF%B1%16%FF%B5%16%FE%B8I%FB%EA%D1%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00!%F9%04%05%14%00%01%00%2C%00%00%00%00%0E%00%0E%00%00%06y%C0%80pH%A1x%86%C8%A1gT9%26%91%14%93%C9%F8%F4XG%18L%D3*%F4P%3E%9A%8A%23%12q%9C%24%1FJ%03%25%0A%15%12%1BrA%A18%88%04%1E%89e%C3O%24%0As%22%03G%1E%0B%20q%11Yu%0B%5C%01%1E%13o%7F%05%10%13%8DBXY%18%19%10%0CN%5D%22%09%19%0E%0E%10%10%17%9E%01%02%22%25%15%0F%14%15%07%07%0DH%1D%0C%24VV%06%04%A8%B8%9E%B8BA%00%3B";
+          break;
+  }
+}
+function stringToByteArray(str) {
+  var rv = [], i = 0, sz = str.length;
+  for (; i < sz; ++i) {
+    rv.push(str.charCodeAt(i));
+  }
+  return rv;
+}
+function byteArrayToString(ary) {
+  var rv = [], i = 0, sz = ary.length;
+  for (; i < sz; ++i) {
+    rv.push(String.fromCharCode(ary[i]));
+  }
+  return rv.join("");
+}
+function HTMLEntity() {
+  var src, enc, dec;
+  src = uu.id("source").value;
+  enc = uu.module.codec.htmlEntity.encode(src);
+  dec = uu.module.codec.htmlEntity.decode(enc);
+
+  uu.id("encode").innerText = enc;
+  uu.id("decode").innerText = dec;
+}
+function Base64() {
+  var src, enc, dec;
+  src = uu.id("source").value;
+
+  enc = uu.module.codec.base64.encode(stringToByteArray(src), false);
+  dec = uu.module.codec.base64.decode(enc);
+
+  uu.id("encode").innerText = enc;
+  uu.id("decode").innerText = byteArrayToString(dec);
+}
+function URLSafe64() {
+  var src, enc, dec;
+  src = uu.id("source").value;
+
+  enc = uu.module.codec.base64.encode(stringToByteArray(src), true);
+  dec = uu.module.codec.base64.decode(enc);
+
+  uu.id("encode").innerText = enc;
+  uu.id("decode").innerText = byteArrayToString(dec);
+}
+function JSON() {
+  var src, enc, dec;
+  src = uu.id("source").value;
+  try {
+    src = uu.module.evaljs(src);
+    enc = uu.module.codec.json.encode(src);
+    dec = uu.module.codec.json.decode(enc);
+
+    uu.id("encode").innerText = enc;
+    uu.id("decode").innerText = dec;
+    uu.log(dec);
+  } catch(e) {
+    uu.id("encode").innerText = "ERROR";
+    uu.id("decode").innerText = "ERROR";
+  }
+}
+function LineBreak() {
+  var src, enc, dec;
+  src = uu.id("source").value;
+  enc = uu.module.codec.lineBreak.encode(src);
+  dec = uu.module.codec.lineBreak.decode(enc);
+
+  uu.id("encode").innerText = enc;
+  uu.id("decode").innerText = dec;
+}
+function UTF8() {
+  var src, enc, dec;
+  src = uu.id("source").value;
+
+  enc = uu.module.codec.utf8.encode(src);
+  dec = uu.module.codec.utf8.decode(enc);
+
+  uu.id("encode").innerText = enc;
+  uu.id("decode").innerText = dec;
+}
+function text() {
+  var src, enc, dec;
+  src = uu.id("source").value;
+
+  enc = uu.module.codec.text.encode(src);
+  dec = uu.module.codec.text.decode(enc);
+
+  uu.id("encode").innerText = enc;
+  uu.id("decode").innerText = dec;
+}
+function DataURI() {
+  var src, enc, dec;
+  src = uu.id("source").value;
+
+  dec = uu.module.codec.dataURI.decode(src);
+
+//  uu.id("decode").innerText = byteArrayToString(dec);
+  uu.syslog.byteArray(dec);
 }
 
+
 function boot() {
+  uu.msg.post(uu.syslog, "DEPTH", 8); // depth 変更
 }
-uu.module("", "io", boot);
+uu.module("", "dev,io,evaljs", boot);
 </script>
 </body>
 </html>
