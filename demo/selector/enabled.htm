@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<title>uu.pseudo - test</title>
+<title>uupaa.js - uu.attr("*[:enabled]") test</title>
 <!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="../../lib/javascript-xpath.js"></script><![endif]-->
 <script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
   <style>
@@ -11,8 +11,8 @@
 </head>
 <body>
 <a href="../../README.htm">README</a> &gt; 
-<a href="../../SELECTOR.htm#uu.pseudo">SELECTOR</a><br />
-<a href="./selector.htm">uu.pseudo</a> | <a href="./css.htm">uu.css</a> | <a href="./form.htm">uu.css(form)</a>
+<a href="../../SELECTOR.htm#uu.attr">SELECTOR</a><br />
+<a href="./selector.htm">uu.attr</a> | <a href="./css.htm">uu.css</a> | <a href="./form.htm">uu.css(form)</a>
 <hr />
 <p>jQueryとの動作の違いを確認するため、テスト用のスクリプトは<a href="http://docs.jquery.com/Selectors/enabled">jQueryのAPI Reference</a>を参考にしています。</p>
   <form>
@@ -22,14 +22,14 @@
 <script>
 uu.module("", "dev", function() {
   uu.ready(function() {
-    uu.pseudo(":enabled", null, "input").forEach(function(v) {
+    uu.attr("*[:enabled]").forEach(function(v) {
       v.value = "this is it";
     });
   }, "W");
 });
 </script>
 <pre>
-  uu.pseudo(":enabled", null, "input").forEach(function(v) {
+  uu.attr("*[:enabled]").forEach(function(v) {
     v.value = "this is it";
   });
 </pre>

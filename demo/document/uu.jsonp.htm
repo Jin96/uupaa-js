@@ -6,7 +6,7 @@
 <title>uupaa.js - uu.jsonp test</title>
 <script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
 <style type="text/css">
-body { background-color: black; color: white; }
+html { background-color: black; color: white; }
 a, b { color: lightblue }
 .result { color: lightblue }
 .step { color: gray }
@@ -47,7 +47,7 @@ function jsonp() {
     uu.id("step" + v).innerText = "";
   });
 
-  uu.pseudo(":checked").forEach(function(v) {
+  uu.attr("input[:checked]").forEach(function(v) {
     val += parseInt(v.value);
   });
   uu.request.callbackFilter = val;
@@ -69,11 +69,13 @@ function boot() {
   foo.huga = 3;
 
   // encode
-  var jsontxt = uu.codec.encodeJSON(foo);
+//  var jsontxt = uu.codec.encodeJSON(foo);
+  var jsontxt = uu.module.codec.json.encode(foo);
   uu.id("result1").innerText = jsontxt.toString();
 
   // decode
-  var obj = uu.codec.decodeJSON(jsontxt);
+//  var obj = uu.codec.decodeJSON(jsontxt);
+  var obj = uu.module.codec.json.decode(jsontxt);
   uu.id("result2").innerText = uu.sprintf("{ hoge:\"%s\", huga:%d }", obj.hoge, obj.huga);
 }
 uu.module("", "io,evaljs", function() {

@@ -1,13 +1,17 @@
-/** Canvas Module2
+/** Canvas Plus Module
  *
  * @author Takao Obara <com.gmail@js.uupaa>
  * @license uupaa.js is licensed under the terms and conditions of the MIT licence.
  * @see <a href="http://code.google.com/p/uupaa-js/">Home(Google Code)</a>
  * @see <a href="http://uupaa-js.googlecode.com/svn/trunk/README.htm">README</a>
  */
-(function() { var /* uud = document, */ uuw = window, uu = uuw.uu;
+(function() { var uud = document, uuw = window, uu = uuw.uu;
 
-uu.module.canvas2 = {};
+uu.module["canvas+"] = {};
+
+if (!("canvas" in uu.module)) {
+  uu.module.canvas = function() {};
+}
 
 
 // ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼

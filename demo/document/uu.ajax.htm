@@ -6,7 +6,7 @@
 <title>uupaa.js - uu.ajax test</title>
 <script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
 <style type="text/css">
-body { background-color: black; color: white; }
+html { background-color: black; color: white; }
 a, b { color: lightblue }
 .result { color: lightblue }
 .step { color: gray }
@@ -52,7 +52,7 @@ function ajax(method, data) {
     uu.id("step" + v).innerText = "";
   });
 
-  uu.pseudo(":checked").forEach(function(v) {
+  uu.attr("input[:checked]").forEach(function(v) {
     val += parseInt(v.value);
   });
   uu.request.callbackFilter = val;

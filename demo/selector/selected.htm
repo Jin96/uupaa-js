@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<title>uupaa.js - uu.pseudo(selected) test</title>
+<title>uupaa.js - uu.attr("option[:selected]") test</title>
 <!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="../../lib/javascript-xpath.js"></script><![endif]-->
 <script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
   <style>
@@ -12,11 +12,11 @@
 </head>
 <body>
 <a href="../../README.htm">README</a> &gt; 
-<a href="../../SELECTOR.htm#uu.pseudo">SELECTOR</a><br />
-<a href="./selector.htm">uu.pseudo</a> | <a href="./css.htm">uu.css</a> | <a href="./form.htm">uu.css(form)</a>
+<a href="../../SELECTOR.htm#uu.attr">SELECTOR</a><br />
+<a href="./selector.htm">uu.attr</a> | <a href="./css.htm">uu.css</a> | <a href="./form.htm">uu.css(form)</a>
 <hr />
 <p>jQueryとの動作の違いを確認するため、テスト用のスクリプトは<a href="http://docs.jquery.com/Selectors/selected">jQueryのAPI Reference</a>を参考にしています。</p>
-  <select name="garden" multiple="multiple">
+  <select name="garden" multiple="multiple" size="6">
     <option>Flowers</option>
     <option selected="selected">Shrubs</option>
     <option>Trees</option>
@@ -31,7 +31,7 @@ uu.module("", "dev", function() {
     uu.css("select").forEach(function(v) {
       v.onchange = function() {
         var str = "";
-        uu.pseudo(":selected").forEach(function(vv) {
+        uu.attr("option[:selected]").forEach(function(vv) {
           str += vv.innerText + " ";
         });
         uu.id("result").innerText = str;
@@ -45,7 +45,7 @@ uu.module("", "dev", function() {
   uu.css("select").forEach(function(v) {
     v.onchange = function() {
       var str = "";
-      uu.pseudo(":selected").forEach(function(vv) {
+      uu.attr("option[:selected]").forEach(function(vv) {
         str += vv.innerText + " ";
       });
       uu.id("result").innerText = str;

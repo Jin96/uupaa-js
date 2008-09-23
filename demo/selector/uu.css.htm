@@ -1,28 +1,46 @@
 <html><head><title>uupaa.js - uu.css(nth-last-of-type) test</title>
 <!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="../../lib/javascript-xpath.js"></script><![endif]-->
-<script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?module=dev"></script>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 </head><body><a href="../../README.htm">README</a> &gt; <a href="../../SELECTOR.htm#uu.css">SELECTOR</a> &gt; uu.css<br />
 <div>
-  <p>hoge</p>
-  <p>huga</p>
+  <div id="one">
+    <p>hoge1</p>
+    <p>huga1</p>
+  </div>
+  <div id="two">
+    <p>hoge2</p>
+    <p>huga2</p>
+  </div>
 </div>
 <div id="result"></div>
 <script>
-uu.module("", "dev", function() {
-  uu.ready(function() {
-    uu.css("p:nth-last-of-type(1)").forEach(function(v) {
-      uu.log(v.innerText); // "huga"
-    });
-  }, "W");
+uu.ready(function() {
+  uu.css("p:nth-last-of-type(1)", uu.id("two")).forEach(function(v) {
+    uu.log(v.innerText); // "huga2"
+  });
+  uu.css("#one > p:nth-last-of-type(1)").forEach(function(v) {
+    uu.log(v.innerText); // "hoge1"
+  });
 });
 </script>
 <pre>
-  &lt;p&gt;hoge&lt;/p&gt;
-  &lt;p&gt;huga&lt;/p&gt;
+&lt;div&gt;
+  &lt;div id="one"&gt;
+    &lt;p&gt;hoge1&lt;/p&gt;
+    &lt;p&gt;huga1&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;div id="two"&gt;
+    &lt;p&gt;hoge2&lt;/p&gt;
+    &lt;p&gt;huga2&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
 
-    uu.css("p:nth-last-of-type(1)").forEach(function(v) {
-      uu.log(v.innerText); // "huga"
-    });
+  uu.css("p:nth-last-of-type(1)", uu.id("two")).forEach(function(v) {
+    uu.log(v.innerText); // "huga2"
+  });
+  uu.css("#one &gt; p:nth-last-of-type(1)").forEach(function(v) {
+    uu.log(v.innerText); // "hoge1"
+  });
 </pre>
 </body></html>

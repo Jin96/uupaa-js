@@ -6,36 +6,43 @@
  * @see <a href="http://uupaa-js.googlecode.com/svn/trunk/README.htm">README</a>
  */
 
-// -----------------------------------
-// Core
-var UU = { VERSION: [0, 5] }, // [major, release]
+// === Core ==========================
+var UU = { VERSION: [0, 6] }, // [major, release]
     uu = function() { return uu._impl.apply(this, arguments); }; // adapter
 
 // --- Mixin ---
-// uu.mix - Object mixin - オブジェクトのミックスイン
-uu.mix = function(base, flavor, aroma /* = undefined */) {
-  for (var i in flavor) {
-    base[i] = flavor[i];
-  }
-  return aroma ? uu.mix(base, aroma) : base;
-};
-// uu.mix.param - Object mixin for parameters - パラメタのミックスイン
-uu.mix.param = function(base, flavor, aroma /* = undefined */) {
-  for (var i in flavor) {
-    (i in base) ? 0 : (base[i] = flavor[i]);
-  }
-  return aroma ? uu.mix.param(base, aroma) : base;
-};
+uu.mix       = function(base, flavor, aroma) { for(var i in flavor){base[i]=flavor[i];}return aroma?uu.mix(base,aroma):base; };
+uu.mix.param = function(base, flavor, aroma) { for(var i in flavor){(i in base)?0:(base[i]=flavor[i]);}return aroma?uu.mix.param(base,aroma):base; };
 
 // -----------------------------------
 (function() { // alias - 頻出するキーワードの別名を生成する、コード圧縮率を高める効果もある
 var uud = document, uuw = window, uuhd = uud.getElementsByTagName("head")[0], // <head>
-    uust = uuw.setTimeout, uupi = uuw.parseInt, uupf = uuw.parseFloat, uumr = Math.round,
-    uuco = uuw.console, uuap = Array.prototype,
+    uupi = uuw.parseInt, uupf = uuw.parseFloat, uumr = Math.round,
     uucs = uud.uniqueID ? function(e) { return e.currentStyle || e.style; } // for IE
                         : uud.defaultView.getComputedStyle; // for Firefox, Opera, Safari
 
 uu.mix(UU, {
+  // --- Selector ---
+  ATTR:         /^([\w\-\*]+)\[(@|\:)([\w]+)(?:(\~=|\^=|\$=|\*=|=)(["'])([^"']*)\5)?\]$/,
+  CSS_ELM:      /^([\*a-z0-9\_\-]+)/i,          // * or E
+  CSS_ID:       /^#([a-z0-9\_\-]+)/i,           // #id
+  CSS_CLASS:    /^\.([a-z0-9\_\-]+)/i,          // .class
+  CSS_ATTR1:    /^\[\s*([^\~\^\$\*\|\=\s]+)\s*([\~\^\$\*\|]?=)\s*([^\]]*)\s*\]/, // [A=V]
+  CSS_ATTR2:    /^\[\s*([^\]]*)\s*\]/,          // [A]
+  CSS_QUOTE:    /^[\"\']?|[\"\']?$/g,           // "..." or '...'
+  CSS_PSEUDO:   /^\:([\w-]+)(?:\((.*)\))?/,     // :nth-child(an+b)
+  CSS_ANB:      /^(-?[\d]*)n((?:\+|-)?[\d]*)/,  // an+b
+  CSS_COMBO:    /^\s*([\>\+\~])\s*|^\s+/,       // E F   E>F   E+F   E~F
+  CSS_GROUP:    /^\s*,\s*/,                     // E,F
+  CSS_GUARD:    { title: 0, id: 0, name: 0, "for": 0 }, // 大小文字を区別する属性名(これ以外は区別しない)
+  CSS_NG_ATTR:  { "class": "className", htmlFor: "for" },
+  CSS_OP:       { "=":  function(v, a) { return v === a; },
+                  "*=": function(v, a) { return a.indexOf(v) !== -1; },
+                  "^=": function(v, a) { return a.indexOf(v) === 0; },
+                  "$=": function(v, a) { return a.lastIndexOf(v) + v.length === a.length; },
+                  "~=": function(v, a) { return (" " + a + " ").indexOf(v) !== -1; },
+                  "|=": function(v, a) { return v === a || a.substring(0, v.length + 1) === v + "-"; }
+                },
   FIRST:       0x101, // UU.FIRST:       first sibling(先頭の兄弟) - 最初
   PREV:        0x102, // UU.PREV:        prev sibling(前の兄弟) - 前
   NEXT:        0x103, // UU.NEXT:        next sibling(次の兄弟) - 次
@@ -52,116 +59,39 @@ uu.mix(UU, {
 });
 
 // --- Detect ---
-uu.mix(uu, {
   // uu.ua - Detect User-Agent and Functions - ブラウザと機能の判別
-  ua:       function(info /* = "" */) {
-              var me = uu.ua, n = (info || "_").toLowerCase();
-              switch (n) {
-              case "display:table":
-                return !(me.ie && me.version < 8); // IE6, IE7はdisplay:table非対応
-              case "version":
-                if (!me.version) {
-                  me.version = me.ie     ? uupf(me._.match(/MSIE ([\d]\.[\d][\w]?)/)[1])  // 5.5, 6, 7, 8(IE Major version)
-                             : me.webkit ? uupf(me._.match(/WebKit\/(\d+(?:\.\d+)*)/)[1]) // 525.13(Webkit Build Number)
-                             : me.gecko  ? uupf(me._.match(/Gecko\/(\d{8})/)[1])          // 20080404(Gecko Build Number)
-                             : me.opera  ? opera.version() : 0; // 10048(Opera Build Number)
-                }
-                return me.version;
-              }
-              return (n in me) ? me[n] : false;
-            }
-});
+uu.ua = function(info) { var n=(info||"_").toLowerCase();return(n in uu.ua)?uu.ua[n]:false; };
 uu.ua._        = navigator.userAgent;            // UserAgent cache
 uu.ua.opera    = !!uuw.opera;                    // is Opera
 uu.ua.ie       = !!uud.uniqueID;                 // is Internet Explorer
 uu.ua.gecko    = uu.ua._.indexOf("Gecko/") >= 0; // is Gecko(Firefox, Camino)
-uu.ua.webkit   = uu.ua._.indexOf("WebKit") >= 0; // is WebKit(Safari, Konqueror)
+uu.ua.webkit   = uu.ua._.indexOf("WebKit") >= 0; // is WebKit(Safari, Konqueror, Chrome)
 uu.ua.ipod     = uu.ua._.indexOf("iPod") >= 0 || uu.ua._.indexOf("iPhone") >= 0; // is iPod/iPhone(Safari)
 uu.ua.wii      = !!(uuw.opera && uuw.opera.wiiremote);              // is Wii Internet channel
 uu.ua.air      = uu.ua._.indexOf("AdobeAIR") >= 0;                  // is Adobe AIR
 uu.ua.std      = uud.compatMode && uud.compatMode === "CSS1Compat"; // is Standard Mode, false is Quirks Mode
-uu.ua.domrange = uud.implementation.hasFeature("Range", "2.0");     // is DOM Level2 Range Module
-uu.ua.version  = uu.ua("version");
+uu.ua.domrange = uud.implementation && uud.implementation.hasFeature("Range", "2.0"); // is DOM Level2 Range Module
+uu.ua.version  = uu.ua.ie     ? uupf(uu.ua._.match(/MSIE ([\d]\.[\d][\w]?)/)[1])  // 5.5, 6, 7, 8(IE Major version)
+               : uu.ua.gecko  ? uupf(uu.ua._.match(/Gecko\/(\d{8})/)[1])          // 20080404(Gecko Build Number)
+               : uu.ua.webkit ? uupf(uu.ua._.match(/WebKit\/(\d+(?:\.\d+)*)/)[1]) // 525.13(Webkit Build Number)
+               : uu.ua.opera  ? opera.version() : 0;                              // 10048(Opera Build Number)
 uu.ua.ie6      = uu.ua.ie && uu.ua.version === 6; // is Internet Explorer Version 6
-uu.ua.ie8std   = uu.ua.ie && uu.ua.version === 8 && uu.ua.std; // is Internet Explorer Version 8 Standard Mode
+uu.ua.ie8      = uu.ua.ie && uu.ua.version === 8; // is Internet Explorer Version 8
 uu.ua.firefox3 = uu.ua.gecko && uu.ua._.indexOf("Firefox/3") >= 0; // is Firefox Version 3
-uu.ua.kestrel  = uu.ua.opera && uu.ua._.indexOf("Opera/9.5") >= 0; // is Opera Version 9.5
+uu.ua.opera95  = uu.ua.opera && uupi(uu.ua.version) >= 10048; // is Opera Version 9.5+
+uu.ua.v8       = uu.ua.webkit && uu.ua._.indexOf("Chrome/") >= 0;  // is Google Chrome(V8)
+uu.ua.minclock = (uu.ua.gecko || uu.ua.v8) ? 10 : 16; // minimum base clock
+uu.ua["display:table"] = !(uu.ua.ie && uu.ua.version < 8); // IE6, IE7はdisplay:table非対応, 他のブラウザでは使用可能
 
 // --- Iteration ---
-uu.mix(uu, {
-  // uu.forEach - Executes a provided function once per hash element - 全要素を評価
-  forEach:  function(mix, fn, me /* = undefined */) {
-              if (mix.forEach) {         // Array -> Array.forEach()
-                mix.forEach(fn, me);
-              } else if (uu.isFA(mix)) { // FakeArray -> Array.prototype.forEach.call()
-                uuap.forEach.call(mix, fn, me);
-              } else {
-                for (var i in mix) {            // Hash, Object
-                  mix.hasOwnProperty(i) && fn.call(me, mix[i], i, mix);
-                }
-              }
-            },
-  // uu.filter - Creates a new array with all elements that pass the test implemented by the provided function
-  //           - 全要素を評価し、結果が真の要素を配列で返す
-  filter:   function(mix, fn, me /* = undefined */) {
-              if (mix.filter)   { return mix.filter(fn, me); }            // Array
-              if (uu.isFA(mix)) { return uuap.filter.call(mix, fn, me); } // FakeArray
-              var rv = [], i, v;
-              for (i in mix) {
-                if (mix.hasOwnProperty(i)) {
-                  v = mix[i];
-                  fn.call(me, v, i, mix) && rv.push(v);
-                }
-              }
-              return rv;
-            }
-});
-// --- Iteration::CrossBrowser ---
-uu.mix.param(uuap, { // uuap is Array.prototype alias
-  // Array.prototype.forEach - Executes a provided function once per array element
-  //                         - 全要素をfnで評価する
-  forEach:  function(fn, me /* = undefined */) {
-              for (var i = 0, sz = this.length; i < sz; ++i) {
-                (i in this) && fn.call(me, this[i], i, this);
-              }
-            },
-  // Array.prototype.filter - Creates a new array with all elements that pass the test implemented by the provided function
-  //                        - 全要素を評価し、結果が真の要素を配列で返す
-  filter:   function(fn, me /* = undefined */) {
-              var rv = [], i = 0, sz = this.length, v;
-              for (; i < sz; ++i) {
-                if (i in this) {
-                  v = this[i];
-                  (fn.call(me, v, i, this)) && rv.push(v);
-                }
-              }
-              return rv;
-            },
-  // Array.prototype.every - Tests whether all elements in the array pass the test implemented by the provided function
-  //                       - 全要素を評価し、全て真ならtrue,偽があればループを中断しfalseを返す
-  every:    function(fn, me /* = undefined */) {
-              for (var i = 0, sz = this.length; i < sz; ++i) {
-                if (i in this && !fn.call(me, this[i], i, this)) { return false; }
-              }
-              return true;
-            },
-  // Array.prototype.some - Tests whether some element in the array passes the test implemented by the provided function
-  //                      - 全要素を評価し、全て偽ならfalse,真があればループを中断しtrueを返す
-  some:     function(fn, me /* = undefined */) {
-              for (var i = 0, sz = this.length; i < sz; ++i) {
-                if (i in this && fn.call(me, this[i], i, this)) { return true; }
-              }
-              return false;
-            },
-  // Array.prototype.map - Creates a new array with the results of calling a provided function on every element in this array
-  //                     - 全要素を評価し配列を返す
-  map:      function(fn, me /* = undefined */) {
-              var rv = new Array(this.length), i = 0, sz = this.length;
-              for (; i < sz; ++i) {
-                (i in this) && (rv[i] = fn.call(me, this[i], i, this));
-              }
-              return rv;
-            }
+uu.forEach = function(mix, fn, me) { if(mix.forEach){mix.forEach(fn,me);}else if(uu.isFA(mix)){Array.prototype.forEach.call(mix,fn,me);}else{for(var i in mix){mix.hasOwnProperty(i) && fn.call(me, mix[i],i,mix);}} };
+uu.filter  = function(mix, fn, me) { if(mix.filter){return mix.filter(fn,me);}if(uu.isFA(mix)){return Array.prototype.filter.call(mix,fn,me);}var rv=[],i,v;for(i in mix){if(mix.hasOwnProperty(i)){v=mix[i],fn.call(me,v,i,mix)&&rv.push(v);}}return rv; };
+uu.mix.param(Array.prototype, { // for IE, Opera9.2x
+  forEach:  function(fn, me) { for(var i=0,sz=this.length;i<sz;++i){(i in this)&&fn.call(me,this[i],i,this);} },
+  filter:   function(fn, me) { var rv=[],i=0,sz=this.length,v;for(;i<sz;++i){if(i in this){v= this[i],(fn.call(me,v,i,this))&&rv.push(v);}}return rv; },
+  every:    function(fn, me) { for(var i=0,sz=this.length;i<sz;++i){if(i in this&&!fn.call(me,this[i],i,this)){return false;}}return true; },
+  some:     function(fn, me) { for(var i=0,sz=this.length;i<sz;++i){if(i in this&&fn.call(me,this[i],i,this)){return true;}}return false; },
+  map:      function(fn, me) { var rv=Array(this.length),i=0,sz=this.length;for(;i<sz;++i){(i in this)&&(rv[i]=fn.call(me,this[i],i,this));}return rv; }
 });
 
 // --- Selector ---
@@ -172,83 +102,37 @@ uu.mix(uu, {
               return (uu._cacheID[id] || (uu._cacheID[id] = uud.getElementById(id)));
             },
   // uu.tag - Tag/Element Selector - タグ(要素)セレクタ
-  tag:      function(tagName, context /* = document */) {
-              return uu.toArray((context || uud).getElementsByTagName(tagName));
+  tag:      function(tagName, context /* = document */) { // for Firefox2+, Safari3+, Opera9+, Chrome
+              return Array.prototype.slice.call((context || uud).getElementsByTagName(tagName));
             },
   // uu.klass - Class Selector - クラスセレクタ
-  klass:    function(className, context /* = document */) {
-              // for Firefox3, Safari3, Opera9.5
-              return uu.toArray((context || uud).getElementsByClassName(className));
+  klass:    function(className, context /* = document */) { // for Firefox3, Safari3, Opera9.5, Chrome
+              return Array.prototype.slice.call((context || uud).getElementsByClassName(className));
             },
   // uu.attr - Attribute Selector - 属性セレクタ
-  // expr: E[@A] E[@A~="V"] E[@A="V"] E[@A^="V"] E[@A$="V"] E[@A*="V"] E[@A="V"]
-  attr:     function(expr, context /* = document */) {
-              var m = expr.match(/^([\w\-\*]+)\[@(\w+)(?:(\~=|\^=|\$=|\*=|=)(["'])([^"']*)\4)?\]$/);
-              return !m ? [] : m[3] ? uu._attr(context || uud, m[1], m[2], m[3], m[5]) // 1:E, 2:A, 3:=, 5:V
-                                    : uu._attr(context || uud, m[1], m[2], "@",  "");
+  attr:     function(expr, context /* = document */) { // expr= E[:checked] E[@A] E[@A~="V"] E[@A^="V"] E[@A$="V"] E[@A*="V"] E[@A="V"] E[@A="V"]
+              var m = expr.match(UU.ATTR);
+              return m ? uu._attr(context || uud, m[1], m[2] === ":", m[3], m[4] ? m[4] : "@", m[6] || "") : []; // 1:E, 3:A, 4:=, 6:V
             },
-  // uu.xpath - XPath Selector - XPathセレクタ
-  xpath:    function(expr, context /* = document */) {
-              var rv = [], i, r = uud.evaluate(expr, context || uud, null, 0, null); // 0 is ANY_TYPE
-              switch (r.resultType) {
-              case 1: rv = r.numberValue; break;  // 1 is NUMBER_TYPE
-              case 2: rv = r.stringValue; break;  // 2 is STRING_TYPE
-              case 3: rv = r.booleanValue; break; // 3 is BOOLEAN_TYPE
-              case 4: i = r.iterateNext();        // 4 is UNORDERED_NODE_ITERATOR_TYPE
-                      while (i) { rv.push(i); i = r.iterateNext(); }
-                      break;
-              }
-              return rv;
-            },
-  // uu.xsnap - XPath Selector on snapshot - XPathスナップショット
-  xsnap:    function(expr, context /* = document */, attr /* = "" */, sort /* = true */) {
+  // uu.xsnap - XPath Selector - XPathセレクタ
+  xpath:    function(expr, context /* = document */, sort /* = true */) {
               var n = uud.evaluate(expr, context || uud, null, sort ? 7 : 6, null), // 7 is SORT
-                  a = attr || "", i = 0, sz = n.snapshotLength, rv = Array(sz), e;
+                  i = 0, sz = n.snapshotLength, rv = Array(sz);
               for (; i < sz; ++i) {
-                e = n.snapshotItem(i);
-                rv[i] = !a ? e : (a in e) ? e[a] : (e.getAttribute(a) || "");
+                rv[i] = n.snapshotItem(i);
               }
               return rv;
             },
   // uu.css - CSS Selector - CSSセレクタ
   css:      function(expr, context /* = document */) {
-              var xpath, node, rv, i = 0, sz;
+              var x = uu.trim(expr), cx = context || document;
               try {
-                if (expr in uu._cacheXPath) {
-                  xpath = uu._cacheXPath[expr];
-                } else {
-                  xpath = uu.toXPath(expr);    // compile
-                  uu._cacheXPath[expr] = xpath; // cache
-                }
-                if (xpath) {
-                  node = uud.evaluate(xpath, context || uud, null, 7, null); // 7 is SORT
-                  if (node && node.snapshotLength) {
-                    for (sz = node.snapshotLength, rv = Array(sz); i < sz; ++i) {
-                      rv[i] = node.snapshotItem(i);
-                    }
-                    return rv;
-                  }
-                }
-              } catch(e) { (uu.config.debug & 0x1) && uu.die("uu.css(expr=%s) -> XPath[%s]", expr, xpath); }
+                return (!cx.querySelector || x.indexOf(":contains") > -1)
+                       ? uu._css(x, cx) : Array.prototype.slice.call(cx.querySelectorAll(x));
+              } catch (e) {
+                (uu.config.debug & 0x1) && uu.die("uu.css(expr=%s)", expr);
+              }
               return [];
-            },
-  // uu.pseudo - Pseudo Selector - 擬似セレクタ
-  pseudo:   function(expr, context /* = document */, tag /* = undefined */) {
-              var rv = [], sl = expr.substring(1), F = {
-                enabled:  function(e) { !e.disabled && rv.push(e); },
-                disabled: function(e) {  e.disabled && rv.push(e); },
-                checked:  function(e) {  e.checked  && (e.type === "checkbox" ||
-                                                        e.type === "radio") && rv.push(e); },
-                selected: function(e) {  e.selected && rv.push(e); },
-                visible:  function(e) { (e.type !== "hidden" && !H(e)) && rv.push(e); },
-                hidden:   function(e) { (e.type === "hidden" ||  H(e)) && rv.push(e); },
-                animated: function(e) { ("uuEffectRunning" in e) && e.uuEffectRunning && rv.push(e); }
-              },
-              T = { checked: "input", selected: "option" },
-              H = function(e) { return uu.css.get(e, "display") === "none" ||
-                                       uu.css.get(e, "visibility") === "hidden"; };
-              (sl in F) && uu.forEach(uu.tag(tag || T[sl] || "*", context || uud), F[sl]);
-              return rv;
             },
   // uu.nodeType - NodeType Selector - ノードタイプセレクタ
   nodeType: function(nodeType, context /* = document */, depth /* = 0 */) {
@@ -257,197 +141,218 @@ uu.mix(uu, {
               return uu.node._recursive(context || uud, F, rv, 0, depth || 0);
             },
   // uu.textNode - Text node Selector - TextNodeセレクタ
-  textNode: function(context /* = document */, deep /* = false */) {
-              uu.nodeType(3, context, deep);
-            },
-  // uu.toXPath - Convert CSS3 selector into XPath - CSS3セレクタをXPathに変換
-  toXPath:  function(expr) {
-              return expr.split(",").map(uu._toXPath).join(" | "); // split Selectors group and join("|")
+  textNode: function(context /* = document */, depth /* = 0 */) {
+              uu.nodeType(3, context, depth);
             },
   _cacheID: { /* id: element, ... */ },
-  _cacheXPath:
-            { /* css3-expr: compiled-xpath, ... */ },
-  _attr:    function(ctx, E, A, OP, V) {
-              var rv = [], sz = V.length, w,
-                  F = {
-                    "@":  function(e) { (A in e || H(e)) && rv.push(e); },
-                    "=":  function(e) { ((A in e && e[A] === V) || G(e) === V) && rv.push(e); },
-                    "*=": function(e) { ((A in e && e[A].indexOf(V) !== -1) || G(e).indexOf(V) !== -1) && rv.push(e); },
-                    "^=": function(e) { ((A in e && e[A].indexOf(V) ===  0) || G(e).indexOf(V) ===  0) && rv.push(e); },
-                    "$=": function(e) { if (A in e && e[A].lastIndexOf(V) + sz === e[A].length) { rv.push(e); return; }
-                                        w = G(e); (w && w.lastIndexOf(V) + sz === w.length) && rv.push(e); },
-                    "~=": function(e) { ((A in e && (" " + e[A] + " ").indexOf(V) !== -1) ||
-                                        (" " + G(e) + " ").indexOf(V) !== -1) && rv.push(e); }
-                  },
+  _attr:    function(ctx, E, P, A, OP, V) { // E=elm, P="@"or":", A=attr, OP=operator, V=value
+              var rv = [], sz = V.length, w, ITEM = {
+                  enabled:  function(e) { !e.disabled && rv.push(e); },
+                  disabled: function(e) {  e.disabled && rv.push(e); },
+                  checked:  function(e) {  e.checked  && (e.type === "checkbox" || e.type === "radio") && rv.push(e); },
+                  selected: function(e) {  e.selected && rv.push(e); },
+                  visible:  function(e) { (e.type !== "hidden" && !HIDE(e)) && rv.push(e); },
+                  hidden:   function(e) { (e.type === "hidden" ||  HIDE(e)) && rv.push(e); },
+                  animated: function(e) { ("uuEffectRunning" in e) && e.uuEffectRunning && rv.push(e); },
+                  "@":      function(e) { (A in e || H(e)) && rv.push(e); },
+                  "=":      function(e) { ((A in e && e[A] === V) || G(e) === V) && rv.push(e); },
+                  "*=":     function(e) { ((A in e && e[A].indexOf(V) !== -1) || G(e).indexOf(V) !== -1) && rv.push(e); },
+                  "^=":     function(e) { ((A in e && e[A].indexOf(V) ===  0) || G(e).indexOf(V) ===  0) && rv.push(e); },
+                  "$=":     function(e) { if (A in e && e[A].lastIndexOf(V) + sz === e[A].length) { rv.push(e); return; }
+                                          w = G(e); (w && w.lastIndexOf(V) + sz === w.length) && rv.push(e); },
+                  "~=":     function(e) { ((A in e && (" " + e[A] + " ").indexOf(V) !== -1) ||
+                                           (" " + G(e) + " ").indexOf(V) !== -1) && rv.push(e); } },
                   G = uu.ua.ie ? function(e) { return "";   } : function(e) { return e.getAttribute(A) || ""; },
                   H = uu.ua.ie ? function(e) { return null; } : function(e) { return e.hasAttribute(A);       };
+              function HIDE(e) { var s = uu.css.get(e); return s.display === "none" || s.visibility === "hidden"; }
               if (A === "class") { A = "className"; }
               if (OP === "~=") { V = " " + V + " "; }
-              uu.forEach(uu.tag(E, ctx), F[OP]);
+              uu.forEach(uu.tag(E, ctx), P ? ITEM[A] : ITEM[OP]);
               return rv;
             },
-  _toXPath: function(sel) {
-              var ELM    = /^([\.\#]?)([a-z0-9\_\*\-]*)/i,     // E
-                  ATTR1  = /^\[\s*([^\~\^\$\*\|\=\s]+)\s*([\~\^\$\*\|]?=)\s*(["'])([^"']*)\3\s*\]/, // E[A=V]
-                  ATTR2  = /^\[\s*([^\]]*)\s*\]/,              // E[A]
-                  COMBO1 = /^(?:\s*([\>\+\~\s]))/,             // E F, E > F, E + F, E ~ F
-                  COMBO2 = /^\s*([a-z0-9\_\*\-]+)/i,           // E + F の F用
-                  PSEUDO = /^\:([\w-]+)(?:\((.*)\))?/i,        // :nth-child(n)
-                  AOPE = { // attr operator
-                    "=" : '[@%1$s="%2$s"]',                                                         // attr=value
-                    "~=": '[contains(concat(" ",@%1$s," ")," %2$s ")]',                             // attr~=value
-                    "^=": '[starts-with(@%1$s,"%2$s")]',                                            // attr^=value
-                    "$=": '[substring(@%1$s,string-length(@%1$s)-string-length("%2$s")+1)="%2$s"]', // attr$=value
-                    "*=": '[contains(@%1$s,"%2$s")]',                                               // attr*=value
-                    "|=": '[@%1$s="%2$s" or starts-with(@%1$s,"%2$s-")]'                            // attr|=value
-                  },
-                  NTH = {
-                    xn_y: /([\d]+)n\+([\d]+)/,                // :nth-child(xn+y)
-                    xn:   /([\d]+)n/                          // :nth-child(xn)
-                  },
-                  rv = [".//", "*"], index = 1, last = null, m, m2;
+  _css:     function(expr, context) {
+              var rv = [], guardHash = {}, cx = [context || uud], cand = { length: 0 },
+                  lastX = "", lastXX = "", x = expr, m, r, w, f, v, i, p;
 
-              function reset(E) { rv.length = 0, rv.push(E), index = 0; }
-              function nth(str) {
-                return (!isNaN(str)) ? /*(*/ (")=" + uupi(str) + "-1") :
-                       (str === "even" || str === "2n")   ? /*(*/ ")mod 2=1" :
-                       (str === "odd"  || str === "2n+1") ? /*(*/ ")mod 2=0" :
-                       (NTH.xn_y.test(str)) ? str.replace(NTH.xn_y, /*(*/ "+ $2)mod $1=1") : // 4n + 1
-                       (NTH.xn.test(str))   ? str.replace(NTH.xn,   /*(*/ ")mod $1=1") : /*(*/ ")"; // 3n
-              }
-
-              while (sel.length && sel != last) {
-                last = sel = uu.trim(sel);
-                if (!sel.length) { break; }
-
-                // Element phase: E.className, E#id
-                m = sel.match(ELM);
-                if (m) {
-                  switch (m[1]) {
-                  case ".": rv.push('[contains(concat(" ",@class," ")," ' + m[2] + ' ")]'); break;
-                  case "#": rv.push('[@id="' + m[2] + '"]'); break;
-                  default:  rv[index] = m[2];
+              function CLIP(tag, cx, cand) { // cand = 検索対象ノードの集合
+                if (!cx.length) { return []; }
+                var rv = [], guard = {}, uid, w, i, sz, csz = cand.length; // length > 0 でcandによる制限を行う
+                cx.forEach(function(v) {
+                  w = v.getElementsByTagName(tag);
+                  for (i = 0, sz = w.length; i < sz; ++i) {
+                    if (w[i].nodeType !== 1) { continue; } // IEでコメントノードを無視する
+                    uid = UID(w[i]);
+                    if (uid in guard || (csz && !(uid in cand))) { continue; } // 二重登録抑止
+                    rv.push(w[i]), guard[uid] = w[i];
                   }
-                  sel = sel.substring(m[0].length);
-                }
-                // Attr phase: E[A], E[A=V], E[A~=V], E[A$=V], E[A*=V], E[A|=V]
-                m = sel.match(ATTR1);
-                if (m) {
-                  (m[2] in AOPE) && rv.push(uu.sprintf(AOPE[m[2]], m[1], m[4]));
-                  sel = sel.substring(m[0].length);
-                } else {
-                  m = sel.match(ATTR2);
-                  if (m) {
-                    rv.push("[@" + m[1] + "]");
-                    sel = sel.substring(m[0].length);
-                  }
-                }
-                // Attr phase: E:not(selector) - sorry. not impl.
-
-                // Pseudo-classes and Pseudo-elements phase:
-                m = sel.match(PSEUDO);
-                while (m) {
-                  switch (m[1]) {
-                  case "root":        rv.push("*[not(parent::*)]"); break;
-                  case "first-child": rv.push("[not(preceding-sibling::*)]"); break;
-                  case "last-child":  rv.push("[not(following-sibling::*)]"); break;
-                  case "only-child":  rv.push("[count(parent::*/child::*)=1]"); break;
-                  case "nth-child":   rv.push(uu.sprintf("[(count(preceding-sibling::*)%1$s]", nth(m[2]))); break; // )
-                  case "nth-last-child":  rv.push(uu.sprintf("[(count(following-sibling::*)%1$s]", nth(m[2]))); break; // )
-                  case "nth-of-type":     rv.push(uu.sprintf("[(count(preceding-sibling::%2$s)%1$s]", nth(m[2]), rv[index])); break; // )
-                  case "nth-last-of-type":rv.push(uu.sprintf("[(count(following-sibling::%2$s)%1$s]", nth(m[2]), rv[index])); break; // )
-                  case "first-of-type":   rv.push(uu.sprintf("[(not(preceding-sibling::%2$s)%1$s]", nth(m[2]), rv[index])); break; // )
-                  case "last-of-type":    rv.push(uu.sprintf("[(not(following-sibling::%2$s)%1$s]", nth(m[2]), rv[index])); break; // )
-                  case "only-of-type":    rv.push(uu.sprintf("[count(parent::*/child::%s)=1]",rv[index])); break;
-                  // --- jQuery
-                  case "first":     rv.push("[1]"); break;
-                  case "last":      rv.push("[last()]"); break;
-                  case "even":      rv.push("[(count(preceding-sibling::*))mod 2=0]"); break;
-                  case "odd":       rv.push("[(count(preceding-sibling::*))mod 2=1]"); break;
-                  case "eq":        reset(uu.sprintf("/descendant::%s[%d]", rv[index], uupi(m[2]) + 1)); break;
-                  case "gt":        reset(uu.sprintf("/descendant::%s[position() > %d]", rv[index], uupi(m[2]) + 1)); break;
-                  case "lt":        reset(uu.sprintf("/descendant::%s[position() < %d]", rv[index], uupi(m[2]) + 1)); break;
-                  case "header":    reset(uu.sprintf("//*[self::h1 or self::h2 or self::h3 or self::h4 or self::h5 or self::h6]")); break;
-                  case "contains":  rv.push(uu.sprintf("[contains(string(), %s)]", m[2])); break;
-                  case "empty":     rv.push("[not(*) and not(text())]"); break;
-                  case "parent":    rv.push("[text()]"); break;
-                  case "input":     rv.push("*[self::input or self::textarea or self::select or self::button]"); break;
-                  case "text":      rv.push('input[@type="text"]'); break;
-                  case "password":  rv.push('input[@type="password"]'); break;
-                  case "radio":     rv.push('input[@type="radio"]'); break;
-                  case "checkbox":  rv.push('input[@type="checkbox"]'); break;
-                  case "submit":    rv.push('input[@type="submit"]'); break;
-                  case "image":     rv.push('input[@type="image"]'); break;
-                  case "reset":     rv.push('input[@type="reset"]'); break;
-                  case "button":    rv.push('*[self::input[@type="button"] or self::button]'); break;
-                  case "file":      rv.push('input[@type="file"]'); break;
-                  }
-                  sel = sel.substring(m[0].length);
-                  m = sel.match(PSEUDO);
-                }
-                // Combinator phase: E F, E > F, E + F, E ~ F
-                m = sel.match(COMBO1);
-                if (m) {
-                  if (m[1] === "+") { // E + F のケースでは、Fを先読みする必要がある
-                    sel = sel.substring(m[0].length);
-                    m2 = sel.match(COMBO2);
-                    if (m2) {
-                      rv.push('/following-sibling::*[1][self::' + m2[1] +']'); // とりあえず
-                      sel = sel.substring(m2[0].length);
-                    }
-                  } else {
-                    switch (m[1]) {
-                    case ">": rv.push("/"); break;
-                    case "~": rv.push("/following-sibling::"); break;
-                    default:  rv.push("//"); break;
-                    }
-                    index = rv.length;
-                    rv.push("*");
-                    sel = sel.substring(m[0].length);
-                  }
-                }
-              }
-              return rv.join("");
-            }
-});
-// --- Selector::CrossBrowser ---
-!uud.getElementsByClassName && uu.mix(uu, { // for Firefox2, IE6/7/8, Opera9.2x
-  klass:    function(className, context /* = document */) {
-              var rv = [], ary, e = uu.tag("*", context || uud), cn = uu.trim(className);
-
-              function F(cn, ary) { // cn = " " + v.className + " ", ary = [ "aaa", "bbb" ]
-                var i = 0, sz = ary.length, rv = 0;
-                for (; i < sz; ++i) {
-                  (cn.indexOf(" " + ary[i] + " ") !== -1) && ++rv;
-                }
-                return rv === sz; // true: match all
-              }
-
-              if (cn.indexOf(" ") === -1) { // className = "aaa"
-                cn = " " + cn + " ";
-                e.forEach(function(v) {
-                  ((" " + v.className + " ").indexOf(cn) !== -1) && rv.push(v);
                 });
-              } else { // className = "aaa bbb ccc"
-                ary = cn.split(" ");
-                e.forEach(function(v) {
-                  F(" " + v.className + " ", ary) && rv.push(v);
-                });
+                return rv;
               }
+              function MIX(r, c, g) { c.forEach(function(v) { !(v.uid in g) && (r.push(v), g[v.uid] = v); }); }
+              function UID(e)    { return ("uid" in e) ? e.uid : (e.uid = ("uid" + ++uu.uid._count)); }
+              function TXT(v)    { return (uu.ua.ie || (uu.ua.opera && !uu.ua.opera95)) ? v.innerText : v.textContent; }
+              function HAS(n, v) { if (uu.ua.ie && !uu.ua.ie8) { var a = n.getAttributeNode(v); return a && a.specified; }
+                                   return n.hasAttribute(v); }
+              function NTH(anb) {
+                var m, a, b;
+                if (!isNaN(anb)) { b = parseInt(anb); return function(i) { return i === b; } }
+                if (anb === "even" || anb === "2n"   || anb === "2n+0") { return function(i) { return (i - 0) % 2 === 0; }; }
+                if (anb === "odd"  || anb === "2n+1" || anb === "2n-1") { return function(i) { return (i - 1) % 2 === 0; }; }
+                m = anb.match(UU.CSS_ANB);
+                !m && uu.die("%d unsupported", anb);
+                a = parseInt(m[1] === "-" ? -1 : m[1] || 1);
+                b = parseInt(m[2] || 0);
+                switch (a) {
+                case  0: return function(i) { return i === b; }; // 繰り返しせずb番目の子を選択する
+                case  1: return function(i) { return i >= b;  }; // 全てのE要素のb番目以降の子供を選択する
+                case -1: return function(i) { return i <= b;  }; // 全てのE要素のb番目以前の子供を選択する
+                }
+                return function(i) { return (i - b) % a === 0; }; // an+b
+              }
+
+              while (x.length && x !== lastX) {
+                lastX = x, m = null;
+
+                cx = CLIP((m = x.match(UU.CSS_ELM)) ? m[1].toUpperCase() : "*", cx, cand);
+                m && (x = x.substring(m[0].length));
+                cand = { length: 0 };
+
+                while (x.length && x !== lastXX) {
+                  lastXX = x, m = null;
+
+                  switch (x.charAt(0)) {
+                  case "#": if ( (m = x.match(UU.CSS_ID)) ) { // m[1] = id
+                              r = uud.getElementById(m[1]), r && (UID(r), cx = [r]);
+                            }
+                            break;
+                  case ".": if ( (m = x.match(UU.CSS_CLASS)) ) {
+                              w = " " + m[1] + " ";
+                              cx = cx.filter(function(v) { return (" " + v.className + " ").indexOf(w) > -1; }); // 該当要素が無くてもcxを更新する
+                            }
+                            break;
+                  case "[": if ( (m = x.match(UU.CSS_ATTR1)) ) {
+                              (m[1] in UU.CSS_NG_ATTR) && (m[1] = UU.CSS_NG_ATTR[m[1]]);
+                              f = m[1] in UU.CSS_GUARD, v = m[3].replace(UU.CSS_QUOTE, ""), !f && (v = v.toLowerCase());
+                              (m[2] === "~=") && (v = " " + v + " ");
+                              cx = cx.filter(function(vv) { w = vv.getAttribute(m[1]);
+                                                            return w && UU.CSS_OP[m[2]](v, f ? w : w.toLowerCase()); });
+                            } else if ( (m = x.match(UU.CSS_ATTR2)) ) { // m[1] = "A"
+                              (m[1] in UU.CSS_NG_ATTR) && (m[1] = UU.CSS_NG_ATTR[m[1]]);
+                              cx = cx.filter(function(v) { return HAS(v, m[1]); });
+                            }
+                            break;
+                  case ":": if ( (m = x.match(UU.CSS_PSEUDO)) ) {
+                              switch (m[1]) {
+                              case "root":            cx = [uud.getElementsByTagName("html")[0]]; break;
+                              case "enabled":         cx = cx.filter(function(v) { return !v.disabled; }); break;
+                              case "disabled":        cx = cx.filter(function(v) { return v.disabled; }); break;
+                              case "checked":         cx = cx.filter(function(v) { return v.checked; }); break;
+                              case "contains":        w = m[2].replace(UU.CSS_QUOTE, "");
+                                                      cx = cx.filter(function(v) { return TXT(v).indexOf(w) > -1; }); break;
+                              case "empty":           cx = cx.filter(function(v) { return !uu.node.count(v) && !TXT(v); }); break;
+                              case "target":          w = location.hash.substring(1);
+                                                      w && (cx = cx.filter(function(v) { return v.id === w || ("name" in v && v.name === w); })); break;
+                              case "link":            w = uu.toArray(uud.links);
+                                                      cx = cx.filter(function(v) { return w.indexOf(v) > -1; }); break;
+                              case "lang":            w = RegExp("^(" + m[2] + "$|" + m[2] + "-)", "i");
+                                                      cx = cx.filter(function(v) { p = v;
+                                                        while (p && p !== uud && !p.getAttribute("lang")) { p = p.parentNode; }
+                                                        return (p && p !== uud) && w.test(p.getAttribute("lang"));
+                                                      });
+                                                      break;
+                              case "first-child":     cx = cx.filter(function(v) { return !uu.node.pos(v); }); break;
+                              case "last-child":      cx = cx.filter(function(v) { return !uu.node.pos(v,1); }); break;
+                              case "only-child":      cx = cx.filter(function(v) { return uu.node.count(v.parentNode) === 1; }); break;
+                              case "nth-last-child":  cx.reverse(); // break through
+                              case "nth-child":       w = null, f = NTH(m[2]);
+                                                      cx = cx.filter(function(v) { p = v.parentNode; (w !== p) && (w = p, i = 0); return f(++i); }); break;
+                              case "nth-last-of-type":cx.reverse(); // break through
+                              case "nth-of-type":     w = null, f = NTH(m[2]), v = {};
+                                                      cx = cx.filter(function(v) { p = v.parentNode; (w !== p) && (w = p, i = {});
+                                                                                   (v.tagName in i) ? ++i[v.tagName] : (i[v.tagName] = 1);
+                                                                                   return f(i[v.tagName]); }); break;
+                              case "last-of-type":    cx.reverse(); // break through
+                              case "first-of-type":   w = null, f = function(i) { return i === 1; }, i = {};
+                                                      cx = cx.filter(function(v) { p = v.parentNode; (w !== p) && (w = p, i = {});
+                                                                                   (v.tagName in i) ? ++i[v.tagName] : (i[v.tagName] = 1);
+                                                                                   return f(i[v.tagName]); }); break;
+                              case "only-of-type":    w = null, f = function(node, tag) { return uu.node.count(node, tag) === 1; };
+                                                      cx = cx.filter(function(v) { p = v.parentNode; (w !== p) && (w = p);
+                                                                                   return f(p, v.tagName); }); break;
+                              default: uu.die(":%s unsupported", m[1]);
+                              }
+                            }
+                  }
+                  m && (x = x.substring(m[0].length));
+                }
+                if ( (m = x.match(UU.CSS_COMBO)) ) { // コンビネーターだけでは要素を確定できないため、絞り込み候補(candidate)をリストアップする
+                  cand = { length: 0 };
+                  switch (m[1] || " ") {
+                  case " ": CLIP("*", cx, cand).forEach(function(v) { // "E " なら Eの全子孫(*)を候補にする
+                              (v.nodeType === 1) && (cand[v.uid] = v, ++cand.length);
+                            });
+                            break;
+                  case ">": cx.forEach(function(v) { // "E>" なら Eの全子供を候補にする
+                              for (w = v.firstChild; w; w = w.nextSibling) {
+                                (w.nodeType === 1) && (cand[UID(w)] = w, ++cand.length);
+                              }
+                            });
+                            break;
+                  case "+":         // "E+" なら Eの直後の弟を候補にする
+                  case "~": r = []; // "E~" なら Eの弟達を候補にする
+                            cx.forEach(function(v) {
+                              r.push(v.parentNode);
+                              while ( (v = v.nextSibling) ) {
+                                if (v.nodeType !== 1) { continue; }
+                                cand[UID(v)] = v, ++cand.length;
+                                if (m[1] === "+") { break; } // choice one
+                              }
+                            });
+                            cand.length && (cx = r); // 候補がある場合のみ差し替える
+                  }
+                  x = x.substring(m[0].length);
+                }
+                if ( (m = x.match(UU.CSS_GROUP)) ) {
+                  MIX(rv, cx, guardHash);
+                  cx = [context || uud], cand = { length: 0 }, lastX = "", lastXX = "";
+                  x = x.substring(m[0].length);
+                }
+              }
+              x.length && uu.die("%s unsupported", x);
+              MIX(rv, cx, guardHash);
               return rv;
             }
+});
+
+// --- Selector::Override ---
+uu.ua.ie && uu.mix(uu, { // for IE6, IE7, IE8
+  tag:      function(tagName, context) { var rv=[],n=(context||uud).getElementsByTagName(tagName),i=0,sz=n.length;for(;i<sz;++i){(n[i].nodeType===1)&&rv.push(n[i]);}return rv; }
+});
+!uud.getElementsByClassName && uu.mix(uu, { // for Firefox2, IE6/7/8, Opera9.2x
+  klass:    function(className, context) { var rv=[],ary,e=uu.tag("*",context||uud),cn=uu.trim(className);function F(cn,ary){var i=0,sz=ary.length,rv=0;for(;i<sz;++i){(cn.indexOf(" "+ary[i]+" ")!==-1)&&++rv;}return rv===sz;}if(cn.indexOf(" ")===-1){cn=" "+cn+" ";e.forEach(function(v){((" "+v.className+" ").indexOf(cn)!==-1)&&rv.push(v);});}else{ary=cn.split(" ");e.forEach(function(v){F(" "+v.className+" ",ary)&&rv.push(v);});}return rv; }
 });
 
 // --- Node ---
 uu.mix(uu.node = function() {}, {
   // uu.node.insert - Insert ELEMENET_NODE or "<HTMLString>" - ELEMENT_NODEまたはHTML文字列をノード化し挿入
   insert:   function(html, context /* = document.body */, pos /* = UU.LAST_CHILD */) {
-              if (uu.ua.ie && uu.isS(html)) {
-                uu.node._insIE(html, context || uud.body, pos || UU.LAST_CHILD);
+              var nd = html, cx = context || uud.body, po = pos || UU.LAST_CHILD, pa = cx.parentNode, F;
+              if (uu.ua.ie && uu.isS(nd)) {
+                F = ((po === UU.FIRST || po === UU.LAST) ? pa : cx).insertAdjacentHTML;
+                switch(po){case UU.FIRST:case UU.FIRST_CHILD:F("AfterBegin",nd);break;case UU.LAST:case UU.LAST_CHILD:F("BeforeEnd",nd);break;case UU.PREV:F("BeforeBegin",nd);break;case UU.NEXT:F("AfterEnd",nd);}
                 return;
               }
-              html = uu.isS(html) ? uu.node.substance(html) : html; // node化
-              uu.node._ins(html, context || uud.body, pos || UU.LAST_CHILD);
+              uu.isS(nd) && (nd = uu.node.substance(nd)); // node化
+              function FIRST(c, n)   { c.firstChild ? c.insertBefore(n, c.firstChild) : c.appendChild(n); }
+              function NEXT(p, c, n) { (p.lastChild === c) ? p.appendChild(n) : p.insertBefore(n, c.nextSibling); }
+              switch (po) {
+              case UU.FIRST:       FIRST(pa, nd); break;
+              case UU.FIRST_CHILD: FIRST(cx, nd); break;
+              case UU.LAST:        pa.appendChild(nd); break;
+              case UU.LAST_CHILD:  cx.appendChild(nd); break;
+              case UU.PREV:        pa.insertBefore(nd, cx); break;
+              case UU.NEXT:        NEXT(pa, cx, nd);
+              }
             },
   // uu.node.insertText - Insert TEXT_NODE or "TextString" - TEXT_NODE または テキスト文字列をノード化し挿入
   insertText:
@@ -456,8 +361,8 @@ uu.mix(uu.node = function() {}, {
                              context || uud.body, pos || UU.LAST_CHILD);
             },
   // uu.node.replace - Replace oldNode with node - nodeとoldNodeを入れ替える
-  replace:  function(node, oldNode, context /* = document.body */) {
-              return (context || uud.body).replaceChild(node, oldNode); // return oldNode
+  replace:  function(node, oldNode, context /* = oldNode.parentNode */) {
+              return (context || oldNode.parentNode).replaceChild(node, oldNode); // return oldNode
             },
   // uu.node.remove - Remove node - nodeを取り除く
   remove:   function(node, context /* = node.parentNode */) {
@@ -478,7 +383,6 @@ uu.mix(uu.node = function() {}, {
                 }
               }
               var rv = [], i, sz;
-
               uu.node._recursive(elm, F, rv, 0, depth || 0);
               for (i = 0, sz = rv.length; i < sz; ++i) {
                 rv[i].parentNode.removeChild(rv[i]);
@@ -508,47 +412,36 @@ uu.mix(uu.node = function() {}, {
               }
               // createContextualFragment が使えない環境(Safar3, Firefox2, IE等)では、
               // <div></div>をプレースホルダとしてノードを生成し、中身だけを切り抜いて返す
-              var e = uud.body.appendChild(uud.createElement("div")); // placeholder
-              e.innerHTML = html;
-              return uu.node.cutdown(e);
+              var rv, e = uud.body.appendChild(uud.createElement("div")); // placeholder
+              e.innerHTML = html, rv = uu.node.cutdown(e), uu.node.remove(e); // remove placeholder
+              return rv;
             },
-  _recursive:
-            function(elm, fn, rv, depth, max) { // 再帰的にELEMENT_NODEを辿る
-              var e, i = 0, sz = elm.childNodes.length;
-              for (; i < sz; ++i) {
-                fn(e = elm.childNodes[i], rv);
-                (e.nodeType === 1 && depth + 1 <= max) &&
-                  uu.node._recursive(e, fn, rv, depth + 1, max);
+  // uu.node.pos - Get ELEMENT_NODE node position - ノードが何番目のELEMENT_NODEかを返す
+  pos:      function(node, reverse /* = false */) {
+              var p = node.parentNode, n, pos = 0, r = reverse || false;
+              if (node.nodeType !== 1 || !p || !p.firstChild) { return -1; }
+              for (n = r ? p.lastChild : p.firstChild; n; n = r ? n.previousSibling : n.nextSibling) {
+                if (n.nodeType !== 1) { continue; }
+                if (node === n) { return pos; } // 0から始まる数値を返す
+                ++pos;
+              }
+              return -1;
+            },
+  // uu.node.count - Count the number of ELEMENET_NODE - ELEMENET_NODEをカウントする
+  count:    function(node, tag /* = "*" */) {
+              var rv = 0, n, t = (tag || "*").toUpperCase();
+              for (n = node.firstChild; n; n = n.nextSibling) {
+                (n.nodeType === 1 && (t === "*" || t === n.tagName.toUpperCase())) && ++rv;
               }
               return rv;
             },
-  _insIE:   function(node, ctx, pos) { // insert for IE
-              ctx = (pos === UU.FIRST || pos === UU.LAST) ? ctx.parentNode : ctx;
-              var F = ctx.insertAdjacentHTML;
-              switch (pos) {
-              case UU.FIRST:
-              case UU.FIRST_CHILD:  F("AfterBegin",  node); break;
-              case UU.LAST:
-              case UU.LAST_CHILD:   F("BeforeEnd",   node); break;
-              case UU.PREV:         F("BeforeBegin", node); break;
-              case UU.NEXT:         F("AfterEnd",    node); break;
+  _recursive:
+            function(elm, fn, rv, depth, max) { // 再帰的にELEMENT_NODEを辿る
+              for (var e, i = 0, sz = elm.childNodes.length; i < sz; ++i) {
+                fn(e = elm.childNodes[i], rv);
+                (e.nodeType === 1 && depth + 1 <= max) && uu.node._recursive(e, fn, rv, depth + 1, max);
               }
-            },
-  _ins:     function(node, ctx, pos) { // insert for Firefox, Opera, Safari
-              function FIRST(ctx)   { ctx.firstChild ? ctx.insertBefore(node, ctx.firstChild)
-                                                     : ctx.appendChild(node); }
-              function PREV(p, ctx) { p.insertBefore(node, ctx); }
-              function NEXT(p, ctx) { (p.lastChild === ctx) ? p.appendChild(node)
-                                                            : p.insertBefore(node, ctx.nextSibling); }
-              function LAST(ctx)    { ctx.appendChild(node); }
-              switch (pos) {
-              case UU.FIRST:        FIRST(ctx.parentNode); break;
-              case UU.PREV:         PREV(ctx.parentNode, ctx); break;
-              case UU.NEXT:         NEXT(ctx.parentNode, ctx); break;
-              case UU.LAST:         LAST(ctx.parentNode); break;
-              case UU.FIRST_CHILD:  FIRST(ctx); break;
-              case UU.LAST_CHILD:   LAST(ctx); break;
-              }
+              return rv;
             }
 });
 
@@ -657,18 +550,14 @@ uu.mix(uu.attr, {
             }
 });
 
-// --- CSS ---
+// --- CSS / Style ---
 uu.mix(uu.css, {
   // uu.css.get - document.defaultView.getComputedStyle wrapper - 計算済みのスタイルを取得
   get:      function(elm, cssProp /* = undefined */) { // cssProp = "prop", ["prop, "prop"], "prop,prop"
-              var rv = {}, cs = uucs(elm, ""), F = uu.css._camelize;
-              function CAMEL(v) { v = F(v); rv[v] = (v in cs) ? cs[v] : ""; }
-              function QUICK(v) {           rv[v] = (v in cs) ? cs[v] : ""; }
-              if (!cssProp) { return cs; } // currentStyle または CSS2Propertiesを返す
-
-              cssProp = uu.notax(cssProp);
-              cssProp.forEach(uu.config.backCompat ? CAMEL : QUICK);
-              return (cssProp.length === 1) ? uu.first(rv, "") : rv; // 指定された要素数が1なら文字列を返す
+              if (!cssProp) { return uucs(elm, ""); } // currentStyle または CSS2Propertiesを返す
+              var rv = {}, cs = uucs(elm, ""), i = 0, sz, v = "", p = uu.notax(cssProp);
+              for (sz = p.length; i < sz; ++i) { v = p[i], rv[v] = (v in cs) ? cs[v] : ""; }
+              return (sz === 1) ? cs[v] : rv; // 指定された要素数が1ならhashではなく文字列を返す
             },
   // uu.css.rect - Get RectHash( { x: left, y: top, w: width, h: height } ) (value of px unit)
   rect:     function(elm) {
@@ -677,16 +566,12 @@ uu.mix(uu.css, {
                          { x: uupf(cs.left), y: uupf(cs.top), w: w, h: h };
             },
   // uu.css.opacity - Get opacity value(from 0.0 to 1.0) - 不透明度を数値(0.0～1.0)で取得
-  opacity:  function(elm) {
-              return uupf(uucs(elm, "").opacity);
-            },
+  opacity:  function(elm) { return uupf(uucs(elm, "").opacity); },
   // uu.css.backgroundImage - Get background-image URL - 背景画像のURLを取得
-  // undocumented
-  // 取得できない場合は none を返す
-  // url( ) をトリムした文字列を返す
   backgroundImage:
             function(elm) {
-              var url = uucs(elm, "").backgroundImage, m;
+              var m, url = uu.ua.ie ? (elm.style.backgroundImage || elm.currentStyle.backgroundImage)
+                                    : uucs(elm, "").backgroundImage;
               if (!url) { return "none"; }
               m = url.match(/^url\((.*)\)$/);
               return !m ? "none" : m[1].replace(/["']/g, ""); // trim quote
@@ -694,15 +579,11 @@ uu.mix(uu.css, {
   // uu.css.set - Set style - スタイルを設定
   set:      function(elm, hash) { // hash = { cssProp: value, ... }
               if (!elm) { (uu.config.debug & 0x1) && uu.die("uu.css.set(elm=%s)", elm); return; }
-              var F = uu.css._camelize, opa = "opacity";
-              function CAMEL(v, i) { (i !== opa) && (elm.style[F(i)] = v); }
-              function QUICK(v, i) { (i !== opa) && (elm.style[i]    = v); }
+              var i, opa = "opacity";
               if (opa in hash) { uu.css.setOpacity(elm, hash.opacity); }
-              uu.forEach(hash, uu.config.backCompat ? CAMEL : QUICK);
+              for (i in hash) { (i !== opa) && (elm.style[i] = hash[i]); }
             },
   // uu.css.setRect - Set RectHash( { x: left, y: top, w: width, h: height } )
-  // x,y,w,hは省略可能
-  // autoVisible = true なら、width or height zero で visibility: hiddenにし、1以上でvisible化
   setRect:  function(elm, rect, autoVisible /* = false */) {
               var s = elm.style, r = rect, resize = 0, I = uupi;
               if ("x" in r) { s.left = I(r.x) + "px"; }
@@ -753,15 +634,9 @@ uu.mix(uu.css, {
   // uu.css.toPixel - Unit into px - px単位に変換
   toPixel:  function(elm, val, cssProp /* = "" */) {
               if (!val) { return 0; }
-              if (!isNaN(val) || val.lastIndexOf("px") !== -1) {
-                return uupf(val); // 3,"3","3px" なら 3 を返す
-              }
-              if (val.lastIndexOf("pt") !== -1) {
-                return uupf(val) * uu.css.get.pt();
-              }
-              if (val.lastIndexOf("em") !== -1) {
-                return uupf(val) * uu.css.get.em();
-              }
+              if (!isNaN(val) || val.lastIndexOf("px") !== -1) { return uupf(val); } // 3,"3","3px" なら 3 を返す
+              if (val.lastIndexOf("pt") !== -1) { return uupf(val) * uu.css.measure().pt; }
+              if (val.lastIndexOf("em") !== -1) { return uupf(val) * uu.css.measure().em; }
               return val;
             },
   // uu.css.measure - Measure em and pt, and return PixelHash( { em, pt } ) value
@@ -780,9 +655,7 @@ uu.mix(uu.css, {
   insertRule:
             function(rule, index /* = undefined */) {
               var rv = -1, pos, ss;
-              if (!uu.css._styleSheet) {
-                uu.css._styleSheet = uu.css.createStyleSheet();
-              }
+              !uu.css._styleSheet && (uu.css._styleSheet = uu.css.createStyleSheet());
               ss = uu.css._styleSheet;
 
               if (!uu.ua.ie) { // for Firefox, Opera, Safari
@@ -802,11 +675,8 @@ uu.mix(uu.css, {
   // uu.css.deleteRule - Delete CSS ruls
   deleteRule:
             function(index) {
-              if (uu.ua.ie) {
-                uu.css._styleSheet.removeRule(index); // for IE
-              } else {
-                uu.css._styleSheet.sheet.deleteRule(index); // for Firefox, Opera, Safari
-              }
+              uu.ua.ie ? uu.css._styleSheet.removeRule(index)        // for IE
+                       : uu.css._styleSheet.sheet.deleteRule(index); // for Firefox, Opera, Safari
             },
   // uu.css.createStyleSheet - Create StyleSheet
   createStyleSheet:
@@ -816,6 +686,20 @@ uu.mix(uu.css, {
               e.appendChild(uud.createTextNode(""));
               return uuhd.appendChild(e);
             },
+  // uu.css.unselectable - element unselectable - 要素を選択禁止にする
+  unselectable:
+            function(elm) {
+              if (uu.ua.ie || uu.ua.opera) { // IE, Opera
+                elm.unselectable = "on";
+                elm.onselectstart = "return false";
+              } else if (uu.ua.gecko) { // Firefox
+                elm.style["-moz-user-select"] = "none";
+              } else if (uu.ua.webkit) { // Safari, Chrome
+                elm.style["-webkit-user-select"] = "none";
+              }
+            },
+  // uu.css.recalc - Recalc element style - スタイルを再評価する
+  recalc:   function(elm /* = undefined */) { /* not impl */ },
   _autoVisible:
             function(elm) {
               var s = elm.style, v, zero, I = uupi;
@@ -827,44 +711,17 @@ uu.mix(uu.css, {
                 elm.style.visibility = "visible";
               }
             },
-  _camelize:
-            function(css_prop) { // Convert "css-prop" style into "cssProp" style - "css-prop"を"cssProp"に変換
-              var p = css_prop, ng = { "float": uu.ua.ie ? "styleFloat" : "cssFloat" }; // htmlFor等は処理しない
-              function F(str) {
-                return str.replace(/-([a-z])/g, function(_, words) {
-                  return words.toUpperCase();
-                });
-              }
-              return F((p in ng) ? ng[p] : p);
-            },
-  _pixelHash: // PixelHash( { em, pt } )
-            { em: 0, pt: 0 },
-  _styleSheet:
-            0,
-  _display_block: // XHTML1.x block tag
-            "p,div,dl,ul,ol,form,address,blockquote,h1,h2,h3,h4,h5,h6,fieldset,hr,pre,",
-  _display_buggy: // style.display用機能不全リスト(主にIE6,IE7用)
-            uu.ua("display:table") ? "" : "table,caption,tr,td,th,tbody,thead,tfoot,col,colgroup,",
-  _display_table: // style.display を設定する上で特別な配慮が必要な要素の一覧
-            !uu.ua("display:table") ? {} : {
-              table: "table",              caption:  "table-caption",
-              tr:    "table-row",          th:       "table-cell",        td:    "table-cell",
-              thead: "table-header-group", tbody:    "table-row-group",   tfoot: "table-footer-group",
-              col:   "table-column",       colgroup: "table-column-group"
-            }
+  _pixelHash: { em: 0, pt: 0 }, // PixelHash( { em, pt } )
+  _styleSheet: 0,
+  _display_block: "p,div,dl,ul,ol,form,address,blockquote,h1,h2,h3,h4,h5,h6,fieldset,hr,pre,", // XHTML1.x block tag
+  _display_buggy: uu.ua("display:table") ? "" : "table,caption,tr,td,th,tbody,thead,tfoot,col,colgroup,", // style.display用機能不全リスト(主にIE6,IE7用)
+  _display_table: !uu.ua("display:table") ? {} : { // style.display を設定する上で特別な配慮が必要な要素の一覧
+                      table:"table",caption:"table-caption",tr:"table-row",th:"table-cell",td:"table-cell",thead:"table-header-group",
+                      tbody:"table-row-group",tfoot:"table-footer-group",col:"table-column",colgroup:"table-column-group" }
 });
-// --- CSS::getter/setter::CrossBrowser ---
+// --- CSS::getter/setter::Override ---
 uu.ua.ie && uu.mix(uu.css, {
-  opacity:  function(elm) {
-              return elm.filters.alpha ? uupf(elm.style.opacity) : 1.0;
-            },
-  backgroundImage:
-            function(elm) {
-              var url = elm.style.backgroundImage || elm.currentStyle.backgroundImage, m;
-              if (!url) { return "none"; }
-              m = url.match(/^url\((.*)\)$/);
-              return !m ? "none" : m[1].replace(/["']/g, ""); // trim quote
-            },
+  opacity:  function(elm) { return elm.filters.alpha ? uupf(elm.style.opacity) : 1.0; },
   rect:     function(elm) {
               var cs = uucs(elm, ""), x = cs.left, y = cs.top, w = cs.width, h = cs.height;
               w = (w === "auto") ? elm.clientWidth  : uupf(w);
@@ -882,18 +739,13 @@ uu.ua.ie && uu.mix(uu.css, {
               opa = uupf(opa);
               opa = (opa > 1) ? 1 : (opa < 0.001) ? 0 : opa;
               elm.style.opacity = uupf(opa); // uu.css.opacity()で値を取得できるようにしておく
-              if (elm.filters.alpha) {
-                elm.filters.alpha.opacity = uupf(opa) * 100;
-                return;
-              }
-              elm.style.filter += " alpha(opacity=" + (uupf(opa) * 100) + ")";
-              elm.style.zoom = elm.style.zoom || "1.0";
+              elm.filters.alpha ? (elm.filters.alpha.opacity = uupf(opa) * 100)
+                                : (elm.style.filter += " alpha(opacity=" + (uupf(opa) * 100) + ")",
+                                   elm.style.zoom = elm.style.zoom || "1.0"); // force "hasLayout"
             },
   toPixel:  function(elm, val, cssProp /* = "" */) {
               if (!val) { return 0; }
-              if (!isNaN(val) || val.lastIndexOf("px") !== -1) {
-                return uupf(val); // 3,"3","3px" なら 3 を返す
-              }
+              if (!isNaN(val) || val.lastIndexOf("px") !== -1) { return uupf(val); } // 3,"3","3px" なら 3 を返す
               if (val === "auto") {
                 switch (cssProp || "") {
                 case "width":  return elm.clientWidth;
@@ -908,7 +760,7 @@ uu.ua.ie && uu.mix(uu.css, {
               return rv; // pixel value
             }
 });
-(uu.ua.opera && !uu.ua.kestrel) && uu.mix(uu.css, { // Opera9.2x
+uu.ua.opera && !uu.ua.opera95 && uu.mix(uu.css, { // Opera9.2x
   rect:     function(elm) {
               var cs = uucs(elm, ""), x = cs.left, y = cs.top, w = cs.width, h = cs.height, F = uupf;
               w = (w === "auto") ? elm.clientWidth  : F(w);
@@ -928,15 +780,15 @@ uu.ua.ie && uu.mix(uu.css, {
 // --- Element ---
 uu.mix(uu.element = function() {}, {
   // uu.element.rect - Get element rect(abs) - 要素の絶対位置とサイズを取得
-  rect:     function(elm) {
-              var e = elm, x = 0, y = 0;
+  rect:     function(elm) { // for Firefox2, Firefox3
+              var e = elm, x = 0, y = 0, vp = uu.viewport.rect();
               while (e) {
                 x += e.offsetLeft || 0;
                 y += e.offsetTop  || 0;
                 e = e.offsetParent;
               }
-              return { x:  x, // offset from viewport with scroll(abs x) - 画面左上からのオフセット(スクロール量を含む)
-                       y:  y, // offset from viewport with scroll(abs y) - 画面左上からのオフセット(スクロール量を含む)
+              return { x:  x + vp.sw, // offset from viewport with scroll(abs x) - 画面左上からのオフセット(スクロール量を含む)
+                       y:  y + vp.sh, // offset from viewport with scroll(abs y) - 画面左上からのオフセット(スクロール量を含む)
                        w:  elm.clientWidth,    // padding + width
                        h:  elm.clientHeight,   // padding + height
                        ow: elm.offsetWidth,    // border + padding + width
@@ -952,9 +804,7 @@ uu.mix(uu.element = function() {}, {
                 e = e.offsetParent;
                 if (e) {
                   r = uu.css.get(e, "position"); // ParentHasLayout element = value of position is "relative" or "absolute".
-                  if (r === "relative" || r === "absolute") {
-                    break;
-                  }
+                  if (r === "relative" || r === "absolute") { break; }
                 }
               }
               return { x:  x, // offset from ParentHasLayout element(rel x) - ParentHasLayout要素からのオフセット
@@ -968,16 +818,12 @@ uu.mix(uu.element = function() {}, {
   offsetFromAncestor:
             function(elm, ancestor) {
               var e = elm, x = 0, y = 0;
-              function isRoot(e) { return (e === ancestor || e === uud); }
-
-              if (isRoot(e)) {
-                return { x: 0, y: 0 };
-              }
+              if (e === ancestor || e === uud) { return { x: 0, y: 0 }; }
               while (e) {
                 x += e.offsetLeft || 0;
                 y += e.offsetTop  || 0;
                 e = e.offsetParent;
-                if (isRoot(e)) { break; }
+                if (e === ancestor || e === uud) { break; }
               }
               return { x: x, y: y };
             },
@@ -1039,9 +885,7 @@ uu.mix(uu.viewport = function() {}, {
   // uu.viewport.setVirtualPadding - Set PaddingHash( { top, right, bottom, left } )
   // 各要素は省略可能
   setVirtualPadding:
-            function(padding) {
-              uu.mix(uu.viewport._padding, padding);
-            },
+            function(padding) { uu.mix(uu.viewport._padding, padding); },
   _padding: { top: 0, right: 0, bottom: 0, left: 0 }
 });
 uu.ua.ie && uu.mix(uu.viewport, {
@@ -1057,29 +901,29 @@ uu.ua.ie && uu.mix(uu.viewport, {
 uu.mix(uu, {
   // uu.module - Load Module - モジュールの読み込み
   module:   function(path /* = "" */, module, fn /* = undefined */) {
+              module = uu.module._filter(module);
               var me = uu.module, src = me._build(path || uu.config.modulePath, module),
                   mods = uu.indexes(src), run = 0;
               fn = fn || uu.mute;
-
-              if (!mods.length || me.already(module)) { // already
-                fn();
-                return;
-              }
+              if (!mods.length || me.already(module)) { fn(); return; } // already
               function IE(v, i) {
                 me._inject(i, v, {
                   onreadystatechange: function() {
                     if (!/loaded|complete/.test(this.readyState)) { return; }
                     if (!me.already(this.uuModule)) { me._reload(this); return; }
-                    if (me.already(mods)) { !run++ && fn(); }
+                    if (me.already(mods)) { !run++ && DEL(i) && fn(); }
                   }
                 });
               }
               function STD(v, i) { // v = "{url1};{url2};..."  i = "dev"
                 me._inject(i, v, {
-                  onload:  function() { if (me.already(mods)) { !run++ && fn(); } },
+                  onload:  function() { if (me.already(mods)) { !run++ && DEL(i) && fn(); } },
                   onerror: function() { me._reload(this); }
                 });
               }
+              function DEL(m) { if (m in me._remain) { delete me._remain[m]; uu.diet(me._remain); }
+                                return 1; }
+              me._remain = me._remain.concat(mods);
               uu.forEach(src, uu.ua.ie ? IE : STD);
             }
 });
@@ -1090,7 +934,7 @@ uu.mix(uu.module, {
                 if (v.indexOf(".") === -1) {
                   return v in uu.module;
                 }
-                // "parent.child" format support
+                // "namespace.submodule" format support
                 var rv = 1, e = uu.module, ary = v.split("."), i = 0, sz = ary.length;
                 for (; i < sz; ++i) {
                   if (ary[i] in e) { e = e[ary[i]]; continue; }
@@ -1102,24 +946,23 @@ uu.mix(uu.module, {
             },
   // uu.module.loadSync - Load Module(Synchronized) - モジュールの同期読み込み
   loadSync: function(path /* = "" */, module, fn /* = undefined */) {
+              module = uu.module._filter(module);
               var me = uu.module, src = me._build(path || uu.config.modulePath, module),
                   mods = uu.indexes(src), node, last, tick = 0;
               fn = fn || uu.mute;
-
-              if (!mods.length || me.already(module)) { // already
-                fn();
-                return;
-              }
-
+              if (!mods.length || me.already(module)) { fn(); return; } // already 
+              me._remain = me._remain.concat(mods);
               last = mods.shift();
               node = me._inject(last, src[last]);
-
+              function DEL(m) { if (m in me._remain) { delete me._remain[m]; uu.diet(me._remain); }
+                                return 1; }
               function DELAY() {
                 if ((tick += 100) > me.loadSyncTimeout) {
                   node = me._reload(node, false);
                   tick = 0;
                 }
                 if (me.already(last)) {
+                  DEL(last);
                   if (!mods.length) { fn(); return -1; } // complete
                   last = mods.shift();
                   node = me._inject(last, src[last]);
@@ -1127,12 +970,25 @@ uu.mix(uu.module, {
                 }
                 return 100;
               }
-
               uu.vtmMidSpeed.set(0, DELAY);
             },
   // uu.module.loadSyncTimeout - loadSync timeout
-  loadSyncTimeout:
-            2000,
+  loadSyncTimeout: 2000,
+  _remain:  [], // この配列が空ならModuleReady状態が成立する
+  // ブラウザプリフィクス名を持つモジュールファイルは、該当するブラウザ以外では無視する(読み込まない)
+  _filter:  function(module /* taxing */) {
+              var mod = uu.notax(module);
+              function F(moduleArray, regex) {
+                function FF(v) { return regex.test(v) ? false : true; }
+                return moduleArray.filter(FF);
+              }
+              if (uu.ua.ie)     { return F(mod, /^(gecko|opera|v8|webkit)+/i); }
+              if (uu.ua.v8)     { return F(mod, /^(ie|gecko|opera|webkit)+/i); }
+              if (uu.ua.gecko)  { return F(mod, /^(ie|opera|v8|webkit)+/i); }
+              if (uu.ua.opera)  { return F(mod, /^(ie|gecko|v8|webkit)+/i); }
+              if (uu.ua.webkit) { return F(mod, /^(ie|gecko|opera|v8)+/i); }
+              return mod; // ModuleArray( [ module, module. ... ] )
+            },
   _build:   function(path, module) { // build path
               var rv = {}, base = uu.url.base();
               path = uu.notax(path);
@@ -1171,13 +1027,9 @@ uu.mix(uu.module, {
 // --- Event ---
 uu.mix(uu.event = function() {}, {
   // uu.event.closure - Create event closure - イベントクロージャを生成
-  closure:  function(me) {
-              return uu.ua.ie ? function(e) { me.handleEvent(e); } : me;
-            },
-  // uu.event.target - Detect event target - イベント発生源を取得
-  target:   function(evt) { // for Firefox, Safari, Opera
-              return evt;
-            },
+  closure:  function(me) { return uu.ua.ie ? function(e) { me.handleEvent(e); } : me; },
+  // uu.event.target - Detect event target - イベント発生源を取得 - for Firefox, Safari, Opera
+  target:   function(evt) { return evt; },
   // uu.event.set - Add event handler - イベントハンドラを設定
   set:      function(me, elm, type, capture /* = false */) {
               uu.event._impl(me, elm, type, capture || 0, 1);
@@ -1196,13 +1048,9 @@ uu.mix(uu.event = function() {}, {
               (cancel === void 0 || cancel) && evt.preventDefault();
             },
   // uu.event.toType - Convert DOM Lv0 event type - DOM Lv0イベントタイプに変換
-  toType:   function(evt) {
-              return evt.type;
-            },
+  toType:   function(evt) { return evt.type; },
   // uu.event.toDOMType - Convert DOM event type - DOMイベントタイプに変換
-  toDOMType:function(type) {
-              return type;
-            },
+  toDOMType:function(type) { return type; },
   // uu.event.keyState - Get key state - キーの状態を取得
   keyState: function(evt) {
               return { alt:  evt.altKey,  shift: evt.shiftKey, // alt = Option(Mac)
@@ -1249,43 +1097,37 @@ uu.mix(uu.event = function() {}, {
 //              v.me((++v.idx >= v.max) ? (v.idx = 0) : v.idx);
 //            },
   _impl:    function(me, elm, type, capture, mode) { // mode = set:0x1, unset:0x2, toggle:0x3
-              type = uu.notax(type);
-
+              var e = elm, c = capture, m = mode, ie = uu.ua.ie, ev = uu.event, eid;
               if ("handleEvent" in me) { me = me._eventClosure; }
 
-              (elm === void 0 || !type.length || me === void 0) &&
-                  uu.die("uu.event._impl(elm or type or me) is empty");
-
-              if (!("uuEventID" in elm)) { elm.uuEventID = []; } // add a non-standard proprty
-
-              if (uu.ua.ie && capture) { uu.event._captIE(elm, me, mode); }
-
-              type.forEach(function(_type) {
-                _type = uu.event.toDOMType(_type);
-                var eid = uu.event._db_find(elm, _type, me, capture);
-                (!eid && mode & 0x1) && uu.event._set(elm, _type, me, capture);
-                ( eid && mode & 0x2) && uu.event._unset(elm, _type, me, capture, eid);
+              (me === void 0 || e === void 0 || !type) && uu.die("uu.event._impl(elm/type/me) bad arg");
+              !("uuEventID" in e) && (e.uuEventID = []); // add a non-standard proprty
+              if (ie && c && "setCapture" in e) {
+                eid = ev._find(e, "losecapture", me, 1);
+                if (!eid && m & 0x1) {
+                  e.setCapture(), ev._set(e, "losecapture", me, 1), e.attachEvent("onlosecapture", me);
+                } else if (eid && m & 0x2) {
+                  e.releaseCapture(), ev._unset(eid, e, "losecapture"), e.detachEvent("onlosecapture", me);
+                }
+              }
+              uu.notax(type).forEach(function(v) {
+                v = ev.toDOMType(v), eid = ev._find(e, v, me, c);
+                (!eid && m & 0x1) && (ev._set(e, v, me, c), ie ? e.attachEvent("on" + v, me)
+                                                               : e.addEventListener(v, me, c));
+                ( eid && m & 0x2) && (ev._unset(eid, e, v), ie ? e.detachEvent("on" + v, me)
+                                                               : e.removeEventListener(v, me, c));
               });
             },
-  _set:     function(e, t, f, c) {
-              uu.event._db_set(e, t, f, c);
-              e.addEventListener(t, f, c);
-            },
-  _unset:   function(e, t, f, c, i) {
-              uu.event._db_unset(i, e, t);
-              e.removeEventListener(t, f, c);
-            },
-  _db_set:  function(elm, type, fn, capture) {
+  _set:     function(elm, type, fn, capture) {
               var eid = uu.uid("event"), typecap = type + (capture ? "1" : "0");
               uu.event._db[eid] = [elm, typecap, fn];
               elm.uuEventID.push(eid);
             },
-  _db_unset:
-            function(eid, elm, type) {
+  _unset:   function(eid, elm, type) {
               elm.uuEventID.splice(elm.uuEventID.indexOf(eid), 1);
               delete uu.event._db[eid];
             },
-  _db_find: function(elm, type, fn, capture) {
+  _find:    function(elm, type, fn, capture) {
               var v, i = 0, eid, sz = elm.uuEventID.length, typecap = type + (capture ? "1" : "0");
               for (; i < sz; ++i) {
                 eid = elm.uuEventID[i];
@@ -1298,105 +1140,71 @@ uu.mix(uu.event = function() {}, {
             },
   _db:      { /* unique-id: [elm, type/cap, fn], ... */ } // idをキーとしたデータ構造
 });
-// --- Event::CrossBrowser ---
+// --- Event::Override ---
 uu.ua.gecko && uu.mix(uu.event, {
-  toType:    function(evt) {
-              return (evt.type === "DOMMouseScroll") ? "mousewheel" : evt.type;
-            },
-  toDOMType:
-            function(type) {
-              return (type === "mousewheel") ? "DOMMouseScroll" : type;
-            }
+  toType:   function(evt) { return(evt.type==="DOMMouseScroll")?"mousewheel":evt.type; },
+  toDOMType:function(type) { return(type==="mousewheel")?"DOMMouseScroll":type; }
 });
 uu.ua.opera && uu.mix(uu.event, {
-  mousePos: function(evt) {
-              return { x:  evt.pageX,   y:  evt.pageY,
-                       ox: evt.offsetX, oy: evt.offsetY,
-                       cx: evt.clientX, cy: evt.clientY };
-            }
+  mousePos: function(evt) { return {x:evt.pageX,y:evt.pageY,ox:evt.offsetX,oy:evt.offsetY,cx:evt.clientX,cy:evt.clientY}; }
 });
 uu.ua.ie && uu.mix(uu.event, {
-  toType:   function(evt) {
-              return (evt.type.indexOf("losecapture") >= 0) ? "mouseup" : evt.type;
-            },
-  target:   function(evt) {
-              var s = evt.srcElement, f = evt.fromElement;
-              return { target: s, currentTarget: s, relatedTarget: s === f ? evt.toElement : f };
-            },
-  stop:     function(evt, cancelDefault /* = true */) {
-              evt.cancelBubble = true;
-              if (cancelDefault === void 0 || cancelDefault) {
-                evt.returnValue = false;
-              }
-            },
-  mousePos: function(evt) {
-              var vp = uu.viewport.rect();
-              return { x:  evt.clientX + vp.sw, y: evt.clientY + vp.sh,
-                       ox: evt.offsetX,         oy: evt.offsetY,
-                       cx: evt.clientX,         cy: evt.clientY };
-            },
-  _set:     function(e, t, f, c) {
-              uu.event._db_set(e, t, f, c);
-              e.attachEvent("on" + t, f);
-            },
-  _unset:   function(e, t, f, c, i) {
-              uu.event._db_unset(i, e, t);
-              e.detachEvent("on" + t, f);
-            },
-  _captIE:  function(elm, fn, mode) {
-              if ("setCapture" in elm) {
-                var eid = uu.event._db_find(elm, "losecapture", fn, 1);
-                if (!eid && mode & 0x1) {
-                  elm.setCapture();
-                  uu.event._set(elm, "losecapture", fn, 1); // begin capture
-                } else if (eid && mode & 0x2) {
-                  elm.releaseCapture();
-                  uu.event._unset(elm, "losecapture", fn, eid); // end capture
-                }
-              }
-            }
+  toType:   function(evt) { return(evt.type.indexOf("losecapture")>=0)?"mouseup":evt.type; },
+  target:   function(evt) { var s=evt.srcElement,f=evt.fromElement;return{target:s,currentTarget:s,relatedTarget:s===f?evt.toElement:f}; },
+  stop:     function(evt, cancel) { evt.cancelBubble=true;(cancel===void 0||cancel)&&(evt.returnValue=false); },
+  mousePos: function(evt) { var vp=uu.viewport.rect();return{x:evt.clientX+vp.sw,y:evt.clientY+vp.sh,ox:evt.offsetX,oy:evt.offsetY,cx:evt.clientX,cy:evt.clientY}; }
 });
 
 // --- Ready ---
 uu.mix(uu, {
   // uu.ready - Ready event handler - Readyイベントハンドラを設定
-  ready:    function(fn, id /* = "D" */) {
-              id = id || "D";
-              var me = uu.ready;
-              if (me._run[id]) { fn(); return; }
-
-              function DELAY(n, title) { return me.already("C") ? (me._done(title), -1) : 10; }
-
+  ready:    function(fn, id /* = "DM" */) {
+              function NC(n, title) { return me.already("C") ? (me._done(title), -1) : uu.ua.minclock; }
+              function NM(n, title) { return me.already("M") ? (me._done(title), -1) : uu.ua.minclock; }
+              var me = uu.ready, vtm = uu.vtmHighSpeed;
+              id = id || "DM";
+              id = (id in me._sani) ? me._sani[id] : id; // id sanitize
+              if (me._run[id]) { fn(); return; } // 状態成立済みなら即座にfnをコールバックする
               me._db[id].push(fn);
               switch (id) {
               case "D":  me._dom(fn, id); break;
+              case "M":  me._module(fn, id); break;
               case "W":  uu.event.set(function() { me._done("W"); }, uuw, "load"); break;
               case "C":  (uu.ua.ie || uu.ua.opera) ? me._canvas(fn, id) : me._done("C"); break;
-              case "DC": me(function() { uu.vtmHighSpeed.set(0, DELAY, -1, "DC"); }, "D"); break;
-              case "WC": me(function() { uu.vtmHighSpeed.set(0, DELAY, -1, "WC"); }, "W"); break;
+              case "DM": me(function() { vtm.set(0, NM, -1, "DM");  }, "D" ); break; // "D"が成立したら"M"の成立を待つ
+              case "DC": me(function() { vtm.set(0, NC, -1, "DC");  }, "D" ); break; // "D"が成立したら"C"の成立を待つ
+              case "DMC":me(function() { vtm.set(0, NC, -1, "DMC"); }, "DM"); break; // "DM"が成立したら"C"の成立を待つ
+              case "MW": me(function() { vtm.set(0, NM, -1, "MW");  }, "W" ); break; // "W"が成立したら"M"の成立を待つ
+              case "MWC":me(function() { vtm.set(0, NC, -1, "MWC"); }, "MW"); break; // "MW"が成立したら"C"の成立を待つ
+              case "WC": me(function() { vtm.set(0, NC, -1, "WC");  }, "W" ); break; // "W"が成立したら"C"の成立を待つ
               case "U":  uu.event.set(function() { me._done("U"); }, uuw, "beforeunload,unload"); break;
               case "A":  (uuw.XMLHttpRequest || uuw.ActiveXObject) && me._done("A"); break;
               case "J":  me._done("J"); break;
+              default: uu.die("uu.ready(id=%s) unsupported", id);
               }
             }
 });
 uu.mix(uu.ready, {
   // uu.ready.already - Ready state - Ready状態の確認
-  already:  function(id /* = "D" */) { // D, W, C, DC, WC, U
-              return uu.ready._run[id || "D"] > 0;
+  already:  function(id /* = "DM" */) {
+              return uu.ready._run[id || "DM"] > 0;
             },
   _done:    function(id) { !uu.ready._run[id]++ &&
                                (uu.ready._db[id].forEach(uu.ready._call), uu.ready._db[id] = []); },
-  _call:    function(fn) { fn(); },
+  _call:    function(fn) { fn(); }, // hook(break) point
   _dom:     function(fn, id) {
               if (uu.ua.gecko || uu.ua.opera) { uud.addEventListener("DOMContentLoaded", D, false); }
-              else if (uu.ua.webkit && uud.readyState) { uu.vtmHighSpeed.set(0, WK); }
+              else if (uu.ua.webkit && uud.readyState) { uu.vtmHighSpeed.set(0, WEBKIT); }
               else if (uu.ua.ie && uud.readyState) { uu.vtmHighSpeed.set(0, IE); }
               else { uu.event.set(D, uuw, "load"); } // for legacy browser
               function D() { uu.ready._done("D"); }
-              function WK() { return /loaded|complete/.test(uud.readyState) ? (D(), -1) : 10; }
+              function WEBKIT() { return /loaded|complete/.test(uud.readyState) ? (D(), -1) : uu.ua.minclock; }
               // http://javascript.nwbox.com/IEContentLoaded/
-              function IE() {try{uud.documentElement.doScroll("up");}catch(e){return 10;}D();return-1;}
+              function IE() {try{uud.documentElement.doScroll("up");}catch(e){return uu.ua.minclock;}D();return-1;}
+            },
+  _module:  function(fn, id) {
+              function DELAY() { return (uu.module._remain.length) ? (uu.ready._done("M"), -1) : uu.ua.minclock; }
+              uu.vtmHighSpeed.set(0, DELAY);
             },
   _canvas:  function(fn, id) {
               var tag = uu.toArray(uu.tag("canvas"));
@@ -1405,15 +1213,16 @@ uu.mix(uu.ready, {
               function DELAY() { return READY() ? (uu.ready._done("C"), -1) : 40; }
               function READY() { return tag.every(function(v) { return uu.isF(v.getContext); }); }
             },
-  _run:     { D: 0, W: 0, C: 0, DC: 0, WC: 0, U: 0, A: 0, J: 0 },
-  _db:      { D: [], W: [], C: [], DC: [], WC: [], U: [], A: [], J: [] }
+  _run:     { D: 0, M: 0, W: 0, C: 0, DM: 0, DC: 0, DMC: 0, MW: 0, MWC: 0, WC: 0, U: 0, A: 0, J: 0 },
+  _db:      { D: [], M: [], W: [], C: [], DM: [], DC: [], DMC: [], MW: [], MWC: [], WC: [], U: [], A: [], J: [] },
+  _sani:    { MD: "DM", CD: "DC", DCM: "DMC", MDC: "DMC", MCD: "DMC", CDM: "DMC", CMD: "DMC", WM: "MW",
+              MCW: "MWC", WMC: "MWC", WCM: "MWC", CMW: "MWC", CWM: "MWC", CW: "WC" }
 });
 
 // --- Request ---
 uu.mix(uu.request = function() {}, {
   // uu.request.callbackFilter - Default value of the callback filter - コールバックフィルタのデフォルト値
-  callbackFilter:
-            0x2,
+  callbackFilter: 0x2,
   // uu.request.timeout - Request timeout(zero does not do timeout) - タイムアウト時間(単位:ms)(0でタイムアウトしない)
   timeout:  10000,
   // uu.request.header - Request Header - リクエストヘッダ
@@ -1470,7 +1279,6 @@ uu.mix(uu, {
               (ifMod && (url in rq._cache)) && HEADER(RFCDATE(rq._cache[url]), "If-Modified-Since");
               (cf & 1) && fn(uid, 1, "", 0, url, 1);
               xhr.send(data);
-
               rq.timeout && uu.vtmHighSpeed.set(function() { xhr.abort(); FAIL(408); }, rq.timeout, 1); // 408 "Request Time-out"
             },
   // uu.json - JSONP async request - 非同期リクエスト
@@ -1488,9 +1296,7 @@ uu.mix(uu, {
               node._run = 0;
 
               rq._fn[uid] = function(json, state) {
-                              function SUICIDE() {  uuhd.removeChild(node);
-                                                    node.src = "";
-                                                    delete rq._fn[uid]; }
+                              function SUICIDE() { uuhd.removeChild(node); node.src = ""; delete rq._fn[uid]; }
                               if (node._run++) { return; }
                               if (json) { (cf & 2) && fn(uid, 2, json, 200, url, 1); } // 200 OK
                                    else { FAIL(state || 404); } // 404 "Not Found", 実際には他のエラーかもしれないが知る手段がない
@@ -1546,11 +1352,10 @@ uu.mix(uu, {
                 case "x": v = I(T(idx)); !N(v) && (v = P(t, U(v).toString(16), f)); break;
                 case "X": v = I(T(idx)); !N(v) && (v = P(t, U(v).toString(16).toUpperCase(), f)); break;
                 case "f": v = F(T(idx)).toFixed(p); break;
-                case "c": w = 0; v = T(idx); v = (typeof v === "number") ? C(v) : NaN; break;
+                case "c": w = 0; v = T(idx); v = (typeof v === "number") ? C(v) : ""; break;
                 case "s": /* w = 0; */ v = T(idx).toString(); p && (v = v.substring(0, p)); break;
                 case "%": v = "%"; break;
                 }
-                if (N(v)) { v = v.toString(); f = ""; } // "NaN" does reset flag
                 return (v.length < w) ? PAD(t, v, f || " ", w - v.length) : v;
               }
               function PAD(t, v, f, sz) {
@@ -1566,15 +1371,13 @@ uu.mix(uu, {
               return format.replace(/%(?:([\d]+)\$)?(#|0)?([\d]+)?(?:\.([\d]+))?(l)?([%iduoxXfcs])/g, FORMAT);
             },
   // uu.trim - Trim both(left and right) - 文字列の両端の空白文字を除去
-  trim:     function(str) {
-              return str.replace(/^[\s]*|[\s]*$/g, "");
-            },
+  trim:     function(str) { return str.replace(/^[\s]*|[\s]*$/g, ""); },
   // uu.notax - Receive JointedString, StringArray and String, return an Array
   //          - 結合文字列, 文字列の配列, 文字列を受け取り、配列を返す
   notax:    function(tax, param /* = { sep: ",", fn: undefined, trim: true } */) {
               if (param === void 0) { // quickie
                 return (tax instanceof Array) ? tax :
-                       (tax.indexOf(",") === -1) ? [tax] : tax.split(",").map(uu.trim);
+                       (tax.indexOf(",") > -1) ? tax.split(",").map(uu.trim) : tax ? [tax] : [];
               }
               param = uu.mix.param(param || {}, { sep: ",", fn: uu.echo, trim: true });
               !uu.isS(tax) && uu.die("uu.notax(tax=%s)", tax);
@@ -1585,11 +1388,7 @@ uu.mix(uu, {
               });
             },
   // uu.toPair - Make Hash( { key: value } ) from key and value - key, value から Hash( { key: value } )を生成
-  toPair:   function(key, value) {
-              var rv = {};
-              rv[key] = value;
-              return rv;
-            },
+  toPair:   function(key, value) { var rv = {}; rv[key] = value; return rv; },
   // uu.toHash - Make Hash from Array and FakeArray - 配列,擬似配列をHash化
   toHash:   function(ary) {
               var rv = {}, i = 0, sz = ary.length, v;
@@ -1633,13 +1432,7 @@ uu.mix(uu, {
             },
   // uu.converse - Return Hash which replaced value with key of Hash
   //             - Hashのkeyとvalueを入れ替えたHashを返す
-  converse: function(hash) {
-              var rv = {};
-              uu.forEach(hash, function(v, i) {
-                rv[v] = i;
-              });
-              return rv;
-            },
+  converse: function(hash) { var rv={};uu.forEach(hash,function(v,i){rv[v]=i;});return rv; },
   // uu.size - Length of the Hash/Array/FakeArray - Hash/配列/擬似配列の要素数を返す
   size:     function(mix) {
               var rv = 0, i;
@@ -1689,12 +1482,12 @@ uu.mix(uu, {
             },
   // uu.delay - Lazy evaluation - 遅延評価
   delay:    function(fn, delay /* = 0ms */) {
-              return uust(fn, delay || 0);
+              var tmid = uuw.setTimeout(function() {
+                clearTimeout(tmid); tmid = 0; fn();
+              }, delay || 0);
             },
   // uu.time - Get current time - 現在時刻を取得
-  time:     function() {
-              return (new Date()).getTime();
-            },
+  time:     function() { return (new Date()).getTime(); },
   // uu.isU, uu.isA, uu.isFA, uu.isE, uu.isF, uu.isN, uu.isB, uu.isS - judge types
   isU:      function(mix) { return mix === void 0; },
   isA:      function(mix) { return mix instanceof Array; },
@@ -1705,9 +1498,7 @@ uu.mix(uu, {
   isB:      function(mix) { return typeof mix === "boolean"; },
   isS:      function(mix) { return typeof mix === "string"; },
   // uu.die - Critical error handler
-  die:      function(fmt, p1, p2) {
-              throw TypeError(uu.sprintf(fmt, p1, p2));
-            },
+  die:      function(fmt, p1, p2) { var err = uu.sprintf(fmt, p1, p2); throw TypeError(err); },
   // uu.no - Every return false
   no:       function()    { return false; },
   // uu.echo - Every return first argument
@@ -1718,61 +1509,28 @@ uu.mix(uu, {
 uu.uid._count = 0;
 
 // --- Log ---
-uu.mix(uu.log = function(fmt /*, arg, ... */) { uuco && uuco.log.apply(this, arguments); }, {
-  debug:    function(fmt /*, arg, ... */) { uuco && uuco.debug.apply(this, arguments); },
-  error:    function(fmt /*, arg, ... */) { uuco && uuco.error.apply(this, arguments); },
-  warn:     function(fmt /*, arg, ... */) { uuco && uuco.warn.apply(this, arguments); },
-  info:     function(fmt /*, arg, ... */) { uuco && uuco.info.apply(this, arguments); },
-  dir:      function() { uuco && uuco.inspect.apply(this, arguments); },
-  clear:    function() { uuco && uuco.clear(); }
+uu.mix(uu.log = function(fmt /*, arg, ... */) { uuw.firebug && uuw.console.log.apply(this, arguments); }, {
+  debug:    function(fmt /*, arg, ... */) { uuw.firebug && uuw.console.debug.apply(this, arguments); },
+  error:    function(fmt /*, arg, ... */) { uuw.firebug && uuw.console.error.apply(this, arguments); },
+  warn:     function(fmt /*, arg, ... */) { uuw.firebug && uuw.console.warn.apply(this, arguments); },
+  info:     function(fmt /*, arg, ... */) { uuw.firebug && uuw.console.info.apply(this, arguments); },
+  dir:      function() { uuw.firebug && uuw.console.inspect.apply(this, arguments); },
+  clear:    function() { uuw.firebug && uuw.console.clear(); },
+  hex:      function() {},
+  set:      function() {}
 });
 
 // --- CrossBrowser ---
-uu.mix.param(uuap, { // uuap is Array.prototype alias
-  // Array.indexOf - Returns the first index at which a given element can be found in the array, or -1 if it is not present
-  //               - 配列の先頭から値を検索し最初のindexを返す。無ければ-1を返す
-  indexOf:  function(value, index /* = 0 */) {
-              var sz = this.length;
-              index = index || 0, index = (index < 0) ? index + sz : index;
-              for (; index < sz; ++index) {
-                if (index in this && this[index] === value) { return index; }
-              }
-              return -1;
-            },
-  // Array.lastIndexOf - Returns the last index at which a given element can be found in the array, or -1 if it is not present. The array is searched backwards, starting at fromIndex
-  //                   - 配列の後方から値を検索し最初のindexを返す。無ければ-1を返す
-  lastIndexOf:
-            function(value, index /* = this.length */) {
-              var sz = this.length;
-              index = (index < 0) ? index + sz : sz - 1;
-              for (; index > -1; --index) {
-                if (index in this && this[index] === value) { return index; }
-              }
-              return -1;
-            }
+uu.mix.param(Array.prototype, {
+  indexOf:    function(value, index) { var v=value,i=index||0,sz=this.length;i=(i<0)?i+sz:i;for(;i<sz;++i){if(i in this&&this[i]===v){return i;}}return -1; },
+  lastIndexOf:function(value, index) { var v=value,i=index,sz=this.length;i=(i<0)?i+sz:sz-1;for(;i>-1;--i){if(i in this&&this[i]===v){return i;}}return -1; }
 });
 uu.ua.gecko && !HTMLElement.prototype.outerHTML && (function() {
-  HTMLElement.prototype.__defineGetter__("outerHTML", function() {
-              var r = uud.createRange(), tub = uud.createElement("div");
-              r.selectNode(this);
-              tub.appendChild(r.cloneContents());
-              return tub.innerHTML;
-            });
-  HTMLElement.prototype.__defineSetter__("outerHTML", function(html) {
-              var r = uud.createRange(), f;
-              r.setStartBefore(this);
-              f = r.createContextualFragment(html);
-              this.parentNode.replaceChild(f, this);
-            });
-  HTMLElement.prototype.__defineGetter__("innerText", function() {
-              return this.textContent;
-            });
-  HTMLElement.prototype.__defineSetter__("innerText", function(text) {
-              while(this.hasChildNodes()) {
-                this.removeChild(this.lastChild);
-              }
-              this.appendChild(uud.createTextNode(text));
-            });
+  var p = HTMLElement.prototype;
+  p.__defineGetter__("outerHTML", function()     { var r=uud.createRange(),tub=uud.createElement("div");r.selectNode(this);tub.appendChild(r.cloneContents());return tub.innerHTML; });
+  p.__defineSetter__("outerHTML", function(html) { var r=uud.createRange(),f;r.setStartBefore(this);f=r.createContextualFragment(html);this.parentNode.replaceChild(f,this); });
+  p.__defineGetter__("innerText", function()     { return this.textContent; });
+  p.__defineSetter__("innerText", function(text) { while(this.hasChildNodes()){this.removeChild(this.lastChild);}this.appendChild(uud.createTextNode(text)); });
 }());
 
 // --- Basic Modules ---
@@ -1788,30 +1546,20 @@ uu.module.url.prototype = {
   // uu.module.url.base, uu.url.base - Get base URL
   base:     function() {
               var me = this;
-              function F() {
-                var elm = uu.attr('script[@src*="uupaa.js"]', uuhd), lo = uuw.location;
-                return (!elm.length) ? me.dir(lo.protocol + "//" + lo.pathname.replace(/\\/g, "/"))
-                                     : me.dir(me.abs(elm[0].src));
-              }
+              function F() { var elm = uu.attr('script[@src*="uupaa.js"]', uuhd), lo = uuw.location;
+                             return (!elm.length) ? me.dir(lo.protocol + "//" + lo.pathname.replace(/\\/g, "/"))
+                                                  : me.dir(me.abs(elm[0].src)); }
               return this.db.baseCache || (this.db.baseCache = F());
             },
   // uu.module.url.abs, uu.url.abs - Get absolute URL - 絶対URL化
   abs:      function(path) {
-              function ONTHEFLY(s) { var e = uud.createElement("div");
-                              e.innerHTML = '<a href="' + s + '" />';
-                              return e.firstChild.href; }
+              function ONTHEFLY(s) { var e=uud.createElement("div");e.innerHTML='<a href="'+s+'" />';return e.firstChild.href; }
               return /^(file|https|http)\:\/\//.test(path) ? path : ONTHEFLY(path);
             },
   // uu.module.url.dir, uu.url.dir - Extract scheme and directory part from URL - URLからスキームとディレクトリを取り出す
-  dir:      function(path) {
-              var sl = path.lastIndexOf("/") + 1;
-              return (!sl) ? "" : path.slice(0, sl);
-            },
+  dir:      function(path) { var sl=path.lastIndexOf("/")+1;return sl?path.slice(0, sl):""; },
   // uu.module.url.fileName, uu.url.fileName - Extract file-name and extension part from URL - URLからファイル名と拡張子を取り出す
-  fileName: function(path) {
-              var rv = path.split("/");
-              return rv[rv.length - 1];
-            },
+  fileName: function(path) { var rv=path.split("/");return rv[rv.length-1]; },
   // uu.module.url.query, uu.url.query - Parse QueryString - QueryStringのパース
   query:    function(qstr) {
               var rv = {}, F = uuw.decodeURIComponent;
@@ -1835,16 +1583,16 @@ uu.module.url.prototype = {
 uu.module.virtualTimer = uu.klass.kiss();
 uu.module.virtualTimer.prototype = {
   construct:
-            function(baseClock /* = 10ms */) {
-              uu.mix(this, { baseClock: baseClock || 10, tick: 0, baseTimerID: -1, dietLock: 0,
+            function(baseClock /* = uu.ua.minclock */) {
+              uu.mix(this, { baseClock: baseClock || uu.ua.minclock, tick: 0, baseTimerID: -1, dietLock: 0,
                              db: [ /* vtid: { next, fn, count, dfn, delay, loop, unset }, ... */ ] });
             },
   destruct: function() {
               this.suspend(-1); this.db = null;
             },
   // uu.module.virtualTimer.set - Regist VirtualTimer - 仮想タイマーを登録
-  set:      function(fn /* = uu.mute */, delay /* = 10 */, loop /* = 0 */, title /* = "unknown" */) {
-              fn = uu.isF(fn) ? fn : uu.isS(fn) ? new Function(fn) : uu.mute, delay = delay || 10;
+  set:      function(fn /* = uu.mute */, delay /* = uu.ua.minclock */, loop /* = 0 */, title /* = "unknown" */) {
+              fn = uu.isF(fn) ? fn : uu.isS(fn) ? new Function(fn) : uu.mute, delay = delay || uu.ua.minclock;
               var dfn = uu.isF(delay) ? delay : 0,
                   next = dfn ? dfn(0, title) : delay, vtid = this.db.length;
               if (next < 0) { return -2; }
@@ -1900,9 +1648,9 @@ uu.module.virtualTimer.prototype = {
               ++this.dietLock;
             },
   _impl:    function() {
-              var carry = this;
-              return uuw.setInterval(function() {
-                var me = carry, i = 0, sz = me.db.length, tick = me.tick += me.baseClock, r, db;
+              var me = this;
+              function VTM_RUNNER() {
+                var i = 0, sz = me.db.length, tick = me.tick += me.baseClock, r, db;
                 if (me.dietLock) {
                   me.db = me.db.filter(function(v) { return v.loop || v.next; });
                   me.dietLock = 0; // unlock
@@ -1923,7 +1671,8 @@ uu.module.virtualTimer.prototype = {
                     }
                   }
                 }
-              }, this.baseClock);
+              }
+              return uuw.setInterval(VTM_RUNNER, this.baseClock);
             }
 };
 
@@ -1936,15 +1685,15 @@ uu.module.messagePump.prototype = {
   construct:
             function() {
               var me = this;
-              function F() {
+              function MSGPUMP_RUNNER() {
                 if (!me.msg.length) { me.vtm.suspend(-1); return; } // self suspend
                 var e = me.msg.shift();
                 (e[0] in me.uid) && me.uid[e[0]].msgbox(e[1], e[2], e[3]); // (msg, param1, param2)
               }
               this.uid  = { /* msgbox_uid: msgbox_object, ... */ };
               this.msg  = [ /* num: [ id, msg, param1, param2], ... */ ];
-              this.vtm  = new uu.module.virtualTimer(10);
-              this.vtid = this.vtm.set(F, 10, -1, "MessagePump"); // タイマーは自前の物を使用
+              this.vtm  = new uu.module.virtualTimer(uu.ua.minclock);
+              this.vtid = this.vtm.set(MSGPUMP_RUNNER, uu.ua.minclock, -1, "MessagePump"); // タイマーは自前の物を使用
             },
   // uu.module.messagePump.set, uu.msg.set - Register the destination of the message - メッセージの送信先を登録
   set:      function(obj /* Object has uid property */) {
@@ -2028,7 +1777,7 @@ uu.module.customEvent.prototype = {
               var db = this.db.FONT_RESIZE;
 
               // フォントリサイズを監視
-              // spyの高さ変化 → uu.css.measure(false); で再計算 → メッセージをポスト
+              // spyの高さ変化 → uu.css.measure(false) で再計算 → メッセージをポスト
               function PEEK() {
                 var h = db.spy.offsetHeight;
                 if (db.spyHeight !== h) {
@@ -2078,7 +1827,7 @@ uu.module.agent.prototype = {
             },
   msgbox:   function(msg, p1, p2) {
               switch (msg) {
-              case UU.MSG_CHANGE_READY_STATE: // p1="W" or "D" or "C"
+              case UU.MSG_CHANGE_READY_STATE: // p1="W" or "D" or "C" or "M"
                 this._chainClassName();
                 break;
               }
@@ -2088,8 +1837,7 @@ uu.module.agent.prototype = {
               var m;
               uu.tag("*", uud.body).forEach(function(v) {
                 if (v.className) {
-                  m = (" " + v.className).match(/ js[\w\-]+/g);
-                  if (m) {
+                  if ( (m = (" " + v.className).match(/ js[\w\-]+/g)) ) { // (strict) guard
                     m.forEach(function(vv) {
                       uu.klass.evalWidgetChainedClassName(v, vv.substring(3)); // " jsxxx" -> "xxx"
                     });
@@ -2250,7 +1998,7 @@ uu.module.color.prototype = {
 
               switch (typeof r) {
               case "number":
-                return (g === void 0) ? H(r, 1) : { r: r, g: g, b: b, a: a || 1 };
+                return (g === void 0) ? H(r, 1) : { r: r, g: g, b: b, a: (a === void 0) ? 1 : a };
               case "string":
                 if (r.indexOf(" ") !== -1) { r = r.replace(/ /g, ""); }
                 if (r.charAt(0) === "#") {
@@ -2262,12 +2010,10 @@ uu.module.color.prototype = {
                 if (r in this._name) { // r = "violet"
                   return (name === "transparent") ? H(this._name[r], 0) : H(this._name[r], 1);
                 }
-                m = r.match(/rgba\(([\w\.%]+),([\w\.%]+),([\w\.%]+),([0-9\.]+)\)/);
-                if (m) {
+                if ( (m = r.match(/rgba\(([\w\.%]+),([\w\.%]+),([\w\.%]+),([0-9\.]+)\)/)) ) { // (strict) guard
                   return { r: D(m[1]), g: D(m[2]), b: D(m[3]), a: f(m[4]) };
                 }
-                m = r.match(/rgb\(([\w\.%]+),([\w\.%]+),([\w\.%]+)\)/);
-                if (m) {
+                if ( (m = r.match(/rgb\(([\w\.%]+),([\w\.%]+),([\w\.%]+)\)/)) ) { // (strict) guard
                   return { r: D(m[1]), g: D(m[2]), b: D(m[3]), a: 1 };
                 }
                 break;
@@ -2339,7 +2085,7 @@ uu.module.color.prototype = {
               }
               return MATRIX(); // RGBAHash( { r: 255, g: 255, b: 255, a: 1 } )
             },
-  // uu.module.color.ratio - Set Hue, Saturation and Value - 色相(H), 彩度(S), 明度(V)を設定
+  // uu.module.color.ratio - Arrangement Hue, Saturation and Value - 色相(H), 彩度(S), 明度(V)をアレンジ
   ratio:    function(hash, h /* = 0 */, s /* = 0 */, v /* = 0 */) { // hash = RGBAHash or HSVAHash // hsvには絶対値ではなく増減値を指定
               var rv = uu.mix({}, hash); // clone
               ("r" in hash) && (rv = this.rgba2hsva(rv)); // rgba to hsva
@@ -2380,10 +2126,10 @@ uu.module.color.prototype = {
  */
 uu.module.effect = uu.klass.singleton();
 uu.module.effect.prototype = {
-  speed:    { now: 1, quick: 250, fast: 400, mid: 600, slow: 2000 },
+  speed:    { now: 1, quick: 250, fast: 400, mid: 600, normal: 600, slow: 2000 },
   construct:
             function() {
-              this._vtm = new uu.module.virtualTimer(10);
+              this._vtm = new uu.module.virtualTimer(uu.ua.minclock);
               this._defaultSpeed = this.speed.mid;
               // リソースを抱えている要素と開放用関数の一覧
               this._hasResourceElement = [ /* [Element: deleteResourceFunction], ... */ ];
@@ -2427,7 +2173,7 @@ uu.module.effect.prototype = {
             },
   bullet:   function(elm, param /* = { speed, fn, x: 0, y: 0, w: 120, h: 30, keep: false, revert: false } */) {
               var me = this, pp = this._prepare(elm, uu.mix.param(param || {}, { x: 0, y: 0, w: 120, h: 30 })),
-                  rect = uu.css.show(elm, 1), d = 800 / (pp.speed / 10),
+                  rect = uu.css.show(elm, 1), d = 800 / (pp.speed / uu.ua.minclock),
                   x = rect.x, y = rect.y, w = rect.w, h = rect.h, dx, dy, dw, dh,
                   es = elm.style, vtid = 0, job = 0;
               function FIN() { me._vtm.unset(vtid); me._revert(elm, pp.revert); pp.fn(elm); }
@@ -2463,7 +2209,7 @@ uu.module.effect.prototype = {
                   es.height = h + "px";
                 }
               }
-              vtid = this._vtm.set(loop, 10, 800);
+              vtid = this._vtm.set(loop, uu.ua.minclock, 800);
             },
   puff:     function(elm, param /* = { speed, fn, keep: false, revert: false } */) {
               var me = this, pp = this._prepare(elm, param), run = 0, rect = uu.css.show(elm, 1);
@@ -2572,7 +2318,7 @@ uu.module.effect.prototype = {
               return uu.css.rect(elm);
             },
   _fade:    function(elm, revert, speed, fn, begin, end) { // fade - from begin to end
-              var R = this._revert, delta = 1 / (speed / 10), opa = begin, out = (begin > end) ? 1 : 0;
+              var R = this._revert, delta = 1 / (speed / uu.ua.minclock), opa = begin, out = (begin > end) ? 1 : 0;
               function loop(step) {
                 switch (step) {
                 case 1: return opa !== end;
@@ -2583,10 +2329,10 @@ uu.module.effect.prototype = {
                 }
                 return true;
               }
-              this._core(10, loop);
+              this._core(uu.ua.minclock, loop);
             },
   _move:    function(elm, revert, speed, fn, x, y) { // x, yは絶対座標で指定
-              var R = this._revert, deltaBase = 500 / (speed / 10), rect = uu.css.rect(elm),
+              var R = this._revert, deltaBase = 500 / (speed / uu.ua.minclock), rect = uu.css.rect(elm),
                   delta = { x: (rect.x === x) ? 0 : (rect.x > x) ? -deltaBase : deltaBase,
                             y: (rect.y === y) ? 0 : (rect.y > y) ? -deltaBase : deltaBase };
               function FIN() { R(elm, revert); fn(elm); }
@@ -2607,10 +2353,10 @@ uu.module.effect.prototype = {
                 }
                 return true;
               }
-              this._core(10, loop);
+              this._core(uu.ua.minclock, loop);
             },
   _scale:   function(elm, revert, speed, fn, anchor, w, h) {
-              var R = this._revert, deltaBase = 500 / (speed / 10), rect = uu.css.rect(elm),
+              var R = this._revert, deltaBase = 500 / (speed / uu.ua.minclock), rect = uu.css.rect(elm),
                   delta = { x: 0, w: (rect.w === w) ? 0 : (rect.w > w) ? -deltaBase : deltaBase,
                             y: 0, h: (rect.h === h) ? 0 : (rect.h > h) ? -deltaBase : deltaBase },
                   dw2 = delta.w / 2, dh2 = delta.h / 2;
@@ -2643,7 +2389,7 @@ uu.module.effect.prototype = {
                 }
                 return true;
               }
-              this._core(10, loop);
+              this._core(uu.ua.minclock, loop);
             }
 };
 
@@ -2675,9 +2421,7 @@ uu.module.config.prototype = {
                 repair:     0x1,
                 debug:      0x0,
                 module:     "",
-                cacheID:    0, // uu.id cache
-                cacheXPath: 1, // uu.css cache
-                backCompat: 0
+                cacheID:    0 // uu.id cache
               });
             },
   // uu.module.config.importFromQueryString
@@ -2693,8 +2437,6 @@ uu.module.config.prototype = {
                 if ("debug"      in rv) { this.debug      = uupi(rv.debug);      }
                 if ("module"     in rv) { this.module     = rv.module;           }
                 if ("cacheID"    in rv) { this.cacheID    = uupi(rv.cacheID);    }
-                if ("cacheXPath" in rv) { this.cacheXPath = uupi(rv.cacheXPath); }
-                if ("backCompat" in rv) { this.backCompat = uupi(rv.backCompat); }
               }
               this.modulePath = this.modulePath.replace(/\{BASE\}/g, this.basePath);
               this.imagePath  = this.imagePath.replace(/\{BASE\}/g, this.basePath);
@@ -2702,27 +2444,19 @@ uu.module.config.prototype = {
   // uu.module.config.load
   load:     function() {
               // --- load module ---
-              if (this.module.length) {
-                uu.module("", this.module);
-                this.module = "";
-              }
+              var ary = uu.notax(this.module);
+              (uu.ua.ie && ary.indexOf("ieboost") === -1) && ary.push("ieboost"); // force load ieboost
+              ary.length && uu.module("", ary.join(","));
               // --- load FirebugLite ---
               (!uu.ua.gecko && this.debug & 0x2) && this._loadFirebugLite();
             },
   _loadFirebugLite:
             function() {
-              if (uuw.firebug) { return; } // duplicate load
-              uu.ready(function() {
-                uuw.firebug = uud.createElement('script');
-                firebug.setAttribute("src", "http://getfirebug.com/releases/lite/1.2/firebug-lite-compressed.js");
-                uud.body.appendChild(firebug);
-                (function() {
-                  if (uuw.pi && uuw.firebug) {
-                    uuw.firebug.init();
-                  } else {
-                    setTimeout(arguments.callee);
-                  }
-                })();
+              !uuw.firebug && uu.ready(function() { // guard duplicate running
+                uuw.firebug = uud.createElement("script");
+                uuw.firebug.setAttribute("src", "http://pigs.sourceforge.jp/uupaa/lib/firebuglite1.2.js");
+                uud.body.appendChild(uuw.firebug);
+                (function() { uuw.pi && uuw.firebug ? uuw.firebug.init() : setTimeout(arguments.callee, 2000); })();
               }, "D");
             }
 };
@@ -2730,7 +2464,7 @@ uu.module.config.prototype = {
 // --- Initialize and Instantiate ---
 // System global instance
 uu.url          = new uu.module.url();
-uu.vtmHighSpeed = new uu.module.virtualTimer(10);
+uu.vtmHighSpeed = new uu.module.virtualTimer(uu.ua.minclock);
 uu.vtmMidSpeed  = new uu.module.virtualTimer(100);
 uu.vtmLowSpeed  = new uu.module.virtualTimer(250);
 uu.msg          = new uu.module.messagePump();
@@ -2742,6 +2476,7 @@ uu.effect       = new uu.module.effect();
 uu.config       = new uu.module.config();
 
 uu.ready(function() { uu.msg.post(0, UU.MSG_CHANGE_READY_STATE, "D"); }, "D");
+uu.ready(function() { uu.msg.post(0, UU.MSG_CHANGE_READY_STATE, "M"); }, "M");
 uu.ready(function() { uu.msg.post(0, UU.MSG_CHANGE_READY_STATE, "W"); }, "W");
 uu.ready(function() { uu.msg.post(0, UU.MSG_CHANGE_READY_STATE, "C"); }, "C");
 uu.config.importFromQueryString();

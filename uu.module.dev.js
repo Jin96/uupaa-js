@@ -23,24 +23,27 @@ uu.module.perf.prototype = {
               this.diff = [];
             },
   // uu.module.perf.run
-  run:      function(times /* = 1 */, me /* = undefined */, fn, args /* Array( [arg,...] ) */) {
+  run:      function(fn, loop /* = 1 */, set /* = 1 */) {
+              loop = loop || 1;
+              set  = set  || 1;
               this.diff.length = 0;
-              var rv, i = 0, sz = times || 1;
-              for (; i < sz; ++i) {
-                rv = (new Date()).getTime();
-                fn.apply(me, args || []);
-                this.diff.push((new Date()).getTime() - rv);
+              var past, sz = 0;
+
+              while (set--) {
+                past = uu.time(), sz = loop + 1;
+                while (--sz) { fn(); }
+                this.diff.push(uu.time() - past);
               }
             },
   // uu.module.perf.report
   report:   function() {
               if (!this.diff.length) {
-                return { total: 0, avg: 0, times: 0, dump: [] };
+                return { total: 0, avg: 0, set: 0, dump: [] };
               }
               var total = 0;
               this.diff.forEach(function(v) { total += v; });
               return { total: total, avg: total / this.diff.length,
-                       times: this.diff.length, dump: this.diff };
+                       set: this.diff.length, dump: this.diff };
             }
 };
 
@@ -70,20 +73,24 @@ uu.module.log2.prototype = {
                 this._applyViewPortStyle();
                 this._put(); // 溜まったログを出力
                 break;
-              case "STYLE": // post(p1 = StyleHash( { cssProp: value, ... }) )
-                uu.css.set(this._e, p1);
-                break;
-              case "SORT": // post(p1 = bool)
-                this._sort = !!p1;
-                break;
-              case "FILTER": // post(p1 = bool, [p2 = RegExp Object])
-                this._enableFilter = !!p1;
-                if (p2) {
-                  this._filterExpr = p2;
-                }
+              case "SET":
+                this._set(p1[0] || "", p1[1] || 0, p1[2] || 0);
                 break;
               }
               return 0;
+            },
+  _set:     function(cmd, p1, p2) {
+              // SORT:    p1=Boolean enable
+              // FILTER:  p1=Boolean enable, p2=[RegExp Object]
+              // RECT:    p1=RectHash
+              // DEPTH:   p1=Number depth
+              switch (cmd) {
+              case "SORT":    this._sort = !!p1; break;
+              case "FILTER":  this._enableFilter = !!p1;
+                              rgexp && (this._filterExpr = p2); break;
+              case "RECT":    uu.css.setRect(this._e, p1); break;
+              case "DEPTH":   this._depth = p1; break;
+              }
             },
   clear:    function() {
               if (this._e) { this._e.innerHTML = ""; }
@@ -92,16 +99,87 @@ uu.module.log2.prototype = {
             },
   // uu.module.log2.log - Logging - ログ出力
   log:      function(fmt /*, arg, ... */) {
-              this._stock.push(uu.sprintf.apply(this, arguments));
+              this._stock.push(this._sprintf.apply(this, arguments));
               this._put();
             },
   // uu.module.log2.inspect - Humanize output, Object Reflection - オブジェクトを人間用に加工し出力する
   inspect:  function(/* mix, ... */) {
-              var me = this, nest = 0, max = this._depth;
-              uu.toArray(arguments).forEach(function(v) {
-                me._stock.push(me._inspect(v, me._sort, nest, max));
-              });
+              var me = this, nest = 0, max = this._depth, i = 0, sz = arguments.length;
+              for (; i < sz; ++i) {
+                me._stock.push(me._inspect(arguments[i], me._sort, nest, max));
+              }
               this._put();
+            },
+  // uu.module.log2.hex - Hex dump
+  hex:      function(byteArray) {
+              var rv = [], rb, b = byteArray, p = 0, fmtHex = ["<br />"], fmtAscii = [" "],
+                  i, sz = parseInt(b.length / 16);
+              for (i = 0; i < sz; p += 16, ++i) {
+                rv.push(uu.sprintf(
+                            "<br />%02X %02X %02X %02X %02X %02X %02X %02X  %02X %02X %02X %02X %02X %02X %02X %02X  %A%A%A%A%A%A%A%A%A%A%A%A%A%A%A%A",
+                            b[p + 0], b[p + 1], b[p + 2], b[p + 3], b[p + 4], b[p + 5], b[p + 6], b[p + 7],
+                            b[p + 8], b[p + 9], b[p +10], b[p +11], b[p +12], b[p +13], b[p +14], b[p +15],
+                            b[p + 0], b[p + 1], b[p + 2], b[p + 3], b[p + 4], b[p + 5], b[p + 6], b[p + 7],
+                            b[p + 8], b[p + 9], b[p +10], b[p +11], b[p +12], b[p +13], b[p +14], b[p +15]));
+              }
+              // 16byteに満たない場合は、後ろに詰め物をした配列に値をコピーしdumpする
+              if (b.length % 16) {
+                rb = Array(16);
+
+                for (i = 0; i < b.length % 16; ++i) {
+                  rb[i] = b[p + i];
+                  (i === 8) && fmtHex.push(" ");
+                  fmtHex.push("%02X ");
+                  fmtAscii.push("%A");
+                }
+                for (; i < 16; ++i) {
+                  rb[i] = 0;
+                  fmtHex.push("   ");
+                  fmtAscii.push(" ");
+                }
+                rv.push(uu.sprintf(fmtHex.join(""),
+                                   rb[ 0], rb[ 1], rb[ 2], rb[ 3], rb[ 4], rb[ 5], rb[ 6], rb[ 7],
+                                   rb[ 8], rb[ 9], rb[10], rb[11], rb[12], rb[13], rb[14], rb[15]));
+                rv.push(uu.sprintf(fmtAscii.join(""),
+                                   rb[ 0], rb[ 1], rb[ 2], rb[ 3], rb[ 4], rb[ 5], rb[ 6], rb[ 7],
+                                   rb[ 8], rb[ 9], rb[10], rb[11], rb[12], rb[13], rb[14], rb[15]));
+              }
+              this._stock.push(rv.join(""));
+              this._put();
+            },
+  _sprintf: function(format /*, ... */) {
+              var av = arguments, next = 1, idx = 0, prefix = { o: "0", x: "0x", X: "0X" },
+                  I = parseInt, F = parseFloat, N = isNaN, C = String.fromCharCode, me = this;
+              function FORMAT(m, ai, f, w, p, sz, t, v) { // m(match), sz(size)未使用, vはundefined
+                idx = ai ? I(ai) : next++;
+                switch (t) {
+                case "i":
+                case "d": v = I(T(idx)).toString(); break;
+                case "u": v = I(T(idx)); !N(v) && (v = U(v).toString()); break;
+//              case "o": v = I(T(idx)); !N(v) && (v = P(t, U(v).toString(8), f)); break;
+                case "o": v = I(T(idx)); !N(v) && (v = me.inspect(v)); break;
+                case "x": v = I(T(idx)); !N(v) && (v = P(t, U(v).toString(16), f)); break;
+                case "X": v = I(T(idx)); !N(v) && (v = P(t, U(v).toString(16).toUpperCase(), f)); break;
+                case "f": v = F(T(idx)).toFixed(p); break;
+                case "c": w = 0; v = T(idx); v = (typeof v === "number") ? C(v) : ""; break;
+                case "A": w = 0; v = T(idx); v = (typeof v === "number") ? ASCII(v) : ""; break;
+                case "s": /* w = 0; */ v = T(idx).toString(); p && (v = v.substring(0, p)); break;
+                case "%": v = "%"; break;
+                }
+                return (v.length < w) ? PAD(t, v, f || " ", w - v.length) : v;
+              }
+              function ASCII(v) { return (v < 0x20 || v > 0x7e) ? "." : C(v); } // ASCII(0x20～0x7e)以外ならドット(".")を返す
+              function PAD(t, v, f, sz) {
+                if (f === "0" && (t === "d" || t === "f") && v.indexOf("-") !== -1) {
+                  return "-" + Array(sz + 1).join("0") + v.substring(1); // "-123" -> "-00123"
+                }
+                return Array(sz + 1).join((f === "#") ? " " : f) + v;
+              }
+              function P(t, v, f) { return (f !== "#") ? v : prefix[t] + v; } // add prefix
+              function T(i) { return (av[i] === void 0) ? "undefined" : av[i]; } // "undefined" trap
+              function U(v) { return (v >= 0) ? v : v % 0x100000000 + 0x100000000; } // to unsigned
+
+              return format.replace(/%(?:([\d]+)\$)?(#|0)?([\d]+)?(?:\.([\d]+))?(l)?([%iduoxXfcAs])/g, FORMAT);
             },
   _createViewPort: function() {
               this._e = uu.id(this._id, false);
@@ -127,62 +205,94 @@ uu.module.log2.prototype = {
               }
             },
   _inspect: function(mix, sort, nest, max) {
-              if (mix === null)   { return "null"; }
-              if (mix === void 0) { return "undefined"; }
-              if (uu.isB(mix) ||
-                  uu.isN(mix))    { return mix.toString(); }
-              if (uu.isS(mix))    { return '"' + mix + '"'; }
-              if (uu.isF(mix))    { return this._getFunctionName(mix); }
-              if (uu.isE(mix))    { return this._inspectNode(mix, sort, nest, max); }
-              if (uu.isA(mix))    { return this._inspectArray(mix, sort, nest, max); }
-              if (uu.isFA(mix))   { return this._inspectFakeArray(mix, sort, nest, max); }
-              return this._inspectObject(mix, sort, nest, max);
+              try {
+                if (mix === null)   { return "null"; }
+                if (mix === void 0) { return "undefined"; }
+                if (uu.isB(mix) ||
+                    uu.isN(mix))    { return mix.toString(); }
+                if (uu.isS(mix))    { return '"' + mix + '"'; }
+                if (uu.isF(mix))    { return this._getFunctionName(mix); }
+                if (uu.isE(mix))    { return this._inspectNode(mix, sort, nest, max); }
+                if (!uu.ua.ie && mix instanceof NodeList) {
+                                      return this._inspectNodeList(mix, sort, nest, max); }
+                if (uu.ua.gecko && mix instanceof HTMLCollection) {
+                                      return this._inspectNodeList(mix, sort, nest, max); }
+                if (uu.isA(mix))    { return this._inspectArray(mix, sort, nest, max); }
+                if (uu.isFA(mix))   { return this._inspectFakeArray(mix, sort, nest, max); }
+                if ("r" in mix && "g" in mix && "b" in mix && "a" in mix) {
+                                      return this._inspectRGBAHash(mix, sort, nest, max); }
+                return this._inspectObject(mix, sort, nest, max);
+              } catch(e) { ; }
+              return "*** catch Exception ***";
+            },
+  _inspectRGBAHash:
+            function(mix, sort, nest, max) {
+              return uu.sprintf("[%02X %02X %02X %.1f]", mix.r, mix.g, mix.b, mix.a);
+            },
+  _inspectNodeList:
+            function(mix, sort, nest, max) {
+              var rv = [], i, sz;
+              if (nest + 1 > max) { return uu.sprintf("ElementArray@%d[...]", mix.length); }
+
+              for (i = 0, sz = mix.length; i < sz; ++i) {
+                rv.push(this._inspectNode(mix[i], sort, nest + 1, max));
+              }
+              if (rv.length <= 1) {
+                return uu.sprintf("ElementArray@%d[%s]", mix.length, rv.join(", <br /> "));
+              }
+              if (rv.length <= 4) {
+                return uu.sprintf("ElementArray@%d[%s]", mix.length, rv.join(", "));
+              }
+              return uu.sprintf("ElementArray@%d[<br /> %s<br />]", mix.length, rv.join(", <br /> "));
             },
   _inspectArray:
             function(mix, sort, nest, max) {
               var rv = [], i, sz;
-              if (nest + 1 > max) { return "[Array...]"; }
+              if (nest + 1 > max) { return uu.sprintf("Array@%d[...]", mix.length); }
 
               for (i = 0, sz = mix.length; i < sz; ++i) {
                 rv.push(this._inspect(mix[i], sort, nest + 1, max));
               }
               if (rv.length <= 1) {
-                return "[" + rv.join(", <br /> ") + "]";
+                return uu.sprintf("Array@%d[%s]", mix.length, rv.join(", <br /> "));
               }
-              return "[<br /> " + rv.join(", <br /> ") + "<br />]";
+              if (rv.length <= 4) {
+                return uu.sprintf("Array@%d[%s]", mix.length, rv.join(", "));
+              }
+              return uu.sprintf("Array@%d[<br /> %s<br />]", mix.length, rv.join(", <br /> "));
             },
   _inspectFakeArray:
             function(mix, sort, nest, max) {
               var rv = [], i;
-              if (nest + 1 > max) { return "[FakeArray...]"; }
+              if (nest + 1 > max) { return uu.sprintf("FakeArray@%d[...]", mix.length); }
 
               for (i in mix) {
-                rv.push(uu.sprintf("%16s: %s", i, this._inspect(mix[i], sort, nest + 1, max))); // FakeArray
+                rv.push(uu.sprintf("%s: %s", i, this._inspect(mix[i], sort, nest + 1, max))); // FakeArray
               }
               sort && rv.sort();
               if (uu.size(rv) <= 1) {
-                return "{" + rv.join(", <br /> ") + "}";
+                return uu.sprintf("FakeArray@%d[%s]", mix.length, rv.join(", <br /> "));
               }
-              return "{<br /> " + rv.join(", <br /> ") + "<br />}";
+              return uu.sprintf("FakeArray@%d[<br /> %s<br />]", mix.length, rv.join(", <br /> "));
             },
   _inspectObject:
             function(mix, sort, nest, max) {
               var rv = [], i;
-              if (nest + 1 > max) { return "{Object...}"; }
+              if (nest + 1 > max) { return uu.sprintf("Hash@%d{...}", uu.size(mix)); }
 
               for (i in mix) {
-                rv.push(uu.sprintf("%16s: %s", i, this._inspect(mix[i], sort, nest + 1, max))); // Object
+                rv.push(uu.sprintf("%s: %s", i, this._inspect(mix[i], sort, nest + 1, max))); // Object
               }
               sort && rv.sort();
               if (uu.size(rv) <= 1) {
-                return "{" + rv.join(", <br /> ") + "}";
+                return uu.sprintf("Hash@%d{%s}", uu.size(rv), rv.join(", <br /> "));
               }
-              return "{<br /> " + rv.join(", <br /> ") + "<br />}";
+              return uu.sprintf("Hash@%d{<br /> %s<br />}", uu.size(rv), rv.join(", <br /> "));
             },
   _inspectNode:
             function(mix, sort, nest, max) {
               var rv = [], name = [], i;
-              if (nest + 1 > max) { return this._node2XPath(mix) + "..."; }
+              if (nest + 1 > max) { return uu.sprintf("%s", this._node2XPath(mix)); }
 
               switch (mix.nodeType) {
               case 1:  name.push("(ELEMENT_NODE)"); break;
@@ -203,10 +313,10 @@ uu.module.log2.prototype = {
                 case "innerHTML":
                 case "innerText":
                 case "outerHTML":
-                  rv.push(uu.sprintf("%16s: ...", i));
+                  rv.push(uu.sprintf("%s: ...", i));
                   break;
                 default:
-                  rv.push(uu.sprintf("%16s: %s", i, this._inspect(mix[i], sort, nest + 1, max))); // Object
+                  rv.push(uu.sprintf("%s: %s", i, this._inspect(mix[i], sort, nest + 1, max))); // Object
                 }
               }
               sort && rv.sort();
@@ -240,19 +350,22 @@ uu.module.log2.prototype = {
             }
 };
 uu.syslog = new uu.module.log2();
-// override
+// --- uu.log::Override ---
 uu.log = function(fmt /*, arg, ... */ /* or */ /* mix */) {
   var m = (uu.isS(fmt) && fmt.indexOf("%") >= 0 && arguments.length > 1)
         ? "log" : "inspect";
   uu.syslog[m].apply(uu.syslog, arguments);
 };
-uu.log.inspect = function(/* arg, ... */) {
-  uu.syslog.inspect.apply(uu.syslog, arguments);
-};
-uu.log.clear = function() {
-  uu.syslog.clear();
-}
-
+uu.mix(uu.log, {
+  debug:    function(fmt /*, arg, ... */) { uu.log.apply(uu.syslog, arguments); },
+  error:    function(fmt /*, arg, ... */) { uu.log.apply(uu.syslog, arguments); },
+  warn:     function(fmt /*, arg, ... */) { uu.log.apply(uu.syslog, arguments); },
+  info:     function(fmt /*, arg, ... */) { uu.log.apply(uu.syslog, arguments); },
+  dir:      function() { uu.syslog.inspect.apply(uu.syslog, arguments); },
+  clear:    function() { uu.syslog.clear(); },
+  hex:      function() { uu.syslog.hex.apply(uu.syslog, arguments); },
+  set:      function() { uu.msg.post(uu.syslog, "SET", arguments); }
+});
 
 
 // ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼

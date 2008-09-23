@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<title>uu.pseudo - test</title>
+<title>uupaa.js - uu.attr("*[:animated]") test</title>
 <script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
   <style>
   div { background-color: yellow; border: 1px solid #aaa; width: 80px; height: 80px; margin: 5px; float: left; }
@@ -12,8 +12,8 @@
 </head>
 <body>
 <a href="../../README.htm">README</a> &gt; 
-<a href="../../SELECTOR.htm#uu.pseudo">SELECTOR</a><br />
-<a href="./selector.htm">uu.pseudo</a> | <a href="./css.htm">uu.css</a> | <a href="./form.htm">uu.css(form)</a>
+<a href="../../SELECTOR.htm#uu.attr">SELECTOR</a><br />
+<a href="./selector.htm">uu.attr</a> | <a href="./css.htm">uu.css</a> | <a href="./form.htm">uu.css(form)</a>
 <hr />
 <p>jQueryとの動作の違いを確認するため、テスト用のスクリプトは<a href="http://docs.jquery.com/Selectors/animated">jQueryのAPI Reference</a>を参考にしています。</p>
   <button id="run">Run</button>
@@ -22,7 +22,7 @@
   <div></div>
 <script>
 function F(evt) {
-  uu.pseudo(":animated").forEach(function(v) {
+  uu.attr("*[:animated]").forEach(function(v) {
     uu.klass.toggle(v, "colored");
   });
 }

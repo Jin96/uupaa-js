@@ -20,7 +20,15 @@
    |
 </p>
 <a href="./README.htm">README</a> &gt; <a href="./INDEX.htm">INDEX</a> &gt; SELECTOR<br />
-
+<hr />
+<a href="#uu.id">ID</a> |
+<a href="#uu.tag">Tag/Element</a> |
+<a href="#uu.klass">Class</a> |
+<a href="#uu.attr">Attribute</a> |
+<a href="#uu.xpath">XPath</a> |
+<a href="#uu.css">CSS</a> |
+<a href="#uu.nodeType">Node Type</a> |
+<a href="#uu.textNode">Text Node</a> |
 <hr />
 <dl>
 <!-- -->
@@ -124,37 +132,69 @@
   <dt><a name="uu.attr">Attribute Selector</a> - 属性セレクタ</dt>
   <dd>
     <p>uu.attr(<i>expr</i>, <i>context</i> = document) は
-       <i>context</i> 以下のノードツリーから <i>expr</i> と一致する属性を持つ要素を検索し
+       <i>context</i> 以下のノードツリーから <i>expr</i> と一致する属性や、擬似要素/擬似クラスが一致する要素を検索し
        見つかった要素の配列( <a href="./GLOSSARY.htm#ElementArray">ElementArray</a> )を返します。</p>
-    <p>複数のclass属性を検索する場合は、<a href="#uu.klass">uu.klass</a>を使用してください。
+    <p>複数の class 属性を検索する場合は、<a href="#uu.klass">uu.klass</a> を使用してください。
        uu.attr は 複数の class 属性を検索するように設計されていません。</p>
-    <pre>
- @param String  expr      - 検索式を指定します。
-                            式は、要素E, 属性名A, オペレータ(=, ^=, $=, *=), 属性値V を組み合わせて指定します。
-                            例: 'div[@class*="widget"]', "*[@title]"
- @param Element [context] - 検索開始位置(コンテキスト)を指定します。デフォルトはdocumentです。
-                            documentを指定するとノードツリーの先頭から全ての要素を検索します。
- @return ElementArray     - 検索成功で<a href="./GLOSSARY.htm#ElementArray">ElementArray</a>( [element, ...] )を返します。
-                            失敗で空のElementArray( [] )を返します。
-    </pre>
-    <p>E には要素名(div や ul)を指定します。"*" を指定すると全ての要素名を検索対象にします。
-       <br />A には属性名(class や title)を指定します。
-       <br />属性名に"class"を指定すると、"className"が指定されたものとして扱います。</p>
-    <table>
-    <tr><th><i>expr</i></th><th>内容</th></tr>
-    <tr><td>uu.attr('div[@id]')     </td><td>id属性を持つdiv要素と一致します。</td></tr>
-    <tr><td>uu.attr('*[@id="V"]')   </td><td>id属性の値がVと完全に一致する全要素と一致します。<br />例: &lt;div id="V"&gt;</td></tr>
-    <tr><td>uu.attr('div[@id^="V"]')</td><td>id属性の値がVで始まるdiv要素と一致します。<br />例: &lt;div id="VIP"&gt;</td></tr>
-    <tr><td>uu.attr('div[@id$="V"]')</td><td>id属性の値がVで終わるdiv要素と一致します。<br />例: &lt;div id="CATV"&gt;</td></tr>
-    <tr><td>uu.attr('div[@id*="V"]')</td><td>id属性の値がVを含むdiv要素と一致します。<br />例: &lt;div id="EVE"&gt;</td></tr>
-    <tr><td>uu.attr('div[@class~="V"]')</td><td>id属性の値がスペース区切りのリストで、
-                                          <br />Vがリストに含まれているdiv要素と一致します。
-                                          <br />例: &lt;div class="V W X Y Z"&gt;
-                                          <br />複数のclass属性(例: class="W" と class="Z"を含む要素)を同時に検索するには
-                                          <br /><a href="#uu.klass">uu.klass</a> を使用してください。</td></tr>
-    </table>
     <p>uu.attr は、<a href="#uu.id">uu.id</a> や <a href="#uu.tag">uu.tag</a> よりも低速ですが、
        <a href="#uu.css">uu.css</a>, <a href="#uu.xpath">uu.xpath</a> よりも手軽で、使う機会の多いセレクタです。</p>
+    <pre>
+ @param String  expr      - 検索式を指定します。
+                            式1: E[@A]      - 式1は属性 A を持っている要素 E を検索します。
+                            式2: E[@A="V"]  - 式2は属性 A の値 V が一致する要素 E を検索します。
+                            式3: E[:P]      - 式3は擬似要素/擬似クラス P が一致する要素 E を検索します。
+                            E には要素名(div や ul)を指定します。"*"も指定可能です。"*"を指定すると全ての要素名を検索対象にします。
+                            A には属性名(class や title)を指定します。属性名に"class"を指定すると、"className"が指定されたものとして扱います。
+                            = には"^=", "$=", "*=" も指定可能です。"^="は先頭から一致, "$="は末尾から一致, "*="はどこかが一致する要素を選択します。
+                            V には検索する値を指定します。
+                            P には擬似クラスの名前を指定します。
+
+                            例: uu.attr('div[@class*="widget"]'), uu.attr("*[@title]"),
+                                uu.attr('input[:checked]'),       uu.attr("option[:selected]");
+
+ @param Element [context] - 検索開始位置(コンテキスト)を指定します。デフォルトは document です。
+                            document を指定するとノードツリーの先頭から全ての要素を検索します。
+ @return ElementArray     - 検索成功で <a href="./GLOSSARY.htm#ElementArray">ElementArray</a>( [element, ...] ) を返します。
+                            失敗で空の ElementArray( [] )を返します。
+    </pre>
+    <table>
+    <tr><th><i>expr</i></th><th>内容</th></tr>
+    <tr><td>uu.attr('div[@id]')     </td><td>id 属性を持つ div 要素と一致します。
+                                          <hr />&lt;div id="V1"&gt; &lt;div id="V2"&gt;
+                                          <br />uu.attr("div[@id]").forEach(function(v) { alert(v.id); }); // "V1", "V2"
+                                          </td></tr>
+    <tr><td>uu.attr('*[@id="V1"]')  </td><td>id 属性の値が V1 と完全に一致する全要素と一致します。
+                                          <hr />&lt;div id="V1"&gt; &lt;div id="V2"&gt;
+                                          <br />uu.attr('div[@id="V1"]').forEach(function(v) { alert(v.id); }); // "V1"
+                                          </td></tr>
+    <tr><td>uu.attr('div[@id^="V"]')</td><td>id 属性の値が V で始まる div 要素と一致します。
+                                          <hr />&lt;div id="V1"&gt; &lt;div id="V2"&gt;
+                                          <br />uu.attr('div[@id^="V"]').forEach(function(v) { alert(v.id); }); // "V1", "V2"
+                                    </td></tr>
+    <tr><td>uu.attr('div[@id$="1"]')</td><td>id 属性の値が 1 で終わる div 要素と一致します。
+                                          <hr />&lt;div id="V1"&gt; &lt;div id="V2"&gt;
+                                          <br />uu.attr('div[@id$="1"]').forEach(function(v) { alert(v.id); }); // "V1"
+                                    </td></tr>
+    <tr><td>uu.attr('div[@id*="V"]')</td><td>id 属性の値が V を含む div 要素と一致します。
+                                          <hr />&lt;div id="V1"&gt; &lt;div id="V2"&gt;
+                                          <br />uu.attr('div[@id*="V"]').forEach(function(v) { alert(v.id); }); // "V1", "V2"
+                                    </td></tr>
+    <tr><td>uu.attr('div[@class~="W"]')</td><td>id 属性の値がスペース区切りのリストで、
+                                          <br />W がリストに含まれている div 要素と一致します。
+                                          <hr />&lt;div id="V1" class="V W X Y Z"&gt; &lt;div id="V2" class="W"&gt;
+                                          <br />uu.attr('div[@class~="W"]').forEach(function(v) { alert(v.id); }); // "V1", "V2"
+                                          <hr />複数の class 属性(例: class="W" と class="Z"を含む要素)を同時に検索するには
+                                          <br /><a href="#uu.klass">uu.klass</a> を使用してください。
+                                    </td></tr>
+    <tr><td><a href="./demo/selector/enabled.htm" class="run">uu.attr("*[:enabled]")</a></td><td>要素のdisabled属性がfalseの要素と一致します。<br />　</td></tr>
+    <tr><td><a href="./demo/selector/disabled.htm" class="run">uu.attr("*[:disabled]")</a></td><td>要素のdisabled属性がtrueの要素と一致します。<br />　</td></tr>
+    <tr><td><a href="./demo/selector/checked.htm" class="run">uu.attr("input[:checked]")</a></td><td>input type="radio" か input type="checkbox"の要素で、checked属性がtrueの要素と一致します。<br />:checkedはinput属性専用です。</td></tr>
+    <tr><td><a href="./demo/selector/selected.htm" class="run">uu.attr("option[:selected]")</a></td><td>要素のselected属性がtrueの要素と一致します。<br />:selectedはoption要素専用です。</td></tr>
+    <tr><td>uu.attr("*[:visible]")</td><td>:hidden の条件と一致しない、全ての要素と一致します。</td></tr>
+    <tr><td>uu.attr("*[:hidden]")</td><td>input type="hidden" か display属性が"none" か visibility属性が"hidden" な要素と一致します。</td></tr>
+    <tr><td><a href="./demo/selector/animated.htm" class="run">uu.attr("*[:animated]")</a></td><td>uu.module.effectでアニメーション動作中の要素と一致します。<br />　</td></tr>
+
+    </table>
     <p>属性値の比較はJavaScriptプロパティと、
        HTMLにインラインで記述されている独自の属性("originalattr"など)に対して安全です。
        <br /><a href="http://d.hatena.ne.jp/uupaa/20080620">Webページ構築後にsetAttribute()で設定された値に対しては安全ではありません</a>。</p>
@@ -192,65 +232,29 @@
 <!-- -->
   <dt><a name="uu.xpath">XPath Selector</a> - XPathセレクタ</dt>
   <dd>
-    <p>uu.xpath(<i>expr</i>, <i>context</i> = document) は
-       <i>context</i> 以下のノードツリーから XPath式(<i>expr</i>)に一致する要素を検索し、
-       見つかった要素の配列( <a href="./GLOSSARY.htm#ElementArray">ElementArray</a> )を返します。
-       <br />属性値を取得するXPath式を指定した場合は、属性値(Number, String, Boolean)を返します。</p>
-    <pre>
- @param String  expr      - XPathの評価式(ロケーションパス)を指定します。
- @param Element [context] - 検索開始位置(コンテキスト)を指定します。デフォルトはdocumentです。
-                            documentを指定するとノードツリーの先頭から全ての要素を検索します。
-                            contextを指定した場合は、expr に "//"ではなく"./"で始まる文字列(例: "./div/li")を指定します。
- @return ElementArray/Number/String/Boolean
-                          - 検索成功で<a href="./GLOSSARY.htm#ElementArray">ElementArray</a>( [element, ...] ) か、
-                            Number, String, Boolean値を返します。
-                            失敗で空のElementArray( [] )を返します。
-    </pre>
-    <a href="demo/selector/uu.xpath.htm" class="run">Run</a>
-    <pre class="eg">
-&lt;div&gt;
-  &lt;p&gt;hoge&lt;/p&gt;
-  <b>&lt;p&gt;</b>huga<b>&lt;/p&gt;</b>
-&lt;/div&gt;
-&lt;script&gt;
-    uu.forEach(<b>uu.xpath</b>("/html/body/div/p[2]"), function(v) {
-      uu.log(v.innerText); // "huga"
-    });
-&lt;/script&gt;
-    </pre>
-  </dd>
-<!-- -->
-  <dt><a name="uu.xsnap">XPath Selector on snapshot</a> - XPathスナップショット</dt>
-  <dd>
-    <p>uu.xsnap(<i>expr</i>, <i>context</i> = document, <i>attr</i> = "", <i>sort</i> = true) は
+    <p>uu.xpath(<i>expr</i>, <i>context</i> = document, <i>sort</i> = true) は
        <i>context</i> 以下のノードツリーから XPath式(<i>expr</i>)に一致する要素を検索し、
        見つかった要素のスナップショットを配列( <a href="./GLOSSARY.htm#ElementArray">ElementArray</a> )で返します。
-       <br /><i>attr</i>を指定した場合は、属性値の配列( StringArray( ["string", ...] ) )を返します。
     </p>
     <pre>
  @param String  expr      - XPathの評価式(ロケーションパス)を指定します。
  @param Element [context] - 検索開始位置(コンテキスト)を指定します。デフォルトはdocumentです。
                             documentを指定するとノードツリーの先頭から全ての要素を検索します。
                             コンテキストを指定した場合は、exprに"//"ではなく"./"で始まる文字列を指定します。
- @param String  [attr]    - 取得する属性を指定します。デフォルトは空文字列です。
  @param Boolean [sort]    - 検索結果をソートする場合は true, しない場合はfalseを指定します。
                             省略可能です。デフォルトはtrueです。
- @return ElementArray/StringArray
-                          - attrを指定しない場合は、<a href="./GLOSSARY.htm#ElementArray">ElementArray</a>( [ element, ... ] )を返します。
-                            attrを指定した場合は、列挙した要素の属性値だけからなるStringArray( ["string", ...] )を返します。
-                            返される値は、ある時点のスナップショットです(ノードツリーに追従しない)
-                            ある要素において指定された属性が存在しない場合は、
-                            その要素の属性値は空文字列("")になります(StringArray ( ["最初の要素の属性値", "", "3番目の要素の属性値", ... ] ))。
+ @return ElementArray     - <a href="./GLOSSARY.htm#ElementArray">ElementArray</a>( [ element, ... ] )を返します。
+                            返される値は、ある時点のスナップショットです(ノードツリーの変化に追従しない)
     </pre>
-    <a href="demo/selector/uu.xsnap.htm" class="run">Run</a>
+    <a href="demo/selector/uu.xpath.htm" class="run">Run</a>
     <pre class="eg">
 &lt;div&gt;
   &lt;p id="<b>hoge</b>"&gt;hoge&lt;/p&gt;
   &lt;p id="<b>huga</b>"&gt;huga&lt;/p&gt;
 &lt;/div&gt;
 &lt;script&gt;
-    uu.forEach(<b>uu.xsnap</b>("//p[@id]", document, "id"), function(v) {
-      uu.log(v); // "hoge", "huga"
+    uu.forEach(<b>uu.xpath</b>("//p[@id]", document), function(v) {
+      uu.log(v.id); // "hoge", "huga"
     });
 &lt;/script&gt;
     </pre>
@@ -269,29 +273,33 @@
                         失敗で空のElementArray( [] )を返します。
  @throws TypeError "uu.css(...)" 使用できないセレクタを指定したか、不正なXPathに変換された
     </pre>
-    <p>uu.css内部では、CSS3セレクタを一旦XPathに変換してから検索を行うため、<a href="./DOCUMENT.htm#Dependence_to_XPath_Library">IEではJavaScript-XPathを読み込んでおく</a>必要があります。</p>
-
-    <p>この関数は、<a href="./MODULE.htm#uu.module.config.cacheXPath"><i>uu.config.cacheXPath</i></a> の影響を受けます。
-      <br /><i>uu.config.cacheXPath</i> が 0 なら 毎回 <i>expr</i> をXPath式にコンパイルしてから検索します。
-      <br />1 ならコンパイル済みのXPath式を再利用するため、高速に動作します。
-    </p>
 
     <a href="demo/selector/uu.css.htm" class="run">Run</a> |
-    <a href="demo/selector/css.htm" class="run">CSSセレクタのテスト</a>
+    <a href="demo/selector/css.htm" class="run">CSSセレクタのテスト</a> |
+    <a href="http://d.hatena.ne.jp/uupaa/20080919/1221834168">開発日記</a>
     <pre class="eg">
 &lt;div&gt;
-  &lt;p&gt;hoge&lt;/p&gt;
-  <b>&lt;p&gt;</b>huga<b>&lt;/p&gt;</b>
+  &lt;div id="one"&gt;
+    &lt;p&gt;hoge1&lt;/p&gt;
+    &lt;p&gt;huga1&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;div id="two"&gt;
+    &lt;p&gt;hoge2&lt;/p&gt;
+    &lt;p&gt;huga2&lt;/p&gt;
+  &lt;/div&gt;
 &lt;/div&gt;
-&lt;script&gt;
-    <b>uu.css</b>("p:nth-last-of-type(1)").forEach(function(v) {
-      uu.log(v.innerText); // "huga"
-    });
-&lt;/script&gt;
+
+  uu.css("p:nth-last-of-type(1)", uu.id("two")).forEach(function(v) {
+    uu.log(v.innerText); // "huga2"
+  });
+  uu.css("#one &gt; p:nth-last-of-type(1)").forEach(function(v) {
+    uu.log(v.innerText); // "hoge1"
+  });
     </pre>
   </dd>
 
 <!-- -->
+<!--
   <dt><a name="uu.pseudo">Pseudo Selector</a> - 擬似セレクタ</dt>
   <dd>
     <p>uu.pseudo(<i>expr</i>, <i>context</i> = document, <i>tag</i> = undefined) は
@@ -322,6 +330,7 @@
       var rv = uu.pseudo(":checked"); // "checkbox1"
     </pre>
   </dd>
+ -->
 <!-- -->
   <dt><a name="uu.nodeType">NodeType Selector</a> - ノードタイプセレクタ</dt>
   <dd><p>uu.node(<i>nodeType</i>, <i>context</i> = document, <i>depth</i> = 0) は、
@@ -360,88 +369,85 @@
       </pre>
   </dd>
 
-<!-- -->
-  <dt><a name="uu.toXPath">Convert CSS3 selector into XPath</a> - CSS3セレクタをXPathに変換</dt>
-  <dd><p>uu.toXPath(<i>expr</i>) は、
-      CSS3 セレクタ(<i>expr</i>) を XPath 式に変換します。</p>
-      <pre>
- @param String expr - CSSセレクタを指定します。
- @return String     - 変換成功でXPath式を返します。
-                      失敗で空文字列( "" )を返します。
- @see <a href="http://www.w3.org/TR/css3-selectors/">CSS3 Selector - W3C</a>
-      </pre>
-  </dd>
-
   <dt><a name="List_of_CSS_Selectors">uu.css で使用可能なCSSセレクタの一覧 - List of the available CSS selectors</a></dt>
   <dd>
     <p><a href="#uu.css">uu.css</a>で指定可能な CSS セレクタの一覧です。
-       <a href="http://docs.jquery.com/Selectors">jQuery独自セレクタ(外部サイト)</a> も使用することができます。</p>
+<!--
+       <a href="http://docs.jquery.com/Selectors">jQuery独自セレクタ(外部サイト)</a> も使用することができます。
+ -->
+    </p>
     <table>
-    <tr><th>CSS Selectors</th><th>Substitute<br />代替セレクタ</th><th>Return<br />戻り値</th><th>内容</th></tr>
-    <tr><td>uu.css("*")           </td><td>uu.tag("*")</td><td><a href="./GLOSSARY.htm#ElementArray">ElementArray</a></td><td>全ての要素と一致します。<br />- Universal selector</td></tr>
-    <tr><td>uu.css("#id")         </td><td>uu.id("id")</td><td><a href="./GLOSSARY.htm#ElementArray">ElementArray</a></td><td>属性idが一致する要素と一致します。<br />- ID selectors</td></tr>
-    <tr><td>uu.css(".className")  </td><td>uu.klass("className")</td><td><a href="./GLOSSARY.htm#ElementArray">ElementArray</a></td><td>属性classと一致する要素と一致します。<br />- Class selectors</td></tr>
-    <tr><td>uu.css("<i>E</i>")           </td><td>uu.tag("<i>E</i>")</td><td><a href="./GLOSSARY.htm#ElementArray">ElementArray</a></td><td>全ての要素Eと一致します。<br />- Type selectors</td></tr>
-    <tr><td>uu.css("<i>E, F, G</i>")     </td><td>none</td><td><a href="./GLOSSARY.htm#ElementArray">ElementArray</a></td><td>複数のセレクタを一度に指定できます。<br />個々のセレクタの評価結果を纏めて返します。</td></tr>
-    <tr><td>uu.css("<i>E F</i>")         </td><td>uu.tag("<i>F</i>", <i>E</i>)</td><td><a href="./GLOSSARY.htm#ElementArray">ElementArray</a></td><td>要素Eの子孫の全ての要素Fと一致します。<br />- Descendant combinator</td></tr>
-    <tr><td>uu.css("<i>E > F</i>")       </td><td>uu.tag("<i>F</i>", <i>E</i>) + childNodes</td><td><a href="./GLOSSARY.htm#ElementArray">ElementArray</a></td><td>要素Eの子供の要素Fと一致します。<br />- Child combinator</td></tr>
-    <tr><td>uu.css("<i>E + F</i>")       </td><td>none</td><td><a href="./GLOSSARY.htm#ElementArray">ElementArray</a></td><td>要素EとFが兄弟で、要素Eと隣接する要素Fと一致します。<br />- Adjacent sibling combinator</td></tr>
-    <tr><td>uu.css("<i>E ~ F</i>")       </td><td>none</td><td><a href="./GLOSSARY.htm#ElementArray">ElementArray</a></td><td>要素EとFが兄弟で、要素Eの後に存在する要素Fと一致します。<br />- General sibling combinator</td></tr>
-    <tr><td>uu.css("<i>E[A]</i>")        </td><td>uu.attr('<i>E[@A]</i>')</td><td><a href="./GLOSSARY.htm#ElementArray">ElementArray</a></td><td>属性Aを持つ全ての要素Eと一致します。属性の値は問いません。<br />- Attribute selectors</td></tr>
-    <tr><td>uu.css("<i>E[A="V"]</i>")    </td><td>uu.attr('<i>E[@A="V"]</i>')</td><td><a href="./GLOSSARY.htm#ElementArray">ElementArray</a></td><td>属性Aの値がVの全ての要素Eと一致します。<br />- Attribute selectors</td></tr>
-    <tr><td>uu.css("<i>E[A~="V"]</i>")   </td><td>uu.attr('<i>E[@A~="V"]</i>')</td><td><a href="./GLOSSARY.htm#ElementArray">ElementArray</a></td><td>属性Aの値がスペース区切りのリストで、<br />リストがVを含む全ての要素Eと一致します。<br />- Attribute selectors</td></tr>
-    <tr><td>uu.css("<i>E[A|="V"]</i>")   </td><td>none</td><td><a href="./GLOSSARY.htm#ElementArray">ElementArray</a></td><td>属性Aの値がハイフン区切りのリストで、<br />"V"または"V-"で始まる単語を含む全ての要素Eと一致します。<br />- Attribute selectors</td></tr>
-    <tr><td>uu.css("<i>E[A^="V"]</i>")   </td><td>uu.attr('<i>E[@A^="V"]</i>')</td><td><a href="./GLOSSARY.htm#ElementArray">ElementArray</a></td><td>属性Aの値がVで始まる全ての要素Eと一致します。<br />- Attribute selectors</td></tr>
-    <tr><td>uu.css("<i>E[A$="V"]</i>")   </td><td>uu.attr('<i>E[@A$="V"]</i>')</td><td><a href="./GLOSSARY.htm#ElementArray">ElementArray</a></td><td>属性Aの値がVで終わる全ての要素Eと一致します。<br />- Attribute selectors</td></tr>
-    <tr><td>uu.css("<i>E[A*="V"]</i>")   </td><td>uu.attr('<i>E[@A*="V"]</i>')</td><td><a href="./GLOSSARY.htm#ElementArray">ElementArray</a></td><td>属性Aの値がVを含む全ての要素Eと一致します。<br />- Attribute selectors</td></tr>
-    <tr><td>uu.css(":root")       </td><td>uu.tag("html")</td><td><a href="./GLOSSARY.htm#ElementArray">ElementArray</a></td><td>ルート要素(HTML)と一致します。<br /> - Structural pseudo-classes</td></tr>
-    <tr><td>uu.css("<i>E</i>:nth-child(<a href="#n"><i>n</i></a>)")     </td><td>uu.tag("<i>E</i>")[<i>n</i>]</td><td><a href="./GLOSSARY.htm#ElementArray">ElementArray</a></td><td>先頭から数えて(n|偶数|奇数|計算)番目の兄弟要素と一致します。<br /> - Structural pseudo-classes</td></tr>
-    <tr><td>uu.css("<i>E</i>:nth-last-child(<a href="#n"><i>n</i></a>)")</td><td>none</td><td><a href="./GLOSSARY.htm#ElementArray">ElementArray</a></td><td>末尾から数えて(n|偶数|奇数|計算)番目の兄弟要素と一致します。<br /> - Structural pseudo-classes</td></tr>
-    <tr><td>uu.css("<i>E</i>:nth-of-type(<a href="#n"><i>n</i></a>)")     </td><td>none</td><td><a href="./GLOSSARY.htm#ElementArray">ElementArray</a></td><td>E要素と同じ要素名の兄弟を先頭から数えて<br />(n|偶数|奇数|計算)番目の兄弟要素と一致します。<br /> - Structural pseudo-classes</td></tr>
-    <tr><td>uu.css("<i>E</i>:nth-last-of-type(<a href="#n"><i>n</i></a>)")</td><td>none</td><td><a href="./GLOSSARY.htm#ElementArray">ElementArray</a></td><td>E要素と同じ要素名の兄弟を末尾から数えて<br />(n|偶数|奇数|計算)番目の兄弟要素と一致します。<br /> - Structural pseudo-classes</td></tr>
-    <tr><td>uu.css("<i>E</i>:first-child")</td><td>uu.tag("<i>E</i>") + e.firstChild</td><td><a href="./GLOSSARY.htm#ElementArray">ElementArray</a></td><td>最初の子要素と一致します。<br /> - Structural pseudo-classes</td></tr>
-    <tr><td>uu.css("<i>E</i>:last-child")</td><td>uu.tag("<i>E</i>") + e.lastChild</td><td><a href="./GLOSSARY.htm#ElementArray">ElementArray</a></td><td>最後の子要素と一致します。<br /> - Structural pseudo-classes</td></tr>
-    <tr><td>uu.css("<i>E</i>:first-of-type")</td><td>none</td><td><a href="./GLOSSARY.htm#ElementArray">ElementArray</a></td><td>E要素と同じ要素名の兄弟で、最初の兄弟と一致します。<br /> - Structural pseudo-classes</td></tr>
-    <tr><td>uu.css("<i>E</i>:last-of-type")</td><td>none</td><td><a href="./GLOSSARY.htm#ElementArray">ElementArray</a></td><td>E要素と同じ要素名の兄弟で、最後の兄弟と一致します。<br /> - Structural pseudo-classes</td></tr>
-    <tr><td>uu.css("<i>E</i>:only-child")</td><td>none</td><td><a href="./GLOSSARY.htm#ElementArray">ElementArray</a></td><td>一人っ子と一致します。<br /> - Structural pseudo-classes</td></tr>
-    <tr><td>uu.css("<i>E</i>:only-of-type")</td><td>none</td><td><a href="./GLOSSARY.htm#ElementArray">ElementArray</a></td><td>要素Eの親からみてユニークなEであれば一致します。<br />兄弟にEがいれば一致しません。<br /> - Structural pseudo-classes</td></tr>
-    <tr><td>uu.css("<i>E</i>:empty")</td><td>uu.tag("<i>E</i>")<br />+ e.firstChild == null</td><td><a href="./GLOSSARY.htm#ElementArray">ElementArray</a></td><td>独身(子要素やテキストノードを持たない要素E)と一致します。<br /> - Structural pseudo-classes</td></tr>
-    <tr><th><a name="List_of_jQuery_Selectors">jQuery Selectors</a></th><th>Substitute<br />代替セレクタ</th><th>Return<br />戻り値</th><th>内容</th></tr>
-    <tr><td>:first        </td><td>uu.tag("<i>E</i>")[0]</td><td><a href="./GLOSSARY.htm#ElementArray">ElementArray</a></td><td>最初の要素と一致します。</td></tr>
-    <tr><td>:last         </td><td>uu.tag("<i>E</i>")[length - 1]</td><td><a href="./GLOSSARY.htm#ElementArray">ElementArray</a></td><td>最後の要素と一致します。</td></tr>
-    <tr><td>:even         </td><td>:nth-child(even)</td><td><a href="./GLOSSARY.htm#ElementArray">ElementArray</a></td><td>偶数番目の要素と一致します。</td></tr>
-    <tr><td>:odd          </td><td>:nth-child(odd)</td><td><a href="./GLOSSARY.htm#ElementArray">ElementArray</a></td><td>奇数番目の要素と一致します。</td></tr>
-    <tr><td>:eq(index)    </td><td>:nth-child(index)</td><td><a href="./GLOSSARY.htm#ElementArray">ElementArray</a></td><td>ルート要素から検索し、index番目の要素と一致します。</td></tr>
-    <tr><td>:gt(index)    </td><td>none</td><td><a href="./GLOSSARY.htm#ElementArray">ElementArray</a></td><td>ルート要素から検索し、index番超の要素と一致します。<br />:gt(4) は5番目以上と一致し4番目は含みません。</td></tr>
-    <tr><td>:lt(index)    </td><td>none</td><td><a href="./GLOSSARY.htm#ElementArray">ElementArray</a></td><td>ルート要素から検索し、index番未満の要素と一致します。<br />:lt(4) は3番目以下と一致し4番目は含みません。</td></tr>
+    <tr><th>CSS Selectors       </th><th>Example                  </th><th>Substitute<br />代替セレクタ</th><th>Note</th></tr>
+    <tr><td>Universal selector  </td><td>uu.css("*")              </td><td>uu.tag("*")</td><td>全ての要素と一致します。</td></tr>
+    <tr><td>ID selectors        </td><td>uu.css("#id")            </td><td>uu.id("id")</td><td>属性idが一致する要素と一致します。</td></tr>
+    <tr><td>Class selectors     </td><td>uu.css(".className")     </td><td>uu.klass("className")</td><td>属性classと一致する要素と一致します。</td></tr>
+    <tr><td>Type selectors      </td><td>uu.css("<i>E</i>")       </td><td>uu.tag("<i>E</i>")</td><td>全ての要素Eと一致します。</td></tr>
+    <tr><td>Selectors group     </td><td>uu.css("<i>E, F, G</i>") </td><td>none</td><td>複数のセレクタを一度に指定できます。<br />個々のセレクタの評価結果を纏めて返します。<br />重複する要素は一つにまとめます。</td></tr>
+    <tr><td>Descendant combinator</td><td>uu.css("<i>E F</i>")    </td><td>uu.tag("<i>F</i>", <i>E</i>)</td><td>要素Eの子孫の全ての要素Fと一致します。</td></tr>
+    <tr><td>Child combinator    </td><td>uu.css("<i>E > F</i>")   </td><td>uu.tag("<i>F</i>", <i>E</i>) + childNodes</td><td>要素Eの子供の要素Fと一致します。</td></tr>
+    <tr><td>Adjacent sibling combinator</td><td>uu.css("<i>E + F</i>")</td><td>none</td><td>要素EとFが兄弟で、要素Eと隣接する要素Fと一致します。</td></tr>
+    <tr><td>General sibling combinator</td><td>uu.css("<i>E ~ F</i>")</td><td>none</td><td>要素EとFが兄弟で、要素Eの後に存在する要素Fと一致します。</td></tr>
+    <tr><td>Attribute selectors </td><td>uu.css("<i>E[A]</i>")    </td><td>uu.attr('<i>E[@A]</i>')</td><td>属性Aを持つ全ての要素Eと一致します。属性の値は問いません。</td></tr>
+    <tr><td>Attribute selectors </td><td>uu.css("<i>E[A="V"]</i>")</td><td>uu.attr('<i>E[@A="V"]</i>')</td><td>属性Aの値がVの全ての要素Eと一致します。</td></tr>
+    <tr><td>Attribute selectors </td><td>uu.css("<i>E[A~="V"]</i>")</td><td>uu.attr('<i>E[@A~="V"]</i>')</td><td>属性Aの値がスペース区切りのリストで、<br />リストがVを含む全ての要素Eと一致します。</td></tr>
+    <tr><td>Attribute selectors </td><td>uu.css("<i>E[A|="V"]</i>")</td><td>none</td><td>属性Aの値がハイフン区切りのリストで、<br />"V"または"V-"で始まる単語を含む全ての要素Eと一致します。</td></tr>
+    <tr><td>Attribute selectors </td><td>uu.css("<i>E[A^="V"]</i>")</td><td>uu.attr('<i>E[@A^="V"]</i>')</td><td>属性Aの値がVで始まる全ての要素Eと一致します。</td></tr>
+    <tr><td>Attribute selectors </td><td>uu.css("<i>E[A$="V"]</i>")</td><td>uu.attr('<i>E[@A$="V"]</i>')</td><td>属性Aの値がVで終わる全ての要素Eと一致します。</td></tr>
+    <tr><td>Attribute selectors </td><td>uu.css("<i>E[A*="V"]</i>")</td><td>uu.attr('<i>E[@A*="V"]</i>')</td><td>属性Aの値がVを含む全ての要素Eと一致します。</td></tr>
+    <tr><td>Pseudo-class</td><td>uu.css(":root")       </td><td>uu.tag("html")</td><td>ルート要素(HTML)と一致します。</td></tr>
+    <tr><td>Pseudo-class</td><td>uu.css("<i>E</i>:nth-child(<a href="#n"><i>n</i></a>)")     </td><td>uu.tag("<i>E</i>")[<i>n</i>]</td><td>先頭から数えて<br />(n|偶数|奇数|計算)番目の兄弟要素と一致します。</td></tr>
+    <tr><td>Pseudo-class</td><td>uu.css("<i>E</i>:nth-last-child(<a href="#n"><i>n</i></a>)")</td><td>none</td><td>末尾から数えて<br />(n|偶数|奇数|計算)番目の兄弟要素と一致します。</td></tr>
+    <tr><td>Pseudo-class</td><td>uu.css("<i>E</i>:nth-of-type(<a href="#n"><i>n</i></a>)")     </td><td>none</td><td>E要素と同じ要素名の兄弟を先頭から数えて<br />(n|偶数|奇数|計算)番目の兄弟要素と一致します。</td></tr>
+    <tr><td>Pseudo-class</td><td>uu.css("<i>E</i>:nth-last-of-type(<a href="#n"><i>n</i></a>)")</td><td>none</td><td>E要素と同じ要素名の兄弟を末尾から数えて<br />(n|偶数|奇数|計算)番目の兄弟要素と一致します。</td></tr>
+    <tr><td>Pseudo-class</td><td>uu.css("<i>E</i>:first-child")</td><td>uu.tag("<i>E</i>") + e.firstChild</td><td>最初の子要素と一致します。</td></tr>
+    <tr><td>Pseudo-class</td><td>uu.css("<i>E</i>:last-child")</td><td>uu.tag("<i>E</i>") + e.lastChild</td><td>最後の子要素と一致します。</td></tr>
+    <tr><td>Pseudo-class</td><td>uu.css("<i>E</i>:first-of-type")</td><td>none</td><td>E要素と同じ要素名の兄弟で、最初の兄弟と一致します。</td></tr>
+    <tr><td>Pseudo-class</td><td>uu.css("<i>E</i>:last-of-type")</td><td>none</td><td>E要素と同じ要素名の兄弟で、最後の兄弟と一致します。</td></tr>
+    <tr><td>Pseudo-class</td><td>uu.css("<i>E</i>:only-child")</td><td>none</td><td>一人っ子と一致します。</td></tr>
+    <tr><td>Pseudo-class</td><td>uu.css("<i>E</i>:only-of-type")</td><td>none</td><td>要素Eの親からみてユニークなEであれば一致します。<br />兄弟にEがいれば一致しません。</td></tr>
+    <tr><td>Pseudo-class</td><td>uu.css("<i>E</i>:empty")</td><td>uu.tag("<i>E</i>")<br />+ e.firstChild == null</td><td>独身(子要素やテキストノードを持たない要素E)と一致します。</td></tr>
+    <tr><td>Pseudo-class</td><td>uu.css("<i>E</i>:lang(en)")</td><td></td><td>要素のlang属性が"en"や"en-US"な要素と一致します。</td></tr>
+    <tr><td>Pseudo-class</td><td>uu.css('<i>E</i>:contains("Hello")')</td><td></td><td>"Hello"を含んでいるテキストノードを持つ要素と一致します。</td></tr>
+    <tr><td>Pseudo-class</td><td>uu.css('<i>E</i>:enabled')</td><td></td><td>disabled 属性に "disabled" 以外の値が設定されている要素と一致します。</td></tr>
+    <tr><td>Pseudo-class</td><td>uu.css('<i>E</i>:disabled')</td><td></td><td>disabled 属性に "disabled" が設定されている要素と一致します。</td></tr>
+    <tr><td>Pseudo-class</td><td>uu.css('<i>E</i>:target')</td><td></td><td>現在表示しているコンテンツの#hash と一致するID(またはname)を持つ要素と一致します。</td></tr>
+    </table>
+<!--
+    <table>
+    <tr><th><a name="List_of_jQuery_Selectors">jQuery Selectors</a></th><th>Substitute<br />代替セレクタ</th><th>Note</th></tr>
+    <tr><td>:first        </td><td>uu.tag("<i>E</i>")[0]</td><td>最初の要素と一致します。</td></tr>
+    <tr><td>:last         </td><td>uu.tag("<i>E</i>")[length - 1]</td><td>最後の要素と一致します。</td></tr>
+    <tr><td>:even         </td><td>:nth-child(even)</td><td>偶数番目の要素と一致します。</td></tr>
+    <tr><td>:odd          </td><td>:nth-child(odd)</td><td>奇数番目の要素と一致します。</td></tr>
+    <tr><td>:eq(index)    </td><td>:nth-child(index)</td><td>ルート要素から検索し、index番目の要素と一致します。</td></tr>
+    <tr><td>:gt(index)    </td><td>none</td><td>ルート要素から検索し、index番超の要素と一致します。<br />:gt(4) は5番目以上と一致し4番目は含みません。</td></tr>
+    <tr><td>:lt(index)    </td><td>none</td><td>ルート要素から検索し、index番未満の要素と一致します。<br />:lt(4) は3番目以下と一致し4番目は含みません。</td></tr>
     <tr><td>:header       </td><td>uu.tag("h1") + uu.tag("h2") +
                                    <br />uu.tag("h3") + uu.tag("h4") +
-                                   <br />uu.tag("h5") + uu.tag("h6")</td><td><a href="./GLOSSARY.htm#ElementArray">ElementArray</a></td><td>ルート要素から検索し、<br />h1,h2,h3,h4,h5,h6要素と一致します。</td></tr>
-    <tr><td>:contains(text)</td><td>none</td><td><a href="./GLOSSARY.htm#ElementArray">ElementArray</a></td><td>テキストノードがtextを含んでいる要素と一致します。</td></tr>
-    <tr><td>:parent       </td><td>none</td><td><a href="./GLOSSARY.htm#ElementArray">ElementArray</a></td><td>親要素から見て、<br />テキストノードを含んでいる全ての子要素と一致します。</td></tr>
+                                   <br />uu.tag("h5") + uu.tag("h6")</td><td>ルート要素から検索し、<br />h1,h2,h3,h4,h5,h6要素と一致します。</td></tr>
+    <tr><td>:contains(text)</td><td>none</td><td>テキストノードがtextを含んでいる要素と一致します。</td></tr>
+    <tr><td>:parent       </td><td>none</td><td>親要素から見て、<br />テキストノードを含んでいる全ての子要素と一致します。</td></tr>
     <tr><td>:input        </td><td>uu.tag("input") +
                                    <br />uu.tag("textarea") +
                                    <br />uu.tag("select") +
-                                   <br />uu.tag("button")</td><td><a href="./GLOSSARY.htm#ElementArray">ElementArray</a></td><td>全てのinput, textarea, select, button要素と一致します。</td></tr>
-    <tr><td>:text         </td><td>uu.attr("input[@text]")</td><td><a href="./GLOSSARY.htm#ElementArray">ElementArray</a></td><td>input type="text"の要素と一致します。</td></tr>
-    <tr><td>:password     </td><td>uu.attr("input[@password]")</td><td><a href="./GLOSSARY.htm#ElementArray">ElementArray</a></td><td>input type="password"の要素と一致します。</td></tr>
-    <tr><td>:radio        </td><td>uu.attr("input[@radio]")</td><td><a href="./GLOSSARY.htm#ElementArray">ElementArray</a></td><td>input type="radio"の要素と一致します。</td></tr>
-    <tr><td>:checkbox     </td><td>uu.attr("input[@checkbox]")</td><td><a href="./GLOSSARY.htm#ElementArray">ElementArray</a></td><td>input type="checkbox"の要素と一致します。</td></tr>
-    <tr><td>:submit       </td><td>uu.attr("input[@submit]")</td><td><a href="./GLOSSARY.htm#ElementArray">ElementArray</a></td><td>input type="submit"の要素と一致します。</td></tr>
-    <tr><td>:image        </td><td>uu.attr("input[@image]")</td><td><a href="./GLOSSARY.htm#ElementArray">ElementArray</a></td><td>input type="image"の要素と一致します。</td></tr>
-    <tr><td>:reset        </td><td>uu.attr("input[@reset]")</td><td><a href="./GLOSSARY.htm#ElementArray">ElementArray</a></td><td>input type="reset"の要素と一致します。</td></tr>
-    <tr><td>:button       </td><td>uu.attr("input[@button]")</td><td><a href="./GLOSSARY.htm#ElementArray">ElementArray</a></td><td>input type="button"の要素と一致します。</td></tr>
-    <tr><td>:file         </td><td>uu.attr("input[@file]")</td><td><a href="./GLOSSARY.htm#ElementArray">ElementArray</a></td><td>input type="file"の要素と一致します。</td></tr>
-<!--
-    <tr><td>:hidden       </td><td></td><td>Element(s)</td><td>input type="hidden"の要素と一致します。<br />
-      <span style="color: red">uu.css("...:hidden")は、display: none や visibility: hidden の要素とは一致しません。<br />
-                               uu.pseudo(":hidden")を使用してください。</span></td></tr>
- -->
+                                   <br />uu.tag("button")</td><td>全てのinput, textarea, select, button要素と一致します。</td></tr>
+    <tr><td>:text         </td><td>uu.attr("input[@text]")</td><td>input type="text"の要素と一致します。</td></tr>
+    <tr><td>:password     </td><td>uu.attr("input[@password]")</td><td>input type="password"の要素と一致します。</td></tr>
+    <tr><td>:radio        </td><td>uu.attr("input[@radio]")</td><td>input type="radio"の要素と一致します。</td></tr>
+    <tr><td>:checkbox     </td><td>uu.attr("input[@checkbox]")</td><td>input type="checkbox"の要素と一致します。</td></tr>
+    <tr><td>:submit       </td><td>uu.attr("input[@submit]")</td><td>input type="submit"の要素と一致します。</td></tr>
+    <tr><td>:image        </td><td>uu.attr("input[@image]")</td><td>input type="image"の要素と一致します。</td></tr>
+    <tr><td>:reset        </td><td>uu.attr("input[@reset]")</td><td>input type="reset"の要素と一致します。</td></tr>
+    <tr><td>:button       </td><td>uu.attr("input[@button]")</td><td>input type="button"の要素と一致します。</td></tr>
+    <tr><td>:file         </td><td>uu.attr("input[@file]")</td><td>input type="file"の要素と一致します。</td></tr>
     </table>
+ -->
 
     <a name="n"></a>
     <p>:nth-child(n), :nth-last-child(n), :nth-of-type(n), :nth-last-of-type(n) の n には、
-      <br />"even", "odd", "2n", "2n+1" または "xny" といった文字列や数値を指定可能です。</p>
+      <br />"even", "odd", "2n", "2n+1" または "xny" といった文字列や数値を指定可能です。
+      <br />これはテーブルの行をゼブラカラーにする場合などに使用されます。
+    </p>
     <ul>
       <li>数値: 先頭/末尾から数えてn番目の兄弟要素と一致します。</li>
       <li>"even": 先頭/末尾から数えて偶数番目の兄弟要素と一致します。0,2,4...番目の要素は"even"と一致します。</li>
@@ -453,20 +459,6 @@
       <li>"4n+3": 4で割って余りが2の番号を持つ要素を選択します。</li>
       <li>"4n+4": 4で割って余りが3の番号を持つ要素を選択します。</li>
     </ul>
-  </dd>
-  <dt><a name="List_of_Pseudo_Selectors">uu.pseudo で使用可能なCSSセレクタの一覧</a> - List of the available pseudo selectors</dt>
-  <dd>
-    <p>以下はJavaScriptプロパティの値に対し検索します。<a href="http://d.hatena.ne.jp/uupaa/20080620">Attrノードの値は検索しません。</a></p>
-    <table>
-    <tr><th>Pseudo selectors</th><th>戻り値(Return)</th><th>内容</th></tr>
-    <tr><td><a href="./demo/selector/enabled.htm" class="run">uu.pseudo(":enabled")</a></td><td><a href="./GLOSSARY.htm#ElementArray">ElementArray</a></td><td>要素のdisabled属性がfalseの要素と一致します。<br />- The UI element states pseudo-classes - CSS Level 3</td></tr>
-    <tr><td><a href="./demo/selector/disabled.htm" class="run">uu.pseudo(":disabled")</a></td><td><a href="./GLOSSARY.htm#ElementArray">ElementArray</a></td><td>要素のdisabled属性がtrueの要素と一致します<br />- The UI element states pseudo-classes - CSS Level 3</td></tr>
-    <tr><td><a href="./demo/selector/checked.htm" class="run">uu.pseudo(":checked")</a></td><td><a href="./GLOSSARY.htm#ElementArray">ElementArray</a></td><td>input type="radio" か input type="checkbox"の要素で、checked属性がtrueの要素と一致します。<br /> - The UI element states pseudo-classes - CSS Level 3</td></tr>
-    <tr><td><a href="./demo/selector/selected.htm" class="run">uu.pseudo(":selected")</a></td><td><a href="./GLOSSARY.htm#ElementArray">ElementArray</a></td><td>要素のselected属性がtrueの要素と一致します。<br /> - from jQuery</td></tr>
-    <tr><td>uu.pseudo(":visible")</td><td><a href="./GLOSSARY.htm#ElementArray">ElementArray</a></td><td>:hidden の条件と一致しない、全ての要素と一致します。<br /> - from jQuery</td></tr>
-    <tr><td>uu.pseudo(":hidden")</td><td><a href="./GLOSSARY.htm#ElementArray">ElementArray</a></td><td>input type="hidden" か display属性が"none" か visibility属性が"hidden" な要素と一致します。<br /> - from jQuery</td></tr>
-    <tr><td><a href="./demo/selector/animated.htm" class="run">uu.pseudo(":animated")</a></td><td><a href="./GLOSSARY.htm#ElementArray">ElementArray</a></td><td>uu.module.effectでアニメーション動作中の要素と一致します。<br /> - from jQuery</td></tr>
-    </table>
   </dd>
 </dl>
 

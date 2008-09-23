@@ -4,7 +4,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="./lib/javascript-xpath.js"></script><![endif]-->
-<script id="uupaa.js" type="text/javascript" src="./uupaa.js"></script>
+<script id="uupaa.js" type="text/javascript" src="uupaa.js"></script>
 <title>uupaa.js - Change Log</title>
 <style type="text/css">@import url(./README.css);</style>
 <style type="text/css">
@@ -17,8 +17,11 @@
 #total { margin: 0 auto; }
 #total, #total thead th { border: 1px solid gray }
 #total td { text-align: right }
-#pie {
+.posfixed {
   position: fixed; top: 20px; right: 20px;
+  width: 360px; height: 200px;
+}
+#pie {
   opacity: 0.5;
 }
 #pie:hover {
@@ -43,8 +46,9 @@ li { margin-bottom: 0.5em; }
 <a href="./README.htm">README</a> &gt; CHANGELOG
 <hr />
 
-<img id="pie" class="alpha" src="http://uupaa-js.googlecode.com/svn/trunk/img/b1.gif" alt="Changes" />
-
+<div class="posfixed"><!-- #pie に直接 position:fixedを設定するとieboostのpng透過処理と衝突するためdivの子要素としdivにposition:fixedを設定する -->
+  <img id="pie" src="http://uupaa-js.googlecode.com/svn/trunk/img/b1.gif" alt="Changes" />
+</div>
 
 <div id="log">
   <dl>
@@ -55,6 +59,93 @@ li { margin-bottom: 0.5em; }
     <dt id="version0.x-title">Version 0.x</dt>
     <dd id="version0.x-data">
       <dl>
+        <dt>Version 0.6 2008-09-24 / New CSS3 Selector, DataScheme(image/gif), position:fixed</dt>
+        <dd>
+          <ol>
+            <li class="del">uupaa.js (uu.module.config.backCompat):
+                <br />- Delete backCompat mode. and fixed functions(uu.css.get, uu.css.set).
+            </li>
+
+            <li class="move">uu.module.drag.js (uu.module.drag.shim into uu.module.ieboost.js::uu.module.ieboost.shim):
+            </li>
+
+            <li class="fix">uupaa.js (<a href="./DOCUMENT.htm#uu.notax">uu.notax</a>):
+                <ja><br />- uu.notax("")でArray([])を返すように修正。</ja>
+                <en><br />- uu.notax("") returns Array([]).</en>
+            </li>
+
+            <li class="add">uupaa.js (<a href="./DOCUMENT.htm#uu.ready">uu.ready</a>, uu.ready.already, uu.module, uu.module.loadSync):
+                <ja><br />- <a href="GLOSSARY.htm#ModuleReady">ModuleReady</a>状態を新たにサポート。</ja>
+                <en><br />- Supported a <a href="GLOSSARY.htm#ModuleReady">ModuleReady</a> state newly.</en>
+            </li>
+            <li class="add">uu.module.ieboost.js (<a href="./MODULE.htm#uu.module.ieboost.positionAbsolute">uu.module.ieboost.positionAbsolute</a>):
+                <ja><br />- IE6の標準モードでposition: absoluteを指定した要素のテキストを正しく選択できないバグを修正する機能を追加。</ja>
+                <en><br />- The function to correct the bug that was not able to select the text of the element with position: absolute correctly was added, for IE6 Standard Mode.</en>
+            </li>
+
+            <li class="add">uu.module.ieboost.js (<a href="./MODULE.htm#uu.module.ieboost.positionFixed">uu.module.ieboost.positionFixed</a>):
+                <ja><br />- IE6でposition: fixedをサポート。</ja>
+                <en><br />- Supported a position: fixed for IE6.</en>
+            </li>
+
+            <li class="fix">uupaa.js (<a href="./DOCUMENT.htm#uu.node.substance">uu.node.substance</a>):
+                <ja><br />- Safari3, Firefox2, IEでplaceholderが削除されていない問題を修正。</ja>
+                <en><br />- The problem that placeholder has not been deleted by Safari3, Firefox2, and IE was corrected.</en>
+            </li>
+
+            <li class="add">uupaa.js (<a href="./DOCUMENT.htm#uu.node.pos">uu.node.pos</a>, <a href="./DOCUMENT.htm#uu.node.count">uu.node.count</a>,
+                                      <a href="./DOCUMENT.htm#uu.css.recalc">uu.css.recalc</a>):
+                <br />- Add some functions
+            </li>
+
+            <li class="retake">uupaa.js (<a href="./SELECTOR.htm#uu.css">uu.css</a>,
+                                         <a href="./SELECTOR.htm#uu.xpath">uu.xpath</a>,
+                                         <a href="./MODULE.htm#uu.module.perf.run">uu.module.perf.run</a>):
+                <br />- Retake some functions.
+            </li>
+
+            <li class="del">uupaa.js (uu.xsnap, uu.pseudo, uu.toXPath):
+                <br />- Delete some functions.
+            </li>
+            <li class="fix">uupaa.js (<a href="./SELECTOR.htm#uu.attr">uu.attr</a>):
+                <ja><br />- uu.pseudoの機能をuu.attrに移植。</ja>
+                <en><br />- The function of uu.pseudo was transplanted to uu.attr.</en>
+            </li>
+
+            <li class="add">uu.module.datascheme.js:
+                <br />- Add a module file.
+            </li>
+
+            <li class="retake">uu.module.io.js:
+                <br />- Retake many functions.
+            </li>
+
+            <li class="add">uupaa.js (<a href="./DOCUMENT.htm#uu.css.unselectable">uu.css.unselectable</a>):
+                <br />- Add function.
+            </li>
+            <li class="fix">uupaa.js (<a href="./DOCUMENT.htm#uu.module">uu.module</a>):
+                <ja><br />- ブラウザ名で始まっているモジュール("ieboost"等)は、そのブラウザ以外では実際には読み込まないように修正。
+                    <br />有効なブラウザ名は、"ie", "firefox", "opera", "safari", "chrome"</ja>
+                <en><br />- Module beginning with a browser name is not loaded other than browser to fall under.
+                    <br />Effective browser list: "ie", "firefox", "opera", "safari", "chrome"</en>
+            </li>
+            <li class="add">uu.module.canvas2d.js (<a href="./MODULE.htm#uu.module.canvas2d.dotBlt">uu.module.canvas2d.dotBlt</a>):
+                <br />- Add a function
+            </li>
+            <li class="fix">uupaa.js (<a href="./MODULE.htm#uu.module.color.hash">uu.module.color.hash</a>):
+                <ja><br />- uu.color.hash(0,0,0,0) が RGBAHash( { r: 0, g: 0, b: 0, a: 1 } ) を生成してしまうのを修正。</ja>
+                <en><br />- RGBAHash( { r: 0, g: 0, b: 0, a: 1 } ) revised a generated bug from uu.color.hash(0,0,0,0).</en>
+            </li>
+            <li class="add">uupaa.js (<a href="./DOCUMENT.htm#uu.ua.v8">uu.ua.v8</a>):
+                <br />- Support Google Chrome<img src="./img/c32.png" alt="Google Chrome logo" />
+            </li>
+            <li class="fix">uupaa.js (<a href="./DOCUMENT.htm#uu.node.replace">uu.node.replace</a>):
+                <ja><br />- 引数(context)のデフォルト値を document から oldNode.parentNode に変更。</ja>
+                <en><br />- Chnage arg(context) default value, "document" to "oldNode.parentNode".</en>
+            </li>
+          </ol>
+        </dd>
+
         <dt>Version 0.5 2008-08-31 / Unofficial excanvas.js (ver 0.3) implement</dt>
         <dd>
           <ol>
@@ -63,7 +154,7 @@ li { margin-bottom: 0.5em; }
                 <br />- need uu.trim().
             </li>
 
-            <li class="fix">uu.module.effect+.js (<a href="./MODULE.htm#uu.module.effect+.wave">uu.module.effect+.wave</a>):
+            <li class="add">uu.module.effect+.js (<a href="./MODULE.htm#uu.module.effect+.wave">uu.module.effect+.wave</a>):
             </li>
             <li class="add">uu.module.effect+.js (<a href="./MODULE.htm#uu.module.effect+.sunset">uu.module.effect+.sunset</a>):
             </li>
@@ -191,8 +282,8 @@ li { margin-bottom: 0.5em; }
                 <en><br />- Add a function to pt and em convert into a px unit.</en>
             </li>
             <li class="add">uu.module.drag.js (<a href="./MODULE.htm#uu.module.drag.shim">uu.module.drag.shim</a>):
-                <br />- <ja>IE6のバグ(select要素がz-indexを無視する)を改善するトリック(shim)を実装</ja>
-                <br />- <en>Support the "shim" trick for IE6</en>
+                <ja><br />- IE6のバグ(select要素がz-indexを無視する)を改善するトリック(shim)を実装</ja>
+                <en><br />- Support the "shim" trick for IE6</en>
                 <br />&gt;&gt;<a href="http://dotnetjunkies.com/weblog/jking/archive/2003/07/21/488.aspx">How to cover an IE windowed control (Select Box, ActiveX Object, etc.) with a DHTML layer.(Joe King)</a>
                 <br />&gt;&gt;<a href="http://support.microsoft.com/default.aspx?scid=http://support.microsoft.com:80/support/kb/articles/q177/3/78.asp&amp;NoWebContent=1">INFO: How the Z-index Attribute Works for HTML Elements.(MicroSoft)</a>
             </li>
@@ -506,8 +597,8 @@ li { margin-bottom: 0.5em; }
                 <en><br />- Choose MIT license.</en>
             </li>
             <li>Library Name:
-                <ja><br />- ウーパールーパーをペットショップで発見, ライブラリの名前は uupaa.js に。</ja>
-                <en><br />- Discover an Axolotl(called Wooper Rooper in Japan) in a pet shop; the name of the library in uupaa.js.</en>
+                <ja><br />- ウーパールーパーをペットショップで発見, ライブラリの名前を uupaa.js に。</ja>
+                <en><br />- Discover an Axolotl(called `Wooper Rooper' in Japan) in a pet shop; the name of the library in uupaa.js.</en>
             </li>
           </ul>
         </dd>
@@ -556,10 +647,13 @@ function pie(context, title) {
   );
 }
 function draw(uid, state, img, code, url, async) {
-  if (uu.ua.ie && uu.ua.version <= 6) { // IE6以下は自力で透過png
-    uu.id("pie").style.filter = 'progid:DXImageTransform.Microsoft.AlphaImageLoader(src="' + url + '",sizingMethod=crop)';
+  var e = uu.id("pie");
+  if (uu.ua.ie && uu.ua.version <= 6) { // パイチャートのファイル名には拡張子(".png")が無いため、透過png処理を手動で行う
+    e.style.filter = 'progid:DXImageTransform.Microsoft.AlphaImageLoader(src="' + url + '",sizingMethod=crop)';
+    e.style.width  = "360px";
+    e.style.height = "200px";
   } else {
-    uu.id("pie").src = url;
+    e.src = url;
   }
 }
 var context = null;
@@ -580,17 +674,21 @@ function splitLang() {
   var lang = (navigator.language || navigator.browserLanguage || "en").replace(/\-.*$/, "");
   if (/file:/.test(uu.url.dir(uu.url.base()))) { return; } // local
   if (lang !== "ja") {
-    uu.forEach(uu.tag('ja'), function(v) { v.innerHTML = ""; });
+    uu.forEach(uu.tag('ja'), function(v) {
+      try {
+        v.innerHTML = "";
+      } catch(e) { ; }
+    });
   } else {
-    uu.forEach(uu.tag('en'), function(v) { v.innerHTML = ""; });
+    uu.forEach(uu.tag('en'), function(v) {
+      try {
+        v.innerHTML = "";
+      } catch(e) { ; }
+    });
   }
 }
 function boot() {
   uu.event.set(handleEvent, document, "mousemove");
-
-  if (uu.ua.ie && uu.ua.version <= 6) { // IE6 "position: fixed" do not impl.
-    uu.css.set(uu.id("pie"), { position: "absolute", width: "360px", height: "200px" });
-  }
   pie(uu.id("version0.x-data"), uu.id("version0.x-title").innerText);
 
   splitLang();

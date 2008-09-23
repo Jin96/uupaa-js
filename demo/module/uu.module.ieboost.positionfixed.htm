@@ -1,0 +1,150 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html><head><title>uupaa.js - uu.module.ieboost.posfixed test</title>
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
+<style type="text/css">
+html {
+  background-color: white;
+  color: black;
+  margin: 10px;
+}
+body {
+  padding: 20px;
+  border: 3px dotted gray;
+}
+#posfixeddemo {
+  position: fixed;
+  top: 50px; right: 200px;
+  width: 200px; height:100px;
+  padding: 1em;
+  background-color: yellow;
+  color: #333;
+  font: 600 15pt Verdana;
+  opacity: 0.5;
+}
+span { background-color: gold; }
+</style>
+</head>
+<body><a href="../../README.htm">README</a> &gt; <a href="../../MODULE.htm#uu.module.ieboost.positionfixed">MODULE</a> &gt; uu.module.ieboost.positionfixed<br />
+<a href="./uu.module.ieboost.positionfixed.htm">to Standard Mode...</a> |
+<a href="./uu.module.ieboost.positionfixed_quirks.htm">to Quirks Mode...</a> |
+<a href="./uu.module.ieboost.positionfixed_bottom.htm">to bottom and em ...</a>
+<br />
+<input type="button" value="add box" onclick="addBox()" />
+<pre>
+&lt;style type="text/css"&gt;
+html {
+  background-color: white;
+  color: black;
+  margin: 10px;
+}
+body {
+  padding: 20px;
+  border: 3px dotted gray;
+}
+#posfixeddemo {
+  position: fixed;
+  <span>top: 50px;</span> right: 200px;
+  width: 200px; height:100px;
+  padding: 1em;
+  background-color: yellow;
+  color: #333;
+  font: 600 15pt Verdana;
+  opacity: 0.5;
+}
+&lt;/style&gt;
+</pre>
+
+<script>
+function addBox() {
+  var uid = uu.uid();
+  var left = parseInt(Math.random() * 300 + 100);
+  var top  = parseInt(Math.random() * 300 + 100);
+  var color = parseInt(Math.random() * 0xff * 0xff * 0xff);
+  var html = '<div id="%s" style="position:fixed;top:%dpx;left:%dpx;background-color:%s;opacity:0.4;width:100px;height:100px;">%s</div>';
+  uu.node.insert(uu.sprintf(html, uid, top, left, uu.color.coffee(uu.color.hash(color)), uid));
+  uu.css.recalc();
+}
+</script>
+<div id="posfixeddemo">position: fixed;<br />top: 50px;<br />Standard Mode</div>
+<div id="scroll"> 
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+<p>upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa upa</p>
+</div>
+</body>
+</html>

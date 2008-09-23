@@ -1,0 +1,50 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html><head><title>uupaa.js - test</title>
+<script id="uupaa.js" type="text/javascript" src="uupaa.js"></script>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+<body>
+
+<div id="result"></div>
+
+<p>
+uu.mixは要素のクローンを作成することもできます。
+</p>
+
+<script>
+uu.module("", "dev", function() {
+  uu.ready(function() {
+    var src1 = { a: 1, b: 1 };
+    var clone1 = uu.mix({}, src1);
+
+    uu.log(src1 === clone1); // false
+    uu.log(clone1); // { a: 1, b: 1 }
+
+    var src2 = src1;
+    uu.log(src2 === src1); // true
+    uu.log(src2);   // { a: 1, b: 2 }
+
+    clone1.a = 2828;
+    src2.a = 2929;
+    uu.log(clone1); // { a: 2828, b: 2 }
+    uu.log(src1);   // { a: 2929, b: 2 }
+    uu.log(src2);   // { a: 2929, b: 2 }
+  }, "W");
+});
+</script>
+
+<pre>
+    var src1 = { a: 1, b: 1 };
+    var clone1 = uu.mix({}, src1);
+
+    uu.log(src1 === clone1);
+    uu.log(clone1);
+
+    var src2 = src1;
+    uu.log(src2 === src1);
+    uu.log(src2);
+</pre>
+
+</body>
+</html>

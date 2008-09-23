@@ -14,9 +14,21 @@ tr.category { background-color: #1F1F1F; }
   display: inline-block; border: 1px dashed skyblue; max-width: 8em; height: 5em;
 }
 .maxmin1 { float: left; }
+#posfixeddemo {
+  position: fixed;
+  bottom: 6em; right: 50px;
+  width: 180px; height: 80px;
+  border: 0.3em solid tomato;
+  padding: 1em;
+  background-color: yellow;
+  color: #333;
+  opacity: 0.5;
+}
+
 </style>
+<!--[if IE]><script id="excanvas.js" type="text/javascript" src="http://pigs.sourceforge.jp/excanvas.js"></script><![endif]-->
 <!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="./lib/javascript-xpath.js"></script><![endif]-->
-<script id="uupaa.js" type="text/javascript" src="./uupaa.js"></script>
+<script id="uupaa.js" type="text/javascript" src="./uupaa.js?module=dev,canvas,datascheme"></script>
 </head>
 <body>
 <p>
@@ -35,62 +47,160 @@ tr.category { background-color: #1F1F1F; }
 <hr />
 <div>
 <p>著名なライブラリとの機能比較です。</p>
+<p>uupaa.js は、ブラウザ
+<img src="./img/f32.png" alt="" />
+<img src="./img/o32.png" alt="" />
+<img src="./img/s32.png" alt="" />
+<img src="./img/i32.png" alt="" />
+<img src="./img/c32.png" alt="" /> の違いを吸収しつつ、同様のライブラリよりも高速に動作します。</p>
 </div>
+
+<div id="posfixeddemo"><img src="./img/i32.png" alt="" />IE6+でも<br />position: fixed が使える</div>
+
+
 <table>
+<tr class="category"><th>Only-One Function</th><th>uupaa.js</th><th>jQuery</th><th>Prototype.js</th><th>他のライブラリ/備考</th></tr>
+<tr><td><img src="./img/i32.png" alt="" />
+        <br />IE6+でも <a href="./demo/module/uu.module.drag.htm">
+        <br />Drag &amp; Drop したまま
+        <br />画面外に移動できるから</a>
+        <br />他のブラウザと同じ操作性を実現できる
+        </td>
+        <td>○</td>
+        <td>×</td>
+        <td>×</td><td>他のライブラリの多くは<br />
+                   <a href="http://dev.jquery.com/view/trunk/ui/demos/functional/#ui.dialog">
+                   画面端でドラッグが中断し<br />セレクトボックスが突き抜けてしまう</a></td></tr>
+
+<tr><td><img src="./img/i32.png" alt="" />
+        <br /><a href="http://excanvas.sourceforge.net/">excanvas</a>を改善する機能を搭載しているから
+        <br />IE6+でも<br />HTML5::Canvasで色々できる
+        <br />次世代のUIを開発できる
+        <br /><a href="./demo/canvas/demo.htm">線形グラデーション
+        <br />円形グラデーション
+        <br />多色グラデーション
+        <br />パターン塗りつぶし
+        <br />CSS Level3準拠の色指定</a>が使える
+        <br />描画速度も10%～36%高速化
+        </td><td>○
+<canvas id="rainbow" width="200" height="70"></canvas>
+<br />uu.module.canvas.js
+</td><td>×</td><td>×</td><td>　</td></tr>
+<tr><td><img src="./img/i32.png" alt="" />
+        <br /><a href="http://www.ietf.org/rfc/rfc2397.txt">DataScheme</a>をサポートしているから
+        <br />IE6+でも
+        <br />小さなGIF画像をHTMLに直接埋め込める
+        <br />ページ表示までの時間をもっと高速化できる
+        <br />サーバとネットワークの負荷を軽減できる
+        </td>
+    <td>○
+    <a href="http://larry.masinter.net/">
+    <img alt="Mr. Larry Masinter" src="data:image/gif;base64,R0lGODdhMAAwAPAAAAAAAP///ywAAAAAMAAwAAAC8IyPqcvt3wCcDkiLc7C0qwyGHhSWpjQu5yqmCYsapyuvUUlvONmOZtfzgFzByTB10QgxOR0TqBQejhRNzOfkVJ+5YiUqrXF5Y5lKh/DeuNcP5yLWGsEbtLiOSpa/TPg7JpJHxyendzWTBfX0cxOnKPjgBzi4diinWGdkF8kjdfnycQZXZeYGejmJlZeGl9i2icVqaNVailT6F5iJ90m6mvuTS4OK05M0vDk0Q4XUtwvKOzrcd3iq9uisF81M1OIcR7lEewwcLp7tuNNkM3uNna3F2JQFo97Vriy/Xl4/f1cf5VWzXyym7PHhhx4dbgYKAAA7" />
+    </a>
+    <img alt="star" width="7" src="data:image/gif;base64,R0lGODlhEAAQAMQAAKOHImFOFPHMTMeoJue1TvXsZ%2BziOOzRI%2F3ZbvrmTvjkIT0uEhANA4t4EPjtcvLpXPvzfUU4DevcNPztW%2FXvafz1i%2FfcPe%2FlRfTeJ%2FDmUO%2FnUSkhCMeZRfnaW93AIAAAACH5BAAAAAAALAAAAAAQABAAAAWD4CeOX0CeJ0MsaBsgXJtyFbLJ41tVQMtsiwDHAYEIAoHFhvEhEASdqGPqiAqugECHUihwu14KZTJgLgSTh3qtTgCYIsYgocnY7ZYGKmC5%2BP8eLQ0WBoWFFwdwJAMShRgYBhIYNyQMHhgKAxEBBwoKJiQRCh6gHwwNCnokAQ2KIxutIiEAOw%3D%3D" />
+    <img alt="star" src="data:image/gif;base64,R0lGODlhEAAQAMQAAKOHImFOFPHMTMeoJue1TvXsZ%2BziOOzRI%2F3ZbvrmTvjkIT0uEhANA4t4EPjtcvLpXPvzfUU4DevcNPztW%2FXvafz1i%2FfcPe%2FlRfTeJ%2FDmUO%2FnUSkhCMeZRfnaW93AIAAAACH5BAAAAAAALAAAAAAQABAAAAWD4CeOX0CeJ0MsaBsgXJtyFbLJ41tVQMtsiwDHAYEIAoHFhvEhEASdqGPqiAqugECHUihwu14KZTJgLgSTh3qtTgCYIsYgocnY7ZYGKmC5%2BP8eLQ0WBoWFFwdwJAMShRgYBhIYNyQMHhgKAxEBBwoKJiQRCh6gHwwNCnokAQ2KIxutIiEAOw%3D%3D" />
+    <img alt="star" width="32" src="data:image/gif;base64,R0lGODlhEAAQAMQAAKOHImFOFPHMTMeoJue1TvXsZ%2BziOOzRI%2F3ZbvrmTvjkIT0uEhANA4t4EPjtcvLpXPvzfUU4DevcNPztW%2FXvafz1i%2FfcPe%2FlRfTeJ%2FDmUO%2FnUSkhCMeZRfnaW93AIAAAACH5BAAAAAAALAAAAAAQABAAAAWD4CeOX0CeJ0MsaBsgXJtyFbLJ41tVQMtsiwDHAYEIAoHFhvEhEASdqGPqiAqugECHUihwu14KZTJgLgSTh3qtTgCYIsYgocnY7ZYGKmC5%2BP8eLQ0WBoWFFwdwJAMShRgYBhIYNyQMHhgKAxEBBwoKJiQRCh6gHwwNCnokAQ2KIxutIiEAOw%3D%3D" />
+    <img alt="star" width="64" src="data:image/gif;base64,R0lGODlhEAAQAMQAAKOHImFOFPHMTMeoJue1TvXsZ%2BziOOzRI%2F3ZbvrmTvjkIT0uEhANA4t4EPjtcvLpXPvzfUU4DevcNPztW%2FXvafz1i%2FfcPe%2FlRfTeJ%2FDmUO%2FnUSkhCMeZRfnaW93AIAAAACH5BAAAAAAALAAAAAAQABAAAAWD4CeOX0CeJ0MsaBsgXJtyFbLJ41tVQMtsiwDHAYEIAoHFhvEhEASdqGPqiAqugECHUihwu14KZTJgLgSTh3qtTgCYIsYgocnY7ZYGKmC5%2BP8eLQ0WBoWFFwdwJAMShRgYBhIYNyQMHhgKAxEBBwoKJiQRCh6gHwwNCnokAQ2KIxutIiEAOw%3D%3D" />
+    <br />uu.module.datascheme.js
+    <br />uu.module.ieboost.js
+</td><td>×</td><td>×</td>
+    <td>
+        <br /><a href="http://uupaa-js-spinoff.googlecode.com/svn/trunk/uupaa-datascheme.js/uupaa-datascheme.htm">単位動作版配布中</a></td></tr>
+
+
+
+
 <tr class="category"><th>デザインの自由度向上につながる<br />機能強化ポイント</th><th>uupaa.js</th><th>jQuery</th><th>Prototype.js</th><th>他のライブラリ/備考</th></tr>
-<tr><th>HTML5::Canvasのサポート</th><th>　</th><th>　</th><th>　</th><th>　</th></tr>
-<tr><td><a href="./demo/canvas/demo.htm">線形グラデーション
-          <br />円形グラデーション
-          <br />多色グラデーション
-          <br />パターン塗りつぶし
-          <br />CSS Level3準拠の色指定</a></td>
-          <td>○<br />excanvas.js を改良し<br />10%～36%の高速化も</td><td>×</td><td>×</td><td>　</td></tr>
 <tr><th>CSS Property</th><th>　</th><th>　</th><th>　</th><th>　</th></tr>
-<tr><td>min-width:<br />
+<tr><td><img src="./img/i32.png" alt="" />
+        <br />IE6+でも<br />
+        min-width:<br />
         max-width:<br />
         min-height:<br />
         max-height:<br />
-        (IE6でもリキッドデザインが使用可能)</td>
+        が使える<br />
+        CSS Hack 無しでリキッドデザインが使える</td>
         <td>○<br />
           <div class="maxmin1">max-width: 8em; height: 5em;</div>
           <div class="maxmin2">max-width: 8em; height: 5em;</div>
         <br />uu.module.ieboost.js
         </td><td>不明</td><td>不明</td><td>minmax.js<br />IE7.js</td></tr>
-<tr><td>opacity:<br />(IE6でも不透明度が使える)</td><td>○
+<tr><td><img src="./img/i32.png" alt="" />
+        <br />IE6+でも<br />opacity:
+        <br />が使える
+        <br />背景を透過させられる
+        <br />IE専用のデザイン部品(CSS,画像)が不要に</td><td>○
         <img style="opacity: 0.8" src="img/uu.module.canvas.grid.gif" alt="" />
         <img style="opacity: 0.5" src="img/uu.module.canvas.grid.gif" alt="" />
         <img style="opacity: 0.2" src="img/uu.module.canvas.grid.gif" alt="" />
         <br />uu.module.ieboost.js
         </td><td>不明</td><td>不明</td><td>IE8.js</td></tr>
-<tr><th>png画像の透過</th><th>　</th><th>　</th><th>　</th><th>　</th></tr>
-<tr><td><a href="http://uupaa-js-spinoff.googlecode.com/svn/trunk/suketrans/suketrans.htm">&lt;img src="*.png"&gt;を透過
-        <br />背景のpng画像を透過</a>
-        <br />(IE6でもモダンなデザイン)</td>
-        <td id="alphapngbg" class="alpha">○<br />uu.module.ieboost.js<br /><a href="http://code.google.com/p/uupaa-js-spinoff/">suketrans.js</a></td>
-        <td>△<br />jquery.pngfix.js(不完全)</td><td>不明</td>
-        <td>IE7.js</td></tr>
+
+
+
+<!--
+<tr><td><img src="./img/i32.png" alt="" />
+        <br />IE6+でも<br />position: fixed
+        <br />が使える</td><td><div id="posfixeddemo">position: fixed;</div>○
+        <br />uu.module.ieboost.js
+        </td><td>不明</td><td>不明</td><td>IE7.js</td></tr>
+ -->
+
+
+
+
+
+
+<tr><th>PNG画像の透過</th><th>　</th><th>　</th><th>　</th><th>　</th></tr>
+<tr><td><img src="./img/i32.png" alt="" />
+        <br />IE6+でも<br />
+        PNG画像やPNGの背景画像を<br />自動的に透過する</td>
+        <td id="alphapngbg" class="alpha">○<br />uu.module.ieboost.js</td>
+        <td>△<br />jquery.pngfix.js<br />(不完全)</td><td>不明</td>
+        <td>IE7.js
+            <br ><a href="http://uupaa-js-spinoff.googlecode.com/svn/trunk/uupaa-suketrans.js/uupaa-suketrans.htm">単位動作版配布中</a>
+        </td></tr>
 
 <tr class="category"><th>要素の操作性向上につながる<br />機能強化ポイント</th><th>uupaa.js</th><th>jQuery</th><th>Prototype.js</th><th>他のライブラリ/備考</th></tr>
 <tr><th><a href="./SELECTOR.htm">セレクタ</a></th><th>　</th><th>　</th><th>　</th><th>　</th></tr>
 <tr><td><a href="./SELECTOR.htm#uu.id">ID</a>,
         <a href="./SELECTOR.htm#uu.tag">Tag</a>,
-        <a href="./SELECTOR.htm#uu.klass">Class</a> Selector</td><td>○</td><td>○</td><td>○</td><td>　</td></tr>
+        <a href="./SELECTOR.htm#uu.klass">Class</a> Selector</td><td>○</td><td>×</td><td>○(IDのみ)</td><td>　</td></tr>
 <tr><td><a href="./SELECTOR.htm#uu.nodeType">NodeType</a>,
         <a href="./SELECTOR.htm#uu.textNode">TextNode</a> Selector</td><td>○</td><td>×</td><td>×</td><td>　</td></tr>
-<tr><td><a href="./SELECTOR.htm#uu.attr">Attribute</a>, <a href="./SELECTOR.htm#uu.pseudo">Pseudo</a> Selector</td><td>○</td><td>○</td><td>△</td><td>　</td></tr>
-<tr><td><a href="./SELECTOR.htm#uu.css">CSS1～CSS3</a> Selector</td><td>△(:not 未実装)</td><td>○</td><td>○</td><td>　</td></tr>
+<tr><td><a href="./SELECTOR.htm#uu.attr">Attribute</a> Selector</td><td>○</td><td>×</td><td>×</td><td>　</td></tr>
+<tr><td><a href="./SELECTOR.htm#uu.css">CSS3</a> Selector</td><td>○(:not 未実装)</td><td>△</td><td>○</td><td><a href="http://d.hatena.ne.jp/uupaa/20080919/1221834168">開発日記</a></td></tr>
 <tr><td><a href="./SELECTOR.htm#uu.xpath">XPath</a> Selector</td><td>○<br />IE: <a href="http://coderepos.org/share/wiki/JavaScript-XPath">JavaScript-XPath</a></td>
-                                                                       <td>△<br />XPathは一部のみ実装</td><td>×</td><td>　</td></tr>
-<tr><td><a href="./SELECTOR.htm#List_of_jQuery_Selectors">jQuery独自</a> Selector</td><td>○</td><td>○</td><td>×</td><td>　</td></tr>
+                                                                       <td>×</td><td>×</td><td>　</td></tr>
+<tr><td><a href="./SELECTOR.htm#List_of_jQuery_Selectors">jQuery独自</a> Selector</td><td><del>○</del><br />ver 0.6以降は非対応</td><td>○</td><td>×</td><td>　</td></tr>
 <tr class="category"><th>生産性/可読性向上につながる<br />機能強化ポイント</th><th>uupaa.js</th><th>jQuery</th><th>Prototype.js</th><th>他のライブラリ/備考</th></tr>
 <tr><th>文法</th><th>　</th><th>　</th><th>　</th><th>　</th></tr>
-<tr><td>メソッドチェーンによる簡潔な記述</td><td><del>○</del><br />モッサリするため開発中断</td><td>○</td><td>×</td><td>　</td></tr>
+<tr><td>メソッドチェーンによる簡潔な記述</td><td>×<br />uu.module.canvas.jsは<br />メソッドチェーン対応</td><td>○</td><td>×</td><td>　</td></tr>
 <tr><th>ECMA-262準拠</th><th>　</th><th>　</th><th>　</th><th>　</th></tr>
-<tr><td>Array.<a href="./DOCUMENT.htm#Array.indexOf">indexOf</a>, <a href="./DOCUMENT.htm#Array.lastIndexOf">lastIndexOf</a><br />(IE6+,Safari3+,Opera9+)</td><td>○</td><td>×</td><td>×</td><td>　</td></tr>
-<tr><td>Array.<a href="./DOCUMENT.htm#Array.forEach">forEach</a>, <a href="./DOCUMENT.htm#Array.filter">filter</a>, <a href="./DOCUMENT.htm#Array.every">every</a>, <a href="./DOCUMENT.htm#Array.some">some</a>, <a href="./DOCUMENT.htm#Array.map">map</a><br />(IE6+,Safari3+,Opera9+)</td><td>○</td><td>×</td><td>×</td><td>　</td></tr>
+<tr><td><img src="./img/i32.png" alt="" />
+        <img src="./img/s32.png" alt="" />
+        <img src="./img/o32.png" alt="" />
+        <br />IE6+, Safari3+, Opera9+でも
+        <br />Array.<a href="./DOCUMENT.htm#Array.indexOf">indexOf</a>
+        <br />Array.<a href="./DOCUMENT.htm#Array.lastIndexOf">lastIndexOf</a>
+        <br />が使える</td>
+        <td>○</td><td>×</td><td>×</td><td>　</td></tr>
+<tr><td><img src="./img/i32.png" alt="" />
+        <img src="./img/s32.png" alt="" />
+        <img src="./img/o32.png" alt="" />
+        <br />IE6+, Safari3+, Opera9+でも
+        <br />Array.<a href="./DOCUMENT.htm#Array.forEach">forEach</a>
+        <br />Array.<a href="./DOCUMENT.htm#Array.filter">filter</a>,
+        <br />Array.<a href="./DOCUMENT.htm#Array.every">every</a>,
+        <br />Array.<a href="./DOCUMENT.htm#Array.some">some</a>,
+        <br />Array.<a href="./DOCUMENT.htm#Array.map">map</a>
+        <br />が使える</td><td>○</td><td>×</td><td>×</td><td>　</td></tr>
 <tr><th>デファクトスタンダード/クロスブラウザ</th><th>　</th><th>　</th><th>　</th><th>　</th></tr>
-<tr><td>HTMLElement.outerHTML
-        <br />HTMLElement.innerText<br />(Firefox2+)</td><td>○</td><td>×</td><td>×</td><td>　</td></tr>
+<tr><td><img src="./img/f32.png" alt="" />
+        <br />Firefox2+でも
+        <br />HTMLElement.outerHTML
+        <br />HTMLElement.innerText
+        <br />が使える</td><td>○</td><td>×</td><td>×</td><td>　</td></tr>
 
 <tr class="category"><th>大規模/分散開発向けの<br />機能強化ポイント</th><th>uupaa.js</th><th>jQuery</th><th>Prototype.js</th><th>他のライブラリ/備考</th></tr>
 <tr><th>拡張性</th><th>　</th><th>　</th><th>　</th><th>　</th></tr>
@@ -98,10 +208,11 @@ tr.category { background-color: #1F1F1F; }
 <tr><td><a href="./DOCUMENT.htm#uu.module">モジュールのオンデマンドロード</a></td><td>○</td><td>×</td><td>×</td><td>　</td></tr>
 <tr><td>サードパーティー製モジュール</td><td>×</td><td>○</td><td>○</td><td>　</td></tr>
 <tr><td>i18n</td><td>×<br />検討中</td><td>不明</td><td>不明</td><td>Dojo</td></tr>
+<tr><td>jQuery用に書かれたプラグインの利用</td><td><del>○</del><br /><a href="http://d.hatena.ne.jp/uupaa/20080626/1214492402">可能</a><br />ただし、jQuery互換モジュールは<br />現在非公開</td><td>-</td><td>×</td><td></td></tr>
 
 <tr><th>モダンな設計</th><th>　</th><th>　</th><th>　</th><th>　</th></tr>
 <tr><td><a href="./DOCUMENT.htm#uu.klass.generic">OOP指向の"クラス"を導入</a></td><td>○</td><td>×</td><td>○</td><td>　</td></tr>
-<tr><td>クラスの拡張に対する考え方</td><td>委譲とmixin</td><td>×</td><td>継承とabstract</td><td>　</td></tr>
+<tr><td>クラス, 拡張, 柔軟性に対する考え方</td><td>委譲とmixin<br />ダックタイピング</td><td>prototypeを拡張</td><td>組込オブジェクトを拡張<br />prototypeを拡張<br />継承とabstract</td><td>　</td></tr>
 <tr><td>アーキテクチャー/デザイン パターンの実装<br />
         MVC,
         <a href="./MODULE.htm#uu.module.messagePump">メッセージポンプ</a>,
@@ -129,9 +240,9 @@ tr.category { background-color: #1F1F1F; }
 <tr><td>タブ, アコーディオン等のコントロール</td><td>×<br />開発中</td><td>○<br />サードパーティー</td><td>○<br />サードパーティー</td><td>　</td></tr>
 
 <tr><th>UI</th><th>　</th><th>　</th><th>　</th><th>　</th></tr>
-<tr><td>エフェクト(アニメーション)</td><td>○<br />uu.module.effect+.js</td><td>○</td><td>△<br />script.aculo.us</td><td>　</td></tr>
+<tr><td>エフェクト(アニメーション)</td><td>○<br /><a href="./demo/module/uu.module.effect.htm">uu.module.effect+.js</a></td><td>○</td><td>○<br /><a href="http://script.aculo.us/">script.aculo.us</a></td><td>　</td></tr>
 <tr><td>ドラッグ&amp;ドロップ</td><td>○<br />uu.module.drag.js</td><td>○<br />jQuery.UI</td><td>○<br />script.aculo.us</td><td>　</td></tr>
-<tr><td>canvasのサポート</td><td>○<br />IE: excanvas.js</td><td>×</td><td>×</td><td>　</td></tr>
+<tr><td>canvas のサポート</td><td>○<br />IE: excanvas.js</td><td>×</td><td>×</td><td>　</td></tr>
 <tr><td><a href="./demo/widget/uu.module.widget.window.htm">Window</a></td><td>△<br />開発中<br />uu.module.widget.js</td>
                    <td><a href="http://dev.jquery.com/view/trunk/ui/demos/functional/#ui.dialog">△</a><br />jQuery UI Dialog</td><td>不明</td>
                    <td><a href="http://mochaui.com/demo/">Mootools Mocha UI</a></td></tr>
@@ -147,49 +258,64 @@ tr.category { background-color: #1F1F1F; }
 <tr><th>汚染</th><th>　</th><th>　</th><th>　</th><th>　</th></tr>
 <tr><td><a href="./GLOSSARY.htm#Pollution">プロトタイプ汚染</a></td><td>汚染しない</td><td>汚染しない</td><td>汚染する</td><td>　</td></tr>
 <tr><td><a href="./GLOSSARY.htm#Pollution">グローバルネームスペース汚染</a></td><td>最小限<br />(uuとUU)</td><td>最小限<br />(jQueryと$)</td><td>汚染する</td><td>　</td></tr>
-<tr><td>他のライブラリとの衝突</td><td>衝突しない</td><td>$が衝突する<br />Prototype.js等と<br />共存可能</td><td>$と$$が衝突する<br />他のライブラリとの共存は<br />考えられていない</td><td>　</td></tr>
+<tr><td>他のライブラリとの衝突</td><td>衝突しない</td><td>$が衝突する<br />Prototype.js等と<br />共存可能</td><td>$と$$が衝突する<br />他との共存は<br />考えられていない</td><td>　</td></tr>
 
 <tr class="category"><th>ドキュメント</th><th>uupaa.js</th><th>jQuery</th><th>Prototype.js</th><th>他のライブラリ/備考</th></tr>
 <tr><th>利用方法に関するもの</th><th>　</th><th>　</th><th>　</th><th>　</th></tr>
-<tr><td>初心者向けの読み物, ブログ</td><td>×</td><td>○</td><td>○</td><td>　</td></tr>
+<tr><td>初心者向けの読み物, ブログ</td><td>△<br /><a href="http://d.hatena.ne.jp/uupaa/">開発ブログ</a></td><td>○</td><td>○</td><td>　</td></tr>
 <tr><td>動作サンプル</td><td>△<br />公式のみ</td><td>○</td><td>○</td><td>　</td></tr>
-<tr><td>リファレンス/まとめサイト</td><td>×<br />公式のみ</td><td>○</td><td>○</td><td>　</td></tr>
+<tr><td>リファレンス</td><td>○<br />鋭意作成中</td><td>○</td><td>○</td><td>　</td></tr>
+<tr><td>有志によるまとめサイト</td><td>×<br />Not found...</td><td>○</td><td>○</td><td>　</td></tr>
 <tr class="category"><th>プロジェクトの形態</th><th>uupaa.js</th><th>jQuery</th><th>Prototype.js</th><th>他のライブラリ/備考</th></tr>
 <tr><td>ライセンス</td><td>MIT</td><td>MIT and GPL</td><td>MIT</td><td>　</td></tr>
-<tr><td>ホスト先</td><td><a href="http://code.google.com/p/uupaa-js/">Google Code uupaa-js</a></td>
+<tr><td>公式サイト</td><td><a href="http://code.google.com/p/uupaa-js/">Google Code uupaa-js</a></td>
                      <td><a href="http://jquery.com/">jquery.com</a></td>
                      <td><a href="http://www.prototypejs.org/">prototypejs.org</a></td><td>　</td></tr>
+<tr><td>用途</td><td>WebOS, GUI, HomePage Kit</td><td>HomePage Kit, Effect</td><td>HomePage Kit, Effect</td><td>　</td></tr>
 </table>
-<p>更新日: 2008-08-31</p>
+<p>更新日: 2008-09-24</p>
 <script type="text/javascript">
 function boot() {
+  var x = 100, y = 80, r1 = 40, r2 = 80;
+  var e = uu.id("rainbow");
+  var c2d = new uu.module.canvas2d(e);
+  c2d.setStyle({
+    fill: c2d.gradation(
+            [x, y, r1, x, y, r2],
+            [0.00, "black", 0.02, "#A757A8", 0.16, "#234794",
+             0.30, "#009AD6", 0.44, "#008000", 0.58, "#FFD400",
+             0.72, "#FFB74C", 0.86, "#ED1A3D", 1.00, "#FF0000"]) }).oval(x, y, 0, 0, r2);
 }
-uu.module("", "dev,ieboost", function() {
-  uu.ready(boot, "W");
-});
+uu.ready(boot, "MWC");
 
 /*
   "uupaa.js": {
+    20080924:    4360,
     20080831:    2050,
     20080630:     678
   },
   jQuery: {
+    20080924: 7800000,
     20080831: 7650000,
     20080630: 7820000
   },
   "Prototype.js": {
+    20080924: 3320000,
     20080831: 2000000,
     20080630: 2120000
   },
   "Ext.js": {
+    20080924:  559000,
     20080831:  557000,
     20080630:  540000
   },
   MochiKit: {
+    20080924: 1090000,
     20080831: 1080000,
     20080630: 1080000
   },
   Mootools: {
+    20080924: 1920000,
     20080831: 2010000,
     20080630: 2044000
   }

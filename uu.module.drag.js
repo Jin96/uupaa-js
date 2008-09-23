@@ -68,7 +68,7 @@ uu.module.drag.free.prototype = {
 
     // shim生成
     this.shim = (this.param.shim && uu.ua.ie6)
-              ? new uu.module.drag.shim(elm, this.param.ghost) : 0;
+              ? new uu.module.ieboost.shim(elm, this.param.ghost) : 0;
 
     // EventHandler
     uu.event.set(this, this.elm, "mousedown,mousewheel");
@@ -320,43 +320,6 @@ uu.module.drag.zindexer.prototype = {
       (v.style.zIndex > thresh) && (v.style.zIndex -= 1);
     });
   }
-};
-
-/** THE SHIM(bugfix: selectbox stays in the top(ignore z-index)) for IE6
- *  IEで一部の要素(select等)がz-indexを無視して最上位に居座るバグをFix
- *
- * @class
- */
-uu.module.drag.shim = uu.klass.kiss();
-uu.module.drag.shim.prototype = {
-  construct:
-            function(elm, transparent /* = false */) {
-              this.elm = elm;
-              this.shim = 0;
-              if (uu.ua.ie6) { // IE6 only
-                this.shim = uud.createElement('<iframe scrolling="no" frameborder="0" style="position:absolute;top:0;left:0"></iframe>');
-                elm.parentNode.appendChild(this.shim); // sibl
-                uu.css.setRect(this.shim, uu.css.rect(elm));
-                if (transparent) {
-                  this.shim.style.filter += " alpha(opacity=0)";
-                }
-              }
-            },
-  enable:   function() {
-              return !!this.shim;
-            },
-  display:  function(disp) {
-              this.shim.style.display = disp ? "" : "none";
-            },
-  setRect:  function(rect) {
-              if (!this.shim) { return; }
-              uu.css.setRect(this.shim, rect);
-            },
-  purge:    function() {
-              if (!this.shim) { return; }
-              this.elm.parentNode.removeChild(this.shim);
-              this.shim = 0;
-            }
 };
 
 })(); // end (function())()

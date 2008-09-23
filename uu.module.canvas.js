@@ -11,7 +11,9 @@ var uuw = window, uu = uuw.uu,
     uum = Math, uump = uum.PI,
     uudeg = 180 / uump /*, uurad = uump / 180 */; // to degree, to radian
 
-uu.module.canvas = function() {};
+if (!("canvas" in uu.module)) {
+  uu.module.canvas = function() {};
+}
 
 /** 2D canvas
  *
@@ -264,6 +266,22 @@ uu.module.canvas2d.prototype = {
               // 未実装
               return this;
             },
+  // uu.module.canvas2d.dotBlt
+  // alpah = 0 のドットは描画しない
+  dotBlt:   function(x, y, w, h, ary /* RGBAHashArray */) {
+              var i = 0, j = 0;
+              try {
+                for (; j < h; ++j) {
+                  for (i = 0; i < w; ++i) {
+                    if (ary[i + j * w].a) {
+                      this.setStyle({ fill: ary[i + j * w] });
+                      this.ctx.fillRect(x + i, y + j, 1, 1);
+                    }
+                  }
+                }
+              } catch(e) { ; }
+              return this;
+            },
   // uu.module.canvas2d.gradation - gradation
   // グラデーション
   // color は RGBAHashでも指定可能
@@ -354,7 +372,7 @@ if (!uu.ua.ie || !(uu.config.repair & 0x1)) {
   return;
 }
 if (!("CanvasRenderingContext2D" in window)) {
-  return;
+  throw Error("need excanvas.js");
 }
 // excanvas.js(version 0.2) Hack
 // - createLinearGradient
@@ -750,8 +768,8 @@ function CanvasPattern(image /* HTMLImageElement or HTMLCanvasElement */, repeti
 //    this.img_ = new Image();
 //    this.img_.src = image.src;
     // uu.module.ieboost との連携
-    if ("uupaa_ieboost_alphapngsrc" in image) {
-      this.src_ = image.uupaa_ieboost_alphapngsrc; // 透過処理済みのimage要素の元々の画像
+    if ("uuIEBoostAlphapngSrc" in image) {
+      this.src_ = image.uuIEBoostAlphapngSrc; // 透過処理済みのimage要素の元々の画像
     } else {
       this.src_ = image.src; // 透過処理されていない画像
     }

@@ -5,6 +5,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>uupaa.js - ReadMe</title>
 <style type="text/css">@import url(./README.css);</style>
+<script id="uupaa.js" type="text/javascript" src="./uupaa.js"></script>
 </head>
 <body>
 <p>
@@ -23,7 +24,7 @@
 <h1>uupaa.js</h1>
 
 <p>uupaa.jsは、日本生まれのコンパクトでクロスブラウザなJavaScriptライブラリです。</p>
-<p>“ライブラリの選択肢が増えるのは悪くない”と思える方は、一度<a href="#demo">デモ</a>をご覧になってください。</p>
+<p>“ライブラリの選択肢が増えるのは悪くない”と思える方は、一度デモをご覧になってください。</p>
 
 <p><a href="./FEATURE.htm" class="run">Feature comparison - 機能比較...</a></p>
 
@@ -50,12 +51,9 @@
   <li>豊富な日本語ドキュメント。これからの人にやさしい。</li>
   <li>モジュールのオンデマンドロード, MVC, singleton等々、<br />
       クリティカルな機能を提供します。</li>
-  <li>Cover Flowやポリゴン, Text-To-Speechなど、<br />
-      他には無い特別な機能があります。</li>
   <li>excanvas.js を改良する機能を併せ持つため、<br /><a href="demo/canvas/demo.htm">IEでもしっかりcanvasが使えます。</a></li>
-  <li><a href="./SELECTOR.htm">セレクタ</a>が豊富です。<br />XPath, CSS3セレクタ, jQueryの独自セレクタも使用可能です。</li>
-  <li><a href="./demo/widget/uu.module.widget.window.htm">カジュアルで軽量なUI</a>が(近い将来)使えます。
-      <br />WidgetやUIの共同開発者を募集中です。</li>
+  <li><a href="./SELECTOR.htm">XPath, CSS3セレクタ</a>が使用可能です。</li>
+  <li><a href="./demo/widget/uu.module.widget.window.htm">カジュアルで軽量なUI</a>が(近い将来)使えます。</li>
 </ol>
 </td><td>
 <ol>
@@ -68,12 +66,13 @@
 <hr />
 <h2>Support Browser - サポートブラウザ</h2>
 <ul>
- <li>Internet Explorer 6+ <i>(IE5.5 でも動くかもしれないが未検証のためサポート外)</i></li>
- <li>Safari3+ <i>(Safari2 はサポート外)</i></li>
- <li>Opera9+ <i>(canvas や XPath などが使用できないため Opera8 以下はサポート外)</i></li>
- <li>Firefox2+ <i>(Firefox1.5 系以下は未検証のためサポート外)</i></li>
+ <li><img src="./img/c32.png" alt="Google Chrome logo" />Google Chrome</li>
+ <li><img src="./img/i32.png" alt="Internet Explorer logo" />Internet Explorer 6+</li>
+ <li><img src="./img/s32.png" alt="Safari logo" />Safari3+</li>
+ <li><img src="./img/o32.png" alt="Opera logo" />Opera9+ <i>(canvas や XPath などが使用できないため Opera8 以下はサポート外)</i></li>
+ <li><img src="./img/f32.png" alt="Firefox logo" />Firefox2+ <i>(Firefox1.5 系以下は未検証のためサポート外)</i></li>
 </ul>
-<p>Opera9.5, Firefox3, Internet Explorer 8β2 でも動作を確認しています。
+<p>Opera9.6β, Internet Explorer 8β2 でも動作を確認しています。
   <br /><i>(IE8βには未実装の機能があり、その影響でいくつかのデモは動きません)</i></p>
 
 <hr />
@@ -85,9 +84,9 @@
   <br /> /lib/javascript-xpath.js として uupaa.js に同梱しています。</p>
 <p>ExplorerCanvas は非同梱です。配布元からダウンロードし例を参考に配置してください。</p>
 
-<p>uupaa.js は uupaa.js 単体で動作可能なライブラリです。
-   <br />uupaa.js を拡張する<a href="./DOCUMENT.htm#uu.module">モジュールを追加で読み込む</a>と、様々な機能が使用可能になります。
-   <br />miniディレクトリ以下に圧縮版の uupaa.js もあります。</p>
+<p>uupaa.jsファイル単体でも動作可能ですが、
+   <a href="./DOCUMENT.htm#uu.module">モジュールを追加で読み込む</a>と様々な機能が拡張されます。
+   <br />サイズを圧縮したファイルが mini/ にあります。</p>
 <p>最新版は、
   <a href="http://uupaa-js.googlecode.com/">http://uupaa-js.googlecode.com/</a> または、
   <a href="http://uupaa-js.googlecode.com/svn/trunk/">http://uupaa-js.googlecode.com/svn/trunk/</a> からダウンロードできます。

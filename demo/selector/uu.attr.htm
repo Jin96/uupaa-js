@@ -1,5 +1,6 @@
 <html><head><title>uupaa.js - uu.attr test</title>
 <script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
+<script type="text/javascript" src="../../uu.module.dev.js"></script>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <style>#result { background-color: lime; }</style>
 </head><body><a href="../../README.htm">README</a> &gt; <a href="../../SELECTOR.htm#uu.attr">SELECTOR</a> &gt; uu.attr<br />
@@ -11,7 +12,7 @@
 </div>
 <div id="result"></div>
 <script>
-uu.module("", "dev", function() {
+//uu.module("", "dev", function() {
   uu.ready(function() {
     uu.forEach(uu.attr('p[@originalattr*="attr"]'), function(v) {
       uu.log(v.tagName); // "p"
@@ -32,7 +33,7 @@ uu.module("", "dev", function() {
       uu.log(v.innerText); // "widget"
     });
   });
-});
+//});
 </script>
 <pre>
   &lt;div originalattr="aa-attr"&gt;hoge&lt;/div&gt;

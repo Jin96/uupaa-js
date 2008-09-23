@@ -4,11 +4,10 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>uupaa.js - uu.module.drag test</title>
-<script type="text/javascript" src="../../uupaa.js"></script>
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?module=dev,drag"></script>
 <style>
-body {
+html {
   background: black url(../compat/illusion.jpg) repeat-y 100% 100%;
-  height: 100%; /* bug fix "IE6 position:absolute + Standard Mode = cannot select text" */
 }
 a, b { color: lightblue }
 dl {
@@ -110,7 +109,7 @@ function boot() {
   new uu.module.drag.free(uu.id("free5"), { ghost: false, shim: false });
 }
 
-uu.module("", "dev,drag", boot);
+uu.ready(boot);
 </script>
 
 </body>
