@@ -750,8 +750,20 @@ uu.id("up20").style.backgroundColor = ns.rgb(rgba20up);
 
 <!-- -->
   <dt><a name="uu.module.config.load">uu.module.config.load</a></dt>
-  <dd>uu.module.config.load() は <a href="#uu.module.config.importFromQueryString">importFromQueryString</a> で読み込んだ設定を元に、
+  <dd>uu.module.config.load(<i>boost</i> = true) は <a href="#uu.module.config.importFromQueryString">importFromQueryString</a> で読み込んだ設定を元に、
       モジュールの読み込みと、FirebugLiteの起動を行います。
+      <pre>
+ @param Boolean [boost] - 各ブラウザ用のBugifxモジュールを自動的に読み込む場合に true を指定します。
+                          デフォルトはtrueです。
+      </pre>
+      各ブラウザ毎に自動的に読み込まれるファイルは以下となります。
+      <ul>
+        <li>IE: uu.module.ieboost.js</li>
+        <li>Opera: なし</li>
+        <li>Safari: なし</li>
+        <li>Firefox: なし</li>
+        <li>Google Chrome: なし</li>
+      </ul>
   </dd>
 
 <!-- -->
