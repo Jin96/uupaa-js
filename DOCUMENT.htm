@@ -1773,23 +1773,7 @@ function F(evt) {
 
 <hr />
 <h2><a name="Ready">Ready</a></h2>
-<p>機能が使用可能("U"なら使用不能)になったタイミングで、事前に登録されている関数をコールバックする仕組みを提供します。</p>
-<table>
-<tr><th>Expression</th><th>Function/State</th><th>Combination</th></tr>
-<tr><td>uu.ready(<i>fn</i>, "D")</td><td><a href="./GLOSSARY.htm#DomReady">DomReady</a></td><td>　</td></tr>
-<tr><td>uu.ready(<i>fn</i>, "M")</td><td><a href="./GLOSSARY.htm#ModuleReady">ModuleReady</a></td><td>　</td></tr>
-<tr><td>uu.ready(<i>fn</i>, "W")</td><td><a href="./GLOSSARY.htm#WindowReady">WindowReady</a></td><td>　</td></tr>
-<tr><td>uu.ready(<i>fn</i>, "C")</td><td><a href="./GLOSSARY.htm#CanvasReady">CanvasReady</a></td><td>　</td></tr>
-<tr><td>uu.ready(<i>fn</i>, "DM")</td><td>DomReady + ModuleReady</td><td>DomReady かつ ModuleReady なら条件成立</td></tr>
-<tr><td>uu.ready(<i>fn</i>, "DC")</td><td>DomReady + CanvasReady</td><td>DomReady かつ CanvasReady なら条件成立</td></tr>
-<tr><td>uu.ready(<i>fn</i>, "DMC")</td><td>DomReady + ModuleReady + CanvasReady</td><td>DomReady かつ ModuleReady かつ CanvasReady なら条件成立</td></tr>
-<tr><td>uu.ready(<i>fn</i>, "MW")</td><td>ModuleReady + WindowReady</td><td>ModuleReady かつ WindowReady なら条件成立</td></tr>
-<tr><td>uu.ready(<i>fn</i>, "MWC")</td><td>ModuleReady + WindowReady + CanvasReady</td><td>ModuleReady かつ WindowReady かつ CanvasReady なら条件成立</td></tr>
-<tr><td>uu.ready(<i>fn</i>, "WC")</td><td>WindowReady + CanvasReady</td><td>WindowReady かつ CanvasReady なら条件成立</td></tr>
-<tr><td>uu.ready(<i>fn</i>, "U")</td><td><a href="./GLOSSARY.htm#WindowUnready">WindowUnready</a></td><td>　</td></tr>
-<tr><td>uu.ready(<i>fn</i>, "A")</td><td><a href="./GLOSSARY.htm#AjaxReady">AjaxReady</a></td><td>　</td></tr>
-<tr><td>uu.ready(<i>fn</i>, "J")</td><td><a href="./GLOSSARY.htm#JSONPReady">JSONPReady</a></td><td>　</td></tr>
-</table>
+<p>機能が使用可能になったタイミングで、事前に登録されている関数をコールバックする仕組みを提供します。</p>
 <p>
 類似機能に、<a href="./MODULE.htm#uu.module.imageset">uu.module.imageset</a> が提供する <a href="./GLOSSARY.htm#ImageReady">ImageReady</a> があります。
 </p>
@@ -1798,21 +1782,46 @@ function F(evt) {
 <!-- -->
   <dt><a name="uu.ready">uu.ready</a> - Ready event handler - Readyイベントハンドラを設定</dt>
   <dd><p>uu.ready(<i>fn</i>, <i>id</i> = "DM") は <i>id</i>で指定した機能が使用可能な状態(Ready状態)になると呼ばれる関数(<i>fn</i>)を登録します。
-      <br />状態成立後 uu.ready が呼ばれた場合は、即座に <i>fn</i> をコールバックします。</p>
+      <br />状態成立後に uu.ready が呼ばれた場合は、即座に <i>fn</i> をコールバックします。</p>
+      <table>
+      <tr><th>Expression</th><th>Function/State</th></tr>
+      <tr><td>uu.ready(<i>fn</i>, "D")</td><td><a href="./GLOSSARY.htm#DomReady">DomReady</a></td></tr>
+      <tr><td>uu.ready(<i>fn</i>, "M")</td><td><a href="./GLOSSARY.htm#ModuleReady">ModuleReady</a></td></tr>
+      <tr><td>uu.ready(<i>fn</i>, "W")</td><td><a href="./GLOSSARY.htm#WindowReady">WindowReady</a></td></tr>
+      <tr><td>uu.ready(<i>fn</i>, "C")</td><td><a href="./GLOSSARY.htm#CanvasReady">CanvasReady</a></td></tr>
+      <tr><td>uu.ready(<i>fn</i>, "A")</td><td><a href="./GLOSSARY.htm#AjaxReady">AjaxReady</a></td></tr>
+      <tr><td>uu.ready(<i>fn</i>, "J")</td><td><a href="./GLOSSARY.htm#JSONPReady">JSONPReady</a></td></tr>
+      </table>
       <pre>
  @param Function fn - コールバック関数を指定します。
  @param String [id] - 機能をidで指定します。デフォルトは "DM" です。
-                      指定可能なidは、"D", "M", "W", "C", "DM", "DC", "DMC", "MW", "MWC", "WC", "U", "A", "J" です。
+                      指定可能なidは、"D", "M", "W", "C", "A", "J" と、これらを組み合わせた文字列です。
       </pre>
+      <p>複数の状態が全て成立した場合に関数をコールバックにするには、idに "D", "M", "W", "C", "A", "J" を組み合わせた文字列を指定します。</p>
+      <a href="demo/document/uu.ready.htm" class="run">Run</a>
+<pre class="eg">
+function boot() { ... }
+uu.module("", "drag,canvas");
+uu.ready(boot, "DMC"); // DomReady + ModuleReady + CanvasReady 成立でboot関数を呼ぶ
+</pre>
   </dd>
+
 <!-- -->
   <dt><a name="uu.ready.already">uu.ready.already</a> - Ready state - Ready状態の確認</dt>
-  <dd><p>uu.ready.already(<i>id</i> = "D") は <i>id</i>で指定した機能が既に使用可能ならtrueを返します。</p>
+  <dd><p>uu.ready.already(<i>id</i> = "DM") は <i>id</i>で指定した機能が既に使用可能ならtrueを返します。</p>
+  </dd>
+
+<!-- -->
+  <dt><a name="uu.unready">uu.unready</a> - Unready event handler - Unreadyイベントハンドラを設定</dt>
+  <dd><p>uu.unready(<i>fn</i>) は WindowUnready状態になると呼ばれる関数(<i>fn</i>)を登録します。</p>
+      <table>
+      <tr><th>Expression</th><th>Function/State</th></tr>
+      <tr><td>uu.unready(<i>fn</i>)</td><td><a href="./GLOSSARY.htm#WindowUnready">WindowUnready</a></td></tr>
+      </table>
       <pre>
- @param String [id] - 機能をidで指定します。デフォルトは "DM" です。
-                      指定可能なidは、"D", "M", "W", "C", "DM", "DC", "DMC", "MW", "MWC", "WC", "U", "A", "J" です。
- @return Boolean - 使用可能ならtrueを返します。
+ @param Function fn - コールバック関数を指定します。
       </pre>
+      <a href="demo/document/uu.unready.htm" class="run">Run</a>
   </dd>
 </dl>
 
@@ -2263,7 +2272,7 @@ var hash = { a: 1, b: 2, c: 3 };
 
 <!-- -->
   <dt><a name="uu.diet">uu.diet</a> - Hash/Array memory compaction - Hash/Arrayのコンパクト化</dt>
-  <dd><p>uu.diet(<i>mix</i>) は <i>mix</i>から値がundefined, nullの要素を削除したArrayを生成します。</p>
+  <dd><p>uu.diet(<i>mix</i>) は <i>mix</i>から値がundefined, nullの要素を削除した新しいArrayを生成します。</p>
       <p><i>mix</i>がArrayなら、文字列Indexと、値がundefinedとnullの要素を削除した新しいArrayを返します。<br />
          <i>mix</i>がHashなら、文字列Indexと数字Indexの要素のうち、値がundefinedとnullの要素を削除した新しいHashを返します。</p>
     <pre>

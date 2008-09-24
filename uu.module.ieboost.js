@@ -495,7 +495,7 @@ uu.module.ieboost.positionFixed.prototype = {
                 badElm.forEach(function(v) { // v = 不正な要素のindex
                   delete this._recalc[v];
                 });
-                uu.diet(this._recalc);
+                this._recalc = uu.diet(this._recalc);
               }
             },
   markup:  function() {

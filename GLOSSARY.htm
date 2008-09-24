@@ -198,9 +198,9 @@ alert(hoge === window.hoge); // true
 
   <dt><a name="WindowUnready">WindowUnready</a></dt>
     <dd>WindowUnready はWebページが遷移する直前の状態のことです。<br />
-        WindowUnready を補足し処理を行うには <a href="./DOCUMENT.htm#uu.ready">uu.ready()</a> に関数を登録します。<br />
+        WindowUnready を補足し処理を行うには <a href="./DOCUMENT.htm#uu.unready">uu.unready()</a> に関数を登録します。<br />
         旧来の方法(window.onunload や &lt;body onunload&gt;に関数を登録する方法)は一つの関数しか登録できませんが、
-        uu.ready() を使用すると複数の関数が登録可能です。
+        uu.unready() を使用すると複数の関数が登録可能です。
         IE6+,Safari3+,Firefox2+では、unloadではなく、beforeunloadイベントを補足します。
         <p>モダンなブラウザ(FirefoxやOpera)では、WindowUnready状態にもかかわらずウインドウを表示しようとすると、ブラウザに阻止されます(ポップアップブロック)。</p>
     </dd>
