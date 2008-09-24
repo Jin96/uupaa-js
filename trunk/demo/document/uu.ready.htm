@@ -1,25 +1,83 @@
 <html><head><title>uupaa.js - uu.ready test</title>
 <script id="uupaa.js" type="text/javascript" src="../../uupaa.js"></script>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-</head><body><a href="../../README.htm">README</a> &gt; <a href="../../DOCUMENT.htm#uu.ready">DOCUMENT</a> &gt; uu.ready<br />
+<style type="text/css">
+body { background: white url(http://uupaa-js.googlecode.com/svn/trunk/demo/compat/prairiedog_24bpp.png); }
+#canvas { position: absolute; top: 40px; left: 10px; }
+</style>
+<!--[if IE]><script id="excanvas.js" type="text/javascript" src="http://pigs.sourceforge.jp/excanvas.js"></script><![endif]-->
+<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="../../lib/javascript-xpath.js"></script><![endif]-->
+</head><body class="png"><a href="../../README.htm">README</a> &gt; <a href="../../DOCUMENT.htm#uu.ready">DOCUMENT</a> &gt; uu.ready<br />
 <div id="result"></div>
+  <canvas id="canvas" width="1000" height="1000"></canvas>
 <script>
-    receiverObject1 = {
-      uid: uu.uid(),
-      msgbox: function(msg, p1, p2) {
-        uu.id("result").innerHTML += p1;
-//        window.status += p1;
-      }
-    };
-    uu.msg.set(receiverObject1);
-
 uu.module.loadSync("", "dev,canvas,drag,widget,skin.plasticity,skin.plasticityAngle");
 uu.ready(function() {
-  if (!uu.ready.already("M")) {
-    alert("not ready M");
-  }
-  uu.log("OK");
-//  window.status = "ok";
-});
+  var e = uu.id("result");
+  if (uu.ready.already("D")) { e.innerHTML += "D"; } else { alert("buggy D"); }
+}, "D");
+uu.ready(function() {
+  var e = uu.id("result");
+  if (uu.ready.already("M")) { e.innerHTML += "M"; } else { alert("buggy M"); }
+}, "M");
+uu.ready(function() {
+  var e = uu.id("result");
+  if (uu.ready.already("W")) { e.innerHTML += "W"; } else { alert("buggy W"); }
+}, "W");
+uu.ready(function() {
+  var e = uu.id("result");
+  if (uu.ready.already("C")) { e.innerHTML += "C"; } else { alert("buggy C"); }
+}, "C");
+uu.ready(function() {
+  var e = uu.id("result");
+  if (uu.ready.already("A")) { e.innerHTML += "A"; } else { alert("buggy A"); }
+}, "A");
+uu.ready(function() {
+  var e = uu.id("result");
+  if (uu.ready.already("J")) { e.innerHTML += "J"; } else { alert("buggy J"); }
+}, "J");
+
+// --- comb ---
+uu.ready(function() {
+  var e = uu.id("result");
+  if (uu.ready.already("CM")) { e.innerHTML += "[C+M]"; draw(); } else { alert("buggy CM"); }
+}, "CM");
+
+uu.ready(function() {
+  var e = uu.id("result");
+  if (uu.ready.already("DMCWAJ")) { e.innerHTML += "[D+M+C+W+A+J]"; } else { alert("buggy ALL"); }
+}, "DMCWAJ");
+
+
+function draw() {
+  var can = uu.id("canvas");
+  var c2d = new uu.module.canvas2d(can);
+  c2d.setStyle({ alpha: 0.7, width: 5, color: "violet" });
+
+  var parts = new uu.module.canvasPartsFactory();
+  var x = 10, y = 10;
+
+  parts.button(c2d, "METABOGLOSSY", "BLUE",  { x: x + 0,   y: y + 300, w: 140, h: 50  });
+  parts.button(c2d, "METABOGLOSSY", "GREEN", { x: x + 150, y: y + 300, w: 140, h: 115 });
+  parts.button(c2d, "METABOGLOSSY", "BLACK", { x: x + 300, y: y + 300, w: 140, h: 40, tarun: 0 });
+  parts.button(c2d, "METABOGLOSSY", "RED",   { x: x + 450, y: y + 300, w: 140, h: 50  });
+  parts.button(c2d, "METABOGLOSSY", "",      { x: x + 600, y: y + 300, w: 20, h: 20, r: 5, tarun: 6, color: "#0000a0", color2: "#0097ff", overlayAlpha: 0.38 });
+  parts.button(c2d, "METABOGLOSSY", "",      { x: x + 620, y: y + 300, w: 20, h: 20, r: 5, tarun: 6, color: "#400000", color2: "#ff0000", overlayAlpha: 0.38 });
+  parts.button(c2d, "ANGLEGLOSSY",  "",      { x: x + 0,   y: y + 450, w: 140, h: 140, r:  0, angle: 25, color: "#000",    color2: "#333",    overlayAlpha: 0.25 });
+  parts.button(c2d, "ANGLEGLOSSY.45", "",    { x: x + 150, y: y + 450, w: 140, h: 140, r: 20,            color: "#0000a0", color2: "#0097ff", overlayAlpha: 0.38 });
+  parts.button(c2d, "ANGLEGLOSSY.-45", "",   { x: x + 300, y: y + 450, w: 140, h: 140, r:  2,            color: "#006400", color2: "#00ff00", overlayAlpha: 0.38 });
+  parts.button(c2d, "ANGLEGLOSSY.OVAL", "LEMON", { x: x + 450, y: y + 450, w: 140, h: 140, r: 70, angle: 10 });
+  parts.button(c2d, "ANGLEGLOSSY.FLAT", "GOLD",  { x: x + 600, y: y + 450, w: 140, h: 140 });
+  parts.button(c2d, "JELLYBEAN", "BLACK",    { x: x + 0,   y: y + 600 });
+  parts.button(c2d, "JELLYBEAN", "LEMON",    { x: x + 110, y: y + 600 });
+  parts.button(c2d, "JELLYBEAN", "BLUE",     { x: x + 220, y: y + 600 });
+  parts.button(c2d, "JELLYBEAN", "GREEN",    { x: x + 330, y: y + 600 });
+  parts.button(c2d, "JELLYBEAN", "RED",      { x: x + 440, y: y + 600 });
+  parts.button(c2d, "JELLYBEAN", "PEACH",    { x: x + 550, y: y + 600 });
+  parts.button(c2d, "JELLYBEAN", "GRAY",     { x: x + 0,   y: y + 640 });
+  parts.button(c2d, "JELLYBEAN", "SLIVER",   { x: x + 0,   y: y + 680 });
+  parts.button(c2d, "JELLYBEAN", "GOLD",     { x: x + 110, y: y + 640 });
+}
+
 </script>
 </body></html>

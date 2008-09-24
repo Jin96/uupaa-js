@@ -911,18 +911,19 @@ uu.mix(uu, {
                   onreadystatechange: function() {
                     if (!/loaded|complete/.test(this.readyState)) { return; }
                     if (!me.already(this.uuModule)) { me._reload(this); return; }
-                    if (me.already(mods)) { !run++ && DEL(i) && fn(); }
+                    DEL(i);
+                    if (me.already(mods)) { !run++ && fn(); }
                   }
                 });
               }
               function STD(v, i) { // v = "{url1};{url2};..."  i = "dev"
                 me._inject(i, v, {
-                  onload:  function() { if (me.already(mods)) { !run++ && DEL(i) && fn(); } },
+                  onload:  function() { DEL(i); if (me.already(mods)) { !run++ && fn(); } },
                   onerror: function() { me._reload(this); }
                 });
               }
-              function DEL(m) { if (m in me._remain) { delete me._remain[m]; uu.diet(me._remain); }
-                                return 1; }
+              function DEL(m) { var i = me._remain.indexOf(m);
+                                if (i > -1) { delete me._remain[i]; me._remain = uu.diet(me._remain); } }
               me._remain = me._remain.concat(mods);
               uu.forEach(src, uu.ua.ie ? IE : STD);
             }
@@ -954,8 +955,8 @@ uu.mix(uu.module, {
               me._remain = me._remain.concat(mods);
               last = mods.shift();
               node = me._inject(last, src[last]);
-              function DEL(m) { if (m in me._remain) { delete me._remain[m]; uu.diet(me._remain); }
-                                return 1; }
+              function DEL(m) { var i = me._remain.indexOf(m);
+                                if (i > -1) { delete me._remain[i]; me._remain = uu.diet(me._remain); } }
               function DELAY() {
                 if ((tick += 100) > me.loadSyncTimeout) {
                   node = me._reload(node, false);
@@ -1159,64 +1160,78 @@ uu.ua.ie && uu.mix(uu.event, {
 uu.mix(uu, {
   // uu.ready - Ready event handler - Readyイベントハンドラを設定
   ready:    function(fn, id /* = "DM" */) {
-              function NC(n, title) { return me.already("C") ? (me._done(title), -1) : uu.ua.minclock; }
-              function NM(n, title) { return me.already("M") ? (me._done(title), -1) : uu.ua.minclock; }
-              var me = uu.ready, vtm = uu.vtmHighSpeed;
-              id = id || "DM";
-              id = (id in me._sani) ? me._sani[id] : id; // id sanitize
-              if (me._run[id]) { fn(); return; } // 状態成立済みなら即座にfnをコールバックする
-              me._db[id].push(fn);
-              switch (id) {
-              case "D":  me._dom(fn, id); break;
-              case "M":  me._module(fn, id); break;
-              case "W":  uu.event.set(function() { me._done("W"); }, uuw, "load"); break;
-              case "C":  (uu.ua.ie || uu.ua.opera) ? me._canvas(fn, id) : me._done("C"); break;
-              case "DM": me(function() { vtm.set(0, NM, -1, "DM");  }, "D" ); break; // "D"が成立したら"M"の成立を待つ
-              case "DC": me(function() { vtm.set(0, NC, -1, "DC");  }, "D" ); break; // "D"が成立したら"C"の成立を待つ
-              case "DMC":me(function() { vtm.set(0, NC, -1, "DMC"); }, "DM"); break; // "DM"が成立したら"C"の成立を待つ
-              case "MW": me(function() { vtm.set(0, NM, -1, "MW");  }, "W" ); break; // "W"が成立したら"M"の成立を待つ
-              case "MWC":me(function() { vtm.set(0, NC, -1, "MWC"); }, "MW"); break; // "MW"が成立したら"C"の成立を待つ
-              case "WC": me(function() { vtm.set(0, NC, -1, "WC");  }, "W" ); break; // "W"が成立したら"C"の成立を待つ
-              case "U":  uu.event.set(function() { me._done("U"); }, uuw, "beforeunload,unload"); break;
-              case "A":  (uuw.XMLHttpRequest || uuw.ActiveXObject) && me._done("A"); break;
-              case "J":  me._done("J"); break;
-              default: uu.die("uu.ready(id=%s) unsupported", id);
-              }
+              var _id = id || "DM";
+              if (uu.ready.already(_id)) { fn(); return; } // 状態成立済みなら即座にfnをコールバックする
+              uu.ready._job.push([uu.ready._bit(_id), 0, fn]);
+              uu.ready._vtm.resume(-1);
             }
 });
 uu.mix(uu.ready, {
   // uu.ready.already - Ready state - Ready状態の確認
   already:  function(id /* = "DM" */) {
-              return uu.ready._run[id || "DM"] > 0;
+              return uu.ready._judge(uu.ready._bit(id || "DM"));
             },
-  _done:    function(id) { !uu.ready._run[id]++ &&
-                               (uu.ready._db[id].forEach(uu.ready._call), uu.ready._db[id] = []); },
-  _call:    function(fn) { fn(); }, // hook(break) point
-  _dom:     function(fn, id) {
-              if (uu.ua.gecko || uu.ua.opera) { uud.addEventListener("DOMContentLoaded", D, false); }
-              else if (uu.ua.webkit && uud.readyState) { uu.vtmHighSpeed.set(0, WEBKIT); }
+  init:     function() {
+              var me = uu.ready, ok = uu.ready._ok, tag;
+              if (!me._vtm) {
+                uu.ready._vtm  = new uu.module.virtualTimer(uu.ua.minclock);
+                uu.ready._vtid = uu.ready._vtm.set(READY_RUNNER, uu.ua.minclock, -1, "Ready"); // タイマーは自前の物を使用
+              }
+              function READY_RUNNER() {
+                if (me._job.length) {
+                  me._job.forEach(function(v, i) { (!v[1] && me._judge(v[0])) && (++v[1], v[2]()); });
+                  me._job = me._job.filter(function(v, i) { return !v[1]; });
+                }
+                !me._job.length && me._vtm.suspend(-1); // self suspend
+              }
+              // DomReady
+              if (uu.ua.gecko || uu.ua.opera) { uud.addEventListener("DOMContentLoaded", D_OK, false); }
+              else if (uu.ua.webkit && uud.readyState) { uu.vtmHighSpeed.set(0, WK); }
               else if (uu.ua.ie && uud.readyState) { uu.vtmHighSpeed.set(0, IE); }
-              else { uu.event.set(D, uuw, "load"); } // for legacy browser
-              function D() { uu.ready._done("D"); }
-              function WEBKIT() { return /loaded|complete/.test(uud.readyState) ? (D(), -1) : uu.ua.minclock; }
+              else { uu.event.set(D_OK, uuw, "load"); } // for legacy browser
               // http://javascript.nwbox.com/IEContentLoaded/
-              function IE() {try{uud.documentElement.doScroll("up");}catch(e){return uu.ua.minclock;}D();return-1;}
+              function IE() {try{uud.documentElement.doScroll("up");}catch(e){return uu.ua.minclock;}D_OK();return-1;}
+              function WK() { return /loaded|complete/.test(uud.readyState) ? (D_OK(), -1) : uu.ua.minclock; }
+              function D_OK() { ok["D"] = 1; }
+              // WindowReady
+              uu.event.set(function() { ok["W"] = 1; }, uuw, "load");
+              // CanvasReady // Opera9.5xからcanvasの初期化タイミングが変化(9.2xはDomReady→9.5xはWindowReady)
+              function C_DELAY() { return uu.isF(tag.getContext) ? (ok["C"] = 1, -1) : 100; }
+              if ((uu.ua.ie || uu.ua.opera) && (tag = uu.last(uu.tag("canvas"))) ) {
+                uu.event.set(function() { uu.vtmMidSpeed.set(0, C_DELAY); }, uuw, "load");
+              } else { ok["C"] = 1; }
+              // AjaxReady
+              (uuw.XMLHttpRequest || uuw.ActiveXObject) && (ok["A"] = 1);
             },
-  _module:  function(fn, id) {
-              function DELAY() { return (uu.module._remain.length) ? (uu.ready._done("M"), -1) : uu.ua.minclock; }
-              uu.vtmHighSpeed.set(0, DELAY);
+  _bit:     function(id) {
+              var rv = 0;
+              id.split("").forEach(function(v) { rv |= 2 << "DMWCAJ".indexOf(v); });
+              return rv;
             },
-  _canvas:  function(fn, id) {
-              var tag = uu.toArray(uu.tag("canvas"));
-              // Opera9.5xからcanvasの初期化タイミングが変化(9.2xはDomReady→9.5xはWindowReady)
-              uu.event.set(function() { uu.vtmHighSpeed.set(0, DELAY); }, uuw, "load");
-              function DELAY() { return READY() ? (uu.ready._done("C"), -1) : 40; }
-              function READY() { return tag.every(function(v) { return uu.isF(v.getContext); }); }
+  _judge:   function(bit) {
+              var rv = 0, F = uu.ready._ok;
+              if (bit & 0x02) { rv |= F["D"] ? 0x02 : 0; }
+              if (bit & 0x04) { rv |= !uu.module._remain.length ? 0x04 : 0; }
+              if (bit & 0x08) { rv |= F["W"] ? 0x08 : 0; }
+              if (bit & 0x10) { rv |= F["C"] ? 0x10 : 0; }
+              if (bit & 0x20) { rv |= F["A"] ? 0x20 : 0; }
+              if (bit & 0x40) { rv |= F["J"] ? 0x40 : 0; }
+              return bit === rv;
             },
-  _run:     { D: 0, M: 0, W: 0, C: 0, DM: 0, DC: 0, DMC: 0, MW: 0, MWC: 0, WC: 0, U: 0, A: 0, J: 0 },
-  _db:      { D: [], M: [], W: [], C: [], DM: [], DC: [], DMC: [], MW: [], MWC: [], WC: [], U: [], A: [], J: [] },
-  _sani:    { MD: "DM", CD: "DC", DCM: "DMC", MDC: "DMC", MCD: "DMC", CDM: "DMC", CMD: "DMC", WM: "MW",
-              MCW: "MWC", WMC: "MWC", WCM: "MWC", CMW: "MWC", CWM: "MWC", CW: "WC" }
+  _vtm:     0,
+  _vtid:    0,
+  _job:     [ /* [ bit, run, fn ], ... */ ],
+  _ok:      { D: 0, W: 0, C: 0, A: 0, J: 1 }
+});
+uu.mix(uu, {
+  // uu.unready - Unready event handler - Unreadyイベントハンドラを設定
+  unready:  function(fn) {
+              if (uu.ua.webkit || uu.ua.gecko || uu.ua.ie || uu.ua.opera95) {
+                uu.event.set(fn, uuw, "beforeunload");
+              } else {
+                uu.event.set(fn, uuw, "unload");
+              }
+            }
 });
 
 // --- Request ---
@@ -1459,18 +1474,18 @@ uu.mix(uu, {
                 return a.slice(0, i).indexOf(v) === -1 && a.slice(i + 1).indexOf(v) === -1;
               });
             },
-  // uu.diet - Hash/Array memory compaction - Hash/Arrayのコンパクト化
+  // uu.diet - Hash/Array memory compaction - Hash/Arrayのコンパクト化(非破壊)
   diet:     function(mix) {
               var rv, i, sz;
               if (uu.isA(mix)) {
                 rv = [], i = 0, sz = mix.length;
                 for (; i < sz; ++i) {
-                  (mix[i] !== null && mix[i] !== void 0) && rv.push(mix[i]);
+                  (i in mix && mix[i] !== null && mix[i] !== void 0) && rv.push(mix[i]);
                 }
               } else {
                 rv = {};
                 for (i in mix) {
-                  (mix[i] !== null && mix[i] !== void 0 && mix.hasOwnProperty(i)) && (rv[i] = mix[i]);
+                  (mix.hasOwnProperty(i) && mix[i] !== null && mix[i] !== void 0) && (rv[i] = mix[i]);
                 }
               }
               return rv;
@@ -2476,11 +2491,7 @@ uu.imageset     = new uu.module.imageset();
 uu.color        = new uu.module.color();
 uu.effect       = new uu.module.effect();
 uu.config       = new uu.module.config();
-
-uu.ready(function() { uu.msg.post(0, UU.MSG_CHANGE_READY_STATE, "D"); }, "D");
-uu.ready(function() { uu.msg.post(0, UU.MSG_CHANGE_READY_STATE, "M"); }, "M");
-uu.ready(function() { uu.msg.post(0, UU.MSG_CHANGE_READY_STATE, "W"); }, "W");
-uu.ready(function() { uu.msg.post(0, UU.MSG_CHANGE_READY_STATE, "C"); }, "C");
+uu.ready.init();
 uu.config.importFromQueryString();
 uu.config.load();
 
