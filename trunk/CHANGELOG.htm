@@ -59,9 +59,24 @@ li { margin-bottom: 0.5em; }
     <dt id="version0.x-title">Version 0.x</dt>
     <dd id="version0.x-data">
       <dl>
-        <dt>Version 0.6 2008-09-25 / New CSS3 Selector, DataScheme(image/gif), position:fixed</dt>
+        <dt>Version 0.6 2008-09-29 / New CSS3 Selector, DataScheme(image/gif), position:fixed</dt>
         <dd>
           <ol>
+            <li class="fix">uupaa.js (<a href="./SELECTOR.htm#uu.id">uu.id</a>):
+                <ja><br />- 第二引数を追加し、uu.module.config.cacheIDを廃止。</ja>
+                <en><br />- Added the second argument. Abolished uu.module.config.cacheID.</en>
+            </li>
+
+            <li class="fix">uu.module.widget.js (uu.module.window.layout.handleEvent):
+                <ja><br />- IEでウインドウを最大化中にドラッグで移動できてしまうバグを修正。</ja>
+                <en><br />- Revise the bug that can move in the state that maximized a window in IE.</en>
+            </li>
+
+            <li class="add">uupaa.js (<a href="./SELECTOR.htm#uu.attr">uu.attr</a>):
+                <ja><br />- uu.attr に 否定演算子を追加。uu.attr('E[A!="V"]')</ja>
+                <en><br />- A negative operator is added to uu.attr. uu.attr('E[A!="V"]')</en>
+            </li>
+
             <li class="add">uupaa.js (<a href="./DOCUMENT.htm#uu.unready">uu.unready</a>):
                 <br />- Add a function.
             </li>

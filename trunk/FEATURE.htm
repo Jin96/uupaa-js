@@ -61,18 +61,6 @@ tr.category { background-color: #1F1F1F; }
 <table>
 <tr class="category"><th>Only-One Function</th><th>uupaa.js</th><th>jQuery</th><th>Prototype.js</th><th>他のライブラリ/備考</th></tr>
 <tr><td><img src="./img/i32.png" alt="" />
-        <br />IE6+でも <a href="./demo/module/uu.module.drag.htm">
-        <br />Drag &amp; Drop したまま
-        <br />画面外に移動できるから</a>
-        <br />他のブラウザと同じ操作性を実現できる
-        </td>
-        <td>○</td>
-        <td>×</td>
-        <td>×</td><td>他のライブラリの多くは<br />
-                   <a href="http://dev.jquery.com/view/trunk/ui/demos/functional/#ui.dialog">
-                   画面端でドラッグが中断し<br />セレクトボックスが突き抜けてしまう</a></td></tr>
-
-<tr><td><img src="./img/i32.png" alt="" />
         <br /><a href="http://excanvas.sourceforge.net/">excanvas</a>を改善する機能を搭載しているから
         <br />IE6+でも<br />HTML5::Canvasで色々できる
         <br />次世代のUIを開発できる
@@ -106,6 +94,18 @@ tr.category { background-color: #1F1F1F; }
 </td><td>×</td><td>×</td>
     <td>
         <br /><a href="http://uupaa-js-spinoff.googlecode.com/svn/trunk/uupaa-datascheme.js/uupaa-datascheme.htm">単位動作版配布中</a></td></tr>
+<tr><td><img src="./img/i32.png" alt="" />
+        <br />IE6+でも <a href="./demo/module/uu.module.drag.htm">
+        <br />Drag &amp; Drop したまま
+        <br />画面外に移動できるから</a>
+        <br />他のブラウザと同じ操作性を実現できる
+        </td>
+        <td>○</td>
+        <td>×</td>
+        <td>×</td><td>他のライブラリの多くは<br />
+                   <a href="http://dev.jquery.com/view/trunk/ui/demos/functional/#ui.dialog">
+                   画面端でドラッグが中断し<br />セレクトボックスが突き抜けてしまう</a></td></tr>
+
 
 
 
@@ -208,8 +208,7 @@ tr.category { background-color: #1F1F1F; }
 <tr><td><a href="./DOCUMENT.htm#uu.module">モジュールのオンデマンドロード</a></td><td>○</td><td>×</td><td>×</td><td>　</td></tr>
 <tr><td>サードパーティー製モジュール</td><td>×</td><td>○</td><td>○</td><td>　</td></tr>
 <tr><td>i18n</td><td>×<br />検討中</td><td>不明</td><td>不明</td><td>Dojo</td></tr>
-<tr><td>jQuery用に書かれたプラグインの利用</td><td><del>○</del><br /><a href="http://d.hatena.ne.jp/uupaa/20080626/1214492402">可能</a><br />ただし、jQuery互換モジュールは<br />現在非公開</td><td>-</td><td>×</td><td></td></tr>
-
+<tr><td>jQuery専用プラグインの利用</td><td><del>○</del><br /><a href="http://d.hatena.ne.jp/uupaa/20080626/1214492402">可能</a><br />ただし、jQuery互換モジュールは<br />現在非公開</td><td>-</td><td>×</td><td>　</td></tr>
 <tr><th>モダンな設計</th><th>　</th><th>　</th><th>　</th><th>　</th></tr>
 <tr><td><a href="./DOCUMENT.htm#uu.klass.generic">OOP指向の"クラス"を導入</a></td><td>○</td><td>×</td><td>○</td><td>　</td></tr>
 <tr><td>クラス, 拡張, 柔軟性に対する考え方</td><td>委譲とmixin<br />ダックタイピング</td><td>prototypeを拡張</td><td>組込オブジェクトを拡張<br />prototypeを拡張<br />継承とabstract</td><td>　</td></tr>
@@ -273,7 +272,7 @@ tr.category { background-color: #1F1F1F; }
                      <td><a href="http://www.prototypejs.org/">prototypejs.org</a></td><td>　</td></tr>
 <tr><td>用途</td><td>WebOS, GUI, HomePage Kit</td><td>HomePage Kit, Effect</td><td>HomePage Kit, Effect</td><td>　</td></tr>
 </table>
-<p>更新日: 2008-09-24</p>
+<p>更新日: 2008-09-30</p>
 <script type="text/javascript">
 function boot() {
   var x = 100, y = 80, r1 = 40, r2 = 80;
@@ -290,32 +289,32 @@ uu.ready(boot, "MWC");
 
 /*
   "uupaa.js": {
-    20080924:    4360,
+    20080930:    4660,
     20080831:    2050,
     20080630:     678
   },
   jQuery: {
-    20080924: 7800000,
+    20080930: 7710000,
     20080831: 7650000,
     20080630: 7820000
   },
   "Prototype.js": {
-    20080924: 3320000,
+    20080930: 3260000,
     20080831: 2000000,
     20080630: 2120000
   },
   "Ext.js": {
-    20080924:  559000,
+    20080930:  543000,
     20080831:  557000,
     20080630:  540000
   },
   MochiKit: {
-    20080924: 1090000,
+    20080930: 1080000,
     20080831: 1080000,
     20080630: 1080000
   },
   Mootools: {
-    20080924: 1920000,
+    20080930: 1890000,
     20080831: 2010000,
     20080630: 2044000
   }

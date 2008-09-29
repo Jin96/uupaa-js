@@ -19,31 +19,59 @@ uu.module.dev = function() {};
 uu.module.perf = uu.klass.kiss();
 uu.module.perf.prototype = {
   construct:
-            function() {
-              this.diff = [];
+            function(antiDispersion /* = true */) { // true: ばらつきを消す
+              this._anti = antiDispersion === void 0 || antiDispersion;
+              this._diff = [];
+              this._lastCost = 0;
             },
   // uu.module.perf.run
   run:      function(fn, loop /* = 1 */, set /* = 1 */) {
-              loop = loop || 1;
-              set  = set  || 1;
-              this.diff.length = 0;
-              var past, sz = 0;
+              this._diff.length = 0; // 前回のデータを破棄
+              loop = loop || 1, set = set || 1;
+              set += (this._anti ? 4 : 0);
+              var past, sz = 0, cost = this._cost(loop, set), r = 0;
 
               while (set--) {
                 past = uu.time(), sz = loop + 1;
                 while (--sz) { fn(); }
-                this.diff.push(uu.time() - past);
+                r = uu.time() - past - cost;
+                this._diff.push(r < 0 ? 0 : r); // マイナスにならないように
               }
+              // 前後2回分(計4回分)の数値を捨てる
+              if (this._anti) {
+                this._diff.sort(function(a, b) { return a - b; });
+                this._diff.pop();
+                this._diff.pop();
+                this._diff.shift();
+                this._diff.shift();
+              }
+              this._lastCost = cost;
             },
   // uu.module.perf.report
   report:   function() {
-              if (!this.diff.length) {
-                return { total: 0, avg: 0, set: 0, dump: [] };
+              if (!this._diff.length) {
+                return { total: 0, avg: 0, set: 0, dump: [], cost: 0 };
               }
               var total = 0;
-              this.diff.forEach(function(v) { total += v; });
-              return { total: total, avg: total / this.diff.length,
-                       set: this.diff.length, dump: this.diff };
+              this._diff.forEach(function(v) { total += v; });
+              return { total: total, avg: total / this._diff.length,
+                       set: this._diff.length, dump: this._diff, cost: this._lastCost };
+            },
+  toString: function() {
+              var r = this.report();
+              return uu.sprintf("total=%dms avg=%dms set=%d (cost=%dms)", r.total, r.avg, r.set, r.cost);
+            },
+  // 実処理時間を正確に求めるために、whileループとuu.time()に掛かるコストを求める
+  _cost:    function(loop, set) {
+              var rv = 0, past, sz = 0, dummy = [], r = 0, fn = uu.mute;
+              rv = uu.time();
+              while (set--) {
+                past = uu.time(), sz = loop + 1;
+                while (--sz) { fn(); } // 関数呼び出しコストも含めるためにダミー関数(uu.mute)を呼び出す
+                r = uu.time() - past - 0;
+                dummy.push(r < 0 ? 0 : r); // 出来るだけ近づけるために無駄な演算を行う
+              }
+              return uu.time() - rv; // loop cost
             }
 };
 
@@ -64,15 +92,15 @@ uu.module.log2.prototype = {
               this._enableFilter = false;
               this._filterExpr = null; // RegExp object
               this._e = 0;
+              var me = this;
+              uu.ready(function() {
+                me._createViewPort()
+                me._applyViewPortStyle();
+                me._put(); // 溜まっているログを出力
+              }, "D");
             },
   msgbox:   function(msg, p1, p2) {
               switch (msg) {
-              case UU.MSG_CHANGE_READY_STATE: // post(p1= "W")
-                if (p1 !== "W") { break; }
-                this._createViewPort()
-                this._applyViewPortStyle();
-                this._put(); // 溜まったログを出力
-                break;
               case "SET":
                 this._set(p1[0] || "", p1[1] || 0, p1[2] || 0);
                 break;
@@ -182,7 +210,7 @@ uu.module.log2.prototype = {
               return format.replace(/%(?:([\d]+)\$)?(#|0)?([\d]+)?(?:\.([\d]+))?(l)?([%iduoxXfcAs])/g, FORMAT);
             },
   _createViewPort: function() {
-              this._e = uu.id(this._id, false);
+              this._e = uud.getElementById(this._id);
               if (!this._e) {
                 this._e = uu.mix(uud.body.appendChild(uud.createElement("pre")), { id: this._id });
               }

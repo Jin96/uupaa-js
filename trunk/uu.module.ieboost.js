@@ -60,6 +60,7 @@ uu.module.ieboost.prototype = {
           //      uu.vtmHighSpeed.set(function() {
           //      }, 2000); // 2000msで無限ループ
               }
+              uud.execCommand("BackgroundImageCache", false, true);
             },
   handleEvent:
             function(evt) {
@@ -447,7 +448,7 @@ uu.module.ieboost.datascheme = uu.klass.kiss();
 uu.module.ieboost.datascheme.prototype = {
   construct:
             function() {
-              this._obj = new uu.module.datascheme(48, 48, 0, 0); // MAX DIM(48 x 48), no canvas, delay 200ms
+              this._obj = new uu.module.datascheme(48, 48, 0, 100); // MAX DIM(48 x 48), no canvas, delay 200ms
             }
 };
 
@@ -499,7 +500,7 @@ uu.module.ieboost.positionFixed.prototype = {
               }
             },
   markup:  function() {
-              var me = this, tag = uu.tag("*"), html, vp, rect;
+              var me = this, tag = uu.tag("*"), fxd = 0, html, vp, rect;
 
               // 1. position: fixed の要素を列挙する, 
               // 2. topの値をelm.uuIEBoostPositionFixedに退避する
@@ -509,6 +510,7 @@ uu.module.ieboost.positionFixed.prototype = {
 
                 var cs = v.currentStyle, top, bottom;
                 if (cs["position"] === "fixed" && !("uuIEBoostPositionFixed" in v)) {
+                  ++fxd;
                   top = cs["top"] || v.style.top || 0;
                   bottom = cs["bottom"] || v.style.bottom || 0;
 
@@ -519,8 +521,6 @@ uu.module.ieboost.positionFixed.prototype = {
                       value: top,
                       px: uu.css.toPixel(v, cs["paddingTop"]) + uu.css.toPixel(v, top)
                     };
-//v.style.border = "5px solid blue";
-
                   } else { // case bottom:
                     vp = uu.viewport.rect();
                     rect = uu.element.rect(v);
@@ -536,7 +536,7 @@ uu.module.ieboost.positionFixed.prototype = {
                 }
               });
               // スクロールをスムーズにするため、html, body { background-attachment: fixed } を設定する
-              if (tag.length) {
+              if (fxd) {
                 if (uu.css.backgroundImage(uud.body) === "none") {
                   uu.css.setBackgroundImage(uud.body, "none");
                 }
@@ -595,7 +595,6 @@ uu.module.ieboost.positionAbsolute.prototype = {
  *
  * @class
  */
-//// uu.module.drag.shim = uu.klass.kiss();
 uu.module.ieboost.shim = uu.klass.kiss();
 uu.module.ieboost.shim.prototype = {
   construct:
@@ -636,7 +635,6 @@ if (!uu.ua.ie) { return; }
 
 uu.ready(function() {
   uu.ieboost = new uu.module.ieboost();
-////  alert("ieboost ready");
 }, "D");
 
 uu.mix(uu.css, {

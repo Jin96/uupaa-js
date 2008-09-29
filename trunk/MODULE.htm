@@ -737,12 +737,11 @@ uu.id("up20").style.backgroundColor = ns.rgb(rgba20up);
   <dd><p>uu.module.config.importFromQueryString() は
       <br />&lt;script <b>id="uupaa.js"</b> src="uupaa.js?<b>key=value</b>&amp;<b>...</b>"&gt; の QueryString(key=value)から設定を取り込みます。</p>
       <p>id="uupaa.js"が見つからない場合、設定値は無視されます。</p>
-      <p>&lt;script <b>id="uupaa.js"</b> src="./uupaa.js?<b>module=dev,canvas</b>&amp;<b>debug=2</b>&amp;<b>cacheID=1</b>"&gt;
+      <p>&lt;script <b>id="uupaa.js"</b> src="./uupaa.js?<b>module=dev,canvas</b>&amp;<b>debug=2</b>"&gt;
        これは、以下のように解釈されます。</p>
       <ul>
         <li>uu.module.config.module = "dev,canvas";</li>
         <li>uu.module.config.debug = 2;</li>
-        <li>uu.module.config.cacheID = 1;</li>
       </ul>
       <p>uu.module.config.modulePath や uu.module.config.imagePath には、置換文字列 "{BASE}" が指定できます。
          <br />この文字列は、uu.module.config.basePath の値に置き換わります。</p>
@@ -815,12 +814,6 @@ uu.id("up20").style.backgroundColor = ns.rgb(rgba20up);
           <td>自動的にロードするモジュールをカンマ区切りで指定
               <br />複数指定可能
               <br />例: "module=dev,canvas"</td></tr>
-      <tr><td><a name="uu.module.config.cacheID">cacheID</a></td>
-          <td>Number</td>
-          <td>0</td>
-          <td><a href="./SELECTOR.htm#uu.id">uu.id</a> の検索結果を
-              <br />0: キャッシュしない(低速)
-              <br />1: キャッシュする(高速)</td></tr>
       </table>
   </dd>
 </dl>

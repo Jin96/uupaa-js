@@ -777,6 +777,31 @@ uu.forEach(uu.klass("alpha"), function(v) {
     </pre>
   </dd>
 
+<!-- -->
+  <dt><a name="uu.klass.match">uu.klass.match</a> - Match regexp - 正規表現でクラス名を検索</dt>
+  <dd>
+    <p>uu.klass.match(<i>elm</i>, <i>expr</i>) は
+       <i>elm</i>要素のclassNameプロパティのから、<i>expr</i>にマッチするクラス名を検索し結果返します。</p>
+    <pre>
+ @param Element elm   - 要素を指定します。
+ @param RegExp  expr  - RegExpオブジェクトを指定します。
+ @return Array/null   - マッチ結果の配列またはnullを返します。
+    </pre>
+    <pre class="eg">
+&lt;style&gt;
+.imagerollover { background-image: url(../../img/roll.gif); }
+&lt;/style&gt;
+&lt;div class="imagerollover rollrect_0_0_50_20"&gt;&lt;/div&gt;
+&lt;div class="imagerollover rollrect_0_20_50_20"&gt;&lt;/div&gt;
+var m;
+uu.css("div.imagerollover").forEach(function(v) {
+  if ( (m = <b>uu.klass.match</b>(v, /^rollrect_([\d]+)_([\d]+)_([\d]+)_([\d]+)$/)) ) {
+    uu.log("x=%s y=%s w=%s h=%s", m[1], m[2], m[3], m[4]);
+  }
+});
+    </pre>
+  </dd>
+
 
 <!-- -->
   <dt><a name="uu.klass.setWidgetChainedClassName">uu.klass.setWidgetChainedClassName</a> - Coming Soon</dt>
@@ -1385,15 +1410,6 @@ elm.clientHeight = 14px = 4(padding) + 10(height)
  @param Element elm - 要素を指定します。
     </pre>
   </dd>
-
-<!-- -->
-  <dt><a name="uu.element.fromPoint">uu.element.fromPoint</a> - Coming Soon</dt>
-  <dd>
-    <p>uu.element.fromPoint(<i>x</i>, <i>y</i>) は、点(x, y)にある要素を返します。</p>
-    <pre>
- @return Element - 要素を返します。
-    </pre>
-  </dd>
 </dl>
 
 
@@ -1408,7 +1424,7 @@ elm.clientHeight = 14px = 4(padding) + 10(height)
   <dt><a name="uu.viewport.rect">uu.viewport.rect</a> - Get view-port rect(browser inner size) - ブラウザの表示領域の位置とサイズを取得</dt>
   <dd>
     <p>uu.viewport.rect() は、ブラウザの表示領域の情報を取得します。</p>
-    <p>x, y, w, h の値には <a href="uu.viewport.setVirtualPadding">uu.viewport.setVirtualPadding</a> で設定したパディング値が加味された値が返されます。</p>
+    <p>x, y, w, h の値には <a href="#uu.viewport.setVirtualPadding">uu.viewport.setVirtualPadding</a> で設定したパディング値が加味された値が返されます。</p>
     <pre>
  @return <a href="./GLOSSARY.htm#RectHash">RectHash</a>   - RectHash( { x, y, w, h, sw, sh } )を返します。
                       x:  virtual-padding-left
@@ -1418,6 +1434,7 @@ elm.clientHeight = 14px = 4(padding) + 10(height)
                       sw: scroll width  - スクロールの幅
                       sh: scroll height - スクロールの高さ
     </pre>
+      <a href="demo/document/uu.viewport.htm" class="run">Run</a>
   </dd>
 
 <!-- -->
@@ -1425,7 +1442,7 @@ elm.clientHeight = 14px = 4(padding) + 10(height)
   <dd>
     <p>uu.viewport.setVirtualPadding() は、ブラウザの表示領域の仮想的なpadding情報を設定します。</p>
     <p>top, right, bottom, left のいずれも省略可能で、省略された要素については更新しません。</p>
-    <p>設定された値は <a href="uu.viewport.rect">uu.viewport.rect</a> が返すx, y, w, h の値に影響を与えます。</p>
+    <p>設定された値は <a href="#uu.viewport.rect">uu.viewport.rect</a> が返すx, y, w, h の値に影響を与えます。</p>
     <pre>
  @param PaddingHash - PaddingHash( { top, right, bottom, left } )を指定します。
                       top:    virtual-padding-left
