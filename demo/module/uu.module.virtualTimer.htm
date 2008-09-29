@@ -47,7 +47,7 @@ a, b { color: lightblue }
   <dd><p>setIntervalやsetTimeoutで多数のタイマーを同時に使用すると、かなり低速になる場合がありますが、
       virtualTimerはCPU負荷も低く遅延も少なめです。</p>
       <p>virtualTimerは、インターバル間隔を自由に変化させることが可能です。
-      以下は、一定時間(0ms, 100ms, 200ms, 300ms)で"Hello"を追加し、10ms毎にドット(".")を追加する例です。</p>
+      以下は、一定時間(0ms, 100ms, 200ms, 300ms)で"Hello"を追加し、10ms(または16ms)毎にドット(".")を追加する例です。</p>
       <p id="result1"></p>
       以下の機能もあります。<br />
       virtualTimer.suspend() - 一時停止, 一括停止<br />
@@ -68,7 +68,7 @@ function boot() {
   uu.vtmHighSpeed.set(fn1, delay, 4, "demo");
 
   var fn2 = function() { uu.id("result1").innerText += "."; };
-  uu.vtmHighSpeed.set(fn2, 10, 100); // 10msごとに、200回ドットを打ったら停止
+  uu.vtmHighSpeed.set(fn2, uu.ua.minclock, 100); // 10msごとに、200回ドットを打ったら停止
 
   vp = uu.viewport.rect();
 }
@@ -83,9 +83,9 @@ function countup() {
     var fn3 = function() { uu.id("result2").innerText = counter[0]++; };
     var fn4 = function() { uu.id("result3").innerText = counter[1]++; };
     var fn5 = function() { uu.id("result4").innerText = counter[2]++; toid = setTimeout(arguments.callee, 10); };
-    vtid = uu.vtmHighSpeed.set(fn3, 10, 1000); // 1000カウントで停止
-    itid = setInterval(fn4, 10);
-    toid = setTimeout(fn5, 10);
+    vtid = uu.vtmHighSpeed.set(fn3, uu.ua.minclock, 1000); // 1000カウントで停止
+    itid = setInterval(fn4, uu.ua.minclock);
+    toid = setTimeout(fn5, uu.ua.minclock);
   } else {
     uu.vtmHighSpeed.suspend(vtid);
     if (itid) { clearInterval(itid); }
@@ -100,7 +100,7 @@ function virtualTimer(size) {
 
   for (; i < size; ++i) { cubes.push(createCube(p)); }
   cubes.forEach(function(v) {
-    v.vtid = vtm10.set(function() { move(v); }, 10);
+    v.vtid = vtm10.set(function() { move(v); }, uu.ua.minclock);
   });
 }
 function window_setInterval(size) {
@@ -109,7 +109,7 @@ function window_setInterval(size) {
 
   for (; i < size; ++i) { cubes.push(createCube(p)); }
   cubes.forEach(function(v) {
-    v.itid = setInterval(function() { move(v); }, 10);
+    v.itid = setInterval(function() { move(v); }, uu.ua.minclock);
   });
 }
 function window_setTimeout(size) {
@@ -120,7 +120,7 @@ function window_setTimeout(size) {
   cubes.forEach(function(v) {
     v.toid = setTimeout(function() {
       move(v);
-      v.toid = setTimeout(arguments.callee, 10);
+      v.toid = setTimeout(arguments.callee, uu.ua.minclock);
     }, 10);
   });
 }

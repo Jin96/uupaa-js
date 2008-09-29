@@ -11,7 +11,12 @@
 <script>
 uu.module("", "dev", function() {
   uu.ready(function() {
+    uu.log(uu.id("ID1").innerText); // "hoge"
     uu.log(uu.id("ID2").innerText); // "huga"
+    uu.log(uu.id("ID2").innerText); // "huga"
+    uu.log(uu.id("ID2", 1).innerText); // "huga"
+    uu.log(uu.id("ID2", 0).innerText); // "huga"
+    uu.log(uu._cacheID);
   });
 });
 </script>
@@ -19,6 +24,11 @@ uu.module("", "dev", function() {
   &lt;div id="ID1"&gt;hoge&lt;/div&gt;
   &lt;div id="ID2"&gt;huga&lt;/div&gt;
 
+    uu.log(uu.id("ID1").innerText); // "hoge"
     uu.log(uu.id("ID2").innerText); // "huga"
+    uu.log(uu.id("ID2").innerText); // "huga"
+    uu.log(uu.id("ID2", 1).innerText); // "huga"
+    uu.log(uu.id("ID2", 0).innerText); // "huga"
+    uu.log(uu._cacheID);
 </pre>
 </body></html>

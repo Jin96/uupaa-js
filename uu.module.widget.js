@@ -317,6 +317,9 @@ uu.module.window.layout.prototype = {
               case "mousedown": // title bar, resize handle
                 switch (uu.event.target(evt).target) {
                 case this._fdc.title:
+                      if (this._fdc.viewState.size === 1) { // 最大化中なら何もしない
+                        break;
+                      }
                       uu.event.set(this, uu.ua.ie ? this._fdc.title : uud, "mousemove,mouseup", true);
                       this._mousedownOnTitleBar(evt);
                       break;
@@ -395,7 +398,7 @@ uu.module.window.layout.prototype = {
   _wire:    function(wired) {
               if (!wired) {
                 // normal
-                uu.css.set(this._fdc.bone, uu.ua.ie ? { border: "" } : { outline: "" });
+                uu.css.set(this._fdc.bone, { border: "", cursor: "" });
                 uu.css.show(this._fdc.boneCanvas);
                 uu.css.show(this._fdc.title);
 
@@ -410,8 +413,10 @@ uu.module.window.layout.prototype = {
                 this._wired = 0;
               } else {
                 // wired
-                uu.css.set(this._fdc.bone, uu.ua.ie ? { border: "2px dotted gray"}
-                                                    : { outline: "2px dotted gray" });
+                switch (this._dragging) {
+                case 1: uu.css.set(this._fdc.bone, { border: "2px dotted gray", cursor: "move" }); break;
+                case 2: uu.css.set(this._fdc.bone, { border: "2px dotted gray", cursor: "nw-resize" }); break;
+                }
                 uu.css.hide(this._fdc.boneCanvas);
                 uu.css.hide(this._fdc.title);
                 uu.css.hide(this._fdc.body);

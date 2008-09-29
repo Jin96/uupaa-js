@@ -34,27 +34,35 @@
 <!-- -->
   <dt><a name="uu.id">ID Selector</a> - IDセレクタ</dt>
   <dd>
-    <p>uu.id(<i>id</i>) は <i>id</i> と一致するid属性を持つ要素を検索し、
-       見つかった<a href="./GLOSSARY.htm#Element">Element</a>を返します。</p>
-    <p>この関数は、<a href="./MODULE.htm#uu.module.config.cacheID"><i>uu.config.cacheID</i></a> の影響を受けます。
-      <br /><i>uu.config.cacheID</i> が 0ならキャッシュを使用しません。1 なら検索済みのノードをキャッシュし、次回以降からは非常に高速に動作します。
-      <br />要素を動的に生成/削除し、それらが同じIDを使いまわすようなケースでは、<i>uu.config.cacheID</i> を 0 に設定し、キャッシュを使用しないようにしてください。
+    <p>uu.id(<i>id</i>, <i>really</i> = false) は <i>id</i> と一致するid属性を持つ要素を検索し、
+       <a href="./GLOSSARY.htm#Element">Element</a> を返します。</p>
+    <p><i>really</i> が true ならキャッシュを使用せず、実際に検索を行います。
+      <br /><i>really</i> が false でキャッシュがあればキャッシュされた値を高速に返します(実測で2～5倍高速)。
+    </p>
+    <p><b>注意点:</b>
+      <br />要素を動的に生成/削除し、それらが同じIDを使いまわすようなケースでは、
+      <i>really</i> に 1を指定し、キャッシュに影響されないようなロジックを組んでください。
+      <br />(そのようなケースでは、uu.id を使用せずに、document.getElementById() を直接使用したほうが良いでしょう)
     </p>
     <pre>
  @param String id      - IDを指定します。
+ @param Boolean really - キャッシュを使用する場合は false を、
+                         実際に検索する場合に true を指定します。
+                         デフォルトは false です。true を指定した場合でも検索結果をキャッシュします。
  @return Element/null  - 検索成功で要素の参照を返します。失敗で null を返します。
-                         uu.config.cacheID が 1 に設定されている場合は、
-                         検索済みの要素についてはキャッシュを返します。
+                         reallyがfalseでキャッシュが存在する場合は、キャッシュされた値を返します。
     </pre>
     <a href="demo/selector/uu.id.htm" class="run">Run</a>
     <pre class="eg">
-&lt;div&gt;
   &lt;div id="ID1"&gt;hoge&lt;/div&gt;
-  &lt;div id="<b>ID2</b>"&gt;huga&lt;/div&gt;
-&lt;/div&gt;
-&lt;script&gt;
-    uu.log(<b>uu.id</b>("ID2").innerText); // "huga"
-&lt;/script&gt;
+  &lt;div id="ID2"&gt;huga&lt;/div&gt;
+
+    uu.log(<b>uu.id</b>("ID1").innerText); // "hoge"  with cache
+    uu.log(<b>uu.id</b>("ID2").innerText); // "huga"  with cache
+    uu.log(<b>uu.id</b>("ID2").innerText); // "huga"  with cache
+    uu.log(<b>uu.id</b>("ID2", 1).innerText); // "huga"  without cache
+    uu.log(<b>uu.id</b>("ID2", 0).innerText); // "huga"  with cache
+    uu.log(uu._cacheID); // キャッシュをダンプ
     </pre>
   </dd>
 <!-- -->
@@ -134,22 +142,23 @@
     <p>uu.attr(<i>expr</i>, <i>context</i> = document) は
        <i>context</i> 以下のノードツリーから <i>expr</i> と一致する属性や、擬似要素/擬似クラスが一致する要素を検索し
        見つかった要素の配列( <a href="./GLOSSARY.htm#ElementArray">ElementArray</a> )を返します。</p>
+    <p>uu.attrは、JavaScriptプロパティを検索し、見つからない場合にAttributeを検索します。これはブラウザ間の処理の違いを吸収するためです。</p>
     <p>複数の class 属性を検索する場合は、<a href="#uu.klass">uu.klass</a> を使用してください。
        uu.attr は 複数の class 属性を検索するように設計されていません。</p>
     <p>uu.attr は、<a href="#uu.id">uu.id</a> や <a href="#uu.tag">uu.tag</a> よりも低速ですが、
        <a href="#uu.css">uu.css</a>, <a href="#uu.xpath">uu.xpath</a> よりも手軽で、使う機会の多いセレクタです。</p>
     <pre>
  @param String  expr      - 検索式を指定します。
-                            式1: E[@A]      - 式1は属性 A を持っている要素 E を検索します。
-                            式2: E[@A="V"]  - 式2は属性 A の値 V が一致する要素 E を検索します。
+                            式1: E[@A]      - 式1は属性 A を持っている要素 E を検索します。E[@A] の @ は省略可能です。
+                            式2: E[@A="V"]  - 式2は属性 A の値 V が一致する要素 E を検索します。E[@A="V"] の @ は省略可能です。
                             式3: E[:P]      - 式3は擬似要素/擬似クラス P が一致する要素 E を検索します。
                             E には要素名(div や ul)を指定します。"*"も指定可能です。"*"を指定すると全ての要素名を検索対象にします。
                             A には属性名(class や title)を指定します。属性名に"class"を指定すると、"className"が指定されたものとして扱います。
-                            = には"^=", "$=", "*=" も指定可能です。"^="は先頭から一致, "$="は末尾から一致, "*="はどこかが一致する要素を選択します。
+                            = には "^=", "$=", "*=", "!=" も指定可能です。"=" は完全一致, "^="は先頭から一致, "$="は末尾から一致, "*="はどこかが一致, "!=" は完全不一致の要素を選択します。
                             V には検索する値を指定します。
                             P には擬似クラスの名前を指定します。
 
-                            例: uu.attr('div[@class*="widget"]'), uu.attr("*[@title]"),
+                            例: uu.attr('div[@class*="widget"]'), uu.attr("*[title]"),
                                 uu.attr('input[:checked]'),       uu.attr("option[:selected]");
 
  @param Element [context] - 検索開始位置(コンテキスト)を指定します。デフォルトは document です。
@@ -159,27 +168,31 @@
     </pre>
     <table>
     <tr><th><i>expr</i></th><th>内容</th></tr>
-    <tr><td>uu.attr('div[@id]')     </td><td>id 属性を持つ div 要素と一致します。
+    <tr><td>uu.attr('div[id]')     </td><td>id 属性を持つ div 要素と一致します。
                                           <hr />&lt;div id="V1"&gt; &lt;div id="V2"&gt;
-                                          <br />uu.attr("div[@id]").forEach(function(v) { alert(v.id); }); // "V1", "V2"
+                                          <br />uu.attr("div[id]").forEach(function(v) { alert(v.id); }); // "V1", "V2"
                                           </td></tr>
-    <tr><td>uu.attr('*[@id="V1"]')  </td><td>id 属性の値が V1 と完全に一致する全要素と一致します。
+    <tr><td>uu.attr('div[id!=""]') </td><td>id 属性を持つが値が空ではない div 要素と一致します。
                                           <hr />&lt;div id="V1"&gt; &lt;div id="V2"&gt;
-                                          <br />uu.attr('div[@id="V1"]').forEach(function(v) { alert(v.id); }); // "V1"
+                                          <br />uu.attr('div[id!=""]').forEach(function(v) { alert(v.id); }); // "V1", "V2"
                                           </td></tr>
-    <tr><td>uu.attr('div[@id^="V"]')</td><td>id 属性の値が V で始まる div 要素と一致します。
+    <tr><td>uu.attr('*[id="V1"]')  </td><td>id 属性の値が V1 と完全に一致する全要素と一致します。
                                           <hr />&lt;div id="V1"&gt; &lt;div id="V2"&gt;
-                                          <br />uu.attr('div[@id^="V"]').forEach(function(v) { alert(v.id); }); // "V1", "V2"
-                                    </td></tr>
-    <tr><td>uu.attr('div[@id$="1"]')</td><td>id 属性の値が 1 で終わる div 要素と一致します。
+                                          <br />uu.attr('div[id="V1"]').forEach(function(v) { alert(v.id); }); // "V1"
+                                          </td></tr>
+    <tr><td>uu.attr('div[id^="V"]')</td><td>id 属性の値が V で始まる div 要素と一致します。
                                           <hr />&lt;div id="V1"&gt; &lt;div id="V2"&gt;
-                                          <br />uu.attr('div[@id$="1"]').forEach(function(v) { alert(v.id); }); // "V1"
+                                          <br />uu.attr('div[id^="V"]').forEach(function(v) { alert(v.id); }); // "V1", "V2"
                                     </td></tr>
-    <tr><td>uu.attr('div[@id*="V"]')</td><td>id 属性の値が V を含む div 要素と一致します。
+    <tr><td>uu.attr('div[id$="1"]')</td><td>id 属性の値が 1 で終わる div 要素と一致します。
                                           <hr />&lt;div id="V1"&gt; &lt;div id="V2"&gt;
-                                          <br />uu.attr('div[@id*="V"]').forEach(function(v) { alert(v.id); }); // "V1", "V2"
+                                          <br />uu.attr('div[id$="1"]').forEach(function(v) { alert(v.id); }); // "V1"
                                     </td></tr>
-    <tr><td>uu.attr('div[@class~="W"]')</td><td>id 属性の値がスペース区切りのリストで、
+    <tr><td>uu.attr('div[id*="V"]')</td><td>id 属性の値が V を含む div 要素と一致します。
+                                          <hr />&lt;div id="V1"&gt; &lt;div id="V2"&gt;
+                                          <br />uu.attr('div[id*="V"]').forEach(function(v) { alert(v.id); }); // "V1", "V2"
+                                    </td></tr>
+    <tr><td>uu.attr('div[class~="W"]')</td><td>id 属性の値がスペース区切りのリストで、
                                           <br />W がリストに含まれている div 要素と一致します。
                                           <hr />&lt;div id="V1" class="V W X Y Z"&gt; &lt;div id="V2" class="W"&gt;
                                           <br />uu.attr('div[@class~="W"]').forEach(function(v) { alert(v.id); }); // "V1", "V2"

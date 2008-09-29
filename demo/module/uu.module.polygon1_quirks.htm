@@ -3,7 +3,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>uupaa.js - uu.module.polygon test</title>
 <!--[if IE]><script id="excanvas.js" type="text/javascript" src="http://pigs.sourceforge.jp/excanvas.js"></script><![endif]-->
-<script type="text/javascript" src="../../uupaa.js"></script>
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?module=polygon"></script>
 <style>
 #canvas0 {
   position: absolute;
@@ -29,9 +29,7 @@ function boot() {
     poly.draw(uu.id("canvas0").getContext("2d"), true);
   }, 2000);
 }
-uu.module("", "polygon", function() {
-  uu.ready(boot, "C");
-});
+uu.ready(boot, "DMC");
 </script>
 
 </body>

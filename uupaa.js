@@ -23,7 +23,7 @@ var uud = document, uuw = window, uuhd = uud.getElementsByTagName("head")[0], //
 
 uu.mix(UU, {
   // --- Selector ---
-  ATTR:         /^([\w\-\*]+)\[(@|\:)([\w]+)(?:(\~=|\^=|\$=|\*=|=)(["'])([^"']*)\5)?\]$/,
+  ATTR:         /^([\w\-\*]+)\[(@|\:)?([\w]+)(?:(\~=|\^=|\$=|\*=|\!=|=)(["'])([^"']*)\5)?\]$/,
   CSS_ELM:      /^([\*a-z0-9\_\-]+)/i,          // * or E
   CSS_ID:       /^#([a-z0-9\_\-]+)/i,           // #id
   CSS_CLASS:    /^\.([a-z0-9\_\-]+)/i,          // .class
@@ -59,7 +59,7 @@ uu.mix(UU, {
 });
 
 // --- Detect ---
-  // uu.ua - Detect User-Agent and Functions - ブラウザと機能の判別
+// uu.ua - Detect User-Agent and Functions - ブラウザと機能の判別
 uu.ua = function(info) { var n=(info||"_").toLowerCase();return(n in uu.ua)?uu.ua[n]:false; };
 uu.ua._        = navigator.userAgent;            // UserAgent cache
 uu.ua.opera    = !!uuw.opera;                    // is Opera
@@ -97,31 +97,34 @@ uu.mix.param(Array.prototype, { // for IE, Opera9.2x
 // --- Selector ---
 uu.mix(uu, {
   // uu.id - ID Selector - IDセレクタ
-  id:       function(id) {
-              if (!uu.config.cacheID) { return uud.getElementById(id); }
-              return (uu._cacheID[id] || (uu._cacheID[id] = uud.getElementById(id)));
+  id:       function(id, really /* = false */) {
+              return really ? (uu._cacheID[id] = uud.getElementById(id))
+                            : uu._cacheID[id] || (uu._cacheID[id] = uud.getElementById(id));
             },
   // uu.tag - Tag/Element Selector - タグ(要素)セレクタ
   tag:      function(tagName, context /* = document */) { // for Firefox2+, Safari3+, Opera9+, Chrome
               return Array.prototype.slice.call((context || uud).getElementsByTagName(tagName));
             },
   // uu.klass - Class Selector - クラスセレクタ
-  klass:    function(className, context /* = document */) { // for Firefox3, Safari3, Opera9.5, Chrome
+  klass:    function(className, context /* = document */) { // for Firefox3+, Safari3+, Opera9.5+, Chrome
               return Array.prototype.slice.call((context || uud).getElementsByClassName(className));
             },
   // uu.attr - Attribute Selector - 属性セレクタ
   attr:     function(expr, context /* = document */) { // expr= E[:checked] E[@A] E[@A~="V"] E[@A^="V"] E[@A$="V"] E[@A*="V"] E[@A="V"] E[@A="V"]
-              var m = expr.match(UU.ATTR);
-              return m ? uu._attr(context || uud, m[1], m[2] === ":", m[3], m[4] ? m[4] : "@", m[6] || "") : []; // 1:E, 3:A, 4:=, 6:V
+              var m = uu.trim(expr).match(UU.ATTR), ctx = context || uud;
+              return m ? uu._attr(ctx, m[1], m[2] === ":", m[3], m[4] ? m[4] : "@", m[6] || "") : []; // 1:E, 3:A, 4:=, 6:V
             },
   // uu.xsnap - XPath Selector - XPathセレクタ
   xpath:    function(expr, context /* = document */, sort /* = true */) {
-              var n = uud.evaluate(expr, context || uud, null, sort ? 7 : 6, null), // 7 is SORT
-                  i = 0, sz = n.snapshotLength, rv = Array(sz);
-              for (; i < sz; ++i) {
-                rv[i] = n.snapshotItem(i);
-              }
-              return rv;
+              var n, i = 0, sz, rv;
+              try {
+                n = uud.evaluate(expr, context || uud, null, sort ? 7 : 6, null); // 7 is SORT
+                for (sz = n.snapshotLength, rv = Array(sz); i < sz; ++i) {
+                  rv[i] = n.snapshotItem(i);
+                }
+                return rv;
+              } catch (e) { (uu.config.debug & 0x1) && uu.die("uu.xpath(expr=%s)", expr); }
+              return [];
             },
   // uu.css - CSS Selector - CSSセレクタ
   css:      function(expr, context /* = document */) {
@@ -129,9 +132,7 @@ uu.mix(uu, {
               try {
                 return (!cx.querySelector || x.indexOf(":contains") > -1)
                        ? uu._css(x, cx) : Array.prototype.slice.call(cx.querySelectorAll(x));
-              } catch (e) {
-                (uu.config.debug & 0x1) && uu.die("uu.css(expr=%s)", expr);
-              }
+              } catch (e) { (uu.config.debug & 0x1) && uu.die("uu.css(expr=%s)", expr); }
               return [];
             },
   // uu.nodeType - NodeType Selector - ノードタイプセレクタ
@@ -145,29 +146,35 @@ uu.mix(uu, {
               uu.nodeType(3, context, depth);
             },
   _cacheID: { /* id: element, ... */ },
-  _attr:    function(ctx, E, P, A, OP, V) { // E=elm, P="@"or":", A=attr, OP=operator, V=value
-              var rv = [], sz = V.length, w, ITEM = {
-                  enabled:  function(e) { !e.disabled && rv.push(e); },
-                  disabled: function(e) {  e.disabled && rv.push(e); },
-                  checked:  function(e) {  e.checked  && (e.type === "checkbox" || e.type === "radio") && rv.push(e); },
-                  selected: function(e) {  e.selected && rv.push(e); },
-                  visible:  function(e) { (e.type !== "hidden" && !HIDE(e)) && rv.push(e); },
-                  hidden:   function(e) { (e.type === "hidden" ||  HIDE(e)) && rv.push(e); },
-                  animated: function(e) { ("uuEffectRunning" in e) && e.uuEffectRunning && rv.push(e); },
-                  "@":      function(e) { (A in e || H(e)) && rv.push(e); },
-                  "=":      function(e) { ((A in e && e[A] === V) || G(e) === V) && rv.push(e); },
-                  "*=":     function(e) { ((A in e && e[A].indexOf(V) !== -1) || G(e).indexOf(V) !== -1) && rv.push(e); },
-                  "^=":     function(e) { ((A in e && e[A].indexOf(V) ===  0) || G(e).indexOf(V) ===  0) && rv.push(e); },
-                  "$=":     function(e) { if (A in e && e[A].lastIndexOf(V) + sz === e[A].length) { rv.push(e); return; }
-                                          w = G(e); (w && w.lastIndexOf(V) + sz === w.length) && rv.push(e); },
-                  "~=":     function(e) { ((A in e && (" " + e[A] + " ").indexOf(V) !== -1) ||
-                                           (" " + G(e) + " ").indexOf(V) !== -1) && rv.push(e); } },
-                  G = uu.ua.ie ? function(e) { return "";   } : function(e) { return e.getAttribute(A) || ""; },
-                  H = uu.ua.ie ? function(e) { return null; } : function(e) { return e.hasAttribute(A);       };
+  _attr:    function(ctx, E, P, A, OP, V) { // E=elm, P=":" is true, A=attr, OP=operator, V=value
+              var rv = [], tag = uu.tag(E, ctx), i = 0, sz = tag.length, e, vsz, w;
+              (A === "class") && (A = "className");
+              (OP === "~=") && (V = " " + V + " ");
+              for (; i < sz; ++i) {
+                e = tag[i];
+                switch (P ? A : OP) {
+                case "@":         (A in e || H(e)) && rv.push(e); break;
+                case "=":         ((A in e && e[A] === V) || G(e) === V) && rv.push(e); break;
+                case "!=":        ((A in e && e[A] !== V) || G(e) !== V) && rv.push(e); break;
+                case "*=":        ((A in e && e[A].indexOf(V) !== -1) || G(e).indexOf(V) !== -1) && rv.push(e); break;
+                case "^=":        ((A in e && e[A].indexOf(V) ===  0) || G(e).indexOf(V) ===  0) && rv.push(e); break;
+                case "$=":        vsz = V.length; if (A in e && e[A].lastIndexOf(V) + vsz === e[A].length) { rv.push(e); break; }
+                                  w = G(e); (w && w.lastIndexOf(V) + vsz === w.length) && rv.push(e); break;
+                case "~=":        ((A in e && (" " + e[A] + " ").indexOf(V) !== -1) ||
+                                              (" " + G(e) + " ").indexOf(V) !== -1) && rv.push(e); break;
+                case "enabled":   !e.disabled && rv.push(e); break;
+                case "disabled":  e.disabled && rv.push(e); break;
+                case "checked":   e.checked  && (e.type === "checkbox" || e.type === "radio") && rv.push(e); break;
+                case "selected":  e.selected && rv.push(e); break;
+                case "visible":   (e.type !== "hidden" && !HIDE(e)) && rv.push(e); break;
+                case "hidden":    (e.type === "hidden" ||  HIDE(e)) && rv.push(e); break;
+                case "animated":  ("uuEffectRunning" in e) && e.uuEffectRunning && rv.push(e); break;
+                default: uu.die(":%s unsupported", P ? A : OP);
+                }
+              }
               function HIDE(e) { var s = uu.css.get(e); return s.display === "none" || s.visibility === "hidden"; }
-              if (A === "class") { A = "className"; }
-              if (OP === "~=") { V = " " + V + " "; }
-              uu.forEach(uu.tag(E, ctx), P ? ITEM[A] : ITEM[OP]);
+              function G(e)    { return uu.ua.ie ? "" : e.getAttribute(A) || ""; }
+              function H(e)    { return uu.ua.ie ? null : e.hasAttribute(A); }
               return rv;
             },
   _css:     function(expr, context) {
@@ -188,20 +195,24 @@ uu.mix(uu, {
                 });
                 return rv;
               }
-              function MIX(r, c, g) { c.forEach(function(v) { !(v.uid in g) && (r.push(v), g[v.uid] = v); }); }
-              function UID(e)    { return ("uid" in e) ? e.uid : (e.uid = ("uid" + ++uu.uid._count)); }
-              function TXT(v)    { return (uu.ua.ie || (uu.ua.opera && !uu.ua.opera95)) ? v.innerText : v.textContent; }
-              function HAS(n, v) { if (uu.ua.ie && !uu.ua.ie8) { var a = n.getAttributeNode(v); return a && a.specified; }
-                                   return n.hasAttribute(v); }
+              function JUDGE(v)   { var cs = uucs(v, ""); // http://d.hatena.ne.jp/uupaa/20080928/1222543331
+                                    return uu.ua.ie ? cs.rubyAlign === "center" : cs.outlineWidth === "0px" && cs.outlineStyle === "solid"; }
+              function MARK(r)    { return uu.css.insertRule(r + (uu.ua.ie ? "{ruby-align:center}" : "{outline: 0 solid black}")); }
+              function UNMARK(i)  { uu.css.deleteRule(i); }
+              function MIX(r,c,g) { c.forEach(function(v) { !(v.uid in g) && (r.push(v), g[v.uid] = v); }); }
+              function UID(e)     { return ("uid" in e) ? e.uid : (e.uid = uu.uid()); }
+              function TXT(v)     { return (uu.ua.ie || (uu.ua.opera && !uu.ua.opera95)) ? v.innerText : v.textContent; }
+              function HAS(n, v)  { if (uu.ua.ie && !uu.ua.ie8) { var a = n.getAttributeNode(v); return a && a.specified; }
+                                    return n.hasAttribute(v); }
               function NTH(anb) {
                 var m, a, b;
-                if (!isNaN(anb)) { b = parseInt(anb); return function(i) { return i === b; } }
+                if (!isNaN(anb)) { b = uupi(anb); return function(i) { return i === b; } }
                 if (anb === "even" || anb === "2n"   || anb === "2n+0") { return function(i) { return (i - 0) % 2 === 0; }; }
                 if (anb === "odd"  || anb === "2n+1" || anb === "2n-1") { return function(i) { return (i - 1) % 2 === 0; }; }
                 m = anb.match(UU.CSS_ANB);
                 !m && uu.die("%d unsupported", anb);
-                a = parseInt(m[1] === "-" ? -1 : m[1] || 1);
-                b = parseInt(m[2] || 0);
+                a = uupi(m[1] === "-" ? -1 : m[1] || 1);
+                b = uupi(m[2] || 0);
                 switch (a) {
                 case  0: return function(i) { return i === b; }; // 繰り返しせずb番目の子を選択する
                 case  1: return function(i) { return i >= b;  }; // 全てのE要素のb番目以降の子供を選択する
@@ -252,7 +263,11 @@ uu.mix(uu, {
                               case "empty":           cx = cx.filter(function(v) { return !uu.node.count(v) && !TXT(v); }); break;
                               case "target":          w = location.hash.substring(1);
                                                       w && (cx = cx.filter(function(v) { return v.id === w || ("name" in v && v.name === w); })); break;
-                              case "link":            w = uu.toArray(uud.links);
+                              case "link":
+                              case "visited":         f = m[1] === "link", i = MARK("a:visited"), w = uu.toArray(uud.links).filter(function(v) { return f ? !JUDGE(v) : JUDGE(v); }), UNMARK(i);
+                                                      cx = cx.filter(function(v) { return w.indexOf(v) > -1; }); break;
+                              case "hover":
+                              case "focus":           i = MARK(":" + m[1]), w = uu.tag("*", uud.body).filter(function(v) { return JUDGE(v); }), UNMARK(i);
                                                       cx = cx.filter(function(v) { return w.indexOf(v) > -1; }); break;
                               case "lang":            w = RegExp("^(" + m[2] + "$|" + m[2] + "-)", "i");
                                                       cx = cx.filter(function(v) { p = v;
@@ -514,6 +529,14 @@ uu.mix(uu.klass, {
               var cn = className;
               uu.klass.has(elm, cn) ? uu.klass.remove(elm, cn) : uu.klass.add(elm, cn);
             },
+  // uu.klass.match - Match regexp - 正規表現でクラス名を検索
+  match:    function(elm, expr) {
+              var rv, token = uu.trim(elm.className).split(" "), i = 0, sz = token.length;
+              for (; i < sz; ++i) {
+                if ( (rv = token[i].match(expr)) ) { return rv; }
+              }
+              return null;
+            },
   setWidgetChainedClassName:
             function(uid, className) {
               uu.klass._chain["js" + className] = uid;
@@ -731,7 +754,6 @@ uu.ua.ie && uu.mix(uu.css, {
               }
               x = (x === "auto") ? uu.css.toPixel(x) : uupf(x);
               y = (y === "auto") ? uu.css.toPixel(y) : uupf(y);
-//uu.log("result: x=%s y=%s w=%s h=%s", x, y, w, h);
               return { x: x, y: y, w: w, h: h };
             },
   setOpacity:
@@ -772,7 +794,6 @@ uu.ua.opera && !uu.ua.opera95 && uu.mix(uu.css, { // Opera9.2x
               }
               x = (x === "auto") ? uu.css.toPixel(x) : F(x);
               y = (y === "auto") ? uu.css.toPixel(y) : F(y);
-// uu.log("result: x=%s y=%s w=%s h=%s", x, y, w, h);
               return { x: x, y: y, w: w, h: h };
             }
 });
@@ -838,11 +859,6 @@ uu.mix(uu.element = function() {}, {
   //uu.ui.element.toStatic - Static positioning - 静的座標化
   toStatic: function(elm) {
               elm.style.position = "static";
-            },
-  // uu.ui.element.fromPoint - Coming Soon
-  fromPoint:
-            function(x, y) {
-              return uud.elementFromPoint(x, y);
             }
 });
 
@@ -866,20 +882,14 @@ uu.ua.ie && uu.mix(uu.element, {
             }
 });
 
-//uu.ua.gecko && !uu.ua.firefox3 && uu.mix(uu.element, { // for Firefox2
-//  uu.element.fromPoint = function(x, y) {
-//    return null; // not impl
-//  };
-//});
-
 // --- ViewPort ----
 uu.mix(uu.viewport = function() {}, {
   // uu.viewport.rect - Get view-port rect(browser inner size) - ブラウザの表示領域の位置とサイズを取得
   rect:     function() {
-              var pad = uu.viewport._padding;
-              return { x: pad.left, y: pad.top,
-                       w: uuw.innerWidth  - pad.left - pad.right, // browser view-port width - ブラウザの表示領域の幅
-                       h: uuw.innerHeight - pad.top - pad.bottom, // browser view-port height - ブラウザの表示領域の高さ
+              var p = uu.viewport._padding;
+              return { x: p.left, y: p.top,
+                       w: uuw.innerWidth  - p.left - p.right, // browser view-port width - ブラウザの表示領域の幅
+                       h: uuw.innerHeight - p.top - p.bottom, // browser view-port height - ブラウザの表示領域の高さ
                        sw: uuw.pageXOffset, sh: uuw.pageYOffset }; // scroll width and height - スクロール幅と高さ
             },
   // uu.viewport.setVirtualPadding - Set PaddingHash( { top, right, bottom, left } )
@@ -889,12 +899,7 @@ uu.mix(uu.viewport = function() {}, {
   _padding: { top: 0, right: 0, bottom: 0, left: 0 }
 });
 uu.ua.ie && uu.mix(uu.viewport, {
-  rect:     function() {
-              var e = uu.ua.std ? uud.documentElement : uud.body;
-              return { x: 0, y: 0,
-                       w: e.clientWidth, h: e.clientHeight,
-                       sw: e.scrollLeft,  sh: e.scrollTop };
-            }
+  rect:     function() { var e=uu.ua.std?uud.documentElement:uud.body,p=uu.viewport._padding;return{x:p.left,y:p.top,w:e.clientWidth-p.left-p.right,h:e.clientHeight-p.top-p.bottom,sw:e.scrollLeft,sh:e.scrollTop}; }
 });
 
 // --- Module ---
@@ -1082,7 +1087,7 @@ uu.mix(uu.event = function() {}, {
               // wheelDelta: Safari, IE
               // detail: Firefox
               if (evt.wheelDelta || evt.detail) {
-                rv.wheel = parseInt(evt.detail ? (evt.detail / 3) : (evt.wheelDelta / -120));
+                rv.wheel = uupi(evt.detail ? (evt.detail / 3) : (evt.wheelDelta / -120));
               }
               return rv;
             },
@@ -1226,11 +1231,7 @@ uu.mix(uu.ready, {
 uu.mix(uu, {
   // uu.unready - Unready event handler - Unreadyイベントハンドラを設定
   unready:  function(fn) {
-              if (uu.ua.webkit || uu.ua.gecko || uu.ua.ie || uu.ua.opera95) {
-                uu.event.set(fn, uuw, "beforeunload");
-              } else {
-                uu.event.set(fn, uuw, "unload");
-              }
+              uu.event.set(fn, uuw, (uu.ua.webkit || uu.ua.gecko || uu.ua.ie || uu.ua.opera95) ? "beforeunload" : "unload");
             }
 });
 
@@ -1323,8 +1324,6 @@ uu.mix(uu, {
               rq.timeout && uu.delay(function() { rq._fn[uid]("", 408); }, rq.timeout); // 408 "Request Time-out"
             }
 });
-
-// --- Request.Ajax ---
 uu.mix(uu.ajax, {
   // uu.ajax.loadIfMod - Ajax async request with new-arrival check - 更新チェック付き非同期リクエスト
   loadIfMod:
@@ -2007,7 +2006,7 @@ uu.module.color.prototype = {
   white:    { r: 255, g: 255, b: 255, a: 1 },
   // uu.module.color.hash - Parse color and return RGBAHash - 色をパースしRGBAHashを返す
   hash:     function(r, g, b, a) { // r = Number( Red ) or String( name, #fff, rgb, rgba ) or RGBAHash or HSVAHash
-              var m, i = uuw.parseInt, f = uuw.parseFloat;
+              var m, i = uupi, f = uupf;
               function H(n, a) { return { r: (n >> 16) & 0xff, g: (n >> 8) & 0xff, b: n & 0xff, a: a }; }
               function D(n)    { return (n.lastIndexOf("%") === -1) ? i(n) : f(n) * 2.55 | 0; }
 
@@ -2435,14 +2434,13 @@ uu.module.config.prototype = {
                 imagePath:  "{BASE}img/",
                 repair:     0x1,
                 debug:      0x0,
-                module:     "",
-                cacheID:    0 // uu.id cache
+                module:     ""
               });
             },
   // uu.module.config.importFromQueryString
   importFromQueryString:
             function() {
-              var e = uu.id("uupaa.js"), rv = {};
+              var e = uud.getElementById("uupaa.js"), rv = {};
               if (e && e.src.indexOf("?") !== -1) {
                 rv = uu.url.query(e.src.slice(e.src.indexOf("?") + 1));
                 if ("basePath"   in rv) { this.basePath   = rv.basePath;         }
@@ -2451,7 +2449,6 @@ uu.module.config.prototype = {
                 if ("repair"     in rv) { this.repair     = uupi(rv.repair);     }
                 if ("debug"      in rv) { this.debug      = uupi(rv.debug);      }
                 if ("module"     in rv) { this.module     = rv.module;           }
-                if ("cacheID"    in rv) { this.cacheID    = uupi(rv.cacheID);    }
               }
               this.modulePath = this.modulePath.replace(/\{BASE\}/g, this.basePath);
               this.imagePath  = this.imagePath.replace(/\{BASE\}/g, this.basePath);
