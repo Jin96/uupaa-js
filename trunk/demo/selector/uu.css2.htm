@@ -1,0 +1,128 @@
+<html><head><title>uupaa.js - uu.css(nth-last-of-type) test</title>
+<!--[if IE]><script id="javascript-xpath.js" type="text/javascript" src="../../lib/javascript-xpath.js"></script><![endif]-->
+<script id="uupaa.js" type="text/javascript" src="../../uupaa.js?module=dev"></script>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head><body><a href="../../README.htm">README</a> &gt; <a href="../../SELECTOR.htm#uu.css">SELECTOR</a> &gt; uu.css<br />
+<p>content-type: text/html</p>
+<table>
+<tr><td>
+<div class="zebra">
+ <ul>
+  <li>list1</li>
+  <li>list2</li>
+  <li>list3</li>
+  <li>list4</li>
+  <li>list5</li>
+  <li>list6</li>
+ </ul>
+</div>
+</td><td>
+<div class="top3">
+ <ul>
+  <li>list1</li>
+  <li>list2</li>
+  <li>list3</li>
+  <li>list4</li>
+  <li>list5</li>
+  <li>list6</li>
+ </ul>
+</div>
+</td><td>
+<div class="worst3">
+ <ul>
+  <li>list1</li>
+  <li>list2</li>
+  <li>list3</li>
+  <li>list4</li>
+  <li>list5</li>
+  <li>list6</li>
+ </ul>
+</div>
+</td><td>
+<div class="no5">
+ <ul>
+  <li>list1</li>
+  <li>list2</li>
+  <li>list3</li>
+  <li>list4</li>
+  <li>list5</li>
+  <li>list6</li>
+ </ul>
+</div>
+</td></tr>
+<tr><td colspan="3">
+<pre style="background-color: #c0ffee">
+Source:
+&lt;div class="zebra"&gt;
+ &lt;ul&gt;
+  &lt;li&gt;list1&lt;/li&gt;
+  &lt;li&gt;list2&lt;/li&gt;
+  &lt;li&gt;list3&lt;/li&gt;
+  &lt;li&gt;list4&lt;/li&gt;
+  &lt;li&gt;list5&lt;/li&gt;
+  &lt;li&gt;list6&lt;/li&gt;
+ &lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class="top3"&gt;
+ &lt;ul&gt;
+  &lt;li&gt;list1&lt;/li&gt;
+  &lt;li&gt;list2&lt;/li&gt;
+  &lt;li&gt;list3&lt;/li&gt;
+  &lt;li&gt;list4&lt;/li&gt;
+  &lt;li&gt;list5&lt;/li&gt;
+  &lt;li&gt;list6&lt;/li&gt;
+ &lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class="worst3"&gt;
+ &lt;ul&gt;
+  &lt;li&gt;list1&lt;/li&gt;
+  &lt;li&gt;list2&lt;/li&gt;
+  &lt;li&gt;list3&lt;/li&gt;
+  &lt;li&gt;list4&lt;/li&gt;
+  &lt;li&gt;list5&lt;/li&gt;
+  &lt;li&gt;list6&lt;/li&gt;
+ &lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class="no5"&gt;
+ &lt;ul&gt;
+  &lt;li&gt;list1&lt;/li&gt;
+  &lt;li&gt;list2&lt;/li&gt;
+  &lt;li&gt;list3&lt;/li&gt;
+  &lt;li&gt;list4&lt;/li&gt;
+  &lt;li&gt;list5&lt;/li&gt;
+  &lt;li&gt;list6&lt;/li&gt;
+ &lt;/ul&gt;
+&lt;/div&gt;
+
+  uu.css("div.zebra ul&gt;li:nth-child(even)").forEach(function(v) {
+   v.style.backgroundColor = "silver";
+  });
+  uu.css("div.top3 ul&gt;li:nth-child(-n+3)").forEach(function(v) {
+   v.style.backgroundColor = "silver";
+  });
+  uu.css("div.worst3 ul&gt;li:nth-last-child(-n+3)").forEach(function(v) {
+   v.style.backgroundColor = "silver";
+  });
+  uu.css("div.no5 ul&gt;li:nth-child(5)").forEach(function(v) {
+   v.style.backgroundColor = "silver";
+  });
+</pre>
+</td></tr>
+</table>
+<script>
+uu.ready(function() {
+  uu.css("div.zebra ul>li:nth-child(even)").forEach(function(v) {
+   v.style.backgroundColor = "silver";
+  });
+  uu.css("div.top3 ul>li:nth-child(-n+3)").forEach(function(v) {
+   v.style.backgroundColor = "silver";
+  });
+  uu.css("div.worst3 ul>li:nth-last-child(-n+3)").forEach(function(v) {
+   v.style.backgroundColor = "silver";
+  });
+  uu.css("div.no5 ul>li:nth-child(5)").forEach(function(v) {
+   v.style.backgroundColor = "silver";
+  });
+});
+</script>
+</body></html>
