@@ -37,8 +37,9 @@
     <p>uu.id(<i>id</i>, <i>really</i> = false) は <i>id</i> と一致するid属性を持つ要素を検索し、
        <a href="./GLOSSARY.htm#Element">Element</a> を返します。</p>
     <p><i>really</i> が true ならキャッシュを使用せず、実際に検索を行います。
-      <br /><i>really</i> が false でキャッシュがあればキャッシュされた値を高速に返します(実測で2～5倍高速)。
+      <br /><i>really</i> が false でキャッシュがあればキャッシュされた値を高速に返します(実測で2～130倍高速)。
     </p>
+    <p>IDセレクタは、常にCSSセレクタより高速です。</p>
     <p><b>注意点:</b>
       <br />要素を動的に生成/削除し、それらが同じIDを使いまわすようなケースでは、
       <i>really</i> に 1を指定し、キャッシュに影響されないようなロジックを組んでください。
@@ -72,6 +73,7 @@
        <i>context</i> 以下のノードツリーから <i>tagName</i> と一致する要素を検索し、
           見つかった要素の配列( <a href="./GLOSSARY.htm#ElementArray">ElementArray</a> )を返します。</p>
     <p>ワイルドカード("*")を指定すると全てのタグを検索します。</p>
+    <p>Tag/Elementセレクタは、常にCSSセレクタより高速です。</p>
     <pre>
  @param String  tagName   - タグ名を指定します。
                             ワイルドカード("*")を指定すると、全てのタグを検索します。
@@ -114,6 +116,7 @@
       <br />要素(&lt;div class="bbb ccc aaa"&gt;&lt;/div&gt;)を検索するには、
       <br />uu.klass("aaa bbb") や uu.klass("aaa ccc") とすることができます。
     </p>
+    <p>Classセレクタは、常にCSSセレクタより高速です。</p>
     <pre>
  @param String  className - クラス名を指定します。スペース区切りで複数のクラス名を指定することもできます。
  @param Element [context] - 検索開始位置(コンテキスト)を指定します。デフォルトはdocumentです。
@@ -257,7 +260,7 @@
  @param Boolean [sort]    - 検索結果をソートする場合は true, しない場合はfalseを指定します。
                             省略可能です。デフォルトはtrueです。
  @return ElementArray     - <a href="./GLOSSARY.htm#ElementArray">ElementArray</a>( [ element, ... ] )を返します。
-                            返される値は、ある時点のスナップショットです(ノードツリーの変化に追従しない)
+                            返される値は、ある時点のスナップショットです(静的な情報であり、ノードツリーの変化には追従しない)
     </pre>
     <a href="demo/selector/uu.xpath.htm" class="run">Run</a>
     <pre class="eg">
@@ -276,37 +279,109 @@
 <!-- -->
   <dt><a name="uu.css">CSS Selector</a> - CSSセレクタ</dt>
   <dd>
-    <p>uu.css(<i>expr</i>, <i>context</i> = undefined) は
+    <p>uu.css(<i>expr</i>, <i>context</i> = document) は
        <i>context</i> 以下のノードツリーから <i>expr</i> に一致する要素を検索し、
        見つかった要素の配列( <a href="./GLOSSARY.htm#ElementArray">ElementArray</a> )を返します。</p>
+    <p>特定のノード以下の要素を検索する場合は、<i>context</i> を指定します。
+       全ノードを検索する場合は、<i>context</i> の指定を省略できます。</p>
     <p><a href="#List_of_CSS_Selectors">使用可能なCSSセレクタの一覧</a>をご覧ください。</p>
+    <p>HTMLDocument(content-type: text/html)なら タグの大小文字を無視して検索を行います(uu.css("a")で&lt;a&gt;も&lt;A&gt;もヒットする)
+       <br />XMLLDocument(content-type: text/xml, application/xml, application/xhtml+xml) なら タグの大小文字は区別します。</p>
+    <p>擬似要素のセミコロンは1つでも2つでも同じ結果になります(:before と ::before は同じ)。</p>
+    <p>擬似要素(::first-line, ::first-letter, ::before, ::after)はエラーになりませんが、擬似要素の指定が無かったものとして扱います(div &gt; a::after は div &gt; a と同じ結果になります。</p>
+    <ul>
+      <li><a href="http://www.w3.org/TR/2005/WD-css3-selectors-20051215/">CSS Selectors(CSSセレクタの仕様)(英語)</a></li>
+      <li><a href="http://zng.info/specs/css3-selectors.html">CSS Selectors(CSSセレクタの仕様)(日本語)</a></li>
+      <li><a href="http://d.hatena.ne.jp/uupaa/20081011/1223723093">開発日記(制限事項等の記載もあり)</a></li>
+      <li><a href="http://pigs.sourceforge.jp/blog/200810070000/slickspeed/frameworks/test.html" class="run">CSSセレクタの精度をテスト</a></li>
+      <li><a href="http://pigs.sourceforge.jp/blog/200810070000/slickspeed/" class="run">CSSセレクタの速度をテスト(途中で止まる場合は要リロード)</a></li>
+    </ul>
     <pre>
- @param String expr   - CSS3セレクタを指定します。
- @return ElementArray - 検索成功で<a href="./GLOSSARY.htm#ElementArray">ElementArray</a>( [element, ...] )を返します。
-                        失敗で空のElementArray( [] )を返します。
- @throws TypeError "uu.css(...)" 使用できないセレクタを指定したか、不正なXPathに変換された
+ @param String  expr      - CSSセレクタを指定します。
+ @param Element [context] - 検索開始位置(コンテキスト)を指定します。デフォルトはdocumentです。
+                            documentを指定するとノードツリーの先頭から全ての要素を検索します。
+ @return ElementArray     - 検索成功で<a href="./GLOSSARY.htm#ElementArray">ElementArray</a>( [element, ...] )を返します。
+                            失敗で空のElementArray( [] )を返します。
+ @throws TypeError "uu.css(...)" 使用できないセレクタを指定した
     </pre>
 
-    <a href="demo/selector/uu.css.htm" class="run">Run</a> |
-    <a href="demo/selector/css.htm" class="run">CSSセレクタのテスト</a> |
-    <a href="http://d.hatena.ne.jp/uupaa/20080919/1221834168">開発日記</a>
+    <a href="demo/selector/uu.css.htm" class="run">Run</a>
+    <p>要素を検索する(タグの大文字小文字を無視する), contextを指定して要素を絞り込む</p>
     <pre class="eg">
+&lt;p&gt;content-type: text/html&lt;/p&gt;
 &lt;div&gt;
   &lt;div id="one"&gt;
-    &lt;p&gt;hoge1&lt;/p&gt;
-    &lt;p&gt;huga1&lt;/p&gt;
+    &lt;p&gt;p1&lt;/p&gt;
+    &lt;p&gt;p2&lt;/p&gt;
   &lt;/div&gt;
-  &lt;div id="two"&gt;
-    &lt;p&gt;hoge2&lt;/p&gt;
-    &lt;p&gt;huga2&lt;/p&gt;
-  &lt;/div&gt;
+  &lt;DIV id="two"&gt;
+    &lt;P&gt;p3&lt;/P&gt;
+    &lt;P&gt;p4&lt;/P&gt;
+  &lt;/DIV&gt;
 &lt;/div&gt;
 
-  uu.css("p:nth-last-of-type(1)", uu.id("two")).forEach(function(v) {
-    uu.log(v.innerText); // "huga2"
+  <b>uu.css</b>("p:nth-last-of-type(1)", uu.id("two")).forEach(function(v) {
+    uu.log(v.innerText); // "p4"
   });
-  uu.css("#one &gt; p:nth-last-of-type(1)").forEach(function(v) {
-    uu.log(v.innerText); // "huga1"
+  <b>uu.css</b>("#one &gt; P:nth-last-of-type(1)").forEach(function(v) {
+    uu.log(v.innerText); // "p2"
+  });
+    </pre>
+    <a href="demo/selector/uu.css2.htm" class="run">Run</a>
+    <p>一つ飛びにリストを着色する(ゼブラカラー), 上/下から3つを着色する, 特定位置のノードだけ着色する</p>
+    <pre>
+&lt;div class="zebra"&gt;
+ &lt;ul&gt;
+  &lt;li&gt;list1&lt;/li&gt;
+  &lt;li&gt;list2&lt;/li&gt;
+  &lt;li&gt;list3&lt;/li&gt;
+  &lt;li&gt;list4&lt;/li&gt;
+  &lt;li&gt;list5&lt;/li&gt;
+  &lt;li&gt;list6&lt;/li&gt;
+ &lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class="top3"&gt;
+ &lt;ul&gt;
+  &lt;li&gt;list1&lt;/li&gt;
+  &lt;li&gt;list2&lt;/li&gt;
+  &lt;li&gt;list3&lt;/li&gt;
+  &lt;li&gt;list4&lt;/li&gt;
+  &lt;li&gt;list5&lt;/li&gt;
+  &lt;li&gt;list6&lt;/li&gt;
+ &lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class="worst3"&gt;
+ &lt;ul&gt;
+  &lt;li&gt;list1&lt;/li&gt;
+  &lt;li&gt;list2&lt;/li&gt;
+  &lt;li&gt;list3&lt;/li&gt;
+  &lt;li&gt;list4&lt;/li&gt;
+  &lt;li&gt;list5&lt;/li&gt;
+  &lt;li&gt;list6&lt;/li&gt;
+ &lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class="no5"&gt;
+ &lt;ul&gt;
+  &lt;li&gt;list1&lt;/li&gt;
+  &lt;li&gt;list2&lt;/li&gt;
+  &lt;li&gt;list3&lt;/li&gt;
+  &lt;li&gt;list4&lt;/li&gt;
+  &lt;li&gt;list5&lt;/li&gt;
+  &lt;li&gt;list6&lt;/li&gt;
+ &lt;/ul&gt;
+&lt;/div&gt;
+
+  <b>uu.css</b>("div.zebra ul>li:nth-child(even)").forEach(function(v) {
+   v.style.backgroundColor = "silver";
+  });
+  <b>uu.css</b>("div.top3 ul>li:nth-child(-n+3)").forEach(function(v) {
+   v.style.backgroundColor = "silver";
+  });
+  <b>uu.css</b>("div.worst3 ul>li:nth-last-child(-n+3)").forEach(function(v) {
+   v.style.backgroundColor = "silver";
+  });
+  <b>uu.css</b>("div.no5 ul&gt;li:nth-child(5)").forEach(function(v) {
+   v.style.backgroundColor = "silver";
   });
     </pre>
   </dd>
@@ -390,40 +465,70 @@
  -->
     </p>
     <table>
-    <tr><th>CSS Selectors       </th><th>Example                  </th><th>Substitute<br />代替セレクタ</th><th>Note</th></tr>
-    <tr><td>Universal selector  </td><td>uu.css("*")              </td><td>uu.tag("*")</td><td>全ての要素と一致します。</td></tr>
-    <tr><td>ID selectors        </td><td>uu.css("#id")            </td><td>uu.id("id")</td><td>属性idが一致する要素と一致します。</td></tr>
-    <tr><td>Class selectors     </td><td>uu.css(".className")     </td><td>uu.klass("className")</td><td>属性classと一致する要素と一致します。</td></tr>
-    <tr><td>Type selectors      </td><td>uu.css("<i>E</i>")       </td><td>uu.tag("<i>E</i>")</td><td>全ての要素Eと一致します。</td></tr>
-    <tr><td>Selectors group     </td><td>uu.css("<i>E, F, G</i>") </td><td>none</td><td>複数のセレクタを一度に指定できます。<br />個々のセレクタの評価結果を纏めて返します。<br />重複する要素は一つにまとめます。</td></tr>
-    <tr><td>Descendant combinator</td><td>uu.css("<i>E F</i>")    </td><td>uu.tag("<i>F</i>", <i>E</i>)</td><td>要素Eの子孫の全ての要素Fと一致します。</td></tr>
-    <tr><td>Child combinator    </td><td>uu.css("<i>E > F</i>")   </td><td>uu.tag("<i>F</i>", <i>E</i>) + childNodes</td><td>要素Eの子供の要素Fと一致します。</td></tr>
-    <tr><td>Adjacent sibling combinator</td><td>uu.css("<i>E + F</i>")</td><td>none</td><td>要素EとFが兄弟で、要素Eと隣接する要素Fと一致します。</td></tr>
-    <tr><td>General sibling combinator</td><td>uu.css("<i>E ~ F</i>")</td><td>none</td><td>要素EとFが兄弟で、要素Eの後に存在する要素Fと一致します。</td></tr>
-    <tr><td>Attribute selectors </td><td>uu.css("<i>E[A]</i>")    </td><td>uu.attr('<i>E[@A]</i>')</td><td>属性Aを持つ全ての要素Eと一致します。属性の値は問いません。</td></tr>
-    <tr><td>Attribute selectors </td><td>uu.css("<i>E[A="V"]</i>")</td><td>uu.attr('<i>E[@A="V"]</i>')</td><td>属性Aの値がVの全ての要素Eと一致します。</td></tr>
-    <tr><td>Attribute selectors </td><td>uu.css("<i>E[A~="V"]</i>")</td><td>uu.attr('<i>E[@A~="V"]</i>')</td><td>属性Aの値がスペース区切りのリストで、<br />リストがVを含む全ての要素Eと一致します。</td></tr>
-    <tr><td>Attribute selectors </td><td>uu.css("<i>E[A|="V"]</i>")</td><td>none</td><td>属性Aの値がハイフン区切りのリストで、<br />"V"または"V-"で始まる単語を含む全ての要素Eと一致します。</td></tr>
-    <tr><td>Attribute selectors </td><td>uu.css("<i>E[A^="V"]</i>")</td><td>uu.attr('<i>E[@A^="V"]</i>')</td><td>属性Aの値がVで始まる全ての要素Eと一致します。</td></tr>
-    <tr><td>Attribute selectors </td><td>uu.css("<i>E[A$="V"]</i>")</td><td>uu.attr('<i>E[@A$="V"]</i>')</td><td>属性Aの値がVで終わる全ての要素Eと一致します。</td></tr>
-    <tr><td>Attribute selectors </td><td>uu.css("<i>E[A*="V"]</i>")</td><td>uu.attr('<i>E[@A*="V"]</i>')</td><td>属性Aの値がVを含む全ての要素Eと一致します。</td></tr>
-    <tr><td>Pseudo-class</td><td>uu.css(":root")       </td><td>uu.tag("html")</td><td>ルート要素(HTML)と一致します。</td></tr>
-    <tr><td>Pseudo-class</td><td>uu.css("<i>E</i>:nth-child(<a href="#n"><i>n</i></a>)")     </td><td>uu.tag("<i>E</i>")[<i>n</i>]</td><td>先頭から数えて<br />(n|偶数|奇数|計算)番目の兄弟要素と一致します。</td></tr>
-    <tr><td>Pseudo-class</td><td>uu.css("<i>E</i>:nth-last-child(<a href="#n"><i>n</i></a>)")</td><td>none</td><td>末尾から数えて<br />(n|偶数|奇数|計算)番目の兄弟要素と一致します。</td></tr>
-    <tr><td>Pseudo-class</td><td>uu.css("<i>E</i>:nth-of-type(<a href="#n"><i>n</i></a>)")     </td><td>none</td><td>E要素と同じ要素名の兄弟を先頭から数えて<br />(n|偶数|奇数|計算)番目の兄弟要素と一致します。</td></tr>
-    <tr><td>Pseudo-class</td><td>uu.css("<i>E</i>:nth-last-of-type(<a href="#n"><i>n</i></a>)")</td><td>none</td><td>E要素と同じ要素名の兄弟を末尾から数えて<br />(n|偶数|奇数|計算)番目の兄弟要素と一致します。</td></tr>
-    <tr><td>Pseudo-class</td><td>uu.css("<i>E</i>:first-child")</td><td>uu.tag("<i>E</i>") + e.firstChild</td><td>最初の子要素と一致します。</td></tr>
-    <tr><td>Pseudo-class</td><td>uu.css("<i>E</i>:last-child")</td><td>uu.tag("<i>E</i>") + e.lastChild</td><td>最後の子要素と一致します。</td></tr>
-    <tr><td>Pseudo-class</td><td>uu.css("<i>E</i>:first-of-type")</td><td>none</td><td>E要素と同じ要素名の兄弟で、最初の兄弟と一致します。</td></tr>
-    <tr><td>Pseudo-class</td><td>uu.css("<i>E</i>:last-of-type")</td><td>none</td><td>E要素と同じ要素名の兄弟で、最後の兄弟と一致します。</td></tr>
-    <tr><td>Pseudo-class</td><td>uu.css("<i>E</i>:only-child")</td><td>none</td><td>一人っ子と一致します。</td></tr>
-    <tr><td>Pseudo-class</td><td>uu.css("<i>E</i>:only-of-type")</td><td>none</td><td>要素Eの親からみてユニークなEであれば一致します。<br />兄弟にEがいれば一致しません。</td></tr>
-    <tr><td>Pseudo-class</td><td>uu.css("<i>E</i>:empty")</td><td>uu.tag("<i>E</i>")<br />+ e.firstChild == null</td><td>独身(子要素やテキストノードを持たない要素E)と一致します。</td></tr>
-    <tr><td>Pseudo-class</td><td>uu.css("<i>E</i>:lang(en)")</td><td></td><td>要素のlang属性が"en"や"en-US"な要素と一致します。</td></tr>
-    <tr><td>Pseudo-class</td><td>uu.css('<i>E</i>:contains("Hello")')</td><td></td><td>"Hello"を含んでいるテキストノードを持つ要素と一致します。</td></tr>
-    <tr><td>Pseudo-class</td><td>uu.css('<i>E</i>:enabled')</td><td></td><td>disabled 属性に "disabled" 以外の値が設定されている要素と一致します。</td></tr>
-    <tr><td>Pseudo-class</td><td>uu.css('<i>E</i>:disabled')</td><td></td><td>disabled 属性に "disabled" が設定されている要素と一致します。</td></tr>
-    <tr><td>Pseudo-class</td><td>uu.css('<i>E</i>:target')</td><td></td><td>現在表示しているコンテンツの#hash と一致するID(またはname)を持つ要素と一致します。</td></tr>
+    <tr><th>CSS Selectors           </th><th>Substitute<br />より高速な代替方法</th><th>Note</th></tr>
+    <tr><td>uu.css('*')             </td><td>uu.tag('*')</td><td>Universal selector<hr />全ての要素と一致します。</td></tr>
+    <tr><td>uu.css('#id')           </td><td>uu.id('id')</td><td>ID selectors<hr />属性id が "id" の要素と一致します。</td></tr>
+    <tr><td>uu.css('.classA')<br />
+            uu.css('.classA.classB')</td><td>uu.klass('classA')<br />uu.klass('classA classB')</td>
+                                         <td>Class selectors<hr />属性classが"classA"を含んでいる要素と一致します。
+                                             <br />classAとclassBが指定されている場合は両方を含んでいる要素と一致します。</td></tr>
+    <tr><td>uu.css('<i>E</i>')       </td><td>uu.tag('<i>E</i>')</td><td>Type selectors<hr />全ての要素Eと一致します。</td></tr>
+    <tr><td>uu.css('<i>E, F, G</i>') </td><td>　</td><td>Selectors group<hr />複数のセレクタを一度に指定できます。<br />個々のセレクタの評価結果を纏めて返します。<br />重複する要素は一つにまとめます。<br />いずれかのセレクタの評価が失敗すると全て失敗します(空の配列を返します)。</td></tr>
+    <tr><td>uu.css('<i>E F</i>')    </td><td>uu.tag('<i>F</i>', <i>E</i>)</td><td>Descendant combinator<hr />要素Eの子孫の全ての要素Fと一致します。</td></tr>
+    <tr><td>uu.css('<i>E > F</i>')   </td><td>　</td><td>Child combinator<hr />要素Eの子供の要素Fと一致します。</td></tr>
+    <tr><td>uu.css('<i>E + F</i>')</td><td>　</td><td>Adjacent sibling combinator<hr />要素EとFが兄弟で、要素Eと隣接する要素Fと一致します。<br />最大で1つ要素がヒットします。</td></tr>
+    <tr><td>uu.css('<i>E ~ F</i>')</td><td>　</td><td>General sibling combinator<hr />要素EとFが兄弟で、要素Eの後に存在する要素Fと一致します。<br />複数の要素がヒットする可能性があります。</td></tr>
+    <tr><td>uu.css('<i>E[A]</i>')    </td><td>uu.attr('<i>E[A]</i>')</td><td>Attribute selectors<hr />属性Aを持つ全ての要素Eと一致します。属性の値は問いません。</td></tr>
+    <tr><td>uu.css('<i>E[A="V"]</i>')</td><td>uu.attr('<i>E[A="V"]</i>')</td><td>Attribute selectors<hr />属性Aの値がVの全ての要素Eと一致します。</td></tr>
+    <tr><td>uu.css('<i>E[A~="V"]</i>')</td><td>uu.attr('<i>E[A~="V"]</i>')</td><td>Attribute selectors<hr />属性Aの値がスペース区切りのリストで、<br />リストがVを含む全ての要素Eと一致します。</td></tr>
+    <tr><td>uu.css('<i>E[A|="V"]</i>')</td><td>　</td><td>Attribute selectors<hr />属性Aの値がハイフン区切りのリストで、<br />"V"または"V-"で始まる単語を含む全ての要素Eと一致します。</td></tr>
+    <tr><td>uu.css('<i>E[A^="V"]</i>')</td><td>uu.attr('<i>E[A^="V"]</i>')</td><td>Attribute selectors<hr />属性Aの値がVで始まる全ての要素Eと一致します。</td></tr>
+    <tr><td>uu.css('<i>E[A$="V"]</i>')</td><td>uu.attr('<i>E[A$="V"]</i>')</td><td>Attribute selectors<hr />属性Aの値がVで終わる全ての要素Eと一致します。</td></tr>
+    <tr><td>uu.css('<i>E[A*="V"]</i>')</td><td>uu.attr('<i>E[A*="V"]</i>')</td><td>Attribute selectors<hr />属性Aの値がVを含む全ての要素Eと一致します。</td></tr>
+    <tr><td>uu.css('<i>E[A!="V"]</i>')</td><td>uu.attr('<i>E[A!="V"]</i>')</td><td>Attribute selectors<hr />属性Aの値がVと一致しない全ての要素Eと一致します。</td></tr>
+    <tr><td>uu.css('<i>E</i>:not(expr)')      </td><td></td><td>exprに一致しない要素Eと一致します。<br />expr には "*" , "#id" および ".class" を指定可能です。</td></tr>
+    <tr><td>uu.css(':root')           </td><td>uu.tag('html')<br />document.documentElement</td><td>Pseudo-class<hr />ルート要素(HTML要素)と一致します。</td></tr>
+    <tr><td>uu.css('<i>E</i>:first-child')</td><td>　</td><td>Pseudo-class<hr />最初の子要素と一致します。</td></tr>
+    <tr><td>uu.css('<i>E</i>:last-child')</td><td>　</td><td>Pseudo-class<hr />最後の子要素と一致します。</td></tr>
+    <tr><td>uu.css('<i>E</i>:only-child')</td><td>　</td><td>Pseudo-class<hr />一人っ子と一致します。</td></tr>
+    <tr><td>uu.css('<i>E</i>:nth-child(<a href="#anb"><i>an+b</i></a>)')     </td><td>　</td><td>Pseudo-class<hr />先頭から数えて<br />(n|even|odd|an+b)番目の兄弟要素と一致します。</td></tr>
+    <tr><td>uu.css('<i>E</i>:nth-last-child(<a href="#anb"><i>an+b</i></a>)')</td><td>　</td><td>Pseudo-class<hr />末尾から数えて<br />(n|even|odd|an+b)番目の兄弟要素と一致します。</td></tr>
+    <tr><td>uu.css('<i>E</i>:first-of-type')</td><td>　</td><td>Pseudo-class<hr />E要素と同じ要素名の兄弟で、最初の兄弟と一致します。</td></tr>
+    <tr><td>uu.css('<i>E</i>:last-of-type')</td><td>　</td><td>Pseudo-class<hr />E要素と同じ要素名の兄弟で、最後の兄弟と一致します。</td></tr>
+    <tr><td>uu.css('<i>E</i>:only-of-type')</td><td>　</td><td>Pseudo-class<hr />要素Eの親からみてユニークなEであれば一致します。<br />兄弟にEがいれば一致しません。</td></tr>
+    <tr><td>uu.css('<i>E</i>:nth-of-type(<a href="#anb"><i>an+b</i></a>)')     </td><td>　</td><td>Pseudo-class<hr />E要素と同じ要素名の兄弟を先頭から数えて<br />(n|even|odd|an+b)番目の兄弟要素と一致します。</td></tr>
+    <tr><td>uu.css('<i>E</i>:nth-last-of-type(<a href="#anb"><i>an+b</i></a>)')</td><td>　</td><td>Pseudo-class<hr />E要素と同じ要素名の兄弟を末尾から数えて<br />(n|even|odd|an+b)番目の兄弟要素と一致します。</td></tr>
+    <tr><td>uu.css('<i>E</i>:empty')</td><td>　</td><td>Pseudo-class<hr />独身(子要素やテキストノードを持たない要素E)と一致します。</td></tr>
+    <tr><td>uu.css('<i>E</i>:lang(en)')</td><td>　</td><td>Pseudo-class<hr />要素のlang属性が"en"や"en-US"な要素と一致します。</td></tr>
+    <tr><td>uu.css('<i>E</i>:contains("Hello")')</td><td>　</td><td>Pseudo-class<hr />"Hello"を含んでいるテキストノードを持つ要素と一致します。</td></tr>
+    <tr><td>uu.css('<i>E</i>:enabled')</td><td>　</td><td>Pseudo-class<hr />disabled 属性に "disabled" 以外の値が設定されている要素と一致します。</td></tr>
+    <tr><td>uu.css('<i>E</i>:disabled')</td><td>　</td><td>Pseudo-class<hr />disabled 属性に "disabled" が設定されている要素と一致します。</td></tr>
+    <tr><td>uu.css('<i>E</i>:checked')</td><td>　</td><td>Pseudo-class<hr />チェックされている要素(radiobox, checkbox)と一致します。</td></tr>
+    <tr><td>uu.css('<i>E</i>:contains("foo")')</td><td>　</td><td>Pseudo-class<hr />テキストノードが "foo" を含んでいる要素と一致します。</td></tr>
+    <tr><td>uu.css('<i>E</i>:link')</td><td>　</td><td>Pseudo-class<hr />未訪問のリンクを持つ要素と一致します。</td></tr>
+    <tr><td>uu.css('<i>E</i>:visited')</td><td>　</td><td>Pseudo-class<hr />訪問済みのリンクを持つ要素と一致します。</td></tr>
+    <tr><td>uu.css('<i>E</i>:hover')</td><td>　</td><td>Pseudo-class<hr />マウスカーソルの真下に位置する要素Eと一致します。<br />IE等の一部のブラウザでは、Eにa要素のみ指定可能です。</td></tr>
+    <tr><td>uu.css('<i>E</i>:focus')</td><td>　</td><td>Pseudo-class<hr />フォーカスを持っている要素と一致します。<br />IE等の一部のブラウザでは、Eにa要素やフォーム部品のみ指定可能です。</td></tr>
+    <tr><td>uu.css('<i>E</i>:target')</td><td>　</td><td>Pseudo-class<hr />ページのURIのhashが示すid(またはname)属性を持つ要素と一致します。
+                                                                            <br />ページのURIが ./index.html#topic1 の時に、
+                                                                            <br />&lt;a id="topic1"&gt;&lt;/a&gt; や
+                                                                            <br /> &lt;a name="topic1"&gt;&lt;/a&gt; とマッチします。</td></tr>
+    <tr><td>uu.css('<i>E</i>:first-line')<br />
+            uu.css('<i>E</i>::first-line')</td><td>　</td><td>Pseudo-element<hr />要素の先頭行と一致します。
+                                                                            <br />実際には要素の先頭行を持つ要素と一致します。
+                                                                            <br />つまり、div&gt;ul::first-line は div&gt;ul と同じ結果になります。</td></tr>
+    <tr><td>uu.css('<i>E</i>:first-letter')<br />
+            uu.css('<i>E</i>::first-letter')</td><td>　</td><td>Pseudo-element<hr />要素の先頭文字と一致します。
+                                                                            <br />実際には要素の先頭文字を持つ要素と一致します。
+                                                                            <br />つまり、div&gt;ul::first-letter は div&gt;ul と同じ結果になります。</td></tr>
+    <tr><td>uu.css('<i>E</i>:before')<br />
+            uu.css('<i>E</i>::before')</td><td>　</td><td>Pseudo-element<hr />要素の前に追加される擬似的な要素と一致します。
+                                                                            <br />実際には要素の先頭行を持つ要素と一致します。
+                                                                            <br />つまり、div&gt;ul::before は div&gt;ul と同じ結果になります。</td></tr>
+    <tr><td>uu.css('<i>E</i>:after')<br />
+            uu.css('<i>E</i>::after')</td><td>　</td><td>Pseudo-element<hr />要素の後ろに追加される擬似的な要素と一致します。
+                                                                            <br />実際には要素の先頭文字を持つ要素と一致します。
+                                                                            <br />つまり、div&gt;ul::after は div&gt;ul と同じ結果になります。</td></tr>
     </table>
 <!--
     <table>
@@ -455,22 +560,27 @@
     <tr><td>:file         </td><td>uu.attr("input[@file]")</td><td>input type="file"の要素と一致します。</td></tr>
     </table>
  -->
-
-    <a name="n"></a>
-    <p>:nth-child(n), :nth-last-child(n), :nth-of-type(n), :nth-last-of-type(n) の n には、
-      <br />"even", "odd", "2n", "2n+1" または "xny" といった文字列や数値を指定可能です。
-      <br />これはテーブルの行をゼブラカラーにする場合などに使用されます。
+  </dd>
+  <dt><a name="anb">:nth-child 系の式(an+b)について</a></dt>
+  <dd>
+    <p>:nth-child(an+b), :nth-last-child(an+b), :nth-of-type(an+b), :nth-last-of-type(an+b) の an+b には計算式を指定します。
+      <br />テーブルやリストの行をゼブラカラーにする場合などに多用されます。
+    </p>
+    <p>a には 繰り返し方法を数値で指定します。a=2 なら 2で割り切れる順番の要素を選択し、a=3なら3で割り切れる順番の要素を選択します。aを省略すると 1 が指定されたものとして扱います。
+      <br />b には 先頭からのオフセットを数値で指定します。b=0なら先頭の要素を選択し、b=1なら先頭から2番目の要素を選択します。bを省略すると 0が指定されたものとして扱います。
     </p>
     <ul>
-      <li>数値: 先頭/末尾から数えてn番目の兄弟要素と一致します。</li>
-      <li>"even": 先頭/末尾から数えて偶数番目の兄弟要素と一致します。0,2,4...番目の要素は"even"と一致します。</li>
-      <li>"odd": 先頭/末尾から数えて奇数番目の兄弟要素と一致します。1,3,5...番目の要素は"odd"と一致します。</li>
-      <li>"2n": "even"と同じです。</li>
-      <li>"2n+1": "odd"と同じです。</li>
-      <li>"4n+1": 4で割って余りが0の番号を持つ要素を選択します。</li>
-      <li>"4n+2": 4で割って余りが1の番号を持つ要素を選択します。</li>
-      <li>"4n+3": 4で割って余りが2の番号を持つ要素を選択します。</li>
-      <li>"4n+4": 4で割って余りが3の番号を持つ要素を選択します。</li>
+      <li>uu.css("<i>E</i>:nth-child(3)"): 先頭から数えて4番目の兄弟要素と一致します。</li>
+      <li>uu.css("<i>E</i>:nth-child(even)"): 先頭から数えて偶数番目の兄弟要素と一致します。0,2,4...番目の要素が"even"と一致します。</li>
+      <li>uu.css("<i>E</i>:nth-child(odd)"): 先頭から数えて奇数番目の兄弟要素と一致します。1,3,5...番目の要素が"odd"と一致します。</li>
+      <li>uu.css("<i>E</i>:nth-child(2n)"): "even"と同じです。</li>
+      <li>uu.css("<i>E</i>:nth-child(2n+1)"): "odd"と同じです。</li>
+      <li>uu.css("<i>E</i>:nth-child(4n+1)"): 4で割って余りが0の番号を持つ要素を選択します。</li>
+      <li>uu.css("<i>E</i>:nth-child(4n+2)"): 4で割って余りが1の番号を持つ要素を選択します。</li>
+      <li>uu.css("<i>E</i>:nth-child(4n+3)"): 4で割って余りが2の番号を持つ要素を選択します。</li>
+      <li>uu.css("<i>E</i>:nth-child(4n+4)"): 4で割って余りが3の番号を持つ要素を選択します。</li>
+      <li>uu.css("<i>E</i>:nth-child(-n+3)"): 先頭から要素を3つ選択します。</li>
+      <li>uu.css("<i>E</i>:nth-last-child(-n+3)"): 末尾から要素を3つ選択します。</li>
     </ul>
   </dd>
 </dl>
