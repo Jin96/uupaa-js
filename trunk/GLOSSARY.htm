@@ -7,76 +7,85 @@
 <style type="text/css">@import url(./README.css);</style>
 </head>
 <body>
-<p>
-   | <a href="http://code.google.com/p/uupaa-js/">Project Home(Google Code)</a>
-   | <a href="./README.htm#demo">DEMO</a>
-   | <a href="./CHANGELOG.htm">ChangeLog</a>
-   | <a href="./LICENSE.htm">License</a> |<br />
-   | <a href="./INDEX.htm">Index</a>
-   | <a href="./DOCUMENT.htm">Document</a>
-   | <a href="./SELECTOR.htm">Selector</a>
-   | <a href="./MODULE.htm">Module</a>
-   | <a href="./GLOSSARY.htm">Glossary</a>
-   |
-</p>
-<a href="./README.htm">README</a> &gt; <a href="./INDEX.htm">INDEX</a> &gt; GLOSSARY
-<hr />
 <h2>GLOSSARY - 用語集</h2>
 <dl>
   <dt><a name="Pollution">Pollution</a> - Global name space pollution, Prototype object pollution - グローバルネームスペース汚染, prototype汚染</dt>
-    <dd><p>JavaScriptは最初から存在するオブジェクト(ビルトインオブジェクト)の拡張が可能です。</p>
-        <pre>
-// Numberオブジェクトを拡張し「奇数ならtrueを返す」メソッドを追加する
+    <dd><p>JavaScript は最初から存在するオブジェクト(ビルトインオブジェクト)の拡張が可能です。</p>
+<pre class="eg">
+<u>// Numberオブジェクトを拡張し「奇数ならtrueを返す」メソッドを追加する</u>
 Number.prototype.odd = function() {
   return !!(this.valueOf() % 2);
 }
-        </pre>
-        <p>これはJavaScriptの魅力の1つでありOOP的な観点からも有益に見えるものですが、これには落とし穴があります。
+</pre>
+        <p>これは JavaScript の魅力の1つであり OOP 的な観点からも有益に見えるものですが、これには落とし穴があります。
            <br />安易な拡張を繰り返すと ライブラリ併用時の衝突や、
-           Array + for inループで拡張された(意図しない)プロパティが列挙され、ループ処理が使えなくなる等の副作用が露呈するのです。</p>
-        <p>やりすぎた拡張は「プロトタイプ汚染」と呼ばれます。JavaScriptという言語が持つ優れた拡張性は、汚染とのトレードオフなのです。</p>
-        <p>ブラウザ上で動作するJavaScriptでは、トップレベルオブジェクト(windowオブジェクト)が常に存在します。
+           Array + for in ループで拡張された(意図しない)プロパティが列挙され、ループ処理が使えなくなる等の副作用が露呈するのです。</p>
+        <p>やりすぎた拡張は「プロトタイプ汚染」と呼ばれます。JavaScript という言語が持つ優れた拡張性は、汚染とのトレードオフなのです。</p>
+        <p>ブラウザ上で動作する JavaScript では、トップレベルオブジェクト(window オブジェクト)が常に存在します。
           <br />トップレベルオブジェクトはどこからでもアクセス可能なネームスペース(スコープ)に属す特別なオブジェクトです。
-          <br />windowオブジェクトに何かを追加するということは、グローバル関数やグローバル変数を追加したことになります。</p>
-        <pre>
-// ブラウザ上で動作するJavaScriptでは、var hoge = 1; は、window.hoge = 1; と同じ
+          <br />window オブジェクトに何かを追加するということは、グローバル関数やグローバル変数を追加したことになります。</p>
+<pre class="eg">
+<u>// ブラウザ上で動作する JavaScript では</u>
+<u>// var hoge = 1; は、window.hoge = 1; と同じ</u>
 &lt;script&gt;
 var hoge = 1;
-alert(hoge === window.hoge); // true
+alert(hoge === window.hoge); <u>// true</u>
 &lt;/script&gt;
-        </pre>
+</pre>
         <p>コンセプトの異なる複数のライブラリを組み合わせた場合に、トップレベルオブジェクト以下の名前空間(グローバルネームスペース)が汚染され、ライブラリの衝突が発生するケースがあります。
            <br />特に、window.$ や window.$$ などは、多くのライブラリが似て非なる実装を行っているため、簡単に衝突します。</p>
-        <p>以下がuupaa.jsによるグローバルネームスペースの汚染とprototypeの拡張リストです。<br />
-           ライブラリ併用時でも極力衝突が起きないように配慮してあります。</p>
+        <p>以下が uupaa.js によるグローバルネームスペースの拡張リストです。<br />
+           ライブラリ併用による衝突が発生しないように配慮してあります。</p>
         <dl>
           <dt>window(Global Object)</dt>
             <dd>
+              <p>uu で始まるキーワードは uupaa.js が使用します。</p>
               <ul>
-                  <li>window.uu - uupaa.js用ネームスペース</li>
-                  <li>window.UU - uupaa.jsの定数格納用ネームスペース</li>
+                  <li>window.uu - uupaa.js 用ネームスペース</li>
+                  <li>window.uuClass - クラス用ネームスペース</li>
+                  <li>window.uuConst - 定数格納用ネームスペース</li>
+                  <li>window.uuConfig - 設定格納用ネームスペース</li>
               </ul>
             </dd>
           <dt>Array.prototype</dt>
             <dd>
-              <p>非モダンブラウザ(IE等)に、ECMA-262準拠のメソッドを追加実装するものです。</p>
+              <p>ECMA-262の仕様を非モダンブラウザでも使用可能にします。</p>
               <ul>
-                <li><a href="./DOCUMENT.htm#Array.indexOf">Array.prototype.indexOf</a><i> - (JavaScript 1.6準拠)</i></li>
-                <li><a href="./DOCUMENT.htm#Array.lastIndexOf">Array.prototype.lastIndexOf</a><i> - (JavaScript 1.6準拠)</i></li>
-                <li><a href="./DOCUMENT.htm#Array.forEach">Array.prototype.forEach</a><i> - (JavaScript 1.5準拠)</i></li>
-                <li><a href="./DOCUMENT.htm#Array.filter">Array.prototype.filter</a><i> - (JavaScript 1.5準拠)</i></li>
-                <li><a href="./DOCUMENT.htm#Array.every">Array.prototype.every</a><i> - (JavaScript 1.5準拠)</i></li>
-                <li><a href="./DOCUMENT.htm#Array.some">Array.prototype.some</a><i> - (JavaScript 1.5準拠)</i></li>
-                <li><a href="./DOCUMENT.htm#Array.map">Array.prototype.map</a><i> - (JavaScript 1.5準拠)</i></li>
+                <li><a href="https://developer.mozilla.org/ja/Core_JavaScript_1.5_Reference/Global_Objects/Array/indexOf">MDC::Array.prototype.indexOf</a><i> - (JavaScript 1.5準拠)</i></li>
+                <li><a href="https://developer.mozilla.org/ja/Core_JavaScript_1.5_Reference/Global_Objects/Array/lastIndexOf">MDC::Array.prototype.lastIndexOf</a><i> - (JavaScript 1.5準拠)</i></li>
+                <li><a href="https://developer.mozilla.org/ja/Core_JavaScript_1.5_Reference/Global_Objects/Array/forEach">MDC::Array.prototype.forEach</a><i> - (JavaScript 1.6準拠)</i></li>
+                <li><a href="https://developer.mozilla.org/ja/Core_JavaScript_1.5_Reference/Global_Objects/Array/filter">MDC::Array.prototype.filter</a><i> - (JavaScript 1.6準拠)</i></li>
+                <li><a href="https://developer.mozilla.org/ja/Core_JavaScript_1.5_Reference/Global_Objects/Array/every">MDC::Array.prototype.every</a><i> - (JavaScript 1.6準拠)</i></li>
+                <li><a href="https://developer.mozilla.org/ja/Core_JavaScript_1.5_Reference/Global_Objects/Array/some">MDC::Array.prototype.some</a><i> - (JavaScript 1.6準拠)</i></li>
+                <li><a href="https://developer.mozilla.org/ja/Core_JavaScript_1.5_Reference/Global_Objects/Array/map">MDC::Array.prototype.map</a><i> - (JavaScript 1.6準拠)</i></li>
+                <li><a href="https://developer.mozilla.org/ja/Core_JavaScript_1.5_Reference/Objects/Array/reduce">MDC::Array.prototype.reduce</a><i> - (JavaScript 1.8準拠)</i></li>
+                <li><a href="https://developer.mozilla.org/ja/Core_JavaScript_1.5_Reference/Objects/Array/reduceRight">MDC::Array.prototype.reduceRight</a><i> - (JavaScript 1.8準拠)</i></li>
               </ul>
             </dd>
+          <dt>String.prototype</dt>
+            <dd>
+              <p>多用される機能を取り込みます。</p>
+              <ul>
+                <li><a href="https://developer.mozilla.org/Ja/Core_JavaScript_1.5_Reference/Global_Objects/String/Trim">MDC::String.prototype.trim</a><i> - (Firefox 3.1 由来の拡張)</i></li>
+                <li><a href="https://developer.mozilla.org/Ja/Core_JavaScript_1.5_Reference/Global_Objects/String/TrimLeft">MDC::String.prototype.trimLeft</a><i> - (Firefox 3.1 由来の拡張)</i></li>
+                <li><a href="https://developer.mozilla.org/Ja/Core_JavaScript_1.5_Reference/Global_Objects/String/TrimRight">MDC::String.prototype.trimRight</a><i> - (Firefox 3.1 由来の拡張)</i></li>
+              </ul>
+            </dd>
+          <dt>Math.prototype</dt>
+            <dd>
+              <p>多用される機能を取り込みます。</p>
+              <ul>
+                <li>Math.toDegrees<i> - (Java.Math 由来の拡張)</i></li>
+                <li>Math.toRadians<i> - (Java.Math 由来の拡張)</i></li>
+              </ul>
+            </dd>
+
           <dt>HTMLElement.prototype</dt>
             <dd>
-              <p>元はIEの独自実装だったものが、他のブラウザでもネイティブに実装され、利用可能になるケースがあります。
-                 <br />以下はデファクトスタンダードとなったそれらの機能を、JavaScriptレベルで利用可能にする拡張です。</p>
+              <p>多用される機能を取り込みます。</p>
               <ul>
-                <li>HTMLElement.prototype.outerHTML <i>- Firefox2+ で outerHTML を使用可能にする getter/setter</i></li>
-                <li>HTMLElement.prototype.innerText <i>- Firefox2+ で innerText を使用可能にする getter/setter</i></li>
+                <li>HTMLElement.prototype.outerHTML <i>- Firefox2+ で outerHTML を使用可能にする</i> - (IE 由来の拡張)</li>
+                <li>HTMLElement.prototype.innerText <i>- Firefox2+ で innerText を使用可能にする</i> - (IE 由来の拡張)</li>
               </ul>
             </dd>
         </dl>
@@ -85,162 +94,113 @@ alert(hoge === window.hoge); // true
   <dt><a name="Selector">Selector</a> - セレクタ</dt>
     <dd>
       <p>ある要素の色やテキストを変更しようとした場合に、まずその要素を特定する必要があります。
-        <br />セレクタとは、ドキュメントツリーに多数存在する要素の中から、ある特徴を元に要素を絞り込む機能を持った一連の関数群のことです。
-        <br />uupaa.jsでは様々なニーズやユーザの好みに対応すべく、多様なセレクタを提供しています。
+        <br />セレクタとは、ドキュメントツリーに存在する多数の要素から、ある特徴を元に絞り込みを行う一連の関数群のことです。
+        <br />uupaa.js は、多様なセレクタを提供しています。
       </p>
       <ul>
-        <li>id属性が一致する要素を検索する <a href="./SELECTOR.htm#uu.id">ID Selector</a></li>
-        <li>タグ名が一致する要素を検索する <a href="./SELECTOR.htm#uu.tag">Tag/Element Selector</a></li>
-        <li>class属性が一致する要素を検索する <a href="./SELECTOR.htm#uu.klass">Class Selector</a></li>
-        <li>完全一致/部分一致する属性を持つ要素や擬似要素を検索する <a href="./SELECTOR.htm#uu.attr">Attribute Selector</a></li>
-        <li>XPathで要素や属性,テキストを検索する <a href="./SELECTOR.htm#uu.xpath">XPath Selector</a></li>
-        <li>CSSセレクタで要素を検索する <a href="./SELECTOR.htm#uu.css">CSS Selector</a></li>
-        <li>ノードタイプが一致する要素を深さ制限付きで検索する <a href="./SELECTOR.htm#uu.nodeType">NodeType Selector</a></li>
-        <li>テキストノードを深さ制限付きで検索する <a href="./SELECTOR.htm#uu.textNode">TextNode Selector</a></li>
+        <li>id属性が一致する要素を検索する uu.id()</li>
+        <li>タグ名が一致する要素を検索する uu.tag()</li>
+        <li>class属性が一致する要素を検索する uu.className() </li>
+        <li>CSSセレクタで要素を検索する uu.css()</li>
+        <li>XPathで要素や属性,テキストを検索する uu.xpath()</li>
       </ul>
-
-      <p>CSSセレクタやXPathセレクタは、もっと簡単なセレクタ(とその組み合わせ)で表現可能なケースがあります。</p>
-      <p>例えば以下のようなケースです。</p>
-      <table>
-      <tr><th>Action</th><th>CSSセレクタ, XPathセレクタで表現</th><th>他のセレクタ(+組み合わせ)で表現</th></tr>
-      <tr><td>div要素を全て列挙したい</td><td>uu.xpath('//div')</td><td>uu.tags("div")</td></tr>
-      <tr><td>document.body以下のscript要素を列挙したい</td><td>uu.xpath('./script', document.body)</td><td>uu.tag("script", document.body)</td></tr>
-      <tr><td>class属性が"piyo"なdiv要素を列挙したい<br />&lt;div class="piyo"&gt;</td><td>uu.xpath('//div[@class="piyo"]')</td><td>uu.attr('div[@class="piyo"]')</td></tr>
-      <tr><td>class属性に文字列としての"piyo"が含まれているdiv要素を列挙したい<br />&lt;div class="piyozo"&gt;</td><td>uu.xpath('//div[contains(@class,"piyo")]')</td><td>uu.attr('div[@class~="piyo"]')</td></tr>
-      <tr><td>class属性にclassName"piyo"が含まれている全ての要素を列挙したい<br />&lt;<i>tag</i> class="hoge piyo"&gt;</td><td>uu.css(".piyo")</td><td>uu.klass("piyo")</td></tr>
-      <tr><td>id属性を持つ要素を列挙したい</td><td>uu.css("*[id]");</td><td>uu.attr("*[@id]");</td></tr>
-      <tr><td>title="hoge"で<br />class="piyo"な要素を列挙したい</td><td>uu.xpath('//*[@title="hoge" and @class="piyo"]');</td><td>uu.attr('*[@title="hoge"]').forEach(function(v) {<br />　uu.klass.has("piyo");<br />})</td></tr>
-      </table>
-      <del><p>jQueryに慣れた人向けに<a href="./SELECTOR.htm#uu.css">CSSセレクタ</a>はjQueryの構文も理解するようになっています。</p></del>
     </dd>
 
   <dt><a name="SyntaxSugar">SyntaxSugar</a> - シンタックスシュガー</dt>
-    <dd><p>シンタックスシュガーとは、苦く飲みづらい薬を糖衣(砂糖でまぶした)した状態のことです。
+    <dd><p>シンタックスシュガーとは、苦く飲みづらい薬を糖衣(砂糖でまぶ)した状態のことです。
           <br />プログラミングの世界では、構文を簡単に扱えるように形を多少変化させたものを意味します。
         </p>
-        <p>Objectが持つプロパティにアクセスするためのJavaScriptの本質的な構文は hash["a"] で、
-          <br />ドットシンタックス(hash.a)はシンタックスシュガーになります。
-          <br /><i>hash["(; _ ;)"]</i> は構文的に正しく、<i>hash.(; _ ;)</i> はエラーになる等の能力的な違いもあります。
-        </p>
+        <p>var hash = { a: 0 }; とあった場合に、「hash の a にアクセスする」には、2種類の構文が使えます。</p>
+        <ul>
+          <li>スクエアシンタックス: hash["a"] </li>
+          <li>ドットシンタックス: hash.a </li>
+        </ul>
+        <p>JavaScript の本質的な構文は スクエアシンタックス で、ドットシンタックス はその シンタックスシュガーです。
+          <br />ドットシンタックスは記号や数値で始まるプロパティにアクセスできないという制限もあります。</p>
+        <p>hash["(; _ ;)"] は構文的に正しく、hash.(; _ ;) はエラーになります。</p>
     </dd>
 
   <dt><a name="Element">Element</a> - 要素</dt>
     <dd>配列の個々の値を、配列の要素(Element)と呼びます。
-        <br />また、ドキュメントツリー(DOMツリー)に参加している個々の要素のこともElementと呼びます。
-        <br />ドキュメントツリー上の要素にアクセスするには、<a href="./SELECTOR.htm">Selector</a>を使用します。
+        <br />また、ドキュメントツリーに参加している個々の要素のことも Element と呼びます。
+        <br />ドキュメントツリー上の要素にアクセスするには <a href="#Selector">Selector</a> を使います。
     </dd>
 
   <dt><a name="Attribute">Attribute</a> - 属性</dt>
-    <dd><p>&lt;div id="sample" class="dummy"&gt;&lt;/div&gt; といったHTMLの断片があった場合に、
-        <br />id属性の値は"sample"で、class属性の値は"dummy"です。</p>
-        <p>div要素のstyle属性の値を全て列挙する場合は以下のようにします。</p>
-        <ol>
-          <li><a href="./SELECTOR.htm#uu.css">uu.css</a>("div[style]").forEach(function(v) {　<br />　uu.log(v.style);<br />});</li>
-          <li><a href="./SELECTOR.htm#uu.attr">uu.attr</a>("div[@style]").forEach(function(v) {　<br />　uu.log(v.style);<br />});</li>
-        </ol>
+    <dd><p>&lt;div id="sample" class="dummy"&gt;&lt;/div&gt; といった HTML の断片があった場合に、
+        <br />id 属性の値は "sample" で、class 属性の値は "dummy" です。</p>
+        <p>div 要素の style 属性の値を全て列挙するには次のようにします。</p>
+<pre class="eg">
+uu.css("div[style]").forEach(function(v) {
+  alert(v.style);
+});
+</pre>
     </dd>
 
   <dt><a name="NodeType">NodeType</a> - ノードタイプ</dt>
-    <dd><p>DOMノードにはいくつか種類があり、これをNodeTypeと呼びます。</p>
+    <dd><p>DOMノードにはいくつか種類があり、これを NodeType と呼びます。</p>
       <table>
       <tr><th>NodeType</th><th>Value</th><th>説明</th></tr>
-      <tr><td>ELEMENT_NODE</td><td>1</td><td>HTMLを構成する要素(タグ)です。</td></tr>
-      <tr><td>ATTRIBUTE_NODE</td><td>2</td><td>DOM Attributeノードです。</td></tr>
+      <tr><td>ELEMENT_NODE</td><td>1</td><td>HTML を構成する要素(タグ)です。</td></tr>
+      <tr><td>ATTRIBUTE_NODE</td><td>2</td><td>DOM Attribute ノードです。</td></tr>
       <tr><td>TEXT_NODE</td><td>3</td><td>テキストノードです。</td></tr>
-      <tr><td>CDATA_SECTION_NODE</td><td>4</td><td>CDATAセクションノードです。</td></tr>
+      <tr><td>CDATA_SECTION_NODE</td><td>4</td><td>CDATA セクションノードです。</td></tr>
       <tr><td>ENTITY_REFERENCE_NODE</td><td>5</td><td></td></tr>
       <tr><td>ENTITY_NODE</td><td>6</td><td></td></tr>
       <tr><td>PROCESSING_INSTRUCTION_NODE</td><td>7</td><td></td></tr>
       <tr><td>COMMENT_NODE</td><td>8</td><td>コメントノードです。</td></tr>
-      <tr><td>DOCUMENT_NODE</td><td>9</td><td>documentノード(ルートノード)です。</td></tr>
+      <tr><td>DOCUMENT_NODE</td><td>9</td><td>document ノード(ルートノード)です。</td></tr>
       <tr><td>DOCUMENT_TYPE_NODE</td><td>10</td><td></td></tr>
       <tr><td>DOCUMENT_FRAGMENT_NODE</td><td>11</td><td></td></tr>
       <tr><td>NOTATION_NODE</td><td>12</td><td></td></tr>
       </table>
     </dd>
 
-  <dt><a name="Module">Module</a> - モジュール</dt>
-    <dd><p>モジュールは機能を拡張する仕組みです。他のシステムでは同様の仕組みをプラグインやアドオンと呼んでいたりもします。
-           <br />uupaa.jsでは、機能が必要となったタイミングでモジュールを読み込み、モジュールが提供する機能を利用することが可能です。</p>
-        <p>モジュールの読み込みには、<a href="./MODULE.htm#uu.module">uu.module()</a> か
-           <a href="./MODULE.htm#uu.module.loadSync">uu.module.loadSync()</a> を使用します。これらには同期,非同期の違いがあります。
-        <br />読み込み状況を調べるには、<a href="./MODULE.htm#uu.module.already">uu.module.already()</a> を使用します。</p>
-        <p>モジュールの中から、さらにモジュールを読み込むことも可能です。</p>
-        <p>uupaa.jsを読み込んだHTMLファイルの場所(ディレクトリ)が、モジュール読み込み時のカレントディレクトリになります。
-        <br />uupaa.jsのカレントディレクトリは、<a href="./MODULE.htm#uu.module.url.base">uu.module.url.base()</a> で取得できます。
-        </p>
+  <dt><a name="Feature">Feature</a> - フューチャー</dt>
+    <dd><p>Feature は機能を拡張する仕組みです。他のシステムでは同様の仕組みをプラグインやアドオンと呼んでいたりもします。
+           <br />uupaa.jsでは、部品のオンデマンドロード(必要になったタイミングでロードすること)が可能です。</p>
+        <p>部品の読み込みには、uu.feature() を使用します。</p>
     </dd>
 
-  <dt><a name="Class">Class</a> - OOP Class, CSS Class - OOPクラス と CSSクラス</dt>
+  <dt><a name="Class">Class</a> - The "OOP Class", The "CSS Class" - OOPクラス と CSSクラス</dt>
     <dd>
-      <p>
-      uupaa.jsにおける"クラス"という言葉には、オブジェクト指向用語(OOP)としての"クラス"と、CSSの"クラス"の二つの意味があります。
-      <br />
-      <a href="./SELECTOR.htm#uu.klass">uu.klass()</a> は CSS クラス名で要素を絞り込む CSSセレクタ、
-      <br />
-      <a href="./DOCUMENT.htm#uu.klass.add">uu.klass.add()</a>, 
-      <a href="./DOCUMENT.htm#uu.klass.has">uu.klass.has()</a>, 
-      <a href="./DOCUMENT.htm#uu.klass.remove">uu.klass.remove()</a>は、
-      要素の CSSクラス名を追加/検索/削除を行う関数、
-      <br />
-      <a href="./DOCUMENT.htm#uu.klass.generic">uu.klass.generic()</a>, 
-      <a href="./DOCUMENT.htm#uu.klass.singleton">uu.klass.singleton()</a> は OOPクラスの雛形を生成する関数です。
-      </p>
-      <p>"class" は JavaScript の予約語なので、"klass" としています。</p>
+      <p>uupaa.js における"クラス"という言葉には、
+         オブジェクト指向用語(OOP)としての"クラス"と、CSS の"クラス"の二つの意味があります。</p>
+      <ul>
+        <li>uu.className() は CSS セレクタです。</li>
+        <li>uu.className.add(), uu.className.has(), uu.className.remove() は className のマニピュレーターです。</li>
+        <li>uuClass(), uuClass.Generic(), uuClass.Singleton() は OOP クラスの雛形を生成する関数です。</li>
+      </ul>
     </dd>
 
   <dt><a name="WindowReady">WindowReady</a></dt>
-    <dd>WindowReady はWebページの表示に必要な全情報が揃った状態のことです。<br />
-        WindowReady を補足し処理を行うには <a href="./DOCUMENT.htm#uu.ready">uu.ready()</a> に関数を登録します。<br />
+    <dd>WindowReady は Web ページの表示に必要な全情報が揃った状態のことです。<br />
+        WindowReady を補足し処理を行うには uu.ready() に関数を登録します。<br />
         旧来の方法(window.onload や &lt;body onload&gt;に関数を登録する方法)は一つの関数しか登録できませんが、
-        uu.ready() を使用すると複数の関数が登録可能です。
+        uu.ready() には関数を複数登録可能です(コールバックする順番はランダムです)。
     </dd>
 
   <dt><a name="WindowUnready">WindowUnready</a></dt>
-    <dd>WindowUnready はWebページが遷移する直前の状態のことです。<br />
-        WindowUnready を補足し処理を行うには <a href="./DOCUMENT.htm#uu.unready">uu.unready()</a> に関数を登録します。<br />
-        旧来の方法(window.onunload や &lt;body onunload&gt;に関数を登録する方法)は一つの関数しか登録できませんが、
-        uu.unready() を使用すると複数の関数が登録可能です。
-        IE6+,Safari3+,Firefox2+では、unloadではなく、beforeunloadイベントを補足します。
-        <p>モダンなブラウザ(FirefoxやOpera)では、WindowUnready状態にもかかわらずウインドウを表示しようとすると、ブラウザに阻止されます(ポップアップブロック)。</p>
+    <dd>WindowUnready は現在のページから他のWeb ページに遷移する直前の状態のことです。<br />
+        WindowUnready を補足し処理を行うには uu.unready() に関数を登録します。<br />
+        uu.unready() には関数を複数登録可能です(コールバックする順番はランダムです)。
     </dd>
 
   <dt><a name="DomReady">DomReady</a></dt>
     <dd>DomReady は文書構造(DOM)の解析が終了した状態のことです。<br />
-        DomReady を補足し処理を行うには <a href="./DOCUMENT.htm#uu.ready">uu.ready()</a> に関数を登録します。<br />
-        背景: DomReadyはWindowReadyよりも先に成立します。DomReadyで画面の構築を開始すると、ビジターのイライラを減らせます。
+        DomReady を補足し処理を行うには uu.ready() に関数を登録します。<br />
+        DomReady は WindowReady よりも先に成立します。DomReady で画面の構築を開始すると、ビジターのイライラを減らせます。
     </dd>
 
-  <dt><a name="ModuleReady">ModuleReady</a></dt>
-    <dd>ModuleReadyは、<a href="DOCUMENT.htm#uu.module">uu.module</a>
-        または <a href="DOCUMENT.htm#uu.module.loadSync">uu.module.loadSync</a> で読み込みが完了した状態のことです。<br />
-        ModuleReady を補足し処理を行うには <a href="./DOCUMENT.htm#uu.ready">uu.ready()</a> に関数を登録します。<br />
-        ModuleReady は、再度 uu.module や uu.module.loadSync で読み込みを開始すると状態が解除されます。
+  <dt><a name="FeatureReady">FeatureReady</a></dt>
+    <dd>FeatureReadyは、uu.feature() でロードが完了した状態のことです。<br />
+        FeatureReady を補足し処理を行うには uu.ready() に関数を登録します。<br />
+        FeatureReady 状態は、uu.feature() で読み込みを開始すると解除されます。
     </dd>
 
   <dt><a name="CanvasReady">CanvasReady</a></dt>
-    <dd>CanvasReady は、canvasが使用可能な状態のことです。<br />
-        CanvasReady を補足し処理を行うには <a href="./DOCUMENT.htm#uu.ready">uu.ready()</a> に関数を登録します。<br />
-        背景: Firefox2, Safari1.3, Opera9はcanvasをネイティブにサポートしますが。IE6, IE7, IE8はcanvasに対応していません。
-        excanvas.jsによりIEでもcanvas要素が使用可能になりますが、excanvas.js内の初期化完了を知る必要があります。
-    </dd>
-
-  <dt><a name="AjaxReady">AjaxReady</a></dt>
-    <dd>AjaxReady は、Ajaxが使用可能な状態のことです。<br />
-        AjaxReady を補足し処理を行うには <a href="./DOCUMENT.htm#uu.ready">uu.ready()</a> に関数を登録します。<br />
-        IE6でActiveXをOFFにしてあると AjaxReady 状態にはなりません。
-    </dd>
-
-  <dt><a name="JSONPReady">JSONPReady</a></dt>
-    <dd>JSONPReady は、JSONPが使用可能な状態のことです。<br />
-        JSONPReady を補足し処理を行うには <a href="./DOCUMENT.htm#uu.ready">uu.ready()</a> に関数を登録します。
-    </dd>
-
-  <dt><a name="ImageReady">ImageReady</a></dt>
-    <dd>ImageReadyは、画像がブラウザにキャッシュ(プリロード)され、即座に使用可能な状態のことです。
-        <br />canvasで画像を使用するためには、その画像がブラウザにキャッシュされている必要があります。
-        <br />画像をプリロードするには、<a href="./MODULE.htm#uu.module.image.load">uu.module.image.load()</a>を使用し、
-        <br />ImageReady状態の確認は<a href="./MODULE.htm#uu.module.image.already">uu.module.image.already()</a>を使用します。
+    <dd>CanvasReady は、HTML5::Canvas が使用可能な状態のことです。<br />
+        CanvasReady を補足し処理を行うには uu.ready() に関数を登録します。
     </dd>
 
   <dt><a name="JointedString">Jointed String</a> - 結合文字列</dt>
@@ -249,11 +209,12 @@ alert(hoge === window.hoge); // true
 
   <dt><a name="cssProp">cssProp, css-prop</a></dt>
     <dd>
-      <p><a href="http://www.w3.org/TR/DOM-Level-2-Style/css.html#CSS-extended">CSS2Properties</a>で定義されているCSSのプロパティ名(スタイル名)の形式を<b>cssProp</b>と呼びます。
+      <p><a href="http://www.w3.org/TR/DOM-Level-2-Style/css.html#CSS-extended">CSS2Properties</a> で
+        定義されている CSS のプロパティ名(スタイル名)の形式を <b>cssProp</b> と呼びます。
         <br />例: fontWeight
       </p>
       <p>
-        CSSで使用可能なプロパティ名(スタイル名)の形式を<b>css-prop</b>と呼びます。
+        CSS で使用可能なプロパティ名(スタイル名)の形式を <b>css-prop</b> と呼びます。
         <br />例: font-weight<br />
       </p>
     </dd>
@@ -264,82 +225,68 @@ alert(hoge === window.hoge); // true
         HTML タグに直接書かれたインラインスタイル(＜tag style="xx: ..."＞)や、
         style 要素で設定されているスタイルも加味したもので、画面描画に使用される実際の値にかなり近いものです。</p>
         <p>
-        計算済みのスタイルの単位は(基本的には)px ですが、一部のブラウザではそれ以外の値("auto")を返す場合もあります。<br />
-        相対単位(pt,em等)で値を指定している場合でも、getComputedStyle() が返す値の単位は px になります。<br />
-        color 値は、"rgb(red,gree,blue)"や"#FFFFFF"に変換されます。(ブラウザ毎に異なります)<br />
-        { fontWeight: "normal" } を、{ fontWeight: "400" } に変換するブラウザもあります。
+        計算済みのスタイルの単位は(基本的には) px ですが、IEはそれ以外の値( "auto" )を返す場合もあります。<br />
+        相対単位(pt,em 等)で値を指定している場合でも、getComputedStyle() が返す値の単位は px になります。<br />
+        color は、"rgb(red,gree,blue)" や "#FFFFFF" に変換されます(ブラウザ毎に異なります)。<br />
+        { fontWeight: "normal" } を、{ fontWeight: "400" } に変換するブラウザもあります。<br />
+        see: <a href="http://d.hatena.ne.jp/uupaa/20080928/1222543331">ブラウザ毎の getComputedStyle の戻り値</a>
         </p>
     </dd>
 
   <dt><a name="ParentHasLayout">ParentHasLayout</a> - Parent has Layout - レイアウト上の親要素</dt>
     <dd>CSS の position が "relative" または "absolute" に設定されている最寄の親要素を ParentHasLayout と呼びます。<br />
       オフセット座標を返す関数の多くは、最寄の ParentHasLayout からのオフセット値を返します。<br />
-      類語には、IE の CSS バグの話題で頻出する <a href="http://msdn2.microsoft.com/en-us/library/ms533776.aspx">hasLayout(外部のサイト)</a> があります。<br />
+      類似語に、IE の CSS バグの話題で頻出する <a href="http://msdn2.microsoft.com/en-us/library/ms533776.aspx">MSDN::hasLayout</a> があります。<br />
       IE6,7では、zoom = 1; とするだけで、インライン要素などが hasLayout=true な要素になりえますが、そのような要素は、ParentHasLayout とは呼びません。
-      <br />IE8標準モードでは hasLayout プロパティが無くなるそうですが、油断はできません。
+      <br />IE8 の IE8モードでは hasLayout プロパティが削除されました。
       </dd>
 
-  <dt><a name="TypeTaxing">Type "Taxing"</a> - Taxing型, 厄介な引数</dt>
-    <dd>
-        <p><a href="./DOCUMENT.htm#uu.css.get">uu.css.get</a> や <a href="./DOCUMENT.htm#uu.module">uu.module</a> など、いくつかの関数には以下の3種類の引数を渡すことが可能です。</p>
-        <ol>
-          <li>文字列( "ab" )</li>
-          <li><a href="#StringArray">StringArray</a>( [ "ab", "12" ] )</li>
-          <li><a href="#JointedString">カンマ結合文字列</a>( "ab,12" )</li>
-        </ol>
-        <p>これらの引数をまとめて<b>Taxing型</b>と呼びます。</p>
-        <p>Taxing型の引数をパースする専門の関数として <a href="./DOCUMENT.htm#uu.notax">uu.notax</a> があります。</p>
-        <p>背景: 引数の自由度が高いと便利です。その反面、解釈にコストが掛かる厄介(Taxing)な引数とも言えます。</p></dd>
-
   <dt><a name="TypeThis">Type "this"</a> - this型</dt>
-    <dd>this型はObject型のエリアスです。<br />
-      thisを渡すことが可能な引数を、this型と呼びます。<br />
-      this型の引数に undefined を渡すと windowオブジェクト が指定された場合と同様に動作します。</dd>
+    <dd>this 型は Object 型の別名(alias)です。<br />
+      this を渡すことが可能な引数を、this 型と呼びます。<br />
+      this 型の引数に undefined を渡すと window オブジェクト が指定された場合と同様に動作します。</dd>
 
   <dt><a name="TypeMix">Type "Mix"</a> - Mix型</dt>
-    <dd>Mix型はあらゆる型(object, Hash, number, string, boolean, ...)を意味する説明上の(擬似的な)型です。<br />
-      あらゆる型を受け付ける引数があれば、その引数を<b>Mix</b>型と呼びます。</dd>
+    <dd>Mix 型はあらゆる型(object, Hash, number, string, boolean, ...)を意味する説明上の(擬似的な)型です。<br />
+      あらゆる型を受け付ける引数があれば、その引数を <b>Mix</b> と呼びます。</dd>
 
   <dt><a name="TypeHash">Type "Hash"</a> - Hash型</dt>
     <dd>
-      <p>Hash型はObject型の別名(alias)です。
-        <br />連想配列的に使用される Object 型の変数を <b>Hash</b> と呼びます。
+      <p>Hash 型は Object 型の別名(alias)です。
+        <br />連想配列的な Object 型の変数を <b>Hash</b> と呼びます。
       </p>
-      <pre>
-var hash = { a: 1, b: 2, c: 3 }; // Hashを生成
-      </pre>
-      <p>文字列Indexでアクセスする要素が混ざった Array も <b>Hash</b> と呼びます。
+<pre class="eg">
+var hash = { a: 1, b: 2, c: 3 }; <u>// Hashを生成</u>
+</pre>
+      <p>文字列 Index でアクセスする要素が混在する Array も <b>Hash</b> と呼びます。
       </p>
-      <pre>
-var ary = [ 1, 2, 3 ]; // この時点では、Arrayと呼ばれる
-ary["StringIndex"] = "a"; // この時点で、Hashと呼ばれる
-      </pre>
+<pre class="eg">
+var ary = [ 1, 2, 3 ]; <u>// この時点では Array と呼ぶが</u>
+ary["StringIndex"] = "a"; <u>// これ以後は Hash と呼ぶ</u>
+</pre>
       </dd>
 
   <dt><a name="FakeArray">FakeArray</a> - 擬似配列</dt>
     <dd>
         <p>便宜上 Array と同じように操作できるが、実体は Array や <a href="#TypeHash">Hash</a> ではなく、length プロパティを持つものを FakeArray(擬似配列) と呼びます。
           <br />代表的なものに、arguments, NodeList, document.images があります。</p>
-        <p>FakeArray の各要素を評価するには <a href="./DOCUMENT.htm#uu.forEach">uu.forEach</a>() を使用し、
-          Array 化するには <a href="./DOCUMENT.htm#uu.toArray">uu.toArray</a>() を使用します。
-        </p>
     </dd>
 
   <dt><a name="StringArray">StringArray</a></dt>
     <dd>文字列を要素とする Array( ["a", "b", ... ] ) を StringArray と呼びます。<br />
-        文字列以外の要素(数値,関数,undefinedなど)を含んでいる場合は、StringArray とは呼ばず、<a href="#TypeHash">Hash</a> と呼びます。
+        文字列以外の要素(数値, function, null, undefined, element など)を含んでいる場合は、StringArray とは呼ばず、<a href="#TypeHash">Hash</a> と呼びます。
         要素数ゼロの StringArray もありえます。
     </dd>
 
   <dt><a name="FunctionArray">FunctionArray</a></dt>
     <dd>Function を要素とする Array( [ function, ... ] )を FunctionArray と呼びます。<br />
-        Function 以外の要素(数値,文字列,null,undefinedなど)を含んでいる場合は、FunctionArray と呼ばず、<a href="#TypeHash">Hash</a>と呼びます。
+        Function 以外の要素(数値, 文字列, null, undefined, element など)を含んでいる場合は、FunctionArray と呼ばず、<a href="#TypeHash">Hash</a>と呼びます。
         要素数ゼロの FunctionArray もありえます。
     </dd>
 
   <dt><a name="ElementArray">ElementArray</a></dt>
     <dd><a href="#Element">Element</a>を要素とする Array( [ Element, ... ] )を ElementArray と呼びます。<br />
-        Element 以外の要素(数値,文字列,関数,null,undefinedなど)を含んでいる場合は、ElementArray と呼ばず、<a href="#TypeHash">Hash</a>と呼びます。
+        Element 以外の要素(数値, 文字列, function, null, undefined, element など)を含んでいる場合は、ElementArray と呼ばず、<a href="#TypeHash">Hash</a>と呼びます。
         要素数ゼロの ElementArray もありえます。
     </dd>
 
@@ -350,57 +297,68 @@ ary["StringIndex"] = "a"; // この時点で、Hashと呼ばれる
           <br />矩形の座標/サイズを表現する入れ物として使います。
           <br />x, y, w, h 以外の要素を持つRectHashや、{ x, y } しか持たない Hash を RectHash と呼ぶ場合があります。
         </p>
-        <p>CSSで要素の座標をサイズを指定するには、
-              <a href="./DOCUMENT.htm#uu.css.setRect">uu.css.setRect()</a>を使用します。
-              取得は、<a href="./DOCUMENT.htm#uu.css.rect">uu.css.rect()</a>を使用します。
-        </p>
     </dd>
 
   <dt><a name="RGBAHash">RGBAHash</a></dt>
     <dd>RGBAHash は { r, g, b, a } を要素に持つ <a href="#TypeHash">Hash</a> です。
-        <br />r,g,b には0～255の数値を指定します。a には0.0～1.0の数値を指定します。
-        <br />RGBAHash は、<a href="./MODULE.htm#uu.module.color.hash">uu.module.color.hash()</a>等で使用します。
-        <pre class="eg">
-var rbga = { r: 255, g: 255, b: 255, a: 1.0 }; // "white"
-        </pre>
+        <br />r, g, b には 0～255 の数値を指定します。a には 0.0～1.0 の数値を指定します。
+<pre class="eg">
+var rbga = { r: 255, g: 255, b: 255, a: 1.0 }; <u>// "white"</u>
+</pre>
     </dd>
 
   <dt><a name="HSVAHash">HSVAHash</a></dt>
     <dd>HSVAHash は { h, s, v, a  } を要素に持つ <a href="#TypeHash">Hash</a> です。
-        <br />h には0～360、s と v には0～100の数値を指定します。a には0.0～1.0の数値を指定します。
-        <br />HSVAHash は、<a href="./MODULE.htm#uu.module.color.hash">uu.module.color.hash()</a>等で使用します。
-        <pre class="eg">
-var hsva = { h: 360, s: 100, v: 100, a: 1.0 }; // "white"
-        </pre>
+        <br />h には 0～360、s と v には 0～100 の数値を指定します。a には 0.0～1.0 の数値を指定します。
+<pre class="eg">
+var hsva = { h: 360, s: 100, v: 100, a: 1.0 }; <u>// "white"</u>
+</pre>
     </dd>
 
   <dt><a name="Unicast">Unicast</a> - ユニキャスト</dt>
-    <dd><a href="./MODULE.htm#uu.module.messagePump.send">uu.module.messagePump.send()</a> や
-        <a href="./MODULE.htm#uu.module.messagePump.post">uu.module.messagePump.post()</a> で、
-        <br />誰か1人にメッセージを転送することをユニキャストと呼びます。
+    <dd>uu.msg.send() や uu.msg.post() で、誰か1人にメッセージを転送することをユニキャストと呼びます。
         <br />送信者自身にユニキャストすることもできます。
     </dd>
 
   <dt><a name="Multicast">Multicast</a> - マルチキャスト</dt>
-    <dd><a href="./MODULE.htm#uu.module.messagePump.send">uu.module.messagePump.send()</a> や
-        <a href="./MODULE.htm#uu.module.messagePump.post">uu.module.messagePump.post()</a> で、
-        <br />何人かに同じメッセージを転送することをマルチキャストと呼びます。
+    <dd>uu.msg.send() や uu.msg.post() で、何人かに同じメッセージを転送することをユニキャストと呼びます。
     </dd>
 
   <dt><a name="Broadcast">Broadcast</a> - ブロードキャスト</dt>
-    <dd><a href="./MODULE.htm#uu.module.messagePump.send">uu.module.messagePump.send()</a> や
-        <a href="./MODULE.htm#uu.module.messagePump.post">uu.module.messagePump.post()</a> で、
-        <br />全員に同じメッセージを転送することをブロードキャストと呼びます。
+    <dd>uu.msg.send() や uu.msg.post() で、全員に同じメッセージを転送することをブロードキャストと呼びます。
         <br />ブロードキャストでは、送信者自身にもメッセージが転送されます。
     </dd>
 
   <dt><a name="URLSafe64">URLSafe64</a></dt>
-    <dd>RFC3548(The "URL and Filename safe" Base 64 Alphabet)で提唱されているBase64の亜種です。<br />
-        JavaScriptの文字列(UTF-16)をUTF-8に変換し、さらに通常のBase64でエンコードを行った後に、
-        URLに含むことができない一部の記号("+", "/", "=")を、安全な記号("-", "_")に差し替えし、
+    <dd>RFC3548(The "URL and Filename safe" Base 64 Alphabet)で提唱されている Base64 の亜種です。<br />
+        JavaScript の文字列(UTF-16)を UTF-8 に変換し、さらに通常の Base64 でエンコードを行った後に、
+        URL に含むことができない一部の記号("+", "/", "=")を、安全な記号("-", "_")に差し替えし、
         末尾の"="を除去します。<br />
         デコードは、省略された末尾の"="を文字列の長さを元に補完し、差し替えた記号を元に戻した後で
-        Base64としてデコードします。
+        Base64 としてデコードします。
+    </dd>
+
+  <dt><a name="Singleton">Singleton</a> - シングルトン</dt>
+    <dd><p>Singletonは、「一つしか存在しないもの」という意味です。<br />
+      シングルトンクラスは、何度 new しても常に一つの実体(の参照)を返すため、
+      スマートなグローバル変数 を生成できます。</p>
+<pre class="eg">
+var obj1 = new SingletonClass(); <u>// インスタンスを生成</u>
+var obj2 = new SingletonClass(); <u>// obj1の参照を取得</u>
+alert(obj1 === obj2); <u>// true  (obj1とobj2は同じもの)</u>
+</pre>
+      </dd>
+
+  <dt><a name="StackNumber">StackNumber</a> - スタック番号</dt>
+    <dd>スタック番号 は 0 以上の整数です。
+        スタックが3個積まれている状態で、トップスタックのスタック番号は 2, ボトムスタックのスタック番号は 0 になります。
+<pre class="eg" style="line-height: 1">
+  │  │
+  │■│ ← top stack(n=2)    最後に積まれたスタック
+  │■│ ← n=1               二番目に積まれたスタック
+  │■│ ← bottom stack(n=0) 最初に積まれたスタック
+─┴─┴─ 
+</pre>
     </dd>
 </dl>
 </body>
