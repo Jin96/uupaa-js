@@ -1,1 +1,0 @@
-(function(){var uuw=window,uu=uuw.uu;uu.module.evaljs=function(str){var rv=false;try{rv=eval("("+str+")")}catch(e){if(e instanceof SyntaxError){throw SyntaxError("SyntaxError: "+e.message)}throw e}return rv}})();
