@@ -648,16 +648,20 @@ function ofTypeFilter(fid, negate, elms) {
 
 // :enabled  :disabled  :checked  :digit  :negative  :tween  :playing
 function simpleFilter(fid, negate, elms) {
-  var rv = [], ri = -1, v, i = 0, ok;
+  var rv = [], ri = -1, v, i = 0, ok, tgt;
 
   while ( (v = elms[i++]) ) {
-    ok = 0;
+    tgt = ok = 0;
     switch (fid) {
-    case 0x0b: ok = !v.disabled; break;   // 0x0b: enabled
-    case 0x0c: ok = !!v.disabled; break;  // 0x0c: disabled
-    case 0x0d: ok = !!v.checked; break;   // 0x0d: checked
+    case 0x0b: tgt = "disabled" in v; ok = !v.disabled; break;  // 0x0b: enabled
+    case 0x0c: tgt = "disabled" in v; ok = !!v.disabled; break; // 0x0c: disabled
+    case 0x0d: tgt = "checked"  in v; ok = !!v.checked; break;  // 0x0d: checked
     }
-    if (ok ^ negate) {
+    if (!tgt) { // fix #144
+      if (negate) {
+        rv[++ri] = v;
+      }
+    } else if (ok ^ negate) {
       rv[++ri] = v;
     }
   }
@@ -806,9 +810,9 @@ function nth(anb) {
 
 // --- export ---
 uu.mix(uu.css.querySelectorAll, {
-  styleQuery:   function() { return []; }, // dummy function
-  childFilter:  childFilter,
-  FILTER_MAP:   FILTER_MAP
+  styleQuery:  function() { return []; }, // dummy function
+  childFilter: childFilter,
+  FILTER_MAP:  FILTER_MAP
 });
 
 (function() {
