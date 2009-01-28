@@ -1,6 +1,6 @@
-// === Query Plus ==========================================
-// depend: ua, query, styleSheet
-uu.feat["query+"] = {};
+// === Query CSS Plus ======================================
+// depend: query_css, styleSheet, color
+uu.feat.query_css_plus = {};
 
 (function() {
 var STYLE_OPERATOR  = { "=": 1, ":": 1, "!=": 2, "*=": 3, "^=": 4, "$=": 5,
@@ -9,7 +9,7 @@ var STYLE_OPERATOR  = { "=": 1, ":": 1, "!=": 2, "*=": 3, "^=": 4, "$=": 5,
                         opacity: 2, width: 3, height: 3 },
     DIGIT           = /^\s*(?:[\-+]?)[\d,\.]+\s*$/,
     NEGATIVE        = /^\s*\-[\d,\.]+\s*$/,
-    MARKUP_STYLE    = uu.ua.ie ? "ruby-align:center" : "outline:0 solid #000";
+    MARKUP_STYLE    = UU.IE ? "ruby-align:center" : "outline:0 solid #000";
 
 uu.mix(uu.css.querySelectorAll.FILTER_MAP, {
   link:     [0x0e, actionFilter], // override
@@ -48,32 +48,34 @@ uu.mix(uu.css.querySelectorAll.FILTER_MAP, {
 });
 
 // :link  :visited  :hover  :focus
-function actionFilter(fid, elms, pusedo) {
+function actionFilter(fid, negate, elms, pusedo) {
   var rv = [], ri = -1, ruleIndex, ary = [], v, i = 0;
 
   switch (fid) {
   case 0x0e: // 0x0e: link
   case 0x0f: // 0x0f: visited
-    ruleIndex = uu.style.insertRule("a:" + pusedo, MARKUP_STYLE);
+    ruleIndex = uu.style.appendRule("query+", "a:" + pusedo, MARKUP_STYLE);
     ary = uu.toArray(uudoc.links);
     break;
   case 0x10: // 0x10: hover
   case 0x11: // 0x11: focus
-    ruleIndex = uu.style.insertRule(":" + pusedo, MARKUP_STYLE);
+    ruleIndex = uu.style.appendRule("query+", ":" + pusedo, MARKUP_STYLE);
     ary = uu.tag("*", uudoc.body);
   }
 
   while ( (v = ary[i++]) ) {
     if (spy(v)) {
-      (elms.indexOf(v) >= 0) && (rv[++ri] = v);
+      if ((elms.indexOf(v) >= 0) ^ negate) {
+        rv[++ri] = v;
+      }
     }
   }
-  uu.style.deleteRule(ruleIndex);
+  uu.style.deleteRule("query+", ruleIndex);
   return rv;
 }
 
 // :digit  :negative  :tween  :playing
-function extendFilter(fid, elms) {
+function extendFilter(fid, negate, elms) {
   var rv = [], ri = -1, v, i = 0, ok;
 
   while ( (v = elms[i++]) ) {
@@ -84,7 +86,7 @@ function extendFilter(fid, elms) {
     case 0x42: ok = !!v.uuTween; break;   // 0x42: tween
     case 0x43: ok = v.uuTween && v.uuTween.playing(); break; // 0x43: playing
     }
-    if (ok) {
+    if (ok ^ negate) {
       rv[++ri] = v;
     }
   }
@@ -96,7 +98,7 @@ function spy(elm) {
   var rv, cs;
 
   // http://d.hatena.ne.jp/uupaa/20080928/1222543331
-  if (uu.ua.ie) {
+  if (UU.IE) {
     cs = elm.currentStyle || elm.style;
     rv = cs.rubyAlign === "center";
   } else {
@@ -106,7 +108,7 @@ function spy(elm) {
   return rv;
 }
 
-function jFilter(fid, elms, pseudo, value, tags, contentType) {
+function jFilter(fid, negate, elms, pseudo, value, tags, contentType) {
   var rv = [], ri = -1, v, i = 0, iz = elms.length, ok, rex;
 
   for(; i < iz; ++i) {
@@ -134,30 +136,30 @@ function jFilter(fid, elms, pseudo, value, tags, contentType) {
     case 0x92:  ok = (v.type !== "hidden" && !hidden(v)); break;
     case 0x93:  ok = v.selected; break;
     }
-    if (ok) {
+    if (ok ^ negate) {
       rv[++ri] = v;
     }
   }
   return rv;
 }
 
-function even(fid, elms, pseudo, value, tags, contentType) {
+function even(fid, negate, elms, pseudo, value, tags, contentType) {
   var filter = uu.css.querySelectorAll.FILTER_MAP["nth-child"];
-  return filter[1](filter[0], elms, pseudo, "odd", tags, contentType);
+  return filter[1](filter[0], negate, elms, pseudo, "odd", tags, contentType);
 }
 
-function odd(fid, elms, pseudo, value, tags, contentType) {
+function odd(fid, negate, elms, pseudo, value, tags, contentType) {
   var filter = uu.css.querySelectorAll.FILTER_MAP["nth-child"];
-  return filter[1](filter[0], elms, pseudo, "even", tags, contentType);
+  return filter[1](filter[0], negate, elms, pseudo, "even", tags, contentType);
 }
 
-function eq(fid, elms, pseudo, value) {
+function eq(fid, negate, elms, pseudo, value) {
   var rv = elms[parseInt(value)];
-  return rv ? [rv] : [];
+  return (rv ^ negate) ? [rv] : [];
 }
 
 function hidden(elm) {
-  var ie = uu.ua.ie || (uu.ua.opera && uu.ua.version < 9.5),
+  var ie = UU.IE || (UU.OPERA && opera.version() < 9.5),
       cs = ie ? (elm.currentStyle || elm.style)
               : uu.style(elm, "");
   return cs.display === "none" || cs.visibility === "hidden";
@@ -200,8 +202,8 @@ function judgeStyle(negate, elms, style, operator, value) {
 
   // pre-filter
   if (prop === 1) { // 1: color, backgroundColor
-    v1 = uu.style.toColorNumber(v1);
-    v2 = uu.style.toColorNumber(v2);
+    v1 = uu.color.parse(v1)[0];
+    v2 = uu.color.parse(v2)[0];
   }
 
   // to number
@@ -215,7 +217,7 @@ function judgeStyle(negate, elms, style, operator, value) {
 
   while ( (e = elms[i++]) ) {
     switch (prop) {
-    case 1: r = uu.style.toColorNumber(uu.style(e)[style]); break;
+    case 1: r = uu.color.parse(uu.style(e)[style])[0]; break;
     case 2: r = uu.style.getOpacity(e); break;
     case 3: rect = uu.style.getRect(e);
             r = style === "width" ? rect.w || rect.ow : rect.h || rect.oh;

@@ -1,6 +1,6 @@
-// === Query ===============================================
-// depend: array, ua, aid, ready
-uu.feat.query = {};
+// === Query CSS ===========================================
+// depend: none
+uu.feat.query_css = {};
 
 // --- local scope -----------------------------------------
 (function() {
@@ -8,11 +8,12 @@ uu.feat.query = {};
 var rootElement = uudoc.documentElement ||
                   uudoc.getElementsByTagName("html")[0],
     headElement = uudoc.getElementsByTagName("head")[0],
-    textContent = uu.aid.textContent,
-    _ie         = uu.ua.ie,
-    _ie8mode8   = uu.ua.ie8mode8,
-    // --- content type(HTML or XML) cache ---
-    contentTypeCache = {},
+    textContent = UU.IE || (UU.OPERA && opera.version() < 9.5) ? "innerText"
+                                                               : "textContent",
+    _ie         = UU.IE,
+    _ie8mode8   = UU.IE8MODE8,
+    // --- content-type cache (1: HTML, 2: XML) ---
+    contentTypeCache = { /* uuid: contentType */ },
     // tag dict( { a: "A", A: "A", ... } )
     htmlTag = {},
     xmlTag  = {},
@@ -34,7 +35,7 @@ var rootElement = uudoc.documentElement ||
     ID_OR_CLASS = /^[#\.]([a-z_\u00C0-\uFFEE\-][\w\u00C0-\uFFEE\-]*)/i,
     CHILD       = /^\s*(?:([>+~])\s*)?(\*|\w*)/,
     GROUP       = /^\s*,\s*/,
-    PSEUDO      = /^(?::(not)\((?:(\*)|(\w+)|[#\.][a-z_\u00C0-\uFFEE\-][\w\u00C0-\uFFEE\-]*|\[\s*(?:[^~\^$*|=!\/\s]+\s*[~\^$*|!\/]?\=\s*(["'])?.*?\4i?|[^\]\s]+)\s*\]|:contains\((["'])?.*?\5\)|:[\w\-]+(?:\([^\u0029]+\))?)\)|:contains\((["'])?(.*?)\6\)|::?([\w\-]+)(?:\((.*)\))?)/i,
+    PSEUDO      = /^(?::(not)\((?:(\*)|(\w+)|[#\.][a-z_\u00C0-\uFFEE\-][\w\u00C0-\uFFEE\-]*|\[\s*(?:[^~\^$*|=!\/\s]+\s*[~\^$*|!\/]?\=\s*(["'])?.*?\4i?|[^\]\s]+)\s*\]|:contains\((["'])?.*?\5\)|::?[\w\-]+(?:\([^\u0029]+\))?)\)|:contains\((["'])?(.*?)\6\)|::?([\w\-]+)(?:\((.*)\))?)/i,
     ATTR        = /^\[\s*(?:([^~\^$*|=!\/\s]+)\s*([~\^$*|!\/]?\=)\s*(["'])?(.*?)\3(i?)|([^\]\s]+))\s*\]/,
     STYLE       = /^\{\s*([^\^$*=!<>&\/\s]+)\s*(:|[\^$*!<>&\/]?\=)\s*(["'])?(.*?)\3(i?)\s*\}/,
     NTH_ANB     = /^((even)|(odd)|(1n\+0|n\+0|n)|(\d+)|((-?\d*)n([+\-]?\d*)))$/,
@@ -69,10 +70,10 @@ var rootElement = uudoc.documentElement ||
       target:             [0x17, target],
       contains:           [0x18, contains],
       // [0x40 - 0x43] reserved.
-      before:             [0x100, null], // 0x100 is none operation
-      after:              [0x100, null],
-      "first-letter":     [0x100, null],
-      "first-line":       [0x100, null]
+      before:             [0xf00, null], // bit 0x100: use flag
+      after:              [0xf00, null], // bit 0x200: none operation flag
+      "first-letter":     [0xf00, null], // bit 0x400: :not exclude flag
+      "first-line":       [0xf00, null]  // bit 0x800: need double semicolon(::) flag
     };
 
 function quickQuery(match, context, really) { // , _tags, _contentType) {
@@ -135,7 +136,7 @@ function quickQuery(match, context, really) { // , _tags, _contentType) {
 
 // uu.css.querySelectorAll
 uu.css.querySelectorAll = function(expr, context, really) {
-  var _contentType, _tags, _ie = uu.ua.ie, // alias
+  var _contentType, _tags, _ie = UU.IE, // alias
       // --- double registration guard ---
       uuid,       // unique-id
       guard = {}, // global guard
@@ -167,7 +168,7 @@ uu.css.querySelectorAll = function(expr, context, really) {
   if (withComma && QUICK_COMMA.test(expr)) { // split("#id, .class, E")
     w = expr.split(","); // "expr, expr, expr"
     for (i = 0, iz = w.length; i < iz; ++i) {
-      v = w[i].replace(UU.TRIM, "");
+      v = w[i].replace(UU.UTIL.TRIM, "");
       if (!v) { throw expr + " syntax error"; }
       r = uu.css.querySelectorAll(v, context, really);
       mix(r, rv, unq);
@@ -298,9 +299,17 @@ uu.css.querySelectorAll = function(expr, context, really) {
         if ( (match = ID_OR_CLASS.exec(expr)) ) {
           needle = match[1]; // "id"
 
-          while ( (v = ctx[i++]) ) {
-            if (((w = v.id) && (w === needle)) ^ negate) {
-              r[++ri] = v;
+          if (_contentType === 1) { // 1:html (match id or name)
+            while ( (v = ctx[i++]) ) {
+              if (((w = v.id || v.name) && (w === needle)) ^ negate) {
+                r[++ri] = v;
+              }
+            }
+          } else { // 2: xml (match id)
+            while ( (v = ctx[i++]) ) {
+              if (((w = v.id) && (w === needle)) ^ negate) {
+                r[++ri] = v;
+              }
             }
           }
         }
@@ -323,6 +332,9 @@ uu.css.querySelectorAll = function(expr, context, really) {
         if ( (match = PSEUDO.exec(expr)) ) {
           if ( (iz = ctx.length) ) {
             if (match[1]) { // :not(...)
+              if (negate) {
+                throw ":not(:not(...)) syntax error";
+              }
               if (match[2]) { // :not(*)
                 break;
               }
@@ -350,12 +362,21 @@ uu.css.querySelectorAll = function(expr, context, really) {
                 if ( !(v = FILTER_MAP[pseudo]) ) {
                   throw ":" + pseudo + " unsupported";
                 }
-                if (v[0] & 0x100) { // 0x100 is none operation
-                  r = negate ? [] : ctx;
-                } else {
-                  r = v[1].call(this, v[0], negate, ctx, pseudo,
-                                match[9] || match[7], _tags, _contentType);
+                w = v[0];
+                if (w & 0x100) {
+                  if ((w & 0x800) && !/^::/.test(expr)) {
+                    throw match[0] + " syntax error(need ::)";
+                  }
+                  if ((w & 0x400) && negate) {
+                    throw ":not(" + match[0] + ") syntax error(exclude pseudo-element)";
+                  }
+                  if (w & 0x200) { // 0x100 is none operation
+                    r = negate ? [] : ctx;
+                    break;
+                  }
                 }
+                r = v[1].call(this, w, negate, ctx, pseudo,
+                              match[9] || match[7], _tags, _contentType);
               }
             }
           }
@@ -683,13 +704,17 @@ function root(fid, negate, elms) {
 }
 
 // :target
-function target(fid, negate, elms) {
+function target(fid, negate, elms, pseudo, value, tags, contentType) {
   var rv = [], ri = -1, i = 0, v, needle = location.hash.slice(1);
 
   if (needle) {
-    while ( (v = elms[i++]) ) {
-      if (((v.id || v.name) === needle) ^ negate) {
-        rv[++ri] = v;
+    if (contentType === 1) { // 1: html
+      while ( (v = elms[i++]) ) {
+        (((v.id || v.name) === needle) ^ negate) && (rv[++ri] = v);
+      }
+    } else { // 2: xml
+      while ( (v = elms[i++]) ) {
+        ((v.id === needle) ^ negate) && (rv[++ri] = v);
       }
     }
   }
@@ -698,7 +723,7 @@ function target(fid, negate, elms) {
 
 // :contains
 function contains(fid, negate, elms, pseudo, value) {
-  valie = value.replace(UU.TRIM_QUOTE, "");
+  valie = value.replace(UU.UTIL.TRIM_QUOTE, "");
   var rv = [], ri = -1, v, i = 0,
       _textContent = textContent;
 
@@ -712,9 +737,16 @@ function contains(fid, negate, elms, pseudo, value) {
 
 // :link
 function link(fid, negate, elms) {
-  var rv = [], ri = -1, ary = uu.toArray(uudoc.links), v, i = 0;
+  var rv = [], ri = -1, ary = uu.toArray(uudoc.links), v, i = 0,
+      j = 0, jz = elms.length, hit;
   while ( (v = ary[i++]) ) {
-    if ((elms.indexOf(v) >= 0) ^ negate) {
+    for (hit = -1, j = 0; j < jz; ++j) {
+      if (elms[j] === v) {
+        hit = j;
+        break;
+      }
+    }
+    if ((hit >= 0) ^ negate) {
       rv[++ri] = v;
     }
   }
@@ -823,13 +855,17 @@ uu.mix(uu.css.querySelectorAll, {
   }
 })();
 
-uu.ready(function() {
+(function() {
   // prebuild node.uuid
-  var ary = uu.tag("*"), v, i = 0, iz = ary.length;
-  for (; i < iz; ++i) {
-    v = ary[i];
-    v.uuid || (v.uuid = ++uu._uuid);
+  function prebuild() {
+    var ary = uu.tag("*"), v, i = 0, iz = ary.length;
+    for (; i < iz; ++i) {
+      v = ary[i];
+      v.uuid || (v.uuid = ++uu._uuid);
+    }
   }
-});
+  UU.IE ? window.attachEvent("onload", prebuild)
+        : window.addEventListener("load", prebuild, false);
+})();
 
 })(); // end (function())() scope
