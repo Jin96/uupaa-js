@@ -40,9 +40,8 @@ uu.mix(UU, {
   UTIL: {
     // --- regexp ---
     TRIM:         /^\s+|\s+$/g, // String.prototype.trim()
-    TRIM_LEFT:    /^\s+$/g,     // String.prototype.trimLeft()
+    TRIM_LEFT:    /^\s+/g,      // String.prototype.trimLeft()
     TRIM_RIGHT:   /\s+$/g,      // String.prototype.trimRight()
-    TRIM_QUOTE:   /^\s*["']?|["']?\s*$/g,
     SPLIT_TOKEN:  /[\b, ]+/,
     // :after :before :contains :digit :first-letter :first-line :link
     // :negative :playing :target :visited  !=  ?=  /=  <=  >=  &=  {  }
@@ -57,12 +56,8 @@ uu.mix(UU.CONFIG, {
 }, 0, 0);
 
 uu.mix(uu, {
-  state: {
-    // uu.state.domReady - DOMReady state(true: ready, false: not ready)
-    domReady: false,
-    // uu.state.canvasReady - CanvasReady state(true: ready, false: not ready)
-    canvasReady: false
-  },
+  // uu.codec - codec package
+  codec: {},
 
   // uu.uuid - get UUID
   uuid: function() {
@@ -160,8 +155,8 @@ uu.mix(uu, {
         }
         name = urv, nz = uri + 1;
       }
-      // /(?:^| )(AA|BB|CC)(?:$| )/g
-      rex = RegExp("(?:^| )(" + name.join("|") + ")(?:$| )", "g");
+      // /(?:^| )(AA|BB|CC)(?:$|(?= ))/g
+      rex = RegExp("(?:^| )(" + name.join("|") + ")(?:$|(?= ))", "g");
 
       while ( (v = nodeList[i++]) ) {
         c = v.className;
@@ -192,16 +187,16 @@ uu.mix(uu, {
   // uu.toArray - convert FakeArray to Array
   toArray: (function() {
     if (!UU.IE) {
-      return function(source,      // FakeArray/Array: source
+      return function(fake,        // FakeArray/Array: source
                       fromIndex) { // Number(default: 0): from index
-        return Array.prototype.slice.call(source, fromIndex || 0);
+        return Array.prototype.slice.call(fake, fromIndex || 0);
         // return Array
       };
     }
-    return function(source, fromIndex) {
-      var rv = [], v, i = 0, fidx = fromIndex || 0;
-      while ( (v = source[fidx++]) ) {
-        rv[i++] = v;
+    return function(fake, fromIndex) {
+      var rv = [], ri = -1, i = fromIndex || 0, iz = fake.length;
+      for (; i < iz; ++i) {
+        rv[++ri] = fake[i];
       }
       return rv;
     };
@@ -209,11 +204,12 @@ uu.mix(uu, {
 });
 
 // --- detect base dir ---
-(function(loc, nodeList) {
-  UU.BASE_DIR = loc.protocol + "//" + loc.pathname.replace(/\\/g, "/");
+// from: <script src="http://example.com/dir/uupaa.js"> 
+// detect to: "http://example.com/dir"
+(function(nodeList) {
+  UU.BASE_DIR = location.protocol + "//"
+              + location.pathname.replace(/\\/g, "/");
   var v, i = 0, ary, src, div = uudoc.createElement("div");
-  // <script src="http://example.com/dir/uupaa.js">
-  // detected BASE_DIR = "http://example.com/dir"
   while ( (v = nodeList[i++]) ) {
     if (/uupaa.*\.js$/.test(v.src)) {
       if (/^(file|https|http)\:\/\//.test(v.src)) { // judge abs path
@@ -229,4 +225,137 @@ uu.mix(uu, {
       break;
     }
   }
-})(location, uudoc.getElementsByTagName("script"));
+})(uudoc.getElementsByTagName("script"));
+
+// === OOP =================================================
+// depend: none
+uu.feat.oop = {};
+
+// uu.Class - create a generic class
+uu.Class = function(name,    // String: class name
+                    proto) { // Hash(default: {}): prototype object
+  // "this" is the window object, in this scope.
+  uu.Class[name] = function() {
+    var me = this;
+    // "this" is the instance newly generated, in this scope.
+    me.uuid || (me.uuid = uu.uuid()); // add "uuid" property
+    me.msgbox && uu.msg && uu.msg.regist(me);
+    me.construct && me.construct.apply(me, arguments);
+    if (me.destruct && uu.unready) {
+      uu.unready(function() { me.destruct(); });
+    }
+  }
+  uu.Class[name].prototype = proto || {};
+};
+
+// uu.Class.Singleton - create a singleton class
+uu.Class.Singleton = function(name,    // String: class name
+                              proto) { // Hash(default: {}): prototype object
+  uu.Class[name] = function() {
+    var me = this, hash = arguments.callee;
+    if (hash.instance) {
+      me.stabled && me.stabled.apply(me, arguments); // after the second
+    } else {
+      hash.instance = me; // keep instance
+      me.uuid || (me.uuid = uu.uuid()); // add "uuid" property
+      me.msgbox && uu.msg && uu.msg.regist(me);
+      me.construct && me.construct.apply(me, arguments);
+      if (me.destruct && uu.unready) {
+        uu.unready(function() { me.destruct(); });
+      }
+    }
+    // hash.instance is returned. "this" is abandoned.
+    return hash.instance;
+  };
+  uu.Class[name].prototype = proto || {};
+};
+
+// === Ready ===============================================
+// depend: none
+uu.feat.ready = {};
+
+uu.mix(UU.CONFIG, {
+  AUTO_RUN: "boot" // String(default: "boot"): uu.ready auto run function name
+}, 0, 0);
+
+(function() {
+  var order = [];
+
+  function fire() {
+    var v, i = 0;
+    while ( (v = order[i++]) ) {
+      v(); // (3)
+    }
+    order = []; // purge
+    (v = window[UU.CONFIG.AUTO_RUN]) && v(); // boot loader
+  }
+
+  (function LOOP() {
+    uu.domReady ? fire() : setTimeout(LOOP, 0); // (2)
+  })();
+
+  uu.mix(uu, {
+    // uu.domReady
+    domReady: false,
+
+    // uu.ready - ready event handler
+    ready: function(fn) { // Function: callback function
+      uu.domReady ? fn() : order.push(fn);
+    },
+
+    // uu.unready - unready event handler
+    unready: function(fn) { // Function: callback function
+      UU.IE ? attachEvent("onunload", fn) // IE
+            : addEventListener("unload", fn, false);
+    }
+  });
+
+  (function(fn) {
+    if (UU.IE || (UU.WEBKIT && uudoc.readyState)) {
+      (function LOOP() {
+        var ok = 0;
+        try {
+          // http://javascript.nwbox.com/IEContentLoaded/
+          ok = UU.IE ? (uudoc.documentElement.doScroll("up") || 1)
+                     : /loaded|complete/.test(uudoc.readyState);
+        } catch(err) {}
+        ok ? fn() : setTimeout(LOOP, 0);
+      })();
+    } else if (UU.GECKO || UU.OPERA) {
+      uudoc.addEventListener("DOMContentLoaded", fn, false);
+    } else {
+      addEventListener("load", fn, false); // for legacy browser
+    }
+  })(function() { uu.domReady = true; }); // (1)
+})();
+
+// === Canvas Ready ========================================
+// depend: ready
+uu.feat.canvasReady = {};
+
+uu.mix(uu.canvas, {
+  // uu.canvasReady
+  canvasReady: false,
+
+  // uu.canvas.ready
+  ready: function(fn,       // Function: callback function
+                  canvas) { // Node(default: undefined): canvas element
+    (function LOOP() {
+      var ok = uu.canvasReady;
+      if (canvas && UU.IE) {
+        ok = canvas && canvas.getContext().contextReady;
+      }
+      ok ? fn() : setTimeout(LOOP, 32);
+    })();
+  }
+});
+
+!UU.IE && (function(fn) {
+  if (UU.OPERA) {
+    window.addEventListener("load", fn, false); // window.onload
+  } else if (UU.WEBKIT || UU.GECKO) {
+    uu.ready(fn); // DOMContentLoaded
+  } else {
+    fn(); // now
+  }
+})(function() { uu.canvasReady = true; });

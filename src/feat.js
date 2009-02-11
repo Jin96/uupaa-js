@@ -69,7 +69,7 @@ uu.mix(uu.feat, {
     exclude = [
       "loadFrom,load,collectDependencyList,already,mix,init,feat,prototype",
       UU.CONFIG.FEAT_EXCLUDE.replace(/^\s*,?|,?\s*$/g, "")
-    ].join(",").replace(/^,|,$/g, "");
+    ].join(",").replace(/^[\s,]+|[\s,]+$/g, "");
     ary = exclude.split(",");
 
     for (i in uu.feat) {

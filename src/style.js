@@ -1,5 +1,5 @@
 // === Style ===============================================
-// depend: ua, ready, viewport
+// depend: viewport
 uu.feat.style = {};
 
 (function() {
@@ -47,12 +47,12 @@ uu.mix(uu.style, {
   // uu.style.getOpacity - get opacity value(from 0.0 to 1.0)
   getOpacity: (function() {
     if (!UU.IE) {
-      function(elm) { // Node:
+      return function(elm) { // Node:
         return parseFloat(fnStyle(elm, "").opacity);
         // return Number float(0.0 to 1.0)
       }
     }
-    function(elm) {
+    return function(elm) {
       return elm.filters.alpha ? elm.style.opacity : 1.0;
     }
   })(),
@@ -190,7 +190,7 @@ uu.mix(uu.style, {
       pixel.em = e.clientHeight / 12;
       uudoc.body.removeChild(e);
     }
-    return pixel; // return Number
+    return pixel; // return Hash ( { pt, em } )
   },
 
   // uu.style.offsetFromAncestor
@@ -237,16 +237,16 @@ uu.mix(uu.style, {
   selectable: function(elm,        // Node:
                        prohibit) { // Boolean(default: true): false is unselectable
     var ng = (prohibit === void 0) ? 1 : prohibit, e;
-    if (UU.IE || uu.ua.opera) {
+    if (UU.IE || UU.OPERA) {
       e = elm;
       while (e) {
         e.unselectable = ng ? "on" : "";
         e.onselectstart = ng ? "return false" : "";
         e = e.parentNode;
       }
-    } else if (uu.ua.gecko) {
+    } else if (UU.GECKO) {
       elm.style["-moz-user-select"] = ng ? "none" : "";
-    } else if (uu.ua.webkit) {
+    } else if (UU.WEBKIT) {
       elm.style["-webkit-user-select"] = ng ? "none" : "";
     }
   },

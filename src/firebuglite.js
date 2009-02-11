@@ -38,7 +38,11 @@ uu.feat.firebuglite = {};
   IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
   OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-UU.CONFIG.DEBUG_MODE && !uu.ua.gecko && (function() {
+uu.firebug = function() {
+  ;
+};
+
+UU.CONFIG.DEBUG_MODE && !UU.GECKO && (function() {
 
 // Firebug Lite version 1.2
 (function(_scope){_scope.pi=Object(3.14159265358979323846);
@@ -124,5 +128,7 @@ d.console.historyIndex+=_event.keyCode!=40?0:d.console.historyIndex==d.console.h
 if(d.inspector.enabled&&target!=document.body&&target!=document.firstChild&&target!=document.childNodes[1]&&target!=el.borderInspector.environment.getElement()&&target!=el.main.environment.getElement()&&target.offsetParent!=el.main.environment.getElement())d.inspector.inspect(target)}},runMultiline:function(){with(firebug){d.console.run.call(window,el.right.console.input.environment.getElement().value)}},runCSS:function(){with(firebug){var source=el.right.css.input.environment.getElement().value.replace(/\n|\t/g,"").split("}");for(var i=0;i<source.length;i++){var item=source[i]+"}",rule=!pi.env.ie?item:item.split(/{|}/),collection=document.getElementsByTagName("style"),style=collection.length>0?collection[0]:document.body.appendChild(document.createElement("style"));if(!item.match(/.+\{.+\}/))continue;
 if(pi.env.ie)style.styleSheet.addRule(rule[0],rule[1]);else style.sheet.insertRule(rule,style.sheet.cssRules.length)}}},scriptsSelectbox:function(){with(firebug){d.scripts.open(parseInt(el.button.scripts.selectbox.environment.getElement().value))}},xhrTextbox:function(_event){with(firebug){if(_event.keyCode==13){d.xhr.addObject.apply(window,el.button.xhr.textbox.environment.getElement().value.split(","))}}}}};window.console=firebug.d.console;pi.util.AddEvent(window,"resize",firebug.d.refreshSize);pi.util.AddEvent(document,"mousemove",firebug.listen.mouse);pi.util.AddEvent(document,"keydown",firebug.listen.keyboard);pi.util.DOMContentLoaded.push(firebug.init);
 
-firebug.init();
+uu.firebug = function() {
+  firebug.init();
+};
 })();
