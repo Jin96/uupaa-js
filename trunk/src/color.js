@@ -1,5 +1,5 @@
 // === Color ===============================================
-// depend: oop
+// depend: none
 uu.feat.color = {};
 
 // --- types of color ---
@@ -44,6 +44,11 @@ UU.COLOR = {
   RGBA:       5, // UU.COLOR.RGBA - "rgba(,,,)"
   HSVA:       6, // UU.COLOR.HSVA - "hsva(,,,)"
   HSLA:       7  // UU.COLOR.HSLA - "hsla(,,,)"
+};
+
+// uu.Class.Color factory
+uu.color = function(r, g, b, a) { // see uu.Class.Color.construct
+  return new uu.Class.Color(r, g, b, a);
 };
 
 // --- local scope ------------------------------------------------------
@@ -265,11 +270,6 @@ uu.mix(uu.color, {
     // return RGBAHash
   }
 });
-
-// uu.Class.Color factory
-uu.color = function(r, g, b, a) { // see uu.Class.Color.construct
-  return new uu.Class.Color(r, g, b, a);
-};
 
 /** Color
  *

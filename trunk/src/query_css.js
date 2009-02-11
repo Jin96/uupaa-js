@@ -28,6 +28,7 @@ var rootElement = uudoc.documentElement ||
       "body":   function()    { return [uudoc.body];  },
       ":link":  function()    { return uu.toArray(uudoc.links); } // spoof
     },
+    TRIM_QUOTE  = /^\s*["']?|["']?\s*$/g,
     QUICK_QUERY = /^(?:\*?(\.|#)([a-z_\u00C0-\uFFEE\-][\w\u00C0-\uFFEE\-]*)|(\w+)(?:\s*,\s*(\w+)(?:\s*,\s*(\w+))?)?|(\w+)\s+(\w+)(?:\s+(\w+))?)$/i,
     QUICK_HEAD  = /^#([a-z_\u00C0-\uFFEE\-][\w\u00C0-\uFFEE\-]*)\b(?![#\.:\[])|^((?:\.[a-z_\u00C0-\uFFEE\-][\w\u00C0-\uFFEE\-]*)+)$/i, // ]
     QUICK_COMMA = /^[^"'\(\)]*,/,
@@ -76,7 +77,7 @@ var rootElement = uudoc.documentElement ||
       "first-line":       [0xf00, null]  // bit 0x800: need double semicolon(::) flag
     };
 
-function quickQuery(match, context, really) { // , _tags, _contentType) {
+function quickQuery(match, context, really) {
   var rv = [], ri = -1, unq = {}, uuid,
       m1, m2, m3, nodeList1, nodeList2, nodeList3,
       v, i, j, k, iz, jz, kz;
@@ -93,6 +94,9 @@ function quickQuery(match, context, really) { // , _tags, _contentType) {
   // "E" or "E,F" or "E,F,G"
   if (match[3]) {
     m1 = match[3], m2 = match[4], m3 = match[5];
+    if (/^\d+$/.test(m1) || /^\d+$/.test(m2) || /^\d+$/.test(m3)) {
+      throw expr + " syntax error";
+    }
 
     unq[m1] = 1, nodeList1 = uu.toArray(context.getElementsByTagName(m1));
     if (m2 && !(m2 in unq)) {
@@ -150,13 +154,16 @@ uu.css.querySelectorAll = function(expr, context, really) {
       lastExpr2,  // last expr for inner loop
       // --- iterator and loop counter ---
       i, j, iz,
-      // --- quick flags(complex state mode) ---
-      withComma = expr.indexOf(",") >= 0, // with comma(",")
       // --- work ---
+      withComma = expr.indexOf(",") >= 0, // with comma(",")
       tag,        // the E or F or universal selector("*")
       isUniversal,// true: tag is universal selector("*")
       joint,      // >+~_#.:[     // ]
       nodeList, needle, pseudo, v, w, operator, match, negate = 0;
+
+  if (/^[>+~]|[>+~*]{2}|[>+~]$/.test(expr)) {
+    throw expr + " syntax error";
+  }
 
   // --- Quick phase ---
   if (!withComma && expr in QUICK_STATIC) { // "*" ":root" "body" ...
@@ -176,7 +183,7 @@ uu.css.querySelectorAll = function(expr, context, really) {
     return rv;
   }
   if (!withComma) {
-    if ( (match = QUICK_HEAD.exec(expr)) ) { // complex
+    if ( (match = QUICK_HEAD.exec(expr)) ) {
       if (match[1]) {
         w = uudoc.getElementById(match[1]);
         ctx = w ? [w] : [];
@@ -258,7 +265,7 @@ uu.css.querySelectorAll = function(expr, context, really) {
         }
       } else {
         // >+~ is not found
-        if (iz === 1) { // complex
+        if (iz === 1) {
           r = uu.tag(tag, ctx[0]);
         } else {
           for (; i < iz; ++i) {
@@ -431,7 +438,7 @@ uu.css.querySelectorAll = function(expr, context, really) {
     }
 
     // "E,F" phase
-    if (withComma && expr && (match = GROUP.exec(expr)) ) { // complex
+    if (withComma && expr && (match = GROUP.exec(expr)) ) {
       ++mixed;
       mix(ctx, rv, guard);
       ctx = [context];
@@ -441,7 +448,7 @@ uu.css.querySelectorAll = function(expr, context, really) {
   }
 
   if (expr.length) {
-    throw ":" + expr + " unsupported";
+    throw expr + " unsupported";
   }
   return mixed ? mix(ctx, rv, guard) : ctx;
 }
@@ -669,16 +676,18 @@ function ofTypeFilter(fid, negate, elms) {
 
 // :enabled  :disabled  :checked  :digit  :negative  :tween  :playing
 function simpleFilter(fid, negate, elms) {
-  var rv = [], ri = -1, v, i = 0, ok, tgt;
+  var rv = [], ri = -1, v, i = 0, ok, needValidate,
+      rex = /^(input|button|select|option|textarea)$/i;
 
   while ( (v = elms[i++]) ) {
-    tgt = ok = 0;
+    needValidate = ok = 0;
     switch (fid) {
-    case 0x0b: tgt = "disabled" in v; ok = !v.disabled; break;  // 0x0b: enabled
-    case 0x0c: tgt = "disabled" in v; ok = !!v.disabled; break; // 0x0c: disabled
-    case 0x0d: tgt = "checked"  in v; ok = !!v.checked; break;  // 0x0d: checked
+    case 0x0b: ++needValidate; ok = !v.disabled; break;  // 0x0b: enabled
+    case 0x0c: ++needValidate; ok = !!v.disabled; break; // 0x0c: disabled
+    case 0x0d: ++needValidate; ok = !!v.checked; break;  // 0x0d: checked
     }
-    if (!tgt) { // fix #144
+
+    if (needValidate && !rex.test(v.tagName)) { // fix #144
       if (negate) {
         rv[++ri] = v;
       }
@@ -723,7 +732,7 @@ function target(fid, negate, elms, pseudo, value, tags, contentType) {
 
 // :contains
 function contains(fid, negate, elms, pseudo, value) {
-  valie = value.replace(UU.UTIL.TRIM_QUOTE, "");
+  valie = value.replace(TRIM_QUOTE, "");
   var rv = [], ri = -1, v, i = 0,
       _textContent = textContent;
 

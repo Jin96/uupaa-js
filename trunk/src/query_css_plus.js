@@ -1,5 +1,5 @@
 // === Query CSS Plus ======================================
-// depend: query_css, styleSheet, color
+// depend: query_css, stylesheet, color
 uu.feat.query_css_plus = {};
 
 (function() {
