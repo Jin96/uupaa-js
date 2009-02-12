@@ -1,5 +1,5 @@
 // === Z-Index =============================================
-// depend: advance
+// depend: boost
 uu.feat.zindex = {};
 
 /** z-index management

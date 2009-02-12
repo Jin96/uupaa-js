@@ -1,6 +1,6 @@
-// === Advance + ECMAScript 3.1 + HTML5 ====================
+// === Boost, ECMAScript3.1 + HTML5 + Advance Spec =========
 // depend: none
-uu.feat.advance = {};
+uu.feat.boost = {};
 
 // === Dec Table ===========================================
 // depend: none

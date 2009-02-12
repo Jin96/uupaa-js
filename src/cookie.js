@@ -1,5 +1,5 @@
 // === Cookie ==============================================
-// depend: advance
+// depend: boost
 uu.feat.cookie = {};
 
 // uu.cookie - store and retrieve cookie

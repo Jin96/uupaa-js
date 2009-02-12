@@ -1,5 +1,5 @@
 // === Ajax ================================================
-// depend: advance
+// depend: boost
 uu.feat.ajax = {};
 
 uu.mix(UU.CONFIG, {

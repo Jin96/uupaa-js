@@ -305,14 +305,16 @@ uu.mix(UU.CONFIG, {
 }, 0, 0);
 
 (function() {
-  var order = [];
+  var order = [0, [], [], []];
 
   function fire() {
-    var v, i = 0;
-    while ( (v = order[i++]) ) {
-      v(); // (3)
+    var i, j, jz, v;
+    for (i = 1; i < 4; ++i) {
+      for (j = 0, jz = order[i].length; j < jz; ++j) {
+        order[i][j]();
+      }
     }
-    order = []; // purge
+    order = null; // purge
     (v = window[UU.CONFIG.AUTO_RUN]) && v(); // boot loader
   }
 
@@ -325,8 +327,10 @@ uu.mix(UU.CONFIG, {
     domReady: false,
 
     // uu.ready - ready event handler
-    ready: function(fn) { // Function: callback function
-      uu.domReady ? fn() : order.push(fn);
+    ready: function(fn,         // Function: callback function
+                    priority) { // Number(default: 3): priority, 1 = high, 2 = mid, 3 = low
+      priority = ((priority === void 0 ? 3 : priority) & 0x3) || 3;
+      uu.domReady ? fn() : order[priority].push(fn);
     },
 
     // uu.unready - unready event handler
