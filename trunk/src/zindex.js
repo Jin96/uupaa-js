@@ -15,7 +15,7 @@ uu.Class.Singleton("ZIndex", {
 
   // uu.Class.Drag.ZIndex.attach - attach z-index handler
   attach: function(elm) { // Node:
-    if (this._elm.indexOf(elm) === -1) {
+    if (this._elm.indexOf(elm) < 0) {
       this._elm.push(elm);
       elm.style.zIndex = ++this._top; // top + 1
     }
@@ -24,8 +24,9 @@ uu.Class.Singleton("ZIndex", {
 
   // uu.Class.Drag.ZIndex.detach - detach z-index handler
   detach: function(elm) { // Node:
-    if (this._elm.indexOf(elm) !== -1) {
-      delete this._elm[this._elm.indexOf(elm)];
+    var pos = this._elm.indexOf(elm);
+    if (pos >= 0) {
+      this._elm.splice(pos, 1);
       --this._top;
     }
     return this; // return this
@@ -33,8 +34,8 @@ uu.Class.Singleton("ZIndex", {
 
   // uu.Class.Drag.ZIndex.beginDrag
   beginDrag: function(elm) { // Node:
-    if (this._elm.indexOf(elm) === -1) {
-      this.attach(elm); // auto regist
+    if (this._elm.indexOf(elm) < 0) {
+      this.attach(elm); // auto attach
     }
     this._sink(elm);
     elm.style.zIndex = this._boost + 1;
@@ -43,7 +44,7 @@ uu.Class.Singleton("ZIndex", {
 
   // uu.Class.Drag.ZIndex.endDrag
   endDrag: function(elm) { // Node:
-    if (this._elm.indexOf(elm) !== -1) {
+    if (this._elm.indexOf(elm) >= 0) {
       elm.style.zIndex = this._top; // move surface
     }
     return this; // return this
@@ -51,7 +52,7 @@ uu.Class.Singleton("ZIndex", {
 
   // uu.Class.Drag.ZIndex.top
   top: function(elm) { // Node:
-    if (this._elm.indexOf(elm) !== -1) {
+    if (this._elm.indexOf(elm) >= 0) {
       this._sink(elm);
       elm.style.zIndex = this._top; // move surface
     }
@@ -59,9 +60,10 @@ uu.Class.Singleton("ZIndex", {
   },
 
   _sink: function(elm) {
-    var thresh = elm.style.zIndex || 10; // threshold
-    this._elm.forEach(function(v) {
+    var thresh = elm.style.zIndex || 10, // threshold
+        ary = this._elm, v, i = 0;
+    while ( (v = ary[i++]) ) {
       (v.style.zIndex > thresh) && (v.style.zIndex -= 1);
-    });
+    }
   }
 });

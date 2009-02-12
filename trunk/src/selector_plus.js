@@ -1,6 +1,6 @@
-// === Query CSS Plus ======================================
-// depend: query_css, stylesheet, color
-uu.feat.query_css_plus = {};
+// === Selector Plus ======================================
+// depend: selector, stylesheet, color
+uu.feat.selector_plus = {};
 
 (function() {
 var STYLE_OPERATOR  = { "=": 1, ":": 1, "!=": 2, "*=": 3, "^=": 4, "$=": 5,
@@ -54,23 +54,23 @@ function actionFilter(fid, negate, elms, pusedo) {
   switch (fid) {
   case 0x0e: // 0x0e: link
   case 0x0f: // 0x0f: visited
-    ruleIndex = uu.style.appendRule("query+", "a:" + pusedo, MARKUP_STYLE);
+    ruleIndex = uu.style.appendRule("selector+", "a:" + pusedo, MARKUP_STYLE);
     ary = uu.toArray(uudoc.links);
     break;
   case 0x10: // 0x10: hover
   case 0x11: // 0x11: focus
-    ruleIndex = uu.style.appendRule("query+", ":" + pusedo, MARKUP_STYLE);
+    ruleIndex = uu.style.appendRule("selector+", ":" + pusedo, MARKUP_STYLE);
     ary = uu.tag("*", uudoc.body);
   }
 
   while ( (v = ary[i++]) ) {
-    if (spy(v)) {
+    if (agent(v)) {
       if ((elms.indexOf(v) >= 0) ^ negate) {
         rv[++ri] = v;
       }
     }
   }
-  uu.style.deleteRule("query+", ruleIndex);
+  uu.style.deleteRule("selector+", ruleIndex);
   return rv;
 }
 
@@ -93,8 +93,8 @@ function extendFilter(fid, negate, elms) {
   return rv;
 }
 
-// spy style
-function spy(elm) {
+// style peek agent
+function agent(elm) {
   var rv, cs;
 
   // http://d.hatena.ne.jp/uupaa/20080928/1222543331
@@ -182,7 +182,6 @@ uu.css.querySelectorAll.styleQuery = function(negate, elms, match) {
   }
   return judgeStyle(negate, elms, match[1], operator, needle);
 };
-
 
 // {style operator "value"}
 function judgeStyle(negate, elms, style, operator, value) {
