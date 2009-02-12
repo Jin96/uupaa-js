@@ -1,12 +1,13 @@
-// === Custom Event: Font Resize ===========================
+// === Custom Event ========================================
 // depend: boost
-uu.feat.event_fontResize = {};
+uu.feat.customEvent = {};
 
+// === Custom Event: Font Resize ===========================
 /** Font Resize
  *
  * @class
  */
-uu.Class.Singleton("EventFontResize", {
+uu.Class.Singleton("CustomEventFontResize", {
   construct: function() {
     this._fn = []; // Array( [callback function, ... ] )
     this._agent = this._createAgent();
@@ -14,12 +15,12 @@ uu.Class.Singleton("EventFontResize", {
     this._runner();
   },
 
-  // uu.Class.EventFontResize.attach - attach event handler
+  // uu.Class.CustomEventFontResize.attach - attach event handler
   attach: function(fn) { // Function: callback function
     this._fn.push(fn);
   },
 
-  // uu.Class.EventFontResize.detach - detach event handler
+  // uu.Class.CustomEventFontResize.detach - detach event handler
   detach: function(fn) { // Function: callback function
     var idx = this._fn.indexOf(fn);
     if (idx >= 0) {
@@ -29,7 +30,7 @@ uu.Class.Singleton("EventFontResize", {
 
   _createAgent: function() {
     var rv = uudoc.body.appendChild(uudoc.createElement("div"));
-    rv.id = "uuEventFontResizeAgent";
+    rv.id = "uuCustomEventFontResizeAgent";
     rv.style.cssText = "position:absolute;font-size:large;visibility:hidden;" +
                        "height:1em;top:-10em;left:-10em";
     return rv;
@@ -52,7 +53,56 @@ uu.Class.Singleton("EventFontResize", {
   }
 });
 
-uu.eventFontResize = null;
+uu.customEventFontResize = null;
 uu.ready(function() {
-  uu.eventFontResize = new uu.Class.EventFontResize();
+  uu.customEventFontResize = new uu.Class.CustomEventFontResize();
+}, 2);
+
+// === Custom Event: Revalidate View ===========================
+/** Revalidate View
+ *
+ * @class
+ */
+uu.Class.Singleton("CustomEventView", {
+  construct: function() {
+    this._fn = []; // Array( [[callback function, kind], ... ] )
+  },
+
+  // uu.Class.CustomEventView.attach - attach event handler
+  attach: function(fn,     // Function: callback function
+                   kind) { // Number: kind, 1 = add element, 2 = resize
+    this._fn.push([fn, kind]);
+  },
+
+  // uu.Class.CustomEventView.detach - detach event handler
+  detach: function(fn) { // Function: callback function
+    var idx = -1, i = 0, iz = this._fn.length;
+    for (; i < iz; ++i) {
+      if (i in this._fn) {
+        if (this._fn[i][0] === fn) {
+          idx = i;
+          break;
+        }
+      }
+    }
+    if (idx >= 0) {
+      this._fn.splice(idx, 1);
+    }
+  },
+
+  // uu.Class.CustomEventView.revalidate - revalidate view
+  revalidate: function(kind) { // Number(default: 3): kind, 1 = add element, 2 = resize, 3 = all
+    kind = kind === void 0 ? 3 : kind;
+    var v, i = 0;
+    while ( (v = this._fn[i++]) ) {
+      if (kind & v[1]) {
+        v[0](); // callback
+      }
+    }
+  }
 });
+
+uu.customEventView = null;
+uu.ready(function() {
+  uu.customEventView = new uu.Class.CustomEventView();
+}, 2);

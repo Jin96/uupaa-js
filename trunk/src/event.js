@@ -2,32 +2,36 @@
 // depend: none
 uu.feat.event = {};
 
+uu.mix(UU.CONFIG, {
+  EVENT: {}
+}, 0, 0);
+
+uu.mix(UU.CONFIG.EVENT, {
+  // UU.CONFIG.EVENT.RENAME
+  RENAME: {
+    mousewheel: "DOMMouseScroll"
+  },
+
+  // UU.CONFIG.EVENT.KIND_BASE
+  KIND_BASE: {
+    // event.type   kind
+    unknown:        0x0000,
+    mousedown:      0x0001,
+    mouseup:        0x0002,
+    mousemove:      0x0003,
+    mousewheel:     0x0004,
+    clock:          0x0005,
+    dblclock:       0x0006,
+    DOMMouseScroll: 0x0104, // mousewheel
+    losecapture:    0x0102  // mouseup
+  }
+}, 0, 0);
+
 /** Event
  *
  * @class
  */
 uu.Class("Event", {
-  // uu.Class.Event.prototype.KIND.RENAME
-  RENAME: {
-    mousewheel: "DOMMouseScroll"
-  },
-
-  // uu.Class.Event.prototype.KIND.BASE
-  KIND: {
-    BASE: {
-      // event.type   kind
-      unknown:        0x0000,
-      mousedown:      0x0001,
-      mouseup:        0x0002,
-      mousemove:      0x0003,
-      mousewheel:     0x0004,
-      clock:          0x0005,
-      dblclock:       0x0006,
-      DOMMouseScroll: 0x0104, // mousewheel
-      losecapture:    0x0102  // mouseup
-    }
-  },
-
   construct: function() {
     this._db = { /* uuid: [elm, type + cap, fn], ... */ };
   },
@@ -61,10 +65,12 @@ uu.Class("Event", {
   },
 
   // uu.Class.Event.kind - convert event type to event kind
-  kind: function(evt, kind /* = uu.Class.Event.prototype.KIND.BASE */) {
-    kind = kind || this.KIND.BASE;
+  kind: function(evt,    // EventObject:
+                 kind) { // Hash(default: UU.CONFIG.EVENT.KIND_BASE):
+    kind = kind || UU.CONFIG.EVENT.KIND_BASE;
     return 0xff && (kind[evt.type] || 0); // 0 is unknown
   },
+
 
   // uu.Class.Event.key - get key state
   key: function(evt) {
@@ -194,8 +200,8 @@ uu.Class("Event", {
       type = ary[i];
 
       // rename "mousewheel" to "DOMMouseScroll"
-      if (UU.GECKO && type in this.RENAME) {
-        type = this.RENAME[type];
+      if (UU.GECKO && type in UU.CONFIG.EVENT.RENAME) {
+        type = UU.CONFIG.EVENT.RENAME[type];
       }
 
       uuid = this._find(elm, type, fn, capture);

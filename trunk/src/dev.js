@@ -1,5 +1,5 @@
 // === Develop =============================================
-// depend: advance,aid,feat,ready,node,stylesheet,types,hash
+// depend: boost,aid,feat,node,stylesheet,types,hash
 uu.feat.dev = {}; // package
 
 // === Develop - Performance ===============================
@@ -357,6 +357,45 @@ uu.mix(uu.test.problem, {
 // depend: string_sprintf,types,hash
 uu.feat.inspect = {};
 
+uu.mix(UU.CONFIG, {
+  INSPECT: {}
+}, 0, 0);
+
+uu.mix(UU.CONFIG.INSPECT, {
+  // UU.CONFIG.INSPECT.PROPERTY_FILTER - RegExp/null: property filter
+  PROPERTY_FILTER: null,
+
+  // UU.CONFIG.INSPECT.IGNORE_PROPERTYS - ignore property list(1: ignore, 2: shorty)
+  IGNORE_PROPERTYS: {
+    ELEMENT_NODE: 1,
+    ATTRIBUTE_NODE: 1,
+    TEXT_NODE: 1,
+    CDATA_SECTION_NODE: 1,
+    ENTITY_REFERENCE_NODE: 1,
+    ENTITY_NODE: 1,
+    PROCESSING_INSTRUCTION_NODE: 1,
+    COMMENT_NODE: 1,
+    DOCUMENT_NODE: 1,
+    DOCUMENT_TYPE_NODE: 1,
+    DOCUMENT_FRAGMENT_NODE: 1,
+    NOTATION_NODE: 1,
+    DOCUMENT_POSITION_DISCONNECTED: 1,
+    DOCUMENT_POSITION_PRECEDING: 1,
+    DOCUMENT_POSITION_FOLLOWING: 1,
+    DOCUMENT_POSITION_CONTAINS: 1,
+    DOCUMENT_POSITION_CONTAINED_BY: 1,
+    DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC: 1,
+    all: 2,
+    currentStyle: 2,
+    style: 2,
+    innerHTML: 2,
+    innerText: 2,
+    outerHTML: 2,
+    outerText: 2,
+    textContent: 2
+  }
+}, 0, 0);
+
 uu.inspect = function(mix,   // Mix: object
                       sort,  // Boolean: true is sort
                       nest,  // Number: current nest count
@@ -385,7 +424,7 @@ uu.mix(uu.inspect, {
                     nest,     // Number: current nest count
                     max,      // Number: max nest count
                     types) {  // Number: UU.TYPES
-    var rv = [], i, iz, rz,
+    var rv = [], v, i, iz, rz,
         sp1 = Array(nest + 1).join("  "),
         sp2 = Array(nest + 2).join("  "),
         typeNames = {},
@@ -404,7 +443,12 @@ uu.mix(uu.inspect, {
       }
     } else {
       for (i = 0, iz = mix.length; i < iz; ++i) {
-        rv.push(uu.sprintf("%s%s", sp2, uu.inspect(mix[i], sort, nest + 1, max)));
+        try {
+          if (i in mix) {
+            v = mix[i];
+            rv.push(uu.sprintf("%s%s", sp2, uu.inspect(v, sort, nest + 1, max)));
+          }
+        } catch(err) { ; }
       }
     }
     sort && rv.sort();
@@ -420,26 +464,31 @@ uu.mix(uu.inspect, {
                  sort,  // Boolean: true is sort
                  nest,  // Number: current nest count
                  max) { // Number: max nest count
-    var rv = [], name = [], i,
+    var rv = [], name = [], v, i,
         sp1 = Array(nest + 1).join("  "),
-        sp2 = Array(nest + 2).join("  ");
+        sp2 = Array(nest + 2).join("  "),
+        nodeType = mix.nodeType,
         ignore;
 
     if (nest + 1 > max) {
       return uu.sprintf("%s", uu.inspect.toXPath(mix));
     }
 
-    switch (mix.nodeType) {
-    case 3:  return ["(TEXT_NODE)[\"",
-                     mix.nodeValue.substring(0, 32).replace(/\n/, "\\n"),
-                     "\"]"].join("");
-    case 8:  return ["(COMMENT_NODE)[\"",
-                     mix.nodeValue.substring(0, 32).replace(/\n/, "\\n"),
-                     "\"]"].join("");
-    case 9:  return "(DOCUMENT_NODE)";
-    case 1:  name.push("(ELEMENT_NODE)"); break;
-    case 11: name.push("(DOCUMENT_FRAGMENT_NODE)"); break;
-    default: return uu.sprintf("(NODE[nodeType:%d])", mix.nodeType);
+    switch (nodeType) {
+    case  1:
+      name.push("(ELEMENT_NODE)"); break;
+    case 11:
+      name.push("(DOCUMENT_FRAGMENT_NODE)"); break;
+    case  3:
+      return ["(TEXT_NODE)[\"",
+              mix.nodeValue.substring(0, 32).replace(/\n/, "\\n"), "\"]"].join("");
+    case  8:
+      return ["(COMMENT_NODE)[\"",
+              mix.nodeValue.substring(0, 32).replace(/\n/, "\\n"), "\"]"].join("");
+    case  9:
+      return "(DOCUMENT_NODE)";
+    default:
+      return uu.sprintf("(NODE[nodeType:%d])", mix.nodeType);
     }
 
     if (mix.nodeType !== 11) {
@@ -449,14 +498,20 @@ uu.mix(uu.inspect, {
     }
 
     for (i in mix) {
-      if (this._enableFilter && !this._filterExpr.test(i)) { continue; }
-      ignore = uu.inspect._ignoreProps[i] || 0;
+      if (UU.CONFIG.INSPECT.PROPERTY_FILTER &&
+          !UU.CONFIG.INSPECT.PROPERTY_FILTER.test(i)) {
+        continue;
+      }
+      ignore = UU.CONFIG.INSPECT.IGNORE_PROPERTYS[i] || 0;
       if (ignore) {
         if (ignore === 2) {
           rv.push(uu.sprintf("%s%s: ...", sp2, i));
         }
       } else {
-        rv.push(uu.sprintf("%s%s: %s", sp2, i, this._inspect(mix[i], sort, nest + 1, max))); // Object
+        try {
+          v = mix[i];
+          rv.push(uu.sprintf("%s%s: %s", sp2, i, uu.inspect(mix[i], sort, nest + 1, max))); // Object
+        } catch(err) { ; }
       }
     }
     sort && rv.sort();
@@ -527,35 +582,5 @@ uu.mix(uu.inspect, {
     rv.reverse();
     return "/" + rv.join("/") + "[" + POS(elm, elm.tagName) + "]";
     // return String
-  },
-
-  // ignore property list
-  _ignoreProps: { // 1: ignore, 2: shorty
-    ELEMENT_NODE: 1,
-    ATTRIBUTE_NODE: 1,
-    TEXT_NODE: 1,
-    CDATA_SECTION_NODE: 1,
-    ENTITY_REFERENCE_NODE: 1,
-    ENTITY_NODE: 1,
-    PROCESSING_INSTRUCTION_NODE: 1,
-    COMMENT_NODE: 1,
-    DOCUMENT_NODE: 1,
-    DOCUMENT_TYPE_NODE: 1,
-    DOCUMENT_FRAGMENT_NODE: 1,
-    NOTATION_NODE: 1,
-    DOCUMENT_POSITION_DISCONNECTED: 1,
-    DOCUMENT_POSITION_PRECEDING: 1,
-    DOCUMENT_POSITION_FOLLOWING: 1,
-    DOCUMENT_POSITION_CONTAINS: 1,
-    DOCUMENT_POSITION_CONTAINED_BY: 1,
-    DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC: 1,
-    all: 2,
-    currentStyle: 2,
-    style: 2,
-    innerHTML: 2,
-    innerText: 2,
-    outerHTML: 2,
-    outerText: 2,
-    textContent: 2
   }
 });

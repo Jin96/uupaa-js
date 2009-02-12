@@ -1,5 +1,5 @@
 // === Message Pump ========================================
-// depend: advance
+// depend: boost
 uu.feat.msg = {};
 
 /** Message Pump

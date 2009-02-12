@@ -2,9 +2,9 @@
 // depend: event,zindex
 uu.feat.event_drag = {};
 
-uu.mix(uu.Class.Event.prototype.KIND, {
-  // uu.Class.Event.prototype.KIND.DRAG
-  DRAG: {
+uu.mix(UU.CONFIG.EVENT, {
+  // UU.CONFIG.EVENT.KIND_DRAG
+  KIND_DRAG: {
     // event.type   kind
     unknown:        0x0000,
     mousedown:      0x0001,
@@ -12,7 +12,7 @@ uu.mix(uu.Class.Event.prototype.KIND, {
     mousemove:      0x0003,
     losecapture:    0x0102  // mouseup
   }
-});
+}, 0, 0);
 
 // uu.Class.Event.drag - generic drag and drop impl
 uu.mix(uu.Class.Event.prototype, {
@@ -20,7 +20,7 @@ uu.mix(uu.Class.Event.prototype, {
                  dragFrame,
                  dragArea) {
     var mx, my, off, iebody,
-        kind = 0xff && (this.KIND.DRAG[evt.type] || 0),
+        kind = 0xff && (UU.CONFIG.EVENT.KIND_DRAG[evt.type] || 0),
         rect, x, y, style;
 
     if (!kind || (kind > 0x3) ||
@@ -79,9 +79,10 @@ uu.Class("SimplyDrag", {
   construct: function(dragFrame,  // Node: drag frame
                       dragArea) { // Node: drag area
     this._dragFrame = dragFrame;
+
     this._dragArea = dragArea;
     this._dragArea.style.cursor = "move";
-    uu.event.attach(this._dragArea, "mousedown", this);
+    uu.event.attach(dragArea, "mousedown", this);
   },
 
   handleEvent: function(evt) {
