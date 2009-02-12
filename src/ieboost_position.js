@@ -43,8 +43,25 @@ uu.Class("PositionFixed", {
   construct: function() {
     this._targetElement = [];
     this._smoothScrollFixed = 0;
-    uu.ua.quirks ? uu.style.appendRule("ieboost", ".uuPositionFixed", "behavior: expression(uu.Class.PositionFixed._expressionQuirks(this))")
-                 : uu.style.appendRule("ieboost", ".uuPositionFixed", "behavior: expression(uu.Class.PositionFixed._expression(this))");
+
+    if (uu.ua.quirks) {
+      uu.style.appendRule(
+          "ieboost",
+          ".uuPositionFixed",
+          "behavior: expression(" +
+            "this.style.pixelTop=document.body.scrollTop+this.uuPositionFixed.pxVValue," +
+            "this.style.pixelLeft=document.body.scrollLeft+this.uuPositionFixed.pxHValue)"
+      );
+    } else {
+      uu.style.appendRule(
+          "ieboost",
+          ".uuPositionFixed",
+          "behavior: expression(" +
+            "this.style.pixelTop=document.documentElement.scrollTop+this.uuPositionFixed.pxVValue," +
+            "this.style.pixelLeft=document.documentElement.scrollLeft+this.uuPositionFixed.pxHValue)"
+      );
+    }
+
     this.markup();
     this.fix();
 
@@ -115,7 +132,8 @@ uu.Class("PositionFixed", {
         if (cs.top !== "auto") { // top:
           mode |= 0x1;
           cssVValue = cs.top;
-          pxVValue = uu.style.toPixel(v, cs.paddingTop) + uu.style.toPixel(v, cs.top);
+          pxVValue = uu.style.toPixel(v, cs.paddingTop)
+                   + uu.style.toPixel(v, cs.top);
         } else { // bottom:
           mode |= 0x2;
           cssVValue = cs.bottom;
@@ -125,7 +143,8 @@ uu.Class("PositionFixed", {
         if (cs.left !== "auto") { // left:
           mode |= 0x4;
           cssHValue = cs.left;
-          pxHValue = uu.style.toPixel(v, cs.paddingLeft) + uu.style.toPixel(v, cs.left);
+          pxHValue = uu.style.toPixel(v, cs.paddingLeft)
+                   + uu.style.toPixel(v, cs.left);
         } else { // right:
           mode |= 0x8;
           cssHValue = cs.right;
@@ -152,7 +171,7 @@ uu.Class("PositionFixed", {
   fix: function() {
     var ary = [], ai = -1, v, i = 0, iz = this._targetElement.length,
         viewport = uu.viewport.getRect(), unit = uu.style.unit(),
-        cs, prop, mode, rect;
+        cs, prop, mode, rect, w, rex = /em$/;
 
     for (; i < iz; ++i) {
       v = this._targetElement[i];
@@ -166,29 +185,25 @@ uu.Class("PositionFixed", {
       rect = uu.style.getRect(v);
 
       if (mode & 0x1) { // 0x1: top
-        if (/em$/.test(prop.cssVValue)) {
+        if (rex.test(prop.cssVValue)) {
           prop.pxVValue = uu.style.toPixel(v, cs.paddingTop)
                         + parseFloat(prop.cssVValue) * unit.em;
         }
       } else { // 0x2: bottom
-        if (/em$/.test(prop.cssVValue)) {
-          prop.pxVValue = viewport.h - rect.oh - (parseFloat(prop.cssVValue) * unit.em);
-        } else {
-          prop.pxVValue = viewport.h - rect.oh - uu.style.toPixel(v, prop.cssVValue);
-        }
+        w = rex.test(prop.cssVValue) ? (parseFloat(prop.cssVValue) * unit.em)
+                                     : uu.style.toPixel(v, prop.cssVValue);
+        prop.pxVValue = viewport.h - rect.oh - w;
       }
 
       if (mode & 0x4) { // 0x4: left
-        if (/em$/.test(prop.cssHValue)) {
+        if (rex.test(prop.cssHValue)) {
           prop.pxHValue = uu.style.toPixel(v, cs.paddingLeft)
                         + parseFloat(prop.cssHValue) * unit.em;
         }
       } else { // 0x8: right
-        if (/em$/.test(prop.cssHValue)) {
-          prop.pxHValue = viewport.w - rect.ow - (parseFloat(prop.cssHValue) * unit.em);
-        } else {
-          prop.pxHValue = viewport.w - rect.ow - uu.style.toPixel(v, prop.cssHValue);
-        }
+        w = rex.test(prop.cssHValue) ? (parseFloat(prop.cssHValue) * unit.em)
+                                     : uu.style.toPixel(v, prop.cssHValue);
+        prop.pxHValue = viewport.w - rect.ow - w;
       }
       ary[++ai] = v;
     }
@@ -197,19 +212,6 @@ uu.Class("PositionFixed", {
       uudoc.recalc(1); // update
     }
     this._targetElement = ary;
-  }
-});
-
-// --- static method ---
-uu.mix(uu.Class.PositionFixed, {
-  _expression: function(elm) {
-    elm.style.top = (uudoc.documentElement.scrollTop + elm.uuPositionFixed.pxVValue) + "px";
-    elm.style.left = (uudoc.documentElement.scrollLeft + elm.uuPositionFixed.pxHValue) + "px";
-  },
-
-  _expressionQuirks: function(elm) {
-    elm.style.top = (uudoc.body.scrollTop + elm.uuPositionFixed.pxVValue) + "px";
-    elm.style.left = (uudoc.body.scrollLeft + elm.uuPositionFixed.pxHValue) + "px";
   }
 });
 
