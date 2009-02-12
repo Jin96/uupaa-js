@@ -13,7 +13,7 @@ uu.mix(uu.feat, {
   loadFrom: function(url,   // String: from url
                      feat,  // JointString: "feat" or "feat,feat..."
                      fn) {  // Function(default: undefined): callback
-    uu.feat.feat._url = url.replace(/\/+$/, ""); // trim tail "/"
+    uu.feat.feat._url = url.replace(UU.UTIL.TRIM_TAIL_SLASH, "");
     uu.feat.load(feat, fn);
   },
 
@@ -82,7 +82,7 @@ uu.mix(uu.feat, {
 
 uu.feat.feat = {
   // loadFrom url
-  _url: UU.BASE_DIR,
+  _url: UU.CONFIG.BASE_DIR,
 
   // job database
   _job: { /* jobid: { fn, feats, timeout } */ },

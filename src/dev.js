@@ -361,9 +361,9 @@ uu.inspect = function(mix,   // Mix: object
                       sort,  // Boolean: true is sort
                       nest,  // Number: current nest count
                       max) { // Number: max nest count
-  var type = uu.types(mix);
+  var types = uu.types(mix);
   try {
-    switch (type) {
+    switch (types) {
     case UU.NULL: return "null";
     case UU.UNDEF:return "undefined";
     case UU.BOOL:
@@ -373,28 +373,32 @@ uu.inspect = function(mix,   // Mix: object
     case UU.NODE: return uu.inspect.node(mix, sort, nest, max);
     case UU.HASH:
     case UU.ARRAY:
-    case UU.FAKE: return uu.inspect.iterate(mix, sort, nest, max, type);
-    case UU.RGBA: return uu.sprintf("[%02X %02X %02X %.1f]", mix.r, mix.g, mix.b, mix.a || 1.0);
+    case UU.FAKE: return uu.inspect.iterate(mix, sort, nest, max, types);
     }
-  } catch(e) { ; }
+  } catch(err) { ; }
   return "*** catch exception ***";
 };
 
 uu.mix(uu.inspect, {
-  iterate: function(mix,    // Mix: object
-                    sort,   // Boolean: true is sort
-                    nest,   // Number: current nest count
-                    max,    // Number: max nest count
-                    type) { // Number: UU.TYPES
+  iterate: function(mix,      // Mix: object
+                    sort,     // Boolean: true is sort
+                    nest,     // Number: current nest count
+                    max,      // Number: max nest count
+                    types) {  // Number: UU.TYPES
     var rv = [], i, iz, rz,
         sp1 = Array(nest + 1).join("  "),
         sp2 = Array(nest + 2).join("  "),
-        name = { 3: "Hash", 4: "Array", 10: "FakeArray" }[type];
+        typeNames = {},
+        name = "";
+    typeNames[UU.HASH]  = "Hash";
+    typeNames[UU.ARRAY] = "Array";
+    typeNames[UU.FAKE]  = "FakeArray";
+    name = typeNames[types];
 
     if (nest + 1 > max) {
       return uu.sprintf("%s%s@%d[...]", sp1, name, uu.size(mix));
     }
-    if (type === 2) { // Hash
+    if (types === UU.HASH) {
       for (i in mix) {
         rv.push(uu.sprintf("%s%s: %s", sp2, i, uu.inspect(mix[i], sort, nest + 1, max)));
       }
@@ -435,7 +439,7 @@ uu.mix(uu.inspect, {
     case 9:  return "(DOCUMENT_NODE)";
     case 1:  name.push("(ELEMENT_NODE)"); break;
     case 11: name.push("(DOCUMENT_FRAGMENT_NODE)"); break;
-    default: return uu.sprintf("(NODE[type:%d])", mix.nodeType);
+    default: return uu.sprintf("(NODE[nodeType:%d])", mix.nodeType);
     }
 
     if (mix.nodeType !== 11) {

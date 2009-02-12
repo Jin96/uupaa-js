@@ -3,9 +3,14 @@
 uu.feat.jsonp = {};
 
 uu.mix(UU.CONFIG, {
-  JSONP_REQUEST_TIMEOUT: 10 * 1000, // request timeout(unit: sec)(min: 10000)
-  JSONP_SUICIDE_TIMER:   10 * 1000, // suicide timer(unit: sec)(min: 10000)
-  JSONP_CALLBACK_FUNCTION_NAME: "callback" // JSONP callback function name
+  // UU.CONFIG.JSONP_REQUEST_TIMEOUT - request timeout(unit: sec)(min: 10000)
+  JSONP_REQUEST_TIMEOUT: 10 * 1000,
+
+  // UU.CONFIG.JSONP_SUICIDE_TIMER - suicide timer(unit: sec)(min: 10000)
+  JSONP_SUICIDE_TIMER: 10 * 1000,
+
+  // UU.CONFIG.JSONP_CALLBACK_FUNCTION_NAME - JSONP callback function name
+  JSONP_CALLBACK_FUNCTION_NAME: "callback"
 }, 0, 0);
 
 // uu.jsonp - JSONP async request
@@ -64,6 +69,7 @@ uu.jsonp = function(url,      // URLString: request url
   head.appendChild(node);
   node.setAttribute("src", uu.url(hash));
 
+  // watchdog
   setTimeout(function() {
     uu.jsonp._job[rv.id]("", 408); // 408 "Request Time-out"
   }, UU.CONFIG.JSONP_REQUEST_TIMEOUT);

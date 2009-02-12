@@ -43,6 +43,7 @@ uu.mix(UU, {
     TRIM_LEFT:    /^\s+/g,      // String.prototype.trimLeft()
     TRIM_RIGHT:   /\s+$/g,      // String.prototype.trimRight()
     SPLIT_TOKEN:  /[\b, ]+/,
+    TRIM_TAIL_SLASH: /\/+$/,
     // :after :before :contains :digit :first-letter :first-line :link
     // :negative :playing :target :visited  !=  ?=  /=  <=  >=  &=  {  }
     CSS_REJECT:   /(:(a|b|co|dig|first-l|li|ne|p|t|v))|!=|\/=|<=|>=|&=|\{/ // }
@@ -51,6 +52,7 @@ uu.mix(UU, {
 
 uu.mix(UU.CONFIG, {
   BASE_DIR:   "", // script base dir(lazy auto detection)
+  IMG_DIR:    "{BASE_DIR}/img", // image base dir
   DEBUG_MODE: 1,  // 1: enable debug mode
   ASSERT:     1   // 1: enable assertion
 }, 0, 0);
@@ -98,17 +100,17 @@ uu.mix(uu, {
     // return canvas node
   },
 
-  // uu.id - query id
+  // uu.id - id selector
   id: function(expr) { // String: "id"
     return uudoc.getElementById(expr);
     // return Node or null
   },
 
-  // uu.tag - query tagName
+  // uu.tag - tagName selector
   tag: (function() {
     if (!UU.IE) {
       return function(expr,      // String: "*" or "tag"
-                      context) { // Node(default: document): query context
+                      context) { // Node(default: document): context
         return Array.prototype.slice.call(
                     (context || uudoc).getElementsByTagName(expr));
         // return NodeArray( [Node, Node, ...] ) or EmptyArray( [] )
@@ -130,11 +132,11 @@ uu.mix(uu, {
     };
   })(),
 
-  // uu.className - query className
+  // uu.className - className selector
   className: (function() {
     if (uudoc.getElementsByClassName) {
       return function(expr,      // JointString: "class" or "class1 class2 ..."
-                      context) { // Node(default: document): query context
+                      context) { // Node(default: document): context
         return Array.prototype.slice.call(
                     (context || uudoc).getElementsByClassName(expr));
         // return NodeArray( [Node, Node, ...] ) or EmptyArray( [] )
@@ -169,9 +171,9 @@ uu.mix(uu, {
     };
   })(),
 
-  // uu.css - query css
+  // uu.css - css selector
   css: function(expr,      // String: "css > rule"
-                context) { // Node(default: document): query context
+                context) { // Node(default: document): context
     if (uudoc.querySelectorAll) {
       if (!UU.UTIL.CSS_REJECT.test(expr)) {
         try {
@@ -182,6 +184,20 @@ uu.mix(uu, {
     return uu.css.querySelectorAll(expr.replace(UU.UTIL.TRIM, ""),
                                    context || uudoc);
     // return NodeArray( [Node, Node, ...] ) or EmptyArray( [] )
+  },
+
+  // uu.xpath - xpath selector
+  xpath: function(expr,      // String: "./p[@id]"
+                  context) { // Node(default: document): context
+    try {
+      var nodeList = uudoc.evaluate(expr, context, null, 7, null), // 7: SORT
+          i = 0, iz = nodeList.snapshotLength, rv = Array(iz);
+      for (; i < iz; ++i) {
+        rv[i] = nodeList.snapshotItem(i);
+      }
+      return rv;
+    } catch(err) {}
+    return [];
   },
 
   // uu.toArray - convert FakeArray to Array
@@ -200,31 +216,41 @@ uu.mix(uu, {
       }
       return rv;
     };
-  })()
+  })(),
+
+  toAbsURL: function(url) { // URLString:
+    if (!/^(file|https|http)\:\/\//.test(url)) {
+      var div = uudoc.createElement("div");
+      div.innerHTML = '<a href="' + url + '" />';
+      url = div.firstChild ? div.firstChild.href
+                           : /href\="([^"]+)"/.exec(div.innerHTML)[1];
+    }
+    return url;
+  }
 });
 
 // --- detect base dir ---
 // from: <script src="http://example.com/dir/uupaa.js"> 
 // detect to: "http://example.com/dir"
 (function(nodeList) {
-  UU.BASE_DIR = location.protocol + "//"
-              + location.pathname.replace(/\\/g, "/");
-  var v, i = 0, ary, src, div = uudoc.createElement("div");
+  UU.CONFIG.BASE_DIR = location.protocol + "//"
+               + location.pathname.replace(/\\/g, "/");
+  var v, i = 0, ary;
   while ( (v = nodeList[i++]) ) {
     if (/uupaa.*\.js$/.test(v.src)) {
-      if (/^(file|https|http)\:\/\//.test(v.src)) { // judge abs path
-        src = v.src;
-      } else {
-        div.innerHTML = '<a href="' + v.src + '" />';
-        src = div.firstChild ? div.firstChild.href
-                             : /href\="([^"]+)"/.exec(div.innerHTML)[1];
-      }
-      ary = src.split("/");
-      ary.pop(); // chop tail("uupaa.js")
-      UU.BASE_DIR = ary.join("/"); // reset base dir
+      ary = uu.toAbsURL(v.src).split("/");
+      ary.pop(); // chop tail
+      UU.CONFIG.BASE_DIR = ary.join("/");
       break;
     }
   }
+  UU.CONFIG.BASE_DIR = UU.CONFIG.BASE_DIR.replace(UU.UTIL.TRIM_TAIL_SLASH, "");
+
+  if (/\{BASE_DIR\}/.test(UU.CONFIG.IMG_DIR)) {
+    UU.CONFIG.IMG_DIR =
+        uu.toAbsURL(UU.CONFIG.IMG_DIR.replace(/\{BASE_DIR\}/, UU.CONFIG.BASE_DIR));
+  }
+  UU.CONFIG.IMG_DIR = UU.CONFIG.IMG_DIR.replace(UU.UTIL.TRIM_TAIL_SLASH, "");
 })(uudoc.getElementsByTagName("script"));
 
 // === OOP =================================================
