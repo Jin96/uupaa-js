@@ -1,5 +1,5 @@
 // === Custom Event: Font Resize ===========================
-// depend: advance,oop
+// depend: boost
 uu.feat.event_fontResize = {};
 
 /** Font Resize
