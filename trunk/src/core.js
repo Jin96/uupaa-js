@@ -51,10 +51,17 @@ uu.mix(UU, {
 });
 
 uu.mix(UU.CONFIG, {
-  BASE_DIR:   "", // script base dir(lazy auto detection)
-  IMG_DIR:    "{BASE_DIR}/img", // image base dir
-  DEBUG_MODE: 1,  // 1: enable debug mode
-  ASSERT:     1   // 1: enable assertion
+  // UU.CONFIG.BASE_DIR - script base dir(lazy auto detection)
+  BASE_DIR:   "",
+
+  // UU.CONFIG.IMG_DIR - image base dir
+  IMG_DIR:    "{BASE_DIR}img/",
+
+  // UU.CONFIG.DEBUG_MODE - 1: enable debug mode
+  DEBUG_MODE: 1,
+
+  // UU.CONFIG.ASSERT - 1: enable assertion
+  ASSERT:     1
 }, 0, 0);
 
 uu.mix(uu, {
@@ -233,25 +240,32 @@ uu.mix(uu, {
 // from: <script src="http://example.com/dir/uupaa.js"> 
 // detect to: "http://example.com/dir"
 (function(nodeList) {
-  UU.CONFIG.BASE_DIR = location.protocol + "//"
-               + location.pathname.replace(/\\/g, "/");
-  var v, i = 0, ary;
+  var v, i = 0, ary = (location.protocol + "//" +
+                       location.pathname.replace(/\\/g, "/")).split("/");
   while ( (v = nodeList[i++]) ) {
     if (/uupaa.*\.js$/.test(v.src)) {
       ary = uu.toAbsURL(v.src).split("/");
-      ary.pop(); // chop tail
-      UU.CONFIG.BASE_DIR = ary.join("/");
       break;
     }
   }
-  UU.CONFIG.BASE_DIR = UU.CONFIG.BASE_DIR.replace(UU.UTIL.TRIM_TAIL_SLASH, "");
+  ary.pop(); // cut tail
+  UU.CONFIG.BASE_DIR = ary.join("/") + "/";
 
   if (/\{BASE_DIR\}/.test(UU.CONFIG.IMG_DIR)) {
     UU.CONFIG.IMG_DIR =
         uu.toAbsURL(UU.CONFIG.IMG_DIR.replace(/\{BASE_DIR\}/, UU.CONFIG.BASE_DIR));
   }
-  UU.CONFIG.IMG_DIR = UU.CONFIG.IMG_DIR.replace(UU.UTIL.TRIM_TAIL_SLASH, "");
+  UU.CONFIG.IMG_DIR = UU.CONFIG.IMG_DIR.replace(UU.UTIL.TRIM_TAIL_SLASH, "") + "/";
 })(uudoc.getElementsByTagName("script"));
+
+
+
+/*
+alert(UU.CONFIG.BASE_DIR);
+alert(UU.CONFIG.IMG_DIR);
+ */
+
+
 
 // === OOP =================================================
 // depend: none
