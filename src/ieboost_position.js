@@ -7,7 +7,7 @@ uu.feat.ieboost_position = {};
  *
  * @class
  */
-uu.Class("PositionAbsolute", {
+uu.Class.Singleton("PositionAbsolute", {
   construct: function() {
     this._fixed = 0;
     this.fix();
@@ -31,7 +31,7 @@ uu.Class("PositionAbsolute", {
 });
 
 UU.IE && uu.ua.version === 6 && !uu.ua.quirks && uu.ready(function() {
-  uu.ieboostPositionAbsolute = new uu.Class.PositionAbsolute();
+  new uu.Class.PositionAbsolute();
 });
 
 // === IEBoost fix position: fixed bug =====================
@@ -39,7 +39,7 @@ UU.IE && uu.ua.version === 6 && !uu.ua.quirks && uu.ready(function() {
  *
  * @class
  */
-uu.Class("PositionFixed", {
+uu.Class.Singleton("PositionFixed", {
   construct: function() {
     this._targetElement = [];
     this._smoothScrollFixed = 0;
@@ -216,7 +216,7 @@ uu.Class("PositionFixed", {
 });
 
 UU.IE && uu.ua.version === 6 && uu.ready(function() {
-  uu.ieboostPositionFixed = new uu.Class.PositionFixed();
+  new uu.Class.PositionFixed();
   try {
     uudoc.execCommand("BackgroundImageCache", false, true);
   } catch (err) { ; }

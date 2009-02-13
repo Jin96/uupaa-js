@@ -13,7 +13,7 @@ uu.mix(uu.feat, {
   loadFrom: function(url,   // String: from url
                      feat,  // JointString: "feat" or "feat,feat..."
                      fn) {  // Function(default: undefined): callback
-    uu.feat.feat._url = url.replace(UU.UTIL.TRIM_TAIL_SLASH, "");
+    uu.feat.feat._url = url.replace(UU.UTIL.TRIM_TAIL_SLASH, "") + "/";
     uu.feat.load(feat, fn);
   },
 
@@ -133,7 +133,7 @@ uu.feat.feat = {
           uu.feat.feat._kill(jobid);
         };
       }
-      scr.setAttribute("src", uu.feat.feat._url + "/" + v + ".js");
+      scr.setAttribute("src", uu.feat.feat._url + v + ".js");
       uudoc.getElementsByTagName("head")[0].appendChild(scr);
       uu.feat.feat._run[v] = 1;
     });

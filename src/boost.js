@@ -378,3 +378,15 @@ UU.IE && (function() {
     uudoc.createElement(v);
   })
 })();
+
+(function() {
+  var block = "p,div,dl,ul,ol,form,address,blockquote,h1,h2,h3,h4,h5,h6," +
+              "fieldset,hr,pre,"; // XHTML1.x block tag(exclude table)
+  uu.mix(uu, {
+    // uu.isBlockTag - is block tag
+    isBlockTag: function(tagName) { // String:
+      var tag = tagName.toLowerCase();
+      return block.indexOf(tag + ",") >= 0;
+    }
+  });
+})();

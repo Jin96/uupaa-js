@@ -125,7 +125,7 @@ uu.mix(uu.style, {
 
   // uu.style.setRect - set RectHash( { x: left, y: top, w: width, h: height } )
   setRect: function(elm,    // Node:
-                    rect) { // Hash: { x, y, w, h }
+                    rect) { // RectHash: { x, y, w, h }
     var s = elm.style;
 
     if (UU.IE || UU.OPERA) {
