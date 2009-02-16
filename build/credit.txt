@@ -1,0 +1,1 @@
+// uupaa.js // { version:"0.7.0", license:"MIT", author:"uupaa.js@gmail.com" }
