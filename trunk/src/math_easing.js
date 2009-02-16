@@ -1,6 +1,6 @@
-// === Math.Easing =========================================
+// === Easing ==============================================
 // depend: none
-uu.feat.math_easing = {};
+uu.feat.easing = {};
 
 /*
   This code block from [Robert Penner's EASING EQUATIONS]
