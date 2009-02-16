@@ -239,7 +239,7 @@ uu.mix(uu, {
 // --- detect base dir ---
 // from: <script src="http://example.com/dir/uupaa.js"> 
 // detect to: "http://example.com/dir"
-(function(nodeList) {
+(function(nodeList, config) {
   var v, i = 0, ary = (location.protocol + "//" +
                        location.pathname.replace(/\\/g, "/")).split("/");
   while ( (v = nodeList[i++]) ) {
@@ -249,23 +249,14 @@ uu.mix(uu, {
     }
   }
   ary.pop(); // cut tail
-  UU.CONFIG.BASE_DIR = ary.join("/") + "/";
+  config.BASE_DIR = ary.join("/") + "/";
 
-  if (/\{BASE_DIR\}/.test(UU.CONFIG.IMG_DIR)) {
-    UU.CONFIG.IMG_DIR =
-        uu.toAbsURL(UU.CONFIG.IMG_DIR.replace(/\{BASE_DIR\}/, UU.CONFIG.BASE_DIR));
+  if (/\{BASE_DIR\}/.test(config.IMG_DIR)) {
+    config.IMG_DIR =
+        uu.toAbsURL(config.IMG_DIR.replace(/\{BASE_DIR\}/, config.BASE_DIR));
   }
-  UU.CONFIG.IMG_DIR = UU.CONFIG.IMG_DIR.replace(UU.UTIL.TRIM_TAIL_SLASH, "") + "/";
-})(uudoc.getElementsByTagName("script"));
-
-
-
-/*
-alert(UU.CONFIG.BASE_DIR);
-alert(UU.CONFIG.IMG_DIR);
- */
-
-
+  config.IMG_DIR = config.IMG_DIR.replace(UU.UTIL.TRIM_TAIL_SLASH, "") + "/";
+})(uudoc.getElementsByTagName("script"), UU.CONFIG);
 
 // === OOP =================================================
 // depend: none

@@ -2,54 +2,32 @@
 // depend: ua, stylesheet, style, viewport, customEvent
 uu.feat.ieboost = {};
 
-/*
-2009-02-14
-  min-width だけが指定されている場合は、"auto" の値で一度幅を求める必要がありそう
+uu.mix(UU.CONFIG, {
+  IEBOOST: {}
+}, 0, 0);
 
+uu.mix(UU.CONFIG.IEBOOST, {
+  MAX_WIDTH: true,
+  ALPHA_PNG: true,
+  OPACITY: true,
+  POSITION_ABSOLUTE: true,
+  POSITION_FIXED: true,
+  BLANK_PNG: "b32.png" // use alpha png
+}, 0, 0);
 
- */
+// === IEBoost BackgroundImageCache care ===================
+UU.IE && uu.ua.version === 6 && uu.ready(function() {
+  try {
+    uudoc.execCommand("BackgroundImageCache", false, true);
+  } catch (err) { ; }
+});
 
-
-
-// === IEBoost MaxMin ======================================
+// === IEBoost MaxWidth ====================================
 /** CSS2.1 max-width, min-width, max-height, min-height for IE6
  *
- * max-width, min-width, max-height, min-heightを持つブロック要素に
- * マーキング(uuMaxMin)を行い幅と高さを制御する
- *
- * ブロック要素(未処理)
- *    -> node.uuMaxMin プロパティは存在しない
- *
- * ブロック要素(処理対象)
- *    -> node.uuMaxMin = {
- *          min-width: min-width指定値,
- *          max-width: max-width指定値,
- *          min-height: min-width指定値,
- *          max-height: max-width指定値,
- *          width: マークアップ直前の状態で計算された幅(%またはpx)
- *          height: マークアップ直前の状態で計算された高さ(%またはpx)
- *          w0: min-width指定値をルールに基づき事前に計算した値(-1なら,min-widthについては処理対象外)
- *          w2: max-width指定値をルールに基づき事前に計算した値(-1なら,max-widthについては処理対象外)
- *          h0: min-height指定値をルールに基づき事前に計算した値(-1なら,min-heightについては処理対象外)
- *          h2: max-height指定値をルールに基づき事前に計算した値(-1なら,max-heightについては処理対象外)
- *       }
- * ブロック要素(処理対象外)
- *    -> node.uuMaxMin = {
- *          min-width: undefined
- *          max-width: undefined
- *          min-height: undefined
- *          max-height: undefined
- *          width: マークアップ直前の状態で計算された幅(%またはpx)
- *          height: マークアップ直前の状態で計算された高さ(%またはpx)
- *          w0: -1
- *          w2: -1
- *          h0: -1
- *          h2: -1
- *       }
- * インライン要素(処理対象外) -> element.uuMaxMin プロパティは存在しない
  * @class
  */
-uu.Class.Singleton("MaxMin", {
+uu.Class.Singleton("MaxWidth", {
   construct: function() {
     this._targetElement = [];
     this._lock = 0;
@@ -59,12 +37,12 @@ uu.Class.Singleton("MaxMin", {
     // set event handler
     var me = this;
     uu.customEventView.attach(function() { // add element + resize, update view
-      me.markup(1); // re-validate
+      me.markup();
       me.fix();
     }, 3);
     uu.customEventFontResize.attach(function() { // font-resize
       uu.style.unit(1); // re-validate em and pt
-      me.markup(1); // re-validate
+      me.markup();
       me.fix();
     });
     uu.event.attach(window, "resize", this);
@@ -72,140 +50,72 @@ uu.Class.Singleton("MaxMin", {
 
   handleEvent: function(evt) {
     if (evt.type === "resize") { // window resize event
-      this.markup(1); // re-validate
+      this.markup();
       this.fix();
     }
   },
 
-  // min-height, max-height, min-width, max-width 適用対象を列挙
-  // 動的に要素を追加したりCSSを変更するような用法なら、
-  // その都度このメソッドを呼ぶ必要がある。
-  // CSS2の仕様上ブロックレベル要素のみに適用する(table要素は除外)
-  markup: function(force) { // Boolean(default: false): force revalidate
-    force = force || false;
-
-    var rv = [], cs, mm, w, h, r,
-        nodeList = uu.tag("*", uudoc.body), v, i = 0,
-        fnDim = this._getDimension;
+  markup: function() {
+    var rv = [], nodeList = uu.tag("*", uudoc.body), v, i = 0, cs,
+        maxWidth, minWidth, maxHeight, minHeight;
 
     while ( (v = nodeList[i++]) ) {
       if (!uu.isBlockTag(v.tagName)) {
-        continue; // (min|max)-(width|height)はブロックエレメント限定
+        continue; // exclude(max-width: block element only)
       }
 
       cs = v.currentStyle;
-      // 要素に独自プロパティ(uuMaxMin)を追加し計算済みの値を保存する
-      if (force || !v.uuMaxMin) { // 初回 または 強制再評価
-        // "" 又は "auto" が指定されている場合は、
-        // currentStyle.width や clientWidth の値は使えないため
-        // getBoundingClientRect() から幅と高さを取得する
-        r = v.getBoundingClientRect();
-        w = cs.width, h = cs.height;
-        if (cs.width.lastIndexOf("%") === -1) {
-          // %指定以外ならpx単位の値を取得する, %指定ならそのまま
-          w = (cs.width === "auto") ? (r.right - r.left) : v.clientWidth;
-          w += "px";
+      maxWidth  = cs["max-width"]  || ""; // length | % | none | inherit
+      minWidth  = cs["min-width"]  || ""; // length | % | inherit
+      maxHeight = cs["max-height"] || ""; // length | % | none | inherit
+      minHeight = cs["minHeight"];        // length | % | inherit (ie6 default "auto")
+
+      /^(inherit|none|auto)$/.test(maxWidth)  && (maxWidth  = "");
+      /^(inherit|none|auto)$/.test(minWidth)  && (minWidth  = "");
+      /^(inherit|none|auto)$/.test(maxHeight) && (maxHeight = "");
+      /^(inherit|none|auto)$/.test(minHeight) && (minHeight = "");
+
+      if (maxWidth  === "" &&
+          minWidth  === "" &&
+          maxHeight === "" &&
+          minHeight === "") {
+        if ("uuMaxWidth" in v) {
+          delete v["uuMaxWidth"];
         }
-        if (cs.height.lastIndexOf("%") === -1) {
-          h = (cs.height === "auto") ? (r.bottom - r.top) : v.clientHeight;
-          h += "px";
-        }
-        // 要素に独自プロパティ(uuMaxMin)を追加し、
-        // style要素/インライン属性で指定されたCSSプロパティを一式保存する
-        v.uuMaxMin = {
-          width: w,
-          height: h,
-          "min-width":  cs["min-width"],
-          "max-width":  cs["max-width"],
-          "min-height": cs["minHeight"],
-          "max-height": cs["max-height"]
-        };
+        continue; // exclude
       }
-      // 2回目以降は、
-      // style要素/インライン属性で指定されたCSSプロパティについては
-      // 変動していないはずなのでそのまま
-      // 現在の幅/高さを用いた事前の再計算処理だけ行う。
-      mm = v.uuMaxMin;
-      uu.mix(mm, {
-        w0: fnDim(v, mm["min-width"],  "width"),
-        w2: fnDim(v, mm["max-width"],  "width"),
-        h0: fnDim(v, mm["min-height"], "height"),
-        h2: fnDim(v, mm["max-height"], "height")
+
+      uu.mix(v, {
+        uuMaxWidth: {}
+      }, 0, 0);
+      uu.mix(v.uuMaxWidth, {
+        maxWidth:  maxWidth,
+        minWidth:  minWidth,
+        maxHeight: maxHeight,
+        minHeight: minHeight
       });
-
-      // CSS2の仕様にあわせた打ち消し処理
-      // (min-width > max-width なら，max-width = min-width)
-      if (mm.w0 !== -1 && mm.w2 !== -1 && mm.w0 > mm.w2) {
-        mm.w2 = mm.w0;
-      }
-      if (mm.h0 !== -1 && mm.h2 !== -1 && mm.h0 > mm.h2) {
-        mm.h2 = mm.h0;
-      }
-
-      // min-width(w0), max-width(w2), min-height(h0), max-height(h2) の
-      // いずれもが指定されていなければ描画対象に含めない
-      if (mm.w0 === -1 && mm.w2 === -1 && mm.h0 === -1 && mm.h2 === -1) {
-        continue; // 全て -1 なら処理対象外
-      }
-      rv.push(v); // 描画対象に追加
+      uu.mix(v.uuMaxWidth, {
+        orgWidth:  v.currentStyle.width,
+        orgHeight: v.currentStyle.height
+      }, 0, 0);
+      rv.push(v);
     }
-
     this._targetElement = rv;
   },
 
-  // CSS2の仕様書にあるルールを元に要素のサイズを求める
-  _getDimension: function(elm, val, name) {
-    if (!val || val === "auto" || val === "none") {
-      return -1;
-    }
-    var props = { width: 1, height: 2 },
-        rect;
-    if (val.lastIndexOf("%") >= 0) {
-      // パーセント指定なら -> 親要素の幅/高さに対する%指定と解釈する
-      switch (props[name] || 0) {
-      case 1: // width
-        rect = uu.style.getRect(elm.parentNode);
-        return rect.w * parseFloat(val) / 100; // 親要素の幅から計算
-      case 2: // height
-        rect = uu.style.getRect(elm.parentNode);
-// ▼▼▼▼▼
-//      return rect.w * parseFloat(val) / 100; // 親要素の高さから計算
-// ▲▲▲▲▲
-        return rect.h * parseFloat(val) / 100; // 親要素の高さから計算
-      }
-      return -1;
-    }
-    return isNaN(val) ? uu.style.toPixel(elm, val, name) : -1; // 単位付の値(3em)
-  },
-
-  // IEから連続でイベントが来るため、
-  // 一定時間内の同種のイベントを一つにまとめて処理しないと、
-  // イベント内でイベントが発生(無限ループ)し、
-  // ブラウザがフリーズしたり、勝手にスクロールしたりする。
+  // some events are brought together, and it will process it later
   fix: function() {
-    if (!this._targetElement.length) {
+    if (!this._targetElement.length || this._lock) { // locked
       return;
-    }
-    if (this._lock) {
-      return; // locked
     }
     var me = this;
 
     function FIX() {
-      var ary = me._targetElement, v, i = 0, iz = ary.length, mm;
       me._lock = 1; // lock
 
+      var ary = me._targetElement, i = 0, iz = ary.length;
       for (; i < iz; ++i) {
-        if (i in ary) {
-          v = ary[i];
-          mm = v.uuMaxMin;
-          if (mm.w0 !== -1 || mm.w2 !== -1) {
-            me._resizeWidth(v);
-          }
-          if (mm.h0 !== -1 || mm.h2 !== -1) {
-            me._resizeHeight(v);
-          }
-        }
+        me.recalc(ary[i], ary[i].uuMaxWidth);
       }
       // lazy unlock(crucial)
       setTimeout(function() {
@@ -215,68 +125,132 @@ uu.Class.Singleton("MaxMin", {
     setTimeout(FIX, 40); // lazy 40ms
   },
 
-  // ブラウザに再計算させた値を元に、適正範囲内に収まっているかを判断する
-  // わかり辛いのでコメント大盛り
-  _resizeWidth: function(elm) {
-    var mm = elm.uuMaxMin, s = elm.style, w,
-        auto;
+  recalc: function(elm, hash) {
+    var calcMaxWidth = 0,
+        calcMinWidth = 0,
+        calcMaxHeight = 0,
+        calcMinHeight = 0,
+        unit = uu.style.unit(),
+        rect = elm.getBoundingClientRect(),
+        match, val, runVal, width, height;
+        currentRect = { width: rect.right - rect.left,
+                        height: rect.bottom - rect.top };
 
-    function MIN() {
-      if (mm.w0 === -1) { // min-widthが指定されていない → nop
-        return false;
+    if (hash.maxWidth !== "") {
+      if ( (match = /(?:(px)|(pt)|(em)|(%))$/.exec(hash.maxWidth)) ) {
+        val = parseFloat(hash.maxWidth);
+        if (match[4]) {
+          rect = elm.parentNode.getBoundingClientRect();
+          calcMaxWidth = (rect.right - rect.left) * val / 100;
+        } else {
+          calcMaxWidth = val * (match[2] ? unit.pt : match[3] ? unit.em : 1);
+        }
       }
-      s.width = mm.w0; // 一時的にmin-widthの値を幅に設定する(再計算/再描画)が走る
-      // min-widthで再計算後の幅が元の幅(w)より大きければ
-      // 既にmin-widthを下回っていたことになるため、
-      // style.widthにmin-widthを適用した状態でfalseを返す
-      return (elm.clientWidth > w) ? true : false;
     }
-
-    function MAX() {
-      if (mm.w2 === -1) {
-        return false; // max-widthが指定されていない → nop
+    if (hash.minWidth !== "") {
+      if ( (match = /(?:(px)|(pt)|(em)|(%))$/.exec(hash.minWidth)) ) {
+        val = parseFloat(hash.minWidth);
+        if (match[4]) {
+          rect = elm.parentNode.getBoundingClientRect();
+          calcMinWidth = (rect.right - rect.left) * val / 100;
+        } else {
+          calcMinWidth = val * (match[2] ? unit.pt : match[3] ? unit.em : 1);
+        }
       }
-      s.width = mm.w2;
-      return (elm.clientWidth < w) ? true : false;
     }
 
-    // widthをCSS指定値に戻し、ブラウザに本来の幅を再計算させる
-    s.width = mm.width;
-
-    // 本来の幅をwに保存
-    w = elm.clientWidth;
-    if (!MIN() && !MAX()) {
-      s.width = mm.width; // 範囲内に収まっている場合は、本来の幅に戻す
-    }
-  },
-
-  _resizeHeight: function(elm) {
-    var mm = elm.uuMaxMin, s = elm.style, h;
-
-    function MIN() {
-      if (mm.h0 === -1) {
-        return false;
+    if (hash.maxHeight !== "") {
+      if ( (match = /(?:(px)|(pt)|(em)|(%))$/.exec(hash.maxHeight)) ) {
+        val = parseFloat(hash.maxHeight);
+        if (match[4]) {
+          rect = elm.parentNode.getBoundingClientRect();
+          calcMaxHeight = (rect.bottom - rect.top) * val / 100;
+        } else {
+          calcMaxHeight = val * (match[2] ? unit.pt : match[3] ? unit.em : 1);
+        }
       }
-      s.height = mm.h0;
-      return (elm.clientHeight > h) ? true : false;
     }
-
-    function MAX() {
-      if (mm.h2 === -1) {
-        return false;
+    if (hash.minHeight !== "") {
+      if ( (match = /(?:(px)|(pt)|(em)|(%))$/.exec(hash.minHeight)) ) {
+        val = parseFloat(hash.minHeight);
+        if (match[4]) {
+          rect = elm.parentNode.getBoundingClientRect();
+          calcMinHeight = (rect.bottom - rect.top) * val / 100;
+        } else {
+          calcMinHeight = val * (match[2] ? unit.pt : match[3] ? unit.em : 1);
+        }
       }
-      s.height = mm.h2;
-      return (elm.clientHeight < h) ? true : false;
     }
 
-    s.height = mm.height;
-    h = elm.clientHeight;
-    if (!MIN() && !MAX()) { s.height = mm.height; }
+    // recalc
+    if (calcMaxWidth || calcMinWidth) {
+
+      // recalc max-width
+      if (calcMinWidth > calcMaxWidth) {
+        calcMaxWidth = calcMinWidth;
+      }
+
+      // recalc width
+      // width: auto !important
+      runVal = elm.runtimeStyle.width;  // keep runtimeStyle.width
+//    styleVal = elm.style.width; // x
+//    elm.runtimeStyle.width = elm.currentStyle.width; // x
+      elm.runtimeStyle.width = hash.orgWidth;
+      elm.style.width = "auto";
+      rect = elm.getBoundingClientRect(); // re-validate
+      width = rect.right - rect.left;
+
+//    elm.style.width = styleVal; // x
+      elm.style.width = hash.orgWidth; // o
+      elm.runtimeStyle.width = runVal; // restore style
+
+      // recalc limits
+      if (width > calcMaxWidth) {
+        width = calcMaxWidth;
+        elm.style.pixelWidth = width;
+      } else if (width < calcMinWidth) {
+        width = calcMinWidth;
+        elm.style.pixelWidth = width;
+      } else {
+        elm.style.pixelWidth = currentRect.width - 2;
+      }
+    }
+
+    if (calcMaxHeight || calcMinHeight) {
+
+      // recalc max-height
+      if (calcMinHeight > calcMaxHeight) {
+        calcMaxHeight = calcMinHeight;
+      }
+
+      // recalc height
+      // height: auto !important
+      runVal = elm.runtimeStyle.height;  // keep runtimeStyle.height
+      elm.runtimeStyle.height = hash.orgHeight;
+      elm.style.height = "auto";
+      rect = elm.getBoundingClientRect(); // re-validate
+      height = rect.bottom - rect.top;
+
+      elm.style.height = hash.orgHeight; // o
+      elm.runtimeStyle.height = runVal; // restore style
+
+      // recalc limits
+      if (height > calcMaxHeight) {
+        height = calcMaxHeight;
+        elm.style.pixelHeight = height;
+      } else if (height < calcMinHeight) {
+        height = calcMinHeight;
+        elm.style.pixelHeight = height;
+      } else {
+        elm.style.pixelHeight = currentRect.height - 2;
+      }
+    }
   }
 });
 
-UU.IE && uu.ua.version === 6 && uu.ready(function() {
-  new uu.Class.MaxMin();
+UU.IE && uu.ua.version === 6 && UU.CONFIG.IEBOOST.MAX_WIDTH &&
+uu.ready(function() {
+  new uu.Class.MaxWidth();
 });
 
 // === IEBoost Alpha PNG ===================================
@@ -284,29 +258,49 @@ UU.IE && uu.ua.version === 6 && uu.ready(function() {
  *
  * @class
  */
-uu.mix(UU.CONFIG, {
-  ALPHA_PNG: {
-    SPACER_IMAGE: "b32.png"
-  }
-}, 0, 0);
-
-uu.Class.Singleton("AlphaPNG", {
+uu.Class.Singleton("IEBoostAlphaPNG", {
   construct: function() {
-    uu.style.appendRule("ieboost", "img",    "behavior: expression(uu.Class.AlphaPNG._expression(this))");
-    uu.style.appendRule("ieboost", ".png",   "behavior: expression(uu.Class.AlphaPNG._expression(this))");
-    uu.style.appendRule("ieboost", "input",  "behavior: expression(uu.Class.AlphaPNG._expression(this))");
-    uu.style.appendRule("ieboost", ".alpha", "behavior: expression(uu.Class.AlphaPNG._expression(this))");
+    var expr = "behavior: expression(uu.Class.IEBoostAlphaPNG._expression(this))";
+    uu.style.appendRule("ieboost", "img",    expr);
+    uu.style.appendRule("ieboost", ".png",   expr);
+    uu.style.appendRule("ieboost", "input",  expr);
+    uu.style.appendRule("ieboost", ".alpha", expr);
   }
 });
-uu.mix(uu.Class.AlphaPNG, {
+uu.mix(uu.Class.IEBoostAlphaPNG, {
   _expression: function(elm) {
-    var spacer = UU.CONFIG.ALPHA_PNG.SPACER_IMAGE,
+    var spacer = UU.CONFIG.IEBOOST.BLANK_PNG,
+        alphaLoader = "DXImageTransform.Microsoft.AlphaImageLoader",
         reg = RegExp(spacer + "$"),
         url, w, h, run = 0,
-        src = elm.src || "",
-        tagName = elm.tagName.toLowerCase();
+        src = elm.src || "", inputImage = 0,
+        tagName = elm.tagName.toLowerCase(),
+        me = uu.Class.IEBoostAlphaPNG;
+
+    function setAlphaLoader(elm, src, method) {
+      if (elm.filters.length && alphaLoader in elm.filters) {
+        elm.filters[alphaLoader].enabled = 1;
+        elm.filters[alphaLoader].src = src;
+      } else {
+        elm.style.filter +=
+            [" progid:", alphaLoader,
+             "(src='", src, "', sizingMethod='", method, "')"].join("");
+      }
+    }
+
+    function unsetAlphaLoader(elm) {
+      if (elm.filters.length && alphaLoader in elm.filters) {
+        elm.filters[alphaLoader].enabled = 0;
+      }
+    }
 
     switch (tagName) {
+    case "input":
+      if (elm.type !== "image") {
+        break;
+      }
+      inputImage = 1;
+      // break;
     case "img":
       if (/.png$/i.test(src)) {
         if (reg.test(src)) {
@@ -317,48 +311,26 @@ uu.mix(uu.Class.AlphaPNG, {
         w = elm.width;
         h = elm.height;
 
-        uu.Class.AlphaPNG._setAlphaLoader(elm, src, "image");
+        setAlphaLoader(elm, src, "image");
 
         elm.src = UU.CONFIG.IMG_DIR + spacer;
-        elm.width = w; // hasLayout = true
-        elm.height = h;
+
+        // hasLayout = true
+        if (inputImage) {
+          elm.style.zoom = 1;
+        } else {
+          elm.width = w;
+          elm.height = h;
+        }
         ++run;
       } else {
-        // <img src="*.png">  ->  <img src="*.gif">
-        // 内部的に使用しているpngファイル(b32.png)と、DataSchmeは除外する
         if (!reg.test(src) && !(/^data:/.test(src))) {
+          // <img src="xxx.png">  -> xxx.gif or xxx.jpg
+          // exclude "b32.png" or  DataScheme
           elm.uuAlphaPNGSrc = src;
 
           // disable filter and make it original size
-          uu.Class.AlphaPNG._unsetAlphaLoader(elm);
-          elm.style.width = "auto";
-          elm.style.height = "auto";
-          // ここでDataSchemeを持つ要素のwidth,heightが上書されてしまうと
-          // ieboost.datascheme の処理に支障がでる
-        }
-      }
-      break;
-    case "input":
-      if (elm.type !== "image") { break; }
-      if (/.png$/i.test(src)) {
-        if (reg.test(src)) {
-          break; // nop
-        }
-        elm.uuAlphaPNGSrc = src;
-
-        uu.Class.AlphaPNG._setAlphaLoader(elm, src, "image");
-
-        elm.src = UU.CONFIG.IMG_DIR + spacer;
-        elm.style.zoom = 1; // hasLayout = true
-
-        ++run;
-      } else {
-        // <input type="image" src="*.png">  ->  <input type="image" src="*.gif">
-        if (!reg.test(src)) {
-          elm.uuAlphaPNGSrc = src;
-
-          // disable filter
-          uu.Class.AlphaPNG._unsetAlphaLoader(elm);
+          unsetAlphaLoader(elm);
           elm.style.width = "auto";
           elm.style.height = "auto";
         }
@@ -367,29 +339,29 @@ uu.mix(uu.Class.AlphaPNG, {
     default:
       url = uu.style.getBackgroundImage(elm);
       if (url === "none") {
-        uu.Class.ALPHAPNG._unsetAlphaLoader(elm);
+        unsetAlphaLoader(elm);
         break;
       }
       if (reg.test(url)) {
         break; // nop
       }
       if (/.png$/i.test(url)) {
-        uu.Class.AlphaPNG._setAlphaLoader(elm, url, "crop");
+        setAlphaLoader(elm, url, "crop");
         elm.style.backgroundImage = "url(" + UU.CONFIG.IMG_DIR + spacer + ")";
 
         elm.style.zoom = 1; // hasLayout = true
         ++run;
-      } else { // *.png → *.jpg
-        uu.Class.AlphaPNG._unsetAlphaLoader(elm);
+      } else { // xxx.png -> xxx.gif or xxx.jpg
+        unsetAlphaLoader(elm);
       }
     }
 
     if (run) {
-      uu.Class.AlphaPNG._bugfix(elm);
+      me._bugfix(elm);
     }
     // attach spy and purge behavior
     if (!("uuIEBoostAlphaPNGSpy" in elm)) {
-      elm.attachEvent("onpropertychange", uu.Class.AlphaPNG._onpropertychange);
+      elm.attachEvent("onpropertychange", me._onpropertychange);
       elm.uuIEBoostAlphaPNGSpy = 1;
     }
     elm.style.behavior = "none";
@@ -400,33 +372,13 @@ uu.mix(uu.Class.AlphaPNG, {
     var evt = window.event;
     switch (evt.propertyName) {
     case "style.backgroundImage":
-    case "src":  // <img src="1.png"> → <input type="2.png">
-      uu.Class.AlphaPNG._expression(evt.srcElement);
+    case "src":  // <img src="1.png"> -> <input type="2.png">
+      uu.Class.IEBoostAlphaPNG._expression(evt.srcElement);
       break;
     }
   },
 
-  // set alpha image loader
-  _setAlphaLoader: function(elm, src, method) {
-    var aloader = "DXImageTransform.Microsoft.AlphaImageLoader";
-    if (elm.filters.length && aloader in elm.filters) {
-      elm.filters[aloader].enabled = 1;
-      elm.filters[aloader].src = src;
-    } else {
-      elm.style.filter += " progid:" + aloader
-                       +  "(src='" + src + "', sizingMethod='" + method + "')";
-    }
-  },
-
-  // unset alpha image loader
-  _unsetAlphaLoader: function(elm) {
-    var aloader = "DXImageTransform.Microsoft.AlphaImageLoader";
-    if (elm.filters.length && aloader in elm.filters) {
-      elm.filters[aloader].enabled = 0;
-    }
-  },
-
-  // 透過された画像の上に配置した要素[a, input, textarea, select ]をクリック可能にする
+  // [a, input, textarea, select ] clickable
   _bugfix: function(elm) {
     var i = 0, sz = elm.childNodes.length, c;
 
@@ -444,14 +396,14 @@ uu.mix(uu.Class.AlphaPNG, {
       c = elm.childNodes[i];
       if (c.nodeType === 1) {
         FIX(c);
-        c.firstChild && uu.Class.AlphaPNG._bugfix(c);
+        c.firstChild && uu.Class.IEBoostAlphaPNG._bugfix(c);
       }
     }
   }
 });
 
-UU.IE && uu.ready(function() {
-  new uu.Class.AlphaPNG();
+UU.IE && UU.CONFIG.IEBOOST.ALPHA_PNG && uu.ready(function() {
+  new uu.Class.IEBoostAlphaPNG();
 });
 
 // === IEBoost Opacity =====================================
@@ -459,7 +411,7 @@ UU.IE && uu.ready(function() {
  *
  * @class
  */
-uu.Class.Singleton("Opacity", {
+uu.Class.Singleton("IEBoostOpacity", {
   construct: function() {
     this.fix();
 
@@ -484,8 +436,8 @@ uu.Class.Singleton("Opacity", {
   }
 });
 
-UU.IE && uu.ready(function() {
-  new uu.Class.Opacity();
+UU.IE && UU.CONFIG.IEBOOST.OPACITY && uu.ready(function() {
+  new uu.Class.IEBoostOpacity();
 });
 
 // === IEBoost fix position:absolute bug ===================
@@ -493,7 +445,7 @@ UU.IE && uu.ready(function() {
  *
  * @class
  */
-uu.Class.Singleton("PositionAbsolute", {
+uu.Class.Singleton("IEBoostPositionAbsolute", {
   construct: function() {
     this._fixed = 0;
     this.fix();
@@ -516,8 +468,9 @@ uu.Class.Singleton("PositionAbsolute", {
   }
 });
 
-UU.IE && uu.ua.version === 6 && !uu.ua.quirks && uu.ready(function() {
-  new uu.Class.PositionAbsolute();
+UU.IE && uu.ua.version === 6 && !uu.ua.quirks &&
+UU.CONFIG.IEBOOST.POSITION_ABSOLUTE && uu.ready(function() {
+  new uu.Class.IEBoostPositionAbsolute();
 });
 
 // === IEBoost fix position: fixed bug =====================
@@ -525,7 +478,7 @@ UU.IE && uu.ua.version === 6 && !uu.ua.quirks && uu.ready(function() {
  *
  * @class
  */
-uu.Class.Singleton("PositionFixed", {
+uu.Class.Singleton("IEBoostPositionFixed", {
   construct: function() {
     this._targetElement = [];
     this._smoothScrollFixed = 0;
@@ -701,9 +654,7 @@ uu.Class.Singleton("PositionFixed", {
   }
 });
 
-UU.IE && uu.ua.version === 6 && uu.ready(function() {
-  new uu.Class.PositionFixed();
-  try {
-    uudoc.execCommand("BackgroundImageCache", false, true);
-  } catch (err) { ; }
+UU.IE && uu.ua.version === 6 &&
+UU.CONFIG.IEBOOST.POSITION_FIXED && uu.ready(function() {
+  new uu.Class.IEBoostPositionFixed();
 });
