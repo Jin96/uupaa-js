@@ -1,4 +1,5 @@
 // === Image Source ========================================
+// depend: ua
 uu.feat.imagesource = {};
 
 // --- types of image-source ---
@@ -97,11 +98,12 @@ uu.Class("ImageSource", {
         !run++ && (--me._loading, uu.imagesource.dict.add(src, 1));
       };
       img.onload  = function() {
-        !run++ && (--me._loading, uu.imagesource.dict.add(src, uu.ua.opera && !img.complete));
+        !run++ && (--me._loading, uu.imagesource.dict.add(src, UU.OPERA &&
+                                                          !img.complete));
       };
       img.src = src;
 
-      if (uu.ua.gecko && uu.engine < 1900) { // Firefox2.x
+      if (UU.GECKO && uu.engine < 1900) { // Firefox2.x
         (function() {
           if (!run) {
             if (img.complete && !img.width) {

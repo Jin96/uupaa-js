@@ -166,11 +166,16 @@ uu.mix(uu.style, {
           case 2: return elm.clientHeight; // 2: height
           }
         }
+        uu.customEvent && uu.customEvent.disable();
+
         // @see this trick: http://d.hatena.ne.jp/uupaa/20080628
         s = elm.style, r = elm.runtimeStyle, sx = s.left, rx = r.left;
         r.left = (elm.currentStyle || elm.style).left; // style="left: currentStyle.left !important"
         s.left = val, val = s.pixelLeft;               // stealthily set, and get pixel value(not redraw)
         s.left = sx, r.left = rx;                      // restore style
+
+        uu.customEvent && uu.customEvent.enable();
+
       } else if ( (match = /(?:(px)|(pt)|(em))$/.exec(val) ) ) {
         unit = uu.style.unit();
         val = parseFloat(val);
@@ -184,11 +189,15 @@ uu.mix(uu.style, {
   // uu.style.unit - measure unit(pt, em)
   unit: function(really) { // Boolean(default: false): force re-validate
     if (really || !pixel.em) {
+      uu.customEvent && uu.customEvent.disable();
+
       var e = uudoc.body.appendChild(uudoc.createElement("div"));
       e.style.cssText = "width:12pt;height:12em";
       pixel.pt = e.clientWidth  / 12;
       pixel.em = e.clientHeight / 12;
       uudoc.body.removeChild(e);
+
+      uu.customEvent && uu.customEvent.enable();
     }
     return pixel; // return Hash ( { pt, em } )
   },

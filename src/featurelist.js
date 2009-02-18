@@ -22,7 +22,7 @@ uu.featureList = {
 };
 if (UU.IE) {
   uu.featureList["canvas"] = "ua,hash,style,matrix2d,color";
-  uu.featureList["ieboost"] = "ua,stylesheet,style,viewport,customEvent";
+  uu.featureList["ieboost"] = "ua,stylesheet,style,className,viewport,event,customEvent,selector";
 } else {
   uu.featureList["canvas"] = "ua";
   uu.feat.canvas = {};
