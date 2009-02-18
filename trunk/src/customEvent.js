@@ -29,10 +29,14 @@ uu.Class.Singleton("CustomEventFontResize", {
   },
 
   _createAgent: function() {
+    uu.customEvent && uu.customEvent.disable();
+
     var rv = uudoc.body.appendChild(uudoc.createElement("div"));
     rv.id = "uuCustomEventFontResizeAgent";
     rv.style.cssText = "position:absolute;font-size:large;visibility:hidden;" +
                        "height:1em;top:-10em;left:-10em";
+
+    uu.customEvent && uu.customEvent.enable();
     return rv;
   },
 
@@ -58,23 +62,63 @@ uu.ready(function() {
   uu.customEventFontResize = new uu.Class.CustomEventFontResize();
 }, 2);
 
-// === Custom Event: Revalidate View ===========================
-/** Revalidate View
- *
- * @class
- */
-uu.Class.Singleton("CustomEventView", {
+// === Custom Event ========================================
+UU.CONFIG.CUSTOM_EVENT = {
+  ADD_ELEMENT:      0x01, // with node
+  REMOVE_ELEMENT:   0x02, // with node
+  UPDATE_ELEMENT:   0x04,
+  UPDATE_VIEWPORT:  0x10, // resize
+  RESIZE_FONT:      0x20, // font-resize
+  ALL:              0xff
+};
+
+uu.Class.Singleton("CustomEvent", {
   construct: function() {
-    this._fn = []; // Array( [[callback function, kind], ... ] )
+    this._fn = []; // Array( [[callback function, customEvent], ... ] )
+    this._enable = true;
+
+    // set event handler
+    var me = this;
+
+    uu.customEventFontResize.attach(function() {
+      uu.style.unit(1);
+      me.fire(UU.CONFIG.CUSTOM_EVENT.RESIZE_FONT);
+    });
+
+    uu.event.attach(window, "resize", this);
+
+    if (UU.IE && uu.ua.version < 8) {
+      // hook add element for IE6, IE7
+      window.attachEvent("onload", function() {
+        uudoc.createStyleSheet().cssText =
+            "*{behavior:expression(uu.Class.CustomEvent._addElement(this))}";
+      });
+    }
   },
 
-  // uu.Class.CustomEventView.attach - attach event handler
-  attach: function(fn,     // Function: callback function
-                   kind) { // Number: kind, 1 = add element, 2 = resize
-    this._fn.push([fn, kind]);
+  handleEvent: function(evt) {
+    if (evt.type === "resize") {
+      this.fire(UU.CONFIG.CUSTOM_EVENT.UPDATE_VIEWPORT);
+    }
   },
 
-  // uu.Class.CustomEventView.detach - detach event handler
+  // uu.Class.CustomEvent.enable
+  enable: function() {
+    this._enable = true;
+  },
+
+  // uu.Class.CustomEvent.disable
+  disable: function() {
+    this._enable = false;
+  },
+
+  // uu.Class.CustomEvent.attach - attach event handler
+  attach: function(fn,            // Function: callback function
+                   customEvent) { // Number: customEvent, UU.CONFIG.CUSTOM_EVENT...
+    this._fn.push([fn, customEvent]);
+  },
+
+  // uu.Class.CustomEvent.detach - detach event handler
   detach: function(fn) { // Function: callback function
     var idx = -1, i = 0, iz = this._fn.length;
     for (; i < iz; ++i) {
@@ -90,19 +134,49 @@ uu.Class.Singleton("CustomEventView", {
     }
   },
 
-  // uu.Class.CustomEventView.revalidate - revalidate view
-  revalidate: function(kind) { // Number(default: 3): kind, 1 = add element, 2 = resize, 3 = all
-    kind = kind === void 0 ? 3 : kind;
+  // uu.Class.CustomEvent.fire - revalidate
+  fire: function(customEvent, // Number(default: 0xff): customEvent
+                 node) {      // Node(default: undefined):
+    customEvent = customEvent === void 0 ? 0xff : customEvent;
+
+    if (!this._enable) {
+      return;
+    }
+
     var v, i = 0;
     while ( (v = this._fn[i++]) ) {
-      if (kind & v[1]) {
-        v[0](); // callback
+      if (customEvent & v[1]) {
+        v[0](node); // callback
       }
     }
   }
 });
 
-uu.customEventView = null;
+// static function
+uu.mix(uu.Class.CustomEvent, {
+  // uu.Class.CustomEvent._addElement
+  _addElement: function(elm) {
+    // @see http://d.hatena.ne.jp/uupaa/20081129/1227951320
+    if (elm.style.behavior === "none") { return; } // guard: text selection + drag
+    elm.style.behavior = "none"; // disable CSS::expression
+
+    if (elm.nodeType === 1) {
+      // hook remove element
+      (function(node) {
+        var rm = node.removeChild;
+        node.removeChild = function(oldChild) {
+          var rv = rm(oldChild);
+          uu.customEvent.fire(UU.CONFIG.CUSTOM_EVENT.REMOVE_ELEMENT, rv);
+          return rv;
+        }
+      })(elm);
+
+      uu.customEvent.fire(UU.CONFIG.CUSTOM_EVENT.ADD_ELEMENT, elm);
+    }
+  }
+});
+
+uu.customEvent = null;
 uu.ready(function() {
-  uu.customEventView = new uu.Class.CustomEventView();
-}, 2);
+  uu.customEvent = new uu.Class.CustomEvent();
+}, 2); // 2: mid

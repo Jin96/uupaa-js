@@ -1095,8 +1095,8 @@ alert("image.complete="+image.complete);
 */
 
   if ("src" in image) { // HTMLImageElement
-    if ("uuIEBoostAlphapngSrc" in image) { // special attr by uupaa.js
-      this._src = image.uuIEBoostAlphapngSrc;
+    if ("uuIEBoostAlphaPNGSrc" in image) { // special attr by uupaa.js
+      this._src = image.uuIEBoostAlphaPNGSrc;
     } else {
       this._src = image.src;
     }
@@ -1826,8 +1826,8 @@ function VMLPatt(image /* HTMLImageElement */, repetition /* = undefined */) {
   this._type = 3; // 3:tile
 
   if ("src" in image) { // HTMLImageElement
-    if ("uuIEBoostAlphapngSrc" in image) { // special attr by uupaa.js
-      this._src = image.uuIEBoostAlphapngSrc;
+    if ("uuIEBoostAlphaPNGSrc" in image) { // special attr by uupaa.js
+      this._src = image.uuIEBoostAlphaPNGSrc;
     } else {
       this._src = image.src;
     }
