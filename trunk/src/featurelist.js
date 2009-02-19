@@ -3,6 +3,7 @@ uu.featureList = {
   // feat:        "depend, ..."
   ajax:           "boost",
   jsonp:          "url",
+  customEvent:    "boost,event,ua",
   dev:            "boost,aid,feat,ready,node,stylesheet,types,hash",
   dev_viewer:     "dev,style,event,event_drag,firebuglite,msg",
   style:          "viewport",
@@ -26,5 +27,6 @@ if (UU.IE) {
 } else {
   uu.featureList["canvas"] = "ua";
   uu.feat.canvas = {};
-  uu.feat.ieboost = {};
+  uu.featureList["ieboost"] = "ua,stylesheet,style,className,viewport,event,customEvent,selector";
+//  uu.feat.ieboost = {};
 }

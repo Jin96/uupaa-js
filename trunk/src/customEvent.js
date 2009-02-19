@@ -1,5 +1,5 @@
 // === Custom Event ========================================
-// depend: boost
+// depend: boost,event,ua
 uu.feat.customEvent = {};
 
 // === Custom Event: Font Resize ===========================
@@ -41,14 +41,24 @@ uu.Class.Singleton("CustomEventFontResize", {
   },
 
   _runner: function() {
-    var solver = this;
+    var me = this;
     (function FONT_RESIZE_RUNNER() {
+      var v, i, iz, offsetHeight, fire = 0;
+
+      uu.customEvent && uu.customEvent.disable();
+
       // peek resize font
-      if (solver._oh !== solver._agent.offsetHeight) {
-        solver._oh = solver._agent.offsetHeight; // store
-        var v, i = 0, iz = solver._fn.length;
-        for (; i < iz; ++i) {
-          v = solver._fn[i];
+      offsetHeight = me._agent.offsetHeight;
+      if (me._oh !== offsetHeight) {
+        me._oh = offsetHeight; // store
+        ++fire;
+      }
+
+      uu.customEvent && uu.customEvent.enable();
+
+      if (fire) {
+        for (i = 0, iz = me._fn.length; i < iz; ++i) {
+          v = me._fn[i];
           v && v(); // callback function
         }
       }
@@ -67,8 +77,8 @@ UU.CONFIG.CUSTOM_EVENT = {
   ADD_ELEMENT:      0x01, // with node
   REMOVE_ELEMENT:   0x02, // with node
   UPDATE_ELEMENT:   0x04,
-  UPDATE_VIEWPORT:  0x10, // resize
-  RESIZE_FONT:      0x20, // font-resize
+  RESIZE_VIEWPORT:  0x10, // resize window
+  RESIZE_FONT:      0x20, // resize font
   ALL:              0xff
 };
 
@@ -76,6 +86,7 @@ uu.Class.Singleton("CustomEvent", {
   construct: function() {
     this._fn = []; // Array( [[callback function, customEvent], ... ] )
     this._enable = true;
+    this._lastEvent = 0x0; // infinitely resize guard
 
     // set event handler
     var me = this;
@@ -97,8 +108,10 @@ uu.Class.Singleton("CustomEvent", {
   },
 
   handleEvent: function(evt) {
-    if (evt.type === "resize") {
-      this.fire(UU.CONFIG.CUSTOM_EVENT.UPDATE_VIEWPORT);
+    if (this._enable) {
+      if (evt.type === "resize") {
+        this.fire(UU.CONFIG.CUSTOM_EVENT.RESIZE_VIEWPORT);
+      }
     }
   },
 
@@ -139,14 +152,18 @@ uu.Class.Singleton("CustomEvent", {
                  node) {      // Node(default: undefined):
     customEvent = customEvent === void 0 ? 0xff : customEvent;
 
-    if (!this._enable) {
-      return;
-    }
+    if (this._enable) {
+      if (customEvent & UU.CONFIG.CUSTOM_EVENT.RESIZE_VIEWPORT &&
+          customEvent & this._lastEvent) {
+        customEvent = customEvent & ~UU.CONFIG.CUSTOM_EVENT.RESIZE_VIEWPORT;
+      }
+      this._lastEvent = customEvent;
 
-    var v, i = 0;
-    while ( (v = this._fn[i++]) ) {
-      if (customEvent & v[1]) {
-        v[0](node); // callback
+      var v, i = 0;
+      while ( (v = this._fn[i++]) ) {
+        if (customEvent & v[1]) {
+          v[0](customEvent, node); // callback
+        }
       }
     }
   }
@@ -158,7 +175,12 @@ uu.mix(uu.Class.CustomEvent, {
   _addElement: function(elm) {
     // @see http://d.hatena.ne.jp/uupaa/20081129/1227951320
     if (elm.style.behavior === "none") { return; } // guard: text selection + drag
+
+    uu.customEvent.disable();
+
     elm.style.behavior = "none"; // disable CSS::expression
+
+    uu.customEvent.enable();
 
     if (elm.nodeType === 1) {
       // hook remove element
