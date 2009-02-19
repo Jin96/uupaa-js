@@ -12,7 +12,6 @@ uu.mix(UU.CONFIG.IEBOOST, {
   OPACITY: true,
   POSITION_ABSOLUTE: true,
   POSITION_FIXED: true,
-
   BLANK_PNG: "b32.png" // use alpha png
 }, 0, 0);
 
@@ -63,13 +62,18 @@ uu.Class.Singleton("IEBoostAlphaPNG", {
     this._delayTimer = 0;
 
     var me = this, cev = UU.CONFIG.CUSTOM_EVENT;
-    uu.customEvent.attach(function(node) {
+
+    uu.customEvent.attach(function(customEvent, node) {
       me.markup(node);
     }, cev.ADD_ELEMENT);
 
     uu.customEvent.attach(function() {
       me.fix();
-    }, cev.ALL & ~(cev.ADD_ELEMENT | cev.REMOVE_ELEMENT));
+    }, cev.RESIZE_VIEWPORT);
+
+    uu.customEvent.attach(function() {
+      me.fix();
+    }, cev.UPDATE_ELEMENT | cev.RESIZE_FONT);
   },
 
   markup: function(elm) { // Node(default: undefined):
@@ -104,16 +108,15 @@ uu.Class.Singleton("IEBoostAlphaPNG", {
     clearTimeout(this._delayTimer);
     this._delayTimer = setTimeout(function() {
       me._fix(ary);
-    }, 1000);
+    }, 40);
   },
 
   _fix: function(ary) {
-    var me = this,
-        v, i = 0, iz = ary.length,
+    var v, i = 0, iz = ary.length,
         fn = uu.Class.IEBoostAlphaPNG._onpropertychange,
         spacer = UU.CONFIG.IEBOOST.BLANK_PNG,
         spacerRex = RegExp(spacer + "$"),
-        dim, src, url;
+        dim, src;
 
     if (!iz) { return; }
 
@@ -170,10 +173,7 @@ uu.Class.Singleton("IEBoostAlphaPNG", {
         default:
           this._background(v);
         }
-      } catch (err) {
-        alert(err.message);
-//        throw err.message;
-      }
+      } catch (err) { ; }
     }
   },
 
@@ -204,16 +204,17 @@ uu.Class.Singleton("IEBoostAlphaPNG", {
     img = new Image();
     img.onload = function() {
       uu.customEvent.disable();
-        elm.attachEvent("onpropertychange", fn); // detach
+        elm.detachEvent("onpropertychange", fn); // detach
           me._addBackground(elm, src, bgColor, img);
 
-          uu.style.setBackgroundImage(elm, UU.CONFIG.IMG_DIR + spacer);
+//        uu.style.setBackgroundImage(elm, UU.CONFIG.IMG_DIR + spacer);
+          elm.style.backgroundImage = "url(" + UU.CONFIG.IMG_DIR + spacer + ")";
           elm.uuIEBoostAlphaPNGBGSrc = src;
 
           elm.style.backgroundColor = "transparent";
           elm.uuIEBoostAlphaPNGBGColor = bgColor;
 
-        elm.detachEvent("onpropertychange", fn); // re-attach
+        elm.attachEvent("onpropertychange", fn); // re-attach
       uu.customEvent.enable();
     };
     img.src = src === "none" ? (UU.CONFIG.IMG_DIR + spacer)
@@ -221,8 +222,7 @@ uu.Class.Singleton("IEBoostAlphaPNG", {
   },
 
   _addBackground: function(elm, url, bgColor, img) {
-    var fn = uu.Class.IEBoostAlphaPNG._onpropertychange,
-        cs = elm.currentStyle,
+    var cs = elm.currentStyle,
         boxRect, imgRect,
         zIndex = (parseInt(cs.zIndex) || 0) - 5000,
         posx = cs.backgroundPositionX || "0%", // left, center, right, %, length
@@ -231,8 +231,8 @@ uu.Class.Singleton("IEBoostAlphaPNG", {
         x, y, match, rv, offsetX = 0, offsetY = 0;
 
     boxRect = {
-      w: Math.max(elm.clientWidth, elm.scrollWidth),
-      h: Math.max(elm.clientHeight, elm.scrollHeight)
+      w: elm.clientWidth  || 0,
+      h: elm.clientHeight || 0
     };
     imgRect = {
       w: img.width,
@@ -341,8 +341,6 @@ uu.Class.Singleton("IEBoostAlphaPNG", {
         url         // vml.fill.src(URLString)
         );
     }
-// uu.id("out").innerText = rv;
-
     elm.insertAdjacentHTML("beforeEnd", rv);
   },
 
@@ -396,13 +394,14 @@ uu.mix(uu.Class.IEBoostAlphaPNG, {
     switch (evt.propertyName) {
     case "style.backgroundImage":
     case "src": // <img><input type="image">, src change
-      uu.customEvent.fire(UU.CONFIG.CUSTOM_EVENT.UPDATE_ELEMENT, evt.srcElement);
+//      uu.customEvent.fire(UU.CONFIG.CUSTOM_EVENT.UPDATE_ELEMENT, evt.srcElement);
+      uu.ieboostAlphaPNG.fix(evt.srcElement);
     }
   }
 });
 
 UU.IE && UU.CONFIG.IEBOOST.ALPHA_PNG && uu.ready(function() {
-  new uu.Class.IEBoostAlphaPNG();
+  uu.ieboostAlphaPNG = new uu.Class.IEBoostAlphaPNG();
 });
 
 // === IEBoost MaxWidth ====================================
@@ -418,31 +417,21 @@ uu.Class.Singleton("MaxWidth", {
     this.fix();
 
     // set event handler
-    var me = this;
+    var me = this, cev = UU.CONFIG.CUSTOM_EVENT;
 
     uu.customEvent.attach(function() {
       me.markup();
       me.fix();
-    }, UU.CONFIG.CUSTOM_EVENT.ALL);
+    }, cev.ADD_ELEMENT | cev.REMOVE_ELEMENT | cev.UPDATE_ELEMENT);
 
-/*
-    uu.customEventFontResize.attach(function() { // font-resize
-      uu.style.unit(1); // re-validate em and pt
-      me.markup();
+    uu.customEvent.attach(function() {
       me.fix();
-    });
- */
-//    uu.event.attach(window, "resize", this);
-  },
+    }, cev.RESIZE_VIEWPORT);
 
-/*
-  handleEvent: function(evt) {
-    if (evt.type === "resize") { // window resize event
-      this.markup();
-      this.fix();
-    }
+    uu.customEvent.attach(function() {
+      me.fix();
+    }, cev.RESIZE_FONT);
   },
- */
 
   markup: function() {
     var rv = [], nodeList = uu.tag("*", uudoc.body), v, i = 0, cs,
@@ -503,9 +492,15 @@ uu.Class.Singleton("MaxWidth", {
       me._lock = 1; // lock
 
       var ary = me._targetElement, i = 0, iz = ary.length;
+
+      uu.customEvent.disable();
+
       for (; i < iz; ++i) {
         me.recalc(ary[i], ary[i].uuMaxWidth);
       }
+
+      uu.customEvent.enable();
+
       // lazy unlock(crucial)
       setTimeout(function() {
         me._lock = 0; // unlock
@@ -652,15 +647,18 @@ uu.Class.Singleton("IEBoostOpacity", {
     this.fix();
 
     // set event handler
-    var me = this;
+    var me = this, cev = UU.CONFIG.CUSTOM_EVENT;
+
     uu.customEvent.attach(function() {
       me.fix();
-    }, UU.CONFIG.CUSTOM_EVENT.ADD_ELEMENT |
-       UU.CONFIG.CUSTOM_EVENT.UPDATE_ELEMENT);
+    }, cev.ADD_ELEMENT | cev.UPDATE_ELEMENT);
   },
 
   fix: function() {
     var nodeList = uu.tag("*", uudoc.body), v, i = 0, opacity;
+
+    uu.customEvent.disable();
+
     while ( (v = nodeList[i++]) ) {
       opacity = v.style.opacity || v.currentStyle.opacity;
       if (opacity) {
@@ -670,6 +668,8 @@ uu.Class.Singleton("IEBoostOpacity", {
         }
       }
     }
+
+    uu.customEvent.enable();
   }
 });
 
@@ -742,37 +742,25 @@ uu.Class.Singleton("IEBoostPositionFixed", {
     this.fix();
 
     // set event handler
-    var me = this;
+    var me = this, cev = UU.CONFIG.CUSTOM_EVENT;
 
-    uu.customEvent.attach(function() {
+    uu.customEvent.attach(function(customEvent) {
       me.markup();
-    }, UU.CONFIG.CUSTOM_EVENT.ADD_ELEMENT |
-       UU.CONFIG.CUSTOM_EVENT.UPDATE_ELEMENT);
+    }, cev.ADD_ELEMENT | cev.UPDATE_ELEMENT);
 
-    uu.customEvent.attach(function() { // resize, update view
+    uu.customEvent.attach(function(customEvent) { // resize, update view
       me.fix();
-    }, UU.CONFIG.CUSTOM_EVENT.ADD_ELEMENT |
-       UU.CONFIG.CUSTOM_EVENT.UPDATE_ELEMENT |
-       UU.CONFIG.CUSTOM_EVENT.UPDATE_VIEWPORT |
-       UU.CONFIG.CUSTOM_EVENT.RESIZE_FONT);
+    }, cev.ADD_ELEMENT | cev.UPDATE_ELEMENT |
+       cev.RESIZE_VIEWPORT | cev.RESIZE_FONT);
 
-/*
-    uu.customEventFontResize.attach(function() { // font-resize
-      uu.style.unit(1); // re-validate em and pt
-      me.fix();
-    });
     uu.event.attach(window, "resize", this);
- */
   },
 
-/*
   handleEvent: function(evt) {
     if (evt.type === "resize") { // window resize event
       this.fix();
     }
   },
- */
-
   _fixSmoothScroll: function() {
     if (this._smoothScrollFixed) { return; }
 

@@ -221,15 +221,15 @@ uu.mix(uu.style, {
 
   // uu.style.getBackgroundImage - get background-image URL
   getBackgroundImage: function(elm) { // Node:
-    var url, m;
+    var url, match;
     if (UU.IE) {
       url = (elm.style.backgroundImage || elm.currentStyle.backgroundImage);
     } else {
       url = uu.style(elm, "").backgroundImage;
     }
     if (url) {
-      if ( (m = /^url\((.*)\)$/.exec(url)) ) {
-        return m[1].replace(/^\s*[\"\']?|[\"\']?\s*$/g, ""); // trim quote
+      if ( (match = /^url\((.*)\)$/.exec(url)) ) {
+        return match[1].replace(/^\s*[\"\']?|[\"\']?\s*$/g, ""); // trim quote
         // return String( "http://..." )
       }
     }
@@ -239,7 +239,11 @@ uu.mix(uu.style, {
   // uu.style.setBackgroundImage - set background-image URL
   setBackgroundImage: function(elm,   // Node:
                                url) { // String: "url(http://...)" or "http://..."
+    uu.customEvent && uu.customEvent.disable();
+
     elm.style.backgroundImage = !url.indexOf("url") ? url : "url(" + url + ")";
+
+    uu.customEvent && uu.customEvent.enable();
   },
 
   // uu.style.selectable - element selectable

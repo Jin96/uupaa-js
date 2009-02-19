@@ -155,6 +155,7 @@ uu.Class("Event", {
 
     if (UU.IE) {
       me._uuEventClosure = function(evt) {
+        evt = evt || window.event;
         var src  = evt.srcElement,
             from = evt.fromElement;
         evt.target = src;
