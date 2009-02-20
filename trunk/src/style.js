@@ -85,7 +85,8 @@ uu.mix(uu.style, {
 
   // uu.style.getRect - get element absolute position and rectangle
   getRect: function(elm) { // Node:
-    var e, x = 0, y = 0, fix = 0, rect, viewport;
+    var e, x = 0, y = 0, fix = 0, rect, viewport
+        w = 0, h = 0;
 
     if (elm.getBoundingClientRect) {
       // get relative position
@@ -98,6 +99,8 @@ uu.mix(uu.style, {
       viewport = uu.viewport.getRect();
       x = rect.left + viewport.sx - fix;
       y = rect.top  + viewport.sy - fix;
+      w = rect.right - rect.left;
+      h = rect.bottom - rect.top;
     } else {
       // get absolute position
       e = elm;
@@ -114,8 +117,8 @@ uu.mix(uu.style, {
       x: x,
       y: y,
       // element dimension(style.width + padding)
-      w: elm.clientWidth,
-      h: elm.clientHeight,
+      w: elm.clientWidth  || elm.scrollWidth  || w,
+      h: elm.clientHeight || elm.scrollHeight || h,
       // element dimension(style.width + padding + border)
       ow: elm.offsetWidth,
       oh: elm.offsetHeight

@@ -1,5 +1,5 @@
 // === IEBoost =============================================
-// depend: ua, stylesheet, style, className, viewport, event, customEvent, selector
+// depend: boost, ua, stylesheet, style, className, viewport, event, customEvent
 uu.feat.ieboost = {};
 
 uu.mix(UU.CONFIG, {
@@ -7,12 +7,12 @@ uu.mix(UU.CONFIG, {
 }, 0, 0);
 
 uu.mix(UU.CONFIG.IEBOOST, {
-  MAX_WIDTH: true,
   ALPHA_PNG: true,
+  MAX_WIDTH: false,
   OPACITY: true,
   POSITION_ABSOLUTE: true,
   POSITION_FIXED: true,
-  BLANK_PNG: "b32.png" // use alpha png
+  BLANK_PNG: "b32.png"
 }, 0, 0);
 
 // === IEBoost BackgroundImageCache care ===================
@@ -22,7 +22,7 @@ UU.IE && uu.ua.version === 6 && uu.ready(function() {
   } catch (err) { ; }
 });
 
-// === IEBoost VML care ====================================
+// === IEBoost VML care ===================================
 UU.IE && uu.ua.version <= 8 && uu.ready(function() {
   if (!uudoc.namespaces["v"]) {
     uudoc.namespaces.add("v", "urn:schemas-microsoft-com:vml");
@@ -35,6 +35,24 @@ UU.IE && uu.ua.version <= 8 && uu.ready(function() {
     "o\\:*{behavior:url(#default#VML)}";
 });
 
+// === IEBoost print care =================================
+UU.IE && uu.ua.version <= 8 && uu.ready(function() {
+  window.attachEvent("onbeforeprint", function() {
+    var nodeList = uu.className("ieboostnoprintable", uudoc.body),
+        v, i = 0;
+    while ( (v = nodeList[i++]) ) {
+      v.style.visibility = "hidden";
+    }
+  });
+  window.attachEvent("onafterprint", function() {
+    var nodeList = uu.className("ieboostnoprintable", uudoc.body),
+        v, i = 0;
+    while ( (v = nodeList[i++]) ) {
+      v.style.visibility = "visible";
+    }
+  });
+});
+
 // === IEBoost Alpha PNG ===================================
 /** Alpha png image transparent for IE6
  *
@@ -42,327 +60,90 @@ UU.IE && uu.ua.version <= 8 && uu.ready(function() {
  */
 (function() {
 var ALPHA_LOADER = "DXImageTransform.Microsoft.AlphaImageLoader",
+    ALPHA_FILTER = " progid:%s(src='%s',sizingMethod='image')",
     ALPHA_REPEAT = [
-    '<div class="ieboostalphapngbg" style="background-color:%s;z-index:%d;position:absolute;top:0;left:0;overflow:hidden;width:%dpx;height:%dpx;%s">',
+    '<div class="ieboostalphapngbg ieboostnoprintable" unselectable="on" onselectstart="return false" ',
+      'style="background-color:%s;z-index:%d;position:absolute;top:0;left:0;overflow:hidden;width:%dpx;height:%dpx;%s">',
       '<v:rect style="position:absolute;left:%dpx;top:%dpx;width:%dpx;height:%dpx;%s" coordsize="21600,21600" filled="t" stroked="f">',
         '<v:fill type="tile" src="%s" />',
       '</v:rect>',
     '</div>'].join(""),
-    tagHash1 = { input: 1, INPUT: 1, img: 2, IMG: 2 },
-    tagHash2 = { a: 1, input: 2, select: 2, textarea: 2,
-                 A: 1, INPUT: 2, SELECT: 2, TEXTAREA: 2 },
+    BLANK = UU.CONFIG.IEBOOST.BLANK_PNG,
+    BLANK_REX = RegExp(BLANK + "$"),
+    tagHash1 =  { input: 1, INPUT: 1, img: 2, IMG: 2 },
+    tagHash2 =  { a: 1, input: 2, select: 2, textarea: 2,
+                  A: 1, INPUT: 2, SELECT: 2, TEXTAREA: 2 },
+    propHash =  { width: 1, height: 1,
+                  "style.backgroundImage": 2,
+                  "style.backgroundColor": 3,
+                  "style.backgroundPositionX": 4,
+                  "style.backgroundPositionY": 4,
+                  "style.backgroundRepeat": 4 },
     posHash = { left: 0, center: 50, right: 100, top: 0, bottom: 100 },
     POS_X = /^(left|center|right)|(\d+%)|(\d+em)|(\d+pt)|(\d+px)$/,
-    POS_Y = /^(top|center|bottom)|(\d+%)|(\d+em)|(\d+pt)|(\d+px)$/;
-
+    POS_Y = /^(top|center|bottom)|(\d+%)|(\d+em)|(\d+pt)|(\d+px)$/,
+    onImgInputChange = null,
+    onBackgroundChange = null;
 
 uu.Class.Singleton("IEBoostAlphaPNG", {
   construct: function() {
-    this._targetElement = [];
     this._delayTimer = 0;
+    var me = this, cev = UU.CONFIG.CUSTOM_EVENT,
+        expr1 = 'behavior:expression(uu.ieboostAlphaPNG.initImgInput(this))';
+        expr2 = 'behavior:expression(uu.ieboostAlphaPNG.initBackground(this))';
 
-    var me = this, cev = UU.CONFIG.CUSTOM_EVENT;
-
-    uu.customEvent.attach(function(customEvent, node) {
-      me.markup(node);
-    }, cev.ADD_ELEMENT);
-
-    uu.customEvent.attach(function() {
-      me.fix();
-    }, cev.RESIZE_VIEWPORT);
+    uu.style.appendRule("ieboost", "img",    expr1);
+    uu.style.appendRule("ieboost", "input",  expr1);
+    uu.style.appendRule("ieboost", ".png",   expr2);
+    uu.style.appendRule("ieboost", ".alpha", expr2);
 
     uu.customEvent.attach(function() {
-      me.fix();
-    }, cev.UPDATE_ELEMENT | cev.RESIZE_FONT);
-  },
-
-  markup: function(elm) { // Node(default: undefined):
-    var v, i = 0, fn = uu.Class.IEBoostAlphaPNG._onpropertychange;
-
-    if (elm) {
-      if (this._targetElement.indexOf(elm) < 0) {
-        if (uu.className.has("png") || uu.className.has("alpha") ||
-            elm.tagName.toLowerCase() === "img" ||
-            elm.tagName.toLowerCase() === "input" && elm.type === "image") {
-          this._targetElement.push(elm);
-          if (!elm.uuIEBoostAlphaPNGAgent) {
-            elm.uuIEBoostAlphaPNGAgent = 1;
-            elm.attachEvent("onpropertychange", fn);
-          }
+        var nodeList = uu.className("alpha", uudoc.body).concat(
+                          uu.className("png", uudoc.body)),
+            v, i = 0;
+        while ( (v = nodeList[i++]) ) {
+          me.fixBackground(v, 1);
         }
-      }
-    } else {
-      this._targetElement = uu.css("img,input[type=image],.png,.alpha");
-      while ( (v = this._targetElement[i++]) ) {
-        if (!v.uuIEBoostAlphaPNGAgent) {
-          v.uuIEBoostAlphaPNGAgent = 1;
-          v.attachEvent("onpropertychange", fn);
-        }
-      }
-    }
+    }, cev.RESIZE_BODY | cev.RESIZE_FONT);
   },
 
-  fix: function(elm) { // Node(default: undefined):
-    var me = this, ary = elm ? [elm] : this._targetElement;
+  initImgInput: function(elm) {
+    elm.style.behavior = "none";
+    onImgInputChange = uu.Class.IEBoostAlphaPNG.onImgInputChange;
 
-    clearTimeout(this._delayTimer);
-    this._delayTimer = setTimeout(function() {
-      me._fix(ary);
-    }, 40);
+    if (tagHash1[elm.tagName] === 1 && elm.type !== "image") { // input[type!=image]
+      return;
+    }
+    uu.ieboostAlphaPNG.applyAlphaLoader(elm);
+    elm.attachEvent("onpropertychange", onImgInputChange);
   },
 
-  _fix: function(ary) {
-    var v, i = 0, iz = ary.length,
-        fn = uu.Class.IEBoostAlphaPNG._onpropertychange,
-        spacer = UU.CONFIG.IEBOOST.BLANK_PNG,
-        spacerRex = RegExp(spacer + "$"),
-        dim, src;
+  applyAlphaLoader: function(elm) {
+    var width = elm.width, height = elm.height;
 
-    if (!iz) { return; }
+    elm.uuIEBoostAlphaPNGSrc = elm.src;
 
-    for (; i < iz; ++i) {
-      v = ary[i];
-      try {
-        switch (tagHash1[v.tagName] || 0) {
-        case 1: // 1: input
-          if (v.type === "image") { break; }
-        case 2: // 2: img
-          src = v.src;
-          if (spacerRex.test(src) || v.uuIEBoostAlphaPNGSrc === src) {
-            break; // nop
-          }
-
-          if (/.png$/.test(src)) {
-            // keep src and dimension
-            v.detachEvent("onpropertychange", fn); // detach
-            {
-              v.uuIEBoostAlphaPNGSrc = src;
-              dim = { w: v.width, h: v.height };
-
-              // swap src
-              this.setAlphaLoader(v, src, "image");
-              v.src = UU.CONFIG.IMG_DIR + spacer;
-
-              // force hasLayout: true
-              if (tagHash[v.tagName] === 1) { // 1: input
-                v.style.zoom = 1;
-              } else {
-                v.width  = dim.w;
-                v.height = dim.h;
-              }
-              this._bugfix(v);
-            }
-            v.attachEvent("onpropertychange", fn); // re-attach
-
-          } else {
-            if (!/^data:/.test(src)) {
-              // <img src="xxx.png">  -> xxx.gif or xxx.jpg
-              // exclude "b32.png" or DataScheme
-              v.detachEvent("onpropertychange", fn); // detach
-              {
-                v.uuIEBoostAlphaPNGSrc = src;
-                // disable filter and make it original size
-                this.unsetAlphaLoader(v);
-                v.style.width  = "auto";
-                v.style.height = "auto";
-              }
-              v.attachEvent("onpropertychange", fn); // re-attach
-            }
-          }
-          break;
-        default:
-          this._background(v);
-        }
-      } catch (err) { ; }
-    }
-  },
-
-  _background: function(elm) {
-    var me = this,
-        fn = uu.Class.IEBoostAlphaPNG._onpropertychange,
-        img, nodeList, v, i = 0,
-        url = uu.style.getBackgroundImage(elm), src, bgColor,
-        cs = elm.currentStyle,
-        spacer = UU.CONFIG.IEBOOST.BLANK_PNG,
-        spacerRex = RegExp(spacer + "$");
-
-    uu.customEvent.disable();
-      nodeList = uu.className("ieboostalphapngbg", elm);
-      while ( (v = nodeList[i++]) ) {
-        v.parentNode.removeChild(v);
-      }
-    uu.customEvent.enable();
-
-    if (spacerRex.test(url)) {
-      src = elm.uuIEBoostAlphaPNGBGSrc;
-      bgColor = elm.uuIEBoostAlphaPNGBGColor;
-    } else {
-      src = url;
-      bgColor = cs.backgroundColor;
-    }
-
-    img = new Image();
-    img.onload = function() {
-      uu.customEvent.disable();
-        elm.detachEvent("onpropertychange", fn); // detach
-          me._addBackground(elm, src, bgColor, img);
-
-//        uu.style.setBackgroundImage(elm, UU.CONFIG.IMG_DIR + spacer);
-          elm.style.backgroundImage = "url(" + UU.CONFIG.IMG_DIR + spacer + ")";
-          elm.uuIEBoostAlphaPNGBGSrc = src;
-
-          elm.style.backgroundColor = "transparent";
-          elm.uuIEBoostAlphaPNGBGColor = bgColor;
-
-        elm.attachEvent("onpropertychange", fn); // re-attach
-      uu.customEvent.enable();
-    };
-    img.src = src === "none" ? (UU.CONFIG.IMG_DIR + spacer)
-                             : src;
-  },
-
-  _addBackground: function(elm, url, bgColor, img) {
-    var cs = elm.currentStyle,
-        boxRect, imgRect,
-        zIndex = (parseInt(cs.zIndex) || 0) - 5000,
-        posx = cs.backgroundPositionX || "0%", // left, center, right, %, length
-        posy = cs.backgroundPositionY || "0%", // top, center, bottom, %, length
-        repeat = cs.backgroundRepeat || "repeat", // repeat｜repeat-x｜repeat-y｜no-repeat
-        x, y, match, rv, offsetX = 0, offsetY = 0;
-
-    boxRect = {
-      w: elm.clientWidth  || 0,
-      h: elm.clientHeight || 0
-    };
-    imgRect = {
-      w: img.width,
-      h: img.height
-    };
-
-    if ( (match = POS_X.exec(posx)) ) {
-      if (match[1]) {
-        x = Math.round((boxRect.w - imgRect.w) * (posHash[match[1]] / 100));
-      } else if (match[2]) {
-        x = Math.round((boxRect.w - imgRect.w) * (parseInt(match[2]) / 100));
-      }
-    }
-    if ( (match = POS_Y.exec(posy)) ) {
-      if (match[1]) {
-        y = Math.round((boxRect.h - imgRect.h) * (posHash[match[1]] / 100));
-      } else if (match[2]) {
-        y = Math.round((boxRect.h - imgRect.h) * (parseInt(match[2]) / 100));
-      }
-    }
-
-    // box: position: relative
-    cs = elm.currentStyle;
-    if (!cs.position || cs.position === "static") {
-      elm.style.position = "relative";
-    }
-
-    switch (repeat) {
-    case "no-repeat":
-      rv = ALPHA_REPEAT.sprintf(
-        bgColor,    // div.style.background-color(String)
-        zIndex,     // div.style.z-index(Number)
-        boxRect.w,  // div.style.width(Number, unit: px)
-        boxRect.h,  // div.style.height(Number, unit: px)
-        "",         // div.style.extras(String)
-        x,          // vml.rect.style.left(Number, unit: px)
-        y,          // vml.rect.style.top(Number, unit: px)
-        imgRect.w,  // vml.rect.style.width(Number, unit: px)
-        imgRect.h,  // vml.rect.style.height(Number, unit: px)
-        "",         // vml.rect.style.extras(String)
-        url         // vml.fill.src(URLString)
-        );
-      break;
-    case "repeat-x":
-      offsetX = x;
-      while (offsetX > 0) {
-        offsetX -= imgRect.w;
-      }
-
-      rv = ALPHA_REPEAT.sprintf(
-        bgColor,    // div.style.background-color(String)
-        zIndex,     // div.style.z-index(Number)
-        boxRect.w,  // div.style.width(Number, unit: px)
-        boxRect.h,  // div.style.height(Number, unit: px)
-        "",         // div.style.extras(String)
-        offsetX,    // vml.rect.style.left(Number, unit: px)
-        y,          // vml.rect.style.top(Number, unit: px)
-        boxRect.w - offsetX, // vml.rect.style.width(Number, unit: px)
-        imgRect.h,  // vml.rect.style.height(Number, unit: px)
-        "",         // vml.rect.style.extras(String)
-        url         // vml.fill.src(URLString)
-        );
-      break;
-    case "repeat-y":
-      offsetY = y;
-      while (offsetY > 0) {
-        offsetY -= imgRect.h;
-      }
-
-      rv = ALPHA_REPEAT.sprintf(
-        bgColor,    // div.style.background-color(String)
-        zIndex,     // div.style.z-index(Number)
-        boxRect.w,  // div.style.width(Number, unit: px)
-        boxRect.h,  // div.style.height(Number, unit: px)
-        "",         // div.style.extras(String)
-        x,          // vml.rect.style.left(Number, unit: px)
-        offsetY,    // vml.rect.style.top(Number, unit: px)
-        imgRect.w,  // vml.rect.style.width(Number, unit: px)
-        boxRect.h - offsetY, // vml.rect.style.height(Number, unit: px)
-        "",         // vml.rect.style.extras(String)
-        url         // vml.fill.src(URLString)
-        );
-      break;
-    case "repeat":
-      offsetX = x;
-      while (offsetX > 0) {
-        offsetX -= imgRect.w;
-      }
-
-      offsetY = y;
-      while (offsetY > 0) {
-        offsetY -= imgRect.h;
-      }
-
-      rv = ALPHA_REPEAT.sprintf(
-        bgColor,    // div.style.background-color(String)
-        zIndex,     // div.style.z-index(Number)
-        boxRect.w,  // div.style.width(Number, unit: px)
-        boxRect.h,  // div.style.height(Number, unit: px)
-        "",         // div.style.extras(String)
-        offsetX,    // vml.rect.style.left(Number, unit: px)
-        offsetY,    // vml.rect.style.top(Number, unit: px)
-        boxRect.w - offsetX, // vml.rect.style.width(Number, unit: px)
-        boxRect.h - offsetY, // vml.rect.style.height(Number, unit: px)
-        "",         // vml.rect.style.extras(String)
-        url         // vml.fill.src(URLString)
-        );
-    }
-    elm.insertAdjacentHTML("beforeEnd", rv);
-  },
-
-  setAlphaLoader: function(elm, src, method) {
+//  this.setAlphaLoader(elm, elm.src, "image");
     if (elm.filters.length && ALPHA_LOADER in elm.filters) {
       elm.filters[ALPHA_LOADER].enabled = 1;
-      elm.filters[ALPHA_LOADER].src = src;
+      elm.filters[ALPHA_LOADER].src = elm.src;
     } else {
-      elm.style.filter +=
-          [" progid:", ALPHA_LOADER,
-           "(src='", src, "', sizingMethod='", method, "')"].join("");
+      elm.style.filter += ALPHA_FILTER.sprintf(ALPHA_LOADER, elm.src);
     }
-  },
 
-  unsetAlphaLoader: function(elm) {
-    if (elm.filters.length && ALPHA_LOADER in elm.filters) {
-      elm.filters[ALPHA_LOADER].enabled = 0;
+    elm.src = UU.CONFIG.IMG_DIR + BLANK;
+
+    // force hasLayout: true
+    elm.style.zoom = 1;
+    if (tagHash1[elm.tagName] === 2) { // 2: img
+      elm.width  = width;
+      elm.height = height;
     }
+    this.fixAlphaLoaderBug(elm);
   },
 
   // [a, input, textarea, select ] clickable
-  _bugfix: function(elm) {
+  fixAlphaLoaderBug: function(elm) {
     var v;
 
     function clickable(elm) {
@@ -381,24 +162,348 @@ uu.Class.Singleton("IEBoostAlphaPNG", {
     for (v = elm.firstChild; v; v = v.nextSibling) {
       if (v.nodeType === 1) {
         clickable(v);
-        v.firstChild && this._bugfix(v);
+        v.firstChild && this.fixAlphaLoaderBug(v);
       }
     }
+  },
+
+  fixImgInput: function(elm) {
+    var src = elm.src;
+
+    if (/.png$/.test(src)) {
+      if (BLANK_REX.test(src)) {
+        return;
+      }
+
+      elm.detachEvent("onpropertychange", onImgInputChange); // detach
+      uu.ieboostAlphaPNG.applyAlphaLoader(elm);
+      elm.attachEvent("onpropertychange", onImgInputChange); // re-attach
+    } else {
+      if (!/^data:/.test(src)) {
+        // <img src="xxx.png">  -> xxx.gif or xxx.jpg
+        // exclude "b32.png" or DataScheme
+        elm.detachEvent("onpropertychange", onImgInputChange); // detach
+        elm.uuIEBoostAlphaPNGSrc = src;
+        // disable filter and make it original size
+
+        if (elm.filters.length && ALPHA_LOADER in elm.filters) {
+          elm.filters[ALPHA_LOADER].enabled = 0;
+        }
+
+        elm.style.width  = "auto";
+        elm.style.height = "auto";
+        elm.attachEvent("onpropertychange", onImgInputChange); // re-attach
+      }
+    }
+  },
+
+  initBackground: function(elm) {
+    elm.style.behavior = "none";
+    onBackgroundChange = uu.Class.IEBoostAlphaPNG.onBackgroundChange;
+
+    var cs = elm.currentStyle, hash, img,
+        w, h;
+    if (elm === uudoc.body || elm === uudoc.documentElement) {
+      w = elm.offsetWidth  - 20;
+      h = elm.offsetHeight + 10;
+    } else {
+      w = elm.clientWidth  || elm.scrollWidth;
+      h = elm.clientHeight || elm.scrollHeight;
+    }
+
+    elm.uuIEBoostAlphaPNGHash = {
+      vml:    0,
+      image:  uu.style.getBackgroundImage(elm),
+      width:  w,
+      height: h,
+      color:  cs.backgroundColor,
+      posx:   cs.backgroundPositionX,
+      posy:   cs.backgroundPositionY,
+      repeat: cs.backgroundRepeat
+    };
+    hash = elm.uuIEBoostAlphaPNGHash;
+
+    if (!/png$/i.test(hash.image)) {
+      elm.attachEvent("onpropertychange", onBackgroundChange);
+      return;
+    }
+
+    img = new Image();
+    img.onload = function() {
+      hash.vml = 1;
+      elm.style.backgroundImage = "url(" + UU.CONFIG.IMG_DIR + BLANK + ")";
+      elm.style.backgroundColor = "transparent";
+      uu.ieboostAlphaPNG.addBackground(elm, img, hash);
+      elm.attachEvent("onpropertychange", onBackgroundChange);
+    };
+    img.src = hash.image;
+  },
+
+  fixBackground: function(elm, prop) {
+    var img, nodeList, v, i = 0,
+        cs = elm.currentStyle, add = 0, remove = 0, changeProp = 0,
+        hash = elm.uuIEBoostAlphaPNGHash,
+        curt = {
+          image:  uu.style.getBackgroundImage(elm),
+          width:  0,
+          height: 0,
+          color:  cs.backgroundColor,
+          posx:   cs.backgroundPositionX,
+          posy:   cs.backgroundPositionY,
+          repeat: cs.backgroundRepeat
+        },
+        fmt1 = /png$/i.test(hash.image), // true: before is png
+        fmt2 = /png$/i.test(curt.image); // true: after is png
+
+    if (elm === uudoc.body || elm === uudoc.documentElement) {
+      curt.width  = elm.offsetWidth  - 20;
+      curt.height = elm.offsetHeight + 10;
+    } else {
+      curt.width  = elm.clientWidth  || elm.scrollWidth;
+      curt.height = elm.clientHeight || elm.scrollHeight;
+    }
+
+    if (curt.width  !== hash.width  ||
+        curt.height !== hash.height ||
+        curt.color  !== hash.color  ||
+        curt.posx   !== hash.posx   ||
+        curt.posy   !== hash.posy   ||
+        curt.repeat !== hash.repeat) {
+      ++changeProp;
+    }
+    if (curt.image !== hash.image) {
+      if (fmt1 && fmt2) { // 1.png -> 2.png
+        ++add, ++remove;
+      } else if (!fmt1 && fmt2) { // *.gif/none -> *.png
+        ++add;
+      } else if (fmt1 && !fmt2) { // *.png -> *.gif/none
+        ++remove;
+      }
+    } else if (hash.vml && changeProp) {
+      ++add, ++remove;
+    }
+
+    switch (prop) {
+    case 2: // 2: style.backgroundImage
+      hash.image = curt.image;
+      break;
+    case 3: // 3: style.backgroundColor
+      hash.color = curt.color;
+      break;
+    }
+
+    if (remove) {
+      nodeList = uu.className("ieboostalphapngbg", elm);
+      while ( (v = nodeList[i++]) ) {
+        v.parentNode.removeChild(v);
+      }
+      if (!add) {
+        elm.detachEvent("onpropertychange", onBackgroundChange); // detach
+
+        hash.vml = 0;
+//      hash.image = hash.image;
+        hash.width = curt.width;
+        hash.height = curt.height;
+//      hash.color = hash.color;
+        hash.posx = curt.posx;
+        hash.posy = curt.posy;
+        hash.repeat = curt.repeat;
+
+        elm.style.backgroundImage = "url(" + hash.image + ")"; // restore
+        elm.style.backgroundColor = hash.color; // restore
+
+        elm.attachEvent("onpropertychange", onBackgroundChange); // re-attach
+        return;
+      }
+    }
+
+    if (add) {
+
+      img = new Image();
+      img.onload = function() {
+        elm.detachEvent("onpropertychange", onBackgroundChange); // detach
+
+        hash.vml = 1;
+//      hash.image = hash.image;
+        hash.width = curt.width;
+        hash.height = curt.height;
+//      hash.color = hash.color;
+        hash.posx = curt.posx;
+        hash.posy = curt.posy;
+        hash.repeat = curt.repeat;
+
+        elm.style.backgroundImage = "url(" + UU.CONFIG.IMG_DIR + BLANK + ")";
+        elm.style.backgroundColor = "transparent";
+        uu.ieboostAlphaPNG.addBackground(elm, img, hash);
+
+        elm.attachEvent("onpropertychange", onBackgroundChange); // re-attach
+      };
+      img.src = hash.image;
+    }
+  },
+
+  addBackground: function(elm, img, hash) {
+    var cs = elm.currentStyle,
+        zIndex  = (parseInt(cs.zIndex) || 0) - 5000,
+        posx    = hash.posx   || "0%", // left, center, right, %, length
+        posy    = hash.posy   || "0%", // top, center, bottom, %, length
+        repeat  = hash.repeat || "repeat", // repeat｜repeat-x｜repeat-y｜no-repeat
+        x, y, match, rv, offsetX = 0, offsetY = 0, unit = uu.style.unit(),
+        imgWidth = img.width,
+        imgHeight = img.height;
+
+    if ( (match = POS_X.exec(posx)) ) {
+      if (match[1]) {
+        x = Math.round((hash.width - imgWidth) * (posHash[match[1]] / 100));
+      } else if (match[2]) { // 100%
+        x = Math.round((hash.width - imgWidth) * (parseInt(match[2]) / 100));
+      } else if (match[3]) { // 100em
+        x = parseInt(match[3]) * unit.em;
+      } else if (match[4]) { // 100pt
+        x = parseInt(match[4]) * unit.pt;
+      } else if (match[5]) { // 100px
+        x = parseInt(match[5]);
+      }
+    }
+    if ( (match = POS_Y.exec(posy)) ) {
+      if (match[1]) {
+        y = Math.round((hash.height - imgHeight) * (posHash[match[1]] / 100));
+      } else if (match[2]) {
+        y = Math.round((hash.height - imgHeight) * (parseInt(match[2]) / 100));
+      } else if (match[3]) { // 100em
+        y = parseInt(match[3]) * unit.em;
+      } else if (match[4]) { // 100pt
+        y = parseInt(match[4]) * unit.pt;
+      } else if (match[5]) { // 100px
+        y = parseInt(match[5]);
+      }
+    }
+
+    // box: position: relative
+    cs = elm.currentStyle;
+    if (!cs.position || cs.position === "static") {
+      elm.style.position = "relative";
+    }
+
+    switch (repeat) {
+    case "no-repeat":
+      rv = ALPHA_REPEAT.sprintf(
+        hash.color,   // div.style.background-color(String)
+        zIndex,       // div.style.z-index(Number)
+        hash.width,   // div.style.width(Number, unit: px)
+        hash.height,  // div.style.height(Number, unit: px)
+        "",           // div.style.extras(String)
+        x,            // vml.rect.style.left(Number, unit: px)
+        y,            // vml.rect.style.top(Number, unit: px)
+        imgWidth,     // vml.rect.style.width(Number, unit: px)
+        imgHeight,    // vml.rect.style.height(Number, unit: px)
+        "",           // vml.rect.style.extras(String)
+        hash.image    // vml.fill.src(URLString)
+      );
+      break;
+    case "repeat-x":
+      offsetX = x;
+      while (offsetX > 0) {
+        offsetX -= imgWidth;
+      }
+
+      rv = ALPHA_REPEAT.sprintf(
+        hash.color,   // div.style.background-color(String)
+        zIndex,       // div.style.z-index(Number)
+        hash.width,   // div.style.width(Number, unit: px)
+        hash.height,  // div.style.height(Number, unit: px)
+        "",           // div.style.extras(String)
+        offsetX,      // vml.rect.style.left(Number, unit: px)
+        y,            // vml.rect.style.top(Number, unit: px)
+        hash.width - offsetX, // vml.rect.style.width(Number, unit: px)
+        imgHeight,    // vml.rect.style.height(Number, unit: px)
+        "",           // vml.rect.style.extras(String)
+        hash.image    // vml.fill.src(URLString)
+      );
+      break;
+    case "repeat-y":
+      offsetY = y;
+      while (offsetY > 0) {
+        offsetY -= imgHeight;
+      }
+
+      rv = ALPHA_REPEAT.sprintf(
+        hash.color,   // div.style.background-color(String)
+        zIndex,       // div.style.z-index(Number)
+        hash.width,   // div.style.width(Number, unit: px)
+        hash.height,  // div.style.height(Number, unit: px)
+        "",           // div.style.extras(String)
+        x,            // vml.rect.style.left(Number, unit: px)
+        offsetY,      // vml.rect.style.top(Number, unit: px)
+        imgWidth,     // vml.rect.style.width(Number, unit: px)
+        hash.height - offsetY, // vml.rect.style.height(Number, unit: px)
+        "",           // vml.rect.style.extras(String)
+        hash.image    // vml.fill.src(URLString)
+      );
+      break;
+    case "repeat":
+      offsetX = x;
+      while (offsetX > 0) {
+        offsetX -= imgWidth;
+      }
+
+      offsetY = y;
+      while (offsetY > 0) {
+        offsetY -= imgHeight;
+      }
+
+      rv = ALPHA_REPEAT.sprintf(
+        hash.color,   // div.style.background-color(String)
+        zIndex,       // div.style.z-index(Number)
+        hash.width,   // div.style.width(Number, unit: px)
+        hash.height,  // div.style.height(Number, unit: px)
+        "",           // div.style.extras(String)
+        offsetX,      // vml.rect.style.left(Number, unit: px)
+        offsetY,      // vml.rect.style.top(Number, unit: px)
+        hash.width  - offsetX, // vml.rect.style.width(Number, unit: px)
+        hash.height - offsetY, // vml.rect.style.height(Number, unit: px)
+        "",           // vml.rect.style.extras(String)
+        hash.image    // vml.fill.src(URLString)
+      );
+    }
+//    elm.insertAdjacentHTML("beforeEnd", rv);
+    elm.insertAdjacentHTML("AfterBegin", rv);
   }
 });
-})();
 
 uu.mix(uu.Class.IEBoostAlphaPNG, {
-  _onpropertychange: function() {
-    var evt = window.event;
-    switch (evt.propertyName) {
-    case "style.backgroundImage":
-    case "src": // <img><input type="image">, src change
-//      uu.customEvent.fire(UU.CONFIG.CUSTOM_EVENT.UPDATE_ELEMENT, evt.srcElement);
-      uu.ieboostAlphaPNG.fix(evt.srcElement);
+  onImgInputChange: function() {
+    var evt = window.event,
+        elm = evt.srcElement,
+  //    prop = evt.propertyName, // "src"
+        tag = tagHash1[elm.tagName];
+
+    if (tag === 1 && elm.type !== "image") { // input[type!=image]
+      return;
+    }
+    uu.ieboostAlphaPNG.fixImgInput(elm);
+  },
+
+  onBackgroundChange: function() {
+    var evt = window.event,
+        elm = evt.srcElement,
+        prop = propHash[evt.propertyName] || 0, url;
+
+    switch (prop) {
+    case 2: // style.backgroundImage
+      url = uu.style.getBackgroundImage(elm);
+      if (BLANK_REX.test(url)) {
+        return;
+      }
+    case 1: // width, height
+    case 3: // style.backgroundColor
+    case 4: // style.backgroundPositionX, ...
+      uu.ieboostAlphaPNG.fixBackground(elm, prop);
     }
   }
 });
+
+})();
 
 UU.IE && UU.CONFIG.IEBOOST.ALPHA_PNG && uu.ready(function() {
   uu.ieboostAlphaPNG = new uu.Class.IEBoostAlphaPNG();
@@ -724,7 +829,7 @@ uu.Class.Singleton("IEBoostPositionFixed", {
       uu.style.appendRule(
           "ieboost",
           ".uuPositionFixed",
-          "behavior: expression(" +
+          "behavior:expression(" +
             "this.style.pixelTop=document.body.scrollTop+this.uuPositionFixed.pxVValue," +
             "this.style.pixelLeft=document.body.scrollLeft+this.uuPositionFixed.pxHValue)"
       );
@@ -732,7 +837,7 @@ uu.Class.Singleton("IEBoostPositionFixed", {
       uu.style.appendRule(
           "ieboost",
           ".uuPositionFixed",
-          "behavior: expression(" +
+          "behavior:expression(" +
             "this.style.pixelTop=document.documentElement.scrollTop+this.uuPositionFixed.pxVValue," +
             "this.style.pixelLeft=document.documentElement.scrollLeft+this.uuPositionFixed.pxHValue)"
       );
@@ -751,16 +856,19 @@ uu.Class.Singleton("IEBoostPositionFixed", {
     uu.customEvent.attach(function(customEvent) { // resize, update view
       me.fix();
     }, cev.ADD_ELEMENT | cev.UPDATE_ELEMENT |
-       cev.RESIZE_VIEWPORT | cev.RESIZE_FONT);
+//     cev.RESIZE_VIEWPORT | cev.RESIZE_FONT);
+       cev.RESIZE_BODY | cev.RESIZE_FONT);
 
-    uu.event.attach(window, "resize", this);
+//    uu.event.attach(window, "resize", this);
   },
 
+/*
   handleEvent: function(evt) {
     if (evt.type === "resize") { // window resize event
       this.fix();
     }
   },
+ */
   _fixSmoothScroll: function() {
     if (this._smoothScrollFixed) { return; }
 
@@ -836,6 +944,7 @@ uu.Class.Singleton("IEBoostPositionFixed", {
         };
         uu.className.toggle(v, "uuPositionFixed");
         v.style.position = "absolute"; // position:fixed -> position:absolute
+        v.style.zIndex = 5000; // z-index effect
       }
     }
     if (fixed) {
