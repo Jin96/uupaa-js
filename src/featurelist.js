@@ -23,10 +23,9 @@ uu.featureList = {
 };
 if (UU.IE) {
   uu.featureList["canvas"] = "ua,hash,style,matrix2d,color";
-  uu.featureList["ieboost"] = "ua,stylesheet,style,className,viewport,event,customEvent,selector";
+  uu.featureList["ieboost"] = "boost,ua,stylesheet,style,className,viewport,event,customEvent";
 } else {
   uu.featureList["canvas"] = "ua";
   uu.feat.canvas = {};
-  uu.featureList["ieboost"] = "ua,stylesheet,style,className,viewport,event,customEvent,selector";
-//  uu.feat.ieboost = {};
+  uu.feat.ieboost = {};
 }

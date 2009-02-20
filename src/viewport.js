@@ -19,8 +19,8 @@ uu.viewport = {
 
     return {
       // viewport dimension
-      w: UU.IE ? iebody.clientWidth  : window.innerWidth,
-      h: UU.IE ? iebody.clientHeight : window.innerHeight,
+      w: UU.IE ? (iebody.clientWidth  || iebody.scrollWidth)  : window.innerWidth,
+      h: UU.IE ? (iebody.clientHeight || iebody.scrollHeight) : window.innerHeight,
       // scrollX, scrollY
       sx: sx,
       sy: sy
