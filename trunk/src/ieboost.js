@@ -63,11 +63,13 @@ var ALPHA_LOADER = "DXImageTransform.Microsoft.AlphaImageLoader",
     ALPHA_FILTER = " progid:%s(src='%s',sizingMethod='image')",
     ALPHA_REPEAT = [
     '<div class="ieboostalphapngbg ieboostnoprintable" unselectable="on" onselectstart="return false" ',
-      'style="background-color:%s;z-index:%d;position:absolute;top:0;left:0;overflow:hidden;width:%dpx;height:%dpx;%s">',
+//    'style="background-color:%s;z-index:%d;position:absolute;top:0;left:0;overflow:hidden;width:%dpx;height:%dpx;%s">',
+      'style="%s;%s">',
       '<v:rect style="position:absolute;left:%dpx;top:%dpx;width:%dpx;height:%dpx;%s" coordsize="21600,21600" filled="t" stroked="f">',
         '<v:fill type="tile" src="%s" />',
       '</v:rect>',
     '</div>'].join(""),
+    ALPHA_REPEAT_STYLE1 = 'background-color:%s;z-index:%d;position:absolute;top:0;left:0;overflow:hidden;width:%dpx;height:%dpx;',
     BLANK = UU.CONFIG.IEBOOST.BLANK_PNG,
     BLANK_REX = RegExp(BLANK + "$"),
     tagHash1 =  { input: 1, INPUT: 1, img: 2, IMG: 2 },
@@ -83,11 +85,11 @@ var ALPHA_LOADER = "DXImageTransform.Microsoft.AlphaImageLoader",
     POS_X = /^(left|center|right)|(\d+%)|(\d+em)|(\d+pt)|(\d+px)$/,
     POS_Y = /^(top|center|bottom)|(\d+%)|(\d+em)|(\d+pt)|(\d+px)$/,
     onImgInputChange = null,
-    onBackgroundChange = null;
+    onBackgroundChange = null,
+    delayTimer = 0;
 
 uu.Class.Singleton("IEBoostAlphaPNG", {
   construct: function() {
-    this._delayTimer = 0;
     var me = this, cev = UU.CONFIG.CUSTOM_EVENT,
         expr1 = 'behavior:expression(uu.ieboostAlphaPNG.initImgInput(this))';
         expr2 = 'behavior:expression(uu.ieboostAlphaPNG.initBackground(this))';
@@ -263,6 +265,7 @@ uu.Class.Singleton("IEBoostAlphaPNG", {
       curt.height = elm.clientHeight || elm.scrollHeight;
     }
 
+/*
     if (curt.width  !== hash.width  ||
         curt.height !== hash.height ||
         curt.color  !== hash.color  ||
@@ -271,6 +274,17 @@ uu.Class.Singleton("IEBoostAlphaPNG", {
         curt.repeat !== hash.repeat) {
       ++changeProp;
     }
+ */
+    if (!prop ||
+        curt.width  !== hash.width  ||
+        curt.height !== hash.height ||
+        curt.color  !== hash.color  ||
+        curt.posx   !== hash.posx   ||
+        curt.posy   !== hash.posy   ||
+        curt.repeat !== hash.repeat) {
+      ++changeProp;
+    }
+
     if (curt.image !== hash.image) {
       if (fmt1 && fmt2) { // 1.png -> 2.png
         ++add, ++remove;
@@ -343,12 +357,13 @@ uu.Class.Singleton("IEBoostAlphaPNG", {
   },
 
   addBackground: function(elm, img, hash) {
-    var cs = elm.currentStyle,
+    var div, divstyle, cssText = elm.style.cssText,
+        cs = elm.currentStyle,
         zIndex  = (parseInt(cs.zIndex) || 0) - 5000,
         posx    = hash.posx   || "0%", // left, center, right, %, length
         posy    = hash.posy   || "0%", // top, center, bottom, %, length
         repeat  = hash.repeat || "repeat", // repeat｜repeat-x｜repeat-y｜no-repeat
-        x, y, match, rv, offsetX = 0, offsetY = 0, unit = uu.style.unit(),
+        x, y, match, offsetX = 0, offsetY = 0, unit = uu.style.unit(),
         imgWidth = img.width,
         imgHeight = img.height;
 
@@ -385,14 +400,18 @@ uu.Class.Singleton("IEBoostAlphaPNG", {
       elm.style.position = "relative";
     }
 
+    divstyle = ALPHA_REPEAT_STYLE1.sprintf(
+      hash.color,   // div.style.background-color(String)
+      zIndex,       // div.style.z-index(Number)
+      hash.width,   // div.style.width(Number, unit: px)
+      hash.height   // div.style.height(Number, unit: px)
+    );
+
     switch (repeat) {
     case "no-repeat":
-      rv = ALPHA_REPEAT.sprintf(
-        hash.color,   // div.style.background-color(String)
-        zIndex,       // div.style.z-index(Number)
-        hash.width,   // div.style.width(Number, unit: px)
-        hash.height,  // div.style.height(Number, unit: px)
-        "",           // div.style.extras(String)
+      div = ALPHA_REPEAT.sprintf(
+        cssText,      // div.style.extras(String)
+        divstyle,
         x,            // vml.rect.style.left(Number, unit: px)
         y,            // vml.rect.style.top(Number, unit: px)
         imgWidth,     // vml.rect.style.width(Number, unit: px)
@@ -406,13 +425,9 @@ uu.Class.Singleton("IEBoostAlphaPNG", {
       while (offsetX > 0) {
         offsetX -= imgWidth;
       }
-
-      rv = ALPHA_REPEAT.sprintf(
-        hash.color,   // div.style.background-color(String)
-        zIndex,       // div.style.z-index(Number)
-        hash.width,   // div.style.width(Number, unit: px)
-        hash.height,  // div.style.height(Number, unit: px)
-        "",           // div.style.extras(String)
+      div = ALPHA_REPEAT.sprintf(
+        cssText,      // div.style.extras(String)
+        divstyle,
         offsetX,      // vml.rect.style.left(Number, unit: px)
         y,            // vml.rect.style.top(Number, unit: px)
         hash.width - offsetX, // vml.rect.style.width(Number, unit: px)
@@ -427,12 +442,9 @@ uu.Class.Singleton("IEBoostAlphaPNG", {
         offsetY -= imgHeight;
       }
 
-      rv = ALPHA_REPEAT.sprintf(
-        hash.color,   // div.style.background-color(String)
-        zIndex,       // div.style.z-index(Number)
-        hash.width,   // div.style.width(Number, unit: px)
-        hash.height,  // div.style.height(Number, unit: px)
-        "",           // div.style.extras(String)
+      div = ALPHA_REPEAT.sprintf(
+        cssText,      // div.style.extras(String)
+        divstyle,
         x,            // vml.rect.style.left(Number, unit: px)
         offsetY,      // vml.rect.style.top(Number, unit: px)
         imgWidth,     // vml.rect.style.width(Number, unit: px)
@@ -452,12 +464,9 @@ uu.Class.Singleton("IEBoostAlphaPNG", {
         offsetY -= imgHeight;
       }
 
-      rv = ALPHA_REPEAT.sprintf(
-        hash.color,   // div.style.background-color(String)
-        zIndex,       // div.style.z-index(Number)
-        hash.width,   // div.style.width(Number, unit: px)
-        hash.height,  // div.style.height(Number, unit: px)
-        "",           // div.style.extras(String)
+      div = ALPHA_REPEAT.sprintf(
+        cssText,      // div.style.extras(String)
+        divstyle,
         offsetX,      // vml.rect.style.left(Number, unit: px)
         offsetY,      // vml.rect.style.top(Number, unit: px)
         hash.width  - offsetX, // vml.rect.style.width(Number, unit: px)
@@ -467,7 +476,7 @@ uu.Class.Singleton("IEBoostAlphaPNG", {
       );
     }
 //    elm.insertAdjacentHTML("beforeEnd", rv);
-    elm.insertAdjacentHTML("AfterBegin", rv);
+    elm.insertAdjacentHTML("AfterBegin", div);
   }
 });
 
@@ -499,6 +508,14 @@ uu.mix(uu.Class.IEBoostAlphaPNG, {
     case 3: // style.backgroundColor
     case 4: // style.backgroundPositionX, ...
       uu.ieboostAlphaPNG.fixBackground(elm, prop);
+      break;
+    case 0:
+      if (/^style/.test(evt.propertyName)) {
+        clearTimeout(delayTimer);
+        delayTimer = setTimeout(function() {
+          uu.ieboostAlphaPNG.fixBackground(elm, 0);
+        }, 40);
+      }
     }
   }
 });
