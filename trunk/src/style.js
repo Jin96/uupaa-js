@@ -159,14 +159,15 @@ uu.mix(uu.style, {
   toPixel: function(elm,    // Node:
                     val,    // String: "20px", "20em", "20pt"
                     prop) { // String(default: ""): "width" or "height" (ie only)
-    var match, s, r, sx, rx, unit;
+    var match, s, r, sx, rx, unit, rect;
 
     if (typeof val === "string") {
       if (UU.IE) {
         if (val === "auto") {
+          rect = getBoundingClientRect();
           switch ({ width: 1, height: 2 }[prop || ""] || 0) {
-          case 1: return elm.clientWidth;  // 1: width
-          case 2: return elm.clientHeight; // 2: height
+          case 1: return elm.clientWidth  || (rect.right - rect.left); // 1: width
+          case 2: return elm.clientHeight || (rect.bottom - rect.top); // 2: height
           }
         }
         uu.customEvent && uu.customEvent.disable();
