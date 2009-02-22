@@ -328,8 +328,11 @@ uu.mix(UU.CONFIG, {
   })();
 
   uu.mix(uu, {
-    // uu.domReady
+    // uu.domReady - DOMContentLoaded (read-only)
     domReady: false,
+
+    // uu.windowReady - window.onload (read-only)
+    windowReady: false,
 
     // uu.ready - ready event handler
     ready: function(fn,         // Function: callback function
@@ -359,9 +362,19 @@ uu.mix(UU.CONFIG, {
     } else if (UU.GECKO || UU.OPERA) {
       uudoc.addEventListener("DOMContentLoaded", fn, false);
     } else {
-      addEventListener("load", fn, false); // for legacy browser
+      window.addEventListener("load", fn, false); // for legacy browser
     }
   })(function() { uu.domReady = true; }); // (1)
+
+  (function(fn) {
+    if (UU.IE) {
+      window.attachEvent("onload", fn);
+    } else if (window.addEventListener) {
+      window.addEventListener("load", fn, false);
+    } else {
+      fn();
+    }
+  })(function() { uu.windowReady = true; });
 })();
 
 // === Canvas Ready ========================================

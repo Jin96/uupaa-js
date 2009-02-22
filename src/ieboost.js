@@ -1,5 +1,5 @@
 // === IEBoost =============================================
-// depend: boost, ua, stylesheet, style, className, viewport, event, customEvent
+// depend: boost, ua, stylesheet, style, className, viewport, node, event, customEvent
 uu.feat.ieboost = {};
 
 uu.mix(UU.CONFIG, {
@@ -7,12 +7,13 @@ uu.mix(UU.CONFIG, {
 }, 0, 0);
 
 uu.mix(UU.CONFIG.IEBOOST, {
-  ALPHA_PNG: true,
+  PNG: true,
+  PNG_BG: true,
   MAX_WIDTH: false,
-  OPACITY: true,
-  POSITION_ABSOLUTE: true,
-  POSITION_FIXED: true,
-  BLANK_PNG: "b32.png"
+  OPACITY: false,
+  POSITION_ABSOLUTE: false,
+  POSITION_FIXED: false,
+  BLANK_IMAGE: "b32.gif"
 }, 0, 0);
 
 // === IEBoost BackgroundImageCache care ===================
@@ -36,6 +37,7 @@ UU.IE && uu.ua.version <= 8 && uu.ready(function() {
 });
 
 // === IEBoost print care =================================
+/*
 UU.IE && uu.ua.version <= 8 && uu.ready(function() {
   window.attachEvent("onbeforeprint", function() {
     var nodeList = uu.className("ieboostnoprintable", uudoc.body),
@@ -52,80 +54,43 @@ UU.IE && uu.ua.version <= 8 && uu.ready(function() {
     }
   });
 });
+ */
 
 // === IEBoost Alpha PNG ===================================
-/** Alpha png image transparent for IE6
- *
- * @class
- */
+// <img src="*.png"> or <input type="image" src="*.png"> care
 (function() {
 var ALPHA_LOADER = "DXImageTransform.Microsoft.AlphaImageLoader",
     ALPHA_FILTER = " progid:%s(src='%s',sizingMethod='image')",
-    ALPHA_REPEAT = [
-    '<div class="ieboostalphapngbg ieboostnoprintable" unselectable="on" onselectstart="return false" ',
-//    'style="background-color:%s;z-index:%d;position:absolute;top:0;left:0;overflow:hidden;width:%dpx;height:%dpx;%s">',
-      'style="%s;%s">',
-      '<v:rect style="position:absolute;left:%dpx;top:%dpx;width:%dpx;height:%dpx;%s" coordsize="21600,21600" filled="t" stroked="f">',
-        '<v:fill type="tile" src="%s" />',
-      '</v:rect>',
-    '</div>'].join(""),
-    ALPHA_REPEAT_STYLE1 = 'background-color:%s;z-index:%d;position:absolute;top:0;left:0;overflow:hidden;width:%dpx;height:%dpx;',
-    BLANK = UU.CONFIG.IEBOOST.BLANK_PNG,
+    BLANK = UU.CONFIG.IEBOOST.BLANK_IMAGE,
     BLANK_REX = RegExp(BLANK + "$"),
     tagHash1 =  { input: 1, INPUT: 1, img: 2, IMG: 2 },
     tagHash2 =  { a: 1, input: 2, select: 2, textarea: 2,
                   A: 1, INPUT: 2, SELECT: 2, TEXTAREA: 2 },
-    propHash =  { width: 1, height: 1,
-                  "style.backgroundImage": 2,
-                  "style.backgroundColor": 3,
-                  "style.backgroundPositionX": 4,
-                  "style.backgroundPositionY": 4,
-                  "style.backgroundRepeat": 4 },
-    posHash = { left: 0, center: 50, right: 100, top: 0, bottom: 100 },
-    POS_X = /^(left|center|right)|(\d+%)|(\d+em)|(\d+pt)|(\d+px)$/,
-    POS_Y = /^(top|center|bottom)|(\d+%)|(\d+em)|(\d+pt)|(\d+px)$/,
-    onImgInputChange = null,
-    onBackgroundChange = null,
-    delayTimer = 0;
+    onImgInputChange = null;
 
-uu.Class.Singleton("IEBoostAlphaPNG", {
+uu.Class.Singleton("IEBoostPNG", {
   construct: function() {
-    var me = this, cev = UU.CONFIG.CUSTOM_EVENT,
-        expr1 = 'behavior:expression(uu.ieboostAlphaPNG.initImgInput(this))';
-        expr2 = 'behavior:expression(uu.ieboostAlphaPNG.initBackground(this))';
-
-    uu.style.appendRule("ieboost", "img",    expr1);
-    uu.style.appendRule("ieboost", "input",  expr1);
-    uu.style.appendRule("ieboost", ".png",   expr2);
-    uu.style.appendRule("ieboost", ".alpha", expr2);
-
-    uu.customEvent.attach(function() {
-        var nodeList = uu.className("alpha", uudoc.body).concat(
-                          uu.className("png", uudoc.body)),
-            v, i = 0;
-        while ( (v = nodeList[i++]) ) {
-          me.fixBackground(v, 1);
-        }
-    }, cev.RESIZE_BODY | cev.RESIZE_FONT);
+    var expr = "behavior:expression(uu.ieboostPNG.initImgInput(this))";
+    uu.style.appendRule("ieboost", "img",   expr);
+    uu.style.appendRule("ieboost", "input", expr);
   },
 
   initImgInput: function(elm) {
     elm.style.behavior = "none";
-    onImgInputChange = uu.Class.IEBoostAlphaPNG.onImgInputChange;
+    onImgInputChange = uu.Class.IEBoostPNG.onImgInputChange;
 
     if (tagHash1[elm.tagName] === 1 && elm.type !== "image") { // input[type!=image]
       return;
     }
-    uu.ieboostAlphaPNG.applyAlphaLoader(elm);
+    uu.ieboostPNG.applyAlphaLoader(elm);
     elm.attachEvent("onpropertychange", onImgInputChange);
   },
 
   applyAlphaLoader: function(elm) {
     var width = elm.width, height = elm.height;
 
-    elm.uuIEBoostAlphaPNGSrc = elm.src;
+    elm.uuIEBoostPNGSrc = elm.src;
 
-//  this.setAlphaLoader(elm, elm.src, "image");
     if (elm.filters.length && ALPHA_LOADER in elm.filters) {
       elm.filters[ALPHA_LOADER].enabled = 1;
       elm.filters[ALPHA_LOADER].src = elm.src;
@@ -178,14 +143,14 @@ uu.Class.Singleton("IEBoostAlphaPNG", {
       }
 
       elm.detachEvent("onpropertychange", onImgInputChange); // detach
-      uu.ieboostAlphaPNG.applyAlphaLoader(elm);
+      uu.ieboostPNG.applyAlphaLoader(elm);
       elm.attachEvent("onpropertychange", onImgInputChange); // re-attach
     } else {
       if (!/^data:/.test(src)) {
         // <img src="xxx.png">  -> xxx.gif or xxx.jpg
         // exclude "b32.png" or DataScheme
         elm.detachEvent("onpropertychange", onImgInputChange); // detach
-        elm.uuIEBoostAlphaPNGSrc = src;
+        elm.uuIEBoostPNGSrc = src;
         // disable filter and make it original size
 
         if (elm.filters.length && ALPHA_LOADER in elm.filters) {
@@ -197,181 +162,167 @@ uu.Class.Singleton("IEBoostAlphaPNG", {
         elm.attachEvent("onpropertychange", onImgInputChange); // re-attach
       }
     }
+  }
+});
+
+uu.Class.IEBoostPNG.onImgInputChange = function() {
+  var evt = window.event,
+      elm = evt.srcElement,
+      tag = tagHash1[elm.tagName];
+
+  if (tag === 1 && elm.type !== "image") { // input[type!=image]
+    return;
+  }
+  uu.ieboostPNG.fixImgInput(elm);
+}
+
+})();
+
+UU.IE && UU.CONFIG.IEBOOST.PNG && uu.ready(function() {
+  uu.ieboostPNG = new uu.Class.IEBoostPNG();
+});
+
+// === IEBoost Alpha PNG background ========================
+// <div class="alpha" style="background-image: url(*.png)"> care
+(function() {
+var ALPHA_SHIM = [
+      '<div class="ieboostpngbg" unselectable="on" onselectstart="return false" ',
+        'style="display:none;position:absolute;top:0;left:0;overflow:hidden">',
+      '</div>'].join(""),
+    ALPHA_VML = [
+      '<v:rect id="%s" print="no" coordsize="21600,21600" filled="t" stroked="f" ',
+          'style="position:absolute;left:%dpx;top:%dpx;width:%dpx;height:%dpx">',
+        '<v:fill id="%s" type="tile" src="%s" />',
+      '</v:rect>'].join(""),
+    BLANK = UU.CONFIG.IEBOOST.BLANK_IMAGE,
+    BLANK_REX = RegExp(BLANK + "$"),
+    propHash = { "style.backgroundImage": 2,
+                 "style.backgroundColor": 3 },
+    posHash = { left: 0, center: 50, right: 100, top: 0, bottom: 100 },
+    POS_X = /^(left|center|right)|(\d+%)|(\d+em)|(\d+pt)|(\d+px)$/,
+    POS_Y = /^(top|center|bottom)|(\d+%)|(\d+em)|(\d+pt)|(\d+px)$/,
+    onBackgroundChange = null;
+
+uu.Class.Singleton("IEBoostPNGBG", {
+  construct: function() {
+    uu.style.appendRule("ieboost", ".alpha",
+        "behavior:expression(uu.ieboostPNGBG.background(this));"+
+        "top:expression(uu.ieboostPNGBG.reposVML(this));"+
+        "left:expression(uu.ieboostPNGBG.reposVML(this));"+
+        "width:expression(this.pair.div.offsetWidth!==this.offsetWidth&&uu.ieboostPNGBG.draw(this,1));"+
+        "height:expression(this.pair.div.offsetHeight!==this.offsetHeight&&uu.ieboostPNGBG.draw(this,1));");
+
+    uu.customEvent.attach(function(customEvent, node) {
+      var div = 0, repos = 0, nodeList, v, i = 0;
+      if (node && node.pair && node.pair.div) {
+        div = node.pair.div;
+        div.parentNode.removeChild(div);
+        ++repos;
+      }
+      if (repos) {
+        nodeList = uu.className("alpha");
+        while ( (v = nodeList[i++]) ) {
+          uu.ieboostPNGBG.reposVML(v, 1);
+        }
+      }
+    }, UU.CONFIG.CUSTOM_EVENT.REMOVE_ELEMENT);
   },
 
-  initBackground: function(elm) {
+  background: function(elm) {
     elm.style.behavior = "none";
-    onBackgroundChange = uu.Class.IEBoostAlphaPNG.onBackgroundChange;
 
-    var cs = elm.currentStyle, hash, img,
-        w, h;
-    if (elm === uudoc.body || elm === uudoc.documentElement) {
-      w = elm.offsetWidth  - 20;
-      h = elm.offsetHeight + 10;
-    } else {
-      w = elm.clientWidth  || elm.scrollWidth;
-      h = elm.clientHeight || elm.scrollHeight;
-    }
-
-    elm.uuIEBoostAlphaPNGHash = {
-      vml:    0,
-      image:  uu.style.getBackgroundImage(elm),
-      width:  w,
-      height: h,
-      color:  cs.backgroundColor,
-      posx:   cs.backgroundPositionX,
-      posy:   cs.backgroundPositionY,
-      repeat: cs.backgroundRepeat
-    };
-    hash = elm.uuIEBoostAlphaPNGHash;
-
-    if (!/png$/i.test(hash.image)) {
-      elm.attachEvent("onpropertychange", onBackgroundChange);
-      return;
-    }
-
-    img = new Image();
-    img.onload = function() {
-      hash.vml = 1;
-      elm.style.backgroundImage = "url(" + UU.CONFIG.IMG_DIR + BLANK + ")";
-      elm.style.backgroundColor = "transparent";
-      uu.ieboostAlphaPNG.addBackground(elm, img, hash);
-      elm.attachEvent("onpropertychange", onBackgroundChange);
-    };
-    img.src = hash.image;
-  },
-
-  fixBackground: function(elm, prop) {
-    var img, nodeList, v, i = 0,
-        cs = elm.currentStyle, add = 0, remove = 0, changeProp = 0,
-        hash = elm.uuIEBoostAlphaPNGHash,
-        curt = {
-          image:  uu.style.getBackgroundImage(elm),
-          width:  0,
-          height: 0,
-          color:  cs.backgroundColor,
-          posx:   cs.backgroundPositionX,
-          posy:   cs.backgroundPositionY,
-          repeat: cs.backgroundRepeat
-        },
-        fmt1 = /png$/i.test(hash.image), // true: before is png
-        fmt2 = /png$/i.test(curt.image); // true: after is png
-
-    if (elm === uudoc.body || elm === uudoc.documentElement) {
-      curt.width  = elm.offsetWidth  - 20;
-      curt.height = elm.offsetHeight + 10;
-    } else {
-      curt.width  = elm.clientWidth  || elm.scrollWidth;
-      curt.height = elm.clientHeight || elm.scrollHeight;
-    }
-
-/*
-    if (curt.width  !== hash.width  ||
-        curt.height !== hash.height ||
-        curt.color  !== hash.color  ||
-        curt.posx   !== hash.posx   ||
-        curt.posy   !== hash.posy   ||
-        curt.repeat !== hash.repeat) {
-      ++changeProp;
-    }
- */
-    if (!prop ||
-        curt.width  !== hash.width  ||
-        curt.height !== hash.height ||
-        curt.color  !== hash.color  ||
-        curt.posx   !== hash.posx   ||
-        curt.posy   !== hash.posy   ||
-        curt.repeat !== hash.repeat) {
-      ++changeProp;
-    }
-
-    if (curt.image !== hash.image) {
-      if (fmt1 && fmt2) { // 1.png -> 2.png
-        ++add, ++remove;
-      } else if (!fmt1 && fmt2) { // *.gif/none -> *.png
-        ++add;
-      } else if (fmt1 && !fmt2) { // *.png -> *.gif/none
-        ++remove;
-      }
-    } else if (hash.vml && changeProp) {
-      ++add, ++remove;
-    }
-
-    switch (prop) {
-    case 2: // 2: style.backgroundImage
-      hash.image = curt.image;
-      break;
-    case 3: // 3: style.backgroundColor
-      hash.color = curt.color;
-      break;
-    }
-
-    if (remove) {
-      nodeList = uu.className("ieboostalphapngbg", elm);
-      while ( (v = nodeList[i++]) ) {
-        v.parentNode.removeChild(v);
-      }
-      if (!add) {
-        elm.detachEvent("onpropertychange", onBackgroundChange); // detach
-
-        hash.vml = 0;
-//      hash.image = hash.image;
-        hash.width = curt.width;
-        hash.height = curt.height;
-//      hash.color = hash.color;
-        hash.posx = curt.posx;
-        hash.posy = curt.posy;
-        hash.repeat = curt.repeat;
-
-        elm.style.backgroundImage = "url(" + hash.image + ")"; // restore
-        elm.style.backgroundColor = hash.color; // restore
-
-        elm.attachEvent("onpropertychange", onBackgroundChange); // re-attach
+    if (!elm.uuIEBoostAlpahPNGAgentID) {
+      var url = uu.style.getBackgroundImage(elm),
+          id = uu.uuid(), 
+          div = uu.node.insert(ALPHA_SHIM, uudoc.body),
+          vml = ALPHA_VML.sprintf("vmlrect" + id, 0, 0, 0, 0, "vmlfill" + id, "");
+      div.insertAdjacentHTML("beforeEnd", vml);
+      div.pair = elm.uniqueID; // 循環参照をさけるため、こちらには uniqueIDを持たせる
+      elm.pair = {
+        div: div,
+        vmlrect: uu.id("vmlrect" + id),
+        vmlfill: uu.id("vmlfill" + id)
+      };
+      onBackgroundChange = uu.Class.IEBoostPNGBG.onBackgroundChange;
+      if (!/png$/i.test(url)) {
+        elm.attachEvent("onpropertychange", onBackgroundChange); // image, colorの変化を監視する
         return;
       }
     }
+    this.draw(elm);
+    elm.attachEvent("onpropertychange", onBackgroundChange); // image, colorの変化を監視する
+  },
 
-    if (add) {
+  draw: function(elm,     // Node:
+                 force) { // Boolean(default: false): force redraw
+    var me = this, redraw = force ? 1 : 0, img;
 
+    // backgroundColor
+    if (elm.orgBackgroundColor !== elm.pair.div.style.backgroundColor) {
+      elm.orgBackgroundColor = elm.style.backgroundColor;
+      elm.style.backgroundColor = "transparent";
+      ++redraw;
+    }
+
+    // backgroundImage
+    if (elm.orgBackgroundSrc !== elm.pair.vmlfill.src) {
+        elm.orgBackgroundSrc = uu.style.getBackgroundImage(elm);
       img = new Image();
       img.onload = function() {
-        elm.detachEvent("onpropertychange", onBackgroundChange); // detach
 
-        hash.vml = 1;
-//      hash.image = hash.image;
-        hash.width = curt.width;
-        hash.height = curt.height;
-//      hash.color = hash.color;
-        hash.posx = curt.posx;
-        hash.posy = curt.posy;
-        hash.repeat = curt.repeat;
+        elm.orgBackgroundImageWidth  = img.width;
+        elm.orgBackgroundImageHeight = img.height;
+        elm.style.backgroundImage = "url(" + UU.CONFIG.IMG_DIR + "b32.gif" + ")";
 
-        elm.style.backgroundImage = "url(" + UU.CONFIG.IMG_DIR + BLANK + ")";
-        elm.style.backgroundColor = "transparent";
-        uu.ieboostAlphaPNG.addBackground(elm, img, hash);
-
-        elm.attachEvent("onpropertychange", onBackgroundChange); // re-attach
+        me.drawVML(elm);
       };
-      img.src = hash.image;
+      img.src = elm.orgBackgroundSrc;
+      redraw = 0;
+    }
+    if (redraw) {
+      this.drawVML(elm);
+    }
+  },
+  
+  reposVML: function(elm,     // Node:
+                     force) { // Boolean(default: false): force re-position
+    var repos = 0, rect, div;
+
+    // top, left
+    if (force ||
+        elm.orgOffsetTop !== elm.offsetTop ||
+        elm.orgOffsetLeft !== elm.offsetLeft) { 
+      elm.orgOffsetTop  = elm.offsetTop;
+      elm.orgOffsetLeft = elm.offsetLeft;
+      ++repos;
+    }
+
+    if (repos) {
+      rect = uu.style.getRect(elm);
+      div = elm.pair.div;
+      div.style.pixelLeft = rect.x;
+      div.style.pixelTop  = rect.y;
     }
   },
 
-  addBackground: function(elm, img, hash) {
-    var div, divstyle, cssText = elm.style.cssText,
-        cs = elm.currentStyle,
-        zIndex  = (parseInt(cs.zIndex) || 0) - 5000,
-        posx    = hash.posx   || "0%", // left, center, right, %, length
-        posy    = hash.posy   || "0%", // top, center, bottom, %, length
-        repeat  = hash.repeat || "repeat", // repeat｜repeat-x｜repeat-y｜no-repeat
+  drawVML: function(elm) {
+    var cs = elm.currentStyle,
+        zIndex  = (parseInt(cs.zIndex) || 0) - 1,
+        posx    = cs.backgroundPositionX || "0%", // left, center, right, %, length
+        posy    = cs.backgroundPositionY || "0%", // top, center, bottom, %, length
+        repeat  = cs.backgroundRepeat    || "repeat", // repeat｜repeat-x｜repeat-y｜no-repeat
         x, y, match, offsetX = 0, offsetY = 0, unit = uu.style.unit(),
-        imgWidth = img.width,
-        imgHeight = img.height;
+        imgWidth  = elm.orgBackgroundImageWidth,
+        imgHeight = elm.orgBackgroundImageHeight,
+        color = elm.orgBackgroundColor,
+        src   = elm.orgBackgroundSrc;
+        rect  = uu.style.getRect(elm);
 
     if ( (match = POS_X.exec(posx)) ) {
       if (match[1]) {
-        x = Math.round((hash.width - imgWidth) * (posHash[match[1]] / 100));
+        x = Math.round((rect.w - imgWidth) * (posHash[match[1]] / 100));
       } else if (match[2]) { // 100%
-        x = Math.round((hash.width - imgWidth) * (parseInt(match[2]) / 100));
+        x = Math.round((rect.w - imgWidth) * (parseInt(match[2]) / 100));
       } else if (match[3]) { // 100em
         x = parseInt(match[3]) * unit.em;
       } else if (match[4]) { // 100pt
@@ -382,9 +333,9 @@ uu.Class.Singleton("IEBoostAlphaPNG", {
     }
     if ( (match = POS_Y.exec(posy)) ) {
       if (match[1]) {
-        y = Math.round((hash.height - imgHeight) * (posHash[match[1]] / 100));
+        y = Math.round((rect.h - imgHeight) * (posHash[match[1]] / 100));
       } else if (match[2]) {
-        y = Math.round((hash.height - imgHeight) * (parseInt(match[2]) / 100));
+        y = Math.round((rect.h - imgHeight) * (parseInt(match[2]) / 100));
       } else if (match[3]) { // 100em
         y = parseInt(match[3]) * unit.em;
       } else if (match[4]) { // 100pt
@@ -394,143 +345,92 @@ uu.Class.Singleton("IEBoostAlphaPNG", {
       }
     }
 
-    // box: position: relative
-    cs = elm.currentStyle;
-    if (!cs.position || cs.position === "static") {
-      elm.style.position = "relative";
-    }
+    var div = elm.pair.div,
+        vmlrect = elm.pair.vmlrect,
+        vmlfill = elm.pair.vmlfill;
 
-    divstyle = ALPHA_REPEAT_STYLE1.sprintf(
-      hash.color,   // div.style.background-color(String)
-      zIndex,       // div.style.z-index(Number)
-      hash.width,   // div.style.width(Number, unit: px)
-      hash.height   // div.style.height(Number, unit: px)
-    );
+    div.style.display = "block";
+    div.style.zIndex  = zIndex;
+    div.style.backgroundColor = color;
+    div.style.pixelLeft   = rect.x;
+    div.style.pixelTop    = rect.y;
+    div.style.pixelWidth  = rect.w;
+    div.style.pixelHeight = rect.h;
 
     switch (repeat) {
     case "no-repeat":
-      div = ALPHA_REPEAT.sprintf(
-        cssText,      // div.style.extras(String)
-        divstyle,
-        x,            // vml.rect.style.left(Number, unit: px)
-        y,            // vml.rect.style.top(Number, unit: px)
-        imgWidth,     // vml.rect.style.width(Number, unit: px)
-        imgHeight,    // vml.rect.style.height(Number, unit: px)
-        "",           // vml.rect.style.extras(String)
-        hash.image    // vml.fill.src(URLString)
-      );
+      vmlrect.style.pixelLeft    = x;
+      vmlrect.style.pixelTop     = y;
+      vmlrect.style.pixelWidth   = imgWidth;
+      vmlrect.style.pixelHeight  = imgHeight;
       break;
     case "repeat-x":
       offsetX = x;
-      while (offsetX > 0) {
-        offsetX -= imgWidth;
-      }
-      div = ALPHA_REPEAT.sprintf(
-        cssText,      // div.style.extras(String)
-        divstyle,
-        offsetX,      // vml.rect.style.left(Number, unit: px)
-        y,            // vml.rect.style.top(Number, unit: px)
-        hash.width - offsetX, // vml.rect.style.width(Number, unit: px)
-        imgHeight,    // vml.rect.style.height(Number, unit: px)
-        "",           // vml.rect.style.extras(String)
-        hash.image    // vml.fill.src(URLString)
-      );
+      while (offsetX > 0) { offsetX -= imgWidth; }
+
+      vmlrect.style.pixelLeft    = offsetX;
+      vmlrect.style.pixelTop     = y;
+      vmlrect.style.pixelWidth   = rect.w - offsetX;
+      vmlrect.style.pixelHeight  = imgHeight;
       break;
     case "repeat-y":
       offsetY = y;
-      while (offsetY > 0) {
-        offsetY -= imgHeight;
-      }
+      while (offsetY > 0) { offsetY -= imgHeight; }
 
-      div = ALPHA_REPEAT.sprintf(
-        cssText,      // div.style.extras(String)
-        divstyle,
-        x,            // vml.rect.style.left(Number, unit: px)
-        offsetY,      // vml.rect.style.top(Number, unit: px)
-        imgWidth,     // vml.rect.style.width(Number, unit: px)
-        hash.height - offsetY, // vml.rect.style.height(Number, unit: px)
-        "",           // vml.rect.style.extras(String)
-        hash.image    // vml.fill.src(URLString)
-      );
+      vmlrect.style.pixelLeft    = x;
+      vmlrect.style.pixelTop     = offsetY;
+      vmlrect.style.pixelWidth   = imgWidth;
+      vmlrect.style.pixelHeight  = rect.h - offsetY;
       break;
     case "repeat":
       offsetX = x;
-      while (offsetX > 0) {
-        offsetX -= imgWidth;
-      }
-
       offsetY = y;
-      while (offsetY > 0) {
-        offsetY -= imgHeight;
-      }
+      while (offsetX > 0) { offsetX -= imgWidth; }
+      while (offsetY > 0) { offsetY -= imgHeight; }
 
-      div = ALPHA_REPEAT.sprintf(
-        cssText,      // div.style.extras(String)
-        divstyle,
-        offsetX,      // vml.rect.style.left(Number, unit: px)
-        offsetY,      // vml.rect.style.top(Number, unit: px)
-        hash.width  - offsetX, // vml.rect.style.width(Number, unit: px)
-        hash.height - offsetY, // vml.rect.style.height(Number, unit: px)
-        "",           // vml.rect.style.extras(String)
-        hash.image    // vml.fill.src(URLString)
-      );
+      vmlrect.style.pixelLeft    = offsetX;
+      vmlrect.style.pixelTop     = offsetY;
+      vmlrect.style.pixelWidth   = rect.w - offsetX;
+      vmlrect.style.pixelHeight  = rect.h - offsetY;
     }
-//    elm.insertAdjacentHTML("beforeEnd", rv);
-    elm.insertAdjacentHTML("AfterBegin", div);
+//    if (vmlfill.src !== src) {
+      vmlfill.src = src;
+//    }
   }
 });
 
-uu.mix(uu.Class.IEBoostAlphaPNG, {
-  onImgInputChange: function() {
-    var evt = window.event,
-        elm = evt.srcElement,
-  //    prop = evt.propertyName, // "src"
-        tag = tagHash1[elm.tagName];
+uu.Class.IEBoostPNGBG.onBackgroundChange = function() {
+  var evt = window.event,
+      elm = evt.srcElement,
+      prop = propHash[evt.propertyName], url;
 
-    if (tag === 1 && elm.type !== "image") { // input[type!=image]
+  switch (prop || 0) {
+  case 2: // style.backgroundImage
+    url = uu.style.getBackgroundImage(elm);
+    if (BLANK_REX.test(url)) {
       return;
     }
-    uu.ieboostAlphaPNG.fixImgInput(elm);
-  },
-
-  onBackgroundChange: function() {
-    var evt = window.event,
-        elm = evt.srcElement,
-        prop = propHash[evt.propertyName] || 0, url;
-
-    switch (prop) {
-    case 2: // style.backgroundImage
-      url = uu.style.getBackgroundImage(elm);
-      if (BLANK_REX.test(url)) {
-        return;
-      }
-    case 1: // width, height
-    case 3: // style.backgroundColor
-    case 4: // style.backgroundPositionX, ...
-      uu.ieboostAlphaPNG.fixBackground(elm, prop);
-      break;
-    case 0:
-      if (/^style/.test(evt.propertyName)) {
-        clearTimeout(delayTimer);
-        delayTimer = setTimeout(function() {
-          uu.ieboostAlphaPNG.fixBackground(elm, 0);
-        }, 40);
-      }
+    uu.ieboostPNGBG.draw(elm, true);
+    break;
+  case 3: // style.backgroundColor
+    if (elm.style.backgroundColor === "transparent") {
+      return;
     }
+    uu.ieboostPNGBG.draw(elm, true);
+    break;
+  default:
+    uu.ieboostPNGBG.draw(elm);
   }
-});
+};
 
 })();
 
-UU.IE && UU.CONFIG.IEBOOST.ALPHA_PNG && uu.ready(function() {
-  uu.ieboostAlphaPNG = new uu.Class.IEBoostAlphaPNG();
+UU.IE && UU.CONFIG.IEBOOST.PNG_BG && uu.ready(function() {
+  uu.ieboostPNGBG = new uu.Class.IEBoostPNGBG();
 });
 
 // === IEBoost MaxWidth ====================================
-/** CSS2.1 max-width, min-width, max-height, min-height for IE6
- *
- * @class
- */
+// CSS2.1 max-width, min-width, max-height, min-height for IE6
 uu.Class.Singleton("MaxWidth", {
   construct: function() {
     this._targetElement = [];
@@ -760,10 +660,6 @@ uu.ready(function() {
 });
 
 // === IEBoost Opacity =====================================
-/** opacity:
- *
- * @class
- */
 uu.Class.Singleton("IEBoostOpacity", {
   construct: function() {
     this.fix();
@@ -800,10 +696,7 @@ UU.IE && UU.CONFIG.IEBOOST.OPACITY && uu.ready(function() {
 });
 
 // === IEBoost fix position:absolute bug ===================
-/** position: absolute bug(cannot select text) fix for IE6 Standard mode
- *
- * @class
- */
+// position: absolute bug(cannot select text) fix for IE6 Standard mode
 uu.Class.Singleton("IEBoostPositionAbsolute", {
   construct: function() {
     this._fixed = 0;
@@ -833,10 +726,7 @@ UU.CONFIG.IEBOOST.POSITION_ABSOLUTE && uu.ready(function() {
 });
 
 // === IEBoost fix position: fixed bug =====================
-/** position: fixed for IE6
- *
- * @class
- */
+// position: fixed for IE6
 uu.Class.Singleton("IEBoostPositionFixed", {
   construct: function() {
     this._targetElement = [];

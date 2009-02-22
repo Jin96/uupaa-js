@@ -137,9 +137,10 @@ uu.ready(function() {
 
 // === Custom Event ========================================
 UU.CONFIG.CUSTOM_EVENT = {
-  ADD_ELEMENT:      0x01, // with node
-  REMOVE_ELEMENT:   0x02, // with node
-  UPDATE_ELEMENT:   0x04,
+  NOTIFY:           0x01, // without node
+  ADD_ELEMENT:      0x02, // with node
+  REMOVE_ELEMENT:   0x04, // with node
+  UPDATE_ELEMENT:   0x08,
   RESIZE_VIEWPORT:  0x10, // resize window
   RESIZE_BODY:      0x20, // resize body (one shot)
   RESIZE_FONT:      0x40, // resize font
@@ -168,10 +169,16 @@ uu.Class.Singleton("CustomEvent", {
 
     if (UU.IE && uu.ua.version < 8) {
       // hook add element for IE6, IE7
-      window.attachEvent("onload", function() {
-        uudoc.createStyleSheet().cssText =
-            "*{behavior:expression(uu.Class.CustomEvent._addElement(this))}";
-      });
+      if (uu.windowReady) {
+        setAgent();
+      } else {
+        window.attachEvent("onload", setAgent);
+      }
+    }
+
+    function setAgent() {
+      uudoc.createStyleSheet().cssText =
+          "*{behavior:expression(uu.Class.CustomEvent._addElement(this))}";
     }
   },
 
@@ -216,9 +223,9 @@ uu.Class.Singleton("CustomEvent", {
   },
 
   // uu.Class.CustomEvent.fire - revalidate
-  fire: function(customEvent, // Number(default: 0xff): customEvent
+  fire: function(customEvent, // Number(default: 0x01): customEvent
                  node) {      // Node(default: undefined):
-    customEvent = customEvent === void 0 ? 0xff : customEvent;
+    customEvent = customEvent === void 0 ? 0x01 : customEvent;
 
     if (this._enable) {
       if (customEvent & UU.CONFIG.CUSTOM_EVENT.RESIZE_VIEWPORT &&
