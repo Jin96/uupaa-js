@@ -136,7 +136,7 @@ uu.ready(function() {
 }, 2);
 
 // === Custom Event ========================================
-UU.CONFIG.CUSTOM_EVENT = {
+UU.CUSTOM_EVENT = {
   NOTIFY:           0x01, // without node
   ADD_ELEMENT:      0x02, // with node
   REMOVE_ELEMENT:   0x04, // with node
@@ -158,11 +158,11 @@ uu.Class.Singleton("CustomEvent", {
 
     uu.customEventResizeFont.attach(function() {
       uu.style.unit(1);
-      me.fire(UU.CONFIG.CUSTOM_EVENT.RESIZE_FONT);
+      me.fire(UU.CUSTOM_EVENT.RESIZE_FONT);
     });
 
     uu.customEventResizeBody.attach(function() {
-      me.fire(UU.CONFIG.CUSTOM_EVENT.RESIZE_BODY);
+      me.fire(UU.CUSTOM_EVENT.RESIZE_BODY);
     });
 
     uu.event.attach(window, "resize", this);
@@ -185,7 +185,7 @@ uu.Class.Singleton("CustomEvent", {
   handleEvent: function(evt) {
     if (this._enable) {
       if (evt.type === "resize") {
-        this.fire(UU.CONFIG.CUSTOM_EVENT.RESIZE_VIEWPORT);
+        this.fire(UU.CUSTOM_EVENT.RESIZE_VIEWPORT);
       }
     }
   },
@@ -202,7 +202,7 @@ uu.Class.Singleton("CustomEvent", {
 
   // uu.Class.CustomEvent.attach - attach event handler
   attach: function(fn,            // Function: callback function
-                   customEvent) { // Number: customEvent, UU.CONFIG.CUSTOM_EVENT...
+                   customEvent) { // Number: customEvent, UU.CUSTOM_EVENT...
     this._fn.push([fn, customEvent]);
   },
 
@@ -228,9 +228,9 @@ uu.Class.Singleton("CustomEvent", {
     customEvent = customEvent === void 0 ? 0x01 : customEvent;
 
     if (this._enable) {
-      if (customEvent & UU.CONFIG.CUSTOM_EVENT.RESIZE_VIEWPORT &&
+      if (customEvent & UU.CUSTOM_EVENT.RESIZE_VIEWPORT &&
           customEvent & this._lastEvent) {
-        customEvent = customEvent & ~UU.CONFIG.CUSTOM_EVENT.RESIZE_VIEWPORT;
+        customEvent = customEvent & ~UU.CUSTOM_EVENT.RESIZE_VIEWPORT;
       }
       this._lastEvent = customEvent;
 
@@ -263,12 +263,12 @@ uu.mix(uu.Class.CustomEvent, {
         var rm = node.removeChild;
         node.removeChild = function(oldChild) {
           var rv = rm(oldChild);
-          uu.customEvent.fire(UU.CONFIG.CUSTOM_EVENT.REMOVE_ELEMENT, rv);
+          uu.customEvent.fire(UU.CUSTOM_EVENT.REMOVE_ELEMENT, rv);
           return rv;
         }
       })(elm);
 
-      uu.customEvent.fire(UU.CONFIG.CUSTOM_EVENT.ADD_ELEMENT, elm);
+      uu.customEvent.fire(UU.CUSTOM_EVENT.ADD_ELEMENT, elm);
     }
   }
 });
