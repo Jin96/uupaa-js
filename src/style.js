@@ -117,8 +117,8 @@ uu.mix(uu.style, {
       x: x,
       y: y,
       // element dimension(style.width + padding)
-      w: elm.clientWidth  || elm.scrollWidth  || w,
-      h: elm.clientHeight || elm.scrollHeight || h,
+      w: elm.clientWidth  || w,
+      h: elm.clientHeight || h,
       // element dimension(style.width + padding + border)
       ow: elm.offsetWidth,
       oh: elm.offsetHeight

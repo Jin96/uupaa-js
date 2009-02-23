@@ -7,7 +7,7 @@ uu.mix(UU.CONFIG, {
 }, 0, 0);
 
 uu.mix(UU.CONFIG.IEBOOST, {
-  PNG: true,
+  PNG: false,
   PNG_BG: true,
   MAX_WIDTH: false,
   OPACITY: false,
@@ -184,145 +184,161 @@ UU.IE && UU.CONFIG.IEBOOST.PNG && uu.ready(function() {
 
 // === IEBoost Alpha PNG background ========================
 // <div class="alpha" style="background-image: url(*.png)"> care
+window.posWidth = function(elm) {
+  elm.pair &&
+    (elm.pair.offsetWidth !== elm.offsetWidth) &&
+      uu.ieboostPNGBG.draw(this,1);
+};
+
 (function() {
-var ALPHA_SHIM = [
-      '<div class="ieboostpngbg" unselectable="on" onselectstart="return false" ',
-        'style="display:none;position:absolute;top:0;left:0;overflow:hidden">',
-      '</div>'].join(""),
-    ALPHA_VML = [
-      '<v:rect id="%s" print="no" coordsize="21600,21600" filled="t" stroked="f" ',
-          'style="position:absolute;left:%dpx;top:%dpx;width:%dpx;height:%dpx">',
-        '<v:fill id="%s" type="tile" src="%s" />',
-      '</v:rect>'].join(""),
+var VML0 = '<div class="ieboostalphapngbg" unselectable="on" onselectstart="return false" ' +
+              ' style="position:absolute;overflow:hidden;background-color:%s;z-index:%d;left:%dpx;top:%dpx;width:%dpx;height:%dpx"></div>',
+    VML1 = '<v:rect style="position:absolute;left:%dpx;top:%dpx;width:%dpx;height:%dpx" coordsize="21600,21600" filled="t" stroked="f" print="f"></v:rect>',
+    VML2 = '<v:fill type="tile" src="%s" />',
     BLANK = UU.CONFIG.IEBOOST.BLANK_IMAGE,
     BLANK_REX = RegExp(BLANK + "$"),
-    propHash = { "style.backgroundImage": 2,
-                 "style.backgroundColor": 3 },
+    REPEAT =    { "no-repeat":  0x0,
+                  "repeat-x":   0x1,
+                  "repeat-y":   0x2,
+                  "repeat":     0x3 },
+    propHash =  { "style.backgroundImage": 2,
+                  "style.backgroundColor": 3,
+                  "style.backgroundPositionX": 4,
+                  "style.backgroundPositionY": 4,
+                  "style.backgroundRepeat": 4 },
     posHash = { left: 0, center: 50, right: 100, top: 0, bottom: 100 },
     POS_X = /^(left|center|right)|(\d+%)|(\d+em)|(\d+pt)|(\d+px)$/,
-    POS_Y = /^(top|center|bottom)|(\d+%)|(\d+em)|(\d+pt)|(\d+px)$/,
-    onBackgroundChange = null;
+    POS_Y = /^(top|center|bottom)|(\d+%)|(\d+em)|(\d+pt)|(\d+px)$/;
 
 uu.Class.Singleton("IEBoostPNGBG", {
   construct: function() {
+    var me = this;
+
     uu.style.appendRule("ieboost", ".alpha",
-        "behavior:expression(uu.ieboostPNGBG.background(this));"+
         "top:expression(uu.ieboostPNGBG.reposVML(this));"+
         "left:expression(uu.ieboostPNGBG.reposVML(this));"+
-        "width:expression(this.pair.div.offsetWidth!==this.offsetWidth&&uu.ieboostPNGBG.draw(this,1));"+
-        "height:expression(this.pair.div.offsetHeight!==this.offsetHeight&&uu.ieboostPNGBG.draw(this,1));");
+        "width:expression(this.pair&&(this.pair.drawWidth!==uu.ieboostPNGBG.getWidth(this))&&uu.ieboostPNGBG.draw(this,1));"+
+        "height:expression(this.pair&&(this.pair.drawHeight!==uu.ieboostPNGBG.getHeight(this))&&uu.ieboostPNGBG.draw(this,1));");
 
-    uu.customEvent.attach(function(customEvent, node) {
-      var div = 0, repos = 0, nodeList, v, i = 0;
-      if (node && node.pair && node.pair.div) {
-        div = node.pair.div;
-        div.parentNode.removeChild(div);
-        ++repos;
+    uu.customEvent.attach(function(customEvent, elm) {
+      if (uu.className.has(elm, "alpha")) {
+        me.init(elm);
       }
-      if (repos) {
-        nodeList = uu.className("alpha");
-        while ( (v = nodeList[i++]) ) {
-          uu.ieboostPNGBG.reposVML(v, 1);
-        }
-      }
-    }, UU.CONFIG.CUSTOM_EVENT.REMOVE_ELEMENT);
+    }, UU.CUSTOM_EVENT.ADD_ELEMENT);
   },
 
-  background: function(elm) {
-    elm.style.behavior = "none";
-
-    if (!elm.uuIEBoostAlpahPNGAgentID) {
-      var url = uu.style.getBackgroundImage(elm),
-          id = uu.uuid(), 
-          div = uu.node.insert(ALPHA_SHIM, uudoc.body),
-          vml = ALPHA_VML.sprintf("vmlrect" + id, 0, 0, 0, 0, "vmlfill" + id, "");
-      div.insertAdjacentHTML("beforeEnd", vml);
-      div.pair = elm.uniqueID; // 循環参照をさけるため、こちらには uniqueIDを持たせる
-      elm.pair = {
-        div: div,
-        vmlrect: uu.id("vmlrect" + id),
-        vmlfill: uu.id("vmlfill" + id)
-      };
-      onBackgroundChange = uu.Class.IEBoostPNGBG.onBackgroundChange;
-      if (!/png$/i.test(url)) {
-        elm.attachEvent("onpropertychange", onBackgroundChange); // image, colorの変化を監視する
-        return;
-      }
-    }
-    this.draw(elm);
-    elm.attachEvent("onpropertychange", onBackgroundChange); // image, colorの変化を監視する
-  },
-
-  draw: function(elm,     // Node:
-                 force) { // Boolean(default: false): force redraw
-    var me = this, redraw = force ? 1 : 0, img;
-
-    // backgroundColor
-    if (elm.orgBackgroundColor !== elm.pair.div.style.backgroundColor) {
-      elm.orgBackgroundColor = elm.style.backgroundColor;
-      elm.style.backgroundColor = "transparent";
-      ++redraw;
-    }
-
-    // backgroundImage
-    if (elm.orgBackgroundSrc !== elm.pair.vmlfill.src) {
-        elm.orgBackgroundSrc = uu.style.getBackgroundImage(elm);
-      img = new Image();
-      img.onload = function() {
-
-        elm.orgBackgroundImageWidth  = img.width;
-        elm.orgBackgroundImageHeight = img.height;
-        elm.style.backgroundImage = "url(" + UU.CONFIG.IMG_DIR + "b32.gif" + ")";
-
-        me.drawVML(elm);
-      };
-      img.src = elm.orgBackgroundSrc;
-      redraw = 0;
-    }
-    if (redraw) {
-      this.drawVML(elm);
+  init: function(elm) {
+    elm.pair = null;
+    if (/png$/i.test(uu.style.getBackgroundImage(elm))) {
+      this.draw(elm);
     }
   },
-  
+
+  getWidth: function(elm) {
+    if (elm === uudoc.body || elm === uudoc.documentElement) {
+      return elm.offsetWidth - 20;
+    }
+    if (elm.clientWidth && elm.clientHeight) {
+      return elm.clientWidth;
+    }
+    var rect = elm.getBoundingClientRect();
+    return rect.right - rect.left;
+  },
+
+  getHeight: function(elm) {
+    if (elm === uudoc.body || elm === uudoc.documentElement) {
+      return elm.offsetHeight + 10;
+    }
+    if (elm.clientWidth && elm.clientHeight) {
+      return elm.clientHeight;
+    }
+    var rect = elm.getBoundingClientRect();
+    return rect.bottom - rect.top;
+  },
+
   reposVML: function(elm,     // Node:
                      force) { // Boolean(default: false): force re-position
     var repos = 0, rect, div;
 
     // top, left
     if (force ||
-        elm.orgOffsetTop !== elm.offsetTop ||
+        elm.orgOffsetTop  !== elm.offsetTop ||
         elm.orgOffsetLeft !== elm.offsetLeft) { 
+      elm.detachEvent("onpropertychange", onBackgroundChange);
       elm.orgOffsetTop  = elm.offsetTop;
       elm.orgOffsetLeft = elm.offsetLeft;
+      elm.attachEvent("onpropertychange", onBackgroundChange);
       ++repos;
     }
 
     if (repos) {
       rect = uu.style.getRect(elm);
-      div = elm.pair.div;
-      div.style.pixelLeft = rect.x;
-      div.style.pixelTop  = rect.y;
+      div = elm.pair;
+      if (div) {
+        div.style.pixelLeft = rect.x;
+        div.style.pixelTop  = rect.y;
+      }
+    }
+  },
+
+  draw: function(elm,     // Node:
+                 force) { // Boolean(default: false): force redraw
+    var me = this, redraw = force ? 1 : 0, img,
+        color = elm.currentStyle.backgroundColor,
+        url = uu.style.getBackgroundImage(elm);
+
+    // backgroundColor
+    if (color !== "transparent") {
+      elm.detachEvent("onpropertychange", onBackgroundChange);
+      elm.orgBackgroundColor = color;
+      elm.style.backgroundColor = "transparent";
+      elm.attachEvent("onpropertychange", onBackgroundChange);
+      ++redraw;
+    }
+
+    // backgroundImage
+    if (!BLANK_REX.test(url)) {
+      elm.detachEvent("onpropertychange", onBackgroundChange);
+      elm.orgBackgroundSrc = url;
+      elm.attachEvent("onpropertychange", onBackgroundChange);
+      img = new Image();
+      img.onload = function() {
+        elm.detachEvent("onpropertychange", onBackgroundChange);
+        elm.orgBackgroundImageWidth  = img.width;
+        elm.orgBackgroundImageHeight = img.height;
+        elm.style.backgroundImage = "url(" + UU.CONFIG.IMG_DIR + BLANK + ")";
+        elm.attachEvent("onpropertychange", onBackgroundChange);
+        me.drawVML(elm);
+      };
+      img.src = url;
+      redraw = 0;
+    }
+    if (redraw) {
+      this.drawVML(elm);
     }
   },
 
   drawVML: function(elm) {
     var cs = elm.currentStyle,
-        zIndex  = (parseInt(cs.zIndex) || 0) - 1,
-        posx    = cs.backgroundPositionX || "0%", // left, center, right, %, length
-        posy    = cs.backgroundPositionY || "0%", // top, center, bottom, %, length
-        repeat  = cs.backgroundRepeat    || "repeat", // repeat｜repeat-x｜repeat-y｜no-repeat
-        x, y, match, offsetX = 0, offsetY = 0, unit = uu.style.unit(),
-        imgWidth  = elm.orgBackgroundImageWidth,
-        imgHeight = elm.orgBackgroundImageHeight,
-        color = elm.orgBackgroundColor,
-        src   = elm.orgBackgroundSrc;
-        rect  = uu.style.getRect(elm);
+        unit = uu.style.unit(),
+        rect = uu.style.getRect(elm),
+        posx = cs.backgroundPositionX || "0%", // left, center, right, %, length
+        posy = cs.backgroundPositionY || "0%", // top, center, bottom, %, length
+        repeat = REPEAT[cs.backgroundRepeat || "repeat"], // repeat�brepeat-x�brepeat-y�bno-repeat
+        iw = elm.orgBackgroundImageWidth,
+        ih = elm.orgBackgroundImageHeight,
+        match, div, vmlrect, vmlfill,
+        x, y, ox = 0, oy = 0,       // offset x, y
+        px, py, pw = iw, ph = ih;   // pixel rect
+
+    rect.w = this.getWidth(elm);
+    rect.h = this.getHeight(elm);
 
     if ( (match = POS_X.exec(posx)) ) {
       if (match[1]) {
-        x = Math.round((rect.w - imgWidth) * (posHash[match[1]] / 100));
+        x = Math.round((rect.w - iw) * (posHash[match[1]] / 100));
       } else if (match[2]) { // 100%
-        x = Math.round((rect.w - imgWidth) * (parseInt(match[2]) / 100));
+        x = Math.round((rect.w - iw) * (parseInt(match[2]) / 100));
       } else if (match[3]) { // 100em
         x = parseInt(match[3]) * unit.em;
       } else if (match[4]) { // 100pt
@@ -333,9 +349,9 @@ uu.Class.Singleton("IEBoostPNGBG", {
     }
     if ( (match = POS_Y.exec(posy)) ) {
       if (match[1]) {
-        y = Math.round((rect.h - imgHeight) * (posHash[match[1]] / 100));
+        y = Math.round((rect.h - ih) * (posHash[match[1]] / 100));
       } else if (match[2]) {
-        y = Math.round((rect.h - imgHeight) * (parseInt(match[2]) / 100));
+        y = Math.round((rect.h - ih) * (parseInt(match[2]) / 100));
       } else if (match[3]) { // 100em
         y = parseInt(match[3]) * unit.em;
       } else if (match[4]) { // 100pt
@@ -344,58 +360,45 @@ uu.Class.Singleton("IEBoostPNGBG", {
         y = parseInt(match[5]);
       }
     }
+    div = uudoc.createElement(
+            VML0.sprintf(elm.orgBackgroundColor,
+                         (parseInt(cs.zIndex) || 0) - 1,
+                         rect.x, rect.y, rect.w, rect.h));
 
-    var div = elm.pair.div,
-        vmlrect = elm.pair.vmlrect,
-        vmlfill = elm.pair.vmlfill;
-
-    div.style.display = "block";
-    div.style.zIndex  = zIndex;
-    div.style.backgroundColor = color;
-    div.style.pixelLeft   = rect.x;
-    div.style.pixelTop    = rect.y;
-    div.style.pixelWidth  = rect.w;
-    div.style.pixelHeight = rect.h;
-
-    switch (repeat) {
-    case "no-repeat":
-      vmlrect.style.pixelLeft    = x;
-      vmlrect.style.pixelTop     = y;
-      vmlrect.style.pixelWidth   = imgWidth;
-      vmlrect.style.pixelHeight  = imgHeight;
-      break;
-    case "repeat-x":
-      offsetX = x;
-      while (offsetX > 0) { offsetX -= imgWidth; }
-
-      vmlrect.style.pixelLeft    = offsetX;
-      vmlrect.style.pixelTop     = y;
-      vmlrect.style.pixelWidth   = rect.w - offsetX;
-      vmlrect.style.pixelHeight  = imgHeight;
-      break;
-    case "repeat-y":
-      offsetY = y;
-      while (offsetY > 0) { offsetY -= imgHeight; }
-
-      vmlrect.style.pixelLeft    = x;
-      vmlrect.style.pixelTop     = offsetY;
-      vmlrect.style.pixelWidth   = imgWidth;
-      vmlrect.style.pixelHeight  = rect.h - offsetY;
-      break;
-    case "repeat":
-      offsetX = x;
-      offsetY = y;
-      while (offsetX > 0) { offsetX -= imgWidth; }
-      while (offsetY > 0) { offsetY -= imgHeight; }
-
-      vmlrect.style.pixelLeft    = offsetX;
-      vmlrect.style.pixelTop     = offsetY;
-      vmlrect.style.pixelWidth   = rect.w - offsetX;
-      vmlrect.style.pixelHeight  = rect.h - offsetY;
+    elm.detachEvent("onpropertychange", onBackgroundChange);
+    if (elm.pair) {
+      elm.removeChild(elm.pair);
     }
-//    if (vmlfill.src !== src) {
-      vmlfill.src = src;
-//    }
+    elm.pair = elm.firstChild ? elm.insertBefore(div, elm.firstChild)
+                              : elm.appendChild(div);
+    elm.pair.drawWidth  = rect.w;
+    elm.pair.drawHeight = rect.h;
+    elm.attachEvent("onpropertychange", onBackgroundChange);
+
+    px = x;
+    py = y;
+
+    if (repeat & 0x1) { // "repeat-x" or "repeat"
+      ox = x;
+      while (ox > 0) {
+        ox -= iw;
+      }
+      px = ox;
+      pw = rect.w - ox;
+    }
+    if (repeat & 0x2) { // "repeat-y" or "repeat"
+      oy = y;
+      while (oy > 0) {
+        oy -= ih;
+      }
+      py = oy;
+      ph = rect.h - oy;
+    }
+
+    vmlrect = uudoc.createElement(VML1.sprintf(px, py, pw, ph));
+    vmlfill = uudoc.createElement(VML2.sprintf(elm.orgBackgroundSrc));
+    elm.pair.appendChild(vmlrect);
+    vmlrect.appendChild(vmlfill);
   }
 });
 
@@ -407,15 +410,16 @@ uu.Class.IEBoostPNGBG.onBackgroundChange = function() {
   switch (prop || 0) {
   case 2: // style.backgroundImage
     url = uu.style.getBackgroundImage(elm);
-    if (BLANK_REX.test(url)) {
-      return;
+    if (!BLANK_REX.test(url)) {
+      uu.ieboostPNGBG.draw(elm, true);
     }
-    uu.ieboostPNGBG.draw(elm, true);
     break;
   case 3: // style.backgroundColor
-    if (elm.style.backgroundColor === "transparent") {
-      return;
+    if (elm.style.backgroundColor !== "transparent") {
+      uu.ieboostPNGBG.draw(elm, true);
     }
+    break;
+  case 4: // style.backgroundPositionX, ...
     uu.ieboostPNGBG.draw(elm, true);
     break;
   default:
@@ -423,11 +427,11 @@ uu.Class.IEBoostPNGBG.onBackgroundChange = function() {
   }
 };
 
-})();
-
 UU.IE && UU.CONFIG.IEBOOST.PNG_BG && uu.ready(function() {
   uu.ieboostPNGBG = new uu.Class.IEBoostPNGBG();
+  onBackgroundChange = uu.Class.IEBoostPNGBG.onBackgroundChange;
 });
+})();
 
 // === IEBoost MaxWidth ====================================
 // CSS2.1 max-width, min-width, max-height, min-height for IE6
@@ -439,20 +443,21 @@ uu.Class.Singleton("MaxWidth", {
     this.fix();
 
     // set event handler
-    var me = this, cev = UU.CONFIG.CUSTOM_EVENT;
+    var me = this;
 
     uu.customEvent.attach(function() {
       me.markup();
       me.fix();
-    }, cev.ADD_ELEMENT | cev.REMOVE_ELEMENT | cev.UPDATE_ELEMENT);
+    }, UU.CUSTOM_EVENT.ADD_ELEMENT | UU.CUSTOM_EVENT.REMOVE_ELEMENT |
+       UU.CUSTOM_EVENT.UPDATE_ELEMENT);
 
     uu.customEvent.attach(function() {
       me.fix();
-    }, cev.RESIZE_VIEWPORT);
+    }, UU.CUSTOM_EVENT.RESIZE_VIEWPORT);
 
     uu.customEvent.attach(function() {
       me.fix();
-    }, cev.RESIZE_FONT);
+    }, UU.CUSTOM_EVENT.RESIZE_FONT);
   },
 
   markup: function() {
@@ -665,11 +670,11 @@ uu.Class.Singleton("IEBoostOpacity", {
     this.fix();
 
     // set event handler
-    var me = this, cev = UU.CONFIG.CUSTOM_EVENT;
+    var me = this;
 
     uu.customEvent.attach(function() {
       me.fix();
-    }, cev.ADD_ELEMENT | cev.UPDATE_ELEMENT);
+    }, UU.CUSTOM_EVENT.ADD_ELEMENT | UU.CUSTOM_EVENT.UPDATE_ELEMENT);
   },
 
   fix: function() {
@@ -754,17 +759,17 @@ uu.Class.Singleton("IEBoostPositionFixed", {
     this.fix();
 
     // set event handler
-    var me = this, cev = UU.CONFIG.CUSTOM_EVENT;
+    var me = this;
 
     uu.customEvent.attach(function(customEvent) {
       me.markup();
-    }, cev.ADD_ELEMENT | cev.UPDATE_ELEMENT);
+    }, UU.CUSTOM_EVENT.ADD_ELEMENT | UU.CUSTOM_EVENT.UPDATE_ELEMENT);
 
     uu.customEvent.attach(function(customEvent) { // resize, update view
       me.fix();
-    }, cev.ADD_ELEMENT | cev.UPDATE_ELEMENT |
-//     cev.RESIZE_VIEWPORT | cev.RESIZE_FONT);
-       cev.RESIZE_BODY | cev.RESIZE_FONT);
+    }, UU.CUSTOM_EVENT.ADD_ELEMENT | UU.CUSTOM_EVENT.UPDATE_ELEMENT |
+//     UU.CUSTOM_EVENT.RESIZE_VIEWPORT | UU.CUSTOM_EVENT.RESIZE_FONT);
+       UU.CUSTOM_EVENT.RESIZE_BODY | UU.CUSTOM_EVENT.RESIZE_FONT);
 
 //    uu.event.attach(window, "resize", this);
   },
