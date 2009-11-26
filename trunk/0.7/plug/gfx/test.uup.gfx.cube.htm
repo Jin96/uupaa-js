@@ -1,0 +1,23 @@
+<!doctype html><html><head><meta charset="utf-8" />
+<title></title>
+<style></style>
+<script>
+window.xconfig = {};
+</script>
+<script src="../../uupaa.js"></script>
+<script src="uup.gfx.js"></script>
+<script src="uup.gfx.cube.js"></script>
+<script>
+function xcanvas(uu) {
+  var out = uu.id("out");
+  var ctx = out.getContext("2d");
+  var cube = uu.factory("GfxCube");
+
+  cube.add({ x: 100, y: 100 });
+  cube.draw(ctx);
+  uu.ev.hover(out, function() { cube.run(ctx); },
+                   function() { cube.stop(); });
+}
+</script></head><body>
+<canvas id="out" width="200" height="200"></canvas>
+</body></html>
