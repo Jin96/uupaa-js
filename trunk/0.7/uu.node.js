@@ -10,19 +10,19 @@ uu.mix(uu, {
 });
 uu.mix(uu.node, {
     diet:       uunodediet,     // uu.node.diet(ctx = body, depth = 0)
-    index:      uunodeindex,    // [1][find node index] uu.node.index(node) -> Number
-                                // [2][find tag index]  uu.node.index(node, "div") -> Number
-    first:      uunodefirst,    // [1][find] uu.node.first(node) -> find first sibling
-                                // [2][add]  uu.node.first(ctx, uu.div()) -> HTMLDivElement
-                                // [3][add]  uu.node.first(ctx, "<div><p>txt</p></div>") -> HTMLDivElement
-    prev:       uunodeprev,     // @see uu.node.first
-    next:       uunodenext,     // @see uu.node.first
-    last:       uunodelast,     // @see uu.node.first
-    firstChild: uunodefirstchild,
-    lastChild:  uunodelastchild,
-    data: uu.mix(uunodedata, {  // [1][get all] uu.node.data(node) -> { key: value, ... }
-                                // [2][get one] uu.node.data(node, key) -> Mix
-                                // [3][set]     uu.node.data(node, key, value) -> node
+//  uu.node.first, uu.node.prev, uu.node.next, uu.node.last,
+//  uu.node.firstChild, uu.node.lastChild:
+                                // uu.node.first(ctx, uu.p() or "<p>html</p>") -> <p>
+    // [1][find node index] uu.node.find(node) -> Number
+    // [2][find tag index]  uu.node.find(node, "div") -> Number
+    find:       uunodefind,
+//  uu.node.find.first, uu.node.find.prev, uu.node.find.next, uu.node.find.last,
+//  uu.node.find.firstChild, uu.node.find.lastChild:
+                                // uu.node.find.first(ctx) -> node
+    // [1][get all] uu.node.data(node) -> { key: value, ... }
+    // [2][get one] uu.node.data(node, key) -> Mix
+    // [3][set]     uu.node.data(node, key, value) -> node
+    data: uu.mix(uunodedata, {
       get:      uunodedataget,  // uu.node.data.get(node, key) -> Mix
       set:      uunodedataset,  // uu.node.data.set(node, key, value) -> node
       clear:    uunodedataclear // [1][clear data] uu.node.data.clear(node, key) -> node
@@ -67,7 +67,7 @@ function uuxpath(node) { // @param Node: ELEMENT_NODE
     n = n.parentNode;
   }
   return "/" + rv.reverse().join("/") +
-         "[" + uunodeindex(node, node.tagName) + "]";
+         "[" + uunodefind(node, node.tagName) + "]";
 }
 
 // uu.node.diet - removes CRLF/blank-text/white-space/comment node
@@ -90,12 +90,12 @@ function uunodediet(ctx,     // @param Node(= document.body): parent node
   }
 }
 
-// uu.node.index
+// uu.node.find - find node index
 // [1][find node index] uu.node.index(node) -> Number
 // [2][find tag index]  uu.node.index(node, "div") -> Number
-function uunodeindex(node,  // @param Node: ELEMENT_NODE
-                     tag) { // @param String(= ""): tag
-                            // @return Number: ELEMENT_NODE index(from 1) or -1
+function uunodefind(node,  // @param Node: ELEMENT_NODE
+                    tag) { // @param String(= ""): tag
+                           // @return Number: ELEMENT_NODE index(from 1) or -1
   var rv = 0, cn = node.parentNode.firstChild;
 
   for (; cn; cn = cn.nextSibling) {
@@ -108,46 +108,29 @@ function uunodeindex(node,  // @param Node: ELEMENT_NODE
   return -1;
 }
 
-// uu.node.first - find first sibling node / add first sibling node
-// [1][find] uu.node.first(ctx) -> find first sibling
-// [2][add]  uu.node.first(ctx, uu.div()) -> HTMLDivElement
-// [3][add]  uu.node.first(ctx, "<div><p>txt</p></div>") -> HTMLDivElement
-function uunodefirst(ctx,    // @param Node: context
-                     data) { // @param Node/DocumentFragment/HTMLString:
-                             // @return Node: found node / first node
-  return data ? uu.node(data, ctx, 1) // 1: first sibling
-              : _nodefindfirst(ctx);
-}
-
-// uu.node.prev - find previous sibling node / add previous sibling node
-function uunodeprev(ctx, data) { // @see uu.node.first
-  return data ? uu.node(data, ctx, 2) // 2: prev sibling
-              : _nodefindprev(ctx);
-}
-
-// uu.node.next - find next sibling node / add next sibling node
-function uunodenext(ctx, data) { // @see uu.node.first
-  return data ? uu.node(data, ctx, 3) // 3: next sibling
-              : _nodefindprev(ctx, 1);
-}
-
-// uu.node.last - find last sibling node / add last sibling node
-function uunodelast(ctx, data) { // @see uu.node.first
-  return data ? uu.node(data, ctx, 4)  // 4: last sibling
-              : _nodefindfirst(ctx, 1);
-}
-
-// uu.node.firstChild - find firstChild node / add firstChild node
-function uunodefirstchild(ctx, data) { // @see uu.node.first
-  return data ? uu.node(data, ctx, 5) // 5: first child
-              : _nodefindfirst(ctx, 0, 1);
-}
-
-// uu.node.lastChild - find lastChild node / add lastChild node
-function uunodelastchild(ctx, data) { // @see uu.node.first
-  return data ? uu.node(data, ctx, 6)  // 6: last child
-              : _nodefindfirst(ctx, 1, 1);
-}
+uu.hash.each({ first: 1, prev: 2, next: 3, last: 4,
+               firstChild: 5, lastChild: 6 }, function(pos, method) {
+  // uu.node.first - add first sibling node
+  // [1][add] uu.node.first(uu.p(), ctx) -> <p>
+  // [2][add] uu.node.first("<p>html</p>", ctx) -> <p>
+  uu.node[method] = function(node,  // @param Node/DocumentFragment/HTMLString:
+                             ctx) { // @param Node(= <body>): context
+                                    // @return Node: first node
+    return uu.node(node, ctx, pos);
+  };
+  // uu.node.find.first - find first sibling node
+  uunodefind[method] = function(ctx) { // @param Node: context
+                                       // @return Node: node
+    switch (pos) {
+    case 1: return _nodefindfirst(ctx); // first
+    case 2: return _nodefindprev(ctx); // prev
+    case 3: return _nodefindprev(ctx, 1); // next
+    case 4: return _nodefindfirst(ctx, 1); // last
+    case 5: return _nodefindfirst(ctx, 0, 1); // firstChild
+    }
+    return _nodefindfirst(ctx, 1, 1); // lastChild
+  }
+});
 
 // inner - find first / last sibling node
 function _nodefindfirst(node, last, child) {

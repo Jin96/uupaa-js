@@ -47,8 +47,8 @@ var _config = uuarg(_xconfig, {
     _HASH = 1, _NODE = 2, _FAKE = 4, _RGBA = 8, _NULL = 16, _VOID = 32,
     _BOOL = 64, _NUM = 128, _STR = 256, _REX = 512, _ARY = 1024,
     _FUNC = 2048, _DATE = 4096,
-    _TYPE = uuhash( // http://d.hatena.ne.jp/uupaa/20091006/
-        "+undefined,32,boolean,64,number,128,string,256,[object Boolean],64," +
+    _TYPE = uuhashnum( // http://d.hatena.ne.jp/uupaa/20091006/
+        "undefined,32,boolean,64,number,128,string,256,[object Boolean],64," +
         "[object Number],128,[object String],256,[object RegExp],512," +
         "[object Array],1024,[object Function],2048,[object Date],4096"),
     _ATTR = uuhash(!_ver.ie67 ? "for,htmlFor,className,class" :
@@ -61,7 +61,7 @@ var _config = uuarg(_xconfig, {
                 "bgrpt,backgroundRepeat,bgpos,backgroundPosition"),
     _EVENT = "mousedown,mouseup,mousemove,mousewheel,click,dblclick,keydown," +
              "keypress,keyup,change,submit,focus,blur,contextmenu",
-    _EVCODE = uuhash("+mousedown,1,mouseup,2,mousemove,3," +
+    _EVCODE = uuhashnum("mousedown,1,mouseup,2,mousemove,3," +
         "mousewheel,4,click,5,dblclick,6,keydown,7,keypress,8,keyup,9," +
         "mouseenter,10,mouseleave,11,mouseover,12,mouseout,13,contextmenu,14," +
         "focus,15,blur,16,losecapture,0x102,DOMMouseScroll,0x104"),
@@ -72,7 +72,7 @@ var _config = uuarg(_xconfig, {
              _ver.opera ? { contextmenu: "mousedown" } : {},
     _NGWORD = /(:(a|b|co|dig|first-l|li|mom|ne|p|sc|t|v))|!=|\/=|<=|>=|&=|x7b/,
     _ISO_DATE = /^(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d):(\d\d)(?:\.(\d*))?Z$/,
-    _FMT_BITS = uuhash("+i,32785,d,32785,u,32801,o,33121,x,33377,X,37473," +
+    _FMT_BITS = uuhashnum("i,32785,d,32785,u,32801,o,33121,x,33377,X,37473," +
                        "f,146,c,10240,A,18432,s,132,%,3076,j,67584"),
     _FMT_PARSE = /%(?:(\d+)\$)?(#|0)?(\d+)?(?:\.(\d+))?(l)?([%iduoxXfcAsj])/g,
     _JSON_SWAP = uuhash('",\\",\b,\\b,\f,\\f,\n,\\n,\r,\\r,\t,\\t,\\,\\\\'),
@@ -80,6 +80,7 @@ var _config = uuarg(_xconfig, {
     _JSON_ESCAPE = /(?:\"|\\[bfnrt\\])/g,
     _JSON_ENCODE = /[\x00-\x1F\u0080-\uFFEE]/g,
     _JSON_NGWORD = /[^,:{}\[\]0-9.\-+Eaeflnr-u \n\r\t]/,
+    _JAM_KLASS = { "+": uuklassadd, "-": uuklasssub, "!": uuklasstoggle },
     _QUERY_STR = /(?:([^\=]+)\=([^\;]+);?)/g,
     _FROM_ENT = /&(?:amp|lt|gt|quot);/g,
     _EVPARSE = /^(?:(\w+)\.)?(\w+)(\+)?$/, // ^[NameSpace.]EvntType[Capture]$
@@ -94,27 +95,21 @@ var _config = uuarg(_xconfig, {
     _TRIM = /^\s+|\s+$/g,
     _UCS2 = /\\u([0-9a-z]{4})/g,
     _ENT = uuhash("&,&amp;,<,&lt;,>,&gt;,\",&quot;," +
-                  "&amp;,&,&lt;,<,&gt;,>,&quot;,\"");
+                  "&amp;,&,&lt;,<,&gt;,>,&quot;,\""),
+    _dmz = { root: doc.documentElement || _html, // root or <html>(IE quirks)
+             iebody: 0,       // [lazy] documentElement or <body>(IE quirks)
+             ndiddb: _ndiddb, // nodeid database
+             ndidseed: 0,     // nodeid counter
+             DEC2: _DEC2, HEX2: _HEX2, FIX: _FIX, EVENT: _EVENT,
+             HTML5TAG: _HTML5 };
 
-// --- I/F ---
-uu = uumix(_uujam, {
-  // --- Library workspace ---
-  ver:    uumix(_ver, {         // uu.ver - { ua, re, sl, fl, ie, ie6, ie7, ie8,
-    lib: 0.7                    //   ie67, opera, gecko, webkit, chrome, safari,
-  }),                           //   iphone, quirks, advanced, majority, lib }
-  waste:        0,              // uu.waste  - 1~ is reloaded library
+// --- structure ---
+uu = uumix(_uujamfactory, {     // uu(expr, ctx) -> Instance(jam)
+  ver:    uumix(_ver, {         // uu.ver - version and meta infos
+    lib:        0.7             //      ua, re, sl, fl, ie, ie6, ie7, ie8, ie67,
+  }),                           //      opera, gecko, webkit, chrome, safari,
+                                //      iphone, quirks, advanced, majority, lib
   config:       _config,        // uu.config - { aria, debug, light, ... }
-  // --- scope / mixin ---
-  // [1][short code] uu.exp()           -> window.mix, window.ie
-  // [2][add prefix] uu.exp("pfx")      -> window.pfx_mix, window.pfx_ie
-  // [3][add suffix] uu.exp("", "_sfx") -> window.mix_sfx, window.ie_sfx
-  exp:          uuexp,
-  // [1][override]     uu.mix({a:9, b:9}, {a:1}, {b:2}) -> base( {a:1, b:2} )
-  // [2][not override] uu.mix({a:9, b:9}, {a:1}, {a:2}, 0) -> base( {a:9} )
-  // [3][clone hash]   uu.mix({}, {a:1}) -> base( {a:1} )
-  mix:          uumix,
-  // [1][supply args] uu.arg({ a: 1 }, { b: 2 }) -> new Hash( { a: 1, b: 2 } )
-  arg:          uuarg,
   // --- ajax / jsonp ---
   ajax:   uumix(uuajax, {       // uu.ajax(url, option = {}, fn, ngfn = void 0)
     get:        uuajaxget,      // uu.ajax.get(url, option = {}, fn, ngfn = void 0 )
@@ -127,7 +122,7 @@ uu = uumix(_uujam, {
   jsonp:  uumix(uujsonp, {      // uu.jsonp(url, option = {}, fn, ngfn = void 0)
     _db:        _jsonpdb        // [protected] jsonp job database
   }),
-  // --- array ---
+  // --- array / hash ---
   // [1][clone]             uu.ary(Array) -> new Array
   // [2][convert NodeList]  uu.ary(NodeList) -> [elm, ...]
   // [3][convert arguments] uu.ary(arguments) -> [elm, ...]
@@ -147,7 +142,30 @@ uu = uumix(_uujam, {
                                 // [2][unique literals] uu.ary.uniqye([0,1,2,1,0], 1) -> [0,1,2]
     indexOf:    uuaryindexof    // uu.ary.indexOf(ary, find, index = 0) -> Number
   }),
-  each:         uuaryeach,      // [alias] uu.ary.each
+  // [1][through] uu.hash({ key: "val" }) -> { key: "val" }
+  // [2][to hash] uu.hash("key", mix) -> { key: mix }
+  // [3][to hash(split comma)] uu.hash("key,a,key2,b") -> {key: "a", key2: "b"}
+  // [4][to hash(split space)] uu.hash(" key a key2 b") -> {key: "a", key2: "b"}
+  hash:   uumix(uuhash, {
+    num:        uuhashnum,      // uu.hash.num("key,0,key2,1") -> { key: 0, key2: 1 }
+    has:        uuhashhas,      // uu.hash.has({a:1,b:2}, {a:1,b:2,c:3}) -> true
+    each:       uuhasheach,     // uu.hash.each(hash, fn)
+    size:       uuhashsize,     // uu.hash.size(mix) -> Number(hash length)
+    keys:       uuhashkeys,     // uu.hash.keys(mix) -> [key1, key2, ...]
+    css2kb:     uuhashcss2kb,   // uu.hash.css2kb([className, ...]) -> Hash
+    values:     uuhashvalues,   // uu.hash.values(mix) -> [value1, value2, ...]
+    indexOf:    uuhashindexof,  // uu.hash.indexOf({a: 1, b: 2, c: 2}, 2) -> "b"
+    combine:    uuhashcombine,  // uu.hash.combine(keyary, valary) -> { ... }
+    hasValue:   uuhashhasvalue  // uu.hash.hasValue({ a: 1, b: 2 }, 2) -> true
+  }),
+  each:         uueach,         // [1][array.forEach] uu.each(ary, fn)
+                                // [2][hash.forEach]  uu.each(hash, fn)
+  mix:          uumix,          // [1][override]     uu.mix({a:9, b:9}, {a:1}, {b:2}) -> base( {a:1, b:2} )
+                                // [2][not override] uu.mix({a:9, b:9}, {a:1}, {a:2}, 0) -> base( {a:9} )
+                                // [3][clone hash]   uu.mix({}, {a:1}) -> base( {a:1} )
+  arg:          uuarg,          // [supply args] uu.arg({ a: 1 }, { b: 2 }) -> new Hash( { a: 1, b: 2 } )
+  exp:          uuexp,          // [1][short code] uu.exp()      -> window.mix, window.ie
+                                // [2][add prefix] uu.exp("pfx") -> window.pfx_mix, window.pfx_ie
   // --- attribute ---
   // [1][get one attr]   uu.attr(node, "attr") -> "value"
   // [2][get some attrs] uu.attr(node, "attr1,attr2") -> { attr1: "val", attr2: "val" }
@@ -205,9 +223,6 @@ uu = uumix(_uujam, {
       blackout: 0               // 1 is blackout (css3 cache reload)
     }
   }),
-  // --- function / script --
-  // uu.js("JavaScript Expression") -> eval(expr) result
-  js:           uujs,
   // --- form ---
   // [1][node] uu.text("text") -> createTextNode("text")
   // [2][get]  uu.text(node) -> text or [text, ...]
@@ -222,28 +237,6 @@ uu = uumix(_uujam, {
     get:        uuvalget,       // uu.val.get(node) -> val or [val, ...]
     set:        uuvalset        // uu.val.set(node, val) -> node
   }),
-  // --- hash / object ---
-  // [1][through] uu.hash({ key: "val" }) -> { key: "val" }
-  // [2][to hash] uu.hash("key", mix) -> { key: mix }
-  // [3][to hash(split comma)] uu.hash("key,a,key2,b") -> {key: "a", key2: "b"}
-  // [4][to hash(comma + num)] uu.hash("0key,0,key2,1") -> {key: 0, key2: 1}
-  // [5][to hash(split space)] uu.hash(" key a key2 b") -> {key: "a", key2: "b"}
-  hash:   uumix(uuhash, {
-    has:        uuhashhas,      // uu.hash.has({a:1,b:2}, {a:1,b:2,c:3}) -> true
-    size:       uuhashsize,     // uu.hash.size(mix) -> Number(hash length)
-    keys:       uuhashkeys,     // uu.hash.keys(mix) -> [key1, key2, ...]
-    css2kb:     uuhashcss2kb,   // uu.hash.css2kb([className, ...]) -> Hash
-    values:     uuhashvalues,   // uu.hash.values(mix) -> [value1, value2, ...]
-    indexOf:    uuhashindexof,  // uu.hash.indexOf({a: 1, b: 2, c: 2}, 2) -> "b"
-    combine:    uuhashcombine,  // uu.hash.combine(keyary, valary) -> { ... }
-    hasValue:   uuhashhasvalue  // uu.hash.hasValue({ a: 1, b: 2 }, 2) -> true
-  }),
-  // --- lazy ---
-  lazy:   uumix(uulazy, {       // uu.lazy(id = "", fn, order = 0)
-    fire:       uulazyfire      // uu.lazy.fire(id = "")
-  }),
-  // --- message pump ---
-  msg:          0,              // [lazy] uu.msg is MessagePump class instance
   // --- node / node list / tag ---
   // [1][add to body] uu.node(uu.div()) -> <div>
   // [2][add to body] uu.node(uu.div(), doc.body) -> <div>
@@ -265,8 +258,6 @@ uu = uumix(_uujam, {
   head:         uuhead,         // uu.head(node, attr, style, tagid) -> <head>
   body:         uubody,         // uu.body(node, attr, style, tagid) -> <body>
   img:          uuimg,          // uu.img(node, attr, style, tagid) -> <img>
-  // --- number ---
-  guid:         uuguid,         // uu.guid() -> Number(unique)
   // --- string ---
   // [1] uu.fix("-webkit-shadow")   -> "-webkit-shadow"
   // [2] uu.fix("background-color") -> "backgroundColor"
@@ -318,8 +309,6 @@ uu = uumix(_uujam, {
   FUNC:         _FUNC,          // uu.FUNC   - Function
   DATE:         _DATE,          // uu.DATE   - Date
   UNDEF:        _VOID,          // uu.UNDEF  - [alias] uu.VOID
-  // --- ui ---
-  ui:           uuui,           // [create instance] uu.ui(widget, placeholder, option) -> instance
   // --- user agent (uu.ver.* alias) ---
   ie:           _ie,            // is IE
   ie6:          _ver.ie6,       // is IE6
@@ -328,8 +317,18 @@ uu = uumix(_uujam, {
   ie67:         _ver.ie67,      // is IE6 or IE7
   opera:        _ver.opera,     // is Opera
   gecko:        _ver.gecko,     // is Gecko
-  webkit:       _ver.webkit     // is WebKit
+  webkit:       _ver.webkit,    // is WebKit
+  // --- other ---
+  js:           uujs,           // uu.js("JavaScript Expression") -> eval(expr) result
+  ui:           uuui,           // [create instance] uu.ui(widget, placeholder, option) -> instance
+  guid:         uuguid,         // uu.guid() -> Number(unique)
+  lazy:   uumix(uulazy, {       // uu.lazy(id = "", fn, order = 0)
+    fire:       uulazyfire      // uu.lazy.fire(id = "")
+  }),
+  dmz:          _dmz,           // uu.dmz - public data and methods
+  waste:        0               // uu.waste - 1+ is library reloaded, 0 is first time
 });
+
 // --- message pump ---
 MessagePump.prototype = {
   regist:       uumsgregist,    // uu.msg.regist(instance) -> this
@@ -341,23 +340,55 @@ MessagePump.prototype = {
                                 // [2][unicast]   uu.mgg.post(instance, "hello")
                                 // [3][broadcast] uu.msg.post(0, "hello")
 };
+uu.msg = new MessagePump();     // MessagePump class instance
+
+uumix(uujam.prototype, {
+  // --- stack ---
+  back:         jamback,        // jam.back() -> jam
+  find:         jamfind,        // jam.find(expr) -> jam
+  // --- nodeset ---
+  nth:          jamnth,         // jam.nth(= 0) -> Node / void 0
+  each:         jameach,        // jam.each(fn) -> jam
+  size:         jamsize,        // jam.size() -> Number
+  indexOf:      jamindexOf,     // jam.indexOf(node) -> Number(-1 is not found)
+  // --- node ---
+//first, prev, next, last, firstChild, lastChild, add
+  remove:       jamremove,      // jam.remove() -> jam
+  // [1][get] jam.attr("attr") -> ["value", ...]
+  // [2][get] jam.attr("attr1,attr2") -> [{ attr1: "value", attr2: "value" }, ...]
+  // [3][set] jam.attr("attr", "value") -> jam
+  // [4][set] jam.attr({ attr: "value", ... }) -> jam
+  attr:         jamattr,
+  // [1][get] jam.css("color") -> ["red", ...]
+  // [2][get] jam.css("color,width") -> [{ color: "red", width: "20px" }, ...]
+  // [3][set] jam.css("color", "red") -> jam
+  // [4][set] jam.css({ color: "red" }) -> jam
+  css:          jamcss,
+  // [1][add]    jam.klass("+className") -> jam
+  // [2][sub]    jam.klass("-className") -> jam
+  // [3][toggle] jam.klass("!className") -> jam
+  // [4][clear]  jam.klass() -> jam
+  klass:        jamklass,
+  bind:         jambind,        // jam.bind("click", fn) -> jam
+  unbind:       jamunbind,      // jam.unbind("click") -> jam
+  show:         jamshow,        // jam.show(fadein = false) -> jam
+  hide:         jamhide,        // jam.hide(fadeout = false) -> jam
+//mousedown, mouseup, mousemove, mousewheel, click, dblclick, keydown,
+//keypress, keyup, change, submit, focus, blur, contextmenu
+  hover:        jamhover,       // jam.hover(enter, leave) -> jam
+  // [1][get] jam.html() -> ["innerHTML", ...]
+  // [2][set] jam.html("<p>html</p>") -> jam
+  html:         jamhtml,
+  // [1][get] jam.text() -> ["innerText", ...]
+  // [2][set] jam.text("html") -> jam
+  text:         jamtext,
+  // [1][get] jam.val() -> ["value", ...]
+  // [2][set] jam.val("value") -> jam
+  val:          jamval
+});
 
 // === init interface ===
-uu.msg = new MessagePump();
-
-// inner - uu.jam, bridge I/F
-function _uujam(expr, ctx, option) {
-  return uu.jam(expr, ctx, option);
-}
 uu.config.imgdir = uu.config.imgdir.replace(/\/+$/, "") + "/"; // add tail(/)
-// uu.dmz - public data and methods
-uu.dmz = {
-  root: doc.documentElement || _html, // root or <html>(IE quirks mode)
-  iebody: 0,       // [lazy] documentElement or <body>(IE quirks)
-  ndiddb: _ndiddb, // nodeid database
-  ndidseed: 0,     // nodeid counter
-  DEC2: _DEC2, HEX2: _HEX2, FIX: _FIX, EVENT: _EVENT, HTML5TAG: _HTML5
-};
 // work
 function _toary(a) { // make array from FakeArray/Array/Arguments
   var r=[],i=a.length;while(i--){r[i]=a[i];}return r;
@@ -370,52 +401,22 @@ function _matcher(a) { // make className matcher from array
   return RegExp("(?:^| )("+a.join("|")+")(?:$|(?= ))","g");
 }
 
-// --- scope / mixin ---
-// uu.exp - create alias, export scope, explosion!
-// [1][short code] uu.exp()           -> window.mix, window.ie
-// [2][add prefix] uu.exp("pfx")      -> window.pfx_mix, window.pfx_ie
-// [3][add suffix] uu.exp("", "_sfx") -> window.mix_sfx, window.ie_sfx
-function uuexp(prefix,   // @param String(= ""):
-               suffix) { // @param String(= ""):
-  prefix = prefix || "";
-  suffix = suffix || "";
-  var v, p;
-
-  for (p in uu) {
-    v = prefix + p + suffix;
-    v in win || (win[v] = uu[p]); // not override (eg: window.opera)
-  }
+// --- Jam (nodeset I/F) ---
+// uu.jam - nodeset accessor factory
+function _uujamfactory(expr, ctx) {
+  return new uujam(expr, ctx);
 }
-
-// [1][override]     uu.mix({a:9, b:9}, {a:1}, {b:2}) -> base( {a:1, b:2} )
-// [2][not override] uu.mix({a:9, b:9}, {a:1}, {a:2}, 0) -> base( {a:9} )
-// [3][clone hash]   uu.mix({}, {a:1}) -> base( {a:1} )
-function uumix(base,       // @param Hash: mixin base
-               flavor,     // @param Hash: add flavor
-               aroma,      // @param Hash(= void 0): add aroma
-               override) { // @param Number(= 1): 1 is override
-                           // @return Hash: base
-  var i;
-
-  if (override === void 0 || override) { // [1][3]
-    for (i in flavor) {
-      base[i] = flavor[i];
-    }
-  } else { // [2]
-    for (i in flavor) {
-      i in base || (base[i] = flavor[i]);
-    }
-  }
-  return aroma ? uumix(base, aroma, void 0, override) : base;
-}
-
-// uu.arg - supply default arguments
-// [1][supply args] uu.arg({ a: 1 }, { b: 2 }) -> new Hash( { a: 1, b: 2 } )
-function uuarg(arg1,   // @param Hash: arg1
-               arg2,   // @param Hash: arg2
-               arg3) { // @param Hash(= void 0): arg3
-                       // @return Hash: new Hash(mixed arg)
-  return uumix(uumix({}, arg1), arg2, arg3, 0); // [1]
+function uujam(expr,  // @param Node/NodeArray/String/Instance/window/document:
+               ctx) { // @param Node(= void 0): context
+  this._stack = [[]]; // [nodeset, ...]
+  this._ns = !expr ? [] // nodeset
+           : (expr === win || expr.nodeType) ? [expr] // node
+           : uuisary(expr) ? expr.slice() // clone NodeArray
+           : uuisstr(expr) ?
+                (!expr.indexOf("<") ? [uunodebulk(expr)]  // <div> -> fragment
+                                    : uuquery(expr, ctx)) // query
+           : (expr instanceof uujam) ? expr._ns.slice() // copy constructor
+           : []; // bad expr
 }
 
 // --- ajax / jsonp ---
@@ -599,7 +600,7 @@ function uujsonp(url,    // @param URLString: request url
   setTimeout(_jsonpwatchdog, timeout * 1000);
 }
 
-// --- array ---
+// --- array / hash ---
 // uu.ary - clone array, convert array, split string
 // [1][clone]             uu.ary(Array) -> new Array
 // [2][convert NodeList]  uu.ary(NodeList) -> [elm, ...]
@@ -723,6 +724,207 @@ function uuaryindexof(ary,     // @param Array:
   return -1;
 }
 
+// uu.hash - make hash from key value pair
+// [1][through] uu.hash({ key: "val" }) -> { key: "val" }
+// [2][to hash] uu.hash("key", mix) -> { key: mix }
+// [3][to hash(split comma)] uu.hash("key,a,key2,b") -> { key: "a", key2: "b" }
+// [4][to hash(split space)] uu.hash(" key a key2 b") -> { key: "a", key2: "b" }
+function uuhash(key,     // @param String/Hash: key
+                value) { // @param Mix(= void 0): value
+                         // @return Hash: { key: value, ... }
+  var rv = {}, i = 0, v, ary;
+
+  if (value !== void 0) { // [2]
+    rv[key] = value;
+  } else if (typeof key === "string") { // [3][4]
+    ary = !key.indexOf(" ") ? key.slice(1).split(" ") : key.split(",");
+    while ( (v = ary[i++]) ) {
+      rv[v] = ary[i++];
+    }
+  } else { // [1]
+    rv = key;
+  }
+  return rv;
+}
+
+// uu.hash.num - make { key: num } value pair
+// uu.hash.num("key,0,key2,1") -> { key: 0, key2: 1 }
+function uuhashnum(str) { // @param String:
+                          // @return Hash:
+  var rv = {}, i = 0, v, ary = str.split(",");
+
+  while ( (v = ary[i++]) ) {
+    rv[v] = +(ary[i++]);
+  }
+  return rv;
+}
+
+// uu.hash.has - has Hash
+function uuhashhas(find,   // @param Hash: find { key, value, ... }
+                   hash) { // @param Hash:
+                           // @return Boolean:
+  var v, w, i;
+
+  for (i in find) {
+    v = find[i], w = hash[i];
+    if (!(i in hash) || // key not found
+        (v !== w && _jsoninsp(v) !== _jsoninsp(w))) { // match JSON
+      return false;
+    }
+  }
+  return true;
+}
+
+// uu.hash.each - Hash forEach
+function uuhasheach(hash, // @param Hash:
+                    fn) { // @param Function: callback
+  for (var i in hash) {
+    fn(hash[i], i); // fn(value, index)
+  }
+}
+
+// uu.hash.size - get hash length
+function uuhashsize(mix) { // @param Array/Hash:
+                           // @return Number:
+  return uuisary(mix) ? mix.length : uuhashkeys(mix).length;
+}
+
+// uu.hash.keys - enum hash keys
+function uuhashkeys(mix,    // @param Array/Hash:
+                    _val) { // @hidden Boolean(= false): true is enum values
+                            // @return Array: [key, ... ]
+  var rv = [], ri = -1, i, iz;
+
+  if (uuisary(mix)) {
+    for (i = 0, iz = mix.length; i < iz; ++i) {
+      i in mix && (rv[++ri] = _val ? mix[i] : i);
+    }
+  } else {
+    for (i in mix) {
+      mix.hasOwnProperty(i) && (rv[++ri] = _val ? mix[i] : i);
+    }
+  }
+  return rv;
+}
+
+// uu.hash.css2kb - hash from CSS implemented data
+// .hoge { list-style: url(?key=val) }
+// uu.hash.css2kb("hoge") -> { key: val }
+function uuhashcss2kb(name) { // @param String/Array: className or [className, ...]
+                              // @return Hash: { key: value, ... }
+  function _qsparse(m, key, val, v) {
+    v = fn(val);
+    return rv[fn(key)] = isNaN(v) ? v : parseFloat(v);
+  }
+  // http://d.hatena.ne.jp/uupaa/20091125
+  var rv = {}, cs, url, v, i = 0, ary = uuisary(name) ? name : [name],
+      div = doc.body.appendChild(doc.createElement("div")),
+      fn = decodeURIComponent;
+
+  while ( (v = ary[i++]) ) {
+    div.className = v;
+    cs = _ie ? div.currentStyle : _cstyle(div, null);
+    url = uutrimurl(cs.listStyleImage);
+    if (url && url.indexOf("?") > 0) {
+      url.slice(url.indexOf("?") + 1).replace(_QUERY_STR, _qsparse);
+    }
+  }
+  doc.body.removeChild(div);
+  return rv;
+}
+
+// uu.hash.values - enum hash values
+function uuhashvalues(mix) { // @param Array/Hash:
+                             // @return Array: [value, ... ]
+  return uuhashkeys(mix, 1);
+}
+
+// uu.hash.indexOf - find first key from value
+function uuhashindexof(hash,    // @param Hash:
+                       value) { // @param Mix: find value
+                                // @return String/void 0: "found-key" or void 0
+  for (var i in hash){
+    if (hash.hasOwnProperty(i) && hash[i] === value) {
+      return i;
+    }
+  }
+  return void 0;
+}
+
+// uu.hash.combine - make { key: value } pair from array
+function uuhashcombine(keyary,     // @param Array: key array
+                       valary,     // @param Array: value array
+                       toNumber) { // @param Number(= 0): 1 is exec parseInt()
+                                   // @return Hash: { key: value, ... }
+  var rv = {}, i = 0, iz = keyary.length;
+
+  for (; i < iz; ++i) {
+    rv[keyary[i]] = toNumber ? parseInt(valary[i]) : valary[i];
+  }
+  return rv;
+}
+
+// uu.hash.hasValue - has value
+function uuhashhasvalue(hash,    // @param Hash:
+                        value) { // @param Mix: find value
+                                 // @return Boolean:
+  return uuhashindexof(hash, value) !== void 0;
+}
+
+// uu.each - Hash forEach, tiny Array.prototype.forEach
+function uueach(mix,  // @param Hash/Array:
+                fn) { // @param Function: callback
+  uuisary(mix) ? uuaryeach(mix, fn) : uuhasheach(mix, fn);
+}
+
+// uu.mix - mixin
+// [1][override]     uu.mix({a:9, b:9}, {a:1}, {b:2}) -> base( {a:1, b:2} )
+// [2][not override] uu.mix({a:9, b:9}, {a:1}, {a:2}, 0) -> base( {a:9} )
+// [3][clone hash]   uu.mix({}, {a:1}) -> base( {a:1} )
+function uumix(base,       // @param Hash: mixin base
+               flavor,     // @param Hash: add flavor
+               aroma,      // @param Hash(= void 0): add aroma
+               override) { // @param Number(= 1): 1 is override
+                           // @return Hash: base
+  var i;
+
+  if (override === void 0 || override) { // [1][3]
+    for (i in flavor) {
+      base[i] = flavor[i];
+    }
+  } else { // [2]
+    for (i in flavor) {
+      i in base || (base[i] = flavor[i]);
+    }
+  }
+  return aroma ? uumix(base, aroma, void 0, override) : base;
+}
+
+// uu.arg - supply default arguments
+// [1][supply args] uu.arg({ a: 1 }, { b: 2 }) -> new Hash( { a: 1, b: 2 } )
+function uuarg(arg1,   // @param Hash: arg1
+               arg2,   // @param Hash: arg2
+               arg3) { // @param Hash(= void 0): arg3
+                       // @return Hash: new Hash(mixed arg)
+  return uumix(uumix({}, arg1), arg2, arg3, 0); // [1]
+}
+
+// uu.exp - create alias, export scope, explosion!
+// [1][short code] uu.exp()           -> window.mix, window.ie
+// [2][add prefix] uu.exp("pfx")      -> window.pfx_mix, window.pfx_ie
+// [3][add suffix] uu.exp("", "_sfx") -> window.mix_sfx, window.ie_sfx
+function uuexp(prefix,   // @param String(= ""):
+               suffix) { // @param String(= ""):
+  prefix = prefix || "";
+  suffix = suffix || "";
+  var v, p;
+
+  for (p in uu) {
+    v = prefix + p + suffix;
+    v in win || (win[v] = uu[p]); // not override (eg: window.opera)
+  }
+}
+
 // --- attribute ---
 // uu.attr - attribute accessor
 // [1][get one attr]   uu.attr(node, "attr") -> "value"
@@ -836,7 +1038,7 @@ function uuclass(name,    // @param String: class name
 
     uuclassguid(me);
     me.init && me.init.apply(me, arguments);
-    me.fin  && uu.ev.attach(win, "unload", function() {
+    me.fin  && uuevattach(win, "unload", function() {
       me.fin();
     });
     me.msgbox || (me.msgbox = uuvain);
@@ -867,7 +1069,7 @@ function uuclasssingleton(name,    // @param String: class name
     } else {
       uuclassguid(me);
       me.init && me.init.apply(me, arg);
-      me.fin  && uu.ev.attach(win, "unload", function() {
+      me.fin  && uuevattach(win, "unload", function() {
         me.fin();
       });
       me.msgbox || (me.msgbox = uuvain);
@@ -933,7 +1135,7 @@ function uumsgsend(to,      // @param Array/0/instance(= 0): addr or guid
   var rv = [], v, i = 0, ary, guid;
 
   if (to) { // [1][2]
-    ary = uu.isary(to) ? to : [to];
+    ary = uuisary(to) ? to : [to];
     while ( (v = ary[i++]) ) {
       guid = (typeof v === "number") ? v : v.uuguid;
       rv.push(this._addrdb[guid].msgbox(msg, param));
@@ -967,7 +1169,7 @@ function uumsgpost(to,      // @param Array/0/instance(= 0): addr or guid
   var me = this, v, i = 0, ary, guid;
 
   if (to) { // [1][2]
-    ary = uu.isary(to) ? to : [to];
+    ary = uuisary(to) ? to : [to];
     while ( (v = ary[i++]) ) {
       guid = (typeof v === "number") ? v : v.uuguid;
       me._envelope.push([guid, msg, param]); // stock
@@ -1011,7 +1213,7 @@ function uuev(node,   // @param Node:
   var types = node.uuevtypes || (node.uuevfn = {}, node.uuevtypes = ","),
       ary = names.split(","), v, i = 0, m, name, closure, handler,
       losecapture = "losecapture",
-      webkit = _ver.webkit, iebody = uu.dmz.iebody;
+      webkit = _ver.webkit, iebody = _dmz.iebody;
 
   if (mode === 1) {
     handler = uuisfunc(fn) ? fn : fn.handleEvent;
@@ -1111,17 +1313,9 @@ function uuevdetach(node, type, fn, capture) {
 // [1][DOM ready] uu.ready(fn, order = 0)
 function uuready(fn,      // @param Function(= void 0): callback function
                  order) { // @param Number(= 0): uu.lazy order
-  if (fn !== void 0 && !uu.ready.gone.blackout) {
-    uu.ready.gone.dom ? fn(uu) : uulazy("boot", fn, order || 0); // [1] stock
+  if (fn !== void 0 && !uuready.gone.blackout) {
+    uuready.gone.dom ? fn(uu) : uulazy("boot", fn, order || 0); // [1] stock
   }
-}
-
-// --- function / script ---
-// uu.js
-// uu.js("JavaScript Expression") -> eval result
-function uujs(expr) { // @param JavaScriptExpressionString:
-                      // @return Mix: eval(expr) result
-  return (new Function(expr))();
 }
 
 // --- form ---
@@ -1139,7 +1333,7 @@ function uutext(node,   // @param Node/String:
 // uu.text.get
 function uutextget(node) { // @param Node:
                            // @return String: innerText
-  return node[uu.gecko ? "textContent" : "innerText"];
+  return node[_ver.gecko ? "textContent" : "innerText"];
 }
 
 // uu.text.set
@@ -1204,7 +1398,7 @@ function uuvalset(node,  // @param Node:
 
   if (node.tagName.toLowerCase() === "select") {
     ary = node.options, prop = "selected";
-  } else if ({ checkbox: 2, radio: 2 }[node.type || ""]) {
+  } else if ({ checkbox: 1, radio: 1 }[node.type || ""]) {
     ary = node.name ? uuary(doc.getElementsByName(node.name)) : [node];
   }
   if (ary) {
@@ -1222,159 +1416,6 @@ function uuvalset(node,  // @param Node:
     node.value = vals.join(""); // <textarea> <button> <option>
   }
   return node;
-}
-
-// --- hash / object ---
-// uu.hash - make hash from key value pair
-// [1][through] uu.hash({ key: "val" }) -> { key: "val" }
-// [2][to hash] uu.hash("key", mix) -> { key: mix }
-// [3][to hash(split comma)] uu.hash("key,a,key2,b") -> { key: "a", key2: "b" }
-// [4][to hash(comma + num)] uu.hash("+key,0,key2,1") -> { key: 0, key2: 1 }
-// [5][to hash(split space)] uu.hash(" key a key2 b") -> { key: "a", key2: "b" }
-function uuhash(key,     // @param String/Hash: key
-                value) { // @param Mix(= void 0): value
-                         // @return Hash: { key: value, ... }
-  var rv = {}, i = 0, v, ary, n = 0;
-
-  if (value !== void 0) { // [2]
-    rv[key] = value;
-  } else if (typeof key === "string") { // [3][4][5]
-    ary = !key.indexOf(" ") ? key.slice(1).split(" ") :
-          !key.indexOf("+") ? (++n, key.slice(1).split(",")) : key.split(",");
-    while ( (v = ary[i++]) ) {
-      rv[v] = n ? +(ary[i++]) : ary[i++];
-    }
-  } else { // [1]
-    rv = key;
-  }
-  return rv;
-}
-
-// uu.hash.has - has Hash
-function uuhashhas(find,   // @param Hash: find { key, value, ... }
-                   hash) { // @param Hash:
-                           // @return Boolean:
-  var v, w, i;
-
-  for (i in find) {
-    v = find[i], w = hash[i];
-    if (!(i in hash) || // key not found
-        (v !== w && _jsoninsp(v) !== _jsoninsp(w))) { // match JSON
-      return false;
-    }
-  }
-  return true;
-}
-
-// uu.hash.size - get hash length
-function uuhashsize(mix) { // @param Array/Hash:
-                           // @return Number:
-  return uuisary(mix) ? mix.length : uuhashkeys(mix).length;
-}
-
-// uu.hash.keys - enum hash keys
-function uuhashkeys(mix,    // @param Array/Hash:
-                    _val) { // @hidden Boolean(= false): true is enum values
-                            // @return Array: [key, ... ]
-  var rv = [], ri = -1, i, iz;
-
-  if (uuisary(mix)) {
-    for (i = 0, iz = mix.length; i < iz; ++i) {
-      i in mix && (rv[++ri] = _val ? mix[i] : i);
-    }
-  } else {
-    for (i in mix) {
-      mix.hasOwnProperty(i) && (rv[++ri] = _val ? mix[i] : i);
-    }
-  }
-  return rv;
-}
-
-// uu.hash.css2kb - hash from CSS implemented data
-// .hoge { list-style: url(?key=val) }
-// uu.hash.css2kb("hoge") -> { key: val }
-function uuhashcss2kb(name) { // @param String/Array: className or [className, ...]
-                              // @return Hash: { key: value, ... }
-  function _qsparse(m, key, val, v) {
-    v = fn(val);
-    return rv[fn(key)] = isNaN(v) ? v : parseFloat(v);
-  }
-  // http://d.hatena.ne.jp/uupaa/20091125
-  var rv = {}, cs, url, v, i = 0, ary = uuisary(name) ? name : [name],
-      div = doc.body.appendChild(doc.createElement("div")),
-      fn = decodeURIComponent;
-
-  while ( (v = ary[i++]) ) {
-    div.className = v;
-    cs = _ie ? div.currentStyle : _cstyle(div, null);
-    url = uutrimurl(cs.listStyleImage);
-    if (url && url.indexOf("?") > 0) {
-      url.slice(url.indexOf("?") + 1).replace(_QUERY_STR, _qsparse);
-    }
-  }
-  doc.body.removeChild(div);
-  return rv;
-}
-
-// uu.hash.values - enum hash values
-function uuhashvalues(mix) { // @param Array/Hash:
-                             // @return Array: [value, ... ]
-  return uuhashkeys(mix, 1);
-}
-
-// uu.hash.indexOf - find first key from value
-function uuhashindexof(hash,    // @param Hash:
-                       value) { // @param Mix: find value
-                                // @return String/void 0: "found-key" or void 0
-  for (var i in hash){
-    if (hash.hasOwnProperty(i) && hash[i] === value) {
-      return i;
-    }
-  }
-  return void 0;
-}
-
-// uu.hash.combine - make { key: value } pair from array
-function uuhashcombine(keyary,     // @param Array: key array
-                       valary,     // @param Array: value array
-                       toNumber) { // @param Number(= 0): 1 is exec parseInt()
-                                   // @return Hash: { key: value, ... }
-  var rv = {}, i = 0, iz = keyary.length;
-
-  for (; i < iz; ++i) {
-    rv[keyary[i]] = toNumber ? parseInt(valary[i]) : valary[i];
-  }
-  return rv;
-}
-
-// uu.hash.hasValue - has value
-function uuhashhasvalue(hash,    // @param Hash:
-                        value) { // @param Mix: find value
-                                 // @return Boolean:
-  return uuhashindexof(hash, value) !== void 0;
-}
-
-// --- lazy evaluate ---
-// uu.lazy
-function uulazy(id,      // @param String(= ""): id
-                fn,      // @param Function: callback function
-                order) { // @param Number(= 0): 0 is low, 1 is mid, 2 is high
-  id = id || "";
-  id in _lazydb || (_lazydb[id] = [[], [], []]);
-  _lazydb[id][order || 0].push(fn);
-}
-
-// uu.lazy.fire
-function uulazyfire(id) { // @param String(= ""): id
-  id = id || "";
-  if (id in _lazydb) {
-    var v, i = 0, db = _lazydb[id], ary = db[2].concat(db[1], db[0]);
-
-    delete _lazydb[id];
-    while ( (v = ary[i++]) ) {
-      v(uu);
-    }
-  }
 }
 
 // --- node ---
@@ -1407,7 +1448,7 @@ function uunode(data,  // @param Node/DocumentFragment/HTMLString:
 // uu.node.id - get nodeid
 function uunodeid(node) { // @param Node:
                           // @return Number: nodeid, from 1
-  return node.uuguid || (_ndiddb[node.uuguid = ++uu.dmz.ndidseed] = node,
+  return node.uuguid || (_ndiddb[node.uuguid = ++_dmz.ndidseed] = node,
                          node.uuguid);
 }
 
@@ -1461,7 +1502,7 @@ function uunodeswap(swapin,    // @param Node: swapin
 function uunodewrap(node,      // @param Node:
                     wrapper) { // @param Node:
                                // @return Node:
-  return wrapper.appendChild(uu.node.swap(wrapper, node));
+  return wrapper.appendChild(uunodeswap(wrapper, node));
 }
 
 // uu.node.clear - clear all children
@@ -1534,7 +1575,7 @@ function _newtag(/* var_args */) { // @param Mix: var_args, nodes, attr/css
     xtag && win.xtag(uu, node, tagid);
   }
   var v, i = 0, j = 0, iz = arguments.length,
-      xtag = uu.isfunc(win.xtag), atag = { a: 1, A: 1 },
+      xtag = uuisfunc(win.xtag), atag = { a: 1, A: 1 },
       node = this.nodeType ? this : doc.createElement(this + ""),
       c, cmd = { ":": 1, "#": 2, "url:": 3 };
 
@@ -1563,16 +1604,10 @@ function _newtag(/* var_args */) { // @param Mix: var_args, nodes, attr/css
   return node;
 }
 
-// --- number ---
-// uu.guid - get unique number
-function uuguid() { // @return Number: unique number, from 1
-  return ++_guid;
-}
-
 // --- query ---
 // uu.query - query CSS3 Selector
 function uuquery(expr,  // @param String: "css > rule"
-                 ctx) { // @param Node(= document): query context
+                 ctx) { // @param NodeArray/Node(= document): query context
                         // @return NodeArray: [Node, ...]
   if (doc.querySelectorAll && !_NGWORD.test(expr)) {
     if (ctx && ctx.nodeType) { // [:scope] guard
@@ -1947,64 +1982,248 @@ function uutype(mix,     // @param Mix:
   var rv = _TYPE[typeof mix] || _TYPE[_tostr.call(mix)] ||
            (!mix ? 16 : mix.nodeType ? 2 : "length" in mix ? 4 :
             ("r" in mix && "g" in mix && "b" in mix && "a" in mix) ? 8 : 1);
-  // http://d.hatena.ne.jp/uupaa/20091006/
-  // 1: HASH, 2: NODE, 4: FAKE, 8: RGBA, 16: NULL, 32: VOID, 64: BOOL,
-  // 128: NUM, 256: STR, 512: REX, 1024: ARY, 2048: FUNC, 4096: DATE
+
   return match ? !!(match & rv) : rv;
 }
 
 // uu.isnum - is number
 function uuisnum(mix) { // @param Mix:
                         // @return Boolean:
-  return _TYPE[_tostr.call(mix)] === 128;
+  return _TYPE[_tostr.call(mix)] === _NUM;
 }
 
 // uu.isstr - is string
 function uuisstr(mix) { // @param Mix:
                         // @return Boolean:
-  return _TYPE[_tostr.call(mix)] === 256;
+  return _TYPE[_tostr.call(mix)] === _STR;
 }
 
 // uu.isary - is array
 function uuisary(mix) { // @param Mix:
                         // @return Boolean:
-  return _TYPE[_tostr.call(mix)] === 1024;
+  return _TYPE[_tostr.call(mix)] === _ARY;
 }
 
 // uu.isfunc - is function
 function uuisfunc(mix) { // @param Mix:
                          // @return Boolean:
-  return _TYPE[_tostr.call(mix)] === 2048;
+  return _TYPE[_tostr.call(mix)] === _FUNC;
 }
 
-// --- ui ---
+// --- other ---
+// uu.js - eval js
+// uu.js("JavaScript Expression") -> eval result
+function uujs(expr) { // @param JavaScriptExpressionString:
+                      // @return Mix: eval(expr) result
+  return (new Function(expr))();
+}
+
 // uu.ui - create instance
 function uuui(widget,      // @param Node/String: widget name
               placeholder, // @param Node(= void 0): place holder node
                            //                        void 0 is add body
               option) {    // @param Hash(= {}): option
                            // @return Instance:
-  return uu.ui[widget](placeholder, option);
+  return uuui[widget](placeholder, option);
+}
+
+// uu.guid - get unique number
+function uuguid() { // @return Number: unique number, from 1
+  return ++_guid;
+}
+
+// uu.lazy - lazy evaluate
+function uulazy(id,      // @param String(= ""): id
+                fn,      // @param Function: callback function
+                order) { // @param Number(= 0): 0 is low, 1 is mid, 2 is high
+  id = id || "";
+  id in _lazydb || (_lazydb[id] = [[], [], []]);
+  _lazydb[id][order || 0].push(fn);
+}
+
+// uu.lazy.fire
+function uulazyfire(id) { // @param String(= ""): id
+  id = id || "";
+  if (id in _lazydb) {
+    var v, i = 0, db = _lazydb[id], ary = db[2].concat(db[1], db[0]);
+
+    delete _lazydb[id];
+    while ( (v = ary[i++]) ) {
+      v(uu);
+    }
+  }
+}
+
+// --- jam ---
+// jam.back
+function jamback() { // @return jam:
+  this._ns = this._stack.pop() || [];
+  return this;
+}
+
+// jam.find
+function jamfind(expr) { // @return jam:
+  this._stack.push(this._ns); // add stack
+  this._ns = uuquery("! " + expr, this._ns);
+  return this;
+}
+
+// jam.nth - nodeset[nth]
+function jamnth(nth) { // @param Number(= 0):  0 is first element
+                       //                   : -1 is last element
+                       // @return Node:
+  return this._ns[nth < 0 ? nth + this._ns.length : nth || 0];
+}
+
+// jam.each
+function jameach(fn) { // @return jam:
+  uuaryeach(this._ns, fn);
+  return this;
+}
+
+// jam.size - nodeset.length
+function jamsize() { // @return Number:
+  return this._ns.length;
+}
+
+// jam.indexOf - nodeset.indexOf(node)
+function jamindexOf(node) { // @param Node:
+                            // @return Number: found index or -1
+  return uuaryindexof(this._ns.indexOf, node);
+}
+
+uuhasheach({ first: 1, prev: 2, next: 3, last: 4,
+             firstChild: 5, lastChild: 6, add: 6 }, function(pos, method) {
+  // jam.first, jam.prev, jam.next, jam.last, jam.firstChild, jam.lastChild, jam.add
+  // jam.lastChild(node or "<p>html</p>") -> jam
+  uujam.prototype[method] = function(node) { // @param Node/HTMLString:
+                                             // @return jam:
+    var ary = this._ns, w, i = 0;
+
+    if (ary.length === 1) {
+      uunode(node, ary[0], pos);
+    } else {
+      while ( (w = ary[i++]) ) {
+        uunode(uunodebulk(node), w, pos); // clone node
+      }
+    }
+    return this;
+  };
+});
+
+// jam.remove
+function jamremove() { // @return jam:
+  return _jameach(this, uunoderemove);
+}
+
+// jam.attr
+function jamattr(a, b) { // @return jam:
+  return _jammap(this, uuattr, a, b);
+}
+
+// jam.css
+function jamcss(a, b) { // @return jam:
+  return _jammap(this, uu.css, a, b);
+}
+
+// jam.klass
+function jamklass(a) { // @return jam:
+  function _clear(v) { v.className = ""; }
+  var method = _JAM_KLASS[a.charAt(0)];
+
+  return method ? _jammap(this, method, a.slice(1))
+                : _jammap(this, a ? uuklassadd : _clear, a);
+}
+
+// jam.bind
+function jambind(a) { // @return jam:
+  return _jameach(this, uuev, a);
+}
+
+// jam.unbind
+function jamunbind(a) { // @return jam:
+  return _jameach(this, uuevunbind, a);
+}
+
+// jam.show
+function jamshow(a) { // @return jam:
+  return _jammap(this, uu.css.show, a);
+}
+
+// jam.hide
+function jamhide(a) { // @return jam:
+  return _jammap(this, uu.css.hide, a);
+}
+
+// jam.hover
+function jamhover(enter, leave) { // @return jam:
+  return _jameach(this, uuev.hover, enter, leave);
+}
+
+// jam.html
+function jamhtml(a) { // @return jam:
+  function _jamhtml(node, value) {
+    return (value === void 0) ? node.innerHTML
+                              : (uunode(node, uunodeclear(node)), node);
+  }
+  return _jammap(this, _jamhtml, a);
+}
+
+// jam.text
+function jamtext(a) { // @return jam:
+  return _jammap(this, uutext, a);
+}
+
+// jam.val
+function jamval(a) { // @return jam:
+  return _jammap(this, uuval, a);
+}
+
+// inner - node iterator
+function _jameach(jam, fn, p1, p2, p3, p4) {
+  var v, ary = jam._ns, i = 0;
+
+  while ( (v = ary[i++]) ) {
+    fn(v, p1, p2, p3, p4);
+  }
+  return jam;
+}
+
+// inner - node iterator
+function _jammap(jam, fn, p1, p2, p3, p4) {
+  var rv = [], ary = jam._ns, w, v, i = 0, r = 0;
+
+  while ( (v = ary[i]) ) {
+    rv[i++] = w = fn(v, p1, p2, p3, p4);
+    r || (r = (v === w) ? 1 : 2); // 1: r is node
+  }
+  return (r < 2) ? jam : rv; // return jam or [result, ...]
 }
 
 // --- initialize ---
 // inner - build element creator - add uu.div(), uu.a(), ...
-uuaryeach(uu.ary("a,b,br,dd,div,dl,dt,h1,h2,h3,h4,h5,h6,i,iframe,input,li,ol," +
-                 "option,p,pre,select,span,table,tbody,tr,td,th,tfoot," +
-                 "textarea,u,ul," + _HTML5), function(v) {
+uuaryeach(uuary("a,b,br,dd,div,dl,dt,h1,h2,h3,h4,h5,h6,i,iframe,input,li,ol," +
+                "option,p,pre,select,span,table,tbody,tr,td,th,tfoot," +
+                "textarea,u,ul," + _HTML5), function(v) {
   uu[v] = function(/* var_args */) { // @param Mix: var_args
     return arguments.length ? _newtag.apply(v, arguments)
                             : doc.createElement(v);
   };
 });
 
-// inner - build DOM Level2 event handler - add uu.click(), uu.mousemove(), ...
-uuaryeach(uu.ary(_EVENT), function(v) {
+// inner - build DOM Lv2 event handler - uu.click(), jam.click(), ...
+uuaryeach(uuary(_EVENT), function(v) {
   uu[v] = function(node, fn) {
     return uuev(node, v, fn);
   };
   uu["un" + v] = function(node) {
     return uuev(node, v, 0, 2);
+  };
+  uujam.prototype[v] = function(fn) {
+    return _jameach(this, uuev, v, fn);
+  };
+  uujam.prototype["un" + v] = function() {
+    return _jameach(this, uuevunbind, v);
   };
 });
 
@@ -2017,8 +2236,8 @@ try {
 (function(gone) {
   function _fire() {
     if (!gone.blackout && !gone.dom++) {
-      _ie && (uu.dmz.iebody = uu.ver.quirks ? doc.body : uu.dmz.root);
-      uu.lazy.fire("boot");
+      _ie && (_dmz.iebody = _ver.quirks ? doc.body : _dmz.root);
+      uulazy.fire("boot");
       uuisfunc(win.xboot || 0) && win.xboot(uu);
     }
   }
@@ -2031,17 +2250,17 @@ try {
     gone.win = 1;
     _fire();
     uuisfunc(win.xwin || 0) && win.xwin(uu);
-    uu.lazy.fire("canvas");
+    uulazy.fire("canvas");
   }
   uuevattach(win, "load", _windowloaded);
   _ie ? _peekie() : uuevattach(doc, "DOMContentLoaded", _fire);
-})(uu.ready.gone);
+})(uuready.gone);
 
 // inner - prebuild camelized hash(http://handsout.jp/slide/1894)  and nodeid
-uu.ready(function() {
+uuready(function() {
   uumix(_camelhash(_FIX, _ver.webkit ? _cstyle(_html, null) : _html.style),
         _STYLE, _ATTR);
-  var nodes = uu.tag("*"), v, i = 0;
+  var nodes = uutag("*"), v, i = 0;
 
   while ( (v = nodes[i++]) ) {
     uunodeid(v);

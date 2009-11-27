@@ -22,10 +22,4 @@ uu.url.js
 uu.css3.js
 uu.css3.fixie.js
 uu.css3.boxeffect.js
-// ui
-uu.tween.js
 uu.codec.js
-plug/ui/uup.ui.tab.js
-plug/ui/uup.ui.slider.js
-// jam
-uu.jam.blue.js

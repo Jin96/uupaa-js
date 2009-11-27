@@ -151,7 +151,7 @@ function draggableinit(
     me._tgt = evt.node; // evt.currentTarget
     uu.css.toAbsolute(me._tgt);
     if (uu.ie6) {
-      uu.each(uu.tag("select"), function(v) {
+      uu.ary.each(uu.tag("select"), function(v) {
         v.style.visibility = "hidden";
       });
     }
@@ -160,7 +160,7 @@ function draggableinit(
   this._opt.mouseup = function(evt, tgt, grip, code, opt, x, y) {
     uu.css.toStatic(tgt);
     if (uu.ie6) {
-      uu.each(uu.tag("select"), function(v) {
+      uu.ary.each(uu.tag("select"), function(v) {
         v.style.visibility = "";
       });
     }
@@ -228,11 +228,11 @@ function sortableinit(ul,       // @param Node: <ul> node
 //  this._ul  = ul;
   this._li  = uu.query("!>li", ul);
 
-  uu.each(this._li, function(v) {
+  uu.ary.each(this._li, function(v) {
     v.style.cursor = "move";
     uu.ev(v, "mousedown+", me);
     me._tgt = v; // dummy
-    v.uusortable = { idx: uu.node.index(v),
+    v.uusortable = { idx: uu.node.find(v),
                      rect: uu.css.rect(v) };
   });
 
@@ -248,8 +248,8 @@ function sortableinit(ul,       // @param Node: <ul> node
   this._opt.mouseup = function(evt, tgt) {
     uu.node.swap(tgt, me._fp);
     uu.css.toStatic(tgt);
-    uu.each(me._li, function(v) {
-      v.uusortable = { idx: uu.node.index(v),
+    uu.ary.each(me._li, function(v) {
+      v.uusortable = { idx: uu.node.find(v),
                        rect: uu.css.rect(v) }; // update
     });
   };

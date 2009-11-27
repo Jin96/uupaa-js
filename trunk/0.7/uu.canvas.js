@@ -122,11 +122,11 @@ function _createelement(tag,      // @param String: tag name
 // uu.canvas.init
 function uucanvasinit() {
   if (uu.ie) {
-    uu.each(uu.tag("canvas"), function(v) {
+    uu.ary.each(uu.tag("canvas"), function(v) {
       (uu.klass.has(v, "vml") || !uu.ver.sl) ? initVML(v) : initSL(v);
     });
   } else if (_safari3x) {
-    uu.each(uu.tag("canvas"), _initOldWebKitCanvas);
+    uu.ary.each(uu.tag("canvas"), _initOldWebKitCanvas);
   }
   uu.ready.gone.win = uu.ready.gone.canvas = 1;
 }

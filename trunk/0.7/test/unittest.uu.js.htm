@@ -328,16 +328,18 @@ function xboot(uu) {
 
         return [hash, "==", { key: 'a', key2: 'b' }];
       },
-      "[4][to hash(comma + num)] uu.hash('+key,0,key2,1') -> { key: 0, key2: 1 }": function(uu) {
-        var hash = uu.hash('+key,0,key2,1');
-
-        return [hash, "==", { key: 0, key2: 1 }];
-      },
-      "[5][to hash(split space)] uu.hash(' key a key2 b') -> { key: 'a', key2: 'b' }": function(uu) {
+      "[4][to hash(split space)] uu.hash(' key a key2 b') -> { key: 'a', key2: 'b' }": function(uu) {
         var hash = uu.hash(' key a key2 b');
 
         return [hash, "==", { key: 'a', key2: 'b' }];
       },
+    "uu.hash.num()": "",
+      "uu.hash.num('key,0,key2,1') -> { key: 0, key2: 1 }": function(uu) {
+        var hash = uu.hash.num('key,0,key2,1');
+
+        return [hash, "==", { key: 0, key2: 1 }];
+      },
+
     "uu.hash.has()": "",
       "uu.hash.has({ a: 1, b: 2 }, { a: 1, b: 2, c: 3 }) -> true": function(uu) {
         return [uu.hash.has({ a: 1, b: 2 }, { a: 1, b: 2, c: 3 }), "is true"];
@@ -435,7 +437,7 @@ function xboot(uu) {
         return [uu.node.has(document.body, uu.id('ctx')), "is false"];
       },
 
-
+/*
     "uu.nore.first()": "",
       "uu.node.first(uu.id('tgt')) == uu.id('first')": function(uu) {
         return [uu.node.first(uu.id('tgt')), "==", uu.id('first')];
@@ -460,6 +462,60 @@ function xboot(uu) {
       "uu.node.lastChild(uu.id('tgt')) == uu.id('lastChild')": function(uu) {
         return [uu.node.lastChild(uu.id('tgt')), "==", uu.id('lastChild')];
       },
+ */
+    "uu.nore.first()": "",
+      "uu.node.first(uu.p(':hoge'))": function(uu) {
+        return [uu.node.first(uu.p(':hoge')), "is node"];
+      },
+    "uu.nore.prev()": "",
+      "uu.node.prev(uu.p(':hoge')) == uu.id('prev')": function(uu) {
+        return [uu.node.prev(uu.p(':hoge')), "is node"];
+      },
+    "uu.nore.next()": "",
+      "uu.node.next(uu.p(':hoge')) == uu.id('next')": function(uu) {
+        return [uu.node.next(uu.p(':hoge')), "is node"];
+      },
+    "uu.nore.last()": "",
+      "uu.node.last(uu.p(':hoge')) == uu.id('last')": function(uu) {
+        return [uu.node.last(uu.p(':hoge')), "is node"];
+      },
+    "uu.nore.firstChild()": "",
+      "uu.node.firstChild(uu.p(':hoge')) == uu.id('firstChild')": function(uu) {
+        return [uu.node.firstChild(uu.p(':hoge')), "is node"];
+      },
+    "uu.nore.lastChild()": "",
+      "uu.node.lastChild(uu.p(':hoge')) == uu.id('lastChild')": function(uu) {
+        return [uu.node.lastChild(uu.p(':hoge')), "is node"];
+      },
+
+    "uu.nore.find.first()": "",
+      "uu.node.find.first(uu.id('tgt')) == uu.id('first')": function(uu) {
+        return [uu.node.find.first(uu.id('tgt')), "==", uu.id('first')];
+      },
+    "uu.nore.find.prev()": "",
+      "uu.node.find.prev(uu.id('tgt')) == uu.id('prev')": function(uu) {
+        return [uu.node.find.prev(uu.id('tgt')), "==", uu.id('prev')];
+      },
+    "uu.nore.find.next()": "",
+      "uu.node.find.next(uu.id('tgt')) == uu.id('next')": function(uu) {
+        return [uu.node.find.next(uu.id('tgt')), "==", uu.id('next')];
+      },
+    "uu.nore.find.last()": "",
+      "uu.node.find.last(uu.id('tgt')) == uu.id('last')": function(uu) {
+        return [uu.node.find.last(uu.id('tgt')), "==", uu.id('last')];
+      },
+    "uu.nore.find.firstChild()": "",
+      "uu.node.find.firstChild(uu.id('tgt')) == uu.id('firstChild')": function(uu) {
+        return [uu.node.find.firstChild(uu.id('tgt')), "==", uu.id('firstChild')];
+      },
+    "uu.nore.find.lastChild()": "",
+      "uu.node.find.lastChild(uu.id('tgt')) == uu.id('lastChild')": function(uu) {
+        return [uu.node.find.lastChild(uu.id('tgt')), "==", uu.id('lastChild')];
+      },
+
+
+
+
     "uu.nore.remove()": "",
       "uu.node.remove(uu.id('ctx'))": function(uu) {
         return [uu.node.remove(uu.id('ctx')), "is node"];

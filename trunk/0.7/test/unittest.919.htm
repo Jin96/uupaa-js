@@ -1,6 +1,5 @@
 <!doctype html><html><head><meta charset="UTF-8" />
 <title></title>
-<script src="../uuvers.js"></script>
 <script src="../uu.js"></script>
 <script src="../uu.str.js"></script>
 <script src="../uu.node.js"></script>
@@ -14,11 +13,8 @@
 <script>
 function xboot(uu, $) {
   uu.test({
-      "[1][has array] uu.ary.has(undefined, ['1', , 2, 3]) は false (undefined は検索できない)": function(uu) {
-        return [uu.ary.has(undefined, ['1', , 2, 3]), "is false"];
-      },
-      "[1][has array] uu.ary.has(undefined, ['1', undefined, 2, 3]) は false (undefined は検索できない)": function(uu) {
-        return [uu.ary.has(undefined, ['1', undefined, 2, 3]), "is false"];
+      "uu.node.first(uu.p(':hoge'))": function(uu) {
+        return [uu.node.first(uu.p(':hoge')), "is node"];
       },
 
     "End Of Test": ""
