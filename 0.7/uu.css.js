@@ -1,6 +1,6 @@
 
 // === CSS 2.1 / StyleSheet ===
-// depend: uu.js, uu.color.js, uu.str.js
+// depend: uu.js, uu.color.js, uu.str.js, uu.tween.js
 //
 // clientWidth           = style.width + padding
 // offsetWidth           = style.width + padding + border
