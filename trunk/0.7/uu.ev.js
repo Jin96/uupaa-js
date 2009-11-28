@@ -3,7 +3,8 @@
 // depend: uu.js
 uu.waste || (function(win, doc, uu) {
 var _CLICKS = { click: 1, dblclick: 2 },
-    _EVENT_VKEY = uu.hash( // event virtual keycode
+    _EVCODE = uu.dmz.EVCODE,
+    _EVVKEY = uu.hash( // event virtual keycode
         "8,BS,9,TAB,13,ENTER,16,SHIFT,17,CTRL,18,ALT,27,ESC," +
         "32,SP,33,PGUP,34,PGDN,35,END,36,HOME,37,LEFT,38,UP,39,RIGHT,40,DOWN," +
         "45,INS,46,DEL,48,0,49,1,50,2,51,3,52,4,53,5,54,6,55,7,56,8,57,9," +
@@ -12,7 +13,7 @@ var _CLICKS = { click: 1, dblclick: 2 },
 
 // uu.ev.*
 uu.mix(uu.ev, {
-    more:       uuevmore,       // uu.ev.more(event) -> event { btn, vkey, wheel, clicks, vkeycode }
+    more:       uuevmore,       // uu.ev.more(event) -> { btn, vkey, wheel, clicks, vkeycode }
     fire:       uuevfire,       // uu.ev.fire(node, "customEvent", param) -> node
     times:      uuevtimes,      // [1] uu.ev.times(node, names, cyclic, var_args, ...) -> node
     hover:      uuevhover,      // [1][callback]  uu.ev.hover(node, function(){}, function(){}) -> node
@@ -21,12 +22,10 @@ uu.mix(uu.ev, {
 });
 
 // uu.ev.more - more information
-function uuevmore(evt) { // @param event:
-                         // @return event: uu.mix(event, { btn, vkey, wheel,
-                         //                                clicks, vkeycode })
+function uuevmore(evt) { // @param EventObject:
+                         // @return Hash: { btn, vkey, wheel, clicks, vkeycode }
   var btn = evt.button || 0, wheel = 0, clicks = 0,
-      vkeycode = evt.keyCode || evt.charCode || 0,
-      EVENT_CODE = uu.dmz.EVENT_CODE;
+      vkeycode = evt.keyCode || evt.charCode || 0;
 
   if (evt.code) {
     if (uu.ie) {
@@ -34,7 +33,7 @@ function uuevmore(evt) { // @param event:
       wheel = (evt.wheelDelta / -120) | 0;
       clicks = _CLICKS[evt.type] || 0;
     } else {
-      if (evt.code === EVENT_CODE.mousewheel) {
+      if (evt.code === _EVCODE.mousewheel) {
         wheel = (evt.detail ? (evt.detail / 3)
                             : (evt.wheelDelta / -120)) | 0;
       } else {
@@ -42,12 +41,11 @@ function uuevmore(evt) { // @param event:
       }
     }
   }
-  evt.btn = btn;
-  evt.vkey = _EVENT_VKEY[vkeycode] || ""; // "UP", "1", "A"
-  evt.wheel = wheel;
-  evt.clicks = clicks;
-  evt.vkeycode = vkeycode; // 38, 49, 65
-  return evt;
+  return { btn: btn,
+           vkey: _EVVKEY[vkeycode] || "", // "UP", "1", "A"
+           wheel: wheel,
+           clicks: clicks,
+           vkeycode: vkeycode }; // 38, 49, 65
 }
 
 // uu.ev.fire - fire event / fire custom event(none capture event only)

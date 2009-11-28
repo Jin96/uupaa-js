@@ -104,11 +104,9 @@ function draghandleevent(evt) {
 
 // uu.Class.Drag.mousewheel
 function dragmousewheel(evt) {
-  var opt = this._opt, wheel, size, w, h;
-
-  uu.ev.more(evt);
+  var opt = this._opt, wheel, size, w, h, more = uu.ev.more(evt);
   if (opt.wheel === 1) {
-    wheel = evt.wheel * 10;
+    wheel = more.wheel * 10;
     size = uu.css.size(this._tgt, 1); // plain size
     w = uuevdraglimit(opt.minw, size.w + wheel, opt.maxw),
     h = uuevdraglimit(opt.minh, size.h + wheel, opt.maxh);
@@ -116,7 +114,7 @@ function dragmousewheel(evt) {
     uu.css.size.set(this._tgt, w, h);
     this._shim && this._shim.resize({ w: w, h: h });
   } else {
-    opt.wheel(evt, this._tgt, this._grip);
+    opt.wheel(evt, more, this._tgt, this._grip);
   }
 }
 

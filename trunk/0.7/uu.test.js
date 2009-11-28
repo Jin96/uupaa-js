@@ -6,18 +6,22 @@ var _TYPE_ALIAS = uu.hash(
         "ISUNDEF,ISVOID,ISUNDEFINED,ISVOID,ISOBJECT,ISHASH,ISARRAY,ISARY," +
         "ISBOOLEAN,ISBOOL,ISNUMBER,ISNUM,ISSTRING,ISSTR," +
         "ISFUNCTION,ISFUNC,ISFAKEARRAY,ISFAKE,ISFAKEARY,ISFAKE"),
-    _LI = '<li style="padding:5px;border:1px solid #ccc;background-color:%s">' +
-              '<p style="color:white">%s<br />%s</p></li>',
+    _OL  = '<ol>%s</ol>',
+    _DIV = '<div style="position:fixed;top:0;font-size:xx-large">%s: %d/%d %s</div>',
+    _LI  = '<li style="padding:5px;border:1px solid #ccc;background-color:%s">' +
+              '<p style="color:white"><a name="uutest%d"></a>%s<br />%s</p></li>',
     _BGCOLOR = { 1: "green", 2: "#0c0", 9: "red" };
 
 uu.test = uutest; // uu.test({ "title": function() { return [lhs, ope, rhs] })
 
 // uu.test
 function uutest(hash) { // @param Hash: { title: function, ... }
-  var rv = {}, r, v, i, jr, node = [], fn, ary;
+  var rv = {}, r, v, i, j = 0, jr, node = [], fn, ary,
+      ok = 0, total = 0, ng = [];
 
   // collect
   for (i in hash) {
+    ++j;
     v = hash[i];
     ary = [jr = 2, ''];
     if (uu.isfunc(v)) {
@@ -30,15 +34,18 @@ function uutest(hash) { // @param Hash: { title: function, ... }
           ary = [+!!jr, uu.fmt(r[2] === void 0 ? "%j %s" : "%j %s %j",
                                r[0], r[1], r[2])];
           uu.isfunc(fn = r[3] || r[2]) && fn(); // after callback
+          jr ? ++ok : ng.push(uu.fmt('<a href="#uutest%d">%d</a>', j, j));
+          ++total;
         }
       } catch(err) {
         ary = [9, err.message];
       }
     }
     (!jr || rv > 2) && (document.body.style.backgroundColor = "red");
-    node.push(uu.fmt(_LI, _BGCOLOR[ary[0]], uu.esc(i), uu.esc(ary[1])));
+    node.push(uu.fmt(_LI, _BGCOLOR[ary[0]], j, uu.esc(i), uu.esc(ary[1])));
   }
-  uu.node("<ol>" + node.join("") + "</ol>");
+  uu.node(uu.fmt(_OL + _DIV, node.join(""), ok === total ? "OK" : "NG", ok, total,
+                 ok === total ? "" : "(" + ng.join(", ") + ")"));
 }
 
 // inner -

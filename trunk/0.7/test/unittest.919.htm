@@ -11,7 +11,7 @@
 </head><body id="body">
 <div id="div" title="title" style="display:none">text</div>
 <script>
-function xboot(uu, $) {
+function xboot() {
   uu.test({
       "uu.node.first(uu.p(':hoge'))": function() {
         return [uu.node.first(uu.p(':hoge')), "is node"];
@@ -23,7 +23,7 @@ function xboot(uu, $) {
  */
 
     "End Of Test": ""
-  }, 1);
+  });
 }
 </script>
 

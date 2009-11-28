@@ -185,7 +185,7 @@ function uucssset(node,   // @param Node:
                           //           or { "css-prop": "value", ... }
                           // @return Node:
   var prop, i, FIX = uu.dmz.FIX,
-      hook = { opacity: uucssopacityset };
+      hook = { opacity: uucssopacity.set };
 
   for (i in hash) {
     prop = FIX[i] || i;
