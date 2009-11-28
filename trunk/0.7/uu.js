@@ -340,7 +340,7 @@ MessagePump.prototype = {
                                 // [2][unicast]   uu.mgg.post(instance, "hello")
                                 // [3][broadcast] uu.msg.post(0, "hello")
 };
-uu.msg = new MessagePump();     // MessagePump class instance
+uu.msg = new MessagePump();     // MessagePump instance
 
 uumix(uujam.prototype, {
   // --- stack ---
@@ -1574,10 +1574,9 @@ function _newtag(/* var_args */) { // @param Mix: var_args, nodes, attr/css
     uunodeid(node); // regist node
     xtag && win.xtag(uu, node, tagid);
   }
-  var v, i = 0, j = 0, iz = arguments.length,
+  var v, w, x, i = 0, j = 0, iz = arguments.length,
       xtag = uuisfunc(win.xtag), atag = { a: 1, A: 1 },
-      node = this.nodeType ? this : doc.createElement(this + ""),
-      c, cmd = { ":": 1, "#": 2, "url:": 3 };
+      node = this.nodeType ? this : doc.createElement(this + "");
 
   for (; i < iz; ++i) {
     v = arguments[i];
@@ -1585,15 +1584,15 @@ function _newtag(/* var_args */) { // @param Mix: var_args, nodes, attr/css
     case _NODE: node.appendChild(v); break; // [1][3]
     case _NUM:  _callback(node, v); break; // [5]
     case _STR:  // [2][4][6][8][10]
-      c = cmd[v.slice(0, 4)];
-      if (c === 1) { // [2]
-        node.appendChild(doc.createTextNode(v.slice(1)));
-      } else if (c === 2) { // [4]
-        _callback(node, v.slice(1));
-      } else if (c) { // [10]
+      w = ":#".indexOf(v.slice(0, 1));
+      if (w >= 0) { // [2][4]
+        x = v.slice(1);
+        w ? _callback(node, x) : node.appendChild(doc.createTextNode(x));
+        break;
+      } else if (!v.indexOf("url:")) { // [10]
         node.setAttribute(atag[node.tagName] ? "href" : "src", v.slice(4));
+        break;
       }
-      if (c) { break; }
     default:
       switch (j++) {
       case 0: uuattrset(node, uuhash(v)); break; // [6][7]
@@ -2260,7 +2259,7 @@ try {
 uuready(function() {
   uumix(_camelhash(_FIX, _ver.webkit ? _cstyle(_html, null) : _html.style),
         _STYLE, _ATTR);
-  var nodes = uutag("*"), v, i = 0;
+  var nodes = uu.tag("*"), v, i = 0; // [uu.tag]
 
   while ( (v = nodes[i++]) ) {
     uunodeid(v);
@@ -2394,11 +2393,11 @@ function uuvers(consel,    // @param Number(= 0): 1 is add conditional selector
   }
   rv.ie67 = rv.ie6 || rv.ie7;
   rv.advanced = (gecko  && re >  1.9) || // Firefox 3.5+(1.91)
-                (webkit && re >  529);   // Safari 4+, Google Chrome 2+
+                (webkit && re >= 528);   // Safari 4+, Google Chrome 2+
   rv.majority = (ie     && ua >= 6)   || // IE 6+
                 (opera  && ua >= 9.5) || // Opera 9.5+
                 (gecko  && re >= 1.9) || // Firefox 3+
-                (webkit && re >  524);   // Safari 3.1+, Google Chrome
+                (webkit && re >  524);   // Safari 3.1+, Google Chrome 1+
   // conditional selector
   if (consel) {
     html = doc.getElementsByTagName("html")[0];

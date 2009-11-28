@@ -13,9 +13,14 @@
 <script>
 function xboot(uu, $) {
   uu.test({
-      "uu.node.first(uu.p(':hoge'))": function(uu) {
+      "uu.node.first(uu.p(':hoge'))": function() {
         return [uu.node.first(uu.p(':hoge')), "is node"];
       },
+/*
+      "uu.node.first(uu.p(':hoge')) -": function() {
+        return [uu.node.first(uu.p(':hoge')), "is false"];
+      },
+ */
 
     "End Of Test": ""
   }, 1);
