@@ -4,7 +4,6 @@
 uu.waste || (function(win, doc, uu) {
 
 uu.mix(uu, {
-  // --- tween ---
   tween: uu.mix(uutween, {      // uu.tween(node, duration, {...}, fn = void 0) -> node
     move:       uutweenmove,    // uu.tween.move(node, duration, x, y, w, h, opacity, fn = void 0) -> node
     stop:       uutweenstop,    // [1][stop all tween]  uu.tween.stop() -> [node, ...]
