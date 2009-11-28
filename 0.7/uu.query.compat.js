@@ -1,7 +1,7 @@
 
 // === jQuery Selectors ===
 // depend: uu.js, uu.query.js
-uu.waste || (function(uu) {
+uu.waste || (function(win, doc, uu) {
 var _HEADER = /h[1-6]/i,
     _BUTTON = /button/i,
     _INPUT  = /(?:input|textarea|select|button)/i;
@@ -32,7 +32,7 @@ uu.mix(uu.query.filters, {
 });
 
 // inner -
-function jFilter(fid, negate, elms, pseudo, value, tags, contentType) {
+function jFilter(fid, negate, elms, pseudo, value) {
   var rv = [], ri = -1, v, i = 0, iz = elms.length, ok, TYPE = "type";
 
   for(; i < iz; ++i) {
@@ -75,7 +75,7 @@ function even(fid, negate, elms, pseudo, value, tags, contentType) {
 
 // inner -
 function odd(fid, negate, elms, pseudo, value, tags, contentType) {
-  var fl = uuquery.filters["nth-child"];
+  var fl = uu.query.filters["nth-child"];
   return fl[1](fl[0], negate, elms, pseudo, "even", tags, contentType);
 }
 
@@ -90,5 +90,5 @@ function eq(fid, negate, elms, pseudo, value) {
   return (ok ^ negate) ? [v] : [];
 }
 
-})(uu);
+})(window, document, uu);
 

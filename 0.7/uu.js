@@ -101,7 +101,7 @@ var _config = uuarg(_xconfig, {
              ndiddb: _ndiddb, // nodeid database
              ndidseed: 0,     // nodeid counter
              DEC2: _DEC2, HEX2: _HEX2, FIX: _FIX, EVENT: _EVENT,
-             HTML5TAG: _HTML5 };
+             EVCODE: _EVCODE, HTML5TAG: _HTML5 };
 
 // --- structure ---
 uu = uumix(_uujamfactory, {     // uu(expr, ctx) -> Instance(jam)
@@ -1204,8 +1204,8 @@ function uuev(node,   // @param Node:
                      : evt.relatedTarget;
       evt.px   = _ie ? (evt.clientX + iebody.scrollLeft) : evt.pageX;
       evt.py   = _ie ? (evt.clientY + iebody.scrollTop)  : evt.pageY;
-      evt.ox   = evt.offsetX || evt.layerX; // [offsetX] IE, Opera, WebKit
-      evt.oy   = evt.offsetY || evt.layerY; // [layerX]  Gecko, WebKit
+      evt.ox   = evt.offsetX || evt.layerX || 0; // [offsetX] IE, Opera, WebKit
+      evt.oy   = evt.offsetY || evt.layerY || 0; // [layerX]  Gecko, WebKit
     }
     handler.call(fn, evt, node);
   }
@@ -1584,19 +1584,21 @@ function _newtag(/* var_args */) { // @param Mix: var_args, nodes, attr/css
     case _NODE: node.appendChild(v); break; // [1][3]
     case _NUM:  _callback(node, v); break; // [5]
     case _STR:  // [2][4][6][8][10]
-      w = ":#".indexOf(v.slice(0, 1));
-      if (w >= 0) { // [2][4]
-        x = v.slice(1);
-        w ? _callback(node, x) : node.appendChild(doc.createTextNode(x));
-        break;
-      } else if (!v.indexOf("url:")) { // [10]
-        node.setAttribute(atag[node.tagName] ? "href" : "src", v.slice(4));
-        break;
+      if (v) {
+        w = ":#".indexOf(v.slice(0, 1));
+        if (w >= 0) { // [2][4]
+          x = v.slice(1);
+          w ? _callback(node, x) : node.appendChild(doc.createTextNode(x));
+          break;
+        } else if (!v.indexOf("url:")) { // [10]
+          node.setAttribute(atag[node.tagName] ? "href" : "src", v.slice(4));
+          break;
+        }
       }
     default:
       switch (j++) {
-      case 0: uuattrset(node, uuhash(v)); break; // [6][7]
-      case 1: uu.css.set(node, uuhash(v));       // [8][9]
+      case 0: v && uuattrset(node, uuhash(v)); break; // [6][7]
+      case 1: v && uu.css.set(node, uuhash(v));       // [8][9]
       }
     }
   }
@@ -2183,6 +2185,9 @@ function _jameach(jam, fn, p1, p2, p3, p4) {
   var v, ary = jam._ns, i = 0;
 
   while ( (v = ary[i++]) ) {
+    if (v && v.nodeType === 11) { // 11: DocumentFragment
+      v = v.firstChild || v;
+    }
     fn(v, p1, p2, p3, p4);
   }
   return jam;
@@ -2193,6 +2198,9 @@ function _jammap(jam, fn, p1, p2, p3, p4) {
   var rv = [], ary = jam._ns, w, v, i = 0, r = 0;
 
   while ( (v = ary[i]) ) {
+    if (v && v.nodeType === 11) { // 11: DocumentFragment
+      v = v.firstChild || v;
+    }
     rv[i++] = w = fn(v, p1, p2, p3, p4);
     r || (r = (v === w) ? 1 : 2); // 1: r is node
   }

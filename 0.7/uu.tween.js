@@ -1,6 +1,6 @@
 
 // === Tween ===
-// depend: uu.js, uu.color.js, uu.css.js, uu.img.js, uu.query.js
+// depend: uu.js, uu.color.js, uu.css.js, uu.query.js, /* uu.img.js */
 uu.waste || (function(win, doc, uu) {
 
 uu.mix(uu, {
@@ -18,9 +18,9 @@ uu.mix(uu, {
 function uutween(node,     // @param Node:
                  duration, // @param Number: duration, 0 is now, 1000 is 1sec
                  param,    // @param Hash(= void 0): { prop:[begin,end,ez], ...}
-                           //        false/Number: begin, false is current value
-                           //        Number: end
-                           //        Function(= easeInOutQuad): easing function
+                           //         param[prop][0] false/Number: begin, false is current value
+                           //         param[prop][1] Number: end
+                           //         param[prop][2] Function(= easeInOutQuad): easing function
                  fn,       // @param Function(= void 0): post callback
                  prefn) {  // @param Function(= void 0): pre callback
                            // @return Node:

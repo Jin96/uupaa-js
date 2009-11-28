@@ -38,8 +38,9 @@ function marge($packagefile, $outfile, $minify, $libHeader, $libFooter) {
       $txt = preg_replace('/\/\* var_args \*\//', "", $txt);
 
       // { hash:     value }  ->  { hash: value }
-      $txt = preg_replace('/(\w+):\s+(uu\w+)/m', "$1: $2", $txt);  // xxx: uuxxx
+      $txt = preg_replace('/(\w+):\s+(uu\.?\w+)/m', "$1: $2", $txt); // xxx: uuxxx
       $txt = preg_replace('/(\w+):\s+(jam\w+)/m', "$1: $2", $txt); // xxx: jamxxx
+      $txt = preg_replace('/(\w+):\s+(bite\w+)/m', "$1: $2", $txt); // xxx: bitexxx
       $txt = preg_replace('/(\w+):\s+(_\w+)/m', "$1: $2", $txt);   // xxx: _xxx
       $txt = preg_replace('/(\w+):\s+\{\}/m', "$1: {}", $txt);     // xxx: {}
       $txt = preg_replace('/(\w+):\s+0/m', "$1: 0", $txt);         // xxx: 0
