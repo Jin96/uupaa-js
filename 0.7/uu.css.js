@@ -11,6 +11,9 @@ var _mix    = uu.mix,
     _ie     = uu.ie,
     _cstyle = win.getComputedStyle,
     _db     = { ss: {} }, // { StyleSheetid: StyleSheetObject, ... }
+    _FIX    = uu.dmz.FIX,
+    _NPROPS = { opacity: 2, lineHeight: 1, fontWeight: 1,
+                fontSizeAdjust: 1, zIndex: 1, zoom: 1 },
     _ALPHA  = /^alpha\([^\x29]+\) ?/,
     _BORDER = { thin: 1, medium: 3, thick: (uu.ie67 || uu.opera) ? 6 : 5 },
     _IE_DX  = "DXImageTransform.Microsoft.",
@@ -171,7 +174,7 @@ function uucss(node,    // @param Node:
                value) { // @param String(= void 0):
                         // @return String/Hash/CSS2Properties/Node:
   if (key === void 0) {
-    return _ie ? node.currentStyle : _cstyle(node, null); // [1]
+    return (_ie ? node.currentStyle : _cstyle(node, null)) || {}; // [1]
   }
   return (value === void 0 &&
           uu.isstr(key)) ? uucssget(node, key) // [2][3]
@@ -184,13 +187,22 @@ function uucssset(node,   // @param Node:
                   hash) { // @param Hash: { cssProp: "value", ... }
                           //           or { "css-prop": "value", ... }
                           // @return Node:
-  var prop, i, FIX = uu.dmz.FIX,
-      hook = { opacity: uucssopacity.set };
+  var ns = node.style, p, v, i, n,
+      FIX = _FIX, NPROPS = _NPROPS, STR = "string";
 
   for (i in hash) {
-    prop = FIX[i] || i;
-    hook[prop] ? hook[prop](node, parseFloat(hash[i]))
-               : (node.style[prop] = hash[i]); // backgroundColor="transparent"
+    v = hash[i];
+    p = FIX[i] || i;
+    if (typeof v === STR) {
+      ns[p] = v; // backgroundColor="transparent"
+    } else {
+      n = NPROPS[p];
+      if (n === 2) {
+        uucssopacity.set(node, v);
+      } else {
+        ns[p] = n ? v : (v + "px"); // zoom = 1, width = 100 + "px"
+      }
+    }
   }
   return node;
 }
@@ -203,7 +215,7 @@ function uucssget(node,     // @param Node:
                             // @return String/Hash: "value"
                             //                   or { cssProp: "value", ... }
   var rv = {}, ary = styles.split(","), v, i = 0,
-      ns = _cstyle(node, null), FIX = uu.dmz.FIX;
+      ns = _cstyle(node, null), FIX = _FIX;
 
   while ( (v = ary[i++]) ) {
     rv[v] = ns[FIX[v] || v];
@@ -214,7 +226,7 @@ function uucssget(node,     // @param Node:
 function uucssgetie(node, styles) {
   var rv = {}, ary = styles.split(","), v, w, i = 0,
       ns = node.currentStyle, actval = uucsspxactvalue,
-      STR = "string", AUTO = "auto", PX = "px", FIX = uu.dmz.FIX;
+      STR = "string", AUTO = "auto", PX = "px", FIX = _FIX;
 
   while ( (v = ary[i++]) ) {
     w = ns[FIX[v] || v];
