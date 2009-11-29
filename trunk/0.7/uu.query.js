@@ -210,37 +210,39 @@ function uuqueryselectorall(expr,      // @param String: expr
   }
 
   // --- Quick phase ---
-  if (!withComma && expr in _QUICK_STATIC) { // "*" ":root" "body" ...
-    return _QUICK_STATIC[expr](context);
-  }
-  match = _QUICK_QUERY.exec(expr); // "#id" ".class" "E" "E F" "E,F"...
-  if (match) {
-    return quickQuery(expr, match, context);
-  }
-  if (withComma && _QUICK_COMMA.test(expr)) { // split("#id, .class, E")
-    w = expr.split(","); // "expr, expr, expr"
-    for (i = 0, iz = w.length; i < iz; ++i) {
-      v = uu.trim(w[i]);
-      if (!v) {
-        throw expr + " syntax error";
-      }
-      r = uuqueryselectorall(v, context);
-      mixin(r, rv, unq);
+  if (context.nodeType) {
+    if (!withComma && expr in _QUICK_STATIC) { // "*" ":root" "body" ...
+      return _QUICK_STATIC[expr](context);
     }
-    return rv;
-  }
-  if (!withComma) {
-    match = _QUICK_HEAD.exec(expr);
+    match = _QUICK_QUERY.exec(expr); // "#id" ".class" "E" "E F" "E,F"...
     if (match) {
-      if (match[1]) {
-        w = doc.getElementById(match[1]);
-        ctx = w ? [w] : [];
-      } else {
-        // ".class.class" -> " class class"
-        v = match[2].replace(_DOT_TO_SPACE, " ");
-        return uu.klass(v, context);
+      return quickQuery(expr, match, context);
+    }
+    if (withComma && _QUICK_COMMA.test(expr)) { // split("#id, .class, E")
+      w = expr.split(","); // "expr, expr, expr"
+      for (i = 0, iz = w.length; i < iz; ++i) {
+        v = uu.trim(w[i]);
+        if (!v) {
+          throw expr + " syntax error";
+        }
+        r = uuqueryselectorall(v, context);
+        mixin(r, rv, unq);
       }
-      expr = expr.slice(match[0].length);
+      return rv;
+    }
+    if (!withComma) {
+      match = _QUICK_HEAD.exec(expr);
+      if (match) {
+        if (match[1]) {
+          w = doc.getElementById(match[1]);
+          ctx = w ? [w] : [];
+        } else {
+          // ".class.class" -> " class class"
+          v = match[2].replace(_DOT_TO_SPACE, " ");
+          return uu.klass(v, context);
+        }
+        expr = expr.slice(match[0].length);
+      }
     }
   }
 

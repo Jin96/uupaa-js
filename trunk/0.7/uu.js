@@ -414,7 +414,8 @@ function uujam(expr,  // @param Node/NodeArray/String/Instance/window/document:
            : uuisary(expr) ? expr.slice() // clone NodeArray
            : uuisstr(expr) ?
                 (!expr.indexOf("<") ? [uunodebulk(expr)]  // <div> -> fragment
-                                    : uuquery(expr, ctx)) // query
+                                    : uuquery(expr, ctx && ctx._ns ? ctx._ns.slice()
+                                                                   : ctx)) // query
            : (expr instanceof uujam) ? expr._ns.slice() // copy constructor
            : []; // bad expr
 }
