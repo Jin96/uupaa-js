@@ -3,9 +3,10 @@
 
 = uup.bite.js =
 
-uup.bite.js のソースコードをみんなで編集
+uupaa.js 0.7 上で、jQuery プラグインを動かすプラグイン(uup.bite.js)
 
-2009-11-30 18:17 @smogami さんのコード( http://jsbin.com/agoso/edit ) を取り込み
+== 変更履歴 ==
+2009-11-30 18:17 @smogami さんのコード( http://jsbin.com/agoso/edit ) を取り込みました。
 
 {{{
 
