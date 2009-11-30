@@ -5,7 +5,10 @@
 
 uup.bite.js のソースコードをみんなで編集
 
+2009-11-30 18:17 @smogami さんのコード( http://jsbin.com/agoso/edit ) を取り込み
+
 {{{
+
 
 // === bite ===
 // depend: uu.js, uu.css
@@ -24,14 +27,12 @@ bite.fn.extend = function(hash) { return _uumix(bite.fn, hash); };
 bite.extend = function(hash, a, b) {
   return arguments.length > 1 ? _uumix(hash, a, b) : _uumix(bite, hash);
 };
-
-// bite.exp - export scope
-bite.exp = function(prefix) { // @param String(= ""): prefix
-  prefix = prefix || "";
-  win[prefix + "$"]      = bite;
-  win[prefix + "jQuery"] = bite;
+// bite.exp - export scope 
+bite.exp = function(prefix) { // @param String(= ""): prefix 
+  prefix = prefix || ""; 
+  win[prefix + "$"]      = bite; 
+  win[prefix + "jQuery"] = bite; 
 };
-
 win.$$$ = bite;
 
 _uumix(bite.prototype, {
@@ -62,7 +63,6 @@ _uumix(bite.prototype, {
 //  children:   bitechildren,
 //  closet:     bitecloset,
 //  contents:   bitecontents,
-//  find:       bitefind,
 //  next:       bitenext,
 //  nextAll:    bitenextall,
 //  parent:     biteparent,
@@ -74,10 +74,10 @@ _uumix(bite.prototype, {
   end:          biteend,        // bite.end() -> this
   append:       biteappend,     // bite.append(html) -> this
 //  appendTo:   biteappendto,
-//  prepend:    biteprepend,
+  prepend:      biteprepend,    // bite.append(html) -> this
 //  prependTo:  biteprependto,
   after:        biteafter,      // bite.after(html) -> this
-//  before:     bitebefore,
+  before:       bitebefore,     // bite.before(html) -> this
 //  insertAfter:biteinsertafter,
 //  insertBefore:
 //  wrap:       bitewrap,
@@ -85,7 +85,7 @@ _uumix(bite.prototype, {
   wrapInner:    bitewrapInner,  // bite.wrapInner(html) -> this
 //  repleaceWith: biterepleacewith,
 //  replaceAll: bitereplaceall,
-//  empty:      biteempty,
+  empty:        biteempty,      // bite.empty() -> this
   remove:       biteremove,     // bite.remove() -> this
 //  clone:      biteclone,
   show:         biteshow,       // bite.show() -> this
@@ -119,6 +119,8 @@ function bite(expr, ctx) {
 }
 
 function biteinit(expr, ctx) {
+  this.length = 0;
+
   this._stack = [[]]; // [nodeset, ...]
   this._ns = !expr ? [] // nodeset
       : (expr === win || expr.nodeType) ? [expr] // node
@@ -131,6 +133,8 @@ function biteinit(expr, ctx) {
       : (expr instanceof bite) ? expr._ns.slice() // copy constructor
       : uu.isfunc(expr) ? (uu.ready(expr), []) // ready
       : []; // bad expr
+
+  Array.prototype.push.apply(this, this._ns);
 }
 
 // bite.each
@@ -242,7 +246,7 @@ function bitetoggleclass(className, // @param JointString: "class1 class2"
 // [1][get] bite.html() -> String
 // [2][set] bite.html("<p>text</p>") -> this
 function bitehtml(html) { // @param String(= void 0):
-                          // @return this:
+                         // @return this:
   var v, i = 0;
 
   if (html === void 0) {
@@ -259,7 +263,7 @@ function bitehtml(html) { // @param String(= void 0):
 // [1][get] bite.text() -> String
 // [2][set] bite.text("text") -> this
 function bitetext(text) { // @param String(= void 0):
-                          // @return this:
+                         // @return this:
   var v, i = 0;
 
   if (text === void 0) {
@@ -320,6 +324,35 @@ function biteappend(html) { // @param bite/HTMLString/Node:
   return this;
 }
 
+// bite.prepend
+function biteprepend(html) { // @param bite/HTMLString/Node:
+                             // @return this:
+  var i = 0, v;
+
+  while ( (v = this._ns[i++]) ) {
+    if (html._ns) {
+      _uunode(html._ns[0], v, 5); // bite._ns[0] -> appendChild
+    } else if (uu.isstr(html) || html.nodeType) {
+      _uunode(html, v, 5);
+    }
+  }
+  return this;
+}
+
+function biteprependto(html) { // @param bite/HTMLString/Node:
+                             // @return this:
+  var i = 0, v;
+
+  while ( (v = this._ns[i++]) ) {
+    if (html._ns) {
+      _uunode(html._ns[0], v, 1); // bite._ns[0] -> appendChild
+    } else if (uu.isstr(html) || html.nodeType) {
+      _uunode(html, v, 1);
+    }
+  }
+  return this;
+}
+
 // bite.after
 function biteafter(html) { // @param bite/HTMLString/Node:
                            // @return this:
@@ -330,6 +363,21 @@ function biteafter(html) { // @param bite/HTMLString/Node:
       _uunode(html._ns[0], v, 3); // bite._ns[0]
     } else if (uu.isstr(html) || html.nodeType) {
       _uunode(html, v, 3); // nextSibling
+    }
+  }
+  return this;
+}
+
+// bite.before
+function bitebefore(html) { // @param bite/HTMLString/Node:
+                            // @return this:
+  var i = 0, v;
+
+  while ( (v = this._ns[i++]) ) {
+    if (html._ns) {
+      _uunode(html._ns[0], v, 2); // bite._ns[0] -> inseretBefore
+    } else if (uu.isstr(html) || html.nodeType) {
+      _uunode(html, v, 2);
     }
   }
   return this;
@@ -353,11 +401,44 @@ function bitewrapInner(wrapper) { // @param HTMLString/Node:
   return this;
 }
 
-// bite.remove - remove node
-function biteremove() { // @return this:
+// bite.empty
+function biteempty() { // @return this:
+/*
+  var v, i = 0,
+      descendants = uu.query("*", this._ns),
+      uuevunbind = _uuev.unbind;
+
+  while ( (v = descendants[i++]) ) {
+     uuevunbind(v);
+  }
+
+  i=0;
+  while ( (v = this._ns[i++]) ) {
+    v.innerHTML = "";
+  }
+  return this;
+ */
   var v, i = 0;
 
   while ( (v = this._ns[i++]) ) {
+    uu.node.clear(v);
+  }
+  return this;
+}
+
+// bite.remove - remove node
+function biteremove() { // @return this:
+  var v, i = 0,
+      descendants = uu.query("*", this._ns),
+      uuevunbind = _uuev.unbind;
+
+  while ( (v = descendants[i++]) ) {
+    uuevunbind(v);
+  }
+
+  i = 0;
+  while ( (v = this._ns[i++]) ) {
+    uuevunbind(v);
     v.parentNode.removeChild(v);
   }
   return this;
