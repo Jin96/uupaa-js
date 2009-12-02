@@ -4,6 +4,7 @@
 //   aria: 0,        // @param Number(= 0): 1 is enable WAI-ARIA
 //   debug: 0,       // @param Number(= 0): 1 is debug mode, 0 is normal mode
 //   light: 1,       // @param Number(= 1): 1 is light weight mode
+//   altcss: 1,      // @param Number(= 1): 1 is enable altcss functions
 //   consel: 0,      // @param Number(= 1): 1 is enable conditional selector
 //   imgdir: "img",  // @param String(= "img"): image dir
 //   visited: 0,     // @param Number(= 0): 1 is :visited activate
@@ -16,7 +17,7 @@
 // window.xboot(uu) - DOMContentLoaded or window.onload callback handler
 // window.xwin(uu) - window.onload callback handler
 // window.xcanvas(uu) - canvas ready callback handler
-// window.xtag(uu, node, tagid) - new tag( uu.div(), etc... ) callback handler
+// window.xtag(uu, node, tagid) - uu.div(tagid) ..  callback handler
 
 var uu; // library namespace
 
@@ -25,7 +26,8 @@ function uuvain() {} // global function, memory leak of IE is evaded
 
 uu ? ++uu.waste : (function(win, doc, _xconfig, _cstyle, _json) {
 var _config = uuarg(_xconfig, {
-        aria: 0, debug: 0, light: 1, consel: 1, imgdir: "img", visited: 0,
+        aria: 0, debug: 0, light: 1, altcss: 1, consel: 1,
+        imgdir: "img", visited: 0,
         css3maxmin: 0, css3markup: 0 }),
     _ver    = uuvers(_config.consel),
     _ie     = _ver.ie,
@@ -123,11 +125,14 @@ uu = uumix(_uujamfactory, {     // uu(expr, ctx) -> Instance(jam)
     _db:        _jsonpdb        // [protected] jsonp job database
   }),
   // --- array / hash ---
-  // [1][clone]             uu.ary(Array) -> new Array
-  // [2][convert NodeList]  uu.ary(NodeList) -> [elm, ...]
-  // [3][convert arguments] uu.ary(arguments) -> [elm, ...]
-  // [4][split comma]       uu.ary("word,word") -> ["word", "word"]
-  // [5][split space]       uu.ary(" word word") -> ["word", "word"]
+  // [1][through]           uu.ary([1, 2])     -> [1, 2]
+  // [2][to ary]            uu.ary(12)         -> [12]
+  // [3][to ary]            uu.ary("12")       -> ["12"]
+  // [4][to ary(no split)]  uu.ary("12,12", 0) -> ["12,12"]
+  // [5][convert NodeList]  uu.ary(NodeList)   -> [elm, ...]
+  // [6][convert arguments] uu.ary(arguments)  -> [elm, ...]
+  // [7][split ,]           uu.ary("word,word") -> ["word", "word"]
+  // [8][split ;]           uu.ary("word;word", ";") -> ["word", "word"]
   ary:    uumix(uuary, {
     has:        uuaryhas,       // [1][has array] uu.ary.has([1, 2], [1, 2, 3]) -> true
                                 // [2][has node]  uu.ary.has(<body>, [<head>, <body>]) -> true
@@ -138,14 +143,16 @@ uu = uumix(_uujamfactory, {     // uu(expr, ctx) -> Instance(jam)
                                 // [4][ascii a-z] uu.ary.sort(["a","z"], "Z-A") -> ["z", "a"]
                                 // [5][user func] uu.ary.sort(["a","z"], fn)    -> ["z", "a"]
     clean:      uuaryclean,     // uu.ary.clean([,,1,2,,]) -> [1, 2]
+    clone:      uuaryclone,     // uu.ary.clone([1, 2]) -> new Array(1, 2)
     unique:     uuaryunique,    // [1][unique elements] uu.ary.unique([<body>, <body>]) -> [<body>]
                                 // [2][unique literals] uu.ary.uniqye([0,1,2,1,0], 1) -> [0,1,2]
     indexOf:    uuaryindexof    // uu.ary.indexOf(ary, find, index = 0) -> Number
   }),
-  // [1][through] uu.hash({ key: "val" }) -> { key: "val" }
-  // [2][to hash] uu.hash("key", mix) -> { key: mix }
-  // [3][to hash(split comma)] uu.hash("key,a,key2,b") -> {key: "a", key2: "b"}
-  // [4][to hash(split space)] uu.hash(" key a key2 b") -> {key: "a", key2: "b"}
+  // [1][through]     uu.hash({ key: "val" }) -> { key: "val" }
+  // [2][to hash]     uu.hash("key", mix)     -> { key: mix }
+  // [3][split , str] uu.hash("key,a,key2,b")              -> { key:"a",key2:"b" }
+  // [4][split ; str] uu.hash("key;a;key2;b", ";", uu.STR) -> { key:"a",key2:"b" }
+  // [5][split , num] uu.hash("key,0,key2,1", ",", uu.NUM) -> { key:0,  key2:1   }
   hash:   uumix(uuhash, {
     num:        uuhashnum,      // uu.hash.num("key,0,key2,1") -> { key: 0, key2: 1 }
     has:        uuhashhas,      // uu.hash.has({a:1,b:2}, {a:1,b:2,c:3}) -> true
@@ -331,14 +338,14 @@ uu = uumix(_uujamfactory, {     // uu(expr, ctx) -> Instance(jam)
 
 // --- message pump ---
 MessagePump.prototype = {
-  regist:       uumsgregist,    // uu.msg.regist(instance) -> this
-  unregist:     uumsgunregist,  // uu.msg.unregist(instance) -> this
-  send:         uumsgsend,      // [1][multicast] uu.msg.send([inst1, inst2], "hello") -> [result1, result2]
-                                // [2][unicast]   uu.msg.send(inst, "hello") -> "world!"
-                                // [3][broadcast] uu.msg.send(0, "hello") -> ["world!", ...]
-  post:         uumsgpost       // [1][multicast] uu.msg.post([instance, instance], "hello")
-                                // [2][unicast]   uu.mgg.post(instance, "hello")
-                                // [3][broadcast] uu.msg.post(0, "hello")
+  send:         uumsgsend,      // [1][multicast] MessagePump.send([inst1, inst2], "hello") -> [result1, result2]
+                                // [2][unicast]   MessagePump.send(inst, "hello") -> "world!"
+                                // [3][broadcast] MessagePump.send(0, "hello") -> ["world!", ...]
+  post:         uumsgpost,      // [1][multicast] MessagePump.post([instance, instance], "hello")
+                                // [2][unicast]   MessagePump.post(instance, "hello")
+                                // [3][broadcast] MessagePump.post(0, "hello")
+  regist:       uumsgregist,    // MessagePump.regist(instance) -> this
+  unregist:     uumsgunregist   // MessagePump.unregist(instance) -> this
 };
 uu.msg = new MessagePump();     // MessagePump instance
 
@@ -492,9 +499,14 @@ function uuajax(url,    // @param URLString: request url
 
   if (xhr) {
     try {
+      // [Gecko] beforeunload event -> gc
       _ver.gecko && uuevattach(win, "beforeunload", befn = _ajaxabort);
+
+      // initialize
       xhr.open(data ? "POST" : "GET", url, true);
       xhr.onreadystatechange = _ajaxstatechange;
+
+      // set header
       header.push("X-Requested-With", "XMLHttpRequest");
       ifmod && _ajaxdb[url] &&
           header.push("If-Modified-Since", uudate2str(_ajaxdb[url], 1)); // GMT
@@ -503,6 +515,8 @@ function uuajax(url,    // @param URLString: request url
       while ( (v = header[i++]) ) {
         xhr.setRequestHeader(v, header[i++]);
       }
+
+      // request
       xhr.send(data || null);
       setTimeout(_ajaxwatchdog, timeout * 1000);
       return;
@@ -547,20 +561,23 @@ function uuajaxifmod(url,    // @param URLString: request url
 }
 
 // uu.ajax.create - create XMLHttpRequest object
-function uuajaxcreate(xml) { // @param Number(= 0): 1 is Microsoft.XMLDOM
+function uuajaxcreate(xml) { // @param Number(= 0): 1 is Microsoft.XMLDOM (IE6)
                              // @return XMLHttpRequest/XMLDOMRequest/void 0:
-  var rv, name = xml ? "Microsoft.XMLDOM" : "Microsoft.XMLHTTP";
+  var rv;
 
   try {
-           win.XMLHttpRequest && (rv = new win.XMLHttpRequest());
-    !rv && win.ActiveXObject  && (rv = new win.ActiveXObject(name));
-  } catch (err) {}
+    rv = new win.XMLHttpRequest();
+  } catch (e) {
+    try { // [IE6]
+      rv = new win.ActiveXObject("Microsoft.XML" + (xml ? "DOM" : "HTTP"));
+    } catch (f) {}
+  }
   return rv;
 }
 
 // uu.ajax.gc - remove Modified Since request cache and request object
 function uuajaxgc() {
-  _ajaxdb = {};   // free If-Modified-Since cache
+  _ajaxdb = {};    // free If-Modified-Since cache
   _syncxhr = null; // free ajax.sync xhr object
 }
 
@@ -602,22 +619,25 @@ function uujsonp(url,    // @param URLString: request url
 }
 
 // --- array / hash ---
-// uu.ary - clone array, convert array, split string
-// [1][clone]             uu.ary(Array) -> new Array
-// [2][convert NodeList]  uu.ary(NodeList) -> [elm, ...]
-// [3][convert arguments] uu.ary(arguments) -> [elm, ...]
-// [4][split comma]       uu.ary("word,word") -> ["word", "word"]
-// [5][split space]       uu.ary(" word word") -> ["word", "word"]
-function uuary(data) { // @param NodeList/Arguments/Array/String/Mix:
-                       // @return Array:
-  var rv = [], i = data.length;
+// uu.ary - to array, convert array, split string
+// [1][through]           uu.ary([1, 2])     -> [1, 2]
+// [2][to ary]            uu.ary(12)         -> [12]
+// [3][to ary]            uu.ary("12")       -> ["12"]
+// [4][to ary(no split)]  uu.ary("12,12", 0) -> ["12,12"]
+// [5][convert NodeList]  uu.ary(NodeList)   -> [elm, ...]
+// [6][convert arguments] uu.ary(arguments)  -> [elm, ...]
+// [7][split ,]           uu.ary("word,word") -> ["word", "word"]
+// [8][split ;]           uu.ary("word;word", ";") -> ["word", "word"]
+function uuary(mix,     // @param Array/Mix/NodeList/Arguments/String:
+               split) { // @param String(= ","): splitter, "" or 0 is no split
+                        // @return Array:
+  var type = uu.type(mix), sp = split === void 0 ? "," : split;
 
-  if (i) {
-    rv = (typeof data === "string")
-       ? (!data.indexOf(" ") ? data.slice(1).split(" ") : data.split(","))
-       : (_cstyle ? _slice.call(data) : _toary(data));
-  }
-  return rv;
+  return (type === _ARY)  ? mix // [1]
+       : (type === _FAKE) ? (_cstyle ? _slice.call(mix)
+                                     : _toary(mix)) // [5][6]
+       : (type === _STR && sp) ? mix.split(sp) // [7][8]
+       : [mix]; // [2][3][4]
 }
 
 // uu.ary.has - has array
@@ -629,7 +649,7 @@ function uuaryhas(ary,   // @param Array/Mix: search element(s)
   if (ary === void 0) { // [IE, Fx2,Fx3] exclude undefined value
     return false;       // http://d.hatena.ne.jp/uupaa/20091022
   }
-  var a = uuisary(ary) ? ary : [ary], i = 0, iz = a.length;
+  var a = uuary(ary), i = 0, iz = a.length;
 
   for (; i < iz; ++i) {
     if (i in a && uuaryindexof(ctx, a[i]) < 0) {
@@ -683,6 +703,12 @@ function uuaryclean(src) { // @param Array: source
   return rv;
 }
 
+// uu.ary.clone - clone array
+function uuaryclone(ary) { // @param Array:
+                           // @return Array: new Array
+  return _slice.call(ary);
+}
+
 // uu.ary.unique - make array from unique element
 // [1][unique elements] uu.ary.unique([<body>, <body>]) -> [<body>]
 // [2][unique literals] uu.ary.uniqye([0,1,2,1,0], 1) -> [0,1,2]
@@ -726,24 +752,33 @@ function uuaryindexof(ary,     // @param Array:
 }
 
 // uu.hash - make hash from key value pair
-// [1][through] uu.hash({ key: "val" }) -> { key: "val" }
-// [2][to hash] uu.hash("key", mix) -> { key: mix }
-// [3][to hash(split comma)] uu.hash("key,a,key2,b") -> { key: "a", key2: "b" }
-// [4][to hash(split space)] uu.hash(" key a key2 b") -> { key: "a", key2: "b" }
-function uuhash(key,     // @param String/Hash: key
-                value) { // @param Mix(= void 0): value
-                         // @return Hash: { key: value, ... }
-  var rv = {}, i = 0, v, ary;
+// [1][through]     uu.hash({ key: "val" }) -> { key: "val" }
+// [2][to hash]     uu.hash("key", mix)     -> { key: mix }
+// [3][split , str] uu.hash("key,a,key2,b")              -> { key:"a",key2:"b" }
+// [4][split ; str] uu.hash("key;a;key2;b", ";", uu.STR) -> { key:"a",key2:"b" }
+// [5][split , num] uu.hash("key,0,key2,1", ",", uu.NUM) -> { key:0,  key2:1   }
+function uuhash(key,    // @param String/Hash: key
+                value,  // @param Mix(= void 0 or ","): value or splitter
+                type) { // @param Number(= void 0 or uu.STR): value type (for split)
+                        //              uu.STR or uu.NUM
+                        // @return Hash: { key: value, ... }
+  var rv = {}, i = 0, v, ary, num, split = 0;
 
-  if (value !== void 0) { // [2]
+  if (type !== v) { // [4][5]
+    ++split;
+  } else if (value !== v) { // [2]
     rv[key] = value;
-  } else if (typeof key === "string") { // [3][4]
-    ary = !key.indexOf(" ") ? key.slice(1).split(" ") : key.split(",");
-    while ( (v = ary[i++]) ) {
-      rv[v] = ary[i++];
-    }
+  } else if (typeof key === "string") { // [3]
+    ++split;
   } else { // [1]
     rv = key;
+  }
+  if (split) {
+    ary = key.split(value || ","); // default splitter = ","
+    num = type === _NUM;
+    while ( (v = ary[i++]) ) {
+      rv[v] = num ? +(ary[i++]) : ary[i++];
+    }
   }
   return rv;
 }
@@ -752,12 +787,7 @@ function uuhash(key,     // @param String/Hash: key
 // uu.hash.num("key,0,key2,1") -> { key: 0, key2: 1 }
 function uuhashnum(str) { // @param String:
                           // @return Hash:
-  var rv = {}, i = 0, v, ary = str.split(",");
-
-  while ( (v = ary[i++]) ) {
-    rv[v] = +(ary[i++]);
-  }
-  return rv;
+  return uuhash(str, 0, _NUM);
 }
 
 // uu.hash.has - has Hash
@@ -818,7 +848,7 @@ function uuhashcss2kb(name) { // @param String/Array: className or [className, .
     return rv[fn(key)] = isNaN(v) ? v : parseFloat(v);
   }
   // http://d.hatena.ne.jp/uupaa/20091125
-  var rv = {}, cs, url, v, i = 0, ary = uuisary(name) ? name : [name],
+  var rv = {}, cs, url, v, i = 0, ary = uuary(name),
       div = doc.body.appendChild(doc.createElement("div")),
       fn = decodeURIComponent;
 
@@ -860,7 +890,7 @@ function uuhashcombine(keyary,     // @param Array: key array
   var rv = {}, i = 0, iz = keyary.length;
 
   for (; i < iz; ++i) {
-    rv[keyary[i]] = toNumber ? parseInt(valary[i]) : valary[i];
+    rv[keyary[i]] = toNumber ? +(valary[i]) : valary[i];
   }
   return rv;
 }
@@ -875,7 +905,7 @@ function uuhashhasvalue(hash,    // @param Hash:
 // uu.each - Hash forEach, tiny Array.prototype.forEach
 function uueach(mix,  // @param Hash/Array:
                 fn) { // @param Function: callback
-  uuisary(mix) ? uuaryeach(mix, fn) : uuhasheach(mix, fn);
+  (uuisary(mix) ? uuaryeach : uuhasheach)(mix, fn);
 }
 
 // uu.mix - mixin
@@ -898,7 +928,7 @@ function uumix(base,       // @param Hash: mixin base
       i in base || (base[i] = flavor[i]);
     }
   }
-  return aroma ? uumix(base, aroma, void 0, override) : base;
+  return aroma ? uumix(base, aroma, 0, override) : base;
 }
 
 // uu.arg - supply default arguments
@@ -1104,27 +1134,15 @@ function uufactory(name,   // @param String: class name
 }
 
 // --- message pump ---
-// uu.msg - Message Pump instance
+// uu.Class.MessagePump
 function MessagePump() {
-  this._addrdb = {};   // { guid: instance, ... }
-  this._envelope = []; // [ [ guid, msg, param1, param2], ...]
-  this._run = 0;
+  this.db = {}; // Address { guid: instance, ... }
 }
 
-// uu.msg.regist - register the destination of the message
-function uumsgregist(inst) { // @param Instance: class instance
-  this._addrdb[uuclassguid(inst)] = inst;
-}
-
-// uu.msg.unregist
-function uumsgunregist(inst) { // @param Instance: class instance
-  delete this._addrdb[uuclassguid(inst)];
-}
-
-// uu.msg.send - send a message synchronously
-// [1][multicast] uu.msg.send([inst1, inst2], "hello") -> [result1, result2]
-// [2][unicast]   uu.msg.send(inst, "hello") -> "world!"
-// [3][broadcast] uu.msg.send(0, "hello") -> ["world!", ...]
+// MessagePump.send - send a message synchronously
+// [1][multicast] MessagePump.send([inst1, inst2], "hello") -> [result1, result2]
+// [2][unicast]   MessagePump.send(inst, "hello") -> "world!"
+// [3][broadcast] MessagePump.send(0, "hello") -> ["world!", ...]
 function uumsgsend(to,      // @param Array/0/instance(= 0): addr or guid
                             //           [instance, ...] is multicast
                             //           instance is unicast
@@ -1133,54 +1151,46 @@ function uumsgsend(to,      // @param Array/0/instance(= 0): addr or guid
                    param) { // @param Mix(= void 0):
                             // @return Array/Mix: [result, ...](broad or multi)
                             //                 or result(uni)
-  var rv = [], v, i = 0, ary, guid;
+  var rv = [], v, i = 0, ary, db = this.db;
 
   if (to) { // [1][2]
-    ary = uuisary(to) ? to : [to];
+    ary = uuary(to);
     while ( (v = ary[i++]) ) {
-      guid = (typeof v === "number") ? v : v.uuguid;
-      rv.push(this._addrdb[guid].msgbox(msg, param));
+      rv.push(db[uuisnum(v) ? v : v.uuguid].msgbox(msg, param));
     }
     return (rv.length === 1) ? rv[0] : rv;
   }
-  for (i in this._addrdb) { // [3]
-    rv.push(this._addrdb[i].msgbox(msg, param));
+  for (i in db) { // [3]
+    rv.push(db[i].msgbox(msg, param));
   }
   return rv;
 }
 
-// uu.msg.post - send a message asynchronously
-// [1][multicast] uu.msg.post([instance, instance], "hello")
-// [2][unicast]   uu.mgg.post(instance, "hello")
-// [3][broadcast] uu.msg.post(0, "hello")
+// MessagePump.post - send a message asynchronously
+// [1][multicast] MessagePump.post([instance, instance], "hello")
+// [2][unicast]   MessagePump.post(instance, "hello")
+// [3][broadcast] MessagePump.post(0, "hello")
 function uumsgpost(to,      // @param Array/0/instance(= 0): addr or guid
                             //           [instance, ...] is multicast
                             //           instance is unicast
                             //           0 is broadcast
                    msg,     // @param String: msg
                    param) { // @param Mix(= void 0): param
-  function _msgloop(w, e, a, z) {
-    e = me._envelope, a = me._addrdb, z = me._run = e.length;
-    if (z) {
-      w = e.shift(); // retrieve a envelope
-      (w[0] in a) && a[w[0]].msgbox(w[1], w[2]); // msgbox(msg, param)
-      setTimeout(_msgloop, 0);
-    }
-  }
-  var me = this, v, i = 0, ary, guid;
+  var me = this, addr = to ? uuary(to) : uu.hash.keys(me.db);
 
-  if (to) { // [1][2]
-    ary = uuisary(to) ? to : [to];
-    while ( (v = ary[i++]) ) {
-      guid = (typeof v === "number") ? v : v.uuguid;
-      me._envelope.push([guid, msg, param]); // stock
-    }
-  } else { // [3]
-    for (guid in me._addrdb) {
-      me._envelope.push([guid, msg, param]); // stock
-    }
-  }
-  !me._run && _msgloop(); // lazy evaluate
+  setTimeout(function() {
+    me.send(addr, msg, param);
+  }, 0);
+}
+
+// MessagePump.regist - register the destination of the message
+function uumsgregist(inst) { // @param Instance: class instance
+  this.db[uuclassguid(inst)] = inst;
+}
+
+// MessagePump.unregist
+function uumsgunregist(inst) { // @param Instance: class instance
+  delete this.db[uuclassguid(inst)];
 }
 
 // --- event ---
@@ -1395,7 +1405,7 @@ function uuvalget(node) { // @param Node:
 function uuvalset(node,  // @param Node:
                   val) { // @param String/Array:
                          // @return Node:
-  var v, i = 0, j, jz, prop, ary, vals = uuisary(val) ? val : [val];
+  var v, i = 0, j, jz, prop, ary, vals = uuary(val);
 
   if (node.tagName.toLowerCase() === "select") {
     ary = node.options, prop = "selected";
@@ -1575,6 +1585,10 @@ function _newtag(/* var_args */) { // @param Mix: var_args, nodes, attr/css
     uunodeid(node); // regist node
     xtag && win.xtag(uu, node, tagid);
   }
+  function _tohash(str) {
+    return !str.indexOf(" ") ? uuhash(uutrim(str), " ", _STR) // " color red"
+                             : uuhash(str);                   // "color,red"
+  }
   var v, w, x, i = 0, j = 0, iz = arguments.length,
       xtag = uuisfunc(win.xtag), atag = { a: 1, A: 1 },
       node = this.nodeType ? this : doc.createElement(this + "");
@@ -1598,8 +1612,8 @@ function _newtag(/* var_args */) { // @param Mix: var_args, nodes, attr/css
       }
     default:
       switch (j++) {
-      case 0: v && uuattrset(node, uuhash(v)); break; // [6][7]
-      case 1: v && uu.css.set(node, uuhash(v));       // [8][9]
+      case 0: v && uuattrset(node, _tohash(v)); break; // [6][7]
+      case 1: v && uu.css.set(node, _tohash(v));       // [8][9]
       }
     }
   }
