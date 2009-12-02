@@ -1,22 +1,12 @@
 <?php
-$libHeader =<<<EOS
-/*!{id:"uupaa.js",ver:0.7,license:"MIT",author:"uupaa.js@gmail.com"}*/
-
-EOS;
-
-$libFooter =<<<EOS
-uu.lazy.fire("init");
-
-EOS;
 
 // marge and strip comment
-function marge($packagefile, $outfile, $minify, $libHeader, $libFooter) {
+function marge($packagefile, $outfile, $minify) {
   $dir = isWin() ? '..\\' : '../';
   $ary = file($packagefile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
   $fp = fopen($outfile, 'w');
   !$fp and die($outfile . " file open fail");
 
-  fwrite($fp, $libHeader);
   foreach($ary as $value) {
     // skip blank and C++ comment line
     if (preg_match('/^\s*$/', $value) || // blank
@@ -72,11 +62,10 @@ function marge($packagefile, $outfile, $minify, $libHeader, $libFooter) {
       $txt = preg_replace('/\((\w+),\n\s+(\w+),\n\s+(\w+),\n\s+(\w+)\)/', "($1, $2, $3, $4)", $txt);
       $txt = preg_replace('/\((\w+),\n\s+(\w+),\n\s+(\w+)\)/', "($1, $2, $3)", $txt);
       $txt = preg_replace('/\((\w+),\n\s+(\w+)\)/', "($1, $2)", $txt);
-
     }
     fwrite($fp, $txt);
+    fwrite($fp, "\n");
   }
-  fwrite($fp, $libFooter);
   fclose($fp);
 }
 function isWin() {
@@ -115,8 +104,7 @@ while ($v = array_shift($argv)) {
 }
 $packagefile = '#' . $package . '.pkg'; // "#full.pkg"
 
-
-marge($packagefile, $outfile, $minify, $libHeader, $libFooter);
+marge($packagefile, $outfile, $minify);
 
 switch ($compiler) {
 case "g":

@@ -1,3 +1,5 @@
+build/header.txt
+
 uu.js
 uu.str.js
 uu.node.js
@@ -23,3 +25,5 @@ uu.css3.js
 uu.css3.fixie.js
 uu.css3.boxeffect.js
 uu.codec.js
+
+build/footer.txt
