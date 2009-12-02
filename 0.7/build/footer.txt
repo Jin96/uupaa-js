@@ -1,0 +1,1 @@
+uu.lazy.fire("init");

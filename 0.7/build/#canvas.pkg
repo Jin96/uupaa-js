@@ -1,3 +1,5 @@
+build/header.txt
+
 uu.js
 uu.color.js
 uu.img.js
@@ -7,3 +9,5 @@ uu.canvas.sl.js
 uu.canvas.vml.js
 uu.canvas.extend.js
 uu.layer.js
+
+build/footer.txt

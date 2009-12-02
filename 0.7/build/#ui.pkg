@@ -1,3 +1,5 @@
+build/header.txt
+
 uu.js
 uu.str.js
 uu.node.js
@@ -28,4 +30,6 @@ uu.codec.js
 
 //plug/ui/uup.ui.tab.js
 //plug/ui/uup.ui.slider.js
+
+build/footer.txt
 
