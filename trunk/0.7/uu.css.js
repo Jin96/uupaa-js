@@ -22,18 +22,18 @@ var _mix    = uu.mix,
     _POS_PARENT = { relative: 1, absolute: 1 };
 
 // --- css / style ---
-// [1][get] uu.css(node) -> { color: "red", ... }(getComputedStyle)
-// [2][get] uu.css(node, "color") -> "red"
-// [3][get] uu.css(node, "color,width") -> { color: "red", width: "20px" }
-// [4][set] uu.css(node, "color", "red") -> node
-// [5][set] uu.css(node, { color: "red" }) -> node
+// [1][get all  styles] uu.css(node) -> { color: "red", ... }(getComputedStyle)
+// [2][get one  style]  uu.css(node, "color") -> "red"
+// [3][get some styles] uu.css(node, "color,width") -> { color: "red", width: "20px" }
+// [4][set one  style]  uu.css(node, "color", "red") -> node
+// [5][set some styles] uu.css(node, { color: "red" }) -> node
 uu.css = _mix(uucss, {
   // --- style handler ---
   get:          _ie ? uucssgetie
-                    : uucssget, // [1] uu.css.get(node, "color") -> "red"
-                                // [2] uu.css.get(node, "color,text-align")
-                                //                -> { color: "red", textAlign: "left" }
-  set:          uucssset,       // [1] uu.css.set(node, { color: "red" }) -> node
+                    : uucssget, // [1][get one  style]  uu.css.get(node, "color") -> "red"
+                                // [2][get some styles] uu.css.get(node, "color,text-align") -> {color:"red", textAlign:"left"}
+  set:          uucssset,       // [1][set one  style]  uu.css.set(node, "color", "red") -> node
+                                // [2][set some styles] uu.css.set(node, { color: "red" }) -> node
   // --- opacity ---
   // [1][get] uu.css.opacity(node) -> Number(0.0~1.0)
   // [2][set] uu.css.opacity(node, opacity, diff = false) -> node
@@ -164,32 +164,33 @@ uu.Class("CSSRule", {
 
 // --- css / style ---
 // uu.css - css accessor
-// [1][get] uu.css(node) -> { color: "red", ... }(getComputedStyle)
-// [2][get] uu.css(node, "color") -> "red"
-// [3][get] uu.css(node, "color,width") -> { color: "red", width: "20px" }
-// [4][set] uu.css(node, "color", "red") -> node
-// [5][set] uu.css(node, { color: "red" }) -> node
-function uucss(node,    // @param Node:
-               key,     // @param JointString/Hash(= void 0):
-               value) { // @param String(= void 0):
-                        // @return String/Hash/CSS2Properties/Node:
-  if (key === void 0) {
+// [1][get all  styles] uu.css(node) -> { color: "red", ... }(getComputedStyle)
+// [2][get one  style]  uu.css(node, "color") -> "red"
+// [3][get some styles] uu.css(node, "color,width") -> { color: "red", width: "20px" }
+// [4][set one  style]  uu.css(node, "color", "red") -> node
+// [5][set some styles] uu.css(node, { color: "red" }) -> node
+function uucss(node,   // @param Node:
+               mix1,   // @param JointString/Hash(= void 0):
+               mix2) { // @param String(= void 0):
+                       // @return String/Hash/CSS2Properties/Node:
+  if (!mix1) {
     return (_ie ? node.currentStyle : _cstyle(node, null)) || {}; // [1]
   }
-  return (value === void 0 &&
-          uu.isstr(key)) ? uucssget(node, key) // [2][3]
-                         : uucssset(node, uu.hash(key, value)); // [4][5]
+  return ((mix2 === void 0 && uu.isstr(mix1)) ? uucssget // [2][3]
+                                              : uucssset)(node, mix1, mix2); // [4][5]
 }
 
 // uu.css.set
-// [1] uu.css.set(node, { color: "red" }) -> node
-function uucssset(node,   // @param Node:
-                  hash) { // @param Hash: { cssProp: "value", ... }
-                          //           or { "css-prop": "value", ... }
-                          // @return Node:
-  var ns = node.style, p, v, i, n,
+// [1][set one  style]  uu.css.set(node, "color", "red") -> node
+// [2][set some styles] uu.css.set(node, { color: "red" }) -> node
+function uucssset(node,  // @param Node:
+                  key,   // @param String/Hash:
+                  val) { // @param String(= void 0):
+                         // @return Node:
+  var hash, ns = node.style, p, v, i, n,
       FIX = _FIX, NPROPS = _NPROPS, STR = "string";
 
+  uu.isstr(key) ? (hash = {}, hash[key] = val) : (hash = key);
   for (i in hash) {
     v = hash[i];
     p = FIX[i] || i;
@@ -208,8 +209,8 @@ function uucssset(node,   // @param Node:
 }
 
 // uu.css.get - get getComputedStyle(node) value
-// [1] uu.css.get(node, "color") -> "red"
-// [2] uu.css.get(node, "color,text-align") -> {color:"red", textAlign:"left"}
+// [1][get one  style]  uu.css.get(node, "color") -> "red"
+// [2][get some styles] uu.css.get(node, "color,text-align") -> {color:"red", textAlign:"left"}
 function uucssget(node,     // @param Node:
                   styles) { // @param JointString: "css-prop,cssProp..."
                             // @return String/Hash: "value"

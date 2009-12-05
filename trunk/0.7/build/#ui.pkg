@@ -28,8 +28,8 @@ uu.css3.boxeffect.js
 uu.tween.js
 uu.codec.js
 
-//plug/ui/uup.ui.tab.js
-//plug/ui/uup.ui.slider.js
+plug/ui/uup.ui.tab.js
+plug/ui/uup.ui.slider.js
 
 build/footer.txt
 

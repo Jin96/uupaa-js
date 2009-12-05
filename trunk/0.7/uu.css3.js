@@ -14,7 +14,7 @@
     //    <img src="1dot.gif">
     //    <div style="background: url(1dot.gif)">
 uu.waste || (function(win, doc, uu) {
-var _featcanvas = uu.ver.majority,
+var _canvasok = uu.ver.majority,
     _usedocfg = !(uu.gecko && uu.ver.re <= 1.9), // 1: use document fragmens
     _rules = [],        // generated rules
     _uniqueRuleuID = 0, // unique rule id
@@ -39,16 +39,16 @@ var _featcanvas = uu.ver.majority,
       disptbl:    uu.ie67   ? 0x80    : 0, // -uu-display: table
       opacity:    uu.ie     ? 0x100   : 0, // opacity:
       textshadow: uu.ie     ? 0x200   : 0, // -uu-text-shadow:
-      boxeffect:  _featcanvas ? 0x400 : 0, // -uu-box-effect:
-      boxshadow:  _featcanvas ? 0x800 : 0, // -uu-box-shadow:
-      boxreflect: _featcanvas ? 0x1000: 0, // -uu-box-reflect:
-      bradius:    _featcanvas ? 0x2000: 0, // -uu-border-radius:
-      bimage:     _featcanvas ? 0x4000: 0, // -uu-border-image:
-      mbg:        _featcanvas ? 0x8000: 0  // -uu-background:
-                                           // -uu-background-color:
-                                           // -uu-background-image:
-                                           // -uu-background-repeat:
-                                           // -uu-background-position:
+      boxeffect:  _canvasok ? 0x400 : 0, // -uu-box-effect:
+      boxshadow:  _canvasok ? 0x800 : 0, // -uu-box-shadow:
+      boxreflect: _canvasok ? 0x1000: 0, // -uu-box-reflect:
+      bradius:    _canvasok ? 0x2000: 0, // -uu-border-radius:
+      bimage:     _canvasok ? 0x4000: 0, // -uu-border-image:
+      mbg:        _canvasok ? 0x8000: 0  // -uu-background:
+                                         // -uu-background-color:
+                                         // -uu-background-image:
+                                         // -uu-background-repeat:
+                                         // -uu-background-position:
     },
     _DECL2EXCSS = {
       position:                 1,
@@ -81,12 +81,17 @@ var _featcanvas = uu.ver.majority,
       "-uu-background-position":uucss3setbgpos
     };
 
-!uu.config.css3maxmin && (_EXCSS.maxmin = 0);
+!uu.config.maxmin && (_EXCSS.maxmin = 0);
 
-// uu.css3.css(context = void 0, rebuild = 0, css = "")
+// [1][get] uu.css3(node, "color") -> "red"
+// [2][get] uu.css3(node, "color,width") -> { color: "red", width: "20px" }
+// [3][set] uu.css3(node, "color", "red") -> node
+// [4][set] uu.css3(node, { color: "red" }) -> node
 uu.css3 = uu.mix(uucss3, {
-  get:          uucss3get,      // uu.css3.get(node, prop) -> "extend / computed-like style"
-  set:          uucss3set,      // uu.css3.set(node, prop, value, redraw = 0) -> node
+  get:          uucss3get,      // [1][get one  style]  uu.css3.get(node, "color") -> "red"
+                                // [2][get some styles] uu.css3.get(node, "color,text-align") -> {color:"red", textAlign:"left"}
+  set:          uucss3set,      // [1][set one  style]  uu.css3.set(node, "-uu-box-shadow", "3px 3px 3px") -> node
+                                // [2][set some styles] uu.css3.set(node, { "-uu-box-shadow": "3px 3px 3px" }) -> node
   decl:         uucss3decl,     // uu.css3.decl(node) -> Hash/void 0
   rules:        uucss3rules,    // uu.css3.rules() -> [rule, ...]
   review:       uucss3review,   // uu.css3.review(ctx, full)
@@ -96,48 +101,43 @@ uu.css3 = uu.mix(uucss3, {
 });
 
 // uu.css3 - css3 accessor
-//// [1][get] uu.css3(node) -> { color: "red", ... }(getComputedStyle)
-// [2][get] uu.css3(node, "color") -> "red"
-// [3][get] uu.css3(node, "color,width") -> { color: "red", width: "20px" }
-// [4][set] uu.css3(node, "color", "red") -> node
-// [5][set] uu.css3(node, { color: "red" }) -> node
-function uucss3(node,    // @param Node:
-                key,     // @param JointString/Hash(= void 0):
-                value) { // @param String(= void 0):
-                         // @return String/Hash/CSS2Properties/Node:
-/*
-  if (key === void 0) {
-    return uu.mix(uu.css(node), uucss3decl(node).decl);
-  }
- */
-  return (value === void 0 &&
-          uu.isstr(key)) ? uucss3get(node, key)
-                         : uucss3set(node, uu.hash(key, value));
+// [1][get] uu.css3(node, "color") -> "red"
+// [2][get] uu.css3(node, "color,width") -> { color: "red", width: "20px" }
+// [3][set] uu.css3(node, "color", "red") -> node
+// [4][set] uu.css3(node, { color: "red" }) -> node
+function uucss3(node,   // @param Node:
+                mix1,   // @param JointString/Hash(= void 0):
+                mix2) { // @param String(= void 0):
+                        // @return String/Hash/CSS2Properties/Node:
+  return ((mix2 === void 0 && uu.isstr(mix1)) ? uucss3get
+                                              : uucss3set)(node, mix1, mix2);
 }
 
 // uu.css3.get
-function uucss3get(node,   // @param Node:
-                   prop) { // @param String: "color"
-                           // @return String: "red"
-  var rv = "", data;
+// [1][get one  style]  uu.css3.get(node, "color") -> "red"
+// [2][get some styles] uu.css3.get(node, "color,text-align") -> {color:"red", textAlign:"left"}
+function uucss3get(node,     // @param Node:
+                   styles) { // @param JointString: "color"
+                             // @return String: "red"
+  var rv = {}, ary = styles.split(","), v, i = 0,
+      data = _uid2data[uu.node.id(node)];
 
-  if (!prop.indexOf("-uu")) { // eg: "-uu-box-shadow"
-    data = _uid2data[uu.node.id(node)];
-    if (data) {
-      rv = data.excss.decl[prop] || "";
-    }
-  } else {
-    rv = uu.css.get(node, prop);
+  while ( (v = ary[i++]) ) {
+    rv[v] = (data && !v.indexOf("-uu")) ? (data.excss.decl[v] || "")
+                                        : uu.css.get(node, v);
   }
-  return rv;
+  return (ary.length === 1) ? rv[ary[0]] : rv;
 }
 
 // uu.css3.set
-function uucss3set(node,     // @param Node:
-                   hash,     // @param Hash: { prop: value, ... }
-                   redraw) { // @param Boolean(= false):
-  var fn, i, v, FIX = uu.dmz.FIX;
+// [1][set one  style]     uu.css3.set(node, "-uu-box-shadow", "3px 3px 3px") -> node
+// [2][set some styles]    uu.css3.set(node, { "-uu-box-shadow": "3px 3px 3px" }) -> node
+function uucss3set(node,  // @param Node:
+                   key,   // @param String/Hash:
+                   val) { // @param String(= void 0):
+  var hash, fn, i, v, FIX = uu.dmz.FIX;
 
+  uu.isstr(key) ? (hash = {}, hash[key] = val) : (hash = key);
   for (i in hash) {
     v = hash[i];
     if (v !== void 0) {
@@ -153,7 +153,6 @@ function uucss3set(node,     // @param Node:
       }
     }
   }
-  redraw && uucss3redraw();
 }
 
 // uu.css3.decl - get declaration values (raw CSS String)
@@ -821,7 +820,7 @@ function autoviewbox() {
 function boot() {
   var css = "", tick = +new Date;
 
-  autoviewbox();
+  _plus && autoviewbox();
 
   if (_mark || _plus) {
     uu.ie && _memento();
@@ -841,24 +840,31 @@ function boot() {
 }
 
 // +------------+----------------+---------------+
-// |            | mark           | plus          |
+// |            | mark = 1       | plus = 1      |
 // +------------+----------------+---------------+
 // | IE         | 6, 7, 8        | 6, 7, 8       |
 // | Opera      |                | 9.5 +         |
-// | Gecko      | 1.8 ~ 1.89     | 1.8 +         |
+// | Gecko      | 1.81 ~ 1.9     | 1.81 +        |
 // | Webkit     | 522 ~ 529      | 522 +         |
 // +------------+----------------+---------------+
-uu.ie     && (uu.ver.ua >= 6)                       && (++_mark, ++_plus);
-uu.opera  && (uu.ver.ua >= 9.5)                     && ++_plus;
-uu.gecko  && (uu.ver.re >  1.8 && uu.ver.re <= 1.9) && ++_mark;
-uu.gecko  && (uu.ver.re >  1.8)                     && ++_plus;
-uu.webkit && (uu.ver.re >= 522 && uu.ver.re <  530) && ++_mark;
-uu.webkit && (uu.ver.re >= 522)                     && ++_plus;
+(function() {
+  uu.ie     && (uu.ver.ua >= 6)                       && (++_mark, ++_plus);
+  uu.opera  && (uu.ver.ua >= 9.5)                     && ++_plus;
+  uu.gecko  && (uu.ver.re >  1.8 && uu.ver.re <= 1.9) && ++_mark;
+  uu.gecko  && (uu.ver.re >  1.8)                     && ++_plus;
+  uu.webkit && (uu.ver.re >= 522 && uu.ver.re <  530) && ++_mark;
+  uu.webkit && (uu.ver.re >= 522)                     && ++_plus;
 
-switch (uu.config.css3markup) {
-case -1: _mark = 0; break;
-case  1: _mark = 1;
-}
+  // http://d.hatena.ne.jp/uupaa/20091203/1259828564
+  if (uu.isfunc(uu.config.altcss)) {
+    // 0 is auto, 1 is enable, -1 is disable
+    var ary = uu.config.altcss(uu); // @return Array: [mark, plus]
+
+    _mark = { "-1": 0, 0: _mark, 1: 1 }[ary[0]];
+    _plus = { "-1": 0, 0: _plus, 1: 1 }[ary[1]];
+  }
+})();
+
 // functional collision with uu.canvas is evaded
 uu.lazy("init", function() {
   uu.ready(boot);
