@@ -4,14 +4,12 @@
 //   aria: 0,        // @param Number(= 0): 1 is enable WAI-ARIA
 //   debug: 0,       // @param Number(= 0): 1 is debug mode, 0 is normal mode
 //   light: 1,       // @param Number(= 1): 1 is light weight mode
-//   altcss: 1,      // @param Number(= 1): 1 is enable altcss functions
+//   altcss: 0,      // @param Number/Function(= 0): altcss mode
+//                   //                     0 is auto, callback function
 //   consel: 0,      // @param Number(= 1): 1 is enable conditional selector
+//   maxmin: 0,      // @param Number(= 0): 1 is enable max-width:, 0 is disable
 //   imgdir: "img",  // @param String(= "img"): image dir
-//   visited: 0,     // @param Number(= 0): 1 is :visited activate
-//   css3maxmin: 0,  // @param Number(= 0): max-width: min-width: and *-height
-//                   //                     1 is enable, 0 is disable
-//   css3markup: 0,  // @param Number(= 0): css3 markup mode,
-//                   //                     0 is auto, 1 is force, -1 is disable
+//   visited: 0      // @param Number(= 0): 1 is E:visited activate
 // };
 // --- user callback functions ---
 // window.xboot(uu) - DOMContentLoaded or window.onload callback handler
@@ -26,9 +24,8 @@ function uuvain() {} // global function, memory leak of IE is evaded
 
 uu ? ++uu.waste : (function(win, doc, _xconfig, _cstyle, _json) {
 var _config = uuarg(_xconfig, {
-        aria: 0, debug: 0, light: 1, altcss: 1, consel: 1,
-        imgdir: "img", visited: 0,
-        css3maxmin: 0, css3markup: 0 }),
+        aria: 0, debug: 0, light: 1, altcss: 1, consel: 1, maxmin: 0,
+        imgdir: "img", visited: 0 }),
     _ver    = uuvers(_config.consel),
     _ie     = _ver.ie,
     _qtag   = _ie ? uutaglegacy : uutag,
@@ -37,13 +34,13 @@ var _config = uuarg(_xconfig, {
     _head   = doc.getElementsByTagName("head")[0], // <head>
     _slice  = Array.prototype.slice, // quick toArray
     _tostr  = Object.prototype.toString, // type detector
-    _guid   = 0, // uu.guid() counter
+    _guid   = 0,  // uu.guid() counter
+    _sxhr   = 0,  // [lazy] xhr object cache for uu.ajax.sync
+    _jjdb   = {}, // { jobid: fn, ... } jsonp job database
     _lazydb = {}, // { id: [[low], [mid], [high]], ... }
     _ndiddb = {}, // { nodeid: node, ... }
     _ajaxdb = {}, // { "url": last modified date time(unit: ms), ...}
-    _syncxhr = 0, // [lazy] xhr object cache for uu.ajax.sync
-    _jsonpdb = {}, // JSONP job db
-    _FIX = {},
+    _FIX  = {},
     _DEC2 = _numary("0123456789"),       // { 0: "00", ...  99: "99" }
     _HEX2 = _numary("0123456789abcdef"), // { 0: "00", ... 255: "ff" }
     _HASH = 1, _NODE = 2, _FAKE = 4, _RGBA = 8, _NULL = 16, _VOID = 32,
@@ -99,6 +96,7 @@ var _config = uuarg(_xconfig, {
     _ENT = uuhash("&,&amp;,<,&lt;,>,&gt;,\",&quot;," +
                   "&amp;,&,&lt;,<,&gt;,>,&quot;,\""),
     _dmz = { root: doc.documentElement || _html, // root or <html>(IE quirks)
+             jjdb: _jjdb,     // jsonp job database
              iebody: 0,       // [lazy] documentElement or <body>(IE quirks)
              ndiddb: _ndiddb, // nodeid database
              ndidseed: 0,     // nodeid counter
@@ -121,18 +119,17 @@ uu = uumix(_uujamfactory, {     // uu(expr, ctx) -> Instance(jam)
     create:     uuajaxcreate,   // uu.ajax.create() -> XMLHttpRequestObject
     gc:         uuajaxgc        // uu.ajax.gc()
   }),
-  jsonp:  uumix(uujsonp, {      // uu.jsonp(url, option = {}, fn, ngfn = void 0)
-    _db:        _jsonpdb        // [protected] jsonp job database
-  }),
+  jsonp:        uujsonp,        // uu.jsonp(url, option = {}, fn, ngfn = void 0)
   // --- array / hash ---
   // [1][through]           uu.ary([1, 2])     -> [1, 2]
-  // [2][to ary]            uu.ary(12)         -> [12]
-  // [3][to ary]            uu.ary("12")       -> ["12"]
-  // [4][to ary(no split)]  uu.ary("12,12", 0) -> ["12,12"]
+  // [2][literal to ary]    uu.ary(12)         -> [12]
+  // [3][string to ary]     uu.ary("12")       -> ["12"]
+  // [4][string to ary(no split)]
+  //                        uu.ary("12,12", 0) -> ["12,12"]
   // [5][convert NodeList]  uu.ary(NodeList)   -> [elm, ...]
   // [6][convert arguments] uu.ary(arguments)  -> [elm, ...]
-  // [7][split ,]           uu.ary("word,word") -> ["word", "word"]
-  // [8][split ;]           uu.ary("word;word", ";") -> ["word", "word"]
+  // [7][string split(,)]   uu.ary("word,word") -> ["word", "word"]
+  // [8][string split(;)]   uu.ary("word;word", ";") -> ["word", "word"]
   ary:    uumix(uuary, {
     has:        uuaryhas,       // [1][has array] uu.ary.has([1, 2], [1, 2, 3]) -> true
                                 // [2][has node]  uu.ary.has(<body>, [<head>, <body>]) -> true
@@ -148,11 +145,11 @@ uu = uumix(_uujamfactory, {     // uu(expr, ctx) -> Instance(jam)
                                 // [2][unique literals] uu.ary.uniqye([0,1,2,1,0], 1) -> [0,1,2]
     indexOf:    uuaryindexof    // uu.ary.indexOf(ary, find, index = 0) -> Number
   }),
-  // [1][through]     uu.hash({ key: "val" }) -> { key: "val" }
-  // [2][to hash]     uu.hash("key", mix)     -> { key: mix }
-  // [3][split , str] uu.hash("key,a,key2,b")              -> { key:"a",key2:"b" }
-  // [4][split ; str] uu.hash("key;a;key2;b", ";", uu.STR) -> { key:"a",key2:"b" }
-  // [5][split , num] uu.hash("key,0,key2,1", ",", uu.NUM) -> { key:0,  key2:1   }
+  // [1][through]      uu.hash({ key: "val" }) -> { key: "val" }
+  // [2][pair to hash] uu.hash("key", mix)     -> { key: mix }
+  // [3][split(,)]     uu.hash("key,a,key2,b")              -> { key:"a",key2:"b" }
+  // [4][split(;)]     uu.hash("key;a;key2;b", ";", uu.STR) -> { key:"a",key2:"b" }
+  // [5][split(,) num] uu.hash("key,0,key2,1", ",", uu.NUM) -> { key:0,  key2:1   }
   hash:   uumix(uuhash, {
     num:        uuhashnum,      // uu.hash.num("key,0,key2,1") -> { key: 0, key2: 1 }
     has:        uuhashhas,      // uu.hash.has({a:1,b:2}, {a:1,b:2,c:3}) -> true
@@ -174,16 +171,17 @@ uu = uumix(_uujamfactory, {     // uu(expr, ctx) -> Instance(jam)
   exp:          uuexp,          // [1][short code] uu.exp()      -> window.mix, window.ie
                                 // [2][add prefix] uu.exp("pfx") -> window.pfx_mix, window.pfx_ie
   // --- attribute ---
-  // [1][get one attr]   uu.attr(node, "attr") -> "value"
-  // [2][get some attrs] uu.attr(node, "attr1,attr2") -> { attr1: "val", attr2: "val" }
-  // [3][set one attr]   uu.attr(node, "attr", "val") -> node
-  // [4][set some attrs] uu.attr(node, { attr: "val" }) -> node
+  // [1][get all  attrs] uu.attr(node) -> { all: attrs }
+  // [2][get many attrs] uu.attr(node, 1) -> { many: attrs }
+  // [3][get one  attr]  uu.attr(node, "attr") -> "value"
+  // [4][get some attrs] uu.attr(node, "attr1,attr2") -> { attr1: "val", attr2: "val" }
+  // [5][set one  attr]  uu.attr(node, "attr", "val") -> node
+  // [6][set some attrs] uu.attr(node, { attr: "val" }) -> node
   attr:   uumix(uuattr, {
-    get:        uuattrget,      // [1][get all attrs]  uu.attr.get(node) -> { all: attrs }
-                                // [2][get many attrs] uu.attr.get(node, 1) -> { many: attrs }
-                                // [3][get one attr]   uu.attr.get(node, "attr") -> String
-                                // [4][get some attrs] uu.attr.get(node, "attr,...") -> Hash
-    set:        uuattrset       // [1][set some attrs] uu.attr.set(node, { id: "hoge" }) -> node
+    get:        uuattrget,      // [1][get one  attr]  uu.attr.get(node, "attr") -> String
+                                // [2][get some attrs] uu.attr.get(node, "attr,...") -> Hash
+    set:        uuattrset       // [1][set one  attr]  uu.attr.set(node, key, val ) -> node
+                                // [2][set some attrs] uu.attr.set(node, { key: val, ... }) -> node
   }),
   // --- query ---
   query:  uumix(uuquery, {      // uu.query(expr, ctx = document) -> [node, ...]
@@ -339,7 +337,7 @@ uu = uumix(_uujamfactory, {     // uu(expr, ctx) -> Instance(jam)
 // --- message pump ---
 MessagePump.prototype = {
   send:         uumsgsend,      // [1][multicast] MessagePump.send([inst1, inst2], "hello") -> [result1, result2]
-                                // [2][unicast]   MessagePump.send(inst, "hello") -> "world!"
+                                // [2][unicast]   MessagePump.send(inst, "hello") -> ["world!"]
                                 // [3][broadcast] MessagePump.send(0, "hello") -> ["world!", ...]
   post:         uumsgpost,      // [1][multicast] MessagePump.post([instance, instance], "hello")
                                 // [2][unicast]   MessagePump.post(instance, "hello")
@@ -503,7 +501,7 @@ function uuajax(url,    // @param URLString: request url
       _ver.gecko && uuevattach(win, "beforeunload", befn = _ajaxabort);
 
       // initialize
-      xhr.open(data ? "POST" : "GET", url, true);
+      xhr.open(data ? "POST" : "GET", url, true); // true is async
       xhr.onreadystatechange = _ajaxstatechange;
 
       // set header
@@ -540,9 +538,9 @@ function uuajaxpost(url, data, option, fn, ngfn) { // @see uuajax params
 function uuajaxsync(url) { // @param String: request url
                            // @return String: "responseText"
   try {
-    var xhr = _syncxhr || (_syncxhr = uuajaxcreate());
+    var xhr = _sxhr || (_sxhr = uuajaxcreate());
 
-    xhr.open("GET", url, false); // sync
+    xhr.open("GET", url, false); // false = sync
     xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
     xhr.send(null);
     if (!xhr.status || xhr.status === 200) {
@@ -577,8 +575,8 @@ function uuajaxcreate(xml) { // @param Number(= 0): 1 is Microsoft.XMLDOM (IE6)
 
 // uu.ajax.gc - remove Modified Since request cache and request object
 function uuajaxgc() {
-  _ajaxdb = {};    // free If-Modified-Since cache
-  _syncxhr = null; // free ajax.sync xhr object
+  _ajaxdb = {}; // free If-Modified-Since cache
+  _sxhr = null; // free ajax.sync xhr object
 }
 
 // uu.jsonp - Async JSONP request
@@ -591,10 +589,10 @@ function uujsonp(url,    // @param URLString: request url
                  ngfn) { // @param Function(= void 0): ngfn(status, url)
   function _jsonpgc() {
     _head.removeChild(node);
-    delete _jsonpdb[jobid];
+    delete _jjdb[jobid];
   }
   function _jsonpwatchdog() {
-    _jsonpdb[jobid]("", 408); // 408 "Request Time-out"
+    _jjdb[jobid]("", 408); // 408 "Request Time-out"
   }
   function _jsonpjob(json, status) {
     if (!node._run++) {
@@ -609,9 +607,9 @@ function uujsonp(url,    // @param URLString: request url
       jobid = "j" + uuguid(),
       node = doc.createElement("script"),
       src = url + (url.indexOf("?") < 0 ? "?" : ";") +
-                  method + "=uu.jsonp._db." + jobid;
+                  method + "=uu.dmz.jjdb." + jobid; // uu.dmz.jjdb = _jjdb
 
-  _jsonpdb[jobid] = _jsonpjob;
+  _jjdb[jobid] = _jsonpjob;
   uumix(node, { type: "text/javascript", charset: "utf-8", _run: 0 });
   _head.appendChild(node);
   node.setAttribute("src", src);
@@ -621,17 +619,18 @@ function uujsonp(url,    // @param URLString: request url
 // --- array / hash ---
 // uu.ary - to array, convert array, split string
 // [1][through]           uu.ary([1, 2])     -> [1, 2]
-// [2][to ary]            uu.ary(12)         -> [12]
-// [3][to ary]            uu.ary("12")       -> ["12"]
-// [4][to ary(no split)]  uu.ary("12,12", 0) -> ["12,12"]
+// [2][literal to ary]    uu.ary(12)         -> [12]
+// [3][string to ary]     uu.ary("12")       -> ["12"]
+// [4][string to ary(no split)]
+//                        uu.ary("12,12", 0) -> ["12,12"]
 // [5][convert NodeList]  uu.ary(NodeList)   -> [elm, ...]
 // [6][convert arguments] uu.ary(arguments)  -> [elm, ...]
-// [7][split ,]           uu.ary("word,word") -> ["word", "word"]
-// [8][split ;]           uu.ary("word;word", ";") -> ["word", "word"]
+// [7][string split(,)]   uu.ary("word,word") -> ["word", "word"]
+// [8][string split(;)]   uu.ary("word;word", ";") -> ["word", "word"]
 function uuary(mix,     // @param Array/Mix/NodeList/Arguments/String:
                split) { // @param String(= ","): splitter, "" or 0 is no split
                         // @return Array:
-  var type = uu.type(mix), sp = split === void 0 ? "," : split;
+  var type = uutype(mix), sp = split === void 0 ? "," : split;
 
   return (type === _ARY)  ? mix // [1]
        : (type === _FAKE) ? (_cstyle ? _slice.call(mix)
@@ -689,44 +688,39 @@ function uuarysort(ary,    // @param Array:
   return ary;
 }
 
-// uu.ary.clean - array compaction, trim null and undefined element
-function uuaryclean(src) { // @param Array: source
+// uu.ary.clean - array compaction, trim null and void 0 elements
+function uuaryclean(ary) { // @param Array: source
                            // @return Array:
-  var rv = [], ri = -1, v, i = 0, iz = src.length;
-
-  for (; i < iz; ++i) {
-    if (i in src) {
-      v = src[i];
-      (v !== null && v !== void 0) && (rv[++ri] = v);
-    }
+  for (var rv = [], i = 0, iz = ary.length; i < iz; ++i) {
+    i in ary && ary[i] != null && rv.push(ary[i]); // [!=] !== null && !== void 0
   }
   return rv;
 }
 
 // uu.ary.clone - clone array
-function uuaryclone(ary) { // @param Array:
+function uuaryclone(ary) { // @param Array: source
                            // @return Array: new Array
   return _slice.call(ary);
 }
 
-// uu.ary.unique - make array from unique element
+// uu.ary.unique - make array from unique element( trim null and void 0 elements)
 // [1][unique elements] uu.ary.unique([<body>, <body>]) -> [<body>]
 // [2][unique literals] uu.ary.uniqye([0,1,2,1,0], 1) -> [0,1,2]
-function uuaryunique(src,       // @param Array: source
+function uuaryunique(ary,       // @param Array: source
                      literal) { // @param Number(= 0):
                                 //          0 is Mix,
                                 //          1 is literal(NUM, STR, BOOL) only
                                 // @return Array:
-  var rv = [], ri = -1, v, i = 0, j, iz = src.length, f, unq = {};
+  var rv = [], ri = -1, v, i = 0, j, iz = ary.length, f, unq = {};
 
   for (; i < iz; ++i) {
-    v = src[i];
-    if (v !== null && v !== void 0) {
+    v = ary[i];
+    if (v != null) { // [!=] !== null && !== void 0
       if (literal) { // [2]
         unq[v] || (unq[v] = 1, rv[++ri] = v);
       } else { // [1]
         for (f = 0, j = i - 1; !f && j >= 0; --j) {
-          f = (v === src[j]);
+          f = (v === ary[j]);
         }
         !f && (rv[++ri] = v);
       }
@@ -752,11 +746,11 @@ function uuaryindexof(ary,     // @param Array:
 }
 
 // uu.hash - make hash from key value pair
-// [1][through]     uu.hash({ key: "val" }) -> { key: "val" }
-// [2][to hash]     uu.hash("key", mix)     -> { key: mix }
-// [3][split , str] uu.hash("key,a,key2,b")              -> { key:"a",key2:"b" }
-// [4][split ; str] uu.hash("key;a;key2;b", ";", uu.STR) -> { key:"a",key2:"b" }
-// [5][split , num] uu.hash("key,0,key2,1", ",", uu.NUM) -> { key:0,  key2:1   }
+// [1][through]      uu.hash({ key: "val" }) -> { key: "val" }
+// [2][pair to hash] uu.hash("key", mix)     -> { key: mix }
+// [3][split(,)]     uu.hash("key,a,key2,b")              -> { key:"a",key2:"b" }
+// [4][split(;)]     uu.hash("key;a;key2;b", ";", uu.STR) -> { key:"a",key2:"b" }
+// [5][split(,) num] uu.hash("key,0,key2,1", ",", uu.NUM) -> { key:0,  key2:1   }
 function uuhash(key,    // @param String/Hash: key
                 value,  // @param Mix(= void 0 or ","): value or splitter
                 type) { // @param Number(= void 0 or uu.STR): value type (for split)
@@ -817,7 +811,7 @@ function uuhasheach(hash, // @param Hash:
 // uu.hash.size - get hash length
 function uuhashsize(mix) { // @param Array/Hash:
                            // @return Number:
-  return uuisary(mix) ? mix.length : uuhashkeys(mix).length;
+  return (uuisary(mix) ? mix : uuhashkeys(mix)).length;
 }
 
 // uu.hash.keys - enum hash keys
@@ -958,36 +952,22 @@ function uuexp(prefix,   // @param String(= ""):
 
 // --- attribute ---
 // uu.attr - attribute accessor
-// [1][get one attr]   uu.attr(node, "attr") -> "value"
-// [2][get some attrs] uu.attr(node, "attr1,attr2") -> { attr1: "val", attr2: "val" }
-// [3][set one attr]   uu.attr(node, "attr", "val") -> node
-// [4][set some attrs] uu.attr(node, { attr: "val" }) -> node
-function uuattr(node,  // @param Node:
-                key,   // @param JointString/Hash(= void 0): key
-                val) { // @param String(= void 0): value
-                       // @return String/Hash/void 0:
-  return (key === void 0 || (uuisstr(key) && val === void 0)) ?
-         uuattrget(node, key) : // [1][2]
-         uuattrset(node, uuhash(key, val)); // [3][4]
-}
+// [1][get all  attrs] uu.attr(node) -> { all: attrs }
+// [2][get many attrs] uu.attr(node, 1) -> { many: attrs }
+// [3][get one  attr]  uu.attr(node, "attr") -> "value"
+// [4][get some attrs] uu.attr(node, "attr1,attr2") -> { attr1: "val", attr2: "val" }
+// [5][set one  attr]  uu.attr(node, "attr", "val") -> node
+// [6][set some attrs] uu.attr(node, { attr: "val" }) -> node
+function uuattr(node,   // @param Node:
+                mix1,   // @param JointString/Hash/Number(= void 0): key
+                mix2) { // @param String(= void 0): value
+                        // @return String/Hash/Node:
+  if (!mix1 || mix1 === 1) { // [1][2]
+    var rv = {}, ary = node.attributes, v, w, i = 0;
 
-// uu.attr.get - get attribute
-// [1][get all attrs]  uu.attr.get(node) -> { all: attrs }
-// [2][get many attrs] uu.attr.get(node, 1) -> { many: attrs }
-// [3][get one attr]   uu.attr.get(node, "attr") -> String
-// [4][get some attrs] uu.attr.get(node, "attr,...") -> Hash
-function uuattrget(node,    // @param Node:
-                   attrs) { // @param JointString: "attr1,..."
-                            // @return String/Hash: "value" (one attr)
-                            //                   or { attr1: "value", ... }
-  var rv = {}, ary, v, w, i = 0, ie8 = _ver.ie8, ATTR = _ATTR,
-      IEFIX = { href: 1, src: 1 }; // fix a[href^="#"] for IE6, IE7
-
-  if (!attrs || attrs === 1) { // [1] all, [2] many
-    ary = node.attributes;
     while ( (v = ary[i++]) ) {
       w = v.name;
-      if (!attrs) {
+      if (!mix1) {
         rv[w] = v.value;
       } else if (v.specified && w !== "style" && w.indexOf("uu")) {
         rv[w] = v.value;
@@ -995,6 +975,20 @@ function uuattrget(node,    // @param Node:
     }
     return rv;
   }
+  return ((mix2 === void 0 && uuisstr(mix1)) ? uuattrget // [3][4]
+                                             : uuattrset)(node, mix1, mix2); // [5][6]
+}
+
+// uu.attr.get - get attribute
+// [1][get one  attr]  uu.attr.get(node, "attr") -> String
+// [2][get some attrs] uu.attr.get(node, "attr,...") -> Hash
+function uuattrget(node,    // @param Node:
+                   attrs) { // @param JointString: "attr1,..."
+                            // @return String/Hash: "value" (one attr)
+                            //                   or { attr1: "value", ... }
+  var rv = {}, ary, v, w, i = 0, ie8 = _ver.ie8, ATTR = _ATTR,
+      IEFIX = { href: 1, src: 1 }; // fix a[href^="#"] for IE6, IE7
+
   ary = attrs.split(",");
   while ( (v = ary[i++]) ) {
     w = ATTR[v] || v;
@@ -1005,12 +999,15 @@ function uuattrget(node,    // @param Node:
 }
 
 // uu.attr.set - set attribute
-// [1][set some attrs] uu.attr.set(node, { id: "hoge" }) -> node
-function uuattrset(node,   // @param Node:
-                   hash) { // @param Hash: { attr1: "value", ... }
-                           // @return Node:
-  var i, ATTR = _ATTR;
+// [1][set one  attr]  uu.attr.set(node, key, val ) -> node
+// [2][set some attrs] uu.attr.set(node, { key: val, ... }) -> node
+function uuattrset(node,  // @param Node:
+                   key,   // @param String/Hash: key
+                   val) { // @param String(= void 0): value
+                          // @return Node:
+  var hash, i, ATTR = _ATTR;
 
+  uuisstr(key) ? (hash = {}, hash[key] = val) : (hash = key);
   for (i in hash) {
     node.setAttribute(ATTR[i] || i, hash[i]);
   }
@@ -1026,9 +1023,9 @@ function uuklasshas(node,   // @param Node:
 
   if (!name || !cn) { return false; }
   if (name.indexOf(" ") < 0) {
-    return (" " + cn + " ").indexOf(" " + name + " ") >= 0;
+    return (" " + cn + " ").indexOf(" " + name + " ") >= 0; // single
   }
-  ary = uusplit(name);
+  ary = uusplit(name); // multi
   m = cn.match(_matcher(ary));
   return m && m.length >= ary.length;
 }
@@ -1038,7 +1035,7 @@ function uuklasshas(node,   // @param Node:
 function uuklassadd(node,   // @param Node:
                     name) { // @param JointString: "class1 class2 ..."
                             // @return Node:
-  node.className += " " + name; // [perf point] no uutriminner()
+  node.className += " " + name; // [perf point] // uutriminner()
   return node;
 }
 
@@ -1074,10 +1071,6 @@ function uuclass(name,    // @param String: class name
     });
     me.msgbox || (me.msgbox = uuvain);
     uu.msg.regist(me);
-    me.send = me.msgbox;
-    me.post = function(msg, param) {
-      me.msgbox(msg, param);
-    };
   };
   uuclass[name].prototype = proto || {};
 }
@@ -1105,10 +1098,6 @@ function uuclasssingleton(name,    // @param String: class name
       });
       me.msgbox || (me.msgbox = uuvain);
       uu.msg.regist(me);
-      me.send = me.msgbox;
-      me.post = function(msg, param) {
-        me.msgbox(msg, param);
-      };
     }
     return self.instance || (self.instance = me);
   };
@@ -1136,12 +1125,13 @@ function uufactory(name,   // @param String: class name
 // --- message pump ---
 // uu.Class.MessagePump
 function MessagePump() {
-  this.db = {}; // Address { guid: instance, ... }
+  this._db = {};   // Address { guid: instance, ... }
+  this._guid = []; // guid cache [guid, ...]
 }
 
 // MessagePump.send - send a message synchronously
 // [1][multicast] MessagePump.send([inst1, inst2], "hello") -> [result1, result2]
-// [2][unicast]   MessagePump.send(inst, "hello") -> "world!"
+// [2][unicast]   MessagePump.send(inst, "hello") -> ["world!"]
 // [3][broadcast] MessagePump.send(0, "hello") -> ["world!", ...]
 function uumsgsend(to,      // @param Array/0/instance(= 0): addr or guid
                             //           [instance, ...] is multicast
@@ -1149,19 +1139,12 @@ function uumsgsend(to,      // @param Array/0/instance(= 0): addr or guid
                             //           0 is broadcast
                    msg,     // @param String: msg
                    param) { // @param Mix(= void 0):
-                            // @return Array/Mix: [result, ...](broad or multi)
-                            //                 or result(uni)
-  var rv = [], v, i = 0, ary, db = this.db;
+                            // @return Arra: [result, ...]
+  var rv = [], ri = -1, v, w, i = 0, ary = to ? uuary(to) : this._guid;
 
-  if (to) { // [1][2]
-    ary = uuary(to);
-    while ( (v = ary[i++]) ) {
-      rv.push(db[uuisnum(v) ? v : v.uuguid].msgbox(msg, param));
-    }
-    return (rv.length === 1) ? rv[0] : rv;
-  }
-  for (i in db) { // [3]
-    rv.push(db[i].msgbox(msg, param));
+  while ( (v = ary[i++]) ) {
+    w = this._db[v.uuguid || v || 0];
+    w && (rv[++ri] = w.msgbox(msg, param));
   }
   return rv;
 }
@@ -1176,21 +1159,23 @@ function uumsgpost(to,      // @param Array/0/instance(= 0): addr or guid
                             //           0 is broadcast
                    msg,     // @param String: msg
                    param) { // @param Mix(= void 0): param
-  var me = this, addr = to ? uuary(to) : uu.hash.keys(me.db);
+  var me = this;
 
   setTimeout(function() {
-    me.send(addr, msg, param);
+    me.send(to ? uuary(to) : me._guid, msg, param);
   }, 0);
 }
 
 // MessagePump.regist - register the destination of the message
 function uumsgregist(inst) { // @param Instance: class instance
-  this.db[uuclassguid(inst)] = inst;
+  this._db[uuclassguid(inst)] = inst;
+  this._guid = uu.hash.keys(this._db);
 }
 
 // MessagePump.unregist
 function uumsgunregist(inst) { // @param Instance: class instance
   delete this.db[uuclassguid(inst)];
+  this._guid = uu.hash.keys(this._db);
 }
 
 // --- event ---
@@ -1238,9 +1223,11 @@ function uuev(node,   // @param Node:
       name = m[2];
       (m[3] && _ie && name === "mousemove") &&
           uuev(node, losecapture, closure, mode); // IE mouse capture
+
       if (types.indexOf("," + v + ",") >= 0) { // bound?
         if (mode === 2) { // detach event
           _ie && (name === losecapture) && node.releaseCapture();
+
           // ",dblclick," <- ",my.click+,dblclick,".replace(",my.click+,", ",")
           node.uuevtypes = node.uuevtypes.replace("," + v + ",", ",");
           node.uuevfn[v] = void 0;
@@ -1248,6 +1235,7 @@ function uuev(node,   // @param Node:
         }
       } else if (mode === 1) { // attach event
         _ie && (name === losecapture) && node.setCapture();
+
         // ",my.click+,dblclick," <- ",my.click+," + "dblclick" + ,"
         node.uuevtypes += v + ",";
         node.uuevfn[v] = closure;
@@ -1585,9 +1573,10 @@ function _newtag(/* var_args */) { // @param Mix: var_args, nodes, attr/css
     uunodeid(node); // regist node
     xtag && win.xtag(uu, node, tagid);
   }
-  function _tohash(str) {
-    return !str.indexOf(" ") ? uuhash(uutrim(str), " ", _STR) // " color red"
-                             : uuhash(str);                   // "color,red"
+  function _tohash(mix) {
+    return !uuisstr(mix) ? mix
+         : !mix.indexOf(" ") ? uuhash(uutrim(mix), " ", _STR) // " color red"
+                             : uuhash(mix);                   // "color,red"
   }
   var v, w, x, i = 0, j = 0, iz = arguments.length,
       xtag = uuisfunc(win.xtag), atag = { a: 1, A: 1 },
@@ -2278,14 +2267,23 @@ try {
   _ie ? _peekie() : uuevattach(doc, "DOMContentLoaded", _fire);
 })(uuready.gone);
 
-// inner - prebuild camelized hash(http://handsout.jp/slide/1894)  and nodeid
+// inner -
+// 1. prebuild camelized hash - http://handsout.jp/slide/1894
+// 2. prebuild nodeid
+// 3. remove comment node(IE only) - http://d.hatena.ne.jp/uupaa/20091203/1259820356
 uuready(function() {
   uumix(_camelhash(_FIX, _ver.webkit ? _cstyle(_html, null) : _html.style),
         _STYLE, _ATTR);
-  var nodes = uu.tag("*"), v, i = 0; // [uu.tag]
+  var live = _html.getElementsByTagName("*"), v, w, ary = [], i = 0, j = 0;
 
-  while ( (v = nodes[i++]) ) {
-    uunodeid(v);
+  uunodeid(_html);
+  while ( (v = live[i++]) ) {   // live NodeList
+    w = v.nodeType;
+    w === 1 ? uunodeid(v) :     // 1: ELEMENT_NODE
+    w === 8 ? ary.push(v) : 0;  // 8: COMMENT_NODE (IE only)
+  }
+  while ( (v = ary[j++]) ) {    // [IE] static NodeArray
+    v.parentNode.removeChild(v);
   }
 }, 2); // 2: high order
 

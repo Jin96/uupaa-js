@@ -85,7 +85,7 @@ array_shift($argv);
 while ($v = array_shift($argv)) {
   switch ($v) {
   case "-j":
-    $minify = 0;
+ // $minify = 0;
     $compiler = "";
     break;
   case "-g":
