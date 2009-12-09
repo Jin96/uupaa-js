@@ -369,7 +369,7 @@ function shimbind() {
 
 // uu.Class.Shim.unbind - purge
 function shimunbind() {
-  this._shim && (uu.node.sub(this._shim), this._shim = 0);
+  this._shim && (uu.node.remove(this._shim), this._shim = 0);
 }
 
 // uu.Class.Shim.resize

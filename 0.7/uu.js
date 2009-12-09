@@ -444,7 +444,7 @@ function uuajax(url,    // @param URLString: request url
     if (xhr.readyState === 4) {
       if ((fileScheme && !xhr.status) || xhr.status === 200) {
         if (fn && !run++) {
-          ctype = xhr.getResponseHeader("content-type") || "";
+          ctype = xhr.getResponseHeader("Content-Type") || "";
           fn(ctype.indexOf("xml") < 0 ? xhr.responseText       // text
                                       : xhr.responseXML, url); // xml
         }
@@ -1591,11 +1591,11 @@ function _newtag(/* var_args */) { // @param Mix: var_args, nodes, attr/css
       if (v) {
         w = ":#".indexOf(v.slice(0, 1));
         if (w >= 0) { // [2][4]
-          x = v.slice(1);
+          x = v.slice(1); // trim ":" or "#"
           w ? _callback(node, x) : node.appendChild(doc.createTextNode(x));
           break;
         } else if (!v.indexOf("url:")) { // [10]
-          node.setAttribute(atag[node.tagName] ? "href" : "src", v.slice(4));
+          node.setAttribute(atag[node.tagName] ? "href" : "src", v.slice(4)); // trim "url:"
           break;
         }
       }
@@ -1663,7 +1663,7 @@ function uutag(expr,  // @param String: "*" or "tag"
   return _slice.call((ctx || doc).getElementsByTagName(expr));
 }
 
-// inner - getElementsByTagName for legacy browser(Opera9.2x, IE6, IE7, IE8)
+// inner - getElementsByTagName for legacy browser(IE6~IE8, Opera9.2x)
 function uutaglegacy(expr, ctx) {
   var nl = (ctx || doc).getElementsByTagName(expr),
       rv = [], ri = -1, v, i = 0;
@@ -1685,7 +1685,7 @@ function uuklass(expr,  // @param JointString: "class", "class1, ..."
   return _slice.call((ctx || doc).getElementsByClassName(expr));
 }
 
-// inner - getElementsByClassName for legacy browser(IE6 - IE8, etc...)
+// inner - getElementsByClassName for legacy browser(IE6~IE8, etc...)
 function uuklasslegacy(expr, ctx) {
   var nodes = (ctx || doc).getElementsByTagName("*"),
       name = uusplit(expr),
@@ -1696,7 +1696,7 @@ function uuklasslegacy(expr, ctx) {
   while ( (v = nodes[i++]) ) {
     c = v.className;
     if (c) {
-      match = c.match(rex); // [NG!] match = rex.exec(c);
+      match = c.match(rex); // match = rex.exec(c);
       (match && match.length >= nz) && (rv[++ri] = v);
     }
   }
@@ -1791,13 +1791,13 @@ function uuucs2(str,   // @param String:
 
 // uu.unesc - unescape from HTML entity
 function uuunesc(str) { // @param String: '&lt;a href=&quot;&amp;&quot;&gt;'
-                        // @return String '<a href="&">'
+                        // @return String: '<a href="&">'
   return str.replace(_FROM_ENT, _uuescentity);
 }
 
 // uu.unucs2 - "\u0000" to char
 function uuunucs2(str) { // @param String:
-                         // @return String "\u0000" ~ "\uffff"
+                         // @return String: "\u0000" ~ "\uffff"
   function _uuunucs2(m, hex) {
     return String.fromCharCode(parseInt(hex, 16));
   }
@@ -1982,7 +1982,7 @@ function _jsoninsp(mix, fn) {
 function uutype(mix,     // @param Mix:
                 match) { // @param Number(= 0): match types
                          // @return Boolean/Number: true is match,
-                         //                         false is unmatch
+                         //                         false is unmatch,
                          //                         Number is matched bits
   var rv = _TYPE[typeof mix] || _TYPE[_tostr.call(mix)] ||
            (!mix ? 16 : mix.nodeType ? 2 : "length" in mix ? 4 :
@@ -2247,7 +2247,7 @@ try {
 (function(gone) {
   function _fire() {
     if (!gone.blackout && !gone.dom++) {
-      _ie && (_dmz.iebody = _ver.quirks ? doc.body : _dmz.root);
+      _ie && (_dmz.iebody = _ver.quirks ? doc.body : _dmz.root); // [IE] lazy detect
       uulazy.fire("boot");
       uuisfunc(win.xboot || 0) && win.xboot(uu);
     }
@@ -2295,7 +2295,7 @@ function _camelhash(rv, props) {
   function _decamelize(m, c, C) {
     return c + "-" + C.toLowerCase();
   }
-  var i, v, webkit = _ver.webkit,
+  var i, v, webkit = _ver.webkit, gecko = _ver.gecko,
       CAMELIZE = /-([a-z])/g, DECAMELIZE = /([a-z])([A-Z])/g;
 
   for (i in props) {
@@ -2304,6 +2304,7 @@ function _camelhash(rv, props) {
       if (i.indexOf("-")) { // -webkit-xxx
         v = webkit ? i.replace(CAMELIZE, _camelize)
                    : i.replace(DECAMELIZE, _decamelize);
+        gecko && !v.indexOf("Moz") && (v = "-moz" + v.slice(3));
         // { text-align: "textAlign", ... }
         (i !== v) && (webkit ? (rv[i] = v) : (rv[v] = i));
       }
@@ -2370,7 +2371,7 @@ function uuvers(consel,    // @param Number(= 0): 1 is add conditional selector
                            //                 ie7, ie8, ie67, opera, webkit,
                            //                 chrome, safari, iphone, quirks,
                            //                 advanced, majority }
-  var sl = slupper || 4, ax, v, doc = document, html, cn,
+  var sl = slupper || 4, ax, v, doc = document,
       nv = navigator, nu = nv.userAgent,
       ie = !!doc.uniqueID, opera = window.opera,
       ua = opera ? +(opera.version().replace(/\d$/, ""))
@@ -2383,6 +2384,9 @@ function uuvers(consel,    // @param Number(= 0): 1 is add conditional selector
       gecko  = nu.indexOf("Gecko/") > 0,
       webkit = nu.indexOf("WebKit") > 0,
       chrome = nu.indexOf("Chrome") > 0,
+      html = doc.getElementsByTagName("html")[0],
+      ary = "ie,ie67,opera,gecko,webkit,iphone,majority".split(","),
+      cn = [html.className.replace(/ifnojs/, ""), "ifjs"], i = 0,
       rv = { ua: ua, re: re, sl: 0, fl: 0, xml: xml,
              ie: ie, ie6: ie && ua === 6, ie7: ie && ua === 7,
              ie8: ie && (doc.documentMode || 0) === 8,
@@ -2419,18 +2423,15 @@ function uuvers(consel,    // @param Number(= 0): 1 is add conditional selector
                 (opera  && ua >= 9.5) || // Opera 9.5+
                 (gecko  && re >= 1.9) || // Firefox 3+
                 (webkit && re >  524);   // Safari 3.1+, Google Chrome 1+
-  // conditional selector
+  // --- conditional selector ---
   if (consel) {
-    html = doc.getElementsByTagName("html")[0];
-    cn = [html.className.replace(/ifnojs/, ""), "ifjs"];
-    rv.ie       && cn.push("ifie ifie" + rv.ua);
-    rv.ie67     && cn.push("ifie67");
-    rv.opera    && cn.push("ifopera");
-    rv.gecko    && cn.push("ifgecko");
-    rv.webkit   && cn.push("ifwebkit");
-    rv.iphone   && cn.push("ifiphone");
-    rv.majority && cn.push("ifmajority");
+    while ( (v = ary[i++]) ) {
+      rv[v] && cn.push("if" + v);
+    }
+    rv.ie && cn.push("ifie" + rv.ua); // [IE] fix multi versioning
     cn.push(rv.advanced ? "ifadvanced" : "ifclassic");
+
+    // <html class="..."> modify
     html.className = cn.join(" ").replace(/^\s+|\s+$/g, "").replace(/\./g, "");
   }
   return rv;

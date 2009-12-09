@@ -1,4 +1,3 @@
-
 // === bite ===
 // depend: uu.js, uu.css
 uu.waste || (function(win, doc, uu) {
@@ -9,14 +8,21 @@ var _uuev = uu.ev,
     _uuattr = uu.attr,
     _uuhash = uu.hash,
     _uunode = uu.node,
-    _uuklass = uu.klass;
+    _uuklass = uu.klass,
+    _speed = { slow: 600, normal: 400, fast: 200 };
+//    _rootobj = bite(doc);
 
 bite.fn = biteinit.prototype = bite.prototype;
 bite.fn.extend = function(hash) { return _uumix(bite.fn, hash); };
 bite.extend = function(hash, a, b) {
-  return arguments.length > 1 ? _uumix(hash, a, b) : _uumix(bite, hash);
+  return a ? _uumix(hash, a, b) : _uumix(bite, hash);
 };
-bite.exp = function() { win.$ = win.jQuery = bite; };
+// bite.exp - export scope 
+bite.exp = function(prefix) { // @param String(= ""): prefix 
+  prefix = prefix || ""; 
+  win[prefix + "$"]      = bite; 
+  win[prefix + "jQuery"] = bite; 
+};
 win.$$$ = bite;
 
 _uumix(bite.prototype, {
@@ -35,8 +41,8 @@ _uumix(bite.prototype, {
   html:         bitehtml,
   text:         bitetext,
   val:          biteval,
-//  filter:     bitefilter,   // [1] bite.filter(expr)
-                              // [2] bite.filter(fn)
+  filter:       bitefilter,     // [1] bite.filter(expr)
+                                // [2] bite.filter(fn)
   find:         bitefind,       // bite.find(expr) -> this
 
 //  is:         biteis,       // bite.is(expr)
@@ -44,25 +50,24 @@ _uumix(bite.prototype, {
 //  not:        bitenot,      // bite.not(expr)
 //  slice:      biteslice,    // bite.slice(start, end)
 //  add:        biteadd,
-//  children:   bitechildren,
+  children:     bitechildren, // bite.children(expr) -> this
 //  closet:     bitecloset,
 //  contents:   bitecontents,
-//  find:       bitefind,
 //  next:       bitenext,
 //  nextAll:    bitenextall,
-//  parent:     biteparent,
+  parent:       biteparent,   // bite.parent(expr) -> this
 //  parents:    biteparents,
 //  prev:       biteprev,
 //  prevAll:    biteprevall,
-//  siblings:   bitesiblings,
+  siblings:     bitesiblings,
 //  andSelf:    biteandself,
   end:          biteend,        // bite.end() -> this
   append:       biteappend,     // bite.append(html) -> this
 //  appendTo:   biteappendto,
-//  prepend:    biteprepend,
+  prepend:      biteprepend,    // bite.append(html) -> this
 //  prependTo:  biteprependto,
   after:        biteafter,      // bite.after(html) -> this
-//  before:     bitebefore,
+  before:       bitebefore,     // bite.before(html) -> this
 //  insertAfter:biteinsertafter,
 //  insertBefore:
 //  wrap:       bitewrap,
@@ -70,14 +75,18 @@ _uumix(bite.prototype, {
   wrapInner:    bitewrapInner,  // bite.wrapInner(html) -> this
 //  repleaceWith: biterepleacewith,
 //  replaceAll: bitereplaceall,
-//  empty:      biteempty,
+  empty:        biteempty,      // bite.empty() -> this
   remove:       biteremove,     // bite.remove() -> this
 //  clone:      biteclone,
   show:         biteshow,       // bite.show() -> this
   hide:         bitehide,       // bite.hide() -> this
   fadeIn:       bitefadein,     // bite.fadein(duration) -> this
   fadeOut:      bitefadeout,    // bite.fadeout(duration) -> this
+  fadeTo:       bitefadeto,     // bite.fadeto(speed, opacity, [callback]) -> this
+  slideToggle:  biteslidetoggle, // bite.slideToggle(speed, [callback]) -> this
+  toggle:       bitetoggle,     // bite.toggle(speed, [callback]) -> this
   animate:      biteanimate,    // bite.animate(hash, duration) -> this
+  stop:         bitestop,       // bite.stop() -> this
   width:        bitewidth,      // bite.width() -> Number
   height:       biteheight,     // bite.height() -> Number
   bind:         bitebind,       // bite.bind("click", fn) -> this
@@ -90,7 +99,7 @@ _uumix(bite.prototype, {
 _uuary.each(_uuary(uu.dmz.EVENT), function(v) {
   bite.fn[v] = function(fn) {
     function bindThis(evt, node) {
-      fn.call(node, evt);
+      fn.call(node, evt); // this = node
     }
     return _biteeach(this, _uuev, v, bindThis);
   };
@@ -104,18 +113,22 @@ function bite(expr, ctx) {
 }
 
 function biteinit(expr, ctx) {
+  function _evalctx(ctx) {
+    return ctx && ctx._ns ? ctx._ns.slice()
+                          : uu.isstr(ctx) ? uu.query(ctx) : ctx;
+  }
   this._stack = [[]]; // [nodeset, ...]
   this._ns = !expr ? [] // nodeset
       : (expr === win || expr.nodeType) ? [expr] // node
       : uu.isary(expr) ? expr.slice() // clone NodeArray
       : uu.isstr(expr) ? (!expr.indexOf("<")
                            ? [_uunode.bulk(expr)] // <div> -> fragment
-                           : uu.query(expr, ctx && ctx._ns ? ctx._ns.slice()
-                                                           : uu.isstr(ctx) ? uu.query(ctx)
-                                                                           : ctx))
+                           : uu.query(expr, _evalctx(ctx)))
       : (expr instanceof bite) ? expr._ns.slice() // copy constructor
       : uu.isfunc(expr) ? (uu.ready(expr), []) // ready
       : []; // bad expr
+  this.length = 0;
+  Array.prototype.push.apply(this, this._ns);
 }
 
 // bite.each
@@ -157,9 +170,9 @@ function biteget(nth) { // @param Number(= void 0): nth
 }
 
 // bite.attr
-// [1][get] bite.attr(name) - String
-// [2][set] bite.attr(properties) - this
-// [3][set] bite.attr(name, value) - this
+// [1][get] bite.attr(name) -> String
+// [2][set] bite.attr(properties) -> this
+// [3][set] bite.attr(name, value) -> this
 function biteattr(a1, a2) {
   if (a2 === void 0) {
     return uu.isstr(a1) ? _uuattr.get(this._ns[0], a1) // [1]
@@ -177,9 +190,9 @@ function biteremoveattr(name) {
 }
 
 // bite.css
-// [1][get] bite.css(name) - String
-// [2][set] bite.css(properties) - this
-// [3][set] bite.css(name, value) - this
+// [1][get] bite.css(name) -> String
+// [2][set] bite.css(properties) -> this
+// [3][set] bite.css(name, value) -> this
 function bitecss(a1, a2) {
   if (a2 === void 0) {
     return uu.isstr(a1) ? _uucss.get(this._ns[0], a1) // [1]
@@ -224,8 +237,8 @@ function bitetoggleclass(className, // @param JointString: "class1 class2"
 }
 
 // bite.html
-// [1][get] bite.html() - String
-// [2][set] bite.html("<p>text</p>") - this
+// [1][get] bite.html() -> String
+// [2][set] bite.html("<p>text</p>") -> this
 function bitehtml(html) { // @param String(= void 0):
                          // @return this:
   var v, i = 0;
@@ -241,8 +254,8 @@ function bitehtml(html) { // @param String(= void 0):
 }
 
 // bite.text
-// [1][get] bite.text() - String
-// [2][set] bite.text("text") - this
+// [1][get] bite.text() -> String
+// [2][set] bite.text("text") -> this
 function bitetext(text) { // @param String(= void 0):
                          // @return this:
   var v, i = 0;
@@ -258,8 +271,8 @@ function bitetext(text) { // @param String(= void 0):
 }
 
 // bite.val
-// [1][get] bite.val() - ["value", ...]
-// [2][set] bite.val(val) - this
+// [1][get] bite.val() -> ["value", ...]
+// [2][set] bite.val(val) -> this
 function biteval(val) {
   var rv = this, node = this._ns, v, i = 0;
 
@@ -276,17 +289,55 @@ function biteval(val) {
   return rv;
 }
 
+// bite.filter
+// [1] bite.filter(expr) -> this
+// [2] bite.filter(fn)   -> this
+function bitefilter(expr) { // @param String/Function:
+                            // @return this:
+  this._stack.push(this._ns); // add stack
+  if (uu.isfunc(expr)) {
+    var rv = [], ary = this._ns, ri = -1, v, i = 0, iz = ary.length;
+
+    for (; i < iz; ++i) {
+      v = ary[i];
+      expr.call(v, i) && (rv[++ri] = v);
+    }
+    this._ns = rv;
+  } else {
+    this._ns = uu.query("! " + expr, this._ns);
+  }
+  this.length = this._ns;
+  return this;
+}
+
 // bite.find
 function bitefind(expr) { // @param String:
                           // @return this:
   this._stack.push(this._ns); // add stack
   this._ns = uu.query("! " + expr, this._ns);
+  this.length = this._ns.length;
   return this;
+}
+
+// bite.children
+function bitechildren(expr) { // @param String(= void 0):
+  return _bitechildren(this, 1, expr); // 1: children
+}
+
+// bite.parent
+function biteparent(expr) { // @param String(= void 0):
+  return _bitechildren(this, 3, expr); // 3: parent
+}
+
+// bite.siblings
+function bitesiblings(expr) { // @param String(= void 0):
+  return _bitechildren(this, 2, expr); // 2: siblings
 }
 
 // bite.end
 function biteend() { // @return this:
   this._ns = this._stack.pop() || [];
+  this.length = this._ns.length;
   return this;
 }
 
@@ -305,6 +356,35 @@ function biteappend(html) { // @param bite/HTMLString/Node:
   return this;
 }
 
+// bite.prepend
+function biteprepend(html) { // @param bite/HTMLString/Node:
+                             // @return this:
+  var i = 0, v;
+
+  while ( (v = this._ns[i++]) ) {
+    if (html._ns) {
+      _uunode(html._ns[0], v, 5); // bite._ns[0] -> appendChild
+    } else if (uu.isstr(html) || html.nodeType) {
+      _uunode(html, v, 5);
+    }
+  }
+  return this;
+}
+
+function biteprependto(html) { // @param bite/HTMLString/Node:
+                             // @return this:
+  var i = 0, v;
+
+  while ( (v = this._ns[i++]) ) {
+    if (html._ns) {
+      _uunode(html._ns[0], v, 1); // bite._ns[0] -> appendChild
+    } else if (uu.isstr(html) || html.nodeType) {
+      _uunode(html, v, 1);
+    }
+  }
+  return this;
+}
+
 // bite.after
 function biteafter(html) { // @param bite/HTMLString/Node:
                            // @return this:
@@ -315,6 +395,21 @@ function biteafter(html) { // @param bite/HTMLString/Node:
       _uunode(html._ns[0], v, 3); // bite._ns[0]
     } else if (uu.isstr(html) || html.nodeType) {
       _uunode(html, v, 3); // nextSibling
+    }
+  }
+  return this;
+}
+
+// bite.before
+function bitebefore(html) { // @param bite/HTMLString/Node:
+                            // @return this:
+  var i = 0, v;
+
+  while ( (v = this._ns[i++]) ) {
+    if (html._ns) {
+      _uunode(html._ns[0], v, 2); // bite._ns[0] -> inseretBefore
+    } else if (uu.isstr(html) || html.nodeType) {
+      _uunode(html, v, 2);
     }
   }
   return this;
@@ -338,11 +433,44 @@ function bitewrapInner(wrapper) { // @param HTMLString/Node:
   return this;
 }
 
-// bite.remove - remove node
-function biteremove() { // @return this:
+// bite.empty
+function biteempty() { // @return this:
+/*
+  var v, i = 0,
+      descendants = uu.query("*", this._ns),
+      uuevunbind = _uuev.unbind;
+
+  while ( (v = descendants[i++]) ) {
+     uuevunbind(v);
+  }
+
+  i=0;
+  while ( (v = this._ns[i++]) ) {
+    v.innerHTML = "";
+  }
+  return this;
+ */
   var v, i = 0;
 
   while ( (v = this._ns[i++]) ) {
+    uu.node.clear(v);
+  }
+  return this;
+}
+
+// bite.remove - remove node
+function biteremove() { // @return this:
+  var v, i = 0,
+      descendants = uu.query("*", this._ns),
+      uuevunbind = _uuev.unbind;
+
+  while ( (v = descendants[i++]) ) {
+    uuevunbind(v);
+  }
+
+  i = 0;
+  while ( (v = this._ns[i++]) ) {
+    uuevunbind(v);
     v.parentNode.removeChild(v);
   }
   return this;
@@ -360,25 +488,92 @@ function bitehide() { // @return this:
 
 // bite.fadeIn -
 function bitefadein(speed) { // @param Number(= 400):
-  return _biteeach(this, _uucss.show,
-                   speed === void 0 ? 400 : speed, 1);
+  return _biteeach(this, _uucss.show, _speed[speed] || speed, 1);
 }
 
 // bite.fadeOut -
 function bitefadeout(speed) { // @param Number(= 400):
-  return _biteeach(this, _uucss.hide,
-                   speed === void 0 ? 400 : speed, 1);
+  return _biteeach(this, _uucss.hide, _speed[speed] || speed, 1);
+}
+
+// bite.fadeTo -
+function bitefadeto(speed,     // @param String/Number(= 400):
+                    opacity) { // @param Number:
+  return _biteeach(this, uu.tween, _speed[speed] || speed,
+                   { o: [false, opacity] });
+}
+
+// bite.slidetoggle -
+function biteslidetoggle(speed) { // @param String/Number(= 400):
+  function _slidetoggle(node) {
+    var cs = uu.css(node), show = 0, param,
+        height = cs.height;
+
+    if (cs.display === "none" || cs.visibility === "hidden") {
+      show = 1;
+      param = { h: [0, height] }; // show
+    } else {
+      param = { h: [false, 0] }; // hide
+    }
+    uu.tween(node, _speed[speed] || speed, param,
+        function(node, ns) {
+          if (!show) {
+            ns.display = "none";
+            ns.visibility = "hidden";
+            ns.height = height + "px"; // restore size
+          }
+        });
+    return this;
+  }
+  return _biteeach(this, _slidetoggle);
+}
+
+// bite.toggle -
+function bitetoggle(speed) {
+  function _toggle(node) {
+    var cs = uu.css(node);
+
+    if (cs.display === "none" || cs.visibility === "hidden") {
+      uu.css.show(node, _speed[speed] || speed);
+    } else {
+      uu.css.hide(node, _speed[speed] || speed);
+    }
+    return this;
+  }
+  return _biteeach(this, _toggle);
 }
 
 // bite.animate
 function biteanimate(hash,
-                     duration) {
-  var rv = {}, i;
+                     duration,
+                     easing) {
+  function _biteanimate(node) {
+    var rv = {}, i, v, w, cs =  uu.css(node);
 
-  for (i in hash) {
-    rv[i] = [false, hash[i]];
+    for (i in hash) {
+      v = hash[i];
+      if (uu.isstr(v)) {
+        if (!v.indexOf("-=")) {
+          w = uu.css.px(node, i);
+          rv[i] = [w, w - parseFloat(v.slice(2)), easing];
+        } else if (!v.indexOf("+=")) {
+          w = uu.css.px(node, i);
+          rv[i] = [w, w + parseFloat(v.slice(2)), easing];
+        } else {
+          rv[i] = [false, parseFloat(v), easing];
+        }
+      } else {
+        rv[i] = [false, v, easing];
+      }
+    }
+    uu.tween(node, duration, rv);
   }
-  return _biteeach(this, uu.tween, duration, rv);
+  return _biteeach(this, _biteanimate);
+}
+
+// bite.stop
+function bitestop() { // @return this:
+  return _biteeach(this, uu.tween.stop, 1);
 }
 
 // bite.width
@@ -422,6 +617,33 @@ function _biteeach(me, fn, p1, p2, p3, p4) {
     }
     fn(v, p1, p2, p3, p4);
   }
+  return me;
+}
+
+// inner - enum children
+function _bitechildren(me,     // @param bite:
+                       mode,   // @param Number:
+                       expr) { // @param String(= void 0):
+  me._stack.push(me._ns); // add stack
+  var rv = [], v, w, i = 0;
+
+  while ( (v = me._ns[i++]) ) {
+    switch (mode) {
+    case 1: w = v.firstChild; break; // children
+    case 2: w = v.parentNode.firstChild; break; // siblings
+    case 3: rv.push(v.parentNode); break; // parent
+    }
+    if (mode < 3) {
+      for (; w; w = w.nextSibling) {
+        if (w.nodeType === 1) {
+          rv.push(w);
+        }
+      }
+    }
+  }
+  expr && uu.isstr(expr) && (rv = uu.query(rv, expr));
+  me._ns = rv;
+  me.length = me._ns.length;
   return me;
 }
 

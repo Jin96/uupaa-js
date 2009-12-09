@@ -284,7 +284,7 @@ _impl.extendTextAPI = function(ctx) { // @param CanvasRenderingContext2D:
 // inner - remove all text node
 function removeTextWebKit(ctx) {
   uu.ary.each(ctx.canvas.uutextlayer, function(v) { // remove all text node
-    uu.node.sub(v);
+    uu.node.remove(v);
   });
   ctx.canvas.uutextlayer = [];
 }
