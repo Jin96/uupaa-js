@@ -4,7 +4,7 @@
 uu.waste || (function(win, doc, uu) {
 
 uu.mix(uu, {
-  tween: uu.mix(uutween, {      // uu.tween(node, duration, {...}, fn = void 0) -> node
+  tween: uu.mix(uutween, {      // uu.tween(node, duration, {...}, fn = void 0, prefn = void 0) -> node
     move:       uutweenmove,    // uu.tween.move(node, duration, x, y, w, h, opacity, fn = void 0) -> node
     stop:       uutweenstop,    // [1][stop all tween]  uu.tween.stop() -> [node, ...]
                                 // [2][stop node tween] uu.tween.stop(node) -> node
@@ -22,7 +22,9 @@ function uutween(node,     // @param Node:
                            //         param[prop][1] Number: end
                            //         param[prop][2] Function(= easeInOutQuad): easing function
                  fn,       // @param Function(= void 0): post callback
+                           //             fn(node, node.style)
                  prefn) {  // @param Function(= void 0): pre callback
+                           //             prefn(node, node.currentStyle)
                            // @return Node:
   // bond
   //    node.uutweenq - tween queue
@@ -31,9 +33,9 @@ function uutween(node,     // @param Node:
   function _uutweenlazy() {
     _uutweennext(node);
   }
-  node.uutweenq || (node.uutweenq = []);
-  if (node.uutweenq.push([duration, param, fn, prefn]) === 1) {
-    node.uutween = 1;
+  node.uutweenq || (node.uutweenq = []); // init
+  if (node.uutweenq.push([duration, param, fn, prefn]) === 1) { // first time
+    node.uutween = 1; // markup
     node.style.overflow = "hidden";
 /* keep
     uu.img.render(node, 1); // 1: speed
@@ -85,7 +87,7 @@ function _uutweenrunner(node) {
   if (prefn) {
     w = prefn(node, cs); // prefn(node, node.currentStyle)
     if (w === false) {
-      setTimeout(_uutweenrunnerlazy, 0);
+      setTimeout(_uutweenrunnerlazy, 0); // false -> skip
       return;
     } else if (w !== true) {
       pm = w; // override param

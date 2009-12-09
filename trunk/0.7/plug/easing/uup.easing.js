@@ -207,11 +207,11 @@ function bj(t,b,c,d,s) {
               :bg(n1-d,b+n2,n2,d,s);
 }
 function bk(t,b,c,d) { return c-bl(d-t,0,c,d)+b; }
-function bl(t,b,c,d) { var n1=7.5625*t,n2=2.75;
-                       if((t/=d)<(1/n2)){return c*(n1*t)+b;}
-                       else if(t<(2/n2)){return c*((t-=(1.5/n2))*n1+0.75)+b;}
-                       return t<(2.5/n2)?(c*((t-=(2.25/n2))*n1+0.9375)+b)
-                                        :(c*((t-=(2.625/n2))*n1+0.984375)+b); }
+function bl(t,b,c,d) { var n1=7.5625,n2=2.75;
+                       if((t/=d)<(1/n2)){return c*(n1*t*t)+b;}
+                       else if(t<(2/n2)){return c*(n1*(t-=(1.5/n2))*t+.75)+b;}
+                       return t<(2.5/n2)?(c*(n1*(t-=(2.25/n2))*t+.9375)+b)
+                                        :(c*(n1*(t-=(2.625/n2))*t+.984375)+b); }
 function bm(t,b,c,d) { var n1=t*2,n2=0.5;
                        return t<d/2?bk(n1,0,c,d)*n2+b
                                    :bl(n1-d,0,c,d)*n2+c*n2+b; }

@@ -219,7 +219,7 @@ function uucssget(node,     // @param Node:
       ns = _cstyle(node, null), FIX = _FIX;
 
   while ( (v = ary[i++]) ) {
-    rv[v] = ns[FIX[v] || v];
+    rv[v] = ns[FIX[v] || v] || "";
   }
   return (ary.length === 1) ? rv[ary[0]] : rv;
 }
@@ -230,7 +230,7 @@ function uucssgetie(node, styles) {
       STR = "string", AUTO = "auto", PX = "px", FIX = _FIX;
 
   while ( (v = ary[i++]) ) {
-    w = ns[FIX[v] || v];
+    w = ns[FIX[v] || v] || "";
     if (typeof w === STR) {
       w = (w === AUTO || w.lastIndexOf(PX) < 0) ? actval(node, w)
                                                 : parseInt(w);
@@ -710,7 +710,7 @@ function uucssshow(node,      // @param Node:
           tmp = uu.node(doc.createElement(node.tagName)); // add to body
           // detect actual display value
           ns.display = uu.css(tmp).display;
-          uu.node.sub(tmp);
+          uu.node.remove(tmp);
         }
         size = uucsssizeget(node, 2);
         // override uu.tween(param)
