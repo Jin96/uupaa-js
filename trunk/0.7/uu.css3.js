@@ -81,7 +81,7 @@ var _canvasok = uu.ver.majority,
       "-uu-background-position":uucss3setbgpos
     };
 
-!uu.config.maxmin && (_EXCSS.maxmin = 0);
+!uu.config.cssexpr && (_EXCSS.maxmin = 0);
 
 // [1][get] uu.css3(node, "color") -> "red"
 // [2][get] uu.css3(node, "color,width") -> { color: "red", width: "20px" }

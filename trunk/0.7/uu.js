@@ -7,7 +7,7 @@
 //   altcss: 0,      // @param Number/Function(= 0): altcss mode
 //                   //                     0 is auto, callback function
 //   consel: 0,      // @param Number(= 1): 1 is enable conditional selector
-//   maxmin: 0,      // @param Number(= 0): 1 is enable max-width:, 0 is disable
+//   cssexpr: 0,     // @param Number(= 0): 1 is enable css-expression, 0 is disable
 //   imgdir: "img",  // @param String(= "img"): image dir
 //   visited: 0      // @param Number(= 0): 1 is E:visited activate
 // };
@@ -24,7 +24,7 @@ function uuvain() {} // global function, memory leak of IE is evaded
 
 uu ? ++uu.waste : (function(win, doc, _xconfig, _cstyle, _json) {
 var _config = uuarg(_xconfig, {
-        aria: 0, debug: 0, light: 1, altcss: 1, consel: 1, maxmin: 0,
+        aria: 0, debug: 0, light: 1, altcss: 1, consel: 1, cssexpr: 0,
         imgdir: "img", visited: 0 }),
     _ver    = uuvers(_config.consel),
     _ie     = _ver.ie,
