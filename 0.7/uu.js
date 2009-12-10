@@ -342,8 +342,8 @@ MessagePump.prototype = {
   post:         uumsgpost,      // [1][multicast] MessagePump.post([instance, instance], "hello")
                                 // [2][unicast]   MessagePump.post(instance, "hello")
                                 // [3][broadcast] MessagePump.post(0, "hello")
-  regist:       uumsgregist,    // MessagePump.regist(instance) -> this
-  unregist:     uumsgunregist   // MessagePump.unregist(instance) -> this
+  register:     uumsgregister,  // MessagePump.register(instance) -> this
+  unregister:   uumsgunregister // MessagePump.unregister(instance) -> this
 };
 uu.msg = new MessagePump();     // MessagePump instance
 
@@ -1070,7 +1070,7 @@ function uuclass(name,    // @param String: class name
       me.fin();
     });
     me.msgbox || (me.msgbox = uuvain);
-    uu.msg.regist(me);
+    uu.msg.register(me);
   };
   uuclass[name].prototype = proto || {};
 }
@@ -1097,7 +1097,7 @@ function uuclasssingleton(name,    // @param String: class name
         me.fin();
       });
       me.msgbox || (me.msgbox = uuvain);
-      uu.msg.regist(me);
+      uu.msg.register(me);
     }
     return self.instance || (self.instance = me);
   };
@@ -1166,14 +1166,14 @@ function uumsgpost(to,      // @param Array/0/instance(= 0): addr or guid
   }, 0);
 }
 
-// MessagePump.regist - register the destination of the message
-function uumsgregist(inst) { // @param Instance: class instance
+// MessagePump.register - register the destination of the message
+function uumsgregister(inst) { // @param Instance: class instance
   this._db[uuclassguid(inst)] = inst;
   this._guid = uu.hash.keys(this._db);
 }
 
-// MessagePump.unregist
-function uumsgunregist(inst) { // @param Instance: class instance
+// MessagePump.unregister
+function uumsgunregister(inst) { // @param Instance: class instance
   delete this.db[uuclassguid(inst)];
   this._guid = uu.hash.keys(this._db);
 }
@@ -1570,7 +1570,7 @@ function _newtag(/* var_args */) { // @param Mix: var_args, nodes, attr/css
                                    // @this Node/String: <body>, "div"
                                    // @return Node:
   function _callback(node, tagid) {
-    uunodeid(node); // regist node
+    uunodeid(node); // register node
     xtag && win.xtag(uu, node, tagid);
   }
   function _tohash(mix) {
