@@ -1,12 +1,30 @@
 
 // === Tween ===
 // depend: uu.js, uu.color.js, uu.css.js
+
+// Math.linear
+Math.linear = function(t, b, c, d) {
+  return c * t / d + b;
+};
+
+// Math.easeInOutQuad
+Math.easeInOutQuad = function(t, b, c, d) {
+  return (t /= d / 2) < 1 ?  c / 2 * t * t + b
+                          : -c / 2 * ((--t) * (t - 2) - 1) + b;
+};
+
 uu.waste || (function(win, doc, uu) {
 var _FIX = uu.dmz.FIX,
-    _HEX2 = uu.dmz.HEX2;
+    _TWSTYLES = { opacity: 1, color: 2, backgroundColor: 2, left: 3, top: 3 },
+    _TWFMT1 = 'uu.css.opacity.set(node,fin?%f:Math.%s(gain,%f,%f,ms));',
+    _TWFMT2 = 'var g=gain/(ms||1),cv0=%j,cv1=%j,cv2=uu.dmz.HEX2,F=parseInt;' +
+              'node.style.%s="#"+(cv2[F(fin?cv1.r:(cv1.r-cv0.r)*g+cv0.r)]||0)+' +
+                                '(cv2[F(fin?cv1.g:(cv1.g-cv0.g)*g+cv0.g)]||0)+' +
+                                '(cv2[F(fin?cv1.b:(cv1.b-cv0.b)*g+cv0.b)]||0);',
+    _TWFMT3 = 'node.style.%s=(fin?%f:Math.%s(gain,%f,%f,ms))+"px";';
 
 uu.mix(uu, {
-  tween: uu.mix(uutween, {      // uu.tween(node, ms, {...}, fn = void 0, prefn = void 0) -> node
+  tween: uu.mix(uutween, {      // uu.tween(node, ms, {...}, fn = void 0) -> node
     fin:        uutweenfin,     // uu.tween.fin(node, all = 0) -> node or [node, ...]
     running:    uutweenrunning  // uu.tween.running(node) -> Boolean
   })
@@ -30,12 +48,9 @@ function uutween(node,  // @param Node:
     var q = node.uutweenq[0],
         now = q.tm ? +new Date
                    : (q.raw = _uutweenbuild(node, q.pa), q.tm = +new Date),
-        raw = q.raw, gain = now - q.tm, ms = q.ms,
-        fin = q.fin || (now >= (q.tm + ms)), v, i = 0;
+        fin = q.fin || (now >= (q.tm + q.ms));
 
-    while ( (v = raw[0][i]) ) { // perf point
-      raw[1][i++](fin, gain, ms, 0);
-    }
+    q.raw(node, fin, now - q.tm, q.ms, 0); // update styles
     if (fin) {
       q.fn && q.fn(node, node.style); // fn(node, node.style)
       node.uutweenq.shift(node.uutween = 0); // [ATOMIC] dequeue
@@ -61,14 +76,14 @@ function uutweenfin(node,  // @param Node(= 0): 0 is all node
   while( (v = ary[i++]) ) {
     if (v.uutween) { // [ATOMIC]
       for (j = 0, jz = all ? v.uutweenq.length : 1; j < jz; ++j) {
-        v.uutweenq[j].fin = 1;
+        v.uutweenq[j].fin = 1; // fin bit
       }
     }
   }
   return (node === void 0) ? ary : node;
 }
 
-// inner - build params
+// inner - build function
 function _uutweenbuild(node, param) {
   function _toabs(curt, end, fn, ope) {
     if (uu.isnum(end)) { return end; }
@@ -77,80 +92,44 @@ function _uutweenbuild(node, param) {
          : (ope === "-=") ? curt - fn(end.slice(2))
          : fn(end);
   }
-  var cs = uu.css(node), i, v, w, v0, v1, v2, fn, off, size,
-      rv = [[], []];
+  var rv = "", i, v0, v1, v2, w, off;
 
   for (i in param) {
     if (uu.isary(param[i])) {
       v1 = param[i][0]; // param.val
-      v2 = param[i][1] || _uutweeneaseinoutquad; // param.ezfn
+      v2 = param[i][1] || "easeInOutQuad"; // param.ezfn
     } else {
       v1 = param[i]; // param.val
-      v2 = _uutweeneaseinoutquad; // param.ezfn
+      v2 = "easeInOutQuad"; // param.ezfn
     }
-    switch (w = _FIX[i] || i) {
-    case "opacity": // [o][opacity]
+    switch (_TWSTYLES[w = _FIX[i] || i]) {
+    case 1: // [o][opacity]
       v0 = uu.css[w].get(node);
       v1 = _toabs(v0, v1, parseFloat);
-      fn =  (function(prop, v0, v1, v2, delta) {
-              return function(fin, gain, ms) {
-                uu.css[prop].set(node, fin ? v1 : v2(gain, v0, delta, ms));
-              };
-            })(w, v0, v1, v2, v1 - v0);
+      rv += uu.fmt(_TWFMT1, v1, v2, v0, v1 - v0);
       break;
-    case "left": // [x][left][y][top]
-    case "top":
+    case 2: // [color][bgcolor][backgroundColor]
+      rv += uu.fmt(_TWFMT2, uu.color(uu.css(node)[w], 1), uu.color(v1, 1), w);
+      break;
+    case 3: // [x][left][y][top]
       off || (off = uu.css.off.get(node, null, 1)); // offset from foster
       v0 = (w === "top") ? off.y : off.x;
       v1 = _toabs(v0, v1, parseInt);
-      fn =  (function(prop, v0, v1, v2, delta) {
-              return function(fin, gain, ms) {
-                node.style[prop] = (fin ? v1 : v2(gain, v0, delta, ms)) + "px";
-              };
-            })(w, v0, v1, v2, v1 - v0);
-      break;
-    case "color": // [color][bgcolor][backgroundColor]
-    case "backgroundColor":
-      fn =  (function(prop, v0, v1, v2) {
-              return function(fin, gain, ms, gd) {
-                gd = gain / (ms || 1); // [division by zero]
-                node.style[prop] = "#" +
-                    v2[parseInt(fin ? v1.r : (v1.r - v0.r) * gd + v0.r)] +
-                    v2[parseInt(fin ? v1.g : (v1.g - v0.g) * gd + v0.g)] +
-                    v2[parseInt(fin ? v1.b : (v1.b - v0.b) * gd + v0.b)];
-              };
-            })(w, uu.color(cs[w], 1), uu.color(v1, 1), _HEX2);
+      rv += uu.fmt(_TWFMT3, w, v1, v2, v0, v1 - v0);
       break;
     default: // [w][width][h][height][other]
       v0 = uu.css.px(node, w) || 0;
       v1 = _toabs(v0, v1, parseInt);
-      fn =  (function(prop, v0, v1, v2, delta) {
-              return function(fin, gain, ms) {
-                node.style[prop] = (fin ? v1 : v2(gain, v0, delta, ms)) + "px";
-              };
-            })(w, v0, v1, v2, v1 - v0);
+      rv += uu.fmt(_TWFMT3, w, v1, v2, v0, v1 - v0);
     }
-    rv[0].push(w);  // properties
-    rv[1].push(fn); // tween funcs
   }
-  return rv;
+  return new Function("node", "fin", "gain", "ms", rv);
 }
 
 // uu.tween.running
 function uutweenrunning(node) { // @param Node:
                                 // @return Boolean:
   return !!node.uutween;
-}
-
-// inner - linear
-function _uutweenlinear(t, b, c, d) {
-  return c * t / d + b;
-}
-
-// inner - easeInOutQuad
-function _uutweeneaseinoutquad(t, b, c, d) {
-  return (t /= d / 2) < 1 ?  c / 2 * t * t + b
-                          : -c / 2 * ((--t) * (t - 2) - 1) + b;
 }
 
 })(window, document, uu);
