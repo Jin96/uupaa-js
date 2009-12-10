@@ -311,19 +311,27 @@ function uucssoffget(node,     // @param: Node:
                      ancestor, // @param: Node(= <html>): ancestor node
                      foster) { // @param: Number(= 0): 1 is break foster node
                                // @return Hash: { x, y }
+  var x = 0, y = 0, n = node, cs;
+
+  if (foster) {
+    cs = _ie ? n.currentStyle : _cstyle(n, null);
+    if (_POS_PARENT[cs.position]) {
+      if (cs.left !== "auto" && cs.top !== "auto") {
+        return { x: parseInt(cs.left), y: parseInt(cs.top) };
+      }
+    }
+  }
   ancestor = ancestor || uu.html();
-  foster = foster || 0;
-  var x = 0, y = 0, n = node, ns;
 
   while (n && n !== ancestor) {
     x += n.offsetLeft || 0;
     y += n.offsetTop  || 0;
     n = n.offsetParent;
     if (foster && n) {
-      ns = _ie ? n.currentStyle : _cstyle(n, null);
+      cs = _ie ? n.currentStyle : _cstyle(n, null);
       // positioning parent is { position: relative }
       //                    or { position: absolute }
-      if (_POS_PARENT[ns.position]) {
+      if (_POS_PARENT[cs.position]) {
         break;
       }
     }

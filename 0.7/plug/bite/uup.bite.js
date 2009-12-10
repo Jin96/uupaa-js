@@ -548,11 +548,10 @@ function biteanimate(hash,
                      duration,
                      easing) {
   function _biteanimate(node) {
-    var rv = {}, i, v, w, cs =  uu.css(node);
+    var rv = {}, i;
 
     for (i in hash) {
-      v = hash[i];
-      rv[i] = [v, easing];
+      rv[i] = [hash[i], easing];
     }
     uu.tween(node, duration, rv);
   }

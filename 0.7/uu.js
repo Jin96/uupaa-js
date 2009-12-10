@@ -72,8 +72,9 @@ var _config = uuarg(_xconfig, {
     _NGWORD = /(:(a|b|co|dig|first-l|li|mom|ne|p|sc|t|v))|!=|\/=|<=|>=|&=|x7b/,
     _ISO_DATE = /^(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d):(\d\d)(?:\.(\d*))?Z$/,
     _FMT_BITS = uuhashnum("i,32785,d,32785,u,32801,o,33121,x,33377,X,37473," +
-                       "f,146,c,10240,A,18432,s,132,%,3076,j,67584"),
-    _FMT_PARSE = /%(?:(\d+)\$)?(#|0)?(\d+)?(?:\.(\d+))?(l)?([%iduoxXfcAsj])/g,
+                      "f,146,c,10240,A,18432,s,132,%,3076,j,67584," +
+                      "r,133120,R,264192,h,526336"),
+    _FMT_PARSE = /%(?:(\d+)\$)?(#|0)?(\d+)?(?:\.(\d+))?(l)?([%iduoxXfcAsjrRh])/g,
     _JSON_SWAP = uuhash('",\\",\b,\\b,\f,\\f,\n,\\n,\r,\\r,\t,\\t,\\,\\\\'),
     _JSON_UNESC = /"(\\.|[^"\\])*"/g,
     _JSON_ESCAPE = /(?:\"|\\[bfnrt\\])/g,
@@ -376,6 +377,7 @@ uumix(uujam.prototype, {
   klass:        jamklass,
   bind:         jambind,        // jam.bind("click", fn) -> jam
   unbind:       jamunbind,      // jam.unbind("click") -> jam
+  tween:        jamtween,       // jam.tween(ms, param, fn) -> jam
   show:         jamshow,        // jam.show(fadein = false) -> jam
   hide:         jamhide,        // jam.hide(fadeout = false) -> jam
 //mousedown, mouseup, mousemove, mousewheel, click, dblclick, keydown,
@@ -1740,6 +1742,9 @@ function uufmt(format            // @param String: sprintf format string
     w & 16384 && (v = ovf ? "" : (v < 32 || v > 126) ? "." : charCode(v));
     w & 32768 && (flag = (flag === "0") ? "" : flag);
     w & 65536 && (v = uumix2json(v, 0, 1));
+    w & 131072&& (v = "rgb(" + v.r + "," + v.g + "," + v.b + ")");
+    w & 262144&& (v = "rgba(" + v.r + "," + v.g + "," + v.b + "," + v.a + ")");
+    w & 524288&& (v = "#" + _HEX2[v.r] + _HEX2[v.g] + _HEX2[v.b]);
     v = w & 4096 ? v.toString().toUpperCase() : v.toString();
     if (w & 2048 || width === void 0 || v.length >= width) {
       return v;
@@ -1963,13 +1968,14 @@ function _jsoninsp(mix, fn) {
               for (; i < iz; ++i) {
                 ary.push(_jsoninsp(mix[i], fn));
               }
-              rv =  "[" + ary.join(",") + "]"; break;
-  case _RGBA:
+              rv = "[" + ary.join(",") + "]"; break;
+  case _RGBA: rv = '{"r":' + mix.r +  ',"g":' + mix.g +  ',"b":' + mix.b + 
+                   ',"a":' + mix.a + '}'; break;
   case _HASH: ary = [];
               for (i in mix) {
                 ary.push('"' + uustr2json(i) + '":' + _jsoninsp(mix[i], fn));
               }
-              rv =  "{" + ary.join(",") + "}"; break;
+              rv = "{" + ary.join(",") + "}"; break;
   default: rv = fn ? fn(mix) : "";
   }
   return rv;
@@ -2143,6 +2149,11 @@ function jamklass(a) { // @return jam:
 // jam.bind
 function jambind(a) { // @return jam:
   return _jameach(this, uuev, a);
+}
+
+// jam.tween
+function jamtween(ms, param, fn) { // @return jam
+  return _jameach(this, uu.tween, ms, param, fn);
 }
 
 // jam.unbind

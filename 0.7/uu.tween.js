@@ -31,13 +31,13 @@ function uutween(node,  // @param Node:
         now = q.tm ? +new Date
                    : (q.raw = _uutweenbuild(node, q.pa), q.tm = +new Date),
         raw = q.raw, gain = now - q.tm, ms = q.ms,
-        fin = q.fin || (now >= (q.tm + ms)), ns = node.style, v, i = 0;
+        fin = q.fin || (now >= (q.tm + ms)), v, i = 0;
 
     while ( (v = raw[0][i]) ) { // perf point
-      ns[v] = raw[1][i++](fin, gain, ms, 0); // arg4 is every zero
+      raw[1][i++](fin, gain, ms, 0);
     }
     if (fin) {
-      q.fn && q.fn(node, ns); // fn(node, node.style)
+      q.fn && q.fn(node, node.style); // fn(node, node.style)
       node.uutweenq.shift(node.uutween = 0); // [ATOMIC] dequeue
       if (!node.uutweenq.length) {
         return;
@@ -70,12 +70,12 @@ function uutweenfin(node,  // @param Node(= 0): 0 is all node
 
 // inner - build params
 function _uutweenbuild(node, param) {
-  function _toabs(curt, end, ope) {
+  function _toabs(curt, end, fn, ope) {
     if (uu.isnum(end)) { return end; }
     ope = end.slice(0, 2);
-    return (ope === "+=") ? curt + parseFloat(end.slice(2))
-         : (ope === "-=") ? curt - parseFloat(end.slice(2))
-         : parseFloat(end);
+    return (ope === "+=") ? curt + fn(end.slice(2))
+         : (ope === "-=") ? curt - fn(end.slice(2))
+         : fn(end);
   }
   var cs = uu.css(node), i, v, w, v0, v1, v2, fn, off, size,
       rv = [[], []];
@@ -91,45 +91,44 @@ function _uutweenbuild(node, param) {
     switch (w = _FIX[i] || i) {
     case "opacity": // [o][opacity]
       v0 = uu.css[w].get(node);
-      v1 = _toabs(v0, v1);
-      fn =  (function(v0, v1, v2, delta) {
-              return function(fin, gain, ms, rv) {
-                rv = fin ? v1 : v2(gain, v0, delta, ms);
-                uu.ie && uu.css.opacity.set(node, rv);
-                return rv;
+      v1 = _toabs(v0, v1, parseFloat);
+      fn =  (function(prop, v0, v1, v2, delta) {
+              return function(fin, gain, ms) {
+                uu.css[prop].set(node, fin ? v1 : v2(gain, v0, delta, ms));
               };
-            })(v0, v1, v2, v1 - v0);
+            })(w, v0, v1, v2, v1 - v0);
       break;
     case "left": // [x][left][y][top]
     case "top":
       off || (off = uu.css.off.get(node, null, 1)); // offset from foster
       v0 = (w === "top") ? off.y : off.x;
-      v1 = _toabs(v0, v1);
-      fn =  (function(v0, v1, v2, delta) {
+      v1 = _toabs(v0, v1, parseInt);
+      fn =  (function(prop, v0, v1, v2, delta) {
               return function(fin, gain, ms) {
-                return (fin ? v1 : v2(gain, v0, delta, ms)) + "px";
+                node.style[prop] = (fin ? v1 : v2(gain, v0, delta, ms)) + "px";
               };
-            })(v0, v1, v2, v1 - v0);
+            })(w, v0, v1, v2, v1 - v0);
       break;
     case "color": // [color][bgcolor][backgroundColor]
     case "backgroundColor":
-      fn =  (function(v0, v1, v2) {
+      fn =  (function(prop, v0, v1, v2) {
               return function(fin, gain, ms, gd) {
                 gd = gain / (ms || 1); // [division by zero]
-                return "#" + v2[parseInt(fin ? v1.r : (v1.r - v0.r) * gd + v0.r)]
-                           + v2[parseInt(fin ? v1.g : (v1.g - v0.g) * gd + v0.g)]
-                           + v2[parseInt(fin ? v1.b : (v1.b - v0.b) * gd + v0.b)];
+                node.style[prop] = "#" +
+                    v2[parseInt(fin ? v1.r : (v1.r - v0.r) * gd + v0.r)] +
+                    v2[parseInt(fin ? v1.g : (v1.g - v0.g) * gd + v0.g)] +
+                    v2[parseInt(fin ? v1.b : (v1.b - v0.b) * gd + v0.b)];
               };
-            })(uu.color(cs[w], 1), uu.color(v1, 1), _HEX2);
+            })(w, uu.color(cs[w], 1), uu.color(v1, 1), _HEX2);
       break;
     default: // [w][width][h][height][other]
       v0 = uu.css.px(node, w) || 0;
-      v1 = _toabs(v0, v1);
-      fn =  (function(v0, v1, v2, delta) {
+      v1 = _toabs(v0, v1, parseInt);
+      fn =  (function(prop, v0, v1, v2, delta) {
               return function(fin, gain, ms) {
-                return parseInt(fin ? v1 : v2(gain, v0, delta, ms)) + "px";
+                node.style[prop] = (fin ? v1 : v2(gain, v0, delta, ms)) + "px";
               };
-            })(v0, v1, v2, v1 - v0);
+            })(w, v0, v1, v2, v1 - v0);
     }
     rv[0].push(w);  // properties
     rv[1].push(fn); // tween funcs
@@ -150,7 +149,8 @@ function _uutweenlinear(t, b, c, d) {
 
 // inner - easeInOutQuad
 function _uutweeneaseinoutquad(t, b, c, d) {
-  return (t/=d/2)<1?c/2*t*t+b:-c/2*((--t)*(t-2)-1)+b;
+  return (t /= d / 2) < 1 ?  c / 2 * t * t + b
+                          : -c / 2 * ((--t) * (t - 2) - 1) + b;
 }
 
 })(window, document, uu);
