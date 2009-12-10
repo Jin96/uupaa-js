@@ -724,8 +724,12 @@ function uucsshide(node,      // @param Node:
                    fadeout) { // @param Number(= 0): fadeout tween duration
                               //                     0 is disable
                               // @return Node:
-  var size = uucsssizeget(node, 2); // offscreen
+  var size = uucsssizeget(node, 2), // offscreen
+      cs = uucss(node);
 
+  if (cs.display === "none" || cs.visibility === "hidden") {
+    return node;
+  }
   uu.tween(node, fadeout || 0,
       { w: [false, 0], h: [false, 0], o: [false, 0] },
       function(node, ns) {
@@ -733,9 +737,6 @@ function uucsshide(node,      // @param Node:
         ns.visibility = "hidden";
         ns.width  = size.w + "px"; // restore size
         ns.height = size.h + "px";
-      },
-      function(node, cs) {
-        return !(cs.display === "none" || cs.visibility === "hidden");
       });
   return node;
 }

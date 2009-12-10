@@ -552,19 +552,7 @@ function biteanimate(hash,
 
     for (i in hash) {
       v = hash[i];
-      if (uu.isstr(v)) {
-        if (!v.indexOf("-=")) {
-          w = uu.css.px(node, i);
-          rv[i] = [w, w - parseFloat(v.slice(2)), easing];
-        } else if (!v.indexOf("+=")) {
-          w = uu.css.px(node, i);
-          rv[i] = [w, w + parseFloat(v.slice(2)), easing];
-        } else {
-          rv[i] = [false, parseFloat(v), easing];
-        }
-      } else {
-        rv[i] = [false, v, easing];
-      }
+      rv[i] = [v, easing];
     }
     uu.tween(node, duration, rv);
   }
@@ -573,7 +561,7 @@ function biteanimate(hash,
 
 // bite.stop
 function bitestop() { // @return this:
-  return _biteeach(this, uu.tween.stop, 1);
+  return _biteeach(this, uu.tween.fin);
 }
 
 // bite.width
