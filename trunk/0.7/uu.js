@@ -44,12 +44,15 @@ var _config = uuarg(_xconfig, {
     _DEC2   = _numary("0123456789"),       // { 0: "00", ...  99: "99" }
     _HEX2   = _numary("0123456789abcdef"), // { 0: "00", ... 255: "ff" }
     _HASH   = 1, _NODE = 2, _FAKE = 4, _DATE = 8, _NULL = 16, _VOID = 32,
-    _BOOL   = 64, _FUNC = 128, _NUM = 256, _STR = 1024, _ARY = 2048, _REX = 4096,
+    _BOOL   = 64, _FUNC = 128, _NUM = 256, _STR = 1024, _ARY = 2048,
+    _REX    = 4096, _CSTYLE = 8192,
     _TYPE   = { "undefined": _VOID, "boolean": _BOOL, number: _NUM, string: _STR,
-                "[object Boolean]": _BOOL, "[object Number]": _NUM,
-                "[object String]": _STR, "[object RegExp]": _REX,
-                "[object Array]": _ARY, "[object Function]": _FUNC,
-                "[object Date]": _DATE }, // http://d.hatena.ne.jp/uupaa/20091006
+                "[object Function]": _FUNC, "[object Boolean]": _BOOL,
+                "[object Number]": _NUM, "[object String]": _STR,
+                "[object RegExp]": _REX, "[object Array]": _ARY,
+                "[object Date]": _DATE, // http://d.hatena.ne.jp/uupaa/20091006
+                "[object CSSStyleDeclaration]": _CSTYLE, // [WebKit][Opera]
+                "[object ComputedCSSStyleDeclaration]": _CSTYLE }, // [Gecko]
     _ATTR   = uuhash(!_ver.ie67 ? "for,htmlFor,className,class" :
                 ("class,className,for,htmlFor,colspan,colSpan,accesskey," +
                 "accessKey,rowspan,rowSpan,tabindex,tabIndex")),
@@ -301,7 +304,6 @@ uu = uumix(_uujamfactory, {     // uu(expr, ctx) -> Instance(jam)
   isary:        uuisary,        // uu.isary([]) -> true
   isfunc:       uuisfunc,       // uu.isfunc(uuvain) -> true
   isrgba:       uuisrgba,       // uu.isrgba({r:0,g:0,b:0,a:0}) -> true
-  iscssdecl:    uuiscssdecl,    // uu.iscssdecl(window.getComputedStyle(node, null)) -> true
   HASH:         _HASH,          // uu.HASH   - Object(Hash)
   NODE:         _NODE,          // uu.NODE   - Node
   FAKE:         _FAKE,          // uu.FAKE   - FakeArray, NodeList, arguments
@@ -1946,6 +1948,8 @@ function _jsoninspect(mix, fn) {
   var ary, type = uutype(mix), w, i, iz;
 
   switch (type) {
+  case _CSTYLE:
+  case _HASH: ary = []; break;
   case _NODE: return '"uuguid":' + uunodeid(mix);
   case _NULL: return "null";
   case _VOID: return "undefined";
@@ -1959,13 +1963,9 @@ function _jsoninspect(mix, fn) {
                 ary.push(_jsoninspect(mix[i], fn));
               }
               return "[" + ary + "]";
-  case _HASH: ary = []; break;
   default:    return fn ? (fn(mix) || "") : "";
   }
-  if (uuisrgba(mix)) {
-    return '"r":' + mix.r + ',"g":' + mix.g + ',"b":' + mix.b + ',"a":' + mix.a;
-  }
-  if (uuiscssdecl(mix)) {
+  if (type === _CSTYLE) {
     w = uu.webkit;
     for (i in mix) {
       if (typeof mix[i] === "string" && (w || i != (+i + ""))) { // !isNaN(i)
@@ -1973,6 +1973,8 @@ function _jsoninspect(mix, fn) {
         ary.push('"' + i + '":' + uustr2json(mix[i], 1));
       }
     }
+  } else if ("a" in mix && uuisrgba(mix)) {
+    ary = ["r:" + mix.r, "g:" + mix.g, "b:" + mix.b, "a:" + mix.a];
   } else {
     for (i in mix) {
       ary.push(uustr2json(i, 1) + ":" + _jsoninspect(mix[i], fn));
@@ -2024,13 +2026,6 @@ function uuisfunc(mix) { // @param Mix:
 function uuisrgba(hash) { // @param Hash:
                           // @return Boolean:
   return hash && ("r" in hash && "g" in hash && "b" in hash && "a" in hash);
-}
-
-// uu.iscssdecl - is CSSStyleDeclaration hash
-function uuiscssdecl(hash) { // @param Hash:
-                             // @return Boolean:
-  return (_ie && hash && hash.cssFloat) ? true
-       : _tostr.call(hash).indexOf("CSSStyleDeclaration") > 0;
 }
 
 // --- other ---
@@ -2479,6 +2474,7 @@ function uuvers(consel,    // @param Number(= 0): 1 is add conditional selector
 }
 
 //{:: window.getComputedStyle() for IE6+
+// http://d.hatena.ne.jp/uupaa/20091212
 window.getComputedStyle || (function() {
 var _PT = /pt$/, _FULL = [], _MORE = [], _BOX = [],
     _MOD = { top: 1, left: 2, width: 3, height: 4 },
