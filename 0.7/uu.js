@@ -19,7 +19,7 @@
 
 var uu; // library namespace
 
-function uup() { return uu.hash.keys(uup); }; // plugin namespace
+function uup() { return uu.hash.keys(uup); } // plugin namespace
 function uuvain() {} // global function, memory leak of IE is evaded
 
 uu ? ++uu.waste : (function(win, doc, _xconfig, _json) {

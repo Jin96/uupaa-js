@@ -121,7 +121,7 @@ case "g":
            . $package . '.g' . $mobile . '.js';
   break;
 case "y":
-  $command = 'java -jar lib.y.jar --charset "utf-8" -o mini.'
+  $command = 'java -jar lib.y.jar -v --charset "utf-8" -o mini.'
            . $package . '.y' . $mobile . '.js ' . $outfile;
   break;
 case "m":
