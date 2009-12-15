@@ -804,16 +804,6 @@ function xboot(uu) {
                                 function() { return [new Number(''), "is number"];   },
       "new String('') は string 型":
                                 function() { return [new String(''), "is string"];   },
-    "uu.isrgba": "",
-      "uu.isrgba({r:0,g:0,b:0,a:0}) は rgba 型":
-      function() {
-        return [uu.isrgba({r:0,g:0,b:0,a:0}), "is true"];
-      },
-    "uu.iscssdecl": "",
-      "uu.iscssdecl(window.getComputedStyle(document.body, null) は CSSStyleDeclaration 型":
-      function() {
-        return [uu.iscssdecl(window.getComputedStyle(document.body, null)), "is true"];
-      },
 
 // -----------------------
     "uu.url()": "",
