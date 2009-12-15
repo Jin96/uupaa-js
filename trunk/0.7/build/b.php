@@ -1,7 +1,7 @@
 <?php
 
 // marge and strip comment
-function marge($packagefile, $outfile, $minify) {
+function marge($packagefile, $outfile, $minify, $mobile) {
   $dir = isWin() ? '..\\' : '../';
   $ary = file($packagefile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
   $fp = fopen($outfile, 'w');
@@ -15,9 +15,14 @@ function marge($packagefile, $outfile, $minify) {
     }
     $src = trim($value);
     $txt = file_get_contents($dir . $src);
+
+    // \r\n -> \n
+    $txt = preg_replace('/(\r\n|\r|\n)/m', "\n", $txt);
+
+    if ($mobile) {
+      $txt = preg_replace('/\/\/\{\:\:([^\n]*)\n.*?\/\/\:\:\}/ms', "/*{::$1 ::}*/", $txt);
+    }
     if ($minify) {
-      // \r\n -> \n
-      $txt = preg_replace('/(\r\n|\r|\n)/m', "\n", $txt);
       // strip comment line
       $txt = preg_replace('/(^|\s)\/\/[^\n]*$/m', '', $txt);
       // strip tail space
@@ -80,6 +85,7 @@ $package = "full";
 $outfile = isWin() ? "..\\uupaa.js" : "../uupaa.js";
 $compiler = "y";
 $command = "";
+$mobile = "";
 
 array_shift($argv);
 while ($v = array_shift($argv)) {
@@ -97,6 +103,9 @@ while ($v = array_shift($argv)) {
   case "-m":
     $compiler = "m";
     break;
+  case "-mb":
+    $mobile = ".mb";
+    break;
   default:
     $package = $v;
     break;
@@ -104,20 +113,20 @@ while ($v = array_shift($argv)) {
 }
 $packagefile = '#' . $package . '.pkg'; // "#full.pkg"
 
-marge($packagefile, $outfile, $minify);
+marge($packagefile, $outfile, $minify, $mobile);
 
 switch ($compiler) {
 case "g":
   $command = 'java -jar lib.g.jar --js=' . $outfile . ' --js_output_file=mini.'
-           . $package . '.g.js';
+           . $package . '.g' . $mobile . '.js';
   break;
 case "y":
   $command = 'java -jar lib.y.jar --charset "utf-8" -o mini.'
-           . $package . '.y.js ' . $outfile;
+           . $package . '.y' . $mobile . '.js ' . $outfile;
   break;
 case "m":
   $command = 'lib.m.exe -w5 -hc ' . $outfile . ' -o mini.'
-           . $package . '.m.js';
+           . $package . '.m' . $mobile . '.js';
   break;
 }
 echo "- package: {$packagefile}\n";

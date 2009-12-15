@@ -372,23 +372,25 @@ function xboot(uu) {
 
         return [hash, "==", { key: 'a', key2: 'b' }];
       },
-      "[4][split ; str] uu.hash('key;a;key2;b', ';', uu.STR) -> { key: 'a', key2: 'b' }": function() {
-        var hash = uu.hash('key;a;key2;b', ';', uu.STR);
+      "[4][split ; str] uu.hash('key;a;key2;b', ';', 0) -> { key: 'a', key2: 'b' }": function() {
+        var hash = uu.hash('key;a;key2;b', ';', 0);
 
         return [hash, "==", { key: 'a', key2: 'b' }];
       },
-      "[5][split , num] uu.hash('key,0,key2,1', ',', uu.NUM) -> { key: 0, key2: 1 }": function() {
-        var hash = uu.hash('key,0,key2,1', ',', uu.NUM);
+      "[5][split , num] uu.hash('key,0,key2,1', ',', 1) -> { key: 0, key2: 1 }": function() {
+        var hash = uu.hash('key,0,key2,1', ',', 1);
 
         return [hash, "==", { key: 0, key2: 1 }];
       },
 
+/*
     "uu.hash.num()": "",
       "uu.hash.num('key,0,key2,1') -> { key: 0, key2: 1 }": function() {
         var hash = uu.hash.num('key,0,key2,1');
 
         return [hash, "==", { key: 0, key2: 1 }];
       },
+ */
 
     "uu.hash.has()": "",
       "uu.hash.has({ a: 1, b: 2 }, { a: 1, b: 2, c: 3 }) -> true": function() {
@@ -794,8 +796,6 @@ function xboot(uu) {
                                 function() { return [document.getElementsByTagName('body'), "is fakearray"]; },
 
       "new Date は date 型":    function() { return [new Date, "is date"]; },
-      "{r:0,g:0,b:0,a:0} は rgba 型":
-                                function() { return [{r:0,g:0,b:0,a:0}, "is rgba"]; },
       "uu.type(123, uu.STR | uu.NUM) は boolean 型 の戻り値を返す":
                                 function() { return [uu.type(123, uu.STR | uu.NUM), "is boolean"]; },
       "new Boolean(false) は boolean 型":
@@ -804,7 +804,16 @@ function xboot(uu) {
                                 function() { return [new Number(''), "is number"];   },
       "new String('') は string 型":
                                 function() { return [new String(''), "is string"];   },
-
+    "uu.isrgba": "",
+      "uu.isrgba({r:0,g:0,b:0,a:0}) は rgba 型":
+      function() {
+        return [uu.isrgba({r:0,g:0,b:0,a:0}), "is true"];
+      },
+    "uu.iscssdecl": "",
+      "uu.iscssdecl(window.getComputedStyle(document.body, null) は CSSStyleDeclaration 型":
+      function() {
+        return [uu.iscssdecl(window.getComputedStyle(document.body, null)), "is true"];
+      },
 
 // -----------------------
     "uu.url()": "",

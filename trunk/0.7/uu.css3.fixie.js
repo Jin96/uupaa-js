@@ -39,7 +39,7 @@ function position() {
   if (!_job.position.length) { return; }
 
   var ary = [], v, w, i = 0, iz = _job.position.length,
-      vp = uu.css.size(), cs, p;
+      vp = uu.win.size(), cs, p;
 
   for (; i < iz; ++i) {
     v = _job.position[i];
@@ -94,7 +94,7 @@ function positionInit() { // @return NodeArray:
 function positionMarkup(node) { // @param Node: context
   if ("uuCSSPosition" in node) { return; } // bonded
 
-  var vp = uu.css.size(), rect = uu.css.size(node),
+  var vp = uu.win.size(), rect = uu.css.size(node),
       cs = node.currentStyle,
       v = cs.top  !== "auto", // vertical
       h = cs.left !== "auto", // horizontal

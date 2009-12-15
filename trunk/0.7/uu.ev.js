@@ -1,6 +1,9 @@
 
 // === Event ===
 // depend: uu.js
+//
+// ::event.keyCode
+//    http://www.w3.org/TR/DOM-Level-3-Events/#events-keyboardevents
 uu.waste || (function(win, doc, uu) {
 var _CLICKS = { click: 1, dblclick: 2 },
     _EVCODE = uu.dmz.EVCODE,
