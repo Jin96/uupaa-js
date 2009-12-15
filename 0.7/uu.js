@@ -22,14 +22,14 @@ var uu; // library namespace
 function uup() { return uu.hash.keys(uup); }; // plugin namespace
 function uuvain() {} // global function, memory leak of IE is evaded
 
-uu ? ++uu.waste : (function(win, doc, _xconfig, _cstyle, _json) {
+uu ? ++uu.waste : (function(win, doc, _xconfig, _json) {
 var _config = uuarg(_xconfig, {
         aria: 0, debug: 0, light: 1, altcss: 1, consel: 1, cssexpr: 0,
         imgdir: "img", visited: 0 }),
     _ver    = uuvers(_config.consel),
     _ie     = _ver.ie,
-    _qtag   = _ie ? uutaglegacy : uutag,
-    _qklass = doc.getElementsByClassName ? uuklass : uuklasslegacy,
+    _qtag   = _ie ? (uutaglegacy || 0) : uutag,
+    _qklass = doc.getElementsByClassName ? uuklass : (uuklasslegacy || 0),
     _html   = doc.getElementsByTagName("html")[0], // <html>
     _head   = doc.getElementsByTagName("head")[0], // <head>
     _slice  = Array.prototype.slice, // quick toArray
@@ -40,41 +40,41 @@ var _config = uuarg(_xconfig, {
     _lazydb = {}, // { id: [[low], [mid], [high]], ... }
     _ndiddb = {}, // { nodeid: node, ... }
     _ajaxdb = {}, // { "url": last modified date time(unit: ms), ...}
-    _FIX  = {},
-    _DEC2 = _numary("0123456789"),       // { 0: "00", ...  99: "99" }
-    _HEX2 = _numary("0123456789abcdef"), // { 0: "00", ... 255: "ff" }
-    _HASH = 1, _NODE = 2, _FAKE = 4, _RGBA = 8, _NULL = 16, _VOID = 32,
-    _BOOL = 64, _NUM = 128, _STR = 256, _REX = 512, _ARY = 1024,
-    _FUNC = 2048, _DATE = 4096,
-    _TYPE = uuhashnum( // http://d.hatena.ne.jp/uupaa/20091006/
-        "undefined,32,boolean,64,number,128,string,256,[object Boolean],64," +
-        "[object Number],128,[object String],256,[object RegExp],512," +
-        "[object Array],1024,[object Function],2048,[object Date],4096"),
-    _ATTR = uuhash(!_ver.ie67 ? "for,htmlFor,className,class" :
-            ("class,className,for,htmlFor,colspan,colSpan,accesskey," +
-             "accessKey,rowspan,rowSpan,tabindex,tabIndex")),
-    _STYLE = uuhash((_ie ? "float,styleFloat,cssFloat,styleFloat"
-                         : "float,cssFloat,styleFloat,cssFloat") +
+    _FIX    = {},
+    _DEC2   = _numary("0123456789"),       // { 0: "00", ...  99: "99" }
+    _HEX2   = _numary("0123456789abcdef"), // { 0: "00", ... 255: "ff" }
+    _HASH   = 1, _NODE = 2, _FAKE = 4, _DATE = 8, _NULL = 16, _VOID = 32,
+    _BOOL   = 64, _FUNC = 128, _NUM = 256, _STR = 1024, _ARY = 2048, _REX = 4096,
+    _TYPE   = { "undefined": _VOID, "boolean": _BOOL, number: _NUM, string: _STR,
+                "[object Boolean]": _BOOL, "[object Number]": _NUM,
+                "[object String]": _STR, "[object RegExp]": _REX,
+                "[object Array]": _ARY, "[object Function]": _FUNC,
+                "[object Date]": _DATE }, // http://d.hatena.ne.jp/uupaa/20091006
+    _ATTR   = uuhash(!_ver.ie67 ? "for,htmlFor,className,class" :
+                ("class,className,for,htmlFor,colspan,colSpan,accesskey," +
+                "accessKey,rowspan,rowSpan,tabindex,tabIndex")),
+    _STYLE  = uuhash((_ie ? "float,styleFloat,cssFloat,styleFloat"
+                          : "float,cssFloat,styleFloat,cssFloat") +
                 ",pos,position,w,width,h,height,x,left,y,top,o,opacity," +
                 "bg,background,bgcolor,backgroundColor,bgimg,backgroundImage," +
                 "bgrpt,backgroundRepeat,bgpos,backgroundPosition"),
-    _EVENT = "mousedown,mouseup,mousemove,mousewheel,click,dblclick,keydown," +
-             "keypress,keyup,change,submit,focus,blur,contextmenu",
-    _EVCODE = uuhashnum("mousedown,1,mouseup,2,mousemove,3," +
-        "mousewheel,4,click,5,dblclick,6,keydown,7,keypress,8,keyup,9," +
-        "mouseenter,10,mouseleave,11,mouseover,12,mouseout,13,contextmenu,14," +
-        "focus,15,blur,16,losecapture,0x102,DOMMouseScroll,0x104"),
-    _HTML5 = "abbr,article,aside,audio,bb,canvas,datagrid,datalist,details," +
-             "dialog,eventsource,figure,footer,header,hgroup,mark,menu," +
-             "meter,nav,output,progress,section,time,video",
-    _EVFIX = _ver.gecko ? { mousewheel: "DOMMouseScroll" } :
-             _ver.opera ? { contextmenu: "mousedown" } : {},
+    _EVENT  = "mousedown,mouseup,mousemove,mousewheel,click,dblclick,keydown," +
+              "keypress,keyup,change,submit,focus,blur,contextmenu",
+    _EVCODE = { mousedown: 1, mouseup: 2, mousemove: 3, mousewheel: 4, click: 5,
+                dblclick: 6, keydown: 7, keypress: 8, keyup: 9, mouseenter: 10,
+                mouseleave: 11, mouseover: 12, mouseout: 13, contextmenu: 14,
+                focus: 15, blur: 16, resize: 17,
+                losecapture: 0x102, DOMMouseScroll: 0x104 },
+    _HTML5  = "abbr,article,aside,audio,bb,canvas,datagrid,datalist,details," +
+              "dialog,eventsource,figure,footer,header,hgroup,mark,menu," +
+              "meter,nav,output,progress,section,time,video",
+    _EVFIX  = _ver.gecko ? { mousewheel: "DOMMouseScroll" } :
+              _ver.opera ? { contextmenu: "mousedown" } : {},
     _NGWORD = /(:(a|b|co|dig|first-l|li|mom|ne|p|sc|t|v))|!=|\/=|<=|>=|&=|x7b/,
     _ISO_DATE = /^(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d):(\d\d)(?:\.(\d*))?Z$/,
-    _FMT_BITS = uuhashnum("i,32785,d,32785,u,32801,o,33121,x,33377,X,37473," +
-                      "f,146,c,10240,A,18432,s,132,%,3076,j,67584," +
-                      "r,133120,R,264192,h,526336"),
-    _FMT_PARSE = /%(?:(\d+)\$)?(#|0)?(\d+)?(?:\.(\d+))?(l)?([%iduoxXfcAsjrRh])/g,
+    _FMT_BITS = { i: 0x8011, d: 0x8011, u: 0x8021, o: 0x8161, x: 0x8261,
+                  X: 0x9261, f: 0x92, c: 0x2800, s: 0x84, j: 0xC00 },
+    _FMT_PARSE = /%(?:(\d+)\$)?(#|0)?(\d+)?(?:\.(\d+))?(l)?([%iduoxXfcsj])/g,
     _JSON_SWAP = uuhash('",\\",\b,\\b,\f,\\f,\n,\\n,\r,\\r,\t,\\t,\\,\\\\'),
     _JSON_UNESC = /"(\\.|[^"\\])*"/g,
     _JSON_ESCAPE = /(?:\"|\\[bfnrt\\])/g,
@@ -148,11 +148,9 @@ uu = uumix(_uujamfactory, {     // uu(expr, ctx) -> Instance(jam)
   }),
   // [1][through]      uu.hash({ key: "val" }) -> { key: "val" }
   // [2][pair to hash] uu.hash("key", mix)     -> { key: mix }
-  // [3][split(,)]     uu.hash("key,a,key2,b")              -> { key:"a",key2:"b" }
-  // [4][split(;)]     uu.hash("key;a;key2;b", ";", uu.STR) -> { key:"a",key2:"b" }
-  // [5][split(,) num] uu.hash("key,0,key2,1", ",", uu.NUM) -> { key:0,  key2:1   }
+  // [3][split(,)]     uu.hash("key,a,key2,b")         -> { key:"a",key2:"b" }
+  // [4][split(;)]     uu.hash("key;a;key2;b", ";", 0) -> { key:"a",key2:"b" }
   hash:   uumix(uuhash, {
-    num:        uuhashnum,      // uu.hash.num("key,0,key2,1") -> { key: 0, key2: 1 }
     has:        uuhashhas,      // uu.hash.has({a:1,b:2}, {a:1,b:2,c:3}) -> true
     each:       uuhasheach,     // uu.hash.each(hash, fn)
     size:       uuhashsize,     // uu.hash.size(mix) -> Number(hash length)
@@ -272,6 +270,7 @@ uu = uumix(_uujamfactory, {     // uu(expr, ctx) -> Instance(jam)
   fix:          uufix,
   fmt:          uufmt,          // uu.fmt("%s-%d", var_args, ...) -> "formatted string"
   puff:         uupuff,         // uu.puff("%s-%d", ...) -> alert(uu.fmt("%s-%d", ...))
+  rep:          uurep,          // uu.rep("str", n = 0) -> "strstrstr..."
   esc:          uuesc,          // uu.esc('<a href="&">') -> '&lt;a href=&quot;&amp;&quot;&gt;'
   ucs2:         uuucs2,         // uu.ucs2("string", 0) -> "\u0073"
   unesc:        uuunesc,        // uu.unesc('&lt;a href=&quot;&amp;&quot;&gt;') -> '<a href="&">'
@@ -291,7 +290,7 @@ uu = uumix(_uujamfactory, {     // uu(expr, ctx) -> Instance(jam)
                                 // [3][RFC1123 now]  uu.date2str(0, 1)    -> "Wed, 16 Sep 2009 16:18:14 GMT"
                                 // [4][RFC1123 date] uu.date2str(date, 1) -> "Wed, 16 Sep 2009 16:18:14 GMT"
   str2date:     uustr2date,     // uu.str2date("2000-01-01T00:00:00[.000]Z") -> { valid, date }
-  str2json:     uustr2json,     // uu.str2json(str) -> String
+  str2json:     uustr2json,     // uu.str2json(str, quote = false) -> String
   mix2json:     uumix2json,     // uu.mix2json(mix, fn = void 0, usejs = 0) -> String
   json2mix:     uujson2mix,     // uu.json2mix(str, usejs = 0) -> Mix
   // --- type ---
@@ -301,20 +300,20 @@ uu = uumix(_uujamfactory, {     // uu(expr, ctx) -> Instance(jam)
   isstr:        uuisstr,        // uu.isstr("a") -> true
   isary:        uuisary,        // uu.isary([]) -> true
   isfunc:       uuisfunc,       // uu.isfunc(uuvain) -> true
+  isrgba:       uuisrgba,       // uu.isrgba({r:0,g:0,b:0,a:0}) -> true
+  iscssdecl:    uuiscssdecl,    // uu.iscssdecl(window.getComputedStyle(node, null)) -> true
   HASH:         _HASH,          // uu.HASH   - Object(Hash)
   NODE:         _NODE,          // uu.NODE   - Node
   FAKE:         _FAKE,          // uu.FAKE   - FakeArray, NodeList, arguments
-  RGBA:         _RGBA,          // uu.RGBA   - { r, g, b, a }
+  DATE:         _DATE,          // uu.DATE   - Date
   NULL:         _NULL,          // uu.NULL   - null
   VOID:         _VOID,          // uu.VOID   - undefined
   BOOL:         _BOOL,          // uu.BOOL   - Boolean
+  FUNC:         _FUNC,          // uu.FUNC   - Function
   NUM:          _NUM,           // uu.NUM    - Number
   STR:          _STR,           // uu.STR    - String
-  REX:          _REX,           // uu.REX    - RegExp
   ARY:          _ARY,           // uu.ARY    - Array
-  FUNC:         _FUNC,          // uu.FUNC   - Function
-  DATE:         _DATE,          // uu.DATE   - Date
-  UNDEF:        _VOID,          // uu.UNDEF  - [alias] uu.VOID
+  REX:          _REX,           // uu.REX    - RegExp
   // --- user agent (uu.ver.* alias) ---
   ie:           _ie,            // is IE
   ie6:          _ver.ie6,       // is IE6
@@ -327,6 +326,9 @@ uu = uumix(_uujamfactory, {     // uu(expr, ctx) -> Instance(jam)
   // --- other ---
   js:           uujs,           // uu.js("JavaScript Expression") -> eval(expr) result
   ui:           uuui,           // [create instance] uu.ui(widget, placeholder, option) -> instance
+  win: {
+    size:       uuwinsize       // uu.win.size() -> { iw, ih, sw, sh }
+  },
   guid:         uuguid,         // uu.guid() -> Number(unique)
   lazy:   uumix(uulazy, {       // uu.lazy(id = "", fn, order = 0)
     fire:       uulazyfire      // uu.lazy.fire(id = "")
@@ -635,8 +637,7 @@ function uuary(mix,     // @param Array/Mix/NodeList/Arguments/String:
   var type = uutype(mix), sp = split === void 0 ? "," : split;
 
   return (type === _ARY)  ? mix // [1]
-       : (type === _FAKE) ? (_cstyle ? _slice.call(mix)
-                                     : _toary(mix)) // [5][6]
+       : (type === _FAKE) ? (_ie ? _toary(mix) : _slice.call(mix)) // [5][6]
        : (type === _STR && sp) ? mix.split(sp) // [7][8]
        : [mix]; // [2][3][4]
 }
@@ -750,17 +751,16 @@ function uuaryindexof(ary,     // @param Array:
 // uu.hash - make hash from key value pair
 // [1][through]      uu.hash({ key: "val" }) -> { key: "val" }
 // [2][pair to hash] uu.hash("key", mix)     -> { key: mix }
-// [3][split(,)]     uu.hash("key,a,key2,b")              -> { key:"a",key2:"b" }
-// [4][split(;)]     uu.hash("key;a;key2;b", ";", uu.STR) -> { key:"a",key2:"b" }
-// [5][split(,) num] uu.hash("key,0,key2,1", ",", uu.NUM) -> { key:0,  key2:1   }
+// [3][split(,)]     uu.hash("key,a,key2,b")         -> { key:"a",key2:"b" }
+// [4][split(;)]     uu.hash("key;a;key2;b", ";", 0) -> { key:"a",key2:"b" }
 function uuhash(key,    // @param String/Hash: key
                 value,  // @param Mix(= void 0 or ","): value or splitter
-                type) { // @param Number(= void 0 or uu.STR): value type (for split)
-                        //              uu.STR or uu.NUM
+                type) { // @param Number(= void 0): value type,
+                        //                          0 is string, 1 is number
                         // @return Hash: { key: value, ... }
   var rv = {}, i = 0, v, ary, num, split = 0;
 
-  if (type !== v) { // [4][5]
+  if (type !== v) { // [4]
     ++split;
   } else if (value !== v) { // [2]
     rv[key] = value;
@@ -771,19 +771,12 @@ function uuhash(key,    // @param String/Hash: key
   }
   if (split) {
     ary = key.split(value || ","); // default splitter = ","
-    num = type === _NUM;
+    num = type === 1;
     while ( (v = ary[i++]) ) {
       rv[v] = num ? +(ary[i++]) : ary[i++];
     }
   }
   return rv;
-}
-
-// uu.hash.num - make { key: num } value pair
-// uu.hash.num("key,0,key2,1") -> { key: 0, key2: 1 }
-function uuhashnum(str) { // @param String:
-                          // @return Hash:
-  return uuhash(str, 0, _NUM);
 }
 
 // uu.hash.has - has Hash
@@ -795,7 +788,7 @@ function uuhashhas(find,   // @param Hash: find { key, value, ... }
   for (i in find) {
     v = find[i], w = hash[i];
     if (!(i in hash) || // key not found
-        (v !== w && _jsoninsp(v) !== _jsoninsp(w))) { // match JSON
+        (v !== w && _jsoninspect(v) !== _jsoninspect(w))) { // match JSON
       return false;
     }
   }
@@ -850,7 +843,7 @@ function uuhashcss2kb(name) { // @param String/Array: className or [className, .
 
   while ( (v = ary[i++]) ) {
     div.className = v;
-    cs = _ie ? div.currentStyle : _cstyle(div, null);
+    cs = _ie ? div.currentStyle : win.getComputedStyle(div, null);
     url = uutrimurl(cs.listStyleImage);
     if (url && url.indexOf("?") > 0) {
       url.slice(url.indexOf("?") + 1).replace(_QUERY_STR, _qsparse);
@@ -1577,8 +1570,8 @@ function _newtag(/* var_args */) { // @param Mix: var_args, nodes, attr/css
   }
   function _tohash(mix) {
     return !uuisstr(mix) ? mix
-         : !mix.indexOf(" ") ? uuhash(uutrim(mix), " ", _STR) // " color red"
-                             : uuhash(mix);                   // "color,red"
+         : !mix.indexOf(" ") ? uuhash(uutrim(mix), " ", 0) // " color red"
+                             : uuhash(mix);                // "color,red"
   }
   var v, w, x, i = 0, j = 0, iz = arguments.length,
       xtag = uuisfunc(win.xtag), atag = { a: 1, A: 1 },
@@ -1621,7 +1614,7 @@ function uuquery(expr,  // @param String: "css > rule"
       try {
         var nl = (ctx || doc).querySelectorAll(expr);
 
-        return _cstyle ? _slice.call(nl) : _toary(nl);
+        return _ie ? _toary(nl) : _slice.call(nl);
       } catch(err) {} // case: extend pseudo class / operators
     }
   }
@@ -1665,7 +1658,7 @@ function uutag(expr,  // @param String: "*" or "tag"
   return _slice.call((ctx || doc).getElementsByTagName(expr));
 }
 
-// inner - getElementsByTagName for legacy browser(IE6~IE8, Opera9.2x)
+//{:: inner - getElementsByTagName for legacy browser(IE6~IE8, Opera9.2x)
 function uutaglegacy(expr, ctx) {
   var nl = (ctx || doc).getElementsByTagName(expr),
       rv = [], ri = -1, v, i = 0;
@@ -1679,6 +1672,7 @@ function uutaglegacy(expr, ctx) {
   }
   return rv;
 }
+//::}
 
 // uu.klass - query className
 function uuklass(expr,  // @param JointString: "class", "class1, ..."
@@ -1687,7 +1681,7 @@ function uuklass(expr,  // @param JointString: "class", "class1, ..."
   return _slice.call((ctx || doc).getElementsByClassName(expr));
 }
 
-// inner - getElementsByClassName for legacy browser(IE6~IE8, etc...)
+//{:: inner - getElementsByClassName for legacy browser(IE6~IE8, etc...)
 function uuklasslegacy(expr, ctx) {
   var nodes = (ctx || doc).getElementsByTagName("*"),
       name = uusplit(expr),
@@ -1704,6 +1698,7 @@ function uuklasslegacy(expr, ctx) {
   }
   return rv;
 }
+//::}
 
 // --- string ---
 // uu.fix - fix style property, attribute name
@@ -1721,45 +1716,32 @@ function uufix(str) { // @param String:
 function uufmt(format            // @param String: sprintf format string
                /* var_args */) { // @param Mix: sprintf var_args
                                  // @return String: formated string
-  function _uufmtparse(m, aidx, flag, width, prec, size, types) {
-    var v, w = _FMT_BITS[types], ovf;
+  // http://d.hatena.ne.jp/uupaa/20091214
+  function _uufmtparse(m, argidx, flag, width, prec, size, types) {
+    if (types === "%") { return "%"; }
+    idx = argidx ? parseInt(argidx) : next++;
+    var w = _FMT_BITS[types], ovf, pad,
+        v = (av[idx] === void 0) ? "" : av[idx];
 
-    idx = aidx ? parseInt(aidx) : next++;
-
-    w & 1024 || (v = (av[idx] === void 0) ? "undefined" : av[idx]);
-    w & 1   && (v = parseInt(v));
-    w & 2   && (v = parseFloat(v));
-    w & 4   && (v = ((types === "s" ? v : types) || "").toString());
-    if (w & (1 | 2) && isNaN(v)) { return ""; }
-
-    w & 32  && (v = (v >= 0) ? v : v % 0x100000000 + 0x100000000);
-    w & 256 && (v = v.toString(8));
-    w & 512 && (v = v.toString(16));
-    w & 64  && (flag === "#") && (v = ((w & 256) ? "0" : "0x") + v);
-    w & 128 && prec && (v = (w & 2) ? v.toFixed(prec) : v.substring(0, prec));
-    w & 24576 && (ovf = (typeof v !== "number" || v < 0));
-    w & 8192  && (v = ovf ? "" : charCode(v));
-    w & 16384 && (v = ovf ? "" : (v < 32 || v > 126) ? "." : charCode(v));
-    w & 32768 && (flag = (flag === "0") ? "" : flag);
-    w & 65536 && (v = uumix2json(v, 0, 1));
-    w & 131072&& (v = "rgb(" + v.r + "," + v.g + "," + v.b + ")");
-    w & 262144&& (v = "rgba(" + v.r + "," + v.g + "," + v.b + "," + v.a + ")");
-    w & 524288&& (v = "#" + _HEX2[v.r] + _HEX2[v.g] + _HEX2[v.b]);
-    v = w & 4096 ? v.toString().toUpperCase() : v.toString();
-    if (w & 2048 || width === void 0 || v.length >= width) {
-      return v;
+    w & 3 && (v = w & 1 ? parseInt(v) : parseFloat(v), v = isNaN(v) ? "": v);
+    w & 4 && (v = ((types === "s" ? v : types) || "").toString());
+    w & 0x20  && (v = v >= 0 ? v : v % 0x100000000 + 0x100000000);
+    w & 0x300 && (v = v.toString(w & 0x100 ? 8 : 16));
+    w & 0x40  && flag === "#" && (v = (w & 0x100 ? "0" : "0x") + v);
+    w & 0x80  && prec && (v = w & 2 ? v.toFixed(prec) : v.slice(0, prec));
+    w & 0x400 && (v = _jsoninspect(v));
+    w & 0x6000 && (ovf = (typeof v !== "number" || v < 0));
+    w & 0x2000 && (v = ovf ? "" : String.fromCharCode(v));
+    w & 0x8000 && (flag = flag === "0" ? "" : flag);
+    v = w & 0x1000 ? v.toString().toUpperCase() : v.toString();
+    if (!(w & 0x800 || width === void 0 || v.length >= width)) {
+      pad = uurep((!flag || flag === "#") ? " " : flag, width - v.length);
+      v = ((w & 0x10 && flag === "0") && !v.indexOf("-"))
+        ? ("-" + pad + v.slice(1)) : (pad + v);
     }
-    // -- pad zero or space ---
-    flag = flag || " ";
-    size = width - v.length;
-    if (flag === "0" && (w & 16) && v.indexOf("-") !== -1) {
-      // "-123" -> "-00123"
-      return "-" + Array(size + 1).join("0") + v.substring(1);
-    }
-    return Array(size + 1).join((flag === "#") ? " " : flag) + v;
+    return v;
   }
-  var next = 1, idx = 0, av = arguments,
-      charCode = String.fromCharCode;
+  var next = 1, idx = 0, av = arguments;
 
   return format.replace(_FMT_PARSE, _uufmtparse);
 }
@@ -1772,6 +1754,13 @@ function uupuff(format            // @param String: sprintf format string
                                   // @return String: formated string
   alert((arguments.length === 1) ? uufmt("%j", format)
                                  : uufmt.apply(this, arguments));
+}
+
+// uu.rep - repeat string
+function uurep(str, // @param String: "str"
+               n) { // @param Number(= 0): times
+                    // @return String: "strstrstr..."
+  return Array(n + 1).join(str);
 }
 
 // uu.esc - escape to HTML entity 
@@ -1924,7 +1913,7 @@ function uumix2json(mix,  // @param Mix:
                     js) { // @param Number(= 0): 0 is native JSON, 1 is js impl
                           // @return JSONString:
   return (!js && _json) ? _json.stringify(mix) || ""
-                        : _jsoninsp(mix, fn);
+                        : _jsoninspect(mix, fn);
 }
 
 // uu.json2mix
@@ -1937,8 +1926,9 @@ function uujson2mix(str,  // @param JSONString:
 }
 
 // uu.str2json
-function uustr2json(str) { // @param String:
-                           // @return String:
+function uustr2json(str,     // @param String:
+                    quote) { // @param Boolean(= false): true is add quote(")
+                             // @return String:
   function _swap(m) {
     return _JSON_SWAP[m];
   }
@@ -1946,39 +1936,49 @@ function uustr2json(str) { // @param String:
     c = str.charCodeAt(0);
     return "\\u" + _HEX2[(c >> 8) & 255] + _HEX2[c & 255];
   }
-  return str.replace(_JSON_ESCAPE, _swap).
-             replace(_JSON_ENCODE, _ucs2);
+  var rv = str.replace(_JSON_ESCAPE, _swap).replace(_JSON_ENCODE, _ucs2);
+
+  return quote ? '"' + rv + '"' : rv;
 }
 
 // inner - json inspect
-function _jsoninsp(mix, fn) {
-  var rv = "", ary, i, iz;
+function _jsoninspect(mix, fn) {
+  var ary, type = uutype(mix), w, i, iz;
 
-  switch (uutype(mix)) {
-  case _NODE: rv = '{"uuguid":' + uunodeid(mix) + "}"; break;
-  case _NULL: rv = "null"; break;
-  case _VOID: rv = "undefined"; break;
-  case _DATE: rv = uudate2str(mix); break;
+  switch (type) {
+  case _NODE: return '"uuguid":' + uunodeid(mix);
+  case _NULL: return "null";
+  case _VOID: return "undefined";
+  case _DATE: return uudate2str(mix);
   case _FUNC:
   case _BOOL:
-  case _NUM:  rv = mix.toString(); break;
-  case _STR:  rv =  '"' + uustr2json(mix) + '"'; break;
+  case _NUM:  return mix.toString();
+  case _STR:  return uustr2json(mix, 1);
   case _ARY:
-  case _FAKE: ary = [], i = 0, iz = mix.length;
-              for (; i < iz; ++i) {
-                ary.push(_jsoninsp(mix[i], fn));
+  case _FAKE: for (ary = [], i = 0, iz = mix.length; i < iz; ++i) {
+                ary.push(_jsoninspect(mix[i], fn));
               }
-              rv = "[" + ary.join(",") + "]"; break;
-  case _RGBA: rv = '{"r":' + mix.r +  ',"g":' + mix.g +  ',"b":' + mix.b + 
-                   ',"a":' + mix.a + '}'; break;
-  case _HASH: ary = [];
-              for (i in mix) {
-                ary.push('"' + uustr2json(i) + '":' + _jsoninsp(mix[i], fn));
-              }
-              rv = "{" + ary.join(",") + "}"; break;
-  default: rv = fn ? fn(mix) : "";
+              return "[" + ary + "]";
+  case _HASH: ary = []; break;
+  default:    return fn ? (fn(mix) || "") : "";
   }
-  return rv;
+  if (uuisrgba(mix)) {
+    return '"r":' + mix.r + ',"g":' + mix.g + ',"b":' + mix.b + ',"a":' + mix.a;
+  }
+  if (uuiscssdecl(mix)) {
+    w = uu.webkit;
+    for (i in mix) {
+      if (typeof mix[i] === "string" && (w || i != (+i + ""))) { // !isNaN(i)
+        w && (i = mix.item(i));
+        ary.push('"' + i + '":' + uustr2json(mix[i], 1));
+      }
+    }
+  } else {
+    for (i in mix) {
+      ary.push(uustr2json(i, 1) + ":" + _jsoninspect(mix[i], fn));
+    }
+  }
+  return "{" + ary + "}";
 }
 
 // --- type ---
@@ -1991,8 +1991,7 @@ function uutype(mix,     // @param Mix:
                          //                         false is unmatch,
                          //                         Number is matched bits
   var rv = _TYPE[typeof mix] || _TYPE[_tostr.call(mix)] ||
-           (!mix ? 16 : mix.nodeType ? 2 : "length" in mix ? 4 :
-            ("r" in mix && "g" in mix && "b" in mix && "a" in mix) ? 8 : 1);
+           (!mix ? 16 : mix.nodeType ? 2 : "length" in mix ? 4 : 1);
 
   return match ? !!(match & rv) : rv;
 }
@@ -2021,6 +2020,19 @@ function uuisfunc(mix) { // @param Mix:
   return _TYPE[_tostr.call(mix)] === _FUNC;
 }
 
+// uu.isrgba - is { r, g, b, a } hash
+function uuisrgba(hash) { // @param Hash:
+                          // @return Boolean:
+  return hash && ("r" in hash && "g" in hash && "b" in hash && "a" in hash);
+}
+
+// uu.iscssdecl - is CSSStyleDeclaration hash
+function uuiscssdecl(hash) { // @param Hash:
+                             // @return Boolean:
+  return (_ie && hash && hash.cssFloat) ? true
+       : _tostr.call(hash).indexOf("CSSStyleDeclaration") > 0;
+}
+
 // --- other ---
 // uu.js - eval js
 // uu.js("JavaScript Expression") -> eval result
@@ -2036,6 +2048,22 @@ function uuui(widget,      // @param Node/String: widget name
               option) {    // @param Hash(= {}): option
                            // @return Instance:
   return uuui[widget](placeholder, option);
+}
+
+// uu.win.size
+function uuwinsize() { // @return Hash: { iw, ih, sw, sh }
+                       //   iw Number: innerWidth
+                       //   ih Number: innerHeight
+                       //   sw Number: scrollWidth
+                       //   sh Number: scrollHeight
+  if (_ie) {
+    var node = _dmz.iebody;
+
+    return { iw: node.clientWidth, ih: node.clientHeight,
+             sw: node.scrollLeft,  sh: node.scrollTop };
+  }
+  return { iw: win.innerWidth,  ih: win.innerHeight,
+           sw: win.pageXOffset, sh: win.pageYOffset };
 }
 
 // uu.guid - get unique number
@@ -2250,8 +2278,7 @@ uuaryeach(uuary(_EVENT), function(v) {
 });
 
 try {
-  _ie ? doc.execCommand("BackgroundImageCache", false, true)
-      : _cstyle || (win.getComputedStyle = doc.defaultView.getComputedStyle);
+  _ie && doc.execCommand("BackgroundImageCache", false, true);
 } catch(err) {} // ignore error(IETester / stand alone IE too)
 
 // inner - bootstrap, WindowReadyState and DOMReadyState handler
@@ -2283,8 +2310,8 @@ try {
 // 2. prebuild nodeid
 // 3. remove comment node(IE only) - http://d.hatena.ne.jp/uupaa/20091203/1259820356
 uuready(function() {
-  uumix(_camelhash(_FIX, _ver.webkit ? _cstyle(_html, null) : _html.style),
-        _STYLE, _ATTR);
+  uumix(_camelhash(_FIX, _ver.webkit ? win.getComputedStyle(_html, null)
+                                     : _html.style), _STYLE, _ATTR);
   var live = _html.getElementsByTagName("*"), v, w, ary = [], i = 0, j = 0;
 
   uunodeid(_html);
@@ -2324,7 +2351,7 @@ function _camelhash(rv, props) {
   return rv;
 }
 
-})(window, document, window.xconfig || {}, window.getComputedStyle, window.JSON);
+})(window, document, window.xconfig || {}, window.JSON);
 
 // window.uuvers - collect versions and meta informations
 //    http://d.hatena.ne.jp/uupaa/20090603
@@ -2407,7 +2434,7 @@ function uuvers(consel,    // @param Number(= 0): 1 is add conditional selector
              iphone: webkit && /iPod|iPhone/.test(nu),
              quirks: (doc.compatMode || "") !== "CSS1Compat" };
 
-  // Flash version (version 7.0 ~ later)
+//{:: Flash version (version 7.0 ~ later)
   try {
     ax = ie ? new ActiveXObject("ShockwaveFlash.ShockwaveFlash")
             : nv.plugins["Shockwave Flash"];
@@ -2415,8 +2442,9 @@ function uuvers(consel,    // @param Number(= 0): 1 is add conditional selector
                            : ax.description);
     rv.fl = v ? parseFloat(v[0], 10) : 0;
   } catch(err) {}
+//::}
 
-  // Silverlight version (version 3.0 ~ later)
+//{:: Silverlight version (version 3.0 ~ later)
   if (sl >= 3) {
     try {
       ax = ie ? new ActiveXObject("AgControl.AgControl")
@@ -2427,6 +2455,8 @@ function uuvers(consel,    // @param Number(= 0): 1 is add conditional selector
       }
     } catch(err) {}
   }
+//::}
+
   rv.ie67 = rv.ie6 || rv.ie7;
   rv.advanced = (gecko  && re >  1.9) || // Firefox 3.5+(1.91)
                 (webkit && re >= 528);   // Safari 4+, Google Chrome 2+
@@ -2447,4 +2477,108 @@ function uuvers(consel,    // @param Number(= 0): 1 is add conditional selector
   }
   return rv;
 }
+
+//{:: window.getComputedStyle() for IE6+
+window.getComputedStyle || (function() {
+var _PT = /pt$/, _FULL = [], _MORE = [], _BOX = [],
+    _MOD = { top: 1, left: 2, width: 3, height: 4 },
+    _UNIT = { m: 1, t: 2, "%": 3, o: 3 }, // em, pt, %, auto
+    _THICK = (document.documentMode || 0) > 7 ? "5px" : "6px";
+
+window.getComputedStyle = winstyle;
+
+function winstyle(node,     // @param Node:
+                  pseudo,   // @param String(= void 0):
+                  option) { // @param Number(= 0x0):
+                            //   0x0: enum full properties
+                            //   0x1: enum more properties
+                            //   0x2: enum some properties
+                            // @return Hash: { prop: "val", ... }
+  if (!node.currentStyle) {
+    return {};
+  }
+  var rv = {},
+      ns = node.style,
+      cs = node.currentStyle,
+      rs = node.runtimeStyle,
+      em, rect, unit, v, w, x, i = 0, j = 0, m1, m2,
+      ary = !option ? _FULL : (option === 1) ? _MORE : 0,
+      stock = { "0px": "0px", "1px": "1px", "2px": "2px", "5px": "5px",
+                thin: "1px", medium: "3px", thick: _THICK };
+
+  if (ary) {
+    while ( (w = ary[j++]) ) {
+      rv[w] = cs[w];
+    }
+  }
+
+  em = parseFloat(cs.fontSize) * (_PT.test(cs.fontSize) ? 4 / 3 : 1);
+  rect = node.getBoundingClientRect();
+
+  // calc border, padding and margin size
+  while ( (w = _BOX[i++]) ) {
+    v = cs[w];
+    if (!(v in stock)) {
+      x = v;
+      switch (unit = _UNIT[v.slice(-1)] || 0) {
+      case 1: x = parseFloat(v) * em; break;    // em
+      case 2: x = parseFloat(v) * 4 / 3; break; // pt
+      case 3: m1 = ns.left, m2 = rs.left;       // %, auto
+              rs.left = cs.left, ns.left = v;
+              x = ns.pixelLeft, ns.left = m1, rs.left = m2;
+      }
+      stock[v] = unit ? x + "px" : x;
+    }
+    rv[w] = stock[v];
+  }
+  for (w in _MOD) {
+    v = cs[w];
+    switch (unit = _UNIT[v.slice(-1)] || 0) {
+    case 1: v = parseFloat(v) * em; break;    // em
+    case 2: v = parseFloat(v) * 4 / 3; break; // pt
+    case 3: // %, auto
+      switch (_MOD[w]) {
+      case 1: v = node.offsetTop; break;
+      case 2: v = node.offsetLeft; break;
+      case 3: v = (node.offsetWidth  || rect.right - rect.left)
+                - parseInt(rv.borderLeftWidth) - parseInt(rv.borderRightWidth)
+                - parseInt(rv.paddingLeft) - parseInt(rv.paddingRight);
+              v = v > 0 ? v : 0;
+              break;
+      case 4: v = (node.offsetHeight || rect.bottom - rect.top)
+                - parseInt(rv.borderTopWidth) - parseInt(rv.borderBottomWidth)
+                - parseInt(rv.paddingTop) - parseInt(rv.paddingBottom);
+              v = v > 0 ? v : 0;
+      }
+    }
+    rv[w] = unit ? v + "px" : v;
+  }
+  rv.fontSize = em + "px";
+  rv.cssFloat = cs.styleFloat; // compat alias
+  return rv;
+}
+
+// init - make _FULL, _MORE, _BOX props
+(function() {
+  var ary = [" "], i, w, trim = /^\s+|\s+$/g,
+      cs = document.getElementsByTagName("html")[0].currentStyle;
+
+  for (i in cs) {
+    ary.push(i);
+  }
+  ary.sort();
+  w = ary.join(" ").replace(/ (?:accelerator|behavior|hasLayout|zoom)/g, "");
+  _FULL = w.replace(trim, "").split(" ");
+  _MORE = w.replace(/ (?:lay\w+|rub\w+|text\w+|pageB\w+|ms\w+|scr\w+)/g, "").
+    replace(/ (?:blockDirection|orphans|quotes|widows|filter|styleFloat)/g, "").
+    replace(/ (?:imeMode|writingMode|unicodeBidi|emptyCells|tableLayout)/g, "").
+    replace(/ (?:border(?:Color|Style|Width)|margin|padding|outline) /g, " ").
+    replace(/ (border\w+Width|margin\w+|padding\w+)/g, function(_, m) {
+      return _BOX.push(m), _;
+    }).replace(trim, "").concat(" textAlign textOverflow textIndent").
+    split(" ").sort();
+})();
+
+})();
+//::}
 

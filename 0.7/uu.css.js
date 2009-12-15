@@ -55,15 +55,13 @@ uu.css = _mix(uucss, {
     set:        uucssoffset     // uu.css.off.set(node, x, y) -> node
   }),
   // --- size (w, h) ---
-  // [1][get] uu.css.size() -> { iw, ih, sw, sh }(inner size + scroll size)
-  // [2][get] uu.css.size(node) -> { w, h }(node.style.width + padding + border)
-  // [3][get] uu.css.size(node, 1) -> { w, h }(node.style.width)
-  // [4][set] uu.css.size(node, width, height) -> node
+  // [1][get] uu.css.size(node) -> { w, h }(node.style.width + padding + border)
+  // [2][get] uu.css.size(node, 1) -> { w, h }(node.style.width)
+  // [3][set] uu.css.size(node, width, height) -> node
   size:    _mix(uucsssize, {
-    get:        uucsssizeget,   // [1][get] uu.css.size() -> { iw, ih, sw, sh }(inner size + scroll size)
-                                // [2][get] uu.css.size(node) -> { w, h }(node.style.width + padding + border)
-                                // [3][get] uu.css.size(node, 1) -> { w, h }(node.style.width)
-                                // [4][get] uu.css.size(node, 2) -> { w, h }(node.style.width)(offscreen)
+    get:        uucsssizeget,   // [1][get] uu.css.size(node) -> { w, h }(node.style.width + padding + border)
+                                // [2][get] uu.css.size(node, 1) -> { w, h }(node.style.width)
+                                // [3][get] uu.css.size(node, 2) -> { w, h }(node.style.width)(offscreen)
     set:        uucsssizeset    // [1][set] uu.css.size(node, width, height) -> node
   }),
   // --- rect (x, y, w, h) ---
@@ -357,11 +355,10 @@ function uucssoffset(node, // @param Node:
 }
 
 // uu.css.size
-// [1][get] uu.css.size() -> { iw, ih, sw, sh }(inner size + scroll size)
-// [2][get] uu.css.size(node) -> { w, h }(node.style.width + padding + border)
-// [3][get] uu.css.size(node, 1) -> { w, h }(node.style.width)
-// [4][set] uu.css.size(node, width, height) -> node
-function uucsssize(node, // @param Node(= void 0):
+// [1][get] uu.css.size(node) -> { w, h }(node.style.width + padding + border)
+// [2][get] uu.css.size(node, 1) -> { w, h }(node.style.width)
+// [3][set] uu.css.size(node, width, height) -> node
+function uucsssize(node, // @param Node:
                    w,    // @param Number/Number(= 0): width or plain
                    h) {  // @param Number: height
                              // @return Node/Hash:
@@ -370,11 +367,10 @@ function uucsssize(node, // @param Node(= void 0):
 }
 
 // uu.css.size.get
-// [1][get] uu.css.size() -> { iw, ih, sw, sh }(inner size + scroll size)
-// [2][get] uu.css.size(node) -> { w, h }(node.style.width + padding + border)
-// [3][get] uu.css.size(node, 1) -> { w, h }(node.style.width)
-// [4][get] uu.css.size(node, 2) -> { w, h }(node.style.width)(offscreen)
-function uucsssizeget(node,   // @param Node(= void 0):
+// [1][get] uu.css.size(node) -> { w, h }(node.style.width + padding + border)
+// [2][get] uu.css.size(node, 1) -> { w, h }(node.style.width)
+// [3][get] uu.css.size(node, 2) -> { w, h }(node.style.width)(offscreen)
+function uucsssizeget(node,   // @param Node:
                       mode) { // @param Number(= 0):
                               //            0 is combined(add padding, add border)
                               //            1 is plain(no padding, no border)
@@ -387,15 +383,6 @@ function uucsssizeget(node,   // @param Node(= void 0):
                               //         Number/void 0: _y
   var w, h, r, ns, curt;
 
-  if (node === void 0) { // [1] window inner size, scroll size
-    if (_ie) {
-      node = uu.dmz.iebody;
-      return { iw: node.clientWidth, ih: node.clientHeight,
-               sw: node.scrollLeft,  sh: node.scrollTop };
-    }
-    return { iw: win.innerWidth,  ih: win.innerHeight,
-             sw: win.pageXOffset, sh: win.pageYOffset };
-  }
   switch (mode || 0) {
   case 0: // [2] combined(+padding, +border) size
     w = node.offsetWidth  || 0;

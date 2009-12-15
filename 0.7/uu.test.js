@@ -99,8 +99,7 @@ function _eq2(v1, v2) {
     switch (type1) {
     case uu.ARY:
     case uu.FAKE: return uu.ary(v1).join(",") === uu.ary(v2).join(",");
-    case uu.HASH:
-    case uu.RGBA: return (uu.hash.size(v1) === uu.hash.size(v2) &&
+    case uu.HASH: return (uu.hash.size(v1) === uu.hash.size(v2) &&
                           uu.hash.has(v2, v1));
     case uu.FUNC: return false;
     case uu.DATE: return uu.date2str(v1) === uu.date2str(v2);
