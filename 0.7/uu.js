@@ -303,7 +303,6 @@ uu = uumix(_uujamfactory, {     // uu(expr, ctx) -> Instance(jam)
   isstr:        uuisstr,        // uu.isstr("a") -> true
   isary:        uuisary,        // uu.isary([]) -> true
   isfunc:       uuisfunc,       // uu.isfunc(uuvain) -> true
-  isrgba:       uuisrgba,       // uu.isrgba({r:0,g:0,b:0,a:0}) -> true
   HASH:         _HASH,          // uu.HASH   - Object(Hash)
   NODE:         _NODE,          // uu.NODE   - Node
   FAKE:         _FAKE,          // uu.FAKE   - FakeArray, NodeList, arguments
@@ -1973,7 +1972,7 @@ function _jsoninspect(mix, fn) {
         ary.push('"' + i + '":' + uustr2json(mix[i], 1));
       }
     }
-  } else if ("a" in mix && uuisrgba(mix)) {
+  } else if ("r" in mix && "g" in mix && "b" in mix && "a" in mix) { // RGBA
     ary = ["r:" + mix.r, "g:" + mix.g, "b:" + mix.b, "a:" + mix.a];
   } else {
     for (i in mix) {
@@ -2020,12 +2019,6 @@ function uuisary(mix) { // @param Mix:
 function uuisfunc(mix) { // @param Mix:
                          // @return Boolean:
   return _TYPE[_tostr.call(mix)] === _FUNC;
-}
-
-// uu.isrgba - is { r, g, b, a } hash
-function uuisrgba(hash) { // @param Hash:
-                          // @return Boolean:
-  return hash && ("r" in hash && "g" in hash && "b" in hash && "a" in hash);
 }
 
 // --- other ---
