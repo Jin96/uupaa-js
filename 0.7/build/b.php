@@ -1,4 +1,6 @@
 <?php
+// usage:
+//  >b.php [package] [-g | -y | -m | -j] [-o outfile]
 
 // marge and strip comment
 function marge($packagefile, $outfile, $minify, $mobile) {
@@ -41,23 +43,7 @@ function marge($packagefile, $outfile, $minify, $mobile) {
       $txt = preg_replace('/(\w+):\s+0/m', "$1: 0", $txt);         // xxx: 0
 
       // "  " -> "\t"
-      // sorry evil...
-      $txt = preg_replace('/^                                /m', "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t", $txt);// 32sp -> 16tb
-      $txt = preg_replace('/^                              /m', "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t", $txt);// 30sp -> 15tb
-      $txt = preg_replace('/^                            /m', "\t\t\t\t\t\t\t\t\t\t\t\t\t\t", $txt);// 28sp -> 14tb
-      $txt = preg_replace('/^                          /m', "\t\t\t\t\t\t\t\t\t\t\t\t\t", $txt);// 26sp -> 13tb
-      $txt = preg_replace('/^                        /m', "\t\t\t\t\t\t\t\t\t\t\t\t", $txt);// 24sp -> 12tb
-      $txt = preg_replace('/^                      /m', "\t\t\t\t\t\t\t\t\t\t\t", $txt);// 22sp -> 11tb
-      $txt = preg_replace('/^                    /m', "\t\t\t\t\t\t\t\t\t\t", $txt);// 20sp -> 10tb
-      $txt = preg_replace('/^                  /m', "\t\t\t\t\t\t\t\t\t", $txt);// 18sp -> 9tb
-      $txt = preg_replace('/^                /m', "\t\t\t\t\t\t\t\t", $txt);// 16sp -> 8tb
-      $txt = preg_replace('/^              /m', "\t\t\t\t\t\t\t", $txt);// 14sp -> 7tb
-      $txt = preg_replace('/^            /m', "\t\t\t\t\t\t", $txt);// 12sp -> 6tb
-      $txt = preg_replace('/^          /m', "\t\t\t\t\t", $txt);// 10sp -> 5tb
-      $txt = preg_replace('/^        /m', "\t\t\t\t", $txt);  // 8sp -> 4tab
-      $txt = preg_replace('/^      /m', "\t\t\t", $txt);      // 6sp -> 3tab
-      $txt = preg_replace('/^    /m', "\t\t", $txt);          // 4sp -> 2tab
-      $txt = preg_replace('/^  /m', "\t", $txt);              // 2sp -> 1tab
+      $txt = preg_replace_callback('/^[ ]{2,}/m', sp2tab, $txt); // 2sp -> 1tab
 
       // function(arg,
       //          arg,       ->  function(arg, arg, arg)
@@ -73,12 +59,14 @@ function marge($packagefile, $outfile, $minify, $mobile) {
   }
   fclose($fp);
 }
+function sp2tab($m) { // "  " -> "\t"
+  $lz = mb_strlen($m[0]);
+  return str_repeat("\t", $lz / 2) . ($lz % 2 ? " " : "");
+}
 function isWin() {
   return substr(PHP_OS, 0, 3) == 'WIN';
 }
 
-// usage:
-//  "b.php [package] [-g | -y | -m | -j]"
 $v = "";
 $minify = 1;
 $package = "full";
@@ -105,6 +93,10 @@ while ($v = array_shift($argv)) {
     break;
   case "-mb":
     $mobile = ".mb";
+    break;
+  case "-o":
+    $outfile = isWin() ? "..\\" : "../";
+    $outfile = $outfile . array_shift($argv);
     break;
   default:
     $package = $v;

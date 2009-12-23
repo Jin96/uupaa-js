@@ -6,7 +6,7 @@
 //    http://www.w3.org/TR/DOM-Level-3-Events/#events-keyboardevents
 uu.waste || (function(win, doc, uu) {
 var _CLICKS = { click: 1, dblclick: 2 },
-    _EVCODE = uu.dmz.EVCODE,
+    _EVCODE = uupub.EVCODE,
     _EVVKEY = uu.hash( // event virtual keycode
         "8,BS,9,TAB,13,ENTER,16,SHIFT,17,CTRL,18,ALT,27,ESC," +
         "32,SP,33,PGUP,34,PGDN,35,END,36,HOME,37,LEFT,38,UP,39,RIGHT,40,DOWN," +
@@ -99,7 +99,7 @@ function uuevdragbase(
     return { x: 0, y: 0, px: 0, py: 0 };
   }
   if (uu.ie) {
-    iebody = uu.dmz.iebody;
+    iebody = uupub.iebody;
     x = evt.clientX + iebody.scrollLeft;
     y = evt.clientY + iebody.scrollTop;
   } else {
@@ -175,7 +175,7 @@ function uuevhover(node,    // @param Node:
     // ignode mouse transit(mouseover, mouseout) in child node
     if (evt.node !== rel && !uu.node.has(rel, evt.node)) {
       evt.name = "mouseenter";
-      enter.call(node, evt, node); // enter(evt, node)
+      enter(evt, node); // enter(evt, node)
     }
     uu.ev.stop(evt); // cancel bubble
   }
@@ -184,7 +184,7 @@ function uuevhover(node,    // @param Node:
 
     if (evt.node !== rel && !uu.node.has(rel, evt.node)) {
       evt.name = "mouseleave";
-      leave.call(node, evt, node); // leave(evt, node)
+      leave(evt, node); // leave(evt, node)
     }
     uu.ev.stop(evt); // cancel bubble
   }
@@ -192,11 +192,17 @@ function uuevhover(node,    // @param Node:
     uu.klass.has(node, enter) ? uu.klass.sub(node, enter)
                               : (node.className += " " + enter); // [perf]
   }
+  function _evhookmouseenterie(evt) {
+    enter(evt, node);
+  }
+  function _evhookmouseleaveie(evt) {
+    leave(evt, node);
+  }
   var klass = uu.isstr(enter);
 
   if (uu.ie) {
-    uu.ev(node, "mouseenter", klass ? _evhovertoggle : enter);
-    uu.ev(node, "mouseleave", klass ? _evhovertoggle : leave);
+    uu.ev(node, "mouseenter", klass ? _evhovertoggle : _evhookmouseenterie);
+    uu.ev(node, "mouseleave", klass ? _evhovertoggle : _evhookmouseleaveie);
   } else {
     uu.ev(node, "mouseover+", klass ? _evhovertoggle : _evhookmouseenter);
     uu.ev(node, "mouseout+",  klass ? _evhovertoggle : _evhookmouseleave);

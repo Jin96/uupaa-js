@@ -1,21 +1,21 @@
 
 // === CSS3 Selector ===
 // depend: uu.js, uu.color.js, uu.css.js
-uu.waste || (function(win, doc, uu, _dmz, _cstyle, _innerText) {
+uu.waste || (function(win, doc, uu, _cstyle, _innerText) {
 var _ssid   = "uuqueryss", // StyleSheet ID
     // --- content-type cache (1: HTML, 2: XML) ---
     _ctypedb      = {}, // { quid: contentType }
     _htmltagdb    = {}, // tag dict( { a: "A", A: "A", ... } )
     _xmltagdb     = {},
-    _ndiddb       = _dmz.ndiddb,
-    _HTML5TAG     = _dmz.HTML5TAG + ",", // add tail comma
+    _ndiddb       = uupub.ndiddb,
+    _HTML5TAG     = uupub.HTML5TAG + ",", // add tail comma
     _QUICK_STATIC = {
       "*":      function(ctx) { return uu.tag("*", ctx); },
-      "*:root": function() { return [_dmz.root]; }, // fix #27 (*:root)
-      ":root":  function() { return [_dmz.root]; }, // fix #27 (*:root)
+      "*:root": function() { return [uupub.root]; }, // fix #27 (*:root)
+      ":root":  function() { return [uupub.root]; }, // fix #27 (*:root)
       "* :root":function() { return []; }, // fix #27b (* :root)
       "* html": function() { return []; }, // fix #27b (* html) IE6 CSS Star Hack
-      html:     function() { return [_dmz.root]; },
+      html:     function() { return [uupub.root]; },
       head:     function() { return [uu.head()]; },
       body:     function() { return [doc.body]; },
       ":link":  function() { return uu.ary(doc.links); } }, // spoof
@@ -165,13 +165,13 @@ function quickQuery(expr, match, context) {
         for (k = 0, kz = nodeList3.length; k < kz; ++k) {
           v = nodeList3[k];
           uid = v.uuguid ||
-              (_ndiddb[v.uuguid = newid = ++_dmz.ndidseed] = v, newid);
+              (_ndiddb[v.uuguid = newid = ++uupub.ndidseed] = v, newid);
           uid in unq || (rv[++ri] = v, unq[uid] = 1);
         }
       } else {
         v = nodeList2[j];
         uid = v.uuguid ||
-            (_ndiddb[v.uuguid = newid = ++_dmz.ndidseed] = v, newid);
+            (_ndiddb[v.uuguid = newid = ++uupub.ndidseed] = v, newid);
         uid in unq || (rv[++ri] = v, unq[uid] = 1);
       }
     }
@@ -301,7 +301,7 @@ function uuqueryselectorall(expr,      // @param String: expr
               if (v.nodeType === 1) {
                 if (isUniversal || v.tagName === tag) {
                   uid = v.uuguid ||
-                        (_ndiddb[v.uuguid = w = ++_dmz.ndidseed] = v, w);
+                        (_ndiddb[v.uuguid = w = ++uupub.ndidseed] = v, w);
                   if (uid in unq) {
                     break;
                   } else {
@@ -327,7 +327,7 @@ function uuqueryselectorall(expr,      // @param String: expr
               if (!uu.ie || !isUniversal || v.nodeType === 1) {
                 if (isUniversal || v.tagName === tag) {
                   uid = v.uuguid ||
-                        (_ndiddb[v.uuguid = w = ++_dmz.ndidseed] = v, w);
+                        (_ndiddb[v.uuguid = w = ++uupub.ndidseed] = v, w);
                   uid in unq || (r[++ri] = v, unq[uid] = 1);
                 }
               }
@@ -413,9 +413,9 @@ function uuqueryselectorall(expr,      // @param String: expr
 
               // ":root:xxx-child" or ":root:xxx-type" -> not match
               // ":root:not(:first-child)"             -> match root element
-              if (iz === 1 && ctx[0] === _dmz.root
+              if (iz === 1 && ctx[0] === uupub.root
                            && _ROOT_REJECT.test(pseudo)) {
-                r = negate ? [_dmz.root] : [];
+                r = negate ? [uupub.root] : [];
               } else {
                 if ( !(v = _FILTERS[pseudo]) ) {
                   throw ":" + pseudo + " unsupported";
@@ -522,7 +522,7 @@ function mixin(ctx, rv, guard) {
 
   while ( (v = ctx[i++]) ) {
     uid = v.uuguid ||
-          (_ndiddb[v.uuguid = newid = ++_dmz.ndidseed] = v, newid);
+          (_ndiddb[v.uuguid = newid = ++uupub.ndidseed] = v, newid);
     uid in guard || (rv[++ri] = v, guard[uid] = 1);
   }
   return rv;
@@ -657,7 +657,7 @@ function nthChildFilter(fid, negate, elms, pseudo, value, tags, contentType) {
   for (; i < iz; ++i) {
     pn = elms[i].parentNode;
     uid = pn.uuguid ||
-          (_ndiddb[pn.uuguid = newid = ++_dmz.ndidseed] = pn, newid);
+          (_ndiddb[pn.uuguid = newid = ++uupub.ndidseed] = pn, newid);
     if (!(uid in unq)) {
       unq[uid] = 1;
       idx = 0;
@@ -772,12 +772,12 @@ function simpleFilter(fid, negate, elms) {
 // inner - :root
 function root(fid, negate, elms) {
   if (!negate) {
-    return [_dmz.root];
+    return [uupub.root];
   }
   var rv = [], ri = -1, v, i = 0;
 
   while ( (v = elms[i++]) ) {
-    if (v !== _dmz.root) {
+    if (v !== uupub.root) {
       rv[++ri] = v;
     }
   }
@@ -970,6 +970,9 @@ function uiFilter(fid, negate, elms) {
 
 // inner -
 function styleQuery(negate, elms, match) {
+  function _color2num(c) {
+    return (c.r << 16) + (c.g << 8) + c.b;
+  }
   var value = uu.trim.quote(match[4]),
       prop, propKind,
       operator = _EX_OPERATOR[match[2]], w,
@@ -1006,8 +1009,8 @@ function styleQuery(negate, elms, match) {
   propKind = _EX_PROP_KIND[prop] || 0;
   switch (propKind) {
   case 1: // 1: color, backgroundColor to number
-    v1 = uu.color(v1, 2);
-    hasRange && (v2 = uu.color(v2, 2));
+    v1 = _color2num(uu.color(v1));
+    hasRange && (v2 = _color2num(uu.color(v2)));
     break;
   case 2: // 2: opacity
     v1 = xfloat(v1);
@@ -1022,7 +1025,7 @@ function styleQuery(negate, elms, match) {
   while ( (e = elms[i++]) ) {
     switch (propKind) {
     case 1: // color, backgroundColor
-      r = uu.color((uu.ie ? e.currentStyle : _cstyle(e, null))[prop], 2);
+      r = _color2num(uu.color((uu.ie ? e.currentStyle : _cstyle(e, null))[prop]));
       break;
     case 2: // opacity
       r = uu.css.opacity.get(e);
@@ -1156,6 +1159,6 @@ function createTagDictionary() {
 // --- initialize ---
 createTagDictionary();
 
-})(window, document, uu, uu.dmz, window.getComputedStyle,
+})(window, document, uu, window.getComputedStyle,
    uu.gecko ? "textContent" : "innerText");
 

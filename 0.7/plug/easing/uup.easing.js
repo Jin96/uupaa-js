@@ -57,7 +57,8 @@ function mix(base, flavor) {
 }
 
 mix(Math, {
-  linearTween:        aa,
+  linear:             aa,
+  linearTween:        aa, // [alias]
   easeInQuad:         ab,
   easeOutQuad:        ac,
   easeInOutQuad:      ad,

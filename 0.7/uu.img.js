@@ -2,8 +2,8 @@
 // === Image ===
 // depend: uu.js
 uu.waste || (function(win, doc, uu) {
-var _imgdb = {}, // { url: ImageObject, ... }
-    _render = ((uu.gecko && uu.ver.re >= 1.92) || (uu.ie && uu.ver.ua >= 7));
+var _imgdb = {}; // { url: ImageObject, ... }
+//  _render = ((uu.gecko && uu.ver.re >= 1.92) || (uu.ie && uu.ver.ua >= 7));
 
 uu.mix(uu.img, {
     load:       uuimgload,   // uu.img.load(url, fn) -> ImageObject

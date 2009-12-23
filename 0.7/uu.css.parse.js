@@ -34,6 +34,9 @@ function uucssparse(cleancss) { // @param String: "clean css"
       SEMICOLON = /\s*;\s*/,
       STAR_HACK = /^\s*\*\s+html/i;
 
+  if (!cleancss) {
+    return rv;
+  }
   v = cleancss.replace(/(["'])(.*?)\1/g, function(m, q, str) { 
     ++escape;
     return q + str.replace(SPECIAL_CHAR, function(code) {
@@ -49,8 +52,9 @@ function uucssparse(cleancss) { // @param String: "clean css"
   ary = v.split(/\s*\{|\}\s*/);
   !uu.ie && ary.pop(); // for IE Array.split bug
 
-  if (ary.length % 2) {
-    return; // parse error
+  if (ary.length % 2) { // parse error
+    uu.config.debug && alert("uu.css.parse() parse error\n" + v);
+    return rv;
   }
 
   for (i = 0, iz = ary.length; i < iz; i += 2) {

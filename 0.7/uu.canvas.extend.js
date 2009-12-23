@@ -1,6 +1,6 @@
 
 // === Canvas Extend ===
-// depend: uu.js, uu.color.js, uu.canvas.js
+// depend: uu.js, uu.canvas.js
 uu.waste || (function(win, doc, uu, _cstyle, CANVAS2D) {
 var _impl         = uu.canvas.impl,
     _colorCache   = _impl.colorCache,

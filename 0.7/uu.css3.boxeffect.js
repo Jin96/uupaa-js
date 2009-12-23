@@ -149,7 +149,7 @@ function fxbond(node,    // @param Node:
       margin:       { t: 0, l: 0, r: 0, b: 0, w: 0, h: 0 },
       border:       { render: 0, shorthand: 0,
                       t: 0, l: 0, r: 0, b: 0, w: 0, h: 0,
-                      tc: ["#000000", 0] },
+                      topcolor: uu.color("transparent") }, // ColorHash
       mbg:          { render: 0,
                       type: [],
                       image: ["none"],
@@ -158,8 +158,8 @@ function fxbond(node,    // @param Node:
                       attachment: ["scroll"],
                       origin: ["padding"],
                       clip: ["no-clip"],
-                      rgba: { r: 0, g: 0, b: 0, a: 0 },
-                      altcolor: uu.css.bgcolor.inherit(node, 1),
+                      rgba: uu.color("transparent"),
+                      altcolor: uu.css.bgcolor.inherit(node), // ColorHash
                       grad: [],
                       imgobj: [],
                       timerid: -1 },
@@ -328,7 +328,7 @@ function boxeffectDraw(bfx,      // @param Hash:
         ary = bfx.bradius.r;
       }
       vctx.save();
-      vctx.fillStyle = bfx.border.tc[0];
+      vctx.fillStyle = bfx.border.topcolor.hex;
       boxpath(vctx,
               bfx.nodeOffset.x,
               bfx.nodeOffset.y,
@@ -359,10 +359,10 @@ function boxeffectDraw(bfx,      // @param Hash:
             !bfx.mbg.rgba.b &&
             !bfx.mbg.rgba.a) { // -uu-background-color: transparent
           nctx.globalAlpha = bfx.mbg.altcolor.a;
-          nctx.fillStyle = uu.color.hex(bfx.mbg.altcolor);
+          nctx.fillStyle = bfx.mbg.altcolor.hex;
         } else {
           nctx.globalAlpha = bfx.mbg.rgba.a;
-          nctx.fillStyle = uu.color.hex(bfx.mbg.rgba);
+          nctx.fillStyle = bfx.mbg.rgba.hex;
         }
         boxpath(nctx,
                 _ie67 ? bfx.border.l : 0,
@@ -387,7 +387,7 @@ function boxeffectDraw(bfx,      // @param Hash:
       if (bfx.border.render && bfx.border.shorthand) {
         if (!bfx.bradius.r[0] && bfx.bradius.shorthand) {
           nctx.save();
-          nctx.strokeStyle = bfx.border.tc[0];
+          nctx.strokeStyle = bfx.border.topcolor.hex;
           nctx.lineWidth = bfx.border.t * 2;
           boxpath(nctx, 0, 0,
                   bfx.nodeRect.w,
@@ -441,7 +441,7 @@ function drawFakeShadow(ctx, x, y, width, height,
 function drawFakeShadowIE(ctx, x, y, width, height,
                           rgba, blur, radius) {
   var i = 0, j = 0, k, step = 1, line = 5, r = radius,
-      hexcolor = uu.color.hex(rgba);
+      hexcolor = rgba.hex;
 
   if (_ie6 && uu.config.light) {
     step *= 3, line *= 2.5;
@@ -747,9 +747,9 @@ function trainBorder(bfx) {
   hash.render = 0;
   hash.shorthand = 0;
   _mix(hash, uu.css.border.get(node, 1));
-  hash.tc = uu.color(ns.borderTopColor);
+  hash.topcolor = uu.color(ns.borderTopColor);
 
-  if (hash.tc[1]) { // has border
+  if (hash.topcolor.a) { // has border (not transparent)
     if (hash.t || hash.l || hash.r || hash.b) {
       hash.render = 1;
     }
