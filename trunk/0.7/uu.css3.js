@@ -83,6 +83,18 @@ var _canvasok = uu.ver.majority,
 
 !uu.config.cssexpr && (_EXCSS.maxmin = _EXCSS.position = 0);
 
+/*
+doc.getCSSCanvasContext || (doc.getCSSCanvasContext = getCSSCanvasContext);
+
+// document.getCSSCanvasContext
+function getCSSCanvasContext(contextType, // @param String: "2d"
+                             id,          // @param String:
+                             width,       // @param Number:
+                             height) {    // @param Number:
+  return newnode._ctx2d;
+}
+ */
+
 // [1][get] uu.css3(node, "color") -> "red"
 // [2][get] uu.css3(node, "color,width") -> { color: "red", width: "20px" }
 // [3][set] uu.css3(node, "color", "red") -> node
@@ -135,7 +147,7 @@ function uucss3get(node,     // @param Node:
 function uucss3set(node,  // @param Node:
                    key,   // @param String/Hash:
                    val) { // @param String(= void 0):
-  var hash, fn, i, v, FIX = uu.dmz.FIX;
+  var hash, fn, i, v, FIX = uupub.FIX;
 
   uu.isstr(key) ? (hash = {}, hash[key] = val) : (hash = key);
   for (i in hash) {
@@ -259,7 +271,7 @@ function _validate(rawdata, context) {
       expair, exbits, exdecl, exorder, exoi, exv, exw, exi, // work
       // document fragment context
       dfctx = (!context || context === doc ||
-                           context === uu.dmz.root) ? doc.body : context;
+                           context === uupub.root) ? doc.body : context;
 
   // reset global vars
   _rules = [];
@@ -586,10 +598,10 @@ function uucss3setbg(node, prop, value) {
 
 // inner -
 function uucss3setbgcolor(node, prop, value) {
-  var rv = uu.color(value, 1),
+  var rv = uu.color(value),
       data = _uid2data[uu.node.id(node)];
 
-  if (!rv.valid) { throw prop + "=" + value; }
+  if (!rv) { throw prop + "=" + value; }
   if (data) {
     data.excss.decl[prop] = value; // update
 
@@ -817,7 +829,7 @@ function autoviewbox() {
   }
 }
 
-function boot() {
+function _css3init() {
   var css = "", tick = +new Date;
 
   _plus && autoviewbox();
@@ -867,7 +879,7 @@ function boot() {
 
 // functional collision with uu.canvas is evaded
 uu.lazy("init", function() {
-  uu.ready(boot);
+  uu.ready(_css3init);
 }, 1); // 1: mid order
 
 })(window, document, uu);

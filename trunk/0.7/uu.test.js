@@ -60,8 +60,10 @@ function _judge(lhs, ope, rhs) {
   switch (ope) {
   case "IS":
   case "->":
-  case "==":      rv =  _eq2(lhs, rhs); break;
-  case "!=":      rv = !_eq2(lhs, rhs); break;
+  case "==":
+  case "LIKE":    rv =  uu.like(lhs, rhs); break;
+  case "!=":
+  case "NOTLIKE": rv = !uu.like(lhs, rhs); break;
   case "===":     rv = lhs.valueOf() == rhs.valueOf(); break;
   case "!==":     rv = lhs.valueOf() != rhs.valueOf(); break;
   case ">":       rv = lhs >  rhs; break;
@@ -74,9 +76,9 @@ function _judge(lhs, ope, rhs) {
   case "|":       rv = lhs |  rhs; break;
   case "||":
   case "OR":      rv = lhs || rhs; break;
-  case "HAS":     rv = _has(lhs, rhs); break;
+  case "HAS":     rv =  uu.has(lhs, rhs); break;
   case "!HAS":
-  case "HASNOT":  rv = !_has(lhs, rhs); break;
+  case "HASNOT":  rv = !uu.has(lhs, rhs); break;
   case "ISTRUE":  rv = !!lhs; break;
   case "ISFALSE": rv =  !lhs; break;
   case "ISNAN":   rv = isNaN(lhs); break;
@@ -89,34 +91,6 @@ function _judge(lhs, ope, rhs) {
     }
   }
   return rv;
-}
-
-// inner - "==" operator
-function _eq2(v1, v2) {
-  var type1 = uu.type(v1);
-
-  if (type1 === uu.type(v2)) {
-    switch (type1) {
-    case uu.ARY:
-    case uu.FAKE: return uu.ary(v1).join(",") === uu.ary(v2).join(",");
-    case uu.HASH: return (uu.hash.size(v1) === uu.hash.size(v2) &&
-                          uu.hash.has(v2, v1));
-    case uu.FUNC: return false;
-    case uu.DATE: return uu.date2str(v1) === uu.date2str(v2);
-    }
-    return v1 === v2;
-  }
-  return false;
-}
-
-// inner - "has" operator
-function _has(v1, v2) {
-  switch (uu.type(v1)) {
-  case uu.STR:  return (v1.indexOf(v2) >= 0);
-  case uu.HASH: return uu.hash.has(v2, v1);
-  case uu.ARY:  return uu.ary.has(v2, v1);
-  }
-  return false;
 }
 
 })(uu);

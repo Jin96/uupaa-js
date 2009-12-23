@@ -2,135 +2,37 @@
 // === Color ===
 // depend: uu.js
 //
-// type Number = 0x000000
-// type RGBAHash = { r,g,b,a }
-// type RGBAValidHash = { r,g,b,a,valid }
-// type HexColorString = "#ffffff"
-// type HexColorValidArray = [HexColorString, alpha, valid]
-// type RGBAColorString = "rgba(0,0,0,0)"
-// type W3CNamedColorString = "pink", "skyblue"
+// type ColorHash = { hex: "#000000", rgba: "rgba(0,0,0,0)",
+//                    r: 0, g: 0, b: 0, a: 0 }
+// type RGBAHash = { r: 0, g: 0, b: 0, a: 0 }
+// type HSVAHash = { h: 0, s: 0, v: 0, a: 0 }
+// type HSLAHash = { h: 0, s: 0, l: 0, a: 0 }
+// type W3CNamedColorString = "pink"
 
 uu.waste || (function(win, doc, uu) {
-var _HEX2 = uu.dmz.HEX2,
-    _round = Math.round,
-    _colordb = { transparent: { hex: "#000000", num: 0,
-                                r: 0, g: 0, b: 0, a: 0, valid: 1 } },
-    _MANY_SPACE = /\s+/g,
-    _PARSE_HEX = /^#(([\da-f])([\da-f])([\da-f])([\da-f]{3})?)$/,
-    _PARSE_RGBA = /(rgba?)\((\d+),(\d+),(\d+)(?:,([\d\.]+))?\)/,
-    _PARSE_PERCENT = /[\d\.]+%/g;
+var _HEX = uupub.HEX2, _round = Math.round;
 
-// [1][HexColor] uu.color("white")    -> ["#ffffff", 1, 1]
-// [2][RGBAHash] uu.color("white", 1) -> { r:255,g:255,b:255,a:1,valid:1 }
-// [3][Number]   uu.color("white", 2) -> Number(0xffffff)
-uu.color = uu.mix(uucolor, {
-  add:          uucoloradd,       // uu.color.add("000000black,...")
-  hex:          uucolorhex,       // uu.color.hex(rgba) -> HexColorString("#ffffff")
-  rgba:         uucolorrgba,      // uu.color.rgba(rgba) -> RGBAColorString("rgba(0,0,0,0)")
-  gray:         uucolorgray,      // uu.color.gray(rgba) -> RGBAHash
-  sepia:        uucolorsepia,     // uu.color.sepia(rgba) -> RGBAHash
-  comple:       uucolorcomple,    // uu.color.comple(rgba) -> RGBAHash
-  arrange:      uucolorarrange,   // uu.color.arrange(rgba, h = 0, s = 0, v = 0) -> RGBAHash
-  hex2rgba:     uucolorhex2rgba,  // uu.color.hex2rgba(hex) -> RGBAHash
-  num2rgba:     uucolornum2rgba,  // uu.color.num2rgba(number) -> RGBAHash
-  rgba2hsva:    uucolorrgba2hsva, // uu.color.rgba2hsva(rgba) -> HSVAHash
-  hsva2rgba:    uucolorhsva2rgba, // uu.color.hsva2rgba(hsva) -> RGBAHash
-  rgba2hsla:    uucolorrgba2hsla, // uu.color.rgba2hsla(rgba) -> HSLAHash
-  hsla2rgba:    uucolorhsla2rgba, // uu.color.hsla2rgba(hsla) -> RGBAHash
-  _db:          _colordb          // [protected] color db
+uu.mix(uu.color, {
+  gray:         uucolorgray,      // uu.color.gray(RGBAHash/ColorHash) -> ColorHash
+  sepia:        uucolorsepia,     // uu.color.sepia(RGBAHash/ColorHash) -> ColorHash
+  comple:       uucolorcomple,    // uu.color.comple(RGBAHash/ColorHash) -> ColorHash
+  arrange:      uucolorarrange,   // uu.color.arrange(RGBAHash/ColorHash, h = 0, s = 0, v = 0) -> ColorHash
+  rgba2hsva:    uucolorrgba2hsva, // uu.color.rgba2hsva(RGBAHash/ColorHash) -> HSVAHash
+  hsva2rgba:    uucolorhsva2rgba, // uu.color.hsva2rgba(HSVAHash) -> ColorHash
+  rgba2hsla:    uucolorrgba2hsla, // uu.color.rgba2hsla(RGBAHash/ColorHash) -> HSLAHash
+  hsla2rgba:    uucolorhsla2rgba  // uu.color.hsla2rgba(HSLAHash) -> ColorHash
 });
 
-// uu.color - parse color
-// [1][HexColor] uu.color("white")    -> ["#ffffff", 1, 1]
-// [2][RGBAHash] uu.color("white", 1) -> { r:255,g:255,b:255,a:1,valid:1 }
-// [3][Number]   uu.color("white", 2) -> Number(0xffffff)
-function uucolor(color,  // @parem RGBAColorString/HexColorString
-                         //        /W3CNamedColorString:
-                 type) { // @param Number(= 0): result type
-                         // @return HexColorValidArray(type=0)
-                         //         /RGBAValidHash(type=1)
-                         //         /Number(type=2):
-  var rv = _colordb[color], m, n;
-
-  !rv && (color = color.toLowerCase().replace(_MANY_SPACE, ""),
-          rv = _colordb[color]);
-  if (rv) {
-    return !type ? [rv.hex, rv.a, rv.valid]    // [1]
-                 : (type === 1) ? rv : rv.num; // [2][3]
-  }
-  m = _PARSE_HEX.exec(color);
-  if (m) {
-    rv = m[5] ? m[1]
-              : (m[2] + m[2] + m[3] + m[3] + m[4] + m[4]);
-    if (!type) {
-      return ["#" + rv, 1, 1]; // [1]
-    }
-    n = parseInt(rv, 16);
-    return (type === 1) ? { r: (n >> 16) & 255, g: (n >> 8) & 255, // [2]
-                            b: n & 255, a: 1, valid: 1 } : n;      // [3]
-  }
-  m = _PARSE_RGBA.exec(color);
-  if (!m) {
-    m = _PARSE_RGBA.exec(color.replace(_PARSE_PERCENT, function(n) {
-      return Math.min((parseFloat(n) || 0) * 2.55, 255) | 0
-    }));
-  }
-  switch (type || 0) {
-  case 0: return m ? ["#" + _HEX2[m[2]] + _HEX2[m[3]] + _HEX2[m[4]], // [1]
-                      m[1] === "rgb" ? 1 : parseFloat(m[5]), 1]
-                   : ["#000000", 0, 0];
-  case 1: return m ? { r: m[2] | 0, g: m[3] | 0, b: m[4] | 0, // [2]
-                       a: m[1] === "rgb" ? 1 : parseFloat(m[5]),
-                       valid: 1 }
-                   : { r: 0, g: 0, b: 0, a: 0, valid: 0 };
-  }
-  return m ? m[2] * 65536 + m[3] * 256 + m[4] * 1 : 0; // [3]
-}
-
-// uu.color.add
-function uucoloradd(items) { // @param JointString: "000000black,..."
-  var key, val, num, v, i = 0, item = items.split(",");
-
-  while ( (v = item[i++]) ) {
-    key = v.slice(6);
-    val = v.slice(0, 6);
-    num = parseInt(val, 16);
-    _colordb[key] = {
-      hex: "#" + val,
-      num: num,
-      r: (num >> 16) & 255,
-      g: (num >> 8) & 255,
-      b: num & 255,
-      a: 1,
-      valid: 1
-    };
-  }
-}
-
-// uu.color.hex - return Hex Color String( "#ffffff" )
-function uucolorhex(rgba) { // @param RGBAHash: Hash( { r,g,b,a })
-                            // @return HexColorString( "#ffffff" )
-  return "#" + _HEX2[rgba.r] + _HEX2[rgba.g] + _HEX2[rgba.b];
-}
-
-// uu.color.rgba - return RGBA Color String( "rgba(0,0,0,0)" )
-function uucolorrgba(rgba) { // @param RGBAHash: Hash( { r,g,b,a })
-                             // @return RGBAColorString( "rgba(0,0,0,0)" )
-  return "rgba(" + rgba.r + "," + rgba.g + "," +
-                   rgba.b + "," + rgba.a + ")";
-}
-
 // uu.color.gray - gray color (G channel method)
-function uucolorgray(rgba) { // @param RGBAHash: Hash( { r,g,b,a })
-                             // @return RGBAHash:
-  return { r: rgba.g, g: rgba.g,
-           b: rgba.g, a: rgba.a };
+function uucolorgray(c) { // @param ColorHash/RGBAHash:
+                          // @return ColorHash:
+  return _supply({ r: c.g, g: c.g, b: c.g, a: c.a });
 }
 
 // uu.color.sepia - sepia color
-function uucolorsepia(rgba) { // @param RGBAHash: Hash( { r,g,b,a })
-                              // @return RGBAHash:
-  var r = rgba.r, g = rgba.g, b = rgba.b,
+function uucolorsepia(c) { // @param ColorHash/RGBAHash:
+                           // @return ColorHash:
+  var r = c.r, g = c.g, b = c.b,
       y = 0.2990 * r + 0.5870 * g + 0.1140 * b,
       u = -0.091,
       v = 0.056;
@@ -140,51 +42,37 @@ function uucolorsepia(rgba) { // @param RGBAHash: Hash( { r,g,b,a })
   b = y + 1.7330 * u;
   r *= 1.2;
   b *= 0.8;
-  return { r: r < 0 ? 0 : r > 255 ? 255 : r | 0,
-           g: g < 0 ? 0 : g > 255 ? 255 : g | 0,
-           b: b < 0 ? 0 : b > 255 ? 255 : b | 0, a: rgba.a };
+  return _supply({ r: r < 0 ? 0 : r > 255 ? 255 : r | 0,
+                   g: g < 0 ? 0 : g > 255 ? 255 : g | 0,
+                   b: b < 0 ? 0 : b > 255 ? 255 : b | 0, a: c.a });
 }
 
 // uu.color.comple - complementary color
-function uucolorcomple(rgba) { // @param RGBAHash: Hash( { r,g,b,a })
-                               // @return RGBAHash:
-  return { r: rgba.r ^ 255, g: rgba.g ^ 255,
-           b: rgba.b ^ 255, a: rgba.a };
+function uucolorcomple(c) { // @param ColorHash/RGBAHash:
+                            // @return ColorHash:
+  return _supply({ r: c.r ^ 255, g: c.g ^ 255, b: c.b ^ 255, a: c.a });
 }
 
 // uu.color.arrange - arrangemented color(Hue, Saturation and Value)
 //    Hue is absolure value,
 //    Saturation and Value is relative value.
-function uucolorarrange(rgba, // @param RGBAHash: Hash( { r,g,b,a })
-                        h,    // @param Number(=0): Hue (-360~360)
-                        s,    // @param Number(=0): Saturation (-100~100)
-                        v) {  // @param Number(=0): Value (-100~100)
-                              // @return RGBAHash:
-  var rv = uucolorrgba2hsva(rgba), r = 360;
+function uucolorarrange(c,   // @param ColorHash/RGBAHash:
+                        h,   // @param Number(=0): Hue (-360~360)
+                        s,   // @param Number(=0): Saturation (-100~100)
+                        v) { // @param Number(=0): Value (-100~100)
+                             // @return ColorHash:
+  var rv = uucolorrgba2hsva(c), r = 360;
 
   rv.h += h, rv.h = (rv.h > r) ? rv.h - r : (rv.h < 0) ? rv.h + r : rv.h;
   rv.s += s, rv.s = (rv.s > 100) ? 100 : (rv.s < 0) ? 0 : rv.s;
   rv.v += v, rv.v = (rv.v > 100) ? 100 : (rv.v < 0) ? 0 : rv.v;
-  return uucolorhsva2rgba(rv);
-}
-
-// uu.color.hex2rgba - convert "#ffffff" to RGBAHash
-function uucolorhex2rgba(hex) { // @param HexColorString: String( "#ffffff" )
-                                // @return RGBAHash: Hash( { r,g,b,a } )
-  return uucolornum2rgba(parseInt(hex.slice(1), 16));
-}
-
-// uu.color.num2rgba - convert Number(0xffffff) to RGBAHash
-function uucolornum2rgba(num) { // @param Number: 0xffffff
-                                // @return RGBAHash: Hash( { r,g,b,a } )
-  return { r: (num >> 16) & 0xff, g: (num >> 8) & 0xff,
-           b: num & 0xff, a: 1 };
+  return uucolorhsva2rgba(rv); // ColorHash
 }
 
 // uu.color.rgba2hsva
-function uucolorrgba2hsva(rgba) { // @param RGBAHash:
-                                  // @return HSVAHash:
-  var r = rgba.r / 255, g = rgba.g / 255, b = rgba.b / 255,
+function uucolorrgba2hsva(c) { // @param ColorHash/RGBAHash:
+                               // @return HSVAHash:
+  var r = c.r / 255, g = c.g / 255, b = c.b / 255,
       max = Math.max(r, g, b),
       diff = max - Math.min(r, g, b),
       h = 0,
@@ -192,19 +80,20 @@ function uucolorrgba2hsva(rgba) { // @param RGBAHash:
       v = _round(max * 100);
 
   if (!s) {
-    return { h: 0, s: 0, v: v, a: rgba.a };
+    return { h: 0, s: 0, v: v, a: c.a };
   }
   h = (r === max) ? ((g - b) * 60 / diff) :
       (g === max) ? ((b - r) * 60 / diff + 120)
                   : ((r - g) * 60 / diff + 240);
   // HSVAHash( { h:360, s:100, v:100, a:1.0 } )
-  return { h: (h < 0) ? h + 360 : h, s: s, v: v, a: rgba.a };
+  return { h: (h < 0) ? h + 360 : h, s: s, v: v, a: c.a };
 }
 
 // uu.color.hsva2rgba
 function uucolorhsva2rgba(hsva) { // @param HSVAHash:
-                                  // @return RGBAHash:
-  var h = (hsva.h >= 360) ? 0 : hsva.h,
+                                  // @return ColorHash:
+  var rv,
+      h = (hsva.h >= 360) ? 0 : hsva.h,
       s = hsva.s / 100,
       v = hsva.v / 100,
       a = hsva.a,
@@ -222,22 +111,24 @@ function uucolorhsva2rgba(hsva) { // @param HSVAHash:
   t = round((1 - (s * (1 - f))) * v255),
   w = round(v255);
   switch (matrix) {
-  case 0: return { r: w, g: t, b: p, a: a };
-  case 1: return { r: q, g: w, b: p, a: a };
-  case 2: return { r: p, g: w, b: t, a: a };
-  case 3: return { r: p, g: q, b: w, a: a };
-  case 4: return { r: t, g: p, b: w, a: a };
-  case 5: return { r: w, g: p, b: q, a: a };
+  case 0:  rv = { r: w, g: t, b: p }; break;
+  case 1:  rv = { r: q, g: w, b: p }; break;
+  case 2:  rv = { r: p, g: w, b: t }; break;
+  case 3:  rv = { r: p, g: q, b: w }; break;
+  case 4:  rv = { r: t, g: p, b: w }; break;
+  case 5:  rv = { r: w, g: p, b: q }; break;
+  default: rv = { r: 0, g: 0, b: 0 };
   }
-  return { r: 0, g: 0, b: 0, a: a };
+  rv.a = a;
+  return _supply(rv);
 }
 
 // uu.color.rgba2hsla
-function uucolorrgba2hsla(rgba) { // @param RGBAHash:
-                                  // @return HSLAHash:
-  var r = rgba.r / 255,
-      g = rgba.g / 255,
-      b = rgba.b / 255,
+function uucolorrgba2hsla(c) { // @param ColorHash/RGBAHash:
+                               // @return HSLAHash:
+  var r = c.r / 255,
+      g = c.g / 255,
+      b = c.b / 255,
       max = Math.max(r, g, b),
       min = Math.min(r, g, b),
       diff = max - min,
@@ -256,12 +147,12 @@ function uucolorrgba2hsla(rgba) { // @param RGBAHash:
     }
     h *= 60;
   }
-  return { h: h, s: _round(s * 100), l: _round(l * 100), a: rgba.a };
+  return { h: h, s: _round(s * 100), l: _round(l * 100), a: c.a };
 }
 
 // uu.color.hsla2rgba - ( h: 0-360, s: 0-100, l: 0-100, a: alpha )
 function uucolorhsla2rgba(hsla) { // @param HSLAHash:
-                                  // @return RGBAHash:
+                                  // @return ColorHash:
   var h = (hsla.h === 360) ? 0 : hsla.h,
       s = hsla.s / 100,
       l = hsla.l / 100,
@@ -290,13 +181,21 @@ function uucolorhsla2rgba(hsla) { // @param HSLAHash:
     g = l1 * g + l2;
     b = l1 * b + l2;
   }
-  return { r: _round(r * 255), g: _round(g * 255),
-           b: _round(b * 255), a: hsla.a };
+  return _supply({ r: _round(r * 255), g: _round(g * 255),
+                   b: _round(b * 255), a: hsla.a });
+}
+
+// inner -
+function _supply(c) { // @param RGBAHash/ColorHash:
+                      // @return ColorHash:
+  c.rgba || (c.rgba = "rgba(" + c.r + "," + c.g + "," + c.b + "," + c.a + ")");
+  c.hex  || (c.hex  = "#" + _HEX[c.r] + _HEX[c.g] + _HEX[c.b]);
+  return c;
 }
 
 // --- initialize ---
 // add W3C Named Color
-uucoloradd("000000black,888888gray,ccccccsilver,ffffffwhite,ff0000red,ffff00" +
+uu.color.add("000000black,888888gray,ccccccsilver,ffffffwhite,ff0000red,ffff00"+
 "yellow,00ff00lime,00ffffaqua,00ffffcyan,0000ffblue,ff00fffuchsia,ff00ffmage" +
 "nta,880000maroon,888800olive,008800green,008888teal,000088navy,880088purple" +
 ",696969dimgray,808080gray,a9a9a9darkgray,c0c0c0silver,d3d3d3lightgrey,dcdcd" +

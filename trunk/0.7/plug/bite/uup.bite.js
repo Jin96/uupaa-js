@@ -546,21 +546,25 @@ function bitetoggle(speed) {
 // bite.animate
 function biteanimate(hash,
                      duration,
-                     easing) {
+                     easing,
+                     fn) {
   function _biteanimate(node) {
     var rv = {}, i;
 
     for (i in hash) {
       rv[i] = [hash[i], easing];
     }
-    uu.tween(node, duration, rv);
+    function _wrap(node, ns) {
+      fn.call(node, node, ns); // this manage
+    }
+    uu.tween(node, duration, rv, fn ? _wrap : 0);
   }
   return _biteeach(this, _biteanimate);
 }
 
 // bite.stop
 function bitestop() { // @return this:
-  return _biteeach(this, uu.tween.fin);
+  return _biteeach(this, uu.tween.skip);
 }
 
 // bite.width

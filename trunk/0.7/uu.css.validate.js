@@ -68,8 +68,8 @@ function border(value, // @param String: border value
       style = v;
       continue;
     }
-    r = uu.color(v, 1);
-    if (r.valid) {
+    r = uu.color(v);
+    if (r) {
       rgba = r;
       continue;
     }
@@ -106,8 +106,8 @@ function shadow(value, // @param String: -uu-box-shadow: value
     oy    = ary.shift() || 0;
     blur  = ary.shift() || 0;
 
-    c = uu.color(rgba, 1);
-    valid = c.valid;
+    c = uu.color(rgba);
+    valid = !!c; // 0 is invalid color
 
     rv.rgba.push(c); // rgba
     rv.ox.push(ox);
@@ -258,8 +258,8 @@ function background(value, // @param String: -uu-background: value
           // color is permitted in <final-bg-layer>, but not in <bg-layer>
           // http://www.w3.org/TR/css3-background/
           if (!rgba) {
-            rgba = uu.color(w, 1);
-            valid = rgba.valid;
+            rgba = uu.color(w);
+            valid = !!rgba;
             continue;
           }
         }

@@ -94,10 +94,20 @@ function uuurldir(abspath,  // @param URLString/PathString: absolute path
 // uu.url.parse - parse URL
 // uu.url.parse(".") is current url
 function uuurlparse(url) { // @param URLString:
-                           // @return Boolean/Hash: false is fail,
-                           //         Hash: { url, scheme, domain, port, base,
-                           //                 path, dir, file, query, hash,
-                           //                 fragment }
+                           // @return Hash/0: 0 is fail,
+                           //         { url, scheme, domain, port, base,
+                           //           path, dir, file, query, hash, fragment }
+                           //   hash.url    - AbsoluteURLString: "http://..."
+                           //   hash.scheme - SchemeString: "file" or "http" or "https"
+                           //   hash.domain - DomainNameString: "www.example.com"
+                           //   hash.port   - PortNumberString: "" or "8080"
+                           //   hash.base   - BaseURLString: "shceme://domain[:port]/dir"
+                           //   hash.path   - PathString: "/" or "/dir/file.ext"
+                           //   hash.dir    - DirString: "/" or "/dir"
+                           //   hash.file   - FileNameString: "" or "file.ext"
+                           //   hash.query  - QueryString: "" or "key1=value1;key2=value2"
+                           //   hash.hash   - QueryStringHash: { key: value, ... }
+                           //   hash.fragment - FragmentString( "" or "menu1" )
   var m, w = ["/", ""], abs = uuurlabs(url);
 
   m = _FILE.exec(abs);
@@ -111,28 +121,17 @@ function uuurlparse(url) { // @param URLString:
   m = _URL.exec(abs);
   if (m) {
     m[4] && uuurldir(m[4], w);
-    return {
-      url:      abs,          // AbsoluteURLString( "http://..." )
-      scheme:   m[1],         // SchemeString( "file" or "http" or "https" )
-      domain:   m[2],         // DomainNameString( "www.example.com" )
-      port:     m[3] || "",   // PortNumber( "8080" or "" ) - not Number
-      base:     (m[1] + "://" + m[2]) + (m[3] ? ":" + m[3] : "") + w[0],
-      path:     m[4] || "/",  // PathString( "/dir/file.ext" or "/" )
-      dir:      w[0],         // DirString( "/dir" or "/" )
-      file:     w[1],         // FileNameString( "file.ext" or "" )
-      query:    m[5] || "",   // QueryString( "key1=value1;key2=value2" or "" )
-      hash:     m[5] ? uuqsparse(m[5]) : {},
-                              // QueryHash( { key1: "value1", key2: "value2" } )
-      fragment: m[6] || ""    // FragmentString( "menu1" or "" )
-    };
+    return { url: abs, scheme: m[1], domain: m[2], port: m[3] || "",
+             base: (m[1] + "://" + m[2]) + (m[3] ? ":" + m[3] : "") + w[0],
+             path: m[4] || "/", dir: w[0], file: w[1], query: m[5] || "",
+             hash: m[5] ? uuqsparse(m[5]) : {}, fragment: m[6] || "" };
   }
-  return false;
+  return 0;
 }
 
 // uu.url.build - build URL
 function uuurlbuild(hash) { // @param Hash:
-                            // @return String:
-                            //         "scheme://domain:port/path?query#fragment"
+                            // @return String: "scheme://domain:port/path?query#fragment"
   return [hash.scheme, "://", hash.domain,
           hash.port     ? ":" + hash.port     : "", hash.path || "/",
           hash.query    ? "?" + hash.query    : "",

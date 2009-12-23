@@ -37,7 +37,7 @@ var _slhosts      = 0,  // Silverlight host count
                       FANTASY: 1, CURSIVE: 1 },
     _QUOTE        = /[\"\']/g,
     _COMMA        = /\s*,\s*/g,
-    _METHOD = {
+    _METHOD = { // SL2D and VML2D Methods
         save:             save,
         restore:          restore,
         scale:            scale,
@@ -98,15 +98,15 @@ CanvasGradient.prototype.addColorStop = addColorStop;
 // hook document.createElement
 if ((uu.ie || _safari3x) && !doc.uucreateelement) {
   doc.uucreateelement = doc.createElement; // keep original method
-  doc.createElement = _createelement;
+  doc.createElement = _createElement;
 }
 
-// inner - create element
-function _createelement(tag,      // @param String: tag name
+// inner - document.createElement wrapper
+function _createElement(tag,      // @param String: tag name
                         vml,      // @param Boolean(= false): true is vml canvas
                         dummy1,   // @param Mix: dummy arg
                         dummy2) { // @param Mix: dummy arg
-                                 // @return Node: new element
+                                  // @return Node: new element
   if (tag === "canvas") {
     var elm = doc.uucreateelement("CANVAS"); // [!] upper case
 
@@ -140,7 +140,9 @@ function uucanvasexpire() {
 
 // uu.canvas.impl.parseColor
 function uucanvasimplparsecolor(c) { // @param ColorString:
-  return _colorCache[c] = uu.color(c); // add cache
+  var rgba = uu.color(c);
+
+  return _colorCache[c] = [rgba.hex, rgba.a]; // add cache
 }
 
 // uu.canvas.impl.matrix2DMultiply - 2D Matrix multiply
@@ -224,14 +226,8 @@ function uucanvasimplgettextmetric(text, font) {
 
 // uu.canvas.impl.bgcolor - get background-color from ancestor
 // [uu.css.bgcolor.inherit] copy
-function uucanvasimplbgcolor(node,   // @param Node:
-                             type) { // @param Number(= 0): result type
-                                     //            0 = return HexColorValidArray
-                                     //            1 = return RGBAValidHash
-                                     //            2 = return Number
-                                     // @return HexColorValidArray(type=0)
-                                     //         /RGBAValidHash(type=1)
-                                     //         /Number(type=2):
+function uucanvasimplbgcolor(node) { // @param Node:
+                                     // @return String: "#ffffff"
   var n = node, color = "transparent",
       ZERO = { transparent: 1, "rgba(0, 0, 0, 0)": 1 };
 
@@ -242,7 +238,7 @@ function uucanvasimplbgcolor(node,   // @param Node:
     }
     n = n.parentNode;
   }
-  return uu.color(ZERO[color] ? "white" : color, type || 0);
+  return uu.color(ZERO[color] ? "white" : color).hex;
 }
 
 // uu.canvas.impl.parseFont - parse CSS::font style
@@ -504,13 +500,13 @@ function initSurface(resize) { // @param Number(= 0): 1 is resize
 
 // inner - onPropertyChange handler
 function onPropertyChange(evt) {
-  var tgt, name = evt.propertyName, ctx;
+  var node, name = evt.propertyName, ctx;
 
   if ({ width: 1, height: 1 }[name]) {
-    tgt = evt.srcElement; // tgt = <canvas>
-    tgt.style[name] = _math.max(parseInt(tgt[name]), 0) + "px";
-    if (tgt._ctx2d._readyState) {
-      ctx = tgt._ctx2d;
+    node = evt.srcElement; // node = <canvas>
+    node.style[name] = _math.max(parseInt(node[name]), 0) + "px";
+    if (node._ctx2d._readyState) {
+      ctx = node._ctx2d;
       ctx.initSurface(1); // 1: resize
       ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     }
@@ -625,6 +621,7 @@ function initSL(node) { // @param Node:
   newnode.height = newnode.style.pixelHeight =
       (ah && ah.specified) ? ah.nodeValue : 150;
 
+  // CanvasRenderingContext.getContext
   newnode.getContext = function() {
     return newnode._ctx2d;
   };
@@ -684,6 +681,7 @@ function initVML(node) { // @param Node:
   newnode.style.pixelWidth  = (aw && aw.specified) ? aw.nodeValue : 300;
   newnode.style.pixelHeight = (ah && ah.specified) ? ah.nodeValue : 150;
 
+  // CanvasRenderingContext.getContext
   newnode.getContext = function() {
     return newnode._ctx2d;
   };
@@ -728,7 +726,7 @@ uu.ie && uu.lazy("init", function() {
 
 // functional collision with uu.css3 is evaded
 uu.ie && uu.lazy("init", function() {
-  var v, i = 0, ary = uu.dmz.HTML5TAG.split(","), VML = "#default#VML",
+  var v, i = 0, ary = uupub.HTML5TAG.split(","), VML = "#default#VML",
       ss = doc.createStyleSheet(),
       ns = doc.namespaces, NS = "urn:schemas-microsoft-com:";
 

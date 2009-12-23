@@ -7,9 +7,10 @@
 //   altcss: 0,      // @param Number/Function(= 0): altcss mode
 //                   //                     0 is auto, callback function
 //   consel: 0,      // @param Number(= 1): 1 is enable conditional selector
-//   cssexpr: 0,     // @param Number(= 0): 1 is enable css-expression, 0 is disable
 //   imgdir: "img",  // @param String(= "img"): image dir
-//   visited: 0      // @param Number(= 0): 1 is E:visited activate
+//   cssexpr: 0,     // @param Number(= 0): 1 is enable css-expression, 0 is disable
+//   visited: 0,     // @param Number(= 0): 1 is E:visited activate
+//   innerText: 0    // @param Number(= 0): 1 is innerText, outerHTML extend for Gecko
 // };
 // --- user callback functions ---
 // window.xboot(uu) - DOMContentLoaded or window.onload callback handler
@@ -17,16 +18,23 @@
 // window.xcanvas(uu) - canvas ready callback handler
 // window.xtag(uu, node, tagid) - uu.div(tagid) ..  callback handler
 
-var uu; // library namespace
+var uu,    // window.uu    - uupaa.js library namespace
+    uupub; // window.uupub - public data and methods
 
-function uup() { return uu.hash.keys(uup); } // plugin namespace
-function uuvain() {} // global function, memory leak of IE is evaded
+// window.uup - plugin namespace, enum plugins
+function uup() { // @return Array: ["plugin-name", ...]
+  return uu.hash.keys(uup);
+}
+
+// window.uuvain - global empty function(memory leak of IE is evaded)
+function uuvain() {
+}
 
 uu ? ++uu.waste : (function(win, doc, _xconfig, _json) {
-var _config = uuarg(_xconfig, {
-        aria: 0, debug: 0, light: 1, altcss: 1, consel: 1, cssexpr: 0,
-        imgdir: "img", visited: 0 }),
-    _ver    = uuvers(_config.consel),
+var _cfg    = uuarg(_xconfig, {
+        aria: 0, debug: 0, light: 1, altcss: 1, consel: 1, imgdir: "img",
+        cssexpr: 0, visited: 0, innerText: 0 }),
+    _ver    = uuvers(_cfg.consel),
     _ie     = _ver.ie,
     _qtag   = _ie ? (uutaglegacy || 0) : uutag,
     _qklass = doc.getElementsByClassName ? uuklass : (uuklasslegacy || 0),
@@ -35,14 +43,16 @@ var _config = uuarg(_xconfig, {
     _slice  = Array.prototype.slice, // quick toArray
     _tostr  = Object.prototype.toString, // type detector
     _guid   = 0,  // uu.guid() counter
-    _sxhr   = 0,  // [lazy] xhr object cache for uu.ajax.sync
-    _jjdb   = {}, // { jobid: fn, ... } jsonp job database
+    _colorc = {}, // color cache
+    _colordb= { transparent:{ r: 0, g: 0, b: 0, a: 0, // color db
+                              hex: "#000000", rgba: "rgba(0,0,0,0)" }},
+    _jsondb = {}, // { jobid: fn, ... } jsonp job database
     _lazydb = {}, // { id: [[low], [mid], [high]], ... }
     _ndiddb = {}, // { nodeid: node, ... }
-    _ajaxdb = {}, // { "url": last modified date time(unit: ms), ...}
+    _ajaxc  = {}, // ajax cache { "url": last modified date time(unit: ms), ...}
     _FIX    = {},
-    _DEC2   = _numary("0123456789"),       // { 0: "00", ...  99: "99" }
-    _HEX2   = _numary("0123456789abcdef"), // { 0: "00", ... 255: "ff" }
+    _DEC2   = _numary("0123456789"),       // ["00", ...  99: "99"]
+    _HEX2   = _numary("0123456789abcdef"), // ["00", ... 255: "ff"]
     _HASH   = 1, _NODE = 2, _FAKE = 4, _DATE = 8, _NULL = 16, _VOID = 32,
     _BOOL   = 64, _FUNC = 128, _NUM = 256, _STR = 1024, _ARY = 2048,
     _REX    = 4096, _CSTYLE = 8192,
@@ -61,8 +71,10 @@ var _config = uuarg(_xconfig, {
                 ",pos,position,w,width,h,height,x,left,y,top,o,opacity," +
                 "bg,background,bgcolor,backgroundColor,bgimg,backgroundImage," +
                 "bgrpt,backgroundRepeat,bgpos,backgroundPosition"),
-    _EVENT  = "mousedown,mouseup,mousemove,mousewheel,click,dblclick,keydown," +
+    _EV     = "mousedown,mouseup,mousemove,mousewheel,click,dblclick,keydown," +
               "keypress,keyup,change,submit,focus,blur,contextmenu",
+    _EVFIX  = _ver.gecko ? { mousewheel: "DOMMouseScroll" } :
+              _ver.opera ? { contextmenu: "mousedown" } : {},
     _EVCODE = { mousedown: 1, mouseup: 2, mousemove: 3, mousewheel: 4, click: 5,
                 dblclick: 6, keydown: 7, keypress: 8, keyup: 9, mouseenter: 10,
                 mouseleave: 11, mouseover: 12, mouseout: 13, contextmenu: 14,
@@ -71,8 +83,6 @@ var _config = uuarg(_xconfig, {
     _HTML5  = "abbr,article,aside,audio,bb,canvas,datagrid,datalist,details," +
               "dialog,eventsource,figure,footer,header,hgroup,mark,menu," +
               "meter,nav,output,progress,section,time,video",
-    _EVFIX  = _ver.gecko ? { mousewheel: "DOMMouseScroll" } :
-              _ver.opera ? { contextmenu: "mousedown" } : {},
     _NGWORD = /(:(a|b|co|dig|first-l|li|mom|ne|p|sc|t|v))|!=|\/=|<=|>=|&=|x7b/,
     _ISO_DATE = /^(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d):(\d\d)(?:\.(\d*))?Z$/,
     _FMT_BITS = { i: 0x8011, d: 0x8011, u: 0x8021, o: 0x8161, x: 0x8261,
@@ -85,45 +95,55 @@ var _config = uuarg(_xconfig, {
     _JSON_NGWORD = /[^,:{}\[\]0-9.\-+Eaeflnr-u \n\r\t]/,
     _JAM_KLASS = { "+": uuklassadd, "-": uuklasssub, "!": uuklasstoggle },
     _QUERY_STR = /(?:([^\=]+)\=([^\;]+);?)/g,
+    _HSLACOLOR = /^hsla?\((\d+),(\d+),(\d+)(?:,([\d\.]+))?\)/,
+    _RGBACOLOR = /^rgba?\((\d+),(\d+),(\d+)(?:,([\d\.]+))?\)/,
+    _HEXCOLOR = /^#(([\da-f])([\da-f])([\da-f])([\da-f]{3})?)$/,
     _FROM_ENT = /&(?:amp|lt|gt|quot);/g,
     _EVPARSE = /^(?:(\w+)\.)?(\w+)(\+)?$/, // ^[NameSpace.]EvntType[Capture]$
     _BRACKET = /^\s*[\(\[\{<]?|[>\}\]\)]?\s*$/g,
     _SPCOMMA = /^[ ,]+|[ ,]+$/g,
+    _PERCENT = /[\d\.]+%/g,
     _COMMAS = /,,+/g,
-    _SCHEME = /^(file|https?):/,
+    _SCHEME = /^(?:file|https?):/,
     _SPACES = /\s\s+/g,
     _TO_ENT = /[&<>"]/g,
+    _SPACE = /\s+/g,
     _QUOTE = /^\s*["']?|["']?\s*$/g,
     _TAGS = /<\/?[^>]+>/g,
     _TRIM = /^\s+|\s+$/g,
     _UCS2 = /\\u([0-9a-z]{4})/g,
-    _ENT = uuhash("&,&amp;,<,&lt;,>,&gt;,\",&quot;," +
-                  "&amp;,&,&lt;,<,&gt;,>,&quot;,\""),
-    _dmz = { root: doc.documentElement || _html, // root or <html>(IE quirks)
-             jjdb: _jjdb,     // jsonp job database
-             iebody: 0,       // [lazy] documentElement or <body>(IE quirks)
-             ndiddb: _ndiddb, // nodeid database
-             ndidseed: 0,     // nodeid counter
-             DEC2: _DEC2, HEX2: _HEX2, FIX: _FIX, EVENT: _EVENT,
-             EVCODE: _EVCODE, HTML5TAG: _HTML5 };
+    _ENT = uuhash('&,&amp;,<,&lt;,>,&gt;,",&quot;,&amp;,&,&lt;,<,&gt;,>,&quot;,"');
+
+uupub = {
+  root: doc.documentElement || _html, // root or <html>(IE quirks)
+  jsondb: _jsondb, // jsonp job database
+  iebody: 0,       // [lazy] documentElement or <body>(IE quirks)
+  ndiddb: _ndiddb, // nodeid database
+  ndidseed: 0,     // nodeid counter
+  DEC2: _DEC2, HEX2: _HEX2, FIX: _FIX, EVCODE: _EVCODE, HTML5TAG: _HTML5
+};
+_cfg.imgdir = _cfg.imgdir.replace(/\/+$/, "") + "/"; // "img" -> "img/"
 
 // --- structure ---
 uu = uumix(_uujamfactory, {     // uu(expr, ctx) -> Instance(jam)
   ver:    uumix(_ver, {         // uu.ver - version and meta infos
     lib:        0.7             //      ua, re, sl, fl, ie, ie6, ie7, ie8, ie67,
   }),                           //      opera, gecko, webkit, chrome, safari,
-                                //      iphone, quirks, advanced, majority, lib
-  config:       _config,        // uu.config - { aria, debug, light, ... }
+                                //      iphone, quirks, advanced, majority, xml, lib
+  config:       _cfg,           // uu.config - { aria, debug, light, ... }
   // --- ajax / jsonp ---
-  ajax:   uumix(uuajax, {       // uu.ajax(url, option = {}, fn, ngfn = void 0)
-    get:        uuajaxget,      // uu.ajax.get(url, option = {}, fn, ngfn = void 0 )
-    post:       uuajaxpost,     // uu.ajax.post(url, data, option = {}, fn, ngfn = void 0)
+  ajax:   uumix(uuajax, {       // uu.ajax(url, option = {}, fn = void 0, ngfn = void 0)
+    get:        uuajaxget,      // uu.ajax.get(url, option = {}, fn, ngfn = void 0) -> guid
+    post:       uuajaxpost,     // uu.ajax.post(url, data, option = {}, fn, ngfn = void 0) -> guid
     sync:       uuajaxsync,     // uu.ajax.sync(url) -> "response text"
     ifmod:      uuajaxifmod,    // uu.ajax.ifmod(url, option = {}, fn, ngfn = void 0)
+    queue:      uuajaxqueue,    // uu.ajax.queue("0+1>2>3", [url, ...], [option, ...], [fn, ...], lastfn, ngfn)
     create:     uuajaxcreate,   // uu.ajax.create() -> XMLHttpRequestObject
-    gc:         uuajaxgc        // uu.ajax.gc()
+    expire:     uuajaxexpire    // uu.ajax.expire()
   }),
-  jsonp:        uujsonp,        // uu.jsonp(url, option = {}, fn, ngfn = void 0)
+  jsonp:  uumix(uujsonp, {      // uu.jsonp(url, option = {}, fn = void 0, ngfn = void 0) -> guid
+    queue:      uujsonpqueue    // uu.jsonp.queue("0+1>2>3", [url, ...], [option, ...], [fn, ...], lastfn, ngfn)
+  }),
   // --- array / hash ---
   // [1][through]           uu.ary([1, 2])     -> [1, 2]
   // [2][literal to ary]    uu.ary(12)         -> [12]
@@ -209,6 +229,11 @@ uu = uumix(_uujamfactory, {     // uu(expr, ctx) -> Instance(jam)
   // [2][define and create instance] uu.factory("my2", prototype, arg1, ...)
   //                                                  -> new uu.Class("my2")
   factory:      uufactory,
+  // --- color ---
+  color:  uumix(uucolor, {      // uu.color("black") -> ColorHash or 0
+    add:        uucoloradd,     // uu.color.add("000000black,...")
+    expire:     uucolorexpire   // uu.color.expire()
+  }),
   // --- event ---
   ev:     uumix(uuev, {         // [1][bind] uu.ev(node, "click", fn)
                                 // [2][bind] uu.ev(node, "my.click", fn)
@@ -297,6 +322,10 @@ uu = uumix(_uujamfactory, {     // uu(expr, ctx) -> Instance(jam)
   mix2json:     uumix2json,     // uu.mix2json(mix, fn = void 0, usejs = 0) -> String
   json2mix:     uujson2mix,     // uu.json2mix(str, usejs = 0) -> Mix
   // --- type ---
+  has:          uuhas,          // [1] uu.has("a", "abc") -> true
+                                // [2] uu.has([1], [1, 2]) -> uu.ary.has
+                                // [3] uu.has({ a:1 }, { a:1, b:2 }) -> uu.hash.has
+  like:         uulike,         // uu.like(mix, mix) -> Boolean
   type:         uutype,         // [1] uu.type("str") -> 0x100(uu.STR)
                                 // [2] uu.type("str", uu.STR | uu.NUM) -> true
   isnum:        uuisnum,        // uu.isnum(123) -> true
@@ -325,7 +354,7 @@ uu = uumix(_uujamfactory, {     // uu(expr, ctx) -> Instance(jam)
   gecko:        _ver.gecko,     // is Gecko
   webkit:       _ver.webkit,    // is WebKit
   // --- other ---
-  js:           uujs,           // uu.js("JavaScript Expression") -> eval(expr) result
+  js:           uujs,           // uu.js("js+expr") -> new Function("js+expr")
   ui:           uuui,           // [create instance] uu.ui(widget, placeholder, option) -> instance
   win: {
     size:       uuwinsize       // uu.win.size() -> { iw, ih, sw, sh }
@@ -334,11 +363,10 @@ uu = uumix(_uujamfactory, {     // uu(expr, ctx) -> Instance(jam)
   lazy:   uumix(uulazy, {       // uu.lazy(id = "", fn, order = 0)
     fire:       uulazyfire      // uu.lazy.fire(id = "")
   }),
-  dmz:          _dmz,           // uu.dmz - public data and methods
   waste:        0               // uu.waste - 1+ is library reloaded, 0 is first time
 });
 
-// --- message pump ---
+// --- Message Pump ---
 MessagePump.prototype = {
   send:         uumsgsend,      // [1][multicast] MessagePump.send([inst1, inst2], "hello") -> [result1, result2]
                                 // [2][unicast]   MessagePump.send(inst, "hello") -> ["world!"]
@@ -351,6 +379,55 @@ MessagePump.prototype = {
 };
 uu.msg = new MessagePump();     // MessagePump instance
 
+// --- ECMAScript-262 5th ---
+Array.isArray || (Array.isArray = uuisary);
+
+//{::
+uumix(Array.prototype, {
+  indexOf:      arrayindexof,
+  lastIndexOf:  arraylastindexof,
+  every:        arrayevery,
+  some:         arraysome,
+  forEach:      arrayforeach,
+  map:          arraymap,
+  filter:       arrayfilter
+}, 0, 0);
+//::}
+
+uumix(Array.prototype, {
+  reduce:       arrayreduce,
+  reduceRight:  arrayreduceright
+}, 0, 0);
+
+uumix(Boolean.prototype, {
+  toJSON:       numbertojson
+}, 0, 0);
+
+uumix(Date.prototype, {
+  toISOString:  datetoisostring,
+  toJSON:       datetoisostring
+}, 0, 0);
+
+uumix(Number.prototype, {
+  toJSON:       numbertojson
+}, 0, 0);
+
+uumix(String.prototype, {
+  trim:         stringtrim,
+  toJSON:       stringtojson
+}, 0, 0);
+
+//{::
+_ver.gecko && _cfg.innerText && !win.HTMLElement.prototype.innerText &&
+(function(proto) {
+  proto.__defineGetter__("innerText", innertextgetter);
+  proto.__defineSetter__("innerText", innertextsetter);
+  proto.__defineGetter__("outerHTML", outerhtmlgetter);
+  proto.__defineSetter__("outerHTML", outerhtmlsetter);
+})(win.HTMLElement.prototype);
+//::}
+
+// --- uu.jam ---
 uumix(uujam.prototype, {
   // --- stack ---
   back:         jamback,        // jam.back() -> jam
@@ -361,7 +438,7 @@ uumix(uujam.prototype, {
   size:         jamsize,        // jam.size() -> Number
   indexOf:      jamindexOf,     // jam.indexOf(node) -> Number(-1 is not found)
   // --- node ---
-//first, prev, next, last, firstChild, lastChild, add
+  //first, prev, next, last, firstChild, lastChild, add
   remove:       jamremove,      // jam.remove() -> jam
   // [1][get] jam.attr("attr") -> ["value", ...]
   // [2][get] jam.attr("attr1,attr2") -> [{ attr1: "value", attr2: "value" }, ...]
@@ -383,8 +460,8 @@ uumix(uujam.prototype, {
   tween:        jamtween,       // jam.tween(ms, param, fn) -> jam
   show:         jamshow,        // jam.show(fadein = false) -> jam
   hide:         jamhide,        // jam.hide(fadeout = false) -> jam
-//mousedown, mouseup, mousemove, mousewheel, click, dblclick, keydown,
-//keypress, keyup, change, submit, focus, blur, contextmenu
+  //mousedown, mouseup, mousemove, mousewheel, click, dblclick, keydown,
+  //keypress, keyup, change, submit, focus, blur, contextmenu
   hover:        jamhover,       // jam.hover(enter, leave) -> jam
   // [1][get] jam.html() -> ["innerHTML", ...]
   // [2][set] jam.html("<p>html</p>") -> jam
@@ -397,85 +474,82 @@ uumix(uujam.prototype, {
   val:          jamval
 });
 
-// === init interface ===
-uu.config.imgdir = uu.config.imgdir.replace(/\/+$/, "") + "/"; // add tail(/)
-// work
-function _toary(a) { // make array from FakeArray/Array/Arguments
-  var r=[],i=a.length;while(i--){r[i]=a[i];}return r;
-}
-function _numary(s) { // make numbering array from string
-  var r=[],k=-1,i=0,j,a=s.split(""),z=a.length;
-  for(;i<z;++i){for(j=0;j<z;++j){r[++k]=a[i]+a[j];}}return r;
-}
-function _matcher(a) { // make className matcher from array
-  return RegExp("(?:^| )("+a.join("|")+")(?:$|(?= ))","g");
-}
-
-// --- Jam (nodeset I/F) ---
+// --- uu.jam (nodeset interface) ---
 // uu.jam - nodeset accessor factory
 function _uujamfactory(expr, ctx) {
   return new uujam(expr, ctx);
 }
+
 function uujam(expr,  // @param Node/NodeArray/String/Instance/window/document:
                ctx) { // @param Node(= void 0): context
   this._stack = [[]]; // [nodeset, ...]
   this._ns = !expr ? [] // nodeset
-           : (expr === win || expr.nodeType) ? [expr] // node
-           : uuisary(expr) ? expr.slice() // clone NodeArray
-           : uuisstr(expr) ?
-                (!expr.indexOf("<") ? [uunodebulk(expr)]  // <div> -> fragment
-                                    : uuquery(expr, ctx && ctx._ns ? ctx._ns.slice()
-                                                                   : ctx)) // query
-           : (expr instanceof uujam) ? expr._ns.slice() // copy constructor
-           : []; // bad expr
+      : (expr === win || expr.nodeType) ? [expr] // node
+      : uuisary(expr) ? expr.slice() // clone NodeArray
+      : uuisstr(expr) ?
+          (!expr.indexOf("<") ? [uunodebulk(expr)]  // <div> -> fragment
+                              : uuquery(expr, ctx && ctx._ns ? ctx._ns.slice()
+                                                             : ctx)) // query
+      : (expr instanceof uujam) ? expr._ns.slice() // copy constructor
+      : []; // bad expr
 }
 
 // --- ajax / jsonp ---
-// uu.ajax - Async "GET" or "POST" request
-// uu.ajax("http://", {}, function(txt) { alert(txt); });
-// uu.ajax("http://", {}, function(txt) { uu.puff("result:%s", txt); },
-//                        function(code, url) { uu.puff(url) });
+// uu.ajax - async "GET", "POST", "PUT", "DELETE" and "HEAD" request
+// uu.ajax("http://...", {}, function(hash) { alert(hash.rv); });
+// uu.ajax("http://...", {}, function(hash) { uu.puff(hash.rv); },
+//                           function(hash) { uu.puff("! %s !", hash.url) });
 function uuajax(url,    // @param URLString: request url
-                option, // @param Hash(= {}): { data, header, timeout, xhr }
-                        //    option.data    - Mix(= null): request data
+                option, // @param Hash(= {}): { data, header, timeout, method }
+                        //    option.data    - Mix(= null): request data(auto "POST")
                         //    option.header  - Array(= []): [(key, value), ...]
+                        //    option.method  - String(= "GET" or "POST"):
                         //    option.timeout - Number(= 10):  unit sec
-                        //    option.xhr     - Object(= void 0): overrideMimeType
-                fn,     // @param Function(= void 0): fn(txt)
-                ngfn) { // @param Function(= void 0): ngfn(status, url)
+                        //    option.nocache - Number(= 0): 1 is no cache
+                fn,     // @param Function(= void 0): fn({ rv, url, code, guid, type })
+                        //    rv   - String: responseText or responseXML or ""(fail)
+                        //    url  - String: request url (absolute)
+                        //    code - Number: status code (0, 2xx, 3xx, 4xx, 5xx)
+                        //    guid - Number: request id (atom)
+                        //    type - String: Content-Type( "text/css" or ""(fail) )
+                ngfn,   // @param Function(= void 0): ngfn({ rv, url, code, guid, type })
+                _fn2) { // @hidden Function: for uu.ajax.queue
+                        // @return Number: guid(request atom)
   function _ajaxstatechange() {
-    var ctype, lastmod;
+    var rv = "", type, code, lastmod, hash;
 
     if (xhr.readyState === 4) {
-      if ((fileScheme && !xhr.status) || xhr.status === 200) {
+      code = xhr.status || 0;
+      if ((code >= 200 && code < 300) || (!code && !url.indexOf("file:"))) {
         if (fn && !run++) {
-          ctype = xhr.getResponseHeader("Content-Type") || "";
-          fn(ctype.indexOf("xml") < 0 ? xhr.responseText       // text
-                                      : xhr.responseXML, url); // xml
+          type = xhr.getResponseHeader("Content-Type") || "";
+          method === "HEAD" || (rv = type.indexOf("xml") < 0 ? xhr.responseText
+                                                             : xhr.responseXML);
+          fn(hash = { code: code, rv: rv, url: url,
+                      guid: guid, type: type, id: opt.id });
+          _fn2 && _fn2(hash); // callback uu.ajax.queue
         }
-        if (ifmod) { // parse "Last-Modified" value
+        if (opt.ifmod) { // parse "Last-Modified" value
           lastmod = xhr.getResponseHeader("Last-Modified");
-          _ajaxdb[url] = lastmod ? Date.parse(lastmod) : 0;
+          _ajaxc[url] = lastmod ? Date.parse(lastmod) : 0; // add cache
         }
       } else {
-        _ajaxng(xhr.status || ((_ver.opera && ifmod) ? 304 : 400), url);
+        _ajaxng(code || ((_ver.opera && opt.ifmod) ? 304 : 400)); // [Opera]
       }
       _ajaxgc();
     }
   }
-  function _ajaxng(status, url) {
-    (ng && !run++) && ng(status, url);
+  function _ajaxng(code) {
+    ngfn && !run++ &&
+        ngfn({ code: code, rv: "", url: url, guid: guid, type: "", id: opt.id });
   }
   function _ajaxgc() {
     befn && uuevdetach(win, "beforeunload", befn);
-    if (xhr) {
-      xhr.onreadystatechange = uuvain;
-      xhr = null;
-    }
+    xhr && (xhr.onreadystatechange = uuvain, xhr = null); // [IE] mem leak
   }
   function _ajaxwatchdog() {
     _ajaxabort();
-    _ajaxng(408, url); // 408 "Request Time-out"
+    _ajaxng(408); // 408 "Request Time-out"
     _ajaxgc();
   }
   function _ajaxabort() {
@@ -483,67 +557,65 @@ function uuajax(url,    // @param URLString: request url
       xhr && xhr.abort();
     } catch(err) {}
   }
-  option = option || {};
-  var run = 0, v, i = 0, befn, div, fileScheme,
-      timeout = option.timeout || 10, // 10sec
-      header = option.header || [],
-      ifmod = option.ifmod,
-      data = option.data,
-      xhr = option.xhr || uuajaxcreate(),
-      ng = ngfn;
+  var opt = option || {}, xhr = uuajaxcreate(),
+      method = opt.method || (opt.data ? "POST" : "GET"),
+      header = opt.header || [],
+      guid = uuguid(), run = 0, v, i = 0, befn, div;
 
+  // relative url -> absolute url
   if (!_SCHEME.test(url)) {
     div = doc.createElement("div");
     div.innerHTML = '<a href="' + url + '" />';
     url = div.firstChild ? div.firstChild.href
                          : /href\="([^"]+)"/.exec(div.innerHTML)[1];
   }
-  fileScheme = !url.indexOf("file:");
-
+  opt.nocache && (url += (url.indexOf("?") < 0 ? "?" :
+                          url.indexOf("&") < 0 ? ";" : "&") + "uuguid=" + guid);
   if (xhr) {
     try {
       // [Gecko] beforeunload event -> gc
       _ver.gecko && uuevattach(win, "beforeunload", befn = _ajaxabort);
 
       // initialize
-      xhr.open(data ? "POST" : "GET", url, true); // true is async
+      xhr.open(method, url, true); // GET / POST / PUT / DELETE / HEAD, Async
       xhr.onreadystatechange = _ajaxstatechange;
 
       // set header
       header.push("X-Requested-With", "XMLHttpRequest");
-      ifmod && _ajaxdb[url] &&
-          header.push("If-Modified-Since", uudate2str(_ajaxdb[url], 1)); // GMT
-      data &&
+      opt.ifmod && _ajaxc[url] &&
+          header.push("If-Modified-Since", uudate2str(_ajaxc[url], 1)); // GMT
+      opt.data &&
           header.push("Content-Type", "application/x-www-form-urlencoded");
       while ( (v = header[i++]) ) {
         xhr.setRequestHeader(v, header[i++]);
       }
 
       // request
-      xhr.send(data || null);
-      setTimeout(_ajaxwatchdog, timeout * 1000);
-      return;
+      xhr.send(opt.data || null);
+      setTimeout(_ajaxwatchdog, (option.timeout || 10) * 1000);
+      return guid;
     } catch (err) {}
   }
-  _ajaxng(400, url); // create object or request error
-  _ajaxgc();
+  // create object or request error
+  setTimeout(function() { _ajaxng(400), _ajaxgc(); }, 0); // [delay]
+  return guid;
 }
 
-// uu.ajax.get - ASync "GET" request
-function uuajaxget(url, option, fn, ngfn) { // @see uuajax params
+// uu.ajax.get - async "GET" request
+function uuajaxget(url, option, fn, ngfn) { // @see uu.ajax
   uuajax(url, uuarg(option, { data: null }), fn, ngfn);
 }
 
-// uu.ajax.post - ASync "POST" request
-function uuajaxpost(url, data, option, fn, ngfn) { // @see uuajax params
+// uu.ajax.post - async "POST" request
+function uuajaxpost(url, data, option, fn, ngfn) { // @see uu.ajax
   uuajax(url, uuarg(option, { data: data }), fn, ngfn);
 }
 
-// uu.ajax.sync - Sync "GET" request
-function uuajaxsync(url) { // @param String: request url
-                           // @return String: "responseText"
+// uu.ajax.sync - sync "GET" request
+function uuajaxsync(url) { // @param String:
+                           // @return String: responseText
   try {
-    var xhr = _sxhr || (_sxhr = uuajaxcreate());
+    var xhr = uuajaxcreate();
 
     xhr.open("GET", url, false); // false = sync
     xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
@@ -551,37 +623,85 @@ function uuajaxsync(url) { // @param String: request url
     if (!xhr.status || xhr.status === 200) {
       return xhr.responseText;
     }
-  } catch(err) {}
+  } catch(err) {
+    _cfg.debug &&
+        alert("uu.ajax.sync error. " + err.message + url);
+  }
   return "";
 }
 
-// uu.ajax.ifmod - Async "GET" or "POST" request with "If-Modified-Since" header
-function uuajaxifmod(url,    // @param URLString: request url
-                     option, // @param Hash(= {}): { data, header, timeout }
-                     fn,     // @param Function(= void 0): fn(txt)
-                     ngfn) { // @param Function(= void 0): ngfn(status, url)
+// uu.ajax.ifmod - async request with "If-Modified-Since" header
+function uuajaxifmod(url, option, fn, ngfn) { // @see uu.ajax
   uuajax(url, uuarg(option, { ifmod: 1 }), fn, ngfn);
 }
 
-// uu.ajax.create - create XMLHttpRequest object
-function uuajaxcreate(xml) { // @param Number(= 0): 1 is Microsoft.XMLDOM (IE6)
-                             // @return XMLHttpRequest/XMLDOMRequest/void 0:
-  var rv;
-
-  try {
-    rv = new win.XMLHttpRequest();
-  } catch (e) {
-    try { // [IE6]
-      rv = new win.ActiveXObject("Microsoft.XML" + (xml ? "DOM" : "HTTP"));
-    } catch (f) {}
-  }
-  return rv;
+// uu.ajax.queue - request queue
+// uu.ajax.queue("a+b>c", [url, ...], [option, ...], [fn], lastfn, ngfn)
+function uuajaxqueue(cmd,    // @param String: "0>1", "0+1", "0+1>2>3"
+                     urlary, // @param Array: [url, ...]
+                     optary, // @param Array: [option, ...]
+                     fnary,  // @param Array: [fn, ...]
+                     lastfn, // @param Function(= void 0): lastfn([{ rv, url, code, guid, type }, ... ])
+                     ngfn) { // @param Function(= void 0): ngfn({ rv, url, code, guid, type })
+  _uuajaxq(1, cmd, urlary, optary, fnary, lastfn || uuvain, ngfn || uuvain, []);
 }
 
-// uu.ajax.gc - remove Modified Since request cache and request object
-function uuajaxgc() {
-  _ajaxdb = {}; // free If-Modified-Since cache
-  _sxhr = null; // free ajax.sync xhr object
+// inner - uu.ajax.queue impl. http://d.hatena.ne.jp/uupaa/20091221
+function _uuajaxq(ajax, cmd, url, opt, fn, lastfn, ngfn, rv) {
+  function _nextq(r) {
+    _uuajaxq(ajax, cmd, url, opt, fn, lastfn, ngfn, rv.concat(r)); // recursive
+  }
+  if (!cmd) {
+    lastfn(rv); // finish
+    return;
+  }
+  var c = cmd.split(""), ary = [], v;
+
+  cmd = "";
+  while ( (v = c.shift()) ) { // v = "a"
+    ary.push(url.shift(), uumix(opt.shift() || {}, { id: v }), fn.shift());
+    if (c.shift() === ">") {
+      cmd = c.join(""); // rebuild command, "0+1>2>3" -> "2>3"
+      break;
+    }
+  }
+  _uuajaxparallel(ajax, ary, _nextq, ngfn);
+}
+
+// inner - ajax/jsonp parallel load
+function _uuajaxparallel(ajax, ary, lastfn, ngfn) {
+  function _nextp(hash) {
+    var idx = uuaryindexof(atom, hash.guid); // = Array.indexOf
+
+    rv[idx] = hash;
+    ++n >= iz / 3 && !run++ && lastfn(rv); // fn([{...}, ..])
+  }
+  function _error(hash) {
+    !run++ && ngfn(hash);
+  }
+  var rv = [], atom = [], i = 0, iz = ary.length, n = 0, run = 0;
+
+  for (; i < iz; i += 3) {
+    atom.push((ajax ? uu.ajax : uu.jsonp)(ary[i], ary[i + 1],
+                                          ary[i + 2], _error, _nextp));
+  }
+}
+
+// uu.ajax.create - create XMLHttpRequest object
+function uuajaxcreate() { // @return XMLHttpRequest/0:
+  try {
+    return new win.XMLHttpRequest();
+  } catch (err) {
+    try { // [IE6]
+      return new win.ActiveXObject("Microsoft.XMLHTTP");
+    } catch (err) {}
+  }
+  return 0;
+}
+
+// uu.ajax.expire - expire Modified Since request cache and sync xhr object
+function uuajaxexpire() {
+  _ajaxc = {};  // expire If-Modified-Since cache
 }
 
 // uu.jsonp - Async JSONP request
@@ -590,35 +710,51 @@ function uujsonp(url,    // @param URLString: request url
                  option, // @param Hash(= {}): { method, timeout }
                          //   option.mehtod  - String(= "callback"):
                          //   option.timeout - Number(= 10): unit sec
-                 fn,     // @param Function(= void 0): fn(json)
-                 ngfn) { // @param Function(= void 0): ngfn(status, url)
-  function _jsonpgc() {
-    _head.removeChild(node);
-    delete _jjdb[jobid];
-  }
+                 fn,     // @param Function: fn({ rv, url, code, guid, type })
+                 ngfn,   // @param Function(= void 0): ngfn({ rv, url, code, guid, type })
+                 _fn2) { // @hidden Function: for uu.jsonp.queue
+                         // @return Number: guid(request atom)
   function _jsonpwatchdog() {
-    _jjdb[jobid]("", 408); // 408 "Request Time-out"
+    _jsondb[jobid]("", 408); // 408 "Request Time-out"
   }
-  function _jsonpjob(json, status) {
-    if (!node._run++) {
-      json ? (fn && fn(json))
-           : (ngfn && ngfn(status || 404, src));
+  function _jsonpjob(rv, code, hash) {
+    if (!node.uujsonprun++) {
+      if (rv) {
+        fn && fn(hash = { code: 200, rv: rv, url: url, guid: guid,
+                          type: type, id: opt.id });
+        _fn2 && _fn2(hash);
+      } else {
+        ngfn && ngfn({ code: code || 404, rv: "", url: url, guid: guid,
+                       type: "", id: opt.id });
+      }
       setTimeout(_jsonpgc, (timeout + 10) * 1000);
     }
   }
-  option = option || {};
-  var timeout = option.timeout || 10,
-      method = option.method || "callback",
+  function _jsonpgc() {
+    _head.removeChild(node);
+    delete _jsondb[jobid];
+  }
+  var opt = option || {},
+      guid = uuguid(), type = "text/javascript",
+      timeout = opt.timeout || 10,
+      method = opt.method || "callback",
       jobid = "j" + uuguid(),
       node = doc.createElement("script"),
-      src = url + (url.indexOf("?") < 0 ? "?" : ";") +
-                  method + "=uu.dmz.jjdb." + jobid; // uu.dmz.jjdb = _jjdb
+      src = url + (url.indexOf("?") < 0 ? "?" :
+                   url.indexOf("&") < 0 ? ";" : "&") +
+                  method + "=uupub.jsondb." + jobid; // uupub.jsondb = _jobid
 
-  _jjdb[jobid] = _jsonpjob;
-  uumix(node, { type: "text/javascript", charset: "utf-8", _run: 0 });
+  _jsondb[jobid] = _jsonpjob;
+  uumix(node, { type: type, charset: "utf-8", uujsonprun: 0 });
   _head.appendChild(node);
   node.setAttribute("src", src);
   setTimeout(_jsonpwatchdog, timeout * 1000);
+  return guid;
+}
+
+// uu.jsonp.queue - request queue
+function uujsonpqueue(cmd, urlary, optary, fnary, lastfn, ngfn) { // @see uu.ajax.queue
+  _uuajaxq(0, cmd, urlary, optary, fnary, lastfn || uuvain, ngfn || uuvain, []);
 }
 
 // --- array / hash ---
@@ -1118,6 +1254,65 @@ function uufactory(name,   // @param String: class name
   return new uuclass[name](arg1, arg2, arg3, arg4); // [1]
 }
 
+// --- color ---
+// uu.color - parse color
+function uucolor(str) { // @parem String: "black", "#fff", "rgba(0,0,0,0)" ...
+                        // @return ColorHash/0: 0 is error
+  function _p2n(n) { // percent to number
+    n = ((parseFloat(n) || 0) * 2.56) | 0;
+    return n > 255 ? 255 : n;
+  }
+  var v, m, n, r, g, b, a, add = 0, rgb = 0,
+      rv = _colordb[str] || _colorc[str]
+                         || _colordb[++add, v = str.toLowerCase()];
+
+  if (!rv) {
+    switch ({ "#": 1, r: 2, h: 3 }[v.charAt(0)]) {
+    case 1: m = _HEXCOLOR.exec(v);
+            if (m) {
+              n = parseInt(m[5] ? m[1] // "#ffffff"
+                                : m[2] + m[2] + m[3] + m[3] + m[4] + m[4], 16);
+              rv = { r: n >> 16, g: (n >> 8) & 255, b: n & 255, a: 1, hex: v };
+            }
+            break;
+    case 2: ++rgb;
+    case 3: m = (rgb ? _RGBACOLOR : _HSLACOLOR).exec(v.replace(_SPACE, "").
+                                                       replace(_PERCENT, _p2n));
+            if (m) {
+              r = m[1] | 0, g = m[2] | 0, b = m[3] | 0;
+              a = m[4] ? parseFloat(m[4]) : 1;
+              rv = rgb ? { r: r, g: g, b: b, a: a }
+                       : uu.color.hsla2rgba({ h: r, s: g, l: b, a: a }); // depend
+            }
+    }
+  }
+  if (add && rv) {
+    rv.hex  || (rv.hex  = "#" + _HEX2[rv.r] + _HEX2[rv.g] + _HEX2[rv.b]);
+    rv.rgba || (rv.rgba = "rgba(" + rv.r + "," + rv.g + "," +
+                                    rv.b + "," + rv.a + ")");
+    _colorc[str] = rv; // add cache
+  }
+  return rv || 0; // ColorHash or 0
+}
+
+// uu.color.add
+function uucoloradd(str) { // @param JointString: "000000black,..."
+  var ary = str.split(","), i = 0, v, w, n, r, g, b;
+
+  while ( (v = ary[i++]) ) {
+    w = v.slice(0, 6);
+    n = parseInt(w, 16);
+    r = n >> 16, g = (n >> 8) & 255, b = n & 255;
+    _colordb[v.slice(6)] = { hex: "#" + w, r: r, g: g, b: b, a: 1,
+                             rgba: "rgba(" + r + "," + g + "," + b + ",1)" };
+  }
+}
+
+// uu.color.expire - expire color cache
+function uucolorexpire() {
+  _colorc = {};
+}
+
 // --- message pump ---
 // uu.Class.MessagePump
 function MessagePump() {
@@ -1205,7 +1400,7 @@ function uuev(node,   // @param Node:
   var types = node.uuevtypes || (node.uuevfn = {}, node.uuevtypes = ","),
       ary = names.split(","), v, i = 0, m, name, closure, handler,
       losecapture = "losecapture",
-      webkit = _ver.webkit, iebody = _dmz.iebody;
+      webkit = _ver.webkit, iebody = uupub.iebody;
 
   if (mode === 1) {
     handler = uuisfunc(fn) ? fn : fn.handleEvent;
@@ -1443,7 +1638,7 @@ function uunode(data,  // @param Node/DocumentFragment/HTMLString:
 // uu.node.id - get nodeid
 function uunodeid(node) { // @param Node:
                           // @return Number: nodeid, from 1
-  return node.uuguid || (_ndiddb[node.uuguid = ++_dmz.ndidseed] = node,
+  return node.uuguid || (_ndiddb[node.uuguid = ++uupub.ndidseed] = node,
                          node.uuguid);
 }
 
@@ -1972,8 +2167,6 @@ function _jsoninspect(mix, fn) {
         ary.push('"' + i + '":' + uustr2json(mix[i], 1));
       }
     }
-  } else if ("r" in mix && "g" in mix && "b" in mix && "a" in mix) { // RGBA
-    ary = ["r:" + mix.r, "g:" + mix.g, "b:" + mix.b, "a:" + mix.a];
   } else {
     for (i in mix) {
       ary.push(uustr2json(i, 1) + ":" + _jsoninspect(mix[i], fn));
@@ -1983,6 +2176,39 @@ function _jsoninspect(mix, fn) {
 }
 
 // --- type ---
+// uu.has - has
+function uuhas(mix,   // @param Hash/Array/String: find
+               ctx) { // @param Hash/Array/String: context
+                      // @return Boolean:
+  switch (uutype(mix)) {
+  case _HASH: return uuhashhas(mix, ctx);
+  case _FAKE:
+  case _ARY:  return uuaryhas(mix, ctx);
+  case _STR:  return (mix.indexOf(ctx) >= 0);
+  }
+  return false;
+}
+
+// uu.like - like
+function uulike(mix1,   // @param Mix:
+                mix2) { // @param Mix:
+                        // @return Boolean:
+  var type1 = uutype(mix1);
+
+  if (type1 !== uutype(mix2)) {
+    return false;
+  }
+  switch (type1) {
+  case _FUNC: return false;
+  case _DATE: return uudate2str(mix1) === uudate2str(mix2);
+  case _HASH: return (uuhashsize(mix1) === uuhashsize(mix2) &&
+                        uuhashhas(mix1, mix2));
+  case _FAKE: // http://d.hatena.ne.jp/uupaa/20091223
+  case _ARY:  return uuary(mix1) + "" == uuary(mix2);
+  }
+  return mix1 === mix2;
+}
+
 // uu.type - type detection
 // [1] uu.type("str") -> 0x100(uu.STR)
 // [2] uu.type("str", uu.STR | uu.NUM) -> true
@@ -2045,7 +2271,7 @@ function uuwinsize() { // @return Hash: { iw, ih, sw, sh }
                        //   sw Number: scrollWidth
                        //   sh Number: scrollHeight
   if (_ie) {
-    var node = _dmz.iebody;
+    var node = uupub.iebody;
 
     return { iw: node.clientWidth, ih: node.clientHeight,
              sw: node.scrollLeft,  sh: node.scrollTop };
@@ -2081,7 +2307,174 @@ function uulazyfire(id) { // @param String(= ""): id
   }
 }
 
-// --- jam ---
+// --- ECMAScript-262 5th ---
+//{:: Array.prototype.indexOf
+function arrayindexof(elm,   // @param Mix: searchElement
+                      idx) { // @param Number(= 0): fromIndex
+                             // @return Number: found index or -1
+  var iz = this.length, i = idx || 0;
+
+  i = (i < 0) ? i + iz : i;
+  for (; i < iz; ++i) {
+    if (i in this && this[i] === elm) {
+      return i;
+    }
+  }
+  return -1;
+}
+
+// Array.prototype.lastIndexOf
+function arraylastindexof(elm,   // @param Mix: searchElement
+                          idx) { // @param Number(= this.length): fromIndex
+                                 // @return Number: found index or -1
+  var iz = this.length, i = idx;
+
+  i = (i < 0) ? i + iz + 1 : iz;
+  while (--i >= 0) {
+    if (i in this && this[i] === elm) {
+      return i;
+    }
+  }
+  return -1;
+}
+
+// Array.prototype.every
+function arrayevery(fn,        // @param Function: callback evaluator
+                    fn_this) { // @param this(= void 0): fn.call(this)
+                               // @return Boolean:
+  for (var i = 0, iz = this.length; i < iz; ++i) {
+    if (i in this && !fn.call(fn_this, this[i], i, this)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+// Array.prototype.some
+function arraysome(fn,        // @param Function: callback evaluator
+                   fn_this) { // @param this(= void 0): fn.call(this)
+                              // @return Boolean:
+  for (var i = 0, iz = this.length; i < iz; ++i) {
+    if (i in this && fn.call(fn_this, this[i], i, this)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+// Array.prototype.forEach
+function arrayforeach(fn,        // @param Function: callback evaluator
+                      fn_this) { // @param this(= void 0): fn.call(this)
+  for (var i = 0, iz = this.length; i < iz; ++i) {
+    i in this && fn.call(fn_this, this[i], i, this);
+  }
+}
+
+// Array.prototype.map
+function arraymap(fn,        // @param Function: callback evaluator
+                  fn_this) { // @param this(= void 0): fn.call(this)
+                             // @return Array: [element, ... ]
+  for (var iz = this.length, rv = Array(iz), i = 0; i < iz; ++i) {
+    i in this && (rv[i] = fn.call(fn_this, this[i], i, this));
+  }
+  return rv;
+}
+
+// Array.prototype.filter
+function arrayfilter(fn,        // @param Function: callback evaluator
+                     fn_this) { // @param this(= void 0): fn.call(this)
+                                // @return Array: [element, ... ]
+  for (var rv = [], ri = -1, v, i = 0, iz = this.length; i < iz; ++i) {
+    i in this && fn.call(fn_this, v = this[i], i, this) && (rv[++ri] = v);
+  }
+  return rv;
+}
+//::}
+
+// Array.prototype.reduce
+function arrayreduce(fn,     // @param Function: callback evaluator
+                     init) { // @param Mix(= void 0): initial value
+                             // @return Mix:
+  var z, f = 0, rv = init === z ? z : (++f, init), i = 0, iz = this.length;
+
+  for (; i < iz; ++i) {
+    i in this && (rv = f ? fn(rv, this[i], i, this) : (++f, this[i]));
+  }
+  if (!f) { throw ""; } // reduce of empty array with no initial value
+  return rv;
+}
+
+// Array.prototype.reduceRight
+function arrayreduceright(fn,     // @param Function: callback evaluator
+                          init) { // @param Mix(= void 0): initial value
+                                  // @return Mix:
+  var z, f = 0, rv = init === z ? z : (++f, init), i = this.length;
+
+  while (--i >= 0) {
+    i in this && (rv = f ? fn(rv, this[i], i, this) : (++f, this[i]));
+  }
+  if (!f) { throw ""; } // reduce of empty array with no initial value
+  return rv;
+}
+
+// Date.prototype.toISOString - to ISO8601 string
+function datetoisostring() { // @return String:
+  return uudate2str(this);
+}
+
+// Number.prototype.toJSON, Boolean.prototype.toJSON
+function numbertojson() { // @return String: "123", "true", "false"
+  return this.toString();
+}
+
+// String.prototype.trim
+function stringtrim() { // @return String: "has  space"
+  return this.replace(_TRIM, "");
+}
+
+// String.prototype.toJSON
+function stringtojson() { // @return String: "string"
+  return uustr2json(this);
+}
+
+// --- HTMLElement.prototype ---
+//{::
+// HTMLElement.prototype.innerText getter
+function innertextgetter() {
+  return this.textContent;
+}
+
+// HTMLElement.prototype.innerText setter
+function innertextsetter(text) {
+  while (this.hasChildNodes()) {
+    this.removeChild(this.lastChild);
+  }
+  this.appendChild(doc.createTextNode(text));
+}
+
+// HTMLElement.prototype.outerHTML getter
+function outerhtmlgetter() {
+  var rv, me = this, p = me.parentNode,
+      r = doc.createRange(), div = doc.createElement("div");
+
+  !p && doc.body.appendChild(me); // orphan
+  r.selectNode(me);
+  div.appendChild(r.cloneContents());
+  rv = div.innerHTML;
+  !p && me.parentNode.removeChild(me);
+  return rv;
+}
+
+// HTMLElement.prototype.outerHTML setter
+function outerhtmlsetter(html) {
+  var r = doc.createRange();
+
+  r.setStartBefore(this);
+  this.parentNode.replaceChild(r.createContextualFragment(html), this);
+}
+//::}
+
+// --- uu.jam ---
 // jam.back
 function jamback() { // @return jam:
   this._ns = this._stack.pop() || [];
@@ -2250,7 +2643,7 @@ uuaryeach(uuary("a,b,br,dd,div,dl,dt,h1,h2,h3,h4,h5,h6,i,iframe,input,li,ol," +
 });
 
 // inner - build DOM Lv2 event handler - uu.click(), jam.click(), ...
-uuaryeach(uuary(_EVENT), function(v) {
+uuaryeach(uuary(_EV), function(v) {
   uu[v] = function(node, fn) {
     return uuev(node, v, fn);
   };
@@ -2273,7 +2666,7 @@ try {
 (function(gone) {
   function _fire() {
     if (!gone.blackout && !gone.dom++) {
-      _ie && (_dmz.iebody = _ver.quirks ? doc.body : _dmz.root); // [IE] lazy detect
+      _ie && (uupub.iebody = _ver.quirks ? doc.body : uupub.root); // [IE] lazy detect
       uulazy.fire("boot");
       uuisfunc(win.xboot || 0) && win.xboot(uu);
     }
@@ -2339,6 +2732,22 @@ function _camelhash(rv, props) {
   return rv;
 }
 
+// inner - make array from FakeArray/Array/Arguments
+function _toary(a) {
+  var r=[],i=a.length;while(i--){r[i]=a[i];}return r;
+}
+
+// inner - make numbering array from string
+function _numary(s) {
+  var r=[],k=-1,i=0,j,a=s.split(""),z=a.length;
+  for(;i<z;++i){for(j=0;j<z;++j){r[++k]=a[i]+a[j];}}return r;
+}
+
+// inner - make className matcher from array
+function _matcher(a) {
+  return RegExp("(?:^| )("+a.join("|")+")(?:$|(?= ))","g");
+}
+
 })(window, document, window.xconfig || {}, window.JSON);
 
 // window.uuvers - collect versions and meta informations
@@ -2364,7 +2773,7 @@ function _camelhash(rv, props) {
 // iphone   - Boolean: true is iPhone, iPod
 // quirks   - Boolean: true is quirks mode
 // advanced - Boolean: true is Advanced browsers
-//              (Firefox3.5+, Safari4+, Google Chrome2+)
+//              (Firefox3.5+, Safari4+, Google Chrome2+, Opera10.50)
 // majority - Boolean: true is major/majority browsers
 //              (IE6+, Firefox3+, Safari3.1+, Google Chrome2+, Opera 9.5+)
 // xml      - Boolean: true is XML Document, false is HTML Document
@@ -2382,7 +2791,7 @@ function _camelhash(rv, props) {
 // | "ifiphone"    | iPhone, iPod
 // | "ifjs"        | Enable JavaScript
 // | "ifmajority"  | IE6+, Opera9.5+, Firefox3+, Safari3.1+, Google Chrome
-// | "ifadvanced"  | Firefox3.5+, Safari4+, Google Chrome2+
+// | "ifadvanced"  | Firefox3.5+, Safari4+, Google Chrome2+, Opera10.50
 // | "ifclassic"   | not advanced browser
 // +---------------+------------------
 // <style>
@@ -2393,10 +2802,10 @@ function _camelhash(rv, props) {
 // </style>
 function uuvers(consel,    // @param Number(= 0): 1 is add conditional selector
                 slupper) { // @param Number(= 4): Silverlight upper version
-                           // @return Hash: { ua, re, sl, fl, ie, ie6,
-                           //                 ie7, ie8, ie67, opera, webkit,
-                           //                 chrome, safari, iphone, quirks,
-                           //                 advanced, majority }
+                           // @return Hash: { ua, re, sl, fl, ie, ie6, ie7, ie8,
+                           //                 ie67, opera, webkit, chrome,
+                           //                 safari, iphone, quirks, advanced,
+                           //                 majority, xml }
   var sl = slupper || 4, ax, v, doc = document,
       nv = navigator, nu = nv.userAgent,
       ie = !!doc.uniqueID, opera = window.opera,
@@ -2447,7 +2856,8 @@ function uuvers(consel,    // @param Number(= 0): 1 is add conditional selector
 
   rv.ie67 = rv.ie6 || rv.ie7;
   rv.advanced = (gecko  && re >  1.9) || // Firefox 3.5+(1.91)
-                (webkit && re >= 528);   // Safari 4+, Google Chrome 2+
+                (webkit && re >= 528) || // Safari 4+, Google Chrome 2+
+                (opera  && ua >= 10.5);  // Opera10.50+
   rv.majority = (ie     && ua >= 6)   || // IE 6+
                 (opera  && ua >= 9.5) || // Opera 9.5+
                 (gecko  && re >= 1.9) || // Firefox 3+

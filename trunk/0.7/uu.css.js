@@ -11,7 +11,6 @@ var _mix    = uu.mix,
     _ie     = uu.ie,
     _cstyle = win.getComputedStyle,
     _db     = { ss: {} }, // { StyleSheetid: StyleSheetObject, ... }
-    _FIX    = uu.dmz.FIX,
     _NPROPS = { opacity: 2, lineHeight: 1, fontWeight: 1,
                 fontSizeAdjust: 1, zIndex: 1, zoom: 1 },
     _ALPHA  = /^alpha\([^\x29]+\) ?/,
@@ -91,7 +90,7 @@ uu.css = _mix(uucss, {
                                     // uu.css.px.actvalue(node, value) -> Number(123)
   }),
   // --- appear ---
-  show:         uucssshow,        // uu.css.show(node, fadein = 0, opacity = 1) -> node
+  show:         uucssshow,        // uu.css.show(node, fadein = 0) -> node
   hide:         uucsshide,        // uu.css.hide(node, fadeout = 0) -> node
   // --- positioning ---
   toStatic:     uucsstostatic,    // uu.css.toStatic(node) -> node
@@ -101,21 +100,17 @@ uu.css = _mix(uucss, {
   selectable:   uucssselectable,    // uu.css.selectable(node) -> node
   unselectable: uucssunselectable,  // uu.css.unselectable(node) -> node
   // --- background ---
-  // [1][get] uu.css.bg(node, colorType) -> { color, img, rpt, pos }
+  // [1][get] uu.css.bg(node) -> { color, img, rpt, pos }
   // [2][set] uu.css.bg(node, color, img, rpt, pos) -> node
   bg:      _mix(uucssbg, {
-    get:        uucssbgget,       // uu.css.bg.get(node, colorType = 0) -> { color, img, rpt, pos }
+    get:        uucssbgget,       // uu.css.bg.get(node) -> { color, img, rpt, pos }
     set:        uucssbgset        // uu.css.bg.set(node, color, img, rpt, pos) -> node
   }),
-  // [1][get] uu.css.bgcolor(node, type = 0) -> [color, alpha] / { r, g, b, a } / 0xffffff
-  // [2][set] uu.css.bgcolor(node, "#ffffff", alpha) -> node
-  // [3][set] uu.css.bgcolor(node, { r, g, b, a }) -> node
-  // [4][set] uu.css.bgcolor(node, 0xffffff, alpha) -> node
-  bgcolor: _mix(uucssbgcolor, {
-    get:        uucssbgcolorget,  // uu.css.bgcolor.get(node, type = 0) -> [color, alpha] / { r, g, b, a } / 0xffffff
-    set:        uucssbgcolorset,  // [1][set] uu.css.bgcolor.set(node, "#ffffff") -> node
-                                  // [2][set] uu.css.bgcolor.set(node, { r, g, b, a }) -> node
-    inherit:    uucssbgcolorinherit // uu.css.bgcolor.inherit(node, type = 0) -> [color, alpha] / { r, g, b, a } / 0xffffff
+  bgcolor: _mix(uucssbgcolor, {   // [1][get] uu.css.bgcolor(node) -> ColorHash
+                                  // [2][set] uu.css.bgcolor(node, ColorHash) -> node
+    get:        uucssbgcolorget,  // uu.css.bgcolor.get(node) -> ColorHash
+    set:        uucssbgcolorset,  // uu.css.bgcolor.set(node, ColorHash) -> node
+    inherit:    uucssbgcolorinherit // uu.css.bgcolor.inherit(node) -> ColorHash
   }),
   // [1][get] uu.css.bgimg(node) -> URLString or ""
   // [2][set] uu.css.bgimg(node, url) -> node
@@ -186,7 +181,7 @@ function uucssset(node,  // @param Node:
                   val) { // @param String(= void 0):
                          // @return Node:
   var hash, ns = node.style, p, v, i, n,
-      FIX = _FIX, NPROPS = _NPROPS, STR = "string";
+      FIX = uupub.FIX, NPROPS = _NPROPS, STR = "string";
 
   uu.isstr(key) ? (hash = {}, hash[key] = val) : (hash = key);
   for (i in hash) {
@@ -214,7 +209,7 @@ function uucssget(node,     // @param Node:
                             // @return String/Hash: "value"
                             //                   or { cssProp: "value", ... }
   var rv = {}, ary = styles.split(","), v, i = 0,
-      ns = _cstyle(node, null), FIX = _FIX;
+      ns = _cstyle(node, null), FIX = uupub.FIX;
 
   while ( (v = ary[i++]) ) {
     rv[v] = ns[FIX[v] || v] || "";
@@ -225,7 +220,7 @@ function uucssget(node,     // @param Node:
 function uucssgetie(node, styles) {
   var rv = {}, ary = styles.split(","), v, w, i = 0,
       ns = node.currentStyle, actval = uucsspxactvalue,
-      STR = "string", AUTO = "auto", PX = "px", FIX = _FIX;
+      STR = "string", AUTO = "auto", PX = "px", FIX = uupub.FIX;
 
   while ( (v = ary[i++]) ) {
     w = ns[FIX[v] || v] || "";
@@ -687,31 +682,34 @@ function uucsspxie(node, prop) {
 }
 
 // uu.css.show - show node
-function uucssshow(node,      // @param Node:
-                   fadein,    // @param Number(= 0): fadein tween duration
-                   opacity) { // @param Number(= 1): end opacity
-                              // @return Node:
-  uu.tween(node, fadein || 0, {}, 0,
-      function(node, cs) {
-        if (!(cs.display === "none" || cs.visibility === "hidden")) {
-          return false; // shown
-        }
-        var ns = node.style, tmp, size;
+function uucssshow(node,     // @param Node:
+                   fadein) { // @param Number(= 0): fadein tween duration
+                             // @return Node:
+  var cs = uucss(node), ns = node.style,
+      tmp, size, opa;
 
-        ns.visibility = "visible";
-        ns.display = "";
-        if (uu.css(node).display === "none") {
-          // <style>{ display: none }</style>
-          tmp = uu.node(doc.createElement(node.tagName)); // add to body
-          // detect actual display value
-          ns.display = uu.css(tmp).display;
-          uu.node.remove(tmp);
-        }
-        size = uucsssizeget(node, 2);
-        // override uu.tween(param)
-        return { w: [0, size.w], h: [0, size.h], o: [0, opacity || 1] };
-      });
-  return node;
+  if (cs.display !== "none" && cs.visibility !== "hidden") {
+    return node; // shown
+  }
+  ns.visibility = "visible";
+  ns.display = "";
+
+  if (uucss(node).display === "none") {
+    // <style>{ display: none }</style>
+    tmp = uu.node(doc.createElement(node.tagName)); // add to body
+    // detect actual display value
+    ns.display = uucss(tmp).display;
+    uu.node.remove(tmp);
+  }
+
+  size = uucsssizeget(node, 2);
+  opa = uucss.opacity.get(node);
+
+  ns.width = "0";
+  ns.height = "0";
+  uucss.opacity.set(node, 0);
+
+  return uu.tween(node, fadein || 0, { w: size.w, h: size.h, o: opa });
 }
 
 // uu.css.hide - hide node
@@ -720,19 +718,19 @@ function uucsshide(node,      // @param Node:
                               //                     0 is disable
                               // @return Node:
   var size = uucsssizeget(node, 2), // offscreen
+      opa = uucss.opacity.get(node),
       cs = uucss(node);
 
   if (cs.display === "none" || cs.visibility === "hidden") {
     return node;
   }
-  uu.tween(node, fadeout || 0,
-      { w: [false, 0], h: [false, 0], o: [false, 0] },
-      function(node, ns) {
-        ns.display = "none";
-        ns.visibility = "hidden";
-        ns.width  = size.w + "px"; // restore size
-        ns.height = size.h + "px";
-      });
+  uu.tween(node, fadeout || 0, { w: 0, h: 0, o: 0 }, function(node, ns) {
+    ns.display = "none";
+    ns.visibility = "hidden";
+    ns.width  = size.w + "px"; // restore size
+    ns.height = size.h + "px";
+    uucss.opacity.set(node, opa);
+  });
   return node;
 }
 
@@ -802,33 +800,32 @@ function _uucssselectablefalse() {
 
 // =========================================================
 // uu.css.bg
-// [1][get] uu.css.bg(node, colorType) -> { color, img, rpt, pos }
+// [1][get] uu.css.bg(node) -> { color, img, rpt, pos }
 // [2][set] uu.css.bg(node, color, img, rpt, pos) -> node
-function uucssbg(node, color, img, rpt, pos) {
-  return (color === void 0 || uu.isnum(color)) ?
-         uucssbgget(node, color || 0) : // [1]
-         uucssbgset(node, color, img, rpt, pos); // [2]
+function uucssbg(node,   // @param Node:
+                 color,  // @param RGBAHash:
+                 img,    // @param URLString:
+                 rpt,    // @param String:
+                 pos) {  // @param Array: [x, y]
+  return color ? uucssbgset(node, color, img, rpt, pos) // [2]
+               : uucssbgget(node); // [1]
 }
 
 // uu.css.bg.get
-function uucssbgget(node,   // @param Node:
-                    type) { // @param Number(= 0): result type
-                            //            0 = return HexColorValidArray
-                            //            1 = return RGBAValidHash
-                            //            2 = return Number
+function uucssbgget(node) { // @param Node:
                             // @return Hash: { color, img, rpt, pos }
-  return { color: uucssbgcolorget(node, type),
-           img: uucssbgimgget(node),
-           rpt: uucssbgrptget(node),
-           pos: uucssbgposget(node) };
+  return { color: uucssbgcolorget(node), // RGBAHash
+           img: uucssbgimgget(node),     // URLString
+           rpt: uucssbgrptget(node),     // String
+           pos: uucssbgposget(node) };   // Array
 }
 
 // uu.css.bg.set
 function uucssbgset(node,  // @param Node:
-                    color, // @param ColorString/RGBAHash:
+                    color, // @param ColorHash:
                     img,   // @param URLString: "http://..."
                     rpt,   // @param String: "repeat"
-                    pos) { // @param Hash: { x, y }
+                    pos) { // @param Array: [x, y]
                            //        String: x, "0%", "left", "30px"
                            //        String: y, "0%", "top", "30px"
                            // @return Node:
@@ -840,48 +837,30 @@ function uucssbgset(node,  // @param Node:
 }
 
 // uu.css.bgcolor
-// [1][get] uu.css.bgcolor(node, type = 0) -> [color, alpha] / { r, g, b, a } / 0xffffff
-// [2][set] uu.css.bgcolor(node, "#ffffff") -> node
-// [3][set] uu.css.bgcolor(node, { r, g, b, a }) -> node
-function uucssbgcolor(node, type) {
-  return (type === void 0 ||
-          typeof type === "number") ? uucssbgcolorget(node, type || 0)
-                                    : uucssbgcolorset(node, type);
+// [1][get] uu.css.bgcolor(node) -> ColorHash
+// [2][set] uu.css.bgcolor(node, ColorHash) -> node
+function uucssbgcolor(node, color) {
+  return (color ? uucssbgcolorset : uucssbgcolorget)(node, color);
 }
 
 // uu.css.bgcolor.get - get background-color
-function uucssbgcolorget(node,   // @param Node:
-                         type) { // @param Number(= 0): result type
-                                 //            0 = return HexColorValidArray
-                                 //            1 = return RGBAValidHash
-                                 //            2 = return Number
-                                 // @return HexColorValidArray(type=0)
-                                 //         /RGBAValidHash(type=1)
-                                 //         /Number(type=2):
-  return uu.color(uu.css(node).backgroundColor, type);
+function uucssbgcolorget(node) { // @param Node:
+                                 // @return ColorHash:
+  return uu.color(uu.css(node).backgroundColor);
 }
 
 // uu.css.bgcolor.set - set background-color
-// [1][set] uu.css.bgcolor.set(node, "#ffffff") -> node
-// [2][set] uu.css.bgcolor.set(node, { r, g, b, a }) -> node
+// uu.css.bgcolor.set(node, ColorHash) -> node
 function uucssbgcolorset(node,    // @param Node:
-                         color) { // @param String/RGBAHash:
+                         color) { // @param ColorHash:
                                   // @return Node:
-  node.style.backgroundColor =
-      (typeof color === "string") ? color
-                                  : uu.color.rgba(color);
+  node.style.backgroundColor = uu.ver.advanced ? color.rgba : color.hex;
   return node;
 }
 
 // uu.css.bgcolor.inherit - get background-color from ancestor
-function uucssbgcolorinherit(node,   // @param Node:
-                             type) { // @param Number(= 0): result type
-                                     //            0 = return HexColorValidArray
-                                     //            1 = return RGBAValidHash
-                                     //            2 = return Number
-                                     // @return HexColorValidArray(type=0)
-                                     //         /RGBAValidHash(type=1)
-                                     //         /Number(type=2):
+function uucssbgcolorinherit(node) { // @param Node:
+                                     // @return ColorHash:
   var n = node, color = "transparent",
       ZERO = { transparent: 1, "rgba(0, 0, 0, 0)": 1 };
 
@@ -892,7 +871,7 @@ function uucssbgcolorinherit(node,   // @param Node:
     }
     n = n.parentNode;
   }
-  return uu.color(ZERO[color] ? "white" : color, type || 0);
+  return uu.color(ZERO[color] ? "white" : color);
 }
 
 // uu.css.bgimg
@@ -1006,7 +985,7 @@ function uucsstextshadowsetie(node, param) {
       ox = uucsspxactvalueie(node, ary[1]),
       oy = uucsspxactvalueie(node, ary[2]),
       blur = uucsspxactvalueie(node, ary[3]),
-      rgba = uu.color(ary[0], 1),
+      chash = uu.color(ary[0]),
       dir = Math.atan2(oy, ox) * (180 / Math.PI) + 90;
 
   if (node.uucsstextshadow === void 0) {
@@ -1018,20 +997,20 @@ function uucsstextshadowsetie(node, param) {
   node.uucsstextshadow = param;
 
   obj = node.filters.item(_SHADOW);
-  obj.Color = uu.color.hex(rgba); // "#ffffff" style
+  obj.Color = chash.hex; // "#ffffff" style
   obj.Strength = (ox || oy) ? Math.max(Math.abs(ox), Math.abs(oy)) : 0;
   obj.Direction = dir;
-  obj.Enabled = !rgba.a ? false : true;
+  obj.Enabled = !chash.a ? false : true;
 
   obj = node.filters.item(_BLUR);
   obj.Add = true;
   obj.Strength = (ox || oy) ? Math.min(blur / 2.5, 10) : 5;
   obj.Direction = dir;
-  obj.Enabled = !rgba.a ? false : true;
+  obj.Enabled = !chash.a ? false : true;
 }
 
 // uu.css.makeShadow - make shadow param string
-function uucssmakeshadow(color,  // @param Array: ColorString/RGBAHash color
+function uucssmakeshadow(color,  // @param Array: ColorString/ColorHash/RGBAHash color
                          ox,     // @param Array: shadow offsetX ("px" unit)
                          oy,     // @param Array: shadow offsetY ("px" unit)
                          blur) { // @param Array: shadow blur ("px" unit)

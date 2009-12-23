@@ -40,13 +40,15 @@ function uusvg(tag) { // @param String: svg tag
 function uuflash(url,      // @param URLString:
                  width,    // @param Number:
                  height,   // @param Number:
-                 option) { // @param Hash(= { wmode: "transparent",
+                 option) { // @param Hash(= { id: "external{guid}",
+                           //                 wmode: "transparent",
                            //                 play: "true", loop: "false" }):
                            // @return Node: new <object> element
   var rv = uu.mix(doc.createElement("object"),
                   { type: "application/x-shockwave-flash",
                     data: url, width: width, height: height }),
-      h = uu.arg(option, { movie: url, wmode: "transparent",
+      h = uu.arg(option, { id: "external" + uu.guid(),
+                           movie: url, wmode: "transparent",
                            play: "true", loop: "false" }), i;
 
   for (i in h) {

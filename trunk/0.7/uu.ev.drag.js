@@ -142,7 +142,7 @@ function draggableinit(
   // keep droppable bgcolor and rect
   i = 0;
   while ( (v = droppable[i++]) ) {
-    v.uudroppable = { bgcolor: uu.css.bgcolor(v)[0],
+    v.uudroppable = { bgcolor: uu.css.bgcolor(v)[0].hex,
                       rect: uu.css.rect(v) }; // bond
   }
   this._opt.mousedown = function(evt) {
