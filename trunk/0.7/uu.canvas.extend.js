@@ -1,11 +1,12 @@
 
 // === Canvas Extend ===
 // depend: uu.js, uu.canvas.js
-uu.waste || (function(win, doc, uu, _cstyle, CANVAS2D) {
+uu.waste || (function(win, doc, uu, _cstyle) {
 var _impl         = uu.canvas.impl,
     _colorCache   = _impl.colorCache,
     _firefox3     = uu.gecko && uu.ver.re === 1.9, // Firefox3.0
-    _PROTO        = CANVAS2D in win ? win[CANVAS2D].prototype : 0,
+    _crc2d        = "CanvasRenderingContext2D",
+    _PROTO        = _crc2d in win ? win[_crc2d].prototype : 0,
     _SHADOW_WIDTH = 4, // compat SL, VML
     _GLOBAL_ALPHA = "globalAlpha",
     _GLOBAL_COMPO = "globalCompositeOperation",
@@ -393,5 +394,5 @@ if (_PROTO) {
   _impl.extendLockAPI(_PROTO);
 }
 
-})(window, document, uu, window.getComputedStyle, "CanvasRenderingContext2D");
+})(window, document, uu, window.getComputedStyle);
 

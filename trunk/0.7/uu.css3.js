@@ -33,22 +33,22 @@ var _canvasok = uu.ver.majority,
       SKIP_PSEUDO: /^\*$|::?before$|::?after$|::?first-letter$|::?first-line$|:active|:focus|:hover|:unknown/
     },
     _EXCSS = { // extend css functions
-      position:   uu.ie6    ? 0x10    : 0, // position: fixed, absolute bug
-      alphapng:   uu.ie6    ? 0x20    : 0, // <img src="some.alpha.png">
-      maxmin:     uu.ie67   ? 0x40    : 0, // max-width:
-      disptbl:    uu.ie67   ? 0x80    : 0, // -uu-display: table
-      opacity:    uu.ie     ? 0x100   : 0, // opacity:
-      textshadow: uu.ie     ? 0x200   : 0, // -uu-text-shadow:
-      boxeffect:  _canvasok ? 0x400 : 0, // -uu-box-effect:
-      boxshadow:  _canvasok ? 0x800 : 0, // -uu-box-shadow:
-      boxreflect: _canvasok ? 0x1000: 0, // -uu-box-reflect:
-      bradius:    _canvasok ? 0x2000: 0, // -uu-border-radius:
-      bimage:     _canvasok ? 0x4000: 0, // -uu-border-image:
-      mbg:        _canvasok ? 0x8000: 0  // -uu-background:
-                                         // -uu-background-color:
-                                         // -uu-background-image:
-                                         // -uu-background-repeat:
-                                         // -uu-background-position:
+      position:   uu.ie6    ? 0x10   : 0, // position: fixed, absolute bug
+      alphapng:   uu.ie6    ? 0x20   : 0, // <img src="some.alpha.png">
+      maxmin:     uu.ie67   ? 0x40   : 0, // max-width:
+      disptbl:    uu.ie67   ? 0x80   : 0, // -uu-display: table
+      opacity:    uu.ie     ? 0x100  : 0, // opacity:
+      textshadow: uu.ie     ? 0x200  : 0, // -uu-text-shadow:
+      boxeffect:  _canvasok ? 0x400  : 0, // -uu-box-effect:
+      boxshadow:  _canvasok ? 0x800  : 0, // -uu-box-shadow:
+      boxreflect: _canvasok ? 0x1000 : 0, // -uu-box-reflect:
+      bradius:    _canvasok ? 0x2000 : 0, // -uu-border-radius:
+      bimage:     _canvasok ? 0x4000 : 0, // -uu-border-image:
+      mbg:        _canvasok ? 0x8000 : 0  // -uu-background:
+                                          // -uu-background-color:
+                                          // -uu-background-image:
+                                          // -uu-background-repeat:
+                                          // -uu-background-position:
     },
     _DECL2EXCSS = {
       position:                 1,
