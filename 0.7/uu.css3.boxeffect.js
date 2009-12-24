@@ -2,7 +2,7 @@
 // === CSS3 BoxEffect ===
 // depend: uu.js, uu.css.js, uu.css3.js
 uu.waste || (function(win, doc, uu, _mix, _ie, _ie6, _ie67, _cstyle, _math) {
-var _uids = {}, // { uid: node, ... }
+var _niddb = {}, // nodeid db { nodeid: node, ... }
     _drawFakeShadow = _ie67 ? drawFakeShadowIE : drawFakeShadow,
     _BFX = "uucss3bfx",
     _URL = /^\s*url\((.*)\)$/,
@@ -14,40 +14,41 @@ var _uids = {}, // { uid: node, ... }
     _BACLGROUND_POSITION_H = { left: "0%", center: "50%", right: "100%" },
     _BACLGROUND_POSITION_V = { top: "0%", center: "50%", bottom: "100%" };
 
-uu.css3.boxeffect = _mix(boxeffect, {
-  bond:   fxbond,
-  recalc: fxrecalc
+uu.css3.boxeffect = _mix(uucss3boxeffect, { // uu.css.boxeffect(node, excss)
+  bond:   uucss3boxeffectbond,   // uu.css3.boxeffect.bond(node, excess) -> node.uucss3bfx hash
+  recalc: uucss3boxeffectrecalc
 });
 
 // uu.css3.boxeffect
-function boxeffect(node, excss) {
+function uucss3boxeffect(node,    // @param Node:
+                         excss) { // @param excss:
   var view = node.parentNode,
       vs = _ie ? view.currentStyle : _cstyle(view, null),
       ns = _ie ? node.currentStyle : _cstyle(node, null),
-      uid = uu.node.id(node), m, mbgsh = 0,
+      nid = uu.node.id(node), m, mbgsh = 0,
       bfx, hash, render, nw, nh,
       viw = view.style.width,
       vih = view.style.height,
       decl, declw = -1, declh = -1,
       MBG = _MBG, MBG_CASE = _MBG_CASE;
 
-  if (vs.display === "none" || ns.display === "none") {
+  if (vs.display === "none" || ns.display === "none") { // hidden
     return;
   }
+  _niddb[nid] = node; // manage nodeid
 
-  _uids[uid] = node;
+  _ie67 && _fixIELayoutBug(view, node, vs, ns);
 
-  _ie67 && fixIELayoutBug(view, node, vs, ns);
+  bfx = uucss3boxeffectbond(node, excss);
 
-  bfx = fxbond(node, excss);
-
+  // apply style
   uu.css3.set(node, {
     "-uu-box-effect":    bfx.decl["-uu-box-effect"] || "auto",
     "-uu-box-shadow":    bfx.decl["-uu-box-shadow"],
     "-uu-box-reflect":   bfx.decl["-uu-box-reflect"],
     "-uu-border-radius": bfx.decl["-uu-border-radius"]
   });
-  _mix(bfx.margin, uu.css.margin.get(bfx.node));
+  _mix(bfx.margin, uu.css.margin.get(bfx.node)); // copy margin
   trainBorder(bfx);
   _ie67 && trainFakeBorder(bfx);
 
@@ -59,6 +60,7 @@ function boxeffect(node, excss) {
   trainMBG(bfx);
 
   if (bfx.boxreflect.render) {
+    // -uu-box-reflect:
     hash = bfx.boxreflect;
     if (hash.dir === "below") {
       if (node.tagName === "IMG") {
@@ -126,9 +128,9 @@ function boxeffect(node, excss) {
 }
 
 // uu.css3.boxeffect.bond
-function fxbond(node,    // @param Node:
-                excss) { // @param excss:
-                         // @return Hash:
+function uucss3boxeffectbond(node,    // @param Node:
+                             excss) { // @param excss:
+                                      // @return Hash: node.uucss3bfx hash
   if (!(_BFX in node)) {
     var view = node.parentNode;
 
@@ -174,11 +176,11 @@ function fxbond(node,    // @param Node:
 };
 
 // uu.css3.boxeffect.recalc
-function fxrecalc() {
-  var node, uid, view, bfx, vs, ns;
+function uucss3boxeffectrecalc() {
+  var node, nid, view, bfx, vs, ns;
 
-  for (uid in _uids) {
-    node = _uids[uid];
+  for (nid in _niddb) {
+    node = _niddb[nid];
     view = node.parentNode;
 
     vs = _ie ? view.currentStyle : _cstyle(view, null);
@@ -746,7 +748,7 @@ function trainBorder(bfx) {
 
   hash.render = 0;
   hash.shorthand = 0;
-  _mix(hash, uu.css.border.get(node, 1));
+  _mix(hash, uu.css.border.get(node, 1)); // copy border
   hash.topcolor = uu.color(ns.borderTopColor);
 
   if (hash.topcolor.a) { // has border (not transparent)
@@ -754,6 +756,7 @@ function trainBorder(bfx) {
       hash.render = 1;
     }
   }
+  // top === right === bottom === left -> shorthand = 1
   if (hash.t === hash.r &&
       hash.t === hash.b &&
       hash.t === hash.l) {
@@ -764,17 +767,17 @@ function trainBorder(bfx) {
 function trainFakeBorder(bfx) {
   // http://d.hatena.ne.jp/uupaa/20090719
   var node = bfx.node,
-      ns = _ie ? node.currentStyle : _cstyle(node, null);
+      ncs = _ie ? node.currentStyle : _cstyle(node, null);
 
   bfx.ie6borderorg = {
-    marginTop: ns.marginTop,
-    marginLeft: ns.marginLeft,
-    marginRight: ns.marginRight,
-    marginBottom: ns.marginBottom,
-    borderTopWidth: ns.borderTopWidth,
-    borderLeftWidth: ns.borderLeftWidth,
-    borderRightWidth: ns.borderRightWidth,
-    borderBottomWidth: ns.borderBottomWidth,
+    marginTop: ncs.marginTop,
+    marginLeft: ncs.marginLeft,
+    marginRight: ncs.marginRight,
+    marginBottom: ncs.marginBottom,
+    borderTopWidth: ncs.borderTopWidth,
+    borderLeftWidth: ncs.borderLeftWidth,
+    borderRightWidth: ncs.borderRightWidth,
+    borderBottomWidth: ncs.borderBottomWidth,
     borderStyle: "solid"
   };
   bfx.ie6borderfix = {
@@ -787,21 +790,23 @@ function trainFakeBorder(bfx) {
 }
 
 // IE6,IE7 CSS layout bugfix
-function fixIELayoutBug(view, node, viewStyle, nodeStyle) { // IE6, IE7
-  if (!viewStyle.hasLayout) {
-    view.style.zoom = 1;
-  }
-  node.style.zoom = 1; // apply z-index(sink canvas)
-  if (nodeStyle.position === "static") {
-    node.style.position = "relative"; // set "position: relative"
-  }
+function _fixIELayoutBug(view,  // @param Node: view node
+                         node,  // @param Node: node
+                         vcs,   // @param ComputedStyle: view.getComputedStyle
+                         ncs) { // @param ComputedStyle: node.getComputedStyle
+  var ns = node.style;
+
+  !vcs.hasLayout && (view.style.zoom = 1);
+  ns.zoom = 1; // apply z-index(sink canvas)
+  ncs.position === "static" && (ns.position = "relative"); // to relative
+
   // bugfix position:relative + margin:auto
   // see demo/viewbox_position/position_relative.htm
-  if (node.style.position === "relative") {
-    (nodeStyle.marginTop === "auto") && (node.style.marginTop = 0);
-    (nodeStyle.marginLeft === "auto") && (node.style.marginLeft = 0);
-    (nodeStyle.marginRight === "auto") && (node.style.marginRight = 0);
-    (nodeStyle.marginBottom === "auto") && (node.style.marginBottom = 0);
+  if (ns.position === "relative") {
+    (ncs.marginTop === "auto") && (ns.marginTop = 0);
+    (ncs.marginLeft === "auto") && (ns.marginLeft = 0);
+    (ncs.marginRight === "auto") && (ns.marginRight = 0);
+    (ncs.marginBottom === "auto") && (ns.marginBottom = 0);
   }
 }
 

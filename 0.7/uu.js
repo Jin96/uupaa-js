@@ -50,6 +50,7 @@ var _cfg    = uuarg(_xconfig, {
     _lazydb = {}, // { id: [[low], [mid], [high]], ... }
     _ndiddb = {}, // { nodeid: node, ... }
     _ajaxc  = {}, // ajax cache { "url": last modified date time(unit: ms), ...}
+    _ajaxs  = 0,  // static xhr object
     _FIX    = {},
     _DEC2   = _numary("0123456789"),       // ["00", ...  99: "99"]
     _HEX2   = _numary("0123456789abcdef"), // ["00", ... 255: "ff"]
@@ -512,9 +513,12 @@ function uuajax(url,    // @param URLString: request url
                         //    code - Number: status code (0, 2xx, 3xx, 4xx, 5xx)
                         //    guid - Number: request id (atom)
                         //    type - String: Content-Type( "text/css" or ""(fail) )
-                ngfn,   // @param Function(= void 0): ngfn({ rv, url, code, guid, type })
-                _fn2) { // @hidden Function: for uu.ajax.queue
+                ngfn) { // @param Function(= void 0): ngfn({ rv, url, code, guid, type })
                         // @return Number: guid(request atom)
+  return _uuajax(url, option, fn, ngfn);
+}
+
+function _uuajax(url, option, fn, ngfn, _fn2) {
   function _ajaxstatechange() {
     var rv = "", type, code, lastmod, hash;
 
@@ -557,7 +561,7 @@ function uuajax(url,    // @param URLString: request url
       xhr && xhr.abort();
     } catch(err) {}
   }
-  var opt = option || {}, xhr = uuajaxcreate(),
+  var opt = option || {}, xhr = opt.xhr || uuajaxcreate(),
       method = opt.method || (opt.data ? "POST" : "GET"),
       header = opt.header || [],
       guid = uuguid(), run = 0, v, i = 0, befn, div;
@@ -603,21 +607,21 @@ function uuajax(url,    // @param URLString: request url
 
 // uu.ajax.get - async "GET" request
 function uuajaxget(url, option, fn, ngfn) { // @see uu.ajax
-  uuajax(url, uuarg(option, { data: null }), fn, ngfn);
+  return _uuajax(url, uuarg(option, { data: null }), fn, ngfn);
 }
 
 // uu.ajax.post - async "POST" request
 function uuajaxpost(url, data, option, fn, ngfn) { // @see uu.ajax
-  uuajax(url, uuarg(option, { data: data }), fn, ngfn);
+  return _uuajax(url, uuarg(option, { data: data }), fn, ngfn);
 }
 
 // uu.ajax.sync - sync "GET" request
 function uuajaxsync(url) { // @param String:
                            // @return String: responseText
   try {
-    var xhr = uuajaxcreate();
+    var xhr = _ajaxs || (_ajaxs = uuajaxcreate());
 
-    xhr.open("GET", url, false); // false = sync
+    xhr.open("GET", url, false); // sync
     xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
     xhr.send(null);
     if (!xhr.status || xhr.status === 200) {
@@ -632,7 +636,7 @@ function uuajaxsync(url) { // @param String:
 
 // uu.ajax.ifmod - async request with "If-Modified-Since" header
 function uuajaxifmod(url, option, fn, ngfn) { // @see uu.ajax
-  uuajax(url, uuarg(option, { ifmod: 1 }), fn, ngfn);
+  return _uuajax(url, uuarg(option, { ifmod: 1 }), fn, ngfn);
 }
 
 // uu.ajax.queue - request queue
@@ -682,26 +686,21 @@ function _uuajaxparallel(ajax, ary, lastfn, ngfn) {
   var rv = [], atom = [], i = 0, iz = ary.length, n = 0, run = 0;
 
   for (; i < iz; i += 3) {
-    atom.push((ajax ? uu.ajax : uu.jsonp)(ary[i], ary[i + 1],
+    atom.push((ajax ? _uuajax : _uujsonp)(ary[i], ary[i + 1],
                                           ary[i + 2], _error, _nextp));
   }
 }
 
 // uu.ajax.create - create XMLHttpRequest object
 function uuajaxcreate() { // @return XMLHttpRequest/0:
-  try {
-    return new win.XMLHttpRequest();
-  } catch (err) {
-    try { // [IE6]
-      return new win.ActiveXObject("Microsoft.XMLHTTP");
-    } catch (err) {}
-  }
-  return 0;
+  return win.ActiveXObject  ? new ActiveXObject("Microsoft.XMLHTTP") :
+         win.XMLHttpRequest ? new XMLHttpRequest() : 0;
 }
 
 // uu.ajax.expire - expire Modified Since request cache and sync xhr object
 function uuajaxexpire() {
-  _ajaxc = {};  // expire If-Modified-Since cache
+  _ajaxc = {};   // expire If-Modified-Since cache
+  _ajaxs = null;
 }
 
 // uu.jsonp - Async JSONP request
@@ -711,9 +710,12 @@ function uujsonp(url,    // @param URLString: request url
                          //   option.mehtod  - String(= "callback"):
                          //   option.timeout - Number(= 10): unit sec
                  fn,     // @param Function: fn({ rv, url, code, guid, type })
-                 ngfn,   // @param Function(= void 0): ngfn({ rv, url, code, guid, type })
-                 _fn2) { // @hidden Function: for uu.jsonp.queue
+                 ngfn) { // @param Function(= void 0): ngfn({ rv, url, code, guid, type })
                          // @return Number: guid(request atom)
+  return _uujsonp(url, option, fn, ngfn);
+}
+
+function _uujsonp(url, option, fn, ngfn, _fn2) {
   function _jsonpwatchdog() {
     _jsondb[jobid]("", 408); // 408 "Request Time-out"
   }
@@ -2937,14 +2939,14 @@ function winstyle(node,     // @param Node:
     case 2: v = parseFloat(v) * 4 / 3; break; // pt
     case 3: // %, auto
       switch (_MOD[w]) {
-      case 1: v = node.offsetTop; break;
-      case 2: v = node.offsetLeft; break;
-      case 3: v = (node.offsetWidth  || rect.right - rect.left)
+      case 1: v = node.offsetTop; break;  // style.top
+      case 2: v = node.offsetLeft; break; // style.left
+      case 3: v = (node.offsetWidth  || rect.right - rect.left) // style.width
                 - parseInt(rv.borderLeftWidth) - parseInt(rv.borderRightWidth)
                 - parseInt(rv.paddingLeft) - parseInt(rv.paddingRight);
               v = v > 0 ? v : 0;
               break;
-      case 4: v = (node.offsetHeight || rect.bottom - rect.top)
+      case 4: v = (node.offsetHeight || rect.bottom - rect.top) // style.height
                 - parseInt(rv.borderTopWidth) - parseInt(rv.borderBottomWidth)
                 - parseInt(rv.paddingTop) - parseInt(rv.paddingBottom);
               v = v > 0 ? v : 0;
