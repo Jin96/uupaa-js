@@ -65,9 +65,10 @@ function uucss3boxeffect(node,    // @param Node:
     if (hash.dir === "below") {
       if (node.tagName === "IMG") {
         // delay loader
-        uu.img.load(node.src, function(img, state, dim) {
-          if (state === 1) {
-            bfx.layer = new uu.layer(view, dim.w, dim.h * 2 + hash.offset);
+        uu.img.load(node.src, function(imghash) {
+          if (imghash.code === 200) {
+            bfx.layer = new uu.layer(view, imghash.w,
+                                           imghash.h * 2 + hash.offset);
             // http://d.hatena.ne.jp/uupaa/20090822
             bfx.nodeOffset = uu.css.off.get(bfx.node, view); // from ancestor
             bfx.layer.createReflectionLayer(
@@ -113,6 +114,14 @@ function uucss3boxeffect(node,    // @param Node:
     bfx.layer = new uu.layer(view, declw, declh, { HIDDEN: 0 });
     bfx.nodebgLayer = bfx.layer.createLayer("nodebg", render, 0, 1,
                                             bfx.nodeRect.w, bfx.nodeRect.h);
+
+
+if (0) {
+    bfx.canvasbgLayer = bfx.layer.createLayer("canvasbg", render, 0, 1,
+                                            bfx.nodeRect.w, bfx.nodeRect.h);
+}
+
+
     // http://d.hatena.ne.jp/uupaa/20090822
     // [1] calc viewbg dimension
     bfx.nodeOffset = uu.css.off.get(bfx.node, view); // from ancestor
@@ -142,6 +151,7 @@ function uucss3boxeffectbond(node,    // @param Node:
       layer:        0,
       nodebgLayer:  0,
       viewbgLayer:  0,
+//      canvasbgLayer:0,
       hasReflectLayer: 0,
       slmode:       0, // 1 = Silverlight mode
       viewRect:     uu.css.size(view),
@@ -479,7 +489,7 @@ function drawMultipleBackgroundImage(bfx, ctx) {
       break;
     case 1: // image
       img = mbg.imgobj[i];
-      if (img.state === 1) {
+      if (img.code === 200) {
         pos[i] = trainBackgroundPosition(bfx, mbg.position[i], img);
         ++draw;
       }
@@ -516,7 +526,7 @@ function drawMultipleBackgroundImage(bfx, ctx) {
       switch (mbg.type[i]) {
       case 1:
         img = mbg.imgobj[i];
-        if (img.state === 1) {
+        if (img.code === 200) {
           switch (BACKGROUND_REPEAT[mbg.repeat[i]] || 0) {
           case 1: // "no-repeat"
             // http://twitter.com/uupaa/status/2763996863
@@ -608,7 +618,7 @@ function trainMBG(bfx) {
   var mbg = bfx.mbg, i = 0, iz, m, url, _ceil = _math.ceil, N,
       URL = _URL, QUOTE = _QUOTE, UU_GRADIENT = _UU_GRADIENT;
 
-  // spec http://www.w3.org/TR/css3-background/#layering
+  // @see MultiBG http://www.w3.org/TR/css3-background/#layering
   N = _math.max(mbg.image.length, mbg.repeat.length, mbg.position.length);
 
   if (N > mbg.image.length) {
@@ -642,8 +652,8 @@ function trainMBG(bfx) {
                             mbg.grad[i].type) ? 1 : 0;
     }
   }
-  function lazyRedraw(img, state) {
-    if (state === 1) {
+  function lazyRedraw(hash) {
+    if (hash.code === 200) {
       (bfx.mbg.timerid >= 0) && clearTimeout(bfx.mbg.timerid);
       bfx.mbg.timerid = setTimeout(function() {
         boxeffectRecalcRect(bfx.node, bfx);

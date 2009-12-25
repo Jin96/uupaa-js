@@ -2683,10 +2683,31 @@ try {
     _fire();
     uuisfunc(win.xwin || 0) && win.xwin(uu);
     uulazy.fire("canvas");
+    //{:: [IE] fix mem leak
+    uuevdetach(win, "load", _windowloaded);
+    //::}
   }
   uuevattach(win, "load", _windowloaded);
   _ie ? _peekie() : uuevattach(doc, "DOMContentLoaded", _fire);
 })(uuready.gone);
+
+//{:: [IE] fix mem leak
+function unload() {
+  var nodeid, node, ary, i, v;
+
+  for (nodeid in _ndiddb) {
+    try {
+      node = _ndiddb[nodeid];
+      ary = node.attributes, i = 0;
+      while ( (v = ary[i++]) ) {
+        !v.name.indexOf("uu") && (node[v.name] = null);
+      }
+    } catch (err) {}
+  }
+  win.detachEvent("onunload", unload);
+}
+_ie && win.attachEvent("onunload", unload);
+//::}
 
 // inner -
 // 1. prebuild camelized hash - http://handsout.jp/slide/1894
@@ -2880,13 +2901,13 @@ function uuvers(consel,    // @param Number(= 0): 1 is add conditional selector
 
 //{:: window.getComputedStyle() for IE6+
 // http://d.hatena.ne.jp/uupaa/20091212
-window.getComputedStyle || (function() {
+window.getComputedStyle || (function(win) {
 var _PT = /pt$/, _FULL = [], _MORE = [], _BOX = [],
     _MOD = { top: 1, left: 2, width: 3, height: 4 },
     _UNIT = { m: 1, t: 2, "%": 3, o: 3 }, // em, pt, %, auto
     _THICK = (document.documentMode || 0) > 7 ? "5px" : "6px";
 
-window.getComputedStyle = winstyle;
+win.getComputedStyle = winstyle;
 
 function winstyle(node,     // @param Node:
                   pseudo,   // @param String(= void 0):
@@ -2980,6 +3001,13 @@ function winstyle(node,     // @param Node:
     split(" ").sort();
 })();
 
-})();
+// --- [IE] fix mem leak ---
+function _unload() {
+  win.getComputedStyle = null;
+  win.detachEvent("onunload", _unload);
+}
+win.attachEvent("onunload", _unload);
+
+})(window);
 //::}
 

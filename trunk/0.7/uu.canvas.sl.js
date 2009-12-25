@@ -591,7 +591,7 @@ function drawImage(image) {
             sc[1] ? _buildShadowBlur(this, "Image", sc) : "",
             '</Image></Canvas>');
   } else { // HTMLCanvasElement
-    iz = image._ctx2d._history.length;
+    iz = image.uuctx2d._history.length;
     switch (info.az) {
     case 3:
       m = _mtx2dmultiply(_mtx2dtranslate(dx, dy), this._mtx);
@@ -623,14 +623,14 @@ function drawImage(image) {
 
     // shadow not impl
     rv.push(_SL_CANVAS_ZINDEX, zindex,
-            '" Opacity="', this[_GLOBAL_ALPHA], // image._ctx2d[_GLOBAL_ALPHA],
+            '" Opacity="', this[_GLOBAL_ALPHA], // image.uuctx2d[_GLOBAL_ALPHA],
             size, '">',
             clip, _buildMatrixTransform('Canvas', m),
 //            sc[1] ? _buildShadowBlur(me, "Canvas", sc) : "",
             '<Canvas>');
 
     for (; i < iz; ++i) {
-      rv.push(image._ctx2d._history[i]);
+      rv.push(image.uuctx2d._history[i]);
     }
     rv.push('</Canvas></Canvas>');
   }

@@ -28,10 +28,8 @@ var _canvasok = uu.ver.majority,
     _uid2data = {},     // { uid: { node, rules, klass, excss }, ... }
                         // excss: { bits: 0, decl: {}, order: "" }
     _BFX = "uucss3bfx",
-    _CONST = {
-      CSS3CLASS: /uucss[\w]+\s*/g,
-      SKIP_PSEUDO: /^\*$|::?before$|::?after$|::?first-letter$|::?first-line$|:active|:focus|:hover|:unknown/
-    },
+    _CSS3CLASS = /uucss[\w]+\s*/g,
+    _SKIP_PSEUDO = /^\*$|::?before$|::?after$|::?first-letter$|::?first-line$|:active|:focus|:hover|:unknown/,
     _EXCSS = { // extend css functions
       position:   uu.ie6    ? 0x10   : 0, // position: fixed, absolute bug
       alphapng:   uu.ie6    ? 0x20   : 0, // <img src="some.alpha.png">
@@ -67,33 +65,44 @@ var _canvasok = uu.ver.majority,
       "-uu-background-position":_EXCSS.mbg
     },
     _EXSTYLE2FUNC = {
-      opacity:                  uucss3setopacity,
-      "-uu-text-shadow":        uucss3settextshadow,
-      "-uu-box-effect":         uucss3setboxeffect,
-      "-uu-box-shadow":         uucss3setboxshadow,
-      "-uu-box-reflect":        uucss3setboxreflect,
-//    "-uu-border-image":       uucss3setborderimage,
-      "-uu-border-radius":      uucss3setborderradius,
-      "-uu-background":         uucss3setbg,
-      "-uu-background-color":   uucss3setbgcolor,
-      "-uu-background-image":   uucss3setbgimg,
-      "-uu-background-repeat":  uucss3setbgrpt,
-      "-uu-background-position":uucss3setbgpos
+      opacity:                  _uucss3setopacity,
+      "-uu-text-shadow":        _uucss3settextshadow,
+      "-uu-box-effect":         _uucss3setboxeffect,
+      "-uu-box-shadow":         _uucss3setboxshadow,
+      "-uu-box-reflect":        _uucss3setboxreflect,
+//    "-uu-border-image":       _uucss3setborderimage,
+      "-uu-border-radius":      _uucss3setborderradius,
+      "-uu-background":         _uucss3setbg,
+      "-uu-background-color":   _uucss3setbgcolor,
+      "-uu-background-image":   _uucss3setbgimg,
+      "-uu-background-repeat":  _uucss3setbgrpt,
+      "-uu-background-position":_uucss3setbgpos
     };
 
 !uu.config.cssexpr && (_EXCSS.maxmin = _EXCSS.position = 0);
 
 /*
-doc.getCSSCanvasContext || (doc.getCSSCanvasContext = getCSSCanvasContext);
-
-// document.getCSSCanvasContext
+//{:: document.getCSSCanvasContext
 function getCSSCanvasContext(contextType, // @param String: "2d"
                              id,          // @param String:
                              width,       // @param Number:
                              height) {    // @param Number:
-  return newnode._ctx2d;
+  return newnode.uuctx2d;
 }
  */
+
+// attach document.createElement
+if (!doc.getCSSCanvasContext) {
+  doc.getCSSCanvasContext = getCSSCanvasContext;
+  uu.ie && win.attachEvent("onunload", _unload);
+}
+
+// [IE] fix mem leak
+function _unload() {
+//  doc.getCSSCanvasContext = null;
+  win.detachEvent("onunload", _unload);
+}
+//::}
 
 // [1][get] uu.css3(node, "color") -> "red"
 // [2][get] uu.css3(node, "color,width") -> { color: "red", width: "20px" }
@@ -206,7 +215,7 @@ function _uucss3review(ctx, rebuild, dirtycss) {
     css = uu.css.clean(_dirtycss = (dirtycss || uu.css.imports()));
     _rawdata = uu.mix(uu.css.parse(css), { init: 1 });
   }
-  _validate(_rawdata, ctx);
+  _uucss3validate(_rawdata, ctx);
 
   uu.config.debug && (win.status = (new Date - tick) + "ms");
 }
@@ -246,14 +255,14 @@ function unbond(context) { // @param Node:
 }
 
 // inner - validate CSS
-function _validate(rawdata, context) {
+function _uucss3validate(rawdata, context) {
   // uuNode.cutdown - cut all nodes less than context
-  function cutdown(context) { // @Node(= document.body): parent node
+  function cutdown(context) { // @param Node(= <body>): parent node
                               // @return DocumentFragment:
     var rv, ctx = context || doc.body;
     if (doc.createRange) {
       (rv = doc.createRange()).selectNodeContents(ctx);
-      return rv.extractContents(); // return DocumentFragment
+      return rv.extractContents();
     }
     rv = doc.createDocumentFragment();
     while (ctx.firstChild) {
@@ -264,14 +273,13 @@ function _validate(rawdata, context) {
 
   var v, w, i = 0, j, k, l, iz = rawdata.specs.length, jz, kz, lz,
       spec, data, expr, ruleid, nodeuid, excss, node,
-      // vars alias
-      IMP = " !important;",
       fragment, ruleset = [],
       gridx = -1,
       expair, exbits, exdecl, exorder, exoi, exv, exw, exi, // work
       // document fragment context
       dfctx = (!context || context === doc ||
-                           context === uupub.root) ? doc.body : context;
+                           context === uupub.root) ? doc.body : context,
+      DISPLAY_INLINE = /display:inline;/i, INLINE = /^inline$/;
 
   // reset global vars
   _rules = [];
@@ -284,7 +292,7 @@ function _validate(rawdata, context) {
     for (j = 0, jz = data.length; j < jz; ++j) {
       expr = data[j].expr;
 
-      if (_CONST.SKIP_PSEUDO.test(expr)) { // skip universal, pseudo-class/elements
+      if (_SKIP_PSEUDO.test(expr)) { // skip universal, pseudo-class/elements
         continue;
       }
 
@@ -316,7 +324,7 @@ function _validate(rawdata, context) {
           if (_mark) {
             // ".uucss[num] { color: red; font-size: 24pt; ... }"
             w = (spec < 10000) ? data[j].decl.join(";")
-                               : data[j].decl.join(IMP) + IMP;
+                               : data[j].decl.join(" !important;") + " !important;";
             w += ";";
             ruleset.push(".uucss" + ruleid, w);
           }
@@ -344,11 +352,11 @@ function _validate(rawdata, context) {
                 _uid2data[nodeuid].klass.push("uucss" + ruleid);
               }
 
-              // for Acid2 test(need UU_LIGHT = 0)
-              //    inline-element has neither width nor height(in IE6, IE7)
+              // [ACID2][IE6][IE7] inline-element has neither width nor height
+              //                   (need window.xconfig.light = 0)
               if (uu.ie67 && !uu.config.light) {
-                if (/display:inline;/i.test(w) ||
-                    /^inline$/.test(v.currentStyle.display)) {
+                if (DISPLAY_INLINE.test(w) ||
+                    INLINE.test(v.currentStyle.display)) {
                   _mark && _uid2data[nodeuid].klass.push("uucssinline");
                 }
               }
@@ -416,7 +424,7 @@ function _validate(rawdata, context) {
     }
   }
 
-  _plus && plusPlan(rawdata.init, context);
+  _plus && _uucss3plusplan(rawdata.init, context);
 
   _usedocfg && !uu.css3._deny && (fragment = cutdown(dfctx));
   // --- begin code block ---
@@ -427,7 +435,7 @@ function _validate(rawdata, context) {
       i = 0;
       while ( (v = _lazyClearClass[i++]) ) {
         if (!(uu.ie67 && v.getAttribute("uuCSSLock"))) {
-          v.className = v.className.replace(_CONST.CSS3CLASS, "");
+          v.className = v.className.replace(_CSS3CLASS, "");
           v.removeAttribute("uucss3c");
         }
       }
@@ -460,24 +468,24 @@ function _validate(rawdata, context) {
         _rules[++gridx] = ".uucssinline{width:auto;height:auto}";
       }
       // boost prevalidate
-      _plus && plusPrevalidate(rawdata.init);
+      _plus && _uucss3plusprevalidate(rawdata.init);
   // --- end code block ---
   _usedocfg && !uu.css3._deny && dfctx.appendChild(fragment);
 
   // boost postvalidate
-  _plus && plusPostvalidate(_uid2data, rawdata.init, context);
+  _plus && _uucss3pluspostvalidate(_uid2data, rawdata.init, context);
 
   // Opera9.5+ problem fix and Opera9.2 flicker fix
   uu.opera && (_usedocfg = 0);
 }
 
-// inner -
-function uucss3setopacity(node, prop, value) {
+// inner - opacity:
+function _uucss3setopacity(node, prop, value) {
   uu.css.opacity.set(node, value);
 }
 
-// inner -
-function uucss3settextshadow(node, prop, value) {
+// inner - -uu-text-shadow:
+function _uucss3settextshadow(node, prop, value) {
   var shadow = uu.css.validate.shadow(value);
 
   if (!shadow.valid) {
@@ -488,8 +496,8 @@ function uucss3settextshadow(node, prop, value) {
                         shadow.oy, shadow.blur));
 }
 
-// inner -
-function uucss3setboxeffect(node, prop, value) {
+// inner - -uu-box-effect:
+function _uucss3setboxeffect(node, prop, value) {
   if (!/^(?:none|auto)$/.test(value)) { throw prop + "=" + value; }
 
   var data = _uid2data[uu.node.id(node)];
@@ -513,8 +521,8 @@ function uucss3setboxeffect(node, prop, value) {
   }
 }
 
-// inner -
-function uucss3setboxshadow(node, prop, value) {
+// inner - -uu-box-shadow:
+function _uucss3setboxshadow(node, prop, value) {
   var rv = uu.css.validate.shadow(value), hash,
       data = _uid2data[uu.node.id(node)];
 
@@ -532,8 +540,8 @@ function uucss3setboxshadow(node, prop, value) {
   }
 }
 
-// inner -
-function uucss3setboxreflect(node, prop, value) {
+// inner - -uu-box-reflect:
+function _uucss3setboxreflect(node, prop, value) {
   var rv = uu.css.validate.boxReflect(value),
       data = _uid2data[uu.node.id(node)], hash;
 
@@ -549,8 +557,8 @@ function uucss3setboxreflect(node, prop, value) {
   }
 }
 
-// inner -
-function uucss3setborderradius(node, prop, value) {
+// inner - -uu-border-radius:
+function _uucss3setborderradius(node, prop, value) {
   var rv = uu.css.validate.borderRadius(value), hash,
       data = _uid2data[uu.node.id(node)];
 
@@ -575,14 +583,14 @@ function uucss3setborderradius(node, prop, value) {
   }
 }
 
-/*
-function uucss3setborderimage(node, prop, value) {
+/* // inner - -uu-border-image:
+function _uucss3setborderimage(node, prop, value) {
   // ToDo:
 }
  */
 
-// inner -
-function uucss3setbg(node, prop, value) {
+// inner - -uu-background:
+function _uucss3setbg(node, prop, value) {
   var rv = uu.css.validate.background(value),
       data = _uid2data[uu.node.id(node)];
 
@@ -596,8 +604,8 @@ function uucss3setbg(node, prop, value) {
   }
 }
 
-// inner -
-function uucss3setbgcolor(node, prop, value) {
+// inner - -uu-background-color:
+function _uucss3setbgcolor(node, prop, value) {
   var rv = uu.color(value),
       data = _uid2data[uu.node.id(node)];
 
@@ -611,8 +619,8 @@ function uucss3setbgcolor(node, prop, value) {
   }
 }
 
-// inner -
-function uucss3setbgimg(node, prop, value) {
+// inner - -uu-background-image:
+function _uucss3setbgimg(node, prop, value) {
   var rv = uu.split.token(value, ","),
       data = _uid2data[uu.node.id(node)];
 
@@ -625,8 +633,8 @@ function uucss3setbgimg(node, prop, value) {
   }
 }
 
-// inner -
-function uucss3setbgrpt(node, prop, value) {
+// inner - -uu-background-repeat:
+function _uucss3setbgrpt(node, prop, value) {
   var rv = value.split(","),
       data = _uid2data[uu.node.id(node)];
 
@@ -639,8 +647,8 @@ function uucss3setbgrpt(node, prop, value) {
   }
 }
 
-// inner -
-function uucss3setbgpos(node, prop, value) {
+// inner - -uu-background-position:
+function _uucss3setbgpos(node, prop, value) {
   var rv = value.split(","),
       data = _uid2data[uu.node.id(node)];
 
@@ -653,15 +661,15 @@ function uucss3setbgpos(node, prop, value) {
   }
 }
 
-// plus.init
-function plusInit(context) {
+// inner - plus.init
+function _uucss3plusinit(context) {
   if (_EXCSS.position) {
     _plan.init = uucss3.fixie.position.init(context);
   }
 }
 
-// plus.plan - make plan
-function plusPlan(revalidate, context) {
+// inner - plus.plan - make plan
+function _uucss3plusplan(revalidate, context) {
   if (!revalidate) {
     if (_EXCSS.alphapng) {
       _plan.alphapng = uucss3.fixie.alphapng.query(context);
@@ -669,8 +677,8 @@ function plusPlan(revalidate, context) {
   }
 }
 
-// plus.prevalidate - pre-validate plan
-function plusPrevalidate(revalidate) {
+// inner - plus.prevalidate - pre-validate plan
+function _uucss3plusprevalidate(revalidate) {
   var v, i = 0;
 
   if (!revalidate) {
@@ -687,8 +695,8 @@ function plusPrevalidate(revalidate) {
   }
 }
 
-// plus.postvalidate - post-validate plan
-function plusPostvalidate(uid2data, revalidate, context) {
+// inner - plus.postvalidate - post-validate plan
+function _uucss3pluspostvalidate(uid2data, revalidate, context) {
   var i = 0, uid, node, excss, bits, ns, disptbl = [],
       boxeffect = [], bfxi = -1, shadow,
       _float = parseFloat,
@@ -750,7 +758,7 @@ function plusPostvalidate(uid2data, revalidate, context) {
 }
 
 // inner - blackout
-function _blackout(css) { // @return Boolean: true is blackout
+function _uucss3blackout(css) { // @return Boolean: true is blackout
   var name = win.name;
   // http://d.hatena.ne.jp/uupaa/20090619
 /*
@@ -778,7 +786,7 @@ function _blackout(css) { // @return Boolean: true is blackout
 }
 
 // inner - memento for IE6, IE7, IE8
-function _memento() {
+function _uucss3memento() {
   var node = uu.tag("style"), v, i = 0, MEMENTO = "uucss3memento";
 
   while ( (v = node[i++]) ) {
@@ -792,7 +800,7 @@ function _memento() {
 
 // inner - decode data:text/javascript
 //    <script src="data:text/javascript,..">
-function _decodescript() {
+function _uucss3decodescript() {
   var node = uu.tag("script"), v, i = 0, hash, dstr, DATA = "data:";
 
   while ( (v = node[i++]) ) {
@@ -808,7 +816,7 @@ function _decodescript() {
 
 // --- initialize / export ---
 // inner - wrap auto viewbox
-function autoviewbox() {
+function _uucss3autoviewbox() {
   var ary1 = uu.query('[class/="uuautoviewbox*"]'), ary2,
       div, v, w, i = 0, j, padding, rex = /[_-]/g;
 
@@ -829,24 +837,31 @@ function autoviewbox() {
   }
 }
 
+// inner - collect css, parse, validate and draw
 function _css3init() {
   var css = "", tick = +new Date;
 
-  _plus && autoviewbox();
+  _plus && _uucss3autoviewbox();
 
   if (_mark || _plus) {
-    uu.ie && _memento();
+    uu.ie && _uucss3memento();
     css = uu.css.clean(_dirtycss = (css || uu.css.imports()));
-    if (uu.ie6 && _blackout(css)) { // ignore lazy
+    if (uu.ie6 && _uucss3blackout(css)) { // ignore lazy
       return;
     }
+    // create style sheet
     uu.css.create("uucss3");
-    uu.ie && !uu.config.light && uu.codec.datauri && _decodescript();
+    // decode <script src="data:...">
+    uu.ie && !uu.config.light && uu.codec.datauri && _uucss3decodescript();
+    // parse
     _rawdata = uu.mix(uu.css.parse(css), { init: 0 });
 
-    _plus && plusInit();
-    _validate(_rawdata);
+    _plus && _uucss3plusinit();
+    _uucss3validate(_rawdata);
+    // init flag
     _rawdata.init = 1;
+
+    // debug
     uu.config.debug && (win.status = (new Date - tick) + "ms");
   }
 }

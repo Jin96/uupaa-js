@@ -783,10 +783,10 @@ function drawImage(image) {
             rv.push('<div', _VML_BASE_STYLE, zindex,
                     ';left:', _round(c0.x / _ZOOM),
                     'px;top:', _round(c0.y / _ZOOM), 'px">')
-            iz = image._ctx2d._history.length;
+            iz = image.uuctx2d._history.length;
 
             for (; i < iz; ++i) {
-              rv.push(image._ctx2d._history[i]);
+              rv.push(image.uuctx2d._history[i]);
             }
             rv.push('</div>');
             break;
@@ -796,10 +796,10 @@ function drawImage(image) {
                     trans(m, dx, dy, dw, dh),
                     '"><div style="width:',  _round(iw * dw / sw),
                                'px;height:', _round(ih * dh / sh), 'px">');
-            iz = image._ctx2d._history.length;
+            iz = image.uuctx2d._history.length;
 
             for (; i < iz; ++i) {
-              rv.push(image._ctx2d._history[i]);
+              rv.push(image.uuctx2d._history[i]);
             }
             rv.push('</div></div>');
             break;
@@ -810,10 +810,10 @@ function drawImage(image) {
                     ';overflow:hidden',
                     trans(m, dx, dy, dw, dh), '">');
 
-            iz = image._ctx2d._history.length;
+            iz = image.uuctx2d._history.length;
 
             for (; i < iz; ++i) {
-              rv.push(image._ctx2d._history[i]);
+              rv.push(image.uuctx2d._history[i]);
             }
             rv.push('</div>');
             break;

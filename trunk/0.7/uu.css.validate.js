@@ -25,37 +25,32 @@ var _LENGTH = /^(?:[\d\.]+(%|px|em|pt|cm|mm|in|pc|px)|0)$/,
     _BOX_REFLECT_MASK = /^(?:(-uu-gradient\(.*?\))|(none|url\(.*?\)))$/;
 
 uu.css.validate = {
-  width:        width,        // fn(value, rv = void 0) - return { width, valid }
-  border:       border,       // fn(value, rv = void 0) - return { width, style, color }
-  shadow:       shadow,       // fn(value, rv = void 0) - return { rgba, ox, oy, blur, valid }
-  gradient:     gradient,     // fn(value, rv = void 0) - return { type, point, radius, offset, color, valid }
-  background:   background,   // fn(value, rv = void 0) - return { image, repeat, position, attachment,
-                              //                                   origin, clip, rgba, valid }
-  boxReflect:   boxReflect,   // fn(value, rv = void 0) - return { tl, tr, br, bl, valid }
-  borderRadius: borderRadius  // fn(value, rv = void 0) - return { tl, tr, br, bl, valid }
+  width:        width,        // width(value) - return { width, valid }
+  border:       border,       // border(value) - return { width, style, color }
+  shadow:       shadow,       // shadow(value) - return { rgba, ox, oy, blur, valid }
+  gradient:     gradient,     // gradient(value) - return { type, point, radius, offset, color, valid }
+  background:   background,   // background(value) - return { image, repeat, position, attachment,
+                              //                              origin, clip, rgba, valid }
+  boxReflect:   boxReflect,   // boxReflect(value) - return { tl, tr, br, bl, valid }
+  borderRadius: borderRadius  // borderRadius(value) - return { tl, tr, br, bl, valid }
 };
 
 // uu.css.validate.width - parse width: property
-function width(value, // @param String: width value
-               rv) {  // @param Hash(= void 0): result value
-                      // @return Hash: {
-                      //            width: "value",
-                      //            valid: 1 }
-  rv || (rv = {});
-  rv.width = value;
-  rv.valid = (_LENGTH.test(value) || value === "auto") ? 1 : 0;
-  return rv;
+function width(value) { // @param String: width value
+                        // @return Hash: { width, valid }
+                        //      width - String: "value"
+                        //      valid - Number: 0 or 1
+  return { width: value,
+           valid: (_LENGTH.test(value) || value === "auto") ? 1 : 0 };
 }
 
 // uu.css.validate.border - parse border: short hand property
-function border(value, // @param String: border value
-                rv) {  // @param Hash(= void 0): result value
-                       // @return Hash: {
-                       //            width: "value",
-                       //            style: "value",
-                       //            rgba:  "value",
-                       //            valid: 1 }
-  rv || (rv = {});
+function border(value) { // @param String: border value
+                         // @return Hash: { width, style, rgba, valid }
+                         //     width - String: "value"
+                         //     style - String: "value"
+                         //     rgba  - String: "value"
+                         //     valid - Number: 0 or 1
   var ary = uu.split.token(value, " "), v, i = 0,
       width, style, rgba, r, valid = 1;
 
@@ -76,26 +71,22 @@ function border(value, // @param String: border value
     valid = 0;
     break;
   }
-  rv.width = width || "medium";
-  rv.style = style || "none";
-  rv.rgba  = rgba;
-  rv.valid = valid;
-  return rv;
+  return { width: width || "medium", style: style || "none",
+           rgba: rgba, valid: valid };
 }
 
 // uu.css.validate.shadow - parse shadow: property
 //    box-shadow: <color> || <offsetX> <offsetY> <blur>, ...
 //    text-shadow: <color> || <offsetX> <offsetY> <blur>, ...
-function shadow(value, // @param String: -uu-box-shadow: value
-                rv) {  // @param Hash(= void 0): result value
-                       // @return Hash: {
-                       //            rgba:  [{r,g,b,a}, ...],
-                       //            ox:    ["0px", ...],
-                       //            oy:    ["0px", ...],
-                       //            blur:  ["0px", ...],
-                       //            valid: 1 }
-  rv || (rv = { rgba: [], ox: [], oy: [], blur: [] });
-  var multi, ary, v, i = 0, c, rgba, ox, oy, blur, valid = 1;
+function shadow(value) { // @param String: -uu-box-shadow: value
+                         // @return Hash: { rgba, ox, oy, blur, valid }
+                         //     rgba  - Array: [ColorHash, ...]
+                         //     ox    - Array: ["0px", ...]
+                         //     oy    - Array: ["0px", ...]
+                         //     blur  - Array: ["0px", ...]
+                         //     valid - Number: 0 or 1
+  var rv = { rgba: [], ox: [], oy: [], blur: [] },
+      multi, ary, v, i = 0, c, rgba, ox, oy, blur, valid = 1;
 
   multi = uu.split.token(uu.trim(value), ",");
   while (valid && (v = multi[i++])) {
@@ -122,16 +113,14 @@ function shadow(value, // @param String: -uu-box-shadow: value
 // uu.css.validate.gradient - parse gradient() value
 //    gradient(<type>, <point> [, <radius>]?,
 //                     <point> [, <radius>]? [, <stop>]*)
-function gradient(value, // @param String: -uu-gradient() value
-                  rv) {  // @param Hash(= void 0): result value
-                         // @return Hash: {
-                         //            type:  "linear" or "radial",
-                         //            point:  [],
-                         //            radius: [],
-                         //            offset: [],
-                         //            color:  [],
-                         //            valid:  1 }
-  rv || (rv = { type: "", point: [], radius: [], offset: [], color: [] });
+function gradient(value) { // @param String: -uu-gradient() value
+                           // @return Hash: { type, point, radius, offset, color, valid }
+                           //     type   - String: "linear" or "radial"
+                           //     point  - Array:  ["0", "100%", "20", "20%"]
+                           //     radius - Array:  [radius1, radius2]
+                           //     offset - Array:  [0, ...]
+                           //     color  - Array:  ["#C0FFEE", ... ]
+                           //     valid  - Number: 0 or 1
   var type = 0, point = [], radius = [], from = 0, to = 0,
       offset = [], color = [], valid = 0,
       m, m2, ary, tmpary, v, w, i = 0;
@@ -200,33 +189,27 @@ function gradient(value, // @param String: -uu-gradient() value
       !offset.length) {
     valid = 0;
   }
-
-  rv.valid  = valid;
-  rv.type   = (type === 1) ? "linear" :
-              (type === 2) ? "radial" : "";
-  rv.point  = point;    // ["0", "100%", "20", "20%"]
-  rv.radius = radius;   // [radius1, radius2]
-  rv.offset = offset;   // [0, ...]
-  rv.color  = color;    // ["#C0FFEE", ... ]
-  return rv;
+  return { type: (type === 1) ? "linear" : (type === 2) ? "radial" : "",
+           point: point, radius: radius,
+           offset: offset, color: color, valid: valid };
 }
 
 // uu.css.validate.background - parse background: short hand property
 //    background("url(...) top left, blue url(...) bottom center")
-function background(value, // @param String: -uu-background: value
-                    rv) {  // @param Hash(= void 0): result value
-                           // @return Hash: {
-                           //            image: ["url(...), ...],
-                           //            repeat: ["repeat", ...],
-                           //            position: ["0% 0%", ...],
-                           //            attachment: ["scroll", ...],
-                           //            origin: ["padding", ...],
-                           //            clip: ["no-clip", ...],
-                           //            rgba: { r,g,b,a },
-                           //            valid: 1 }
-  rv || (rv = { image: [], repeat: [], position: [],
-                attachment: [], origin: [], clip: [] });
-  var multi, i = 0, j, iz, m, v, w, ary,
+function background(value) { // @param String: -uu-background: value
+                             // @return Hash: { image, repeat, position, attachment,
+                             //                 origin, clip, rgba, valid }
+                             //     image     - Array: ["url(...), ...]
+                             //     repeat    - Array: ["repeat",  ...]
+                             //     position  - Array: ["0% 0%",   ...]
+                             //     attachment- Array: ["scroll",  ...]
+                             //     origin    - Array: ["padding", ...]
+                             //     clip      - Array: ["no-clip", ...]
+                             //     rgba      - Array: { r,g,b,a }
+                             //     valid     - Number: 0 or 1
+  var rv = { image: [], repeat: [], position: [],
+             attachment: [], origin: [], clip: [] },
+      multi, i = 0, j, iz, m, v, w, ary,
       img, rpt, att, pox, poy, ori, clp, rgba, valid = 1;
 
   multi = uu.split.token(uu.trim.inner(value), ",");
@@ -285,14 +268,13 @@ function background(value, // @param String: -uu-background: value
 //    <direction> ::= "above" / "below" / "left" / "right"
 //    <offset> ::= length
 //    <mask-box-image> ::= -uu-gradient() or url()
-function boxReflect(value, // @param String: -uu-box-reflect: value
-                    rv) {  // @param Hash(= void 0): result value
-                           // @return Hash: { dir:    "below",
-                           //                 offset: "0",
-                           //                 url:    "",
-                           //                 grad:   void 0,
-                           //                 valid:  1 }
-  rv || (rv = {});
+function boxReflect(value) { // @param String: -uu-box-reflect: value
+                             // @return Hash: { dir, offset, url, grad, valid }
+                             //     dir    - String: "below"
+                             //     offset - String: "0"
+                             //     url    - String: ""
+                             //     grad   - Hash:   { type, point, radius, offset, color, valid }
+                             //     valid  - Number: 0 or 1
   var m, v, i = 0, ary = uu.split.token(value, ""),
       dir, off, url, grad, valid = 1;
 
@@ -322,27 +304,23 @@ function boxReflect(value, // @param String: -uu-box-reflect: value
       valid = 0;
     }
   }
-  rv.valid  = valid;
-  rv.dir    = dir;
-  rv.offset = off || "0";
-  rv.url    = url || "";
-  rv.grad   = grad;
-  return rv;
+  return { dir: dir, offset: off || "0", url: url || "",
+           grad: grad, valid: valid };
 }
 
 // uu.css.validate.border-radius - parse border-radius: property
 //    border-radius: <radius>{1,4} [/ <radius>{1,4}]
 //    border-radius: top-left, top-right, bottom-right, bottom-left
 //    border-radius: top-left, top-right, [top-left], [top-right]
-function borderRadius(value, // @param String: -uu-border-radius: value
-                      rv) {  // @param Hash(= void 0): result value
-                             // @return Hash: { tl: ["0px", "0px"],
-                             //                 tr: ["0px", "0px"],
-                             //                 br: ["0px", "0px"],
-                             //                 bl: ["0px", "0px"],
-                             //                 valid: 1 }
-  rv || (rv = { tl: [], tr: [], br: [], bl: [] });
-  var multi = value.split("/"), ary, v, i = 0, valid = 1;
+function borderRadius(value) { // @param String: -uu-border-radius: value
+                               // @return Hash: { tl, tr, br, bl, valid }
+                               //     tl    - Array:  ["0px", "0px"]
+                               //     tr    - Array:  ["0px", "0px"]
+                               //     br    - Array:  ["0px", "0px"]
+                               //     bl    - Array:  ["0px", "0px"]
+                               //     valid - Number: 0 or 1
+  var rv = { tl: [], tr: [], br: [], bl: [] },
+      multi = value.split("/"), ary, v, i = 0, valid = 1;
 
   while (valid && (v = multi[i++])) {
     ary = uu.split(v);

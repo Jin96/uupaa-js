@@ -9,6 +9,7 @@ var _slhosts      = 0,  // Silverlight host count
     _colorCache   = {}, // { color: ["#ffffff", alpha] }
     _metricNode,        // [lazy] Measure Text Metric Node
     _safari3x     = uu.webkit && uu.ver.re < 530, // Safari3.x
+    _orgCreateElement = 0, // document.createElement
     // property alias
     _GLOBAL_ALPHA = "globalAlpha",
     _GLOBAL_COMPO = "globalCompositeOperation",
@@ -95,20 +96,14 @@ uu.mix(win, {
 
 CanvasGradient.prototype.addColorStop = addColorStop;
 
-// hook document.createElement
-if ((uu.ie || _safari3x) && !doc.uucreateelement) {
-  doc.uucreateelement = doc.createElement; // keep original method
-  doc.createElement = _createElement;
-}
-
-// inner - document.createElement wrapper
+//{:: inner - document.createElement wrapper
 function _createElement(tag,      // @param String: tag name
                         vml,      // @param Boolean(= false): true is vml canvas
                         dummy1,   // @param Mix: dummy arg
                         dummy2) { // @param Mix: dummy arg
                                   // @return Node: new element
   if (tag === "canvas") {
-    var elm = doc.uucreateelement("CANVAS"); // [!] upper case
+    var elm = _orgCreateElement("CANVAS"); // [!] upper case
 
     if (uu.ie) {
       return (vml || !uu.ver.sl) ? initVML(elm) : initSL(elm);
@@ -116,8 +111,26 @@ function _createElement(tag,      // @param String: tag name
       return _initOldWebKitCanvas(elm);
     }
   }
-  return doc.uucreateelement(tag, vml, dummy1, dummy2);
+  return _orgCreateElement(tag, vml, dummy1, dummy2);
 }
+
+// hook document.createElement
+if ((uu.ie || _safari3x) && !doc.uucreateelement) {
+  _orgCreateElement = doc.createElement; // keep original method
+  doc.createElement = _createElement;
+  uu.ie && win.attachEvent("onunload", _unload);
+}
+
+// [IE] fix mem leak
+function _unload() {
+  doc.createElement = uu.ie67 ? null : _orgCreateElement; // [!]
+  win.CanvasRenderingContext2D = null;
+  win.CanvasGradient = null;
+  win.CanvasPattern = null;
+  win.TextMetrics = null;
+  win.detachEvent("onunload", _unload);
+}
+//::}
 
 // uu.canvas.init
 function uucanvasinit() {
@@ -505,8 +518,8 @@ function onPropertyChange(evt) {
   if ({ width: 1, height: 1 }[name]) {
     node = evt.srcElement; // node = <canvas>
     node.style[name] = _math.max(parseInt(node[name]), 0) + "px";
-    if (node._ctx2d._readyState) {
-      ctx = node._ctx2d;
+    if (node.uuctx2d._readyState) {
+      ctx = node.uuctx2d;
       ctx.initSurface(1); // 1: resize
       ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     }
@@ -623,12 +636,12 @@ function initSL(node) { // @param Node:
 
   // CanvasRenderingContext.getContext
   newnode.getContext = function() {
-    return newnode._ctx2d;
+    return newnode.uuctx2d;
   };
-  newnode._ctx2d = new SL2D(newnode);
+  newnode.uuctx2d = new SL2D(newnode);
 
   win[onload] = function(sender) { // @param Node: sender is <Canvas> node
-    var ctx = newnode._ctx2d;
+    var ctx = newnode.uuctx2d;
 
     ctx._view = sender.children;
     ctx._content = sender.getHost().content; // getHost() -> <object>
@@ -649,6 +662,12 @@ function initSL(node) { // @param Node:
       '<param name="onLoad" value="', onload, '" />',   // bond to global
     '</object>'].join("");
   newnode.attachEvent("onpropertychange", onPropertyChange);
+  win.attachEvent("onunload", function() {
+    newnode.uuctx2d = null;
+    newnode.getContext = null;
+    newnode.detachEvent("onpropertychange", onPropertyChange);
+    win.detachEvent("onunload", arguments.callee);
+  })
   return newnode;
 }
 
@@ -683,10 +702,16 @@ function initVML(node) { // @param Node:
 
   // CanvasRenderingContext.getContext
   newnode.getContext = function() {
-    return newnode._ctx2d;
+    return newnode.uuctx2d;
   };
-  newnode._ctx2d = new VML2D(newnode);
+  newnode.uuctx2d = new VML2D(newnode);
   newnode.attachEvent("onpropertychange", onPropertyChange);
+  win.attachEvent("onunload", function() {
+    newnode.uuctx2d = null;
+    newnode.getContext = null;
+    newnode.detachEvent("onpropertychange", onPropertyChange);
+    win.detachEvent("onunload", arguments.callee);
+  })
   return newnode;
 }
 
