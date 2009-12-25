@@ -2,6 +2,15 @@
 // === CSS Parser ===
 // depend: uu.js, uu.codec.js, uu.css.validate.js
 uu.waste || (function(win, doc, uu) {
+var _importCache = {}, // import cache { url: cssText }
+    SPEC_E = /\w+/g,
+    SPEC_ID = /#[\w\u00C0-\uFFEE\-]+/g, // (
+    SPEC_NOT = /:not\(([^\)]+)\)/,
+    SPEC_ATTR = /\[\s*(?:([^~\^$*|=\s]+)\s*([~\^$*|]?\=)\s*(["'])?(.*?)\3|([^\]\s]+))\s*\]/g,
+    SPEC_CLASS = /\.[\w\u00C0-\uFFEE\-]+/g,
+    SPEC_PCLASS = /:[\w\-]+(?:\(.*\))?/g,
+    SPEC_PELEMENT = /::?(?:first-letter|first-line|before|after)/g,
+    SPEC_CONTAINS = /:contains\((["'])?.*?\1\)/g;
 
 uu.mix(uu.css, {
   parse:        uucssparse,     // uu.css.parse("clean css") -> { specs, data }
@@ -9,7 +18,6 @@ uu.mix(uu.css, {
   imports:      uucssimports    // uu.css.imports() -> "dirty css"
 });
 
-var _importCache = {}; // import cache { url: cssText }
 
 // uu.css.parse
 function uucssparse(cleancss) { // @param String: "clean css"
@@ -72,18 +80,18 @@ function uucssparse(cleancss) { // @param String: "clean css"
 
       if (decls[k]) {
         both = decls[k].split(COLON);
-        prop = both.shift();  // "color"
+        prop = both.shift();  // "color:red" -> "color"
 
-        val = both.join(":"); // "red"
+        val = both.join(":"); // "color:red" -> "red"
         if (escape) {
           val = val.replace(SPECIAL_CODE, function(m, code) {
             return CODE2SEPA[code];
           });
         }
 
-        if (prop.indexOf("\\") >= 0) { // .parser { m\argin: 2em; };
+        if (prop.indexOf("\\") >= 0) { // [ACID2] .parser { m\argin: 2em; };
           ++ignore;
-        } else if (rex1.test(val)) { // !important rule
+        } else if (rex1.test(val)) { // [!important] rule
           val = val.replace(rex2, ""); // trim "!important"
           valid = (!uu.config.light && valids[prop]) ?
                       uu.css.validate[prop](val).valid : 1;
@@ -93,7 +101,7 @@ function uucssparse(cleancss) { // @param String: "clean css"
           } else {
             ++ignore;
           }
-        } else { // normal rule
+        } else { // [normal] rule
           valid = (!uu.config.light && valids[prop]) ?
                       uu.css.validate[prop](val).valid : 1;
           if (valid) {
@@ -116,7 +124,7 @@ function uucssparse(cleancss) { // @param String: "clean css"
         });
       }
 
-      // * html .parser {  background: gray; }  -> "gray"
+      // [CSS HACK] * html .parser {  background: gray; }  -> "gray"
       if (STAR_HACK.test(v)) {
         uu.config.debug &&
             alert(v + " ignore CSS Star hack");
@@ -222,15 +230,7 @@ function _calcspec(expr) { // @param String: simple selector(without comma)
   function C() { ++c; return ""; }
   function C2(m, E) { return " " + E; }
 
-  var a = 0, b = 0, c = 0,
-      SPEC_E = /\w+/g,
-      SPEC_ID = /#[\w\u00C0-\uFFEE\-]+/g, // (
-      SPEC_NOT = /:not\(([^\)]+)\)/,
-      SPEC_ATTR = /\[\s*(?:([^~\^$*|=\s]+)\s*([~\^$*|]?\=)\s*(["'])?(.*?)\3|([^\]\s]+))\s*\]/g,
-      SPEC_CLASS = /\.[\w\u00C0-\uFFEE\-]+/g,
-      SPEC_PCLASS = /:[\w\-]+(?:\(.*\))?/g,
-      SPEC_PELEMENT = /::?(?:first-letter|first-line|before|after)/g,
-      SPEC_CONTAINS = /:contains\((["'])?.*?\1\)/g;
+  var a = 0, b = 0, c = 0;
 
   expr.replace(SPEC_NOT, C2).      // :not(E)
        replace(SPEC_ID, A).        // #id

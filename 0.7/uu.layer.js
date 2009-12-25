@@ -13,7 +13,6 @@ uu.layer = uu.mix(uulayer, {    // new uu.layer(view, width = "auto", height = "
   getLayerInstance: getLayerInstance
                                 // layer.getLayerInstance(elm) -> return LayerObject or null
 });
-win.uuLayer = uu.layer; // back compat
 
 uulayer.prototype = {
   // --- view operations ---
@@ -210,7 +209,7 @@ function createLayer(id,       // @param String: layer id
     h = (height !== void 0) ? height :
         (v.style.height === "auto") ? v.offsetHeight : parseInt(v.style.height);
     // onPropertyChange guard
-    uu.ie ? elm._ctx2d.guard(function() { elm.width = w; })
+    uu.ie ? elm.uuctx2d.guard(function() { elm.width = w; })
           : (elm.width = w);
     elm.height = h;
     es = elm.style;
@@ -301,7 +300,7 @@ function resizeLayer(id,       // @param String: layer id
   switch (node.tagName.toLowerCase()) {
   case "canvas":
     // onPropertyChange guard
-    uu.ie ? node._ctx2d.guard(function() { node.width = width; })
+    uu.ie ? node.uuctx2d.guard(function() { node.width = width; })
           : (node.width = width);
     node.height = height;
     break;

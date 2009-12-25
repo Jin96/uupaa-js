@@ -2,7 +2,8 @@
 // === Image ===
 // depend: uu.js
 uu.waste || (function(win, doc, uu) {
-var _imgdb = {}; // { url: ImageObject, ... }
+var _imgdb = {}, // { url: ImageObject, ... }
+    _imgfn = {}; // { url: [fn, ...] }
 //  _render = ((uu.gecko && uu.ver.re >= 1.92) || (uu.ie && uu.ver.ua >= 7));
 
 uu.mix(uu.img, {
@@ -20,45 +21,41 @@ function uuimgload(url,  // @param String:
                          //     Hash: dim: { w, h }
                          // @return ImageObject:
   function _onimageload() {
-    var v, i = 0, ary = img.uufn.slice(), // copy
-        keep = { img: img, state: img.state,
-                 dim: { w: img.width, h: img.height }};
+    var v, i = 0, ary = _imgfn[url].slice(), // copy
+        arg = { img: img, code: img.code, w: img.width, h: img.height };
 
-    img.uufn = []; // clear
+    _imgfn[url] = []; // clear
     while ( (v = ary[i++]) ) {
       try {
-        v(keep.img, keep.state, keep.dim); // fn(imgObj, state, dim)
+        v(arg);
       } catch(err) {}
     }
   }
   var img;
 
-  if (url in _imgdb) {
+  if (url in _imgdb) { // already exist
     img = _imgdb[url];
-    img.uufn.push(fn); // stock
-    img.state && _onimageload(); // -1 or 1
+    img.code === 200 ? _onimageload()
+                     : _imgfn[url].push(fn);
     return img;
   }
   _imgdb[url] = img = new Image();
-  img.state = 0; // bond
-  img.clear = function() { // bond
-    delete _imgdb[url];
-    img.onerror = img.onload = uuvain;
-    img = void 0; // [IE6] fix memory leak
-  };
+  _imgfn[url] = [fn];
+  img.code = 0;
+
   img.onerror = function() {
-    img.state = -1; // error
     img.width = img.height = 0;
+    img.code = 404;
     _onimageload();
+    img.onerror = img.onload = null;
   };
   img.onload = function() {
     if (img.complete || img.readyState === "complete") { // [IE8] readyState
-      img.state = 1; // loaded
+      img.code = 200;
       _onimageload();
     }
+    img.onerror = img.onload = null;
   };
-  img.uufn || (img.uufn = []); // bond
-  img.uufn.push(fn); // stock
   img.setAttribute("src", url);
   return img;
 }
