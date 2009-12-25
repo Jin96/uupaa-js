@@ -8,16 +8,19 @@ header,nav,article,section,aside,footer { display: block; }
   -uu-background-image: -uu-gradient(linear, 0% 0%, 0% 100%, from(skyblue), to(#E1FAF7));
   -uu-box-shadow: steelblue 5px 5px 10px;
   -uu-border-radius: 50px 10px 10px 50px;
+  border: 0 none; /* [IE] avoid black border */
 }
 #features {
   -uu-background-image: -uu-gradient(linear, 0% 0%, 0% 100%, from(pink), to(#E1FAF7));
   -uu-box-shadow: deeppink 5px 5px 10px;
   -uu-border-radius: 10px 10px 10px 10px;
-}
+  border: 0 none; /* [IE] avoid black border */
+} 
 #info {
   -uu-background-image: -uu-gradient(linear, 0% 0%, 0% 100%, from(#BFE019), to(#E1FAF7));
   -uu-box-shadow: #ff3 5px 5px 10px;
   -uu-border-radius: 10px 50px 50px 10px;
+  border: 0 none; /* [IE] avoid black border */
 }
 #info li a {
   color: navy;
@@ -80,9 +83,9 @@ window.xconfig = {
       <p title="redady">Ready</p>
       <ul>
         <li><img src="img/f32.alpha.png" />Firefox 3+</li>
-        <li><img src="img/s32.alpha.png" />Safari 3.1+</li>
+        <li><img src="img/s32.alpha.png" />Safari 3.1+, iPhone, iPod</li>
         <li><img src="img/o32.alpha.png" />Opera 9.5+</li>
-        <li><img src="img/c32.alpha.png" />Chrome 1+</li>
+        <li><img src="img/c32.alpha.png" />Chrome</li>
         <li><img src="img/i32.alpha.png" />IE 6+</li>
       </ul>
     </div>
@@ -92,8 +95,10 @@ window.xconfig = {
       <p title="features">Features</p>
       <ul>
         <li>HTML5, CSS3</li>
-        <li>Gradients, Rounded corners, Drop shadows, Multiple backgrounds, Reflection, IE boost</li>
-        <li>CSS3 Selectors, Ajax, DOM, Event, Tween, Drag&amp;Drop, UI, jQuery plugins</li>
+        <li>Gradients, Rounded corners, Drop shadows,
+            Multiple backgrounds, Canvas, BackgroundCanvas, Reflection, IE boost</li>
+        <li>CSS3 Selectors, Ajax, DOM, Event, Tween,
+            Drag&amp;Drop, UI, jQuery plugins</li>
       </ul>
     </div>
   </div>

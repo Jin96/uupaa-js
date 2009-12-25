@@ -81,29 +81,6 @@ var _canvasok = uu.ver.majority,
 
 !uu.config.cssexpr && (_EXCSS.maxmin = _EXCSS.position = 0);
 
-/*
-//{:: document.getCSSCanvasContext
-function getCSSCanvasContext(contextType, // @param String: "2d"
-                             id,          // @param String:
-                             width,       // @param Number:
-                             height) {    // @param Number:
-  return newnode.uuctx2d;
-}
- */
-
-// attach document.createElement
-if (!doc.getCSSCanvasContext) {
-  doc.getCSSCanvasContext = getCSSCanvasContext;
-  uu.ie && win.attachEvent("onunload", _unload);
-}
-
-// [IE] fix mem leak
-function _unload() {
-//  doc.getCSSCanvasContext = null;
-  win.detachEvent("onunload", _unload);
-}
-//::}
-
 // [1][get] uu.css3(node, "color") -> "red"
 // [2][get] uu.css3(node, "color,width") -> { color: "red", width: "20px" }
 // [3][set] uu.css3(node, "color", "red") -> node
@@ -118,6 +95,9 @@ uu.css3 = uu.mix(uucss3, {
   review:       uucss3review,   // uu.css3.review(ctx, full)
   redraw:       uucss3redraw,   // uu.css3.redraw()
   dirtycss:     uucss3dirtycss, // uu.css3.dirtycss() -> "dirty css"
+  bgcanvas: uu.mix(uucss3bgcanvas, {  // uu.css3.bgcanvas("id") -> CanvasRenderingContext/null
+    redraw:     uucss3bgcanvasredraw  // uu.css3.bgcanvas.redraw(fn)
+  }),
   _deny:        0               // [protected] deny removeChild
 });
 
@@ -228,6 +208,34 @@ function uucss3rules() { // @return Array: rule-set
 // uu.css3.dirtycss - get last collected CSS
 function uucss3dirtycss() { // @return String: "dirty CSS"
   return _dirtycss;
+}
+
+// uu.css3.bgcanvas - get -uu-canvas context
+function uucss3bgcanvas(id) { // @param String: ident
+                              // @return CanvasRenderingContext/null:
+  var bfx = _uucss3bgcanvas(id);
+
+  return bfx ? bfx.layer.getContext("nodebg") : null;
+}
+
+// uu.css3.bgcanvas.redraw - bind redraw callback function
+function uucss3bgcanvasredraw(id,   // @param String:
+                              fn) { // @param Function: callback function
+  var bfx = _uucss3bgcanvas(id);
+
+  bfx && (bfx.redrawfn = fn);
+}
+
+// inner - find -uu-canvas node
+function _uucss3bgcanvas(id) { // @return Hash: bfx
+  var ary = uu.query(":boxeffect", doc.body), v, i = 0;
+
+  while ( (v = ary[i++]) ) {
+    if (v[_BFX].mbg.canvasid === id) {
+      return v[_BFX];
+    }
+  }
+  return 0;
 }
 
 // inner - unbond attrs
