@@ -1018,7 +1018,7 @@ function uucssmakeshadow(color,  // @param Array: ColorString/ColorHash/RGBAHash
   var rv = [], c, v, i = 0;
 
   while ( (v = color[i]) ) {
-    c = (typeof v === "string") ? v : uu.color.rgba(v);
+    c = (typeof v === "string") ? v : v.rgba;
     rv.push(c + " " + ox[i] + " " + oy[i] + " " + blur[i]);
     ++i;
   }

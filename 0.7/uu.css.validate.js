@@ -20,7 +20,7 @@ var _LENGTH = /^(?:[\d\.]+(%|px|em|pt|cm|mm|in|pc|px)|0)$/,
     _SPLIT_COMMA = /\s*,\s*/,
     _PERCENT     = /%$/,
     _BACKGROUND_POS   = /^([\d\.]+(%|px|em|pt|cm|mm|in|pc|px)|left|center|right|top|bottom|0)$/,
-    _BACKGROUND_IDENT = /^(?:(-uu-gradient\(.*?\))|(none|url\(.*?\))|(repeat|no-repeat|repeat-x|repeat-y|space|round)|(scroll|fixed|local)|(border-box|padding-box|content-box)|(no-clip))$/,
+    _BACKGROUND_IDENT = /^(?:(-uu-canvas\(.*?\))|(-uu-gradient\(.*?\))|(none|url\(.*?\))|(repeat|no-repeat|repeat-x|repeat-y|space|round)|(scroll|fixed|local)|(border-box|padding-box|content-box)|(no-clip))$/,
     _BOX_REFLECT_DIR  = /^(above|below|left|right)$/,
     _BOX_REFLECT_MASK = /^(?:(-uu-gradient\(.*?\))|(none|url\(.*?\)))$/;
 
@@ -205,7 +205,7 @@ function background(value) { // @param String: -uu-background: value
                              //     attachment- Array: ["scroll",  ...]
                              //     origin    - Array: ["padding", ...]
                              //     clip      - Array: ["no-clip", ...]
-                             //     rgba      - Array: { r,g,b,a }
+                             //     rgba      - ColorHash:
                              //     valid     - Number: 0 or 1
   var rv = { image: [], repeat: [], position: [],
              attachment: [], origin: [], clip: [] },
@@ -223,12 +223,13 @@ function background(value) { // @param String: -uu-background: value
     while ( (w = ary[j++]) ) {
       m = _BACKGROUND_IDENT.exec(w);
       if (m) {
-        if (m[1]) { img ? (valid = 0) : (img = m[1]); } // -uu-gradient
-        if (m[2]) { img ? (valid = 0) : (img = m[2]); } // url
-        if (m[3]) { rpt ? (valid = 0) : (rpt = m[3]); } // repeat
-        if (m[4]) { att ? (valid = 0) : (att = m[4]); } // attachment
-        if (m[5]) { ori ? (valid = 0) : (ori = m[5]); } // origin
-        if (m[6]) { clp ? (valid = 0) : (clp = m[6]); } // clip
+        if (m[1]) { img ? (valid = 0) : (img = m[1]); } // -uu-canvas
+        if (m[2]) { img ? (valid = 0) : (img = m[2]); } // -uu-gradient
+        if (m[3]) { img ? (valid = 0) : (img = m[3]); } // url
+        if (m[4]) { rpt ? (valid = 0) : (rpt = m[4]); } // repeat
+        if (m[5]) { att ? (valid = 0) : (att = m[5]); } // attachment
+        if (m[6]) { ori ? (valid = 0) : (ori = m[6]); } // origin
+        if (m[7]) { clp ? (valid = 0) : (clp = m[7]); } // clip
         continue;
       } else {
         m = _BACKGROUND_POS.exec(w);
@@ -251,7 +252,7 @@ function background(value) { // @param String: -uu-background: value
       valid = 0;
       break;
     }
-    rv.image.push(img || "none");
+    rv.image.push(img || "none"); // "-uu-canvas(...)" or "-uu-gradient(...)" or "url(...)"
     rv.repeat.push(rpt || "repeat");
     rv.attachment.push(att || "scroll");
     rv.position.push((pox || "0%") + " " + (poy || "0%"));

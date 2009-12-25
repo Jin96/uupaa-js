@@ -5,9 +5,9 @@ uu.waste || (function(win, doc, uu, _mix, _ie, _ie6, _ie67, _cstyle, _math) {
 var _niddb = {}, // nodeid db { nodeid: node, ... }
     _drawFakeShadow = _ie67 ? drawFakeShadowIE : drawFakeShadow,
     _BFX = "uucss3bfx",
-    _URL = /^\s*url\((.*)\)$/,
-    _QUOTE = /^\s*[\"\']?|[\"\']?\s*$/g,
-    _UU_GRADIENT = /^\s*-uu-gradient/,
+    _IMG_URL = /^\s*url\((.*)\)$/,         // "url(...)" (
+    _IMG_CANVAS = /^\s*-uu-canvas\(([^\)]+)\)/, // "-uu-canvas(...)"
+    _IMG_GRADIENT = /^\s*-uu-gradient/,    // "-uu-gradient(...)"
     _MBG = /-uu-background(-image|-repeat|-position|-color|-attachment|-clip|-origin|-size|-break)?/g,
     _MBG_CASE = { "-image": 2, "-repeat": 2, "-position": 2, "-color": 2 },
     _BACKGROUND_REPEAT = { "no-repeat": 1, "repeat-x": 2, "repeat-y": 2 },
@@ -115,13 +115,6 @@ function uucss3boxeffect(node,    // @param Node:
     bfx.nodebgLayer = bfx.layer.createLayer("nodebg", render, 0, 1,
                                             bfx.nodeRect.w, bfx.nodeRect.h);
 
-
-if (0) {
-    bfx.canvasbgLayer = bfx.layer.createLayer("canvasbg", render, 0, 1,
-                                            bfx.nodeRect.w, bfx.nodeRect.h);
-}
-
-
     // http://d.hatena.ne.jp/uupaa/20090822
     // [1] calc viewbg dimension
     bfx.nodeOffset = uu.css.off.get(bfx.node, view); // from ancestor
@@ -151,7 +144,6 @@ function uucss3boxeffectbond(node,    // @param Node:
       layer:        0,
       nodebgLayer:  0,
       viewbgLayer:  0,
-//      canvasbgLayer:0,
       hasReflectLayer: 0,
       slmode:       0, // 1 = Silverlight mode
       viewRect:     uu.css.size(view),
@@ -163,8 +155,8 @@ function uucss3boxeffectbond(node,    // @param Node:
                       t: 0, l: 0, r: 0, b: 0, w: 0, h: 0,
                       topcolor: uu.color("transparent") }, // ColorHash
       mbg:          { render: 0,
-                      type: [],
-                      image: ["none"],
+                      type: [], // 1 is url, 2 is gradient, 3 is canvas
+                      image: ["none"], // "-uu-canvas(...)" or "-uu-gradient(...)" or "url(...)"
                       repeat: ["repeat"],
                       position: ["0% 0%"],
                       attachment: ["scroll"],
@@ -173,13 +165,16 @@ function uucss3boxeffectbond(node,    // @param Node:
                       rgba: uu.color("transparent"),
                       altcolor: uu.css.bgcolor.inherit(node), // ColorHash
                       grad: [],
+                      canvasid: "", // "-uu-canvas(id)" -> "id"
                       imgobj: [],
                       timerid: -1 },
       bradius:      { render: 0, shorthand: 0, r: [0, 0, 0, 0] },
       boxshadow:    { render: 0, rgba: 0, ox: 0, oy: 0, blur: 0 },
       boxreflect:   { render: 0, dir: 0, offset: 0, url: 0,
                       grad: { render: 0 } },
-      boxeffect:    { render: 0 }
+      boxeffect:    { render: 0 },
+      redrawfn:     0 // redraw callback function for -uu-background-image: -uu-canvas()
+                      // document.setCSSCanvasContextRedraw("ident", redrawfn)
     };
   }
   return node[_BFX];
@@ -410,7 +405,9 @@ function boxeffectDraw(bfx,      // @param Hash:
         }
       }
     }
-
+    if (bfx.redrawfn) {
+      bfx.redrawfn(1); // callback
+    }
     layer.pop();
   }
 
@@ -498,6 +495,9 @@ function drawMultipleBackgroundImage(bfx, ctx) {
       if (mbg.grad[i].render) {
         ++draw;
       }
+      break;
+    case 3: // canvas
+      ++draw;
     }
   }
 
@@ -524,7 +524,7 @@ function drawMultipleBackgroundImage(bfx, ctx) {
     }
     while (i--) {
       switch (mbg.type[i]) {
-      case 1:
+      case 1: // image
         img = mbg.imgobj[i];
         if (img.code === 200) {
           switch (BACKGROUND_REPEAT[mbg.repeat[i]] || 0) {
@@ -556,10 +556,13 @@ function drawMultipleBackgroundImage(bfx, ctx) {
           }
         }
         break;
-      case 2:
+      case 2: // gradient
         if (mbg.grad[i].render) {
           drawGradient(bfx, ctx, mbg.grad[i]);
         }
+        break;
+      case 3: // canvas
+        // NOP
       }
     }
   }
@@ -615,8 +618,9 @@ function drawGradient(bfx, ctx, hash) {
 }
 
 function trainMBG(bfx) {
-  var mbg = bfx.mbg, i = 0, iz, m, url, _ceil = _math.ceil, N,
-      URL = _URL, QUOTE = _QUOTE, UU_GRADIENT = _UU_GRADIENT;
+  var mbg = bfx.mbg, i = 0, iz, m, mm, url, _ceil = _math.ceil, N,
+      IMG_URL = _IMG_URL, IMG_CANVAS = _IMG_CANVAS,
+      IMG_GRADIENT = _IMG_GRADIENT;
 
   // @see MultiBG http://www.w3.org/TR/css3-background/#layering
   N = _math.max(mbg.image.length, mbg.repeat.length, mbg.position.length);
@@ -640,16 +644,22 @@ function trainMBG(bfx) {
     mbg.position[i] = uu.trim(mbg.position[i]);
     mbg.type[i] = 0; // 0 = unknown
 
-    m = URL.exec(mbg.image[i]);
+    m = IMG_URL.exec(mbg.image[i]);
     if (m) {
       mbg.type[i] = 1; // image
-      url = m[1].replace(QUOTE, "");
+      url = uu.trim.quote(m[1]);
       mbg.imgobj[i] = uu.img.load(url, lazyRedraw);
-    } else if (UU_GRADIENT.test(mbg.image[i])) {
+    } else if (IMG_GRADIENT.test(mbg.image[i])) {
       mbg.type[i] = 2; // gradient
       mbg.grad[i] = uu.css.validate.gradient(mbg.image[i]);
       mbg.grad[i].render = (mbg.grad[i].valid &&
                             mbg.grad[i].type) ? 1 : 0;
+    } else {
+      mm = IMG_CANVAS.exec(mbg.image[i]);
+      if (mm) {
+        mbg.type[i] = 3; // canvas
+        mbg.canvasid = uu.trim.quote(mm[1]);
+      }
     }
   }
   function lazyRedraw(hash) {
