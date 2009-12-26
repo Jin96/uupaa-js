@@ -1260,7 +1260,7 @@ function uufactory(name,   // @param String: class name
 // uu.color - parse color
 function uucolor(str) { // @parem String: "black", "#fff", "rgba(0,0,0,0)" ...
                         // @return ColorHash/0: 0 is error
-  function _p2n(n) { // percent to number
+  function _p2n(n) { // percent(0.0~1.0) to number(0~255)
     n = ((parseFloat(n) || 0) * 2.56) | 0;
     return n > 255 ? 255 : n;
   }
@@ -1274,7 +1274,8 @@ function uucolor(str) { // @parem String: "black", "#fff", "rgba(0,0,0,0)" ...
             if (m) {
               n = parseInt(m[5] ? m[1] // "#ffffff"
                                 : m[2] + m[2] + m[3] + m[3] + m[4] + m[4], 16);
-              rv = { r: n >> 16, g: (n >> 8) & 255, b: n & 255, a: 1, hex: v };
+              rv = { r: n >> 16, g: (n >> 8) & 255, b: n & 255, a: 1,
+                     hex: m[5] ? v : 0 };
             }
             break;
     case 2: ++rgb;
@@ -1290,6 +1291,8 @@ function uucolor(str) { // @parem String: "black", "#fff", "rgba(0,0,0,0)" ...
   }
   if (add && rv) {
     rv.hex  || (rv.hex  = "#" + _HEX2[rv.r] + _HEX2[rv.g] + _HEX2[rv.b]);
+    rv.argb || (rv.argb = "#" + _HEX2[_p2n(rv.a * 100)] +
+                                _HEX2[rv.r] + _HEX2[rv.g] + _HEX2[rv.b]);
     rv.rgba || (rv.rgba = "rgba(" + rv.r + "," + rv.g + "," +
                                     rv.b + "," + rv.a + ")");
     _colorc[str] = rv; // add cache
@@ -1306,6 +1309,7 @@ function uucoloradd(str) { // @param JointString: "000000black,..."
     n = parseInt(w, 16);
     r = n >> 16, g = (n >> 8) & 255, b = n & 255;
     _colordb[v.slice(6)] = { hex: "#" + w, r: r, g: g, b: b, a: 1,
+                             argb: "#ff" + w,
                              rgba: "rgba(" + r + "," + g + "," + b + ",1)" };
   }
 }
@@ -2665,34 +2669,34 @@ try {
 } catch(err) {} // ignore error(IETester / stand alone IE too)
 
 // inner - bootstrap, WindowReadyState and DOMReadyState handler
-(function(gone) {
-  function _fire() {
-    if (!gone.blackout && !gone.dom++) {
-      _ie && (uupub.iebody = _ver.quirks ? doc.body : uupub.root); // [IE] lazy detect
-      uulazy.fire("boot");
-      uuisfunc(win.xboot || 0) && win.xboot(uu);
-    }
+function _ready() {
+  if (!uuready.gone.blackout && !uuready.gone.dom++) {
+    _ie && (uupub.iebody = _ver.quirks ? doc.body : uupub.root); // [IE] lazy detect
+    uulazy.fire("boot");
+    uuisfunc(win.xboot || 0) && win.xboot(uu);
   }
-  function _peekie() {
-    try {
-      doc.firstChild.doScroll("up"), _fire();
-    } catch(err) { setTimeout(_peekie, 64); }
-  }
-  function _windowloaded() {
-    gone.win = 1;
-    _fire();
-    uuisfunc(win.xwin || 0) && win.xwin(uu);
-    uulazy.fire("canvas");
-    //{:: [IE] fix mem leak
-    uuevdetach(win, "load", _windowloaded);
-    //::}
-  }
-  uuevattach(win, "load", _windowloaded);
-  _ie ? _peekie() : uuevattach(doc, "DOMContentLoaded", _fire);
-})(uuready.gone);
+}
+
+// inner - window onloaded
+function _winload() {
+  uuready.gone.win = 1;
+  _ready();
+  uuisfunc(win.xwin || 0) && win.xwin(uu);
+  uulazy.fire("canvas");
+}
+
+// inner - DOMContentLoaded(IE)
+function _domreadyie() {
+  try {
+    doc.firstChild.doScroll("up"), _ready();
+  } catch(err) { setTimeout(_domreadyie, 64); }
+}
+
+uuevattach(win, "load", _winload);
+_ie ? _domreadyie() : uuevattach(doc, "DOMContentLoaded", _ready);
 
 //{:: [IE] fix mem leak
-function unload() {
+function _winunload() {
   var nodeid, node, ary, i, v;
 
   for (nodeid in _ndiddb) {
@@ -2704,9 +2708,10 @@ function unload() {
       }
     } catch (err) {}
   }
-  win.detachEvent("onunload", unload);
+  win.detachEvent("onload", _winload);
+  win.detachEvent("onunload", _winunload);
 }
-_ie && win.attachEvent("onunload", unload);
+_ie && win.attachEvent("onunload", _winunload);
 //::}
 
 // inner -
@@ -3002,11 +3007,11 @@ function winstyle(node,     // @param Node:
 })();
 
 // --- [IE] fix mem leak ---
-function _unload() {
+function _winunload() {
   win.getComputedStyle = null;
-  win.detachEvent("onunload", _unload);
+  win.detachEvent("onunload", _winunload);
 }
-win.attachEvent("onunload", _unload);
+win.attachEvent("onunload", _winunload);
 
 })(window);
 //::}
