@@ -6,8 +6,6 @@ var _mtx2d          = _impl.mtx2d,
     _mtx2dscale     = _mtx2d.scale,
     _mtx2dmultiply  = _mtx2d.multiply,
     _mtx2dtranslate = _mtx2d.translate,
-    _colorCache     = _impl.colorCache,
-    _parseColor     = _impl.parseColor,
     _HEX2           = uupub.HEX2,
     _SHADOW_WIDTH   = 4,
     _TO_DEGREES     = 180 / _math.PI, // Math.toDegrees - from java.math
@@ -116,16 +114,16 @@ function clearRect(x, y, w, h) {
     _clear(this); // clear all
   } else {
     var fg, zindex = 0,
-        c = _impl.bgcolor(this._node);
+        color = uu.css.bgcolor.inherit(this._node);
 
     switch (_COMPOSITES[this[_GLOBAL_COMPO]]) {
     case  4: zindex = --this._zindex; break;
     case 10: _clear(this);
     }
 
-    fg = _SL_PATH_OPACITY + (c[1] * this[_GLOBAL_ALPHA]) +
+    fg = _SL_PATH_OPACITY + (color.a * this[_GLOBAL_ALPHA]) +
          '" Canvas.ZIndex="' + zindex +
-         _SL_FILL + c[0] +
+         _SL_FILL + color.hex +
          _SL_DATA + _rect(this, x, y, w, h) + '" />';
 
     !this.xFlyweight &&
@@ -254,11 +252,10 @@ function arc(x, y, radius, startAngle, endAngle, anticlockwise) {
 function fill(wire, path) {
   path = path || this._path.join("");
 
-  var rv = [], fg, zindex = 0, mix, c,
+  var rv = [], fg, zindex = 0, mix, color,
       style = wire ? this[_STROKE_STYLE]
                    : this[_FILL_STYLE],
-      sc = _colorCache[this[_SHADOW_COLOR]] ||
-           _parseColor(this[_SHADOW_COLOR]);
+      scolor = uu.color(this[_SHADOW_COLOR]);
 
   mix = _COMPOSITES[this[_GLOBAL_COMPO]];
   if (mix) {
@@ -266,19 +263,19 @@ function fill(wire, path) {
   }
 
   if (typeof style === "string") {
-    c = _colorCache[style] || _parseColor(style);
+    color = uu.color(style);
 
     rv.push(_SL_CANVAS_ZINDEX, zindex, '">',
-            _SL_PATH_OPACITY, c[1] * this[_GLOBAL_ALPHA],
+            _SL_PATH_OPACITY, color.a * this[_GLOBAL_ALPHA],
             // http://twitter.com/uupaa/status/5179317486
             _SL_DATA, wire ? path : "F1 " + path, // [F1] FillRule=Nonzero
             wire ? _buildStrokeProps(this) : "",
-            wire ? _SL_STROKE : _SL_FILL, c[0], '">',
-            sc[1] ? _buildShadowBlur(this, "Path", sc) : "",
+            wire ? _SL_STROKE : _SL_FILL, color.hex, '">',
+            scolor.a ? _buildShadowBlur(this, "Path", scolor) : "",
             '</Path></Canvas>');
     fg = rv.join("");
   } else {
-    fg = _FILL_FUNC[style._type](this, style, path, wire, mix, zindex, sc);
+    fg = _FILL_FUNC[style._type](this, style, path, wire, mix, zindex, scolor);
   }
   !this.xFlyweight &&
     this._history.push(this._clipPath ? (fg = _clippy(this, fg)) : fg);
@@ -286,12 +283,11 @@ function fill(wire, path) {
 }
 
 // inner - Linear Gradient Fill
-function _linearGradientFill(me, style, path, wire, mix, zindex, shadowColor) {
+function _linearGradientFill(me, style, path, wire, mix, zindex, color) {
   var rv = [],
       fp = style._param,
       c0 = _map2(me._mtx, fp.x0, fp.y0, fp.x1, fp.y1),
-      prop = wire ? "Stroke" : "Fill",
-      color = _buildLinearColor(style._colorStop);
+      prop = wire ? "Stroke" : "Fill";
 
   rv.push(_SL_CANVAS_ZINDEX, zindex, '">',
           _SL_PATH_OPACITY, me[_GLOBAL_ALPHA],
@@ -299,18 +295,18 @@ function _linearGradientFill(me, style, path, wire, mix, zindex, shadowColor) {
           wire ? _buildStrokeProps(me) : "", '"><Path.', prop,
           '><LinearGradientBrush MappingMode="Absolute" StartPoint="',
           c0.x1, ",", c0.y1,
-            '" EndPoint="', c0.x2, ",", c0.y2, '">', color,
+            '" EndPoint="', c0.x2, ",", c0.y2, '">',
+            _buildLinearColor(style._colorStop),
           '</LinearGradientBrush></Path.', prop, '>',
-          shadowColor[1] ? _buildShadowBlur(me, "Path", shadowColor) : "",
+          color.a ? _buildShadowBlur(me, "Path", color) : "",
           '</Path></Canvas>');
   return rv.join("");
 }
 
 // inner - Radial Gradient Fill
-function _radialGradientFill(me, style, path, wire, mix, zindex, shadowColor) {
+function _radialGradientFill(me, style, path, wire, mix, zindex, color) {
   var rv = [], prop = wire ? "Stroke" : "Fill",
       fp = style._param,
-      color = _buildRadialColor(style),
       zindex2 = 0,
       rr = fp.r1 * 2,
       x = fp.x1 - fp.r1,
@@ -327,17 +323,13 @@ function _radialGradientFill(me, style, path, wire, mix, zindex, shadowColor) {
     // fill outside
     if (style._colorStop.length) {
       v = style._colorStop[style._colorStop.length - 1];
-      if (v.color[1] > 0.001) {
+      if (v.color.a > 0.001) {
         if (mix === 4) { zindex2 = --me._zindex; }
         bari =  [ _SL_PATH_OPACITY, me[_GLOBAL_ALPHA],
                   '" Canvas.ZIndex="', zindex2,
-                  _SL_DATA, path, _SL_FILL, '#',
-                  _HEX2[parseFloat(v.color[1] / (1 / 255))] +
-                  v.color[0].substring(1),
-                  '" />'].join("");
+                  _SL_DATA, path, _SL_FILL, v.color.argb, '" />'].join("");
         !me.xFlyweight &&
-          me._history.push(me._clipPath ? (bari = _clippy(this, bari))
-                                            : bari);
+          me._history.push(me._clipPath ? (bari = _clippy(this, bari)) : bari);
         _drawxaml(me, bari);
       }
     }
@@ -348,16 +340,17 @@ function _radialGradientFill(me, style, path, wire, mix, zindex, shadowColor) {
           wire ? _buildStrokeProps(me) : "",
           '"><Ellipse.', prop, '><RadialGradientBrush GradientOrigin="',
           gx, ',', gy,
-          '" Center="0.5,0.5" RadiusX="0.5" RadiusY="0.5">', color,
+          '" Center="0.5,0.5" RadiusX="0.5" RadiusY="0.5">',
+            _buildRadialColor(style),
           '</RadialGradientBrush></Ellipse.', prop, '>',
             tmpmtx,
-            shadowColor[1] ? _buildShadowBlur(me, "Ellipse", shadowColor) : "",
+            color.a ? _buildShadowBlur(me, "Ellipse", color) : "",
           '</Ellipse></Canvas>');
   return rv.join("");
 }
 
 // inner - Pattern Fill
-function _patternFill(me, style, path, wire, mix, zindex, shadowColor) {
+function _patternFill(me, style, path, wire, mix, zindex, color) {
   var rv = [], prop = wire ? "Stroke" : "Fill",
       zindex2 = 0,
       sw, sh, xz, yz, x, y, // use tile mode
@@ -376,7 +369,7 @@ function _patternFill(me, style, path, wire, mix, zindex, shadowColor) {
 
     rv.push(_SL_CANVAS_ZINDEX, zindex, '">');
 
-    if (shadowColor[1]) {
+    if (color.a) {
       sx = _SHADOW_WIDTH / 2 + me[_SHADOW_OFFSET_X];
       sy = _SHADOW_WIDTH / 2 + me[_SHADOW_OFFSET_Y];
       so = me.xShadowOpacityFrom;
@@ -386,7 +379,7 @@ function _patternFill(me, style, path, wire, mix, zindex, shadowColor) {
         rv.push(_SL_PATH_OPACITY, so.toFixed(2),
                 _SL_CANVAS_LEFT, sx, _SL_CANVAS_TOP, sy,
                 _SL_DATA, path, wire ? _buildStrokeProps(me) : "",
-                _SL_FILL, shadowColor[0],
+                _SL_FILL, color.hex,
                 '" />');
       }
     }
@@ -397,7 +390,7 @@ function _patternFill(me, style, path, wire, mix, zindex, shadowColor) {
         rv.push('<Image Opacity="', me[_GLOBAL_ALPHA],
                 _SL_CANVAS_LEFT, x * sw, _SL_CANVAS_TOP, y * sh,
                 '" Source="', style._src, '">',
-//              shadowColor[1] ? _buildShadowBlur(me, "Image", shadowColor) : "",
+//              color.a ? _buildShadowBlur(me, "Image", color) : "",
                 '</Image>');
       }
     }
@@ -413,7 +406,7 @@ function _patternFill(me, style, path, wire, mix, zindex, shadowColor) {
           '"><Path.', prop, '><ImageBrush Stretch="None" ImageSource="',
           style._src,
           '" /></Path.', prop, '>',
-          shadowColor[1] ? _buildShadowBlur(me, "Path", shadowColor) : "",
+          color.a ? _buildShadowBlur(me, "Path", color) : "",
           '</Path></Canvas>');
   return rv.join("");
 }
@@ -433,13 +426,12 @@ function fillText(text, x, y, maxWidth, wire) {
   text = text.replace(_TEXT_SPACE, " ");
   var style = wire ? this[_STROKE_STYLE] : this[_FILL_STYLE],
       types = (typeof style === "string") ? 0 : style._type,
-      rv = [], fg, c,
+      rv = [], fg, color,
       fp, c0, zindex = 0, mtx, rgx, rgy,
       font = _impl.parseFont(this.font, this.canvas),
       metric = _impl.getTextMetric(text, font.formal),
       offX = 0, align = this.textAlign, dir = "ltr",
-      sc = _colorCache[this[_SHADOW_COLOR]] ||
-           _parseColor(this[_SHADOW_COLOR]);
+      scolor = uu.color(this[_SHADOW_COLOR]);
 
   switch (_COMPOSITES[this[_GLOBAL_COMPO]]) {
   case  4: zindex = --this._zindex; break;
@@ -461,9 +453,9 @@ function fillText(text, x, y, maxWidth, wire) {
 
   rv.push(_SL_CANVAS_ZINDEX, zindex, '">');
   if (!types) {
-    c = _colorCache[style] || _parseColor(style);
-    rv.push('<TextBlock Opacity="', c[1] * this[_GLOBAL_ALPHA],
-            '" Foreground="', c[0]);
+    color = uu.color(style);
+    rv.push('<TextBlock Opacity="', color.a * this[_GLOBAL_ALPHA],
+            '" Foreground="', color.hex);
   } else {
     rv.push('<TextBlock Opacity="', this[_GLOBAL_ALPHA]);
   }
@@ -472,25 +464,25 @@ function fillText(text, x, y, maxWidth, wire) {
           '" FontStyle="', _FONT_STYLES[font.style] || "Normal",
           '" FontWeight="', _FONT_WEIGHTS[font.weight] || "Normal",
           '">', uu.esc(text), mtx,
-          sc[1] ? _buildShadowBlur(this, "TextBlock", sc) : "");
+          scolor.a ? _buildShadowBlur(this, "TextBlock", scolor) : "");
 
   switch (types) {
-  case 1: c = _buildLinearColor(style._colorStop);
-          fp = style._param;
+  case 1: fp = style._param;
           c0 = _map2(this._mtx, fp.x0, fp.y0, fp.x1, fp.y1),
           rv.push('<TextBlock.Foreground>',
                   '<LinearGradientBrush MappingMode="Absolute" StartPoint="',
                   c0.x1, ",", c0.y1,
-                  '" EndPoint="', c0.x2, ",", c0.y2, '">', c,
+                  '" EndPoint="', c0.x2, ",", c0.y2, '">',
+                      _buildLinearColor(style._colorStop),
                   '</LinearGradientBrush></TextBlock.Foreground>');
           break;
-  case 2: c = _buildRadialColor(style);
-          fp = style._param,
+  case 2: fp = style._param,
           rgx = (fp.x0 - (fp.x1 - fp.r1)) / (fp.r1 * 2),
           rgy = (fp.y0 - (fp.y1 - fp.r1)) / (fp.r1 * 2),
           rv.push('<TextBlock.Foreground>',
                   '<RadialGradientBrush GradientOrigin="', rgx, ',', rgy,
-                  '" Center="0.5,0.5" RadiusX="0.5" RadiusY="0.5">', c,
+                  '" Center="0.5,0.5" RadiusX="0.5" RadiusY="0.5">',
+                      _buildRadialColor(style),
                   '</RadialGradientBrush></TextBlock.Foreground>');
           break;
   case 3: rv.push('<TextBlock.Foreground>',
@@ -527,8 +519,7 @@ function drawImage(image) {
       i = 0, iz, // for copy canvas
       // for shadow
       si = 0, so = 0, sd = 0, shx = 0, shy = 0,
-      sc = _colorCache[this[_SHADOW_COLOR]] ||
-           _parseColor(this[_SHADOW_COLOR]);
+      scolor = uu.color(this[_SHADOW_COLOR]);
 
   switch (_COMPOSITES[this[_GLOBAL_COMPO]]) {
   case  4: zindex = --this._zindex; break;
@@ -560,7 +551,7 @@ function drawImage(image) {
       clip = '<Image.Clip><RectangleGeometry Rect="' +
              [dx - x, dy - y, dw, dh].join(" ") +
              '" /></Image.Clip>';
-      if (sc[1]) {
+      if (scolor.a) {
         sclip = '<Rectangle.Clip><RectangleGeometry Rect="' +
                 [dx - x, dy - y, dw, dh].join(" ") +
                 '" /></Rectangle.Clip>';
@@ -569,7 +560,7 @@ function drawImage(image) {
 
     rv.push(_SL_CANVAS_ZINDEX, zindex, '">');
 
-    if (sc[1]) {
+    if (scolor.a) {
       shx = _SHADOW_WIDTH / 2 + this[_SHADOW_OFFSET_X];
       shy = _SHADOW_WIDTH / 2 + this[_SHADOW_OFFSET_Y];
       so = this.xShadowOpacityFrom;
@@ -579,7 +570,7 @@ function drawImage(image) {
       for (; si < _SHADOW_WIDTH; so += sd, --shx, --shy, ++si) {
         rv.push('<Rectangle Opacity="', so.toFixed(2),
                 _SL_CANVAS_LEFT, shx, _SL_CANVAS_TOP, shy,
-                size, _SL_FILL, sc[0], '">', sclip,
+                size, _SL_FILL, scolor.hex, '">', sclip,
                 tmpmtx,
                 '</Rectangle>');
       }
@@ -588,7 +579,7 @@ function drawImage(image) {
     rv.push('<Image Opacity="', this[_GLOBAL_ALPHA],
             '" Source="', image.src, size, '">',
             clip, _buildMatrixTransform('Image', m),
-            sc[1] ? _buildShadowBlur(this, "Image", sc) : "",
+            scolor.a ? _buildShadowBlur(this, "Image", scolor) : "",
             '</Image></Canvas>');
   } else { // HTMLCanvasElement
     iz = image.uuctx2d._history.length;
@@ -614,7 +605,7 @@ function drawImage(image) {
       clip = '<Canvas.Clip><RectangleGeometry Rect="' +
              [(dx - x) / bw, (dy - y) / bh, dw / bw, dh / bh].join(" ") +
              '" /></Canvas.Clip>';
-//        if (sc[1]) {
+//        if (scolor.a) {
 //          sclip = ['<Rectangle.Clip><RectangleGeometry Rect="',
 //                   [(dx - x) / bw, (dy - y) / bh, dw / bw, dh / bh].join(" "),
 //                   '" /></Rectangle.Clip>'].join("");
@@ -626,7 +617,7 @@ function drawImage(image) {
             '" Opacity="', this[_GLOBAL_ALPHA], // image.uuctx2d[_GLOBAL_ALPHA],
             size, '">',
             clip, _buildMatrixTransform('Canvas', m),
-//            sc[1] ? _buildShadowBlur(me, "Canvas", sc) : "",
+//            scolor.a ? _buildShadowBlur(me, "Canvas", scolor) : "",
             '<Canvas>');
 
     for (; i < iz; ++i) {
@@ -661,14 +652,12 @@ function createPattern(image, repetition) {
 
 // inner - build Linear Color
 function _buildLinearColor(ary) {
-  var rv = [], v, i = 0, iz = ary.length, n = 1 / 255;
+  var rv = [], v, i = 0, iz = ary.length;
 
   for (; i < iz; ++i) {
     v = ary[i];
-    rv.push('<GradientStop Color="#',
-              _HEX2[parseFloat(v.color[1] / n)],
-              v.color[0].substring(1),
-              '" Offset="', v.offset, '" />');
+    rv.push('<GradientStop Color="' + v.color.argb +
+            '" Offset="' + v.offset + '" />');
   }
   return rv.join("");
 }
@@ -676,7 +665,7 @@ function _buildLinearColor(ary) {
 // inner - build Radial Color
 function _buildRadialColor(style) {
   var rv = [],
-      fp = style._param, n = 1 / 255,
+      fp = style._param,
       r0 = fp.r0 / fp.r1,
       remain = 1 - r0,
       v,
@@ -684,16 +673,12 @@ function _buildRadialColor(style) {
       iz = style._colorStop.length;
   if (!iz) { return ""; }
 
-  rv.push('<GradientStop Color="#',
-            _HEX2[parseFloat(style._colorStop[0].color[1] / n)],
-            style._colorStop[0].color[0].substring(1),
-            '" Offset="', 0, '" />');
+  rv.push('<GradientStop Color="', style._colorStop[0].color.argb,
+          '" Offset="0" />');
   for (i = 0; i < iz; ++i) {
     v = style._colorStop[i];
-    rv.push('<GradientStop Color="#',
-              _HEX2[parseFloat(v.color[1] / n)],
-              v.color[0].substring(1),
-              '" Offset="', (v.offset * remain + r0), '" />');
+    rv.push('<GradientStop Color="' + v.color.argb +
+            '" Offset="' + (v.offset * remain + r0) + '" />');
   }
   return rv.join("");
 }
@@ -710,15 +695,17 @@ function _buildMatrixTransform(type, m) {
 }
 
 // inner - build Shadow Blur
-function _buildShadowBlur(me, type, shadowColor) {
+function _buildShadowBlur(me,      // @param this:
+                          type,    // @param String:
+                          color) { // @param ColorHash:
   var sdepth = 0,
       sx = me[_SHADOW_OFFSET_X],
       sy = me[_SHADOW_OFFSET_Y];
 
-  if (shadowColor[1]) {
+  if (color.a) {
     sdepth = _math.max(_math.abs(sx), _math.abs(sy)) * 1.2;
     return ['<', type, '.Effect><DropShadowEffect Opacity="', 1.0,
-            '" Color="', shadowColor[0],
+            '" Color="', color.hex,
             '" BlurRadius="', me.shadowBlur * 1.2,
             '" Direction="', _math.atan2(-sy, sx) * _TO_DEGREES,
             '" ShadowDepth="', sdepth,

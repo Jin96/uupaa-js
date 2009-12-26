@@ -10,14 +10,18 @@ var _importCache = {}, // import cache { url: cssText }
     SPEC_CLASS = /\.[\w\u00C0-\uFFEE\-]+/g,
     SPEC_PCLASS = /:[\w\-]+(?:\(.*\))?/g,
     SPEC_PELEMENT = /::?(?:first-letter|first-line|before|after)/g,
-    SPEC_CONTAINS = /:contains\((["'])?.*?\1\)/g;
+    SPEC_CONTAINS = /:contains\((["'])?.*?\1\)/g,
+    IMP_COMMENT = /\/\*[^*]*\*+([^\/][^*]*\*+)*\//g,
+    IMP_IMPORTS = /@import\s*(?:url)?[\("']+\s*([\w\/.+-]+)\s*["'\)]+\s*([\w]+)?\s*;/g,
+    IMP_CSS_FILE = /\.css$/,
+    IMP_DATA_SCHEME = /^data\:text\/css[;,]/,
+    HTML_COMMENT = /^\s*<!--|-->\s*$/g;
 
 uu.mix(uu.css, {
   parse:        uucssparse,     // uu.css.parse("clean css") -> { specs, data }
   clean:        uucssclean,     // uu.css.clean("dirty css") -> "clean css"
   imports:      uucssimports    // uu.css.imports() -> "dirty css"
 });
-
 
 // uu.css.parse
 function uucssparse(cleancss) { // @param String: "clean css"
@@ -149,9 +153,9 @@ function uucssparse(cleancss) { // @param String: "clean css"
 // uu.css.imports
 function uucssimports() { // @return String: "dirty CSS"
   function imp(css, absdir) { // @import
-    return css.replace(COMMENT, "").
-//             replace(IMPORTS, function(m, url, media) {
-               replace(IMPORTS, function(m, url) {
+    return css.replace(HTML_COMMENT, "").
+               replace(IMP_COMMENT, "").
+               replace(IMP_IMPORTS, function(m, url) {
       var v = uu.url.abs(url, absdir);
       return imp(uu.ajax.sync(v), uu.url.dir(v));
     });
@@ -159,18 +163,14 @@ function uucssimports() { // @return String: "dirty CSS"
   var rv = [], absdir = uu.url(), href, hash, dstr,
       node = uu.ary(doc.styleSheets), v, w, i = 0,
       prop1 = uu.ie ? "owningElement" : "ownerNode",
-      prop2 = uu.ie ? "uucss3memento" : "textContent", // MEMENTO
-      COMMENT = /\/\*[^*]*\*+([^\/][^*]*\*+)*\//g,
-      IMPORTS = /@import\s*(?:url)?[\("']+\s*([\w\/.+-]+)\s*["'\)]+\s*([\w]+)?\s*;/g,
-      CSS_FILE = /\.css$/,
-      DATA_SCHEME = /^data\:text\/css[;,]/;
+      prop2 = uu.ie ? "uucss3memento" : "textContent"; // MEMENTO
 
   while ( (v = node[i++]) ) {
     if (!v.disabled) {
       href = v.href || "";
       // ignore data:text/css for !(IE6,IE7)
-      if (!DATA_SCHEME.test(href)) {
-        if (CSS_FILE.test(href)) {
+      if (!IMP_DATA_SCHEME.test(href)) {
+        if (IMP_CSS_FILE.test(href)) {
           // <link>
           w = uu.url.abs(v.href, absdir);
           w in _importCache ||
@@ -192,7 +192,7 @@ function uucssimports() { // @return String: "dirty CSS"
   if (!uu.config.light && uu.codec.datauri) {
     node = doc.getElementsByTagName("link"), i = 0;
     while ( (v = node[i++]) ) {
-      if (DATA_SCHEME.test(v.href)) {
+      if (IMP_DATA_SCHEME.test(v.href)) {
         hash = uu.codec.datauri.decode(v.href);
         dstr = String.fromCharCode.apply(null, hash.data);
         w = "link" + i; // "link1"
@@ -207,7 +207,7 @@ function uucssimports() { // @return String: "dirty CSS"
 // uu.css.clean - cleanup dirty css
 function uucssclean(dirtycss) { // @param String: dirty css
                                 // @return String: clean css
-  return uu.trim(dirtycss.replace(/^\s*<!--|-->\s*$/g, ""). // <!-- ... -->
+  return uu.trim(dirtycss.replace(HTML_COMMENT, ""). // <!-- ... -->
     replace(/url\(([^\x29]+)\)/gi, function(m, data) { // url(...) -> url("...")
       return 'url("' + data.replace(/^["']|["']$/g, "") + '")'; // trim quote
     }).

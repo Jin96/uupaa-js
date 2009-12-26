@@ -6,7 +6,6 @@ var _slhosts      = 0,  // Silverlight host count
     _fontUniqueID = 0,  // font cache unique id
     _fontCache    = {}, // { uid: { font: fontString } }
     _unitCache    = {}, // { uid: { pt, em } }
-    _colorCache   = {}, // { color: ["#ffffff", alpha] }
     _metricNode,        // [lazy] Measure Text Metric Node
     _safari3x     = uu.webkit && uu.ver.re < 530, // Safari3.x
     _orgCreateElement = 0, // document.createElement
@@ -70,10 +69,7 @@ uu.mix(uu.canvas, {
   SL2D:     SL2D,
   VML2D:    VML2D,
   impl: {
-    bgcolor:            uucanvasimplbgcolor,
     parseFont:          uucanvasimplparsefont,
-    parseColor:         uucanvasimplparsecolor,
-    colorCache:         _colorCache,
     drawImageArgs:      uucanvasimpldrawimageargs,
     getTextMetric:      uucanvasimplgettextmetric,
     FONT_SCALES:        _FONT_SCALES,
@@ -148,14 +144,6 @@ function uucanvasinit() {
 function uucanvasexpire() {
   _fontCache  = {};
   _unitCache  = {};
-  _colorCache = {};
-}
-
-// uu.canvas.impl.parseColor
-function uucanvasimplparsecolor(c) { // @param ColorString:
-  var rgba = uu.color(c);
-
-  return _colorCache[c] = [rgba.hex, rgba.a]; // add cache
 }
 
 // uu.canvas.impl.matrix2DMultiply - 2D Matrix multiply
@@ -235,23 +223,6 @@ function uucanvasimplgettextmetric(text, font) {
 
   return { w: _metricNode.offsetWidth,
            h: _metricNode.offsetHeight };
-}
-
-// uu.canvas.impl.bgcolor - get background-color from ancestor
-// [uu.css.bgcolor.inherit] copy
-function uucanvasimplbgcolor(node) { // @param Node:
-                                     // @return String: "#ffffff"
-  var n = node, color = "transparent",
-      ZERO = { transparent: 1, "rgba(0, 0, 0, 0)": 1 };
-
-  while (n && n !== doc && ZERO[color]) {
-    if ((uu.ie && n.currentStyle) || !uu.ie) {
-      color = (uu.ie ? n.currentStyle
-                     : win.getComputedStyle(n, null)).backgroundColor;
-    }
-    n = n.parentNode;
-  }
-  return uu.color(ZERO[color] ? "white" : color).hex;
 }
 
 // uu.canvas.impl.parseFont - parse CSS::font style
@@ -560,11 +531,10 @@ function CanvasGradient(type, param, vml) {
 
 // CanvasGradient.prototype.addColorStop
 function addColorStop(offset, color) {
-  var c = _colorCache[color] || uucanvasimplparsecolor(color),
-      v, i = 0, iz;
+  var v, i = 0, iz;
 
   if (!this._vml) { // SL
-    this._colorStop.push({ offset: offset, color: c });
+    this._colorStop.push({ offset: offset, color: uu.color(color) });
   } else { // VML
     // collision of the offset is evaded
     for (iz = this._colorStop.length; i < iz; ++i) {
@@ -575,7 +545,7 @@ function addColorStop(offset, color) {
         }
       }
     }
-    this._colorStop.push({ offset: 1 - offset, color: c });
+    this._colorStop.push({ offset: 1 - offset, color: uu.color(color) });
   }
   this._colorStop.sort(function(a, b) {
     return a.offset - b.offset;

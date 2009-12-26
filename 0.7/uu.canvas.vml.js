@@ -6,8 +6,6 @@ var _mtx2d          = _impl.mtx2d,
     _mtx2dscale     = _mtx2d.scale,
     _mtx2dmultiply  = _mtx2d.multiply,
 //  _mtx2dtranslate = _mtx2d.translate,
-    _colorCache     = _impl.colorCache,
-    _parseColor     = _impl.parseColor,
     _round          = _math.round,
     _ZOOM           = 10,
     _HALF_ZOOM      = 5,
@@ -137,7 +135,7 @@ function clearRect(x, y, w, h) {
     _clear(this); // clear all
   } else {
     var fg, zindex = 0,
-        c = _impl.bgcolor(this._node);
+        color = uu.css.bgcolor.inherit(this._node);
 
     switch (_COMPOSITES[this[_GLOBAL_COMPO]]) {
     case  4: zindex = --this._zindex; break;
@@ -147,8 +145,8 @@ function clearRect(x, y, w, h) {
     fg = [_VML_SHAPE_STYLE, zindex,
           _VML_FILL, _VML_COORD, _VML_PATH, _rect(this, x, y, w, h),
           _VML_VFILL, _VML_TYPE_HEAD, 'solid',
-          _VML_COLOR, c[0],
-          _VML_OPACITY, (c[1] * this[_GLOBAL_ALPHA]).toFixed(2),
+          _VML_COLOR, color.hex,
+          _VML_OPACITY, (color.a * this[_GLOBAL_ALPHA]).toFixed(2),
           _VML_END_SHAPE].join("");
 
     !this.xFlyweight &&
@@ -287,13 +285,12 @@ function arc(x, y, radius, startAngle, endAngle, anticlockwise) {
 function fill(wire, path) {
   path = path || this._path.join("");
 
-  var rv = [], fg, zindex = 0, mix, c,
+  var rv = [], fg, zindex = 0, mix, color,
       style = wire ? this[_STROKE_STYLE]
                    : this[_FILL_STYLE],
       // for shadow
       si = 0, so = 0, sd = 0, sx = 0, sy = 0,
-      sc = _colorCache[this[_SHADOW_COLOR]] ||
-           _parseColor(this[_SHADOW_COLOR]);
+      scolor = uu.color(this[_SHADOW_COLOR]);
 
   mix = _COMPOSITES[this[_GLOBAL_COMPO]];
   if (mix) {
@@ -301,9 +298,9 @@ function fill(wire, path) {
   }
 
   if (typeof style === "string") {
-    c = _colorCache[style] || _parseColor(style);
+    color = uu.color(style);
 
-    if (sc[1]) {
+    if (scolor.a) {
       sx = _SHADOW_WIDTH / 2 + this[_SHADOW_OFFSET_X];
       sy = _SHADOW_WIDTH / 2 + this[_SHADOW_OFFSET_Y];
       so = this.xShadowOpacityFrom;
@@ -316,7 +313,7 @@ function fill(wire, path) {
                 wire ? _VML_STROKE : _VML_FILL,
                 _VML_COORD, _VML_PATH, path,
                 wire ? _VML_VSTROKE : _VML_VFILL,
-                _VML_COLOR_HEAD, sc[0],
+                _VML_COLOR_HEAD, scolor.hex,
                 _VML_OPACITY, so.toFixed(2),
                 wire ? _buildStrokeProps(this) : "",
                 _VML_END_SHAPE);
@@ -326,14 +323,14 @@ function fill(wire, path) {
             wire ? _VML_STROKE : _VML_FILL,
             _VML_COORD, _VML_PATH, path,
             wire ? _VML_VSTROKE : _VML_VFILL,
-            _VML_COLOR_HEAD, c[0],
-            _VML_OPACITY, (c[1] * this[_GLOBAL_ALPHA]).toFixed(2),
+            _VML_COLOR_HEAD, color.hex,
+            _VML_OPACITY, (color.a * this[_GLOBAL_ALPHA]).toFixed(2),
             wire ? _buildStrokeProps(this) : "",
             _VML_END_SHAPE);
 
     fg = rv.join("");
   } else {
-    fg = _FILL_FUNC[style._type](this, style, path, wire, mix, zindex, sc);
+    fg = _FILL_FUNC[style._type](this, style, path, wire, mix, zindex, scolor);
   }
   !this.xFlyweight &&
     this._history.push(this._clipPath ? (fg = _clippy(this, fg)) : fg);
@@ -342,18 +339,17 @@ function fill(wire, path) {
 }
 
 // inner - Linear Gradient Fill
-function _linearGradientFill(me, style, path, wire, mix, zindex, shadowColor) {
+function _linearGradientFill(me, style, path, wire, mix, zindex, color) {
   var rv = [],
       fp = style._param,
       c0 = _map2(me._mtx, fp.x0, fp.y0, fp.x1, fp.y1),
       angle = _math.atan2(c0.x2 - c0.x1, c0.y2 - c0.y1) * _TO_DEGREES,
-      color = _buildGradationColor(style._colorStop),
       // for shadow
       si = 0, siz = _SHADOW_WIDTH, so = 0, sd = 0, sx = 0, sy = 0;
 
   (angle < 0) && (angle += 360);
 
-  if (shadowColor[1]) {
+  if (color.a) {
     sx = _SHADOW_WIDTH / 2 + me[_SHADOW_OFFSET_X];
     sy = _SHADOW_WIDTH / 2 + me[_SHADOW_OFFSET_Y];
     so = me.xShadowOpacityFrom;
@@ -372,7 +368,7 @@ function _linearGradientFill(me, style, path, wire, mix, zindex, shadowColor) {
                 wire ? _VML_VSTROKE : _VML_VFILL,
                 wire ? _VML_FILLTYPE_HEAD : _VML_TYPE_HEAD,
                 wire ? 'solid' : 'gradient" method="sigma" focus="0%',
-                _VML_COLOR, shadowColor[0],
+                _VML_COLOR, color.hex,
                 _VML_OPACITY, so.toFixed(2),
                 _VML_ANGLE, angle,
                 wire ? _buildStrokeProps(me) : "",
@@ -387,7 +383,8 @@ function _linearGradientFill(me, style, path, wire, mix, zindex, shadowColor) {
             wire ? _VML_FILLTYPE_HEAD : _VML_TYPE_HEAD,
             wire ? 'solid' : 'gradient" method="sigma" focus="0%',
             wire ? _VML_COLOR : _VML_COLORS,
-            wire ? _parseColor(me.xMissColor)[0] : color,
+            wire ? uu.color(me.xMissColor).hex
+                 : _buildGradationColor(style._colorStop),
             _VML_OPACITY, me[_GLOBAL_ALPHA],
             '" o:opacity2="', me[_GLOBAL_ALPHA], // fill only
             _VML_ANGLE, angle,
@@ -397,10 +394,9 @@ function _linearGradientFill(me, style, path, wire, mix, zindex, shadowColor) {
 }
 
 // inner - Radial Gradient Fill
-function _radialGradientFill(me, style, path, wire, mix, zindex, shadowColor) {
+function _radialGradientFill(me, style, path, wire, mix, zindex, color) {
   var rv = [], brush, v,
       fp = style._param, fsize, fposX, fposY, focusParam = "",
-      color = _buildGradationColor(style._colorStop),
       zindex2 = 0,
       x = fp.x1 - fp.r1,
       y = fp.y1 - fp.r1,
@@ -417,7 +413,7 @@ function _radialGradientFill(me, style, path, wire, mix, zindex, shadowColor) {
     fposY = (1 - fsize + (fp.y0 - fp.y1) / fp.r1) / 2; // forcus position y
   }
 
-  if (shadowColor[1]) {
+  if (color.a) {
     sx = _SHADOW_WIDTH / 2 + me[_SHADOW_OFFSET_X];
     sy = _SHADOW_WIDTH / 2 + me[_SHADOW_OFFSET_Y];
     so = me.xShadowOpacityFrom;
@@ -445,7 +441,7 @@ function _radialGradientFill(me, style, path, wire, mix, zindex, shadowColor) {
               'px', wire ? _VML_STROKE : _VML_FILL,
               '" coordsize="11000,11000',
               focusParam, _VML_OPACITY, so.toFixed(2),
-              _VML_COLOR, shadowColor[0],
+              _VML_COLOR, color.hex,
               '" /></v:oval>');
     }
   }
@@ -455,18 +451,18 @@ function _radialGradientFill(me, style, path, wire, mix, zindex, shadowColor) {
     brush = [_VML_VSTROKE, _VML_FILLTYPE_HEAD, 'tile',
              _buildStrokeProps(me),
              _VML_OPACITY, me[_GLOBAL_ALPHA],
-             _VML_COLOR, _parseColor(me.xMissColor)[0]].join("");
+             _VML_COLOR, uu.color(me.xMissColor).hex].join("");
   } else {
     // fill outside
     if (style._colorStop.length) {
       v = style._colorStop[0]; // 0 = outer color
-      if (v.color[1] > 0.001) {
+      if (v.color.a > 0.001) {
         if (mix === 4) { zindex2 = --me._zindex; }
         rv.push(_VML_SHAPE_STYLE, zindex2,
                 _VML_FILL, _VML_COORD, _VML_PATH, path,
                 _VML_VFILL, _VML_TYPE_HEAD, 'solid',
-                _VML_COLOR, v.color[0],
-                _VML_OPACITY, (v.color[1] * me[_GLOBAL_ALPHA]).toFixed(2),
+                _VML_COLOR, v.color.hex,
+                _VML_OPACITY, (v.color.a * me[_GLOBAL_ALPHA]).toFixed(2),
                 _VML_END_SHAPE);
       }
     }
@@ -476,7 +472,7 @@ function _radialGradientFill(me, style, path, wire, mix, zindex, shadowColor) {
              '" focusposition="', fposX, ',', fposY,
              _VML_OPACITY, me[_GLOBAL_ALPHA],
              '" o:opacity2="', me[_GLOBAL_ALPHA],
-             _VML_COLORS, color].join("");
+             _VML_COLORS, _buildGradationColor(style._colorStop)].join("");
   }
   rv.push('<v:oval', _VML_BASE_STYLE, zindex, // need z-index
           ';left:', _round(c0.x / _ZOOM),
@@ -489,12 +485,12 @@ function _radialGradientFill(me, style, path, wire, mix, zindex, shadowColor) {
 }
 
 // inner - Pattern Fill
-function _patternFill(me, style, path, wire, mix, zindex, shadowColor) {
+function _patternFill(me, style, path, wire, mix, zindex, color) {
   var rv = [],
       // for shadow
       si = 0, so = 0, sd = 0, sx = 0, sy = 0;
 
-  if (shadowColor[1]) {
+  if (color.a) {
     sx = _SHADOW_WIDTH / 2 + me[_SHADOW_OFFSET_X];
     sy = _SHADOW_WIDTH / 2 + me[_SHADOW_OFFSET_Y];
     so = me.xShadowOpacityFrom;
@@ -510,7 +506,7 @@ function _patternFill(me, style, path, wire, mix, zindex, shadowColor) {
                 wire ? _VML_VSTROKE: _VML_VFILL,
                 wire ? _VML_FILLTYPE_HEAD : _VML_TYPE_HEAD, 'solid',
                 wire ? _buildStrokeProps(me) : "",
-                _VML_COLOR, shadowColor[0],
+                _VML_COLOR, color.hex,
                 _VML_OPACITY, so.toFixed(2),
               _VML_END_SHAPE);
     }
@@ -537,9 +533,9 @@ function clip() {
 // inner -
 function _clippy(me, fg) {
   if (!me.xClipStyle) {
-    var bg = _impl.bgcolor(me._node);
+    var color = uu.css.bgcolor.inherit(me._node);
 
-    me.xClipStyle = bg[0];
+    me.xClipStyle = color.hex;
   }
   return [fg, '<v:shape style="position:absolute;width:10px;height:10px',
           _VML_FILL, _VML_COORD, _VML_PATH, me._clipPath,
@@ -552,7 +548,7 @@ function fillText(text, x, y, maxWidth, wire) {
   text = text.replace(_TEXT_SPACE, " ");
   var style = wire ? this[_STROKE_STYLE] : this[_FILL_STYLE],
       types = (typeof style === "string") ? 0 : style._type,
-      rv = [], fg, c,
+      rv = [], fg, color,
       align = this.textAlign, dir = "ltr",
       font = _impl.parseFont(this.font, this.canvas),
       m = this._mtx, zindex = 0,
@@ -564,8 +560,7 @@ function fillText(text, x, y, maxWidth, wire) {
       offset = { x: 0, y: 0 },
       // for shadow
       si = 0, so = 0, sd = 0, sx = 0, sy = 0,
-      sc = _colorCache[this[_SHADOW_COLOR]] ||
-           _parseColor(this[_SHADOW_COLOR]);
+      scolor = uu.color(this[_SHADOW_COLOR]);
 
   switch (_COMPOSITES[this[_GLOBAL_COMPO]]) {
   case  4: zindex = --this._zindex; break;
@@ -589,7 +584,7 @@ function fillText(text, x, y, maxWidth, wire) {
   }
   skewOffset = _map(this._mtx, x + offset.x, y + offset.y);
 
-  if (sc[1]) {
+  if (scolor.a) {
     sx = _SHADOW_WIDTH / 2 + this[_SHADOW_OFFSET_X];
     sy = _SHADOW_WIDTH / 2 + this[_SHADOW_OFFSET_Y];
     so = _math.max(this.xShadowOpacityFrom + 0.9, 1);
@@ -601,7 +596,7 @@ function fillText(text, x, y, maxWidth, wire) {
               'px;top:', sy, 'px',
               _VML_FILL, '" from="', -left, ' 0" to="', right,
               ' 0.05', _VML_COORD, '">',
-              '<v:fill color="', sc[0],
+              '<v:fill color="', scolor.hex,
               '" opacity="', so.toFixed(2), '" />',
               '<v:skew on="t" matrix="', skew ,'" ',
               ' offset="', _round(skewOffset.x / _ZOOM), ',',
@@ -622,9 +617,9 @@ function fillText(text, x, y, maxWidth, wire) {
 
   switch (types) {
   case 0:
-    c = _colorCache[style] || _parseColor(style);
-    rv.push('<v:fill color="', c[0],
-            '" opacity="', c[1] * this[_GLOBAL_ALPHA], '" />');
+    color = uu.color(style);
+    rv.push('<v:fill color="', color.hex,
+            '" opacity="', color.a * this[_GLOBAL_ALPHA], '" />');
     break;
   case 1:
   case 2:
@@ -682,8 +677,7 @@ function drawImage(image) {
       sizeTrans, // 0: none size transform, 1: size transform
       // for shadow
       si = 0, so = 0, sd = 0, shx = 0, shy = 0, shw = _SHADOW_WIDTH,
-      sc = _colorCache[this[_SHADOW_COLOR]] ||
-           _parseColor(this[_SHADOW_COLOR]);
+      scolor = uu.color(this[_SHADOW_COLOR]);
 
   function trans(m, x, y, w, h) {
     var c0 = _map2(me._mtx, x, y, x + w, y),
@@ -740,7 +734,7 @@ function drawImage(image) {
         '<div style="width:' + _round(iw * dw / sw) +
             'px;height:' + _round(ih * dh / sh) + 'px;',
         // shadow only
-        'background-color:' + sc[0] + ';' +
+        'background-color:' + scolor.hex + ';' +
           _FILTER_PREFIX + _DX_PFX + 'Alpha(opacity=$3)' + _FILTER_POSTFIX,
         // alphaloader
         _FILTER_PREFIX + _DX_PFX + 'AlphaImageLoader(src=' +
@@ -750,7 +744,7 @@ function drawImage(image) {
             (sizeTrans ? '</div>' : '') + '</div></div>'
       ];
 
-      if (sc[1]) {
+      if (scolor.a) {
         shx = shw / 2 + this[_SHADOW_OFFSET_X];
         shy = shw / 2 + this[_SHADOW_OFFSET_Y];
         so = this.xShadowOpacityFrom;
@@ -856,7 +850,7 @@ function _buildGradationColor(ary) {
   var rv = [], i = 0, iz = ary.length;
 
   for (; i < iz; ++i) {
-    rv.push(ary[i].offset + " " + ary[i].color[0]);
+    rv.push(ary[i].offset + " " + ary[i].color.hex);
   }
   return rv.join(",");
 }
