@@ -6,7 +6,6 @@ var _mtx2d          = _impl.mtx2d,
     _mtx2dscale     = _mtx2d.scale,
     _mtx2dmultiply  = _mtx2d.multiply,
     _mtx2dtranslate = _mtx2d.translate,
-    _HEX2           = uupub.HEX2,
     _SHADOW_WIDTH   = 4,
     _TO_DEGREES     = 180 / _math.PI, // Math.toDegrees - from java.math
     _GLOBAL_ALPHA   = "globalAlpha",
