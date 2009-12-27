@@ -1,1 +1,0 @@
-uuMeta.canvas.setup();
