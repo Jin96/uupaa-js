@@ -44,7 +44,7 @@ var _cfg    = uuarg(_xconfig, {
     _tostr  = Object.prototype.toString, // type detector
     _guid   = 0,  // uu.guid() counter
     _colorc = {}, // color cache
-    _colordb= { transparent:{ r: 0, g: 0, b: 0, a: 0, // color db
+    _colordb= { transparent:{ r: 0, g: 0, b: 0, a: 0, argb: "#00000000",
                               hex: "#000000", rgba: "rgba(0,0,0,0)" }},
     _jsondb = {}, // { jobid: fn, ... } jsonp job database
     _lazydb = {}, // { id: [[low], [mid], [high]], ... }
@@ -98,7 +98,7 @@ var _cfg    = uuarg(_xconfig, {
     _QUERY_STR = /(?:([^\=]+)\=([^\;]+);?)/g,
     _HSLACOLOR = /^hsla?\((\d+),(\d+),(\d+)(?:,([\d\.]+))?\)/,
     _RGBACOLOR = /^rgba?\((\d+),(\d+),(\d+)(?:,([\d\.]+))?\)/,
-    _HEXCOLOR = /^#(([\da-f])([\da-f])([\da-f])([\da-f]{3})?)$/,
+    _HEXCOLOR = /^#(?:[\da-f]{3,8})$/,
     _FROM_ENT = /&(?:amp|lt|gt|quot);/g,
     _EVPARSE = /^(?:(\w+)\.)?(\w+)(\+)?$/, // ^[NameSpace.]EvntType[Capture]$
     _BRACKET = /^\s*[\(\[\{<]?|[>\}\]\)]?\s*$/g,
@@ -233,6 +233,7 @@ uu = uumix(_uujamfactory, {     // uu(expr, ctx) -> Instance(jam)
   // --- color ---
   color:  uumix(uucolor, {      // uu.color("black") -> ColorHash or 0
     add:        uucoloradd,     // uu.color.add("000000black,...")
+    fix:        uucolorfix,     // uu.color.fix(ColorHash/RGBAHash) -> ColorHash
     expire:     uucolorexpire   // uu.color.expire()
   }),
   // --- event ---
@@ -1260,27 +1261,26 @@ function uufactory(name,   // @param String: class name
 // uu.color - parse color
 function uucolor(str) { // @parem String: "black", "#fff", "rgba(0,0,0,0)" ...
                         // @return ColorHash/0: 0 is error
-  function _p2n(n) { // percent(0.0~1.0) to number(0~255)
-    n = ((parseFloat(n) || 0) * 2.56) | 0;
-    return n > 255 ? 255 : n;
-  }
-  var v, m, n, r, g, b, a, add = 0, rgb = 0,
+  var v, m, n, r, g, b, a = 1, add = 0, rgb = 0,
       rv = _colordb[str] || _colorc[str]
                          || _colordb[++add, v = str.toLowerCase()];
 
   if (!rv) {
     switch ({ "#": 1, r: 2, h: 3 }[v.charAt(0)]) {
-    case 1: m = _HEXCOLOR.exec(v);
-            if (m) {
-              n = parseInt(m[5] ? m[1] // "#ffffff"
-                                : m[2] + m[2] + m[3] + m[3] + m[4] + m[4], 16);
-              rv = { r: n >> 16, g: (n >> 8) & 255, b: n & 255, a: 1,
-                     hex: m[5] ? v : 0 };
+    case 1: if (!_HEXCOLOR.test(v)) { return 0; }
+            m = v.split("");
+            switch (m.length) {
+            case 4: n = parseInt(m[1]+m[1] + m[2]+m[2] + m[3]+m[3], 16); break; // #fff
+            case 7: n = parseInt(v.slice(1), 16); break; // #ffffff
+            case 9: n = parseInt(v.slice(3), 16); // #00ffffff
+                    a = ((parseInt(v.slice(1, 3), 16) / 2.55) | 0) / 100;
             }
+            n !== void 0 &&
+                (rv = { r: n >> 16, g: (n >> 8) & 255, b: n & 255, a: a });
             break;
     case 2: ++rgb;
-    case 3: m = (rgb ? _RGBACOLOR : _HSLACOLOR).exec(v.replace(_SPACE, "").
-                                                       replace(_PERCENT, _p2n));
+    case 3: m = (rgb ? _RGBACOLOR : _HSLACOLOR).exec(
+                    v.replace(_SPACE, "").replace(_PERCENT, _uucolorp2n));
             if (m) {
               r = m[1] | 0, g = m[2] | 0, b = m[3] | 0;
               a = m[4] ? parseFloat(m[4]) : 1;
@@ -1289,15 +1289,15 @@ function uucolor(str) { // @parem String: "black", "#fff", "rgba(0,0,0,0)" ...
             }
     }
   }
-  if (add && rv) {
-    rv.hex  || (rv.hex  = "#" + _HEX2[rv.r] + _HEX2[rv.g] + _HEX2[rv.b]);
-    rv.argb || (rv.argb = "#" + _HEX2[_p2n(rv.a * 100)] +
-                                _HEX2[rv.r] + _HEX2[rv.g] + _HEX2[rv.b]);
-    rv.rgba || (rv.rgba = "rgba(" + rv.r + "," + rv.g + "," +
-                                    rv.b + "," + rv.a + ")");
-    _colorc[str] = rv; // add cache
-  }
+  add && rv && (_colorc[str] = uucolorfix(rv)); // add cache
   return rv || 0; // ColorHash or 0
+}
+
+// inner - percent(0.0~1.0) to number(0~255)
+function _uucolorp2n(n) { // @param Number: 0.0~1.0
+                          // @return Number: 0~255
+  n = ((parseFloat(n) || 0) * 2.56) | 0;
+  return n > 255 ? 255 : n;
 }
 
 // uu.color.add
@@ -1312,6 +1312,16 @@ function uucoloradd(str) { // @param JointString: "000000black,..."
                              argb: "#ff" + w,
                              rgba: "rgba(" + r + "," + g + "," + b + ",1)" };
   }
+}
+
+// uu.color.fix - fix ColorHash
+function uucolorfix(c) { // @param ColorHash/RGBAHash:
+                         // @return ColorHash:
+  c.hex  || (c.hex  = "#" + _HEX2[c.r] + _HEX2[c.g] + _HEX2[c.b]);
+  c.argb || (c.argb = "#" + _HEX2[_uucolorp2n(c.a * 100)] +
+                            _HEX2[c.r] + _HEX2[c.g] + _HEX2[c.b]);
+  c.rgba || (c.rgba = "rgba(" + c.r + "," + c.g + "," + c.b + "," + c.a + ")");
+  return c;
 }
 
 // uu.color.expire - expire color cache
