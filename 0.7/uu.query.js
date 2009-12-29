@@ -922,7 +922,7 @@ function nth(anb) {
 }
 
 // inner - :digit(0x40)  :negative(0x41)  :tween(0x42)
-//         :boxeffec(0x43)
+//         :boxeffect(0x43)
 function extendFilter(fid, negate, elms) {
   var rv = [], ri = -1, v, i = 0, ok;
 
