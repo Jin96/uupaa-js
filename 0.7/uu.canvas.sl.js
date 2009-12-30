@@ -713,7 +713,7 @@ function _buildShadowBlur(me,      // @param this:
   return "";
 }
 
-// inner - build stroke propertys
+// inner - build stroke properties
 function _buildStrokeProps(obj) {
   var cap = _CAPS[obj.lineCap],
       width = (obj.lineWidth * obj._lineScale).toFixed(2);

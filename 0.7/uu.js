@@ -36,6 +36,9 @@ var _cfg    = uuarg(_xconfig, {
         cssexpr: 0, visited: 0, innerText: 0 }),
     _ver    = uuvers(_cfg.consel),
     _ie     = _ver.ie,
+    _gecko  = _ver.gecko,
+    _opera  = _ver.opera,
+    _webkit = _ver.webkit,
     _qtag   = _ie ? (uutaglegacy || 0) : uutag,
     _qklass = doc.getElementsByClassName ? uuklass : (uuklasslegacy || 0),
     _html   = doc.getElementsByTagName("html")[0], // <html>
@@ -74,8 +77,8 @@ var _cfg    = uuarg(_xconfig, {
                 "bgrpt,backgroundRepeat,bgpos,backgroundPosition"),
     _EV     = "mousedown,mouseup,mousemove,mousewheel,click,dblclick,keydown," +
               "keypress,keyup,change,submit,focus,blur,contextmenu",
-    _EVFIX  = _ver.gecko ? { mousewheel: "DOMMouseScroll" } :
-              _ver.opera ? { contextmenu: "mousedown" } : {},
+    _EVFIX  = _gecko ? { mousewheel: "DOMMouseScroll" } :
+              _opera ? { contextmenu: "mousedown" } : {},
     _EVCODE = { mousedown: 1, mouseup: 2, mousemove: 3, mousewheel: 4, click: 5,
                 dblclick: 6, keydown: 7, keypress: 8, keyup: 9, mouseenter: 10,
                 mouseleave: 11, mouseover: 12, mouseout: 13, contextmenu: 14,
@@ -121,7 +124,8 @@ uupub = {
   iebody: 0,       // [lazy] documentElement or <body>(IE quirks)
   ndiddb: _ndiddb, // nodeid database
   ndidseed: 0,     // nodeid counter
-  DEC2: _DEC2, HEX2: _HEX2, FIX: _FIX, EVCODE: _EVCODE, HTML5TAG: _HTML5
+  DEC2: _DEC2, HEX2: _HEX2, FIX: _FIX, HTML5TAG: _HTML5,
+  EVFIX: _EVFIX, EVCODE: _EVCODE
 };
 _cfg.imgdir = _cfg.imgdir.replace(/\/+$/, "") + "/"; // "img" -> "img/"
 
@@ -237,14 +241,13 @@ uu = uumix(_uujamfactory, {     // uu(expr, ctx) -> Instance(jam)
     expire:     uucolorexpire   // uu.color.expire()
   }),
   // --- event ---
-  ev:     uumix(uuev, {         // [1][bind] uu.ev(node, "click", fn)
-                                // [2][bind] uu.ev(node, "my.click", fn)
-    has:        uuevhas,        // uu.ev.has(node, "click") -> Boolean
+  ev:     uumix(uuev, {         // uu.ev(node, "namespace.click", fn) -> node
+    has:        uuevhas,        // uu.ev.has(node, "namespace.click") -> Boolean
     stop:       uuevstop,       // uu.ev.stop(event) -> event
-    unbind:     uuevunbind,     // [1][unbind all]  uu.ev.unbind(node)
-                                // [2][unbind some] uu.ev.unbind(node, "click+,dblclick")
-                                // [3][unbind namespace all]  uu.ev.unbind(node, "my.*")
-                                // [4][unbind namespace some] uu.ev.unbind(node, "my.click+,my.dblclick")
+    unbind:     uuevunbind,     // [1][unbind all]  uu.ev.unbind(node) -> node
+                                // [2][unbind some] uu.ev.unbind(node, "click+,dblclick") -> node
+                                // [3][unbind namespace all]  uu.ev.unbind(node, "namespace.*") -> node
+                                // [4][unbind namespace some] uu.ev.unbind(node, "namespace.click+,namespace.dblclick") -> node
     attach:     uuevattach,     // [protected] raw level api
     detach:     uuevdetach      // [protected] raw level api
   }),
@@ -276,10 +279,6 @@ uu = uumix(_uujamfactory, {     // uu(expr, ctx) -> Instance(jam)
   // [2][add to body] uu.node(uu.div(), doc.body) -> <div>
   // [3][add to context node] uu.node("<div><p>txt</p></div>", ctx) -> <div>
   node:   uumix(uunode, {
-    id:   uumix(uunodeid, {     // uu.node.id(node) -> nodeid
-      toNode:   uunodeidtonode, // uu.node.id.toNode(nodeid) -> node
-      remove:   uunodeidremove  // uu.node.id.remove(node) -> node
-    }),
     has:        uunodehas,      // uu.node.has(node, ctx) -> Boolean
     bulk:       uunodebulk,     // [1][clone] uu.node.bulk(node) -> DocumentFragment
                                 // [2][build] uu.node.bulk("<p>html</p>") -> DocumentFragment
@@ -287,6 +286,10 @@ uu = uumix(_uujamfactory, {     // uu(expr, ctx) -> Instance(jam)
     wrap:       uunodewrap,     // uu.node.wrap(node, wrapper) -> node
     clear:      uunodeclear,    // uu.node.clear(ctx) -> ctx
     remove:     uunoderemove    // uu.node.remove(node) -> node
+  }),
+  nodeid:  uumix(uunodeid, {    // uu.nodeid(node) -> nodeid
+    toNode:     uunodeidtonode, // uu.nodeid.toNode(nodeid) -> node
+    remove:     uunodeidremove  // uu.nodeid.remove(node) -> node
   }),
   html:         uuhtml,         // uu.html(node, attr, style, tagid) -> <html>
   head:         uuhead,         // uu.head(node, attr, style, tagid) -> <head>
@@ -420,7 +423,7 @@ uumix(String.prototype, {
 }, 0, 0);
 
 //{::
-_ver.gecko && _cfg.innerText && !win.HTMLElement.prototype.innerText &&
+_gecko && _cfg.innerText && !win.HTMLElement.prototype.innerText &&
 (function(proto) {
   proto.__defineGetter__("innerText", innertextgetter);
   proto.__defineSetter__("innerText", innertextsetter);
@@ -539,7 +542,7 @@ function _uuajax(url, option, fn, ngfn, _fn2) {
           _ajaxc[url] = lastmod ? Date.parse(lastmod) : 0; // add cache
         }
       } else {
-        _ajaxng(code || ((_ver.opera && opt.ifmod) ? 304 : 400)); // [Opera]
+        _ajaxng(code || ((_opera && opt.ifmod) ? 304 : 400)); // [Opera]
       }
       _ajaxgc();
     }
@@ -579,7 +582,7 @@ function _uuajax(url, option, fn, ngfn, _fn2) {
   if (xhr) {
     try {
       // [Gecko] beforeunload event -> gc
-      _ver.gecko && uuevattach(win, "beforeunload", befn = _ajaxabort);
+      _gecko && uuevattach(win, "beforeunload", befn = _ajaxabort);
 
       // initialize
       xhr.open(method, url, true); // GET / POST / PUT / DELETE / HEAD, Async
@@ -1387,36 +1390,32 @@ function uumsgunregister(inst) { // @param Instance: class instance
 
 // --- event ---
 // uu.ev - bind event
-// [1][bind] uu.ev(node, "click", fn)
-// [2][bind] uu.ev(node, "my.click", fn)
-function uuev(node,   // @param Node:
-              names,  // @param JointString: "click,click+,..."
-              fn,     // @param Function/Instance: callback function
-              mode) { // @param Number(= 1): 1 is attach, 2 is detach
-                      // @return Node:
+// uu.ev(node, "namespace.click", fn)
+function uuev(node,    // @param Node:
+              nstypes, // @param JointString: "click,click+,..."
+              fn,      // @param Function/Instance: callback function
+              mode) {  // @param Number(= 1): 1 is attach, 2 is detach
+                       // @return Node:
   function _uuevclosure(evt, fire) {
     evt = evt || win.event;
     if (!fire && !evt.code) {
-      var src = evt.srcElement || evt.target, from = evt.fromElement;
+      var src = evt.srcElement || evt.target;
 
+      src = (_webkit && src.nodeType === 3) ? src.parentNode : src;
       evt.node = node;
-      evt.name = evt.type;
-      evt.code = (_EVCODE[evt.type] || 0) & 255,
-      evt.src  = (webkit && src.nodeType === 3) ? src.parentNode : src;
-      evt.rel  = _ie ? ((src === from) ? evt.toElement : from)
-                     : evt.relatedTarget;
-      evt.px   = _ie ? (evt.clientX + iebody.scrollLeft) : evt.pageX;
-      evt.py   = _ie ? (evt.clientY + iebody.scrollTop)  : evt.pageY;
-      evt.ox   = evt.offsetX || evt.layerX || 0; // [offsetX] IE, Opera, WebKit
-      evt.oy   = evt.offsetY || evt.layerY || 0; // [layerX]  Gecko, WebKit
+      evt.code = (_EVCODE[evt.type] || 0) & 255;
+      evt.src = src;
+      evt.px = _ie ? evt.clientX + uupub.iebody.scrollLeft : evt.pageX;
+      evt.py = _ie ? evt.clientY + uupub.iebody.scrollTop  : evt.pageY;
+      evt.ox = evt.offsetX || evt.layerX || 0; // [offsetX] IE, Opera, WebKit
+      evt.oy = evt.offsetY || evt.layerY || 0; // [layerX]  Gecko, WebKit
     }
-    handler.call(fn, evt, node);
+    handler.call(fn, evt, node, src);
   }
   mode = mode || 1;
   var types = node.uuevtypes || (node.uuevfn = {}, node.uuevtypes = ","),
-      ary = names.split(","), v, i = 0, m, name, closure, handler,
-      losecapture = "losecapture",
-      webkit = _ver.webkit, iebody = uupub.iebody;
+      nstype = nstypes.split(","), v, i = 0, m,
+      type, capt, closure, handler;
 
   if (mode === 1) {
     handler = uuisfunc(fn) ? fn : fn.handleEvent;
@@ -1424,29 +1423,30 @@ function uuev(node,   // @param Node:
   } else if (mode === 2) {
     closure = fn.uuevclosure || fn;
   }
-  while ( (v = ary[i++]) ) { // v = "my.click+"
-    m = _EVPARSE.exec(v); // split ["my.click+", "my", "click", "+"]
+  while ( (v = nstype[i++]) ) { // v = "namespace.click+"
+    m = _EVPARSE.exec(v); // split ["namespace.click+", "namespace", "click", "+"]
     if (m) {
-      name = m[2];
-      (m[3] && _ie && name === "mousemove") &&
-          uuev(node, losecapture, closure, mode); // IE mouse capture
+      type = m[2]; // "click"
+      capt = m[3]; // "+"
+      (capt && _ie && type === "mousemove") &&
+          uuev(node, "losecapture", closure, mode); // IE mouse capture
 
       if (types.indexOf("," + v + ",") >= 0) { // bound?
         if (mode === 2) { // detach event
-          _ie && (name === losecapture) && node.releaseCapture();
+          _ie && (type === "losecapture") && node.releaseCapture();
 
-          // ",dblclick," <- ",my.click+,dblclick,".replace(",my.click+,", ",")
+          // ",dblclick," <- ",namespace.click+,dblclick,".replace(",namespace.click+,", ",")
           node.uuevtypes = node.uuevtypes.replace("," + v + ",", ",");
           node.uuevfn[v] = void 0;
-          uuevdetach(node, _EVFIX[name] || name, closure, m[3]);
+          uuevdetach(node, _EVFIX[type] || type, closure, capt);
         }
       } else if (mode === 1) { // attach event
-        _ie && (name === losecapture) && node.setCapture();
+        _ie && (type === "losecapture") && node.setCapture();
 
-        // ",my.click+,dblclick," <- ",my.click+," + "dblclick" + ,"
+        // ",namespace.click+,dblclick," <- ",namespace.click+," + "dblclick" + ,"
         node.uuevtypes += v + ",";
         node.uuevfn[v] = closure;
-        uuevattach(node, _EVFIX[name] || name, closure, m[3]);
+        uuevattach(node, _EVFIX[type] || type, closure, capt);
       }
     }
   }
@@ -1454,10 +1454,10 @@ function uuev(node,   // @param Node:
 }
 
 // uu.ev.has - has event
-function uuevhas(node,   // @param Node: target node
-                 name) { // @param String: "click", "my.mousemove+"
-                         // @return Boolean:
-  return (node.uuevtypes || "").indexOf("," + name + ",") >= 0;
+function uuevhas(node,     // @param Node: target node
+                 nstype) { // @param String: "click", "namespace.mousemove+"
+                           // @return Boolean:
+  return (node.uuevtypes || "").indexOf("," + nstype + ",") >= 0;
 }
 
 // uu.ev.stop - stop stopPropagation and preventDefault
@@ -1471,22 +1471,22 @@ function uuevstop(evt) { // @param event:
 // uu.ev.unbind - unbind event
 // [1][unbind all]  uu.ev.unbind(node)
 // [2][unbind some] uu.ev.unbind(node, "click+,dblclick")
-// [3][unbind namespace all]  uu.ev.unbind(node, "my.*")
-// [4][unbind namespace some] uu.ev.unbind(node, "my.click+,my.dblclick")
-function uuevunbind(node,    // @param Node: target node
-                    names) { // @param JointString(= void 0): "click,click+,..."
-                             // @return Node:
+// [3][unbind namespace all]  uu.ev.unbind(node, "namespace.*")
+// [4][unbind namespace some] uu.ev.unbind(node, "namespace.click+,namespace.dblclick")
+function uuevunbind(node,      // @param Node: target node
+                    nstypes) { // @param JointString(= void 0): "click,click+,..."
+                               // @return Node:
   function _eachnamespace(w) {
     !w.indexOf(ns) && uuev(node, w, node.uuevfn[w], 2);
   }
-  var types = node.uuevtypes, ary, v, i = 0, ns;
+  var types = node.uuevtypes, nstype, v, i = 0, ns;
 
   if (types && types.length > 1) { // ignore ","
-    if (names) { // [2][3][4]
-      ary = uusplitcomma(names);
-      while ( (v = ary[i++]) ) {
-        if (v.lastIndexOf(".*") > 1) { // [3] "my.*"
-          ns = v.slice(0, -1); // "my."
+    if (nstypes) { // [2][3][4]
+      nstype = uusplitcomma(nstypes);
+      while ( (v = nstype[i++]) ) {
+        if (v.lastIndexOf(".*") > 1) { // [3] "namespace.*"
+          ns = v.slice(0, -1); // "namespace."
           uuaryeach(uusplitcomma(types), _eachnamespace);
         } else { // [2][4]
           (types.indexOf("," + v + ",") >= 0) &&
@@ -1494,8 +1494,8 @@ function uuevunbind(node,    // @param Node: target node
         }
       }
     } else { // [1]
-      ary = uusplitcomma(types);
-      while ( (v = ary[i++]) ) {
+      nstype = uusplitcomma(types);
+      while ( (v = nstype[i++]) ) {
         uuev(node, v, node.uuevfn[v], 2);
       }
     }
@@ -1539,7 +1539,7 @@ function uutext(node,   // @param Node/String:
 // uu.text.get
 function uutextget(node) { // @param Node:
                            // @return String: innerText
-  return node[_ver.gecko ? "textContent" : "innerText"];
+  return node[_gecko ? "textContent" : "innerText"];
 }
 
 // uu.text.set
@@ -1817,8 +1817,8 @@ function _newtag(/* var_args */) { // @param Mix: var_args, nodes, attr/css
 }
 
 // --- query ---
-// uu.query - query CSS3 Selector
-function uuquery(expr,  // @param String: "css > rule"
+// uu.query - document.querySelectorAll like function
+function uuquery(expr,  // @param String: "css > expr"
                  ctx) { // @param NodeArray/Node(= document): query context
                         // @return NodeArray: [Node, ...]
   if (doc.querySelectorAll && !_NGWORD.test(expr)) {
@@ -2176,7 +2176,7 @@ function _jsoninspect(mix, fn) {
   default:    return fn ? (fn(mix) || "") : "";
   }
   if (type === _CSTYLE) {
-    w = uu.webkit;
+    w = _webkit;
     for (i in mix) {
       if (typeof mix[i] === "string" && (w || i != (+i + ""))) { // !isNaN(i)
         w && (i = mix.item(i));
@@ -2729,8 +2729,8 @@ _ie && win.attachEvent("onunload", _winunload);
 // 2. prebuild nodeid
 // 3. remove comment node(IE only) - http://d.hatena.ne.jp/uupaa/20091203/1259820356
 uuready(function() {
-  uumix(_camelhash(_FIX, _ver.webkit ? win.getComputedStyle(_html, null)
-                                     : _html.style), _STYLE, _ATTR);
+  uumix(_camelhash(_FIX, _webkit ? win.getComputedStyle(_html, null)
+                                 : _html.style), _STYLE, _ATTR);
   var live = _html.getElementsByTagName("*"), v, w, ary = [], i = 0, j = 0;
 
   uunodeid(_html);
@@ -2752,18 +2752,17 @@ function _camelhash(rv, props) {
   function _decamelize(m, c, C) {
     return c + "-" + C.toLowerCase();
   }
-  var i, v, webkit = _ver.webkit, gecko = _ver.gecko,
-      CAMELIZE = /-([a-z])/g, DECAMELIZE = /([a-z])([A-Z])/g;
+  var i, v, CAMELIZE = /-([a-z])/g, DECAMELIZE = /([a-z])([A-Z])/g;
 
   for (i in props) {
     if (typeof props[i] === "string") {
-      webkit && (i = props.item(i)); // i = "text-align"
+      _webkit && (i = props.item(i)); // i = "text-align"
       if (i.indexOf("-")) { // -webkit-xxx
-        v = webkit ? i.replace(CAMELIZE, _camelize)
-                   : i.replace(DECAMELIZE, _decamelize);
-        gecko && !v.indexOf("Moz") && (v = "-moz" + v.slice(3));
+        v = _webkit ? i.replace(CAMELIZE, _camelize)
+                    : i.replace(DECAMELIZE, _decamelize);
+        _gecko && !v.indexOf("Moz") && (v = "-moz" + v.slice(3));
         // { text-align: "textAlign", ... }
-        (i !== v) && (webkit ? (rv[i] = v) : (rv[v] = i));
+        (i !== v) && (_webkit ? (rv[i] = v) : (rv[v] = i));
       }
     }
   }

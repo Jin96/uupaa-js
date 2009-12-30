@@ -285,7 +285,7 @@ function _measureUnit(elm) {
   return { pt: pt, em: em };
 }
 
-// inner - copy property
+// inner - copy properties
 function _copyprop(to, from) {
   to[_GLOBAL_ALPHA] = from[_GLOBAL_ALPHA];
   to[_GLOBAL_COMPO] = from[_GLOBAL_COMPO];

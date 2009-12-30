@@ -11,6 +11,7 @@ uu.color.js
 uu.css.js
 uu.css.parse.js
 uu.css.validate.js
+uu.live.js
 uu.query.js
 // canvas
 uu.img.js

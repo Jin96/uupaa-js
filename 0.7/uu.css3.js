@@ -121,7 +121,7 @@ function uucss3get(node,     // @param Node:
                    styles) { // @param JointString: "color"
                              // @return String: "red"
   var rv = {}, ary = styles.split(","), v, i = 0,
-      data = _uid2data[uu.node.id(node)];
+      data = _uid2data[uu.nodeid(node)];
 
   while ( (v = ary[i++]) ) {
     rv[v] = (data && !v.indexOf("-uu")) ? (data.excss.decl[v] || "")
@@ -163,7 +163,7 @@ function uucss3decl(node) { // @param Node:
                             //             String: order, comma jointed string
                             //                            has,last-comma,
                             //             Hash: decl { color: "red", ... }
-  var rv = _uid2data[uu.node.id(node)];
+  var rv = _uid2data[uu.nodeid(node)];
 
   return rv ? rv.excss : rv;
 }
@@ -338,7 +338,7 @@ function _uucss3validate(rawdata, context) {
           }
           for (k = 0, kz = node.length; k < kz; ++k) {
             v = node[k];
-            nodeuid = uu.node.id(v); // node unique id
+            nodeuid = uu.nodeid(v); // node unique id
 
             // init container
             if (!(nodeuid in _uid2data)) {
@@ -385,7 +385,7 @@ function _uucss3validate(rawdata, context) {
         } else { // "!important" route
           for (k = 0, kz = node.length; k < kz; ++k) {
             v = node[k];
-            nodeuid = uu.node.id(v); // node unique id
+            nodeuid = uu.nodeid(v); // node unique id
 
             if (_mark) {
               v.setAttribute("uucss3i", 1); // bond + markup for revalidate
@@ -508,7 +508,7 @@ function _uucss3settextshadow(node, prop, value) {
 function _uucss3setboxeffect(node, prop, value) {
   if (!/^(?:none|auto)$/.test(value)) { throw prop + "=" + value; }
 
-  var data = _uid2data[uu.node.id(node)];
+  var data = _uid2data[uu.nodeid(node)];
 
   if (data) {
     data.excss.decl[prop] = value; // update
@@ -532,7 +532,7 @@ function _uucss3setboxeffect(node, prop, value) {
 // inner - -uu-box-shadow:
 function _uucss3setboxshadow(node, prop, value) {
   var rv = uu.css.validate.shadow(value), hash,
-      data = _uid2data[uu.node.id(node)];
+      data = _uid2data[uu.nodeid(node)];
 
   if (!rv.valid) { throw prop + "=" + value; }
   if (data) {
@@ -551,7 +551,7 @@ function _uucss3setboxshadow(node, prop, value) {
 // inner - -uu-box-reflect:
 function _uucss3setboxreflect(node, prop, value) {
   var rv = uu.css.validate.boxReflect(value),
-      data = _uid2data[uu.node.id(node)], hash;
+      data = _uid2data[uu.nodeid(node)], hash;
 
   if (!rv.valid) { throw prop + "=" + value; }
   if (data) {
@@ -568,7 +568,7 @@ function _uucss3setboxreflect(node, prop, value) {
 // inner - -uu-border-radius:
 function _uucss3setborderradius(node, prop, value) {
   var rv = uu.css.validate.borderRadius(value), hash,
-      data = _uid2data[uu.node.id(node)];
+      data = _uid2data[uu.nodeid(node)];
 
   if (!rv.valid) { throw prop + "=" + value; }
   if (data) {
@@ -600,7 +600,7 @@ function _uucss3setborderimage(node, prop, value) {
 // inner - -uu-background:
 function _uucss3setbg(node, prop, value) {
   var rv = uu.css.validate.background(value),
-      data = _uid2data[uu.node.id(node)];
+      data = _uid2data[uu.nodeid(node)];
 
   if (!rv.valid) { throw prop + "=" + value; }
   if (data) {
@@ -615,7 +615,7 @@ function _uucss3setbg(node, prop, value) {
 // inner - -uu-background-color:
 function _uucss3setbgcolor(node, prop, value) {
   var rv = uu.color(value),
-      data = _uid2data[uu.node.id(node)];
+      data = _uid2data[uu.nodeid(node)];
 
   if (!rv) { throw prop + "=" + value; }
   if (data) {
@@ -630,7 +630,7 @@ function _uucss3setbgcolor(node, prop, value) {
 // inner - -uu-background-image:
 function _uucss3setbgimg(node, prop, value) {
   var rv = uu.split.token(value, ","),
-      data = _uid2data[uu.node.id(node)];
+      data = _uid2data[uu.nodeid(node)];
 
   if (data) {
     data.excss.decl[prop] = value; // update
@@ -644,7 +644,7 @@ function _uucss3setbgimg(node, prop, value) {
 // inner - -uu-background-repeat:
 function _uucss3setbgrpt(node, prop, value) {
   var rv = value.split(","),
-      data = _uid2data[uu.node.id(node)];
+      data = _uid2data[uu.nodeid(node)];
 
   if (data) {
     data.excss.decl[prop] = value; // update
@@ -658,7 +658,7 @@ function _uucss3setbgrpt(node, prop, value) {
 // inner - -uu-background-position:
 function _uucss3setbgpos(node, prop, value) {
   var rv = value.split(","),
-      data = _uid2data[uu.node.id(node)];
+      data = _uid2data[uu.nodeid(node)];
 
   if (data) {
     data.excss.decl[prop] = value; // update
@@ -752,7 +752,7 @@ function _uucss3pluspostvalidate(uid2data, revalidate, context) {
     if (EXCSS.boxeffect) {
       i = 0;
       while ( (node = boxeffect[i++]) ) {
-        uucss3.boxeffect(node, _uid2data[uu.node.id(node)].excss);
+        uucss3.boxeffect(node, _uid2data[uu.nodeid(node)].excss);
       }
     }
   }
