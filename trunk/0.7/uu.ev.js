@@ -6,7 +6,6 @@
 //    http://www.w3.org/TR/DOM-Level-3-Events/#events-keyboardevents
 uu.waste || (function(win, doc, uu) {
 var _CLICKS = { click: 1, dblclick: 2 },
-    _EVCODE = uupub.EVCODE,
     _EVVKEY = uu.hash( // event virtual keycode
         "8,BS,9,TAB,13,ENTER,16,SHIFT,17,CTRL,18,ALT,27,ESC," +
         "32,SP,33,PGUP,34,PGDN,35,END,36,HOME,37,LEFT,38,UP,39,RIGHT,40,DOWN," +
@@ -16,7 +15,7 @@ var _CLICKS = { click: 1, dblclick: 2 },
 
 // uu.ev.*
 uu.mix(uu.ev, {
-    more:       uuevmore,       // uu.ev.more(event) -> { btn, vkey, wheel, clicks, vkeycode }
+    more:       uuevmore,       // uu.ev.more(event) -> { rel, btn, vkey, wheel, clicks, vkeycode }
     fire:       uuevfire,       // uu.ev.fire(node, "customEvent", param) -> node
     times:      uuevtimes,      // [1] uu.ev.times(node, names, cyclic, var_args, ...) -> node
     hover:      uuevhover,      // [1][callback]  uu.ev.hover(node, function(){}, function(){}) -> node
@@ -26,17 +25,19 @@ uu.mix(uu.ev, {
 
 // uu.ev.more - more information
 function uuevmore(evt) { // @param EventObject:
-                         // @return Hash: { btn, vkey, wheel, clicks, vkeycode }
-  var btn = evt.button || 0, wheel = 0, clicks = 0,
+                         // @return Hash: { rel, btn, vkey, wheel, clicks, vkeycode }
+  var rel, btn = evt.button || 0, wheel = 0, clicks = 0,
       vkeycode = evt.keyCode || evt.charCode || 0;
 
   if (evt.code) {
     if (uu.ie) {
+      rel = evt.src === evt.fromElement ? evt.toElement : evt.fromElement;
       btn = !btn ? void 0 : (btn & 1) ? 0 : (btn & 2) ? 1 : 2;
       wheel = (evt.wheelDelta / -120) | 0;
       clicks = _CLICKS[evt.type] || 0;
     } else {
-      if (evt.code === _EVCODE.mousewheel) {
+      evt.rel = evt.relatedTarget;
+      if (evt.code === uupub.EVCODE.mousewheel) {
         wheel = (evt.detail ? (evt.detail / 3)
                             : (evt.wheelDelta / -120)) | 0;
       } else {
@@ -44,7 +45,8 @@ function uuevmore(evt) { // @param EventObject:
       }
     }
   }
-  return { btn: btn,
+  return { rel: rel, // relatedTarget
+           btn: btn,
            vkey: _EVVKEY[vkeycode] || "", // "UP", "1", "A"
            wheel: wheel,
            clicks: clicks,

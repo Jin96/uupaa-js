@@ -25,7 +25,7 @@ function uucss3boxeffect(node,    // @param Node:
   var view = node.parentNode,
       vs = _ie ? view.currentStyle : _cstyle(view, null),
       ns = _ie ? node.currentStyle : _cstyle(node, null),
-      nid = uu.node.id(node), m, mbgsh = 0,
+      nid = uu.nodeid(node), m, mbgsh = 0,
       bfx, hash, render, nw, nh,
       viw = view.style.width,
       vih = view.style.height,

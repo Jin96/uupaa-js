@@ -248,7 +248,7 @@ function uuqueryselectorall(expr,      // @param String: expr
   }
 
   // init tag set
-  uid = uu.node.id(context);
+  uid = uu.nodeid(context);
   _ctype = _ctypedb[uid] || (_ctypedb[uid] = getContentType(context));
   _tags = _ctype === 1 ? _htmltagdb : _xmltagdb;
   // http://twitter.com/uupaa/status/4542172000

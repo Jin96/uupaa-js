@@ -855,7 +855,7 @@ function _buildGradationColor(ary) {
   return rv.join(",");
 }
 
-// inner - build stroke propertys
+// inner - build stroke properties
 function _buildStrokeProps(obj) {
   var width = (obj.lineWidth * obj._lineScale).toFixed(2);
 

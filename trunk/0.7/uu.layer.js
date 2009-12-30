@@ -109,7 +109,7 @@ function uulayer(view,     // @param Node: layer container
                  option) { // @param Hash: { HIDDEN, FLYWEIGHT }
                            //     Number: HIDDEN,     1 is (overflow = "hidden")
                            //     Number: FLYWEIGHT,  1 is (ctx.xFlyweight = 1)
-  var uid = uu.node.id(view);
+  var uid = uu.nodeid(view);
 
   if (uid in _layerdb) {
     return _layerdb[uid]; // already
@@ -146,7 +146,7 @@ function initLayer(me, view, width, height, option) {
 // uu.layer.getLayerInstance
 function getLayerInstance(elm) { // @param Node:
                                  // @return LayerObject/null:
-  var uid = uu.node.id(elm);
+  var uid = uu.nodeid(elm);
 
   if (uid in _layerdb) {
     return _layerdb[uid];

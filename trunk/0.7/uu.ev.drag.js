@@ -291,14 +291,14 @@ function zindexinit() {
 
 // uu.Class.ZIndex.top
 function zindextop(node) { // @param Node:
-  this._nodedb[uu.node.id(node)] &&
+  this._nodedb[uu.nodeid(node)] &&
       (_zsink(this, node),
        node.style.zIndex = this._ztop); // move surface
 }
 
 // uu.Class.ZIndex.bind - bind z-index handler
 function zindexbind(node) { // @param Node:
-  var id = uu.node.id(node);
+  var id = uu.nodeid(node);
 
   this._nodedb[id] || (this._nodedb[id] = node,
                        node.style.zIndex = ++this._ztop); // top + 1
@@ -306,7 +306,7 @@ function zindexbind(node) { // @param Node:
 
 // uu.Class.ZIndex.unbind - unbind z-index handler
 function zindexunbind(node) { // @param Node:
-  var id = uu.node.id(node);
+  var id = uu.nodeid(node);
 
   this._nodedb[id] && (delete this._nodedb[id], --this._ztop);
 }
@@ -322,7 +322,7 @@ function zindexdrag(node) { // @param Node:
   }
   if (_toggle(node, "zindexdrag")) { 
     // end drag
-    this._nodedb[uu.node.id(node)] &&
+    this._nodedb[uu.nodeid(node)] &&
         (node.style.zIndex = this._ztop); // move surface
     return 0;
   }
