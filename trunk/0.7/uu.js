@@ -124,8 +124,7 @@ uupub = {
   iebody: 0,       // [lazy] documentElement or <body>(IE quirks)
   ndiddb: _ndiddb, // nodeid database
   ndidseed: 0,     // nodeid counter
-  DEC2: _DEC2, HEX2: _HEX2, FIX: _FIX, HTML5TAG: _HTML5,
-  EVFIX: _EVFIX, EVCODE: _EVCODE
+  DEC2: _DEC2, HEX2: _HEX2, FIX: _FIX, HTML5TAG: _HTML5, EVCODE: _EVCODE
 };
 _cfg.imgdir = _cfg.imgdir.replace(/\/+$/, "") + "/"; // "img" -> "img/"
 
@@ -1438,7 +1437,7 @@ function uuev(node,    // @param Node:
           // ",dblclick," <- ",namespace.click+,dblclick,".replace(",namespace.click+,", ",")
           node.uuevtypes = node.uuevtypes.replace("," + v + ",", ",");
           node.uuevfn[v] = void 0;
-          uuevdetach(node, _EVFIX[type] || type, closure, capt);
+          uuevdetach(node, type, closure, capt);
         }
       } else if (mode === 1) { // attach event
         _ie && (type === "losecapture") && node.setCapture();
@@ -1446,7 +1445,7 @@ function uuev(node,    // @param Node:
         // ",namespace.click+,dblclick," <- ",namespace.click+," + "dblclick" + ,"
         node.uuevtypes += v + ",";
         node.uuevfn[v] = closure;
-        uuevattach(node, _EVFIX[type] || type, closure, capt);
+        uuevattach(node, type, closure, capt);
       }
     }
   }
@@ -1505,12 +1504,14 @@ function uuevunbind(node,      // @param Node: target node
 
 // [protected] uu.ev.attach - attach event - raw level api
 function uuevattach(node, type, fn, capture) {
+  type = _EVFIX[type] || type;
   _ie ? node.attachEvent("on" + type, fn)
       : node.addEventListener(type, fn, !!(capture || 0));
 }
 
 // [protected] uu.ev.detach - detach event - raw level api
 function uuevdetach(node, type, fn, capture) {
+  type = _EVFIX[type] || type;
   _ie ? node.detachEvent("on" + type, fn)
       : node.removeEventListener(type, fn, !!(capture || 0));
 }
@@ -2572,8 +2573,8 @@ function jamklass(a) { // @return jam:
 }
 
 // jam.bind
-function jambind(a) { // @return jam:
-  return _jameach(this, uuev, a);
+function jambind(type, fn) { // @return jam:
+  return _jameach(this, uuev, type, fn);
 }
 
 // jam.tween
@@ -2582,8 +2583,8 @@ function jamtween(ms, param, fn) { // @return jam
 }
 
 // jam.unbind
-function jamunbind(a) { // @return jam:
-  return _jameach(this, uuevunbind, a);
+function jamunbind(type) { // @return jam:
+  return _jameach(this, uuevunbind, type);
 }
 
 // jam.show
