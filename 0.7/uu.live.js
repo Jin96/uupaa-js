@@ -1,12 +1,11 @@
 
 // === Live ===
 // depend: uu.js
-//
+// http://d.hatena.ne.jp/uupaa/20091231
 uu.waste || (function(win, doc, uu) {
-var _livedb = {}; // { "expr\vnamespace.click": {...}, ... }
-
-// uu.match
-uu.match = uumatch;             // uu.match("p > a", NodeArray/Node, rtype = 0) -> Boolean/NodeArray
+var _livedb = {}, // { "expr\vnamespace.click": {...}, ... }
+    _LIVEFIX = uu.ie ? { focus: "focusin", blur: "focusout" }
+             : uu.gecko ? {} : { focus: "DOMFocusIn", blur: "DOMFocusOut" };
 
 // uu.live
 uu.live = uu.mix(uulive, {      // uu.live("css > expr", "namespace.click", fn)
@@ -14,41 +13,18 @@ uu.live = uu.mix(uulive, {      // uu.live("css > expr", "namespace.click", fn)
   unbind:       uuliveunbind    // uu.live.unbind("css > expr" = void 0, "namespace.click" = void 0)
 });
 
-// uu.match - document.matchesSelector like function
-function uumatch(expr,    // @param String: "css > expr"
-                 ctx,     // @param NodeArray/Node: match context
-                 rtype) { // @param Number(= 0): result type,
-                          //             0 is Boolean result, matches all,
-                          //             1 is Boolean result, matches any,
-                          //             2 is NodeArray result, matches array
-                          // @return Boolean/NodeArray:
-  ctx = ctx.nodeType ? [ctx] : ctx;
-  var rv = [], hash = {}, v, w, i = 0, j = 0, ary = uu.query(expr, doc);
-
-  if (ctx.length === 1) {
-    v = ctx[0];
-    while ( (w = ary[i++]) ) {
-      if (v === w) {
-        rv.push(v);
-        break;
-      }
-    }
-  } else {
-    while ( (v = ary[i++]) ) {
-      hash[v.uuguid || uu.nodeid(v)] = 1;
-    }
-    while ( (v = ctx[j++]) ) {
-      (v.uuguid || uu.nodeid(v)) in hash && rv.push(v);
-    }
-  }
-  return !rtype ? rv.length === ctx.length : rtype < 2 ? !!rv.length : rv;
-}
+// uu.match
+uu.match = uumatch;             // uu.match("p > a", NodeArray/Node, rtype = 0) -> Boolean/NodeArray
 
 // uu.live
-// http://d.hatena.ne.jp/uupaa/20091231
 function uulive(expr,   // @param String: "css > expr"
                 nstype, // @param String: "namespace.click"
                 fn) {   // @param Function: callback fn(evt, node, src)
+  _uulive(expr, nstype, fn);
+}
+
+// inner -
+function _uulive(expr, nstype, fn, hash) {
   function _uuliveclosure(evt) {
     evt = evt || win.event;
     var src = evt.srcElement || evt.target;
@@ -67,13 +43,35 @@ function uulive(expr,   // @param String: "css > expr"
   }
   if (!uulivehas(expr, nstype)) {
     var ary = nstype.split("."), // "namespace.click" -> ["namespace", "click"]
-        type = ary.pop(), ns = ary.pop() || "",
+        type = ary.pop(), ns = ary.pop() || "", capt = 0,
         handler = uu.isfunc(fn) ? fn : fn.handleEvent,
         closure = fn.uuevliveclosure = _uuliveclosure;
 
-    _livedb[expr + "\v" + nstype] = {
-        expr: expr, ns: ns, type: type, nstype: nstype, fn: closure };
-    uu.ev.attach(doc, uupub.EVFIX[type] || type, closure);
+    hash || (hash = _livedb[expr + "\v" + nstype] = {
+                expr: expr, ns: ns, type: type, nstype: nstype, unbind: [] });
+
+    if (uu.gecko) {
+      (type === "focus" || type === "blur") && (capt = 1);
+    }
+
+    hash.unbind.push(function() {
+      uu.ev.detach(doc, _LIVEFIX[type] || type, closure, capt);
+    });
+    uu.ev.attach(doc, _LIVEFIX[type] || type, closure, capt);
+
+    if (uu.ie) {
+      if (/submit$/.test(type)) {
+        _uulive(expr + " input[type=submit]," + expr + " input[type=image]",
+                nstype.replace(/submit$/, "click"), fn, hash);
+      } else if (/change$/.test(type)) {
+        _uulive(expr, nstype.replace(/change$/, "focus"), function(evt) {
+          uu.ev(evt.srcElement, "uulivehook.change", fn);
+        }, hash);
+        _uulive(expr, nstype.replace(/change$/, "blur"), function(evt) {
+          uu.ev.unbind(evt.srcElement, "uulivehook.change");
+        }, hash);
+      }
+    }
   }
 }
 
@@ -108,10 +106,42 @@ function uuliveunbind(expr,     // @param String(= void 0): "css > expr"
     case 4: r = expr === v.expr && ns === v.ns; // [4]
     }
     if (r) {
-      uu.ev.detach(doc, v.type, v.fn);
+      v.unbind.forEach(function(v) {
+        v();
+      });
       delete _livedb[i];
     }
   }
+}
+
+// uu.match - document.matchesSelector like function
+function uumatch(expr,    // @param String: "css > expr"
+                 ctx,     // @param NodeArray/Node: match context
+                 rtype) { // @param Number(= 0): result type,
+                          //             0 is Boolean result, matches all,
+                          //             1 is Boolean result, matches any,
+                          //             2 is NodeArray result, matches array
+                          // @return Boolean/NodeArray:
+  ctx = ctx.nodeType ? [ctx] : ctx;
+  var rv = [], hash = {}, v, w, i = 0, j = 0, ary = uu.query(expr, doc);
+
+  if (ctx.length === 1) {
+    v = ctx[0];
+    while ( (w = ary[i++]) ) {
+      if (v === w) {
+        rv.push(v);
+        break;
+      }
+    }
+  } else {
+    while ( (v = ary[i++]) ) {
+      hash[v.uuguid || uu.nodeid(v)] = 1;
+    }
+    while ( (v = ctx[j++]) ) {
+      (v.uuguid || uu.nodeid(v)) in hash && rv.push(v);
+    }
+  }
+  return !rtype ? rv.length === ctx.length : rtype < 2 ? !!rv.length : rv;
 }
 
 })(window, document, uu);
