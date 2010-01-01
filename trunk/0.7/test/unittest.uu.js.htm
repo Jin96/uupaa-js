@@ -1,6 +1,7 @@
-<!doctype html><html><head><meta charset="UTF-8" />
+<!doctype html><html class="ifnojs addua addos"><head><meta charset="UTF-8" />
 <title></title>
 <script src="../uu.js"></script>
+<script src="../uu.consel.js"></script>
 <script src="../uu.str.js"></script>
 <script src="../uu.css.js"></script>
 <script src="../uu.node.js"></script>
@@ -767,32 +768,31 @@ function xboot(uu) {
 // -----------------------
     "Type": "",
       "null は null 型":        function() { return [null,    "is null"];     },
-      "void 0 は undefined 型": function() { return [void 0,  "is undef"];    },
-      "void 0 は undefined 型": function() { return [void 0,  "is undefined"];},
-      "{} は hash 型":          function() { return [{},      "is hash"];     },
-      "{} は hash 型":          function() { return [{},      "is hash"];     },
-      "{} は hash 型":          function() { return [{},      "is object"];   },
-      "[] は array 型":         function() { return [[],      "is ary"];      },
-      "[] は array 型":         function() { return [[],      "is array"];    },
-      "false は boolean 型":    function() { return [false,   "is bool"];     },
-      "true は boolean 型":     function() { return [true,    "is boolean"];  },
-      "123 は number 型":       function() { return [123,     "is num"];      },
-      "-123.4 は number 型":    function() { return [-123.4,  "is number"];   },
-      "1 / 0 は number 型":     function() { return [1 / 0,   "is number"];   },
-      "0 / 0 は number 型":     function() { return [0 / 0,   "is number"];   },
-      "'' は string 型":        function() { return ['',      "is str"];      },
-      "'' は string 型":        function() { return ['',      "is string"];   },
-      "function(){} は function 型(1)":
+      "void 0 は undefined 型(is undef)": function() { return [void 0,  "is undef"];    },
+      "void 0 は undefined 型(is undefined)": function() { return [void 0,  "is undefined"];},
+      "{} は hash 型(is hash)":  function() { return [{},      "is hash"];     },
+      "{} は hash 型(is object)":function() { return [{},      "is object"];   },
+      "[] は array 型(is ary)":  function() { return [[],      "is ary"];      },
+      "[] は array 型(is array)":function() { return [[],      "is array"];    },
+      "false は boolean 型(is bool)":    function() { return [false,   "is bool"];     },
+      "true は boolean 型(is boolean)":     function() { return [true,    "is boolean"];  },
+      "123 は number 型(is num)":       function() { return [123,     "is num"];      },
+      "-123.4 は number 型(is number)":    function() { return [-123.4,  "is number"];   },
+      "1 / 0 は number 型(is number)":     function() { return [1 / 0,   "is number"];   },
+      "0 / 0 は number 型(is number)":     function() { return [0 / 0,   "is number"];   },
+      "'' は string 型(is str)":        function() { return ['',      "is str"];      },
+      "'' は string 型(is string)":        function() { return ['',      "is string"];   },
+      "function(){} は function 型(is func)":
                                 function() { return [function(){}, "is func"]; },
-      "function(){} は function 型(2)":
+      "function(){} は function 型(is function)":
                                 function() { return [function(){}, "is function"]; },
       "document.body は node 型":
                                 function() { return [document.body, "is node"]; },
-      "document.getElementsByTagName('body') は fake 型(1)":
+      "document.getElementsByTagName('body') は fake 型(is fake)":
                                 function() { return [document.getElementsByTagName('body'), "is fake"]; },
-      "document.getElementsByTagName('body') は fake 型(2)":
+      "document.getElementsByTagName('body') は fake 型(is fakeary)":
                                 function() { return [document.getElementsByTagName('body'), "is fakeary"]; },
-      "document.getElementsByTagName('body') は fake 型(3)":
+      "document.getElementsByTagName('body') は fake 型(is fakearray)":
                                 function() { return [document.getElementsByTagName('body'), "is fakearray"]; },
 
       "new Date は date 型":    function() { return [new Date, "is date"]; },
@@ -805,6 +805,51 @@ function xboot(uu) {
       "new String('') は string 型":
                                 function() { return [new String(''), "is string"];   },
 
+    "Array.isArray()": "",
+      // from V8 unit test
+      // http://code.google.com/p/v8/source/browse/branches/bleeding_edge/test/mjsunit/third_party/array-isarray.js?spec=svn3060&r=3060
+      "Array.isArray([]) is true": function() {
+          return [Array.isArray([]), "is true"];
+      },
+      "Array.isArray(new Array) is true": function() {
+          return [Array.isArray(new Array), "is true"];
+      },
+      "Array.isArray(Array()) is true": function() {
+          return [Array.isArray(Array()), "is true"];
+      },
+      "Array.isArray('abc'.match(/(a)*/g)) is true": function() {
+          return [Array.isArray('abc'.match(/(a)*/g)), "is true"];
+      },
+      "Array.isArray((function(){ return Array.isArray(arguments); })()) is false": function() {
+          return [(function(){ return Array.isArray(arguments); })(), "is false"];
+      },
+      "Array.isArray() is false": function() {
+          return [Array.isArray(), "is false"];
+      },
+      "Array.isArray(null) is false": function() {
+          return [Array.isArray(null), "is false"];
+      },
+      "Array.isArray(undefined) is false": function() {
+          return [Array.isArray(undefined), "is false"];
+      },
+      "Array.isArray(true) is false": function() {
+          return [Array.isArray(true), "is false"];
+      },
+      "Array.isArray(false) is false": function() {
+          return [Array.isArray(false), "is false"];
+      },
+      "Array.isArray('a string') is false": function() {
+          return [Array.isArray('a string'), "is false"];
+      },
+      "Array.isArray({}) is false": function() {
+          return [Array.isArray({}), "is false"];
+      },
+      "Array.isArray({length: 5}) is false": function() {
+          return [Array.isArray({length: 5}), "is false"];
+      },
+      "Array.isArray({__proto__: Array.prototype, length:1, 0:1, 1:2}) is false": function() {
+          return [Array.isArray({__proto__: Array.prototype, length:1, 0:1, 1:2}), "is false"];
+      },
 // -----------------------
     "uu.url()": "",
       "uu.url() は 絶対URLを返す": function() {

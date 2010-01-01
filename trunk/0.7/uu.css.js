@@ -854,7 +854,7 @@ function uucssbgcolorget(node) { // @param Node:
 function uucssbgcolorset(node,    // @param Node:
                          color) { // @param ColorHash:
                                   // @return Node:
-  node.style.backgroundColor = uu.ver.advanced ? color.rgba : color.hex;
+  node.style.backgroundColor = uu.ver.adv ? color.rgba : color.hex;
   return node;
 }
 

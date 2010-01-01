@@ -14,7 +14,7 @@
     //    <img src="1dot.gif">
     //    <div style="background: url(1dot.gif)">
 uu.waste || (function(win, doc, uu) {
-var _canvasok = uu.ver.majority,
+var _canvasok = uu.ver.major,
     _usedocfg = !(uu.gecko && uu.ver.re <= 1.9), // 1: use document fragmens
     _rules = [],        // generated rules
     _uniqueRuleuID = 0, // unique rule id
