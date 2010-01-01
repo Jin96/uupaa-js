@@ -7,7 +7,10 @@ var _TYPE_ALIAS = uu.hash(
         "ISBOOLEAN,ISBOOL,ISNUMBER,ISNUM,ISSTRING,ISSTR," +
         "ISFUNCTION,ISFUNC,ISFAKEARRAY,ISFAKE,ISFAKEARY,ISFAKE"),
     _OL  = '<ol>%s</ol>',
-    _DIV = '<div style="position:fixed;top:0;font-size:xx-large">%s: %d/%d %s</div>',
+    _DIV = '<div class="uutestresult"' +
+           ' style="position:fixed;top:0;font-size:xx-large">%s:' +
+           ' <span class="ok">%d</span> / <span class="total">%d</span>' +
+           ' <p>%s</p></div>',
     _LI  = '<li style="padding:5px;border:1px solid #ccc;background-color:%s">' +
               '<p style="color:white"><a name="uutest%d"></a>%s<br />%s</p></li>',
     _BGCOLOR = { 1: "green", 2: "#0c0", "-1": "red" };

@@ -6,7 +6,6 @@
 //   light: 1,       // @param Number(= 1): 1 is light weight mode
 //   altcss: 0,      // @param Number/Function(= 0): altcss mode
 //                   //                     0 is auto, callback function
-//   consel: 0,      // @param Number(= 1): 1 is enable conditional selector
 //   imgdir: "img",  // @param String(= "img"): image dir
 //   cssexpr: 0,     // @param Number(= 0): 1 is enable css-expression, 0 is disable
 //   visited: 0,     // @param Number(= 0): 1 is E:visited activate
@@ -32,9 +31,9 @@ function uuvain() {
 
 uu ? ++uu.waste : (function(win, doc, _xconfig, _json) {
 var _cfg    = uuarg(_xconfig, {
-        aria: 0, debug: 0, light: 1, altcss: 1, consel: 1, imgdir: "img",
+        aria: 0, debug: 0, light: 1, altcss: 1, imgdir: "img",
         cssexpr: 0, visited: 0, innerText: 0 }),
-    _ver    = uuvers(_cfg.consel),
+    _ver    = uuvers(),
     _ie     = _ver.ie,
     _gecko  = _ver.gecko,
     _opera  = _ver.opera,
@@ -131,9 +130,9 @@ _cfg.imgdir = _cfg.imgdir.replace(/\/+$/, "") + "/"; // "img" -> "img/"
 // --- structure ---
 uu = uumix(_uujamfactory, {     // uu(expr, ctx) -> Instance(jam)
   ver:    uumix(_ver, {         // uu.ver - version and meta infos
-    lib:        0.7             //      ua, re, sl, fl, ie, ie6, ie7, ie8, ie67,
-  }),                           //      opera, gecko, webkit, chrome, safari,
-                                //      iphone, quirks, advanced, majority, xml, lib
+    lib:        0.7             //    ua, re, sl, fl, ie, ie6, ie7, ie8, ie67,
+  }),                           //    opera, webkit, gecko, chrome, safari, iphone,
+                                //    quirks, xml, win, mac, unix, adv, major, lib
   config:       _cfg,           // uu.config - { aria, debug, light, ... }
   // --- ajax / jsonp ---
   ajax:   uumix(uuajax, {       // uu.ajax(url, option = {}, fn = void 0, ngfn = void 0)
@@ -2810,40 +2809,18 @@ function _matcher(a) {
 // safari   - Boolean: true is Safari, iPhone, iPod (exclude Google Chrome)
 // iphone   - Boolean: true is iPhone, iPod
 // quirks   - Boolean: true is quirks mode
-// advanced - Boolean: true is Advanced browsers
-//              (Firefox3.5+, Safari4+, Google Chrome2+, Opera10.50)
-// majority - Boolean: true is major/majority browsers
-//              (IE6+, Firefox3+, Safari3.1+, Google Chrome2+, Opera 9.5+)
 // xml      - Boolean: true is XML Document, false is HTML Document
-// +------ CONDITIONAL SELECTOR ------
-// | IDENT         | CONDITION
-// +---------------+------------------
-// | "ifie"        | IE6, IE7, IE8
-// | "ifie6"       | IE6
-// | "ifie7"       | IE7
-// | "ifie8"       | IE8
-// | "ifie67"      | IE6, IE7
-// | "ifopera"     | Opera9.5+
-// | "ifgecko"     | Firefox3+
-// | "ifwebkit"    | Safari3.1+, Google Chrome2+, iPhone, iPod
-// | "ifiphone"    | iPhone, iPod
-// | "ifjs"        | Enable JavaScript
-// | "ifmajority"  | IE6+, Opera9.5+, Firefox3+, Safari3.1+, Google Chrome
-// | "ifadvanced"  | Firefox3.5+, Safari4+, Google Chrome2+, Opera10.50
-// | "ifclassic"   | not advanced browser
-// +---------------+------------------
-// <style>
-//  div>ul { color: black }               /* for Generic browser */
-//  html.ifwebkit div>ul { color: blue }  /* for Safari, Chrome, iPhone */
-//  html.ifadvanced div>ul { color: red } /* for Safari4, Chrome2, Firefox3.5 */
-//  html.ifclassic div>ul { color: green } /* for IE, Opera10, Firefox3 */
-// </style>
-function uuvers(consel,    // @param Number(= 0): 1 is add conditional selector
-                slupper) { // @param Number(= 4): Silverlight upper version
+// win      - Boolean: true is Windows OS
+// mac      - Boolean: true is Mac, Mac OS X
+// unix     - Boolean: true is Unix like OS, Linux, FreeBSD, SunOS
+// adv      - Boolean: true is Advanced browsers
+//              (Firefox3.5+, Safari4+, Google Chrome2+, Opera10.50)
+// major    - Boolean: true is Major/Majority browsers
+//              (IE6+, Firefox3+, Safari3.1+, Google Chrome2+, Opera 9.5+)
+function uuvers(slupper) { // @param Number(= 4): Silverlight upper version
                            // @return Hash: { ua, re, sl, fl, ie, ie6, ie7, ie8,
-                           //                 ie67, opera, webkit, chrome,
-                           //                 safari, iphone, quirks, advanced,
-                           //                 majority, xml }
+                           //    ie67, opera, webkit, chrome, safari, iphone,
+                           //    quirks, xml, win, mac, unix, adv, major }
   var sl = slupper || 4, ax, v, doc = document,
       nv = navigator, nu = nv.userAgent,
       ie = !!doc.uniqueID, opera = window.opera,
@@ -2854,12 +2831,12 @@ function uuvers(consel,    // @param Number(= 0): 1 is add conditional selector
               exec(nu) || [,0])[1]).toString().replace(/[^\d\.]/g, "").
               replace(/^(\d+\.\d+)(\.(\d+))?$/,"$1$3")),
       xml = doc.createElement("p").tagName === doc.createElement("P").tagName,
-      gecko  = nu.indexOf("Gecko/") > 0,
+      gecko = nu.indexOf("Gecko/") > 0,
       webkit = nu.indexOf("WebKit") > 0,
       chrome = nu.indexOf("Chrome") > 0,
       html = doc.getElementsByTagName("html")[0],
-      ary = "ie,ie67,opera,gecko,webkit,iphone,majority".split(","),
-      cn = [html.className.replace(/ifnojs/, ""), "ifjs"], i = 0,
+      ary = [html.className.replace(/ifnojs|addua|addos/g, ""), "ifjs"], i = 0,
+      id = "adv,major", cn = html.className,
       rv = { ua: ua, re: re, sl: 0, fl: 0, xml: xml,
              ie: ie, ie6: ie && ua === 6, ie7: ie && ua === 7,
              ie8: ie && (doc.documentMode || 0) === 8,
@@ -2867,7 +2844,9 @@ function uuvers(consel,    // @param Number(= 0): 1 is add conditional selector
              webkit: webkit, chrome: chrome, 
              safari: !chrome && nu.indexOf("Safari") > 0,
              iphone: webkit && /iPod|iPhone/.test(nu),
-             quirks: (doc.compatMode || "") !== "CSS1Compat" };
+             quirks: (doc.compatMode || "") !== "CSS1Compat",
+             win: nu.indexOf("Win") > 0, mac: nu.indexOf("Mac") > 0, 
+             unix: /X11|Linux/.test(nu) };
 
 //{:: Flash version (version 7.0 ~ later)
   try {
@@ -2892,25 +2871,26 @@ function uuvers(consel,    // @param Number(= 0): 1 is add conditional selector
   }
 //::}
 
-  rv.ie67 = rv.ie6 || rv.ie7;
-  rv.advanced = (gecko  && re >  1.9) || // Firefox 3.5+(1.91)
-                (webkit && re >= 528) || // Safari 4+, Google Chrome 2+
-                (opera  && ua >= 10.5);  // Opera10.50+
-  rv.majority = (ie     && ua >= 6)   || // IE 6+
-                (opera  && ua >= 9.5) || // Opera 9.5+
-                (gecko  && re >= 1.9) || // Firefox 3+
-                (webkit && re >  524);   // Safari 3.1+, Google Chrome 1+
-  // --- conditional selector ---
-  if (consel) {
-    while ( (v = ary[i++]) ) {
-      rv[v] && cn.push("if" + v);
-    }
-    rv.ie && cn.push("ifie" + rv.ua); // [IE] fix multi versioning
-    cn.push(rv.advanced ? "ifadvanced" : "ifclassic");
+  rv.ie67  = rv.ie6 || rv.ie7;
+  rv.adv   = (gecko  && re >  1.9) || // Firefox 3.5+(1.91)
+             (webkit && re >= 528) || // Safari 4+, Google Chrome 2+
+             (opera  && ua >= 10.5);  // Opera10.50+
+  rv.major = (ie     && ua >= 6)   || // IE 6+
+             (opera  && ua >= 9.5) || // Opera 9.5+
+             (gecko  && re >= 1.9) || // Firefox 3+
+             (webkit && re >  524);   // Safari 3.1+, Google Chrome 1+
 
-    // <html class="..."> modify
-    html.className = cn.join(" ").replace(/^\s+|\s+$/g, "").replace(/\./g, "");
+  // --- conditional selector ---
+  // http://d.hatena.ne.jp/uupaa/20100101
+  /addua/.test(cn) && (id += ",ie,ie6,ie7,ie8,ie67,opera,gecko,webkit,iphone");
+  /addos/.test(cn) && (id += ",win,mac,unix");
+  id = id.split(",");
+  while ( (v = id[i++]) ) {
+    ary.push((rv[v] ? "if" : "ifno") + v);
   }
+  // <html class="..."> modify
+  /ifnojs/.test(cn) && (html.className = ary.join(" ").replace(/^\s+/, ""));
+
   return rv;
 }
 
