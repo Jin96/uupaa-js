@@ -5,7 +5,6 @@ uu.waste || (function(win, doc, uu) {
 
 uu.mix(uu, {
   svg:          uusvg,          // uu.svg(tag) -> new <svg> element
-  flash:        uuflash,        // uu.flash("http://...", width, height) -> new <object> element
   xpath:        uuxpath         // uu.xpath(node) -> "/html/body/div[5]"
 });
 uu.mix(uu.node, {
@@ -34,28 +33,6 @@ uu.mix(uu.node, {
 function uusvg(tag) { // @param String: svg tag
                       // @return Node: new <svg> element
   return doc.createElementNS("http://www.w3.org/2000/svg", tag);
-}
-
-// uu.flash - create <object> element for Flash
-function uuflash(url,      // @param URLString:
-                 width,    // @param Number:
-                 height,   // @param Number:
-                 option) { // @param Hash(= { id: "external{guid}",
-                           //                 wmode: "transparent",
-                           //                 play: "true", loop: "false" }):
-                           // @return Node: new <object> element
-  var rv = uu.mix(doc.createElement("object"),
-                  { type: "application/x-shockwave-flash",
-                    data: url, width: width, height: height }),
-      h = uu.arg(option, { id: "external" + uu.guid(),
-                           movie: url, wmode: "transparent",
-                           play: "true", loop: "false" }), i;
-
-  for (i in h) {
-    rv.appendChild(uu.mix(doc.createElement("param"),
-                          { name: i, value: h[i] }));
-  }
-  return rv;
 }
 
 // uu.xpath - get xpath

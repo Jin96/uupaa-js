@@ -203,7 +203,7 @@ function createLayer(id,       // @param String: layer id
       w, h;
 
   if (type.indexOf("canvas") >= 0) {
-    elm = doc.createElement("canvas", type === "vmlcanvas");
+    elm = uue("canvas", type === "vmlcanvas");
     w = (width !== void 0) ? width :
         (v.style.width  === "auto") ? v.offsetWidth  : parseInt(v.style.width);
     h = (height !== void 0) ? height :
@@ -224,7 +224,7 @@ function createLayer(id,       // @param String: layer id
     this._clid = id;
     this._cctx = ctx;
   } else {
-    elm = doc.createElement(type);
+    elm = uue(type);
     es = elm.style;
 
     back ? v.insertBefore(elm, v.firstChild)
@@ -899,7 +899,7 @@ function image(image,  // @param HTMLImageElement
   case 5: this._cctx.drawImage(image, arg1, arg2, arg3, arg4); break;
   case 9: this._cctx.drawImage(image, arg1, arg2, arg3, arg4,
                                       arg5, arg6, arg7, arg8); break;
-  default: throw "";
+  default: throw new Error("NOT_SUPPORTED_ERR");
   }
   return this;
 }

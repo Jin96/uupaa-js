@@ -895,7 +895,7 @@ function qstrokeRect(x, y, w, h, hexcolor, alpha, lineWidth) {
 // CanvasRenderingContext2D.prototype.lock
 function lock(clearScreen) { // @param Boolean(= false):
   if (this._lockState) {
-    throw "duplicate lock";
+    throw new Error("duplicate lock");
   }
   this._lockState = clearScreen ? 2 : 1;
 }

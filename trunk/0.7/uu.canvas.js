@@ -7,7 +7,7 @@ var _slhosts      = 0,  // Silverlight host count
     _fontCache    = {}, // { uid: { font: fontString } }
     _unitCache    = {}, // { uid: { pt, em } }
     _metricNode,        // [lazy] Measure Text Metric Node
-    _safari3x     = uu.webkit && uu.ver.re < 530, // Safari3.x
+    _safari3x     = uu.webkit && uu.ver.re < 528, // Safari3.x
     _orgCreateElement = 0, // document.createElement
     // property alias
     _GLOBAL_ALPHA = "globalAlpha",
@@ -208,13 +208,13 @@ function uucanvasimpldrawimageargs(image) {
       dx: a[5], dy: a[6], dw: a[7], dh: a[8]
     };
   }
-  throw "";
+  throw new Error("NOT_SUPPORTED_ERR");
 }
 
 // uu.canvas.impl.getTextMetric - measure text rect(width, height)
 function uucanvasimplgettextmetric(text, font) {
   if (!_metricNode) {
-    _metricNode = doc.createElement("div");
+    _metricNode = uue();
     _metricNode.style.cssText = _METRIC_STYLE;
     doc.body.appendChild(_metricNode);
   }
@@ -240,7 +240,7 @@ function uucanvasimplparsefont(font, embase) {
   }
 
   // computed font style by CSS parser
-  dummy = doc.createElement("div");
+  dummy = uue();
   style = dummy.style;
   try {
     style.font = font;
@@ -276,7 +276,7 @@ function uucanvasimplparsefont(font, embase) {
 
 // inner - measure unit
 function _measureUnit(elm) {
-  var node = elm.appendChild(doc.createElement("div")), pt, em;
+  var node = elm.appendChild(uue()), pt, em;
 
   node.style.cssText = _MEASURE_STYLE;
   pt = node.clientWidth  / 12;
@@ -509,11 +509,11 @@ function CanvasPattern(image, repetition) {
 
   switch (repetition) {
   case "repeat": break;
-  default: throw "";
+  default: throw new Error("NOT_SUPPORTED_ERR");
   }
 
   if (!("src" in image)) { // HTMLCanvasElement unsupported
-    throw "";
+    throw new Error("NOT_SUPPORTED_ERR");
   }
   this._src = image.src; // HTMLImageElement
   this._dim = uu.img.actsize(image);
@@ -646,7 +646,7 @@ function VML2D(node) { // @param Node:
   this.canvas = node;
   node.uuCanvasType = "VML2D";
   this.initSurface();
-  var div = node.appendChild(doc.createElement("div")), ds = div.style;
+  var div = node.appendChild(uue()), ds = div.style;
 
   div.uuCanvasDirection = node.currentStyle.direction;
   ds.pixelWidth  = node.width;
@@ -726,7 +726,7 @@ uu.ie && uu.lazy("init", function() {
       ns = doc.namespaces, NS = "urn:schemas-microsoft-com:";
 
   while ( (v = ary[i++]) ) {
-    doc.createElement(v);
+    uue(v);
   }
   if (!ns["v"]) {
     ns.add("v", NS + "vml", VML);

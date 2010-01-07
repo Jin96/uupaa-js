@@ -11,8 +11,8 @@
     //    <img src="data:image/*,...">
     //    <div style="background: url(data:image/*,...)">
     //          v
-    //    <img src="1dot.gif">
-    //    <div style="background: url(1dot.gif)">
+    //    <img src="uu1dot.gif">
+    //    <div style="background: url(uu1dot.gif)">
 uu.waste || (function(win, doc, uu) {
 var _canvasok = uu.ver.major,
     _usedocfg = !(uu.gecko && uu.ver.re <= 1.9), // 1: use document fragmens
@@ -497,7 +497,7 @@ function _uucss3settextshadow(node, prop, value) {
   var shadow = uu.css.validate.shadow(value);
 
   if (!shadow.valid) {
-    throw prop + "=" + value;
+    throw new Error(prop + "=" + value);
   }
   uu.css.textShadow.set(node,
       uu.css.makeShadow(shadow.rgba, shadow.ox,
@@ -506,7 +506,7 @@ function _uucss3settextshadow(node, prop, value) {
 
 // inner - -uu-box-effect:
 function _uucss3setboxeffect(node, prop, value) {
-  if (!/^(?:none|auto)$/.test(value)) { throw prop + "=" + value; }
+  if (!/^(?:none|auto)$/.test(value)) { throw new Error(prop + "=" + value); }
 
   var data = _uid2data[uu.nodeid(node)];
 
@@ -534,7 +534,7 @@ function _uucss3setboxshadow(node, prop, value) {
   var rv = uu.css.validate.shadow(value), hash,
       data = _uid2data[uu.nodeid(node)];
 
-  if (!rv.valid) { throw prop + "=" + value; }
+  if (!rv.valid) { throw new Error(prop + "=" + value); }
   if (data) {
     data.excss.decl[prop] = value; // update
 
@@ -553,7 +553,7 @@ function _uucss3setboxreflect(node, prop, value) {
   var rv = uu.css.validate.boxReflect(value),
       data = _uid2data[uu.nodeid(node)], hash;
 
-  if (!rv.valid) { throw prop + "=" + value; }
+  if (!rv.valid) { throw new Error(prop + "=" + value); }
   if (data) {
     data.excss.decl[prop] = value; // update
 
@@ -570,7 +570,7 @@ function _uucss3setborderradius(node, prop, value) {
   var rv = uu.css.validate.borderRadius(value), hash,
       data = _uid2data[uu.nodeid(node)];
 
-  if (!rv.valid) { throw prop + "=" + value; }
+  if (!rv.valid) { throw new Error(prop + "=" + value); }
   if (data) {
     data.excss.decl[prop] = value; // update
 
@@ -602,7 +602,7 @@ function _uucss3setbg(node, prop, value) {
   var rv = uu.css.validate.background(value),
       data = _uid2data[uu.nodeid(node)];
 
-  if (!rv.valid) { throw prop + "=" + value; }
+  if (!rv.valid) { throw new Error(prop + "=" + value); }
   if (data) {
     data.excss.decl[prop] = value; // update
 
@@ -617,7 +617,7 @@ function _uucss3setbgcolor(node, prop, value) {
   var rv = uu.color(value),
       data = _uid2data[uu.nodeid(node)];
 
-  if (!rv) { throw prop + "=" + value; }
+  if (!rv) { throw new Error(prop + "=" + value); }
   if (data) {
     data.excss.decl[prop] = value; // update
 
@@ -838,7 +838,7 @@ function _uucss3autoviewbox() {
         break;
       }
     }
-    div = doc.createElement("div");
+    div = uue();
     div.className = "viewbox";
     div.style.padding = padding || "auto";
     uu.node.wrap(v, div);
@@ -880,14 +880,14 @@ function _css3init() {
 // | IE         | 6, 7, 8        | 6, 7, 8       |
 // | Opera      |                | 9.5 +         |
 // | Gecko      | 1.81 ~ 1.9     | 1.81 +        |
-// | Webkit     | 522 ~ 529      | 522 +         |
+// | Webkit     | 522 ~ 527      | 522 +         |
 // +------------+----------------+---------------+
 (function() {
   uu.ie     && (uu.ver.ua >= 6)                       && (++_mark, ++_plus);
   uu.opera  && (uu.ver.ua >= 9.5)                     && ++_plus;
   uu.gecko  && (uu.ver.re >  1.8 && uu.ver.re <= 1.9) && ++_mark;
   uu.gecko  && (uu.ver.re >  1.8)                     && ++_plus;
-  uu.webkit && (uu.ver.re >= 522 && uu.ver.re <  530) && ++_mark;
+  uu.webkit && (uu.ver.re >= 522 && uu.ver.re <  528) && ++_mark;
   uu.webkit && (uu.ver.re >= 522)                     && ++_plus;
 
   // http://d.hatena.ne.jp/uupaa/20091203/1259828564
