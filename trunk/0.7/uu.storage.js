@@ -494,19 +494,22 @@ _useWebStorage ? _detected(win.localStorage, 0, 2)
 
 function _detectFlashStorage() { // all
   if (_useFlashStorage) {
-    var url = uu.config.imgdir + "uu.storage.swf", div,
-        obj = uu.id("externalflashstorage");
+    uu.ready(function() {
+      var url = uu.config.imgdir + "uu.storage.swf", div,
+          obj = uu.id("externalflashstorage");
 
-    if (obj) {
-      _detected(obj, 0, 4); // already exists
-    } else {
-      uu.ajax(url, 0, function() { // file stat
-        uu.body(div = uu.div());
-        _detected(uu.flash(div, "externalflashstorage", url, 1, 1), 1, 4);
-      }, function() {
-        _detectIEStorage(); // next chain
-      });
-    }
+      if (obj) {
+        _detected(obj, 0, 4); // already exists
+      } else {
+        // [IE][ignore] http://twitter.com/uupaa/status/7473790508
+        uu.ajax(url, { ignore: 1 }, function() { // file stat
+          uu.body(div = uu.div());
+          _detected(uu.flash(div, "externalflashstorage", url, 1, 1), 1, 4);
+        }, function() {
+          _detectIEStorage(); // next chain
+        });
+      }
+    }, 2); // 2: high(system)
   } else {
     _detectIEStorage(); // next chain
   }
