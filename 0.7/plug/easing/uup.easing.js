@@ -1,10 +1,10 @@
 
 // === easing ===
-/*
+/*!
   The original writer in this code block is Robert Penner.
     http://www.robertpenner.com/easing/
  */
-/*
+/*!
   TERMS OF USE - EASING EQUATIONS
 
   Open source under the BSD License.
