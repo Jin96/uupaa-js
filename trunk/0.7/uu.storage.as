@@ -84,14 +84,14 @@ class FlashStorage {
     var obj:Object = new FlashStorage(),
         fn:Function = ExternalInterface.addCallback;
 
-    fn("uulocalall", obj, obj.jsall);
-    fn("uulocalnth", obj, obj.jsnth);
-    fn("uulocalget", obj, obj.jsget);
-    fn("uulocalset", obj, obj.jsset);
-    fn("uulocalsize", obj, obj.jssize);
-    fn("uulocalpairs", obj, obj.jspairs);
-    fn("uulocalclear", obj, obj.jsclear);
-    fn("uulocalremove", obj, obj.jsremove);
+    fn("flashstorageall", obj, obj.jsall);
+    fn("flashstoragenth", obj, obj.jsnth);
+    fn("flashstorageget", obj, obj.jsget);
+    fn("flashstorageset", obj, obj.jsset);
+    fn("flashstoragesize", obj, obj.jssize);
+    fn("flashstoragepairs", obj, obj.jspairs);
+    fn("flashstorageclear", obj, obj.jsclear);
+    fn("flashstorageremove", obj, obj.jsremove);
 
     ExternalInterface.call("uu.as.dmz.storageReadyCallback", "from flash");
   }

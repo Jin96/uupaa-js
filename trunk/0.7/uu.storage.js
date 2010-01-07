@@ -7,14 +7,14 @@
 //
 uu.waste || (function(win, doc, uu) {
 var _db = 0,      // Storage object
-    _dbwait = 0,  // 1 is waiting
+    _dbwait = 0,  // 1: waiting
     _backend = 0, // Storage backend,
                   //     0: none
                   //     1: waiting...
                   //     2: Web Storage    (use localStorage)
                   //     3: DOM Storage    (use globalStorage)
-                  //     4: IE Storage     (use IE userData behavior)
-                  //     5: Flash Storage  (use SharedObject)
+                  //     4: Flash Storage  (use SharedObject)
+                  //     5: IE Storage     (use IE userData behavior)
                   //     6: Cookie Storage (use Cookie)
     _persist = new Date(2032, 1, 1), // IEStorage, CookieStorage persist date
     _cookieReady = !!navigator.cookieEnabled,
@@ -28,8 +28,8 @@ var _db = 0,      // Storage object
                      : 0,
     _useWebStorage    = win.localStorage  ? 1 : 0,
 //  _useDOMStorage    = win.globalStorage ? 1 : 0,
-    _useIEStorage     = uu.ie             ? 1 : 0,
     _useFlashStorage  = uu.ver.fl > 7     ? 1 : 0,
+    _useIEStorage     = uu.ie             ? 1 : 0,
     _useCookieStorage = _cookieReady      ? 1 : 0,
     _NULL_TRAP = "__uu_null_trap__";
 
@@ -194,8 +194,8 @@ function uulocal(a, b, c) { // @return String/Boolean:
               }
               break;
 //{::
-      case 4: rv = _ieall(); break;
-      case 5: rv = _flashall(); break;
+      case 4: rv = _flashall(); break;
+      case 5: rv = _ieall(); break;
       case 6: rv = _uucookiegetall("uustorage");
 //::}
       }
@@ -217,15 +217,15 @@ function uulocalnth(nth) { // @param Number: index
     switch (_backend) {
     case 2: rv = _db.key(nth); break;
 //{::
-    case 4: rv = _ienth(nth); break;
-    case 5: rv = _flashnth(nth); break;
+    case 4: rv = _flashnth(nth); break;
+    case 5: rv = _ienth(nth); break;
     case 6: hash = _uucookiegetall("uustorage");
             rv = uu.hash.nth(hash, nth)[0];
 //::}
     }
   } catch(err) {
     uu.config.debug && alert(err);
-    rv = null;
+    rv = "";
   }
   return rv == null ? "" : rv; // [HTML5 SPEC] throw INDEX_SIZE_ERR
 }
@@ -240,15 +240,15 @@ function uulocalget(key) { // @param String: "key"
       switch (_backend) {
       case 2: rv = _db[key]; break;
 //{::
-      case 4: rv = _ieget(key); break;
-      case 5: rv = _flashget(key); break;
+      case 4: rv = _flashget(key); break;
+      case 5: rv = _ieget(key); break;
       case 6: rv = _uucookiegetall("uustorage")[key];
 //::}
       }
     }
   } catch(err) {
     uu.config.debug && alert(err);
-    rv = null;
+    rv = "";
   }
   return rv == null ? "" : rv; // [HTML5 SPEC] null
 }
@@ -270,8 +270,8 @@ function uulocalset(key,    // @param String: "key"
             rv = !safe ? 1 : (_db[key] === val);
             break;
 //{::
-    case 4: rv = _ieset(key, val, safe); break;
-    case 5: rv = _flashset(key, val, safe); break;
+    case 4: rv = _flashset(key, val, safe); break;
+    case 5: rv = _ieset(key, val, safe); break;
     case 6: rv = uucookieset("uustorage" + key, val, safe, { maxage: _persist });
 //::}
     }
@@ -302,8 +302,8 @@ function uulocalsize() { // @return Hash: { use, max, free }
             }
             break;
 //{::
-    case 4: return _iesize();
-    case 5: return _db.uulocalsize();
+    case 4: return _db.flashstoragesize();
+    case 5: return _iesize();
     case 6: return uucookiesize();
 //::}
     }
@@ -319,8 +319,8 @@ function uulocalpairs() { // @return Number: pairs
     switch (_backend) {
     case 2: return _db.length;
 //{::
-    case 4: return _ieindex().length;
-    case 5: return _db.uulocalpairs();
+    case 4: return _db.flashstoragepairs();
+    case 5: return _ieindex().length;
     case 6: return uucookiepairs("uustorage");
 //::}
     }
@@ -336,8 +336,8 @@ function uulocalclear() {
     switch (_backend) {
     case 2: _db.clear(); break;
 //{::
-    case 4: _ieclear(); break;
-    case 5: _db.uulocalclear(); break;
+    case 4: _db.flashstorageclear(); break;
+    case 5: _ieclear(); break;
     case 6: uucookieclear("uustorage");
 //::}
     }
@@ -358,8 +358,8 @@ function uulocalremove(key) { // @param String: "key"
       switch (_backend) {
       case 2: _db.removeItem(key); break;
 //{::
-      case 4: _ieremove(key); break;
-      case 5: _db.uulocalremove(key); break;
+      case 4: _db.flashstorageremove(key); break;
+      case 5: _ieremove(key); break;
       case 6: uucookieremove("uustorage" + key);
 //::}
       }
@@ -455,25 +455,15 @@ function _iesaveindex(ary) {
 //::}
 
 //{:: --- Flash Storage ---
-// inner - setup flash storage
-function _initflash() {
-  _dbwait = 1;
-  var div;
-
-  uu.body(div = uu.div());
-  return uu.flash(div, "externaluulocal", uu.config.imgdir + "uu.storage.swf", 1, 1);
-}
-
 uu.as.dmz.storageReadyCallback = flashStorageReadyCallback;
 
 // uu.as.dmz.storageReadyCallback - callback from FlashStorage
 function flashStorageReadyCallback(/* msg */) {
   _dbwait = 0;
-  _backend = 5;
   uu.as.dmz.storageReadyCallback = uuvain;
 }
 function _flashall() {
-  var rv = {}, r = _db.uulocalall(), i, v;
+  var rv = {}, r = _db.flashstorageall(), i, v;
 
   for (i in r) {
     v = r[i];
@@ -483,32 +473,57 @@ function _flashall() {
   return rv;
 }
 function _flashnth(nth) {
-  var rv = _db.uulocalnth(nth);
+  var rv = _db.flashstoragenth(nth);
 
   return (rv !== _NULL_TRAP) ? rv : null; // [!] restore null
 }
 function _flashget(key) {
-  var rv = _db.uulocalget(key);
+  var rv = _db.flashstorageget(key);
 
   return (rv !== _NULL_TRAP) ? rv : null; // [!] restore null
 }
 function _flashset(key, val, safe) {
-  return _db.uulocalset(key, val || _NULL_TRAP, safe || 0); // [!] null trap
+  return _db.flashstorageset(key, val || _NULL_TRAP, safe || 0); // [!] null trap
 }
 //::}
 
 // --- open storage object ---
-_backend = (_useWebStorage && (_db = win.localStorage))  ? 2 // Firefox3.5+, IE8+, Safari4+, Opera10.50+
-//       : (_useDOMStorage && (_db = win.globalStorage)) ? 3 // Firefox2.0~3.0
-         : (_useIEStorage  && (_db = _ieinit()))         ? 4 // IE6~IE8
-         : 0;
-//(_backend === 3) && (_db = _db[location.hostname]); // back compat
+_dbwait = 1;
+_useWebStorage ? _detected(win.localStorage, 0, 2)
+               : _detectFlashStorage(); // next chain
 
-_backend || uu.ready(function() {
-  _backend = (_useFlashStorage && (_db = _initflash())) ? 0 // Opera9.5~10.10, Safari3
-           : _useCookieStorage ? 6 // for all
-           : 0;
-}, 2); // 2: high(system)
+function _detectFlashStorage() { // all
+  if (_useFlashStorage) {
+    var url = uu.config.imgdir + "uu.storage.swf", div,
+        obj = uu.id("externalflashstorage");
+
+    if (obj) {
+      _detected(obj, 0, 4); // already exists
+    } else {
+      uu.ajax(url, 0, function() { // file stat
+        uu.body(div = uu.div());
+        _detected(uu.flash(div, "externalflashstorage", url, 1, 1), 1, 4);
+      }, function() {
+        _detectIEStorage(); // next chain
+      });
+    }
+  } else {
+    _detectIEStorage(); // next chain
+  }
+}
+function _detectIEStorage() { // IE6~IE8
+  _useIEStorage ? _detected(_ieinit(), 0, 5)
+                : _detectCookieStorage(); // next chain
+}
+function _detectCookieStorage() { // all
+  _useCookieStorage ? _detected(uucookie, 0, 6)
+                    : _detected(0, void 0);
+}
+function _detected(db, wait, backend) {
+  _db = db;
+  _dbwait = wait;
+  _backend = backend;
+}
 
 })(window, document, uu);
 

@@ -34,10 +34,9 @@ function uue(tag) { // @param String(= "div"): tag name, "a", "p"
 function uuvain() {
 }
 
-uu ? ++uu.waste : (function(win, doc, _xconfig, _json) {
-var _cfg    = uuarg(_xconfig, {
-        aria: 0, debug: 0, light: 1, altcss: 1, imgdir: ".",
-        cssexpr: 0, visited: 0, innerText: 0 }),
+uu ? ++uu.waste : (function(win, doc, _xcfg, _json) {
+var _cfg    = uuarg(_xcfg, { aria: 0, debug: 0, light: 1, altcss: 1, imgdir: ".",
+                             cssexpr: 0, visited: 0, innerText: 0 }),
     _ver    = uuvers(),
     _ie     = _ver.ie,
     _gecko  = _ver.gecko,
