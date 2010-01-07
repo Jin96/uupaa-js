@@ -519,6 +519,7 @@ function uuajax(url,    // @param URLString: request url
                         //    option.method  - String(= "GET" or "POST"):
                         //    option.timeout - Number(= 10):  unit sec
                         //    option.nocache - Number(= 0): 1 is no cache
+                        //    option.ignore  - Number(= 0): 1 is ignore response data
                 fn,     // @param Function(= void 0): fn({ rv, url, code, guid, type })
                         //    rv   - String: responseText or responseXML or ""(fail)
                         //    url  - String: request url (absolute)
@@ -532,16 +533,16 @@ function uuajax(url,    // @param URLString: request url
 
 function _uuajax(url, option, fn, ngfn, _fn2) {
   function _ajaxstatechange() {
-    var rv = "", type, code, lastmod, hash;
+    var rv, type, code, lastmod, hash;
 
     if (xhr.readyState === 4) {
       code = xhr.status || 0;
       if ((code >= 200 && code < 300) || (!code && !url.indexOf("file:"))) {
         if (fn && !run++) {
           type = xhr.getResponseHeader("Content-Type") || "";
-          method === "HEAD" || (rv = type.indexOf("xml") < 0 ? xhr.responseText
-                                                             : xhr.responseXML);
-          fn(hash = { code: code, rv: rv, url: url,
+          ignore || (rv = type.indexOf("xml") < 0 ? xhr.responseText
+                                                  : xhr.responseXML);
+          fn(hash = { code: code, rv: rv || "", url: url,
                       guid: guid, type: type, id: opt.id });
           _fn2 && _fn2(hash); // callback uu.ajax.queue
         }
@@ -575,6 +576,7 @@ function _uuajax(url, option, fn, ngfn, _fn2) {
   }
   var opt = option || {}, xhr = opt.xhr || uuajaxcreate(),
       method = opt.method || (opt.data ? "POST" : "GET"),
+      ignore = opt.ignore || (method === "HEAD" ? 1 : 0),
       header = opt.header || [],
       guid = uuguid(), run = 0, v, i = 0, befn, div;
 
