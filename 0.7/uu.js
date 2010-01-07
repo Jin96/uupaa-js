@@ -6,7 +6,7 @@
 //   light: 1,       // @param Number(= 1): 1 is light weight mode
 //   altcss: 0,      // @param Number/Function(= 0): altcss mode
 //                   //                     0 is auto, callback function
-//   imgdir: "img",  // @param String(= "img"): image dir
+//   imgdir: ".",    // @param String(= "."): image dir
 //   cssexpr: 0,     // @param Number(= 0): 1 is enable css-expression, 0 is disable
 //   visited: 0,     // @param Number(= 0): 1 is E:visited activate
 //   innerText: 0    // @param Number(= 0): 1 is innerText, outerHTML extend for Gecko
@@ -25,13 +25,18 @@ function uup() { // @return Array: ["plugin-name", ...]
   return uu.hash.keys(uup);
 }
 
+// window.uue - create HTMLElement(easy but slowly)
+function uue(tag) { // @param String(= "div"): tag name, "a", "p"
+  return document.createElement(tag || "div");
+}
+
 // window.uuvain - global empty function(memory leak of IE is evaded)
 function uuvain() {
 }
 
 uu ? ++uu.waste : (function(win, doc, _xconfig, _json) {
 var _cfg    = uuarg(_xconfig, {
-        aria: 0, debug: 0, light: 1, altcss: 1, imgdir: "img",
+        aria: 0, debug: 0, light: 1, altcss: 1, imgdir: ".",
         cssexpr: 0, visited: 0, innerText: 0 }),
     _ver    = uuvers(),
     _ie     = _ver.ie,
@@ -177,7 +182,8 @@ uu = uumix(_uujamfactory, {     // uu(expr, ctx) -> Instance(jam)
   // [3][split(,)]     uu.hash("key,a,key2,b")         -> { key:"a",key2:"b" }
   // [4][split(;)]     uu.hash("key;a;key2;b", ";", 0) -> { key:"a",key2:"b" }
   hash:   uumix(uuhash, {
-    has:        uuhashhas,      // uu.hash.has({a:1,b:2}, {a:1,b:2,c:3}) -> true
+    has:        uuhashhas,      // uu.hash.has({ a: 1, b: 2 }, { a: 1, b: 2, c: 3 }) -> true
+    nth:        uuhashnth,      // uu.hash.nth({ a: 1, b: 2 }, 1) -> ["b", 2]
     each:       uuhasheach,     // uu.hash.each(hash, fn)
     size:       uuhashsize,     // uu.hash.size(mix) -> Number(hash length)
     keys:       uuhashkeys,     // uu.hash.keys(mix) -> [key1, key2, ...]
@@ -251,6 +257,7 @@ uu = uumix(_uujamfactory, {     // uu(expr, ctx) -> Instance(jam)
   }),
   // --- event.ready ---
   ready:  uumix(uuready, {      // [1][DOM ready] uu.ready(fn, order = 0)
+                                //       order: 0 is low, 1 is mid, 2 is high(system)
     gone: {
       dom:      0,              // 1 is DOMContentLoaded event fired
       win:      0,              // 1 is window.onload event fired called
@@ -362,8 +369,12 @@ uu = uumix(_uujamfactory, {     // uu(expr, ctx) -> Instance(jam)
   win: {
     size:       uuwinsize       // uu.win.size() -> { iw, ih, sw, sh }
   },
+  date: {
+    hash:       uudatehash      // uu.date.hash(new Date) -> { Y, M, D, h, m, s, ms }
+  },
   guid:         uuguid,         // uu.guid() -> Number(unique)
   lazy:   uumix(uulazy, {       // uu.lazy(id = "", fn, order = 0)
+                                //         order: 0 is low, 1 is mid, 2 is high(system)
     fire:       uulazyfire      // uu.lazy.fire(id = "")
   }),
   waste:        0               // uu.waste - 1+ is library reloaded, 0 is first time
@@ -570,7 +581,7 @@ function _uuajax(url, option, fn, ngfn, _fn2) {
 
   // relative url -> absolute url
   if (!_SCHEME.test(url)) {
-    div = doc.createElement("div");
+    div = uue();
     div.innerHTML = '<a href="' + url + '" />';
     url = div.firstChild ? div.firstChild.href
                          : /href\="([^"]+)"/.exec(div.innerHTML)[1];
@@ -743,7 +754,7 @@ function _uujsonp(url, option, fn, ngfn, _fn2) {
       timeout = opt.timeout || 10,
       method = opt.method || "callback",
       jobid = "j" + uuguid(),
-      node = doc.createElement("script"),
+      node = uue("script"),
       src = url + (url.indexOf("?") < 0 ? "?" :
                    url.indexOf("&") < 0 ? ";" : "&") +
                   method + "=uupub.jsondb." + jobid; // uupub.jsondb = _jobid
@@ -936,6 +947,20 @@ function uuhashhas(find,   // @param Hash: find { key, value, ... }
   return true;
 }
 
+// uu.hash.nth - nth pair
+function uuhashnth(hash,  // @param Hash: { a: 1, b: 2 }
+                   nth) { // @param Number: 1
+                          // @return Array: ["b", 2], [] (not found)
+  var i, j = -1;
+
+  for (i in hash) {
+    if (++j === nth) {
+      return [i, hash[i]];
+    }
+  }
+  return [];
+}
+
 // uu.hash.each - Hash forEach
 function uuhasheach(hash, // @param Hash:
                     fn) { // @param Function: callback
@@ -979,7 +1004,7 @@ function uuhashcss2kb(name) { // @param String/Array: className or [className, .
   }
   // http://d.hatena.ne.jp/uupaa/20091125
   var rv = {}, cs, url, v, i = 0, ary = uuary(name),
-      div = doc.body.appendChild(doc.createElement("div")),
+      div = doc.body.appendChild(uue()),
       fn = decodeURIComponent;
 
   while ( (v = ary[i++]) ) {
@@ -1519,6 +1544,7 @@ function uuevdetach(node, type, fn, capture) {
 // [1][DOM ready] uu.ready(fn, order = 0)
 function uuready(fn,      // @param Function(= void 0): callback function
                  order) { // @param Number(= 0): uu.lazy order
+                          //         order: 0 is low, 1 is mid, 2 is high(system)
   if (fn !== void 0 && !uuready.gone.blackout) {
     uuready.gone.dom ? fn(uu) : uulazy("boot", fn, order || 0); // [1] stock
   }
@@ -1600,7 +1626,7 @@ function uuvalget(node) { // @param Node:
 function uuvalset(node,  // @param Node:
                   val) { // @param String/Array:
                          // @return Node:
-  var v, i = 0, j, jz, prop, ary, vals = uuary(val);
+  var v, i = 0, j, jz, prop, ary, vals = uuisary(val) ? val : [val];
 
   if (node.tagName.toLowerCase() === "select") {
     ary = node.options, prop = "selected";
@@ -2071,7 +2097,7 @@ function uudate2str(date,   // @param Date/Number(= void 0):
                             // @return ISO8601DateString/RFC1123DateString: 
   date = !date ? new Date() // void 0 or 0 -> current time [1][3]
                : uuisnum(date) ? new Date(date) : date;
-  var rv = "", pad0, ms;
+  var rv = "", h;
 
   if (type) { // GMT(RFC1123) [3][4]
     rv = date.toUTCString();
@@ -2080,15 +2106,10 @@ function uudate2str(date,   // @param Date/Number(= void 0):
       (rv.length < 29) && (rv = rv.replace(/, /, ", 0")); // [IE] fix format
     }
   } else { // [1][2]
-    ms = date.getUTCMilliseconds();
-    pad0 = (ms < 10) ? "00" : (ms < 100) ? "0" : "";
-    rv = date.getUTCFullYear() + '-' +
-            _DEC2[date.getUTCMonth() + 1] + '-' +
-            _DEC2[date.getUTCDate()]      + 'T' +
-            _DEC2[date.getUTCHours()]     + ':' +
-            _DEC2[date.getUTCMinutes()]   + ':' +
-            _DEC2[date.getUTCSeconds()]   + '.' +
-            pad0 + date.getUTCMilliseconds() + 'Z';
+    h = uudatehash(date);
+    rv = h.Y + '-' + _DEC2[h.M] + '-' + _DEC2[h.D] + 'T' +
+                     _DEC2[h.h] + ':' + _DEC2[h.m] + ':' + _DEC2[h.s] + '.' +
+         ((h.ms < 10) ? "00" : (h.ms < 100) ? "0" : "") + h.ms + 'Z';
   }
   return rv;
 }
@@ -2296,6 +2317,16 @@ function uuwinsize() { // @return Hash: { iw, ih, sw, sh }
            sw: win.pageXOffset, sh: win.pageYOffset };
 }
 
+// uu.date.hash - get date members
+function uudatehash(date) { // @param Date:
+                            // @return Hash: { Y: 2010, M: 12, D: 31,
+                            //                 h: 23, m: 59, s: 59, ms: 999 }
+  return { Y: date.getUTCFullYear(), M: date.getUTCMonth() + 1,
+           D: date.getUTCDate(),     h: date.getUTCHours(),
+           m: date.getUTCMinutes(),  s: date.getUTCSeconds(),
+           ms: date.getUTCMilliseconds() };
+}
+
 // uu.guid - get unique number
 function uuguid() { // @return Number: unique number, from 1
   return ++_guid;
@@ -2304,7 +2335,7 @@ function uuguid() { // @return Number: unique number, from 1
 // uu.lazy - lazy evaluate
 function uulazy(id,      // @param String(= ""): id
                 fn,      // @param Function: callback function
-                order) { // @param Number(= 0): 0 is low, 1 is mid, 2 is high
+                order) { // @param Number(= 0): 0 is low, 1 is mid, 2 is high(system)
   id = id || "";
   id in _lazydb || (_lazydb[id] = [[], [], []]);
   _lazydb[id][order || 0].push(fn);
@@ -2416,7 +2447,7 @@ function arrayreduce(fn,     // @param Function: callback evaluator
   for (; i < iz; ++i) {
     i in this && (rv = f ? fn(rv, this[i], i, this) : (++f, this[i]));
   }
-  if (!f) { throw ""; } // reduce of empty array with no initial value
+  if (!f) { throw new Error("reduce of empty array with no initial value"); }
   return rv;
 }
 
@@ -2429,7 +2460,7 @@ function arrayreduceright(fn,     // @param Function: callback evaluator
   while (--i >= 0) {
     i in this && (rv = f ? fn(rv, this[i], i, this) : (++f, this[i]));
   }
-  if (!f) { throw ""; } // reduce of empty array with no initial value
+  if (!f) { throw new Error("reduce of empty array with no initial value"); }
   return rv;
 }
 
@@ -2742,7 +2773,7 @@ uuready(function() {
   while ( (v = ary[j++]) ) {    // [IE] static NodeArray
     v.parentNode.removeChild(v);
   }
-}, 2); // 2: high order
+}, 2); // 2: high(system) order
 
 // inner -
 function _camelhash(rv, props) {
@@ -2793,7 +2824,7 @@ function _matcher(a) {
 // ua       - Number: User Agent version
 // re       - Number: Rendering Engine version
 //              (Firefox2: 1.81, Firefox3: 1.9, Firefox3.5: 1.91,
-//               Safari3.1: 525, Safari4: 530)
+//               Safari3.1: 525, Safari4: 528)
 // sl       - Number: Silverlight version(3 later)
 // fl       - Number: Flash version(7 later)
 // ie       - Boolean: true is IE6, IE7, IE8+
@@ -2830,14 +2861,13 @@ function uuvers(slupper) { // @param Number(= 4): Silverlight upper version
       re = parseFloat(((/(?:rv\:|ari\/|sto\/)(\d+\.\d+(\.\d+)?)/.
               exec(nu) || [,0])[1]).toString().replace(/[^\d\.]/g, "").
               replace(/^(\d+\.\d+)(\.(\d+))?$/,"$1$3")),
-      xml = doc.createElement("p").tagName === doc.createElement("P").tagName,
       gecko = nu.indexOf("Gecko/") > 0,
       webkit = nu.indexOf("WebKit") > 0,
       chrome = nu.indexOf("Chrome") > 0,
       html = doc.getElementsByTagName("html")[0],
       ary = [html.className.replace(/ifnojs|addua|addos/g, ""), "ifjs"], i = 0,
       id = "adv,major", cn = html.className,
-      rv = { ua: ua, re: re, sl: 0, fl: 0, xml: xml,
+      rv = { ua: ua, re: re, sl: 0, fl: 0, xml: uue().tagName === uue().tagName,
              ie: ie, ie6: ie && ua === 6, ie7: ie && ua === 7,
              ie8: ie && (doc.documentMode || 0) === 8,
              opera: !!opera, gecko: gecko,

@@ -696,7 +696,7 @@ function uucssshow(node,     // @param Node:
 
   if (uucss(node).display === "none") {
     // <style>{ display: none }</style>
-    tmp = uu.node(doc.createElement(node.tagName)); // add to body
+    tmp = uu.node(uue(node.tagName)); // add to body
     // detect actual display value
     ns.display = uucss(tmp).display;
     uu.node.remove(tmp);
@@ -1035,7 +1035,7 @@ function uucsscreate(ssid) { // @param String(= "uuss"): StyleSheet id
     if (_ie) {
       _db.ss[ssid] = doc.createStyleSheet();
     } else {
-      var node = doc.createElement("style");
+      var node = uue("style");
 
       node.appendChild(doc.createTextNode(""));
       _db.ss[ssid] = uu.head().appendChild(node);

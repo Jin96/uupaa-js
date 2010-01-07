@@ -136,7 +136,7 @@ function quickQuery(expr, match, context) {
     if (_QUICK_DIGIT.test(m1) ||
         _QUICK_DIGIT.test(m2) ||
         _QUICK_DIGIT.test(m3)) {
-      throw expr + " syntax error";
+      throw new Error(expr + " syntax error");
     }
 
     unq[m1] = 1;
@@ -207,7 +207,7 @@ function uuqueryselectorall(expr,      // @param String: expr
       nodeList, needle, pseudo, v, w, operator, match, negate = 0;
 
   if (_SYNTAX_ERROR.test(expr)) {
-    throw expr + " syntax error";
+    throw new Error(expr + " syntax error");
   }
 
   // --- Quick phase ---
@@ -224,7 +224,7 @@ function uuqueryselectorall(expr,      // @param String: expr
       for (i = 0, iz = w.length; i < iz; ++i) {
         v = uu.trim(w[i]);
         if (!v) {
-          throw expr + " syntax error";
+          throw new Error(expr + " syntax error");
         }
         r = uuqueryselectorall(v, context);
         mixin(r, rv, unq);
@@ -392,7 +392,7 @@ function uuqueryselectorall(expr,      // @param String: expr
           if (iz) {
             if (match[1]) { // :not(...)
               if (negate) {
-                throw ":not(:not(...)) syntax error";
+                throw new Error(":not(:not(...)) syntax error");
               }
               if (match[2]) { // :not(*)
                 break;
@@ -419,16 +419,16 @@ function uuqueryselectorall(expr,      // @param String: expr
                 r = negate ? [uupub.root] : [];
               } else {
                 if ( !(v = _FILTERS[pseudo]) ) {
-                  throw ":" + pseudo + " unsupported";
+                  throw new Error(":" + pseudo + " unsupported");
                 }
                 w = v[0];
                 if (w & 0x100) {
                   if ((w & 0x800) && !_DOUBLE_COLON.test(expr)) {
-                    throw match[0] + " syntax error(need ::)";
+                    throw new Error(match[0] + " syntax error(need ::)");
                   }
                   if ((w & 0x400) && negate) {
-                    throw ":not(" + match[0] + ") syntax error" +
-                          "(exclude pseudo-element)";
+                    throw new Error(":not(" + match[0] + ") syntax error" +
+                                    "(exclude pseudo-element)");
                   }
                   if (w & 0x200) { // 0x100 is none operation
                     r = negate ? [] : ctx;
@@ -464,12 +464,12 @@ function uuqueryselectorall(expr,      // @param String: expr
             if (!match[3] &&
                 match[4].indexOf(" ") >= 0 &&
                 match[4].replace(_SYNTAX_ERROR2, "").indexOf(" ") >= 0) {
-              throw match[0] + " syntax error";
+              throw new Error(match[0] + " syntax error");
             }
             needle = uu.trim.quote(match[4]);
             operator = _ATTR_OPERATOR[match[2]];
             if (!operator) {
-              throw match[0] + " unsupported";
+              throw new Error(match[0] + " unsupported");
             }
             w = match[5] || ""; // regexp flag
 
@@ -512,7 +512,7 @@ function uuqueryselectorall(expr,      // @param String: expr
   }
 
   if (expr.length) {
-    throw expr + " unsupported";
+    throw new Error(expr + " unsupported");
   }
   return mixed ? mixin(ctx, rv, guard) : ctx;
 }
@@ -906,7 +906,7 @@ function onlyOfType(fid, negate, elms, pseudo, value, tags, contentType) {
 function nth(anb) {
   var a, b, c, match = _NTH_ANB.exec(anb);
 
-  if (!match) { throw anb + " unsupported"; }
+  if (!match) { throw new Error(anb + " unsupported"); }
   if (match[2]) { return { a: 2, b: 0, k: 3 }; } // nth(even)
   if (match[3]) { return { a: 2, b: 1, k: 3 }; } // nth(odd)
   if (match[4]) { return { a: 0, b: 0, k: 2 }; } // nth(1n+0), nth(n+0), nht(n)
@@ -984,7 +984,7 @@ function styleQuery(negate, elms, match) {
       xfloat = parseFloat;
 
   if (!operator) {
-    throw match[0] + " unsupported";
+    throw new Error(match[0] + " unsupported");
   }
   w = match[5] || ""; // regexp flag
 
@@ -1001,7 +1001,7 @@ function styleQuery(negate, elms, match) {
   if (operator === 11) { // 11: "&="
     ary = v1.split(_STYLE_RANGE); // {prop&=0x0~0xf}
     if (ary.length !== 2) {
-      throw "[" + prop + "&=" + v1 + "-???] syntax error";
+      throw new Error("[" + prop + "&=" + v1 + "-???] syntax error");
     }
     v1 = ary[0];
     v2 = ary[1];

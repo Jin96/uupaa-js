@@ -3,7 +3,7 @@
 // depend: uu.js, uu.css.js, uu.css3.js
 uu.waste || (function(win, doc, uu) {
 var _styleSheetID = "uucss3ie",
-    _spacer = uu.config.imgdir + "1dot.gif",
+    _spacer = uu.config.imgdir + "uu1dot.gif",
     _job = { position: [], maxmin: [] },
     _ALPHA1 = "progid:DXImageTransform.Microsoft.AlphaImageLoader",
     _ALPHA2 = " " + _ALPHA1 + "(src='#',sizingMethod='image')",
@@ -185,7 +185,7 @@ function disptbl(ary) { // @param NodeArray:
   var v, i = 0, j, tbl, row, cell;
 
   while ( (v = ary[i++]) ) {
-    tbl = doc.createElement("table");
+    tbl = uue("table");
     // copy attrs
     tbl.id = v.id;
     tbl.title = v.title;

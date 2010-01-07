@@ -320,7 +320,7 @@ function fillTextWebKit(text, x, y, maxWidth, wire) {
     //      <div>text</div>   <- canvas.uutextlayer[0]
     //    </div>
     //  </...>
-    root = canvas.parentNode.appendChild(doc.createElement("div"));
+    root = canvas.parentNode.appendChild(uue());
     uu.mix(root.style, { position: "absolute", overflow: "hidden" });
     // fix style
     hash = { visibility: cs.visibility,
@@ -350,7 +350,7 @@ function fillTextWebKit(text, x, y, maxWidth, wire) {
   } else if (align === "right") {
     offX = metric.w;
   }
-  node = root.appendChild(doc.createElement("div"));
+  node = root.appendChild(uue());
   ns = node.style;
   ns.position = "absolute";
   ns.opacity = ctx[_GLOBAL_ALPHA];

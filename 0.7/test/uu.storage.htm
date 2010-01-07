@@ -1,0 +1,159 @@
+﻿<!doctype html><html><head><meta charset="utf-8" />
+<title>uu.storage</title>
+<script>
+window.xconfig = { debug: 1, imgdir: "../" };
+</script>
+<script src="../uu.js"></script>
+<script src="../uu.flash.js"></script>
+<script src="../uu.storage.js"></script>
+<script>
+var _BACKEND = {
+  0: "No Storage",
+  1: "Use Flash Storage (Plz Wait)",
+  2: "Use Web Storage (localStorage)",
+  3: "Use DOM Storage (globalStorage)",
+  4: "Use IE Storage (IE userData behavior)",
+  5: "Use Flash Storage (SharedObject)",
+  6: "Use Cookie Storage (Cookie)"
+};
+
+function xwin(uu) {
+  uu.id("setpair").disabled = false;
+  uu.id("refresh").disabled = false;
+
+  setTimeout(wairfor, 0);
+}
+function wairfor() {
+  var backend = uu.local.backend();
+
+  uu.text(uu.id("backend"), _BACKEND[backend]);
+  if (backend >= 2) {
+    return; // xupdate();
+  }
+  setTimeout(wairfor, 200);
+}
+
+function xrand() {
+  uu.id("key").value = "key" + ((Math.random() * 100000) | 0);
+  uu.id("val").value = "val" + ((Math.random() * 100000) | 0);
+}
+
+function xupdate() {
+  var hash = uu.local();
+  uu.val(uu.id("all"), uu.mix2json(hash));
+
+  var pairs = uu.local.pairs();
+  uu.text(uu.id("pairs"), pairs);
+}
+function xsize() {
+  var hash = uu.local.size(),
+      node = uu.id("size");
+
+  if (!hash.free) {
+    node.style.color = "red";
+  } else {
+    node.style.color = "black";
+  }
+  if (hash.max > 1024 * 1024) {
+    uu.text(node, ["use: " + hash.use +
+                   "bytes(" + (hash.use / 1024 / 1024).toFixed(2), 
+                   "MB), max: " + (hash.max / 1024 / 1024).toFixed(2),
+                   "MB, free: " + hash.free +
+                   "bytes(" + (hash.free / 1024 / 1024).toFixed(2),
+                   "MB)"].join(" "));
+  } else {
+    uu.text(node, ["use: " + hash.use,
+                   "bytes, max: " + hash.max,
+                   "bytes, free: " + hash.free,
+                   "bytes"].join(" "));
+  }
+}
+
+function xget() {
+  var val = uu.local.get(uu.id("key").value);
+
+  uu.id("val").value = val;
+
+  xupdate();
+}
+
+function xset(rand, norefresh) {
+  if (rand) {
+    xrand();
+  }
+  if (!uu.local.set(uu.id("key").value, uu.id("val").value, 1)) {
+    alert("fail");
+    return;
+  }
+  if (!norefresh) {
+    xupdate();
+  }
+  xsize();
+}
+function xremove(last) {
+  var pairs = uu.local.pairs();
+  var key = uu.local.nth(last ? pairs - 1 : 0) || "", val = "";
+
+  if (key) {
+    val = uu.local.get(key);
+  }
+  uu.id("key").value = key;
+  uu.id("val").value = val;
+
+  uu.local.remove(key);
+  xupdate();
+  xsize();
+}
+function xclear() {
+  uu.local.clear();
+  xupdate();
+  xsize();
+  uu.id("setpair").disabled = false;
+  uu.id("refresh").disabled = false;
+}
+function xrefresh() {
+  xupdate();
+  xsize();
+}
+function xlimittest() {
+  xclear();
+
+  var hash = uu.local.size();
+  var spam;
+  var use = hash.free - 1024;
+
+  spam = uu.rep("0", use);
+  if (!uu.local.set("a", spam, 1)) { // safe
+    xsize();
+    alert("test fail");
+  } else {
+    xsize();
+    alert("test ok");
+    uu.id("setpair").disabled = true;
+    uu.id("refresh").disabled = true;
+  }
+}
+</script>
+</head><body>
+<h1 id="backend" style="text-shadow: gray 3px 3px 3px">Plz Wait...</h1>
+<input id="setpair" type="button" value="add pair" onclick="xset(1, 0)" />
+<input type="button" value="add pair(no refresh)" onclick="xset(1, 1)" />
+<input type="button" value="update value" onclick="xset(0)" />
+<input type="button" value="get value" onclick="xget()" />
+<input type="button" value="remove first pair" onclick="xremove(0)" />
+<input type="button" value="remove last pair" onclick="xremove(1)" />
+<br />
+<br />
+key/value: <input id="key" type="text" value="key" />
+<input id="val" type="text" value="val" />
+pairs: <span id="pairs">unknown</span><br />
+<input type="button" value="size" onclick="xsize()" />
+<span id="size">unknown</span>
+<br />
+<br />
+all: <textarea id="all" cols="60" rows="5"></textarea><br />
+<input type="button" value="clear" onclick="xclear()" />
+<input id="refresh" type="button" value="refresh" onclick="xrefresh()" />
+<input type="button" value="limit test" onclick="xlimittest()" />
+
+</body></html>

@@ -2,7 +2,7 @@
 // === URL ===
 // depend: uu.js
 uu.waste || (function(win, doc, uu) {
-var _absurl, // [lazy] uu.url(), current absolute-url cache
+var _curturl, // [lazy] uu.url(), current absolute-url cache
     _AMP = /&amp;|&/g,
     _URL = /^(\w+):\/\/([^\/:]+)(?::(\d*))?([^ ?#]*)(?:\?([^#]*))?(?:#(.*))?/i,
     _FILE = /^file:\/\/(?:\/)?(?:loc\w+\/)?([^ ?#]*)(?:\?([^#]*))?(?:#(.*))?/i,
@@ -17,26 +17,24 @@ var _absurl, // [lazy] uu.url(), current absolute-url cache
 uu.url = uu.mix(uuurl, {
   abs:        uuurlabs,       // uu.url.abs(url = ".", curtdir = "") -> absolute URL
   dir:        uuurldir,       // uu.url.dir(path, result) -> absolute directory
+  build:      uuurlbuild,     // uu.url.build(url) -> "scheme://domain:port/path?query#fragment"
   parse:      uuurlparse,     // uu.url.parse(url) -> { url, scheme, domain, port, base, path,
                               //                        dir, file, query, hash, fragment }
-  build:      uuurlbuild      // uu.url.build(url) -> "scheme://domain:port/path?query#fragment"
+  split:      uuurlsplit      // uu.url.split("http://.../dir/file.exe") -> ["http://.../dir/", "file.ext"]
 });
 
-// [1][parse]    uu.qs() -> { key: "val" } (parse location.href)
-// [2][parse]    uu.qs("key=val;key2=val2") -> { key: "val", key2: "val2" }
-// [3][build(;)] uu.qs({ key: "val", key2: "val2" })    -> "key=val;key2=val2"
-// [4][build(&)] uu.qs({ key: "val", key2: "val2" }, 1) -> "key=val&key2=val2"
-// [5][add]      uu.qs("key=val", "key2", "val2") -> "key=val;key2=val2"
-// [6][add]      uu.qs("key=val", { key2 : "val2" }) -> "key=val;key2=val2"
+// [1][parse] uu.qs() -> { key: "val" } (parse location.href)
+// [2][parse] uu.qs("key=val;key2=val2")          -> { key: "val", key2: "val2" }
+// [3][build] uu.qs({ key: "val", key2: "val2" }) -> "key=val;key2=val2"
+// [4][add]   uu.qs("key=val",  "key2", "val2")   -> "key=val;key2=val2"
+// [5][add]   uu.qs("key=val", { key2 : "val2" }) -> "key=val;key2=val2"
 uu.qs = uu.mix(uuqs, {
-  add:        uuqsadd,        // [1] uu.qs.add("key=val", "key2", "val2") -> "key=val;key2=val2"
+  add:        uuqsadd,        // [1] uu.qs.add("key=val",  "key2", "val2")   -> "key=val;key2=val2"
                               // [2] uu.qs.add("key=val", { key2 : "val2" }) -> "key=val;key2=val2"
-  amp:        uuqsamp,        // uu.qs.amp("key=val;key2=val2") -> "key=val&key2=val2"
-  parse:      uuqsparse,      // [1] uu.qs.parse("http://...?key=value") -> { key: "value" }
-                              // [2] uu.qs.parse("../img.png?key=value") -> { key: "value" }
-                              // [3] uu.qs.parse("key=value") -> { key: "value" }
-  build:      uuqsbuild       // [1][build(;)] uu.qs.build({key:"val",key2:"val2"})    -> "key=val;key2=val2"
-                              // [2][build(&)] uu.qs.build({key:"val",key2:"val2"}, 1) -> "key=val&key2=val2"
+  amp:        uuqsamp,        // uu.qs.amp("key=val;key2=val2", entity = 0)  -> "key=val&key2=val2"
+  build:      uuqsbuild,      // uu.qs.build({key:"val",key2:"val2"})        -> "key=val;key2=val2"
+  parse:      uuqsparse       // [1] uu.qs.parse("../img.png?key=value") -> { key: "value" }
+                              // [2] uu.qs.parse("key=value")            -> { key: "value" }
 });
 
 // --- url / path ---
@@ -57,7 +55,7 @@ function uuurlabs(url,       // @param URLString(= "."): rel/abs URL
                              // @return URLString: absolute URL
   function _uuurlabs(url) {
     if (!_SCHEME.test(url)) {
-      var div = doc.createElement("div");
+      var div = uue();
 
       div.innerHTML = '<a href="' + (curtdir || "") + url + '" />';
       url = div.firstChild ? div.firstChild.href
@@ -65,11 +63,8 @@ function uuurlabs(url,       // @param URLString(= "."): rel/abs URL
     }
     return url.replace(_AMP, ";"); // "&" -> ";"
   }
-  if (!url || url === ".") {
-    _absurl || (_absurl = _uuurlabs("."));
-    return _absurl; // return cached abs-url
-  }
-  return _uuurlabs(url);
+  return (!url || url === ".") ? (_curturl || (_curturl = _uuurlabs(".")))
+                               : _uuurlabs(url);
 }
 
 // uu.url.dir - absolute path to absolute directory(chop filename)
@@ -78,17 +73,31 @@ function uuurlabs(url,       // @param URLString(= "."): rel/abs URL
 // uu.url.dir("/file.ext")                       -> "/"
 // uu.url.dir("/")                               -> "/"
 // uu.url.dir("")                                -> "/"
-function uuurldir(abspath,  // @param URLString/PathString: absolute path
-                  result) { // @param Array(= void 0): ref result array
-                            //                            ["dir/", "file.ext"]
-                            // @return String: absolute directory path,
-                            //                 has tail "/"
-  result = result || [];
-  var ary = abspath.split("/");
+function uuurldir(path) { // @param URLString/PathString: path
+                          // @return String: directory path, has tail "/"
+  var ary = path.split("/");
 
-  result[1] = ary.pop(); // file
-  result[0] = ary.join("/") + "/";
-  return result[0];
+  ary.pop(); // chop "file.ext"
+  return ary.join("/") + "/";
+}
+
+// uu.url.split - split dir/file "dir/file.ext" -> ["dir/", "file.ext"]
+function uuurlsplit(path) { // @param URLString/PathString: path
+                            // @return Array: ["dir/", "file.ext"]
+  var rv = [], ary = path.split("/");
+
+  rv[1] = ary.pop(); // file
+  rv[0] = ary.join("/") + "/";
+  return rv;
+}
+
+// uu.url.build - build URL
+function uuurlbuild(hash) { // @param Hash:
+                            // @return String: "scheme://domain:port/path?query#fragment"
+  return [hash.scheme, "://", hash.domain,
+          hash.port     ? ":" + hash.port     : "", hash.path || "/",
+          hash.query    ? "?" + hash.query    : "",
+          hash.fragment ? "#" + hash.fragment : ""].join("");
 }
 
 // uu.url.parse - parse URL
@@ -112,7 +121,7 @@ function uuurlparse(url) { // @param URLString:
 
   m = _FILE.exec(abs);
   if (m) {
-    uuurldir(m[1], w);
+    w = uuurlsplit(m[1]);
     return { url: abs, scheme: "file", domain: "", port: "",
              base: "file:///" + w[0], path: m[1], dir: w[0],
              file: w[1], query: "", hash: m[2] ? uuqsparse(m[2]) : {},
@@ -120,7 +129,7 @@ function uuurlparse(url) { // @param URLString:
   }
   m = _URL.exec(abs);
   if (m) {
-    m[4] && uuurldir(m[4], w);
+    m[4] && (w = uuurlsplit(m[4]));
     return { url: abs, scheme: m[1], domain: m[2], port: m[3] || "",
              base: (m[1] + "://" + m[2]) + (m[3] ? ":" + m[3] : "") + w[0],
              path: m[4] || "/", dir: w[0], file: w[1], query: m[5] || "",
@@ -129,44 +138,30 @@ function uuurlparse(url) { // @param URLString:
   return 0;
 }
 
-// uu.url.build - build URL
-function uuurlbuild(hash) { // @param Hash:
-                            // @return String: "scheme://domain:port/path?query#fragment"
-  return [hash.scheme, "://", hash.domain,
-          hash.port     ? ":" + hash.port     : "", hash.path || "/",
-          hash.query    ? "?" + hash.query    : "",
-          hash.fragment ? "#" + hash.fragment : ""].join("");
-}
-
 // uu.qs - query string accessor
-// [1][parse]    uu.qs() -> { key: "val" } (parse location.href)
-// [2][parse]    uu.qs("key=val;key2=val2") -> { key: "val", key2: "val2" }
-// [3][build(;)] uu.qs({ key: "val", key2: "val2" })    -> "key=val;key2=val2"
-// [4][build(&)] uu.qs({ key: "val", key2: "val2" }, 1) -> "key=val&key2=val2"
-// [5][add]      uu.qs("key=val", "key2", "val2") -> "key=val;key2=val2"
-// [6][add]      uu.qs("key=val", { key2 : "val2" }) -> "key=val;key2=val2"
-function uuqs(base,    // @param String/Hash: 
-              key,     // @param String/Hash:
-              value) { // @param String:
-                       // @return String/Hash:
-  if (base === void 0) { // [1]
+// [1][parse] uu.qs() -> { key: "val" } (parse location.href)
+// [2][parse] uu.qs("key=val;key2=val2")          -> { key: "val", key2: "val2" }
+// [3][build] uu.qs({ key: "val", key2: "val2" }) -> "key=val;key2=val2"
+// [4][add]   uu.qs("key=val",  "key2", "val2")   -> "key=val;key2=val2"
+// [5][add]   uu.qs("key=val", { key2 : "val2" }) -> "key=val;key2=val2"
+function uuqs(a, b, c) { // @return String/Hash:
+  if (a === void 0) { // [1]
     return uuqsparse(location.href);
   }
-  return !uu.isstr(base) ? uuqsbuild(base, key) :      // [3][4]
-         (key === void 0) ? uuqsparse(base)            // [2]
-                          : uuqsadd(base, key, value); // [5][6]
+  return !uu.isstr(a) ? uuqsbuild(a, b) : // [3]
+         (b === void 0 ? uuqsparse : uuqsadd)(a, b, c); // [2][4][5]
 }
 
 // uu.qs.add - add query string
-// [1][add] uu.qs.add("key=val", "key2", "val2") -> "key=val;key2=val2"
-// [2][add] uu.qs.add("key=val", { key2 : "val2" }) -> "key=val;key2=val2"
+// [1] uu.qs.add("key=val",  "key2", "val2")   -> "key=val;key2=val2"
+// [2] uu.qs.add("key=val", { key2 : "val2" }) -> "key=val;key2=val2"
 function uuqsadd(url,     // @param String:
                  key,     // @param Hash/String:
                  value) { // @param String:
                           // @return String:
   var hash = uuurlparse(url);
 
-  hash.query = uuqsbuild(uu.mix(hash.hash, uu.hash(key, value)));
+  hash.query = uuqsbuild(uu.arg(hash.hash, uu.hash(key, value)));
   return uuurlbuild(hash);
 }
 
@@ -178,10 +173,20 @@ function uuqsamp(str,      // @param String: "key=val;key2=val2"
   return str.replace(/;/g, entity ? "&amp;" : "&");
 }
 
+// uu.qs.build - build query string
+function uuqsbuild(query) { // @param Hash: { key: "val", key2: "val2" }
+                            // @return QueryString: "key=val;key2=val2"
+  var rv = [], i, fn = encodeURIComponent;
+
+  for (i in query) {
+    rv.push(fn(i) + "=" + fn(query[i]));
+  }
+  return rv.join(";");
+}
+
 // uu.qs.parse - parse query string
-// [1] uu.qs.parse("http://...?key=value") -> { key: "value" }
-// [2] uu.qs.parse("../img.png?key=value") -> { key: "value" }
-// [3] uu.qs.parse("key=value") -> { key: "value" }
+// [1] uu.qs.parse("../img.png?key=value") -> { key: "value" }
+// [2] uu.qs.parse("key=value")            -> { key: "value" }
 function uuqsparse(query) { // @param URLString/QueryString:
                             // @return Hash: { key: value, ... }
   function _uuqsparse(m, key, value) {
@@ -189,25 +194,11 @@ function uuqsparse(query) { // @param URLString/QueryString:
   }
   var rv = {}, fn = decodeURIComponent;
 
-  if (query.indexOf("?") >= 0) { // [1][2]
+  if (query.indexOf("?") >= 0) { // [1]
     return uuurlparse(query).hash;
   }
-  query.replace(_AMP, ";").replace(_QUERY_STR, _uuqsparse); // [3]
+  query.replace(_AMP, ";").replace(_QUERY_STR, _uuqsparse); // [2]
   return rv;
-}
-
-// uu.qs.build - build query string
-// [1][build(;)] uu.qs.build({key:"val",key2:"val2"})    -> "key=val;key2=val2"
-// [2][build(&)] uu.qs.build({key:"val",key2:"val2"}, 1) -> "key=val&key2=val2"
-function uuqsbuild(query, // @param Hash: { key: "val", key2: "val2" }
-                   amp) { // @param Boolean(= false): use amp(&) separator
-                          // @return QueryString: "key=val;key2=val2"
-  var rv = [], i, fn = encodeURIComponent;
-
-  for (i in query) {
-    rv.push(fn(i) + "=" + fn(query[i]));
-  }
-  return rv.join(amp ? "&" : ";");
 }
 
 })(window, document, uu);
