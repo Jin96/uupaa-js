@@ -7,7 +7,7 @@
   import flash.text.TextFieldType;
   import flash.text.TextFieldAutoSize;
 
-  public class Canvafl extends Sprite {
+  public class Canvas extends Sprite {
     private var input:TextField;
     private var output:TextField;
     private var sendBtn:Sprite;
@@ -17,7 +17,7 @@
 
       output.appendText("JavaScript says: " + msg + "\n");
     }
-    public function Canvafl() {
+    public function Canvas() {
       ExternalInterface.addCallback("jssend", jssend);
 
       input = new TextField();
