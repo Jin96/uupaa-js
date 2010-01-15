@@ -16,6 +16,7 @@
 // window.xwin(uu) - window.onload callback handler
 // window.xcanvas(uu) - canvas ready callback handler
 // window.xtag(uu, node, tagid) - uu.div(tagid) ..  callback handler
+// window.xlocal(backend) - WebStorage ready callback hander
 
 var uu,    // window.uu    - uupaa.js library namespace
     uupub; // window.uupub - public data and methods
@@ -1178,52 +1179,52 @@ function uuattrset(node,  // @param Node:
 
 // --- className(klass) ---
 // uu.klass.has - has className
-function uuklasshas(node,   // @param Node:
-                    name) { // @param JointString: "class1 class2 ..."
-                            // @return Boolean:
+function uuklasshas(node,         // @param Node:
+                    classNames) { // @param JointString: "class1 class2 ..."
+                                  // @return Boolean:
   var m, ary, cn = node.className;
 
-  if (!name || !cn) { return false; }
-  if (name.indexOf(" ") < 0) {
-    return (" " + cn + " ").indexOf(" " + name + " ") >= 0; // single
+  if (!classNames || !cn) { return false; }
+  if (classNames.indexOf(" ") < 0) {
+    return (" " + cn + " ").indexOf(" " + classNames + " ") >= 0; // single
   }
-  ary = uusplit(name); // multi
+  ary = uusplit(classNames); // multi
   m = cn.match(_matcher(ary));
   return m && m.length >= ary.length;
 }
 
 // uu.klass.add - add className
 // [1][add className] uu.klass.add(node, "class1 class2") -> node
-function uuklassadd(node,   // @param Node:
-                    name) { // @param JointString: "class1 class2 ..."
-                            // @return Node:
-  node.className += " " + name; // [perf point] // uutriminner()
+function uuklassadd(node,         // @param Node:
+                    classNames) { // @param JointString: "class1 class2 ..."
+                                  // @return Node:
+  node.className += " " + classNames; // [perf point] // uutriminner()
   return node;
 }
 
 // uu.klass.sub - remove className
 // [1][sub className] uu.klass.sub(node, "class1 class2") -> node
-function uuklasssub(node,   // @param Node:
-                    name) { // @param JointString(= ""): "class1 class2 ..."
-                            // @return Node:
+function uuklasssub(node,         // @param Node:
+                    classNames) { // @param JointString(= ""): "class1 class2 ..."
+                                  // @return Node:
   node.className =
-      uutriminner(node.className.replace(_matcher(uusplit(name)), ""));
+      uutriminner(node.className.replace(_matcher(uusplit(classNames)), ""));
   return node;
 }
 
 // uu.klass.toggle - toggle(add / sub) className property
-function uuklasstoggle(node,   // @param Node:
-                       name) { // @param JointString: "class1 class2 ..."
-                               // @return Node:
-  (uuklasshas(node, name) ? uuklasssub : uuklassadd)(node, name);
+function uuklasstoggle(node,         // @param Node:
+                       classNames) { // @param JointString: "class1 class2 ..."
+                                     // @return Node:
+  (uuklasshas(node, classNames) ? uuklasssub : uuklassadd)(node, classNames);
   return node;
 }
 
 // --- Class / Instance ---
 // uu.Class - create a generic class
-function uuclass(name,    // @param String: class name
-                 proto) { // @param Hash(= void 0): prototype object
-  uuclass[name] = function() {
+function uuclass(className, // @param String: class name
+                 proto) {   // @param Hash(= void 0): prototype object
+  uuclass[className] = function() {
     var me = this;
 
     uuclassguid(me);
@@ -1234,7 +1235,7 @@ function uuclass(name,    // @param String: class name
     me.msgbox || (me.msgbox = uuvain);
     uu.msg.register(me);
   };
-  uuclass[name].prototype = proto || {};
+  uuclass[className].prototype = proto || {};
 }
 
 // uu.Class.guid - get instance id
@@ -1244,10 +1245,10 @@ function uuclassguid(instance) { // @param Instance:
 }
 
 // uu.Class.singleton - create a singleton class
-function uuclasssingleton(name,    // @param String: class name
-                          proto) { // @param Hash(= void 0): prototype object
-                                   // @return Object: singleton class instance
-  uuclass[name] = function() {
+function uuclasssingleton(className, // @param String: class name
+                          proto) {   // @param Hash(= void 0): prototype object
+                                     // @return Object: singleton class instance
+  uuclass[className] = function() {
     var me = this, arg = arguments, self = arg.callee;
 
     if (self.instance) {
@@ -1263,25 +1264,25 @@ function uuclasssingleton(name,    // @param String: class name
     }
     return self.instance || (self.instance = me);
   };
-  uuclass[name].prototype = proto || {};
+  uuclass[className].prototype = proto || {};
 }
 
 // uu.factory - class factory(max args 4)
 // [1][create instance] uu.factory("my", arg1, ...) -> new uu.Class("my")
 // [2][define and create instance] uu.factory("my2", prototype, arg1, ...)
 //                                                  -> new uu.Class("my2")
-function uufactory(name,   // @param String: class name
-                   arg1,   // @param Hash/Mix(= void 0): prototype or arg1
-                   arg2,   // @param Mix(= void 0):
-                   arg3,   // @param Mix(= void 0):
-                   arg4,   // @param Mix(= void 0):
-                   arg5) { // @param Mix(= void 0):
-                           // @return Instance: new Class[name](arg, ...)
-  if (!uuclass[name]) { // [2]
-    uuclass(name, arg1); // define Class
-    return new uuclass[name](arg2, arg3, arg4, arg5);
+function uufactory(className, // @param String: class name
+                   arg1,      // @param Hash/Mix(= void 0): prototype or arg1
+                   arg2,      // @param Mix(= void 0):
+                   arg3,      // @param Mix(= void 0):
+                   arg4,      // @param Mix(= void 0):
+                   arg5) {    // @param Mix(= void 0):
+                              // @return Instance: new Class[className](arg, ...)
+  if (!uuclass[className]) { // [2]
+    uuclass(className, arg1); // define Class
+    return new uuclass[className](arg2, arg3, arg4, arg5);
   }
-  return new uuclass[name](arg1, arg2, arg3, arg4); // [1]
+  return new uuclass[className](arg1, arg2, arg3, arg4); // [1]
 }
 
 // --- color ---
@@ -2855,7 +2856,7 @@ function uuvers(slupper) { // @param Number(= 4): Silverlight upper version
                            //    quirks, xml, win, mac, unix, adv, major }
   var sl = slupper || 4, ax, v, doc = document,
       nv = navigator, nu = nv.userAgent,
-      ie = !!doc.uniqueID, opera = window.opera,
+      ie = !!doc.uniqueID, opera = window.opera || false,
       ua = opera ? +(opera.version().replace(/\d$/, ""))
                  : parseFloat((/(?:IE |fox\/|ome\/|ion\/)(\d+\.\d)/.
                               exec(nu) || [,0])[1]),
