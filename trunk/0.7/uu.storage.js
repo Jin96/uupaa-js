@@ -526,6 +526,13 @@ function _detected(db, wait, backend) {
   _db = db;
   _dbwait = wait;
   _backend = backend;
+
+  _backend && uu.isfunc(win.xlocal) && setTimeout(WebStorageReady, 0);
+}
+
+// inner - window.xlocal callback
+function WebStorageReady() {
+  win.xlocal(_backend);
 }
 
 })(window, document, uu);
