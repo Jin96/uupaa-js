@@ -461,6 +461,7 @@ uu.as.dmz.storageReadyCallback = flashStorageReadyCallback;
 function flashStorageReadyCallback(/* msg */) {
   _dbwait = 0;
   uu.as.dmz.storageReadyCallback = uuvain;
+  uu.isfunc(win.xlocal) && setTimeout(WebStorageReady, 0);
 }
 function _flashall() {
   var rv = {}, r = _db.flashstorageall(), i, v;
@@ -527,7 +528,9 @@ function _detected(db, wait, backend) {
   _dbwait = wait;
   _backend = backend;
 
-  _backend && uu.isfunc(win.xlocal) && setTimeout(WebStorageReady, 0);
+  if (_backend === 2 || _backend === 5 || _backend === 6) {
+    uu.isfunc(win.xlocal) && setTimeout(WebStorageReady, 0);
+  }
 }
 
 // inner - window.xlocal callback
