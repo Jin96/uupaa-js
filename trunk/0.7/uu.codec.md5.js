@@ -1,7 +1,7 @@
 
 // === MD5 ===
 // depend: uu.js
-uu.waste || (function(uu) {
+uu.agein || (function(uu) {
 var _S11 =  7,
     _S12 = 12,
     _S13 = 17,

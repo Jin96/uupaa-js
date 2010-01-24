@@ -1,7 +1,7 @@
 
 // === Codec ===
 // depend: uu.js
-uu.waste || (function(uu) {
+uu.agein || (function(uu) {
 var _B64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/",
     _DATA_URI   = /^data:([\w\/]+)(;base64)?,/,
     _B64_NGCHAR = /[^A-Za-z0-9\+\/]/,

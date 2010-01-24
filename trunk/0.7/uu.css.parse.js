@@ -1,7 +1,7 @@
 
 // === CSS Parser ===
 // depend: uu.js, uu.codec.js, uu.css.validate.js
-uu.waste || (function(win, doc, uu) {
+uu.agein || (function(win, doc, uu) {
 var _importCache = {}, // import cache { url: cssText }
     SPEC_E = /\w+/g,
     SPEC_ID = /#[\w\u00C0-\uFFEE\-]+/g, // (

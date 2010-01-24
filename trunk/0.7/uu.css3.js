@@ -13,7 +13,7 @@
     //          v
     //    <img src="uu1dot.gif">
     //    <div style="background: url(uu1dot.gif)">
-uu.waste || (function(win, doc, uu) {
+uu.agein || (function(win, doc, uu) {
 var _canvasok = uu.ver.major,
     _usedocfg = !(uu.gecko && uu.ver.re <= 1.9), // 1: use document fragmens
     _rules = [],        // generated rules
@@ -136,7 +136,7 @@ function uucss3get(node,     // @param Node:
 function uucss3set(node,  // @param Node:
                    key,   // @param String/Hash:
                    val) { // @param String(= void 0):
-  var hash, fn, i, v, FIX = uupub.FIX;
+  var hash, fn, i, v, fixdb = uu.fix._db;
 
   uu.isstr(key) ? (hash = {}, hash[key] = val) : (hash = key);
   for (i in hash) {
@@ -150,7 +150,7 @@ function uucss3set(node,  // @param Node:
           !i.indexOf("margin") && (node[_BFX].train.margin = 1);
           !i.indexOf("border") && (node[_BFX].train.border = 1);
         }
-        node.style[FIX[i] || i] = v;
+        node.style[fixdb[i] || i] = v;
       }
     }
   }
@@ -286,7 +286,7 @@ function _uucss3validate(rawdata, context) {
       expair, exbits, exdecl, exorder, exoi, exv, exw, exi, // work
       // document fragment context
       dfctx = (!context || context === doc ||
-                           context === uupub.root) ? doc.body : context,
+                           context === uu.root) ? doc.body : context,
       DISPLAY_INLINE = /display:inline;/i, INLINE = /^inline$/;
 
   // reset global vars

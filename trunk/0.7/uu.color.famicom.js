@@ -1,7 +1,7 @@
 
 // === uu.color.cud ===
 // FAMICOM(R) Named Color(from "fc00" to "fc3f")
-uu.waste || uu.color.add(
+uu.agein || uu.color.add(
 "7b7b7bfc00,0000fffc01,0000bdfc02,4229bdfc03,940084fc04,ad0021fc05,8c1000fc06,"+
 "8c1000fc07,522900fc08,007300fc09,006b00fc0a,005a00fc0b,004252fc0c,000000fc0d,"+
 "000000fc0e,000000fc0f,bdbdbdfc10,0073f7fc11,0052f7fc12,6b42fffc13,de00cefc14,"+

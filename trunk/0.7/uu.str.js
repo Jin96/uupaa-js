@@ -1,7 +1,7 @@
 
 // === String++ ===
 // depend: uu.js
-uu.waste || (function(win, doc, uu) {
+uu.agein || (function(win, doc, uu) {
 
 uu.split.token = uusplittoken;
 

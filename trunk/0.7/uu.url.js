@@ -1,7 +1,7 @@
 
 // === URL ===
 // depend: uu.js
-uu.waste || (function(win, doc, uu) {
+uu.agein || (function(win, doc, uu) {
 var _curturl, // [lazy] uu.url(), current absolute-url cache
     _AMP = /&amp;|&/g,
     _URL = /^(\w+):\/\/([^\/:]+)(?::(\d*))?([^ ?#]*)(?:\?([^#]*))?(?:#(.*))?/i,

@@ -1,7 +1,7 @@
 
 // === Drag Event ===
 // depend: uu.js, uu.css.js
-uu.waste || (function(win, doc, uu) {
+uu.agein || (function(win, doc, uu) {
 
 // uu.Class.Drag - Generic Drag and Drop manage class
 uu.Class("Drag", {

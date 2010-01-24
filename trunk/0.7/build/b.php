@@ -43,7 +43,7 @@ function marge($packagefile, $outfile, $minify, $mobile) {
       $txt = preg_replace('/(\w+):\s+0/m', "$1: 0", $txt);         // xxx: 0
 
       // "  " -> "\t"
-      $txt = preg_replace_callback('/^[ ]{2,}/m', sp2tab, $txt); // 2sp -> 1tab
+      $txt = preg_replace_callback('/^[ ]{4,}/m', sp2tab, $txt); // 4space -> 1tab
 
       // function(arg,
       //          arg,       ->  function(arg, arg, arg)
@@ -59,9 +59,9 @@ function marge($packagefile, $outfile, $minify, $mobile) {
   }
   fclose($fp);
 }
-function sp2tab($m) { // "  " -> "\t"
+function sp2tab($m) { // "    " -> "\t"
   $lz = mb_strlen($m[0]);
-  return str_repeat("\t", $lz / 2) . ($lz % 2 ? " " : "");
+  return str_repeat("\t", $lz / 4) . ($lz % 4 ? " " : "");
 }
 function isWin() {
   return substr(PHP_OS, 0, 3) == 'WIN';

@@ -1,47 +1,13 @@
 
 // === VML Canvas ===
 // depend: uu.js, uu.color.js, uu.css.js
-uu.waste || (function(win, doc, uu, _impl, _math) {
-var _mtx2d          = _impl.mtx2d,
-    _mtx2dscale     = _mtx2d.scale,
-    _mtx2dmultiply  = _mtx2d.multiply,
-//  _mtx2dtranslate = _mtx2d.translate,
-    _round          = _math.round,
-    _ZOOM           = 10,
-    _HALF_ZOOM      = 5,
-    _SHADOW_WIDTH   = 4,
-    _TO_DEGREES     = 180 / _math.PI, // Math.toDegrees - from java.math
-    _GLOBAL_ALPHA   = "globalAlpha",
-    _GLOBAL_COMPO   = "globalCompositeOperation",
-    _STROKE_STYLE   = "strokeStyle",
-    _FILL_STYLE     = "fillStyle",
-    _SHADOW_OFFSET_X= "shadowOffsetX",
-    _SHADOW_OFFSET_Y= "shadowOffsetY",
-    _SHADOW_COLOR   = "shadowColor",
+uu.agein || (function(win, doc, uu) {
+var _SHADOW_WIDTH   = 4,
     _FILL_FUNC      = { 1: _linearGradientFill,
                         2: _radialGradientFill,
                         3: _patternFill },
     _COMPOSITES     = { "source-over": 0, "destination-over": 4, copy: 10 },
     _CAPS           = { square: "square", butt: "flat", round: "round" },
-    // fragments
-    _VML_COORD      = '" coordsize="100,100',
-    _VML_FILL       = '" filled="t" stroked="f',
-    _VML_STROKE     = '" filled="f" stroked="t',
-    _VML_PATH       = '" path="',
-    _VML_COLOR      = '" color="',
-    _VML_COLORS     = '" colors="',
-    _VML_OPACITY    = '" opacity="',
-    _VML_ANGLE      = '" angle="',
-    _VML_FILLTYPE_HEAD = ' filltype="',
-    _VML_TYPE_HEAD  = ' type="',
-    _VML_COLOR_HEAD = ' color="',
-    _VML_BASE_STYLE = ' style="position:absolute;z-index:',
-    _VML_SHAPE_STYLE= '<v:shape style="position:absolute;' +
-                      'width:10px;height:10px;z-index:',
-    _VML_END_SHAPE  = '" /></v:shape>',
-    _VML_VSTROKE    = '"><v:stroke',
-    _VML_VFILL      = '"><v:fill',
-    _TEXT_SPACE     = /(\t|\v|\f|\r\n|\r|\n)/g,
     _FILTER_PREFIX  = uu.ie8 ? "-ms-filter:'" : "filter:",
     _FILTER_POSTFIX = uu.ie8 ? "'" : "",
     _DX_PFX         = 'progid:DXImageTransform.Microsoft.';
@@ -79,8 +45,8 @@ function _rect(me, x, y, w, h) {
       m0 = m[0], m1 = m[1],
       m3 = m[3], m4 = m[4],
       m6 = m[6], m7 = m[7],
-      zm = _ZOOM,
-      hm = _HALF_ZOOM,
+      zm = 10.00,
+      hm = 5.00,
       xw = x + w,
       yh = y + h,
       c0x = (x  * m0 + y  * m3 + m6) * zm - hm,
@@ -103,17 +69,17 @@ function _rect(me, x, y, w, h) {
 // inner - map
 function _map(mtx, x, y) {
   return {
-    x: _round((x * mtx[0] + y * mtx[3] + mtx[6]) * _ZOOM - _HALF_ZOOM),
-    y: _round((x * mtx[1] + y * mtx[4] + mtx[7]) * _ZOOM - _HALF_ZOOM)
+    x: Math.round((x * mtx[0] + y * mtx[3] + mtx[6]) * 10.00 - 5.00),
+    y: Math.round((x * mtx[1] + y * mtx[4] + mtx[7]) * 10.00 - 5.00)
   };
 }
 
 function _map2(mtx, x1, y1, x2, y2) {
   return {
-    x1: _round((x1 * mtx[0] + y1 * mtx[3] + mtx[6]) * _ZOOM - _HALF_ZOOM),
-    y1: _round((x1 * mtx[1] + y1 * mtx[4] + mtx[7]) * _ZOOM - _HALF_ZOOM),
-    x2: _round((x2 * mtx[0] + y2 * mtx[3] + mtx[6]) * _ZOOM - _HALF_ZOOM),
-    y2: _round((x2 * mtx[1] + y2 * mtx[4] + mtx[7]) * _ZOOM - _HALF_ZOOM)
+    x1: Math.round((x1 * mtx[0] + y1 * mtx[3] + mtx[6]) * 10.00 - 5.00),
+    y1: Math.round((x1 * mtx[1] + y1 * mtx[4] + mtx[7]) * 10.00 - 5.00),
+    x2: Math.round((x2 * mtx[0] + y2 * mtx[3] + mtx[6]) * 10.00 - 5.00),
+    y2: Math.round((x2 * mtx[1] + y2 * mtx[4] + mtx[7]) * 10.00 - 5.00)
   };
 }
 
@@ -137,17 +103,16 @@ function clearRect(x, y, w, h) {
     var fg, zindex = 0,
         color = uu.css.bgcolor.inherit(this._node);
 
-    switch (_COMPOSITES[this[_GLOBAL_COMPO]]) {
+    switch (_COMPOSITES[this.globalCompositeOperation]) {
     case  4: zindex = --this._zindex; break;
     case 10: _clear(this);
     }
 
-    fg = [_VML_SHAPE_STYLE, zindex,
-          _VML_FILL, _VML_COORD, _VML_PATH, _rect(this, x, y, w, h),
-          _VML_VFILL, _VML_TYPE_HEAD, 'solid',
-          _VML_COLOR, color.hex,
-          _VML_OPACITY, (color.a * this[_GLOBAL_ALPHA]).toFixed(2),
-          _VML_END_SHAPE].join("");
+    fg = '<v:shape style="position:absolute;width:10px;height:10px;z-index:' + zindex +
+         '" filled="t" stroked="f" coordsize="100,100" path="' + _rect(this, x, y, w, h) +
+         '"><v:fill type="solid" color="' + color.hex +
+         '" opacity="' + (color.a * this.globalAlpha).toFixed(2) +
+         '" /></v:shape>'
 
     !this.xFlyweight &&
       this._history.push(this._clipPath ? (fg = _clippy(this, fg)) : fg);
@@ -170,8 +135,8 @@ function fillRect(x, y, w, h) {
   // When all canvases are painted out,
   // the fillStyle(background-color) is preserved.
   if (path === this._clipRect) { // full size path
-    if (typeof this[_FILL_STYLE] === "string") {
-      this.xClipStyle = this[_FILL_STYLE]; // keep bgcolor
+    if (typeof this.fillStyle === "string") {
+      this.xClipStyle = this.fillStyle; // keep bgcolor
     }
   }
   this.fill(0, path);
@@ -185,8 +150,8 @@ function closePath() {
 // CanvasRenderingContext2D.prototype.moveTo
 function moveTo(x, y) {
   var m = this._mtx, // inlining: _map(x, y)
-      ix = (x * m[0] + y * m[3] + m[6]) * _ZOOM - _HALF_ZOOM,
-      iy = (x * m[1] + y * m[4] + m[7]) * _ZOOM - _HALF_ZOOM;
+      ix = (x * m[0] + y * m[3] + m[6]) * 10.00 - 5.00,
+      iy = (x * m[1] + y * m[4] + m[7]) * 10.00 - 5.00;
 
   // http://d.hatena.ne.jp/uupaa/20090822
   this._path.push("m ", (ix+(ix<0?-0.49:0.5))|0, " ",
@@ -198,8 +163,8 @@ function moveTo(x, y) {
 // CanvasRenderingContext2D.prototype.lineTo
 function lineTo(x, y) {
   var m = this._mtx, // inlining: _map(x, y)
-      zm = _ZOOM,
-      hm = _HALF_ZOOM,
+      zm = 10.00,
+      hm = 5.00,
       ix = (x * m[0] + y * m[3] + m[6]) * zm - hm,
       iy = (x * m[1] + y * m[4] + m[7]) * zm - hm;
 
@@ -220,8 +185,8 @@ function quadraticCurveTo(cpx, cpy, x, y) {
       m0 = m[0], m1 = m[1],
       m3 = m[3], m4 = m[4],
       m6 = m[6], m7 = m[7],
-      zm = _ZOOM,
-      hm = _HALF_ZOOM,
+      zm = 10.00,
+      hm = 5.00,
       c0x = (x    * m0 + y    * m3 + m6) * zm - hm,
       c0y = (x    * m1 + y    * m4 + m7) * zm - hm,
       c1x = (cp1x * m0 + cp1y * m3 + m6) * zm - hm,
@@ -258,11 +223,11 @@ function rect(x, y, w, h) {
 
 // CanvasRenderingContext2D.prototype.arc
 function arc(x, y, radius, startAngle, endAngle, anticlockwise) {
-  radius *= _ZOOM;
-  var x1 = x + (_math.cos(startAngle) * radius) - _HALF_ZOOM,
-      y1 = y + (_math.sin(startAngle) * radius) - _HALF_ZOOM,
-      x2 = x + (_math.cos(endAngle)   * radius) - _HALF_ZOOM,
-      y2 = y + (_math.sin(endAngle)   * radius) - _HALF_ZOOM,
+  radius *= 10.00;
+  var x1 = x + (Math.cos(startAngle) * radius) - 5.00,
+      y1 = y + (Math.sin(startAngle) * radius) - 5.00,
+      x2 = x + (Math.cos(endAngle)   * radius) - 5.00,
+      y2 = y + (Math.sin(endAngle)   * radius) - 5.00,
       c0, c1, rx, ry;
 
   if (!anticlockwise) {
@@ -286,13 +251,13 @@ function fill(wire, path) {
   path = path || this._path.join("");
 
   var rv = [], fg, zindex = 0, mix, color,
-      style = wire ? this[_STROKE_STYLE]
-                   : this[_FILL_STYLE],
+      style = wire ? this.strokeStyle
+                   : this.fillStyle,
       // for shadow
       si = 0, so = 0, sd = 0, sx = 0, sy = 0,
-      scolor = uu.color(this[_SHADOW_COLOR]);
+      scolor = uu.color(this.shadowColor);
 
-  mix = _COMPOSITES[this[_GLOBAL_COMPO]];
+  mix = _COMPOSITES[this.globalCompositeOperation];
   if (mix) {
     (mix === 4) ? (zindex = --this._zindex) : _clear(this);
   }
@@ -301,33 +266,42 @@ function fill(wire, path) {
     color = uu.color(style);
 
     if (scolor.a) {
-      sx = _SHADOW_WIDTH / 2 + this[_SHADOW_OFFSET_X];
-      sy = _SHADOW_WIDTH / 2 + this[_SHADOW_OFFSET_Y];
+      sx = _SHADOW_WIDTH / 2 + this.shadowOffsetX;
+      sy = _SHADOW_WIDTH / 2 + this.shadowOffsetY;
       so = this.xShadowOpacityFrom;
       sd = this.xShadowOpacityDelta;
 
       for (; si < _SHADOW_WIDTH; so += sd, --sx, --sy, ++si) {
-        rv.push(_VML_SHAPE_STYLE, zindex,
-                ';left:', sx,
-                'px;top:', sy, 'px',
-                wire ? _VML_STROKE : _VML_FILL,
-                _VML_COORD, _VML_PATH, path,
-                wire ? _VML_VSTROKE : _VML_VFILL,
-                _VML_COLOR_HEAD, scolor.hex,
-                _VML_OPACITY, so.toFixed(2),
-                wire ? _buildStrokeProps(this) : "",
-                _VML_END_SHAPE);
+        if (wire) {
+          rv.push('<v:shape style="position:absolute;width:10px;height:10px;z-index:', zindex,
+                  ';left:', sx, 'px;top:', sy,
+                  'px" filled="f" stroked="t" coordsize="100,100" path="', path,
+                  '"><v:stroke color="', scolor.hex,
+                  '" opacity="', so.toFixed(2),
+                  _buildStrokeProps(this), '" /></v:shape>');
+        } else {
+          rv.push('<v:shape style="position:absolute;width:10px;height:10px;z-index:', zindex,
+                  ';left:', sx, 'px;top:', sy,
+                  'px" filled="t" stroked="f" coordsize="100,100" path="', path,
+                  '"><v:fill color="', scolor.hex,
+                  '" opacity="', so.toFixed(2),
+                  '" /></v:shape>');
+        }
       }
     }
-    rv.push(_VML_SHAPE_STYLE, zindex,
-            wire ? _VML_STROKE : _VML_FILL,
-            _VML_COORD, _VML_PATH, path,
-            wire ? _VML_VSTROKE : _VML_VFILL,
-            _VML_COLOR_HEAD, color.hex,
-            _VML_OPACITY, (color.a * this[_GLOBAL_ALPHA]).toFixed(2),
-            wire ? _buildStrokeProps(this) : "",
-            _VML_END_SHAPE);
-
+    if (wire) {
+      rv.push('<v:shape style="position:absolute;width:10px;height:10px;z-index:', zindex,
+              '" filled="f" stroked="t" coordsize="100,100" path="', path,
+              '"><v:stroke color="', color.hex,
+              '" opacity="', (color.a * this.globalAlpha).toFixed(2),
+              _buildStrokeProps(this), '" /></v:shape>');
+    } else {
+      rv.push('<v:shape style="position:absolute;width:10px;height:10px;z-index:', zindex,
+              '" filled="t" stroked="f" coordsize="100,100" path="', path,
+              '"><v:fill color="', color.hex,
+              '" opacity="', (color.a * this.globalAlpha).toFixed(2),
+              '" /></v:shape>');
+    }
     fg = rv.join("");
   } else {
     fg = _FILL_FUNC[style._type](this, style, path, wire, mix, zindex, scolor);
@@ -343,15 +317,15 @@ function _linearGradientFill(me, style, path, wire, mix, zindex, color) {
   var rv = [],
       fp = style._param,
       c0 = _map2(me._mtx, fp.x0, fp.y0, fp.x1, fp.y1),
-      angle = _math.atan2(c0.x2 - c0.x1, c0.y2 - c0.y1) * _TO_DEGREES,
+      angle = Math.atan2(c0.x2 - c0.x1, c0.y2 - c0.y1) * 180 / Math.PI,
       // for shadow
       si = 0, siz = _SHADOW_WIDTH, so = 0, sd = 0, sx = 0, sy = 0;
 
   (angle < 0) && (angle += 360);
 
   if (color.a) {
-    sx = _SHADOW_WIDTH / 2 + me[_SHADOW_OFFSET_X];
-    sy = _SHADOW_WIDTH / 2 + me[_SHADOW_OFFSET_Y];
+    sx = _SHADOW_WIDTH / 2 + me.shadowOffsetX;
+    sy = _SHADOW_WIDTH / 2 + me.shadowOffsetY;
     so = me.xShadowOpacityFrom;
     sd = me.xShadowOpacityDelta;
 
@@ -360,36 +334,40 @@ function _linearGradientFill(me, style, path, wire, mix, zindex, color) {
       sd = 0.2 / siz; // opacity from 0.05 to 0.25
     }
     for (; si < siz; so += sd, --sx, --sy, ++si) {
-      rv.push(_VML_SHAPE_STYLE, zindex,
-              ';left:', sx, 'px;top:', sy, 'px',
-              _VML_COORD, wire ? _VML_STROKE : _VML_FILL,
-              _VML_PATH, path,
-                // brush
-                wire ? _VML_VSTROKE : _VML_VFILL,
-                wire ? _VML_FILLTYPE_HEAD : _VML_TYPE_HEAD,
-                wire ? 'solid' : 'gradient" method="sigma" focus="0%',
-                _VML_COLOR, color.hex,
-                _VML_OPACITY, so.toFixed(2),
-                _VML_ANGLE, angle,
-                wire ? _buildStrokeProps(me) : "",
-              _VML_END_SHAPE);
+      if (wire) {
+        rv.push('<v:shape style="position:absolute;width:10px;height:10px;z-index:', zindex,
+                ';left:', sx, 'px;top:', sy,
+                'px" coordsize="100,100" filled="f" stroked="t" path="', path,
+                '"><v:stroke filltype="solid" color="', color.hex,
+                '" opacity="', so.toFixed(2),
+                '" angle="', angle,
+                _buildStrokeProps(me), '" /></v:shape>');
+      } else {
+        rv.push('<v:shape style="position:absolute;width:10px;height:10px;z-index:', zindex,
+                ';left:', sx, 'px;top:', sy,
+                'px" coordsize="100,100" filled="t" stroked="f" path="', path,
+                '"><v:fill type="gradient" method="sigma" focus="0%" color="', color.hex,
+                '" opacity="', so.toFixed(2),
+                '" angle="', angle, '" /></v:shape>');
+      }
     }
   }
-  rv.push(_VML_SHAPE_STYLE, zindex,
-          _VML_COORD, wire ? _VML_STROKE : _VML_FILL,
-          _VML_PATH, path,
-            // brush
-            wire ? _VML_VSTROKE : _VML_VFILL,
-            wire ? _VML_FILLTYPE_HEAD : _VML_TYPE_HEAD,
-            wire ? 'solid' : 'gradient" method="sigma" focus="0%',
-            wire ? _VML_COLOR : _VML_COLORS,
-            wire ? uu.color(me.xMissColor).hex
-                 : _buildGradationColor(style._colorStop),
-            _VML_OPACITY, me[_GLOBAL_ALPHA],
-            '" o:opacity2="', me[_GLOBAL_ALPHA], // fill only
-            _VML_ANGLE, angle,
-            wire ? _buildStrokeProps(me) : "",
-          _VML_END_SHAPE);
+  if (wire) {
+    rv.push('<v:shape style="position:absolute;width:10px;height:10px;z-index:', zindex,
+            '" coordsize="100,100" filled="f" stroked="t" path="', path,
+            '"><v:stroke filltype="solid" color="', uu.color(me.xMissColor).hex,
+            '" opacity="', me.globalAlpha,
+            '" o:opacity2="', me.globalAlpha, // fill only
+            '" angle="', angle, _buildStrokeProps(me), '" /></v:shape>');
+  } else {
+    rv.push('<v:shape style="position:absolute;width:10px;height:10px;z-index:', zindex,
+            '" coordsize="100,100" filled="t" stroked="f" path="', path,
+            '"><v:fill type="gradient" method="sigma" focus="0%" colors="',
+            _buildGradationColor(style._colorStop),
+            '" opacity="', me.globalAlpha,
+            '" o:opacity2="', me.globalAlpha, // fill only
+            '" angle="', angle, '" /></v:shape>');
+  }
   return rv.join("");
 }
 
@@ -414,8 +392,8 @@ function _radialGradientFill(me, style, path, wire, mix, zindex, color) {
   }
 
   if (color.a) {
-    sx = _SHADOW_WIDTH / 2 + me[_SHADOW_OFFSET_X];
-    sy = _SHADOW_WIDTH / 2 + me[_SHADOW_OFFSET_Y];
+    sx = _SHADOW_WIDTH / 2 + me.shadowOffsetX;
+    sy = _SHADOW_WIDTH / 2 + me.shadowOffsetY;
     so = me.xShadowOpacityFrom;
     sd = me.xShadowOpacityDelta;
 
@@ -425,62 +403,75 @@ function _radialGradientFill(me, style, path, wire, mix, zindex, color) {
     }
 
     if (wire) {
-      focusParam = _VML_VSTROKE + _VML_FILLTYPE_HEAD + 'tile' +
+      focusParam = '"><v:stroke' + ' filltype="' + 'tile' +
                    _buildStrokeProps(me);
     } else {
-      focusParam = [_VML_VFILL, _VML_TYPE_HEAD,
+      focusParam = ['"><v:fill', ' type="',
                     'gradientradial" method="sigma" focussize="',
                     fsize, ',', fsize,
                     '" focusposition="', fposX, ',', fposY].join("");
     }
     for (; si < siz; so += sd, --sx, --sy, ++si) {
-      rv.push('<v:oval', _VML_BASE_STYLE, zindex,
-              ';left:', _round(c0.x / _ZOOM) + sx,
-              'px;top:', _round(c0.y / _ZOOM) + sy,
-              'px;width:', r1x, 'px;height:', r1y,
-              'px', wire ? _VML_STROKE : _VML_FILL,
-              '" coordsize="11000,11000',
-              focusParam, _VML_OPACITY, so.toFixed(2),
-              _VML_COLOR, color.hex,
-              '" /></v:oval>');
+      if (wire) {
+        rv.push('<v:oval style="position:absolute;z-index:', zindex,
+                ';left:', Math.round(c0.x / 10.00) + sx,
+                'px;top:', Math.round(c0.y / 10.00) + sy,
+                'px;width:', r1x, 'px;height:', r1y,
+                'px" filled="f" stroked="t" coordsize="11000,11000',
+                focusParam, '" opacity="', so.toFixed(2),
+                '" color="', color.hex, '" /></v:oval>');
+      } else {
+        rv.push('<v:oval style="position:absolute;z-index:', zindex,
+                ';left:', Math.round(c0.x / 10.00) + sx,
+                'px;top:', Math.round(c0.y / 10.00) + sy,
+                'px;width:', r1x, 'px;height:', r1y,
+                'px" filled="t" stroked="f" coordsize="11000,11000',
+                focusParam, '" opacity="', so.toFixed(2),
+                '" color="', color.hex, '" /></v:oval>');
+      }
     }
   }
 
   if (wire) {
     // VML has not stroke gradient
-    brush = [_VML_VSTROKE, _VML_FILLTYPE_HEAD, 'tile',
+    brush = ['"><v:stroke', ' filltype="', 'tile',
              _buildStrokeProps(me),
-             _VML_OPACITY, me[_GLOBAL_ALPHA],
-             _VML_COLOR, uu.color(me.xMissColor).hex].join("");
+             '" opacity="', me.globalAlpha,
+             '" color="', uu.color(me.xMissColor).hex].join("");
   } else {
     // fill outside
     if (style._colorStop.length) {
       v = style._colorStop[0]; // 0 = outer color
       if (v.color.a > 0.001) {
         if (mix === 4) { zindex2 = --me._zindex; }
-        rv.push(_VML_SHAPE_STYLE, zindex2,
-                _VML_FILL, _VML_COORD, _VML_PATH, path,
-                _VML_VFILL, _VML_TYPE_HEAD, 'solid',
-                _VML_COLOR, v.color.hex,
-                _VML_OPACITY, (v.color.a * me[_GLOBAL_ALPHA]).toFixed(2),
-                _VML_END_SHAPE);
+        rv.push('<v:shape style="position:absolute;width:10px;height:10px;z-index:', zindex2,
+                '" filled="t" stroked="f" coordsize="100,100" path="', path,
+                '"><v:fill type="solid" color="', v.color.hex,
+                '" opacity="', (v.color.a * me.globalAlpha).toFixed(2),
+                '" /></v:shape>');
       }
     }
-    brush = [_VML_VFILL, _VML_TYPE_HEAD,
-             'gradientradial" method="sigma" focussize="',
-             fsize , ',', fsize,
+    brush = ['"><v:fill type="gradientradial" method="sigma" focussize="', fsize , ',', fsize,
              '" focusposition="', fposX, ',', fposY,
-             _VML_OPACITY, me[_GLOBAL_ALPHA],
-             '" o:opacity2="', me[_GLOBAL_ALPHA],
-             _VML_COLORS, _buildGradationColor(style._colorStop)].join("");
+             '" opacity="', me.globalAlpha,
+             '" o:opacity2="', me.globalAlpha,
+             '" colors="', _buildGradationColor(style._colorStop)].join("");
   }
-  rv.push('<v:oval', _VML_BASE_STYLE, zindex, // need z-index
-          ';left:', _round(c0.x / _ZOOM),
-          'px;top:', _round(c0.y / _ZOOM),
-          'px;width:', r1x, 'px;height:', r1y, 'px',
-          wire ? _VML_STROKE : _VML_FILL,
-          '" coordsize="11000,11000', brush,
-          '" /></v:oval>');
+  if (wire) {
+    rv.push('<v:oval style="position:absolute;z-index:', zindex, // need z-index
+            ';left:', Math.round(c0.x / 10.00),
+            'px;top:', Math.round(c0.y / 10.00),
+            'px;width:', r1x, 'px;height:', r1y,
+            'px" filled="f" stroked="t" coordsize="11000,11000', brush,
+            '" /></v:oval>');
+  } else {
+    rv.push('<v:oval style="position:absolute;z-index:', zindex, // need z-index
+            ';left:', Math.round(c0.x / 10.00),
+            'px;top:', Math.round(c0.y / 10.00),
+            'px;width:', r1x, 'px;height:', r1y,
+            'px" filled="t" stroked="f" coordsize="11000,11000', brush,
+            '" /></v:oval>');
+  }
   return rv.join("");
 }
 
@@ -491,37 +482,39 @@ function _patternFill(me, style, path, wire, mix, zindex, color) {
       si = 0, so = 0, sd = 0, sx = 0, sy = 0;
 
   if (color.a) {
-    sx = _SHADOW_WIDTH / 2 + me[_SHADOW_OFFSET_X];
-    sy = _SHADOW_WIDTH / 2 + me[_SHADOW_OFFSET_Y];
+    sx = _SHADOW_WIDTH / 2 + me.shadowOffsetX;
+    sy = _SHADOW_WIDTH / 2 + me.shadowOffsetY;
     so = me.xShadowOpacityFrom;
     sd = me.xShadowOpacityDelta;
 
     for (; si < _SHADOW_WIDTH; so += sd, --sx, --sy, ++si) {
-      rv.push(_VML_SHAPE_STYLE, zindex,
-              ';left:', sx, 'px;top:', sy, 'px',
-              _VML_COORD,
-              wire ? _VML_STROKE : _VML_FILL,
-              _VML_PATH, path,
-                // brush
-                wire ? _VML_VSTROKE: _VML_VFILL,
-                wire ? _VML_FILLTYPE_HEAD : _VML_TYPE_HEAD, 'solid',
-                wire ? _buildStrokeProps(me) : "",
-                _VML_COLOR, color.hex,
-                _VML_OPACITY, so.toFixed(2),
-              _VML_END_SHAPE);
+      if (wire) {
+        rv.push('<v:shape style="position:absolute;width:10px;height:10px;z-index:', zindex,
+                ';left:', sx, 'px;top:', sy,
+                'px" coordsize="100,100" filled="f" stroked="t" path="', path,
+                '"><v:stroke filltype="', _buildStrokeProps(me),
+                '" color="', color.hex,
+                '" opacity="', so.toFixed(2), '" /></v:shape>');
+      } else {
+        rv.push('<v:shape style="position:absolute;width:10px;height:10px;z-index:', zindex,
+                ';left:', sx, 'px;top:', sy,
+                'px" coordsize="100,100" filled="t" stroked="f" path="', path,
+                '"><v:fill type="solid" color="', color.hex,
+                '" opacity="', so.toFixed(2), '" /></v:shape>');
+      }
     }
   }
-  rv.push(_VML_SHAPE_STYLE, zindex,
-          _VML_COORD,
-          wire ? _VML_STROKE : _VML_FILL,
-          _VML_PATH, path,
-            // brush
-            wire ? _VML_VSTROKE : _VML_VFILL,
-            wire ? _VML_FILLTYPE_HEAD : _VML_TYPE_HEAD, 'tile',
-            _VML_OPACITY, me[_GLOBAL_ALPHA],
-            '" src="', style._src,
-            wire ? _buildStrokeProps(me) : "",
-          _VML_END_SHAPE);
+  if (wire) {
+    rv.push('<v:shape style="position:absolute;width:10px;height:10px;z-index:', zindex,
+            '" coordsize="100,100" filled="f" stroked="t" path="', path,
+            '"><v:stroke filltype="tile" opacity="', me.globalAlpha,
+            '" src="', style._src, _buildStrokeProps(me), '" /></v:shape>');
+  } else {
+    rv.push('<v:shape style="position:absolute;width:10px;height:10px;z-index:', zindex,
+            '" coordsize="100,100" filled="t" stroked="f" path="', path,
+            '"><v:fill type="tile" opacity="', me.globalAlpha,
+            '" src="', style._src, '" /></v:shape>');
+  }
   return rv.join("");
 }
 
@@ -537,20 +530,19 @@ function _clippy(me, fg) {
 
     me.xClipStyle = color.hex;
   }
-  return [fg, '<v:shape style="position:absolute;width:10px;height:10px',
-          _VML_FILL, _VML_COORD, _VML_PATH, me._clipPath,
-          _VML_VFILL, _VML_TYPE_HEAD, 'solid', _VML_COLOR, me.xClipStyle,
-          _VML_END_SHAPE].join("");
+  return [fg,
+          '<v:shape style="position:absolute;width:10px;height:10px" filled="t" stroked="f" coordsize="100,100" path="', me._clipPath,
+          '"><v:fill type="solid" color="', me.xClipStyle, '" /></v:shape>'].join("");
 }
 
 // CanvasRenderingContext2D.prototype.fillText
 function fillText(text, x, y, maxWidth, wire) {
-  text = text.replace(_TEXT_SPACE, " ");
-  var style = wire ? this[_STROKE_STYLE] : this[_FILL_STYLE],
+  text = text.replace(/(\t|\v|\f|\r\n|\r|\n)/g, " ");
+  var style = wire ? this.strokeStyle : this.fillStyle,
       types = (typeof style === "string") ? 0 : style._type,
       rv = [], fg, color,
       align = this.textAlign, dir = "ltr",
-      font = _impl.parseFont(this.font, this.canvas),
+      font = uu.font.parse(this.font, this.canvas),
       m = this._mtx, zindex = 0,
       fp, c0, // for grad
       skew = m[0].toFixed(3) + ',' + m[3].toFixed(3) + ',' +
@@ -560,9 +552,9 @@ function fillText(text, x, y, maxWidth, wire) {
       offset = { x: 0, y: 0 },
       // for shadow
       si = 0, so = 0, sd = 0, sx = 0, sy = 0,
-      scolor = uu.color(this[_SHADOW_COLOR]);
+      scolor = uu.color(this.shadowColor);
 
-  switch (_COMPOSITES[this[_GLOBAL_COMPO]]) {
+  switch (_COMPOSITES[this.globalCompositeOperation]) {
   case  4: zindex = --this._zindex; break;
   case 10: _clear(this);
   }
@@ -579,58 +571,55 @@ function fillText(text, x, y, maxWidth, wire) {
   if (this.textBaseline === "top") {
     // text margin-top fine tuning
     offset.y = font.size /
-        (_impl.FONT_SCALES[font.rawfamily.split(",")[0].toUpperCase()] ||
+        (uu.font.SCALE[font.rawfamily.split(",")[0].toUpperCase()] ||
          this.xTextMarginTop);
   }
   skewOffset = _map(this._mtx, x + offset.x, y + offset.y);
 
   if (scolor.a) {
-    sx = _SHADOW_WIDTH / 2 + this[_SHADOW_OFFSET_X];
-    sy = _SHADOW_WIDTH / 2 + this[_SHADOW_OFFSET_Y];
-    so = _math.max(this.xShadowOpacityFrom + 0.9, 1);
+    sx = _SHADOW_WIDTH / 2 + this.shadowOffsetX;
+    sy = _SHADOW_WIDTH / 2 + this.shadowOffsetY;
+    so = Math.max(this.xShadowOpacityFrom + 0.9, 1);
     sd = this.xShadowOpacityDelta;
 
     for (; si < _SHADOW_WIDTH; so += sd, --sx, --sy, ++si) {
-      rv.push('<v:line',
-              _VML_BASE_STYLE, zindex, ';width:1px;height:1px;left:', sx,
+      rv.push('<v:line style="position:absolute;z-index:', zindex,
+              ';width:1px;height:1px;left:', sx,
               'px;top:', sy, 'px',
-              _VML_FILL, '" from="', -left, ' 0" to="', right,
-              ' 0.05', _VML_COORD, '">',
-              '<v:fill color="', scolor.hex,
-              '" opacity="', so.toFixed(2), '" />',
-              '<v:skew on="t" matrix="', skew ,'" ',
-              ' offset="', _round(skewOffset.x / _ZOOM), ',',
-                           _round(skewOffset.y / _ZOOM),
-              '" origin="', left ,' 0" />',
-              '<v:path textpathok="t" />',
-              '<v:textpath on="t" string="', uu.esc(text),
+              '" filled="t" stroked="f" from="', -left, ' 0" to="', right,
+              ' 0.05" coordsize="100,100"><v:fill color="', scolor.hex,
+              '" opacity="', so.toFixed(2),
+              '" /><v:skew on="t" matrix="', skew,
+              '" offset="', Math.round(skewOffset.x / 10.00), ',',
+                            Math.round(skewOffset.y / 10.00),
+              '" origin="', left,
+              ' 0" /><v:path textpathok="t" /><v:textpath on="t" string="',
+              uu.esc(text),
               '" style="v-text-align:', align,
-              ';font:', uu.esc(font.formal),
-              '" /></v:line>');
+              ';font:', uu.esc(font.formal), '" /></v:line>');
     }
   }
 
-  rv.push('<v:line',
-          _VML_BASE_STYLE, zindex, ';width:1px;height:1px',
-          _VML_FILL, '" from="', -left, ' 0" to="', right,
-          ' 0.05', _VML_COORD, '">');
+  rv.push('<v:line style="position:absolute;z-index:', zindex,
+          ';width:1px;height:1px" filled="t" stroked="f" from="', -left,
+          ' 0" to="', right, ' 0.05" coordsize="100,100">');
 
   switch (types) {
   case 0:
     color = uu.color(style);
     rv.push('<v:fill color="', color.hex,
-            '" opacity="', color.a * this[_GLOBAL_ALPHA], '" />');
+            '" opacity="', color.a * this.globalAlpha, '" />');
     break;
   case 1:
   case 2:
     fp = style._param;
     c0 = _map2(this._mtx, fp.x0, fp.y0, this._mtx, fp.x1, fp.y1);
-    rv.push('<v:fill type="gradient" method="sigma" focus="0%',
-            _VML_COLORS, _buildGradationColor(style._colorStop),
-            _VML_OPACITY, this[_GLOBAL_ALPHA],
-            '" o:opacity2="', this[_GLOBAL_ALPHA],
-            _VML_ANGLE,
-            _math.atan2(c0.x2 - c0.x1, c0.y2 - c0.y1) * _TO_DEGREES,
+    rv.push('<v:fill type="gradient" method="sigma" focus="0%" colors="',
+            _buildGradationColor(style._colorStop),
+            '" opacity="', this.globalAlpha,
+            '" o:opacity2="', this.globalAlpha,
+            '" angle="',
+            Math.atan2(c0.x2 - c0.x1, c0.y2 - c0.y1) * 180 / Math.PI,
             '" />');
     break;
   case 3:
@@ -638,12 +627,12 @@ function fillText(text, x, y, maxWidth, wire) {
             style._src, '" />');
     break;
   }
-  rv.push('<v:skew on="t" matrix="', skew ,'" ',
-          ' offset="', _round(skewOffset.x / _ZOOM), ',',
-                       _round(skewOffset.y / _ZOOM),
-          '" origin="', left ,' 0" />',
-          '<v:path textpathok="t" />',
-          '<v:textpath on="t" string="', uu.esc(text),
+  rv.push('<v:skew on="t" matrix="', skew,
+          '" offset="', Math.round(skewOffset.x / 10.00), ',',
+                        Math.round(skewOffset.y / 10.00),
+          '" origin="', left,
+          ' 0" /><v:path textpathok="t" /><v:textpath on="t" string="',
+          uu.esc(text),
           '" style="v-text-align:', align,
           ';font:', uu.esc(font.formal),
           '" /></v:line>');
@@ -658,40 +647,39 @@ function fillText(text, x, y, maxWidth, wire) {
 // drawImage(image, dx, dy)
 // drawImage(image, dx, dy, dw, dh)
 // drawImage(image, sx, sy, sw, sh, dx, dy, dw, dh)
-function drawImage(image) {
-  var info = _impl.drawImageArgs.apply(this, arguments),
-      method = info.az === 3 ? "image" : "scale",
-      dx = info.dx,
-      dy = info.dy,
-      dw = info.dw,
-      dh = info.dh,
-      sx = info.sx,
-      sy = info.sy,
-      sw = info.sw,
-      sh = info.sh,
-      iw = info.dim.w,
-      ih = info.dim.h,
+function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
+  var dim = uu.img.actsize(image),
+      az = arguments.length, full = (az === 9),
+      sx = full ? a1 : 0,
+      sy = full ? a2 : 0,
+      sw = full ? a3 : dim.w,
+      sh = full ? a4 : dim.h,
+      dx = full ? a5 : a1,
+      dy = full ? a6 : a2,
+      dw = full ? a7 : a3 || dim.w,
+      dh = full ? a8 : a4 || dim.h,
+      method = az === 3 ? "image" : "scale",
       rv = [], fg, m,
       frag = [], sfrag, tfrag, // code fragment
       i = 0, iz, me = this, c0, zindex = 0,
       sizeTrans, // 0: none size transform, 1: size transform
       // for shadow
       si = 0, so = 0, sd = 0, shx = 0, shy = 0, shw = _SHADOW_WIDTH,
-      scolor = uu.color(this[_SHADOW_COLOR]);
+      scolor = uu.color(this.shadowColor);
 
   function trans(m, x, y, w, h) {
     var c0 = _map2(me._mtx, x, y, x + w, y),
         c1 = _map2(me._mtx, x + w, y + h, x, y + h);
     return [";padding:0 ",
-            _round(_math.max(c0.x1, c0.x2, c1.x1, c1.x2) / _ZOOM), "px ",
-            _round(_math.max(c0.y1, c0.y2, c1.y1, c1.y2) / _ZOOM), "px 0;",
+            Math.round(Math.max(c0.x1, c0.x2, c1.x1, c1.x2) / 10.00), "px ",
+            Math.round(Math.max(c0.y1, c0.y2, c1.y1, c1.y2) / 10.00), "px 0;",
             _FILTER_PREFIX, _DX_PFX, "Matrix(M11=", m[0], ",M12=", m[3],
               ",M21=", m[1], ",M22=", m[4],
-              ",Dx=", _round(c0.x1 / _ZOOM),
-              ",Dy=", _round(c0.y1 / _ZOOM), ")", _FILTER_POSTFIX].join("");
+              ",Dx=", Math.round(c0.x1 / 10.00),
+              ",Dy=", Math.round(c0.y1 / 10.00), ")", _FILTER_POSTFIX].join("");
   }
 
-  switch (_COMPOSITES[this[_GLOBAL_COMPO]]) {
+  switch (_COMPOSITES[this.globalCompositeOperation]) {
   case  4: zindex = --this._zindex; break;
   case 10: _clear(this);
   }
@@ -701,17 +689,16 @@ function drawImage(image) {
 
     if (this.xImageRender) {
       rv.push(
-        '<v:image', _VML_BASE_STYLE, zindex,
+        '<v:image style="position:absolute;z-index:', zindex,
         ';width:',    dw,
         'px;height:', dh,
-        'px;left:', _round(c0.x / _ZOOM),
-        'px;top:',  _round(c0.y / _ZOOM),
-        'px', _VML_COORD,
-        '" src="', image.src,
-        '" cropleft="',   sx / iw,
-        '" croptop="',    sy / ih,
-        '" cropright="',  (iw - sx - sw) / iw,
-        '" cropbottom="', (ih - sy - sh) / ih,
+        'px;left:', Math.round(c0.x / 10.00),
+        'px;top:',  Math.round(c0.y / 10.00),
+        'px" coordsize="100,100" src="', image.src,
+        '" cropleft="',   sx / dim.w,
+        '" croptop="',    sy / dim.h,
+        '" cropright="',  (dim.w - sx - sw) / dim.w,
+        '" cropbottom="', (dim.h - sy - sh) / dim.h,
         '" />');
     } else {
       sizeTrans = (sx || sy); // 0: none size transform, 1: size transform
@@ -719,20 +706,20 @@ function drawImage(image) {
 
       frag = [
         // shadow only
-        '<div' + _VML_BASE_STYLE + (zindex - 10) +
+        '<div style="position:absolute;z-index:' + (zindex - 10) +
             ';left:$1px;top:$2px' + tfrag + '">',
         '<div style="position:relative;overflow:hidden;width:' +
-            _round(dw) + 'px;height:' + _round(dh) + 'px">',
+            Math.round(dw) + 'px;height:' + Math.round(dh) + 'px">',
         !sizeTrans ? "" : [
-          '<div style="width:', _math.ceil(dw + sx * dw / sw),
-            'px;height:', _math.ceil(dh + sy * dh / sh),
+          '<div style="width:', Math.ceil(dw + sx * dw / sw),
+            'px;height:', Math.ceil(dh + sy * dh / sh),
             'px;',
             _FILTER_PREFIX, _DX_PFX,
             'Matrix(Dx=', (-sx * dw / sw).toFixed(3),
                   ',Dy=', (-sy * dh / sh).toFixed(3), ')',
             _FILTER_POSTFIX, '">'].join(""),
-        '<div style="width:' + _round(iw * dw / sw) +
-            'px;height:' + _round(ih * dh / sh) + 'px;',
+        '<div style="width:' + Math.round(dim.w * dw / sw) +
+            'px;height:' + Math.round(dim.h * dh / sh) + 'px;',
         // shadow only
         'background-color:' + scolor.hex + ';' +
           _FILTER_PREFIX + _DX_PFX + 'Alpha(opacity=$3)' + _FILTER_POSTFIX,
@@ -745,8 +732,8 @@ function drawImage(image) {
       ];
 
       if (scolor.a) {
-        shx = shw / 2 + this[_SHADOW_OFFSET_X];
-        shy = shw / 2 + this[_SHADOW_OFFSET_Y];
+        shx = shw / 2 + this.shadowOffsetX;
+        shy = shw / 2 + this.shadowOffsetY;
         so = this.xShadowOpacityFrom;
         sd = this.xShadowOpacityDelta;
 
@@ -754,29 +741,29 @@ function drawImage(image) {
                 frag[4] + frag[6];
         for (; si < shw; so += sd, --shx, --shy, ++si) {
           rv.push(
-            sfrag.replace(/\$1/, this._efx ? shx : _round(c0.x / _ZOOM) + shx)
-                 .replace(/\$2/, this._efx ? shy : _round(c0.y / _ZOOM) + shy)
+            sfrag.replace(/\$1/, this._efx ? shx : Math.round(c0.x * 0.1) + shx)
+                 .replace(/\$2/, this._efx ? shy : Math.round(c0.y * 0.1) + shy)
                  .replace(/\$3/, (so * 100).toFixed(2)));
         }
       }
 
-      rv.push('<div', _VML_BASE_STYLE, zindex);
+      rv.push('<div style="position:absolute;z-index:', zindex);
       if (this._efx) {
         rv.push(tfrag, '">');
       } else { // 1:1 scale
-        rv.push(';top:', _round(c0.y / _ZOOM),
-                'px;left:', _round(c0.x / _ZOOM), 'px">')
+        rv.push(';top:', Math.round(c0.y * 0.1),
+                'px;left:', Math.round(c0.x * 0.1), 'px">')
       }
       rv.push(frag[1], frag[2], frag[3], frag[5], frag[6]);
     }
     fg = rv.join("");
   } else {
     c0 = _map(this._mtx, dx, dy);
-    switch (info.az) {
+    switch (az) {
     case 3: // 1:1 scale
-            rv.push('<div', _VML_BASE_STYLE, zindex,
-                    ';left:', _round(c0.x / _ZOOM),
-                    'px;top:', _round(c0.y / _ZOOM), 'px">')
+            rv.push('<div style="position:absolute;z-index:', zindex,
+                    ';left:', Math.round(c0.x * 0.1),
+                    'px;top:', Math.round(c0.y * 0.1), 'px">')
             iz = image.uuctx2d._history.length;
 
             for (; i < iz; ++i) {
@@ -785,11 +772,11 @@ function drawImage(image) {
             rv.push('</div>');
             break;
     case 5:
-            m = _mtx2dmultiply(_mtx2dscale(dw / iw, dh / ih), this._mtx);
-            rv.push('<div', _VML_BASE_STYLE, zindex,
+            m = uu.m2d.scale(dw / dim.w, dh / dim.h, this._mtx);
+            rv.push('<div style="position:absolute;z-index:', zindex,
                     trans(m, dx, dy, dw, dh),
-                    '"><div style="width:',  _round(iw * dw / sw),
-                               'px;height:', _round(ih * dh / sh), 'px">');
+                    '"><div style="width:',  Math.round(dim.w * dw / sw),
+                               'px;height:', Math.round(dim.h * dh / sh), 'px">');
             iz = image.uuctx2d._history.length;
 
             for (; i < iz; ++i) {
@@ -798,9 +785,8 @@ function drawImage(image) {
             rv.push('</div></div>');
             break;
     case 9: // buggy(not impl)
-            m = _mtx2dmultiply(_mtx2dscale(dw / sw, dh / sh), this._mtx);
-//          m = _mtx2dmultiply(_mtx2dtranslate(dx, dy), m);
-            rv.push('<div', _VML_BASE_STYLE, zindex,
+            m = uu.m2d.scale(dw / sw, dh / sh, this._mtx);
+            rv.push('<div style="position:absolute;z-index:', zindex,
                     ';overflow:hidden',
                     trans(m, dx, dy, dw, dh), '">');
 
@@ -815,9 +801,9 @@ function drawImage(image) {
     fg = rv.join("");
     // effect CSS::opacity and filter::opacity
 //    fg = fg.replace(/opacity=\"([\d\.]+)\"/g, function(m, opa) {
-//      return 'opacity="' + (opa * me[_GLOBAL_ALPHA]).toFixed(3) + '"';
+//      return 'opacity="' + (opa * me.globalAlpha).toFixed(3) + '"';
 //    }).replace(/opacity=([\d\.]+)/g, function(m, opa) {
-//      return 'opacity=' + (opa * me[_GLOBAL_ALPHA]).toFixed(3);
+//      return 'opacity=' + (opa * me.globalAlpha).toFixed(3);
 //    });
   }
   !this.xFlyweight &&
@@ -878,11 +864,11 @@ function qstroke(hexcolor, alpha, lineWidth) {
 
 // CanvasRenderingContext2D.prototype.qstrokeRect
 function qstrokeRect(x, y, w, h, hexcolor, alpha, lineWidth) {
-  var hm = _HALF_ZOOM,
-      ix = x * _ZOOM,
-      iy = y * _ZOOM,
-      iw = (x + w) * _ZOOM,
-      ih = (y + h) * _ZOOM;
+  var hm = 5.00,
+      ix = x * 10.00,
+      iy = y * 10.00,
+      iw = (x + w) * 10.00,
+      ih = (y + h) * 10.00;
 
   this._path = ["m " + (ix - hm) + " " + (iy - hm) +
                 "l " + (ix - hm) + " " + (ih - hm) +
@@ -912,5 +898,5 @@ function unlock() {
   this._lockState = 0;
 }
 
-})(window, document, uu, uu.canvas.impl, Math);
+})(window, document, uu);
 

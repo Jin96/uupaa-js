@@ -1,7 +1,7 @@
 
 // === CSS Validator ===
 // depend: uu.js, uu.color.js, uu.str.js
-uu.waste || (function(uu) {
+uu.agein || (function(uu) {
 var _LENGTH = /^(?:[\d\.]+(%|px|em|pt|cm|mm|in|pc|px)|0)$/,
     _HEAD_DIGIT = /^\d/,
     _WIDTH_KEYWORD = /^(?:thin|medium|thick)$/,

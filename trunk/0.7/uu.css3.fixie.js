@@ -1,7 +1,7 @@
 
 // === IE Boost ===
 // depend: uu.js, uu.css.js, uu.css3.js
-uu.waste || (function(win, doc, uu) {
+uu.agein || (function(win, doc, uu) {
 var _styleSheetID = "uucss3ie",
     _spacer = uu.config.imgdir + "uu1dot.gif",
     _job = { position: [], maxmin: [] },

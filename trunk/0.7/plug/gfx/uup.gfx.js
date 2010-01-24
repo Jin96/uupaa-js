@@ -1,6 +1,6 @@
 
 // === gfx plugin ===
-uu.waste || (function(uu, uup) {
+uu.again || (function(uu, uup) {
 
 uup.gfx = {};
 

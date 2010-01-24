@@ -1,7 +1,7 @@
 
 // === LZW ===
 // depend: uu.js
-uu.waste || (function(uu) {
+uu.agein || (function(uu) {
 
 uu.mix(uu.codec, {
   lzw: {

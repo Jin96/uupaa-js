@@ -9,7 +9,7 @@
 // type HSLAHash = { h: 0, s: 0, l: 0, a: 0 }
 // type W3CNamedColorString = "pink"
 
-uu.waste || (function(win, doc, uu) {
+uu.agein || (function(win, doc, uu) {
 var _round = Math.round;
 
 uu.mix(uu.color, {

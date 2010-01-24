@@ -14,6 +14,8 @@ uu.css.validate.js
 uu.query.js
 // canvas
 uu.img.js
+uu.font.js
+uu.matrix2d.js
 uu.canvas.js
 uu.canvas.sl.js
 uu.canvas.vml.js

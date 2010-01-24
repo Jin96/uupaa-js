@@ -1,7 +1,7 @@
 
 // === track plugin (Google Analytics) ===
 // depend: uu.js
-uu.waste || (function(win, doc, uu, uup) {
+uu.again || (function(win, doc, uu, uup) {
 
 uup.track = uuptrack; // uu.track("UA-XXXXX-X")
 

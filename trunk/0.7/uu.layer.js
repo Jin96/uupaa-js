@@ -1,7 +1,7 @@
 
 // === Layer ===
 // depend: uu.js, uu.css.js, uu.canvas.js
-uu.waste || (function(win, doc, uu) {
+uu.agein || (function(win, doc, uu) {
 
 var _TO_RADIANS = Math.PI / 180, // Math.toRadians - from java.math
     _360DEG = 360 * _TO_RADIANS, // 6.283185307179586
@@ -190,7 +190,8 @@ function getViewInfo() { // @return Hash: { clid, cctx, front, rear,
 
 // uu.layer.createLayer - create child layer
 function createLayer(id,       // @param String: layer id
-                     type,     // @param String: "canvas", "vmlcanvas",
+                     type,     // @param String: "canvas", "vmlcanvas", "flcanvas",
+                               //                "slcanvas",
                                //                "div", "img", etc...
                      hide,     // @param Boolean(= false): true = hidden layer
                      back,     // @param Boolean(= false): back insertion
@@ -203,7 +204,9 @@ function createLayer(id,       // @param String: layer id
       w, h;
 
   if (type.indexOf("canvas") >= 0) {
-    elm = uue("canvas", type === "vmlcanvas");
+//  elm = uue("canvas", type === "vmlcanvas");
+    elm = uu.canvas.create(type === "vmlcanvas" ? "vml" :
+                           type === "slcanvas" ? "sl" : "fl");
     w = (width !== void 0) ? width :
         (v.style.width  === "auto") ? v.offsetWidth  : parseInt(v.style.width);
     h = (height !== void 0) ? height :
