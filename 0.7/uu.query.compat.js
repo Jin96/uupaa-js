@@ -1,7 +1,7 @@
 
 // === jQuery Selectors ===
 // depend: uu.js, uu.query.js
-uu.waste || (function(win, doc, uu) {
+uu.agein || (function(win, doc, uu) {
 var _HEADER = /h[1-6]/i,
     _BUTTON = /button/i,
     _INPUT  = /(?:input|textarea|select|button)/i;

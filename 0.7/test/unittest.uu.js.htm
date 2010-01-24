@@ -1,7 +1,6 @@
 <!doctype html><html class="ifnojs addua addos"><head><meta charset="UTF-8" />
 <title></title>
 <script src="../uu.js"></script>
-<script src="../uu.consel.js"></script>
 <script src="../uu.str.js"></script>
 <script src="../uu.css.js"></script>
 <script src="../uu.node.js"></script>
@@ -116,13 +115,6 @@ function xboot(uu) {
       },
       "uu.ary.clean([]) -> []": function() {
         return [uu.ary.clean([]), "->", []];
-      },
-    "uu.ary.clone()": "",
-      "uu.ary.clone([1,2]) は 配列とその中身を複製(クローン)する。元の配列 [1,2] とクローンされた配列は別( !== )の配列である": function() {
-        var ary1 = [1, 2];
-        var ary2 = uu.ary.clone(ary1);
-
-        return [ary1, "!==", ary2];
       },
     "uu.ary.unique()": "",
       "[1][unique elements] uu.ary.unique([<body>, <head>, <body>]) は [<body>, <head>]": function() {
@@ -268,8 +260,8 @@ function xboot(uu) {
 
         return [obj1, "is instance"];
       },
-      "[2][define Class and create instance] uu.factory('my', { init: uuvain }, 1) は クラス'my'を定義し、new uu.Class('my', 1) の結果(インスタンス)を返す": function() {
-        var obj2 = uu.factory('my', { init: uuvain }, 1);
+      "[2][define Class and create instance] uu.factory('my', { init: uunop }, 1) は クラス'my'を定義し、new uu.Class('my', 1) の結果(インスタンス)を返す": function() {
+        var obj2 = uu.factory('my', { init: uunop }, 1);
 
         return [obj2, "is instance"];
       },
@@ -428,6 +420,12 @@ function xboot(uu) {
       },
       "['key', 'key2'] と ['1', '2'] から { key: 1, key2: 2 } を生成する(value を数値化)": function() {
         return [uu.hash.combine(['key', 'key2'], ['1', '2'], 1), "==", { key: 1, key2: 2 }];
+      },
+      "['key', 'key2'] と '1' から { key: '1', key2: '1' } を生成する": function() {
+        return [uu.hash.combine(['key', 'key2'], '1'), "==", { key: '1', key2: '1' }];
+      },
+      "['key', 'key2'] と '1' から { key: 1, key2: 1 } を生成する(value を数値化)": function() {
+        return [uu.hash.combine(['key', 'key2'], '1', 1), "==", { key: 1, key2: 1 }];
       },
     "uu.hash.hasValue()": "",
       "uu.hash.hasValue({ a: 1, b: 2 }, 2) -> true": function() {
@@ -796,8 +794,8 @@ function xboot(uu) {
                                 function() { return [document.getElementsByTagName('body'), "is fakearray"]; },
 
       "new Date は date 型":    function() { return [new Date, "is date"]; },
-      "uu.type(123, uu.STR | uu.NUM) は boolean 型 の戻り値を返す":
-                                function() { return [uu.type(123, uu.STR | uu.NUM), "is boolean"]; },
+      "uu.type(123, uu.type.STR | uu.type.NUM) は boolean 型 の戻り値を返す":
+                                function() { return [uu.type(123, uu.type.STR | uu.type.NUM), "is boolean"]; },
       "new Boolean(false) は boolean 型":
                                 function() { return [new Boolean(false), "is boolean"];   },
       "new Number(1) は number 型":

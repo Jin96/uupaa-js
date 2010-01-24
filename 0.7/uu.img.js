@@ -1,7 +1,7 @@
 
 // === Image ===
 // depend: uu.js
-uu.waste || (function(win, doc, uu) {
+uu.agein || (function(win, doc, uu) {
 var _imgdb = {}, // { url: ImageObject, ... }
     _imgfn = {}; // { url: [fn, ...] }
 //  _render = ((uu.gecko && uu.ver.re >= 1.92) || (uu.ie && uu.ver.ua >= 7));

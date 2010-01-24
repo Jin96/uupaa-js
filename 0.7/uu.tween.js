@@ -2,7 +2,7 @@
 // === Tween ===
 // depend: uu.js, uu.color.js, uu.css.js(uu.css.opacity)
 
-uu.waste || (function(win, doc, uu) {
+uu.agein || (function(win, doc, uu) {
 var _IOQUAD = "(t=gain,b=%f,c=%f,(t/=ms2)<1?c/2*t*t+b:-c/2*((--t)*(t-2)-1)+b)",
     _ALPHA = /^alpha\([^\x29]+\) ?/,
     _PROPS = { opacity: 1, color: 2, backgroundColor: 2, left: 3, top: 3,
@@ -12,7 +12,7 @@ var _IOQUAD = "(t=gain,b=%f,c=%f,(t/=ms2)<1?c/2*t*t+b:-c/2*((--t)*(t-2)-1)+b)",
             (uu.ie ? 'ns.filter=((o>0&&o<1)?"alpha(opacity="+(o*100)+")":"");' +
                      'fin&&uu.css.opacity.set(node,%2$f)&&(ns.filter+=" %1$s");'
                    : 'ns.opacity=fin?%2$f:o;'),
-            'var gms=gain/ms,hex=uupub.HEX2;' +
+            'var gms=gain/ms,hex=uu.hash._hex2;' +
             'ns.%s="#"+(hex[(fin?%5$d:(%5$d-%2$d)*gms+%2$d)|0]||0)+' + // color
                       '(hex[(fin?%6$d:(%6$d-%3$d)*gms+%3$d)|0]||0)+' +
                       '(hex[(fin?%7$d:(%7$d-%4$d)*gms+%4$d)|0]||0);',
@@ -98,7 +98,7 @@ function _twjs(node, param) {
     return (ope === "+=") ? curt + fn(end.slice(2))
          : (ope === "-=") ? curt - fn(end.slice(2)) : fn(end);
   }
-  var rv = _FMT[0], i, v0, v1, ez, w, n,
+  var rv = _FMT[0], i, v0, v1, ez, w, n, fixdb = uu.fix._db,
       cs = win.getComputedStyle(node, null, 1);
 
   for (i in param) {
@@ -107,7 +107,7 @@ function _twjs(node, param) {
       uu.isary(param[i]) ? (v1 = param[i][0], ez = param[i][1]) // val, ezfn
                          : (v1 = param[i]); // param.val
 
-      switch (n = _PROPS[w = uupub.FIX[i] || i]) {
+      switch (n = _PROPS[w = fixdb[i] || i]) {
       case 1: // opacity
         v0 = uu.css[w].get(node);
         "uucssopacity" in node || uu.css[w].set(node, v0); // [IE] set opacity

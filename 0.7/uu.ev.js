@@ -4,7 +4,7 @@
 //
 // ::event.keyCode
 //    http://www.w3.org/TR/DOM-Level-3-Events/#events-keyboardevents
-uu.waste || (function(win, doc, uu) {
+uu.agein || (function(win, doc, uu) {
 var _CLICKS = { click: 1, dblclick: 2 },
     _EVVKEY = uu.hash( // event virtual keycode
         "8,BS,9,TAB,13,ENTER,16,SHIFT,17,CTRL,18,ALT,27,ESC," +
@@ -37,7 +37,7 @@ function uuevmore(evt) { // @param EventObject:
       clicks = _CLICKS[evt.type] || 0;
     } else {
       evt.rel = evt.relatedTarget;
-      if (evt.code === uupub.EVCODE.mousewheel) {
+      if (evt.code === uu.ev._code.mousewheel) {
         wheel = (evt.detail ? (evt.detail / 3)
                             : (evt.wheelDelta / -120)) | 0;
       } else {
@@ -60,8 +60,8 @@ function uuevfire(node,    // @param Node: target node
                            // @return Node:
   if (uu.ev.has(node, name)) {
     node.uuevfn[name].call(node, {
-      stopPropagation: uuvain,
-      preventDefault:  uuvain,
+      stopPropagation: uunop,
+      preventDefault:  uunop,
       node:   node, // current target
       name:   name, // event name
       code:   0,    // 0: unknown
@@ -101,7 +101,7 @@ function uuevdragbase(
     return { x: 0, y: 0, px: 0, py: 0 };
   }
   if (uu.ie) {
-    iebody = uupub.iebody;
+    iebody = uu.iebody;
     x = evt.clientX + iebody.scrollLeft;
     y = evt.clientY + iebody.scrollTop;
   } else {
@@ -192,7 +192,7 @@ function uuevhover(node,    // @param Node:
   }
   function _evhovertoggle() {
     uu.klass.has(node, enter) ? uu.klass.sub(node, enter)
-                              : (node.className += " " + enter); // [perf]
+                              : (node.className += " " + enter); // [OPTIMIZED]
   }
   function _evhookmouseenterie(evt) {
     enter(evt, node);

@@ -1,6 +1,6 @@
 
 // === gfx - cube polygon plugin ===
-uu.waste || (function(uu, uup, _math) {
+uu.again || (function(uu, uup, _math) {
 
 var _PI = _math.PI,
     _DEFAULT_PARM = {

@@ -1,7 +1,7 @@
 
 // === Flash / ActionScript bridge ===
 // depend: uu.js
-uu.waste || (function(win, doc, uu) {
+uu.agein || (function(win, doc, uu) {
 
 uu.mix(uu, {
   flash:        uuflash,        // uu.flash(id, url, width, height, option) -> new <object> element

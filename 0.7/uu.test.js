@@ -1,7 +1,7 @@
 
 // === Unit Test ===
 // depend: uu.js
-uu.waste || (function(uu) {
+uu.agein || (function(uu) {
 var _TYPE_ALIAS = uu.hash(
         "ISUNDEF,ISVOID,ISUNDEFINED,ISVOID,ISOBJECT,ISHASH,ISARRAY,ISARY," +
         "ISBOOLEAN,ISBOOL,ISNUMBER,ISNUM,ISSTRING,ISSTR," +
@@ -89,8 +89,8 @@ function _judge(lhs, ope, rhs) {
   case "ISINSTANCE": rv = !!lhs.msgbox; break;
   default:
     ope = (_TYPE_ALIAS[ope] || ope).slice(2);
-    if (ope in uu) {
-      rv = !!uu.type(lhs, uu[ope]); // ISARY -> uu.ARY
+    if (ope in uu.type) {
+      rv = !!uu.type(lhs, uu.type[ope]); // ISARY -> uu.type..ARY
     }
   }
   return rv;

@@ -6,7 +6,7 @@
 // offsetWidth           = style.width + padding + border
 // getBoundingClientRect = style.width + padding + border
 //
-uu.waste || (function(win, doc, uu) {
+uu.agein || (function(win, doc, uu) {
 var _mix    = uu.mix,
     _ie     = uu.ie,
     _cstyle = win.getComputedStyle,
@@ -181,12 +181,12 @@ function uucssset(node,  // @param Node:
                   val) { // @param String(= void 0):
                          // @return Node:
   var hash, ns = node.style, p, v, i, n,
-      FIX = uupub.FIX, NPROPS = _NPROPS, STR = "string";
+      fixdb = uu.fix._db, NPROPS = _NPROPS, STR = "string";
 
   uu.isstr(key) ? (hash = {}, hash[key] = val) : (hash = key);
   for (i in hash) {
     v = hash[i];
-    p = FIX[i] || i;
+    p = fixdb[i] || i;
     if (typeof v === STR) {
       ns[p] = v; // backgroundColor="transparent"
     } else {
@@ -209,10 +209,10 @@ function uucssget(node,     // @param Node:
                             // @return String/Hash: "value"
                             //                   or { cssProp: "value", ... }
   var rv = {}, ary = styles.split(","), v, i = 0,
-      ns = _cstyle(node, null), FIX = uupub.FIX;
+      ns = _cstyle(node, null), fixdb = uu.fix._db;
 
   while ( (v = ary[i++]) ) {
-    rv[v] = ns[FIX[v] || v] || "";
+    rv[v] = ns[fixdb[v] || v] || "";
   }
   return (ary.length === 1) ? rv[ary[0]] : rv;
 }
@@ -220,10 +220,10 @@ function uucssget(node,     // @param Node:
 function uucssgetie(node, styles) {
   var rv = {}, ary = styles.split(","), v, w, i = 0,
       ns = node.currentStyle, actval = uucsspxactvalue,
-      STR = "string", AUTO = "auto", PX = "px", FIX = uupub.FIX;
+      STR = "string", AUTO = "auto", PX = "px", fixdb = uu.fix._db;
 
   while ( (v = ary[i++]) ) {
-    w = ns[FIX[v] || v] || "";
+    w = ns[fixdb[v] || v] || "";
     if (typeof w === STR) {
       w = (w === AUTO || w.lastIndexOf(PX) < 0) ? actval(node, w)
                                                 : parseInt(w);

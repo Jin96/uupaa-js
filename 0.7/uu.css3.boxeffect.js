@@ -1,7 +1,7 @@
 
 // === CSS3 BoxEffect ===
 // depend: uu.js, uu.css.js, uu.css3.js
-uu.waste || (function(win, doc, uu, _mix, _ie, _ie6, _ie67, _cstyle, _math) {
+uu.agein || (function(win, doc, uu, _mix, _ie, _ie6, _ie67, _cstyle, _math) {
 var _niddb = {}, // nodeid db { nodeid: node, ... }
     _drawFakeShadow = _ie67 ? drawFakeShadowIE : drawFakeShadow,
     _BFX = "uucss3bfx",

@@ -1,6 +1,6 @@
 // === bite ===
 // depend: uu.js, uu.css
-uu.waste || (function(win, doc, uu) {
+uu.again || (function(win, doc, uu) {
 var _uuev = uu.ev,
     _uuary = uu.ary,
     _uucss = uu.css,

@@ -5,7 +5,7 @@
 // Web Storage:  http://www.w3.org/TR/webstorage/#storage
 //         IE8:  http://msdn.microsoft.com/en-us/library/cc197062(VS.85).aspx
 //
-uu.waste || (function(win, doc, uu) {
+uu.agein || (function(win, doc, uu) {
 var _db = 0,      // Storage object
     _dbwait = 0,  // 1: waiting
     _backend = 0, // Storage backend,
@@ -460,7 +460,7 @@ uu.as.dmz.storageReadyCallback = flashStorageReadyCallback;
 // uu.as.dmz.storageReadyCallback - callback from FlashStorage
 function flashStorageReadyCallback(/* msg */) {
   _dbwait = 0;
-  uu.as.dmz.storageReadyCallback = uuvain;
+  uu.as.dmz.storageReadyCallback = uunop;
   uu.isfunc(win.xlocal) && setTimeout(WebStorageReady, 0);
 }
 function _flashall() {

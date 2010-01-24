@@ -2,7 +2,7 @@
 // === Live ===
 // depend: uu.js
 // http://d.hatena.ne.jp/uupaa/20091231
-uu.waste || (function(win, doc, uu) {
+uu.agein || (function(win, doc, uu) {
 var _livedb = {}, // { "expr\vnamespace.click": {...}, ... }
     _LIVEFIX = uu.ie ? { focus: "focusin", blur: "focusout" }
              : uu.gecko ? {} : { focus: "DOMFocusIn", blur: "DOMFocusOut" };
@@ -32,10 +32,10 @@ function _uulive(expr, nstype, fn, hash) {
     src = (uu.webkit && src.nodeType === 3) ? src.parentNode : src;
     if (uu.match(expr, src)) {
       evt.node = doc;
-      evt.code = (uupub.EVCODE[evt.type] || 0) & 255;
+      evt.code = (_code[evt.type] || 0) & 255;
       evt.src = src;
-      evt.px = uu.ie ? evt.clientX + uupub.iebody.scrollLeft : evt.pageX;
-      evt.py = uu.ie ? evt.clientY + uupub.iebody.scrollTop  : evt.pageY;
+      evt.px = uu.ie ? evt.clientX + uu.iebody.scrollLeft : evt.pageX;
+      evt.py = uu.ie ? evt.clientY + uu.iebody.scrollTop  : evt.pageY;
       evt.ox = evt.offsetX || evt.layerX || 0; // [offsetX] IE, Opera, WebKit
       evt.oy = evt.offsetY || evt.layerY || 0; // [layerX]  Gecko, WebKit
       handler.call(fn, evt, doc, src);
@@ -45,7 +45,8 @@ function _uulive(expr, nstype, fn, hash) {
     var ary = nstype.split("."), // "namespace.click" -> ["namespace", "click"]
         type = ary.pop(), ns = ary.pop() || "", capt = 0,
         handler = uu.isfunc(fn) ? fn : fn.handleEvent,
-        closure = fn.uuevliveclosure = _uuliveclosure;
+        closure = fn.uuevliveclosure = _uuliveclosure,
+        _code = uu.ev._code;
 
     hash || (hash = _livedb[expr + "\v" + nstype] = {
                 expr: expr, ns: ns, type: type, nstype: nstype, unbind: [] });

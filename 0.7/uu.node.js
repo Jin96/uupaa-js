@@ -1,7 +1,7 @@
 
 // === Node++ ===
 // depend: uu.js
-uu.waste || (function(win, doc, uu) {
+uu.agein || (function(win, doc, uu) {
 
 uu.mix(uu, {
   svg:          uusvg,          // uu.svg(tag) -> new <svg> element

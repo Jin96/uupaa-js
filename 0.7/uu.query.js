@@ -1,21 +1,21 @@
 
 // === CSS3 Selector ===
 // depend: uu.js, uu.color.js, uu.css.js
-uu.waste || (function(win, doc, uu, _cstyle, _innerText) {
+uu.agein || (function(win, doc, uu, _cstyle, _innerText) {
 var _ssid   = "uuqueryss", // StyleSheet ID
     // --- content-type cache (1: HTML, 2: XML) ---
     _ctypedb      = {}, // { quid: contentType }
     _htmltagdb    = {}, // tag dict( { a: "A", A: "A", ... } )
     _xmltagdb     = {},
-    _ndiddb       = uupub.ndiddb,
-    _HTML5TAG     = uupub.HTML5TAG + ",", // add tail comma
+    _nodeid       = uu.node.id,
+    _HTML5HASH    = uu.hash.combine(uu.tag.HTML5, 1, 1), // { abbr: 1, ... }
     _QUICK_STATIC = {
       "*":      function(ctx) { return uu.tag("*", ctx); },
-      "*:root": function() { return [uupub.root]; }, // fix #27 (*:root)
-      ":root":  function() { return [uupub.root]; }, // fix #27 (*:root)
+      "*:root": function() { return [uu.root]; }, // fix #27 (*:root)
+      ":root":  function() { return [uu.root]; }, // fix #27 (*:root)
       "* :root":function() { return []; }, // fix #27b (* :root)
       "* html": function() { return []; }, // fix #27b (* html) IE6 CSS Star Hack
-      html:     function() { return [uupub.root]; },
+      html:     function() { return [uu.root]; },
       head:     function() { return [uu.head()]; },
       body:     function() { return [doc.body]; },
       ":link":  function() { return uu.ary(doc.links); } }, // spoof
@@ -166,13 +166,13 @@ function quickQuery(expr, match, context) {
         for (k = 0, kz = nodeList3.length; k < kz; ++k) {
           v = nodeList3[k];
           uid = v.uuguid ||
-              (_ndiddb[v.uuguid = newid = ++uupub.ndidseed] = v, newid);
+              (_nodeid._db[v.uuguid = newid = ++_nodeid._num] = v, newid);
           uid in unq || (rv[++ri] = v, unq[uid] = 1);
         }
       } else {
         v = nodeList2[j];
         uid = v.uuguid ||
-            (_ndiddb[v.uuguid = newid = ++uupub.ndidseed] = v, newid);
+            (_nodeid._db[v.uuguid = newid = ++_nodeid._num] = v, newid);
         uid in unq || (rv[++ri] = v, unq[uid] = 1);
       }
     }
@@ -302,7 +302,7 @@ function uuqueryselectorall(expr,      // @param String: expr
               if (v.nodeType === 1) {
                 if (isUniversal || v.tagName === tag) {
                   uid = v.uuguid ||
-                        (_ndiddb[v.uuguid = w = ++uupub.ndidseed] = v, w);
+                        (_nodeid._db[v.uuguid = w = ++_nodeid._num] = v, w);
                   if (uid in unq) {
                     break;
                   } else {
@@ -328,7 +328,7 @@ function uuqueryselectorall(expr,      // @param String: expr
               if (!uu.ie || !isUniversal || v.nodeType === 1) {
                 if (isUniversal || v.tagName === tag) {
                   uid = v.uuguid ||
-                        (_ndiddb[v.uuguid = w = ++uupub.ndidseed] = v, w);
+                        (_nodeid._db[v.uuguid = w = ++_nodeid._num] = v, w);
                   uid in unq || (r[++ri] = v, unq[uid] = 1);
                 }
               }
@@ -414,9 +414,9 @@ function uuqueryselectorall(expr,      // @param String: expr
 
               // ":root:xxx-child" or ":root:xxx-type" -> not match
               // ":root:not(:first-child)"             -> match root element
-              if (iz === 1 && ctx[0] === uupub.root
+              if (iz === 1 && ctx[0] === uu.root
                            && _ROOT_REJECT.test(pseudo)) {
-                r = negate ? [uupub.root] : [];
+                r = negate ? [uu.root] : [];
               } else {
                 if ( !(v = _FILTERS[pseudo]) ) {
                   throw new Error(":" + pseudo + " unsupported");
@@ -523,7 +523,7 @@ function mixin(ctx, rv, guard) {
 
   while ( (v = ctx[i++]) ) {
     uid = v.uuguid ||
-          (_ndiddb[v.uuguid = newid = ++uupub.ndidseed] = v, newid);
+          (_nodeid._db[v.uuguid = newid = ++_nodeid._num] = v, newid);
     uid in guard || (rv[++ri] = v, guard[uid] = 1);
   }
   return rv;
@@ -548,8 +548,8 @@ function addTag(tag, contentType) {
   // IE unsupport HTML5 tags
   // http://d.hatena.ne.jp/uupaa/20090820
   if (uu.ie || uu.opera) {
-    if (contentType === 1) {
-      if (_HTML5TAG.indexOf(tag + ",") >= 0) {
+    if (contentType === 1) { // 1: HTMLDocument
+      if (_HTML5HASH[tag]) { // [OPTIMIZED]
         return lo;
       }
     }
@@ -658,7 +658,7 @@ function nthChildFilter(fid, negate, elms, pseudo, value, tags, contentType) {
   for (; i < iz; ++i) {
     pn = elms[i].parentNode;
     uid = pn.uuguid ||
-          (_ndiddb[pn.uuguid = newid = ++uupub.ndidseed] = pn, newid);
+          (_nodeid._db[pn.uuguid = newid = ++_nodeid._num] = pn, newid);
     if (!(uid in unq)) {
       unq[uid] = 1;
       idx = 0;
@@ -773,12 +773,12 @@ function simpleFilter(fid, negate, elms) {
 // inner - :root
 function root(fid, negate, elms) {
   if (!negate) {
-    return [uupub.root];
+    return [uu.root];
   }
   var rv = [], ri = -1, v, i = 0;
 
   while ( (v = elms[i++]) ) {
-    if (v !== uupub.root) {
+    if (v !== uu.root) {
       rv[++ri] = v;
     }
   }
