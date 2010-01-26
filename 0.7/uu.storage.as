@@ -14,7 +14,7 @@ class FlashStorage {
     for (key in so.data) {
       val = so.data[key];
       if (val === null) {
-        val = "__uu_null_trap__"; // [!] AS2("") -> JS(null) null trap
+        val = "UU_NULL_TRAP__"; // [!] AS2("") -> JS(null) null trap
       }
       rv[key] = val;
     }
@@ -28,12 +28,12 @@ class FlashStorage {
         return key;
       }
     }
-    return "__uu_null_trap__"; // [!] AS2("") -> JS(null) null trap
+    return "UU_NULL_TRAP__"; // [!] AS2("") -> JS(null) null trap
   }
   private function jsget(key:String):String {
     var rv:String = obj().data[key];
 
-    return (rv === null) ? "__uu_null_trap__" : rv; // [!] AS2("") -> JS(null) null trap
+    return (rv === null) ? "UU_NULL_TRAP__" : rv; // [!] AS2("") -> JS(null) null trap
   }
   private function jsset(key:String, val:String, safe:Number):Number {
     var so:SharedObject = obj(), n:Number = 0, r:Object;
