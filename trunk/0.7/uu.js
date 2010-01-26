@@ -51,10 +51,10 @@ var _cfg    = uuarg(window.xconfig || {}, {
     _TRIM   = /^\s+|\s+$/g,
     _QUOTE  = /^\s*["']?|["']?\s*$/g,
     _SPACES = /\s\s+/g,
-    _TYPES  = { "undefined":        0x020,
-                "[object Boolean]": 0x040,  "boolean":  0x040,
-                "[object Number]":  0x100,  number:     0x100,
-                "[object String]":  0x200,  string:     0x200,
+    _TYPEOF = { "undefined":        0x020,
+                "boolean":          0x040,
+                "number":           0x100,
+                "string":           0x200,
                 "[object Function]":0x080,
                 "[object RegExp]":  0x800,
                 "[object Array]":   0x400,
@@ -237,10 +237,11 @@ uu = uumix(jamfactory, {            // uu(expr, ctx) -> Instance(jam)
     ready:    uumix(uuready, {      // [1][DOM ready] uu.ready(fn, order = 0)
                                     //       order: 0 is low, 1 is mid, 2 is high(system)
         gone: {
-            dom:      0,            // 1 is DOMContentLoaded event fired
-            win:      0,            // 1 is window.onload event fired called
-            canvas:   0,            // 1 is <canvas> ready event fired called
-            blackout: 0             // 1 is blackout (css3 cache reload)
+            dom:        0,          // 1 is DOMContentLoaded event fired
+            win:        0,          // 1 is window.onload event fired
+            canvas:     0,          // 1 is <canvas> ready event fired
+            storage:    0,          // 1 is localStorage ready event fired 
+            blackout:   0           // 1 is blackout (css3 cache reload)
         }
     }),
     // --- form ---
@@ -278,7 +279,7 @@ uu = uumix(jamfactory, {            // uu(expr, ctx) -> Instance(jam)
     html:           uuhtml,         // uu.html(node, attr, style, buildid) -> <html>
     head:           uuhead,         // uu.head(node, attr, style, buildid) -> <head>
     body:           uubody,         // uu.body(node, attr, style, buildid) -> <body>
-    iebody:         0,              // [lazy] documentElement or <body> (IE quirks)
+    iebody:         0,              // [lazy detect] documentElement or <body> (IE quirks)
     // --- string ---
     // [1] uu.fix("-webkit-shadow")   -> "-webkit-shadow"
     // [2] uu.fix("background-color") -> "backgroundColor"
@@ -307,7 +308,7 @@ uu = uumix(jamfactory, {            // uu(expr, ctx) -> Instance(jam)
                                     // [3][RFC1123 now]  uu.date2str(0, 1)    -> "Wed, 16 Sep 2009 16:18:14 GMT"
                                     // [4][RFC1123 date] uu.date2str(date, 1) -> "Wed, 16 Sep 2009 16:18:14 GMT"
     str2date:       uustr2date,     // uu.str2date("2000-01-01T00:00:00[.000]Z") -> { valid, date }
-    str2json:       uustr2json,     // uu.str2json(str, quote = false) -> String
+    str2json:       uustr2json,     // uu.str2json(str, addQuote = 0) -> String
     mix2json:       uumix2json,     // uu.mix2json(mix, fn = void 0, usejs = 0) -> String
     json2mix:       uujson2mix,     // uu.json2mix(str, usejs = 0) -> Mix
     // --- type ---
@@ -355,9 +356,9 @@ uu = uumix(jamfactory, {            // uu(expr, ctx) -> Instance(jam)
         hash:       uudatehash      // uu.date.hash(new Date) -> { Y, M, D, h, m, s, ms }
     },
     guid:           uuguid,         // uu.guid() -> Number(unique)
-    lazy:     uumix(uulazy, {       // uu.lazy(id = "", fn, order = 0)
+    lazy:     uumix(uulazy, {       // uu.lazy(id, fn, order = 0)
                                     //         order: 0 is low, 1 is mid, 2 is high(system)
-        fire:       uulazyfire      // uu.lazy.fire(id = "")
+        fire:       uulazyfire      // uu.lazy.fire(id)
     })
 });
 
@@ -2252,7 +2253,7 @@ uufix._db = {}; // fix db
 // uu.fmt("%s-%d", var_args, ...) -> "formatted string"
 function uufmt(format            // @param String: sprintf format string
                /* var_args */) { // @param Mix: sprintf var_args
-                                 // @return String: formated string
+                                 // @return String: "formatted string"
     // http://d.hatena.ne.jp/uupaa/20091214
     function _uufmtparse(m, argidx, flag, width, prec, size, types) {
         if (types === "%") {
@@ -2269,7 +2270,7 @@ function uufmt(format            // @param String: sprintf format string
         w & 0x300 && (v = v.toString(w & 0x100 ? 8 : 16));
         w & 0x40  && flag === "#" && (v = (w & 0x100 ? "0" : "0x") + v);
         w & 0x80  && prec && (v = w & 2 ? v.toFixed(prec) : v.slice(0, prec));
-        w & 0x400 && (v = _jsoninspect(v));
+        w & 0x400 && (v = _jsoninspect(v)); // "%j"
         w & 0x6000 && (ovf = (typeof v !== "number" || v < 0));
         w & 0x2000 && (v = ovf ? "" : String.fromCharCode(v));
         w & 0x8000 && (flag = flag === "0" ? "" : flag);
@@ -2290,7 +2291,7 @@ uufmt._fmt = /%(?:(\d+)\$)?(#|0)?(\d+)?(?:\.(\d+))?(l)?([%iduoxXfcsj])/g;
 uufmt._bits = { i: 0x8011, d: 0x8011, u: 0x8021, o: 0x8161, x: 0x8261,
                 X: 0x9261, f: 0x92, c: 0x2800, s: 0x84, j: 0xC00 };
 
-// uu.puff - alert + uu.fmt
+// uu.puff - alert + uu.fmt + JSON.stringify
 // [1][json]   uu.puff(mix)
 // [2][format] uu.puff("%j...", mix, ...);
 function uupuff(format            // @param String: sprintf format string
@@ -2431,13 +2432,13 @@ function uudate2str(date,   // @param Date/Number(= void 0):
     return rv;
 }
 
-// uu.str2date - decode format time string // from ISO8601 string to Date
-// [1] uu.str2date("2000-01-01T00:00:00[.000]Z") -> { valid, date }
+// uu.str2date - decode format time string(ISO8601 string to Date)
+// uu.str2date("2000-01-01T00:00:00[.000]Z") -> { valid, date }
 function uustr2date(str,  // @param ISO8601DateString/RFC1123DateString:
                     rv) { // @param Hash(= void 0):
                           // @return Hash: { valid, date }
                           //         Boolean: valid, 0 or 1
-                          //         DateObject: date, date object or NaN
+                          //         DateObject: date, Date or NaN
     function _uustr2date(_, dow, d, m) {
         return dow + " " + m + " " + d;
     }
@@ -2461,7 +2462,7 @@ uustr2date._parse = /^(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d):(\d\d)(?:\.(\d*))?Z$/;
 // uu.mix2json
 function uumix2json(mix,  // @param Mix:
                     fn,   // @param Function(= void 0): callback
-                    js) { // @param Number(= 0): 0 is native JSON, 1 is js impl
+                    js) { // @param Number(= 0): 0 is native JSON, 1 is use js
                           // @return JSONString:
     return (!js && win.JSON) ? win.JSON.stringify(mix) || ""
                              : _jsoninspect(mix, fn);
@@ -2469,11 +2470,11 @@ function uumix2json(mix,  // @param Mix:
 
 // uu.json2mix
 function uujson2mix(str,  // @param JSONString:
-                    js) { // @param Number(= 0): 0 is native JSON, 1 is js impl
+                    js) { // @param Number(= 0): 0 is native JSON, 1 is use js
                           // @return Mix/Boolean:
-    var dig = uujson2mix, JSON = win.JSON || 0;
+    var dig = uujson2mix;
 
-    return (!js && JSON) ? JSON.parse(str) :
+    return (!js && win.JSON) ? win.JSON.parse(str) :
            dig._ng.test(str.replace(dig._esc, "")) ? false
                                                    : uujs("return " + str + ";");
 }
@@ -2481,9 +2482,9 @@ uujson2mix._ng  = /[^,:{}\[\]0-9.\-+Eaeflnr-u \n\r\t]/; // NG word
 uujson2mix._esc = /"(\\.|[^"\\])*"/g; // unescape
 
 // uu.str2json
-function uustr2json(str,     // @param String:
-                    quote) { // @param Boolean(= false): true is add quote(")
-                             // @return String:
+function uustr2json(str,        // @param String:
+                    addQuote) { // @param Number(= 0): 1 is add quote(")
+                                // @return String:
     function _swap(m) {
         return div._swap[m];
     }
@@ -2494,7 +2495,7 @@ function uustr2json(str,     // @param String:
     var div = uustr2json,
         rv = str.replace(div._esc, _swap).replace(div._enc, _ucs2);
 
-    return quote ? '"' + rv + '"' : rv;
+    return addQuote ? '"' + rv + '"' : rv;
 }
 uustr2json._swap = uuhash('",\\",\b,\\b,\f,\\f,\n,\\n,\r,\\r,\t,\\t,\\,\\\\');
 uustr2json._esc = /(?:\"|\\[bfnrt\\])/g; // escape
@@ -2532,7 +2533,7 @@ function _jsoninspect(mix, fn) {
             }
         }
     } else {
-        for (i in mix) {
+        for (i in mix) { // uu.type.HASH
             ary[++ai] = uustr2json(i, 1) + ":" + _jsoninspect(mix[i], fn);
         }
     }
@@ -2581,8 +2582,8 @@ function uutype(mix,     // @param Mix:
                          // @return Boolean/Number: true is match,
                          //                         false is unmatch,
                          //                         Number is matched bits
-    var rv = _TYPES[typeof mix] ||
-             _TYPES[Object.prototype.toString.call(mix)] ||
+    var rv = _TYPEOF[typeof mix] ||
+             _TYPEOF[Object.prototype.toString.call(mix)] ||
              (!mix ? 0x010 : mix.nodeType ? 0x002 : // uu.type.NODE or NODE
              "length" in mix ? 0x004 : 0x001);      // uu.type.FAKE or uu.type.HASH
 
@@ -2592,34 +2593,32 @@ function uutype(mix,     // @param Mix:
 // uu.isnum - is number
 function uuisnum(mix) { // @param Mix: 123 or Number(123)
                         // @return Boolean:
-    return (_TYPES[typeof mix] ||
-            _TYPES[Object.prototype.toString.call(mix)]) === 0x100;
+    return typeof mix === "number";
 } // [OPTIMIZED]
 
 // uu.isstr - is string
 function uuisstr(mix) { // @param Mix: "abc" or String("abc")
                         // @return Boolean:
-    return (_TYPES[typeof mix] ||
-            _TYPES[Object.prototype.toString.call(mix)]) === 0x200;
+    return typeof mix === "string";
 } // [OPTIMIZED]
 
 // uu.isary - is array
 function uuisary(mix) { // @param Mix: [1,2,3]
                         // @return Boolean:
-    return _TYPES[Object.prototype.toString.call(mix)] === 0x400;
+    return Object.prototype.toString.call(mix) === "[object Array]";
 } // [OPTIMIZED]
 
 // uu.isfunc - is function
 function uuisfunc(mix) { // @param Mix: function(){}
                          // @return Boolean:
-    return _TYPES[Object.prototype.toString.call(mix)] === 0x080;
+    return Object.prototype.toString.call(mix) === "[object Function]";
 } // [OPTIMIZED]
 
 // --- other ---
 // uu.js - eval js
 // uu.js("JavaScript Expression") -> eval result
 function uujs(expr) { // @param JavaScriptExpressionString:
-                      // @return Mix: eval(expr) result
+                      // @return Mix: new Function(expr) result
     return (new Function(expr))();
 }
 
@@ -2652,9 +2651,9 @@ function uuwinsize() { // @return Hash: { iw, ih, sw, sh }
 function uudatehash(date) { // @param Date:
                             // @return Hash: { Y: 2010, M: 12, D: 31,
                             //                 h: 23, m: 59, s: 59, ms: 999 }
-    return { Y: date.getUTCFullYear(), M: date.getUTCMonth() + 1,
-             D: date.getUTCDate(),     h: date.getUTCHours(),
-             m: date.getUTCMinutes(),  s: date.getUTCSeconds(),
+    return { Y:  date.getUTCFullYear(), M: date.getUTCMonth() + 1,
+             D:  date.getUTCDate(),     h: date.getUTCHours(),
+             m:  date.getUTCMinutes(),  s: date.getUTCSeconds(),
              ms: date.getUTCMilliseconds() };
 }
 
@@ -2665,19 +2664,17 @@ function uuguid() { // @return Number: unique number, from 1
 uuguid._num = 0; // guid counter
 
 // uu.lazy - lazy evaluate
-function uulazy(id,      // @param String(= ""): id
+function uulazy(id,      // @param String: id
                 fn,      // @param Function: callback function
                 order) { // @param Number(= 0): 0 is low, 1 is mid, 2 is high(system)
-    id = id || "";
-    id in uulazy._db || (uulazy._db[id] = [[], [], []]);
+    uulazy._db[id] || (uulazy._db[id] = [[], [], []]);
     uulazy._db[id][order || 0].push(fn);
 }
-uulazy._db = {}; // { id: [[low], [mid], [high]], ... } lazy job db
+uulazy._db = {}; // { id: [[low], [mid], [high]], ... } job db
 
 // uu.lazy.fire
-function uulazyfire(id) { // @param String(= ""): id
-    id = id || "";
-    if (id in uulazy._db) {
+function uulazyfire(id) { // @param String: id
+    if (uulazy._db[id]) {
         var v, i = -1, db = uulazy._db[id], ary = db[2].concat(db[1], db[0]);
 
         delete uulazy._db[id];
@@ -2689,14 +2686,14 @@ function uulazyfire(id) { // @param String(= ""): id
 
 // --- ECMAScript-262 5th ---
 //{mb Array.prototype.indexOf
-function arrayindexof(elm,   // @param Mix: searchElement
-                      idx) { // @param Number(= 0): fromIndex
-                             // @return Number: found index or -1
+function arrayindexof(search, // @param Mix: search element
+                      idx) {  // @param Number(= 0): from index
+                              // @return Number: found index or -1
     var iz = this.length, i = idx || 0;
 
     i = (i < 0) ? i + iz : i;
     for (; i < iz; ++i) {
-        if (i in this && this[i] === elm) {
+        if (i in this && this[i] === search) {
             return i;
         }
     }
@@ -2704,14 +2701,14 @@ function arrayindexof(elm,   // @param Mix: searchElement
 }
 
 // Array.prototype.lastIndexOf
-function arraylastindexof(elm,   // @param Mix: searchElement
-                          idx) { // @param Number(= this.length): fromIndex
-                                 // @return Number: found index or -1
+function arraylastindexof(search, // @param Mix: search element
+                          idx) {  // @param Number(= this.length): from index
+                                  // @return Number: found index or -1
     var iz = this.length, i = idx;
 
     i = (i < 0) ? i + iz + 1 : iz;
     while (--i >= 0) {
-        if (i in this && this[i] === elm) {
+        if (i in this && this[i] === search) {
             return i;
         }
     }
@@ -2841,11 +2838,11 @@ function outerhtmlgetter() {
     var rv, me = this, p = me.parentNode,
         r = doc.createRange(), div = doc.createElement("div");
 
-    !p && doc.body.appendChild(me); // orphan
+    p || doc.body.appendChild(me); // orphan
     r.selectNode(me);
     div.appendChild(r.cloneContents());
     rv = div.innerHTML;
-    !p && me.parentNode.removeChild(me);
+    p || me.parentNode.removeChild(me);
     return rv;
 }
 
@@ -2873,8 +2870,9 @@ function jamfind(expr) { // @return jam:
 }
 
 // jam.nth - nodeset[nth]
-function jamnth(nth) { // @param Number(= 0):  0 is first element
+function jamnth(nth) { // @param Number(= 0): 0 is first element
                        //                   : -1 is last element
+                       //                   : nth < 0 is negative index
                        // @return Node:
     return this._ns[nth < 0 ? nth + this._ns.length : nth || 0];
 }
@@ -2896,10 +2894,17 @@ function jamindexOf(node) { // @param Node:
     return uuaryindexof(this._ns.indexOf, node);
 }
 
+// jam.add
+// jam.first
+// jam.prev
+// jam.next
+// jam.last
+// jam.firstChild
+// jam.lastChild
 uuhasheach({ first: 1, prev: 2, next: 3, last: 4,
              firstChild: 5, lastChild: 6, add: 6 }, function(pos, method) {
-    // jam.first, jam.prev, jam.next, jam.last, jam.firstChild, jam.lastChild, jam.add
-    // jam.lastChild(node or "<p>html</p>") -> jam
+
+    // jam.add(node or "<p>html</p>") -> jam
     uujam.prototype[method] = function(node) { // @param Node/HTMLString:
                                                // @return jam:
         var ary = this._ns, w, i = -1;
@@ -2927,7 +2932,7 @@ function jamattr(a, b) { // @return jam:
 
 // jam.css
 function jamcss(a, b) { // @return jam:
-    return _jammap(this, uu.css, a, b);
+    return _jammap(this, uucss, a, b);
 }
 
 // jam.klass
@@ -3059,7 +3064,7 @@ function _ready() {
     if (!uuready.gone.blackout && !uuready.gone.dom++) {
         _ie && (uu.iebody = _ver.quirks ? doc.body : uu.root); // [IE] lazy detect
 
-        uulazy.fire("boot");
+        uulazyfire("boot");
         uuisfunc(win.xboot || 0) && win.xboot(uu); // window.xboot(uu) callback
     }
 }
@@ -3069,7 +3074,7 @@ function _winload() {
     uuready.gone.win = 1;
     _ready();
     uuisfunc(win.xwin || 0) && win.xwin(uu); // window.xwin(uu) callback
-    uulazy.fire("canvas");
+    uulazyfire("canvas");
 }
 
 // inner - DOMContentLoaded(IE)
