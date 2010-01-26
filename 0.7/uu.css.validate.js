@@ -51,10 +51,10 @@ function border(value) { // @param String: border value
                          //     style - String: "value"
                          //     rgba  - String: "value"
                          //     valid - Number: 0 or 1
-  var ary = uu.split.token(value, " "), v, i = 0,
+  var ary = uu.split.token(value, " "), v, i = -1,
       width, style, rgba, r, valid = 1;
 
-  while (valid && (v = ary[i++])) {
+  while (valid && (v = ary[++i])) {
     if (_LENGTH.test(v) || _WIDTH_KEYWORD.test(v)) {
       width = v;
       continue;
@@ -86,10 +86,10 @@ function shadow(value) { // @param String: -uu-box-shadow: value
                          //     blur  - Array: ["0px", ...]
                          //     valid - Number: 0 or 1
   var rv = { rgba: [], ox: [], oy: [], blur: [] },
-      multi, ary, v, i = 0, c, rgba, ox, oy, blur, valid = 1;
+      multi, ary, v, i = -1, c, rgba, ox, oy, blur, valid = 1;
 
   multi = uu.split.token(uu.trim(value), ",");
-  while (valid && (v = multi[i++])) {
+  while (valid && (v = multi[++i])) {
     ary = uu.split.token(v, " ");
 
     rgba = _HEAD_DIGIT.test(ary[0]) ? ary.pop() : ary.shift();
@@ -123,14 +123,14 @@ function gradient(value) { // @param String: -uu-gradient() value
                            //     valid  - Number: 0 or 1
   var type = 0, point = [], radius = [], from = 0, to = 0,
       offset = [], color = [], valid = 0,
-      m, m2, ary, tmpary, v, w, i = 0;
+      m, m2, ary, tmpary, v, w, i = -1;
 
   m = _HEAD_GRADIENT.exec(value);
   if (m) {
     valid = 1;
     ary = uu.split.token(m[1], ",");
 
-    while (valid && (v = ary[i++])) {
+    while (valid && (v = ary[++i])) {
       if (_GRAD_TYPE.test(v)) {
         type ? (valid = 0)
              : (type = (v === "linear") ? 1 : 2); // 1: linear, 2: radial
@@ -209,13 +209,13 @@ function background(value) { // @param String: -uu-background: value
                              //     valid     - Number: 0 or 1
   var rv = { image: [], repeat: [], position: [],
              attachment: [], origin: [], clip: [] },
-      multi, i = 0, j, iz, m, v, w, ary,
+      multi, i = -1, j, iz, m, v, w, ary,
       img, rpt, att, pox, poy, ori, clp, rgba, valid = 1;
 
   multi = uu.split.token(uu.trim.inner(value), ",");
   iz = multi.length;
 
-  while (valid && (v = multi[i++])) {
+  while (valid && (v = multi[++i])) {
     img = rpt = pox = poy = ori = clp = "";
     ary = uu.split.token(uu.trim(v), " ");
 
@@ -276,10 +276,10 @@ function boxReflect(value) { // @param String: -uu-box-reflect: value
                              //     url    - String: ""
                              //     grad   - Hash:   { type, point, radius, offset, color, valid }
                              //     valid  - Number: 0 or 1
-  var m, v, i = 0, ary = uu.split.token(value, ""),
+  var m, v, i = -1, ary = uu.split.token(value, ""),
       dir, off, url, grad, valid = 1;
 
-  while ( valid && (v = ary[i++]) ) {
+  while ( valid && (v = ary[++i]) ) {
     if (_BOX_REFLECT_DIR.test(v)) {
       dir ? (valid = 0) : (dir = v);
       continue;
@@ -321,9 +321,9 @@ function borderRadius(value) { // @param String: -uu-border-radius: value
                                //     bl    - Array:  ["0px", "0px"]
                                //     valid - Number: 0 or 1
   var rv = { tl: [], tr: [], br: [], bl: [] },
-      multi = value.split("/"), ary, v, i = 0, valid = 1;
+      multi = value.split("/"), ary, v, i = -1, valid = 1;
 
-  while (valid && (v = multi[i++])) {
+  while (valid && (v = multi[++i])) {
     ary = uu.split(v);
     switch (ary.length) {
     case 1: rv.tl.push(ary[0]);

@@ -61,10 +61,10 @@ function uunodediet(ctx,     // @param Node(= document.body): parent node
       }
     }
   }
-  var rv = [], v, i = 0, limit = depth || 0, BLANK = /\S/;
+  var rv = [], v, i = -1, limit = depth || 0, BLANK = /\S/;
 
   _impl(ctx, 0);
-  while ( (v = rv[i++]) ) {
+  while ( (v = rv[++i]) ) {
     v.parentNode.removeChild(v);
   }
 }

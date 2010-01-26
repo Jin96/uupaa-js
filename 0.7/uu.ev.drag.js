@@ -127,21 +127,21 @@ function draggableinit(
                        //        Number: ghost, 1 is enable ghost effect
                        //        ColorString(= "bisque"): droppablebg,
                        //                                 drop allow bgcolor
-  var me = this, v, i = 0;
+  var me = this, v, i = -1;
 
   this._opt = uu.arg(option, { ghost: 0, droppablebg: "bisque", zmanage: 1 });
   this._tgt = 0;
   this._draggable = draggable;
   this._droppable = droppable;
 
-  while ( (v = draggable[i++]) ) {
+  while ( (v = draggable[++i]) ) {
     v.style.cursor = "move";
     uu.mousedown(v, this);
     this._tgt = v; // dummy
   }
   // keep droppable bgcolor and rect
-  i = 0;
-  while ( (v = droppable[i++]) ) {
+  i = -1;
+  while ( (v = droppable[++i]) ) {
     v.uudroppable = { bgcolor: uu.css.bgcolor(v).hex,
                       rect: uu.css.rect(v) }; // bond
   }
@@ -187,9 +187,9 @@ function draggablehandleevent(evt) {
 
 // inner -
 function _draggableinrect(ary, x, y, bg) {
-  var rv, v, i = 0;
+  var rv, v, i = -1;
 
-  while ( (v = ary[i++]) ) {
+  while ( (v = ary[++i]) ) {
     v.style.backgroundColor = uu.css.inRect(v.uudroppable.rect, x, y)
                             ? (rv = v, bg)
                             : v.uudroppable.bgcolor;
@@ -199,9 +199,9 @@ function _draggableinrect(ary, x, y, bg) {
 
 // inner -
 function _draggableready(ctx, ary) {
-  var v, i = 0;
+  var v, i = -1;
 
-  while ( (v = ary[i++]) ) {
+  while ( (v = ary[++i]) ) {
     if (uu.node.has(v, ctx)) {
       return 0;
     }
@@ -254,31 +254,34 @@ function sortableinit(ul,       // @param Node: <ul> node
 }
 // uu.Class.Sortable.handleEvent
 function sortablehandleevent(evt) {
-  var rv = this.drag(evt, this._tgt, this._tgt, this._opt),
-      code = evt.code, v, w, r, i;
+    var _tgt = this._tgt, _li,
+        rv = this.drag(evt, _tgt, _tgt, this._opt),
+        code = evt.code, v, w, r, i = -1;
 
-  if (code) {
-    if (code <= 2) { // [1] mousedown, [2] mouseup
-      uu.ev(uu.ie ? this._tgt : doc, "mousemove+,mouseup+", this, code);
-    } else if (code === 3) { // [3] mousemove
-      i = 0;
-      while ( (v = this._li[i++]) ) {
-        if (v !== this._tgt) { // exclude drag target
-          w = v.uusortable;
-          r = w.rect;
-          if ((rv.x > r.x && rv.x < r.x + r.w) && // [inlining] uu.css.inRect
-              (rv.y > r.y && rv.y < r.y + r.h)) {
-            (w.idx < this._tgt.uusortable.idx) ? uu.node.prev(v, this._fp)
-                                               : uu.node.next(v, this._fp);
-            // swap manage hash
-            v.uusortable = this._tgt.uusortable;
-            this._tgt.uusortable = w;
-          }
+    if (code) {
+        if (code <= 2) { // [1] mousedown, [2] mouseup
+            uu.ev(uu.ie ? _tgt : doc, "mousemove+,mouseup+", this, code);
+        } else if (code === 3) { // [3] mousemove
+            _li = this._li;
+
+            while ( (v = _li[++i]) ) {
+                if (v !== _tgt) { // exclude drag target
+                    w = v.uusortable;
+                    r = w.rect;
+                    if ((rv.x > r.x && rv.x < r.x + r.w) // [inlining] uu.css.inRect
+                        && (rv.y > r.y && rv.y < r.y + r.h)) {
+
+                        (w.idx < _tgt.uusortable.idx) ? uu.node.prev(v, this._fp)
+                                                      : uu.node.next(v, this._fp);
+                        // swap manage hash
+                        v.uusortable = _tgt.uusortable;
+                        this._tgt.uusortable = w;
+                    }
+                }
+            }
         }
-      }
+        uu.ev.stop(evt);
     }
-    uu.ev.stop(evt);
-  }
 }
 
 // --- z-index ---

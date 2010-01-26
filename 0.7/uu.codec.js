@@ -36,7 +36,7 @@ uu.codec = {
 // uu.codec.hex.decode - "%00%01" to [0x00, 0x01]
 function uucodechexdecode(hex) { // @param HexString: "%00" + ASCII string
                                  // @return ByteArray:
-  var rv = [], ri = -1, c = 0, i = 0, iz = hex.length,
+  var rv = [], ri = -1, c = 0, i = -1, iz = hex.length,
       mark = "%".charCodeAt(0);
 
   if (!hex.length) {
@@ -49,7 +49,7 @@ function uucodechexdecode(hex) { // @param HexString: "%00" + ASCII string
     }
   }
   while (i < iz) {
-    c = hex.charCodeAt(i++);
+    c = hex.charCodeAt(++i);
     if (c === mark) {
       rv[++ri] = parseInt(hex.charAt(i) + hex.charAt(i + 1), 16);
       i += 2;
@@ -117,7 +117,7 @@ function uucodecutf8decode(ary) { // @param UTF8ByteArray:
 function uucodecbase64encode(ary,       // @param ByteArray: array( [0x0, ... ] )
                              urlsafe) { // @param Boolean(= true): true = URLSafe
                                         // @return Base64String/URLSafe64String:
-  var rv = [], pad = 0, code = _B64, c = 0, i = 0, iz;
+  var rv = [], pad = 0, code = _B64, c = 0, i = -1, iz;
 
   switch (ary.length % 3) {
   case 1: ary.push(0); ++pad;
@@ -126,7 +126,7 @@ function uucodecbase64encode(ary,       // @param ByteArray: array( [0x0, ... ] 
   iz = ary.length;
 
   while (i < iz) {
-    c = (ary[i++] << 16) | (ary[i++] << 8) | (ary[i++]);
+    c = (ary[++i] << 16) | (ary[++i] << 8) | (ary[++i]);
     rv.push(code.charAt((c >>> 18) & 0x3f),
             code.charAt((c >>> 12) & 0x3f),
             code.charAt((c >>>  6) & 0x3f),
@@ -167,7 +167,7 @@ function uucodecbase64decode(b64) { // @param Base64String/URLSafe64String:
     return []; // bad data
   }
 
-  var rv = [], pad = 0, hash = _b64db, c = 0, i = 0, iz;
+  var rv = [], pad = 0, hash = _b64db, c = 0, i = -1, iz;
 
   switch (b64.length % 4) { // pad length( "=" or "==" or "" )
   case 2: b64 += "="; ++pad;
@@ -176,10 +176,10 @@ function uucodecbase64decode(b64) { // @param Base64String/URLSafe64String:
 
   iz = b64.length;
   while (i < iz) {                    // 00000000|00000000|00000000
-    c = (hash[b64.charAt(i++)] << 18) // 111111  |        |
-      | (hash[b64.charAt(i++)] << 12) //       11|1111    |
-      | (hash[b64.charAt(i++)] <<  6) //         |    1111|11
-      |  hash[b64.charAt(i++)]        //         |        |  111111
+    c = (hash[b64.charAt(++i)] << 18) // 111111  |        |
+      | (hash[b64.charAt(++i)] << 12) //       11|1111    |
+      | (hash[b64.charAt(++i)] <<  6) //         |    1111|11
+      |  hash[b64.charAt(++i)]        //         |        |  111111
     rv.push((c >>> 16) & 0xff, (c >>> 8) & 0xff, c & 0xff);
   }
   rv.length -= [0,1,2][pad]; // cut tail

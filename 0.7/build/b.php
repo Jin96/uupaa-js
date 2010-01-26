@@ -22,7 +22,13 @@ function marge($packagefile, $outfile, $minify, $mobile) {
     $txt = preg_replace('/(\r\n|\r|\n)/m', "\n", $txt);
 
     if ($mobile) {
-      $txt = preg_replace('/\/\/\{\:\:([^\n]*)\n.*?\/\/\:\:\}/ms', "/*{::$1 ::}*/", $txt);
+//    $txt = preg_replace('/\/\/\{\:\:([^\n]*)\n.*?\/\/\:\:\}/ms', "/*{::$1 ::}*/", $txt);
+/*
+//{mb
+  ...
+//}mb
+ */
+      $txt = preg_replace('/\/\/\{mb([^\n]*)\n.*?\/\/\}mb/ms', "/*{mb$1 }mb*/", $txt);
     }
     if ($minify) {
       // strip comment line
@@ -71,6 +77,7 @@ $v = "";
 $minify = 1;
 $package = "full";
 $outfile = isWin() ? "..\\uupaa.js" : "../uupaa.js";
+$options = '';
 $compiler = "y";
 $command = "";
 $mobile = "";
@@ -109,11 +116,17 @@ marge($packagefile, $outfile, $minify, $mobile);
 
 switch ($compiler) {
 case "g":
-  $command = 'java -jar lib.g.jar --js=' . $outfile . ' --js_output_file=mini.'
+/*
+  $options = '--warning_level=VERBOSE '
+           . '--compilation_level=ADVANCED_OPTIMIZATIONS ';
+ */
+  $command = 'java -jar lib.g.jar ' . $options . ' --js=' . $outfile
+           . ' --js_output_file=mini.'
            . $package . '.g' . $mobile . '.js';
   break;
 case "y":
-  $command = 'java -jar lib.y.jar -v --charset "utf-8" -o mini.'
+  $options = '--charset "utf-8" ';
+  $command = 'java -jar lib.y.jar -v ' . $options . ' -o mini.'
            . $package . '.y' . $mobile . '.js ' . $outfile;
   break;
 case "m":

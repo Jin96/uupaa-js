@@ -21,11 +21,11 @@ function uuimgload(url,  // @param String:
                          //     Hash: dim: { w, h }
                          // @return ImageObject:
   function _onimageload() {
-    var v, i = 0, ary = _imgfn[url].slice(), // copy
+    var v, i = -1, ary = _imgfn[url].slice(), // copy
         arg = { img: img, code: img.code, w: img.width, h: img.height };
 
     _imgfn[url] = []; // clear
-    while ( (v = ary[i++]) ) {
+    while ( (v = ary[++i]) ) {
       try {
         v(arg);
       } catch(err) {}
