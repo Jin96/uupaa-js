@@ -1,24 +1,25 @@
 // === Core ===
 // --- user configurations ---
-// window.xconfig = {
-//   aria: 0,        // @param Number(= 0): 1 is enable WAI-ARIA
-//   debug: 0,       // @param Number(= 0): 1 is debug mode, 0 is normal mode
-//   light: 1,       // @param Number(= 1): 1 is light weight mode
-//   altcss: 0,      // @param Number/Function(= 0): altcss mode
-//                   //                     0 is auto, callback function
-//   imgdir: ".",    // @param String(= "."): image dir
-//   cssexpr: 0,     // @param Number(= 0): 1 is enable css-expression, 0 is disable
-//   visited: 0,     // @param Number(= 0): 1 is E:visited activate
-//   innerText: 0    // @param Number(= 0): 1 is innerText, outerHTML extend for Gecko
-// };
-// --- user callback functions ---
-// window.xboot(uu) - DOMContentLoaded or window.onload callback handler
-// window.xwin(uu) - window.onload callback handler
-// window.xcanvas(uu) - canvas ready callback handler
-// window.xtag(uu, node, buildid) - uu.div(buildid) ..  callback handler
-// window.xlocal(backend) - WebStorage ready callback hander
+//  window.xconfig = {
+//      aria: 0,        // Number(= 0): 1 is enable WAI-ARIA
+//      debug: 0,       // Number(= 0): 1 is debug mode, 0 is normal mode
+//      light: 1,       // Number(= 1): 1 is light weight mode
+//      altcss: 0,      // Number/Function(= 0): altcss mode
+//                      //                       0 is auto, callback function
+//      imgdir: ".",    // String(= "."): image dir
+//      cssexpr: 0,     // Number(= 0): 1 is enable css-expression, 0 is disable
+//      visited: 0,     // Number(= 0): 1 is activate E:visited{}
+//      innerText: 0    // Number(= 0): 1 is extend innerText, outerHTML for Gecko
+//  };
 
-// --- add global variables ---
+// --- user callback functions ---
+//  window.xwin(uu) - window.onload callback handler
+//  window.xboot(uu) - DOMContentLoaded or window.onload callback handler
+//  window.xcanvas(uu, CanvasNodeList) - canvas ready callback handler
+//  window.xlocal(uu, backend) - WebStorage ready callback hander
+//  window.xtag(uu, node, buildid, nodeid) - uu.div(buildid) ..  callback handler
+
+// --- add global variable and functions ---
 var uu; // window.uu - uupaa.js library namespace
 
 // window.uup - plugin namespace, enum plugins
@@ -31,7 +32,7 @@ function uue(tag) { // @param String(= "div"): tag name, "a", "p"
     return document.createElement(tag || "div");
 }
 
-// window.uunop - no operation
+// window.uunop - nop function
 function uunop() {
 }
 
@@ -40,7 +41,7 @@ uu ? ++uu.agein : (function(win, doc) {
 var _cfg    = uuarg(window.xconfig || {}, {
                     aria: 0, debug: 0, light: 1, altcss: 1, imgdir: ".",
                     cssexpr: 0, visited: 0, innerText: 0 }),
-    _ver    = uuvers(), // browser and version detection
+    _ver    = _vers(),
     _ie     = _ver.ie,
     _gecko  = _ver.gecko,
     _opera  = _ver.opera,
@@ -65,12 +66,37 @@ var _cfg    = uuarg(window.xconfig || {}, {
 _cfg.imgdir = _cfg.imgdir.replace(/\/+$/, "") + "/"; // ("img" -> "img/")
 
 // --- build library structure ---
-uu = uumix(_uujamfactory, {         // uu(expr, ctx) -> Instance(jam)
+uu = uumix(jamfactory, {            // uu(expr, ctx) -> Instance(jam)
     agein:          0,              // uu.agein - library reloaded
-    ver:      uumix(_ver, {         // uu.ver - version and meta infos
-        lib:        0.7             //    ua, re, sl, fl, ie, ie6, ie7, ie8, ie67,
-    }),                             //    opera, webkit, gecko, chrome, safari, iphone,
-                                    //    quirks, xml, win, mac, unix, adv, major, lib
+    ver:      uumix(_ver, {         // uu.ver - version and plugin detection
+        lib:        0.7             // uu.ver.lib    - Number: Library version
+    }),                             // uu.ver.ua     - Number: User Agent version
+                                    // uu.ver.re     - Number: Rendering Engine version
+                                    //                 (Firefox2: 1.81, Firefox3: 1.9, Firefox3.5: 1.91,
+                                    //                  Safari3.1: 525, Safari4: 528)
+                                    // uu.ver.sl     - Number: Silverlight version(3 later)
+                                    // uu.ver.fl     - Number: Flash version(7 later)
+                                    // uu.ver.ie     - Boolean: true is IE6, IE7, IE8+
+                                    // uu.ver.ie6    - Boolean: true is IE6
+                                    // uu.ver.ie7    - Boolean: true is IE7
+                                    // uu.ver.ie8    - Boolean: true is IE8 (exclude IE9)
+                                    // uu.ver.ie67   - Boolean: true is IE67
+                                    // uu.ver.ie678  - Boolean: true is IE678
+                                    // uu.ver.opera  - Boolean: true is Opera
+                                    // uu.ver.gecko  - Boolean: true is Gecko based browsers
+                                    // uu.ver.webkit - Boolean: true is Safari, Google Chrome, iPhone, iPod
+                                    // uu.ver.chrome - Boolean: true is Google Chrome
+                                    // uu.ver.safari - Boolean: true is Safari, iPhone, iPod
+                                    // uu.ver.iphone - Boolean: true is iPhone, iPod
+                                    // uu.ver.quirks - Boolean: true is quirks mode
+                                    // uu.ver.xml    - Boolean: true is XML Document, false is HTML Document
+                                    // uu.ver.win    - Boolean: true is Windows OS
+                                    // uu.ver.mac    - Boolean: true is Mac, Mac OS X
+                                    // uu.ver.unix   - Boolean: true is Unix like OS, Linux, FreeBSD, SunOS
+                                    // uu.ver.adv    - Boolean: true is Advanced browsers
+                                    //                 (Firefox3.5+, Safari4+, Google Chrome2+, Opera10.50+)
+                                    // uu.ver.major  - Boolean: true is Major/Majority browsers
+                                    //                 (IE6+, Firefox3+, Safari3.1+, Google Chrome2+, Opera 9.5+)
     config:       _cfg,             // uu.config - { aria, debug, light, ... }
     // --- ajax / jsonp ---
     ajax:     uumix(uuajax, {       // uu.ajax(url, option = {}, fn = void 0, ngfn = void 0)
@@ -147,6 +173,26 @@ uu = uumix(_uujamfactory, {         // uu(expr, ctx) -> Instance(jam)
         set:        uuattrset       // [1][set one  attr]  uu.attr.set(node, key, val ) -> node
                                     // [2][set some attrs] uu.attr.set(node, { key: val, ... }) -> node
     }),
+    // --- css / style ---
+    // [1][get all  computed styles] uu.css(node) -> { width: "100px", ... }
+    // [2][get more computed styles] uu.css(node, 0x1) -> { width: "100px", ... }
+    // [3][get some computed styles] uu.css(node, 0x2) -> { width: "100px", ... }
+    // [4][get one  style]           uu.css(node, "color") -> "red"
+    // [5][get some styles]          uu.css(node, "color,width") -> { color: "red", width: "20px" }
+    // [6][set one  style]           uu.css(node, "color", "red") -> node
+    // [7][set some styles]          uu.css(node, { color: "red" }) -> node
+    css:      uumix(uucss, {
+        get:        uucssget,       // [1][get one  style]  uu.css.get(node, "color") -> "red"
+                                    // [2][get some styles] uu.css.get(node, "color,text-align") -> {color:"red", textAlign:"left"}
+        set:        uucssset,       // [1][set one  style]  uu.css.set(node, "color", "red") -> node
+                                    // [2][set some styles] uu.css.set(node, { color: "red" }) -> node
+        opacity: uumix(uucsso, {    // [1][get] uu.css.opacity(node) -> Number(0.0~1.0)
+                                    // [2][set] uu.css.opacity(node, opacity, diff = false) -> node
+            get:    uucssoget,      // uu.css.opacity.get(node) -> Number(0.0~1.0)
+            set:    uucssoset       // uu.css.opacity.set(node, opacity, diff = false) -> node
+        })
+    }),
+    cs:             uucs,           // uu.cs(node, mode = 0) -> Hash(window.getComputedStyle or currentStyle)
     // --- query ---
     query:    uumix(uuquery, {      // uu.query(expr, ctx = document) -> [node, ...]
         ui:         uuqueryui       // [1][query all ui instance]  uu.query.ui("", ctx) -> { name, [instance, ...] }
@@ -295,6 +341,7 @@ uu = uumix(_uujamfactory, {         // uu(expr, ctx) -> Instance(jam)
     ie7:            _ver.ie7,       // is IE7
     ie8:            _ver.ie8,       // is IE8(ie8 mode)
     ie67:           _ver.ie67,      // is IE6 or IE7
+    ie678:          _ver.ie678,     // is IE6 or IE7 or IE8
     opera:          _opera,         // is Opera
     gecko:          _gecko,         // is Gecko
     webkit:         _webkit,        // is WebKit
@@ -331,7 +378,7 @@ uu.msg = new MessagePump();
 // --- ECMAScript-262 5th ---
 Array.isArray || (Array.isArray = uuisary);
 
-//{::
+//{mb
 uumix(Array.prototype, {
     indexOf:        arrayindexof,
     lastIndexOf:    arraylastindexof,
@@ -341,7 +388,7 @@ uumix(Array.prototype, {
     map:            arraymap,
     filter:         arrayfilter
 }, 0, 0);
-//::}
+//}mb
 
 uumix(Array.prototype, {
     reduce:         arrayreduce,
@@ -366,7 +413,7 @@ uumix(String.prototype, {
     toJSON:         stringtojson
 }, 0, 0);
 
-//{::
+//{mb
 _gecko && _cfg.innerText && !win.HTMLElement.prototype.innerText &&
 (function(proto) {
     proto.__defineGetter__("innerText", innertextgetter);
@@ -374,7 +421,7 @@ _gecko && _cfg.innerText && !win.HTMLElement.prototype.innerText &&
     proto.__defineGetter__("outerHTML", outerhtmlgetter);
     proto.__defineSetter__("outerHTML", outerhtmlsetter);
 })(win.HTMLElement.prototype);
-//::}
+//}mb
 
 // --- uu.jam class ---
 uumix(uujam.prototype, {
@@ -424,8 +471,8 @@ uumix(uujam.prototype, {
 });
 
 // --- uu.jam (nodeset interface) ---
-// uu.jam - nodeset accessor factory
-function _uujamfactory(expr, ctx) {
+// uu - uu.jam factory
+function jamfactory(expr, ctx) {
     return new uujam(expr, ctx);
 }
 
@@ -1093,9 +1140,9 @@ function uuattr(node,   // @param Node:
                 mix2) { // @param String(= void 0): value
                         // @return String/Hash/Node:
     if (!mix1 || mix1 === 1) { // [1][2]
-        var rv = {}, ary = node.attributes, v, w, i = 0;
+        var rv = {}, ary = node.attributes, v, w, i = -1;
 
-        while ( (v = ary[i++]) ) {
+        while ( (v = ary[++i]) ) {
             w = v.name;
             if (!mix1) {
                 rv[w] = v.value;
@@ -1147,6 +1194,239 @@ function uuattrset(node,  // @param Node:
     }
     return node;
 }
+
+// --- css / style ---
+// uu.css - css accessor
+// [1][get all  computed styles] uu.css(node) -> { width: "100px", ... }
+// [2][get more computed styles] uu.css(node, 0x1) -> { width: "100px", ... }
+// [3][get some computed styles] uu.css(node, 0x2) -> { width: "100px", ... }
+// [4][get one  style]           uu.css(node, "color") -> "red"
+// [5][get some styles]          uu.css(node, "color,width") -> { color: "red", width: "20px" }
+// [6][set one  style]           uu.css(node, "color", "red") -> node
+// [7][set some styles]          uu.css(node, { color: "red" }) -> node
+function uucss(node, a, b) { // @return String/Hash/CSS2Properties/Node:
+    if (!a || typeof a === "number") {
+        return uucs(node, a || 0); // [1][2][3]
+    }
+    return ((b === void 0 && uuisstr(a)) ? uucssget // [4][5]
+                                         : uucssset)(node, a, b); // [6][7]
+}
+
+// uu.css.get - get getComputedStyle(node) value
+// [1][get one  style]  uu.css.get(node, "color") -> "red"
+// [2][get some styles] uu.css.get(node, "color,text-align") -> {color:"red", textAlign:"left"}
+function uucssget(node,     // @param Node:
+                  styles) { // @param JointString: "css-prop,cssProp..."
+                            // @return String/Hash: "value"
+                            //                   or { cssProp: "value", ... }
+    var rv = {}, ary = styles.split(","), v, i = -1,
+        ns = uucss(node), fixdb = uufix._db;
+
+    while ( (v = ary[++i]) ) {
+        rv[v] = ns[fixdb[v] || v] || "";
+    }
+    return (ary.length === 1) ? rv[ary[0]] : rv;
+}
+
+// uu.css.set
+// [1][set one  style]  uu.css.set(node, "color", "red") -> node
+// [2][set some styles] uu.css.set(node, { color: "red" }) -> node
+function uucssset(node,  // @param Node:
+                  key,   // @param String/Hash:
+                  val) { // @param String(= void 0):
+                         // @return Node:
+    var hash = uuhash(key, val), ns = node.style, p, v, i, n,
+        fixdb = uufix._db, hook = uucssset._hook;
+
+    for (i in hash) {
+        v = hash[i];
+        p = fixdb[i] || i;
+        if (typeof v === "string") {
+            ns[p] = v; // backgroundColor="transparent"
+        } else {
+            n = hook[p];
+            if (n === 2) {
+                uucssoset(node, v);
+            } else {
+                ns[p] = n ? v : (v + "px"); // zoom = 1, width = 100 + "px"
+            }
+        }
+    }
+    return node;
+}
+uucssset._hook = { opacity: 2, lineHeight: 1, fontWeight: 1,
+                   fontSizeAdjust: 1, zIndex: 1, zoom: 1 };
+
+// uu.css.opacity
+// [1][get] uu.css.opacity(node) -> Number(0.0~1.0)
+// [2][set] uu.css.opacity(node, opacity, diff = false) -> node
+function uucsso(node,    // @param Node:
+                opacity, // @param Number(= void 0): 0.0~1.0
+                diff) {  // @param Boolean(= false):
+                         // @return Number/Node:
+    return (opacity === void 0 ? uucssoget : uucssoset)(node, opacity, diff);
+}
+
+// uu.css.opacity.get - get opacity value(from 0.0 to 1.0)
+function uucssoget(node) { // @param Node:
+                           // @return Number: float(from 0.0 to 1.0)
+    if (_ie) {
+        var v = node.uucsso; // undefined or 1.0 ~ 2.0
+
+        return v === void 0 ? 1 : (v - 1);
+    }
+    return parseFloat(node.style.opacity ||
+                      win.getComputedStyle(node, null).opacity);
+}
+
+// uu.css.opacity.set - set opacity value(from 0.0 to 1.0)
+function uucssoset(node,   // @param Node:
+                   val,    // @param Number: opacity, float(from 0.0 to 1.0)
+                   diff) { // @param Boolean(= false):
+                           // @return Node:
+    var ns;
+
+    if (uu.ie678) {
+        ns = node.style;
+        if (node.uucsso === void 0) { // init
+            if (uu.ie67) { // [FIX][IE]
+                if ((node.currentStyle || {}).width === "auto") {
+                    ns.zoom = 1;
+                }
+            }
+        }
+    }
+    diff && (val += uucssoget(node));
+
+    // normalize
+    val = (val > 0.999) ? 1
+        : (val < 0.001) ? 0 : val;
+    node.style.opacity = val;
+
+    if (uu.ie678) {
+        node.uucsso = val + 1; // (1.0 ~ 2.0)
+        ns.visibility = val ? "" : "hidden";
+        ns.filter = ((val > 0 && val < 1)
+                  ? "alpha(val=" + (val * 100) + ") " : "")
+                  + ns.filter.replace(uucssoset._alpha, "");
+    }
+    return node;
+}
+uucssoset._alpha = /^alpha\([^\x29]+\) ?/;
+
+// uu.cs - getComputedStyle, currentStyle wrapper
+function uucs(node,   // @param Node:
+              mode) { // @param Number(= 0):
+                      //   0: enum full properties
+                      //   1: enum more properties
+                      //   2: enum some properties
+                      //   4: currentStyle (IE6,IE7,IE8 only)
+                      // @return Hash: { prop: "val", ... }
+//{mb
+    // http://d.hatena.ne.jp/uupaa/20091212
+    if (uu.ie678) {
+        if (mode === 4) {
+            return node.currentStyle;
+        }
+        if (!node.currentStyle) {
+            return {};
+        }
+        var rv = {},
+            ns = node.style,
+            cs = node.currentStyle,
+            rs = node.runtimeStyle,
+            dig = uucs, box = dig._hash.box, unit = dig._unit, mod = dig._mod,
+            em, rect, ut, v, w, x, i = -1, j = -1, m1, m2,
+            ary = !mode ? dig._hash.full : (mode === 1) ? dig._hash.more : 0,
+            stock = { "0px": "0px", "1px": "1px", "2px": "2px", "5px": "5px",
+                      thin: "1px", medium: "3px", thick: dig._thick };
+
+        if (ary) {
+            while ( (w = ary[++j]) ) {
+                rv[w] = cs[w];
+            }
+        }
+
+        em = parseFloat(cs.fontSize) * (dig._pt.test(cs.fontSize) ? 4 / 3 : 1);
+        rect = node.getBoundingClientRect();
+
+        // calc border, padding and margin size
+        while ( (w = box[++i]) ) {
+            v = cs[w];
+            if (!(v in stock)) {
+                x = v;
+                switch (ut = unit[v.slice(-1)]) {
+                case 1: x = parseFloat(v) * em; break;    // "12em"
+                case 2: x = parseFloat(v) * 4 / 3; break; // "12pt"
+                case 3: m1 = ns.left, m2 = rs.left; // %, auto
+                        rs.left = cs.left, ns.left = v;
+                        x = ns.pixelLeft, ns.left = m1, rs.left = m2;
+                }
+                stock[v] = ut ? x + "px" : x;
+            }
+            rv[w] = stock[v];
+        }
+        for (w in mod) {
+            v = cs[w];
+            switch (ut = unit[v.slice(-1)]) {
+            case 1: v = parseFloat(v) * em; break;    // "12em"
+            case 2: v = parseFloat(v) * 4 / 3; break; // "12pt"
+            case 3: // %, auto
+                switch (mod[w]) {
+                case 1: v = node.offsetTop; break;  // style.top
+                case 2: v = node.offsetLeft; break; // style.left
+                case 3: v = (node.offsetWidth  || rect.right - rect.left) // style.width
+                          - parseInt(rv.borderLeftWidth) - parseInt(rv.borderRightWidth)
+                          - parseInt(rv.paddingLeft) - parseInt(rv.paddingRight);
+                        v = v > 0 ? v : 0;
+                        break;
+                case 4: v = (node.offsetHeight || rect.bottom - rect.top) // style.height
+                          - parseInt(rv.borderTopWidth) - parseInt(rv.borderBottomWidth)
+                          - parseInt(rv.paddingTop) - parseInt(rv.paddingBottom);
+                        v = v > 0 ? v : 0;
+                }
+            }
+            rv[w] = ut ? v + "px" : v;
+        }
+        rv.fontSize = em + "px";
+        rv.cssFloat = cs.styleFloat; // compat alias
+        return rv;
+    }
+//}mb
+    return win.getComputedStyle(node, null);
+}
+//{mb
+uucs._pt = /pt$/;
+uucs._mod = { top: 1, left: 2, width: 3, height: 4 };
+uucs._unit = { m: 1, t: 2, "%": 3, o: 3 }; // em, pt, %, auto
+uucs._hash = uu.ie678 ? _builduucshash() : {};
+uucs._thick = uu.ie8 ? "5px" : "6px";
+//}mb
+
+//{mb inner - build uucss hash
+function _builduucshash() {
+    // http://d.hatena.ne.jp/uupaa/20091212
+    var rv = { full: [], more: [], box: [] },
+        ary = [" "], i, w, trim = /^\s+|\s+$/g,
+        cs = document.getElementsByTagName("html")[0].currentStyle;
+
+    for (i in cs) {
+        ary.push(i);
+    }
+    ary.sort();
+    w = ary.join(" ").replace(/ (?:accelerator|behavior|hasLayout|zoom)/g, "");
+    rv.full = w.replace(trim, "").split(" ");
+    rv.more = w.replace(/ (?:lay\w+|rub\w+|text\w+|pageB\w+|ms\w+|scr\w+)/g, "").
+        replace(/ (?:blockDirection|orphans|quotes|widows|filter|styleFloat)/g, "").
+        replace(/ (?:imeMode|writingMode|unicodeBidi|emptyCells|tableLayout)/g, "").
+        replace(/ (?:border(?:Color|Style|Width)|margin|padding|outline) /g, " ").
+        replace(/ (border\w+Width|margin\w+|padding\w+)/g, function(_, m) {
+          return rv.box.push(m), _;
+        }).replace(trim, "").concat(" textAlign textOverflow textIndent").
+        split(" ").sort();
+    return rv;
+}
+//}mb
 
 // --- className(klass) ---
 // uu.klass.has - has className
@@ -1431,7 +1711,7 @@ function uuev(node,    // @param Node:
     }
     mode = mode || 1;
     var types = node.uuevtypes || (node.uuevfn = {}, node.uuevtypes = ","),
-        nstype = nstypes.split(","), v, i = -1, iz = nstype.length, m,
+        nstype = nstypes.split(","), v, i = -1, m,
         type, capt, closure, handler, _code = uuev._code;
 
     if (mode === 1) {
@@ -1842,7 +2122,7 @@ function _buildNode(node,   // @param Node/String:
             if (++j === 1) {
                 v && uuattrset(node, tohash(v)); // [6][7] set attr
             } else if (j === 2) {
-                v && uu.css.set(node, tohash(v)); // [8][9] set css
+                v && uucssset(node, tohash(v)); // [8][9] set css
             }
         }
     }
@@ -2408,7 +2688,7 @@ function uulazyfire(id) { // @param String(= ""): id
 }
 
 // --- ECMAScript-262 5th ---
-//{:: Array.prototype.indexOf
+//{mb Array.prototype.indexOf
 function arrayindexof(elm,   // @param Mix: searchElement
                       idx) { // @param Number(= 0): fromIndex
                              // @return Number: found index or -1
@@ -2489,7 +2769,7 @@ function arrayfilter(fn,        // @param Function: callback evaluator
     }
     return rv;
 }
-//::}
+//}mb
 
 // Array.prototype.reduce
 function arrayreduce(fn,     // @param Function: callback evaluator
@@ -2542,7 +2822,7 @@ function stringtojson() { // @return String: "string"
 }
 
 // --- HTMLElement.prototype ---
-//{::
+//{mb
 // HTMLElement.prototype.innerText getter
 function innertextgetter() {
     return this.textContent;
@@ -2576,7 +2856,7 @@ function outerhtmlsetter(html) {
     r.setStartBefore(this);
     this.parentNode.replaceChild(r.createContextualFragment(html), this);
 }
-//::}
+//}mb
 
 // --- uu.jam ---
 // jam.back
@@ -2743,35 +3023,35 @@ function _jammap(jam, fn, p1, p2, p3, p4) {
 // --- initialize ---
 // inner - setup node builder - uu.div(), uu.a(), ...
 uuaryeach(uutag.HTML4, function(v) {
-    uu[v] = function() { // @param Mix: var_args
+    uu[v] = function html4() { // @param Mix: var_args
         return _buildNode(v, arguments);
     };
 });
 uuaryeach(uutag.HTML5, function(v) {
     uu.ie && doc.createElement(v); // [IE]
-    uu[v] = function() { // @param Mix: var_args
+    uu[v] = function html5() { // @param Mix: var_args
         return _buildNode(v, arguments);
     };
 });
 
 // inner - build DOM Lv2 event handler - uu.click(), jam.click(), ...
 uuaryeach(uuev._list, function(v) {
-    uu[v] = function(node, fn) { // uu.click(node, fn) -> node
+    uu[v] = function bind(node, fn) { // uu.click(node, fn) -> node
         return uuev(node, v, fn);
     };
-    uu["un" + v] = function(node) { // uu.unclick(node) -> node
+    uu["un" + v] = function unbind(node) { // uu.unclick(node) -> node
         return uuev(node, v, 0, 2);
     };
-    uujam.prototype[v] = function(fn) { // uu("li").click(fn) -> jam
+    uujam.prototype[v] = function jambind(fn) { // uu("li").click(fn) -> jam
         return _jameach(this, uuev, v, fn);
     };
-    uujam.prototype["un" + v] = function() { // uu("li").unclick() -> jam
+    uujam.prototype["un" + v] = function jamunbind() { // uu("li").unclick() -> jam
         return _jameach(this, uuevunbind, v);
     };
 });
 
 try {
-    _ie && doc.execCommand("BackgroundImageCache", false, true);
+    uu.ie6 && doc.execCommand("BackgroundImageCache", false, true);
 } catch(err) {} // ignore error(IETester / stand alone IE too)
 
 // inner - bootstrap, WindowReadyState and DOMReadyState handler
@@ -2802,7 +3082,7 @@ function _domreadyie() {
 uuevattach(win, "load", _winload);
 _ie ? _domreadyie() : uuevattach(doc, "DOMContentLoaded", _ready);
 
-//{:: [IE] fix mem leak
+//{mb [IE] fix mem leak
 function _winunload() {
     var nodeid, node, ary, i, v;
 
@@ -2819,7 +3099,7 @@ function _winunload() {
     win.detachEvent("onunload", _winunload);
 }
 _ie && win.attachEvent("onunload", _winunload);
-//::}
+//}mb
 
 // inner -
 // 1. prebuild camelized hash - http://handsout.jp/slide/1894
@@ -2832,8 +3112,8 @@ uuready(function() {
                 "bg,background,bgcolor,backgroundColor,bgimg,backgroundImage," +
                 "bgrpt,backgroundRepeat,bgpos,backgroundPosition");
 
-    uumix(_camelhash(uufix._db, _webkit ? win.getComputedStyle(_html, null)
-                                        : _html.style), styles, uuattr._hash);
+    uumix(_camelhash(uufix._db, _webkit ? uu.cs(_html) : _html.style),
+                     styles, uuattr._hash);
     uunodeid(_html);
     while ( (v = nodeList[++i]) ) {
         v.nodeType === 1 && uunodeid(v); // 1: ELEMENT_NODE
@@ -2882,42 +3162,12 @@ function _matcher(a) {
     return RegExp("(?:^| )(" + a.join("|") + ")(?:$|(?= ))", "g");
 }
 
-})(window, document);
-
-// window.uuvers - collect versions and meta informations
-//    http://d.hatena.ne.jp/uupaa/20090603
-//
-// ua       - Number: User Agent version
-// re       - Number: Rendering Engine version
-//              (Firefox2: 1.81, Firefox3: 1.9, Firefox3.5: 1.91,
-//               Safari3.1: 525, Safari4: 528)
-// sl       - Number: Silverlight version(3 later)
-// fl       - Number: Flash version(7 later)
-// ie       - Boolean: true is IE6, IE7, IE8+
-// ie6      - Boolean: true is IE6
-// ie7      - Boolean: true is IE7
-// ie8      - Boolean: true is IE8 (exclude IE9)
-// ie67     - Boolean: true is IE67
-// opera    - Boolean: true is Opera
-// gecko    - Boolean: true is Gecko based browsers
-// webkit   - Boolean: true is WebKit based browsers
-//              (Safari, iPhone, iPod, Google Chrome)
-// chrome   - Boolean: true is Google Chrome (exclude Safari, iPhone, iPod)
-// safari   - Boolean: true is Safari, iPhone, iPod (exclude Google Chrome)
-// iphone   - Boolean: true is iPhone, iPod
-// quirks   - Boolean: true is quirks mode
-// xml      - Boolean: true is XML Document, false is HTML Document
-// win      - Boolean: true is Windows OS
-// mac      - Boolean: true is Mac, Mac OS X
-// unix     - Boolean: true is Unix like OS, Linux, FreeBSD, SunOS
-// adv      - Boolean: true is Advanced browsers
-//              (Firefox3.5+, Safari4+, Google Chrome2+, Opera10.50)
-// major    - Boolean: true is Major/Majority browsers
-//              (IE6+, Firefox3+, Safari3.1+, Google Chrome2+, Opera 9.5+)
-function uuvers(slupper) { // @param Number(= 4): Silverlight upper version
-                           // @return Hash: { ua, re, sl, fl, ie, ie6, ie7, ie8,
-                           //    ie67, opera, webkit, chrome, safari, iphone,
-                           //    quirks, xml, win, mac, unix, adv, major }
+// inner - collect versions and meta informations
+function _vers(slupper) { // @param Number(= 4): Silverlight upper version
+                          // @return Hash: { ua, re, sl, fl, ie, ie6, ie7, ie8,
+                          //    ie67, opera, webkit, chrome, safari, iphone,
+                          //    quirks, xml, win, mac, unix, adv, major }
+    // http://d.hatena.ne.jp/uupaa/20090603
     var sl = slupper || 4, ax, v, i = -1, doc = document,
         nu = navigator.userAgent,
         ie = !!doc.uniqueID, opera = window.opera || false,
@@ -2933,7 +3183,7 @@ function uuvers(slupper) { // @param Number(= 4): Silverlight upper version
         html = doc.getElementsByTagName("html")[0],
         ary = [html.className.replace(/ifnojs|addua|addos/g, ""), "ifjs"],
         id = "adv,major", cn = html.className,
-        rv = { ua: ua, re: re, sl: 0, fl: 0, xml: uue().tagName === uue().tagName,
+        rv = { ua: ua, re: re, sl: 0, fl: 0,
                ie: ie, ie6: ie && ua === 6, ie7: ie && ua === 7,
                ie8: ie && (doc.documentMode || 0) === 8,
                opera: !!opera, gecko: gecko,
@@ -2941,10 +3191,11 @@ function uuvers(slupper) { // @param Number(= 4): Silverlight upper version
                safari: !chrome && nu.indexOf("Safari") > 0,
                iphone: webkit && /iPod|iPhone/.test(nu),
                quirks: (doc.compatMode || "") !== "CSS1Compat",
+               xml: uue().tagName === uue("DIV").tagName,
                win: nu.indexOf("Win") > 0, mac: nu.indexOf("Mac") > 0, 
                unix: /X11|Linux/.test(nu) };
 
-  //{:: Flash version (version 7.0 ~ later)
+  //{mb Flash version (version 7.0 ~ later)
     try {
         ax = ie ? new ActiveXObject("ShockwaveFlash.ShockwaveFlash")
                 : navigator.plugins["Shockwave Flash"];
@@ -2952,9 +3203,9 @@ function uuvers(slupper) { // @param Number(= 4): Silverlight upper version
                                : ax.description);
         rv.fl = v ? parseFloat(v[0], 10) : 0;
     } catch(err) {}
-  //::}
+  //}mb
 
-  //{:: Silverlight version (version 3.0 ~ later)
+  //{mb Silverlight version (version 3.0 ~ later)
     if (sl >= 3) {
         try {
             ax = ie ? new ActiveXObject("AgControl.AgControl")
@@ -2965,9 +3216,10 @@ function uuvers(slupper) { // @param Number(= 4): Silverlight upper version
             }
         } catch(err) {}
     }
-  //::}
+  //}mb
 
     rv.ie67  = rv.ie6 || rv.ie7;
+    rv.ie678 = rv.ie6 || rv.ie7 || rv.ie8;
     rv.adv   = (gecko  && re >  1.9) || // Firefox 3.5+(1.91)
                (webkit && re >= 528) || // Safari 4+, Google Chrome 2+
                (opera  && ua >= 10.5);  // Opera10.50+
@@ -2978,7 +3230,7 @@ function uuvers(slupper) { // @param Number(= 4): Silverlight upper version
 
     // --- conditional selector ---
     // http://d.hatena.ne.jp/uupaa/20100101
-    /addua/.test(cn) && (id += ",ie,ie6,ie7,ie8,ie67,opera,gecko,webkit,iphone");
+    /addua/.test(cn) && (id += ",ie,ie6,ie7,ie8,ie67,ie678,opera,gecko,webkit,iphone");
     /addos/.test(cn) && (id += ",win,mac,unix");
     id = id.split(",");
     while ( (v = id[++i]) ) {
@@ -2990,115 +3242,5 @@ function uuvers(slupper) { // @param Number(= 4): Silverlight upper version
     return rv;
 }
 
-//{:: window.getComputedStyle() for IE6+
-// http://d.hatena.ne.jp/uupaa/20091212
-window.getComputedStyle || (function(win) {
-var _PT = /pt$/, _FULL = [], _MORE = [], _BOX = [],
-    _MOD = { top: 1, left: 2, width: 3, height: 4 },
-    _UNIT = { m: 1, t: 2, "%": 3, o: 3 }, // em, pt, %, auto
-    _THICK = (document.documentMode || 0) > 7 ? "5px" : "6px";
-
-win.getComputedStyle = winstyle;
-
-function winstyle(node,     // @param Node:
-                  pseudo,   // @param String(= void 0):
-                  option) { // @param Number(= 0x0):
-                            //   0x0: enum full properties
-                            //   0x1: enum more properties
-                            //   0x2: enum some properties
-                            // @return Hash: { prop: "val", ... }
-    if (!node.currentStyle) {
-      return {};
-    }
-    var rv = {},
-        ns = node.style,
-        cs = node.currentStyle,
-        rs = node.runtimeStyle,
-        em, rect, unit, v, w, x, i = -1, j = 0, m1, m2,
-        ary = !option ? _FULL : (option === 1) ? _MORE : 0,
-        stock = { "0px": "0px", "1px": "1px", "2px": "2px", "5px": "5px",
-                  thin: "1px", medium: "3px", thick: _THICK };
-
-    if (ary) {
-        while ( (w = ary[j++]) ) {
-            rv[w] = cs[w];
-        }
-    }
-
-    em = parseFloat(cs.fontSize) * (_PT.test(cs.fontSize) ? 4 / 3 : 1);
-    rect = node.getBoundingClientRect();
-
-    // calc border, padding and margin size
-    while ( (w = _BOX[++i]) ) {
-        v = cs[w];
-        if (!(v in stock)) {
-            x = v;
-            switch (unit = _UNIT[v.slice(-1)] || 0) {
-            case 1: x = parseFloat(v) * em; break;    // em
-            case 2: x = parseFloat(v) * 4 / 3; break; // pt
-            case 3: m1 = ns.left, m2 = rs.left;       // %, auto
-                    rs.left = cs.left, ns.left = v;
-                    x = ns.pixelLeft, ns.left = m1, rs.left = m2;
-            }
-            stock[v] = unit ? x + "px" : x;
-        }
-        rv[w] = stock[v];
-    }
-    for (w in _MOD) {
-        v = cs[w];
-        switch (unit = _UNIT[v.slice(-1)] || 0) {
-        case 1: v = parseFloat(v) * em; break;    // em
-        case 2: v = parseFloat(v) * 4 / 3; break; // pt
-        case 3: // %, auto
-            switch (_MOD[w]) {
-            case 1: v = node.offsetTop; break;  // style.top
-            case 2: v = node.offsetLeft; break; // style.left
-            case 3: v = (node.offsetWidth  || rect.right - rect.left) // style.width
-                      - parseInt(rv.borderLeftWidth) - parseInt(rv.borderRightWidth)
-                      - parseInt(rv.paddingLeft) - parseInt(rv.paddingRight);
-                    v = v > 0 ? v : 0;
-                    break;
-            case 4: v = (node.offsetHeight || rect.bottom - rect.top) // style.height
-                      - parseInt(rv.borderTopWidth) - parseInt(rv.borderBottomWidth)
-                      - parseInt(rv.paddingTop) - parseInt(rv.paddingBottom);
-                    v = v > 0 ? v : 0;
-            }
-        }
-        rv[w] = unit ? v + "px" : v;
-    }
-    rv.fontSize = em + "px";
-    rv.cssFloat = cs.styleFloat; // compat alias
-    return rv;
-}
-
-// init - make _FULL, _MORE, _BOX props
-(function() {
-    var ary = [" "], i, w, trim = /^\s+|\s+$/g,
-        cs = document.getElementsByTagName("html")[0].currentStyle;
-
-    for (i in cs) {
-        ary.push(i);
-    }
-    ary.sort();
-    w = ary.join(" ").replace(/ (?:accelerator|behavior|hasLayout|zoom)/g, "");
-    _FULL = w.replace(trim, "").split(" ");
-    _MORE = w.replace(/ (?:lay\w+|rub\w+|text\w+|pageB\w+|ms\w+|scr\w+)/g, "").
-        replace(/ (?:blockDirection|orphans|quotes|widows|filter|styleFloat)/g, "").
-        replace(/ (?:imeMode|writingMode|unicodeBidi|emptyCells|tableLayout)/g, "").
-        replace(/ (?:border(?:Color|Style|Width)|margin|padding|outline) /g, " ").
-        replace(/ (border\w+Width|margin\w+|padding\w+)/g, function(_, m) {
-          return _BOX.push(m), _;
-        }).replace(trim, "").concat(" textAlign textOverflow textIndent").
-        split(" ").sort();
-})();
-
-// --- [IE] fix mem leak ---
-function _winunload() {
-    win.getComputedStyle = null;
-    win.detachEvent("onunload", _winunload);
-}
-win.attachEvent("onunload", _winunload);
-
-})(window);
-//::}
+})(window, document);
 

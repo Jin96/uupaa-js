@@ -120,9 +120,9 @@ function positionMarkup(node) { // @param Node: context
 
 // uu.css3.fixie.alphapng - apply alpha png filter
 function alphapng(ary) { // @param NodeArray:
-  var v, i = 0, hash;
+  var v, i = -1, hash;
 
-  while ( (v = ary[i++]) ) {
+  while ( (v = ary[++i]) ) {
     hash = uu.node.data.get(v, "uucss3.fixie.alphapng");
     if (!hash || !hash.efx) {
       hash.efx = 1;
@@ -139,18 +139,18 @@ function alphapng(ary) { // @param NodeArray:
 function alphapngUndo(nodeArray) { // @param NodeArray:
   function removeFilter(filter) {
     var rv = [], token = uu.split.token(filter, " ", 0),
-        v, i = 0;
+        v, i = -1;
 
-    while ( (v = token[i++]) ) {
+    while ( (v = token[++i]) ) {
       if (v.indexOf(_ALPHA1) < 0) {
         rv.push(v);
       }
     }
     return rv.join(" ");
   }
-  var v, i = 0, hash;
+  var v, i = -1, hash;
 
-  while ( (v = nodeArray[i++]) ) {
+  while ( (v = nodeArray[++i]) ) {
     hash = uu.node.data.get(v, "uucss3.fixie.alphapng");
     if (hash.efx) {
       hash.efx = 0;
@@ -163,12 +163,12 @@ function alphapngUndo(nodeArray) { // @param NodeArray:
 // uu.css3.fixie.alphapng.query - query alpha png nodes
 function alphapngQuery(context) { // @param Node: context
                                   // @return NodeArray:
-  var rv = [], v, i = 0,
+  var rv = [], v, i = -1,
       ary = uu.query('img[src$=".png"],input[type=image][src$=".png"]',
                       context),
       idx1 = ".alpha.png", idx2 = " alpha ";
 
-  while ( (v = ary[i++]) ) {
+  while ( (v = ary[++i]) ) {
     if (v.src.lastIndexOf(idx1) >= 0 ||
         (" " + v.className + " ").indexOf(idx2) >= 0) {
       rv.push(v);
@@ -182,9 +182,9 @@ function alphapngQuery(context) { // @param Node: context
 // === uu.css3.fixie.disptbl ===
 // care: -uu-display: table: for IE6, IE7
 function disptbl(ary) { // @param NodeArray:
-  var v, i = 0, j, tbl, row, cell;
+  var v, i = -1, j, tbl, row, cell;
 
-  while ( (v = ary[i++]) ) {
+  while ( (v = ary[++i]) ) {
     tbl = uue("table");
     // copy attrs
     tbl.id = v.id;
@@ -223,11 +223,11 @@ function disptbl(ary) { // @param NodeArray:
 // === uu.css3.fixie.maxmin ===
 // care: max-width, min-width, max-height, min-height for IE6, IE7(td, th only)
 function maxmin() {
-  var elm, i = 0, hash,
+  var elm, i = -1, hash,
       calcMaxWidth, calcMinWidth, calcMaxHeight, calcMinHeight,
       run, width, height, rect;
 
-  while ( (elm = _job.maxmin[i++]) ) {
+  while ( (elm = _job.maxmin[++i]) ) {
     hash = elm.uuCSSMaxMin;
 
     calcMaxWidth  = maxminSize(elm, hash, "maxWidth", 1);
@@ -314,11 +314,11 @@ function maxminMarkup(context) {
   var rv = [], xw, nw, xh, nh,
       node = uu.ie6 ? uu.tag("*", context)
                     : uu.query("td,th", context), // IE7 td, th
-      v, i = 0, cs,
+      v, i = -1, cs,
       MAXMIN_KEYWORD = _MAXMIN_KEYWORD,
       MAXMIN_BLOCK_LEVEL = _MAXMIN_BLOCK_LEVEL;
 
-  while ( (v = node[i++]) ) {
+  while ( (v = node[++i]) ) {
     cs = v.currentStyle;
     if (uu.ie7 || MAXMIN_BLOCK_LEVEL[cs.display]) {
       xw = cs["max-width"]  || cs.maxWidth || ""; // length | % | none

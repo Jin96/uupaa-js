@@ -161,11 +161,11 @@ function uucssimports() { // @return String: "dirty CSS"
     });
   }
   var rv = [], absdir = uu.url(), href, hash, dstr,
-      node = uu.ary(doc.styleSheets), v, w, i = 0,
+      node = uu.ary(doc.styleSheets), v, w, i = -1,
       prop1 = uu.ie ? "owningElement" : "ownerNode",
       prop2 = uu.ie ? "uucss3memento" : "textContent"; // MEMENTO
 
-  while ( (v = node[i++]) ) {
+  while ( (v = node[++i]) ) {
     if (!v.disabled) {
       href = v.href || "";
       // ignore data:text/css for !(IE6,IE7)
@@ -190,8 +190,9 @@ function uucssimports() { // @return String: "dirty CSS"
   // decode datauri
   //    <link href="data:text/css,...">
   if (!uu.config.light && uu.codec.datauri) {
-    node = doc.getElementsByTagName("link"), i = 0;
-    while ( (v = node[i++]) ) {
+    node = doc.getElementsByTagName("link");
+    i = -1;
+    while ( (v = node[++i]) ) {
       if (IMP_DATA_SCHEME.test(v.href)) {
         hash = uu.codec.datauri.decode(v.href);
         dstr = String.fromCharCode.apply(null, hash.data);

@@ -28,18 +28,18 @@ var _slhosts = 0, // Silverlight host count
       initSurface:      initSurface  // IE only
     };
 
-//{::
+//{mb
 uu.mix(SL2D.prototype,  _CanvasRenderingContext2D);
 uu.mix(VML2D.prototype, _CanvasRenderingContext2D);
-//::}
+//}mb
 
 uu.mix(uu.canvas, {
   init:             uucanvasinit,   // uu.canvas.init()
   create:           uucanvascreate, // uu.canvas.create() -> <canvas>
-//{::
+//{mb
   SL2D:             SL2D,
   VML2D:            VML2D
-//::}
+//}mb
 });
 
 uu.mix(win, {
@@ -51,11 +51,11 @@ CanvasGradient.prototype.addColorStop = addColorStop;
 
 // uu.canvas.init
 function uucanvasinit() {
-//{::
+//{mb
   uu.ie && uu.ary.each(uu.tag("canvas"), function(v) {
     _orderedinit(v, v.className);
   });
-//::}
+//}mb
   uu.ready.gone.win = uu.ready.gone.canvas = 1;
 }
 
@@ -67,7 +67,7 @@ function uucanvascreate(types) { // @param String(= "vml sl fl"):
   return uu.ie ? _orderedinit(elm, types) : elm;
 }
 
-//{:: [IE] fix mem leak
+//{mb [IE] fix mem leak
 uu.ie && win.attachEvent("onunload", _unload);
 
 function _unload() {
@@ -339,28 +339,27 @@ function addColorStop(offset, color) {
 // inner - remove fallback contents
 function removeFallback(node) { // @param Node:
                                 // @return Node: new node
-  if (!node.parentNode) {
-    return node;
-  }
-  var rv = doc.createElement(node.outerHTML),
-      endTags = doc.getElementsByTagName("/CANVAS"),
-      idx = node.sourceIndex,
-      v, w, i = 0, iz = endTags.length;
-
-  for (; i < iz; ++i) {
-    if (idx < endTags[i].sourceIndex &&
-        node.parentNode === endTags[i].parentNode) {
-      v = doc.all[endTags[i].sourceIndex];
-      do {
-        w = v.previousSibling; // keep previous
-        v.parentNode.removeChild(v);
-        v = w;
-      } while (v !== node);
-      break;
+    if (!node.parentNode) {
+        return node;
     }
-  }
-  node.parentNode.replaceChild(rv, node);
-  return rv;
+    var rv = doc.createElement(node.outerHTML),
+        endTags = doc.getElementsByTagName("/CANVAS"),
+        parent = node.parentNode,
+        idx = node.sourceIndex, x, v, w, i = -1;
+
+    while ( (x = endTags[++i]) ) {
+        if (idx < x.sourceIndex && parent === x.parentNode) {
+            v = doc.all[x.sourceIndex];
+            do {
+                w = v.previousSibling; // keep previous
+                v.parentNode.removeChild(v);
+                v = w;
+            } while (v !== node);
+            break;
+        }
+    }
+    parent.replaceChild(rv, node);
+    return rv;
 }
 
 // uu.canvas.SL2D - Silverlight 2D
@@ -468,7 +467,7 @@ function initVML(node) { // @param Node:
   })
   return newnode;
 }
-//::}
+//}mb
 
 // uu.canvas.FL2D - Flash 2D
 function FL2D(node) { // @param Node:
@@ -495,7 +494,7 @@ uu.lazy("canvas", function() {
   win.xcanvas && win.xcanvas(uu, uu.tag("canvas"));
 });
 
-//{:: add inline XAML source
+//{mb add inline XAML source
 uu.ie && uu.lazy("init", function() {
   if (uu.ver.sl && !uu.id("xaml")) {
     doc.write('<script type="text/xaml" id="xaml"><Canvas' +
@@ -519,7 +518,7 @@ uu.ie && uu.lazy("init", function() {
     "v\:image,v\:line,v\:skew,v\:path,o\:opacity2" +
     "{behavior:url(#default#VML);display:inline-block}"; // [!] inline-block
 }, 0); // 0, low order
-//::}
+//}mb
 
 })(window, document, uu);
 

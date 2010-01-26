@@ -345,7 +345,7 @@ function uuqueryselectorall(expr,      // @param String: expr
       lastExpr2 = expr;
       match = null;
 
-      r = [], ri = -1, i = 0;
+      r = [], ri = -1, i = -1;
 
       joint = _JOINT2[expr.charAt(0)] || 9; // 9: dummy
 
@@ -356,13 +356,13 @@ function uuqueryselectorall(expr,      // @param String: expr
           needle = match[1]; // "id"
 
           if (_ctype === 1) { // 1:html (match id or name)
-            while ( (v = ctx[i++]) ) {
+            while ( (v = ctx[++i]) ) {
               if (((w = v.id || v.name) && (w === needle)) ^ negate) {
                 r[++ri] = v;
               }
             }
           } else { // 2: xml (match id)
-            while ( (v = ctx[i++]) ) {
+            while ( (v = ctx[++i]) ) {
               if (((w = v.id) && (w === needle)) ^ negate) {
                 r[++ri] = v;
               }
@@ -376,7 +376,7 @@ function uuqueryselectorall(expr,      // @param String: expr
         if (match) {
           needle = (" " + match[1] + " "); // " className "
 
-          while ( (v = ctx[i++]) ) {
+          while ( (v = ctx[++i]) ) {
             if (((w = v.className) &&
                 ((" " + w + " ").indexOf(needle) >= 0)) ^ negate) {
               r[++ri] = v;
@@ -400,7 +400,7 @@ function uuqueryselectorall(expr,      // @param String: expr
               if (match[3]) { // ':not(div)' -> match[3] = "div"
                 tag = match[3];
                 tag = _tags[tag] || addTag(tag, _ctype);
-                while ( (v = ctx[i++]) ) {
+                while ( (v = ctx[++i]) ) {
                   (v.tagName !== tag) && (r[++ri] = v);
                 }
                 break;
@@ -449,7 +449,7 @@ function uuqueryselectorall(expr,      // @param String: expr
           if (match[6]) { // "[A]"
             needle = match[6];
 
-            while ( (v = ctx[i++]) ) {
+            while ( (v = ctx[++i]) ) {
               if (uu.ie) {
                 w = v.getAttributeNode(needle);
                 if ((w && w.specified) ^ negate) {
@@ -519,9 +519,9 @@ function uuqueryselectorall(expr,      // @param String: expr
 
 // inner - mix results
 function mixin(ctx, rv, guard) {
-  var ri = rv.length - 1, i = 0, v, uid, newid;
+  var ri = rv.length - 1, i = -1, v, uid, newid;
 
-  while ( (v = ctx[i++]) ) {
+  while ( (v = ctx[++i]) ) {
     uid = v.uuguid ||
           (_nodeid._db[v.uuguid = newid = ++_nodeid._num] = v, newid);
     uid in guard || (rv[++ri] = v, guard[uid] = 1);
@@ -559,7 +559,7 @@ function addTag(tag, contentType) {
 
 // inner - [attr operator "value"]
 function judgeAttr(negate, elms, attr, operator, value) {
-  var rv = [], ri = -1, r, e, v = value, i = 0, rex,
+  var rv = [], ri = -1, r, e, v = value, i = -1, rex,
       attrFlag = 0, // attrFlag: ie only
       isInsens = !(attr in _ATTR_CASESENS); // true: case insensitive
 
@@ -577,7 +577,7 @@ function judgeAttr(negate, elms, attr, operator, value) {
     if (isInsens) {
       v = v.toLowerCase();
     }
-    while ( (e = elms[i++]) ) {
+    while ( (e = elms[++i]) ) {
       r = e.getAttribute(attr, attrFlag);
       if (r) {
         if (isInsens) {
@@ -598,7 +598,7 @@ function judgeAttr(negate, elms, attr, operator, value) {
     if (rex) {
       v = RegExp(rex, isInsens ? "i": "");
     }
-    while ( (e = elms[i++]) ) {
+    while ( (e = elms[++i]) ) {
       r = e.getAttribute(attr, attrFlag);
       if ((r && v.test(r)) ^ negate) {
         rv[++ri] = e;
@@ -610,11 +610,11 @@ function judgeAttr(negate, elms, attr, operator, value) {
 
 // inner - :first-child  :last-child  :only-child
 function uuquerychildfilter(fid, negate, elms) {
-  var rv = [], ri = -1, i = 0, v, c, f,
+  var rv = [], ri = -1, i = -1, v, c, f,
       iter1 = "previousSibling",
       iter2 = "nextSibling";
 
-  while ( (v = elms[i++]) ) {
+  while ( (v = elms[++i]) ) {
     f = 0;
     // first-child
     if (fid & 1) {
@@ -688,11 +688,11 @@ function nthOfTypeFilter(fid, negate, elms, pseudo, value) {
     elms.reverse();
   }
 
-  var rv = [], ri = -1, v, i = 0, unq = {},
+  var rv = [], ri = -1, v, i = -1, unq = {},
       idx, pn, currentParent = null, tagName, ok,
       f = nth(value), a = f.a, b = f.b, k = f.k;
 
-  while ( (v = elms[i++]) ) {
+  while ( (v = elms[++i]) ) {
     pn = v.parentNode;
     if (pn !== currentParent) {
       currentParent = pn;
@@ -726,10 +726,10 @@ function ofTypeFilter(fid, negate, elms) {
   if (fid === 0x0a) { // 0x0a: last-of-type
     elms.reverse();
   }
-  var rv = [], ri = -1, v, i = 0, unq = {},
+  var rv = [], ri = -1, v, i = -1, unq = {},
       pn, currentParent = null;
 
-  while ( (v = elms[i++]) ) {
+  while ( (v = elms[++i]) ) {
     pn = v.parentNode;
     if (pn !== currentParent) {
       currentParent = pn;
@@ -749,9 +749,9 @@ function ofTypeFilter(fid, negate, elms) {
 
 // inner - :enabled  :disabled  :checked
 function simpleFilter(fid, negate, elms) {
-  var rv = [], ri = -1, v, i = 0, ok, needValidate;
+  var rv = [], ri = -1, v, i = -1, ok, needValidate;
 
-  while ( (v = elms[i++]) ) {
+  while ( (v = elms[++i]) ) {
     needValidate = ok = 0;
     switch (fid) {
     case 0x0b: ++needValidate; ok = !v.disabled; break;  // 0x0b: enabled
@@ -775,9 +775,9 @@ function root(fid, negate, elms) {
   if (!negate) {
     return [uu.root];
   }
-  var rv = [], ri = -1, v, i = 0;
+  var rv = [], ri = -1, v, i = -1;
 
-  while ( (v = elms[i++]) ) {
+  while ( (v = elms[++i]) ) {
     if (v !== uu.root) {
       rv[++ri] = v;
     }
@@ -787,15 +787,15 @@ function root(fid, negate, elms) {
 
 // inner - :target
 function target(fid, negate, elms, pseudo, value, tags, contentType) {
-  var rv = [], ri = -1, i = 0, v, needle = location.hash.slice(1);
+  var rv = [], ri = -1, i = -1, v, needle = location.hash.slice(1);
 
   if (needle) {
     if (contentType === 1) { // 1: html
-      while ( (v = elms[i++]) ) {
+      while ( (v = elms[++i]) ) {
         (((v.id || v.name) === needle) ^ negate) && (rv[++ri] = v);
       }
     } else { // 2: xml
-      while ( (v = elms[i++]) ) {
+      while ( (v = elms[++i]) ) {
         ((v.id === needle) ^ negate) && (rv[++ri] = v);
       }
     }
@@ -805,9 +805,9 @@ function target(fid, negate, elms, pseudo, value, tags, contentType) {
 
 // inner - :contains
 function contains(fid, negate, elms, pseudo, value) {
-  var rv = [], ri = -1, v, i = 0;
+  var rv = [], ri = -1, v, i = -1;
 
-  while ( (v = elms[i++]) ) {
+  while ( (v = elms[++i]) ) {
     if ((v[_innerText].indexOf(value) >= 0) ^ negate) {
       rv[++ri] = v;
     }
@@ -817,10 +817,10 @@ function contains(fid, negate, elms, pseudo, value) {
 
 // inner - :link
 function link(fid, negate, elms) {
-  var rv = [], ri = -1, ary = uu.ary(doc.links), v, i = 0,
+  var rv = [], ri = -1, ary = uu.ary(doc.links), v, i = -1,
       j = 0, jz = elms.length, hit;
 
-  while ( (v = ary[i++]) ) {
+  while ( (v = ary[++i]) ) {
     for (hit = -1, j = 0; j < jz; ++j) {
       if (elms[j] === v) {
         hit = j;
@@ -836,9 +836,9 @@ function link(fid, negate, elms) {
 
 // inner - :empty
 function empty(fid, negate, elms) {
-  var rv = [], ri = -1, i = 0, v, c, missMatch = 0;
+  var rv = [], ri = -1, i = -1, v, c, missMatch = 0;
 
-  while ( (v = elms[i++]) ) {
+  while ( (v = elms[++i]) ) {
     missMatch = 0;
     for (c = v.firstChild; c; c = c.nextSibling) {
       if (c.nodeType === 1) {
@@ -873,11 +873,11 @@ function lang(fid, negate, elms, pseudo, value) {
 
 // inner - :only-of-type
 function onlyOfType(fid, negate, elms, pseudo, value, tags, contentType) {
-  var rv = [], ri = -1, v, i = 0, c, f, t, tagName,
+  var rv = [], ri = -1, v, i = -1, c, f, t, tagName,
       iter1 = "nextSibling",
       iter2 = "previousSibling";
 
-  while ( (v = elms[i++]) ) {
+  while ( (v = elms[++i]) ) {
     f = 0;
     tagName = v.tagName,
     t = tags[tagName] || addTag(tagName, contentType);
@@ -924,9 +924,9 @@ function nth(anb) {
 // inner - :digit(0x40)  :negative(0x41)  :tween(0x42)
 //         :boxeffect(0x43)
 function extendFilter(fid, negate, elms) {
-  var rv = [], ri = -1, v, i = 0, ok;
+  var rv = [], ri = -1, v, i = -1, ok;
 
-  while ( (v = elms[i++]) ) {
+  while ( (v = elms[++i]) ) {
     ok = 0;
     switch (fid) {
     case 0x40: ok = _DIGIT_FILTER.test(v[_innerText] || ""); break;
@@ -943,9 +943,9 @@ function extendFilter(fid, negate, elms) {
 
 // inner - :mom(0x44)
 function parentFilter(fid, negate, elms) {
-  var rv = [], ri = -1, v, i = 0, ok;
+  var rv = [], ri = -1, v, i = -1, ok;
 
-  while ( (v = elms[i++]) ) {
+  while ( (v = elms[++i]) ) {
     ok = v.parentNode ? 1 : 0;
     if (ok ^ negate) {
       rv[++ri] = v.parentNode; // || void 0
@@ -956,9 +956,9 @@ function parentFilter(fid, negate, elms) {
 
 // inner - :ui(0x50)  :uislider(0x51)
 function uiFilter(fid, negate, elms) {
-  var rv = [], ri = -1, v, i = 0, ok;
+  var rv = [], ri = -1, v, i = -1, ok;
 
-  while ( (v = elms[i++]) ) {
+  while ( (v = elms[++i]) ) {
     ok = 0;
     switch (fid) {
     case 0x50: ok = !!v.uuui; break;
@@ -979,7 +979,7 @@ function styleQuery(negate, elms, match) {
   var value = uu.trim.quote(match[4]),
       prop, propKind,
       operator = _EX_OPERATOR[match[2]], w,
-      rv = [], ri = -1, ary, ok, r, e, v1, v2 = 0, i = 0,
+      rv = [], ri = -1, ary, ok, r, e, v1, v2 = 0, i = -1,
       hasRange = 0, unitExchanged = 0,
       xfloat = parseFloat;
 
@@ -1025,7 +1025,7 @@ function styleQuery(negate, elms, match) {
     r = v2, v2 = v1, v1 = r; // swap(v1, v2);
   }
 
-  while ( (e = elms[i++]) ) {
+  while ( (e = elms[++i]) ) {
     switch (propKind) {
     case 1: // color, backgroundColor
       r = _color2num(uu.color((uu.ie ? e.currentStyle : _cstyle(e, null))[prop]));
@@ -1090,14 +1090,14 @@ function styleQuery(negate, elms, match) {
 // inner -
 function visitedFilter(fid, negate, elms) {
   // :link(0x0e)  :visited(0x0f)
-  var rv = [], ri = -1, v, i = 0, ok, cs, idx;
+  var rv = [], ri = -1, v, i = -1, ok, cs, idx;
 
   // http://d.hatena.ne.jp/uupaa/20080928
   uu.css.create(_ssid);
   idx = uu.css.inject(_ssid, "a:visited",
                       uu.ie ? "ruby-align:center"
                             : "outline:0 solid #000");
-  while ( (v = elms[i++]) ) {
+  while ( (v = elms[++i]) ) {
     if (v.tagName === "A") {
       if (uu.ie) {
         ok = (v.currentStyle.rubyAlign === "center") ? 1 : 0;
@@ -1124,14 +1124,14 @@ function visitedFilter(fid, negate, elms) {
 // inner -
 function actionFilter(fid, negate, elms, pusedo) {
   // :hover(0x10)  :focus(0x11)
-  var rv = [], ri = -1, v, i = 0, ok, cs, idx;
+  var rv = [], ri = -1, v, i = -1, ok, cs, idx;
 
   // http://d.hatena.ne.jp/uupaa/20080928
   uu.css.create(_ssid);
   idx = uu.css.inject(_ssid, ":" + pusedo,
                       uu.ie ? "ruby-align:center"
                             : "outline:0 solid #000");
-  while ( (v = elms[i++]) ) {
+  while ( (v = elms[++i]) ) {
     if (uu.ie) {
       ok = (v.currentStyle.rubyAlign === "center") ? 1 : 0;
     } else {

@@ -120,10 +120,10 @@ function uucss3(node,   // @param Node:
 function uucss3get(node,     // @param Node:
                    styles) { // @param JointString: "color"
                              // @return String: "red"
-  var rv = {}, ary = styles.split(","), v, i = 0,
+  var rv = {}, ary = styles.split(","), v, i = -1,
       data = _uid2data[uu.nodeid(node)];
 
-  while ( (v = ary[i++]) ) {
+  while ( (v = ary[++i]) ) {
     rv[v] = (data && !v.indexOf("-uu")) ? (data.excss.decl[v] || "")
                                         : uu.css.get(node, v);
   }
@@ -228,9 +228,9 @@ function uucss3bgcanvasredraw(id,   // @param String:
 
 // inner - find -uu-canvas node
 function _uucss3bgcanvas(id) { // @return Hash: bfx
-  var ary = uu.query(":boxeffect", doc.body), v, i = 0;
+  var ary = uu.query(":boxeffect", doc.body), v, i = -1;
 
-  while ( (v = ary[i++]) ) {
+  while ( (v = ary[++i]) ) {
     if (v[_BFX].mbg.canvasid === id) {
       return v[_BFX];
     }
@@ -251,8 +251,8 @@ function unbond(context) { // @param Node:
   //   1. collect old style from element.uucss3ihash
   //   2. remove element.uuCSSI attr
   if (!uu.ie) {
-    node = uu.query("[uucss3i]", context), i = 0;
-    while ( (v = node[i++]) ) {
+    node = uu.query("[uucss3i]", context), i = -1;
+    while ( (v = node[++i]) ) {
       for (j in v.uucss3ihash) {
         v.style.removeProperty(j);
         v.style.setProperty(j, v.uucss3ihash[j], "");
@@ -307,9 +307,9 @@ function _uucss3validate(rawdata, context) {
       try {
         if (_plus) {
           expair = data[j].pair;
-          exbits = 0, exdecl = {}, exorder = [], exoi = -1, exi = 0;
+          exbits = 0, exdecl = {}, exorder = [], exoi = -1, exi = -1;
 
-          while ( (exv = expair[exi++]) ) {
+          while ( (exv = expair[++exi]) ) {
             switch (exw = _DECL2EXCSS[exv.prop] || 0) {
             case 1: (exv.val === "fixed") && (exbits |= _EXCSS.position); break;
             case 2: (exv.val === "table") && (exbits |= _EXCSS.disptbl); break;
@@ -440,8 +440,8 @@ function _uucss3validate(rawdata, context) {
       uu.css.clear("uucss3");
 
       // lazy - clear all className
-      i = 0;
-      while ( (v = _lazyClearClass[i++]) ) {
+      i = -1;
+      while ( (v = _lazyClearClass[++i]) ) {
         if (!(uu.ie67 && v.getAttribute("uuCSSLock"))) {
           v.className = v.className.replace(_CSS3CLASS, "");
           v.removeAttribute("uucss3c");
@@ -462,8 +462,8 @@ function _uucss3validate(rawdata, context) {
         }
       }
       // insert rule
-      i = 0;
-      while ( (v = ruleset[i++]) ) {
+      i = -1;
+      while ( (v = ruleset[++i]) ) {
         uu.css.inject("uucss3", v, ruleset[i]);
         _rules[++gridx] = ruleset[i] + "{" + ruleset[i] + "}";
         ++i;
@@ -687,11 +687,11 @@ function _uucss3plusplan(revalidate, context) {
 
 // inner - plus.prevalidate - pre-validate plan
 function _uucss3plusprevalidate(revalidate) {
-  var v, i = 0;
+  var v, i = -1;
 
   if (!revalidate) {
     if (_plan.init.length) {
-      while ( (v = _plan.init[i++]) ) {
+      while ( (v = _plan.init[++i]) ) {
         v();
       }
       _plan.init = []; // clear
@@ -750,8 +750,8 @@ function _uucss3pluspostvalidate(uid2data, revalidate, context) {
     EXCSS.position && uucss3.fixie.position();
     EXCSS.disptbl && uucss3.fixie.disptbl(disptbl);
     if (EXCSS.boxeffect) {
-      i = 0;
-      while ( (node = boxeffect[i++]) ) {
+      i = -1;
+      while ( (node = boxeffect[++i]) ) {
         uucss3.boxeffect(node, _uid2data[uu.nodeid(node)].excss);
       }
     }
@@ -795,9 +795,9 @@ function _uucss3blackout(css) { // @return Boolean: true is blackout
 
 // inner - memento for IE6, IE7, IE8
 function _uucss3memento() {
-  var node = uu.tag("style"), v, i = 0, MEMENTO = "uucss3memento";
+  var node = uu.tag("style"), v, i = -1, MEMENTO = "uucss3memento";
 
-  while ( (v = node[i++]) ) {
+  while ( (v = node[++i]) ) {
     // skip <style id="uucss3ignore...">
     if (v.id && !v.id.indexOf("uucss3ignore")) {
       continue;
@@ -809,9 +809,9 @@ function _uucss3memento() {
 // inner - decode data:text/javascript
 //    <script src="data:text/javascript,..">
 function _uucss3decodescript() {
-  var node = uu.tag("script"), v, i = 0, hash, dstr, DATA = "data:";
+  var node = uu.tag("script"), v, i = -1, hash, dstr, DATA = "data:";
 
-  while ( (v = node[i++]) ) {
+  while ( (v = node[++i]) ) {
     if (!v.src.indexOf(DATA)) {
       hash = uu.codec.datauri.decode(v.src);
       if (hash.mime === "text/javascript") {
@@ -826,9 +826,9 @@ function _uucss3decodescript() {
 // inner - wrap auto viewbox
 function _uucss3autoviewbox() {
   var ary1 = uu.query('[class/="uuautoviewbox*"]'), ary2,
-      div, v, w, i = 0, j, padding, rex = /[_-]/g;
+      div, v, w, i = -1, j, padding, rex = /[_-]/g;
 
-  while ( (v = ary1[i++]) ) {
+  while ( (v = ary1[++i]) ) {
     ary2 = uu.split(v.className);
     padding = "";
     j = 0;

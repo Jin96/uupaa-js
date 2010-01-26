@@ -124,21 +124,21 @@ function uumatch(expr,    // @param String: "css > expr"
                           //             2 is NodeArray result, matches array
                           // @return Boolean/NodeArray:
   ctx = ctx.nodeType ? [ctx] : ctx;
-  var rv = [], hash = {}, v, w, i = 0, j = 0, ary = uu.query(expr, doc);
+  var rv = [], hash = {}, v, w, i = -1, j = -1, ary = uu.query(expr, doc);
 
   if (ctx.length === 1) {
     v = ctx[0];
-    while ( (w = ary[i++]) ) {
+    while ( (w = ary[++i]) ) {
       if (v === w) {
         rv.push(v);
         break;
       }
     }
   } else {
-    while ( (v = ary[i++]) ) {
+    while ( (v = ary[++i]) ) {
       hash[v.uuguid || uu.nodeid(v)] = 1;
     }
-    while ( (v = ctx[j++]) ) {
+    while ( (v = ctx[++j]) ) {
       (v.uuguid || uu.nodeid(v)) in hash && rv.push(v);
     }
   }

@@ -9,39 +9,14 @@
 uu.agein || (function(win, doc, uu) {
 var _mix    = uu.mix,
     _ie     = uu.ie,
-    _cstyle = win.getComputedStyle,
     _db     = { ss: {} }, // { StyleSheetid: StyleSheetObject, ... }
-    _NPROPS = { opacity: 2, lineHeight: 1, fontWeight: 1,
-                fontSizeAdjust: 1, zIndex: 1, zoom: 1 },
-    _ALPHA  = /^alpha\([^\x29]+\) ?/,
     _BORDER = { thin: 1, medium: 3, thick: (uu.ie67 || uu.opera) ? 6 : 5 },
     _IE_DX  = "DXImageTransform.Microsoft.",
     _SHADOW = _IE_DX + "Shadow",
     _BLUR   = _IE_DX + "MotionBlur",
     _POS_PARENT = { relative: 1, absolute: 1 };
 
-// --- css / style ---
-// [1][get all  styles] uu.css(node) -> { color: "red", ... }(getComputedStyle)
-// [2][get one  style]  uu.css(node, "color") -> "red"
-// [3][get some styles] uu.css(node, "color,width") -> { color: "red", width: "20px" }
-// [4][set one  style]  uu.css(node, "color", "red") -> node
-// [5][set some styles] uu.css(node, { color: "red" }) -> node
-uu.css = _mix(uucss, {
-  // --- style handler ---
-  get:          _ie ? uucssgetie
-                    : uucssget, // [1][get one  style]  uu.css.get(node, "color") -> "red"
-                                // [2][get some styles] uu.css.get(node, "color,text-align") -> {color:"red", textAlign:"left"}
-  set:          uucssset,       // [1][set one  style]  uu.css.set(node, "color", "red") -> node
-                                // [2][set some styles] uu.css.set(node, { color: "red" }) -> node
-  // --- opacity ---
-  // [1][get] uu.css.opacity(node) -> Number(0.0~1.0)
-  // [2][set] uu.css.opacity(node, opacity, diff = false) -> node
-  opacity: _mix(uucssopacity, {
-    get:        _ie ? uucssopacitygetie
-                    : uucssopacityget, // uu.css.opacity.get(node) -> Number(0.0~1.0)
-    set:        _ie ? uucssopacitysetie
-                    : uucssopacityset  // uu.css.opacity.set(node, opacity, diff = false) -> node
-  }),
+_mix(uu.css, {
   // --- offset (x, y) ---
   // [1][get] uu.css.off(node) -> { x, y }(from <html>)
   // [2][get] uu.css.off(node, node.parentNode) -> { x, y }(from ancestor)
@@ -155,133 +130,6 @@ uu.Class("CSSRule", {
                                 //                             "#id1", "color:blue"]) -> this
 });
 
-// --- css / style ---
-// uu.css - css accessor
-// [1][get all  styles] uu.css(node) -> { color: "red", ... }(getComputedStyle)
-// [2][get one  style]  uu.css(node, "color") -> "red"
-// [3][get some styles] uu.css(node, "color,width") -> { color: "red", width: "20px" }
-// [4][set one  style]  uu.css(node, "color", "red") -> node
-// [5][set some styles] uu.css(node, { color: "red" }) -> node
-function uucss(node,   // @param Node:
-               mix1,   // @param JointString/Hash(= void 0):
-               mix2) { // @param String(= void 0):
-                       // @return String/Hash/CSS2Properties/Node:
-  if (!mix1) {
-    return (_ie ? node.currentStyle : _cstyle(node, null)) || {}; // [1]
-  }
-  return ((mix2 === void 0 && uu.isstr(mix1)) ? uucssget // [2][3]
-                                              : uucssset)(node, mix1, mix2); // [4][5]
-}
-
-// uu.css.set
-// [1][set one  style]  uu.css.set(node, "color", "red") -> node
-// [2][set some styles] uu.css.set(node, { color: "red" }) -> node
-function uucssset(node,  // @param Node:
-                  key,   // @param String/Hash:
-                  val) { // @param String(= void 0):
-                         // @return Node:
-  var hash, ns = node.style, p, v, i, n,
-      fixdb = uu.fix._db, NPROPS = _NPROPS, STR = "string";
-
-  uu.isstr(key) ? (hash = {}, hash[key] = val) : (hash = key);
-  for (i in hash) {
-    v = hash[i];
-    p = fixdb[i] || i;
-    if (typeof v === STR) {
-      ns[p] = v; // backgroundColor="transparent"
-    } else {
-      n = NPROPS[p];
-      if (n === 2) {
-        uucssopacity.set(node, v);
-      } else {
-        ns[p] = n ? v : (v + "px"); // zoom = 1, width = 100 + "px"
-      }
-    }
-  }
-  return node;
-}
-
-// uu.css.get - get getComputedStyle(node) value
-// [1][get one  style]  uu.css.get(node, "color") -> "red"
-// [2][get some styles] uu.css.get(node, "color,text-align") -> {color:"red", textAlign:"left"}
-function uucssget(node,     // @param Node:
-                  styles) { // @param JointString: "css-prop,cssProp..."
-                            // @return String/Hash: "value"
-                            //                   or { cssProp: "value", ... }
-  var rv = {}, ary = styles.split(","), v, i = 0,
-      ns = _cstyle(node, null), fixdb = uu.fix._db;
-
-  while ( (v = ary[i++]) ) {
-    rv[v] = ns[fixdb[v] || v] || "";
-  }
-  return (ary.length === 1) ? rv[ary[0]] : rv;
-}
-
-function uucssgetie(node, styles) {
-  var rv = {}, ary = styles.split(","), v, w, i = 0,
-      ns = node.currentStyle, actval = uucsspxactvalue,
-      STR = "string", AUTO = "auto", PX = "px", fixdb = uu.fix._db;
-
-  while ( (v = ary[i++]) ) {
-    w = ns[fixdb[v] || v] || "";
-    if (typeof w === STR) {
-      w = (w === AUTO || w.lastIndexOf(PX) < 0) ? actval(node, w)
-                                                : parseInt(w);
-    }
-    rv[v] = w;
-  }
-  return (ary.length === 1) ? rv[ary[0]] : rv;
-}
-
-// uu.css.opacity
-// [1][get] uu.css.opacity(node) -> Number(0.0~1.0)
-// [2][set] uu.css.opacity(node, opacity, diff = false) -> node
-function uucssopacity(node,    // @param Node:
-                      opacity, // @param Number(= void 0): 0.0~1.0
-                      diff) {  // @param Boolean(= false):
-                               // @return Number/Node:
-  return (opacity === void 0) ? uucssopacityget(node)
-                              : uucssopacityset(node, opacity, diff);
-}
-
-// uu.css.opacity.get - get opacity value(from 0.0 to 1.0)
-function uucssopacityget(node) { // @param Node:
-                                 // @return Number: float(from 0.0 to 1.0)
-  return parseFloat(node.style.opacity || _cstyle(node, null).opacity);
-}
-
-function uucssopacitygetie(node) {
-  return ("uucssopacity" in node) ? node.uucssopacity : 1;
-}
-
-// uu.css.opacity.set - set opacity value(from 0.0 to 1.0)
-function uucssopacityset(node,    // @param Node:
-                         opacity, // @param Number: float(from 0.0 to 1.0)
-                         diff) {  // @param Boolean(= false):
-                                  // @return Node:
-  diff && (opacity += uucssopacityget(node));
-  node.style.opacity = (opacity > 0.999) ? 1
-                     : (opacity < 0.001) ? 0 : opacity;
-  return node;
-}
-
-function uucssopacitysetie(node, opacity, diff) {
-  var ns = node.style, cs, opa = opacity, BOND = "uucssopacity";
-
-  if (node[BOND] === void 0) { // init
-    cs = node.currentStyle;
-    (uu.ie67 && cs && cs.width === "auto") && (ns.zoom = 1);
-  }
-  diff && (opa += (node[BOND] || 1));
-  node[BOND] = opa = (opa > 0.999) ? 1
-                   : (opa < 0.001) ? 0 : opa;
-  ns.visibility = opa ? "" : "hidden";
-  ns.filter = ((opa > 0 && opa < 1)
-            ? "alpha(opacity=" + (opa * 100) + ") " : "")
-            + ns.filter.replace(_ALPHA, "");
-  return node;
-}
-
 // =========================================================
 // uu.css.off
 // [1][get] uu.css.off(node) -> { x, y }(from <html>)
@@ -307,7 +155,7 @@ function uucssoffget(node,     // @param: Node:
   var x = 0, y = 0, n = node, cs;
 
   if (foster) {
-    cs = _ie ? n.currentStyle : _cstyle(n, null);
+    cs = _ie ? n.currentStyle : win.getComputedStyle(n, null);
     if (_POS_PARENT[cs.position]) {
       if (cs.left !== "auto" && cs.top !== "auto") {
         return { x: parseInt(cs.left), y: parseInt(cs.top) };
@@ -321,7 +169,7 @@ function uucssoffget(node,     // @param: Node:
     y += n.offsetTop  || 0;
     n = n.offsetParent;
     if (foster && n) {
-      cs = _ie ? n.currentStyle : _cstyle(n, null);
+      cs = _ie ? n.currentStyle : win.getComputedStyle(n, null);
       // positioning parent is { position: relative }
       //                    or { position: absolute }
       if (_POS_PARENT[cs.position]) {
@@ -624,7 +472,7 @@ function uucsspxactvalue(node,    // @param Node:
   }
   st.setProperty("left", value, "important");
   // get pixel
-  value = parseInt(_cstyle(node, null).left);
+  value = parseInt(win.getComputedStyle(node, null).left);
   // restore
   st.removeProperty("left");
   st.setProperty("left", stleft, "");
@@ -663,7 +511,7 @@ function uucsspxactvalueie(node,    // @param Node:
 function uucsspx(node,   // @param Node:
                  prop) { // @param String: style property name
                          // @return Number: pixel value
-  return parseInt(_cstyle(node, null)[prop]) || 0;
+  return parseInt(uu.cs(node)[prop]) || 0;
 }
 
 function uucsspxie(node, prop) {
@@ -685,7 +533,7 @@ function uucsspxie(node, prop) {
 function uucssshow(node,     // @param Node:
                    fadein) { // @param Number(= 0): fadein tween duration
                              // @return Node:
-  var cs = uucss(node), ns = node.style,
+  var cs = uu.css(node), ns = node.style,
       tmp, size, opa;
 
   if (cs.display !== "none" && cs.visibility !== "hidden") {
@@ -694,20 +542,20 @@ function uucssshow(node,     // @param Node:
   ns.visibility = "visible";
   ns.display = "";
 
-  if (uucss(node).display === "none") {
+  if (uu.css(node).display === "none") {
     // <style>{ display: none }</style>
     tmp = uu.node(uue(node.tagName)); // add to body
     // detect actual display value
-    ns.display = uucss(tmp).display;
+    ns.display = uu.css(tmp).display;
     uu.node.remove(tmp);
   }
 
   size = uucsssizeget(node, 2);
-  opa = uucss.opacity.get(node);
+  opa = uu.css.opacity.get(node);
 
   ns.width = "0";
   ns.height = "0";
-  uucss.opacity.set(node, 0);
+  uu.css.opacity.set(node, 0);
 
   return uu.tween(node, fadein || 0, { w: size.w, h: size.h, o: opa });
 }
@@ -718,8 +566,8 @@ function uucsshide(node,      // @param Node:
                               //                     0 is disable
                               // @return Node:
   var size = uucsssizeget(node, 2), // offscreen
-      opa = uucss.opacity.get(node),
-      cs = uucss(node);
+      opa = uu.css.opacity.get(node),
+      cs = uu.css(node);
 
   if (cs.display === "none" || cs.visibility === "hidden") {
     return node;
@@ -729,7 +577,7 @@ function uucsshide(node,      // @param Node:
     ns.visibility = "hidden";
     ns.width  = size.w + "px"; // restore size
     ns.height = size.h + "px";
-    uucss.opacity.set(node, opa);
+    uu.css.opacity.set(node, opa);
   });
   return node;
 }
@@ -867,7 +715,7 @@ function uucssbgcolorinherit(node) { // @param Node:
   while (n && n !== doc && ZERO[color]) {
     if ((_ie && n.currentStyle) || !_ie) {
       color = (uu.ie ? n.currentStyle
-                     : _cstyle(n, null)).backgroundColor;
+                     : win.getComputedStyle(n, null)).backgroundColor;
     }
     n = n.parentNode;
   }
@@ -966,7 +814,7 @@ function uucsstextshadow(node,    // @param Node:
 // uu.css.textShadow.get - get text-shadow value
 function uucsstextshadowget(node) { // @param Node:
                                     // @return String: "rgba(0,0,0,0) ox oy blur"
-  return _cstyle(node, null).textShadow || "rgba(0,0,0,0) 0 0 0";
+  return win.getComputedStyle(node, null).textShadow || "rgba(0,0,0,0) 0 0 0";
 }
 
 function uucsstextshadowgetie(node) {
@@ -1106,10 +954,10 @@ function uucssruleinit(ssid) { // @param String:
 function uucssruleadd(expr,   // @param String/Array: expr or [(expr, decl), ...]
                       decl) { // @param String(= void 0): decl
                               // @return this:
-  var v, i = 0, ary = (decl === void 0) ? expr : [expr, decl];
+  var v, i = -1, ary = (decl === void 0) ? expr : [expr, decl];
 
-  while ( (v = ary[i++]) ) {
-    uucssinject(this._ssid, v, ary[i++]);
+  while ( (v = ary[++i]) ) {
+    uucssinject(this._ssid, v, ary[++i]);
   }
   return this;
 }

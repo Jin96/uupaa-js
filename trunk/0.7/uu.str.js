@@ -13,13 +13,13 @@ function uusplittoken(expr,     // @param String: expression
   splitter = splitter || " ";
   if (expr.indexOf(splitter) < 0) { return [expr]; }
 
-  var rv = [], ary = expr.split(""), v, w, i = 0,
+  var rv = [], ary = expr.split(""), v, w, i = -1,
       nest = 0, quote = 0, q, tmp = [], ti = -1, esc = 0,
       TOKEN = { "(": 2, ")": 3, '"': 4, "'": 4, "\\": 5 }; // [!]keep local
 
   TOKEN[splitter] = 1;
 
-  while ( (v = ary[i++]) ) {
+  while ( (v = ary[++i]) ) {
     if (esc) {
       esc = 0;
       tmp[++ti] = v;

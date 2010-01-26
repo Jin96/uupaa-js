@@ -82,12 +82,12 @@ function uucookieget(key) { // @param String: "key"
 
 // inner - get all cookies
 function _uucookiegetall(prefix) { // @hidden String(= void 0): prefix filter
-  var rv = {}, i = 0, pair, ary, kv, k, v,
+  var rv = {}, i = -1, pair, ary, kv, k, v,
       pfx = prefix || "", pz = pfx.length;
 
   if (_cookieReady && doc.cookie) {
     pair = doc.cookie.split("; ");
-    while ( (kv = pair[i++]) ) {
+    while ( (kv = pair[++i]) ) {
       ary = kv.split("=");
       k = ary[0];
       v = decodeURIComponent(ary[1] == null ? "" : ary[1]);
@@ -193,11 +193,11 @@ function uulocal(a, b, c) { // @return String/Boolean:
                 rv[v] = _db.getItem(v);
               }
               break;
-//{::
+//{mb
       case 4: rv = _flashall(); break;
       case 5: rv = _ieall(); break;
       case 6: rv = _uucookiegetall("uustorage");
-//::}
+//}mb
       }
     } catch (err) {
       uu.config.debug && alert(err);
@@ -216,12 +216,12 @@ function uulocalnth(nth) { // @param Number: index
   try {
     switch (_backend) {
     case 2: rv = _db.key(nth); break;
-//{::
+//{mb
     case 4: rv = _flashnth(nth); break;
     case 5: rv = _ienth(nth); break;
     case 6: hash = _uucookiegetall("uustorage");
             rv = uu.hash.nth(hash, nth)[0];
-//::}
+//}mb
     }
   } catch(err) {
     uu.config.debug && alert(err);
@@ -239,11 +239,11 @@ function uulocalget(key) { // @param String: "key"
     if (key) {
       switch (_backend) {
       case 2: rv = _db[key]; break;
-//{::
+//{mb
       case 4: rv = _flashget(key); break;
       case 5: rv = _ieget(key); break;
       case 6: rv = _uucookiegetall("uustorage")[key];
-//::}
+//}mb
       }
     }
   } catch(err) {
@@ -269,11 +269,11 @@ function uulocalset(key,    // @param String: "key"
             _db[key] = val;
             rv = !safe ? 1 : (_db[key] === val);
             break;
-//{::
+//{mb
     case 4: rv = _flashset(key, val, safe); break;
     case 5: rv = _ieset(key, val, safe); break;
     case 6: rv = uucookieset("uustorage" + key, val, safe, { maxage: _persist });
-//::}
+//}mb
     }
   } catch(err) {
     uu.config.debug && alert(err);
@@ -301,11 +301,11 @@ function uulocalsize() { // @return Hash: { use, max, free }
               return { use: n, max: max, free: Math.max(max - n, 0) };
             }
             break;
-//{::
+//{mb
     case 4: return _db.flashstoragesize();
     case 5: return _iesize();
     case 6: return uucookiesize();
-//::}
+//}mb
     }
   } catch(err) {
     uu.config.debug && alert(err);
@@ -318,11 +318,11 @@ function uulocalpairs() { // @return Number: pairs
   try {
     switch (_backend) {
     case 2: return _db.length;
-//{::
+//{mb
     case 4: return _db.flashstoragepairs();
     case 5: return _ieindex().length;
     case 6: return uucookiepairs("uustorage");
-//::}
+//}mb
     }
   } catch(err) {
     uu.config.debug && alert(err);
@@ -335,11 +335,11 @@ function uulocalclear() {
   try {
     switch (_backend) {
     case 2: _db.clear(); break;
-//{::
+//{mb
     case 4: _db.flashstorageclear(); break;
     case 5: _ieclear(); break;
     case 6: uucookieclear("uustorage");
-//::}
+//}mb
     }
   } catch(err) {
     uu.config.debug && alert(err);
@@ -357,11 +357,11 @@ function uulocalremove(key) { // @param String: "key"
     try {
       switch (_backend) {
       case 2: _db.removeItem(key); break;
-//{::
+//{mb
       case 4: _db.flashstorageremove(key); break;
       case 5: _ieremove(key); break;
       case 6: uucookieremove("uustorage" + key);
-//::}
+//}mb
       }
     } catch(err) {
       uu.config.debug && alert(err);
@@ -369,7 +369,7 @@ function uulocalremove(key) { // @param String: "key"
   }
 }
 
-//{:: --- IE Storage ---
+//{mb --- IE Storage ---
 function _ieinit() {
   var meta = uue("meta");
 
@@ -379,9 +379,9 @@ function _ieinit() {
   return meta;
 }
 function _ieall() {
-  var rv = {}, ary = _ieindex(), v, i = 0;
+  var rv = {}, ary = _ieindex(), v, i = -1;
 
-  while ( (v = ary[i++]) ) {
+  while ( (v = ary[++i]) ) {
     rv[v] = _db.getAttribute(v) || "";
   }
   return rv;
@@ -415,21 +415,21 @@ function _ieset(key, val, safe) {
   return 1;
 }
 function _iesize() {
-  var ary, idx, v, i = 0, n = 0, max = 1024 * 63; // 63kB
+  var ary, idx, v, i = -1, n = 0, max = 1024 * 63; // 63kB
 
   _db.load("uustorage");
   idx = _db.getAttribute("uulocalidx") || "";
   ary = idx ? idx.split("\v") : [];
-  while ( (v = ary[i++]) ) {
+  while ( (v = ary[++i]) ) {
     n += (_db.getAttribute(v) || "").length;
   }
   n += idx.length;
   return { use: n, max: max, free: max - n };
 }
 function _ieclear() {
-  var ary = _ieindex(), v, i = 0;
+  var ary = _ieindex(), v, i = -1;
 
-  while ( (v = ary[i++]) ) {
+  while ( (v = ary[++i]) ) {
     _db.removeAttribute(v);
   }
   _iesaveindex([]);
@@ -452,9 +452,9 @@ function _iesaveindex(ary) {
   _db.setAttribute("uulocalidx", ary.join("\v"));
   _db.save("uustorage");
 }
-//::}
+//}mb
 
-//{:: --- Flash Storage ---
+//{mb --- Flash Storage ---
 uu.as.dmz.storageReadyCallback = flashStorageReadyCallback;
 
 // uu.as.dmz.storageReadyCallback - callback from FlashStorage
@@ -486,7 +486,7 @@ function _flashget(key) {
 function _flashset(key, val, safe) {
   return _db.flashstorageset(key, val || _NULL_TRAP, safe || 0); // [!] null trap
 }
-//::}
+//}mb
 
 // --- open storage object ---
 _dbwait = 1;
@@ -535,7 +535,7 @@ function _detected(db, wait, backend) {
 
 // inner - window.xlocal callback
 function WebStorageReady() {
-  win.xlocal(_backend);
+  win.xlocal(uu, _backend);
 }
 
 })(window, document, uu);
