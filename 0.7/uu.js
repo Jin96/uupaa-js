@@ -72,9 +72,9 @@ var _cfg    = uuarg(window.xconfig || {}, {
     _QUOTE  = /^\s*["']?|["']?\s*$/g,
     _SPACES = /\s\s+/g,
     _TYPEOF = { "undefined":        0x020,
-                "boolean":          0x040,
-                "number":           0x100,
-                "string":           0x200,
+                "[object Boolean]": 0x040, "boolean":          0x040,
+                "[object Number]":  0x100, "number":           0x100,
+                "[object String]":  0x200, "string":           0x200,
                 "[object Function]":0x080,
                 "[object RegExp]":  0x800,
                 "[object Array]":   0x400,
@@ -1017,7 +1017,7 @@ function uuhashkeys(mix,    // @param Array/Hash:
             i in mix && (rv[++ri] = _val ? mix[i] : i);
         }
     } else {
-        if (Object.keys) {
+        if (!_val && Object.keys) {
             return Object.keys(mix);
         }
         for (i in mix) {
@@ -1534,12 +1534,12 @@ function uuclass(className, // @param String: "Class"
                lv3.init && lv3.init.apply(lv3, arguments);
 
         // destructor(~lv3 -> ~lv2 -> ~lv1)
-        lv3.__fin__ = lv3.fin || uunop;
+        lv3["~fin"] = lv3.fin || uunop;
         lv3.fin && uuevattach(win, "unload", function() {
             lv3.fin && lv3.fin();
         });
         lv3.fin = function wrapper() {
-            lv3.__fin__();
+            lv3["~fin"]();
             lv2 && lv2.fin && lv2.fin.call(lv3);
             lv1 && lv1.fin && lv1.fin.call(lv3);
 
@@ -1782,26 +1782,28 @@ function uuev(node,    // @param Node:
     function _uuevclosure(evt, fire) {
         evt = evt || win.event;
         if (!fire && !evt.code) {
-            var src = evt.srcElement || evt.target;
+            var src = evt.srcElement || evt.target; // [IE] srcElement
 
-            src = (_webkit && src.nodeType === 3) ? src.parentNode : src;
+            src = (xwebkit && src.nodeType === 3) ? src.parentNode : src;
             evt.node = node;
-            evt.code = (_code[evt.type] || 0) & 255;
+            evt.code = (xcode[evt.type] || 0) & 255;
             evt.src = src;
-            evt.px = _ie ? evt.clientX + uu.iebody.scrollLeft : evt.pageX;
-            evt.py = _ie ? evt.clientY + uu.iebody.scrollTop  : evt.pageY;
-            evt.ox = evt.offsetX || evt.layerX || 0; // [offsetX] IE, Opera, WebKit
-            evt.oy = evt.offsetY || evt.layerY || 0; // [layerX]  Gecko, WebKit
+            evt.px = xie ? evt.clientX + uu.iebody.scrollLeft : evt.pageX;
+            evt.py = xie ? evt.clientY + uu.iebody.scrollTop  : evt.pageY;
+            evt.ox = evt.offsetX || evt.layerX || 0; // [IE][Opera][WebKit] offsetX
+            evt.oy = evt.offsetY || evt.layerY || 0; // [Gecko][WebKit] layerX
         }
-        handler.call(fn, evt, node, src);
-    }
+        xpao ? handler.call(fn, evt, node, src) : fn(evt, node, src);
+    } // [OPTIMIZED]
+
     mode = mode || 1;
     var types = node.uuevtypes || (node.uuevfn = {}, node.uuevtypes = ","),
         nstype = nstypes.split(","), v, i = -1, m,
-        type, capt, closure, handler, _code = uuev._code;
+        type, capt, closure, handler,
+        xpao = 0, xcode = uuev._code, xie = _ie, xwebkit = _webkit;
 
     if (mode === 1) {
-        handler = uuisfunc(fn) ? fn : fn.handleEvent;
+        handler = uuisfunc(fn) ? fn : (++xpao, fn.handleEvent);
         closure = fn.uuevclosure = _uuevclosure;
     } else if (mode === 2) {
         closure = fn.uuevclosure || fn;
@@ -3229,10 +3231,11 @@ function _camelhash(rv, props) {
         if (typeof props[key] === "string") {
             val = key;
             if (_webkit) {
-                key = props.item(key); // key = "z-index"
-                if (key.indexOf("-") >= 0) { // "-webkit-xxx" or "z-index"
-                    val = key.replace(CAMELIZE, _camelize); // "z-index" -> "zIndex"
+                key = props.item(key); // key = "-webkit-...", "z-index"
+                if (key.indexOf("-") >= 0) {
+                    val = key.replace(CAMELIZE, _camelize);
                 }
+                (key !== val) && (rv[key] = val);
             } else {
                 if (_gecko) {
                     !val.indexOf("Moz") && (val = "-moz" + val.slice(3));
@@ -3242,8 +3245,8 @@ function _camelhash(rv, props) {
                     !val.indexOf("O") && (val = "-o" + val.slice(1));
                 }
                 val = val.replace(DECAMELIZE, _decamelize);
+                (key !== val) && (rv[val] = key);
             }
-            (key !== val) && (rv[val] = key);
         }
     }
     return rv;
