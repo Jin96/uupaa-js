@@ -599,9 +599,25 @@ function xboot(uu) {
 
 // -----------------------
     "uu.fix()": "",
-      'uu.fix("-webkit-shadow") -> "-webkit-shadow"': function() {
-        return [uu.fix("-webkit-shadow"), "->", "-webkit-shadow"];
+
+      'uu.fix("-webkit-shadow") -> "WebkitShadow"': function() {
+        return uu.webkit ? [uu.fix("-webkit-shadow"), "->", "WebkitShadow"]
+                         : ["WebKit ONLY", "==", "WebKit ONLY"];
+                
       },
+      'uu.fix("-moz-appearance") -> "MozAppearance"': function() {
+        return uu.gecko ? [uu.fix("-moz-appearance"), "->", "MozAppearance"]
+                        : ["Gecko ONLY", "==", "Gecko ONLY"];
+      },
+      'uu.fix("-ms-block-progression") -> "msBlockProgression"': function() {
+        return uu.ie ? [uu.fix("-ms-block-progression"), "->", "msBlockProgression"]
+                     : ["IE ONLY", "==", "IE ONLY"];
+      },
+      'uu.fix("-o-transition-property") -> "OTransitionProperty"': function() {
+        return uu.opera ? [uu.fix("-o-transition-property"), "->", "OTransitionProperty"]
+                        : ["OPERA ONLY", "==", "OPERA ONLY"];
+      },
+
       'uu.fix("background-color") -> "backgroundColor"': function() {
         return [uu.fix("background-color"), "->", "backgroundColor"];
       },
