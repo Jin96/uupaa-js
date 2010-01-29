@@ -189,7 +189,7 @@ function strokeText(text, x, y, maxWidth) {
 
 // CanvasRenderingContext2D.prototype.measureText
 function measureText(text) {
-  var metric = uu.font.metric(text, this.font);
+  var metric = uu.font.metric(this.font, text);
 
   return { width: metric.w, height: metric.h };
 }

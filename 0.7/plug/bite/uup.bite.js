@@ -120,11 +120,11 @@ function biteinit(expr, ctx) {
   this._stack = [[]]; // [nodeset, ...]
   this._ns = !expr ? [] // nodeset
       : (expr === win || expr.nodeType) ? [expr] // node
-      : uu.isary(expr) ? expr.slice() // clone NodeArray
-      : uu.isstr(expr) ? (!expr.indexOf("<")
-                           ? [_uunode.bulk(expr)] // <div> -> fragment
-                           : uu.query(expr, _evalctx(ctx)))
-      : (expr instanceof bite) ? expr._ns.slice() // copy constructor
+      : Array.isArray(expr) ? expr.concat() // clone NodeArray
+      : typeof expr === "string" ? (!expr.indexOf("<")
+                                 ? [_uunode.bulk(expr)] // <div> -> fragment
+                                 : uu.query(expr, _evalctx(ctx)))
+      : (expr instanceof bite) ? expr._ns.concat() // copy constructor
       : uu.isfunc(expr) ? (uu.ready(expr), []) // ready
       : []; // bad expr
   this.length = 0;

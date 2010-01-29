@@ -1,0 +1,393 @@
+<!doctype html><html><head><meta charset="utf-8" />
+<title></title>
+<style>
+.a { color: red; }
+.b { color: green; }
+.c { color: blue; }
+</style>
+<script src="../../uu.js"></script>
+<script>
+var msg = [];
+function xboot(uu) {
+
+// Class A, Super Super Class
+    uu.Class("A", {
+        // コンストラクタ
+        init: function Ainit(a, b) {
+            msg.push(uu.fmt('<b class="a">A</b>.init: a=%s b=%s', a, b));
+            this.a = a;
+            this.b = b;
+        },
+        // デストラクタ
+        fin: function Afin() {
+            msg.push(uu.fmt('<b class="a">A</b>.fin'));
+            this.a = null;
+            this.b = null;
+            window.console && console.log("Afin");
+        },
+        puff: function Apuff(num) {
+            msg.push(uu.fmt('<b class="a">A</b>.puff: a=%d, b=%d, c=%d, num=%d', this.a, this.b, this.c, num));
+        }
+    });
+
+// Class B, Super Class
+// puffメソッド無し版
+    uu.Class("B0A : A", {
+        init: function B0Ainit(a, b) {
+            msg.push(uu.fmt('<b class="b">B0A</b>.init: a=%s b=%s', a, b));
+            this.c = this.a * this.b;
+        },
+        fin: function B0Afin() {
+            msg.push(uu.fmt('<b class="b">B0A</b>.fin'));
+            this.c = null;
+            window.console && console.log("B0Afin");
+        }
+//      puff: function B0Apuff(num) {}
+    });
+    uu.Class("B1A : A", {
+        init: function B1Ainit(a, b) {
+            msg.push(uu.fmt('<b class="b">B1A</b>.init: a=%s b=%s', a, b));
+            this.c = this.a * this.b;
+        },
+        fin: function B1Afin() {
+            msg.push(uu.fmt('<b class="b">B1A</b>.fin'));
+            this.c = null;
+            window.console && console.log("B1Afin");
+        },
+        puff: function B1Apuff(num) {
+            msg.push(uu.fmt('<b class="b">B1A</b>.puff'));
+
+            // 親クラスのpuffメソッドを呼び出す -> A.puff を呼ぶ
+//            this.superMethod(arguments.callee, "puff", num);
+            this.superMethod(B1Apuff, "puff", num);
+        }
+    });
+
+// Class C, Sub Class
+// Class B0 を継承 + puffメソッド無し
+
+    uu.Class("C0B0A < B0A", {
+        init: function C0B0Ainit(a, b) {
+            msg.push(uu.fmt('<b class="c">C0B0A</b>.init: a=%s b=%s', a, b));
+            this.d = this.a ^ this.b;
+        },
+        fin: function C0B0Afin() {
+            msg.push(uu.fmt('<b class="c">C0B0A</b>.fin'));
+            this.d = null;
+            window.console && console.log("C0B0Afin");
+        }
+//      puff: function C0B0Apuff(num) {}
+    });
+
+// Class B0 を継承 + puffメソッド有り
+    uu.Class("C1B0A < B0A", {
+        init: function C1B0Ainit(a, b) {
+            msg.push(uu.fmt('<b class="c">C1B0A</b>.init: a=%s b=%s', a, b));
+            this.d = this.a ^ this.b;
+        },
+        fin: function C1B0Afin() {
+            msg.push(uu.fmt('<b class="c">C1B0A</b>.fin'));
+            this.d = null;
+            window.console && console.log("C1B0Afin");
+        },
+        puff: function C1B0Apuff(num) {
+            msg.push(uu.fmt('<b class="c">C1B0A</b>.puff'));
+
+            // 親クラスのpuffメソッドを呼び出す -> B0A.puffは未定義 -> A.puff を呼ぶ
+//          this.superMethod(arguments.callee, "puff", num * 100, 123);
+            this.superMethod(C1B0Apuff, "puff", num * 100, 123);
+        }
+    });
+
+// Class B1 を継承 + puffメソッド無し
+    uu.Class("C0B1A < B1A", {
+        init: function C0B1Ainit(a, b) {
+            msg.push(uu.fmt('<b class="c">C0B1A</b>.init: a=%s b=%s', a, b));
+            this.d = this.a ^ this.b;
+        },
+        fin: function C0B1Afin() {
+            msg.push(uu.fmt('<b class="c">C0B1A</b>.fin'));
+            this.d = null;
+            window.console && console.log("C0B1Afin");
+        }
+//      puff: function C0B1Apuff(num) {}
+    });
+
+// Class B1 を継承 + puffメソッド有り
+    uu.Class("C1B1A < B1A", {
+        init: function C1B1Ainit(a, b) {
+            msg.push(uu.fmt('<b class="c">C1B1A</b>.init: a=%s b=%s', a, b));
+            this.d = this.a ^ this.b;
+        },
+        fin: function C1B1Afin() {
+            msg.push(uu.fmt('<b class="c">C1B1A</b>.fin'));
+            this.d = null;
+            window.console && console.log("C1B1Afin");
+        },
+        puff: function C1B1Apuff(num) {
+            msg.push(uu.fmt('<b class="c">C1B1A</b>.puff'));
+
+            // 親クラスのpuffメソッドを呼び出す -> B1A.puff -> A.puff を呼ぶ
+//          this.superMethod(arguments.callee, "puff", num * 100, 123);
+            this.superMethod(C1B1Apuff, "puff", num * 100, 123);
+
+//          msg.push(uu.fmt("C1B1A.puff: a=%d, b=%d, c=%d, d=%d", this.a, this.b, this.c, this.d));
+        }
+    });
+
+    /////////////////////
+    msg.push('::コンストラクタのテスト'); dump();
+        msg.push('Class A のインスタンスを生成');
+        var objA  = uu.factory("A", 1, 2);
+        dump();
+
+        msg.push('Class B0A のインスタンスを生成 - A.init -> B0A.init 順に呼ばれる');
+        var objB0A  = uu.factory("B0A", 1, 2);
+        dump();
+
+        msg.push('Class B1A のインスタンスを生成 - A.init -> B1A.init 順に呼ばれる');
+        var objB1A  = uu.factory("B1A", 1, 2);
+        dump();
+
+        msg.push('Class C0B0A のインスタンスを生成 - A.init -> B0A.init -> C0B0A.init 順に呼ばれる');
+        var objC0B0A = uu.factory("C0B0A", 1, 2);
+        dump();
+
+        msg.push('Class C0B1A のインスタンスを生成 - A.init -> B0A.init -> C1B0A.init 順に呼ばれる');
+        var objC1B0A = uu.factory("C1B0A", 1, 2);
+        dump();
+
+        msg.push('Class C1B0A のインスタンスを生成 - A.init -> B1A.init -> C0B1A.init 順に呼ばれる');
+        var objC0B1A = uu.factory("C0B1A", 1, 2);
+        dump();
+
+        msg.push('Class C1B1A のインスタンスを生成 - A.init -> B1A.init -> C1B1A.init 順に呼ばれる');
+        var objC1B1A = uu.factory("C1B1A", 1, 2);
+        dump();
+
+        msg.push('Class C1B1A の別インスタンス(objC1B1A2)を生成 - A.init -> B1A.init -> C1B1A.init 順に呼ばれる');
+        var objC1B1A2 = uu.factory("C1B1A", 3, 4);
+        dump();
+
+    /////////////////////
+    msg.push('::継承と、superMethodのテスト'); dump();
+
+    msg.push('各クラスに定義されている puff メソッドを呼び出す。');
+    msg.push('定義されていない場合は、親の puff メソッドを呼び出す');
+    msg.push('this.superMethod()を使うと、サブクラスから親のメソッドを呼び出すことができる');
+    dump();
+
+    msg.push('A.puffを呼び出す -> <b class="a">A</b>.puff が呼ばれる');
+    objA.puff(2); dump();
+
+    msg.push('B0A.puffを呼び出す -> <b class="a">A</b>.puff が呼ばれる');
+    objB0A.puff(2); dump();
+
+    msg.push('B1A.puffを呼び出す -> <b class="b">B1A</b>.puff -> <b class="a">A</b>.puff が呼ばれる');
+    objB1A.puff(2); dump();
+
+    msg.push('C0B0A.puffを呼び出す -> <b class="a">A</b>.puff が呼ばれる (C0B0A.puff と B0A.puff は未定義なので)');
+    objC0B0A.puff(2); dump();
+
+    msg.push('C0B1A.puffを呼び出す -> <b class="b">B1A</b>.puff -> <b class="a">A</b>.puff が呼ばれる (C0B0A.puff は未定義なので)');
+    objC0B1A.puff(2); dump();
+
+    msg.push('C1B0A.puffを呼び出す -> <b class="c">C1B0A</b>.puff -> <b class="a">A</b>.puff が呼ばれる (B0A.puff は未定義なので)');
+    objC1B0A.puff(2); dump();
+
+    msg.push('C1B1A.puffを呼び出す -> <b class="c">C1B1A</b>.puff -> <b class="b">B1A</b>.puff -> <b class="a">A</b>.puff が呼ばれる');
+    objC1B1A.puff(2); dump();
+
+    msg.push('objC1B1A2.puffを呼び出す -><b class="c">C1B1A</b>.puff -> <b class="b">B1A</b>.puff -> <b class="a">A</b>.puff が呼ばれる');
+    objC1B1A2.puff(2); dump();
+
+
+    /////////////////////
+    msg.push('::デストラクタのテスト'); dump();
+
+    msg.push('objC1B1A2 のデストラクタを実行');
+    msg.push('デストラクタを実行すると、objC1B1A2 の全プロパティが null になる');
+    msg.push('ただし、ローカル変数 objC1B1A2 そのものはメモリ上に存在する');
+    dump();
+
+    msg.push('デストラクタ( fin )はコンストラクタとは逆順(C -> B -> A)に実行される');
+    msg.push('::objC1B1A2.fin() -> <b class="c">C1B1A</b>.fin -> <b class="b">B1A</b>.fin -> <b class="a">A</b>.fin');
+    objC1B1A2.fin();
+    dump();
+
+
+    // 一通り廃棄
+    if (0) { // tested
+        objA.fin();
+        objB0A.fin();
+        objB1A.fin();
+        objC0B0A.fin();
+        objC0B1A.fin();
+        objC1B0A.fin();
+        objC1B1A.fin();
+        dump();
+    }
+
+    if (0) { // tested
+        if (objA instanceof uu.Class.A) {
+            msg.push('objA instanceof uu.Class.A は true');
+            dump();
+        } else {
+            throw new Error("false is objA instanceof uu.Class.A");
+        }
+    }
+
+    if (0) { // tested
+        // objC1B1A のデストラクタを再実行
+        // エラーで怒られる
+        try {
+            msg.push('デストラクタ( fin )実行済のインスタンスで再度デストラクタを実行すると怒られる');
+            msg.push('::objC1B1A2.fin() -> raise Error(class C instance was destructed)');
+            objC1B1A2.fin();
+        } catch (err) {
+            alert("予定された例外: " + err.message + " が発生しました");
+        }
+        dump();
+    }
+}
+function dump() {
+    var i = 0, iz = msg.length;
+    var rv = [];
+
+    for (; i < iz; ++i) {
+        rv.push(uu.fmt("%s%s", uu.rep("\t", i), msg[i]));
+    }
+    uu.id("out").innerHTML += rv.join("<br />") + "<br /><br />";
+    msg = [];
+}
+</script></head><body>
+<pre id="out">
+</pre>
+<h1>クラス定義部分のソースコード</h1>
+<pre style="margin: 1em; border: 3px dotted; background-color: #fef">
+// Class A, Super Super Class
+    uu.Class("A", {
+        // コンストラクタ
+        init: function Ainit(a, b) {
+            msg.push(uu.fmt('<b class="a">A</b>.init: a=%s b=%s', a, b));
+            this.a = a;
+            this.b = b;
+        },
+        // デストラクタ
+        fin: function Afin() {
+            msg.push(uu.fmt('<b class="a">A</b>.fin'));
+            this.a = null;
+            this.b = null;
+            window.console && console.log("Afin");
+        },
+        puff: function Apuff(num) {
+            msg.push(uu.fmt('<b class="a">A</b>.puff: a=%d, b=%d, c=%d, num=%d', this.a, this.b, this.c, num));
+        }
+    });
+
+// Class B, Super Class
+// puffメソッド無し版
+    uu.Class("B0A : A", {
+        init: function B0Ainit(a, b) {
+            msg.push(uu.fmt('<b class="b">B0A</b>.init: a=%s b=%s', a, b));
+            this.c = this.a * this.b;
+        },
+        fin: function B0Afin() {
+            msg.push(uu.fmt('<b class="b">B0A</b>.fin'));
+            this.c = null;
+            window.console && console.log("B0Afin");
+        }
+//      puff: function B0Apuff(num) {}
+    });
+    uu.Class("B1A : A", {
+        init: function B1Ainit(a, b) {
+            msg.push(uu.fmt('<b class="b">B1A</b>.init: a=%s b=%s', a, b));
+            this.c = this.a * this.b;
+        },
+        fin: function B1Afin() {
+            msg.push(uu.fmt('<b class="b">B1A</b>.fin'));
+            this.c = null;
+            window.console && console.log("B1Afin");
+        },
+        puff: function B1Apuff(num) {
+            msg.push(uu.fmt('<b class="b">B1A</b>.puff'));
+
+            // 親クラスのpuffメソッドを呼び出す -> A.puff を呼ぶ
+//            this.superMethod(arguments.callee, "puff", num);
+            this.superMethod(B1Apuff, "puff", num);
+        }
+    });
+
+// Class C, Sub Class
+// Class B0 を継承 + puffメソッド無し
+
+    uu.Class("C0B0A < B0A", {
+        init: function C0B0Ainit(a, b) {
+            msg.push(uu.fmt('<b class="c">C0B0A</b>.init: a=%s b=%s', a, b));
+            this.d = this.a ^ this.b;
+        },
+        fin: function C0B0Afin() {
+            msg.push(uu.fmt('<b class="c">C0B0A</b>.fin'));
+            this.d = null;
+            window.console && console.log("C0B0Afin");
+        }
+//      puff: function C0B0Apuff(num) {}
+    });
+
+// Class B0 を継承 + puffメソッド有り
+    uu.Class("C1B0A < B0A", {
+        init: function C1B0Ainit(a, b) {
+            msg.push(uu.fmt('<b class="c">C1B0A</b>.init: a=%s b=%s', a, b));
+            this.d = this.a ^ this.b;
+        },
+        fin: function C1B0Afin() {
+            msg.push(uu.fmt('<b class="c">C1B0A</b>.fin'));
+            this.d = null;
+            window.console && console.log("C1B0Afin");
+        },
+        puff: function C1B0Apuff(num) {
+            msg.push(uu.fmt('<b class="c">C1B0A</b>.puff'));
+
+            // 親クラスのpuffメソッドを呼び出す -> B0A.puffは未定義 -> A.puff を呼ぶ
+//          this.superMethod(arguments.callee, "puff", num * 100, 123);
+            this.superMethod(C1B0Apuff, "puff", num * 100, 123);
+        }
+    });
+
+// Class B1 を継承 + puffメソッド無し
+    uu.Class("C0B1A < B1A", {
+        init: function C0B1Ainit(a, b) {
+            msg.push(uu.fmt('<b class="c">C0B1A</b>.init: a=%s b=%s', a, b));
+            this.d = this.a ^ this.b;
+        },
+        fin: function C0B1Afin() {
+            msg.push(uu.fmt('<b class="c">C0B1A</b>.fin'));
+            this.d = null;
+            window.console && console.log("C0B1Afin");
+        }
+//      puff: function C0B1Apuff(num) {}
+    });
+
+// Class B1 を継承 + puffメソッド有り
+    uu.Class("C1B1A < B1A", {
+        init: function C1B1Ainit(a, b) {
+            msg.push(uu.fmt('<b class="c">C1B1A</b>.init: a=%s b=%s', a, b));
+            this.d = this.a ^ this.b;
+        },
+        fin: function C1B1Afin() {
+            msg.push(uu.fmt('<b class="c">C1B1A</b>.fin'));
+            this.d = null;
+            window.console && console.log("C1B1Afin");
+        },
+        puff: function C1B1Apuff(num) {
+            msg.push(uu.fmt('<b class="c">C1B1A</b>.puff'));
+
+            // 親クラスのpuffメソッドを呼び出す -> B1A.puff -> A.puff を呼ぶ
+//          this.superMethod(arguments.callee, "puff", num * 100, 123);
+            this.superMethod(C1B1Apuff, "puff", num * 100, 123);
+
+//          msg.push(uu.fmt("C1B1A.puff: a=%d, b=%d, c=%d, d=%d", this.a, this.b, this.c, this.d));
+        }
+    });
+</pre>
+</body></html>

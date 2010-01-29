@@ -1,0 +1,26 @@
+<!doctype html><html><head><meta charset="utf-8" />
+<title></title>
+<style>body { font-family: HogeHoge, serif }</style>
+<script>
+window.xconfig = { innerText: 1 };
+</script>
+<script src="../../uu.js"></script>
+<script src="../../uu.str.js"></script>
+<script src="../../uu.font.js"></script>
+<script src="../../uu.query.js"></script>
+<script>
+function xboot(uu) {
+    uu("li").each(function(v, i) {
+        v.innerHTML += " - [" + ((uu.font.able(v.innerText)) ? "○" : "×") + "]";
+    });
+}
+</script></head><body>
+<ol>
+ <li style="font: 24pt 'MS Mincho'">'MS Mincho'</li>
+ <li style="font: 24pt 'メイリオ'">'メイリオ'</li>
+ <li style="font: 24pt IPAGothic">IPAGothic</li>
+ <li style="font: 24pt 'HG丸ｺﾞｼｯｸM-PRO'">'HG丸ｺﾞｼｯｸM-PRO'</li>
+ <li style="font: 24pt serif">serif</li>
+ <li style="font: 24pt HogeHoge">HogeHoge</li>
+</ol>
+</body></html>
