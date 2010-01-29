@@ -3215,7 +3215,7 @@ uuready(function() {
     }
 }, 2); // 2: high(system) order
 
-// inner -
+// inner - make camelized hash( { "text-align": "TextAlign", ...}) from getComputedStyle
 function _camelhash(rv, props) {
     function _camelize(m, c) {
         return c.toUpperCase();
@@ -3223,24 +3223,33 @@ function _camelhash(rv, props) {
     function _decamelize(m, c, C) {
         return c + "-" + C.toLowerCase();
     }
-    var i, v, CAMELIZE = /-([a-z])/g, DECAMELIZE = /([a-z])([A-Z])/g;
+    var key, val, CAMELIZE = /-([a-z])/g, DECAMELIZE = /([a-z])([A-Z])/g;
 
-    for (i in props) {
-        if (typeof props[i] === "string") {
-            _webkit && (i = props.item(i)); // i = "text-align"
-            if (i.indexOf("-")) { // -webkit-xxx
-                v = _webkit ? i.replace(CAMELIZE, _camelize)
-                            : i.replace(DECAMELIZE, _decamelize);
-                _gecko && !v.indexOf("Moz") && (v = "-moz" + v.slice(3));
-                // { text-align: "textAlign", ... }
-                (i !== v) && (_webkit ? (rv[i] = v) : (rv[v] = i));
+    for (key in props) {
+        if (typeof props[key] === "string") {
+            val = key;
+            if (_webkit) {
+                key = props.item(key); // key = "z-index"
+                if (key.indexOf("-") >= 0) { // "-webkit-xxx" or "z-index"
+                    val = key.replace(CAMELIZE, _camelize); // "z-index" -> "zIndex"
+                }
+            } else {
+                if (_gecko) {
+                    !val.indexOf("Moz") && (val = "-moz" + val.slice(3));
+                } else if (_ie) {
+                    !val.indexOf("ms") && (val = "-ms" + val.slice(2));
+                } else if (_opera) {
+                    !val.indexOf("O") && (val = "-o" + val.slice(1));
+                }
+                val = val.replace(DECAMELIZE, _decamelize);
             }
+            (key !== val) && (rv[val] = key);
         }
     }
     return rv;
 }
 
-// inner - make numbering array from string
+// inner - make numbering array from string ("0123456789" -> ["00", "01" ... "99"])
 function _numary(s) {
     var r = [], k = -1, i = 0, j, a = s.split(""), z = a.length;
 
