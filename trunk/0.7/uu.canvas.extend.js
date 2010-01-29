@@ -55,7 +55,7 @@ if (uu.opera && uu.ver.ua >= 9.5 && uu.ver.ua < 10.5) {
 
     // CanvasRenderingContext2D.prototype.measureText
     measureText: function(text) {
-      var metric = uu.font.metric(text, this.font);
+      var metric = uu.font.metric(this.font, text);
 
       // new TextMetrics(metric.w, metric.h);
       return { width: metric.w, height: metric.h }; // [Opera10.50][FIX]
@@ -107,7 +107,7 @@ function fillTextSVG(ctx, text, x, y, maxWidth, wire) {
       svg     = _newsvg("svg"),
       txt     = _newsvg("text"),
       scolor  = uu.color(ctx.shadowColor),
-      metric  = uu.font.metric(text, ctx.font),
+      metric  = uu.font.metric(ctx.font, text),
       offx    = 0, // offset x
       offy    = 0, // offset y
       margin  = 50;

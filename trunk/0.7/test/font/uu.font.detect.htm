@@ -1,0 +1,44 @@
+<!doctype html><html><head><meta charset="utf-8" />
+<title></title>
+<style>body { font-family: HogeHoge, IPAGothic, Meiryo, "MS Mincho", serif }</style>
+<script src="../../uu.js"></script>
+<script src="../../uu.str.js"></script>
+<script src="../../uu.font.js"></script>
+<script src="../../uu.query.js"></script>
+<script>
+function xboot(uu) {
+    detect();
+}
+function detect() {
+    var font = uu.font.detect(uu.body());
+    uu("#applied").text(font);
+}
+function shuffle() {
+    var fontList = uu.cs.quick(document.body).fontFamily;
+    var ary = uu.split.token(fontList, ",");
+    var rv = [], ri = -1;
+
+    var i = ary.length;
+
+    while (i) {
+        rv[++ri] = ary.splice((Math.random() * i) | 0, 1);
+        --i;
+    }
+    document.body.style.fontFamily = rv.join(",");
+    uu("#fontorder").val(rv.join(","));
+    detect();
+}
+</script></head><body>
+<input id="fontorder" type="button" value="bodyのフォントオーダーをシャッフルするよ" onclick="shuffle()" />
+<p style="font-size: 24pt">&lt;body&gt;に適用されているフォントは
+    <span id="applied" style="color: red"></span> だよ</p>
+
+<div style="font-size: 24pt">MS明朝, メイリオ, IPAゴシック</div>
+
+<!-- sample -->
+<ul>
+ <li style="font: 24pt 'MS Mincho'">MS明朝</li>
+ <li style="font: 24pt 'メイリオ'">メイリオ</li>
+ <li style="font: 24pt IPAGothic">IPAゴシック</li>
+</ul>
+</body></html>

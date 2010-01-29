@@ -140,8 +140,7 @@ function uucssoff(node, // @param: Node:
                   x,    // @param: Number/Node(= <html>): x or ancestor node
                   y) {  // @param: Number(= 0): y or 1 is break foster node
                         // @return Node/Hash: { x, y }
-  return (uu.isnum(x) && uu.isnum(y)) ? uucssoffset(node, x, y)
-                                      : uucssoffget(node, x, y);
+  return (uu.isnum(x) && uu.isnum(y) ? uucssoffset : uucssoffget)(node, x, y);
 }
 
 // uu.css.off.get - offset from ancestor or foster node(positioning parent)

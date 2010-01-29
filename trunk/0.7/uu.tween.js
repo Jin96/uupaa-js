@@ -95,7 +95,7 @@ function _twjs(node, param) {
                          : uu.fmt(_IOQUAD, v0, v1 - v0));
     }
     function _toabs(curt, end, fn, ope) {
-        if (uu.isnum(end)) {
+        if (typeof end === "number") {
             return end;
         }
         ope = end.slice(0, 2);
@@ -108,8 +108,8 @@ function _twjs(node, param) {
     for (i in param) {
         if (i !== "fps") {
             ez = 0;
-            uu.isary(param[i]) ? (v1 = param[i][0], ez = param[i][1]) // val, ezfn
-                               : (v1 = param[i]); // param.val
+            Array.isArray(param[i]) ? (v1 = param[i][0], ez = param[i][1]) // val, ezfn
+                                    : (v1 = param[i]); // param.val
 
             switch (n = _PROPS[w = fixdb[i] || i]) {
             case 1: // opacity
