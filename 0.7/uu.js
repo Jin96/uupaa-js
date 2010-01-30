@@ -3225,27 +3225,20 @@ function _camelhash(rv, props) {
     function _decamelize(m, c, C) {
         return c + "-" + C.toLowerCase();
     }
-    var key, val, CAMELIZE = /-([a-z])/g, DECAMELIZE = /([a-z])([A-Z])/g;
+    var k, v, CAMELIZE = /-([a-z])/g, DECAMELIZE = /([a-z])([A-Z])/g;
 
-    for (key in props) {
-        if (typeof props[key] === "string") {
-            val = key;
+    for (k in props) {
+        if (typeof props[k] === "string") {
             if (_webkit) {
-                key = props.item(key); // key = "-webkit-...", "z-index"
-                if (key.indexOf("-") >= 0) {
-                    val = key.replace(CAMELIZE, _camelize);
-                }
-                (key !== val) && (rv[key] = val);
+                v = k = props.item(k); // k = "-webkit-...", "z-index"
+                k.indexOf("-") >= 0 && (v = k.replace(CAMELIZE, _camelize));
+                (k !== v) && (rv[k] = v);
             } else {
-                if (_gecko) {
-                    !val.indexOf("Moz") && (val = "-moz" + val.slice(3));
-                } else if (_ie) {
-                    !val.indexOf("ms") && (val = "-ms" + val.slice(2));
-                } else if (_opera) {
-                    !val.indexOf("O") && (val = "-o" + val.slice(1));
-                }
-                val = val.replace(DECAMELIZE, _decamelize);
-                (key !== val) && (rv[val] = key);
+                v = ((_gecko && !k.indexOf("Moz")) ? "-moz" + k.slice(3) :
+                     (_ie    && !k.indexOf("ms"))  ? "-ms"  + k.slice(2) :
+                     (_opera && !k.indexOf("O"))   ? "-o"   + k.slice(1) : k).
+                    replace(DECAMELIZE, _decamelize);
+                (k !== v) && (rv[v] = k);
             }
         }
     }
