@@ -599,9 +599,13 @@ function xboot(uu) {
 
 // -----------------------
     "uu.fix()": "",
-
-      'uu.fix("-webkit-shadow") -> "WebkitShadow"': function() {
-        return uu.webkit ? [uu.fix("-webkit-shadow"), "->", "WebkitShadow"]
+/*
+      'uu.fix("-webkit-shadow") -> "-webkit-shadow"': function() {
+        return [uu.fix("-webkit-shadow"), "->", "-webkit-shadow"];
+      },
+ */
+      'uu.fix("-webkit-box-shadow") -> "WebkitBoxShadow"': function() {
+        return uu.webkit ? [uu.fix("-webkit-box-shadow"), "->", "WebkitBoxShadow"]
                          : ["WebKit ONLY", "==", "WebKit ONLY"];
                 
       },
