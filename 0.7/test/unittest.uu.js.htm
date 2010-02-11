@@ -49,30 +49,34 @@ function xboot(uu) {
         return [uu.ary('word;word', ';'), "==", ['word', 'word']];
       },
     "uu.ary.has()": "",
-      "[1][has array] uu.ary.has(1, [1, 2, 3]) は true": function() {
-        return [uu.ary.has(1, [1, 2, 3]), "is true"];
+      "[1][has array] uu.ary.has([1, 2, 3], 1) は true": function() {
+        return [uu.ary.has([1, 2, 3], 1), "is true"];
       },
-      "[1][has array] uu.ary.has('1', [1, 2, 3]) は false": function() {
-        return [uu.ary.has('1', [1, 2, 3]), "is false"];
+      "[1][has array] uu.ary.has([1, 2, 3], '1') は false": function() {
+        return [uu.ary.has([1, 2, 3], '1'), "is false"];
       },
-      "[1][has array] uu.ary.has('1', ['1', 2, 3]) は true": function() {
-        return [uu.ary.has('1', ['1', 2, 3]), "is true"];
+      "[1][has array] uu.ary.has(['1', 2, 3], '1') は true": function() {
+        return [uu.ary.has(['1', 2, 3], '1'), "is true"];
       },
-      "[1][has array] uu.ary.has(2, ['1', , 2, 3]) は true (粗い配列でもとりあえずOK)": function() {
-        return [uu.ary.has(2, ['1', , 2, 3]), "is true"];
+      "[1][has array] uu.ary.has(['1', , 2, 3], 2) は true (粗い配列でもとりあえずOK)": function() {
+        return [uu.ary.has(['1', , 2, 3], 2), "is true"];
       },
-      "[1][has array] uu.ary.has(undefined, ['1', , 2, 3]) は false (undefined は検索できない)": function() {
-        return [uu.ary.has(undefined, ['1', , 2, 3]), "is false"];
+      "[1][has array] uu.ary.has(['1', , 2, 3], undefined) は false (undefined は検索できない)": function() {
+        return [uu.ary.has(['1', , 2, 3], undefined), "is false"];
       },
-      "[1][has array] uu.ary.has(undefined, ['1', undefined, 2, 3]) は false (undefined は検索できない)": function() {
-        return [uu.ary.has(undefined, ['1', undefined, 2, 3]), "is false"];
+      "[1][has array] uu.ary.has(['1', undefined, 2, 3], undefined) は false (undefined は検索できない)": function() {
+        return [uu.ary.has(['1', undefined, 2, 3], undefined), "is false"];
       },
-      "[1][has array] uu.ary.has([1, 2], [1, 2, 3]) は true": function() {
-        return [uu.ary.has([1, 2], [1, 2, 3]), "is true"];
+      "[1][has array] uu.ary.has([1, 2, 3], [1, 2]) は true": function() {
+        return [uu.ary.has([1, 2, 3], [1, 2]), "is true"];
       },
-      "[2][has node] uu.ary.has(document.body, [document, document.body]) は true": function() {
-        return [uu.ary.has(document.body, [document, document.body]), "is true"];
+      "[2][has node] uu.ary.has([document, document.body], document.body) は true": function() {
+        return [uu.ary.has([document, document.body], document.body), "is true"];
       },
+      "[3][has node] uu.ary.has([document, document.body, document.getElementsByTagName('head')[0]], [document, document.body]) は true": function() {
+        return [uu.ary.has([document, document.body, document.getElementsByTagName('head')[0]], [document, document.body]), "is true"];
+      },
+
     "uu.ary.sort()": "",
       "[1][num 0-9] uu.ary.sort([11, 222, 4], '0-9') は 数字順(0→9)([4, 11, 222])にソートされる": function() {
         return [uu.ary.sort([4, 11, 222], "0-9"), "==", [4, 11, 222]];
@@ -386,17 +390,17 @@ function xboot(uu) {
  */
 
     "uu.hash.has()": "",
-      "uu.hash.has({ a: 1, b: 2 }, { a: 1, b: 2, c: 3 }) -> true": function() {
-        return [uu.hash.has({ a: 1, b: 2 }, { a: 1, b: 2, c: 3 }), "is true"];
+      "uu.hash.has({ a: 1, b: 2, c: 3 }, { a: 1, b: 2 }) -> true": function() {
+        return [uu.hash.has({ a: 1, b: 2, c: 3 }, { a: 1, b: 2 }), "is true"];
       },
-      "uu.hash.has({ a: '1', b: 2 }, { a: 1, b: 2, c: 3 }) -> false": function() {
-        return [uu.hash.has({ a: '1', b: 2 }, { a: 1, b: 2, c: 3 }), "is false"];
+      "uu.hash.has({ a: 1, b: 2, c: 3 }, { a: '1', b: 2 }) -> false": function() {
+        return [uu.hash.has({ a: 1, b: 2, c: 3 }, { a: '1', b: 2 }), "is false"];
       },
-      "uu.hash.has({ a: function() { return 'a'}, b: 2 }, { a: function() { return 'a'}, b: 2, c: 3 }) -> true": function() {
-        return [uu.hash.has({ a: function() { return 'a'}, b: 2 }, { a: function() { return 'a'}, b: 2, c: 3 }), "is true"];
+      "uu.hash.has({ a: function() { return 'a'}, b: 2, c: 3 }, { a: function() { return 'a'}, b: 2 }) -> true": function() {
+        return [uu.hash.has({ a: function() { return 'a'}, b: 2, c: 3 }, { a: function() { return 'a'}, b: 2 }), "is true"];
       },
-      "uu.hash.has({ a: function() { return 'a'}, b: 2 }, { a: function() { return 'b'}, b: 2, c: 3 }) -> false": function() {
-        return [uu.hash.has({ a: function() { return 'a'}, b: 2 }, { a: function() { return 'b'}, b: 2, c: 3 }), "is false"];
+      "uu.hash.has({ a: function() { return 'b'}, b: 2, c: 3 }, { a: function() { return 'a'}, b: 2 }) -> false": function() {
+        return [uu.hash.has({ a: function() { return 'b'}, b: 2, c: 3 }, { a: function() { return 'a'}, b: 2 }), "is false"];
       },
     "uu.hash.size()": "",
       "ハッシュサイズは2": function() {

@@ -10,13 +10,13 @@ uu.font = {
     metric:     fontmetric,     // uu.font.text(font, text) -> { w, h }
     isUsable:   fontisusable,   // uu.font.able(fontName) -> Boolean
     SCALE:      {
-//{mb
+//{{{!mb
         ARIAL: 1.55, "ARIAL BLACK": 1.07, "COMIC SANS MS": 1.15,
         "COURIER NEW": 1.6, GEORGIA: 1.6, "LUCIDA GRANDE": 1,
         "LUCIDA SANS UNICODE": 1, "TIMES NEW ROMAN": 1.65,
         "TREBUCHET MS": 1.55, VERDANA: 1.4,
         "MS UI GOTHIC": 2, "MS PGOTHIC": 2, MEIRYO: 1,
-//}mb
+//}}}!mb
         "SANS-SERIF": 1, SERIF: 1, MONOSPACE: 1, FANTASY: 1, CURSIVE: 1
     }
 };
@@ -93,7 +93,7 @@ fontparse._sizes = {
 function fontdetect(node) { // @param Node:
                             // @return String: detected font, eg: "serif"
     var fam = uu.cs.quick(node).fontFamily,
-        ary = uu.split.token(fam, ","), i = -1,
+        ary = uu.split.token(fam, ","), v, i = -1,
         a, b = fontmetric("72pt " + fam);
 
     while ( (v = ary[++i]) ) {

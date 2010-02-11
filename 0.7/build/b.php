@@ -1,9 +1,17 @@
 <?php
 // usage:
-//  >b.php [package] [-g | -y | -m | -j] [-o outfile]
+//  >b.php [package] [-g | -y | -m | -j] [-out outfile] [-mb] [-debug]
+//    -g    Google Closure Compiler
+//    -y    Microsoft Ajax Minifier
+//    -m    YUI Compressor
+//    -out  outfile, default: "uupaa.js"
+//    -mb   コードブロック {{{!mb ～ }}}!mb を切り落とします。
+//          IE用や余計なコードを切り落とし、
+//          iPhone, Android用にファイルサイズをコンパクトにします。
+//    -debug コードブロック {{{!debug ～ }}}!debug を残します
 
 // marge and strip comment
-function marge($packagefile, $outfile, $minify, $mobile) {
+function marge($packagefile, $outfile, $minify, $optimize) {
   $dir = isWin() ? '..\\' : '../';
   $ary = file($packagefile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
   $fp = fopen($outfile, 'w');
@@ -21,18 +29,17 @@ function marge($packagefile, $outfile, $minify, $mobile) {
     // \r\n -> \n
     $txt = preg_replace('/(\r\n|\r|\n)/m', "\n", $txt);
 
-    if ($mobile) {
-//    $txt = preg_replace('/\/\/\{\:\:([^\n]*)\n.*?\/\/\:\:\}/ms', "/*{::$1 ::}*/", $txt);
-/*
-//{mb
-  ...
-//}mb
- */
-      $txt = preg_replace('/\/\/\{mb([^\n]*)\n.*?\/\/\}mb/ms', "/*{mb$1 }mb*/", $txt);
+    if (!array_key_exists('debug', $optimize)) { // {{{!debug ～ }}}!debug
+      $txt = preg_replace('/\{\{\{\!debug([^\n]*)\n.*?\}\}\}\!debug/ms', '', $txt);
+    }
+    if (array_key_exists('mb', $optimize)) { // {{{!mb ～ }}}!mb
+      $txt = preg_replace('/\{\{\{\!mb([^\n]*)\n.*?\}\}\}\!mb/ms', "/*{{{!mb$1 }}}!mb*/", $txt);
     }
     if ($minify) {
-      // strip comment line
+      // strip comment line  "//..." -> ""
       $txt = preg_replace('/(^|\s)\/\/[^\n]*$/m', '', $txt);
+      // strip comment line  "\n/**/" -> ""
+      $txt = preg_replace('/\n\/\*\*\//m', '', $txt);
       // strip tail space
       $txt = preg_replace('/\s+$/m', '', $txt);
       // strip blank line
@@ -80,7 +87,7 @@ $outfile = isWin() ? "..\\uupaa.js" : "../uupaa.js";
 $options = '';
 $compiler = "y";
 $command = "";
-$mobile = "";
+$optimize = array();
 
 array_shift($argv);
 while ($v = array_shift($argv)) {
@@ -99,9 +106,12 @@ while ($v = array_shift($argv)) {
     $compiler = "m";
     break;
   case "-mb":
-    $mobile = ".mb";
+    $optimize["mb"] = ".mb";
     break;
-  case "-o":
+  case "-debug":
+    $optimize["debug"] = ".debug";
+    break;
+  case "-out":
     $outfile = isWin() ? "..\\" : "../";
     $outfile = $outfile . array_shift($argv);
     break;
@@ -110,9 +120,11 @@ while ($v = array_shift($argv)) {
     break;
   }
 }
+ksort($optimize); // ["mb"=>".mb", "debug"=>".debug"] -> ["debug"=>".debug", "mb"=>".mb"]
+
 $packagefile = '#' . $package . '.pkg'; // "#full.pkg"
 
-marge($packagefile, $outfile, $minify, $mobile);
+marge($packagefile, $outfile, $minify, $optimize);
 
 switch ($compiler) {
 case "g":
@@ -122,16 +134,16 @@ case "g":
  */
   $command = 'java -jar lib.g.jar ' . $options . ' --js=' . $outfile
            . ' --js_output_file=mini.'
-           . $package . '.g' . $mobile . '.js';
+           . $package . '.g' . join($optimize) . '.js';
   break;
 case "y":
   $options = '--charset "utf-8" ';
   $command = 'java -jar lib.y.jar -v ' . $options . ' -o mini.'
-           . $package . '.y' . $mobile . '.js ' . $outfile;
+           . $package . '.y' . join($optimize) . '.js ' . $outfile;
   break;
 case "m":
   $command = 'lib.m.exe -w5 -hc ' . $outfile . ' -o mini.'
-           . $package . '.m' . $mobile . '.js';
+           . $package . '.m' . join($optimize) . '.js';
   break;
 }
 echo "- package: {$packagefile}\n";
