@@ -3,7 +3,7 @@
 // depend: uu.js, uu.canvas.js
 uu.agein || (function(win, doc, uu, CRC2D) {
 
-//{mb === extend text and shadow api ===
+//{{{!mb === extend text and shadow api ===
 if (uu.opera && uu.ver.ua >= 9.5 && uu.ver.ua < 10.5) {
 
   // wrapper
@@ -169,7 +169,7 @@ function fillTextSVG(ctx, text, x, y, maxWidth, wire) {
     doc.body.removeChild(svg);
   }
 }
-//}mb
+//}}}!mb
 
 // === extend lock, unlock ===
 if (CRC2D.prototype) {

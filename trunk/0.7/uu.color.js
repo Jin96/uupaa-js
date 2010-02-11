@@ -2,7 +2,7 @@
 // === Color ===
 // depend: uu.js
 //
-// type ColorHash = { hex: "#000000", rgba: "rgba(0,0,0,0)",
+// type ColorHash = { hex: "#000000", rgba: "rgba(0,0,0,0)", num: 0x000000,
 //                    r: 0, g: 0, b: 0, a: 0, argb: "#00000000" }
 // type RGBAHash = { r: 0, g: 0, b: 0, a: 0 }
 // type HSVAHash = { h: 0, s: 0, v: 0, a: 0 }

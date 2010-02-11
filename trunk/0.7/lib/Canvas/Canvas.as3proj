@@ -5,7 +5,7 @@
     <movie disabled="False" />
     <movie input="" />
     <movie path="..\..\uu.canvas.swf" />
-    <movie fps="30" />
+    <movie fps="60" />
     <movie width="300" />
     <movie height="150" />
     <movie version="10" />

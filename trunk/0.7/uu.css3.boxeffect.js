@@ -460,8 +460,8 @@ function drawFakeShadowIE(ctx, x, y, width, height,
   if (r[0] === 0 && (r[0] === r[1] && r[0] === r[2] && r[0] === r[3])) {
     for (; i < blur; i += step) {
       k = i / blur;
-      ctx.qstrokeRect(x + i, y + i, width - (i * 2), height - (i * 2),
-                      hexcolor, k * k * k, line);
+      ctx.quickStrokeRect(x + i, y + i, width - (i * 2), height - (i * 2),
+                          hexcolor, k * k * k, line);
     }
   } else {
     for (; i < blur; i += step) {
@@ -469,7 +469,7 @@ function drawFakeShadowIE(ctx, x, y, width, height,
       j += 0.5;
       boxpath(ctx, x + i, y + i, width - (i * 2), height - (i * 2),
               [r[0] - j, r[1] - j, r[2] - j, r[3] - j]);
-      ctx.qstroke(hexcolor, k * k * k, line);
+      ctx.quickStroke(hexcolor, k * k * k, line);
     }
   }
   ctx.unlock();
