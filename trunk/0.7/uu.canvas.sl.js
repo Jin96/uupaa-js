@@ -222,14 +222,15 @@ function arc(x, y, radius, startAngle, endAngle, anticlockwise) {
     rx = this._scaleX * radius;
     ry = this._scaleY * radius;
 
-    sx = x + (Math.cos(startAngle) * radius);
-    sy = y + (Math.sin(startAngle) * radius);
-    ex = x + (Math.cos(endAngle) * radius);
-    ey = y + (Math.sin(endAngle) * radius);
+    sx = Math.cos(startAngle) * radius + x;
+    sy = Math.sin(startAngle) * radius + y;
+    ex = Math.cos(endAngle)   * radius + x;
+    ey = Math.sin(endAngle)   * radius + y;
 
     // add <PathFigure StartPoint="..">
     this._path.length ? this.lineTo(sx, sy)
                       : this.moveTo(sx, sy);
+
     if (this._matrixfxd) {
         c0 = _map(this._matrix, ex, ey);
         ex = c0.x;
@@ -999,7 +1000,6 @@ function _clippy(ctx, fg) {
     return '<Canvas Clip="' + ctx._clipPath + '">' + fg + '</Canvas>';
 }
 
-
 // inner - build Linear Color
 function _buildLinearColor(obj) { // @param CanvasGradient:
                                   // @return String:
@@ -1086,11 +1086,11 @@ function _drawxaml(ctx, fg) {
 
 // add inline XAML source
 uu.ie && uu.ver.sl && uu.lazy("init", function() {
-    if (!uu.id("xaml")) {
-        doc.write('<script type="text/xaml" id="xaml"><Canvas' +
-              ' xmlns="http://schemas.microsoft.com/client/2007"></Canvas>' +
-              '</script>');
-    }
+    uu.id("xaml") || uu.head(uu.mix(uue("script"), {
+        id:   "xaml",
+        type: "text/xaml",
+        text: '<Canvas xmlns="http://schemas.microsoft.com/client/2007"></Canvas>'
+    }));
 }, 2); // 2: high order
 
 })(window, document, uu);
