@@ -1055,7 +1055,7 @@ function uuhashkeys(mix,    // @param Array/Hash:
 // uu.hash.css2kb("hoge") -> { key: val }
 function uuhashcss2kb(name) { // @param String/Array: className or [className, ...]
                               // @return Hash: { key: value, ... }
-    function _qsparse(m, key, val, v) {
+    function _parseQueryString(m, key, val, v) {
         v = fn(val);
         return rv[fn(key)] = isNaN(v) ? v : parseFloat(v);
     }
@@ -1069,7 +1069,7 @@ function uuhashcss2kb(name) { // @param String/Array: className or [className, .
         cs = _ie ? div.currentStyle : win.getComputedStyle(div, null);
         url = uutrimurl(cs.listStyleImage);
         if (url && url.indexOf("?") > 0) {
-            url.slice(url.indexOf("?") + 1).replace(_kv, _qsparse);
+            url.slice(url.indexOf("?") + 1).replace(_kv, _parseQueryString);
         }
     }
     doc.body.removeChild(div);
@@ -2052,6 +2052,20 @@ function uuvalset(node,  // @param Node:
 
 // --- node ---
 // uu.node - add node
+//
+//  <div id="parent">
+//      <div id="first">(1) first sibling</div>
+//      <div id="prev">(2) prev sibling</div>
+//      <div id="ctx">context node
+//          <div id="firstChild">(5) first child</div>
+//          <div>
+//              <div id="onlyChild"></div>
+//          </div>
+//          <div id="lastChild">(6) last child</div>
+//      </div>
+//      <div id="next">(3) next sibling</div>
+//      <div id="last">(4) last sibling</div>
+//  </div>
 function uunode(data,  // @param Node/DocumentFragment/HTMLString:
                 ctx,   // @param Node(= <body>): context
                 pos) { // @param Number(= 6): insert position
@@ -2059,6 +2073,7 @@ function uunode(data,  // @param Node/DocumentFragment/HTMLString:
                        //        3: next sibling,  4: last sibling
                        //        5: first child,   6: last child
                        // @return Node: node or first node
+/*
     ctx = ctx || doc.body;
     var n = data.nodeType ? data : uunodebulk(data), p = ctx.parentNode,
         ib = "insertBefore", fc = "firstChild",
@@ -2073,6 +2088,22 @@ function uunode(data,  // @param Node/DocumentFragment/HTMLString:
         case 2: p[ib](n, ctx); break;
         case 3: (p.lastChild === ctx) ? p.appendChild(n)
                                       : p[ib](n, ctx.nextSibling);
+        }
+    }
+    return rv;
+ */
+    ctx = ctx || doc.body;
+    var n = data.nodeType ? data : uunodebulk(data), p = ctx.parentNode,
+        rv = (n.nodeType === 11) ? n.firstChild : n; // 11: DocumentFragment
+
+    if (!{ input: 1, INPUT: 1 }[ctx.nodeName]) {
+        switch (pos || 6) {
+        case 1: p.insertBefore(n, p.firstChild); break;
+        case 2: p.insertBefore(n, ctx); break;
+        case 3: p.insertBefore(n, ctx.nextSibling); break;
+        case 4: p.appendChild(n); break;
+        case 5: ctx.insertBefore(n, ctx.firstChild); break;
+        case 6: ctx.appendChild(n);
         }
     }
     return rv;

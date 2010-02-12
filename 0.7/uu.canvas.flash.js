@@ -1,13 +1,13 @@
 
 // === Flash Canvas ===
 // depend: uu.js, uu.color.js, uu.css.js, uu.img.js,
-//         uu.font.js, uu.canvas.js
+//         uu.font.js, uu.canvas.js, uu.flash.js
 
 //  <canvas width="300" height="150">
 //      <object id="externalcanvas{n}" width="300" height="150" classid="...">
+//          <param name="allowScriptAccess" value="sameDomain" />
 //          <param name="wmode" value="transparent" />
 //          <param name="movie" value="../uu.canvas.swf" />
-//          <param name="allowScriptAccess" value="always" />
 //      </object>
 //  </canvas>
 
@@ -48,7 +48,7 @@ uu.mix(uu.canvas.FL2D.prototype, {
     save:                   save,
     scale:                  scale,
     send:                   send,           // [EXTEND]
-    buildProp:              buildProp,      // [EXTEND]
+    sendProp:               sendProp,       // [EXTEND]
     setTransform:           setTransform,
     stroke:                 stroke,
     strokeRect:             strokeRect,
@@ -69,7 +69,7 @@ function init(ctx, node) { // @param Node: <canvas>
     ctx._view = null; // swf <object>
 
     ctx._stock.push("in\t" + node.width + "\t" + node.height);
-    ctx.buildProp();
+    ctx.sendProp();
 }
 
 // uu.canvas.FL2D.build
@@ -97,10 +97,9 @@ function build(node) { // @param Node: <canvas>
     // create swf <object>
     node.innerHTML = uu.fmt(
         '<object id="%s" width="%s" height="%s" classid="%s">' +
+            '<param name="allowScriptAccess" value="sameDomain" />' +
             '<param name="wmode" value="transparent" />' +
-            '<param name="movie" value="%s" />' +
-            '<param name="allowScriptAccess" value="always" />' +
-        '</object>',
+            '<param name="movie" value="%s" /></object>',
         id, node.width, node.height,
         "clsid:d27cdb6e-ae6d-11cf-96b8-444553540000",
         uu.config.imgdir + "uu.canvas.swf");
@@ -180,6 +179,9 @@ function _copyprop(to, from) {
 
 // CanvasRenderingContext2D.prototype.arc
 function arc(x, y, radius, startAngle, endAngle, anticlockwise) {
+    this.send("ar\t" + x + "\t" + y + "\t" +
+                       radius + "\t" + startAngle + "\t" +
+                       endAngle + "\t" + anticlockwise);
 }
 
 // CanvasRenderingContext2D.prototype.arcTo -> NOT IMPL
@@ -208,7 +210,7 @@ function clearRect(x, y, w, h) {
 
 // CanvasRenderingContext2D.prototype.clip
 function clip() {
-//    this.send("cl");
+    this.send("cl");
 }
 
 // CanvasRenderingContext2D.prototype.closePath
@@ -221,7 +223,7 @@ function closePath() {
 // CanvasRenderingContext2D.prototype.createLinearGradient
 function createLinearGradient(x0, y0, x1, y1) {
     function CanvasGradient(x0, y0, x1, y1) {
-        this.fn = _linearGradientFill;
+        this.linear = 1;
         this.param = { x0: x0, y0: y0, x1: x1, y1: y1 };
         this.color = [];
         this.colors = "";
@@ -279,24 +281,32 @@ function createRadialGradient(x0, y0, r0, x1, y1, r1) { // @return Hash:
 // drawImage(image, dx, dy, dw, dh)
 // drawImage(image, sx, sy, sw, sh, dx, dy, dw, dh)
 function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
-    this.send("dI\t" + a1 + "\t" + a2 + "\t" + a3 + "\t" + a4 + "\t" +
-                       a5 + "\t" + a6 + "\t" + a7 + "\t" + a8);
+    this.sendProp();
+    if (a3 === void 0) {
+        this.send("d3\t" + a1 + "\t" + a2);
+    } else if (a5 === void 0) {
+        this.send("d5\t" + a1 + "\t" + a2 + "\t" + a3 + "\t" + a4);
+    } else {
+        this.send("d9\t" + a1 + "\t" + a2 + "\t" + a3 + "\t" + a4 + "\t" +
+                           a5 + "\t" + a6 + "\t" + a7 + "\t" + a8);
+    }
 }
 
 // CanvasRenderingContext2D.prototype.fill
 function fill() {
+    this.sendProp();
     this.send("fi");
 }
 
 // CanvasRenderingContext2D.prototype.fillRect
 function fillRect(x, y, w, h) {
-    this.buildProp();
+    this.sendProp();
     this.send("fR\t" + x + "\t" + y + "\t" + w + "\t" + h);
 }
 
 // CanvasRenderingContext2D.prototype.fillText
 function fillText(text, x, y, maxWidth) {
-    this.buildProp();
+    this.sendProp();
     this.send("fT\t" + text + "\t" + (x || 0) + "\t" +
                                      (y || 0) + "\t" + maxWidth || 0);
 }
@@ -332,12 +342,13 @@ function moveTo(x, y) {
 
 // CanvasRenderingContext2D.prototype.quadraticCurveTo
 function quadraticCurveTo(cpx, cpy, x, y) {
+    this.send("qC\t" + cpx + "\t" + cpy + "\t" + x + "\t" + y);
 }
 
 // CanvasRenderingContext2D.prototype.rect
 function rect(x, y, w, h) {
-    this.buildProp();
-    this.send("mT\t" + x + "\t" + y + "\t" + w + "\t" + h);
+    this.sendProp();
+    this.send("re\t" + x + "\t" + y + "\t" + w + "\t" + h);
 }
 
 // CanvasRenderingContext2D.prototype.resize
@@ -354,7 +365,7 @@ function resize(width,    // @param Number: width
         this.canvas.style.pixelHeight = height;
     }
     this._readyState = state;
-    this.send("re\t" + width + "\t" + height);
+    this.send("rz\t" + width + "\t" + height);
 }
 
 // CanvasRenderingContext2D.prototype.restore
@@ -364,8 +375,7 @@ function restore() {
 
 // CanvasRenderingContext2D.prototype.rotate
 function rotate(angle) {
-    this._matrixfxd = 1;
-    this._matrix = uu.m2d.rotate(angle, this._matrix);
+    this.send("ro\t" + angle);
 }
 
 // CanvasRenderingContext2D.prototype.save
@@ -379,56 +389,43 @@ function save() {
 
 // CanvasRenderingContext2D.prototype.scale
 function scale(x, y) {
-/*
-    this._matrixfxd = 1;
-    this._matrix = uu.m2d.scale(x, y, this._matrix);
-    this._scaleX *= x;
-    this._scaleY *= y;
-    this._lineScale = (this._matrix[0] + this._matrix[4]) / 2;
- */
+    this.send("sc\t" + x + "\t" + y);
 }
 
 // CanvasRenderingContext2D.prototype.setTransform
 function setTransform(m11, m12, m21, m22, dx, dy) {
-/*
-    if (m11 === 1 && !m12 && m22 === 1 && !m21 && !dx && !dy) {
-        this._matrixfxd = 0; // reset _matrixfxd flag
-    }
-    this._matrix = [m11, m12, 0,  m21, m22, 0,  dx, dy, 1];
- */
+    this.send("ST\t" + m11 + "\t" + m12 + "\t" +
+                       m21 + "\t" + m22 + "\t" +
+                        dx + "\t" +  dy);
 }
 
 // CanvasRenderingContext2D.prototype.stroke
 function stroke() {
-    this.buildProp();
+    this.sendProp();
     this.send("st");
 }
 
 // CanvasRenderingContext2D.prototype.strokeRect
 function strokeRect(x, y, w, h) {
-    this.buildProp();
+    this.sendProp();
     this.send("sR\t" + x + "\t" + y + "\t" + w + "\t" + h);
 }
 // CanvasRenderingContext2D.prototype.strokeText
 function strokeText(text, x, y, maxWidth) {
-    this.buildProp();
+    this.sendProp();
     this.send("sT\t" + text + "\t" + (x || 0) + "\t" + (y || 0) + "\t" + maxWidth || 0);
 }
 
 // CanvasRenderingContext2D.prototype.transform
 function transform(m11, m12, m21, m22, dx, dy) {
-/*
-    this._matrixfxd = 1;
-    this._matrix = uu.m2d.transform(m11, m12, m21, m22, dx, dy, this._matrix);
- */
+    this.send("tf\t" + m11 + "\t" + m12 + "\t" +
+                       m21 + "\t" + m22 + "\t" +
+                        dx + "\t" +  dy);
 }
 
 // CanvasRenderingContext2D.prototype.translate
 function translate(x, y) {
-/*
-    this._matrixfxd = 1;
-    this._matrix = uu.m2d.translate(x, y, this._matrix);
- */
+    this.send("tl\t" + x + "\t" + y);
 }
 
 // CanvasRenderingContext2D.prototype.unlock
@@ -444,58 +441,91 @@ function unlock() {
 }
 
 // inner
-function buildProp() {
+function sendProp() {
     var ary = this._stock, i = ary.length - 1;
 
+    // globalAlpha
     if (this.globalAlpha !== this._globalAlpha) {
         ary[++i] = "gA\t" + (this._globalAlpha = this.globalAlpha);
     }
-    if (this.globalCompositeOperation !== this._globalCompositeOperation) {
-        ary[++i] = "gC\t" + (this._globalCompositeOperation = this.globalCompositeOperation);
+
+    // globalCompositeOperation
+    if (this.globalCompositeOperation !== this._mix) {
+        ary[++i] = "gC\t" + (this._mix = this.globalCompositeOperation);
     }
+
+    // strokeStyle
     if (this.strokeStyle !== this._strokeStyle) {
         if (typeof this.strokeStyle === "string") {
             this.__strokeStyle = uu.color(this._strokeStyle = this.strokeStyle);
             ary[++i] = "s0\t" + this.__strokeStyle.num + "\t" + this.__strokeStyle.a;
+        } else if (this.strokeStyle.linear) {
+
+            ary[++i] = "s1\t" + this.__strokeStyle.num + "\t" + this.__strokeStyle.a;
+
         }
     }
+
+    // fillStyle
     if (this.fillStyle !== this._fillStyle) {
         if (typeof this.fillStyle === "string") {
             this.__fillStyle = uu.color(this._fillStyle = this.fillStyle);
             ary[++i] = "f0\t" + this.__fillStyle.num + "\t" + this.__fillStyle.a;
         }
     }
+
+    // lineWidth
     if (this.lineWidth !== this._lineWidth) {
         ary[++i] = "lW\t" + (this._lineWidth = this.lineWidth);
     }
+
+    // lineCap
     if (this.lineCap !== this._lineCap) {
         ary[++i] = "lC\t" + (this._lineCap = this.lineCap);
     }
+
+    // lineJoin
     if (this.lineJoin !== this._lineJoin) {
         ary[++i] = "lJ\t" + (this._lineJoin = this.lineJoin);
     }
+
+    // miterLimit
     if (this.miterLimit !== this._miterLimit) {
         ary[++i] = "mL\t" + (this._miterLimit = this.miterLimit);
     }
+
+    // shadowBlur
     if (this.shadowBlur !== this._shadowBlur) {
         ary[++i] = "sB\t" + (this._shadowBlur = this.shadowBlur);
     }
+
+    // shadowColor
     if (this.shadowColor !== this._shadowColor) {
         this.__shadowColor = uu.color(this._fillStyle = this.shadowColor);
         ary[++i] = "sC\t" + this.__shadowColor.num + "\t" + this.__shadowColor.a;
     }
+
+    // shadowOffsetX
     if (this.shadowOffsetX !== this._shadowOffsetX) {
         ary[++i] = "sX\t" + (this._shadowOffsetX = this.shadowOffsetX);
     }
+
+    // shadowOffsetY
     if (this.shadowOffsetY !== this._shadowOffsetY) {
         ary[++i] = "sY\t" + (this._shadowOffsetY = this.shadowOffsetY);
     }
+
+    // font
     if (this.font !== this._font) {
         ary[++i] = "fo\t" + (this._font = this.font);
     }
+
+    // textAlign
     if (this.textAlign !== this._textAlign) {
         ary[++i] = "tA\t" + (this._textAlign = this.textAlign);
     }
+
+    // textBaseline
     if (this.textBaseline !== this._textBaseline) {
         ary[++i] = "tB\t" + (this._textBaseline = this.textBaseline);
     }
@@ -506,15 +536,13 @@ function send(fg) { // @param String: fragment, "{COMMAND}\t{ARG1}\t..."
         this._stock.push(fg);
     }
     if (!this._lockState && this._readyState) {
-
-//alert(this._stock.join("\t"));
-        this._view.CallFunction(
-            '<invoke name="send" returntype="javascript"><arguments><string>' +
-                this._stock.join("\t") +
-            '</string></arguments></invoke>');
+        this._view.CallFunction(send._prefix + this._stock.join("\t") +
+                                send._suffix);
         this._stock = []; // clear
     }
 }
+send._prefix = '<invoke name="send" returntype="javascript"><arguments><string>';
+send._suffix = '</string></arguments></invoke>';
 
 /*
 function _toXML(value) {

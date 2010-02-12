@@ -1,0 +1,155 @@
+<!doctype html><html><head>
+  <title>A canvas remove fallback content example</title>
+
+<script>xconfig={imgdir:"../"}</script>
+<!--
+<script type="text/javascript" src="../uupaa.js"></script>
+ -->
+<script>
+function canvasReady() {
+    lazyLoad("../uupaa.js", function() {
+        uu.canvas.init();
+        drawShape(document.getElementById('slcanvas'));
+        drawShape(document.getElementById('vmlcanvas'));
+        drawShape(document.getElementById('flashcanvas'));
+    });
+}
+
+function lazyLoad(url, callback) {
+    var scr     = document.createElement("script");
+    scr.type    = "text/javascript";
+    scr.charset = "utf-8";
+
+    if (document.uniqueID) {
+        scr.onreadystatechange = function() {
+            if (/loaded|complete/.test(this.readyState)) {
+                  callback();
+            }
+        };
+    } else {
+        scr.onload = function() {
+            callback();
+        };
+    }
+
+    scr.setAttribute("src", url);
+    document.getElementsByTagName("head")[0].appendChild(scr);
+}
+
+function drawShape(canvas) {
+    if (!canvas.getContext) { return; }
+
+    var ctx = canvas.getContext('2d');
+
+    ctx.fillRect(25,25,100,100);
+    ctx.clearRect(45,45,60,60);
+    ctx.strokeRect(50,50,50,50);
+}
+</script>
+    <style type="text/css">
+      body { margin: 20px; font-family: arial,verdana,helvetica; background: #fff;}
+      h1 { font-size: 140%; font-weight:normal; color: #036; border-bottom: 1px solid #ccc; }
+      canvas { border: 2px solid #000; float: left; margin-right: 20px; margin-bottom: 20px; }
+      pre { float:left; display:block; background: rgb(238,238,238); border: 1px dashed #666; padding: 15px 20px; margin: 0 0 10px 0; }
+    </style>
+  </head>
+
+  <body>
+    <h1>canvas <code>remove fallback content</code> example</h1>
+    <input type="button" value="Load library" onclick="canvasReady()" /><br /><br />
+    <div>
+
+      <canvas id="slcanvas" class="sl" width="150" height="150">
+        <p style="border: 1px solid red">
+          fallback text
+        </p>
+      </canvas>
+      <canvas id="vmlcanvas" class="vml" width="150" height="150">
+        fallback image
+        <br />
+        <img src="img/rhino.jpg" alt="alt image" />
+        <div>
+          <p>alternative contents...</p>
+        </div>
+        <!--
+          comment node
+        -->
+      </canvas>
+      <canvas id="flashcanvas" class="flash" width="150" height="150">
+        <p style="border: 1px solid red">
+          fallback text
+        </p>
+      </canvas>
+
+<pre>
+&lt;!--
+&lt;script type="text/javascript" src="../uupaa.js"&gt;&lt;/script&gt;
+--&gt;
+
+&lt;input type="button" value="load library" onclick="canvasReady()" /&gt;
+
+      &lt;canvas id="slcanvas" width="150" height="150"&gt;
+        &lt;p style="border: 1px solid red"&gt;
+          fallback text
+        &lt;/p&gt;
+      &lt;/canvas&gt;
+      &lt;canvas id="vmlcanvas" class="vml" width="150" height="150"&gt;
+        fallback image
+        &lt;br /&gt;
+        &lt;img src="img/rhino.jpg" alt="alt image" /&gt;
+        &lt;div&gt;
+          &lt;p&gt;alternative contents...&lt;/p&gt;
+        &lt;/div&gt;
+        &lt;!--
+          comment node
+        --&gt;
+      &lt;/canvas&gt;
+      &lt;canvas id="flashcanvas" width="150" height="150"&gt;
+        &lt;p style="border: 1px solid red"&gt;
+          fallback text
+        &lt;/p&gt;
+      &lt;/canvas&gt;
+
+function canvasReady() {
+    lazyLoad("../uupaa.js", function() {
+        uu.canvas.init();
+        drawShape(document.getElementById('slcanvas'));
+        drawShape(document.getElementById('vmlcanvas'));
+        drawShape(document.getElementById('flashcanvas'));
+    });
+}
+
+function lazyLoad(url, callback) {
+    var scr     = document.createElement("script");
+    scr.type    = "text/javascript";
+    scr.charset = "utf-8";
+
+    if (document.uniqueID) {
+        scr.onreadystatechange = function() {
+            if (/loaded|complete/.test(this.readyState)) {
+                  callback();
+            }
+        };
+    } else {
+        scr.onload = function() {
+            callback();
+        };
+    }
+
+    scr.setAttribute("src", url);
+    document.getElementsByTagName("head")[0].appendChild(scr);
+}
+
+function drawShape(canvas) {
+    if (canvas.getContext) { return; }
+
+    var ctx = canvas.getContext('2d');
+
+    ctx.fillRect(25,25,100,100);
+    ctx.clearRect(45,45,60,60);
+    ctx.strokeRect(50,50,50,50);
+}
+</pre>
+    </div>
+  </body>
+</html>

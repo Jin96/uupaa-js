@@ -474,6 +474,7 @@ function xboot(uu) {
   <div id="prev">prev</div>\
   <div id="tgt">tgt\
     <div id="firstChild">firstChild</div>\
+    <div><div id="onlyChild"></div></div>\
     <div id="lastChild">lastChild</div>\
   </div>\
   <div id="next">next</div>\
@@ -543,6 +544,10 @@ function xboot(uu) {
         return [uu.node.lastChild(uu.p(':hoge'), uu.id('tgt')), "is node"];
       },
 
+    "uu.node.next() + onlyChild + insertAfter": "",
+      "uu.node.next(uu.p(':only'), uu.id('onlyChild'))": function() {
+        return [uu.node.next(uu.p(':only'), uu.id('onlyChild')), "is node"];
+      },
 
 
     "uu.nore.remove()": "",
@@ -611,7 +616,7 @@ function xboot(uu) {
       'uu.fix("-webkit-box-shadow") -> "WebkitBoxShadow"': function() {
         return uu.webkit ? [uu.fix("-webkit-box-shadow"), "->", "WebkitBoxShadow"]
                          : ["WebKit ONLY", "==", "WebKit ONLY"];
-                
+
       },
       'uu.fix("-moz-appearance") -> "MozAppearance"': function() {
         return uu.gecko ? [uu.fix("-moz-appearance"), "->", "MozAppearance"]
@@ -768,7 +773,7 @@ function xboot(uu) {
         var now = new Date;
         var str = uu.date2str(now, 0);
         var rv = uu.str2date(str);
-        
+
         return [now, "===", rv.date];
       },
       "uu.date2str(現在時刻, 1) の結果は uu.str2date() でデコードできる": function() {
@@ -776,7 +781,7 @@ function xboot(uu) {
         now.setMilliseconds(0); // ms を切り落として比較する
         var str = uu.date2str(now, 1, 1);
         var rv = uu.str2date(str);
-        
+
         return [now, "==", rv.date];
       },
     "uu.str2date()": "",

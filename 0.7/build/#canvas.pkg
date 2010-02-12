@@ -4,15 +4,13 @@ uu.js
 uu.color.js
 uu.img.js
 uu.css.js
-//uu.flash.js
 uu.font.js
-uu.matrix2d.js
-uu.font.js
+uu.flash.js
 uu.matrix2d.js
 uu.canvas.js
-//uu.canvas.fl.js
 uu.canvas.sl.js
 uu.canvas.vml.js
+uu.canvas.flash.js
 uu.canvas.extend.js
 uu.layer.js
 
