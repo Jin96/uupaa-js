@@ -352,8 +352,8 @@ function rect(x, y, w, h) {
 }
 
 // CanvasRenderingContext2D.prototype.resize
-function resize(width,    // @param Number: width
-                height) { // @param Number: height
+function resize(width,    // @param Number(= void 0): width
+                height) { // @param Number(= void 0): height
     var state = this._readyState;
 
     this.initSurface()
