@@ -3,9 +3,10 @@
 // depend: uu.js, uu.canvas.js
 uu.agein || (function(win, doc, uu, CRC2D) {
 
+//{{{!mb
 var extendOpera = uu.opera && uu.ver.ua >= 9.5 && uu.ver.ua < 10.5;
 
-//{{{!mb === extend text and shadow api ===
+// === extend text and shadow api ===
 if (extendOpera) {
     // wrapper
     CRC2D.prototype._save    = CRC2D.prototype.save;
@@ -179,9 +180,10 @@ function _strokeText(ctx, text, x, y, maxWidth, fill) {
 
 // === extend lock, unlock ===
 if (CRC2D.prototype) {
-    CRC2D.prototype.clear   = clear;    // [EXTEND]
     CRC2D.prototype.lock    = lock;     // [EXTEND]
+    CRC2D.prototype.clear   = clear;    // [EXTEND]
     CRC2D.prototype.unlock  = uunop;    // [EXTEND]
+    CRC2D.prototype.resize  = resize;   // [EXTEND]
 }
 
 // CanvasRenderingContext2D.prototype.lock
@@ -192,6 +194,18 @@ function lock(clear) { // @param Boolean: clear screen
 // CanvasRenderingContext2D.prototype.clear
 function clear() {
     this.clearRect(0, 0, this.canvas.width, this.canvas.height);
+}
+
+// CanvasRenderingContext2D.prototype.resize
+function resize(width,    // @param Number(= void 0):
+                height) { // @param Number(= void 0):
+
+    if (width !== void 0) {
+        this.canvas.width = width;
+    }
+    if (height !== void 0) {
+        this.canvas.height = height;
+    }
 }
 
 })(window, document, uu, window["CanvasRenderingContext2D"] || 0);
