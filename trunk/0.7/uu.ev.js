@@ -26,31 +26,31 @@ uu.mix(uu.ev, {
 // uu.ev.more - more information
 function uuevmore(evt) { // @param EventObject:
                          // @return Hash: { rel, btn, vkey, wheel, clicks, vkeycode }
-  var rel, btn = evt.button || 0, wheel = 0, clicks = 0,
-      vkeycode = evt.keyCode || evt.charCode || 0;
+    var rel, btn = evt.button || 0, wheel = 0, clicks = 0,
+        vkeycode = evt.keyCode || evt.charCode || 0;
 
-  if (evt.code) {
-    if (uu.ie) {
-      rel = evt.src === evt.fromElement ? evt.toElement : evt.fromElement;
-      btn = !btn ? void 0 : (btn & 1) ? 0 : (btn & 2) ? 1 : 2;
-      wheel = (evt.wheelDelta / -120) | 0;
-      clicks = _CLICKS[evt.type] || 0;
-    } else {
-      evt.rel = evt.relatedTarget;
-      if (evt.code === uu.ev._code.mousewheel) {
-        wheel = (evt.detail ? (evt.detail / 3)
-                            : (evt.wheelDelta / -120)) | 0;
-      } else {
-        clicks = (evt.detail || 0) & 0x03 || _CLICKS[evt.type] || 0;
-      }
+    if (evt.code) {
+        if (uu.ie) {
+            rel = evt.src === evt.fromElement ? evt.toElement : evt.fromElement;
+            btn = !btn ? void 0 : (btn & 1) ? 0 : (btn & 2) ? 1 : 2;
+            wheel = (evt.wheelDelta / -120) | 0;
+            clicks = _CLICKS[evt.type] || 0;
+        } else {
+            evt.rel = evt.relatedTarget;
+            if (evt.code === uu.ev._code.mousewheel) {
+                wheel = (evt.detail ? (evt.detail / 3)
+                                    : (evt.wheelDelta / -120)) | 0;
+            } else {
+                clicks = (evt.detail || 0) & 0x03 || _CLICKS[evt.type] || 0;
+            }
+        }
     }
-  }
-  return { rel: rel, // relatedTarget
-           btn: btn,
-           vkey: _EVVKEY[vkeycode] || "", // "UP", "1", "A"
-           wheel: wheel,
-           clicks: clicks,
-           vkeycode: vkeycode }; // 38, 49, 65
+    return { rel: rel, // relatedTarget
+             btn: btn,
+             vkey: _EVVKEY[vkeycode] || "", // "UP", "1", "A"
+             wheel: wheel,
+             clicks: clicks,
+             vkeycode: vkeycode }; // 38, 49, 65
 }
 
 // uu.ev.fire - fire event / fire custom event(none capture event only)
@@ -58,23 +58,23 @@ function uuevfire(node,    // @param Node: target node
                   name,    // @param String: "click", "custom"
                   param) { // @param Mix(= void 0): param
                            // @return Node:
-  if (uu.ev.has(node, name)) {
-    node.uuevfn[name].call(node, {
-      stopPropagation: uunop,
-      preventDefault:  uunop,
-      node:   node, // current target
-      name:   name, // event name
-      code:   0,    // 0: unknown
-      src:    node, // event source
-      rel:    node,
-      px:     0,
-      py:     0,
-      ox:     0,
-      oy:     0,
-      param:  param
-    }, 1);
-  }
-  return node;
+    if (uu.ev.has(node, name)) {
+        node.uuevfn[name].call(node, {
+            stopPropagation: uunop,
+            preventDefault:  uunop,
+            node:   node, // current target
+            name:   name, // event name
+            code:   0,    // 0: unknown
+            src:    node, // event source
+            rel:    node,
+            px:     0,
+            py:     0,
+            ox:     0,
+            oy:     0,
+            param:  param
+        }, 1);
+    }
+    return node;
 }
 
 // uu.ev.dragbase -
@@ -90,56 +90,56 @@ function uuevdragbase(
                       //        Number: left, right, top, bottom - limit rect
                       //        Function: mouseup, mousemove, mousedown
                       // @return Hash: { x, y, px, py }
-  grip = grip || tgt;
-  var x, y, px = 0, py = 0, off, r, opt = option || {},
-      code = evt.code, ts = tgt.style, iebody;
+    grip = grip || tgt;
+    var x, y, px = 0, py = 0, off, r, opt = option || {},
+        code = evt.code, ts = tgt.style, iebody;
 
-  if (!code || code > 3 ||
-      (code === 3 && !grip.uuevdrag) || // [3] mousemove
-      (code === 1 &&  grip.uuevdrag) || // [1] mousedown
-      (code === 2 && !grip.uuevdrag)) { // [2] mouseup or losecapture(in IE)
-    return { x: 0, y: 0, px: 0, py: 0 };
-  }
-  if (uu.ie) {
-    iebody = uu.iebody;
-    x = evt.clientX + iebody.scrollLeft;
-    y = evt.clientY + iebody.scrollTop;
-  } else {
-    x = evt.pageX;
-    y = evt.pageY;
-  }
-  if (code === 3) { // [3] mousemove
-    off = grip.uuevdragoff;
-    px = x - off.x;
-    py = y - off.y;
+    if (!code || code > 3
+        || (code === 3 && !grip.uuevdrag) // [3] mousemove
+        || (code === 1 &&  grip.uuevdrag) // [1] mousedown
+        || (code === 2 && !grip.uuevdrag)) { // [2] mouseup or losecapture(in IE)
+        return { x: 0, y: 0, px: 0, py: 0 };
+    }
+    if (uu.ie) {
+        iebody = uu.iebody;
+        x = evt.clientX + iebody.scrollLeft;
+        y = evt.clientY + iebody.scrollTop;
+    } else {
+        x = evt.pageX;
+        y = evt.pageY;
+    }
+    if (code === 3) { // [3] mousemove
+        off = grip.uuevdragoff;
+        px = x - off.x;
+        py = y - off.y;
 
-    if (opt.limit) {
-      if (px < opt.left)   { px = opt.left;   }
-      if (px > opt.right)  { px = opt.right;  }
-      if (py < opt.top)    { py = opt.top;    }
-      if (py > opt.bottom) { py = opt.bottom; }
+        if (opt.limit) {
+            if (px < opt.left)   { px = opt.left;   }
+            if (px > opt.right)  { px = opt.right;  }
+            if (py < opt.top)    { py = opt.top;    }
+            if (py > opt.bottom) { py = opt.bottom; }
+        }
+        uu.ie ? (ts.pixelLeft = px) : (ts.left = px + "px");
+        uu.ie ? (ts.pixelTop  = py) : (ts.top  = py + "px");
+        if (opt.mousemove) {
+            opt.mousemove(evt, tgt, grip, code, opt, x, y, px, py);
+        }
+    } else if (code === 1) { // [1] mousedown
+        if (opt.mousedown) {
+            r = opt.mousedown(evt, tgt, grip, code, opt, x, y);
+            if (r) { // override - target node, grip node
+                tgt = r.tgt;
+                grip = r.grip;
+            }
+        }
+        grip.uuevdragoff = { x: x - parseInt(tgt.style.left || 0),
+                             y: y - parseInt(tgt.style.top  || 0) };
+        grip.uuevdrag = opt.zmanage ? uu.factory("ZIndex").drag(tgt) : 1;
+    } else { // [2] mouseup
+        opt.mouseup && opt.mouseup(evt, tgt, grip, code, opt, x, y);
+        grip.uuevdrag = opt.zmanage ? uu.factory("ZIndex").drag(tgt) : 0;
     }
-    uu.ie ? (ts.pixelLeft = px) : (ts.left = px + "px");
-    uu.ie ? (ts.pixelTop  = py) : (ts.top  = py + "px");
-    if (opt.mousemove) {
-      opt.mousemove(evt, tgt, grip, code, opt, x, y, px, py);
-    }
-  } else if (code === 1) { // [1] mousedown
-    if (opt.mousedown) {
-      r = opt.mousedown(evt, tgt, grip, code, opt, x, y);
-      if (r) { // override - target node, grip node
-        tgt = r.tgt;
-        grip = r.grip;
-      }
-    }
-    grip.uuevdragoff = { x: x - parseInt(tgt.style.left || 0),
-                         y: y - parseInt(tgt.style.top  || 0) };
-    grip.uuevdrag = opt.zmanage ? uu.factory("ZIndex").drag(tgt) : 1;
-  } else { // [2] mouseup
-    opt.mouseup && opt.mouseup(evt, tgt, grip, code, opt, x, y);
-    grip.uuevdrag = opt.zmanage ? uu.factory("ZIndex").drag(tgt) : 0;
-  }
-  return { x: x, y: y, px: px, py: py };
+    return { x: x, y: y, px: px, py: py };
 }
 
 // uu.ev.times - cyclic events
@@ -149,20 +149,20 @@ function uuevtimes(node,     // @param Node: target node
                    cyclic    // @param Number: cyclic times, 0 is infinite
            /* var_args */) { // @param Function: callback functions
                              // @return Node:
-  function _wrap(evt) {
-    callbacks[index++](evt);
-    if (index >= callbacks.length) {
-      index = 0;
-      if (cyclic && !--cyclic) {
-        uu.ev(node, names, _wrap, 2);
-      }
+    function _wrap(evt) {
+        callbacks[index++](evt);
+        if (index >= callbacks.length) {
+            index = 0;
+            if (cyclic && !--cyclic) {
+                uu.ev(node, names, _wrap, 2);
+            }
+        }
     }
-  }
-  cyclic = cyclic || 0;
-  var index = 0, callbacks = uu.ary(arguments).slice(3);
+    cyclic = cyclic || 0;
+    var index = 0, callbacks = uu.ary(arguments).slice(3);
 
-  callbacks.length && uu.ev(node, names, _wrap, 1);
-  return node;
+    callbacks.length && uu.ev(node, names, _wrap, 1);
+    return node;
 }
 
 // uu.ev.hover
@@ -172,44 +172,44 @@ function uuevhover(node,    // @param Node:
                    enter,   // @param Function/JointString: callback or class
                    leave) { // @param Function(= void 0):
                             // @return Node:
-  function _evhookmouseenter(evt) {
-    var rel = evt.relatedTarget;
-    // ignode mouse transit(mouseover, mouseout) in child node
-    if (evt.node !== rel && !uu.node.has(rel, evt.node)) {
-      evt.name = "mouseenter";
-      enter(evt, node); // enter(evt, node)
+    function _evhookmouseenter(evt) {
+        var rel = evt.relatedTarget;
+        // ignode mouse transit(mouseover, mouseout) in child node
+        if (evt.node !== rel && !uu.node.has(rel, evt.node)) {
+            evt.name = "mouseenter";
+            enter(evt, node); // enter(evt, node)
+        }
+        uu.ev.stop(evt); // cancel bubble
     }
-    uu.ev.stop(evt); // cancel bubble
-  }
-  function _evhookmouseleave(evt) {
-    var rel = evt.relatedTarget;
+    function _evhookmouseleave(evt) {
+        var rel = evt.relatedTarget;
 
-    if (evt.node !== rel && !uu.node.has(rel, evt.node)) {
-      evt.name = "mouseleave";
-      leave(evt, node); // leave(evt, node)
+        if (evt.node !== rel && !uu.node.has(rel, evt.node)) {
+            evt.name = "mouseleave";
+            leave(evt, node); // leave(evt, node)
+        }
+        uu.ev.stop(evt); // cancel bubble
     }
-    uu.ev.stop(evt); // cancel bubble
-  }
-  function _evhovertoggle() {
-    uu.klass.has(node, enter) ? uu.klass.sub(node, enter)
-                              : (node.className += " " + enter); // [OPTIMIZED]
-  }
-  function _evhookmouseenterie(evt) {
-    enter(evt, node);
-  }
-  function _evhookmouseleaveie(evt) {
-    leave(evt, node);
-  }
-  var klass = uu.isstr(enter);
+    function _evhovertoggle() {
+        uu.klass.has(node, enter) ? uu.klass.sub(node, enter)
+                                  : (node.className += " " + enter); // [OPTIMIZED]
+    }
+    function _evhookmouseenterie(evt) {
+        enter(evt, node);
+    }
+    function _evhookmouseleaveie(evt) {
+        leave(evt, node);
+    }
+    var klass = uu.isstr(enter);
 
-  if (uu.ie) {
-    uu.ev(node, "mouseenter", klass ? _evhovertoggle : _evhookmouseenterie);
-    uu.ev(node, "mouseleave", klass ? _evhovertoggle : _evhookmouseleaveie);
-  } else {
-    uu.ev(node, "mouseover+", klass ? _evhovertoggle : _evhookmouseenter);
-    uu.ev(node, "mouseout+",  klass ? _evhovertoggle : _evhookmouseleave);
-  }
-  return node;
+    if (uu.ie) {
+        uu.ev(node, "mouseenter", klass ? _evhovertoggle : _evhookmouseenterie);
+        uu.ev(node, "mouseleave", klass ? _evhovertoggle : _evhookmouseleaveie);
+    } else {
+        uu.ev(node, "mouseover+", klass ? _evhovertoggle : _evhookmouseenter);
+        uu.ev(node, "mouseout+",  klass ? _evhovertoggle : _evhookmouseleave);
+    }
+    return node;
 }
 
 })(window, document, uu);
