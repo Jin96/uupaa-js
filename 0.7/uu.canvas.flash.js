@@ -5,7 +5,8 @@
 
 //  <canvas width="300" height="150">
 //      <object id="externalcanvas{n}" width="300" height="150" classid="...">
-//          <param name="allowScriptAccess" value="sameDomain" />
+//          <param name="allowScriptAccess" value="always" />
+//          <param name="flashVars" value="" />
 //          <param name="wmode" value="transparent" />
 //          <param name="movie" value="../uu.canvas.swf" />
 //      </object>
@@ -67,9 +68,6 @@ function init(ctx, node) { // @param Node: <canvas>
     ctx.initSurface();
 
     ctx._view = null; // swf <object>
-
-    ctx._stock.push("in\t" + node.width + "\t" + node.height);
-    ctx.sendProp();
 }
 
 // uu.canvas.FL2D.build
@@ -86,25 +84,25 @@ function build(node) { // @param Node: <canvas>
     // wait for response from flash
     uu.flash.dmz[id] = flashCanvasReadyCallback;
 
-    function flashCanvasReadyCallback(/* msg */) {
+    function flashCanvasReadyCallback() {
         var ctx = node.uuctx2d;
 
-        ctx._readyState = 1; // draw ready
-        ctx.send();
+        ctx._readyState = 1; // 1: draw ready
         uu.flash.dmz[id] = null; // free
     };
 
     // create swf <object>
     node.innerHTML = uu.fmt(
         '<object id="%s" width="%s" height="%s" classid="%s">' +
-            '<param name="allowScriptAccess" value="sameDomain" />' +
+            '<param name="allowScriptAccess" value="always" />' +
+            '<param name="flashVars" value="" />' +
             '<param name="wmode" value="transparent" />' +
             '<param name="movie" value="%s" /></object>',
         id, node.width, node.height,
         "clsid:d27cdb6e-ae6d-11cf-96b8-444553540000",
         uu.config.imgdir + "uu.canvas.swf");
 
-    node.uuctx2d._view = uu.id(id); // find <object>
+    node.uuctx2d._view = uu.id(id); // find swf <object>
 
     win.attachEvent("onunload", function() { // [FIX][MEM LEAK]
         node.uuctx2d = node.getContext = null;
@@ -150,6 +148,8 @@ function initSurface() {
     this._stock         = [];   // lock stock
     this._lockState     = 0;    // lock state, 0: unlock, 1: lock, 2: lock + clear
     this._readyState    = 0;
+    this._tmid          = 0;    // timer id
+    this._msgid         = 1;    // message id(1~9)
 }
 
 // inner -
@@ -322,6 +322,9 @@ function lock(clearScreen) { // @param Boolean(= false):
         throw new Error("duplicate lock");
     }
     this._lockState = clearScreen ? 2 : 1;
+    if (clearScreen) {
+        this._stock.push("cA");
+    }
 }
 
 // CanvasRenderingContext2D.prototype.measureText
@@ -431,7 +434,6 @@ function translate(x, y) {
 // CanvasRenderingContext2D.prototype.unlock
 function unlock() {
     if (this._lockState) {
-        (this._lockState === 2) && this.clear(); // [LAZY]
         if (this._stock.length) {
             this._lockState = 0; // [!] pre unlock
             this.send();
@@ -531,6 +533,7 @@ function sendProp() {
     }
 }
 
+/*
 function send(fg) { // @param String: fragment, "{COMMAND}\t{ARG1}\t..."
     if (fg) {
         this._stock.push(fg);
@@ -539,6 +542,41 @@ function send(fg) { // @param String: fragment, "{COMMAND}\t{ARG1}\t..."
         this._view.CallFunction(send._prefix + this._stock.join("\t") +
                                 send._suffix);
         this._stock = []; // clear
+    }
+}
+send._prefix = '<invoke name="send" returntype="javascript"><arguments><string>';
+send._suffix = '</string></arguments></invoke>';
+ */
+function send(fg) { // @param String: fragment, "{COMMAND}\t{ARG1}\t..."
+    if (fg) {
+        this._stock.push(fg);
+    }
+    if (!this._lockState && this._readyState) {
+        if (this._readyState === 1) {
+            if (this._view) {
+                // send "init" command
+                this._view.CallFunction(send._prefix +
+                    "in\t" + this.canvas.width + "\t" + this.canvas.height +
+                    send._suffix);
+                this._readyState = 2;
+            }
+        }
+        if (this._readyState === 2) {
+            var ctx = this;
+
+            // <param name="flashVars" param="t={time}&c={cmd}" />
+            if (!ctx._tmid) {
+                ctx._tmid = setTimeout(function() {
+                    if (ctx._tmid && ctx._stock.length) {
+                        ctx._view.flashVars = "i=" + ++ctx._msgid +
+                                             "&c=" + ctx._stock.join("\t");
+                        ctx._stock = []; // clear
+                        ctx._msgid > 9 && (ctx._msgid = 1);
+                        ctx._tmid = clearTimeout();
+                    }
+                }, 0);
+            }
+        }
     }
 }
 send._prefix = '<invoke name="send" returntype="javascript"><arguments><string>';

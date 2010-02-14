@@ -220,8 +220,8 @@ uu = uumix(jamfactory, {            // uu(expr, ctx) -> Instance(jam)
             set:    uucssoset       // uu.css.opacity.set(node, opacity, diff = false) -> node
         })
     }),
-    cs:       uumix(uucs, {         // uu.cs(node, mode = 0) -> Hash(window.getComputedStyle or currentStyle)
-        quick:      uucsquick       // uu.cs.quick(node) -> Hash(window.getComputedStyle or currentStyle)
+    style:    uumix(uustyle, {      // uu.style(node, mode = 0) -> Hash(window.getComputedStyle or currentStyle)
+        quick:      uustylequick    // uu.style.quick(node)     -> Hash(window.getComputedStyle or currentStyle)
     }),
     // --- query ---
     query:    uumix(uuquery, {      // uu.query(expr, ctx = document) -> [node, ...]
@@ -412,37 +412,37 @@ Array.isArray || (Array.isArray = uuisary);
 
 //{{{!mb
 uumix(Array.prototype, {
-    indexOf:        arrayindexof,
-    lastIndexOf:    arraylastindexof,
-    every:          arrayevery,
-    some:           arraysome,
-    forEach:        arrayforeach,
-    map:            arraymap,
-    filter:         arrayfilter
+    indexOf:        arrayindexof,       //     indexOf(search, idx = 0) -> Number or -1
+    lastIndexOf:    arraylastindexof,   // lastIndexOf(search, idx = 0) -> Number or -1
+    every:          arrayevery,         //       every(fn, fn_this = void 0) -> Boolean
+    some:           arraysome,          //        some(fn, fn_this = void 0) -> Boolean
+    forEach:        arrayforeach,       //     forEach(fn, fn_this = void 0)
+    map:            arraymap,           //         map(fn, fn_this = void 0) -> Array
+    filter:         arrayfilter         //      filter(fn, fn_this = void 0) -> Array
 }, 0, 0);
 //}}}!mb
 
 uumix(Array.prototype, {
-    reduce:         arrayreduce,
-    reduceRight:    arrayreduceright
+    reduce:         arrayreduce,        //      reduce(fn, init = void 0) -> Mix
+    reduceRight:    arrayreduceright    // reduceRight(fn, init = void 0) -> Mix
 }, 0, 0);
 
 uumix(Boolean.prototype, {
-    toJSON:         numbertojson
+    toJSON:         numbertojson        //      toJSON() -> String
 }, 0, 0);
 
 uumix(Date.prototype, {
-    toISOString:    datetoisostring,
-    toJSON:         datetoisostring
+    toISOString:    datetoisostring,    // toISOString() -> String
+    toJSON:         datetoisostring     //      toJSON() -> String
 }, 0, 0);
 
 uumix(Number.prototype, {
-    toJSON:         numbertojson
+    toJSON:         numbertojson        //      toJSON() -> String
 }, 0, 0);
 
 uumix(String.prototype, {
-    trim:           stringtrim,
-    toJSON:         stringtojson
+    trim:           stringtrim,         //        trim(" space ") -> "space"
+    toJSON:         stringtojson        //      toJSON() -> String
 }, 0, 0);
 
 //{{{!mb
@@ -458,49 +458,63 @@ _gecko && _cfg.innerText && !win.HTMLElement.prototype.innerText &&
 // --- uu.jam class ---
 uumix(uujam.prototype, {
     // --- stack ---
-    back:           jamback,        // jam.back() -> jam
-    find:           jamfind,        // jam.find(expr) -> jam
+    back:           jamback,        //       jam.back() -> jam
+    find:           jamfind,        //       jam.find(expr) -> jam
     // --- nodeset ---
-    nth:            jamnth,         // jam.nth(= 0) -> Node / void 0
-    each:           jameach,        // jam.each(fn) -> jam
-    size:           jamsize,        // jam.size() -> Number(nodeset.length)
-    clone:          jamclone,       // jam.clone() -> Array(nodeset)
-    indexOf:        jamindexOf,     // jam.indexOf(node) -> Number(index or -1)
-    // --- node ---
-    //first, prev, next, last, firstChild, lastChild, add
-    remove:         jamremove,      // jam.remove() -> jam
-    // [1][get] jam.attr("attr") -> ["value", ...]
-    // [2][get] jam.attr("attr1,attr2") -> [{ attr1: "value", attr2: "value" }, ...]
-    // [3][set] jam.attr("attr", "value") -> jam
-    // [4][set] jam.attr({ attr: "value", ... }) -> jam
-    attr:           jamattr,
-    // [1][get] jam.css("color") -> ["red", ...]
-    // [2][get] jam.css("color,width") -> [{ color: "red", width: "20px" }, ...]
-    // [3][set] jam.css("color", "red") -> jam
-    // [4][set] jam.css({ color: "red" }) -> jam
-    css:            jamcss,
-    // [1][add]    jam.klass("+className") -> jam
-    // [2][sub]    jam.klass("-className") -> jam
-    // [3][toggle] jam.klass("!className") -> jam
-    // [4][clear]  jam.klass() -> jam
-    klass:          jamklass,
-    bind:           jambind,        // jam.bind("click", fn) -> jam
-    unbind:         jamunbind,      // jam.unbind("click") -> jam
-    tween:          jamtween,       // jam.tween(ms, param, fn) -> jam
-    show:           jamshow,        // jam.show(fadein = false) -> jam
-    hide:           jamhide,        // jam.hide(fadeout = false) -> jam
-    //mousedown, mouseup, mousemove, mousewheel, click, dblclick, keydown,
-    //keypress, keyup, change, submit, focus, blur, contextmenu
-    hover:          jamhover,       // jam.hover(enter, leave) -> jam
-    // [1][get] jam.html() -> ["innerHTML", ...]
-    // [2][set] jam.html("<p>html</p>") -> jam
-    html:           jamhtml,
-    // [1][get] jam.text() -> ["innerText", ...]
-    // [2][set] jam.text("html") -> jam
-    text:           jamtext,
-    // [1][get] jam.val() -> ["value", ...]
-    // [2][set] jam.val("value") -> jam
-    val:            jamval
+    nth:            jamnth,         //        jam.nth(= 0) -> Node / void 0
+    each:           jameach,        //       jam.each(fn) -> jam
+    size:           jamsize,        //       jam.size() -> Number(nodeset.length)
+    clone:          jamclone,       //      jam.clone() -> Array(nodeset)
+    indexOf:        jamindexOf,     //    jam.indexOf(node) -> Number(index or -1)
+    // --- nodeset manipulator ---
+//  first:          jamfirst,       //      jam.first(Node or "<p>fragment</p>") -> jam
+//  prev:           jamprev,        //       jam.prev(Node or "<p>fragment</p>") -> jam
+//  next:           jamnext,        //       jam.next(Node or "<p>fragment</p>") -> jam
+//  last:           jamlast,        //       jam.last(Node or "<p>fragment</p>") -> jam
+//  firstChild:     jamfirstChild,  // jam.firstChild(Node or "<p>fragment</p>") -> jam
+//  lastChild:      jamlastChild,   //  jam.lastChild(Node or "<p>fragment</p>") -> jam
+//  add:            jamadd,         //        jam.add(Node or "<p>fragment</p>") -> jam  // [alias] jamlastChild
+    remove:         jamremove,      //     jam.remove() -> jam
+    // --- attr, css, className ---
+    attr:           jamattr,        // [1][get] jam.attr("attr") -> ["value", ...]
+                                    // [2][get] jam.attr("attr1,attr2") -> [{ attr1: "value", attr2: "value" }, ...]
+                                    // [3][set] jam.attr("attr", "value") -> jam
+                                    // [4][set] jam.attr({ attr: "value", ... }) -> jam
+    css:            jamcss,         // [1][get] jam.css("color") -> ["red", ...]
+                                    // [2][get] jam.css("color,width") -> [{ color: "red", width: "20px" }, ...]
+                                    // [3][set] jam.css("color", "red") -> jam
+                                    // [4][set] jam.css({ color: "red" }) -> jam
+    klass:          jamklass,       // [1][add]    jam.klass("+className") -> jam
+                                    // [2][sub]    jam.klass("-className") -> jam
+                                    // [3][toggle] jam.klass("!className") -> jam
+                                    // [4][clear]  jam.klass() -> jam
+    // --- event ---
+    bind:           jambind,        //        jam.bind("click", fn) -> jam
+    unbind:         jamunbind,      //      jam.unbind("click") -> jam
+    tween:          jamtween,       //       jam.tween(ms, param, fn) -> jam
+    show:           jamshow,        //        jam.show(fadein = false) -> jam
+    hide:           jamhide,        //        jam.hide(fadeout = false) -> jam
+//  mousedown:      jammousedown,   //   jam.mousedown(fn) -> jam
+//  mouseup:        jammouseup,     //     jam.mouseup(fn) -> jam
+//  mousemove:      jammousemove,   //   jam.mousemove(fn) -> jam
+//  mousewheel:     jammousewheel,  //  jam.mousewheel(fn) -> jam
+//  click:          jamclick,       //       jam.click(fn) -> jam
+//  dblclick:       jamdblclick,    //    jam.dblclick(fn) -> jam
+//  keydown:        jamkeydown,     //     jam.keydown(fn) -> jam
+//  keypress:       jamkeypress,    //    jam.keypress(fn) -> jam
+//  change:         jamchange,      //      jam.change(fn) -> jam
+//  submit:         jamsubmit,      //      jam.submit(fn) -> jam
+//  focus:          jamfocus,       //       jam.focus(fn) -> jam
+//  blur:           jamblur,        //        jam.blur(fn) -> jam
+//  contextmenu:    jamcontextmenu, // jam.contextmenu(fn) -> jam
+    hover:          jamhover,       //       jam.hover(enterFn, leaveFn -> jam
+    // --- html, text, form data ---
+    html:           jamhtml,        // [1][get] jam.html() -> ["innerHTML", ...]
+                                    // [2][set] jam.html("<p>html</p>") -> jam
+    text:           jamtext,        // [1][get] jam.text() -> ["innerText", ...]
+                                    // [2][set] jam.text("html") -> jam
+    val:            jamval          // [1][get] jam.val() -> ["value", ...]
+                                    // [2][set] jam.val("value") -> jam
 });
 
 // --- uu.jam (nodeset interface) ---
@@ -1257,7 +1271,7 @@ function uuattrset(node,  // @param Node:
 // [7][set some styles]          uu.css(node, { color: "red" }) -> node
 function uucss(node, a, b) { // @return String/Hash/CSS2Properties/Node:
     if (!a || typeof a === "number") {
-        return uucs(node, a || 0); // [1][2][3]
+        return uustyle(node, a || 0); // [1][2][3]
     }
     return ((b === void 0 && uuisstr(a)) ? uucssget // [4][5]
                                          : uucssset)(node, a, b); // [6][7]
@@ -1365,14 +1379,14 @@ function uucssoset(node,   // @param Node:
 }
 uucssoset._alpha = /^alpha\([^\x29]+\) ?/;
 
-// uu.cs - getComputedStyle, currentStyle wrapper
-function uucs(node,   // @param Node:
-              mode) { // @param Number(= 0):
-                      //   0: enum full properties
-                      //   1: enum more properties
-                      //   2: enum some properties
-                      //   4: currentStyle (IE6,IE7,IE8 only)
-                      // @return Hash: { prop: "val", ... }
+// uu.style - getComputedStyle, currentStyle wrapper
+function uustyle(node,   // @param Node:
+                 mode) { // @param Number(= 0):
+                         //   0: enum full properties
+                         //   1: enum more properties
+                         //   2: enum some properties
+                         //   4: currentStyle (IE6,IE7,IE8 only)
+                         // @return Hash: { prop: "val", ... }
 //{{{!mb
     // http://d.hatena.ne.jp/uupaa/20091212
     if (uu.ie678) {
@@ -1386,7 +1400,7 @@ function uucs(node,   // @param Node:
             ns = node.style,
             cs = node.currentStyle,
             rs = node.runtimeStyle,
-            dig = uucs, box = dig._hash.box, unit = dig._unit, mod = dig._mod,
+            dig = uustyle, box = dig._hash.box, unit = dig._unit, mod = dig._mod,
             em, rect, ut, v, w, x, i = -1, j = -1, m1, m2,
             ary = !mode ? dig._hash.full : (mode === 1) ? dig._hash.more : 0,
             stock = { "0px": "0px", "1px": "1px", "2px": "2px", "5px": "5px",
@@ -1447,17 +1461,17 @@ function uucs(node,   // @param Node:
     return win.getComputedStyle(node, null);
 }
 //{{{!mb
-uucs._pt = /pt$/;
-uucs._mod = { top: 1, left: 2, width: 3, height: 4 };
-uucs._unit = { m: 1, t: 2, "%": 3, o: 3 }; // em, pt, %, auto
-uucs._hash = uu.ie678 ? _builduucshash() : {};
-uucs._thick = uu.ie8 ? "5px" : "6px";
+uustyle._pt = /pt$/;
+uustyle._mod = { top: 1, left: 2, width: 3, height: 4 };
+uustyle._unit = { m: 1, t: 2, "%": 3, o: 3 }; // em, pt, %, auto
+uustyle._hash = uu.ie678 ? _builduucshash() : {};
+uustyle._thick = uu.ie8 ? "5px" : "6px";
 //}}}!mb
 
-// uu.cs.quick - getComputedStyle or currentStyle
-function uucsquick(node) { // @param Node:
-                           // @return Hash: { prop: "val", ... }
-    return uucs(node, 4);
+// uu.style.quick - getComputedStyle or currentStyle
+function uustylequick(node) { // @param Node:
+                              // @return Hash: { prop: "val", ... }
+    return uustyle(node, 4);
 }
 
 //{{{!mb inner - build uucss hash
@@ -3264,7 +3278,7 @@ uuready(function() {
                 "bg,background,bgcolor,backgroundColor,bgimg,backgroundImage," +
                 "bgrpt,backgroundRepeat,bgpos,backgroundPosition");
 
-    uumix(_camelhash(uufix._db, _webkit ? uu.cs(_html) : _html.style),
+    uumix(_camelhash(uufix._db, _webkit ? uustyle(_html) : _html.style),
                      styles, uuattr._hash);
     uunodeid(_html);
     while ( (v = nodeList[++i]) ) {

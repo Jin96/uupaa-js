@@ -26,11 +26,19 @@
 			border:1px solid #444;
 		}
 	</style>
-
   <script>window.xconfig = { imgdir: "../" };</script>
 
   <script src="../uupaa.js"></script>
 	<script>
+function stress() {
+    if (!window.name || window.name === "20 boost") {
+        window.name = "833 boost";
+        location.reload(false);
+    } else {
+        window.name = "20 boost";
+        location.reload(false);
+    }
+}
 		var canvas, ctx;
 		var particles = [];
 		var NUM_PARTICLES = 20;
@@ -39,6 +47,16 @@ var begin = +new Date;
 var fpscount = 0;
 // use ctx.lock()
 var uselock = 0;
+
+	    if (window.name) {
+	        var cmd = window.name.split(" ");
+
+	        NUM_PARTICLES = parseInt(cmd[0]);
+	        if (cmd[1] === "boost") {
+                uselock = 1;
+	        }
+	    }
+
 
 		function Particle() {
 			this.x = Math.random() * canvas.width;
@@ -123,6 +141,7 @@ function boost() {
   <body>
     <h1 id="detected" style="color:white"></h1>
 	<input type="button" value="boost on/off" onclick="boost()" />
+	<input type="button" value="stress on/off" onclick="stress()" />
 	<br />
 	<canvas id="canvas" class="flash" width="400" height="300"></canvas>
 </body>
