@@ -190,7 +190,7 @@ function getViewInfo() { // @return Hash: { clid, cctx, front, rear,
 
 // uu.layer.createLayer - create child layer
 function createLayer(id,       // @param String: layer id
-                     type,     // @param String: "canvas", "vmlcanvas", "flcanvas",
+                     type,     // @param String: "canvas", "vmlcanvas", "flashcanvas",
                                //                "slcanvas",
                                //                "div", "img", etc...
                      hide,     // @param Boolean(= false): true = hidden layer
@@ -198,58 +198,56 @@ function createLayer(id,       // @param String: layer id
                      width,    // @param Number(= void 0): canvas,image width
                      height) { // @param Number(= void 0): canvas,image height
                                // @return Node: new layer element
-  type = type.toLowerCase();
+    type = type.toLowerCase();
 
-  var elm, es, ctx, v = this.view, viewInfo = this.getViewInfo(),
-      w, h;
+    var elm, es, ctx, v = this.view, viewInfo = this.getViewInfo(),
+        w, h;
 
-  if (type.indexOf("canvas") >= 0) {
-//  elm = uue("canvas", type === "vmlcanvas");
-    elm = uu.canvas.create(type === "vmlcanvas" ? "vml" :
-                           type === "slcanvas" ? "sl" : "fl");
-    w = (width !== void 0) ? width :
-        (v.style.width  === "auto") ? v.offsetWidth  : parseInt(v.style.width);
-    h = (height !== void 0) ? height :
-        (v.style.height === "auto") ? v.offsetHeight : parseInt(v.style.height);
-    // onPropertyChange guard
-    uu.ie ? elm.uuctx2d.guard(function() { elm.width = w; })
-          : (elm.width = w);
-    elm.height = h;
-    es = elm.style;
+    if (type.indexOf("canvas") >= 0) {
+        w = (width !== void 0) ? width :
+            (v.style.width  === "auto") ? v.offsetWidth  : parseInt(v.style.width);
+        h = (height !== void 0) ? height :
+            (v.style.height === "auto") ? v.offsetHeight : parseInt(v.style.height);
 
-    back ? v.insertBefore(elm, v.firstChild)
-         : v.appendChild(elm);
+        elm = uu.canvas.create(w, h, createLayer._canvasType[type] || "");
+        es = elm.style;
 
-    ctx = elm.getContext("2d");
-    ctx.textBaseline = "top"; // force
-    (this._option.FLYWEIGHT) && (ctx.xFlyweight = 1);
-    // set current context
-    this._clid = id;
-    this._cctx = ctx;
-  } else {
-    elm = uue(type);
-    es = elm.style;
+        back ? v.insertBefore(elm, v.firstChild)
+             : v.appendChild(elm);
 
-    back ? v.insertBefore(elm, v.firstChild)
-         : v.appendChild(elm);
-
-    if (type !== "img") {
-      es.width  = v.style.width;
-      es.height = v.style.height;
+        ctx = elm.getContext("2d");
+        ctx.textBaseline = "top"; // force
+        (this._option.FLYWEIGHT) && (ctx.xFlyweight = 1);
+        // set current context
+        this._clid = id;
+        this._cctx = ctx;
     } else {
-      (width  !== void 0) && (elm.width  = width);
-      (height !== void 0) && (elm.height = height);
-    }
-  }
-  es.zIndex = back ? (viewInfo.zmin - 1) : (viewInfo.zmax + 1);
-  es.display = hide ? "none": "";
-  es.position = "absolute";
-  es.top = "0";
-  es.left = "0";
+        elm = uue(type);
+        es = elm.style;
 
-  this._layer[id] = { elm: elm, ctx: ctx, chain: [] };
-  return elm;
+        back ? v.insertBefore(elm, v.firstChild)
+             : v.appendChild(elm);
+
+        if (type !== "img") {
+            es.width  = v.style.width;
+            es.height = v.style.height;
+        } else {
+            (width  !== void 0) && (elm.width  = width);
+            (height !== void 0) && (elm.height = height);
+        }
+    }
+    es.zIndex = back ? (viewInfo.zmin - 1) : (viewInfo.zmax + 1);
+    es.display = hide ? "none": "";
+    es.position = "absolute";
+    es.top = "0";
+    es.left = "0";
+
+    this._layer[id] = { elm: elm, ctx: ctx, chain: [] };
+    return elm;
 }
+createLayer._canvasType = {
+    slcanvas: "sl", flashcanvas: "flash", vmlcanvas: "vml"
+};
 
 // uu.layer.appendLayer - add node
 function appendLayer(id,     // @param String: layer id
@@ -298,24 +296,27 @@ function resizeLayer(id,       // @param String: layer id
                      width,    // @param Number: pixel width
                      height) { // @param Number: pixel height
                                // @return this:
-  var node = this._layer[id].elm;
+    var node = this._layer[id].elm, ctx;
 
-  switch (node.tagName.toLowerCase()) {
-  case "canvas":
-    // onPropertyChange guard
-    uu.ie ? node.uuctx2d.guard(function() { node.width = width; })
-          : (node.width = width);
-    node.height = height;
-    break;
-  case "img":
-    node.width  = width;
-    node.height = height;
-    break;
-  default:
-    node.style.width  = width  + "px";
-    node.style.height = height + "px";
-  }
-  return this;
+    switch (node.tagName.toLowerCase()) {
+    case "canvas":
+        ctx = node.getContext("2d");
+        if (ctx.resize) {
+            ctx.resize(width, height);
+        } else {
+            node.width = width;
+            node.height = height;
+        }
+        break;
+    case "img":
+        node.width  = width;
+        node.height = height;
+        break;
+    default:
+        node.style.width  = width  + "px";
+        node.style.height = height + "px";
+    }
+    return this;
 }
 
 // uu.layer.refLayer - refer child layer

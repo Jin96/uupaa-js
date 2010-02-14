@@ -134,47 +134,11 @@ function initSurface() {
     this.textAlign      = "start";
     this.textBaseline   = "alphabetic";
     // --- hidden properties ---
-    this._lineScale     = 1;
-    this._scaleX        = 1;
-    this._scaleY        = 1;
-    this._zindex        = -1;
-    this._matrixfxd     = 0;    // 1: matrix effected
-    this._matrix        = [1, 0, 0,  0, 1, 0,  0, 0, 1]; // Matrix.identity
-    this._history       = [];   // canvas rendering history
-    this._stack         = [];   // matrix and prop stack.
-    this._path          = [];   // current path
-    this._clipPath      = null; // clipping path
-    this._clipRect      = null; // clipping rect
     this._stock         = [];   // lock stock
     this._lockState     = 0;    // lock state, 0: unlock, 1: lock, 2: lock + clear
     this._readyState    = 0;
     this._tmid          = 0;    // timer id
     this._msgid         = 1;    // message id(1~9)
-}
-
-// inner -
-function _copyprop(to, from) {
-    to.globalAlpha      = from.globalAlpha;
-    to.globalCompositeOperation = from.globalCompositeOperation;
-    to.strokeStyle      = from.strokeStyle;
-    to.fillStyle        = from.fillStyle;
-    to.lineWidth        = from.lineWidth;
-    to.lineCap          = from.lineCap;
-    to.lineJoin         = from.lineJoin;
-    to.miterLimit       = from.miterLimit;
-    to.shadowBlur       = from.shadowBlur;
-    to.shadowColor      = from.shadowColor;
-    to.shadowOffsetX    = from.shadowOffsetX;
-    to.shadowOffsetY    = from.shadowOffsetY;
-    to.font             = from.font;
-    to.textAlign        = from.textAlign;
-    to.textBaseline     = from.textBaseline;
-    to._lineScale       = from._lineScale;
-    to._scaleX          = from._scaleX;
-    to._scaleY          = from._scaleY;
-    to._matrixfxd       = from._matrixfxd;
-    to._matrix          = from._matrix.concat();
-    to._clipPath        = from._clipPath;
 }
 
 // CanvasRenderingContext2D.prototype.arc
@@ -185,7 +149,6 @@ function arc(x, y, radius, startAngle, endAngle, anticlockwise) {
 }
 
 // CanvasRenderingContext2D.prototype.arcTo -> NOT IMPL
-
 
 // CanvasRenderingContext2D.prototype.beginPath
 function beginPath() {
@@ -313,7 +276,7 @@ function fillText(text, x, y, maxWidth) {
 
 // CanvasRenderingContext2D.prototype.lineTo
 function lineTo(x, y) {
-    this.send("lT\t" + x + "\t" + y);
+    this.send("lT\t" + ((x * 100) | 0) + "\t" + ((y * 100) | 0));
 }
 
 // CanvasRenderingContext2D.prototype.lock
@@ -336,7 +299,7 @@ function measureText(text) {
 
 // CanvasRenderingContext2D.prototype.moveTo
 function moveTo(x, y) {
-    this.send("mT\t" + x + "\t" + y);
+    this.send("mT\t" + ((x * 100) | 0) + "\t" + ((y * 100) | 0));
 }
 
 // CanvasRenderingContext2D.prototype.putImageData -> NOT IMPL
@@ -373,7 +336,7 @@ function resize(width,    // @param Number(= void 0): width
 
 // CanvasRenderingContext2D.prototype.restore
 function restore() {
-    this._stack.length && _copyprop(this, this._stack.pop());
+    this.send("rs");
 }
 
 // CanvasRenderingContext2D.prototype.rotate
@@ -383,11 +346,7 @@ function rotate(angle) {
 
 // CanvasRenderingContext2D.prototype.save
 function save() {
-    var prop = { _matrix: [] };
-
-    _copyprop(prop, this);
-    prop._clipPath = this._clipPath ? String(this._clipPath) : null;
-    this._stack.push(prop);
+    this.send("sv");
 }
 
 // CanvasRenderingContext2D.prototype.scale
@@ -447,8 +406,8 @@ function sendProp() {
     var ary = this._stock, i = ary.length - 1;
 
     // globalAlpha
-    if (this.globalAlpha !== this._globalAlpha) {
-        ary[++i] = "gA\t" + (this._globalAlpha = this.globalAlpha);
+    if (this.globalAlpha !== this._alpha) {
+        ary[++i] = "gA\t" + (this._alpha = this.globalAlpha);
     }
 
     // globalCompositeOperation
@@ -503,7 +462,7 @@ function sendProp() {
 
     // shadowColor
     if (this.shadowColor !== this._shadowColor) {
-        this.__shadowColor = uu.color(this._fillStyle = this.shadowColor);
+        this.__shadowColor = uu.color(this._shadowColor = this.shadowColor);
         ary[++i] = "sC\t" + this.__shadowColor.num + "\t" + this.__shadowColor.a;
     }
 
@@ -533,20 +492,6 @@ function sendProp() {
     }
 }
 
-/*
-function send(fg) { // @param String: fragment, "{COMMAND}\t{ARG1}\t..."
-    if (fg) {
-        this._stock.push(fg);
-    }
-    if (!this._lockState && this._readyState) {
-        this._view.CallFunction(send._prefix + this._stock.join("\t") +
-                                send._suffix);
-        this._stock = []; // clear
-    }
-}
-send._prefix = '<invoke name="send" returntype="javascript"><arguments><string>';
-send._suffix = '</string></arguments></invoke>';
- */
 function send(fg) { // @param String: fragment, "{COMMAND}\t{ARG1}\t..."
     if (fg) {
         this._stock.push(fg);
@@ -581,61 +526,6 @@ function send(fg) { // @param String: fragment, "{COMMAND}\t{ARG1}\t..."
 }
 send._prefix = '<invoke name="send" returntype="javascript"><arguments><string>';
 send._suffix = '</string></arguments></invoke>';
-
-/*
-function _toXML(value) {
-    var type = typeof(value);
-
-    if (type == "string") {
-        return "<string>" + _escXML(value) +
-               "</string>";
-    } else if (type == "undefined") {
-        return "<undefined/>";
-    } else if (type == "number") {
-        return "<number>" + value + "</number>";
-    } else if (value == null) {
-        return "<null/>";
-    } else if (type == "boolean") {
-        return value ? "<true/>" : "<false/>";
-    } else if (value instanceof Date) {
-        return "<date>" + value.getTime() + "</date>";
-    } else if (value instanceof Array) {
-        return _ary2XML(value);
-    } else if (type == "object") {
-        return _obj2XML(value);
-    } else {
-        return "<null/>"; // ???
-    }
-}
-
-function _escXML(s) {
-    return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").
-             replace(/>/g, "&gt;").replace(/"/g, "&quot;").
-             replace(/'/g, "&apos;");
-}
-
-function _ary2XML(obj) {
-    var s = "<array>";
-
-    for (var i=0; i<obj.length; i++) {  // ←(3)
-        s += "<property id=\"" + i + "\">" +
-             _toXML(obj[i]) +   // ←(4)
-             "</property>";
-    }
-    return s + "</array>";
-}
-
-function _obj2XML(obj) {
-    var s = "<object>";
-
-    for (var prop in obj) {
-        s += "<property id=\"" + prop + "\">" +
-             _toXML(obj[prop]) +
-             "</property>";
-    }
-    return s + "</object>";
-}
- */
 
 })(window, document, uu);
 
