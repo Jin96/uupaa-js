@@ -92,7 +92,7 @@ fontparse._sizes = {
 //ja                レンダリングに使用されているフォントを特定する
 function fontdetect(node) { // @param Node:
                             // @return String: detected font, eg: "serif"
-    var fam = uu.cs.quick(node).fontFamily,
+    var fam = uu.style.quick(node).fontFamily,
         ary = uu.split.token(fam, ","), v, i = -1,
         a, b = fontmetric("72pt " + fam);
 

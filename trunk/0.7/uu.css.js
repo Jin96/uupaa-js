@@ -510,7 +510,7 @@ function uucsspxactvalueie(node,    // @param Node:
 function uucsspx(node,   // @param Node:
                  prop) { // @param String: style property name
                          // @return Number: pixel value
-  return parseInt(uu.cs(node)[prop]) || 0;
+  return parseInt(uu.style(node)[prop]) || 0;
 }
 
 function uucsspxie(node, prop) {
@@ -777,8 +777,8 @@ function uucssbgrptset(node,     // @param Node:
 // [1][get] uu.css.bgpos(node) -> [x, y]
 // [2][set] uu.css.bgpos(node, [x, y]) -> node
 function uucssbgpos(node, // @param Node:
-                    x,    // @param String: 
-                    y) {  // @param String: 
+                    x,    // @param String:
+                    y) {  // @param String:
                           // @return Hash/Node:
   return (y === void 0) ? uucssbgposget(node, x)
                         : uucssbgposset(node, x, y);

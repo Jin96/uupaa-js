@@ -69,11 +69,11 @@ package {
         private var buff:BitmapData;
         private var canvasWidth:int = 300;
         private var canvasHeight:int = 150;
+        private var msgid:String; // last message id
 
         public function Canvas() {
             // for local debug
             Security.allowDomain("*");
-
 
             ExternalInterface.addCallback("send", recv);
 
@@ -86,21 +86,32 @@ package {
             ExternalInterface.call("uu.flash.dmz." + ExternalInterface.objectID);
         }
 
-        private function recv(msg:String):void {
-//ExternalInterface.call("uu.flash.alert", "recv=" + msg.replace(/\t/g, ":"));
-/*
-            trace("memory = " + System.totalMemory);
- */
+        private function onEnterFrame(evt:Event):void {
+            var cmd:Object = stage.loaderInfo.parameters;
 
+            if (cmd.i && msgid !== cmd.i) {
+trace(cmd.i + ":" + cmd.c);
+                msgid = cmd.i; // update
+                recv(cmd.c);
+            }
+        }
+
+        private function recv(msg:String):void {
             var ary:Array = msg.split("\t");
             var i:int = -1;
             var iz:int = ary.length;
             var v:String;
 
-//            buff.lock();
+/*
+            if (buff) {
+                buff.lock();
+            }
+ */
             while (++i < iz) {
                 switch (ary[i]) { // {COMMAND}
-                case "in": init(+ary[++i], +ary[++i]); break;
+                case "in": init(+ary[++i], +ary[++i]);
+                           addEventListener("enterFrame", onEnterFrame);
+                           break;
                 case "gA": globalAlpha  = +ary[++i]; break;
                 case "gC": globalCompositeOperation = ary[++i]; break;
                 case "s0": strokeStyle  = 0;
@@ -149,12 +160,20 @@ package {
                                        +ary[++i], +ary[++i],
                                        +ary[++i], +ary[++i]); break;
                 case "tl": translate(+ary[++i], +ary[++i]); break;
+                case "undefined": // [!] undefined trap
+                    trace("[!] undefined trap");
+                    return;
                 default:
+                    trace("[!] unknown command trap: " + ary[i]);
                     ExternalInterface.call("uu.flash.alert", "Unknown command=" + ary[i]);
                     return;
                 }
             }
-//            buff.unlock();
+/*
+            if (buff) {
+                buff.unlock();
+            }
+ */
         }
 
         private function init(width:int, height:int):void {
