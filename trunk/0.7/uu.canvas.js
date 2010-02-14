@@ -34,15 +34,17 @@ function VML2D(node) { // @param Node: <canvas>
 function uucanvasinit() {
 //{{{!mb
     uu.ie && uu.ary.each(uu.tag("canvas"), function(node) {
-        // remove fallback contents
-        //      <canvas>fallback contents...</canvas> -> <canvas></canvas>
-        var newNode = _removeFallback(node);
+        if (!node.uuctx2d) { // already(altcss too)
+            // remove fallback contents
+            //      <canvas>fallback contents...</canvas> -> <canvas></canvas>
+            var newNode = _removeFallback(node);
 
-        newNode.width  = newNode.width;
-        newNode.height = newNode.height;
-        newNode.style.pixelWidth  = parseInt(newNode.width);
-        newNode.style.pixelHeight = parseInt(newNode.height);
-        _build(newNode, newNode.className);
+            newNode.width  = newNode.width;
+            newNode.height = newNode.height;
+            newNode.style.pixelWidth  = parseInt(newNode.width);
+            newNode.style.pixelHeight = parseInt(newNode.height);
+            _build(newNode, newNode.className);
+        }
     });
 //}}}!mb
     uu.ready.gone.win = uu.ready.gone.canvas = 1;

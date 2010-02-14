@@ -43,21 +43,21 @@ package {
         private var miterLimit:Number = 10;
         // --- shadows ---
         private var shadowBlur:Number;
-        private var shadowColor:Array;
+        private var shadowColor:Array = [0, 1];
         private var shadowOffsetX:Number;
         private var shadowOffsetY:Number;
         // --- text ---
-        private var font:String;
-        private var textAlign:String;
-        private var textBaseline:String;
+        private var font:String = "10px sans-serif";
+        private var textAlign:String = "start";
+        private var textBaseline:String = "alphabetic";
         // --- hidden properties ---
         private var _lineScale:Number = 1;
         private var _scaleX:Number = 1;
         private var _scaleY:Number = 1;
         private var _matrixfxd:Number = 0;
         private var _matrix:Matrix = new Matrix();
-        private var _stack:Array;
-        private var _path:Array;
+        private var _stack:Array = [];
+        private var _path:Array = [];
         private var _clipPath:String;
         private var _clipRect:String;
         private var _beginX:Number = 0;
@@ -69,7 +69,7 @@ package {
         private var buff:BitmapData;
         private var canvasWidth:int = 300;
         private var canvasHeight:int = 150;
-        private var msgid:String; // last message id
+        private var msgid:String = ""; // last message id
 
         public function Canvas() {
             // for local debug
@@ -136,9 +136,9 @@ trace(cmd.i + ":" + cmd.c);
                                +ary[++i], +ary[++i], +ary[++i]); break;
                 case "bP": beginPath(); break;
                 case "cP": closePath(); break;
-                case "mT": moveTo(+ary[++i], +ary[++i]); break;
+                case "mT": moveTo(ary[++i] * 0.01, ary[++i] * 0.01); break;
                 case "qC": quadraticCurveTo(+ary[++i], +ary[++i], +ary[++i], +ary[++i]); break;
-                case "lT": lineTo(+ary[++i], +ary[++i]); break;
+                case "lT": lineTo(ary[++i] * 0.01, ary[++i] * 0.01); break;
                 case "st": stroke(); break;
                 case "fi": fill(); break;
                 case "cA": clearAll(); break;
@@ -160,6 +160,8 @@ trace(cmd.i + ":" + cmd.c);
                                        +ary[++i], +ary[++i],
                                        +ary[++i], +ary[++i]); break;
                 case "tl": translate(+ary[++i], +ary[++i]); break;
+                case "sv": save(); break;
+                case "rs": restore(); break;
                 case "undefined": // [!] undefined trap
                     trace("[!] undefined trap");
                     return;
@@ -209,8 +211,8 @@ trace(cmd.i + ":" + cmd.c);
             _path.length ? lineTo(sx, sy)
                          : moveTo(_beginX = sx, _beginY = sy);
 
-            if (Math.round(sx * 1000) === Math.round(ex * 1000)
-                && Math.round(sy * 1000) === Math.round(ey * 1000)) {
+            if (Math.round(sx * 100) === Math.round(ex * 100)
+                && Math.round(sy * 100) === Math.round(ey * 100)) {
                 _path.push("c", x, y, radius); // circle
             } else {
                 _path.push("a", x, y, radius, startAngle, endAngle, anticlockwise); // arc
@@ -465,6 +467,45 @@ trace(cmd.i + ":" + cmd.c);
         private function fillText(text:String, x:Number, y:Number, maxWidth:Number): void {
         }
         private function strokeText(text:String, x:Number, y:Number, maxWidth:Number): void {
+        }
+
+        private function save(): void {
+            var prop:Object = {};
+
+            _copyprop(prop, this);
+// TODO
+//          prop._clipPath = this._clipPath ? String(this._clipPath) : null;
+            _stack.push(prop);
+        }
+
+        private function restore(): void {
+            _stack.length && _copyprop(this, _stack.pop());
+        }
+
+        private function _copyprop(to:Object, from:Object):void {
+            to.globalAlpha      = from.globalAlpha;
+            to.globalCompositeOperation = from.globalCompositeOperation;
+            to.strokeStyle      = from.strokeStyle;
+            to.strokeColor      = from.strokeColor.concat();
+            to.fillStyle        = from.fillStyle;
+            to.fillColor        = from.fillColor.concat();
+            to.lineWidth        = from.lineWidth;
+            to.lineCap          = from.lineCap;
+            to.lineJoin         = from.lineJoin;
+            to.miterLimit       = from.miterLimit;
+            to.shadowBlur       = from.shadowBlur;
+            to.shadowColor      = from.shadowColor;
+            to.shadowOffsetX    = from.shadowOffsetX;
+            to.shadowOffsetY    = from.shadowOffsetY;
+            to.font             = from.font;
+            to.textAlign        = from.textAlign;
+            to.textBaseline     = from.textBaseline;
+            to._lineScale       = from._lineScale;
+            to._scaleX          = from._scaleX;
+            to._scaleY          = from._scaleY;
+            to._matrixfxd       = from._matrixfxd;
+            to._matrix          = from._matrix.clone();
+            to._clipPath        = from._clipPath;
         }
     }
 }

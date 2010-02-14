@@ -635,7 +635,7 @@ function rotate(angle) {
 
 // CanvasRenderingContext2D.prototype.save
 function save() {
-    var prop = { _matrix: [] };
+    var prop = {};
 
     _copyprop(prop, this);
     prop._clipPath = this._clipPath ? String(this._clipPath) : null;
