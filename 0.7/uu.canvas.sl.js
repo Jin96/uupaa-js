@@ -693,21 +693,25 @@ function stroke(path, fill) {
         fg = style.fn(this, style, path, fill, mix, zindex);
     } else {
         if (fill) {
-          rv.push('<Canvas Canvas.ZIndex="', zindex, '">',
-                  '<Path Opacity="', this.__fillStyle.a * this.globalAlpha,
-                  // http://twitter.com/uupaa/status/5179317486
-                  '" Data="F1 ', path, // [F1] FillRule=Nonzero
-                  '" Fill="', this.__fillStyle.hex, '">',
-                  this.__shadowColor.a ? _buildShadowBlur(this, "Path", this.__shadowColor) : "",
-                  '</Path></Canvas>');
+            rv.push('<Canvas Canvas.ZIndex="', zindex, '">',
+                    '<Path Opacity="', this.__fillStyle.a * this.globalAlpha,
+                    // http://twitter.com/uupaa/status/5179317486
+                    '" Data="F1 ', path, // [F1] FillRule=Nonzero
+                    '" Fill="', this.__fillStyle.hex, '">',
+                    this.__shadowColor.a ? _buildShadowBlur(this, "Path", this.__shadowColor) : "",
+                    '</Path></Canvas>');
 
         } else {
-          rv.push('<Canvas Canvas.ZIndex="', zindex, '">',
-                  '<Path Opacity="', this.__strokeStyle.a * this.globalAlpha,
-                  '" Data="', path, _buildStrokeProps(this),
-                  '" Stroke="', this.__strokeStyle.hex, '">',
-                  this.__shadowColor.a ? _buildShadowBlur(this, "Path", this.__shadowColor) : "",
-                  '</Path></Canvas>');
+            if (path.length >= 32767) {
+                // Silverlight max path is 32767
+                throw new Error("Path too long. Silverlight.maxpath is 32767, path.length = " + path.length);
+            }
+            rv.push('<Canvas Canvas.ZIndex="', zindex, '">',
+                    '<Path Opacity="', this.__strokeStyle.a * this.globalAlpha,
+                    '" Data="', path, _buildStrokeProps(this),
+                    '" Stroke="', this.__strokeStyle.hex, '">',
+                    this.__shadowColor.a ? _buildShadowBlur(this, "Path", this.__shadowColor) : "",
+                    '</Path></Canvas>');
         }
         fg = rv.join("");
     }

@@ -257,7 +257,11 @@ package {
             canvasWidth = width;
             canvasHeight = height;
 
-            _buff && _buff.dispose();
+            if (_buff) {
+                _buff.copyPixels(_clearAllBuff, _clearAllRect, _clearAllPoint);
+                _buff.dispose();
+                // _shape.graphics.clear();
+            }
             _buff = new BitmapData(width, height, true, 0); // 300 x 150
             _view = new Bitmap(_buff,
                                flyweight ? PixelSnapping.AUTO : PixelSnapping.NEVER,
@@ -397,13 +401,15 @@ package {
                     gfx.drawEllipse(ary[++i], ary[++i], ary[++i], ary[++i]);
                     break;
                 case "a": // arc
-                    drawArc(ary[++i], ary[++i], ary[++i],
+                    drawArc(gfx,
+                            ary[++i], ary[++i], ary[++i],
                             ary[++i], ary[++i], ary[++i]);
                 }
             }
         }
 
-        private function drawArc(x:Number, y:Number, radius:Number,
+        private function drawArc(gfx:Graphics,
+                                 x:Number, y:Number, radius:Number,
                                  startAngle:Number, endAngle:Number,
                                  anticlockwise:Number):void {
         }

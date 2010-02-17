@@ -140,6 +140,8 @@ function initSurface() {
     this._readyState    = 0;
     this._tmid          = 0;    // timer id
     this._msgid         = 1;    // message id
+    // --- extend properties ---
+    this.xFlyweight     = 0;    // 1 is animation mode
 }
 
 // inner -
@@ -165,7 +167,7 @@ function _copyprop(to, from) {
 function arc(x, y, radius, startAngle, endAngle, anticlockwise) {
     this.send("ar\t" + x + "\t" + y + "\t" +
                        radius + "\t" + startAngle + "\t" +
-                       endAngle + "\t" + anticlockwise);
+                       endAngle + "\t" + (anticlockwise ? 1 : 0));
 }
 
 // CanvasRenderingContext2D.prototype.arcTo -> NOT IMPL
@@ -372,7 +374,7 @@ function resize(width,    // @param Number(= void 0): width
         this.canvas.style.pixelHeight = height;
     }
     this._readyState = state;
-    this.send("rz\t" + width + "\t" + height + "\t" + xFlyweight);
+    this.send("rz\t" + width + "\t" + height + "\t" + this.xFlyweight);
 }
 
 // CanvasRenderingContext2D.prototype.restore
@@ -521,10 +523,10 @@ function send(fg) { // @param String: fragment, "{COMMAND}\t{ARG1}\t..."
     if (!this._lockState && this._readyState) {
         if (this._readyState === 1) {
             if (this._view) {
-                // send "init" command. init(width, heigth, xFlyWeight)
+                // send "init" command. init(width, heigth, xFlyweight)
                 this._view.CallFunction(send._prefix +
                     "in\t" + this.canvas.width + "\t" + this.canvas.height +
-                    "\t" + this.xFlyWeight +
+                    "\t" + this.xFlyweight +
                     send._suffix);
                 this._readyState = 2;
             }
