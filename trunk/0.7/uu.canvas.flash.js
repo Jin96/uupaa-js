@@ -49,7 +49,7 @@ uu.mix(uu.canvas.FL2D.prototype, {
     save:                   save,
     scale:                  scale,
     send:                   send,           // [EXTEND]
-    sendProp:               sendProp,       // [EXTEND]
+    sendState:              sendState,      // [EXTEND]
     setTransform:           setTransform,
     stroke:                 stroke,
     strokeRect:             strokeRect,
@@ -89,7 +89,7 @@ function build(node) { // @param Node: <canvas>
 
         ctx._readyState = 1; // 1: draw ready
         uu.flash.dmz[id] = null; // free
-    };
+    }
 
     // create swf <object>
     node.innerHTML = uu.fmt(
@@ -134,11 +134,31 @@ function initSurface() {
     this.textAlign      = "start";
     this.textBaseline   = "alphabetic";
     // --- hidden properties ---
+    this._stack         = [];   // matrix and prop stack.
     this._stock         = [];   // lock stock
     this._lockState     = 0;    // lock state, 0: unlock, 1: lock, 2: lock + clear
     this._readyState    = 0;
     this._tmid          = 0;    // timer id
-    this._msgid         = 1;    // message id(1~9)
+    this._msgid         = 1;    // message id
+}
+
+// inner -
+function _copyprop(to, from) {
+    to.globalAlpha      = from.globalAlpha;
+    to.globalCompositeOperation = from.globalCompositeOperation;
+    to.strokeStyle      = from.strokeStyle;
+    to.fillStyle        = from.fillStyle;
+    to.lineWidth        = from.lineWidth;
+    to.lineCap          = from.lineCap;
+    to.lineJoin         = from.lineJoin;
+    to.miterLimit       = from.miterLimit;
+    to.shadowBlur       = from.shadowBlur;
+    to.shadowColor      = from.shadowColor;
+    to.shadowOffsetX    = from.shadowOffsetX;
+    to.shadowOffsetY    = from.shadowOffsetY;
+    to.font             = from.font;
+    to.textAlign        = from.textAlign;
+    to.textBaseline     = from.textBaseline;
 }
 
 // CanvasRenderingContext2D.prototype.arc
@@ -152,6 +172,7 @@ function arc(x, y, radius, startAngle, endAngle, anticlockwise) {
 
 // CanvasRenderingContext2D.prototype.beginPath
 function beginPath() {
+//  this.sendState();
     this.send("bP");
 }
 
@@ -184,12 +205,13 @@ function closePath() {
 // CanvasRenderingContext2D.prototype.createImageData -> NOT IMPL
 
 // CanvasRenderingContext2D.prototype.createLinearGradient
-function createLinearGradient(x0, y0, x1, y1) {
+function createLinearGradient(x0, y0, x1, y1) { // @return CanvasGradient:
     function CanvasGradient(x0, y0, x1, y1) {
         this.linear = 1;
-        this.param = { x0: x0, y0: y0, x1: x1, y1: y1 };
+        this.param = x0 + "\t" + y0 + "\t" + x1 + "\t" + y1;
         this.color = [];
-        this.colors = "";
+        this._cache = "";
+        this.toString = toString;
         this.addColorStop = addColorStop;
     }
     return new CanvasGradient(x0, y0, x1, y1);
@@ -197,10 +219,28 @@ function createLinearGradient(x0, y0, x1, y1) {
 
 // CanvasGradient.prototype.addColorStop
 function addColorStop(offset, color) {
-    this.color.push({ offset: offset, color: uu.color(color) });
+    this.color.push({ offset: (offset * 255.5) | 0, // Math.round(offset)
+                      color:  uu.color(color) });
+    this._cache = ""; // clear cache
+}
+
+// CanvasGradient.prototype.toString
+function toString() {
+    if (this._cache) {
+        return this._cache;
+    }
     this.color.sort(function(a, b) {
         return a.offset - b.offset;
     });
+
+    var rv = [], ary = this.color, v, i = 0, iz = ary.length;
+
+    for (; i < iz; ++i) {
+        v = ary[i];
+        rv.push(v.offset, v.color.num, v.color.a);
+    }
+    // x0, y0, x1, y0, length, {offset1, color1.num, color1.a}, {offset2, ...}
+    return this._cache = this.param + "\t" + iz + "\t" + rv.join("\t");
 }
 
 // CanvasRenderingContext2D.prototype.createPattern
@@ -227,13 +267,14 @@ function createPattern(image,    // @param HTMLImageElement/HTMLCanvasElement:
 }
 
 // CanvasRenderingContext2D.prototype.createRadialGradient
-function createRadialGradient(x0, y0, r0, x1, y1, r1) { // @return Hash:
+function createRadialGradient(x0, y0, r0, x1, y1, r1) { // @return CanvasGradient:
     function CanvasGradient(x0, y0, r0, x1, y1, r1) {
-        this.fn = _radialGradientFill;
-        this.param = { x0: x0, y0: y0, r0: r0,
-                       x1: x1, y1: y1, r1: r1 };
+        this.radial = 1;
+        this.param = x0 + "\t" + y0 + "\t" + r0 + "\t" +
+                     x1 + "\t" + y1 + "\t" + r1;
         this.color = [];
-        this.colors = "";
+        this._cache = "";
+        this.toString = toString;
         this.addColorStop = addColorStop;
     }
     return new CanvasGradient(x0, y0, r0, x1, y1, r1);
@@ -244,7 +285,7 @@ function createRadialGradient(x0, y0, r0, x1, y1, r1) { // @return Hash:
 // drawImage(image, dx, dy, dw, dh)
 // drawImage(image, sx, sy, sw, sh, dx, dy, dw, dh)
 function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
-    this.sendProp();
+    this.sendState();
     if (a3 === void 0) {
         this.send("d3\t" + a1 + "\t" + a2);
     } else if (a5 === void 0) {
@@ -257,26 +298,26 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
 
 // CanvasRenderingContext2D.prototype.fill
 function fill() {
-    this.sendProp();
+    this.sendState();
     this.send("fi");
 }
 
 // CanvasRenderingContext2D.prototype.fillRect
 function fillRect(x, y, w, h) {
-    this.sendProp();
+    this.sendState();
     this.send("fR\t" + x + "\t" + y + "\t" + w + "\t" + h);
 }
 
 // CanvasRenderingContext2D.prototype.fillText
 function fillText(text, x, y, maxWidth) {
-    this.sendProp();
+    this.sendState();
     this.send("fT\t" + text + "\t" + (x || 0) + "\t" +
                                      (y || 0) + "\t" + maxWidth || 0);
 }
 
 // CanvasRenderingContext2D.prototype.lineTo
 function lineTo(x, y) {
-    this.send("lT\t" + ((x * 100) | 0) + "\t" + ((y * 100) | 0));
+    this.send("lT\t" + ((x * 1000) | 0) + "\t" + ((y * 1000) | 0));
 }
 
 // CanvasRenderingContext2D.prototype.lock
@@ -299,7 +340,7 @@ function measureText(text) {
 
 // CanvasRenderingContext2D.prototype.moveTo
 function moveTo(x, y) {
-    this.send("mT\t" + ((x * 100) | 0) + "\t" + ((y * 100) | 0));
+    this.send("mT\t" + ((x * 1000) | 0) + "\t" + ((y * 1000) | 0));
 }
 
 // CanvasRenderingContext2D.prototype.putImageData -> NOT IMPL
@@ -313,7 +354,7 @@ function quadraticCurveTo(cpx, cpy, x, y) {
 
 // CanvasRenderingContext2D.prototype.rect
 function rect(x, y, w, h) {
-    this.sendProp();
+    this.sendState();
     this.send("re\t" + x + "\t" + y + "\t" + w + "\t" + h);
 }
 
@@ -331,11 +372,12 @@ function resize(width,    // @param Number(= void 0): width
         this.canvas.style.pixelHeight = height;
     }
     this._readyState = state;
-    this.send("rz\t" + width + "\t" + height);
+    this.send("rz\t" + width + "\t" + height + "\t" + xFlyweight);
 }
 
 // CanvasRenderingContext2D.prototype.restore
 function restore() {
+    this._stack.length && _copyprop(this, this._stack.pop());
     this.send("rs");
 }
 
@@ -346,6 +388,12 @@ function rotate(angle) {
 
 // CanvasRenderingContext2D.prototype.save
 function save() {
+    var prop = {};
+
+    _copyprop(prop, this);
+    this._stack.push(prop);
+
+    this.sendState(); // [!]
     this.send("sv");
 }
 
@@ -363,18 +411,19 @@ function setTransform(m11, m12, m21, m22, dx, dy) {
 
 // CanvasRenderingContext2D.prototype.stroke
 function stroke() {
-    this.sendProp();
+    this.sendState();
     this.send("st");
 }
 
 // CanvasRenderingContext2D.prototype.strokeRect
 function strokeRect(x, y, w, h) {
-    this.sendProp();
+    this.sendState();
     this.send("sR\t" + x + "\t" + y + "\t" + w + "\t" + h);
 }
+
 // CanvasRenderingContext2D.prototype.strokeText
 function strokeText(text, x, y, maxWidth) {
-    this.sendProp();
+    this.sendState();
     this.send("sT\t" + text + "\t" + (x || 0) + "\t" + (y || 0) + "\t" + maxWidth || 0);
 }
 
@@ -402,96 +451,69 @@ function unlock() {
 }
 
 // inner
-function sendProp() {
+function sendState() {
     var ary = this._stock, i = ary.length - 1;
 
-    // globalAlpha
-    if (this.globalAlpha !== this._alpha) {
-        ary[++i] = "gA\t" + (this._alpha = this.globalAlpha);
-    }
+    this._alpha !== this.globalAlpha &&
+        (ary[++i] = "gA\t" + (this._alpha = this.globalAlpha));
 
-    // globalCompositeOperation
-    if (this.globalCompositeOperation !== this._mix) {
-        ary[++i] = "gC\t" + (this._mix = this.globalCompositeOperation);
-    }
+    this._mix != this.globalCompositeOperation &&
+        (ary[++i] = "gC\t" + (this._mix = this.globalCompositeOperation));
 
-    // strokeStyle
-    if (this.strokeStyle !== this._strokeStyle) {
+    if (this._strokeStyle !== this.strokeStyle) {
         if (typeof this.strokeStyle === "string") {
             this.__strokeStyle = uu.color(this._strokeStyle = this.strokeStyle);
             ary[++i] = "s0\t" + this.__strokeStyle.num + "\t" + this.__strokeStyle.a;
         } else if (this.strokeStyle.linear) {
-
-            ary[++i] = "s1\t" + this.__strokeStyle.num + "\t" + this.__strokeStyle.a;
-
+            ary[++i] = "s1\t" + this.strokeStyle.toString();
         }
     }
 
-    // fillStyle
-    if (this.fillStyle !== this._fillStyle) {
+    if (this._fillStyle !== this.fillStyle) {
         if (typeof this.fillStyle === "string") {
             this.__fillStyle = uu.color(this._fillStyle = this.fillStyle);
             ary[++i] = "f0\t" + this.__fillStyle.num + "\t" + this.__fillStyle.a;
+        } else if (this.fillStyle.linear) {
+            ary[++i] = "f1\t" + this.fillStyle.toString();
         }
     }
 
-    // lineWidth
-    if (this.lineWidth !== this._lineWidth) {
-        ary[++i] = "lW\t" + (this._lineWidth = this.lineWidth);
-    }
+    this._lineWidth !== this.lineWidth &&
+        (ary[++i] = "lW\t" + (this._lineWidth = this.lineWidth));
 
-    // lineCap
-    if (this.lineCap !== this._lineCap) {
-        ary[++i] = "lC\t" + (this._lineCap = this.lineCap);
-    }
+    this._lineCap !== this.lineCap &&
+        (ary[++i] = "lC\t" + (this._lineCap = this.lineCap));
 
-    // lineJoin
-    if (this.lineJoin !== this._lineJoin) {
-        ary[++i] = "lJ\t" + (this._lineJoin = this.lineJoin);
-    }
+    this._lineJoin !== this.lineJoin &&
+        (ary[++i] = "lJ\t" + (this._lineJoin = this.lineJoin));
 
-    // miterLimit
-    if (this.miterLimit !== this._miterLimit) {
-        ary[++i] = "mL\t" + (this._miterLimit = this.miterLimit);
-    }
+    this._miterLimit !== this.miterLimit &&
+        (ary[++i] = "mL\t" + (this._miterLimit = this.miterLimit));
 
-    // shadowBlur
-    if (this.shadowBlur !== this._shadowBlur) {
-        ary[++i] = "sB\t" + (this._shadowBlur = this.shadowBlur);
-    }
+    this._shadowBlur !== this.shadowBlur &&
+        (ary[++i] = "sB\t" + (this._shadowBlur = this.shadowBlur));
 
-    // shadowColor
-    if (this.shadowColor !== this._shadowColor) {
-        this.__shadowColor = uu.color(this._shadowColor = this.shadowColor);
-        ary[++i] = "sC\t" + this.__shadowColor.num + "\t" + this.__shadowColor.a;
-    }
+    this._shadowColor !== this.shadowColor &&
+        (this.__shadowColor = uu.color(this._shadowColor = this.shadowColor),
+         ary[++i] = "sC\t" + this.__shadowColor.num + "\t" + this.__shadowColor.a);
 
-    // shadowOffsetX
-    if (this.shadowOffsetX !== this._shadowOffsetX) {
-        ary[++i] = "sX\t" + (this._shadowOffsetX = this.shadowOffsetX);
-    }
+    this._shadowOffsetX !== this.shadowOffsetX &&
+        (ary[++i] = "sX\t" + (this._shadowOffsetX = this.shadowOffsetX));
 
-    // shadowOffsetY
-    if (this.shadowOffsetY !== this._shadowOffsetY) {
-        ary[++i] = "sY\t" + (this._shadowOffsetY = this.shadowOffsetY);
-    }
+    this._shadowOffsetY !== this.shadowOffsetY &&
+        (ary[++i] = "sY\t" + (this._shadowOffsetY = this.shadowOffsetY));
 
-    // font
-    if (this.font !== this._font) {
-        ary[++i] = "fo\t" + (this._font = this.font);
-    }
+    this._font !== this.font &&
+        (ary[++i] = "fo\t" + (this._font = this.font));
 
-    // textAlign
-    if (this.textAlign !== this._textAlign) {
-        ary[++i] = "tA\t" + (this._textAlign = this.textAlign);
-    }
+    this._textAlign !== this.textAlign &&
+        (ary[++i] = "tA\t" + (this._textAlign = this.textAlign));
 
-    // textBaseline
-    if (this.textBaseline !== this._textBaseline) {
-        ary[++i] = "tB\t" + (this._textBaseline = this.textBaseline);
-    }
+    this._textBaseline !== this.textBaseline &&
+        (ary[++i] = "tB\t" + (this._textBaseline = this.textBaseline));
 }
 
+// inner -
 function send(fg) { // @param String: fragment, "{COMMAND}\t{ARG1}\t..."
     if (fg) {
         this._stock.push(fg);
@@ -499,9 +521,10 @@ function send(fg) { // @param String: fragment, "{COMMAND}\t{ARG1}\t..."
     if (!this._lockState && this._readyState) {
         if (this._readyState === 1) {
             if (this._view) {
-                // send "init" command
+                // send "init" command. init(width, heigth, xFlyWeight)
                 this._view.CallFunction(send._prefix +
                     "in\t" + this.canvas.width + "\t" + this.canvas.height +
+                    "\t" + this.xFlyWeight +
                     send._suffix);
                 this._readyState = 2;
             }
@@ -513,11 +536,19 @@ function send(fg) { // @param String: fragment, "{COMMAND}\t{ARG1}\t..."
             if (!ctx._tmid) {
                 ctx._tmid = setTimeout(function() {
                     if (ctx._tmid && ctx._stock.length) {
-                        ctx._view.flashVars = "i=" + ++ctx._msgid +
-                                             "&c=" + ctx._stock.join("\t");
+                        var cmd = "i=" + ctx._msgid + "&c=";
+
+                        // http://twitter.com/uupaa/status/9182387840
+                        // http://twitter.com/uupaa/status/9195030504
+                        // http://twitter.com/uupaa/status/9195279662
+                        // http://twitter.com/uupaa/status/9196237383
+                        // http://twitter.com/uupaa/status/9196368732
+                        cmd += ctx._stock.join("\t"); // [!]
+
+                        ctx._view.flashVars = cmd;
                         ctx._stock = []; // clear
-                        ctx._msgid > 9 && (ctx._msgid = 1);
-                        ctx._tmid = clearTimeout();
+                        ++ctx._msgid > 9 && (ctx._msgid = 1);
+                        ctx._tmid = clearTimeout(ctx._tmid);
                     }
                 }, 0);
             }
