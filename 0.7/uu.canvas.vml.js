@@ -73,7 +73,6 @@ function init(ctx, node) { // @param Node: <canvas>
     ctx._view.style.pixelWidth  = node.width;
     ctx._view.style.pixelHeight = node.height;
     ctx._clipRect = _rect(ctx, 0, 0, node.width, node.height);
-    ctx._readyState = 1; // 0: not ready, 1: complete
 }
 
 // uu.canvas.VML2D.build
@@ -128,9 +127,12 @@ function initSurface() {
     this._clipPath      = null; // clipping path
     this._clipRect      = null; // clipping rect
     this._stock         = [];   // lock stock
-    this._lockState     = 0;    // lock state, 0: unlock, 1: lock, 2: lock + clear
     this._px            = 0;    // current position x
     this._py            = 0;    // current position y
+    this._state         = 1;    // state,   0x0: not ready
+                                //          0x1: draw ready(normal)
+                                //          0x2: + locked
+                                //          0x4: + lazy clear
     // --- extend properties ---
     this.xFlyweight     = 0;    // 1 is animation mode
     this.xMissColor     = "black";
@@ -207,7 +209,7 @@ function bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y) {
 
 // CanvasRenderingContext2D.prototype.clear
 function clear() {
-    this._history = [];
+    this.xFlyweight || (this._history = []);
     this._zindex = 0;
     this._view.innerHTML = ""; // clear all
 }
@@ -463,8 +465,8 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
     }
     this.xFlyweight ||
         this._history.push(this._clipPath ? (fg = _clippy(this, fg)) : fg);
-    this._lockState ? this._stock.push(fg)
-                    : this._view.insertAdjacentHTML("BeforeEnd", fg);
+    this._state !== 0x1 ? this._stock.push(fg)
+                        : this._view.insertAdjacentHTML("BeforeEnd", fg);
 }
 
 // inner - iamge transform
@@ -528,10 +530,10 @@ function lineTo(x, y) {
 
 // CanvasRenderingContext2D.prototype.lock
 function lock(clearScreen) { // @param Boolean(= false):
-    if (this._lockState) {
-        throw new Error("duplicate lock");
+    if (this._state & 0x2) {
+        throw new Error("duplicate lock. state=" + this._state);
     }
-    this._lockState = clearScreen ? 2 : 1;
+    this._state |= clearScreen ? 0x6 : 0x2;
 }
 
 // CanvasRenderingContext2D.prototype.measureText
@@ -564,8 +566,8 @@ function quickStroke(hexcolor, alpha, lineWidth) {
              '" opacity="' + alpha.toFixed(2) +
              '" weight="' + lineWidth + 'px" /></v:shape>';
 
-    this._lockState ? this._stock.push(fg)
-                    : this._view.insertAdjacentHTML("BeforeEnd", fg);
+    this._state !== 0x1 ? this._stock.push(fg)
+                        : this._view.insertAdjacentHTML("BeforeEnd", fg);
 }
 
 // CanvasRenderingContext2D.prototype.quickStrokeRect
@@ -644,6 +646,7 @@ function _rect(ctx, x, y, w, h) {
 // CanvasRenderingContext2D.prototype.resize
 function resize(width,    // @param Number(= void 0): width
                 height) { // @param Number(= void 0): height
+    var state = this._state;
 
     this.initSurface()
 
@@ -655,6 +658,7 @@ function resize(width,    // @param Number(= void 0): width
         this._view.style.pixelHeight = height;
         this.canvas.style.pixelHeight = height;
     }
+    this._state = state;
 }
 
 // CanvasRenderingContext2D.prototype.restore
@@ -767,8 +771,8 @@ function stroke(path, fill) {
     }
     this.xFlyweight ||
         this._history.push(this._clipPath ? (fg = _clippy(this, fg)) : fg);
-    this._lockState ? this._stock.push(fg)
-                    : this._view.insertAdjacentHTML("BeforeEnd", fg);
+    this._state !== 0x1 ? this._stock.push(fg)
+                        : this._view.insertAdjacentHTML("BeforeEnd", fg);
 }
 
 // CanvasRenderingContext2D.prototype.strokeRect
@@ -887,8 +891,8 @@ function strokeText(text, x, y, maxWidth, fill) {
     fg = rv.join("");
     this.xFlyweight ||
         this._history.push(this._clipPath ? (fg = _clippy(this, fg)) : fg);
-    this._lockState ? this._stock.push(fg)
-                    : this._view.insertAdjacentHTML("BeforeEnd", fg);
+    this._state !== 0x1 ? this._stock.push(fg)
+                        : this._view.insertAdjacentHTML("BeforeEnd", fg);
 }
 
 // CanvasRenderingContext2D.prototype.transform
@@ -905,14 +909,18 @@ function translate(x, y) {
 
 // CanvasRenderingContext2D.prototype.unlock
 function unlock() {
-    if (this._lockState) {
-        (this._lockState === 2) && this.clear(); // [LAZY]
-        if (this._stock.length) {
-            this._view.insertAdjacentHTML("BeforeEnd", this._stock.join(""));
-            this._stock = [];
-        }
+    switch (this._state) {
+    case 0x7: // [THROUGH][INLINE][LAZY] // this.clear();
+            this.xFlyweight || (this._history = []);
+            this._zindex = 0;
+            this._view.innerHTML = ""; // clear all
+    case 0x3:
+            this._state = 0x1; // unlock
+            if (this._stock.length) {
+                this._view.insertAdjacentHTML("BeforeEnd", this._stock.join(""));
+                this._stock = [];
+            }
     }
-    this._lockState = 0;
 }
 
 // inner -
@@ -1107,7 +1115,6 @@ function _radialGradientFill(ctx, obj, path, fill, mix, zindex) {
 
 // inner - Pattern Fill
 function _patternFill(ctx, obj, path, fill, mix, zindex) {
-
     var rv = [],
         // for shadow
         si = 0, so = 0, sd = 0, sx = 0, sy = 0;
@@ -1172,10 +1179,35 @@ function _buildGradationColor(obj) { // @param CanvasGradient:
 
 // inner - build stroke properties
 function _buildStrokeProps(obj) {
-    return '" joinstyle="'  + obj.lineJoin +
-           '" miterlimit="' + obj.miterLimit +
-           '" weight="'     + (obj.lineWidth * obj._lineScale).toFixed(2) +
-           'px" endcap="' + (obj.lineCap === "butt" ? "flat" : obj.lineCap);
+    var modify = 0;
+
+    if (obj.lineJoin !== obj._lineJoin) {
+        obj._lineJoin = obj.lineJoin;
+        ++modify;
+    }
+    if (obj.lineWidth !== obj._lineWidth) {
+        obj._lineWidth = obj.lineWidth;
+        obj.__lineWidth = (obj.lineWidth * obj._lineScale).toFixed(2);
+        ++modify;
+    }
+    if (obj.miterLimit !== obj._miterLimit) {
+        obj._miterLimit = obj.miterLimit;
+        ++modify;
+    }
+    if (obj.lineCap !== obj._lineCap) {
+        obj._lineCap = obj.lineCap;
+        obj.__lineCap = (obj.lineCap === "butt") ? "flat" : obj.lineCap;
+        ++modify;
+    }
+
+    if (modify) {
+        obj._strokeCache =
+                '" joinstyle="'  + obj._lineJoin +
+                '" miterlimit="' + obj._miterLimit +
+                '" weight="'     + obj.__lineWidth +
+                'px" endcap="'   + obj.__lineCap;
+    }
+    return obj._strokeCache;
 }
 
 // functional collision with uu.css3(altcss) is evaded

@@ -3,16 +3,17 @@ package {
     import flash.system.Security; // for Security.allowDomain
     import flash.system.System;
 
-    //
     import flash.display.Shape;
     import flash.display.Sprite;
     import flash.display.StageAlign;
     import flash.display.StageScaleMode;
+    import flash.display.PixelSnapping;
     import flash.display.Bitmap;
     import flash.display.BitmapData;
     import flash.display.BlendMode;
     import flash.display.CapsStyle;
     import flash.display.Graphics;
+    import flash.display.GradientType;
     import flash.display.InterpolationMethod;
     import flash.display.JointStyle;
     import flash.display.LineScaleMode;
@@ -30,13 +31,23 @@ package {
 
     public class Canvas extends Sprite {
         // --- compositing ---
-        private var globalAlpha:Number;
-        private var globalCompositeOperation:String;
+        private var globalAlpha:Number = 1; // globalAlpha
+        private var mix:String = "source-over"; // globalCompositeOperation
         // --- colors and styles ---
         private var strokeStyle:int = 0;
         private var strokeColor:Array = [0, 1];
+        private var strokeRatios:Array = []; // liner
+        private var strokeColors:Array = []; // liner
+        private var strokeAlphas:Array = []; // liner
+        private var strokeMatrix:Matrix = new Matrix(); // liner
+
         private var fillStyle:int = 0;
         private var fillColor:Array = [0, 1];
+        private var fillRatios:Array = []; // liner
+        private var fillColors:Array = []; // liner
+        private var fillAlphas:Array = []; // liner
+        private var fillMatrix:Matrix = new Matrix(); // liner
+
         private var lineWidth:Number = 1;
         private var lineCap:String = "none"; // butt
         private var lineJoin:String = "miter";
@@ -55,7 +66,7 @@ package {
         private var _scaleX:Number = 1;
         private var _scaleY:Number = 1;
         private var _matrixfxd:Number = 0;
-        private var _matrix:Matrix = new Matrix();
+        private var _matrix:Matrix;
         private var _stack:Array = [];
         private var _path:Array = [];
         private var _clipPath:String;
@@ -64,12 +75,18 @@ package {
         private var _beginY:Number = 0;
         private var _curtX:Number = 0;
         private var _curtY:Number = 0;
-        private var shape:Shape;
-        private var view:Bitmap;
-        private var buff:BitmapData;
+        private var _shape:Shape;
+        private var _view:Bitmap;
+        private var _buff:BitmapData;
+        private var _msgid:String = ""; // last message id
+        // clearAll params
+        private var _clearAllBuff:BitmapData;
+        private var _clearAllRect:Rectangle;
+        private var _clearAllPoint:Point;
+
+        private var xFlyweight:int = 0;
         private var canvasWidth:int = 300;
         private var canvasHeight:int = 150;
-        private var msgid:String = ""; // last message id
 
         public function Canvas() {
             // for local debug
@@ -77,11 +94,12 @@ package {
 
             ExternalInterface.addCallback("send", recv);
 
-            shape = new Shape;
+            _shape = new Shape;
             stage.frameRate = 60;
-            stage.scaleMode = "noScale"; // StageScaleMode.NO_SCALE;
+            stage.scaleMode = StageScaleMode.NO_SCALE;
             stage.align     = StageAlign.TOP_LEFT;
 //          blendMode = BlendMode.LAYER;
+//            cacheAsBitmap = true;
 
             ExternalInterface.call("uu.flash.dmz." + ExternalInterface.objectID);
         }
@@ -89,10 +107,12 @@ package {
         private function onEnterFrame(evt:Event):void {
             var cmd:Object = stage.loaderInfo.parameters;
 
-            if (cmd.i && msgid !== cmd.i) {
-trace(cmd.i + ":" + cmd.c);
-                msgid = cmd.i; // update
+            if (cmd.i && _msgid !== cmd.i) {
+// trace(cmd.i + ":" + cmd.c);
+                _msgid = cmd.i; // update
+                _buff && _buff.lock();
                 recv(cmd.c);
+                _buff && _buff.unlock();
             }
         }
 
@@ -100,68 +120,72 @@ trace(cmd.i + ":" + cmd.c);
             var ary:Array = msg.split("\t");
             var i:int = -1;
             var iz:int = ary.length;
-            var v:String;
 
-/*
-            if (buff) {
-                buff.lock();
-            }
- */
+            var p:Object, j:int, jz:int;
+            var w:Number, h:Number, d:Number, tx:Number, ty:Number;
+            var dx:Number, dy:Number;
+
             while (++i < iz) {
                 switch (ary[i]) { // {COMMAND}
-                case "in": init(+ary[++i], +ary[++i]);
-                           addEventListener("enterFrame", onEnterFrame);
-                           break;
-                case "gA": globalAlpha  = +ary[++i]; break;
-                case "gC": globalCompositeOperation = ary[++i]; break;
-                case "s0": strokeStyle  = 0;
-                           strokeColor  = [+ary[++i], +ary[++i]]; break;
-                case "f0": fillStyle    = 0;
-                           fillColor    = [+ary[++i], +ary[++i]]; break;
-                case "lW": lineWidth    = +ary[++i]; break;
-                case "lC": v = ary[++i];
-                           lineCap      = v === "butt" ? "none" : v; break;
-                case "lJ": lineJoin     = ary[++i]; break;
-                case "mL": miterLimit   = +ary[++i]; break;
-                case "sB": shadowBlur   = +ary[++i]; break;
-                case "sC": shadowColor  = [+ary[++i], +ary[++i]]; break;
-                case "sX": shadowOffsetX= +ary[++i]; break;
-                case "sY": shadowOffsetY= +ary[++i]; break;
-                case "fo": font         = ary[++i]; break;
-                case "tA": textAlign    = ary[++i]; break;
-                case "tB": textBaseline = ary[++i]; break;
-                case "re": rect(+ary[++i], +ary[++i], +ary[++i], +ary[++i]); break;
-                case "rz": resize(+ary[++i], +ary[++i]); break;
-                case "ar": arc(+ary[++i], +ary[++i], +ary[++i],
-                               +ary[++i], +ary[++i], +ary[++i]); break;
-                case "bP": beginPath(); break;
-                case "cP": closePath(); break;
-                case "mT": moveTo(ary[++i] * 0.01, ary[++i] * 0.01); break;
-                case "qC": quadraticCurveTo(+ary[++i], +ary[++i], +ary[++i], +ary[++i]); break;
-                case "lT": lineTo(ary[++i] * 0.01, ary[++i] * 0.01); break;
-                case "st": stroke(); break;
-                case "fi": fill(); break;
-                case "cA": clearAll(); break;
-                case "cR": clearRect(+ary[++i], +ary[++i], +ary[++i], +ary[++i]); break;
-                case "fR": fillRect(+ary[++i], +ary[++i], +ary[++i], +ary[++i], 1); break;
-                case "sR": fillRect(+ary[++i], +ary[++i], +ary[++i], +ary[++i], 0); break;
-                case "sT": strokeText(ary[++i], +ary[++i], +ary[++i], +ary[++i]); break;
-                case "fT": fillText(ary[++i], +ary[++i], +ary[++i], +ary[++i]); break;
-//              case "d3": drawImage(ary[++i], +ary[++i], +ary[++i]); break;
-//              case "d5": drawImage(ary[++i], +ary[++i], +ary[++i], +ary[++i], +ary[++i]); break;
-//              case "d9": drawImage(ary[++i], +ary[++i], +ary[++i], +ary[++i], +ary[++i],
-//                                             +ary[++i], +ary[++i], +ary[++i], +ary[++i]); break;
-                case "ro": rotate(+ary[++i]); break;
-                case "sc": scale(+ary[++i], +ary[++i]); break;
-                case "ST": setTransform(+ary[++i], +ary[++i],
+                case "in":  init(+ary[++i], +ary[++i], +ary[++i]);
+                            addEventListener("enterFrame", onEnterFrame);
+                            break;
+                case "gA":  globalAlpha = +ary[++i]; break;
+                case "gC":  mix = ary[++i]; break;
+                case "s0":  strokeStyle = 0;
+                            strokeColor = [+ary[++i], +ary[++i]];
+                            break;
+                case "s1":  strokeStyle = 1;
+                            i = setStrokeGradientProps(ary, i); break;
+                case "f0":  fillStyle = 0;
+                            fillColor = [+ary[++i], +ary[++i]];
+                            break;
+                case "f1":  fillStyle = 1;
+                            i = setFillGradientProps(ary, i); break;
+                case "lW":  lineWidth = +ary[++i]; break;
+                case "lC":  lineCap = ary[++i];
+                            lineCap === "butt" && (lineCap = "none"); break;
+                case "lJ":  lineJoin = ary[++i]; break;
+                case "mL":  miterLimit = +ary[++i]; break;
+                case "sB":  shadowBlur = +ary[++i]; break;
+                case "sC":  shadowColor = [+ary[++i], +ary[++i]]; break;
+                case "sX":  shadowOffsetX= +ary[++i]; break;
+                case "sY":  shadowOffsetY= +ary[++i]; break;
+                case "fo":  font = ary[++i]; break;
+                case "tA":  textAlign = ary[++i]; break;
+                case "tB":  textBaseline = ary[++i]; break;
+                case "re":  rect(+ary[++i], +ary[++i], +ary[++i], +ary[++i]); break;
+                case "rz":  init(+ary[++i], +ary[++i], +ary[++i]); break;
+                case "ar":  arc(+ary[++i], +ary[++i], +ary[++i],
+                                +ary[++i], +ary[++i], +ary[++i]); break;
+                case "bP":  _path = []; break; // reset path
+                case "cP":  closePath(); break;
+                case "mT":  moveTo(ary[++i] * 0.001, ary[++i] * 0.001); break;
+                case "qC":  quadraticCurveTo(+ary[++i], +ary[++i], +ary[++i], +ary[++i]); break;
+                case "lT":  lineTo(ary[++i] * 0.001, ary[++i] * 0.001); break;
+                case "st":  stroke(); break;
+                case "fi":  fill(); break;
+                case "cA":  _buff.copyPixels(_clearAllBuff, _clearAllRect, _clearAllPoint); break;
+                case "cR":  clearRect(+ary[++i], +ary[++i], +ary[++i], +ary[++i]); break;
+                case "fR":  fillRect(+ary[++i], +ary[++i], +ary[++i], +ary[++i], 1); break;
+                case "sR":  fillRect(+ary[++i], +ary[++i], +ary[++i], +ary[++i], 0); break;
+                case "sT":  strokeText(ary[++i], +ary[++i], +ary[++i], +ary[++i]); break;
+                case "fT":  fillText(ary[++i], +ary[++i], +ary[++i], +ary[++i]); break;
+//              case "d3":  drawImage(ary[++i], +ary[++i], +ary[++i]); break;
+//              case "d5":  drawImage(ary[++i], +ary[++i], +ary[++i], +ary[++i], +ary[++i]); break;
+//              case "d9":  drawImage(ary[++i], +ary[++i], +ary[++i], +ary[++i], +ary[++i],
+//                                              +ary[++i], +ary[++i], +ary[++i], +ary[++i]); break;
+                case "ro":  rotate(+ary[++i]); break;
+                case "sc":  scale(+ary[++i], +ary[++i]); break;
+                case "ST":  setTransform(+ary[++i], +ary[++i],
+                                         +ary[++i], +ary[++i],
+                                         +ary[++i], +ary[++i]); break;
+                case "tf":  x_transform(+ary[++i], +ary[++i],
                                         +ary[++i], +ary[++i],
                                         +ary[++i], +ary[++i]); break;
-                case "tf": x_transform(+ary[++i], +ary[++i],
-                                       +ary[++i], +ary[++i],
-                                       +ary[++i], +ary[++i]); break;
-                case "tl": translate(+ary[++i], +ary[++i]); break;
-                case "sv": save(); break;
-                case "rs": restore(); break;
+                case "tl":  translate(+ary[++i], +ary[++i]); break;
+                case "sv":  save(); break;
+                case "rs":  restore(); break;
                 case "undefined": // [!] undefined trap
                     trace("[!] undefined trap");
                     return;
@@ -171,20 +195,79 @@ trace(cmd.i + ":" + cmd.c);
                     return;
                 }
             }
-/*
-            if (buff) {
-                buff.unlock();
-            }
- */
         }
 
-        private function init(width:int, height:int):void {
+        private function setStrokeGradientProps(ary:Array, i:int):int {
+            var p:Object = { x0: +ary[++i], y0: +ary[++i],
+                             x1: +ary[++i], y1: +ary[++i] };
+            var w:Number = p.x1 - p.x0,
+                h:Number = p.y1 - p.y0;
+            var d:Number = Math.sqrt(w * w + h * h);
+
+            strokeMatrix.identity();
+            strokeMatrix.createGradientBox(d, d, Math.atan2(h, w),
+                                            ((p.x0 + p.x1) - d) / 2,
+                                            ((p.y0 + p.y1) - d) / 2);
+            strokeRatios = [];
+            strokeColors = [];
+            strokeAlphas = [];
+
+            var j:int = 0;
+            var jz:int = +ary[++i];
+
+            for (; j < jz; ++j) {
+                strokeRatios.push(+ary[++i]);
+                strokeColors.push(+ary[++i]);
+                strokeAlphas.push(+ary[++i]);
+            }
+            return i;
+        }
+
+        private function setFillGradientProps(ary:Array, i:int):int {
+            var p:Object = { x0: +ary[++i], y0: +ary[++i],
+                             x1: +ary[++i], y1: +ary[++i] };
+            var w:Number = p.x1 - p.x0,
+                h:Number = p.y1 - p.y0;
+            var d:Number = Math.sqrt(w * w + h * h);
+
+            fillMatrix.identity();
+            fillMatrix.createGradientBox(d, d, Math.atan2(h, w),
+                                            ((p.x0 + p.x1) - d) / 2,
+                                            ((p.y0 + p.y1) - d) / 2);
+            fillRatios = [];
+            fillColors = [];
+            fillAlphas = [];
+
+            var j:int = 0;
+            var jz:int = +ary[++i];
+
+            for (; j < jz; ++j) {
+                fillRatios.push(+ary[++i]);
+                fillColors.push(+ary[++i]);
+                fillAlphas.push(+ary[++i]);
+            }
+            return i;
+        }
+
+        private function init(width:int, height:int, flyweight:int):void {
+            _matrix = new Matrix();
+            _beginX = _beginY = _curtX = _curtY = 0;
+
+            xFlyweight = flyweight;
             canvasWidth = width;
             canvasHeight = height;
 
-            buff = new BitmapData(canvasWidth, canvasHeight, true, 0); // 300 x 150
-            view = new Bitmap(buff, "always");
-            addChild(view);
+            _buff && _buff.dispose();
+            _buff = new BitmapData(width, height, true, 0); // 300 x 150
+            _view = new Bitmap(_buff,
+                               flyweight ? PixelSnapping.AUTO : PixelSnapping.NEVER,
+                               flyweight ? false : true);
+            addChild(_view);
+
+            // build clearAll params
+            _clearAllBuff = _buff.clone();
+            _clearAllRect = new Rectangle(0, 0, width, height);
+            _clearAllPoint = new Point(0, 0);
         }
 
         private function arc(x:Number, y:Number, radius:Number,
@@ -200,8 +283,8 @@ trace(cmd.i + ":" + cmd.c);
                 var p1:Point = _matrix.transformPoint(new Point(sx, sy));
                 var p2:Point = _matrix.transformPoint(new Point(ex, ey));
 
-                x = p0.x;
-                y = p0.y;
+                x  = p0.x;
+                y  = p0.y;
                 sx = p1.x;
                 sy = p1.y;
                 ex = p2.x;
@@ -213,7 +296,14 @@ trace(cmd.i + ":" + cmd.c);
 
             if (Math.round(sx * 100) === Math.round(ex * 100)
                 && Math.round(sy * 100) === Math.round(ey * 100)) {
-                _path.push("c", x, y, radius); // circle
+                if (_scaleX === _scaleY) {
+                    // circle
+                    _path.push("c", x, y, this._scaleX * radius);
+                } else {
+                    // ellipse
+                    _path.push("e", x, y, this._scaleX * radius * 2,
+                                          this._scaleY * radius * 2);
+                }
             } else {
                 _path.push("a", x, y, radius, startAngle, endAngle, anticlockwise); // arc
             }
@@ -221,12 +311,12 @@ trace(cmd.i + ":" + cmd.c);
             _curtY = ey;
         }
 
-        private function beginPath():void {
-            _path = []; // reset;
-        }
-
         private function closePath():void {
-            _path.push("x", _curtX = _beginX, _curtY = _beginY);
+            if (_path.length) {
+                if (_curtX !== _beginX || _curtY !== _beginY) {
+                    _path.push("x", _curtX = _beginX, _curtY = _beginY);
+                }
+            }
         }
 
         private function moveTo(x:Number, y:Number):void {
@@ -236,7 +326,7 @@ trace(cmd.i + ":" + cmd.c);
                 x = p.x;
                 y = p.y;
             }
-            _path.push("m", _curtX = x, _curtY = y);
+            _path.push("m", _beginX = _curtX = x, _beginY = _curtY = y);
         }
 
         private function lineTo(x:Number, y:Number):void {
@@ -246,75 +336,65 @@ trace(cmd.i + ":" + cmd.c);
                 x = p.x;
                 y = p.y;
             }
+            // add begin point
+            if (!_path.length) {
+                _path.push("m", _beginX = x, _beginY = y);
+            }
             _path.push("l", _curtX = x, _curtY = y);
         }
 
-        private function clearAll():void {
-            shape.graphics.beginFill(0);
-            shape.graphics.drawRect(0, 0, canvasWidth, canvasHeight);
-            shape.graphics.endFill();
-
-            buff.draw(shape, _matrix, null, "erase"); // BlendMode.ERASE
-            shape.graphics.clear();
-        }
-
         private function clearRect(x:Number, y:Number, w:Number, h:Number):void {
-            shape.graphics.beginFill(0);
-            shape.graphics.drawRect(x, y, w, h);
-            shape.graphics.endFill();
+            if (!x && !y && w >= canvasWidth && h >= canvasHeight) {
+                // clearAll
+                _buff.copyPixels(_clearAllBuff, _clearAllRect, _clearAllPoint);
+            } else {
+                _shape.graphics.beginFill(0);
+                _shape.graphics.drawRect(x, y, w, h);
+                _shape.graphics.endFill();
 
-            buff.draw(shape, _matrix, null, "erase"); // BlendMode.ERASE
-//          buff.draw(shape, _matrix, null, "invert");
-            shape.graphics.clear();
+                _buff.draw(_shape, _matrix, null, BlendMode.ERASE);
+                _shape.graphics.clear();
+            }
         }
 
         private function stroke():void {
-            // lineStyle(thickness:Number, rgb:Number, alpha:Number, pixelHinting:Boolean, noScale:String, capsStyle:String, jointStyle:String, miterLimit:Number)
-            switch (strokeStyle) {
-            case 0: shape.graphics.lineStyle(lineWidth * _lineScale,
-                                strokeColor[0],
-                                strokeColor[1] * globalAlpha,
-                                true,       // pixelHinting
-                                "normal",   // scaleMode
-                                lineCap,
-                                lineJoin,
-                                miterLimit);
-                    break;
-            }
+            _applyStrokeStyle();
+
             buildPath(_path);
-            buff.draw(shape);
-            shape.graphics.clear();
+            _buff.draw(_shape);
+            _shape.graphics.clear();
         }
 
         private function fill():void {
-            switch (strokeStyle) {
-            case 0: shape.graphics.beginFill(fillColor[0],
-                                             fillColor[1] * globalAlpha);
-                    break;
-            }
+            _applyFillStyle();
+
             buildPath(_path);
-            shape.graphics.endFill();
-            buff.draw(shape);
-            shape.graphics.clear();
+            _shape.graphics.endFill();
+            _buff.draw(_shape);
+            _shape.graphics.clear();
         }
 
         private function buildPath(ary:Array):void {
             var i:int = -1;
             var iz:int = ary.length;
+            var gfx:Graphics = _shape.graphics;
 
             while (i < iz) {
                 switch (ary[++i]) {
                 case "x": // closePath
-                    shape.graphics.lineTo(ary[++i], ary[++i]);
+                    gfx.lineTo(ary[++i], ary[++i]);
                     break;
                 case "m": // moveTo
-                    shape.graphics.moveTo(ary[++i], ary[++i]);
+                    gfx.moveTo(ary[++i], ary[++i]);
                     break;
                 case "l": // lineTo
-                    shape.graphics.lineTo(ary[++i], ary[++i]);
+                    gfx.lineTo(ary[++i], ary[++i]);
                     break;
                 case "c": // circle
-                    shape.graphics.drawCircle(ary[++i], ary[++i], ary[++i]);
+                    gfx.drawCircle(ary[++i], ary[++i], ary[++i]);
+                    break;
+                case "e": // ellipse
+                    gfx.drawEllipse(ary[++i], ary[++i], ary[++i], ary[++i]);
                     break;
                 case "a": // arc
                     drawArc(ary[++i], ary[++i], ary[++i],
@@ -326,56 +406,31 @@ trace(cmd.i + ":" + cmd.c);
         private function drawArc(x:Number, y:Number, radius:Number,
                                  startAngle:Number, endAngle:Number,
                                  anticlockwise:Number):void {
-
         }
 
         private function fillRect(x:Number, y:Number,
                                   w:Number, h:Number, fill:int):void {
             if (fill) {
-                switch (fillStyle) {
-                // beginFill(color, alpha)
-                case 0: shape.graphics.beginFill(fillColor[0],
-                                                 fillColor[1] * globalAlpha);
-                        break;
-                }
+                _applyFillStyle();
             } else {
-                var width:Number;
-                var alpha:Number;
-
-                switch (strokeStyle) {
-                case 0: width = lineWidth * _lineScale;
-                        alpha = strokeColor[1] * globalAlpha;
-                        if (!_matrixfxd && width === 1 && alpha > 0.5) {
-                            width = 2;
-                            alpha = 0.5;
-                        }
-                        shape.graphics.lineStyle(width,
-                                strokeColor[0],
-                                alpha,
-                                true,
-                                "normal",
-                                lineCap,
-                                lineJoin,
-                                miterLimit);
-                        break;
-                }
+                _applyStrokeStyle();
             }
             var p1:Point = _matrix.transformPoint(new Point(x, y));
             var p2:Point = _matrix.transformPoint(new Point(x + w, y));
             var p3:Point = _matrix.transformPoint(new Point(x + w, y + h));
             var p4:Point = _matrix.transformPoint(new Point(x, y + h));
 
-            shape.graphics.moveTo(p1.x, p1.y);
-            shape.graphics.lineTo(p2.x, p2.y);
-            shape.graphics.lineTo(p3.x, p3.y);
-            shape.graphics.lineTo(p4.x, p4.y);
-            shape.graphics.lineTo(p1.x, p1.y);
+            _shape.graphics.moveTo(p1.x, p1.y);
+            _shape.graphics.lineTo(p2.x, p2.y);
+            _shape.graphics.lineTo(p3.x, p3.y);
+            _shape.graphics.lineTo(p4.x, p4.y);
+            _shape.graphics.lineTo(p1.x, p1.y);
             if (fill) {
-                shape.graphics.endFill();
+                _shape.graphics.endFill();
             }
 
-            buff.draw(shape);
-            shape.graphics.clear();
+            _buff.draw(_shape);
+            _shape.graphics.clear();
         }
 
         private function rect(x:Number, y:Number, w:Number, h:Number):void {
@@ -392,20 +447,6 @@ trace(cmd.i + ":" + cmd.c);
             return _matrix.transformPoint(new Point(x, y));
         }
  */
-
-        private function resize(w:Number, h:Number):void {
-            _beginX = _beginY = 0;
-            _curtX = _curtY = 0;
-            _matrix = new Matrix();
-
-            canvasWidth  = w;
-            canvasHeight = h;
-
-            buff.dispose();
-            buff = new BitmapData(canvasWidth, canvasHeight, true, 0);
-            view = new Bitmap(buff);
-            addChild(view);
-        }
 
         private function scale(x:Number, y:Number):void {
             var curt:Matrix = _matrix.clone();
@@ -432,9 +473,9 @@ trace(cmd.i + ":" + cmd.c);
         private function translate(x:Number, y:Number):void {
             var curt:Matrix = _matrix.clone();
 
-            _matrix.identity();
+            _matrix.identity(); // reset
             _matrix.translate(x, y);
-            _matrix.concat(curt);
+            _matrix.concat(curt); // matrix multiply
             _matrixfxd = 1;
         }
 
@@ -462,7 +503,6 @@ trace(cmd.i + ":" + cmd.c);
 
         private function quadraticCurveTo(cpx:Number, cpy:Number,
                                             x:Number,   y:Number):void {
-
         }
         private function fillText(text:String, x:Number, y:Number, maxWidth:Number): void {
         }
@@ -480,11 +520,12 @@ trace(cmd.i + ":" + cmd.c);
 
         private function restore(): void {
             _stack.length && _copyprop(this, _stack.pop());
+
         }
 
         private function _copyprop(to:Object, from:Object):void {
             to.globalAlpha      = from.globalAlpha;
-            to.globalCompositeOperation = from.globalCompositeOperation;
+            to.mix              = from.mix;
             to.strokeStyle      = from.strokeStyle;
             to.strokeColor      = from.strokeColor.concat();
             to.fillStyle        = from.fillStyle;
@@ -494,7 +535,7 @@ trace(cmd.i + ":" + cmd.c);
             to.lineJoin         = from.lineJoin;
             to.miterLimit       = from.miterLimit;
             to.shadowBlur       = from.shadowBlur;
-            to.shadowColor      = from.shadowColor;
+            to.shadowColor      = from.shadowColor.concat();
             to.shadowOffsetX    = from.shadowOffsetX;
             to.shadowOffsetY    = from.shadowOffsetY;
             to.font             = from.font;
@@ -506,6 +547,58 @@ trace(cmd.i + ":" + cmd.c);
             to._matrixfxd       = from._matrixfxd;
             to._matrix          = from._matrix.clone();
             to._clipPath        = from._clipPath;
+        }
+
+        private function _applyStrokeStyle():void {
+            var matrix:Matrix;
+
+            switch (strokeStyle) {
+            case 0: _shape.graphics.lineStyle(
+                            lineWidth * _lineScale,
+                            strokeColor[0],
+                            strokeColor[1] * globalAlpha,
+                            true,
+                            "normal",
+                            lineCap,
+                            lineJoin,
+                            miterLimit);
+                    break;
+            case 1:
+                    matrix = strokeMatrix.clone();
+                    matrix.concat(_matrix);
+
+                    _shape.graphics.lineStyle(lineWidth * _lineScale);
+                    _shape.graphics.lineGradientStyle(
+                            GradientType.LINEAR,
+                            strokeColors,
+                            strokeAlphas,
+                            strokeRatios,
+                            matrix);
+                    break;
+            }
+        }
+
+        private function _applyFillStyle():void {
+            var matrix:Matrix;
+
+            switch (fillStyle) {
+            case 0: _shape.graphics.beginFill(
+                            fillColor[0],
+                            fillColor[1] * globalAlpha);
+                    break;
+
+            case 1:
+                    matrix = fillMatrix.clone();
+                    matrix.concat(_matrix);
+
+                    _shape.graphics.beginGradientFill(
+                            GradientType.LINEAR,
+                            fillColors,
+                            fillAlphas,
+                            fillRatios,
+                            matrix);
+                    break;
+            }
         }
     }
 }

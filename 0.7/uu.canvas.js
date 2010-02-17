@@ -4,8 +4,8 @@
 //
 uu.agein || (function(win, doc, uu) {
 
-var _flash = (uu.ie && uu.ver.flash > 9 && uu.config.flash) ?
-              uu.ajax.sync.preload(uu.config.imgdir + "uu.canvas.swf") : 0;
+var _flashCanvas = (uu.ie && uu.ver.flash > 9 && uu.config.flash) ?
+                   uu.ajax.sync.preload(uu.config.imgdir + "uu.canvas.swf") : 0;
 
 uu.mix(uu.canvas, {
     init:           uucanvasinit,   // uu.canvas.init()
@@ -72,14 +72,14 @@ function _build(node,    // @param Node: <canvas>
     while ( (v = ary[++i]) ) {
         if (v === "sl" && uu.ver.sl) {
             return SL2D.build(node);
-        } else if (v === "flash" && _flash) {
+        } else if (v === "flash" && _flashCanvas) {
             return FL2D.build(node);
         } else if (v === "vml") {
             return VML2D.build(node);
         }
     }
     // backend detect order: Silverlight -> Flash -> VML
-    return (uu.ver.sl ? SL2D : _flash ? FL2D : VML2D).build(node);
+    return (uu.ver.sl ? SL2D : _flashCanvas ? FL2D : VML2D).build(node);
 }
 
 // inner - remove fallback contents

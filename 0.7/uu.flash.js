@@ -75,7 +75,7 @@ function uuflashsend(guid,    // @param Number: instance guid
 function uuflashalert(msg,     // @param Mix: message
                       debug) { // @param Boolean: debug mode only
     if (debug) {
-        _cfg.debug && uu.puff(msg);
+        uu.config.debug && uu.puff(msg);
     } else {
         uu.puff(msg);
     }

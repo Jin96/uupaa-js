@@ -72,9 +72,8 @@ function init(ctx, node) { // @param Node: <canvas>
     ctx.canvas = node;
     ctx.initSurface();
 
-    ctx._view = null;
-    ctx._content = null;
-    ctx._readyState = 0; // 0: not ready, 1: ready(after xaml onLoad="")
+    ctx._view = null;    // <Canvas>
+    ctx._content = null; // <object>
 }
 
 // uu.canvas.SL2D.build
@@ -98,7 +97,7 @@ function build(node) { // @param Node: <canvas>
             ctx._view.add(ctx._content.createFromXaml(
                 "<Canvas>" + ctx._stock.join("") + "</Canvas>"));
         }
-        ctx._readyState = 1; // draw ready
+        ctx._state = 0x1; // draw ready(locked flag off)
         ctx._stock = []
         win[onload] = null; // gc
     };
@@ -142,6 +141,7 @@ function initSurface() {
     this.textAlign      = "start";
     this.textBaseline   = "alphabetic";
     // --- hidden properties ---
+    this._strokeCache   = "";
     this._lineScale     = 1;
     this._scaleX        = 1;
     this._scaleY        = 1;
@@ -154,8 +154,10 @@ function initSurface() {
     this._clipPath      = null; // clipping path
     this._clipRect      = null; // clipping rect
     this._stock         = [];   // lock stock
-    this._lockState     = 0;    // lock state, 0: unlock, 1: lock, 2: lock + clear
-    this._readyState    = 0;
+    this._state         = 0;    // state,   0x0: not ready
+                                //          0x1: draw ready(normal)
+                                //          0x2: + locked
+                                //          0x4: + lazy clear
     // --- extend properties ---
     this.xFlyweight     = 0;    // 1 is animation mode
     this.xMissColor     = "black";
@@ -263,9 +265,9 @@ function bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y) {
 
 // CanvasRenderingContext2D.prototype.clear
 function clear() {
-    this._history = [];
+    this.xFlyweight || (this._history = []);
     this._zindex = 0;
-    this._readyState ? this._view.clear() : (this._stock = []);
+    this._state ? this._view.clear() : (this._stock = []);
 }
 
 // CanvasRenderingContext2D.prototype.clearRect
@@ -290,18 +292,19 @@ function clearRect(x, y, w, h) {
 
         this.xFlyweight ||
             this._history.push(this._clipPath ? (fg = _clippy(this, fg)) : fg);
-        _drawxaml(this, fg);
+        this._state !== 0x1 ? this._stock.push(fg)
+                            : this._view.add(this._content.createFromXaml(fg));
     }
 }
 
 // CanvasRenderingContext2D.prototype.clip
 function clip() {
-  this._clipPath = this._path.join("");
+    this._clipPath = this._path.join("");
 }
 
 // CanvasRenderingContext2D.prototype.closePath
 function closePath() {
-  this._path.push(" Z");
+    this._path.push(" Z");
 }
 
 // CanvasRenderingContext2D.prototype.createImageData -> NOT IMPL
@@ -495,7 +498,8 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
     fg = rv.join("");
     this.xFlyweight ||
         this._history.push(this._clipPath ? (fg = _clippy(this, fg)) : fg);
-    _drawxaml(this, fg);
+    this._state !== 0x1 ? this._stock.push(fg)
+                        : this._view.add(this._content.createFromXaml(fg));
 }
 
 // CanvasRenderingContext2D.prototype.fill
@@ -507,7 +511,6 @@ function fill(path) {
 function fillRect(x, y, w, h) {
     this.stroke(_rect(this, x, y, w, h), 1);
 }
-
 
 // CanvasRenderingContext2D.prototype.fillText
 function fillText(text, x, y, maxWidth) {
@@ -530,10 +533,10 @@ function lineTo(x, y) {
 
 // CanvasRenderingContext2D.prototype.lock
 function lock(clearScreen) { // @param Boolean(= false):
-    if (this._lockState) {
-        throw new Error("duplicate lock");
+    if (this._state & 0x2) {
+        throw new Error("duplicate lock. state=" + this._state);
     }
-    this._lockState = clearScreen ? 2 : 1;
+    this._state |= clearScreen ? 0x6 : 0x2;
 }
 
 // CanvasRenderingContext2D.prototype.measureText
@@ -564,7 +567,8 @@ function quickStroke(hexcolor, alpha, lineWidth) {
               '" StrokeStartLineCap="round" StrokeEndLineCap="round"' +
               '" Stroke="' + hexcolor + '"></Path></Canvas>';
 
-    _drawxaml(this, fg);
+    this._state !== 0x1 ? this._stock.push(fg)
+                        : this._view.add(this._content.createFromXaml(fg));
 }
 
 // CanvasRenderingContext2D.prototype.quickStrokeRect
@@ -609,7 +613,7 @@ function _rect(ctx, x, y, w, h) {
 // CanvasRenderingContext2D.prototype.resize
 function resize(width,    // @param Number(= void 0): width
                 height) { // @param Number(= void 0): height
-    var state = this._readyState;
+    var state = this._state;
 
     this.initSurface()
 
@@ -619,7 +623,7 @@ function resize(width,    // @param Number(= void 0): width
     if (height !== void 0) {
         this.canvas.style.pixelHeight = height;
     }
-    this._readyState = state;
+    this._state = state;
 }
 
 // CanvasRenderingContext2D.prototype.restore
@@ -700,7 +704,6 @@ function stroke(path, fill) {
         } else {
           rv.push('<Canvas Canvas.ZIndex="', zindex, '">',
                   '<Path Opacity="', this.__strokeStyle.a * this.globalAlpha,
-                  // http://twitter.com/uupaa/status/5179317486
                   '" Data="', path, _buildStrokeProps(this),
                   '" Stroke="', this.__strokeStyle.hex, '">',
                   this.__shadowColor.a ? _buildShadowBlur(this, "Path", this.__shadowColor) : "",
@@ -710,7 +713,8 @@ function stroke(path, fill) {
     }
     this.xFlyweight ||
         this._history.push(this._clipPath ? (fg = _clippy(this, fg)) : fg);
-    _drawxaml(this, fg);
+    this._state !== 0x1 ? this._stock.push(fg)
+                        : this._view.add(this._content.createFromXaml(fg));
 }
 
 // CanvasRenderingContext2D.prototype.strokeRect
@@ -806,7 +810,8 @@ function strokeText(text, x, y, maxWidth, fill) {
     fg = rv.join("");
     this.xFlyweight ||
         this._history.push(this._clipPath ? (fg = _clippy(this, fg)) : fg);
-    _drawxaml(this, fg);
+    this._state !== 0x1 ? this._stock.push(fg)
+                        : this._view.add(this._content.createFromXaml(fg));
 }
 
 // CanvasRenderingContext2D.prototype.transform
@@ -823,15 +828,19 @@ function translate(x, y) {
 
 // CanvasRenderingContext2D.prototype.unlock
 function unlock() {
-    if (this._lockState) {
-        (this._lockState === 2) && this.clear(); // [LAZY]
-        if (this._stock.length) {
-            this._lockState = 0; // [!] pre unlock
-            _drawxaml(this, "<Canvas>" + this._stock.join("") + "</Canvas>");
-            this._stock = [];
-        }
+    switch (this._state) {
+    case 0x7: // [THROUGH][INLINE][LAZY] // this.clear();
+            this.xFlyweight || (this._history = []);
+            this._zindex = 0;
+            this._state ? this._view.clear() : (this._stock = []);
+    case 0x3:
+            this._state = 0x1; // unlock
+            if (this._stock.length) {
+                this._view.add(this._content.createFromXaml(
+                        "<Canvas>" + this._stock.join("") + "</Canvas>"));
+                this._stock = [];
+            }
     }
-    this._lockState = 0;
 }
 
 // inner -
@@ -911,7 +920,8 @@ function _radialGradientFill(ctx, obj, path, fill, mix, zindex) {
                           '" Data="', path, '" Fill="', v.color.argb, '" />'].join("");
                 !ctx.xFlyweight &&
                   ctx._history.push(ctx._clipPath ? (bari = _clippy(ctx, bari)) : bari);
-                _drawxaml(ctx, bari);
+                ctx._state !== 0x1 ? ctx._stock.push(bari)
+                                   : ctx._view.add(ctx._content.createFromXaml(bari));
             }
         }
     }
@@ -1046,7 +1056,7 @@ function _buildMatrixTransform(type, m) {
 
 // inner - build Shadow Blur
 function _buildShadowBlur(ctx,     // @param this:
-                          type,    // @param String:
+                          type,    // @param String: "TextBlock", "Image", "Path", "Ellipse"
                           color) { // @param ColorHash:
     var sdepth = 0,
         sx = ctx.shadowOffsetX,
@@ -1066,22 +1076,36 @@ function _buildShadowBlur(ctx,     // @param this:
 
 // inner - build stroke properties
 function _buildStrokeProps(obj) {
-    var cap = obj.lineCap === "butt" ? "flat" : obj.lineCap;
+    var modify = 0;
 
-    return '" StrokeLineJoin="'     + obj.lineJoin +
-           '" StrokeThickness="'    + (obj.lineWidth * obj._lineScale).toFixed(2) +
-           '" StrokeMiterLimit="'   + obj.miterLimit +
-           '" StrokeStartLineCap="' + cap +
-           '" StrokeEndLineCap="'   + cap;
-}
-
-// inner -
-function _drawxaml(ctx, fg) {
-    if (ctx._lockState || !ctx._readyState) {
-        ctx._stock.push(fg);
-    } else {
-        ctx._view.add(ctx._content.createFromXaml(fg));
+    if (obj.lineJoin !== obj._lineJoin) {
+        obj._lineJoin = obj.lineJoin;
+        ++modify;
     }
+    if (obj.lineWidth !== obj._lineWidth) {
+        obj._lineWidth = obj.lineWidth;
+        obj.__lineWidth = (obj.lineWidth * obj._lineScale).toFixed(2);
+        ++modify;
+    }
+    if (obj.miterLimit !== obj._miterLimit) {
+        obj._miterLimit = obj.miterLimit;
+        ++modify;
+    }
+    if (obj.lineCap !== obj._lineCap) {
+        obj._lineCap = obj.lineCap;
+        obj.__lineCap = (obj.lineCap === "butt") ? "flat" : obj.lineCap;
+        ++modify;
+    }
+
+    if (modify) {
+        obj._strokeCache =
+                '" StrokeLineJoin="'     + obj._lineJoin +
+                '" StrokeThickness="'    + obj.__lineWidth +
+                '" StrokeMiterLimit="'   + obj._miterLimit +
+                '" StrokeStartLineCap="' + obj.__lineCap +
+                '" StrokeEndLineCap="'   + obj.__lineCap;
+    }
+    return obj._strokeCache;
 }
 
 // add inline XAML source

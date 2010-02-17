@@ -1,0 +1,108 @@
+<!doctype html><html><head>
+    <title>A canvas recycle path example</title>
+    <meta name="DC.creator" content="Kamiel Martinet, http://www.martinet.nl/">
+    <meta name="DC.publisher" content="Mozilla Developer Center, http://developer.mozilla.org">
+
+<script>xconfig={imgdir:"../"}</script>
+<script type="text/javascript" src="../uupaa.js"></script>
+
+<script>
+function xcanvas() {
+    draw(document.getElementById('slcanvas'));
+    draw(document.getElementById('vmlcanvas'));
+    draw(document.getElementById('flashcanvas'));
+}
+function matrix() {
+    draw(document.getElementById('slcanvas'), 1);
+    draw(document.getElementById('vmlcanvas'), 1);
+    draw(document.getElementById('flashcanvas'), 1);
+}
+function draw(canvas, matrix){
+    if (!canvas.getContext){ return; }
+
+    var ctx = canvas.getContext('2d');
+
+    if (matrix) {
+        ctx.clear();
+        ctx.translate(-10, 5);
+        ctx.scale(1.2, 0.8);
+        ctx.rotate(5 * Math.PI / 180);
+    }
+
+    ctx.fillStyle = "blue";
+    ctx.beginPath();
+    ctx.moveTo(50, 10);
+    ctx.lineTo(90, 90);
+    ctx.lineTo(10, 90);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.translate(100, 100);
+    ctx.fillStyle = "green";
+    ctx.fill();
+
+    ctx.translate(200, 200);
+    ctx.fillStyle = "yellow";
+    ctx.fill();
+}
+</script>
+    <style type="text/css">
+      body { margin: 20px; font-family: arial,verdana,helvetica; background: #fff;}
+      h1 { font-size: 140%; font-weight:normal; color: #036; border-bottom: 1px solid #ccc; }
+      canvas { border: 2px solid #000; float: left; margin-right: 20px; margin-bottom: 20px; }
+      pre { float:left; display:block; background: rgb(238,238,238); border: 1px dashed #666; padding: 15px 20px; margin: 0 0 10px 0; }
+    </style>
+  </head>
+
+  <body>
+    <h1>A canvas <code>recycle path</code> example</h1>
+    <div>
+      <input type="button" value="matrix effect" onclick="matrix()" />
+      <br />
+      <canvas id="slcanvas" class="sl" width="150" height="150"></canvas>
+      <canvas id="vmlcanvas" class="vml" width="150" height="150"></canvas>
+      <canvas id="flashcanvas" class="flash" width="150" height="150"></canvas>
+      <pre>
+function xcanvas() {
+    draw(document.getElementById('slcanvas'));
+    draw(document.getElementById('vmlcanvas'));
+    draw(document.getElementById('flashcanvas'));
+}
+function matrix() {
+    draw(document.getElementById('slcanvas'), 1);
+    draw(document.getElementById('vmlcanvas'), 1);
+    draw(document.getElementById('flashcanvas'), 1);
+}
+function draw(canvas, matrix){
+    if (!canvas.getContext){ return; }
+
+    var ctx = canvas.getContext('2d');
+
+    if (matrix) {
+        ctx.clear();
+        ctx.translate(-10, 5);
+        ctx.scale(1.2, 0.8);
+        ctx.rotate(5 * Math.PI / 180);
+    }
+
+    ctx.fillStyle = "blue";
+    ctx.beginPath();
+    ctx.moveTo(50, 10);
+    ctx.lineTo(90, 90);
+    ctx.lineTo(10, 90);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.translate(100, 100);
+    ctx.fillStyle = "green";
+    ctx.fill();
+
+    ctx.translate(200, 200);
+    ctx.fillStyle = "yellow";
+    ctx.fill();
+}
+      </pre>
+    </div>
+  </body>
+
+</html>
