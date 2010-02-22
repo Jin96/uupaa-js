@@ -453,7 +453,7 @@ function drawFakeShadowIE(ctx, x, y, width, height,
     var i = 0, j = 0, k, step = 1, line = 5, r = radius,
         hexcolor = rgba.hex;
 
-    if (_ie6 && uu.config.light) {
+    if (_ie6 && !uu.config.right) {
         step *= 3, line *= 2.5;
     }
 

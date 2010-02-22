@@ -1,7 +1,7 @@
 
 // === CSS 3 ===
 // depend: uu.js, uu.css.*.js, uu.query.js, uu.canvas.*.js, uu.layer.js, uu.url.js
-// if (uu.ie67 && !uu.config.light) {
+// if (uu.ie67 && uu.config.right) {
 //    IE6, IE7: Size of an inline element is invalidated.
 //        <span style="width:100px; height:100px">inline with size</span>
 //                             v            v
@@ -19,8 +19,8 @@ var _canvasok = uu.ver.major,
     _rules = [],        // generated rules
     _uniqueRuleuID = 0, // unique rule id
     _uniqueRules = {},  // unique rule
-    _mark = 0,
-    _plus = 0,
+    _selector = 0,      // 1 is enable CSS3Selector
+    _render = 0,        // 1 is enable CSS3Rendering
     _plan = { init: [], alphapng: [], boxeffect: [] },
     _rawdata = { init: 0, specs: [], data: {} }, // [lazy]
     _dirtycss = "",     // last collected css
@@ -78,8 +78,6 @@ var _canvasok = uu.ver.major,
       "-uu-background-repeat":  _uucss3setbgrpt,
       "-uu-background-position":_uucss3setbgpos
     };
-
-!uu.config.cssexpr && (_EXCSS.maxmin = _EXCSS.position = 0);
 
 // [1][get] uu.css3(node, "color") -> "red"
 // [2][get] uu.css3(node, "color,width") -> { color: "red", width: "20px" }
@@ -180,7 +178,7 @@ function uucss3review(ctx,    // @param Node/IDString(= void 0):
                               //                      revalidation context
                       full) { // @param Number(= 0): 0 is quick build
     // lazy revalidate for :target
-    (_mark || _plus) && setTimeout(function() {
+    (_selector || _render) && setTimeout(function() {
         _uucss3review(uu.isstr(ctx) ? uu.id(ctx) : ctx, full || 0, "");
     }, 0);
 }
@@ -305,7 +303,7 @@ function _uucss3validate(rawdata, context) {
             }
 
             try {
-                if (_plus) {
+                if (_render) {
                     expair = data[j].pair;
                     exbits = 0, exdecl = {}, exorder = [], exoi = -1, exi = -1;
 
@@ -329,7 +327,7 @@ function _uucss3validate(rawdata, context) {
                              (_uniqueRules[expr] = ++_uniqueRuleuID);
 
                     // add new rule
-                    if (_mark) {
+                    if (_selector) {
                         // ".uucss[num] { color: red; font-size: 24pt; ... }"
                         w = (spec < 10000) ? data[j].decl.join(";")
                                            : data[j].decl.join(" !important;") + " !important;";
@@ -355,22 +353,21 @@ function _uucss3validate(rawdata, context) {
 
                             _uid2data[nodeuid].rules[ruleid] = ruleid;
 
-                            if (_mark) {
+                            if (_selector) {
                                 // .uucss{n}
                                 _uid2data[nodeuid].klass.push("uucss" + ruleid);
                             }
 
                             // [ACID2][IE6][IE7] inline-element has neither width nor height
-                            //                   (need window.xconfig.light = 0)
-                            if (uu.ie67 && !uu.config.light) {
+                            if (uu.ie67 && uu.config.right) {
                                 if (DISPLAY_INLINE.test(w) ||
                                       INLINE.test(v.currentStyle.display)) {
-                                    _mark && _uid2data[nodeuid].klass.push("uucssinline");
+                                    _selector && _uid2data[nodeuid].klass.push("uucssinline");
                                 }
                             }
                         }
                         // mixin plus info
-                        if (_plus) {
+                        if (_render) {
                             // mixin bits
                             _uid2data[nodeuid].excss.bits |= excss.bits;
 
@@ -387,7 +384,7 @@ function _uucss3validate(rawdata, context) {
                         v = node[k];
                         nodeuid = uu.nodeid(v); // node unique id
 
-                        if (_mark) {
+                        if (_selector) {
                             v.setAttribute("uucss3i", 1); // bond + markup for revalidate
 
                             // init container
@@ -412,7 +409,7 @@ function _uucss3validate(rawdata, context) {
                             };
                         }
                         // mixin plus info
-                        if (_plus) {
+                        if (_render) {
                             // mixin bits
                             _uid2data[nodeuid].excss.bits |= excss.bits;
 
@@ -432,7 +429,7 @@ function _uucss3validate(rawdata, context) {
         }
     }
 
-    _plus && _uucss3plusplan(rawdata.init, context);
+    _render && _uucss3plusplan(rawdata.init, context);
 
     _usedocfg && !uu.css3._deny && (fragment = cutdown(dfctx));
     // --- begin code block ---
@@ -449,7 +446,7 @@ function _uucss3validate(rawdata, context) {
         }
 
         // apply to className
-        if (_mark) {
+        if (_selector) {
             for (nodeuid in _uid2data) {
                 v = _uid2data[nodeuid].node;
                 if (uu.ie67 && v.getAttribute("uuCSSLock")) {
@@ -470,18 +467,18 @@ function _uucss3validate(rawdata, context) {
         }
 
         // strip width
-        if (uu.ie67 && !uu.config.light) {
+        if (uu.ie67 && uu.config.right) {
             uu.css.inject("uucss3",
                           ".uucssinline", "width:auto;height:auto");
             _rules[++gridx] = ".uucssinline{width:auto;height:auto}";
         }
         // boost prevalidate
-        _plus && _uucss3plusprevalidate(rawdata.init);
+        _render && _uucss3plusprevalidate(rawdata.init);
     // --- end code block ---
     _usedocfg && !uu.css3._deny && dfctx.appendChild(fragment);
 
     // boost postvalidate
-    _plus && _uucss3pluspostvalidate(_uid2data, rawdata.init, context);
+    _render && _uucss3pluspostvalidate(_uid2data, rawdata.init, context);
 
     // Opera9.5+ problem fix and Opera9.2 flicker fix
     uu.opera && (_usedocfg = 0);
@@ -859,9 +856,9 @@ function _uucss3autoviewbox() {
 function _css3init() {
     var css = "", tick = +new Date;
 
-    _plus && _uucss3autoviewbox();
+    _render && _uucss3autoviewbox();
 
-    if (_mark || _plus) {
+    if (_selector || _render) {
         uu.ie && _uucss3memento();
         css = uu.css.clean(_dirtycss = (css || uu.css.imports()));
         if (uu.ie6 && _uucss3blackout(css)) { // ignore lazy
@@ -870,11 +867,11 @@ function _css3init() {
         // create style sheet
         uu.css.create("uucss3");
         // decode <script src="data:...">
-        uu.ie && !uu.config.light && uu.codec.datauri && _uucss3decodescript();
+        uu.ie && uu.config.right && uu.codec.datauri && _uucss3decodescript();
         // parse
         _rawdata = uu.mix(uu.css.parse(css), { init: 0 });
 
-        _plus && _uucss3plusinit();
+        _render && _uucss3plusinit();
         _uucss3validate(_rawdata);
         // init flag
         _rawdata.init = 1;
@@ -884,29 +881,33 @@ function _css3init() {
     }
 }
 
-// +------------+----------------+---------------+
-// |            | mark = 1       | plus = 1      |
-// +------------+----------------+---------------+
-// | IE         | 6, 7, 8        | 6, 7, 8       |
-// | Opera      |                | 9.5 +         |
-// | Gecko      | 1.81 ~ 1.9     | 1.81 +        |
-// | Webkit     | 522 ~ 527      | 522 +         |
-// +------------+----------------+---------------+
+// +------------+----------------+---------------+-------------------+
+// |            | selector="auto"| render="auto" | cssexpr = "auto"  |
+// +------------+----------------+---------------+-------------------+
+// | IE         | 6, 7, 8        | 6, 7, 8       | 6, 7, 8           |
+// | Opera      |                | 9.5 +         |                   |
+// | Gecko      | 1.81 ~ 1.9     | 1.81 +        |                   |
+// | Webkit     | 522 ~ 527      | 522 +         |                   |
+// +------------+----------------+---------------+-------------------+
 (function() {
-    uu.ie     && (uu.ver.ua >= 6)                       && (++_mark, ++_plus);
-    uu.opera  && (uu.ver.ua >= 9.5)                     && ++_plus;
-    uu.gecko  && (uu.ver.re >  1.8 && uu.ver.re <= 1.9) && ++_mark;
-    uu.gecko  && (uu.ver.re >  1.8)                     && ++_plus;
-    uu.webkit && (uu.ver.re >= 522 && uu.ver.re <  528) && ++_mark;
-    uu.webkit && (uu.ver.re >= 522)                     && ++_plus;
+    uu.ie     && (uu.ver.ua >= 6)                       && (++_selector, ++_render);
+    uu.opera  && (uu.ver.ua >= 9.5)                     && ++_render;
+    uu.gecko  && (uu.ver.re >  1.8 && uu.ver.re <= 1.9) && ++_selector;
+    uu.gecko  && (uu.ver.re >  1.8)                     && ++_render;
+    uu.webkit && (uu.ver.re >= 522 && uu.ver.re <  528) && ++_selector;
+    uu.webkit && (uu.ver.re >= 522)                     && ++_render;
 
-    // http://d.hatena.ne.jp/uupaa/20091203/1259828564
     if (uu.isfunc(uu.config.altcss)) {
-        // 0 is auto, 1 is enable, -1 is disable
-        var ary = uu.config.altcss(uu); // @return Array: [mark, plus]
+        var hash = uu.config.altcss(uu), // @return Hash: { selector, render, cssexpr }
+            expr = 0;
 
-        _mark = { "-1": 0, 0: _mark, 1: 1 }[ary[0]];
-        _plus = { "-1": 0, 0: _plus, 1: 1 }[ary[1]];
+        _selector = ({ "off": 0, "auto": _selector, "on": 1 }[hash.selector]) || 0;
+        _render   = ({ "off": 0, "auto": _render,   "on": 1 }[hash.render])   || 0;
+        expr      = ({ "off": 0, "auto": _cssexpr,  "on": 1 }[hash.cssexpr])  || 0;
+
+        if (!expr) {
+            _EXCSS.maxmin = _EXCSS.position = 0;
+        }
     }
 })();
 

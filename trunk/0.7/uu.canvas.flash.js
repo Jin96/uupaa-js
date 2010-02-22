@@ -88,6 +88,8 @@ function build(node) { // @param Node: <canvas>
         var ctx = node.uuctx2d;
 
         ctx._readyState = 1; // 1: draw ready
+        ctx.sendState();
+        ctx.send();
         uu.flash.dmz[id] = null; // free
     }
 
@@ -100,7 +102,7 @@ function build(node) { // @param Node: <canvas>
             '<param name="movie" value="%s" /></object>',
         id, node.width, node.height,
         "clsid:d27cdb6e-ae6d-11cf-96b8-444553540000",
-        uu.config.imgdir + "uu.canvas.swf");
+        uu.config.dir + "uu.canvas.swf");
 
     node.uuctx2d._view = uu.id(id); // find swf <object>
 
@@ -287,15 +289,16 @@ function createRadialGradient(x0, y0, r0, x1, y1, r1) { // @return CanvasGradien
 // drawImage(image, dx, dy, dw, dh)
 // drawImage(image, sx, sy, sw, sh, dx, dy, dw, dh)
 function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
+    var src = image.src,
+        args = (a3 === void 0) ? 3
+             : (a5 === void 0) ? 5 : 9;
+
     this.sendState();
-    if (a3 === void 0) {
-        this.send("d3\t" + a1 + "\t" + a2);
-    } else if (a5 === void 0) {
-        this.send("d5\t" + a1 + "\t" + a2 + "\t" + a3 + "\t" + a4);
-    } else {
-        this.send("d9\t" + a1 + "\t" + a2 + "\t" + a3 + "\t" + a4 + "\t" +
-                           a5 + "\t" + a6 + "\t" + a7 + "\t" + a8);
-    }
+    this.send("dI\t" + args + "\t" + src + "\t" +
+              a1 + "\t" + a2 + "\t" +
+              (a3 || 0) + "\t" + (a4 || 0) + "\t" +
+              (a5 || 0) + "\t" + (a6 || 0) + "\t" +
+              (a7 || 0) + "\t" + (a8 || 0));
 }
 
 // CanvasRenderingContext2D.prototype.fill

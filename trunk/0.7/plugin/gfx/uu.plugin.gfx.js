@@ -1,8 +1,8 @@
 
 // === gfx plugin ===
-uu.again || (function(uu, uup) {
+uu.again || (function(uu) {
 
-uup.gfx = {};
+uu.plugin.gfx = {};
 
-})(uu, uup);
+})(uu);
 
