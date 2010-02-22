@@ -1,5 +1,5 @@
 
-// === CSS3 Selector ===
+// === CSS3 Selector(document.querySelectorAll) ===
 // depend: uu.js, uu.color.js, uu.css.js
 uu.agein || (function(win, doc, uu, _cstyle, _innerText) {
 var _ssid   = "uuqueryss", // StyleSheet ID
@@ -10,15 +10,15 @@ var _ssid   = "uuqueryss", // StyleSheet ID
     _nodeid       = uu.node.id,
     _HTML5HASH    = uu.hash.combine(uu.tag.HTML5, 1, 1), // { abbr: 1, ... }
     _QUICK_STATIC = {
-      "*":      function(ctx) { return uu.tag("*", ctx); },
-      "*:root": function() { return [uu.root]; }, // fix #27 (*:root)
-      ":root":  function() { return [uu.root]; }, // fix #27 (*:root)
-      "* :root":function() { return []; }, // fix #27b (* :root)
-      "* html": function() { return []; }, // fix #27b (* html) IE6 CSS Star Hack
-      html:     function() { return [uu.root]; },
-      head:     function() { return [uu.head()]; },
-      body:     function() { return [doc.body]; },
-      ":link":  function() { return uu.ary(doc.links); } }, // spoof
+        "*":      function(ctx) { return uu.tag("*", ctx); },
+        "*:root": function() { return [uu.root]; }, // fix #27 (*:root)
+        ":root":  function() { return [uu.root]; }, // fix #27 (*:root)
+        "* :root":function() { return []; }, // fix #27b (* :root)
+        "* html": function() { return []; }, // fix #27b (* html) IE6 CSS Star Hack
+        html:     function() { return [uu.root]; },
+        head:     function() { return [uu.head()]; },
+        body:     function() { return [doc.body]; },
+        ":link":  function() { return uu.ary(doc.links); } }, // spoof
     // :after :before :contains :digit :first-letter :first-line :link
     // :negative :playing :target :visited  !=  ?=  /=  <=  >=  &=  {  }
     _SYNTAX_ERROR = /^[>+~]|[>+~*]{2}|[>+~]$/,
@@ -62,48 +62,51 @@ var _ssid   = "uuqueryss", // StyleSheet ID
                       ">=": 9,    // E{prop >= value}            more than
                       "<=": 10,   // E{prop <= value}            less than
                       "&=": 11 }, // E{prop &= value1 ~ value2}  from value1 to value2
-    _DUMMY = function() { return []; },
+    _DUMMY = function() {
+        return [];
+    },
     _FILTERS = {
-      "first-child":    [0x01, uuquerychildfilter],
-      "last-child":     [0x02, uuquerychildfilter],
-      "only-child":     [0x03, uuquerychildfilter],
-      "nth-child":      [0x04, nthChildFilter],
-      "nth-last-child": [0x05, nthChildFilter],
-      "nth-of-type":    [0x06, nthOfTypeFilter],
-      "nth-last-of-type":
-                        [0x07, nthOfTypeFilter],
-      "first-of-type":  [0x09, ofTypeFilter],
-      "last-of-type":   [0x0a, ofTypeFilter],
-      enabled:          [0x0b, simpleFilter],
-      disabled:         [0x0c, simpleFilter],
-      checked:          [0x0d, simpleFilter],
-      link:             [0x0e, uu.config.visited ? visitedFilter : link],
-      visited:          [0x0f, uu.config.visited ? visitedFilter : _DUMMY],
-      hover:            [0x10, actionFilter],
-      focus:            [0x11, actionFilter],
-      empty:            [0x12, empty],
-      lang:             [0x13, lang],
-      "only-of-type":   [0x14, onlyOfType],
-      // [0x15] reserved.
-      root:             [0x16, root],
-      target:           [0x17, target],
-      contains:         [0x18, contains],
-      digit:            [0x40, extendFilter],
-      negative:         [0x41, extendFilter],
-      tween:            [0x42, extendFilter],
-      boxeffect:        [0x43, extendFilter],
-      mom:              [0x44, parentFilter],
-      ui:               [0x50, uiFilter],
-      uislider:         [0x51, uiFilter],
-      // bit information
-      //    0x100: use flag
-      //    0x200: none operation flag
-      //    0x400: :not exclude flag
-      //    0x800: need double-semicolon(::) flag
-      before:           [0xf00, null],
-      after:            [0xf00, null],
-      "first-letter":   [0xf00, null],
-      "first-line":     [0xf00, null] };
+        "first-child":      [0x01, uuquerychildfilter],
+        "last-child":       [0x02, uuquerychildfilter],
+        "only-child":       [0x03, uuquerychildfilter],
+        "nth-child":        [0x04, nthChildFilter],
+        "nth-last-child":   [0x05, nthChildFilter],
+        "nth-of-type":      [0x06, nthOfTypeFilter],
+        "nth-last-of-type":
+                            [0x07, nthOfTypeFilter],
+        "first-of-type":    [0x09, ofTypeFilter],
+        "last-of-type":     [0x0a, ofTypeFilter],
+        enabled:            [0x0b, simpleFilter],
+        disabled:           [0x0c, simpleFilter],
+        checked:            [0x0d, simpleFilter],
+        link:               [0x0e, uu.config.visited ? visitedFilter : link],
+        visited:            [0x0f, uu.config.visited ? visitedFilter : _DUMMY],
+        hover:              [0x10, actionFilter],
+        focus:              [0x11, actionFilter],
+        empty:              [0x12, empty],
+        lang:               [0x13, lang],
+        "only-of-type":     [0x14, onlyOfType],
+        // [0x15] reserved.
+        root:               [0x16, root],
+        target:             [0x17, target],
+        contains:           [0x18, contains],
+        digit:              [0x40, extendFilter],
+        negative:           [0x41, extendFilter],
+        tween:              [0x42, extendFilter],
+        boxeffect:          [0x43, extendFilter],
+        mom:                [0x44, parentFilter],
+        ui:                 [0x50, uiFilter],
+        uislider:           [0x51, uiFilter],
+        // bit information
+        //    0x100: use flag
+        //    0x200: none operation flag
+        //    0x400: :not exclude flag
+        //    0x800: need double-semicolon(::) flag
+        before:             [0xf00, null],
+        after:              [0xf00, null],
+        "first-letter":     [0xf00, null],
+        "first-line":       [0xf00, null]
+    };
 
 if (uu.config.visited) {
     delete _QUICK_STATIC[":link"];
@@ -288,7 +291,9 @@ function uuqueryselectorall(expr,      // @param String: expr
                         for (v = ctx[i].nextSibling; v; v = v.nextSibling) {
                             if (v.nodeType === 1) {
                                 w = v.tagName;
-                                if (uu.ie && !w.indexOf("/")) { continue; } // fix #25
+                                if (uu.ie && !w.indexOf("/")) {
+                                    continue; // fix #25
+                                }
                                 if (isUniversal || w === tag) {
                                     r[++ri] = v;
                                 }
@@ -461,9 +466,9 @@ function uuqueryselectorall(expr,      // @param String: expr
                         }
                     } else { // "[A=V]"
                         // fix #Acid2 [class=second two]
-                        if (!match[3] &&
-                              match[4].indexOf(" ") >= 0 &&
-                              match[4].replace(_SYNTAX_ERROR2, "").indexOf(" ") >= 0) {
+                        if (!match[3]
+                            && match[4].indexOf(" ") >= 0
+                            && match[4].replace(_SYNTAX_ERROR2, "").indexOf(" ") >= 0) {
                             throw new Error(match[0] + " syntax error");
                         }
                         needle = uu.trim.quote(match[4]);
@@ -591,7 +596,9 @@ function judgeAttr(negate, elms, attr, operator, value) {
         case 3: rex = v; break;                           // [attr *= value]
         case 4: rex = "^" + v; break;                     // [attr ^= value]
         case 5: rex = v + "$"; break;                     // [attr $= value]
-        case 6: if (v.indexOf(" ") >= 0) { return rv; }   // fix #7b
+        case 6: if (v.indexOf(" ") >= 0) {
+                    return rv; // fix #7b
+                }
                 rex = "(?:^| )" + v + "(?:$| )"; break;   // [attr ~= value]
         case 7: rex = "^" + v + "\\-|^" + v + "$"; break; // [attr |= value]
         }
@@ -906,11 +913,21 @@ function onlyOfType(fid, negate, elms, pseudo, value, tags, contentType) {
 function nth(anb) {
     var a, b, c, match = _NTH_ANB.exec(anb);
 
-    if (!match) { throw new Error(anb + " unsupported"); }
-    if (match[2]) { return { a: 2, b: 0, k: 3 }; } // nth(even)
-    if (match[3]) { return { a: 2, b: 1, k: 3 }; } // nth(odd)
-    if (match[4]) { return { a: 0, b: 0, k: 2 }; } // nth(1n+0), nth(n+0), nht(n)
-    if (match[5]) { return { a: 0, b: parseInt(match[5], 10), k: 1 }; } // nth(1)
+    if (!match) {
+        throw new Error(anb + " unsupported");
+    }
+    if (match[2]) {
+        return { a: 2, b: 0, k: 3 }; // nth(even)
+    }
+    if (match[3]) {
+        return { a: 2, b: 1, k: 3 }; // nth(odd)
+    }
+    if (match[4]) {
+        return { a: 0, b: 0, k: 2 }; // nth(1n+0), nth(n+0), nht(n)
+    }
+    if (match[5]) {
+        return { a: 0, b: parseInt(match[5], 10), k: 1 }; // nth(1)
+    }
     a = (match[7] === "-" ? -1 : match[7] || 1) - 0;
     b = (match[8] || 0) - 0;
     c = a < 2;

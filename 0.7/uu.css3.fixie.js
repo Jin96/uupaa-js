@@ -3,7 +3,7 @@
 // depend: uu.js, uu.css.js, uu.css3.js
 uu.agein || (function(win, doc, uu) {
 var _styleSheetID = "uucss3ie",
-    _spacer = uu.config.imgdir + "uu1dot.gif",
+    _spacer = uu.config.dir + "uu1dot.gif",
     _job = { position: [], maxmin: [] },
     _ALPHA1 = "progid:DXImageTransform.Microsoft.AlphaImageLoader",
     _ALPHA2 = " " + _ALPHA1 + "(src='#',sizingMethod='image')",

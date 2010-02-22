@@ -4,8 +4,8 @@
 //
 uu.agein || (function(win, doc, uu) {
 
-var _flashCanvas = (uu.ie && uu.ver.flash > 9 && uu.config.flash) ?
-                   uu.ajax.sync.preload(uu.config.imgdir + "uu.canvas.swf") : 0;
+var _flashCanvas = (uu.ie && uu.ver.flash > 9) ?
+                   uu.ajax.sync.preload(uu.config.dir + "uu.canvas.swf") : 0;
 
 uu.mix(uu.canvas, {
     init:           uucanvasinit,   // uu.canvas.init()

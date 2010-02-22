@@ -1,9 +1,9 @@
 
 // === track plugin (Google Analytics) ===
 // depend: uu.js
-uu.again || (function(win, doc, uu, uup) {
+uu.again || (function(win, doc, uu) {
 
-uup.track = uuptrack; // uu.track("UA-XXXXX-X")
+uu.plugin.track = uuptrack; // uu.track("UA-XXXXX-X")
 
 // uu.track - add Google Analytics script
 function uuptrack(account, // @param String: "UA-XXXXX-X"
@@ -23,5 +23,5 @@ function uuptrack(account, // @param String: "UA-XXXXX-X"
   setTimeout(_uutrackload, delay * 1000);
 }
 
-})(window, document, uu, uup);
+})(window, document, uu);
 

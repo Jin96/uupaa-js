@@ -26,8 +26,8 @@ function marge($packagefile, $outfile, $minify, $optimize) {
     $src = trim($value);
     $txt = file_get_contents($dir . $src);
 
-    // \r\n -> \n
-    $txt = preg_replace('/(\r\n|\r|\n)/m', "\n", $txt);
+    // \r\n(CRLF) -> \n(LF)
+    $txt = preg_replace('/(\r\n|\r|\n)/m', "\n", $txt); // \r = x0d = CR, \n = x0a = LF
 
     if (!array_key_exists('debug', $optimize)) { // {{{!debug ～ }}}!debug
       $txt = preg_replace('/\{\{\{\!debug([^\n]*)\n.*?\}\}\}\!debug/ms', '', $txt);

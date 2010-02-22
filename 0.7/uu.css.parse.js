@@ -59,10 +59,10 @@ function uucssparse(cleancss) { // @param String: "clean css"
     if (uu.ie) {
         v = v.replace(/^\s*\{/,   "*{").  // }
               replace(/\}\s*\{/g, "}*{"). // }
-              replace(/\{\}/g,    "{ }"); // for IE Array.split bug
+              replace(/\{\}/g,    "{ }"); // [FIX][IE] Array.split bug
     }
     ary = v.split(/\s*\{|\}\s*/);
-    !uu.ie && ary.pop(); // for IE Array.split bug
+    !uu.ie && ary.pop(); // [FIX][IE] Array.split bug
 
     if (ary.length % 2) { // parse error
         uu.config.debug && alert("uu.css.parse() parse error\n" + v);
@@ -97,7 +97,7 @@ function uucssparse(cleancss) { // @param String: "clean css"
                     ++ignore;
                 } else if (rex1.test(val)) { // [!important] rule
                     val = val.replace(rex2, ""); // trim "!important"
-                    valid = (!uu.config.light && valids[prop]) ?
+                    valid = (uu.config.right && valids[prop]) ?
                                 uu.css.validate[prop](val).valid : 1;
                     if (valid) {
                         gd2[++gd2i] = prop + ":" + val;
@@ -106,7 +106,7 @@ function uucssparse(cleancss) { // @param String: "clean css"
                         ++ignore;
                     }
                 } else { // [normal] rule
-                    valid = (!uu.config.light && valids[prop]) ?
+                    valid = (uu.config.right && valids[prop]) ?
                                 uu.css.validate[prop](val).valid : 1;
                     if (valid) {
                         gd1[++gd1i] = prop + ":" + val; // "color:red"
@@ -166,10 +166,13 @@ function uucssimports() { // @return String: "dirty CSS"
         prop2 = uu.ie ? "uucss3memento" : "textContent"; // MEMENTO
 
     while ( (v = node[++i]) ) {
+
         if (!v.disabled) {
             href = v.href || "";
-            // ignore data:text/css for !(IE6,IE7)
+
+            // [IE6][IE7] decode "date:text/css..."
             if (!IMP_DATA_SCHEME.test(href)) {
+
                 if (IMP_CSS_FILE.test(href)) {
                     // <link>
                     w = uu.url.abs(v.href, absdir);
@@ -189,7 +192,7 @@ function uucssimports() { // @return String: "dirty CSS"
     }
     // decode datauri
     //    <link href="data:text/css,...">
-    if (!uu.config.light && uu.codec.datauri) {
+    if (uu.config.right && uu.codec.datauri) {
         node = doc.getElementsByTagName("link");
         i = -1;
         while ( (v = node[++i]) ) {
@@ -220,7 +223,7 @@ function uucssclean(dirtycss) { // @param String: dirty css
         replace(/\s*[\r\n]+\s*/g, " ").       // ...\r\n...
         replace(/[\u0000-\u001f]+/g, "").     // \u0009 -> "" (unicode)
         replace(/\\x?[0-3]?[0-9a-f]/gi, "")); // "\x9"  -> "" (hex \x00 ~ \x1f)
-                                            // "\9"   -> "" (octet \0 ~ \37)
+                                              // "\9"   -> "" (octet \0 ~ \37)
 }
 
 // inner - calculating a selector's specificity

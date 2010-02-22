@@ -3,14 +3,11 @@
 // --- user configurations ---
 //
 //  window.xconfig = {
+//      dir: ".",       // String(= "."): parts dir
 //      aria: 0,        // Number(= 0): 1 is enable WAI-ARIA
-//      debug: 0,       // Number(= 0): 1 is debug mode, 0 is normal mode
-//      flash: 1,       // Number(= 0): 1 is use flash //ja 1 で不足している機能を Flash で補填する
-//      light: 1,       // Number(= 1): 1 is light weight mode //ja 1 で速度優先モードを有効にする
-//      altcss: 0,      // Number/Function(= 0): AltCSS mode, 0 is auto, func is callback function
-//ja                                             関数を指定すると AltCSS の微調整が可能に
-//      imgdir: ".",    // String(= "."): image dir, //ja uupaa.js 用の画像ディレクトリを指定する
-//      cssexpr: 0,     // Number(= 0): 1 is enable CSS Expression(in IE)
+//      debug: 0,       // Number(= 0): 1 is DebugMode
+//      right: 0,       // Number(= 0): 1 is RightMode, 0 is QuickMode
+//      altcss: 0,      // Function(= void 0): AltCSSMode callback
 //      visited: 0,     // Number(= 0): 1 is enable uu.query(":visited")
 //      innerText: 0    // Number(= 0): 1 is enable innerText, outerHTML(in Gecko)
 //  };
@@ -41,12 +38,6 @@
 var uu; // window.uu - uupaa.js library namespace
         //ja uupaa.js ライブラリのネームスペース
 
-// window.uup - plugin namespace, enum plugins
-//ja            プラグインネームスペース及びプラグラインの列挙
-function uup() { // @return Array: ["plugin-name", ...]
-    return uu.hash.keys(uup);
-}
-
 // window.uue - createElement wrapper
 function uue(tag) { // @param String(= "div"): tag name, "a", "p"
                     // @return Node: <div>
@@ -59,10 +50,8 @@ function uunop() { // @return undefined:
 
 // --- main ---
 uu ? ++uu.agein : (function(win, doc) {
-var _cfg    = uuarg(win.xconfig || {}, {
-                    aria: 0, debug: 0, flash: 1, light: 1,
-                    altcss: 1, imgdir: ".",
-                    cssexpr: 0, visited: 0, innerText: 0 }),
+var _cfg    = uuarg(win.xconfig || {}, { dir: ".", aria: 0, debug: 0, right: 0,
+                                         visited: 0, innerText: 0 }),
     _ver    = _vers(), // browser, plugin, version detection
     _ie     = _ver.ie,
     _gecko  = _ver.gecko,
@@ -84,8 +73,8 @@ var _cfg    = uuarg(win.xconfig || {}, {
                 "[object CSSStyleDeclaration]":         0x1000,   // [WebKit][Opera]
                 "[object ComputedCSSStyleDeclaration]": 0x1000 }; // [Gecko]
 
-// imgdir path normalization("img" -> "img/")
-_cfg.imgdir = _cfg.imgdir.replace(/\/+$/, "") + "/";
+// parts dir normalization("../img" -> "../img/")
+_cfg.dir = _cfg.dir.replace(/\/+$/, "") + "/";
 
 // --- library structure ---
 uu = uumix(jamfactory, {            // uu(expr, ctx) -> Instance(jam)
@@ -121,7 +110,9 @@ uu = uumix(jamfactory, {            // uu(expr, ctx) -> Instance(jam)
                                     //                 (IE6+, Firefox3+, Safari3.1+, Google Chrome2+, Opera 9.5+)
                                     // uu.ver.jit    - Boolean: true is JIT browsers, Firefox3.5+, Google Chrome,
                                     //                                                Safari4+, Opera10.50+, IE9+
-    config:         _cfg,           // uu.config - { aria, debug, light, ... }
+    config:         _cfg,           // uu.config - { aria, debug, right, ... }
+    // --- plugin / plugin name space ---
+    plugin:         uuplugin,       // uu.plugin() -> ["plugin-name", ...]
     // --- ajax / jsonp ---
     ajax:     uumix(uuajax, {       // uu.ajax(url, option = {}, fn = void 0, ngfn = void 0)
         get:        uuajaxget,      // uu.ajax.get(url, option = {}, fn, ngfn = void 0) -> guid
@@ -306,6 +297,7 @@ uu = uumix(jamfactory, {            // uu(expr, ctx) -> Instance(jam)
         toNode:     uunodeidtonode, // uu.nodeid.toNode(nodeid) -> node
         remove:     uunodeidremove  // uu.nodeid.remove(node) -> node
     }),
+    // --- virtual node / node builder ---
     root:           doc.documentElement || _html, // root or <html> (IE quirks)
     html:           uuhtml,         // uu.html(node, attr, style, buildid) -> <html>
     head:           uuhead,         // uu.head(node, attr, style, buildid) -> <head>
@@ -535,6 +527,12 @@ function uujam(expr,  // @param Node/NodeArray/String/Instance/window/document:
         : Array.isArray(expr) ? expr.concat() // clone NodeArray
         : (expr instanceof uujam) ? expr._ns.concat() // copy constructor
         : []; // bad expr
+}
+
+// --- plugin / plugin name space ---
+// uu.plugin - enum plugins
+function uuplugin() { // @return Array: ["plugin-name", ...]
+    return uu.hash.keys(uuplugin);
 }
 
 // --- ajax / jsonp ---
