@@ -212,11 +212,11 @@ function background(value) { // @param String: -uu-background: value
                              //     valid     - Number: 0 or 1
     var rv = { image: [], repeat: [], position: [],
                attachment: [], origin: [], clip: [] },
-        multi, i = -1, j, final, m, v, w, ary,
+        multi, i = -1, j, finalLayer, m, v, w, ary,
         img, rpt, att, pox, poy, ori, clp, rgba, valid = 1;
 
     multi = uu.split.token(uu.trim.inner(value), ",");
-    final = multi.length - 1; // final-bg-layer
+    finalLayer = multi.length - 1; // final-bg-layer
 
     while (valid && (v = multi[++i])) {
         img = rpt = pox = poy = ori = clp = "";
@@ -241,7 +241,7 @@ function background(value) { // @param String: -uu-background: value
                         : pox ? (poy = m[1])
                               : (pox = m[1]);
                     continue;
-                } else if (i === final) {
+                } else if (i === finalLayer) {
                     // color is permitted in <final-bg-layer>, but not in <bg-layer>
                     // http://www.w3.org/TR/css3-background/
                     if (!rgba) {

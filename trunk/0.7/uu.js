@@ -1688,7 +1688,8 @@ function uucolor(str) { // @parem String: "black", "#fff", "rgba(0,0,0,0)" ...
         case 3:
             m = (rgb ? dig._rgba
                      : dig._hsla).exec(v.replace(dig._sp, "").
-                                         replace(dig._percent, _uucolorp2n));
+                                         replace(dig._percent, rgb ? _percent255
+                                                                   : _percent100));
             if (m) {
                 r = m[1] | 0, g = m[2] | 0, b = m[3] | 0;
                 a = m[4] ? parseFloat(m[4]) : 1;
@@ -1704,16 +1705,24 @@ uucolor._db = { transparent:{ r: 0, g: 0, b: 0, a: 0, argb: "#00000000", num: 0,
                               hex: "#000000", rgba: "rgba(0,0,0,0)" }};
 uucolor._sp = /\s+/g; // many space
 uucolor._hex = /^#(?:[\da-f]{3,8})$/; // #fff or #ffffff or #ffffffff
-uucolor._hsla = /^hsla?\((\d+),(\d+),(\d+)(?:,([\d\.]+))?\)/; // hsla(,,,)
-uucolor._rgba = /^rgba?\((\d+),(\d+),(\d+)(?:,([\d\.]+))?\)/; // rgba(,,,)
+uucolor._hsla = /^hsla?\(([\d\.]+),([\d\.]+),([\d\.]+)(?:,([\d\.]+))?\)/; // hsla(,,,)
+uucolor._rgba = /^rgba?\(([\d\.]+),([\d\.]+),([\d\.]+)(?:,([\d\.]+))?\)/; // rgba(,,,)
 uucolor._cache = {};
-uucolor._percent = /[\d\.]+%/g;
+uucolor._percent = /([\d\.]+)%/g;
 
-// inner - percent(0.0~1.0) to number(0~255)
-function _uucolorp2n(n) { // @param Number: 0.0~1.0
+// inner - percent("100%") to number(0~255)
+function _percent255(_,   // @param String: "100.0%"
+                     n) { // @param String: "100.0"
                           // @return Number: 0~255
-    n = ((parseFloat(n) || 0) * 2.56) | 0;
-    return n > 255 ? 255 : n;
+    return (n * 2.555) & 0xff;
+}
+
+// inner - percent("100%") to number(0~100)
+function _percent100(_,   // @param String: "100.0%"
+                     n) { // @param Number: "100.0"
+                          // @return Number: 0~100
+    n = n | 0;
+    return n > 100 ? 100 : n;
 }
 
 // uu.color.add
@@ -1725,8 +1734,8 @@ function uucoloradd(str) { // @param JointString: "000000black,..."
         w = v.slice(0, 6);
         n = parseInt(w, 16);
         r = n >> 16;
-        g = (n >> 8) & 0xFF;
-        b = n & 0xFF;
+        g = (n >> 8) & 0xff;
+        b = n & 0xff;
         dig._db[v.slice(6)] = { hex: "#" + w, r: r, g: g, b: b, a: 1,
                                 argb: "#ff" + w, num: n,
                                 rgba: "rgba(" + r + "," + g + "," + b + ",1)" };
@@ -1740,7 +1749,7 @@ function uucolorfix(c) { // @param ColorHash/RGBAHash:
 
     c.num  || (c.num  = (c.r << 16) + (c.g << 8) + c.b);
     c.hex  || (c.hex  = "#" + hex2[c.r] + hex2[c.g] + hex2[c.b]);
-    c.argb || (c.argb = "#" + hex2[_uucolorp2n(c.a * 100)] +
+    c.argb || (c.argb = "#" + hex2[(c.a * 255) & 0xff] +
                               hex2[c.r] + hex2[c.g] + hex2[c.b]);
     c.rgba || (c.rgba = "rgba(" + c.r + "," + c.g + "," + c.b + "," + c.a + ")");
     return c;

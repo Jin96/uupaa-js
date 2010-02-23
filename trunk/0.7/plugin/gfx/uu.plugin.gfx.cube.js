@@ -1,6 +1,6 @@
 
 // === gfx - cube polygon plugin ===
-uu.again || (function(uu, uup, _math) {
+uu.again || (function(uu, _math) {
 
 var _PI = _math.PI,
     _DEFAULT_PARM = {
@@ -158,5 +158,5 @@ function gfxcubeloop(me, ctx, param) {
   }
 }
 
-})(uu, uup, Math);
+})(uu, Math);
 

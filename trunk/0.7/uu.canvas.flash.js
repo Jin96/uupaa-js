@@ -88,7 +88,7 @@ function build(node) { // @param Node: <canvas>
         var ctx = node.uuctx2d;
 
         ctx._readyState = 1; // 1: draw ready
-        ctx.sendState();
+        ctx.sendState(0xf);
         ctx.send();
         uu.flash.dmz[id] = null; // free
     }
@@ -211,7 +211,7 @@ function closePath() {
 // CanvasRenderingContext2D.prototype.createLinearGradient
 function createLinearGradient(x0, y0, x1, y1) { // @return CanvasGradient:
     function CanvasGradient(x0, y0, x1, y1) {
-        this.linear = 1;
+        this.type = 1;
         this.param = x0 + "\t" + y0 + "\t" + x1 + "\t" + y1;
         this.color = [];
         this._cache = "";
@@ -230,33 +230,40 @@ function addColorStop(offset, color) {
 
 // CanvasGradient.prototype.toString
 function toString() {
-    if (this._cache) {
-        return this._cache;
-    }
-    this.color.sort(function(a, b) {
-        return a.offset - b.offset;
-    });
+    if (!this._cache) {
+        this.color.sort(function(a, b) {
+            return a.offset - b.offset;
+        });
 
-    var rv = [], ary = this.color, v, i = 0, iz = ary.length;
+        var rv = [], ary = this.color, v, i = 0, iz = ary.length;
 
-    for (; i < iz; ++i) {
-        v = ary[i];
-        rv.push(v.offset, v.color.num, v.color.a);
+        for (; i < iz; ++i) {
+            v = ary[i];
+            rv.push(v.offset, v.color.num, v.color.a);
+        }
+        // liner
+        //      x0, y0,     x1, y1,     length, {offset1, color1.num, color1.a},
+        //                                      {offset2, ...}
+        // radial
+        //      x0, y0, r0, x1, y1, r1, length, {offset1, color1.num, color1.a},
+        //                                      {offset2, ...}
+        this._cache = this.param + "\t" + iz + "\t" + rv.join("\t");
     }
-    // x0, y0, x1, y0, length, {offset1, color1.num, color1.a}, {offset2, ...}
-    return this._cache = this.param + "\t" + iz + "\t" + rv.join("\t");
+    return this._cache;
 }
+
 
 // CanvasRenderingContext2D.prototype.createPattern
 function createPattern(image,    // @param HTMLImageElement/HTMLCanvasElement:
                        repeat) { // @param String(= "repeat"): repetition
                                  // @return Hash:
     function CanvasPattern(image, repeat) {
-        this.fn = _patternFill;
+        this.type = 3;
         this.src = image.src; // HTMLImageElement
-        this.dim = uu.img.actsize(image);
-        this.type = 3; // 3:tile
         this.repeat = repeat;
+        this.toString = function() {
+            return this.src + "\t" + this.repeat;
+        };
     }
     repeat = repeat || "repeat";
 
@@ -273,7 +280,7 @@ function createPattern(image,    // @param HTMLImageElement/HTMLCanvasElement:
 // CanvasRenderingContext2D.prototype.createRadialGradient
 function createRadialGradient(x0, y0, r0, x1, y1, r1) { // @return CanvasGradient:
     function CanvasGradient(x0, y0, r0, x1, y1, r1) {
-        this.radial = 1;
+        this.type = 2;
         this.param = x0 + "\t" + y0 + "\t" + r0 + "\t" +
                      x1 + "\t" + y1 + "\t" + r1;
         this.color = [];
@@ -293,7 +300,7 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
         args = (a3 === void 0) ? 3
              : (a5 === void 0) ? 5 : 9;
 
-    this.sendState();
+    this.sendState(0x5);
     this.send("dI\t" + args + "\t" + src + "\t" +
               a1 + "\t" + a2 + "\t" +
               (a3 || 0) + "\t" + (a4 || 0) + "\t" +
@@ -303,19 +310,19 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
 
 // CanvasRenderingContext2D.prototype.fill
 function fill() {
-    this.sendState();
+    this.sendState(0x5);
     this.send("fi");
 }
 
 // CanvasRenderingContext2D.prototype.fillRect
 function fillRect(x, y, w, h) {
-    this.sendState();
+    this.sendState(0x5);
     this.send("fR\t" + x + "\t" + y + "\t" + w + "\t" + h);
 }
 
 // CanvasRenderingContext2D.prototype.fillText
 function fillText(text, x, y, maxWidth) {
-    this.sendState();
+    this.sendState(0xd);
     this.send("fT\t" + text + "\t" + (x || 0) + "\t" +
                                      (y || 0) + "\t" + maxWidth || 0);
 }
@@ -359,7 +366,7 @@ function quadraticCurveTo(cpx, cpy, x, y) {
 
 // CanvasRenderingContext2D.prototype.rect
 function rect(x, y, w, h) {
-    this.sendState();
+    this.sendState(0x5);
     this.send("re\t" + x + "\t" + y + "\t" + w + "\t" + h);
 }
 
@@ -398,7 +405,7 @@ function save() {
     _copyprop(prop, this);
     this._stack.push(prop);
 
-    this.sendState(); // [!]
+    this.sendState(0xf); // [!]
     this.send("sv");
 }
 
@@ -416,19 +423,19 @@ function setTransform(m11, m12, m21, m22, dx, dy) {
 
 // CanvasRenderingContext2D.prototype.stroke
 function stroke() {
-    this.sendState();
+    this.sendState(0x7);
     this.send("st");
 }
 
 // CanvasRenderingContext2D.prototype.strokeRect
 function strokeRect(x, y, w, h) {
-    this.sendState();
+    this.sendState(0x7);
     this.send("sR\t" + x + "\t" + y + "\t" + w + "\t" + h);
 }
 
 // CanvasRenderingContext2D.prototype.strokeText
 function strokeText(text, x, y, maxWidth) {
-    this.sendState();
+    this.sendState(0xf);
     this.send("sT\t" + text + "\t" + (x || 0) + "\t" + (y || 0) + "\t" + maxWidth || 0);
 }
 
@@ -456,66 +463,76 @@ function unlock() {
 }
 
 // inner
-function sendState() {
+function sendState(bits) { // @param Number: bits
     var ary = this._stock, i = ary.length - 1;
 
-    this._alpha !== this.globalAlpha &&
-        (ary[++i] = "gA\t" + (this._alpha = this.globalAlpha));
+    if (bits & 0x1) {
+        this._alpha !== this.globalAlpha &&
+            (ary[++i] = "gA\t" + (this._alpha = this.globalAlpha));
 
-    this._mix != this.globalCompositeOperation &&
-        (ary[++i] = "gC\t" + (this._mix = this.globalCompositeOperation));
+/*
+        this._mix != this.globalCompositeOperation &&
+            (ary[++i] = "gC\t" + (this._mix = this.globalCompositeOperation));
+ */
 
-    if (this._strokeStyle !== this.strokeStyle) {
-        if (typeof this.strokeStyle === "string") {
-            this.__strokeStyle = uu.color(this._strokeStyle = this.strokeStyle);
-            ary[++i] = "s0\t" + this.__strokeStyle.num + "\t" + this.__strokeStyle.a;
-        } else if (this.strokeStyle.linear) {
-            ary[++i] = "s1\t" + this.strokeStyle.toString();
+        if (this._strokeStyle !== this.strokeStyle) {
+            if (typeof this.strokeStyle === "string") {
+                this.__strokeStyle = uu.color(this._strokeStyle = this.strokeStyle);
+                ary[++i] = "s0\t" + this.__strokeStyle.num + "\t" + this.__strokeStyle.a;
+            } else {
+                ary[++i] = "s" + this.strokeStyle.type + "\t" + this.strokeStyle.toString();
+            }
+        }
+
+        if (this._fillStyle !== this.fillStyle) {
+            if (typeof this.fillStyle === "string") {
+                this.__fillStyle = uu.color(this._fillStyle = this.fillStyle);
+                ary[++i] = "f0\t" + this.__fillStyle.num + "\t" + this.__fillStyle.a;
+            } else {
+                ary[++i] = "f" + this.fillStyle.type + "\t" + this.fillStyle.toString();
+            }
         }
     }
+    if (bits & 0x2) {
+        this._lineWidth !== this.lineWidth &&
+            (ary[++i] = "lW\t" + (this._lineWidth = this.lineWidth));
 
-    if (this._fillStyle !== this.fillStyle) {
-        if (typeof this.fillStyle === "string") {
-            this.__fillStyle = uu.color(this._fillStyle = this.fillStyle);
-            ary[++i] = "f0\t" + this.__fillStyle.num + "\t" + this.__fillStyle.a;
-        } else if (this.fillStyle.linear) {
-            ary[++i] = "f1\t" + this.fillStyle.toString();
-        }
+        this._lineCap !== this.lineCap &&
+            (ary[++i] = "lC\t" + (this._lineCap = this.lineCap));
+
+        this._lineJoin !== this.lineJoin &&
+            (ary[++i] = "lJ\t" + (this._lineJoin = this.lineJoin));
+
+        this._miterLimit !== this.miterLimit &&
+            (ary[++i] = "mL\t" + (this._miterLimit = this.miterLimit));
     }
+/*
+    if (bits & 0x4) {
+        this._shadowBlur !== this.shadowBlur &&
+            (ary[++i] = "sB\t" + (this._shadowBlur = this.shadowBlur));
 
-    this._lineWidth !== this.lineWidth &&
-        (ary[++i] = "lW\t" + (this._lineWidth = this.lineWidth));
+        this._shadowColor !== this.shadowColor &&
+            (this.__shadowColor = uu.color(this._shadowColor = this.shadowColor),
+             ary[++i] = "sC\t" + this.__shadowColor.num + "\t" + this.__shadowColor.a);
 
-    this._lineCap !== this.lineCap &&
-        (ary[++i] = "lC\t" + (this._lineCap = this.lineCap));
+        this._shadowOffsetX !== this.shadowOffsetX &&
+            (ary[++i] = "sX\t" + (this._shadowOffsetX = this.shadowOffsetX));
 
-    this._lineJoin !== this.lineJoin &&
-        (ary[++i] = "lJ\t" + (this._lineJoin = this.lineJoin));
+        this._shadowOffsetY !== this.shadowOffsetY &&
+            (ary[++i] = "sY\t" + (this._shadowOffsetY = this.shadowOffsetY));
+    }
+ */
+    if (bits & 0x8) {
+        this._font !== this.font &&
+            (ary[++i] = "fo\t" + (this._font = this.font));
+/*
+        this._textAlign !== this.textAlign &&
+            (ary[++i] = "tA\t" + (this._textAlign = this.textAlign));
 
-    this._miterLimit !== this.miterLimit &&
-        (ary[++i] = "mL\t" + (this._miterLimit = this.miterLimit));
-
-    this._shadowBlur !== this.shadowBlur &&
-        (ary[++i] = "sB\t" + (this._shadowBlur = this.shadowBlur));
-
-    this._shadowColor !== this.shadowColor &&
-        (this.__shadowColor = uu.color(this._shadowColor = this.shadowColor),
-         ary[++i] = "sC\t" + this.__shadowColor.num + "\t" + this.__shadowColor.a);
-
-    this._shadowOffsetX !== this.shadowOffsetX &&
-        (ary[++i] = "sX\t" + (this._shadowOffsetX = this.shadowOffsetX));
-
-    this._shadowOffsetY !== this.shadowOffsetY &&
-        (ary[++i] = "sY\t" + (this._shadowOffsetY = this.shadowOffsetY));
-
-    this._font !== this.font &&
-        (ary[++i] = "fo\t" + (this._font = this.font));
-
-    this._textAlign !== this.textAlign &&
-        (ary[++i] = "tA\t" + (this._textAlign = this.textAlign));
-
-    this._textBaseline !== this.textBaseline &&
-        (ary[++i] = "tB\t" + (this._textBaseline = this.textBaseline));
+        this._textBaseline !== this.textBaseline &&
+            (ary[++i] = "tB\t" + (this._textBaseline = this.textBaseline));
+ */
+    }
 }
 
 // inner -
