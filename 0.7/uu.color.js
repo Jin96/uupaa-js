@@ -18,9 +18,9 @@ uu.mix(uu.color, {
     comple:       uucolorcomple,    // uu.color.comple(RGBAHash/ColorHash) -> ColorHash
     arrange:      uucolorarrange,   // uu.color.arrange(RGBAHash/ColorHash, h = 0, s = 0, v = 0) -> ColorHash
     rgba2hsva:    uucolorrgba2hsva, // uu.color.rgba2hsva(RGBAHash/ColorHash) -> HSVAHash
-    hsva2rgba:    uucolorhsva2rgba, // uu.color.hsva2rgba(HSVAHash) -> ColorHash
+    hsva2rgba:    uucolorhsva2rgba, // uu.color.hsva2rgba(HSVAHash) -> RGBAHash
     rgba2hsla:    uucolorrgba2hsla, // uu.color.rgba2hsla(RGBAHash/ColorHash) -> HSLAHash
-    hsla2rgba:    uucolorhsla2rgba  // uu.color.hsla2rgba(HSLAHash) -> ColorHash
+    hsla2rgba:    uucolorhsla2rgba  // uu.color.hsla2rgba(HSLAHash) -> RGBAHash
 });
 
 // uu.color.gray - gray color (G channel method)
@@ -66,7 +66,7 @@ function uucolorarrange(c,   // @param ColorHash/RGBAHash:
     rv.h += h, rv.h = (rv.h > r) ? rv.h - r : (rv.h < 0) ? rv.h + r : rv.h;
     rv.s += s, rv.s = (rv.s > 100) ? 100 : (rv.s < 0) ? 0 : rv.s;
     rv.v += v, rv.v = (rv.v > 100) ? 100 : (rv.v < 0) ? 0 : rv.v;
-    return uucolorhsva2rgba(rv); // ColorHash
+    return uu.color.fix(uucolorhsva2rgba(rv)); // ColorHash
 }
 
 // uu.color.rgba2hsva
@@ -91,7 +91,7 @@ function uucolorrgba2hsva(c) { // @param ColorHash/RGBAHash:
 
 // uu.color.hsva2rgba
 function uucolorhsva2rgba(hsva) { // @param HSVAHash:
-                                  // @return ColorHash:
+                                  // @return RGBAHash:
     var rv,
         h = (hsva.h >= 360) ? 0 : hsva.h,
         s = hsva.s / 100,
@@ -103,7 +103,7 @@ function uucolorhsva2rgba(hsva) { // @param HSVAHash:
 
     if (!s) {
         h = round(v * 255);
-        return { r: h, g: h, b: h, a: a };
+        return { r: h, g: h, b: h, a: a }; // RGBAHash
     }
     v255 = v * 255,
     p = round((1 - s) * v255),
@@ -120,7 +120,7 @@ function uucolorhsva2rgba(hsva) { // @param HSVAHash:
     default: rv = { r: 0, g: 0, b: 0 };
     }
     rv.a = a;
-    return uu.color.fix(rv);
+    return rv; // RGBAHash
 }
 
 // uu.color.rgba2hsla
@@ -152,7 +152,7 @@ function uucolorrgba2hsla(c) { // @param ColorHash/RGBAHash:
 
 // uu.color.hsla2rgba - ( h: 0-360, s: 0-100, l: 0-100, a: alpha )
 function uucolorhsla2rgba(hsla) { // @param HSLAHash:
-                                  // @return ColorHash:
+                                  // @return RGBAHash:
     var h = (hsla.h === 360) ? 0 : hsla.h,
         s = hsla.s / 100,
         l = hsla.l / 100,
@@ -181,8 +181,10 @@ function uucolorhsla2rgba(hsla) { // @param HSLAHash:
         g = l1 * g + l2;
         b = l1 * b + l2;
     }
-    return uu.color.fix({ r: _round(r * 255), g: _round(g * 255),
-                          b: _round(b * 255), a: hsla.a });
+    return { r: ((r * 255) + 0.5) | 0,
+             g: ((g * 255) + 0.5) | 0,
+             b: ((b * 255) + 0.5) | 0,
+             a: hsla.a };
 }
 
 // --- initialize ---

@@ -903,7 +903,7 @@ function _css3init() {
 
         _selector = ({ "off": 0, "auto": _selector, "on": 1 }[hash.selector]) || 0;
         _render   = ({ "off": 0, "auto": _render,   "on": 1 }[hash.render])   || 0;
-        expr      = ({ "off": 0, "auto": _cssexpr,  "on": 1 }[hash.cssexpr])  || 0;
+        expr      = ({ "off": 0, "auto": uu.ie,     "on": 1 }[hash.cssexpr])  || 0;
 
         if (!expr) {
             _EXCSS.maxmin = _EXCSS.position = 0;

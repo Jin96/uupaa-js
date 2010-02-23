@@ -538,7 +538,7 @@ function boost() {
       var now = new Date(),
           sec = now.getSeconds();
 
-      if (!(sec % 10)) { // 0, 10, 20, ...
+      if (!(sec % 5)) { // 0, 5, 10, 15, ...
         var node = document.getElementById("wait")
         node.style.display = "none";
 
