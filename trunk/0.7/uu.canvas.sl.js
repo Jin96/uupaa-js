@@ -13,6 +13,7 @@
 uu.agein || (function(win, doc, uu) {
 var _SHADOW = { width: 4, from: 0.01, delta: 0.05 },
     _COMPOS = { "source-over": 0, "destination-over": 4, copy: 10 },
+    _FIXED4 = /\.(\d{4})(?:[\d]+)/g, // toFixed(4)
     _TO_DEGREES = 180 / Math.PI, // Math.toDegrees - from java.math
     _FONT_STYLES = { normal: "Normal", italic: "Italic", oblique: "Italic" },
     _FONT_WEIGHTS = { normal: "Normal", bold: "Bold", bolder: "ExtraBold",
@@ -36,6 +37,7 @@ uu.mix(uu.canvas.SL2D.prototype, {
     createRadialGradient:   createRadialGradient,
     drawImage:              drawImage,
     fill:                   fill,
+    fillCircle:             fillCircle,     // [EXTEND]
     fillRect:               fillRect,
     fillText:               fillText,
     getImageData:           uunop,
@@ -57,6 +59,7 @@ uu.mix(uu.canvas.SL2D.prototype, {
     scale:                  scale,
     setTransform:           setTransform,
     stroke:                 stroke,
+    strokeCircle:           strokeCircle,   // [EXTEND]
     strokeRect:             strokeRect,
     strokeText:             strokeText,
     transform:              transform,
@@ -507,6 +510,23 @@ function fill(path) {
     this.stroke(path, 1);
 }
 
+// CanvasRenderingContext2D.prototype.fillCircle
+function fillCircle(x,       // @param Number:
+                    y,       // @param Number:
+                    r,       // @param Number: radius
+                    color) { // @param ColorHash:
+
+    var fg = '<Ellipse Canvas.Left="' + (x - r) +
+             '" Canvas.Top="' + (y - r) +
+             '" Opacity="' + color.a * this.globalAlpha +
+             '" Width="' + (r * 2) +
+             '" Height="' + (r * 2) +
+             '" Fill="' + color.hex + '" />';
+
+    this._state !== 0x1 ? this._stock.push(fg)
+                        : this._view.add(this._content.createFromXaml(fg));
+}
+
 // CanvasRenderingContext2D.prototype.fillRect
 function fillRect(x, y, w, h) {
     this.stroke(_rect(this, x, y, w, h), 1);
@@ -679,7 +699,8 @@ function stroke(path, fill) {
         }
     }
 
-    path = path || this._path.join("");
+    // (123.456789).toFixed(4) -> "123.4567"
+    path = (path || this._path.join("")).replace(_FIXED4, ".$1");
 
     var rv = [], fg, zindex = 0, mix,
         style = fill ? this.fillStyle
@@ -717,6 +738,23 @@ function stroke(path, fill) {
     }
     this.xFlyweight ||
         this._history.push(this._clipPath ? (fg = _clippy(this, fg)) : fg);
+    this._state !== 0x1 ? this._stock.push(fg)
+                        : this._view.add(this._content.createFromXaml(fg));
+}
+
+// CanvasRenderingContext2D.prototype.strokeCircle
+function strokeCircle(x,       // @param Number:
+                      y,       // @param Number:
+                      r,       // @param Number: radius
+                      color) { // @param ColorHash:
+    var fg = '<Ellipse Canvas.Left="' + (x - r) +
+             '" Canvas.Top="' + (y - r) +
+             '" Opacity="' + color.a * this.globalAlpha +
+             '" Width="' + (r * 2) +
+             '" Height="' + (r * 2) +
+             '" Stroke="' + color.hex +
+             '" StrokeThickness="' + this.lineWidth + '" />';
+
     this._state !== 0x1 ? this._stock.push(fg)
                         : this._view.add(this._content.createFromXaml(fg));
 }

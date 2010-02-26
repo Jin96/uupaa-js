@@ -31,6 +31,7 @@ uu.mix(uu.canvas.VML2D.prototype, {
     createRadialGradient:   createRadialGradient,
     drawImage:              drawImage,
     fill:                   fill,
+    fillCircle:             fillCircle,     // [EXTEND]
     fillRect:               fillRect,
     fillText:               fillText,
     getImageData:           uunop,
@@ -52,6 +53,7 @@ uu.mix(uu.canvas.VML2D.prototype, {
     scale:                  scale,
     setTransform:           setTransform,
     stroke:                 stroke,
+    strokeCircle:           strokeCircle,   // [EXTEND]
     strokeRect:             strokeRect,
     strokeText:             strokeText,
     transform:              transform,
@@ -490,6 +492,23 @@ function fill(path) {
     this.stroke(path, 1);
 }
 
+// CanvasRenderingContext2D.prototype.fillCircle
+function fillCircle(x,       // @param Number:
+                    y,       // @param Number:
+                    r,       // @param Number: radius
+                    color) { // @param ColorHash:
+    var fg = '<v:oval style="position:absolute;left:' + (x - r) +
+             'px;top:' + (y - r) +
+             'px;width:' + (r * 2) +
+             'px;height:' + (r * 2) +
+             'px" filled="t" stroked="f"><v:fill opacity="' +
+             (color.a * this.globalAlpha) +
+             '" color="' + color.hex + '" /></v:oval>';
+
+    this._state !== 0x1 ? this._stock.push(fg)
+                        : this._view.insertAdjacentHTML("BeforeEnd", fg);
+}
+
 // CanvasRenderingContext2D.prototype.fillRect
 function fillRect(x, y, w, h) {
     var path = _rect(this, x, y, w, h);
@@ -775,6 +794,24 @@ function stroke(path, fill) {
                         : this._view.insertAdjacentHTML("BeforeEnd", fg);
 }
 
+// CanvasRenderingContext2D.prototype.strokeCircle
+function strokeCircle(x,       // @param Number:
+                      y,       // @param Number:
+                      r,       // @param Number: radius
+                      color) { // @param ColorHash:
+    var fg = '<v:oval style="position:absolute;left:' + (x - r) +
+             'px;top:' + (y - r) +
+             'px;width:' + (r * 2) +
+             'px;height:' + (r * 2) +
+             'px" filled="f" stroked="t"><v:stroke opacity="' +
+             (color.a * this.globalAlpha) +
+             '" color="' + color.hex +
+             '" weight="' + this.lineWidth + 'px" /></v:oval>';
+
+    this._state !== 0x1 ? this._stock.push(fg)
+                        : this._view.insertAdjacentHTML("BeforeEnd", fg);
+}
+
 // CanvasRenderingContext2D.prototype.strokeRect
 function strokeRect(x, y, w, h) {
     this.stroke(_rect(this, x, y, w, h));
@@ -1041,12 +1078,11 @@ function _radialGradientFill(ctx, obj, path, fill, mix, zindex) {
         }
 
         if (fill) {
-            focusParam = ['"><v:fill', ' type="',
-                          'gradientradial" method="sigma" focussize="',
+            focusParam = ['"><v:fill type="gradientradial" method="sigma" focussize="',
                           fsize, ',', fsize,
                           '" focusposition="', fposX, ',', fposY].join("");
         } else {
-            focusParam = '"><v:stroke' + ' filltype="' + 'tile' +
+            focusParam = '"><v:stroke filltype="tile' +
                          _buildStrokeProps(ctx);
         }
         for (; si < siz; so += sd, --sx, --sy, ++si) {

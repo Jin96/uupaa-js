@@ -1669,7 +1669,7 @@ function uucolor(str) { // @parem String: "black", "#fff", "rgba(0,0,0,0)" ...
 
     if (!rv) {
         switch ({ "#": 1, r: 2, h: 3 }[v.charAt(0)]) {
-        case 1:
+        case 1: // #fff or #ffffff
             if (!dig._hex.test(v)) {
                 return 0; // invalid color, unknown format
             }
@@ -1683,18 +1683,23 @@ function uucolor(str) { // @parem String: "black", "#fff", "rgba(0,0,0,0)" ...
             n !== void 0 &&
                 (rv = { r: n >> 16, g: (n >> 8) & 255, b: n & 255, a: a, num: n });
             break;
-        case 2:
+        case 2: // rgb(,,) or rgba(,,,)
             ++rgb; // [THROUGH]
-        case 3:
+        case 3: // hsl(,,) or hsla(,,,)
             m = (rgb ? dig._rgba
-                     : dig._hsla).exec(v.replace(dig._sp, "").
-                                         replace(dig._percent, rgb ? _percent255
+                     : dig._hsla).exec(v.indexOf("%") < 0 ? v :
+                                       v.replace(dig._percent, rgb ? _percent255
                                                                    : _percent100));
             if (m) {
                 r = m[1] | 0, g = m[2] | 0, b = m[3] | 0;
                 a = m[4] ? parseFloat(m[4]) : 1;
-                rv = rgb ? { r: r, g: g, b: b, a: a }
-                         : uu.color.hsla2rgba({ h: r, s: g, l: b, a: a }); // depend uu.color.js
+                rv = rgb ? { r: r > 255 ? 255 : r,
+                             g: g > 255 ? 255 : g,
+                             b: b > 255 ? 255 : b, a: a }
+                         : uu.color.hsla2rgba({ // depend uu.color.js
+                             h: r > 360 ? 360 : r,
+                             s: g > 100 ? 100 : g,
+                             l: b > 100 ? 100 : b, a: a });
             }
         }
     }
@@ -1703,10 +1708,9 @@ function uucolor(str) { // @parem String: "black", "#fff", "rgba(0,0,0,0)" ...
 }
 uucolor._db = { transparent:{ r: 0, g: 0, b: 0, a: 0, argb: "#00000000", num: 0,
                               hex: "#000000", rgba: "rgba(0,0,0,0)" }};
-uucolor._sp = /\s+/g; // many space
 uucolor._hex = /^#(?:[\da-f]{3,8})$/; // #fff or #ffffff or #ffffffff
-uucolor._hsla = /^hsla?\(([\d\.]+),([\d\.]+),([\d\.]+)(?:,([\d\.]+))?\)/; // hsla(,,,)
-uucolor._rgba = /^rgba?\(([\d\.]+),([\d\.]+),([\d\.]+)(?:,([\d\.]+))?\)/; // rgba(,,,)
+uucolor._hsla = /^hsla?\(\s*([\d\.]+)\s*,\s*([\d\.]+)\s*,\s*([\d\.]+)\s*(?:,\s*([\d\.]+))?\s*\)/; // hsla(,,,)
+uucolor._rgba = /^rgba?\(\s*([\d\.]+)\s*,\s*([\d\.]+)\s*,\s*([\d\.]+)\s*(?:,\s*([\d\.]+))?\s*\)/; // rgba(,,,)
 uucolor._cache = {};
 uucolor._percent = /([\d\.]+)%/g;
 
@@ -1714,7 +1718,7 @@ uucolor._percent = /([\d\.]+)%/g;
 function _percent255(_,   // @param String: "100.0%"
                      n) { // @param String: "100.0"
                           // @return Number: 0~255
-    return (n * 2.555) & 0xff;
+    return (n * 2.555) & 255;
 }
 
 // inner - percent("100%") to number(0~100)
