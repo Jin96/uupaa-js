@@ -1,19 +1,24 @@
 
 // === extend CanvasRenderingContext2D ===
 // depend: uu.js, uu.canvas.js
-uu.agein || (function(win, doc, uu, CRC2D) {
+uu.agein || (function(win, doc, uu) {
 
 //{{{!mb
-var extendOpera = uu.opera && uu.ver.ua >= 9.5 && uu.ver.ua < 10.5;
+var _extendOpera = uu.opera && uu.ver.ua >= 9.5 && uu.ver.ua < 10.5,
+    _CanvasPrototype;
 
-// === extend text and shadow api ===
-if (extendOpera) {
-    // wrapper
-    CRC2D.prototype._save    = CRC2D.prototype.save;
-    CRC2D.prototype._restore = CRC2D.prototype.restore;
+if (window["CanvasRenderingContext2D"]) {
+    _CanvasPrototype = win.CanvasRenderingContext2D.prototype;
 }
 
-extendOpera && uu.mix(CRC2D.prototype, {
+// === extend text and shadow api ===
+if (_extendOpera) {
+    // wrapper
+    _CanvasPrototype._save    = _CanvasPrototype.save;
+    _CanvasPrototype._restore = _CanvasPrototype.restore;
+}
+
+_extendOpera && uu.mix(_CanvasPrototype, {
     _shadow:        ["transparent", 0, 0, 0],
     _stack:         [],
     font:           "10px sans-serif",
@@ -179,11 +184,13 @@ function _strokeText(ctx, text, x, y, maxWidth, fill) {
 //}}}!mb
 
 // === extend lock, unlock ===
-if (CRC2D.prototype) {
-    CRC2D.prototype.lock    = lock;     // [EXTEND]
-    CRC2D.prototype.clear   = clear;    // [EXTEND]
-    CRC2D.prototype.unlock  = uunop;    // [EXTEND]
-    CRC2D.prototype.resize  = resize;   // [EXTEND]
+if (_CanvasPrototype) {
+    _CanvasPrototype.lock   = lock;     // [EXTEND]
+    _CanvasPrototype.clear  = clear;    // [EXTEND]
+    _CanvasPrototype.unlock = uunop;    // [EXTEND]
+    _CanvasPrototype.resize = resize;   // [EXTEND]
+    _CanvasPrototype.fillCircle   = fillCircle;   // [EXTEND]
+    _CanvasPrototype.strokeCircle = strokeCircle; // [EXTEND]
 }
 
 // CanvasRenderingContext2D.prototype.lock
@@ -208,5 +215,33 @@ function resize(width,    // @param Number(= void 0):
     }
 }
 
-})(window, document, uu, window["CanvasRenderingContext2D"] || 0);
+// CanvasRenderingContext2D.prototype.fillCircle
+function fillCircle(x,       // @param Number:
+                    y,       // @param Number:
+                    r,       // @param Number: radius
+                    color) { // @param ColorHash:
+    this.save();
+    this.fillStyle = color.rgba;
+    this.beginPath();
+    this.arc(x, y, r, 0, 2 * Math.PI, true);
+    this.fill();
+    this.closePath();
+    this.restore();
+}
+
+// CanvasRenderingContext2D.prototype.strokeCircle
+function strokeCircle(x,       // @param Number:
+                      y,       // @param Number:
+                      r,       // @param Number: radius
+                      color) { // @param ColorHash:
+    this.save();
+    this.strokeStyle = color.rgba;
+    this.beginPath();
+    this.arc(x, y, r, 0, 2 * Math.PI, true);
+    this.stroke();
+    this.closePath();
+    this.restore();
+}
+
+})(window, document, uu);
 

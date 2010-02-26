@@ -1,5 +1,5 @@
 <!doctype html><html><head>
-    <title>Canvas drawImage example 2</title>
+    <title>A canvas createPattern example</title>
     <meta name="DC.creator" content="Kamiel Martinet, http://www.martinet.nl/">
     <meta name="DC.publisher" content="Mozilla Developer Center, http://developer.mozilla.org">
 
@@ -28,29 +28,31 @@ function drawShape(canvas, matrix){
         ctx.scale(1.2, 0.8);
         ctx.rotate(5 * Math.PI / 180);
     }
+    // create new image object to use as pattern
     var img = new Image();
     img.onload = function(){
-        var i, j, alpha = 1;
-        for (i=0;i<4;i++){
-            for (j=0;j<3;j++){
-                ctx.globalAlpha = (alpha -= 0.08);
-                ctx.drawImage(img,j*50,i*38,50,38);
-            }
-        }
+        // create pattern
+        var ptrn = ctx.createPattern(img,'repeat');
+        ctx.beginPath();
+        ctx.strokeStyle = ptrn;
+        ctx.lineWidth = 6;
+        ctx.strokeRect(10,10,40,40);
+        ctx.strokeRect(30,30,40,40);
+        ctx.strokeRect(50,50,40,40);
+        ctx.strokeRect(70,70,40,40);
     }
-    img.src = 'img/rhino.jpg?' + new Date().getTime();
+    img.src = 'img/wallpaper.png?' + (new Date).getTime();
 }
 </script>
     <style type="text/css">
       body { margin: 20px; font-family: arial,verdana,helvetica; background: #fff;}
       h1 { font-size: 140%; font-weight:normal; color: #036; border-bottom: 1px solid #ccc; }
-      h2 { font-size: 100%; color: #036; }
       canvas { border: 2px solid #000; float: left; margin-right: 20px; margin-bottom: 20px; }
       pre { float:left; display:block; background: rgb(238,238,238); border: 1px dashed #666; padding: 15px 20px; margin: 0 0 10px 0; }
     </style>
   </head>
   <body>
-    <h1>Canvas drawImage example 2</h1>
+    <h1>A canvas <code>createPattern</code> example</h1>
     <div>
       <input type="button" value="matrix effect" onclick="matrix()" />
       <br />
@@ -58,6 +60,10 @@ function drawShape(canvas, matrix){
       <canvas id="vmlcanvas" class="vml" width="150" height="150"></canvas>
       <canvas id="flashcanvas" class="flash" width="150" height="150"></canvas>
       <pre>
+      &lt;canvas id="slcanvas" class="sl" width="150" height="150"&gt;&lt;/canvas&gt;
+      &lt;canvas id="vmlcanvas" class="vml" width="150" height="150"&gt;&lt;/canvas&gt;
+      &lt;canvas id="flashcanvas" class="flash" width="150" height="150"&gt;&lt;/canvas&gt;
+
 function xcanvas() {
     drawShape(document.getElementById('slcanvas'));
     drawShape(document.getElementById('vmlcanvas'));
@@ -79,23 +85,22 @@ function drawShape(canvas, matrix){
         ctx.scale(1.2, 0.8);
         ctx.rotate(5 * Math.PI / 180);
     }
+    // create new image object to use as pattern
     var img = new Image();
     img.onload = function(){
-        var i, j, alpha = 1;
-        for (i=0;i<4;i++){
-            for (j=0;j<3;j++){
-                ctx.globalAlpha = (alpha -= 0.08);
-                ctx.drawImage(img,j*50,i*38,50,38);
-            }
-        }
+        // create pattern
+        var ptrn = ctx.createPattern(img,'repeat');
+        ctx.beginPath();
+        ctx.strokeStyle = ptrn;
+        ctx.lineWidth = 6;
+        ctx.strokeRect(10,10,40,40);
+        ctx.strokeRect(30,30,40,40);
+        ctx.strokeRect(50,50,40,40);
+        ctx.strokeRect(70,70,40,40);
     }
-    img.src = 'img/rhino.jpg?' + new Date().getTime();
+    img.src = 'img/wallpaper.png?' + (new Date).getTime();
 }
       </pre>
-      <div style="float:left;">
-        <h2>Source image</h2>
-        <img src="img/rhino.jpg"/>
-      </div>
     </div>
   </body>
 </html>

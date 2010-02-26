@@ -1,0 +1,202 @@
+<!doctype html><html><head>
+<title>demoscene</title>
+<style type="text/css">
+html { font-family: sans-serif; }
+form.appjet_form { border: 1px solid #ccc; background-color: #eee; margin: 1.0em 0; }
+form.appjet_form input { margin: 0.2em; }
+</style>
+<script>xconfig={dir:"../"}</script>
+<script src="../uupaa.js"></script>
+
+<script>
+// calc fps
+var begin = +new Date;
+var fpscount = 0;
+// use ctx.lock()
+var uselock = 1;
+
+
+var time=0;
+var sin=Math.sin;var cos=Math.cos;var sqrt=Math.sqrt;
+var hex = (function() {
+    var rv = [], i, j;
+    for (i = 0; i < 16; ++i) {
+      for (j = 0; j < 16; ++j) {
+        rv[i * 16 + j] = i.toString(16) + j.toString(16);
+      }
+    }
+    return rv;
+})();
+
+
+function obj(x,y,z,t){
+  var f=1.0,_x,_y,_z;
+  _x = cos(t)+sin(t*0.2)-x, _y = 0.3-y, _z = 2.0+cos(t*0.5)*0.5-z;
+  f*=sqrt(_x*_x+_y*_y+_z*_z)
+
+  _x = -cos(t*0.7)-x, _y = 0.3-y, _z = 2.0+sin(t*0.5)-z;
+  f*=sqrt(_x*_x+_y*_y+_z*_z)
+
+  _x = -sin(t*0.2)*0.5-x, _y = sin(t)-y, _z = 2.0-z;
+  f*=sqrt(_x*_x+_y*_y+_z*_z)
+
+  f*=cos(y)*cos(x)-0.1-cos(z*7.0+t*7.0)*cos(x*3.0)*cos(y*4.0)*0.1;
+  return f;
+}
+
+function evalColor(x,y,t){
+   var vx=x*2.0-1.0; var vy=-y*2.0+1.0;
+   var s=0.4;
+   var ox=vx;var oy=vy*1.25;var oz=0.0;
+   var dx=(vx+cos(t)*0.3)/64.0;var dy=vy/64.0;var dz=1.0/64.0;
+   var tt=0.0;
+   var g=1.0;
+      var _f, _x, _y, _z;
+      var _dx, _dy, _dz;
+   while((g>s)&&(tt<375)){
+      _f = 1.0;
+      _x = ox+dx*tt;
+      _y = oy+dy*tt;
+      _z = oz+dz*tt;
+
+      _dx = cos(t)+sin(t*0.2)-_x, _dy = 0.3-_y, _dz = 2.0+cos(t*0.5)*0.5 - _z;
+      _f*=sqrt(_dx*_dx+_dy*_dy+_dz*_dz);
+      _dx = -cos(t*0.7)-_x, _dy = 0.3-_y, _dz = 2.0+sin(t*0.5) - _z;
+      _f*=sqrt(_dx*_dx+_dy*_dy+_dz*_dz);
+      _dx = -sin(t*0.2)*0.5-_x, _dy = sin(t)-_y, _dz = 2.0 - _z;
+      _f*=sqrt(_dx*_dx+_dy*_dy+_dz*_dz);
+      _f*=cos(_y)*cos(_x)-0.1-cos(_z*7.0+t*7.0)*cos(_x*3.0)*cos(_y*4.0)*0.1;
+
+      g = _f;
+
+      tt+=g*4;
+   };
+   var color=0.0;
+   var dxtt=ox+dx*tt;var dytt=oy+dy*tt;var dztt=oz+dz*tt;
+   var objd=obj(dxtt,dytt,dztt,t);
+   var nx=objd-obj(dxtt+0.01,dytt,dztt,t);
+   var ny=objd-obj(dxtt,dytt+0.01,dztt,t);
+   var nz=objd-obj(dxtt,dytt,dztt+0.01,t);
+   var d=sqrt(nx*nx+ny*ny+nz*nz);ny=ny/d;nz=nz/d;
+     var max1 = -0.5*nz, max2 = -0.5*ny+0.5*nz;
+     color+=(max1>0?max1:0)+(max2>0?max2:0)*0.5;
+   var r=(color+0.1*tt*0.025);
+   var g=(color+0.2*tt*0.025);
+   var b=(color+0.5*tt*0.025);
+
+  if (r<0) r=0; else if (r>1) r=1;
+  if (g<0) g=0; else if (g>1) g=1;
+  if (b<0) b=0; else if (b>1) b=1;
+//  return ((r*255)&255)+","+((g*255)&255)+","+((b*255)&255);
+  return "#"+hex[(r*255)&0xff]+hex[(g*255)&0xff]+hex[(b*255)&0xff];
+}
+
+var canvas;
+var ctx;
+function draw(){
+    if (uselock) {
+        ctx.lock(1);
+    } else {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+    var px, py, maxr=64;
+
+    for(x=0;x<maxr;++x){
+            px=x/maxr;
+            for(y=0;y<maxr;++y){
+                    py=y/maxr;
+//                  ctx.fillStyle="rgb("+eval(px,py,time)+")";
+                    ctx.fillStyle=evalColor(px,py,time);
+                    ctx.fillRect(x*2,y*2,2,2);
+            }
+    }
+    if (uselock) {
+        ctx.unlock();
+    }
+    time+=0.1;
+    setTimeout(draw,1);
+
+    // fps
+    if ((++fpscount & 0x3f) === 0x3f) {
+        var fps = fpscount / (((+new Date) - begin))
+        window.status = "fps = " + ((fps * 1000) | 0) + (uselock ? " boost" : " off");
+    }
+}
+
+function boost() {
+    begin = +new Date; // reset
+    fpscount = 0; // reset
+    uselock = !uselock; // toggle
+}
+
+function xcanvas(uu, canvas) {
+    if (uu.ie) {
+        var choice = confirm("IE very slowly, continue?");
+        if (!choice) {
+            return;
+        }
+    }
+
+    ctx = canvas[0].getContext("2d");
+    ctx.xFlyweight = 1;
+
+    if (ctx instanceof uu.canvas.VML2D) {
+        uu.id("detected").innerText = "Backend: VML";
+    } else if (ctx instanceof uu.canvas.FL2D) {
+        uu.id("detected").innerText = "Backend: Flash";
+    } else if (ctx instanceof uu.canvas.SL2D) {
+        uu.id("detected").innerText = "Backend: Silverlight";
+    } else {
+        uu.id("detected").innerText = "Native Canvas";
+    }
+
+    draw();
+}
+
+function switchBackend() {
+    var n = window.name || "";
+
+    if (!n) {
+        window.name = "flash";
+    } else {
+        switch (n) {
+        case "sl":      window.name = "flash"; break;
+        case "flash":   window.name = "vml"; break;
+        case "vml":     window.name = "sl"; break;
+        }
+    }
+    location.reload(false);
+}
+
+function xboot(uu) {
+    uu.id("canvas").className = window.name || "sl";
+}
+
+function boost() {
+    begin = +new Date; // reset
+    fpscount = 0; // reset
+    uselock = !uselock; // toggle
+}
+
+</script>
+
+</head>
+<body>
+
+<H2>Metatunnel in JavaScript</H2><canvas id="canvas" width="128" height="128"></canvas>
+<p>By <a href=http://twitter.com/paulofalcao>PauloFalcao</a></p>
+Original 1K version by <a href=http://www.pouet.net/prod.php?which=52777>FRequency</a>
+
+
+
+<div style="clear: both;"></div>
+<div id="appjetfooter"
+     style="border-top: 1px solid #ccc; margin-top: 1.2em; font-family: verdana, helvetica, sans-serif; font-size: 0.8em;">
+</div>
+
+    <h1 id="detected" style="color:white"></h1>
+    <input type="button" value="boost on/off" onclick="boost()" />
+    <input type="button" value="sl/flash/vml" onclick="switchBackend()" />
+
+</body>
+</html>

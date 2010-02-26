@@ -29,6 +29,7 @@ uu.mix(uu.canvas.FL2D.prototype, {
     createRadialGradient:   createRadialGradient,
     drawImage:              drawImage,
     fill:                   fill,
+    fillCircle:             fillCircle,     // [EXTEND]
     fillRect:               fillRect,
     fillText:               fillText,
     getImageData:           uunop,
@@ -52,6 +53,7 @@ uu.mix(uu.canvas.FL2D.prototype, {
     sendState:              sendState,      // [EXTEND]
     setTransform:           setTransform,
     stroke:                 stroke,
+    strokeCircle:           strokeCircle,   // [EXTEND]
     strokeRect:             strokeRect,
     strokeText:             strokeText,
     transform:              transform,
@@ -119,8 +121,8 @@ function initSurface() {
     this.globalAlpha    = 1.0;
     this.globalCompositeOperation = "source-over";
     // --- colors and styles ---
-    this.strokeStyle    = "black";
-    this.fillStyle      = "black";
+    this.strokeStyle    = "black"; // String or Object
+    this.fillStyle      = "black"; // String or Object
     // --- line caps/joins ---
     this.lineWidth      = 1;
     this.lineCap        = "butt";
@@ -150,8 +152,8 @@ function initSurface() {
 function _copyprop(to, from) {
     to.globalAlpha      = from.globalAlpha;
     to.globalCompositeOperation = from.globalCompositeOperation;
-    to.strokeStyle      = from.strokeStyle;
-    to.fillStyle        = from.fillStyle;
+    to.strokeStyle      = from.strokeStyle.toString(); // [!] no ref
+    to.fillStyle        = from.fillStyle.toString();   // [!] no ref
     to.lineWidth        = from.lineWidth;
     to.lineCap          = from.lineCap;
     to.lineJoin         = from.lineJoin;
@@ -168,8 +170,10 @@ function _copyprop(to, from) {
 // CanvasRenderingContext2D.prototype.arc
 function arc(x, y, radius, startAngle, endAngle, anticlockwise) {
     this.send("ar\t" + x + "\t" + y + "\t" +
-                       radius + "\t" + startAngle + "\t" +
-                       endAngle + "\t" + (anticlockwise ? 1 : 0));
+                       radius     + "\t" +
+                       startAngle + "\t" +
+                       endAngle   + "\t" +
+                       (anticlockwise ? 1 : 0));
 }
 
 // CanvasRenderingContext2D.prototype.arcTo -> NOT IMPL
@@ -314,6 +318,18 @@ function fill() {
     this.send("fi");
 }
 
+// CanvasRenderingContext2D.prototype.fillCircle
+function fillCircle(x,       // @param Number:
+                    y,       // @param Number:
+                    r,       // @param Number: radius
+                    color) { // @param ColorHash:
+    this.send("X0\t" + x + "\t" +
+                       y + "\t" +
+                       r + "\t" +
+                       color.num + "\t" +
+                       color.a * this.globalAlpha);
+}
+
 // CanvasRenderingContext2D.prototype.fillRect
 function fillRect(x, y, w, h) {
     this.sendState(0x5);
@@ -322,9 +338,7 @@ function fillRect(x, y, w, h) {
 
 // CanvasRenderingContext2D.prototype.fillText
 function fillText(text, x, y, maxWidth) {
-    this.sendState(0xd);
-    this.send("fT\t" + text + "\t" + (x || 0) + "\t" +
-                                     (y || 0) + "\t" + maxWidth || 0);
+    this.strokeText(text, x, y, maxWidth, 1);
 }
 
 // CanvasRenderingContext2D.prototype.lineTo
@@ -379,11 +393,14 @@ function resize(width,    // @param Number(= void 0): width
 
     if (width !== void 0) {
         this.canvas.style.pixelWidth = width;
+        this._view.width = width;
     }
     if (height !== void 0) {
         this.canvas.style.pixelHeight = height;
+        this._view.height = height;
     }
     this._readyState = state;
+    this._msgid = 999; // [!] force send
     this.send("rz\t" + width + "\t" + height + "\t" + this.xFlyweight);
 }
 
@@ -395,7 +412,7 @@ function restore() {
 
 // CanvasRenderingContext2D.prototype.rotate
 function rotate(angle) {
-    this.send("ro\t" + angle);
+    this.send("ro\t" + ((angle * 1000000) | 0));
 }
 
 // CanvasRenderingContext2D.prototype.save
@@ -427,6 +444,19 @@ function stroke() {
     this.send("st");
 }
 
+// CanvasRenderingContext2D.prototype.strokeCircle
+function strokeCircle(x,       // @param Number:
+                      y,       // @param Number:
+                      r,       // @param Number: radius
+                      color) { // @param ColorHash:
+    this.sendState(0x2);
+    this.send("X1\t" + x + "\t" +
+                       y + "\t" +
+                       r + "\t" +
+                       color.num + "\t" +
+                       color.a * this.globalAlpha);
+}
+
 // CanvasRenderingContext2D.prototype.strokeRect
 function strokeRect(x, y, w, h) {
     this.sendState(0x7);
@@ -434,9 +464,14 @@ function strokeRect(x, y, w, h) {
 }
 
 // CanvasRenderingContext2D.prototype.strokeText
-function strokeText(text, x, y, maxWidth) {
-    this.sendState(0xf);
-    this.send("sT\t" + text + "\t" + (x || 0) + "\t" + (y || 0) + "\t" + maxWidth || 0);
+function strokeText(text, x, y, maxWidth, fill) {
+    text = text.replace(/(\t|\v|\f|\r\n|\r|\n)/g, " ");
+
+    this.sendState(0xd);
+    this.send((fill ? "fT\t"
+                    : "sT\t") + text + "\t" +
+              (x || 0) + "\t" +
+              (y || 0) + "\t" + (maxWidth || 0));
 }
 
 // CanvasRenderingContext2D.prototype.transform
@@ -470,16 +505,17 @@ function sendState(bits) { // @param Number: bits
         this._alpha !== this.globalAlpha &&
             (ary[++i] = "gA\t" + (this._alpha = this.globalAlpha));
 
-/*
         this._mix != this.globalCompositeOperation &&
             (ary[++i] = "gC\t" + (this._mix = this.globalCompositeOperation));
- */
 
         if (this._strokeStyle !== this.strokeStyle) {
             if (typeof this.strokeStyle === "string") {
                 this.__strokeStyle = uu.color(this._strokeStyle = this.strokeStyle);
                 ary[++i] = "s0\t" + this.__strokeStyle.num + "\t" + this.__strokeStyle.a;
             } else {
+                // "s1" = LinerStroke
+                // "s2" = RadialStroke
+                // "s3" = PatternStorke
                 ary[++i] = "s" + this.strokeStyle.type + "\t" + this.strokeStyle.toString();
             }
         }
@@ -489,6 +525,9 @@ function sendState(bits) { // @param Number: bits
                 this.__fillStyle = uu.color(this._fillStyle = this.fillStyle);
                 ary[++i] = "f0\t" + this.__fillStyle.num + "\t" + this.__fillStyle.a;
             } else {
+                // "f1" = LinerFill
+                // "f2" = RadialFill
+                // "f3" = PatternFill
                 ary[++i] = "f" + this.fillStyle.type + "\t" + this.fillStyle.toString();
             }
         }
@@ -506,6 +545,7 @@ function sendState(bits) { // @param Number: bits
         this._miterLimit !== this.miterLimit &&
             (ary[++i] = "mL\t" + (this._miterLimit = this.miterLimit));
     }
+
 /*
     if (bits & 0x4) {
         this._shadowBlur !== this.shadowBlur &&
@@ -522,6 +562,7 @@ function sendState(bits) { // @param Number: bits
             (ary[++i] = "sY\t" + (this._shadowOffsetY = this.shadowOffsetY));
     }
  */
+
     if (bits & 0x8) {
         this._font !== this.font &&
             (ary[++i] = "fo\t" + (this._font = this.font));
