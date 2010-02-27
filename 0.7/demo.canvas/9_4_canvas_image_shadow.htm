@@ -1,5 +1,5 @@
 <!doctype html><html><head>
-    <title>A canvas fillRect, strokeRect and clearRect example</title>
+    <title>Canvas shadow drawImage example 3</title>
     <meta name="DC.creator" content="Kamiel Martinet, http://www.martinet.nl/">
     <meta name="DC.publisher" content="Mozilla Developer Center, http://developer.mozilla.org">
 
@@ -17,10 +17,18 @@ function matrix() {
     drawShape(document.getElementById('vmlcanvas'), 1);
     drawShape(document.getElementById('flashcanvas'), 1);
 }
+
+var globalAlpha = 1.0;
+function alpha() {
+    globalAlpha -= 0.2;
+}
+
 function drawShape(canvas, matrix){
     if (!canvas.getContext){ return; }
 
     var ctx = canvas.getContext('2d');
+
+    ctx.globalAlpha = globalAlpha;
 
     if (matrix) {
         ctx.clear();
@@ -28,28 +36,39 @@ function drawShape(canvas, matrix){
         ctx.scale(1.2, 0.8);
         ctx.rotate(5 * Math.PI / 180);
     }
-    ctx.fillRect(25,25,100,100);
-    ctx.clearRect(45,45,60,60);
-    ctx.strokeRect(50,50,50,50);
+    ctx.shadowBlur = 10;
+    ctx.shadowOffsetX = 10;
+    ctx.shadowOffsetY = 10;
+    ctx.shadowColor = "gray";
+
+    ctx.drawImage(document.getElementById('source'),33,71,104,124,21,20,87,104);
+    ctx.drawImage(document.getElementById('frame'),0,0);
+
+    ctx.drawImage(document.getElementById('source'),33,71,104,124,21,220,87,104);
 }
 </script>
     <style type="text/css">
       body { margin: 20px; font-family: arial,verdana,helvetica; background: #fff;}
       h1 { font-size: 140%; font-weight:normal; color: #036; border-bottom: 1px solid #ccc; }
-      canvas { border: 2px solid #000; float: left; margin-right: 20px; margin-bottom: 20px; }
+      h2 { font-size: 100%; color: #036; }
+      canvas { float: left; margin-right: 20px; margin-bottom: 20px; }
       pre { float:left; display:block; background: rgb(238,238,238); border: 1px dashed #666; padding: 15px 20px; margin: 0 0 10px 0; }
     </style>
   </head>
-
   <body>
-    <h1>An example of fillRect, clearRect and strokeRect</h1>
     <div>
+      <h1>Canvas <code>shadow drawImage</code> example 3</h1>
       <input type="button" value="matrix effect" onclick="matrix()" />
+      <input type="button" value="alpha -0.2" onclick="alpha()" />
       <br />
-      <canvas id="slcanvas" class="sl" width="150" height="150"></canvas>
-      <canvas id="vmlcanvas" class="vml" width="150" height="150"></canvas>
-      <canvas id="flashcanvas" class="flash" width="150" height="150"></canvas>
-<pre>
+      <canvas id="slcanvas" class="sl" width="150" height="350"></canvas>
+      <canvas id="vmlcanvas" class="vml" width="150" height="350"></canvas>
+      <canvas id="flashcanvas" class="flash" width="150" height="350"></canvas>
+      <pre>
+&lt;canvas id="slcanvas" class="sl" width="150" height="350"&gt;&lt;/canvas&gt;
+&lt;canvas id="vmlcanvas" class="vml" width="150" height="350"&gt;&lt;/canvas&gt;
+&lt;canvas id="flashcanvas" class="flash" width="150" height="350"&gt;&lt;/canvas&gt;
+
 function xcanvas() {
     drawShape(document.getElementById('slcanvas'));
     drawShape(document.getElementById('vmlcanvas'));
@@ -71,12 +90,22 @@ function drawShape(canvas, matrix){
         ctx.scale(1.2, 0.8);
         ctx.rotate(5 * Math.PI / 180);
     }
-    ctx.fillRect(25,25,100,100);
-    ctx.clearRect(45,45,60,60);
-    ctx.strokeRect(50,50,50,50);
+    ctx.shadowBlur = 10;
+    ctx.shadowOffsetX = 10;
+    ctx.shadowOffsetY = 10;
+    ctx.shadowColor = "gray";
+
+    ctx.drawImage(document.getElementById('source'),33,71,104,124,21,20,87,104);
+    ctx.drawImage(document.getElementById('frame'),0,0);
+
+    ctx.drawImage(document.getElementById('source'),33,71,104,124,21,220,87,104);
 }
-</pre>
+    </pre>
+      <div style="float:left;">
+        <h2>Source img</h2>
+        <img id="source" src="img/rhino.jpg" width="300" height="227" alt="">
+        <img id="frame" src="img/picture_frame.png" width="132" height="150" alt="">
+      </div>
     </div>
   </body>
-
 </html>

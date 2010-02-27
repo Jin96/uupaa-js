@@ -389,7 +389,7 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
                 (sizeTrans ? '</div>' : '') + '</div></div>'
         ];
 
-        if (this.__shadowColor.a) {
+        if (this.__shadowColor.a && this.shadowBlur) {
             iz = _SHADOW.width;
             shx = iz / 2 + this.shadowOffsetX;
             shy = iz / 2 + this.shadowOffsetY;
@@ -751,7 +751,7 @@ function stroke(path, fill) {
         color = fill ? this.__fillStyle
                      : this.__strokeStyle;
 
-        if (this.__shadowColor.a) {
+        if (this.__shadowColor.a && this.shadowBlur) {
               sx = _SHADOW.width / 2 + this.shadowOffsetX;
               sy = _SHADOW.width / 2 + this.shadowOffsetY;
               so = _SHADOW.from;
@@ -871,7 +871,7 @@ function strokeText(text, x, y, maxWidth, fill) {
     }
     skewOffset = _map(this._matrix, x + offset.x, y + offset.y);
 
-    if (this.__shadowColor.a) {
+    if (this.__shadowColor.a && this.shadowBlur) {
         sx = _SHADOW.width / 2 + this.shadowOffsetX;
         sy = _SHADOW.width / 2 + this.shadowOffsetY;
         so = Math.max(_SHADOW.from + 0.9, 1);
@@ -997,7 +997,7 @@ function _linearGradientFill(ctx, obj, path, fill, mix, zindex) {
 
     (angle < 0) && (angle += 360);
 
-    if (ctx.__shadowColor.a) {
+    if (ctx.__shadowColor.a && ctx.shadowBlur) {
         sx = _SHADOW.width / 2 + ctx.shadowOffsetX;
         sy = _SHADOW.width / 2 + ctx.shadowOffsetY;
         so = _SHADOW.from;
@@ -1066,7 +1066,7 @@ function _radialGradientFill(ctx, obj, path, fill, mix, zindex) {
         fposY = (1 - fsize + (fp.y0 - fp.y1) / fp.r1) / 2; // forcus position y
     }
 
-    if (ctx.__shadowColor.a) {
+    if (ctx.__shadowColor.a && ctx.shadowBlur) {
         sx = _SHADOW.width / 2 + ctx.shadowOffsetX;
         sy = _SHADOW.width / 2 + ctx.shadowOffsetY;
         so = _SHADOW.from;
@@ -1155,7 +1155,7 @@ function _patternFill(ctx, obj, path, fill, mix, zindex) {
         // for shadow
         si = 0, so = 0, sd = 0, sx = 0, sy = 0;
 
-    if (ctx.__shadowColor.a) {
+    if (ctx.__shadowColor.a && ctx.shadowBlur) {
         sx = _SHADOW.width / 2 + ctx.shadowOffsetX;
         sy = _SHADOW.width / 2 + ctx.shadowOffsetY;
         so = _SHADOW.from;
