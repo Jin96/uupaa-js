@@ -8,7 +8,7 @@ uu.font = {
     parse:      fontparse,      // uu.font.parse(font, embase) -> Hash
     detect:     fontdetect,     // uu.font.detect(node) -> String("Alial")
     metric:     fontmetric,     // uu.font.text(font, text) -> { w, h }
-    isUsable:   fontisusable,   // uu.font.able(fontName) -> Boolean
+    ready:      fontready,      // uu.font.ready(fonts) -> Array
     SCALE:      {
 //{{{!mb
         ARIAL: 1.55, "ARIAL BLACK": 1.07, "COMIC SANS MS": 1.15,
@@ -62,9 +62,9 @@ function fontparse(font,     // @param String: font string, "12pt Arial"
         } else {
             throw new Error("unknown font unit");
         }
-        rv.style = style.fontStyle;
-        rv.weight = style.fontWeight;
-        rv.variant = style.fontVariant;
+        rv.style = style.fontStyle; // normal, italic, oblique
+        rv.weight = style.fontWeight; // normal, bold, bolder, lighter, 100~900
+        rv.variant = style.fontVariant; // normal, small-caps
         rv.rawfamily = style.fontFamily.replace(/[\"\']/g, "");
         rv.family = "'" + rv.rawfamily.replace(/\s*,\s*/g, "','") + "'";
         rv.formal = [rv.style,
@@ -126,14 +126,21 @@ function fontmetric(font,   // @param CSSFronString: "12pt Arial"
 }
 fontmetric._node = 0; // [lazy] measure node
 
-// uu.font.isUsable - usable font
-//ja                    レンダリングに利用可能なフォントを判別する
-function fontisusable(fontName) { // @param String: font name, "Arial"
-                                  // @return Boolean: true is installed
-    var a = fontmetric("72pt dummy"),
-        b = fontmetric("72pt " + fontName);
+// uu.font.ready - enum usable font
+//ja               レンダリングに利用可能なフォントを列挙する
+function fontready(fonts) { // @param FontNameArray: ["Arial", "Times New Roman", "UnknownFontName"]
+                            // @return Array: ["Arial", "Times New Roman"]
+    var rv = [], i = 0, iz = fonts.length, a, b;
 
-    return a.w !== b.w || a.h !== b.h;
+    for (; i < iz; ++i) {
+        a = fontmetric("72pt dummy");
+        b = fontmetric("72pt " + fonts[i]);
+
+        if (a.w !== b.w || a.h !== b.h) {
+            rv.push(fonts[i]);
+        }
+    }
+    return rv;
 }
 
 })(window, document, uu);

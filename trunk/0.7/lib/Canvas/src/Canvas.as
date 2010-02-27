@@ -1,32 +1,41 @@
 package {
-
     import flash.display.*;
-    import flash.system.Security; // for Security.allowDomain
-    import flash.system.System;
+//  import flash.system.Security; // for Security.allowDomain
+//  import flash.system.System;
     import flash.events.Event;
-    import flash.geom.ColorTransform;
-    import flash.geom.Matrix;
-    import flash.geom.Point;
-    import flash.geom.Rectangle;
+    import flash.geom.*;
     import flash.net.URLRequest;
-    import flash.text.TextField;
-    import flash.text.TextFieldAutoSize;
-    import flash.text.TextFormat;
+    import flash.filters.*;
+    import flash.text.*;
     import flash.external.ExternalInterface;
 
     public class Canvas extends Sprite {
-        private var draw:Draw = new Draw();
+        private var canvasDraw:CanvasDraw = new CanvasDraw();
         // --- compositing ---
         private var globalAlpha:Number = 1; // globalAlpha
-        private var mix:String = "source-over"; // globalCompositeOperation
+        private var mix:String = ""; // globalCompositeOperation
+        private var mixdb:Object = {
+            "source-over":      "", // BlendMode.NORMAL
+            "source-in":        BlendMode.NORMAL,
+            "source-out":       BlendMode.INVERT,
+            "source-atop":      BlendMode.NORMAL,
+            "destination-over": "destination-over",
+            "destination-in":   BlendMode.NORMAL,
+            "destination-out":  BlendMode.ERASE,
+            "destination-atop": BlendMode.NORMAL,
+            "lighter":          BlendMode.LIGHTEN,
+            "darker":           BlendMode.DARKEN,
+            "copy":             "copy",
+            "xor":              BlendMode.NORMAL
+        };
         // --- colors and styles ---
         private var strokeStyle:int = 0; // 0: color, 1: liner, 2: radial, 3: pattern
         private var strokeColor:Array = [0, 1];
-        private var strokeGradient:Gradient = new Gradient();
+        private var strokeGradient:CanvasGradient = new CanvasGradient();
         private var strokePattern:Array = []; // [url, repeation]
         private var fillStyle:int = 0; // 0: color, 1: liner, 2: radial, 3: pattern
         private var fillColor:Array = [0, 1];
-        private var fillGradient:Gradient = new Gradient();
+        private var fillGradient:CanvasGradient = new CanvasGradient();
         private var fillPattern:Array = []; // [url, repeation]
         private var lineWidth:Number = 1;
         private var lineCap:String = "none"; // butt
@@ -38,11 +47,9 @@ package {
         private var shadowOffsetX:Number;
         private var shadowOffsetY:Number;
         // --- text ---
-        private var font:String = "10px sans-serif";
+        private var font:Array = []; // [style, weight, variant, family]
         private var textAlign:String = "start";
         private var textBaseline:String = "alphabetic";
-        private var textField:TextField;
-        private var textFormat:TextFormat;
         // --- hidden properties ---
         private var _lineScale:Number = 1;
         private var _scaleX:Number = 1;
@@ -53,6 +60,7 @@ package {
         private var _path:Array = [];
         private var _clipPath:Array = [];
         private var _clipShape:Shape;
+        private var _shadow:BitmapFilter; // shadow filter
 
         private var _beginX:Number = 0;
         private var _beginY:Number = 0;
@@ -79,7 +87,7 @@ package {
 
         public function Canvas() {
             // for local debug
-            Security.allowDomain("*");
+//          Security.allowDomain("*");
 
             ExternalInterface.addCallback("send", recv);
 
@@ -157,7 +165,7 @@ package {
                             init(+ary[++i], +ary[++i], +ary[++i]); break;
                 case "xp":  expire(); break;
                 case "gA":  globalAlpha = +ary[++i]; break;
-                case "gC":  mix = ary[++i]; break;
+                case "gC":  mix = mixdb[ary[++i]]; break;
                 case "s0":  strokeStyle = 0;
                             strokeColor = [+ary[++i], +ary[++i]]; break;
                 case "s1":  strokeStyle = 1;
@@ -189,11 +197,12 @@ package {
                 case "lJ":  lineJoin = ary[++i]; break;
                 case "lW":  lineWidth = +ary[++i]; break;
                 case "mL":  miterLimit = +ary[++i]; break;
-                case "sB":  shadowBlur = +ary[++i]; break;
-                case "sC":  shadowColor = [+ary[++i], +ary[++i]]; break;
-                case "sX":  shadowOffsetX= +ary[++i]; break;
-                case "sY":  shadowOffsetY= +ary[++i]; break;
-                case "fo":  font = ary[++i]; break;
+                case "sh":  shadowBlur    = +ary[++i];
+                            shadowColor   = [+ary[++i], +ary[++i]];
+                            shadowOffsetX = +ary[++i];
+                            shadowOffsetY = +ary[++i];
+                            setShadow(); break;
+                case "fo":  font = [+ary[++i], ary[++i], ary[++i], ary[++i], ary[++i]]; break;
                 case "tA":  textAlign = ary[++i]; break;
                 case "tB":  textBaseline = ary[++i]; break;
                 case "re":  rect(+ary[++i], +ary[++i], +ary[++i], +ary[++i]); break;
@@ -314,14 +323,14 @@ package {
                                 ary[++i], ary[++i]); // x, y
                     break;
                 case "a": // arc
-                    draw.arc(gfx, _matrix,
-                                ary[++i], ary[++i], ary[++i],
-                                ary[++i], ary[++i], ary[++i]);
+                    canvasDraw.arc(gfx, _matrix,
+                                    ary[++i], ary[++i], ary[++i],
+                                    ary[++i], ary[++i], ary[++i]);
                     break;
                 case "b": // bezierCurveTo
-                    draw.bezierCurveTo(gfx,
-                                       ary[++i], ary[++i],
-                                       ary[++i], ary[++i]);
+                    canvasDraw.bezierCurveTo(gfx,
+                                    ary[++i], ary[++i],
+                                    ary[++i], ary[++i]);
                 }
             }
         }
@@ -425,16 +434,6 @@ package {
                 _gfx.drawRect(x, y, w, h);
                 _gfx.endFill();
 
-/*
-                var p1:Point = _matrix.transformPoint(new Point(x, y));
-                var p2:Point = _matrix.transformPoint(new Point(w, h));
-
-                var rect = new Rectangle(p1.x, p1.y, p2.w, p2.h);
-                _buff.draw(_shape, _matrix, null, BlendMode.ERASE, rect, true);
-                _gfx.clear();
- */
-
-
                 _buff.draw(_shape, _matrix, null, BlendMode.ERASE);
                 _gfx.clear();
             }
@@ -446,17 +445,30 @@ package {
 
             buildPath(_path, _gfx);
             fill && _gfx.endFill();
-            _buff.draw(_shape);
+
+            if (!mix) {
+                _buff.draw(_shape);
+            } else {
+                var mode:String = mix;
+                switch (mix) {
+                case "copy":
+                    // clear all
+                    _buff.copyPixels(_clearAllBuff, _clearAllRect, _clearAllPoint);
+                    _buff.draw(_shape);
+                    break;
+                case "destination-over":
+                    var bg:BitmapData = _buff.clone();
+
+                    _buff.copyPixels(_clearAllBuff, _clearAllRect, _clearAllPoint);
+                    _buff.draw(_shape);
+                    _buff.draw(bg);
+
+                    break;
+                default:
+                    _buff.draw(_shape, null, null, mode);
+                }
+            }
             _gfx.clear();
-        }
-
-        private function clip():void {
-            var gfx:Graphics = _clipShape.graphics;
-
-            gfx.clear();
-            gfx.beginFill(0);
-            buildPath(_clipPath = _path.concat(), gfx);
-            gfx.endFill();
         }
 
         private function strokeRect(x:Number, y:Number,
@@ -495,6 +507,15 @@ package {
             lineTo(x, y + h);
             lineTo(x, y);
             closePath();
+        }
+
+        private function clip():void {
+            var gfx:Graphics = _clipShape.graphics;
+
+            gfx.clear();
+            gfx.beginFill(0);
+            buildPath(_clipPath = _path.concat(), gfx);
+            gfx.endFill();
         }
 
         private function scale(x:Number, y:Number):void {
@@ -587,6 +608,8 @@ package {
             var sw:Number = 0;
             var sh:Number = 0;
             var bmp:BitmapData;
+            var filterBmp:BitmapData; // filter bitmap
+            var filterRect:Rectangle; // filter rect
             var matrix:Matrix = new Matrix();
 
             if (args > 5) { // args 9 version
@@ -611,15 +634,31 @@ package {
                 dh = param[3] || bmp.height;
             }
 
+            // apply shadow
+            if (_shadow) {
+                filterRect = bmp.generateFilterRect(bmp.rect, _shadow);
+                filterBmp = new BitmapData(filterRect.width,
+                                           filterRect.height, true, 0);
+                filterBmp.copyPixels(bmp, bmp.rect,
+                                     new Point(filterRect.x - bmp.rect.x,
+                                               filterRect.y - bmp.rect.y));
+                filterBmp.applyFilter(bmp, bmp.rect, new Point(), _shadow);
+            }
+
+            // apply matrix
             matrix.scale(dw / bmp.width, dh / bmp.height);
             matrix.translate(dx, dy);
             matrix.concat(_matrix);
 
-            _buff.draw(bmp, matrix,
+            _buff.draw(_shadow ? filterBmp : bmp,
+                       matrix,
                        globalAlpha < 1 ? new ColorTransform(1, 1, 1, globalAlpha)
                                        : null,
                        null, null, true);
+
+            // [GC]
             bmp = null;
+            filterBmp && (filterBmp = null);
         }
 
         private function save(): void {
@@ -641,6 +680,9 @@ package {
                     _clipShape.graphics.endFill();
                 }
                 _copyprop(this, last); // restore props
+
+                // restore shadow
+                _shape.filters = _shadow ? [_shadow] : [];
             }
         }
 
@@ -659,7 +701,7 @@ package {
             to.shadowColor      = from.shadowColor.concat();
             to.shadowOffsetX    = from.shadowOffsetX;
             to.shadowOffsetY    = from.shadowOffsetY;
-            to.font             = from.font;
+            to.font             = from.font.concat();
             to.textAlign        = from.textAlign;
             to.textBaseline     = from.textBaseline;
             to._lineScale       = from._lineScale;
@@ -763,8 +805,113 @@ package {
         }
 
         private function strokeText(text:String, x:Number, y:Number, maxWidth:Number, fill:int): void {
-    //TODO:
-//            textFormat = new TextFormat();
+            var color:uint = fill ? fillColor[0] : strokeColor[0];
+            var a:Number = (fill ? fillColor[1] : strokeColor[1]) * globalAlpha;
+            var textFormat:TextFormat = new TextFormat();
+            var textField:TextField = new TextField();
+            var bmp:BitmapData;
+            var filterBmp:BitmapData; // filter bitmap
+            var filterRect:Rectangle; // filter rect
+            var matrix:Matrix = new Matrix(1, 0, 0, 1, x, y);
+
+            // text-align
+            textFormat.align = TextFormatAlign.LEFT;
+            textField.autoSize = TextFieldAutoSize.LEFT; // [!][NEED] auto resize
+/*
+            switch (textAlign) {
+            case "center":
+                textFormat.align = TextFormatAlign.CENTER;
+                textField.autoSize = TextFieldAutoSize.CENTER; // [!][NEED] auto resize
+
+trace("textAlign=CENTER");
+                break;
+            case "right":
+                textFormat.align = TextFormatAlign.RIGHT;
+                textField.autoSize = TextFieldAutoSize.CENTER; // [!][NEED] auto resize
+trace("textAlign=RIGHT");
+            }
+ */
+
+            // font-size
+            textFormat.size = font[0];
+
+            // font-style
+            switch (font[1]) {
+            case "italic":
+            case "oblique":
+                textFormat.italic = true;
+            }
+
+            // font-weight
+            switch (font[2]) {
+            case "bold":
+            case "bolder":
+            case "500":
+            case "600":
+            case "700":
+            case "800":
+            case "900":
+                textFormat.bold = true;
+            }
+
+            // font-variant
+            // font[3]
+
+            // font-family
+            textFormat.font = font[4].replace(/^'+|'+$/g, ""); // "'Arial'" -> "Arial"
+            textFormat.color = color;
+
+            textField.defaultTextFormat = textFormat; // apply font
+//            textField.autoSize = TextFieldAutoSize.LEFT; // [!][NEED] auto resize
+            textField.text = text;
+
+            bmp = new BitmapData(textField.width, textField.height, true, 0);
+            bmp.draw(textField);
+
+            // apply shadow
+            if (_shadow) {
+                filterRect = bmp.generateFilterRect(bmp.rect, _shadow);
+                filterBmp = new BitmapData(filterRect.width,
+                                           filterRect.height, true, 0);
+                filterBmp.copyPixels(bmp, bmp.rect,
+                                     new Point(filterRect.x - bmp.rect.x,
+                                               filterRect.y - bmp.rect.y));
+                filterBmp.applyFilter(bmp, bmp.rect, new Point(), _shadow);
+            }
+
+            // apply matrix
+            matrix.concat(_matrix);
+
+            _buff.draw(_shadow ? filterBmp : bmp,
+                       matrix,
+                       a < 1 ? new ColorTransform(1, 1, 1, a)
+                             : null,
+                       null, null, true);
+
+            // [GC]
+            bmp = null;
+            filterBmp && (filterBmp = null);
+        }
+
+        private function setShadow():void {
+            if (!this.shadowColor[1] && !this.shadowBlur) {
+                _shadow = null;
+                _shape.filters = [];
+                return;
+            }
+
+            var angle:Number = Math.atan2(shadowOffsetY, shadowOffsetX) * 180 / Math.PI; // toDegree
+
+            _shadow = new DropShadowFilter(
+                            Math.sqrt(shadowOffsetX * shadowOffsetX +
+                                      shadowOffsetY * shadowOffsetY),
+                            angle < 0 ? angle + 360 : angle,
+                            shadowColor[0],
+                            shadowColor[1],
+                            shadowBlur,
+                            shadowBlur);
+
+            _shape.filters = [_shadow];
         }
     }
 }

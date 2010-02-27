@@ -1,7 +1,6 @@
 <!doctype html><html><head>
-    <title>A canvas fillRect, strokeRect and clearRect example</title>
-    <meta name="DC.creator" content="Kamiel Martinet, http://www.martinet.nl/">
-    <meta name="DC.publisher" content="Mozilla Developer Center, http://developer.mozilla.org">
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>A canvas fillText and strokeText example</title>
 
 <script>xconfig={dir:"../"}</script>
 <script src="../uupaa.js"></script>
@@ -28,9 +27,20 @@ function drawShape(canvas, matrix){
         ctx.scale(1.2, 0.8);
         ctx.rotate(5 * Math.PI / 180);
     }
-    ctx.fillRect(25,25,100,100);
-    ctx.clearRect(45,45,60,60);
-    ctx.strokeRect(50,50,50,50);
+
+    var fillText = "fill. 日本語";
+    var strokeText = "stroke. 日本語";
+
+    ctx.textBaseline = "top";
+    ctx.font = "64pt Arial";
+
+    ctx.fillStyle = "orange";  // shadow color
+    ctx.fillText(fillText, 22, 22);
+    ctx.fillStyle = "red";
+    ctx.fillText(fillText, 20, 20);
+
+    ctx.strokeStyle = "blue";
+    ctx.strokeText(strokeText, 20, 80);
 }
 </script>
     <style type="text/css">
@@ -40,16 +50,15 @@ function drawShape(canvas, matrix){
       pre { float:left; display:block; background: rgb(238,238,238); border: 1px dashed #666; padding: 15px 20px; margin: 0 0 10px 0; }
     </style>
   </head>
-
   <body>
-    <h1>An example of fillRect, clearRect and strokeRect</h1>
+    <h1>A canvas <code>fillText and strokeText</code> example</h1>
     <div>
       <input type="button" value="matrix effect" onclick="matrix()" />
       <br />
-      <canvas id="slcanvas" class="sl" width="150" height="150"></canvas>
-      <canvas id="vmlcanvas" class="vml" width="150" height="150"></canvas>
-      <canvas id="flashcanvas" class="flash" width="150" height="150"></canvas>
-<pre>
+      <canvas id="slcanvas" class="sl" width="700" height="200"></canvas>
+      <canvas id="vmlcanvas" class="vml" width="700" height="200"></canvas>
+      <canvas id="flashcanvas" class="flash" width="700" height="200"></canvas>
+      <pre>
 function xcanvas() {
     drawShape(document.getElementById('slcanvas'));
     drawShape(document.getElementById('vmlcanvas'));
@@ -71,12 +80,22 @@ function drawShape(canvas, matrix){
         ctx.scale(1.2, 0.8);
         ctx.rotate(5 * Math.PI / 180);
     }
-    ctx.fillRect(25,25,100,100);
-    ctx.clearRect(45,45,60,60);
-    ctx.strokeRect(50,50,50,50);
+
+    var fillText = "fill. 日本語";
+    var strokeText = "stroke. 日本語";
+
+    ctx.textBaseline = "top";
+    ctx.font = "64pt Arial";
+
+    ctx.fillStyle = "orange";  // shadow color
+    ctx.fillText(fillText, 22, 22);
+    ctx.fillStyle = "red";
+    ctx.fillText(fillText, 20, 20);
+
+    ctx.strokeStyle = "blue";
+    ctx.strokeText(strokeText, 20, 80);
 }
-</pre>
+      </pre>
     </div>
   </body>
-
 </html>

@@ -4,14 +4,14 @@ package {
 
     import flash.geom.Matrix;
 
-    public class Gradient {
+    public class CanvasGradient {
         public var ratios:Array = [];
         public var colors:Array = [];
         public var alphas:Array = [];
         public var matrix:Matrix = new Matrix();
         public var focalPointRatio:Number; // for Radial
 
-        public function Gradient() {
+        public function CanvasGradient() {
         }
 
         // get alphas x globalAlpha

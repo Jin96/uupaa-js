@@ -433,7 +433,7 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
 
         rv.push('<Canvas Canvas.ZIndex="', zindex, '">');
 
-        if (this.__shadowColor.a) {
+        if (this.__shadowColor.a && this.shadowBlur) {
             iz = _SHADOW.width;
             shx = iz / 2 + this.shadowOffsetX;
             shy = iz / 2 + this.shadowOffsetY;
@@ -452,7 +452,7 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
         rv.push('<Image Opacity="', this.globalAlpha,
                 '" Source="', image.src, size, '">',
                 clip, _buildMatrixTransform('Image', m),
-                this.__shadowColor.a ? _buildShadowBlur(this, "Image", this.__shadowColor) : "",
+                (this.__shadowColor.a && this.shadowBlur) ? _buildShadowBlur(this, "Image", this.__shadowColor) : "",
                 '</Image></Canvas>');
     } else { // HTMLCanvasElement
         iz = image.uuctx2d._history.length;
@@ -490,7 +490,7 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
                 '" Opacity="', this.globalAlpha,
                 size, '">',
                 clip, _buildMatrixTransform('Canvas', m),
-    //            this.__shadowColor.a ? _buildShadowBlur(me, "Canvas", this.__shadowColor) : "",
+    //          (this.__shadowColor.a && this.shadowBlur) ? _buildShadowBlur(me, "Canvas", this.__shadowColor) : "",
                 '<Canvas>');
 
         for (; i < iz; ++i) {
@@ -719,7 +719,7 @@ function stroke(path, fill) {
                     // http://twitter.com/uupaa/status/5179317486
                     '" Data="F1 ', path, // [F1] FillRule=Nonzero
                     '" Fill="', this.__fillStyle.hex, '">',
-                    this.__shadowColor.a ? _buildShadowBlur(this, "Path", this.__shadowColor) : "",
+                    (this.__shadowColor.a && this.shadowBlur) ? _buildShadowBlur(this, "Path", this.__shadowColor) : "",
                     '</Path></Canvas>');
 
         } else {
@@ -731,7 +731,7 @@ function stroke(path, fill) {
                     '<Path Opacity="', this.__strokeStyle.a * this.globalAlpha,
                     '" Data="', path, _buildStrokeProps(this),
                     '" Stroke="', this.__strokeStyle.hex, '">',
-                    this.__shadowColor.a ? _buildShadowBlur(this, "Path", this.__shadowColor) : "",
+                    (this.__shadowColor.a && this.shadowBlur) ? _buildShadowBlur(this, "Path", this.__shadowColor) : "",
                     '</Path></Canvas>');
         }
         fg = rv.join("");
@@ -821,7 +821,7 @@ function strokeText(text, x, y, maxWidth, fill) {
             '" FontStyle="', _FONT_STYLES[font.style] || "Normal",
             '" FontWeight="', _FONT_WEIGHTS[font.weight] || "Normal",
             '">', uu.esc(text), mtx,
-            this.__shadowColor.a ? _buildShadowBlur(this, "TextBlock", this.__shadowColor) : "");
+            (this.__shadowColor.a && this.shadowBlur) ? _buildShadowBlur(this, "TextBlock", this.__shadowColor) : "");
 
     if (typeof style === "string") {
         ;
@@ -927,7 +927,7 @@ function _linearGradientFill(ctx, obj, path, fill, mix, zindex) {
               '" EndPoint="', c0.x2, ",", c0.y2, '">',
               obj.colors || _buildLinearColor(obj),
             '</LinearGradientBrush></Path.', prop, '>',
-            ctx.__shadowColor.a ? _buildShadowBlur(ctx, "Path", ctx.__shadowColor) : "",
+            (ctx.__shadowColor.a && ctx.shadowBlur) ? _buildShadowBlur(ctx, "Path", ctx.__shadowColor) : "",
             '</Path></Canvas>');
     return rv.join("");
 }
@@ -977,7 +977,7 @@ function _radialGradientFill(ctx, obj, path, fill, mix, zindex) {
               obj.colors || _buildRadialColor(obj),
             '</RadialGradientBrush></Ellipse.', prop, '>',
               tmpmtx,
-              ctx.__shadowColor.a ? _buildShadowBlur(ctx, "Ellipse", ctx.__shadowColor) : "",
+              (ctx.__shadowColor.a && ctx.shadowBlur) ? _buildShadowBlur(ctx, "Ellipse", ctx.__shadowColor) : "",
             '</Ellipse></Canvas>');
     return rv.join("");
 }
@@ -1026,7 +1026,7 @@ function _patternFill(ctx, obj, path, fill, mix, zindex) {
                 rv.push('<Image Opacity="', ctx.globalAlpha,
                         '" Canvas.Left="', x * sw, '" Canvas.Top="', y * sh,
                         '" Source="', obj.src, '">',
-        //              ctx.__shadowColor.a ? _buildShadowBlur(ctx, "Image", ctx.__shadowColor) : "",
+        //              (ctx.__shadowColor.a && ctx.shadowBlur) ? _buildShadowBlur(ctx, "Image", ctx.__shadowColor) : "",
                         '</Image>');
             }
         }
@@ -1042,7 +1042,7 @@ function _patternFill(ctx, obj, path, fill, mix, zindex) {
             '"><Path.', prop, '><ImageBrush Stretch="None" ImageSource="',
             obj.src,
             '" /></Path.', prop, '>',
-            ctx.__shadowColor.a ? _buildShadowBlur(ctx, "Path", ctx.__shadowColor) : "",
+            (ctx.__shadowColor.a && ctx.shadowBlur) ? _buildShadowBlur(ctx, "Path", ctx.__shadowColor) : "",
             '</Path></Canvas>');
     return rv.join("");
 }

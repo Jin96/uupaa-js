@@ -1,0 +1,101 @@
+<!doctype html><html><head><title>Waves</title>
+<script>xconfig={dir:"../"}</script>
+<script src="../uupaa.js"></script>
+<script>
+var waves = ["rgba(157, 187, 210, 0.3)",
+             "rgba(171, 216, 201, 0.3)",
+             "rgba(135, 199, 215, 0.3)",
+             "rgba(223, 233, 235, 0.3)"]
+
+var i = 0;
+var canvas;
+var ctx;
+
+function draw() {
+    ctx.lock(1);
+
+    for(var j = waves.length - 1; j >= 0; --j) {
+        var offset = i + j * Math.PI * 12;
+        ctx.fillStyle = (waves[j]);
+
+        var randomLeft = Math.abs(Math.pow( Math.sin(offset/100), 2 )) * 200;
+        var randomRight = Math.abs(Math.pow( Math.sin((offset/100) + 10), 2 )) * 200;
+        var randomLeftConstraint = Math.abs(Math.pow( Math.sin((offset/90)+2), 2 )) * 300;
+        var randomRightConstraint = Math.abs(Math.pow( Math.sin((offset/90)+1), 2)) * 300;
+
+        ctx.beginPath();
+        ctx.moveTo(0, randomLeft + 10);
+
+//      ctx.lineTo(canvas.width, randomRight + 10);
+        ctx.bezierCurveTo(canvas.width / 3, randomLeftConstraint,
+                            canvas.width / 3 * 2, randomRightConstraint,
+                            canvas.width, randomRight + 10);
+        ctx.lineTo(canvas.width , canvas.height);
+        ctx.lineTo(0, canvas.height);
+        ctx.lineTo(0, randomLeft + 10);
+        ctx.fill();
+        ctx.closePath();
+    }
+    ++i;
+    ctx.unlock();
+}
+
+function xcanvas(uu, node) {
+    var sz = uu.win.size();
+    canvas = node[0];
+    ctx = canvas.getContext("2d");
+
+    ctx.resize(sz.iw - 40, sz.ih - 40)
+//    ctx = canvas.getContext("2d");
+
+    if (ctx instanceof uu.canvas.VML2D) {
+        document.title = "Backend: VML";
+    } else if (ctx instanceof uu.canvas.FL2D) {
+        document.title = "Backend: Flash";
+    } else if (ctx instanceof uu.canvas.SL2D) {
+        document.title = "Backend: Silverlight";
+    } else {
+        document.title = "Native Canvas";
+    }
+    ctx.xFlyweight = 1;
+
+    setInterval(draw, 20);
+}
+
+function switchBackend() {
+    var n = window.name || "";
+
+    if (!n) {
+        window.name = "flash";
+    } else {
+        switch (n) {
+        case "sl":      window.name = "flash"; break;
+        case "flash":   window.name = "vml"; break;
+        case "vml":     window.name = "sl"; break;
+        }
+    }
+    location.reload(false);
+}
+function xboot(uu) {
+    uu.id("canvas").className = window.name || "sl";
+}
+
+</script>
+<style>
+body {
+    margin: 0;
+    width: 100%; height: 100%;
+}
+#canvas {
+    position: absolute;
+    top: 20px; left: 0;
+    width: 100%; height: 100%;
+}
+</style>
+</head><body>
+<input type="button" value="sl/flash/vml" onclick="switchBackend()" />
+<br />
+
+<canvas id="canvas" width="400" height="400"></canvas>
+
+</body></html>

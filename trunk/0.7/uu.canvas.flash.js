@@ -499,7 +499,7 @@ function unlock() {
 
 // inner
 function sendState(bits) { // @param Number: bits
-    var ary = this._stock, i = ary.length - 1;
+    var ary = this._stock, i = ary.length - 1, font;
 
     if (bits & 0x1) {
         this._alpha !== this.globalAlpha &&
@@ -546,33 +546,42 @@ function sendState(bits) { // @param Number: bits
             (ary[++i] = "mL\t" + (this._miterLimit = this.miterLimit));
     }
 
-/*
     if (bits & 0x4) {
-        this._shadowBlur !== this.shadowBlur &&
-            (ary[++i] = "sB\t" + (this._shadowBlur = this.shadowBlur));
+        if (this._shadowBlur !== this.shadowBlur
+            || this._shadowOffsetX !== this.shadowOffsetX
+            || this._shadowOffsetY !== this.shadowOffsetY
+            || this._shadowColor   !== this.shadowColor) {
 
-        this._shadowColor !== this.shadowColor &&
-            (this.__shadowColor = uu.color(this._shadowColor = this.shadowColor),
-             ary[++i] = "sC\t" + this.__shadowColor.num + "\t" + this.__shadowColor.a);
+            if (this._shadowColor !== this.shadowColor) {
+                this.__shadowColor = uu.color(this._shadowColor = this.shadowColor);
+            }
+            this._shadowBlur    = this.shadowBlur;
+            this._shadowOffsetX = this.shadowOffsetX;
+            this._shadowOffsetY = this.shadowOffsetY;
 
-        this._shadowOffsetX !== this.shadowOffsetX &&
-            (ary[++i] = "sX\t" + (this._shadowOffsetX = this.shadowOffsetX));
-
-        this._shadowOffsetY !== this.shadowOffsetY &&
-            (ary[++i] = "sY\t" + (this._shadowOffsetY = this.shadowOffsetY));
+            ary[++i] = "sh\t" + this.shadowBlur        + "\t" +
+                                this.__shadowColor.num + "\t" +
+                                this.__shadowColor.a   + "\t" +
+                                this.shadowOffsetX     + "\t" +
+                                this.shadowOffsetY;
+        }
     }
- */
 
     if (bits & 0x8) {
-        this._font !== this.font &&
-            (ary[++i] = "fo\t" + (this._font = this.font));
-/*
+        if (this._font !== this.font) {
+            this._font = this.font;
+
+            font = uu.font.parse(this.font, this.canvas);
+            ary[++i] = "fo\t" + font.size + "\t" +
+                                font.style + "\t" +
+                                font.weight + "\t" +
+                                font.variant + "\t" +
+                                font.family;
+        }
         this._textAlign !== this.textAlign &&
             (ary[++i] = "tA\t" + (this._textAlign = this.textAlign));
-
         this._textBaseline !== this.textBaseline &&
             (ary[++i] = "tB\t" + (this._textBaseline = this.textBaseline));
- */
     }
 }
 
