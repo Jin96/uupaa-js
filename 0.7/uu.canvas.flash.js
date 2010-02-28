@@ -90,6 +90,9 @@ function build(node) { // @param Node: <canvas>
         var ctx = node.uuctx2d;
 
         ctx._readyState = 1; // 1: draw ready
+        if (node.currentStyle.direction === "rtl") {
+            ctx._stock.push("rt");
+        }
         ctx.sendState(0xf);
         ctx.send();
         uu.flash.dmz[id] = null; // free

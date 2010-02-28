@@ -17,6 +17,22 @@ function matrix() {
     drawShape(document.getElementById('vmlcanvas'), 1);
     drawShape(document.getElementById('flashcanvas'), 1);
 }
+
+var globalAlpha = 1.0
+function switchAlpha() {
+    globalAlpha -= 0.2;
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+}
+var shadowBlur = 1;
+function switchBlur() {
+    shadowBlur += 1;
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+}
+
 function drawShape(canvas, matrix){
     if (!canvas.getContext){ return; }
 
@@ -33,9 +49,11 @@ function drawShape(canvas, matrix){
     img.onload = function(){
         // create pattern
         var ptrn = ctx.createPattern(img,'repeat');
-        ctx.shadowBlur = 15;
+        ctx.shadowBlur = shadowBlur;
         ctx.shadowOffsetX = 10;
         ctx.shadowOffsetY = 10;
+        ctx.globalAlpha = globalAlpha;
+
         ctx.shadowColor = "gray";
         ctx.beginPath();
         ctx.strokeStyle = ptrn;
@@ -60,6 +78,8 @@ function drawShape(canvas, matrix){
     <h1>A canvas <code>shadow createPattern</code> example</h1>
     <div>
       <input type="button" value="matrix effect" onclick="matrix()" />
+      <input type="button" value="alpha -0.2" onclick="switchAlpha()" />
+      <input type="button" value="blur +1" onclick="switchBlur()" />
       <br />
       <canvas id="slcanvas" class="sl" width="150" height="150"></canvas>
       <canvas id="vmlcanvas" class="vml" width="150" height="150"></canvas>
@@ -80,6 +100,22 @@ function matrix() {
     drawShape(document.getElementById('vmlcanvas'), 1);
     drawShape(document.getElementById('flashcanvas'), 1);
 }
+
+var globalAlpha = 1.0
+function switchAlpha() {
+    globalAlpha -= 0.2;
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+}
+var shadowBlur = 1;
+function switchBlur() {
+    shadowBlur += 1;
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+}
+
 function drawShape(canvas, matrix){
     if (!canvas.getContext){ return; }
 
@@ -96,9 +132,11 @@ function drawShape(canvas, matrix){
     img.onload = function(){
         // create pattern
         var ptrn = ctx.createPattern(img,'repeat');
-        ctx.shadowBlur = 15;
+        ctx.shadowBlur = shadowBlur;
         ctx.shadowOffsetX = 10;
         ctx.shadowOffsetY = 10;
+        ctx.globalAlpha = globalAlpha;
+
         ctx.shadowColor = "gray";
         ctx.beginPath();
         ctx.strokeStyle = ptrn;

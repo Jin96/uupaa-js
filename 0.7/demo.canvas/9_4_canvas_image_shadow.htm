@@ -21,6 +21,9 @@ function matrix() {
 var globalAlpha = 1.0;
 function alpha() {
     globalAlpha -= 0.2;
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
 }
 
 function drawShape(canvas, matrix){
@@ -30,8 +33,8 @@ function drawShape(canvas, matrix){
 
     ctx.globalAlpha = globalAlpha;
 
+    ctx.clear();
     if (matrix) {
-        ctx.clear();
         ctx.translate(-10, 5);
         ctx.scale(1.2, 0.8);
         ctx.rotate(5 * Math.PI / 180);

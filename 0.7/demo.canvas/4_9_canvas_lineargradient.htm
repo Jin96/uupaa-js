@@ -8,26 +8,36 @@
 
 <script>
 function xcanvas() {
-    draw(document.getElementById('slcanvas'));
-    draw(document.getElementById('vmlcanvas'));
-    draw(document.getElementById('flashcanvas'));
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
 }
 function matrix() {
-    draw(document.getElementById('slcanvas'), 1);
-    draw(document.getElementById('vmlcanvas'), 1);
-    draw(document.getElementById('flashcanvas'), 1);
+    drawShape(document.getElementById('slcanvas'), 1);
+    drawShape(document.getElementById('vmlcanvas'), 1);
+    drawShape(document.getElementById('flashcanvas'), 1);
 }
-function draw(canvas, matrix){
+
+var globalAlpha = 1.0
+function switchAlpha() {
+    globalAlpha -= 0.2;
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+}
+
+function drawShape(canvas, matrix){
     if (!canvas.getContext){ return; }
 
     var ctx = canvas.getContext('2d');
 
+    ctx.clear();
     if (matrix) {
-        ctx.clear();
         ctx.translate(-10, 5);
         ctx.scale(1.2, 0.8);
         ctx.rotate(5 * Math.PI / 180);
     }
+    ctx.globalAlpha = globalAlpha;
 
     // Create gradients
     var lingrad = ctx.createLinearGradient(0,0,0,150);
@@ -60,32 +70,44 @@ function draw(canvas, matrix){
     <h1>A canvas <code>linearGradient</code> example</h1>
     <div>
       <input type="button" value="matrix effect" onclick="matrix()" />
+      <input type="button" value="alpha -0.2" onclick="switchAlpha()" />
+
       <br />
       <canvas id="slcanvas" class="sl" width="150" height="150"></canvas>
       <canvas id="vmlcanvas" class="vml" width="150" height="150"></canvas>
       <canvas id="flashcanvas" class="flash" width="150" height="150"></canvas>
       <pre>
 function xcanvas() {
-    draw(document.getElementById('slcanvas'));
-    draw(document.getElementById('vmlcanvas'));
-    draw(document.getElementById('flashcanvas'));
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
 }
 function matrix() {
-    draw(document.getElementById('slcanvas'), 1);
-    draw(document.getElementById('vmlcanvas'), 1);
-    draw(document.getElementById('flashcanvas'), 1);
+    drawShape(document.getElementById('slcanvas'), 1);
+    drawShape(document.getElementById('vmlcanvas'), 1);
+    drawShape(document.getElementById('flashcanvas'), 1);
 }
+
+var globalAlpha = 1.0
+function switchAlpha() {
+    globalAlpha -= 0.2;
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+}
+
 function draw(canvas, matrix){
     if (!canvas.getContext){ return; }
 
     var ctx = canvas.getContext('2d');
 
+    ctx.clear();
     if (matrix) {
-        ctx.clear();
         ctx.translate(-10, 5);
         ctx.scale(1.2, 0.8);
         ctx.rotate(5 * Math.PI / 180);
     }
+    ctx.globalAlpha = globalAlpha;
 
     // Create gradients
     var lingrad = ctx.createLinearGradient(0,0,0,150);

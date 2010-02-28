@@ -15,23 +15,38 @@ function matrix() {
     drawShape(document.getElementById('vmlcanvas'), 1);
     drawShape(document.getElementById('flashcanvas'), 1);
 }
+var globalAlpha = 1.0
+function switchAlpha() {
+    globalAlpha -= 0.2;
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+}
+var shadowBlur = 1;
+function switchBlur() {
+    shadowBlur += 1;
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+}
+
 function drawShape(canvas, matrix){
     if (!canvas.getContext){ return; }
 
     var ctx = canvas.getContext('2d');
 
+    ctx.clear();
     if (matrix) {
-        ctx.clear();
         ctx.translate(-10, 5);
         ctx.scale(1.2, 0.8);
         ctx.rotate(5 * Math.PI / 180);
     }
-    ctx.shadowBlur = 10;
+    ctx.shadowBlur = shadowBlur;
     ctx.shadowOffsetX = 10;
     ctx.shadowOffsetY = 10;
     ctx.shadowColor = "gray";
     ctx.lineWidth = 3;
-    ctx.globalAlpha = 1.0;
+    ctx.globalAlpha = globalAlpha;
 
     var grad1 = ctx.createLinearGradient(105,0, 200,100);
     grad1.addColorStop(0,    'yellow');
@@ -102,6 +117,8 @@ function drawShape(canvas, matrix){
     <h1>A canvas <code>shadow path</code> example</h1>
     <div>
       <input type="button" value="matrix effect" onclick="matrix()" />
+      <input type="button" value="alpha -0.2" onclick="switchAlpha()" />
+      <input type="button" value="blur +1" onclick="switchBlur()" />
       <br />
       <canvas id="slcanvas" class="sl" width="300" height="300"></canvas>
       <canvas id="vmlcanvas" class="vml" width="300" height="300"></canvas>

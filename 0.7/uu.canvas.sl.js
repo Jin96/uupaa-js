@@ -677,6 +677,7 @@ function scale(x, y) {
 
 // CanvasRenderingContext2D.prototype.setTransform
 function setTransform(m11, m12, m21, m22, dx, dy) {
+    this._matrixfxd = 1;
     if (m11 === 1 && !m12 && m22 === 1 && !m21 && !dx && !dy) {
         this._matrixfxd = 0; // reset _matrixfxd flag
     }
