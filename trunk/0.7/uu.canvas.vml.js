@@ -11,10 +11,26 @@
 //  </canvas>
 
 uu.agein || (function(win, doc, uu) {
-var _SHADOW = { width: 4, from: 0.01, delta: 0.05 },
+var _QQ     = /\?/g, // place holder
     _COMPOS = { "source-over": 0, "destination-over": 4, copy: 10 },
     _FILTER = uu.ie8 ? ["-ms-filter:'progid:DXImageTransform.Microsoft.", "'"]
-                     : ["filter:progid:DXImageTransform.Microsoft.", ""];
+                     : ["filter:progid:DXImageTransform.Microsoft.", ""],
+    // zindex(+shadowOffsetX +shadowOffsetY), path, color.hex, opacity(+strokeProps or +' type="solid"')
+    _COLOR_FILL     = '<v:shape style="position:absolute;width:10px;height:10px;z-index:?" filled="t" stroked="f" coordsize="100,100" path="?"><v:fill color="?" opacity="?" /></v:shape>',
+    _COLOR_STROKE   = '<v:shape style="position:absolute;width:10px;height:10px;z-index:?" filled="f" stroked="t" coordsize="100,100" path="?"><v:stroke color="?" opacity="?" /></v:shape>',
+
+    // zindex(+shadowOffsetX +shadowOffsetY), path, color.hex, opacity(+strokeProps), angle
+    _LINER_FILL     = '<v:shape style="position:absolute;width:10px;height:10px;z-index:?" coordsize="100,100" filled="t" stroked="f" path="?"><v:fill type="gradient" method="sigma" focus="0%" opacity="?" angle="?" /></v:shape>',
+    _LINER_STROKE   = '<v:shape style="position:absolute;width:10px;height:10px;z-index:?" coordsize="100,100" filled="f" stroked="t" path="?"><v:stroke filltype="solid" opacity="?" angle="?" /></v:shape>',
+
+    // zindex, left, top, width, height, opacity(+'" color="?' +focussize1, +focussize2, +focusposition1, +focusposition2)
+    _RADIAL_FILL    = '<v:oval style="position:absolute;z-index:?;left:?px;top:?px;width:?px;height:?px" filled="t" stroked="f" coordsize="11000,11000"><v:fill type="gradientradial" method="sigma" opacity="?" /></v:oval>',
+    // zindex, left, top, width, height, opacity(+strokeProps, +color)
+    _RADIAL_STROKE  = '<v:oval style="position:absolute;z-index:?;left:?px;top:?px;width:?px;height:?px" filled="f" stroked="t" coordsize="11000,11000"><v:stroke filltype="tile" opacity="?" /></v:oval>',
+
+    // zindex, left, top, path, type["solid" or "tile"], opacity(+color, +src, +strokeProps)
+    _PATTERN_FILL   = '<v:shape style="position:absolute;width:10px;height:10px;z-index:?;left:?px;top:?px" coordsize="100,100" filled="t" stroked="f" path="?"><v:fill type="?" opacity="?" /></v:shape>',
+    _PATTERN_STROKE = '<v:shape style="position:absolute;width:10px;height:10px;z-index:?;left:?px;top:?px" coordsize="100,100" filled="f" stroked="t" path="?"><v:stroke filltype="?" opacity="?" /></v:shape>';
 
 uu.mix(uu.canvas.VML2D.prototype, {
     arc:                    arc,
@@ -116,6 +132,7 @@ function initSurface() {
     this.textAlign      = "start";
     this.textBaseline   = "alphabetic";
     // --- hidden properties ---
+    this._mix           = -1;
     this._lineScale     = 1;
     this._scaleX        = 1;
     this._scaleY        = 1;
@@ -224,18 +241,16 @@ function clearRect(x, y, w, h) {
     if ((!x && !y && w >= this.canvas.width && h >= this.canvas.height)) {
         this.clear();
     } else {
-        var fg, zindex = 0, color = uu.css.bgcolor.inherit(this._view);
-
-        switch (_COMPOS[this.globalCompositeOperation]) {
-        case  4: zindex = --this._zindex; break;
-        case 10: this.clear();
+        if (this._mix === -1) {
+            this._mix = _COMPOS[this.globalCompositeOperation];
         }
 
-        fg = '<v:shape style="position:absolute;width:10px;height:10px;z-index:' + zindex +
-             '" filled="t" stroked="f" coordsize="100,100" path="' + _rect(this, x, y, w, h) +
-             '"><v:fill type="solid" color="' + color.hex +
-             '" opacity="' + (color.a * this.globalAlpha).toFixed(2) +
-             '" /></v:shape>'
+        var color = uu.css.bgcolor.inherit(this._view),
+            zindex = (this._mix ===  4) ? --this._zindex
+                   : (this._mix === 10) ? (this.clear(), 0) : 0,
+            fg = _buildVML(_COLOR_FILL,
+                           [zindex, _rect(this, x, y, w, h), color.hex,
+                            (this.globalAlpha * color.a) + ' type="solid"']);
 
         this.xFlyweight ||
             this._history.push(this._clipPath ? (fg = _clippy(this, fg)) : fg);
@@ -329,6 +344,9 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
     if (this.shadowColor !== this._shadowColor) {
         this.__shadowColor = uu.color(this._shadowColor = this.shadowColor);
     }
+    if (this._mix === -1) {
+        this._mix = _COMPOS[this.globalCompositeOperation];
+    }
 
     var dim = uu.img.actsize(image), // img actual size
         az = arguments.length, full = (az === 9),
@@ -341,85 +359,94 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
         dw = full ? a7 : a3 || dim.w,
         dh = full ? a8 : a4 || dim.h,
         rv = [], fg, m,
-        frag = [], sfrag, tfrag, // code fragment
-        i = 0, iz, c0, zindex = 0,
-        sizeTrans, // 0: none size transform, 1: size transform
-        // for shadow
-        so = 0, shx = 0, shy = 0;
+        frag = [], tfrag, // code fragment
+        i = 0, iz, c0,
+        zindex = (this._mix ===  4) ? --this._zindex
+               : (this._mix === 10) ? (this.clear(), 0) : 0,
+        sizeTrans; // 0: none size transform, 1: size transform
 
-    switch (_COMPOS[this.globalCompositeOperation]) {
-    case  4: zindex = --this._zindex; break;
-    case 10: this.clear();
-    }
+    if (image.src) { // HTMLImageElement
+        if (!this._matrixfxd
+            && this.globalAlpha === 1
+            && !(this.__shadowColor.a && this.shadowBlur)) {
 
-    if (image.src) { // image is HTMLImageElement
-        c0 = _map(this._matrix, dx, dy);
+            rv.push(
+                '<v:image style="position:absolute;z-index:', zindex,
+                ';width:',      dw,
+                'px;height:',   dh,
+                'px;left:',     dx,
+                'px;top:',      dy,
+                'px" coordsize="100,100" src="', image.src,
+                '" opacity="',  0.5,
+                '" cropleft="', sx / dim.w,
+                '" croptop="',  sy / dim.h,
+                '" cropright="',    (dim.w - sx - sw) / dim.w,
+                '" cropbottom="',   (dim.h - sy - sh) / dim.h,
+                '" />');
+        } else {
+            c0 = _map(this._matrix, dx, dy);
 
-        sizeTrans = (sx || sy); // 0: none size transform, 1: size transform
-        tfrag = this._matrixfxd ? _imageTransform(this, this._matrix, dx, dy, dw, dh) : '';
+            sizeTrans = (sx || sy); // 0: none size transform, 1: size transform
+            tfrag = this._matrixfxd ? _imageTransform(this, this._matrix, dx, dy, dw, dh) : '';
 
-        frag = [
-            // [0] shadow only
-            '<div style="position:absolute;z-index:' + (zindex - 10) +
-                ';left:$1px;top:$2px' + tfrag + '">',
-            // [1]
-            '<div style="position:relative;overflow:hidden;width:' +
-                Math.round(dw) + 'px;height:' + Math.round(dh) + 'px">',
-            // [2]
-            !sizeTrans ? "" : [
-                '<div style="width:', Math.ceil(dw + sx * dw / sw),
-                    'px;height:', Math.ceil(dh + sy * dh / sh),
-                    'px;',
-                    _FILTER[0],
-                    'Matrix(Dx=', (-sx * dw / sw).toFixed(3),
-                          ',Dy=', (-sy * dh / sh).toFixed(3), ')',
-                    _FILTER[1], '">'].join(""),
-            // [3]
-            '<div style="width:' + Math.round(dim.w * dw / sw) +
-                'px;height:' + Math.round(dim.h * dh / sh) + 'px;',
-            // [4] shadow only
-            'background-color:' + this.__shadowColor.hex + ';' +
-                _FILTER[0] + 'Alpha(opacity=$3)' + _FILTER[1],
-            // [5] alphaloader
-            _FILTER[0] + 'AlphaImageLoader(src=' +
-                image.src + ',SizingMethod=' +
-                (az === 3 ? "image" : "scale") + ')' + _FILTER[1],
-            // [6]
-            '"></div>' +
-                (sizeTrans ? '</div>' : '') + '</div></div>'
-        ];
+            frag = [
+                // [0] shadow only
+                '<div style="position:absolute;z-index:' + (zindex - 10) +
+                    ';left:$1px;top:$2px' + tfrag + '">',
+                // [1]
+                '<div style="position:relative;overflow:hidden;width:' +
+                    Math.round(dw) + 'px;height:' + Math.round(dh) + 'px">',
+                // [2]
+                !sizeTrans ? "" : [
+                    '<div style="width:', Math.ceil(dw + sx * dw / sw),
+                        'px;height:', Math.ceil(dh + sy * dh / sh),
+                        'px;',
+                        _FILTER[0],
+                        'Matrix(Dx=', (-sx * dw / sw).toFixed(3),
+                              ',Dy=', (-sy * dh / sh).toFixed(3), ')',
+                        _FILTER[1], '">'].join(""),
+                // [3]
+                '<div style="width:' + Math.round(dim.w * dw / sw) +
+                    'px;height:' + Math.round(dim.h * dh / sh) + 'px;',
+                // [4] shadow only
+                'background-color:' + this.__shadowColor.hex + ';' +
+                    _FILTER[0] + 'Alpha(opacity=$3)' + _FILTER[1],
+                // [5] alphaloader
+                _FILTER[0] + 'AlphaImageLoader(src=' +
+                    image.src + ',SizingMethod=' +
+                    (az === 3 ? "image" : "scale") + ')' + _FILTER[1],
+                // [6]
+                '"></div>' +
+                    (sizeTrans ? '</div>' : '') + '</div></div>'
+            ];
 
-        if (this.__shadowColor.a && this.shadowBlur) {
-            iz = _SHADOW.width;
-            shx = iz / 2 + this.shadowOffsetX;
-            shy = iz / 2 + this.shadowOffsetY;
-            so = _SHADOW.from;
-
-            sfrag = frag[0] + frag[1] + frag[2] + frag[3] + frag[4] + frag[6];
-
-            for (i = 0; i < iz; so += _SHADOW.delta, --shx, --shy, ++i) {
+            if (this.__shadowColor.a && this.shadowBlur) {
+                fg = frag[0] + frag[1] + frag[2] + frag[3] + frag[4] + frag[6];
                 rv.push(
-                    sfrag.replace(/\$1/, this._matrixfxd ? shx : Math.round(c0.x * 0.1) + shx)
-                         .replace(/\$2/, this._matrixfxd ? shy : Math.round(c0.y * 0.1) + shy)
-                         .replace(/\$3/, (so * 100).toFixed(2)));
-            }
-        }
+                    fg.replace(/\$1/, this._matrixfxd ? this.shadowOffsetX
+                                                      : Math.round(c0.x * 0.1) + this.shadowOffsetX)
+                      .replace(/\$2/, this._matrixfxd ? this.shadowOffsetY
+                                                      : Math.round(c0.y * 0.1) + this.shadowOffsetY)
+                      .replace(/\$3/, this.globalAlpha / Math.sqrt(this.shadowBlur) * 50));
 
-        rv.push('<div style="position:absolute;z-index:', zindex);
-        if (this._matrixfxd) {
-            rv.push(tfrag, '">');
-        } else { // 1:1 scale
-            rv.push(';top:', Math.round(c0.y * 0.1),
-                    'px;left:', Math.round(c0.x * 0.1), 'px">')
+            }
+
+            rv.push('<div style="position:absolute;z-index:', zindex);
+            if (this._matrixfxd) {
+                rv.push(tfrag, '">');
+            } else { // 1:1 scale
+                rv.push(';top:', Math.round(c0.y * 0.1),
+                        'px;left:', Math.round(c0.x * 0.1), 'px">')
+            }
+            rv.push(frag[1], frag[2], frag[3], frag[5], frag[6]);
         }
-        rv.push(frag[1], frag[2], frag[3], frag[5], frag[6]);
         fg = rv.join("");
-    } else {
+    } else { // HTMLCanvasElement
         c0 = _map(this._matrix, dx, dy);
         switch (az) {
         case 3: // 1:1 scale
                 rv.push('<div style="position:absolute;z-index:', zindex,
-                        ';left:', Math.round(c0.x * 0.1),
+                        ';left:',  Math.round(c0.x * 0.1),
                         'px;top:', Math.round(c0.y * 0.1), 'px">')
                 iz = image.uuctx2d._history.length;
 
@@ -498,12 +525,12 @@ function fillCircle(x,       // @param Number:
                     r,       // @param Number: radius
                     color) { // @param ColorHash:
     var fg = '<v:oval style="position:absolute;left:' + (x - r) +
-             'px;top:' + (y - r) +
-             'px;width:' + (r * 2) +
-             'px;height:' + (r * 2) +
-             'px" filled="t" stroked="f"><v:fill opacity="' +
-             (color.a * this.globalAlpha) +
-             '" color="' + color.hex + '" /></v:oval>';
+                 'px;top:' + (y - r) +
+                 'px;width:' + (r * 2) +
+                 'px;height:' + (r * 2) +
+                 'px" filled="t" stroked="f"><v:fill opacity="' +
+                 (color.a * this.globalAlpha) +
+                 '" color="' + color.hex + '" /></v:oval>';
 
     this._state !== 0x1 ? this._stock.push(fg)
                         : this._view.insertAdjacentHTML("BeforeEnd", fg);
@@ -579,11 +606,9 @@ function moveTo(x, y) {
 
 // CanvasRenderingContext2D.prototype.quickStroke - quick stroke
 function quickStroke(hexcolor, alpha, lineWidth) {
-    var fg = '<v:shape style="position:absolute;width:10px;height:10px' +
-             '" filled="f" stroked="t" coordsize="100,100" path="' +
+    var fg = '<v:shape style="position:absolute;width:10px;height:10px" filled="f" stroked="t" coordsize="100,100" path="' +
              this._path.join("") + '"><v:stroke color="' + hexcolor +
-             '" opacity="' + alpha.toFixed(2) +
-             '" weight="' + lineWidth + 'px" /></v:shape>';
+             '" opacity="' + alpha + '" weight="' + lineWidth + 'px" /></v:shape>';
 
     this._state !== 0x1 ? this._stock.push(fg)
                         : this._view.insertAdjacentHTML("BeforeEnd", fg);
@@ -711,6 +736,7 @@ function scale(x, y) {
 
 // CanvasRenderingContext2D.prototype.setTransform
 function setTransform(m11, m12, m21, m22, dx, dy) {
+    this._matrixfxd = 1;
     if (m11 === 1 && !m12 && m22 === 1 && !m21 && !dx && !dy) {
         this._matrixfxd = 0; // reset _matrixfxd flag
     }
@@ -732,61 +758,42 @@ function stroke(path, fill) {
             this.__fillStyle = uu.color(this._fillStyle = this.fillStyle);
         }
     }
+    if (this._mix === -1) {
+        this._mix = _COMPOS[this.globalCompositeOperation];
+    }
 
     path = path || this._path.join("");
 
-    var rv = [], fg, zindex = 0, mix, color,
-        style = fill ? this.fillStyle
-                     : this.strokeStyle,
-        // for shadow
-        si = 0, so = 0, sd = 0, sx = 0, sy = 0;
+    var fg = "", strokeProps,
+        zindex = (this._mix ===  4) ? --this._zindex
+               : (this._mix === 10) ? (this.clear(), 0) : 0,
+        color = fill ? this.fillStyle : this.strokeStyle;
 
-    switch (mix = _COMPOS[this.globalCompositeOperation]) {
-    case  4: zindex = --this._zindex; break;
-    case 10: this.clear();
-    }
-    if (typeof style !== "string") {
-        fg = style.fn(this, style, path, fill, mix, zindex);
+    if (typeof color !== "string") {
+        fg = color.fn(this, color, path, fill, zindex);
     } else {
-        color = fill ? this.__fillStyle
-                     : this.__strokeStyle;
+        strokeProps = fill ? "" : _buildStrokeProps(this);
+        color = fill ? this.__fillStyle : this.__strokeStyle;
 
         if (this.__shadowColor.a && this.shadowBlur) {
-              sx = _SHADOW.width / 2 + this.shadowOffsetX;
-              sy = _SHADOW.width / 2 + this.shadowOffsetY;
-              so = _SHADOW.from;
-              sd = _SHADOW.delta;
-
-            for (; si < _SHADOW.width; so += sd, --sx, --sy, ++si) {
-                if (fill) {
-                    rv.push('<v:shape style="position:absolute;width:10px;height:10px;z-index:', zindex,
-                            ';left:', sx, 'px;top:', sy,
-                            'px" filled="t" stroked="f" coordsize="100,100" path="', path,
-                            '"><v:fill color="', this.__shadowColor.hex,
-                            '" opacity="', so.toFixed(2), '" /></v:shape>');
-                } else {
-                    rv.push('<v:shape style="position:absolute;width:10px;height:10px;z-index:', zindex,
-                            ';left:', sx, 'px;top:', sy,
-                            'px" filled="f" stroked="t" coordsize="100,100" path="', path,
-                            '"><v:stroke color="', this.__shadowColor.hex,
-                            '" opacity="', so.toFixed(2), _buildStrokeProps(this), '" /></v:shape>');
-                }
-            }
+            fg = _buildVML(fill ? _COLOR_FILL : _COLOR_STROKE,
+                           [zindex + ";left:" + (this.shadowOffsetX + 1) + "px;top:" +
+                                                (this.shadowOffsetY + 1) + "px",
+                            path, this.__shadowColor.hex,
+                            (this.globalAlpha / Math.sqrt(this.shadowBlur) * 0.5) + strokeProps]);
         }
+        // [SPEED OPTIMIZED]
         if (fill) {
-            rv.push('<v:shape style="position:absolute;width:10px;height:10px;z-index:', zindex,
-                    '" filled="t" stroked="f" coordsize="100,100" path="', path,
-                    '"><v:fill color="', color.hex,
-                    '" opacity="', (color.a * this.globalAlpha).toFixed(2),
-                    '" /></v:shape>');
+            fg += '<v:shape style="position:absolute;width:10px;height:10px;z-index:' + zindex +
+                    '" filled="t" stroked="f" coordsize="100,100" path="' + path +
+                    '"><v:fill color="' + color.hex +
+                    '" opacity="' + (this.globalAlpha * color.a) + '" /></v:shape>';
         } else {
-            rv.push('<v:shape style="position:absolute;width:10px;height:10px;z-index:', zindex,
-                    '" filled="f" stroked="t" coordsize="100,100" path="', path,
-                    '"><v:stroke color="', color.hex,
-                    '" opacity="', (color.a * this.globalAlpha).toFixed(2),
-                    _buildStrokeProps(this), '" /></v:shape>');
+            fg += '<v:shape style="position:absolute;width:10px;height:10px;z-index:' + zindex +
+                    '" filled="f" stroked="t" coordsize="100,100" path="' + path +
+                    '"><v:stroke color="' + color.hex +
+                    '" opacity="' + (this.globalAlpha * color.a) + strokeProps + '" /></v:shape>';
         }
-        fg = rv.join("");
     }
     this.xFlyweight ||
         this._history.push(this._clipPath ? (fg = _clippy(this, fg)) : fg);
@@ -804,7 +811,7 @@ function strokeCircle(x,       // @param Number:
              'px;width:' + (r * 2) +
              'px;height:' + (r * 2) +
              'px" filled="f" stroked="t"><v:stroke opacity="' +
-             (color.a * this.globalAlpha) +
+             (this.globalAlpha * color.a) +
              '" color="' + color.hex +
              '" weight="' + this.lineWidth + 'px" /></v:oval>';
 
@@ -832,27 +839,26 @@ function strokeText(text, x, y, maxWidth, fill) {
             this.__fillStyle = uu.color(this._fillStyle = this.fillStyle);
         }
     }
+    if (this._mix === -1) {
+        this._mix = _COMPOS[this.globalCompositeOperation];
+    }
 
     text = text.replace(/(\t|\v|\f|\r\n|\r|\n)/g, " ");
 
     var style = fill ? this.fillStyle : this.strokeStyle,
+        zindex = (this._mix ===  4) ? --this._zindex
+               : (this._mix === 10) ? (this.clear(), 0) : 0,
         rv = [], fg, color,
         align = this.textAlign, dir = "ltr",
         font = uu.font.parse(this.font, this.canvas),
-        m = this._matrix, zindex = 0,
+        m = this._matrix,
         fp, c0, // for grad
         skew = m[0].toFixed(3) + ',' + m[3].toFixed(3) + ',' +
                m[1].toFixed(3) + ',' + m[4].toFixed(3) + ',0,0',
         skewOffset,
         delta = 1000, left = 0, right = delta,
         offset = { x: 0, y: 0 },
-        // for shadow
-        si = 0, so = 0, sd = 0, sx = 0, sy = 0;
-
-    switch (_COMPOS[this.globalCompositeOperation]) {
-    case  4: zindex = --this._zindex; break;
-    case 10: this.clear();
-    }
+        blur;
 
     switch (align) {
     case "end": dir = "rtl"; // break;
@@ -872,27 +878,22 @@ function strokeText(text, x, y, maxWidth, fill) {
     skewOffset = _map(this._matrix, x + offset.x, y + offset.y);
 
     if (this.__shadowColor.a && this.shadowBlur) {
-        sx = _SHADOW.width / 2 + this.shadowOffsetX;
-        sy = _SHADOW.width / 2 + this.shadowOffsetY;
-        so = Math.max(_SHADOW.from + 0.9, 1);
-        sd = _SHADOW.delta;
+        blur = Math.sqrt(this.shadowBlur);
 
-        for (; si < _SHADOW.width; so += sd, --sx, --sy, ++si) {
-          rv.push('<v:line style="position:absolute;z-index:', zindex,
-                  ';width:1px;height:1px;left:', sx,
-                  'px;top:', sy, 'px',
-                  '" filled="t" stroked="f" from="', -left, ' 0" to="', right,
-                  ' 0.05" coordsize="100,100"><v:fill color="', this.__shadowColor.hex,
-                  '" opacity="', so.toFixed(2),
-                  '" /><v:skew on="t" matrix="', skew,
-                  '" offset="', Math.round(skewOffset.x / 10.00), ',',
-                                Math.round(skewOffset.y / 10.00),
-                  '" origin="', left,
-                  ' 0" /><v:path textpathok="t" /><v:textpath on="t" string="',
-                  uu.esc(text),
-                  '" style="v-text-align:', align,
-                  ';font:', uu.esc(font.formal), '" /></v:line>');
-        }
+        rv.push('<v:line style="position:absolute;z-index:', zindex,
+                ';width:1px;height:1px;left:', this.shadowOffsetX + 1,
+                'px;top:', this.shadowOffsetY + 1, 'px',
+                '" filled="t" stroked="f" from="', -left, ' 0" to="', right,
+                ' 0.05" coordsize="100,100"><v:fill color="', this.__shadowColor.hex,
+                '" opacity="', (this.globalAlpha / blur /* * 0.5 */).toFixed(3),
+                '" /><v:skew on="t" matrix="', skew,
+                '" offset="', Math.round(skewOffset.x / 10.00), ',',
+                              Math.round(skewOffset.y / 10.00),
+                '" origin="', left,
+                ' 0" /><v:path textpathok="t" /><v:textpath on="t" string="',
+                uu.esc(text),
+                '" style="v-text-align:', align,
+                ';font:', uu.esc(font.formal), '" /></v:line>');
     }
 
     rv.push('<v:line style="position:absolute;z-index:', zindex,
@@ -902,7 +903,7 @@ function strokeText(text, x, y, maxWidth, fill) {
     if (typeof style === "string") {
         color = fill ? this.__fillStyle : this.__strokeStyle;
         rv.push('<v:fill color="', color.hex,
-                '" opacity="', color.a * this.globalAlpha, '" />');
+                '" opacity="', (color.a * this.globalAlpha).toFixed(2), '" />');
     } else if (style.fn === _patternFill) {
         rv.push('<v:fill position="0,0" type="tile" src="', style.src, '" />');
     } else { // liner, radial
@@ -926,6 +927,7 @@ function strokeText(text, x, y, maxWidth, fill) {
             ';font:', uu.esc(font.formal),
             '" /></v:line>');
     fg = rv.join("");
+
     this.xFlyweight ||
         this._history.push(this._clipPath ? (fg = _clippy(this, fg)) : fg);
     this._state !== 0x1 ? this._stock.push(fg)
@@ -987,77 +989,68 @@ function _map2(m,    // @param Array: matrix
 }
 
 // inner - Linear Gradient Fill
-function _linearGradientFill(ctx, obj, path, fill, mix, zindex) {
-    var rv = [],
-        fp = obj.param,
+function _linearGradientFill(ctx, obj, path, fill, zindex) {
+    var fg = "", fp = obj.param,
         c0 = _map2(ctx._matrix, fp.x0, fp.y0, fp.x1, fp.y1),
         angle = Math.atan2(c0.x2 - c0.x1, c0.y2 - c0.y1) * 180 / Math.PI,
-        // for shadow
-        si = 0, siz = _SHADOW.width, so = 0, sd = 0, sx = 0, sy = 0;
+        color, strokeProps = fill ? "" : _buildStrokeProps(ctx);
 
-    (angle < 0) && (angle += 360);
+    angle < 0 && (angle += 360);
 
     if (ctx.__shadowColor.a && ctx.shadowBlur) {
-        sx = _SHADOW.width / 2 + ctx.shadowOffsetX;
-        sy = _SHADOW.width / 2 + ctx.shadowOffsetY;
-        so = _SHADOW.from;
-        sd = _SHADOW.delta;
-
-        if (!fill) {
-            siz = ctx.lineWidth,
-            sd = 0.2 / siz; // opacity from 0.05 to 0.25
-        }
-        for (; si < siz; so += sd, --sx, --sy, ++si) {
-            if (fill) {
-              rv.push('<v:shape style="position:absolute;width:10px;height:10px;z-index:', zindex,
-                      ';left:', sx, 'px;top:', sy,
-                      'px" coordsize="100,100" filled="t" stroked="f" path="', path,
-                      '"><v:fill type="gradient" method="sigma" focus="0%" color="', ctx.__shadowColor.hex,
-                      '" opacity="', so.toFixed(2),
-                      '" angle="', angle, '" /></v:shape>');
-            } else {
-              rv.push('<v:shape style="position:absolute;width:10px;height:10px;z-index:', zindex,
-                      ';left:', sx, 'px;top:', sy,
-                      'px" coordsize="100,100" filled="f" stroked="t" path="', path,
-                      '"><v:stroke filltype="solid" color="', ctx.__shadowColor.hex,
-                      '" opacity="', so.toFixed(2),
-                      '" angle="', angle,
-                      _buildStrokeProps(ctx), '" /></v:shape>');
-            }
-        }
+        // --- fill ---
+        //  <v:shape style="position:absolute;width:10px;height:10px;z-index:?;left:?px;top:?px"
+        //                                                                    ~~~~~~~~~~~~~~~~~
+        //      coordsize="100,100" filled="t" stroked="f" path="?">
+        //      <v:fill type="gradient" method="sigma" focus="0%" opacity="?" angle="?" color="?" />
+        //                                                                            ~~~~~~~~~~
+        //  </v:shape>
+        //
+        // --- stroke ---
+        //  <v:shape style="position:absolute;width:10px;height:10px;z-index:?;left:?px;top:?px"
+        //                                                                    ~~~~~~~~~~~~~~~~~
+        //      coordsize="100,100" filled="f" stroked="t" path="?">
+        //      <v:stroke filltype="solid" opacity="?" angle="?" color="?" joinstyle="?" miterlimit="?" weight="?px" endcap="?" />
+        //                                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        //  </v:shape>
+        fg = _buildVML(fill ? _LINER_FILL : _LINER_STROKE,
+                       [zindex + ";left:" + (ctx.shadowOffsetX + 1) + "px;top:" +
+                                            (ctx.shadowOffsetY + 1) + "px",
+                        path, (ctx.globalAlpha / Math.sqrt(ctx.shadowBlur) * 0.5),
+                        angle + '" color="' + ctx.__shadowColor.hex + strokeProps]);
     }
-    if (fill) {
-        rv.push('<v:shape style="position:absolute;width:10px;height:10px;z-index:', zindex,
-                '" coordsize="100,100" filled="t" stroked="f" path="', path,
-                '"><v:fill type="gradient" method="sigma" focus="0%" colors="',
-                obj.colors || _buildGradationColor(obj),
-                '" opacity="', ctx.globalAlpha,
-                '" o:opacity2="', ctx.globalAlpha, // fill only
-                '" angle="', angle, '" /></v:shape>');
-    } else {
-        rv.push('<v:shape style="position:absolute;width:10px;height:10px;z-index:', zindex,
-                '" coordsize="100,100" filled="f" stroked="t" path="', path,
-                '"><v:stroke filltype="solid" color="', uu.color(ctx.xMissColor).hex,
-                '" opacity="', ctx.globalAlpha,
-                '" o:opacity2="', ctx.globalAlpha, // fill only
-                '" angle="', angle, _buildStrokeProps(ctx), '" /></v:shape>');
-    }
-    return rv.join("");
+    // --- fill ---
+    //  <v:shape style="position:absolute;width:10px;height:10px;z-index:?"
+    //      coordsize="100,100" filled="t" stroked="f" path="?">
+    //      <v:fill type="gradient" method="sigma" focus="0%" opacity="?" angle="?" colors="?" o:opacity2="?" />
+    //                                                                            ~~~~~~~~~~~~~~~~~~~~~~~~~~
+    //  </v:shape>
+    //
+    // --- stroke ---
+    //  <v:shape style="position:absolute;width:10px;height:10px;z-index:?"
+    //      coordsize="100,100" filled="f" stroked="t" path="?">
+    //      <v:stroke filltype="solid" opacity="?" angle="?" color="?" o:opacity2="?" joinstyle="?" miterlimit="?" weight="?px" endcap="?" />
+    //                                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    //  </v:shape>
+    color = fill ? ('" colors="' + (obj.colors || _buildGradationColor(obj)))
+                 : ('" color="'  + uu.color(ctx.xMissColor).hex);
+    return fg + _buildVML(fill ? _LINER_FILL : _LINER_STROKE,
+                          [zindex, path, ctx.globalAlpha,
+                           angle + strokeProps + color + '" o:opacity2="' + ctx.globalAlpha]);
 }
 
 // inner - Radial Gradient Fill
-function _radialGradientFill(ctx, obj, path, fill, mix, zindex) {
-
-    var rv = [], brush, v,
-        fp = obj.param, fsize, fposX, fposY, focusParam = "",
+function _radialGradientFill(ctx, obj, path, fill, zindex) {
+    var rv = [], /* brush, */ v,
+        /* fg = "", */ more,
+        fp = obj.param, fsize, fposX, fposY, /* focusParam = "", */
         zindex2 = 0,
         x = fp.x1 - fp.r1,
         y = fp.y1 - fp.r1,
         r1x = fp.r1 * ctx._scaleX,
         r1y = fp.r1 * ctx._scaleY,
         c0 = _map(ctx._matrix, x, y),
-        // for shadow
-        si = 0, siz = _SHADOW.width, so = 0, sd = 0, sx = 0, sy = 0;
+        strokeProps = fill ? "" : _buildStrokeProps(ctx);
 
     // focus
     if (fill) {
@@ -1067,129 +1060,123 @@ function _radialGradientFill(ctx, obj, path, fill, mix, zindex) {
     }
 
     if (ctx.__shadowColor.a && ctx.shadowBlur) {
-        sx = _SHADOW.width / 2 + ctx.shadowOffsetX;
-        sy = _SHADOW.width / 2 + ctx.shadowOffsetY;
-        so = _SHADOW.from;
-        sd = _SHADOW.delta;
-
-        if (!fill) {
-            siz = ctx.lineWidth;
-            sd = 0.2 / siz; // opacity from 0.05 to 0.25
-        }
-
-        if (fill) {
-            focusParam = ['"><v:fill type="gradientradial" method="sigma" focussize="',
-                          fsize, ',', fsize,
-                          '" focusposition="', fposX, ',', fposY].join("");
-        } else {
-            focusParam = '"><v:stroke filltype="tile' +
-                         _buildStrokeProps(ctx);
-        }
-        for (; si < siz; so += sd, --sx, --sy, ++si) {
-            if (fill) {
-              rv.push('<v:oval style="position:absolute;z-index:', zindex,
-                      ';left:', Math.round(c0.x / 10.00) + sx,
-                      'px;top:', Math.round(c0.y / 10.00) + sy,
-                      'px;width:', r1x, 'px;height:', r1y,
-                      'px" filled="t" stroked="f" coordsize="11000,11000',
-                      focusParam, '" opacity="', so.toFixed(2),
-                      '" color="', ctx.__shadowColor.hex, '" /></v:oval>');
-            } else {
-              rv.push('<v:oval style="position:absolute;z-index:', zindex,
-                      ';left:', Math.round(c0.x / 10.00) + sx,
-                      'px;top:', Math.round(c0.y / 10.00) + sy,
-                      'px;width:', r1x, 'px;height:', r1y,
-                      'px" filled="f" stroked="t" coordsize="11000,11000',
-                      focusParam, '" opacity="', so.toFixed(2),
-                      '" color="', ctx.__shadowColor.hex, '" /></v:oval>');
-            }
-        }
+        // --- fill shadow ---
+        //      [[inside]]
+        //      <v:oval style="position:absolute;z-index:?;left:?px;top:?px;width:?px;height:?px"
+        //          filled="t" stroked="f" coordsize="11000,11000">
+        //          <v:fill type="gradientradial" method="sigma" opacity="?" color="?" focussize="?,?" focusposition="?,?" />
+        //                                                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        //      </v:oval>
+        //
+        // --- stroke shadow ---
+        //      [[inside]]
+        //      <v:oval style="position:absolute;z-index:?;left:?px;top:?px;width:?px;height:?px"
+        //          filled="f" stroked="t" coordsize="11000,11000">
+        //          <v:stroke filltype="tile" opacity="?" color="?" joinstyle="?" miterlimit="?" weight="?px" endcap="?" />
+        //                                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        //      </v:oval>
+        //
+        more = fill ? _buildVML('" color="?" focussize="?,?" focusposition="?,?',
+                                [ctx.__shadowColor.hex, fsize, fsize, fposX, fposY])
+                    : _buildVML('" color="??', [ctx.__shadowColor.hex, strokeProps]);
+        rv.push(_buildVML(fill ? _RADIAL_FILL : _RADIAL_STROKE,
+                       [zindex,
+                        Math.round(c0.x / 10.00) + ctx.shadowOffsetX + 1,
+                        Math.round(c0.y / 10.00) + ctx.shadowOffsetY + 1, r1x, r1y,
+                        (ctx.globalAlpha / Math.sqrt(ctx.shadowBlur) * 0.5) + more]));
     }
 
-    if (!fill) {
-        // VML has not stroke gradient
-        brush = ['"><v:stroke', ' filltype="', 'tile',
-                 _buildStrokeProps(ctx),
-                 '" opacity="', ctx.globalAlpha,
-                 '" color="', uu.color(ctx.xMissColor).hex].join("");
-    } else {
+    if (fill) {
         // fill outside
         if (obj.color.length) {
             v = obj.color[0]; // 0 = outer color
             if (v.color.a > 0.001) {
-                if (mix === 4) { zindex2 = --ctx._zindex; }
+                if (ctx._mix === 4) { zindex2 = --ctx._zindex; }
                 rv.push('<v:shape style="position:absolute;width:10px;height:10px;z-index:', zindex2,
                         '" filled="t" stroked="f" coordsize="100,100" path="', path,
                         '"><v:fill type="solid" color="', v.color.hex,
-                        '" opacity="', (v.color.a * ctx.globalAlpha).toFixed(2),
+                        '" opacity="', (ctx.globalAlpha * v.color.a).toFixed(3),
                         '" /></v:shape>');
             }
         }
-        brush = ['"><v:fill type="gradientradial" method="sigma" focussize="', fsize , ',', fsize,
-                 '" focusposition="', fposX, ',', fposY,
-                 '" opacity="', ctx.globalAlpha,
-                 '" o:opacity2="', ctx.globalAlpha,
-                 '" colors="', obj.colors || _buildGradationColor(obj)].join("");
     }
-    if (fill) {
-        rv.push('<v:oval style="position:absolute;z-index:', zindex, // need z-index
-                ';left:', Math.round(c0.x / 10.00),
-                'px;top:', Math.round(c0.y / 10.00),
-                'px;width:', r1x, 'px;height:', r1y,
-                'px" filled="t" stroked="f" coordsize="11000,11000', brush,
-                '" /></v:oval>');
-    } else {
-        rv.push('<v:oval style="position:absolute;z-index:', zindex, // need z-index
-                ';left:', Math.round(c0.x / 10.00),
-                'px;top:', Math.round(c0.y / 10.00),
-                'px;width:', r1x, 'px;height:', r1y,
-                'px" filled="f" stroked="t" coordsize="11000,11000', brush,
-                '" /></v:oval>');
-    }
+    // --- fill ---
+    //      [[outside]]
+    //      <v:shape style="position:absolute;width:10px;height:10px;z-index:?"
+    //          filled="t" stroked="f" coordsize="100,100" path="?">
+    //          <v:fill type="solid" color="?" opacity="?" />
+    //      </v:shape>
+    //
+    //      [[inside]]
+    //      <v:oval style="position:absolute;z-index:?;left:?px;top:?px;width:?px;height:?px"
+    //          filled="t" stroked="f" coordsize="11000,11000">
+    //          <v:fill type="gradientradial" method="sigma" opacity="?" o:opacity2="?" colors="?" focussize="?,?" focusposition="?,?" />
+    //                                                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    //      </v:oval>
+    //
+    // --- stroke ---
+    //      [[inside]]
+    //      <v:oval style="position:absolute;z-index:?;left:?px;top:?px;width:?px;height:?px"
+    //          filled="f" stroked="t" coordsize="11000,11000">
+    //          <v:stroke filltype="tile" opacity="?" color="?" joinstyle="?" miterlimit="?" weight="?px" endcap="?" />
+    //                                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    //      </v:oval>
+    more = fill ? _buildVML('" o:opacity2="?" colors="?" focussize="?,?" focusposition="?,?',
+                            [ctx.globalAlpha, obj.colors || _buildGradationColor(obj),
+                             fsize, fsize, fposX, fposY])
+                : _buildVML('" color="??', [uu.color(ctx.xMissColor).hex, strokeProps]);
+
+    rv.push(_buildVML(fill ? _RADIAL_FILL : _RADIAL_STROKE,
+                   [zindex,
+                    Math.round(c0.x / 10.00),
+                    Math.round(c0.y / 10.00), r1x, r1y,
+                    ctx.globalAlpha + more]));
     return rv.join("");
 }
 
 // inner - Pattern Fill
-function _patternFill(ctx, obj, path, fill, mix, zindex) {
-    var rv = [],
-        // for shadow
-        si = 0, so = 0, sd = 0, sx = 0, sy = 0;
+function _patternFill(ctx, obj, path, fill, zindex) {
+    var fg = "", strokeProps = fill ? "" : _buildStrokeProps(ctx);
 
     if (ctx.__shadowColor.a && ctx.shadowBlur) {
-        sx = _SHADOW.width / 2 + ctx.shadowOffsetX;
-        sy = _SHADOW.width / 2 + ctx.shadowOffsetY;
-        so = _SHADOW.from;
-        sd = _SHADOW.delta;
+        // --- fill --
+        //      <v:shape style="position:absolute;width:10px;height:10px;z-index:?;left:?px;top:?px"
+        //          coordsize="100,100" filled="t" stroked="f" path="?">
+        //          <v:fill type="?" opacity="?" color="?" />
+        //                                     ~~~~~~~~~~
+        //      </v:shape>
+        //
+        // --- stroke ---
+        //      <v:shape style="position:absolute;width:10px;height:10px;z-index:?;left:?px;top:?px"
+        //          coordsize="100,100" filled="f" stroked="t" path="?">
+        //          <v:stroke filltype="?" opacity="?" color="?" joinstyle="?" miterlimit="?" weight="?px" endcap="?" />
+        //                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        //      </v:shape>
+        fg = _buildVML(fill ? _PATTERN_FILL : _PATTERN_STROKE,
+                       [zindex, ctx.shadowOffsetX + 1,
+                                ctx.shadowOffsetY + 1,
+                        path, "solid",
+                        (ctx.globalAlpha / Math.sqrt(ctx.shadowBlur) * 0.5) +
+                        '" color="' + ctx.__shadowColor.hex + strokeProps]);
+    }
 
-        for (; si < _SHADOW.width; so += sd, --sx, --sy, ++si) {
-            if (fill) {
-                rv.push('<v:shape style="position:absolute;width:10px;height:10px;z-index:', zindex,
-                        ';left:', sx, 'px;top:', sy,
-                        'px" coordsize="100,100" filled="t" stroked="f" path="', path,
-                        '"><v:fill type="solid" color="', ctx.__shadowColor.hex,
-                        '" opacity="', so.toFixed(2), '" /></v:shape>');
-            } else {
-                rv.push('<v:shape style="position:absolute;width:10px;height:10px;z-index:', zindex,
-                        ';left:', sx, 'px;top:', sy,
-                        'px" coordsize="100,100" filled="f" stroked="t" path="', path,
-                        '"><v:stroke filltype="', _buildStrokeProps(ctx),
-                        '" color="', ctx.__shadowColor.hex,
-                        '" opacity="', so.toFixed(2), '" /></v:shape>');
-            }
-        }
-    }
-    if (fill) {
-        rv.push('<v:shape style="position:absolute;width:10px;height:10px;z-index:', zindex,
-                '" coordsize="100,100" filled="t" stroked="f" path="', path,
-                '"><v:fill type="tile" opacity="', ctx.globalAlpha,
-                '" src="', obj.src, '" /></v:shape>');
-    } else {
-        rv.push('<v:shape style="position:absolute;width:10px;height:10px;z-index:', zindex,
-                '" coordsize="100,100" filled="f" stroked="t" path="', path,
-                '"><v:stroke filltype="tile" opacity="', ctx.globalAlpha,
-                '" src="', obj.src, _buildStrokeProps(ctx), '" /></v:shape>');
-    }
-    return rv.join("");
+    // --- fill --
+    //      <v:shape style="position:absolute;width:10px;height:10px;z-index:?;left:?px;top:?px"
+    //          coordsize="100,100" filled="t" stroked="f" path="?">
+    //          <v:fill type="?" opacity="?" src="?" />
+    //                                     ~~~~~~~~
+    //      </v:shape>
+    //
+    // --- stroke ---
+    //      <v:shape style="position:absolute;width:10px;height:10px;z-index:?;left:?px;top:?px"
+    //          coordsize="100,100" filled="f" stroked="t" path="?">
+    //          <v:stroke filltype="?" opacity="?" src="?" joinstyle="?" miterlimit="?" weight="?px" endcap="?" />
+    //                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    //      </v:shape>
+    return fg + _buildVML(fill ? _PATTERN_FILL : _PATTERN_STROKE,
+                          [zindex, 0, 0,
+                           path, "tile",
+                           ctx.globalAlpha + '" src="' + obj.src + strokeProps]);
 }
 
 // inner -
@@ -1244,6 +1231,14 @@ function _buildStrokeProps(obj) {
                 'px" endcap="'   + obj.__lineCap;
     }
     return obj._strokeCache;
+}
+
+function _buildVML(format, ary) {
+    var i = -1;
+
+    return format.replace(_QQ, function() {
+               return ary[++i];
+           });
 }
 
 // functional collision with uu.css3(altcss) is evaded
