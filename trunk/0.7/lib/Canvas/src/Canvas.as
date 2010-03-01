@@ -87,7 +87,7 @@ package {
             _clipShape = new Shape();
             _shape.mask = _clipShape;
 
-            stage.frameRate = 60;
+            stage.frameRate = 62.5;
             stage.scaleMode = StageScaleMode.NO_SCALE;
             stage.align     = StageAlign.TOP_LEFT;
 
@@ -107,21 +107,13 @@ package {
                         break;
                 case 1: // not ready(locked) -> ready
                         _state = 2;
-                        _buff && _buff.lock();
-
-                            cmd.c && _stock.push(cmd.c);
-                            tmp = _stock.join("\t");
-                            _stock = []; // pre clear
-                            recv(tmp);
-
-                        _buff && _buff.unlock();
+                        cmd.c && _stock.push(cmd.c);
+                        tmp = _stock.join("\t");
+                        _stock = []; // pre clear
+                        recv(tmp);
                         break;
                 case 2: // ready
-                        _buff && _buff.lock();
-
-                            recv(cmd.c);
-
-                        _buff && _buff.unlock();
+                        recv(cmd.c);
                 }
             }
         }
@@ -129,36 +121,35 @@ package {
         private function next(state:int):void {
             _state = state;
 
-            _buff && _buff.lock();
+            var tmp:String = _stock.join("\t");
 
-                var tmp:String = _stock.join("\t");
-                _stock = []; // pre clear
-                tmp && recv(tmp);
-
-            _buff && _buff.unlock();
+            _stock = []; // pre clear
+            tmp && recv(tmp);
         }
 
         private function recv(msg:String):void {
-            var ary:Array = msg.split("\t");
+            var a:Array = msg.split("\t");
             var i:int = -1;
-            var iz:int = ary.length;
+            var iz:int = a.length;
             var fill:int;
+
+            _buff && _buff.lock();
 
             while (++i < iz) {
                 fill = 0;
-                switch (ary[i]) { // COMMAND
-                case "in":  init(+ary[++i], +ary[++i], +ary[++i]);
+                switch (a[i]) { // COMMAND
+                case "in":  init(+a[++i], +a[++i], +a[++i]);
                             _state = 1; // not ready(locked) -> ready
                             addEventListener("enterFrame", onEnterFrame);
                             break;
                 case "rz":  // resize
                             expire();
-                            init(+ary[++i], +ary[++i], +ary[++i]); break;
+                            init(+a[++i], +a[++i], +a[++i]); break;
                 case "xp":  expire(); break;
                 case "rt":  _rtl = 1; break; // direction = rtl
-                case "gA":  globalAlpha = +ary[++i]; break;
+                case "gA":  globalAlpha = +a[++i]; break;
                 case "gC":  mix = 0;
-                            switch (mixMode = ary[++i]) {
+                            switch (mixMode = a[++i]) {
 //                          case "source-over":     break;
 //                          case "source-in":       break;
 //                          case "source-out":      break;
@@ -174,94 +165,98 @@ package {
                             }
                             break;
                 case "s0":  strokeStyle = 0;
-                            strokeColor = [+ary[++i], +ary[++i]]; break;
+                            strokeColor = [+a[++i], +a[++i]]; break;
                 case "s1":  strokeStyle = 1;
-                            i = strokeGradient.setLiner(ary, i); break;
+                            i = strokeGradient.setLiner(a, i); break;
                 case "s2":  strokeStyle = 2;
-                            i = strokeGradient.setRadial(ary, i); break;
+                            i = strokeGradient.setRadial(a, i); break;
                 case "s3":  strokeStyle = 3;
-                            setPattern(ary[++i], ary[++i], 0);
+                            setPattern(a[++i], a[++i], 0);
                             if (_state < 2) {
-                                _stock.push(ary.slice(++i).join("\t")); // push remain commands
+                                _stock.push(a.slice(++i).join("\t")); // push remain commands
                                 return;
                             }
                             break;
                 case "f0":  fillStyle = 0;
-                            fillColor = [+ary[++i], +ary[++i]]; break;
+                            fillColor = [+a[++i], +a[++i]]; break;
                 case "f1":  fillStyle = 1;
-                            i = fillGradient.setLiner(ary, i); break;
+                            i = fillGradient.setLiner(a, i); break;
                 case "f2":  fillStyle = 2;
-                            i = fillGradient.setRadial(ary, i); break;
+                            i = fillGradient.setRadial(a, i); break;
                 case "f3":  fillStyle = 3;
-                            setPattern(ary[++i], ary[++i], 1);
+                            setPattern(a[++i], a[++i], 1);
                             if (_state < 2) {
-                                _stock.push(ary.slice(++i).join("\t")); // push remain commands
+                                _stock.push(a.slice(++i).join("\t")); // push remain commands
                                 return;
                             }
                             break;
-                case "lC":  lineCap = ary[++i];
+                case "lC":  lineCap = a[++i];
                             lineCap === "butt" && (lineCap = "none"); break;
-                case "lJ":  lineJoin = ary[++i]; break;
-                case "lW":  lineWidth = +ary[++i]; break;
-                case "mL":  miterLimit = +ary[++i]; break;
-                case "sh":  shadowBlur    = +ary[++i];
-                            shadowColor   = [+ary[++i], +ary[++i]];
-                            shadowOffsetX = +ary[++i];
-                            shadowOffsetY = +ary[++i];
+                case "lJ":  lineJoin = a[++i]; break;
+                case "lW":  lineWidth = +a[++i]; break;
+                case "mL":  miterLimit = +a[++i]; break;
+                case "sh":  shadowBlur = +a[++i];
+                            shadowColor = [+a[++i], +a[++i]];
+                            shadowOffsetX = +a[++i];
+                            shadowOffsetY = +a[++i];
                             setShadow(); break;
-                case "fo":  font = [+ary[++i], ary[++i], ary[++i], ary[++i], ary[++i]]; break;
-                case "tA":  textAlign = ary[++i]; break;
-                case "tB":  textBaseline = ary[++i]; break;
-                case "re":  rect(+ary[++i], +ary[++i], +ary[++i], +ary[++i]); break;
+                case "fo":  font = [+a[++i], a[++i], a[++i], a[++i], a[++i]]; break;
+                case "tA":  textAlign = a[++i]; break;
+                case "tB":  textBaseline = a[++i]; break;
+                case "re":  rect(+a[++i], +a[++i], +a[++i], +a[++i]); break;
                 case "bP":  _path = []; break; // reset path
                 case "cP":  closePath(); break;
-                case "cR":  clearRect(+ary[++i], +ary[++i], +ary[++i], +ary[++i]); break;
+                case "cR":  clearRect(+a[++i], +a[++i], +a[++i], +a[++i]); break;
                 case "cA":  _buff.copyPixels(_clearAllBuff, _clearAllRect, _clearAllPoint); break;
-                case "mT":  moveTo(ary[++i] * 0.001, ary[++i] * 0.001); break;
-                case "lT":  lineTo(ary[++i] * 0.001, ary[++i] * 0.001); break;
-                case "ar":  arc(+ary[++i], +ary[++i], +ary[++i],
-                                +ary[++i], +ary[++i], +ary[++i]); break;
-                case "qC":  quadraticCurveTo(+ary[++i], +ary[++i],
-                                             +ary[++i], +ary[++i]); break;
-                case "bC":  bezierCurveTo(+ary[++i], +ary[++i],
-                                          +ary[++i], +ary[++i],
-                                          +ary[++i], +ary[++i]); break;
+                case "mT":  moveTo(a[++i] * 0.001, a[++i] * 0.001); break;
+                case "lT":  lineTo(a[++i] * 0.001, a[++i] * 0.001); break;
+                case "ar":  arc(+a[++i], +a[++i], +a[++i],
+                                +a[++i], +a[++i], +a[++i]); break;
+                case "qC":  quadraticCurveTo(+a[++i], +a[++i],
+                                             +a[++i], +a[++i]); break;
+                case "bC":  bezierCurveTo(+a[++i], +a[++i],
+                                          +a[++i], +a[++i],
+                                          +a[++i], +a[++i]); break;
                 case "fi":  fill = 1; // [THROUGH]
                 case "st":  stroke(fill); break;
                 case "fR":  fill = 1; // [THROUGH]
-                case "sR":  strokeRect(+ary[++i], +ary[++i], +ary[++i], +ary[++i], fill); break;
+                case "sR":  strokeRect(+a[++i], +a[++i], +a[++i], +a[++i], fill); break;
                 case "fT":  fill = 1; // [THROUGH]
-                case "sT":  strokeText(ary[++i], +ary[++i], +ary[++i], +ary[++i], fill); break;
+                case "sT":  strokeText(a[++i], +a[++i], +a[++i], +a[++i], fill); break;
                 case "cl":  clip(); break;
-                case "dI":  drawImage(+ary[++i], ary[++i],
-                                      [+ary[++i], +ary[++i], +ary[++i], +ary[++i],
-                                       +ary[++i], +ary[++i], +ary[++i], +ary[++i]]);
+                case "dI":  drawImage(+a[++i], a[++i],
+                                      [+a[++i], +a[++i], +a[++i], +a[++i],
+                                       +a[++i], +a[++i], +a[++i], +a[++i]]);
                             if (_state < 2) {
-                                _stock.push(ary.slice(++i).join("\t")); // push remain commands
+                                _stock.push(a.slice(++i).join("\t")); // push remain commands
                                 return;
                             }
                             break;
-                case "ro":  rotate(ary[++i] * 0.000001); break;
-                case "sc":  scale(+ary[++i], +ary[++i]); break;
-                case "ST":  setTransform(+ary[++i], +ary[++i], +ary[++i], +ary[++i],
-                                         +ary[++i], +ary[++i]); break;
-                case "tf":  transform__(+ary[++i], +ary[++i], +ary[++i], +ary[++i],
-                                        +ary[++i], +ary[++i]); break;
-                case "tl":  translate(+ary[++i], +ary[++i]); break;
+                case "ro":  rotate(a[++i] * 0.000001); break;
+                case "sc":  scale(+a[++i], +a[++i]); break;
+                case "ST":  setTransform(+a[++i], +a[++i], +a[++i], +a[++i],
+                                         +a[++i], +a[++i]); break;
+                case "tf":  transform__(+a[++i], +a[++i], +a[++i], +a[++i],
+                                        +a[++i], +a[++i]); break;
+                case "tl":  translate(+a[++i], +a[++i]); break;
                 case "sv":  save(); break;
                 case "rs":  restore(); break;
                 case "X0":  fill = 1; // [THROUGH]
-                case "X1":  strokeCircle(+ary[++i], +ary[++i],
-                                         +ary[++i], +ary[++i], +ary[++i], fill); break;
+                case "X1":  strokeCircle(+a[++i], +a[++i],
+                                         +a[++i], +a[++i], +a[++i], fill); break;
                 case "undefined": // [!] undefined trap
+                    _buff && _buff.unlock();
                     trace("[!] undefined trap");
                     return;
                 default:
-                    trace("[!] unknown command trap: " + ary[i]);
-                    ExternalInterface.call("uu.flash.alert", "Unknown command=" + ary[i]);
+                    _buff && _buff.unlock();
+                    trace("[!] unknown command trap: " + a[i]);
+                    ExternalInterface.call("uu.flash.alert", "Unknown command=" + a[i]);
                     return;
                 }
             }
+
+            _buff && _buff.unlock();
         }
 
         private function init(width:int, height:int, flyweight:int):void {

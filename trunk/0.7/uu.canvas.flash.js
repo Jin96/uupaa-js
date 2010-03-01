@@ -602,6 +602,12 @@ function send(fg) { // @param String: fragment, "{COMMAND}\t{ARG1}\t..."
                     "\t" + this.xFlyweight +
                     send._suffix);
                 this._readyState = 2;
+
+                // [FIX] http://twitter.com/uupaa/status/9837157309
+                // at first
+                this._view.CallFunction(send._prefix +
+                    this._stock.join("\t") +
+                    send._suffix);
             }
         }
         if (this._readyState === 2) {
