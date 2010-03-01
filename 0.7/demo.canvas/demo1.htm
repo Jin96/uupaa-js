@@ -40,6 +40,7 @@ var fpscount = 0;
 var uselock = 1;
 var stress = 20;
 var restart = 0;
+//var TTL = 10;
 
 
 function Particle() {
@@ -97,7 +98,10 @@ function loop() {
         }
         setTimeout(loop, 0);
     } else {
+//        if (TTL > 0)
         setTimeout(loop, 0);
+
+//        --TTL;
     }
 
     // fps
