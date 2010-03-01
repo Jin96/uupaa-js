@@ -25,7 +25,7 @@ function switchAlpha() {
     drawShape(document.getElementById('vmlcanvas'));
     drawShape(document.getElementById('flashcanvas'));
 }
-var shadowBlur = 1;
+var shadowBlur = 15;
 function switchBlur() {
     shadowBlur += 1;
     drawShape(document.getElementById('slcanvas'));
@@ -38,8 +38,8 @@ function drawShape(canvas, matrix){
 
     var ctx = canvas.getContext('2d');
 
+    ctx.clear();
     if (matrix) {
-        ctx.clear();
         ctx.translate(-10, 5);
         ctx.scale(1.2, 0.8);
         ctx.rotate(5 * Math.PI / 180);
@@ -52,9 +52,8 @@ function drawShape(canvas, matrix){
         ctx.shadowBlur = shadowBlur;
         ctx.shadowOffsetX = 10;
         ctx.shadowOffsetY = 10;
-        ctx.globalAlpha = globalAlpha;
-
         ctx.shadowColor = "gray";
+        ctx.globalAlpha = globalAlpha;
         ctx.beginPath();
         ctx.strokeStyle = ptrn;
         ctx.fillStyle = ptrn;
@@ -136,7 +135,6 @@ function drawShape(canvas, matrix){
         ctx.shadowOffsetX = 10;
         ctx.shadowOffsetY = 10;
         ctx.globalAlpha = globalAlpha;
-
         ctx.shadowColor = "gray";
         ctx.beginPath();
         ctx.strokeStyle = ptrn;
