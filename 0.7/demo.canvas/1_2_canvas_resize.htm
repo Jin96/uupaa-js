@@ -15,6 +15,16 @@ function matrix() {
     drawShape(document.getElementById('vmlcanvas'), 1);
     drawShape(document.getElementById('flashcanvas'), 1);
 }
+function redraw() {
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+}
+function reduce() {
+    resize("slcanvas", -10, -10);
+    resize("vmlcanvas", -10, -10);
+    resize("flashcanvas", -10, -10);
+}
 function drawShape(canvas, matrix){
     var ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -55,16 +65,6 @@ function resize(id, width, height) {
     if (ctx.resize) {
         ctx.resize(w, h);
     }
-}
-function reduce() {
-    resize("slcanvas", -10, -10);
-    resize("vmlcanvas", -10, -10);
-    resize("flashcanvas", -10, -10);
-}
-function redraw() {
-    drawShape(document.getElementById('slcanvas'));
-    drawShape(document.getElementById('vmlcanvas'));
-    drawShape(document.getElementById('flashcanvas'));
 }
 </script>
     <style type="text/css">
@@ -106,6 +106,16 @@ function matrix() {
     drawShape(document.getElementById('vmlcanvas'), 1);
     drawShape(document.getElementById('flashcanvas'), 1);
 }
+function redraw() {
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+}
+function reduce() {
+    resize("slcanvas", -10, -10);
+    resize("vmlcanvas", -10, -10);
+    resize("flashcanvas", -10, -10);
+}
 function drawShape(canvas, matrix){
     var ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -146,16 +156,6 @@ function resize(id, width, height) {
     if (ctx.resize) {
         ctx.resize(w, h);
     }
-}
-function reduce() {
-    resize("slcanvas", -10, -10);
-    resize("vmlcanvas", -10, -10);
-    resize("flashcanvas", -10, -10);
-}
-function redraw() {
-    drawShape(document.getElementById('slcanvas'));
-    drawShape(document.getElementById('vmlcanvas'));
-    drawShape(document.getElementById('flashcanvas'));
 }
 </pre>
     </div>

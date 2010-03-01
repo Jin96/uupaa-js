@@ -132,7 +132,6 @@ function initSurface() {
     this.textAlign      = "start";
     this.textBaseline   = "alphabetic";
     // --- hidden properties ---
-    this._mix           = -1;
     this._lineScale     = 1;
     this._scaleX        = 1;
     this._scaleY        = 1;
@@ -194,16 +193,22 @@ function arc(x, y, radius, startAngle, endAngle, anticlockwise) {
         c0, c1, rx, ry;
 
     if (!anticlockwise) { // [FIX] "wa" bug
-        (x1.toExponential(5) === x2.toExponential(5)) && (x1 += 0.125);
-        (y1.toExponential(5) === y2.toExponential(5)) && (y1 += 0.125);
+        if (x1.toExponential(5) === x2.toExponential(5)) {
+            x1 += 0.125;
+        }
+        if (y1.toExponential(5) === y2.toExponential(5)) {
+            y1 += 0.125;
+        }
     }
     c0 = _map2(this._matrix, x1, y1, x2, y2);
     c1 = _map(this._matrix, x, y);
     rx = this._scaleX * radius;
     ry = this._scaleY * radius;
+    // [FIX][at][wa] bug, (width | 0) and (height | 0)
+    // http://twitter.com/uupaa/status/9833358743
     this._path.push(anticlockwise ? "at " : "wa ",
-                    c1.x - rx, " ", c1.y - ry, " ",
-                    c1.x + rx, " ", c1.y + ry, " ",
+                    (c1.x - rx) | 0, " ", (c1.y - ry) | 0, " ",
+                    (c1.x + rx) | 0, " ", (c1.y + ry) | 0, " ",
                     c0.x1, " ", c0.y1, " ",
                     c0.x2, " ", c0.y2);
 }
@@ -241,16 +246,16 @@ function clearRect(x, y, w, h) {
     if ((!x && !y && w >= this.canvas.width && h >= this.canvas.height)) {
         this.clear();
     } else {
-        if (this._mix === -1) {
-            this._mix = _COMPOS[this.globalCompositeOperation];
+        if (this.globalCompositeOperation !== this._mix) {
+            this.__mix = _COMPOS[this._mix];
         }
 
-        var color = uu.css.bgcolor.inherit(this._view),
-            zindex = (this._mix ===  4) ? --this._zindex
-                   : (this._mix === 10) ? (this.clear(), 0) : 0,
-            fg = _buildVML(_COLOR_FILL,
-                           [zindex, _rect(this, x, y, w, h), color.hex,
-                            (this.globalAlpha * color.a) + ' type="solid"']);
+        var color = uu.css.bgcolor.inherit(this.canvas),
+            zindex = (this.__mix ===  4) ? --this._zindex
+                   : (this.__mix === 10) ? (this.clear(), 0) : 0,
+            fg = _build(_COLOR_FILL,
+                        [zindex, _rect(this, x, y, w, h), color.hex,
+                         (this.globalAlpha * color.a) + ' type="solid"']);
 
         this.xFlyweight ||
             this._history.push(this._clipPath ? (fg = _clippy(this, fg)) : fg);
@@ -344,8 +349,8 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
     if (this.shadowColor !== this._shadowColor) {
         this.__shadowColor = uu.color(this._shadowColor = this.shadowColor);
     }
-    if (this._mix === -1) {
-        this._mix = _COMPOS[this.globalCompositeOperation];
+    if (this.globalCompositeOperation !== this._mix) {
+        this.__mix = _COMPOS[this._mix];
     }
 
     var dim = uu.img.actsize(image), // img actual size
@@ -361,15 +366,13 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
         rv = [], fg, m,
         frag = [], tfrag, // code fragment
         i = 0, iz, c0,
-        zindex = (this._mix ===  4) ? --this._zindex
-               : (this._mix === 10) ? (this.clear(), 0) : 0,
+        zindex = (this.__mix ===  4) ? --this._zindex
+               : (this.__mix === 10) ? (this.clear(), 0) : 0,
+        renderShadow = this.__shadowColor.a && this.shadowBlur,
         sizeTrans; // 0: none size transform, 1: size transform
 
     if (image.src) { // HTMLImageElement
-        if (!this._matrixfxd
-            && this.globalAlpha === 1
-            && !(this.__shadowColor.a && this.shadowBlur)) {
-
+        if (!this._matrixfxd && this.globalAlpha === 1 && !renderShadow) {
             rv.push(
                 '<v:image style="position:absolute;z-index:', zindex,
                 ';width:',      dw,
@@ -420,7 +423,7 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
                     (sizeTrans ? '</div>' : '') + '</div></div>'
             ];
 
-            if (this.__shadowColor.a && this.shadowBlur) {
+            if (renderShadow) {
                 fg = frag[0] + frag[1] + frag[2] + frag[3] + frag[4] + frag[6];
                 rv.push(
                     fg.replace(/\$1/, this._matrixfxd ? this.shadowOffsetX
@@ -695,12 +698,12 @@ function resize(width,    // @param Number(= void 0): width
     this.initSurface()
 
     if (width !== void 0) {
-        this._view.style.pixelWidth = width;
-        this.canvas.style.pixelWidth = width;
+        this.canvas.style.pixelWidth = width; // resize <canvas>
+        this._view.style.pixelWidth = width;  // resize <div>
     }
     if (height !== void 0) {
-        this._view.style.pixelHeight = height;
         this.canvas.style.pixelHeight = height;
+        this._view.style.pixelHeight = height;
     }
     this._state = state;
 }
@@ -758,29 +761,29 @@ function stroke(path, fill) {
             this.__fillStyle = uu.color(this._fillStyle = this.fillStyle);
         }
     }
-    if (this._mix === -1) {
-        this._mix = _COMPOS[this.globalCompositeOperation];
+    if (this.globalCompositeOperation !== this._mix) {
+        this.__mix = _COMPOS[this._mix];
     }
 
     path = path || this._path.join("");
 
     var fg = "", strokeProps,
-        zindex = (this._mix ===  4) ? --this._zindex
-               : (this._mix === 10) ? (this.clear(), 0) : 0,
+        zindex = (this.__mix ===  4) ? --this._zindex
+               : (this.__mix === 10) ? (this.clear(), 0) : 0,
         color = fill ? this.fillStyle : this.strokeStyle;
 
     if (typeof color !== "string") {
         fg = color.fn(this, color, path, fill, zindex);
     } else {
-        strokeProps = fill ? "" : _buildStrokeProps(this);
+        strokeProps = fill ? "" : _stroke(this);
         color = fill ? this.__fillStyle : this.__strokeStyle;
 
         if (this.__shadowColor.a && this.shadowBlur) {
-            fg = _buildVML(fill ? _COLOR_FILL : _COLOR_STROKE,
-                           [zindex + ";left:" + (this.shadowOffsetX + 1) + "px;top:" +
-                                                (this.shadowOffsetY + 1) + "px",
-                            path, this.__shadowColor.hex,
-                            (this.globalAlpha / Math.sqrt(this.shadowBlur) * 0.5) + strokeProps]);
+            fg = _build(fill ? _COLOR_FILL : _COLOR_STROKE,
+                        [zindex + ";left:" + (this.shadowOffsetX + 1) + "px;top:" +
+                                             (this.shadowOffsetY + 1) + "px",
+                         path, this.__shadowColor.hex,
+                         (this.globalAlpha / Math.sqrt(this.shadowBlur) * 0.5) + strokeProps]);
         }
         // [SPEED OPTIMIZED]
         if (fill) {
@@ -839,15 +842,15 @@ function strokeText(text, x, y, maxWidth, fill) {
             this.__fillStyle = uu.color(this._fillStyle = this.fillStyle);
         }
     }
-    if (this._mix === -1) {
-        this._mix = _COMPOS[this.globalCompositeOperation];
+    if (this.globalCompositeOperation !== this._mix) {
+        this.__mix = _COMPOS[this._mix];
     }
 
     text = text.replace(/(\t|\v|\f|\r\n|\r|\n)/g, " ");
 
     var style = fill ? this.fillStyle : this.strokeStyle,
-        zindex = (this._mix ===  4) ? --this._zindex
-               : (this._mix === 10) ? (this.clear(), 0) : 0,
+        zindex = (this.__mix ===  4) ? --this._zindex
+               : (this.__mix === 10) ? (this.clear(), 0) : 0,
         rv = [], fg, color,
         align = this.textAlign, dir = "ltr",
         font = uu.font.parse(this.font, this.canvas),
@@ -885,7 +888,8 @@ function strokeText(text, x, y, maxWidth, fill) {
                 'px;top:', this.shadowOffsetY + 1, 'px',
                 '" filled="t" stroked="f" from="', -left, ' 0" to="', right,
                 ' 0.05" coordsize="100,100"><v:fill color="', this.__shadowColor.hex,
-                '" opacity="', (this.globalAlpha / blur /* * 0.5 */).toFixed(3),
+//              '" opacity="', (this.globalAlpha / blur * 0.5).toFixed(3),
+                '" opacity="', (this.globalAlpha / blur).toFixed(3),
                 '" /><v:skew on="t" matrix="', skew,
                 '" offset="', Math.round(skewOffset.x / 10.00), ',',
                               Math.round(skewOffset.y / 10.00),
@@ -910,7 +914,7 @@ function strokeText(text, x, y, maxWidth, fill) {
         fp = style.param;
         c0 = _map2(this._matrix, fp.x0, fp.y0, this._matrix, fp.x1, fp.y1);
         rv.push('<v:fill type="gradient" method="sigma" focus="0%" colors="',
-                style.colors || _buildGradationColor(style),
+                style.colors || _gradationColor(style),
                 '" opacity="', this.globalAlpha,
                 '" o:opacity2="', this.globalAlpha,
                 '" angle="',
@@ -993,7 +997,7 @@ function _linearGradientFill(ctx, obj, path, fill, zindex) {
     var fg = "", fp = obj.param,
         c0 = _map2(ctx._matrix, fp.x0, fp.y0, fp.x1, fp.y1),
         angle = Math.atan2(c0.x2 - c0.x1, c0.y2 - c0.y1) * 180 / Math.PI,
-        color, strokeProps = fill ? "" : _buildStrokeProps(ctx);
+        color, strokeProps = fill ? "" : _stroke(ctx);
 
     angle < 0 && (angle += 360);
 
@@ -1013,11 +1017,11 @@ function _linearGradientFill(ctx, obj, path, fill, zindex) {
         //      <v:stroke filltype="solid" opacity="?" angle="?" color="?" joinstyle="?" miterlimit="?" weight="?px" endcap="?" />
         //                                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         //  </v:shape>
-        fg = _buildVML(fill ? _LINER_FILL : _LINER_STROKE,
-                       [zindex + ";left:" + (ctx.shadowOffsetX + 1) + "px;top:" +
-                                            (ctx.shadowOffsetY + 1) + "px",
-                        path, (ctx.globalAlpha / Math.sqrt(ctx.shadowBlur) * 0.5),
-                        angle + '" color="' + ctx.__shadowColor.hex + strokeProps]);
+        fg = _build(fill ? _LINER_FILL : _LINER_STROKE,
+                    [zindex + ";left:" + (ctx.shadowOffsetX + 1) + "px;top:" +
+                                         (ctx.shadowOffsetY + 1) + "px",
+                     path, (ctx.globalAlpha / Math.sqrt(ctx.shadowBlur) * 0.5),
+                     angle + '" color="' + ctx.__shadowColor.hex + strokeProps]);
     }
     // --- fill ---
     //  <v:shape style="position:absolute;width:10px;height:10px;z-index:?"
@@ -1032,11 +1036,11 @@ function _linearGradientFill(ctx, obj, path, fill, zindex) {
     //      <v:stroke filltype="solid" opacity="?" angle="?" color="?" o:opacity2="?" joinstyle="?" miterlimit="?" weight="?px" endcap="?" />
     //                                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     //  </v:shape>
-    color = fill ? ('" colors="' + (obj.colors || _buildGradationColor(obj)))
+    color = fill ? ('" colors="' + (obj.colors || _gradationColor(obj)))
                  : ('" color="'  + uu.color(ctx.xMissColor).hex);
-    return fg + _buildVML(fill ? _LINER_FILL : _LINER_STROKE,
-                          [zindex, path, ctx.globalAlpha,
-                           angle + strokeProps + color + '" o:opacity2="' + ctx.globalAlpha]);
+    return fg + _build(fill ? _LINER_FILL : _LINER_STROKE,
+                       [zindex, path, ctx.globalAlpha,
+                        angle + strokeProps + color + '" o:opacity2="' + ctx.globalAlpha]);
 }
 
 // inner - Radial Gradient Fill
@@ -1050,7 +1054,7 @@ function _radialGradientFill(ctx, obj, path, fill, zindex) {
         r1x = fp.r1 * ctx._scaleX,
         r1y = fp.r1 * ctx._scaleY,
         c0 = _map(ctx._matrix, x, y),
-        strokeProps = fill ? "" : _buildStrokeProps(ctx);
+        strokeProps = fill ? "" : _stroke(ctx);
 
     // focus
     if (fill) {
@@ -1076,10 +1080,10 @@ function _radialGradientFill(ctx, obj, path, fill, zindex) {
         //                                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         //      </v:oval>
         //
-        more = fill ? _buildVML('" color="?" focussize="?,?" focusposition="?,?',
-                                [ctx.__shadowColor.hex, fsize, fsize, fposX, fposY])
-                    : _buildVML('" color="??', [ctx.__shadowColor.hex, strokeProps]);
-        rv.push(_buildVML(fill ? _RADIAL_FILL : _RADIAL_STROKE,
+        more = fill ? _build('" color="?" focussize="?,?" focusposition="?,?',
+                             [ctx.__shadowColor.hex, fsize, fsize, fposX, fposY])
+                    : _build('" color="??', [ctx.__shadowColor.hex, strokeProps]);
+        rv.push(_build(fill ? _RADIAL_FILL : _RADIAL_STROKE,
                        [zindex,
                         Math.round(c0.x / 10.00) + ctx.shadowOffsetX + 1,
                         Math.round(c0.y / 10.00) + ctx.shadowOffsetY + 1, r1x, r1y,
@@ -1091,7 +1095,7 @@ function _radialGradientFill(ctx, obj, path, fill, zindex) {
         if (obj.color.length) {
             v = obj.color[0]; // 0 = outer color
             if (v.color.a > 0.001) {
-                if (ctx._mix === 4) { zindex2 = --ctx._zindex; }
+                if (ctx.__mix === 4) { zindex2 = --ctx._zindex; }
                 rv.push('<v:shape style="position:absolute;width:10px;height:10px;z-index:', zindex2,
                         '" filled="t" stroked="f" coordsize="100,100" path="', path,
                         '"><v:fill type="solid" color="', v.color.hex,
@@ -1121,12 +1125,12 @@ function _radialGradientFill(ctx, obj, path, fill, zindex) {
     //          <v:stroke filltype="tile" opacity="?" color="?" joinstyle="?" miterlimit="?" weight="?px" endcap="?" />
     //                                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     //      </v:oval>
-    more = fill ? _buildVML('" o:opacity2="?" colors="?" focussize="?,?" focusposition="?,?',
-                            [ctx.globalAlpha, obj.colors || _buildGradationColor(obj),
-                             fsize, fsize, fposX, fposY])
-                : _buildVML('" color="??', [uu.color(ctx.xMissColor).hex, strokeProps]);
+    more = fill ? _build('" o:opacity2="?" colors="?" focussize="?,?" focusposition="?,?',
+                         [ctx.globalAlpha, obj.colors || _gradationColor(obj),
+                          fsize, fsize, fposX, fposY])
+                : _build('" color="??', [uu.color(ctx.xMissColor).hex, strokeProps]);
 
-    rv.push(_buildVML(fill ? _RADIAL_FILL : _RADIAL_STROKE,
+    rv.push(_build(fill ? _RADIAL_FILL : _RADIAL_STROKE,
                    [zindex,
                     Math.round(c0.x / 10.00),
                     Math.round(c0.y / 10.00), r1x, r1y,
@@ -1136,7 +1140,7 @@ function _radialGradientFill(ctx, obj, path, fill, zindex) {
 
 // inner - Pattern Fill
 function _patternFill(ctx, obj, path, fill, zindex) {
-    var fg = "", strokeProps = fill ? "" : _buildStrokeProps(ctx);
+    var fg = "", strokeProps = fill ? "" : _stroke(ctx);
 
     if (ctx.__shadowColor.a && ctx.shadowBlur) {
         // --- fill --
@@ -1152,12 +1156,12 @@ function _patternFill(ctx, obj, path, fill, zindex) {
         //          <v:stroke filltype="?" opacity="?" color="?" joinstyle="?" miterlimit="?" weight="?px" endcap="?" />
         //                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         //      </v:shape>
-        fg = _buildVML(fill ? _PATTERN_FILL : _PATTERN_STROKE,
-                       [zindex, ctx.shadowOffsetX + 1,
-                                ctx.shadowOffsetY + 1,
-                        path, "solid",
-                        (ctx.globalAlpha / Math.sqrt(ctx.shadowBlur) * 0.5) +
-                        '" color="' + ctx.__shadowColor.hex + strokeProps]);
+        fg = _build(fill ? _PATTERN_FILL : _PATTERN_STROKE,
+                    [zindex, ctx.shadowOffsetX + 1,
+                             ctx.shadowOffsetY + 1,
+                     path, "solid",
+                     (ctx.globalAlpha / Math.sqrt(ctx.shadowBlur) * 0.5) +
+                     '" color="' + ctx.__shadowColor.hex + strokeProps]);
     }
 
     // --- fill --
@@ -1173,16 +1177,15 @@ function _patternFill(ctx, obj, path, fill, zindex) {
     //          <v:stroke filltype="?" opacity="?" src="?" joinstyle="?" miterlimit="?" weight="?px" endcap="?" />
     //                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     //      </v:shape>
-    return fg + _buildVML(fill ? _PATTERN_FILL : _PATTERN_STROKE,
-                          [zindex, 0, 0,
-                           path, "tile",
-                           ctx.globalAlpha + '" src="' + obj.src + strokeProps]);
+    return fg + _build(fill ? _PATTERN_FILL : _PATTERN_STROKE,
+                       [zindex, 0, 0, path, "tile",
+                        ctx.globalAlpha + '" src="' + obj.src + strokeProps]);
 }
 
 // inner -
 function _clippy(ctx, fg) {
     if (!ctx._clipStyle) {
-        ctx._clipStyle = uu.css.bgcolor.inherit(ctx._view);
+        ctx._clipStyle = uu.css.bgcolor.inherit(ctx.canvas);
     }
     return [fg,
             '<v:shape style="position:absolute;width:10px;height:10px" filled="t" stroked="f" coordsize="100,100" path="', ctx._clipPath,
@@ -1190,8 +1193,8 @@ function _clippy(ctx, fg) {
 }
 
 // inner - build Gradation Color
-function _buildGradationColor(obj) { // @param CanvasGradient:
-                                     // @return String:
+function _gradationColor(obj) { // @param CanvasGradient:
+                                // @return String:
     var rv = [], ary = obj.color, i = 0, iz = ary.length;
 
     for (; i < iz; ++i) {
@@ -1201,7 +1204,7 @@ function _buildGradationColor(obj) { // @param CanvasGradient:
 }
 
 // inner - build stroke properties
-function _buildStrokeProps(obj) {
+function _stroke(obj) {
     var modify = 0;
 
     if (obj.lineJoin !== obj._lineJoin) {
@@ -1233,7 +1236,8 @@ function _buildStrokeProps(obj) {
     return obj._strokeCache;
 }
 
-function _buildVML(format, ary) {
+// inner build VML
+function _build(format, ary) {
     var i = -1;
 
     return format.replace(_QQ, function() {

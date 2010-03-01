@@ -492,10 +492,14 @@ package {
 
 //          _buff.draw(_shape);
 //          mix ? mixin(_buff, _shape) : _buff.draw(_shape);
-            mixin(_buff, _shape, null, //_matrix,
+/*
+            mixin(_buff, _shape, _matrix,
                   globalAlpha < 1 ? new ColorTransform(1, 1, 1, globalAlpha)
                                   : null,
                   true);
+ */
+            // [!][TEST] 4_3_canvas_globalalpha.htm
+            mixin(_buff, _shape, null, null, true);
 
             _gfx.clear();
         }
