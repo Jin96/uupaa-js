@@ -96,10 +96,10 @@ package {
 
         private function onEnterFrame(evt:Event):void {
             var cmd:Object = stage.loaderInfo.parameters;
-            var tmp:String;
+            var msg:String;
 
             if (cmd.i && _msgid !== cmd.i) {
-    //trace(cmd.i + ":" + cmd.c);
+//trace(cmd.i + ":" + cmd.c);
                 _msgid = cmd.i; // update
                 switch (_state) {
                 case 0: // not ready(locked)
@@ -107,13 +107,23 @@ package {
                         break;
                 case 1: // not ready(locked) -> ready
                         _state = 2;
-                        cmd.c && _stock.push(cmd.c);
-                        tmp = _stock.join("\t");
-                        _stock = []; // pre clear
-                        recv(tmp);
+                        _buff && _buff.lock();
+
+                            cmd.c && _stock.push(cmd.c);
+                            msg = _stock.join("\t");
+                            msg = msg.replace(/^\t+/, ""); // trim head(\t)
+
+                            _stock = []; // pre clear
+                            msg && recv(msg);
+
+                        _buff && _buff.unlock();
                         break;
                 case 2: // ready
-                        recv(cmd.c);
+                        _buff && _buff.lock();
+
+                            recv(cmd.c);
+
+                        _buff && _buff.unlock();
                 }
             }
         }
@@ -121,10 +131,16 @@ package {
         private function next(state:int):void {
             _state = state;
 
-            var tmp:String = _stock.join("\t");
+            _buff && _buff.lock();
 
-            _stock = []; // pre clear
-            tmp && recv(tmp);
+                var msg:String = _stock.join("\t");
+
+                msg = msg.replace(/^\t+/, ""); // trim head(\t)
+
+                _stock = []; // pre clear
+                msg && recv(msg);
+
+            _buff && _buff.unlock();
         }
 
         private function recv(msg:String):void {
@@ -132,8 +148,6 @@ package {
             var i:int = -1;
             var iz:int = a.length;
             var fill:int;
-
-            _buff && _buff.lock();
 
             while (++i < iz) {
                 fill = 0;
@@ -245,18 +259,14 @@ package {
                 case "X1":  strokeCircle(+a[++i], +a[++i],
                                          +a[++i], +a[++i], +a[++i], fill); break;
                 case "undefined": // [!] undefined trap
-                    _buff && _buff.unlock();
                     trace("[!] undefined trap");
                     return;
                 default:
-                    _buff && _buff.unlock();
                     trace("[!] unknown command trap: " + a[i]);
                     ExternalInterface.call("uu.flash.alert", "Unknown command=" + a[i]);
                     return;
                 }
             }
-
-            _buff && _buff.unlock();
         }
 
         private function init(width:int, height:int, flyweight:int):void {
