@@ -1,6 +1,8 @@
 build/header.txt
 
 uu.js
+uu.jam.js
+uu.ajax.js
 uu.color.js
 uu.css.js
 uu.node.js

@@ -17,21 +17,40 @@ function matrix() {
     drawShape(document.getElementById('vmlcanvas'), 1);
     drawShape(document.getElementById('flashcanvas'), 1);
 }
+
+var globalAlpha = 1.0
+function switchAlpha() {
+    globalAlpha -= 0.2;
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+}
+
+var lineWidth = 1.0
+function switchLineWidth() {
+    lineWidth += 2;
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+}
+
 function drawShape(canvas, matrix){
     if (!canvas.getContext){ return; }
 
     var ctx = canvas.getContext('2d');
 
+    ctx.clear();
     if (matrix) {
-        ctx.clear();
         ctx.translate(-10, 5);
         ctx.scale(1.2, 0.8);
         ctx.rotate(5 * Math.PI / 180);
     }
+    ctx.globalAlpha = globalAlpha;
+    ctx.lineWidth = lineWidth;
 
     var lineJoin = ['round','bevel','miter'];
 
-    ctx.lineWidth = 10;
+    ctx.lineWidth += 10;
     for (var i=0;i<lineJoin.length;i++){
         ctx.lineJoin = lineJoin[i];
         ctx.beginPath();
@@ -55,6 +74,8 @@ function drawShape(canvas, matrix){
     <h1>A canvas lineJoin example</h1>
     <div>
       <input type="button" value="matrix effect" onclick="matrix()" />
+      <input type="button" value="alpha -0.2" onclick="switchAlpha()" />
+      <input type="button" value="lineWidth +2" onclick="switchLineWidth()" />
       <br />
       <canvas id="slcanvas" class="sl" width="150" height="150"></canvas>
       <canvas id="vmlcanvas" class="vml" width="150" height="150"></canvas>
@@ -70,21 +91,40 @@ function matrix() {
     drawShape(document.getElementById('vmlcanvas'), 1);
     drawShape(document.getElementById('flashcanvas'), 1);
 }
+
+var globalAlpha = 1.0
+function switchAlpha() {
+    globalAlpha -= 0.2;
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+}
+
+var lineWidth = 1.0
+function switchLineWidth() {
+    lineWidth += 2;
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+}
+
 function drawShape(canvas, matrix){
     if (!canvas.getContext){ return; }
 
     var ctx = canvas.getContext('2d');
 
+    ctx.clear();
     if (matrix) {
-        ctx.clear();
         ctx.translate(-10, 5);
         ctx.scale(1.2, 0.8);
         ctx.rotate(5 * Math.PI / 180);
     }
+    ctx.globalAlpha = globalAlpha;
+    ctx.lineWidth = lineWidth;
 
     var lineJoin = ['round','bevel','miter'];
 
-    ctx.lineWidth = 10;
+    ctx.lineWidth += 10;
     for (var i=0;i<lineJoin.length;i++){
         ctx.lineJoin = lineJoin[i];
         ctx.beginPath();

@@ -26,6 +26,15 @@ function alpha() {
     drawShape(document.getElementById('flashcanvas'));
 }
 
+var shadowBlur = 0;
+function switchShadowBlur() {
+    shadowBlur += 2;
+
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+}
+
 function drawShape(canvas, matrix){
     if (!canvas.getContext){ return; }
 
@@ -68,7 +77,7 @@ function setShadow(ctx, color, ox, oy, blur) {
     ctx.shadowColor = color;
     ctx.shadowOffsetX = ox;
     ctx.shadowOffsetY = oy
-    ctx.shadowBlur = blur;
+    ctx.shadowBlur = blur + shadowBlur;
     return [color, ox, oy, blur].join(", ");
 }
 </script>
@@ -84,6 +93,7 @@ function setShadow(ctx, color, ox, oy, blur) {
     <div>
       <input type="button" value="matrix effect" onclick="matrix()" />
       <input type="button" value="alpha -0.2" onclick="alpha()" />
+      <input type="button" value="shadowBlur +2" onclick="switchShadowBlur()" />
       <br />
       <canvas id="slcanvas" class="sl" width="360" height="400"></canvas>
       <canvas id="vmlcanvas" class="vml" width="360" height="400"></canvas>
@@ -114,6 +124,15 @@ function alpha() {
     drawShape(document.getElementById('flashcanvas'));
 }
 
+var shadowBlur = 0;
+function switchShadowBlur() {
+    shadowBlur += 2;
+
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+}
+
 function drawShape(canvas, matrix){
     if (!canvas.getContext){ return; }
 
@@ -156,7 +175,7 @@ function setShadow(ctx, color, ox, oy, blur) {
     ctx.shadowColor = color;
     ctx.shadowOffsetX = ox;
     ctx.shadowOffsetY = oy
-    ctx.shadowBlur = blur;
+    ctx.shadowBlur = blur + shadowBlur;
     return [color, ox, oy, blur].join(", ");
 }
       </pre>

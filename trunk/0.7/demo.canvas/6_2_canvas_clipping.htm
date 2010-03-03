@@ -8,28 +8,50 @@
 
 <script>
 function xcanvas() {
-    draw(document.getElementById('slcanvas'));
-    draw(document.getElementById('vmlcanvas'));
-    draw(document.getElementById('flashcanvas'));
+    drawShape(document.getElementById('slcanvas'), 0, 1);
+    drawShape(document.getElementById('vmlcanvas'), 0, 1);
+    drawShape(document.getElementById('flashcanvas'), 0, 1);
 }
 function matrix() {
-    draw(document.getElementById('slcanvas'), 1);
-    draw(document.getElementById('vmlcanvas'), 1);
-    draw(document.getElementById('flashcanvas'), 1);
+    drawShape(document.getElementById('slcanvas'), 1);
+    drawShape(document.getElementById('vmlcanvas'), 1);
+    drawShape(document.getElementById('flashcanvas'), 1);
 }
-function draw(canvas, matrix){
+
+var globalAlpha = 1.0;
+function switchAlpha() {
+    globalAlpha -= 0.2;
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+}
+
+var lineWidth = 1.0;
+function switchLineWidth() {
+    lineWidth += 2;
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+}
+
+function drawShape(canvas, matrix, first){
     if (!canvas.getContext){ return; }
 
     var ctx = canvas.getContext('2d');
 
+    ctx.clear();
     if (matrix) {
-        ctx.clear();
         ctx.translate(-10, 5);
         ctx.scale(1.2, 0.8);
         ctx.rotate(5 * Math.PI / 180);
     }
-    ctx.fillRect(0,0,150,150);
-    ctx.translate(75,75);
+    ctx.globalAlpha = globalAlpha;
+    ctx.lineWidth = lineWidth;
+
+    if (first) {
+        ctx.fillRect(0,0,150,150);
+        ctx.translate(75,75);
+    }
     // Create a circular clipping path
     ctx.beginPath();
     ctx.arc(0,0,60,0,Math.PI*2,true);
@@ -81,6 +103,8 @@ function drawStar(ctx,r){
     <h1>A canvas <code>clip</code> example</h1>
     <div>
       <input type="button" value="matrix effect" onclick="matrix()" />
+      <input type="button" value="alpha -0.2" onclick="switchAlpha()" />
+      <input type="button" value="lineWidth +2" onclick="switchLineWidth()" />
       <br />
       <canvas id="slcanvas" class="sl" width="150" height="150"></canvas>
       <canvas id="vmlcanvas" class="vml" width="150" height="150"></canvas>
@@ -96,26 +120,43 @@ function matrix() {
     draw(document.getElementById('vmlcanvas'), 1);
     draw(document.getElementById('flashcanvas'), 1);
 }
+
+var globalAlpha = 1.0;
+function switchAlpha() {
+    globalAlpha -= 0.2;
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+}
+
+var lineWidth = 1.0;
+function switchLineWidth() {
+    lineWidth += 2;
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+}
+
 function draw(canvas, matrix){
     if (!canvas.getContext){ return; }
 
     var ctx = canvas.getContext('2d');
 
+    ctx.clear();
     if (matrix) {
-        ctx.clear();
         ctx.translate(-10, 5);
         ctx.scale(1.2, 0.8);
         ctx.rotate(5 * Math.PI / 180);
     }
+    ctx.globalAlpha = globalAlpha;
+    ctx.lineWidth = lineWidth;
+
     ctx.fillRect(0,0,150,150);
     ctx.translate(75,75);
-
     // Create a circular clipping path
-/*
     ctx.beginPath();
     ctx.arc(0,0,60,0,Math.PI*2,true);
     ctx.clip();
- */
 
     // draw background
     var lingrad = ctx.createLinearGradient(0,-75,0,75);

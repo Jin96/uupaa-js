@@ -8,26 +8,58 @@
 
 <script>
 function xcanvas() {
-    draw(document.getElementById('slcanvas'));
-    draw(document.getElementById('vmlcanvas'));
-    draw(document.getElementById('flashcanvas'));
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
 }
 function matrix() {
-    draw(document.getElementById('slcanvas'), 1);
-    draw(document.getElementById('vmlcanvas'), 1);
-    draw(document.getElementById('flashcanvas'), 1);
+    drawShape(document.getElementById('slcanvas'), 1);
+    drawShape(document.getElementById('vmlcanvas'), 1);
+    drawShape(document.getElementById('flashcanvas'), 1);
 }
-function draw(canvas, matrix){
+
+var globalAlpha = 1.0
+function switchAlpha() {
+    globalAlpha -= 0.2;
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+}
+
+var lineWidth = 1.0;
+function switchLineWidth() {
+    lineWidth += 2;
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+}
+
+var shadowBlur = 0;
+function switchShadowBlur() {
+    shadowBlur += 2;
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+}
+
+function drawShape(canvas, matrix){
     if (!canvas.getContext){ return; }
 
     var ctx = canvas.getContext('2d');
 
+    ctx.clear();
     if (matrix) {
-        ctx.clear();
         ctx.translate(-10, 5);
         ctx.scale(1.2, 0.8);
         ctx.rotate(5 * Math.PI / 180);
     }
+    ctx.globalAlpha = globalAlpha;
+    ctx.lineWidth = lineWidth;
+    ctx.shadowOffsetX = 3;
+    ctx.shadowOffsetY = 3;
+    ctx.shadowColor = "green";
+    ctx.shadowBlur = shadowBlur;
+
     ctx.fillRect(0,0,300,300);
     var i, j;
     for (i=0;i<3;i++) {
@@ -70,32 +102,64 @@ function drawSpirograph(ctx,R,r,O){
     <h1>A <code>translate</code> example</h1>
     <div>
       <input type="button" value="matrix effect" onclick="matrix()" />
+      <input type="button" value="alpha -0.2" onclick="switchAlpha()" />
+      <input type="button" value="lineWidth +2" onclick="switchLineWidth()" />
+      <input type="button" value="shadowBlur +2" onclick="switchShadowBlur()" />
       <br />
       <canvas id="slcanvas" class="sl" width="300" height="300"></canvas>
       <canvas id="vmlcanvas" class="vml" width="300" height="300"></canvas>
       <canvas id="flashcanvas" class="flash" width="300" height="300"></canvas>
       <pre>
 function xcanvas() {
-    draw(document.getElementById('slcanvas'));
-    draw(document.getElementById('vmlcanvas'));
-    draw(document.getElementById('flashcanvas'));
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
 }
 function matrix() {
-    draw(document.getElementById('slcanvas'), 1);
-    draw(document.getElementById('vmlcanvas'), 1);
-    draw(document.getElementById('flashcanvas'), 1);
+    drawShape(document.getElementById('slcanvas'), 1);
+    drawShape(document.getElementById('vmlcanvas'), 1);
+    drawShape(document.getElementById('flashcanvas'), 1);
 }
-function draw(canvas, matrix){
+
+var globalAlpha = 1.0
+function switchAlpha() {
+    globalAlpha -= 0.2;
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+}
+
+var lineWidth = 1.0;
+function switchLineWidth() {
+    lineWidth += 2;
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+}
+
+var shadowBlur = 0;
+function switchShadowBlur() {
+    shadowBlur += 2;
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+}
+
+function drawShape(canvas, matrix){
     if (!canvas.getContext){ return; }
 
     var ctx = canvas.getContext('2d');
 
+    ctx.clear();
     if (matrix) {
-        ctx.clear();
         ctx.translate(-10, 5);
         ctx.scale(1.2, 0.8);
         ctx.rotate(5 * Math.PI / 180);
     }
+    ctx.globalAlpha = globalAlpha;
+    ctx.lineWidth = lineWidth;
+    ctx.shadowBlur = shadowBlur;
+
     ctx.fillRect(0,0,300,300);
     var i, j;
     for (i=0;i<3;i++) {

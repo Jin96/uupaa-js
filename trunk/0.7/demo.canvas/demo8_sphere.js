@@ -166,7 +166,11 @@ ctx.xFlyweight = 1;
 
 			// fill the canvas with 10% alpha before new render to create cheap motion blur effect:
 			ctx.fillStyle = 'rgba(0,0,0,0.1)';
+if (ctx.clear) {
+    ctx.clear()
+} else {
 			ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
 
 			// z-sorting objects
 			objectsInScene.sort(context.sortOnDepth);

@@ -141,13 +141,13 @@ function xcanvas(uu, canvas) {
     ctx.xFlyweight = 1;
 
     if (ctx instanceof uu.canvas.VML2D) {
-        uu.id("detected").innerText = "Backend: VML";
+        document.title = "Backend: VML";
     } else if (ctx instanceof uu.canvas.FL2D) {
-        uu.id("detected").innerText = "Backend: Flash";
+        document.title = "Backend: Flash";
     } else if (ctx instanceof uu.canvas.SL2D) {
-        uu.id("detected").innerText = "Backend: Silverlight";
+        document.title = "Backend: Silverlight";
     } else {
-        uu.id("detected").innerText = "Native Canvas";
+        document.title = "Native Canvas";
     }
 
     draw();

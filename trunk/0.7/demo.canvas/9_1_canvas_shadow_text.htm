@@ -18,8 +18,17 @@ function matrix() {
 }
 
 var globalAlpha = 1.0;
-function alpha() {
+function switchAlpha() {
     globalAlpha -= 0.2;
+
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+}
+
+var shadowBlur = 0;
+function switchShadowBlur() {
+    shadowBlur += 2;
 
     drawShape(document.getElementById('slcanvas'));
     drawShape(document.getElementById('vmlcanvas'));
@@ -61,7 +70,7 @@ function setShadow(ctx, color, ox, oy, blur) {
     ctx.shadowColor = color;
     ctx.shadowOffsetX = ox;
     ctx.shadowOffsetY = oy
-    ctx.shadowBlur = blur;
+    ctx.shadowBlur = blur + shadowBlur;
     return [color, ox, oy, blur].join(", ");
 }
 </script>
@@ -76,7 +85,8 @@ function setShadow(ctx, color, ox, oy, blur) {
     <h1>A canvas <code style="text-shadow: 10px 10px 10px black">shadow text</code> example</h1>
     <div>
       <input type="button" value="matrix effect" onclick="matrix()" />
-      <input type="button" value="alpha -0.2" onclick="alpha()" />
+      <input type="button" value="alpha -0.2" onclick="switchAlpha()" />
+      <input type="button" value="shadowBlur +2" onclick="switchShadowBlur()" />
       <br />
       <canvas id="slcanvas" class="sl" width="360" height="360"></canvas>
       <canvas id="vmlcanvas" class="vml" width="360" height="360"></canvas>
@@ -96,18 +106,38 @@ function matrix() {
     drawShape(document.getElementById('vmlcanvas'), 1);
     drawShape(document.getElementById('flashcanvas'), 1);
 }
+
+var globalAlpha = 1.0;
+function switchAlpha() {
+    globalAlpha -= 0.2;
+
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+}
+
+var shadowBlur = 0;
+function switchShadowBlur() {
+    shadowBlur += 2;
+
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+}
+
 function drawShape(canvas, matrix){
     if (!canvas.getContext){ return; }
 
     var ctx = canvas.getContext('2d');
 
+    ctx.globalAlpha = globalAlpha;
+
+    ctx.clear();
     if (matrix) {
-        ctx.clear();
         ctx.translate(-10, 5);
         ctx.scale(1.2, 0.8);
         ctx.rotate(5 * Math.PI / 180);
     }
-    ctx.globalAlpha   = 1.0;
     ctx.font          = "24pt Arial";
     ctx.textBaseline  = "top";
     ctx.fillStyle     = "red";
@@ -130,7 +160,7 @@ function setShadow(ctx, color, ox, oy, blur) {
     ctx.shadowColor = color;
     ctx.shadowOffsetX = ox;
     ctx.shadowOffsetY = oy
-    ctx.shadowBlur = blur;
+    ctx.shadowBlur = blur + shadowBlur;
     return [color, ox, oy, blur].join(", ");
 }
       </pre>

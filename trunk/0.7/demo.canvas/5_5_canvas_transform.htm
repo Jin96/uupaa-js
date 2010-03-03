@@ -8,22 +8,22 @@
 
 <script>
 function xcanvas() {
-    draw(document.getElementById('slcanvas'));
-    draw(document.getElementById('vmlcanvas'));
-    draw(document.getElementById('flashcanvas'));
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
 }
 function matrix() {
-    draw(document.getElementById('slcanvas'), 1);
-    draw(document.getElementById('vmlcanvas'), 1);
-    draw(document.getElementById('flashcanvas'), 1);
+    drawShape(document.getElementById('slcanvas'), 1);
+    drawShape(document.getElementById('vmlcanvas'), 1);
+    drawShape(document.getElementById('flashcanvas'), 1);
 }
-function draw(canvas, matrix){
+function drawShape(canvas, matrix){
     if (!canvas.getContext){ return; }
 
     var ctx = canvas.getContext('2d');
 
+    ctx.clear();
     if (matrix) {
-        ctx.clear();
         ctx.translate(-10, 5);
         ctx.scale(1.2, 0.8);
         ctx.rotate(5 * Math.PI / 180);
@@ -62,22 +62,22 @@ function draw(canvas, matrix){
       <canvas id="flashcanvas" class="flash" width="350" height="350"></canvas>
       <pre>
 function xcanvas() {
-    draw(document.getElementById('slcanvas'));
-    draw(document.getElementById('vmlcanvas'));
-    draw(document.getElementById('flashcanvas'));
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
 }
 function matrix() {
-    draw(document.getElementById('slcanvas'), 1);
-    draw(document.getElementById('vmlcanvas'), 1);
-    draw(document.getElementById('flashcanvas'), 1);
+    drawShape(document.getElementById('slcanvas'), 1);
+    drawShape(document.getElementById('vmlcanvas'), 1);
+    drawShape(document.getElementById('flashcanvas'), 1);
 }
-function draw(canvas, matrix){
+function drawShape(canvas, matrix){
     if (!canvas.getContext){ return; }
 
     var ctx = canvas.getContext('2d');
 
+    ctx.clear();
     if (matrix) {
-        ctx.clear();
         ctx.translate(-10, 5);
         ctx.scale(1.2, 0.8);
         ctx.rotate(5 * Math.PI / 180);

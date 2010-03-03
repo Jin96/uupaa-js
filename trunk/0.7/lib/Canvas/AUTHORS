@@ -1,0 +1,29 @@
+=== uu.canvas.swf ===
+
+uupaa.js:
+    http://code.google.com/p/uupaa-js/
+
+Developers:
+    uupaa <uupaa.js@gmail.com>
+
+License:
+    MIT
+
+---------------------------------------
+Bezier_lib.as:
+    http://timotheegroleau.com/Flash/articles/cubic_bezier_in_flash.htm
+
+Developers:
+	Timothee Groleau
+
+---------------------------------------
+CanvasArc.as:
+    http://code.google.com/p/ascanvas/
+    http://code.google.com/p/ascanvas/source/browse/trunk/src/com/gamemeal/html/Canvas.as#593
+
+Developers:
+    Colin Leung
+
+License:
+    The New BSD License
+

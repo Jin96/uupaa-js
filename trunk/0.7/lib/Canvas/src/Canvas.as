@@ -10,7 +10,6 @@ package {
     import flash.external.ExternalInterface;
 
     public class Canvas extends Sprite {
-        private var canvasDraw:CanvasDraw = new CanvasDraw();
         // --- compositing ---
         private var globalAlpha:Number = 1; // globalAlpha
         private var mix:int = 0; // globalCompositeOperation
@@ -47,7 +46,7 @@ package {
         private var _path:Array = [];
         private var _rtl:int = 0; // 1: direction=rtl
         private var _clipPath:Array = [];
-        private var _clipShape:Shape;
+        private var _clipShape:Shape = new Shape();
         private var _shadow:BitmapFilter; // shadow filter
 
         private var _beginX:Number = 0;
@@ -63,7 +62,6 @@ package {
                                         // 1: not ready -> ready
                                         // 2: ready
         private var _stock:Array = [];
-        private var _imgdb:Object = {}; // image cached db. { url: loader }
         // clearAll params
         private var _clearAllBuff:BitmapData;
         private var _clearAllRect:Rectangle;
@@ -72,9 +70,12 @@ package {
         private var xFlyweight:int = 0;
         private var canvasWidth:int = 300;
         private var canvasHeight:int = 150;
-        // ----
-        private var as2optim:AS2Optimize = new AS2Optimize();
-        private var as3optim:AS3Optimize = new AS3Optimize();
+
+        public  var imageCache:Object = {}; // image cached db. { url: BitmapData }
+        private var fillImage:CanvasImage;
+        private var strokeImage:CanvasImage;
+        private var canvasArc:CanvasArc = new CanvasArc();
+        private var canvasBezier:CanvasBezier = new CanvasBezier();
 
         public function Canvas() {
             // for local debug
@@ -84,12 +85,14 @@ package {
 
             _shape = new Shape();
             _gfx = _shape.graphics;
-            _clipShape = new Shape();
-            _shape.mask = _clipShape;
+            _shape.mask = null;
 
             stage.frameRate = 62.5;
             stage.scaleMode = StageScaleMode.NO_SCALE;
             stage.align     = StageAlign.TOP_LEFT;
+
+            fillImage   = new CanvasImage(this);
+            strokeImage = new CanvasImage(this);
 
             ExternalInterface.call("uu.flash.dmz." + ExternalInterface.objectID);
         }
@@ -99,7 +102,12 @@ package {
             var msg:String;
 
             if (cmd.i && _msgid !== cmd.i) {
-//trace(cmd.i + ":" + cmd.c);
+
+                // for debug
+                if (0) {
+                    trace(cmd.i + ":" + cmd.c);
+                }
+
                 _msgid = cmd.i; // update
                 switch (_state) {
                 case 0: // not ready(locked)
@@ -131,16 +139,18 @@ package {
         private function next(state:int):void {
             _state = state;
 
-            _buff && _buff.lock();
+            if (_state) {
+                _buff && _buff.lock();
 
-                var msg:String = _stock.join("\t");
+                    var msg:String = _stock.join("\t");
 
-                msg = msg.replace(/^\t+/, ""); // trim head(\t)
+                    msg = msg.replace(/^\t+/, ""); // trim head(\t)
 
-                _stock = []; // pre clear
-                msg && recv(msg);
+                    _stock = []; // pre clear
+                    msg && recv(msg);
 
-            _buff && _buff.unlock();
+                _buff && _buff.unlock();
+            }
         }
 
         private function recv(msg:String):void {
@@ -157,9 +167,9 @@ package {
                             addEventListener("enterFrame", onEnterFrame);
                             break;
                 case "rz":  // resize
-                            expire();
+                            clearCache();
                             init(+a[++i], +a[++i], +a[++i]); break;
-                case "xp":  expire(); break;
+                case "xp":  clearCache(); break;
                 case "rt":  _rtl = 1; break; // direction = rtl
                 case "gA":  globalAlpha = +a[++i]; break;
                 case "gC":  mix = 0;
@@ -185,7 +195,7 @@ package {
                 case "s2":  strokeStyle = 2;
                             i = strokeGradient.setRadial(a, i); break;
                 case "s3":  strokeStyle = 3;
-                            setPattern(a[++i], a[++i], 0);
+                            loadPatternImage(a[++i], a[++i], 0);
                             if (_state < 2) {
                                 _stock.push(a.slice(++i).join("\t")); // push remain commands
                                 return;
@@ -198,7 +208,7 @@ package {
                 case "f2":  fillStyle = 2;
                             i = fillGradient.setRadial(a, i); break;
                 case "f3":  fillStyle = 3;
-                            setPattern(a[++i], a[++i], 1);
+                            loadPatternImage(a[++i], a[++i], 1);
                             if (_state < 2) {
                                 _stock.push(a.slice(++i).join("\t")); // push remain commands
                                 return;
@@ -221,7 +231,7 @@ package {
                 case "bP":  _path = []; break; // reset path
                 case "cP":  closePath(); break;
                 case "cR":  clearRect(+a[++i], +a[++i], +a[++i], +a[++i]); break;
-                case "cA":  _buff.copyPixels(_clearAllBuff, _clearAllRect, _clearAllPoint); break;
+                case "cA":  clearAll(); break;
                 case "mT":  moveTo(a[++i] * 0.001, a[++i] * 0.001); break;
                 case "lT":  lineTo(a[++i] * 0.001, a[++i] * 0.001); break;
                 case "ar":  arc(+a[++i], +a[++i], +a[++i],
@@ -270,18 +280,26 @@ package {
         }
 
         private function init(width:int, height:int, flyweight:int):void {
-            _matrix = new Matrix();
-            _path = []; // reset path
-            _beginX = _beginY = _curtX = _curtY = 0;
-
             xFlyweight = flyweight;
             canvasWidth = width;
             canvasHeight = height;
 
+            // reset matrix
+            _matrix = new Matrix();
+
+            // reset path
+            _path = [];
+
+            // reset path current position
+            _beginX = _beginY = _curtX = _curtY = 0;
+
+            // reset mask
+            _shape.mask = null;
+
+            // reset canvas
             if (_buff) {
-                _buff.copyPixels(_clearAllBuff, _clearAllRect, _clearAllPoint);
+                clearAll();
                 _buff.dispose();
-                // _gfx.clear();
             }
             _buff = new BitmapData(width, height, true, 0); // 300 x 150
             _view = new Bitmap(_buff,
@@ -293,23 +311,18 @@ package {
             _clearAllBuff = _buff.clone();
             _clearAllRect = new Rectangle(0, 0, width, height);
             _clearAllPoint = new Point(0, 0);
-
-            // build clipShape
-            rect(0, 0, width, height);
-            clip();
         }
 
-        // clear cache
-        private function expire():void {
-            // TODO: test
+        private function clearCache():void {
             var url:String;
-            var loader:Loader;
 
-            for (url in _imgdb) {
-                loader = _imgdb[url];
-                Bitmap(loader.content).bitmapData.dispose();
-                loader.unload();
+            for (url in imageCache) {
+                imageCache[url].dispose();
             }
+        }
+
+        private function clearAll():void {
+            _buff.copyPixels(_clearAllBuff, _clearAllRect, _clearAllPoint);
         }
 
         private function buildPath(ary:Array, gfx:Graphics):void {
@@ -335,14 +348,14 @@ package {
                                 ary[++i], ary[++i]); // x, y
                     break;
                 case "a": // arc
-                    canvasDraw.arc(gfx, _matrix,
+                    canvasArc.draw(gfx, _matrix,
                                     ary[++i], ary[++i], ary[++i],
                                     ary[++i], ary[++i], ary[++i]);
                     break;
                 case "b": // bezierCurveTo
-                    canvasDraw.bezierCurveTo(gfx,
-                                    ary[++i], ary[++i],
-                                    ary[++i], ary[++i]);
+                    canvasBezier.draw(gfx,
+                                      ary[++i], ary[++i],
+                                      ary[++i], ary[++i]);
                 }
             }
         }
@@ -401,8 +414,9 @@ package {
                 x = p.x;
                 y = p.y;
             }
-    //          _path.length || moveTo(x, y); // add begin point
-            _path.length || _path.push("m", _beginX = x, _beginY = y); // add begin point
+            // add begin point
+            _path.length || _path.push("m", _beginX = x, _beginY = y);
+
             _path.push("l", _curtX = x, _curtY = y);
         }
 
@@ -413,8 +427,9 @@ package {
             var cp2:Point = _matrix.transformPoint(new Point(cp2x, cp2y));
             var   p:Point = _matrix.transformPoint(new Point(x, y));
 
-    //          _path.length || moveTo(cp1x, cp1y); // add begin point
-            _path.length || _path.push("m", _beginX = cp1.x, _beginY = cp1.y); // add begin point
+            // add begin point
+            _path.length || _path.push("m", _beginX = cp1.x, _beginY = cp1.y);
+
             _path.push("b", new Point(_curtX, _curtY), cp1, cp2, p);
             _curtX = p.x;
             _curtY = p.y;
@@ -425,7 +440,9 @@ package {
             var cp:Point = _matrix.transformPoint(new Point(cpx, cpy));
             var  p:Point = _matrix.transformPoint(new Point(x, y));
 
-            _path.length || moveTo(cpx, cpy); // add begin point
+            // add begin point
+            _path.length || _path.push("m", _beginX = cpx, _beginY = cpy);
+
             _path.push("q", cp.x, cp.y, _curtX = p.x, _curtX = p.y);
         }
 
@@ -439,14 +456,12 @@ package {
 
         private function clearRect(x:Number, y:Number, w:Number, h:Number):void {
             if (!x && !y && w >= canvasWidth && h >= canvasHeight) {
-                // clearAll
-                _buff.copyPixels(_clearAllBuff, _clearAllRect, _clearAllPoint);
+                clearAll();
             } else {
                 _gfx.beginFill(0);
                 _gfx.drawRect(x, y, w, h);
                 _gfx.endFill();
 
-//              _buff.draw(_shape, _matrix, null, BlendMode.ERASE);
                 _buff.draw(_shape, _matrix, null, BlendMode.ERASE, null, true);
                 _gfx.clear();
             }
@@ -459,14 +474,7 @@ package {
             buildPath(_path, _gfx);
             fill && _gfx.endFill();
 
-            mix ? mixin(_buff, _shape) : _buff.draw(_shape);
-/*
-            mixin(_buff, _shape, _matrix,
-                  globalAlpha < 1 ? new ColorTransform(1, 1, 1, globalAlpha)
-                                  : null,
-                  true);
- */
-
+            mixin(_buff, _shape, null);
             _gfx.clear();
         }
 
@@ -487,25 +495,12 @@ package {
                 _gfx.lineTo(p4.x, p4.y);
                 _gfx.lineTo(p1.x, p1.y);
             } else {
-                _gfx.moveTo(x, y);
-                _gfx.lineTo(x + w, y);
-                _gfx.lineTo(x + w, y + h);
-                _gfx.lineTo(x, y + h);
-                _gfx.lineTo(x, y);
+                _gfx.drawRect(x, y, w, h);
             }
+
             fill && _gfx.endFill();
 
-//          _buff.draw(_shape);
-//          mix ? mixin(_buff, _shape) : _buff.draw(_shape);
-/*
-            mixin(_buff, _shape, _matrix,
-                  globalAlpha < 1 ? new ColorTransform(1, 1, 1, globalAlpha)
-                                  : null,
-                  true);
- */
-            // [!][TEST] 4_3_canvas_globalalpha.htm
-            mixin(_buff, _shape, null, null, true);
-
+            mixin(_buff, _shape, null);
             _gfx.clear();
         }
 
@@ -519,12 +514,13 @@ package {
         }
 
         private function clip():void {
-            var gfx:Graphics = _clipShape.graphics;
+            _clipShape.graphics.clear();
+            _clipShape.graphics.beginFill(0);
+            buildPath(_clipPath = _path.concat(), _clipShape.graphics);
+            _clipShape.graphics.endFill();
 
-            gfx.clear();
-            gfx.beginFill(0);
-            buildPath(_clipPath = _path.concat(), gfx);
-            gfx.endFill();
+            // apply mask
+            _shape.mask = _clipShape;
         }
 
         private function scale(x:Number, y:Number):void {
@@ -586,28 +582,23 @@ package {
             _lineScale = (_matrix.a + _matrix.d) / 2;
         }
 
-        private function drawImage(args:Number, image:String, param:Array):void {
-            function onload(evt:Event):void {
-                loader.contentLoaderInfo.removeEventListener(Event.COMPLETE, onload);
+        private function drawImage(args:Number,  // 3, 5, 9
+                                   image:String, // url
+                                   param:Array):void {
+            var me:* = this;
+            var canvasImage:CanvasImage = new CanvasImage(this);
+            var rv:Boolean = canvasImage.load(image, function():void {
+                me.drawImageCallback(args, image, param, canvasImage.bitmapData);
+                me.next(1);
+            });
 
-                _drawImage(args, image, param, _imgdb[image] = loader); // add cache
-                next(1);
-            }
-
-            var loader:Loader = _imgdb[image];
-
-            if (loader) { // use cache
-                _drawImage(args, image, param, loader); // redraw from cache
-                next(2);
-            } else {
-                _state = 0; // not ready(locked)
-                loader = new Loader();
-                loader.contentLoaderInfo.addEventListener(Event.COMPLETE, onload);
-                loader.load(new URLRequest(image));
-            }
+            next(rv ? 2 : 0);
         }
 
-        private function _drawImage(args:Number, image:String, param:Array, loader:Loader):void {
+        private function drawImageCallback(args:Number,
+                                           image:String,
+                                           param:Array,
+                                           bitmapData:BitmapData):void {
             var dx:Number = 0;
             var dy:Number = 0;
             var dw:Number = 0;
@@ -632,11 +623,11 @@ package {
                 dh = param[7];
 
                 bmp = new BitmapData(sw, sh, true, 0);
-                bmp.copyPixels(Bitmap(loader.content).bitmapData,
+                bmp.copyPixels(bitmapData,
                                new Rectangle(sx, sy, sw, sh),
                                new Point(0, 0));
             } else { // args 2 or 4 version
-                bmp = Bitmap(loader.content).bitmapData;
+                bmp = bitmapData;
                 dx = param[0];
                 dy = param[1];
                 dw = param[2] || bmp.width;
@@ -659,21 +650,7 @@ package {
             matrix.translate(dx, dy);
             matrix.concat(_matrix);
 
-/*
-            _buff.draw(_shadow ? filterBmp : bmp,
-                       matrix,
-                       globalAlpha < 1 ? new ColorTransform(1, 1, 1, globalAlpha)
-                                       : null,
-                       null, null, true);
- */
-
-
-            mixin(_buff,
-                  _shadow ? filterBmp : bmp,
-                  matrix,
-                  globalAlpha < 1 ? new ColorTransform(1, 1, 1, globalAlpha)
-                                  : null,
-                  true);
+            mixin(_buff, _shadow ? filterBmp : bmp, matrix);
 
             // [GC]
             bmp = null;
@@ -732,81 +709,76 @@ package {
         }
 
         private function _applyStrokeStyle():void {
-            if (!strokeStyle) {
+            if (!strokeStyle) { // Color
                 _gfx.lineStyle(
                             lineWidth * _lineScale,
                             strokeColor[0],
-                            strokeColor[1] * globalAlpha,
+                            strokeColor[1], // * globalAlpha
                             true,
                             LineScaleMode.NORMAL,
                             lineCap,
                             lineJoin,
                             miterLimit);
-            } else if (strokeStyle < 3) {
+            } else if (strokeStyle < 3) { // Liner, Radial
                 var matrix:Matrix = strokeGradient.matrix.clone();
-                    matrix.concat(_matrix);
+
+                matrix.concat(_matrix);
 
                 _gfx.lineStyle(lineWidth * _lineScale);
                 _gfx.lineGradientStyle(
                         strokeStyle === 1 ? GradientType.LINEAR
                                           : GradientType.RADIAL,
                         strokeGradient.colors,
-                        strokeGradient.mixedAlpha(globalAlpha),
+                        strokeGradient.alphas, // strokeGradient.mixedAlpha(globalAlpha),
                         strokeGradient.ratios,
                         matrix,
                         SpreadMethod.PAD,
                         InterpolationMethod.RGB,
                         strokeStyle === 1 ? 0
                                           : strokeGradient.focalPointRatio);
+            } else { // pattern
+                _gfx.beginBitmapFill(strokeImage.bitmapData, _matrix);
             }
         }
 
         private function _applyFillStyle():void {
-            if (!fillStyle) {
-                _gfx.beginFill(fillColor[0], fillColor[1] * globalAlpha);
-            } else if (fillStyle < 3) {
+            if (!fillStyle) { // Color
+                _gfx.beginFill(fillColor[0],
+                               fillColor[1]); // * globalAlpha
+            } else if (fillStyle < 3) { // Liner, Radial
                 var matrix:Matrix = fillGradient.matrix.clone();
+
                 matrix.concat(_matrix);
 
                 _gfx.beginGradientFill(
                         fillStyle === 1 ? GradientType.LINEAR
                                         : GradientType.RADIAL,
                         fillGradient.colors,
-                        fillGradient.mixedAlpha(globalAlpha),
+                        fillGradient.alphas, // fillGradient.mixedAlpha(globalAlpha),
                         fillGradient.ratios,
                         matrix,
                         SpreadMethod.PAD,
                         InterpolationMethod.RGB,
                         fillStyle === 1 ? 0
                                         : fillGradient.focalPointRatio);
+            } else { // pattern
+                _gfx.beginBitmapFill(fillImage.bitmapData, _matrix);
             }
         }
 
-        private function setPattern(url:String, repeation:String, fill:int):void {
-            function onload(evt:Event):void {
-                loader.contentLoaderInfo.removeEventListener(Event.COMPLETE, onload);
-
-                _imgdb[param[0]] = loader; // add cache
-                _gfx.beginBitmapFill(Bitmap(loader.content).bitmapData, _matrix);
-                next(1);
-            }
-
+        private function loadPatternImage(url:String, repeation:String, fill:int):void {
             var param:Array = fill ? fillPattern : strokePattern;
 
             param[0] = url;
             param[1] = repeation;
 
-            var loader:Loader = _imgdb[param[0]];
+            var canvasImage:CanvasImage = fill ? fillImage : strokeImage;
+            var me:Canvas = this;
+            var rv:Boolean = canvasImage.load(url, function():void {
+                me.next(1);
+            });
 
-            if (loader) { // use cache
-                _gfx.beginBitmapFill(Bitmap(loader.content).bitmapData, _matrix);
-                next(2);
-            } else {
-                _state = 0; // not ready(locked)
-                loader = new Loader();
-                loader.contentLoaderInfo.addEventListener(Event.COMPLETE, onload);
-                loader.load(new URLRequest(param[0]));
-            }
+            next(rv ? 2 : 0);
         }
 
         private function strokeCircle(x:Number, y:Number, radius:Number,
@@ -836,11 +808,11 @@ package {
             textFormat.color = color;
             textFormat.size = font[0]; // font-size
             textFormat.font = font[4].replace(/^'+|'+$/g, ""); // "'Arial'" -> "Arial"
-            textFormat.italic = font[1] !== "normal"; // italic, oblique
-            textFormat.bold = /[b56789]/.test(font[2]); // bold, bolder, 500~900
+            textFormat.italic = font[1] !== "normal";       // italic, oblique
+            textFormat.bold = /[b56789]/.test(font[2]);     // bold, bolder, 500~900
             textFormat.align = TextFormatAlign.LEFT;
-            textField.defaultTextFormat = textFormat; // apply font
-            textField.autoSize = TextFieldAutoSize.LEFT; // [!][NEED] auto resize
+            textField.defaultTextFormat = textFormat;       // apply font
+            textField.autoSize = TextFieldAutoSize.LEFT;    // [!][NEED] auto resize
             textField.text = text;
 
             switch (textAlign) {
@@ -868,19 +840,7 @@ package {
             // apply matrix
             matrix.concat(_matrix);
 
-/*
-            _buff.draw(_shadow ? filterBmp : bmp,
-                       matrix,
-                       a < 1 ? new ColorTransform(1, 1, 1, a)
-                             : null,
-                       null, null, true);
- */
-            mixin(_buff,
-                  _shadow ? filterBmp : bmp,
-                  matrix,
-                  globalAlpha < 1 ? new ColorTransform(1, 1, 1, globalAlpha)
-                                  : null,
-                  true);
+            mixin(_buff, _shadow ? filterBmp : bmp, matrix);
 
             // [GC]
             bmp = null;
@@ -911,11 +871,13 @@ package {
         // draw with blendMode
         private function mixin(bg:BitmapData,           // _buff
                                pict:IBitmapDrawable,    // _shape
-                               matrix:Matrix = null,
-                               colorTransform:ColorTransform = null,
-                               smoothing:Boolean = false):void {
+                               matrix:Matrix = null):void {
+            var color:ColorTransform = globalAlpha < 1
+                                     ? new ColorTransform(1, 1, 1, globalAlpha)
+                                     : null;
+
             if (!mix) {
-                bg.draw(pict, matrix, colorTransform, null, null, smoothing);
+                bg.draw(pict, matrix, color, null, null, true);
             } else {
                 var bgcopy:BitmapData;
 
@@ -923,7 +885,7 @@ package {
                 case "copy":
                     // clear -> draw
                     bg.copyPixels(_clearAllBuff, _clearAllRect, _clearAllPoint);
-                    bg.draw(pict);
+                    bg.draw(pict, matrix, color, null, null, true);
                     break;
                 case "destination-over":
                     // copy(bg) -> clear -> draw(pict) -> draw(copied bg)
@@ -931,11 +893,10 @@ package {
 
                     bg.copyPixels(_clearAllBuff, _clearAllRect, _clearAllPoint);
                     bg.draw(pict);
-                    bg.draw(bgcopy);
+                    bg.draw(bgcopy, matrix, color, null, null, true);
                     break;
                 default:
-//                  bg.draw(pict, null, null, mode, null, true);
-                    bg.draw(pict, matrix, colorTransform, mixMode, null, smoothing);
+                    bg.draw(pict, matrix, color, mixMode, null, true);
                 }
             }
         }
