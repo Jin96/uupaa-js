@@ -157,7 +157,7 @@ function uucssimports() { // @return String: "dirty CSS"
                    replace(IMP_COMMENT, "").
                    replace(IMP_IMPORTS, function(m, url) {
             var v = uu.url.abs(url, absdir);
-            return imp(uu.ajax.sync(v), uu.url.dir(v));
+            return imp(uu.ajax.sync(v).rv, uu.url.dir(v));
         });
     }
     var rv = [], absdir = uu.url(), href, hash, dstr,
@@ -177,7 +177,7 @@ function uucssimports() { // @return String: "dirty CSS"
                     // <link>
                     w = uu.url.abs(v.href, absdir);
                     w in _importCache ||
-                        (_importCache[w] = imp(uu.ajax.sync(w), uu.url.dir(w)));
+                        (_importCache[w] = imp(uu.ajax.sync(w).rv, uu.url.dir(w)));
                     rv.push(_importCache[w]);
                 } else {
                     // skip <style id="uucss3ignore...">

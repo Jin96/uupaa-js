@@ -1,11 +1,11 @@
 
 // === <canvas> ===
-// depend: uu.js, uu.flash.js
+// depend: uu.js
 //
 uu.agein || (function(win, doc, uu) {
 
 var _flashCanvas = (uu.ie && uu.ver.flash > 9) ?
-                   uu.ajax.sync.preload(uu.config.dir + "uu.canvas.swf") : 0;
+                   _swfLoader(uu.config.dir + "uu.canvas.swf") : 0;
 
 uu.mix(uu.canvas, {
     init:           uucanvasinit,   // uu.canvas.init()
@@ -39,8 +39,8 @@ function uucanvasinit() {
             //      <canvas>fallback contents...</canvas> -> <canvas></canvas>
             var newNode = _removeFallback(node);
 
-            newNode.width  = newNode.width;
-            newNode.height = newNode.height;
+            newNode.width  = node.width  || "300";
+            newNode.height = node.height || "150";
             newNode.style.pixelWidth  = parseInt(newNode.width);
             newNode.style.pixelHeight = parseInt(newNode.height);
             _build(newNode, newNode.className);
@@ -51,16 +51,20 @@ function uucanvasinit() {
 }
 
 // uu.canvas.create - create canvas element
-function uucanvascreate(width,   // @param Number(= 300):
-                        height,  // @param Number(= 150):
-                        order) { // @param String(= "sl flash vml"): backend order
-                                 // @return Node: new element
-    var node = uue(uu.ie ? "CANVAS" : "canvas"); // [IE][!] need upper case
+function uucanvascreate(width,         // @param Number(= 300):
+                        height,        // @param Number(= 150):
+                        order,         // @param String(= "sl flash vml"): backend order
+                        placeHolder) { // @param Node(= <body>): placeholder Node
+                                       // @return Node: new element
+    var canvas = uue(uu.ie ? "CANVAS" : "canvas"); // [IE][!] need upper case
 
-    node.width  = width  == null ? 300 : width;
-    node.height = height == null ? 150 : height;
+    canvas.width  = width  == null ? 300 : width;
+    canvas.height = height == null ? 150 : height;
 
-    return uu.ie ? _build(node, order || "sl flash vml") : node;
+    placeHolder || (placeHolder = doc.body.appendChild(uue())); // <body><div /></body>
+                                                                //       ~~~~~~~
+    placeHolder.parentNode.replaceChild(canvas, placeHolder);
+    return uu.ie ? _build(canvas, order || "sl flash vml") : canvas;
 }
 
 //{{{!mb inner - build canvas <canvas class="flash sl vml">
@@ -106,6 +110,24 @@ function _removeFallback(node) { // @param Node:
     }
     parent.replaceChild(rv, node);
     return rv;
+}
+//}}}!mb
+
+//{{{!mb
+// inner - swf preloader
+function _swfLoader(url) { // @param String: url
+                           // @return Number: 1 or 0
+    try {
+        var xhr = win.ActiveXObject  ? new ActiveXObject("Microsoft.XMLHTTP") :
+                  win.XMLHttpRequest ? new XMLHttpRequest() : 0;
+
+        xhr.open("GET", url, false); // sync
+        xhr.send(null);
+        if (!xhr.status || (xhr.status >= 200 && xhr.status < 300)) {
+            return 1;
+        }
+    } catch (err) {}
+    return 0;
 }
 //}}}!mb
 

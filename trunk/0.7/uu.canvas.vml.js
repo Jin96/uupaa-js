@@ -11,10 +11,11 @@
 //  </canvas>
 
 uu.agein || (function(win, doc, uu) {
-var _QQ     = /\?/g, // place holder
-    _COMPOS = { "source-over": 0, "destination-over": 4, copy: 10 },
+var _COMPOS = { "source-over": 0, "destination-over": 4, copy: 10 },
     _FILTER = uu.ie8 ? ["-ms-filter:'progid:DXImageTransform.Microsoft.", "'"]
                      : ["filter:progid:DXImageTransform.Microsoft.", ""],
+    _CLIPPY         = '<v:shape style="position:absolute;width:10px;height:10px" filled="t" stroked="f" coordsize="100,100" path="?"><v:fill type="solid" color="?" /></v:shape>',
+
     // zindex(+shadowOffsetX +shadowOffsetY), path, color.hex, opacity(+strokeProps or +' type="solid"')
     _COLOR_FILL     = '<v:shape style="position:absolute;width:10px;height:10px;z-index:?" filled="t" stroked="f" coordsize="100,100" path="?"><v:fill color="?" opacity="?" /></v:shape>',
     _COLOR_STROKE   = '<v:shape style="position:absolute;width:10px;height:10px;z-index:?" filled="f" stroked="t" coordsize="100,100" path="?"><v:stroke color="?" opacity="?" /></v:shape>',
@@ -253,7 +254,7 @@ function clearRect(x, y, w, h) {
         var color = uu.css.bgcolor.inherit(this.canvas),
             zindex = (this.__mix ===  4) ? --this._zindex
                    : (this.__mix === 10) ? (this.clear(), 0) : 0,
-            fg = _build(_COLOR_FILL,
+            fg = uu.fmt(_COLOR_FILL,
                         [zindex, _rect(this, x, y, w, h), color.hex,
                          (this.globalAlpha * color.a) + ' type="solid"']);
 
@@ -780,7 +781,7 @@ function stroke(path, fill) {
         color = fill ? this.__fillStyle : this.__strokeStyle;
 
         if (this.__shadowColor.a && this.shadowBlur) {
-            fg = _build(fill ? _COLOR_FILL : _COLOR_STROKE,
+            fg = uu.fmt(fill ? _COLOR_FILL : _COLOR_STROKE,
                         [zindex + ";left:" + (this.shadowOffsetX + 1) + "px;top:" +
                                              (this.shadowOffsetY + 1) + "px",
                          path, this.__shadowColor.hex,
@@ -1018,7 +1019,7 @@ function _linearGradientFill(ctx, obj, path, fill, zindex) {
         //      <v:stroke filltype="solid" opacity="?" angle="?" color="?" joinstyle="?" miterlimit="?" weight="?px" endcap="?" />
         //                                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         //  </v:shape>
-        fg = _build(fill ? _LINER_FILL : _LINER_STROKE,
+        fg = uu.fmt(fill ? _LINER_FILL : _LINER_STROKE,
                     [zindex + ";left:" + (ctx.shadowOffsetX + 1) + "px;top:" +
                                          (ctx.shadowOffsetY + 1) + "px",
                      path, (ctx.globalAlpha / Math.sqrt(ctx.shadowBlur) * 0.5),
@@ -1039,7 +1040,7 @@ function _linearGradientFill(ctx, obj, path, fill, zindex) {
     //  </v:shape>
     color = fill ? ('" colors="' + (obj.colors || _gradationColor(obj)))
                  : ('" color="'  + uu.color(ctx.xMissColor).hex);
-    return fg + _build(fill ? _LINER_FILL : _LINER_STROKE,
+    return fg + uu.fmt(fill ? _LINER_FILL : _LINER_STROKE,
                        [zindex, path, ctx.globalAlpha,
                         angle + strokeProps + color + '" o:opacity2="' + ctx.globalAlpha]);
 }
@@ -1081,10 +1082,10 @@ function _radialGradientFill(ctx, obj, path, fill, zindex) {
         //                                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         //      </v:oval>
         //
-        more = fill ? _build('" color="?" focussize="?,?" focusposition="?,?',
+        more = fill ? uu.fmt('" color="?" focussize="?,?" focusposition="?,?',
                              [ctx.__shadowColor.hex, fsize, fsize, fposX, fposY])
-                    : _build('" color="??', [ctx.__shadowColor.hex, strokeProps]);
-        rv.push(_build(fill ? _RADIAL_FILL : _RADIAL_STROKE,
+                    : uu.fmt('" color="??', [ctx.__shadowColor.hex, strokeProps]);
+        rv.push(uu.fmt(fill ? _RADIAL_FILL : _RADIAL_STROKE,
                        [zindex,
                         Math.round(c0.x / 10.00) + ctx.shadowOffsetX + 1,
                         Math.round(c0.y / 10.00) + ctx.shadowOffsetY + 1, r1x, r1y,
@@ -1126,12 +1127,12 @@ function _radialGradientFill(ctx, obj, path, fill, zindex) {
     //          <v:stroke filltype="tile" opacity="?" color="?" joinstyle="?" miterlimit="?" weight="?px" endcap="?" />
     //                                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     //      </v:oval>
-    more = fill ? _build('" o:opacity2="?" colors="?" focussize="?,?" focusposition="?,?',
+    more = fill ? uu.fmt('" o:opacity2="?" colors="?" focussize="?,?" focusposition="?,?',
                          [ctx.globalAlpha, obj.colors || _gradationColor(obj),
                           fsize, fsize, fposX, fposY])
-                : _build('" color="??', [uu.color(ctx.xMissColor).hex, strokeProps]);
+                : uu.fmt('" color="??', [uu.color(ctx.xMissColor).hex, strokeProps]);
 
-    rv.push(_build(fill ? _RADIAL_FILL : _RADIAL_STROKE,
+    rv.push(uu.fmt(fill ? _RADIAL_FILL : _RADIAL_STROKE,
                    [zindex,
                     Math.round(c0.x / 10.00),
                     Math.round(c0.y / 10.00), r1x, r1y,
@@ -1157,7 +1158,7 @@ function _patternFill(ctx, obj, path, fill, zindex) {
         //          <v:stroke filltype="?" opacity="?" color="?" joinstyle="?" miterlimit="?" weight="?px" endcap="?" />
         //                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         //      </v:shape>
-        fg = _build(fill ? _PATTERN_FILL : _PATTERN_STROKE,
+        fg = uu.fmt(fill ? _PATTERN_FILL : _PATTERN_STROKE,
                     [zindex, ctx.shadowOffsetX + 1,
                              ctx.shadowOffsetY + 1,
                      path, "solid",
@@ -1178,7 +1179,7 @@ function _patternFill(ctx, obj, path, fill, zindex) {
     //          <v:stroke filltype="?" opacity="?" src="?" joinstyle="?" miterlimit="?" weight="?px" endcap="?" />
     //                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     //      </v:shape>
-    return fg + _build(fill ? _PATTERN_FILL : _PATTERN_STROKE,
+    return fg + uu.fmt(fill ? _PATTERN_FILL : _PATTERN_STROKE,
                        [zindex, 0, 0, path, "tile",
                         ctx.globalAlpha + '" src="' + obj.src + strokeProps]);
 }
@@ -1188,9 +1189,7 @@ function _clippy(ctx, fg) {
     if (!ctx._clipStyle) {
         ctx._clipStyle = uu.css.bgcolor.inherit(ctx.canvas);
     }
-    return [fg,
-            '<v:shape style="position:absolute;width:10px;height:10px" filled="t" stroked="f" coordsize="100,100" path="', ctx._clipPath,
-            '"><v:fill type="solid" color="', ctx._clipStyle.hex, '" /></v:shape>'].join("");
+    return fg + uu.fmt(_CLIPPY, [ctx._clipPath, ctx._clipStyle.hex]);
 }
 
 // inner - build Gradation Color
@@ -1205,45 +1204,36 @@ function _gradationColor(obj) { // @param CanvasGradient:
 }
 
 // inner - build stroke properties
-function _stroke(obj) {
+function _stroke(ctx) {
     var modify = 0;
 
-    if (obj.lineJoin !== obj._lineJoin) {
-        obj._lineJoin = obj.lineJoin;
+    if (ctx.lineJoin !== ctx._lineJoin) {
+        ctx._lineJoin = ctx.lineJoin;
         ++modify;
     }
-    if (obj.lineWidth !== obj._lineWidth) {
-        obj._lineWidth = obj.lineWidth;
-        obj.__lineWidth = (obj.lineWidth * obj._lineScale).toFixed(2);
+    if (ctx.lineWidth !== ctx._lineWidth) {
+        ctx._lineWidth = ctx.lineWidth;
+        ctx.__lineWidth = (ctx.lineWidth * ctx._lineScale).toFixed(2);
         ++modify;
     }
-    if (obj.miterLimit !== obj._miterLimit) {
-        obj._miterLimit = obj.miterLimit;
+    if (ctx.miterLimit !== ctx._miterLimit) {
+        ctx._miterLimit = ctx.miterLimit;
         ++modify;
     }
-    if (obj.lineCap !== obj._lineCap) {
-        obj._lineCap = obj.lineCap;
-        obj.__lineCap = (obj.lineCap === "butt") ? "flat" : obj.lineCap;
+    if (ctx.lineCap !== ctx._lineCap) {
+        ctx._lineCap = ctx.lineCap;
+        ctx.__lineCap = (ctx.lineCap === "butt") ? "flat" : ctx.lineCap;
         ++modify;
     }
 
     if (modify) {
-        obj._strokeCache =
-                '" joinstyle="'  + obj._lineJoin +
-                '" miterlimit="' + obj._miterLimit +
-                '" weight="'     + obj.__lineWidth +
-                'px" endcap="'   + obj.__lineCap;
+        ctx._strokeCache =
+                '" joinstyle="'  + ctx._lineJoin +
+                '" miterlimit="' + ctx._miterLimit +
+                '" weight="'     + ctx.__lineWidth +
+                'px" endcap="'   + ctx.__lineCap;
     }
-    return obj._strokeCache;
-}
-
-// inner build VML
-function _build(format, ary) {
-    var i = -1;
-
-    return format.replace(_QQ, function() {
-               return ary[++i];
-           });
+    return ctx._strokeCache;
 }
 
 // functional collision with uu.css3(altcss) is evaded

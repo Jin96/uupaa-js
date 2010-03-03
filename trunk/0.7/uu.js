@@ -62,6 +62,7 @@ var _cfg    = uuarg(win.xconfig || {}, { dir: ".", aria: 0, debug: 0, right: 0,
     _TRIM   = /^\s+|\s+$/g,
     _QUOTE  = /^\s*["']?|["']?\s*$/g,
     _SPACES = /\s\s+/g,
+    _PLACEH = /\?/g, // placeholder
     _TYPEOF = { "undefined":        0x020,
                 "[object Boolean]": 0x040, "boolean":          0x040,
                 "[object Number]":  0x100, "number":           0x100,
@@ -149,7 +150,6 @@ uu = uumix(uujamfactory, {          // uu(expr, ctx) -> Instance(jam)
         each:       uuhasheach,     // uu.hash.each(hash, fn)
         size:       uuhashsize,     // uu.hash.size(mix) -> Number(hash length)
         keys:       uuhashkeys,     // uu.hash.keys(mix) -> [key1, key2, ...]
-        css2kb:     uuhashcss2kb,   // uu.hash.css2kb([className, ...]) -> Hash
         values:     uuhashvalues,   // uu.hash.values(mix) -> [value1, value2, ...]
         indexOf:    uuhashindexof,  // uu.hash.indexOf({a: 1, b: 2, c: 2}, 2) -> "b"
         combine:    uuhashcombine,  // [1][ary x ary] uu.hash.combine(["a","b"], [1,2]) -> { a: 1, b: 2 }
@@ -200,10 +200,7 @@ uu = uumix(uujamfactory, {          // uu(expr, ctx) -> Instance(jam)
         quick:      uustylequick    // uu.style.quick(node)     -> Hash(window.getComputedStyle or currentStyle)
     }),
     // --- query ---
-    query:    uumix(uuquery, {      // uu.query(expr, ctx = document) -> [node, ...]
-        ui:         uuqueryui       // [1][query all ui instance]  uu.query.ui("", ctx) -> { name, [instance, ...] }
-                                    // [2][query some ui instance] uu.query.ui("slider", ctx) -> [instance, ...]
-    }),
+    query:          uuquery,        // uu.query(expr, ctx = document) -> [node, ...]
     id:             uuid,           // uu.id(expr, ctx = document) -> node or null
     tag:            uutag,          // uu.tag(expr, ctx = document) -> [node, ...]
     // --- className(klass) ---
@@ -251,20 +248,6 @@ uu = uumix(uujamfactory, {          // uu(expr, ctx) -> Instance(jam)
             blackout:   0           // 1 is blackout (css3 cache reload)
         }
     }),
-    // --- form ---
-    // [1][node] uu.text("text") -> createTextNode("text")
-    // [2][get]  uu.text(node) -> text or [text, ...]
-    // [3][set]  uu.text(node, "text") -> node
-    text:     uumix(uutext, {
-        get:        uutextget,      // uu.text.get(node) -> text or [text, ...]
-        set:        uutextset       // uu.text.set(node, text) -> node
-    }),
-    // [1][get] uu.val(node) -> val or [val, ...]
-    // [2][set] uu.val(node, "val") -> node
-    val:      uumix(uuval, {
-        get:        uuvalget,       // uu.val.get(node) -> val or [val, ...]
-        set:        uuvalset        // uu.val.set(node, val) -> node
-    }),
     // --- node / node list / tag ---
     // [1][add to body] uu.node(uu.div()) -> <div>
     // [2][add to body] uu.node(uu.div(), doc.body) -> <div>
@@ -294,9 +277,8 @@ uu = uumix(uujamfactory, {          // uu(expr, ctx) -> Instance(jam)
     // [3] uu.fix("float")            -> "cssFloat" or "styleFloat"(IE)
     // [4] uu.fix("for")              -> "htmlFor"
     fix:            uufix,
-    fmt:            uufmt,          // uu.fmt("%s-%d", var_args, ...) -> "formatted string"
-    puff:           uupuff,         // uu.puff("%s-%d", ...) -> alert(uu.fmt("%s-%d", ...))
-    rep:            uurep,          // uu.rep("str", n = 0) -> "strstrstr..."
+    fmt:            uufmt,          // uu.fmt("?-?", [1, 2]) -> "1-2"
+    puff:           uupuff,         // uu.puff(mix) -> alert(...)
     esc:            uuesc,          // uu.esc('<a href="&">') -> '&lt;a href=&quot;&amp;&quot;&gt;'
     ucs2:           uuucs2,         // uu.ucs2("string", 0) -> "\u0073"
     unesc:          uuunesc,        // uu.unesc('&lt;a href=&quot;&amp;&quot;&gt;') -> '<a href="&">'
@@ -356,10 +338,10 @@ uu = uumix(uujamfactory, {          // uu(expr, ctx) -> Instance(jam)
     webkit:         _webkit,        // is WebKit
     // --- other ---
     js:             uujs,           // uu.js("js+expr") -> new Function("js+expr")
-    ui:             uuui,           // [create instance] uu.ui(widget, placeholder, option) -> instance
     win: {
         size:       uuwinsize       // uu.win.size() -> { iw, ih, sw, sh }
     },
+    dmz:            {},             // uu.dmz - DeMilitarized Zone(proxy)
     date: {
         hash:       uudatehash      // uu.date.hash(new Date) -> { Y, M, D, h, m, s, ms }
     },
@@ -679,33 +661,6 @@ function uuhashkeys(mix,    // @param Array/Hash:
     }
     return rv;
 }
-
-// uu.hash.css2kb - hash from CSS implemented data
-// .hoge { list-style: url(?key=val) }
-// uu.hash.css2kb("hoge") -> { key: val }
-function uuhashcss2kb(name) { // @param String/Array: className or [className, ...]
-                              // @return Hash: { key: value, ... }
-    function _parseQueryString(m, key, val, v) {
-        v = fn(val);
-        return rv[fn(key)] = isNaN(v) ? v : parseFloat(v);
-    }
-    // http://d.hatena.ne.jp/uupaa/20091125
-    var rv = {}, cs, url, ary = uuary(name), i = 0, iz = ary.length,
-        div = doc.body.appendChild(uue()),
-        fn = decodeURIComponent, _kv = uuhashcss2kb._kv; // alias
-
-    for (; i < iz; ++i) {
-        div.className = ary[i];
-        cs = _ie ? div.currentStyle : win.getComputedStyle(div, null);
-        url = uutrimurl(cs.listStyleImage);
-        if (url && url.indexOf("?") > 0) {
-            url.slice(url.indexOf("?") + 1).replace(_kv, _parseQueryString);
-        }
-    }
-    doc.body.removeChild(div);
-    return rv;
-}
-uuhashcss2kb._kv = /(?:([^\=]+)\=([^\;]+);?)/g; // key = value
 
 // uu.hash.values - enum hash values
 function uuhashvalues(mix) { // @param Array/Hash:
@@ -1080,7 +1035,7 @@ function uustyle(node,   // @param Node:
 uustyle._pt = /pt$/;
 uustyle._mod = { top: 1, left: 2, width: 3, height: 4 };
 uustyle._unit = { m: 1, t: 2, "%": 3, o: 3 }; // em, pt, %, auto
-uustyle._hash = uu.ie678 ? _builduucshash() : {};
+uustyle._hash = uu.ie678 ? _builduustylehash() : {};
 uustyle._thick = uu.ie8 ? "5px" : "6px";
 //}}}!mb
 
@@ -1090,8 +1045,8 @@ function uustylequick(node) { // @param Node:
     return uustyle(node, 4);
 }
 
-//{{{!mb inner - build uucss hash
-function _builduucshash() {
+//{{{!mb inner - build uu.style hash
+function _builduustylehash() {
     // http://d.hatena.ne.jp/uupaa/20091212
     var rv = { full: [], more: [], box: [] },
         ary = [" "], i, w, trim = /^\s+|\s+$/g,
@@ -1593,106 +1548,6 @@ function uuready(fn,      // @param Function(= void 0): callback function
     }
 }
 
-// --- form ---
-// uu.text - text element creator, innerText accessor
-// [1][node] uu.text("text") -> createTextNode("text")
-// [2][get]  uu.text(node) -> text or [text, ...]
-// [3][set]  uu.text(node, "text") -> node
-function uutext(node,   // @param Node/String:
-                text) { // @param String(= void 0):
-                        // @return Array/String/Node:
-    return uuisstr(node) ? doc.createTextNode(node) : // [1]
-           ((text === void 0) ? uutextget : uutextset)(node, text); // [2][3]
-}
-
-// uu.text.get
-function uutextget(node) { // @param Node:
-                           // @return String: innerText
-    return node[_gecko ? "textContent" : "innerText"];
-}
-
-// uu.text.set
-function uutextset(node,   // @param Node:
-                   text) { // @param Array/String: innerText
-                           // @return Node: node
-    uunode(doc.createTextNode(Array.isArray(text) ? text.join("") : text),
-           uunodeclear(node));
-    return node;
-}
-
-// uu.val - value
-// [1][get] uu.val(node) -> value
-// [2][set] uu.val(node, "value") -> node
-function uuval(node,  // @param Node:
-               val) { // @param String(= void 0):
-                      // @return String/Node:
-    return ((val === void 0) ? uuvalget : uuvalset)(node, val);
-}
-
-// uu.val.get - get value
-// [1][<textarea>]       uu.val.get(node) -> "innerText"
-// [2][<button>]         uu.val.get(node) -> "<button value>"
-// [3][<option>]         uu.val.get(node) -> "<option value>" or
-//                                           "<option>value</option>"
-// [4][<selet>]          uu.val.get(node) -> selected option value
-// [5][<selet multiple>] uu.val.get(node) -> ["value", ...]
-// [6][<input checkbox>] uu.val.get(node) -> ["value", ...]
-// [7][<input radio>]    uu.val.get(node) -> "value"
-function uuvalget(node) { // @param Node:
-                          // @return Array/String:
-    var rv = [], v, i = -1, ary, multi = 0;
-
-    if (node.tagName.toLowerCase() === "select") {
-        i = node.selectedIndex;
-        multi = node.multiple;
-        if (i >= 0) {
-            while ( (v = node.options[++i]) ) {
-                v.selected && rv.push(v.value || v.text);
-                if (!multi) { break; }
-            }
-        }
-        rv = multi ? rv : (rv[0] || "");
-    } else if (node.type === "radio" || node.type === "checkbox") {
-        ary = node.name ? uuary(doc.getElementsByName(node.name)) : [node];
-        while ( (v = ary[++i]) ) {
-            v.checked && rv.push(v.value);
-        }
-        rv = (node.type !== "radio") ? rv : (rv[0] || "");
-    } else {
-        rv = node.value; // <textarea> <button> <option>
-    }
-    return rv;
-}
-
-// uu.val.set - set value
-// uu.val.set(node, value) -> node
-function uuvalset(node,  // @param Node:
-                  val) { // @param String/Array:
-                         // @return Node:
-    var v, i = -1, j, jz, prop, ary, vals = Array.isArray(val) ? val : [val];
-
-    if (node.tagName.toLowerCase() === "select") {
-        ary = node.options, prop = "selected";
-    } else if ({ checkbox: 1, radio: 1 }[node.type || ""]) {
-        ary = node.name ? uuary(doc.getElementsByName(node.name)) : [node];
-    }
-    if (ary) {
-        prop || (prop = "checked"); // prop is "selected" or "checked"
-        while ( (v = ary[++i]) ) {
-            v[prop] = false; // reset current state
-        }
-        i = -1, jz = vals.length;
-        while ( (v = ary[++i]) ) {
-            for (j = 0; j < jz; ++j) {
-                ((v.value || v.text) == vals[j]) && (v[prop] = true); // 0 [==] "0"
-            }
-        }
-    } else {
-        node.value = vals.join(""); // <textarea> <button> <option>
-    }
-    return node;
-}
-
 // --- node ---
 // uu.node - add node
 //
@@ -1936,29 +1791,6 @@ function uuquery(expr,  // @param String: "css > expr"
 }
 uuquery._ng = /(:(a|b|co|dig|first-l|li|mom|ne|p|sc|t|v))|!=|\/=|<=|>=|&=|x7b/; // NG word
 
-// [1][query all ui instance]  uu.query.ui("", ctx) -> { name, [instance, ...] }
-// [2][query some ui instance] uu.query.ui("slider", ctx) -> [instance, ...]
-function uuqueryui(widget, // @param String(= ""): widget name
-                   ctx) {  // @param String(= <body>): context
-                           // @param Array/Hash: [instance, ...]
-                           //                    { name, [instance, ...], ... }
-    var rv, ary = uuquery(":ui" + (widget || ""), ctx || doc.body),
-        v, i = 0, iz = ary.length;
-
-    if (widget) {
-        for (rv = []; i < iz; ++i) {
-            rv.push(ary[i].uuui.instance);
-        }
-    } else {
-        for (rv = {}; i < iz; ++i) {
-            v = ary[i];
-            rv[v.uuui.name] || (rv[v.uuui.name] = []);
-            rv[v.uuui.name].push(v.uuui.instance);
-        }
-    }
-    return rv;
-}
-
 // uu.id - query id
 function uuid(expr,  // @param String: id
               ctx) { // @param Node(= document): query context
@@ -2034,63 +1866,20 @@ function uufix(str) { // @param String:
 }
 uufix._db = {}; // fix db
 
-// uu.fmt - sprintf (PHP::sprintf like function)
-// uu.fmt("%s-%d", var_args, ...) -> "formatted string"
-function uufmt(format            // @param String: sprintf format string
-               /* var_args */) { // @param Mix: sprintf var_args
-                                 // @return String: "formatted string"
-    // http://d.hatena.ne.jp/uupaa/20091214
-    function _uufmtparse(m, argidx, flag, width, prec, size, types) {
-        if (types === "%") {
-            return types;
-        }
-        idx = argidx ? parseInt(argidx) : next++;
+// uu.fmt - placeholder( "?" ) replacement
+// uu.fmt("? dogs", [101]) -> "101 dogs"
+function uufmt(format, // @param String: formatted string with placeholder
+               ary) {  // @param Array: [Mix, ...]
+                       // @return String: "formatted string"
+    var i = -1;
 
-        var w = uufmt._bits[types], ovf, pad,
-            v = (av[idx] === void 0) ? "" : av[idx];
-
-        w & 3 && (v = w & 1 ? parseInt(v) : parseFloat(v), v = isNaN(v) ? "": v);
-        w & 4 && (v = ((types === "s" ? v : types) || "").toString());
-        w & 0x20  && (v = v >= 0 ? v : v % 0x100000000 + 0x100000000);
-        w & 0x300 && (v = v.toString(w & 0x100 ? 8 : 16));
-        w & 0x40  && flag === "#" && (v = (w & 0x100 ? "0" : "0x") + v);
-        w & 0x80  && prec && (v = w & 2 ? v.toFixed(prec) : v.slice(0, prec));
-        w & 0x400 && (v = _jsoninspect(v)); // "%j"
-        w & 0x6000 && (ovf = (typeof v !== "number" || v < 0));
-        w & 0x2000 && (v = ovf ? "" : String.fromCharCode(v));
-        w & 0x8000 && (flag = flag === "0" ? "" : flag);
-        v = w & 0x1000 ? v.toString().toUpperCase() : v.toString();
-        // padding
-        if (!(w & 0x800 || width === void 0 || v.length >= width)) {
-            pad = uurep((!flag || flag === "#") ? " " : flag, width - v.length);
-            v = ((w & 0x10 && flag === "0") && !v.indexOf("-")) ?
-                ("-" + pad + v.slice(1)) : (pad + v);
-        }
-        return v;
-    }
-    var next = 1, idx = 0, av = arguments;
-
-    return format.replace(uufmt._fmt, _uufmtparse);
-}
-uufmt._fmt = /%(?:(\d+)\$)?(#|0)?(\d+)?(?:\.(\d+))?(l)?([%iduoxXfcsj])/g;
-uufmt._bits = { i: 0x8011, d: 0x8011, u: 0x8021, o: 0x8161, x: 0x8261,
-                X: 0x9261, f: 0x92, c: 0x2800, s: 0x84, j: 0xC00 };
-
-// uu.puff - alert + uu.fmt + JSON.stringify
-// [1][json]   uu.puff(mix)
-// [2][format] uu.puff("%j...", mix, ...);
-function uupuff(format            // @param String: sprintf format string
-                /* var_args */) { // @param Mix: sprintf var_args
-                                  // @return String: formated string
-    alert((arguments.length === 1) ? uufmt("%j", format)
-                                   : uufmt.apply(this, arguments));
+    return format.replace(_PLACEH, function() { return ary[++i]; });
 }
 
-// uu.rep - repeat string
-function uurep(str, // @param String: "str"
-               n) { // @param Number(= 0): times
-                    // @return String: "strstrstr..."
-    return Array(n + 1).join(str);
+// uu.puff - alert + JSON.stringify
+function uupuff(mix) { // @param Mix: object
+                       // @return String: formated string
+    alert(_jsoninspect(mix));
 }
 
 // uu.esc - escape to HTML entity
@@ -2405,15 +2194,6 @@ function uuisfunc(mix) { // @param Mix: function(){}
 function uujs(expr) { // @param JavaScriptExpressionString:
                       // @return Mix: new Function(expr) result
     return (new Function(expr))();
-}
-
-// uu.ui - create instance
-function uuui(widget,      // @param Node/String: widget name
-              placeholder, // @param Node(= void 0): place holder node
-                           //                        void 0 is add body
-              option) {    // @param Hash(= {}): option
-                           // @return Instance:
-    return uuui[widget](placeholder, option);
 }
 
 // uu.win.size

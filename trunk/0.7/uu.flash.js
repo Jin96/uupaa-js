@@ -5,7 +5,6 @@ uu.agein || (function(win, doc, uu) {
 
 uu.mix(uu, {
     flash: uu.mix(uuflash, {        // uu.flash(id, url, width, height, option) -> new <object> element
-        dmz:        {},             // uu.flash.dmz - bridge
         send:       uuflashsend,    // uu.flash.send(guid, msg, param) -> Mix
         post:       uuflashpost,    // uu.flash.post(guid, msg, param)
         alert:      uuflashalert    // uu.flash.alert("msg", debug = 0)
@@ -41,16 +40,16 @@ function uuflash(replaceNode, // @param Node: replacement node
                                                              : "always" });
 
     for (i in opt) {
-        ary.push(uu.fmt('<param name="%s" value="%s" />', i, opt[i]));
+        ary.push(uu.fmt('<param name="?" value="?" />', [i, opt[i]]));
     }
     fg = uu.fmt('<object class="uuflashobject"' +
-                ' id="%s" %s="%s" data="%s" width="%d" height="%d">%s</object>',
-                      objectID,
-                          uu.ie ? "classid" : "type",
-                              uu.ie ? "clsid:d27cdb6e-ae6d-11cf-96b8-444553540000"
-                                    : "application/x-shockwave-flash",
-                                        url,       width,      height,
-                                                                   ary.join(""));
+                ' id="?" ?="?" data="?" width="?" height="?">?</object>',
+                     [objectID,
+                         uu.ie ? "classid" : "type",
+                            uu.ie ? "clsid:d27cdb6e-ae6d-11cf-96b8-444553540000"
+                                  : "application/x-shockwave-flash",
+                                     url,      width,     height,
+                                                             ary.join("")]);
     node = uu.node.bulk(fg);
     uu.node.swap(node, replaceNode);
     return uu.id(objectID);

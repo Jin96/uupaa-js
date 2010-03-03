@@ -94,7 +94,7 @@ package {
             fillImage   = new CanvasImage(this);
             strokeImage = new CanvasImage(this);
 
-            ExternalInterface.call("uu.flash.dmz." + ExternalInterface.objectID);
+            ExternalInterface.call("uu.dmz." + ExternalInterface.objectID);
         }
 
         private function onEnterFrame(evt:Event):void {

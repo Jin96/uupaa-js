@@ -104,7 +104,7 @@ class FlashStorage {
         fn("flashstorageclear", obj, obj.jsclear);
         fn("flashstorageremove", obj, obj.jsremove);
 
-        ExternalInterface.call("uu.flash.dmz.storageReadyCallback", "from flash");
+        ExternalInterface.call("uu.dmz.storageReadyCallback", "from flash");
     }
 };
 
