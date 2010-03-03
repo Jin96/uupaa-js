@@ -83,7 +83,7 @@ uu = uumix(uujamfactory, {          // uu(expr, ctx) -> Instance(jam)
     ver:      uumix(_ver, {         // uu.ver - version and plugin detection
         lib:        0.7             // uu.ver.lib    - Number: Library version
     }),                             // uu.ver.ua     - Number: User Agent version
-                                    // uu.ver.re     - Number: Rendering Engine version
+                                    // uu.ver.render - Number: Rendering Engine version
                                     //                 (Firefox2: 1.81, Firefox3: 1.9, Firefox3.5: 1.91,
                                     //                  Safari3.1: 525, Safari4: 528)
                                     // uu.ver.sl     - Number: Silverlight version(3 later)
@@ -2561,8 +2561,9 @@ function _matcher(ary) {
 
 // inner - collect versions and meta informations
 function _vers(slupper) { // @param Number(= 4): Silverlight upper version
-                          // @return Hash: { ua, re, sl, flash, ie, ie6, ie7, ie8,
-                          //    ie67, opera, webkit, chrome, safari, iphone,
+                          // @return Hash: { ua, render, sl, flash,
+                          //    ie, ie6, ie7, ie8, ie67,
+                          //    opera, webkit, chrome, safari, iphone,
                           //    quirks, xml, win, mac, unix, adv, major }
     // http://d.hatena.ne.jp/uupaa/20090603
     var sl = slupper || 4, ax, v, i = -1,
@@ -2571,16 +2572,16 @@ function _vers(slupper) { // @param Number(= 4): Silverlight upper version
         ua = opera ? +(opera.version().replace(/\d$/, ""))
                    : parseFloat((/(?:IE |fox\/|ome\/|ion\/)(\d+\.\d)/.
                                 exec(nu) || [,0])[1]),
-        re = parseFloat(((/(?:rv\:|ari\/|sto\/)(\d+\.\d+(\.\d+)?)/.
-                exec(nu) || [,0])[1]).toString().replace(/[^\d\.]/g, "").
-                replace(/^(\d+\.\d+)(\.(\d+))?$/,"$1$3")),
+        render = parseFloat(((/(?:rv\:|ari\/|sto\/)(\d+\.\d+(\.\d+)?)/.
+                 exec(nu) || [,0])[1]).toString().replace(/[^\d\.]/g, "").
+                 replace(/^(\d+\.\d+)(\.(\d+))?$/,"$1$3")),
         gecko = nu.indexOf("Gecko/") > 0,
         webkit = nu.indexOf("WebKit") > 0,
         chrome = nu.indexOf("Chrome") > 0,
         html = doc.getElementsByTagName("html")[0],
         ary = [html.className.replace(/ifnojs|addua|addos/g, ""), "ifjs"],
         id = "adv,major", cn = html.className,
-        rv = { ua: ua, re: re, sl: 0, flash: 0,
+        rv = { ua: ua, render: render, sl: 0, flash: 0,
                ie: ie, ie6: ie && ua === 6, ie7: ie && ua === 7,
                ie8: ie && (doc.documentMode || 0) === 8,
                opera: !!opera, gecko: gecko,
@@ -2618,14 +2619,14 @@ function _vers(slupper) { // @param Number(= 4): Silverlight upper version
     rv.ie67  = rv.ie6 || rv.ie7;
     rv.ie678 = rv.ie6 || rv.ie7 || rv.ie8;
     rv.jit   =
-    rv.adv   = (ie     && ua >= 9)   || // IE 9+
-               (gecko  && re >  1.9) || // Firefox 3.5+(1.91)
-               (webkit && re >= 528) || // Safari 4+, Google Chrome 2+
-               (opera  && ua >= 10.5);  // Opera10.50+
-    rv.major = (ie     && ua >= 6)   || // IE 6+
-               (opera  && ua >= 9.5) || // Opera 9.5+
-               (gecko  && re >= 1.9) || // Firefox 3+
-               (webkit && re >  524);   // Safari 3.1+, Google Chrome 1+
+    rv.adv   = (ie     && ua     >= 9)   || // IE 9+
+               (gecko  && render >  1.9) || // Firefox 3.5+(1.91)
+               (webkit && render >= 528) || // Safari 4+, Google Chrome 2+
+               (opera  && ua     >= 10.5);  // Opera10.50+
+    rv.major = (ie     && ua     >= 6)   || // IE 6+
+               (opera  && ua     >= 9.5) || // Opera 9.5+
+               (gecko  && render >= 1.9) || // Firefox 3+
+               (webkit && render >  524);   // Safari 3.1+, Google Chrome 1+
 
     // --- conditional selector ---
     // http://d.hatena.ne.jp/uupaa/20100101
