@@ -612,6 +612,14 @@ package {
             var filterRect:Rectangle; // filter rect
             var matrix:Matrix = new Matrix();
 
+            // http://twitter.com/uupaa/status/9934417220
+            var copyOffsetX:Number = (shadowOffsetX < 0 ? -shadowOffsetX : 0) + 20;
+            var copyOffsetY:Number = (shadowOffsetY < 0 ? -shadowOffsetY : 0) + 20;
+
+            if (!_shadow) {
+                copyOffsetX = copyOffsetY = 0;
+            }
+
             if (args > 5) { // args 9 version
                 sx = param[0];
                 sy = param[1];
@@ -622,12 +630,22 @@ package {
                 dw = param[6];
                 dh = param[7];
 
+                dx += copyOffsetX;
+                dy += copyOffsetY;
+
+                // TODO: Shadow Offset
+
                 bmp = new BitmapData(sw, sh, true, 0);
                 bmp.copyPixels(bitmapData,
                                new Rectangle(sx, sy, sw, sh),
-                               new Point(0, 0));
+                               new Point());
             } else { // args 2 or 4 version
-                bmp = bitmapData;
+                bmp = new BitmapData(copyOffsetX + bitmapData.width,
+                                     copyOffsetY + bitmapData.height, true, 0);
+                bmp.copyPixels(bitmapData,
+                               bmp.rect,
+                               new Point(copyOffsetX, copyOffsetY));
+
                 dx = param[0];
                 dy = param[1];
                 dw = param[2] || bmp.width;
@@ -649,6 +667,10 @@ package {
             matrix.scale(dw / bmp.width, dh / bmp.height);
             matrix.translate(dx, dy);
             matrix.concat(_matrix);
+
+            // http://twitter.com/uupaa/status/9934417220
+            matrix.tx -= copyOffsetX;
+            matrix.ty -= copyOffsetY;
 
             mixin(_buff, _shadow ? filterBmp : bmp, matrix);
 
@@ -805,6 +827,11 @@ package {
             var filterRect:Rectangle; // filter rect
             var matrix:Matrix = new Matrix(1, 0, 0, 1, x, y);
 
+            // http://twitter.com/uupaa/status/9934417220
+            var copyOffsetX:Number = (shadowOffsetX < 0 ? -shadowOffsetX : 0) + 20;
+            var copyOffsetY:Number = (shadowOffsetY < 0 ? -shadowOffsetY : 0) + 20;
+            var copyOffsetMatrix:Matrix = new Matrix(1, 0, 0, 1, copyOffsetX, copyOffsetY);
+
             textFormat.color = color;
             textFormat.size = font[0]; // font-size
             textFormat.font = font[4].replace(/^'+|'+$/g, ""); // "'Arial'" -> "Arial"
@@ -823,8 +850,10 @@ package {
             case "end":     matrix.tx -= _rtl ? 2 : textField.width - 3; break; // [FIX] -3
             }
 
-            bmp = new BitmapData(textField.width, textField.height, true, 0);
-            bmp.draw(textField);
+            // http://twitter.com/uupaa/status/9934417220
+            bmp = new BitmapData(copyOffsetX + textField.width,
+                                 copyOffsetY + textField.height, true, 0);
+            bmp.draw(textField, copyOffsetMatrix);
 
             // apply shadow
             if (_shadow) {
@@ -839,6 +868,10 @@ package {
 
             // apply matrix
             matrix.concat(_matrix);
+
+            // http://twitter.com/uupaa/status/9934417220
+            matrix.tx -= copyOffsetX;
+            matrix.ty -= copyOffsetY;
 
             mixin(_buff, _shadow ? filterBmp : bmp, matrix);
 
