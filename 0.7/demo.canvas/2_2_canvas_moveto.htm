@@ -17,26 +17,46 @@ function matrix() {
     drawShape(document.getElementById('vmlcanvas'), 1);
     drawShape(document.getElementById('flashcanvas'), 1);
 }
-function drawShape(canvas, matrix){
-    if (canvas.getContext){
-        var ctx = canvas.getContext('2d');
 
-        if (matrix) {
-            ctx.clear();
-            ctx.translate(-10, 5);
-            ctx.scale(1.2, 0.8);
-            ctx.rotate(5 * Math.PI / 180);
-        }
-        ctx.beginPath();
-        ctx.arc(75,75,50,0,Math.PI*2,true); // Outer circle
-        ctx.moveTo(110,75);
-        ctx.arc(75,75,35,0,Math.PI,false);   // Mouth
-        ctx.moveTo(65,65);
-        ctx.arc(60,65,5,0,Math.PI*2,true);  // Left eye
-        ctx.moveTo(95,65);
-        ctx.arc(90,65,5,0,Math.PI*2,true);  // Right eye
-        ctx.stroke();
+var globalAlpha = 1.0
+function switchAlpha() {
+    globalAlpha -= 0.2;
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+}
+
+var lineWidth = 1.0
+function switchLineWidth() {
+    lineWidth += 2;
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+}
+
+function drawShape(canvas, matrix){
+    if (!canvas.getContext){ return; }
+
+    var ctx = canvas.getContext('2d');
+
+    ctx.clear();
+    if (matrix) {
+        ctx.translate(-10, 5);
+        ctx.scale(1.2, 0.8);
+        ctx.rotate(5 * Math.PI / 180);
     }
+    ctx.globalAlpha = globalAlpha;
+    ctx.lineWidth = lineWidth;
+
+    ctx.beginPath();
+    ctx.arc(75,75,50,0,Math.PI*2,true); // Outer circle
+    ctx.moveTo(110,75);
+    ctx.arc(75,75,35,0,Math.PI,false);   // Mouth
+    ctx.moveTo(65,65);
+    ctx.arc(60,65,5,0,Math.PI*2,true);  // Left eye
+    ctx.moveTo(95,65);
+    ctx.arc(90,65,5,0,Math.PI*2,true);  // Right eye
+    ctx.stroke();
 }
 </script>
     <style type="text/css">
@@ -51,6 +71,8 @@ function drawShape(canvas, matrix){
     <h1>A canvas <code>moveto</code> example</h1>
     <div>
       <input type="button" value="matrix effect" onclick="matrix()" />
+      <input type="button" value="alpha -0.2" onclick="switchAlpha()" />
+      <input type="button" value="lineWidth +2" onclick="switchLineWidth()" />
       <br />
       <canvas id="slcanvas" class="sl" width="150" height="150"></canvas>
       <canvas id="vmlcanvas" class="vml" width="150" height="150"></canvas>
@@ -66,26 +88,46 @@ function matrix() {
     drawShape(document.getElementById('vmlcanvas'), 1);
     drawShape(document.getElementById('flashcanvas'), 1);
 }
-function drawShape(canvas, matrix){
-    if (canvas.getContext){
-        var ctx = canvas.getContext('2d');
 
-        if (matrix) {
-            ctx.clear();
-            ctx.translate(-10, 5);
-            ctx.scale(1.2, 0.8);
-            ctx.rotate(5 * Math.PI / 180);
-        }
-        ctx.beginPath();
-        ctx.arc(75,75,50,0,Math.PI*2,true); // Outer circle
-        ctx.moveTo(110,75);
-        ctx.arc(75,75,35,0,Math.PI,false);   // Mouth
-        ctx.moveTo(65,65);
-        ctx.arc(60,65,5,0,Math.PI*2,true);  // Left eye
-        ctx.moveTo(95,65);
-        ctx.arc(90,65,5,0,Math.PI*2,true);  // Right eye
-        ctx.stroke();
+var globalAlpha = 1.0
+function switchAlpha() {
+    globalAlpha -= 0.2;
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+}
+
+var lineWidth = 1.0
+function switchLineWidth() {
+    lineWidth += 2;
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+}
+
+function drawShape(canvas, matrix){
+    if (!canvas.getContext){ return; }
+
+    var ctx = canvas.getContext('2d');
+
+    ctx.clear();
+    if (matrix) {
+        ctx.translate(-10, 5);
+        ctx.scale(1.2, 0.8);
+        ctx.rotate(5 * Math.PI / 180);
     }
+    ctx.globalAlpha = globalAlpha;
+    ctx.lineWidth = lineWidth;
+
+    ctx.beginPath();
+    ctx.arc(75,75,50,0,Math.PI*2,true); // Outer circle
+    ctx.moveTo(110,75);
+    ctx.arc(75,75,35,0,Math.PI,false);   // Mouth
+    ctx.moveTo(65,65);
+    ctx.arc(60,65,5,0,Math.PI*2,true);  // Left eye
+    ctx.moveTo(95,65);
+    ctx.arc(90,65,5,0,Math.PI*2,true);  // Right eye
+    ctx.stroke();
 }
 </pre>
     </div>

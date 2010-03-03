@@ -1,6 +1,8 @@
 build/header.txt
 
 uu.js
+uu.jam.js
+uu.ajax.js
 uu.str.js
 uu.node.js
 uu.ev.js
@@ -16,10 +18,12 @@ uu.query.js
 // canvas
 uu.img.js
 uu.font.js
+uu.flash.js
 uu.matrix2d.js
 uu.canvas.js
 uu.canvas.sl.js
 uu.canvas.vml.js
+uu.canvas.flash.js
 uu.canvas.extend.js
 uu.layer.js
 // css3
@@ -32,7 +36,7 @@ uu.codec.js
 uu.test.js
 
 // plugin
-//plug/ui/uup.ui.tab.js
-//plug/ui/uup.ui.slider.js
+//plug/ui/uu.plugin.ui.tab.js
+//plug/ui/uu.plugin.ui.slider.js
 
 build/footer.txt

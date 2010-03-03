@@ -22,9 +22,9 @@ function switchAlpha() {
     drawShape(document.getElementById('vmlcanvas'));
     drawShape(document.getElementById('flashcanvas'));
 }
-var shadowBlur = 3;
+var shadowBlur = 2;
 function switchBlur() {
-    shadowBlur += 3;
+    shadowBlur += 2;
     drawShape(document.getElementById('slcanvas'));
     drawShape(document.getElementById('vmlcanvas'));
     drawShape(document.getElementById('flashcanvas'));
@@ -41,7 +41,7 @@ function drawShape(canvas, matrix){
         ctx.scale(1.2, 0.8);
         ctx.rotate(5 * Math.PI / 180);
     }
-    ctx.shadowBlur = shadowBlur;
+    ctx.shadowBlur = shadowBlur + 4;
     ctx.shadowOffsetX = 10;
     ctx.shadowOffsetY = 10;
     ctx.shadowColor = "gray";
@@ -118,7 +118,7 @@ function drawShape(canvas, matrix){
     <div>
       <input type="button" value="matrix effect" onclick="matrix()" />
       <input type="button" value="alpha -0.2" onclick="switchAlpha()" />
-      <input type="button" value="blur +3" onclick="switchBlur()" />
+      <input type="button" value="blur +2" onclick="switchBlur()" />
       <br />
       <canvas id="slcanvas" class="sl" width="300" height="300"></canvas>
       <canvas id="vmlcanvas" class="vml" width="300" height="300"></canvas>

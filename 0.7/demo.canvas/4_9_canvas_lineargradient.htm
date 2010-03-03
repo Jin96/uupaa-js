@@ -26,6 +26,14 @@ function switchAlpha() {
     drawShape(document.getElementById('flashcanvas'));
 }
 
+var lineWidth = 1.0
+function switchLineWidth() {
+    lineWidth += 2;
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+}
+
 function drawShape(canvas, matrix){
     if (!canvas.getContext){ return; }
 
@@ -38,6 +46,7 @@ function drawShape(canvas, matrix){
         ctx.rotate(5 * Math.PI / 180);
     }
     ctx.globalAlpha = globalAlpha;
+    ctx.lineWidth = lineWidth;
 
     // Create gradients
     var lingrad = ctx.createLinearGradient(0,0,0,150);
@@ -71,6 +80,7 @@ function drawShape(canvas, matrix){
     <div>
       <input type="button" value="matrix effect" onclick="matrix()" />
       <input type="button" value="alpha -0.2" onclick="switchAlpha()" />
+      <input type="button" value="lineWidth +2" onclick="switchLineWidth()" />
 
       <br />
       <canvas id="slcanvas" class="sl" width="150" height="150"></canvas>
@@ -96,7 +106,15 @@ function switchAlpha() {
     drawShape(document.getElementById('flashcanvas'));
 }
 
-function draw(canvas, matrix){
+var lineWidth = 1.0
+function switchLineWidth() {
+    lineWidth += 2;
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+}
+
+function drawShape(canvas, matrix){
     if (!canvas.getContext){ return; }
 
     var ctx = canvas.getContext('2d');
@@ -108,6 +126,7 @@ function draw(canvas, matrix){
         ctx.rotate(5 * Math.PI / 180);
     }
     ctx.globalAlpha = globalAlpha;
+    ctx.lineWidth = lineWidth;
 
     // Create gradients
     var lingrad = ctx.createLinearGradient(0,0,0,150);

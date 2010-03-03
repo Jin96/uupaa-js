@@ -14,6 +14,7 @@ package {
         public function CanvasGradient() {
         }
 
+/*
         // get alphas x globalAlpha
         public function mixedAlpha(globalAlpha:Number):Array {
             var i:int = 0;
@@ -25,6 +26,7 @@ package {
             }
             return rv;
         }
+ */
 
         public function setLiner(ary:Array, i:int):int {
             var x0:Number = +ary[++i];

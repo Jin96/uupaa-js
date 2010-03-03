@@ -613,7 +613,7 @@ function send(fg) { // @param String: fragment, "{COMMAND}\t{ARG1}\t..."
         if (this._readyState === 2) {
             var ctx = this;
 
-            // <param name="flashVars" param="t={time}&c={cmd}" />
+            // <param name="flashVars" param="i={msgid}&c={cmd}" />
             if (!ctx._tmid) {
                 ctx._tmid = setTimeout(function() {
                     if (ctx._tmid && ctx._stock.length) {

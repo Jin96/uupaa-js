@@ -143,10 +143,10 @@ function boost() {
 }
 
 function switchStress() {
-    if (stress === 20) {
-        restart = 1000;
-    } else {
-        restart = 20;
+    switch (stress) {
+    case  20: restart = 100; break;
+    case 100: restart = 300; break;
+    case 300: restart =  20;
     }
 }
 
@@ -174,7 +174,7 @@ function xboot(uu) {
     <h1 id="detected" style="color:white"></h1>
     <input type="button" value="boost on/off" onclick="boost()" />
     <input type="button" value="sl/flash/vml" onclick="switchBackend()" />
-    <input type="button" value="stress on/off" onclick="switchStress()" />
+    <input type="button" value="particles 20/100/300" onclick="switchStress()" />
     <br />
     <canvas id="canvas" width="400" height="300"></canvas>
 </body>

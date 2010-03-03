@@ -15,45 +15,81 @@ function matrix() {
     drawShape(document.getElementById('vmlcanvas'), 1);
     drawShape(document.getElementById('flashcanvas'), 1);
 }
+
+var globalAlpha = 1.0
+function switchAlpha() {
+    globalAlpha -= 0.2;
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+}
+
+var lineWidth = 1.0
+function switchLineWidth() {
+    lineWidth += 2;
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+}
+
+var fontSize = 16;
+function switchFontSize() {
+    fontSize += 2;
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+}
+
+var shadowBlur = 0;
+function switchShadowBlur() {
+    shadowBlur += 2;
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+}
+
 function drawShape(canvas, matrix){
     if (!canvas.getContext){ return; }
 
     var ctx = canvas.getContext('2d');
 
+    ctx.clear();
     if (matrix) {
-        ctx.clear();
         ctx.translate(-10, 5);
         ctx.scale(1.2, 0.8);
         ctx.rotate(5 * Math.PI / 180);
     }
+    ctx.globalAlpha = globalAlpha;
+    ctx.lineWidth = lineWidth;
+
     ctx.textBaseline = "top";
-    ctx.font = "16pt Arial";
+    ctx.font = fontSize + "pt Arial";
     ctx.shadowColor = "red";
     ctx.shadowOffsetX = 10;
     ctx.shadowOffsetY = 10;
-    ctx.shadowBlur = 10;
+    ctx.shadowBlur = shadowBlur + 10;
     ctx.fillText("red shadow", 80, 20);
 
     ctx.save();
     ctx.textAlign = "center";
-    ctx.font = "20pt 'Arial Black'";
+    ctx.font = (fontSize + 4) + "pt 'Arial Black'";
     ctx.fillStyle = "#09F";
     ctx.shadowColor = "green";
     ctx.shadowOffsetX = 5;
     ctx.shadowOffsetY = 5;
-    ctx.shadowBlur = 5;
+    ctx.shadowBlur = shadowBlur + 5;
     ctx.fillText("green shadow", 120, 60);
 
     ctx.save();
     ctx.textAlign = "end";
-    ctx.font = "24pt 'Times New Roman'";
-    ctx.globalAlpha = 0.5;
+    ctx.font = (fontSize + 8) + "pt 'Times New Roman'";
+    ctx.globalAlpha = globalAlpha - 0.5;
     ctx.globalCompositeOperation = "source-out";
     ctx.fillStyle = "#eee";
     ctx.shadowColor = "blue";
     ctx.shadowOffsetX = 3;
     ctx.shadowOffsetY = -1;
-    ctx.shadowBlur =  0;
+    ctx.shadowBlur = shadowBlur + 0;
     ctx.fillText("blue shadow", 220, 100);
     ctx.restore();
 
@@ -74,6 +110,10 @@ function drawShape(canvas, matrix){
     <h1>A <code>save</code> and <code>restore</code> canvas state example</h1>
     <div>
       <input type="button" value="matrix effect" onclick="matrix()" />
+      <input type="button" value="alpha -0.2" onclick="switchAlpha()" />
+      <input type="button" value="lineWidth +2" onclick="switchLineWidth()" />
+      <input type="button" value="fontSize +2" onclick="switchFontSize()" />
+      <input type="button" value="shadowBlur +2" onclick="switchShadowBlur()" />
       <br />
       <canvas id="slcanvas" class="sl" width="300" height="300"></canvas>
       <canvas id="vmlcanvas" class="vml" width="300" height="300"></canvas>
@@ -93,45 +133,81 @@ function matrix() {
     drawShape(document.getElementById('vmlcanvas'), 1);
     drawShape(document.getElementById('flashcanvas'), 1);
 }
+
+var globalAlpha = 1.0
+function switchAlpha() {
+    globalAlpha -= 0.2;
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+}
+
+var lineWidth = 1.0
+function switchLineWidth() {
+    lineWidth += 2;
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+}
+
+var fontSize = 16;
+function switchFontSize() {
+    fontSize += 2;
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+}
+
+var shadowBlur = 0;
+function switchShadowBlur() {
+    shadowBlur += 2;
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+}
+
 function drawShape(canvas, matrix){
     if (!canvas.getContext){ return; }
 
     var ctx = canvas.getContext('2d');
 
+    ctx.clear();
     if (matrix) {
-        ctx.clear();
         ctx.translate(-10, 5);
         ctx.scale(1.2, 0.8);
         ctx.rotate(5 * Math.PI / 180);
     }
+    ctx.globalAlpha = globalAlpha;
+    ctx.lineWidth = lineWidth;
+
     ctx.textBaseline = "top";
-    ctx.font = "16pt Arial";
+    ctx.font = fontSize + "pt Arial";
     ctx.shadowColor = "red";
     ctx.shadowOffsetX = 10;
     ctx.shadowOffsetY = 10;
-    ctx.shadowBlur = 10;
+    ctx.shadowBlur = shadowBlur + 10;
     ctx.fillText("red shadow", 80, 20);
 
     ctx.save();
     ctx.textAlign = "center";
-    ctx.font = "20pt 'Arial Black'";
+    ctx.font = (fontSize + 4) + "pt 'Arial Black'";
     ctx.fillStyle = "#09F";
     ctx.shadowColor = "green";
     ctx.shadowOffsetX = 5;
     ctx.shadowOffsetY = 5;
-    ctx.shadowBlur = 5;
+    ctx.shadowBlur = shadowBlur + 5;
     ctx.fillText("green shadow", 120, 60);
 
     ctx.save();
     ctx.textAlign = "end";
-    ctx.font = "24pt 'Times New Roman'";
-    ctx.globalAlpha = 0.5;
+    ctx.font = (fontSize + 8) + "pt 'Times New Roman'";
+    ctx.globalAlpha = globalAlpha - 0.5;
     ctx.globalCompositeOperation = "source-out";
     ctx.fillStyle = "#eee";
     ctx.shadowColor = "blue";
     ctx.shadowOffsetX = 3;
     ctx.shadowOffsetY = -1;
-    ctx.shadowBlur =  0;
+    ctx.shadowBlur = shadowBlur + 0;
     ctx.fillText("blue shadow", 220, 100);
     ctx.restore();
 

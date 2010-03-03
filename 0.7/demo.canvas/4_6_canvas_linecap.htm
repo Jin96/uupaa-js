@@ -17,36 +17,56 @@ function matrix() {
     drawShape(document.getElementById('vmlcanvas'), 1);
     drawShape(document.getElementById('flashcanvas'), 1);
 }
+
+var globalAlpha = 1.0
+function switchAlpha() {
+    globalAlpha -= 0.2;
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+}
+
+var lineWidth = 1.0
+function switchLineWidth() {
+    lineWidth += 2;
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+}
+
 function drawShape(canvas, matrix){
     if (!canvas.getContext){ return; }
 
     var ctx = canvas.getContext('2d');
 
+    ctx.clear();
     if (matrix) {
-        ctx.clear();
         ctx.translate(-10, 5);
         ctx.scale(1.2, 0.8);
         ctx.rotate(5 * Math.PI / 180);
     }
+    ctx.globalAlpha = globalAlpha;
+    ctx.lineWidth = lineWidth;
+
     var lineCap = ['butt','round','square'];
 
     // Draw guides
     ctx.strokeStyle = '#09f';
     ctx.beginPath();
-    ctx.moveTo(10,10);
-    ctx.lineTo(140,10);
-    ctx.moveTo(10,140);
-    ctx.lineTo(140,140);
+    ctx.moveTo(10,20);
+    ctx.lineTo(140,20);
+    ctx.moveTo(10,130);
+    ctx.lineTo(140,130);
     ctx.stroke();
 
     // Draw lines
     ctx.strokeStyle = 'black';
+    ctx.lineWidth += 15;
     for (var i=0;i<lineCap.length;i++){
-        ctx.lineWidth = 15;
         ctx.lineCap = lineCap[i];
         ctx.beginPath();
-        ctx.moveTo(25+i*50,10);
-        ctx.lineTo(25+i*50,140);
+        ctx.moveTo(25+i*50,20);
+        ctx.lineTo(25+i*50,130);
         ctx.stroke();
     }
 }
@@ -62,6 +82,8 @@ function drawShape(canvas, matrix){
     <h1>A canvas <code>lineCap</code> example</h1>
     <div>
       <input type="button" value="matrix effect" onclick="matrix()" />
+      <input type="button" value="alpha -0.2" onclick="switchAlpha()" />
+      <input type="button" value="lineWidth +2" onclick="switchLineWidth()" />
       <br />
       <canvas id="slcanvas" class="sl" width="150" height="150"></canvas>
       <canvas id="vmlcanvas" class="vml" width="150" height="150"></canvas>
@@ -77,36 +99,56 @@ function matrix() {
     drawShape(document.getElementById('vmlcanvas'), 1);
     drawShape(document.getElementById('flashcanvas'), 1);
 }
+
+var globalAlpha = 1.0
+function switchAlpha() {
+    globalAlpha -= 0.2;
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+}
+
+var lineWidth = 1.0
+function switchLineWidth() {
+    lineWidth += 2;
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+}
+
 function drawShape(canvas, matrix){
     if (!canvas.getContext){ return; }
 
     var ctx = canvas.getContext('2d');
 
+    ctx.clear();
     if (matrix) {
-        ctx.clear();
         ctx.translate(-10, 5);
         ctx.scale(1.2, 0.8);
         ctx.rotate(5 * Math.PI / 180);
     }
+    ctx.globalAlpha = globalAlpha;
+    ctx.lineWidth = lineWidth;
+
     var lineCap = ['butt','round','square'];
 
     // Draw guides
     ctx.strokeStyle = '#09f';
     ctx.beginPath();
-    ctx.moveTo(10,10);
-    ctx.lineTo(140,10);
-    ctx.moveTo(10,140);
-    ctx.lineTo(140,140);
+    ctx.moveTo(10,20);
+    ctx.lineTo(140,20);
+    ctx.moveTo(10,130);
+    ctx.lineTo(140,130);
     ctx.stroke();
 
     // Draw lines
     ctx.strokeStyle = 'black';
+    ctx.lineWidth += 15;
     for (var i=0;i<lineCap.length;i++){
-        ctx.lineWidth = 15;
         ctx.lineCap = lineCap[i];
         ctx.beginPath();
-        ctx.moveTo(25+i*50,10);
-        ctx.lineTo(25+i*50,140);
+        ctx.moveTo(25+i*50,20);
+        ctx.lineTo(25+i*50,130);
         ctx.stroke();
     }
 }
