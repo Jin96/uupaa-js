@@ -1,6 +1,7 @@
 
 // === Tween ===
 // depend: uu.js, uu.color.js, uu.css.js(uu.css.opacity)
+//         uu.str.js(uu.sprintf)
 
 uu.agein || (function(win, doc, uu) {
 
@@ -75,9 +76,9 @@ function uutweenrunning(node) { // @param Node:
 // inner - build javascript function
 function _twjs(node, param) {
     function _build(n, word, v0, v1, ez) {
-        return uu.fmt(_twjs._FMT[n], word, v1,
-                      ez ? uu.fmt("Math.%s(gain,%f,%f,ms)", ez, v0, v1 - v0)
-                         : uu.fmt(_twjs._IOQUAD, v0, v1 - v0));
+        return uu.sprintf(_twjs._FMT[n], word, v1,
+                          ez ? uu.sprintf("Math.%s(gain,%f,%f,ms)", ez, v0, v1 - v0)
+                             : uu.sprintf(_twjs._IOQUAD, v0, v1 - v0));
     }
     function _toabs(curt, end, fn, ope) {
         if (typeof end === "number") {
@@ -107,7 +108,7 @@ function _twjs(node, param) {
             case 2: // color
                 v0 = uu.color(cs[w]);
                 v1 = uu.color(v1);
-                rv += uu.fmt(_twjs._FMT[n], w, v0.r, v0.g, v0.b, v1.r, v1.g, v1.b);
+                rv += uu.sprintf(_twjs._FMT[n], w, v0.r, v0.g, v0.b, v1.r, v1.g, v1.b);
                 break;
             case 3:
                 v0 = (w === "top") ? node.offsetTop : node.offsetLeft;

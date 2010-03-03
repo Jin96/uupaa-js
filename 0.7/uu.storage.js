@@ -460,12 +460,12 @@ function _iesaveindex(ary) {
 //}}}!mb
 
 //{{{!mb --- Flash Storage ---
-uu.flash.dmz.storageReadyCallback = flashStorageReadyCallback;
+uu.dmz.storageReadyCallback = flashStorageReadyCallback;
 
-// uu.flash.dmz.storageReadyCallback - callback from FlashStorage
+// uu.dmz.storageReadyCallback - callback from FlashStorage
 function flashStorageReadyCallback(/* msg */) {
     _dbwait = 0;
-    uu.flash.dmz.storageReadyCallback = uunop;
+    uu.dmz.storageReadyCallback = uunop;
     setTimeout(WebStorageReady, 0);
 }
 function _flashall() {

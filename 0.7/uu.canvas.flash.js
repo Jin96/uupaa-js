@@ -84,7 +84,7 @@ function build(node) { // @param Node: <canvas>
     var id = "externalcanvas" + uu.guid();
 
     // wait for response from flash
-    uu.flash.dmz[id] = flashCanvasReadyCallback;
+    uu.dmz[id] = flashCanvasReadyCallback;
 
     function flashCanvasReadyCallback() {
         var ctx = node.uuctx2d;
@@ -95,19 +95,19 @@ function build(node) { // @param Node: <canvas>
         }
         ctx.sendState(0xf);
         ctx.send();
-        uu.flash.dmz[id] = null; // free
+        uu.dmz[id] = null; // free
     }
 
     // create swf <object>
     node.innerHTML = uu.fmt(
-        '<object id="%s" width="%s" height="%s" classid="%s">' +
+        '<object id="?" width="?" height="?" classid="?">' +
             '<param name="allowScriptAccess" value="always" />' +
             '<param name="flashVars" value="" />' +
             '<param name="wmode" value="transparent" />' +
-            '<param name="movie" value="%s" /></object>',
-        id, node.width, node.height,
-        "clsid:d27cdb6e-ae6d-11cf-96b8-444553540000",
-        uu.config.dir + "uu.canvas.swf");
+            '<param name="movie" value="?" /></object>',
+        [id, node.width, node.height,
+         "clsid:d27cdb6e-ae6d-11cf-96b8-444553540000",
+         uu.config.dir + "uu.canvas.swf"]);
 
     node.uuctx2d._view = uu.id(id); // find swf <object>
 

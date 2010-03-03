@@ -11,8 +11,7 @@
 //  </canvas>
 
 uu.agein || (function(win, doc, uu) {
-var _QQ     = /\?/g, // place holder
-    _COMPOS = { "source-over": 0, "destination-over": 4, copy: 10 },
+var _COMPOS = { "source-over": 0, "destination-over": 4, copy: 10 },
     _FIXED4 = /\.(\d{4})(?:[\d]+)/g, // toFixed(4)
     _TO_DEGREES = 180 / Math.PI, // Math.toDegrees - from java.math
     _FONT_STYLES = { normal: "Normal", italic: "Italic", oblique: "Italic" },
@@ -418,7 +417,7 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
             shadow = renderShadow ? _blur(this, "Image", this.__shadowColor) : "";
             matrix = _matrix("Image", uu.m2d.translate(dx, dy, this._matrix));
 
-            fg = _build('<Canvas Canvas.ZIndex="?"><Image Opacity="?" Source="?">??</Image></Canvas>',
+            fg = uu.fmt('<Canvas Canvas.ZIndex="?"><Image Opacity="?" Source="?">??</Image></Canvas>',
                         [zindex, this.globalAlpha, image.src, matrix, shadow]);
             break;
         case 5:
@@ -441,7 +440,7 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
             shadow = renderShadow ? _blur(this, "Image", this.__shadowColor) : "";
             matrix = _matrix("Image", uu.m2d.translate(dx, dy, this._matrix));
 
-            fg = _build('<Canvas Canvas.ZIndex="?"><Image Opacity="?" Source="?" Width="?" Height="?" Stretch="Fill">??</Image></Canvas>',
+            fg = uu.fmt('<Canvas Canvas.ZIndex="?"><Image Opacity="?" Source="?" Width="?" Height="?" Stretch="Fill">??</Image></Canvas>',
                         [zindex, this.globalAlpha, image.src, dw, dh, matrix, shadow]);
             break;
         case 9:
@@ -476,7 +475,7 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
             shadow = renderShadow ? _blur(this, "Canvas", this.__shadowColor) : "";
             matrix = _matrix("Canvas", uu.m2d.translate(x, y, this._matrix));
 
-            fg = _build('<Canvas Canvas.ZIndex="?"><Canvas><Image Opacity="?" Source="?" Width="?" Height="?" Stretch="Fill"><Image.Clip><RectangleGeometry Rect="?" /></Image.Clip></Image></Canvas>??</Canvas>',
+            fg = uu.fmt('<Canvas Canvas.ZIndex="?"><Canvas><Image Opacity="?" Source="?" Width="?" Height="?" Stretch="Fill"><Image.Clip><RectangleGeometry Rect="?" /></Image.Clip></Image></Canvas>??</Canvas>',
                         [zindex, this.globalAlpha, image.src, w, h, [dx - x, dy - y, dw, dh].join(" "), matrix, shadow]);
         }
     } else { // HTMLCanvasElement
@@ -507,7 +506,7 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
             shadow = renderShadow ? _blur(this, "Canvas", this.__shadowColor) : "";
             matrix = _matrix("Canvas", az === 3 ? m : uu.m2d.scale(dw / dim.w, dh / dim.h, m));
 
-            fg = _build('<Canvas Canvas.ZIndex="?" Opacity="?"><Canvas>?</Canvas>??</Canvas>',
+            fg = uu.fmt('<Canvas Canvas.ZIndex="?" Opacity="?"><Canvas>?</Canvas>??</Canvas>',
                         [zindex, this.globalAlpha, history, matrix, shadow]);
             break;
         case 9:
@@ -543,7 +542,7 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
             shadow = renderShadow ? _blur(this, "Canvas", this.__shadowColor) : "";
             matrix = _matrix("Canvas", uu.m2d.scale(bw, bh, m));
 
-            fg = _build('<Canvas Canvas.ZIndex="?" Opacity="?"><Canvas>?<Canvas.Clip><RectangleGeometry Rect="?" /></Canvas.Clip></Canvas>??</Canvas>',
+            fg = uu.fmt('<Canvas Canvas.ZIndex="?" Opacity="?"><Canvas>?<Canvas.Clip><RectangleGeometry Rect="?" /></Canvas.Clip></Canvas>??</Canvas>',
                         [zindex, this.globalAlpha, history,
                          [(dx - x) / bw, (dy - y) / bh, dw / bw, dh / bh].join(" "),
                         matrix, shadow]);
@@ -567,7 +566,7 @@ function fillCircle(x,       // @param Number:
                     color) { // @param ColorHash:
     var fg = '<Ellipse Canvas.Left="' + (x - r) +
              '" Canvas.Top="' + (y - r) +
-             '" Opacity="' + color.a * this.globalAlpha +
+             '" Opacity="' + (this.globalAlpha * color.a) +
              '" Width="' + (r * 2) +
              '" Height="' + (r * 2) +
              '" Fill="' + color.hex + '" />';
@@ -792,7 +791,7 @@ function strokeCircle(x,       // @param Number:
                       color) { // @param ColorHash:
     var fg = '<Ellipse Canvas.Left="' + (x - r) +
              '" Canvas.Top="' + (y - r) +
-             '" Opacity="' + color.a * this.globalAlpha +
+             '" Opacity="' + (this.globalAlpha * color.a) +
              '" Width="' + (r * 2) +
              '" Height="' + (r * 2) +
              '" Stroke="' + color.hex +
@@ -829,11 +828,10 @@ function strokeText(text, x, y, maxWidth, fill) {
     text = text.replace(/(\t|\v|\f|\r\n|\r|\n)/g, " ");
 
     var style = fill ? this.fillStyle : this.strokeStyle,
-        rv = [], fg, color,
-        fp, c0,
         zindex = (this.__mix ===  4) ? --this._zindex
                : (this.__mix === 10) ? (this.clear(), 0) : 0,
-        mtx, rgx, rgy,
+        rv = [], fg, color,
+        fp, c0, mtx, rgx, rgy,
         font = uu.font.parse(this.font, this.canvas),
         metric = uu.font.metric(font.formal, text),
         offX = 0, align = this.textAlign, dir = "ltr";
@@ -854,7 +852,7 @@ function strokeText(text, x, y, maxWidth, fill) {
     rv.push('<Canvas Canvas.ZIndex="', zindex, '">');
     if (typeof style === "string") {
         color = fill ? this.__fillStyle : this.__strokeStyle;
-        rv.push('<TextBlock Opacity="', color.a * this.globalAlpha,
+        rv.push('<TextBlock Opacity="', (this.globalAlpha * color.a),
                 '" Foreground="', color.hex);
     } else {
         rv.push('<TextBlock Opacity="', this.globalAlpha);
@@ -893,6 +891,7 @@ function strokeText(text, x, y, maxWidth, fill) {
     }
     rv.push('</TextBlock></Canvas>');
     fg = rv.join("");
+
     this.xFlyweight ||
         this._history.push(this._clipPath ? (fg = _clippy(this, fg)) : fg);
     this._state !== 0x1 ? this._stock.push(fg)
@@ -1071,7 +1070,7 @@ function _patternFill(ctx, obj, path, fill, zindex) {
                          '" Source="', obj.src, '"></Image>');
             }
         }
-        return _build('<Canvas Canvas.ZIndex="?"><Canvas Canvas.ZIndex="?" Clip="?">?</Canvas>?</Canvas>',
+        return uu.fmt('<Canvas Canvas.ZIndex="?"><Canvas Canvas.ZIndex="?" Clip="?">?</Canvas>?</Canvas>',
                       [zindex, zindex2, path, img.join(""), shadow]);
     }
 
@@ -1187,15 +1186,6 @@ function _stroke(ctx) {
                 '" StrokeEndLineCap="'   + ctx.__lineCap;
     }
     return ctx._strokeCache;
-}
-
-// inner - build XAML
-function _build(format, ary) {
-    var i = -1;
-
-    return format.replace(_QQ, function() {
-               return ary[++i];
-           });
 }
 
 // add inline XAML source
