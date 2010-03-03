@@ -34,6 +34,16 @@ function switchBlur() {
     drawShape(document.getElementById('flashcanvas'));
 }
 
+var shadowOffsetX = 10;
+var shadowOffsetY = 10;
+function switchOffset() {
+    shadowOffsetX -= 5;
+    shadowOffsetY -= 5;
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+}
+
 function drawShape(canvas, matrix){
     if (!canvas.getContext){ return; }
 
@@ -48,14 +58,14 @@ function drawShape(canvas, matrix){
         ctx.rotate(5 * Math.PI / 180);
     }
     ctx.shadowBlur = shadowBlur + 4;
-    ctx.shadowOffsetX = 10;
-    ctx.shadowOffsetY = 10;
+    ctx.shadowOffsetX = shadowOffsetX;
+    ctx.shadowOffsetY = shadowOffsetY;
     ctx.shadowColor = "gray";
 
-    ctx.drawImage(document.getElementById('source'),33,71,104,124,21,20,87,104);
-    ctx.drawImage(document.getElementById('frame'),0,0);
+    ctx.drawImage(document.getElementById('source'),33,71,104,124,21 + 10,20 + 10,87,104);
+    ctx.drawImage(document.getElementById('frame'),10,10);
 
-    ctx.drawImage(document.getElementById('source'),33,71,104,124,21,220,87,104);
+    ctx.drawImage(document.getElementById('source'),33,71,104,124,21 + 10,220 + 10,87,104);
 }
 </script>
     <style type="text/css">
@@ -72,6 +82,7 @@ function drawShape(canvas, matrix){
       <input type="button" value="matrix effect" onclick="matrix()" />
       <input type="button" value="alpha -0.2" onclick="switchAlpha()" />
       <input type="button" value="blur +2" onclick="switchBlur()" />
+      <input type="button" value="offset -5,-5" onclick="switchOffset()" />
       <br />
       <canvas id="slcanvas" class="sl" width="150" height="350"></canvas>
       <canvas id="vmlcanvas" class="vml" width="150" height="350"></canvas>
@@ -104,6 +115,16 @@ function switchBlur() {
     drawShape(document.getElementById('flashcanvas'));
 }
 
+var shadowOffsetX = 10;
+var shadowOffsetY = 10;
+function switchOffset() {
+    shadowOffsetX -= 5;
+    shadowOffsetY -= 5;
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+}
+
 function drawShape(canvas, matrix){
     if (!canvas.getContext){ return; }
 
@@ -118,8 +139,8 @@ function drawShape(canvas, matrix){
         ctx.rotate(5 * Math.PI / 180);
     }
     ctx.shadowBlur = shadowBlur + 4;
-    ctx.shadowOffsetX = 10;
-    ctx.shadowOffsetY = 10;
+    ctx.shadowOffsetX = shadowOffsetX;
+    ctx.shadowOffsetY = shadowOffsetY;
     ctx.shadowColor = "gray";
 
     ctx.drawImage(document.getElementById('source'),33,71,104,124,21,20,87,104);

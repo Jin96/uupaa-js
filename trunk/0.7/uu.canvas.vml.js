@@ -248,7 +248,7 @@ function clearRect(x, y, w, h) {
         this.clear();
     } else {
         if (this.globalCompositeOperation !== this._mix) {
-            this.__mix = _COMPOS[this._mix];
+            this.__mix = _COMPOS[this._mix = this.globalCompositeOperation];
         }
 
         var color = uu.css.bgcolor.inherit(this.canvas),
@@ -351,7 +351,7 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
         this.__shadowColor = uu.color(this._shadowColor = this.shadowColor);
     }
     if (this.globalCompositeOperation !== this._mix) {
-        this.__mix = _COMPOS[this._mix];
+        this.__mix = _COMPOS[this._mix = this.globalCompositeOperation];
     }
 
     var dim = uu.img.actsize(image), // img actual size
@@ -764,7 +764,7 @@ function stroke(path, fill) {
         }
     }
     if (this.globalCompositeOperation !== this._mix) {
-        this.__mix = _COMPOS[this._mix];
+        this.__mix = _COMPOS[this._mix = this.globalCompositeOperation];
     }
 
     path = path || this._path.join("");
@@ -845,7 +845,7 @@ function strokeText(text, x, y, maxWidth, fill) {
         }
     }
     if (this.globalCompositeOperation !== this._mix) {
-        this.__mix = _COMPOS[this._mix];
+        this.__mix = _COMPOS[this._mix = this.globalCompositeOperation];
     }
 
     text = text.replace(/(\t|\v|\f|\r\n|\r|\n)/g, " ");
