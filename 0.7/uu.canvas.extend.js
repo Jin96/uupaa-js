@@ -1,10 +1,11 @@
 
 // === extend CanvasRenderingContext2D ===
-// depend: uu.js, uu.canvas.js
+// depend: uu.js
 uu.agein || (function(win, doc, uu) {
 
 //{{{!mb
 var _extendOpera = uu.opera && uu.ver.ua >= 9.5 && uu.ver.ua < 10.5,
+    _extendGecko = uu.gecko && uu.ver.render === 1.9,
     _CanvasPrototype;
 
 if (window["CanvasRenderingContext2D"]) {
@@ -12,26 +13,54 @@ if (window["CanvasRenderingContext2D"]) {
 }
 
 // === extend text and shadow api ===
-if (_extendOpera) {
+if (_extendOpera || _extendGecko) {
+
     // wrapper
     _CanvasPrototype._save    = _CanvasPrototype.save;
     _CanvasPrototype._restore = _CanvasPrototype.restore;
-}
 
-_extendOpera && uu.mix(_CanvasPrototype, {
-    _shadow:        ["transparent", 0, 0, 0],
-    _stack:         [],
-    font:           "10px sans-serif",
-    textAlign:      "start",
-    textBaseline:   "top",          // spec: "alphabetic"
-    xMissColor:     "black",
-    xTextMarginTop: 1.3,
-    save:           save,           // [EXTEND]
-    restore:        restore,        // [EXTEND]
-    fillText:       fillText,       // [EXTEND]
-    strokeText:     strokeText,     // [EXTEND]
-    measureText:    measureText     // [EXTEND]
-});
+    uu.mix(_CanvasPrototype, {
+        _shadow:        ["transparent", 0, 0, 0], // for Firefox3.0
+        _stack:         [],
+        font:           "10px sans-serif",
+        textAlign:      "start",
+        textBaseline:   "top",          // spec: "alphabetic"
+        xTextMarginTop: 1.3,
+        save:           save,           // [MODIFY]
+        restore:        restore,        // [MODIFY]
+        fillText:       fillText,       // [EXTEND]
+        strokeText:     strokeText,     // [EXTEND]
+        measureText:    measureText     // [EXTEND]
+    });
+
+    if (_extendGecko) {
+        // shadow accesser
+        _CanvasPrototype.__defineSetter__("shadowColor",    function(color) {
+            this._shadow[0] = color;
+        });
+        _CanvasPrototype.__defineSetter__("shadowOffsetX",  function(x) {
+            this._shadow[1] = x;
+        });
+        _CanvasPrototype.__defineSetter__("shadowOffsetY",  function(y) {
+            this._shadow[2] = y;
+        });
+        _CanvasPrototype.__defineSetter__("shadowBlur",     function(blur) {
+            this._shadow[3] = blur;
+        });
+        _CanvasPrototype.__defineGetter__("shadowColor",    function() {
+            return this._shadow[0];
+        });
+        _CanvasPrototype.__defineGetter__("shadowOffsetX",  function() {
+            return this._shadow[1];
+        });
+        _CanvasPrototype.__defineGetter__("shadowOffsetY",  function() {
+            return this._shadow[2];
+        });
+        _CanvasPrototype.__defineGetter__("shadowBlur",     function() {
+            return this._shadow[3];
+        });
+    }
+}
 
 // CanvasRenderingContext2D.prototype.save
 function save() {
@@ -72,67 +101,107 @@ function measureText(text) {
     return { width: metric.w, height: metric.h };
 }
 
-// inner - SVG Text render
+// inner -
+function _newsvg(tag) {
+    return doc.createElementNS("http://www.w3.org/2000/svg", tag);
+}
+
+// inner -
+function _buildShadow(svg, shadowOffsetX, shadowOffsetY,
+                           shadowBlur, shadowColor) {
+    var e = [],
+        blur = shadowBlur < 8 ? shadowBlur * 0.5
+                              : Math.sqrt(shadowBlur * 2);
+
+    //  [0] <svg:defs>
+    //  [1]     <svg:filter id="dropshadow" filterUnits="userSpaceOnUse">
+    //  [2]         <svg:feGaussianBlur in="SourceAlpha" stdDeviation="?" />
+    //  [3]         <svg:feOffset dx="?" dy="?" result="offsetblur" />
+    //  [4]         <svg:feFlood flood-color="?" flood-opacity="?" />
+    //  [5]         <svg:feComposite in2="offsetblur" operator="in" />
+    //  [6]         <svg:feMerge>
+    //  [7]             <svg:feMergeNode />
+    //  [8]             <svg:feMergeNode in="SourceGraphic" />
+    //          </svg:filter>
+    //      </svg:defs>
+
+    svg.appendChild(e[0] = _newsvg("defs"));
+      e[0].appendChild(e[1] = _newsvg("filter"));
+        e[1].appendChild(e[2] = _newsvg("feGaussianBlur"));
+        e[1].appendChild(e[3] = _newsvg("feOffset"));
+        e[1].appendChild(e[4] = _newsvg("feFlood"));
+        e[1].appendChild(e[5] = _newsvg("feComposite"));
+        e[1].appendChild(e[6] = _newsvg("feMerge"));
+          e[6].appendChild(e[7] = _newsvg("feMergeNode"));
+          e[6].appendChild(e[8] = _newsvg("feMergeNode"));
+
+    e[1].setAttribute("id",             "dropshadow");
+    e[1].setAttribute("filterUnits",    "userSpaceOnUse");
+    e[2].setAttribute("in",             "SourceAlpha");
+    e[2].setAttribute("stdDeviation",   blur);
+    e[3].setAttribute("dx",             shadowOffsetX);
+    e[3].setAttribute("dy",             shadowOffsetY);
+    e[3].setAttribute("result",         "offsetblur");
+    e[4].setAttribute("flood-color",    shadowColor.hex);
+    e[4].setAttribute("flood-opacity",  shadowColor.a);
+    e[5].setAttribute("in2",            "offsetblur");
+    e[5].setAttribute("operator",       "in");
+    e[8].setAttribute("in",             "SourceGraphic");
+}
+
+// inner - Text render
 function _strokeText(ctx, text, x, y, maxWidth, fill) {
-    function _newsvg(tag) {
-        return doc.createElementNS("http://www.w3.org/2000/svg", tag);
+    var style = fill ? ctx.fillStyle : ctx.strokeStyle;
+
+    if (typeof style !== "string") {
+        return;
     }
-    function filter(svg, sx, sy, sblur, scolor) {
-        var e = [];
 
-        svg.appendChild(e[0] = _newsvg("defs"));
-          e[0].appendChild(e[1] = _newsvg("filter"));
-            e[1].appendChild(e[2] = _newsvg("feGaussianBlur"));
-            e[1].appendChild(e[3] = _newsvg("feOffset"));
-            e[1].appendChild(e[4] = _newsvg("feFlood"));
-            e[1].appendChild(e[5] = _newsvg("feComposite"));
-            e[1].appendChild(e[6] = _newsvg("feMerge"));
-              e[6].appendChild(e[7] = _newsvg("feMergeNode"));
-              e[6].appendChild(e[8] = _newsvg("feMergeNode"));
-
-        e[1].setAttribute("id",           "dropshadow");
-        e[1].setAttribute("filterUnits",  "userSpaceOnUse");
-        e[2].setAttribute("in",           "SourceAlpha");
-        e[2].setAttribute("stdDeviation", (sblur < 8) ? sblur * 0.5
-                                                      : Math.sqrt(sblur * 2));
-        e[3].setAttribute("dx",           sx);
-        e[3].setAttribute("dy",           sy);
-        e[3].setAttribute("result",       "offsetblur");
-        e[4].setAttribute("flood-color",  scolor.hex);
-        e[4].setAttribute("flood-opacity",scolor.a);
-        e[5].setAttribute("in2",          "offsetblur");
-        e[5].setAttribute("operator",     "in");
-        e[8].setAttribute("in",           "SourceGraphic");
+    // detect and cache text-direction
+    if (!ctx._ltr) {
+        ctx._ltr = win.getComputedStyle(ctx.canvas, null).direction === "ltr";
     }
     text = text.replace(/(\t|\v|\f|\r\n|\r|\n)/g, " ");
 
-    if (!ctx._ltr) { // cache text-direction
-        ctx._ltr = win.getComputedStyle(ctx.canvas, null).direction === "ltr";
+    if (_extendOpera) {
+        _strokeTextOpera(ctx, text, x, y, maxWidth, fill);
+    } else if (_extendGecko) {
+        _strokeTextGecko(ctx, text, x, y, maxWidth, fill);
     }
-    var style   = fill ? ctx.fillStyle : ctx.strokeStyle,
-        types   = (typeof style === "string") ? 0 : style._type,
-        align   = ctx.textAlign,
-        ltr     = ctx._ltr,
+}
+
+// inner - Text Render for Opera9.5~10.10
+function _strokeTextOpera(ctx, text, x, y, maxWidth, fill) {
+    var align   = ctx.textAlign,
+        metric  = uu.font.metric(ctx.font, text),
         font    = uu.font.parse(ctx.font, ctx.canvas),
+        shadowColor = uu.color(ctx.shadowColor),
+        shadow  = shadowColor.a && ctx.shadowBlur,
         svg     = _newsvg("svg"),
         txt     = _newsvg("text"),
-        scolor  = uu.color(ctx.shadowColor),
-        metric  = uu.font.metric(ctx.font, text),
         offx    = 0, // offset x
         offy    = 0, // offset y
-        margin  = 50;
+        margin  = 50,
+        cage;
+
+    if (!ctx._cage) {
+        cage = uue();
+        cage.style = "display:none";
+        ctx._cage = doc.body.appendChild(cage);
+    }
 
     switch (align) {
     case "left":   align = "start"; break;
     case "center": align = "middle"; break;
     case "right":  align = "end"; break;
-    case "start":  align = ltr ? "start" : "end"; break;
-    case "end":    align = ltr ? "end"   : "start";
+    case "start":  align = ctx._ltr ? "start" : "end"; break;
+    case "end":    align = ctx._ltr ? "end"   : "start";
     }
     switch (align) {
     case "middle": offx = metric.w * 0.5; break;
     case "end":    offx = metric.w;
     }
+
     if (ctx.textBaseline === "top") {
         // text margin-top fine tuning
         offy = font.size /
@@ -142,13 +211,15 @@ function _strokeText(ctx, text, x, y, maxWidth, fill) {
     svg.setAttribute("width",  metric.w + margin * 2);
     svg.setAttribute("height", metric.h + margin * 2);
 
-    if (scolor.a) {
-        filter(svg, ctx.shadowOffsetX, ctx.shadowOffsetY, ctx.shadowBlur, scolor);
+    if (shadow) {
+        _buildShadow(svg, ctx.shadowOffsetX, ctx.shadowOffsetY,
+                          ctx.shadowBlur, shadowColor);
         txt.setAttribute("filter", "url(#dropshadow)");
     }
+
     txt.setAttribute("x",            offx + margin);
     txt.setAttribute("y",            offy + margin + offy * 0.41666); // offy / 2.4
-    txt.setAttribute("fill",         types ? ctx.xMissColor : style);
+    txt.setAttribute("fill",         fill ? ctx.fillStyle : ctx.strokeStyle);
     txt.setAttribute("text-anchor",  align);
     txt.setAttribute("font-style",   font.style);
     txt.setAttribute("font-variant", font.variant);
@@ -164,22 +235,61 @@ function _strokeText(ctx, text, x, y, maxWidth, fill) {
     svg.appendChild(txt);
     txt.appendChild(doc.createTextNode(text));
 
-    if (scolor.a) { // [OPTIMIZED] text-shadow optimization
-        doc.body.appendChild(svg);
+    if (shadow) { // [OPTIMIZED] text-shadow optimization
+        ctx._cage.appendChild(svg);
     }
 
     ctx.save();
     ctx.globalCompositeOperation = "source-over";
-
-//  try {
-        ctx.drawImage(svg, x - margin - offx, y - margin);
-//  } catch(err) {}
-
+    ctx.drawImage(svg, x - margin - offx, y - margin);
     ctx.restore();
 
-    if (scolor.a) { // [OPTIMIZED] text-shadow optimization
-        doc.body.removeChild(svg);
+    if (shadow) { // [OPTIMIZED] text-shadow optimization
+        ctx._cage.removeChild(svg);
     }
+}
+
+// inner - Text render for Firefox3.0
+function _strokeTextGecko(ctx, text, x, y, maxWidth, fill) {
+    var align   = ctx.textAlign,
+        metric  = uu.font.metric(ctx.font, text),
+        shadowColor = uu.color(ctx.shadowColor),
+        shadow  = shadowColor.a && ctx.shadowBlur,
+        offX    = 0,
+        offY    = (metric.h + metric.h * 0.5) * 0.5; // emulate textBaseline="top"
+
+    switch (align) {
+    case "start":   align = ctx._ltr ? "left"  : "right"; break;
+    case "end":     align = ctx._ltr ? "right" : "left";
+    }
+    switch (align) {
+    case "center":  offX = metric.w * 0.5; break;
+    case "right":   offX = metric.w;
+    }
+
+    ctx.save();
+    ctx.globalCompositeOperation = "source-over";
+    ctx.mozTextStyle = ctx.font;
+    ctx.translate(x - offX, y + offY);
+
+    if (!fill) {
+        ctx.fillStyle = ctx.strokeStyle;
+    }
+
+    if (shadow) {
+        ctx.save();
+        ctx.translate(ctx.shadowOffsetX + 1,
+                      ctx.shadowOffsetY + 1);
+        ctx.globalAlpha = ctx.globalAlpha / Math.sqrt(ctx.shadowBlur); // * 0.5;
+        ctx.fillStyle = shadowColor.hex;
+        ctx.mozDrawText(text);
+        ctx.restore();
+    }
+
+    ctx.mozDrawText(text);
+    // http://d.hatena.ne.jp/uupaa/20090506/1241572019
+    ctx.fillRect(0,0,0,0); // force redraw(Firefox3.0 bug)
+    ctx.restore();
 }
 //}}}!mb
 
