@@ -925,8 +925,8 @@ package {
                     bgcopy = bg.clone();
 
                     bg.copyPixels(_clearAllBuff, _clearAllRect, _clearAllPoint);
-                    bg.draw(pict);
-                    bg.draw(bgcopy, matrix, color, null, null, true);
+                    bg.draw(pict, matrix, color, null, null, true);
+                    bg.draw(bgcopy);
                     break;
                 default:
                     bg.draw(pict, matrix, color, mixMode, null, true);
