@@ -706,6 +706,7 @@ function resize(width,    // @param Number(= void 0): width
         this._view.style.pixelHeight = height;
     }
     this._state = state;
+    this._clipRect = _rect(this, 0, 0, width, height);
 }
 
 // CanvasRenderingContext2D.prototype.restore
