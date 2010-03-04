@@ -12,6 +12,8 @@
 //      </object>
 //  </canvas>
 
+//{{{!mb
+
 uu.agein || (function(win, doc, uu) {
 
 uu.mix(uu.canvas.FL2D.prototype, {
@@ -643,4 +645,6 @@ send._prefix = '<invoke name="send" returntype="javascript"><arguments><string>'
 send._suffix = '</string></arguments></invoke>';
 
 })(window, document, uu);
+
+//}}}!mb
 

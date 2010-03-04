@@ -4,16 +4,21 @@
 //
 uu.agein || (function(win, doc, uu) {
 
+//{{{!mb
+
 var _flashCanvas = (uu.ie && uu.ver.flash > 9) ?
                    _swfLoader(uu.config.dir + "uu.canvas.swf") : 0;
 
-uu.mix(uu.canvas, {
-    init:           uucanvasinit,   // uu.canvas.init()
-    create:         uucanvascreate, // uu.canvas.create(width = 300, height = 150, order = "vml sl flash") -> <canvas>
-    FL2D:           FL2D,           // uu.canvas.FL2D class
-    SL2D:           SL2D,           // uu.canvas.SL2D class
-    VML2D:          VML2D           // uu.canvas.VML2D class
-});
+//}}}!mb
+
+uu.canvas.init   = uucanvasinit;    // uu.canvas.init()
+uu.canvas.create = uucanvascreate;  // uu.canvas.create(width = 300, height = 150, order = "vml sl flash") -> <canvas>
+
+//{{{!mb
+
+uu.canvas.FL2D   = FL2D;            // uu.canvas.FL2D class
+uu.canvas.SL2D   = SL2D;            // uu.canvas.SL2D class
+uu.canvas.VML2D  = VML2D;           // uu.canvas.VML2D class
 
 // class FL2D
 function FL2D(node) { // @param Node: <canvas>
@@ -29,6 +34,8 @@ function SL2D(node) { // @param Node: <canvas>
 function VML2D(node) { // @param Node: <canvas>
     VML2D.init(this, node);
 }
+
+//}}}!mb
 
 // uu.canvas.init
 function uucanvasinit() {
@@ -111,9 +118,7 @@ function _removeFallback(node) { // @param Node:
     parent.replaceChild(rv, node);
     return rv;
 }
-//}}}!mb
 
-//{{{!mb
 // inner - swf preloader
 function _swfLoader(url) { // @param String: url
                            // @return Number: 1 or 0

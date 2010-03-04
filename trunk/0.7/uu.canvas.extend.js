@@ -3,14 +3,16 @@
 // depend: uu.js
 uu.agein || (function(win, doc, uu) {
 
-//{{{!mb
-var _extendOpera = uu.opera && uu.ver.ua >= 9.5 && uu.ver.ua < 10.5,
-    _extendGecko = uu.gecko && uu.ver.render === 1.9,
-    _CanvasPrototype;
+var _CanvasPrototype;
 
-if (window["CanvasRenderingContext2D"]) {
+if (win["CanvasRenderingContext2D"]) {
     _CanvasPrototype = win.CanvasRenderingContext2D.prototype;
 }
+
+//{{{!mb
+
+var _extendOpera = uu.opera && uu.ver.ua >= 9.5 && uu.ver.ua < 10.5,
+    _extendGecko = uu.gecko && uu.ver.render === 1.9;
 
 // === extend text and shadow api ===
 if (_extendOpera || _extendGecko) {
@@ -291,6 +293,7 @@ function _strokeTextGecko(ctx, text, x, y, maxWidth, fill) {
     ctx.fillRect(0,0,0,0); // force redraw(Firefox3.0 bug)
     ctx.restore();
 }
+
 //}}}!mb
 
 // === extend lock, unlock ===
