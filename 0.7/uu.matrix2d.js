@@ -4,6 +4,9 @@
 // typeof Matrix = [m11, m12, m13,
 //                  m21, m22, m23,
 //                  m31, m32, m33]
+
+//{{{!mb
+
 uu.agein || (function() {
 
 uu.m2d = {
@@ -93,4 +96,6 @@ function m2dtranslate(x,   // @param Number:
 }
 
 })();
+
+//}}}!mb
 

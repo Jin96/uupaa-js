@@ -10,6 +10,8 @@
 //      </div>
 //  </canvas>
 
+//{{{!mb
+
 uu.agein || (function(win, doc, uu) {
 var _COMPOS = { "source-over": 0, "destination-over": 4, copy: 10 },
     _FILTER = uu.ie8 ? ["-ms-filter:'progid:DXImageTransform.Microsoft.", "'"]
@@ -1253,4 +1255,6 @@ uu.ie && uu.lazy("init", function() {
 }, 0); // 0, low order
 
 })(window, document, uu);
+
+//}}}!mb
 

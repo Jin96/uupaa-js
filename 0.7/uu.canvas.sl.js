@@ -10,6 +10,8 @@
 //      </object>
 //  </canvas>
 
+//{{{!mb
+
 uu.agein || (function(win, doc, uu) {
 var _COMPOS = { "source-over": 0, "destination-over": 4, copy: 10 },
     _FIXED4 = /\.(\d{4})(?:[\d]+)/g, // toFixed(4)
@@ -1198,4 +1200,6 @@ uu.ie && uu.ver.sl && uu.lazy("init", function() {
 }, 2); // 2: high order
 
 })(window, document, uu);
+
+//}}}!mb
 
