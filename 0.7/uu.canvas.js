@@ -46,8 +46,8 @@ function uucanvasinit() {
             //      <canvas>fallback contents...</canvas> -> <canvas></canvas>
             var newNode = _removeFallback(node);
 
-            newNode.width  = node.width  || "300";
-            newNode.height = node.height || "150";
+            newNode.width  = parseInt(node.width  || "300"); // 300px -> 300
+            newNode.height = parseInt(node.height || "150");
             newNode.style.pixelWidth  = parseInt(newNode.width);
             newNode.style.pixelHeight = parseInt(newNode.height);
             _build(newNode, newNode.className);

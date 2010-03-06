@@ -91,6 +91,8 @@ function loop() {
     if (restart) {
         stress = restart;
         restart = 0;
+        begin = +new Date; // reset
+        fpscount = 0; // reset
 
         particles = [];
         for(var i = 0; i < stress; i++) {

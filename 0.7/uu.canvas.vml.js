@@ -134,6 +134,9 @@ function initSurface() {
     this.font           = "10px sans-serif";
     this.textAlign      = "start";
     this.textBaseline   = "alphabetic";
+    // --- current position ---
+    this.px             = 0;    // current position x
+    this.py             = 0;    // current position y
     // --- hidden properties ---
     this._lineScale     = 1;
     this._scaleX        = 1;
@@ -148,8 +151,6 @@ function initSurface() {
     this._clipPath      = null; // clipping path
     this._clipRect      = null; // clipping rect
     this._stock         = [];   // lock stock
-    this._px            = 0;    // current position x
-    this._py            = 0;    // current position y
     this._state         = 1;    // state,   0x0: not ready
                                 //          0x1: draw ready(normal)
                                 //          0x2: + locked
@@ -207,6 +208,7 @@ function arc(x, y, radius, startAngle, endAngle, anticlockwise) {
     c1 = _map(this._matrix, x, y);
     rx = this._scaleX * radius;
     ry = this._scaleY * radius;
+
     // [FIX][at][wa] bug, (width | 0) and (height | 0)
     // http://twitter.com/uupaa/status/9833358743
     this._path.push(anticlockwise ? "at " : "wa ",
@@ -216,7 +218,63 @@ function arc(x, y, radius, startAngle, endAngle, anticlockwise) {
                     c0.x2, " ", c0.y2);
 }
 
-// CanvasRenderingContext2D.prototype.arcTo -> NOT IMPL
+// CanvasRenderingContext2D.prototype.arcTo
+//function arcTo(x1, y1, x2, y2, radius) {
+    /*
+     *  The original writer in code block is mindcat.
+     *
+     *  http://d.hatena.ne.jp/mindcat/20100131/
+     */
+/*
+    var m = this._matrix,
+        _x0 = this.px,
+        _y0 = this.py,
+        _x1 = x1,
+        _y1 = y1,
+        _x2 = x2,
+        _y2 = y2,
+        x0, y0, a1, b1, a2, b2, mm,
+        dd, cc, tt, k1, k2, j1, j2, cx, cy, px, py, qx, qy,
+        ang1, ang2;
+
+    x0 = (_x0 * m[0] + _y0 * m[3] + m[6]) * 10 - 5;
+    y0 = (_x0 * m[1] + _y0 * m[4] + m[7]) * 10 - 5;
+    x1 = (_x1 * m[0] + _y1 * m[3] + m[6]) * 10 - 5;
+    y1 = (_x1 * m[1] + _y1 * m[4] + m[7]) * 10 - 5;
+    x2 = (_x2 * m[0] + _y2 * m[3] + m[6]) * 10 - 5;
+    y2 = (_x2 * m[1] + _y2 * m[4] + m[7]) * 10 - 5;
+
+    a1 = y0 - y1;
+    b1 = x0 - x1;
+    a2 = y2 - y1;
+    b2 = x2 - x1;
+    mm = Math.abs(a1 * b2 - b1 * a2);
+
+    if (!mm || !radius) {
+        this.lineTo(x1, y1);
+        return;
+    }
+    dd = a1 * a1 + b1 * b1;
+    cc = a2 * a2 + b2 * b2;
+    tt = a1 * a2 + b1 * b2;
+    k1 = radius * Math.sqrt(dd) / mm;
+    k2 = radius * Math.sqrt(cc) / mm;
+    j1 = k1 * tt / dd;
+    j2 = k2 * tt / cc;
+    cx = k1 * b2 + k2 * b1;
+    cy = k1 * a2 + k2 * a1;
+    px = b1 * (k2 + j1);
+    py = a1 * (k2 + j1);
+    qx = b2 * (k1 + j2);
+    qy = a2 * (k1 + j2);
+    ang1 = Math.atan2(py - cy, px - cx);
+    ang2 = Math.atan2(qy - cy, qx - cx);
+
+    this.lineTo(px + x1, py + y1);
+    this.arc(cx + x1, cy + y1, radius,
+             ang1, ang2, b1 * a2 > b2 * a1);
+}
+ */
 
 // CanvasRenderingContext2D.prototype.beginPath
 function beginPath() {
@@ -228,10 +286,13 @@ function bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y) {
     var c0 = _map2(this._matrix, cp1x, cp1y, cp2x, cp2y),
         c1 = _map(this._matrix, x, y);
 
+    // add begin point
+    this._path.length || this._path.push("m", c0.x1, " ", c0.y1);
+
     this._path.push("c ", c0.x1, " ", c0.y1, " ",
                           c0.x2, " ", c0.y2, " ", c1.x,  " ", c1.y);
-    this._px = x;
-    this._py = y;
+    this.px = x;
+    this.py = y;
 }
 
 // CanvasRenderingContext2D.prototype.clear
@@ -546,8 +607,8 @@ function fillCircle(x,       // @param Number:
 function fillRect(x, y, w, h) {
     var path = _rect(this, x, y, w, h);
 
-    this._px = x;
-    this._py = y;
+    this.px = x;
+    this.py = y;
 
     // When all canvases are painted out,
     // the fillStyle(background-color) is preserved.
@@ -569,15 +630,20 @@ function fillText(text, x, y, maxWidth) {
 
 // CanvasRenderingContext2D.prototype.lineTo
 function lineTo(x, y) {
-    var m = this._matrix, // inlining: _map(x, y)
+    var m = this._matrix,
         ix = (x * m[0] + y * m[3] + m[6]) * 10 - 5,
         iy = (x * m[1] + y * m[4] + m[7]) * 10 - 5;
 
+    // [OPTIMIZED] Math.round()
     // http://d.hatena.ne.jp/uupaa/20090822
-    this._path.push("l ", (ix+(ix<0?-0.49:0.5))|0, " ",
-                          (iy+(iy<0?-0.49:0.5))|0);
-    this._px = x;
-    this._py = y;
+    ix = (ix+(ix<0?-0.49:0.5))|0;
+    iy = (iy+(iy<0?-0.49:0.5))|0;
+
+    this._path.length || this._path.push("m ", ix, " ", iy);
+    this._path.push("l ", ix, " ", iy);
+
+    this.px = x;
+    this.py = y;
 }
 
 // CanvasRenderingContext2D.prototype.lock
@@ -601,11 +667,12 @@ function moveTo(x, y) {
         ix = (x * m[0] + y * m[3] + m[6]) * 10 - 5,
         iy = (x * m[1] + y * m[4] + m[7]) * 10 - 5;
 
+    // [OPTIMIZED] Math.round()
     // http://d.hatena.ne.jp/uupaa/20090822
     this._path.push("m ", (ix+(ix<0?-0.49:0.5))|0, " ",
                           (iy+(iy<0?-0.49:0.5))|0);
-    this._px = x;
-    this._py = y;
+    this.px = x;
+    this.py = y;
 }
 
 // CanvasRenderingContext2D.prototype.putImageData -> NOT IMPL
@@ -637,10 +704,10 @@ function quickStrokeRect(x, y, w, h, hexcolor, alpha, lineWidth) {
 
 // CanvasRenderingContext2D.prototype.quadraticCurveTo
 function quadraticCurveTo(cpx, cpy, x, y) {
-    var cp1x = this._px + 2.0 / 3.0 * (cpx - this._px),
-        cp1y = this._py + 2.0 / 3.0 * (cpy - this._py),
-        cp2x = cp1x + (x - this._px) / 3.0,
-        cp2y = cp1y + (y - this._py) / 3.0,
+    var cp1x = this.px + 2.0 / 3.0 * (cpx - this.px),
+        cp1y = this.py + 2.0 / 3.0 * (cpy - this.py),
+        cp2x = cp1x + (x - this.px) / 3.0,
+        cp2y = cp1y + (y - this.py) / 3.0,
         m = this._matrix,
         m0 = m[0], m1 = m[1],
         m3 = m[3], m4 = m[4],
@@ -652,20 +719,25 @@ function quadraticCurveTo(cpx, cpy, x, y) {
         c2x = (cp2x * m0 + cp2y * m3 + m6) * 10 - 5,
         c2y = (cp2x * m1 + cp2y * m4 + m7) * 10 - 5;
 
+    // [OPTIMIZED] Math.round()
     // http://d.hatena.ne.jp/uupaa/20090822
-    this._path.push("c ",
-        (c1x+(c1x<0?-0.49:0.5))|0, " ", (c1y+(c1y<0?-0.49:0.5))|0, " ",
+    cpx = (c1x+(c1x<0?-0.49:0.5))|0;
+    cpy = (c1y+(c1y<0?-0.49:0.5))|0;
+
+    this._path.length || this._path.push("m ", cpx, " ", cpy);
+
+    this._path.push("c ", cpx, " ", cpy, " ",
         (c2x+(c2x<0?-0.49:0.5))|0, " ", (c2y+(c2y<0?-0.49:0.5))|0, " ",
         (c0x+(c0x<0?-0.49:0.5))|0, " ", (c0y+(c0y<0?-0.49:0.5))|0);
-    this._px = x;
-    this._py = y;
+    this.px = x;
+    this.py = y;
 }
 
 // CanvasRenderingContext2D.prototype.rect
 function rect(x, y, w, h) {
     this._path.push(_rect(this, x, y, w, h));
-    this._px = x;
-    this._py = y;
+    this.px = x;
+    this.py = y;
 }
 
 // inner -
@@ -957,10 +1029,11 @@ function translate(x, y) {
 // CanvasRenderingContext2D.prototype.unlock
 function unlock() {
     switch (this._state) {
-    case 0x7: // [THROUGH][INLINE][LAZY] // this.clear();
+    case 0x7: // [INLINE][LAZY] // this.clear();
             this.xFlyweight || (this._history = []);
             this._zindex = 0;
             this._view.innerHTML = ""; // clear all
+            // break; [THROUGH]
     case 0x3:
             this._state = 0x1; // unlock
             if (this._stock.length) {
