@@ -49,10 +49,10 @@ package {
         private var _clipShape:Shape = new Shape();
         private var _shadow:BitmapFilter; // shadow filter
 
-        private var _beginX:Number = 0;
-        private var _beginY:Number = 0;
-        private var _curtX:Number = 0;
-        private var _curtY:Number = 0;
+        private var bx:Number = 0; // begin position x
+        private var by:Number = 0; // begin position y
+        private var px:Number = 0; // current position x
+        private var py:Number = 0; // current position y
         private var _shape:Shape;
         private var _gfx:Graphics; // shape.graphics
         private var _view:Bitmap;
@@ -236,6 +236,8 @@ package {
                 case "lT":  lineTo(a[++i] * 0.001, a[++i] * 0.001); break;
                 case "ar":  arc(+a[++i], +a[++i], +a[++i],
                                 +a[++i], +a[++i], +a[++i]); break;
+                case "at":  arcTo(+a[++i], +a[++i], +a[++i],
+                                  +a[++i], +a[++i]); break;
                 case "qC":  quadraticCurveTo(+a[++i], +a[++i],
                                              +a[++i], +a[++i]); break;
                 case "bC":  bezierCurveTo(+a[++i], +a[++i],
@@ -291,7 +293,7 @@ package {
             _path = [];
 
             // reset path current position
-            _beginX = _beginY = _curtX = _curtY = 0;
+            bx = by = px = py = 0;
 
             // reset mask
             _shape.mask = null;
@@ -347,6 +349,14 @@ package {
                     gfx.curveTo(ary[++i], ary[++i],  // cpx, cpy
                                 ary[++i], ary[++i]); // x, y
                     break;
+                case "t": // arcTo
+/*
+                    drawArcTo(gfx,
+                              ary[++i], ary[++i],            // x0, y0
+                              ary[++i], ary[++i],            // x1, y1
+                              ary[++i], ary[++i], ary[++i]); // x2, y2, radius
+ */
+                    break;
                 case "a": // arc
                     canvasArc.draw(gfx, _matrix,
                                     ary[++i], ary[++i], ary[++i],
@@ -379,9 +389,9 @@ package {
                 ex = p2.x;
                 ey = p2.y;
             }
-            // add StartPoint
+            // add begin point
             _path.length ? _path.push("l", sx, sy)
-                         : _path.push("m", _beginX = sx, _beginY = sy);
+                         : _path.push("m", bx = sx, by = sy);
 
             if (_scaleX === _scaleY
                 && Math.round(sx * 100) === Math.round(ex * 100)
@@ -393,8 +403,12 @@ package {
                 _path.push("a", x, y, radius, startAngle, endAngle,
                            anticlockwise);
             }
-            _curtX = ex;
-            _curtY = ey;
+            px = ex;
+            py = ey;
+        }
+
+        private function arcTo(x1:Number, y1:Number,
+                               x2:Number, y2:Number, radius:Number):void {
         }
 
         private function moveTo(x:Number, y:Number):void {
@@ -404,7 +418,7 @@ package {
                 x = p.x;
                 y = p.y;
             }
-            _path.push("m", _beginX = _curtX = x, _beginY = _curtY = y);
+            _path.push("m", bx = px = x, by = py = y);
         }
 
         private function lineTo(x:Number, y:Number):void {
@@ -415,9 +429,9 @@ package {
                 y = p.y;
             }
             // add begin point
-            _path.length || _path.push("m", _beginX = x, _beginY = y);
+            _path.length || _path.push("m", bx = x, by = y);
 
-            _path.push("l", _curtX = x, _curtY = y);
+            _path.push("l", px = x, py = y);
         }
 
         private function bezierCurveTo(cp1x:Number, cp1y:Number,
@@ -428,11 +442,11 @@ package {
             var   p:Point = _matrix.transformPoint(new Point(x, y));
 
             // add begin point
-            _path.length || _path.push("m", _beginX = cp1.x, _beginY = cp1.y);
-
-            _path.push("b", new Point(_curtX, _curtY), cp1, cp2, p);
-            _curtX = p.x;
-            _curtY = p.y;
+            _path.length || _path.push("m", px = bx = cp1.x,
+                                            py = by = cp1.y);
+            _path.push("b", new Point(px, py), cp1, cp2, p);
+            px = p.x;
+            py = p.y;
         }
 
         private function quadraticCurveTo(cpx:Number, cpy:Number,
@@ -441,15 +455,15 @@ package {
             var  p:Point = _matrix.transformPoint(new Point(x, y));
 
             // add begin point
-            _path.length || _path.push("m", _beginX = cpx, _beginY = cpy);
+            _path.length || _path.push("m", bx = cpx, by = cpy);
 
-            _path.push("q", cp.x, cp.y, _curtX = p.x, _curtX = p.y);
+            _path.push("q", cp.x, cp.y, px = p.x, py = p.y);
         }
 
         private function closePath():void {
             if (_path.length) {
-                if (_curtX !== _beginX || _curtY !== _beginY) {
-                    _path.push("x", _curtX = _beginX, _curtY = _beginY);
+                if (px !== bx || py !== by) {
+                    _path.push("x", px = bx, py = by);
                 }
             }
         }

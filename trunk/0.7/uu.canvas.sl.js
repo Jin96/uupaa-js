@@ -92,14 +92,16 @@ function build(node) { // @param Node: <canvas>
     var onload = "uuonslload" + uu.guid(); // window.uuonslload{n}
 
     win[onload] = function(sender) { // @param Node: sender is <Canvas> node
-        var ctx = node.uuctx2d;
+        var ctx = node.uuctx2d, xaml;
 
         ctx._view = sender.children;
         ctx._content = sender.getHost().content; // getHost() -> <object>
         // dump
         if (ctx._stock.length) {
+            xaml = ctx._stock.join("");
+
             ctx._view.add(ctx._content.createFromXaml(
-                "<Canvas>" + ctx._stock.join("") + "</Canvas>"));
+                "<Canvas>" + xaml + "</Canvas>"));
         }
         ctx._state = 0x1; // draw ready(locked flag off)
         ctx._stock = []
@@ -144,6 +146,9 @@ function initSurface() {
     this.font           = "10px sans-serif";
     this.textAlign      = "start";
     this.textBaseline   = "alphabetic";
+    // --- current position ---
+    this.px             = 0;    // current position x
+    this.py             = 0;    // current position y
     // --- hidden properties ---
     this._strokeCache   = "";
     this._lineScale     = 1;
@@ -199,7 +204,7 @@ function arc(x, y, radius, startAngle, endAngle, anticlockwise) {
         isLargeArc = 0,
         magic = 0.0001570796326795,
         sweepDirection = anticlockwise ? 0 : 1,
-        sx, sy, ex, ey, rx, ry, c0;
+        sx, sy, ex, ey, rx, ry, m, _ex, _ey;
 
     // angle normalize
     (deg1 < 0)   && (deg1 += 360);
@@ -238,15 +243,72 @@ function arc(x, y, radius, startAngle, endAngle, anticlockwise) {
                       : this.moveTo(sx, sy);
 
     if (this._matrixfxd) {
-        c0 = _map(this._matrix, ex, ey);
-        ex = c0.x;
-        ey = c0.y;
+        m = this._matrix, _ex = ex, _ey = ey;
+
+        ex = _ex * m[0] + _ey * m[3] + m[6]; // x * m11 + y * m21 + dx
+        ey = _ex * m[1] + _ey * m[4] + m[7]; // x * m12 + y * m22 + dy
     }
     this._path.push(" A", rx, " ", ry, " 0 ", isLargeArc, " ",
                     sweepDirection, " ", ex, " ", ey);
 }
 
-// CanvasRenderingContext2D.prototype.arcTo -> NOT IMPL
+// CanvasRenderingContext2D.prototype.arcTo
+//function arcTo(x1, y1, x2, y2, radius) {
+    /*
+     *  The original writer in code block is mindcat.
+     *
+     *  http://d.hatena.ne.jp/mindcat/20100131/
+     */
+/*
+    var m = this._matrix,
+        _x0 = this.px,
+        _y0 = this.py,
+        _x1 = x1,
+        _y1 = y1,
+        _x2 = x2,
+        _y2 = y2,
+        x0, y0, a1, b1, a2, b2, mm,
+        dd, cc, tt, k1, k2, j1, j2, cx, cy, px, py, qx, qy,
+        ang1, ang2;
+
+    x0 = _x0 * m[0] + _y0 * m[3] + m[6];
+    y0 = _x0 * m[1] + _y0 * m[4] + m[7];
+    x1 = _x1 * m[0] + _y1 * m[3] + m[6];
+    y1 = _x1 * m[1] + _y1 * m[4] + m[7];
+    x2 = _x2 * m[0] + _y2 * m[3] + m[6];
+    y2 = _x2 * m[1] + _y2 * m[4] + m[7];
+
+    a1 = y0 - y1;
+    b1 = x0 - x1;
+    a2 = y2 - y1;
+    b2 = x2 - x1;
+    mm = Math.abs(a1 * b2 - b1 * a2);
+
+    if (!mm || !radius) {
+        this.lineTo(x1, y1);
+        return;
+    }
+    dd = a1 * a1 + b1 * b1;
+    cc = a2 * a2 + b2 * b2;
+    tt = a1 * a2 + b1 * b2;
+    k1 = radius * Math.sqrt(dd) / mm;
+    k2 = radius * Math.sqrt(cc) / mm;
+    j1 = k1 * tt / dd;
+    j2 = k2 * tt / cc;
+    cx = k1 * b2 + k2 * b1;
+    cy = k1 * a2 + k2 * a1;
+    px = b1 * (k2 + j1);
+    py = a1 * (k2 + j1);
+    qx = b2 * (k1 + j2);
+    qy = a2 * (k1 + j2);
+    ang1 = Math.atan2(py - cy, px - cx);
+    ang2 = Math.atan2(qy - cy, qx - cx);
+
+    this.lineTo(px + x1, py + y1);
+    this.arc(cx + x1, cy + y1, radius,
+             ang1, ang2, b1 * a2 > b2 * a1);
+}
+  */
 
 // CanvasRenderingContext2D.prototype.beginPath
 function beginPath() {
@@ -256,15 +318,23 @@ function beginPath() {
 // CanvasRenderingContext2D.prototype.bezierCurveTo
 function bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y) {
     if (this._matrixfxd) {
-        var c0 = _map2(this._matrix, cp1x, cp1y, cp2x, cp2y),
-            c1 = _map(this._matrix, x, y);
+        var m = this._matrix,
+            _1x = cp1x, _1y = cp1y, _2x = cp2x, _2y = cp2y, _x = x, _y = y;
 
-        this._path.push(" C", c0.x1, " ", c0.y1, " ",
-                              c0.x2, " ", c0.y2, " ", c1.x, " ", c1.y);
-    } else {
-        this._path.push(" C", cp1x, " ", cp1y, " ",
-                              cp2x, " ", cp2y, " ", x, " ", y);
+        cp1x = _1x * m[0] + _1y * m[3] + m[6];
+        cp1y = _1x * m[1] + _1y * m[4] + m[7];
+        cp2x = _2x * m[0] + _2y * m[3] + m[6];
+        cp2y = _2x * m[1] + _2y * m[4] + m[7];
+           x =  _x * m[0] +  _y * m[3] + m[6];
+           y =  _x * m[1] +  _y * m[4] + m[7];
     }
+    // add begin point
+    this._path.length || this._path.push(" M", cp1x, " ", cp1y);
+
+    this._path.push(" C", cp1x, " ", cp1y, " ",
+                          cp2x, " ", cp2y, " ", x, " ", y);
+    this.px = x;
+    this.py = y;
 }
 
 // CanvasRenderingContext2D.prototype.clear
@@ -391,8 +461,7 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
         dy = full ? a6 : a2,
         dw = full ? a7 : a3 || dim.w,
         dh = full ? a8 : a4 || dim.h,
-        fg, m,
-        bw, bh, w, h, x, y,
+        fg, m, x, y, w, h, bw, bh,
         zindex = (this.__mix ===  4) ? --this._zindex
                : (this.__mix === 10) ? (this.clear(), 0) : 0,
         renderShadow = this.__shadowColor.a && this.shadowBlur,
@@ -580,6 +649,8 @@ function fillCircle(x,       // @param Number:
 // CanvasRenderingContext2D.prototype.fillRect
 function fillRect(x, y, w, h) {
     this.stroke(_rect(this, x, y, w, h), 1);
+    this.px = x;
+    this.py = y;
 }
 
 // CanvasRenderingContext2D.prototype.fillText
@@ -593,12 +664,15 @@ function fillText(text, x, y, maxWidth) {
 // CanvasRenderingContext2D.prototype.lineTo
 function lineTo(x, y) {
     if (this._matrixfxd) {
-        var c0 = _map(this._matrix, x, y);
+        var m = this._matrix, _x = x, _y = y;
 
-        this._path.push(" L", c0.x, " ", c0.y);
-    } else {
-        this._path.push(" L", x, " ", y);
+        x = _x * m[0] + _y * m[3] + m[6]; // x * m11 + y * m21 + dx
+        y = _x * m[1] + _y * m[4] + m[7]; // x * m12 + y * m22 + dy
     }
+    this._path.length || this._path.push(" M", x, " ", y);
+    this._path.push(" L", x, " ", y);
+    this.px = x;
+    this.py = y;
 }
 
 // CanvasRenderingContext2D.prototype.lock
@@ -619,12 +693,14 @@ function measureText(text) {
 // CanvasRenderingContext2D.prototype.moveTo
 function moveTo(x, y) {
     if (this._matrixfxd) {
-        var c0 = _map(this._matrix, x, y);
+        var m = this._matrix, _x = x, _y = y;
 
-        this._path.push(" M", c0.x, " ", c0.y);
-    } else {
-        this._path.push(" M", x, " ", y);
+        x = _x * m[0] + _y * m[3] + m[6]; // x * m11 + y * m21 + dx
+        y = _x * m[1] + _y * m[4] + m[7]; // x * m12 + y * m22 + dy
     }
+    this._path.push(" M", x, " ", y);
+    this.px = x;
+    this.py = y;
 }
 
 // CanvasRenderingContext2D.prototype.putImageData -> NOT IMPL
@@ -652,27 +728,35 @@ function quickStrokeRect(x, y, w, h, hexcolor, alpha, lineWidth) {
 // CanvasRenderingContext2D.prototype.quadraticCurveTo
 function quadraticCurveTo(cpx, cpy, x, y) {
     if (this._matrixfxd) {
-        var c0 = _map2(this._matrix, cpx, cpy, x, y);
+        var m = this._matrix, _1x = cpx, _1y = cpy, _x = x, _y = y;
 
-        this._path.push(" Q", c0.x1, " ", c0.y1, " ", c0.x2, " ", c0.y2);
-    } else {
-        this._path.push(" Q", cpx, " ", cpy, " ", x, " ", y);
+        cpx = _1x * m[0] + _1y * m[3] + m[6]; // x * m11 + y * m21 + dx
+        cpy = _1x * m[1] + _1y * m[4] + m[7]; // x * m12 + y * m22 + dy
+          x =  _x * m[0] +  _y * m[3] + m[6]; // x * m11 + y * m21 + dx
+          y =  _x * m[1] +  _y * m[4] + m[7]; // x * m12 + y * m22 + dy
     }
+    this._path.length || this._path.push(" M", cpx, " ", cpy);
+    this._path.push(" Q", cpx, " ", cpy, " ", x, " ", y);
+    this.px = x;
+    this.py = y;
 }
 
 // CanvasRenderingContext2D.prototype.rect
 function rect(x, y, w, h) {
     this._path.push(_rect(this, x, y, w, h));
+    this.px = x;
+    this.py = y;
 }
 
 // inner -
 function _rect(ctx, x, y, w, h) {
     if (ctx._matrixfxd) {
-        var c0 = _map2(ctx._matrix, x, y, x + w, y),
-            c1 = _map2(ctx._matrix, x + w, y + h, x, y + h);
+        var m = ctx._matrix, xw = x + w, yh = y + h;
 
-        return [" M", c0.x1, " ", c0.y1, " L", c0.x2, " ", c0.y2,
-                " L", c1.x1, " ", c1.y1, " L", c1.x2, " ", c1.y2,
+        return [" M", x  * m[0] + y  * m[3] + m[6], " ", x  * m[1] + y  * m[4] + m[7],
+                " L", xw * m[0] + y  * m[3] + m[6], " ", xw * m[1] + y  * m[4] + m[7],
+                " L", xw * m[0] + yh * m[3] + m[6], " ", xw * m[1] + yh * m[4] + m[7],
+                " L", x  * m[0] + yh * m[3] + m[6], " ", x  * m[1] + yh * m[4] + m[7],
                 " Z"].join("");
     }
     return [" M", x,     " ", y,     " L", x + w, " ", y,
@@ -753,7 +837,8 @@ function stroke(path, fill) {
         this.__mix = _COMPOS[this._mix = this.globalCompositeOperation];
     }
 
-    // (123.456789).toFixed(4) -> "123.4567"
+    // avoid Silverlight MaxPathLength = 32768
+    //    (123.456789).toFixed(4) -> "123.4567"
     path = (path || this._path.join("")).replace(_FIXED4, ".$1");
 
     var fg, shadow = "", more,
@@ -833,7 +918,7 @@ function strokeText(text, x, y, maxWidth, fill) {
         zindex = (this.__mix ===  4) ? --this._zindex
                : (this.__mix === 10) ? (this.clear(), 0) : 0,
         rv = [], fg, color,
-        fp, c0, mtx, rgx, rgy,
+        fp, m = this._matrix, x0, y0, x1, y1,
         font = uu.font.parse(this.font, this.canvas),
         metric = uu.font.metric(font.formal, text),
         offX = 0, align = this.textAlign, dir = "ltr";
@@ -847,9 +932,6 @@ function strokeText(text, x, y, maxWidth, fill) {
     case "center": offX = (metric.w - 4) / 2; break; // -4: adjust
     case "right":  offX = metric.w;
     }
-    mtx = _matrix(
-              'TextBlock',
-              uu.m2d.translate(x - offX, y, this._matrix));
 
     rv.push('<Canvas Canvas.ZIndex="', zindex, '">');
     if (typeof style === "string") {
@@ -863,29 +945,39 @@ function strokeText(text, x, y, maxWidth, fill) {
             '" FontSize="', font.size.toFixed(2),
             '" FontStyle="', _FONT_STYLES[font.style] || "Normal",
             '" FontWeight="', _FONT_WEIGHTS[font.weight] || "Normal",
-            '">', uu.esc(text), mtx,
+            '">', uu.esc(text),
+                _matrix('TextBlock',
+                        uu.m2d.translate(x - offX, y, this._matrix)),
             (this.__shadowColor.a && this.shadowBlur) ? _blur(this, "TextBlock", this.__shadowColor) : "");
 
     if (typeof style === "string") {
         ;
     } else if (style.fn === _radialGradientFill) {
         fp = style.param,
-        rgx = (fp.x0 - (fp.x1 - fp.r1)) / (fp.r1 * 2),
-        rgy = (fp.y0 - (fp.y1 - fp.r1)) / (fp.r1 * 2),
+        x0 = (fp.x0 - (fp.x1 - fp.r1)) / (fp.r1 * 2),
+        y0 = (fp.y0 - (fp.y1 - fp.r1)) / (fp.r1 * 2),
+
         rv.push('<TextBlock.Foreground><RadialGradientBrush GradientOrigin="',
-                rgx, ',', rgy,
+                x0, ',', y0,
                 '" Center="0.5,0.5" RadiusX="0.5" RadiusY="0.5">',
                     style.colors || _radialColor(style),
                 '</RadialGradientBrush></TextBlock.Foreground>');
+
     } else if (style.fn === _linearGradientFill) {
         fp = style.param;
-        c0 = _map2(this._matrix, fp.x0, fp.y0, fp.x1, fp.y1),
+
+        x0 = fp.x0 * m[0] + fp.y0 * m[3] + m[6]; // x * m11 + y * m21 + dx
+        y0 = fp.x0 * m[1] + fp.y0 * m[4] + m[7]; // x * m12 + y * m22 + dy
+        x1 = fp.x1 * m[0] + fp.x1 * m[3] + m[6]; // x * m11 + y * m21 + dx
+        y1 = fp.y1 * m[1] + fp.y1 * m[4] + m[7]; // x * m12 + y * m22 + dy
+
         rv.push('<TextBlock.Foreground>',
                 '<LinearGradientBrush MappingMode="Absolute" StartPoint="',
-                c0.x1, ",", c0.y1,
-                '" EndPoint="', c0.x2, ",", c0.y2, '">',
+                x0, ",", y0,
+                '" EndPoint="', x1, ",", y1, '">',
                     style.colors || _linearColor(style),
                 '</LinearGradientBrush></TextBlock.Foreground>');
+
     } else { // pattern
         rv.push('<TextBlock.Foreground><ImageBrush Stretch="None" ImageSource="',
                 style.src,
@@ -915,10 +1007,11 @@ function translate(x, y) {
 // CanvasRenderingContext2D.prototype.unlock
 function unlock() {
     switch (this._state) {
-    case 0x7: // [THROUGH][INLINE][LAZY] // this.clear();
+    case 0x7: // [INLINE][LAZY] // this.clear();
             this.xFlyweight || (this._history = []);
             this._zindex = 0;
             this._state ? this._view.clear() : (this._stock = []);
+            // break; [THROUGH]
     case 0x3:
             this._state = 0x1; // unlock
             if (this._stock.length) {
@@ -929,46 +1022,30 @@ function unlock() {
     }
 }
 
-// inner -
-function _map(m,   // @param Array: matrix
-              x,   // @param Number: x
-              y) { // @param Number: y
-                   // @return Hash: { x, y }
-    return {
-        x: x * m[0] + y * m[3] + m[6], // x * m11 + y * m21 + dx
-        y: x * m[1] + y * m[4] + m[7]  // x * m12 + y * m22 + dy
-    };
-}
-
-// inner -
-function _map2(m,    // @param Array: matrix
-               x1,   // @param Number: x
-               y1,   // @param Number: y
-               x2,   // @param Number: x
-               y2) { // @param Number: y
-                     // @return Hash: { x1, y1, x2, y2 }
-    return {
-        x1: x1 * m[0] + y1 * m[3] + m[6], // x * m11 + y * m21 + dx
-        y1: x1 * m[1] + y1 * m[4] + m[7], // x * m12 + y * m22 + dy
-        x2: x2 * m[0] + y2 * m[3] + m[6], // x * m11 + y * m21 + dx
-        y2: x2 * m[1] + y2 * m[4] + m[7]  // x * m12 + y * m22 + dy
-    };
-}
-
 // inner - Linear Gradient Fill
 function _linearGradientFill(ctx, obj, path, fill, zindex) {
     var rv = [],
         fp = obj.param,
-        c0 = _map2(ctx._matrix, fp.x0, fp.y0, fp.x1, fp.y1),
+        m  = ctx._matrix,
+        x0 = fp.x0,
+        y0 = fp.y0,
+        x1 = fp.x1,
+        y1 = fp.y1,
         prop = fill ? "Fill" : "Stroke";
+
+    if (ctx._matrixfxd) {
+        x0 = fp.x0 * m[0] + fp.y0 * m[3] + m[6], // x * m11 + y * m21 + dx
+        y0 = fp.x0 * m[1] + fp.y0 * m[4] + m[7]  // x * m12 + y * m22 + dy
+        x1 = fp.x1 * m[0] + fp.y1 * m[3] + m[6], // x * m11 + y * m21 + dx
+        y1 = fp.x1 * m[1] + fp.y1 * m[4] + m[7]  // x * m12 + y * m22 + dy
+    }
 
     rv.push('<Canvas Canvas.ZIndex="', zindex,
             '"><Path Opacity="', ctx.globalAlpha,
             '" Data="', path,
             fill ? "" : _stroke(ctx), '"><Path.', prop,
             '><LinearGradientBrush MappingMode="Absolute" StartPoint="',
-            c0.x1, ",", c0.y1,
-              '" EndPoint="', c0.x2, ",", c0.y2, '">',
+                x0, ",", y0, '" EndPoint="', x1, ",", y1, '">',
               obj.colors || _linearColor(obj),
             '</LinearGradientBrush></Path.', prop, '>',
             (ctx.__shadowColor.a && ctx.shadowBlur) ? _blur(ctx, "Path", ctx.__shadowColor) : "",

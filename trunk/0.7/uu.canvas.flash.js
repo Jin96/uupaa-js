@@ -143,6 +143,8 @@ function initSurface() {
     this.textAlign      = "start";
     this.textBaseline   = "alphabetic";
     // --- hidden properties ---
+    this.px             = 0;
+    this.py             = 0;
     this._stack         = [];   // matrix and prop stack.
     this._stock         = [];   // lock stock
     this._lockState     = 0;    // lock state, 0: unlock, 1: lock, 2: lock + clear
@@ -181,7 +183,13 @@ function arc(x, y, radius, startAngle, endAngle, anticlockwise) {
                        (anticlockwise ? 1 : 0));
 }
 
-// CanvasRenderingContext2D.prototype.arcTo -> NOT IMPL
+// CanvasRenderingContext2D.prototype.arcTo
+/*
+function arcTo(x1, y1, x2, y2, radius) {
+    this.send("at\t" + x1 + "\t" + y1 + "\t" +
+                       x2 + "\t" + y2 + "\t" + radius);
+}
+ */
 
 // CanvasRenderingContext2D.prototype.beginPath
 function beginPath() {
