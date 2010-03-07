@@ -82,6 +82,7 @@ package {
 //          Security.allowDomain("*");
 
             ExternalInterface.addCallback("send", recv);
+            ExternalInterface.addCallback("resize", resize);
 
             _shape = new Shape();
             _gfx = _shape.graphics;
@@ -153,7 +154,7 @@ package {
             }
         }
 
-        private function recv(msg:String):void {
+        public function recv(msg:String):void {
             var a:Array = msg.split("\t");
             var i:int = -1;
             var iz:int = a.length;
@@ -166,9 +167,6 @@ package {
                             _state = 1; // not ready(locked) -> ready
                             addEventListener("enterFrame", onEnterFrame);
                             break;
-                case "rz":  // resize
-                            clearCache();
-                            init(+a[++i], +a[++i], +a[++i]); break;
                 case "xp":  clearCache(); break;
                 case "rt":  _rtl = 1; break; // direction = rtl
                 case "gA":  globalAlpha = +a[++i]; break;
@@ -282,6 +280,7 @@ package {
         }
 
         private function init(width:int, height:int, flyweight:int):void {
+//trace("init(), width="+width+",height="+height);
             xFlyweight = flyweight;
             canvasWidth = width;
             canvasHeight = height;
@@ -300,19 +299,28 @@ package {
 
             // reset canvas
             if (_buff) {
-                clearAll();
+//                clearAll();
                 _buff.dispose();
+                _buff = new BitmapData(width, height, true, 0); // 300 x 150
+                _view.bitmapData = _buff;
+            } else {
+                _buff = new BitmapData(width, height, true, 0); // 300 x 150
+                _view = new Bitmap(_buff,
+                                   flyweight ? PixelSnapping.AUTO : PixelSnapping.NEVER,
+                                   flyweight ? false : true);
+                addChild(_view);
             }
-            _buff = new BitmapData(width, height, true, 0); // 300 x 150
-            _view = new Bitmap(_buff,
-                               flyweight ? PixelSnapping.AUTO : PixelSnapping.NEVER,
-                               flyweight ? false : true);
-            addChild(_view);
 
             // build clearAll params
             _clearAllBuff = _buff.clone();
             _clearAllRect = new Rectangle(0, 0, width, height);
             _clearAllPoint = new Point(0, 0);
+        }
+
+        public function resize(width:int, height:int, flyweight:int):void {
+//trace("resize(), width="+width+",height="+height);
+            clearCache();
+            init(width, height, flyweight);
         }
 
         private function clearCache():void {

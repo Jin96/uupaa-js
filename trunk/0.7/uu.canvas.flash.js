@@ -75,49 +75,73 @@ function init(ctx, node) { // @param Node: <canvas>
 }
 
 // uu.canvas.FL2D.build
-function build(node) { // @param Node: <canvas>
-                       // @return Node:
+function build(canvas) { // @param Node: <canvas>
+                         // @return Node:
     // CanvasRenderingContext.getContext
-    node.getContext = function() {
-        return node.uuctx2d;
+    canvas.getContext = function() {
+        return canvas.uuctx2d;
     };
-    node.uuctx2d = new uu.canvas.FL2D(node);
+    canvas.uuctx2d = new uu.canvas.FL2D(canvas);
 
     var id = "externalcanvas" + uu.guid();
 
-    // wait for response from flash
     uu.dmz[id] = flashCanvasReadyCallback;
 
+    // wait for response from flash initializer
     function flashCanvasReadyCallback() {
-        var ctx = node.uuctx2d;
+        var ctx = canvas.uuctx2d;
 
         ctx._readyState = 1; // 1: draw ready
-        if (node.currentStyle.direction === "rtl") {
+        if (canvas.currentStyle.direction === "rtl") {
             ctx._stock.push("rt");
         }
         ctx.sendState(0xf);
         ctx.send();
-        uu.dmz[id] = null; // free
+        // [GC]
+        uu.dmz[id] = null;
     }
 
     // create swf <object>
-    node.innerHTML = uu.fmt(
+    canvas.innerHTML = uu.fmt(
         '<object id="?" width="?" height="?" classid="?">' +
             '<param name="allowScriptAccess" value="always" />' +
             '<param name="flashVars" value="" />' +
             '<param name="wmode" value="transparent" />' +
             '<param name="movie" value="?" /></object>',
-        [id, node.width, node.height,
+        [id, canvas.width, canvas.height,
          "clsid:d27cdb6e-ae6d-11cf-96b8-444553540000",
          uu.config.dir + "uu.canvas.swf"]);
 
-    node.uuctx2d._view = uu.id(id); // find swf <object>
+//  canvas.uuctx2d._view = uu.id(id); // find swf <object>
+    canvas.uuctx2d._view = canvas.firstChild; // <object>
+
+    // uncapture key events(release focus)
+    function onFocus(evt) {
+        var obj = evt.srcElement,     // <canvas><object /></canvas>
+            canvas = obj.parentNode;  // <canvas>
+
+        obj.blur();
+        canvas.focus();
+    }
+
+    // trap <canvas width>, <canvas height> change event
+    function onPropertyChange(evt) {
+        var attr = evt.propertyName;
+
+        attr === "width"  && canvas.uuctx2d.resize(canvas.width);
+        attr === "height" && canvas.uuctx2d.resize(void 0, canvas.height);
+    }
+
+    canvas.firstChild.attachEvent("onfocus", onFocus); // <object>.attachEvent
+    canvas.attachEvent("onpropertychange", onPropertyChange);
 
     win.attachEvent("onunload", function() { // [FIX][MEM LEAK]
-        node.uuctx2d = node.getContext = null;
+        canvas.uuctx2d = canvas.getContext = null;
         win.detachEvent("onunload", arguments.callee);
+        canvas.detachEvent("onfocus", onFocus);
+        canvas.detachEvent("onpropertychange", onPropertyChange);
     });
-    return node;
+    return canvas;
 }
 
 // CanvasRenderingContext2D.prototype.initSurface
@@ -416,8 +440,10 @@ function resize(width,    // @param Number(= void 0): width
         this._view.height = height;
     }
     this._readyState = state;
-    this._msgid = 999; // [!] force send
-    this.send("rz\t" + width + "\t" + height + "\t" + this.xFlyweight);
+    this._msgid = 100 + uu.guid(); // [!] next command force send
+
+    // [SYNC] ExternalInterface.resize
+    this._view.resize(this.canvas.width, this.canvas.height, this.xFlyweight);
 }
 
 // CanvasRenderingContext2D.prototype.restore
@@ -609,14 +635,14 @@ function send(fg) { // @param String: fragment, "{COMMAND}\t{ARG1}\t..."
     if (!this._lockState && this._readyState) {
         if (this._readyState === 1) {
             if (this._view) {
-                // send "init" command. init(width, heigth, xFlyweight)
+                // [SYNC] send "init" command. init(width, heigth, xFlyweight)
                 this._view.CallFunction(send._prefix +
                     "in\t" + this.canvas.width + "\t" + this.canvas.height +
                     "\t" + this.xFlyweight +
                     send._suffix);
                 this._readyState = 2;
 
-                // [FIX] http://twitter.com/uupaa/status/9837157309
+                // [SYNC][FIX] http://twitter.com/uupaa/status/9837157309
                 // at first
                 this._view.CallFunction(send._prefix +
                     this._stock.join("\t") +

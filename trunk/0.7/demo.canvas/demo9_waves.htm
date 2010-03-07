@@ -45,7 +45,9 @@ function xcanvas(uu, node) {
     canvas = node[0];
     ctx = canvas.getContext("2d");
 
-    ctx.resize(sz.iw - 40, sz.ih - 40)
+    canvas.width = sz.iw - 40;
+    canvas.height = sz.ih - 40;
+//    ctx.resize(sz.iw - 40, sz.ih - 40)
 //    ctx = canvas.getContext("2d");
 
     if (ctx instanceof uu.canvas.VML2D) {
