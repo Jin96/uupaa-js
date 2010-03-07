@@ -1440,7 +1440,8 @@ function uuev(node,    // @param Node:
 
             if (types.indexOf("," + v + ",") >= 0) { // bound?
                 if (mode === 2) { // detach event
-                    _ie && (type === "losecapture") && node.releaseCapture();
+                    _ie && type === "losecapture" && node.releaseCapture &&
+                        node.releaseCapture();
 
                     // ",dblclick," <- ",namespace.click+,dblclick,".replace(",namespace.click+,", ",")
                     node.uuevtypes = node.uuevtypes.replace("," + v + ",", ",");
@@ -1448,7 +1449,8 @@ function uuev(node,    // @param Node:
                     uuevdetach(node, type, closure, capt);
                 }
             } else if (mode === 1) { // attach event
-                _ie && (type === "losecapture") && node.setCapture();
+                _ie && type === "losecapture" && node.setCapture &&
+                    node.setCapture();
 
                 // ",namespace.click+,dblclick," <- ",namespace.click+," + "dblclick" + ,"
                 node.uuevtypes += v + ",";

@@ -81,18 +81,19 @@ function init(ctx, node) { // @param Node: <canvas>
 }
 
 // uu.canvas.SL2D.build
-function build(node) { // @param Node: <canvas>
-                       // @return Node:
+function build(canvas) { // @param Node: <canvas>
+                         // @return Node:
     // CanvasRenderingContext.getContext
-    node.getContext = function() {
-        return node.uuctx2d;
+    canvas.getContext = function() {
+        return canvas.uuctx2d;
     };
-    node.uuctx2d = new uu.canvas.SL2D(node);
+    canvas.uuctx2d = new uu.canvas.SL2D(canvas);
 
     var onload = "uuonslload" + uu.guid(); // window.uuonslload{n}
 
+    // wait for response from Silverlight initializer
     win[onload] = function(sender) { // @param Node: sender is <Canvas> node
-        var ctx = node.uuctx2d, xaml;
+        var ctx = canvas.uuctx2d, xaml;
 
         ctx._view = sender.children;
         ctx._content = sender.getHost().content; // getHost() -> <object>
@@ -105,11 +106,12 @@ function build(node) { // @param Node: <canvas>
         }
         ctx._state = 0x1; // draw ready(locked flag off)
         ctx._stock = []
-        win[onload] = null; // gc
+        // [GC]
+        win[onload] = null;
     };
 
     // create Silverlight <object>
-    node.innerHTML = [
+    canvas.innerHTML = [
         '<object type="application/x-silverlight-2" width="100%" height="100%">',
             '<param name="background" value="#00000000" />',  // transparent
             '<param name="windowless" value="true" />',
@@ -117,11 +119,33 @@ function build(node) { // @param Node: <canvas>
             '<param name="onLoad" value="', onload, '" />',   // bond to global
         '</object>'].join("");
 
+    // uncapture key events(release focus)
+    function onFocus(evt) {
+        var obj = evt.srcElement,     // <canvas><object /></canvas>
+            canvas = obj.parentNode;  // <canvas>
+
+        obj.blur();
+        canvas.focus();
+    }
+
+    // trap <canvas width>, <canvas height> change event
+    function onPropertyChange(evt) {
+        var attr = evt.propertyName;
+
+        attr === "width"  && canvas.uuctx2d.resize(canvas.width);
+        attr === "height" && canvas.uuctx2d.resize(void 0, canvas.height);
+    }
+
+    canvas.firstChild.attachEvent("onfocus", onFocus); // <object>.attachEvent
+    canvas.attachEvent("onpropertychange", onPropertyChange);
+
     win.attachEvent("onunload", function() { // [FIX][MEM LEAK]
-        node.uuctx2d = node.getContext = null;
+        canvas.uuctx2d = canvas.getContext = null;
         win.detachEvent("onunload", arguments.callee);
+        canvas.detachEvent("onfocus", onFocus);
+        canvas.detachEvent("onpropertychange", onPropertyChange);
     });
-    return node;
+    return canvas;
 }
 
 // CanvasRenderingContext2D.prototype.initSurface

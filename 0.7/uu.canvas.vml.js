@@ -97,19 +97,41 @@ function init(ctx, node) { // @param Node: <canvas>
 }
 
 // uu.canvas.VML2D.build
-function build(node) { // @param Node: <canvas>
-                       // @return Node:
+function build(canvas) { // @param Node: <canvas>
+                         // @return Node:
     // CanvasRenderingContext.getContext
-    node.getContext = function() {
-        return node.uuctx2d;
+    canvas.getContext = function() {
+        return canvas.uuctx2d;
     };
-    node.uuctx2d = new uu.canvas.VML2D(node);
+    canvas.uuctx2d = new uu.canvas.VML2D(canvas);
+
+    // uncapture key events(release focus)
+    function onFocus(evt) {
+        var div = evt.srcElement,     // <canvas><div /></canvas>
+            canvas = div.parentNode;  // <canvas>
+
+        div.blur();
+        canvas.focus();
+    }
+
+    // trap <canvas width>, <canvas height> change event
+    function onPropertyChange(evt) {
+        var attr = evt.propertyName;
+
+        attr === "width"  && canvas.uuctx2d.resize(canvas.width);
+        attr === "height" && canvas.uuctx2d.resize(void 0, canvas.height);
+    }
+
+    canvas.firstChild.attachEvent("onfocus", onFocus); // <object>.attachEvent
+    canvas.attachEvent("onpropertychange", onPropertyChange);
 
     win.attachEvent("onunload", function() { // [FIX][MEM LEAK]
-        node.uuctx2d = node.getContext = null;
+        canvas.uuctx2d = canvas.getContext = null;
         win.detachEvent("onunload", arguments.callee);
+        canvas.detachEvent("onfocus", onFocus);
+        canvas.detachEvent("onpropertychange", onPropertyChange);
     });
-    return node;
+    return canvas;
 }
 
 // CanvasRenderingContext2D.prototype.initSurface
