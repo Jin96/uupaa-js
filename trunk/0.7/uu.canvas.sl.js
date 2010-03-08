@@ -434,7 +434,7 @@ function createPattern(image,    // @param HTMLImageElement/HTMLCanvasElement:
     function CanvasPattern(image, repeat) {
         this.fn = _patternFill;
         this.src = image.src; // HTMLImageElement
-        this.dim = uu.img.actsize(image);
+        this.dim = uu.img.size(image);
         this.type = 3; // 3:tile
         this.repeat = repeat;
     }
@@ -475,7 +475,7 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
         this.__mix = _COMPOS[this._mix = this.globalCompositeOperation];
     }
 
-    var dim = uu.img.actsize(image), // img actual size
+    var dim = uu.img.size(image), // img actual size
         az = arguments.length, full = (az === 9),
         sx = full ? a1 : 0,
         sy = full ? a2 : 0,

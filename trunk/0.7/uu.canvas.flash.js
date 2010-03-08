@@ -83,7 +83,7 @@ function build(canvas) { // @param Node: <canvas>
     };
     canvas.uuctx2d = new uu.canvas.FL2D(canvas);
 
-    var id = "externalcanvas" + uu.guid();
+    var id = "externalcanvas" + uu.guid() + (+new Date);
 
     uu.dmz[id] = flashCanvasReadyCallback;
 
@@ -333,22 +333,39 @@ function createRadialGradient(x0, y0, r0, x1, y1, r1) { // @return CanvasGradien
 }
 
 // CanvasRenderingContext2D.prototype.drawImage
-// drawImage(image, dx, dy)
-// drawImage(image, dx, dy, dw, dh)
-// drawImage(image, sx, sy, sw, sh, dx, dy, dw, dh)
+// drawImage(image,       dx, dy)
+// drawImage(image,       dx, dy, dw, dh)
+// drawImage(image,       sx, sy, sw, sh, dx, dy, dw, dh)
 function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
     var args = (a3 === void 0) ? 3
-             : (a5 === void 0) ? 5 : 9;
+             : (a5 === void 0) ? 5 : 9,
+        dx, dy, dw, dh, sx, sy, sw, sh, canvas;
 
     if (image.src) { // HTMLImageElement
         this.sendState(0x5);
-        this.send("dI\t" + args + "\t" + image.src + "\t" +
+        this.send("d0\t" + args + "\t" + image.src + "\t" +
                   a1 + "\t" + a2 + "\t" +
                   (a3 || 0) + "\t" + (a4 || 0) + "\t" +
                   (a5 || 0) + "\t" + (a6 || 0) + "\t" +
                   (a7 || 0) + "\t" + (a8 || 0));
     } else { // HTMLCanvasElement
-        ; // NOP
+        canvas = image.firstChild;
+
+        sx = 0;
+        sy = 0;
+        sw = canvas.width;
+        sh = canvas.height;
+
+        switch (args) {
+        case 3: dx = a1, dy = a2, dw = sw, dh = sh; break;
+        case 5: dx = a1, dy = a2, dw = a3, dh = a4; break;
+        case 9: sx = a1, sy = a2, sw = a3, sh = a4;
+                dx = a5, dy = a6, dw = a7, dh = a8;
+        }
+        this.sendState(0x5);
+        this.send("d1\t" + args + "\t" + canvas.id + "\t" +
+                  sx + "\t" + sy + "\t" + sw + "\t" + sh + "\t" +
+                  dx + "\t" + dy + "\t" + dw + "\t" + dh);
     }
 }
 

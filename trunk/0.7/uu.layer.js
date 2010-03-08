@@ -914,7 +914,7 @@ function image(image,  // @param HTMLImageElement
 function fitImage(image) { // @param HTMLImageElement: image element
                            // @return this:
     var ctx = this._cctx,
-        dim = uu.img.actsize(image),
+        dim = uu.img.size(image),
         cw = parseInt(ctx.canvas.width),
         ch = parseInt(ctx.canvas.height),
         sw = dim.w,
@@ -1036,7 +1036,7 @@ function createReflectionLayer(
               offsetX,       // @param Number(= 0): offset X
               offsetY) {     // @param Number(= 0): offset Y
                              // @return Node: new layer element
-    var dim = uu.img.actsize(image),
+    var dim = uu.img.size(image),
         w = width || dim.w,
         h = height || dim.h,
         ox = offsetX || 0,
