@@ -20,3 +20,12 @@ lib/Canvas/src/CanvasArc.as
 Developers:
 	Colin Leung
 
+---------------------------------------
+lib/Canvas/src/com/adobe/images/BitString.as
+lib/Canvas/src/com/adobe/images/JPGEncoder.as
+lib/Canvas/src/com/adobe/images/PNGEncoder.as
+    http://code.google.com/p/as3corelib/
+
+Project:
+    corelib ActionScript 3 Library
+
