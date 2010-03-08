@@ -1,13 +1,13 @@
 package {
-    import flash.display.*;
-//  import flash.system.Security; // for Security.allowDomain
-//  import flash.system.System;
-    import flash.events.Event;
-    import flash.geom.*;
-    import flash.net.URLRequest;
+    import flash.external.*;
     import flash.filters.*;
+    import flash.display.*;
+    import flash.events.*;
+//  import flash.system.*; // for Security.allowDomain
+    import flash.utils.*;
+    import flash.geom.*;
     import flash.text.*;
-    import flash.external.ExternalInterface;
+    import flash.net.*;
 
     public class Canvas extends Sprite {
         // --- compositing ---
@@ -71,6 +71,11 @@ package {
         private var canvasWidth:int = 300;
         private var canvasHeight:int = 150;
 
+        // copyCanvas
+        private var _callback:Function = null;
+        private var _copyBuff:BitmapData;
+        private var _localConnection:LocalConnection = new LocalConnection();
+
         public  var imageCache:Object = {}; // image cached db. { url: BitmapData }
         private var fillImage:CanvasImage;
         private var strokeImage:CanvasImage;
@@ -83,6 +88,10 @@ package {
 
             ExternalInterface.addCallback("send", recv);
             ExternalInterface.addCallback("resize", resize);
+
+            // copyCanvas
+            _localConnection.client = this;
+            _localConnection.connect(ExternalInterface.objectID);
 
             _shape = new Shape();
             _gfx = _shape.graphics;
@@ -143,14 +152,17 @@ package {
             if (_state) {
                 _buff && _buff.lock();
 
-                    var msg:String = _stock.join("\t");
-
-                    msg = msg.replace(/^\t+/, ""); // trim head(\t)
+                    var msg:String = _stock.join("\t").replace(/^\t+/, "");
 
                     _stock = []; // pre clear
                     msg && recv(msg);
 
                 _buff && _buff.unlock();
+            }
+
+            // wait for copyCanvas
+            if (_callback !== null && !_stock.length) {
+                _callback();
             }
         }
 
@@ -248,13 +260,17 @@ package {
                 case "fT":  fill = 1; // [THROUGH]
                 case "sT":  strokeText(a[++i], +a[++i], +a[++i], +a[++i], fill); break;
                 case "cl":  clip(); break;
-                case "dI":  drawImage(+a[++i], a[++i],
+                case "d0":  drawImage(+a[++i], a[++i],
                                       [+a[++i], +a[++i], +a[++i], +a[++i],
                                        +a[++i], +a[++i], +a[++i], +a[++i]]);
                             if (_state < 2) {
                                 _stock.push(a.slice(++i).join("\t")); // push remain commands
                                 return;
                             }
+                            break;
+                case "d1":  copyCanvas(+a[++i], a[++i], // <object id>
+                                       { sx: +a[++i], sy: +a[++i], sw: +a[++i], sh: +a[++i],
+                                         dx: +a[++i], dy: +a[++i], dw: +a[++i], dh: +a[++i] });
                             break;
                 case "ro":  rotate(a[++i] * 0.000001); break;
                 case "sc":  scale(+a[++i], +a[++i]); break;
@@ -604,13 +620,13 @@ package {
             _lineScale = (_matrix.a + _matrix.d) / 2;
         }
 
-        private function drawImage(args:Number,  // 3, 5, 9
-                                   image:String, // url
+        private function drawImage(args:Number, // 3, 5, 9
+                                   url:String,
                                    param:Array):void {
             var me:* = this;
             var canvasImage:CanvasImage = new CanvasImage(this);
-            var rv:Boolean = canvasImage.load(image, function():void {
-                me.drawImageCallback(args, image, param, canvasImage.bitmapData);
+            var rv:Boolean = canvasImage.load(url, function():void {
+                me.drawImageCallback(args, param, canvasImage.bitmapData);
                 me.next(1);
             });
 
@@ -618,7 +634,6 @@ package {
         }
 
         private function drawImageCallback(args:Number,
-                                           image:String,
                                            param:Array,
                                            bitmapData:BitmapData):void {
             var dx:Number = 0;
@@ -839,7 +854,8 @@ package {
             _gfx.clear();
         }
 
-        private function strokeText(text:String, x:Number, y:Number, maxWidth:Number, fill:int): void {
+        private function strokeText(text:String, x:Number, y:Number,
+                                    maxWidth:Number, fill:int): void {
             var color:uint = fill ? fillColor[0] : strokeColor[0];
             var a:Number = (fill ? fillColor[1] : strokeColor[1]) * globalAlpha;
             var textFormat:TextFormat = new TextFormat();
@@ -848,6 +864,7 @@ package {
             var filterBmp:BitmapData; // filter bitmap
             var filterRect:Rectangle; // filter rect
             var matrix:Matrix = new Matrix(1, 0, 0, 1, x, y);
+            var glowFilter:GlowFilter;
 
             // http://twitter.com/uupaa/status/9934417220
             var copyOffsetX:Number = (shadowOffsetX < 0 ? -shadowOffsetX : 0) + 20;
@@ -863,6 +880,14 @@ package {
             textField.defaultTextFormat = textFormat;       // apply font
             textField.autoSize = TextFieldAutoSize.LEFT;    // [!][NEED] auto resize
             textField.text = text;
+
+            // strokeText
+            if (!fill) {
+                glowFilter = new GlowFilter(strokeColor[0],
+                                            strokeColor[1],
+                                            2, 2, 2, 1, false, true);
+                textField.filters = [glowFilter];
+            }
 
             switch (textAlign) {
             case "left":    matrix.tx -= 2; break; // [FIX] -2
@@ -953,6 +978,75 @@ package {
                 default:
                     bg.draw(pict, matrix, color, mixMode, null, true);
                 }
+            }
+        }
+
+        private function copyCanvas(args:Number, // 3, 5, 9
+                                    id:String,   // copy source canvas id
+                                    param:Object):void {
+            next(0); // lock
+            _localConnection.send(id,
+                                  "sendBack",
+                                  ExternalInterface.objectID,
+                                  param);
+        }
+
+        public function sendBack(id:String, param:Object):void {
+            var me:* = this;
+
+            _callback = function():void {
+                me.readySendBack(id, param);
+            };
+            next(_state);
+        }
+
+        public function readySendBack(id:String, param:Object):void {
+            _callback = null;
+
+            var x:int = 0;
+            var y:int = 0;
+            var w:int = Math.ceil(param.sw / 100) * 100;
+            var h:int = Math.ceil(param.sh / 100) * 100;
+            var index:int = 0;
+            var blocks:int = w * h / 10000;
+            var canvas:BitmapData = new BitmapData(w, h, true, 0);
+
+            canvas.copyPixels(_buff, _buff.rect, new Point());
+
+            // http://livedocs.adobe.com/flash/9.0_jp/ActionScriptLangRefV3/flash/net/LocalConnection.html#send()
+            // The maximum of one packet is 40kB.
+            // 100 x 100 x 4bpp = 40000B = 3.9kB
+            for (; y < h; y += 100) {
+                for (x = 0; x < w; ++index, x += 100) {
+                    _localConnection.send(id,
+                                          "recvLocalConnection",
+                                          param,
+                                          x, y, 100, 100, index, blocks,
+                                          canvas.getPixels(new Rectangle(x, y, 100, 100)));
+                }
+            }
+        }
+
+        public function recvLocalConnection(param:Object,
+                                            x:int, y:int, w:int, h:int,
+                                            index:int, blocks:int,
+                                            byteArray:ByteArray):void {
+            // first time
+            if (!index) {
+                _copyBuff = new BitmapData(Math.ceil(param.sw / 100) * 100,
+                                           Math.ceil(param.sh / 100) * 100, true, 0);
+            }
+
+            _copyBuff.setPixels(new Rectangle(x, y, w, h), byteArray);
+
+            // finish
+            if (index === blocks - 1) {
+                drawImageCallback(9, [param.sx, param.sy, param.sw, param.sh,
+                                      param.dx, param.dy, param.dw, param.dh],
+                                  _copyBuff);
+                _copyBuff.dispose();
+
+                next(1); // unlock
             }
         }
     }
