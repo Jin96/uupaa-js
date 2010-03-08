@@ -3,6 +3,7 @@
 // depend: uu.js
 uu.agein || (function(uu) {
 var _B64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/",
+    _B64_CHAR   = _B64.split(""),
     _DATA_URI   = /^data:([\w\/]+)(;base64)?,/,
     _B64_NGCHAR = /[^A-Za-z0-9\+\/]/,
     _S64_CHAR   = /-_=/g,
@@ -123,7 +124,7 @@ function uucodecutf8decode(ary) { // @param UTF8ByteArray:
 function uucodecbase64encode(ary,       // @param ByteArray: array( [0x0, ... ] )
                              urlsafe) { // @param Boolean(= true): true = URLSafe
                                         // @return Base64String/URLSafe64String:
-    var rv = [], pad = 0, code = _B64, c = 0, i = -1, iz;
+    var rv = [], pad = 0, c = 0, i = -1, iz;
 
     switch (ary.length % 3) {
     case 1: ary.push(0); ++pad;
@@ -133,10 +134,10 @@ function uucodecbase64encode(ary,       // @param ByteArray: array( [0x0, ... ] 
 
     while (i < iz) {
         c = (ary[++i] << 16) | (ary[++i] << 8) | (ary[++i]);
-        rv.push(code.charAt((c >>> 18) & 0x3f),
-                code.charAt((c >>> 12) & 0x3f),
-                code.charAt((c >>>  6) & 0x3f),
-                code.charAt( c         & 0x3f));
+        rv.push(_B64_CHAR[(c >>> 18) & 0x3f],
+                _B64_CHAR[(c >>> 12) & 0x3f],
+                _B64_CHAR[(c >>>  6) & 0x3f],
+                _B64_CHAR[ c         & 0x3f]);
     }
     switch (pad) {
     case 2: rv[rv.length - 2] = "=";

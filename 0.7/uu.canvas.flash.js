@@ -81,6 +81,26 @@ function build(canvas) { // @param Node: <canvas>
     canvas.getContext = function() {
         return canvas.uuctx2d;
     };
+
+    // CanvasRenderingContext.toDataURL
+    canvas.toDataURL = function(mimeType,      // @param String(= "image/png"): mime type
+                                jpegQuality) { // @param Number(= 0.8): jpeg quality, 0.0 ~ 1.0
+        if (!canvas.width || !canvas.height) {
+            return "data:,";
+        }
+
+        mimeType = (mimeType || "image/png").toLowerCase();
+        mimeType = mimeType === "image/jpeg" ? mimeType : "image/png";
+
+        jpegQuality = parseFloat(jpegQuality); // undefined -> NaN
+        if (isNaN(jpegQuality)) {
+            jpegQuality = 0.8;
+        }
+
+        // [SYNC] ExternalInterface.toDataURL
+        return canvas.uuctx2d._view.toDataURL(mimeType, jpegQuality);
+    };
+
     canvas.uuctx2d = new uu.canvas.FL2D(canvas);
 
     var id = "externalcanvas" + uu.guid() + (+new Date);

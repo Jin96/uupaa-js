@@ -8,6 +8,9 @@ package {
     import flash.geom.*;
     import flash.text.*;
     import flash.net.*;
+    // depend librarys
+    import com.adobe.images.JPGEncoder;
+    import com.adobe.images.PNGEncoder;
 
     public class Canvas extends Sprite {
         // --- compositing ---
@@ -74,6 +77,9 @@ package {
         // copyCanvas
         private var _callback:Function = null;
         private var _copyBuff:BitmapData;
+        private var _zip:ByteArray = null;
+        private var _unzip:ByteArray = null;
+        private var _compress:int = 1; // 1: use zip
         private var _localConnection:LocalConnection = new LocalConnection();
 
         public  var imageCache:Object = {}; // image cached db. { url: BitmapData }
@@ -88,6 +94,7 @@ package {
 
             ExternalInterface.addCallback("send", recv);
             ExternalInterface.addCallback("resize", resize);
+            ExternalInterface.addCallback("toDataURL", toDataURL);
 
             // copyCanvas
             _localConnection.client = this;
@@ -240,8 +247,10 @@ package {
                 case "re":  rect(+a[++i], +a[++i], +a[++i], +a[++i]); break;
                 case "bP":  _path = []; break; // reset path
                 case "cP":  closePath(); break;
-                case "cR":  clearRect(+a[++i], +a[++i], +a[++i], +a[++i]); break;
-                case "cA":  clearAll(); break;
+                case "cR":  _zip = null;
+                            clearRect(+a[++i], +a[++i], +a[++i], +a[++i]); break;
+                case "cA":  _zip = null;
+                            clearAll(); break;
                 case "mT":  moveTo(a[++i] * 0.001, a[++i] * 0.001); break;
                 case "lT":  lineTo(a[++i] * 0.001, a[++i] * 0.001); break;
                 case "ar":  arc(+a[++i], +a[++i], +a[++i],
@@ -254,13 +263,17 @@ package {
                                           +a[++i], +a[++i],
                                           +a[++i], +a[++i]); break;
                 case "fi":  fill = 1; // [THROUGH]
-                case "st":  stroke(fill); break;
+                case "st":  _zip = null;
+                            stroke(fill); break;
                 case "fR":  fill = 1; // [THROUGH]
-                case "sR":  strokeRect(+a[++i], +a[++i], +a[++i], +a[++i], fill); break;
+                case "sR":  _zip = null;
+                            strokeRect(+a[++i], +a[++i], +a[++i], +a[++i], fill); break;
                 case "fT":  fill = 1; // [THROUGH]
-                case "sT":  strokeText(a[++i], +a[++i], +a[++i], +a[++i], fill); break;
+                case "sT":  _zip = null;
+                            strokeText(a[++i], +a[++i], +a[++i], +a[++i], fill); break;
                 case "cl":  clip(); break;
-                case "d0":  drawImage(+a[++i], a[++i],
+                case "d0":  _zip = null;
+                            drawImage(+a[++i], a[++i],
                                       [+a[++i], +a[++i], +a[++i], +a[++i],
                                        +a[++i], +a[++i], +a[++i], +a[++i]]);
                             if (_state < 2) {
@@ -282,7 +295,8 @@ package {
                 case "sv":  save(); break;
                 case "rs":  restore(); break;
                 case "X0":  fill = 1; // [THROUGH]
-                case "X1":  strokeCircle(+a[++i], +a[++i],
+                case "X1":  _zip = null;
+                            strokeCircle(+a[++i], +a[++i],
                                          +a[++i], +a[++i], +a[++i], fill); break;
                 case "undefined": // [!] undefined trap
                     trace("[!] undefined trap");
@@ -335,6 +349,7 @@ package {
 
         public function resize(width:int, height:int, flyweight:int):void {
 //trace("resize(), width="+width+",height="+height);
+            _zip = null;
             clearCache();
             init(width, height, flyweight);
         }
@@ -349,6 +364,23 @@ package {
 
         private function clearAll():void {
             _buff.copyPixels(_clearAllBuff, _clearAllRect, _clearAllPoint);
+        }
+
+        public function toDataURL(mimeType:String,
+                                  jpegQuality:Number):String {
+            var jpgEncoder:JPGEncoder;
+            var byteArray:ByteArray;
+
+            switch (mimeType) {
+            case "image/jpeg":
+                    jpgEncoder = new JPGEncoder(jpegQuality * 100);
+                    byteArray = jpgEncoder.encode(_buff);
+                    break;
+            case "image/png":
+            default:
+                    byteArray = PNGEncoder.encode(_buff);
+            }
+            return "data:" + mimeType + ";base64," + CanvasBase64.encode(byteArray);
         }
 
         private function buildPath(ary:Array, gfx:Graphics):void {
@@ -981,72 +1013,113 @@ package {
             }
         }
 
-        private function copyCanvas(args:Number, // 3, 5, 9
+        private function copyCanvas(args:int, // 3, 5, 9
                                     id:String,   // copy source canvas id
                                     param:Object):void {
             next(0); // lock
             _localConnection.send(id,
                                   "sendBack",
                                   ExternalInterface.objectID,
-                                  param);
+                                  args, param);
         }
 
-        public function sendBack(id:String, param:Object):void {
+        public function sendBack(id:String, args:int, param:Object):void {
             var me:* = this;
 
             _callback = function():void {
-                me.readySendBack(id, param);
+                me.readySendBack(id, args, param);
             };
             next(_state);
         }
 
-        public function readySendBack(id:String, param:Object):void {
+        private function readySendBack(id:String, args:int, param:Object):void {
             _callback = null;
 
-            var x:int = 0;
-            var y:int = 0;
-            var w:int = Math.ceil(param.sw / 100) * 100;
-            var h:int = Math.ceil(param.sh / 100) * 100;
             var index:int = 0;
-            var blocks:int = w * h / 10000;
-            var canvas:BitmapData = new BitmapData(w, h, true, 0);
+            var blocks:int = 0;
+            var packetSize:int = 40760; // 40kB - 200B
+            var packet:ByteArray;
+            var width:int = canvasWidth;
+            var height:int = canvasHeight;
 
-            canvas.copyPixels(_buff, _buff.rect, new Point());
+            // http://twitter.com/uupaa/status/10189405664
+            if (!_zip) {
+                _zip = _buff.getPixels(new Rectangle(0, 0, width, height));
+                if (_compress) {
+                    _zip.compress();
+                }
+            }
+            _zip.position = 0; // reset position
+            blocks = Math.ceil(_zip.bytesAvailable / packetSize);
 
-            // http://livedocs.adobe.com/flash/9.0_jp/ActionScriptLangRefV3/flash/net/LocalConnection.html#send()
-            // The maximum of one packet is 40kB.
-            // 100 x 100 x 4bpp = 40000B = 3.9kB
-            for (; y < h; y += 100) {
-                for (x = 0; x < w; ++index, x += 100) {
-                    _localConnection.send(id,
-                                          "recvLocalConnection",
-                                          param,
-                                          x, y, 100, 100, index, blocks,
-                                          canvas.getPixels(new Rectangle(x, y, 100, 100)));
+            if (blocks < 2) {
+                _localConnection.send(id, "recvLocalConnection",
+                                      args, param, index, blocks, width, height, _zip);
+            } else {
+                while (_zip.bytesAvailable) {
+                    packet = new ByteArray();
+                    _zip.readBytes(packet, 0, Math.min(packetSize, _zip.bytesAvailable));
+
+                    _localConnection.send(id, "recvLocalConnection",
+                                          args, param, index, blocks, width, height, packet);
+                    ++index;
                 }
             }
         }
 
-        public function recvLocalConnection(param:Object,
-                                            x:int, y:int, w:int, h:int,
+        public function recvLocalConnection(args:int,
+                                            param:Object,
                                             index:int, blocks:int,
-                                            byteArray:ByteArray):void {
-            // first time
-            if (!index) {
-                _copyBuff = new BitmapData(Math.ceil(param.sw / 100) * 100,
-                                           Math.ceil(param.sh / 100) * 100, true, 0);
+                                            width:int, height:int, packet:ByteArray):void {
+/*
+trace("--------recvLocalConnection in, packet.size="+packet.length);
+trace(" index="+index);
+trace(" blocks="+blocks);
+trace(" sw="+param.sw);
+ */
+
+            function drawImage(args:int, param:Object):void {
+                var ary:Array = [];
+
+                switch (args) {
+                case 3: ary = [param.dx, param.dy, 0, 0, 0, 0, 0, 0]; break;
+                case 5: ary = [param.dx, param.dy, param.dw, param.dh, 0, 0, 0, 0]; break;
+                case 9: ary = [param.sx, param.sy, param.sw, param.sh,
+                               param.dx, param.dy, param.dw, param.dh];
+                }
+                drawImageCallback(args, ary, _copyBuff);
             }
 
-            _copyBuff.setPixels(new Rectangle(x, y, w, h), byteArray);
-
-            // finish
-            if (index === blocks - 1) {
-                drawImageCallback(9, [param.sx, param.sy, param.sw, param.sh,
-                                      param.dx, param.dy, param.dw, param.dh],
-                                  _copyBuff);
+            if (blocks < 2) {
+                if (_compress) {
+                    packet.uncompress();
+                }
+                _copyBuff = new BitmapData(width, height, true, 0);
+                _copyBuff.setPixels(_copyBuff.rect, packet);
+                drawImage(args, param);
                 _copyBuff.dispose();
 
                 next(1); // unlock
+            } else {
+                if (!index) {
+                    _copyBuff = new BitmapData(width, height, true, 0);
+                    _unzip = new ByteArray();
+                }
+
+                _unzip.writeBytes(packet);
+
+                if (index === blocks - 1) {
+                    if (_compress) {
+                        _unzip.uncompress();
+                    }
+                    _unzip.position = 0; // reset position
+
+                    _copyBuff.setPixels(_copyBuff.rect, _unzip);
+                    drawImage(args, param);
+                    _copyBuff.dispose();
+
+                    next(1); // unlock
+                }
             }
         }
     }
