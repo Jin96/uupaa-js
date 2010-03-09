@@ -95,6 +95,8 @@ package {
             ExternalInterface.addCallback("send", recv);
             ExternalInterface.addCallback("resize", resize);
             ExternalInterface.addCallback("toDataURL", toDataURL);
+            ExternalInterface.addCallback("getImageData", getImageData);
+            ExternalInterface.addCallback("putImageData", putImageData);
 
             // copyCanvas
             _localConnection.client = this;
@@ -178,6 +180,8 @@ package {
             var i:int = -1;
             var iz:int = a.length;
             var fill:int;
+            var loopout:int = 0;
+            var modify:int = 0; // canvas updated
 
             while (++i < iz) {
                 fill = 0;
@@ -215,7 +219,7 @@ package {
                             loadPatternImage(a[++i], a[++i], 0);
                             if (_state < 2) {
                                 _stock.push(a.slice(++i).join("\t")); // push remain commands
-                                return;
+                                ++loopout;
                             }
                             break;
                 case "f0":  fillStyle = 0;
@@ -228,7 +232,7 @@ package {
                             loadPatternImage(a[++i], a[++i], 1);
                             if (_state < 2) {
                                 _stock.push(a.slice(++i).join("\t")); // push remain commands
-                                return;
+                                ++loopout;
                             }
                             break;
                 case "lC":  lineCap = a[++i];
@@ -247,9 +251,9 @@ package {
                 case "re":  rect(+a[++i], +a[++i], +a[++i], +a[++i]); break;
                 case "bP":  _path = []; break; // reset path
                 case "cP":  closePath(); break;
-                case "cR":  _zip = null;
+                case "cR":  ++modify;
                             clearRect(+a[++i], +a[++i], +a[++i], +a[++i]); break;
-                case "cA":  _zip = null;
+                case "cA":  ++modify;
                             clearAll(); break;
                 case "mT":  moveTo(a[++i] * 0.001, a[++i] * 0.001); break;
                 case "lT":  lineTo(a[++i] * 0.001, a[++i] * 0.001); break;
@@ -263,22 +267,22 @@ package {
                                           +a[++i], +a[++i],
                                           +a[++i], +a[++i]); break;
                 case "fi":  fill = 1; // [THROUGH]
-                case "st":  _zip = null;
+                case "st":  ++modify;
                             stroke(fill); break;
                 case "fR":  fill = 1; // [THROUGH]
-                case "sR":  _zip = null;
+                case "sR":  ++modify;
                             strokeRect(+a[++i], +a[++i], +a[++i], +a[++i], fill); break;
                 case "fT":  fill = 1; // [THROUGH]
-                case "sT":  _zip = null;
+                case "sT":  ++modify;
                             strokeText(a[++i], +a[++i], +a[++i], +a[++i], fill); break;
                 case "cl":  clip(); break;
-                case "d0":  _zip = null;
+                case "d0":  ++modify;
                             drawImage(+a[++i], a[++i],
                                       [+a[++i], +a[++i], +a[++i], +a[++i],
                                        +a[++i], +a[++i], +a[++i], +a[++i]]);
                             if (_state < 2) {
                                 _stock.push(a.slice(++i).join("\t")); // push remain commands
-                                return;
+                                ++loopout;
                             }
                             break;
                 case "d1":  copyCanvas(+a[++i], a[++i], // <object id>
@@ -295,16 +299,25 @@ package {
                 case "sv":  save(); break;
                 case "rs":  restore(); break;
                 case "X0":  fill = 1; // [THROUGH]
-                case "X1":  _zip = null;
+                case "X1":  ++modify;
                             strokeCircle(+a[++i], +a[++i],
                                          +a[++i], +a[++i], +a[++i], fill); break;
                 case "undefined": // [!] undefined trap
-                    trace("[!] undefined trap");
-                    return;
-                default:
-                    trace("[!] unknown command trap: " + a[i]);
-                    ExternalInterface.call("uu.flash.alert", "Unknown command=" + a[i]);
-                    return;
+                            trace("[!] undefined trap");
+                            ++loopout;
+                            break;
+                default:    trace("[!] unknown command trap: " + a[i]);
+                            ExternalInterface.call("uu.flash.alert", "Unknown command=" + a[i]);
+                            ++loopout;
+                }
+                //
+                if (modify) {
+                    _zip = null;
+                    modify = 0;
+                }
+                //
+                if (loopout) {
+                    break;
                 }
             }
         }
@@ -381,6 +394,33 @@ package {
                     byteArray = PNGEncoder.encode(_buff);
             }
             return "data:" + mimeType + ";base64," + CanvasBase64.encode(byteArray);
+        }
+
+        public function getImageData(sx:int, sy:int, sw:int, sh:int):Array {
+            var rv:Array = [sw, sh];
+            var i:int = 1;
+            var copy:BitmapData = new BitmapData(sw - sx, sh - sy, true, 0);
+
+            copy.copyPixels(_buff, new Rectangle(sx, sy, sw, sh), new Point());
+
+            var data:ByteArray = copy.getPixels(new Rectangle(0, 0, sw - sx,
+                                                                    sh - sy));
+
+            data.position = 0;
+
+            while (data.bytesAvailable) {
+                rv[++i] = data.readUnsignedInt();
+            }
+            return rv;
+        }
+
+        public function putImageData(imagedata:Array,        // @param Array:
+                                     dx:int,                 // @param int:
+                                     dy:int,                 // @param int:
+                                     dirtyX:int,             // @param int:
+                                     dirtyY:int,             // @param int:
+                                     dirtyWidth:int,         // @param int:
+                                     dirtyHeight:int):void { // @param int:
         }
 
         private function buildPath(ary:Array, gfx:Graphics):void {

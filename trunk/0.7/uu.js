@@ -299,7 +299,7 @@ uu = uumix(uujamfactory, {          // uu(expr, ctx) -> Instance(jam)
                                     // [4][RFC1123 date] uu.date2str(date, 1) -> "Wed, 16 Sep 2009 16:18:14 GMT"
     str2date:       uustr2date,     // uu.str2date("2000-01-01T00:00:00[.000]Z") -> { valid, date }
     str2json:       uustr2json,     // uu.str2json(str, addQuote = 0) -> String
-    mix2json:       uumix2json,     // uu.mix2json(mix, fn = void 0, usejs = 0) -> String
+    json:           uujson,         // uu.json(mix, fn = void 0, native = 0) -> JSONString
     json2mix:       uujson2mix,     // uu.json2mix(str, usejs = 0) -> Mix
     // --- type ---
     has:            uuhas,          // [1] uu.has("abc", "a") -> true
@@ -2035,13 +2035,13 @@ function uustr2date(str,  // @param ISO8601DateString/RFC1123DateString:
 }
 uustr2date._parse = /^(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d):(\d\d)(?:\.(\d*))?Z$/;
 
-// uu.mix2json
-function uumix2json(mix,  // @param Mix:
-                    fn,   // @param Function(= void 0): callback
-                    js) { // @param Number(= 0): 0 is native JSON, 1 is use js
-                          // @return JSONString:
-    return (!js && win.JSON) ? win.JSON.stringify(mix) || ""
-                             : _jsoninspect(mix, fn);
+// uu.json
+function uujson(mix,      // @param Mix:
+                fn,       // @param Function(= void 0): callback
+                native) { // @param Number(= 0): 1 is Native JSON, 0 is js impl
+                      // @return JSONString:
+    return native && win.JSON ? win.JSON.stringify(mix) || ""
+                              : _jsoninspect(mix, fn);
 }
 
 // uu.json2mix

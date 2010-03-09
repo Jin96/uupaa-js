@@ -25,7 +25,7 @@ uu.mix(uu.canvas.FL2D.prototype, {
     clearRect:              clearRect,
     clip:                   clip,
     closePath:              closePath,
-    createImageData:        uunop,
+    createImageData:        createImageData,
     createLinearGradient:   createLinearGradient,
     createPattern:          createPattern,
     createRadialGradient:   createRadialGradient,
@@ -34,14 +34,14 @@ uu.mix(uu.canvas.FL2D.prototype, {
     fillCircle:             fillCircle,     // [EXTEND]
     fillRect:               fillRect,
     fillText:               fillText,
-    getImageData:           uunop,
+    getImageData:           getImageData,
     initSurface:            initSurface,    // [EXTEND]
     isPointInPath:          uunop,
     lineTo:                 lineTo,
     lock:                   lock,           // [EXTEND]
     measureText:            measureText,
     moveTo:                 moveTo,
-    putImageData:           uunop,
+    putImageData:           putImageData,
     quickStroke:            uunop,          // [EXTEND]
     quickStrokeRect:        uunop,          // [EXTEND]
     quadraticCurveTo:       quadraticCurveTo,
@@ -132,7 +132,6 @@ function build(canvas) { // @param Node: <canvas>
          "clsid:d27cdb6e-ae6d-11cf-96b8-444553540000",
          uu.config.dir + "uu.canvas.swf"]);
 
-//  canvas.uuctx2d._view = uu.id(id); // find swf <object>
     canvas.uuctx2d._view = canvas.firstChild; // <object>
 
     // uncapture key events(release focus)
@@ -218,6 +217,26 @@ function _copyprop(to, from) {
     to.textBaseline     = from.textBaseline;
 }
 
+// class ImageData
+function ImageData(width,  // @param Number:
+                   height, // @param Number:
+                   data) { // @param ImageData(= void 0):
+    var i, iz;
+
+    this.width  = width;
+    this.height = height;
+
+    if (data && data.length) {
+        this.data = data.concat();
+    } else {
+        this.data = [];
+
+        for (i = 0, iz = width * height; i < iz; ++i) {
+            this.data.push(0, 0, 0, 0); // RGBA
+        }
+    }
+}
+
 // CanvasRenderingContext2D.prototype.arc
 function arc(x, y, radius, startAngle, endAngle, anticlockwise) {
     this.send("ar\t" + x + "\t" + y + "\t" +
@@ -267,7 +286,57 @@ function closePath() {
     this.send("cP");
 }
 
-// CanvasRenderingContext2D.prototype.createImageData -> NOT IMPL
+// CanvasRenderingContext2D.prototype.createImageData
+// createImageData(sw, sh)
+// createImageData(imagedata)
+function createImageData(a,   // @param ImageData/Number: imagedata or width
+                         b) { // @param Number: height
+                              // @return ImageData: { width, height, data }
+    var sw, sh;
+
+    if (arguments.length === 2) {
+        sw = a;
+        sh = b;
+    } else {
+        if (!a) {
+            throw new Error("NOT_SUPPORTED_ERR");
+        }
+        sw = a.width;
+        sh = a.height;
+    }
+    return new ImageData(sw, sh);
+}
+
+// CanvasRenderingContext2D.prototype.getImageData
+function getImageData(sx,   // @param Number:
+                      sy,   // @param Number:
+                      sw,   // @param Number:
+                      sh) { // @param Number:
+    if (isNaN(sx) || isNaN(sy) || isNaN(sw) || isNaN(sh)) {
+        throw new Error("NOT_SUPPORTED_ERR");
+    }
+    if (!sw || !sh) {
+        throw new Error("INDEX_SIZE_ERR");
+    }
+
+    var width, height, rawdata, data = [], i = 0, j = -1, iz, n;
+
+    rawdata = this._view.getImageData(sx, sy, sw, sh);
+
+    // get actual size
+    width = rawdata.shift();
+    height = rawdata.shift();
+
+    for (iz = rawdata.length; i < iz; ++i) {
+        n = rawdata[i];
+        // 32bit unit(ARGB) -> [R,G,B,A]
+        data[++j] = (n >> 16) & 0xff; // R
+        data[++j] = (n >>  8) & 0xff; // G
+        data[++j] =  n        & 0xff; // B
+        data[++j] = (n >> 24) & 0xff; // A
+    }
+    return new ImageData(width, height, data);
+}
 
 // CanvasRenderingContext2D.prototype.createLinearGradient
 function createLinearGradient(x0, y0, x1, y1) { // @return CanvasGradient:
@@ -446,7 +515,31 @@ function moveTo(x, y) {
     this.send("mT\t" + ((x * 1000) | 0) + "\t" + ((y * 1000) | 0));
 }
 
-// CanvasRenderingContext2D.prototype.putImageData -> NOT IMPL
+// CanvasRenderingContext2D.prototype.putImageData
+function putImageData(imagedata,     // @param ImageData:
+                      dx,            // @param Number:
+                      dy,            // @param Number:
+                      dirtyX,        // @param Number:
+                      dirtyY,        // @param Number:
+                      dirtyWidth,    // @param Number:
+                      dirtyHeight) { // @param Number:
+    if (isNaN(dx) || isNaN(dy) || isNaN(dirtyX) || isNaN(dirtyY)
+        || isNaN(dirtyWidth) || isNaN(dirtyHeight)) {
+        throw new Error("NOT_SUPPORTED_ERR");
+    }
+    if (!imagedata) {
+        throw new Error("TYPE_MISMATCH_ERR");
+    }
+
+    dirtyX      = dirtyX      === void 0 ? 0 : dirtyX;
+    dirtyY      = dirtyY      === void 0 ? 0 : dirtyY;
+    dirtyWidth  = dirtyWidth  === void 0 ? imagedata.width  : dirtyWidth;
+    dirtyHeight = dirtyHeight === void 0 ? imagedata.height : dirtyHeight;
+
+    this._view.putImageData(imagedata.data, dx, dy,
+                            dirtyX, dirtyY, dirtyWidth, dirtyHeight);
+}
+
 // CanvasRenderingContext2D.prototype.quickStroke -> NOT IMPL
 // CanvasRenderingContext2D.prototype.quickStrokeRect -> NOT IMPL
 

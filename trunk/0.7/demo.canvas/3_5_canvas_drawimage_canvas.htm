@@ -1,0 +1,174 @@
+<!doctype html><html><head>
+    <title>Canvas drawImage(canvas) example</title>
+
+<script>xconfig={dir:"../"}</script>
+<script type="text/javascript" src="../uupaa.js"></script>
+
+<script>
+function xcanvas() {
+    drawShape(document.getElementById('slcanvas'),
+              document.getElementById('slcanvas2'));
+    drawShape(document.getElementById('vmlcanvas'),
+              document.getElementById('vmlcanvas2'));
+    drawShape(document.getElementById('flashcanvas'),
+              document.getElementById('flashcanvas2'));
+}
+function matrix() {
+    drawShape(document.getElementById('slcanvas'),
+              document.getElementById('slcanvas2'), 1);
+    drawShape(document.getElementById('vmlcanvas'),
+              document.getElementById('vmlcanvas2'), 1);
+    drawShape(document.getElementById('flashcanvas'),
+              document.getElementById('flashcanvas2'), 1);
+}
+var globalAlpha = 1.0
+function switchAlpha() {
+    globalAlpha -= 0.2;
+    drawShape(document.getElementById('slcanvas'),
+              document.getElementById('slcanvas2'));
+    drawShape(document.getElementById('vmlcanvas'),
+              document.getElementById('vmlcanvas2'));
+    drawShape(document.getElementById('flashcanvas'),
+              document.getElementById('flashcanvas2'));
+}
+var shadowBlur = 5;
+function switchBlur() {
+    shadowBlur += 5;
+    drawShape(document.getElementById('slcanvas'),
+              document.getElementById('slcanvas2'));
+    drawShape(document.getElementById('vmlcanvas'),
+              document.getElementById('vmlcanvas2'));
+    drawShape(document.getElementById('flashcanvas'),
+              document.getElementById('flashcanvas2'));
+}
+
+function drawShape(canvas, canvas2, matrix){
+    if (!canvas.getContext){ return; }
+
+    var ctx  = canvas.getContext('2d');
+    var ctx2 = canvas2.getContext('2d');
+
+    ctx.clear();
+    if (matrix) {
+        ctx.translate(-10, 5);
+        ctx.scale(1.2, 0.8);
+        ctx.rotate(5 * Math.PI / 180);
+    }
+    ctx.shadowBlur = shadowBlur;
+    ctx.shadowOffsetX = 10;
+    ctx.shadowOffsetY = 10;
+    ctx.shadowColor = "gray";
+    ctx.lineWidth = 3;
+    ctx.globalAlpha = globalAlpha;
+
+
+    var img = new Image();
+    img.onload = function(){
+        ctx.drawImage(img,0,0);
+        ctx.beginPath();
+        ctx.moveTo(30,96);
+        ctx.lineTo(70,66);
+        ctx.lineTo(103,76);
+        ctx.lineTo(170,15);
+        ctx.stroke();
+
+        ctx2.globalAlpha = 0.5;
+//        ctx2.shadowColor = "red";
+//        ctx2.shadowBlur = 3;
+        ctx2.fillStyle = "green";
+        ctx2.fillRect(0, 0, ctx2.canvas.width, ctx2.canvas.height);
+
+        ctx2.drawImage(ctx.canvas, 10, 10);
+        ctx2.drawImage(ctx.canvas, 30, 30, 100, 130);
+        ctx2.drawImage(ctx.canvas, 10, 10, 40, 40, 60, 100, 80, 80);
+    }
+    img.src = 'img/backdrop.png?' + new Date().getTime();
+}
+</script>
+    <style type="text/css">
+      body { margin: 20px; font-family: arial,verdana,helvetica; background: #fff;}
+      h1 { font-size: 140%; font-weight:normal; color: #036; border-bottom: 1px solid #ccc; }
+      h2 { font-size: 100%; color: #036; }
+      canvas { float: left; margin-right: 20px; margin-bottom: 20px; }
+      pre { float:left; display:block; background: rgb(238,238,238); border: 1px dashed #666; padding: 15px 20px; margin: 0 0 10px 0; }
+    </style>
+  </head>
+  <body>
+    <h1>Canvas <code>drawImage(canvas)</code> example</h1>
+    <div>
+      <input type="button" value="matrix effect" onclick="matrix()" />
+      <input type="button" value="alpha -0.2" onclick="switchAlpha()" />
+      <input type="button" value="blur +5" onclick="switchBlur()" />
+      <br />
+
+      <canvas id="slcanvas" class="sl" width="180" height="130"></canvas>
+      <canvas id="slcanvas2" class="sl" width="200" height="200"></canvas>
+      <canvas id="vmlcanvas" class="vml" width="180" height="130"></canvas>
+      <canvas id="vmlcanvas2" class="vml" width="200" height="200"></canvas>
+      <canvas id="flashcanvas" class="flash" width="180" height="130"></canvas>
+      <canvas id="flashcanvas2" class="flash" width="200" height="200"></canvas>
+      <pre>
+      &lt;canvas id="slcanvas" class="sl" width="180" height="130"&gt;&lt;/canvas&gt;
+      &lt;canvas id="slcanvas2" class="sl" width="200" height="200"&gt;&lt;/canvas&gt;
+      &lt;canvas id="vmlcanvas" class="vml" width="180" height="130"&gt;&lt;/canvas&gt;
+      &lt;canvas id="vmlcanvas2" class="vml" width="200" height="200"&gt;&lt;/canvas&gt;
+      &lt;canvas id="flashcanvas" class="flash" width="180" height="130"&gt;&lt;/canvas&gt;
+      &lt;canvas id="flashcanvas2" class="flash" width="200" height="200"&gt;&lt;/canvas&gt;
+
+function xcanvas() {
+    drawShape(document.getElementById('slcanvas'),
+              document.getElementById('slcanvas2'));
+    drawShape(document.getElementById('vmlcanvas'),
+              document.getElementById('vmlcanvas2'));
+    drawShape(document.getElementById('flashcanvas'),
+              document.getElementById('flashcanvas2'));
+}
+function matrix() {
+    drawShape(document.getElementById('slcanvas'),
+              document.getElementById('slcanvas2'), 1);
+    drawShape(document.getElementById('vmlcanvas'),
+              document.getElementById('vmlcanvas2'), 1);
+    drawShape(document.getElementById('flashcanvas'),
+              document.getElementById('flashcanvas2'), 1);
+}
+function drawShape(canvas, canvas2, matrix){
+    if (!canvas.getContext){ return; }
+
+    var ctx  = canvas.getContext('2d');
+    var ctx2 = canvas2.getContext('2d');
+
+    if (matrix) {
+        ctx.clear();
+        ctx.translate(-10, 5);
+        ctx.scale(1.2, 0.8);
+        ctx.rotate(5 * Math.PI / 180);
+    }
+    var img = new Image();
+    img.onload = function(){
+        ctx.drawImage(img,0,0);
+        ctx.beginPath();
+        ctx.moveTo(30,96);
+        ctx.lineTo(70,66);
+        ctx.lineTo(103,76);
+        ctx.lineTo(170,15);
+        ctx.stroke();
+
+        ctx2.globalAlpha = 0.5;
+//        ctx2.shadowColor = "red";
+//        ctx2.shadowBlur = 3;
+        ctx2.fillStyle = "green";
+        ctx2.fillRect(0, 0, ctx2.canvas.width, ctx2.canvas.height);
+        ctx2.drawImage(ctx.canvas, 10, 10);
+        ctx2.drawImage(ctx.canvas, 30, 30, 100, 130);
+        ctx2.drawImage(ctx.canvas, 10, 10, 40, 40, 60, 100, 80, 80);
+    }
+    img.src = 'img/backdrop.png?' + new Date().getTime();
+}
+      </pre>
+      <div style="float:left;">
+        <h2>Source image</h2>
+        <img src="img/backdrop.png"/>
+      </div>
+    </div>
+  </body>
+</html>
