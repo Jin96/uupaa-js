@@ -90,7 +90,7 @@ function uusprintf(format            // @param String: sprintf format string
         w & 0x300 && (v = v.toString(w & 0x100 ? 8 : 16));
         w & 0x40  && flag === "#" && (v = (w & 0x100 ? "0" : "0x") + v);
         w & 0x80  && prec && (v = w & 2 ? v.toFixed(prec) : v.slice(0, prec));
-        w & 0x400 && (v = uu.mix2json(v, 0, 1)); // "%j"
+        w & 0x400 && (v = uu.json(v)); // "%j"
         w & 0x6000 && (ovf = (typeof v !== "number" || v < 0));
         w & 0x2000 && (v = ovf ? "" : String.fromCharCode(v));
         w & 0x8000 && (flag = flag === "0" ? "" : flag);
