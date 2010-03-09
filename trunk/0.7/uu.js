@@ -299,8 +299,9 @@ uu = uumix(uujamfactory, {          // uu(expr, ctx) -> Instance(jam)
                                     // [4][RFC1123 date] uu.date2str(date, 1) -> "Wed, 16 Sep 2009 16:18:14 GMT"
     str2date:       uustr2date,     // uu.str2date("2000-01-01T00:00:00[.000]Z") -> { valid, date }
     str2json:       uustr2json,     // uu.str2json(str, addQuote = 0) -> String
-    json:           uujson,         // uu.json(mix, fn = void 0, native = 0) -> JSONString
-    json2mix:       uujson2mix,     // uu.json2mix(str, usejs = 0) -> Mix
+    json:     uumix(uujson, {       // uu.json(mix, nativeJSON = 0, callback = void 0) -> JSONString
+        toMix:      uujsontomix     // uu.json.toMix(str, nativeJSON = 0) -> Mix
+    }),
     // --- type ---
     has:            uuhas,          // [1] uu.has("abc", "a") -> true
                                     // [2] uu.has([1, 2], [1]) -> uu.ary.has
@@ -2036,26 +2037,26 @@ function uustr2date(str,  // @param ISO8601DateString/RFC1123DateString:
 uustr2date._parse = /^(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d):(\d\d)(?:\.(\d*))?Z$/;
 
 // uu.json
-function uujson(mix,      // @param Mix:
-                fn,       // @param Function(= void 0): callback
-                native) { // @param Number(= 0): 1 is Native JSON, 0 is js impl
-                      // @return JSONString:
-    return native && win.JSON ? win.JSON.stringify(mix) || ""
-                              : _jsoninspect(mix, fn);
+function uujson(mix,        // @param Mix:
+                nativeJSON, // @param Number(= 0): 1 is Native JSON, 0 is js impl
+                callback) { // @param Function(= void 0): callback
+                            // @return JSONString:
+    return nativeJSON && win.JSON ? win.JSON.stringify(mix) || ""
+                                  : _jsoninspect(mix, callback);
 }
 
-// uu.json2mix
-function uujson2mix(str,  // @param JSONString:
-                    js) { // @param Number(= 0): 0 is native JSON, 1 is use js
-                          // @return Mix/Boolean:
-    var dig = uujson2mix;
+// uu.json.toMix
+function uujsontomix(str,          // @param JSONString:
+                     nativeJSON) { // @param Number(= 0): 1 is Native JSON, 1 is js impl
+                                   // @return Mix/Boolean:
+    var dig = uujsontomix;
 
-    return (!js && win.JSON) ? win.JSON.parse(str) :
+    return nativeJSON && win.JSON ? win.JSON.parse(str) :
            dig._ng.test(str.replace(dig._esc, "")) ? false
                                                    : uujs("return " + str + ";");
 }
-uujson2mix._ng  = /[^,:{}\[\]0-9.\-+Eaeflnr-u \n\r\t]/; // NG word
-uujson2mix._esc = /"(\\.|[^"\\])*"/g; // unescape
+uujsontomix._ng  = /[^,:{}\[\]0-9.\-+Eaeflnr-u \n\r\t]/; // NG word
+uujsontomix._esc = /"(\\.|[^"\\])*"/g; // unescape
 
 // uu.str2json
 function uustr2json(str,        // @param String:
