@@ -1,44 +1,42 @@
 package {
     import flash.external.*;
-    import flash.filters.*;
     import flash.display.*;
+    import flash.filters.*;
     import flash.events.*;
 //  import flash.system.*; // for Security.allowDomain
     import flash.utils.*;
     import flash.geom.*;
-    import flash.text.*;
-    import flash.net.*;
-    // depend librarys
-    import com.adobe.images.JPGEncoder;
-    import com.adobe.images.PNGEncoder;
 
     public class Canvas extends Sprite {
+        // --- dimensions ---
+        public  var canvasWidth:int = 300;
+        public  var canvasHeight:int = 150;
         // --- compositing ---
-        private var globalAlpha:Number = 1; // globalAlpha
+        public  var globalAlpha:Number = 1; // globalAlpha
         private var mix:int = 0; // globalCompositeOperation
         private var mixMode:String = ""; // globalCompositeOperation
         // --- colors and styles ---
-        private var strokeStyle:int = 0; // 0: color, 1: liner, 2: radial, 3: pattern
-        private var strokeColor:Array = [0, 1];
+        public  var strokeStyle:int = 0; // 0: color, 1: liner, 2: radial, 3: pattern
+        public  var strokeColor:Array = [0, 1];
         private var strokeGradient:CanvasGradient = new CanvasGradient();
         private var strokePattern:Array = []; // [url, repeation]
-        private var fillStyle:int = 0; // 0: color, 1: liner, 2: radial, 3: pattern
-        private var fillColor:Array = [0, 1];
+        public  var fillStyle:int = 0; // 0: color, 1: liner, 2: radial, 3: pattern
+        public  var fillColor:Array = [0, 1];
         private var fillGradient:CanvasGradient = new CanvasGradient();
         private var fillPattern:Array = []; // [url, repeation]
-        private var lineWidth:Number = 1;
-        private var lineCap:String = "none"; // butt
-        private var lineJoin:String = "miter";
-        private var miterLimit:Number = 10;
+        public  var lineWidth:Number = 1;
+        public  var lineCap:String = "none"; // butt
+        public  var lineJoin:String = "miter";
+        public  var miterLimit:Number = 10;
         // --- shadows ---
-        private var shadowBlur:Number;
-        private var shadowColor:Array = [0, 1];
-        private var shadowOffsetX:Number;
-        private var shadowOffsetY:Number;
+        public  var shadowBlur:Number;
+        public  var shadowColor:Array = [0, 1];
+        public  var shadowOffsetX:Number;
+        public  var shadowOffsetY:Number;
         // --- text ---
-        private var font:Array = []; // [style, weight, variant, family]
-        private var textAlign:String = "start";
-        private var textBaseline:String = "alphabetic";
+        public  var font:Array = []; // [style, weight, variant, family]
+        public  var textAlign:String = "start";
+        public  var textBaseline:String = "alphabetic";
         // --- hidden properties ---
         private var _lineScale:Number = 1;
         private var _scaleX:Number = 1;
@@ -47,10 +45,9 @@ package {
         private var _matrix:Matrix;
         private var _stack:Array = [];
         private var _path:Array = [];
-        private var _rtl:int = 0; // 1: direction=rtl
         private var _clipPath:Array = [];
         private var _clipShape:Shape = new Shape();
-        private var _shadow:BitmapFilter; // shadow filter
+        private var _shadowFilter:BitmapFilter; // shadow filter
 
         private var bx:Number = 0; // begin position x
         private var by:Number = 0; // begin position y
@@ -71,22 +68,18 @@ package {
         private var _clearAllPoint:Point;
 
         private var xFlyweight:int = 0;
-        private var canvasWidth:int = 300;
-        private var canvasHeight:int = 150;
 
         // copyCanvas
         private var _callback:Function = null;
-        private var _copyBuff:BitmapData;
-        private var _zip:ByteArray = null;
-        private var _unzip:ByteArray = null;
-        private var _compress:int = 1; // 1: use zip
-        private var _localConnection:LocalConnection = new LocalConnection();
 
-        public  var imageCache:Object = {}; // image cached db. { url: BitmapData }
         private var fillImage:CanvasImage;
         private var strokeImage:CanvasImage;
         private var canvasArc:CanvasArc = new CanvasArc();
         private var canvasBezier:CanvasBezier = new CanvasBezier();
+        private var canvasPixel:CanvasPixel;
+        private var canvasText:CanvasText;
+        private var canvasCopy:CanvasCopy;
+        private var canvasDrawImage:CanvasDrawImage;
 
         public function Canvas() {
             // for local debug
@@ -98,10 +91,6 @@ package {
             ExternalInterface.addCallback("getImageData", getImageData);
             ExternalInterface.addCallback("putImageData", putImageData);
 
-            // copyCanvas
-            _localConnection.client = this;
-            _localConnection.connect(ExternalInterface.objectID);
-
             _shape = new Shape();
             _gfx = _shape.graphics;
             _shape.mask = null;
@@ -112,8 +101,28 @@ package {
 
             fillImage   = new CanvasImage(this);
             strokeImage = new CanvasImage(this);
+            canvasPixel = new CanvasPixel(this);
+            canvasText  = new CanvasText(this);
+            canvasCopy  = new CanvasCopy(this);
+            canvasDrawImage = new CanvasDrawImage(this);
 
             ExternalInterface.call("uu.dmz." + ExternalInterface.objectID);
+        }
+
+        public function get bitmapData():BitmapData {
+            return _buff;
+        }
+
+        public function get shadowFilter():BitmapFilter {
+            return _shadowFilter;
+        }
+
+        public function get matrix():Matrix {
+            return _matrix;
+        }
+
+        public function set callback(fn:Function):void {
+            _callback = fn;
         }
 
         private function onEnterFrame(evt:Event):void {
@@ -155,8 +164,10 @@ package {
             }
         }
 
-        private function next(state:int):void {
-            _state = state;
+        public function next(state:int = -1):void {
+            if (state !== -1) {
+                _state = state;
+            }
 
             if (_state) {
                 _buff && _buff.lock();
@@ -190,8 +201,8 @@ package {
                             _state = 1; // not ready(locked) -> ready
                             addEventListener("enterFrame", onEnterFrame);
                             break;
-                case "xp":  clearCache(); break;
-                case "rt":  _rtl = 1; break; // direction = rtl
+                case "xp":  CanvasImageCache.getInstance().clear(); break;
+                case "rt":  canvasText.direction = 1; break; // direction = rtl
                 case "gA":  globalAlpha = +a[++i]; break;
                 case "gC":  mix = 0;
                             switch (mixMode = a[++i]) {
@@ -274,7 +285,7 @@ package {
                             strokeRect(+a[++i], +a[++i], +a[++i], +a[++i], fill); break;
                 case "fT":  fill = 1; // [THROUGH]
                 case "sT":  ++modify;
-                            strokeText(a[++i], +a[++i], +a[++i], +a[++i], fill); break;
+                            canvasText.draw(a[++i], +a[++i], +a[++i], +a[++i], fill); break;
                 case "cl":  clip(); break;
                 case "d0":  ++modify;
                             drawImage(+a[++i], a[++i],
@@ -285,9 +296,13 @@ package {
                                 ++loopout;
                             }
                             break;
-                case "d1":  copyCanvas(+a[++i], a[++i], // <object id>
-                                       { sx: +a[++i], sy: +a[++i], sw: +a[++i], sh: +a[++i],
-                                         dx: +a[++i], dy: +a[++i], dw: +a[++i], dh: +a[++i] });
+                case "d1":  if (modify) {
+                                modify = 0;
+                                canvasCopy.purge();
+                            }
+                            canvasCopy.draw(+a[++i], a[++i], // <object id>
+                                            { sx: +a[++i], sy: +a[++i], sw: +a[++i], sh: +a[++i],
+                                              dx: +a[++i], dy: +a[++i], dw: +a[++i], dh: +a[++i] });
                             break;
                 case "ro":  rotate(a[++i] * 0.000001); break;
                 case "sc":  scale(+a[++i], +a[++i]); break;
@@ -310,15 +325,12 @@ package {
                             ExternalInterface.call("uu.flash.alert", "Unknown command=" + a[i]);
                             ++loopout;
                 }
-                //
-                if (modify) {
-                    _zip = null;
-                    modify = 0;
-                }
-                //
                 if (loopout) {
                     break;
                 }
+            }
+            if (modify) {
+                canvasCopy.purge();
             }
         }
 
@@ -362,17 +374,9 @@ package {
 
         public function resize(width:int, height:int, flyweight:int):void {
 //trace("resize(), width="+width+",height="+height);
-            _zip = null;
-            clearCache();
+            canvasCopy.purge();
+            CanvasImageCache.getInstance().clear();
             init(width, height, flyweight);
-        }
-
-        private function clearCache():void {
-            var url:String;
-
-            for (url in imageCache) {
-                imageCache[url].dispose();
-            }
         }
 
         private function clearAll():void {
@@ -381,46 +385,20 @@ package {
 
         public function toDataURL(mimeType:String,
                                   jpegQuality:Number):String {
-            var jpgEncoder:JPGEncoder;
-            var byteArray:ByteArray;
-
-            switch (mimeType) {
-            case "image/jpeg":
-                    jpgEncoder = new JPGEncoder(jpegQuality * 100);
-                    byteArray = jpgEncoder.encode(_buff);
-                    break;
-            case "image/png":
-            default:
-                    byteArray = PNGEncoder.encode(_buff);
-            }
-            return "data:" + mimeType + ";base64," + CanvasBase64.encode(byteArray);
+            return canvasPixel.toDataURL(mimeType, jpegQuality);
         }
 
         public function getImageData(sx:int, sy:int, sw:int, sh:int):Array {
-            var rv:Array = [sw, sh];
-            var i:int = 1;
-            var copy:BitmapData = new BitmapData(sw - sx, sh - sy, true, 0);
-
-            copy.copyPixels(_buff, new Rectangle(sx, sy, sw, sh), new Point());
-
-            var data:ByteArray = copy.getPixels(new Rectangle(0, 0, sw - sx,
-                                                                    sh - sy));
-
-            data.position = 0;
-
-            while (data.bytesAvailable) {
-                rv[++i] = data.readUnsignedInt();
-            }
-            return rv;
+            return canvasPixel.getImageData(sx, sy, sw, sh);
         }
 
-        public function putImageData(imagedata:Array,        // @param Array:
-                                     dx:int,                 // @param int:
-                                     dy:int,                 // @param int:
-                                     dirtyX:int,             // @param int:
-                                     dirtyY:int,             // @param int:
-                                     dirtyWidth:int,         // @param int:
-                                     dirtyHeight:int):void { // @param int:
+        public function putImageData(imagedata:Array,
+                                     dx:int, dy:int,
+                                     dirtyX:int, dirtyY:int,
+                                     dirtyWidth:int, dirtyHeight:int):void {
+            return canvasPixel.putImageData(imagedata,
+                                            dx, dy, dirtyX, dirtyY,
+                                            dirtyWidth, dirtyHeight);
         }
 
         private function buildPath(ary:Array, gfx:Graphics):void {
@@ -698,94 +676,11 @@ package {
             var me:* = this;
             var canvasImage:CanvasImage = new CanvasImage(this);
             var rv:Boolean = canvasImage.load(url, function():void {
-                me.drawImageCallback(args, param, canvasImage.bitmapData);
+                me.canvasDrawImage.draw(args, param, canvasImage.bitmapData);
                 me.next(1);
             });
 
             next(rv ? 2 : 0);
-        }
-
-        private function drawImageCallback(args:Number,
-                                           param:Array,
-                                           bitmapData:BitmapData):void {
-            var dx:Number = 0;
-            var dy:Number = 0;
-            var dw:Number = 0;
-            var dh:Number = 0;
-            var sx:Number = 0;
-            var sy:Number = 0;
-            var sw:Number = 0;
-            var sh:Number = 0;
-            var bmp:BitmapData;
-            var filterBmp:BitmapData; // filter bitmap
-            var filterRect:Rectangle; // filter rect
-            var matrix:Matrix = new Matrix();
-
-            // http://twitter.com/uupaa/status/9934417220
-            var copyOffsetX:Number = (shadowOffsetX < 0 ? -shadowOffsetX : 0) + 20;
-            var copyOffsetY:Number = (shadowOffsetY < 0 ? -shadowOffsetY : 0) + 20;
-
-            if (!_shadow) {
-                copyOffsetX = copyOffsetY = 0;
-            }
-
-            if (args > 5) { // args 9 version
-                sx = param[0];
-                sy = param[1];
-                sw = param[2];
-                sh = param[3];
-                dx = param[4];
-                dy = param[5];
-                dw = param[6];
-                dh = param[7];
-
-                dx += copyOffsetX;
-                dy += copyOffsetY;
-
-                // TODO: Shadow Offset
-
-                bmp = new BitmapData(sw, sh, true, 0);
-                bmp.copyPixels(bitmapData,
-                               new Rectangle(sx, sy, sw, sh),
-                               new Point());
-            } else { // args 2 or 4 version
-                bmp = new BitmapData(copyOffsetX + bitmapData.width,
-                                     copyOffsetY + bitmapData.height, true, 0);
-                bmp.copyPixels(bitmapData,
-                               bmp.rect,
-                               new Point(copyOffsetX, copyOffsetY));
-
-                dx = param[0];
-                dy = param[1];
-                dw = param[2] || bmp.width;
-                dh = param[3] || bmp.height;
-            }
-
-            // apply shadow
-            if (_shadow) {
-                filterRect = bmp.generateFilterRect(bmp.rect, _shadow);
-                filterBmp = new BitmapData(filterRect.width,
-                                           filterRect.height, true, 0);
-                filterBmp.copyPixels(bmp, bmp.rect,
-                                     new Point(filterRect.x - bmp.rect.x,
-                                               filterRect.y - bmp.rect.y));
-                filterBmp.applyFilter(bmp, bmp.rect, new Point(), _shadow);
-            }
-
-            // apply matrix
-            matrix.scale(dw / bmp.width, dh / bmp.height);
-            matrix.translate(dx, dy);
-            matrix.concat(_matrix);
-
-            // http://twitter.com/uupaa/status/9934417220
-            matrix.tx -= copyOffsetX;
-            matrix.ty -= copyOffsetY;
-
-            mixin(_buff, _shadow ? filterBmp : bmp, matrix);
-
-            // [GC]
-            bmp = null;
-            filterBmp && (filterBmp = null);
         }
 
         private function save(): void {
@@ -809,7 +704,7 @@ package {
                 _copyprop(this, last); // restore props
 
                 // restore shadow
-                _shape.filters = _shadow ? [_shadow] : [];
+                _shape.filters = _shadowFilter ? [_shadowFilter] : [];
             }
         }
 
@@ -926,85 +821,13 @@ package {
             _gfx.clear();
         }
 
-        private function strokeText(text:String, x:Number, y:Number,
-                                    maxWidth:Number, fill:int): void {
-            var color:uint = fill ? fillColor[0] : strokeColor[0];
-            var a:Number = (fill ? fillColor[1] : strokeColor[1]) * globalAlpha;
-            var textFormat:TextFormat = new TextFormat();
-            var textField:TextField = new TextField();
-            var bmp:BitmapData;
-            var filterBmp:BitmapData; // filter bitmap
-            var filterRect:Rectangle; // filter rect
-            var matrix:Matrix = new Matrix(1, 0, 0, 1, x, y);
-            var glowFilter:GlowFilter;
-
-            // http://twitter.com/uupaa/status/9934417220
-            var copyOffsetX:Number = (shadowOffsetX < 0 ? -shadowOffsetX : 0) + 20;
-            var copyOffsetY:Number = (shadowOffsetY < 0 ? -shadowOffsetY : 0) + 20;
-            var copyOffsetMatrix:Matrix = new Matrix(1, 0, 0, 1, copyOffsetX, copyOffsetY);
-
-            textFormat.color = color;
-            textFormat.size = font[0]; // font-size
-            textFormat.font = font[4].replace(/^'+|'+$/g, ""); // "'Arial'" -> "Arial"
-            textFormat.italic = font[1] !== "normal";       // italic, oblique
-            textFormat.bold = /[b56789]/.test(font[2]);     // bold, bolder, 500~900
-            textFormat.align = TextFormatAlign.LEFT;
-            textField.defaultTextFormat = textFormat;       // apply font
-            textField.autoSize = TextFieldAutoSize.LEFT;    // [!][NEED] auto resize
-            textField.text = text;
-
-            // strokeText
-            if (!fill) {
-                glowFilter = new GlowFilter(strokeColor[0],
-                                            strokeColor[1],
-                                            2, 2, 2, 1, false, true);
-                textField.filters = [glowFilter];
-            }
-
-            switch (textAlign) {
-            case "left":    matrix.tx -= 2; break; // [FIX] -2
-            case "start":   matrix.tx -= _rtl ? textField.width - 3 : 2; break; // [FIX] -2
-            case "center":  matrix.tx -= textField.width / 2; break;
-            case "right":   matrix.tx -= textField.width - 3; break; // [FIX] -3
-            case "end":     matrix.tx -= _rtl ? 2 : textField.width - 3; break; // [FIX] -3
-            }
-
-            // http://twitter.com/uupaa/status/9934417220
-            bmp = new BitmapData(copyOffsetX + textField.width,
-                                 copyOffsetY + textField.height, true, 0);
-            bmp.draw(textField, copyOffsetMatrix);
-
-            // apply shadow
-            if (_shadow) {
-                filterRect = bmp.generateFilterRect(bmp.rect, _shadow);
-                filterBmp = new BitmapData(filterRect.width,
-                                           filterRect.height, true, 0);
-                filterBmp.copyPixels(bmp, bmp.rect,
-                                     new Point(filterRect.x - bmp.rect.x,
-                                               filterRect.y - bmp.rect.y));
-                filterBmp.applyFilter(bmp, bmp.rect, new Point(), _shadow);
-            }
-
-            // apply matrix
-            matrix.concat(_matrix);
-
-            // http://twitter.com/uupaa/status/9934417220
-            matrix.tx -= copyOffsetX;
-            matrix.ty -= copyOffsetY;
-
-            mixin(_buff, _shadow ? filterBmp : bmp, matrix);
-
-            // [GC]
-            bmp = null;
-            filterBmp && (filterBmp = null);
-        }
-
         private function setShadow():void {
             if (this.shadowColor[1] && this.shadowBlur) {
                 var angle:Number = Math.atan2(shadowOffsetY,
                                               shadowOffsetX) * 180 / Math.PI; // toDegree
 
-                _shadow = new DropShadowFilter(
+                _shadowFilter =
+                    new DropShadowFilter(
                                 Math.sqrt(shadowOffsetX * shadowOffsetX +
                                           shadowOffsetY * shadowOffsetY),
                                 angle < 0 ? angle + 360 : angle,
@@ -1013,17 +836,17 @@ package {
                                 shadowBlur,
                                 shadowBlur);
 
-                _shape.filters = [_shadow];
+                _shape.filters = [_shadowFilter];
             } else {
-                _shadow = null;
+                _shadowFilter = null;
                 _shape.filters = [];
             }
         }
 
         // draw with blendMode
-        private function mixin(bg:BitmapData,           // _buff
-                               pict:IBitmapDrawable,    // _shape
-                               matrix:Matrix = null):void {
+        public function mixin(bg:BitmapData,           // _buff
+                              pict:IBitmapDrawable,    // _shape
+                              matrix:Matrix = null):void {
             var color:ColorTransform = globalAlpha < 1
                                      ? new ColorTransform(1, 1, 1, globalAlpha)
                                      : null;
@@ -1049,116 +872,6 @@ package {
                     break;
                 default:
                     bg.draw(pict, matrix, color, mixMode, null, true);
-                }
-            }
-        }
-
-        private function copyCanvas(args:int, // 3, 5, 9
-                                    id:String,   // copy source canvas id
-                                    param:Object):void {
-            next(0); // lock
-            _localConnection.send(id,
-                                  "sendBack",
-                                  ExternalInterface.objectID,
-                                  args, param);
-        }
-
-        public function sendBack(id:String, args:int, param:Object):void {
-            var me:* = this;
-
-            _callback = function():void {
-                me.readySendBack(id, args, param);
-            };
-            next(_state);
-        }
-
-        private function readySendBack(id:String, args:int, param:Object):void {
-            _callback = null;
-
-            var index:int = 0;
-            var blocks:int = 0;
-            var packetSize:int = 40760; // 40kB - 200B
-            var packet:ByteArray;
-            var width:int = canvasWidth;
-            var height:int = canvasHeight;
-
-            // http://twitter.com/uupaa/status/10189405664
-            if (!_zip) {
-                _zip = _buff.getPixels(new Rectangle(0, 0, width, height));
-                if (_compress) {
-                    _zip.compress();
-                }
-            }
-            _zip.position = 0; // reset position
-            blocks = Math.ceil(_zip.bytesAvailable / packetSize);
-
-            if (blocks < 2) {
-                _localConnection.send(id, "recvLocalConnection",
-                                      args, param, index, blocks, width, height, _zip);
-            } else {
-                while (_zip.bytesAvailable) {
-                    packet = new ByteArray();
-                    _zip.readBytes(packet, 0, Math.min(packetSize, _zip.bytesAvailable));
-
-                    _localConnection.send(id, "recvLocalConnection",
-                                          args, param, index, blocks, width, height, packet);
-                    ++index;
-                }
-            }
-        }
-
-        public function recvLocalConnection(args:int,
-                                            param:Object,
-                                            index:int, blocks:int,
-                                            width:int, height:int, packet:ByteArray):void {
-/*
-trace("--------recvLocalConnection in, packet.size="+packet.length);
-trace(" index="+index);
-trace(" blocks="+blocks);
-trace(" sw="+param.sw);
- */
-
-            function drawImage(args:int, param:Object):void {
-                var ary:Array = [];
-
-                switch (args) {
-                case 3: ary = [param.dx, param.dy, 0, 0, 0, 0, 0, 0]; break;
-                case 5: ary = [param.dx, param.dy, param.dw, param.dh, 0, 0, 0, 0]; break;
-                case 9: ary = [param.sx, param.sy, param.sw, param.sh,
-                               param.dx, param.dy, param.dw, param.dh];
-                }
-                drawImageCallback(args, ary, _copyBuff);
-            }
-
-            if (blocks < 2) {
-                if (_compress) {
-                    packet.uncompress();
-                }
-                _copyBuff = new BitmapData(width, height, true, 0);
-                _copyBuff.setPixels(_copyBuff.rect, packet);
-                drawImage(args, param);
-                _copyBuff.dispose();
-
-                next(1); // unlock
-            } else {
-                if (!index) {
-                    _copyBuff = new BitmapData(width, height, true, 0);
-                    _unzip = new ByteArray();
-                }
-
-                _unzip.writeBytes(packet);
-
-                if (index === blocks - 1) {
-                    if (_compress) {
-                        _unzip.uncompress();
-                    }
-                    _unzip.position = 0; // reset position
-
-                    _copyBuff.setPixels(_copyBuff.rect, _unzip);
-                    drawImage(args, param);
-                    _copyBuff.dispose();
-
-                    next(1); // unlock
                 }
             }
         }
