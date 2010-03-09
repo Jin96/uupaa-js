@@ -302,8 +302,7 @@ if (_CanvasPrototype) {
     _CanvasPrototype.clear  = clear;    // [EXTEND]
     _CanvasPrototype.unlock = uunop;    // [EXTEND]
     _CanvasPrototype.resize = resize;   // [EXTEND]
-    _CanvasPrototype.fillCircle   = fillCircle;   // [EXTEND]
-    _CanvasPrototype.strokeCircle = strokeCircle; // [EXTEND]
+    _CanvasPrototype.drawCircle = drawCircle; // [EXTEND]
 }
 
 // CanvasRenderingContext2D.prototype.lock
@@ -328,32 +327,35 @@ function resize(width,    // @param Number(= void 0):
     }
 }
 
-// CanvasRenderingContext2D.prototype.fillCircle
-function fillCircle(x,       // @param Number:
-                    y,       // @param Number:
-                    r,       // @param Number: radius
-                    color) { // @param ColorHash:
-    this.save();
-    this.fillStyle = color.rgba;
-    this.beginPath();
-    this.arc(x, y, r, 0, 2 * Math.PI, true);
-    this.fill();
-    this.closePath();
-    this.restore();
-}
+// CanvasRenderingContext2D.prototype.drawCircle
+function drawCircle(x,             // @param Number:
+                    y,             // @param Number:
+                    r,             // @param Number: radius
+                    fillColor,     // @param ColorHash(= void 0): fillColor
+                    strokeColor,   // @param ColorHash(= void 0): strokeColor
+                    lineWidth) {   // @param Number(= 1): stroke lineWidth
+    if (fillColor || strokeColor) {
+        var lw = lineWidth === void 0 ? 1 : lineWidth;
 
-// CanvasRenderingContext2D.prototype.strokeCircle
-function strokeCircle(x,       // @param Number:
-                      y,       // @param Number:
-                      r,       // @param Number: radius
-                      color) { // @param ColorHash:
-    this.save();
-    this.strokeStyle = color.rgba;
-    this.beginPath();
-    this.arc(x, y, r, 0, 2 * Math.PI, true);
-    this.stroke();
-    this.closePath();
-    this.restore();
+        this.save();
+        if (fillColor) {
+            this.fillStyle = fillColor.rgba;
+        }
+        if (strokeColor && lw) {
+            this.strokeStyle = strokeColor.rgba;
+            this.lineWidth = lw;
+        }
+        this.beginPath();
+        this.arc(x, y, r, 0, 2 * Math.PI, true);
+        this.closePath();
+        if (fillColor) {
+            this.fill();
+        }
+        if (strokeColor && lw) {
+            this.stroke();
+        }
+        this.restore();
+    }
 }
 
 })(window, document, uu);

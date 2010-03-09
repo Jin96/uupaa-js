@@ -36,9 +36,9 @@ uu.mix(uu.canvas.SL2D.prototype, {
     createLinearGradient:   createLinearGradient,
     createPattern:          createPattern,
     createRadialGradient:   createRadialGradient,
+    drawCircle:             drawCircle,     // [EXTEND]
     drawImage:              drawImage,
     fill:                   fill,
-    fillCircle:             fillCircle,     // [EXTEND]
     fillRect:               fillRect,
     fillText:               fillText,
     getImageData:           uunop,
@@ -60,7 +60,6 @@ uu.mix(uu.canvas.SL2D.prototype, {
     scale:                  scale,
     setTransform:           setTransform,
     stroke:                 stroke,
-    strokeCircle:           strokeCircle,   // [EXTEND]
     strokeRect:             strokeRect,
     strokeText:             strokeText,
     transform:              transform,
@@ -463,6 +462,36 @@ function createRadialGradient(x0, y0, r0, x1, y1, r1) { // @return Hash:
     return new CanvasGradient(x0, y0, r0, x1, y1, r1);
 }
 
+// CanvasRenderingContext2D.prototype.drawCircle
+function drawCircle(x,             // @param Number:
+                    y,             // @param Number:
+                    r,             // @param Number: radius
+                    fillColor,     // @param ColorHash(= void 0): fillColor
+                    strokeColor,   // @param ColorHash(= void 0): strokeColor
+                    lineWidth) {   // @param Number(= 1): stroke lineWidth
+    if (fillColor || strokeColor) {
+        var lw = lineWidth === void 0 ? 1 : lineWidth,
+            a  = fillColor ? fillColor.a : strokeColor.a,
+            fg = '<Ellipse Canvas.Left="' + (x - r) +
+                 '" Canvas.Top="' + (y - r) +
+                 '" Opacity="' + (this.globalAlpha * a) +
+                 '" Width="' + (r * 2) +
+                 '" Height="' + (r * 2);
+
+        if (fillColor) {
+            fg +=   '" Fill="' + fillColor.hex;
+        }
+        if (strokeColor && lw) {
+            fg +=   '" Stroke="' + strokeColor.hex +
+                    '" StrokeThickness="' + lw;
+        }
+        fg += '" />';
+
+        this._state !== 0x1 ? this._stock.push(fg)
+                            : this._view.add(this._content.createFromXaml(fg));
+    }
+}
+
 // CanvasRenderingContext2D.prototype.drawImage
 // drawImage(image, dx, dy)
 // drawImage(image, dx, dy, dw, dh)
@@ -652,22 +681,6 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
 // CanvasRenderingContext2D.prototype.fill
 function fill(path) {
     this.stroke(path, 1);
-}
-
-// CanvasRenderingContext2D.prototype.fillCircle
-function fillCircle(x,       // @param Number:
-                    y,       // @param Number:
-                    r,       // @param Number: radius
-                    color) { // @param ColorHash:
-    var fg = '<Ellipse Canvas.Left="' + (x - r) +
-             '" Canvas.Top="' + (y - r) +
-             '" Opacity="' + (this.globalAlpha * color.a) +
-             '" Width="' + (r * 2) +
-             '" Height="' + (r * 2) +
-             '" Fill="' + color.hex + '" />';
-
-    this._state !== 0x1 ? this._stock.push(fg)
-                        : this._view.add(this._content.createFromXaml(fg));
 }
 
 // CanvasRenderingContext2D.prototype.fillRect
@@ -891,23 +904,6 @@ function stroke(path, fill) {
     }
     this.xFlyweight ||
         this._history.push(this._clipPath ? (fg = _clippy(this, fg)) : fg);
-    this._state !== 0x1 ? this._stock.push(fg)
-                        : this._view.add(this._content.createFromXaml(fg));
-}
-
-// CanvasRenderingContext2D.prototype.strokeCircle
-function strokeCircle(x,       // @param Number:
-                      y,       // @param Number:
-                      r,       // @param Number: radius
-                      color) { // @param ColorHash:
-    var fg = '<Ellipse Canvas.Left="' + (x - r) +
-             '" Canvas.Top="' + (y - r) +
-             '" Opacity="' + (this.globalAlpha * color.a) +
-             '" Width="' + (r * 2) +
-             '" Height="' + (r * 2) +
-             '" Stroke="' + color.hex +
-             '" StrokeThickness="' + this.lineWidth + '" />';
-
     this._state !== 0x1 ? this._stock.push(fg)
                         : this._view.add(this._content.createFromXaml(fg));
 }

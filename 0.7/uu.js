@@ -1321,7 +1321,7 @@ function uucoloradd(str) { // @param JointString: "000000black,..."
 }
 
 // uu.color.fix - fix ColorHash
-function uucolorfix(c) { // @param ColorHash/RGBAHash:
+function uucolorfix(c) { // @param ColorHash/RGBAHash: color
                          // @return ColorHash:
     var hex2 = uuhash._hex2;
 

@@ -29,9 +29,9 @@ uu.mix(uu.canvas.FL2D.prototype, {
     createLinearGradient:   createLinearGradient,
     createPattern:          createPattern,
     createRadialGradient:   createRadialGradient,
+    drawCircle:             drawCircle,     // [EXTEND]
     drawImage:              drawImage,
     fill:                   fill,
-    fillCircle:             fillCircle,     // [EXTEND]
     fillRect:               fillRect,
     fillText:               fillText,
     getImageData:           getImageData,
@@ -55,7 +55,6 @@ uu.mix(uu.canvas.FL2D.prototype, {
     sendState:              sendState,      // [EXTEND]
     setTransform:           setTransform,
     stroke:                 stroke,
-    strokeCircle:           strokeCircle,   // [EXTEND]
     strokeRect:             strokeRect,
     strokeText:             strokeText,
     transform:              transform,
@@ -421,6 +420,25 @@ function createRadialGradient(x0, y0, r0, x1, y1, r1) { // @return CanvasGradien
     return new CanvasGradient(x0, y0, r0, x1, y1, r1);
 }
 
+// CanvasRenderingContext2D.prototype.drawCircle
+function drawCircle(x,             // @param Number:
+                    y,             // @param Number:
+                    r,             // @param Number: radius
+                    fillColor,     // @param ColorHash(= void 0): fillColor
+                    strokeColor,   // @param ColorHash(= void 0): strokeColor
+                    lineWidth) {   // @param Number(= 1): stroke lineWidth
+    if (fillColor || strokeColor) {
+        var lw = lineWidth === void 0 ? 1 : lineWidth,
+            f = fillColor ? (fillColor.num + "\t" + this.globalAlpha * fillColor.a)
+                          : "0\t0",
+            s = strokeColor ? (strokeColor.num + "\t" + this.globalAlpha * strokeColor.a)
+                          : "0\t0";
+
+        this.send("X0\t" + x + "\t" + y + "\t" + r + "\t" +
+                           f + "\t" + s + "\t" + lw);
+    }
+}
+
 // CanvasRenderingContext2D.prototype.drawImage
 // drawImage(image,       dx, dy)
 // drawImage(image,       dx, dy, dw, dh)
@@ -462,18 +480,6 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
 function fill() {
     this.sendState(0x5);
     this.send("fi");
-}
-
-// CanvasRenderingContext2D.prototype.fillCircle
-function fillCircle(x,       // @param Number:
-                    y,       // @param Number:
-                    r,       // @param Number: radius
-                    color) { // @param ColorHash:
-    this.send("X0\t" + x + "\t" +
-                       y + "\t" +
-                       r + "\t" +
-                       color.num + "\t" +
-                       color.a * this.globalAlpha);
 }
 
 // CanvasRenderingContext2D.prototype.fillRect
@@ -614,19 +620,6 @@ function setTransform(m11, m12, m21, m22, dx, dy) {
 function stroke() {
     this.sendState(0x7);
     this.send("st");
-}
-
-// CanvasRenderingContext2D.prototype.strokeCircle
-function strokeCircle(x,       // @param Number:
-                      y,       // @param Number:
-                      r,       // @param Number: radius
-                      color) { // @param ColorHash:
-    this.sendState(0x2);
-    this.send("X1\t" + x + "\t" +
-                       y + "\t" +
-                       r + "\t" +
-                       color.num + "\t" +
-                       color.a * this.globalAlpha);
 }
 
 // CanvasRenderingContext2D.prototype.strokeRect

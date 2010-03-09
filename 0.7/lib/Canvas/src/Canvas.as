@@ -313,10 +313,12 @@ package {
                 case "tl":  translate(+a[++i], +a[++i]); break;
                 case "sv":  save(); break;
                 case "rs":  restore(); break;
-                case "X0":  fill = 1; // [THROUGH]
-                case "X1":  ++modify;
-                            strokeCircle(+a[++i], +a[++i],
-                                         +a[++i], +a[++i], +a[++i], fill); break;
+                case "X0":  ++modify;
+                            drawCircle(+a[++i], +a[++i], +a[++i], // x, y, r
+                                       +a[++i], +a[++i],          // fillColor.hex, fillColor.a
+                                       +a[++i], +a[++i],          // strokeColor.hex, strokeColor.a
+                                       +a[++i]);                  // lineWidth
+                            break;
                 case "undefined": // [!] undefined trap
                             trace("[!] undefined trap");
                             ++loopout;
@@ -807,14 +809,18 @@ package {
             next(rv ? 2 : 0);
         }
 
-        private function strokeCircle(x:Number, y:Number, radius:Number,
-                                      color:Number, colorAlpha:Number, fill:int):void {
-            if (fill) {
-                _gfx.beginFill(color, colorAlpha);
+        private function drawCircle(x:Number, y:Number, radius:Number,
+                                    fillColor:int, fillColorAlpha:Number,
+                                    strokeColor:int, strokeColorAlpha:Number,
+                                    lineWidth:int):void {
+            if (fillColorAlpha) {
+                _gfx.beginFill(fillColor, fillColorAlpha);
                 _gfx.drawCircle(x, y, radius);
                 _gfx.endFill();
-            } else {
-                _gfx.lineStyle(lineWidth * _lineScale, color, colorAlpha, true);
+            }
+            if (strokeColorAlpha && lineWidth) {
+                _gfx.lineStyle(lineWidth * _lineScale,
+                               strokeColor, strokeColorAlpha, true);
                 _gfx.drawCircle(x, y, radius);
             }
             _buff.draw(_shape);
