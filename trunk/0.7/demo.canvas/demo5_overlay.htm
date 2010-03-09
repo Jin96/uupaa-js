@@ -35,7 +35,7 @@ var begin = +new Date;
 var fpscount = 0;
 // use ctx.lock()
 var uselock = 1;
-var fill = 1;
+var mode = 1;
 /* *************** */
 
 
@@ -73,11 +73,13 @@ function draw() {
             ctx.closePath();
  */
             ctx.globalAlpha = 0.5 * d;
-            if (fill) {
-                ctx.fillCircle(x, y, r, uu.color('hsl(' + hue + ',100%,50%)'));
-            } else {
-//              ctx.lineWidth = 1;
-                ctx.strokeCircle(x, y, r, uu.color('hsl(' + hue + ',100%,50%)'));
+            switch (mode) {
+            case 0: ctx.drawCircle(x, y, r, uu.color('hsl(' + hue + ',100%,50%)'));
+                    break;
+            case 1: ctx.drawCircle(x, y, r, void 0, uu.color('hsl(' + hue + ',100%,50%)'), 1);
+                    break;
+            case 2: ctx.drawCircle(x, y, r, uu.color('hsl(' + hue + ',100%,50%)'),
+                                            uu.color('hsl(' + hue + ',80%,30%)'), 2);
             }
         }
     }
@@ -132,7 +134,11 @@ function boost() {
     uselock = !uselock; // toggle
 }
 function switchStyle() {
-    fill = !fill; // toggle
+    switch (mode) {
+    case 0: mode = 1; break;
+    case 1: mode = 2; break;
+    default: mode = 0;
+    }
 }
 function switchBackend() {
     var n = window.name || "";
