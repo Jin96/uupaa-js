@@ -1,17 +1,21 @@
 
 package {
     import flash.display.*;
-    import flash.events.Event;
+    import flash.events.*;
     import flash.net.*;
 
     public class CanvasImage {
 
-        public var canvas:Canvas; // Boss
-        public var url:String;
-        public var bitmapData:BitmapData;
+        private var _canvas:Canvas; // Boss
+//      private var _url:String;
+        private var _bitmapData:BitmapData;
 
         public function CanvasImage(boss:Canvas) {
-            canvas = boss;
+            _canvas = boss;
+        }
+
+        public function get bitmapData():BitmapData {
+            return _bitmapData;
         }
 
         public function load(url:String, callback:Function):Boolean {
@@ -19,10 +23,10 @@ package {
                 loader.contentLoaderInfo.removeEventListener(Event.COMPLETE, onload);
 
                 // retrieve image
-                bitmapData = Bitmap(loader.content).bitmapData;
+                _bitmapData = Bitmap(loader.content).bitmapData;
 
                 // add cache
-                canvas.imageCache[url] = bitmapData;
+                cache.add(url, _bitmapData);
 
                 // [GC]
                 loader.unload();
@@ -31,18 +35,17 @@ package {
             }
 
             var loader:Loader = new Loader();
+            var cache:CanvasImageCache = CanvasImageCache.getInstance();
 
-            // find cached image
-            bitmapData = canvas.imageCache[url];
-
-            if (bitmapData) {
+            if (cache.find(url)) {
                 callback();
             } else {
+                _bitmapData = cache.ref(url);
                 // load
                 loader.contentLoaderInfo.addEventListener(Event.COMPLETE, onload);
                 loader.load(new URLRequest(url));
             }
-            return bitmapData ? true : false; // true is cached
+            return _bitmapData ? true : false; // true is cached
         }
     }
 }
