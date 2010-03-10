@@ -96,6 +96,12 @@ function build(canvas) { // @param Node: <canvas>
             jpegQuality = 0.8;
         }
 
+        // [SYNC] pre render
+        if (this._stock.length) {
+            this._view.CallFunction(send._prefix + this._stock.join("\t") +
+                                    send._suffix);
+        }
+
         // [SYNC] ExternalInterface.toDataURL
         return canvas.uuctx2d._view.toDataURL(mimeType, jpegQuality);
     };
@@ -217,23 +223,58 @@ function _copyprop(to, from) {
 }
 
 // class ImageData
-function ImageData(width,  // @param Number:
-                   height, // @param Number:
-                   data) { // @param ImageData(= void 0):
-    var i, iz;
-
+function ImageData(width,     // @param Number:
+                   height,    // @param Number:
+                   rawdata) { // @param Array(= void 0):
     this.width  = width;
     this.height = height;
+    this.build  = imagedatabuild;
+    this.cache  = [];
+    this.useCache = 0;
 
-    if (data && data.length) {
-        this.data = data.concat();
+    var rv = [], n, i = -1, j = -1, iz = width * height;
+
+    if (!rawdata) {
+        while (++i < iz) {
+            rv.push(0, 0, 0, 0); // RGBA
+        }
     } else {
-        this.data = [];
+        iz = rawdata.length;
 
-        for (i = 0, iz = width * height; i < iz; ++i) {
-            this.data.push(0, 0, 0, 0); // RGBA
+        while (++i < iz) {
+            n = rawdata[i];
+
+            rv[++j] = (n >> 16) & 0xff; // R
+            rv[++j] = (n >>  8) & 0xff; // G
+            rv[++j] =  n        & 0xff; // B
+            rv[++j] = (n >> 24) & 0xff; // A
         }
     }
+    this.data = rv;
+}
+
+// ImageData.build - build rawdata
+//      [(R,G,B,A), ...] -> [Number(ARGB), ...]
+function imagedatabuild() {
+    if (this.useCache && this.cache.length) {
+        return this.cache;
+    }
+
+    var rv = [], data = this.data, n,
+        i = -1, j = -1, iz = data.length / 4 - 1;
+
+    while (i < iz) {
+        n  = data[++j] << 16;
+        n |= data[++j] << 8;
+        n |= data[++j];
+        n += data[++j] * 0x1000000;
+
+        rv[++i] = n;
+    }
+    if (this.useCache) {
+        this.cache = rv; // cache
+    }
+    return rv;
 }
 
 // CanvasRenderingContext2D.prototype.arc
@@ -318,23 +359,22 @@ function getImageData(sx,   // @param Number:
         throw new Error("INDEX_SIZE_ERR");
     }
 
-    var width, height, rawdata, data = [], i = 0, j = -1, iz, n;
+    var rawdata, width, height;
 
+    // [SYNC] pre render
+    if (this._stock.length) {
+        this._view.CallFunction(send._prefix + this._stock.join("\t") +
+                                send._suffix);
+    }
+
+    // [SYNC]
     rawdata = this._view.getImageData(sx, sy, sw, sh);
 
     // get actual size
-    width = rawdata.shift();
+    width  = rawdata.shift();
     height = rawdata.shift();
 
-    for (iz = rawdata.length; i < iz; ++i) {
-        n = rawdata[i];
-        // 32bit unit(ARGB) -> [R,G,B,A]
-        data[++j] = (n >> 16) & 0xff; // R
-        data[++j] = (n >>  8) & 0xff; // G
-        data[++j] =  n        & 0xff; // B
-        data[++j] = (n >> 24) & 0xff; // A
-    }
-    return new ImageData(width, height, data);
+    return new ImageData(width, height, rawdata);
 }
 
 // CanvasRenderingContext2D.prototype.createLinearGradient
@@ -529,8 +569,7 @@ function putImageData(imagedata,     // @param ImageData:
                       dirtyY,        // @param Number:
                       dirtyWidth,    // @param Number:
                       dirtyHeight) { // @param Number:
-    if (isNaN(dx) || isNaN(dy) || isNaN(dirtyX) || isNaN(dirtyY)
-        || isNaN(dirtyWidth) || isNaN(dirtyHeight)) {
+    if (isNaN(dx) || isNaN(dy)) {
         throw new Error("NOT_SUPPORTED_ERR");
     }
     if (!imagedata) {
@@ -542,8 +581,22 @@ function putImageData(imagedata,     // @param ImageData:
     dirtyWidth  = dirtyWidth  === void 0 ? imagedata.width  : dirtyWidth;
     dirtyHeight = dirtyHeight === void 0 ? imagedata.height : dirtyHeight;
 
-    this._view.putImageData(imagedata.data, dx, dy,
-                            dirtyX, dirtyY, dirtyWidth, dirtyHeight);
+    if (isNaN(dirtyX) || isNaN(dirtyY)
+        || isNaN(dirtyWidth) || isNaN(dirtyHeight)) {
+        throw new Error("NOT_SUPPORTED_ERR");
+    }
+
+    var rawdata = imagedata.build().join(",");
+
+    this.send("pI\t" + imagedata.width  + "\t" +
+                       imagedata.height + "\t" +
+                       dx + "\t" +
+                       dy + "\t" +
+                       dirtyX + "\t" +
+                       dirtyY + "\t" +
+                       dirtyWidth + "\t" +
+                       dirtyHeight + "\t" +
+                       rawdata);
 }
 
 // CanvasRenderingContext2D.prototype.quickStroke -> NOT IMPL

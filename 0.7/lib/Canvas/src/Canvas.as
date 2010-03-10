@@ -89,7 +89,6 @@ package {
             ExternalInterface.addCallback("resize", resize);
             ExternalInterface.addCallback("toDataURL", toDataURL);
             ExternalInterface.addCallback("getImageData", getImageData);
-            ExternalInterface.addCallback("putImageData", putImageData);
 
             _shape = new Shape();
             _gfx = _shape.graphics;
@@ -313,6 +312,17 @@ package {
                 case "tl":  translate(+a[++i], +a[++i]); break;
                 case "sv":  save(); break;
                 case "rs":  restore(); break;
+                case "pI":  canvasPixel.putImageData(
+                                +a[++i],    // imagedata.width,
+                                +a[++i],    // imagedata.height,
+                                +a[++i],    // dx,
+                                +a[++i],    // dy,
+                                +a[++i],    // dirtyX,
+                                +a[++i],    // dirtyY,
+                                +a[++i],    // dirtyWidth,
+                                +a[++i],    // dirtyHeight,
+                                 a[++i]);   // "rawdata,..."
+                            break;
                 case "X0":  ++modify;
                             drawCircle(+a[++i], +a[++i], +a[++i], // x, y, r
                                        +a[++i], +a[++i],          // fillColor.hex, fillColor.a
@@ -337,7 +347,7 @@ package {
         }
 
         private function init(width:int, height:int, flyweight:int):void {
-//trace("init(), width="+width+",height="+height);
+//trace(ExternalInterface.objectID + "init(), width="+width+",height="+height);
             xFlyweight = flyweight;
             canvasWidth = width;
             canvasHeight = height;
@@ -392,15 +402,6 @@ package {
 
         public function getImageData(sx:int, sy:int, sw:int, sh:int):Array {
             return canvasPixel.getImageData(sx, sy, sw, sh);
-        }
-
-        public function putImageData(imagedata:Array,
-                                     dx:int, dy:int,
-                                     dirtyX:int, dirtyY:int,
-                                     dirtyWidth:int, dirtyHeight:int):void {
-            return canvasPixel.putImageData(imagedata,
-                                            dx, dy, dirtyX, dirtyY,
-                                            dirtyWidth, dirtyHeight);
         }
 
         private function buildPath(ary:Array, gfx:Graphics):void {
