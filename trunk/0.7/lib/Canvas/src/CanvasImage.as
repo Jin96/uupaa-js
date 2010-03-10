@@ -38,6 +38,7 @@ package {
             var cache:CanvasImageCache = CanvasImageCache.getInstance();
 
             if (cache.find(url)) {
+                _bitmapData = cache.ref(url);
                 callback();
             } else {
                 _bitmapData = cache.ref(url);
