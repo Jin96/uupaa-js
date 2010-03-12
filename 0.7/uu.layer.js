@@ -191,7 +191,7 @@ function getViewInfo() { // @return Hash: { clid, cctx, front, rear,
 // uu.layer.createLayer - create child layer
 function createLayer(id,       // @param String: layer id
                      type,     // @param String: "canvas", "vmlcanvas", "flashcanvas",
-                               //                "slcanvas",
+                               //                "silverlightcanvas",
                                //                "div", "img", etc...
                      hide,     // @param Boolean(= false): true = hidden layer
                      back,     // @param Boolean(= false): back insertion
@@ -246,7 +246,8 @@ function createLayer(id,       // @param String: layer id
     return elm;
 }
 createLayer._canvasType = {
-    slcanvas: "sl", flashcanvas: "flash", vmlcanvas: "vml"
+    slcanvas: "sl", silverlightcanvas: "sl",
+    flashcanvas: "flash", vmlcanvas: "vml"
 };
 
 // uu.layer.appendLayer - add node

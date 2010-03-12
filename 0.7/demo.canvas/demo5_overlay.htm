@@ -3,7 +3,7 @@
 <head>
 <title>Overlay animation</title>
 <style>
-
+canvas { border: 1px solid gray }
 </style>
 <script>xconfig={dir:"../"}</script>
 <script type="text/javascript" src="../uupaa.js"></script>
@@ -110,21 +110,13 @@ window.onload = function() {
   };
 };
  */
-function xcanvas() {
-    canvas=document.getElementById("c").getContext("2d");
-    canvas.xFlyweight = 1;
+function xcanvas(uu, canvases) {
+    var ctx = canvases[0].getContext("2d");
+    ctx.xFlyweight = 1;
 
-    if (canvas instanceof uu.canvas.VML2D) {
-        uu.id("detected").innerText = "Backend: VML";
-    } else if (canvas instanceof uu.canvas.FL2D) {
-        uu.id("detected").innerText = "Backend: Flash";
-    } else if (canvas instanceof uu.canvas.SL2D) {
-        uu.id("detected").innerText = "Backend: Silverlight";
-    } else {
-        uu.id("detected").innerText = "Native Canvas";
-    }
+    document.title = "Backend: " + (ctx.xBackend || "Canvas");
 
-    document.getElementById('c').onmousedown = function(e) {
+    canvases[0].onmousedown = function(e) {
         addPointAtEvent(e || window.event);
     };
 }
@@ -162,12 +154,13 @@ function xboot(uu) {
 </script>
 </head>
 <body>
-<input type="button" value="boost on/off" onclick="boost()" />
-<input type="button" value="sl/flash/vml" onclick="switchBackend()" />
+<input type="button" value="boost/off" onclick="boost()" />
+<input type="button" value="Silverlight/Flash/VML" onclick="switchBackend()" />
 <input type="button" value="fill/stroke" onclick="switchStyle()" />
-<h1 id="detected"></h1>
+<br />
 
-<canvas id="c" width=500 height=500 onmousemove="addPointAtEvent(event)"></canvas>
+
+<canvas id="c" width=800 height=600 onmousemove="addPointAtEvent(event)"></canvas>
 
 
 </body>

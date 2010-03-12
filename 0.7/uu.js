@@ -52,7 +52,7 @@ function uunop() { // @return undefined:
 uu ? ++uu.agein : (function(win, doc) {
 var _cfg    = uuarg(win.xconfig || {}, { dir: ".", aria: 0, debug: 0, right: 0,
                                          visited: 0, innerText: 0 }),
-    _ver    = _vers(), // browser, plugin, version detection
+    _ver    = _detectVersion(),
     _ie     = _ver.ie,
     _gecko  = _ver.gecko,
     _opera  = _ver.opera,
@@ -86,7 +86,7 @@ uu = uumix(uujamfactory, {          // uu(expr, ctx) -> Instance(jam)
                                     // uu.ver.render - Number: Rendering Engine version
                                     //                 (Firefox2: 1.81, Firefox3: 1.9, Firefox3.5: 1.91,
                                     //                  Safari3.1: 525, Safari4: 528)
-                                    // uu.ver.sl     - Number: Silverlight version(3 later)
+                                    // uu.ver.silverlight - Number: Silverlight version(3 later)
                                     // uu.ver.flash  - Number: Flash version(7 later)
                                     // uu.ver.ie     - Boolean: true is IE6, IE7, IE8+
                                     // uu.ver.ie6    - Boolean: true is IE6
@@ -243,6 +243,7 @@ uu = uumix(uujamfactory, {          // uu(expr, ctx) -> Instance(jam)
         gone: {
             dom:        0,          // 1 is DOMContentLoaded event fired
             win:        0,          // 1 is window.onload event fired
+            audio:      0,          // 1 is <audio> ready event fired
             canvas:     0,          // 1 is <canvas> ready event fired
             storage:    0,          // 1 is localStorage ready event fired
             blackout:   0           // 1 is blackout (css3 cache reload)
@@ -2563,13 +2564,12 @@ function _matcher(ary) {
 }
 
 // inner - collect versions and meta informations
-function _vers(slupper) { // @param Number(= 4): Silverlight upper version
-                          // @return Hash: { ua, render, sl, flash,
-                          //    ie, ie6, ie7, ie8, ie67,
-                          //    opera, webkit, chrome, safari, iphone,
-                          //    quirks, xml, win, mac, unix, adv, major }
+function _detectVersion() { // @return Hash: { ua, render, silverlight, flash,
+                            //    ie, ie6, ie7, ie8, ie67,
+                            //    opera, webkit, chrome, safari, iphone,
+                            //    quirks, xml, win, mac, unix, adv, major }
     // http://d.hatena.ne.jp/uupaa/20090603
-    var sl = slupper || 4, ax, v, i = -1,
+    var ax, v, i = -1, sl = 5,
         nu = navigator.userAgent,
         ie = !!doc.uniqueID, opera = window.opera || false,
         ua = opera ? +(opera.version().replace(/\d$/, ""))
@@ -2584,7 +2584,7 @@ function _vers(slupper) { // @param Number(= 4): Silverlight upper version
         html = doc.getElementsByTagName("html")[0],
         ary = [html.className.replace(/ifnojs|addua|addos/g, ""), "ifjs"],
         id = "adv,major", cn = html.className,
-        rv = { ua: ua, render: render, sl: 0, flash: 0,
+        rv = { ua: ua, render: render, silverlight: 0, flash: 0,
                ie: ie, ie6: ie && ua === 6, ie7: ie && ua === 7,
                ie8: ie && (doc.documentMode || 0) === 8,
                opera: !!opera, gecko: gecko,
@@ -2596,7 +2596,7 @@ function _vers(slupper) { // @param Number(= 4): Silverlight upper version
                win: nu.indexOf("Win") > 0, mac: nu.indexOf("Mac") > 0,
                unix: /X11|Linux/.test(nu) };
 
-  //{{{!mb Flash version (version 7.0 ~ later)
+  //{{{!mb detect Flash version (version 7 ~ later)
     try {
         ax = ie ? new ActiveXObject("ShockwaveFlash.ShockwaveFlash")
                 : navigator.plugins["Shockwave Flash"];
@@ -2606,14 +2606,16 @@ function _vers(slupper) { // @param Number(= 4): Silverlight upper version
     } catch(err) {}
   //}}}!mb
 
-  //{{{!mb Silverlight version (version 3.0 ~ later)
+  //{{{!mb detect Silverlight version (version 3 ~ later)
     if (sl >= 3) {
         try {
             ax = ie ? new ActiveXObject("AgControl.AgControl")
                     : parseInt(/\d+\.\d+/.exec(navigator.plugins["Silverlight Plug-In"].
                                                description)[0]);
-            for (; sl >= 3 && !rv.sl; --sl) {
-                (ie ? ax.IsVersionSupported(sl + ".0") : ax >= sl) && (rv.sl = sl);
+            for (; sl >= 3 && !rv.silverlight; --sl) {
+                if (ie ? ax.IsVersionSupported(sl + ".0") : ax >= sl) {
+                    rv.silverlight = sl;
+                }
             }
         } catch(err) {}
     }

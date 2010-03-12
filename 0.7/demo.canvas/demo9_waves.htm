@@ -50,15 +50,7 @@ function xcanvas(uu, node) {
 //    ctx.resize(sz.iw - 40, sz.ih - 40)
 //    ctx = canvas.getContext("2d");
 
-    if (ctx instanceof uu.canvas.VML2D) {
-        document.title = "Backend: VML";
-    } else if (ctx instanceof uu.canvas.FL2D) {
-        document.title = "Backend: Flash";
-    } else if (ctx instanceof uu.canvas.SL2D) {
-        document.title = "Backend: Silverlight";
-    } else {
-        document.title = "Native Canvas";
-    }
+    document.title = "Backend: " + (ctx.xBackend || "Canvas");
     ctx.xFlyweight = 1;
 
     setInterval(draw, 20);
@@ -95,7 +87,7 @@ body {
 }
 </style>
 </head><body>
-<input type="button" value="sl/flash/vml" onclick="switchBackend()" />
+    <input type="button" value="Silverlight/Flash/VML" onclick="switchBackend()" />
 <br />
 
 <canvas id="canvas" width="400" height="400"></canvas>

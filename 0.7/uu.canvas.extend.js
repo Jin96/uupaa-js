@@ -296,13 +296,16 @@ function _strokeTextGecko(ctx, text, x, y, maxWidth, fill) {
 
 //}}}!mb
 
-// === extend lock, unlock ===
+// === extend functions and properties ===
 if (_CanvasPrototype) {
+    // --- function ---
     _CanvasPrototype.lock   = lock;     // [EXTEND]
     _CanvasPrototype.clear  = clear;    // [EXTEND]
     _CanvasPrototype.unlock = uunop;    // [EXTEND]
     _CanvasPrototype.resize = resize;   // [EXTEND]
     _CanvasPrototype.drawCircle = drawCircle; // [EXTEND]
+    // --- property ---
+    _CanvasPrototype.xBackend = "Canvas"; // [EXTEND]
 }
 
 // CanvasRenderingContext2D.prototype.lock

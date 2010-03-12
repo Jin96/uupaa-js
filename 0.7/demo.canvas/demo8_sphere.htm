@@ -17,15 +17,7 @@ canvas {
 function xcanvas() {
     var ctx = document.getElementById("sphere").getContext("2d");
 
-    if (ctx instanceof uu.canvas.VML2D) {
-        document.title = "Backend: VML";
-    } else if (ctx instanceof uu.canvas.FL2D) {
-        document.title = "Backend: Flash";
-    } else if (ctx instanceof uu.canvas.SL2D) {
-        document.title = "Backend: Silverlight";
-    } else {
-        document.title = "Native Canvas";
-    }
+    document.title = "Backend: " + (ctx.xBackend || "Canvas");
     ctx.xFlyweight = 1;
 
     new Sphere();
@@ -50,7 +42,7 @@ function xboot(uu) {
 
 </script>
 </head><body>
-    <input type="button" value="sl/flash/vml" onclick="switchBackend()" />
+    <input type="button" value="Silverlight/Flash/VML" onclick="switchBackend()" />
     <div align="center">
         <canvas id="sphere" width="600" height="600"></canvas>
     </div>

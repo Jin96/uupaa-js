@@ -16,7 +16,7 @@
 
 uu.agein || (function(win, doc, uu) {
 
-uu.mix(uu.canvas.FL2D.prototype, {
+uu.mix(uu.canvas.Flash.prototype, {
     arc:                    arc,
     arcTo:                  uunop,
     beginPath:              beginPath,
@@ -36,7 +36,7 @@ uu.mix(uu.canvas.FL2D.prototype, {
     fillText:               fillText,
     getImageData:           getImageData,
     initSurface:            initSurface,    // [EXTEND]
-    isPointInPath:          uunop,
+    isPointInPath:          isPointInPath,
     lineTo:                 lineTo,
     lock:                   lock,           // [EXTEND]
     measureText:            measureText,
@@ -52,7 +52,6 @@ uu.mix(uu.canvas.FL2D.prototype, {
     save:                   save,
     scale:                  scale,
     send:                   send,           // [EXTEND]
-    sendState:              sendState,      // [EXTEND]
     setTransform:           setTransform,
     stroke:                 stroke,
     strokeRect:             strokeRect,
@@ -62,10 +61,10 @@ uu.mix(uu.canvas.FL2D.prototype, {
     unlock:                 unlock          // [EXTEND]
 });
 
-uu.canvas.FL2D.init = init;
-uu.canvas.FL2D.build = build;
+uu.canvas.Flash.init = init;
+uu.canvas.Flash.build = build;
 
-// uu.canvas.FL2D.init
+// uu.canvas.Flash.init
 function init(ctx, node) { // @param Node: <canvas>
     ctx.canvas = node;
     ctx.initSurface();
@@ -73,12 +72,12 @@ function init(ctx, node) { // @param Node: <canvas>
     ctx._view = null; // swf <object>
 }
 
-// uu.canvas.FL2D.build
+// uu.canvas.Flash.build
 function build(canvas) { // @param Node: <canvas>
                          // @return Node:
     // CanvasRenderingContext.getContext
     canvas.getContext = function() {
-        return canvas.uuctx2d;
+        return canvas.uuctx;
     };
 
     // CanvasRenderingContext.toDataURL
@@ -96,17 +95,12 @@ function build(canvas) { // @param Node: <canvas>
             jpegQuality = 0.8;
         }
 
-        // [SYNC] pre render
-        if (this._stock.length) {
-            this._view.CallFunction(send._prefix + this._stock.join("\t") +
-                                    send._suffix);
-        }
-
         // [SYNC] ExternalInterface.toDataURL
-        return canvas.uuctx2d._view.toDataURL(mimeType, jpegQuality);
+        clearance(this);
+        return canvas.uuctx._view.toDataURL(mimeType, jpegQuality);
     };
 
-    canvas.uuctx2d = new uu.canvas.FL2D(canvas);
+    canvas.uuctx = new uu.canvas.Flash(canvas);
 
     var id = "externalcanvas" + uu.guid() + (+new Date);
 
@@ -114,14 +108,13 @@ function build(canvas) { // @param Node: <canvas>
 
     // wait for response from flash initializer
     function flashCanvasReadyCallback() {
-        var ctx = canvas.uuctx2d;
+        var ctx = canvas.uuctx;
 
         ctx._readyState = 1; // 1: draw ready
         if (canvas.currentStyle.direction === "rtl") {
             ctx._stock.push("rt");
         }
-        ctx.sendState(0xf);
-        ctx.send();
+        ctx.send("XX", 0xf);
         // [GC]
         uu.dmz[id] = null;
     }
@@ -137,7 +130,7 @@ function build(canvas) { // @param Node: <canvas>
          "clsid:d27cdb6e-ae6d-11cf-96b8-444553540000",
          uu.config.dir + "uu.canvas.swf"]);
 
-    canvas.uuctx2d._view = canvas.firstChild; // <object>
+    canvas.uuctx._view = canvas.firstChild; // <object>
 
     // uncapture key events(release focus)
     function onFocus(evt) {
@@ -152,15 +145,15 @@ function build(canvas) { // @param Node: <canvas>
     function onPropertyChange(evt) {
         var attr = evt.propertyName;
 
-        attr === "width"  && canvas.uuctx2d.resize(canvas.width);
-        attr === "height" && canvas.uuctx2d.resize(void 0, canvas.height);
+        attr === "width"  && canvas.uuctx.resize(canvas.width);
+        attr === "height" && canvas.uuctx.resize(void 0, canvas.height);
     }
 
     canvas.firstChild.attachEvent("onfocus", onFocus); // <object>.attachEvent
     canvas.attachEvent("onpropertychange", onPropertyChange);
 
     win.attachEvent("onunload", function() { // [FIX][MEM LEAK]
-        canvas.uuctx2d = canvas.getContext = null;
+        canvas.uuctx = canvas.getContext = null;
         win.detachEvent("onunload", arguments.callee);
         canvas.detachEvent("onfocus", onFocus);
         canvas.detachEvent("onpropertychange", onPropertyChange);
@@ -190,16 +183,18 @@ function initSurface() {
     this.font           = "10px sans-serif";
     this.textAlign      = "start";
     this.textBaseline   = "alphabetic";
+    // --- current position ---
+    this.px             = 0;    // current position x
+    this.py             = 0;    // current position y
     // --- hidden properties ---
-    this.px             = 0;
-    this.py             = 0;
     this._stack         = [];   // matrix and prop stack.
     this._stock         = [];   // lock stock
     this._lockState     = 0;    // lock state, 0: unlock, 1: lock, 2: lock + clear
     this._readyState    = 0;
-    this._tmid          = 0;    // timer id
-    this._msgid         = 1;    // message id
+    this._lastTimerID   = 0;
+    this._lastMessageID = 1;
     // --- extend properties ---
+    this.xBackend       = "Flash";
     this.xFlyweight     = 0;    // 1 is animation mode
 }
 
@@ -296,7 +291,6 @@ function arcTo(x1, y1, x2, y2, radius) {
 
 // CanvasRenderingContext2D.prototype.beginPath
 function beginPath() {
-//  this.sendState();
     this.send("bP");
 }
 
@@ -361,13 +355,8 @@ function getImageData(sx,   // @param Number:
 
     var rawdata, width, height;
 
-    // [SYNC] pre render
-    if (this._stock.length) {
-        this._view.CallFunction(send._prefix + this._stock.join("\t") +
-                                send._suffix);
-    }
-
     // [SYNC]
+    clearance(this);
     rawdata = this._view.getImageData(sx, sy, sw, sh);
 
     // get actual size
@@ -421,7 +410,6 @@ function toString() {
     return this._cache;
 }
 
-
 // CanvasRenderingContext2D.prototype.createPattern
 function createPattern(image,    // @param HTMLImageElement/HTMLCanvasElement:
                        repeat) { // @param String(= "repeat"): repetition
@@ -472,7 +460,7 @@ function drawCircle(x,             // @param Number:
             f = fillColor ? (fillColor.num + "\t" + this.globalAlpha * fillColor.a)
                           : "0\t0",
             s = strokeColor ? (strokeColor.num + "\t" + this.globalAlpha * strokeColor.a)
-                          : "0\t0";
+                            : "0\t0";
 
         this.send("X0\t" + x + "\t" + y + "\t" + r + "\t" +
                            f + "\t" + s + "\t" + lw);
@@ -489,12 +477,11 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
         dx, dy, dw, dh, sx, sy, sw, sh, canvas;
 
     if (image.src) { // HTMLImageElement
-        this.sendState(0x5);
         this.send("d0\t" + args + "\t" + image.src + "\t" +
                   a1 + "\t" + a2 + "\t" +
                   (a3 || 0) + "\t" + (a4 || 0) + "\t" +
                   (a5 || 0) + "\t" + (a6 || 0) + "\t" +
-                  (a7 || 0) + "\t" + (a8 || 0));
+                  (a7 || 0) + "\t" + (a8 || 0), 0x5);
     } else { // HTMLCanvasElement
         canvas = image.firstChild;
 
@@ -509,28 +496,32 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
         case 9: sx = a1, sy = a2, sw = a3, sh = a4;
                 dx = a5, dy = a6, dw = a7, dh = a8;
         }
-        this.sendState(0x5);
         this.send("d1\t" + args + "\t" + canvas.id + "\t" +
                   sx + "\t" + sy + "\t" + sw + "\t" + sh + "\t" +
-                  dx + "\t" + dy + "\t" + dw + "\t" + dh);
+                  dx + "\t" + dy + "\t" + dw + "\t" + dh, 0x5);
     }
 }
 
 // CanvasRenderingContext2D.prototype.fill
 function fill() {
-    this.sendState(0x5);
-    this.send("fi");
+    this.send("fi", 0x5);
 }
 
 // CanvasRenderingContext2D.prototype.fillRect
 function fillRect(x, y, w, h) {
-    this.sendState(0x5);
-    this.send("fR\t" + x + "\t" + y + "\t" + w + "\t" + h);
+    this.send("fR\t" + x + "\t" + y + "\t" + w + "\t" + h, 0x5);
 }
 
 // CanvasRenderingContext2D.prototype.fillText
 function fillText(text, x, y, maxWidth) {
     this.strokeText(text, x, y, maxWidth, 1);
+}
+
+// CanvasRenderingContext2D.prototype.isPointInPath
+function isPointInPath(x, y) {
+    // [SYNC] ExternalInterface.toDataURL
+    clearance(this);
+    return this._view.isPointInPath(x, y);
 }
 
 // CanvasRenderingContext2D.prototype.lineTo
@@ -609,8 +600,7 @@ function quadraticCurveTo(cpx, cpy, x, y) {
 
 // CanvasRenderingContext2D.prototype.rect
 function rect(x, y, w, h) {
-    this.sendState(0x5);
-    this.send("re\t" + x + "\t" + y + "\t" + w + "\t" + h);
+    this.send("re\t" + x + "\t" + y + "\t" + w + "\t" + h, 0x5);
 }
 
 // CanvasRenderingContext2D.prototype.resize
@@ -629,7 +619,7 @@ function resize(width,    // @param Number(= void 0): width
         this._view.height = height;
     }
     this._readyState = state;
-    this._msgid = 100 + uu.guid(); // [!] next command force send
+    this._lastMessageID = 100 + uu.guid(); // [!] next command force send
 
     // [SYNC] ExternalInterface.resize
     this._view.resize(this.canvas.width, this.canvas.height, this.xFlyweight);
@@ -653,8 +643,7 @@ function save() {
     _copyprop(prop, this);
     this._stack.push(prop);
 
-    this.sendState(0xf); // [!]
-    this.send("sv");
+    this.send("sv", 0xf); // [!]
 }
 
 // CanvasRenderingContext2D.prototype.scale
@@ -671,25 +660,22 @@ function setTransform(m11, m12, m21, m22, dx, dy) {
 
 // CanvasRenderingContext2D.prototype.stroke
 function stroke() {
-    this.sendState(0x7);
-    this.send("st");
+    this.send("st", 0x7);
 }
 
 // CanvasRenderingContext2D.prototype.strokeRect
 function strokeRect(x, y, w, h) {
-    this.sendState(0x7);
-    this.send("sR\t" + x + "\t" + y + "\t" + w + "\t" + h);
+    this.send("sR\t" + x + "\t" + y + "\t" + w + "\t" + h, 0x7);
 }
 
 // CanvasRenderingContext2D.prototype.strokeText
 function strokeText(text, x, y, maxWidth, fill) {
     text = text.replace(/(\t|\v|\f|\r\n|\r|\n)/g, " ");
 
-    this.sendState(0xd);
     this.send((fill ? "fT\t"
                     : "sT\t") + text + "\t" +
               (x || 0) + "\t" +
-              (y || 0) + "\t" + (maxWidth || 0));
+              (y || 0) + "\t" + (maxWidth || 0), 0xd);
 }
 
 // CanvasRenderingContext2D.prototype.transform
@@ -709,62 +695,78 @@ function unlock() {
     if (this._lockState) {
         if (this._stock.length) {
             this._lockState = 0; // [!] pre unlock
-            this.send();
+            this.send("XX");
         }
     }
     this._lockState = 0;
 }
 
-// inner
-function sendState(bits) { // @param Number: bits
-    var ary = this._stock, i = ary.length - 1, font;
+// CanvasRenderingContext2D.prototype.send
+function send(commands, // @param String: commands, "{COMMAND}\t{ARG1}\t..."
+              state) {  // @param Number: state bits
+                        //      0x0: none
+                        //      0x1: globalAlpha, globalCompositeOperation
+                        //           strokeStyle, fillStyle
+                        //      0x2: lineWidth, lineCap, lineJoin, miterLimit
+                        //      0x4: shadowBlur, shadowOffsetX, shadowOffsetY
+                        //           shadowColor
+                        //      0x8: font, textAlign, textBaseline
+    var ctx = this, ary = this._stock, i = ary.length - 1, font,
+        bit = state || 0;
 
-    if (bits & 0x1) {
-        this._alpha !== this.globalAlpha &&
-            (ary[++i] = "gA\t" + (this._alpha = this.globalAlpha));
+    // --- build state phase ---
 
-        this._mix != this.globalCompositeOperation &&
-            (ary[++i] = "gC\t" + (this._mix = this.globalCompositeOperation));
-
+    if (bit & 0x1) {
+        if (this._alpha !== this.globalAlpha) {
+            ary[++i] = "gA\t" + (this._alpha = this.globalAlpha);
+        }
+        if (this._mix != this.globalCompositeOperation) {
+            ary[++i] = "gC\t" + (this._mix = this.globalCompositeOperation);
+        }
         if (this._strokeStyle !== this.strokeStyle) {
             if (typeof this.strokeStyle === "string") {
                 this.__strokeStyle = uu.color(this._strokeStyle = this.strokeStyle);
-                ary[++i] = "s0\t" + this.__strokeStyle.num + "\t" + this.__strokeStyle.a;
+                ary[++i] = "s0\t" + this.__strokeStyle.num + "\t" +
+                                    this.__strokeStyle.a;
             } else {
                 // "s1" = LinerStroke
                 // "s2" = RadialStroke
                 // "s3" = PatternStorke
-                ary[++i] = "s" + this.strokeStyle.type + "\t" + this.strokeStyle.toString();
+                ary[++i] = "s" + this.strokeStyle.type + "\t" +
+                                 this.strokeStyle.toString();
             }
         }
-
         if (this._fillStyle !== this.fillStyle) {
             if (typeof this.fillStyle === "string") {
                 this.__fillStyle = uu.color(this._fillStyle = this.fillStyle);
-                ary[++i] = "f0\t" + this.__fillStyle.num + "\t" + this.__fillStyle.a;
+                ary[++i] = "f0\t" + this.__fillStyle.num + "\t" +
+                                    this.__fillStyle.a;
             } else {
                 // "f1" = LinerFill
                 // "f2" = RadialFill
                 // "f3" = PatternFill
-                ary[++i] = "f" + this.fillStyle.type + "\t" + this.fillStyle.toString();
+                ary[++i] = "f" + this.fillStyle.type + "\t" +
+                                 this.fillStyle.toString();
             }
         }
     }
-    if (bits & 0x2) {
-        this._lineWidth !== this.lineWidth &&
-            (ary[++i] = "lW\t" + (this._lineWidth = this.lineWidth));
 
-        this._lineCap !== this.lineCap &&
-            (ary[++i] = "lC\t" + (this._lineCap = this.lineCap));
-
-        this._lineJoin !== this.lineJoin &&
-            (ary[++i] = "lJ\t" + (this._lineJoin = this.lineJoin));
-
-        this._miterLimit !== this.miterLimit &&
-            (ary[++i] = "mL\t" + (this._miterLimit = this.miterLimit));
+    if (bit & 0x2) {
+        if (this._lineWidth !== this.lineWidth) {
+            ary[++i] = "lW\t" + (this._lineWidth = this.lineWidth);
+        }
+        if (this._lineCap !== this.lineCap) {
+            ary[++i] = "lC\t" + (this._lineCap = this.lineCap);
+        }
+        if (this._lineJoin !== this.lineJoin) {
+            ary[++i] = "lJ\t" + (this._lineJoin = this.lineJoin);
+        }
+        if (this._miterLimit !== this.miterLimit) {
+            ary[++i] = "mL\t" + (this._miterLimit = this.miterLimit);
+        }
     }
 
-    if (bits & 0x4) {
+    if (bit & 0x4) {
         if (this._shadowBlur !== this.shadowBlur
             || this._shadowOffsetX !== this.shadowOffsetX
             || this._shadowOffsetY !== this.shadowOffsetY
@@ -785,7 +787,7 @@ function sendState(bits) { // @param Number: bits
         }
     }
 
-    if (bits & 0x8) {
+    if (bit & 0x8) {
         if (this._font !== this.font) {
             this._font = this.font;
 
@@ -796,21 +798,21 @@ function sendState(bits) { // @param Number: bits
                                 font.variant + "\t" +
                                 font.family;
         }
-        this._textAlign !== this.textAlign &&
-            (ary[++i] = "tA\t" + (this._textAlign = this.textAlign));
-        this._textBaseline !== this.textBaseline &&
-            (ary[++i] = "tB\t" + (this._textBaseline = this.textBaseline));
+        if (this._textAlign !== this.textAlign) {
+            ary[++i] = "tA\t" + (this._textAlign = this.textAlign);
+        }
+        if (this._textBaseline !== this.textBaseline) {
+            ary[++i] = "tB\t" + (this._textBaseline = this.textBaseline);
+        }
     }
-}
 
-// inner -
-function send(fg) { // @param String: fragment, "{COMMAND}\t{ARG1}\t..."
-    if (fg) {
-        this._stock.push(fg);
-    }
-    if (!this._lockState && this._readyState) {
+    // --- build message phase ---
+    ary[++i] = commands;
+
+    if (!this._lockState) {
         if (this._readyState === 1) {
             if (this._view) {
+
                 // [SYNC] send "init" command. init(width, heigth, xFlyweight)
                 this._view.CallFunction(send._prefix +
                     "in\t" + this.canvas.width + "\t" + this.canvas.height +
@@ -818,41 +820,55 @@ function send(fg) { // @param String: fragment, "{COMMAND}\t{ARG1}\t..."
                     send._suffix);
                 this._readyState = 2;
 
-                // [SYNC][FIX] http://twitter.com/uupaa/status/9837157309
-                // at first
-                this._view.CallFunction(send._prefix +
-                    this._stock.join("\t") +
-                    send._suffix);
+                clearance(this);
             }
         }
         if (this._readyState === 2) {
-            var ctx = this;
 
-            // <param name="flashVars" param="i={msgid}&c={cmd}" />
-            if (!ctx._tmid) {
-                ctx._tmid = setTimeout(function() {
-                    if (ctx._tmid && ctx._stock.length) {
-                        var cmd = "i=" + ctx._msgid + "&c=";
+            // <param name="flashVars" param="i={msgid}&b={msgbody}" />
+            if (!this._lastTimerID) {
+                this._lastTimerID = setTimeout(function() {
+                    if (ctx._lastTimerID) {
+                        if (ctx._stock.length) {
+                            // http://twitter.com/uupaa/status/9182387840
+                            // http://twitter.com/uupaa/status/9195030504
+                            // http://twitter.com/uupaa/status/9195279662
+                            // http://twitter.com/uupaa/status/9196237383
+                            // http://twitter.com/uupaa/status/9196368732
+                            var message = "i=" + ctx._lastMessageID +
+                                          "&b=" + ctx._stock.join("\t");
 
-                        // http://twitter.com/uupaa/status/9182387840
-                        // http://twitter.com/uupaa/status/9195030504
-                        // http://twitter.com/uupaa/status/9195279662
-                        // http://twitter.com/uupaa/status/9196237383
-                        // http://twitter.com/uupaa/status/9196368732
-                        cmd += ctx._stock.join("\t"); // [!]
+                            // pre clear
+                            ctx._stock = [];
 
-                        ctx._view.flashVars = cmd;
-                        ctx._stock = []; // clear
-                        ++ctx._msgid > 9 && (ctx._msgid = 1);
-                        ctx._tmid = clearTimeout(ctx._tmid);
+                            // [ASYNC] There might be a packet loss
+                            ctx._view.flashVars = message;
+
+                            // round-trip
+                            ++ctx._lastMessageID > 9 && (ctx._lastMessageID = 1);
+
+//                          clearTimeout(ctx._lastTimerID);
+                        }
+                        ctx._lastTimerID = 0;
                     }
-                }, 0);
+                }, 0); // http://twitter.com/uupaa/status/9837157309
             }
         }
     }
 }
 send._prefix = '<invoke name="send" returntype="javascript"><arguments><string>';
 send._suffix = '</string></arguments></invoke>';
+
+// inner - stocked messages clearance
+function clearance(ctx) {
+    if (ctx._stock.length) {
+        var msg = ctx._stock.join("\t");
+
+        ctx._stock = []; // pre clear
+        // [SYNC]
+        ctx._view.CallFunction(send._prefix + msg + send._suffix);
+    }
+}
 
 })(window, document, uu);
 

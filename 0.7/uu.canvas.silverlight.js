@@ -6,6 +6,7 @@
 //  <canvas width="300" height="150">
 //      <object>
 //          <Canvas>
+//              <Path />
 //          </Canvas>
 //      </object>
 //  </canvas>
@@ -23,7 +24,7 @@ var _COMPOS = { "source-over": 0, "destination-over": 4, copy: 10 },
                       "600": "SemiBold", "700": "Bold", "800": "ExtraBold",
                       "900": "Black" };
 
-uu.mix(uu.canvas.SL2D.prototype, {
+uu.mix(uu.canvas.Silverlight.prototype, {
     arc:                    arc,
     arcTo:                  uunop,
     beginPath:              beginPath,
@@ -67,10 +68,10 @@ uu.mix(uu.canvas.SL2D.prototype, {
     unlock:                 unlock          // [EXTEND]
 });
 
-uu.canvas.SL2D.init = init;
-uu.canvas.SL2D.build = build;
+uu.canvas.Silverlight.init = init;
+uu.canvas.Silverlight.build = build;
 
-// uu.canvas.SL2D.init
+// uu.canvas.Silverlight.init
 function init(ctx, node) { // @param Node: <canvas>
     ctx.canvas = node;
     ctx.initSurface();
@@ -79,20 +80,20 @@ function init(ctx, node) { // @param Node: <canvas>
     ctx._content = null; // <object>
 }
 
-// uu.canvas.SL2D.build
+// uu.canvas.Silverlight.build
 function build(canvas) { // @param Node: <canvas>
                          // @return Node:
     // CanvasRenderingContext.getContext
     canvas.getContext = function() {
-        return canvas.uuctx2d;
+        return canvas.uuctx;
     };
-    canvas.uuctx2d = new uu.canvas.SL2D(canvas);
+    canvas.uuctx = new uu.canvas.Silverlight(canvas);
 
     var onload = "uuonslload" + uu.guid(); // window.uuonslload{n}
 
     // wait for response from Silverlight initializer
     win[onload] = function(sender) { // @param Node: sender is <Canvas> node
-        var ctx = canvas.uuctx2d, xaml;
+        var ctx = canvas.uuctx, xaml;
 
         ctx._view = sender.children;
         ctx._content = sender.getHost().content; // getHost() -> <object>
@@ -131,15 +132,15 @@ function build(canvas) { // @param Node: <canvas>
     function onPropertyChange(evt) {
         var attr = evt.propertyName;
 
-        attr === "width"  && canvas.uuctx2d.resize(canvas.width);
-        attr === "height" && canvas.uuctx2d.resize(void 0, canvas.height);
+        attr === "width"  && canvas.uuctx.resize(canvas.width);
+        attr === "height" && canvas.uuctx.resize(void 0, canvas.height);
     }
 
     canvas.firstChild.attachEvent("onfocus", onFocus); // <object>.attachEvent
     canvas.attachEvent("onpropertychange", onPropertyChange);
 
     win.attachEvent("onunload", function() { // [FIX][MEM LEAK]
-        canvas.uuctx2d = canvas.getContext = null;
+        canvas.uuctx = canvas.getContext = null;
         win.detachEvent("onunload", arguments.callee);
         canvas.detachEvent("onfocus", onFocus);
         canvas.detachEvent("onpropertychange", onPropertyChange);
@@ -153,8 +154,8 @@ function initSurface() {
     this.globalAlpha    = 1.0;
     this.globalCompositeOperation = "source-over";
     // --- colors and styles ---
-    this.strokeStyle    = "black";
-    this.fillStyle      = "black";
+    this.strokeStyle    = "black"; // String or Object
+    this.fillStyle      = "black"; // String or Object
     // --- line caps/joins ---
     this.lineWidth      = 1;
     this.lineCap        = "butt";
@@ -191,6 +192,7 @@ function initSurface() {
                                 //          0x2: + locked
                                 //          0x4: + lazy clear
     // --- extend properties ---
+    this.xBackend       = "Silverlight";
     this.xFlyweight     = 0;    // 1 is animation mode
     this.xMissColor     = "black";
 }
@@ -450,7 +452,7 @@ function createPattern(image,    // @param HTMLImageElement/HTMLCanvasElement:
 }
 
 // CanvasRenderingContext2D.prototype.createRadialGradient
-function createRadialGradient(x0, y0, r0, x1, y1, r1) { // @return Hash:
+function createRadialGradient(x0, y0, r0, x1, y1, r1) { // @return CanvasGradient:
     function CanvasGradient(x0, y0, r0, x1, y1, r1) {
         this.fn = _radialGradientFill;
         this.param = { x0: x0, y0: y0, r0: r0,
@@ -603,7 +605,7 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
                         [zindex, this.globalAlpha, image.src, w, h, [dx - x, dy - y, dw, dh].join(" "), matrix, shadow]);
         }
     } else { // HTMLCanvasElement
-        history = image.uuctx2d._history.join("");
+        history = image.uuctx._history.join("");
 
         switch (az) {
         case 3:
@@ -1288,11 +1290,12 @@ function _stroke(ctx) {
 }
 
 // add inline XAML source
-uu.ie && uu.ver.sl && uu.lazy("init", function() {
+uu.ie && uu.ver.silverlight && uu.lazy("init", function() {
     uu.id("xaml") || uu.head(uu.mix(uue("script"), {
         id:   "xaml",
         type: "text/xaml",
-        text: '<Canvas xmlns="http://schemas.microsoft.com/client/2007"></Canvas>'
+        text: '<Canvas xmlns="http://schemas.microsoft.com/client/2007" ' +
+                      'xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"></Canvas>'
     }));
 }, 2); // 2: high order
 
