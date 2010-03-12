@@ -29,5 +29,7 @@ uu.css3.js
 uu.css3.fixie.js
 uu.css3.boxeffect.js
 uu.codec.js
+uu.codec.base64.js
+uu.codec.url.js
 
 build/footer.txt

@@ -13,11 +13,13 @@ function xcanvas(uu) {
   var ctx = out.getContext("2d");
   var cube = uu.factory("GfxCube");
 
+  ctx.xFlyweight = 1;
+
   cube.add({ x: 100, y: 100 });
   cube.draw(ctx);
   uu.ev.hover(out, function() { cube.run(ctx); },
                    function() { cube.stop(); });
 }
 </script></head><body>
-<canvas id="out" width="200" height="200"></canvas>
+<canvas id="out" class="flash sl vml" width="200" height="200"></canvas>
 </body></html>
