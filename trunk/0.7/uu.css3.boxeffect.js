@@ -84,10 +84,10 @@ function uucss3boxeffect(node,    // @param Node:
         }
     } else {
         backend = "vmlcanvas";
-        if (_ie && uu.ver.sl
-            && bfx.decl["-uu-backend"] === "sl") {
+        if (_ie && uu.ver.silverlight
+            && bfx.decl["-uu-backend"] === "silver") {
 
-            bfx.slmode = 1; // Silverlight mode(buggy)
+            bfx.backend = 1; // Silverlight mode(buggy)
             backend = "slcanvas";
         }
 
@@ -146,7 +146,7 @@ function uucss3boxeffectbond(node,    // @param Node:
             nodebgLayer:    0,
             viewbgLayer:    0,
             hasReflectLayer:0,
-            slmode:         0, // 1 = Silverlight mode
+            backend:        0, // 0: VML, 1: Silverlight, 2: Flash
             viewRect:       uu.css.size(view),
             nodeRect:       uu.css.size(node),
             nodeOffset:     0, // lazy

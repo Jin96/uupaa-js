@@ -131,7 +131,7 @@ Email him: CanvasGame@gmail.com for suggestions.
 
 
 var map;
-var canvas;
+var ctx;
 var overlay;
 //variables initiated at the bottom of the code...
 
@@ -271,9 +271,9 @@ function drawCanvas(){
 
     //	canvas.clearRect(0,0,400, 300);
     if (uselock) {
-      canvas.lock(1);
+      ctx.lock(1);
     } else {
-      canvas.clearRect(0, 0, 400, 300);
+      ctx.clearRect(0, 0, 400, 300);
     }
 
 
@@ -324,17 +324,17 @@ function drawCanvas(){
 		var shade1=Math.floor(wallH1*2+20); if (shade1>255) shade1=255;
 		var shade2=Math.floor(wallH2*2+20); if (shade2>255) shade2=255;
 
-		linGrad = canvas.createLinearGradient(tl[0],0,tr[0],0);
+		linGrad = ctx.createLinearGradient(tl[0],0,tr[0],0);
 		linGrad.addColorStop(0, 'rgba('+(face[i/4]%2==0 ? shade1 : 0)+','+(face[i/4]==1 ? shade1 : 0)+','+(face[i/4]==2 ? 0 : shade1)+',1.0)');
 		linGrad.addColorStop(1, 'rgba('+(face[i/4]%2==0 ? shade2 : 0)+','+(face[i/4]==1 ? shade2 : 0)+','+(face[i/4]==2 ? 0 : shade2)+',1.0)');
 
-		canvas.beginPath();
-		canvas.moveTo(tl[0], tl[1]);
-		canvas.lineTo(tr[0], tr[1]);
-		canvas.lineTo(br[0], br[1]);
-		canvas.lineTo(bl[0], bl[1]);
-		canvas.fillStyle = linGrad;
-		canvas.fill();
+		ctx.beginPath();
+		ctx.moveTo(tl[0], tl[1]);
+		ctx.lineTo(tr[0], tr[1]);
+		ctx.lineTo(br[0], br[1]);
+		ctx.lineTo(bl[0], bl[1]);
+		ctx.fillStyle = linGrad;
+		ctx.fill();
 
 
 		map.lineTo(playerPos[0]*8+Math.cos(theta1)*(wall[i+1])*8, playerPos[1]*8+Math.sin(theta1)*(wall[i+1])*8);
@@ -349,7 +349,7 @@ function drawCanvas(){
       map.unlock();
     }
     if (uselock) {
-      canvas.unlock();
+      ctx.unlock();
     }
             // fps
             if ((++fpscount & 0x3f) === 0x3f) {
@@ -514,18 +514,10 @@ function xcanvas() {
 	map=document.getElementById("map").getContext("2d");
 	map.xFlyweight = 1;
 
-	canvas=document.getElementById("canvas").getContext("2d");
-	canvas.xFlyweight = 1;
+	ctx=document.getElementById("canvas").getContext("2d");
+	ctx.xFlyweight = 1;
 
-	if (canvas instanceof uu.canvas.VML2D) {
-	    uu.id("detected").innerText = "Backend: VML";
-	} else if (canvas instanceof uu.canvas.FL2D) {
-	    uu.id("detected").innerText = "Backend: Flash";
-	} else if (canvas instanceof uu.canvas.SL2D) {
-	    uu.id("detected").innerText = "Backend: Silverlight";
-    } else {
-	    uu.id("detected").innerText = "Native Canvas";
-    }
+    document.title = "Backend: " + (ctx.xBackend || "Canvas");
 
 
 	overlay=document.getElementById("overlay");
@@ -561,8 +553,8 @@ function xboot(uu) {
 
 
 <h1 id="detected" style="color:white"></h1>
-<input type="button" value="boost on/off" onclick="boost()" />
-<input type="button" value="sl/flash/vml" onclick="switchBackend()" />
+    <input type="button" value="boost/off" onclick="boost()" />
+    <input type="button" value="Silverlight/Flash/VML" onclick="switchBackend()" />
 
 
 </body></html>

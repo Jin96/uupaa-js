@@ -35,7 +35,7 @@ var _COMPOS = { "source-over": 0, "destination-over": 4, copy: 10 },
     _PATTERN_FILL   = '<v:shape style="position:absolute;width:10px;height:10px;z-index:?;left:?px;top:?px" coordsize="100,100" filled="t" stroked="f" path="?"><v:fill type="?" opacity="?" /></v:shape>',
     _PATTERN_STROKE = '<v:shape style="position:absolute;width:10px;height:10px;z-index:?;left:?px;top:?px" coordsize="100,100" filled="f" stroked="t" path="?"><v:stroke filltype="?" opacity="?" /></v:shape>';
 
-uu.mix(uu.canvas.VML2D.prototype, {
+uu.mix(uu.canvas.VML.prototype, {
     arc:                    arc,
     arcTo:                  uunop,
     beginPath:              beginPath,
@@ -79,10 +79,10 @@ uu.mix(uu.canvas.VML2D.prototype, {
     unlock:                 unlock          // [EXTEND]
 });
 
-uu.canvas.VML2D.init = init;
-uu.canvas.VML2D.build = build;
+uu.canvas.VML.init = init;
+uu.canvas.VML.build = build;
 
-// uu.canvas.VML2D.init
+// uu.canvas.VML.init
 function init(ctx, node) { // @param Node: <canvas>
     ctx.canvas = node;
     ctx.initSurface();
@@ -95,14 +95,14 @@ function init(ctx, node) { // @param Node: <canvas>
     ctx._clipRect = _rect(ctx, 0, 0, node.width, node.height);
 }
 
-// uu.canvas.VML2D.build
+// uu.canvas.VML.build
 function build(canvas) { // @param Node: <canvas>
                          // @return Node:
     // CanvasRenderingContext.getContext
     canvas.getContext = function() {
-        return canvas.uuctx2d;
+        return canvas.uuctx;
     };
-    canvas.uuctx2d = new uu.canvas.VML2D(canvas);
+    canvas.uuctx = new uu.canvas.VML(canvas);
 
     // uncapture key events(release focus)
     function onFocus(evt) {
@@ -117,15 +117,15 @@ function build(canvas) { // @param Node: <canvas>
     function onPropertyChange(evt) {
         var attr = evt.propertyName;
 
-        attr === "width"  && canvas.uuctx2d.resize(canvas.width);
-        attr === "height" && canvas.uuctx2d.resize(void 0, canvas.height);
+        attr === "width"  && canvas.uuctx.resize(canvas.width);
+        attr === "height" && canvas.uuctx.resize(void 0, canvas.height);
     }
 
     canvas.firstChild.attachEvent("onfocus", onFocus); // <object>.attachEvent
     canvas.attachEvent("onpropertychange", onPropertyChange);
 
     win.attachEvent("onunload", function() { // [FIX][MEM LEAK]
-        canvas.uuctx2d = canvas.getContext = null;
+        canvas.uuctx = canvas.getContext = null;
         win.detachEvent("onunload", arguments.callee);
         canvas.detachEvent("onfocus", onFocus);
         canvas.detachEvent("onpropertychange", onPropertyChange);
@@ -139,8 +139,8 @@ function initSurface() {
     this.globalAlpha    = 1.0;
     this.globalCompositeOperation = "source-over";
     // --- colors and styles ---
-    this.strokeStyle    = "black";
-    this.fillStyle      = "black";
+    this.strokeStyle    = "black"; // String or Object
+    this.fillStyle      = "black"; // String or Object
     // --- line caps/joins ---
     this.lineWidth      = 1;
     this.lineCap        = "butt";
@@ -177,6 +177,7 @@ function initSurface() {
                                 //          0x2: + locked
                                 //          0x4: + lazy clear
     // --- extend properties ---
+    this.xBackend       = "VML";
     this.xFlyweight     = 0;    // 1 is animation mode
     this.xMissColor     = "black";
     this.xTextMarginTop = 1.3;
@@ -414,7 +415,7 @@ function createPattern(image,    // @param HTMLImageElement/HTMLCanvasElement:
 }
 
 // CanvasRenderingContext2D.prototype.createRadialGradient
-function createRadialGradient(x0, y0, r0, x1, y1, r1) { // @return Hash:
+function createRadialGradient(x0, y0, r0, x1, y1, r1) { // @return CanvasGradient:
     function CanvasGradient(x0, y0, r0, x1, y1, r1) {
         this.fn = _radialGradientFill;
         this.param = { x0: x0, y0: y0, r0: r0,
@@ -567,10 +568,10 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
                 rv.push('<div style="position:absolute;z-index:', zindex,
                         ';left:',  Math.round(c0.x * 0.1),
                         'px;top:', Math.round(c0.y * 0.1), 'px">')
-                iz = image.uuctx2d._history.length;
+                iz = image.uuctx._history.length;
 
                 for (; i < iz; ++i) {
-                    rv.push(image.uuctx2d._history[i]);
+                    rv.push(image.uuctx._history[i]);
                 }
                 rv.push('</div>');
                 break;
@@ -580,10 +581,10 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
                         _imageTransform(this, m, dx, dy, dw, dh),
                         '"><div style="width:',  Math.round(dim.w * dw / sw),
                                    'px;height:', Math.round(dim.h * dh / sh), 'px">');
-                iz = image.uuctx2d._history.length;
+                iz = image.uuctx._history.length;
 
                 for (; i < iz; ++i) {
-                    rv.push(image.uuctx2d._history[i]);
+                    rv.push(image.uuctx._history[i]);
                 }
                 rv.push('</div></div>');
                 break;
@@ -593,10 +594,10 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
                         ';overflow:hidden',
                         _imageTransform(this, m, dx, dy, dw, dh), '">');
 
-                iz = image.uuctx2d._history.length;
+                iz = image.uuctx._history.length;
 
                 for (; i < iz; ++i) {
-                    rv.push(image.uuctx2d._history[i]);
+                    rv.push(image.uuctx._history[i]);
                 }
                 rv.push('</div>');
                 break;
@@ -1139,9 +1140,8 @@ function _linearGradientFill(ctx, obj, path, fill, zindex) {
 
 // inner - Radial Gradient Fill
 function _radialGradientFill(ctx, obj, path, fill, zindex) {
-    var rv = [], /* brush, */ v,
-        /* fg = "", */ more,
-        fp = obj.param, fsize, fposX, fposY, /* focusParam = "", */
+    var rv = [], v, more,
+        fp = obj.param, fsize, fposX, fposY,
         zindex2 = 0,
         x = fp.x1 - fp.r1,
         y = fp.y1 - fp.r1,

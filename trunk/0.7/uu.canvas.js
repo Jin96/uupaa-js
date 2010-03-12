@@ -12,27 +12,27 @@ var _flashCanvas = (uu.ie && uu.ver.flash > 8) ?
 //}}}!mb
 
 uu.canvas.init   = uucanvasinit;    // uu.canvas.init()
-uu.canvas.create = uucanvascreate;  // uu.canvas.create(width = 300, height = 150, order = "vml sl flash") -> <canvas>
+uu.canvas.create = uucanvascreate;  // uu.canvas.create(width = 300, height = 150, order = "vml silver flash") -> <canvas>
 
 //{{{!mb
 
-uu.canvas.FL2D   = FL2D;            // uu.canvas.FL2D class
-uu.canvas.SL2D   = SL2D;            // uu.canvas.SL2D class
-uu.canvas.VML2D  = VML2D;           // uu.canvas.VML2D class
+uu.canvas.Silverlight = Silverlight; // uu.canvas.Silverlight class
+uu.canvas.Flash       = Flash;       // uu.canvas.Flash class
+uu.canvas.VML         = VML;         // uu.canvas.VML class
 
-// class FL2D
-function FL2D(node) { // @param Node: <canvas>
-    FL2D.init(this, node);
+// class Silverlight
+function Silverlight(node) { // @param Node: <canvas>
+    Silverlight.init(this, node);
 }
 
-// class SL2D
-function SL2D(node) { // @param Node: <canvas>
-    SL2D.init(this, node);
+// class Flash
+function Flash(node) { // @param Node: <canvas>
+    Flash.init(this, node);
 }
 
-// class VML2D
-function VML2D(node) { // @param Node: <canvas>
-    VML2D.init(this, node);
+// class VML
+function VML(node) { // @param Node: <canvas>
+    VML.init(this, node);
 }
 
 //}}}!mb
@@ -41,7 +41,7 @@ function VML2D(node) { // @param Node: <canvas>
 function uucanvasinit() {
 //{{{!mb
     uu.ie && uu.ary.each(uu.tag("canvas"), function(node) {
-        if (!node.uuctx2d) { // already initialized (altcss and other)
+        if (!node.uuctx) { // already initialized (altcss and other)
             // remove fallback contents
             //      <canvas>fallback contents...</canvas> -> <canvas></canvas>
             var newNode = _removeFallback(node);
@@ -60,7 +60,7 @@ function uucanvasinit() {
 // uu.canvas.create - create canvas element
 function uucanvascreate(width,         // @param Number(= 300):
                         height,        // @param Number(= 150):
-                        order,         // @param String(= "sl flash vml"): backend order
+                        order,         // @param String(= "silver flash vml"): backend order
                         placeHolder) { // @param Node(= <body>): placeholder Node
                                        // @return Node: new element
     var canvas = uue(uu.ie ? "CANVAS" : "canvas"); // [IE][!] need upper case
@@ -71,26 +71,27 @@ function uucanvascreate(width,         // @param Number(= 300):
     placeHolder || (placeHolder = doc.body.appendChild(uue())); // <body><div /></body>
                                                                 //       ~~~~~~~
     placeHolder.parentNode.replaceChild(canvas, placeHolder);
-    return uu.ie ? _build(canvas, order || "sl flash vml") : canvas;
+    return uu.ie ? _build(canvas, order || "silver flash vml") : canvas;
 }
 
-//{{{!mb inner - build canvas <canvas class="flash sl vml">
+//{{{!mb inner - build canvas <canvas class="flash silver vml">
 function _build(node,    // @param Node: <canvas>
                 order) { // @param SpaceJointString:
                          // @return Node:
     var ary = uu.split(order), i = -1, v;
 
     while ( (v = ary[++i]) ) {
-        if (v === "sl" && uu.ver.sl) {
-            return SL2D.build(node);
-        } else if (v === "flash" && _flashCanvas) {
-            return FL2D.build(node);
+        if ((v === "silver" || v === "sl") && uu.ver.silverlight) {
+            return Silverlight.build(node);
+        } else if ((v === "flash" || v === "fl") && _flashCanvas) {
+            return Flash.build(node);
         } else if (v === "vml") {
-            return VML2D.build(node);
+            return VML.build(node);
         }
     }
     // backend detect order: Silverlight -> Flash -> VML
-    return (uu.ver.sl ? SL2D : _flashCanvas ? FL2D : VML2D).build(node);
+    return (uu.ver.silverlight ? Silverlight
+                               : _flashCanvas ? Flash : VML).build(node);
 }
 
 // inner - remove fallback contents

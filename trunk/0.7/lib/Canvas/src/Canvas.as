@@ -3,7 +3,6 @@ package {
     import flash.display.*;
     import flash.filters.*;
     import flash.events.*;
-//  import flash.system.*; // for Security.allowDomain
     import flash.utils.*;
     import flash.geom.*;
 
@@ -37,6 +36,11 @@ package {
         public  var font:Array = []; // [style, weight, variant, family]
         public  var textAlign:String = "start";
         public  var textBaseline:String = "alphabetic";
+        // --- current positon, start position ---
+        private var bx:Number = 0; // begin position x
+        private var by:Number = 0; // begin position y
+        private var px:Number = 0; // current position x
+        private var py:Number = 0; // current position y
         // --- hidden properties ---
         private var _lineScale:Number = 1;
         private var _scaleX:Number = 1;
@@ -47,31 +51,23 @@ package {
         private var _path:Array = [];
         private var _clipPath:Array = [];
         private var _clipShape:Shape = new Shape();
-        private var _shadowFilter:BitmapFilter; // shadow filter
-
-        private var bx:Number = 0; // begin position x
-        private var by:Number = 0; // begin position y
-        private var px:Number = 0; // current position x
-        private var py:Number = 0; // current position y
+        // --- Shape, Filter ---
         private var _shape:Shape;
         private var _gfx:Graphics; // shape.graphics
         private var _view:Bitmap;
         private var _buff:BitmapData;
-        private var _msgid:String = ""; // last message id
+        private var _clearBitmap:BitmapData; // clearAll()
+        private var _shadowFilter:BitmapFilter; // shadow filter
+        private var _mode:int = 0; // 1: xFlyweight
+        // --- JavaScript <- -> ActionScript ---
+        private var _lastMessageID:String = "";
         private var _state:int = 0;     // 0: not ready(locked)
                                         // 1: not ready -> ready
                                         // 2: ready
         private var _stock:Array = [];
-        // clearAll params
-        private var _clearAllBuff:BitmapData;
-        private var _clearAllRect:Rectangle;
-        private var _clearAllPoint:Point;
-
-        private var xFlyweight:int = 0;
-
-        // copyCanvas
-        private var _callback:Function = null;
-
+        // --- ActionScript <- -> ActionScript ---
+        private var _callback:Function = null; // for copyCanvas
+        // --- sub class instance ---
         private var fillImage:CanvasImage;
         private var strokeImage:CanvasImage;
         private var canvasArc:CanvasArc = new CanvasArc();
@@ -82,13 +78,11 @@ package {
         private var canvasDrawImage:CanvasDrawImage;
 
         public function Canvas() {
-            // for local debug
-//          Security.allowDomain("*");
-
             ExternalInterface.addCallback("send", recv);
             ExternalInterface.addCallback("resize", resize);
             ExternalInterface.addCallback("toDataURL", toDataURL);
             ExternalInterface.addCallback("getImageData", getImageData);
+            ExternalInterface.addCallback("isPointInPath", isPointInPath);
 
             _shape = new Shape();
             _gfx = _shape.graphics;
@@ -124,41 +118,43 @@ package {
             _callback = fn;
         }
 
-        private function onEnterFrame(evt:Event):void {
-            var cmd:Object = stage.loaderInfo.parameters;
-            var msg:String;
+        private function onEnterFrame(event:Event):void {
+            var message:Object = stage.loaderInfo.parameters;
+            var messageID:String = message.i;
+            var messageBody:String = message.b;
+            var commands:String;
 
-            if (cmd.i && _msgid !== cmd.i) {
+            if (messageID) {
+                if (_lastMessageID !== messageID) {
+                    _lastMessageID = messageID; // update
 
-                // for debug
-                if (0) {
-                    trace(cmd.i + ":" + cmd.c);
-                }
+0 && trace("valid message=" + messageID + ":" + messageBody);
 
-                _msgid = cmd.i; // update
-                switch (_state) {
-                case 0: // not ready(locked)
-                        _stock.push(cmd.c);
-                        break;
-                case 1: // not ready(locked) -> ready
-                        _state = 2;
-                        _buff && _buff.lock();
+                    switch (_state) {
+                    case 0: // not ready(locked)
+                            _stock.push(messageBody);
+                            break;
+                    case 1: // not ready(locked) -> ready
+                            _state = 2;
+                            _buff && _buff.lock();
 
-                            cmd.c && _stock.push(cmd.c);
-                            msg = _stock.join("\t");
-                            msg = msg.replace(/^\t+/, ""); // trim head(\t)
+                                messageBody && _stock.push(messageBody);
+                                commands = _stock.join("\t").replace(/^\t+/, ""); // trim head(\t)
 
-                            _stock = []; // pre clear
-                            msg && recv(msg);
+                                _stock = []; // pre clear
+                                commands && recv(commands);
 
-                        _buff && _buff.unlock();
-                        break;
-                case 2: // ready
-                        _buff && _buff.lock();
+                            _buff && _buff.unlock();
+                            break;
+                    case 2: // ready
+                            _buff && _buff.lock();
 
-                            recv(cmd.c);
+                                recv(messageBody);
 
-                        _buff && _buff.unlock();
+                            _buff && _buff.unlock();
+                    }
+                } else {
+0 && trace("ignore message=" + messageID + ":" + messageBody);
                 }
             }
         }
@@ -171,10 +167,10 @@ package {
             if (_state) {
                 _buff && _buff.lock();
 
-                    var msg:String = _stock.join("\t").replace(/^\t+/, "");
+                    var commands:String = _stock.join("\t").replace(/^\t+/, "");
 
                     _stock = []; // pre clear
-                    msg && recv(msg);
+                    commands && recv(commands);
 
                 _buff && _buff.unlock();
             }
@@ -185,13 +181,15 @@ package {
             }
         }
 
-        public function recv(msg:String):void {
-            var a:Array = msg.split("\t");
+        public function recv(commands:String):void {
+            var a:Array = commands.split("\t"); // command array
             var i:int = -1;
             var iz:int = a.length;
             var fill:int;
             var loopout:int = 0;
             var modify:int = 0; // canvas updated
+
+0 && trace("commands="+commands);
 
             while (++i < iz) {
                 fill = 0;
@@ -329,6 +327,8 @@ package {
                                        +a[++i], +a[++i],          // strokeColor.hex, strokeColor.a
                                        +a[++i]);                  // lineWidth
                             break;
+                case "XX":  // dummy
+                            break;
                 case "undefined": // [!] undefined trap
                             trace("[!] undefined trap");
                             ++loopout;
@@ -346,9 +346,9 @@ package {
             }
         }
 
-        private function init(width:int, height:int, flyweight:int):void {
+        private function init(width:int, height:int, mode:int):void {
 //trace(ExternalInterface.objectID + "init(), width="+width+",height="+height);
-            xFlyweight = flyweight;
+            _mode = mode;
             canvasWidth = width;
             canvasHeight = height;
 
@@ -373,26 +373,24 @@ package {
             } else {
                 _buff = new BitmapData(width, height, true, 0); // 300 x 150
                 _view = new Bitmap(_buff,
-                                   flyweight ? PixelSnapping.AUTO : PixelSnapping.NEVER,
-                                   flyweight ? false : true);
+                                   mode ? PixelSnapping.AUTO : PixelSnapping.NEVER,
+                                   mode ? false : true);
                 addChild(_view);
             }
 
             // build clearAll params
-            _clearAllBuff = _buff.clone();
-            _clearAllRect = new Rectangle(0, 0, width, height);
-            _clearAllPoint = new Point(0, 0);
+            _clearBitmap = _buff.clone();
         }
 
-        public function resize(width:int, height:int, flyweight:int):void {
+        public function resize(width:int, height:int, mode:int):void {
 //trace("resize(), width="+width+",height="+height);
             canvasCopy.purge();
             CanvasImageCache.getInstance().clear();
-            init(width, height, flyweight);
+            init(width, height, mode);
         }
 
         private function clearAll():void {
-            _buff.copyPixels(_clearAllBuff, _clearAllRect, _clearAllPoint);
+            _buff.copyPixels(_clearBitmap, _clearBitmap.rect, new Point());
         }
 
         public function toDataURL(mimeType:String,
@@ -402,6 +400,38 @@ package {
 
         public function getImageData(sx:int, sy:int, sw:int, sh:int):Array {
             return canvasPixel.getImageData(sx, sy, sw, sh);
+        }
+
+        public function isPointInPath(x:int, y:int):Boolean {
+            var shape:Shape = new Shape();
+            var gfx:Graphics = shape.graphics;
+            var bitmapData:BitmapData = new BitmapData(canvasWidth, canvasHeight,
+                                                       false, 0xFFFFFFFF);
+            var bitmap:Bitmap = new Bitmap(bitmapData);
+
+            gfx.beginFill(0);
+            buildPath(_path, gfx);
+            gfx.endFill();
+
+if (0) {
+    trace(_path.join(","));
+    gfx.lineStyle(0, 0xff00ff00, 1);
+    gfx.drawCircle(x, y, 5);
+}
+            bitmapData.draw(shape);
+            gfx.clear();
+
+            var dot:uint = bitmapData.getPixel(x, y);
+
+if (0) {
+    addChild(bitmap);
+    trace("x="+x);
+    trace("y="+y);
+    trace("dot="+dot);
+}
+
+            // search black dot
+            return dot === 0;
         }
 
         private function buildPath(ary:Array, gfx:Graphics):void {
@@ -866,14 +896,14 @@ package {
                 switch (mixMode) {
                 case "copy":
                     // clear -> draw
-                    bg.copyPixels(_clearAllBuff, _clearAllRect, _clearAllPoint);
+                    bg.copyPixels(_clearBitmap, _clearBitmap.rect, new Point());
                     bg.draw(pict, matrix, color, null, null, true);
                     break;
                 case "destination-over":
                     // copy(bg) -> clear -> draw(pict) -> draw(copied bg)
                     bgcopy = bg.clone();
 
-                    bg.copyPixels(_clearAllBuff, _clearAllRect, _clearAllPoint);
+                    bg.copyPixels(_clearBitmap, _clearBitmap.rect, new Point());
                     bg.draw(pict, matrix, color, null, null, true);
                     bg.draw(bgcopy);
                     break;

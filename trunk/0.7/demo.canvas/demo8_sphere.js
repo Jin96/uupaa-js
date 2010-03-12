@@ -64,22 +64,24 @@ ctx.xFlyweight = 1;
 			}
 
 			// create followers:
-			for(var i=0; i<nrOfFollowers; i++) {
+			if (!uu.ie) {
+    			for(var i=0; i<nrOfFollowers; i++) {
 
-				var object = {};
-				object.x = 0;
-				object.y = 0;
-				object.z = 0;
-				object.momentumx = 0;
-				object.momentumy = 0;
-				object.momentumz = 0;
+    				var object = {};
+    				object.x = 0;
+    				object.y = 0;
+    				object.z = 0;
+    				object.momentumx = 0;
+    				object.momentumy = 0;
+    				object.momentumz = 0;
 
-				var leader;
+    				var leader;
 
-				this.assignLeader(object);
+    				this.assignLeader(object);
 
-				object.type = "follow";
-				objectsInScene.push(object);
+    				object.type = "follow";
+    				objectsInScene.push(object);
+    			}
 			}
 
 			var me = this;
@@ -165,12 +167,12 @@ ctx.xFlyweight = 1;
 			cz = Math.cos(cameraView.rotZ);
 
 			// fill the canvas with 10% alpha before new render to create cheap motion blur effect:
-			ctx.fillStyle = 'rgba(0,0,0,0.1)';
-if (ctx.clear) {
-    ctx.clear()
-} else {
-			ctx.fillRect(0, 0, canvas.width, canvas.height);
-}
+            if (uu.ie) {
+                ctx.clear()
+            } else {
+                ctx.fillStyle = 'rgba(0,0,0,0.1)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
 
 			// z-sorting objects
 			objectsInScene.sort(context.sortOnDepth);
@@ -187,7 +189,7 @@ ctx.lock();
 						context.displayObject(obj);
 						break;
 					case "follow":
-						context.displayFollower(obj);
+					    uu.ie || context.displayFollower(obj);
 						break;
 				}
 

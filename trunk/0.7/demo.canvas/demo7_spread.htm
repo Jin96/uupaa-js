@@ -3,9 +3,9 @@
   <head>
     <!-- http://tomtheisen.com/spread/ -->
     <title>spread</title>
-    <!--
-        <script type="text/javascript" src="flashcanvas.js"></script>
-    -->
+<style>
+html, body { background-color: black; color: white; }
+</style>
 <script>xconfig={dir:"../"}</script>
 <script src="../uupaa.js"></script>
 
@@ -106,13 +106,13 @@
             }
         }
 
-        function xcanvas() {
+        function xcanvas(uu, canvases) {
             fadecheck = document.getElementById("fadecheck");
             cyclecheck = document.getElementById("cyclecheck");
             randomizecheck = document.getElementById("randomizecheck");
             wrapcheck = document.getElementById("wrapcheck");
 
-            paper = document.getElementById("notepad").getContext("2d");
+            paper = canvases[0].getContext("2d");
             paper.fillStyle = "rgb(0,0, 0)";
             paper.fillRect(0,0,width,height);
             paper.fillStyle = "rgba(0,0, 0, 0.005)";
@@ -121,16 +121,8 @@
             document.getElementById("notepad").onclick = paper_click;
             document.getElementById("branchframestext").onblur = function() {new_branch_frames = parseInt(this.value);};
 
+            document.title = "Backend: " + (paper.xBackend || "Canvas");
 
-            if (paper instanceof uu.canvas.VML2D) {
-                uu.id("detected").innerText = "Backend: VML";
-            } else if (paper instanceof uu.canvas.FL2D) {
-                uu.id("detected").innerText = "Backend: Flash";
-            } else if (paper instanceof uu.canvas.SL2D) {
-                uu.id("detected").innerText = "Backend: Silverlight";
-            } else {
-                uu.id("detected").innerText = "Native Canvas";
-            }
             paper.xFlyweight = 1;
 
 
@@ -158,17 +150,14 @@ function xboot(uu) {
     </script>
   </head>
   <body>
-    <input type="button" value="sl/flash/vml" onclick="switchBackend()" />
-    <b id="detected"></b>
-    <p>
-
         <input type="checkbox" id="cyclecheck" checked="checked" /> <label for="cyclecheck">Cycle colors</label>
         <input type="checkbox" id="fadecheck" /> <label for="fadecheck">Fade</label>
         <input type="checkbox" id="randomizecheck" /> <label for="randomizecheck">Randomize Position</label>
         <input type="checkbox" id="wrapcheck" /> <label for="wrapcheck">Wrap Edges</label>
         <br />
         <label for="branchframestext">Spawn new every n frames:</label> <input type="text" id="branchframestext" value="20" size="3" />
-    </p>
+        <input type="button" value="Silverlight/Flash/VML" onclick="switchBackend()" />
+
     <canvas id="notepad" width="600" height="600"></canvas>
     <p>
         I love feedback.  canvas@tomtheisen.com

@@ -238,19 +238,10 @@ function key_manager(evt) {
 	top.status='$'+key+'='+$c(key);
 }
 
-function xcanvas() {
-    canvas = document.getElementById("shadebob");
-    ctx = canvas.getContext("2d");
+function xcanvas(uu, canvases) {
+    ctx = canvases[0].getContext("2d");
 
-    if (ctx instanceof uu.canvas.VML2D) {
-        document.title = "Backend: VML";
-    } else if (ctx instanceof uu.canvas.FL2D) {
-        document.title = "Backend: Flash";
-    } else if (ctx instanceof uu.canvas.SL2D) {
-        document.title = "Backend: Silverlight";
-    } else {
-        document.title = "Native Canvas";
-    }
+    document.title = "Backend: " + (ctx.xBackend || "Canvas");
     resize();
 }
 

@@ -97,7 +97,7 @@ function draw(){
     if (uselock) {
         ctx.lock(1);
     } else {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     }
     var px, py, maxr=64;
 
@@ -140,16 +140,7 @@ function xcanvas(uu, canvas) {
     ctx = canvas[0].getContext("2d");
     ctx.xFlyweight = 1;
 
-    if (ctx instanceof uu.canvas.VML2D) {
-        document.title = "Backend: VML";
-    } else if (ctx instanceof uu.canvas.FL2D) {
-        document.title = "Backend: Flash";
-    } else if (ctx instanceof uu.canvas.SL2D) {
-        document.title = "Backend: Silverlight";
-    } else {
-        document.title = "Native Canvas";
-    }
-
+    document.title = "Backend: " + (ctx.xBackend || "Canvas");
     draw();
 }
 
@@ -195,8 +186,8 @@ Original 1K version by <a href=http://www.pouet.net/prod.php?which=52777>FRequen
 </div>
 
     <h1 id="detected" style="color:white"></h1>
-    <input type="button" value="boost on/off" onclick="boost()" />
-    <input type="button" value="sl/flash/vml" onclick="switchBackend()" />
+    <input type="button" value="boost/off" onclick="boost()" />
+    <input type="button" value="Silverlight/Flash/VML" onclick="switchBackend()" />
 
 </body>
 </html>
