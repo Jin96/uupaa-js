@@ -154,7 +154,8 @@ uu = uumix(uujamfactory, {          // uu(expr, ctx) -> Instance(jam)
         indexOf:    uuhashindexof,  // uu.hash.indexOf({a: 1, b: 2, c: 2}, 2) -> "b"
         combine:    uuhashcombine,  // [1][ary x ary] uu.hash.combine(["a","b"], [1,2]) -> { a: 1, b: 2 }
                                     // [2][ary x val] uu.hash.combine(["a","b"], 1)     -> { a: 1, b: 1 }
-        hasValue:   uuhashhasvalue  // uu.hash.hasValue({ a: 1, b: 2 }, 2) -> true
+        hasValue:   uuhashhasvalue, // uu.hash.hasValue({ a: 1, b: 2 }, 2) -> true
+        quickMap:   uuhashquickmap  // uu.hash.quickMap(seed, prefix = "", s2n, n2s)
     }),
     each:           uueach,         // [1][array.forEach] uu.each(ary, fn)
                                     // [2][hash.forEach]  uu.each(hash, fn)
@@ -596,8 +597,13 @@ function uuhash(key,    // @param String/Hash: key
     }
     return rv;
 }
-uuhash._dec2 = _numary("0123456789");       // ["00", ...  99: "99"]
-uuhash._hex2 = _numary("0123456789abcdef"); // ["00", ... 255: "ff"]
+// dd2num = { "00":   0 , ... "99":  99  }; Zero-filled dec string -> Number
+// num2dd = {    0: "00", ...   99: "99" }; Number -> Zero-filled dec string
+uuhashquickmap("0123456789",       "", uuhash._dd2num = {}, uuhash._num2dd = {});
+
+// hh2num = { "00":   0 , ... "ff": 255  }; Zero-filled hex string -> Number
+// num2hh = {    0: "00", ...  255: "ff" }; Number -> Zero-filled hex string
+uuhashquickmap("0123456789abcdef", "", uuhash._hh2num = {}, uuhash._num2hh = {});
 
 // uu.hash.has - has Hash
 function uuhashhas(ctx,    // @param Hash: context
@@ -709,6 +715,24 @@ function uuhashhasvalue(hash,    // @param Hash:
                         value) { // @param Mix: find value
                                  // @return Boolean:
     return uuhashindexof(hash, value) !== void 0;
+}
+
+// uu.hash.quickMap - build String <-> Number mapping table
+function uuhashquickmap(seed,   // @param String: "0123456789" or "0123456789abcdef"
+                        prefix, // @param String(= ""): prefix
+                        s2n,    // @param Hash: String to Number
+                        n2s) {  // @param Hash: Number to String
+    prefix = prefix || "";
+
+    var i = 0, j, k = -1, v, ary = seed.split(""), iz = ary.length;
+
+    for (; i < iz; ++i) {
+        for (j = 0; j < iz; ++j) {
+            v = prefix + ary[i] + ary[j];
+            s2n[v] = ++k; // { "00": 0, "01": 1, ... "ff": 255  }
+            n2s[k] = v;   // {    0: 0,    1: 1, ...  255: "ff" }
+        }
+    }
 }
 
 // uu.each - Hash forEach, tiny Array.prototype.forEach
@@ -1324,12 +1348,12 @@ function uucoloradd(str) { // @param JointString: "000000black,..."
 // uu.color.fix - fix ColorHash
 function uucolorfix(c) { // @param ColorHash/RGBAHash: color
                          // @return ColorHash:
-    var hex2 = uuhash._hex2;
+    var num2hh = uuhash._num2hh;
 
     c.num  || (c.num  = (c.r << 16) + (c.g << 8) + c.b);
-    c.hex  || (c.hex  = "#" + hex2[c.r] + hex2[c.g] + hex2[c.b]);
-    c.argb || (c.argb = "#" + hex2[(c.a * 255) & 0xff] +
-                              hex2[c.r] + hex2[c.g] + hex2[c.b]);
+    c.hex  || (c.hex  = "#" + num2hh[c.r] + num2hh[c.g] + num2hh[c.b]);
+    c.argb || (c.argb = "#" + num2hh[(c.a * 255) & 0xff] +
+                              num2hh[c.r] + num2hh[c.g] + num2hh[c.b]);
     c.rgba || (c.rgba = "rgba(" + c.r + "," + c.g + "," + c.b + "," + c.a + ")");
     return c;
 }
@@ -1906,7 +1930,7 @@ function uuucs2(str,   // @param String:
                        // @return String "\u0000" ~ "\uffff"
     var c = str.charCodeAt(pos || 0);
 
-    return "\\u" + uuhash._hex2[(c >> 8) & 255] + uuhash._hex2[c & 255];
+    return "\\u" + uuhash._num2hh[(c >> 8) & 255] + uuhash._num2hh[c & 255];
 }
 
 // uu.unesc - unescape from HTML entity
@@ -1993,7 +2017,7 @@ function uudate2str(date,   // @param Date/Number(= void 0):
                             // @return ISO8601DateString/RFC1123DateString:
     date = !date ? new Date() // void 0 or 0 -> current time [1][3]
                  : typeof date === "number" ? new Date(date) : date;
-    var rv = "", h, dec2 = uuhash._dec2;
+    var rv = "", h, num2dd = uuhash._num2dd;
 
     if (type) { // GMT(RFC1123) [3][4]
         rv = date.toUTCString();
@@ -2003,8 +2027,8 @@ function uudate2str(date,   // @param Date/Number(= void 0):
         }
     } else { // [1][2]
         h = uudatehash(date);
-        rv = h.Y + '-' + dec2[h.M] + '-' + dec2[h.D] + 'T' +
-                         dec2[h.h] + ':' + dec2[h.m] + ':' + dec2[h.s] + '.' +
+        rv = h.Y + '-' + num2dd[h.M] + '-' + num2dd[h.D] + 'T' +
+                         num2dd[h.h] + ':' + num2dd[h.m] + ':' + num2dd[h.s] + '.' +
              ((h.ms < 10) ? "00" : (h.ms < 100) ? "0" : "") + h.ms + 'Z';
     }
     return rv;
@@ -2068,7 +2092,7 @@ function uustr2json(str,        // @param String:
     }
     function _ucs2(str, c) {
         c = str.charCodeAt(0);
-        return "\\u" + uuhash._hex2[(c >> 8) & 255] + uuhash._hex2[c & 255];
+        return "\\u" + uuhash._num2hh[(c >> 8) & 255] + uuhash._num2hh[c & 255];
     }
     var div = uustr2json,
         rv = str.replace(div._esc, _swap).replace(div._enc, _ucs2);
@@ -2541,18 +2565,6 @@ function _camelhash(rv, props) {
                     replace(DECAMELIZE, _decamelize);
                 (k !== v) && (rv[v] = k);
             }
-        }
-    }
-    return rv;
-}
-
-// inner - make numbering array from string ("0123456789" -> ["00", "01" ... "99"])
-function _numary(str) {
-    var rv = [], ri = -1, i = 0, j, ary = str.split(""), iz = ary.length;
-
-    for (; i < iz; ++i) {
-        for (j = 0; j < iz; ++j) {
-            rv[++ri] = ary[i] + ary[j];
         }
     }
     return rv;

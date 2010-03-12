@@ -859,24 +859,35 @@ function _css3init() {
     _render && _uucss3autoviewbox();
 
     if (_selector || _render) {
+
+        // guard ie bug
         uu.ie && _uucss3memento();
+
+        // collect css
         css = uu.css.clean(_dirtycss = (css || uu.css.imports()));
+
+        // judge blackout
         if (uu.ie6 && _uucss3blackout(css)) { // ignore lazy
             return;
         }
+
         // create style sheet
         uu.css.create("uucss3");
+
         // decode <script src="data:...">
         uu.ie && uu.config.right && uu.codec.datauri && _uucss3decodescript();
+
         // parse
         _rawdata = uu.mix(uu.css.parse(css), { init: 0 });
 
         _render && _uucss3plusinit();
+
         _uucss3validate(_rawdata);
-        // init flag
+
+        // set initialized flag
         _rawdata.init = 1;
 
-        // debug
+        // perf time
         uu.config.debug && (win.status = (new Date - tick) + "ms");
     }
 }

@@ -129,7 +129,7 @@ _twjs._FMT = ['var t,b,c,ms2=ms/2,ns=node.style;',
               (uu.ie ? 'ns.filter=((o>0&&o<1)?"alpha(opacity="+(o*100)+")":"");' +
                        'fin&&uu.css.opacity.set(node,%2$f)&&(ns.filter+=" %1$s");'
                      : 'ns.opacity=fin?%2$f:o;'),
-              'var gms=gain/ms,hex=uu.hash._hex2;' +
+              'var gms=gain/ms,hex=uu.hash._num2hh;' +
               'ns.%s="#"+(hex[(fin?%5$d:(%5$d-%2$d)*gms+%2$d)|0]||0)+' + // color
                         '(hex[(fin?%6$d:(%6$d-%3$d)*gms+%3$d)|0]||0)+' +
                         '(hex[(fin?%7$d:(%7$d-%4$d)*gms+%4$d)|0]||0);',
