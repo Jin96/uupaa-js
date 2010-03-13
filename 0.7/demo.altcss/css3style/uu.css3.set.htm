@@ -1,0 +1,131 @@
+<!doctype html><html><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>-uu-box-reflect</title>
+<style type="text/css">
+@import url(../../README.css);
+body {
+  width: 600px;
+}
+.view {
+  padding: 20px;
+}
+.gradation-box {
+  border: 11px solid rgb(204, 204, 204);
+  -uu-box-shadow: skyblue 0px 3px 20px;
+  -uu-background-image:
+    -uu-gradient(linear, left top, left bottom, from(white),
+                     color-stop(0.1, white), to(rgb(205, 221, 241)));
+  -uu-border-radius: 5px;
+  display: block;
+  margin: 20px;
+  height: 160px;
+  padding: 10px;
+  vertical-align: top;
+  position: relative;
+}
+.gradation-box > * {
+  margin-left: 80px;
+}
+.gradation-box > .view {
+  margin-left: 0;
+  display: block;
+  float: left;
+}
+.reflect {
+  -uu-box-reflect: below 0px
+      -uu-gradient(linear, left top, left bottom, from(transparent),
+                       color-stop(0.65, transparent), to(white));
+}
+.canvas-view {
+  position: absolute;
+  right: -30px;
+  bottom: -30px;
+}
+h1 {
+  color: blue;
+  font-size: 36px;
+  line-height: 1;
+  font-family: Helvetica, sans-serif;
+  margin-top: 20px;
+  padding: 0;
+  text-shadow: gray 5px 5px 5px;
+  -uu-text-shadow: gray 5px 5px 5px;
+}
+html.ifie6 h1,
+html.ifie7 h1 {
+  width: 200px;
+}
+
+html.ifie6 .canvas-view {
+  bottom: 60px;
+}
+</style>
+<script>
+window.xconfig = { dir: "../img" };
+</script>
+<script type="text/javascript" src="../../uupaa.js"></script>
+<script>
+function boot(type) {
+}
+function bloody() {
+  var excssnode = uu.query(".gradation-box");
+  var h1 = uu.query("h1");
+  var grad = "-uu-gradient(linear, 0% 0%, 0% 100%, from(#870404), to(#EB0505), color-stop(0.5,#331F0B))";
+
+  uu.css3.set(h1[0], { color: "#c00" });
+  uu.css3.set(h1[0], { "-uu-text-shadow": "red 1px 20px 20px" });
+
+  uu.css3.set(excssnode[0], { border: "4px solid red" });
+  uu.css3.set(excssnode[0], { "-uu-box-shadow": "red 1px 20px 20px" });
+  uu.css3.set(excssnode[0], { "-uu-background-image": grad });
+  uu.css3.set(excssnode[0], { "-uu-border-radius": "5px 5px 40px 40px" });
+  uu.css3.redraw();
+}
+function box_effect_toggle() {
+  var excssnode = uu.query(".gradation-box");
+  var val = uu.css3.get(excssnode[0], "-uu-box-effect");
+
+  if (val === "none") {
+    uu.css3.set(excssnode[0], { "-uu-box-effect": "auto" });
+  } else {
+    uu.css3.set(excssnode[0], { "-uu-box-effect": "none" });
+  }
+  uu.css3.redraw();
+}
+function box_reflect_toggle() {
+  var excssnode = uu.query(".reflect");
+  var val = uu.css3.get(excssnode[0], "-uu-box-effect");
+
+  if (val === "none") {
+    uu.css3.set(excssnode[0], { "-uu-box-effect": "auto" });
+  } else {
+    uu.css3.set(excssnode[0], { "-uu-box-effect": "none" });
+  }
+  uu.css3.redraw();
+}
+
+</script>
+
+</head>
+<body>
+<h2>ExCSSNode</h2>
+<input type="button" value="-uu-box-effect: none / auto [toggle]" onclick="box_effect_toggle()" />
+<input type="button" value="bloody" onclick="bloody()" />
+<h2>Reflection Image</h2>
+<input type="button" value="-uu-box-effect: none / auto [toggle]" onclick="box_reflect_toggle()" />
+
+<div class="view" id="toplayer">
+  <div class="gradation-box">
+    <div class="view">
+      <img class="reflect" src="../img/upapa.jpg" />
+    </div>
+    <h1>uupaa.js</h1>
+    <p class="link">
+      <a href="http://code.google.com/p/uupaa-js/">uupaa-js project</a>
+    </p>
+  </div>
+</div>
+
+
+</body>
+</html>

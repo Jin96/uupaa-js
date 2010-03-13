@@ -1,0 +1,56 @@
+<!doctype html>
+<html><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>box-radius:</title>
+<style>
+@import url(reset.css);
+
+.view {
+  padding: 25px; /* shadow padding */
+}
+.radius-all {
+  color: gold; background-color: blue;
+  border: 1em solid navy;
+  -uu-border-radius: 10em 5em 10em 5px;
+}
+</style>
+<script type="text/javascript" src="../../uupaa.js"></script>
+
+
+</head>
+<body>
+<input type="button" value="revalidate" onclick="uu.css3.review()" />
+
+<hr />
+<h2>-uu-border-radius:</h2>
+
+
+
+<div class="view">
+  <div class="radius-all"><pre>
+.radius-all {
+  background-color: blue;
+  border: 1em solid navy;
+  -uu-border-radius: 10em 5em 10em 5px;
+}</pre></div>
+</div>
+
+
+
+<div class="view">
+  <div class="radius-all radius-corner"><pre>
+.radius-all {
+  background-color: blue;
+  border: 1em solid navy;
+  -uu-border-radius: 10em 5em 10em 5px;
+}
+.radius-corner {
+  background-color: blue;
+  border: 1em solid navy;
+  -uu-border-radius: 10em 5em 10em 5px;
+}</pre></div>
+</div>
+
+
+</body>
+</html>

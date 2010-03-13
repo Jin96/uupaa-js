@@ -1,0 +1,86 @@
+<!doctype html>
+<html><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>box-radius:</title>
+<style>
+@import url(reset.css);
+
+.view {
+  padding: 35px; /* shadow padding */
+}
+.radius1 {
+  color: gold; background-color: blue;
+  border: 1em solid navy;
+  -uu-border-radius: 20px;
+}
+.radius2 {
+  color: gold; background-color: blue;
+  border: 1em solid navy;
+  -uu-border-radius: 0 20px;
+}
+.radius3 {
+  color: gold; background-color: blue;
+  border: 1em solid navy;
+  -uu-border-radius: 0 20px 5px;
+}
+.radius4 {
+  color: gold; background-color: blue;
+  border: 1em solid navy;
+  -uu-border-radius: 0 20px 5px 10px;
+}
+
+</style>
+<script type="text/javascript" src="../../uupaa.js"></script>
+
+</head>
+<body>
+<input type="button" value="revalidate" onclick="uu.css3.review()" />
+
+<hr />
+<h2>-uu-border-radius:</h2>
+
+
+
+<div class="view">
+  <div class="radius1"><pre>
+.radius1 {
+  color: gold; background-color: blue;
+  border: 1em solid navy;
+  -uu-border-radius: 20px;
+}</pre></div>
+</div>
+
+
+<div class="view">
+  <div class="radius2"><pre>
+.radius2 {
+  color: gold; background-color: blue;
+  border: 1em solid navy;
+  -uu-border-radius: 0 20px;
+}</pre></div>
+</div>
+
+
+<div class="view">
+  <div class="radius3"><pre>
+.radius3 {
+  color: gold; background-color: blue;
+  border: 1em solid navy;
+  -uu-border-radius: 0 20px 5px;
+}</pre></div>
+</div>
+
+
+<div class="view">
+  <div class="radius4"><pre>
+.radius4 {
+  color: gold; background-color: blue;
+  border: 1em solid navy;
+  -uu-border-radius: 0 20px 5px 10px;
+}</pre></div>
+</div>
+
+
+
+</body>
+</html>

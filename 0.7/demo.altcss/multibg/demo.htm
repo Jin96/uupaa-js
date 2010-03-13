@@ -1,0 +1,111 @@
+<!doctype html>
+<html class="ifnojs"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>box-shadow:</title>
+<style>
+@import url(../../README.css);
+html, body {
+  color: white;
+  background-color: black;
+}
+.view {
+  padding: 40px; /* shadow padding */
+}
+.boxshadow1 {
+  border: 1px solid silver;
+  -uu-border-radius: 350px;
+  -uu-box-shadow: silver 5px 5px 50px;
+}
+.mbg1 {
+  -uu-background-image:
+      url(../img/c32.alpha.png), url(../img/f32.alpha.png),
+      url(../img/e32.alpha.png), url(../img/o32.alpha.png),
+      url(../img/s32.alpha.png),
+      url(../img/stage.png),
+      url(../img/solareclipse.jpg);
+  -uu-background-repeat:
+      no-repeat, no-repeat, no-repeat, no-repeat, no-repeat,
+      no-repeat,
+      repeat;
+  -uu-background-position:
+      30% 98%, 40% 98%, 50% 98%, 60% 98%, 70% 98%,
+      center bottom,
+      center center;
+}
+html.ifnojs .mbg1 {
+  color: red;
+  background: url(../img/solareclipse.jpg) repeat center center;
+}
+</style>
+<script type="text/javascript" src="../../uupaa.js"></script>
+
+</head>
+<body>
+<input type="button" value="revalidate" onclick="uu.css3.review()" />
+
+<hr />
+<h2>Multiple Background Image DEMO</h2>
+
+
+
+
+<div class="view">
+  <div class="boxshadow1 mbg1"><pre>
+.boxshadow1 {
+  border: 1px solid silver;
+  -uu-border-radius: 350px;
+  -uu-box-shadow: silver 5px 5px 50px;
+}
+.mbg1 {
+  -uu-background-image:
+      url(../img/c32.alpha.png), url(../img/f32.alpha.png),
+      url(../img/e32.alpha.png), url(../img/o32.alpha.png),
+      url(../img/s32.alpha.png),
+      url(../img/stage.png),
+      url(../img/solareclipse.jpg);
+  -uu-background-repeat:
+      no-repeat, no-repeat, no-repeat, no-repeat, no-repeat,
+      no-repeat,
+      repeat;
+  -uu-background-position:
+      30% 98%, 40% 98%, 50% 98%, 60% 98%, 70% 98%,
+      center bottom,
+      center center;
+}
+html.ifnojs .mbg1 {
+  color: red;
+  background: url(../img/solareclipse.jpg) repeat center center;
+}</pre></div></div>
+
+<pre class="eg">
+
+.boxshadow1 {
+  border: 1px solid silver;
+  -uu-border-radius: 350px;
+  -uu-box-shadow: silver 5px 5px 50px;
+}
+.mbg1 {
+  background-image:
+      url(../img/c32.alpha.png), url(../img/f32.alpha.png),
+      url(../img/e32.alpha.png), url(../img/o32.alpha.png),
+      url(../img/s32.alpha.png),
+      url(../img/stage.png),
+      url(../img/solareclipse.jpg);
+  background-repeat:
+      no-repeat, no-repeat, no-repeat, no-repeat, no-repeat,
+      no-repeat,
+      repeat;
+  background-position:
+      30% 98%, 40% 98%, 50% 98%, 60% 98%, 70% 98%,
+      center bottom,
+      center center;
+}
+html.ifnojs .mbg1 {
+  /* JavaScript OFF の環境用 */
+  color: red;
+  background: url(../img/solareclipse.jpg) repeat center center;
+}</pre>
+
+
+</body>
+</html>

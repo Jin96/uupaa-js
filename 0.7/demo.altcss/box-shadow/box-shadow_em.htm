@@ -1,0 +1,151 @@
+<!doctype html>
+<html><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>-uu-box-shadow: em</title>
+<style>
+@import url(reset.css);
+
+.view {
+  padding: 30px; /* shadow padding */
+  outline: 1px solid red;
+}
+.base {
+  margin-top: 3em;
+  margin-left: 2em;
+  margin-right: 1em;
+  margin-bottom: 5em;
+  padding-top: 3em;
+  padding-left: 2em;
+  padding-right: 1em;
+  padding-bottom: 5em;
+  border: 1em solid navy;
+}
+.boxshadow2 {
+  -uu-box-shadow: blue 1em 1em 2.5em;
+}
+.radius {
+  color: gold;
+  -uu-background: blue url(../img/lena.jpg) repeat top left;
+  border: 1.5em solid skyblue;
+  border-top-width: 3em;
+  border-left-width: 2em;
+  border-right-width: 1em;
+  border-bottom-width: 5em;
+  -uu-border-radius: 5em;
+}
+.noborder {
+  border: 0em none;
+}
+</style>
+<script type="text/javascript" src="../../uupaa.js"></script>
+
+</head>
+<body>
+<input type="button" value="revalidate" onclick="uu.css3.review()" />
+<h1>-uu-box-shadow: em</h1>
+
+<div class="view">
+  <div class="base">
+    <pre>
+.base {
+  margin-top: 3em;
+  margin-left: 2em;
+  margin-right: 1em;
+  margin-bottom: 5em;
+  padding-top: 3em;
+  padding-left: 2em;
+  padding-right: 1em;
+  padding-bottom: 5em;
+  border: 1em solid navy;
+}
+    </pre>
+  </div>
+</div>
+
+<div class="view">
+  <div id="tgt" class="base boxshadow2">
+    <pre>
+.base {
+  margin-top: 3em;
+  margin-left: 2em;
+  margin-right: 1em;
+  margin-bottom: 5em;
+  padding-top: 3em;
+  padding-left: 2em;
+  padding-right: 1em;
+  padding-bottom: 5em;
+  border: 1em solid navy;
+}
+.boxshadow2 {
+  -uu-box-shadow: blue 1em 1em 2.5em;
+}
+    </pre>
+  </div>
+</div>
+
+
+
+<div class="view">
+  <div id="tgt" class="base boxshadow2 radius">
+    <pre>
+.base {
+  margin-top: 3em;
+  margin-left: 2em;
+  margin-right: 1em;
+  margin-bottom: 5em;
+  padding-top: 3em;
+  padding-left: 2em;
+  padding-right: 1em;
+  padding-bottom: 5em;
+  border: 1em solid navy;
+}
+.boxshadow2 {
+  -uu-box-shadow: blue 1em 1em 2.5em;
+}
+.radius {
+  color: gold;
+  -uu-background: blue url(../img/lena.jpg) repeat top left;
+  border: 1.5em solid skyblue;
+  border-top-width: 3em;
+  border-left-width: 2em;
+  border-right-width: 1em;
+  border-bottom-width: 5em;
+  -uu-border-radius: 5em;
+}
+    </pre>
+  </div>
+</div>
+
+
+<div class="view">
+  <div id="tgt" class="base boxshadow2 radius noborder">
+    <pre>
+.base {
+  margin: 2em; padding: 1em;
+  border: 1em solid navy;
+}
+.boxshadow2 {
+  -uu-box-shadow: blue 1em 1em 2.5em;
+}
+.radius {
+  color: gold;
+  -uu-background: blue url(../img/lena.jpg) repeat top left;
+  border: 1.5em solid skyblue;
+  border-top-width: 3em;
+  border-left-width: 2em;
+  border-right-width: 1em;
+  border-bottom-width: 5em;
+  -uu-border-radius: 5em;
+}
+.noborder {
+  border: 0em none;
+}
+    </pre>
+  </div>
+</div>
+
+
+
+
+</body>
+</html>

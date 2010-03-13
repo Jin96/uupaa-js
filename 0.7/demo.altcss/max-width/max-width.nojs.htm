@@ -1,0 +1,421 @@
+<!doctype html><html><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>max-width:</title>
+<style>
+@import url(../../README.css);
+b { color: tomato }
+.cage {
+  border: 5px solid gray;
+  width: 80%;
+}
+.box {
+  margin: 0; padding: 0;
+  display: inline-block; border: 1px dashed skyblue;
+}
+</style>
+<script src="../../uupaa.js"></script>
+
+</head>
+<body>
+<br />
+<br />
+
+<!-- test1 -->
+<div class="cage">
+  <input type="button" value="test1" onclick="test1(uu.query.id('test1'))" />
+  <div id="test1"></div><br />
+  <pre class="source">
+&lt;div&gt;
+  &lt;div class="box" style="float: left; <b>max-width: 16em; max-height: 16em;</b>"&gt;
+    max-width: 16em; max-height: 16em;
+  &lt;/div&gt;
+  &lt;div class="box" style="<b>max-width: 16em; max-height: 16em;</b>"&gt;
+    max-width: 16em; max-height: 16em;
+  &lt;/div&gt;
+  &lt;div style="clear: both"&gt;&lt;/div&gt;
+&lt;/div&gt;
+  </pre>
+  <script>
+  function test1(elm) {
+    uu.node(elm,
+      [ '<div>',
+          '<div class="box" style="float: left; max-width: 16em; max-height: 16em;">',
+            'max-width: 16em; max-height: 16em;',
+          '</div>',
+          '<div class="box" style="max-width: 16em; max-height: 16em;">',
+            'max-width: 16em; max-height: 16em;',
+          '</div>',
+          '<div style="clear: both"></div>',
+        '</div>'].join(""));
+  }
+  </script>
+</div>
+
+<!-- test2 -->
+<div class="cage">
+  <input type="button" value="test2" onclick="test2(uu.query.id('test2'))" />
+  <div id="test2"></div><br />
+  <pre class="source">
+&lt;div&gt;
+  &lt;div class="box" style="float: left; <b>min-width: 8em; min-height: 8em;</b>"&gt;
+    min-width: 8em; min-height: 8em;
+  &lt;/div&gt;
+  &lt;div class="box" style="<b>min-width: 8em; min-height: 8em;</b>"&gt;
+    min-width: 8em; min-height: 8em;
+  &lt;/div&gt;
+  &lt;div style="clear: both"&gt;&lt;/div&gt;
+&lt;/div&gt;
+  </pre>
+  <script>
+  function test2(elm) {
+    uu.node(elm,
+      [ '<div>',
+          '<div class="box" style="float: left; min-width: 8em; min-height: 8em;">',
+            'min-width: 8em; min-height: 8em;',
+          '</div>',
+          '<div class="box" style="min-width: 8em; min-height: 8em;">',
+            'min-width: 8em; min-height: 8em;',
+          '</div>',
+          '<div style="clear: both"></div>',
+        '</div>'].join(""));
+  }
+  </script>
+</div>
+
+<!-- test3 -->
+<div class="cage">
+  <input type="button" value="test3" onclick="test3(uu.query.id('test3'))" />
+  <div id="test3"></div><br />
+  <pre class="source">
+&lt;div&gt;
+  &lt;div class="box" style="float: left; <b>max-width: 16em; max-height: 16em; width: 12em;</b>"&gt;
+    max-width: 16em; max-height: 16em;
+    &lt;br /&gt;width: 12em;
+  &lt;/div&gt;
+  &lt;div class="box" style="<b>max-width: 16em; max-height: 16em; width: 12em;</b>"&gt;
+    max-width: 16em; max-height: 16em;
+    &lt;br /&gt;width: 12em;
+  &lt;/div&gt;
+  &lt;div style="clear: both"&gt;&lt;/div&gt;
+&lt;/div&gt;
+  </pre>
+  <script>
+  function test3(elm) {
+    uu.node(elm,
+      [ '<div>',
+          '<div class="box" style="float: left; max-width: 16em; max-height: 16em; width: 12em;">',
+            'max-width: 16em; max-height: 16em;',
+            '<br />width: 12em;',
+          '</div>',
+          '<div class="box" style="max-width: 16em; max-height: 16em; width: 12em;">',
+            'max-width: 16em; max-height: 16em;',
+            '<br />width: 12em;',
+          '</div>',
+          '<div style="clear: both"></div>',
+        '</div>'].join(""));
+  }
+  </script>
+</div>
+
+
+
+<!-- test11 -->
+<div class="cage">
+  <input type="button" value="test11" onclick="test11(uu.query.id('test11'))" />
+  <div id="test11"></div><br />
+  <pre class="source">
+&lt;div&gt;
+  &lt;div class="box" style="float: left; <b>max-width: 160px; max-height: 160px;</b>"&gt;
+    max-width: 160px; max-height: 160px;
+  &lt;/div&gt;
+  &lt;div class="box" style="<b>max-width: 160px; max-height: 160px;</b>"&gt;
+    max-width: 160px; max-height: 160px;
+  &lt;/div&gt;
+  &lt;div style="clear: both"&gt;&lt;/div&gt;
+&lt;/div&gt;
+  </pre>
+  <script>
+  function test11(elm) {
+    uu.node(elm,
+      [ '<div>',
+          '<div class="box" style="float: left; max-width: 160px; max-height: 160px;">',
+            'max-width: 160px; max-height: 160px;',
+          '</div>',
+          '<div class="box" style="max-width: 160px; max-height: 160px;">',
+            'max-width: 160px; max-height: 160px;',
+          '</div>',
+          '<div style="clear: both"></div>',
+        '</div>'].join(""));
+  }
+  </script>
+</div>
+
+
+<!-- test12 -->
+<div class="cage">
+  <input type="button" value="test12" onclick="test12(uu.query.id('test12'))" />
+  <div id="test12"></div><br />
+  <pre class="source">
+&lt;div&gt;
+  &lt;div class="box" style="float: left; <b>min-width: 80px; min-height: 80px;</b>"&gt;
+    min-width: 80px; min-height: 80px;
+  &lt;/div&gt;
+  &lt;div class="box" style="<b>min-width: 80px; min-height: 80px;</b>"&gt;
+    min-width: 80px; min-height: 80px;
+  &lt;/div&gt;
+  &lt;div style="clear: both"&gt;&lt;/div&gt;
+&lt;/div&gt;
+  </pre>
+  <script>
+  function test12(elm) {
+    uu.node(elm,
+      [ '<div>',
+          '<div class="box" style="float: left; min-width: 80px; min-height: 80px;">',
+            'min-width: 80px; min-height: 80px;',
+          '</div>',
+          '<div class="box" style="min-width: 80px; min-height: 80px;">',
+            'min-width: 80px; min-height: 80px;',
+          '</div>',
+          '<div style="clear: both"></div>',
+        '</div>'].join(""));
+  }
+  </script>
+</div>
+
+
+
+<!-- test13 -->
+<div class="cage">
+  <input type="button" value="test13" onclick="test13(uu.query.id('test13'))" />
+  <div id="test13"></div><br />
+  <pre class="source">
+&lt;div&gt;
+  &lt;div class="box" style="float: left; <b>max-width: 160px; max-height: 160px; width: 120px;</b>"&gt;
+    max-width: 160px; max-height: 160px;
+    &lt;br /&gt;width: 120px;
+  &lt;/div&gt;
+  &lt;div class="box" style="<b>max-width: 160px; max-height: 160px; width: 120px;</b>"&gt;
+    max-width: 160px; max-height: 160px;
+    &lt;br /&gt;width: 120px;
+  &lt;/div&gt;
+  &lt;div style="clear: both"&gt;&lt;/div&gt;
+&lt;/div&gt;
+  </pre>
+  <script>
+  function test13(elm) {
+    uu.node(elm,
+      [ '<div>',
+          '<div class="box" style="float: left; max-width: 160px; max-height: 160px; width: 120px;">',
+            'max-width: 160px; max-height: 160px;',
+            '<br />width: 120px;',
+          '</div>',
+          '<div class="box" style="max-width: 160px; max-height: 160px; width: 120px;">',
+            'max-width: 160px; max-height: 160px;',
+            '<br />width: 120px;',
+          '</div>',
+          '<div style="clear: both"></div>',
+        '</div>'].join(""));
+  }
+  </script>
+</div>
+
+
+
+<!-- test21 -->
+<div class="cage">
+  <input type="button" value="test21" onclick="test21(uu.query.id('test21'))" />
+  <div id="test21"></div><br />
+  <pre class="source">
+&lt;div&gt;
+  &lt;div class="box" style="float: left; <b>max-width: 50%; max-height: 50%;</b>"&gt;
+    max-width: 50%; max-height: 50%;
+  &lt;/div&gt;
+  &lt;div class="box" style="<b>max-width: 50%; max-height: 50%;</b>"&gt;
+    max-width: 50%; max-height: 50%;
+  &lt;/div&gt;
+  &lt;div style="clear: both"&gt;&lt;/div&gt;
+&lt;/div&gt;
+  </pre>
+  <script>
+  function test21(elm) {
+    uu.node(elm,
+      [ '<div>',
+          '<div class="box" style="float: left; max-width: 50%; max-height: 50%;">',
+            'max-width: 50%; max-height: 50%;',
+          '</div>',
+          '<div class="box" style="max-width: 50%; max-height: 50%;">',
+            'max-width: 50%; max-height: 50%;',
+          '</div>',
+          '<div style="clear: both"></div>',
+        '</div>'].join(""));
+  }
+  </script>
+</div>
+
+
+
+
+<!-- test22 -->
+<div class="cage">
+  <input type="button" value="test22" onclick="test22(uu.query.id('test22'))" />
+  <div id="test22"></div><br />
+  <pre class="source">
+&lt;div&gt;
+  &lt;div class="box" style="float: left; <b>min-width: 20%; min-height: 20%;</b>"&gt;
+    min-width: 20%; min-height: 20%;
+  &lt;/div&gt;
+  &lt;div class="box" style="<b>min-width: 20%; min-height: 20%;</b>"&gt;
+    min-width: 20%; min-height: 20%;
+  &lt;/div&gt;
+  &lt;div style="clear: both"&gt;&lt;/div&gt;
+&lt;/div&gt;
+  </pre>
+  <script>
+  function test22(elm) {
+    uu.node(elm,
+      [ '<div>',
+          '<div class="box" style="float: left; min-width: 20%; min-height: 20%;">',
+            'min-width: 20%; min-height: 20%;',
+          '</div>',
+          '<div class="box" style="min-width: 20%; min-height: 20%;">',
+            'min-width: 20%; min-height: 20%;',
+          '</div>',
+          '<div style="clear: both"></div>',
+        '</div>'].join(""));
+  }
+  </script>
+</div>
+
+
+
+<!-- test23 -->
+<div class="cage">
+  <input type="button" value="test23" onclick="test23(uu.query.id('test23'))" />
+  <div id="test23"></div><br />
+  <pre class="source">
+&lt;div&gt;
+  &lt;div class="box" style="float: left; <b>max-width: 50%; max-height: 50%; width: 40%;</b>"&gt;
+    max-width: 50%; max-height: 50%;
+    &lt;br /&gt;width: 40%;
+  &lt;/div&gt;
+  &lt;div class="box" style="<b>max-width: 50%; max-height: 50%; width: 40%;</b>"&gt;
+    max-width: 50%; max-height: 50%;
+    &lt;br /&gt;width: 40%;
+  &lt;/div&gt;
+  &lt;div style="clear: both"&gt;&lt;/div&gt;
+&lt;/div&gt;
+  </pre>
+  <script>
+  function test23(elm) {
+    uu.node(elm,
+      [ '<div>',
+          '<div class="box" style="float: left; minx-width: 30%; max-width: 50%; max-height: 50%; width: 40%;">',
+            'max-width: 50%; max-height: 50%;',
+            '<br />width: 40%;',
+          '</div>',
+          '<div class="box" style="max-width: 50%; max-height: 50%; width: 40%;">',
+            'max-width: 50%; max-height: 50%;',
+            '<br />width: 40%;',
+          '</div>',
+          '<div style="clear: both"></div>',
+        '</div>'].join(""));
+  }
+  </script>
+</div>
+
+
+
+
+<!-- test31 -->
+<div class="cage">
+  <input type="button" value="test31" onclick="test31(uu.query.id('test31'))" />
+  <div id="test31"></div><br />
+  <pre class="source">
+&lt;div style="border: 1px solid black;"&gt;
+  &lt;div style="margin-left: auto; margin-right: auto; width: 10em;
+                 border: 1px solid red;
+                 <b>max-width: 16em; max-height: 16em; min-width: 8em; min-height: 8em;</b>"&gt;
+    block level element
+  &lt;/div&gt;
+  &lt;div style="clear: both"&gt;&lt;/div&gt;
+&lt;/div&gt;
+  </pre>
+  <script>
+  function test31(elm) {
+    uu.node(elm,
+    [ '<div style="border: 1px solid black;">',
+        '<div style="margin-left: auto; margin-right: auto; width: 10em; border: 1px solid red; max-width: 16em; max-height: 16em; min-width: 8em; min-height: 8em;">',
+          'block level element',
+        '</div>',
+        '<div style="clear: both"></div>',
+      '</div>'].join(""));
+  }
+  </script>
+</div>
+
+
+<!-- test40 -->
+<div class="cage">
+  <input type="button" value="test40" onclick="test40(uu.query.id('test40'))" />
+  <div id="test40"></div><br />
+  <pre class="source">
+&lt;table&gt;&lt;tbody&gt;&lt;tr&gt;
+  &lt;td class="box" style="<b>min-width: 100px; max-width: 150px</b>"&gt;A&lt;/td&gt;
+  &lt;td class="box" style="<b>min-width: 100px; max-width: 150px</b>"&gt;B&lt;/td&gt;
+  &lt;td class="box" style="<b>min-width: 100px; max-width: 150px</b>"&gt;C&lt;/td&gt;
+&lt;/tr&gt;&lt;tr&gt;
+  &lt;td class="box" style="<b>min-width: 120px; max-width: 150px</b>"&gt;D&lt;/td&gt;
+  &lt;td class="box" style="<b>min-width: 120px; max-width: 150px</b>"&gt;E&lt;/td&gt;
+  &lt;td class="box" style="<b>min-width: 120px; max-width: 150px</b>"&gt;F&lt;/td&gt;
+&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+  </pre>
+  <script>
+  function test40(elm) {
+    uu.node(elm,
+    [ '<table><tbody><tr>',
+        '<td class="box" style="min-width: 100px; max-width: 150px">A</td>',
+        '<td class="box" style="min-width: 100px; max-width: 150px">B</td>',
+        '<td class="box" style="min-width: 100px; max-width: 150px">C</td>',
+      '</tr><tr>',
+        '<td class="box" style="min-width: 100px; max-width: 150px">D</td>',
+        '<td class="box" style="min-width: 100px; max-width: 150px">E</td>',
+        '<td class="box" style="min-width: 100px; max-width: 150px">F</td>',
+      '</tr></tbody></table>'].join(""));
+  }
+  </script>
+</div>
+
+<!-- test41 -->
+<div class="cage">
+  <input type="button" value="test41" onclick="test41(uu.query.id('test41'))" />
+  <div id="test41"></div><br />
+  <pre class="source">
+&lt;table&gt;&lt;tbody&gt;&lt;tr&gt;
+  &lt;td class="box" style="<b>min-width: 100px; max-height: 10px</b>"&gt;W W W W W W W W W&lt;/td&gt;
+  &lt;td class="box" style="<b>min-width: 60px;</b>"&gt;WW WW WW WW WW WW&lt;/td&gt;
+  &lt;td class="box" style="<b>min-width: 100px; min-height: 140px</b>"&gt;WWW WWW WWW WWW W&lt;/td&gt;
+&lt;/tr&gt;&lt;tr&gt;
+  &lt;td class="box" style="<b>min-width: 100px; min-height: 100px</b>"&gt;WWWW WWWW WWWW WW&lt;/td&gt;
+  &lt;td class="box" style="<b>min-width: 60px;  min-height: 120px</b>"&gt;WWWWW WWWWW WWWWW&lt;/td&gt;
+  &lt;td class="box" style="<b>min-width: 100px; min-height: 140px</b>"&gt;WWWWWW WWWWWW WWW&lt;/td&gt;
+&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+  </pre>
+  <script>
+  function test41(elm) {
+    uu.node(elm,
+    [ '<table><tbody><tr>',
+        '<td class="box" style="min-width: 100px; max-height: 10px">W W W W W W W W W</td>',
+        '<td class="box" style="min-width: 60px;">WW WW WW WW WW WW</td>',
+        '<td class="box" style="min-width: 100px; min-height: 140px">WWW WWW WWW WWW W</td>',
+      '</tr><tr>',
+        '<td class="box" style="min-width: 100px; min-height: 100px">WWWW WWWW WWWW WW</td>',
+        '<td class="box" style="min-width: 60px;  min-height: 120px">WWWWW WWWWW WWWWW</td>',
+        '<td class="box" style="min-width: 100px; min-height: 140px">WWWWWW WWWWWW WWW</td>',
+      '</tr></tbody></table>'].join(""));
+  }
+  </script>
+</div>
+
+
+</body>
+</html>

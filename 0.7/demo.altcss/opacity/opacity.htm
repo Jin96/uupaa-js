@@ -1,0 +1,119 @@
+<!doctype html><html><head><title>opacity:</title>
+<style>
+@import url(../../README.css);
+.view {
+  background-image: url(../img/2star.gif);
+}
+.opacity {
+  opacity: 0.6;
+}
+.style1 {
+  color: black;
+  background-color: white;
+}
+</style>
+<script>
+window.xconfig = { dir: "../img" };
+</script>
+<script type="text/javascript" src="../../uupaa.js"></script>
+
+</head><body>
+<h1>opacity:</h1>
+<div>
+  <div class="view">
+    <a class="opacity style1" href="http://example.com">a</a>
+    <a class="style1" style="opacity:0.8" href="http://example.com">a</a>
+    <a class="style1" href="http://example.com">a</a>
+  </div>
+<hr />
+
+  <div class="view">
+    <div class="opacity style1">div</div>
+    <div class="style1" style="opacity:0.8">div</div>
+    <div class="style1">div</div>
+  </div>
+<hr />
+
+  <div class="view">
+    <table>
+    <tr>
+      <td class="opacity style1">td</td>
+      <td class="opacity style1">td</td>
+      <td class="opacity style1">td</td></tr>
+    <tr>
+      <td class="style1" style="opacity:0.8">td</td>
+      <td class="style1" style="opacity:0.8">td</td>
+      <td class="style1" style="opacity:0.8">td</td></tr>
+    <tr>
+      <td class="style1">td</td>
+      <td class="style1">td</td>
+      <td class="style1">td</td></tr>
+    </table>
+  </div>
+<hr />
+
+  <div class="view">
+    <img class="opacity style1" src="../img/c32.alpha.png" />
+    <img class="style1" style="opacity:0.8" src="../img/c32.alpha.png" />
+    <img class="style1" src="../img/c32.alpha.png" />
+  </div>
+</div>
+
+<pre class="eg">
+
+&lt;style&gt;
+.view {
+  background-image: url(../img/2star.gif);
+}
+.opacity {
+  opacity: 0.6;
+}
+.style1 {
+  color: black;
+  background-color: white;
+}
+&lt;/style&gt;
+
+&lt;div&gt;
+  &lt;div class="view"&gt;
+    &lt;a class="opacity style1" href="http://example.com"&gt;a&lt;/a&gt;
+    &lt;a class="style1" href="http://example.com"&gt;a&lt;/a&gt;
+  &lt;/div&gt;
+&lt;hr /&gt;
+
+  &lt;div class="view"&gt;
+    &lt;div class="opacity style1"&gt;div&lt;/div&gt;
+    &lt;div class="style1"&gt;div&lt;/div&gt;
+  &lt;/div&gt;
+&lt;hr /&gt;
+
+  &lt;div class="view"&gt;
+    &lt;table&gt;
+    &lt;tr&gt;
+      &lt;td class="opacity style1"&gt;td&lt;/td&gt;
+      &lt;td class="opacity style1"&gt;td&lt;/td&gt;
+      &lt;td class="opacity style1"&gt;td&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;/table&gt;
+  &lt;/div&gt;
+  &lt;div class="view"&gt;
+    &lt;table&gt;
+    &lt;tr&gt;
+      &lt;td class="style1"&gt;td&lt;/td&gt;
+      &lt;td class="style1"&gt;td&lt;/td&gt;
+      &lt;td class="style1"&gt;td&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;/table&gt;
+  &lt;/div&gt;
+&lt;hr /&gt;
+
+  &lt;div class="view"&gt;
+    &lt;img class="opacity style1" src="../img/c32.alpha.png" /&gt;
+  &lt;/div&gt;
+  &lt;div class="view"&gt;
+    &lt;img class="style1" src="../img/c32.alpha.png" /&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+</pre>
+</body></html>

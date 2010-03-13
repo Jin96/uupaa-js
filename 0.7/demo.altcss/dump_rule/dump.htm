@@ -1,0 +1,35 @@
+<!doctype html><html class="ifnojs"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>dump rule</title>
+<style type="text/css">
+.star tr>:first-child {
+  color: red;
+}
+.hover:hover {
+  background-color: skyblue;
+}
+</style>
+<script>
+window.xconfig = { dir: "../img" };
+</script>
+<script type="text/javascript" src="../../uupaa.js"></script>
+
+<script>
+function dump() {
+  var ruleset = uu.css3.rules();
+  uu.id("dumpruleset").innerHTML += ruleset.join("<br />");
+}
+setTimeout(dump, 1500);
+</script>
+
+</head>
+<body><div id="dumpruleset"></div>
+
+<table class="star">
+<tr>
+  <th>CSS Selector</th>
+  <th></th></tr>
+</table>
+
+</body>
+</html>

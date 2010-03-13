@@ -1,0 +1,62 @@
+<!doctype html>
+<html><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>background-repeat:</title>
+<style>
+html, body {
+  color: white;
+  background-color: black;
+}
+pre.code {
+  color: #ffc;
+  background-color: #110;
+  border: 1px solid navy;
+}
+.view {
+  padding: 40px; /* shadow padding */
+}
+.boxshadow1 {
+  border: 1px solid silver;
+  -uu-border-radius: 350px;
+  -uu-box-shadow: silver 5px 5px 50px;
+}
+html.ifnojs .mbg1 {
+  background: url(../img/solareclipse.jpg) repeat center center;
+}
+.mbg1 {
+  -uu-background: url(../img/c32.png) repeat-x center center,
+                  url(../img/f32.png) repeat-y center center,
+                  url(../img/solareclipse.jpg) repeat;
+}
+</style>
+<script>
+window.UUMETA_DEBUG = 1;
+</script>
+<script type="text/javascript" src="../../uupaa.js"></script>
+
+</head>
+<body>
+<input type="button" value="revalidate" onclick="uu.css3.review()" />
+
+<hr />
+<h2>Multiple Background Image, background-repeat:</h2>
+
+
+<div class="view">
+  <div class="boxshadow1 mbg1"><pre>
+.boxshadow1 {
+  border: 1px solid silver;
+  -uu-border-radius: 350px;
+  -uu-box-shadow: silver 5px 5px 50px;
+}
+html.ifnojs .mbg1 {
+  background: url(../img/solareclipse.jpg) repeat center centet;
+}
+.mbg1 {
+  -uu-background: url(../img/c32.png) repeat-x center center,
+                  url(../img/f32.png) repeat-y center center,
+                  url(../img/solareclipse.jpg) repeat;
+}</pre></div></div>
+
+</body>
+</html>

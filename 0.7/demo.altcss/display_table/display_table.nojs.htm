@@ -1,0 +1,65 @@
+<!doctype html><html><head><title></title>
+<style>
+.cell1, .disptblcell1 {
+  width: 20%;
+  background-color: #FFCC66;
+}
+.cell2, .disptblcell2 {
+  width: 29%;
+  background-color: #CC6633;
+}
+.cell3, .disptblcell3 {
+  width: 30%;
+  background-color: #FF9966;
+}
+
+.disptbl { display: table; }
+.disptblcell1 { display: table-cell; }
+.disptblcell2 { display: table-cell; }
+.disptblcell3 { display: table-cell; }
+
+.top { vertical-align: top }
+.middle { vertical-align: middle }
+.bottom { vertical-align: bottom }
+.left { text-align: left }
+.center { text-align: center }
+.right { text-align: right }
+</style>
+</head><body>
+
+<table class="tbl">
+  <tbody>
+  <tr>
+    <td class="cell1">navigation</td>
+    <td class="cell2">content</td>
+    <td class="cell3">sidebar</td>
+  </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<div class="disptbl">
+  <div class="disptblcell1 top left">navigation<span>|span|</span><p>|p|</p></div>
+  <div class="disptblcell2 middle center">content<span>|span|</span><p>|p|</p></div>
+  <div class="disptblcell3 bottom right">sidebar<span>|span|</span><p>|p|</p></div>
+  <div>
+    <ul>
+      <li>1</li>
+      <li>2</li>
+      <li>3</li>
+      <li>4</li>
+      <li>5</li>
+    </ul>
+  </div>
+</div>
+
+<hr />
+
+<ul class="disptbl" style="margin: 0; padding: 0">
+  <li class="disptblcell1 top left">navigation<span>|span|</span><p>|p|</p></li>
+  <li class="disptblcell2 middle center">content<span>|span|</span><p>|p|</p></li>
+  <li class="disptblcell3 bottom right">sidebar<span>|span|</span><p>|p|</p></li>
+</ul>
+
+</body></html>

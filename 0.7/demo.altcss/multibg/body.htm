@@ -1,0 +1,51 @@
+<!doctype html>
+<html><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>background-repeat:</title>
+<style>
+html, body {
+  color: white;
+  background-color: black;
+}
+html {
+  padding: 40px; /* shadow padding */
+}
+html.ifnojs body {
+  background: url(../img/solareclipse.jpg) repeat center center;
+}
+body {
+  -uu-background: url(../img/c32.png) repeat-x center center,
+              url(../img/f32.png) repeat-y center center,
+              url(../img/solareclipse.jpg) repeat;
+  border: 1px solid silver;
+  -uu-border-radius: 350px;
+  -uu-box-shadow: silver 5px 5px 50px;
+}
+pre.code {
+  color: #ffc;
+  background-color: #110;
+  border: 1px solid navy;
+}
+</style>
+<script type="text/javascript" src="../../uupaa.js"></script>
+
+
+</head>
+<body>
+<p>IE6, IE7 では body に対し -uu-xxx は使用できません(制限事項)</p>
+<pre>
+.boxshadow1 {
+  border: 1px solid silver;
+  -uu-border-radius: 350px;
+  -uu-box-shadow: silver 5px 5px 50px;
+}
+html.ifnojs .mbg1 {
+  background: url(../img/solareclipse.jpg) repeat center center;
+}
+.mbg1 {
+  -uu-background: url(../img/c32.png) repeat-x center center,
+              url(../img/f32.png) repeat-y center center,
+              url(../img/solareclipse.jpg) repeat;
+}</pre>
+</body>
+</html>

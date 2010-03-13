@@ -1,0 +1,9 @@
+@import url("../c.css");
+
+/* b.css */
+#sample b {
+  font: 16pt monospace; text-align: center;
+}
+#sample b {
+  background-color: #bbb;
+}
