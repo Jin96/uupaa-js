@@ -35,5 +35,6 @@ uu.codec.js
 plug/ui/uup.ui.tab.js
 plug/ui/uup.ui.slider.js
 
+uu.lazy.js
 build/footer.txt
 

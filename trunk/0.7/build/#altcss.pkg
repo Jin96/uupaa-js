@@ -32,4 +32,6 @@ uu.codec.js
 uu.codec.base64.js
 uu.codec.url.js
 
+uu.lazy.js
+
 build/footer.txt

@@ -41,4 +41,6 @@ uu.test.js
 //plug/ui/uu.plugin.ui.tab.js
 //plug/ui/uu.plugin.ui.slider.js
 
+uu.lazy.js
+
 build/footer.txt

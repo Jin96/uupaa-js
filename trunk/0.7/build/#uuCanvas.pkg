@@ -13,4 +13,5 @@ uu.canvas.flash.js
 uu.canvas.extend.js
 //uu.layer.js
 
+uu.lazy.js
 build/footer.txt
