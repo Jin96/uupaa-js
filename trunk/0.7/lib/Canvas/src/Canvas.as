@@ -64,7 +64,9 @@ package {
         private var _state:int = 0;     // 0: not ready(locked)
                                         // 1: not ready -> ready
                                         // 2: ready
-        private var _stock:Array = [];
+        private var _jscallback:Array = [];
+        // --- command stock ---
+        public  var _stock:Array = [];
         // --- ActionScript <- -> ActionScript ---
         private var _callback:Function = null; // for copyCanvas
         // --- sub class instance ---
@@ -83,6 +85,7 @@ package {
             ExternalInterface.addCallback("toDataURL", toDataURL);
             ExternalInterface.addCallback("getImageData", getImageData);
             ExternalInterface.addCallback("isPointInPath", isPointInPath);
+            ExternalInterface.addCallback("addJsCallback", addJsCallback);
 
             _shape = new Shape();
             _gfx = _shape.graphics;
@@ -128,7 +131,7 @@ package {
                 if (_lastMessageID !== messageID) {
                     _lastMessageID = messageID; // update
 
-0 && trace("valid message=" + messageID + ":" + messageBody);
+0 && trace(ExternalInterface.objectID + ", valid message=" + messageID + ":" + messageBody);
 
                     switch (_state) {
                     case 0: // not ready(locked)
@@ -153,10 +156,18 @@ package {
 
                             _buff && _buff.unlock();
                     }
-                } else {
-0 && trace("ignore message=" + messageID + ":" + messageBody);
                 }
             }
+
+
+            // copy ready
+            if (_state && !_stock.length && _jscallback.length) {
+                var timer:Timer = new Timer(10, 1);
+
+                timer.addEventListener(TimerEvent.TIMER, execJsCallback);
+                timer.start();
+            }
+
         }
 
         public function next(state:int = -1):void {
@@ -189,7 +200,7 @@ package {
             var loopout:int = 0;
             var modify:int = 0; // canvas updated
 
-0 && trace("commands="+commands);
+0 && trace(ExternalInterface.objectID + "[recv] "+commands);
 
             while (++i < iz) {
                 fill = 0;
@@ -346,8 +357,32 @@ package {
             }
         }
 
+        public function addJsCallback(guid:String):void {
+//trace("addJsCallback=" + guid);
+            _jscallback.push(guid);
+        }
+
+        // callback javascript functions
+        private function execJsCallback(event:TimerEvent):void {
+            var ary:Array = _jscallback.concat(),
+                i:int = 0, iz:int = ary.length, fn:String;
+
+            // pre clear
+            _jscallback = [];
+
+            for (; i < iz; ++i) {
+                fn = "uu.dmz." + ExternalInterface.objectID + ary[i];
+
+//trace("execJsCallback.callback=" + fn);
+
+                // callback
+                ExternalInterface.call(fn);
+            }
+
+        }
+
         private function init(width:int, height:int, mode:int):void {
-//trace(ExternalInterface.objectID + "init(), width="+width+",height="+height);
+//trace(ExternalInterface.objectID + " init(), width="+width+",height="+height);
             _mode = mode;
             canvasWidth = width;
             canvasHeight = height;
