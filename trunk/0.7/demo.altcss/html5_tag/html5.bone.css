@@ -1,0 +1,40 @@
+header,nav,article,section,aside,footer {
+  display: block;
+  padding: 5px;
+}
+/*
+.view {
+  padding: 5px;
+}
+.uuautoviewbox {
+  padding: 5px;
+}
+ */
+
+.tbl {
+  width: 100%;
+  display: table;
+  -uu-display: table;
+}
+.tbl>.cell1 {
+  display: table-cell;
+  width: 70%;
+/*
+  background-color: pink;
+ */
+}
+.tbl>.cell2 {
+  display: table-cell;
+  width: 25%;
+/*
+  background-color: skyblue;
+ */
+}
+aside {
+  min-height: 200px;
+}
+html.ifie67 .cell1,
+html.ifsafari31 .cell1,
+html.ifsafari32 .cell1 {
+  vertical-align: top;
+}

@@ -1,0 +1,8 @@
+@import "dir2/b.css";
+@import "dir2/d.css";
+@import "c.css";
+
+/* a.css */
+#sample a {
+  background-color: #aaa;
+}

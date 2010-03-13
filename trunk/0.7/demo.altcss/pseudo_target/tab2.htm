@@ -1,0 +1,71 @@
+<!doctype html><html><head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<title>:target</title>
+<style>
+html, body { margin: 0; padding: 0 }
+/* conditional selector for IE6, IE7 */
+html.ifie6 #menu,
+html.ifie7 #menu { top:13px; }
+
+#menu {
+  position: absolute;
+  top:0;
+  left:20px;
+  font-size: 12px;
+}
+#menu a {
+  display: block;
+  text-decoration: none;
+  text-align: center;
+  width: 55px;
+  height: 20px;
+  border-bottom: none;
+  padding: 5px 0 0;
+  margin-right: 5px;
+  float: left;
+  color: black;
+}
+div {
+  width: 400px;
+  height: 180px;
+  padding: 10px;
+  margin: 20px 0;
+  background-color: white;
+}
+#text1 { z-index: 2; }
+#text1, #menu1 { background-color: pink; }
+#text2, #menu2 { background-color: orange; }
+#text3, #menu3 { background-color: limegreen; }
+#text4, #menu4 { background-color: skyblue; }
+#text5, #menu5 { background-color: cornflowerblue; }
+div {
+  position: absolute;
+  top: 17px;
+  left: 20px;
+}
+#text1:target { z-index: 2; }
+#text2:target { z-index: 2; }
+#text3:target { z-index: 2; }
+#text4:target { z-index: 2; }
+#text5:target { z-index: 2; }
+</style>
+<script src="../../uupaa.js"></script>
+
+</head><body>
+<a href="../../README.htm">BACK</a>
+
+<p id="menu">
+  <a href="#text1" id="menu1" onclick="uu.css3.review()">text1</a>
+  <a href="#text2" id="menu2" onclick="uu.css3.review()">text2</a>
+  <a href="#text3" id="menu3" onclick="uu.css3.review()">text3</a>
+  <a href="#text4" id="menu4" onclick="uu.css3.review()">text4</a>
+  <a href="#text5" id="menu5" onclick="uu.css3.review()">text5</a>
+</p>
+
+<div id="text1"><h2>text1</h2><p>text1 body</p></div>
+<div id="text2"><h2>text2</h2><p>text2 body</p></div>
+<div id="text3"><h2>text3</h2><p>text3 body</p></div>
+<div id="text4"><h2>text4</h2><p>text4 body</p></div>
+<div id="text5"><h2>text5</h2><p>text5 body</p></div>
+
+</body></html>

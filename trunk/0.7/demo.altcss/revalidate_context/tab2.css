@@ -1,0 +1,43 @@
+/* conditional selector for IE6, IE7 */
+html.ifie6 #menu,
+html.ifie7 #menu { top:13px; }
+
+#menu {
+  position: absolute;
+  top:0;
+  left:20px;
+  font-size: 12px;
+}
+#menu a {
+  display: block;
+  text-decoration: none;
+  text-align: center;
+  width: 55px;
+  height: 20px;
+  border-bottom: none;
+  padding: 5px 0 0;
+  margin-right: 5px;
+  float: left;
+  color: black;
+}
+div.tab2 > div {
+  width: 400px;
+  height: 180px;
+  padding: 10px;
+  margin: 20px 0;
+  background-color: white;
+  position: absolute;
+  top: 17px;
+  left: 20px;
+}
+#text1 { z-index: 2; }
+#text1, #menu1 { background-color: pink; }
+#text2, #menu2 { background-color: orange; }
+#text3, #menu3 { background-color: limegreen; }
+#text4, #menu4 { background-color: skyblue; }
+#text5, #menu5 { background-color: cornflowerblue; }
+#text1:target { z-index: 2; }
+#text2:target { z-index: 2; }
+#text3:target { z-index: 2; }
+#text4:target { z-index: 2; }
+#text5:target { z-index: 2; }
