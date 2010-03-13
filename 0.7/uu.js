@@ -1,3 +1,4 @@
+
 // === Core ===
 //
 // --- user configurations ---
@@ -50,7 +51,7 @@ function uunop() { // @return undefined:
 
 // --- main ---
 uu ? ++uu.agein : (function(win, doc) {
-var _cfg    = uuarg(win.xconfig || {}, { dir: ".", aria: 0, debug: 0, right: 0,
+var _cfg    = uuarg(win.xconfig || {}, { dir: "", aria: 0, debug: 0, right: 0,
                                          visited: 0, innerText: 0 }),
     _ver    = _detectVersion(),
     _ie     = _ver.ie,
@@ -74,7 +75,10 @@ var _cfg    = uuarg(win.xconfig || {}, { dir: ".", aria: 0, debug: 0, right: 0,
                 "[object CSSStyleDeclaration]":         0x1000,   // [WebKit][Opera]
                 "[object ComputedCSSStyleDeclaration]": 0x1000 }; // [Gecko]
 
-// parts dir normalization("../img" -> "../img/")
+// detect script directory path, and path normalization("../img" -> "../img/")
+if ({ "": 1, ".": 1, "./": 1 }[_cfg.dir]) { // "" or "." or "./"
+    _cfg.dir = uutag("script").pop().getAttribute("src").replace(/[^\/]+$/, "");
+}
 _cfg.dir = _cfg.dir.replace(/\/+$/, "") + "/";
 
 // --- library structure ---

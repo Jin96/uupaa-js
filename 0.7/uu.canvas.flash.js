@@ -4,7 +4,7 @@
 //         uu.font.js, uu.canvas.js, uu.flash.js
 
 //  <canvas width="300" height="150">
-//      <object id="externalcanvas{n}" width="300" height="150" classid="...">
+//      <object id="external{n}" width="300" height="150" classid="...">
 //          <param name="allowScriptAccess" value="always" />
 //          <param name="flashVars" value="" />
 //          <param name="wmode" value="transparent" />
@@ -87,7 +87,7 @@ function build(canvas) { // @param Node: <canvas>
             return "data:,";
         }
 
-        mimeType = (mimeType || "image/png").toLowerCase();
+        mimeType = (mimeType || "").toLowerCase();
         mimeType = mimeType === "image/jpeg" ? mimeType : "image/png";
 
         jpegQuality = parseFloat(jpegQuality); // undefined -> NaN
@@ -101,22 +101,28 @@ function build(canvas) { // @param Node: <canvas>
     };
 
     canvas.uuctx = new uu.canvas.Flash(canvas);
+    canvas.uuctx._id = "external" + uu.guid() + "x" + (+new Date).toString(16);
 
-    var id = "externalcanvas" + uu.guid() + (+new Date);
-
-    uu.dmz[id] = flashCanvasReadyCallback;
+    uu.dmz[canvas.uuctx._id] = flashCanvasReadyCallback;
 
     // wait for response from flash initializer
     function flashCanvasReadyCallback() {
         var ctx = canvas.uuctx;
 
-        ctx._readyState = 1; // 1: draw ready
-        if (canvas.currentStyle.direction === "rtl") {
-            ctx._stock.push("rt");
-        }
-        ctx.send("XX", 0xf);
-        // [GC]
-        uu.dmz[id] = null;
+        // [ASYNC]
+        setTimeout(function() {
+            ctx._readyState = 1; // 1: draw ready
+
+            // [SYNC] send "init" command. init(width, heigth, xFlyweight)
+            ctx._view.CallFunction(send._prefix +
+                "in\t" + ctx.canvas.width + "\t" + ctx.canvas.height +
+                "\t" + ctx.xFlyweight + send._suffix);
+
+            if (canvas.currentStyle.direction === "rtl") {
+                ctx._stock.push("rt");
+            }
+            ctx.send("XX", 0xf);
+        }, 0);
     }
 
     // create swf <object>
@@ -126,7 +132,7 @@ function build(canvas) { // @param Node: <canvas>
             '<param name="flashVars" value="" />' +
             '<param name="wmode" value="transparent" />' +
             '<param name="movie" value="?" /></object>',
-        [id, canvas.width, canvas.height,
+        [canvas.uuctx._id, canvas.width, canvas.height,
          "clsid:d27cdb6e-ae6d-11cf-96b8-444553540000",
          uu.config.dir + "uu.canvas.swf"]);
 
@@ -153,7 +159,8 @@ function build(canvas) { // @param Node: <canvas>
     canvas.attachEvent("onpropertychange", onPropertyChange);
 
     win.attachEvent("onunload", function() { // [FIX][MEM LEAK]
-        canvas.uuctx = canvas.getContext = null;
+        uu.dmz[canvas.uuctx._id] = null;
+        canvas.uuctx = canvas.getContext = canvas.toDataURL = null;
         win.detachEvent("onunload", arguments.callee);
         canvas.detachEvent("onfocus", onFocus);
         canvas.detachEvent("onpropertychange", onPropertyChange);
@@ -193,6 +200,8 @@ function initSurface() {
     this._readyState    = 0;
     this._lastTimerID   = 0;
     this._lastMessageID = 1;
+    this._id            = "";   // "external{n}..."
+    this._innerLock     = 0;    // lock for copy ready
     // --- extend properties ---
     this.xBackend       = "Flash";
     this.xFlyweight     = 0;    // 1 is animation mode
@@ -352,6 +361,9 @@ function getImageData(sx,   // @param Number:
     if (!sw || !sh) {
         throw new Error("INDEX_SIZE_ERR");
     }
+    if (this._readyState !== 2) {
+        throw new Error("FLASH_NOT_READY");
+    }
 
     var rawdata, width, height;
 
@@ -474,7 +486,7 @@ function drawCircle(x,             // @param Number:
 function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
     var args = (a3 === void 0) ? 3
              : (a5 === void 0) ? 5 : 9,
-        dx, dy, dw, dh, sx, sy, sw, sh, canvas;
+        dx, dy, dw, dh, sx, sy, sw, sh, canvas, guid, ctx = this;
 
     if (image.src) { // HTMLImageElement
         this.send("d0\t" + args + "\t" + image.src + "\t" +
@@ -499,6 +511,16 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
         this.send("d1\t" + args + "\t" + canvas.id + "\t" +
                   sx + "\t" + sy + "\t" + sw + "\t" + sh + "\t" +
                   dx + "\t" + dy + "\t" + dw + "\t" + dh, 0x5);
+
+        // peek copy ready state
+        //   js -> as -> js callback
+        ++this._innerLock;
+        this._view.addJsCallback(guid = uu.guid());
+
+        uu.dmz[this._id + guid] = function() {
+            --ctx._innerLock; // unlock
+            ctx.send("XX");
+        };
     }
 }
 
@@ -809,19 +831,11 @@ function send(commands, // @param String: commands, "{COMMAND}\t{ARG1}\t..."
     // --- build message phase ---
     ary[++i] = commands;
 
-    if (!this._lockState) {
+    if (!this._lockState && this._innerLock <= 0) {
         if (this._readyState === 1) {
-            if (this._view) {
+            this._readyState = 2;
 
-                // [SYNC] send "init" command. init(width, heigth, xFlyweight)
-                this._view.CallFunction(send._prefix +
-                    "in\t" + this.canvas.width + "\t" + this.canvas.height +
-                    "\t" + this.xFlyweight +
-                    send._suffix);
-                this._readyState = 2;
-
-                clearance(this);
-            }
+            clearance(this);
         }
         if (this._readyState === 2) {
 
