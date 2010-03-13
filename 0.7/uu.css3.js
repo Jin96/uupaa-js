@@ -31,52 +31,52 @@ var _canvasok = uu.ver.major,
     _CSS3CLASS = /uucss[\w]+\s*/g,
     _SKIP_PSEUDO = /^\*$|::?before$|::?after$|::?first-letter$|::?first-line$|:active|:focus|:hover|:unknown/,
     _EXCSS = { // extend css functions
-      position:   uu.ie6    ? 0x10   : 0, // position: fixed, absolute bug
-      alphapng:   uu.ie6    ? 0x20   : 0, // <img src="some.alpha.png">
-      maxmin:     uu.ie67   ? 0x40   : 0, // max-width:
-      disptbl:    uu.ie67   ? 0x80   : 0, // -uu-display: table
-      opacity:    uu.ie     ? 0x100  : 0, // opacity:
-      textshadow: uu.ie     ? 0x200  : 0, // -uu-text-shadow:
-      boxeffect:  _canvasok ? 0x400  : 0, // -uu-box-effect:
-      boxshadow:  _canvasok ? 0x800  : 0, // -uu-box-shadow:
-      boxreflect: _canvasok ? 0x1000 : 0, // -uu-box-reflect:
-      bradius:    _canvasok ? 0x2000 : 0, // -uu-border-radius:
-      bimage:     _canvasok ? 0x4000 : 0, // -uu-border-image:
-      mbg:        _canvasok ? 0x8000 : 0  // -uu-background:
-                                          // -uu-background-color:
-                                          // -uu-background-image:
-                                          // -uu-background-repeat:
-                                          // -uu-background-position:
+        position:   uu.ie6    ? 0x10   : 0, // position: fixed, absolute bug
+        alphapng:   uu.ie6    ? 0x20   : 0, // <img src="some.alpha.png">
+        maxmin:     uu.ie67   ? 0x40   : 0, // max-width:
+        disptbl:    uu.ie67   ? 0x80   : 0, // -uu-display: table
+        opacity:    uu.ie     ? 0x100  : 0, // opacity:
+        textshadow: uu.ie     ? 0x200  : 0, // -uu-text-shadow:
+        boxeffect:  _canvasok ? 0x400  : 0, // -uu-box-effect:
+        boxshadow:  _canvasok ? 0x800  : 0, // -uu-box-shadow:
+        boxreflect: _canvasok ? 0x1000 : 0, // -uu-box-reflect:
+        bradius:    _canvasok ? 0x2000 : 0, // -uu-border-radius:
+        bimage:     _canvasok ? 0x4000 : 0, // -uu-border-image:
+        mbg:        _canvasok ? 0x8000 : 0  // -uu-background:
+                                            // -uu-background-color:
+                                            // -uu-background-image:
+                                            // -uu-background-repeat:
+                                            // -uu-background-position:
     },
     _DECL2EXCSS = {
-      position:                 1,
-      "-uu-display":            2,
-      opacity:                  _EXCSS.opacity,
-      "-uu-text-shadow":        _EXCSS.textshadow,
-      "-uu-box-effect":         _EXCSS.boxeffect,
-      "-uu-box-shadow":         _EXCSS.boxshadow,
-      "-uu-box-reflect":        _EXCSS.boxreflect,
-//    "-uu-border-image":       _EXCSS.bimage,
-      "-uu-border-radius":      _EXCSS.bradius,
-      "-uu-background":         _EXCSS.mbg,
-      "-uu-background-color":   _EXCSS.mbg,
-      "-uu-background-image":   _EXCSS.mbg,
-      "-uu-background-repeat":  _EXCSS.mbg,
-      "-uu-background-position":_EXCSS.mbg
+        position:                 1,
+        "-uu-display":            2,
+        opacity:                  _EXCSS.opacity,
+        "-uu-text-shadow":        _EXCSS.textshadow,
+        "-uu-box-effect":         _EXCSS.boxeffect,
+        "-uu-box-shadow":         _EXCSS.boxshadow,
+        "-uu-box-reflect":        _EXCSS.boxreflect,
+  //    "-uu-border-image":       _EXCSS.bimage,
+        "-uu-border-radius":      _EXCSS.bradius,
+        "-uu-background":         _EXCSS.mbg,
+        "-uu-background-color":   _EXCSS.mbg,
+        "-uu-background-image":   _EXCSS.mbg,
+        "-uu-background-repeat":  _EXCSS.mbg,
+        "-uu-background-position":_EXCSS.mbg
     },
     _EXSTYLE2FUNC = {
-      opacity:                  _uucss3setopacity,
-      "-uu-text-shadow":        _uucss3settextshadow,
-      "-uu-box-effect":         _uucss3setboxeffect,
-      "-uu-box-shadow":         _uucss3setboxshadow,
-      "-uu-box-reflect":        _uucss3setboxreflect,
-//    "-uu-border-image":       _uucss3setborderimage,
-      "-uu-border-radius":      _uucss3setborderradius,
-      "-uu-background":         _uucss3setbg,
-      "-uu-background-color":   _uucss3setbgcolor,
-      "-uu-background-image":   _uucss3setbgimg,
-      "-uu-background-repeat":  _uucss3setbgrpt,
-      "-uu-background-position":_uucss3setbgpos
+        opacity:                  _uucss3setopacity,
+        "-uu-text-shadow":        _uucss3settextshadow,
+        "-uu-box-effect":         _uucss3setboxeffect,
+        "-uu-box-shadow":         _uucss3setboxshadow,
+        "-uu-box-reflect":        _uucss3setboxreflect,
+  //    "-uu-border-image":       _uucss3setborderimage,
+        "-uu-border-radius":      _uucss3setborderradius,
+        "-uu-background":         _uucss3setbg,
+        "-uu-background-color":   _uucss3setbgcolor,
+        "-uu-background-image":   _uucss3setbgimg,
+        "-uu-background-repeat":  _uucss3setbgrpt,
+        "-uu-background-position":_uucss3setbgpos
     };
 
 // [1][get] uu.css3(node, "color") -> "red"
@@ -459,9 +459,14 @@ function _uucss3validate(rawdata, context) {
             }
         }
         // insert rule
-        i = -1;
-        while ( (v = ruleset[++i]) ) {
+        //    ruleset[0] = expr = ".uucss1"
+        //    ruleset[1] = decl = "text-align:center;"
+        i = 0;
+        while ( (v = ruleset[i++]) ) { // v = expr
+
+            // uu.css.inject("uucss3", expr, decl)
             uu.css.inject("uucss3", v, ruleset[i]);
+
             _rules[++gridx] = ruleset[i] + "{" + ruleset[i] + "}";
             ++i;
         }
