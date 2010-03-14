@@ -3,8 +3,8 @@
 // depend: uu.js, uu.color.js, uu.css.js, uu.img.js,
 //         uu.font.js, uu.canvas.js
 
-//  <canvas width="300" height="150">
-//      <div>
+//  <canvas width="300" height="150">   <- canvas
+//      <div>                           <- view
 //          <v:shape style="...">
 //          </v:shape>
 //      </div>
@@ -50,22 +50,19 @@ uu.mix(uu.canvas.VML.prototype, {
     createRadialGradient:   createRadialGradient,
     drawCircle:             drawCircle,     // [EXTEND]
     drawImage:              drawImage,
+    drawRoundRect:          drawRoundRect,  // [EXTEND]
     fill:                   fill,
     fillRect:               fillRect,
     fillText:               fillText,
     getImageData:           uunop,
-    initSurface:            initSurface,    // [EXTEND]
     isPointInPath:          uunop,
     lineTo:                 lineTo,
     lock:                   lock,           // [EXTEND]
     measureText:            measureText,
     moveTo:                 moveTo,
     putImageData:           uunop,
-    quickStroke:            quickStroke,    // [EXTEND]
-    quickStrokeRect:        quickStrokeRect, // [EXTEND]
     quadraticCurveTo:       quadraticCurveTo,
     rect:                   rect,
-    resize:                 resize,         // [EXTEND]
     restore:                restore,
     rotate:                 rotate,
     save:                   save,
@@ -84,25 +81,36 @@ uu.canvas.VML.build = build;
 
 // uu.canvas.VML.init
 function init(ctx, node) { // @param Node: <canvas>
+    initSurface(ctx);
     ctx.canvas = node;
-    ctx.initSurface();
-
-    ctx._view = node.appendChild(uue()); // <canvas><div></div></canvas>
+    ctx._view = node.appendChild(uue());
     ctx._view.uuCanvasDirection = node.currentStyle.direction;
     ctx._view.style.cssText     = "overflow:hidden;position:absolute;direction:ltr";
     ctx._view.style.pixelWidth  = node.width;
     ctx._view.style.pixelHeight = node.height;
     ctx._clipRect = _rect(ctx, 0, 0, node.width, node.height);
+    ctx._state = 1; // 0x0: not ready
+                    // 0x1: draw ready(normal)
+                    // 0x2: + locked
+                    // 0x4: + lazy clear
 }
 
 // uu.canvas.VML.build
 function build(canvas) { // @param Node: <canvas>
                          // @return Node:
+    var ctx;
+
     // CanvasRenderingContext.getContext
     canvas.getContext = function() {
-        return canvas.uuctx;
+        return ctx;
     };
-    canvas.uuctx = new uu.canvas.VML(canvas);
+
+    // CanvasRenderingContext.toDataURL
+    canvas.toDataURL = function() {
+        return "data:,";
+    };
+
+    ctx = new uu.canvas.VML(canvas);
 
     // uncapture key events(release focus)
     function onFocus(evt) {
@@ -115,17 +123,32 @@ function build(canvas) { // @param Node: <canvas>
 
     // trap <canvas width>, <canvas height> change event
     function onPropertyChange(evt) {
-        var attr = evt.propertyName;
+        var attr = evt.propertyName, width, height;
 
-        attr === "width"  && canvas.uuctx.resize(canvas.width);
-        attr === "height" && canvas.uuctx.resize(void 0, canvas.height);
+        if (attr === "width" || attr === "height") {
+            initSurface(ctx);
+
+            width  = parseInt(canvas.width);
+            height = parseInt(canvas.height);
+
+            // resize <canvas>
+            canvas.style.pixelWidth  = width  < 0 ? 0 : width;
+            canvas.style.pixelHeight = height < 0 ? 0 : height;
+
+            // resize view
+            ctx._view.style.pixelWidth  = width  < 0 ? 0 : width;
+            ctx._view.style.pixelHeight = height < 0 ? 0 : height;
+
+            ctx._clipRect = _rect(ctx, 0, 0, width, height);
+            ctx.clear();
+        }
     }
 
-    canvas.firstChild.attachEvent("onfocus", onFocus); // <object>.attachEvent
+    canvas.firstChild.attachEvent("onfocus", onFocus);
     canvas.attachEvent("onpropertychange", onPropertyChange);
 
     win.attachEvent("onunload", function() { // [FIX][MEM LEAK]
-        canvas.uuctx = canvas.getContext = null;
+        canvas.getContext = canvas.toDataURL = null;
         win.detachEvent("onunload", arguments.callee);
         canvas.detachEvent("onfocus", onFocus);
         canvas.detachEvent("onpropertychange", onPropertyChange);
@@ -133,54 +156,50 @@ function build(canvas) { // @param Node: <canvas>
     return canvas;
 }
 
-// CanvasRenderingContext2D.prototype.initSurface
-function initSurface() {
+// inner -
+function initSurface(ctx) {
     // --- compositing ---
-    this.globalAlpha    = 1.0;
-    this.globalCompositeOperation = "source-over";
+    ctx.globalAlpha     = 1;
+    ctx.globalCompositeOperation = "source-over";
     // --- colors and styles ---
-    this.strokeStyle    = "black"; // String or Object
-    this.fillStyle      = "black"; // String or Object
+    ctx.strokeStyle     = "black"; // String or Object
+    ctx.fillStyle       = "black"; // String or Object
     // --- line caps/joins ---
-    this.lineWidth      = 1;
-    this.lineCap        = "butt";
-    this.lineJoin       = "miter";
-    this.miterLimit     = 10;
+    ctx.lineWidth       = 1;
+    ctx.lineCap         = "butt";
+    ctx.lineJoin        = "miter";
+    ctx.miterLimit      = 10;
     // --- shadows ---
-    this.shadowBlur     = 0;
-    this.shadowColor    = "transparent"; // transparent black
-    this.shadowOffsetX  = 0;
-    this.shadowOffsetY  = 0;
+    ctx.shadowBlur      = 0;
+    ctx.shadowColor     = "transparent"; // transparent black
+    ctx.shadowOffsetX   = 0;
+    ctx.shadowOffsetY   = 0;
     // --- text ---
-    this.font           = "10px sans-serif";
-    this.textAlign      = "start";
-    this.textBaseline   = "alphabetic";
+    ctx.font            = "10px sans-serif";
+    ctx.textAlign       = "start";
+    ctx.textBaseline    = "alphabetic";
     // --- current position ---
-    this.px             = 0;    // current position x
-    this.py             = 0;    // current position y
+    ctx.px              = 0;    // current position x
+    ctx.py              = 0;    // current position y
     // --- hidden properties ---
-    this._lineScale     = 1;
-    this._scaleX        = 1;
-    this._scaleY        = 1;
-    this._zindex        = -1;
-    this._matrixfxd     = 0;    // 1: matrix effected
-    this._matrix        = [1, 0, 0,  0, 1, 0,  0, 0, 1]; // Matrix.identity
-    this._history       = [];   // canvas rendering history
-    this._stack         = [];   // matrix and prop stack.
-    this._path          = [];   // current path
-    this._clipStyle     = 0;    // 0 or ColorHash
-    this._clipPath      = null; // clipping path
-    this._clipRect      = null; // clipping rect
-    this._stock         = [];   // lock stock
-    this._state         = 1;    // state,   0x0: not ready
-                                //          0x1: draw ready(normal)
-                                //          0x2: + locked
-                                //          0x4: + lazy clear
+    ctx._stack          = [];   // matrix and prop stack.
+    ctx._stock          = [];   // lock stock
+    ctx._lineScale      = 1;
+    ctx._scaleX         = 1;
+    ctx._scaleY         = 1;
+    ctx._zindex         = -1;
+    ctx._matrixfxd      = 0;    // 1: matrix effected
+    ctx._matrix         = [1, 0, 0,  0, 1, 0,  0, 0, 1]; // Matrix.identity
+    ctx._history        = [];   // canvas rendering history
+    ctx._path           = [];   // current path
+    ctx._clipStyle      = 0;    // 0 or ColorHash
+    ctx._clipPath       = null; // clipping path
+    ctx._clipRect       = null; // clipping rect
     // --- extend properties ---
-    this.xBackend       = "VML";
-    this.xFlyweight     = 0;    // 1 is animation mode
-    this.xMissColor     = "black";
-    this.xTextMarginTop = 1.3;
+    ctx.xBackend        = "VML";
+    ctx.xFlyweight      = 0;    // 1 is animation mode
+    ctx.xMissColor      = "black";
+    ctx.xTextMarginTop  = 1.3;
 }
 
 // inner -
@@ -206,16 +225,17 @@ function _copyprop(to, from) {
     to._matrixfxd       = from._matrixfxd;
     to._matrix          = from._matrix.concat();
     to._clipPath        = from._clipPath;
+    return to;
 }
 
 // CanvasRenderingContext2D.prototype.arc
 function arc(x, y, radius, startAngle, endAngle, anticlockwise) {
-    radius *= 10.00;
+    radius *= 10;
 
-    var x1 = x + (Math.cos(startAngle) * radius) - 5.00,
-        y1 = y + (Math.sin(startAngle) * radius) - 5.00,
-        x2 = x + (Math.cos(endAngle)   * radius) - 5.00,
-        y2 = y + (Math.sin(endAngle)   * radius) - 5.00,
+    var x1 = x + (Math.cos(startAngle) * radius) - 5,
+        y1 = y + (Math.sin(startAngle) * radius) - 5,
+        x2 = x + (Math.cos(endAngle)   * radius) - 5,
+        y2 = y + (Math.sin(endAngle)   * radius) - 5,
         c0, c1, rx, ry;
 
     if (!anticlockwise) { // [FIX] "wa" bug
@@ -359,8 +379,6 @@ function closePath() {
     this._path.push(" x");
 }
 
-// CanvasRenderingContext2D.prototype.createImageData -> NOT IMPL
-
 // CanvasRenderingContext2D.prototype.createLinearGradient
 function createLinearGradient(x0, y0, x1, y1) { // @return Hash:
     function CanvasGradient(x0, y0, x1, y1) {
@@ -428,20 +446,20 @@ function createRadialGradient(x0, y0, r0, x1, y1, r1) { // @return CanvasGradien
 }
 
 // CanvasRenderingContext2D.prototype.drawCircle
-function drawCircle(x,             // @param Number:
-                    y,             // @param Number:
-                    r,             // @param Number: radius
-                    fillColor,     // @param ColorHash(= void 0): fillColor
-                    strokeColor,   // @param ColorHash(= void 0): strokeColor
-                    lineWidth) {   // @param Number(= 1): stroke lineWidth
+function drawCircle(x,           // @param Number:
+                    y,           // @param Number:
+                    radius,      // @param Number: radius
+                    fillColor,   // @param ColorHash(= void 0): fillColor
+                    strokeColor, // @param ColorHash(= void 0): strokeColor
+                    lineWidth) { // @param Number(= 1): stroke lineWidth
     if (fillColor || strokeColor) {
         var lw = lineWidth === void 0 ? 1 : lineWidth,
-            fg = '<v:oval style="position:absolute;left:' + (x - r) +
-                    'px;top:' + (y - r) +
-                    'px;width:' + (r * 2) +
-                    'px;height:' + (r * 2) +
-                    'px" filled="' + (fillColor ? "t" : "f") +
-                    '" stroked="' + (strokeColor ? "t" : "f") + '">';
+            fg = '<v:oval style="position:absolute;left:' + (x - radius) +
+                    'px;top:'       + (y - radius) +
+                    'px;width:'     + (radius * 2) +
+                    'px;height:'    + (radius * 2) +
+                    'px" filled="'  + (fillColor ? "t" : "f") +
+                    '" stroked="'   + (strokeColor ? "t" : "f") + '">';
         if (fillColor) {
             fg +=   '<v:fill opacity="' + (this.globalAlpha * fillColor.a) +
                             '" color="' + fillColor.hex + '" />';
@@ -481,6 +499,7 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
         dw = full ? a7 : a3 || dim.w,
         dh = full ? a8 : a4 || dim.h,
         rv = [], fg, m,
+        history, // HTMLCanvasElement context history
         frag = [], tfrag, // code fragment
         i = 0, iz, c0,
         zindex = (this.__mix ===  4) ? --this._zindex
@@ -562,16 +581,18 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
         }
         fg = rv.join("");
     } else { // HTMLCanvasElement
+        history = image.getContext("2d")._history;
         c0 = _map(this._matrix, dx, dy);
+
         switch (az) {
         case 3: // 1:1 scale
                 rv.push('<div style="position:absolute;z-index:', zindex,
                         ';left:',  Math.round(c0.x * 0.1),
                         'px;top:', Math.round(c0.y * 0.1), 'px">')
-                iz = image.uuctx._history.length;
+                iz = history.length;
 
                 for (; i < iz; ++i) {
-                    rv.push(image.uuctx._history[i]);
+                    rv.push(history[i]);
                 }
                 rv.push('</div>');
                 break;
@@ -581,10 +602,10 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
                         _imageTransform(this, m, dx, dy, dw, dh),
                         '"><div style="width:',  Math.round(dim.w * dw / sw),
                                    'px;height:', Math.round(dim.h * dh / sh), 'px">');
-                iz = image.uuctx._history.length;
+                iz = history.length;
 
                 for (; i < iz; ++i) {
-                    rv.push(image.uuctx._history[i]);
+                    rv.push(history[i]);
                 }
                 rv.push('</div></div>');
                 break;
@@ -594,10 +615,10 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
                         ';overflow:hidden',
                         _imageTransform(this, m, dx, dy, dw, dh), '">');
 
-                iz = image.uuctx._history.length;
+                iz = history.length;
 
                 for (; i < iz; ++i) {
-                    rv.push(image.uuctx._history[i]);
+                    rv.push(history[i]);
                 }
                 rv.push('</div>');
                 break;
@@ -625,13 +646,100 @@ function _imageTransform(ctx, m, x, y, w, h) {
 
     return [
         ";padding:0 ",
-        Math.round(Math.max(c0.x1, c0.x2, c1.x1, c1.x2) / 10.00), "px ",
-        Math.round(Math.max(c0.y1, c0.y2, c1.y1, c1.y2) / 10.00), "px 0;",
+        Math.round(Math.max(c0.x1, c0.x2, c1.x1, c1.x2) / 10), "px ",
+        Math.round(Math.max(c0.y1, c0.y2, c1.y1, c1.y2) / 10), "px 0;",
         _FILTER[0], "Matrix(M11=", m[0], ",M12=", m[3],
               ",M21=", m[1], ",M22=", m[4],
-              ",Dx=", Math.round(c0.x1 / 10.00),
-              ",Dy=", Math.round(c0.y1 / 10.00), ")", _FILTER[1]
+              ",Dx=", Math.round(c0.x1 / 10),
+              ",Dy=", Math.round(c0.y1 / 10), ")", _FILTER[1]
     ].join("");
+}
+
+// CanvasRenderingContext2D.prototype.drawRoundRect - round rect
+function drawRoundRect(x,           // @param Number:
+                       y,           // @param Number:
+                       width,       // @param Number:
+                       height,      // @param Number:
+                       radius,      // @param Array: [top-left, top-right, bottom-right, bottom-left]
+                       fillColor,   // @param ColorHash(= void 0): fillColor
+                       strokeColor, // @param ColorHash(= void 0): strokeColor
+                       lineWidth) { // @param Number(= 1): stroke lineWidth
+    if (fillColor || strokeColor) {
+        var lw = lineWidth === void 0 ? 1 : lineWidth,
+            path, fg, ix, iy, iw, ih;
+
+        if (!radius[0]
+            && radius[0] === radius[1]
+            && radius[0] === radius[2]
+            && radius[0] === radius[3]) {
+
+            // radius = [0, 0, 0, 0]
+            ix = x * 10 - 5;
+            iy = y * 10 - 5;
+            iw = (x + width)  * 10 - 5;
+            ih = (y + height) * 10 - 5;
+
+            path = ["m " + ix + " " + iy +
+                    "l " + ix + " " + ih +
+                    "l " + iw + " " + ih +
+                    "l " + iw + " " + iy +
+                    "l " + ix + " " + iy + "x"].join("");
+        } else {
+            path = _buildRoundRectPath(this, x, y, width, height, radius);
+        }
+
+        fg = '<v:shape style="position:absolute;width:10px;height:10px;z-index:0' +
+                '" filled="'   + (fillColor         ? "t" : "f") +
+                '" stroked="'  + (strokeColor && lw ? "t" : "f") +
+                '" coordsize="100,100" path="' + path + '">';
+
+        if (fillColor) {
+            fg +=   '<v:fill opacity="' + (this.globalAlpha * fillColor.a) +
+                            '" color="' + fillColor.hex + '" />';
+        }
+        if (strokeColor && lw) {
+            fg +=   '<v:stroke opacity="' + (this.globalAlpha * strokeColor.a) +
+                            '" color="' + strokeColor.hex +
+                            '" weight="' + lw + 'px" />';
+        }
+        fg += '</v:shape>';
+
+        this._state !== 0x1 ? this._stock.push(fg)
+                            : this._view.insertAdjacentHTML("BeforeEnd", fg);
+    }
+}
+
+// inner - build round rect paths
+function _buildRoundRectPath(ctx, x, y, width, height, radius) {
+    var w = width,
+        h = height,
+        r0 = radius[0], r1 = radius[1],
+        r2 = radius[2], r3 = radius[3],
+        w2 = (width  / 2) | 0, h2 = (height / 2) | 0;
+
+    r0 < 0 && (r0 = 0);
+    r1 < 0 && (r1 = 0);
+    r2 < 0 && (r2 = 0);
+    r3 < 0 && (r3 = 0);
+    (r0 >= w2 || r0 >= h2) && (r0 = Math.min(w2, h2) - 2);
+    (r1 >= w2 || r1 >= h2) && (r1 = Math.min(w2, h2) - 2);
+    (r2 >= w2 || r2 >= h2) && (r2 = Math.min(w2, h2) - 2);
+    (r3 >= w2 || r3 >= h2) && (r3 = Math.min(w2, h2) - 2);
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(x, y + h2);
+    ctx.lineTo(x, y + h - r3);
+    ctx.quadraticCurveTo(x, y + h, x + r3, y + h); // bottom-left
+    ctx.lineTo(x + w - r2, y + h);
+    ctx.quadraticCurveTo(x + w, y + h, x + w, y + h - r2); // bottom-right
+    ctx.lineTo(x + w, y + r1);
+    ctx.quadraticCurveTo(x + w, y, x + w - r1, y); // top-left
+    ctx.lineTo(x + r0, y);
+    ctx.quadraticCurveTo(x, y, x, y + r0); // top-right
+    ctx.closePath();
+    ctx.restore();
+    return ctx._path.join("");
 }
 
 // CanvasRenderingContext2D.prototype.fill
@@ -661,9 +769,6 @@ function fillText(text, x, y, maxWidth) {
     this.strokeText(text, x, y, maxWidth, 1);
 }
 
-// CanvasRenderingContext2D.prototype.getImageData -> NOT IMPL
-// CanvasRenderingContext2D.prototype.isPointInPath -> NOT IMPL
-
 // CanvasRenderingContext2D.prototype.lineTo
 function lineTo(x, y) {
     var m = this._matrix,
@@ -685,7 +790,7 @@ function lineTo(x, y) {
 // CanvasRenderingContext2D.prototype.lock
 function lock(clearScreen) { // @param Boolean(= false):
     if (this._state & 0x2) {
-        throw new Error("duplicate lock. state=" + this._state);
+        throw new Error("DUPLICATE_LOCK");
     }
     this._state |= clearScreen ? 0x6 : 0x2;
 }
@@ -711,39 +816,12 @@ function moveTo(x, y) {
     this.py = y;
 }
 
-// CanvasRenderingContext2D.prototype.putImageData -> NOT IMPL
-
-// CanvasRenderingContext2D.prototype.quickStroke - quick stroke
-function quickStroke(hexcolor, alpha, lineWidth) {
-    var fg = '<v:shape style="position:absolute;width:10px;height:10px" filled="f" stroked="t" coordsize="100,100" path="' +
-             this._path.join("") + '"><v:stroke color="' + hexcolor +
-             '" opacity="' + alpha + '" weight="' + lineWidth + 'px" /></v:shape>';
-
-    this._state !== 0x1 ? this._stock.push(fg)
-                        : this._view.insertAdjacentHTML("BeforeEnd", fg);
-}
-
-// CanvasRenderingContext2D.prototype.quickStrokeRect
-function quickStrokeRect(x, y, w, h, hexcolor, alpha, lineWidth) {
-    var ix = x * 10,
-        iy = y * 10,
-        iw = (x + w) * 10,
-        ih = (y + h) * 10;
-
-    this._path = ["m " + (ix - 5) + " " + (iy - 5) +
-                  "l " + (ix - 5) + " " + (ih - 5) +
-                  "l " + (iw - 5) + " " + (ih - 5) +
-                  "l " + (iw - 5) + " " + (iy - 5) +
-                  "l " + (ix - 5) + " " + (iy - 5) + "x"];
-    this.quickStroke(hexcolor, alpha, lineWidth);
-}
-
 // CanvasRenderingContext2D.prototype.quadraticCurveTo
 function quadraticCurveTo(cpx, cpy, x, y) {
-    var cp1x = this.px + 2.0 / 3.0 * (cpx - this.px),
-        cp1y = this.py + 2.0 / 3.0 * (cpy - this.py),
-        cp2x = cp1x + (x - this.px) / 3.0,
-        cp2y = cp1y + (y - this.py) / 3.0,
+    var cp1x = this.px + 2 / 3 * (cpx - this.px),
+        cp1y = this.py + 2 / 3 * (cpy - this.py),
+        cp2x = cp1x + (x - this.px) / 3,
+        cp2y = cp1y + (y - this.py) / 3,
         m = this._matrix,
         m0 = m[0], m1 = m[1],
         m3 = m[3], m4 = m[4],
@@ -801,25 +879,6 @@ function _rect(ctx, x, y, w, h) {
             " x"].join("");
 }
 
-// CanvasRenderingContext2D.prototype.resize
-function resize(width,    // @param Number(= void 0): width
-                height) { // @param Number(= void 0): height
-    var state = this._state;
-
-    this.initSurface()
-
-    if (width !== void 0) {
-        this.canvas.style.pixelWidth = width; // resize <canvas>
-        this._view.style.pixelWidth = width;  // resize <div>
-    }
-    if (height !== void 0) {
-        this.canvas.style.pixelHeight = height;
-        this._view.style.pixelHeight = height;
-    }
-    this._state = state;
-    this._clipRect = _rect(this, 0, 0, width, height);
-}
-
 // CanvasRenderingContext2D.prototype.restore
 function restore() {
     this._stack.length && _copyprop(this, this._stack.pop());
@@ -833,9 +892,8 @@ function rotate(angle) {
 
 // CanvasRenderingContext2D.prototype.save
 function save() {
-    var prop = {};
+    var prop = _copyprop({}, this);
 
-    _copyprop(prop, this);
     prop._clipPath = this._clipPath ? String(this._clipPath) : null;
     this._stack.push(prop);
 }
@@ -966,6 +1024,7 @@ function strokeText(text, x, y, maxWidth, fill) {
     case "center": left = right = delta / 2; break;
     case "right":  left = delta, right = 0.05;
     }
+
     if (this.textBaseline === "top") {
         // text margin-top fine tuning
         offset.y = font.size /
@@ -985,8 +1044,8 @@ function strokeText(text, x, y, maxWidth, fill) {
 //              '" opacity="', (this.globalAlpha / blur * 0.5).toFixed(3),
                 '" opacity="', (this.globalAlpha / blur).toFixed(3),
                 '" /><v:skew on="t" matrix="', skew,
-                '" offset="', Math.round(skewOffset.x / 10.00), ',',
-                              Math.round(skewOffset.y / 10.00),
+                '" offset="', Math.round(skewOffset.x / 10), ',',
+                              Math.round(skewOffset.y / 10),
                 '" origin="', left,
                 ' 0" /><v:path textpathok="t" /><v:textpath on="t" string="',
                 uu.esc(text),
@@ -1016,8 +1075,8 @@ function strokeText(text, x, y, maxWidth, fill) {
                 '" />');
     }
     rv.push('<v:skew on="t" matrix="', skew,
-            '" offset="', Math.round(skewOffset.x / 10.00), ',',
-                          Math.round(skewOffset.y / 10.00),
+            '" offset="', Math.round(skewOffset.x / 10), ',',
+                          Math.round(skewOffset.y / 10),
             '" origin="', left,
             ' 0" /><v:path textpathok="t" /><v:textpath on="t" string="',
             uu.esc(text),
@@ -1179,8 +1238,8 @@ function _radialGradientFill(ctx, obj, path, fill, zindex) {
                     : uu.fmt('" color="??', [ctx.__shadowColor.hex, strokeProps]);
         rv.push(uu.fmt(fill ? _RADIAL_FILL : _RADIAL_STROKE,
                        [zindex,
-                        Math.round(c0.x / 10.00) + ctx.shadowOffsetX + 1,
-                        Math.round(c0.y / 10.00) + ctx.shadowOffsetY + 1, r1x, r1y,
+                        Math.round(c0.x / 10) + ctx.shadowOffsetX + 1,
+                        Math.round(c0.y / 10) + ctx.shadowOffsetY + 1, r1x, r1y,
                         (ctx.globalAlpha / Math.sqrt(ctx.shadowBlur) * 0.5) + more]));
     }
 
@@ -1226,8 +1285,8 @@ function _radialGradientFill(ctx, obj, path, fill, zindex) {
 
     rv.push(uu.fmt(fill ? _RADIAL_FILL : _RADIAL_STROKE,
                    [zindex,
-                    Math.round(c0.x / 10.00),
-                    Math.round(c0.y / 10.00), r1x, r1y,
+                    Math.round(c0.x / 10),
+                    Math.round(c0.y / 10), r1x, r1y,
                     ctx.globalAlpha + more]));
     return rv.join("");
 }

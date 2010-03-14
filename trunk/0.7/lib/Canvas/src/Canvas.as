@@ -338,6 +338,15 @@ package {
                                        +a[++i], +a[++i],          // strokeColor.hex, strokeColor.a
                                        +a[++i]);                  // lineWidth
                             break;
+                case "X1":  ++modify;
+                            drawRoundRect(+a[++i], +a[++i],          // x, y,
+                                          +a[++i], +a[++i],          // width, height
+                                          [+a[++i], +a[++i],         // round[0], round[1]
+                                           +a[++i], +a[++i]],        // round[2], round[3]
+                                          +a[++i], +a[++i],          // fillColor.hex, fillColor.a
+                                          +a[++i], +a[++i],          // strokeColor.hex, strokeColor.a
+                                          +a[++i]);                  // lineWidth
+                            break;
                 case "XX":  // dummy
                             break;
                 case "undefined": // [!] undefined trap
@@ -891,6 +900,82 @@ if (0) {
             }
             _buff.draw(_shape);
             _gfx.clear();
+        }
+
+        private function drawRoundRect(x:Number, y:Number,
+                                       width:Number, height:Number,
+                                       radius:Array,
+                                       xfillColor:int, fillColorAlpha:Number,
+                                       xstrokeColor:int, strokeColorAlpha:Number,
+                                       xlineWidth:int):void {
+            if (radius[0] === radius[1]
+                && radius[0] === radius[2]
+                && radius[0] === radius[3]) {
+
+                if (fillColorAlpha) {
+                    _gfx.beginFill(xfillColor, fillColorAlpha);
+                    _gfx.drawRoundRect(x, y, width, height, radius[0]);
+                    _gfx.endFill();
+                }
+                if (strokeColorAlpha && xlineWidth) {
+                    _gfx.lineStyle(xlineWidth * _lineScale,
+                                   xstrokeColor, strokeColorAlpha, true);
+                    _gfx.drawRoundRect(x, y, width, height, radius[0]);
+                }
+                _buff.draw(_shape);
+                _gfx.clear();
+            } else {
+                var w:Number = width,
+                    h:Number = height,
+                    r0:Number = radius[0],
+                    r1:Number = radius[1],
+                    r2:Number = radius[2],
+                    r3:Number = radius[3],
+                    w2:Number = (width  / 2) | 0,
+                    h2:Number = (height / 2) | 0;
+
+                r0 < 0 && (r0 = 0);
+                r1 < 0 && (r1 = 0);
+                r2 < 0 && (r2 = 0);
+                r3 < 0 && (r3 = 0);
+                (r0 >= w2 || r0 >= h2) && (r0 = Math.min(w2, h2) - 2);
+                (r1 >= w2 || r1 >= h2) && (r1 = Math.min(w2, h2) - 2);
+                (r2 >= w2 || r2 >= h2) && (r2 = Math.min(w2, h2) - 2);
+                (r3 >= w2 || r3 >= h2) && (r3 = Math.min(w2, h2) - 2);
+
+                save();
+                setTransform(1, 0, 0, 1, 0, 0);
+
+                if (fillColorAlpha) {
+                    fillStyle = 0;
+                    fillColor = [xfillColor, fillColorAlpha];
+                }
+                if (strokeColorAlpha && xlineWidth) {
+                    strokeStyle = 0;
+                    strokeColor = [xstrokeColor, strokeColorAlpha];
+                    lineWidth = xlineWidth;
+                }
+
+                _path = []; // beginPath();
+                moveTo(x, y + h2);
+                lineTo(x, y + h - r3);
+                quadraticCurveTo(x, y + h, x + r3, y + h); // bottom-left
+                lineTo(x + w - r2, y + h);
+                quadraticCurveTo(x + w, y + h, x + w, y + h - r2); // bottom-right
+                lineTo(x + w, y + r1);
+                quadraticCurveTo(x + w, y, x + w - r1, y); // top-left
+                lineTo(x + r0, y);
+                quadraticCurveTo(x, y, x, y + r0); // top-right
+                closePath();
+
+                if (fillColorAlpha) {
+                    stroke(1); // fill()
+                }
+                if (strokeColorAlpha && xlineWidth) {
+                    stroke(0); // stroke()
+                }
+                restore();
+            }
         }
 
         private function setShadow():void {

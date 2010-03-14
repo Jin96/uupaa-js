@@ -3,9 +3,9 @@
 // depend: uu.js, uu.color.js, uu.css.js, uu.img.js,
 //         uu.font.js, uu.canvas.js
 
-//  <canvas width="300" height="150">
-//      <object>
-//          <Canvas>
+//  <canvas width="300" height="150">   <- canvas
+//      <object>                        <- content
+//          <Canvas>                    <- view
 //              <Path />
 //          </Canvas>
 //      </object>
@@ -39,22 +39,19 @@ uu.mix(uu.canvas.Silverlight.prototype, {
     createRadialGradient:   createRadialGradient,
     drawCircle:             drawCircle,     // [EXTEND]
     drawImage:              drawImage,
+    drawRoundRect:          drawRoundRect,  // [EXTEND]
     fill:                   fill,
     fillRect:               fillRect,
     fillText:               fillText,
     getImageData:           uunop,
-    initSurface:            initSurface,    // [EXTEND]
     isPointInPath:          uunop,
     lineTo:                 lineTo,
     lock:                   lock,           // [EXTEND]
     measureText:            measureText,
     moveTo:                 moveTo,
     putImageData:           uunop,
-    quickStroke:            quickStroke,    // [EXTEND]
-    quickStrokeRect:        quickStrokeRect, // [EXTEND]
     quadraticCurveTo:       quadraticCurveTo,
     rect:                   rect,
-    resize:                 resize,         // [EXTEND]
     restore:                restore,
     rotate:                 rotate,
     save:                   save,
@@ -73,27 +70,38 @@ uu.canvas.Silverlight.build = build;
 
 // uu.canvas.Silverlight.init
 function init(ctx, node) { // @param Node: <canvas>
+    initSurface(ctx);
     ctx.canvas = node;
-    ctx.initSurface();
-
-    ctx._view = null;    // <Canvas>
-    ctx._content = null; // <object>
+    ctx._view = null;
+    ctx._content = null;
+    ctx._state = 0;      // 0x0: not ready
+                         // 0x1: draw ready(normal)
+                         // 0x2: + locked
+                         // 0x4: + lazy clear
 }
 
 // uu.canvas.Silverlight.build
 function build(canvas) { // @param Node: <canvas>
                          // @return Node:
+    var ctx;
+
     // CanvasRenderingContext.getContext
     canvas.getContext = function() {
-        return canvas.uuctx;
+        return ctx;
     };
-    canvas.uuctx = new uu.canvas.Silverlight(canvas);
+
+    // CanvasRenderingContext.toDataURL
+    canvas.toDataURL = function() {
+        return "data:,";
+    };
+
+    ctx = new uu.canvas.Silverlight(canvas);
 
     var onload = "uuonslload" + uu.guid(); // window.uuonslload{n}
 
     // wait for response from Silverlight initializer
     win[onload] = function(sender) { // @param Node: sender is <Canvas> node
-        var ctx = canvas.uuctx, xaml;
+        var xaml;
 
         ctx._view = sender.children;
         ctx._content = sender.getHost().content; // getHost() -> <object>
@@ -105,9 +113,7 @@ function build(canvas) { // @param Node: <canvas>
                 "<Canvas>" + xaml + "</Canvas>"));
         }
         ctx._state = 0x1; // draw ready(locked flag off)
-        ctx._stock = []
-        // [GC]
-        win[onload] = null;
+        ctx._stock = [];
     };
 
     // create Silverlight <object>
@@ -130,71 +136,78 @@ function build(canvas) { // @param Node: <canvas>
 
     // trap <canvas width>, <canvas height> change event
     function onPropertyChange(evt) {
-        var attr = evt.propertyName;
+        var attr = evt.propertyName, width, height;
 
-        attr === "width"  && canvas.uuctx.resize(canvas.width);
-        attr === "height" && canvas.uuctx.resize(void 0, canvas.height);
+        if (attr === "width" || attr === "height") {
+            initSurface(ctx);
+
+            width  = parseInt(canvas.width);
+            height = parseInt(canvas.height);
+
+            // resize <canvas>
+            canvas.style.pixelWidth  = width  < 0 ? 0 : width;
+            canvas.style.pixelHeight = height < 0 ? 0 : height;
+
+            ctx.clear();
+        }
     }
 
-    canvas.firstChild.attachEvent("onfocus", onFocus); // <object>.attachEvent
+    canvas.firstChild.attachEvent("onfocus", onFocus);
     canvas.attachEvent("onpropertychange", onPropertyChange);
 
     win.attachEvent("onunload", function() { // [FIX][MEM LEAK]
-        canvas.uuctx = canvas.getContext = null;
+        canvas.getContext = canvas.toDataURL = null;
         win.detachEvent("onunload", arguments.callee);
         canvas.detachEvent("onfocus", onFocus);
         canvas.detachEvent("onpropertychange", onPropertyChange);
+        win[onload] = null;
     });
     return canvas;
 }
 
-// CanvasRenderingContext2D.prototype.initSurface
-function initSurface() {
+// inner -
+function initSurface(ctx) {
     // --- compositing ---
-    this.globalAlpha    = 1.0;
-    this.globalCompositeOperation = "source-over";
+    ctx.globalAlpha     = 1;
+    ctx.globalCompositeOperation = "source-over";
     // --- colors and styles ---
-    this.strokeStyle    = "black"; // String or Object
-    this.fillStyle      = "black"; // String or Object
+    ctx.strokeStyle     = "black"; // String or Object
+    ctx.fillStyle       = "black"; // String or Object
     // --- line caps/joins ---
-    this.lineWidth      = 1;
-    this.lineCap        = "butt";
-    this.lineJoin       = "miter";
-    this.miterLimit     = 10;
+    ctx.lineWidth       = 1;
+    ctx.lineCap         = "butt";
+    ctx.lineJoin        = "miter";
+    ctx.miterLimit      = 10;
     // --- shadows ---
-    this.shadowBlur     = 0;
-    this.shadowColor    = "transparent"; // transparent black
-    this.shadowOffsetX  = 0;
-    this.shadowOffsetY  = 0;
+    ctx.shadowBlur      = 0;
+    ctx.shadowColor     = "transparent"; // transparent black
+    ctx.shadowOffsetX   = 0;
+    ctx.shadowOffsetY   = 0;
     // --- text ---
-    this.font           = "10px sans-serif";
-    this.textAlign      = "start";
-    this.textBaseline   = "alphabetic";
+    ctx.font            = "10px sans-serif";
+    ctx.textAlign       = "start";
+    ctx.textBaseline    = "alphabetic";
     // --- current position ---
-    this.px             = 0;    // current position x
-    this.py             = 0;    // current position y
+    ctx.px              = 0;    // current position x
+    ctx.py              = 0;    // current position y
     // --- hidden properties ---
-    this._strokeCache   = "";
-    this._lineScale     = 1;
-    this._scaleX        = 1;
-    this._scaleY        = 1;
-    this._zindex        = -1;
-    this._matrixfxd     = 0;    // 1: matrix effected
-    this._matrix        = [1, 0, 0,  0, 1, 0,  0, 0, 1]; // Matrix.identity
-    this._history       = [];   // canvas rendering history
-    this._stack         = [];   // matrix and prop stack.
-    this._path          = [];   // current path
-    this._clipPath      = null; // clipping path
-    this._clipRect      = null; // clipping rect
-    this._stock         = [];   // lock stock
-    this._state         = 0;    // state,   0x0: not ready
-                                //          0x1: draw ready(normal)
-                                //          0x2: + locked
-                                //          0x4: + lazy clear
+    ctx._stack          = [];   // matrix and prop stack.
+    ctx._stock          = [];   // lock stock
+    ctx._lineScale      = 1;
+    ctx._scaleX         = 1;
+    ctx._scaleY         = 1;
+    ctx._zindex         = -1;
+    ctx._matrixfxd      = 0;    // 1: matrix effected
+    ctx._matrix         = [1, 0, 0,  0, 1, 0,  0, 0, 1]; // Matrix.identity
+    ctx._history        = [];   // canvas rendering history
+    ctx._path           = [];   // current path
+    ctx._clipPath       = null; // clipping path
+    ctx._clipRect       = null; // clipping rect
+    ctx._strokeCache    = "";
     // --- extend properties ---
-    this.xBackend       = "Silverlight";
-    this.xFlyweight     = 0;    // 1 is animation mode
-    this.xMissColor     = "black";
+    ctx.xBackend        = "Silverlight";
+    ctx.xFlyweight      = 0;    // 1 is animation mode
+    ctx.xMissColor      = "black";
 }
 
 // inner -
@@ -220,6 +233,7 @@ function _copyprop(to, from) {
     to._matrixfxd       = from._matrixfxd;
     to._matrix          = from._matrix.concat();
     to._clipPath        = from._clipPath;
+    return to;
 }
 
 // CanvasRenderingContext2D.prototype.arc
@@ -406,8 +420,6 @@ function closePath() {
     this._path.push(" Z");
 }
 
-// CanvasRenderingContext2D.prototype.createImageData -> NOT IMPL
-
 // CanvasRenderingContext2D.prototype.createLinearGradient
 function createLinearGradient(x0, y0, x1, y1) { // @return Hash:
     function CanvasGradient(x0, y0, x1, y1) {
@@ -465,20 +477,20 @@ function createRadialGradient(x0, y0, r0, x1, y1, r1) { // @return CanvasGradien
 }
 
 // CanvasRenderingContext2D.prototype.drawCircle
-function drawCircle(x,             // @param Number:
-                    y,             // @param Number:
-                    r,             // @param Number: radius
-                    fillColor,     // @param ColorHash(= void 0): fillColor
-                    strokeColor,   // @param ColorHash(= void 0): strokeColor
-                    lineWidth) {   // @param Number(= 1): stroke lineWidth
+function drawCircle(x,           // @param Number:
+                    y,           // @param Number:
+                    radius,      // @param Number: radius
+                    fillColor,   // @param ColorHash(= void 0): fillColor
+                    strokeColor, // @param ColorHash(= void 0): strokeColor
+                    lineWidth) { // @param Number(= 1): stroke lineWidth
     if (fillColor || strokeColor) {
         var lw = lineWidth === void 0 ? 1 : lineWidth,
             a  = fillColor ? fillColor.a : strokeColor.a,
-            fg = '<Ellipse Canvas.Left="' + (x - r) +
-                 '" Canvas.Top="' + (y - r) +
-                 '" Opacity="' + (this.globalAlpha * a) +
-                 '" Width="' + (r * 2) +
-                 '" Height="' + (r * 2);
+            fg = '<Ellipse Canvas.Left="' + (x - radius) +
+                 '" Canvas.Top="'   + (y - radius) +
+                 '" Opacity="'      + (this.globalAlpha * a) +
+                 '" Width="'        + (radius * 2) +
+                 '" Height="'       + (radius * 2);
 
         if (fillColor) {
             fg +=   '" Fill="' + fillColor.hex;
@@ -605,7 +617,7 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
                         [zindex, this.globalAlpha, image.src, w, h, [dx - x, dy - y, dw, dh].join(" "), matrix, shadow]);
         }
     } else { // HTMLCanvasElement
-        history = image.uuctx._history.join("");
+        history = image.getContext("2d")._history.join("");
 
         switch (az) {
         case 3:
@@ -680,6 +692,77 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
                         : this._view.add(this._content.createFromXaml(fg));
 }
 
+// CanvasRenderingContext2D.prototype.drawRoundRect - round rect
+function drawRoundRect(x,           // @param Number:
+                       y,           // @param Number:
+                       width,       // @param Number:
+                       height,      // @param Number:
+                       radius,      // @param Array: [top-left, top-right, bottom-right, bottom-left]
+                       fillColor,   // @param ColorHash(= void 0): fillColor
+                       strokeColor, // @param ColorHash(= void 0): strokeColor
+                       lineWidth) { // @param Number(= 1): stroke lineWidth
+    if (fillColor || strokeColor) {
+        var lw = lineWidth === void 0 ? 1 : lineWidth,
+            a  = fillColor ? fillColor.a : strokeColor.a, fg, endTag;
+
+        if (radius[0] === radius[1]
+            && radius[0] === radius[2]
+            && radius[0] === radius[3]) {
+
+            fg = '<Rectangle Canvas.Left="' + x + '" Canvas.Top="' + y +
+                    '" Width="' + width + '" Height="' + height +
+                    '" RadiusX="' + radius[0] + '" RadiusY="' + radius[0] +
+                    '" Opacity="' + (this.globalAlpha * a);
+            endTag = '" />';
+        } else {
+            fg = '<Canvas><Path Opacity="' + (this.globalAlpha * a) +
+                    '" Data="' + _buildRoundRectPath(x, y, width, height, radius);
+            endTag = '"></Path></Canvas>';
+        }
+
+        if (fillColor) {
+            fg +=   '" Fill="' + fillColor.hex;
+        }
+        if (strokeColor && lw) {
+            fg +=   '" Stroke="' + strokeColor.hex +
+                    '" StrokeThickness="' + lw;
+        }
+        fg += endTag;
+
+        this._state !== 0x1 ? this._stock.push(fg)
+                            : this._view.add(this._content.createFromXaml(fg));
+    }
+}
+
+// inner - build round rect paths
+function _buildRoundRectPath(x, y, width, height, radius) {
+    var w = width, h = height,
+        r0 = radius[0], r1 = radius[1],
+        r2 = radius[2], r3 = radius[3],
+        w2 = (width  / 2) | 0, h2 = (height / 2) | 0;
+
+    r0 < 0 && (r0 = 0);
+    r1 < 0 && (r1 = 0);
+    r2 < 0 && (r2 = 0);
+    r3 < 0 && (r3 = 0);
+    (r0 >= w2 || r0 >= h2) && (r0 = Math.min(w2, h2) - 2);
+    (r1 >= w2 || r1 >= h2) && (r1 = Math.min(w2, h2) - 2);
+    (r2 >= w2 || r2 >= h2) && (r2 = Math.min(w2, h2) - 2);
+    (r3 >= w2 || r3 >= h2) && (r3 = Math.min(w2, h2) - 2);
+
+    return [" M", x, " ", y + h2,                           // ctx.moveTo(x, y + h2)
+            " L", x, " ", y + h - r3,                       // ctx.lineTo(x, y + h - r3);
+            " Q", x, " ", y + h, " ", x + r3, " ", y + h,   // ctx.quadraticCurveTo(x, y + h, x + r3, y + h); // bottom-left
+            " L", x + w - r2, " ", y + h,                   // ctx.lineTo(x + w - r2, y + h);
+            " Q", x + w, " ", y + h, " ", x + w, " ",
+                                          y + h - r2,       // ctx.quadraticCurveTo(x + w, y + h, x + w, y + h - r2); // bottom-right
+            " L", x + w, " ", y + r1,                       // ctx.lineTo(x + w, y + r1);
+            " Q", x + w, " ", y, " ", x + w - r1, " ", y,   // ctx.quadraticCurveTo(x + w, y, x + w - r1, y); // top-left
+            " L", x + r0, " ", y,                           // ctx.lineTo(x + r0, y);
+            " Q", x, " ", y, " ", x, " ", y + r0,           // ctx.quadraticCurveTo(x, y, x, y + r0); // top-right
+            " Z"].join("");                                 // ctx.closePath();
+}
+
 // CanvasRenderingContext2D.prototype.fill
 function fill(path) {
     this.stroke(path, 1);
@@ -696,9 +779,6 @@ function fillRect(x, y, w, h) {
 function fillText(text, x, y, maxWidth) {
     this.strokeText(text, x, y, maxWidth, 1);
 }
-
-// CanvasRenderingContext2D.prototype.getImageData -> NOT IMPL
-// CanvasRenderingContext2D.prototype.isPointInPath -> NOT IMPL
 
 // CanvasRenderingContext2D.prototype.lineTo
 function lineTo(x, y) {
@@ -717,7 +797,7 @@ function lineTo(x, y) {
 // CanvasRenderingContext2D.prototype.lock
 function lock(clearScreen) { // @param Boolean(= false):
     if (this._state & 0x2) {
-        throw new Error("duplicate lock. state=" + this._state);
+        throw new Error("DUPLICATE_LOCK");
     }
     this._state |= clearScreen ? 0x6 : 0x2;
 }
@@ -740,28 +820,6 @@ function moveTo(x, y) {
     this._path.push(" M", x, " ", y);
     this.px = x;
     this.py = y;
-}
-
-// CanvasRenderingContext2D.prototype.putImageData -> NOT IMPL
-
-// CanvasRenderingContext2D.prototype.quickStroke - quick stroke
-function quickStroke(hexcolor, alpha, lineWidth) {
-    var fg =  '<Canvas Canvas.ZIndex="0"><Path Opacity="' + alpha.toFixed(2) +
-              '" Data="' + this._path.join("") +
-              '" StrokeLineJoin="round" StrokeThickness="' + lineWidth +
-              '" StrokeStartLineCap="round" StrokeEndLineCap="round"' +
-              '" Stroke="' + hexcolor + '"></Path></Canvas>';
-
-    this._state !== 0x1 ? this._stock.push(fg)
-                        : this._view.add(this._content.createFromXaml(fg));
-}
-
-// CanvasRenderingContext2D.prototype.quickStrokeRect
-function quickStrokeRect(x, y, w, h, hexcolor, alpha, lineWidth) {
-    this._path = [" M" + x       + " "  + y +
-                  " V" + (y + h) + " H" + (x + w) +
-                  " V" + y       + " H" + x       + " Z"];
-    this.quickStroke(hexcolor, alpha, lineWidth);
 }
 
 // CanvasRenderingContext2D.prototype.quadraticCurveTo
@@ -803,22 +861,6 @@ function _rect(ctx, x, y, w, h) {
             " Z"].join("");
 }
 
-// CanvasRenderingContext2D.prototype.resize
-function resize(width,    // @param Number(= void 0): width
-                height) { // @param Number(= void 0): height
-    var state = this._state;
-
-    this.initSurface()
-
-    if (width !== void 0) {
-        this.canvas.style.pixelWidth = width; // resize <canvas>
-    }
-    if (height !== void 0) {
-        this.canvas.style.pixelHeight = height;
-    }
-    this._state = state;
-}
-
 // CanvasRenderingContext2D.prototype.restore
 function restore() {
     this._stack.length && _copyprop(this, this._stack.pop());
@@ -832,9 +874,8 @@ function rotate(angle) {
 
 // CanvasRenderingContext2D.prototype.save
 function save() {
-    var prop = {};
+    var prop = _copyprop({}, this);
 
-    _copyprop(prop, this);
     prop._clipPath = this._clipPath ? String(this._clipPath) : null;
     this._stack.push(prop);
 }
@@ -883,16 +924,15 @@ function stroke(path, fill) {
     var fg, shadow = "", more,
         zindex = (this.__mix ===  4) ? --this._zindex
                : (this.__mix === 10) ? (this.clear(), 0) : 0,
-        color = fill ? this.fillStyle
-                     : this.strokeStyle;
+        color = fill ? this.fillStyle : this.strokeStyle;
 
     if (typeof color !== "string") {
         fg = color.fn(this, color, path, fill, zindex);
     } else {
         // [!] Data="F1 " -> FillRule=Nonzero
         // http://twitter.com/uupaa/status/5179317486
-        color = fill ? this.__fillStyle
-                     : this.__strokeStyle;
+        color = fill ? this.__fillStyle : this.__strokeStyle;
+
         // [SPEED OPTIMIZED]
         more = fill ? "F1" + path + '" Fill="' + color.hex
                     : path + _stroke(this) + '" Stroke="' + color.hex;
@@ -1245,8 +1285,7 @@ function _blur(ctx,     // @param this:
 
     if (color.a) {
         sdepth = Math.max(Math.abs(sx), Math.abs(sy)) * 1.2;
-        return ['<', type, '.Effect><DropShadowEffect Opacity="', 1.0,
-                '" Color="', color.hex,
+        return ['<', type, '.Effect><DropShadowEffect Opacity="1" Color="', color.hex,
                 '" BlurRadius="', ctx.shadowBlur * 1.2,
                 '" Direction="', Math.atan2(-sy, sx) * _TO_DEGREES,
                 '" ShadowDepth="', sdepth,

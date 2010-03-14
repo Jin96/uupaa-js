@@ -97,7 +97,8 @@ function init() {
 	context=shadebob.getContext('2d');
 
 context.xFlyweight=1;
-context.resize(canvas_w, canvas_h);
+  context.canvas.width = canvas_w;
+  context.canvas.height = canvas_h;
 
 	document.body.style.width=(canvas_x+canvas_w)+'px';
 	document.body.style.height=(canvas_y+canvas_h+60+margin*2)+'px';

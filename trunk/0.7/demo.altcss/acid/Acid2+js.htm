@@ -118,18 +118,21 @@
 
 <script>
 window.xconfig = {
-  right: 1
+  right: 1,
+  debug: 0
 };
 </script>
 <script src="../../uupaa.js"></script>
 <script>
-/* for debug
-function dump() {
-  var ruleset = uu.css3.rules();
-  uu.id("dumpruleset").innerHTML += ruleset.join("<br />");
+if (uu.config.debug) {
+    function dump() {
+        var ruleset = uu.css3.rules();
+
+        // uu.id("dumpruleset").innerHTML += ruleset.join("<br />");
+        uu.id("dumpruleset").innerHTML += uu.json(ruleset.join("<br />"));
+    }
+    setTimeout(dump, 15000);
 }
-setTimeout(dump, 15000);
- */
 </script>
 
  </head>

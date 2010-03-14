@@ -3,7 +3,7 @@
 <head>
 <title>Overlay animation</title>
 <style>
-canvas { border: 1px solid gray }
+canvas { border: 1px solid gray; border-top-width: 20px; }
 </style>
 <script src="../uupaa.js"></script>
 <script>
@@ -34,7 +34,7 @@ var begin = +new Date;
 var fpscount = 0;
 // use ctx.lock()
 var uselock = 1;
-var mode = 1;
+var mode = 0;
 /* *************** */
 
 
@@ -73,12 +73,26 @@ function draw() {
  */
             ctx.globalAlpha = 0.5 * d;
             switch (mode) {
-            case 0: ctx.drawCircle(x, y, r, uu.color('hsl(' + hue + ',100%,50%)'));
-                    break;
-            case 1: ctx.drawCircle(x, y, r, void 0, uu.color('hsl(' + hue + ',100%,50%)'), 1);
-                    break;
-            case 2: ctx.drawCircle(x, y, r, uu.color('hsl(' + hue + ',100%,50%)'),
+            case 0: ctx.drawCircle(x, y, r, uu.color('hsl(' + hue + ',100%,50%)'),
                                             uu.color('hsl(' + hue + ',80%,30%)'), 2);
+                    break;
+            case 1: ctx.drawCircle(x, y, r, uu.color('hsl(' + hue + ',100%,50%)'));
+                    break;
+            case 2: ctx.drawCircle(x, y, r, void 0, uu.color('hsl(' + hue + ',100%,50%)'), 1);
+                    break;
+            case 3: ctx.drawRoundRect(x, y, 100, 100,
+                                      [0, 50, 0, 50],
+                                      uu.color('hsl(' + hue + ',100%,50%)'),
+                                      uu.color('hsl(' + hue + ',80%,30%)'), 2);
+                    break;
+            case 4: ctx.drawRoundRect(x, y, 100, 100,
+                                      [0, 50, 0, 50],
+                                      uu.color('hsl(' + hue + ',100%,50%)'));
+                    break;
+            case 5: ctx.drawRoundRect(x, y, 100, 100,
+                                      [20, 20, 20, 20],
+                                      void 0, uu.color('hsl(' + hue + ',100%,50%)'), 1);
+                    break;
             }
         }
     }
@@ -111,6 +125,9 @@ window.onload = function() {
  */
 function xcanvas(uu, canvases) {
     var ctx = canvases[0].getContext("2d");
+
+    canvases[0].onclick = switchStyle;
+
     ctx.xFlyweight = 1;
 
     document.title = "Backend: " + (ctx.xBackend || "Canvas");
@@ -125,10 +142,9 @@ function boost() {
     uselock = !uselock; // toggle
 }
 function switchStyle() {
-    switch (mode) {
-    case 0: mode = 1; break;
-    case 1: mode = 2; break;
-    default: mode = 0;
+    ++mode;
+    if (mode > 5) {
+        mode = 0;
     }
 }
 function switchBackend() {
@@ -159,7 +175,7 @@ function xboot(uu) {
 <br />
 
 
-<canvas id="c" width=800 height=600 onmousemove="addPointAtEvent(event)"></canvas>
+<canvas id="c" width=500 height=400 onmousemove="addPointAtEvent(event)"></canvas>
 
 
 </body>

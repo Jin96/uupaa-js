@@ -49,21 +49,13 @@ function wide() {
     resize("flashcanvas", 10, 10);
 }
 function resize(id, width, height) {
-    var node = document.getElementById(id),
-        ctx = node.getContext("2d"),
-        w = parseInt(node.width) + width,
-        h = parseInt(node.height) + height;
+    var canvas = document.getElementById(id),
+        ctx = canvas.getContext("2d"),
+        w = parseInt(canvas.width) + width,
+        h = parseInt(canvas.height) + height;
 
-    if (ctx.clear) {
-        ctx.clear();
-    } else {
-        ctx.clearRect(0, 0, w, h);
-    }
-    node.width  = w;
-    node.height = h;
-    if (ctx.resize) {
-        ctx.resize(w, h);
-    }
+    canvas.width  = w;
+    canvas.height = h;
 }
 </script>
     <style type="text/css">
@@ -145,16 +137,8 @@ function resize(id, width, height) {
         w = parseInt(node.width) + width,
         h = parseInt(node.height) + height;
 
-    if (ctx.clear) {
-        ctx.clear();
-    } else {
-        ctx.clearRect(0, 0, w, h);
-    }
     node.width  = w;
     node.height = h;
-    if (ctx.resize) {
-        ctx.resize(w, h);
-    }
 }
 </pre>
     </div>
