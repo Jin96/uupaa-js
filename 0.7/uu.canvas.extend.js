@@ -302,8 +302,8 @@ if (_CanvasPrototype) {
     _CanvasPrototype.lock   = lock;     // [EXTEND]
     _CanvasPrototype.clear  = clear;    // [EXTEND]
     _CanvasPrototype.unlock = uunop;    // [EXTEND]
-    _CanvasPrototype.resize = resize;   // [EXTEND]
     _CanvasPrototype.drawCircle = drawCircle; // [EXTEND]
+    _CanvasPrototype.drawRoundRect = drawRoundRect; // [EXTEND]
     // --- property ---
     _CanvasPrototype.xBackend = "Canvas"; // [EXTEND]
 }
@@ -318,25 +318,13 @@ function clear() {
     this.clearRect(0, 0, this.canvas.width, this.canvas.height);
 }
 
-// CanvasRenderingContext2D.prototype.resize
-function resize(width,    // @param Number(= void 0):
-                height) { // @param Number(= void 0):
-
-    if (width !== void 0) {
-        this.canvas.width = width;
-    }
-    if (height !== void 0) {
-        this.canvas.height = height;
-    }
-}
-
 // CanvasRenderingContext2D.prototype.drawCircle
-function drawCircle(x,             // @param Number:
-                    y,             // @param Number:
-                    r,             // @param Number: radius
-                    fillColor,     // @param ColorHash(= void 0): fillColor
-                    strokeColor,   // @param ColorHash(= void 0): strokeColor
-                    lineWidth) {   // @param Number(= 1): stroke lineWidth
+function drawCircle(x,           // @param Number:
+                    y,           // @param Number:
+                    raduis,      // @param Number: radius
+                    fillColor,   // @param ColorHash(= void 0): fillColor
+                    strokeColor, // @param ColorHash(= void 0): strokeColor
+                    lineWidth) { // @param Number(= 1): stroke lineWidth
     if (fillColor || strokeColor) {
         var lw = lineWidth === void 0 ? 1 : lineWidth;
 
@@ -349,8 +337,65 @@ function drawCircle(x,             // @param Number:
             this.lineWidth = lw;
         }
         this.beginPath();
-        this.arc(x, y, r, 0, 2 * Math.PI, true);
+        this.arc(x, y, raduis, 0, 2 * Math.PI, true);
         this.closePath();
+        if (fillColor) {
+            this.fill();
+        }
+        if (strokeColor && lw) {
+            this.stroke();
+        }
+        this.restore();
+    }
+}
+
+// CanvasRenderingContext2D.prototype.drawRoundRect - round rect
+function drawRoundRect(x,           // @param Number:
+                       y,           // @param Number:
+                       width,       // @param Number:
+                       height,      // @param Number:
+                       radius,      // @param Array: [top-left, top-right, bottom-right, bottom-left]
+                       fillColor,   // @param ColorHash(= void 0): fillColor
+                       strokeColor, // @param ColorHash(= void 0): strokeColor
+                       lineWidth) { // @param Number(= 1): stroke lineWidth
+    if (fillColor || strokeColor) {
+        var lw = lineWidth === void 0 ? 1 : lineWidth,
+            w = width, h = height,
+            r0 = radius[0], r1 = radius[1], r2 = radius[2], r3 = radius[3],
+            w2 = (width  / 2) | 0, h2 = (height / 2) | 0;
+
+        r0 < 0 && (r0 = 0);
+        r1 < 0 && (r1 = 0);
+        r2 < 0 && (r2 = 0);
+        r3 < 0 && (r3 = 0);
+        (r0 >= w2 || r0 >= h2) && (r0 = Math.min(w2, h2) - 2);
+        (r1 >= w2 || r1 >= h2) && (r1 = Math.min(w2, h2) - 2);
+        (r2 >= w2 || r2 >= h2) && (r2 = Math.min(w2, h2) - 2);
+        (r3 >= w2 || r3 >= h2) && (r3 = Math.min(w2, h2) - 2);
+
+        this.save();
+        this.setTransform(1, 0, 0, 1, 0, 0);
+
+        if (fillColor) {
+            this.fillStyle = fillColor.rgba;
+        }
+        if (strokeColor && lw) {
+            this.strokeStyle = strokeColor.rgba;
+            this.lineWidth = lw;
+        }
+
+        this.beginPath();
+        this.moveTo(x, y + h2);
+        this.lineTo(x, y + h - r3);
+        this.quadraticCurveTo(x, y + h, x + r3, y + h); // bottom-left
+        this.lineTo(x + w - r2, y + h);
+        this.quadraticCurveTo(x + w, y + h, x + w, y + h - r2); // bottom-right
+        this.lineTo(x + w, y + r1);
+        this.quadraticCurveTo(x + w, y, x + w - r1, y); // top-left
+        this.lineTo(x + r0, y);
+        this.quadraticCurveTo(x, y, x, y + r0); // top-right
+        this.closePath();
+
         if (fillColor) {
             this.fill();
         }

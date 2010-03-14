@@ -199,8 +199,8 @@ function _uucss3review(ctx, rebuild, dirtycss) {
 }
 
 // uu.css3.rules
-function uucss3rules() { // @return Array: rule-set
-    return _rules;
+function uucss3rules() { // @return Array: rule-set (copy)
+    return _rules.concat();
 }
 
 // uu.css3.dirtycss - get last collected CSS
@@ -467,7 +467,7 @@ function _uucss3validate(rawdata, context) {
             // uu.css.inject("uucss3", expr, decl)
             uu.css.inject("uucss3", v, ruleset[i]);
 
-            _rules[++gridx] = ruleset[i] + "{" + ruleset[i] + "}";
+            _rules[++gridx] = v + "{" + ruleset[i] + "}";
             ++i;
         }
 
@@ -533,7 +533,7 @@ function _uucss3setboxeffect(node, prop, value) {
 
 // inner - -uu-box-shadow:
 function _uucss3setboxshadow(node, prop, value) {
-    var rv = uu.css.validate.shadow(value), hash,
+    var rv = uu.css.validate.shadow(value), boxshadow,
         data = _uid2data[uu.nodeid(node)];
 
     if (!rv.valid) {
@@ -543,12 +543,12 @@ function _uucss3setboxshadow(node, prop, value) {
         data.excss.decl[prop] = value; // update
 
         _BFX in node || uucss3.boxeffect.bond(node, data.excss);
-        hash = node[_BFX].boxshadow;
-        hash.render = 1;
-        hash.rgba = rv.rgba[0];
-        hash.ox   = uu.css.px.value(node, rv.ox[0]);
-        hash.oy   = uu.css.px.value(node, rv.oy[0]);
-        hash.blur = uu.css.px.value(node, rv.blur[0]);
+        boxshadow = node[_BFX].boxshadow;
+        boxshadow.render = 1;
+        boxshadow.colorHash = rv.rgba[0]; // first background color
+        boxshadow.ox   = uu.css.px.value(node, rv.ox[0]);
+        boxshadow.oy   = uu.css.px.value(node, rv.oy[0]);
+        boxshadow.blur = uu.css.px.value(node, rv.blur[0]);
     }
 }
 
@@ -634,7 +634,7 @@ function _uucss3setbgcolor(node, prop, value) {
         data.excss.decl[prop] = value; // update
 
         _BFX in node || uucss3.boxeffect.bond(node, data.excss);
-        node[_BFX].mbg.rgba = rv;
+        node[_BFX].mbg.colorHash = rv;
         node[_BFX].train.mbg = 1;
     }
 }

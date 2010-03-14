@@ -41,7 +41,7 @@ function VML(node) { // @param Node: <canvas>
 function uucanvasinit() {
 //{{{!mb
     uu.ie && uu.ary.each(uu.tag("canvas"), function(node) {
-        if (!node.uuctx) { // already initialized (altcss and other)
+        if (!node.getContext) { // already initialized (altcss and other)
             // remove fallback contents
             //      <canvas>fallback contents...</canvas> -> <canvas></canvas>
             var newNode = _removeFallback(node);

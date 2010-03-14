@@ -3,7 +3,6 @@
 // depend: uu.js, uu.css.js, uu.css3.js
 uu.agein || (function(win, doc, uu, _mix, _ie, _ie6, _ie67, _cstyle, _math) {
 var _niddb = {}, // nodeid db { nodeid: node, ... }
-    _drawFakeShadow = _ie67 ? drawFakeShadowIE : drawFakeShadow,
     _BFX = "uucss3bfx",
     _IMG_URL = /^\s*url\((.*)\)$/,         // "url(...)" (
     _IMG_CANVAS = /^\s*-uu-canvas\(([^\)]+)\)/, // "-uu-canvas(...)"
@@ -163,14 +162,14 @@ function uucss3boxeffectbond(node,    // @param Node:
                                 attachment: ["scroll"],
                                 origin: ["padding"],
                                 clip: ["no-clip"],
-                                rgba: uu.color("transparent"),
+                                colorHash: uu.color("transparent"),
                                 altcolor: uu.css.bgcolor.inherit(node), // ColorHash
                                 grad: [],
                                 canvasid: "", // "-uu-canvas(id)" -> "id"
                                 imgobj: [],
                                 timerid: -1 },
             bradius:        { render: 0, shorthand: 0, r: [0, 0, 0, 0] },
-            boxshadow:      { render: 0, rgba: 0, ox: 0, oy: 0, blur: 0 },
+            boxshadow:      { render: 0, colorHash: 0, ox: 0, oy: 0, blur: 0 },
             boxreflect:     { render: 0, dir: 0, offset: 0, url: 0,
                                 grad: { render: 0 } },
             boxeffect:      { render: 0 },
@@ -248,7 +247,8 @@ function boxeffectDraw(bfx,      // @param Hash:
         layer = bfx.layer,
         nodebg = bfx.nodebgLayer,
         viewbg = bfx.viewbgLayer,
-        nw, nh, nctx, vctx, hash, ary;
+        nw, nh, nctx, vctx, ary,
+        boxshadow, bradius; // alias
 
     train(bfx);
 
@@ -310,16 +310,16 @@ function boxeffectDraw(bfx,      // @param Hash:
    */
         // draw shadow
         if (bfx.boxeffect.render && bfx.boxshadow.render) {
-            hash = bfx.boxshadow;
+            boxshadow = bfx.boxshadow;
             vctx.save();
-            _drawFakeShadow(vctx,
-                            bfx.nodeOffset.x - hash.blur / 2 + hash.ox,
-                            bfx.nodeOffset.y - hash.blur / 2 + hash.oy,
-                            bfx.nodeRect.w + hash.blur,
-                            bfx.nodeRect.h + hash.blur,
-                            hash.rgba,
-                           _math.max(hash.blur, _math.abs(hash.ox * 2),
-                                                _math.abs(hash.oy * 2)),
+            drawFakeShadow(vctx,
+                            bfx.nodeOffset.x - boxshadow.blur / 2 + boxshadow.ox,
+                            bfx.nodeOffset.y - boxshadow.blur / 2 + boxshadow.oy,
+                            bfx.nodeRect.w + boxshadow.blur,
+                            bfx.nodeRect.h + boxshadow.blur,
+                            boxshadow.colorHash,
+                           _math.max(boxshadow.blur, _math.abs(boxshadow.ox * 2),
+                                                     _math.abs(boxshadow.oy * 2)),
                             bfx.bradius.r);
             vctx.restore();
         }
@@ -328,11 +328,11 @@ function boxeffectDraw(bfx,      // @param Hash:
         if (bfx.boxeffect.render && bfx.border.render) {
             ary = [];
             if (bfx.boxshadow.render) {
-                hash = bfx.bradius.r;
-                ary[0] = !hash[0] ? 1 : (hash[0] < 40) ? hash[0] + 4 : hash[0];
-                ary[1] = !hash[1] ? 1 : (hash[1] < 40) ? hash[1] + 4 : hash[1];
-                ary[2] = !hash[2] ? 1 : (hash[2] < 40) ? hash[2] + 4 : hash[2];
-                ary[3] = !hash[3] ? 1 : (hash[3] < 40) ? hash[3] + 4 : hash[3];
+                bradius = bfx.bradius.r;
+                ary[0] = !bradius[0] ? 1 : (bradius[0] < 40) ? bradius[0] + 4 : bradius[0];
+                ary[1] = !bradius[1] ? 1 : (bradius[1] < 40) ? bradius[1] + 4 : bradius[1];
+                ary[2] = !bradius[2] ? 1 : (bradius[2] < 40) ? bradius[2] + 4 : bradius[2];
+                ary[3] = !bradius[3] ? 1 : (bradius[3] < 40) ? bradius[3] + 4 : bradius[3];
             } else {
                 ary = bfx.bradius.r;
             }
@@ -359,18 +359,18 @@ function boxeffectDraw(bfx,      // @param Hash:
 
         // draw background-color
         if (bfx.boxeffect.render) {
-            if (bfx.border.render || bfx.boxshadow.render || bfx.mbg.rgba.a) {
+            if (bfx.border.render || bfx.boxshadow.render || bfx.mbg.colorHash.a) {
                 nctx.save();
 
                 // -uu-background-color: transparent
-                if (!bfx.mbg.rgba.r && !bfx.mbg.rgba.g
-                    && !bfx.mbg.rgba.b && !bfx.mbg.rgba.a) {
+                if (!bfx.mbg.colorHash.r && !bfx.mbg.colorHash.g
+                    && !bfx.mbg.colorHash.b && !bfx.mbg.colorHash.a) {
 
                     nctx.globalAlpha = bfx.mbg.altcolor.a;
                     nctx.fillStyle = bfx.mbg.altcolor.hex;
                 } else {
-                    nctx.globalAlpha = bfx.mbg.rgba.a;
-                    nctx.fillStyle = bfx.mbg.rgba.hex;
+                    nctx.globalAlpha = bfx.mbg.colorHash.a;
+                    nctx.fillStyle = bfx.mbg.colorHash.hex;
                 }
                 boxpath(nctx,
                         _ie67 ? bfx.border.l : 0,
@@ -429,51 +429,28 @@ function boxeffectDraw(bfx,      // @param Hash:
 }
 
 function drawFakeShadow(ctx, x, y, width, height,
-                        rgba, blur, radius) {
-    var i = 0, j = 0, k, step = 1, line = 5, r = radius,
-        fg = "rgba(" + [rgba.r, rgba.g, rgba.b, ""].join(","); // fragment
+                        colorHash, blur, radius) {
+    var i = 0, j = 0, k, alpha, step = 1, line = 5,
+        hex = colorHash.hex,
+        // pre build  "rgb(r,g,b,"
+        rgb = "rgba(" + colorHash.r + "," +
+                        colorHash.g + "," + colorHash.b + ","; // ))
 
-    ctx.save();
-    ctx.globalAlpha = 1;
-    ctx.lineWidth = line;
-    ctx.lineJoin = "round";
-    for (; i < blur; i += step) {
-        k = i / blur;
-        j += 0.5;
-        ctx.strokeStyle = fg + (k * k * k) + ")";
-        boxpath(ctx, x + i, y + i, width - (i * 2), height - (i * 2),
-                [r[0] - j, r[1] - j, r[2] - j, r[3] - j]);
-        ctx.stroke();
-    }
-    ctx.restore();
-}
-
-function drawFakeShadowIE(ctx, x, y, width, height,
-                          rgba, blur, radius) {
-    var i = 0, j = 0, k, step = 1, line = 5, r = radius,
-        hexcolor = rgba.hex;
-
+    // [IE6] thin out shadow
     if (_ie6 && !uu.config.right) {
         step *= 3, line *= 2.5;
     }
 
-    ctx.lock();
-    if (r[0] === 0 && (r[0] === r[1] && r[0] === r[2] && r[0] === r[3])) {
-        for (; i < blur; i += step) {
-            k = i / blur;
-            ctx.quickStrokeRect(x + i, y + i, width - (i * 2), height - (i * 2),
-                                hexcolor, k * k * k, line);
-        }
-    } else {
-        for (; i < blur; i += step) {
-            k = i / blur;
-            j += 0.5;
-            boxpath(ctx, x + i, y + i, width - (i * 2), height - (i * 2),
-                    [r[0] - j, r[1] - j, r[2] - j, r[3] - j]);
-            ctx.quickStroke(hexcolor, k * k * k, line);
-        }
+    for (; i < blur; i += step) {
+        k = i / blur;
+        j += 0.5;
+        alpha = k * k * k;
+        ctx.drawRoundRect(
+                x + i, y + i, width - (i * 2), height - (i * 2),
+                [radius[0] - j, radius[1] - j, radius[2] - j, radius[3] - j],
+                void 0, // (
+                { hex: hex, rgba: rgb + alpha + ")", a: alpha }, line);
     }
-    ctx.unlock();
 }
 
 function drawMultipleBackgroundImage(bfx, ctx) {

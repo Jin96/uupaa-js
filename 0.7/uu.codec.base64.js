@@ -82,6 +82,7 @@ function base64decode(base64str, // @param Base64String/URLSafe64String:
 
     iz = base64str.length - 1;
     if (uu.ie) {
+        // unsupported string[indexer] of IE
         while (i < iz) {                              // 00000000|00000000|00000000 (24bit)
             c = (DECODE[base64str.charAt(++i)] << 18) // 111111  |        |
               | (DECODE[base64str.charAt(++i)] << 12) //       11|1111    |
@@ -100,10 +101,7 @@ function base64decode(base64str, // @param Base64String/URLSafe64String:
     }
     rv.length -= [0,1,2][pad]; // cut tail
 
-    if (toStr) {
-        return String.fromCharCode.apply(null, rv);
-    }
-    return rv;
+    return toStr ? String.fromCharCode.apply(null, rv) : rv;
 }
 
 })(uu);
