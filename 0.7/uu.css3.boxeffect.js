@@ -69,7 +69,7 @@ function uucss3boxeffect(node,    // @param Node:
                         bfx.layer = new uu.layer(view, imghash.w,
                                                        imghash.h * 2 + hash.offset);
                         // http://d.hatena.ne.jp/uupaa/20090822
-                        bfx.nodeOffset = uu.css.off.get(bfx.node, view); // from ancestor
+                        bfx.nodeOffset = uu.css.offset.get(bfx.node, view); // from ancestor
                         bfx.layer.createReflectionLayer(
                             "reflect", node, 0,
                             node.offsetLeft + (_ie67 ? bfx.border.l : 0),
@@ -117,7 +117,7 @@ function uucss3boxeffect(node,    // @param Node:
 
         // http://d.hatena.ne.jp/uupaa/20090822
         // [1] calc viewbg dimension
-        bfx.nodeOffset = uu.css.off.get(bfx.node, view); // from ancestor
+        bfx.nodeOffset = uu.css.offset.get(bfx.node, view); // from ancestor
         nw = bfx.nodeRect.w + bfx.nodeOffset.x * 2;
         nh = bfx.nodeRect.h + bfx.nodeOffset.y * 2;
         // [2] set viewbg dimension
@@ -231,7 +231,7 @@ function boxeffectRecalcRect(node, bfx) {
     // update rect
     bfx.nodeRect = uu.css.size(node);
     bfx.viewRect = uu.css.size(bfx.view);
-    bfx.nodeOffset = uu.css.off.get(bfx.node, bfx.view); // from ancestor
+    bfx.nodeOffset = uu.css.offset.get(bfx.node, bfx.view); // from ancestor
 
     if (_ie67) {
         _mix(node.style, bfx.ie6borderfix);

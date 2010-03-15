@@ -100,7 +100,7 @@ function _twjs(node, param) {
             switch (n = _twjs._PROPS[w = fixdb[i] || i]) {
             case 1: // opacity
                 v0 = uu.css[w].get(node);
-                node.uucsso || uu.css[w].set(node, v0); // [IE] set opacity
+                node.uucssopacity || uu.css[w].set(node, v0); // [IE] set opacity
                 rv += _build(n, uu.ie ? node.style.filter.replace(_twjs._ALPHA, "")
                                       : "",
                              v0, _toabs(v0, v1, parseFloat), ez);

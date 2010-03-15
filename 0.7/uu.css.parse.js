@@ -2,26 +2,12 @@
 // === CSS Parser ===
 // depend: uu.js, uu.codec.js, uu.css.validate.js
 uu.agein || (function(win, doc, uu) {
-var _importCache = {}, // import cache { url: cssText }
-    SPEC_E = /\w+/g,
-    SPEC_ID = /#[\w\u00C0-\uFFEE\-]+/g, // (
-    SPEC_NOT = /:not\(([^\)]+)\)/,
-    SPEC_ATTR = /\[\s*(?:([^~\^$*|=\s]+)\s*([~\^$*|]?\=)\s*(["'])?(.*?)\3|([^\]\s]+))\s*\]/g,
-    SPEC_CLASS = /\.[\w\u00C0-\uFFEE\-]+/g,
-    SPEC_PCLASS = /:[\w\-]+(?:\(.*\))?/g,
-    SPEC_PELEMENT = /::?(?:first-letter|first-line|before|after)/g,
-    SPEC_CONTAINS = /:contains\((["'])?.*?\1\)/g,
-    IMP_COMMENT = /\/\*[^*]*\*+([^\/][^*]*\*+)*\//g,
-    IMP_IMPORTS = /@import\s*(?:url)?[\("']+\s*([\w\/.+-]+)\s*["'\)]+\s*([\w]+)?\s*;/g,
-    IMP_CSS_FILE = /\.css$/,
-    IMP_DATA_SCHEME = /^data\:text\/css[;,]/,
-    HTML_COMMENT = /^\s*<!--|-->\s*$/g;
 
-uu.mix(uu.css, {
-    parse:        uucssparse,     // uu.css.parse("clean css") -> { specs, data }
-    clean:        uucssclean,     // uu.css.clean("dirty css") -> "clean css"
-    imports:      uucssimports    // uu.css.imports() -> "dirty css"
-});
+var _CSSCache = {}; // CSS Cache { url: cssText }
+
+uu.css.parse   = uucssparse;    // uu.css.parse("clean css") -> { specs, data }
+uu.css.clean   = uucssclean;    // uu.css.clean("dirty css") -> "clean css"
+uu.css.imports = uucssimports;  // uu.css.imports() -> "dirty css"
 
 // uu.css.parse
 function uucssparse(cleancss) { // @param String: "clean css"
@@ -152,66 +138,74 @@ function uucssparse(cleancss) { // @param String: "clean css"
 
 // uu.css.imports
 function uucssimports() { // @return String: "dirty CSS"
-    function imp(css, absdir) { // @import
-        return css.replace(HTML_COMMENT, "").
-                   replace(IMP_COMMENT, "").
-                   replace(IMP_IMPORTS, function(m, url) {
+    function load(css, absdir) {
+        return css.replace(uucssimports._HTML_COMMENT, "").
+                   replace(uucssimports._CSTYLE_COMMENT, "").
+                   replace(uucssimports._IMPORTS, function(m, url) {
             var v = uu.url.abs(url, absdir);
-            return imp(uu.ajax.sync(v).rv, uu.url.dir(v));
+
+            return load(uu.ajax.sync(v).rv, uu.url.dir(v));
         });
     }
-    var rv = [], absdir = uu.url(), href, hash, dstr,
-        node = uu.ary(doc.styleSheets), v, w, i = -1,
+
+    var rv = [], absdir = uu.url(), href, hash, linkID, url,
+        node = uu.ary(doc.styleSheets), v, i = -1,
         prop1 = uu.ie ? "owningElement" : "ownerNode",
         prop2 = uu.ie ? "uucss3memento" : "textContent"; // MEMENTO
 
+    // <style>* { color:red }</style>
+    // <link href="data:text/css,.picture%20%7B%20background%3A%20none%3B%20%7D" />
     while ( (v = node[++i]) ) {
 
+        // skip <style disabled="disabled">
         if (!v.disabled) {
             href = v.href || "";
 
-            // [IE6][IE7] decode "date:text/css..."
-            if (!IMP_DATA_SCHEME.test(href)) {
+            if (uucssimports._DATA_URI.test(href)) {
 
-                if (IMP_CSS_FILE.test(href)) {
-                    // <link>
-                    w = uu.url.abs(v.href, absdir);
-                    w in _importCache ||
-                        (_importCache[w] = imp(uu.ajax.sync(w).rv, uu.url.dir(w)));
-                    rv.push(_importCache[w]);
-                } else {
-                    // skip <style id="uucss3ignore...">
-                    if (v.id && !v.id.indexOf("uucss3ignore")) {
-                        continue;
-                    }
-                    // <style>
-                    rv.push(imp(v[prop1][prop2], absdir));
-                }
-            }
-        }
-    }
-    // decode datauri
-    //    <link href="data:text/css,...">
-    if (uu.config.right && uu.codec.datauri) {
-        node = doc.getElementsByTagName("link");
-        i = -1;
-        while ( (v = node[++i]) ) {
-            if (IMP_DATA_SCHEME.test(v.href)) {
-                hash = uu.codec.datauri.decode(v.href);
-                dstr = String.fromCharCode.apply(null, hash.data);
-                w = "link" + i; // "link1"
-                w in _importCache || (_importCache[w] = imp(dstr, absdir));
-                rv.push(_importCache[w]);
+                // <link href="data:text/css,. ...">
+                hash = uu.codec.datauri.decode(href, true); // { mime, data }
+
+                linkID = "link" + i; // "link{n}"
+                linkID in _CSSCache ||
+                    (_CSSCache[linkID] = load(hash.data, absdir));
+
+                rv.push(_CSSCache[linkID]);
+
+            } else if (uucssimports._CSS_EXT.test(href)) {
+
+                // <link href="example.css">
+                url = uu.url.abs(href, absdir);
+                url in _CSSCache ||
+                    (_CSSCache[url] = load(uu.ajax.sync(url).rv, uu.url.dir(url)));
+
+                rv.push(_CSSCache[url]);
+
+            } else if (v.id && !v.id.indexOf("uucss3ignore")) {
+
+                // skip <style id="uucss3ignore{xxx}">
+
+            } else {
+
+                // <style>
+                rv.push(load(v[prop1][prop2], absdir));
             }
         }
     }
     return rv.join("");
 }
+uucssimports._IMPORTS = /@import\s*(?:url)?[\("']+\s*([\w\/.+-]+)\s*["'\)]+\s*([\w]+)?\s*;/g;
+uucssimports._CSS_EXT = /(?:\.css$|\.css\?)/; // "hoge.css" or "hoeg.css?key=val"
+uucssimports._DATA_URI = /^data\:text\/css[;,]/;
+uucssimports._HTML_COMMENT = /^\s*<!--|-->\s*$/g;                 // <!-- ... -->
+uucssimports._CSTYLE_COMMENT = /\/\*[^*]*\*+([^\/][^*]*\*+)*\//g; /* ... */
 
 // uu.css.clean - cleanup dirty css
 function uucssclean(dirtycss) { // @param String: dirty css
                                 // @return String: clean css
-    return uu.trim(dirtycss.replace(HTML_COMMENT, ""). // <!-- ... -->
+    var rv;
+
+    rv = dirtycss.replace(/^\s*<!--|-->\s*$/g, ""). // <!-- ... -->
         replace(/url\(([^\x29]+)\)/gi, function(m, data) { // url(...) -> url("...")
             return 'url("' + data.replace(/^["']|["']$/g, "") + '")'; // trim quote
         }).
@@ -222,8 +216,9 @@ function uucssclean(dirtycss) { // @param String: dirty css
         replace(/@[^;]+\s*;/g, "").           // @charset
         replace(/\s*[\r\n]+\s*/g, " ").       // ...\r\n...
         replace(/[\u0000-\u001f]+/g, "").     // \u0009 -> "" (unicode)
-        replace(/\\x?[0-3]?[0-9a-f]/gi, "")); // "\x9"  -> "" (hex \x00 ~ \x1f)
+        replace(/\\x?[0-3]?[0-9a-f]/gi, "");  // "\x9"  -> "" (hex \x00 ~ \x1f)
                                               // "\9"   -> "" (octet \0 ~ \37)
+    return uu.trim(rv);
 }
 
 // inner - calculating a selector's specificity
@@ -236,17 +231,25 @@ function _calcspec(expr) { // @param String: simple selector(without comma)
 
     var a = 0, b = 0, c = 0;
 
-    expr.replace(SPEC_NOT, C2).      // :not(E)
-         replace(SPEC_ID, A).        // #id
-         replace(SPEC_CLASS, B).     // .class
-         replace(SPEC_CONTAINS, B).  // :contains("...")
-         replace(SPEC_PELEMENT, C).  // ::pseudo-element
-         replace(SPEC_PCLASS, B).    // :pseudo-class
-         replace(SPEC_ATTR, B).      // [attr=value]
-         replace(SPEC_E, C);         // E
+    expr.replace(_calcspec._NOT, C2).      // :not(E)
+         replace(_calcspec._ID, A).        // #id
+         replace(_calcspec._CLASS, B).     // .class
+         replace(_calcspec._CONTAINS, B).  // :contains("...")
+         replace(_calcspec._PELEMENT, C).  // ::pseudo-element
+         replace(_calcspec._PCLASS, B).    // :pseudo-class
+         replace(_calcspec._ATTR, B).      // [attr=value]
+         replace(_calcspec._E, C);         // E
     // ignore the universal selector
     return a * 100 + b * 10 + c;
 }
+_calcspec._E = /\w+/g;
+_calcspec._ID = /#[\w\u00C0-\uFFEE\-]+/g; // (
+_calcspec._NOT = /:not\(([^\)]+)\)/;
+_calcspec._ATTR = /\[\s*(?:([^~\^$*|=\s]+)\s*([~\^$*|]?\=)\s*(["'])?(.*?)\3|([^\]\s]+))\s*\]/g;
+_calcspec._CLASS = /\.[\w\u00C0-\uFFEE\-]+/g;
+_calcspec._PCLASS = /:[\w\-]+(?:\(.*\))?/g;
+_calcspec._PELEMENT = /::?(?:first-letter|first-line|before|after)/g;
+_calcspec._CONTAINS = /:contains\((["'])?.*?\1\)/g;
 
 })(window, document, uu);
 

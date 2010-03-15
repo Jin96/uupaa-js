@@ -18,15 +18,15 @@ var _mix    = uu.mix,
 
 _mix(uu.css, {
     // --- offset (x, y) ---
-    // [1][get] uu.css.off(node) -> { x, y }(from <html>)
-    // [2][get] uu.css.off(node, node.parentNode) -> { x, y }(from ancestor)
-    // [3][get] uu.css.off(node, null, 1) -> { x, y }(from foster)
-    // [4][set] uu.css.off(node, x, y) -> node
-    off:     _mix(uucssoff, {
-        get:      uucssoffget,    // [1][from <html>]   uu.css.off.get(node) -> { x, y }
-                                  // [2][from ancestor] uu.css.off.get(node, node.parentNode) -> { x, y }
-                                  // [3][from foster]   uu.css.off.get(node, 0, 1) -> { x, y }
-        set:      uucssoffset     // uu.css.off.set(node, x, y) -> node
+    // [1][get] uu.css.offset(node) -> { x, y }(from <html>)
+    // [2][get] uu.css.offset(node, node.parentNode) -> { x, y }(from ancestor)
+    // [3][get] uu.css.offset(node, null, 1) -> { x, y }(from foster)
+    // [4][set] uu.css.offset(node, x, y) -> node
+    offset:  _mix(uucssoffset, {
+        get:      uucssoffsetget, // [1][from <html>]   uu.css.offset.get(node) -> { x, y }
+                                  // [2][from ancestor] uu.css.offset.get(node, node.parentNode) -> { x, y }
+                                  // [3][from foster]   uu.css.offset.get(node, 0, 1) -> { x, y }
+        set:      uucssoffsetset  // uu.css.offset.set(node, x, y) -> node
     }),
     // --- size (w, h) ---
     // [1][get] uu.css.size(node) -> { w, h }(node.style.width + padding + border)
@@ -131,26 +131,27 @@ uu.Class("CSSRule", {
 });
 
 // =========================================================
-// uu.css.off
-// [1][get] uu.css.off(node) -> { x, y }(from <html>)
-// [2][get] uu.css.off(node, node.parentNode) -> { x, y }(from ancestor)
-// [3][get] uu.css.off(node, null, 1) -> { x, y }(from foster)
-// [4][set] uu.css.off(node, x, y) -> node
-function uucssoff(node, // @param: Node:
-                  x,    // @param: Number/Node(= <html>): x or ancestor node
-                  y) {  // @param: Number(= 0): y or 1 is break foster node
-                        // @return Node/Hash: { x, y }
-    return (uu.isnum(x) && uu.isnum(y) ? uucssoffset : uucssoffget)(node, x, y);
+// uu.css.offset
+// [1][get] uu.css.offset(node) -> { x, y }(from <html>)
+// [2][get] uu.css.offset(node, node.parentNode) -> { x, y }(from ancestor)
+// [3][get] uu.css.offset(node, null, 1) -> { x, y }(from foster)
+// [4][set] uu.css.offset(node, x, y) -> node
+function uucssoffset(node, // @param: Node:
+                     x,    // @param: Number/Node(= <html>): x or ancestor node
+                     y) {  // @param: Number(= 0): y or 1 is break foster node
+                           // @return Node/Hash: { x, y }
+    return (uu.isnum(x) && uu.isnum(y) ? uucssoffsetset
+                                       : uucssoffsetget)(node, x, y);
 }
 
-// uu.css.off.get - offset from ancestor or foster node(positioning parent)
-// [1][from <html>]   uu.css.off.get(node) -> { x, y }
-// [2][from ancestor] uu.css.off.get(node, node.parentNode) -> { x, y }
-// [3][from foster]   uu.css.off.get(node, 0, 1) -> { x, y }
-function uucssoffget(node,     // @param: Node:
-                     ancestor, // @param: Node(= <html>): ancestor node
-                     foster) { // @param: Number(= 0): 1 is break foster node
-                               // @return Hash: { x, y }
+// uu.css.offset.get - offset from ancestor or foster node(positioning parent)
+// [1][from <html>]   uu.css.offset.get(node) -> { x, y }
+// [2][from ancestor] uu.css.offset.get(node, node.parentNode) -> { x, y }
+// [3][from foster]   uu.css.offset.get(node, 0, 1) -> { x, y }
+function uucssoffsetget(node,     // @param: Node:
+                        ancestor, // @param: Node(= <html>): ancestor node
+                        foster) { // @param: Number(= 0): 1 is break foster node
+                                  // @return Hash: { x, y }
     var x = 0, y = 0, n = node, cs;
 
     if (foster) {
@@ -179,11 +180,11 @@ function uucssoffget(node,     // @param: Node:
     return { x: x, y: y };
 }
 
-// uu.css.off.set - set relative node position
-function uucssoffset(node, // @param Node:
-                     x,    // @param Number: x
-                     y) {  // @param Number: y
-                           // @return Node:
+// uu.css.offset.set - set relative node position
+function uucssoffsetset(node, // @param Node:
+                        x,    // @param Number: x
+                        y) {  // @param Number: y
+                              // @return Node:
     var ns = node.style;
 
     if (_ie || uu.opera) {
@@ -345,7 +346,7 @@ function uucssmarginget(node,     // @param Node:
                                   //         Number: h, top + bottom
     if (!("uucssmargin" in node) || actual) {
         var Z = "0px",
-            ns = uu.css(node),
+            ns = uu.style(node),
             t = ns.marginTop,
             l = ns.marginLeft,
             r = ns.marginRight,
@@ -373,7 +374,7 @@ function uucssborderget(node,     // @param Node:
                                   //         Number: h, top + bottom
     if (!("uucssborder" in node) || actual) {
         var Z = "0px",
-            ns = uu.css(node),
+            ns = uu.style(node),
             t = ns.borderTopWidth,
             l = ns.borderLeftWidth,
             r = ns.borderRightWidth,
@@ -401,7 +402,7 @@ function uucsspaddingget(node,     // @param Node:
                                    //         Number: h, top + bottom
     if (!("uucsspadding" in node) || actual) {
         var Z = "0px",
-            ns = uu.css(node),
+            ns = uu.style(node),
             t = ns.paddingTop,
             l = ns.paddingLeft,
             r = ns.paddingRight,
@@ -439,7 +440,7 @@ function uucsspxvalue(node,     // @param Node: context
             if (value.lastIndexOf("pt") > 0) {
                 rv *= 4 / 3; // 1.333...
             } else if (value.lastIndexOf("em") > 0) {
-                fontSize = uu.css(node).fontSize;
+                fontSize = uu.style(node).fontSize;
                 if (fontSize.lastIndexOf("pt") > 0) { // 12pt * 1.333 = 16px
                     rv *= parseFloat(fontSize) * 4 / 3;
                 } else {
@@ -532,7 +533,7 @@ function uucsspxie(node, prop) {
 function uucssshow(node,     // @param Node:
                    fadein) { // @param Number(= 0): fadein tween duration
                              // @return Node:
-    var cs = uu.css(node), ns = node.style,
+    var cs = uu.style(node), ns = node.style,
         tmp, size, opa;
 
     if (cs.display !== "none" && cs.visibility !== "hidden") {
@@ -541,11 +542,11 @@ function uucssshow(node,     // @param Node:
     ns.visibility = "visible";
     ns.display = "";
 
-    if (uu.css(node).display === "none") {
+    if (uu.style(node).display === "none") {
         // <style>{ display: none }</style>
         tmp = uu.node(uue(node.tagName)); // add to body
         // detect actual display value
-        ns.display = uu.css(tmp).display;
+        ns.display = uu.style(tmp).display;
         uu.node.remove(tmp);
     }
 
@@ -566,7 +567,7 @@ function uucsshide(node,      // @param Node:
                               // @return Node:
     var size = uucsssizeget(node, 2), // offscreen
         opa = uu.css.opacity.get(node),
-        cs = uu.css(node);
+        cs = uu.style(node);
 
     if (cs.display === "none" || cs.visibility === "hidden") {
         return node;
@@ -592,7 +593,7 @@ function uucsstostatic(node) { // @return Node:
 function uucsstoabsolute(node) { // @param Node:
                                  // @return Node:
     var ns = node.style,
-        off = uucssoffget(node, void 0, 1), // offset from foster
+        off = uucssoffsetget(node, void 0, 1), // offset from foster
         margin = uucssmarginget(node);
 
     ns.position = "absolute";
@@ -604,7 +605,7 @@ function uucsstoabsolute(node) { // @param Node:
 // uu.css.toRelative - to relative
 function uucsstorelative(node) { // @param Node:
                                  // @return Node:
-    var ns = node.style, cs = uu.css(node);
+    var ns = node.style, cs = uu.style(node);
 
     ns.left = cs.left;
     ns.top  = cs.top;
@@ -693,7 +694,7 @@ function uucssbgcolor(node, color) {
 // uu.css.bgcolor.get - get background-color
 function uucssbgcolorget(node) { // @param Node:
                                  // @return ColorHash:
-    return uu.color(uu.css(node).backgroundColor);
+    return uu.color(uu.style(node).backgroundColor);
 }
 
 // uu.css.bgcolor.set - set background-color
@@ -701,7 +702,7 @@ function uucssbgcolorget(node) { // @param Node:
 function uucssbgcolorset(node,    // @param Node:
                          color) { // @param ColorHash:
                                   // @return Node:
-    node.style.backgroundColor = uu.ver.adv ? color.rgba : color.hex;
+    node.style.backgroundColor = uu.ver.advanced ? color.rgba : color.hex;
     return node;
 }
 
@@ -733,7 +734,7 @@ function uucssbgimg(node, url) {
 //    unsupport CSS3 multiple background-image
 function uucssbgimgget(node) { // @param Node:
                                // @return String: "http://..." or ""
-    var url = uu.trim.url(uu.css(node).backgroundImage);
+    var url = uu.trim.url(uu.style(node).backgroundImage);
 
     if (url.indexOf(",") > 0) { // MultiBG
         return "";
@@ -762,7 +763,7 @@ function uucssbgrpt(node,     // @param Node:
 // uu.css.bgrpt.get
 function uucssbgrptget(node) { // @param Node:
                                // @return String: "repeat"
-    return uu.css(node).backgroundRepeat;
+    return uu.style(node).backgroundRepeat;
 }
 
 // uu.css.bgrpt.set
@@ -789,7 +790,7 @@ function uucssbgposget(node) { // @param Node:
                                // @return Array: [x, y]
                                //         String: x, "0%", "left", "30px"
                                //         String: y, "0%", "top", "30px"
-    return uu.css(node).backgroundPosition.split(" ");
+    return uu.style(node).backgroundPosition.split(" ");
 }
 
 // uu.css.bgpos.set

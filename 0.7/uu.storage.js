@@ -501,7 +501,7 @@ _useWebStorage ? _detected(win.localStorage, 0, 2)
 function _detectFlashStorage() { // all
     if (_useFlashStorage) {
         uu.ready(function() {
-            var url = uu.config.dir + "uu.storage.swf", div,
+            var url = uu.config.baseDir + "uu.storage.swf", div,
                 obj = uu.id("externalflashstorage");
 
             if (obj) {

@@ -5,9 +5,9 @@ uu.agein || (function(win, doc, uu) {
 
 uu.mix(uu, {
     // --- ajax / jsonp ---
-    ajax:    uu.mix(uuajax, {       // uu.ajax(url, option = {}, fn = void 0, ngfn = void 0)
-        get:        uuajaxget,      // uu.ajax.get(url, option = {}, fn, ngfn = void 0) -> guid
-        post:       uuajaxpost,     // uu.ajax.post(url, data, option = {}, fn, ngfn = void 0) -> guid
+    ajax:    uu.mix(uuajax, {       // uu.ajax(url, option = {}, fn = void 0, ngfn = void 0, beforefn = void 0)
+        get:        uuajaxget,      // uu.ajax.get(url, option = {}, fn, ngfn = void 0, beforefn = void 0) -> guid
+        post:       uuajaxpost,     // uu.ajax.post(url, data, option = {}, fn, ngfn = void 0, beforefn = void 0) -> guid
         sync:       uuajaxsync,     // uu.ajax.sync(url, option = {}) -> { rv: "response text" or "", ok, code }
         ifmod:      uuajaxifmod,    // uu.ajax.ifmod(url, option = {}, fn, ngfn = void 0)
         queue:      uuajaxqueue,    // uu.ajax.queue("0+1>2>3", [url, ...], [option, ...], [fn, ...], lastfn, ngfn)
@@ -22,31 +22,38 @@ uu.mix(uu, {
 
 // --- ajax / jsonp ---
 // uu.ajax - async "GET", "POST", "PUT", "DELETE" and "HEAD" request
-// uu.ajax("http://...", {}, function(hash) { alert(hash.rv); });
-// uu.ajax("http://...", {}, function(hash) { uu.puff("OK:" + hash.rv); },
-//                           function(hash) { uu.puff("NG:" + hash.url) });
-function uuajax(url,    // @param URLString: request url
-                option, // @param Hash(= {}): { data, header, method, timeout, nocache, ignore }
-                        //    option.data    - Mix(= null): request data(auto "POST")
-                        //    option.header  - Array(= []): [(key, value), ...]
-                        //    option.method  - String(= "GET" or "POST"):
-                        //    option.timeout - Number(= 10):  unit sec
-                        //    option.nocache - Number(= 0): 1 is no cache
-                        //    option.ignore  - Number(= 0): 1 is ignore response data
-                fn,     // @param Function(= void 0): fn({ rv, url, code, guid, type })
-                        //    rv   - String: responseText or responseXML or ""(fail)
-                        //    url  - String: request url (absolute)
-                        //    code - Number: status code (0, 2xx, 3xx, 4xx, 5xx)
-                        //    guid - Number: request id (atom)
-                        //    type - String: Content-Type( "text/css" or ""(fail) )
-                ngfn) { // @param Function(= void 0): ngfn({ rv, url, code, guid, type })
-                        // @return Number: guid(request atom)
-    return _uuajax(url, option, fn, ngfn);
+// [1][basic use]        uu.ajax("http://...", {}, function(hash) { alert(hash.rv); });
+// [2][trap error]       uu.ajax("http://...", {}, function(hash) { uu.puff("OK:" + hash.rv); },
+//                                                 function(hash) { uu.puff("NG:" + hash.url) });
+// [3][trap before send] uu.ajax("http://...", {}, function(hash) {...},
+//                                                 void 0,
+//                                                 function(xhr) { xhr.overrideMimeType(...); });
+function uuajax(
+        url,        // @param URLString: request url
+        option,     // @param Hash(= {}): { data, header, method, timeout, nocache, ignore }
+                    //    option.xhr     - XMLHttpRequestObject(= void 0):
+                    //    option.data    - Mix(= null): request data(auto "POST")
+                    //    option.header  - Array(= []): [(key, value), ...]
+                    //    option.method  - String(= "GET" or "POST"):
+                    //    option.timeout - Number(= 10):  unit sec
+                    //    option.nocache - Number(= 0): 1 is no cache
+                    //    option.ignore  - Number(= 0): 1 is ignore response data
+        fn,         // @param Function(= void 0): fn({ rv, url, code, guid, type })
+                    //    rv   - String: responseText or responseXML or ""(fail)
+                    //    url  - String: request url (absolute)
+                    //    code - Number: status code (0, 2xx, 3xx, 4xx, 5xx)
+                    //    guid - Number: request id (atom)
+                    //    type - String: Content-Type( "text/css" or ""(fail) )
+        ngfn,       // @param Function(= void 0): ngfn({ rv, url, code, guid, type })
+        beforefn) { // @param Function(= void 0): trap before send function
+                    //                            beforefn(XMLHttpRequestObject)
+                    // @return Number: guid(request atom)
+    return _uuajax(url, option, fn, ngfn, void 0, beforefn);
 }
 uuajax._cache  = {}; // { "url": Number(lastModified), ... }
 uuajax._scheme = /^(?:file|https?):/; // judge absolute url
 
-function _uuajax(url, option, fn, ngfn, _fn2) {
+function _uuajax(url, option, fn, ngfn, _fn2, beforefn) {
     function _ajaxstatechange() {
         var rv, type, code, lastmod, hash;
 
@@ -129,6 +136,9 @@ function _uuajax(url, option, fn, ngfn, _fn2) {
                 xhr.setRequestHeader(v, header[++i]);
             }
 
+            // before send
+            beforefn && beforefn(xhr);
+
             // request
             xhr.send(opt.data || null);
             setTimeout(_ajaxwatchdog, (option.timeout || 10) * 1000);
@@ -141,13 +151,13 @@ function _uuajax(url, option, fn, ngfn, _fn2) {
 }
 
 // uu.ajax.get - async "GET" request
-function uuajaxget(url, option, fn, ngfn) { // @see uu.ajax
-    return _uuajax(url, uu.arg(option, { data: null }), fn, ngfn);
+function uuajaxget(url, option, fn, ngfn, beforefn) { // @see uu.ajax
+    return _uuajax(url, uu.arg(option, { data: null }), fn, ngfn, beforefn);
 }
 
 // uu.ajax.post - async "POST" request
-function uuajaxpost(url, data, option, fn, ngfn) { // @see uu.ajax
-    return _uuajax(url, uu.arg(option, { data: data }), fn, ngfn);
+function uuajaxpost(url, data, option, fn, ngfn, beforefn) { // @see uu.ajax
+    return _uuajax(url, uu.arg(option, { data: data }), fn, ngfn, beforefn);
 }
 
 // uu.ajax.sync - sync "GET" request

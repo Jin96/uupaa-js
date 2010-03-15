@@ -258,7 +258,7 @@ function _jammap(jam, fn, p1, p2, p3, p4) {
 }
 
 // inner - build DOM Lv2 event handler - uu.click(), jam.click(), ...
-uu.ary.each(uu.ev._list, function(v) {
+uu.ary.each(uu.ev._LIST, function(v) {
     uujam.prototype[v] = function jambind(fn) { // uu("li").click(fn) -> jam
         return _jameach(this, uu.ev, v, fn);
     };
