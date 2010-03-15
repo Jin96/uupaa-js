@@ -123,7 +123,7 @@ function uulayer(view,     // @param Node: layer container
 }
 
 function initLayer(me, view, width, height, option) {
-    var st = view.style, cs = uu.css(view);
+    var st = view.style, cs = uu.style(view);
 
     me.view = view; // [public] uu.layer.view
     me._layer = {}; // Hash( { id: elm, ctx, chain } )

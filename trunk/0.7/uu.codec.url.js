@@ -4,11 +4,11 @@
 uu.agein || (function(uu) {
 
 uu.codec.url = {
-    decode: urldecode       // uu.codec.url.decode(String) -> ByteArray
+    decode: urldecode       // uu.codec.url.decode(String, toStr = false) -> ByteArray
 };
 
 uu.codec.datauri = {
-    decode: datauridecode   // uu.codec.datauri.decode(String) -> { mime, data }
+    decode: datauridecode   // uu.codec.datauri.decode(String, toStr = false) -> { mime, data }
 };
 
 // uu.codec.url.decode - http://%00%01HexString2ByteArray/

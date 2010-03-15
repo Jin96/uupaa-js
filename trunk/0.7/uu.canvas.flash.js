@@ -133,7 +133,7 @@ function build(canvas) { // @param Node: <canvas>
             '<param name="movie" value="?" /></object>',
         [ctx._id, canvas.width, canvas.height,
          "clsid:d27cdb6e-ae6d-11cf-96b8-444553540000",
-         uu.config.dir + "uu.canvas.swf"]);
+         uu.config.baseDir + "uu.canvas.swf"]);
 
     ctx._view = canvas.firstChild; // <object>
 

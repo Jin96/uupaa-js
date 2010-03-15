@@ -11,11 +11,11 @@ var _ssid   = "uuqueryss", // StyleSheet ID
     _HTML5HASH    = uu.hash.combine(uu.tag.HTML5, 1, 1), // { abbr: 1, ... }
     _QUICK_STATIC = {
         "*":      function(ctx) { return uu.tag("*", ctx); },
-        "*:root": function() { return [uu.root]; }, // fix #27 (*:root)
-        ":root":  function() { return [uu.root]; }, // fix #27 (*:root)
+        "*:root": function() { return [uu.rootNode]; }, // fix #27 (*:root)
+        ":root":  function() { return [uu.rootNode]; }, // fix #27 (*:root)
         "* :root":function() { return []; }, // fix #27b (* :root)
         "* html": function() { return []; }, // fix #27b (* html) IE6 CSS Star Hack
-        html:     function() { return [uu.root]; },
+        html:     function() { return [uu.rootNode]; },
         head:     function() { return [uu.head()]; },
         body:     function() { return [doc.body]; },
         ":link":  function() { return uu.ary(doc.links); } }, // spoof
@@ -419,9 +419,9 @@ function uuqueryselectorall(expr,      // @param String: expr
 
                             // ":root:xxx-child" or ":root:xxx-type" -> not match
                             // ":root:not(:first-child)"             -> match root element
-                            if (iz === 1 && ctx[0] === uu.root
+                            if (iz === 1 && ctx[0] === uu.rootNode
                                          && _ROOT_REJECT.test(pseudo)) {
-                                r = negate ? [uu.root] : [];
+                                r = negate ? [uu.rootNode] : [];
                             } else {
                                 if ( !(v = _FILTERS[pseudo]) ) {
                                     throw new Error(":" + pseudo + " unsupported");
@@ -780,12 +780,12 @@ function simpleFilter(fid, negate, elms) {
 // inner - :root
 function root(fid, negate, elms) {
     if (!negate) {
-        return [uu.root];
+        return [uu.rootNode];
     }
     var rv = [], ri = -1, v, i = 0;
 
     while ( (v = elms[i++]) ) {
-        if (v !== uu.root) {
+        if (v !== uu.rootNode) {
             rv[++ri] = v;
         }
     }

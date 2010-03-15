@@ -11,8 +11,8 @@
     //    <img src="data:image/*,...">
     //    <div style="background: url(data:image/*,...)">
     //          v
-    //    <img src="uu1dot.gif">
-    //    <div style="background: url(uu1dot.gif)">
+    //    <img src="uu.alphafilter.gif">
+    //    <div style="background: url(uu.alphafilter.gif)">
 uu.agein || (function(win, doc, uu) {
 var _canvasok = uu.ver.major,
     _usedocfg = !(uu.gecko && uu.ver.render <= 1.9), // 1: use document fragmens
@@ -284,7 +284,7 @@ function _uucss3validate(rawdata, context) {
         expair, exbits, exdecl, exorder, exoi, exv, exw, exi, // work
         // document fragment context
         dfctx = (!context || context === doc ||
-                             context === uu.root) ? doc.body : context,
+                             context === uu.rootNode) ? doc.body : context,
         DISPLAY_INLINE = /display:inline;/i, INLINE = /^inline$/;
 
     // reset global vars
@@ -502,7 +502,7 @@ function _uucss3settextshadow(node, prop, value) {
         throw new Error(prop + "=" + value);
     }
     uu.css.textShadow.set(node,
-        uu.css.makeShadow(shadow.rgba, shadow.ox,
+        uu.css.makeShadow(shadow.colorHash, shadow.ox,
                           shadow.oy, shadow.blur));
 }
 
@@ -533,7 +533,8 @@ function _uucss3setboxeffect(node, prop, value) {
 
 // inner - -uu-box-shadow:
 function _uucss3setboxshadow(node, prop, value) {
-    var rv = uu.css.validate.shadow(value), boxshadow,
+    var rv = uu.css.validate.shadow(value), // { [colorHash,...], [ox, ...], [oy, ...], [blur, ...], valid }
+        boxshadow,
         data = _uid2data[uu.nodeid(node)];
 
     if (!rv.valid) {
@@ -545,7 +546,7 @@ function _uucss3setboxshadow(node, prop, value) {
         _BFX in node || uucss3.boxeffect.bond(node, data.excss);
         boxshadow = node[_BFX].boxshadow;
         boxshadow.render = 1;
-        boxshadow.colorHash = rv.rgba[0]; // first background color
+        boxshadow.colorHash = rv.colorHash[0]; // pickup first bgcolor
         boxshadow.ox   = uu.css.px.value(node, rv.ox[0]);
         boxshadow.oy   = uu.css.px.value(node, rv.oy[0]);
         boxshadow.blur = uu.css.px.value(node, rv.blur[0]);
@@ -738,7 +739,7 @@ function _uucss3pluspostvalidate(uid2data, revalidate, context) {
             shadow = uu.css.validate.shadow(excss.decl["-uu-text-shadow"]);
             if (shadow.valid) {
                 uu.css.textShadow.set(node,
-                    uu.css.makeShadow(shadow.rgba, shadow.ox,
+                    uu.css.makeShadow(shadow.colorHash, shadow.ox,
                                       shadow.oy, shadow.blur));
             }
         }

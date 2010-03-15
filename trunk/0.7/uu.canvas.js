@@ -7,7 +7,7 @@ uu.agein || (function(win, doc, uu) {
 //{{{!mb
 
 var _flashCanvas = (uu.ie && uu.ver.flash > 8) ?
-                   _swfLoader(uu.config.dir + "uu.canvas.swf") : 0;
+                   _swfLoader(uu.config.baseDir + "uu.canvas.swf") : 0;
 
 //}}}!mb
 
