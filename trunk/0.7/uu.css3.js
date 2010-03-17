@@ -909,8 +909,8 @@ function _css3init() {
 (function() {
     var render = uu.ver.render;
 
-    uu.ie     && (uu.ver.ua >= 6)                 && (++_selector, ++_render);
-    uu.opera  && (uu.ver.ua >= 9.5)               && ++_render;
+    uu.ie     && (uu.ver.browser >= 6)            && (++_selector, ++_render);
+    uu.opera  && (uu.ver.browser >= 9.5)          && ++_render;
     uu.gecko  && (render >  1.8 && render <= 1.9) && ++_selector;
     uu.gecko  && (render >  1.8)                  && ++_render;
     uu.webkit && (render >= 522 && render <  528) && ++_selector;

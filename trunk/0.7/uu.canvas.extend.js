@@ -1,6 +1,6 @@
 
 // === extend CanvasRenderingContext2D ===
-// depend: uu.js
+// depend: uu
 uu.agein || (function(win, doc, uu) {
 
 var _CanvasPrototype;
@@ -11,7 +11,7 @@ if (win["CanvasRenderingContext2D"]) {
 
 //{{{!mb
 
-var _extendOpera = uu.opera && uu.ver.ua >= 9.5 && uu.ver.ua < 10.5,
+var _extendOpera = uu.opera && uu.ver.browser >= 9.5 && uu.ver.browser < 10.5,
     _extendGecko = uu.gecko && uu.ver.render === 1.9;
 
 // === extend text and shadow api ===
@@ -229,7 +229,7 @@ function _strokeTextOpera(ctx, text, x, y, maxWidth, fill) {
     txt.setAttribute("font-weight",  font.weight);
     txt.setAttribute("font-family",  font.family);
 
-    if (uu.ver.ua < 10) { // [Opera9.5][Opera9.6][FIX] font detect bug
+    if (uu.ver.browser < 10) { // [Opera9.5][Opera9.6][FIX] font detect bug
         if (!txt.getAttribute("font-family").replace(/[\"\']/g, "")) {
             return;
         }
