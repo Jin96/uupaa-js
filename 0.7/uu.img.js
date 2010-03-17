@@ -57,7 +57,7 @@ uuimgload._fn = {}; // { url: [fn, ...] }
 
 // uu.img.render
 /* keep
-//  _render = ((uu.gecko && uu.ver.render >= 1.92) || (uu.ie && uu.ver.ua >= 7));
+//  _render = ((uu.gecko && uu.ver.render >= 1.92) || (uu.ie && uu.ver.browser >= 7));
 function uuimgrender(node,    // @param HTMLImageElement: image node
                      speed) { // @param Number(= 0): render mode
                               //                     0 is quality, 1 is speed

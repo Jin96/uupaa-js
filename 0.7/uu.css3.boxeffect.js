@@ -163,7 +163,7 @@ function uucss3boxeffectbond(node,    // @param Node:
                                 origin: ["padding"],
                                 clip: ["no-clip"],
                                 colorHash: uu.color("transparent"),
-                                altcolor: uu.css.bgcolor.inherit(node), // ColorHash
+                                altcolor: uu.canvas.bgcolor(node), // ColorHash
                                 grad: [],
                                 canvasid: "", // "-uu-canvas(id)" -> "id"
                                 imgobj: [],

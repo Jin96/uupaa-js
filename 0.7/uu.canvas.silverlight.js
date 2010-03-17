@@ -1,7 +1,6 @@
 
 // === Silverlight Canvas ===
-// depend: uu.js, uu.color.js, uu.css.js, uu.img.js,
-//         uu.font.js, uu.canvas.js
+// depend: uu, uu.color, uu.img, uu.font, uu.canvas
 
 //  <canvas width="300" height="150">   <- canvas
 //      <object>                        <- content
@@ -395,7 +394,7 @@ function clearRect(x, y, w, h) {
             this.__mix = _COMPOS[this._mix = this.globalCompositeOperation];
         }
 
-        var color = uu.css.bgcolor.inherit(this.canvas),
+        var color = uu.canvas.bgcolor(this.canvas),
             zindex = (this.__mix ===  4) ? --this._zindex
                    : (this.__mix === 10) ? (this.clear(), 0) : 0,
             fg = '<Path Opacity="' + (this.globalAlpha * color.a) +

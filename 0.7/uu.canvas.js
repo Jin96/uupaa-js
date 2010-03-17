@@ -1,6 +1,6 @@
 
 // === <canvas> ===
-// depend: uu.js
+// depend: uu
 //
 uu.agein || (function(win, doc, uu) {
 
@@ -11,8 +11,9 @@ var _flashCanvas = (uu.ie && uu.ver.flash > 8) ?
 
 //}}}!mb
 
-uu.canvas.init   = uucanvasinit;    // uu.canvas.init()
-uu.canvas.create = uucanvascreate;  // uu.canvas.create(width = 300, height = 150, order = "vml silver flash") -> <canvas>
+uu.canvas.init   = uucanvasinit;     // uu.canvas.init()
+uu.canvas.create = uucanvascreate;   // uu.canvas.create(width = 300, height = 150, order = "vml silver flash") -> <canvas>
+uu.canvas.bgcolor = uucanvasbgcolor; // uu.canvas.bgcolor(node) -> ColorHash
 
 //{{{!mb
 
@@ -73,6 +74,23 @@ function uucanvascreate(width,         // @param Number(= 300):
     placeHolder.parentNode.replaceChild(canvas, placeHolder);
     return uu.ie ? _build(canvas, order || "silver flash vml") : canvas;
 }
+
+// uu.canvas.bgcolor - get canvas background-color
+function uucanvasbgcolor(node) { // @param Node:
+                                 // @return ColorHash:
+    var n = node, color = "transparent",
+        ZERO = uucanvasbgcolor._ZERO;
+
+    while (n && n !== doc && ZERO[color]) {
+        if (uu.ie && !n.currentStyle) {
+            break;
+        }
+        color = uu.style.quick(n).backgroundColor;
+        n = n.parentNode;
+    }
+    return uu.color(ZERO[color] ? "white" : color);
+}
+uucanvasbgcolor._ZERO = { transparent: 1, "rgba(0, 0, 0, 0)": 1 };
 
 //{{{!mb inner - build canvas <canvas class="flash silver vml">
 function _build(node,    // @param Node: <canvas>

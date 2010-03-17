@@ -1,7 +1,6 @@
 
 // === VML Canvas ===
-// depend: uu.js, uu.color.js, uu.css.js, uu.img.js,
-//         uu.font.js, uu.canvas.js
+// depend: uu, uu.color, uu.img, uu.font, uu.canvas
 
 //  <canvas width="300" height="150">   <- canvas
 //      <div>                           <- view
@@ -356,7 +355,7 @@ function clearRect(x, y, w, h) {
             this.__mix = _COMPOS[this._mix = this.globalCompositeOperation];
         }
 
-        var color = uu.css.bgcolor.inherit(this.canvas),
+        var color = uu.canvas.bgcolor(this.canvas),
             zindex = (this.__mix ===  4) ? --this._zindex
                    : (this.__mix === 10) ? (this.clear(), 0) : 0,
             fg = uu.fmt(_COLOR_FILL,
@@ -1338,7 +1337,7 @@ function _patternFill(ctx, obj, path, fill, zindex) {
 // inner -
 function _clippy(ctx, fg) {
     if (!ctx._clipStyle) {
-        ctx._clipStyle = uu.css.bgcolor.inherit(ctx.canvas);
+        ctx._clipStyle = uu.canvas.bgcolor(ctx.canvas);
     }
     return fg + uu.fmt(_CLIPPY, [ctx._clipPath, ctx._clipStyle.hex]);
 }

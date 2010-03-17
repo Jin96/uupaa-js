@@ -1,6 +1,8 @@
 build/header.txt
 
 uu.js
+uu.ifno.js
+uu.class.js
 uu.jam.js
 uu.ajax.js
 uu.str.js

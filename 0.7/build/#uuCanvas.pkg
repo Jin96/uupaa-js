@@ -3,7 +3,6 @@ build/header.txt
 uu.js
 uu.color.js
 uu.img.js
-uu.css.js
 uu.font.js
 uu.matrix2d.js
 uu.canvas.js

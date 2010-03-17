@@ -1,6 +1,6 @@
 
 // === CSS 2.1 / StyleSheet ===
-// depend: uu.js, uu.color.js, uu.str.js, uu.tween.js
+// depend: uu, uu.Class, uu.color, uu.str, uu.tween
 //
 // clientWidth           = style.width + padding
 // offsetWidth           = style.width + padding + border
@@ -84,8 +84,7 @@ _mix(uu.css, {
     bgcolor: _mix(uucssbgcolor, {   // [1][get] uu.css.bgcolor(node) -> ColorHash
                                     // [2][set] uu.css.bgcolor(node, ColorHash) -> node
         get:      uucssbgcolorget,  // uu.css.bgcolor.get(node) -> ColorHash
-        set:      uucssbgcolorset,  // uu.css.bgcolor.set(node, ColorHash) -> node
-        inherit:  uucssbgcolorinherit // uu.css.bgcolor.inherit(node) -> ColorHash
+        set:      uucssbgcolorset   // uu.css.bgcolor.set(node, ColorHash) -> node
     }),
     // [1][get] uu.css.bgimg(node) -> URLString or ""
     // [2][set] uu.css.bgimg(node, url) -> node
@@ -704,22 +703,6 @@ function uucssbgcolorset(node,    // @param Node:
                                   // @return Node:
     node.style.backgroundColor = uu.ver.advanced ? color.rgba : color.hex;
     return node;
-}
-
-// uu.css.bgcolor.inherit - get background-color from ancestor
-function uucssbgcolorinherit(node) { // @param Node:
-                                     // @return ColorHash:
-    var n = node, color = "transparent",
-        ZERO = { transparent: 1, "rgba(0, 0, 0, 0)": 1 };
-
-    while (n && n !== doc && ZERO[color]) {
-        if ((_ie && n.currentStyle) || !_ie) {
-            color = (uu.ie ? n.currentStyle
-                           : win.getComputedStyle(n, null)).backgroundColor;
-        }
-        n = n.parentNode;
-    }
-    return uu.color(ZERO[color] ? "white" : color);
 }
 
 // uu.css.bgimg

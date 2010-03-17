@@ -1,7 +1,6 @@
 
 // === Flash Canvas ===
-// depend: uu.js, uu.color.js, uu.css.js, uu.img.js,
-//         uu.font.js, uu.canvas.js
+// depend: uu, uu.color, uu.img, uu.font, uu.canvas
 
 //  <canvas width="300" height="150">   <- canvas
 //      <object id="external{n}"        <- view
