@@ -161,7 +161,7 @@ function uucssoffsetget(node,     // @param: Node:
             }
         }
     }
-    ancestor = ancestor || uu.html();
+    ancestor = ancestor || doc.html;
 
     while (n && n !== ancestor) {
         x += n.offsetLeft || 0;
@@ -869,7 +869,7 @@ function uucsscreate(ssid) { // @param String(= "uuss"): StyleSheet id
             var node = uue("style");
 
             node.appendChild(doc.createTextNode(""));
-            _db.ss[ssid] = uu.head().appendChild(node);
+            _db.ss[ssid] = doc.head.appendChild(node);
         }
     }
     return uu.factory("CSSRule", ssid);

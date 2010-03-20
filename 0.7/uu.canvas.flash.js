@@ -483,6 +483,10 @@ function drawCircle(x,           // @param Number:
                     fillColor,   // @param ColorHash(= void 0): fillColor
                     strokeColor, // @param ColorHash(= void 0): strokeColor
                     lineWidth) { // @param Number(= 1): stroke lineWidth
+    if (this.globalAlpha <= 0) {
+        return;
+    }
+
     if (fillColor || strokeColor) {
         var lw = lineWidth === void 0 ? 1 : lineWidth,
             f = fillColor ? (fillColor.num + "\t" + this.globalAlpha * fillColor.a)
@@ -500,6 +504,10 @@ function drawCircle(x,           // @param Number:
 // drawImage(image,       dx, dy, dw, dh)
 // drawImage(image,       sx, sy, sw, sh, dx, dy, dw, dh)
 function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
+    if (this.globalAlpha <= 0) {
+        return;
+    }
+
     var args = (a3 === void 0) ? 3
              : (a5 === void 0) ? 5 : 9,
         dx, dy, dw, dh, sx, sy, sw, sh, canvas, guid, ctx = this;
@@ -549,6 +557,10 @@ function drawRoundRect(x,           // @param Number:
                        fillColor,   // @param ColorHash(= void 0): fillColor
                        strokeColor, // @param ColorHash(= void 0): strokeColor
                        lineWidth) { // @param Number(= 1): stroke lineWidth
+    if (this.globalAlpha <= 0) {
+        return;
+    }
+
     if (fillColor || strokeColor) {
         var lw = lineWidth === void 0 ? 1 : lineWidth,
             f = fillColor ? (fillColor.num + "\t" + this.globalAlpha * fillColor.a)
@@ -702,6 +714,10 @@ function strokeRect(x, y, w, h) {
 
 // CanvasRenderingContext2D.prototype.strokeText
 function strokeText(text, x, y, maxWidth, fill) {
+    if (this.globalAlpha <= 0) {
+        return;
+    }
+
     text = text.replace(/(\t|\v|\f|\r\n|\r|\n)/g, " ");
 
     send(this, (fill ? "fT\t"

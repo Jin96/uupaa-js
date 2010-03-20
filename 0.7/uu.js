@@ -2,32 +2,39 @@
 // === Core ===
 //ja 基本的なコーディングスタイルは http://webkit.org/coding/coding-style.html
 //ja    「if や for のブレス( {} )は省略禁止」と、
-//ja    「function と { を同じ行に書く」の2点が、WebKit のスタイルと異なる。
+//ja    「function と { を同じ行に書く」の2点が、WebKit のスタイルと異なります。
 //
 
 
 // --- user callback functions ---
-//ja あらかじめ定義しておくと発動する、ユーザ定義関数の一覧
+//ja 予め定義しておくことによりコールバックする、ユーザ定義関数の一覧です。
 //
-//  window.xwin(uu) - window.onload callback handler
-//ja                  window.onloadイベント成立でコールバックする
-//
-//  window.xboot(uu) - DOMContentLoaded or window.onload callback handler
-//ja                   DOMContentLoadedイベント成立でコールバックする
-//ja                   DOMContentLoadedが使えないブラウザでは、window.onload成立でコールバックする
-//
-//  window.xcanvas(uu, canvasNodeArray) - canvas ready callback handler
-//ja                   <canvas>が利用可能になるとコールバックする,
-//ja                   第二引数には全<canvas>ノードの配列が渡される
-//
-//  window.xlocal(uu, backend) - WebStorage ready callback hander
-//ja                   WebStorage相当の機能が利用可能になるとコールバックする,
-//ja                   第二引数にはバックエンド識別用の値(2～6)が渡される
-//
-//  window.xtag(uu, node, buildid, nodeid) - uu.div(buildid) ..  callback handler
-//ja                   ノードビルダー(uu.div() や uu.a() など)にビルドIDを指定するとノード生成時にコールバックする,
-//ja                   第二引数には生成されたノード, 第三引数にはユーザが指定したビルドIDが、
-//ja                   第四引数には生成されたノードのユニークなノードIDが渡される
+
+// VersionDetected callback handler
+//      window.xver(uu.ver)
+//ja                   ブラウザ種別 + バージョンを元に適用するスタイルを調整する手段を提供します。
+//ja                   uupaa.js(またはuu.js)が読み込まれた後に window.xver がコールバックされます。
+//ja                   引数には、uu.ver オブジェクトが渡されます。
+//ja                   コールバックした時点では、uu オブジェクトは構築中のため使用できません。
+
+// DOMReady callback handler
+//      window.xboot(uu)
+//ja                   document.addEventListener("DOMContentLoaded") でコールバックします
+//ja                   DOMContentLoadedが使えないブラウザでは、window.addEventListener("load") でコールバックします
+
+// WindowReady callback handler
+//      window.xwin(uu)
+//ja                  window.addEventListener("load") でコールバックします
+
+// CanvasReady callback handler
+//      window.xcanvas(uu, canvasNodeArray)
+//ja                   <canvas>が利用可能になるとコールバックします,
+//ja                   第二引数には全<canvas>ノードの配列が渡されます
+
+// LocalStorageReady callback hander
+//      window.xlocal(uu, backend)
+//ja                   WebStorage相当の機能が利用可能になるとコールバックします
+//ja                   第二引数にはバックエンド識別用の値(2～6)が渡さます
 
 // --- add global variable and functions ---
 var uu; // window.uu - uupaa.js library namespace
@@ -47,7 +54,7 @@ function uunop() { // @return undefined:
 
 // --- main ---
 uu ? ++uu.agein : (function(win, doc) {
-var _VER = uuverdetect(navigator.userAgent),
+var _VER = uuverdetect(navigator.userAgent), // uu.ver
     _TYPEOF = {
         "undefined":        0x020,
         "[object Boolean]": 0x040, "boolean":   0x040,
@@ -64,6 +71,9 @@ var _VER = uuverdetect(navigator.userAgent),
 // bond document.html and document.head
 doc.html || (doc.html = uutag("html")[0]); // <html> alias
 doc.head || (doc.head = uutag("head")[0]); // <head> alias
+
+// window.xver(uu.ver) callback
+uuisfunc(win.xver) && win.xver(_VER);
 
 // --- library structure ---
 uu = uumix(uujamfactory, {          // uu(expr, ctx) -> Instance(jam)
@@ -263,9 +273,6 @@ uu = uumix(uujamfactory, {          // uu(expr, ctx) -> Instance(jam)
     }),
     // --- virtual node / node builder ---
     rootNode:       doc.documentElement || doc.html, // documentElement or <html> (IE quirks)
-    html:           uuhtml,         // uu.html(node, attr, style, buildid) -> <html>
-    head:           uuhead,         // uu.head(node, attr, style, buildid) -> <head>
-    body:           uubody,         // uu.body(node, attr, style, buildid) -> <body>
     iebody:         null,           // [lazy detect] documentElement or <body> (IE quirks)
     // --- string ---
     fix:            uufix,          // [1] uu.fix("-webkit-shadow")   -> "-webkit-shadow"
@@ -1541,79 +1548,6 @@ function uunoderemove(node) { // @param Node:
     return void 0;
 }
 
-// uu.html
-function uuhtml(/* var_args */) { // @param Mix: var_args
-                                  // @return Node: <html> node
-    return _buildNode(doc.html, arguments);
-}
-
-// uu.head
-function uuhead(/* var_args */) { // @param Mix: var_args
-                                  // @return Node: <head> node
-    return _buildNode(doc.head, arguments);
-}
-
-// uu.body
-function uubody(/* var_args */) { // @param Mix: var_args
-                                  // @return Node: <body> node
-    return _buildNode(doc.body, arguments);
-}
-
-// inner - node builder
-// [1] uu.div(uu.div()) - add node
-// [2] uu.div(":hello") - add text node
-// [3] uu.div(uu.text("hello")) - add text node
-// [4] uu.div("@buildid") - window.xtag(uu, <div>, "buildid", nodeid) callback
-// [5] uu.div(1) - Number(from 1) is window.xtag(uu, <div>, 1, nodeid) callback
-// [6] uu.div("title,hello") - first String is uu.attr("title,hello")
-// [7] uu.div({ title: "hello" }) - first Hash is uu.attr({ title: "hello" })
-// [8] uu.div("", "color,red") - second String is uu.css("color,red")
-// [9] uu.div("", { color: "red" }) - second Hash is uu.css({ color: "red" })
-// [10] uu.a("url:http://example.com"), uu.img, uu.iframe - String("url:...")
-//                                        is a.href, img.src, iframe.src
-function _buildNode(node,   // @param Node/String:
-                    args) { // @param Mix: arguments(nodes, attr/css)
-                            // @return Node:
-    function tohash(mix) {
-        return !uuisstr(mix) ? mix :
-               !mix.indexOf(" ") ? uuhash(uutrim(mix), " ", 0) // " color red"
-                                 : uuhash(mix);                // "color,red"
-    }
-
-    node.nodeType || (node = uue(node)); // "div" -> <div>
-
-    var v, w, i = 0, j = 0, iz = args.length;
-
-    for (; i < iz; ++i) {
-        v = args[i];
-        w = 1;
-        if (v) {
-            if (v.nodeType && w--) {
-                node.appendChild(v); // [1][3]
-            } else if (typeof v === "number" && w--) { // [5]
-                win.xtag && win.xtag(uu, node, v, uunodeid(node));
-            } else if (typeof v === "string") { // [2][4][6][8][10]
-                if (v.charAt(0) === ":" && w--) {// [2]
-                    node.appendChild(doc.createTextNode(v.slice(1)));
-                } else if (v.charAt(0) === "@" && w--) {// [4]
-                    win.xtag && win.xtag(uu, node, v.slice(1), uunodeid(node));
-                } else if (!v.indexOf("url:") && w--) { // [10]
-                    node.setAttribute({a:1,A:1}[node.tagName] ? "href" : "src",
-                                      v.slice(4));
-                }
-            }
-        }
-        if (w) {
-            if (++j === 1) {
-                v && uuattrset(node, tohash(v)); // [6][7] set attr
-            } else if (j === 2) {
-                v && uucssset(node, tohash(v)); // [8][9] set css
-            }
-        }
-    }
-    return node;
-}
-
 // --- query ---
 // uu.query - querySelectorAll
 function uuquery(expr,  // @param String: "css > expr"
@@ -2325,18 +2259,6 @@ function outerhtmlsetter(html) {
 //}}}!mb
 
 // --- initialize ---
-// inner - setup node builder - uu.div(), uu.a(), ...
-uuaryeach(uutag.HTML4, function(v) {
-    uu[v] = function html4NodeBuilder() { // @param Mix: var_args
-        return _buildNode(v, arguments);
-    };
-});
-uuaryeach(uutag.HTML5, function(v) {
-    uu.ie && doc.createElement(v); // [IE]
-    uu[v] = function html5NodeBuilder() { // @param Mix: var_args
-        return _buildNode(v, arguments);
-    };
-});
 
 // inner - build DOM Lv2 event handler - uu.click(), jam.click(), ...
 uuaryeach(uuev._LIST, function(v) {
@@ -2381,6 +2303,7 @@ function _domreadyie() {
 uuevattach(win, "load", _winload);
 uu.ie ? _domreadyie() : uuevattach(doc, "DOMContentLoaded", _ready);
 
+// --- finalize ---
 //{{{!mb [IE] fix mem leak
 function _winunload() {
     var nodeid, node, ary, i, v;

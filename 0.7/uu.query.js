@@ -15,8 +15,8 @@ var _ssid   = "uuqueryss", // StyleSheet ID
         ":root":  function() { return [uu.rootNode]; }, // fix #27 (*:root)
         "* :root":function() { return []; }, // fix #27b (* :root)
         "* html": function() { return []; }, // fix #27b (* html) IE6 CSS Star Hack
-        html:     function() { return [uu.rootNode]; },
-        head:     function() { return [uu.head()]; },
+        html:     function() { return [uu.rootNode]; }, // doc.html
+        head:     function() { return [doc.head]; },
         body:     function() { return [doc.body]; },
         ":link":  function() { return uu.ary(doc.links); } }, // spoof
     // :after :before :contains :digit :first-letter :first-line :link

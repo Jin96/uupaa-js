@@ -5,6 +5,7 @@
 <script src="../uu.str.js"></script>
 <script src="../uu.css.js"></script>
 <script src="../uu.node.js"></script>
+<script src="../uu.nodebuilder.js"></script>
 <script src="../uu.query.js"></script>
 <script src="../uu.url.js"></script>
 <script src="../uu.img.js"></script>
@@ -33,8 +34,8 @@ function xboot(uu) {
       "[5][convert NodeList] uu.ary(document.getElementsByTagName('HTML')) は NodeList を配列に変換できる。その結果は uu.query('html') と等しい": function() {
         return [uu.ary(document.getElementsByTagName('HTML')), "==", uu.query('html')];
       },
-      "[5][convert NodeList] uu.ary(document.getElementsByTagName('HTML')) は NodeList を配列に変換できる。その結果は [uu.html()] と等しい": function() {
-        return [uu.ary(document.getElementsByTagName('HTML')), "==", [uu.html()]];
+      "[5][convert NodeList] uu.ary(document.getElementsByTagName('HTML')) は NodeList を配列に変換できる。その結果は [document.html] と等しい": function() {
+        return [uu.ary(document.getElementsByTagName('HTML')), "==", [document.html]];
       },
       "[6][convert arguments] uu.ary(arguments) は 引数(1, 2, 3)を配列( [1, 2, 3] )に変換できる": function() {
         function uuarytest1() {
@@ -123,8 +124,8 @@ function xboot(uu) {
       },
     "uu.ary.unique()": "",
       "[1][unique elements] uu.ary.unique([<body>, <head>, <body>]) は [<body>, <head>]": function() {
-        var body = uu.body(),
-            head = uu.head();
+        var body = document.body,
+            head = document.head;
         return [uu.ary.unique([body, head, body]), "==", [body, head]];
       },
       "[1][unique elements] uu.ary.unique([0, 1, 2, 3, 3, 2, 1, 0]) は [0, 1, 2, 3]": function() {
@@ -146,10 +147,10 @@ function xboot(uu) {
         return [uu.ary.indexOf([1,2,3], 1), "is", 0];
       },
       "uu.ary.indexOf([<body>, <head>], <head>) は 1 を返す": function() {
-        return [uu.ary.indexOf([uu.body(), uu.head()], uu.head()), "is", 1];
+        return [uu.ary.indexOf([document.body, document.head], document.head), "is", 1];
       },
       "uu.ary.indexOf([<body>, <head>], <html>) は -1 (not found) を返す": function() {
-        return [uu.ary.indexOf([uu.body(), uu.head()], uu.html()), "is", -1];
+        return [uu.ary.indexOf([document.body, document.head], document.html), "is", -1];
       },
 /*
     "uu.ary.filter()": "",
@@ -212,13 +213,13 @@ function xboot(uu) {
       },
       "uu.attr.get('href,.,title,dot')": function() {
         var e;
-        uu.body(e = uu.a("href,.,title,dot", "#link"));
+        document.body.appendChild(e = uu.a("href,.,title,dot", "#link"));
         var v = uu.attr.get(e, "href");
         return [v, "is", "."];
       },
       "URLを含んでいても、uu.attr.get('href,http://example.com/,title,long') は問題なし": function() {
         var e;
-        uu.body(e = uu.a("href,http://example.com/,title,long", "#link"));
+        document.body.appendChild(e = uu.a("href,http://example.com/,title,long", "#link"));
         var v = uu.attr.get(e, "href");
         return [v, "is string"];
       },

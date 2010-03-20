@@ -3,6 +3,13 @@
 // depend: uu.js
 uu.agein || (function(win, doc, uu) {
 
+// uu.img
+if (!uu.img) {
+    uu.img = function html4NodeBuilder() { // @param Mix: var_args
+        return uu.node.build("img", arguments);
+    };
+}
+
 uu.img.load = uuimgload;    // uu.img.load(url, fn) -> Image
 uu.img.size = uuimgsize;    // uu.img.size(node) -> { w, h }
 

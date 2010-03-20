@@ -79,7 +79,7 @@ function positionInit() { // @return NodeArray:
     }
     var rv = [];
 
-    markup(uu.html());
+    markup(doc.html);
     markup(doc.body);
 
     rv.push(function() {
