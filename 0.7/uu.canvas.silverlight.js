@@ -82,7 +82,9 @@ function init(ctx, node) { // @param Node: <canvas>
 // uu.canvas.Silverlight.build
 function build(canvas) { // @param Node: <canvas>
                          // @return Node:
-    var ctx;
+    var ctx,
+        // [ASYNC] initialized notify callback handler
+        onload = "uuCanvasSilverlightOnLoad" + uu.guid();
 
     // CanvasRenderingContext.getContext
     canvas.getContext = function() {
@@ -96,17 +98,13 @@ function build(canvas) { // @param Node: <canvas>
 
     ctx = new uu.canvas.Silverlight(canvas);
 
-    var onload = "uuonslload" + uu.guid(); // window.uuonslload{n}
-
     // wait for response from Silverlight initializer
     win[onload] = function(sender) { // @param Node: sender is <Canvas> node
-        var xaml;
-
         ctx._view = sender.children;
         ctx._content = sender.getHost().content; // getHost() -> <object>
         // dump
         if (ctx._stock.length) {
-            xaml = ctx._stock.join("");
+            var xaml = ctx._stock.join("");
 
             ctx._view.add(ctx._content.createFromXaml(
                 "<Canvas>" + xaml + "</Canvas>"));

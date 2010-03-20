@@ -19,7 +19,7 @@ if (!uu.canvas) {
 }
 
 uu.canvas.init   = uucanvasinit;     // uu.canvas.init()
-uu.canvas.create = uucanvascreate;   // uu.canvas.create(width = 300, height = 150, order = "vml silver flash") -> <canvas>
+uu.canvas.create = uucanvascreate;   // uu.canvas.create(width = 300, height = 150, order = "svg sl fl vml") -> <canvas>
 uu.canvas.bgcolor = uucanvasbgcolor; // uu.canvas.bgcolor(node) -> ColorHash
 
 //{{{!mb
@@ -58,7 +58,7 @@ function uucanvasinit() {
             newNode.height = parseInt(node.height || "150");
             newNode.style.pixelWidth  = parseInt(newNode.width);
             newNode.style.pixelHeight = parseInt(newNode.height);
-            _build(newNode, newNode.className);
+            _buildCanvas(newNode, newNode.className);
         }
     });
 //}}}!mb
@@ -68,7 +68,7 @@ function uucanvasinit() {
 // uu.canvas.create - create canvas element
 function uucanvascreate(width,         // @param Number(= 300):
                         height,        // @param Number(= 150):
-                        order,         // @param String(= "silver flash vml"): backend order
+                        order,         // @param String(= "svg sl fl vml"): backend order
                         placeHolder) { // @param Node(= <body>): placeholder Node
                                        // @return Node: new element
     var canvas = uue(uu.ie ? "CANVAS" : "canvas"); // [IE][!] need upper case
@@ -79,7 +79,7 @@ function uucanvascreate(width,         // @param Number(= 300):
     placeHolder || (placeHolder = doc.body.appendChild(uue())); // <body><div /></body>
                                                                 //       ~~~~~~~
     placeHolder.parentNode.replaceChild(canvas, placeHolder);
-    return uu.ie ? _build(canvas, order || "silver flash vml") : canvas;
+    return uu.ie ? _buildCanvas(canvas, order || "svg sl fl vml") : canvas;
 }
 
 // uu.canvas.bgcolor - get canvas background-color
@@ -100,24 +100,31 @@ function uucanvasbgcolor(node) { // @param Node:
 uucanvasbgcolor._ZERO = { transparent: 1, "rgba(0, 0, 0, 0)": 1 };
 
 //{{{!mb inner - build canvas <canvas class="flash silver vml">
-function _build(node,    // @param Node: <canvas>
-                order) { // @param SpaceJointString:
-                         // @return Node:
-    var ary = uu.split(order), i = -1, v;
+function _buildCanvas(node,    // @param Node: <canvas>
+                      order) { // @param SpaceJointString:
+                               // @return Node:
+    var ary = uu.split(order.toLowerCase()), i = -1, v;
 
     while ( (v = ary[++i]) ) {
-        if ((v === "silver" || v === "sl") && uu.ver.silverlight) {
-            return Silverlight.build(node);
-        } else if ((v === "flash" || v === "fl") && _flashCanvas) {
-            return Flash.build(node);
-        } else if (v === "vml") {
-            return VML.build(node);
+        switch (_buildCanvas._BACKEND[v]) {
+        case 1: break;
+        case 2: if (uu.ver.silverlight) {
+                    return Silverlight.build(node);
+                }
+                break;
+        case 3: if (_flashCanvas) {
+                    return Flash.build(node);
+                }
+                break;
+        case 4: return VML.build(node);
         }
     }
     // backend detect order: Silverlight -> Flash -> VML
     return (uu.ver.silverlight ? Silverlight
                                : _flashCanvas ? Flash : VML).build(node);
 }
+_buildCanvas._BACKEND = { svg: 1, sl: 2, silver: 2, silverlight: 2,
+                          fl: 3, flash: 3, vml: 4 };
 
 // inner - remove fallback contents
 function _removeFallback(node) { // @param Node:
