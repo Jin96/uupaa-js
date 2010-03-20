@@ -5,11 +5,16 @@
 @import url(html5.bone.css);
 @import url(html5.efx.css);
 </style>
+<script>window.xconfig = { debug: 1 };</script>
 <script>
-window.xconfig = {
-    dir: "../../",
-    debug: 1
-};
+function xver(ver) {
+    var className = ["ifjs"];
+
+    ver.ie67 && className.push("ifie67");
+    ver.safari && !ver.jit && className.push("ifsafari3");
+
+    document.html.className = className.join(" ");
+}
 </script>
 <script type="text/javascript" src="../../uupaa.js"></script>
 
