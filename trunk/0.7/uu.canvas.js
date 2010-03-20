@@ -11,6 +11,13 @@ var _flashCanvas = (uu.ie && uu.ver.flash > 8) ?
 
 //}}}!mb
 
+// uu.canvas
+if (!uu.canvas) {
+    uu.canvas = function html4NodeBuilder() { // @param Mix: var_args
+        return uu.node.build("canvas", arguments);
+    }
+}
+
 uu.canvas.init   = uucanvasinit;     // uu.canvas.init()
 uu.canvas.create = uucanvascreate;   // uu.canvas.create(width = 300, height = 150, order = "vml silver flash") -> <canvas>
 uu.canvas.bgcolor = uucanvasbgcolor; // uu.canvas.bgcolor(node) -> ColorHash

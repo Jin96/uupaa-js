@@ -285,7 +285,7 @@ function _uujsonp(url, option, fn, ngfn, _fn2) {
         }
     }
     function _jsonpgc() {
-        uu.head().removeChild(node);
+        doc.head.removeChild(node);
         delete uujsonp._db[jobid];
     }
     var opt = option || {},
@@ -300,7 +300,7 @@ function _uujsonp(url, option, fn, ngfn, _fn2) {
 
     uujsonp._db[jobid] = _jsonpjob;
     uu.mix(node, { type: type, charset: "utf-8", uujsonprun: 0 });
-    uu.head().appendChild(node);
+    doc.head.appendChild(node);
     node.setAttribute("src", src);
     setTimeout(_jsonpwatchdog, timeout * 1000);
     return guid;

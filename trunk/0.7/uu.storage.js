@@ -378,7 +378,7 @@ function uulocalremove(key) { // @param String: "key"
 function _ieinit() {
     var meta = uue("meta");
 
-    uu.head(meta);
+    doc.head.appendChild(meta);
     meta.addBehavior("#default#userData");
     meta.expires = _persist.toUTCString();
     return meta;
@@ -509,7 +509,7 @@ function _detectFlashStorage() { // all
             } else {
                 // [IE][ignore] http://twitter.com/uupaa/status/7473790508
                 uu.ajax(url, { ignore: 1 }, function() { // file stat
-                    uu.body(div = uu.div());
+                    uu.body.appendChild(div = uu.div());
                     _detected(uu.flash(div, "externalflashstorage", url, 1, 1), 1, 4);
                 }, function() {
                     _detectIEStorage(); // next chain

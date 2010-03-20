@@ -21,6 +21,9 @@ var _COMPOS = { "source-over": 0, "destination-over": 4, copy: 10 },
     _COLOR_FILL     = '<v:shape style="position:absolute;width:10px;height:10px;z-index:?" filled="t" stroked="f" coordsize="100,100" path="?"><v:fill color="?" opacity="?" /></v:shape>',
     _COLOR_STROKE   = '<v:shape style="position:absolute;width:10px;height:10px;z-index:?" filled="f" stroked="t" coordsize="100,100" path="?"><v:stroke color="?" opacity="?" /></v:shape>',
 
+    _IMAGE_FILL     = '<v:shape style="position:absolute;width:10px;height:10px;z-index:?;left:?px;top:?px" filled="t" stroked="f" coordsize="100,100" path="?"><v:fill type="tile" opacity="?" src="?" /></v:shape>',
+    _IMAGE_SHADOW   = '<v:shape style="position:absolute;width:10px;height:10px;z-index:?;left:?px;top:?px" filled="t" stroked="f" coordsize="100,100" path="?"><v:fill color="?" opacity="?" /></v:shape>',
+
     // zindex(+shadowOffsetX +shadowOffsetY), path, color.hex, opacity(+strokeProps), angle
     _LINER_FILL     = '<v:shape style="position:absolute;width:10px;height:10px;z-index:?" coordsize="100,100" filled="t" stroked="f" path="?"><v:fill type="gradient" method="sigma" focus="0%" opacity="?" angle="?" /></v:shape>',
     _LINER_STROKE   = '<v:shape style="position:absolute;width:10px;height:10px;z-index:?" coordsize="100,100" filled="f" stroked="t" path="?"><v:stroke filltype="solid" opacity="?" angle="?" /></v:shape>',
@@ -187,7 +190,7 @@ function initSurface(ctx) {
     ctx._scaleX         = 1;
     ctx._scaleY         = 1;
     ctx._zindex         = -1;
-    ctx._matrixfxd      = 0;    // 1: matrix effected
+    ctx._matrixEffected = 0;    // 1: matrix effected
     ctx._matrix         = [1, 0, 0,  0, 1, 0,  0, 0, 1]; // Matrix.identity
     ctx._history        = [];   // canvas rendering history
     ctx._path           = [];   // current path
@@ -221,7 +224,7 @@ function _copyprop(to, from) {
     to._lineScale       = from._lineScale;
     to._scaleX          = from._scaleX;
     to._scaleY          = from._scaleY;
-    to._matrixfxd       = from._matrixfxd;
+    to._matrixEffected  = from._matrixEffected;
     to._matrix          = from._matrix.concat();
     to._clipPath        = from._clipPath;
     return to;
@@ -451,6 +454,10 @@ function drawCircle(x,           // @param Number:
                     fillColor,   // @param ColorHash(= void 0): fillColor
                     strokeColor, // @param ColorHash(= void 0): strokeColor
                     lineWidth) { // @param Number(= 1): stroke lineWidth
+    if (this.globalAlpha <= 0) {
+        return;
+    }
+
     if (fillColor || strokeColor) {
         var lw = lineWidth === void 0 ? 1 : lineWidth,
             fg = '<v:oval style="position:absolute;left:' + (x - radius) +
@@ -480,6 +487,9 @@ function drawCircle(x,           // @param Number:
 // drawImage(image, dx, dy, dw, dh)
 // drawImage(image, sx, sy, sw, sh, dx, dy, dw, dh)
 function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
+    if (this.globalAlpha <= 0) {
+        return;
+    }
     if (this.shadowColor !== this._shadowColor) {
         this.__shadowColor = uu.color(this._shadowColor = this.shadowColor);
     }
@@ -488,7 +498,7 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
     }
 
     var dim = uu.img.size(image), // img actual size
-        az = arguments.length, full = (az === 9),
+        args = arguments.length, full = (args === 9),
         sx = full ? a1 : 0,
         sy = full ? a2 : 0,
         sw = full ? a3 : dim.w,
@@ -507,25 +517,44 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
         sizeTrans; // 0: none size transform, 1: size transform
 
     if (image.src) { // HTMLImageElement
-        if (!this._matrixfxd && this.globalAlpha === 1 && !renderShadow) {
-            rv.push(
-                '<v:image style="position:absolute;z-index:', zindex,
-                ';width:',      dw,
-                'px;height:',   dh,
-                'px;left:',     dx,
-                'px;top:',      dy,
-                'px" coordsize="100,100" src="', image.src,
-                '" opacity="',  0.5,
-                '" cropleft="', sx / dim.w,
-                '" croptop="',  sy / dim.h,
-                '" cropright="',    (dim.w - sx - sw) / dim.w,
-                '" cropbottom="',   (dim.h - sy - sh) / dim.h,
-                '" />');
+
+        if (!this._matrixEffected) {
+
+            // shadow
+            if (this.__shadowColor.a && this.shadowBlur) {
+                rv.push(uu.fmt(_IMAGE_SHADOW,
+                            [zindex, dx + (this.shadowOffsetX + 1),
+                                     dy + (this.shadowOffsetY + 1),
+                             _rect(this, 0, 0, dw, dh),
+                             this.__shadowColor.hex,
+                             (this.globalAlpha / Math.sqrt(this.shadowBlur) * 0.5)]));
+            }
+
+            // no resize + no opacity
+            if (args === 3 && this.globalAlpha !== 1) {
+                rv.push(uu.fmt(_IMAGE_FILL,
+                               [zindex, dx, dy, _rect(this, 0, 0, dw, dh),
+                                this.globalAlpha, image.src]));
+            } else {
+                rv.push(
+                    '<v:image style="position:absolute;z-index:', zindex,
+                    ';width:',      dw,
+                    'px;height:',   dh,
+                    'px;left:',     dx,
+                    'px;top:',      dy,
+                    'px" coordsize="100,100" src="', image.src,
+                    '" opacity="',  this.globalAlpha, // <vml:image opacity> doesn't work.
+                    '" cropleft="', sx / dim.w,
+                    '" croptop="',  sy / dim.h,
+                    '" cropright="',    (dim.w - sx - sw) / dim.w,
+                    '" cropbottom="',   (dim.h - sy - sh) / dim.h,
+                    '" />');
+            }
         } else {
             c0 = _map(this._matrix, dx, dy);
 
             sizeTrans = (sx || sy); // 0: none size transform, 1: size transform
-            tfrag = this._matrixfxd ? _imageTransform(this, this._matrix, dx, dy, dw, dh) : '';
+            tfrag = this._matrixEffected ? _imageTransform(this, this._matrix, dx, dy, dw, dh) : '';
 
             frag = [
                 // [0] shadow only
@@ -552,7 +581,7 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
                 // [5] alphaloader
                 _FILTER[0] + 'AlphaImageLoader(src=' +
                     image.src + ',SizingMethod=' +
-                    (az === 3 ? "image" : "scale") + ')' + _FILTER[1],
+                    (args === 3 ? "image" : "scale") + ')' + _FILTER[1],
                 // [6]
                 '"></div>' +
                     (sizeTrans ? '</div>' : '') + '</div></div>'
@@ -561,16 +590,16 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
             if (renderShadow) {
                 fg = frag[0] + frag[1] + frag[2] + frag[3] + frag[4] + frag[6];
                 rv.push(
-                    fg.replace(/\$1/, this._matrixfxd ? this.shadowOffsetX
-                                                      : Math.round(c0.x * 0.1) + this.shadowOffsetX)
-                      .replace(/\$2/, this._matrixfxd ? this.shadowOffsetY
-                                                      : Math.round(c0.y * 0.1) + this.shadowOffsetY)
+                    fg.replace(/\$1/, this._matrixEffected ? this.shadowOffsetX
+                                                           : Math.round(c0.x * 0.1) + this.shadowOffsetX)
+                      .replace(/\$2/, this._matrixEffected ? this.shadowOffsetY
+                                                           : Math.round(c0.y * 0.1) + this.shadowOffsetY)
                       .replace(/\$3/, this.globalAlpha / Math.sqrt(this.shadowBlur) * 50));
 
             }
 
             rv.push('<div style="position:absolute;z-index:', zindex);
-            if (this._matrixfxd) {
+            if (this._matrixEffected) {
                 rv.push(tfrag, '">');
             } else { // 1:1 scale
                 rv.push(';top:', Math.round(c0.y * 0.1),
@@ -583,7 +612,7 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
         history = image.getContext("2d")._history;
         c0 = _map(this._matrix, dx, dy);
 
-        switch (az) {
+        switch (args) {
         case 3: // 1:1 scale
                 rv.push('<div style="position:absolute;z-index:', zindex,
                         ';left:',  Math.round(c0.x * 0.1),
@@ -663,6 +692,10 @@ function drawRoundRect(x,           // @param Number:
                        fillColor,   // @param ColorHash(= void 0): fillColor
                        strokeColor, // @param ColorHash(= void 0): strokeColor
                        lineWidth) { // @param Number(= 1): stroke lineWidth
+    if (this.globalAlpha <= 0) {
+        return;
+    }
+
     if (fillColor || strokeColor) {
         var lw = lineWidth === void 0 ? 1 : lineWidth,
             path, fg, ix, iy, iw, ih;
@@ -885,7 +918,7 @@ function restore() {
 
 // CanvasRenderingContext2D.prototype.rotate
 function rotate(angle) {
-    this._matrixfxd = 1;
+    this._matrixEffected = 1;
     this._matrix = uu.m2d.rotate(angle, this._matrix);
 }
 
@@ -899,7 +932,7 @@ function save() {
 
 // CanvasRenderingContext2D.prototype.scale
 function scale(x, y) {
-    this._matrixfxd = 1;
+    this._matrixEffected = 1;
     this._matrix = uu.m2d.scale(x, y, this._matrix);
     this._scaleX *= x;
     this._scaleY *= y;
@@ -908,15 +941,18 @@ function scale(x, y) {
 
 // CanvasRenderingContext2D.prototype.setTransform
 function setTransform(m11, m12, m21, m22, dx, dy) {
-    this._matrixfxd = 1;
+    this._matrixEffected = 1;
     if (m11 === 1 && !m12 && m22 === 1 && !m21 && !dx && !dy) {
-        this._matrixfxd = 0; // reset _matrixfxd flag
+        this._matrixEffected = 0; // reset _matrixEffected flag
     }
     this._matrix = [m11, m12, 0,  m21, m22, 0,  dx, dy, 1];
 }
 
 // CanvasRenderingContext2D.prototype.stroke
 function stroke(path, fill) {
+    if (this.globalAlpha <= 0) {
+        return;
+    }
     if (this.shadowColor !== this._shadowColor) {
         this.__shadowColor = uu.color(this._shadowColor = this.shadowColor);
     }
@@ -980,6 +1016,9 @@ function strokeRect(x, y, w, h) {
 
 // CanvasRenderingContext2D.prototype.strokeText
 function strokeText(text, x, y, maxWidth, fill) {
+    if (this.globalAlpha <= 0) {
+        return;
+    }
     if (this.shadowColor !== this._shadowColor) {
         this.__shadowColor = uu.color(this._shadowColor = this.shadowColor);
     }
@@ -1092,13 +1131,13 @@ function strokeText(text, x, y, maxWidth, fill) {
 
 // CanvasRenderingContext2D.prototype.transform
 function transform(m11, m12, m21, m22, dx, dy) {
-    this._matrixfxd = 1;
+    this._matrixEffected = 1;
     this._matrix = uu.m2d.transform(m11, m12, m21, m22, dx, dy, this._matrix);
 }
 
 // CanvasRenderingContext2D.prototype.translate
 function translate(x, y) {
-    this._matrixfxd = 1;
+    this._matrixEffected = 1;
     this._matrix = uu.m2d.translate(x, y, this._matrix);
 }
 
