@@ -2,6 +2,8 @@
 // === <canvas> ===
 // depend: uu
 //
+//  <canvas width="..." height="...">
+//  </canvas>
 uu.agein || (function(win, doc, uu) {
 
 //{{{!mb
@@ -13,7 +15,7 @@ var _flashCanvas = (uu.ie && uu.ver.flash > 8) ?
 
 // uu.canvas
 if (!uu.canvas) {
-    uu.canvas = function html4NodeBuilder() { // @param Mix: var_args
+    uu.canvas = function html5NodeBuilder() { // @param Mix: var_args
         return uu.node.build("canvas", arguments);
     }
 }
@@ -99,7 +101,7 @@ function uucanvasbgcolor(node) { // @param Node:
 }
 uucanvasbgcolor._ZERO = { transparent: 1, "rgba(0, 0, 0, 0)": 1 };
 
-//{{{!mb inner - build canvas <canvas class="flash silver vml">
+//{{{!mb inner - build canvas <canvas class="fl sl vml">
 function _buildCanvas(node,    // @param Node: <canvas>
                       order) { // @param SpaceJointString:
                                // @return Node:

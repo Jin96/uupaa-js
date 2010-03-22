@@ -43,9 +43,13 @@ var uu; // window.uu - uupaa.js library namespace
         //ja    uuで始まる全ての識別子は、uupaa.jsで予約済みとする
 
 // window.uue - createElement wrapper
-function uue(tag) { // @param String(= "div"): tag name, "a", "p"
-                    // @return Node: <div>
-    return document.createElement(tag || "div");
+function uue(tag,         // @param String(= "div"): tag name, "a", "p"
+             addToBody) { // @param Boolean(= false): true is document.body.appendChild(newNode)
+                          // @return Node: new <node>
+    var newNode = document.createElement(tag || "div");
+
+    return addToBody ? document.body.appendChild(newNode)
+                     : newNode;
 }
 
 // window.uunop - no operation function
@@ -89,6 +93,7 @@ uu = uumix(uujamfactory, {          // uu(expr, ctx) -> Instance(jam)
                                     // uu.ver.silverlight - Number: Silverlight version(0 or 3+)
                                     // uu.ver.sl     - Number: [DEPRECATED] Silverlight version(0 or 3+)
                                     // uu.ver.flash  - Number: Flash version(0 or 7+)
+                                    // uu.ver.as3    - Boolean: true is ActionScript 3(Flash version 9+)
                                     // uu.ver.ie     - Boolean: true is IE6+
                                     // uu.ver.ie6    - Boolean: true is IE6
                                     // uu.ver.ie7    - Boolean: true is IE7
@@ -232,6 +237,7 @@ uu = uumix(uujamfactory, {          // uu(expr, ctx) -> Instance(jam)
     // --- event ---
     ev:       uumix(uuev, {         // uu.ev(node, "namespace.click", fn) -> node
         has:        uuevhas,        // uu.ev.has(node, "namespace.click") -> Boolean
+        fire:       uuevfire,       // uu.ev.fire(node, "customEvent", param) -> node
         stop:       uuevstop,       // uu.ev.stop(event) -> event
         unbind:     uuevunbind,     // [1][unbind all]  uu.ev.unbind(node) -> node
                                     // [2][unbind some] uu.ev.unbind(node, "click+,dblclick") -> node
@@ -332,7 +338,8 @@ uu = uumix(uujamfactory, {          // uu(expr, ctx) -> Instance(jam)
     ie:             _VER.ie,        // is IE
     ie6:            _VER.ie6,       // is IE6
     ie7:            _VER.ie7,       // is IE7
-    ie8:            _VER.ie8,       // is IE8(ie8 mode)
+    ie8:            _VER.ie8,       // is IE8(IE8 mode)
+    ie9:            _VER.ie9,       // is IE9(IE9 mode)
     ie67:           _VER.ie67,      // is IE6 or IE7
     ie678:          _VER.ie678,     // is IE6 or IE7 or IE8
     opera:          _VER.opera,     // is Opera
@@ -340,7 +347,10 @@ uu = uumix(uujamfactory, {          // uu(expr, ctx) -> Instance(jam)
     webkit:         _VER.webkit,    // is WebKit
     // --- debug ---
     puff:           uupuff,         // uu.puff(mix) -> alert(...)
-    trace:          uutrace,        // uu.trace(mix) -> <div id="trace">msg</div>
+    trace:    uumix(uutrace, {      // [1][no title]   uu.trace(mix)        -> <div id="trace">msg</div>
+                                    // [2][with title] uu.trace(title, mix) -> <div id="trace">titlemsg</div>
+        clear:      uutraceclear    // uu.trace.clear()
+    }),
     // --- other ---
     js:             uujs,           // uu.js("js+expr") -> new Function("js+expr")
     win: {
@@ -401,7 +411,7 @@ uumix(String.prototype, {
 }, 0, 0);
 
 //{{{!mb
-win.HTMLElement && win.HTMLElement.prototype.innerText &&
+win.HTMLElement && !win.HTMLElement.prototype.innerText &&
 (function(proto) {
     proto.__defineGetter__("innerText", innertextgetter);
     proto.__defineSetter__("innerText", innertextsetter);
@@ -584,12 +594,12 @@ function uuhash(key,    // @param String/Hash: key
     }
     return rv;
 }
-// dd2num = { "00":   0 , ... "99":  99  }; Zero-filled dec string -> Number
-// num2dd = {    0: "00", ...   99: "99" }; Number -> Zero-filled dec string
+// uu.hash._dd2num = { "00":   0 , ... "99":  99  }; Zero-filled dec string -> Number
+// uu.hash._num2dd = {    0: "00", ...   99: "99" }; Number -> Zero-filled dec string
 uuhashmapping("0123456789",       "", uuhash._dd2num = {}, uuhash._num2dd = {});
 
-// hh2num = { "00":   0 , ... "ff": 255  }; Zero-filled hex string -> Number
-// num2hh = {    0: "00", ...  255: "ff" }; Number -> Zero-filled hex string
+// uu.hash._hh2num = { "00":   0 , ... "ff": 255  }; Zero-filled hex string -> Number
+// uu.hash._num2hh = {    0: "00", ...  255: "ff" }; Number -> Zero-filled hex string
 uuhashmapping("0123456789abcdef", "", uuhash._hh2num = {}, uuhash._num2hh = {});
 
 // uu.hash.has - has Hash
@@ -1327,20 +1337,48 @@ function uuev(node,    // @param Node:
     return node;
 }
 uuev._PARSE = /^(?:(\w+)\.)?(\w+)(\+)?$/; // ^[NameSpace.]EvntType[Capture]$
-uuev._LIST = uuary("mousedown,mouseup,mousemove,mousewheel,click," +
-                   "dblclick,keydown,keypress,keyup,change,submit," +
-                   "focus,blur,contextmenu");
-uuev._CODE = { mousedown: 1, mouseup: 2, mousemove: 3, mousewheel: 4, click: 5,
-               dblclick: 6, keydown: 7, keypress: 8, keyup: 9, mouseenter: 10,
-               mouseleave: 11, mouseover: 12, mouseout: 13, contextmenu: 14,
-               focus: 15, blur: 16, resize: 17,
-               losecapture: 0x102, DOMMouseScroll: 0x104 };
+uuev._LIST = uuary(
+    "mousedown,mouseup,mousemove,mousewheel,click,dblclick," +
+    "keydown,keypress,keyup,change,submit,focus,blur,contextmenu"
+);
+uuev._CODE = {
+    mousedown: 1, mouseup: 2, mousemove: 3, mousewheel: 4, click: 5,
+    dblclick: 6, keydown: 7, keypress: 8, keyup: 9, mouseenter: 10,
+    mouseleave: 11, mouseover: 12, mouseout: 13, contextmenu: 14,
+    focus: 15, blur: 16, resize: 17,
+    losecapture: 0x102, DOMMouseScroll: 0x104
+};
 
 // uu.ev.has - has event
 function uuevhas(node,     // @param Node: target node
                  nstype) { // @param String: "click", "namespace.mousemove+"
                            // @return Boolean:
     return (node.uuevtypes || "").indexOf("," + nstype + ",") >= 0;
+}
+
+// uu.ev.fire - fire event / fire custom event(none capture event only)
+function uuevfire(node,    // @param Node: target node
+                  name,    // @param String: "click", "custom"
+                  param) { // @param Mix(= void 0): param
+                           // @return Node:
+    if (uu.ev.has(node, name)) {
+        node.uuevfn[name].call(node, {
+            stopPropagation: uunop,
+            preventDefault:  uunop,
+            node:   node, // current target
+            name:   name, // event name
+            code:   0,    // 0: unknown
+            src:    node, // event source
+            rel:    node,
+            px:     0,
+            py:     0,
+            ox:     0,
+            oy:     0,
+            type:   name,
+            param:  param
+        }, 1);
+    }
+    return node;
 }
 
 // uu.ev.stop - stop stopPropagation and preventDefault
@@ -1832,20 +1870,34 @@ function uupuff(mix) { // @param Mix: object
 // [1][with title]    uu.trace(title, mix) -> <p>title{mix}</p>
 // [2][without title] uu.trace(mix)        -> <p>{mix</p>
 function uutrace(a, b) {
-    var output = uuid("trace"),
-        tagName = output.tagName, json, title = "";
+    var output = uuid("trace"), json, title = "";
 
-    if (b !== void 0) {
-        title = a;
-        json = _jsoninspect(b);
-    } else {
-        json = _jsoninspect(a);
+    if (output) {
+        if (b !== void 0) {
+            title = a;
+            json = _jsoninspect(b);
+        } else {
+            json = _jsoninspect(a);
+        }
+
+        if (output.tagName.toLowerCase() === "textarea") {
+            output.value += title + json;
+        } else {
+            output.innerHTML += "<p>" + title + json + "</p>";
+        }
     }
+}
 
-    if (tagName === "textarea" || tagName === "TEXTAREA") {
-        output.value += title + json;
-    } else {
-        output.innerHTML += "<p>" + title + json + "</p>";
+// uu.trace.clear
+function uutraceclear() {
+    var output = uuid("trace");
+
+    if (output) {
+        if (output.tagName.toLowerCase() === "textarea") {
+            output.value = "";
+        } else {
+            output.innerHTML = "";
+        }
     }
 }
 
@@ -2291,6 +2343,7 @@ function _winload() {
     _ready();
     uuisfunc(win.xwin || 0) && win.xwin(uu); // window.xwin(uu) callback
     uulazyfire("canvas");
+    uulazyfire("audio");
 }
 
 // inner - DOMContentLoaded(IE)
@@ -2382,7 +2435,7 @@ function _classNameMatcher(ary) {
 // http://d.hatena.ne.jp/uupaa/20090603
 function uuverdetect(userAgent) { // @param String: UserAgent String
                                   // @return Hash: { browser, render,
-                                  //                 silverlight, flash,
+                                  //                 silverlight, flash, as3,
                                   //                 ie, ie6, ie7, ie8, ie9, ie67, ie678,
                                   //                 opera, webkit, chrome,
                                   //                 safari, iphone,
@@ -2467,6 +2520,7 @@ function uuverdetect(userAgent) { // @param String: UserAgent String
     rv.win          = userAgent.indexOf("Win") > 0;
     rv.mac          = userAgent.indexOf("Mac") > 0;
     rv.unix         = /X11|Linux/.test(userAgent);
+    rv.as3          = rv.flash >= 9; // ActionScript 3, FlashPlayer 9+
     rv.advanced     = (ie        && rv.browser >= 9)   || // IE 9+
                       (rv.gecko  && rv.render  >  1.9) || // Firefox 3.5+(1.91)
                       (rv.webkit && rv.render  >= 528) || // Safari 4+, Google Chrome 2+
@@ -2477,10 +2531,10 @@ function uuverdetect(userAgent) { // @param String: UserAgent String
                       (rv.webkit && rv.render  >  524);   // Safari 3.1+, Google Chrome 1+
     rv.jit          = rv.advanced;
 
-    // [DEPRECATED] member
-    rv.ua           = rv.browser;
-    rv.sl           = rv.silverlight;
-    rv.avd          = rv.advanced;
+    // [DEPRECATED] members
+    rv.ua           = rv.browser;       // uu.ver.ua  [DEPRECATED]
+    rv.sl           = rv.silverlight;   // uu.ver.sl  [DEPRECATED]
+    rv.avd          = rv.advanced;      // uu.ver.adv [DEPRECATED]
 
     return rv;
 }
