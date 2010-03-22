@@ -21,8 +21,8 @@ uu.node.build = uunodebuild;
 // --- initialize ---
 // inner - setup node builder - uu.div(), uu.a(), ...
 uu.ary.each(uu.tag.HTML4, function(v) {
-    // skip "img", "canvas"
-    if (v === "img" || v === "canvas") {
+    // skip "img", "canvas", "audio"
+    if (v === "img" || v === "canvas" || v === "audio") {
         return;
     }
 

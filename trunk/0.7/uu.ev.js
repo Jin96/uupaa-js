@@ -1,27 +1,23 @@
 
 // === Event ===
-// depend: uu.js
+// depend: uu
 //
 // ::event.keyCode
 //    http://www.w3.org/TR/DOM-Level-3-Events/#events-keyboardevents
 uu.agein || (function(win, doc, uu) {
 var _CLICKS = { click: 1, dblclick: 2 },
-    _EVVKEY = uu.hash( // event virtual keycode
+    _EVVKEY = uu.hash( // virtual keycode events
         "8,BS,9,TAB,13,ENTER,16,SHIFT,17,CTRL,18,ALT,27,ESC," +
         "32,SP,33,PGUP,34,PGDN,35,END,36,HOME,37,LEFT,38,UP,39,RIGHT,40,DOWN," +
         "45,INS,46,DEL,48,0,49,1,50,2,51,3,52,4,53,5,54,6,55,7,56,8,57,9," +
         "65,A,66,B,67,C,68,D,69,E,70,F,71,G,72,H,73,I,74,J,75,K,76,L,77,M," +
         "78,N,79,O,80,P,81,Q,82,R,83,S,84,T,85,U,86,V,87,W,88,X,89,Y,90,Z");
 
-// uu.ev.*
-uu.mix(uu.ev, {
-    more:       uuevmore,       // uu.ev.more(event) -> { rel, btn, vkey, wheel, clicks, vkeycode }
-    fire:       uuevfire,       // uu.ev.fire(node, "customEvent", param) -> node
-    times:      uuevtimes,      // [1] uu.ev.times(node, names, cyclic, var_args, ...) -> node
-    hover:      uuevhover,      // [1][callback]  uu.ev.hover(node, function(){}, function(){}) -> node
+uu.ev.more      = uuevmore;     // uu.ev.more(event) -> { rel, btn, vkey, wheel, clicks, vkeycode }
+uu.ev.times     = uuevtimes;    // [1] uu.ev.times(node, names, cyclic, var_args, ...) -> node
+uu.ev.hover     = uuevhover;    // [1][callback]  uu.ev.hover(node, function(){}, function(){}) -> node
                                 // [2][toggle class] uu.ev.hover(node, "red white") -> node
-    dragbase:   uuevdragbase    // [protected] drag & drop base handler
-});
+uu.ev.dragbase  = uuevdragbase; // [protected] drag & drop base handler
 
 // uu.ev.more - more information
 function uuevmore(evt) { // @param EventObject:
@@ -51,30 +47,6 @@ function uuevmore(evt) { // @param EventObject:
              wheel: wheel,
              clicks: clicks,
              vkeycode: vkeycode }; // 38, 49, 65
-}
-
-// uu.ev.fire - fire event / fire custom event(none capture event only)
-function uuevfire(node,    // @param Node: target node
-                  name,    // @param String: "click", "custom"
-                  param) { // @param Mix(= void 0): param
-                           // @return Node:
-    if (uu.ev.has(node, name)) {
-        node.uuevfn[name].call(node, {
-            stopPropagation: uunop,
-            preventDefault:  uunop,
-            node:   node, // current target
-            name:   name, // event name
-            code:   0,    // 0: unknown
-            src:    node, // event source
-            rel:    node,
-            px:     0,
-            py:     0,
-            ox:     0,
-            oy:     0,
-            param:  param
-        }, 1);
-    }
-    return node;
 }
 
 // uu.ev.dragbase -
