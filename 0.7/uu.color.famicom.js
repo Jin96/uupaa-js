@@ -1,7 +1,14 @@
 
-// === uu.color.cud ===
+// === uu.color.famicom ===
+//{{{!depend uu
+//}}}!depend
+
+uu.color.famicom || (function() {
+
+uu.color.famicom = 1;
+
 // FAMICOM(R) Named Color(from "fc00" to "fc3f")
-uu.agein || uu.color.add(
+uu.color.add(
 "7b7b7bfc00,0000fffc01,0000bdfc02,4229bdfc03,940084fc04,ad0021fc05,8c1000fc06,"+
 "8c1000fc07,522900fc08,007300fc09,006b00fc0a,005a00fc0b,004252fc0c,000000fc0d,"+
 "000000fc0e,000000fc0f,bdbdbdfc10,0073f7fc11,0052f7fc12,6b42fffc13,de00cefc14,"+
@@ -12,4 +19,6 @@ uu.agein || uu.color.add(
 "a5e7fffc31,b5b5f7fc32,d6b5f7fc33,f7b5f7fc34,ffa5c6fc35,efceadfc36,ffe7adfc37,"+
 "ffde7bfc38,d6f773fc39,b5f7b5fc3a,b5f7d6fc3b,00fffffc3c,f7d6f7fc3d,000000fc3e,"+
 "000000fc3f");
+
+})();
 

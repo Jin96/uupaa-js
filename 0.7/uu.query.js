@@ -1,8 +1,11 @@
 
 // === CSS3 Selector(document.querySelectorAll) ===
-// depend: uu.js, uu.color.js, uu.css.js
-uu.agein || (function(win, doc, uu, _cstyle, _innerText) {
+//{{{!depend uu, uu.color, uu.css
+//}}}!depend
+
+uu.query.selectorAll || (function(win, doc, uu) {
 var _ssid   = "uuqueryss", // StyleSheet ID
+    _innerText = uu.gecko ? "textContent" : "innerText",
     // --- content-type cache (1: HTML, 2: XML) ---
     _ctypedb      = {}, // { quid: contentType }
     _htmltagdb    = {}, // tag dict( { a: "A", A: "A", ... } )
@@ -11,11 +14,11 @@ var _ssid   = "uuqueryss", // StyleSheet ID
     _HTML5HASH    = uu.hash.combine(uu.tag.HTML5, 1, 1), // { abbr: 1, ... }
     _QUICK_STATIC = {
         "*":      function(ctx) { return uu.tag("*", ctx); },
-        "*:root": function() { return [uu.rootNode]; }, // fix #27 (*:root)
-        ":root":  function() { return [uu.rootNode]; }, // fix #27 (*:root)
+        "*:root": function() { return [uu.node.root]; }, // fix #27 (*:root)
+        ":root":  function() { return [uu.node.root]; }, // fix #27 (*:root)
         "* :root":function() { return []; }, // fix #27b (* :root)
         "* html": function() { return []; }, // fix #27b (* html) IE6 CSS Star Hack
-        html:     function() { return [uu.rootNode]; }, // doc.html
+        html:     function() { return [uu.node.root]; }, // doc.html
         head:     function() { return [doc.head]; },
         body:     function() { return [doc.body]; },
         ":link":  function() { return uu.ary(doc.links); } }, // spoof
@@ -419,9 +422,9 @@ function uuqueryselectorall(expr,      // @param String: expr
 
                             // ":root:xxx-child" or ":root:xxx-type" -> not match
                             // ":root:not(:first-child)"             -> match root element
-                            if (iz === 1 && ctx[0] === uu.rootNode
+                            if (iz === 1 && ctx[0] === uu.node.root
                                          && _ROOT_REJECT.test(pseudo)) {
-                                r = negate ? [uu.rootNode] : [];
+                                r = negate ? [uu.node.root] : [];
                             } else {
                                 if ( !(v = _FILTERS[pseudo]) ) {
                                     throw new Error(":" + pseudo + " unsupported");
@@ -569,7 +572,7 @@ function judgeAttr(negate, elms, attr, operator, value) {
         isInsens = !(attr in _ATTR_CASESENS); // true: case insensitive
 
     if (uu.ie) {
-        if (uu.ie8 || _ATTR_IE_BUG[attr]) { // fix a[href^="#"]
+        if (uu.ver.ie8 || _ATTR_IE_BUG[attr]) { // fix a[href^="#"]
             attrFlag = 2;
         } else {
             attr = _ATTR_ALIAS[attr] || attr;
@@ -780,12 +783,12 @@ function simpleFilter(fid, negate, elms) {
 // inner - :root
 function root(fid, negate, elms) {
     if (!negate) {
-        return [uu.rootNode];
+        return [uu.node.root];
     }
     var rv = [], ri = -1, v, i = 0;
 
     while ( (v = elms[i++]) ) {
-        if (v !== uu.rootNode) {
+        if (v !== uu.node.root) {
             rv[++ri] = v;
         }
     }
@@ -1045,7 +1048,7 @@ function styleQuery(negate, elms, match) {
     while ( (e = elms[i++]) ) {
         switch (propKind) {
         case 1: // color, backgroundColor
-            r = _color2num(uu.color((uu.ie ? e.currentStyle : _cstyle(e, null))[prop]));
+            r = _color2num(uu.color(uu.style.quick(e)[prop]));
             break;
         case 2: // opacity
             r = uu.css.opacity.get(e);
@@ -1069,7 +1072,7 @@ function styleQuery(negate, elms, match) {
             }
             break;
         case 5: // top, right, bottom, left
-            r = uu.css.px.value(e, (uu.ie ? e.currentStyle : _cstyle(e, null))[prop]);
+            r = uu.css.px.value(e, uu.style.quick(e)[prop]);
             if (!unitExchanged) {
                 ++unitExchanged;
                 v1 = uu.css.px.value(e, v1);
@@ -1080,7 +1083,7 @@ function styleQuery(negate, elms, match) {
             r = uu.css.bgimg.get(e) || "none"; // "http://..." or "none"
             break;
         default:
-            w = (uu.ie ? e.currentStyle : _cstyle(e, null))[prop];
+            w = uu.style.quick(e)[prop];
             r = (operator >= 9) ? xfloat(w) : w;
         }
 
@@ -1119,7 +1122,7 @@ function visitedFilter(fid, negate, elms) {
             if (uu.ie) {
                 ok = (v.currentStyle.rubyAlign === "center") ? 1 : 0;
             } else {
-                cs = _cstyle(v, null);
+                cs = uu.style(v);
                 ok = (cs.outlineWidth === "0px" &&
                       cs.outlineStyle === "solid") ? 1 : 0;
             }
@@ -1152,7 +1155,7 @@ function actionFilter(fid, negate, elms, pusedo) {
         if (uu.ie) {
             ok = (v.currentStyle.rubyAlign === "center") ? 1 : 0;
         } else {
-            cs = _cstyle(v, null);
+            cs = uu.style(v);
             ok = (cs.outlineWidth === "0px" &&
                   cs.outlineStyle === "solid") ? 1 : 0;
         }
@@ -1179,6 +1182,5 @@ function createTagDictionary() {
 // --- initialize ---
 createTagDictionary();
 
-})(window, document, uu, window.getComputedStyle,
-   uu.gecko ? "textContent" : "innerText");
+})(window, document, uu);
 

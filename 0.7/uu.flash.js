@@ -1,7 +1,9 @@
 
 // === Flash / ActionScript bridge ===
-// depend: uu.js
-uu.agein || (function(win, doc, uu) {
+//{{{!depend uu
+//}}}!depend
+
+uu.flash || (function(win, doc, uu) {
 
 uu.mix(uu, {
     flash: uu.mix(uuflash, {        // uu.flash(id, url, width, height, option) -> new <object> element
@@ -40,16 +42,16 @@ function uuflash(replaceNode, // @param Node: replacement node
                                                              : "always" });
 
     for (i in opt) {
-        ary.push(uu.fmt('<param name="?" value="?" />', [i, opt[i]]));
+        ary.push(uu.fmt('<param name="?" value="?" />', i, opt[i]));
     }
     fg = uu.fmt('<object class="uuflashobject"' +
                 ' id="?" ?="?" data="?" width="?" height="?">?</object>',
-                     [objectID,
+                      objectID,
                          uu.ie ? "classid" : "type",
                             uu.ie ? "clsid:d27cdb6e-ae6d-11cf-96b8-444553540000"
                                   : "application/x-shockwave-flash",
                                      url,      width,     height,
-                                                             ary.join("")]);
+                                                             ary.join(""));
     node = uu.node.bulk(fg);
     uu.node.swap(node, replaceNode);
     return uu.id(objectID);

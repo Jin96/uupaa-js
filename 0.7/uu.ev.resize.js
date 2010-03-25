@@ -1,7 +1,9 @@
 
 // === Resize Event ===
-// depend: uu.js
-uu.agein || (function(win, doc, uu) {
+//{{{!depend uu
+//}}}!depend
+
+uu.ev.resize || (function(win, doc, uu) {
 var _resizeevobj = { node: win, name: "resize", code: 17 }, // 17 -> uu.ev._code
     _resizedb = {
         0: { delay:  40, lock: 0, fn: [] },         // window.onresize(delay:40ms)

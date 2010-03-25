@@ -1,5 +1,7 @@
 // === Matrix 2D ===
-// depend: uu.js
+//{{{!depend uu
+//}}}!depend
+
 //
 // typeof Matrix = [m11, m12, m13,
 //                  m21, m22, m23,
@@ -7,9 +9,9 @@
 
 //{{{!mb
 
-uu.agein || (function() {
+uu.matrix2d || (function() {
 
-uu.m2d = {
+uu.matrix2d = {
     multiply:     m2dmultiply,    // uu.m2d.multiply(a, b) -> Array(Matrix)
     scale:        m2dscale,       // uu.m2d.scale(x, y, m) -> Array(Matrix)
     rotate:       m2drotate,      // uu.m2d.rotate(angle, m) -> Array(Matrix)

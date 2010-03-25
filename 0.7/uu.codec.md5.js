@@ -1,7 +1,10 @@
 
 // === MD5 ===
-// depend: uu.js
-uu.agein || (function(uu) {
+//{{{!depend uu, codec,
+//}}}!depend
+
+uu.codec.md5 || (function(uu) {
+
 var _S11 =  7,
     _S12 = 12,
     _S13 = 17,

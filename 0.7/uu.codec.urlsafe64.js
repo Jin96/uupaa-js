@@ -1,7 +1,9 @@
 
 // === URLSafe64 ===
-// depend: uu, uu.codec, uu.codec.utf8, uu.codec.base64
-uu.agein || (function(uu) {
+//{{{!depend uu, uu.codec, uu.codec.utf8, uu.codec.base64
+//}}}!depend
+
+uu.codec.urlsafe64 || (function(uu) {
 
 uu.codec.urlsafe64 = {
     encode: urlsafe64encode,    // uu.code.urlsafe64encode

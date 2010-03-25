@@ -1,12 +1,13 @@
 
 // === Event ===
-// depend: uu
-//
+//{{{!depend uu
+//}}}!depend
+
 // ::event.keyCode
 //    http://www.w3.org/TR/DOM-Level-3-Events/#events-keyboardevents
-uu.agein || (function(win, doc, uu) {
+uu.ev.more || (function(win, doc, uu) {
 var _CLICKS = { click: 1, dblclick: 2 },
-    _EVVKEY = uu.hash( // virtual keycode events
+    _EVVKEY = uu.split.toHash( // virtual keycode events
         "8,BS,9,TAB,13,ENTER,16,SHIFT,17,CTRL,18,ALT,27,ESC," +
         "32,SP,33,PGUP,34,PGDN,35,END,36,HOME,37,LEFT,38,UP,39,RIGHT,40,DOWN," +
         "45,INS,46,DEL,48,0,49,1,50,2,51,3,52,4,53,5,54,6,55,7,56,8,57,9," +
@@ -73,7 +74,7 @@ function uuevdragbase(
         return { x: 0, y: 0, px: 0, py: 0 };
     }
     if (uu.ie) {
-        iebody = uu.iebody;
+        iebody = uu.quirks ? doc.body : uu.node.root;
         x = evt.clientX + iebody.scrollLeft;
         y = evt.clientY + iebody.scrollTop;
     } else {

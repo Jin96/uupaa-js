@@ -1,7 +1,9 @@
 
 // === String++ ===
-// depend: uu.js
-uu.agein || (function(win, doc, uu) {
+//{{{!depend uu
+//}}}!depend
+
+uu.sprintf || (function(win, doc, uu) {
 
 uu.split.token = uusplittoken;  // uu.split.token(expr, splitter, notrim = false) -> [token, ...]
 uu.sprintf = uusprintf;         // uu.sprintf("%s-%d", var_args, ...) -> "formatted string"

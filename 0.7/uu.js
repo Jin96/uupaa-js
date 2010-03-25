@@ -1,64 +1,36 @@
 
 // === Core ===
-//ja 基本的なコーディングスタイルは http://webkit.org/coding/coding-style.html
-//ja    「if や for のブレス( {} )は省略禁止」と、
-//ja    「function と { を同じ行に書く」の2点が、WebKit のスタイルと異なります。
+
+// WebKit based Cording-Style   -> doc/cording-style.txt
 //
-
-
-// --- user callback functions ---
-//ja 予め定義しておくことによりコールバックする、ユーザ定義関数の一覧です。
+// User configrations           -> doc/user-configrations.txt
 //
+//  - uu.config = { aria, debug, right, altcss, visited }
+//
+// User callback functions      -> doc/user-callback-functions.txt
+//
+//  - window.xver(uu.ver)
+//  - window.xboot(uu)
+//  - window.xwin(uu)
+//  - window.xcanvas(uu, canvasNodeArray)
+//  - window.xlocal(uu, backend)
+//
+// Version and plugin detection -> doc/version-detection.txt
+//
+//  - uu.ver = { library, browser, render, silverlight, flash, as3,
+//               ie, ie6, ie7, ie8, ie9, ie67, ie678, ie89,
+//               opera, gecko, webkit, chrome, safari, iphone,
+//               quirks, xml, win, mac, unix, advanced, major, jit }
 
-// VersionDetected callback handler
-//      window.xver(uu.ver)
-//ja                   ブラウザ種別 + バージョンを元に適用するスタイルを調整する手段を提供します。
-//ja                   uupaa.js(またはuu.js)が読み込まれた後に window.xver がコールバックされます。
-//ja                   引数には、uu.ver オブジェクトが渡されます。
-//ja                   コールバックした時点では、uu オブジェクトは構築中のため使用できません。
-
-// DOMReady callback handler
-//      window.xboot(uu)
-//ja                   document.addEventListener("DOMContentLoaded") でコールバックします
-//ja                   DOMContentLoadedが使えないブラウザでは、window.addEventListener("load") でコールバックします
-
-// WindowReady callback handler
-//      window.xwin(uu)
-//ja                  window.addEventListener("load") でコールバックします
-
-// CanvasReady callback handler
-//      window.xcanvas(uu, canvasNodeArray)
-//ja                   <canvas>が利用可能になるとコールバックします,
-//ja                   第二引数には全<canvas>ノードの配列が渡されます
-
-// LocalStorageReady callback hander
-//      window.xlocal(uu, backend)
-//ja                   WebStorage相当の機能が利用可能になるとコールバックします
-//ja                   第二引数にはバックエンド識別用の値(2～6)が渡さます
-
-// --- add global variable and functions ---
 var uu; // window.uu - uupaa.js library namespace
-        //
-        //ja    uu は uupaa.js ライブラリ用のネームスペース
-        //ja    uuで始まる全ての識別子は、uupaa.jsで予約済みとする
 
-// window.uue - createElement wrapper
-function uue(tag,         // @param String(= "div"): tag name, "a", "p"
-             addToBody) { // @param Boolean(= false): true is document.body.appendChild(newNode)
-                          // @return Node: new <node>
-    var newNode = document.createElement(tag || "div");
+uu || (function(win, doc) {
 
-    return addToBody ? document.body.appendChild(newNode)
-                     : newNode;
-}
-
-// window.uunop - no operation function
-function uunop() { // @return undefined:
-}
-
-// --- main ---
-uu ? ++uu.agein : (function(win, doc) {
-var _VER = uuverdetect(navigator.userAgent), // uu.ver
+var uuver = uumix(_detectVersion(navigator.userAgent), { library: 0.7 }),
+    uuconfig = uuarg(win.xconfig, {
+        aria: 0, debug: 0, right: 0, altcss: 0, visited: 0,
+        baseDir: uutag("script").pop().src.replace(/[^\/]+$/, "")
+    }),
     _TYPEOF = {
         "undefined":        0x020,
         "[object Boolean]": 0x040, "boolean":   0x040,
@@ -72,74 +44,22 @@ var _VER = uuverdetect(navigator.userAgent), // uu.ver
         "[object ComputedCSSStyleDeclaration]": 0x1000  // [Gecko]
     };
 
-// bond document.html and document.head
-doc.html || (doc.html = uutag("html")[0]); // <html> alias
-doc.head || (doc.head = uutag("head")[0]); // <head> alias
+doc.html || (doc.html = uutag("html")[0]); // document.html = <html>
+doc.head || (doc.head = uutag("head")[0]); // document.head = <head>
 
-// window.xver(uu.ver) callback
-uuisfunc(win.xver) && win.xver(_VER);
+win.xver && win.xver(uuver); // window.xver(uu.ver) callback
 
 // --- library structure ---
-uu = uumix(uujamfactory, {          // uu(expr, ctx) -> Instance(jam)
-    agein:          0,              // uu.agein      - Number: 1+: uu.js load count
-    ver:      uumix(_VER, {         // uu.ver        - Hash: version and plugin detection
-        lib:        0.7,            // uu.ver.lib    - Number: Library version
-        detect:     uuverdetect     // uu.ver.detect(userAgentString) -> Hash
-    }),                             // uu.ver.browser - Number: Browser(User Agent) version
-                                    // uu.ver.ua     - Number: [DEPRECATED] Browser(User Agent) version
-                                    // uu.ver.render - Number: Rendering Engine version
-                                    //                 (Firefox2: 1.81, Firefox3: 1.9, Firefox3.5: 1.91,
-                                    //                  Firefox3.6: 1.92, Safari3.1: 525, Safari4: 528)
-                                    // uu.ver.silverlight - Number: Silverlight version(0 or 3+)
-                                    // uu.ver.sl     - Number: [DEPRECATED] Silverlight version(0 or 3+)
-                                    // uu.ver.flash  - Number: Flash version(0 or 7+)
-                                    // uu.ver.as3    - Boolean: true is ActionScript 3(Flash version 9+)
-                                    // uu.ver.ie     - Boolean: true is IE6+
-                                    // uu.ver.ie6    - Boolean: true is IE6
-                                    // uu.ver.ie7    - Boolean: true is IE7
-                                    // uu.ver.ie8    - Boolean: true is IE8
-                                    // uu.ver.ie9    - Boolean: true is IE9
-                                    // uu.ver.ie67   - Boolean: true is IE67
-                                    // uu.ver.ie678  - Boolean: true is IE678
-                                    // uu.ver.opera  - Boolean: true is Opera
-                                    // uu.ver.gecko  - Boolean: true is Gecko based browsers
-                                    // uu.ver.webkit - Boolean: true is Safari, Google Chrome, iPhone, iPod
-                                    // uu.ver.chrome - Boolean: true is Google Chrome
-                                    // uu.ver.safari - Boolean: true is Safari, iPhone, iPod
-                                    // uu.ver.iphone - Boolean: true is iPhone, iPod
-                                    // uu.ver.quirks - Boolean: true is quirks mode
-                                    // uu.ver.xml    - Boolean: true is XML Document, false is HTML Document
-                                    // uu.ver.win    - Boolean: true is Windows OS
-                                    // uu.ver.mac    - Boolean: true is Mac, Mac OS X
-                                    // uu.ver.unix   - Boolean: true is Unix like OS, Linux, FreeBSD, SunOS
-                                    // uu.ver.advanced - Boolean: true is Advanced browsers
-                                    //                 (Firefox3.5+, Safari4+, Google Chrome2+, Opera10.50+)
-                                    // uu.ver.adv    - Boolean: [DEPRECATED] true is Advanced browsers
-                                    // uu.ver.major  - Boolean: true is Major/Majority browsers
-                                    //                 (IE6+, Firefox3+, Safari3.1+, Google Chrome2+, Opera 9.5+)
-                                    // uu.ver.jit    - Boolean: true is JIT browsers, Firefox3.5+, Google Chrome,
-                                    //                                                Safari4+, Opera10.50+, IE9+
-    // --- user configurations ---
-    config:   uuarg(win.xconfig, {
-        aria:       0,              // uu.config.aria   - Number(= 0): 1 is enable WAI-ARIA
-        debug:      0,              // uu.config.debug    - Number(= 0): 1 is DebugMode
-        right:      0,              // uu.config.right    - Number(= 0): 1 is RightMode, 0 is QuickMode
-        altcss:     0,              // uu.config.altcss   - Function(= void 0): AltCSSMode callback
-        visited:    0,              // uu.config.visited  - Number(= 0): 1 is enable uu.query(":visited")
-                                    // uu.config.baseDir  - String(= ""): detected base-directory
-        baseDir:    uutag("script").pop().getAttribute("src").replace(/[^\/]+$/, "")
-                                    //      <script src="../uupaa.js"> -> uu.config.baseDir = "../"
-                                    //      <script src="uupaa.js">    -> uu.config.baseDir = ""
-    }),
+uu = uumix(uujamfactory, {          // uu(expr, ctx) -> jam instance
+    ver:            uuver,          // uu.ver - Hash: version and plugin detection
+    config:         uuconfig,       // uu.config - Hash: user configurations
+    plugin:         uuplugin,       // uu.plugin() -> ["plugin-name", ...], enum plugins
+    require:        uurequire,      // uu.require(url) -> Boolean
     // --- array / hash ---
-    // [1][through]                 uu.ary([1, 2])           -> [1, 2]
-    // [2][literal to ary]          uu.ary(12)               -> [12]
-    // [3][string to ary]           uu.ary("12")             -> ["12"]
-    // [4][string to ary(no split)] uu.ary("12,12", 0)       -> ["12,12"]
-    // [5][convert NodeList]        uu.ary(NodeList)         -> [node, ...]
-    // [6][convert arguments]       uu.ary(arguments)        -> [arg, ...]
-    // [7][string split(,)]         uu.ary("word,word")      -> ["word", "word"]
-    // [8][string split(;)]         uu.ary("word;word", ";") -> ["word", "word"]
+    // [1][through]                  uu.ary([1, 2])    -> [1, 2]
+    // [2][literal to ary]           uu.ary(12)        -> [12]
+    // [3][convert NodeList to ary]  uu.ary(NodeList)  -> [node, ...]
+    // [4][convert arguments to ary] uu.ary(arguments) -> [arg, ...]
     ary:      uumix(uuary, {
         has:        uuaryhas,       // [1][has array] uu.ary.has([1, 2, 3], 1, dence = 1) -> true
                                     // [2][has array] uu.ary.has([1, 2, 3], [1, 2], dence = 1) -> true
@@ -157,10 +77,8 @@ uu = uumix(uujamfactory, {          // uu(expr, ctx) -> Instance(jam)
                                     // [2][unique literals] uu.ary.uniqye([0,1,2,1,0], 1) -> [0,1,2]
         indexOf:    uuaryindexof    // uu.ary.indexOf(ary, find, index = 0, dence = 1) -> Number
     }),
-    // [1][through]                 uu.hash({ key: "val" }) -> { key: "val" }
-    // [2][pair to hash]            uu.hash("key", mix)     -> { key: mix }
-    // [3][split(,)]                uu.hash("key,a,key2,b")         -> { key:"a",key2:"b" }
-    // [4][split(;)]                uu.hash("key;a;key2;b", ";", 0) -> { key:"a",key2:"b" }
+    // [1][through]      uu.hash({ key: "val" }) -> { key: "val" }
+    // [2][pair to hash] uu.hash("key", mix)     -> { key: mix }
     hash:     uumix(uuhash, {
         has:        uuhashhas,      // uu.hash.has({ a: 1, b: 2, c: 3 }, { a: 1, b: 2 }) -> true
         nth:        uuhashnth,      // uu.hash.nth({ a: 1, b: 2 }, 1) -> ["b", 2]
@@ -175,8 +93,8 @@ uu = uumix(uujamfactory, {          // uu(expr, ctx) -> Instance(jam)
         mapping:    uuhashmapping,  // uu.hash.mapping(seed, prefix = "", s2n, n2s)
         hasValue:   uuhashhasvalue  // uu.hash.hasValue({ a: 1, b: 2 }, 2) -> true
     }),
-    each:           uueach,         // [1][array.forEach] uu.each(Array, function(v, i) {...})
-                                    // [2][ hash.forEach] uu.each(Hash,  function(v, i) {...})
+    each:           uueach,         // [1][Array.forEach] uu.each(Array, function(v, i) {...})
+                                    // [2][Hash.forEach ] uu.each(Hash,  function(v, i) {...})
     mix:            uumix,          // [1][override] uu.mix({a:9, b:9}, {a:1}, {b:2})    -> base( {a:1, b:2} )
                                     // [2][stable]   uu.mix({a:9, b:9}, {a:1}, {b:2}, 0) -> base( {a:9, b:9} )
     arg:            uuarg,          // [supply args] uu.arg({ a: 1 }, { b: 2 }) -> new Hash( { a: 1, b: 2 } )
@@ -195,7 +113,7 @@ uu = uumix(uujamfactory, {          // uu(expr, ctx) -> Instance(jam)
         set:        uuattrset       // [1][set one  attr]  uu.attr.set(node, key, val ) -> node
                                     // [2][set some attrs] uu.attr.set(node, { key: val, ... }) -> node
     }),
-    // --- css / style ---
+    // --- css ---
     // [1][get one  style ]         uu.css(node, "color") -> "red"
     // [2][get some styles]         uu.css(node, "color,width") -> { color: "red", width: "20px" }
     // [3][set one  style ]         uu.css(node, "color", "red") -> node
@@ -205,28 +123,30 @@ uu = uumix(uujamfactory, {          // uu(expr, ctx) -> Instance(jam)
                                     // [2][get some styles] uu.css.get(node, "color,text-align") -> {color:"red", textAlign:"left"}
         set:        uucssset,       // [1][set one  style ] uu.css.set(node, "color", "red") -> node
                                     // [2][set some styles] uu.css.set(node, { color: "red" }) -> node
-        opacity: uumix(uucssopacity, {  // [1][get] uu.css.opacity(node) -> Number(0.0~1.0)
-                                        // [2][set] uu.css.opacity(node, opacity, diff = false) -> node
-            get:    uucssopacityget,    // uu.css.opacity.get(node) -> Number(0.0~1.0)
-            set:    uucssopacityset     // uu.css.opacity.set(node, opacity, diff = false) -> node
+        opacity:
+              uumix(uucssopacity, { // [1][get] uu.css.opacity(node) -> Number(0.0~1.0)
+                                    // [2][set] uu.css.opacity(node, opacity, diff = false) -> node
+            get:    uucssopacityget,// uu.css.opacity.get(node) -> Number(0.0~1.0)
+            set:    uucssopacityset // uu.css.opacity.set(node, opacity, diff = false) -> node
         })
     }),
-    // [1][get all  computedStyle]  uu.style(node) -> { width: "100px", ... }
+    // --- getComputedStyle wrapper ---
+    // [1][get all  computedStyle]  uu.style(node)      -> { width: "100px", ... }
     // [2][get more computedStyle]  uu.style(node, 0x1) -> { width: "100px", ... }
     // [3][get some computedStyle]  uu.style(node, 0x2) -> { width: "100px", ... }
-    style:    uumix(uustyle, {      // uu.style(node, mode = 0) -> Hash(window.getComputedStyle or currentStyle)
-        quick:      uustylequick    // uu.style.quick(node)     -> Hash(window.getComputedStyle or currentStyle)
+    style:    uumix(uustyle, {
+        quick:      uustylequick    // uu.style.quick(node) -> Hash(window.getComputedStyle or currentStyle)
     }),
     // --- query ---
     query:          uuquery,        // uu.query(expr, ctx = document) -> [node, ...]
     id:             uuid,           // uu.id(expr, ctx = document) -> node or null
     tag:            uutag,          // uu.tag(expr, ctx = document) -> [node, ...]
     // --- className(klass) ---
-    klass:    uumix(uuklass, {      // [1][query className] uu.klass(expr, ctx = document) -> [node, ...]
-        has:        uuklasshas,     // [1][has className] uu.klass.has(node, "class1 class2") -> Boolean
-        add:        uuklassadd,     // [1][add className] uu.klass.add(node, "class1 class2") -> node
-        sub:        uuklasssub,     // [1][sub className] uu.klass.sub(node, "class1 class2") -> node
-        toggle:     uuklasstoggle   // [1][toggle className] uu.klass.toggle(node, "class1 class2") -> node
+    klass:    uumix(uuklass, {      // [query className]  uu.klass(expr, ctx = document) -> [node, ...]
+        has:        uuklasshas,     // [has className]    uu.klass.has(node, "class1 class2") -> Boolean
+        add:        uuklassadd,     // [add className]    uu.klass.add(node, "class1 class2") -> node
+        sub:        uuklasssub,     // [sub className]    uu.klass.sub(node, "class1 class2") -> node
+        toggle:     uuklasstoggle   // [toggle className] uu.klass.toggle(node, "class1 class2") -> node
     }),
     // --- color ---
     color:    uumix(uucolor, {      // uu.color("black") -> ColorHash or 0(invalid color)
@@ -247,7 +167,7 @@ uu = uumix(uujamfactory, {          // uu(expr, ctx) -> Instance(jam)
         detach:     uuevdetach      // [protected] raw level api
     }),
     // --- event.ready ---
-    ready:    uumix(uuready, {      // [1][DOM ready] uu.ready(fn, order = 0)
+    ready:    uumix(uuready, {      // [DOM ready] uu.ready(fn, order = 0)
                                     //       order: 0 is low, 1 is mid, 2 is high(system)
         gone: {
             dom:        0,          // 1 is DOMContentLoaded event fired
@@ -260,11 +180,16 @@ uu = uumix(uujamfactory, {          // uu(expr, ctx) -> Instance(jam)
         }
     }),
     // --- node / node list / tag ---
-    // [1][add to body]             uu.node(uu.div()) -> <div>
-    // [2][add to body]             uu.node(uu.div(), doc.body) -> <div>
-    // [3][add to context node]     uu.node("<div><p>txt</p></div>", ctx) -> <div>
+    elm:            uuelm,          // uu.elm(tagName = "div") -> doc.createElement(tagName)
+    // [1][add new div node]        uu.node()         -> <body><div /></body>
+    // [2][add new node]            uu.node("p")      -> <body><p /></body>
+    // [3][add node]                uu.node(uu.div()) -> <body><div /></body>
+    // [4][add HTMLFragmentString]  uu.node("<div><p>txt</p></div>") -> <body><div><p>txt</p></div></body>
+    // [5][add DocumentFragment]    uu.node(DocumentFragment)        -> <body>{{fragment}}</body>
     node:     uumix(uunode, {
         has:        uunodehas,      // uu.node.has(node, ctx) -> Boolean
+        root:       doc.documentElement || doc.html,
+                                    // root node, documentElement or <html>(in IE quirks)
         bulk:       uunodebulk,     // [1][clone] uu.node.bulk(node) -> DocumentFragment
                                     // [2][build] uu.node.bulk("<p>html</p>") -> DocumentFragment
         swap:       uunodeswap,     // uu.node.swap(swapin, swapout) -> swapout node
@@ -277,19 +202,13 @@ uu = uumix(uujamfactory, {          // uu(expr, ctx) -> Instance(jam)
         toNode:     uunodeidtonode, // uu.nodeid.toNode(nodeid) -> node
         remove:     uunodeidremove  // uu.nodeid.remove(node) -> node
     }),
-    // --- virtual node / node builder ---
-    rootNode:       doc.documentElement || doc.html, // documentElement or <html> (IE quirks)
-    iebody:         null,           // [lazy detect] documentElement or <body> (IE quirks)
     // --- string ---
-    fix:            uufix,          // [1] uu.fix("-webkit-shadow")   -> "-webkit-shadow"
-                                    // [2] uu.fix("background-color") -> "backgroundColor"
-                                    // [3] uu.fix("float")            -> "cssFloat" or "styleFloat"(IE)
-                                    // [4] uu.fix("for")              -> "htmlFor"
+    // [1] uu.fix("-webkit-shadow")   -> "-webkit-shadow"
+    // [2] uu.fix("background-color") -> "backgroundColor"
+    // [3] uu.fix("float")            -> "cssFloat" or "styleFloat"(IE)
+    // [4] uu.fix("for")              -> "htmlFor"
+    fix:            uufix,
     fmt:            uufmt,          // uu.fmt("?-?", [1, 2]) -> "1-2"
-    esc:            uuesc,          // uu.esc('<a href="&">') -> '&lt;a href=&quot;&amp;&quot;&gt;'
-    ucs2:           uuucs2,         // uu.ucs2("string", 0) -> "\u0073"
-    unesc:          uuunesc,        // uu.unesc('&lt;a href=&quot;&amp;&quot;&gt;') -> '<a href="&">'
-    unucs2:         uuunucs2,       // uu.unucs2("\\u0073\\u0074\\u0072\\u0069\\u006e\\u0067") -> "string"
     trim:     uumix(uutrim, {       // uu.trim(" A  B  C ") -> "A  B  C"
         tag:        uutrimtag,      // uu.trim.tag(" <h1>A</h1>  B  <p>C</p> ") -> "A B C"
         url:        uutrimurl,      // uu.trim.url('url("http://...")') -> "http://..."
@@ -298,16 +217,24 @@ uu = uumix(uujamfactory, {          // uu(expr, ctx) -> Instance(jam)
         bracket:    uutrimbracket   // [trim <>, [], (), {}] uu.trim.bracket(" <bracket> ") -> "bracket"
     }),
     split:    uumix(uusplit, {      // uu.split(" A  B  C ") -> ["A", "B", "C"]
-        comma:      uusplitcomma    // uu.split.comma(", ,,A,,B,C, ")->["A","B","C"]
+        comma:      uusplitcomma,   // uu.split.comma(", ,,A,,B,C, ") -> ["A","B","C"]
+        toHash:     uusplittohash   // uu.split.toHash("key,1,key2,1", splitter = ",", toNumber = false)
+                                    //                                -> { key:  0,  key2:  1  }
     }),
-    date2str:       uudate2str,     // [1][ISO8601 now]  uu.date2str()        -> "2000-01-01T00:00:00.000Z"
-                                    // [2][ISO8601 date] uu.date2str(date)    -> "2000-01-01T00:00:00.000Z"
-                                    // [3][RFC1123 now]  uu.date2str(0, 1)    -> "Wed, 16 Sep 2009 16:18:14 GMT"
-                                    // [4][RFC1123 date] uu.date2str(date, 1) -> "Wed, 16 Sep 2009 16:18:14 GMT"
-    str2date:       uustr2date,     // uu.str2date("2000-01-01T00:00:00[.000]Z") -> { valid, date }
-    str2json:       uustr2json,     // uu.str2json(str, addQuote = 0) -> String
     json:     uumix(uujson, {       // uu.json(mix, nativeJSON = 0, callback = void 0) -> JSONString
-        toMix:      uujsontomix     // uu.json.toMix(str, nativeJSON = 0) -> Mix
+        decode:     uujsondecode    // uu.json.decode(JSONString, nativeJSON = 0) -> Mix
+    }),
+    // --- date ---
+    // typeof DateHash { Y, M, D, h, m, s, ms, time }
+    //
+    // [1][now]            uu.date() -> DateHash
+    // [2][date to hash]   uu.date(new Date) -> DateHash
+    // [3][string to hash] uu.date("2000-01-01T00:00:00[.000]Z") -> DateHash
+    date:     uumix(uudate, {
+        toISOString: uudatetoiso,   // uu.date.toISOString(DateHash = void 0)
+                                    //                        -> "2000-01-01T00:00:00.000Z" (ISO8601)
+        toRFCString: uudatetorfc    // uu.date.toRFCString(DateHash = void 0)
+                                    //                        -> "Wed, 16 Sep 2009 16:18:14 GMT" (RFC1123)
     }),
     // --- type ---
     has:            uuhas,          // [1] uu.has("abc", "a") -> true
@@ -330,21 +257,16 @@ uu = uumix(uujamfactory, {          // uu(expr, ctx) -> Instance(jam)
         REX:        0x800           // uu.type.REX  - RegExp
 //      CSSPROP:    0x1000          // uu.type.CSSPROP - CSS2Properties (window.getComputedStyle)
     }),
-    isnum:          uuisnum,        // uu.isnum(123) -> true
-    isstr:          uuisstr,        // uu.isstr("a") -> true
-    isary:          uuisary,        // uu.isary([]) -> true
-    isfunc:         uuisfunc,       // uu.isfunc(uunop) -> true
+    isnum:          uuisnum,        // uu.isnum(Number)    -> true
+    isstr:          uuisstr,        // uu.isstr(String)    -> true
+    isary:          uuisary,        // uu.isary(Array)     -> true
+    isdate:         uuisdate,       // uu.isdate(Date)     -> true
+    isfunc:         uuisfunc,       // uu.isfunc(Function) -> true
     // --- user agent (uu.ver.* alias) ---
-    ie:             _VER.ie,        // is IE
-    ie6:            _VER.ie6,       // is IE6
-    ie7:            _VER.ie7,       // is IE7
-    ie8:            _VER.ie8,       // is IE8(IE8 mode)
-    ie9:            _VER.ie9,       // is IE9(IE9 mode)
-    ie67:           _VER.ie67,      // is IE6 or IE7
-    ie678:          _VER.ie678,     // is IE6 or IE7 or IE8
-    opera:          _VER.opera,     // is Opera
-    gecko:          _VER.gecko,     // is Gecko
-    webkit:         _VER.webkit,    // is WebKit
+    ie:             uuver.ie,       // is IE
+    opera:          uuver.opera,    // is Opera
+    gecko:          uuver.gecko,    // is Gecko
+    webkit:         uuver.webkit,   // is WebKit (Safari, Google Chrome, iPhone)
     // --- debug ---
     puff:           uupuff,         // uu.puff(mix) -> alert(...)
     trace:    uumix(uutrace, {      // [1][no title]   uu.trace(mix)        -> <div id="trace">msg</div>
@@ -356,10 +278,8 @@ uu = uumix(uujamfactory, {          // uu(expr, ctx) -> Instance(jam)
     win: {
         size:       uuwinsize       // uu.win.size() -> { iw, ih, sw, sh }
     },
+    nop:            function() {},  // uu.nop() -> undefined, (no operation)
     dmz:            {},             // uu.dmz - DeMilitarized Zone(proxy)
-    date: {
-        hash:       uudatehash      // uu.date.hash(new Date) -> { Y, M, D, h, m, s, ms }
-    },
     guid:           uuguid,         // uu.guid() -> Number(unique)
     lazy:     uumix(uulazy, {       // uu.lazy(id, fn, order = 0)
                                     //         order: 0 is low, 1 is mid, 2 is high(system)
@@ -367,9 +287,51 @@ uu = uumix(uujamfactory, {          // uu(expr, ctx) -> Instance(jam)
     })
 });
 
+// --- long name alias ---
+uu.version          = uuver;
+uu.array            = uuary;
+uu.event            = uuev;
+uu.element          = uuelm;
+uu.format           = uufmt;
+uu.isNumber         = uuisnum;
+uu.isString         = uuisstr;
+uu.isArray          = uuisary;
+uu.isDate           = uuisdate;
+uu.isFunction       = uuisfunc;
+uu.type.BOOLEAN     = uu.type.BOOL;
+uu.type.FUNCTION    = uu.type.FUNC;
+uu.type.NUMBER      = uu.type.NUM;
+uu.type.STRING      = uu.type.STR;
+uu.type.ARRAY       = uu.type.ARY;
+uu.type.REGEXP      = uu.type.REX;
+
 // uu - uu.jam factory
 function uujamfactory(expr, ctx) {
     return new uu.jam(expr, ctx); // depend: uu.jam
+}
+
+// --- plugin / plugin name space ---
+// uu.plugin - enum plugins
+function uuplugin() { // @return Array: ["plugin-name", ...]
+    return uu.hash.keys(uuplugin);
+}
+
+// --- construction ---
+// uu.require - require file
+function uurequire(url) { // @param String: url
+                          // @return Boolean: true is load successed
+    try {
+        var xhr = win.ActiveXObject  ? new ActiveXObject("Microsoft.XMLHTTP") :
+                  win.XMLHttpRequest ? new XMLHttpRequest() : 0;
+
+        xhr.open("GET", url, false); // sync
+        xhr.send(null);
+        if (!xhr.status || (xhr.status >= 200 && xhr.status < 300)) {
+            return true;
+        }
+    } catch (err) {}
+
+    return false;
 }
 
 // --- ECMAScript-262 5th ---
@@ -411,7 +373,7 @@ uumix(String.prototype, {
 }, 0, 0);
 
 //{{{!mb
-win.HTMLElement && !win.HTMLElement.prototype.innerText &&
+uu.ver.gecko && win.HTMLElement && !win.HTMLElement.prototype.innerText &&
 (function(proto) {
     proto.__defineGetter__("innerText", innertextgetter);
     proto.__defineSetter__("innerText", innertextsetter);
@@ -422,29 +384,22 @@ win.HTMLElement && !win.HTMLElement.prototype.innerText &&
 
 // --- array / hash ---
 // uu.ary - to array, convert array, split string
-// [1][through]                 uu.ary([1, 2])           -> [1, 2]
-// [2][literal to ary]          uu.ary(12)               -> [12]
-// [3][string to ary]           uu.ary("12")             -> ["12"]
-// [4][string to ary(no split)] uu.ary("12,12", 0)       -> ["12,12"]
-// [5][convert NodeList]        uu.ary(NodeList)         -> [node, ...]
-// [6][convert arguments]       uu.ary(arguments)        -> [arg, ...]
-// [7][string split(,)]         uu.ary("word,word")      -> ["word", "word"]
-// [8][string split(;)]         uu.ary("word;word", ";") -> ["word", "word"]
-function uuary(mix,     // @param Array/Mix/NodeList/Arguments/String:
-               split) { // @param String(= ","): splitter, "" or 0 is no split
-                        // @return Array:
-    var type = uutype(mix), sp = split === void 0 ? "," : split,
-        rv, i, iz;
+// [1][through]                  uu.ary([1, 2])    -> [1, 2]
+// [2][literal to ary]           uu.ary(12)        -> [12]
+// [3][convert NodeList to ary]  uu.ary(NodeList)  -> [node, ...]
+// [4][convert arguments to ary] uu.ary(arguments) -> [arg, ...]
+function uuary(mix) { // @param Array/Mix/NodeList/Arguments/String:
+                      // @return Array:
+    var type = uutype(mix), rv, i, iz;
 
-    if (type === 0x004) { // uu.type.FAKE [5][6]
+    if (type === 0x004) { // uu.type.FAKE [3][4]
         for (rv = [], i = 0, iz = mix.length; i < iz; ++i) {
             rv[i] = mix[i];
         }
         return rv;
     }
     return (type === 0x400) ? mix // uu.type.ARY [1]
-         : (type === 0x200 && sp) ? mix.split(sp) // uu.type.STR [7][8]
-         : [mix]; // [2][3][4]
+         : [mix]; // [2]
 }
 
 // uu.ary.has - has array
@@ -471,7 +426,7 @@ function uuaryhas(ctx,     // @param Array: context
     return true;
 }
 
-// uu.ary.each - quick Array.prototype.forEach
+// uu.ary.each - quick Array.forEach
 function uuaryeach(ary,     // @param Array:
                    fn,      // @param Function: callback
                    dence) { // @param Number(= 1): 0 is Space Array(slowly)
@@ -567,31 +522,15 @@ function uuaryindexof(ary,     // @param Array:
 // uu.hash - make hash from key value pair
 // [1][through]      uu.hash({ key: "val" }) -> { key: "val" }
 // [2][pair to hash] uu.hash("key", mix)     -> { key: mix }
-// [3][split(,)]     uu.hash("key,a,key2,b")         -> { key:"a",key2:"b" }
-// [4][split(;)]     uu.hash("key;a;key2;b", ";", 0) -> { key:"a",key2:"b" }
-function uuhash(key,    // @param String/Hash: key
-                value,  // @param Mix(= void 0 or ","): value or splitter
-                type) { // @param Number(= void 0): value type,
-                        //                          0 is string, 1 is number
-                        // @return Hash: { key: value, ... }
-    var rv = {}, i = 0, iz, v, ary, num, split = 0;
+function uuhash(key,     // @param String/Hash: key
+                value) { // @param Mix(= void 0 or ","): value
+                         // @return Hash: { key: value, ... }
+    if (arguments.length === 1) { // [1]
+        return key;
+    }
+    var rv = {};
 
-    if (type !== v) { // [4]
-        ++split;
-    } else if (value !== v) { // [2]
-        rv[key] = value;
-    } else if (typeof key === "string") { // [3]
-        ++split;
-    } else { // [1]
-        rv = key;
-    }
-    if (split) {
-        ary = key.split(value || ","); // default splitter = ","
-        num = type === 1;
-        for (iz = ary.length; i < iz; i += 2) {
-            rv[ary[i]] = num ? +(ary[i + 1]) : ary[i + 1]; // to number
-        }
-    }
+    rv[key] = value; // [2]
     return rv;
 }
 // uu.hash._dd2num = { "00":   0 , ... "99":  99  }; Zero-filled dec string -> Number
@@ -632,7 +571,7 @@ function uuhashnth(hash,  // @param Hash: { a: 1, b: 2 }
     return [];
 }
 
-// uu.hash.each - Hash forEach
+// uu.hash.each - Hash.forEach
 function uuhasheach(hash, // @param Hash:
                     fn) { // @param Function: callback
     for (var i in hash) {
@@ -738,7 +677,7 @@ function uuhashhasvalue(hash,    // @param Hash:
     return uuhashindexof(hash, value) !== void 0;
 }
 
-// uu.each - Hash forEach, tiny Array.prototype.forEach
+// uu.each - Hash.forEach or quick Array.forEach
 function uueach(mix,  // @param Hash/Array:
                 fn) { // @param Function: callback
     (Array.isArray(mix) ? uuaryeach : uuhasheach)(mix, fn);
@@ -828,9 +767,11 @@ function uuattr(node,   // @param Node:
     return ((mix2 === void 0 && uuisstr(mix1)) ? uuattrget // [3][4]
                                                : uuattrset)(node, mix1, mix2); // [5][6]
 }
-uuattr._HASH = uuhash(uu.ie67 ? "for,htmlFor,className,class" :
-                      ("class,className,for,htmlFor,colspan,colSpan," +
-                       "accesskey,accessKey,rowspan,rowSpan,tabindex,tabIndex"));
+uuattr._HASH = uusplittohash(
+    uu.ver.ie67 ? "for,htmlFor,className,class"
+                : ("class,className,for,htmlFor,colspan,colSpan," +
+                   "accesskey,accessKey,rowspan,rowSpan,tabindex,tabIndex")
+);
 
 // uu.attr.get - get attribute
 // [1][get one  attr]  uu.attr.get(node, "attr") -> String
@@ -840,14 +781,22 @@ function uuattrget(node,    // @param Node:
                             // @return String/Hash: "value" (one attr)
                             //                   or { attr1: "value", ... }
     var rv = {}, ary = attrs.split(","), v, w, i = 0, iz = ary.length,
-        HASH = uuattr._HASH,
-        IEFIX = { href: 1, src: 1 }; // [IE6][IE7][FIX] a[href^="#"] -> full path
+        HASH = uuattr._HASH; // [IE67]  for -> htmlFor, className -> class
+                             // [OTHER] for -> htmlFor, class -> className
 
     for (; i < iz; ++i) {
         v = ary[i];
         w = HASH[v] || v;
-        rv[v] = (uu.ie ? ((uu.ie8 || IEFIX[v]) ? node.getAttribute(v, 2) : node[w])
-                       : node.getAttribute(w)) || "";
+        if (uu.ie) {
+            if (uu.ver.ie89 || v === "href" || v === "src") {
+                // [IE6][IE7][FIX] a[href^="#"] -> full path
+                rv[v] = node.getAttribute(v, 2) || "";
+            } else {
+                rv[v] = node[w] || "";
+            }
+        } else {
+            rv[v] = node.getAttribute(w) || "";
+        }
     }
     return (ary.length === 1) ? rv[ary[0]] : rv; // [3][4]
 }
@@ -954,11 +903,11 @@ function uucssopacityset(node,   // @param Node:
                                  // @return Node:
     var ns; // node.style alias
 
-    if (uu.ie678) {
+    if (uu.ver.ie678) {
         ns = node.style;
         if (node.uucssopacity === void 0) {
             // first time
-            if (uu.ie67) { // [FIX][IE]
+            if (uu.ver.ie67) { // [FIX][IE]
                 if ((node.currentStyle || {}).width === "auto") {
                     ns.zoom = 1;
                 }
@@ -972,7 +921,7 @@ function uucssopacityset(node,   // @param Node:
         : (val < 0.001) ? 0 : val;
     node.style.opacity = val;
 
-    if (uu.ie678) {
+    if (uu.ver.ie678) {
         node.uucssopacity = val + 1; // (1.0 ~ 2.0)
         ns.visibility = val ? "" : "hidden";
         ns.filter = ((val > 0 && val < 1)
@@ -983,6 +932,7 @@ function uucssopacityset(node,   // @param Node:
 }
 uucssopacityset._alpha = /^alpha\([^\x29]+\) ?/;
 
+// --- getComputedStyle wrapper ---
 // uu.style - getComputedStyle, currentStyle wrapper
 function uustyle(node,   // @param Node:
                  mode) { // @param Number(= 0):
@@ -993,7 +943,7 @@ function uustyle(node,   // @param Node:
                          // @return Hash: { prop: "val", ... }
 //{{{!mb
     // http://d.hatena.ne.jp/uupaa/20091212
-    if (uu.ie678) {
+    if (uu.ver.ie678) {
         if (mode === 4) {
             return node.currentStyle;
         }
@@ -1066,10 +1016,10 @@ function uustyle(node,   // @param Node:
     return win.getComputedStyle(node, null);
 }
 //{{{!mb
-uustyle._HASH = uu.ie678 ? _builduustylehash() : {};
+uustyle._HASH = uu.ver.ie678 ? _builduustylehash() : {};
 uustyle._UNITS = { m: 1, t: 2, "%": 3, o: 3 }; // em, pt, %, auto
 uustyle._UNIT_PT = /pt$/;
-uustyle._THICK_FIX = uu.ie8 ? "5px" : "6px";
+uustyle._THICK_FIX = uu.ver.ie8 ? "5px" : "6px";
 uustyle._RECTANGLE = { top: 1, left: 2, width: 3, height: 4 };
 //}}}!mb
 
@@ -1267,7 +1217,8 @@ function uuev(node,    // @param Node:
         evt = evt || win.event;
 
         if (!fire && !evt.code) {
-            var src = evt.srcElement || evt.target; // [IE] srcElement
+            var src = evt.srcElement || evt.target, // [IE] srcElement
+                iebody;
 
             // Extend properties { code, node, src, px, py, ox, oy }
             //      code - @Number: event code, see uuev._CODE
@@ -1282,8 +1233,14 @@ function uuev(node,    // @param Node:
             evt.code = (EVENT_CODE[evt.type] || 0) & 255;
             evt.node = node;
             evt.src = src;
-            evt.px = uu.ie ? evt.clientX + uu.iebody.scrollLeft : evt.pageX;
-            evt.py = uu.ie ? evt.clientY + uu.iebody.scrollTop  : evt.pageY;
+            if (uu.ie) {
+                iebody = uu.quirks ? doc.body : uu.node.root;
+                evt.px = evt.clientX + iebody.scrollLeft;
+                evt.py = evt.clientY + iebody.scrollTop;
+            } else {
+                evt.px = evt.pageX;
+                evt.py = evt.pageY;
+            }
             evt.ox = evt.offsetX || evt.layerX || 0; // [IE][Opera][WebKit] offsetX
             evt.oy = evt.offsetY || evt.layerY || 0; // [Gecko][WebKit] layerX
         }
@@ -1337,10 +1294,8 @@ function uuev(node,    // @param Node:
     return node;
 }
 uuev._PARSE = /^(?:(\w+)\.)?(\w+)(\+)?$/; // ^[NameSpace.]EvntType[Capture]$
-uuev._LIST = uuary(
-    "mousedown,mouseup,mousemove,mousewheel,click,dblclick," +
-    "keydown,keypress,keyup,change,submit,focus,blur,contextmenu"
-);
+uuev._LIST = ("mousedown,mouseup,mousemove,mousewheel,click,dblclick," +
+              "keydown,keypress,keyup,change,submit,focus,blur,contextmenu").split(",");
 uuev._CODE = {
     mousedown: 1, mouseup: 2, mousemove: 3, mousewheel: 4, click: 5,
     dblclick: 6, keydown: 7, keypress: 8, keyup: 9, mouseenter: 10,
@@ -1363,8 +1318,8 @@ function uuevfire(node,    // @param Node: target node
                            // @return Node:
     if (uu.ev.has(node, name)) {
         node.uuevfn[name].call(node, {
-            stopPropagation: uunop,
-            preventDefault:  uunop,
+            stopPropagation: uu.nop,
+            preventDefault:  uu.nop,
             node:   node, // current target
             name:   name, // event name
             code:   0,    // 0: unknown
@@ -1443,7 +1398,7 @@ function uuevdetach(node, type, fn, capture) {
 }
 
 // uu.ready - hook DOMContentLoaded event
-// [1][DOM ready] uu.ready(fn, order = 0)
+// [DOM ready] uu.ready(fn, order = 0)
 function uuready(fn,      // @param Function(= void 0): callback function
                  order) { // @param Number(= 0): uu.lazy order
                           //         order: 0 is low, 1 is mid, 2 is high(system)
@@ -1454,44 +1409,59 @@ function uuready(fn,      // @param Function(= void 0): callback function
 }
 
 // --- node ---
+// uu.elm - createElement wrapper
+function uuelm(tagName) { // @param String(= "div"):
+                          // @return Node: new <node>
+    return doc.createElement(tagName || "div");
+}
+
 // uu.node - add node
 //
-//  <div id="parent">
-//      <div id="first">(1) first sibling</div>
-//      <div id="prev">(2) prev sibling</div>
-//      <div id="ctx">context node
-//          <div id="firstChild">(5) first child</div>
-//          <div>
-//              <div id="onlyChild"></div>
-//          </div>
-//          <div id="lastChild">(6) last child</div>
-//      </div>
-//      <div id="next">(3) next sibling</div>
-//      <div id="last">(4) last sibling</div>
-//  </div>
-function uunode(data,  // @param Node/DocumentFragment/HTMLString:
-                ctx,   // @param Node(= <body>): context
-                pos) { // @param Number(= 6): insert position
-                       //           1: first sibling
-                       //           2: prev sibling
-                       //           3: next sibling
-                       //           4: last sibling
-                       //           5: first child
-                       //           6: last child
-                       // @return Node: node or first node
+// [1][add new div node]        uu.node()         -> <body><div /></body>
+// [2][add new node]            uu.node("p")      -> <body><p /></body>
+// [3][add node]                uu.node(uu.div()) -> <body><div /></body>
+// [4][add HTMLFragmentString]  uu.node("<div><p>txt</p></div>") -> <body><div><p>txt</p></div></body>
+// [5][add DocumentFragment]    uu.node(DocumentFragment)        -> <body>{{fragment}}</body>
+function uunode(data,       // @param Node/DocumentFragment/HTMLString(= "div"):
+                ctx,        // @param Node(= <body>): add to context
+                position) { // @param Number(= 6): insert position
+                            //           1: first sibling
+                            //           2: prev sibling
+                            //           3: next sibling
+                            //           4: last sibling
+                            //           5: first child
+                            //           6: last child
+                            // @return Node: node or first node
     ctx = ctx || doc.body;
-    var n = data.nodeType ? data : uunodebulk(data), p = ctx.parentNode,
+
+    var n = !data ? doc.createElement("div")      // [1] uu.node()
+          : data.nodeType ? data                  // [3][5] uu.node(Node or DocumentFragment)
+          : !data.indexOf("<") ? uunodebulk(data) // [4] uu.node(HTMLFragmentString)
+          : doc.createElement(data),              // [2] uu.node("p")
+        p = ctx.parentNode,
         rv = (n.nodeType === 11) ? n.firstChild : n; // 11: DocumentFragment
 
-    if (!{ input: 1, INPUT: 1 }[ctx.nodeName]) {
-        switch (pos || 6) {
-        case 1: p.insertBefore(n, p.firstChild); break;     // first sibling
-        case 2: p.insertBefore(n, ctx); break;              // prev sibling
-        case 3: p.insertBefore(n, ctx.nextSibling); break;  // next sibling
-        case 4: p.appendChild(n); break;                    // last sibling
-        case 5: ctx.insertBefore(n, ctx.firstChild); break; // first child
-        case 6: ctx.appendChild(n);                         // last child
-        }
+    //  <div id="parent">
+    //      <div id="first">(position = 1) first sibling</div>
+    //      <div id="prev"> (position = 2) prev sibling</div>
+    //      <div id="ctx">context node
+    //
+    //          <div id="firstChild">(position = 5) first child</div>
+    //          <div></div>
+    //          <div id="lastChild"> (position = 6) last child</div>
+    //
+    //      </div>
+    //      <div id="next"> (position = 3) next sibling</div>
+    //      <div id="last"> (position = 4) last sibling</div>
+    //  </div>
+
+    switch (position || 6) {
+    case 1: p.insertBefore(n, p.firstChild); break;     // first sibling
+    case 2: p.insertBefore(n, ctx); break;              // prev sibling
+    case 3: p.insertBefore(n, ctx.nextSibling); break;  // next sibling
+    case 4: p.appendChild(n); break;                    // last sibling
+    case 5: ctx.insertBefore(n, ctx.firstChild); break; // first child
+    case 6: ctx.appendChild(n);                         // last child
     }
     return rv;
 }
@@ -1536,7 +1506,7 @@ function uunodehas(node,  // @param Node: child node
 function uunodebulk(node) { // @param Node/HTMLString:
                             // @return DocumentFragment:
     var rv = doc.createDocumentFragment(),
-        placeholder = uue();
+        placeholder = uuelm();
 
     placeholder.innerHTML = uuisstr(node) ? node            // [2] "<p>html</p>"
                                           : node.outerHTML; // [1] node
@@ -1621,7 +1591,7 @@ function uutag(expr,  // @param String: "*" or "tag"
     var nodeList = (ctx || doc).getElementsByTagName(expr),
         rv = [], ri = -1, v, i = 0, iz = nodeList.length;
 
-    if (_VER.ie && expr === "*") { // [IE] getElementsByTagName("*") has comment nodes
+    if (uuver.ie && expr === "*") { // [IE] getElementsByTagName("*") has comment nodes
         for (; i < iz; ++i) {
             (v = nodeList[i]).nodeType === 1 && (rv[++ri] = v); // 1: ELEMENT_NODE
         }
@@ -1632,12 +1602,12 @@ function uutag(expr,  // @param String: "*" or "tag"
     }
     return rv;
 }
-uutag.HTML4 = uuary("a,b,br,dd,div,dl,dt,h1,h2,h3,h4,h5,h6,i,img,iframe," +
-                    "input,li,ol,option,p,pre,select,span,table,tbody,tr," +
-                    "td,th,tfoot,textarea,u,ul"); // exclude <html><head><body>
-uutag.HTML5 = uuary("abbr,article,aside,audio,bb,canvas,datagrid,datalist," +
-                    "details,dialog,eventsource,figure,footer,header,hgroup," +
-                    "mark,menu,meter,nav,output,progress,section,time,video");
+uutag.HTML4 = ("a,b,br,dd,div,dl,dt,h1,h2,h3,h4,h5,h6,i,img,iframe," +
+               "input,li,ol,option,p,pre,select,span,table,tbody,tr," +
+               "td,th,tfoot,textarea,u,ul").split(","); // exclude <html><head><body>
+uutag.HTML5 = ("abbr,article,aside,audio,bb,canvas,datagrid,datalist," +
+               "details,dialog,eventsource,figure,footer,header,hgroup," +
+               "mark,menu,meter,nav,output,progress,section,time,video").split(",");
 
 // uu.klass - query className
 function uuklass(expr,  // @param JointString: "class", "class1, ..."
@@ -1687,57 +1657,16 @@ function uufix(str) { // @param String:
 uufix._db = {}; // { "background-color": "backgroundColor", ... }
 
 // uu.fmt - placeholder( "?" ) replacement
-// uu.fmt("? dogs", [101]) -> "101 dogs"
-function uufmt(format, // @param String: formatted string with placeholder
-               ary) {  // @param Array: [Mix, ...]
-                       // @return String: "formatted string"
-    var i = -1;
+// uu.fmt("? dogs", 101) -> "101 dogs"
+function uufmt(format) { // @param String: formatted string with placeholder
+                         // @return String: "formatted string"
+    var i = 0, args = arguments;
 
     return format.replace(uufmt._PLACEHOLDER, function() {
-        return ary[++i];
+        return args[++i];
     });
 }
 uufmt._PLACEHOLDER = /\?/g;
-
-// uu.esc - escape to HTML entity
-function uuesc(str) { // @param String: '<a href="&">'
-                      // @return String '&lt;a href=&quot;&amp;&quot;&gt;'
-    return str.replace(uuesc._ENTITY_KEYWORD, _uuescentity);
-}
-uuesc._ENTITY_KEYWORD = /[&<>"]/g; // entity keyword
-
-// inner - to/from entity
-function _uuescentity(code) {
-    return _uuescentity._HASH[code];
-}
-_uuescentity._HASH = uuhash('&,&amp;,<,&lt;,>,&gt;,",&quot;,' +
-                            '&amp;,&,&lt;,<,&gt;,>,&quot;,"');
-
-// uu.ucs2 - char to "\u0000"
-function uuucs2(str,   // @param String:
-                pos) { // @param Number(= 0): position
-                       // @return String "\u0000" ~ "\uffff"
-    var c = str.charCodeAt(pos || 0);
-
-    return "\\u" + uuhash._num2hh[(c >> 8) & 255] + uuhash._num2hh[c & 255];
-}
-
-// uu.unesc - unescape from HTML entity
-function uuunesc(str) { // @param String: '&lt;a href=&quot;&amp;&quot;&gt;'
-                        // @return String: '<a href="&">'
-    return str.replace(uuunesc._ENTITY_KEYWORD, _uuescentity);
-}
-uuunesc._ENTITY_KEYWORD = /&(?:amp|lt|gt|quot);/g;
-
-// uu.unucs2 - "\u0000" to char
-function uuunucs2(str) { // @param String:
-                         // @return String: "\u0000" ~ "\uffff"
-    function _uuunucs2(m, hex) {
-        return String.fromCharCode(parseInt(hex, 16));
-    }
-    return str.replace(uuunucs2._UHHHH, _uuunucs2);
-}
-uuunucs2._UHHHH = /\\u([0-9a-f]{4})/g; // \u0000 ~ \uffff
 
 // uu.trim - trim both side whitespace
 function uutrim(str) { // @param String: "  has  space "
@@ -1800,63 +1729,19 @@ function uusplitcomma(str) { // @param String: " split,comma,token "
                replace(uusplit._TRIM_SPACE_AND_COMMAS, "").split(",");
 }
 
-// uu.date2str - encode ISO / GMT format time string
-// [1][ISO8601 now]  uu.date2str()        -> "2000-01-01T00:00:00.000Z"
-// [2][ISO8601 date] uu.date2str(date)    -> "2000-01-01T00:00:00.000Z"
-// [3][RFC1123 now]  uu.date2str(0, 1)    -> "Wed, 16 Sep 2009 16:18:14 GMT"
-// [4][RFC1123 date] uu.date2str(date, 1) -> "Wed, 16 Sep 2009 16:18:14 GMT"
-function uudate2str(date,   // @param Date/Number(= void 0):
-                            //        void 0 is current date
-                    type) { // @param Number(= 0) 0 is ISO date, 1 is GMT date
-                            // @return ISO8601DateString/RFC1123DateString:
-    date = !date ? new Date() // void 0 or 0 -> current time [1][3]
-                 : typeof date === "number" ? new Date(date) : date;
-    var rv = "", h, num2dd = uuhash._num2dd;
+// uu.split.toHash - split to hash
+function uusplittohash(str,        // @param String: "key,0,key2,1"
+                       splitter,   // @param String(= ","): splitter
+                       toNumber) { // @param Boolean(= false): convert value to number
+                                   // @return Hash: { key: "0", key2: "1" }
+    var rv = {}, ary = str.split(splitter || ","), i = 0, iz = ary.length,
+        num = toNumber ? true : false;
 
-    if (type) { // GMT(RFC1123) [3][4]
-        rv = date.toUTCString();
-        if (uu.ie && rv.indexOf("UTC") > 0) { // http://d.hatena.ne.jp/uupaa/20080515
-            rv = rv.replace(/UTC/, "GMT");
-            (rv.length < 29) && (rv = rv.replace(/, /, ", 0")); // [IE] fix format
-        }
-    } else { // [1][2]
-        h = uudatehash(date);
-        rv = h.Y + '-' + num2dd[h.M] + '-' + num2dd[h.D] + 'T' +
-                         num2dd[h.h] + ':' + num2dd[h.m] + ':' +
-                         num2dd[h.s] + '.' +
-             ((h.ms < 10) ? "00" : (h.ms < 100) ? "0" : "") + h.ms + 'Z';
+    for (; i < iz; i += 2) {
+        rv[ary[i]] = num ? +(ary[i + 1]) : ary[i + 1];
     }
     return rv;
 }
-
-// uu.str2date - decode format time string(ISO8601 string to Date)
-// uu.str2date("2000-01-01T00:00:00[.000]Z") -> { valid, date }
-function uustr2date(str,  // @param ISO8601DateString/RFC1123DateString:
-                    rv) { // @param Hash(= void 0):
-                          // @return Hash: { valid, date }
-                          //         Boolean: valid, 0 or 1
-                          //         DateObject: date, Date or NaN
-    function _uustr2date(_, dow, d, m) {
-        return dow + " " + m + " " + d;
-    }
-
-    rv || (rv = { valid: 0, date: NaN });
-    var m = uustr2date._PARSE.exec(str);
-
-    if (m) {
-        rv.date = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3],      // yyyy-mm-dd
-                                    +m[4], +m[5], +m[6], +m[7])); // hh:mm:ss.ms
-    } else {
-        if (uu.ie && str.indexOf("GMT") > 0) {
-            str = str.replace(/GMT/, "UTC");
-        }
-        str = str.replace(",", "").replace(/^([\w]+) (\w+) (\w+)/, _uustr2date);
-        rv.date = new Date(str);
-    }
-    rv.valid = isNaN(rv.date) ? 0 : 1;
-    return rv;
-}
-uustr2date._PARSE = /^(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d):(\d\d)(?:\.(\d*))?Z$/;
 
 // --- debug ---
 // uu.puff - alert + JSON.stringify
@@ -1911,41 +1796,41 @@ function uujson(mix,        // @param Mix:
                                   : _jsoninspect(mix, callback);
 }
 
-// uu.json.toMix
-function uujsontomix(str,          // @param JSONString:
-                     nativeJSON) { // @param Number(= 0): switch native impl or js impl
-                                   //               1 is native, 0 is js
-                                   // @return Mix/Boolean:
+// uu.json.decode - decode JSONString
+function uujsondecode(str,          // @param JSONString:
+                      nativeJSON) { // @param Number(= 0): switch native impl or js impl
+                                    //                     1 is native, 0 is js
+                                    // @return Mix/Boolean:
     return nativeJSON && win.JSON ? win.JSON.parse(str) :
-           uujsontomix._NGWORD.test(
-                str.replace(uujsontomix._UNESCAPE, "")) ? false
-                                                        : uujs("return " + str + ";");
+           uujsondecode._NGWORD.test(
+                str.replace(uujsondecode._UNESCAPE, "")) ? false
+                                                         : uujs("return " + str + ";");
 }
-uujsontomix._NGWORD = /[^,:{}\[\]0-9.\-+Eaeflnr-u \n\r\t]/;
-uujsontomix._UNESCAPE = /"(\\.|[^"\\])*"/g;
+uujsondecode._NGWORD = /[^,:{}\[\]0-9.\-+Eaeflnr-u \n\r\t]/;
+uujsondecode._UNESCAPE = /"(\\.|[^"\\])*"/g;
 
-// uu.str2json - string to JSON formatted string
-function uustr2json(str,        // @param String:
-                    addQuote) { // @param Number(= 0): 1 is add quote(")
-                                // @return String: '\u0000' or '"\u0000"'
+// inner - convert string to JSON formatted string
+function _str2json(str,        // @param String:
+                   addQuote) { // @param Number(= 0): 1 is add quote(")
+                               // @return String: '\u0000' or '"\u0000"'
     function _swap(m) {
-        return uustr2json._SWAP[m];
+        return _str2json._SWAP[m];
     }
     function _ucs2(str, c) {
         c = str.charCodeAt(0);
-        // '\u{hhhh}'
+        // '\uffff'
         return "\\u" + uuhash._num2hh[(c >> 8) & 255] +
                        uuhash._num2hh[ c       & 255];
     }
 
-    var rv = str.replace(uustr2json._ESCAPE, _swap).
-                 replace(uustr2json._ENCODE, _ucs2);
+    var rv = str.replace(_str2json._ESCAPE, _swap).
+                 replace(_str2json._ENCODE, _ucs2);
 
     return addQuote ? '"' + rv + '"' : rv;
 }
-uustr2json._SWAP   = uuhash('",\\",\b,\\b,\f,\\f,\n,\\n,\r,\\r,\t,\\t,\\,\\\\');
-uustr2json._ESCAPE = /(?:\"|\\[bfnrt\\])/g; // escape
-uustr2json._ENCODE = /[\x00-\x1F\u0080-\uFFEE]/g;
+_str2json._SWAP = uusplittohash('",\\",\b,\\b,\f,\\f,\n,\\n,\r,\\r,\t,\\t,\\,\\\\');
+_str2json._ESCAPE = /(?:\"|\\[bfnrt\\])/g; // escape
+_str2json._ENCODE = /[\x00-\x1F\u0080-\uFFEE]/g;
 
 // inner - json inspect
 function _jsoninspect(mix, fn) {
@@ -1961,11 +1846,11 @@ function _jsoninspect(mix, fn) {
     case 0x002: return '"uuguid":' + uunodeid(mix); // uu.type.NODE
     case 0x010: return "null";              // uu.type.NULL
     case 0x020: return "undefined";         // uu.type.VOID
-    case 0x008: return uudate2str(mix);     // uu.type.DATE
+    case 0x008: return uudatetoiso(uudate(mix)); // uu.type.DATE
     case 0x040:
     case 0x080:
     case 0x100: return mix.toString();      // uu.type.BOOL & FUNC & NUM
-    case 0x200: return uustr2json(mix, 1);  // uu.type.STR
+    case 0x200: return _str2json(mix, 1);   // uu.type.STR
     case 0x400: // uu.type.ARY & FAKE
     case 0x004: for (ary = [], i = 0, iz = mix.length; i < iz; ++i) {
                     ary[++ai] = _jsoninspect(mix[i], fn);
@@ -1979,15 +1864,98 @@ function _jsoninspect(mix, fn) {
         for (i in mix) {
             if (typeof mix[i] === "string" && (w || i != (+i + ""))) { // !isNaN(i)
                 w && (i = mix.item(i));
-                ary[++ai] = '"' + i + '":' + uustr2json(mix[i], 1);
+                ary[++ai] = '"' + i + '":' + _str2json(mix[i], 1);
             }
         }
     } else {
         for (i in mix) { // uu.type.HASH
-            ary[++ai] = uustr2json(i, 1) + ":" + _jsoninspect(mix[i], fn);
+            ary[++ai] = _str2json(i, 1) + ":" + _jsoninspect(mix[i], fn);
         }
     }
     return "{" + ary + "}";
+}
+
+// --- date ---
+// uu.date - date accessor
+// [1][now]                   uu.date() -> DateHash
+// [2][date to hash]          uu.date(Date) -> DateHash
+// [3][time to hash]          uu.date(milliseconds) -> DateHash
+// [4][DateString to hash]    uu.date("2000-01-01T00:00:00[.000]Z") -> DateHash
+// [5][ISO8601String to hash] uu.date("2000-01-01T00:00:00[.000]Z") -> DateHash
+// [6][RFC1123String to hash] uu.date("Wed, 16 Sep 2009 16:18:14 GMT") -> DateHash
+function uudate(mix) { // @param Date/Number/String(= void 0):
+                       // @return DateHash:
+    return mix === void 0 ? _date2hash(new Date())      // [1] uu.date()
+         : uuisdate(mix)  ? _date2hash(mix)             // [2] uu.date(new Date())
+         : uuisnum(mix)   ? _date2hash(new Date(mix))   // [3] uu.date(1234567)
+         : _date2hash(_str2date(mix) || new Date(mix)); // [4][5][6]
+}
+
+// inner - convert Date to DateHash
+function _date2hash(date) { // @param Date:
+                            // @return Hash: { Y: 2010, M: 12, D: 31,
+                            //                 h: 23, m: 59, s: 59, ms: 999,
+                            //                 time: xxxxxxx }
+    return { Y:  date.getUTCFullYear(),     M:    date.getUTCMonth() + 1,
+             D:  date.getUTCDate(),         h:    date.getUTCHours(),
+             m:  date.getUTCMinutes(),      s:    date.getUTCSeconds(),
+             ms: date.getUTCMilliseconds(), time: date.getTime() };
+}
+
+// inner - DateString to Date
+//      "2000-01-01T00:00:00[.000]Z"    -> Date
+//      "Wed, 16 Sep 2009 16:18:14 GMT" -> Date
+function _str2date(str) { // @param ISO8601DateString/RFC1123DateString:
+                          // @return Date/0:
+    function _toDate(_, dayOfWeek, day, month) {
+        return dayOfWeek + " " + month + " " + day;
+    }
+
+    var m = _str2date._PARSE.exec(str);
+
+    if (m) {
+        return new Date(Date.UTC(+m[1], +m[2] - 1, +m[3],      // yyyy-mm-dd
+                                 +m[4], +m[5], +m[6], +m[7])); // hh:mm:ss.ms
+    } else {
+        if (uu.ie && str.indexOf("GMT") > 0) {
+            str = str.replace(/GMT/, "UTC");
+        }
+        return new Date(str.replace(",", "").
+                            replace(_str2date._DATE, _toDate));
+    }
+    return 0;
+}
+_str2date._PARSE = /^(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d):(\d\d)(?:\.(\d*))?Z$/;
+_str2date._DATE = /^([\w]+) (\w+) (\w+)/;
+
+// uu.date.toISOString - encode DateHash To ISO8601String
+function uudatetoiso(dateHash) { // @param DateHash(= void 0):
+                                 // @return ISO8601String: "2000-01-01T00:00:00.000Z"
+    var v = dateHash === void 0 ? _date2hash(new Date()) : dateHash,
+        padZero = (v.ms < 10) ? "00" : (v.ms < 100) ? "0" : "",
+        dd = uuhash._num2dd;
+
+    return uufmt("?-?-?T?:?:?.?Z", v.Y, dd[v.M], dd[v.D],
+                                   dd[v.h], dd[v.m], dd[v.s], padZero + v.ms);
+}
+
+// uu.date.toRFCString - encode DateHash To RFC1123String
+function uudatetorfc(dateHash) { // @param DateHash(= void 0):
+                                 // @return RFC1123String: "Wed, 16 Sep 2009 16:18:14 GMT"
+    var rv;
+
+    if (dateHash === void 0) {
+        rv = (new Date()).toUTCString();
+    } else {
+        rv = (new Date(dateHash.time)).toUTCString();
+    }
+    if (uu.ie && rv.indexOf("UTC") > 0) {
+        // http://d.hatena.ne.jp/uupaa/20080515
+
+        rv = rv.replace(/UTC/, "GMT");
+        (rv.length < 29) && (rv = rv.replace(/, /, ", 0")); // [IE] fix format
+    }
+    return rv;
 }
 
 // --- type ---
@@ -2015,7 +1983,8 @@ function uulike(mix1,   // @param Mix:
     }
     switch (type1) {
     case 0x080: return false;                                 // uu.type.FUNC
-    case 0x008: return uudate2str(mix1) === uudate2str(mix2); // uu.type.DATE
+    case 0x008: return uudatetoiso(uudate(mix1)) ===
+                       uudatetoiso(uudate(mix2)); // uu.type.DATE
     case 0x001: return (uuhashsize(mix1) === uuhashsize(mix2) // uu.type.HASH
                        && uuhashhas(mix1, mix2));
     case 0x004: // http://d.hatena.ne.jp/uupaa/20091223
@@ -2058,6 +2027,12 @@ function uuisary(mix) { // @param Mix: [1,2,3]
     return Object.prototype.toString.call(mix) === "[object Array]";
 } // [OPTIMIZED]
 
+// uu.isdate - is date
+function uuisdate(mix) { // @param Mix: Date
+                         // @return Boolean:
+    return Object.prototype.toString.call(mix) === "[object Date]";
+} // [OPTIMIZED]
+
 // uu.isfunc - is function
 function uuisfunc(mix) { // @param Mix: function(){}
                          // @return Boolean:
@@ -2079,23 +2054,13 @@ function uuwinsize() { // @return Hash: { iw, ih, sw, sh }
                        //   sw Number: scrollWidth
                        //   sh Number: scrollHeight
     if (uu.ie) {
-        var node = uu.iebody;
+        var iebody = uu.quirks ? doc.body : uu.node.root;
 
-        return { iw: node.clientWidth, ih: node.clientHeight,
-                 sw: node.scrollLeft,  sh: node.scrollTop };
+        return { iw: iebody.clientWidth, ih: iebody.clientHeight,
+                 sw: iebody.scrollLeft,  sh: iebody.scrollTop };
     }
     return { iw: win.innerWidth,  ih: win.innerHeight,
              sw: win.pageXOffset, sh: win.pageYOffset };
-}
-
-// uu.date.hash - get date members
-function uudatehash(date) { // @param Date:
-                            // @return Hash: { Y: 2010, M: 12, D: 31,
-                            //                 h: 23, m: 59, s: 59, ms: 999 }
-    return { Y:  date.getUTCFullYear(), M: date.getUTCMonth() + 1,
-             D:  date.getUTCDate(),     h: date.getUTCHours(),
-             m:  date.getUTCMinutes(),  s: date.getUTCSeconds(),
-             ms: date.getUTCMilliseconds() };
 }
 
 // uu.guid - get unique number
@@ -2255,7 +2220,7 @@ function arrayreduceright(fn,     // @param Function: callback evaluator
 
 // Date.prototype.toISOString - to ISO8601 string
 function datetoisostring() { // @return String:
-    return uudate2str(this);
+    return uudatetoiso(uudate(this));
 }
 
 // Number.prototype.toJSON, Boolean.prototype.toJSON
@@ -2270,7 +2235,7 @@ function stringtrim() { // @return String: "has  space"
 
 // String.prototype.toJSON
 function stringtojson() { // @return String: "string"
-    return uustr2json(this);
+    return _str2json(this);
 }
 
 // --- HTMLElement.prototype ---
@@ -2324,13 +2289,12 @@ uuaryeach(uuev._LIST, function(v) {
 
 // Internet Explorer 6 flicker fix
 try {
-    uu.ie6 && doc.execCommand("BackgroundImageCache", false, true);
+    uu.ver.ie6 && doc.execCommand("BackgroundImageCache", false, true);
 } catch(err) {} // ignore error(IETester / stand alone IE too)
 
 // inner - bootstrap, WindowReadyState and DOMReadyState handler
 function _ready() {
     if (!uuready.gone.blackout && !uuready.gone.dom++) {
-        uu.ie && (uu.iebody = uu.quirks ? doc.body : uu.rootNode); // [IE] lazy detect
 
         uulazyfire("boot");
         uuisfunc(win.xboot || 0) && win.xboot(uu); // window.xboot(uu) callback
@@ -2383,8 +2347,8 @@ uu.ie && win.attachEvent("onunload", _winunload);
 // 2. prebuild nodeid
 uuready(function() {
     var nodeList = doc.html.getElementsByTagName("*"), v, i = -1,
-        styles = uuhash((uu.ie ? "float,styleFloat,cssFloat,styleFloat"
-                               : "float,cssFloat,styleFloat,cssFloat") +
+        styles = uusplittohash((uu.ie ? "float,styleFloat,cssFloat,styleFloat"
+                                      : "float,cssFloat,styleFloat,cssFloat") +
                 ",pos,position,w,width,h,height,x,left,y,top,o,opacity," +
                 "bg,background,bgcolor,backgroundColor,bgimg,backgroundImage," +
                 "bgrpt,backgroundRepeat,bgpos,backgroundPosition");
@@ -2431,17 +2395,10 @@ function _classNameMatcher(ary) {
     return RegExp("(?:^| )(" + ary.join("|") + ")(?:$|(?= ))", "g");
 }
 
-// uu.ver.detect - detect versions and meta informations
+// inner - detect versions and meta informations
 // http://d.hatena.ne.jp/uupaa/20090603
-function uuverdetect(userAgent) { // @param String: UserAgent String
-                                  // @return Hash: { browser, render,
-                                  //                 silverlight, flash, as3,
-                                  //                 ie, ie6, ie7, ie8, ie9, ie67, ie678,
-                                  //                 opera, webkit, chrome,
-                                  //                 safari, iphone,
-                                  //                 quirks, xml, win, mac, unix,
-                                  //                 advanced, major, jit }
-
+function _detectVersion(userAgent) { // @param String: UserAgent String
+                                     // @return VersionHash:
     function detectRenderingEngineVersion(userAgent) {
         var ver = ((/(?:rv\:|ari\/|sto\/)(\d+\.\d+(\.\d+)?)/.exec(userAgent)
                         || [,0])[1]).toString()
@@ -2458,10 +2415,12 @@ function uuverdetect(userAgent) { // @param String: UserAgent String
                                   exec(userAgent) || [,0])[1]);
     }
 
-//{{{!mb detect Flash version (version 7 ~ later)
+
+    // detect Flash version (version 7 ~ later)
     function detectFlashVersion(ie) {
         var rv = 0, obj, ver, m;
 
+//{{{!mb
         try {
             obj = ie ? new ActiveXObject("ShockwaveFlash.ShockwaveFlash")
                      : navigator.plugins["Shockwave Flash"];
@@ -2470,15 +2429,15 @@ function uuverdetect(userAgent) { // @param String: UserAgent String
             m = /\d+\.\d+/.exec(ver);
             rv = m ? parseFloat(m[0]) : 0;
         } catch(err) {}
-
+//}}}!mb
         return rv < 7 ? 0 : rv;
     }
-//}}}!mb
 
-//{{{!mb detect Silverlight version (version 3 ~ later)
+    // detect Silverlight version (version 3 ~ later)
     function detectSilverlightVersion(ie) {
         var rv = 0, obj, check = 3;
 
+//{{{!mb
         try {
             if (ie) {
                 obj = new ActiveXObject("AgControl.AgControl");
@@ -2490,10 +2449,9 @@ function uuverdetect(userAgent) { // @param String: UserAgent String
                 rv = parseInt(/\d+\.\d+/.exec(obj.description)[0]);
             }
         } catch(err) {}
-
+//}}}!mb
         return rv < 3 ? 0 : rv;
     }
-//}}}!mb
 
     var rv = {}, ie = !!doc.uniqueID;
 
@@ -2501,7 +2459,6 @@ function uuverdetect(userAgent) { // @param String: UserAgent String
     rv.browser      = detectUserAgentVersion(userAgent);
     rv.flash        = detectFlashVersion(ie);
     rv.silverlight  = detectSilverlightVersion(ie);
-
     rv.ie           = ie;
     rv.ie6          = ie && rv.browser === 6;
     rv.ie7          = ie && rv.browser === 7;
@@ -2509,6 +2466,7 @@ function uuverdetect(userAgent) { // @param String: UserAgent String
     rv.ie9          = ie && (doc.documentMode || 0) === 9;
     rv.ie67         = rv.ie6 || rv.ie7;
     rv.ie678        = rv.ie6 || rv.ie7 || rv.ie8;
+    rv.ie89         = rv.ie8 || rv.ie9;
     rv.opera        = !!(window.opera || false);
     rv.gecko        = userAgent.indexOf("Gecko/") > 0;
     rv.webkit       = userAgent.indexOf("WebKit") > 0;
@@ -2516,7 +2474,8 @@ function uuverdetect(userAgent) { // @param String: UserAgent String
     rv.safari       = !rv.chrome && userAgent.indexOf("Safari") > 0;
     rv.iphone       = rv.webkit && /iPad|iPod|iPhone/.test(userAgent);
     rv.quirks       = (doc.compatMode || "") !== "CSS1Compat";
-    rv.xml          = uue().tagName === uue("DIV").tagName;
+    rv.xml          = doc.createElement("div").tagName ===
+                      doc.createElement("DIV").tagName;
     rv.win          = userAgent.indexOf("Win") > 0;
     rv.mac          = userAgent.indexOf("Mac") > 0;
     rv.unix         = /X11|Linux/.test(userAgent);
@@ -2530,12 +2489,6 @@ function uuverdetect(userAgent) { // @param String: UserAgent String
                       (rv.gecko  && rv.render  >= 1.9) || // Firefox 3+
                       (rv.webkit && rv.render  >  524);   // Safari 3.1+, Google Chrome 1+
     rv.jit          = rv.advanced;
-
-    // [DEPRECATED] members
-    rv.ua           = rv.browser;       // uu.ver.ua  [DEPRECATED]
-    rv.sl           = rv.silverlight;   // uu.ver.sl  [DEPRECATED]
-    rv.avd          = rv.advanced;      // uu.ver.adv [DEPRECATED]
-
     return rv;
 }
 

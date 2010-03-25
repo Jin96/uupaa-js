@@ -1,7 +1,9 @@
 
 // === URL/DataURI ===
-// depend: uu, uu.codec, uu.codec.base64
-uu.agein || (function(uu) {
+//{{{!depend uu, uu.codec, uu.codec.base64
+//}}}!depend
+
+uu.codec.url || (function(uu) {
 
 uu.codec.url = {
     decode: urldecode       // uu.codec.url.decode(String, toStr = false) -> ByteArray

@@ -1,7 +1,9 @@
 
 // === Unit Test ===
-// depend: uu.js, uu.str.js
-uu.agein || (function(uu) {
+//{{{!depend uu, uu.str
+//}}}!depend
+
+uu.test || (function(uu) {
 
 uu.test = uutest; // uu.test({ "title": function() { return [lhs, ope, rhs] })
 
@@ -29,15 +31,15 @@ function uutest(hash) { // @param Hash: { title: function, ... }
             } catch(err) {
                 ary = [rv = -1, err.message]; // -1: error
             }
-            rv == 1 ? ++ok : ng.push(uu.fmt('<a href="#uutest?">?</a>', [j, j]));
+            rv == 1 ? ++ok : ng.push(uu.fmt('<a href="#uutest?">?</a>', j, j));
             ++total;
         }
         // (rv === -1 || 0) -> error -> red bg
         rv < 1 && (document.body.style.backgroundColor = "red");
         // add item
-        node.push(uu.fmt(uutest._LI, [uutest._BGCOLOR[ary[0]], j,
-                         uu.esc(i).replace(br, "<br />"), // \n -> <br />
-                         uu.esc(ary[1])]));
+        node.push(uu.fmt(uutest._LI, uutest._BGCOLOR[ary[0]], j,
+                         uu.codec.entity.encode(i).replace(br, "<br />"), // \n -> <br />
+                         uu.codec.entity.encode(ary[1])));
     }
     uu.node(
         uu.fmt('<ol>?</ol>' +
@@ -45,10 +47,10 @@ function uutest(hash) { // @param Hash: { title: function, ... }
                   ' style="position:fixed;top:0;font-size:xx-large">?:' +
                   ' <span class="ok">?</span> / <span class="total">?</span>' +
                   ' <p>?</p></div>',
-               [node.join(""),
+                node.join(""),
                 ok === total ? "OK" : "NG",
                 ok, total,
-                ok === total ? "" : "(" + ng.join(", ") + ")"]));
+                ok === total ? "" : "(" + ng.join(", ") + ")"));
 }
 uutest._BGCOLOR = { 1: "green", 2: "#0c0", "-1": "red" };
 uutest._LI = '<li style="padding:5px;border:1px solid #ccc;background-color:?">' +
@@ -95,7 +97,7 @@ function _judge(lhs, ope, rhs) {
     }
     return rv;
 }
-_judge._TYPE_ALIAS = uu.hash(
+_judge._TYPE_ALIAS = uu.split.toHash(
     "ISUNDEF,ISVOID,ISUNDEFINED,ISVOID,ISOBJECT,ISHASH,ISARRAY,ISARY," +
     "ISBOOLEAN,ISBOOL,ISNUMBER,ISNUM,ISSTRING,ISSTR," +
     "ISFUNCTION,ISFUNC,ISFAKEARRAY,ISFAKE,ISFAKEARY,ISFAKE");

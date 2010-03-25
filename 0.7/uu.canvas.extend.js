@@ -1,7 +1,11 @@
 
 // === extend CanvasRenderingContext2D ===
-// depend: uu
-uu.agein || (function(win, doc, uu) {
+//{{{!depend uu, uu.canvas
+//}}}!depend
+
+uu.canvas.extended || (function(win, doc, uu) {
+
+uu.canvas.extended = 1;
 
 var _CanvasPrototype;
 
@@ -187,7 +191,7 @@ function _strokeTextOpera(ctx, text, x, y, maxWidth, fill) {
         cage;
 
     if (!ctx._cage) {
-        cage = uue();
+        cage = uu.elm();
         cage.style = "display:none";
         ctx._cage = doc.body.appendChild(cage);
     }
@@ -301,7 +305,7 @@ if (_CanvasPrototype) {
     // --- function ---
     _CanvasPrototype.lock   = lock;     // [EXTEND]
     _CanvasPrototype.clear  = clear;    // [EXTEND]
-    _CanvasPrototype.unlock = uunop;    // [EXTEND]
+    _CanvasPrototype.unlock = uu.nop;   // [EXTEND]
     _CanvasPrototype.drawCircle = drawCircle; // [EXTEND]
     _CanvasPrototype.drawRoundRect = drawRoundRect; // [EXTEND]
     // --- property ---

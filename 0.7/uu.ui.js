@@ -1,7 +1,7 @@
 
 // === UI ===
 // depend: uu.js
-uu.agein || (function(win, doc, uu) {
+uu.ui || (function(win, doc, uu) {
 
 uu.ui = uuui;               // [create instance] uu.ui(widget, placeholder, option) -> instance
 uu.query.ui = uuqueryui;    // [1][query all ui instance]  uu.query.ui("", ctx) -> { name, [instance, ...] }

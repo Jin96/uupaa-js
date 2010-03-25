@@ -1,28 +1,27 @@
 
 // === CSS 2.1 / StyleSheet ===
-// depend: uu, uu.Class, uu.color, uu.str, uu.tween
-//
+//{{{!depend uu, uu.class, uu.color, uu.str, uu.tween
+//}}}!depend
+
 // clientWidth           = style.width + padding
 // offsetWidth           = style.width + padding + border
 // getBoundingClientRect = style.width + padding + border
 //
-uu.agein || (function(win, doc, uu) {
-var _mix    = uu.mix,
-    _ie     = uu.ie,
-    _db     = { ss: {} }, // { StyleSheetid: StyleSheetObject, ... }
-    _BORDER = { thin: 1, medium: 3, thick: (uu.ie67 || uu.opera) ? 6 : 5 },
+uu.css.offset || (function(win, doc, uu) {
+var _styleSheetDB = { ss: {} }, // { StyleSheetid: StyleSheetObject, ... }
+    _BORDER = { thin: 1, medium: 3, thick: (uu.ver.ie67 || uu.opera) ? 6 : 5 },
     _IE_DX  = "DXImageTransform.Microsoft.",
     _SHADOW = _IE_DX + "Shadow",
     _BLUR   = _IE_DX + "MotionBlur",
     _POS_PARENT = { relative: 1, absolute: 1 };
 
-_mix(uu.css, {
+uu.mix(uu.css, {
     // --- offset (x, y) ---
     // [1][get] uu.css.offset(node) -> { x, y }(from <html>)
     // [2][get] uu.css.offset(node, node.parentNode) -> { x, y }(from ancestor)
     // [3][get] uu.css.offset(node, null, 1) -> { x, y }(from foster)
     // [4][set] uu.css.offset(node, x, y) -> node
-    offset:  _mix(uucssoffset, {
+    offset: uu.mix(uucssoffset, {
         get:      uucssoffsetget, // [1][from <html>]   uu.css.offset.get(node) -> { x, y }
                                   // [2][from ancestor] uu.css.offset.get(node, node.parentNode) -> { x, y }
                                   // [3][from foster]   uu.css.offset.get(node, 0, 1) -> { x, y }
@@ -32,7 +31,7 @@ _mix(uu.css, {
     // [1][get] uu.css.size(node) -> { w, h }(node.style.width + padding + border)
     // [2][get] uu.css.size(node, 1) -> { w, h }(node.style.width)
     // [3][set] uu.css.size(node, width, height) -> node
-    size:    _mix(uucsssize, {
+    size:  uu.mix(uucsssize, {
         get:      uucsssizeget,   // [1][get] uu.css.size(node) -> { w, h }(node.style.width + padding + border)
                                   // [2][get] uu.css.size(node, 1) -> { w, h }(node.style.width)
                                   // [3][get] uu.css.size(node, 2) -> { w, h }(node.style.width)(offscreen)
@@ -41,27 +40,27 @@ _mix(uu.css, {
     // --- rect (x, y, w, h) ---
     // [1][get] uu.css.rect(node) -> { x, y, w, h }
     // [2][set] uu.css.rect(node, hash) -> node
-    rect:    _mix(uucssrect, {
+    rect:  uu.mix(uucssrect, {
         get:      uucssrectget,   // uu.css.rect.get(node) -> { x, y, w, h }
         set:      uucssrectset    // uu.css.rect.set(node, { x, y, w, h }) -> node
     }),
     inRect:       uucssinrect,    // uu.css.inRect({ x, y, w, h }, x, y) -> Boolean
     // --- box ---
-    margin:  _mix(uucssmarginget, {   // [alias] uu.css.margin.get
+    margin: uu.mix(uucssmarginget, {  // [alias] uu.css.margin.get
         get:      uucssmarginget      // uu.css.margin.get(node, actual = false) -> { t, l, r, b, w, h }
     }),
-    border:  _mix(uucssborderget, {   // [alias] uu.css.border.get
+    border: uu.mix(uucssborderget, {  // [alias] uu.css.border.get
         get:      uucssborderget      // uu.css.border.get(node, actual = false) -> { t, l, r, b, w, h }
     }),
-    padding: _mix(uucsspaddingget, {  // [alias] uu.css.padding.get
+    padding: uu.mix(uucsspaddingget, { // [alias] uu.css.padding.get
         get:      uucsspaddingget     // uu.css.padding.get(node, actual = false) -> { t, l, r, b, w, h }
     }),
     // --- convert unit ---
-    px:      _mix(_ie ? uucsspxie
-                      : uucsspx, {    // uu.css.px(node, prop) -> Number(123)
+    px:    uu.mix(uu.ie ? uucsspxie
+                        : uucsspx, {  // uu.css.px(node, prop) -> Number(123)
         value:    uucsspxvalue,       // uu.css.px.value(node, value) -> Number(123)
-        actvalue: _ie ? uucsspxactvalueie
-                      : uucsspxactvalue
+        actvalue: uu.ie ? uucsspxactvalueie
+                        : uucsspxactvalue
                                       // uu.css.px.actvalue(node, value) -> Number(123)
     }),
     // --- appear ---
@@ -77,40 +76,40 @@ _mix(uu.css, {
     // --- background ---
     // [1][get] uu.css.bg(node) -> { color, img, rpt, pos }
     // [2][set] uu.css.bg(node, color, img, rpt, pos) -> node
-    bg:      _mix(uucssbg, {
+    bg:    uu.mix(uucssbg, {
         get:      uucssbgget,       // uu.css.bg.get(node) -> { color, img, rpt, pos }
         set:      uucssbgset        // uu.css.bg.set(node, color, img, rpt, pos) -> node
     }),
-    bgcolor: _mix(uucssbgcolor, {   // [1][get] uu.css.bgcolor(node) -> ColorHash
+    bgcolor: uu.mix(uucssbgcolor, { // [1][get] uu.css.bgcolor(node) -> ColorHash
                                     // [2][set] uu.css.bgcolor(node, ColorHash) -> node
         get:      uucssbgcolorget,  // uu.css.bgcolor.get(node) -> ColorHash
         set:      uucssbgcolorset   // uu.css.bgcolor.set(node, ColorHash) -> node
     }),
     // [1][get] uu.css.bgimg(node) -> URLString or ""
     // [2][set] uu.css.bgimg(node, url) -> node
-    bgimg:   _mix(uucssbgimg, {
+    bgimg: uu.mix(uucssbgimg, {
         get:      uucssbgimgget,  // uu.css.bgimg.get(node) -> "http://..." or ""
         set:      uucssbgimgset   // uu.css.bgimg.set(node, url) -> node
     }),
     // [1][get] uu.css.bgrpt(node) -> "repeat"
     // [2][set] uu.css.bgrpt(node, "repeat) -> node
-    bgrpt:   _mix(uucssbgrpt, {
+    bgrpt: uu.mix(uucssbgrpt, {
         get:      uucssbgrptget,  // uu.css.bgrpt.get(node) -> "repeat"
         set:      uucssbgrptset   // uu.css.bgrpt.set(node, "repeat") -> node
     }),
     // [1][get] uu.css.bgpos(node) -> [x, y]
     // [2][set] uu.css.bgpos(node, [x, y]) -> node
-    bgpos:   _mix(uucssbgpos, {
+    bgpos: uu.mix(uucssbgpos, {
         get:      uucssbgposget,  // uu.css.bgpos.get(node) -> [x, y]
         set:      uucssbgposset   // uu.css.bgpos.set(node, [x, y]) -> node
     }),
     // --- shadow ---
     // [1][get] uu.css.textShadow(node) -> "rgba(0,0,0,0) ox oy blur"
     // [2][set] uu.css.textShadow(node, param) -> node
-    textShadow: _mix(uucsstextshadow, {
-        get:      _ie ? uucsstextshadowgetie
+    textShadow: uu.mix(uucsstextshadow, {
+        get:    uu.ie ? uucsstextshadowgetie
                       : uucsstextshadowget,
-        set:      _ie ? uucsstextshadowsetie
+        set:    uu.ie ? uucsstextshadowsetie
                       : uucsstextshadowset
     }),
     makeShadow:   uucssmakeshadow,  // uu.css.makeShadow([color], [ox], [oy], [blur]) -> "rgba(0,0,0,0) 1px 1px 5px, ..."
@@ -154,7 +153,7 @@ function uucssoffsetget(node,     // @param: Node:
     var x = 0, y = 0, n = node, cs;
 
     if (foster) {
-        cs = _ie ? n.currentStyle : win.getComputedStyle(n, null);
+        cs = uu.ie ? n.currentStyle : win.getComputedStyle(n, null);
         if (_POS_PARENT[cs.position]) {
             if (cs.left !== "auto" && cs.top !== "auto") {
                 return { x: parseInt(cs.left), y: parseInt(cs.top) };
@@ -168,7 +167,7 @@ function uucssoffsetget(node,     // @param: Node:
         y += n.offsetTop  || 0;
         n = n.offsetParent;
         if (foster && n) {
-            cs = _ie ? n.currentStyle : win.getComputedStyle(n, null);
+            cs = uu.ie ? n.currentStyle : win.getComputedStyle(n, null);
             // positioning parent is { position: relative }
             //                    or { position: absolute }
             if (_POS_PARENT[cs.position]) {
@@ -186,7 +185,7 @@ function uucssoffsetset(node, // @param Node:
                               // @return Node:
     var ns = node.style;
 
-    if (_ie || uu.opera) {
+    if (uu.ie || uu.opera) {
         ns.pixelLeft = x;
         ns.pixelTop  = y;
     } else {
@@ -283,7 +282,7 @@ function uucssrectget(node) { // @param Node:
     var rv = uucsssizeget(node), fix = 0, x = 0, y = 0, vp, e;
 
     if (rv._x !== void 0) {
-        fix = (_ie && node.parentNode === doc.body) ? 2 : 0;
+        fix = (uu.ie && node.parentNode === doc.body) ? 2 : 0;
         vp = uucsssizeget();
         x = rv._x + vp.sw - fix;
         y = rv._y + vp.sh - fix;
@@ -310,7 +309,7 @@ function uucssrectset(node,   // @param Node:
                               // @return Node:
     var ns = node.style;
 
-    if (_ie || uu.opera) {
+    if (uu.ie || uu.opera) {
         "x" in rect && (ns.pixelLeft   = rect.x);
         "y" in rect && (ns.pixelTop    = rect.y);
         "w" in rect && (ns.pixelWidth  = rect.w > 0 ? rect.w : 0);
@@ -448,7 +447,7 @@ function uucsspxvalue(node,     // @param Node: context
             }
             return parseInt(rv) || 0;
         }
-        value = (_ie ? uucsspxactvalueie : uucsspxactvalue)(node, value);
+        value = (uu.ie ? uucsspxactvalueie : uucsspxactvalue)(node, value);
     }
     return value || 0;
 }
@@ -543,7 +542,7 @@ function uucssshow(node,     // @param Node:
 
     if (uu.style(node).display === "none") {
         // <style>{ display: none }</style>
-        tmp = uu.node(uue(node.tagName)); // add to body
+        tmp = uu.node(uu.elm(node.tagName)); // add to body
         // detect actual display value
         ns.display = uu.style(tmp).display;
         uu.node.remove(tmp);
@@ -628,7 +627,7 @@ function uucssunselectable(node) { // @param Node:
 function _uucssselectable(node,  // @param Node:
                           sel) { // @param Boolean(= true): true is selectable
                                  // @return Node:
-    if (_ie || uu.opera) {
+    if (uu.ie || uu.opera) {
         node.unselectable = sel ? "" : "on";
         node.onselectstart = sel ? "" : _uucssselectablefalse;
         node = node.parentNode;
@@ -823,7 +822,7 @@ function uucsstextshadowsetie(node, param) {
         (ns.filter.indexOf(_SHADOW) < 0) && (ns.filter += " progid:" + _SHADOW);
         (ns.filter.indexOf(_BLUR)   < 0) && (ns.filter += " progid:" + _BLUR);
         (cs.display === "inline") && (ns.display = "inline-block");
-        (uu.ie67 && cs.width === "auto") && (ns.zoom = 1); // hasLayout
+        (uu.ver.ie67 && cs.width === "auto") && (ns.zoom = 1); // hasLayout
     }
     node.uucsstextshadow = param;
 
@@ -862,14 +861,14 @@ function uucsscreate(ssid) { // @param String(= "uuss"): StyleSheet id
                              // @return instance: uu.Class.CSSRule
     ssid = ssid || "uuss";
 
-    if (!_db.ss[ssid]) {
-        if (_ie) {
-            _db.ss[ssid] = doc.createStyleSheet();
+    if (!_styleSheetDB.ss[ssid]) {
+        if (uu.ie) {
+            _styleSheetDB.ss[ssid] = doc.createStyleSheet();
         } else {
-            var node = uue("style");
+            var node = uu.elm("style");
 
             node.appendChild(doc.createTextNode(""));
-            _db.ss[ssid] = doc.head.appendChild(node);
+            _styleSheetDB.ss[ssid] = doc.head.appendChild(node);
         }
     }
     return uu.factory("CSSRule", ssid);
@@ -882,12 +881,12 @@ function uucssinject(ssid,  // @param String(= "uuss"): StyleSheet id
                      pos) { // @param Number(= void 0): void 0 is last
                             // @return Number: inserted pos or -1(error)
     ssid = ssid || "uuss";
-    var rv = -1, ss = _db.ss[ssid];
+    var rv = -1, ss = _styleSheetDB.ss[ssid];
 
     if (ss) {
         rv = (pos === void 0) ? _rules(ss) : pos;
-        _ie ? ss.addRule(uu.trim(expr), uu.trim(decl), rv)
-            : (rv = ss.sheet.insertRule(expr + "{" + decl + "}", rv));
+        uu.ie ? ss.addRule(uu.trim(expr), uu.trim(decl), rv)
+              : (rv = ss.sheet.insertRule(expr + "{" + decl + "}", rv));
     }
     return rv;
 }
@@ -896,33 +895,33 @@ function uucssinject(ssid,  // @param String(= "uuss"): StyleSheet id
 function uucssreject(ssid,  // @param String(= "uuss"): StyleSheet id
                      pos) { // @param Number(= void 0): void 0 is last
     ssid = ssid || "uuss";
-    var ss = _db.ss[ssid], i;
+    var ss = _styleSheetDB.ss[ssid], i;
 
     if (ss) {
         i = (pos === void 0) ? _rules(ss) - 1 : pos;
-        (i > 1) && (_ie ? ss.removeRule(i)
-                        : ss.sheet.deleteRule(i));
+        (i > 1) && (uu.ie ? ss.removeRule(i)
+                          : ss.sheet.deleteRule(i));
     }
 }
 
 // uu.css.clear - clear CSS rule
 function uucssclear(ssid) { // @param String(= ""): StyleSheet id
     ssid = ssid || "uuss";
-    var ss = _db.ss[ssid], i;
+    var ss = _styleSheetDB.ss[ssid], i;
 
     if (ss) {
         i = _rules(ss);
         while (i--) {
-            _ie ? ss.removeRule(i)
-                : ss.sheet.deleteRule(i);
+            uu.ie ? ss.removeRule(i)
+                  : ss.sheet.deleteRule(i);
         }
     }
 }
 
 // inner -
 function _rules(ss) {
-    return _ie ? ss.rules.length
-               : ss.sheet.cssRules.length;
+    return uu.ie ? ss.rules.length
+                 : ss.sheet.cssRules.length;
 }
 
 // uu.Class.CSSRule.init

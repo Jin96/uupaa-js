@@ -1,7 +1,9 @@
 
 // === form ===
-// depend: uu.js
-uu.agein || (function(win, doc, uu) {
+//{{{!depend uu
+//}}}!depend
+
+uu.text || (function(win, doc, uu) {
 
 uu.mix(uu, {
     // --- form ---

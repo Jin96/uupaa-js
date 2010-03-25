@@ -1,6 +1,7 @@
 
 // === Silverlight Canvas ===
-// depend: uu, uu.color, uu.img, uu.font, uu.canvas
+//{{{!depend uu, uu.color, uu.img, uu.font, uu.canvas, uu.matrix2d
+//}}}!depend
 
 //  <canvas width="300" height="150">   <- canvas
 //      <object>                        <- content
@@ -12,7 +13,7 @@
 
 //{{{!mb
 
-uu.agein || (function(win, doc, uu) {
+uu.canvas.Silverlight.init || (function(win, doc, uu) {
 var _COMPOS = { "source-over": 0, "destination-over": 4, copy: 10 },
     _FIXED4 = /\.(\d{4})(?:[\d]+)/g, // toFixed(4)
     _TO_DEGREES = 180 / Math.PI, // Math.toDegrees - from java.math
@@ -25,14 +26,14 @@ var _COMPOS = { "source-over": 0, "destination-over": 4, copy: 10 },
 
 uu.mix(uu.canvas.Silverlight.prototype, {
     arc:                    arc,
-    arcTo:                  uunop,
+    arcTo:                  uu.nop,
     beginPath:              beginPath,
     bezierCurveTo:          bezierCurveTo,
     clear:                  clear,          // [EXTEND]
     clearRect:              clearRect,
     clip:                   clip,
     closePath:              closePath,
-    createImageData:        uunop,
+    createImageData:        uu.nop,
     createLinearGradient:   createLinearGradient,
     createPattern:          createPattern,
     createRadialGradient:   createRadialGradient,
@@ -42,13 +43,13 @@ uu.mix(uu.canvas.Silverlight.prototype, {
     fill:                   fill,
     fillRect:               fillRect,
     fillText:               fillText,
-    getImageData:           uunop,
-    isPointInPath:          uunop,
+    getImageData:           uu.nop,
+    isPointInPath:          uu.nop,
     lineTo:                 lineTo,
     lock:                   lock,           // [EXTEND]
     measureText:            measureText,
     moveTo:                 moveTo,
-    putImageData:           uunop,
+    putImageData:           uu.nop,
     quadraticCurveTo:       quadraticCurveTo,
     rect:                   rect,
     restore:                restore,
@@ -558,10 +559,10 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
             //      </Image>
             //  </Canvas>
             shadow = renderShadow ? _dropShadow(this, "Image", this.__shadowColor) : "";
-            matrix = _matrix("Image", uu.m2d.translate(dx, dy, this._matrix));
+            matrix = _matrix("Image", uu.matrix2d.translate(dx, dy, this._matrix));
 
             fg = uu.fmt('<Canvas Canvas.ZIndex="?"><Image Opacity="?" Source="?">??</Image></Canvas>',
-                        [zindex, this.globalAlpha, image.src, matrix, shadow]);
+                        zindex, this.globalAlpha, image.src, matrix, shadow);
             break;
         case 5:
             //  [[arg5]]
@@ -581,10 +582,10 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
             //      </Image>
             //  </Canvas>
             shadow = renderShadow ? _dropShadow(this, "Image", this.__shadowColor) : "";
-            matrix = _matrix("Image", uu.m2d.translate(dx, dy, this._matrix));
+            matrix = _matrix("Image", uu.matrix2d.translate(dx, dy, this._matrix));
 
             fg = uu.fmt('<Canvas Canvas.ZIndex="?"><Image Opacity="?" Source="?" Width="?" Height="?" Stretch="Fill">??</Image></Canvas>',
-                        [zindex, this.globalAlpha, image.src, dw, dh, matrix, shadow]);
+                        zindex, this.globalAlpha, image.src, dw, dh, matrix, shadow);
             break;
         case 9:
             //  [[arg9]]
@@ -616,10 +617,10 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
             y = dy - (bh * sy);
 
             shadow = renderShadow ? _dropShadow(this, "Canvas", this.__shadowColor) : "";
-            matrix = _matrix("Canvas", uu.m2d.translate(x, y, this._matrix));
+            matrix = _matrix("Canvas", uu.matrix2d.translate(x, y, this._matrix));
 
             fg = uu.fmt('<Canvas Canvas.ZIndex="?"><Canvas><Image Opacity="?" Source="?" Width="?" Height="?" Stretch="Fill"><Image.Clip><RectangleGeometry Rect="?" /></Image.Clip></Image></Canvas>??</Canvas>',
-                        [zindex, this.globalAlpha, image.src, w, h, [dx - x, dy - y, dw, dh].join(" "), matrix, shadow]);
+                        zindex, this.globalAlpha, image.src, w, h, [dx - x, dy - y, dw, dh].join(" "), matrix, shadow);
         }
     } else { // HTMLCanvasElement
         history = image.getContext("2d")._history.join("");
@@ -645,12 +646,12 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
             //          <DropShadowEffect Opacity="?" Color="?" BlurRadius="?" Direction="?" ShadowDepth="?" />
             //      </Canvas.Effect>
             //  </Canvas>
-            m = uu.m2d.translate(dx, dy, this._matrix);
+            m = uu.matrix2d.translate(dx, dy, this._matrix);
             shadow = renderShadow ? _dropShadow(this, "Canvas", this.__shadowColor) : "";
-            matrix = _matrix("Canvas", args === 3 ? m : uu.m2d.scale(dw / dim.w, dh / dim.h, m));
+            matrix = _matrix("Canvas", args === 3 ? m : uu.matrix2d.scale(dw / dim.w, dh / dim.h, m));
 
             fg = uu.fmt('<Canvas Canvas.ZIndex="?" Opacity="?"><Canvas>?</Canvas>??</Canvas>',
-                        [zindex, this.globalAlpha, history, matrix, shadow]);
+                        zindex, this.globalAlpha, history, matrix, shadow);
             break;
         case 9:
             //  [[arg9]]
@@ -681,14 +682,14 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
             x = dx - (bw * sx);
             y = dy - (bh * sy);
 
-            m = uu.m2d.translate(x, y, this._matrix);
+            m = uu.matrix2d.translate(x, y, this._matrix);
             shadow = renderShadow ? _dropShadow(this, "Canvas", this.__shadowColor) : "";
-            matrix = _matrix("Canvas", uu.m2d.scale(bw, bh, m));
+            matrix = _matrix("Canvas", uu.matrix2d.scale(bw, bh, m));
 
             fg = uu.fmt('<Canvas Canvas.ZIndex="?" Opacity="?"><Canvas>?<Canvas.Clip><RectangleGeometry Rect="?" /></Canvas.Clip></Canvas>??</Canvas>',
-                        [zindex, this.globalAlpha, history,
+                        zindex, this.globalAlpha, history,
                          [(dx - x) / bw, (dy - y) / bh, dw / bw, dh / bh].join(" "),
-                        matrix, shadow]);
+                        matrix, shadow);
         }
     }
     this.xFlyweight ||
@@ -878,7 +879,7 @@ function restore() {
 // CanvasRenderingContext2D.prototype.rotate
 function rotate(angle) {
     this._matrixEffected = 1;
-    this._matrix = uu.m2d.rotate(angle, this._matrix);
+    this._matrix = uu.matrix2d.rotate(angle, this._matrix);
 }
 
 // CanvasRenderingContext2D.prototype.save
@@ -892,7 +893,7 @@ function save() {
 // CanvasRenderingContext2D.prototype.scale
 function scale(x, y) {
     this._matrixEffected = 1;
-    this._matrix = uu.m2d.scale(x, y, this._matrix);
+    this._matrix = uu.matrix2d.scale(x, y, this._matrix);
     this._scaleX *= x;
     this._scaleY *= y;
     this._lineScale = (this._matrix[0] + this._matrix[4]) / 2;
@@ -1037,8 +1038,8 @@ function _strokeText(ctx, text, x, y, maxWidth, fill) {
             '" FontSize="', font.size.toFixed(2),
             '" FontStyle="', _FONT_STYLES[font.style] || "Normal",
             '" FontWeight="', _FONT_WEIGHTS[font.weight] || "Normal",
-            '">', uu.esc(text),
-                _matrix('TextBlock', uu.m2d.translate(x - offX, y, ctx._matrix)));
+            '">', uu.codec.entity.encode(text),
+                _matrix('TextBlock', uu.matrix2d.translate(x - offX, y, ctx._matrix)));
 
     if (fill) {
         rv.push((ctx.__shadowColor.a &&
@@ -1092,13 +1093,13 @@ function _strokeText(ctx, text, x, y, maxWidth, fill) {
 // CanvasRenderingContext2D.prototype.transform
 function transform(m11, m12, m21, m22, dx, dy) {
     this._matrixEffected = 1;
-    this._matrix = uu.m2d.transform(m11, m12, m21, m22, dx, dy, this._matrix);
+    this._matrix = uu.matrix2d.transform(m11, m12, m21, m22, dx, dy, this._matrix);
 }
 
 // CanvasRenderingContext2D.prototype.translate
 function translate(x, y) {
     this._matrixEffected = 1;
-    this._matrix = uu.m2d.translate(x, y, this._matrix);
+    this._matrix = uu.matrix2d.translate(x, y, this._matrix);
 }
 
 // CanvasRenderingContext2D.prototype.unlock
@@ -1160,7 +1161,7 @@ function _radialGradientFill(ctx, obj, path, fill, zindex) {
         y = fp.y1 - fp.r1,
         gx = (fp.x0 - (fp.x1 - fp.r1)) / rr,
         gy = (fp.y0 - (fp.y1 - fp.r1)) / rr,
-        m = uu.m2d.translate(x, y, ctx._matrix),
+        m = uu.matrix2d.translate(x, y, ctx._matrix),
         tmpmtx = _matrix('Ellipse', m),
         v, bari = "";
 
@@ -1247,7 +1248,7 @@ function _patternFill(ctx, obj, path, fill, zindex) {
             }
         }
         return uu.fmt('<Canvas Canvas.ZIndex="?"><Canvas Canvas.ZIndex="?" Clip="?">?</Canvas>?</Canvas>',
-                      [zindex, zindex2, path, img.join(""), shadow]);
+                      zindex, zindex2, path, img.join(""), shadow);
     }
 
     return ['<Canvas Canvas.ZIndex="', zindex,
@@ -1365,7 +1366,7 @@ function _stroke(ctx) {
 
 // add inline XAML source
 uu.ie && uu.ver.silverlight && uu.lazy("init", function() {
-    uu.id("xaml") || doc.head.appendChild(uu.mix(uue("script"), {
+    uu.id("xaml") || doc.head.appendChild(uu.mix(uu.elm("script"), {
             id:   "xaml",
             type: "text/xaml",
             text: '<Canvas xmlns="http://schemas.microsoft.com/client/2007" ' +

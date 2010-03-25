@@ -1,17 +1,10 @@
 
 // === <canvas> ===
-// depend: uu
-//
+//{{{!depend uu
+//}}}!depend
+
 //  <canvas width="..." height="...">
 //  </canvas>
-uu.agein || (function(win, doc, uu) {
-
-//{{{!mb
-
-var _flashCanvas = (uu.ie && uu.ver.flash > 8) ?
-                   _swfLoader(uu.config.baseDir + "uu.canvas.swf") : 0;
-
-//}}}!mb
 
 // uu.canvas
 if (!uu.canvas) {
@@ -19,6 +12,15 @@ if (!uu.canvas) {
         return uu.node.build("canvas", arguments);
     }
 }
+
+uu.canvas.init || (function(win, doc, uu) {
+
+//{{{!mb
+
+var _flashCanvas = (uu.ie && uu.ver.flash > 8) ?
+                   uu.require(uu.config.baseDir + "uu.canvas.swf") : 0;
+
+//}}}!mb
 
 uu.canvas.init   = uucanvasinit;     // uu.canvas.init()
 uu.canvas.create = uucanvascreate;   // uu.canvas.create(width = 300, height = 150, order = "svg sl fl vml") -> <canvas>
@@ -73,12 +75,12 @@ function uucanvascreate(width,         // @param Number(= 300):
                         order,         // @param String(= "svg sl fl vml"): backend order
                         placeHolder) { // @param Node(= <body>): placeholder Node
                                        // @return Node: new element
-    var canvas = uue(uu.ie ? "CANVAS" : "canvas"); // [IE][!] need upper case
+    var canvas = uu.elm(uu.ie ? "CANVAS" : "canvas"); // [IE][!] need upper case
 
     canvas.width  = width  == null ? 300 : width;
     canvas.height = height == null ? 150 : height;
 
-    placeHolder || (placeHolder = doc.body.appendChild(uue())); // <body><div /></body>
+    placeHolder || (placeHolder = doc.body.appendChild(uu.elm())); // <body><div /></body>
                                                                 //       ~~~~~~~
     placeHolder.parentNode.replaceChild(canvas, placeHolder);
     return uu.ie ? _buildCanvas(canvas, order || "svg sl fl vml") : canvas;
@@ -152,22 +154,6 @@ function _removeFallback(node) { // @param Node:
     }
     parent.replaceChild(rv, node);
     return rv;
-}
-
-// inner - swf preloader
-function _swfLoader(url) { // @param String: url
-                           // @return Number: 1 or 0
-    try {
-        var xhr = win.ActiveXObject  ? new ActiveXObject("Microsoft.XMLHTTP") :
-                  win.XMLHttpRequest ? new XMLHttpRequest() : 0;
-
-        xhr.open("GET", url, false); // sync
-        xhr.send(null);
-        if (!xhr.status || (xhr.status >= 200 && xhr.status < 300)) {
-            return 1;
-        }
-    } catch (err) {}
-    return 0;
 }
 //}}}!mb
 

@@ -1,7 +1,9 @@
 
 // === Base64/URLSafe64 ===
-// depend: uu, uu.codec, uu.codec.urf8
-uu.agein || (function(uu) {
+//{{{!depend uu, uu.codec, uu.codec.urf8
+//}}}!depend
+
+uu.codec.base64 || (function(uu) {
 
 var _BASE = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/",
     _NGWORD = /[^A-Za-z0-9\+\/]/,

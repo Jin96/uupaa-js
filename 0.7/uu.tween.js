@@ -1,16 +1,13 @@
 
 // === Tween ===
-// depend: uu.js, uu.color.js, uu.css.js(uu.css.opacity)
-//         uu.str.js(uu.sprintf)
+//{{{!depend uu, uu.color, uu.css, uu.str
+//}}}!depend
 
-uu.agein || (function(win, doc, uu) {
+uu.tween || (function(win, doc, uu) {
 
-uu.mix(uu, {
-    tween:   uu.mix(uutween, {      // uu.tween(node, ms, {...}, fn = void 0) -> node
-        skip:       uutweenskip,    // uu.tween.skip(node = void 0, all = 0) -> node or [node, ...]
-        running:    uutweenrunning  // uu.tween.running(node) -> Boolean
-    })
-});
+uu.tween         = uutween;         // uu.tween(node, ms, {...}, fn = void 0) -> node
+uu.tween.skip    = uutweenskip;     // uu.tween.skip(node = void 0, all = 0) -> node or [node, ...]
+uu.tween.running = uutweenrunning;  // uu.tween.running(node) -> Boolean
 
 // --- tween ---
 // uu.tween - add queue

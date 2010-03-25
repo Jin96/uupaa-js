@@ -2,6 +2,7 @@ build/header.txt
 
 uu.js
 uu.ajax.js
+uu.codec.js
 uu.color.js
 uu.img.js
 uu.css.js

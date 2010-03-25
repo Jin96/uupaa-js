@@ -1,6 +1,8 @@
 // === font ===
-// depend: uu.js
-uu.agein || (function(win, doc, uu) {
+//{{{!depend uu
+//}}}!depend
+
+uu.font || (function(win, doc, uu) {
 
 var _BASE_STYLE = "position:absolute;border:0 none;margin:0;padding:0;";
 
@@ -28,7 +30,7 @@ function fontparse(font,     // @param String: font string, "12pt Arial"
                              // @return Hash:
     // inner - measure em unit
     function _em(node) {
-        var rv, div = node.appendChild(uue());
+        var rv, div = node.appendChild(uu.elm());
 
         div.style.cssText = _BASE_STYLE + "width:12em";
         rv = div.clientWidth / 12;
@@ -42,7 +44,7 @@ function fontparse(font,     // @param String: font string, "12pt Arial"
 
     if (!cache.font[font]) {
         // --- parse font string ---
-        style = uue().style; // dummy element
+        style = uu.elm().style; // dummy element
         try {
             style.font = font; // parse
         } catch (err) {
@@ -113,7 +115,7 @@ function fontmetric(font,   // @param CSSFronString: "12pt Arial"
     var node = fontmetric._node;
 
     if (!node) {
-        fontmetric._node = node = uue();
+        fontmetric._node = node = uu.elm();
         node.style.cssText = _BASE_STYLE +
             "top:-10000px;left:-10000px;text-align:left;visibility:hidden";
         doc.body.appendChild(node);

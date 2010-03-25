@@ -1,7 +1,8 @@
 
 // === track plugin (Google Analytics) ===
-// depend: uu.js
-uu.again || (function(win, doc, uu) {
+//{{{!depend uu, uu.pligin
+//}}}!depend
+uu.plugin.track || (function(win, doc, uu) {
 
 uu.plugin.track = uuptrack; // uu.track("UA-XXXXX-X")
 

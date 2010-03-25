@@ -1,7 +1,9 @@
 
 // === Layer ===
-// depend: uu.js, uu.css.js, uu.canvas.js
-uu.agein || (function(win, doc, uu) {
+//{{{!depend uu, uu.css, uu.canvas
+//}}}!depend
+
+uu.layer || (function(win, doc, uu) {
 
 var _TO_RADIANS = Math.PI / 180, // Math.toRadians - from java.math
     _360DEG = 360 * _TO_RADIANS, // 6.283185307179586
@@ -222,7 +224,7 @@ function createLayer(id,       // @param String: layer id
         this._clid = id;
         this._cctx = ctx;
     } else {
-        elm = uue(type);
+        elm = uu.elm(type);
         es = elm.style;
 
         back ? v.insertBefore(elm, v.firstChild)

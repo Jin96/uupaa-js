@@ -88,7 +88,7 @@ function _uuajax(url, option, fn, ngfn, _fn2, beforefn) {
     }
     function _ajaxgc() {
         befn && uu.ev.detach(win, "beforeunload", befn);
-        xhr && (xhr.onreadystatechange = uunop, xhr = null); // [IE] mem leak
+        xhr && (xhr.onreadystatechange = uu.nop, xhr = null); // [IE] mem leak
     }
     function _ajaxwatchdog() {
         _ajaxabort();
@@ -108,7 +108,7 @@ function _uuajax(url, option, fn, ngfn, _fn2, beforefn) {
 
     // relative url -> absolute url
     if (!uuajax._scheme.test(url)) {
-        div = uue();
+        div = uu.elm();
         div.innerHTML = '<a href="' + url + '" />';
         url = div.firstChild ? div.firstChild.href
                              : /href\="([^"]+)"/.exec(div.innerHTML)[1];
@@ -198,7 +198,7 @@ function uuajaxqueue(cmd,    // @param String: "0>1", "0+1", "0+1>2>3"
                      fnary,  // @param Array: [fn, ...]
                      lastfn, // @param Function(= void 0): lastfn([{ rv, url, code, guid, type }, ... ])
                      ngfn) { // @param Function(= void 0): ngfn({ rv, url, code, guid, type })
-    _uuajaxq(1, cmd, urlary, optary, fnary, lastfn || uunop, ngfn || uunop, []);
+    _uuajaxq(1, cmd, urlary, optary, fnary, lastfn || uu.nop, ngfn || uu.nop, []);
 }
 
 // inner - uu.ajax.queue impl. http://d.hatena.ne.jp/uupaa/20091221
@@ -293,7 +293,7 @@ function _uujsonp(url, option, fn, ngfn, _fn2) {
         timeout = opt.timeout || 10,
         method = opt.method || "callback",
         jobid = "j" + uu.guid(),
-        node = uue("script"),
+        node = uu.elm("script"),
         src = url + (url.indexOf("?") < 0 ? "?" :
                      url.indexOf("&") < 0 ? ";" : "&") +
                     method + "=uu.jsonp._db." + jobid; // uu.jsonp._db = _jobid
@@ -308,7 +308,7 @@ function _uujsonp(url, option, fn, ngfn, _fn2) {
 
 // uu.jsonp.queue - request queue
 function uujsonpqueue(cmd, urlary, optary, fnary, lastfn, ngfn) { // @see uu.ajax.queue
-    _uuajaxq(0, cmd, urlary, optary, fnary, lastfn || uunop, ngfn || uunop, []);
+    _uuajaxq(0, cmd, urlary, optary, fnary, lastfn || uu.nop, ngfn || uu.nop, []);
 }
 
 })(window, document, uu);

@@ -1,6 +1,7 @@
 build/header.uuCanvas.txt
 
 uu.js
+uu.codec.js
 uu.color.js
 uu.img.js
 uu.font.js

@@ -1,7 +1,9 @@
 
 // === Drag Event ===
-// depend: uu.js, uu.css.js
-uu.agein || (function(win, doc, uu) {
+//{{{!depend uu, uu.class, uu.css
+//}}}!depend
+
+uu.Class.Drag || (function(win, doc, uu) {
 
 // uu.Class.Drag - Generic Drag and Drop manage class
 uu.Class("Drag", {
@@ -76,8 +78,8 @@ function draginit(tgt,      // @param Node: move target
     grip.style.cursor = "move";
     this._opt.rel ? uu.css.toRelative(tgt)
                   : uu.css.toAbsolute(tgt);
-    this._shim = (uu.ie6 && !this._opt.rel
-                         && !this._opt.noshim) ? uu.factory("Shim", tgt) : 0;
+    this._shim = (uu.ver.ie6 && !this._opt.rel
+                             && !this._opt.noshim) ? uu.factory("Shim", tgt) : 0;
     uu.mousedown(grip, this);
     this._opt.wheel && uu.mousewheel(tgt, this);
 //  uu.fx.fade(tgt, { begin: 0, end: 1.0 });
@@ -149,7 +151,7 @@ function draggableinit(
     this._opt.mousedown = function(evt) {
         me._tgt = evt.node; // evt.currentTarget
         uu.css.toAbsolute(me._tgt);
-        if (uu.ie6) {
+        if (uu.ver.ie6) {
             uu.ary.each(uu.tag("select"), function(v) {
                 v.style.visibility = "hidden";
             });
@@ -158,7 +160,7 @@ function draggableinit(
     };
     this._opt.mouseup = function(evt, tgt, grip, code, opt, x, y) {
         uu.css.toStatic(tgt);
-        if (uu.ie6) {
+        if (uu.ver.ie6) {
             uu.ary.each(uu.tag("select"), function(v) {
                 v.style.visibility = "";
             });

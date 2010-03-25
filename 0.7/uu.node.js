@@ -1,33 +1,38 @@
 
 // === Node++ ===
-// depend: uu.js
+//{{{!depend uu
+//}}}!depend
+
 uu.agein || (function(win, doc, uu) {
 
-uu.mix(uu, {
-    svg:          uusvg,          // uu.svg(tag) -> new <svg> element
-    xpath:        uuxpath         // uu.xpath(node) -> "/html/body/div[5]"
-});
-uu.mix(uu.node, {
-    diet:       uunodediet,     // uu.node.diet(ctx = body, depth = 0)
-//  uu.node.first, uu.node.prev, uu.node.next, uu.node.last,
-//  uu.node.firstChild, uu.node.lastChild:
-                                // uu.node.first(ctx, uu.p() or "<p>html</p>") -> <p>
-    // [1][find node index] uu.node.find(node) -> Number
-    // [2][find tag index]  uu.node.find(node, "div") -> Number
-    find:       uunodefind,
-//  uu.node.find.first, uu.node.find.prev, uu.node.find.next, uu.node.find.last,
-//  uu.node.find.firstChild, uu.node.find.lastChild:
-                                // uu.node.find.first(ctx) -> node
-    // [1][get all] uu.node.data(node) -> { key: value, ... }
-    // [2][get one] uu.node.data(node, key) -> Mix
-    // [3][set]     uu.node.data(node, key, value) -> node
-    data: uu.mix(uunodedata, {
-        get:      uunodedataget,  // uu.node.data.get(node, key) -> Mix
-        set:      uunodedataset,  // uu.node.data.set(node, key, value) -> node
-        clear:    uunodedataclear // [1][clear data] uu.node.data.clear(node, key) -> node
-                                  // [2][clear all data] uu.node.data.clear(node) -> node
-    })
-});
+uu.svg      = uusvg;        // uu.svg(tag) -> new <svg> element
+uu.xpath    = uuxpath;      // uu.xpath(node) -> "/html/body/div[5]"
+
+uu.node.diet = uunodediet;  // uu.node.diet(ctx = body, depth = 0)
+
+// uu.node.first            // uu.node.first(ctx, uu.p() or "<p>html</p>") -> <p>
+// uu.node.prev             // uu.node.prev(ctx, uu.p() or "<p>html</p>") -> <p>
+// uu.node.next             // uu.node.next(ctx, uu.p() or "<p>html</p>") -> <p>
+// uu.node.last             // uu.node.last(ctx, uu.p() or "<p>html</p>") -> <p>
+// uu.node.firstChild       // uu.node.firstChild(ctx, uu.p() or "<p>html</p>") -> <p>
+// uu.node.lastChild        // uu.node.lastChild(ctx, uu.p() or "<p>html</p>") -> <p>
+
+uu.node.find = uunodefind;  // [1][find node index] uu.node.find(node) -> Number
+                            // [2][find tag index]  uu.node.find(node, "div") -> Number
+// uu.node.find.first       // uu.node.find.first(ctx) -> node
+// uu.node.find.prev        // uu.node.find.prev(ctx) -> node
+// uu.node.find.next        // uu.node.find.next(ctx) -> node
+// uu.node.find.last        // uu.node.find.last(ctx) -> node
+// uu.node.find.firstChild  // uu.node.find.firstChild(ctx) -> node
+// uu.node.find.lastChild   // uu.node.find.lastChild(ctx) -> node
+
+uu.node.data = uunodedata;  // [1][get all] uu.node.data(node) -> { key: value, ... }
+                            // [2][get one] uu.node.data(node, key) -> Mix
+                            // [3][set]     uu.node.data(node, key, value) -> node
+uu.node.data.get = uunodedataget;       // uu.node.data.get(node, key) -> Mix
+uu.node.data.set = uunodedataset;       // uu.node.data.set(node, key, value) -> node
+uu.node.data.clear = uunodedataclear;   // [1][clear data] uu.node.data.clear(node, key) -> node
+                                        // [2][clear all data] uu.node.data.clear(node) -> node
 
 // uu.svg - create SVG element
 function uusvg(tag) { // @param String: svg tag
