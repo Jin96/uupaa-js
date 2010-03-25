@@ -1,7 +1,9 @@
 
 // === hack ===
-// depend: uu.js
-uu.agein || (function(win, doc, uu) {
+//{{{!depend uu
+//}}}!depend
+
+uu.hack || (function(win, doc, uu) {
 
 uu.hack = {
     css2kb: uuhackcss2kb    // uu.hack.css2kb([className, ...]) -> Hash
@@ -18,7 +20,7 @@ function uuhackcss2kb(name) { // @param String/Array: className or [className, .
     }
     // http://d.hatena.ne.jp/uupaa/20091125
     var rv = {}, cs, url, ary = uu.ary(name), i = 0, iz = ary.length,
-        div = doc.body.appendChild(uue()),
+        div = doc.body.appendChild(uu.elm()),
         fn = decodeURIComponent, _kv = uuhackcss2kb._kv; // alias
 
     for (; i < iz; ++i) {

@@ -1,7 +1,9 @@
 
-// === class / message pump ===
-// depend: uu
-uu.agein || (function(win, doc, uu) {
+// === Class / Message Pump ===
+//{{{!depend uu
+//}}}!depend
+
+uu.Class || (function(win, doc, uu) {
 
 // --- class(oop) / instance ---
 uu.Class = uuclass;                 // [1][no inheit] uu.Class("A",   { proto: ... })
@@ -45,7 +47,7 @@ function uuclass(className, // @param String: "Class"
             lv1 = lv2 ? lv2.superClass : 0;
 
         uuclassguid(lv3);
-        lv3.msgbox || (lv3.msgbox = uunop);
+        lv3.msgbox || (lv3.msgbox = uu.nop);
         uu.msg.register(lv3);
 
         // constructor(lv1 -> lv2 -> lv3)
@@ -54,7 +56,7 @@ function uuclass(className, // @param String: "Class"
                lv3.init && lv3.init.apply(lv3, arguments);
 
         // destructor(~lv3 -> ~lv2 -> ~lv1)
-        lv3["~fin"] = lv3.fin || uunop;
+        lv3["~fin"] = lv3.fin || uu.nop;
         lv3.fin && uu.ev.attach(win, "unload", function() {
             lv3.fin && lv3.fin();
         });
@@ -118,7 +120,7 @@ function uuclasssingleton(className, // @param String: class name
             me.fin  && uu.ev.attach(win, "unload", function() {
                 me.fin();
             });
-            me.msgbox || (me.msgbox = uunop);
+            me.msgbox || (me.msgbox = uu.nop);
             uu.msg.register(me);
         }
         return self.instance || (self.instance = me);

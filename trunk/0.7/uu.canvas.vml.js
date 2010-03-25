@@ -1,6 +1,7 @@
 
 // === VML Canvas ===
-// depend: uu, uu.color, uu.img, uu.font, uu.canvas
+//{{{!depend uu, uu.color, uu.img, uu.font, uu.canvas, uu.matrix2d
+//}}}!depend
 
 //  <canvas width="300" height="150">   <- canvas
 //      <div>                           <- view
@@ -11,10 +12,10 @@
 
 //{{{!mb
 
-uu.agein || (function(win, doc, uu) {
+uu.canvas.VML.init || (function(win, doc, uu) {
 var _COMPOS = { "source-over": 0, "destination-over": 4, copy: 10 },
-    _FILTER = uu.ie8 ? ["-ms-filter:'progid:DXImageTransform.Microsoft.", "'"]
-                     : ["filter:progid:DXImageTransform.Microsoft.", ""],
+    _FILTER = uu.ver.ie8 ? ["-ms-filter:'progid:DXImageTransform.Microsoft.", "'"]
+                         : ["filter:progid:DXImageTransform.Microsoft.", ""],
     _CLIPPY         = '<v:shape style="position:absolute;width:10px;height:10px" filled="t" stroked="f" coordsize="100,100" path="?"><v:fill type="solid" color="?" /></v:shape>',
 
     // zindex(+shadowOffsetX +shadowOffsetY), path, color.hex, opacity(+strokeProps or +' type="solid"')
@@ -39,14 +40,14 @@ var _COMPOS = { "source-over": 0, "destination-over": 4, copy: 10 },
 
 uu.mix(uu.canvas.VML.prototype, {
     arc:                    arc,
-    arcTo:                  uunop,
+    arcTo:                  uu.nop,
     beginPath:              beginPath,
     bezierCurveTo:          bezierCurveTo,
     clear:                  clear,          // [EXTEND]
     clearRect:              clearRect,
     clip:                   clip,
     closePath:              closePath,
-    createImageData:        uunop,
+    createImageData:        uu.nop,
     createLinearGradient:   createLinearGradient,
     createPattern:          createPattern,
     createRadialGradient:   createRadialGradient,
@@ -56,13 +57,13 @@ uu.mix(uu.canvas.VML.prototype, {
     fill:                   fill,
     fillRect:               fillRect,
     fillText:               fillText,
-    getImageData:           uunop,
-    isPointInPath:          uunop,
+    getImageData:           uu.nop,
+    isPointInPath:          uu.nop,
     lineTo:                 lineTo,
     lock:                   lock,           // [EXTEND]
     measureText:            measureText,
     moveTo:                 moveTo,
-    putImageData:           uunop,
+    putImageData:           uu.nop,
     quadraticCurveTo:       quadraticCurveTo,
     rect:                   rect,
     restore:                restore,
@@ -85,7 +86,7 @@ uu.canvas.VML.build = build;
 function init(ctx, node) { // @param Node: <canvas>
     initSurface(ctx);
     ctx.canvas = node;
-    ctx._view = node.appendChild(uue());
+    ctx._view = node.appendChild(uu.elm());
     ctx._view.uuCanvasDirection = node.currentStyle.direction;
     ctx._view.style.cssText     = "overflow:hidden;position:absolute;direction:ltr";
     ctx._view.style.pixelWidth  = node.width;
@@ -362,8 +363,8 @@ function clearRect(x, y, w, h) {
             zindex = (this.__mix ===  4) ? --this._zindex
                    : (this.__mix === 10) ? (this.clear(), 0) : 0,
             fg = uu.fmt(_COLOR_FILL,
-                        [zindex, _rect(this, x, y, w, h), color.hex,
-                         (this.globalAlpha * color.a) + ' type="solid"']);
+                        zindex, _rect(this, x, y, w, h), color.hex,
+                         (this.globalAlpha * color.a) + ' type="solid"');
 
         this.xFlyweight ||
             this._history.push(this._clipPath ? (fg = _clippy(this, fg)) : fg);
@@ -523,18 +524,18 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
             // shadow
             if (this.__shadowColor.a && this.shadowBlur) {
                 rv.push(uu.fmt(_IMAGE_SHADOW,
-                            [zindex, dx + (this.shadowOffsetX + 1),
+                            zindex, dx + (this.shadowOffsetX + 1),
                                      dy + (this.shadowOffsetY + 1),
                              _rect(this, 0, 0, dw, dh),
                              this.__shadowColor.hex,
-                             (this.globalAlpha / Math.sqrt(this.shadowBlur) * 0.5)]));
+                             (this.globalAlpha / Math.sqrt(this.shadowBlur) * 0.5)));
             }
 
             // no resize + no opacity
             if (args === 3 && this.globalAlpha !== 1) {
                 rv.push(uu.fmt(_IMAGE_FILL,
-                               [zindex, dx, dy, _rect(this, 0, 0, dw, dh),
-                                this.globalAlpha, image.src]));
+                               zindex, dx, dy, _rect(this, 0, 0, dw, dh),
+                               this.globalAlpha, image.src));
             } else {
                 rv.push(
                     '<v:image style="position:absolute;z-index:', zindex,
@@ -625,7 +626,7 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
                 rv.push('</div>');
                 break;
         case 5:
-                m = uu.m2d.scale(dw / dim.w, dh / dim.h, this._matrix);
+                m = uu.matrix2d.scale(dw / dim.w, dh / dim.h, this._matrix);
                 rv.push('<div style="position:absolute;z-index:', zindex,
                         _imageTransform(this, m, dx, dy, dw, dh),
                         '"><div style="width:',  Math.round(dim.w * dw / sw),
@@ -638,7 +639,7 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
                 rv.push('</div></div>');
                 break;
         case 9: // buggy(not impl)
-                m = uu.m2d.scale(dw / sw, dh / sh, this._matrix);
+                m = uu.matrix2d.scale(dw / sw, dh / sh, this._matrix);
                 rv.push('<div style="position:absolute;z-index:', zindex,
                         ';overflow:hidden',
                         _imageTransform(this, m, dx, dy, dw, dh), '">');
@@ -919,7 +920,7 @@ function restore() {
 // CanvasRenderingContext2D.prototype.rotate
 function rotate(angle) {
     this._matrixEffected = 1;
-    this._matrix = uu.m2d.rotate(angle, this._matrix);
+    this._matrix = uu.matrix2d.rotate(angle, this._matrix);
 }
 
 // CanvasRenderingContext2D.prototype.save
@@ -933,7 +934,7 @@ function save() {
 // CanvasRenderingContext2D.prototype.scale
 function scale(x, y) {
     this._matrixEffected = 1;
-    this._matrix = uu.m2d.scale(x, y, this._matrix);
+    this._matrix = uu.matrix2d.scale(x, y, this._matrix);
     this._scaleX *= x;
     this._scaleY *= y;
     this._lineScale = (this._matrix[0] + this._matrix[4]) / 2;
@@ -985,10 +986,10 @@ function stroke(path, fill) {
 
         if (this.__shadowColor.a && this.shadowBlur) {
             fg = uu.fmt(fill ? _COLOR_FILL : _COLOR_STROKE,
-                        [zindex + ";left:" + (this.shadowOffsetX + 1) + "px;top:" +
+                         zindex + ";left:" + (this.shadowOffsetX + 1) + "px;top:" +
                                              (this.shadowOffsetY + 1) + "px",
                          path, this.__shadowColor.hex,
-                         (this.globalAlpha / Math.sqrt(this.shadowBlur) * 0.5) + strokeProps]);
+                         (this.globalAlpha / Math.sqrt(this.shadowBlur) * 0.5) + strokeProps);
         }
         // [SPEED OPTIMIZED]
         if (fill) {
@@ -1086,9 +1087,9 @@ function strokeText(text, x, y, maxWidth, fill) {
                               Math.round(skewOffset.y / 10),
                 '" origin="', left,
                 ' 0" /><v:path textpathok="t" /><v:textpath on="t" string="',
-                uu.esc(text),
+                uu.codec.entity.encode(text),
                 '" style="v-text-align:', align,
-                ';font:', uu.esc(font.formal), '" /></v:line>');
+                ';font:', uu.codec.entity.encode(font.formal), '" /></v:line>');
     }
 
     rv.push('<v:line style="position:absolute;z-index:', zindex,
@@ -1117,9 +1118,9 @@ function strokeText(text, x, y, maxWidth, fill) {
                           Math.round(skewOffset.y / 10),
             '" origin="', left,
             ' 0" /><v:path textpathok="t" /><v:textpath on="t" string="',
-            uu.esc(text),
+            uu.codec.entity.encode(text),
             '" style="v-text-align:', align,
-            ';font:', uu.esc(font.formal),
+            ';font:', uu.codec.entity.encode(font.formal),
             '" /></v:line>');
     fg = rv.join("");
 
@@ -1132,13 +1133,13 @@ function strokeText(text, x, y, maxWidth, fill) {
 // CanvasRenderingContext2D.prototype.transform
 function transform(m11, m12, m21, m22, dx, dy) {
     this._matrixEffected = 1;
-    this._matrix = uu.m2d.transform(m11, m12, m21, m22, dx, dy, this._matrix);
+    this._matrix = uu.matrix2d.transform(m11, m12, m21, m22, dx, dy, this._matrix);
 }
 
 // CanvasRenderingContext2D.prototype.translate
 function translate(x, y) {
     this._matrixEffected = 1;
-    this._matrix = uu.m2d.translate(x, y, this._matrix);
+    this._matrix = uu.matrix2d.translate(x, y, this._matrix);
 }
 
 // CanvasRenderingContext2D.prototype.unlock
@@ -1210,10 +1211,10 @@ function _linearGradientFill(ctx, obj, path, fill, zindex) {
         //                                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         //  </v:shape>
         fg = uu.fmt(fill ? _LINER_FILL : _LINER_STROKE,
-                    [zindex + ";left:" + (ctx.shadowOffsetX + 1) + "px;top:" +
+                     zindex + ";left:" + (ctx.shadowOffsetX + 1) + "px;top:" +
                                          (ctx.shadowOffsetY + 1) + "px",
                      path, (ctx.globalAlpha / Math.sqrt(ctx.shadowBlur) * 0.5),
-                     angle + '" color="' + ctx.__shadowColor.hex + strokeProps]);
+                     angle + '" color="' + ctx.__shadowColor.hex + strokeProps);
     }
     // --- fill ---
     //  <v:shape style="position:absolute;width:10px;height:10px;z-index:?"
@@ -1231,8 +1232,8 @@ function _linearGradientFill(ctx, obj, path, fill, zindex) {
     color = fill ? ('" colors="' + (obj.colors || _gradationColor(obj)))
                  : ('" color="'  + uu.color(ctx.xMissColor).hex);
     return fg + uu.fmt(fill ? _LINER_FILL : _LINER_STROKE,
-                       [zindex, path, ctx.globalAlpha,
-                        angle + strokeProps + color + '" o:opacity2="' + ctx.globalAlpha]);
+                        zindex, path, ctx.globalAlpha,
+                        angle + strokeProps + color + '" o:opacity2="' + ctx.globalAlpha);
 }
 
 // inner - Radial Gradient Fill
@@ -1272,13 +1273,13 @@ function _radialGradientFill(ctx, obj, path, fill, zindex) {
         //      </v:oval>
         //
         more = fill ? uu.fmt('" color="?" focussize="?,?" focusposition="?,?',
-                             [ctx.__shadowColor.hex, fsize, fsize, fposX, fposY])
-                    : uu.fmt('" color="??', [ctx.__shadowColor.hex, strokeProps]);
+                             ctx.__shadowColor.hex, fsize, fsize, fposX, fposY)
+                    : uu.fmt('" color="??', ctx.__shadowColor.hex, strokeProps);
         rv.push(uu.fmt(fill ? _RADIAL_FILL : _RADIAL_STROKE,
-                       [zindex,
+                        zindex,
                         Math.round(c0.x / 10) + ctx.shadowOffsetX + 1,
                         Math.round(c0.y / 10) + ctx.shadowOffsetY + 1, r1x, r1y,
-                        (ctx.globalAlpha / Math.sqrt(ctx.shadowBlur) * 0.5) + more]));
+                        (ctx.globalAlpha / Math.sqrt(ctx.shadowBlur) * 0.5) + more));
     }
 
     if (fill) {
@@ -1317,15 +1318,15 @@ function _radialGradientFill(ctx, obj, path, fill, zindex) {
     //                                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     //      </v:oval>
     more = fill ? uu.fmt('" o:opacity2="?" colors="?" focussize="?,?" focusposition="?,?',
-                         [ctx.globalAlpha, obj.colors || _gradationColor(obj),
-                          fsize, fsize, fposX, fposY])
-                : uu.fmt('" color="??', [uu.color(ctx.xMissColor).hex, strokeProps]);
+                         ctx.globalAlpha, obj.colors || _gradationColor(obj),
+                         fsize, fsize, fposX, fposY)
+                : uu.fmt('" color="??', uu.color(ctx.xMissColor).hex, strokeProps);
 
     rv.push(uu.fmt(fill ? _RADIAL_FILL : _RADIAL_STROKE,
-                   [zindex,
+                    zindex,
                     Math.round(c0.x / 10),
                     Math.round(c0.y / 10), r1x, r1y,
-                    ctx.globalAlpha + more]));
+                    ctx.globalAlpha + more));
     return rv.join("");
 }
 
@@ -1348,11 +1349,11 @@ function _patternFill(ctx, obj, path, fill, zindex) {
         //                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         //      </v:shape>
         fg = uu.fmt(fill ? _PATTERN_FILL : _PATTERN_STROKE,
-                    [zindex, ctx.shadowOffsetX + 1,
+                     zindex, ctx.shadowOffsetX + 1,
                              ctx.shadowOffsetY + 1,
                      path, "solid",
                      (ctx.globalAlpha / Math.sqrt(ctx.shadowBlur) * 0.5) +
-                     '" color="' + ctx.__shadowColor.hex + strokeProps]);
+                     '" color="' + ctx.__shadowColor.hex + strokeProps);
     }
 
     // --- fill --
@@ -1369,8 +1370,8 @@ function _patternFill(ctx, obj, path, fill, zindex) {
     //                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     //      </v:shape>
     return fg + uu.fmt(fill ? _PATTERN_FILL : _PATTERN_STROKE,
-                       [zindex, 0, 0, path, "tile",
-                        ctx.globalAlpha + '" src="' + obj.src + strokeProps]);
+                        zindex, 0, 0, path, "tile",
+                        ctx.globalAlpha + '" src="' + obj.src + strokeProps);
 }
 
 // inner -
@@ -1378,7 +1379,7 @@ function _clippy(ctx, fg) {
     if (!ctx._clipStyle) {
         ctx._clipStyle = uu.canvas.bgcolor(ctx.canvas);
     }
-    return fg + uu.fmt(_CLIPPY, [ctx._clipPath, ctx._clipStyle.hex]);
+    return fg + uu.fmt(_CLIPPY, ctx._clipPath, ctx._clipStyle.hex);
 }
 
 // inner - build Gradation Color

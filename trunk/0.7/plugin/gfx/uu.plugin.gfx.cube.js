@@ -1,9 +1,11 @@
 
 // === gfx - cube polygon plugin ===
-uu.again || (function(uu, _math) {
+//{{{!depend uu, uu.class, uu.pligin
+//}}}!depend
 
-var _PI = _math.PI,
-    _DEFAULT_PARM = {
+uu.Class.GfxCube || (function(uu) {
+
+var _DEFAULT_PARM = {
         highLight: 0x40,      // Number(= 0x40): cube high light color (0x00~0xff)
         color:     0x000000,  // Number(= 0x000000): cube color (0xrrggbb),
                               //             0xff0000 is red, 0x00ff00 is green
@@ -11,8 +13,8 @@ var _PI = _math.PI,
         x:         0,         // Number(= 0): cube x position
         y:         0,         // Number(= 0): cube y position
         z:         500,       // Number(= 500): cube z position(zoom)
-        phi:       _PI / 100, // Number(= Math.PI / 100): vertical rotation speed
-        theta:     _PI / 80   // Number(= Math.PI / 80): horizontal rotation speed
+        phi:       Math.PI / 100, // Number(= Math.PI / 100): vertical rotation speed
+        theta:     Math.PI / 80   // Number(= Math.PI / 80): horizontal rotation speed
     };
 
 uu.Class("GfxCube", {
@@ -38,9 +40,9 @@ function gfxcubeadd(param) { // @param Hash(= _DEFAULT_PARM):
         i = 0, v1, v2;
 
     for (; i < 5; ++i) {
-        v = (0.5 * i - 0.25) * _PI;
-        v1 = i ? _math.SQRT2 * _math.cos(v) : 0;
-        v2 = i ? _math.SQRT2 * _math.sin(v) : 0;
+        v = (0.5 * i - 0.25) * Math.PI;
+        v1 = i ? Math.SQRT2 * Math.cos(v) : 0;
+        v2 = i ? Math.SQRT2 * Math.sin(v) : 0;
         face[0].push([ v1,  v2,   1]);
         face[1].push([  1,  v1,  v2]);
         face[2].push([ v2,   1,  v1]);
@@ -96,8 +98,8 @@ function gfxcubeloop(me, ctx, param) {
     function order(a, b) {
         return (a[0] === b[0]) ? 0 : (a[0] < b[0]) ? 1 : -1;
     }
-    var sinP = _math.sin(param._phi),   cosP = _math.cos(param._phi),
-        sinT = _math.sin(param._theta), cosT = _math.cos(param._theta),
+    var sinP = Math.sin(param._phi),   cosP = Math.cos(param._phi),
+        sinT = Math.sin(param._theta), cosT = Math.cos(param._theta),
         d = param.face,
         // vector data
         vX = [-sinP,         cosP,            0],
@@ -144,9 +146,9 @@ function gfxcubeloop(me, ctx, param) {
                     ctx.moveTo(px + x, py + -y);
 
                     bright = parseInt(light * ph);
-                    rgba = [_math.min(((pc >> 16) & 0xff) + bright, 255),
-                            _math.min(((pc >>  8) & 0xff) + bright, 255),
-                            _math.min( (pc        & 0xff) + bright, 255), po];
+                    rgba = [Math.min(((pc >> 16) & 0xff) + bright, 255),
+                            Math.min(((pc >>  8) & 0xff) + bright, 255),
+                            Math.min( (pc        & 0xff) + bright, 255), po];
                     ctx.fillStyle = "rgba(" + rgba.join(",") + ")";
                 } else {
                     ctx.lineTo(px + x, py + -y);
@@ -158,5 +160,5 @@ function gfxcubeloop(me, ctx, param) {
     }
 }
 
-})(uu, Math);
+})(uu);
 

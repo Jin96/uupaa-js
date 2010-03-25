@@ -1,7 +1,9 @@
 
 // === IE Boost ===
-// depend: uu.js, uu.css.js, uu.css3.js
-uu.agein || (function(win, doc, uu) {
+//{{{!depend uu, uu.css, uu.css3
+//}}}!depend
+
+uu.css3.fixie || (function(win, doc, uu) {
 var _styleSheetID = "uucss3ie",
     _spacer = uu.config.baseDir + "uu.alphafilter.gif",
     _job = { position: [], maxmin: [] },
@@ -189,7 +191,7 @@ function disptbl(ary) { // @param NodeArray:
     var v, i = -1, j, tbl, row, cell;
 
     while ( (v = ary[++i]) ) {
-        tbl = uue("table");
+        tbl = uu.elm("table");
         // copy attrs
         tbl.id = v.id;
         tbl.title = v.title;
@@ -316,15 +318,15 @@ function maxminSize(elm, hash, prop, horizontal) {
 
 function maxminMarkup(context) {
     var rv = [], xw, nw, xh, nh,
-        node = uu.ie6 ? uu.tag("*", context)
-                      : uu.query("td,th", context), // IE7 td, th
+        node = uu.ver.ie6 ? uu.tag("*", context)
+                          : uu.query("td,th", context), // IE7 td, th
         v, i = -1, cs,
         MAXMIN_KEYWORD = _MAXMIN_KEYWORD,
         MAXMIN_BLOCK_LEVEL = _MAXMIN_BLOCK_LEVEL;
 
     while ( (v = node[++i]) ) {
         cs = v.currentStyle;
-        if (uu.ie7 || MAXMIN_BLOCK_LEVEL[cs.display]) {
+        if (uu.ver.ie7 || MAXMIN_BLOCK_LEVEL[cs.display]) {
             xw = cs["max-width"]  || cs.maxWidth || ""; // length | % | none
             nw = cs["min-width"]  || cs.minWidth || ""; // length | %
             xh = cs["max-height"] || cs.maxHeight|| ""; // length | % | none

@@ -1,7 +1,9 @@
 
 // === CSS Validator ===
-// depend: uu.js, uu.color.js, uu.str.js
-uu.agein || (function(uu) {
+//{{{!depend uu, uu.color, uu.str
+//}}}!depend
+
+uu.css.validate || (function(uu) {
 var _LENGTH = /^(?:[\d\.]+(%|px|em|pt|cm|mm|in|pc|px)|0)$/;
 
 uu.css.validate = {

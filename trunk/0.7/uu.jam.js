@@ -1,7 +1,9 @@
 
 // === Jam (Node set I/F) ===
-// depend: uu.js
-uu.agein || (function(win, doc, uu) {
+//{{{!depend uu
+//}}}!depend
+
+uu.jam || (function(win, doc, uu) {
 
 uu.jam = uujam;
 

@@ -1,7 +1,9 @@
 
 // === Node Builder ===
-// depend: uu
-uu.agein || (function(win, doc, uu) {
+//{{{!depend uu
+//}}}!depend
+
+uu.node.build || (function(win, doc, uu) {
 
 // NodeBuilder callback hander
 //      window.uuNodeBuilder(uu, node, buildid, nodeid)
@@ -11,7 +13,7 @@ uu.agein || (function(win, doc, uu) {
 //ja                   第四引数には生成されたノードのユニークなノードIDが渡されます
 
 var _callbackHandler = uu.isfunc(win.uuNodeBuilder) ? win.uuNodeBuilder
-                     : uu.isfunc(win.xnode) ? win.xnode : uunop;
+                     : uu.isfunc(win.xnode) ? win.xnode : uu.nop;
 
 uu.html = uuhtml;         // uu.html(node, attr, style, buildid) -> <html>
 uu.head = uuhead;         // uu.head(node, attr, style, buildid) -> <head>
@@ -73,12 +75,12 @@ function uunodebuild(node,   // @param Node/String:
                              // @return Node:
     function tohash(mix) {
         return !uu.isstr(mix) ? mix :
-               !mix.indexOf(" ") ? uu.hash(uu.trim(mix), " ", 0) // " color red"
-                                 : uu.hash(mix);                 // "color,red"
+               !mix.indexOf(" ") ? uu.split.toHash(uu.trim(mix), " ") // " color red"
+                                 : uu.split.toHash(mix);              //  "color,red"
     }
 
     // "div" -> <div>
-    node.nodeType || (node = uue(node));
+    node.nodeType || (node = uu.elm(node));
 
     var v, w, i = 0, j = 0, iz = args.length;
 

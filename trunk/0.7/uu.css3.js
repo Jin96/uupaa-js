@@ -1,7 +1,10 @@
 
 // === CSS 3 ===
+//{{{!depend uu, uu.css, uu.css.validate, uu.css.parse, uu.query uu.canvas, uu.layer, uu.url
+//}}}!depend
+
 // depend: uu.js, uu.css.*.js, uu.query.js, uu.canvas.*.js, uu.layer.js, uu.url.js
-// if (uu.ie67 && uu.config.right) {
+// if (uu.ver.ie67 && uu.config.right) {
 //    IE6, IE7: Size of an inline element is invalidated.
 //        <span style="width:100px; height:100px">inline with size</span>
 //                             v            v
@@ -13,7 +16,7 @@
     //          v
     //    <img src="uu.alphafilter.gif">
     //    <div style="background: url(uu.alphafilter.gif)">
-uu.agein || (function(win, doc, uu) {
+uu.css3 || (function(win, doc, uu) {
 var _canvasok = uu.ver.major,
     _usedocfg = !(uu.gecko && uu.ver.render <= 1.9), // 1: use document fragmens
     _rules = [],        // generated rules
@@ -31,22 +34,22 @@ var _canvasok = uu.ver.major,
     _CSS3CLASS = /uucss[\w]+\s*/g,
     _SKIP_PSEUDO = /^\*$|::?before$|::?after$|::?first-letter$|::?first-line$|:active|:focus|:hover|:unknown/,
     _EXCSS = { // extend css functions
-        position:   uu.ie6    ? 0x10   : 0, // position: fixed, absolute bug
-        alphapng:   uu.ie6    ? 0x20   : 0, // <img src="some.alpha.png">
-        maxmin:     uu.ie67   ? 0x40   : 0, // max-width:
-        disptbl:    uu.ie67   ? 0x80   : 0, // -uu-display: table
-        opacity:    uu.ie     ? 0x100  : 0, // opacity:
-        textshadow: uu.ie     ? 0x200  : 0, // -uu-text-shadow:
-        boxeffect:  _canvasok ? 0x400  : 0, // -uu-box-effect:
-        boxshadow:  _canvasok ? 0x800  : 0, // -uu-box-shadow:
-        boxreflect: _canvasok ? 0x1000 : 0, // -uu-box-reflect:
-        bradius:    _canvasok ? 0x2000 : 0, // -uu-border-radius:
-        bimage:     _canvasok ? 0x4000 : 0, // -uu-border-image:
-        mbg:        _canvasok ? 0x8000 : 0  // -uu-background:
-                                            // -uu-background-color:
-                                            // -uu-background-image:
-                                            // -uu-background-repeat:
-                                            // -uu-background-position:
+        position:   uu.ver.ie6  ? 0x10   : 0,   // position: fixed, absolute bug
+        alphapng:   uu.ver.ie6  ? 0x20   : 0,   // <img src="some.alpha.png">
+        maxmin:     uu.ver.ie67 ? 0x40   : 0,   // max-width:
+        disptbl:    uu.ver.ie67 ? 0x80   : 0,   // -uu-display: table
+        opacity:    uu.ver.ie   ? 0x100  : 0,   // opacity:
+        textshadow: uu.ver.ie   ? 0x200  : 0,   // -uu-text-shadow:
+        boxeffect:  _canvasok   ? 0x400  : 0,   // -uu-box-effect:
+        boxshadow:  _canvasok   ? 0x800  : 0,   // -uu-box-shadow:
+        boxreflect: _canvasok   ? 0x1000 : 0,   // -uu-box-reflect:
+        bradius:    _canvasok   ? 0x2000 : 0,   // -uu-border-radius:
+        bimage:     _canvasok   ? 0x4000 : 0,   // -uu-border-image:
+        mbg:        _canvasok   ? 0x8000 : 0    // -uu-background:
+                                                // -uu-background-color:
+                                                // -uu-background-image:
+                                                // -uu-background-repeat:
+                                                // -uu-background-position:
     },
     _DECL2EXCSS = {
         position:                 1,
@@ -284,7 +287,7 @@ function _uucss3validate(rawdata, context) {
         expair, exbits, exdecl, exorder, exoi, exv, exw, exi, // work
         // document fragment context
         dfctx = (!context || context === doc ||
-                             context === uu.rootNode) ? doc.body : context,
+                             context === uu.node.root) ? doc.body : context,
         DISPLAY_INLINE = /display:inline;/i, INLINE = /^inline$/;
 
     // reset global vars
@@ -359,7 +362,7 @@ function _uucss3validate(rawdata, context) {
                             }
 
                             // [ACID2][IE6][IE7] inline-element has neither width nor height
-                            if (uu.ie67 && uu.config.right) {
+                            if (uu.ver.ie67 && uu.config.right) {
                                 if (DISPLAY_INLINE.test(w) ||
                                       INLINE.test(v.currentStyle.display)) {
                                     _selector && _uid2data[nodeuid].klass.push("uucssinline");
@@ -439,7 +442,7 @@ function _uucss3validate(rawdata, context) {
         // lazy - clear all className
         i = -1;
         while ( (v = _lazyClearClass[++i]) ) {
-            if (!(uu.ie67 && v.getAttribute("uuCSSLock"))) {
+            if (!(uu.ver.ie67 && v.getAttribute("uuCSSLock"))) {
                 v.className = v.className.replace(_CSS3CLASS, "");
                 v.removeAttribute("uucss3c");
             }
@@ -449,7 +452,7 @@ function _uucss3validate(rawdata, context) {
         if (_selector) {
             for (nodeuid in _uid2data) {
                 v = _uid2data[nodeuid].node;
-                if (uu.ie67 && v.getAttribute("uuCSSLock")) {
+                if (uu.ver.ie67 && v.getAttribute("uuCSSLock")) {
                     ;
                 } else {
                     w = v.className + " " + _uid2data[nodeuid].klass.join(" ");
@@ -472,7 +475,7 @@ function _uucss3validate(rawdata, context) {
         }
 
         // strip width
-        if (uu.ie67 && uu.config.right) {
+        if (uu.ver.ie67 && uu.config.right) {
             uu.css.inject("uucss3",
                           ".uucssinline", "width:auto;height:auto");
             _rules[++gridx] = ".uucssinline{width:auto;height:auto}";
@@ -851,7 +854,7 @@ function _uucss3autoviewbox() {
                 break;
             }
         }
-        div = uue();
+        div = uu.elm();
         div.className = "viewbox";
         div.style.padding = padding || "auto";
         uu.node.wrap(v, div);
@@ -873,7 +876,7 @@ function _css3init() {
         css = uu.css.clean(_dirtycss = (css || uu.css.imports()));
 
         // judge blackout
-        if (uu.ie6 && _uucss3blackout(css)) { // ignore lazy
+        if (uu.ver.ie6 && _uucss3blackout(css)) { // ignore lazy
             return;
         }
 
@@ -907,14 +910,14 @@ function _css3init() {
 // | Webkit     | 522 ~ 527      | 522 +         |                   |
 // +------------+----------------+---------------+-------------------+
 (function() {
-    var render = uu.ver.render;
-
-    uu.ie     && (uu.ver.browser >= 6)            && (++_selector, ++_render);
-    uu.opera  && (uu.ver.browser >= 9.5)          && ++_render;
-    uu.gecko  && (render >  1.8 && render <= 1.9) && ++_selector;
-    uu.gecko  && (render >  1.8)                  && ++_render;
-    uu.webkit && (render >= 522 && render <  528) && ++_selector;
-    uu.webkit && (render >= 522)                  && ++_render;
+    uu.ie     && (++_selector, ++_render);
+    uu.opera  && (uu.ver.browser >= 9.5) && ++_render;
+    uu.gecko  && (uu.ver.render  >  1.8  &&
+                  uu.ver.render  <= 1.9) && ++_selector;
+    uu.gecko  && (uu.ver.render  >  1.8) && ++_render;
+    uu.webkit && (uu.ver.render  >= 522  &&
+                  uu.ver.render  <  528) && ++_selector;
+    uu.webkit && (uu.ver.render  >= 522) && ++_render;
 
     if (uu.isfunc(uu.config.altcss)) {
         var hash = uu.config.altcss(uu), // @return Hash: { selector, render, cssexpr }

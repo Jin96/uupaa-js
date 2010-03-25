@@ -1,8 +1,10 @@
 
 // === Live ===
-// depend: uu.js
+//{{{!depend uu
+//}}}!depend
+
 // http://d.hatena.ne.jp/uupaa/20091231
-uu.agein || (function(win, doc, uu) {
+uu.live || (function(win, doc, uu) {
 var _livedb = {}; // { "expr\vnamespace.click": {...}, ... }
 
 // uu.live
@@ -25,15 +27,16 @@ function uulive(expr,   // @param String: "css > expr"
 function _uulive(expr, nstype, fn, hash) {
     function _uuliveclosure(evt) {
         evt = evt || win.event;
-        var src = evt.srcElement || evt.target;
+        var src = evt.srcElement || evt.target,
+            iebody = uu.quirks ? doc.body : uu.node.root;
 
         src = (uu.webkit && src.nodeType === 3) ? src.parentNode : src;
         if (uu.match(expr, src)) {
             evt.node = doc;
             evt.code = (_code[evt.type] || 0) & 255;
             evt.src = src;
-            evt.px = uu.ie ? evt.clientX + uu.iebody.scrollLeft : evt.pageX;
-            evt.py = uu.ie ? evt.clientY + uu.iebody.scrollTop  : evt.pageY;
+            evt.px = uu.ie ? evt.clientX + iebody.scrollLeft : evt.pageX;
+            evt.py = uu.ie ? evt.clientY + iebody.scrollTop  : evt.pageY;
             evt.ox = evt.offsetX || evt.layerX || 0; // [offsetX] IE, Opera, WebKit
             evt.oy = evt.offsetY || evt.layerY || 0; // [layerX]  Gecko, WebKit
             handler.call(fn, evt, doc, src);

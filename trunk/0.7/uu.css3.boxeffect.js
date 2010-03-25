@@ -1,7 +1,9 @@
 
 // === CSS3 BoxEffect ===
-// depend: uu.js, uu.css.js, uu.css3.js
-uu.agein || (function(win, doc, uu, _mix, _ie, _ie6, _ie67, _cstyle, _math) {
+//{{{!depend uu, uu.css, uu.css3
+//}}}!depend
+
+uu.css3.boxeffect || (function(win, doc, uu) {
 var _niddb = {}, // nodeid db { nodeid: node, ... }
     _BFX = "uucss3bfx",
     _IMG_URL = /^\s*url\((.*)\)$/,         // "url(...)" (
@@ -13,7 +15,7 @@ var _niddb = {}, // nodeid db { nodeid: node, ... }
     _BACLGROUND_POSITION_H = { left: "0%", center: "50%", right: "100%" },
     _BACLGROUND_POSITION_V = { top: "0%", center: "50%", bottom: "100%" };
 
-uu.css3.boxeffect = _mix(uucss3boxeffect, { // uu.css.boxeffect(node, excss)
+uu.css3.boxeffect = uu.mix(uucss3boxeffect, { // uu.css.boxeffect(node, excss)
     bond:   uucss3boxeffectbond,   // uu.css3.boxeffect.bond(node, excess) -> node.uucss3bfx hash
     recalc: uucss3boxeffectrecalc
 });
@@ -22,8 +24,8 @@ uu.css3.boxeffect = _mix(uucss3boxeffect, { // uu.css.boxeffect(node, excss)
 function uucss3boxeffect(node,    // @param Node:
                          excss) { // @param excss:
     var view = node.parentNode,
-        vs = _ie ? view.currentStyle : _cstyle(view, null),
-        ns = _ie ? node.currentStyle : _cstyle(node, null),
+        vs = uu.ie ? view.currentStyle : win.getComputedStyle(view, null),
+        ns = uu.ie ? node.currentStyle : win.getComputedStyle(node, null),
         nid = uu.nodeid(node), m, mbgsh = 0,
         bfx, hash, backend, nw, nh,
         viw = view.style.width,
@@ -36,7 +38,7 @@ function uucss3boxeffect(node,    // @param Node:
     }
     _niddb[nid] = node; // manage nodeid
 
-    _ie67 && _fixIELayoutBug(view, node, vs, ns);
+    uu.ver.ie67 && _fixIELayoutBug(view, node, vs, ns);
 
     bfx = uucss3boxeffectbond(node, excss);
 
@@ -47,9 +49,9 @@ function uucss3boxeffect(node,    // @param Node:
         "-uu-box-reflect":   bfx.decl["-uu-box-reflect"],
         "-uu-border-radius": bfx.decl["-uu-border-radius"]
     });
-    _mix(bfx.margin, uu.css.margin.get(bfx.node)); // copy margin
+    uu.mix(bfx.margin, uu.css.margin.get(bfx.node)); // copy margin
     trainBorder(bfx);
-    _ie67 && trainFakeBorder(bfx);
+    uu.ver.ie67 && trainFakeBorder(bfx);
 
     while ( (m = MBG.exec(bfx.order)) ) {
         if ((!m[1] && !mbgsh++) || MBG_CASE[m[1]]) {
@@ -72,8 +74,8 @@ function uucss3boxeffect(node,    // @param Node:
                         bfx.nodeOffset = uu.css.offset.get(bfx.node, view); // from ancestor
                         bfx.layer.createReflectionLayer(
                             "reflect", node, 0,
-                            node.offsetLeft + (_ie67 ? bfx.border.l : 0),
-                            node.offsetTop  + (_ie67 ? bfx.border.t : 0),
+                            node.offsetLeft + (uu.ver.ie67 ? bfx.border.l : 0),
+                            node.offsetTop  + (uu.ver.ie67 ? bfx.border.t : 0),
                             0, 0, void 0, 0, hash.offset);
                         node.style.visibility = "hidden";
                         bfx.hasReflectLayer = 1;
@@ -83,7 +85,7 @@ function uucss3boxeffect(node,    // @param Node:
         }
     } else {
         backend = "vmlcanvas";
-        if (_ie && uu.ver.silverlight
+        if (uu.ie && uu.ver.silverlight
             && bfx.decl["-uu-backend"] === "silver") {
 
             bfx.backend = 1; // Silverlight mode(buggy)
@@ -122,8 +124,8 @@ function uucss3boxeffect(node,    // @param Node:
         nh = bfx.nodeRect.h + bfx.nodeOffset.y * 2;
         // [2] set viewbg dimension
         bfx.viewbgLayer = bfx.layer.createLayer("viewbg", backend, 0, 1,
-                                                _math.max(bfx.viewRect.w, nw),
-                                                _math.max(bfx.viewRect.h, nh));
+                                                Math.max(bfx.viewRect.w, nw),
+                                                Math.max(bfx.viewRect.h, nh));
         bfx.layer.appendLayer("node", node);
     }
     boxeffectDraw(bfx, 0);
@@ -188,8 +190,8 @@ function uucss3boxeffectrecalc() {
         node = _niddb[nid];
         view = node.parentNode;
 
-        vs = _ie ? view.currentStyle : _cstyle(view, null);
-        ns = _ie ? node.currentStyle : _cstyle(node, null);
+        vs = uu.ie ? view.currentStyle : win.getComputedStyle(view, null);
+        ns = uu.ie ? node.currentStyle : win.getComputedStyle(node, null);
 
         if (vs.display === "none" || ns.display === "none") {
             continue;
@@ -209,9 +211,9 @@ function uucss3boxeffectrecalc() {
 
 function train(bfx) {
     if (bfx.train.margin || bfx.train.border) {
-        bfx.train.margin && _mix(bfx.margin, uu.css.margin.get(bfx.node));
+        bfx.train.margin && uu.mix(bfx.margin, uu.css.margin.get(bfx.node));
         bfx.train.border && trainBorder(bfx);
-        _ie67 && trainFakeBorder(bfx);
+        uu.ver.ie67 && trainFakeBorder(bfx);
         bfx.train.margin = 0;
         bfx.train.border = 0;
     }
@@ -225,16 +227,16 @@ function boxeffectRecalcRect(node, bfx) {
     train(bfx); // recalc margin, border
 
     // http://d.hatena.ne.jp/uupaa/20090719
-    if (_ie67) { // restore border and margin state
-        _mix(node.style, bfx.ie6borderorg);
+    if (uu.ver.ie67) { // restore border and margin state
+        uu.mix(node.style, bfx.ie6borderorg);
     }
     // update rect
     bfx.nodeRect = uu.css.size(node);
     bfx.viewRect = uu.css.size(bfx.view);
     bfx.nodeOffset = uu.css.offset.get(bfx.node, bfx.view); // from ancestor
 
-    if (_ie67) {
-        _mix(node.style, bfx.ie6borderfix);
+    if (uu.ver.ie67) {
+        uu.mix(node.style, bfx.ie6borderfix);
     }
 }
 
@@ -270,15 +272,15 @@ function boxeffectDraw(bfx,      // @param Hash:
     if (redraw && viewbg && nodebg) {
         nw = bfx.nodeRect.w + bfx.nodeOffset.x * 2;
         nh = bfx.nodeRect.h + bfx.nodeOffset.y * 2;
-        if (_ie67) {
+        if (uu.ver.ie67) {
             layer.resizeLayer("nodebg", bfx.nodeRect.w,
                                         bfx.nodeRect.h);
         } else {
             layer.resizeLayer("nodebg", bfx.nodeRect.w - bfx.border.w,
                                         bfx.nodeRect.h - bfx.border.h);
         }
-        layer.resizeLayer("viewbg", _math.max(bfx.viewRect.w, nw),
-                                    _math.max(bfx.viewRect.h, nh)).
+        layer.resizeLayer("viewbg", Math.max(bfx.viewRect.w, nw),
+                                    Math.max(bfx.viewRect.h, nh)).
               push("viewbg").clear().pop().
               push("nodebg").clear().pop();
     }
@@ -286,9 +288,9 @@ function boxeffectDraw(bfx,      // @param Hash:
     // CSS3 background-origin:
     if (nodebg) {
         nodebg.style.left =
-            (bfx.nodeOffset.x + (_ie67 ? 0 : bfx.border.l)) + "px";
+            (bfx.nodeOffset.x + (uu.ver.ie67 ? 0 : bfx.border.l)) + "px";
         nodebg.style.top =
-            (bfx.nodeOffset.y + (_ie67 ? 0 : bfx.border.t)) + "px";
+            (bfx.nodeOffset.y + (uu.ver.ie67 ? 0 : bfx.border.t)) + "px";
     }
 
     if (viewbg) {
@@ -318,8 +320,8 @@ function boxeffectDraw(bfx,      // @param Hash:
                             bfx.nodeRect.w + boxshadow.blur,
                             bfx.nodeRect.h + boxshadow.blur,
                             boxshadow.colorHash,
-                           _math.max(boxshadow.blur, _math.abs(boxshadow.ox * 2),
-                                                     _math.abs(boxshadow.oy * 2)),
+                            Math.max(boxshadow.blur, Math.abs(boxshadow.ox * 2),
+                                                     Math.abs(boxshadow.oy * 2)),
                             bfx.bradius.r);
             vctx.restore();
         }
@@ -373,8 +375,8 @@ function boxeffectDraw(bfx,      // @param Hash:
                     nctx.fillStyle = bfx.mbg.colorHash.hex;
                 }
                 boxpath(nctx,
-                        _ie67 ? bfx.border.l : 0,
-                        _ie67 ? bfx.border.t : 0,
+                        uu.ver.ie67 ? bfx.border.l : 0,
+                        uu.ver.ie67 ? bfx.border.t : 0,
                         bfx.nodeRect.w - bfx.border.w,
                         bfx.nodeRect.h - bfx.border.h,
                         bfx.bradius.r);
@@ -391,7 +393,7 @@ function boxeffectDraw(bfx,      // @param Hash:
         }
 
         // rewrite border, clipping mbg
-        if (_ie67) {
+        if (uu.ver.ie67) {
             if (bfx.border.render && bfx.border.shorthand) {
                 if (!bfx.bradius.r[0] && bfx.bradius.shorthand) {
                     nctx.save();
@@ -419,8 +421,8 @@ function boxeffectDraw(bfx,      // @param Hash:
 
     // http://d.hatena.ne.jp/uupaa/20090719
     // IE6 'borderColor = "transparent";' unsupported
-    if (_ie67) {
-        _mix(node.style, bfx.ie6borderfix);
+    if (uu.ver.ie67) {
+        uu.mix(node.style, bfx.ie6borderfix);
     }
 
     if (!redraw && bfx.slmode) {
@@ -437,7 +439,7 @@ function drawFakeShadow(ctx, x, y, width, height,
                         colorHash.g + "," + colorHash.b + ","; // ))
 
     // [IE6] thin out shadow
-    if (_ie6 && !uu.config.right) {
+    if (uu.ver.ie6 && !uu.config.right) {
         step *= 3, line *= 2.5;
     }
 
@@ -480,20 +482,20 @@ function drawMultipleBackgroundImage(bfx, ctx) {
     }
 
     if (draw) {
-        if (!_ie || bfx.slmode) {
+        if (!uu.ie || bfx.slmode) {
             // http://d.hatena.ne.jp/uupaa/20090815
             // Google Chrome3 HTML5::Canvas.clip Jaggies
             if (bfx.border.render) {
                 boxpath(ctx,
-                        _ie67 ? bfx.border.l : -1,
-                        _ie67 ? bfx.border.t : -1,
+                        uu.ver.ie67 ? bfx.border.l : -1,
+                        uu.ver.ie67 ? bfx.border.t : -1,
                         bfx.nodeRect.w - bfx.border.w + 2,
                         bfx.nodeRect.h - bfx.border.h + 2,
                         bfx.bradius.r);
             } else {
                 boxpath(ctx,
-                        _ie67 ? bfx.border.l : 0,
-                        _ie67 ? bfx.border.t : 0,
+                        uu.ver.ie67 ? bfx.border.l : 0,
+                        uu.ver.ie67 ? bfx.border.t : 0,
                         bfx.nodeRect.w - bfx.border.w,
                         bfx.nodeRect.h - bfx.border.h,
                         bfx.bradius.r);
@@ -515,8 +517,8 @@ function drawMultipleBackgroundImage(bfx, ctx) {
                         drawImageTile(bfx, ctx, img,
                                       (mbg.repeat[i] === "repeat-x" ? 1 : 0),
                                       pos[i].x | 0, pos[i].y | 0,
-                                      _ie67 ? bfx.border.l : 0,
-                                      _ie67 ? bfx.border.t : 0,
+                                      uu.ver.ie67 ? bfx.border.l : 0,
+                                      uu.ver.ie67 ? bfx.border.t : 0,
                                       bfx.nodeRect.w - bfx.border.w,
                                       bfx.nodeRect.h - bfx.border.h);
                         break;
@@ -524,8 +526,8 @@ function drawMultipleBackgroundImage(bfx, ctx) {
                         ctx.save();
                         ctx.fillStyle = ctx.createPattern(img, "repeat");
                         boxpath(ctx,
-                                _ie67 ? bfx.border.l : 0,
-                                _ie67 ? bfx.border.t : 0,
+                                uu.ver.ie67 ? bfx.border.l : 0,
+                                uu.ver.ie67 ? bfx.border.t : 0,
                                 bfx.nodeRect.w - bfx.border.w,
                                 bfx.nodeRect.h - bfx.border.h,
                                 bfx.bradius.r);
@@ -586,8 +588,8 @@ function drawGradient(bfx, ctx, hash) {
                                 p2, p3, hash.radius[1],
                                 hash.offset, hash.color);
     boxpath(ctx,
-            _ie67 ? bfx.border.l : 0,
-            _ie67 ? bfx.border.t : 0,
+            uu.ver.ie67 ? bfx.border.l : 0,
+            uu.ver.ie67 ? bfx.border.t : 0,
             bfx.nodeRect.w - bfx.border.w,
             bfx.nodeRect.h - bfx.border.h,
             bfx.bradius.r);
@@ -596,24 +598,22 @@ function drawGradient(bfx, ctx, hash) {
 }
 
 function trainMBG(bfx) {
-    var mbg = bfx.mbg, i = 0, iz, m, mm, url, _ceil = _math.ceil, N,
-        IMG_URL = _IMG_URL, IMG_CANVAS = _IMG_CANVAS,
-        IMG_GRADIENT = _IMG_GRADIENT;
+    var mbg = bfx.mbg, i = 0, iz, m, mm, url, N;
 
     // @see MultiBG http://www.w3.org/TR/css3-background/#layering
-    N = _math.max(mbg.image.length, mbg.repeat.length, mbg.position.length);
+    N = Math.max(mbg.image.length, mbg.repeat.length, mbg.position.length);
 
     if (N > mbg.image.length) {
         mbg.image = multipleArray(mbg.image,
-                                  _ceil(N / mbg.image.length), N);
+                                  Math.ceil(N / mbg.image.length), N);
     }
     if (N > mbg.repeat.length) {
         mbg.repeat = multipleArray(mbg.repeat,
-                                   _ceil(N / mbg.repeat.length), N);
+                                   Math.ceil(N / mbg.repeat.length), N);
     }
     if (N > mbg.position.length) {
         mbg.position = multipleArray(mbg.position,
-                                     _ceil(N / mbg.position.length), N);
+                                     Math.ceil(N / mbg.position.length), N);
     }
 
     for (iz = mbg.image.length; i < iz; ++i) {
@@ -622,18 +622,18 @@ function trainMBG(bfx) {
         mbg.position[i] = uu.trim(mbg.position[i]);
         mbg.type[i] = 0; // 0 = unknown
 
-        m = IMG_URL.exec(mbg.image[i]);
+        m = _IMG_URL.exec(mbg.image[i]);
         if (m) {
             mbg.type[i] = 1; // image
             url = uu.trim.quote(m[1]);
             mbg.imgobj[i] = uu.img.load(url, lazyRedraw);
-        } else if (IMG_GRADIENT.test(mbg.image[i])) {
+        } else if (_IMG_GRADIENT.test(mbg.image[i])) {
             mbg.type[i] = 2; // gradient
             mbg.grad[i] = uu.css.validate.gradient(mbg.image[i]);
             mbg.grad[i].render = (mbg.grad[i].valid &&
                                   mbg.grad[i].type) ? 1 : 0;
         } else {
-            mm = IMG_CANVAS.exec(mbg.image[i]);
+            mm = _IMG_CANVAS.exec(mbg.image[i]);
             if (mm) {
                 mbg.type[i] = 3; // canvas
                 mbg.canvasid = uu.trim.quote(mm[1]);
@@ -659,7 +659,7 @@ function trainBackgroundPosition(bfx, pos, img) {
         ih = img.height,
         xfloat = parseFloat;
 
-    if (!_ie67) {
+    if (!uu.ver.ie67) {
         nw -= bfx.border.w;
         nh -= bfx.border.h;
     }
@@ -681,7 +681,7 @@ function trainBackgroundPosition(bfx, pos, img) {
            - iw * xfloat(ary[0]) / 100;
     } else {
         px = uu.css.px.value(bfx.node, ary[0]);
-        if (_ie67) {
+        if (uu.ver.ie67) {
             px += bfx.border.l;
         }
     }
@@ -691,7 +691,7 @@ function trainBackgroundPosition(bfx, pos, img) {
            - ih * xfloat(ary[1]) / 100;
     } else {
         py = uu.css.px.value(bfx.node, ary[1]);
-        if (_ie67) {
+        if (uu.ver.ie67) {
             py += bfx.border.t;
         }
     }
@@ -700,7 +700,7 @@ function trainBackgroundPosition(bfx, pos, img) {
 
 function boxpath(ctx, x, y, w, h, rary, openPath) {
     var r0 = rary[0], r1 = rary[1], r2 = rary[2], r3 = rary[3],
-        w2 = (w / 2) | 0, h2 = (h / 2) | 0, xmin = _math.min;
+        w2 = (w / 2) | 0, h2 = (h / 2) | 0, xmin = Math.min;
 
     if (r0 < 0) { r0 = 0; }
     if (r1 < 0) { r1 = 0; }
@@ -743,11 +743,11 @@ function multipleArray(ary, times, maxLength) {
 function trainBorder(bfx) {
     var node = bfx.node,
         hash = bfx.border,
-        ns = _ie ? node.currentStyle : _cstyle(node, null);
+        ns = uu.ie ? node.currentStyle : win.getComputedStyle(node, null);
 
     hash.render = 0;
     hash.shorthand = 0;
-    _mix(hash, uu.css.border.get(node, 1)); // copy border
+    uu.mix(hash, uu.css.border.get(node, 1)); // copy border
     hash.topcolor = uu.color(ns.borderTopColor);
 
     if (hash.topcolor.a) { // has border (not transparent)
@@ -764,7 +764,7 @@ function trainBorder(bfx) {
 function trainFakeBorder(bfx) {
     // http://d.hatena.ne.jp/uupaa/20090719
     var node = bfx.node,
-        ncs = _ie ? node.currentStyle : _cstyle(node, null);
+        ncs = uu.ie ? node.currentStyle : win.getComputedStyle(node, null);
 
     bfx.ie6borderorg = {
         marginTop: ncs.marginTop,
@@ -807,6 +807,5 @@ function _fixIELayoutBug(view,  // @param Node: view node
     }
 }
 
-})(window, document, uu, uu.mix, uu.ie, uu.ie6, uu.ie67,
-   window.getComputedStyle, Math);
+})(window, document, uu);
 

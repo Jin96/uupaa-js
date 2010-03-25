@@ -1,31 +1,24 @@
 // === bite ===
-// depend: uu.js, uu.css
-uu.again || (function(win, doc, uu) {
-var _uuev = uu.ev,
-    _uuary = uu.ary,
-    _uucss = uu.css,
-    _uumix = uu.mix,
-    _uuattr = uu.attr,
-    _uuhash = uu.hash,
-    _uunode = uu.node,
-    _uuklass = uu.klass,
-    _speed = { slow: 600, normal: 400, fast: 200 };
-//    _rootobj = bite(doc);
+//{{{!depend uu, uu.class, uu.css, uu.pligin
+//}}}!depend
+
+win.$$$ || (function(win, doc, uu) {
+var _speed = { slow: 600, normal: 400, fast: 200 };
 
 bite.fn = biteinit.prototype = bite.prototype;
-bite.fn.extend = function(hash) { return _uumix(bite.fn, hash); };
+bite.fn.extend = function(hash) { return uu.mix(bite.fn, hash); };
 bite.extend = function(hash, a, b) {
-  return a ? _uumix(hash, a, b) : _uumix(bite, hash);
+  return a ? uu.mix(hash, a, b) : uu.mix(bite, hash);
 };
-// bite.exp - export scope 
-bite.exp = function(prefix) { // @param String(= ""): prefix 
-  prefix = prefix || ""; 
-  win[prefix + "$"]      = bite; 
-  win[prefix + "jQuery"] = bite; 
+// bite.exp - export scope
+bite.exp = function(prefix) { // @param String(= ""): prefix
+  prefix = prefix || "";
+  win[prefix + "$"]      = bite;
+  win[prefix + "jQuery"] = bite;
 };
 win.$$$ = bite;
 
-_uumix(bite.prototype, {
+uu.mix(bite.prototype, {
   each:         biteeach,
   size:         bitesize,
   index:        biteindex,      // bite.index(element)
@@ -96,15 +89,15 @@ _uumix(bite.prototype, {
 });
 
 // inner - build DOM Lv2 event handler - bite.click(), ...
-_uuary.each(_uuary(uu.dmz.EVENT), function(v) {
+uu.ary.each(uu.dmz.EVENT.split(","), function(v) {
   bite.fn[v] = function(fn) {
     function bindThis(evt, node) {
       fn.call(node, evt); // this = node
     }
-    return _biteeach(this, _uuev, v, bindThis);
+    return _biteeach(this, uu.ev, v, bindThis);
   };
   bite.fn["un" + v] = function() {
-    return _biteeach(this, _uuev.unbind, v);
+    return _biteeach(this, uu.ev.unbind, v);
   };
 });
 
@@ -122,7 +115,7 @@ function biteinit(expr, ctx) {
       : (expr === win || expr.nodeType) ? [expr] // node
       : Array.isArray(expr) ? expr.concat() // clone NodeArray
       : typeof expr === "string" ? (!expr.indexOf("<")
-                                 ? [_uunode.bulk(expr)] // <div> -> fragment
+                                 ? [uu.node.bulk(expr)] // <div> -> fragment
                                  : uu.query(expr, _evalctx(ctx)))
       : (expr instanceof bite) ? expr._ns.concat() // copy constructor
       : uu.isfunc(expr) ? (uu.ready(expr), []) // ready
@@ -175,10 +168,10 @@ function biteget(nth) { // @param Number(= void 0): nth
 // [3][set] bite.attr(name, value) -> this
 function biteattr(a1, a2) {
   if (a2 === void 0) {
-    return uu.isstr(a1) ? _uuattr.get(this._ns[0], a1) // [1]
-                        : _biteeach(this, _uuattr.set, a1); // [2]
+    return uu.isstr(a1) ? uu.attr.get(this._ns[0], a1) // [1]
+                        : _biteeach(this, uu.attr.set, a1); // [2]
   }
-  return _biteeach(this, _uuattr.set, _uuhash(a1, a2)); // [3]
+  return _biteeach(this, uu.attr.set, uu.hash(a1, a2)); // [3]
 }
 
 // bite.removeAttr(name)
@@ -195,16 +188,16 @@ function biteremoveattr(name) {
 // [3][set] bite.css(name, value) -> this
 function bitecss(a1, a2) {
   if (a2 === void 0) {
-    return uu.isstr(a1) ? _uucss.get(this._ns[0], a1) // [1]
-                        : _biteeach(this, _uucss.set, a1); // [2]
+    return uu.isstr(a1) ? uu.css.get(this._ns[0], a1) // [1]
+                        : _biteeach(this, uu.css.set, a1); // [2]
   }
-  return _biteeach(this, _uucss.set, _uuhash(a1, a2)); // [3]
+  return _biteeach(this, uu.css.set, uu.hash(a1, a2)); // [3]
 }
 
 // bite.addClass - add className for all elements
 function biteaddclass(className) { // @param JointString: "class1 class2"
                                    // @return this:
-  return _biteeach(this, _uuklass.add, className);
+  return _biteeach(this, uu.klass.add, className);
 }
 
 // bite.hasClass
@@ -213,7 +206,7 @@ function bitehasclass(className) { // @param JointString: "class1 class2"
   var rv = false, node = this._ns, v, i = 0;
 
   while ( (v = node[i++]) ) {
-    if (_uuklass.has(v, className)) {
+    if (uu.klass.has(v, className)) {
       rv = true;
     }
   }
@@ -223,7 +216,7 @@ function bitehasclass(className) { // @param JointString: "class1 class2"
 // bite.removeClass - remove className for all elements
 function biteremoveclass(className) { // @param JointString: "class1 class2"
                                       // @return this:
-  return _biteeach(this, _uuklass.sub, className);
+  return _biteeach(this, uu.klass.sub, className);
 }
 
 // bite.toggleClass - toggle(add / remove) className for all elements
@@ -231,9 +224,9 @@ function bitetoggleclass(className, // @param JointString: "class1 class2"
                          add) {     // @param Boolean(= void 0): true is add
                                     // @return this:
   if (add !== void 0) {
-    return _biteeach(this, _uuklass.toggle, className);
+    return _biteeach(this, uu.klass.toggle, className);
   }
-  return _biteeach(this, add ? _uuklass.add : _uuklass.sub, className);
+  return _biteeach(this, add ? uu.klass.add : uu.klass.sub, className);
 }
 
 // bite.html
@@ -348,9 +341,9 @@ function biteappend(html) { // @param bite/HTMLString/Node:
 
   while ( (v = this._ns[i++]) ) {
     if (html._ns) {
-      _uunode(html._ns[0], v); // bite._ns[0] -> appendChild
+      uu.node(html._ns[0], v); // bite._ns[0] -> appendChild
     } else if (uu.isstr(html) || html.nodeType) {
-      _uunode(html, v);
+      uu.node(html, v);
     }
   }
   return this;
@@ -363,9 +356,9 @@ function biteprepend(html) { // @param bite/HTMLString/Node:
 
   while ( (v = this._ns[i++]) ) {
     if (html._ns) {
-      _uunode(html._ns[0], v, 5); // bite._ns[0] -> appendChild
+      uu.node(html._ns[0], v, 5); // bite._ns[0] -> appendChild
     } else if (uu.isstr(html) || html.nodeType) {
-      _uunode(html, v, 5);
+      uu.node(html, v, 5);
     }
   }
   return this;
@@ -377,9 +370,9 @@ function biteprependto(html) { // @param bite/HTMLString/Node:
 
   while ( (v = this._ns[i++]) ) {
     if (html._ns) {
-      _uunode(html._ns[0], v, 1); // bite._ns[0] -> appendChild
+      uu.node(html._ns[0], v, 1); // bite._ns[0] -> appendChild
     } else if (uu.isstr(html) || html.nodeType) {
-      _uunode(html, v, 1);
+      uu.node(html, v, 1);
     }
   }
   return this;
@@ -392,9 +385,9 @@ function biteafter(html) { // @param bite/HTMLString/Node:
 
   while ( (v = this._ns[i++]) ) {
     if (html._ns) {
-      _uunode(html._ns[0], v, 3); // bite._ns[0]
+      uu.node(html._ns[0], v, 3); // bite._ns[0]
     } else if (uu.isstr(html) || html.nodeType) {
-      _uunode(html, v, 3); // nextSibling
+      uu.node(html, v, 3); // nextSibling
     }
   }
   return this;
@@ -407,9 +400,9 @@ function bitebefore(html) { // @param bite/HTMLString/Node:
 
   while ( (v = this._ns[i++]) ) {
     if (html._ns) {
-      _uunode(html._ns[0], v, 2); // bite._ns[0] -> inseretBefore
+      uu.node(html._ns[0], v, 2); // bite._ns[0] -> inseretBefore
     } else if (uu.isstr(html) || html.nodeType) {
-      _uunode(html, v, 2);
+      uu.node(html, v, 2);
     }
   }
   return this;
@@ -421,14 +414,14 @@ function bitewrapInner(wrapper) { // @param HTMLString/Node:
   var i = 0, v, w, x;
 
   while ( (v = this._ns[i++]) ) {
-    x = w = _uunode.bulk(wrapper);
+    x = w = uu.node.bulk(wrapper);
     while (x.firstChild) {
       x = x.firstChild;
     }
     while (v.firstChild) {
       x.appendChild(v.removeChild(v.firstChild));
     }
-    _uunode(w, v, 5); // firstChild
+    uu.node(w, v, 5); // firstChild
   }
   return this;
 }
@@ -438,7 +431,7 @@ function biteempty() { // @return this:
 /*
   var v, i = 0,
       descendants = uu.query("*", this._ns),
-      uuevunbind = _uuev.unbind;
+      uuevunbind = uu.ev.unbind;
 
   while ( (v = descendants[i++]) ) {
      uuevunbind(v);
@@ -462,7 +455,7 @@ function biteempty() { // @return this:
 function biteremove() { // @return this:
   var v, i = 0,
       descendants = uu.query("*", this._ns),
-      uuevunbind = _uuev.unbind;
+      uuevunbind = uu.ev.unbind;
 
   while ( (v = descendants[i++]) ) {
     uuevunbind(v);
@@ -478,22 +471,22 @@ function biteremove() { // @return this:
 
 // bite.show - show elements
 function biteshow() { // @return this:
-  return _biteeach(this, _uucss.show);
+  return _biteeach(this, uu.css.show);
 }
 
 // bite.hide - hide elements
 function bitehide() { // @return this:
-  return _biteeach(this, _uucss.hide);
+  return _biteeach(this, uu.css.hide);
 }
 
 // bite.fadeIn -
 function bitefadein(speed) { // @param Number(= 400):
-  return _biteeach(this, _uucss.show, _speed[speed] || speed, 1);
+  return _biteeach(this, uu.css.show, _speed[speed] || speed, 1);
 }
 
 // bite.fadeOut -
 function bitefadeout(speed) { // @param Number(= 400):
-  return _biteeach(this, _uucss.hide, _speed[speed] || speed, 1);
+  return _biteeach(this, uu.css.hide, _speed[speed] || speed, 1);
 }
 
 // bite.fadeTo -
@@ -569,33 +562,33 @@ function bitestop() { // @return this:
 
 // bite.width
 function bitewidth() { // @return Number:
-  return _uucss.size.get(this._ns[0]).w; // node.style.width + padding + border
+  return uu.css.size.get(this._ns[0]).w; // node.style.width + padding + border
 }
 
 // bite.height
 function biteheight() { // @return Number:
-  return _uucss.size.get(this._ns[0]).h; // node.style.height + padding + border
+  return uu.css.size.get(this._ns[0]).h; // node.style.height + padding + border
 }
 
 // bite.bind - bind event
 function bitebind(name, // @param String: event type
                   fn) { // @param Function: callback
                         // @return this:
-  return _biteeach(this, _uuev, name, fn);
+  return _biteeach(this, uu.ev, name, fn);
 }
 
 // bite.unbind - unbind event
 function biteunbind(name, // @param String: event type
                     fn) { // @param Function: callback
                           // @return this:
-  return _biteeach(this, _uuev.unbind, name, fn);
+  return _biteeach(this, uu.ev.unbind, name, fn);
 }
 
 // bite.hover - bind hover event
 function bitehover(enter,   // @param Function:
                    leave) { // @param Function:
                             // @return this:
-  return _biteeach(this, _uuev.hover, enter, leave);
+  return _biteeach(this, uu.ev.hover, enter, leave);
 }
 
 // inner - node iterator

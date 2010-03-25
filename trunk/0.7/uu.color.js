@@ -1,7 +1,8 @@
 
 // === Color ===
-// depend: uu.js
-//
+//{{{!depend uu
+//}}}!depend
+
 // type ColorHash = { hex: "#000000", rgba: "rgba(0,0,0,0)", num: 0x000000,
 //                    r: 0, g: 0, b: 0, a: 0, argb: "#00000000" }
 // type RGBAHash = { r: 0, g: 0, b: 0, a: 0 }
@@ -9,7 +10,7 @@
 // type HSLAHash = { h: 0, s: 0, l: 0, a: 0 }
 // type W3CNamedColorString = "pink"
 
-uu.agein || (function(win, doc, uu) {
+uu.color.gray || (function(win, doc, uu) {
 var _round = Math.round;
 
 uu.mix(uu.color, {
@@ -22,6 +23,11 @@ uu.mix(uu.color, {
     rgba2hsla:    uucolorrgba2hsla, // uu.color.rgba2hsla(RGBAHash/ColorHash) -> HSLAHash
     hsla2rgba:    uucolorhsla2rgba  // uu.color.hsla2rgba(HSLAHash) -> RGBAHash
 });
+// --- long name alias ---
+uu.color.convertRGBAToHSVA = uucolorrgba2hsva;
+uu.color.convertHSVAToRGBA = uucolorhsva2rgba;
+uu.color.convertRGBAToHSLA = uucolorrgba2hsla;
+uu.color.convertHSLAToRGBA = uucolorhsla2rgba;
 
 // uu.color.gray - gray color (G channel method)
 function uucolorgray(c) { // @param ColorHash/RGBAHash:

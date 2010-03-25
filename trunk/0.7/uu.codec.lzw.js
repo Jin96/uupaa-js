@@ -1,13 +1,13 @@
 
 // === LZW ===
-// depend: uu.js
-uu.agein || (function(uu) {
+//{{{!depend uu, uu.codec
+//}}}!depend
 
-uu.mix(uu.codec, {
-    lzw: {
-        decode: lzwdecode   // fn(bary) - return ByteArray
-    }
-});
+uu.codec.lzw || (function(uu) {
+
+uu.codec.lzw = {
+    decode: lzwdecode   // fn(bary) - return ByteArray
+};
 
 // uu.codec.lzw.decode
 function lzwdecode(bary,      // @param ByteArray: data

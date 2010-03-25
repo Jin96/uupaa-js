@@ -1,6 +1,9 @@
 
 // === uu.css.rotate ===
-uu.agein || (function(uu) {
+//{{{!depend uu
+//}}}!depend
+
+uu.rotate || (function(uu) {
 
 // vml + rotate
 // canvas + rotate

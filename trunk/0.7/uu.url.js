@@ -1,7 +1,7 @@
 
 // === URL ===
 // depend: uu.js
-uu.agein || (function(win, doc, uu) {
+uu.url || (function(win, doc, uu) {
 var _AMP = /&amp;|&/g;
 
 // --- url / query string / path ---
@@ -49,7 +49,7 @@ function uuurlabs(url,       // @param URLString(= "."): rel/abs URL
                              // @return URLString: absolute URL
     function _uuurlabs(url) {
         if (!uuurlabs._SCHEME.test(url)) {
-            var div = uue();
+            var div = uu.elm();
 
             div.innerHTML = '<a href="' + (curtdir || "") + url + '" />';
             url = div.firstChild ? div.firstChild.href

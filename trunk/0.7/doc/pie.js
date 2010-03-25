@@ -26,7 +26,7 @@ uu.Class.singleton("Pie", {
     function _draw(hash) {
       var pie = uu.id("pie");
 
-      if (uu.ie6) { // パイチャートのファイル名には拡張子(".png")が無いため、透過png処理を手動で行う
+      if (uu.ver.ie6) { // パイチャートのファイル名には拡張子(".png")が無いため、透過png処理を手動で行う
         pie.style.filter =
             'progid:DXImageTransform.Microsoft.AlphaImageLoader(src="' + hash.img.src + '",sizingMethod=crop)';
         pie.style.width  = "360px";

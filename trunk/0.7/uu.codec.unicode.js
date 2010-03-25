@@ -1,12 +1,39 @@
 
-// === UTF8 ===
-// depend: uu, uu.codec
-uu.agein || (function(uu) {
+// === UNICODE / UTF8 ===
+//{{{!depend uu, uu.codec
+//}}}!depend
 
-uu.codec.utf8 = {
-    encode: utf8encode, // uu.codec.utf8encode(String) -> UTF8ByteArray
-    decode: utf8decode  // uu.codec.utf8decode(UTF8ByteArray) -> String
+uu.codec.ucs2 || (function(uu) {
+
+uu.codec.ucs2 = {
+    encode: ucs2encode,     // uu.codec.ucs2.encode("string", 0) -> "\u0073"
+    decode: ucs2decode      // uu.codec.ucs2.decode("\\u0073\\u0074\\u0072") -> "str"
 };
+uu.codec.utf8 = {
+    encode: utf8encode,     // uu.codec.utf8.encode(String) -> UTF8ByteArray
+    decode: utf8decode      // uu.codec.utf8.decode(UTF8ByteArray) -> String
+};
+
+// --- implement ---
+
+// uu.codec.ucs2.encode - char to "\u0000"
+function ucs2encode(str,        // @param String:
+                    position) { // @param Number(= 0): position
+                                // @return String "\u0000" ~ "\uffff"
+    var c = str.charCodeAt(position || 0);
+
+    return "\\u" + uu.hash._num2hh[(c >> 8) & 255] + uu.hash._num2hh[c & 255];
+}
+
+// uu.codec.ucs2.decode - "\u0000" to char
+function ucs2decode(str) { // @param String:
+                           // @return String: "\u0000" ~ "\uffff"
+    function _decode(m, hex) {
+        return String.fromCharCode(parseInt(hex, 16));
+    }
+    return str.replace(ucs2decode._UFFFF, _decode);
+}
+ucs2decode._UFFFF = /\\u([0-9a-f]{4})/g; // \u0000 ~ \uffff
 
 // uu.codec.utf8.encode - String to UTF8ByteArray
 function utf8encode(str) { // @param String:

@@ -1,11 +1,12 @@
 
 // === Storage ===
-// depend: uu.js, uu.flash.js
+//{{{!depend uu, uu.flash
+//}}}!depend
 
 // Web Storage:  http://www.w3.org/TR/webstorage/#storage
 //         IE8:  http://msdn.microsoft.com/en-us/library/cc197062(VS.85).aspx
 //
-uu.agein || (function(win, doc, uu) {
+uu.local || (function(win, doc, uu) {
 var _db = 0,      // Storage object
     _dbwait = 0,  // 1: waiting
     _backend = 0, // Storage backend,
@@ -376,7 +377,7 @@ function uulocalremove(key) { // @param String: "key"
 
 //{{{!mb --- IE Storage ---
 function _ieinit() {
-    var meta = uue("meta");
+    var meta = uu.elm("meta");
 
     doc.head.appendChild(meta);
     meta.addBehavior("#default#userData");
@@ -465,7 +466,7 @@ uu.dmz.storageReadyCallback = flashStorageReadyCallback;
 // uu.dmz.storageReadyCallback - callback from FlashStorage
 function flashStorageReadyCallback(/* msg */) {
     _dbwait = 0;
-    uu.dmz.storageReadyCallback = uunop;
+    uu.dmz.storageReadyCallback = uu.nop;
     setTimeout(WebStorageReady, 0);
 }
 function _flashall() {

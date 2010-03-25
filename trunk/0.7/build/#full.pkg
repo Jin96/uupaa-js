@@ -35,6 +35,7 @@ uu.css3.fixie.js
 uu.css3.boxeffect.js
 uu.tween.js
 uu.codec.js
+uu.codec.unicode.js
 uu.codec.base64.js
 uu.codec.url.js
 uu.test.js

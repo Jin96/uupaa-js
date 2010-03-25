@@ -1,7 +1,9 @@
 
 // === CSS Parser ===
-// depend: uu.js, uu.codec.js, uu.css.validate.js
-uu.agein || (function(win, doc, uu) {
+//{{{!depend uu, uu.codec, uu.css.validate
+//}}}!depend
+
+uu.css.parse || (function(win, doc, uu) {
 
 var _CSSCache = {}; // CSS Cache { url: cssText }
 

@@ -1,6 +1,7 @@
 
 // === Flash Canvas ===
-// depend: uu, uu.color, uu.img, uu.font, uu.canvas
+//{{{!depend uu, uu.color, uu.img, uu.font, uu.canvas
+//}}}!depend
 
 //  <canvas width="300" height="150">   <- canvas
 //      <object id="external{n}"        <- view
@@ -14,11 +15,11 @@
 
 //{{{!mb
 
-uu.agein || (function(win, doc, uu) {
+uu.canvas.Flash.init || (function(win, doc, uu) {
 
 uu.mix(uu.canvas.Flash.prototype, {
     arc:                    arc,
-    arcTo:                  uunop,
+    arcTo:                  uu.nop,
     beginPath:              beginPath,
     bezierCurveTo:          bezierCurveTo,
     clear:                  clear,          // [EXTEND]
@@ -130,9 +131,9 @@ function build(canvas) { // @param Node: <canvas>
             '<param name="flashVars" value="" />' +
             '<param name="wmode" value="transparent" />' +
             '<param name="movie" value="?" /></object>',
-        [ctx._id, canvas.width, canvas.height,
+         ctx._id, canvas.width, canvas.height,
          "clsid:d27cdb6e-ae6d-11cf-96b8-444553540000",
-         uu.config.baseDir + "uu.canvas.swf"]);
+         uu.config.baseDir + "uu.canvas.swf");
 
     ctx._view = canvas.firstChild; // <object>
 
