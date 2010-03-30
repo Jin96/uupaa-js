@@ -39,8 +39,8 @@ uu.qs = uu.mix(uuqs, {
 function uuurl(value) { // @param URLString/Hash(= void 0):
                         // @return String/Hash/void 0:
     return (value === void 0) ? uuurlabs() :    // [1]
-           uu.isstr(value) ? uuurlparse(value)  // [2]
-                           : uuurlbuild(value); // [3]
+           uu.isString(value) ? uuurlparse(value)  // [2]
+                              : uuurlbuild(value); // [3]
 }
 
 // uu.url.abs - convert relative URL to absolute URL
@@ -49,7 +49,7 @@ function uuurlabs(url,       // @param URLString(= "."): rel/abs URL
                              // @return URLString: absolute URL
     function _uuurlabs(url) {
         if (!uuurlabs._SCHEME.test(url)) {
-            var div = uu.elm();
+            var div = uu.node();
 
             div.innerHTML = '<a href="' + (curtdir || "") + url + '" />';
             url = div.firstChild ? div.firstChild.href
@@ -147,7 +147,7 @@ function uuqs(a, b, c) { // @return String/Hash:
     if (a === void 0) { // [1]
         return uuqsparse(location.href);
     }
-    return !uu.isstr(a) ? uuqsbuild(a, b) : // [3]
+    return !uu.isString(a) ? uuqsbuild(a, b) : // [3]
            (b === void 0 ? uuqsparse : uuqsadd)(a, b, c); // [2][4][5]
 }
 

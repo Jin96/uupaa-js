@@ -87,7 +87,7 @@ function _uuajax(url, option, fn, ngfn, _fn2, beforefn) {
                    guid: guid, type: "", id: opt.id });
     }
     function _ajaxgc() {
-        befn && uu.ev.detach(win, "beforeunload", befn);
+        befn && uu.event.detach(win, "beforeunload", befn);
         xhr && (xhr.onreadystatechange = uu.nop, xhr = null); // [IE] mem leak
     }
     function _ajaxwatchdog() {
@@ -108,7 +108,7 @@ function _uuajax(url, option, fn, ngfn, _fn2, beforefn) {
 
     // relative url -> absolute url
     if (!uuajax._scheme.test(url)) {
-        div = uu.elm();
+        div = uu.node();
         div.innerHTML = '<a href="' + url + '" />';
         url = div.firstChild ? div.firstChild.href
                              : /href\="([^"]+)"/.exec(div.innerHTML)[1];
@@ -118,7 +118,7 @@ function _uuajax(url, option, fn, ngfn, _fn2, beforefn) {
     if (xhr) {
         try {
             // [Gecko] beforeunload event -> gc
-            uu.gecko && uu.ev.attach(win, "beforeunload", befn = _ajaxabort);
+            uu.gecko && uu.event.attach(win, "beforeunload", befn = _ajaxabort);
 
             // initialize
             xhr.open(method, url, true); // GET / POST / PUT / DELETE / HEAD, Async
@@ -226,7 +226,7 @@ function _uuajaxq(ajax, cmd, url, opt, fn, lastfn, ngfn, rv) {
 // inner - ajax/jsonp parallel load
 function _uuajaxparallel(ajax, ary, lastfn, ngfn) {
     function _nextp(hash) {
-        var idx = uu.ary.indexOf(atom, hash.guid); // = Array.indexOf
+        var idx = atom.indexOf(hash.guid);
 
         rv[idx] = hash;
         ++n >= iz / 3 && !run++ && lastfn(rv); // fn([{...}, ..])
@@ -293,7 +293,7 @@ function _uujsonp(url, option, fn, ngfn, _fn2) {
         timeout = opt.timeout || 10,
         method = opt.method || "callback",
         jobid = "j" + uu.guid(),
-        node = uu.elm("script"),
+        node = uu.node("script"),
         src = url + (url.indexOf("?") < 0 ? "?" :
                      url.indexOf("&") < 0 ? ";" : "&") +
                     method + "=uu.jsonp._db." + jobid; // uu.jsonp._db = _jobid

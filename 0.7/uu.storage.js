@@ -131,8 +131,8 @@ function uucookieset(key,      // @param String: "key"
         opt.path   && rv.push("path="   + opt.path);
         if (age !== void 0) {
             rv.push("expires=" +
-                    (uu.isnum(age) ? new Date((+new Date) + age * 86400000)
-                                   : age).toUTCString());
+                    (uu.isNumber(age) ? new Date((+new Date) + age * 86400000)
+                                      : age).toUTCString());
         }
         (location.protocol === "https:") && rv.push("secure");
         doc.cookie = rv.join("; "); // store
@@ -377,7 +377,7 @@ function uulocalremove(key) { // @param String: "key"
 
 //{{{!mb --- IE Storage ---
 function _ieinit() {
-    var meta = uu.elm("meta");
+    var meta = uu.node("meta");
 
     doc.head.appendChild(meta);
     meta.addBehavior("#default#userData");
@@ -542,7 +542,7 @@ function _detected(db, wait, backend) {
 // inner - window.xlocal callback
 function WebStorageReady() {
     uu.ready.gone.storage = 1;
-    uu.isfunc(win.xlocal || 0) && win.xlocal(uu, _backend);
+    uu.isFunction(win.xlocal || 0) && win.xlocal(uu, _backend);
 }
 
 })(window, document, uu);

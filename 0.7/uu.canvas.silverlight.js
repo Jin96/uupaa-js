@@ -561,7 +561,7 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
             shadow = renderShadow ? _dropShadow(this, "Image", this.__shadowColor) : "";
             matrix = _matrix("Image", uu.matrix2d.translate(dx, dy, this._matrix));
 
-            fg = uu.fmt('<Canvas Canvas.ZIndex="?"><Image Opacity="?" Source="?">??</Image></Canvas>',
+            fg = uu.format('<Canvas Canvas.ZIndex="?"><Image Opacity="?" Source="?">??</Image></Canvas>',
                         zindex, this.globalAlpha, image.src, matrix, shadow);
             break;
         case 5:
@@ -584,7 +584,7 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
             shadow = renderShadow ? _dropShadow(this, "Image", this.__shadowColor) : "";
             matrix = _matrix("Image", uu.matrix2d.translate(dx, dy, this._matrix));
 
-            fg = uu.fmt('<Canvas Canvas.ZIndex="?"><Image Opacity="?" Source="?" Width="?" Height="?" Stretch="Fill">??</Image></Canvas>',
+            fg = uu.format('<Canvas Canvas.ZIndex="?"><Image Opacity="?" Source="?" Width="?" Height="?" Stretch="Fill">??</Image></Canvas>',
                         zindex, this.globalAlpha, image.src, dw, dh, matrix, shadow);
             break;
         case 9:
@@ -619,7 +619,7 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
             shadow = renderShadow ? _dropShadow(this, "Canvas", this.__shadowColor) : "";
             matrix = _matrix("Canvas", uu.matrix2d.translate(x, y, this._matrix));
 
-            fg = uu.fmt('<Canvas Canvas.ZIndex="?"><Canvas><Image Opacity="?" Source="?" Width="?" Height="?" Stretch="Fill"><Image.Clip><RectangleGeometry Rect="?" /></Image.Clip></Image></Canvas>??</Canvas>',
+            fg = uu.format('<Canvas Canvas.ZIndex="?"><Canvas><Image Opacity="?" Source="?" Width="?" Height="?" Stretch="Fill"><Image.Clip><RectangleGeometry Rect="?" /></Image.Clip></Image></Canvas>??</Canvas>',
                         zindex, this.globalAlpha, image.src, w, h, [dx - x, dy - y, dw, dh].join(" "), matrix, shadow);
         }
     } else { // HTMLCanvasElement
@@ -650,7 +650,7 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
             shadow = renderShadow ? _dropShadow(this, "Canvas", this.__shadowColor) : "";
             matrix = _matrix("Canvas", args === 3 ? m : uu.matrix2d.scale(dw / dim.w, dh / dim.h, m));
 
-            fg = uu.fmt('<Canvas Canvas.ZIndex="?" Opacity="?"><Canvas>?</Canvas>??</Canvas>',
+            fg = uu.format('<Canvas Canvas.ZIndex="?" Opacity="?"><Canvas>?</Canvas>??</Canvas>',
                         zindex, this.globalAlpha, history, matrix, shadow);
             break;
         case 9:
@@ -686,7 +686,7 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
             shadow = renderShadow ? _dropShadow(this, "Canvas", this.__shadowColor) : "";
             matrix = _matrix("Canvas", uu.matrix2d.scale(bw, bh, m));
 
-            fg = uu.fmt('<Canvas Canvas.ZIndex="?" Opacity="?"><Canvas>?<Canvas.Clip><RectangleGeometry Rect="?" /></Canvas.Clip></Canvas>??</Canvas>',
+            fg = uu.format('<Canvas Canvas.ZIndex="?" Opacity="?"><Canvas>?<Canvas.Clip><RectangleGeometry Rect="?" /></Canvas.Clip></Canvas>??</Canvas>',
                         zindex, this.globalAlpha, history,
                          [(dx - x) / bw, (dy - y) / bh, dw / bw, dh / bh].join(" "),
                         matrix, shadow);
@@ -1247,7 +1247,7 @@ function _patternFill(ctx, obj, path, fill, zindex) {
                          '" Source="', obj.src, '"></Image>');
             }
         }
-        return uu.fmt('<Canvas Canvas.ZIndex="?"><Canvas Canvas.ZIndex="?" Clip="?">?</Canvas>?</Canvas>',
+        return uu.format('<Canvas Canvas.ZIndex="?"><Canvas Canvas.ZIndex="?" Clip="?">?</Canvas>?</Canvas>',
                       zindex, zindex2, path, img.join(""), shadow);
     }
 
@@ -1366,7 +1366,7 @@ function _stroke(ctx) {
 
 // add inline XAML source
 uu.ie && uu.ver.silverlight && uu.lazy("init", function() {
-    uu.id("xaml") || doc.head.appendChild(uu.mix(uu.elm("script"), {
+    uu.id("xaml") || doc.head.appendChild(uu.mix(uu.node("script"), {
             id:   "xaml",
             type: "text/xaml",
             text: '<Canvas xmlns="http://schemas.microsoft.com/client/2007" ' +

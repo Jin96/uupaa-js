@@ -57,7 +57,7 @@ function uuclass(className, // @param String: "Class"
 
         // destructor(~lv3 -> ~lv2 -> ~lv1)
         lv3["~fin"] = lv3.fin || uu.nop;
-        lv3.fin && uu.ev.attach(win, "unload", function() {
+        lv3.fin && uu.event.attach(win, "unload", function() {
             lv3.fin && lv3.fin();
         });
         lv3.fin = function wrapper() {
@@ -95,7 +95,7 @@ function uuclass(className, // @param String: "Class"
         if (from === obj[method] || superMethod.caller === obj[method]) {
             obj = obj.superClass;
         }
-        return obj[method].apply(this, uu.ary(arguments).slice(2));
+        return obj[method].apply(this, uu.array(arguments).slice(2));
     }
 }
 
@@ -117,7 +117,7 @@ function uuclasssingleton(className, // @param String: class name
         } else {
             uuclassguid(me);
             me.init && me.init.apply(me, arg);
-            me.fin  && uu.ev.attach(win, "unload", function() {
+            me.fin  && uu.event.attach(win, "unload", function() {
                 me.fin();
             });
             me.msgbox || (me.msgbox = uu.nop);
@@ -163,7 +163,7 @@ function uumsgsend(to,      // @param Array/0/instance(= 0): addr or guid
                    msg,     // @param String: msg
                    param) { // @param Mix(= void 0):
                             // @return Arra: [result, ...]
-    var rv = [], ri = -1, v, w, i = -1, ary = to ? uu.ary(to) : this._guid;
+    var rv = [], ri = -1, v, w, i = -1, ary = to ? uu.array(to) : this._guid;
 
     while ( (v = ary[++i]) ) {
         w = this._db[v.uuguid || v || 0];
@@ -185,20 +185,20 @@ function uumsgpost(to,      // @param Array/0/instance(= 0): addr or guid
     var me = this;
 
     setTimeout(function() {
-        me.send(to ? uu.ary(to) : me._guid, msg, param);
+        me.send(to ? uu.array(to) : me._guid, msg, param);
     }, 0);
 }
 
 // MessagePump.register - register the destination of the message
 function uumsgregister(inst) { // @param Instance: class instance
     this._db[uuclassguid(inst)] = inst;
-    this._guid = uu.hash.keys(this._db);
+    this._guid = uu.keys(this._db);
 }
 
 // MessagePump.unregister
 function uumsgunregister(inst) { // @param Instance: class instance
     delete this.db[uuclassguid(inst)];
-    this._guid = uu.hash.keys(this._db);
+    this._guid = uu.keys(this._db);
 }
 
 })(window, document, uu);

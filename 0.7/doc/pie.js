@@ -47,7 +47,7 @@ uu.Class.singleton("Pie", {
     if (!total) {
       return;
     }
-    url = uu.fmt("http://chart.apis.google.com/chart" +
+    url = uu.format("http://chart.apis.google.com/chart" +
                  "?chs=%dx%d" +                 // width, height
                  "&cht=p3&chtt=%s|%d+Changes" + // 3D pie
                  "&chts=FFFFFF,20" +            // title color, title size
@@ -74,13 +74,13 @@ function splitLang() {
   var lang = (navigator.language || navigator.browserLanguage || "en").replace(/\-.*$/, "");
 
   if (lang !== "ja") {
-    uu.each(uu.tag("ja"), function(v) {
+    uu.tag("ja").forEach(function(v) {
       try {
         v.innerHTML = "";
       } catch(err) { ; }
     });
   } else {
-    uu.each(uu.tag("en"), function(v) {
+    uu.tag("en").forEach(function(v) {
       try {
         v.innerHTML = "";
       } catch(err) { ; }

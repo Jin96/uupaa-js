@@ -51,10 +51,10 @@ function position() {
             cs = v.currentStyle;
             w = uu.css.px.value(v, p.vcss, 1);
             p.vpx = (p.mode & 0x1) ? (uu.css.px(v, "paddingTop") + w)
-                                   : (vp.ih - v.offsetHeight - w);
+                                   : (vp.innerHeight - v.offsetHeight - w);
             w = uu.css.px.value(v, p.hcss, 1);
             p.hpx = (p.mode & 0x4) ? (uu.css.px(v, "paddingLeft") + w)
-                                   : (vp.iw - v.offsetWidth - w);
+                                   : (vp.innerWidth - v.offsetWidth - w);
             ary.push(v);
         }
     }
@@ -113,9 +113,9 @@ function positionMarkup(node) { // @param Node: context
         vcss: v ? cs.top : cs.bottom,
         hcss: h ? cs.left : cs.right,
         vpx: v ? (pxfn(node, "paddingTop") + pxfn(node, "top"))
-               : (vp.ih - rect.h - pxfn(node, "bottom")),
+               : (vp.innerHeight - rect.h - pxfn(node, "bottom")),
         hpx: h ? (pxfn(node, "paddingLeft") + pxfn(node, "left"))
-               : (vp.iw - rect.w - pxfn(node, "right"))
+               : (vp.innerWidth - rect.w - pxfn(node, "right"))
     };
     node.className += " uuposfix";
     node.style.position = "absolute"; // position:fixed -> position:absolute
@@ -191,7 +191,7 @@ function disptbl(ary) { // @param NodeArray:
     var v, i = -1, j, tbl, row, cell;
 
     while ( (v = ary[++i]) ) {
-        tbl = uu.elm("table");
+        tbl = uu.node("table");
         // copy attrs
         tbl.id = v.id;
         tbl.title = v.title;

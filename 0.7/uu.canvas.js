@@ -52,7 +52,7 @@ function VML(node) { // @param Node: <canvas>
 // uu.canvas.init
 function uucanvasinit() {
 //{{{!mb
-    uu.ie && uu.ary.each(uu.tag("canvas"), function(node) {
+    uu.ie && uu.tag("canvas").forEach(function(node) {
         if (!node.getContext) { // already initialized (altcss and other)
             // remove fallback contents
             //      <canvas>fallback contents...</canvas> -> <canvas></canvas>
@@ -75,12 +75,12 @@ function uucanvascreate(width,         // @param Number(= 300):
                         order,         // @param String(= "svg sl fl vml"): backend order
                         placeHolder) { // @param Node(= <body>): placeholder Node
                                        // @return Node: new element
-    var canvas = uu.elm(uu.ie ? "CANVAS" : "canvas"); // [IE][!] need upper case
+    var canvas = uu.node(uu.ie ? "CANVAS" : "canvas"); // [IE][!] need upper case
 
     canvas.width  = width  == null ? 300 : width;
     canvas.height = height == null ? 150 : height;
 
-    placeHolder || (placeHolder = doc.body.appendChild(uu.elm())); // <body><div /></body>
+    placeHolder || (placeHolder = doc.body.appendChild(uu.node())); // <body><div /></body>
                                                                 //       ~~~~~~~
     placeHolder.parentNode.replaceChild(canvas, placeHolder);
     return uu.ie ? _buildCanvas(canvas, order || "svg sl fl vml") : canvas;

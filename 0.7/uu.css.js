@@ -138,8 +138,8 @@ function uucssoffset(node, // @param: Node:
                      x,    // @param: Number/Node(= <html>): x or ancestor node
                      y) {  // @param: Number(= 0): y or 1 is break foster node
                            // @return Node/Hash: { x, y }
-    return (uu.isnum(x) && uu.isnum(y) ? uucssoffsetset
-                                       : uucssoffsetget)(node, x, y);
+    return (uu.isNumber(x) && uu.isNumber(y) ? uucssoffsetset
+                                             : uucssoffsetget)(node, x, y);
 }
 
 // uu.css.offset.get - offset from ancestor or foster node(positioning parent)
@@ -542,7 +542,7 @@ function uucssshow(node,     // @param Node:
 
     if (uu.style(node).display === "none") {
         // <style>{ display: none }</style>
-        tmp = uu.node(uu.elm(node.tagName)); // add to body
+        tmp = uu.node.add(node.tagName); // add to body
         // detect actual display value
         ns.display = uu.style(tmp).display;
         uu.node.remove(tmp);
@@ -865,7 +865,7 @@ function uucsscreate(ssid) { // @param String(= "uuss"): StyleSheet id
         if (uu.ie) {
             _styleSheetDB.ss[ssid] = doc.createStyleSheet();
         } else {
-            var node = uu.elm("style");
+            var node = uu.node("style");
 
             node.appendChild(doc.createTextNode(""));
             _styleSheetDB.ss[ssid] = doc.head.appendChild(node);

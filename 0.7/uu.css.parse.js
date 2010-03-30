@@ -151,7 +151,7 @@ function uucssimports() { // @return String: "dirty CSS"
     }
 
     var rv = [], absdir = uu.url(), href, hash, linkID, url,
-        node = uu.ary(doc.styleSheets), v, i = -1,
+        node = uu.array(doc.styleSheets), v, i = -1,
         prop1 = uu.ie ? "owningElement" : "ownerNode",
         prop2 = uu.ie ? "uucss3memento" : "textContent"; // MEMENTO
 

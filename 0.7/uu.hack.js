@@ -19,8 +19,8 @@ function uuhackcss2kb(name) { // @param String/Array: className or [className, .
         return rv[fn(key)] = isNaN(v) ? v : parseFloat(v);
     }
     // http://d.hatena.ne.jp/uupaa/20091125
-    var rv = {}, cs, url, ary = uu.ary(name), i = 0, iz = ary.length,
-        div = doc.body.appendChild(uu.elm()),
+    var rv = {}, cs, url, ary = uu.array(name), i = 0, iz = ary.length,
+        div = doc.body.appendChild(uu.node()),
         fn = decodeURIComponent, _kv = uuhackcss2kb._kv; // alias
 
     for (; i < iz; ++i) {

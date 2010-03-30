@@ -27,7 +27,7 @@ function base64encode(mix,       // @param String/ByteArray: String or Array( [0
                       urlsafe) { // @param Boolean(= false): true = result is URLSafe64String,
                                  //                          false = result is Base64String
                                  // @return Base64String/URLSafe64String:
-    if (uu.isstr(mix)) {
+    if (uu.isString(mix)) {
         mix = uu.codec.utf8.encode(mix); // String -> UTF8ByteArray
     }
 

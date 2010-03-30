@@ -30,7 +30,7 @@ function fontparse(font,     // @param String: font string, "12pt Arial"
                              // @return Hash:
     // inner - measure em unit
     function _em(node) {
-        var rv, div = node.appendChild(uu.elm());
+        var rv, div = node.appendChild(uu.node());
 
         div.style.cssText = _BASE_STYLE + "width:12em";
         rv = div.clientWidth / 12;
@@ -44,7 +44,7 @@ function fontparse(font,     // @param String: font string, "12pt Arial"
 
     if (!cache.font[font]) {
         // --- parse font string ---
-        style = uu.elm().style; // dummy element
+        style = uu.node().style; // dummy element
         try {
             style.font = font; // parse
         } catch (err) {
@@ -115,7 +115,7 @@ function fontmetric(font,   // @param CSSFronString: "12pt Arial"
     var node = fontmetric._node;
 
     if (!node) {
-        fontmetric._node = node = uu.elm();
+        fontmetric._node = node = uu.node();
         node.style.cssText = _BASE_STYLE +
             "top:-10000px;left:-10000px;text-align:left;visibility:hidden";
         doc.body.appendChild(node);

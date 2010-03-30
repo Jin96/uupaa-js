@@ -125,7 +125,7 @@ function build(canvas) { // @param Node: <canvas>
     }
 
     // create swf <object>
-    canvas.innerHTML = uu.fmt(
+    canvas.innerHTML = uu.format(
         '<object id="?" width="?" height="?" classid="?">' +
             '<param name="allowScriptAccess" value="always" />' +
             '<param name="flashVars" value="" />' +

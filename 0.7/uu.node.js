@@ -95,15 +95,15 @@ function uunodefind(node,  // @param Node: ELEMENT_NODE
     return -1;
 }
 
-uu.hash.each({ first: 1, prev: 2, next: 3, last: 4,
-               firstChild: 5, lastChild: 6 }, function(pos, method) {
+uu.each({ first: 1, prev: 2, next: 3, last: 4,
+          firstChild: 5, lastChild: 6 }, function(pos, method) {
     // uu.node.first - add first sibling node
     // [1][add] uu.node.first(uu.p(), ctx) -> <p>
     // [2][add] uu.node.first("<p>html</p>", ctx) -> <p>
     uu.node[method] = function(node,  // @param Node/DocumentFragment/HTMLString:
                                ctx) { // @param Node(= <body>): context
                                       // @return Node: first node
-        return uu.node(node, ctx, pos);
+        return uu.node.add(node, ctx, pos);
     };
     // uu.node.find.first - find first sibling node
     uunodefind[method] = function(ctx) { // @param Node: context

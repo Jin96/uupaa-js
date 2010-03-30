@@ -40,14 +40,12 @@ function draw() {
 }
 
 function xcanvas(uu, node) {
-    var sz = uu.win.size();
+    var dim = uu.win.size();
     canvas = node[0];
     ctx = canvas.getContext("2d");
 
-    canvas.width = sz.iw - 40;
-    canvas.height = sz.ih - 40;
-//    ctx.resize(sz.iw - 40, sz.ih - 40)
-//    ctx = canvas.getContext("2d");
+    canvas.width  = dim.innerWidth  - 40;
+    canvas.height = dim.innerHeight - 40;
 
     document.title = "Backend: " + (ctx.xBackend || "Canvas");
     ctx.xFlyweight = 1;

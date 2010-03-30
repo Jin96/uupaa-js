@@ -1,87 +1,103 @@
 
 // === <audio> ===
-// depend: uu
-//
-//  <audio src="..." preload="..." autoplay="..." loop="..." controls="...">
+//{{{!depend uu
+//}}}!depend
+
+//  <audio autoplay loop="true" src="hoge.mp3">
 //  </audio>
 //
 //     or
 //
-//  <audio preload="..." autoplay="..." loop="..." controls="...">
-//      <source />
-//      <source />
+//  <audio autoplay loop="true">
+//      <source src="hoge.mp3" type="audio/mpeg" />
 //  </audio>
 //
-//  HTMLAudioElement:
+// +--------------+------------+--------------+-------------------+
+// |Browser       | new Audio  | new MP3Audio |  HTMLAudioElement |
+// +--------------+------------+--------------+-------------------+
+// |Firefox3.5+   |  ogg,wav   |     mp3      |    ogg,    wav    |
+// |Safari4+      |  mp3,wav   |     mp3      |        mp3,wav    |
+// |Chrome3+      |  ogg,mp3   |     mp3      |    ogg,mp3        |
+// |Opera10.50+   |  ogg,wav   |     mp3      |    ogg,    wav    |
+// |iPhone3       |     -      |      -       |         -         |
+// |IE6,IE7,IE8   |    mp3     |     mp3      |         -         |
+// |IE9 preview   |    mp3     |     mp3      |         -         |
+// +--------------+------------+--------------+-------------------+
+//  var audio    = new Audio(src = "");
+//  var mp3audio = new MP3Audio(src = "");
 //
-//  var audio = new Audio(src = "");
-//
-//  audio.autoplay = false;
-//  audio.controls = false;
-//  audio.currentSrc = "...";
-//  audio.currentTime = 0;
-//  audio.defaultPlaybackRate = 1;
-//  audio.duration = 267.59588623046875;
-//  audio.ended = false;
-//  audio.loop = false;
-//  audio.muted = false;
-//  audio.networkState = 3;
-//  audio.paused = true;
-//  audio.playbackRate = 1;
-//  audio.played = TimeRanges;
-//  audio.preload = auto;
-//  audio.seekable = TimeRanges;
-//  audio.seeking = false;
-//  audio.src = "...";
-//  audio.startTime = 0;
-//  audio.volume = 1;
-//  audio.addEventListener("play")
+//  --- support properties ---
+//  audio.autoplay = false;         // [READ / WRITE]
+//  audio.loop = false;             // [READ / WRITE]
+//  audio.src = "...";              // [READ / WRITE]
+//  audio.error = false;            // [READ-ONLY]
+//  audio.ended = false;            // [READ-ONLY]
+//  audio.paused = true;            // [READ-ONLY]
+//  audio.volume = 0.5;             // [READ / WRITE]
+//  audio.startTime = 0;            // [READ / WRITE]
+//  audio.currentTime = 0;          // [WRITE-ONLY]
+//  audio.xBackend = "Audio";       // [READ-ONLY]
+//                   "Silverlight"
+//                   "Flash"
+//                   "NoAudio"
+//  --- support methods ---
+//  audio.play();
+//  audio.pause();
+//  audio.stop();
+//  audio.getCurrentTime() -> Number
+//  --- support events ---
 //  audio.addEventListener("pause")
 //  audio.addEventListener("ended")
-
-uu.agein || (function(win, doc, uu) {
-
-// <audio src="...">
-// +--------------+------------+-----+-----+
-// |Browser       | Ogg Vorbis | MP3 | WAV |
-// |Firefox3.5+   |     ok     |     | ok  | -> Silverlight or Flash
-// |Safari4+      |            | ok  | ok  | -> <audio>
-// |Chrome3+      |     ok     | ok  |     | -> <audio>
-// |Opera10.50+   |     ok     |     | ok  | -> Silverlight or Flash
-// |iPhone3       |            |     |     | -> NoAudio
-// |IE6,IE7,IE8   |            |     |     | -> Silverlight or Flash
-// |IE9 preview   |            |     |     | -> Silverlight or Flash
-// +--------------+------------+-----+-----+
-var _builder = NoAudio;
-
-if (uu.ver.advanced) {
-    _builder = Native;
-    if (uu.ver.chrome && uu.ver.browser < 3) {
-        _builder = NoAudio;
-    }
-} else {
-    if (uu.ver.silverlight) {
-        _builder = Silverlight;
-    } else if (uu.ver.flash > 8
-               && _swfLoader(uu.config.baseDir + "uu.audio.swf")) {
-        _builder = Flash;
-    }
-}
+//  audio.addEventListener("error")
+//  audio.addEventListener("playing")
+//  audio.addEventListener("canplay")
 
 // uu.audio
 if (!uu.audio) {
     uu.audio = function html5NodeBuilder() { // @param Mix: var_args
         return uu.node.build("audio", arguments);
-    }
+    };
 }
+
+uu.audio.init || (function(win, doc, uu) {
+
+var _mp3builder,
+    _builder = win.HTMLAudioElement ? Native
+             : uu.ver.silverlight ? Silverlight
+             : uu.ver.as3 && uu.require(uu.config.baseDir + "uu.audio.swf") ? Flash
+             : NoAudio;
 
 if (win.HTMLAudioElement) {
     win.HTMLAudioElement.prototype.getCurrentTime = function() {
         return this.currentTime;
     };
+    win.HTMLAudioElement.prototype.stop = function() {
+        if (!this.error) {
+            if (!this.paused) {
+                if (!this.ended) {
+                    this.pause();
+                    this.currentTime = 0;
+                }
+            }
+        }
+    };
+
+    if (uu.webkit) {
+        win.MP3Audio = win.Audio;
+    } else {
+        _mp3builder = uu.ver.silverlight ? Silverlight
+                    : uu.ver.as3 && uu.require(uu.config.baseDir + "uu.audio.swf") ? Flash
+                    : NoAudio;
+        win.MP3Audio = function(src) { // @param URLString(= ""): media source
+            var audio = _mp3builder.build(uu.node.add("mp3audio")); // <mp3audio>
+
+            src && (audio.src = src);
+            return audio;
+        };
+    }
 } else {
-    win.Audio = function(src) { // @param URLString(= ""): media source
-        var audio = _builder.build(uue("audio", 1));
+    win.Audio = win.MP3Audio = function(src) { // @param URLString(= ""): media source
+        var audio = _builder.build(uu.node.add("audio"));
 
         src && (audio.src = src);
         return audio;
@@ -139,12 +155,12 @@ NoAudio.build = function(audio) {
         return 0;
     };
     audio.xBackend = "NoAudio";
-    audio.play = audio.pause = audio.stop = audio.load = uunop;
+    audio.play = audio.pause = audio.stop = audio.load = uu.nop;
 };
 
 // uu.audio.init
 function uuaudioinit() {
-    uu.ary.each(uu.tag("audio"), function(audio) {
+    uu.tag("audio").forEach(function(audio) {
         var newAudioNode = uu.ie ? _removeFallback(audio) : audio;
 
         _builder.build(newAudioNode);
@@ -155,9 +171,9 @@ function uuaudioinit() {
 // uu.audio.create - create audio element
 function uuaudiocreate(placeHolder) { // @param Node(= <body>): placeholder Node
                                       // @return Node: new element
-    var audio = uue(uu.ie ? "AUDIO" : "audio"); // [IE][!] need upper case
+    var audio = uu.node(uu.ie ? "AUDIO" : "audio"); // [IE][!] need upper case
 
-    placeHolder || (placeHolder = doc.body.appendChild(uue())); // <body><div /></body>
+    placeHolder || (placeHolder = doc.body.appendChild(uu.node())); // <body><div /></body>
                                                                 //       ~~~~~~~
     placeHolder.parentNode.replaceChild(audio, placeHolder);
     return _builder.build(audio);
@@ -187,22 +203,6 @@ function _removeFallback(audio) { // @param Node:
     }
     parent.replaceChild(rv, audio);
     return rv;
-}
-
-// inner - swf preloader
-function _swfLoader(url) { // @param String: url
-                           // @return Number: 1 or 0
-    try {
-        var xhr = win.ActiveXObject  ? new ActiveXObject("Microsoft.XMLHTTP") :
-                  win.XMLHttpRequest ? new XMLHttpRequest() : 0;
-
-        xhr.open("GET", url, false); // sync
-        xhr.send(null);
-        if (!xhr.status || (xhr.status >= 200 && xhr.status < 300)) {
-            return 1;
-        }
-    } catch (err) {}
-    return 0;
 }
 
 // --- initialize ---

@@ -5,7 +5,7 @@
 
 // ::event.keyCode
 //    http://www.w3.org/TR/DOM-Level-3-Events/#events-keyboardevents
-uu.ev.more || (function(win, doc, uu) {
+uu.event.more || (function(win, doc, uu) {
 var _CLICKS = { click: 1, dblclick: 2 },
     _EVVKEY = uu.split.toHash( // virtual keycode events
         "8,BS,9,TAB,13,ENTER,16,SHIFT,17,CTRL,18,ALT,27,ESC," +
@@ -14,14 +14,14 @@ var _CLICKS = { click: 1, dblclick: 2 },
         "65,A,66,B,67,C,68,D,69,E,70,F,71,G,72,H,73,I,74,J,75,K,76,L,77,M," +
         "78,N,79,O,80,P,81,Q,82,R,83,S,84,T,85,U,86,V,87,W,88,X,89,Y,90,Z");
 
-uu.ev.more      = uuevmore;     // uu.ev.more(event) -> { rel, btn, vkey, wheel, clicks, vkeycode }
-uu.ev.times     = uuevtimes;    // [1] uu.ev.times(node, names, cyclic, var_args, ...) -> node
-uu.ev.hover     = uuevhover;    // [1][callback]  uu.ev.hover(node, function(){}, function(){}) -> node
-                                // [2][toggle class] uu.ev.hover(node, "red white") -> node
-uu.ev.dragbase  = uuevdragbase; // [protected] drag & drop base handler
+uu.event.more       = uueventmore;      // uu.event.more(event) -> { rel, btn, vkey, wheel, clicks, vkeycode }
+uu.event.times      = uueventtimes;     // [1] uu.event.times(node, names, cyclic, var_args, ...) -> node
+uu.event.hover      = uueventhover;     // [1][callback]  uu.event.hover(node, function(){}, function(){}) -> node
+                                        // [2][toggle class] uu.event.hover(node, "red white") -> node
+uu.event.dragbase   = uueventdragbase;  // [protected] drag & drop base handler
 
-// uu.ev.more - more information
-function uuevmore(evt) { // @param EventObject:
+// uu.event.more - more information
+function uueventmore(evt) { // @param EventObject:
                          // @return Hash: { rel, btn, vkey, wheel, clicks, vkeycode }
     var rel, btn = evt.button || 0, wheel = 0, clicks = 0,
         vkeycode = evt.keyCode || evt.charCode || 0;
@@ -34,7 +34,7 @@ function uuevmore(evt) { // @param EventObject:
             clicks = _CLICKS[evt.type] || 0;
         } else {
             evt.rel = evt.relatedTarget;
-            if (evt.code === uu.ev._code.mousewheel) {
+            if (evt.code === uu.event._code.mousewheel) {
                 wheel = (evt.detail ? (evt.detail / 3)
                                     : (evt.wheelDelta / -120)) | 0;
             } else {
@@ -50,8 +50,8 @@ function uuevmore(evt) { // @param EventObject:
              vkeycode: vkeycode }; // 38, 49, 65
 }
 
-// uu.ev.dragbase -
-function uuevdragbase(
+// uu.event.dragbase -
+function uueventdragbase(
             evt,      // @param event:
             tgt,      // @param Node: move target node
             grip,     // @param Node(= void 0): grip node
@@ -68,9 +68,9 @@ function uuevdragbase(
         code = evt.code, ts = tgt.style, iebody;
 
     if (!code || code > 3
-        || (code === 3 && !grip.uuevdrag) // [3] mousemove
-        || (code === 1 &&  grip.uuevdrag) // [1] mousedown
-        || (code === 2 && !grip.uuevdrag)) { // [2] mouseup or losecapture(in IE)
+        || (code === 3 && !grip.uueventdrag) // [3] mousemove
+        || (code === 1 &&  grip.uueventdrag) // [1] mousedown
+        || (code === 2 && !grip.uueventdrag)) { // [2] mouseup or losecapture(in IE)
         return { x: 0, y: 0, px: 0, py: 0 };
     }
     if (uu.ie) {
@@ -82,7 +82,7 @@ function uuevdragbase(
         y = evt.pageY;
     }
     if (code === 3) { // [3] mousemove
-        off = grip.uuevdragoff;
+        off = grip.uueventdragoff;
         px = x - off.x;
         py = y - off.y;
 
@@ -105,46 +105,46 @@ function uuevdragbase(
                 grip = r.grip;
             }
         }
-        grip.uuevdragoff = { x: x - parseInt(tgt.style.left || 0),
-                             y: y - parseInt(tgt.style.top  || 0) };
-        grip.uuevdrag = opt.zmanage ? uu.factory("ZIndex").drag(tgt) : 1;
+        grip.uueventdragoff = { x: x - parseInt(tgt.style.left || 0),
+                                y: y - parseInt(tgt.style.top  || 0) };
+        grip.uueventdrag = opt.zmanage ? uu.factory("ZIndex").drag(tgt) : 1;
     } else { // [2] mouseup
         opt.mouseup && opt.mouseup(evt, tgt, grip, code, opt, x, y);
-        grip.uuevdrag = opt.zmanage ? uu.factory("ZIndex").drag(tgt) : 0;
+        grip.uueventdrag = opt.zmanage ? uu.factory("ZIndex").drag(tgt) : 0;
     }
     return { x: x, y: y, px: px, py: py };
 }
 
-// uu.ev.times - cyclic events
-// [1] uu.ev.times(node, "click", 0, var_args, ...)
-function uuevtimes(node,     // @param Node: target node
-                   names,    // @param JointString: "click,click+,..."
-                   cyclic    // @param Number: cyclic times, 0 is infinite
-           /* var_args */) { // @param Function: callback functions
-                             // @return Node:
+// uu.event.times - cyclic events
+// [1] uu.event.times(node, "click", 0, var_args, ...)
+function uueventtimes(node,     // @param Node: target node
+                      names,    // @param JointString: "click,click+,..."
+                      cyclic    // @param Number: cyclic times, 0 is infinite
+              /* var_args */) { // @param Function: callback functions
+                                // @return Node:
     function _wrap(evt) {
         callbacks[index++](evt);
         if (index >= callbacks.length) {
             index = 0;
             if (cyclic && !--cyclic) {
-                uu.ev(node, names, _wrap, 2);
+                uu.event(node, names, _wrap, 2);
             }
         }
     }
     cyclic = cyclic || 0;
-    var index = 0, callbacks = uu.ary(arguments).slice(3);
+    var index = 0, callbacks = uu.array(arguments).slice(3);
 
-    callbacks.length && uu.ev(node, names, _wrap, 1);
+    callbacks.length && uu.event(node, names, _wrap, 1);
     return node;
 }
 
-// uu.ev.hover
-// [1][callback]     uu.ev.hover(node, function(){}, function(){}) -> node
-// [2][toggle class] uu.ev.hover(node, "red white") -> node
-function uuevhover(node,    // @param Node:
-                   enter,   // @param Function/JointString: callback or class
-                   leave) { // @param Function(= void 0):
-                            // @return Node:
+// uu.event.hover
+// [1][callback]     uu.event.hover(node, function(){}, function(){}) -> node
+// [2][toggle class] uu.event.hover(node, "red white") -> node
+function uueventhover(node,    // @param Node:
+                      enter,   // @param Function/JointString: callback or class
+                      leave) { // @param Function(= void 0):
+                               // @return Node:
     function _evhookmouseenter(evt) {
         var rel = evt.relatedTarget;
         // ignode mouse transit(mouseover, mouseout) in child node
@@ -152,7 +152,7 @@ function uuevhover(node,    // @param Node:
             evt.name = "mouseenter";
             enter(evt, node); // enter(evt, node)
         }
-        uu.ev.stop(evt); // cancel bubble
+        uu.event.stop(evt); // cancel bubble
     }
     function _evhookmouseleave(evt) {
         var rel = evt.relatedTarget;
@@ -161,7 +161,7 @@ function uuevhover(node,    // @param Node:
             evt.name = "mouseleave";
             leave(evt, node); // leave(evt, node)
         }
-        uu.ev.stop(evt); // cancel bubble
+        uu.event.stop(evt); // cancel bubble
     }
     function _evhovertoggle() {
         uu.klass.has(node, enter) ? uu.klass.sub(node, enter)
@@ -173,14 +173,14 @@ function uuevhover(node,    // @param Node:
     function _evhookmouseleaveie(evt) {
         leave(evt, node);
     }
-    var klass = uu.isstr(enter);
+    var klass = uu.isString(enter);
 
     if (uu.ie) {
-        uu.ev(node, "mouseenter", klass ? _evhovertoggle : _evhookmouseenterie);
-        uu.ev(node, "mouseleave", klass ? _evhovertoggle : _evhookmouseleaveie);
+        uu.event(node, "mouseenter", klass ? _evhovertoggle : _evhookmouseenterie);
+        uu.event(node, "mouseleave", klass ? _evhovertoggle : _evhookmouseleaveie);
     } else {
-        uu.ev(node, "mouseover+", klass ? _evhovertoggle : _evhookmouseenter);
-        uu.ev(node, "mouseout+",  klass ? _evhovertoggle : _evhookmouseleave);
+        uu.event(node, "mouseover+", klass ? _evhovertoggle : _evhookmouseenter);
+        uu.event(node, "mouseout+",  klass ? _evhovertoggle : _evhookmouseleave);
     }
     return node;
 }
