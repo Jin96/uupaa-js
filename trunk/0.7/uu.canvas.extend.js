@@ -191,7 +191,7 @@ function _strokeTextOpera(ctx, text, x, y, maxWidth, fill) {
         cage;
 
     if (!ctx._cage) {
-        cage = uu.elm();
+        cage = uu.node();
         cage.style = "display:none";
         ctx._cage = doc.body.appendChild(cage);
     }

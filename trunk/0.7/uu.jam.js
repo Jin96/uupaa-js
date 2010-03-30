@@ -70,8 +70,8 @@ uu.mix(uujam.prototype, {
 });
 
 // --- uu.jam (nodeset interface) ---
-function uujam(expr,  // @param Node/NodeArray/String/Instance/window/document:
-               ctx) { // @param Node/jam(= void 0): context
+function uujam(expr,  // @param Jam/Node/NodeArray/String/window:
+               ctx) { // @param Jam/Node(= void 0): context
     this._stack = [[]]; // [nodeset, ...]
     this._ns = !expr ? [] // empty nodeset
         : (expr === win || expr.nodeType) ? [expr] // window / node
@@ -113,7 +113,7 @@ function jamclone() { // @return Array: nodeset
 
 // jam.each
 function jameach(fn) { // @return jam:
-    uu.ary.each(this._ns, fn);
+    this._ns.forEach(fn);
     return this;
 }
 
@@ -125,7 +125,7 @@ function jamsize() { // @return Number:
 // jam.indexOf - nodeset.indexOf(node)
 function jamindexOf(node) { // @param Node:
                             // @return Number: found index or -1
-    return uu.ary.indexOf(this._ns.indexOf, node);
+    return this._ns.indexOf(node);
 }
 
 // jam.add
@@ -135,8 +135,8 @@ function jamindexOf(node) { // @param Node:
 // jam.last
 // jam.firstChild
 // jam.lastChild
-uu.hash.each({ first: 1, prev: 2, next: 3, last: 4,
-               firstChild: 5, lastChild: 6, add: 6 }, function(pos, method) {
+uu.each({ first: 1, prev: 2, next: 3, last: 4,
+          firstChild: 5, lastChild: 6, add: 6 }, function(pos, method) {
 
     // jam.add(node or "<p>html</p>") -> jam
     uujam.prototype[method] = function(node) { // @param Node/HTMLString:
@@ -144,10 +144,10 @@ uu.hash.each({ first: 1, prev: 2, next: 3, last: 4,
         var ary = this._ns, w, i = -1;
 
         if (ary.length === 1) {
-            uu.node(node, ary[0], pos);
+            uu.node.add(node, ary[0], pos);
         } else {
             while ( (w = ary[++i]) ) {
-                uu.node(uu.node.bulk(node), w, pos); // clone node
+                uu.node.add(uu.node.bulk(node), w, pos); // clone node
             }
         }
         return this;
@@ -185,7 +185,7 @@ jamklass._cmd = { "+": uu.klass.add,      // "+class" add class
 
 // jam.bind
 function jambind(type, fn) { // @return jam:
-    return _jameach(this, uu.ev, type, fn);
+    return _jameach(this, uu.event, type, fn);
 }
 
 // jam.tween
@@ -195,7 +195,7 @@ function jamtween(ms, param, fn) { // @return jam
 
 // jam.unbind
 function jamunbind(type) { // @return jam:
-    return _jameach(this, uu.ev.unbind, type);
+    return _jameach(this, uu.event.unbind, type);
 }
 
 // jam.show
@@ -210,14 +210,14 @@ function jamhide(a) { // @return jam:
 
 // jam.hover
 function jamhover(enter, leave) { // @return jam:
-    return _jameach(this, uu.ev.hover, enter, leave);
+    return _jameach(this, uu.event.hover, enter, leave);
 }
 
 // jam.html
 function jamhtml(a) { // @return jam:
     function _jamhtml(node, value) {
         return (value === void 0) ? node.innerHTML
-                                  : (uu.node(node, uu.node.clear(node)), node);
+                                  : (uu.node.add(node, uu.node.clear(node)), node);
     }
     return _jammap(this, _jamhtml, a);
 }
@@ -260,12 +260,12 @@ function _jammap(jam, fn, p1, p2, p3, p4) {
 }
 
 // inner - build DOM Lv2 event handler - uu.click(), jam.click(), ...
-uu.ary.each(uu.ev._LIST, function(v) {
+uu.event._LIST.forEach(function(v) {
     uujam.prototype[v] = function jambind(fn) { // uu("li").click(fn) -> jam
-        return _jameach(this, uu.ev, v, fn);
+        return _jameach(this, uu.event, v, fn);
     };
     uujam.prototype["un" + v] = function jamunbind() { // uu("li").unclick() -> jam
-        return _jameach(this, uu.ev.unbind, v);
+        return _jameach(this, uu.event.unbind, v);
     };
 });
 

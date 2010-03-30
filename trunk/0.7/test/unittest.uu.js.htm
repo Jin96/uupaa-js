@@ -17,192 +17,192 @@
 <script>
 function xboot(uu) {
   uu.test({
-    "uu.ary()": "",
-      "[1][through] uu.ary([1,2]) は引数で与えられた [1,2] をそのまま返す(複製しない)": function() {
+    "uu.array()": "",
+      "[1][through] uu.array([1,2]) は引数で与えられた [1,2] をそのまま返す(複製しない)": function() {
         var ary1 = [1, 2];
         var ref1 = ary1;
 
-        return [uu.ary(ary1), "===", ref1];
+        return [uu.array(ary1), "===", ref1];
       },
-      "[2][to ary] uu.ary(12) は [12] を返す": function() {
-        return [uu.ary(12), "==", [12]];
+      "[2][to ary] uu.array(12) は [12] を返す": function() {
+        return [uu.array(12), "==", [12]];
       },
-      "[2][to ary] uu.ary('12') は ['12'] を返す": function() {
-        return [uu.ary('12'), "==", ['12']];
+      "[2][to ary] uu.array('12') は ['12'] を返す": function() {
+        return [uu.array('12'), "==", ['12']];
       },
-      "[3][convert NodeList] uu.ary(document.getElementsByTagName('HTML')) は NodeList を配列に変換できる。その結果は uu.query('html') と等しい": function() {
-        return [uu.ary(document.getElementsByTagName('HTML')), "==", uu.query('html')];
+      "[3][convert NodeList] uu.array(document.getElementsByTagName('HTML')) は NodeList を配列に変換できる。その結果は uu.query('html') と等しい": function() {
+        return [uu.array(document.getElementsByTagName('HTML')), "==", uu.query('html')];
       },
-      "[3][convert NodeList] uu.ary(document.getElementsByTagName('HTML')) は NodeList を配列に変換できる。その結果は [document.html] と等しい": function() {
-        return [uu.ary(document.getElementsByTagName('HTML')), "==", [document.html]];
+      "[3][convert NodeList] uu.array(document.getElementsByTagName('HTML')) は NodeList を配列に変換できる。その結果は [document.html] と等しい": function() {
+        return [uu.array(document.getElementsByTagName('HTML')), "==", [document.html]];
       },
-      "[4][convert arguments] uu.ary(arguments) は 引数(1, 2, 3)を配列( [1, 2, 3] )に変換できる": function() {
+      "[4][convert arguments] uu.array(arguments) は 引数(1, 2, 3)を配列( [1, 2, 3] )に変換できる": function() {
         function uuarytest1() {
-          return uu.ary(arguments);
+          return uu.array(arguments);
         }
         var rv = uuarytest1(1, 2, 3);
         return [rv, "==", [1, 2, 3]];
       },
-    "uu.ary.has()": "",
-      "[1][has array] uu.ary.has([1, 2, 3], 1) は true": function() {
-        return [uu.ary.has([1, 2, 3], 1), "is true"];
+    "uu.array.has()": "",
+      "[1][has array] uu.array.has([1, 2, 3], 1) は true": function() {
+        return [uu.array.has([1, 2, 3], 1), "is true"];
       },
-      "[1][has array] uu.ary.has([1, 2, 3], '1') は false": function() {
-        return [uu.ary.has([1, 2, 3], '1'), "is false"];
+      "[1][has array] uu.array.has([1, 2, 3], '1') は false": function() {
+        return [uu.array.has([1, 2, 3], '1'), "is false"];
       },
-      "[1][has array] uu.ary.has(['1', 2, 3], '1') は true": function() {
-        return [uu.ary.has(['1', 2, 3], '1'), "is true"];
+      "[1][has array] uu.array.has(['1', 2, 3], '1') は true": function() {
+        return [uu.array.has(['1', 2, 3], '1'), "is true"];
       },
-      "[1][has array] uu.ary.has(['1', , 2, 3], 2) は true (粗い配列でもとりあえずOK)": function() {
-        return [uu.ary.has(['1', , 2, 3], 2), "is true"];
+      "[1][has array] uu.array.has(['1', , 2, 3], 2) は true (粗い配列でもとりあえずOK)": function() {
+        return [uu.array.has(['1', , 2, 3], 2), "is true"];
       },
-      "[1][has array] uu.ary.has(['1', , 2, 3], undefined) は false (undefined は検索できない)": function() {
-        return [uu.ary.has(['1', , 2, 3], undefined), "is false"];
+      "[1][has array] uu.array.has(['1', , 2, 3], undefined) は false (undefined は検索できない)": function() {
+        return [uu.array.has(['1', , 2, 3], undefined), "is false"];
       },
-      "[1][has array] uu.ary.has(['1', undefined, 2, 3], undefined) は false (undefined は検索できない)": function() {
-        return [uu.ary.has(['1', undefined, 2, 3], undefined), "is false"];
+      "[1][has array] uu.array.has(['1', undefined, 2, 3], undefined) は false (undefined は検索できない)": function() {
+        return [uu.array.has(['1', undefined, 2, 3], undefined), "is false"];
       },
-      "[1][has array] uu.ary.has([1, 2, 3], [1, 2]) は true": function() {
-        return [uu.ary.has([1, 2, 3], [1, 2]), "is true"];
+      "[1][has array] uu.array.has([1, 2, 3], [1, 2]) は true": function() {
+        return [uu.array.has([1, 2, 3], [1, 2]), "is true"];
       },
-      "[2][has node] uu.ary.has([document, document.body], document.body) は true": function() {
-        return [uu.ary.has([document, document.body], document.body), "is true"];
+      "[2][has node] uu.array.has([document, document.body], document.body) は true": function() {
+        return [uu.array.has([document, document.body], document.body), "is true"];
       },
-      "[3][has node] uu.ary.has([document, document.body, document.getElementsByTagName('head')[0]], [document, document.body]) は true": function() {
-        return [uu.ary.has([document, document.body, document.getElementsByTagName('head')[0]], [document, document.body]), "is true"];
+      "[3][has node] uu.array.has([document, document.body, document.getElementsByTagName('head')[0]], [document, document.body]) は true": function() {
+        return [uu.array.has([document, document.body, document.getElementsByTagName('head')[0]], [document, document.body]), "is true"];
       },
 
-    "uu.ary.sort()": "",
-      "[1][num 0-9] uu.ary.sort([11, 222, 4], '0-9') は 数字順(0→9)([4, 11, 222])にソートされる": function() {
-        return [uu.ary.sort([4, 11, 222], "0-9"), "==", [4, 11, 222]];
+    "uu.array.sort()": "",
+      "[1][num 0-9] uu.array.sort([11, 222, 4], '0-9') は 数字順(0→9)([4, 11, 222])にソートされる": function() {
+        return [uu.array.sort([4, 11, 222], "0-9"), "==", [4, 11, 222]];
       },
-      "[2][num 9-0] uu.ary.sort([11, 222, 4], '9-0') は 数字順(9→0)([222, 11, 4])にソートされる": function() {
-        return [uu.ary.sort([4, 11, 222], "9-0"), "==", [222, 11, 4]];
+      "[2][num 9-0] uu.array.sort([11, 222, 4], '9-0') は 数字順(9→0)([222, 11, 4])にソートされる": function() {
+        return [uu.array.sort([4, 11, 222], "9-0"), "==", [222, 11, 4]];
       },
-      "[3][ascii a-z] uu.ary.sort(['z', 'a', 'b', 'c'], 'A-Z') は 英字順(A→Z)(['a', 'b', 'c', 'z'])にソートされる": function() {
-        return [uu.ary.sort(['z', 'a', 'b', 'c'], "A-Z"), "==", ['a', 'b', 'c', 'z']];
+      "[3][ascii a-z] uu.array.sort(['z', 'a', 'b', 'c'], 'A-Z') は 英字順(A→Z)(['a', 'b', 'c', 'z'])にソートされる": function() {
+        return [uu.array.sort(['z', 'a', 'b', 'c'], "A-Z"), "==", ['a', 'b', 'c', 'z']];
       },
-      "[4][ascii a-z] uu.ary.sort(['z', 'a', 'b', 'c'], 'Z-A') は 英字順(Z→A)(['z', 'c', 'b', 'a'])にソートされる": function() {
-        return [uu.ary.sort(['z', 'a', 'b', 'c'], "Z-A"), "==", ['z', 'c', 'b', 'a']];
+      "[4][ascii a-z] uu.array.sort(['z', 'a', 'b', 'c'], 'Z-A') は 英字順(Z→A)(['z', 'c', 'b', 'a'])にソートされる": function() {
+        return [uu.array.sort(['z', 'a', 'b', 'c'], "Z-A"), "==", ['z', 'c', 'b', 'a']];
       },
-      "[5][user func] uu.ary.clean([,,1,2,,]) は [1, 2]": function() {
-        return [uu.ary.clean([,,1,2,,]), "is", [1, 2]];
+      "[5][user func] uu.array.clean([,,1,2,,]) は [1, 2]": function() {
+        return [uu.array.clean([,,1,2,,]), "is", [1, 2]];
       },
-    "uu.ary.clean()": "",
-      "uu.ary.clean(var ary=[1,2,3]; delete ary[1]) -> [1,3]。uu.ary.clean は 欠落(delete)した要素や null をスキップする": function() {
+    "uu.array.clean()": "",
+      "uu.array.clean(var ary=[1,2,3]; delete ary[1]) == [1,3]。uu.array.clean は 欠落(delete)した要素や null をスキップする": function() {
         var ary = [1, 2, 3];
         delete ary[1];
-        return [uu.ary.clean(ary), "->", [1, 3]];
+        return [uu.array.clean(ary), "==", [1, 3]];
       },
-      "uu.ary.clean(var ary=[1,2,,null,3]; delete ary[1]) -> [1,3]。uu.ary.clean は 欠落(delete)した要素や null をスキップする": function() {
+      "uu.array.clean(var ary=[1,2,,null,3]; delete ary[1]) == [1,3]。uu.array.clean は 欠落(delete)した要素や null をスキップする": function() {
         var ary = [1,2,,null,3];
         delete ary[1];
-        return [uu.ary.clean(ary), "->", [1, 3]];
+        return [uu.array.clean(ary), "==", [1, 3]];
       },
 
-      "uu.ary.clean([,,1,2,,]) -> [1, 2]": function() {
-        return [uu.ary.clean([,,1,2,,]), "->", [1, 2]];
+      "uu.array.clean([,,1,2,,]) == [1, 2]": function() {
+        return [uu.array.clean([,,1,2,,]), "==", [1, 2]];
       },
-      "uu.ary.clean([,null,1,2,,]) -> [1, 2]": function() {
-        return [uu.ary.clean([,null,1,2,,]), "->", [1, 2]];
+      "uu.array.clean([,null,1,2,,]) == [1, 2]": function() {
+        return [uu.array.clean([,null,1,2,,]), "==", [1, 2]];
       },
-      "uu.ary.clean([null]) -> []": function() {
-        return [uu.ary.clean([null]), "->", []];
+      "uu.array.clean([null]) == []": function() {
+        return [uu.array.clean([null]), "==", []];
       },
-      "uu.ary.clean([void 0]) -> []": function() {
-        return [uu.ary.clean([void 0]), "->", []];
+      "uu.array.clean([void 0]) == []": function() {
+        return [uu.array.clean([void 0]), "==", []];
       },
-      "uu.ary.clean([]) -> []": function() {
-        return [uu.ary.clean([]), "->", []];
+      "uu.array.clean([]) == []": function() {
+        return [uu.array.clean([]), "==", []];
       },
-    "uu.ary.unique()": "",
-      "[1][unique elements] uu.ary.unique([<body>, <head>, <body>]) は [<body>, <head>]": function() {
+    "uu.array.unique()": "",
+      "[1][unique elements] uu.array.unique([<body>, <head>, <body>]) は [<body>, <head>]": function() {
         var body = document.body,
             head = document.head;
-        return [uu.ary.unique([body, head, body]), "==", [body, head]];
+        return [uu.array.unique([body, head, body]), "==", [body, head]];
       },
-      "[1][unique elements] uu.ary.unique([0, 1, 2, 3, 3, 2, 1, 0]) は [0, 1, 2, 3]": function() {
-        return [uu.ary.unique([0, 1, 2, 3, 3, 2, 1, 0]), "==", [0, 1, 2, 3]];
+      "[1][unique elements] uu.array.unique([0, 1, 2, 3, 3, 2, 1, 0]) は [0, 1, 2, 3]": function() {
+        return [uu.array.unique([0, 1, 2, 3, 3, 2, 1, 0]), "==", [0, 1, 2, 3]];
       },
-      "[2][unique literals] uu.ary.unique([0, 1, 2, 3, 3, 2, 1, 0], 1) は [0, 1, 2, 3]": function() {
-        return [uu.ary.unique([0, 1, 2, 3, 3, 2, 1, 0], 1), "==", [0, 1, 2, 3]];
+      "[2][unique literals] uu.array.unique([0, 1, 2, 3, 3, 2, 1, 0], 1) は [0, 1, 2, 3]": function() {
+        return [uu.array.unique([0, 1, 2, 3, 3, 2, 1, 0], 1), "==", [0, 1, 2, 3]];
       },
-      "uu.ary.unique(var ary=[1,2,,null,3,3,2,1,0]; delete ary[1]) は [1, 3, 2, 0]。\nuu.ary.unique は 欠落(delete)した要素や null をスキップする": function() {
+      "uu.array.unique(var ary=[1,2,,null,3,3,2,1,0]; delete ary[1]) は [1, 3, 2, 0]。\nuu.array.unique は 欠落(delete)した要素や null をスキップする": function() {
         var ary = [1,2,,null,3,3,2,1,0];
         delete ary[1];
 
-        return [uu.ary.unique(ary), "==", [1, 3, 2, 0]];
+        return [uu.array.unique(ary), "==", [1, 3, 2, 0]];
       },
 
 
-    "uu.ary.indexOf()": "",
-      "uu.ary.indexOf([1,2,3], 1) は 0 を返す": function() {
-        return [uu.ary.indexOf([1,2,3], 1), "is", 0];
-      },
-      "uu.ary.indexOf([<body>, <head>], <head>) は 1 を返す": function() {
-        return [uu.ary.indexOf([document.body, document.head], document.head), "is", 1];
-      },
-      "uu.ary.indexOf([<body>, <head>], <html>) は -1 (not found) を返す": function() {
-        return [uu.ary.indexOf([document.body, document.head], document.html), "is", -1];
-      },
 /*
-    "uu.ary.filter()": "",
-      "uu.ary.filter([12, 5, 8, 130, 44], function(v) { return v >= 10; }) は [12, 130, 44] を返す": function() {
-        return [uu.ary.filter([12, 5, 8, 130, 44], function(v) { return v >= 10; }), "is", [12, 130, 44]];
+    "uu.array.indexOf()": "",
+      "uu.array.indexOf([1,2,3], 1) は 0 を返す": function() {
+        return [uu.array.indexOf([1,2,3], 1), "is", 0];
       },
-    "uu.ary.every()": "",
-      "uu.ary.every([12, 5, 8, 130, 44], function(v) { return v >= 10; }) は false を返す": function() {
-        return [uu.ary.every([12, 5, 8, 130, 44], function(v) { return v >= 10; }), "is false"];
+      "uu.array.indexOf([<body>, <head>], <head>) は 1 を返す": function() {
+        return [uu.array.indexOf([document.body, document.head], document.head), "is", 1];
       },
-      "uu.ary.every([12, 54, 18, 130, 44], function(v) { return v >= 10; }) は true を返す": function() {
-        return [uu.ary.every([12, 54, 18, 130, 44], function(v) { return v >= 10; }), "is true"];
-      },
-    "uu.ary.some()": "",
-      "uu.ary.some([12, 5, 8, 130, 44], function(v) { return v < 10; }) は true を返す": function() {
-        return [uu.ary.some([12, 5, 8, 130, 44], function(v) { return v < 10; }), "is true"];
-      },
-      "uu.ary.some([12, 54, 18, 130, 44], function(v) { return v < 10; }) は false を返す": function() {
-        return [uu.ary.some([12, 54, 18, 130, 44], function(v) { return v < 10; }), "is false"];
-      },
-    "uu.ary.map()": "",
-      "uu.ary.map([1, 2, 3, 4, 5], function(v) { return v * 2; }) は [2, 4, 6, 8, 10] を返す": function() {
-        return [uu.ary.map([1, 2, 3, 4, 5], function(v) { return v * 2; }), "is", [2, 4, 6, 8, 10]];
+      "uu.array.indexOf([<body>, <head>], <html>) は -1 (not found) を返す": function() {
+        return [uu.array.indexOf([document.body, document.head], document.html), "is", -1];
       },
  */
-    "uu.attr()": "",
-      "[1][get all attrs] uu.attr(uu.id('div')) は Hash を返す(結果はブラウザ依存)": function() {
-        return [uu.attr(uu.id('div')), "is hash"];
+    "Array.filter()": "",
+      "Array.filter([12, 5, 8, 130, 44], function(v) { return v >= 10; }) は [12, 130, 44] を返す": function() {
+        return [[12, 5, 8, 130, 44].filter(function(v) { return v >= 10; }), "is", [12, 130, 44]];
       },
-      "[2][get all attrs(without style, uu*)] uu.attr(uu.id('div'), 1) は { id: 'div', title: 'title' } と等しい('uu'で始まる属性と、style属性は取得できない)": function() {
-        return [uu.attr(uu.id('div'), 1), "->", { id: 'div', title: 'title' }];
+    "Array.every()": "",
+      "Array.every([12, 5, 8, 130, 44], function(v) { return v >= 10; }) は false を返す": function() {
+        return [[12, 5, 8, 130, 44].every(function(v) { return v >= 10; }), "is false"];
+      },
+      "Array.every([12, 54, 18, 130, 44], function(v) { return v >= 10; }) は true を返す": function() {
+        return [[12, 54, 18, 130, 44].every(function(v) { return v >= 10; }), "is true"];
+      },
+    "Array.some()": "",
+      "Array.some([12, 5, 8, 130, 44], function(v) { return v < 10; }) は true を返す": function() {
+        return [[12, 5, 8, 130, 44].some(function(v) { return v < 10; }), "is true"];
+      },
+      "Array.some([12, 54, 18, 130, 44], function(v) { return v < 10; }) は false を返す": function() {
+        return [[12, 54, 18, 130, 44].some(function(v) { return v < 10; }), "is false"];
+      },
+    "Array.map()": "",
+      "Array.map([1, 2, 3, 4, 5], function(v) { return v * 2; }) は [2, 4, 6, 8, 10] を返す": function() {
+        return [[1, 2, 3, 4, 5].map(function(v) { return v * 2; }), "is", [2, 4, 6, 8, 10]];
+      },
+    "uu.attr()": "",
+      "[1][get all attrs] uu.attr.getAll(uu.id('div')) は Hash を返す(結果はブラウザ依存)": function() {
+        return [uu.attr.getAll(uu.id('div')), "is hash"];
+      },
+      "[2][get all attrs(without style, uu*)] uu.attr.getAll(uu.id('div'), 1) は { id: 'div', title: 'title' } と等しい('uu'で始まる属性と、style属性は取得できない)": function() {
+        return [uu.attr.getAll(uu.id('div'), 1), "==", { id: 'div', title: 'title' }];
       },
       "[3][get one attr] uu.attr(uu.id('div'), 'id') は 'div' } と等しい": function() {
-        return [uu.attr(uu.id('div'), 'id'), "->", 'div'];
+        return [uu.attr(uu.id('div'), 'id'), "==", 'div'];
       },
       "[4][get some attrs] uu.attr(uu.id('div'), 'id,title') は { id: 'div', title: 'title' } と等しい": function() {
-        return [uu.attr(uu.id('div'), 'id,title'), "->", { id: 'div', title: 'title' }];
+        return [uu.attr(uu.id('div'), 'id,title'), "==", { id: 'div', title: 'title' }];
       },
       "[5][set one attr] uu.attr(uu.id('div'), 'title', 'hoge') は node を返し、title は hoge に設定される": function() {
         var node = uu.id('div');
         if (uu.attr(node, 'title', 'hoge') !== node) {
           return [uu.attr(node, 'title', 'hoge'), "is fail"];
         }
-        return [uu.attr(node, 'title'), "->", 'hoge'];
+        return [uu.attr(node, 'title'), "==", 'hoge'];
       },
       "[6][set some attrs] uu.attr(uu.id('div'), { 'class': 'A1', title: 'title' }) は node を返し、className は A1 に、 title は title に設定される": function() {
         var node = uu.id('div');
         if (uu.attr(node, { 'class': 'A1', title: 'title' }) !== node) {
           return [uu.attr(node, { 'class': 'A1', title: 'title' }), "is fail"];
         }
-        return [uu.attr(node, 'title'), "->", 'title'];
+        return [uu.attr(node, 'title'), "==", 'title'];
       },
 
     "uu.attr.get()": "",
       "[3][get one attr] uu.attr.get(uu.id('div'), 'id') は 'div' } と等しい": function() {
-        return [uu.attr.get(uu.id('div'), 'id'), "->", 'div'];
+        return [uu.attr.get(uu.id('div'), 'id'), "==", 'div'];
       },
       "[4][get some attrs] uu.attr.get(uu.id('div'), 'id,title') は { id: 'div', title: 'title' } と等しい": function() {
-        return [uu.attr.get(uu.id('div'), 'id,title'), "->", { id: 'div', title: 'title' }];
+        return [uu.attr.get(uu.id('div'), 'id,title'), "==", { id: 'div', title: 'title' }];
       },
       "uu.attr.get('href,.,title,dot')": function() {
         var e;
@@ -305,7 +305,7 @@ function xboot(uu) {
         uu.klass.add(uu.id('div'), "A1 A2 A3");
         uu.klass.add(uu.id('div'), "A4   A1 ");
 
-        return [uu.id('div').className, "->", 'A1 A2 A3 A4 A1'];
+        return [uu.id('div').className, "==", 'A1 A2 A3 A4 A1'];
       },
  */
       "uu.klass.add(uu.id('div')) ( ' A1 A2 A3' ) に 'A4 A1' を足すと ' A1 A2 A3 A4 A1' になる": function() {
@@ -313,7 +313,7 @@ function xboot(uu) {
         uu.klass.add(uu.id('div'), "A1 A2 A3");
         uu.klass.add(uu.id('div'), "A4 A1");
 
-        return [uu.id('div').className, "->", ' A1 A2 A3 A4 A1'];
+        return [uu.id('div').className, "==", ' A1 A2 A3 A4 A1'];
       },
 
     "uu.klass.sub()": "",
@@ -321,26 +321,26 @@ function xboot(uu) {
         uu.id('div').className = "A1 A2 A3 A4 A1";
         uu.klass.sub(uu.id('div'), "A1  A4");
 
-        return [uu.id('div').className, "->", 'A2 A3'];
+        return [uu.id('div').className, "==", 'A2 A3'];
       },
       "uu.klass.sub(uu.id('div')) ( 'B1 B2' )から 存在しないクラス( 'A1 A2 A3 A4 A1' )を引いてもエラーにならない": function() {
         uu.id('div').className = "B1 B2";
         uu.klass.sub(uu.id('div'), "A1 A2 A3 A4 A1");
 
-        return [uu.id('div').className, "->", 'B1 B2'];
+        return [uu.id('div').className, "==", 'B1 B2'];
       },
     "uu.klass.toggle()": "",
       "uu.klass.toggle(uu.id('div')) ( 'A1 A2 B1 B2' ) から 'A2 B2' をトグルすると、'A1 B1' になる": function() {
         uu.id('div').className = "A1 A2 B1 B2";
         uu.klass.toggle(uu.id('div'), "A2 B2");
 
-        return [uu.id('div').className, "->", 'A1 B1'];
+        return [uu.id('div').className, "==", 'A1 B1'];
       },
       "uu.klass.toggle(uu.id('div')) ( 'A1 B1' ) から 'A2 B2' をトグルすると、'A1 B1 A2 B2' になる": function() {
         uu.id('div').className = "A1 B1";
         uu.klass.toggle(uu.id('div'), "A2 B2");
 
-        return [uu.id('div').className, "->", 'A1 B1 A2 B2'];
+        return [uu.id('div').className, "==", 'A1 B1 A2 B2'];
       },
 
 // -----------------------
@@ -354,7 +354,7 @@ function xboot(uu) {
 
         return [hash2, "===", hash1];
       },
-      "[2][to hash] uu.hash('key', 123) -> { key: 123 }": function() {
+      "[2][to hash] uu.hash('key', 123) == { key: 123 }": function() {
         var hash = uu.hash('key', 123);
 
         return [hash, "==", { key: 123 }];
@@ -362,7 +362,7 @@ function xboot(uu) {
 
 /*
     "uu.hash.num()": "",
-      "uu.hash.num('key,0,key2,1') -> { key: 0, key2: 1 }": function() {
+      "uu.hash.num('key,0,key2,1') == { key: 0, key2: 1 }": function() {
         var hash = uu.hash.num('key,0,key2,1');
 
         return [hash, "==", { key: 0, key2: 1 }];
@@ -370,49 +370,50 @@ function xboot(uu) {
  */
 
     "uu.hash.has()": "",
-      "uu.hash.has({ a: 1, b: 2, c: 3 }, { a: 1, b: 2 }) -> true": function() {
+      "uu.hash.has({ a: 1, b: 2, c: 3 }, { a: 1, b: 2 }) == true": function() {
         return [uu.hash.has({ a: 1, b: 2, c: 3 }, { a: 1, b: 2 }), "is true"];
       },
-      "uu.hash.has({ a: 1, b: 2, c: 3 }, { a: '1', b: 2 }) -> false": function() {
+      "uu.hash.has({ a: 1, b: 2, c: 3 }, { a: '1', b: 2 }) == false": function() {
         return [uu.hash.has({ a: 1, b: 2, c: 3 }, { a: '1', b: 2 }), "is false"];
       },
-      "uu.hash.has({ a: function() { return 'a'}, b: 2, c: 3 }, { a: function() { return 'a'}, b: 2 }) -> true": function() {
+      "uu.hash.has({ a: function() { return 'a'}, b: 2, c: 3 }, { a: function() { return 'a'}, b: 2 }) == true": function() {
         return [uu.hash.has({ a: function() { return 'a'}, b: 2, c: 3 }, { a: function() { return 'a'}, b: 2 }), "is true"];
       },
-      "uu.hash.has({ a: function() { return 'b'}, b: 2, c: 3 }, { a: function() { return 'a'}, b: 2 }) -> false": function() {
+      "uu.hash.has({ a: function() { return 'b'}, b: 2, c: 3 }, { a: function() { return 'a'}, b: 2 }) == false": function() {
         return [uu.hash.has({ a: function() { return 'b'}, b: 2, c: 3 }, { a: function() { return 'a'}, b: 2 }), "is false"];
       },
     "uu.hash.size()": "",
       "ハッシュサイズは2": function() {
         return [uu.hash.size({ aaa: 1, bbb: 2 }), "==", 2];
       },
-    "uu.hash.keys()": "",
+    "uu.keys()": "",
       "{ key: 1, key2: 2 } から key の配列[key, key2]を生成する": function() {
-        return [uu.hash.keys({ key: 1, key2: 2 }), "==", ["key", "key2"]];
+        return [uu.keys({ key: 1, key2: 2 }), "==", ["key", "key2"]];
       },
-    "uu.hash.values()": "",
+    "uu.values()": "",
       "{ key: 1, key2: 2 } から値の配列[1,2]を生成する": function() {
-        return [uu.hash.values({ key: 1, key2: 2 }), "==", [1, 2]];
+        return [uu.values({ key: 1, key2: 2 }), "==", [1, 2]];
       },
     "uu.hash.indexOf()": "",
-      "uu.hash.indexOf({ a: 1, b: 2, c: 2 }, 2) -> 'b'": function() {
+      "uu.hash.indexOf({ a: 1, b: 2, c: 2 }, 2) == 'b'": function() {
         return [uu.hash.indexOf({ a: 1, b: 2, c: 2 }, 2), "==", 'b'];
       },
-    "uu.hash.combine()": "",
+    "uu.array.toHash()": "",
       "['key', 'key2'] と ['1', '2'] から { key: '1', key2: '2' } を生成する": function() {
-        return [uu.hash.combine(['key', 'key2'], ['1', '2']), "==", { key: '1', key2: '2' }];
+        return [uu.array.toHash(['key', 'key2'], ['1', '2']), "==", { key: '1', key2: '2' }];
       },
       "['key', 'key2'] と ['1', '2'] から { key: 1, key2: 2 } を生成する(value を数値化)": function() {
-        return [uu.hash.combine(['key', 'key2'], ['1', '2'], 1), "==", { key: 1, key2: 2 }];
+        return [uu.array.toHash(['key', 'key2'], ['1', '2'], 1), "==", { key: 1, key2: 2 }];
       },
       "['key', 'key2'] と '1' から { key: '1', key2: '1' } を生成する": function() {
-        return [uu.hash.combine(['key', 'key2'], '1'), "==", { key: '1', key2: '1' }];
+        return [uu.array.toHash(['key', 'key2'], '1'), "==", { key: '1', key2: '1' }];
       },
       "['key', 'key2'] と '1' から { key: 1, key2: 1 } を生成する(value を数値化)": function() {
-        return [uu.hash.combine(['key', 'key2'], '1', 1), "==", { key: 1, key2: 1 }];
+        return [uu.array.toHash(['key', 'key2'], '1', 1), "==", { key: 1, key2: 1 }];
       },
+/*
     "uu.hash.hasValue()": "",
-      "uu.hash.hasValue({ a: 1, b: 2 }, 2) -> true": function() {
+      "uu.hash.hasValue({ a: 1, b: 2 }, 2) == true": function() {
         return [uu.hash.hasValue({ a: 1, b: 2 }, 2), "is true"];
       },
 
@@ -420,6 +421,7 @@ function xboot(uu) {
       "uu.img.load('../img/cover01.jpg')": function() {
         return [uu.img.load('../img/cover01.jpg'), "is true"];
       },
+ */
 
 
 // -----------------------
@@ -440,14 +442,14 @@ function xboot(uu) {
         var obj1 = uu.factory("MSGBOXTEST1");
         var obj2 = uu.factory("MSGBOXTEST2");
 
-        var rv1 = uu.msg.send(obj1, "obj1 -> obj2", "p1");
-        var rv2 = uu.msg.send(obj2, "obj2 -> obj1", "p1");
+        var rv1 = uu.msg.send(obj1, "obj1 == obj2", "p1");
+        var rv2 = uu.msg.send(obj2, "obj2 == obj1", "p1");
 
         return [rv1[0] === 1, "&&", rv2[0] === 2];
       },
 // -----------------------
-    "uu.node()": "",
-      "uu.node('<div id=\"ctx\">...</div>') is node": function() {
+    "uu.node.add()": "",
+      "uu.node.add('<div id=\"ctx\">...</div>') is node": function() {
         var fg = '\
 <div id="ctx">\
   <div id="first">first</div>\
@@ -460,7 +462,7 @@ function xboot(uu) {
   <div id="next">next</div>\
   <div id="last">last</div>\
 </div>';
-        return [uu.node(fg), "is node"];
+        return [uu.node.add(fg), "is node"];
       },
     "uu.nore.has()": "",
       "uu.node.has(uu.id('tgt'), uu.id('ctx')) == true": function() {
@@ -559,7 +561,7 @@ function xboot(uu) {
 
         var rv = uu.node.data.get(uu.id('div'), 'key');
 
-        return [rv, "is void"];
+        return [rv, "is undefined"];
       },
       "[1][clear data] uu.node.data.clear(uu.id('div'), 'key') で key に関連するデータを消せる(value = { hoge: 1, huga: 2 })": function() {
         uu.node.data.set(uu.id('div'), 'key', { hoge: 1, huga: 2 });
@@ -567,14 +569,14 @@ function xboot(uu) {
 
         var rv = uu.node.data.get(uu.id('div'), 'key');
 
-        return [rv, "is void"];
+        return [rv, "is undefined"];
       },
-      "[1][clear data] uu.node.data.clear(uu.id('div'), 'key') で key に関連するデータを消せる(value = void)": function() {
+      "[1][clear data] uu.node.data.clear(uu.id('div'), 'key') で key に関連するデータを消せる(value = undefined)": function() {
         uu.node.data.clear(uu.id('div'), 'key');
 
         var rv = uu.node.data.get(uu.id('div'), 'key');
 
-        return [rv, "is void"];
+        return [rv, "is undefined"];
       },
 
       "[2][clear all data] uu.node.data.clear(uu.id('div'), 'key') で key に関連するデータを消せる": function() {
@@ -583,51 +585,49 @@ function xboot(uu) {
 
         var rv = uu.node.data.get(uu.id('div'), 'key');
 
-        return [rv, "is void"];
+        return [rv, "is undefined"];
       },
 
 // -----------------------
     "uu.fix()": "",
-/*
-      'uu.fix("-webkit-shadow") -> "-webkit-shadow"': function() {
-        return [uu.fix("-webkit-shadow"), "->", "-webkit-shadow"];
+      'uu.fix("-webkit-shadow") == "-webkit-shadow"': function() {
+        return [uu.fix("-webkit-shadow"), "==", "-webkit-shadow"];
       },
- */
-      'uu.fix("-webkit-box-shadow") -> "WebkitBoxShadow"': function() {
-        return uu.webkit ? [uu.fix("-webkit-box-shadow"), "->", "WebkitBoxShadow"]
+      'uu.fix("-webkit-box-shadow") == "WebkitBoxShadow"': function() {
+        return uu.webkit ? [uu.fix("-webkit-box-shadow"), "==", "WebkitBoxShadow"]
                          : ["WebKit ONLY", "==", "WebKit ONLY"];
 
       },
-      'uu.fix("-moz-appearance") -> "MozAppearance"': function() {
-        return uu.gecko ? [uu.fix("-moz-appearance"), "->", "MozAppearance"]
+      'uu.fix("-moz-appearance") == "MozAppearance"': function() {
+        return uu.gecko ? [uu.fix("-moz-appearance"), "==", "MozAppearance"]
                         : ["Gecko ONLY", "==", "Gecko ONLY"];
       },
-      'uu.fix("-ms-block-progression") -> "msBlockProgression"': function() {
-        return uu.ie ? [uu.fix("-ms-block-progression"), "->", "msBlockProgression"]
+      'uu.fix("-ms-block-progression") == "msBlockProgression"': function() {
+        return uu.ie ? [uu.fix("-ms-block-progression"), "==", "msBlockProgression"]
                      : ["IE ONLY", "==", "IE ONLY"];
       },
-      'uu.fix("-o-transition-property") -> "OTransitionProperty"': function() {
-        return uu.opera ? [uu.fix("-o-transition-property"), "->", "OTransitionProperty"]
+      'uu.fix("-o-transition-property") == "OTransitionProperty"': function() {
+        return uu.opera ? [uu.fix("-o-transition-property"), "==", "OTransitionProperty"]
                         : ["OPERA ONLY", "==", "OPERA ONLY"];
       },
 
-      'uu.fix("background-color") -> "backgroundColor"': function() {
-        return [uu.fix("background-color"), "->", "backgroundColor"];
+      'uu.fix("background-color") == "backgroundColor"': function() {
+        return [uu.fix("background-color"), "==", "backgroundColor"];
       },
-      'uu.fix("float") -> "cssFloat" or "styleFloat"': function() {
-        return [uu.fix("float"), "->", uu.ie ? "styleFloat" : "cssFloat"];
+      'uu.fix("float") == "cssFloat" or "styleFloat"': function() {
+        return [uu.fix("float"), "==", uu.ie ? "styleFloat" : "cssFloat"];
       },
-      'uu.fix("for") -> "htmlFor"': function() {
-        return [uu.fix("for"), "->", "htmlFor"];
+      'uu.fix("for") == "htmlFor"': function() {
+        return [uu.fix("for"), "==", "htmlFor"];
       },
-      'uu.fix("o") -> "opacity"': function() {
-        return [uu.fix("o"), "->", "opacity"];
+      'uu.fix("o") == "opacity"': function() {
+        return [uu.fix("o"), "==", "opacity"];
       },
-      'uu.fix("bg") -> "background"': function() {
-        return [uu.fix("bg"), "->", "background"];
+      'uu.fix("bg") == "background"': function() {
+        return [uu.fix("bg"), "==", "background"];
       },
-      'uu.fix("bgimg") -> "backgroundImage"': function() {
-        return [uu.fix("bgimg"), "->", "backgroundImage"];
+      'uu.fix("bgimg") == "backgroundImage"': function() {
+        return [uu.fix("bgimg"), "==", "backgroundImage"];
       },
 
     "uu.trim()": "",
@@ -705,17 +705,17 @@ function xboot(uu) {
         return [uu.split.comma(',,, ,,A,,,B,C,, '), "==", ['A', 'B', 'C']];
       },
     "uu.split.toHash()": "",
-      "[3][split , str] uu.split.toHash('key,a,key2,b') -> { key: 'a', key2: 'b' }": function() {
+      "[3][split , str] uu.split.toHash('key,a,key2,b') == { key: 'a', key2: 'b' }": function() {
         var hash = uu.split.toHash('key,a,key2,b');
 
         return [hash, "==", { key: 'a', key2: 'b' }];
       },
-      "[4][split ; str] uu.split.toHash('key;a;key2;b', ';', 0) -> { key: 'a', key2: 'b' }": function() {
+      "[4][split ; str] uu.split.toHash('key;a;key2;b', ';', 0) == { key: 'a', key2: 'b' }": function() {
         var hash = uu.split.toHash('key;a;key2;b', ';', 0);
 
         return [hash, "==", { key: 'a', key2: 'b' }];
       },
-      "[5][split , num] uu.split.toHash('key,0,key2,1', ',', 1) -> { key: 0, key2: 1 }": function() {
+      "[5][split , num] uu.split.toHash('key,0,key2,1', ',', 1) == { key: 0, key2: 1 }": function() {
         var hash = uu.split.toHash('key,0,key2,1', ',', 1);
 
         return [hash, "==", { key: 0, key2: 1 }];
@@ -797,36 +797,27 @@ function xboot(uu) {
 // -----------------------
     "Type": "",
       "null は null 型":        function() { return [null,    "is null"];     },
-      "void 0 は undefined 型(is undef)": function() { return [void 0,  "is undef"];    },
       "void 0 は undefined 型(is undefined)": function() { return [void 0,  "is undefined"];},
       "{} は hash 型(is hash)":  function() { return [{},      "is hash"];     },
-      "{} は hash 型(is object)":function() { return [{},      "is object"];   },
-      "[] は array 型(is ary)":  function() { return [[],      "is ary"];      },
+      "[] は array 型(is array)":  function() { return [[],    "is array"];      },
       "[] は array 型(is array)":function() { return [[],      "is array"];    },
-      "false は boolean 型(is bool)":    function() { return [false,   "is bool"];     },
+      "false は boolean 型(is boolean)":    function() { return [false,   "is boolean"];     },
       "true は boolean 型(is boolean)":     function() { return [true,    "is boolean"];  },
-      "123 は number 型(is num)":       function() { return [123,     "is num"];      },
+      "123 は number 型(is number)":       function() { return [123,     "is number"];   },
       "-123.4 は number 型(is number)":    function() { return [-123.4,  "is number"];   },
       "1 / 0 は number 型(is number)":     function() { return [1 / 0,   "is number"];   },
       "0 / 0 は number 型(is number)":     function() { return [0 / 0,   "is number"];   },
-      "'' は string 型(is str)":        function() { return ['',      "is str"];      },
       "'' は string 型(is string)":        function() { return ['',      "is string"];   },
-      "function(){} は function 型(is func)":
-                                function() { return [function(){}, "is func"]; },
       "function(){} は function 型(is function)":
                                 function() { return [function(){}, "is function"]; },
       "document.body は node 型":
                                 function() { return [document.body, "is node"]; },
-      "document.getElementsByTagName('body') は fake 型(is fake)":
-                                function() { return [document.getElementsByTagName('body'), "is fake"]; },
-      "document.getElementsByTagName('body') は fake 型(is fakeary)":
-                                function() { return [document.getElementsByTagName('body'), "is fakeary"]; },
-      "document.getElementsByTagName('body') は fake 型(is fakearray)":
-                                function() { return [document.getElementsByTagName('body'), "is fakearray"]; },
+      "document.getElementsByTagName('body') は fake 型(is FakeArray)":
+                                function() { return [document.getElementsByTagName('body'), "is FakeArray"]; },
 
       "new Date は date 型":    function() { return [new Date, "is date"]; },
-      "uu.type(123, uu.type.STR | uu.type.NUM) は boolean 型 の戻り値を返す":
-                                function() { return [uu.type(123, uu.type.STR | uu.type.NUM), "is boolean"]; },
+      "uu.type(123, uu.type.STRING | uu.type.NUMBER) は boolean 型 の戻り値を返す":
+                                function() { return [uu.type(123, uu.type.STRING | uu.type.NUMBER), "is boolean"]; },
       "new Boolean(false) は boolean 型":
                                 function() { return [new Boolean(false), "is boolean"];   },
       "new Number(1) は number 型":

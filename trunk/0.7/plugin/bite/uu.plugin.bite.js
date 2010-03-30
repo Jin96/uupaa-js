@@ -89,7 +89,7 @@ uu.mix(bite.prototype, {
 });
 
 // inner - build DOM Lv2 event handler - bite.click(), ...
-uu.ary.each(uu.dmz.EVENT.split(","), function(v) {
+uu.dmz.EVENT.split(",").forEach(function(v) {
   bite.fn[v] = function(fn) {
     function bindThis(evt, node) {
       fn.call(node, evt); // this = node
@@ -118,7 +118,7 @@ function biteinit(expr, ctx) {
                                  ? [uu.node.bulk(expr)] // <div> -> fragment
                                  : uu.query(expr, _evalctx(ctx)))
       : (expr instanceof bite) ? expr._ns.concat() // copy constructor
-      : uu.isfunc(expr) ? (uu.ready(expr), []) // ready
+      : uu.isFunction(expr) ? (uu.ready(expr), []) // ready
       : []; // bad expr
   this.length = 0;
   Array.prototype.push.apply(this, this._ns);
@@ -288,7 +288,7 @@ function biteval(val) {
 function bitefilter(expr) { // @param String/Function:
                             // @return this:
   this._stack.push(this._ns); // add stack
-  if (uu.isfunc(expr)) {
+  if (uu.isFunction(expr)) {
     var rv = [], ary = this._ns, ri = -1, v, i = 0, iz = ary.length;
 
     for (; i < iz; ++i) {
@@ -341,9 +341,9 @@ function biteappend(html) { // @param bite/HTMLString/Node:
 
   while ( (v = this._ns[i++]) ) {
     if (html._ns) {
-      uu.node(html._ns[0], v); // bite._ns[0] -> appendChild
+      uu.node.add(html._ns[0], v); // bite._ns[0] -> appendChild
     } else if (uu.isstr(html) || html.nodeType) {
-      uu.node(html, v);
+      uu.node.add(html, v);
     }
   }
   return this;
@@ -356,9 +356,9 @@ function biteprepend(html) { // @param bite/HTMLString/Node:
 
   while ( (v = this._ns[i++]) ) {
     if (html._ns) {
-      uu.node(html._ns[0], v, 5); // bite._ns[0] -> appendChild
+      uu.node.add(html._ns[0], v, 5); // bite._ns[0] -> appendChild
     } else if (uu.isstr(html) || html.nodeType) {
-      uu.node(html, v, 5);
+      uu.node.add(html, v, 5);
     }
   }
   return this;
@@ -370,9 +370,9 @@ function biteprependto(html) { // @param bite/HTMLString/Node:
 
   while ( (v = this._ns[i++]) ) {
     if (html._ns) {
-      uu.node(html._ns[0], v, 1); // bite._ns[0] -> appendChild
+      uu.node.add(html._ns[0], v, 1); // bite._ns[0] -> appendChild
     } else if (uu.isstr(html) || html.nodeType) {
-      uu.node(html, v, 1);
+      uu.node.add(html, v, 1);
     }
   }
   return this;
@@ -385,9 +385,9 @@ function biteafter(html) { // @param bite/HTMLString/Node:
 
   while ( (v = this._ns[i++]) ) {
     if (html._ns) {
-      uu.node(html._ns[0], v, 3); // bite._ns[0]
+      uu.node.add(html._ns[0], v, 3); // bite._ns[0]
     } else if (uu.isstr(html) || html.nodeType) {
-      uu.node(html, v, 3); // nextSibling
+      uu.node.add(html, v, 3); // nextSibling
     }
   }
   return this;
@@ -400,9 +400,9 @@ function bitebefore(html) { // @param bite/HTMLString/Node:
 
   while ( (v = this._ns[i++]) ) {
     if (html._ns) {
-      uu.node(html._ns[0], v, 2); // bite._ns[0] -> inseretBefore
+      uu.node.add(html._ns[0], v, 2); // bite._ns[0] -> inseretBefore
     } else if (uu.isstr(html) || html.nodeType) {
-      uu.node(html, v, 2);
+      uu.node.add(html, v, 2);
     }
   }
   return this;
@@ -421,7 +421,7 @@ function bitewrapInner(wrapper) { // @param HTMLString/Node:
     while (v.firstChild) {
       x.appendChild(v.removeChild(v.firstChild));
     }
-    uu.node(w, v, 5); // firstChild
+    uu.node.add(w, v, 5); // firstChild
   }
   return this;
 }

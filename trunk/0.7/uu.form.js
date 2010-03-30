@@ -30,7 +30,7 @@ uu.mix(uu, {
 function uutext(node,   // @param Node/String:
                 text) { // @param String(= void 0):
                         // @return Array/String/Node:
-    return uu.isstr(node) ? doc.createTextNode(node) : // [1]
+    return uu.isString(node) ? doc.createTextNode(node) : // [1]
            ((text === void 0) ? uutextget : uutextset)(node, text); // [2][3]
 }
 
@@ -44,8 +44,8 @@ function uutextget(node) { // @param Node:
 function uutextset(node,   // @param Node:
                    text) { // @param Array/String: innerText
                            // @return Node: node
-    uu.node(doc.createTextNode(Array.isArray(text) ? text.join("") : text),
-            uu.node.clear(node));
+    uu.node.add(doc.createTextNode(Array.isArray(text) ? text.join("") : text),
+                uu.node.clear(node));
     return node;
 }
 
@@ -82,7 +82,7 @@ function uuvalget(node) { // @param Node:
         }
         rv = multi ? rv : (rv[0] || "");
     } else if (node.type === "radio" || node.type === "checkbox") {
-        ary = node.name ? uu.ary(doc.getElementsByName(node.name)) : [node];
+        ary = node.name ? uu.array(doc.getElementsByName(node.name)) : [node];
         while ( (v = ary[++i]) ) {
             v.checked && rv.push(v.value);
         }
@@ -103,7 +103,7 @@ function uuvalset(node,  // @param Node:
     if (node.tagName.toLowerCase() === "select") {
         ary = node.options, prop = "selected";
     } else if ({ checkbox: 1, radio: 1 }[node.type || ""]) {
-        ary = node.name ? uu.ary(doc.getElementsByName(node.name)) : [node];
+        ary = node.name ? uu.array(doc.getElementsByName(node.name)) : [node];
     }
     if (ary) {
         prop || (prop = "checked"); // prop is "selected" or "checked"

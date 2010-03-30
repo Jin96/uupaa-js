@@ -1,6 +1,7 @@
 
 // === Silverlight Audio ===
-// depend: uu, uu.audio
+//{{{!depend uu, uu.audio
+//}}}!depend
 
 //  <audio>
 //      <object>
@@ -10,7 +11,7 @@
 //      </object>
 //  </audio>
 
-uu.agein || (function(win, doc, uu) {
+uu.audio.Silverlight.init || (function(win, doc, uu) {
 
 uu.audio.Silverlight.init = init;
 uu.audio.Silverlight.build = build;
@@ -83,7 +84,6 @@ function build(audio) { // @param Node: <audio>
                         // @return Node:
     var ctx,
         ERROR_OR_CLOSED = /^(Closed|Error)$/,
-        commandQueueTimer = 0,
         // [ASYNC] initialized notify callback handler
         onload = "uuAudioSilverlightOnLoad" + uu.guid(),
         watchAttrs = {
@@ -96,100 +96,14 @@ function build(audio) { // @param Node: <audio>
         };
 
     ctx = new uu.audio.Silverlight(audio);
+    ctx._commandQueueTimer = 0;
 
     // wait for response from Silverlight initializer
     win[onload] = function(sender) { // @param Node: sender is <Canvas> node
         ctx._view = sender.children;
         ctx._content = sender.getHost().content; // getHost() -> <object>
 
-        ctx._view.add(ctx._content.createFromXaml(
-            '<Canvas xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">' +
-                uu.fmt('<MediaElement x:Name="media" Source="?" Volume="?" />',
-                       [ctx._src, ctx._volume]) +
-            '</Canvas>'));
-
-        ctx._media = sender.findName("media");
-
-        // trap Media Error
-        ctx._media.AddEventListener("MediaFailed", function() {
-            setErrorState(ctx, audio, ctx._media.CurrentState);
-            uu.ev.fire(audio, "error"); // open failed
-        });
-
-        ctx._media.AddEventListener("MediaOpened", function() {
-            uu.ev.fire(audio, "canplay");
-        });
-
-        // trap Change State
-        ctx._media.AddEventListener("CurrentStateChanged", function() {
-//          uu.trace("CurrentStateChanged", ctx._media.CurrentState);
-
-            // ignore consecutive events
-            if (ctx._lastMediaState === ctx._media.CurrentState) {
-                return;
-            }
-            // trap "Closed" or "Error"
-            if (ERROR_OR_CLOSED.test(ctx._lastMediaState)
-                && ERROR_OR_CLOSED.test(ctx._media.CurrentState)) {
-                return;
-            }
-
-            ctx._lastMediaState = ctx._media.CurrentState; // update last state
-
-            switch (ctx._media.CurrentState) {
-            case "Buffering":
-            case "Opening":
-                break;
-            // audio.play(none supported file) -> "Error"
-            // audio.play(file not found)      -> "Closed"
-            // audio.load -> "Error"
-            case "Error":
-            case "Closed":
-                setErrorState(ctx, audio, ctx._media.CurrentState);
-                uu.ev.fire(audio, "error");
-                break;
-            // audio.pause -> MediaState("Paused") -> uuevfire("pause")
-            // audio.stop  -> MediaState("Paused") -> uuevfire("ended")
-            // file end    -> MediaState("Paused") -> uuevfire("ended")
-            case "Paused":
-                if (ctx._lastUserAction === "pause") {
-                    setPausedState(ctx, audio);
-                    uu.ev.fire(audio, "pause");
-                } else {
-                    if (ctx._loop) {
-                        setEndedState(ctx, audio);
-                        uu.ev.fire(audio, "ended"); // ???
-                    } else {
-                        setEndedState(ctx, audio);
-                        uu.ev.fire(audio, "ended");
-                        setPosition(ctx)
-                    }
-                }
-                break;
-            // audio.play -> "Playing"
-            case "Playing":
-                setPlayingState(ctx, audio);
-                uu.ev.fire(audio, "playing");
-                break;
-            case "Stopped":
-                uu.trace("Stopped");
-                break;
-            }
-        });
-
-        // audio.loop
-        if (ctx._loop) {
-            ctx._media.AddEventListener("MediaEnded",
-                                        "uuAudioSilverlightOnMediaEnded");
-        }
-
-        ctx._state = 0x1; // play ready(locked flag off)
-
-        if (ctx._stock.length) {
-            if (!commandQueueTimer) {
-                commandQueueTimer = setTimeout(commandQueue, 0);
-            }
-        }
+        initMedia(ctx, audio);
     };
 
     // create Silverlight <object>
@@ -203,10 +117,10 @@ function build(audio) { // @param Node: <audio>
 
     function commandQueue() {
         if (!ctx._state) {
-            commandQueueTimer = setTimeout(commandQueue, 100);
+            ctx._commandQueueTimer = setTimeout(commandQueue, 100);
             return;
         }
-        commandQueueTimer = 0;
+        ctx._commandQueueTimer = 0;
 
         var ary = ctx._stock, i = 0, iz = ary.length, command, arg;
 
@@ -249,7 +163,7 @@ function build(audio) { // @param Node: <audio>
     };
 
     // attach mutation events
-    if (uu.ie678) {
+    if (uu.ver.ie678) {
         audio.attachEvent("onpropertychange", onPropertyChange);
     }
 
@@ -259,8 +173,8 @@ function build(audio) { // @param Node: <audio>
 
         if (watchAttrs[attr]) {
             ctx._stock.push(attr, audio[attr]);
-            if (!commandQueueTimer) {
-                commandQueueTimer = setTimeout(commandQueue, 0);
+            if (!ctx._commandQueueTimer) {
+                ctx._commandQueueTimer = setTimeout(commandQueue, 0);
             }
         }
     }
@@ -300,22 +214,22 @@ function build(audio) { // @param Node: <audio>
         audio.__defineSetter__("loop", function(v) {
             ctx._loop = v ? true : false;
             ctx._stock.push("loop", v);
-            if (!commandQueueTimer) {
-                commandQueueTimer = setTimeout(commandQueue, 0);
+            if (!ctx._commandQueueTimer) {
+                ctx._commandQueueTimer = setTimeout(commandQueue, 0);
             }
         });
         audio.__defineSetter__("src", function(v) {
             ctx._src = v;
             ctx._stock.push("src", v);
-            if (!commandQueueTimer) {
-                commandQueueTimer = setTimeout(commandQueue, 0);
+            if (!ctx._commandQueueTimer) {
+                ctx._commandQueueTimer = setTimeout(commandQueue, 0);
             }
         });
         audio.__defineSetter__("volume", function(v) {
             ctx._volume = v;
             ctx._stock.push("volume", v);
-            if (!commandQueueTimer) {
-                commandQueueTimer = setTimeout(commandQueue, 0);
+            if (!ctx._commandQueueTimer) {
+                ctx._commandQueueTimer = setTimeout(commandQueue, 0);
             }
         });
         audio.__defineSetter__("startTime", function(v) {
@@ -323,14 +237,14 @@ function build(audio) { // @param Node: <audio>
         });
         audio.__defineSetter__("currentTime", function(v) {
             ctx._stock.push("currentTime", v);
-            if (!commandQueueTimer) {
-                commandQueueTimer = setTimeout(commandQueue, 0);
+            if (!ctx._commandQueueTimer) {
+                ctx._commandQueueTimer = setTimeout(commandQueue, 0);
             }
         });
     }
 
     // fixed memory leak
-    uu.ie678 && win.attachEvent("onunload", function() {
+    uu.ver.ie678 && win.attachEvent("onunload", function() {
         win.detachEvent("onunload", arguments.callee);
         audio.detachEvent("onpropertychange", onPropertyChange);
         win[onload] = null;
@@ -412,9 +326,103 @@ function setPosition(ctx) {
     ctx._media.Position = position; // [!] reattach instance
 }
 
+// inner -
+function initMedia(ctx, audio) {
+    ctx._view.add(ctx._content.createFromXaml(
+        '<Canvas xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">' +
+            uu.format('<MediaElement x:Name="media" Source="?" Volume="?" />',
+                      ctx._src, ctx._volume) +
+        '</Canvas>'));
+
+    ctx._media = sender.findName("media");
+
+    // trap Media Error
+    ctx._media.AddEventListener("MediaFailed", function() {
+        setErrorState(ctx, audio, ctx._media.CurrentState);
+        uu.event.fire(audio, "error"); // open failed
+    });
+
+    ctx._media.AddEventListener("MediaOpened", function() {
+        uu.event.fire(audio, "canplay");
+    });
+
+    // trap Change State
+    ctx._media.AddEventListener("CurrentStateChanged", function() {
+//          uu.trace("CurrentStateChanged", ctx._media.CurrentState);
+
+        // ignore consecutive events
+        if (ctx._lastMediaState === ctx._media.CurrentState) {
+            return;
+        }
+        // trap "Closed" or "Error"
+        if (ERROR_OR_CLOSED.test(ctx._lastMediaState)
+            && ERROR_OR_CLOSED.test(ctx._media.CurrentState)) {
+            return;
+        }
+
+        ctx._lastMediaState = ctx._media.CurrentState; // update last state
+
+        switch (ctx._media.CurrentState) {
+        case "Buffering":
+        case "Opening":
+            break;
+        // audio.play(none supported file) -> "Error"
+        // audio.play(file not found)      -> "Closed"
+        // audio.load -> "Error"
+        case "Error":
+        case "Closed":
+            setErrorState(ctx, audio, ctx._media.CurrentState);
+            uu.event.fire(audio, "error");
+            break;
+        // audio.pause -> MediaState("Paused") -> uueventfire("pause")
+        // audio.stop  -> MediaState("Paused") -> uueventfire("ended")
+        // file end    -> MediaState("Paused") -> uueventfire("ended")
+        case "Paused":
+            if (ctx._lastUserAction === "pause") {
+                setPausedState(ctx, audio);
+                uu.event.fire(audio, "pause");
+            } else {
+                if (ctx._loop) {
+                    setEndedState(ctx, audio);
+                    uu.event.fire(audio, "ended"); // ???
+                } else {
+                    setEndedState(ctx, audio);
+                    uu.event.fire(audio, "ended");
+                    setPosition(ctx)
+                }
+            }
+            break;
+        // audio.play -> "Playing"
+        case "Playing":
+            setPlayingState(ctx, audio);
+            uu.event.fire(audio, "playing");
+            break;
+        case "Stopped":
+            uu.trace("Stopped");
+            setEndedState(ctx, audio);
+            setPosition(ctx)
+            break;
+        }
+    });
+
+    // audio.loop
+    if (ctx._loop) {
+        ctx._media.AddEventListener("MediaEnded",
+                                    "uuAudioSilverlightOnMediaEnded");
+    }
+
+    ctx._state = 0x1; // play ready(locked flag off)
+
+    if (ctx._stock.length) {
+        if (!ctx._commandQueueTimer) {
+            ctx._commandQueueTimer = setTimeout(commandQueue, 0);
+        }
+    }
+}
+
 // add inline XAML source
 uu.ver.silverlight && uu.lazy("init", function() {
-    uu.id("xaml") || doc.head.appendChild(uu.mix(uue("script"), {
+    uu.id("xaml") || doc.head.appendChild(uu.mix(uu.node("script"), {
             id:   "xaml",
             type: "text/xaml",
             text: '<Canvas xmlns="http://schemas.microsoft.com/client/2007" ' +

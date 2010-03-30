@@ -82,18 +82,18 @@ function xcanvas(uu, canvases) {
 
 
 /*
-    uu.ev(canvas, uu.ie ? "mouseenter" : "mouseover",
+    uu.event(canvas, uu.ie ? "mouseenter" : "mouseover",
                     function(evt) { poly.draw(canvas.getContext("2d"), 1); });
-    uu.ev(canvas, uu.ie ? "mouseleave" : "mouseout",
+    uu.event(canvas, uu.ie ? "mouseleave" : "mouseout",
                     function(evt) { poly.stop(); });
  */
 /*
-    uu.ev.hover(canvas,
+    uu.event.hover(canvas,
                 function(evt) { poly.draw(canvas.getContext("2d"), 1) },
                 function(evt) { poly.stop(); });
  */
-    uu.ev.hover(canvas, function() { poly.run(ctx); },
-                        function() { poly.stop(); });
+    uu.event.hover(canvas, function() { poly.run(ctx); },
+                           function() { poly.stop(); });
 
 }
 </script>

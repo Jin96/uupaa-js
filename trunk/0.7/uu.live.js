@@ -45,9 +45,9 @@ function _uulive(expr, nstype, fn, hash) {
     if (!uulivehas(expr, nstype)) {
         var ary = nstype.split("."), // "namespace.click" -> ["namespace", "click"]
             type = ary.pop(), ns = ary.pop() || "", capt = 0,
-            handler = uu.isfunc(fn) ? fn : fn.handleEvent,
-            closure = fn.uuevliveclosure = _uuliveclosure,
-            _code = uu.ev._code;
+            handler = uu.isFunction(fn) ? fn : fn.handleEvent,
+            closure = fn.uueventliveclosure = _uuliveclosure,
+            _code = uu.event._code;
 
         hash || (hash = _livedb[expr + "\v" + nstype] = {
             expr: expr, ns: ns, type: type, nstype: nstype, unbind: []
@@ -58,9 +58,9 @@ function _uulive(expr, nstype, fn, hash) {
         }
 
         hash.unbind.push(function() {
-            uu.ev.detach(doc, _uulive._FIX[type] || type, closure, capt);
+            uu.event.detach(doc, _uulive._FIX[type] || type, closure, capt);
         });
-        uu.ev.attach(doc, _uulive._FIX[type] || type, closure, capt);
+        uu.event.attach(doc, _uulive._FIX[type] || type, closure, capt);
 
         if (uu.ie) {
             if (/submit$/.test(type)) {
@@ -68,10 +68,10 @@ function _uulive(expr, nstype, fn, hash) {
                         nstype.replace(/submit$/, "click"), fn, hash);
             } else if (/change$/.test(type)) {
                 _uulive(expr, nstype.replace(/change$/, "focus"), function(evt) {
-                    uu.ev(evt.srcElement, "uulivehook.change", fn);
+                    uu.event(evt.srcElement, "uulivehook.change", fn);
                 }, hash);
                 _uulive(expr, nstype.replace(/change$/, "blur"), function(evt) {
-                    uu.ev.unbind(evt.srcElement, "uulivehook.change");
+                    uu.event.unbind(evt.srcElement, "uulivehook.change");
                 }, hash);
             }
         }

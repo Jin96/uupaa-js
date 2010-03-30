@@ -12,8 +12,8 @@ uu.node.build || (function(win, doc, uu) {
 //ja                   第二引数には生成されたノード, 第三引数にはユーザが指定したビルドIDが、
 //ja                   第四引数には生成されたノードのユニークなノードIDが渡されます
 
-var _callbackHandler = uu.isfunc(win.uuNodeBuilder) ? win.uuNodeBuilder
-                     : uu.isfunc(win.xnode) ? win.xnode : uu.nop;
+var _callbackHandler = uu.isFunction(win.uuNodeBuilder) ? win.uuNodeBuilder
+                     : uu.isFunction(win.xnode) ? win.xnode : uu.nop;
 
 uu.html = uuhtml;         // uu.html(node, attr, style, buildid) -> <html>
 uu.head = uuhead;         // uu.head(node, attr, style, buildid) -> <head>
@@ -22,7 +22,7 @@ uu.node.build = uunodebuild;
 
 // --- initialize ---
 // inner - setup node builder - uu.div(), uu.a(), ...
-uu.ary.each(uu.tag.HTML4, function(v) {
+uu.tag.HTML4.forEach(function(v) {
     // skip "img", "canvas", "audio"
     if (v === "img" || v === "canvas" || v === "audio") {
         return;
@@ -32,7 +32,7 @@ uu.ary.each(uu.tag.HTML4, function(v) {
         return uunodebuild(v, arguments);
     };
 });
-uu.ary.each(uu.tag.HTML5, function(v) {
+uu.tag.HTML5.forEach(function(v) {
     uu.ie && doc.createElement(v); // [IE]
     uu[v] = function html5NodeBuilder() { // @param Mix: var_args
         return uunodebuild(v, arguments);
@@ -74,13 +74,13 @@ function uunodebuild(node,   // @param Node/String:
                      args) { // @param Mix: arguments(nodes, attr/css)
                              // @return Node:
     function tohash(mix) {
-        return !uu.isstr(mix) ? mix :
+        return !uu.isString(mix) ? mix :
                !mix.indexOf(" ") ? uu.split.toHash(uu.trim(mix), " ") // " color red"
                                  : uu.split.toHash(mix);              //  "color,red"
     }
 
     // "div" -> <div>
-    node.nodeType || (node = uu.elm(node));
+    node.nodeType || (node = uu.node(node));
 
     var v, w, i = 0, j = 0, iz = args.length;
 

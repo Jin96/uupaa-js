@@ -111,8 +111,8 @@ function uucss3(node,   // @param Node:
                 mix1,   // @param JointString/Hash(= void 0):
                 mix2) { // @param String(= void 0):
                         // @return String/Hash/CSS2Properties/Node:
-    return ((mix2 === void 0 && uu.isstr(mix1)) ? uucss3get
-                                                : uucss3set)(node, mix1, mix2);
+    return ((mix2 === void 0 && uu.isString(mix1)) ? uucss3get
+                                                   : uucss3set)(node, mix1, mix2);
 }
 
 // uu.css3.get
@@ -139,7 +139,7 @@ function uucss3set(node,  // @param Node:
                    val) { // @param String(= void 0):
     var hash, fn, i, v, fixdb = uu.fix._db;
 
-    uu.isstr(key) ? (hash = {}, hash[key] = val) : (hash = key);
+    uu.isString(key) ? (hash = {}, hash[key] = val) : (hash = key);
     for (i in hash) {
         v = hash[i];
         if (v !== void 0) {
@@ -182,7 +182,7 @@ function uucss3review(ctx,    // @param Node/IDString(= void 0):
                       full) { // @param Number(= 0): 0 is quick build
     // lazy revalidate for :target
     (_selector || _render) && setTimeout(function() {
-        _uucss3review(uu.isstr(ctx) ? uu.id(ctx) : ctx, full || 0, "");
+        _uucss3review(uu.isString(ctx) ? uu.id(ctx) : ctx, full || 0, "");
     }, 0);
 }
 
@@ -775,8 +775,8 @@ function _uucss3pluspostvalidate(uid2data, revalidate, context) {
 
     if (!revalidate) {
         if (EXCSS.position | EXCSS.maxmin | boxeffect.length) {
-            uu.ev.resize.stop(uu.ie ? 1 : 0); // [IE] agent, [OTHER] event
-            uu.ev.resize(uucss3redraw, uu.ie ? 1 : 0);
+            uu.event.resize.stop(uu.ie ? 1 : 0); // [IE] agent, [OTHER] event
+            uu.event.resize(uucss3redraw, uu.ie ? 1 : 0);
         }
     }
 }
@@ -854,7 +854,7 @@ function _uucss3autoviewbox() {
                 break;
             }
         }
-        div = uu.elm();
+        div = uu.node();
         div.className = "viewbox";
         div.style.padding = padding || "auto";
         uu.node.wrap(v, div);
@@ -919,7 +919,7 @@ function _css3init() {
                   uu.ver.render  <  528) && ++_selector;
     uu.webkit && (uu.ver.render  >= 522) && ++_render;
 
-    if (uu.isfunc(uu.config.altcss)) {
+    if (uu.isFunction(uu.config.altcss)) {
         var hash = uu.config.altcss(uu), // @return Hash: { selector, render, cssexpr }
             expr = 0;
 

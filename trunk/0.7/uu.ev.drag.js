@@ -9,7 +9,7 @@ uu.Class.Drag || (function(win, doc, uu) {
 uu.Class("Drag", {
     init:         draginit,       // init(tgt, grip, option = {})
     handleEvent:  draghandleevent,// handleEvent(evt)
-    drag:         uu.ev.dragbase, // drag(evt, tgt, grip, option) -> { x, y, px, py }
+    drag:         uu.event.dragbase, // drag(evt, tgt, grip, option) -> { x, y, px, py }
     mousewheel:   dragmousewheel  // mousewheel(evt)
 });
 
@@ -17,14 +17,14 @@ uu.Class("Drag", {
 uu.Class("Draggable", {
     init:         draggableinit,  // init(tgt, grip, option = {})
     handleEvent:  draggablehandleevent, // handleEvent(evt)
-    drag:         uu.ev.dragbase  // drag(evt, tgt, grip, option) -> { x, y, px, py }
+    drag:         uu.event.dragbase  // drag(evt, tgt, grip, option) -> { x, y, px, py }
 });
 
 // uu.Class.Sortable - Sortable Drag and Drop manage class
 uu.Class("Sortable", {
     init:         sortableinit,   // init(tgt, grip, option = {})
     handleEvent:  sortablehandleevent, // handleEvent(evt)
-    drag:         uu.ev.dragbase  // drag(evt, tgt, grip, option) -> { x, y, px, py }
+    drag:         uu.event.dragbase  // drag(evt, tgt, grip, option) -> { x, y, px, py }
 });
 
 // uu.Class.ZIndex - z-index manage class
@@ -47,10 +47,10 @@ uu.Class("Shim", {
 
 // --- impl ---
 // inner -
-function uuevdraglimit(min,   // @param Number:
-                       value, // @param Number:
-                       max) { // @param Number:
-                              // @return Boolean:
+function uueventdraglimit(min,   // @param Number:
+                          value, // @param Number:
+                          max) { // @param Number:
+                                 // @return Boolean:
     return (min > value) ? min
                          : (value > max) ? max : value;
 }
@@ -87,13 +87,13 @@ function draginit(tgt,      // @param Node: move target
 
 // uu.Class.Drag.handleEvent
 function draghandleevent(evt) {
-    uu.ev.stop(evt);
+    uu.event.stop(evt);
     var rv = this.drag(evt, this._tgt, this._grip, this._opt),
         code = evt.code;
 
     if (code) {
         if (code <= 2) { // [1] mousedown, [2] mouseup
-            uu.ev(uu.ie ? this._grip : doc, "mousemove+,mouseup+", this, code);
+            uu.event(uu.ie ? this._grip : doc, "mousemove+,mouseup+", this, code);
         } else if (code === 3) { // [3] mousemove
             this._shim &&
                 this._shim.resize({ x: rv.px, y: rv.py, w: this._tgt.offsetWidth,
@@ -106,13 +106,13 @@ function draghandleevent(evt) {
 
 // uu.Class.Drag.mousewheel
 function dragmousewheel(evt) {
-    var opt = this._opt, wheel, size, w, h, more = uu.ev.more(evt);
+    var opt = this._opt, wheel, size, w, h, more = uu.event.more(evt);
 
     if (opt.wheel === 1) {
         wheel = more.wheel * 10;
         size = uu.css.size(this._tgt, 1); // plain size
-        w = uuevdraglimit(opt.minw, size.w + wheel, opt.maxw),
-        h = uuevdraglimit(opt.minh, size.h + wheel, opt.maxh);
+        w = uueventdraglimit(opt.minw, size.w + wheel, opt.maxw),
+        h = uueventdraglimit(opt.minh, size.h + wheel, opt.maxh);
     //  uu.css.rect(this._tgt, { w: w, h: h });
         uu.css.size.set(this._tgt, w, h);
         this._shim && this._shim.resize({ w: w, h: h });
@@ -152,7 +152,7 @@ function draggableinit(
         me._tgt = evt.node; // evt.currentTarget
         uu.css.toAbsolute(me._tgt);
         if (uu.ver.ie6) {
-            uu.ary.each(uu.tag("select"), function(v) {
+            uu.tag("select").forEach(function(v) {
                 v.style.visibility = "hidden";
             });
         }
@@ -161,27 +161,27 @@ function draggableinit(
     this._opt.mouseup = function(evt, tgt, grip, code, opt, x, y) {
         uu.css.toStatic(tgt);
         if (uu.ver.ie6) {
-            uu.ary.each(uu.tag("select"), function(v) {
+            uu.tag("select").forEach(function(v) {
                 v.style.visibility = "";
             });
         }
         var ctx = _draggableinrect(droppable, x, y, me._opt.droppablebg);
 
         if (ctx && _draggableready(ctx, draggable)) {
-            uu.node(tgt, ctx);
+            uu.node.add(tgt, ctx);
         }
     };
 }
 
 // uu.Class.Draggable.handleEvent
 function draggablehandleevent(evt) {
-    uu.ev.stop(evt);
+    uu.event.stop(evt);
     var rv = this.drag(evt, this._tgt, this._tgt, this._opt),
         code = evt.code;
 
     if (code) {
         if (code <= 2) { // [1] mousedown, [2] mouseup
-            uu.ev(uu.ie ? this._tgt : doc, "mousemove+,mouseup+", this, code);
+            uu.event(uu.ie ? this._tgt : doc, "mousemove+,mouseup+", this, code);
         } else if (code === 3) {
             _draggableinrect(this._droppable, rv.x, rv.y, this._opt.droppablebg);
         }
@@ -229,9 +229,9 @@ function sortableinit(ul,       // @param Node: <ul> node
 //  this._ul  = ul;
     this._li  = uu.query("!>li", ul);
 
-    uu.ary.each(this._li, function(v) {
+    this._li.forEach(function(v) {
         v.style.cursor = "move";
-        uu.ev(v, "mousedown+", me);
+        uu.event(v, "mousedown+", me);
         me._tgt = v; // dummy
         v.uusortable = { idx: uu.node.find(v),
                          rect: uu.css.rect(v) };
@@ -249,7 +249,7 @@ function sortableinit(ul,       // @param Node: <ul> node
     this._opt.mouseup = function(evt, tgt) {
         uu.node.swap(tgt, me._fp);
         uu.css.toStatic(tgt);
-        uu.ary.each(me._li, function(v) {
+        me._li.forEach(function(v) {
             v.uusortable = { idx: uu.node.find(v),
                              rect: uu.css.rect(v) }; // update
         });
@@ -263,7 +263,7 @@ function sortablehandleevent(evt) {
 
     if (code) {
         if (code <= 2) { // [1] mousedown, [2] mouseup
-            uu.ev(uu.ie ? _tgt : doc, "mousemove+,mouseup+", this, code);
+            uu.event(uu.ie ? _tgt : doc, "mousemove+,mouseup+", this, code);
         } else if (code === 3) { // [3] mousemove
             _li = this._li;
 
@@ -283,7 +283,7 @@ function sortablehandleevent(evt) {
                 }
             }
         }
-        uu.ev.stop(evt);
+        uu.event.stop(evt);
     }
 }
 

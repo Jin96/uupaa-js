@@ -11,7 +11,7 @@ var _ssid   = "uuqueryss", // StyleSheet ID
     _htmltagdb    = {}, // tag dict( { a: "A", A: "A", ... } )
     _xmltagdb     = {},
     _nodeid       = uu.node.id,
-    _HTML5HASH    = uu.hash.combine(uu.tag.HTML5, 1, 1), // { abbr: 1, ... }
+    _HTML5HASH    = uu.array.toHash(uu.tag.HTML5, 1, 1), // { abbr: 1, ... }
     _QUICK_STATIC = {
         "*":      function(ctx) { return uu.tag("*", ctx); },
         "*:root": function() { return [uu.node.root]; }, // fix #27 (*:root)
@@ -21,7 +21,7 @@ var _ssid   = "uuqueryss", // StyleSheet ID
         html:     function() { return [uu.node.root]; }, // doc.html
         head:     function() { return [doc.head]; },
         body:     function() { return [doc.body]; },
-        ":link":  function() { return uu.ary(doc.links); } }, // spoof
+        ":link":  function() { return uu.array(doc.links); } }, // spoof
     // :after :before :contains :digit :first-letter :first-line :link
     // :negative :playing :target :visited  !=  ?=  /=  <=  >=  &=  {  }
     _SYNTAX_ERROR = /^[>+~]|[>+~*]{2}|[>+~]$/,
@@ -146,16 +146,16 @@ function quickQuery(expr, match, context) {
         }
 
         unq[m1] = 1;
-        nodeList1 = uu.ary(context.getElementsByTagName(m1));
+        nodeList1 = uu.array(context.getElementsByTagName(m1));
 
         if (m2 && !(m2 in unq)) {
             unq[m2] = 1;
-            nodeList2 = uu.ary(context.getElementsByTagName(m2));
+            nodeList2 = uu.array(context.getElementsByTagName(m2));
         }
 
         if (m3 && !(m3 in unq)) {
             unq[m3] = 1;
-            nodeList3 = uu.ary(context.getElementsByTagName(m3));
+            nodeList3 = uu.array(context.getElementsByTagName(m3));
         }
         return [].concat(nodeList1, nodeList2 || [], nodeList3 || []);
     }
@@ -827,7 +827,7 @@ function contains(fid, negate, elms, pseudo, value) {
 
 // inner - :link
 function link(fid, negate, elms) {
-    var rv = [], ri = -1, ary = uu.ary(doc.links), v, i = 0,
+    var rv = [], ri = -1, ary = uu.array(doc.links), v, i = 0,
         j = 0, jz = elms.length, hit;
 
     while ( (v = ary[i++]) ) {

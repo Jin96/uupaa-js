@@ -224,7 +224,7 @@ function createLayer(id,       // @param String: layer id
         this._clid = id;
         this._cctx = ctx;
     } else {
-        elm = uu.elm(type);
+        elm = uu.node(type);
         es = elm.style;
 
         back ? v.insertBefore(elm, v.firstChild)

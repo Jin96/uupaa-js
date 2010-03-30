@@ -86,7 +86,7 @@ uu.canvas.VML.build = build;
 function init(ctx, node) { // @param Node: <canvas>
     initSurface(ctx);
     ctx.canvas = node;
-    ctx._view = node.appendChild(uu.elm());
+    ctx._view = node.appendChild(uu.node());
     ctx._view.uuCanvasDirection = node.currentStyle.direction;
     ctx._view.style.cssText     = "overflow:hidden;position:absolute;direction:ltr";
     ctx._view.style.pixelWidth  = node.width;
@@ -362,7 +362,7 @@ function clearRect(x, y, w, h) {
         var color = uu.canvas.bgcolor(this.canvas),
             zindex = (this.__mix ===  4) ? --this._zindex
                    : (this.__mix === 10) ? (this.clear(), 0) : 0,
-            fg = uu.fmt(_COLOR_FILL,
+            fg = uu.format(_COLOR_FILL,
                         zindex, _rect(this, x, y, w, h), color.hex,
                          (this.globalAlpha * color.a) + ' type="solid"');
 
@@ -523,7 +523,7 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
 
             // shadow
             if (this.__shadowColor.a && this.shadowBlur) {
-                rv.push(uu.fmt(_IMAGE_SHADOW,
+                rv.push(uu.format(_IMAGE_SHADOW,
                             zindex, dx + (this.shadowOffsetX + 1),
                                      dy + (this.shadowOffsetY + 1),
                              _rect(this, 0, 0, dw, dh),
@@ -533,7 +533,7 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
 
             // no resize + no opacity
             if (args === 3 && this.globalAlpha !== 1) {
-                rv.push(uu.fmt(_IMAGE_FILL,
+                rv.push(uu.format(_IMAGE_FILL,
                                zindex, dx, dy, _rect(this, 0, 0, dw, dh),
                                this.globalAlpha, image.src));
             } else {
@@ -985,7 +985,7 @@ function stroke(path, fill) {
         color = fill ? this.__fillStyle : this.__strokeStyle;
 
         if (this.__shadowColor.a && this.shadowBlur) {
-            fg = uu.fmt(fill ? _COLOR_FILL : _COLOR_STROKE,
+            fg = uu.format(fill ? _COLOR_FILL : _COLOR_STROKE,
                          zindex + ";left:" + (this.shadowOffsetX + 1) + "px;top:" +
                                              (this.shadowOffsetY + 1) + "px",
                          path, this.__shadowColor.hex,
@@ -1210,7 +1210,7 @@ function _linearGradientFill(ctx, obj, path, fill, zindex) {
         //      <v:stroke filltype="solid" opacity="?" angle="?" color="?" joinstyle="?" miterlimit="?" weight="?px" endcap="?" />
         //                                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         //  </v:shape>
-        fg = uu.fmt(fill ? _LINER_FILL : _LINER_STROKE,
+        fg = uu.format(fill ? _LINER_FILL : _LINER_STROKE,
                      zindex + ";left:" + (ctx.shadowOffsetX + 1) + "px;top:" +
                                          (ctx.shadowOffsetY + 1) + "px",
                      path, (ctx.globalAlpha / Math.sqrt(ctx.shadowBlur) * 0.5),
@@ -1231,7 +1231,7 @@ function _linearGradientFill(ctx, obj, path, fill, zindex) {
     //  </v:shape>
     color = fill ? ('" colors="' + (obj.colors || _gradationColor(obj)))
                  : ('" color="'  + uu.color(ctx.xMissColor).hex);
-    return fg + uu.fmt(fill ? _LINER_FILL : _LINER_STROKE,
+    return fg + uu.format(fill ? _LINER_FILL : _LINER_STROKE,
                         zindex, path, ctx.globalAlpha,
                         angle + strokeProps + color + '" o:opacity2="' + ctx.globalAlpha);
 }
@@ -1272,10 +1272,10 @@ function _radialGradientFill(ctx, obj, path, fill, zindex) {
         //                                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         //      </v:oval>
         //
-        more = fill ? uu.fmt('" color="?" focussize="?,?" focusposition="?,?',
+        more = fill ? uu.format('" color="?" focussize="?,?" focusposition="?,?',
                              ctx.__shadowColor.hex, fsize, fsize, fposX, fposY)
-                    : uu.fmt('" color="??', ctx.__shadowColor.hex, strokeProps);
-        rv.push(uu.fmt(fill ? _RADIAL_FILL : _RADIAL_STROKE,
+                    : uu.format('" color="??', ctx.__shadowColor.hex, strokeProps);
+        rv.push(uu.format(fill ? _RADIAL_FILL : _RADIAL_STROKE,
                         zindex,
                         Math.round(c0.x / 10) + ctx.shadowOffsetX + 1,
                         Math.round(c0.y / 10) + ctx.shadowOffsetY + 1, r1x, r1y,
@@ -1317,12 +1317,12 @@ function _radialGradientFill(ctx, obj, path, fill, zindex) {
     //          <v:stroke filltype="tile" opacity="?" color="?" joinstyle="?" miterlimit="?" weight="?px" endcap="?" />
     //                                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     //      </v:oval>
-    more = fill ? uu.fmt('" o:opacity2="?" colors="?" focussize="?,?" focusposition="?,?',
+    more = fill ? uu.format('" o:opacity2="?" colors="?" focussize="?,?" focusposition="?,?',
                          ctx.globalAlpha, obj.colors || _gradationColor(obj),
                          fsize, fsize, fposX, fposY)
-                : uu.fmt('" color="??', uu.color(ctx.xMissColor).hex, strokeProps);
+                : uu.format('" color="??', uu.color(ctx.xMissColor).hex, strokeProps);
 
-    rv.push(uu.fmt(fill ? _RADIAL_FILL : _RADIAL_STROKE,
+    rv.push(uu.format(fill ? _RADIAL_FILL : _RADIAL_STROKE,
                     zindex,
                     Math.round(c0.x / 10),
                     Math.round(c0.y / 10), r1x, r1y,
@@ -1348,7 +1348,7 @@ function _patternFill(ctx, obj, path, fill, zindex) {
         //          <v:stroke filltype="?" opacity="?" color="?" joinstyle="?" miterlimit="?" weight="?px" endcap="?" />
         //                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         //      </v:shape>
-        fg = uu.fmt(fill ? _PATTERN_FILL : _PATTERN_STROKE,
+        fg = uu.format(fill ? _PATTERN_FILL : _PATTERN_STROKE,
                      zindex, ctx.shadowOffsetX + 1,
                              ctx.shadowOffsetY + 1,
                      path, "solid",
@@ -1369,7 +1369,7 @@ function _patternFill(ctx, obj, path, fill, zindex) {
     //          <v:stroke filltype="?" opacity="?" src="?" joinstyle="?" miterlimit="?" weight="?px" endcap="?" />
     //                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     //      </v:shape>
-    return fg + uu.fmt(fill ? _PATTERN_FILL : _PATTERN_STROKE,
+    return fg + uu.format(fill ? _PATTERN_FILL : _PATTERN_STROKE,
                         zindex, 0, 0, path, "tile",
                         ctx.globalAlpha + '" src="' + obj.src + strokeProps);
 }
@@ -1379,7 +1379,7 @@ function _clippy(ctx, fg) {
     if (!ctx._clipStyle) {
         ctx._clipStyle = uu.canvas.bgcolor(ctx.canvas);
     }
-    return fg + uu.fmt(_CLIPPY, ctx._clipPath, ctx._clipStyle.hex);
+    return fg + uu.format(_CLIPPY, ctx._clipPath, ctx._clipStyle.hex);
 }
 
 // inner - build Gradation Color

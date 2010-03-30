@@ -51,6 +51,21 @@ function joinSourceFiles($packagefile, $outfile, $minify, $optimize) {
 
         // minify
         if ($minify) {
+            // --- pre-process phase ---
+            $txt = preg_replace('/uu\.?type.HASH/',         '0x001', $txt);
+            $txt = preg_replace('/uu\.?type.NODE/',         '0x002', $txt);
+            $txt = preg_replace('/uu\.?type.FAKEARRAY/',    '0x004', $txt);
+            $txt = preg_replace('/uu\.?type.DATE/',         '0x008', $txt);
+            $txt = preg_replace('/uu\.?type.NULL/',         '0x010', $txt);
+            $txt = preg_replace('/uu\.?type.UNDEFINED/',    '0x020', $txt);
+            $txt = preg_replace('/uu\.?type.BOOLEAN/',      '0x040', $txt);
+            $txt = preg_replace('/uu\.?type.FUNCTION/',     '0x080', $txt);
+            $txt = preg_replace('/uu\.?type.NUMBER/',       '0x100', $txt);
+            $txt = preg_replace('/uu\.?type.STRING/',       '0x200', $txt);
+            $txt = preg_replace('/uu\.?type.ARRAY/',        '0x400', $txt);
+            $txt = preg_replace('/uu\.?type.REGEXP/',       '0x800', $txt);
+            $txt = preg_replace('/uu\.?type.CSS/',          '0x1000', $txt);
+
             // strip comment line  "//..." -> ""
             $txt = preg_replace('/(^|\s)\/\/[^\n]*$/m', '', $txt);
 
@@ -90,6 +105,8 @@ function joinSourceFiles($packagefile, $outfile, $minify, $optimize) {
                                 "($1, $2, $3)", $txt);
             $txt = preg_replace('/\((\w+),\n\s+(\w+)\)/',
                                 "($1, $2)", $txt);
+
+
         }
         fwrite($fp, $txt);
         fwrite($fp, "\n");

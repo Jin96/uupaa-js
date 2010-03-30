@@ -42,9 +42,9 @@ function uuflash(replaceNode, // @param Node: replacement node
                                                              : "always" });
 
     for (i in opt) {
-        ary.push(uu.fmt('<param name="?" value="?" />', i, opt[i]));
+        ary.push(uu.format('<param name="?" value="?" />', i, opt[i]));
     }
-    fg = uu.fmt('<object class="uuflashobject"' +
+    fg = uu.format('<object class="uuflashobject"' +
                 ' id="?" ?="?" data="?" width="?" height="?">?</object>',
                       objectID,
                          uu.ie ? "classid" : "type",
