@@ -59,22 +59,31 @@ function uueventdraglimit(min,   // @param Number:
 // uu.Class.Drag.init
 function draginit(tgt,      // @param Node: move target
                   grip,     // @param Node(= void 0): grip
-                  option) { // @param Hash(= {}):
-                            //        { ghost, wheel, noshim, rel,
-                            //          minw, maxw, minh, maxh }
-                            //        Number: ghost, 1 is enable ghost effect
-                            //        Number/Function: wheel, 0 is off
+                  option) { // @param Hash(= {}): { ghost, wheel, noshim, rel, minw, maxw, minh, maxh }
+                            //      option.ghost - Number: ghost, 1 is enable ghost effect
+                            //      option.wheel - Number/Function: wheel, 0 is off
                             //                                1 is resize
                             //                                fn is callback
-                            //        Number: noshim, 1 is disable shim(in IE6)
-                            //        Number: rel, 1 is relative, 0 is absolute
-                            //        Number: minw, maxw, minh, maxh
+                            //      option.noshim - Number: noshim, 1 is disable shim(in IE6)
+                            //      option.rel - Number: rel, 1 is relative, 0 is absolute
+                            //      option.minw - Number: min width
+                            //      option.maxw - Number: max width
+                            //      option.minh - Number: min height
+                            //      option.maxh - Number: max height
     grip = grip || tgt;
     this._tgt  = tgt;
     this._grip = grip;
-    this._opt  = uu.arg(option,
-                        { ghost: 0, wheel: 0, noshim: 0, rel: 0, zmanage: 1,
-                          minw: 0, maxw: 2000, minh: 0, maxh: 2000 });
+    this._opt  = uu.arg(option, {
+        ghost:      0,
+        wheel:      0,
+        noshim:     0,
+        rel:        0,
+        zmanage:    1,
+        minw:       0,
+        maxw:       2000,
+        minh:       0,
+        maxh:       2000
+    });
     grip.style.cursor = "move";
     this._opt.rel ? uu.css.toRelative(tgt)
                   : uu.css.toAbsolute(tgt);

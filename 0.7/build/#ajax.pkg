@@ -7,7 +7,7 @@ uu.color.js
 uu.css.js
 uu.node.js
 uu.nodebuilder.js
-uu.ev.js
+uu.event.js
 uu.img.js
 uu.tween.js
 uu.live.js
