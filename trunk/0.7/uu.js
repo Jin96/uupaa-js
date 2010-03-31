@@ -53,9 +53,9 @@ uu = uumix(uujamfactory, {          //uu(expression:Jam/Node/NodeArray/String/wi
         REGEXP:     0x800,          // uu.type.REGEXP       - RegExp
         CSS:        0x1000          // uu.type.CSS          - CSSProperties (getComputedStyle result)
     }),
-    isNumber:       uuisnumber,     // uu.isNumber(search:Number):Boolean
-    isString:       uuisstring,     // uu.isString(search:String):Boolean
-    isFunction:     uuisfunction,   // uu.isFunction(search:Function):Boolean
+    isNumber:       uuisnumber,     //   uu.isNumber(search:Mix):Boolean
+    isString:       uuisstring,     //   uu.isString(search:Mix):Boolean
+    isFunction:     uuisfunction,   // uu.isFunction(search:Mix):Boolean
     // --- hash / array ---
     arg:            uuarg,          // uu.arg(arg1:Hash = {}, arg2:Hash, arg3:Hash = undefined):Hash
     mix:            uumix,          // uu.mix(base:Hash, flavor:Hash, aroma:Hash = undefined, override:Boolean = true):Hash
@@ -63,20 +63,20 @@ uu = uumix(uujamfactory, {          //uu(expression:Jam/Node/NodeArray/String/wi
     keys:           uukeys,         // uu.keys(source:Hash/Array):Array
     values:         uuvalues,       // uu.values(source:Hash/Array):Array
     hash:     uumix(uuhash, {       // uu.hash(key:Hash/String, value:Mix = undefined):Hash
-        has:        uuhas,          // uu.hash.has(source:Hash, search:Array):Boolean
-        nth:        uunth,          // uu.hash.nth(source:Hash, nth:Number):Array
-        size:       uusize,         // uu.hash.size(source:Hash):Number
-        clone:      uuclone,        // uu.hash.clone(source:Hash):Hash
+        has:        uuhas,          //     uu.hash.has(source:Hash, search:Array):Boolean
+        nth:        uunth,          //     uu.hash.nth(source:Hash, nth:Number):Array
+        size:       uusize,         //    uu.hash.size(source:Hash):Number
+        clone:      uuclone,        //   uu.hash.clone(source:Hash):Hash
         indexOf:    uuindexof       // uu.hash.indexOf(source:Hash, search:Mix):String/undefined
     }),
     array:    uumix(uuarray, {      // uu.array(source:Array/Mix/NodeList/Arguments):Array
-        has:        uuhas,          // uu.array.has(source:Array, search:Array):Boolean
-        nth:        uunth,          // uu.array.nth(source:Array, nth:Number):Array
-        size:       uusize,         // uu.array.size(source:Array):Number
-        sort:       uusort,         // uu.array.sort(source:Array, method:String/Function = "0-9"):Array
-        clean:      uuclean,        // uu.array.clean(source:Array):Array
-        clone:      uuclone,        // uu.array.clone(source:Array):Array
-        toHash:     uutohash,       // uu.array.toHash(key:Array, value:Array/Mix, toNumber:Boolean):Hash
+        has:        uuhas,          //    uu.array.has(source:Array, search:Array):Boolean
+        nth:        uunth,          //    uu.array.nth(source:Array, nth:Number):Array
+        size:       uusize,         //   uu.array.size(source:Array):Number
+        sort:       uusort,         //   uu.array.sort(source:Array, method:String/Function = "0-9"):Array
+        clean:      uuclean,        //  uu.array.clean(source:Array):Array
+        clone:      uuclone,        //  uu.array.clone(source:Array):Array
+        toHash:     uutohash,       // uu.array.toHash(key:Array, value:Array/Mix, toNumber:Boolean = false):Hash
         unique:     uuunique        // uu.array.unique(source:Array, literalOnly:Boolean = false):Array
     }),
     // --- attribute ---
@@ -120,14 +120,14 @@ uu = uumix(uujamfactory, {          //uu(expression:Jam/Node/NodeArray/String/wi
         quick:      uustylequick    // uu.style.quick(node:Node):Hash
     }),
     // --- query ---
+    id:             uuid,           //    uu.id(expression:String, context:Node = document):Node/null
+    tag:            uutag,          //   uu.tag(expression:String, context:Node = document):NodeArray
     query:          uuquery,        // uu.query(expression:String, context:NodeArray/Node = document):NodeArray
-    id:             uuid,           // uu.id(expression:String, context:Node = document):Node/null
-    tag:            uutag,          // uu.tag(expression:String, context:Node = document):NodeArray
     // --- className(klass) ---
     klass:    uumix(uuklass, {      // uu.klass(expression:String, context:Node = document):NodeArray
-        has:        uuklasshas,     // uu.klass.has(node:Node, classNames:String):Boolean
-        add:        uuklassadd,     // uu.klass.add(node:Node, classNames:String):Node
-        sub:        uuklasssub,     // uu.klass.sub(node:Node, classNames:String):Node
+        has:        uuklasshas,     //    uu.klass.has(node:Node, classNames:String):Boolean
+        add:        uuklassadd,     //    uu.klass.add(node:Node, classNames:String):Node
+        sub:        uuklasssub,     //    uu.klass.sub(node:Node, classNames:String):Node
         toggle:     uuklasstoggle   // uu.klass.toggle(node:Node, classNames:String):Node
     }),
     // --- color ---
@@ -142,7 +142,7 @@ uu = uumix(uujamfactory, {          //uu(expression:Jam/Node/NodeArray/String/wi
         expire:     uucolorexpire   // uu.color.expire()
     }),
     // --- event ---
-    event:    uumix(uuevent, {      // uu.event(node:Node, namespaceAndEventTypes:String, evaluator:Function, mode:Number = 1):Node
+    event:    uumix(uuevent, {      // uu.event(node:Node, namespaceAndEventTypes:String, evaluator:Function, detach:Boolean = false):Node
                                     //  [1][bind a event]            uu.event(node, "click", fn)             -> node
                                     //  [2][bind multi events]       uu.event(node, "click,dblclick", fn)    -> node
                                     //  [3][bind a capture event]    uu.event(node, "mousemove+", fn)        -> node
@@ -153,18 +153,6 @@ uu = uumix(uujamfactory, {          //uu(expression:Jam/Node/NodeArray/String/wi
         unbind:     uueventunbind,  // uu.event.unbind(node:Node, namespaceAndEventTypes:String = undefined):Node
         attach:     uueventattach,  // uu.event.attach(node:Node, eventType:String, evaluator:Function, capture:Boolean = false)
         detach:     uueventdetach   // uu.event.detach(node:Node, eventType:String, evaluator:Function, capture:Boolean = false)
-    }),
-    // --- ready event ---
-    ready:    uumix(uuready, {      // uu.ready(evaluator:Function = undefined, order:Number = 0)
-        gone: {                     // ready event state
-            dom:        0,          // 1 is [DOMReady]          DOMContentLoaded event fired
-            win:        0,          // 1 is [WindowReady]       window.onload event fired
-            audio:      0,          // 1 is [AudioReady]        <audio> ready event fired
-            video:      0,          // 1 is [VideoReady]        <video> ready event fired
-            canvas:     0,          // 1 is [CanvasReady]       <canvas> ready event fired
-            storage:    0,          // 1 is [LocalStroageReady] LocalStorage ready event fired
-            blackout:   0           // 1 is [BlackOut]          blackout (css3 cache reload)
-        }
     }),
     // --- node / node list / tag ---
     node:     uumix(uunode, {       // uu.node(tagName:String = "div"):Node
@@ -182,7 +170,8 @@ uu = uumix(uujamfactory, {          //uu(expression:Jam/Node/NodeArray/String/wi
         wrap:       uunodewrap,     // uu.node.wrap(innerNode:Node, outerNode:Node):Node (innerNode)
         clear:      uunodeclear,    // uu.node.clear(context:Node):Node
         clone:      uunodebulk,     // [alias]
-        remove:     uunoderemove    // uu.node.remove(node:Node):Node
+        remove:     uunoderemove,   // uu.node.remove(node:Node):Node
+        fromPoint:  uunodefrompoint // uu.node.fromPoint(x:Number, y:Number):Node
     }),
     nodeid:   uumix(uunodeid, {     // uu.nodeid(node:Node):Number (nodeid)
         toNode:     uunodeidtonode, // uu.nodeid.toNode(nodeid:Number):Node
@@ -223,6 +212,22 @@ uu = uumix(uujamfactory, {          //uu(expression:Jam/Node/NodeArray/String/wi
     trace:    uumix(uutrace, {      // uu.trace(titleOrSource:String/Mix, source:Mix = undefined)
         clear:      uutraceclear    // uu.trace.clear()
     }),
+    // --- ready event ---
+    ready:    uumix(uuready, {      // uu.ready(evaluator:Function = undefined, order:Number = 0)
+        gone: {                     // ready event state
+            dom:        0,          // 1 is [DOMReady]          DOMContentLoaded event fired
+            win:        0,          // 1 is [WindowReady]       window.onload event fired
+            audio:      0,          // 1 is [AudioReady]        <audio> ready event fired
+            video:      0,          // 1 is [VideoReady]        <video> ready event fired
+            canvas:     0,          // 1 is [CanvasReady]       <canvas> ready event fired
+            storage:    0,          // 1 is [LocalStroageReady] LocalStorage ready event fired
+            blackout:   0           // 1 is [BlackOut]          blackout (css3 cache reload)
+        }
+    }),
+    // --- lazy evaluation ---
+    lazy:     uumix(uulazy, {       // uu.lazy(id:String, evaluator:Function, order:Number = 0)
+        fire:       uulazyfire      // uu.lazy.fire(id:String)
+    }),
     // --- other ---
     js:             uujs,           // uu.js(javascriptExpression:String):Mix
     win: {
@@ -230,10 +235,7 @@ uu = uumix(uujamfactory, {          //uu(expression:Jam/Node/NodeArray/String/wi
     },
     nop:            function() {},  // uu.nop():undefined, (no operation)
     dmz:            {},             // uu.dmz - DeMilitarized Zone(proxy)
-    guid:           uuguid,         // uu.guid():Number
-    lazy:     uumix(uulazy, {       // uu.lazy(id:String, callback:Function, order:Number = 0)
-        fire:       uulazyfire      // uu.lazy.fire(id:String)
-    })
+    guid:           uuguid          // uu.guid():Number
 });
 
 // --- ECMAScript-262 5th ---
@@ -397,31 +399,31 @@ uutype._TYPEOF = {
 };
 
 // uu.isNumber - is number
-function uuisnumber(search) { // @param Number: search
+function uuisnumber(search) { // @param Mix: search
                               // @return Boolean:
     return typeof search === "number";
 }
 
 // uu.isString - is string
-function uuisstring(search) { // @param String: search
+function uuisstring(search) { // @param Mix: search
                               // @return Boolean:
     return typeof search === "string";
 }
 
 // inner - is array
-function uuisarray(search) { // @param Array: search
+function uuisarray(search) { // @param Mix: search
                              // @return Boolean:
     return Object.prototype.toString.call(search) === "[object Array]";
 }
 
 // inner - is date
-function uuisdate(search) { // @param Date: search
+function uuisdate(search) { // @param Mix: search
                             // @return Boolean:
     return Object.prototype.toString.call(search) === "[object Date]";
 }
 
 // uu.isFunction - is function
-function uuisfunction(search) { // @param Function: search
+function uuisfunction(search) { // @param Mix: search
                                 // @return Boolean:
     return Object.prototype.toString.call(search) === "[object Function]";
 }
@@ -1276,16 +1278,16 @@ function uucolorexpire() {
 function uuevent(node,                   // @param Node:
                  namespaceAndEventTypes, // @param String: namespace and event types "click,click+,..."
                  evaluator,              // @param Function/Instance: callback function
-                 mode) {                 // @param Number(= 1): 1 is attach, 2 is detach
+                 detach) {               // @param Boolean(= false): true is detach event, false is attach event
                                          // @return Node:
-    function _uueventclosure(evt, fire) {
+    function _uueventclosure(evt, fromCustomEvent) {
         evt = evt || win.event;
 
-        if (!fire && !evt.code) {
+        if (!fromCustomEvent && !evt.code) {
             var src = evt.srcElement || evt.target, // [IE] srcElement
                 iebody;
 
-            // make ExtendEventHash { code, node, src, px, py, ox, oy }
+            // make EventObjectEx { code, node, src, px, py, ox, oy }
             src = (uu.webkit && src.nodeType === 3) ? src.parentNode : src;
             evt.code = (EVENT_CODE[evt.type] || 0) & 255;
             evt.node = node;
@@ -1301,23 +1303,23 @@ function uuevent(node,                   // @param Node:
             evt.ox = evt.offsetX || evt.layerX || 0; // [IE][Opera][WebKit] offsetX
             evt.oy = evt.offsetY || evt.layerY || 0; // [Gecko][WebKit] layerX
         }
-        PAO ? handler.call(evaluator, evt, node, src)
-            : evaluator(evt, node, src);
+        isInstance ? handler.call(evaluator, evt, node, src)
+                   : evaluator(evt, node, src);
     } // [OPTIMIZED]
 
-    mode = mode || 1;
     var types = node.uueventtypes || (node.uueventfn = {},
                                       node.uueventtypes = ","),
         nstype = namespaceAndEventTypes.split(","), v, i = -1, m,
         type, capt, closure, handler,
-        PAO = 0, EVENT_CODE = uuevent._CODE;
+        isInstance = false, EVENT_CODE = uuevent._CODE;
 
-    if (mode === 1) {
-        handler = uuisfunction(evaluator) ? evaluator
-                                          : (++PAO, evaluator.handleEvent);
-        closure = evaluator.uueventclosure = _uueventclosure;
-    } else if (mode === 2) {
+    if (detach) {
         closure = evaluator.uueventclosure || evaluator;
+    } else {
+        handler = uuisfunction(evaluator)
+                ? evaluator
+                : (isInstance = true, evaluator.handleEvent);
+        closure = evaluator.uueventclosure = _uueventclosure;
     }
     while ( (v = nstype[++i]) ) { // v = "namespace.click+"
         m = uuevent._PARSE.exec(v); // split ["namespace.click+", "namespace", "click", "+"]
@@ -1329,12 +1331,12 @@ function uuevent(node,                   // @param Node:
             // TODO: IE9
             if (uu.ie) {
                 if (capt && type === "mousemove") {
-                    uuevent(node, "losecapture", closure, mode);
+                    uuevent(node, "losecapture", closure, detach);
                 }
             }
 
             if (types.indexOf("," + v + ",") >= 0) { // bound?
-                if (mode === 2) { // detach event
+                if (detach) { // detach event
                     // IE releaseCapture
                     // TODO: IE9
                     if (uu.ie) {
@@ -1349,7 +1351,7 @@ function uuevent(node,                   // @param Node:
                     node.uueventfn[v] = void 0;
                     uueventdetach(node, type, closure, capt);
                 }
-            } else if (mode === 1) { // attach event
+            } else if (!detach) { // attach event
                 uu.ie && type === "losecapture"
                       && node.setCapture
                       && node.setCapture();
@@ -1365,7 +1367,7 @@ function uuevent(node,                   // @param Node:
 }
 uuevent._PARSE = /^(?:(\w+)\.)?(\w+)(\+)?$/; // ^[NameSpace.]EvntType[Capture]$
 uuevent._LIST = ("mousedown,mouseup,mousemove,mousewheel,click,dblclick," +
-              "keydown,keypress,keyup,change,submit,focus,blur,contextmenu").split(",");
+    "keydown,keypress,keyup,change,submit,focus,blur,contextmenu").split(",");
 uuevent._CODE = {
     mousedown: 1, mouseup: 2, mousemove: 3, mousewheel: 4, click: 5,
     dblclick: 6, keydown: 7, keypress: 8, keyup: 9, mouseenter: 10,
@@ -1401,7 +1403,7 @@ function uueventfire(node,      // @param Node: target node
             oy:     0,
             type:   eventType,  // event type
             param:  param
-        }, 1);
+        }, true); // fromCustomEvent = true
     }
     return node;
 }
@@ -1424,7 +1426,7 @@ function uueventunbind(node,                     // @param Node: target node
                        namespaceAndEventTypes) { // @param String(= undefined): namespace and event types, "click,click+,..."
                                                  // @return Node:
     function _eachnamespace(w) {
-        !w.indexOf(ns) && uuevent(node, w, node.uueventfn[w], 2);
+        !w.indexOf(ns) && uuevent(node, w, node.uueventfn[w], true); // detach
     }
 
     // node.uueventtypes = "{{eventtype1}},{{eventtype2}},"
@@ -1438,17 +1440,17 @@ function uueventunbind(node,                     // @param Node: target node
             while ( (v = nstype[++i]) ) {
                 if (v.lastIndexOf(".*") > 1) { // [3] "namespace.*"
                       ns = v.slice(0, -1); // "namespace."
-                      uueach(uusplitcomma(types), _eachnamespace);
+                      uusplitcomma(types).forEach(_eachnamespace);
                 } else { // [2][4]
                       (types.indexOf("," + v + ",") >= 0) &&
-                          uuevent(node, v, node.uueventfn[v], 2);
+                          uuevent(node, v, node.uueventfn[v], true); // detach
                 }
               }
         } else { // [1]
             nstype = uusplitcomma(types);
 
             while ( (v = nstype[++i]) ) {
-                uuevent(node, v, node.uueventfn[v], 2);
+                uuevent(node, v, node.uueventfn[v], true); // detach
             }
         }
     }
@@ -1487,7 +1489,7 @@ function uueventdetach(node,      // @param Node:
 
 // uu.ready - hook DOMContentLoaded event
 function uuready(evaluator, // @param Function(= undefined): callback function
-                 order) {   // @param Number(= 0): order, 0=low, 1=mid, 2=high(system)
+                 order) {   // @param Number(= 0): 0=low, 1=mid, 2=high(system)
     if (evaluator !== void 0 && !uuready.gone.blackout) {
         uuready.gone.dom ? evaluator(uu) // fired -> callback
                          : uulazy("boot", evaluator, order || 0); // [1] stock
@@ -1520,12 +1522,12 @@ function uunodeadd(source,     // @param Node/DocumentFragment/HTMLFragment/TagN
                                // @return Node: node or first node
     context = context || doc.body;
 
-    var n = !source ? doc.createElement("div")          // [1] uu.node.add()
-          : source.nodeType ? source                    // [3][5] uu.node.add(Node or DocumentFragment)
-          : !source.indexOf("<") ? uunodebulk(source)   // [4] uu.node.add(HTMLFragmentString)
-          : doc.createElement(source),                  // [2] uu.node.add("p")
-        p = context.parentNode,
-        rv = (n.nodeType === 11) ? n.firstChild : n; // 11: DocumentFragment
+    var node = !source ? doc.createElement("div")        // [1] uu.node.add()
+             : source.nodeType ? source                  // [3][5] uu.node.add(Node or DocumentFragment)
+             : !source.indexOf("<") ? uunodebulk(source) // [4] uu.node.add(HTMLFragmentString)
+             : doc.createElement(source),                // [2] uu.node.add("p")
+        parentNode = context.parentNode,
+        rv = (node.nodeType === 11) ? node.firstChild : node; // 11: DocumentFragment
 
     //  <div id="parent">
     //      <div id="first">(position = 1) first sibling</div>
@@ -1542,12 +1544,12 @@ function uunodeadd(source,     // @param Node/DocumentFragment/HTMLFragment/TagN
     //  </div>
 
     switch (position || 6) {
-    case 1: p.insertBefore(n, p.firstChild); break;             // first sibling
-    case 2: p.insertBefore(n, context); break;                  // prev sibling
-    case 3: p.insertBefore(n, context.nextSibling); break;      // next sibling
-    case 4: p.appendChild(n); break;                            // last sibling
-    case 5: context.insertBefore(n, context.firstChild); break; // first child
-    case 6: context.appendChild(n);                             // last child
+    case 1: parentNode.insertBefore(node, parentNode.firstChild); break; // first sibling
+    case 2: parentNode.insertBefore(node, context); break;               // prev sibling
+    case 3: parentNode.insertBefore(node, context.nextSibling); break;   // next sibling
+    case 4: parentNode.appendChild(node); break;                         // last sibling
+    case 5: context.insertBefore(node, context.firstChild); break;       // first child
+    case 6: context.appendChild(node);                                   // last child
     }
     return rv;
 }
@@ -1646,6 +1648,16 @@ function uunoderemove(node) { // @param Node:
         return node.parentNode.removeChild(node);
     }
     return node;
+}
+
+// uu.node.fromPoint -
+function uunodefrompoint(x,         // @param Number: x
+                         y,         // @param Number: y
+                         context) { // @param Node: context
+                                    // @return Node: Node or null
+    // TODO: canvas support
+    // TODO: CrossBrowser
+    return (context || doc).elementFromPoint(x | 0, y | 0);
 }
 
 // --- query ---
@@ -2109,11 +2121,11 @@ function uuguid() { // @return Number: unique number, from 1
 uuguid._num = 0; // guid counter
 
 // uu.lazy - lazy evaluate
-function uulazy(id,       // @param String: id
-                callback, // @param Function: callback function
-                order) {  // @param Number(= 0): order, 0=low, 1=mid, 2=high(system)
+function uulazy(id,        // @param String: id
+                evaluator, // @param Function: callback function
+                order) {   // @param Number(= 0): 0=low, 1=mid, 2=high(system)
     uulazy._db[id] || (uulazy._db[id] = [[], [], []]);
-    uulazy._db[id][order || 0].push(callback);
+    uulazy._db[id][order || 0].push(evaluator);
 }
 uulazy._db = {}; // { id: [[low], [mid], [high]], ... } job db
 
@@ -2322,12 +2334,12 @@ function outerhtmlsetter(html) {
 // --- initialize ---
 
 // inner - build DOM Lv2 event handler - uu.click(), jam.click(), ...
-uueach(uuevent._LIST, function(v) {
-    uu[v] = function bindEvent(node, fn) { // uu.click(node, fn) -> node
-        return uuevent(node, v, fn);
+uuevent._LIST.forEach(function(eventType) {
+    uu.event[eventType] = function bindEvent(node, fn) { // uu.click(node, fn) -> node
+        return uuevent(node, eventType, fn); // attach
     };
-    uu["un" + v] = function unbindEvent(node) { // uu.unclick(node) -> node
-        return uuevent(node, v, 0, 2);
+    uu["un" + eventType] = function unbindEvent(node) { // uu.unclick(node) -> node
+        return uuevent(node, eventType, 0, true); // detach
     };
 });
 

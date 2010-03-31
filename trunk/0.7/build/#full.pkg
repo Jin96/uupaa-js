@@ -7,9 +7,9 @@ uu.ajax.js
 uu.str.js
 uu.node.js
 uu.nodebuilder.js
-uu.ev.js
-uu.ev.drag.js
-uu.ev.resize.js
+uu.event.js
+uu.event.drag.js
+uu.event.resize.js
 // css, color
 uu.color.js
 uu.css.js

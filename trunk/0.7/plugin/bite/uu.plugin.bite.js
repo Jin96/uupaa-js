@@ -89,7 +89,7 @@ uu.mix(bite.prototype, {
 });
 
 // inner - build DOM Lv2 event handler - bite.click(), ...
-uu.dmz.EVENT.split(",").forEach(function(v) {
+uuevent._LIST.forEach(function(v) {
   bite.fn[v] = function(fn) {
     function bindThis(evt, node) {
       fn.call(node, evt); // this = node
