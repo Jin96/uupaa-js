@@ -13,6 +13,7 @@ uu.mix(uu, {
     })
 });
 
+/*
 // uu.flash - create flash <object> node
 function uuflash(replaceNode, // @param Node: replacement node
                  objectID,    // @param String: <object id="...">, eg: "externalswf"
@@ -56,6 +57,84 @@ function uuflash(replaceNode, // @param Node: replacement node
     uu.node.swap(node, replaceNode);
     return uu.id(objectID);
 }
+ */
+
+
+
+
+// uu.flash - create flash <object> node
+function uuflash(url,         // @param String: url
+                 option) {    // @param FlashOptionHash(= {}):
+                              // @return Node: new <object> element
+    option = uu.arg(option, {
+        id:         "external" + uu.guid(),
+        width:      "100%",
+        height:     "100%",
+        nocache:    false,
+        marker:     null,
+        param:      []
+    });
+
+    // option.nocache -> "http://example.com/" + "?uuguid={{time}}"
+    if (option.nocache) {
+        url += (url.indexOf("?") < 0 ? "?" :
+                url.indexOf("&") < 0 ? ";" : "&") + "uuguid=" + +(new Date);
+    }
+
+    // add default <param name="allowScriptAccess" value="always" />
+    if (option.param.indexOf("allowScriptAccess") <= 0) {
+        option.param.push("allowScriptAccess", "always");
+    }
+
+    // add <param name="movie" value="{{url}}" />
+    uu.ie && option.param.push("movie", url);
+
+    if (!option.marker) {
+        option.marker = uu.node.add(); // <body>...<div/></body>
+    }
+
+    var paramArray = [], objectNode, i = 0, iz = option.param.length;
+
+    for (; i < iz; i += 2) {
+        paramArray.push(uu.format('<param name="?" value="?" />',
+                                  option.param[i], option.param[i + 1]));
+    }
+/*
+    objectNode = uu.node.bulk(uu.format(uu.ie ? uuflash._FORMAT_IE
+                                              : uuflash._FORMAT,
+                                        option.id,
+                                        url,
+                                        option.width,
+                                        option.height,
+                                        paramArray.join("")));
+ */
+    var fmt = uu.format(uu.ie ? uuflash._FORMAT_IE
+                                              : uuflash._FORMAT,
+                                        option.id,
+                                        url,
+                                        option.width,
+                                        option.height,
+                                        paramArray.join(""));
+//alert(fmt);
+
+    objectNode = uu.node.bulk(fmt);
+
+    uu.node.swap(objectNode, option.marker);
+
+    return uu.id(option.id); // <object id=...>
+}
+uuflash._FORMAT_IE = '<object id="?" classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000" data="?" width="?" height="?">?</object>';
+uuflash._FORMAT    = '<object id="?" type="application/x-shockwave-flash" data="?" width="?" height="?">?</object>';
+
+
+
+
+
+
+
+
+
+
 
 // uu.flash.post - post message from Flash
 function uuflashpost(guid,    // @param Number: instance guid
