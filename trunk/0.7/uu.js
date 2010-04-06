@@ -13,12 +13,13 @@
 //  - window.xboot(uu:Function)
 //  - window.xwin(uu:Function)
 //  - window.xcanvas(uu:Function, canvasNodeArray:NodeArray)
-//  - window.xlocal(uu:Function, backend:Number)
+//  - window.xstorage(uu:Function, storage:StorageObject)
 //
 // * Predefined types ( doc/predefined-types.txt )
 //
 //  - ColorHash, RGBAHash, HSLAHash, HSVAHash, W3CNamedColor
-//  - ExtendEventHash, DateHash
+//  - EventObjectEx, DateHash, AjaxOptionHash, AjaxResultHash
+//  - JSONPOptionHash, FlashOptionHash
 //
 // * Version and plugin detection ( doc/version-detection.txt )
 //
@@ -31,12 +32,14 @@ var uu; // window.uu - uupaa.js library namespace
 
 uu || (function(win, doc) {
 
-// --- library structure ---
-uu = uumix(uujamfactory, {          //uu(expression:Jam/Node/NodeArray/String/window, context:Jam/Node = undefined):Jam
+// --- LIBRARY STRUCTURE ---
+uu = uumix(uufactory, {             // uu(expression:Jam/Node/NodeArray/String/window, arg1:Jam/Node/Mix = void, arg2:Mix = void, arg3:Mix = void, arg4:Mix = void):Jam/Instance
+                                    //  [1][Class factory]   uu("MyClass", arg1, arg2) -> new uu.Clas.MyClass(arg1, arg2)
+                                    //  [2][NodeSet factory] uu("div>ul>li", <body>) -> Jam
     ver:            _version(0.7),  // uu.ver - Hash: detected version and plugin informations
     plugin:         uuplugin,       // uu.plugin():Array
-    require:        uurequire,      // uu.require(url:String):Boolean
-    // --- type ---
+    require:        uurequire,      // uu.require(url:String):AjaxResultHash
+    // --- TYPE ---
     like:           uulike,         // uu.like(lhs:Date/Hash/Fake/Array, rhs:Date/Hash/Fake/Array):Boolean
     type:     uumix(uutype, {       // uu.type(search:Mix, match:Number = 0):Boolean/Number
         HASH:       0x001,          // uu.type.HASH         - Hash (Object)
@@ -44,7 +47,8 @@ uu = uumix(uujamfactory, {          //uu(expression:Jam/Node/NodeArray/String/wi
         FAKEARRAY:  0x004,          // uu.type.FAKEARRAY    - FakeArray (Arguments, NodeList, ...)
         DATE:       0x008,          // uu.type.DATE         - Date
         NULL:       0x010,          // uu.type.NULL         - null
-        UNDEFINED:  0x020,          // uu.type.UNDEFINED    - undefined (void 0)
+        VOID:       0x020,          // uu.type.VOID         - undefined / void
+        UNDEFINED:  0x020,          // uu.type.UNDEFINED    - undefined / void
         BOOLEAN:    0x040,          // uu.type.BOOLEAN      - Boolean
         FUNCTION:   0x080,          // uu.type.FUNCTION     - Function
         NUMBER:     0x100,          // uu.type.NUMBER       - Number
@@ -56,22 +60,22 @@ uu = uumix(uujamfactory, {          //uu(expression:Jam/Node/NodeArray/String/wi
     isNumber:       uuisnumber,     //   uu.isNumber(search:Mix):Boolean
     isString:       uuisstring,     //   uu.isString(search:Mix):Boolean
     isFunction:     uuisfunction,   // uu.isFunction(search:Mix):Boolean
-    // --- hash / array ---
-    arg:            uuarg,          // uu.arg(arg1:Hash = {}, arg2:Hash, arg3:Hash = undefined):Hash
-    mix:            uumix,          // uu.mix(base:Hash, flavor:Hash, aroma:Hash = undefined, override:Boolean = true):Hash
+    // --- HASH / ARRAY ---
+    arg:            uuarg,          // uu.arg(arg1:Hash = {}, arg2:Hash, arg3:Hash = void):Hash
+    mix:            uumix,          // uu.mix(base:Hash, flavor:Hash, aroma:Hash = void, override:Boolean = true):Hash
     each:           uueach,         // uu.each(source:Hash/Array, callback:Function)
     keys:           uukeys,         // uu.keys(source:Hash/Array):Array
     values:         uuvalues,       // uu.values(source:Hash/Array):Array
-    hash:     uumix(uuhash, {       // uu.hash(key:Hash/String, value:Mix = undefined):Hash
+    hash:     uumix(uuhash, {       // uu.hash(key:Hash/String, value:Mix = void):Hash
         has:        uuhas,          //     uu.hash.has(source:Hash, search:Array):Boolean
-        nth:        uunth,          //     uu.hash.nth(source:Hash, nth:Number):Array
+        nth:        uunth,          //     uu.hash.nth(source:Hash, index:Number):Array
         size:       uusize,         //    uu.hash.size(source:Hash):Number
         clone:      uuclone,        //   uu.hash.clone(source:Hash):Hash
-        indexOf:    uuindexof       // uu.hash.indexOf(source:Hash, search:Mix):String/undefined
+        indexOf:    uuindexof       // uu.hash.indexOf(source:Hash, search:Mix):String/void
     }),
     array:    uumix(uuarray, {      // uu.array(source:Array/Mix/NodeList/Arguments):Array
         has:        uuhas,          //    uu.array.has(source:Array, search:Array):Boolean
-        nth:        uunth,          //    uu.array.nth(source:Array, nth:Number):Array
+        nth:        uunth,          //    uu.array.nth(source:Array, index:Number):Array
         size:       uusize,         //   uu.array.size(source:Array):Number
         sort:       uusort,         //   uu.array.sort(source:Array, method:String/Function = "0-9"):Array
         clean:      uuclean,        //  uu.array.clean(source:Array):Array
@@ -79,8 +83,8 @@ uu = uumix(uujamfactory, {          //uu(expression:Jam/Node/NodeArray/String/wi
         toHash:     uutohash,       // uu.array.toHash(key:Array, value:Array/Mix, toNumber:Boolean = false):Hash
         unique:     uuunique        // uu.array.unique(source:Array, literalOnly:Boolean = false):Array
     }),
-    // --- attribute ---
-    attr:     uumix(uuattr, {       // uu.attr(node:Node, key:Hash/String, value:String = undefined):String/Hash/Node
+    // --- ATTRIBUTE ---
+    attr:     uumix(uuattr, {       // uu.attr(node:Node, key:Hash/String, value:String = void):String/Hash/Node
                                     //  [1][get one  attr ] uu.attr(node, "attr") -> "value"
                                     //  [2][get some attrs] uu.attr(node, "attr1,attr2") -> { attr1: "val", attr2: "val" }
                                     //  [3][set one  attr ] uu.attr(node, "attr", "val") -> node
@@ -88,15 +92,15 @@ uu = uumix(uujamfactory, {          //uu(expression:Jam/Node/NodeArray/String/wi
         get:        uuattrget,      // uu.attr.get(node:Node, attrs:String):String/Hash
                                     //  [1][get one  attr ] uu.attr.get(node, "attr") -> String
                                     //  [2][get some attrs] uu.attr.get(node, "attr,...") -> Hash
-        set:        uuattrset,      // uu.attr.set(node:Node, key:String/Hash, value:String = undefined):Node
+        set:        uuattrset,      // uu.attr.set(node:Node, key:String/Hash, value:String = void):Node
                                     //  [1][set one  attr ] uu.attr.set(node, key, val ) -> node
                                     //  [2][set some attrs] uu.attr.set(node, { key: val, ... }) -> node
         getAll:     uuattrgetall    // uu.attr.getAll(node:Node, filter:Boolean = false):Hash
                                     //  [1][get all]    uu.attr(node) -> { all: attrs }
                                     //  [2][use filter] uu.attr(node, true) -> { many: attrs }
     }),
-    // --- css ---
-    css:      uumix(uucss, {        // uu.css(node:Node, key:Hash/String, value:String = undefined):String/Hash/Node
+    // --- CSS ---
+    css:      uumix(uucss, {        // uu.css(node:Node, key:Hash/String, value:String = void):String/Hash/Node
                                     //  [1][get one  style ] uu.css(node, "color") -> "red"
                                     //  [2][get some styles] uu.css(node, "color,width") -> { color: "red", width: "20px" }
                                     //  [3][set one  style ] uu.css(node, "color", "red") -> node
@@ -104,11 +108,11 @@ uu = uumix(uujamfactory, {          //uu(expression:Jam/Node/NodeArray/String/wi
         get:        uucssget,       // uu.css.get(node:Node, styles:String):String/Hash
                                     //  [1][get one  style ] uu.css.get(node, "color") -> "red"
                                     //  [2][get some styles] uu.css.get(node, "color,text-align") -> {color:"red", textAlign:"left"}
-        set:        uucssset,       // uu.css.set(node:Node, key:String/Hash, value:String = undefined) -> node
+        set:        uucssset,       // uu.css.set(node:Node, key:String/Hash, value:String = void):Node
                                     //  [1][set one  style ] uu.css.set(node, "color", "red") -> node
                                     //  [2][set some styles] uu.css.set(node, { color: "red" }) -> node
         opacity:
-              uumix(uucssopacity, { // uu.css.opacity(node:Node, opacity:Number = undefined, isRelativeValue:Boolean = false):Number/node
+              uumix(uucssopacity, { // uu.css.opacity(node:Node, opacity:Number = void, isRelativeValue:Boolean = false):Number/node
                                     //  [1][get opacity] uu.css.opacity(node) -> Number(0.0~1.0)
                                     //  [2][set opacity] uu.css.opacity(node, opacity, isRelativeValue = false) -> node
             get:    uucssopacityget,// uu.css.opacity.get(node:Node):Number
@@ -119,43 +123,39 @@ uu = uumix(uujamfactory, {          //uu(expression:Jam/Node/NodeArray/String/wi
     style:    uumix(uustyle, {      // uu.style(node:Node, mode:Number = 0):Hash
         quick:      uustylequick    // uu.style.quick(node:Node):Hash
     }),
-    // --- query ---
+    // --- QUERY ---
     id:             uuid,           //    uu.id(expression:String, context:Node = document):Node/null
     tag:            uutag,          //   uu.tag(expression:String, context:Node = document):NodeArray
     query:          uuquery,        // uu.query(expression:String, context:NodeArray/Node = document):NodeArray
-    // --- className(klass) ---
+    // --- Node.className ---
     klass:    uumix(uuklass, {      // uu.klass(expression:String, context:Node = document):NodeArray
         has:        uuklasshas,     //    uu.klass.has(node:Node, classNames:String):Boolean
         add:        uuklassadd,     //    uu.klass.add(node:Node, classNames:String):Node
         sub:        uuklasssub,     //    uu.klass.sub(node:Node, classNames:String):Node
         toggle:     uuklasstoggle   // uu.klass.toggle(node:Node, classNames:String):Node
     }),
-    // --- color ---
-    color:    uumix(uucolor, {      // uu.color(source:String):ColorHash/Number
-                                    //  [1][W3CNamedColor to hash] uu.color("black")   -> ColorHash
-                                    //  [2]["#000" to hash]        uu.color("#000")    -> ColorHash
-                                    //  [3]["#000000" to hash]     uu.color("#000000") -> ColorHash
-                                    //  [4]["rgba(,,,,) to hash]   uu.color("rgba(0,0,0,1)")         -> ColorHash
-                                    //  [5]["hsla(,,,,) to hash]   uu.color("hsla(360,100%,100%,1)") -> ColorHash
-        add:        uucoloradd,     // uu.color.add(source:String)
-        fix:        uucolorfix,     // uu.color.fix(source:ColorHash/RGBAHash):ColorHash
-        expire:     uucolorexpire   // uu.color.expire()
+    // --- OOP ---
+    Class:    uumix(uuclass, {      // uu.Class(className:String, proto:Hash = void)
+                                    //  [1][base]    uu.Class("A",   { proto: ... })
+                                    //  [2][inherit] uu.Class("B:A", { proto: ... })
+        guid:       uuclassguid,    // uu.Class.guid():Number
+        singleton:  uuclasssingleton// uu.Class.singleton(className:String, proto:Hash = void)
     }),
-    // --- event ---
+    // --- EVENT ---
     event:    uumix(uuevent, {      // uu.event(node:Node, namespaceAndEventTypes:String, evaluator:Function, detach:Boolean = false):Node
                                     //  [1][bind a event]            uu.event(node, "click", fn)             -> node
                                     //  [2][bind multi events]       uu.event(node, "click,dblclick", fn)    -> node
                                     //  [3][bind a capture event]    uu.event(node, "mousemove+", fn)        -> node
                                     //  [4][bind a namespace.event]  uu.event(node, "MyNameSpace.click", fn) -> node
         has:        uueventhas,     // uu.event.has(node:Node, namespaceAndEventTypes:String):Boolean
-        fire:       uueventfire,    // uu.event.fire(node:Node, eventType:String, param:Mix = undefined):Node
+        fire:       uueventfire,    // uu.event.fire(node:Node, eventType:String, param:Mix = void):Node
         stop:       uueventstop,    // uu.event.stop(eventObject:EventObject):EventObject
-        unbind:     uueventunbind,  // uu.event.unbind(node:Node, namespaceAndEventTypes:String = undefined):Node
+        unbind:     uueventunbind,  // uu.event.unbind(node:Node, namespaceAndEventTypes:String = void):Node
         attach:     uueventattach,  // uu.event.attach(node:Node, eventType:String, evaluator:Function, capture:Boolean = false)
         detach:     uueventdetach   // uu.event.detach(node:Node, eventType:String, evaluator:Function, capture:Boolean = false)
     }),
-    // --- node / node list / tag ---
-    node:     uumix(uunode, {       // uu.node(tagName:String = "div"):Node
+    // --- Node / NodeList ---
+    node:     uumix(uunode, {       // uu.node(tagName:String = "div", attr:Hash = void):Node
         add:        uunodeadd,      // uu.node.add(source:Node/DocumentFragment/HTMLFragment/TagName = "div", context:Node = <body>, position:Number = 6):Node
                                     //  [1][add div node]          uu.node.add()         -> <body><div /></body>
                                     //  [2][from tagName]          uu.node.add("p")      -> <body><p /></body>
@@ -170,14 +170,13 @@ uu = uumix(uujamfactory, {          //uu(expression:Jam/Node/NodeArray/String/wi
         wrap:       uunodewrap,     // uu.node.wrap(innerNode:Node, outerNode:Node):Node (innerNode)
         clear:      uunodeclear,    // uu.node.clear(context:Node):Node
         clone:      uunodebulk,     // [alias]
-        remove:     uunoderemove,   // uu.node.remove(node:Node):Node
-        fromPoint:  uunodefrompoint // uu.node.fromPoint(x:Number, y:Number):Node
+        remove:     uunoderemove    // uu.node.remove(node:Node):Node
     }),
     nodeid:   uumix(uunodeid, {     // uu.nodeid(node:Node):Number (nodeid)
         toNode:     uunodeidtonode, // uu.nodeid.toNode(nodeid:Number):Node
         remove:     uunodeidremove  // uu.nodeid.remove(node:Node):Node (removed node)
     }),
-    // --- string ---
+    // --- STRING ---
     fix:            uufix,          // uu.fix(source:String):String
                                     // [1][css-prop to js-css-prop] uu.fix("background-color") -> "backgroundColor"
                                     // [2][std-name to ie-name]     uu.fix("float")            -> "cssFloat" or "styleFloat"(IE)
@@ -196,24 +195,28 @@ uu = uumix(uujamfactory, {          //uu(expression:Jam/Node/NodeArray/String/wi
         toHash:     uusplittohash   // uu.split.toHash(source:String, splitter:String = ",", toNumber:Boolean = false):Hash
                                     //  [1][hash from string] uu.split.toHash("key,1,key2,1", ",") -> { key: 0, key2: 1 }
     }),
-    format:         uuformat,       // uu.format("? dogs", 101) -> "101 dogs"
+    format:         uuformat,       // uu.format(format:String, var_args, ...):String
                                     // [1][placeholder] uu.format("? dogs and ?", 101, "cats") -> "101 dogs and cats"
     // --- JSON ---
-    json:     uumix(uujson, {       // uu.json(source:Mix, useNativeJSON:Boolean = false, callback:Function = undefined):JSONString
+    json:     uumix(uujson, {       // uu.json(source:Mix, useNativeJSON:Boolean = false, callback:Function = void):JSONString
         decode:     uujsondecode    // uu.json.decode(jsonString:JSONString, useNativeJSON:Boolean = false):Mix/Boolean
     }),
-    // --- date ---
-    date:     uumix(uudate, {       // uu.date(source:Date/Number/String= undefined) -> DateHash
-        toISOString: uudatetoiso,   // uu.date.toISOString(dateHash:DateHash = undefined):ISO8601DateString
-        toRFCString: uudatetorfc    // uu.date.toRFCString(dateHash:DateHash = undefined):RFC1123DateString
-    }),
-    // --- debug ---
+    // --- DATE ---
+    date:           uudate,         // uu.date(source:DateHash/Date/Number/String= void):DateHash
+                                    //  [1][get now]                 uu.date() -> DateHash
+                                    //  [2][DateHash]                uu.date(DateHash) -> cloned DateHash
+                                    //  [2][date to hash]            uu.date(Date) -> DateHash
+                                    //  [3][time to hash]            uu.date(milliseconds) -> DateHash
+                                    //  [4][DateString to hash]      uu.date("2000-01-01T00:00:00[.000]Z") -> DateHash
+                                    //  [5][ISO8601String to hash]   uu.date("2000-01-01T00:00:00[.000]Z") -> DateHash
+                                    //  [6][RFC1123String to hash]   uu.date("Wed, 16 Sep 2009 16:18:14 GMT") -> DateHash
+    // --- DEBUG ---
     puff:           uupuff,         // uu.puff(source:Mix)
-    trace:    uumix(uutrace, {      // uu.trace(titleOrSource:String/Mix, source:Mix = undefined)
+    trace:    uumix(uutrace, {      // uu.trace(titleOrSource:String/Mix, source:Mix = void)
         clear:      uutraceclear    // uu.trace.clear()
     }),
-    // --- ready event ---
-    ready:    uumix(uuready, {      // uu.ready(evaluator:Function = undefined, order:Number = 0)
+    // --- READY EVENT ---
+    ready:    uumix(uuready, {      // uu.ready(evaluator:Function = void, order:Number = 0)
         gone: {                     // ready event state
             dom:        0,          // 1 is [DOMReady]          DOMContentLoaded event fired
             win:        0,          // 1 is [WindowReady]       window.onload event fired
@@ -224,30 +227,46 @@ uu = uumix(uujamfactory, {          //uu(expression:Jam/Node/NodeArray/String/wi
             blackout:   0           // 1 is [BlackOut]          blackout (css3 cache reload)
         }
     }),
-    // --- lazy evaluation ---
+    // --- LAZY EVALUATION ---
     lazy:     uumix(uulazy, {       // uu.lazy(id:String, evaluator:Function, order:Number = 0)
         fire:       uulazyfire      // uu.lazy.fire(id:String)
     }),
-    // --- other ---
+    // --- OTHER ---
     js:             uujs,           // uu.js(javascriptExpression:String):Mix
     win: {
-        size:       uuwinsize       // uu.win.size():Hash { innerWidth, innerHeight, scrollWidth, scrollHeight }
+        size:       uuwinsize       // uu.win.size():Hash { innerWidth, innerHeight, pageXOffset, pageYOffset }
     },
-    nop:            function() {},  // uu.nop():undefined, (no operation)
+    nop:            function() {},  // uu.nop()
     dmz:            {},             // uu.dmz - DeMilitarized Zone(proxy)
     guid:           uuguid          // uu.guid():Number
 });
+
+// --- MessagePump class ---
+MessagePump.prototype = {
+    send:           uumsgsend,      // MessagePump.send(address:Array/Mix, message:String, param:Mix = void):Array/Mix
+                                    //  [1][multicast] MessagePump.send([instance, ...], "hello") -> ["world!", ...]
+                                    //  [2][unicast  ] MessagePump.send(instance, "hello") -> ["world!"]
+                                    //  [3][broadcast] MessagePump.send(null, "hello") -> ["world!", ...]
+    post:           uumsgpost,      // MessagePump.post(address:Array/Mix, message:String, param:Mix = void)
+                                    //  [1][multicast] MessagePump.post([instance, ...], "hello")
+                                    //  [2][unicast  ] MessagePump.post(instance, "hello")
+                                    //  [3][broadcast] MessagePump.post(null, "hello")
+    register:       uumsgregister,  // MessagePump.register(instance:Instance)
+    unregister:     uumsgunregister // MessagePump.unregister(instance:Instance)
+};
+
+uu.msg = new MessagePump();         // uu.msg - MessagePump instance
 
 // --- ECMAScript-262 5th ---
 Array.isArray || (Array.isArray = uuisarray);
 
 //{{{!mb
 uumix(Array.prototype, {
-    map:            arraymap,       //         map(evaluator:Function, that:this = undefined):Array
-    some:           arraysome,      //        some(evaluator:Function, that:this = undefined):Boolean
-    every:          arrayevery,     //       every(evaluator:Function, that:this = undefined):Boolean
-    filter:         arrayfilter,    //      filter(evaluator:Function, that:this = undefined):Array
-    forEach:        arrayforeach,   //     forEach(evaluator:Function, that:this = undefined)
+    map:            arraymap,       //         map(evaluator:Function, that:this = void):Array
+    some:           arraysome,      //        some(evaluator:Function, that:this = void):Boolean
+    every:          arrayevery,     //       every(evaluator:Function, that:this = void):Boolean
+    filter:         arrayfilter,    //      filter(evaluator:Function, that:this = void):Array
+    forEach:        arrayforeach,   //     forEach(evaluator:Function, that:this = void)
     indexOf:        arrayindexof,   //     indexOf(search:Mix, fromIndex:Number = 0):Number
     lastIndexOf:    arraylastindexof// lastIndexOf(search:Mix, fromIndex:Number = this.length):Number
 
@@ -255,8 +274,8 @@ uumix(Array.prototype, {
 //}}}!mb
 
 uumix(Array.prototype, {
-    reduce:         arrayreduce,    //      reduce(evaluator:Function, initialValue:Mix = undefined):Mix
-    reduceRight:    arrayreduceright// reduceRight(evaluator:Function, initialValue:Mix = undefined):Mix
+    reduce:         arrayreduce,    //      reduce(evaluator:Function, initialValue:Mix = void):Mix
+    reduceRight:    arrayreduceright// reduceRight(evaluator:Function, initialValue:Mix = void):Mix
 }, 0, 0);
 
 uumix(Boolean.prototype, {
@@ -294,11 +313,11 @@ uu.gecko    = uu.ver.gecko;
 uu.webkit   = uu.ver.webkit;
 
 uu.config   = uuarg(win.xconfig, {  // uu.config - Hash: user configurations
-    aria:       0,
-    debug:      0,
-    right:      0,
+    aria:       false,
+    debug:      false,
+    right:      false,
     altcss:     0,
-    visited:    0,
+    visited:    false,
     baseDir:    uutag("script").pop().src.replace(/[^\/]+$/, "")
 });
 
@@ -310,12 +329,22 @@ win.xver && win.xver(uu.ver);
 
 // ===================================================================
 
-// --- Jam(NodeSet I/F) ---
-// uu - uu.jam factory
-function uujamfactory(expression, // @param Jam/Node/NodeArray/String/window:
-                      context) {  // @param Jam/Node(= undefined): context
-                                  // @return Jam:
-    return new uu.jam(expression, context); // depend: uu.jam
+// [1][Class factory]   uu("MyClass", arg1, arg2) -> new uu.Clas.MyClass(arg1, arg2)
+// [2][NodeSet factory] uu("div>ul>li", <body>) -> Jam
+
+// uu - factory
+function uufactory(expression, // @param Jam/Node/NodeArray/String/window: expression or ClassName
+                   arg1,       // @param Jam/Node/Mix(= void): context or ClassName.init arg1
+                   arg2,       // @param Mix(= void): ClassName.init arg2
+                   arg3,       // @param Mix(= void): ClassName.init arg3
+                   arg4) {     // @param Mix(= void): ClassName.init arg4
+                               // @return Jam/Instance:
+    // class factory
+    if (typeof expression === "string" && uuclass[expression]) {
+        return new uuclass[expression](arg1, arg2, arg3, arg4);
+    }
+    // jam factory
+    return new uu.jam(expression, arg1, arg2, arg3, arg4); // depend: uu.jam
 }
 
 // --- plugin / plugin name space ---
@@ -326,19 +355,32 @@ function uuplugin() { // @return Array: ["plugin-name", ...]
 
 // uu.require - require file
 function uurequire(url) { // @param String: url
-                          // @return Boolean: true is load successed
+                          // @return AjaxResultHash:
+    var xhr, status = 400, ok = false;
+
     try {
-        var xhr = win.ActiveXObject  ? new ActiveXObject("Microsoft.XMLHTTP") :
-                  win.XMLHttpRequest ? new XMLHttpRequest() : 0;
+        xhr = win.ActiveXObject  ? new ActiveXObject("Microsoft.XMLHTTP") :
+              win.XMLHttpRequest ? new XMLHttpRequest() : 0;
 
         xhr.open("GET", url, false); // sync
         xhr.send(null);
         if (!xhr.status || (xhr.status >= 200 && xhr.status < 300)) {
-            return true;
+            ok = true;
+            status = xhr.status || 200;
         }
-    } catch (err) {}
-
-    return false;
+    } catch (err) {
+        xhr = xhr || { responseText: "", responseXML: "", status: 400 };
+    }
+    return {
+        ok:     ok,
+        url:    url,
+        xhr:    xhr,
+        guid:   uuguid(),
+        status: status,
+        isXMLContent: function() {
+            return /xml/i.test(this.xhr.getResponseHeader("Content-Type") || "");
+        }
+    };
 }
 
 // --- type ---
@@ -360,8 +402,8 @@ function uulike(lhs,   // @param Date/Hash/Fake/Array: lhs
     }
     switch (type1) {
     case uutype.FUNCTION:   return false;
-    case uutype.DATE:       return uudatetoiso(uudate(lhs)) ===
-                                   uudatetoiso(uudate(rhs));
+    case uutype.DATE:       return uudate(lhs).ISO() ===
+                                   uudate(rhs).ISO();
     case uutype.HASH:       return (uusize(lhs) === uusize(rhs) && uuhas(lhs, rhs));
     case uutype.FAKEARRAY:  // http://d.hatena.ne.jp/uupaa/20091223
     case uutype.ARRAY:      return uuarray(lhs) + "" == uuarray(rhs);
@@ -386,7 +428,7 @@ function uutype(search,  // @param Mix: search literal/object
     return match ? !!(match & rv) : rv;
 } // [OPTIMIZED]
 uutype._TYPEOF = {
-    "undefined":        uutype.UNDEFINED,
+    "undefined":        uutype.VOID,
     "[object Boolean]": uutype.BOOLEAN,     "boolean":   uutype.BOOLEAN,
     "[object Number]":  uutype.NUMBER,      "number":    uutype.NUMBER,
     "[object String]":  uutype.STRING,      "string":    uutype.STRING,
@@ -435,7 +477,7 @@ function uuisfunction(search) { // @param Mix: search
 // uu.arg - supply default arguments
 function uuarg(arg1,   // @param Hash(= {}): arg1
                arg2,   // @param Hash: arg2
-               arg3) { // @param Hash(= undefined): arg3
+               arg3) { // @param Hash(= void): arg3
                        // @return Hash: new Hash(mixed arg)
     return uumix(uumix({}, arg1 || {}), arg2, arg3, 0);
 }
@@ -446,7 +488,7 @@ function uuarg(arg1,   // @param Hash(= {}): arg1
 // uu.mix - mixin
 function uumix(base,       // @param Hash: mixin base
                flavor,     // @param Hash: add flavor
-               aroma,      // @param Hash(= undefined): add aroma
+               aroma,      // @param Hash(= void): add aroma
                override) { // @param Boolean(= true): true is override
                            // @return Hash: base
     var i;
@@ -518,7 +560,7 @@ function uuvalues(source) { // @param Hash/Array: source
 
 // uu.hash - to hash, convert hash from key value pair
 function uuhash(key,     // @param Hash/String: key
-                value) { // @param Mix(= undefined): value
+                value) { // @param Mix(= void): value
                          // @return Hash: { key: value, ... }
     if (arguments.length === 1) { // [1]
         return key;
@@ -593,24 +635,24 @@ function uuhas(source,   // @param Hash/Array: source
 // [2][Array nth]           uu.nth(["a", 100], 1)     -> [1, 100]
 
 // uu.nth - nth pair
-function uunth(source, // @param Hash/Array: source
-               nth) {  // @param Number: nth
-                       // @return Array: [key, value]
-                       //                or [undefined, undefined] (not found)
+function uunth(source,  // @param Hash/Array: source
+               index) { // @param Number: index
+                        // @return Array: [key, value]
+                        //                or [void, void] (not found)
     var i, j = 0;
 
     if (Array.isArray(source)) {
-        if (nth in source) {
-            return [nth, source[nth]];
+        if (i in source) {
+            return [i, source[i]];
         }
     } else {
         for (i in source) {
-            if (j++ === nth) {
+            if (j++ === index) {
                 return [i, source[i]];
             }
         }
     }
-    return [,];
+    return [void 0, void 0];
 }
 
 // [1][Hash.length]         uu.size({ a: 1, b: 2 }) -> 2
@@ -636,7 +678,7 @@ function uuclone(source) { // @param Hash/Array: source
 // uu.hash.indexOf - find first key from value
 function uuindexof(source,   // @param Hash: source
                    search) { // @param Mix: search value
-                             // @return String/undefined: "found-key" or undefined
+                             // @return String/void: "found-key" or void
     for (var i in source) {
         if (source.hasOwnProperty(i) && source[i] === search) {
             return i; // String
@@ -757,7 +799,7 @@ function uutohash(key,        // @param Array: key array
 // uu.attr - attribute accessor
 function uuattr(node,    // @param Node:
                 key,     // @param Hash/String: key
-                value) { // @param String(= undefined): value
+                value) { // @param String(= void): value
                          // @return String/Hash/Node:
     return (value === void 0 && uuisstring(key) ? uuattrget // [1][2]
                                                 : uuattrset)(node, key, value); // [3][4]
@@ -803,7 +845,7 @@ function uuattrget(node,    // @param Node:
 // uu.attr.set - set attribute
 function uuattrset(node,  // @param Node:
                    key,   // @param String/Hash: key
-                   value) { // @param String(= undefined): value
+                   value) { // @param String(= void): value
                           // @return Node:
     var hash, i, HASH = uuattr._HASH;
 
@@ -849,7 +891,7 @@ function uuattrgetall(node,     // @param Node:
 // uu.css - css accessor
 function uucss(node,    // @param Node:
                key,     // @param Hash/String: key
-               value) { // @param String(= undefined): value
+               value) { // @param String(= void): value
                         // @return String/Hash/Node:
     return (value === void 0 && uuisstring(key) ? uucssget // [1][2]
                                                 : uucssset)(node, key, value); // [3][4]
@@ -878,7 +920,7 @@ function uucssget(node,     // @param Node:
 // uu.css.set
 function uucssset(node,    // @param Node:
                   key,     // @param String/Hash:
-                  value) { // @param String(= undefined):
+                  value) { // @param String(= void):
                            // @return Node:
     var hash = uuhash(key, value), // make { cssProp: value }
         ns = node.style, p, v, i, n,
@@ -909,7 +951,7 @@ uucssset._hook = { opacity: 2, lineHeight: 1, fontWeight: 1,
 
 // uu.css.opacity
 function uucssopacity(node,              // @param Node:
-                      opacity,           // @param Number(= undefined): opacity 0.0 - 1.0
+                      opacity,           // @param Number(= void): opacity 0.0 - 1.0
                       isRelativeValue) { // @param Boolean(= false): true is relative value
                                          // @return Number/Node:
     return (opacity === void 0 ? uucssopacityget
@@ -920,7 +962,7 @@ function uucssopacity(node,              // @param Node:
 function uucssopacityget(node) { // @param Node:
                                  // @return Number: float(from 0.0 to 1.0)
     if (uu.ie) {
-        var v = node.uucssopacity; // undefined or 1.0 ~ 2.0
+        var v = node.uucssopacity; // void or 1.0 ~ 2.0
 
         return v === void 0 ? 1 : (v - 1);
     }
@@ -1145,127 +1187,164 @@ function uuklasstoggle(node,         // @param Node:
     return node;
 }
 
-// --- color ---
-// [1][W3CNamedColor to hash]   uu.color("black")   -> ColorHash
-// [2]["#000" to hash]          uu.color("#000")    -> ColorHash
-// [3]["#000000" to hash]       uu.color("#000000") -> ColorHash
-// [4]["rgba(,,,,) to hash]     uu.color("rgba(0,0,0,1)")         -> ColorHash
-// [5]["hsla(,,,,) to hash]     uu.color("hsla(360,100%,100%,1)") -> ColorHash
+// --- oop ---
+// uu.Class - create a generic class
+function uuclass(className, // @param String: "Class"
+                            //             or "Class:SuperClass"
+                            //             or "Class<SuperClass"
+                 proto) {   // @param Hash(= void): prototype object
+    // http://d.hatena.ne.jp/uupaa/20100129
+    var ary = className.split(/\s*[\x3a-\x40]\s*/), tmp, i,
+        Class = ary[0], Super = ary[1] || "";
 
-// uu.color - parse color
-function uucolor(source) { // @parem String: "black", "#fff", "rgba(0,0,0,0)" ...
-                           // @return ColorHash/Number: 0 is error
-    var v, m, n, r, g, b, a = 1, add = 0, rgb = 0,
-        rv = uucolor._db[source] || uucolor._cache[source] ||
-             uucolor._db[++add, v = source.toLowerCase()];
+    uuclass[Class] = function uuClass() {
+        var lv3 = this,                     // Lv3: this
+            lv2 = lv3.superClass || 0,      // Lv2: SuperClass
+            lv1 = lv2 ? lv2.superClass : 0; // Lv1: SuperSuperClass
 
-    if (!rv) {
-        switch ({ "#": 1, r: 2, h: 3 }[v.charAt(0)]) {
-        case 1: // #fff or #ffffff
-            if (!uucolor._HEX_FORMAT.test(v)) {
-                return 0; // invalid color, unknown format
-            }
-            m = v.split("");
-            switch (m.length) {
-            case 4: n = parseInt(m[1]+m[1] + m[2]+m[2] + m[3]+m[3], 16); break; // #fff
-            case 7: n = parseInt(v.slice(1), 16); break; // #ffffff
-            case 9: n = parseInt(v.slice(3), 16); // #00ffffff
-                    a = ((parseInt(v.slice(1, 3), 16) / 2.55) | 0) / 100;
-            }
-            n !== void 0 &&
-                (rv = { r: n >> 16, g: (n >> 8) & 255,
-                        b: n & 255, a: a, num: n });
-            break;
-        case 2: // rgb(,,) or rgba(,,,)
-            ++rgb; // [THROUGH]
-        case 3: // hsl(,,) or hsla(,,,)
-            m = (rgb ? uucolor._RGBA_FORMAT
-                     : uucolor._HSLA_FORMAT).exec(
-                        v.indexOf("%") < 0 ? v
-                                           : v.replace(uucolor._PERCENT,
-                                                       rgb ? _percent255
-                                                           : _percent100));
-            if (m) {
-                r = m[1] | 0, g = m[2] | 0, b = m[3] | 0;
-                a = m[4] ? parseFloat(m[4]) : 1;
-                rv = rgb ? { r: r > 255 ? 255 : r,
-                             g: g > 255 ? 255 : g,
-                             b: b > 255 ? 255 : b, a: a }
-                         : uu.color.hsla2rgba({ // depend uu.color
-                             h: r > 360 ? 360 : r,
-                             s: g > 100 ? 100 : g,
-                             l: b > 100 ? 100 : b, a: a });
-            }
+        // register MessagePump
+        uuclassguid(lv3);
+        lv3.msgbox || (lv3.msgbox = uu.nop);
+        uu.msg.register(lv3);
+
+        // constructor(order: lv1 -> lv2 -> lv3)
+        lv1 && lv1.init && lv1.init.apply(lv3, arguments);
+        lv2 && lv2.init && lv2.init.apply(lv3, arguments);
+               lv3.init && lv3.init.apply(lv3, arguments);
+
+        // setup destructor(order: ~lv3 -> ~lv2 -> ~lv1)
+        lv3["~fin"] = lv3.fin || uu.nop;
+        if (lv3.fin) {
+            uu.event.attach(win, "unload", function() {
+                lv3.fin && lv3.fin();
+            });
         }
-    }
-    add && rv && (uucolor._cache[source] = uucolorfix(rv)); // add cache
-    return rv || 0; // ColorHash or 0
-}
-uucolor._db = {
-    transparent: { r: 0, g: 0, b: 0, a: 0, argb: "#00000000", num: 0,
-                   hex: "#000000", rgba: "rgba(0,0,0,0)" }
-};
-uucolor._cache = {};
-uucolor._HEX_FORMAT = /^#(?:[\da-f]{3,8})$/; // #fff or #ffffff or #ffffffff
-uucolor._HSLA_FORMAT = /^hsla?\(\s*([\d\.]+)\s*,\s*([\d\.]+)\s*,\s*([\d\.]+)\s*(?:,\s*([\d\.]+))?\s*\)/; // hsla(,,,)
-uucolor._RGBA_FORMAT = /^rgba?\(\s*([\d\.]+)\s*,\s*([\d\.]+)\s*,\s*([\d\.]+)\s*(?:,\s*([\d\.]+))?\s*\)/; // rgba(,,,)
-uucolor._PERCENT = /([\d\.]+)%/g;
+        lv3.fin = function wrapper() {
+            lv3["~fin"]();
+            lv2 && lv2.fin && lv2.fin.call(lv3);
+            lv1 && lv1.fin && lv1.fin.call(lv3);
 
-// inner - percent("100%") to number(0~255)
-function _percent255(_,   // @param String: "100.0%"
-                     n) { // @param String: "100.0"
-                          // @return Number: 0~255
-    return (n * 2.555) & 255;
-}
-
-// inner - percent("100%") to number(0~100)
-function _percent100(_,   // @param String: "100.0%"
-                     n) { // @param Number: "100.0"
-                          // @return Number: 0~100
-    n = n | 0;
-    return n > 100 ? 100 : n;
-}
-
-// uu.color.add
-function uucoloradd(source) { // @param String: "000000black,..."
-    var ary = source.split(","), i = -1, v, w, n, r, g, b;
-
-    while ( (v = ary[++i]) ) {
-        w = v.slice(0, 6);
-        n = parseInt(w, 16);
-        r = n >> 16;
-        g = (n >> 8) & 0xff;
-        b = n & 0xff;
-        uucolor._db[v.slice(6)] = {
-            hex: "#" + w,
-            num: n,
-            r: r,
-            g: g,
-            b: b,
-            a: 1,
-            argb: "#ff" + w,
-            rgba: "rgba(" + r + "," + g + "," + b + ",1)"
+            // destroy them all
+            for (var i in lv3) {
+                lv3[i] = null;
+            }
         };
+    };
+    uuclass[Class].prototype = proto || {};
+
+    if (Super) { // [2]
+        tmp = function() {};
+        tmp.prototype = uu.Class[Super].prototype;
+        uuclass[Class].prototype = new tmp;
+
+        for (i in proto) {
+            uuclass[Class].prototype[i] = proto[i];
+        }
+        uuclass[Class].prototype.constructor = uuclass[Class];
+        uuclass[Class].prototype.superClass = uu.Class[Super].prototype;
+        uuclass[Class].prototype.superMethod = superMethod;
+    }
+
+    // call superClass method
+    function superMethod(from,             // @param Function: caller
+                         method            // @param String: method name
+                         /* var_args */) { // @param Mix: args
+        var obj = this.superClass;
+
+        // recurtion guard
+        if (from === obj[method] || superMethod.caller === obj[method]) {
+            obj = obj.superClass;
+        }
+        return obj[method].apply(this, uu.array(arguments).slice(2));
     }
 }
 
-// uu.color.fix - fix ColorHash
-function uucolorfix(c) { // @param ColorHash/RGBAHash: source
-                         // @return ColorHash:
-    var num2hh = uuhash._num2hh;
-
-    c.num  || (c.num  = (c.r << 16) + (c.g << 8) + c.b);
-    c.hex  || (c.hex  = "#" + num2hh[c.r] + num2hh[c.g] + num2hh[c.b]);
-    c.argb || (c.argb = "#" + num2hh[(c.a * 255) & 0xff] +
-                              num2hh[c.r] + num2hh[c.g] + num2hh[c.b]);
-    c.rgba || (c.rgba = "rgba(" + c.r + "," + c.g + "," +
-                                  c.b + "," + c.a + ")");
-    return c;
+// uu.Class.guid - get instance id
+function uuclassguid(instance) { // @param Instance:
+                                 // @return Number: instance id, from 1
+    return instance.uuguid || (instance.uuguid = uu.guid());
 }
 
-// uu.color.expire - expire color cache
-function uucolorexpire() {
-    uucolor._cache = {};
+// uu.Class.singleton - create a singleton class
+function uuclasssingleton(className, // @param String: class name
+                          proto) {   // @param Hash(= void): prototype object
+                                     // @return Object: singleton class instance
+    uuclass[className] = function() {
+        var that = this, arg = arguments, self = arg.callee;
+
+        if (self.instance) {
+            that.stable && that.stable.apply(that, arg); // after the second
+        } else {
+            uuclassguid(that);
+            that.init && that.init.apply(that, arg);
+            that.fin  && uu.event.attach(win, "unload", function() {
+                that.fin();
+            });
+            that.msgbox || (that.msgbox = uu.nop);
+            uu.msg.register(that);
+        }
+        return self.instance || (self.instance = that);
+    };
+    uuclass[className].prototype = proto || {};
+}
+
+// --- message pump ---
+// MessagePump
+function MessagePump() {
+    this._addressMap = {}; // AddressMap { guid: instance, ... }
+    this._broadcast = [];  // Broadcast AddressMap [guid, ...]
+}
+
+// [1][multicast] MessagePump.send([instance, ...], "hello") -> ["world!", ...]
+// [2][unicast  ] MessagePump.send(instance, "hello") -> ["world!"]
+// [3][broadcast] MessagePump.send(null, "hello") -> ["world!", ...]
+
+// MessagePump.send - send a message synchronously
+function uumsgsend(address, // @param Array/Mix: address or guid
+                            //           [instance, ...] is multicast
+                            //           instance is unicast
+                            //           null is broadcast
+                   message, // @param String: message
+                   param) { // @param Mix(= void):
+                            // @return Arra: [result, ...]
+    var rv = [], ri = -1, to, obj, i = -1,
+        ary = address ? uu.array(address) : this._broadcast;
+
+    while ( (to = ary[++i]) ) {
+        obj = this._addressMap[to.uuguid || to || 0];
+        obj && (rv[++ri] = obj.msgbox(message, param));
+    }
+    return rv;
+}
+
+// [1][multicast] MessagePump.post([instance, ...], "hello")
+// [2][unicast  ] MessagePump.post(instance, "hello")
+// [3][broadcast] MessagePump.post(null, "hello")
+
+// MessagePump.post - send a message asynchronously
+function uumsgpost(address, // @param Array/Mix: address or guid
+                            //           [instance, ...] is multicast
+                            //           instance is unicast
+                            //           null is broadcast
+                   message, // @param String: message
+                   param) { // @param Mix(= void): param
+    var that = this;
+
+    setTimeout(function() {
+        that.send(address ? uu.array(address) : that._broadcast, message, param);
+    }, 0);
+}
+
+// MessagePump.register - register the destination of the message
+function uumsgregister(instance) { // @param Instance: class instance
+    this._addressMap[uuclassguid(instance)] = instance;
+    this._broadcast = uu.keys(this._addressMap);
+}
+
+// MessagePump.unregister
+function uumsgunregister(instance) { // @param Instance: class instance
+    delete this.db[uuclassguid(instance)];
+    this._broadcast = uu.keys(this._addressMap);
 }
 
 // --- event ---
@@ -1386,7 +1465,7 @@ function uueventhas(node,                     // @param Node: target node
 // uu.event.fire - fire event / fire custom event(none capture event only)
 function uueventfire(node,      // @param Node: target node
                      eventType, // @param String: "click", "custom"
-                     param) {   // @param Mix(= undefined): param
+                     param) {   // @param Mix(= void): param
                                 // @return Node:
     if (uu.event.has(node, eventType)) {
         node.uueventfn[eventType].call(node, {
@@ -1423,7 +1502,7 @@ function uueventstop(eventObject) { // @param EventObject:
 
 // uu.event.unbind - unbind event
 function uueventunbind(node,                     // @param Node: target node
-                       namespaceAndEventTypes) { // @param String(= undefined): namespace and event types, "click,click+,..."
+                       namespaceAndEventTypes) { // @param String(= void): namespace and event types, "click,click+,..."
                                                  // @return Node:
     function _eachnamespace(w) {
         !w.indexOf(ns) && uuevent(node, w, node.uueventfn[w], true); // detach
@@ -1488,7 +1567,7 @@ function uueventdetach(node,      // @param Node:
 }
 
 // uu.ready - hook DOMContentLoaded event
-function uuready(evaluator, // @param Function(= undefined): callback function
+function uuready(evaluator, // @param Function(= void): callback function
                  order) {   // @param Number(= 0): 0=low, 1=mid, 2=high(system)
     if (evaluator !== void 0 && !uuready.gone.blackout) {
         uuready.gone.dom ? evaluator(uu) // fired -> callback
@@ -1498,9 +1577,12 @@ function uuready(evaluator, // @param Function(= undefined): callback function
 
 // --- node ---
 // uu.node - createElement wrapper
-function uunode(tagName) { // @param String(= "div"):
-                           // @return Node: <node>
-    return doc.createElement(tagName || "div");
+function uunode(tagName, // @param String(= "div"):
+                attr) {  // @param Hash(= void):
+                         // @return Node: <node>
+    var rv = doc.createElement(tagName || "div");
+
+    return attr === void 0 ? rv : uumix(rv, attr);
 }
 
 // [1][add div node]            uu.node.add()         -> <body><div /></body>
@@ -1567,7 +1649,7 @@ uunodeid._db = {}; // { nodeid: node, ... }
 
 // uu.nodeid.toNode - get node by nodeid
 function uunodeidtonode(nodeid) { // @param String: nodeid
-                                  // @return Node/undefined:
+                                  // @return Node/void:
     return uunodeid._db[nodeid];
 }
 
@@ -1648,16 +1730,6 @@ function uunoderemove(node) { // @param Node:
         return node.parentNode.removeChild(node);
     }
     return node;
-}
-
-// uu.node.fromPoint -
-function uunodefrompoint(x,         // @param Number: x
-                         y,         // @param Number: y
-                         context) { // @param Node: context
-                                    // @return Node: Node or null
-    // TODO: canvas support
-    // TODO: CrossBrowser
-    return (context || doc).elementFromPoint(x | 0, y | 0);
 }
 
 // --- query ---
@@ -1866,7 +1938,7 @@ function uupuff(source) { // @param Mix: source object
 
 // uu.trace - add trace
 function uutrace(titleOrSource,  // @param String/Mix: title or source
-                 source) {       // @param Mix(= undefined): source (with title)
+                 source) {       // @param Mix(= void): source (with title)
     var output = uuid("trace"), json, title = "";
 
     if (output) {
@@ -1904,7 +1976,7 @@ function uujson(source,        // @param Mix:
                 useNativeJSON, // @param Boolean(= false): switch native impl or js impl
                                //                          true is use native JSON
                                //                          false is use js JSON
-                callback) {    // @param Function(= undefined): error callback
+                callback) {    // @param Function(= void): error callback
                                // @return JSONString:
     return useNativeJSON && win.JSON ? win.JSON.stringify(source) || ""
                                      : _jsoninspect(source, callback);
@@ -1963,8 +2035,8 @@ function _jsoninspect(mix, fn) {
     case uutype.HASH:       ary = []; break;
     case uutype.NODE:       return '"uuguid":' + uunodeid(mix);
     case uutype.NULL:       return "null";
-    case uutype.UNDEFINED:  return "undefined";
-    case uutype.DATE:       return uudatetoiso(uudate(mix));
+    case uutype.VOID:       return "undefined";
+    case uutype.DATE:       return uudate(mix).ISO();
     case uutype.BOOLEAN:
     case uutype.FUNCTION:
     case uutype.NUMBER:     return mix.toString();
@@ -1988,6 +2060,9 @@ function _jsoninspect(mix, fn) {
             }
         }
     } else { // type === uutype.HASH
+//      if (mix.hasOwnProperty("toString")) {
+//          return _str2json(mix.toString(), 1);
+//      }
         for (i in mix) {
             ary[++ai] = _str2json(i, 1) + ":" + _jsoninspect(mix[i], fn);
         }
@@ -1997,6 +2072,7 @@ function _jsoninspect(mix, fn) {
 
 // --- date ---
 // [1][get now]                 uu.date() -> DateHash
+// [2][DateHash]                uu.date(DateHash) -> cloned DateHash
 // [2][date to hash]            uu.date(Date) -> DateHash
 // [3][time to hash]            uu.date(milliseconds) -> DateHash
 // [4][DateString to hash]      uu.date("2000-01-01T00:00:00[.000]Z") -> DateHash
@@ -2004,23 +2080,29 @@ function _jsoninspect(mix, fn) {
 // [6][RFC1123String to hash]   uu.date("Wed, 16 Sep 2009 16:18:14 GMT") -> DateHash
 
 // uu.date - date accessor
-function uudate(source) { // @param Date/Number/String(= undefined):
+function uudate(source) { // @param DateHash/Date/Number/String(= void):
                           // @return DateHash:
     return source === void 0  ? _date2hash(new Date())        // [1] uu.date()
-         : uuisdate(source)   ? _date2hash(source)            // [2] uu.date(new Date())
-         : uuisnumber(source) ? _date2hash(new Date(source))  // [3] uu.date(1234567)
-         : _date2hash(_str2date(source) || new Date(source)); // [4][5][6]
+         : uuisdate(source)   ? _date2hash(source)            // [3] uu.date(new Date())
+         : uuisnumber(source) ? _date2hash(new Date(source))  // [4] uu.date(1234567)
+         : source.GMT         ? uuclone(source)               // [2] uu.date(DateHash)
+         : _date2hash(_str2date(source) || new Date(source)); // [5][6][7]
 }
 
 // inner - convert Date to DateHash
 function _date2hash(date) { // @param Date:
                             // @return Hash: { Y: 2010, M: 12, D: 31,
                             //                 h: 23, m: 59, s: 59, ms: 999,
-                            //                 time: xxxxxxx }
-    return { Y:  date.getUTCFullYear(),     M:    date.getUTCMonth() + 1,
-             D:  date.getUTCDate(),         h:    date.getUTCHours(),
-             m:  date.getUTCMinutes(),      s:    date.getUTCSeconds(),
-             ms: date.getUTCMilliseconds(), time: date.getTime() };
+                            //                 time: xxxxxxx, ISO, RFC, GMT }
+    return {
+        Y:      date.getUTCFullYear(),      M:      date.getUTCMonth() + 1,
+        D:      date.getUTCDate(),          h:      date.getUTCHours(),
+        m:      date.getUTCMinutes(),       s:      date.getUTCSeconds(),
+        ms:     date.getUTCMilliseconds(),  time:   date.getTime(),
+        ISO:    datehashiso,
+        RFC:    datehashrfc,
+        GMT:    datehashrfc
+    };
 }
 
 // "2000-01-01T00:00:00[.000]Z"    -> Date
@@ -2028,7 +2110,7 @@ function _date2hash(date) { // @param Date:
 
 // inner - DateString to Date
 function _str2date(str) { // @param ISO8601DateString/RFC1123DateString:
-                          // @return Date/0:
+                          // @return Date:
     function _toDate(_, dayOfWeek, day, month) {
         return dayOfWeek + " " + month + " " + day;
     }
@@ -2038,43 +2120,30 @@ function _str2date(str) { // @param ISO8601DateString/RFC1123DateString:
     if (m) {
         return new Date(Date.UTC(+m[1], +m[2] - 1, +m[3],      // yyyy-mm-dd
                                  +m[4], +m[5], +m[6], +m[7])); // hh:mm:ss.ms
-    } else {
-        if (uu.ie && str.indexOf("GMT") > 0) {
-            str = str.replace(/GMT/, "UTC");
-        }
-        return new Date(str.replace(",", "").
-                            replace(_str2date._DATE, _toDate));
     }
-    return 0;
+    if (uu.ie && str.indexOf("GMT") > 0) {
+        str = str.replace(/GMT/, "UTC");
+    }
+    return new Date(str.replace(",", "").
+                        replace(_str2date._DATE, _toDate));
 }
 _str2date._PARSE = /^(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d):(\d\d)(?:\.(\d*))?Z$/;
 _str2date._DATE = /^([\w]+) (\w+) (\w+)/;
 
-// [1] uu.date.toISOString(DateHash = undefined) -> "2000-01-01T00:00:00.000Z"
-
-// uu.date.toISOString - encode DateHash To ISO8601String
-function uudatetoiso(dateHash) { // @param DateHash(= undefined):
-                                 // @return ISO8601DateString: "2000-01-01T00:00:00.000Z"
-    var v = dateHash === void 0 ? _date2hash(new Date()) : dateHash,
-        padZero = (v.ms < 10) ? "00" : (v.ms < 100) ? "0" : "",
+// DateHash.ISO - encode DateHash To ISO8601String
+function datehashiso() { // @return ISO8601DateString: "2000-01-01T00:00:00.000Z"
+    var padZero = (this.ms < 10) ? "00" : (this.ms < 100) ? "0" : "",
         dd = uuhash._num2dd;
 
-    return uuformat("?-?-?T?:?:?.?Z", v.Y, dd[v.M], dd[v.D],
-                                      dd[v.h], dd[v.m], dd[v.s], padZero + v.ms);
+    return uuformat("?-?-?T?:?:?.?Z", this.Y, dd[this.M], dd[this.D],
+                                      dd[this.h], dd[this.m], dd[this.s],
+                                      padZero + this.ms);
 }
 
-// [1] uu.date.toRFCString(DateHash = undefined) -> "Wed, 16 Sep 2009 16:18:14 GMT"
+// DateHash.RFC - encode DateHash To RFC1123String
+function datehashrfc() { // @return RFC1123DateString: "Wed, 16 Sep 2009 16:18:14 GMT"
+    var rv = (new Date(this.time)).toUTCString();
 
-// uu.date.toRFCString - encode DateHash To RFC1123String
-function uudatetorfc(dateHash) { // @param DateHash(= undefined):
-                                 // @return RFC1123DateString: "Wed, 16 Sep 2009 16:18:14 GMT"
-    var rv;
-
-    if (dateHash === void 0) {
-        rv = (new Date()).toUTCString();
-    } else {
-        rv = (new Date(dateHash.time)).toUTCString();
-    }
     if (uu.ie && rv.indexOf("UTC") > 0) {
         // http://d.hatena.ne.jp/uupaa/20080515
 
@@ -2110,8 +2179,8 @@ function uuwinsize() { // @return Hash: { innerWidth, innerHeight,
     }
     return { innerWidth:  win.innerWidth,
              innerHeight: win.innerHeight,
-             pageXOffset: win.pageXOffset,
-             pageYOffset: win.pageYOffset };
+             pageXOffset: win.pageXOffset,   // [WebKit][Alias] document.body.scrollLeft
+             pageYOffset: win.pageYOffset }; // [WebKit][Alias] document.body.scrollTop
 }
 
 // uu.guid - get unique number
@@ -2180,7 +2249,7 @@ function arraylastindexof(search,      // @param Mix: search element
 
 // Array.prototype.every
 function arrayevery(evaluator, // @param Function: evaluator
-                    that) {    // @param this(= undefined): evaluator this
+                    that) {    // @param this(= void): evaluator this
                                // @return Boolean:
     for (var i = 0, iz = this.length; i < iz; ++i) {
         if (i in this && !evaluator.call(that, this[i], i, this)) {
@@ -2192,7 +2261,7 @@ function arrayevery(evaluator, // @param Function: evaluator
 
 // Array.prototype.some
 function arraysome(evaluator, // @param Function: evaluator
-                   that) {    // @param this(= undefined): evaluator this
+                   that) {    // @param this(= void): evaluator this
                               // @return Boolean:
     for (var i = 0, iz = this.length; i < iz; ++i) {
         if (i in this && evaluator.call(that, this[i], i, this)) {
@@ -2204,7 +2273,7 @@ function arraysome(evaluator, // @param Function: evaluator
 
 // Array.prototype.forEach
 function arrayforeach(evaluator, // @param Function: evaluator
-                      that) {    // @param this(= undefined): evaluator this
+                      that) {    // @param this(= void): evaluator this
     var i = 0, iz = this.length;
 
     if (that) {
@@ -2220,7 +2289,7 @@ function arrayforeach(evaluator, // @param Function: evaluator
 
 // Array.prototype.map
 function arraymap(evaluator, // @param Function: evaluator
-                  that) {    // @param this(= undefined): evaluator this
+                  that) {    // @param this(= void): evaluator this
                              // @return Array: [element, ... ]
     for (var iz = this.length, rv = Array(iz), i = 0; i < iz; ++i) {
         i in this && (rv[i] = evaluator.call(that, this[i], i, this));
@@ -2230,7 +2299,7 @@ function arraymap(evaluator, // @param Function: evaluator
 
 // Array.prototype.filter
 function arrayfilter(evaluator, // @param Function: evaluator
-                     that) {    // @param this(= undefined): evaluator this
+                     that) {    // @param this(= void): evaluator this
                                 // @return Array: [element, ... ]
     for (var rv = [], ri = -1, v, i = 0, iz = this.length; i < iz; ++i) {
         i in this && evaluator.call(that, v = this[i], i, this)
@@ -2242,7 +2311,7 @@ function arrayfilter(evaluator, // @param Function: evaluator
 
 // Array.prototype.reduce
 function arrayreduce(evaluator,      // @param Function: evaluator
-                     initialValue) { // @param Mix(= undefined): initial value
+                     initialValue) { // @param Mix(= void): initial value
                                      // @return Mix:
     var z, f = 0, rv = initialValue === z ? z : (++f, initialValue),
         i = 0, iz = this.length;
@@ -2259,7 +2328,7 @@ arrayreduce._MSG = "reduce of empty array with no initial value";
 
 // Array.prototype.reduceRight
 function arrayreduceright(evaluator,      // @param Function: evaluator
-                          initialValue) { // @param Mix(= undefined): initial value
+                          initialValue) { // @param Mix(= void): initial value
                                           // @return Mix:
     var z, f = 0, rv = initialValue === z ? z : (++f, initialValue),
         i = this.length;
@@ -2275,7 +2344,7 @@ function arrayreduceright(evaluator,      // @param Function: evaluator
 
 // Date.prototype.toISOString - to ISO8601 string
 function datetoisostring() { // @return String:
-    return uudatetoiso(uudate(this));
+    return uudate(this).ISO();
 }
 
 // Number.prototype.toJSON, Boolean.prototype.toJSON
@@ -2311,14 +2380,14 @@ function innertextsetter(text) {
 
 // HTMLElement.prototype.outerHTML getter
 function outerhtmlgetter() {
-    var rv, me = this, p = me.parentNode,
+    var rv, that = this, p = that.parentNode,
         r = doc.createRange(), div = doc.createElement("div");
 
-    p || doc.body.appendChild(me); // orphan
-    r.selectNode(me);
+    p || doc.body.appendChild(that); // orphan
+    r.selectNode(that);
     div.appendChild(r.cloneContents());
     rv = div.innerHTML;
-    p || me.parentNode.removeChild(me);
+    p || that.parentNode.removeChild(that);
     return rv;
 }
 
@@ -2333,9 +2402,9 @@ function outerhtmlsetter(html) {
 
 // --- initialize ---
 
-// inner - build DOM Lv2 event handler - uu.click(), jam.click(), ...
+// inner - build DOM Lv2 event handler - uu.click(), ...
 uuevent._LIST.forEach(function(eventType) {
-    uu.event[eventType] = function bindEvent(node, fn) { // uu.click(node, fn) -> node
+    uu[eventType] = function bindEvent(node, fn) { // uu.click(node, fn) -> node
         return uuevent(node, eventType, fn); // attach
     };
     uu["un" + eventType] = function unbindEvent(node) { // uu.unclick(node) -> node
@@ -2376,6 +2445,7 @@ function _domreadyie() {
 
 uueventattach(win, "load", _winload);
 uu.ie ? _domreadyie() : uueventattach(doc, "DOMContentLoaded", _ready);
+
 
 // --- finalize ---
 //{{{!mb

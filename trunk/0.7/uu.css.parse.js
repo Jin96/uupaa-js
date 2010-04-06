@@ -146,7 +146,7 @@ function uucssimports() { // @return String: "dirty CSS"
                    replace(uucssimports._IMPORTS, function(m, url) {
             var v = uu.url.abs(url, absdir);
 
-            return load(uu.ajax.sync(v).rv, uu.url.dir(v));
+            return load(uu.require(v).xhr.responseText, uu.url.dir(v));
         });
     }
 
@@ -179,7 +179,7 @@ function uucssimports() { // @return String: "dirty CSS"
                 // <link href="example.css">
                 url = uu.url.abs(href, absdir);
                 url in _CSSCache ||
-                    (_CSSCache[url] = load(uu.ajax.sync(url).rv, uu.url.dir(url)));
+                    (_CSSCache[url] = load(uu.require(url).xhr.responseText, uu.url.dir(url)));
 
                 rv.push(_CSSCache[url]);
 

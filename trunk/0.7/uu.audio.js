@@ -64,7 +64,7 @@ uu.audio.init || (function(win, doc, uu) {
 var _mp3builder,
     _builder = win.HTMLAudioElement ? Native
              : uu.ver.silverlight ? Silverlight
-             : uu.ver.as3 && uu.require(uu.config.baseDir + "uu.audio.swf") ? Flash
+             : uu.ver.as3 && uu.require(uu.config.baseDir + "uu.audio.swf").ok ? Flash
              : NoAudio;
 
 if (win.HTMLAudioElement) {
@@ -86,7 +86,7 @@ if (win.HTMLAudioElement) {
         win.MP3Audio = win.Audio;
     } else {
         _mp3builder = uu.ver.silverlight ? Silverlight
-                    : uu.ver.as3 && uu.require(uu.config.baseDir + "uu.audio.swf") ? Flash
+                    : uu.ver.as3 && uu.require(uu.config.baseDir + "uu.audio.swf").ok ? Flash
                     : NoAudio;
         win.MP3Audio = function(src) { // @param URLString(= ""): media source
             var audio = _mp3builder.build(uu.node.add("mp3audio")); // <mp3audio>

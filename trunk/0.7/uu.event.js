@@ -107,10 +107,10 @@ function uueventdragbase(
         }
         grip.uueventdragoff = { x: x - parseInt(tgt.style.left || 0),
                                 y: y - parseInt(tgt.style.top  || 0) };
-        grip.uueventdrag = opt.zmanage ? uu.factory("ZIndex").drag(tgt) : 1;
+        grip.uueventdrag = opt.zmanage ? uu("ZIndex").drag(tgt) : 1;
     } else { // [2] mouseup
         opt.mouseup && opt.mouseup(evt, tgt, grip, code, opt, x, y);
-        grip.uueventdrag = opt.zmanage ? uu.factory("ZIndex").drag(tgt) : 0;
+        grip.uueventdrag = opt.zmanage ? uu("ZIndex").drag(tgt) : 0;
     }
     return { x: x, y: y, px: px, py: py };
 }
@@ -127,14 +127,14 @@ function uueventtimes(node,     // @param Node: target node
         if (index >= callbacks.length) {
             index = 0;
             if (cyclic && !--cyclic) {
-                uu.event(node, names, _wrap, 2);
+                uu.event(node, names, _wrap, 1);
             }
         }
     }
     cyclic = cyclic || 0;
     var index = 0, callbacks = uu.array(arguments).slice(3);
 
-    callbacks.length && uu.event(node, names, _wrap, 1);
+    callbacks.length && uu.event(node, names, _wrap);
     return node;
 }
 

@@ -5,19 +5,18 @@
 
 // http://d.hatena.ne.jp/uupaa/20100106/1262781846
 // +-----------------+-----------------------+--------+-------+
-// | Backend string  | Real backend          | Min    | Max   |
+// | Backend string  | backend               | Min    | Max   |
 // +-----------------+-----------------------+--------+-------+
-// | "LocalStorage"  | LocalStorage          | 2.2MB  | 8MB   |
-// | "FlashStorage"  | SharedObject          | 99kB(*)| 1MB   |
-// | "IEStorage"     | IE userData behavior  |        | 64kB  |
+// | "LocalStorage"  | LocalStorage          | 1.8MB  | 8MB   |
+// | "FlashStorage"  | SharedObject          | 0~99kB | 1MB   |
+// | "IEStorage"     | IE userData behavior  | 63kB   | 63kB  |
 // | "CookieStorage" | Cookie                |        | 3.8kB |
 // | "NoStorage"     |                       | 0      | 0     |
 // +-----------------+-----------------------+--------+-------+
 
 uu.local || (function(win, doc, uu) {
 
-//var _order = "LocalStorage,FlashStorage,IEStorage,CookieStorage,NoStorage";
-var _order = "FlashStorage,NoStorage";
+var _backendOrder = "LocalStorage,FlashStorage,IEStorage,CookieStorage,NoStorage";
 
 uu.Class.singleton("Storage", {
     init:           init,       // Storage.init()
@@ -52,9 +51,9 @@ uu.Class.NoStorage.isReady = function() { // @return Boolean
 function init() {
     var that = this;
 
-    this.backend = "NoStorage";
+    this.backend = "NoStorage"; // defailt backend
 
-    _order.split(",").some(function(storageName) {
+    _backendOrder.split(",").some(function(storageName) {
         var Class = uu.Class[storageName];
 
         if (Class && Class.isReady()) {
@@ -154,6 +153,11 @@ function pop(url,        // @param String: url
         callback && callback(jsonpResultHash);
     });
 }
+
+// --- init ---
+uu.ready(function() {
+    uu.Class["Storage"] && uu("Storage");
+});
 
 })(window, document, uu);
 

@@ -18,7 +18,7 @@ uu.canvas.init || (function(win, doc, uu) {
 //{{{!mb
 
 var _flashCanvas = (uu.ie && uu.ver.flash > 8) ?
-                   uu.require(uu.config.baseDir + "uu.canvas.swf") : 0;
+                   uu.require(uu.config.baseDir + "uu.canvas.swf").ok : 0;
 
 //}}}!mb
 

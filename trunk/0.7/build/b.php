@@ -1,10 +1,10 @@
 <?php
 // usage:
-//  >b.php [package] [-g | -y | -m | -j] [-out outfile] [-mb] [-debug]
+//  >b.php [package] [-g | -y | -m | -j] [-out "uupaa.js"] [-mb] [-debug]
 //    -g    Google Closure Compiler
 //    -y    Microsoft Ajax Minifier
 //    -m    YUI Compressor
-//    -out  outfile, default: "uupaa.js"
+//    -out  output file name, default: "uupaa.js"
 //    -mb   コードブロック {{{!mb ～ }}}!mb を切り落とします。
 //          IE用や余計なコードを切り落とし、
 //          iPhone, Android用にファイルサイズをコンパクトにします。

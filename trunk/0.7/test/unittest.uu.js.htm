@@ -4,7 +4,7 @@
 <script src="../uu.codec.js"></script>
 <script src="../uu.codec.unicode.js"></script>
 <script src="../uu.class.js"></script>
-<script src="../uu.str.js"></script>
+<script src="../uu.string.js"></script>
 <script src="../uu.css.js"></script>
 <script src="../uu.node.js"></script>
 <script src="../uu.nodebuilder.js"></script>
@@ -225,44 +225,43 @@ function xboot(uu) {
       },
     "uu.Class()": "",
       "uu.Class は複数回生成すると別々のインスタンスを返す": function() {
-        var obj1 = uu.factory("UNITTEST1");
-        var obj2 = uu.factory("UNITTEST1");
+        uu.Class("UNITTEST1");
+
+        var obj1 = uu("UNITTEST1");
+        var obj2 = uu("UNITTEST1");
 
         return [obj1, "!=", obj2];
       },
     "uu.Class.singleton()": "",
       "uu.Class.singleton は複数回生成しても同じインスタンスを返す": function() {
         uu.Class.singleton("UNITTEST2");
-        var obj1 = uu.factory("UNITTEST2");
-        var obj2 = uu.factory("UNITTEST2");
+        var obj1 = uu("UNITTEST2");
+        var obj2 = uu("UNITTEST2");
 
         return [obj1, "==", obj2];
       },
     "uu.Class.guid()": "",
       "uu.Class.guid はユニークな ID を返す": function() {
-        var obj1 = uu.factory("UNITTEST3");
-        var obj2 = uu.factory("UNITTEST3");
+        uu.Class("UNITTEST3");
+
+        var obj1 = uu("UNITTEST3");
+        var obj2 = uu("UNITTEST3");
 
         return [uu.Class.guid(obj1), "<", uu.Class.guid(obj2)];
       },
       "singleton クラスなら uu.Class.guid は同じ ID を返す": function() {
         uu.Class.singleton("UNITTEST4");
-        var obj1 = uu.factory("UNITTEST4");
-        var obj2 = uu.factory("UNITTEST4");
+        var obj1 = uu("UNITTEST4");
+        var obj2 = uu("UNITTEST4");
 
         return [uu.Class.guid(obj1), "==", uu.Class.guid(obj2)];
       },
-    "uu.factory()": "",
-      "[1][create instance] uu.factory('UNITTEST1', 1, 2) は new uu.Class('UNITTEST1', 1, 2) の結果(インスタンス)を返す": function() {
+    "uu(new Class)": "",
+      "[1][create instance] uu('UNITTEST1', 1, 2) は new uu.Class('UNITTEST1', 1, 2) の結果(インスタンス)を返す": function() {
         uu.Class("UNITTEST1"); // define
-        var obj1 = uu.factory("UNITTEST1");
+        var obj1 = uu("UNITTEST1");
 
         return [obj1, "is instance"];
-      },
-      "[2][define Class and create instance] uu.factory('my', { init: uu.nop }, 1) は クラス'my'を定義し、new uu.Class('my', 1) の結果(インスタンス)を返す": function() {
-        var obj2 = uu.factory('my', { init: uu.nop }, 1);
-
-        return [obj2, "is instance"];
       },
 
     "uu.klass.has()": "",
@@ -439,8 +438,8 @@ function xboot(uu) {
             return 2;
           }
         });
-        var obj1 = uu.factory("MSGBOXTEST1");
-        var obj2 = uu.factory("MSGBOXTEST2");
+        var obj1 = uu("MSGBOXTEST1");
+        var obj2 = uu("MSGBOXTEST2");
 
         var rv1 = uu.msg.send(obj1, "obj1 == obj2", "p1");
         var rv2 = uu.msg.send(obj2, "obj2 == obj1", "p1");
@@ -759,36 +758,40 @@ function xboot(uu) {
       "uu.codec.entity.decode('&lt;a href=&quot;&amp;&quot;&gt;') == '<a href=\"&\">'": function() {
         return [uu.codec.entity.decode('&lt;a href=&quot;&amp;&quot;&gt;'), "==", '<a href="&">'];
       },
-    "uu.date.toISOString()": "",
-      "uu.date.toISOString() は現在時刻を ISO8601 形式で返す": function() {
-        return [uu.date.toISOString(), "is string"];
-      },
-      "uu.date.toRFCString() は現在時刻を RFC1123 形式で返す": function() {
-        return [uu.date.toRFCString(), "is string"];
-      },
+    "uu.date": "",
       "uu.date() は DateHash を返す": function() {
         var dateHash = uu.date();
 
         return [dateHash, "is hash"];
       },
-      "uu.date(uu.date.toISOString(uu.date(new Date))) で元に戻る": function() {
+      "uu.date().ISO() は現在時刻を ISO8601 形式で返す": function() {
+        return [uu.date().ISO(), "is string"];
+      },
+      "uu.date().RFC() は現在時刻を RFC1123 形式で返す": function() {
+        return [uu.date().RFC(), "is string"];
+      },
+      "uu.date().GMT() は現在時刻を GMT (RFC1123) 形式で返す": function() {
+        return [uu.date().GMT(), "is string"];
+      },
+
+      "uu.date(uu.date(new Date).ISO()) で元に戻る": function() {
         var now = new Date;
         now.setMilliseconds(0); // ms を切り落として比較する
 
         var dateHash = uu.date(now);
 
-        var isoString = uu.date.toISOString(dateHash);
+        var isoString = dateHash.ISO();
         var rv = uu.date(isoString);
 
         return [dateHash.time, "==", rv.time];
       },
-      "uu.date(uu.date.toRFCString(uu.date(new Date))) で元に戻る": function() {
+      "uu.date(uu.date(new Date).RFC()) で元に戻る": function() {
         var now = new Date;
         now.setMilliseconds(0); // ms を切り落として比較する
 
         var dateHash = uu.date(now);
 
-        var isoString = uu.date.toRFCString(dateHash);
+        var isoString = dateHash.RFC();
         var rv = uu.date(isoString);
 
         return [dateHash.time, "==", rv.time];

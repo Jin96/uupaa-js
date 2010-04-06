@@ -91,6 +91,6 @@ function splitLang() {
 function xboot() {
   splitLang();
 
-  uu.ev(document, "mousemove", uu.factory("Pie"));
+  uu.ev(document, "mousemove", uu("Pie"));
 }
 

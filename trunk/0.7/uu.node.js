@@ -3,19 +3,19 @@
 //{{{!depend uu
 //}}}!depend
 
-uu.agein || (function(win, doc, uu) {
+uu.node.find || (function(win, doc, uu) {
 
 uu.svg      = uusvg;        // uu.svg(tag) -> new <svg> element
 uu.xpath    = uuxpath;      // uu.xpath(node) -> "/html/body/div[5]"
 
 uu.node.diet = uunodediet;  // uu.node.diet(ctx = body, depth = 0)
 
-// uu.node.first            // uu.node.first(ctx, uu.p() or "<p>html</p>") -> <p>
-// uu.node.prev             // uu.node.prev(ctx, uu.p() or "<p>html</p>") -> <p>
-// uu.node.next             // uu.node.next(ctx, uu.p() or "<p>html</p>") -> <p>
-// uu.node.last             // uu.node.last(ctx, uu.p() or "<p>html</p>") -> <p>
-// uu.node.firstChild       // uu.node.firstChild(ctx, uu.p() or "<p>html</p>") -> <p>
-// uu.node.lastChild        // uu.node.lastChild(ctx, uu.p() or "<p>html</p>") -> <p>
+// uu.node.first            // uu.node.first(source, context):Node
+// uu.node.prev             // uu.node.prev(source, context):Node
+// uu.node.next             // uu.node.next(source, context):Node
+// uu.node.last             // uu.node.last(source, context):Node
+// uu.node.firstChild       // uu.node.firstChild(source, context):Node
+// uu.node.lastChild        // uu.node.lastChild(source, context):Node
 
 uu.node.find = uunodefind;  // [1][find node index] uu.node.find(node) -> Number
                             // [2][find tag index]  uu.node.find(node, "div") -> Number
@@ -100,10 +100,10 @@ uu.each({ first: 1, prev: 2, next: 3, last: 4,
     // uu.node.first - add first sibling node
     // [1][add] uu.node.first(uu.p(), ctx) -> <p>
     // [2][add] uu.node.first("<p>html</p>", ctx) -> <p>
-    uu.node[method] = function(node,  // @param Node/DocumentFragment/HTMLString:
-                               ctx) { // @param Node(= <body>): context
-                                      // @return Node: first node
-        return uu.node.add(node, ctx, pos);
+    uu.node[method] = function(source,    // @param Node/DocumentFragment/HTMLFragment/TagName:
+                               context) { // @param Node(= <body>): context
+                                          // @return Node: first node
+        return uu.node.add(source, context, pos);
     };
     // uu.node.find.first - find first sibling node
     uunodefind[method] = function(ctx) { // @param Node: context

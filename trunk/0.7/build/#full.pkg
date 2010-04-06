@@ -4,7 +4,7 @@ uu.js
 uu.class.js
 uu.jam.js
 uu.ajax.js
-uu.str.js
+uu.string.js
 uu.node.js
 uu.nodebuilder.js
 uu.event.js

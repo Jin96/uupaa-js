@@ -70,7 +70,7 @@ window.xconfig = { dir: "../../" };
 
 <script>
 function xcanvas(uu, canvases) {
-    var poly = uu.factory("GfxCube", { fps: 50 });
+    var poly = uu("GfxCube", { fps: 50 });
     var canvas = uu.id("canvas");
     var ctx = canvas.getContext("2d");
 

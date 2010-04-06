@@ -37,7 +37,7 @@ function uutext(node,   // @param Node/String:
 // uu.text.get
 function uutextget(node) { // @param Node:
                            // @return String: innerText
-    return node[_gecko ? "textContent" : "innerText"];
+    return node[uu.gecko ? "textContent" : "innerText"];
 }
 
 // uu.text.set
