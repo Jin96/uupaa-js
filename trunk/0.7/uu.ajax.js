@@ -220,7 +220,7 @@ function _uuajaxqueue(ajax, command, url, option,
                  callback.shift());
 
         if (commandArray.shift() === ">") {
-            command = c.join(""); // rebuild command, "0+1>2>3" -> "2>3"
+            command = commandArray.join(""); // rebuild command, "0+1>2>3" -> "2>3"
             break;
         }
     }
@@ -268,60 +268,71 @@ function uujsonp(url,          // @param String: request url
                                // @return Number: guid(request atom)
     return _uujsonp(url, option || {}, callback, ngCallback);
 }
-uujsonp._db = {}; // { jobid: callback, ... } jsonp job db
+uujsonp._jobdb = {}; // { guid: callback, ... }
 
 function _uujsonp(url, option, callback, ngCallback, _fn2) {
     function _watchdog() {
-        uujsonp._db[jobid]("", 408); // 408 "Request Time-out"
+        uujsonp._jobdb[guid]("", 408); // 408 "Request Time-out"
     }
-    function _receiveData(response, status) {
-        if (!scriptNode.uujsonprun++) {
+    function _garbageCollection() {
+        doc.head.removeChild(script);
+        win[method] = null;
+        delete uujsonp._jobdb[guid];
+    }
 
-            if (response) {
-                var result = _createJSONPResultHash(true, 200, response);
+    var guid = uu.guid(),
+        timeout = option.timeout || 10,
+        src = url,
+        script = uu.node("script", {
+            type:       "text/javascript",
+            charset:    "utf-8",
+            uujsonprun: 0           // chattering guard
+        }),
+        method = option.method || "callback";
+
+    // replace last ? mark
+    //      "http://example.com?callback=?"
+    //                                   v
+    //      "http://example.com?callback={{method}}"
+    //
+    if (/\=\?$/.test(src)) {
+        src = uu.format(src, "?", method);
+    }
+    uujsonp._jobdb[guid] = method;
+
+    // build callback global function
+    win[method] = function(json,       // @param Mix: json data
+                           _status_) { // @param Number: from watchdog
+        if (!script.uujsonprun++) {
+
+            if (json) {
+                var result = {
+                    id:     option.id,
+                    ok:     true,
+                    url:    src,
+                    json:   json,
+                    guid:   guid,
+                    status: 200
+                };
 
                 callback && callback(result);
                 _fn2 && _fn2(result);
             } else {
-                ngCallback &&
-                    ngCallback(_createJSONPResultHash(false, status || 404));
+                ngCallback && ngCallback({
+                    id:     option.id,
+                    ok:     false,
+                    url:    src,
+                    json:   void 0,
+                    guid:   guid,
+                    status: _status_ || 404
+                });
             }
             setTimeout(_garbageCollection, (timeout + 10) * 1000);
         }
-    }
-    function _createJSONPResultHash(ok, status, response) {
-        return {
-            id:     option.id,
-            ok:     ok,
-            url:    url,
-            xhr:    { responseText: response || "", status: status },
-            guid:   guid,
-            status: status
-        };
-    }
-    function _garbageCollection() {
-        doc.head.removeChild(scriptNode);
-        delete uujsonp._db[jobid];
-    }
+    };
 
-    var guid = uu.guid(),
-        jobid = "j" + uu.guid(),
-        timeout = option.timeout || 10,
-        scriptSrc = url,
-        scriptNode = uu.node("script", {
-            type:       "text/javascript",
-            charset:    "utf-8",
-            uujsonprun: 0           // chattering guard
-        });
-
-    scriptSrc += (url.indexOf("?") < 0 ? "?" :
-                  url.indexOf("&") < 0 ? ";" : "&") +
-                  option.method || "callback" + "=uu.jsonp._db." + jobid; // uu.jsonp._db = _jobid
-
-    uujsonp._db[jobid] = _receiveData;
-
-    doc.head.appendChild(scriptNode);
-    scriptNode.setAttribute("src", scriptSrc);
+    doc.head.appendChild(script);
+    script.setAttribute("src", src);
 
     setTimeout(_watchdog, timeout * 1000);
 

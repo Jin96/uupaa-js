@@ -5,60 +5,44 @@
 
 uu.text || (function(win, doc, uu) {
 
-uu.mix(uu, {
-    // --- form ---
-    // [1][node] uu.text("text") -> createTextNode("text")
-    // [2][get]  uu.text(node) -> text or [text, ...]
-    // [3][set]  uu.text(node, "text") -> node
-    text:    uu.mix(uutext, {
-        get:        uutextget,      // uu.text.get(node) -> text or [text, ...]
-        set:        uutextset       // uu.text.set(node, text) -> node
-    }),
-    // [1][get] uu.val(node) -> val or [val, ...]
-    // [2][set] uu.val(node, "val") -> node
-    val:     uu.mix(uuval, {
-        get:        uuvalget,       // uu.val.get(node) -> val or [val, ...]
-        set:        uuvalset        // uu.val.set(node, val) -> node
-    })
-});
-
-// --- form ---
-// uu.text - text element creator, innerText accessor
 // [1][node] uu.text("text") -> createTextNode("text")
 // [2][get]  uu.text(node) -> text or [text, ...]
 // [3][set]  uu.text(node, "text") -> node
-function uutext(node,   // @param Node/String:
-                text) { // @param String(= void 0):
+uu.text = uutext;
+
+// [1][get] uu.value(node) -> value or [value, ...]
+// [2][set] uu.value(node, "value") -> node
+uu.value = uuvalue;
+
+
+// [1][get]  uu.text(node) -> text or [text, ...]
+// [2][set]  uu.text(node, "text") -> node
+
+// uu.text - node.text / node.innerText accessor
+function uutext(node,   // @param Node/String: node or text string
+                text) { // @param String(= void):
                         // @return Array/String/Node:
-    return uu.isString(node) ? doc.createTextNode(node) : // [1]
-           ((text === void 0) ? uutextget : uutextset)(node, text); // [2][3]
-}
-
-// uu.text.get
-function uutextget(node) { // @param Node:
-                           // @return String: innerText
-    return node[uu.gecko ? "textContent" : "innerText"];
-}
-
-// uu.text.set
-function uutextset(node,   // @param Node:
-                   text) { // @param Array/String: innerText
-                           // @return Node: node
+    if (uu.isString(node)) {
+        return doc.createTextNode(node);
+    }
+    if (text === void 0) {
+        return node[uu.gecko ? "textContent" : "innerText"];
+    }
     uu.node.add(doc.createTextNode(Array.isArray(text) ? text.join("") : text),
                 uu.node.clear(node));
     return node;
 }
 
-// uu.val - value
 // [1][get] uu.val(node) -> value
 // [2][set] uu.val(node, "value") -> node
-function uuval(node,  // @param Node:
-               val) { // @param String(= void 0):
-                      // @return String/Node:
-    return ((val === void 0) ? uuvalget : uuvalset)(node, val);
+
+// uu.value - value accessor
+function uuvalue(node,    // @param Node:
+                 value) { // @param String(= void 0):
+                          // @return String/Node:
+    return (value === void 0 ? _valueget : _valueset)(node, value);
 }
 
-// uu.val.get - get value
 // [1][<textarea>]       uu.val.get(node) -> "innerText"
 // [2][<button>]         uu.val.get(node) -> "<button value>"
 // [3][<option>]         uu.val.get(node) -> "<option value>" or
@@ -67,8 +51,10 @@ function uuval(node,  // @param Node:
 // [5][<selet multiple>] uu.val.get(node) -> ["value", ...]
 // [6][<input checkbox>] uu.val.get(node) -> ["value", ...]
 // [7][<input radio>]    uu.val.get(node) -> "value"
-function uuvalget(node) { // @param Node:
-                          // @return Array/String:
+
+// inner -
+function _valueget(node) { // @param Node:
+                           // @return Array/String:
     var rv = [], v, i = -1, ary, multi = 0;
 
     if (node.tagName.toLowerCase() === "select") {
@@ -93,12 +79,11 @@ function uuvalget(node) { // @param Node:
     return rv;
 }
 
-// uu.val.set - set value
-// uu.val.set(node, value) -> node
-function uuvalset(node,  // @param Node:
-                  val) { // @param String/Array:
-                         // @return Node:
-    var v, i = -1, j, jz, prop, ary, vals = Array.isArray(val) ? val : [val];
+// inner -
+function _valueset(node,    // @param Node:
+                   value) { // @param String/Array:
+                            // @return Node:
+    var v, i = -1, j, jz, prop, ary, valueArray = Array.isArray(value) ? value : [value];
 
     if (node.tagName.toLowerCase() === "select") {
         ary = node.options, prop = "selected";
@@ -110,14 +95,14 @@ function uuvalset(node,  // @param Node:
         while ( (v = ary[++i]) ) {
             v[prop] = false; // reset current state
         }
-        i = -1, jz = vals.length;
+        i = -1, jz = valueArray.length;
         while ( (v = ary[++i]) ) {
             for (j = 0; j < jz; ++j) {
-                ((v.value || v.text) == vals[j]) && (v[prop] = true); // 0 [==] "0"
+                ((v.value || v.text) == valueArray[j]) && (v[prop] = true); // 0 [==] "0"
             }
         }
     } else {
-        node.value = vals.join(""); // <textarea> <button> <option>
+        node.value = valueArray.join(""); // <textarea> <button> <option>
     }
     return node;
 }

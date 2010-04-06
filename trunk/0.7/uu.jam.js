@@ -229,7 +229,7 @@ function jamtext(a) { // @return jam:
 
 // jam.val
 function jamval(a) { // @return jam:
-    return _jammap(this, uu.val, a);
+    return _jammap(this, uu.value, a);
 }
 
 // inner - node iterator

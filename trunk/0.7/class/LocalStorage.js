@@ -1,5 +1,5 @@
-// === LocalStorage ===
-//{{{!depend uu, uu.class
+// === LocalStorage (WebStorage) ===
+//{{{!depend uu, uu.class, uu.Class.Storage
 //}}}!depend
 
 // WebStorage: http://www.w3.org/TR/webstorage/#storage
@@ -25,7 +25,9 @@ uu.Class.singleton("LocalStorage", {
     pairs:          pairs,      // pairs():Number
     clear:          clear,      // clear()
     remove:         remove,     // remove(key:String)
-    getAll:         getAll      // getAll():Hash
+    getAll:         getAll,     // getAll():Hash
+    saveToServer:   saveToServer,   // saveToServer(url:String, option:AjaxOptionHash = void, callback:Function = void)
+    loadFromServer: loadFromServer  // loadFromServer(url:String, option:JSONPOptionHash = void, callback:Function = void)
 });
 
 // uu.Class.LocalStorage.isReady - static method
@@ -37,7 +39,7 @@ uu.Class.LocalStorage.isReady = function() { // @return Boolean
 function init(callback) { // @param Function(= void): callback
     this.storage = win.localStorage;
 
-    callback && callback();
+    callback && callback(this);
 }
 
 // LocalStorage.nth - get nth key
@@ -114,6 +116,20 @@ function clear() {
 // LocalStorage.remove
 function remove(key) { // @param String: key
     this.storage.removeItem(key);
+}
+
+// LocalStorage.saveToServer
+function saveToServer(url,        // @param String: url
+                      option,     // @param AjaxOptionHash(= void):
+                      callback) { // @param Function(= void): callback(AjaxResultHash)
+    uu.Class.Storage.saveToServer(this, url, option, callback);
+}
+
+// LocalStorage.loadFromServer
+function loadFromServer(url,        // @param String: url
+                        option,     // @param JSONPOptionHash:
+                        callback) { // @param Function(= void): callback(JSONPResultHash)
+    uu.Class.Storage.loadFromServer(this, url, option, callback);
 }
 
 })(window, document, uu);

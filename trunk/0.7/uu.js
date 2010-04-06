@@ -5,7 +5,7 @@
 //
 // * User configrations ( doc/user-configrations.txt )
 //
-//  - uu.config = { aria, debug, right, altcss, visited }
+//  - uu.config = { aria, debug, right, altcss, storage, visited }
 //
 // * User callback functions ( doc/user-callback-functions.txt )
 //
@@ -317,6 +317,7 @@ uu.config   = uuarg(win.xconfig, {  // uu.config - Hash: user configurations
     debug:      false,
     right:      false,
     altcss:     0,
+    storage:    0,
     visited:    false,
     baseDir:    uutag("script").pop().src.replace(/[^\/]+$/, "")
 });
