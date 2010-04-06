@@ -1,6 +1,6 @@
 
 // === Unit Test ===
-//{{{!depend uu, uu.str
+//{{{!depend uu, uu.string
 //}}}!depend
 
 uu.test || (function(uu) {

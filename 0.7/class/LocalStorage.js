@@ -6,14 +6,15 @@
 //   IE8 spec: http://msdn.microsoft.com/en-us/library/cc197062(VS.85).aspx
 
 uu.Class.LocalStorage || (function(win, doc, uu) {
-var _FREE_SPACE = ((uu.gecko      ? 4.9 // Firefox3.5(5MB), Firefox3.6(4.9MB)
-                :   uu.ver.iphone ? 2.4 // iPhone3.1.2(Safari4+)
-                :   uu.ver.safari ? 8.0 // Safari4+
-                :   uu.ver.chrome ? 2.4 // Chrome4+
-                :   uu.webkit     ? 2.4 // WebKit
-                :   uu.opera      ? 2.4 // Opera10.50
-                :   uu.ie         ? 2.2 // IE8+
-                :   0) * 1024 * 1024) | 0;
+
+var _FREE_SPACE = uu.gecko      ? 5     * 1024 * 1024 - 260 // Firefox3.5+ (5.0MB)
+                : uu.ver.iphone ? 2.5   * 1024 * 1024 - 260 // iPhone3.1.2 (2.5MB)
+                : uu.ver.safari ? 8     * 1024 * 1024       // Safari4+    (8.0MB)
+                : uu.ver.chrome ? 2.5   * 1024 * 1024 - 260 // Chrome4+    (2.5MB)
+                : uu.webkit     ? 2.5   * 1024 * 1024 - 260 // WebKit      (2.5MB)
+                : uu.opera      ? 1.875 * 1024 * 1024 - 128 // Opera10.50  (1.875MB)
+                : uu.ie         ? 5     * 1000 * 1000       // IE8+        (4.768MB)
+                : 0;
 
 uu.Class.singleton("LocalStorage", {
     init:           init,       // init(callback:Function = void)
@@ -76,17 +77,22 @@ function set(key,     // @param String:
     }
 
     // verify
-    return _storage[key] === value;
+    return this.storage[key] === value;
 }
 
 // LocalStorage.size
 function size() { // @return Hash: { used, max }
                   //    used - Number: bytes
                   //    max  - Number: bytes
-    var used = 0, i = 0, iz,
-        remain = this.storage.remainingSpace; // [IE8+]
+    var used = 0, i = 0, iz, remain;
 
-    if (remain != null) { // [IE8+]
+    if (uu.ie && "remainingSpace" in this.storage) { // [IE8+] storage.remainingSpace
+
+        remain = this.storage.remainingSpace;
+
+        if (_FREE_SPACE < remain) { // expand free space
+            _FREE_SPACE = 5 * 1000 * 1000; // 5MB
+        }
         return { used: _FREE_SPACE - remain, max: _FREE_SPACE };
     }
     for (iz = this.storage.length; i < iz; ++i) {

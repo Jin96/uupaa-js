@@ -4,10 +4,10 @@
   <output>
     <movie disabled="False" />
     <movie input="" />
-    <movie path="..\..\uu.canvas.swf" />
-    <movie fps="60" />
-    <movie width="300" />
-    <movie height="150" />
+    <movie path="..\..\uu.storage.swf" />
+    <movie fps="5" />
+    <movie width="1" />
+    <movie height="1" />
     <movie version="9" />
     <movie background="#FFFFFF" />
   </output>
@@ -63,7 +63,7 @@
   </library>
   <!-- Class files to compile (other referenced classes will automatically be included) -->
   <compileTargets>
-    <compile path="src\Canvas.as" />
+    <compile path="src\Storage.as" />
   </compileTargets>
   <!-- Paths to exclude from the Project Explorer tree -->
   <hiddenPaths>
@@ -76,6 +76,6 @@
   <!-- Other project options -->
   <options>
     <option showHiddenPaths="False" />
-    <option testMovie="NewTab" />
+    <option testMovie="Default" />
   </options>
 </project>

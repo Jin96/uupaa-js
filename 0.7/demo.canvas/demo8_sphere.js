@@ -84,11 +84,11 @@ ctx.xFlyweight = 1;
     			}
 			}
 
-			var me = this;
+			var that = this;
 //			canvas.addEventListener('mousemove', this.setMouseXY, false);
 //            if (uu.ie) {
                 uu.mousemove(canvas, function(evt) {
-                    me.setMouseXY(evt);
+                    that.setMouseXY(evt);
                 });
 //            }
             if (uu.ie) {
@@ -97,7 +97,7 @@ ctx.xFlyweight = 1;
 			}
 			document.onmousedown = this.toggleScaling;
 			setInterval(function() {
-			    me.runtime(me)
+			    that.runtime(that)
 			}, 40);
 //			setInterval(this.runtime, 40, this);
 		}

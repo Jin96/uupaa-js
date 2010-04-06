@@ -4,8 +4,9 @@
 
 uu.Class.FlashStorage || (function(win, doc, uu) {
 
-var _ID = "externalflashstorage",
-    _SWF_PATH = uu.config.baseDir + "uu.storage.swf";
+var _SWF_PATH = uu.config.baseDir + "uu.storage.swf",
+    // [!] link to Storage.as "_CALLBACK_ID" on NPAPI I/F
+    _CALLBACK_ID = "externalflashstorage";
 
 uu.Class.singleton("FlashStorage", {
     init:           init,       // init(callback:Function = void)
@@ -29,15 +30,15 @@ function init(callback) { // @param Function(= void): callback
     // wait for response from flash initializer
     function flashStorageReadyCallback() {
         setTimeout(function() {
-            uu.dmz[_ID] = null;
+            uu.dmz[_CALLBACK_ID] = null;
             callback && callback();
         }, 0);
     }
 
-    uu.dmz[_ID] = flashStorageReadyCallback;
+    uu.dmz[_CALLBACK_ID] = flashStorageReadyCallback;
 
     this.storage = uu.flash(_SWF_PATH, {
-                        id: _ID,
+                        id: _CALLBACK_ID,
                         param: [
 //                          "allowScriptAccess", "always"
 //                            "loop", "false",

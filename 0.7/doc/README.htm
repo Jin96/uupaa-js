@@ -72,7 +72,7 @@ header,nav,article,section,aside,footer { display: block; }
   -uu-box-shadow: silver 5px 5px 10px;
   -uu-border-radius: 2px 2px 400px 400px;
   border: 0 none; /* [IE] avoid black border */
-} 
+}
 .bfd2 {
   padding: 10px;
   height: 1100px;
@@ -126,10 +126,10 @@ window.xconfig = {
       <ul>
         <li><img src="img/e32.alpha.png" />IE 6+</li>
         <li><img src="img/f32.alpha.png" />Firefox 3+</li>
-        <li><img src="img/o32.alpha.png" />Opera 9.5+</li>
-        <li><img src="img/c32.alpha.png" />Chrome</li>
+        <li><img src="img/c32.alpha.png" />Chrome 3+</li>
         <li><img src="img/s32.alpha.png" />Safari 3.1+</li>
-        <li><img src="img/i32.alpha.png" />iPhone</li>
+        <li><img src="img/i32.alpha.png" />iPhone/iPod</li>
+        <li><img src="img/o32.alpha.png" />Opera 9.5+</li>
       </ul>
     </div>
   </div>
@@ -167,8 +167,9 @@ window.xconfig = {
     <li>
       <dl>
         <dt>HTML5 APIs</dt>
-        <dd>&lt;canvas&gt; → uu.canvas()</dd>
-        <dd>WebStorage → uu.local()</dd>
+        <dd>&lt;canvas&gt; → uu.canvas() + window.xcanvas(uu, canvasNodeArray)</dd>
+        <dd>&lt;audio&gt; → uu.audio() + window.xaudio(uu, audioNodeArray)</dd>
+        <dd>WebStorage(LocalStorage) → uu.local() + window.xlocal(uu)</dd>
       </dl>
     </li>
     <li>
@@ -184,7 +185,7 @@ window.xconfig = {
         <dd>CSS2 MaxWidth → max-width: (for IE)</dd>
         <dd>CSS3 Opacity → opacity: (for IE)</dd>
         <dd>CSS3 Display:table → -uu-display: table</dd>
-        <dd>CSS3 Gradients → -uu-gradient(...)</dd>
+        <dd>CSS3 Gradients(WebKit syntax) → -uu-gradient(...)</dd>
         <dd>CSS3 BorderRadius → -uu-border-radius:</dd>
         <dd>CSS3 DropShadows → -uu-box-shadow: -uu-text-shadow:</dd>
         <dd>CSS3 MultipleBackgrounds → -uu-background:</dd>
@@ -209,13 +210,28 @@ window.xconfig = {
         <dd>JSON → uu.str2json(), uu.mix2json(), uu.json2mix()</dd>
         <dd>JSONP → uu.jsonp()</dd>
         <dd>Tween → uu.tween()</dd>
-        <dd>Type detection → uu.type(), uu.like(), uu.has(), uu.isxxx()</dd>
-        <dd>Version detection → uuvers()</dd>
-        <dd>window.getComputedStyle (for IE)</dd>
+        <dd>Type detection → uu.type(), uu.like(), uu.has(), uu.isArray()...</dd>
+        <dd>Version and plugin detection → uu.ver</dd>
+        <dd>getComputedStyle → uu.style</dd>
       </dl>
     </li>
   </ul>
 </div>
+<table>
+<tr>
+    <th>CSS3 PROPERTYIES</th>
+    <td><img src="img/e32.alpha.png" /></td>
+    <td><img src="img/f32.alpha.png" /></td>
+    <td><img src="img/o32.alpha.png" /></td>
+    <td><img src="img/c32.alpha.png" /></td>
+    <td><img src="img/s32.alpha.png" /></td>
+    <td><img src="img/i32.alpha.png" /></td>
+    <td><img src="img/u32.alpha.png" /></td>
+</tr>
+<tr><th>RGBA</th><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><th>HSLA</th><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+
+</table>
 
 
 </article>

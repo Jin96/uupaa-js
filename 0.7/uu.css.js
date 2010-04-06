@@ -1,6 +1,6 @@
 
 // === CSS 2.1 / StyleSheet ===
-//{{{!depend uu, uu.class, uu.color, uu.str, uu.tween
+//{{{!depend uu, uu.class, uu.color, uu.string, uu.tween
 //}}}!depend
 
 // clientWidth           = style.width + padding
@@ -120,6 +120,7 @@ uu.mix(uu.css, {
     clear:        uucssclear      // uu.css.clear(ssid = "uuss")
 });
 
+/*
 // uu.Class.CSSRule - StyleSheet manage class
 uu.Class("CSSRule", {
     init:         uucssruleinit,  // uu.Class.CSSRule(ssid)
@@ -127,6 +128,7 @@ uu.Class("CSSRule", {
                                   // [2][add rules] cssrule.add([".class1", "color:red",
                                   //                             "#id1", "color:blue"]) -> this
 });
+ */
 
 // =========================================================
 // uu.css.offset
@@ -871,7 +873,22 @@ function uucsscreate(ssid) { // @param String(= "uuss"): StyleSheet id
             _styleSheetDB.ss[ssid] = doc.head.appendChild(node);
         }
     }
-    return uu.factory("CSSRule", ssid);
+//    return uu("CSSRule", ssid);
+
+    return {
+        // [1][add pair]  add(".class1", "color:red") -> this
+        // [2][add rules] add([".class1", "color:red", "#id1", "color:blue"]) -> this
+        add: function(expr,   // @param String/Array: expr or [(expr, decl), ...]
+                      decl) { // @param String(= void 0): decl
+                              // @return this:
+            var v, i = -1, ary = (decl === void 0) ? expr : [expr, decl];
+
+            while ( (v = ary[++i]) ) {
+                uucssinject(ssid, v, ary[++i]);
+            }
+            return this;
+        }
+    };
 }
 
 // uu.css.inject - add CSS rule
@@ -924,6 +941,7 @@ function _rules(ss) {
                  : ss.sheet.cssRules.length;
 }
 
+/*
 // uu.Class.CSSRule.init
 function uucssruleinit(ssid) { // @param String:
     this._ssid = ssid || "usercss";
@@ -943,6 +961,7 @@ function uucssruleadd(expr,   // @param String/Array: expr or [(expr, decl), ...
     }
     return this;
 }
+ */
 
 })(window, document, uu);
 

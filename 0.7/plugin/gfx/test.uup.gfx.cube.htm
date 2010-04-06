@@ -11,7 +11,7 @@ window.xconfig = { dir: "../../" };
 function xcanvas(uu) {
   var out = uu.id("out");
   var ctx = out.getContext("2d");
-  var cube = uu.factory("GfxCube");
+  var cube = uu("GfxCube");
 
   ctx.xFlyweight = 1;
 

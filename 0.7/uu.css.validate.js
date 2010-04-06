@@ -1,6 +1,6 @@
 
 // === CSS Validator ===
-//{{{!depend uu, uu.color, uu.str
+//{{{!depend uu, uu.color, uu.string
 //}}}!depend
 
 uu.css.validate || (function(uu) {
@@ -38,22 +38,20 @@ function border(value) { // @param String: border value
     var ary = uu.split.token(value, " "), v, i = 0,
         width, style, colorHash, r, valid = 1;
 
-    while (valid && (v = ary[i++])) {
-        if (_LENGTH.test(v) || border._WIDTH_KEYWORD.test(v)) {
-            width = v;
-            continue;
+    try {
+        while (valid && (v = ary[i++])) {
+            if (_LENGTH.test(v) || border._WIDTH_KEYWORD.test(v)) {
+                width = v;
+                continue;
+            }
+            if (border._STYLE_KEYWORD.test(v)) {
+                style = v;
+                continue;
+            }
+            colorHash = uu.color(v); // throws
         }
-        if (border._STYLE_KEYWORD.test(v)) {
-            style = v;
-            continue;
-        }
-        r = uu.color(v);
-        if (r) {
-            colorHash = r;
-            continue;
-        }
+    } catch(err) {
         valid = 0;
-        break;
     }
     return { width: width || "medium", style: style || "none",
              colorHash: colorHash, valid: valid };
@@ -73,25 +71,26 @@ function shadow(value) { // @param String: -uu-box-shadow: value
                          //     blur  - Array: ["0px", ...]
                          //     valid - Number: 0 or 1
     var rv = { colorHash: [], ox: [], oy: [], blur: [] },
-        multi, ary, v, i = 0, c, colorHash, ox, oy, blur, valid = 1;
+        multi, ary, v, i = 0, colorHash, ox, oy, blur, valid = 1;
 
     multi = uu.split.token(uu.trim(value), ",");
 
-    while (valid && (v = multi[i++])) {
-        ary = uu.split.token(v, " ");
+    try {
+        while (valid && (v = multi[i++])) {
+            ary = uu.split.token(v, " ");
 
-        colorHash = shadow._HEAD_DIGIT.test(ary[0]) ? ary.pop() : ary.shift();
-        ox   = ary.shift() || 0;
-        oy   = ary.shift() || 0;
-        blur = ary.shift() || 0;
+            colorHash = shadow._HEAD_DIGIT.test(ary[0]) ? ary.pop() : ary.shift();
+            ox   = ary.shift() || 0;
+            oy   = ary.shift() || 0;
+            blur = ary.shift() || 0;
 
-        c = uu.color(colorHash);
-        valid = !!c; // 0 is invalid color
-
-        rv.colorHash.push(c);
-        rv.ox.push(ox);
-        rv.oy.push(oy);
-        rv.blur.push(blur);
+            rv.colorHash.push(uu.color(colorHash)); // throws
+            rv.ox.push(ox);
+            rv.oy.push(oy);
+            rv.blur.push(blur);
+        }
+    } catch(err) {
+        valid = 0;
     }
     !rv.colorHash.length && (valid = 0);
     rv.valid = valid;
@@ -217,49 +216,52 @@ function background(value) { // @param String: -uu-background: value
     multi = uu.split.token(uu.trim.inner(value), ",");
     finalLayer = multi.length - 1; // final-bg-layer
 
-    while (valid && (v = multi[++i])) {
-        img = rpt = pox = poy = ori = clp = "";
-        ary = uu.split.token(uu.trim(v), " ");
+    try {
+        while (valid && (v = multi[++i])) {
+            img = rpt = pox = poy = ori = clp = "";
+            ary = uu.split.token(uu.trim(v), " ");
 
-        j = -1;
-        while ( (w = ary[++j]) ) {
-            m = background._BACKGROUND_IDENT.exec(w);
-            if (m) {
-                if (m[1]) { img ? (valid = 0) : (img = m[1]); } // -uu-canvas
-                if (m[2]) { img ? (valid = 0) : (img = m[2]); } // -uu-gradient
-                if (m[3]) { img ? (valid = 0) : (img = m[3]); } // url
-                if (m[4]) { rpt ? (valid = 0) : (rpt = m[4]); } // repeat
-                if (m[5]) { att ? (valid = 0) : (att = m[5]); } // attachment
-                if (m[6]) { ori ? (valid = 0) : (ori = m[6]); } // origin
-                if (m[7]) { clp ? (valid = 0) : (clp = m[7]); } // clip
-                continue;
-            } else {
-                m = background._BACKGROUND_POS.exec(w);
+            j = -1;
+            while ( (w = ary[++j]) ) {
+                m = background._BACKGROUND_IDENT.exec(w);
                 if (m) {
-                    poy ? (valid = 0)
-                        : pox ? (poy = m[1])
-                              : (pox = m[1]);
+                    if (m[1]) { img ? (valid = 0) : (img = m[1]); } // -uu-canvas
+                    if (m[2]) { img ? (valid = 0) : (img = m[2]); } // -uu-gradient
+                    if (m[3]) { img ? (valid = 0) : (img = m[3]); } // url
+                    if (m[4]) { rpt ? (valid = 0) : (rpt = m[4]); } // repeat
+                    if (m[5]) { att ? (valid = 0) : (att = m[5]); } // attachment
+                    if (m[6]) { ori ? (valid = 0) : (ori = m[6]); } // origin
+                    if (m[7]) { clp ? (valid = 0) : (clp = m[7]); } // clip
                     continue;
-                } else if (i === finalLayer) {
-                    // color is permitted in <final-bg-layer>, but not in <bg-layer>
-                    // http://www.w3.org/TR/css3-background/
-                    if (!colorHash) {
-                        colorHash = uu.color(w);
-                        valid = !!colorHash;
+                } else {
+                    m = background._BACKGROUND_POS.exec(w);
+                    if (m) {
+                        poy ? (valid = 0)
+                            : pox ? (poy = m[1])
+                                  : (pox = m[1]);
                         continue;
+                    } else if (i === finalLayer) {
+                        // color is permitted in <final-bg-layer>, but not in <bg-layer>
+                        // http://www.w3.org/TR/css3-background/
+                        if (!colorHash) {
+                            colorHash = uu.color(w); // throws
+                            continue;
+                        }
                     }
                 }
+                // unknown token
+                valid = 0;
+                break;
             }
-            // unknown token
-            valid = 0;
-            break;
+            rv.image.push(img || "none"); // "-uu-canvas(...)" or "-uu-gradient(...)" or "url(...)"
+            rv.repeat.push(rpt || "repeat");
+            rv.attachment.push(att || "scroll");
+            rv.position.push((pox || "0%") + " " + (poy || "0%"));
+            rv.origin.push(ori || "padding-box");
+            rv.clip.push(clp || "no-clip");
         }
-        rv.image.push(img || "none"); // "-uu-canvas(...)" or "-uu-gradient(...)" or "url(...)"
-        rv.repeat.push(rpt || "repeat");
-        rv.attachment.push(att || "scroll");
-        rv.position.push((pox || "0%") + " " + (poy || "0%"));
-        rv.origin.push(ori || "padding-box");
-        rv.clip.push(clp || "no-clip");
+    } catch(err) {
+        valid = 0;
     }
     rv.colorHash = colorHash || uu.color("transparent"); // color
     rv.valid = valid; // valid

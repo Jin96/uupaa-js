@@ -1,6 +1,6 @@
 
 // === Tween ===
-//{{{!depend uu, uu.color, uu.css, uu.str
+//{{{!depend uu, uu.color, uu.css, uu.string
 //}}}!depend
 
 uu.tween || (function(win, doc, uu) {

@@ -138,35 +138,35 @@ function xboot(uu) {
     /////////////////////
     msg.push('::コンストラクタのテスト'); dump();
         msg.push('Class A のインスタンスを生成');
-        var objA  = uu.factory("A", 1, 2);
+        var objA  = uu("A", 1, 2);
         dump();
 
         msg.push('Class B0A のインスタンスを生成 - A.init -> B0A.init 順に呼ばれる');
-        var objB0A  = uu.factory("B0A", 1, 2);
+        var objB0A  = uu("B0A", 1, 2);
         dump();
 
         msg.push('Class B1A のインスタンスを生成 - A.init -> B1A.init 順に呼ばれる');
-        var objB1A  = uu.factory("B1A", 1, 2);
+        var objB1A  = uu("B1A", 1, 2);
         dump();
 
         msg.push('Class C0B0A のインスタンスを生成 - A.init -> B0A.init -> C0B0A.init 順に呼ばれる');
-        var objC0B0A = uu.factory("C0B0A", 1, 2);
+        var objC0B0A = uu("C0B0A", 1, 2);
         dump();
 
         msg.push('Class C0B1A のインスタンスを生成 - A.init -> B0A.init -> C1B0A.init 順に呼ばれる');
-        var objC1B0A = uu.factory("C1B0A", 1, 2);
+        var objC1B0A = uu("C1B0A", 1, 2);
         dump();
 
         msg.push('Class C1B0A のインスタンスを生成 - A.init -> B1A.init -> C0B1A.init 順に呼ばれる');
-        var objC0B1A = uu.factory("C0B1A", 1, 2);
+        var objC0B1A = uu("C0B1A", 1, 2);
         dump();
 
         msg.push('Class C1B1A のインスタンスを生成 - A.init -> B1A.init -> C1B1A.init 順に呼ばれる');
-        var objC1B1A = uu.factory("C1B1A", 1, 2);
+        var objC1B1A = uu("C1B1A", 1, 2);
         dump();
 
         msg.push('Class C1B1A の別インスタンス(objC1B1A2)を生成 - A.init -> B1A.init -> C1B1A.init 順に呼ばれる');
-        var objC1B1A2 = uu.factory("C1B1A", 3, 4);
+        var objC1B1A2 = uu("C1B1A", 3, 4);
         dump();
 
     /////////////////////

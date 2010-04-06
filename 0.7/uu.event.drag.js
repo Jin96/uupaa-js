@@ -1,6 +1,6 @@
 
 // === Drag Event ===
-//{{{!depend uu, uu.class, uu.css
+//{{{!depend uu, uu.class, uu.css, uu.color
 //}}}!depend
 
 uu.Class.Drag || (function(win, doc, uu) {
@@ -60,16 +60,16 @@ function uueventdraglimit(min,   // @param Number:
 function draginit(tgt,      // @param Node: move target
                   grip,     // @param Node(= void 0): grip
                   option) { // @param Hash(= {}): { ghost, wheel, noshim, rel, minw, maxw, minh, maxh }
-                            //      option.ghost - Number: ghost, 1 is enable ghost effect
-                            //      option.wheel - Number/Function: wheel, 0 is off
+                            //      option.ghost  - Number: ghost, 1 is enable ghost effect
+                            //      option.wheel  - Number/Function: wheel, 0 is off
                             //                                1 is resize
                             //                                fn is callback
                             //      option.noshim - Number: noshim, 1 is disable shim(in IE6)
-                            //      option.rel - Number: rel, 1 is relative, 0 is absolute
-                            //      option.minw - Number: min width
-                            //      option.maxw - Number: max width
-                            //      option.minh - Number: min height
-                            //      option.maxh - Number: max height
+                            //      option.rel    - Number: rel, 1 is relative, 0 is absolute
+                            //      option.minw   - Number: min width
+                            //      option.maxw   - Number: max width
+                            //      option.minh   - Number: min height
+                            //      option.maxh   - Number: max height
     grip = grip || tgt;
     this._tgt  = tgt;
     this._grip = grip;
@@ -88,7 +88,7 @@ function draginit(tgt,      // @param Node: move target
     this._opt.rel ? uu.css.toRelative(tgt)
                   : uu.css.toAbsolute(tgt);
     this._shim = (uu.ver.ie6 && !this._opt.rel
-                             && !this._opt.noshim) ? uu.factory("Shim", tgt) : 0;
+                             && !this._opt.noshim) ? uu("Shim", tgt) : 0;
     uu.mousedown(grip, this);
     this._opt.wheel && uu.mousewheel(tgt, this);
 //  uu.fx.fade(tgt, { begin: 0, end: 1.0 });
@@ -102,7 +102,8 @@ function draghandleevent(evt) {
 
     if (code) {
         if (code <= 2) { // [1] mousedown, [2] mouseup
-            uu.event(uu.ie ? this._grip : doc, "mousemove+,mouseup+", this, code);
+            uu.event(uu.ie ? this._grip
+                           : doc, "mousemove+,mouseup+", this, code & 2);
         } else if (code === 3) { // [3] mousemove
             this._shim &&
                 this._shim.resize({ x: rv.px, y: rv.py, w: this._tgt.offsetWidth,
@@ -117,7 +118,7 @@ function draghandleevent(evt) {
 function dragmousewheel(evt) {
     var opt = this._opt, wheel, size, w, h, more = uu.event.more(evt);
 
-    if (opt.wheel === 1) {
+    if (opt.wheel) {
         wheel = more.wheel * 10;
         size = uu.css.size(this._tgt, 1); // plain size
         w = uueventdraglimit(opt.minw, size.w + wheel, opt.maxw),
@@ -139,42 +140,53 @@ function draggableinit(
                        //        Number: ghost, 1 is enable ghost effect
                        //        ColorString(= "bisque"): droppablebg,
                        //                                 drop allow bgcolor
-    var me = this, v, i = -1;
+    var that = this, node, i = -1;
 
     this._opt = uu.arg(option, { ghost: 0, droppablebg: "bisque", zmanage: 1 });
     this._tgt = 0;
     this._draggable = draggable;
     this._droppable = droppable;
 
-    while ( (v = draggable[++i]) ) {
-        v.style.cursor = "move";
-        uu.mousedown(v, this);
-        this._tgt = v; // dummy
+    // setup draggable node
+    //      <div style="cursor:move" onmousemove="..."></div>
+    //
+    while ( (node = draggable[++i]) ) {
+        node.style.cursor = "move";
+        uu.mousedown(node, this);
+        this._tgt = node; // dummy
     }
+
     // keep droppable bgcolor and rect
+    //      <div uudroppable={ bgcolor, rect }></div>
     i = -1;
-    while ( (v = droppable[++i]) ) {
-        v.uudroppable = { bgcolor: uu.css.bgcolor(v).hex,
-                          rect: uu.css.rect(v) }; // bond
+    while ( (node = droppable[++i]) ) {
+        node.uudroppable = {
+            bgcolor: uu.css.bgcolor(node).hex,
+            rect:    uu.css.rect(node)
+        };
     }
     this._opt.mousedown = function(evt) {
-        me._tgt = evt.node; // evt.currentTarget
-        uu.css.toAbsolute(me._tgt);
+        that._tgt = evt.node; // evt.currentTarget
+        uu.css.toAbsolute(that._tgt);
+
+        // [IE6] hide select-box
         if (uu.ver.ie6) {
             uu.tag("select").forEach(function(v) {
                 v.style.visibility = "hidden";
             });
         }
-        return { tgt: me._tgt, grip: me._tgt }; // override
+        return { tgt: that._tgt, grip: that._tgt }; // override
     };
     this._opt.mouseup = function(evt, tgt, grip, code, opt, x, y) {
         uu.css.toStatic(tgt);
+
+        // [IE6] show select-box
         if (uu.ver.ie6) {
-            uu.tag("select").forEach(function(v) {
-                v.style.visibility = "";
+            uu.tag("select").forEach(function(node) {
+                node.style.visibility = "";
             });
         }
-        var ctx = _draggableinrect(droppable, x, y, me._opt.droppablebg);
+        var ctx = _draggableinrect(droppable, x, y, that._opt.droppablebg);
 
         if (ctx && _draggableready(ctx, draggable)) {
             uu.node.add(tgt, ctx);
@@ -190,21 +202,35 @@ function draggablehandleevent(evt) {
 
     if (code) {
         if (code <= 2) { // [1] mousedown, [2] mouseup
-            uu.event(uu.ie ? this._tgt : doc, "mousemove+,mouseup+", this, code);
+            uu.event(uu.ie ? this._tgt
+                           : doc, "mousemove+,mouseup+", this, code & 2);
         } else if (code === 3) {
             _draggableinrect(this._droppable, rv.x, rv.y, this._opt.droppablebg);
         }
     }
 }
 
-// inner -
-function _draggableinrect(ary, x, y, bg) {
-    var rv, v, i = -1;
+// inner - Draggable in Rect
+function _draggableinrect(nodeArray, // @param NodeArray:
+                          x,         // @param Number:
+                          y,         // @param Number:
+                          color) {   // @param String: hit color
+    var rv, node, backgroundColor, i = 0, iz = nodeArray.length;
 
-    while ( (v = ary[++i]) ) {
-        v.style.backgroundColor = uu.css.inRect(v.uudroppable.rect, x, y)
-                                ? (rv = v, bg)
-                                : v.uudroppable.bgcolor;
+    for (; i < iz; ++i) {
+        node = nodeArray[i];
+        backgroundColor = node.style.backgroundColor;
+
+        if (uu.css.inRect(node.uudroppable.rect, x, y)) {
+            rv = node;
+            if (backgroundColor !== color) {
+                node.style.backgroundColor = color;
+            }
+        } else {
+            if (backgroundColor !== node.uudroppable.bgcolor) {
+                node.style.backgroundColor = node.uudroppable.bgcolor;
+            }
+        }
     }
     return rv;
 }
@@ -230,7 +256,7 @@ function sortableinit(ul,       // @param Node: <ul> node
                                 //        Number/Function: wheel, 0 is off
                                 //                                1 is resize
                                 //                                fn is callback
-    var me = this;
+    var that = this;
 
     this._opt = uu.arg(option, { ghost: 0, wheel: 0, zmanage: 1 });
     this._tgt = 0;
@@ -240,25 +266,29 @@ function sortableinit(ul,       // @param Node: <ul> node
 
     this._li.forEach(function(v) {
         v.style.cursor = "move";
-        uu.event(v, "mousedown+", me);
-        me._tgt = v; // dummy
+        uu.event(v, "mousedown+", that);
+        that._tgt = v; // dummy
         v.uusortable = { idx: uu.node.find(v),
                          rect: uu.css.rect(v) };
     });
 
     this._opt.mousedown = function(evt) {
-        me._tgt = evt.node; // evt.currentTarget
-        var cloned = me._tgt.cloneNode(true);
+        that._tgt = evt.node; // evt.currentTarget
+        var cloned = that._tgt.cloneNode(true);
 
         cloned.style.visibility = "hidden";
-        me._fp = uu.node.next(me._tgt, cloned);
-        uu.css.toAbsolute(me._tgt);
-        return { tgt: me._tgt, grip: me._tgt }; // override
+
+        // TODO: test
+        that._fp = uu.node.next(that._tgt, cloned);
+
+
+        uu.css.toAbsolute(that._tgt);
+        return { tgt: that._tgt, grip: that._tgt }; // override
     };
     this._opt.mouseup = function(evt, tgt) {
-        uu.node.swap(tgt, me._fp);
+        uu.node.swap(tgt, that._fp);
         uu.css.toStatic(tgt);
-        me._li.forEach(function(v) {
+        that._li.forEach(function(v) {
             v.uusortable = { idx: uu.node.find(v),
                              rect: uu.css.rect(v) }; // update
         });
@@ -272,7 +302,8 @@ function sortablehandleevent(evt) {
 
     if (code) {
         if (code <= 2) { // [1] mousedown, [2] mouseup
-            uu.event(uu.ie ? _tgt : doc, "mousemove+,mouseup+", this, code);
+            uu.event(uu.ie ? _tgt
+                           : doc, "mousemove+,mouseup+", this, code & 2);
         } else if (code === 3) { // [3] mousemove
             _li = this._li;
 
@@ -349,9 +380,9 @@ function zindexdrag(node) { // @param Node:
 }
 
 // inner -
-function _zsink(me, node) {
+function _zsink(that, node) {
     var thresh = node.style.zIndex || 10, // threshold
-        hash = me._nodedb, v, i = 0;
+        hash = that._nodedb, v, i = 0;
 
     for (i in hash) {
         v = hash[i];
@@ -373,7 +404,7 @@ function shimbind() {
             '<iframe scrolling="no" src="javascript:0" frameborder="0"' +
             ' style="position:absolute;top:0;left:0;filter:alpha(opacity=0)">' +
             '</iframe>');
-        uu.node.prev(this._parent, this._shim); // add prev sibl
+        uu.node.prev(this._shim, this._parent); // add prev sibl
     }
     var hash = uu.css.size(this._parent);
 

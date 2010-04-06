@@ -5,19 +5,19 @@
 
 uu.sprintf || (function(win, doc, uu) {
 
-uu.split.token = uusplittoken;  // uu.split.token(expr, splitter, notrim = false) -> [token, ...]
-uu.sprintf = uusprintf;         // uu.sprintf("%s-%d", var_args, ...) -> "formatted string"
+uu.split.token = uusplittoken;  // uu.split.token(expression:String, splitter:String = " ", notrim:Boolean = false):Array
+uu.sprintf = uusprintf;         // uu.sprintf(format:String, var_args ...):String
 
 
 // uu.split.token - split token
-function uusplittoken(expr,     // @param String: expression
-                      splitter, // @param String(= " "):
-                      notrim) { // @param Boolean(= false): false is trim both space
-                                // @return Array: ["token", ...]
+function uusplittoken(expression, // @param String: expression
+                      splitter,   // @param String(= " "):
+                      notrim) {   // @param Boolean(= false): false is trim both space
+                                  // @return Array: ["token", ...]
     splitter = splitter || " ";
-    if (expr.indexOf(splitter) < 0) { return [expr]; }
+    if (expression.indexOf(splitter) < 0) { return [expression]; }
 
-    var rv = [], ary = expr.split(""), v, w, i = -1,
+    var rv = [], ary = expression.split(""), v, w, i = -1,
         nest = 0, quote = 0, q, tmp = [], ti = -1, esc = 0,
         TOKEN = { "(": 2, ")": 3, '"': 4, "'": 4, "\\": 5 }; // [!]keep local
 

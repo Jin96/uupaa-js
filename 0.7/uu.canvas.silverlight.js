@@ -1177,7 +1177,7 @@ function _radialGradientFill(ctx, obj, path, fill, zindex) {
                 }
                 bari =  [ '<Path Opacity="', ctx.globalAlpha,
                           '" Canvas.ZIndex="', zindex2,
-                          '" Data="', path, '" Fill="', v.color.argb, '" />'].join("");
+                          '" Data="', path, '" Fill="', v.color.argb(), '" />'].join("");
                 !ctx.xFlyweight &&
                   ctx._history.push(ctx._clipPath ? (bari = _clippy(ctx, bari)) : bari);
                 ctx._state !== 0x1 ? ctx._stock.push(bari)
@@ -1274,7 +1274,7 @@ function _linearColor(obj) { // @param CanvasGradient:
 
     for (; i < iz; ++i) {
         v = ary[i];
-        rv.push('<GradientStop Color="' + v.color.argb +
+        rv.push('<GradientStop Color="' + v.color.argb() +
                 '" Offset="' + v.offset + '" />');
     }
     return obj.colors = rv.join(""); // bond
@@ -1291,10 +1291,10 @@ function _radialColor(obj) { // @param CanvasGradient:
     if (!iz) {
         return obj.colors = " ";
     }
-    rv.push('<GradientStop Color="', ary[0].color.argb, '" Offset="0" />');
+    rv.push('<GradientStop Color="', ary[0].color.argb(), '" Offset="0" />');
     for (i = 0; i < iz; ++i) {
         v = ary[i];
-        rv.push('<GradientStop Color="' + v.color.argb +
+        rv.push('<GradientStop Color="' + v.color.argb() +
                 '" Offset="' + (v.offset * remain + r0) + '" />');
     }
     return obj.colors = rv.join(""); // bond
