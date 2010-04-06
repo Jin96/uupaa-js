@@ -1,5 +1,5 @@
 // === FlashStorage ===
-//{{{!depend uu, uu.class, uu.flash
+//{{{!depend uu, uu.class, uu.flash, uu.Class.Storage
 //}}}!depend
 
 uu.Class.FlashStorage || (function(win, doc, uu) {
@@ -17,7 +17,9 @@ uu.Class.singleton("FlashStorage", {
     pairs:          pairs,      // pairs():Number
     clear:          clear,      // clear()
     remove:         remove,     // remove(key:String)
-    getAll:         getAll      // getAll():Hash
+    getAll:         getAll,     // getAll():Hash
+    saveToServer:   saveToServer,   // saveToServer(url:String, option:AjaxOptionHash = void, callback:Function = void)
+    loadFromServer: loadFromServer  // loadFromServer(url:String, option:JSONPOptionHash = void, callback:Function = void)
 });
 
 // uu.Class.FlashStorage.isReady - static method
@@ -27,11 +29,13 @@ uu.Class.FlashStorage.isReady = function() { // @return Boolean
 
 // FlashStorage.init
 function init(callback) { // @param Function(= void): callback
+    var that = this;
+
     // wait for response from flash initializer
     function flashStorageReadyCallback() {
         setTimeout(function() {
             uu.dmz[_CALLBACK_ID] = null;
-            callback && callback();
+            callback && callback(that);
         }, 0);
     }
 
@@ -97,6 +101,20 @@ function clear() {
 // FlashStorage.remove
 function remove(key) { // @param String: key
     this.storage.ex_remove(key);
+}
+
+// FlashStorage.saveToServer
+function saveToServer(url,        // @param String: url
+                      option,     // @param AjaxOptionHash(= void):
+                      callback) { // @param Function(= void): callback(AjaxResultHash)
+    uu.Class.Storage.saveToServer(this, url, option, callback);
+}
+
+// FlashStorage.loadFromServer
+function loadFromServer(url,        // @param String: url
+                        option,     // @param JSONPOptionHash:
+                        callback) { // @param Function(= void): callback(JSONPResultHash)
+    uu.Class.Storage.loadFromServer(this, url, option, callback);
 }
 
 })(window, document, uu);

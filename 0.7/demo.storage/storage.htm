@@ -1,6 +1,7 @@
 ﻿<!doctype html><html><head><meta charset="utf-8" />
 <title>uu.storage</title>
 <script src="../uu.js"></script>
+<script src="../uu.ajax.js"></script>
 <script src="../uu.form.js"></script>
 <script src="../uu.flash.js"></script>
 <script src="../class/Storage.js"></script>
@@ -29,7 +30,7 @@ function updateView() {
     var storage = uu("Storage");
     var hash = storage.getAll();
 
-    uu.val(uu.id("all"), uu.json(hash));
+    uu.value(uu.id("all"), uu.json(hash));
 
 
     var pairs = storage.pairs();
@@ -48,7 +49,11 @@ function updateSize() {
     } else {
         node.style.color = "black";
     }
-    if (size.max > 1024 * 1024) {
+    if (size.max === Number.MAX_VALUE) {
+        uu.text(node, "used: 0bytes, max: Number.MAX_VALUE, free: unknown");
+        uu.id("limittest").disabled = true;
+
+    } else if (size.max > 1024 * 1024) {
         uu.text(node,
             uu.format("used: ?bytes(?MB), max: ?MB, remain: ?bytes(?MB)",
                       size.used,
@@ -169,7 +174,7 @@ key/value: <input id="key" type="text" value="key" />
 <textarea id="all" cols="60" rows="5"></textarea><br />
 <br />
 <p>test:</p>
-<input type="button" value="limit test" onclick="limitTest()" /> →
+<input id="limittest" type="button" value="limit test" onclick="limitTest()" /> →
 <input type="button" value="add pair(no refresh)" onclick="setPair(1, 1)" />
 
 </body></html>

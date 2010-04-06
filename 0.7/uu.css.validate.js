@@ -36,7 +36,7 @@ function border(value) { // @param String: border value
                          //     colorHash - ColorHash: {}
                          //     valid - Number: 0 or 1
     var ary = uu.split.token(value, " "), v, i = 0,
-        width, style, colorHash, r, valid = 1;
+        width, style, colorHash, valid = 1;
 
     try {
         while (valid && (v = ary[i++])) {

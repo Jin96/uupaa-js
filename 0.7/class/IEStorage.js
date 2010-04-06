@@ -1,5 +1,5 @@
 // === IEStorage (userData behavior) ===
-//{{{!depend uu, uu.class
+//{{{!depend uu, uu.class, uu.Class.Storage
 //}}}!depend
 
 // http://msdn.microsoft.com/en-us/library/ms531424(VS.85).aspx
@@ -19,7 +19,9 @@ uu.Class.singleton("IEStorage", {
     pairs:          pairs,      // pairs():Number
     clear:          clear,      // clear()
     remove:         remove,     // remove(key:String)
-    getAll:         getAll      // getAll():Hash
+    getAll:         getAll,     // getAll():Hash
+    saveToServer:   saveToServer,   // saveToServer(url:String, option:AjaxOptionHash = void, callback:Function = void)
+    loadFromServer: loadFromServer  // loadFromServer(url:String, option:JSONPOptionHash = void, callback:Function = void)
 });
 
 // uu.Class.IEStorage.isReady - static method
@@ -34,7 +36,7 @@ function init(callback) { // @param Function(= void): callback
     this.storage.addBehavior("#default#userData");
     this.storage.expires = _PERSIST_DATE;
 
-    callback && callback();
+    callback && callback(this);
 }
 
 // IEStorage.nth - get nth key
@@ -140,6 +142,20 @@ function remove(key) { // @param String: key
         this.storage.removeAttribute(key);
         this.storage.save(_STORE_NAME);
     }
+}
+
+// IEStorage.saveToServer
+function saveToServer(url,        // @param String: url
+                      option,     // @param AjaxOptionHash(= void):
+                      callback) { // @param Function(= void): callback(AjaxResultHash)
+    uu.Class.Storage.saveToServer(this, url, option, callback);
+}
+
+// IEStorage.loadFromServer
+function loadFromServer(url,        // @param String: url
+                        option,     // @param JSONPOptionHash:
+                        callback) { // @param Function(= void): callback(JSONPResultHash)
+    uu.Class.Storage.loadFromServer(this, url, option, callback);
 }
 
 })(window, document, uu);

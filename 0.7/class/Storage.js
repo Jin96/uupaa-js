@@ -1,74 +1,102 @@
 
 // === Storage ===
-//{{{!depend uu, uu.class
+//{{{!depend uu, uu.class, uu.ajax
 //}}}!depend
 
-// http://d.hatena.ne.jp/uupaa/20100106/1262781846
-// +-----------------+-----------------------+--------+-------+
-// | Backend string  | backend               | Min    | Max   |
-// +-----------------+-----------------------+--------+-------+
-// | "LocalStorage"  | LocalStorage          | 1.8MB  | 8MB   |
-// | "FlashStorage"  | SharedObject          | 0~99kB | 1MB   |
-// | "IEStorage"     | IE userData behavior  | 63kB   | 63kB  |
-// | "CookieStorage" | Cookie                |        | 3.8kB |
-// | "NoStorage"     |                       | 0      | 0     |
-// +-----------------+-----------------------+--------+-------+
+// +-----------------+-----------------------+-----------+
+// | Backend string  | backend               |    Max    |
+// +-----------------+-----------------------+-----------+
+// | "LocalStorage"  | LocalStorage          | 1.8 ~ 8MB |
+// | "FlashStorage"  | SharedObject          |     100kB |
+// | "IEStorage"     | IE userData behavior  |      63kB |
+// | "CookieStorage" | Cookie                |     3.8kB |
+// | "MemStorage"    |                       |       ?   |
+// +-----------------+-----------------------+-----------+
 
 uu.local || (function(win, doc, uu) {
 
-var _backendOrder = "LocalStorage,FlashStorage,IEStorage,CookieStorage,NoStorage";
+var _backendOrder = "LocalStorage,FlashStorage,IEStorage,CookieStorage,MemStorage";
 
 uu.Class.singleton("Storage", {
-    init:           init,       // Storage.init()
-    nth:            nth,        // Storage.nth(index:Number):String
-    get:            get,        // Storage.get(key:String):String
-    set:            set,        // Storage.set(key:String, value:String):Boolean
-    size:           size,       // Storage.size():Hash { used, max }
-    pairs:          pairs,      // Storage.pairs():Number
-    clear:          clear,      // Storage.clear()
-    remove:         remove,     // Storage.remove(key:String)
-    getAll:         getAll,     // Storage.getAll():Hash
-    push:           push,       // Storage.push(url:String, option:AjaxOptionHash = void, callback:Function = void)
-    pop:            pop         // Storage.pop(url:String, option:JSONPOptionHash = void, callback:Function = void)
+    init:           init,       // init()
+    nth:            nth,        // nth(index:Number):String
+    get:            get,        // get(key:String):String
+    set:            set,        // set(key:String, value:String):Boolean
+    size:           size,       // size():Hash { used, max }
+    pairs:          pairs,      // pairs():Number
+    clear:          clear,      // clear()
+    remove:         remove,     // remove(key:String)
+    getAll:         getAll,     // getAll():Hash
+    saveToServer:   saveToServer,   // saveToServer(url:String, option:AjaxOptionHash = void, callback:Function = void)
+    loadFromServer: loadFromServer  // loadFromServer(url:String, option:JSONPOptionHash = void, callback:Function = void)
 });
 
-uu.Class.singleton("NoStorage", {
-    init:           function(callback) { callback && callback() },
-    nth:            uu.nop,     // NoStorage.nth(index:Number):String
-    get:            uu.nop,     // NoStorage.get(key:String):String
-    set:            uu.nop,     // NoStorage.set(key:String, value:String):Boolean
-    size:           function() { return { used: 0, max: 0 }; },
-    pairs:          uu.nop,     // NoStorage.pairs():Number
-    clear:          uu.nop,     // NoStorage.clear()
-    remove:         uu.nop,     // NoStorage.remove(key:String)
-    getAll:         uu.nop      // NoStorage.getAll():Hash
-});
-uu.Class.NoStorage.isReady = function() { // @return Boolean
-    return true;
+// uu.Class.Storage.saveToServer - static method
+uu.Class.Storage.saveToServer = function(storage,    // @param Hash: StorageObject
+                                         url,        // @param String: url
+                                         option,     // @param AjaxOptionHash(= void):
+                                         callback) { // @param Function(= void): callback(AjaxResultHash)
+    var json = uu.json(storage.getAll());
+
+    uu.ajax.post(url, json, option, function(ajaxResultHash) {
+        callback && callback(ajaxResultHash);
+    }, function(ajaxResultHash) {
+        callback && callback(ajaxResultHash);
+    });
+};
+
+// uu.Class.Storage.loadFromServer - static method
+uu.Class.Storage.loadFromServer = function(storage,    // @param StorageObject:
+                                           url,        // @param String: url
+                                           option,     // @param JSONPOptionHash:
+                                           callback) { // @param Function(= void): callback(JSONPResultHash)
+    uu.jsonp(url, option, function(jsonpResultHash) {
+        if (jsonpResultHash.ok) {
+
+            var key, json = jsonpResultHash.json;
+
+            for (key in json) {
+                storage.set(key, json[key]);
+            }
+        }
+        callback && callback(jsonpResultHash);
+    }, function(jsonpResultHash) {
+        callback && callback(jsonpResultHash);
+    });
 };
 
 // Storage.init
 function init() {
-    var that = this;
+    var that = this,
+        requireDiskSpace = uu.config.storage;
 
-    this.backend = "NoStorage"; // defailt backend
-
-    _backendOrder.split(",").some(function(storageName) {
-        var Class = uu.Class[storageName];
+    _backendOrder.split(",").some(function(backendName) {
+        var Class = uu.Class[backendName];
 
         if (Class && Class.isReady()) {
+            try {
+                uu(backendName, function(storage) {
+                    var size = storage.size();
 
-            that.backend = storageName;
-            that.storage = uu(storageName, function() {
+                    if (requireDiskSpace && requireDiskSpace > size.max) {
 
-                uu.ready.gone.storage = 1;
+                        that.backend = "MemStorage";
+                        that.storage = uu("MemStorage");
+                    } else {
+                        that.backend = backendName;
+                        that.storage = storage;
+                    }
+                    uu.ready.gone.storage = 1;
 
-                if (uu.isFunction(win.xstorage)) {
-                    setTimeout(function() {
-                        win.xstorage(uu, that);
-                    }, 0);
-                }
-            });
+                    if (uu.isFunction(win.xstorage)) {
+                        setTimeout(function() {
+                            win.xstorage(uu, that);
+                        }, 0);
+                    }
+                });
+            } catch(err) {
+                return false;
+            }
             return true;
         }
         return false;
@@ -82,14 +110,14 @@ function nth(index) { // @param Number: index
 }
 
 // Storage.get
-function get(key) { // @param String: "key"
-                    // @return String: "val" or ""
+function get(key) { // @param String:
+                    // @return String: "value" or ""
     return this.storage.get(key) || "";
 }
 
 // Storage.set
-function set(key,     // @param String: "key"
-             value) { // @param String: "val"
+function set(key,     // @param String:
+             value) { // @param String: "value"
                       // @return Boolean: false is quota exceeded
     return this.storage.set(key, value);
 }
@@ -119,39 +147,18 @@ function remove(key) { // @param String: "key"
     this.storage.remove(key);
 }
 
-// TODO: test
-// Storage.push - save to server
-function push(url,        // @param String: url
-              option,     // @param AjaxOptionHash(= void):
-              callback) { // @param Function(= void): callback(AjaxResultHash)
-    var data = uu.json(this.getAll());
-
-    uu.ajax.post(url, data, option, function(ajaxResultHash) {
-        callback && callback(ajaxResultHash);
-    }, function(ajaxResultHash) {
-        callback && callback(ajaxResultHash);
-    });
+// Storage.saveToServer
+function saveToServer(url,        // @param String: url
+                      option,     // @param AjaxOptionHash(= void):
+                      callback) { // @param Function(= void): callback(AjaxResultHash)
+    uu.Class.Storage.saveToServer(this.storage, url, option, callback);
 }
 
-// TODO: test
-// Storage.pop - load from server
-function pop(url,        // @param String: url
-             option,     // @param JSONPOptionHash:
-             callback) { // @param Function(= void): callback(JSONPResultHash)
-    var that = this;
-
-    uu.jsonp(url, option, function(jsonpResultHash) {
-
-        var json = uu.json.decode(jsonpResultHash, true), // use native json
-            key;
-
-        for (key in json) {
-            that.set(key, json[key]);
-        }
-        callback && callback(jsonpResultHash);
-    }, function(jsonpResultHash) {
-        callback && callback(jsonpResultHash);
-    });
+// Storage.loadFromServer
+function loadFromServer(url,        // @param String: url
+                        option,     // @param JSONPOptionHash:
+                        callback) { // @param Function(= void): callback(JSONPResultHash)
+    uu.Class.Storage.loadFromServer(this.storage, url, option, callback);
 }
 
 // --- init ---

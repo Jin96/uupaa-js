@@ -1,5 +1,5 @@
 // === CookieStorage ===
-//{{{!depend uu, uu.class
+//{{{!depend uu, uu.class, uu.Class.Storage
 //}}}!depend
 
 uu.Class.CookieStorage || (function(win, doc, uu) {
@@ -19,8 +19,10 @@ uu.Class.singleton("CookieStorage", {
     clear:          clear,      // clear()
     remove:         remove,     // remove(key:String)
     getAll:         getAll,     // getAll():Hash
-    load:           load,       // [PROTECTED]
-    save:           save        // [PROTECTED]
+    saveToServer:   saveToServer,   // saveToServer(url:String, option:AjaxOptionHash = void, callback:Function = void)
+    loadFromServer: loadFromServer, // loadFromServer(url:String, option:JSONPOptionHash = void, callback:Function = void)
+    store:          store,          // [PROTECTED]
+    retrieve:       retrieve        // [PROTECTED]
 });
 
 // uu.Class.CookieStorage.isReady - static method
@@ -31,9 +33,9 @@ uu.Class.CookieStorage.isReady = function() { // @return Boolean
 // CookieStorage.init
 function init(callback) { // @param Function(= void): callback
     // --- create hash ---
-    this._shadowCookie = this.load();
+    this._shadowCookie = this.retrieve();
 
-    callback && callback();
+    callback && callback(this);
 }
 
 // CookieStorage.nth - get nth key
@@ -66,7 +68,7 @@ function set(key,     // @param String:
     if (before) {
         before += 2; // "; ".length
     }
-    before += this.save(uu.hash(key, value), _PERSIST_DATE);
+    before += this.store(uu.hash(key, value), _PERSIST_DATE);
 
     if (before !== doc.cookie.length) { // before !== after -> !damage!
         return false;
@@ -89,23 +91,23 @@ function pairs() { // @return Number: pairs
 
 // CookieStorage.clear
 function clear() {
-    this.save(this._shadowCookie, _REMOVE_DATE);
+    this.store(this._shadowCookie, _REMOVE_DATE);
     this._shadowCookie = {};
 }
 
 // CookieStorage.remove
 function remove(key) { // @param String:
-    this.save(uu.hash(key, ""), _REMOVE_DATE);
+    this.store(uu.hash(key, ""), _REMOVE_DATE);
     delete this._shadowCookie[key];
 }
 
-// CookieStorage.load
-function load() { // @return Hash: { key: "value", ... }
+// CookieStorage.retrieve
+function retrieve() { // @return Hash: { key: "value", ... }
     var rv = {}, i = -1, pairs, pair, kv, cut = _STORE_NAME.length;
 
     if (doc.cookie) {
 
-        // Load KeyValue pairs
+        // retrieve KeyValue pairs
         //      collect: "{{_STORE_NAME}}key=value"
         //      ignore:  "key=value"
         //
@@ -122,10 +124,10 @@ function load() { // @return Hash: { key: "value", ... }
     return rv;
 }
 
-// CookieStorage.save - save cookie
-function save(hash,   // @param Hash:
-              date) { // @param UTCDateString:
-                      // @return Number: last KeyValue pair length
+// CookieStorage.store - store cookie
+function store(hash,   // @param Hash:
+               date) { // @param UTCDateString:
+                       // @return Number: last KeyValue pair length
     var rv = "", key;
 
     for (key in hash) {
@@ -135,6 +137,20 @@ function save(hash,   // @param Hash:
         doc.cookie = rv + "; expires=" + date + _SECURE;
     }
     return rv.length;
+}
+
+// CookieStorage.saveToServer
+function saveToServer(url,        // @param String: url
+                      option,     // @param AjaxOptionHash(= void):
+                      callback) { // @param Function(= void): callback(AjaxResultHash)
+    uu.Class.Storage.saveToServer(this, url, option, callback);
+}
+
+// CookieStorage.loadFromServer
+function loadFromServer(url,        // @param String: url
+                        option,     // @param JSONPOptionHash:
+                        callback) { // @param Function(= void): callback(JSONPResultHash)
+    uu.Class.Storage.loadFromServer(this, url, option, callback);
 }
 
 })(window, document, uu);
