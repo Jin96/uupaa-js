@@ -1,10 +1,12 @@
 ﻿package {
     import flash.external.*;
     import flash.display.*;
+    import flash.events.*;
     import flash.net.*;
 
     public class Storage extends Sprite {
-        private const _FREE_SPACE:uint = 99 * 1024 - 2; // [!] max 99kB - 2
+        private var _DISK_SPACE:uint = 0;
+        private var _so:SharedObject = null;
         // [!] link to Storage.as "_CALLBACK_ID" on NPAPI I/F
         private const _CALLBACK_ID:String = "externalflashstorage";
 
@@ -18,13 +20,54 @@
             ExternalInterface.addCallback("ex_remove", ex_remove);
             ExternalInterface.addCallback("ex_getAll", ex_getAll);
 
+            _DISK_SPACE = this.detectDiskSpace();
+
             // [FIX] WebKit, Opera, Gecko, ExternalInterface.objectID = null
             // ExternalInterface.call("uu.dmz." + ExternalInterface.objectID);
             ExternalInterface.call("uu.dmz." + _CALLBACK_ID);
         }
 
+        private function detectDiskSpace():uint {
+            var so:SharedObject = getSharedObject();
+            var key:String = "UUDETECTDISKSPACE";
+            var used:uint = so.size;
+            var kb:uint = 1024;
+            var mb:uint = 1024 * 1024;
+
+            if (!used) {
+                so.data[key] = "1";
+                if (so.flush() !== SharedObjectFlushStatus.FLUSHED) {
+                    return 0;
+                }
+            }
+            if (11 * kb - used > 0) {
+                so.data[key] = new Array(11 * kb - used).join("0");
+                if (so.flush() !== SharedObjectFlushStatus.FLUSHED) {
+                    delete so.data[key];
+                    return 10 * kb;
+                }
+            }
+            if (101 * kb - used > 0) {
+                so.data[key] = new Array(101 * kb - used).join("0");
+                if (so.flush() !== SharedObjectFlushStatus.FLUSHED) {
+                    delete so.data[key];
+                    return 100 * kb;
+                }
+            }
+            delete so.data[key];
+
+            return 1 * mb;
+        }
+
         private function getSharedObject():SharedObject {
-            return SharedObject.getLocal("FlashStorage");
+            if (_so === null) {
+                _so = SharedObject.getLocal("FlashStorage");
+                _so.addEventListener(NetStatusEvent.NET_STATUS, netStatusHandler);
+            }
+            return _so;
+        }
+
+        private function netStatusHandler(event:NetStatusEvent):void {
         }
 
         public function ex_nth(index:Number):String {
@@ -46,12 +89,7 @@
 
         public function ex_set(key:String,
                                value:String):Boolean {
-            var so:SharedObject = getSharedObject(), used:uint = 0, r:Object;
-
-            used = so.size + key.length + value.length;
-            if (used > _FREE_SPACE) {
-                return false;
-            }
+            var so:SharedObject = getSharedObject();
 
             try {
                 so.data[key] = value; // store
@@ -71,7 +109,7 @@
         public function ex_size():Object {
             var so:SharedObject = getSharedObject();
 
-            return { used: so.size, max: _FREE_SPACE };
+            return { used: so.size, max: _DISK_SPACE };
         }
 
         public function ex_pairs():Number {

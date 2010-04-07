@@ -13,7 +13,7 @@
 // | "MemStorage"    |                       |       ?   |
 // +-----------------+-----------------------+-----------+
 
-uu.local || (function(win, doc, uu) {
+uu.Class.Storage || (function(win, doc, uu) {
 
 var _backendOrder = "LocalStorage,FlashStorage,IEStorage,CookieStorage,MemStorage";
 

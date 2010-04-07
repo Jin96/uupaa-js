@@ -43,8 +43,9 @@ function init(callback) { // @param Function(= void): callback
 
     this.storage = uu.flash(_SWF_PATH, {
                         id: _CALLBACK_ID,
+                        width: 1,
+                        height: 1,
                         param: [
-//                          "allowScriptAccess", "always"
 //                            "loop", "false",
 //                            "menu", "false",
 //                            "play", "true",
