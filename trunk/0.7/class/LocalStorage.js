@@ -7,7 +7,7 @@
 
 uu.Class.LocalStorage || (function(win, doc, uu) {
 
-var _FREE_SPACE = uu.gecko      ? 5     * 1024 * 1024 - 260 // Firefox3.5+ (5.0MB)
+var _DISK_SPACE = uu.gecko      ? 5     * 1024 * 1024 - 260 // Firefox3.5+ (5.0MB)
                 : uu.ver.iphone ? 2.5   * 1024 * 1024 - 260 // iPhone3.1.2 (2.5MB)
                 : uu.ver.safari ? 8     * 1024 * 1024       // Safari4+    (8.0MB)
                 : uu.ver.chrome ? 2.5   * 1024 * 1024 - 260 // Chrome4+    (2.5MB)
@@ -92,15 +92,15 @@ function size() { // @return Hash: { used, max }
 
         remain = this.storage.remainingSpace;
 
-        if (_FREE_SPACE < remain) { // expand free space
-            _FREE_SPACE = 5 * 1000 * 1000; // 5MB
+        if (_DISK_SPACE < remain) { // expand free space
+            _DISK_SPACE = 5 * 1000 * 1000; // 5MB
         }
-        return { used: _FREE_SPACE - remain, max: _FREE_SPACE };
+        return { used: _DISK_SPACE - remain, max: _DISK_SPACE };
     }
     for (iz = this.storage.length; i < iz; ++i) {
         used += this.storage.getItem(this.storage.key(i)).length;
     }
-    return { used: used, max: _FREE_SPACE };
+    return { used: used, max: _DISK_SPACE };
 }
 
 // LocalStorage.pairs

@@ -8,7 +8,7 @@ uu.Class.IEStorage || (function(win, doc, uu) {
 var _STORE_NAME     = "uustorage",
     _INDEX          = "uuindex",
     _PERSIST_DATE   = (new Date(2032, 1, 1)).toUTCString(),
-    _FREE_SPACE     = 63 * 1024; // 63kB
+    _DISK_SPACE     = 63 * 1024; // 63kB
 
 uu.Class.singleton("IEStorage", {
     init:           init,       // init(callback:Function = void)
@@ -104,7 +104,7 @@ function size() { // @return Hash: { used, max }
     while ( (key = indexes[++i]) ) {
         used += (this.storage.getAttribute(key) || "").length;
     }
-    return { used: used, max: _FREE_SPACE };
+    return { used: used, max: _DISK_SPACE };
 }
 
 // IEStorage.pairs

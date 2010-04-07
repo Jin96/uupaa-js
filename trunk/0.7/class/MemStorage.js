@@ -3,7 +3,7 @@
 //{{{!depend uu, uu.class, uu.Class.Storage
 //}}}!depend
 
-uu.local || (function(win, doc, uu) {
+uu.Class.MemStorage || (function(win, doc, uu) {
 
 uu.Class.singleton("MemStorage", {
     init:           init,       // init(callback:Function = void)

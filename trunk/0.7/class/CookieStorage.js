@@ -6,7 +6,7 @@ uu.Class.CookieStorage || (function(win, doc, uu) {
 var _STORE_NAME     = "uustorage",
     _PERSIST_DATE   = (new Date(2032, 1, 1)).toUTCString(),
     _REMOVE_DATE    = (new Date(0)).toUTCString(),
-    _FREE_SPACE     = 3800, // byte
+    _DISK_SPACE     = 3800, // byte
     _SECURE         = location.protocol === "https:" ? "; secure" : "";
 
 uu.Class.singleton("CookieStorage", {
@@ -61,7 +61,7 @@ function set(key,     // @param String:
                       // @return Boolean: false is quota exceeded
     var before = doc.cookie.length;
 
-    if (before > _FREE_SPACE) {
+    if (before > _DISK_SPACE) {
         return false;
     }
 
@@ -81,7 +81,7 @@ function set(key,     // @param String:
 function size() { // @return Hash: { used, max }
                   //    used - Number: bytes
                   //    max  - Number: bytes
-    return { used: doc.cookie.length, max: _FREE_SPACE };
+    return { used: doc.cookie.length, max: _DISK_SPACE };
 }
 
 // CookieStorage.pairs
