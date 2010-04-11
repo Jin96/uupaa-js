@@ -11,7 +11,7 @@
 <script src="../class/CookieStorage.js"></script>
 <script>
 function xstorage(uu, storage) {
-    uu.id("backend").innerText = storage.backend;
+    uu.id("backend").innerText = storage.toString();
 }
 function loadFromServer() {
     var storage = uu("Storage");

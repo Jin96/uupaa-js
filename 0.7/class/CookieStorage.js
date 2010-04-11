@@ -21,6 +21,7 @@ uu.Class.singleton("CookieStorage", {
     getAll:         getAll,     // getAll():Hash
     saveToServer:   saveToServer,   // saveToServer(url:String, option:AjaxOptionHash = void, callback:Function = void)
     loadFromServer: loadFromServer, // loadFromServer(url:String, option:JSONPOptionHash = void, callback:Function = void)
+    toString:       toString,       // toString():String
     store:          store,          // [PROTECTED]
     retrieve:       retrieve        // [PROTECTED]
 });
@@ -151,6 +152,11 @@ function loadFromServer(url,        // @param String: url
                         option,     // @param JSONPOptionHash:
                         callback) { // @param Function(= void): callback(JSONPResultHash)
     uu.Class.Storage.loadFromServer(this, url, option, callback);
+}
+
+// CookieStorage.toString
+function toString() {
+    return "CookieStorage";
 }
 
 })(window, document, uu);

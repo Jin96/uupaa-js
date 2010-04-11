@@ -7,8 +7,6 @@
     public class Storage extends Sprite {
         private var _DISK_SPACE:uint = 0;
         private var _so:SharedObject = null;
-        // [!] link to Storage.as "_CALLBACK_ID" on NPAPI I/F
-        private const _CALLBACK_ID:String = "externalflashstorage";
 
         public function Storage() {
             ExternalInterface.addCallback("ex_nth", ex_nth);
@@ -22,9 +20,12 @@
 
             _DISK_SPACE = this.detectDiskSpace();
 
-            // [FIX] WebKit, Opera, Gecko, ExternalInterface.objectID = null
-            // ExternalInterface.call("uu.dmz." + ExternalInterface.objectID);
-            ExternalInterface.call("uu.dmz." + _CALLBACK_ID);
+            var flashVars:Object = stage.loaderInfo.parameters;
+            var OBJECT_ID:String = flashVars.ExternalInterfaceObjectID;
+
+            trace(OBJECT_ID);
+
+            ExternalInterface.call("uu.dmz." + OBJECT_ID);
         }
 
         private function detectDiskSpace():uint {

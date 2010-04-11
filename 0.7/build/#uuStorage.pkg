@@ -8,6 +8,7 @@ class/LocalStorage.js
 class/FlashStorage.js
 class/IEStorage.js
 class/CookieStorage.js
+class/MemStorage.js
 uu.lazy.js
 
 build/footer.txt
