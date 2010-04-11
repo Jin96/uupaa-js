@@ -1,0 +1,165 @@
+<!doctype html><html><head><meta charset="utf-8" />
+<title>TinyAudioPlayer - demo</title>
+<script src="../uu.js"></script>
+<script src="../uu.flash.js"></script>
+<script src="../class/Audio.js"></script>
+<script src="../class/HTML5Audio.js"></script>
+<script src="../class/SilverlightAudio.js"></script>
+<script src="../class/FlashAudio.js"></script>
+<script src="../class/NoAudio.js"></script>
+<script>
+function xboot(uu) {
+    if (uu.ver.ie6) {
+        uu.id("source").style.width = "250px";
+    }
+}
+
+function xaudio(uu) {
+    var source = uu.id("source");
+    var playList = [
+        "source/Hydrate-Kenny_Beltrey.mp3",
+        "source/Hydrate-Kenny_Beltrey.ogg",
+        "source/Windows XP Startup.mp3",
+        "source/Windows XP Startup.ogg",
+        "source/Windows XP Startup.wav",
+        "source/Windows XP Shutdown.mp3",
+        "source/Windows XP Shutdown.ogg",
+        "source/Windows XP Shutdown.wav",
+    ];
+    playList.forEach(function(src) {
+        uu.node.add(uu.option({ value: src }, uu.text(src)), source);
+    });
+
+    changeSource(source);
+}
+
+function changeSource(that) {
+    if (currentAudio) {
+        currentAudio.close();
+    }
+    loadAudio(that.options[that.selectedIndex].value);
+}
+
+var currentAudio;
+var masterVolume = 0.2;
+var masterStartTime = 0;
+var masterAutoplay = false;
+
+function loadAudio(source) {
+    uu("Audio", source, { volume:    masterVolume,
+                          autoplay:  masterAutoplay,
+                          startTime: masterStartTime }, function(audio) {
+        window.currentAudio = audio;
+
+        uu.text(uu.id("backend"), audio.toString());
+
+        audio.bind("playing,play,error,canplay", function(event) {
+            traceEvent(event.type);
+        });
+
+        audio.bind("ended", function(event) {
+            traceEvent(event.type);
+            traceTimeupdate();
+        });
+
+        audio.bind("pause", function(event) {
+            traceEvent(event.type);
+            traceTimeupdate();
+        });
+
+        audio.bind("timeupdate", function(event) {
+            traceTimeupdate();
+        });
+
+    });
+}
+
+function traceEvent(eventType) {
+    var state = currentAudio.state();
+    var fileName = state.source.split("/").pop();
+
+    uu.trace(eventType || "", {
+            currentTime:  currentAudio.currentTime().toFixed(0),
+            duration:     state.duration,
+            source:       fileName,
+            state:        state.text });
+}
+
+function traceTimeupdate() {
+    var state = currentAudio.state();
+    var fileName = state.source.split("/").pop();
+
+    uu.text(uu.id("time"), uu.format(
+            "source: ?, currentTime: ?, state: ?, loop: ?, mute: ?, volume: ?, autoplay: ?",
+            fileName,
+            currentAudio.currentTime().toFixed(1),
+            state.text,
+            state.loop,
+            state.muted,
+            currentAudio.volume().toFixed(1),
+            masterAutoplay));
+}
+
+function autoplay(that) {
+    masterAutoplay = !masterAutoplay;
+}
+function toggle(that) {
+    currentAudio.toggle();
+}
+
+function switchLoop(that) {
+    currentAudio.loop();
+}
+
+function switchMute(that) {
+    currentAudio.mute();
+}
+
+function moveVolume(up) {
+    masterVolume += up ? +0.1 : -0.1;
+    masterVolume < 0 && (masterVolume = 0);
+    masterVolume > 1 && (masterVolume = 1);
+
+    currentAudio.volume(masterVolume);
+}
+
+function setStartTime(sec) {
+    masterStartTime = sec;
+    currentAudio.startTime(masterStartTime);
+}
+
+function setCurrentTime(sec) {
+    currentAudio.currentTime(sec);
+}
+
+</script></head><body>
+<h1 id="backend" style="text-shadow: gray 3px 3px 3px">Plz Wait...</h1>
+
+<select id="source" onchange="changeSource(this)"></select>
+<input type="button" value="play/pause" onclick="toggle(this)" />
+<input type="button" value="stop" onclick="currentAudio.stop()" />
+<input type="button" value="loop" onclick="switchLoop(this)" />
+<input type="button" value="vol -" onclick="moveVolume(0)" />
+<input type="button" value="vol +" onclick="moveVolume(1)" />
+<input type="button" value="mute" onclick="switchMute(this)" />
+<input type="button" value="autoplay" onclick="autoplay()" />
+<input type="button" value="trace clear" onclick="uu.trace.clear()" />
+<br />
+set startTime:
+<input type="button" value="0 sec" onclick="setStartTime(0)" />
+<input type="button" value="2 sec" onclick="setStartTime(2)" />
+<input type="button" value="10 sec" onclick="setStartTime(10)" />
+<br />
+set currentTime:
+<input type="button" value="0 sec" onclick="setCurrentTime(0)" />
+<input type="button" value="2 sec" onclick="setCurrentTime(2)" />
+<input type="button" value="10 sec" onclick="setCurrentTime(10)" />
+<br />
+
+<div id="time">---</div>
+<hr />
+
+<div id="trace">
+<a href="http://www.w3.org/TR/html5/video.html">Audio spec</a>
+</div>
+</body></html>

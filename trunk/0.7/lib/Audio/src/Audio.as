@@ -10,11 +10,11 @@
 
         private var _loop:Boolean = false;
         private var _volume:Number = 1;
-        private var _startTime:uint = 0;
-        private var _currentTime:uint = 0;
+        private var _startTime:Number = 0;      // unit: ms
+        private var _currentTime:Number = 0;    // unit: ms
         private var _sound:Sound = new Sound();
         private var _soundChannel:SoundChannel = null;
-        private var _error:Boolean = false;
+        private var _error:Number = 0;
         private var _ended:Boolean = true;
         private var _paused:Boolean = false;
 
@@ -58,7 +58,7 @@
         private function ioErrorHandler(event:Event):void {
             trace("ioErrorHandler: " + event);
 
-            _error = true;
+            _error = 4;
             ExternalInterface.call("uu.dmz." + _OBJECT_ID + "event", "error");
         }
 
@@ -70,7 +70,7 @@
             }
         }
 
-        public function play(position:int):void {
+        public function play(position:Number):void {
             if (_error) {
                 return;
             }
@@ -92,7 +92,6 @@
                 _paused = false;
                 _currentTime = 0;
             }
-            ExternalInterface.call("uu.dmz." + _OBJECT_ID + "event", "play");
             ExternalInterface.call("uu.dmz." + _OBJECT_ID + "event", "playing");
         }
 
@@ -110,7 +109,7 @@
                 if (_soundChannel) {
                     _soundChannel.stop();
                     _paused = true;
-                    _currentTime = _soundChannel.position;
+                    _currentTime = _soundChannel.position; // unit: ms
                 }
             }
         }
@@ -121,7 +120,7 @@
             }
             if (_soundChannel) {
                 _soundChannel.stop();
-                _ended = false;
+                _ended = true;
                 _paused = false;
                 _currentTime = 0;
             }
@@ -152,18 +151,18 @@
         }
 
         public function ex_setStartTime(time:int):void {
-            _startTime = time;
+            _startTime = time * 1000; // sec -> ms
         }
 
         public function ex_getCurrentTime():Number {
             if (_soundChannel) {
-                return _soundChannel.position / 1000;
+                return _soundChannel.position / 1000; // ms -> sec
             }
             return 0;
         }
 
-        public function ex_setCurrentTime(time:int):void {
-            _currentTime = time;
+        public function ex_setCurrentTime(time:Number):void {
+            _currentTime = time * 1000; // sec -> ms
 
             if (!_error && !_paused && !_ended) {
                 // playing

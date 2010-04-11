@@ -39,6 +39,7 @@ uu.Class.NoAudio.isReady = function() {
 
 uu.Class.NoAudio.isSupport = function(source) { // @param String: "music.mp3"
                                                 // @return Boolean;
+    source || ""; // dummy
     return true;
 };
 
@@ -46,6 +47,12 @@ uu.Class.NoAudio.isSupport = function(source) { // @param String: "music.mp3"
 function init(source,     // @param String: "music.mp3"
               option,     // @param AudioOptionHash(= {}):
               callback) { // @param Function(= void): callback(this)
+//    var that = this;
+
+//    // HTMLAudioElement.getContext():AudioContext
+//    this.audio.getContext = function() {
+//        return that;
+//    };
 
     callback && callback(this);
 }
@@ -78,11 +85,11 @@ function loop(value) { // @param Boolean: true is loop
 function state() { // @return Hash: { loop, error, paused, ended, source, duration }
     return {
         loop:       false,
-        error:      true,
+        error:      4,
         paused:     false,
         ended:      false,
         source:     "",
-        duration:   0,
+        duration:   0
     }
 }
 
@@ -121,11 +128,15 @@ function currentTime(time) { // @param Number: time
 // NoAudio.bind
 function bind(eventTypes, // @param String:
               callback) { // @param Function:
+    eventTypes || ""; // dummy
+    callback || ""; // dummy
 }
 
 // NoAudio.unbind
 function unbind(eventTypes, // @param String:
                 callback) { // @param Function:
+    eventTypes || ""; // dummy
+    callback || ""; // dummy
 }
 
 // NoAudio.isPlaying
