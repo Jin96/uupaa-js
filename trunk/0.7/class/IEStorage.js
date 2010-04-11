@@ -21,7 +21,8 @@ uu.Class.singleton("IEStorage", {
     remove:         remove,     // remove(key:String)
     getAll:         getAll,     // getAll():Hash
     saveToServer:   saveToServer,   // saveToServer(url:String, option:AjaxOptionHash = void, callback:Function = void)
-    loadFromServer: loadFromServer  // loadFromServer(url:String, option:JSONPOptionHash = void, callback:Function = void)
+    loadFromServer: loadFromServer, // loadFromServer(url:String, option:JSONPOptionHash = void, callback:Function = void)
+    toString:       toString    // toString():String
 });
 
 // uu.Class.IEStorage.isReady - static method
@@ -156,6 +157,11 @@ function loadFromServer(url,        // @param String: url
                         option,     // @param JSONPOptionHash:
                         callback) { // @param Function(= void): callback(JSONPResultHash)
     uu.Class.Storage.loadFromServer(this, url, option, callback);
+}
+
+// IEStorage.toString
+function toString() {
+    return "IEStorage";
 }
 
 })(window, document, uu);

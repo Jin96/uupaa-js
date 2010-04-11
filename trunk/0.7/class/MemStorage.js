@@ -16,7 +16,8 @@ uu.Class.singleton("MemStorage", {
     remove:         remove,     // remove(key:String)
     getAll:         getAll,     // getAll():Hash
     saveToServer:   saveToServer,   // saveToServer(url:String, option:AjaxOptionHash = void, callback:Function = void)
-    loadFromServer: loadFromServer  // loadFromServer(url:String, option:JSONPOptionHash = void, callback:Function = void)
+    loadFromServer: loadFromServer, // loadFromServer(url:String, option:JSONPOptionHash = void, callback:Function = void)
+    toString:       toString    // toString():String
 });
 
 // uu.Class.MemStorage.isReady - static method
@@ -88,6 +89,11 @@ function loadFromServer(url,        // @param String: url
                         option,     // @param JSONPOptionHash:
                         callback) { // @param Function(= void): callback(JSONPResultHash)
     uu.Class.Storage.loadFromServer(this, url, option, callback);
+}
+
+// MemStorage.toString
+function toString() {
+    return "MemStorage";
 }
 
 })(window, document, uu);

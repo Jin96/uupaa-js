@@ -28,15 +28,16 @@ uu.Class.singleton("Storage", {
     remove:         remove,     // remove(key:String)
     getAll:         getAll,     // getAll():Hash
     saveToServer:   saveToServer,   // saveToServer(url:String, option:AjaxOptionHash = void, callback:Function = void)
-    loadFromServer: loadFromServer  // loadFromServer(url:String, option:JSONPOptionHash = void, callback:Function = void)
+    loadFromServer: loadFromServer, // loadFromServer(url:String, option:JSONPOptionHash = void, callback:Function = void)
+    toString:       toString    // toString():String
 });
 
 // uu.Class.Storage.saveToServer - static method
-uu.Class.Storage.saveToServer = function(storage,    // @param Hash: StorageObject
+uu.Class.Storage.saveToServer = function(backend,    // @param Hash: StorageObject
                                          url,        // @param String: url
                                          option,     // @param AjaxOptionHash(= void):
                                          callback) { // @param Function(= void): callback(AjaxResultHash)
-    var json = uu.json(storage.getAll());
+    var json = uu.json(backend.getAll());
 
     uu.ajax.post(url, json, option, function(ajaxResultHash) {
         callback && callback(ajaxResultHash);
@@ -46,7 +47,7 @@ uu.Class.Storage.saveToServer = function(storage,    // @param Hash: StorageObje
 };
 
 // uu.Class.Storage.loadFromServer - static method
-uu.Class.Storage.loadFromServer = function(storage,    // @param StorageObject:
+uu.Class.Storage.loadFromServer = function(backend,    // @param StorageObject:
                                            url,        // @param String: url
                                            option,     // @param JSONPOptionHash:
                                            callback) { // @param Function(= void): callback(JSONPResultHash)
@@ -56,7 +57,7 @@ uu.Class.Storage.loadFromServer = function(storage,    // @param StorageObject:
             var key, json = jsonpResultHash.json;
 
             for (key in json) {
-                storage.set(key, json[key]);
+                backend.set(key, json[key]);
             }
         }
         callback && callback(jsonpResultHash);
@@ -75,16 +76,13 @@ function init() {
 
         if (Class && Class.isReady()) {
             try {
-                uu(backendName, function(storage) {
-                    var size = storage.size();
+                uu(backendName, function(backend) {
+                    var size = backend.size();
 
                     if (requireDiskSpace && requireDiskSpace > size.max) {
-
-                        that.backend = "MemStorage";
-                        that.storage = uu("MemStorage");
+                        that.backend = uu("MemStorage");
                     } else {
-                        that.backend = backendName;
-                        that.storage = storage;
+                        that.backend = backend;
                     }
                     uu.ready.gone.storage = 1;
 
@@ -106,59 +104,64 @@ function init() {
 // Storage.nth
 function nth(index) { // @param Number: index
                       // @return String: "key" or ""
-    return this.storage.nth(index) || "";
+    return this.backend.nth(index) || "";
 }
 
 // Storage.get
 function get(key) { // @param String:
                     // @return String: "value" or ""
-    return this.storage.get(key) || "";
+    return this.backend.get(key) || "";
 }
 
 // Storage.set
 function set(key,     // @param String:
              value) { // @param String: "value"
                       // @return Boolean: false is quota exceeded
-    return this.storage.set(key, value);
+    return this.backend.set(key, value);
 }
 
 // Storage.getAll
 function getAll() { // @return Hash: { key: "value", ... }
-    return this.storage.getAll();
+    return this.backend.getAll();
 }
 
 // Storage.size
 function size() { // @return Hash: { used, max, free }
-    return this.storage.size();
+    return this.backend.size();
 }
 
 // Storage.pairs
 function pairs() { // @return Number: pairs
-    return this.storage.pairs();
+    return this.backend.pairs();
 }
 
 // Storage.clear
 function clear() {
-    this.storage.clear();
+    this.backend.clear();
 }
 
 // Storage.remove
 function remove(key) { // @param String: "key"
-    this.storage.remove(key);
+    this.backend.remove(key);
 }
 
 // Storage.saveToServer
 function saveToServer(url,        // @param String: url
                       option,     // @param AjaxOptionHash(= void):
                       callback) { // @param Function(= void): callback(AjaxResultHash)
-    uu.Class.Storage.saveToServer(this.storage, url, option, callback);
+    uu.Class.Storage.saveToServer(this.backend, url, option, callback);
 }
 
 // Storage.loadFromServer
 function loadFromServer(url,        // @param String: url
                         option,     // @param JSONPOptionHash:
                         callback) { // @param Function(= void): callback(JSONPResultHash)
-    uu.Class.Storage.loadFromServer(this.storage, url, option, callback);
+    uu.Class.Storage.loadFromServer(this.backend, url, option, callback);
+}
+
+// Storage.toString
+function toString() {
+    return this.backend.toString();
 }
 
 // --- init ---

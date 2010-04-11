@@ -2,11 +2,12 @@
 //{{{!depend uu, uu.class, uu.flash, uu.Class.Storage
 //}}}!depend
 
+//{{{!mb
+
 uu.Class.FlashStorage || (function(win, doc, uu) {
 
 var _SWF_PATH = uu.config.baseDir + "uu.storage.swf",
-    // [!] link to Storage.as "_CALLBACK_ID" on NPAPI I/F
-    _CALLBACK_ID = "externalflashstorage";
+    _already = null;
 
 uu.Class.singleton("FlashStorage", {
     init:           init,       // init(callback:Function = void)
@@ -19,33 +20,38 @@ uu.Class.singleton("FlashStorage", {
     remove:         remove,     // remove(key:String)
     getAll:         getAll,     // getAll():Hash
     saveToServer:   saveToServer,   // saveToServer(url:String, option:AjaxOptionHash = void, callback:Function = void)
-    loadFromServer: loadFromServer  // loadFromServer(url:String, option:JSONPOptionHash = void, callback:Function = void)
+    loadFromServer: loadFromServer, // loadFromServer(url:String, option:JSONPOptionHash = void, callback:Function = void)
+    toString:       toString    // toString():String
 });
 
 // uu.Class.FlashStorage.isReady - static method
 uu.Class.FlashStorage.isReady = function() { // @return Boolean
-    return uu.ver.as3 && uu.require(_SWF_PATH).ok;
+    if (_already === null) {
+        _already = uu.ver.as3 && uu.require(_SWF_PATH).ok;
+    }
+    return _already;
 };
 
 // FlashStorage.init
 function init(callback) { // @param Function(= void): callback
-    var that = this;
+    var that = this,
+        OBJECT_ID = "externalflashstorage";
 
     // wait for response from flash initializer
     function flashStorageReadyCallback() {
         setTimeout(function() {
-            uu.dmz[_CALLBACK_ID] = null;
+            uu.dmz[OBJECT_ID] = null;
             callback && callback(that);
         }, 0);
     }
 
-    uu.dmz[_CALLBACK_ID] = flashStorageReadyCallback;
+    uu.dmz[OBJECT_ID] = flashStorageReadyCallback;
 
     this.storage = uu.flash(_SWF_PATH, {
-                        id: _CALLBACK_ID,
-                        width: 1,
+                        id:     OBJECT_ID,
+                        width:  1,
                         height: 1,
-                        param: [
+                        param:  [
 //                            "loop", "false",
 //                            "menu", "false",
 //                            "play", "true",
@@ -118,5 +124,12 @@ function loadFromServer(url,        // @param String: url
     uu.Class.Storage.loadFromServer(this, url, option, callback);
 }
 
+// FlashStorage.toString
+function toString() {
+    return "FlashStorage";
+}
+
 })(window, document, uu);
+
+//}}}!mb
 
