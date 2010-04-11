@@ -29,7 +29,13 @@ uu.Class.singleton("Storage", {
     getAll:         getAll,     // getAll():Hash
     saveToServer:   saveToServer,   // saveToServer(url:String, option:AjaxOptionHash = void, callback:Function = void)
     loadFromServer: loadFromServer, // loadFromServer(url:String, option:JSONPOptionHash = void, callback:Function = void)
-    toString:       toString    // toString():String
+    toString:       toString,   // toString():String
+    // --- W3C spec API set ---
+    getLength:      pairs,      // [ALIAS]
+    key:            nth,        // [ALIAS]
+    getItem:        get,        // [ALIAS]
+    setItem:        set,        // [ALIAS]
+    removeItem:     remove      // [ALIAS]
 });
 
 // uu.Class.Storage.saveToServer - static method
