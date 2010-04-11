@@ -3,12 +3,11 @@
 //{{{!depend uu, uu.class
 //}}}!depend
 
+// W3C/HTML5/Video/Audio Spec. http://www.w3.org/TR/html5/video.html
+
 uu.Class.HTML5Audio || (function(win, doc, uu) {
 
-var _MP3_READY = true,
-    // gecko unimplemented - audio.loop
-    //      https://developer.mozilla.org/Ja/HTML/Element/Audio
-    _LOOP_IMPL = uu.gecko && uu.ver.render < 1.93 ? false : true;
+var _MP3_READY = false;
 
 uu.Class("HTML5Audio", {
     init:           init,           // init(source:String, option:AudioOptionHash = {}, callback:Function)
@@ -42,7 +41,7 @@ uu.Class.HTML5Audio.isReady = function() { // @return Boolean:
 uu.Class.HTML5Audio.isSupport = function(source) { // @param String: "music.mp3"
                                                    // @return Boolean;
     if (_MP3_READY && /\.mp3$/i.test(source)) { // mp3
-        if (uu.ver.safari || uu.ver.chrome) {
+        if ((uu.ver.win && uu.ver.safari) || uu.ver.chrome) {
             return true;
         }
     } else if (/\.og\w+$/i.test(source)) { // ogg
@@ -50,7 +49,7 @@ uu.Class.HTML5Audio.isSupport = function(source) { // @param String: "music.mp3"
             return true;
         }
     } else if (/\.wav$/i.test(source)) { // wav
-        if (uu.ver.gecko || uu.ver.safari || uu.ver.opera) {
+        if (uu.ver.gecko || (uu.ver.win && uu.ver.safari) || uu.ver.opera) {
             return true;
         }
     }
@@ -76,21 +75,34 @@ function init(source,     // @param String: "music.mp3"
             uu.node.add(this.audio);
         }
     } else {
-        this.audio = new Audio(source);
+        this.audio = new win.Audio(source);
         uu.node.add(this.audio);
     }
 
-    this.audio.loop = option.loop;
+    this.audio.loop = this._loop = option.loop;
     this.audio.volume = option.volume;
-    this.audio.startTime = option.startTime;
+    this._startTime = option.startTime;
+    this._lastUserAction = "";
+    this._closed = false;
 
     var that = this;
 
-    if (!_LOOP_IMPL) {
-        this.bind("ended", function() {
-            that.loop() && that.play();
-        });
-    }
+    // HTMLAudioElement.getContext():AudioContext
+    this.audio.getContext = function() {
+        return that;
+    };
+
+    this.bind("ended", function() {
+        if (that._closed) {
+            return;
+        }
+        if (that._lastUserAction === "stop") {
+            return;
+        }
+        if (that._loop) {
+            that.play();
+        }
+    });
 
     // autoplay
     if (option.autoplay) {
@@ -104,9 +116,8 @@ function init(source,     // @param String: "music.mp3"
 
 // HTML5Audio.close
 function close() {
-    if (!_LOOP_IMPL) {
-        this.unbind("ended");
-    }
+    this._closed = true;
+    this.unbind("ended");
 
     uu.event.fire(this.audio, "ended");
     uu.node.remove(this.audio);
@@ -114,58 +125,89 @@ function close() {
 
 // HTML5Audio.play
 function play() {
+    if (this._closed) {
+        return;
+    }
+    this._lastUserAction = "play";
+
     if (uu.ver.chrome) { // [CHROME][FIX] volume
         var that = this,
             vol = this.audio.volume;
 
         this.audio.volume = 0;
+        if (!this.audio.paused) {
+            this.currentTime(this._startTime);
+        }
         this.audio.play();
 
+        // [!] delay
         setTimeout(function() {
             that.audio.volume = vol;
         }, 0);
         return;
     }
 
+    if (!this.audio.paused) {
+        this.currentTime(this._startTime);
+    }
     this.audio.play();
 }
 
 // HTML5Audio.pause
 function pause() {
-    this.audio.pause();
+    if (this._closed) {
+        return;
+    }
+    if (!this.audio.error) {
+        this._lastUserAction = "pause";
+        this.audio.pause();
+    }
 }
 
 // HTML5Audio.stop
 function stop() {
-    this.currentTime(this.audio.startTime);
-    this.audio.pause();
-    this.currentTime(this.audio.startTime);
+    if (this._closed) {
+        return;
+    }
+    if (!this.audio.error) {
+        this._lastUserAction = "stop";
+        this.audio.pause();
+        this.currentTime(this._startTime);
+    }
 }
 
 // HTML5Audio.loop
 function loop(value) { // @param Boolean: true is loop
                        // @return Boolean/void: true is loop
     if (value === void 0) {
-        return this.audio.loop;
+        return this._loop;
     }
 
+    this._loop = value;
     this.audio.loop = value;
 }
 
 // HTML5Audio.state
 function state() { // @return Hash: { error, paused, ended, source, duration }
-    var error = false;
+    var paused = this.audio.paused || false,
+        ended = this.audio.ended || false,
+        loop = this._loop;
 
-    if (this.audio.error) {
-        error = true;
+    if (this._lastUserAction === "stop") {
+        if (paused) {
+            paused = false;
+            ended = true;
+        }
     }
+    loop = this.audio.loop;
+
     return {
-        loop:       this.audio.loop     || false,
-        error:      error,
-        paused:     this.audio.paused   || false,
-        ended:      this.audio.ended    || false,
+        loop:       loop,
+        error:      this.audio.error    || 0,   // 0, 1 ~ 4
+        paused:     paused,
+        ended:      ended,
         source:     this.audio.src      || "",
-        duration:   this.audio.duration || 0,
+        duration:   this.audio.duration || 0
     };
 }
 
@@ -182,9 +224,9 @@ function volume(value) { // @param Number: 0.0 ~ 1.0
 function startTime(time) { // @param Number: time
                            // @return Number/void:
     if (time === void 0) {
-        return this.audio.startTime;
+        return this._startTime;
     }
-    this.audio.startTime = time;
+    this._startTime = time;
 }
 
 // HTML5Audio.currentTime

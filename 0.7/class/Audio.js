@@ -5,6 +5,7 @@
 
 //  <audio autoplay loop="true">
 //      <source src="hoge.mp3" type="audio/mpeg" />
+//      <source src='audio.ogg' type='audio/ogg; codecs=vorbis'>
 //  </audio>
 //
 // +--------------+-------------+---------------+----------------+----------+
@@ -36,7 +37,6 @@
 uu.Class.Audio || (function(win, doc, uu) {
 
 var _backendOrder = "HTML5Audio,SilverlightAudio,FlashAudio,NoAudio";
-//var _backendOrder = "FlashAudio,NoAudio";
 
 uu.Class("Audio", {
     init:           init,           // init(source:String, option:AudioOptionHash = {}, callback:Function)
@@ -133,7 +133,7 @@ function mute() {
 }
 
 // Audio.loop - toggle loop
-function loop(value) {
+function loop() {
     if (this.backend.loop()) {
         this.backend.loop(false);
     } else {
@@ -142,7 +142,18 @@ function loop(value) {
 }
 
 // Audio.state
-function state() { // @return String:
+function state() { // @return Hash: { text, loop, error, ended,
+                   //                 paused, muted, source }
+                   //   text   - String: statusText
+                   //   loop   - Boolean:
+                   //   error  - Number: 0 is not error,
+                   //                    1 is MEDIA_ERR_ABORTED
+                   //                    2 is MEDIA_ERR_NETWORK
+                   //                    3 is MEDIA_ERR_DECODE,
+                   //                    4 is MEDIA_ERR_SRC_NOT_SUPPORTED
+                   //   ended  - Boolean:
+                   //   muted  - Boolean:
+                   //   source - String:
     var rv = this.backend.state();
 
     rv.muted = this._muted;
@@ -197,7 +208,6 @@ function currentTime(time) { // @param Number: time
         time = 0;
     }
     this.backend.currentTime(time);
-
 }
 
 // Audio.startTime
@@ -224,9 +234,68 @@ function toString() {
 }
 
 // --- init ---
+function _parseAudioTags(audioNodes, callback) {
+
+    audioNodes.forEach(function(audio) {
+        var sourceArray = [],
+            option = {},
+            c = audio.firstChild,
+            ready,
+            readySource = "";
+
+        option.loop = audio.loop || false;
+        option.autoplay = "autoplay" in audio ? true : false;
+
+        if (audio.src) {
+            sourceArray.push(audio.src);
+        } else {
+            for (; c; c = c.nextSibling) {
+                if ("src" in c) {
+                    sourceArray.push(c.src);
+                }
+            }
+        }
+
+        ready = sourceArray.some(function(source) {
+            return _backendOrder.split(",").some(function(backendName) {
+                var Class = uu.Class[backendName];
+
+                if (Class && Class.isReady() && Class.isSupport(source)) {
+                    readySource = source;
+                    return true;
+                }
+                return false;
+            });
+        });
+        if (ready) {
+            option.node = audio;
+            uu("Audio", readySource, option, callback);
+        }
+    });
+}
+
+function _xaudio() {
+    uu.lazy("audio", function() {
+        uu.ready.gone.audio = 1;
+
+        win.xaudio && win.xaudio(uu, uu.tag("audio"));
+    });
+}
+
 uu.ready(function() {
-    uu.ready.gone.audio = 1;
-    win.xaudio && win.xaudio(uu);
+    var nodes = uu.tag("audio"),
+        count = 0;
+
+    if (nodes.length) {
+        _parseAudioTags(nodes, function() {
+            ++count;
+            if (nodes.length >= count) {
+                _xaudio()
+            }
+        });
+    } else {
+        _xaudio();
+    }
 });
 
 })(window, document, uu);

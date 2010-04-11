@@ -76,8 +76,8 @@ function init(source,     // @param String: "music.mp3"
     this.audio           = option.node; // for event
     this._loop           = option.loop;
     this._source         = source;
-    this._error          = false;
-    this._ended          = false;
+    this._error          = 0;
+    this._ended          = true;
     this._paused         = false;
     this._volume         = option.volume;
     this._startTime      = option.startTime;
@@ -89,6 +89,11 @@ function init(source,     // @param String: "music.mp3"
     var that = this,
         // [ASYNC] initialized notify callback handler
         onload = "uuAudioSilverlightOnLoad" + uu.guid();
+
+    // HTMLAudioElement.getContext():AudioContext
+    this.audio.getContext = function() {
+        return that;
+    };
 
     // wait for response from Silverlight initializer
     win[onload] = function(sender) { // @param Node: sender is <Canvas> node
@@ -132,7 +137,7 @@ function initMedia(that) {
 
     // trap Media Error
     that.media.AddEventListener("MediaFailed", function() {
-        that._error = true;
+        that._error = 4;
         that._ended = true;
         that._paused = false;
 
@@ -155,8 +160,6 @@ function initMedia(that) {
 
         if (that._loop) {
             that.media.play();
-
-//            uu.event.fire(that.audio, "play");
         }
     });
 
@@ -184,37 +187,36 @@ function initMedia(that) {
         // media.load -> "Error"
         case "Error":
         case "Closed":
-                that._error = true;
+                that._error = 4;
                 that._ended = true;
                 that._paused = false;
                 uu.event.fire(that.audio, "error");
                 break;
 
-        // media.pause -> MediaState("Paused") -> uueventfire("pause")
-        // media.stop  -> MediaState("Paused") -> uueventfire("ended")
-        // file end    -> MediaState("Paused") -> uueventfire("ended")
+        // userAction.pause()           -> MediaState("Paused") -> x
+        // userAction.stop()            -> MediaState("Paused") -> x
+        // userAction.play() + file end -> MediaState("Paused") -> uueventfire("ended")
         case "Paused":
-                if (that._lastUserAction === "pause") {
+                switch (that._lastUserAction) {
+                case "play": // play() -> file end -> event("ended")
+                    that._ended = true;
+                    that._paused = false;
+                    uu.event.fire(that.audio, "ended");
+                    that.currentTime(that._startTime);
+                    break;
+                case "pause":
                     that._ended = false;
                     that._paused = true;
-                    uu.event.fire(that.audio, "pause");
-                } else {
-                    if (that._loop) {
-                        that._ended = true;
-                        that._paused = false;
-                        uu.event.fire(that.audio, "ended"); // ???
-                    } else {
-                        that._ended = true;
-                        that._paused = false;
-                        uu.event.fire(that.audio, "ended");
-                        that.currentTime(that._startTime);
-                    }
+                    break;
+                case "stop":
+                    that._ended = true;
+                    that._paused = false;
                 }
                 break;
 
         // media.play -> "Playing"
         case "Playing":
-                that._error = null;
+                that._error = 0;
                 that._ended = false;
                 that._paused = false;
                 uu.event.fire(that.audio, "playing");
@@ -225,7 +227,6 @@ function initMedia(that) {
                 that._ended = true;
                 that._paused = false;
                 that.currentTime(that._startTime);
-                uu.event.fire(that.audio, "ended");
         }
     });
 }
@@ -246,9 +247,11 @@ function play() {
         var that = this;
 
         this._lastUserAction = "play";
+        if (this._ended) {
+            this.currentTime(this._startTime);
+        }
+
         this.media.play();
-        this._paused = false;
-        this._ended = false;
         uu.event.fire(this.audio, "play");
 
         if (!this._interval) {
@@ -267,6 +270,7 @@ function pause() {
     if (!this._error) {
         this._lastUserAction = "pause";
         this._paused = true;
+        this._ended = false;
         this.media.pause();
         uu.event.fire(this.audio, "pause");
     }

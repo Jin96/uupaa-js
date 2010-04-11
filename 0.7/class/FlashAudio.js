@@ -83,6 +83,11 @@ function init(source,     // @param String: "music.mp3"
     var that = this,
         OBJECT_ID = "externalflashaudio" + uu.guid();
 
+    // HTMLAudioElement.getContext():AudioContext
+    this.audio.getContext = function() {
+        return that;
+    };
+
     // wait for response from flash initializer
     function flashAudioReadyCallback() {
         setTimeout(function() {
@@ -122,7 +127,7 @@ function close() {
     }
     this.media.ex_stop();
 
-    uu.event.fire(this.audio, "ended");
+//  uu.event.fire(this.audio, "ended");
     uu.node.remove(this.audio);
 }
 
@@ -133,6 +138,7 @@ function play() {
 
         this._lastUserAction = "play";
         this.media.ex_play();
+        uu.event.fire(this.audio, "play");
 
         if (!this._interval) {
 
@@ -150,6 +156,7 @@ function pause() {
     if (!this._error) {
         this._lastUserAction = "pause";
         this.media.ex_pause();
+        uu.event.fire(this.audio, "pause");
     }
 }
 
