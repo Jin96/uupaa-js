@@ -23,7 +23,13 @@ uu.Class.singleton("CookieStorage", {
     loadFromServer: loadFromServer, // loadFromServer(url:String, option:JSONPOptionHash = void, callback:Function = void)
     toString:       toString,       // toString():String
     store:          store,          // [PROTECTED]
-    retrieve:       retrieve        // [PROTECTED]
+    retrieve:       retrieve,       // [PROTECTED]
+    // --- W3C spec API set ---
+    getLength:      pairs,      // [ALIAS]
+    key:            nth,        // [ALIAS]
+    getItem:        get,        // [ALIAS]
+    setItem:        set,        // [ALIAS]
+    removeItem:     remove      // [ALIAS]
 });
 
 // uu.Class.CookieStorage.isReady - static method
