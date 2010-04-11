@@ -4,11 +4,12 @@
 <script src="../uu.ajax.js"></script>
 <script src="../uu.form.js"></script>
 <script src="../uu.flash.js"></script>
-<script src="../class/Storage.js"></script>
-<script src="../class/LocalStorage.js"></script>
-<script src="../class/FlashStorage.js"></script>
-<script src="../class/IEStorage.js"></script>
-<script src="../class/CookieStorage.js"></script>
+<script src="../class/Storage/Storage.js"></script>
+<script src="../class/Storage/LocalStorage.js"></script>
+<script src="../class/Storage/FlashStorage.js"></script>
+<script src="../class/Storage/IEStorage.js"></script>
+<script src="../class/Storage/CookieStorage.js"></script>
+<script src="../class/Storage/MemStorage.js"></script>
 <script>
 
 function xwin(uu) {
@@ -17,7 +18,7 @@ function xwin(uu) {
 }
 
 function xstorage(uu, storage) {
-    uu.id("backend").innerText = storage.toString();
+    uu.text(uu.id("backend"), storage.toString());
     updateSize();
 }
 
