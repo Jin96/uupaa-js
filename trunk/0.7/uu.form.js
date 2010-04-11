@@ -3,38 +3,11 @@
 //{{{!depend uu
 //}}}!depend
 
-uu.text || (function(win, doc, uu) {
-
-// [1][node] uu.text("text") -> createTextNode("text")
-// [2][get]  uu.text(node) -> text or [text, ...]
-// [3][set]  uu.text(node, "text") -> node
-uu.text = uutext;
+uu.value || (function(win, doc, uu) {
 
 // [1][get] uu.value(node) -> value or [value, ...]
 // [2][set] uu.value(node, "value") -> node
 uu.value = uuvalue;
-
-
-// [1][get]  uu.text(node) -> text or [text, ...]
-// [2][set]  uu.text(node, "text") -> node
-
-// uu.text - node.text / node.innerText accessor
-function uutext(node,   // @param Node/String: node or text string
-                text) { // @param String(= void):
-                        // @return Array/String/Node:
-    if (uu.isString(node)) {
-        return doc.createTextNode(node);
-    }
-    if (text === void 0) {
-        return node[uu.gecko ? "textContent" : "innerText"];
-    }
-    uu.node.add(doc.createTextNode(Array.isArray(text) ? text.join("") : text),
-                uu.node.clear(node));
-    return node;
-}
-
-// [1][get] uu.val(node) -> value
-// [2][set] uu.val(node, "value") -> node
 
 // uu.value - value accessor
 function uuvalue(node,    // @param Node:

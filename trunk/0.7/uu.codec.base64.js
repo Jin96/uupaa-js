@@ -83,8 +83,8 @@ function base64decode(base64str, // @param Base64String/URLSafe64String:
     }
 
     iz = base64str.length - 1;
-    if (uu.ie) {
-        // unsupported string[indexer] of IE
+    if (uu.ie67) {
+        // unsupported string[indexer] of IE6, IE7
         while (i < iz) {                              // 00000000|00000000|00000000 (24bit)
             c = (DECODE[base64str.charAt(++i)] << 18) // 111111  |        |
               | (DECODE[base64str.charAt(++i)] << 12) //       11|1111    |

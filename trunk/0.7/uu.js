@@ -9,7 +9,6 @@
 //
 // * User callback functions ( doc/user-callback-functions.txt )
 //
-//  - window.xver(uu.ver:Hash)
 //  - window.xboot(uu:Function)
 //  - window.xwin(uu:Function)
 //  - window.xcanvas(uu:Function, canvasNodeArray:NodeArray)
@@ -96,8 +95,8 @@ uu = uumix(uufactory, {             // uu(expression:Jam/Node/NodeArray/String/w
                                     //  [1][set one  attr ] uu.attr.set(node, key, val ) -> node
                                     //  [2][set some attrs] uu.attr.set(node, { key: val, ... }) -> node
         getAll:     uuattrgetall    // uu.attr.getAll(node:Node, filter:Boolean = false):Hash
-                                    //  [1][get all]    uu.attr(node) -> { all: attrs }
-                                    //  [2][use filter] uu.attr(node, true) -> { many: attrs }
+                                    //  [1][get all]        uu.attr(node) -> { all: attrs }
+                                    //  [2][use filter]     uu.attr(node, true) -> { many: attrs }
     }),
     // --- CSS ---
     css:      uumix(uucss, {        // uu.css(node:Node, key:Hash/String, value:String = void):String/Hash/Node
@@ -142,15 +141,15 @@ uu = uumix(uufactory, {             // uu(expression:Jam/Node/NodeArray/String/w
         singleton:  uuclasssingleton// uu.Class.singleton(className:String, proto:Hash = void)
     }),
     // --- EVENT ---
-    event:    uumix(uuevent, {      // uu.event(node:Node, namespaceAndEventTypes:String, evaluator:Function, detach:Boolean = false):Node
+    event:    uumix(uuevent, {      // uu.event(node:Node, eventTypeEx:String, evaluator:Function, detach:Boolean = false):Node
                                     //  [1][bind a event]            uu.event(node, "click", fn)             -> node
                                     //  [2][bind multi events]       uu.event(node, "click,dblclick", fn)    -> node
                                     //  [3][bind a capture event]    uu.event(node, "mousemove+", fn)        -> node
                                     //  [4][bind a namespace.event]  uu.event(node, "MyNameSpace.click", fn) -> node
-        has:        uueventhas,     // uu.event.has(node:Node, namespaceAndEventTypes:String):Boolean
+        has:        uueventhas,     // uu.event.has(node:Node, eventTypeEx:String):Boolean
         fire:       uueventfire,    // uu.event.fire(node:Node, eventType:String, param:Mix = void):Node
         stop:       uueventstop,    // uu.event.stop(eventObject:EventObject):EventObject
-        unbind:     uueventunbind,  // uu.event.unbind(node:Node, namespaceAndEventTypes:String = void):Node
+        unbind:     uueventunbind,  // uu.event.unbind(node:Node, eventTypeEx:String = void):Node
         attach:     uueventattach,  // uu.event.attach(node:Node, eventType:String, evaluator:Function, capture:Boolean = false)
         detach:     uueventdetach   // uu.event.detach(node:Node, eventType:String, evaluator:Function, capture:Boolean = false)
     }),
@@ -165,9 +164,19 @@ uu = uumix(uufactory, {             // uu(expression:Jam/Node/NodeArray/String/w
         has:        uunodehas,      // uu.node.has(node:Node, context:Node):Boolean
         root:       doc.documentElement || doc.html,
                                     // root node, documentElement or <html>(in IE quirks)
-        bulk:       uunodebulk,     // uu.node.bulk(source:Node/HTMLFragment):DocumentFragment
+        bulk:       uunodebulk,     // uu.node.bulk(source:Node/HTMLFragment, context:Node/TagString = "div"):DocumentFragment
         swap:       uunodeswap,     // uu.node.swap(swapin:Node, swapout:Node):Node (swapout node)
         wrap:       uunodewrap,     // uu.node.wrap(innerNode:Node, outerNode:Node):Node (innerNode)
+        build:      uunodebuild,    // uu.node.build(node:Node/String, args:Mix):Node
+                                    //  [1][add node]           uu.div(uu.div())
+                                    //  [2][add text node]      uu.div("hello")
+                                    //  [3][add text node]      uu.div(uu.text("hello"))
+                                    //  [4][id callback]        uu.div("@buildid") - window.xnode(uu, <div>, {{"buildid"}}, nodeid)
+                                    //  [5][number callback]    uu.div(1)          - window.xnode(uu, <div>, {{1}}, nodeid)
+                                    //  [6][set attr by string] uu.div("title,hello")      - first String is uu.attr("title,hello")
+                                    //  [7][set attr by hash]   uu.div({ title: "hello" }) - first Hash is uu.attr({ title: "hello" })
+                                    //  [8][set css by string]  uu.div("", "color,red")      - second String is uu.css("color,red")
+                                    //  [9][set css by hash]    uu.div("", { color: "red" }) - second Hash is uu.css({ color: "red" })
         clear:      uunodeclear,    // uu.node.clear(context:Node):Node
         clone:      uunodebulk,     // [alias]
         remove:     uunoderemove    // uu.node.remove(node:Node):Node
@@ -176,6 +185,13 @@ uu = uumix(uufactory, {             // uu(expression:Jam/Node/NodeArray/String/w
         toNode:     uunodeidtonode, // uu.nodeid.toNode(nodeid:Number):Node
         remove:     uunodeidremove  // uu.nodeid.remove(node:Node):Node (removed node)
     }),
+    html:           uuhtml,         // uu.html(node, attr, style, buildid) -> <html>
+    head:           uuhead,         // uu.head(node, attr, style, buildid) -> <head>
+    body:           uubody,         // uu.body(node, attr, style, buildid) -> <body>
+    text:           uutext,         // uu.text(node:Node/String, text:String(= void)):Array/String/Node
+                                    //  [1][create node] uu.text("text")       -> createTextNode("text")
+                                    //  [2][get text]    uu.text(node)         -> text or [text, ...]
+                                    //  [3][set text]    uu.text(node, "text") -> node
     // --- STRING ---
     fix:            uufix,          // uu.fix(source:String):String
                                     // [1][css-prop to js-css-prop] uu.fix("background-color") -> "backgroundColor"
@@ -324,9 +340,6 @@ uu.config   = uuarg(win.xconfig, {  // uu.config - Hash: user configurations
 
 doc.html || (doc.html = uutag("html")[0]); // document.html = <html>
 doc.head || (doc.head = uutag("head")[0]); // document.head = <head>
-
-// window.xver(uu.ver) callback
-win.xver && win.xver(uu.ver);
 
 // ===================================================================
 
@@ -1199,35 +1212,41 @@ function uuclass(className, // @param String: "Class"
         Class = ary[0], Super = ary[1] || "";
 
     uuclass[Class] = function uuClass() {
-        var lv3 = this,                     // Lv3: this
-            lv2 = lv3.superClass || 0,      // Lv2: SuperClass
-            lv1 = lv2 ? lv2.superClass : 0; // Lv1: SuperSuperClass
+        var that = this,
+            Super = that.superClass || 0,
+            SuperSuper = Super ? Super.superClass : 0;
 
         // register MessagePump
-        uuclassguid(lv3);
-        lv3.msgbox || (lv3.msgbox = uu.nop);
-        uu.msg.register(lv3);
+        uuclassguid(that);
+        that.msgbox || (that.msgbox = uu.nop);
+        uu.msg.register(that);
 
-        // constructor(order: lv1 -> lv2 -> lv3)
-        lv1 && lv1.init && lv1.init.apply(lv3, arguments);
-        lv2 && lv2.init && lv2.init.apply(lv3, arguments);
-               lv3.init && lv3.init.apply(lv3, arguments);
+        // constructor(order: SuperSuper -> Super -> that)
+        if (SuperSuper && SuperSuper.init) {
+            SuperSuper.init.apply(that, arguments);
+        }
+        if (Super && Super.init) {
+            Super.init.apply(that, arguments);
+        }
+        if (that.init) {
+            that.init.apply(that, arguments);
+        }
 
-        // setup destructor(order: ~lv3 -> ~lv2 -> ~lv1)
-        lv3["~fin"] = lv3.fin || uu.nop;
-        if (lv3.fin) {
+        // setup destructor(order: ~that -> ~Super -> ~SuperSuper)
+        that["~fin"] = that.fin || uu.nop;
+        if (that.fin) {
             uu.event.attach(win, "unload", function() {
-                lv3.fin && lv3.fin();
+                that.fin && that.fin();
             });
         }
-        lv3.fin = function wrapper() {
-            lv3["~fin"]();
-            lv2 && lv2.fin && lv2.fin.call(lv3);
-            lv1 && lv1.fin && lv1.fin.call(lv3);
+        that.fin = function wrapper() {
+            that["~fin"]();
+            Super && Super.fin && Super.fin.call(that);
+            SuperSuper && SuperSuper.fin && SuperSuper.fin.call(that);
 
             // destroy them all
-            for (var i in lv3) {
-                lv3[i] = null;
+            for (var i in that) {
+                that[i] = null;
             }
         };
     };
@@ -1355,11 +1374,11 @@ function uumsgunregister(instance) { // @param Instance: class instance
 // [4][bind a namespace.event]  uu.event(node, "MyNameSpace.click", fn) -> node
 
 // uu.event - bind event
-function uuevent(node,                   // @param Node:
-                 namespaceAndEventTypes, // @param String: namespace and event types "click,click+,..."
-                 evaluator,              // @param Function/Instance: callback function
-                 detach) {               // @param Boolean(= false): true is detach event, false is attach event
-                                         // @return Node:
+function uuevent(node,        // @param Node:
+                 eventTypeEx, // @param EventTypeExString: some EventTypeEx, "click,click+,..."
+                 evaluator,   // @param Function/Instance: callback function
+                 unbind) {    // @param Boolean(= false): true is unbind, false is bind
+                              // @return Node:
     function _uueventclosure(evt, fromCustomEvent) {
         evt = evt || win.event;
 
@@ -1387,13 +1406,20 @@ function uuevent(node,                   // @param Node:
                    : evaluator(evt, node, src);
     } // [OPTIMIZED]
 
-    var types = node.uueventtypes || (node.uueventfn = {},
-                                      node.uueventtypes = ","),
-        nstype = namespaceAndEventTypes.split(","), v, i = -1, m,
-        type, capt, closure, handler,
-        isInstance = false, EVENT_CODE = uuevent._CODE;
+    // --- setup event database ---
+    if (!("uuEventTypeExString" in node)) {
+        node.uuEventTypeExString  = ",";
+        node.uuEventEvaluatorHash = {};
+    }
 
-    if (detach) {
+    var eventTypeExArray = eventTypeEx.split(","),
+        ex, token,
+        bound,
+        evaluatorArray,
+        ns, eventType, capture, closure, handler, i = -1, pos,
+        isInstance = false, EVENT_CODE = uuevent._CODE; // for closure
+
+    if (unbind) {
         closure = evaluator.uueventclosure || evaluator;
     } else {
         handler = uuisfunction(evaluator)
@@ -1401,46 +1427,61 @@ function uuevent(node,                   // @param Node:
                 : (isInstance = true, evaluator.handleEvent);
         closure = evaluator.uueventclosure = _uueventclosure;
     }
-    while ( (v = nstype[++i]) ) { // v = "namespace.click+"
-        m = uuevent._PARSE.exec(v); // split ["namespace.click+", "namespace", "click", "+"]
-        if (m) {
-            type = m[2]; // "click"
-            capt = m[3]; // "+"
 
-            // IE mouse capture
-            // TODO: IE9
-            if (uu.ie) {
-                if (capt && type === "mousemove") {
-                    uuevent(node, "losecapture", closure, detach);
+    while ( (ex = eventTypeExArray[++i]) ) { // ex = "namespace.click+"
+
+        // split token
+        //      "namespace.click+"
+        //              v
+        //      ["namespace.click+", "namespace", "click", "+"]
+        token = uuevent._PARSE.exec(ex);
+        ns        = token[1]; // "namespace"
+        eventType = token[2]; // "click"
+        capture   = token[3]; // "+"
+
+        // IE mouse capture
+        if (uu.ie678) {
+            if (capture && eventType === "mousemove") {
+                uuevent(node, "losecapture", closure, unbind);
+            }
+        }
+
+        bound = node.uuEventTypeExString.indexOf("," + ex + ",") >= 0;
+
+        // IE mouse capture
+        if (uu.ie678) {
+            if (eventType === "losecapture") {
+                if (node.setCapture) {
+                    bound ? node.setCapture()
+                          : node.releaseCapture();
                 }
             }
+        }
 
-            if (types.indexOf("," + v + ",") >= 0) { // bound?
-                if (detach) { // detach event
-                    // IE releaseCapture
-                    // TODO: IE9
-                    if (uu.ie) {
-                        if (type === "losecapture" && node.releaseCapture) {
-                            node.releaseCapture();
-                        }
+        if (unbind) {
+            if (bound) {
+                evaluatorArray = node.uuEventEvaluatorHash[ex];
+
+                pos = evaluatorArray.indexOf(ex);
+                if (pos >= 0) {
+                    evaluatorArray.splice(pos, 1); // remove evaluator
+                    if (!evaluatorArray.length) {
+                        // ",dblclick," <- ",namespace.click+,dblclick,".replace(",namespace.click+,", ",")
+                        node.uuEventTypeExString =
+                                node.uuEventTypeExString.replace("," + ex + ",", ",");
                     }
-
-                    // ",dblclick," <- ",namespace.click+,dblclick,".replace(",namespace.click+,", ",")
-                    node.uueventtypes =
-                            node.uueventtypes.replace("," + v + ",", ",");
-                    node.uueventfn[v] = void 0;
-                    uueventdetach(node, type, closure, capt);
+                    uueventdetach(node, eventType, closure, capture);
                 }
-            } else if (!detach) { // attach event
-                uu.ie && type === "losecapture"
-                      && node.setCapture
-                      && node.setCapture();
-
-                // ",namespace.click+,dblclick," <- ",namespace.click+," + "dblclick" + ,"
-                node.uueventtypes += v + ",";
-                node.uueventfn[v] = closure;
-                uueventattach(node, type, closure, capt);
             }
+        } else {
+            // ",namespace.click+,dblclick," <- ",namespace.click+," + "dblclick" + ,"
+            if (!bound) {
+                node.uuEventTypeExString += ex + ",";
+                node.uuEventEvaluatorHash[ex] = []; // init evaluatorArray
+            }
+            node.uuEventEvaluatorHash[ex].push(closure); // evaluatorArray.push()
+
+            uueventattach(node, eventType, closure, capture);
         }
     }
     return node;
@@ -1457,10 +1498,10 @@ uuevent._CODE = {
 };
 
 // uu.event.has - has event
-function uueventhas(node,                     // @param Node: target node
-                    namespaceAndEventTypes) { // @param String: namespace and event types, "click", "namespace.mousemove+"
-                                              // @return Boolean:
-    return (node.uueventtypes || "").indexOf("," + namespaceAndEventTypes + ",") >= 0;
+function uueventhas(node,          // @param Node: target node
+                    eventTypeEx) { // @param EventTypeExString: namespace and event types, "click", "namespace.mousemove+"
+                                   // @return Boolean:
+    return (node.uuEventTypeExString || "").indexOf("," + eventTypeEx + ",") >= 0;
 }
 
 // uu.event.fire - fire event / fire custom event(none capture event only)
@@ -1469,21 +1510,26 @@ function uueventfire(node,      // @param Node: target node
                      param) {   // @param Mix(= void): param
                                 // @return Node:
     if (uu.event.has(node, eventType)) {
-        node.uueventfn[eventType].call(node, {
-            stopPropagation: uu.nop,
-            preventDefault:  uu.nop,
-            node:   node,       // current target
-            name:   eventType,  // event name
-            code:   0,          // 0: unknown
-            src:    node,       // event source
-            rel:    node,
-            px:     0,
-            py:     0,
-            ox:     0,
-            oy:     0,
-            type:   eventType,  // event type
-            param:  param
-        }, true); // fromCustomEvent = true
+
+        var fakeEventObjectEx = {
+                stopPropagation: uu.nop,
+                preventDefault:  uu.nop,
+                node:   node,       // current target
+                name:   eventType,  // event name
+                code:   0,          // 0: unknown
+                src:    node,       // event source
+                rel:    node,
+                px:     0,
+                py:     0,
+                ox:     0,
+                oy:     0,
+                type:   eventType,  // event type
+                param:  param
+            };
+
+        node.uuEventEvaluatorHash[eventType].forEach(function(evaluator) {
+            evaluator.call(node, fakeEventObjectEx, true); // fromCustomEvent = true
+        });
     }
     return node;
 }
@@ -1502,35 +1548,35 @@ function uueventstop(eventObject) { // @param EventObject:
 // [4][unbind namespace some]   uu.event.unbind(node, "namespace.click+,namespace.dblclick") -> node
 
 // uu.event.unbind - unbind event
-function uueventunbind(node,                     // @param Node: target node
-                       namespaceAndEventTypes) { // @param String(= void): namespace and event types, "click,click+,..."
-                                                 // @return Node:
-    function _eachnamespace(w) {
-        !w.indexOf(ns) && uuevent(node, w, node.uueventfn[w], true); // detach
+function uueventunbind(node,          // @param Node: target node
+                       eventTypeEx) { // @param EventTypeExString(= void): namespace and event types, "click,click+,..."
+                                      // @return Node:
+    function _unbindall(ex) { // @param EventTypeExString: "MyNamespace.mousemove+"
+        // closure vars: node, ns
+
+        if (!ex.indexOf(ns)) {
+            node.uuEventEvaluatorHash[ex].forEach(function(evaluator) {
+                uuevent(node, ex, evaluator, true); // unbind mode
+            });
+        }
     }
 
-    // node.uueventtypes = "{{eventtype1}},{{eventtype2}},"
-    // node.uueventfn    = { eventtype1: evaluator, ... }
-    var types = node.uueventtypes, nstype, v, i = -1, ns;
+    if (eventTypeEx === void 0) { // [1]
+        eventTypeEx = node.uuEventTypeExString; // ",click,MyNamespace.mousemove+,"
+    }
 
-    if (types && types.length > 1) { // ignore ","
-        if (namespaceAndEventTypes) { // [2][3][4]
-            nstype = uusplitcomma(namespaceAndEventTypes);
+    var ns, ary = uusplitcomma(eventTypeEx), ex, i = -1;
 
-            while ( (v = nstype[++i]) ) {
-                if (v.lastIndexOf(".*") > 1) { // [3] "namespace.*"
-                      ns = v.slice(0, -1); // "namespace."
-                      uusplitcomma(types).forEach(_eachnamespace);
-                } else { // [2][4]
-                      (types.indexOf("," + v + ",") >= 0) &&
-                          uuevent(node, v, node.uueventfn[v], true); // detach
-                }
-              }
-        } else { // [1]
-            nstype = uusplitcomma(types);
+    while ( (ex = ary[++i]) ) {
+        if (ex.lastIndexOf(".*") > 1) { // [3] "namespace.*"
+            ns = ex.slice(0, -1);       // "namespace.*" -> "namespace."
+            uusplitcomma(eventTypeEx).forEach(_unbindall);
+        } else { // [2][4]
+            if (eventTypeEx.indexOf("," + ex + ",") >= 0) {
 
-            while ( (v = nstype[++i]) ) {
-                uuevent(node, v, node.uueventfn[v], true); // detach
+                node.uuEventEvaluatorHash[ex].forEach(function(evaluator) {
+                    uuevent(node, ex, evaluator, true); // unbind mode
+                });
             }
         }
     }
@@ -1607,7 +1653,7 @@ function uunodeadd(source,     // @param Node/DocumentFragment/HTMLFragment/TagN
 
     var node = !source ? doc.createElement("div")        // [1] uu.node.add()
              : source.nodeType ? source                  // [3][5] uu.node.add(Node or DocumentFragment)
-             : !source.indexOf("<") ? uunodebulk(source) // [4] uu.node.add(HTMLFragmentString)
+             : !source.indexOf("<") ? uunodebulk(source, context) // [4] uu.node.add(HTMLFragmentString)
              : doc.createElement(source),                // [2] uu.node.add("p")
         parentNode = context.parentNode,
         rv = (node.nodeType === 11) ? node.firstChild : node; // 11: DocumentFragment
@@ -1675,13 +1721,16 @@ function uunodehas(node,      // @param Node: child node
 // [2][build]           uu.node.bulk("<p>html</p>") -> DocumentFragment
 
 // uu.node.bulk - convert HTMLString into DocumentFragment
-function uunodebulk(source) { // @param Node/HTMLFragment: source
-                              // @return DocumentFragment:
-    var rv = doc.createDocumentFragment(),
-        placeholder = uunode();
+function uunodebulk(source,    // @param Node/HTMLFragment: source
+                    context) { // @param Node/TagString(= "div"): context
+                               // @return DocumentFragment:
+    context = context || "div";
 
-    placeholder.innerHTML = uuisstring(source) ? source            // [2] "<p>html</p>"
-                                               : source.outerHTML; // [1] node
+    var rv = doc.createDocumentFragment(),
+        placeholder = context.nodeType ? context : uunode(context);
+
+    placeholder.innerHTML = source.nodeType ? source.outerHTML // [1] node
+                                            : source;          // [2] "<p>html</p>"
     while (placeholder.firstChild) {
         rv.appendChild(placeholder.removeChild(placeholder.firstChild));
     }
@@ -1705,12 +1754,59 @@ function uunodewrap(innerNode,   // @param Node: inner node
     return outerNode.appendChild(uunodeswap(outerNode, innerNode));
 }
 
+// uu.node.build - node builder
+// [1][add node]           uu.div(uu.div())
+// [2][add text node]      uu.div("hello")
+// [3][add text node]      uu.div(uu.text("hello"))
+// [4][id callback]        uu.div("@buildid") - window.xnode(uu, <div>, {{"buildid"}}, nodeid)
+// [5][number callback]    uu.div(1)          - window.xnode(uu, <div>, {{1}}, nodeid)
+// [6][set attr by string] uu.div("title,hello")      - first String is uu.attr("title,hello")
+// [7][set attr by hash]   uu.div({ title: "hello" }) - first Hash is uu.attr({ title: "hello" })
+// [8][set css by string]  uu.div("", "color,red")      - second String is uu.css("color,red")
+// [9][set css by hash]    uu.div("", { color: "red" }) - second Hash is uu.css({ color: "red" })
+function uunodebuild(node,   // @param Node/String:
+                     args) { // @param Mix: arguments(nodes, attr/css)
+                             // @return Node:
+    node.nodeType || (node = uu.node(node)); // "div" -> <div>
+
+    var arg, isString, w, i = 0, j = 0, iz = args.length,
+        xnode = uuisfunction(win.xnode) ? win.xnode : uu.nop;
+
+    for (; i < iz; ++i) {
+        w = 1;
+        arg = args[i];
+        isString = typeof arg === "string";
+
+        if (arg) {
+            if (isString) { // [2][4][6][8]
+                if (arg.indexOf(",") < 0 && w--) { // [2]
+                    node.appendChild(doc.createTextNode(arg));
+                } else if (arg.charAt(0) === "@" && w--) { // [4]
+                    xnode(uu, node, arg.slice(1), uu.nodeid(node));
+                }
+            } else if (arg.nodeType && w--) {
+                node.appendChild(arg); // [1][3]
+            } else if (typeof arg === "number" && w--) { // [5]
+                xnode(uu, node, arg, uu.nodeid(node));
+            }
+        }
+        if (w) {
+            if (++j === 1) {
+                arg && uu.attr.set(node, isString ? uu.split.toHash(arg) : arg); // [6][7]
+            } else if (j === 2) {
+                arg && uu.css.set(node, isString ? uu.split.toHash(arg) : arg); // [8][9]
+            }
+        }
+    }
+    return node;
+}
+
 // [1][clear children]      uu.node.clear(<body>)
 
 // uu.node.clear - clear all children
 function uunodeclear(context) { // @param Node: parent node
                                 // @return Node: context
-    var rv = uu.tag("*", context), v, i = -1;
+    var rv = uutag("*", context), v, i = -1;
 
     while ( (v = rv[++i]) ) {
         uunodeidremove(v);
@@ -1730,6 +1826,42 @@ function uunoderemove(node) { // @param Node:
         uunodeidremove(node);
         return node.parentNode.removeChild(node);
     }
+    return node;
+}
+
+// uu.html
+function uuhtml(/* var_args */) { // @param Mix: var_args
+                                  // @return Node: <html> node
+    return uunodebuild(doc.html, arguments);
+}
+
+// uu.head
+function uuhead(/* var_args */) { // @param Mix: var_args
+                                  // @return Node: <head> node
+    return uunodebuild(doc.head, arguments);
+}
+
+// uu.body
+function uubody(/* var_args */) { // @param Mix: var_args
+                                  // @return Node: <body> node
+    return uunodebuild(doc.body, arguments);
+}
+
+// [1][get text] uu.text(node)         -> text or [text, ...]
+// [2][set text] uu.text(node, "text") -> node
+
+// uu.text - node.text / node.innerText accessor
+function uutext(node,   // @param Node/String: node or text string
+                text) { // @param String(= void):
+                        // @return Array/String/Node:
+    if (uuisstring(node)) {
+        return doc.createTextNode(node);
+    }
+    if (text === void 0) {
+        return node[uu.gecko ? "textContent" : "innerText"];
+    }
+    uunodeadd(doc.createTextNode(Array.isArray(text) ? text.join("") : text),
+              uunodeclear(node));
     return node;
 }
 
@@ -1935,7 +2067,7 @@ function uupuff(source) { // @param Mix: source object
 
 // <div id="trace">msg<div>
 // [1][with title]      uu.trace(title, mix) -> <p>title{mix}</p>
-// [2][without title]   uu.trace(mix)        -> <p>{mix</p>
+// [2][without title]   uu.trace(mix)        -> <p>{mix}</p>
 
 // uu.trace - add trace
 function uutrace(titleOrSource,  // @param String/Mix: title or source
@@ -2413,46 +2545,67 @@ uuevent._LIST.forEach(function(eventType) {
     };
 });
 
+// inner - setup node builder - uu.div(), uu.a(), ...
+uutag.HTML4.forEach(function(v) {
+    // skip "img", "canvas", "audio"
+    if (v === "img" || v === "canvas") {
+        return;
+    }
+
+    uu[v] = function html4NodeBuilder() { // @param Mix: var_args
+        return uunodebuild(v, arguments);
+    };
+});
+uutag.HTML5.forEach(function(v) {
+    uu.ie && doc.createElement(v); // [IE]
+
+    uu[v] = function html5NodeBuilder() { // @param Mix: var_args
+        return uunodebuild(v, arguments);
+    };
+});
+
 // Internet Explorer 6 flicker fix
 try {
     uu.ver.ie6 && doc.execCommand("BackgroundImageCache", false, true);
 } catch(err) {} // ignore error(IETester / stand alone IE too)
 
-// inner - bootstrap, WindowReadyState and DOMReadyState handler
-function _ready() {
-    if (!uuready.gone.blackout && !uuready.gone.dom++) {
-
-        uulazyfire("boot");
-        uuisfunction(win.xboot || 0) && win.xboot(uu); // window.xboot(uu) callback
-    }
-}
-
-// inner - window onloaded
-function _winload() {
+// --- window.onload handler ---
+function _WindowwOnLoad() {
     uuready.gone.win = 1;
-    _ready();
-    uuisfunction(win.xwin || 0) && win.xwin(uu); // window.xwin(uu) callback
+    _DOMContentLoaded();
+    win.xwin && win.xwin(uu); // window.xwin(uu) callback
     uulazyfire("canvas");
     uulazyfire("audio");
     uulazyfire("video");
 }
+uueventattach(win, "load", _WindowwOnLoad);
 
-// inner - DOMContentLoaded(IE)
-function _domreadyie() {
-    try {
-        doc.firstChild.doScroll("up"), _ready();
-    } catch(err) { setTimeout(_domreadyie, 64); }
+// --- DOMContentLoaded handler ---
+function _DOMContentLoaded() {
+    if (!uuready.gone.blackout && !uuready.gone.dom++) {
+
+        uulazyfire("boot");
+        win.xboot && win.xboot(uu); // window.xboot(uu) callback
+    }
 }
-
-uueventattach(win, "load", _winload);
-uu.ie ? _domreadyie() : uueventattach(doc, "DOMContentLoaded", _ready);
-
+// inner - hook DOMContentLoaded for IE6 IE7 IE8
+function _IEDOMContentLoaded() {
+    try {
+        // trick -> http://d.hatena.ne.jp/uupaa/20100410/1270882150
+        new Image.doScroll();
+        _DOMContentLoaded();
+    } catch(err) {
+        setTimeout(_IEDOMContentLoaded, 64);
+    }
+}
+uu.ver.ie678 ? _IEDOMContentLoaded()
+             : uueventattach(doc, "DOMContentLoaded", _DOMContentLoaded);
 
 // --- finalize ---
 //{{{!mb
 
 // inner - [IE] fix mem leak
-function _winunload() {
+function _WindowOnUnload() {
     var nodeid, node, ary, i, v;
 
     for (nodeid in uunodeid._db) {
@@ -2466,10 +2619,10 @@ function _winunload() {
     }
     doc.html = null;
     doc.head = null;
-    win.detachEvent("onload", _winload);
-    win.detachEvent("onunload", _winunload);
+    win.detachEvent("onload", _WindowwOnLoad);
+    win.detachEvent("onunload", _WindowOnUnload);
 }
-uu.ie && win.attachEvent("onunload", _winunload);
+uu.ie && win.attachEvent("onunload", _WindowOnUnload);
 //}}}!mb
 
 // inner -
