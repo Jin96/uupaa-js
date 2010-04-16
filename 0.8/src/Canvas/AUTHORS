@@ -1,0 +1,31 @@
+---------------------------------------
+uu.canvas.swf
+	http://code.google.com/p/uupaa-js/
+
+Developers:
+	uupaa <uupaa.js@gmail.com>
+
+---------------------------------------
+lib/Canvas/src/Bezier_lib.as
+	http://timotheegroleau.com/Flash/articles/cubic_bezier_in_flash.htm
+
+Developers:
+	Timothee Groleau
+
+---------------------------------------
+lib/Canvas/src/CanvasArc.as
+	http://code.google.com/p/ascanvas/
+	http://code.google.com/p/ascanvas/source/browse/trunk/src/com/gamemeal/html/Canvas.as#593
+
+Developers:
+	Colin Leung
+
+---------------------------------------
+lib/Canvas/src/com/adobe/images/BitString.as
+lib/Canvas/src/com/adobe/images/JPGEncoder.as
+lib/Canvas/src/com/adobe/images/PNGEncoder.as
+    http://code.google.com/p/as3corelib/
+
+Project:
+    corelib ActionScript 3 Library
+
