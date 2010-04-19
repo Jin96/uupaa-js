@@ -125,7 +125,7 @@ function init(source,     // @param String: "music.mp3"
             '<param name="onLoad" value="', onload, '" />',   // bond to global
         '</object>'].join("");
 
-    // fixed memory leak
+    // fixed memory leak [IE6][IE7][IE8]
     uu.ver.ie678 && win.attachEvent("onunload", function() {
         win.detachEvent("onunload", arguments.callee);
         win[onload] = null;
@@ -367,7 +367,7 @@ function toString() {
 
 // --- init ---
 // add inline XAML source
-uu.ver.silverlight && uu.ready(function() {
+!uu.opera && uu.ver.silverlight && uu.ready(function() {
     uu.id("xaml") || doc.head.appendChild(uu.node("script", {
         id:   "xaml",
         type: "text/xaml",

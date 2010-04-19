@@ -40,8 +40,10 @@ uu.Class.HTML5Audio.isReady = function() { // @return Boolean:
 
 uu.Class.HTML5Audio.isSupport = function(source) { // @param String: "music.mp3"
                                                    // @return Boolean;
+    var windows = uu.ver.os === "windows";
+
     if (_MP3_READY && /\.mp3$/i.test(source)) { // *.mp3
-        if ((uu.ver.windows && uu.ver.safari) || uu.ver.chrome) {
+        if ((windows && uu.ver.safari) || uu.ver.chrome) {
             return true;
         }
     } else if (/\.og\w+$/i.test(source)) { // *.ogg
@@ -53,7 +55,7 @@ uu.Class.HTML5Audio.isSupport = function(source) { // @param String: "music.mp3"
             return true;
         }
     } else if (/\.wav$/i.test(source)) { // *.wav
-        if (uu.ver.gecko || (uu.ver.windows && uu.ver.safari) || uu.ver.opera) {
+        if ((windows && uu.ver.safari) || uu.ver.gecko || uu.ver.opera) {
             return true;
         }
     }

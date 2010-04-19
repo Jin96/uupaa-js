@@ -10,7 +10,14 @@
 <script src="../src/uu.img.js"></script>
 <script src="../src/uu.test.js"></script>
 </head><body>
-<div id="div" title="title" style="display:none">text</div>
+<div style="display:none">
+    <div id="div" class="class" title="title">text</div>
+
+    <div id="_div" class="class" title="title">text</div>
+    <a id="_a" href="/a"></a>
+    <label id="_label" for="a" accesskey="a" tabindex="1"></label>
+    <table><tr id="_tr" rowspan="2"><td id="_td" colspan="2">aa</td></tr></table>
+</div>
 <script>
 function xboot(uu) {
   uu.test({
@@ -30,8 +37,8 @@ function xboot(uu) {
       "[3][convert NodeList] uu.array(document.getElementsByTagName('HTML')) は NodeList を配列に変換できる。その結果は uu.query('html') と等しい": function() {
         return [uu.array(document.getElementsByTagName('HTML')), "==", uu.query('html')];
       },
-      "[3][convert NodeList] uu.array(document.getElementsByTagName('HTML')) は NodeList を配列に変換できる。その結果は [document.html] と等しい": function() {
-        return [uu.array(document.getElementsByTagName('HTML')), "==", [document.html]];
+      "[3][convert NodeList] uu.array(document.getElementsByTagName('HTML')) は NodeList を配列に変換できる。その結果は [document.documentElement] と等しい": function() {
+        return [uu.array(document.getElementsByTagName('HTML')), "==", [document.documentElement]];
       },
       "[4][convert arguments] uu.array(arguments) は 引数(1, 2, 3)を配列( [1, 2, 3] )に変換できる": function() {
         function uuarytest1() {
@@ -141,7 +148,7 @@ function xboot(uu) {
         return [uu.array.indexOf([document.body, document.head], document.head), "is", 1];
       },
       "uu.array.indexOf([<body>, <head>], <html>) は -1 (not found) を返す": function() {
-        return [uu.array.indexOf([document.body, document.head], document.html), "is", -1];
+        return [uu.array.indexOf([document.body, document.head], document.documentElement), "is", -1];
       },
  */
     "Array.filter()": "",
@@ -200,6 +207,45 @@ function xboot(uu) {
         var v = uu.attr(e, "href");
         return [v, "==", "../dummy.jpg"];
       },
+
+      "[get class] uu.attr(uu.id('_div'), 'class') は 'class' } と等しい": function() {
+        return [uu.attr(uu.id('_div'), 'class'), "==", 'class'];
+      },
+      "[get className] uu.attr(uu.id('_div'), 'className') は 'class' } と等しい": function() {
+        return [uu.attr(uu.id('_div'), 'className'), "==", 'class'];
+      },
+      "[get for] uu.attr(uu.id('_label'), 'for') は 'a' } と等しい": function() {
+        return [uu.attr(uu.id('_label'), 'for'), "==", 'a'];
+      },
+      "[get htmlFor] uu.attr(uu.id('_label'), 'htmlFor') は 'a' } と等しい": function() {
+        return [uu.attr(uu.id('_label'), 'htmlFor'), "==", 'a'];
+      },
+      "[get colspan] uu.attr(uu.id('_td'), 'colspan') は '2' } と等しい": function() {
+        return [uu.attr(uu.id('_td'), 'colspan'), "==", '2'];
+      },
+      "[get colSpan] uu.attr(uu.id('_td'), 'colSpan') は '2' } と等しい": function() {
+        return [uu.attr(uu.id('_td'), 'colSpan'), "==", '2'];
+      },
+      "[get rowspan] uu.attr(uu.id('_tr'), 'rowspan') は '2' } と等しい": function() {
+        return [uu.attr(uu.id('_tr'), 'rowspan'), "==", '2'];
+      },
+      "[get rowSpan] uu.attr(uu.id('_tr'), 'rowSpan') は '2' } と等しい": function() {
+        return [uu.attr(uu.id('_tr'), 'rowSpan'), "==", '2'];
+      },
+      "[get accesskey] uu.attr(uu.id('_label'), 'accesskey') は 'a' } と等しい": function() {
+        return [uu.attr(uu.id('_label'), 'accesskey'), "==", 'a'];
+      },
+      "[get accessKey] uu.attr(uu.id('_label'), 'accessKey') は 'a' } と等しい": function() {
+        return [uu.attr(uu.id('_label'), 'accessKey'), "==", 'a'];
+      },
+      "[get tabindex] uu.attr(uu.id('_label'), 'tabindex') は '1' } と等しい": function() {
+        return [uu.attr(uu.id('_label'), 'tabindex'), "==", '1'];
+      },
+      "[get tabIndex] uu.attr(uu.id('_label'), 'tabIndex') は '1' } と等しい": function() {
+        return [uu.attr(uu.id('_label'), 'tabIndex'), "==", '1'];
+      },
+
+
 
     "uu.attr() - set attr": "",
       "[1][set some attrs] uu.attr(uu.id('div'), { title: 'unittest' }) で設定された値と uu.attr(uu.id('div'), 'title') の結果は等しい": function() {
@@ -462,59 +508,26 @@ function xboot(uu) {
       },
 
 
-    "uu.nore.find.first()": "",
-      "uu.node.find.first(uu.id('tgt')) == uu.id('first')": function() {
-        return [uu.node.find.first(uu.id('tgt')), "==", uu.id('first')];
-      },
-    "uu.nore.find.prev()": "",
-      "uu.node.find.prev(uu.id('tgt')) == uu.id('prev')": function() {
-        return [uu.node.find.prev(uu.id('tgt')), "==", uu.id('prev')];
-      },
-    "uu.nore.find.next()": "",
-      "uu.node.find.next(uu.id('tgt')) == uu.id('next')": function() {
-        return [uu.node.find.next(uu.id('tgt')), "==", uu.id('next')];
-      },
-    "uu.nore.find.last()": "",
-      "uu.node.find.last(uu.id('tgt')) == uu.id('last')": function() {
-        return [uu.node.find.last(uu.id('tgt')), "==", uu.id('last')];
-      },
-    "uu.nore.find.firstChild()": "",
-      "uu.node.find.firstChild(uu.id('tgt')) == uu.id('firstChild')": function() {
-        return [uu.node.find.firstChild(uu.id('tgt')), "==", uu.id('firstChild')];
-      },
-    "uu.nore.find.lastChild()": "",
-      "uu.node.find.lastChild(uu.id('tgt')) == uu.id('lastChild')": function() {
-        return [uu.node.find.lastChild(uu.id('tgt')), "==", uu.id('lastChild')];
-      },
-
     "uu.nore.first()": "",
-      "uu.node.first(uu.p(':hoge'), uu.id('tgt'))": function() {
-        return [uu.node.first(uu.p(':hoge'), uu.id('tgt')), "is node"];
+      "uu.node.first(uu.id('tgt')) == uu.id('first')": function() {
+        return [uu.node.first(uu.id('tgt')), "==", uu.id('first')];
       },
     "uu.nore.prev()": "",
-      "uu.node.prev(uu.p(':hoge'), uu.id('tgt'))": function() {
-        return [uu.node.prev(uu.p(':hoge'), uu.id('tgt')), "is node"];
+      "uu.node.prev(uu.id('tgt')) == uu.id('prev')": function() {
+        return [uu.node.prev(uu.id('tgt')), "==", uu.id('prev')];
       },
     "uu.nore.next()": "",
-      "uu.node.next(uu.p(':hoge'), uu.id('tgt'))": function() {
-        return [uu.node.next(uu.p(':hoge'), uu.id('tgt')), "is node"];
+      "uu.node.next(uu.id('tgt')) == uu.id('next')": function() {
+        return [uu.node.next(uu.id('tgt')), "==", uu.id('next')];
       },
     "uu.nore.last()": "",
-      "uu.node.last(uu.p(':hoge'), uu.id('tgt'))": function() {
-        return [uu.node.last(uu.p(':hoge'), uu.id('tgt')), "is node"];
-      },
-    "uu.nore.firstChild()": "",
-      "uu.node.firstChild(uu.p(':hoge'), uu.id('tgt'))": function() {
-        return [uu.node.firstChild(uu.p(':hoge'), uu.id('tgt')), "is node"];
-      },
-    "uu.nore.lastChild()": "",
-      "uu.node.lastChild(uu.p(':hoge'), uu.id('tgt'))": function() {
-        return [uu.node.lastChild(uu.p(':hoge'), uu.id('tgt')), "is node"];
+      "uu.node.last(uu.id('tgt')) == uu.id('last')": function() {
+        return [uu.node.last(uu.id('tgt')), "==", uu.id('last')];
       },
 
-    "uu.node.next() + onlyChild + insertAfter": "",
-      "uu.node.next(uu.p(':only'), uu.id('onlyChild'))": function() {
-        return [uu.node.next(uu.p(':only'), uu.id('onlyChild')), "is node"];
+    "uu.nore.count()": "",
+      "uu.node.count(uu.id('tgt'))": function() {
+        return [uu.node.count(uu.id('tgt')), "==", 3];
       },
 
 
@@ -604,9 +617,13 @@ function xboot(uu) {
       'uu.fix("float") == "cssFloat" or "styleFloat"': function() {
         return [uu.fix("float"), "==", uu.ie ? "styleFloat" : "cssFloat"];
       },
-      'uu.fix("for") == "htmlFor"': function() {
-        return [uu.fix("for"), "==", "htmlFor"];
+      'uu.fix("for") == "for"': function() {
+        return [uu.fix("for"), "==", "for"];
       },
+      'uu.fix("htmlFor") == "for"': function() {
+        return [uu.fix("htmlFor"), "==", "for"];
+      },
+
       'uu.fix("o") == "opacity"': function() {
         return [uu.fix("o"), "==", "opacity"];
       },
@@ -615,6 +632,17 @@ function xboot(uu) {
       },
       'uu.fix("bgimg") == "backgroundImage"': function() {
         return [uu.fix("bgimg"), "==", "backgroundImage"];
+      },
+
+    "uu.fix.unicode()": "",
+      "uu.fix.unicode('\\u0073\\u0074\\u0072\\u0069\\u006e\\u0067', 0) == 'string'": function() {
+        return [uu.fix.unicode('\\u0073\\u0074\\u0072\\u0069\\u006e\\u0067', 0), "==", 'string'];
+      },
+      "uu.fix.unicode('st\\u0073\\u0074\\u0072\\u0069\\u006e\\u0067', 0) == 'ststring'": function() {
+        return [uu.fix.unicode('st\\u0073\\u0074\\u0072\\u0069\\u006e\\u0067', 0), "==", 'ststring'];
+      },
+      "uu.fix.unicode('\\u3043\\u3044\\u3045', 0) == 'ぃいぅ'": function() {
+        return [uu.fix.unicode('\\u3043\\u3044\\u3045', 0), "==", 'ぃいぅ'];
       },
 
     "uu.trim()": "",
@@ -712,40 +740,16 @@ function xboot(uu) {
       "uu.split.token('url( http:// ) rgba(0, 0, 0, 0) center center') == ['url( http:// )', 'rgba(0, 0, 0, 0)', 'center', 'center'] CSS のトークンを正しく切り出せる": function() {
         return [uu.split.token('url( http:// ) rgba(0, 0, 0, 0) center center'), "==", ['url( http:// )', 'rgba(0, 0, 0, 0)', 'center', 'center']];
       },
-    "uu.Class.Codec.encodeUCS2()": "",
-      "uu.Class.Codec.encodeUCS2('string', 0) == '\\u0073'": function() {
-        return [uu("Codec").encodeUCS2('string', 0), "==", '\\u0073'];
+
+    "uu.entity()": "",
+      "uu.entity('<a href=\"&\">') == '&lt;a href=&quot;&amp;&quot;&gt;'": function() {
+        return [uu.entity('<a href="&">'), "==", '&lt;a href=&quot;&amp;&quot;&gt;'];
       },
-      "uu.Class.Codec.encodeUCS2('string', 1) == '\\u0074'": function() {
-        return [uu("Codec").encodeUCS2('string', 1), "==", '\\u0074'];
+    "uu.entity.decode()": "",
+      "uu.entity.decode('&lt;a href=&quot;&amp;&quot;&gt;') == '<a href=\"&\">'": function() {
+        return [uu.entity.decode('&lt;a href=&quot;&amp;&quot;&gt;'), "==", '<a href="&">'];
       },
-      "uu.Class.Codec.encodeUCS2('あいう', 1) == '\\u3044'": function() {
-        return [uu("Codec").encodeUCS2('あいう', 1), "==", '\\u3044'];
-      },
-      "uu.Class.Codec.encodeUCS2('string', -1) == '\\u0000'  第二引数に不正な値を指定すると、\\u0000 が返る": function() {
-        return [uu("Codec").encodeUCS2('string', -1), "==", '\\u0000'];
-      },
-      "uu.Class.Codec.encodeUCS2('string', 100) == '\\u0000'  第二引数に不正な値を指定すると、\\u0000 が返る": function() {
-        return [uu("Codec").encodeUCS2('string', 100), "==", '\\u0000'];
-      },
-    "uu.Class.Codec.decodeUCS2()": "",
-      "uu.Class.Codec.decodeUCS2('\\u0073\\u0074\\u0072\\u0069\\u006e\\u0067', 0) == 'string'": function() {
-        return [uu("Codec").decodeUCS2('\\u0073\\u0074\\u0072\\u0069\\u006e\\u0067', 0), "==", 'string'];
-      },
-      "uu.Class.Codec.decodeUCS2('st\\u0073\\u0074\\u0072\\u0069\\u006e\\u0067', 0) == 'ststring'": function() {
-        return [uu("Codec").decodeUCS2('st\\u0073\\u0074\\u0072\\u0069\\u006e\\u0067', 0), "==", 'ststring'];
-      },
-      "uu.Class.Codec.decodeUCS2('\\u3043\\u3044\\u3045', 0) == 'ぃいぅ'": function() {
-        return [uu("Codec").decodeUCS2('\\u3043\\u3044\\u3045', 0), "==", 'ぃいぅ'];
-      },
-    "uu.Class.Codec.encodeEntity()": "",
-      "uu.Class.Codec.encodeEntity('<a href=\"&\">') == '&lt;a href=&quot;&amp;&quot;&gt;'": function() {
-        return [uu("Codec").encodeEntity('<a href="&">'), "==", '&lt;a href=&quot;&amp;&quot;&gt;'];
-      },
-    "uu.Class.Codec.decodeEntity()": "",
-      "uu.Class.Codec.decodeEntity('&lt;a href=&quot;&amp;&quot;&gt;') == '<a href=\"&\">'": function() {
-        return [uu("Codec").decodeEntity('&lt;a href=&quot;&amp;&quot;&gt;'), "==", '<a href="&">'];
-      },
+
     "uu.date": "",
       "uu.date() は DateHash を返す": function() {
         var dateHash = uu.date();
