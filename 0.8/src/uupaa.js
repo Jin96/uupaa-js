@@ -32,14 +32,13 @@
 
 var uu; // window.uu - uupaa.js library namespace
 
-uu || (function(win, doc, toString, isArray, getComputedStyle) {
+uu || (function(win, doc, toString, isArray) {
 
 var _versions = detectVersions(0.7),
     _habits   = detectHabits();
 
-// --- EXTEND ---
-doc.html || (doc.html = doc.documentElement); // document.html = <html>
-doc.head || (doc.head = uutag("head")[0]);    // document.head = <head>
+// --- ENHANCE ---
+doc.head || (doc.head = uutag("head")[0]); // document.head = <head> via WebKit
 
 // --- LIBRARY STRUCTURE ---
 uu = uumix(uufactory, {             // uu(expression:Jam/Node/NodeArray/String/window, arg1:Jam/Node/Mix = void, arg2:Mix = void, arg3:Mix = void, arg4:Mix = void):Jam/Instance
@@ -114,11 +113,12 @@ uu = uumix(uufactory, {             // uu(expression:Jam/Node/NodeArray/String/w
     }),
 
     // --- CSS / STYLE ---
-    css:      uumix(uucss, {        // uu.css(node:Node, key:String/Hash, value:String = void):Hash/String/Node
-                                    //  [1][current style]  uu.css(node) -> { key: value, ... }
-                                    //  [2][get value]      uu.css(node, key) -> value
-                                    //  [3][set pair]       uu.css(node, key, value) -> node
-                                    //  [4][set pair]       uu.css(node, { key: value, ... }) -> node
+    css:      uumix(uucss, {        // uu.css(node:Node, key:Boolean/String/Hash = void, value:String = void):Hash/String/Node
+                                    //  [1][getComputedStyle(or currentStyle)] uu.css(node)       -> { key: value, ... }
+                                    //  [2][getComputedStyle(or emulate API) ] uu.css(node, true) -> { key: value, ... }
+                                    //  [3][get value]                         uu.css(node, key)  -> value
+                                    //  [4][set pair]                          uu.css(node, key, value) -> node
+                                    //  [5][set pair]                          uu.css(node, { key: value, ... }) -> node
         getOpacity: getOpacity,     // uu.css.getOpacity(node:Node):Number
         setOpacity: setOpacity      // uu.css.setOpacity(node:Node, value:Number/String):Node
     }),
@@ -128,7 +128,6 @@ uu = uumix(uufactory, {             // uu(expression:Jam/Node/NodeArray/String/w
                                     //  [3][convert pixel]   uu.toPixel(<div>, "12em") -> 192
                                     //  [4][convert pixel]   uu.toPixel(<div>, "12pt") -> 16
                                     //  [5][convert pixel]   uu.toPixel(<div>, "auto") -> 100
-    style:          uustyle,        // uu.style(node:Node, pseudo:String):Hash
     // --- QUERY ---
     id:             uuid,           //    uu.id(expression:String, context:Node = document):Node/null
     tag:            uutag,          //   uu.tag(expression:String, context:Node = document):NodeArray
@@ -178,9 +177,10 @@ uu = uumix(uufactory, {             // uu(expression:Jam/Node/NodeArray/String/w
         remove:     uunoderemove,   // uu.node.remove(node:Node):Node
         // --- FIND NODE ---
         first:      uunodefirst,    // uu.node.first(context:Node):Node/null
-        next:       uunodenext,     // uu.node.next(context:Node):Node/null
         prev:       uunodeprev,     // uu.node.prev(context:Node):Node/null
+        next:       uunodenext,     // uu.node.next(context:Node):Node/null
         last:       uunodelast,     // uu.node.last(context:Node):Node/null
+        count:      uunodecount,    // uu.node.count(context:Node):Number ELEMENT_NODE count
         indexOf:    uunodeindexof   // uu.node.indexOf(node:Node):Number
     }),
     nodeid:   uumix(uunodeid, {     // uu.nodeid(node:Node):Number (nodeid)
@@ -195,11 +195,14 @@ uu = uumix(uufactory, {             // uu(expression:Jam/Node/NodeArray/String/w
                                     //  [2][get text]    uu.text(node)         -> text or [text, ...]
                                     //  [3][set text]    uu.text(node, "text") -> node
     // --- STRING ---
-    fix:            uufix,          // uu.fix(source:String):String
+    fix:      uumix(uufix, {        // uu.fix(source:String):String
                                     //  [1][css-prop to js-css-prop] uu.fix("background-color") -> "backgroundColor"
                                     //  [2][std-name to ie-name]     uu.fix("float")            -> "cssFloat" or "styleFloat"(IE)
                                     //  [3][html-attr to js-attr]    uu.fix("for")              -> "htmlFor"
                                     //  [4][through]                 uu.fix("-webkit-shadow")   -> "-webkit-shadow"
+        unicode:    uufixunicode    // uu.fix.unicode(source:String):String
+                                    //  [1][UnicodeString to String] uu.fix.unicode("\u0041\u0042") -> "AB"
+    }),
     trim:     uumix(uutrim, {       // uu.trim("  has  space  ") -> "has  space"
         tag:        uutrimtag,      // uu.trim.tag("  <h1>A</h1>  B  <p>C</p>  ") -> "A B C"
         url:        uutrimurl,      // uu.trim.url('  url("http://...")  ') -> "http://..."
@@ -793,8 +796,10 @@ function uuattr(node,    // @param Node:
                 value) { // @param String(= void): value
                          // @return String/Hash/Node:
     var rv, ary, v, i = -1,
-        fix = uuattr.fix; // [IE6][IE7] for -> htmlFor, className -> class
-                          // [OTHER]    for -> htmlFor, class -> className
+        fix = uuattr.fix;
+
+    // [IE6][IE7] key=for -> key=htmlFor, key=class -> key=className
+    // [OTHER]    key=htmlFor -> key=for, key=className -> key=class
 
     if (key === void 0) { // [1] uu.attr(node)
         rv = {};
@@ -816,12 +821,12 @@ function uuattr(node,    // @param Node:
     }
     return node;
 }
-uuattr.fix = uusplittohash(
+uuattr.fix = uusplittohash("className,class,htmlFor,for");
 //{{{!mb
-    uu.ver.ie67 ? "for,htmlFor,className,class" :
+if (_habits.syntaxSugar) {
+    uuattr.fix = uusplittohash("for,htmlFor,class,className"); // [IE6][IE7]
+}
 //}}}!mb
-    "class,className,for,htmlFor,colspan,colSpan,accesskey,accessKey,rowspan,rowSpan,tabindex,tabIndex"
-);
 
 //  [1][get all pair]   uu.data(node) -> { key: value, ... }
 //  [2][get value]      uu.data(node, key) -> value
@@ -871,31 +876,56 @@ function uudataclear(node,  // @param Node:
 }
 
 // --- css ---
-//  [1][current style]  uu.css(node) -> { key: value, ... }
-//  [2][get value]      uu.css(node, key) -> value
-//  [3][set pair]       uu.css(node, key, value) -> node
-//  [4][set pair]       uu.css(node, { key: value, ... }) -> node
+//  [1][getComputedStyle(or currentStyle)] uu.css(node)       -> { key: value, ... }
+//  [2][getComputedStyle(or emulate API) ] uu.css(node, true) -> { key: value, ... }
+//  [3][get value]                         uu.css(node, key)  -> value
+//  [4][set pair]                          uu.css(node, key, value) -> node
+//  [5][set pair]                          uu.css(node, { key: value, ... }) -> node
 
 // uu.css - css accessor
 function uucss(node,    // @param Node:
-               key,     // @param String/Hash: key
+               key,     // @param Boolean/String/Hash(= void): key
                value) { // @param String(= void): value
                         // @return Hash/String/Node:
     var style, informal, formal, fix, care;
 
     if (key === void 0) { // [1] uu.css(node)
-        return getComputedStyle ? getComputedStyle(node, null)
-                                : (node.currentStyle || {});
+//{{{!mb
+        if (_habits.computedStyle) {
+//}}}!mb
+            return win.getComputedStyle(node, null);
+//{{{!mb
+        }
+        return node.currentStyle || {};
+//}}}!mb
     }
-    if (arguments.length === 3) { // [3] uu.css(node, key, value)
-        key = uuhash(key, value);
-    } else if (typeof key === "string") { // [2] uu.css(node, key)
-        style = getComputedStyle ? getComputedStyle(node, null)
-                                 : (node.currentStyle || {});
-        return style[uufix.db[key] || key] || "";
+
+    if (key === true) { // [2] uu.css(node, true)
+//{{{!mb
+        if (_habits.computedStyle) {
+//}}}!mb
+            return win.getComputedStyle(node, null);
+//{{{!mb
+        }
+        return !node.currentStyle ? {}
+                                  : _getComputedStyleIE(node);
+//}}}!mb
     }
-    // [4]
+
     fix = uufix.db;
+    if (arguments.length === 3) { // [4] uu.css(node, key, value)
+        key = uuhash(key, value);
+    } else if (typeof key === "string") { // [3] uu.css(node, key)
+//{{{!mb
+        if (_habits.computedStyle) {
+//}}}!mb
+            return win.getComputedStyle(node, null)[fix[key] || key] || "";
+//{{{!mb
+        }
+        return (node.currentStyle || {})[fix[key] || key] || "";
+//}}}!mb
+    }
+    // [5]
     care = uucss.care;
     style = node.style;
 
@@ -921,14 +951,14 @@ uucss.care = { lineHeight: 1, fontWeight: 1,
 function getOpacity(node) { // @param Node:
                             // @return Number: opacity (from 0.0 to 1.0)
 //{{{!mb
-    if (uu.ver.ie678) {
+    if (!_habits.opacity)
         var opacity = node["data-uuopacity"]; // undefined or 1.0 ~ 2.0
 
         return opacity ? (opacity - 1): 1;
     }
 //}}}!mb
     return parseFloat(node.style.opacity ||
-                      getComputedStyle(node, null).opacity);
+                      win.getComputedStyle(node, null).opacity);
 }
 
 // uu.css.setOpacity
@@ -939,9 +969,8 @@ function setOpacity(node,      // @param Node:
     var style = node.style;
 
 //{{{!mb
-    if (uu.ver.ie678) {
+    if (!_habits.opacity) {
         if (!node["data-uuopacity"]) {
-
             // at first time
             if (uu.ver.ie67) { // [FIX][IE6][IE7]
                 if ((node.currentStyle || {}).width === "auto") {
@@ -963,7 +992,7 @@ function setOpacity(node,      // @param Node:
     style.opacity = opacity;
 
 //{{{!mb
-    if (uu.ver.ie678) {
+    if (!_habits.opacity) {
         node["data-uuopacity"] = opacity + 1; // (1.0 ~ 2.0)
         style.visibility = opacity ? "" : "hidden";
         style.filter = ((opacity > 0 && opacity < 1)
@@ -1021,7 +1050,7 @@ function _calcPixel(node,    // @param Node:
     }
     style.setProperty("left", value, "important");
     // get pixel
-    value = parseInt(getComputedStyle(node, null).left);
+    value = parseInt(win.getComputedStyle(node, null).left);
     // restore
     style.removeProperty("left");
     style.setProperty("left", mem[0], "");
@@ -1055,28 +1084,14 @@ function _calcPixelIE(node,    // @param Node:
     return value || 0;
 }
 
-if (!getComputedStyle) {
+if (!_habits.computedStyle) {
     uutopixel.calc = _calcPixelIE;
-    uu.style = uustyleie;
-}
-//}}}!mb
-
-// uu.style -
-function uustyle(node,     // @param Node:
-                 pseudo) { // @param String(= null):
-                           // @return Hash: { width: "123px", ... }
-    return getComputedStyle(node, pseudo || null);
 }
 
-//{{{!mb
-// uu.style - getComputedStyle emulator [IE6][IE7][IE8]
-function uustyleie(node             // @param Node:
-                   /*, pseudo */) { // @param String(= null):
-                                    // @return Hash: { width: "123px", ... }
+// inner - emulate getComputedStyle [IE6][IE7][IE8]
+function _getComputedStyleIE(node) { // @param Node:
+                                     // @return Hash: { width: "123px", ... }
     // http://d.hatena.ne.jp/uupaa/20091212
-    if (!node.currentStyle) {
-        return {};
-    }
     var rv, rect, ut, v, w, x, i = -1, mem,
         style = node.style,
         currentStyle = node.currentStyle,
@@ -1085,12 +1100,12 @@ function uustyleie(node             // @param Node:
         RECTANGLE = { top: 1, left: 2, width: 3, height: 4 },
         fontSize = currentStyle.fontSize,
         em = parseFloat(fontSize) * (/pt$/.test(fontSize) ? 4 / 3 : 1),
-        boxProperties = uustyle.boxs,
+        boxProperties = _getComputedStyleIE.boxs,
         cache = { "0px": "0px", "1px": "1px", "2px": "2px", "5px": "5px",
                   thin: "1px", medium: "3px",
                   thick: uu.ver.ie89 ? "5px" : "6px" };
 
-    rv = uustyle.getProps(currentStyle);
+    rv = _getComputedStyleIE.getProps(currentStyle);
 
     // calc: border***Width, padding***, margin***
     while ( (w = boxProperties[++i]) ) {
@@ -1146,12 +1161,12 @@ function uustyleie(node             // @param Node:
     rv.cssFloat = currentStyle.styleFloat; // compat
     return rv;
 }
-uustyle.boxs = // boxProperties
+_getComputedStyleIE.boxs = // boxProperties
     ("borderBottomWidth,borderLeftWidth,borderRightWidth,borderTopWidth," +
      "marginBottom,marginLeft,marginRight,marginTop," +
      "paddingBottom,paddingLeft,paddingRight,paddingTop").split(",");
 
-uustyle.getProps = (function(props) {
+_getComputedStyleIE.getProps = (function(props) {
     var js = [], i = 0, prop;
 
     while ( (prop = props[i++]) ) {
@@ -1365,8 +1380,8 @@ function uuevent(node,        // @param Node:
                 evt.py = evt.pageY;
 //{{{!mb
             } else {
-                evt.px = evt.clientX + doc.html.scrollLeft;
-                evt.py = evt.clientY + doc.html.scrollTop;
+                evt.px = evt.clientX + doc.documentElement.scrollLeft;
+                evt.py = evt.clientY + doc.documentElement.scrollTop;
             }
 //}}}!mb
             evt.ox = evt.offsetX || evt.layerX || 0; // [IE][Opera][WebKit] offsetX
@@ -1827,11 +1842,14 @@ function uunodeclone(node) { // @param Node:
         var source = sourceNode.firstChild,
             cloned = clonedNode.firstChild;
 
-        copyNodeData(sourceNode, clonedNode);
+        if (sourceNode.nodeType === 1) {
+            copyNodeData(sourceNode, clonedNode);
 
-        for (; source; source = source.nextSibling, cloned = cloned.nextSibling) {
-            if (sourceNode.nodeType === 1) {
-                copyNodeData(source, cloned);
+            for (; source; source = source.nextSibling,
+                           cloned = cloned.nextSibling) {
+                if (source.nodeType === 1) {
+                    copyNodeData(source, cloned);
+                }
             }
         }
     }
@@ -1913,6 +1931,25 @@ function uunodelast(context) { // @param Node:
     return uunodefirst(context, 1);
 }
 
+// uu.node.count - element node count
+function uunodecount(context) { // @param Node:
+                                // @return Number
+//{{{!mb
+    if (_habits.traversal) {
+//}}}!mb
+        return context.childElementCount;
+//{{{!mb
+    }
+
+    var rv = 0, n = context.firstChild;
+
+    for (; n; n = n.nextSibling) {
+        (n.nodeType === 1) && ++rv;
+    }
+    return rv;
+//}}}!mb
+}
+
 // uu.node.indexOf - find ELEMENT_NODE index
 function uunodeindexof(node,          // @param Node: ELEMENT_NODE
                        __tagName__) { // @hidden String: TagName
@@ -1932,7 +1969,7 @@ function uunodeindexof(node,          // @param Node: ELEMENT_NODE
 // uu.html
 function uuhtml(/* var_args */) { // @param Mix: var_args
                                   // @return Node: <html> node
-    return buildNode(doc.html, arguments);
+    return buildNode(doc.documentElement, arguments);
 }
 
 // uu.head
@@ -2084,15 +2121,24 @@ function uufix(source) { // @param String: source
 }
 uufix.db = {}; // { "background-color": "backgroundColor", ... }
 
+// uu.fix.unicode - UnicodeString("\u0041\u0042") to String("AB")
+function uufixunicode(str) { // @param String: "\u0041\u0042"
+                             // @return String: "AB"
+    return str.replace(uufixunicode.uffff, function(m, hex) {
+        return String.fromCharCode(parseInt(hex, 16));
+    });
+}
+uufixunicode.uffff = /\\u([0-9a-f]{4})/g; // \u0000 ~ \uffff
+
 // uu.trim - trim both side whitespace
 function uutrim(source) { // @param String:  "  has  space  "
                           // @return String: "has  space"
     return source.replace(uutrim.trim, "");
 }
-uutrim.tags     = /<\/?[^>]+>/g; // <div> or </div>
-uutrim.trim     = /^\s+|\s+$/g;
-uutrim.quotes   = /^\s*["']?|["']?\s*$/g;
-uutrim.spaces   = /\s\s+/g;
+uutrim.tags   = /<\/?[^>]+>/g; // <div> or </div>
+uutrim.trim   = /^\s+|\s+$/g;
+uutrim.quotes = /^\s*["']?|["']?\s*$/g;
+uutrim.spaces = /\s\s+/g;
 
 // uu.trim.tag - trim.inner + strip tags
 function uutrimtag(source) { // @param String:  "  <h1>A</h1>  B  <p>C</p>  "
@@ -2209,10 +2255,10 @@ function uutrace(source) { // @param Mix(= void): source (with title)
     var output = uuid(uu.config.trace), json;
 
     if (output) {
-        json = _fromUnicode(_jsoninspect(source));
+        json = uufixunicode(_jsoninspect(source));
 
         if (output.tagName.toLowerCase() === "textarea") {
-            output.value += title + json;
+            output.value += json;
         } else {
             output.innerHTML += "<p>" + json + "</p>";
         }
@@ -2279,15 +2325,6 @@ function _str2json(str,        // @param String:
 _str2json.swap = uusplittohash('",\\",\b,\\b,\f,\\f,\n,\\n,\r,\\r,\t,\\t,\\,\\\\');
 _str2json.escape = /(?:\"|\\[bfnrt\\])/g; // escape
 _str2json.encode = /[\x00-\x1F\u0080-\uFFEE]/g;
-
-// inner - UnicodeString("\u0041\u0042") to String("AB")
-function _fromUnicode(str) { // @param String: "\u0041\u0042"
-                             // @return String: "AB"
-    return str.replace(_fromUnicode.uffff, function(m, hex) {
-        return String.fromCharCode(parseInt(hex, 16));
-    });
-}
-_fromUnicode.uffff = /\\u([0-9a-f]{4})/g; // \u0000 ~ \uffff
 
 // inner - json inspect
 function _jsoninspect(mix, callback) {
@@ -2435,7 +2472,7 @@ function uupagesize() { // @return Hash: { innerWidth, innerHeight,
                         //   pageYOffset - Number:
 //{{{!mb
     if (uu.ie) {
-        var iebody = doc.html;
+        var iebody = doc.documentElement;
 
         return { innerWidth:  iebody.clientWidth,
                  innerHeight: iebody.clientHeight,
@@ -2759,7 +2796,7 @@ function _windowonunload() {
             }
         } catch (err) {}
     }
-    doc.html = doc.head = null;
+    doc.head = null;
     win.detachEvent("onload", _windowonload);
     win.detachEvent("onunload", _windowonunload);
 }
@@ -2770,16 +2807,17 @@ uu.ie && win.attachEvent("onunload", _windowonunload);
 // 1. prebuild camelized hash - http://handsout.jp/slide/1894
 // 2. prebuild nodeid
 uuready(function() {
-    var nodeList = uutag("*", doc.html), v, i = -1,
+    var html = doc.documentElement,
+        nodeList = uutag("*", html), v, i = -1,
         styles = uusplittohash((uu.ie ? "float,styleFloat,cssFloat,styleFloat"
                                       : "float,cssFloat,styleFloat,cssFloat") +
                 ",pos,position,w,width,h,height,x,left,y,top,o,opacity," +
                 "bg,background,bgcolor,backgroundColor,bgimg,backgroundImage," +
                 "bgrpt,backgroundRepeat,bgpos,backgroundPosition");
 
-    uumix(_camelhash(uufix.db, uu.webkit ? win.getComputedStyle(doc.html, null)
-                                         : doc.html.style), styles, uuattr.fix);
-    uunodeid(doc.html);
+    uumix(_camelhash(uufix.db, uu.webkit ? win.getComputedStyle(html, null)
+                                         : html.style), styles, uuattr.fix);
+    uunodeid(html);
     while ( (v = nodeList[++i]) ) {
         uunodeid(v);
     }
@@ -2941,24 +2979,48 @@ function fakeToArray(fakeArray) { // @param FakeArray: NodeList, Arguments
 //}}}!mb
 
 function detectHabits() {
-    var o = true, x = false, rv = { slice: o, indexer: o, traversal: o };
+    var o = true, x = false,
+//{{{!mb
+        div, node;
+//}}}!mb
+        rv = {
+            hsla: o,            // hsla color ready?
+            rgba: o,            // rgba color ready?
+            slice: o,           // Array.prototype.slice.call(NodeList) ready?
+            indexer: o,         // String[indexer] ready ?
+            opacity: x,         // node.style.opacity ready? [IE6][IE7][IE8]
+            traversal: o,       // Element Traversal ready? - http://www.w3.org/TR/ElementTraversal/
+            tamperedURL: x,     // node.href tampered [IE6][IE7][IE8]
+            transparent: o,     // border color transparent ready?
+            syntaxSugar: x,     // getAttribute("class") syntax sugar [IE6][IE7]
+            stripComment: x,    // strip comment node [IE6][IE7][IE8]
+            computedStyle: o    // window.getComputedStyle ready?
+        };
 
 //{{{!mb
-    // Array.prototype.slice.call(NodeList) ready?
+    div = uunode();
+    div.innerHTML =
+        '<a href="/z" class="a" style="border:0 solid transparent;opacity:0.1;' +
+        'color:rgb(255,0,0);background:hsla(100,100%,100%,1)"><!-- -->c</a>';
+    node = div.firstChild;
+
+    rv.hsla = /rgb\(255|#f|hsl\(100/.test(node.style.backgroundColor); // )) // typical rgb(255, 255, 255)
+    rv.rgba = /rgb\(255|#f/.test(node.style.color); // ) typical rgb(255, 0, 0)
     try {
         Array.prototype.slice.call(doc.getElementsByTagName("head"));
     } catch(err) { rv.slice = x; }
-
-    // String[indexer] ready ?
     rv.indexer = !!"0"[0];
-
-    // Element Traversal ready ? - http://www.w3.org/TR/ElementTraversal/
+    rv.opacity = node.style.opacity === "0.1";
     rv.traversal = !!doc.documentElement.firstElementChild;
-//}}}!mb
+    rv.tamperedURL = node.getAttribute("href") !== "/z";
+    rv.syntaxSugar = node.getAttribute("class") !== "a";
+    rv.transparent = /tran|rgba/.test(node.style.borderTopColor);
+    rv.stripComment = node.firstChild.nodeType === 3;
+    rv.computedStyle = !!win.getComputedStyle;
 
+//}}}!mb
     return rv;
 }
 
-})(window, document, Object.prototype.toString, Array.isArray,
-   window.getComputedStyle);
+})(window, document, Object.prototype.toString, Array.isArray);
 
