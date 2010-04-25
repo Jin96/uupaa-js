@@ -35,7 +35,11 @@ var uu; // window.uu - uupaa.js library namespace
 uu || (function(win, doc, toString, isArray) {
 
 var _versions = detectVersions(0.7),
-    _habits   = detectHabits();
+    _habits   = detectHabits(),
+    // --- HTML5: EMBEDDING CUSTOM NON-VISIBLE DATA ---
+    DATA_UUGUID = "data-uuguid",
+    DATA_UUEVENT = "data-uuevent",
+    DATA_UUOPACITY = "data-uuopacity";
 
 // --- ENHANCE ---
 doc.head || (doc.head = uutag("head")[0]); // document.head = <head> via WebKit
@@ -821,12 +825,12 @@ function uuattr(node,    // @param Node:
     }
     return node;
 }
-uuattr.fix = uusplittohash("className,class,htmlFor,for");
+uuattr.fix = uusplittohash(
 //{{{!mb
-if (_habits.syntaxSugar) {
-    uuattr.fix = uusplittohash("for,htmlFor,class,className"); // [IE6][IE7]
-}
+    _habits.syntaxSugar ? "for,htmlFor,class,className" : // [IE6][IE7]
 //}}}!mb
+                          "className,class,htmlFor,for"
+);
 
 //  [1][get all pair]   uu.data(node) -> { key: value, ... }
 //  [2][get value]      uu.data(node, key) -> value
@@ -951,8 +955,8 @@ uucss.care = { lineHeight: 1, fontWeight: 1,
 function getOpacity(node) { // @param Node:
                             // @return Number: opacity (from 0.0 to 1.0)
 //{{{!mb
-    if (!_habits.opacity)
-        var opacity = node["data-uuopacity"]; // undefined or 1.0 ~ 2.0
+    if (!_habits.opacity) {
+        var opacity = node[DATA_UUOPACITY]; // undefined or 1.0 ~ 2.0
 
         return opacity ? (opacity - 1): 1;
     }
@@ -970,7 +974,7 @@ function setOpacity(node,      // @param Node:
 
 //{{{!mb
     if (!_habits.opacity) {
-        if (!node["data-uuopacity"]) {
+        if (!node[DATA_UUOPACITY]) {
             // at first time
             if (uu.ver.ie67) { // [FIX][IE6][IE7]
                 if ((node.currentStyle || {}).width === "auto") {
@@ -993,7 +997,7 @@ function setOpacity(node,      // @param Node:
 
 //{{{!mb
     if (!_habits.opacity) {
-        node["data-uuopacity"] = opacity + 1; // (1.0 ~ 2.0)
+        node[DATA_UUOPACITY] = opacity + 1; // (1.0 ~ 2.0)
         style.visibility = opacity ? "" : "hidden";
         style.filter = ((opacity > 0 && opacity < 1)
                      ? "alpha(opacity=" + (opacity * 100) + ") " : "")
@@ -1392,12 +1396,12 @@ function uuevent(node,        // @param Node:
     } // [OPTIMIZED]
 
     // --- setup event database ---
-    if (!("data-uuevent" in node)) {
-        node["data-uuevent"] = { types: "," };
+    if (!(DATA_UUEVENT in node)) {
+        node[DATA_UUEVENT] = { types: "," };
     }
 
     var eventTypeExArray = eventTypeEx.split(","),
-        eventData = node["data-uuevent"],
+        eventData = node[DATA_UUEVENT],
         ex, token, bound,
         eventType, capture, closure, handler, i = -1, pos,
         isInstance = false, eventCode = uuevent.code; // for closure
@@ -1478,7 +1482,7 @@ uuevent.code = {
 function uueventhas(node,          // @param Node: target node
                     eventTypeEx) { // @param EventTypeExString: namespace and event types, "click", "namespace.mousemove+"
                                    // @return Boolean:
-    var types = node["data-uuevent"] ? node["data-uuevent"]["types"] : 0;
+    var types = node[DATA_UUEVENT] ? node[DATA_UUEVENT]["types"] : 0;
 
     return (types || "").indexOf("," + eventTypeEx + ",") >= 0;
 }
@@ -1506,7 +1510,7 @@ function uueventfire(node,      // @param Node: target node
                 param:  param
             };
 
-        node["data-uuevent"][eventType].forEach(function(evaluator) {
+        node[DATA_UUEVENT][eventType].forEach(function(evaluator) {
             evaluator.call(node, fakeEventObjectEx, true); // fromCustomEvent = true
         });
     }
@@ -1543,14 +1547,14 @@ function uueventunbind(node,          // @param Node: target node
         // closure vars: node, ns
 
         if (!ex.indexOf(ns)) {
-            node["data-uuevent"][ex].forEach(function(evaluator) {
+            node[DATA_UUEVENT][ex].forEach(function(evaluator) {
                 uuevent(node, ex, evaluator, true); // unbind mode
             });
         }
     }
 
     if (eventTypeEx === void 0) { // [1]
-        eventTypeEx = node["data-uuevent"]["types"]; // ",click,MyNamespace.mousemove+,"
+        eventTypeEx = node[DATA_UUEVENT]["types"]; // ",click,MyNamespace.mousemove+,"
     }
 
     var ns, ary = uusplitcomma(eventTypeEx), ex, i = -1;
@@ -1563,7 +1567,7 @@ function uueventunbind(node,          // @param Node: target node
         } else { // [2][4]
             if (eventTypeEx.indexOf("," + ex + ",") >= 0) {
 
-                node["data-uuevent"][ex].forEach(function(evaluator) {
+                node[DATA_UUEVENT][ex].forEach(function(evaluator) {
                     uuevent(node, ex, evaluator, true); // unbind mode
                 });
             }
@@ -1683,10 +1687,10 @@ function uunodeadd(source,     // @param Node/DocumentFragment/HTMLFragment/TagN
 // uu.nodeid - get nodeid
 function uunodeid(node) { // @param Node:
                           // @return Number: nodeid, from 1
-    if (!node["data-uuguid"]) {
-        uunodeid.db[node["data-uuguid"] = ++uunodeid.num] = node;
+    if (!node[DATA_UUGUID]) {
+        uunodeid.db[node[DATA_UUGUID] = ++uunodeid.num] = node;
     }
-    return node["data-uuguid"];
+    return node[DATA_UUGUID];
 }
 uunodeid.num = 0; // node id counter
 uunodeid.db = {}; // { nodeid: node, ... }
@@ -1700,8 +1704,8 @@ function uunodeidtonode(nodeid) { // @param String: nodeid
 // uu.nodeid.remove - remove from node db
 function uunodeidremove(node) { // @param Node:
                                 // @return Node: removed node
-    node["data-uuguid"] && (uunodeid.db[node["data-uuguid"]] = null,
-                                        node["data-uuguid"] = null);
+    node[DATA_UUGUID] && (uunodeid.db[node[DATA_UUGUID]] = null,
+                                      node[DATA_UUGUID] = null);
     return node;
 }
 
@@ -1835,7 +1839,7 @@ function uunodeclone(node) { // @param Node:
                 clonedNode[attr.name] = attr.value;
             }
         }
-        uunodeid.db[clonedNode["data-uuguid"] = ++uunodeid.num] = clonedNode;
+        uunodeid.db[clonedNode[DATA_UUGUID] = ++uunodeid.num] = clonedNode;
     }
 
     function drillDown(sourceNode, clonedNode) {
@@ -2886,7 +2890,7 @@ function detectVersions(libraryVersion) { // @param Number: Library version
     }
 
     function detectUserAgentVersion(userAgent) {
-        var opera = window.opera || false;
+        var opera = win.opera || false;
 
         return opera ? +(opera.version().replace(/\d$/, ""))
                      : parseFloat((/(?:IE |fox\/|ome\/|ion\/)(\d+\.\d)/.
@@ -2940,7 +2944,7 @@ function detectVersions(libraryVersion) { // @param Number: Library version
     rv.ie67         = rv.ie6 || rv.ie7;
     rv.ie678        = rv.ie6 || rv.ie7 || rv.ie8;
     rv.ie89         = rv.ie8 || rv.ie9;
-    rv.opera        = !!(window.opera || 0);
+    rv.opera        = !!(win.opera || 0);
     rv.gecko        = /Gecko\//.test(userAgent);
     rv.webkit       = /WebKit/.test(userAgent);
     rv.chrome       = /Chrome/.test(userAgent);
@@ -2981,17 +2985,17 @@ function fakeToArray(fakeArray) { // @param FakeArray: NodeList, Arguments
 function detectHabits() {
     var o = true, x = false,
 //{{{!mb
-        div, node;
+        div, node, style,
 //}}}!mb
         rv = {
+            rgb: o,             // rgb color ready?
             hsla: o,            // hsla color ready?
-            rgba: o,            // rgba color ready?
             slice: o,           // Array.prototype.slice.call(NodeList) ready?
             indexer: o,         // String[indexer] ready ?
             opacity: x,         // node.style.opacity ready? [IE6][IE7][IE8]
             traversal: o,       // Element Traversal ready? - http://www.w3.org/TR/ElementTraversal/
             tamperedURL: x,     // node.href tampered [IE6][IE7][IE8]
-            transparent: o,     // border color transparent ready?
+            transparent: o,     // border-color:transparent ready?
             syntaxSugar: x,     // getAttribute("class") syntax sugar [IE6][IE7]
             stripComment: x,    // strip comment node [IE6][IE7][IE8]
             computedStyle: o    // window.getComputedStyle ready?
@@ -3003,24 +3007,23 @@ function detectHabits() {
         '<a href="/z" class="a" style="border:0 solid transparent;opacity:0.1;' +
         'color:rgb(255,0,0);background:hsla(100,100%,100%,1)"><!-- -->c</a>';
     node = div.firstChild;
+    style = node.style;
 
-    rv.hsla = /rgb\(255|#f|hsl\(100/.test(node.style.backgroundColor); // )) // typical rgb(255, 255, 255)
-    rv.rgba = /rgb\(255|#f/.test(node.style.color); // ) typical rgb(255, 0, 0)
+    rv.rgb  = /rgb\(255|#f/.test(style.color); // ) typical rgb(255, 0, 0)
+    rv.hsla = /rgb\(255|#f|hsl\(100/.test(style.backgroundColor); // )) // typical rgb(255, 255, 255)
     try {
-        Array.prototype.slice.call(doc.getElementsByTagName("head"));
+        Array.prototype.slice.call(uutag("head"));
     } catch(err) { rv.slice = x; }
     rv.indexer = !!"0"[0];
-    rv.opacity = node.style.opacity === "0.1";
+    rv.opacity = style.opacity === "0.1";
     rv.traversal = !!doc.documentElement.firstElementChild;
     rv.tamperedURL = node.getAttribute("href") !== "/z";
     rv.syntaxSugar = node.getAttribute("class") !== "a";
-    rv.transparent = /tran|rgba/.test(node.style.borderTopColor);
+    rv.transparent = /tran|rgba/.test(style.borderTopColor);
     rv.stripComment = node.firstChild.nodeType === 3;
     rv.computedStyle = !!win.getComputedStyle;
-
 //}}}!mb
     return rv;
 }
 
 })(window, document, Object.prototype.toString, Array.isArray);
-
