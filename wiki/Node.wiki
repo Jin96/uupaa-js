@@ -1,13 +1,14 @@
 #summary Node は Element の別名です。
 
-= Introduction =
+= Node =
 
-Add your content here.
+Node は Element の別名です。配列の要素(Array.Element)と区別する場合に便利です。
 
+{{{
+    var node = document.createElement("div");
 
-= Details =
+    var nodeList = document.getElementsByTagName("div");
 
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+    // 「Arrayの各ElementにはNodeが格納されている」
+    var array = [nodeList[0], nodeList[1]];
+}}}
