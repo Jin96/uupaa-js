@@ -99,7 +99,7 @@ alert(obj1 === obj2); // true
 = その他の機能 =
 
   * uu.Class("_!ClassName_", _initializeFunction_) や
-  * uu.Class.singleton("_!ClassName_", _initializeFunction_) は、init メソッドだけのクラスを定義する SyntaxSugar です。
+  * uu.Class.singleton("_!ClassName_", _initializeFunction_) は、init メソッドだけのクラスを定義する !SyntaxSugar です。
 
 {{{
 uu.Class.singleton("State", function() {
