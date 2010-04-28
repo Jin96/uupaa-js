@@ -1,4 +1,4 @@
-#summary Node は Element の別名です。
+#summary Node は Element の別名です
 
 = Node =
 
