@@ -9,6 +9,6 @@ Node は Element の別名です。配列の要素(Array.Element)と区別する
 
     var nodeList = document.getElementsByTagName("div");
 
-    // 「Arrayの各ElementにはNodeが格納されている」
+    // 「Array の各 Element には Node が格納されている」
     var array = [nodeList[0], nodeList[1]];
 }}}
