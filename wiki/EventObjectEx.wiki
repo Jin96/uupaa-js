@@ -1,0 +1,75 @@
+#summary EventObjectEx は 独自のプロパティを拡張した EventObject です
+
+= EventObjectEx =
+
+EventObjectEx は、クロスブラウザ用のプロパティを拡張した EventObject です。
+
+uu.event() で登録した evaluator のコールバック時の第一引数が EventObjectEx になります。
+
+{{{
+EventObjectEx = {
+    code       - Number: event code (uu.event.code)
+    boundNode  - Node:   uu.event(node), event listener node
+    sourceNode - Node:   event target, srcElement(in IE) or event target
+    pageX      - Number: page X (absolute position in WebPage)
+    pageY      - Number: page Y (absolute position in WebPage)
+    offsetX    - Number: offset X (relative position in event source)
+    offsetY    - Number: offset Y (relative position in event source)
+    ...
+}
+}}}
+  * pageX, pageY が IE6～IE8 で追加されます。
+  * offsetX, offsetY が Gecko で追加されます。
+  * EventObjectEx.code には、event.type を数値化した整数が格納されています。値の一覧は uu.event.code で参照できます。
+{{{
+uu.event.code = {
+    mousedown:   1,
+    mouseup:     2,
+    mousemove:   3,
+    mousewheel:  4,
+    click:       5,
+    dblclick:    6,
+    keydown:     7,
+    keypress:    8,
+    keyup:       9,
+    mouseenter:  10,
+    mouseleave:  11,
+    mouseover:   12,
+    mouseout:    13,
+    contextmenu: 14,
+    focus:       15,
+    blur:        16,
+    resize:      17,
+    losecapture:    2,
+    DOMMouseScroll: 4
+}
+}}}
+  * EventObjectEx.boundNode には、uu.event(node) で指定した node です。これは、handleEvent(eventObjectEx, boundNode, sourceNode) の boundNode と同じです。
+  * EventObjectEx.sourceNode には、イベントの発生元の Node が格納されます。これは、handleEvent(eventObjectEx, boundNode, sourceNode) の sourceNode と同じです。
+  * EventObjectEx.pageX, EventObjectEx.pageY には、 Webページの左上からの絶対値が pixel 値で格納されています。
+  * EventObjectEx.offsetX, EventObjectEx.offsetY には、レイアウト上の親(position:static 以外のスタイルが設定されている先祖ノードまたは body ノード)からの相対距離が pixel 値で格納されています。
+
+== 例 ==
+
+関数をイベントハンドラとして登録する。
+{{{
+    var div = uu.node.add();
+    var evaluator = function(eventObjectEx, boundNode, sourceNode) {
+        alert(eventObjectEx.code); // 5
+    };
+
+    uu.event(div, "click", evaluator);
+}}}
+
+クラスインスタンスをイベントハンドラとして登録する。
+{{{
+    uu.Class("Drag", {
+        handleEvent: function(eventObjectEx, boundNode, sourceNode) {
+            alert(eventObjectEx.code); // 5
+        }
+    });
+
+    var div = uu.node.add();
+
+    uu.event(div, "click", uu("Drag"));
+}}}
