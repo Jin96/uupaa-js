@@ -2,7 +2,7 @@
 
 = EventObjectEx =
 
-EventObjectEx は、クロスブラウザ用のプロパティを拡張した EventObject です。
+EventObjectEx は、クロスブラウザ用のプロパティを拡張した !EventObject です。
 
 uu.event() で登録した evaluator のコールバック時の第一引数が EventObjectEx になります。
 
