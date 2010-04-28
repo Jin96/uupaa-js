@@ -9,9 +9,9 @@ uu.Class はカプセル化, 継承, ポリモーフィズム機能を提供し�
 
 = uu.Class =
 
-  * uu.Class("!_ClassName_", _prototypeObject_) は汎用的なクラスを定義します。
-    * !_ClassName_ にはクラス名を指定します。*:* と *<* はクラス名としては使用できません。
-    * 継承は "!_ClassName_ : !_SuperClass_" や !_ClassName_ < !_SuperClass_" とします。
+  * uu.Class("_!ClassName_", _prototypeObject_) は汎用的なクラスを定義します。
+    * _!ClassName_ にはクラス名を指定します。*:* と *<* はクラス名としては使用できません。
+    * 継承は "_!ClassName_ : _!SuperClass_" や _!ClassName_ < _!SuperClass_" とします。
 
     * _prototypeObject_ には public なプロパティやメソッドを指定します。省略も可能です。
     * _prototypeObject_ に *init*: function(_var_args_:Mix, ...) を定義すると、コンストラクタとして機能します。init メソッドは初期化に必要な引数を受け取ることができます。
@@ -70,7 +70,7 @@ uu.event("click", div, obj1);
 }}}
 
 = uu.Class.singleton =
-  * uu.Class.singleton("!_ClassName_", _prototypeObject_) は何度生成しても実体が一つに限定されるシングルトンクラスを定義します。
+  * uu.Class.singleton("_!ClassName_", _prototypeObject_) は何度生成しても実体が一つに限定されるシングルトンクラスを定義します。
 
 {{{
 uu.Class.singleton("MySingletonClass", {
@@ -98,8 +98,8 @@ alert(obj1 === obj2); // true
 
 = その他の機能 =
 
-  * uu.Class("!_ClassName_", _initializeFunction_) や
-  * uu.Class.singleton("!_ClassName_", _initializeFunction_) は、init メソッドだけのクラスを定義する SyntaxSugar です。
+  * uu.Class("_!ClassName_", _initializeFunction_) や
+  * uu.Class.singleton("_!ClassName_", _initializeFunction_) は、init メソッドだけのクラスを定義する SyntaxSugar です。
 
 {{{
 uu.Class.singleton("State", function() {
@@ -133,9 +133,9 @@ uu.Class.singleton("State", {
   * 子のコンストラクタメソッド(*init*)を呼ぶと、親のコンストラクタメソッド(*SuperClass::init*)が自動的に呼ばれます。
   * デストラクタはサポートしていません。
   * 重複した名前を持つクラスは定義できません。_namespace_ClassName_ のようにネームスペースで区切るなどの工夫が必要です。
-  * クラスのインスタンス化は、 new uu.Class.!_ClassName_(引数, ...) または uu("!_ClassName_", 引数, ...) で行います。
-    * uu("!_ClassName_", 引数, ...) では最大で4つまでの引数を指定できます。5番目以降は無視されます。
-  * uu.Class("!_ClassName_") のプロトタイプオブジェクトは、uu.Class`[`!_ClassName_`]`.prototype でアクセスできます。
+  * クラスのインスタンス化は、 new uu.Class._!ClassName_(引数, ...) または uu("_!ClassName_", 引数, ...) で行います。
+    * uu("_!ClassName_", 引数, ...) では最大で4つまでの引数を指定できます。5番目以降は無視されます。
+  * uu.Class("_!ClassName_") のプロトタイプオブジェクトは、uu.Class`[`_!ClassName_`]`.prototype でアクセスできます。
 
 
 == 開発者より ==
