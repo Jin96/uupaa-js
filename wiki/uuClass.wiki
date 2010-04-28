@@ -13,7 +13,7 @@ uu.Class はカプセル化, 継承, ポリモーフィズム機能を提供し�
     * _!ClassName_ にはクラス名を指定します。*:* と *<* はクラス名としては使用できません。
     * 継承は "_!ClassName_ : _!SuperClass_" や _!ClassName_ < _!SuperClass_" とします。
 
-    * _prototypeObject_ には public なプロパティやメソッドを指定します。省略も可能です。
+    * _prototypeObject_ には public なプロパティやメソッドをHashで指定します。省略も可能です。
     * _prototypeObject_ に *init*: function(_var_args_:Mix, ...) を定義すると、コンストラクタとして機能します。init メソッドは初期化に必要な引数を受け取ることができます。
     * _prototypeObject_ に *msgbox*: function(msg:String, param:Mix = undefined) を定義すると、メッセージハンドラとして機能します。msg にはメッセージ文字列が渡され、param にはパラメタが渡されます。
     * _prototypeObject_ に *handleEvent*: function(event:EventObjectEx, node:Node, sourceNode:Node) を定義すると、イベントハンドラとして機能します。sourceNode にはイベントの発生元のノードが渡されます。
