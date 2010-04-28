@@ -135,7 +135,7 @@ uu.Class.singleton("State", {
   * 重複した名前を持つクラスは定義できません。_namespace_`_`_!ClassName_ のようにネームスペースで区切るなどの工夫が必要です。
   * クラスのインスタンス化は、 new uu.Class._!ClassName_(引数, ...) または uu("_!ClassName_", 引数, ...) で行います。
     * uu("_!ClassName_", 引数, ...) では最大で4つまでの引数を指定できます。5番目以降は無視されます。
-  * uu.Class("_!ClassName_") のプロトタイプオブジェクトは、uu.Class`[`_!ClassName_`]`.prototype でアクセスできます。
+  * uu.Class("_!ClassName_") のプロトタイプオブジェクトは、uu.Class`[`_!ClassName_`]`.prototype にあります。
 
 
 == 開発者より ==
