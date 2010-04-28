@@ -1,4 +1,4 @@
-#summary Hash はkey/valueストアに特化したObjectです
+#summary Hash は key/value ストアに特化した Object の別名です
 
 <wiki:toc max_depth="1" />
 
