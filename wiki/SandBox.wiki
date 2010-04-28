@@ -1,4 +1,4 @@
-#summary お砂場です。まずはここで練習してください。
+#summary お砂場です。まずはここで練習してください
 
 = Introduction =
 
