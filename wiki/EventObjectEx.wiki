@@ -14,7 +14,7 @@ EventObjectEx = {
     ...
 }
 }}}
-  * EventObjectEx.node は、uu.event(node) で指定した node です
+  * EventObjectEx.node は、uu.event(node) で指定した node です。
   * EventObjectEx.code には、event.type を数値化した整数が格納されています。値の一覧は uu.event.code で参照できます。
 {{{
 uu.event.code = {
@@ -40,7 +40,7 @@ uu.event.code = {
     DOMMouseScroll: 4
 }
 }}}
-  * EventObjectEx.target は、イベントの発生元の Node です。この値は event.target または event.srcElement (IE6～8) です。
+  * EventObjectEx.target は、イベント発生元の Node です。この値は event.target または event.srcElement (IE6～8) です。
 
 == 例 ==
 
