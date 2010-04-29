@@ -11,6 +11,8 @@ EventObjectEx = {
     node    - Node:   uu.event(node), event listener node
     code    - Number: event code (uu.event.code)
     target  - Node:   event target, srcElement(in IE) or event target
+    pageX   - Number: page X (Absolute position in WebPage)
+    pageY   - Number: page Y (Absolute position in WebPage)
     ...
 }
 }}}
@@ -41,14 +43,16 @@ uu.event.code = {
 }
 }}}
   * EventObjectEx.target は、イベント発生元の Node です。この値は event.target または event.srcElement (IE6～8) です。
+  * EventObjectEx.pageX, EventObjectEx.pageY はWebページの左上隅を基準とした座標です。スクロール成分が不要な場合は EventObjectEx.clientX, clientY で取得できます。
+
 
 == 例 ==
 
 関数をイベントハンドラとして登録する。
 {{{
     var div = uu.node.add();
-    var evaluator = function(eventObjectEx) {
-        alert(eventObjectEx.code); // 5
+    var evaluator = function(event) {
+        alert(event.code); // 5
     };
 
     uu.event(div, "click", evaluator);
@@ -57,8 +61,8 @@ uu.event.code = {
 クラスインスタンスをイベントハンドラとして登録する。
 {{{
     uu.Class("Drag", {
-        handleEvent: function(eventObjectEx) {
-            alert(eventObjectEx.code); // 5
+        handleEvent: function(event) {
+            alert(event.code); // 5
         }
     });
 
