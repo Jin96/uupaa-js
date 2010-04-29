@@ -15,7 +15,7 @@ EventObjectEx = {
 }
 }}}
   * EventObjectEx.node は、uu.event(node) で指定した node です。
-  * EventObjectEx.code には、event.type を数値化した整数が格納されています。値の一覧は uu.event.code で参照できます。
+  * EventObjectEx.code は、uu.event.code`[`event.type`]` の値を格納しています。
 {{{
 uu.event.code = {
     mousedown:   1,
