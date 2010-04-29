@@ -40,7 +40,7 @@ uu.event.code = {
     DOMMouseScroll: 4
 }
 }}}
-  * EventObjectEx.target は、イベントの発生元の Node です。この値は event.target または event.srcElement です。
+  * EventObjectEx.target は、イベントの発生元の Node です。この値は event.target または event.srcElement (IE6～8) です。
 
 == 例 ==
 
