@@ -8,18 +8,13 @@ uu.event() で登録した evaluator のコールバック時の第一引数が 
 
 {{{
 EventObjectEx = {
-    code       - Number: event code (uu.event.code)
-    boundNode  - Node:   uu.event(node), event listener node
-    sourceNode - Node:   event target, srcElement(in IE) or event target
-    pageX      - Number: page X (absolute position in WebPage)
-    pageY      - Number: page Y (absolute position in WebPage)
-    offsetX    - Number: offset X (relative position in event source)
-    offsetY    - Number: offset Y (relative position in event source)
+    node    - Node:   uu.event(node), event listener node
+    code    - Number: event code (uu.event.code)
+    target  - Node:   event target, srcElement(in IE) or event target
     ...
 }
 }}}
-  * pageX, pageY が IE6～IE8 で追加されます。
-  * offsetX, offsetY が Gecko で追加されます。
+  * EventObjectEx.node は、uu.event(node) で指定した node です
   * EventObjectEx.code には、event.type を数値化した整数が格納されています。値の一覧は uu.event.code で参照できます。
 {{{
 uu.event.code = {
@@ -40,21 +35,19 @@ uu.event.code = {
     focus:       15,
     blur:        16,
     resize:      17,
+    custom:      99, // uu.event.fire
     losecapture:    2,
     DOMMouseScroll: 4
 }
 }}}
-  * EventObjectEx.boundNode には、uu.event(node) で指定した node です。これは、handleEvent(eventObjectEx, boundNode, sourceNode) の boundNode と同じです。
-  * EventObjectEx.sourceNode には、イベントの発生元の Node が格納されます。これは、handleEvent(eventObjectEx, boundNode, sourceNode) の sourceNode と同じです。
-  * EventObjectEx.pageX, EventObjectEx.pageY には、 Webページの左上からの絶対値が pixel 値で格納されています。
-  * EventObjectEx.offsetX, EventObjectEx.offsetY には、レイアウト上の親(position:static 以外のスタイルが設定されている先祖ノードまたは body ノード)からの相対距離が pixel 値で格納されています。
+  * EventObjectEx.target は、イベントの発生元の Node です。この値は event.target または event.srcElement です。
 
 == 例 ==
 
 関数をイベントハンドラとして登録する。
 {{{
     var div = uu.node.add();
-    var evaluator = function(eventObjectEx, boundNode, sourceNode) {
+    var evaluator = function(eventObjectEx) {
         alert(eventObjectEx.code); // 5
     };
 
@@ -64,7 +57,7 @@ uu.event.code = {
 クラスインスタンスをイベントハンドラとして登録する。
 {{{
     uu.Class("Drag", {
-        handleEvent: function(eventObjectEx, boundNode, sourceNode) {
+        handleEvent: function(eventObjectEx) {
             alert(eventObjectEx.code); // 5
         }
     });
