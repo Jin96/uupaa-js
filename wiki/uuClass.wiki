@@ -16,7 +16,7 @@ uu.Class はカプセル化, 継承, ポリモーフィズム機能を提供し�
     * _prototypeObject_ には public なプロパティやメソッドを[Hash]で指定します。省略も可能です。
     * _prototypeObject_ に *init*: function(_var_args_:[Mix], ...) を定義すると、コンストラクタとして機能します。init メソッドは初期化に必要な引数を受け取ることができます。
     * _prototypeObject_ に *msgbox*: function(msg:String, param:[Mix] = undefined) を定義すると、メッセージハンドラとして機能します。msg にはメッセージ文字列が渡され、param にはパラメタが渡されます。
-    * _prototypeObject_ に *handleEvent*: function(event:[EventObjectEx], node:[Node], sourceNode:[Node]) を定義すると、イベントハンドラとして機能します。sourceNode にはイベントの発生元のノードが渡されます。
+    * _prototypeObject_ に *handleEvent*: function(event:[EventObjectEx]) を定義すると、イベントハンドラとして機能します。
 
 {{{
 uu.Class("MySuperClass", {
@@ -26,7 +26,7 @@ uu.Class("MySuperClass", {
     msgbox: function(msg, param) { // メッセージハンドラ
         alert(msg);
     },
-    handleEvent: function(event, node, sourceNode) { // イベントハンドラ
+    handleEvent: function(event) { // イベントハンドラ
         alert(event.type);
     },
     setItem: function(key, value) { // ユーザ定義メソッド
@@ -44,7 +44,7 @@ uu.Class("MyClass < MySuperClass", { // MySuperClassを継承
     msgbox: function(msg, param) { // メッセージハンドラ
         this.superMethod("msgbox", msg, param); // MySuperClass::msgbox を呼び出す
     },
-    handleEvent: function(event, node, sourceNode) { // イベントハンドラ
+    handleEvent: function(event) { // イベントハンドラ
     },
     setItem: function(key, value) { // ユーザ定義メソッドのオーバーライド
         window.localStorage[key] = value;
@@ -70,7 +70,7 @@ uu.event("click", div, obj1);
 }}}
 
 = uu.Class.singleton =
-  * uu.Class.singleton("_!ClassName_", _prototypeObject_) は何度生成しても実体が一つに限定されるシングルトンクラスを定義します。
+  * uu.Class.singleton("_!ClassName_", _prototypeObject_) は何度生成しても実体が一つしか存在しないシングルトンクラスを定義します。
 
 {{{
 uu.Class.singleton("MySingletonClass", {
@@ -80,7 +80,7 @@ uu.Class.singleton("MySingletonClass", {
     msgbox: function(msg, param) { // メッセージハンドラ
         alert(msg);
     },
-    handleEvent: function(event, node, sourceNode) { // イベントハンドラ
+    handleEvent: function(event) { // イベントハンドラ
         alert(event.type);
     },
     setItem: function(key, value) { // ユーザ定義メソッド
