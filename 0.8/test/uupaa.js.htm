@@ -618,9 +618,15 @@ function xboot(uu) {
         return [uu.fix("float"), "==", uu.ie ? "styleFloat" : "cssFloat"];
       },
       'uu.fix("for") == "for"': function() {
+        if (uu.ver.ie67) {
+            return [uu.fix("for"), "!=", "for"];
+        }
         return [uu.fix("for"), "==", "for"];
       },
       'uu.fix("htmlFor") == "for"': function() {
+        if (uu.ver.ie67) {
+            return [uu.fix("htmlFor"), "!=", "for"];
+        }
         return [uu.fix("htmlFor"), "==", "for"];
       },
 
@@ -982,6 +988,26 @@ function xboot(uu) {
       "uu.qs.amp('key=val;key2=val2', 1) は 'key=val&amp;key2=val2' に変換される": function() {
         return [uu.qs.amp('key=val;key2=val2', 1), "==", 'key=val&amp;key2=val2'];
       },
+
+    "2010-04-29": "",
+        "uu.Class('SyntaxSugar', function() {\n this.val = 1;\n})\nは\nuu.Class('FullSyntax', {\ninit: function() {\nthis.val = 1;\n}\n})\nのシンタックスシュガーとして機能する": function() {
+
+            uu.Class("SyntaxSugar", function() {
+                this.val = 1;
+            });
+
+            uu.Class("FullSyntax", {
+                init: function() {
+                    this.val = 1;
+                }
+            });
+
+            var obj1 = uu("SyntaxSugar");
+            var obj2 = uu("FullSyntax");
+
+            return [obj1.val, "==", obj2.val];
+        },
+
 
 
     "End Of Test": ""

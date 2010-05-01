@@ -1,10 +1,11 @@
 <?php
 // usage:
-//  >b.php [-g | -y | -m] [-s] [+debug] [-noverbose] package [more-packages...]
+//  >b.php [-g | -y | -m] [-s] [-mb] [+debug] [-noverbose] package [more-packages...]
 //    -g    use Google Closure Compiler
 //    -y    use Microsoft Ajax Minifier
 //    -m    use YUI Compressor
 //    -s    separate build, uupaa.jsを別のファイルとしてビルドします。
+//    -mb   mobile
 //    +debug コードブロック {{{!debug ～ }}}!debug を残します
 //    -noverbose 結果表示画面で一時停止しません。バッチビルドに利用できます。
 //
@@ -94,6 +95,8 @@ function joinSourceFiles($package,      // @param Array:
             // minify
             if ($minify) {
                 // --- pre-process phase ---
+
+                // typeof alias
                 $txt = preg_replace('/uu\.?type.HASH/',         '1', $txt); // uu.?type.HASH -> 1
                 $txt = preg_replace('/uu\.?type.NODE/',         '2', $txt);
                 $txt = preg_replace('/uu\.?type.FAKEARRAY/',    '4', $txt);
@@ -107,6 +110,42 @@ function joinSourceFiles($package,      // @param Array:
                 $txt = preg_replace('/uu\.?type.STRING/',       '512', $txt);
                 $txt = preg_replace('/uu\.?type.ARRAY/',        '1024', $txt);
                 $txt = preg_replace('/uu\.?type.REGEXP/',       '2048', $txt);
+
+                // position alias
+                $txt = preg_replace('/uu\.?node.FIRST_SIBLING/',    '1', $txt);
+                $txt = preg_replace('/uu\.?node.PREV_SIBLING/',     '2', $txt);
+                $txt = preg_replace('/uu\.?node.NEXT_SIBLING/',     '3', $txt);
+                $txt = preg_replace('/uu\.?node.LAST_SIBLING/',     '4', $txt);
+                $txt = preg_replace('/uu\.?node.FIRST_CHILD/',      '5', $txt);
+                $txt = preg_replace('/uu\.?node.LAST_CHILD/',       '6', $txt);
+
+                // nodeType alias
+                $txt = preg_replace('/uu\.?node.ELEMENT_NODE/',         '1', $txt);
+                $txt = preg_replace('/uu\.?node.TEXT_NODE/',            '3', $txt);
+                $txt = preg_replace('/uu\.?node.COMMENT_NODE/',         '8', $txt);
+                $txt = preg_replace('/uu\.?node.DOCUMENT_NODE/',        '9', $txt);
+                $txt = preg_replace('/uu\.?node.DOCUMENT_FRAGMENT_NODE/', '11', $txt);
+
+                // Event.type alias
+                $txt = preg_replace('/uu\.?event.xtype.mousedown/',      '1', $txt);
+                $txt = preg_replace('/uu\.?event.xtype.mouseup/',        '2', $txt);
+                $txt = preg_replace('/uu\.?event.xtype.mousemove/',      '3', $txt);
+                $txt = preg_replace('/uu\.?event.xtype.mousewheel/',     '4', $txt);
+                $txt = preg_replace('/uu\.?event.xtype.click/',          '5', $txt);
+                $txt = preg_replace('/uu\.?event.xtype.dblclick/',       '6', $txt);
+                $txt = preg_replace('/uu\.?event.xtype.keydown/',        '7', $txt);
+                $txt = preg_replace('/uu\.?event.xtype.keypress/',       '8', $txt);
+                $txt = preg_replace('/uu\.?event.xtype.keyup/',          '9', $txt);
+                $txt = preg_replace('/uu\.?event.xtype.mouseenter/',     '10', $txt);
+                $txt = preg_replace('/uu\.?event.xtype.mouseleave/',     '11', $txt);
+                $txt = preg_replace('/uu\.?event.xtype.mouseover/',      '12', $txt);
+                $txt = preg_replace('/uu\.?event.xtype.mouseout/',       '13', $txt);
+                $txt = preg_replace('/uu\.?event.xtype.contextmenu/',    '14', $txt);
+                $txt = preg_replace('/uu\.?event.xtype.focus/',          '15', $txt);
+                $txt = preg_replace('/uu\.?event.xtype.blur/',           '16', $txt);
+                $txt = preg_replace('/uu\.?event.xtype.resize/',         '17', $txt);
+                $txt = preg_replace('/uu\.?event.xtype.losecapture/',    '0x102', $txt);
+                $txt = preg_replace('/uu\.?event.xtype.DOMMouseScroll/', '0x104', $txt);
 
                 // fakeToArray(...) -> Array.prototype.slice.call(...)
                 if ($mobile) {
