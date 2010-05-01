@@ -44,7 +44,7 @@ uu.Class("FlashAudio", {
 
 uu.Class.FlashAudio.isReady = function() {
     if (_already === null) {
-        _already = uu.ver.flash && uu.require(_SWF_PATH).ok;
+        _already = uu.ver.flash && uu.load(_SWF_PATH).ok;
     }
     return _already;
 };
