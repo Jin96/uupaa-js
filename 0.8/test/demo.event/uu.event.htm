@@ -49,7 +49,7 @@ html,body {
 function xboot() {
     uu.Class("Button", {
         handleEvent: function(event) {
-            uu.text(uu.id("xtrace"),
+            uu.text(uu.id("log"),
                     uu.format("type:?, xtype:?, xbutton:?",
                               event.type, event.xtype, event.xbutton));
         }
@@ -60,7 +60,7 @@ function xboot() {
             event.stop();
             var edge = uu.event.getPaddingEdge(event);
 
-            uu.text(uu.id("xtrace"),
+            uu.text(uu.id("log"),
                     uu.format("paddingEdgeX:?, paddingEdgeY:?, pageX:?, pageY:?",
                                                     edge.x, edge.y,
                                                     event.pageX, event.pageY));
@@ -69,7 +69,7 @@ function xboot() {
 
     uu.Class("Wheel", {
         handleEvent: function(event) {
-            uu.text(uu.id("xtrace"),
+            uu.text(uu.id("log"),
                     uu.format("type:?, xtype:?, xwheel:?",
                               event.type, event.xtype, event.xwheel));
         }
@@ -79,7 +79,7 @@ function xboot() {
         handleEvent: function(event) {
             var keyCode = uu.event.getKeyCode(event);
 
-            uu.text(uu.id("xtrace"),
+            uu.text(uu.id("log"),
                     uu.format("type:?, xtype:?, keyCode:?, key:?",
                               event.type, event.xtype, keyCode.code, keyCode.key));
         }
@@ -109,7 +109,7 @@ function xbuild(uu, node) {
 <br />
 <br />
 <br />
-<div id="xtrace"></div>
+<ul id="log"></ul>
 <textarea id="box"></textarea>
 <br />
 <br />

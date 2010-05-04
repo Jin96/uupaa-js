@@ -162,6 +162,7 @@ uu = uumix(uufactory, {             // uu(expression:Jam/Node/NodeArray/String/w
         unbind:     uueventunbind,  // uu.event.unbind(node:Node, eventTypeEx:String = void):Node
         attach:     uueventattach,  // uu.event.attach(node:Node, eventType:String, evaluator:Function, useCapture:Boolean = false)
         detach:     uueventdetach,  // uu.event.detach(node:Node, eventType:String, evaluator:Function, useCapture:Boolean = false)
+        getTouch:   getTouch,       // uu.event.getTouch(event:EventObjectEx):Hash { touches }
         getKeyCode: getKeyCode,     // uu.event.getKeyCode(event:EventObjectEx):Hash { key, code }
         getPaddingEdge:             // uu.event.getPaddingEdge(event:EventObjectEx):Hash { x, y }
                     getPaddingEdge
@@ -170,19 +171,34 @@ uu = uumix(uufactory, {             // uu(expression:Jam/Node/NodeArray/String/w
     node:     uumix(uunode, {       // uu.node(tagName:String = "div", attr:Hash = void):Node
         add:        uunodeadd,      // uu.node.add(source:Node/DocumentFragment/HTMLFragment/TagName = "div",
                                     //             context:Node = <body>,
-                                    //             insertPosition:Number = uu.node.LAST_CHILD):Node
+                                    //             position:String = ".$"):Node
                                     //  [1][add div node]          uu.node.add()         -> <body><div /></body>
                                     //  [2][from tagName]          uu.node.add("p")      -> <body><p /></body>
                                     //  [3][from node]             uu.node.add(uu.div()) -> <body><div /></body>
                                     //  [4][from HTMLFragment]     uu.node.add("<div><p>txt</p></div>") -> <body><div><p>txt</p></div></body>
                                     //  [5][from DocumentFragment] uu.node.add(DocumentFragment)        -> <body>{{fragment}}</body>
+                                    //   --- uu.node.add / uu.node.find position ---
+                                    //    <div id="parentNode">
+                                    //        <div id="firstSibling">^</div>
+                                    //        <div id="prevSibling">-</div>
+                                    //        <div id="contextNode">
+                                    //            <div id="firstChild">.^</div>
+                                    //            <div>-----</div>
+                                    //            <div id="lastChild">.$</div>
+                                    //        </div>
+                                    //        <div id="nextSibling">+</div>
+                                    //        <div id="lastSibling">$</div>
+                                    //    </div>
+                                    //
         has:        uunodehas,      // uu.node.has(node:Node, context:Node):Boolean
-        bulk:       uunodebulk,     // uu.node.bulk(source:Node/HTMLFragment, context:Node/TagString = "div"):DocumentFragment
-        bros:       uunodebros,     // uu.node.bros(context:Node, position:Number = uu.node.LAST_SIBLING):Node/null
-                                    //  [1][find firstSibling] uu.node.find(document.body, FIRST_SIBLING) -> <head>
-                                    //  [2][find prevSibling]  uu.node.find(document.body, PREV_SIBLING) -> <head>
-                                    //  [3][find nextSibling]  uu.node.find(document.head, NEXT_SIBLING) -> <body>
-                                    //  [4][find lastSibling]  uu.node.find(document.head, LAST_SIBLING) -> <body>
+        bulk:       uunodebulk,     // uu.node.bulk(source:Node/HTMLFragment, context:Node = <div>):DocumentFragment
+        find:       uunodefind,     // uu.node.find(context:Node, position:String = ".$"):Node/null
+                                    //  [1][find firstSibling] uu.node.find(document.body, "^") -> <head>
+                                    //  [2][find prevSibling]  uu.node.find(document.body, "-") -> <head>
+                                    //  [3][find nextSibling]  uu.node.find(document.head, "+") -> <body>
+                                    //  [4][find lastSibling]  uu.node.find(document.head, "$") -> <body>
+                                    //  [5][find firstChild]   uu.node.find(document.body, ".^") -> <h1> in <body><h1></h1><div></div></body>
+                                    //  [6][find lastChild]    uu.node.find(document.body, ".$") -> <div> in <body><h1></h1><div></div></body>
         path:       uunodepath,     // uu.node.path(node:Node):String
         swap:       uunodeswap,     // uu.node.swap(swapin:Node, swapout:Node):Node (swapout node)
         wrap:       uunodewrap,     // uu.node.wrap(innerNode:Node, outerNode:Node):Node (innerNode)
@@ -191,24 +207,11 @@ uu = uumix(uufactory, {             // uu(expression:Jam/Node/NodeArray/String/w
         count:      uunodecount,    // uu.node.count(context:Node):Number ELEMENT_NODE count
         remove:     uunoderemove,   // uu.node.remove(node:Node):Node
         indexOf:    uunodeindexof,  // uu.node.indexOf(node:Node):Number
-        // --- position ---
-        FIRST_SIBLING:  1,          //    <div id="parentNode">
-        PREV_SIBLING:   2,          //        <div id="FIRST_SIBLING"></div>
-        NEXT_SIBLING:   3,          //        <div id="PREV_SIBLING"></div>
-        LAST_SIBLING:   4,          //        <div id="contextNode">
-        FIRST_CHILD:    5,          //            <div id="FIRST_CHILD"></div>
-        LAST_CHILD:     6,          //            <div>-----</div>
-                                    //            <div id="LAST_CHILD"></div>
-                                    //        </div>
-                                    //        <div id="NEXT_SIBLING"></div>
-                                    //        <div id="LAST_SIBLING"></div>
-                                    //    </div>
         // --- nodeType alias ---
         ELEMENT_NODE:   1,          // uu.node.ELEMENT_NODE  = 1
         TEXT_NODE:      3,          // uu.node.TEXT_NODE     = 3
         COMMENT_NODE:   8,          // uu.node.COMMENT_NODE  = 8
-        DOCUMENT_NODE:  9,          // uu.node.DOCUMENT_NODE = 9
-        DOCUMENT_FRAGMENT_NODE: 11  // uu.node.DOCUMENT_FRAGMENT_NODE = 11
+        DOCUMENT_NODE:  9           // uu.node.DOCUMENT_NODE = 9
     }),
     nodeid:   uumix(uunodeid, {     // uu.nodeid(node:Node):Number (nodeid)
         toNode:     uunodeidtonode, // uu.nodeid.toNode(nodeid:Number):Node
@@ -263,10 +266,8 @@ uu = uumix(uufactory, {             // uu(expression:Jam/Node/NodeArray/String/w
                                     //  [6][RFC1123String to hash]   uu.date("Wed, 16 Sep 2009 16:18:14 GMT") -> DateHash
     // --- DEBUG ---
     puff:           uupuff,         // uu.puff(source:Mix)
-    trace:    uumix(uutrace, {      // uu.trace(titleOrSource:String/Mix, source:Mix = void)
-                                    //  [1][var dump]         uu.trace(mix)
-                                    //  [2][title + var dump] uu.trace("title", mix)
-        clear:      uutraceclear    // uu.trace.clear()
+    log:      uumix(uulog, {        // uu.log(log:Mix)
+        clear:      uulogclear      // uu.log.clear()
     }),
     // --- EVALUATION ---
     evaljs:         uuevaljs,       // uu.evaljs(javascriptExpression:String):Mix
@@ -286,9 +287,9 @@ uu = uumix(uufactory, {             // uu(expression:Jam/Node/NodeArray/String/w
     },
     // --- OTHER ---
     guid:           uuguid,         // uu.guid():Number - build GUID
-    page: {
-        size:       uupagesize      // uu.page.size():Hash { innerWidth, innerHeight, pageXOffset, pageYOffset }
-        getOrientation:             // uu.page.getOrientation():Number (-90, 0, 90)
+    viewport: {
+        size:       uuviewportsize, // uu.viewport.size():Hash { innerWidth, innerHeight, pageXOffset, pageYOffset }
+        getOrientation:             // uu.viewport.getOrientation():Number (-90, 0, 90)
                     getOrientation
     },
     dmz:            {},             // uu.dmz - DeMilitarized Zone(proxy)
@@ -297,10 +298,10 @@ uu = uumix(uufactory, {             // uu(expression:Jam/Node/NodeArray/String/w
 
 // --- CONSTRUCTION ---
 uu.config = uuarg(win.xconfig, {    // uu.config - Hash: user configurations
+    log:        "log", // <div id="log"></div>
     aria:       false,
     debug:      false,
     right:      false,
-    trace:      "xtrace",
     altcss:     0,
     storage:    0,
     baseDir:    ""
@@ -1543,14 +1544,27 @@ uuevent.xtype = {
     mousedown: 1, mouseup: 2, mousemove: 3, mousewheel: 4, click: 5,
     dblclick: 6, keydown: 7, keypress: 8, keyup: 9, mouseenter: 10,
     mouseleave: 11, mouseover: 12, mouseout: 13, contextmenu: 14,
-    focus: 15, blur: 16, resize: 17,
+    focus: 15, blur: 16, resize: 17, scroll: 18,
     // iPhone events
     touchstart: 32, touchend: 33, touchmove: 34, touchcancel: 35,
     gesturestart: 36, gesturechange: 37, gestureend: 38,
     orientationchange: 39,
+    // HTML5 events
+    online: 50, offline: 51, message: 52,
     // Cross Browser
     losecapture: 0x102, DOMMouseScroll: 0x104
 };
+
+// uu.event.getTouch - get touch info
+function getTouch(event) { // @param EventObjectEx:
+                           // @return Hash: { touches }
+                           //   touches - Array: [touchHash, ...]  (max length = 5)
+                           //   touchHash - Hash: { pageX, pageY }
+    if (uu.ver.iphone) {
+        return { touches: event.touches };
+    }
+    return { touches: [] };
+}
 
 // uu.event.getKeyCode - get key and keyCode (cross browse keyCode)
 function getKeyCode(event) { // @param EventObjectEx:
@@ -1740,39 +1754,75 @@ function uunode(tagName, // @param String(= "div"):
     return attr === void 0 ? rv : uumix(rv, attr);
 }
 
-// [1][add div node]            uu.node.add()         -> <body><div /></body>
-// [2][from tagName]            uu.node.add("p")      -> <body><p /></body>
-// [3][from node]               uu.node.add(uu.div()) -> <body><div /></body>
-// [4][from HTMLFragment]       uu.node.add("<div><p>txt</p></div>") -> <body><div><p>txt</p></div></body>
-// [5][from DocumentFragment]   uu.node.add(DocumentFragment)        -> <body>{{fragment}}</body>
+//  [1][add div node]          uu.node.add()         -> <body><div /></body>
+//  [2][from tagName]          uu.node.add("p")      -> <body><p /></body>
+//  [3][from node]             uu.node.add(uu.div()) -> <body><div /></body>
+//  [4][from HTMLFragment]     uu.node.add("<div><p>txt</p></div>") -> <body><div><p>txt</p></div></body>
+//  [5][from DocumentFragment] uu.node.add(DocumentFragment)        -> <body>{{fragment}}</body>
 
-// uu.node.add - create element, add node, add node to context
-function uunodeadd(source,           // @param Node/DocumentFragment/HTMLFragment/TagName(= "div"):
-                   context,          // @param Node(= <body>): add to context
-                   insertPosition) { // @param Number(= uu.node.LAST_CHILD): insert position
-
-                                     // @return Node: node or first node
+// uu.node.add - add/insert node
+function uunodeadd(source,     // @param Node/DocumentFragment/HTMLFragment/TagName(= "div"):
+                   context,    // @param Node(= <body>): add to context
+                   position) { // @param String(= ".$"): insert position
+                               // @return Node: node or first node
     context = context || doc.body;
 
     var node = !source ? doc.createElement("div")        // [1] uu.node.add()
              : source.nodeType ? source                  // [3][5] uu.node.add(Node or DocumentFragment)
              : !source.indexOf("<") ? uunodebulk(source, context) // [4] uu.node.add(HTMLFragmentString)
              : doc.createElement(source),                // [2] uu.node.add("p")
-        parentNode = context.parentNode, reference = null,
-        rv = (node.nodeType === uu.node.DOCUMENT_FRAGMENT_NODE)
-           ? node.firstChild
-           : node;
+        reference = null,
+        rv = (node.nodeType === 11) ? node.firstChild : node; // 11: DOCUMENT_FRAGMENT_NODE
 
-    switch (insertPosition || uu.node.LAST_CHILD) {
-    case uu.node.FIRST_SIBLING: reference = parentNode.firstChild;
-    case uu.node.PREV_SIBLING:  reference || (reference = context);
-    case uu.node.NEXT_SIBLING:  reference || (reference = context.nextSibling);
-    case uu.node.LAST_SIBLING:  parentNode.insertBefore(node, reference); break;
-    case uu.node.FIRST_CHILD:   reference = context.firstChild;
-    case uu.node.LAST_CHILD:    context.insertBefore(node, reference);
+    switch (uunodefind.pos[position] || 8) {
+    case 1: reference = context.parentNode.firstChild;
+    case 2: reference || (reference = context);
+    case 3: reference || (reference = context.nextSibling);
+    case 4: context.parentNode.insertBefore(node, reference); break;
+    case 5: reference = context.firstChild;
+    case 8: context.insertBefore(node, reference);
     }
     return rv;
 }
+
+// uu.node.find - find node
+function uunodefind(context,    // @param Node: context
+                    position) { // @param String(= ".$"): position
+                                // @return Node: node or null
+    context = context || doc.body;
+
+    var rv, num = uunodefind.pos[position] || 8,
+        around = num === 2 || num === 3,
+        child = num > 4,
+        iters = uunodefind.iters[child ? num - 4 : num], iter;
+
+//{{{!mb
+    if (_habits.traversal) {
+//}}}!mb
+        rv = (around || child) ? context[iters[0]]
+                               : context.parentNode[iters[0]];
+//{{{!mb
+    } else {
+        iter = iters[1];
+        rv = around ? context[iter] :
+             child  ? context[iters[2]]
+                    : context.parentNode[iters[2]];
+        for (; rv; rv = rv[iter]) {
+            if (rv.nodeType === uu.node.ELEMENT_NODE) {
+                break;
+            }
+        }
+    }
+//}}}!mb
+    return rv;
+}
+uunodefind.pos = { "^": 1, "-": 2, "+": 3, "$": 4, ".^": 5, ".$": 8 };
+uunodefind.iters = {
+    1: ["firstElementChild",      "nextSibling",     "firstChild"], // FIRST_SIBLING, FIRST_CHILD
+    2: ["previousElementSibling", "previousSibling", ""],           // PREV_SIBLING
+    3: ["nextElementSibling",     "nextSibling",     ""],           // NEXT_SIBLING
+    4: ["lastElementChild",       "previousSibling", "lastChild"]   // LAST_SIBLING, LAST_CHILD
+};
 
 // uu.nodeid - get nodeid
 function uunodeid(node) { // @param Node:
@@ -1814,12 +1864,10 @@ function uunodehas(node,      // @param Node: child node
 
 // uu.node.bulk - convert HTMLString into DocumentFragment
 function uunodebulk(source,    // @param Node/HTMLFragment: source
-                    context) { // @param Node/TagString(= "div"): context
+                    context) { // @param Node(= <div>): context
                                // @return DocumentFragment:
-    context = context || "div";
-
     var rv = doc.createDocumentFragment(),
-        placeholder = context.nodeType ? context : uunode(context);
+        placeholder = uunode((context || {}).tagName);
 
     placeholder.innerHTML = source.nodeType ? source.outerHTML // [1] node
                                             : source;          // [2] "<p>html</p>"
@@ -1915,7 +1963,7 @@ function uunodewrap(innerNode,   // @param Node: inner node
 function buildNode(node,   // @param Node/TagString: <div> or "div"
                    args) { // @param Arguments: [Node/String/Number, ...]
                            // @return Node:
-    node.nodeType || (node = uu.node(node)); // "div" -> <div>
+    node.nodeType || (node = uunode(node)); // "div" -> <div>
 
     var arg, i = 0, token = 0, callback;
 
@@ -1952,8 +2000,8 @@ function uunodeclear(context) { // @param Node: parent node
         uueventunbind(v);
     }
     rv = []; // gc
-    while (context.firstChild) {
-        context.removeChild(context.firstChild);
+    while (context.lastChild) {
+        context.removeChild(context.lastChild);
     }
     return context;
 }
@@ -2322,33 +2370,21 @@ function uupuff(source) { // @param Mix: source object
     alert(_jsoninspect(source));
 }
 
-// <div id="xtrace">msg<div>
-// [1][dump] uu.trace(source) -> <p>source</p>
+// uu.log - add log
+function uulog(log) { // @param Mix: log data
+    var context = uuid(uu.config.log);
 
-// uu.trace - add trace
-function uutrace(source) { // @param Mix(= void): source (with title)
-    var output = uuid(uu.config.trace), json;
-
-    if (output) {
-        json = uufixunicode(_jsoninspect(source));
-
-        if (output.tagName.toLowerCase() === "textarea") {
-            output.value += json;
-        } else {
-            output.innerHTML += "<p>" + json + "</p>";
-        }
-    }
+    context || uunodeadd(context = uu.ol({ id: uu.config.log }));
+    uunodeadd(uu.li(uu.text(uufixunicode(_jsoninspect(log)))), context);
 }
 
-// uu.trace.clear - clear
-function uutraceclear() {
-    var output = uuid(uu.config.trace);
+// uu.log.clear - clear log
+function uulogclear() {
+    var context = uuid(uu.config.log);
 
-    if (output) {
-        if (output.tagName.toLowerCase() === "textarea") {
-            output.value = "";
-        } else {
-            output.innerHTML = "";
+    if (context) {
+        while (context.lastChild) {
+            context.removeChild(context.lastChild);
         }
     }
 }
@@ -2538,13 +2574,13 @@ function uuevaljs(javascriptExpression) { // @param String:
     return (new Function(javascriptExpression))();
 }
 
-// uu.page.size
-function uupagesize() { // @return Hash: { innerWidth, innerHeight,
-                        //                 pageXOffset, pageYOffset }
-                        //   innerWidth  - Number:
-                        //   innerHeight - Number:
-                        //   pageXOffset - Number:
-                        //   pageYOffset - Number:
+// uu.viewport.size
+function uuviewportsize() { // @return Hash: { innerWidth, innerHeight,
+                            //                 pageXOffset, pageYOffset }
+                            //   innerWidth  - Number:
+                            //   innerHeight - Number:
+                            //   pageXOffset - Number:
+                            //   pageYOffset - Number:
 //{{{!mb
     if (uu.ie) {
         var iebody = doc.documentElement;
@@ -2558,8 +2594,8 @@ function uupagesize() { // @return Hash: { innerWidth, innerHeight,
     return win; // [WebKit][ALIAS] window.pageXOffset = document.body.scrollLeft
 }
 
-// uu.page.getOrientation - get page orientation (for iPhone)
-function getOrientation() { // @return Number: -90, 0, 90
+// uu.viewport.getOrientation - get viewport orientation (for iPhone)
+function getOrientation() { // @return Number: 90(<|), 0(|A|), -90(|>), -180(|V|)
     return win.orientation;
 }
 

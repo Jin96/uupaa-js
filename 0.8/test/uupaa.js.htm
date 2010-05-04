@@ -508,22 +508,31 @@ function xboot(uu) {
       },
 
 
-    "uu.nore.first()": "",
-      "uu.node.first(uu.id('tgt')) == uu.id('first')": function() {
-        return [uu.node.first(uu.id('tgt')), "==", uu.id('first')];
+    "uu.nore.find(firstSibling)": "",
+      "uu.node.find(uu.id('tgt'), '^') == uu.id('first')": function() {
+        return [uu.node.find(uu.id('tgt'), '^'), "==", uu.id('first')];
       },
-    "uu.nore.prev()": "",
-      "uu.node.prev(uu.id('tgt')) == uu.id('prev')": function() {
-        return [uu.node.prev(uu.id('tgt')), "==", uu.id('prev')];
+    "uu.nore.find(previousSibling)": "",
+      "uu.node.find(uu.id('tgt'), '-') == uu.id('prev')": function() {
+        return [uu.node.find(uu.id('tgt'), '-'), "==", uu.id('prev')];
       },
-    "uu.nore.next()": "",
-      "uu.node.next(uu.id('tgt')) == uu.id('next')": function() {
-        return [uu.node.next(uu.id('tgt')), "==", uu.id('next')];
+    "uu.nore.find(nextSibling)": "",
+      "uu.node.find(uu.id('tgt'), '+') == uu.id('next')": function() {
+        return [uu.node.find(uu.id('tgt'), '+'), "==", uu.id('next')];
       },
-    "uu.nore.last()": "",
-      "uu.node.last(uu.id('tgt')) == uu.id('last')": function() {
-        return [uu.node.last(uu.id('tgt')), "==", uu.id('last')];
+    "uu.nore.find(lastSibling)": "",
+      "uu.node.find(uu.id('tgt'), '$') == uu.id('last')": function() {
+        return [uu.node.find(uu.id('tgt'), '$'), "==", uu.id('last')];
       },
+    "uu.nore.find(firstChild)": "",
+      "uu.node.find(uu.id('tgt'), '.^') == uu.id('firstChild')": function() {
+        return [uu.node.find(uu.id('tgt'), '.^'), "==", uu.id('firstChild')];
+      },
+    "uu.nore.find(lastChild)": "",
+      "uu.node.find(uu.id('tgt'), '.$') == uu.id('lastChild')": function() {
+        return [uu.node.find(uu.id('tgt'), '.$'), "==", uu.id('lastChild')];
+      },
+
 
     "uu.nore.count()": "",
       "uu.node.count(uu.id('tgt'))": function() {
