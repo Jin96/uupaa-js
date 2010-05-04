@@ -112,12 +112,14 @@ function joinSourceFiles($package,      // @param Array:
                 $txt = preg_replace('/uu\.?type.REGEXP/',       '2048', $txt);
 
                 // position alias
+/*
                 $txt = preg_replace('/uu\.?node.FIRST_SIBLING/',    '1', $txt);
                 $txt = preg_replace('/uu\.?node.PREV_SIBLING/',     '2', $txt);
                 $txt = preg_replace('/uu\.?node.NEXT_SIBLING/',     '3', $txt);
                 $txt = preg_replace('/uu\.?node.LAST_SIBLING/',     '4', $txt);
                 $txt = preg_replace('/uu\.?node.FIRST_CHILD/',      '5', $txt);
-                $txt = preg_replace('/uu\.?node.LAST_CHILD/',       '6', $txt);
+                $txt = preg_replace('/uu\.?node.LAST_CHILD/',       '8', $txt);
+ */
 
                 // nodeType alias
                 $txt = preg_replace('/uu\.?node.ELEMENT_NODE/',         '1', $txt);
@@ -144,6 +146,10 @@ function joinSourceFiles($package,      // @param Array:
                 $txt = preg_replace('/uu\.?event.xtype.focus/',          '15', $txt);
                 $txt = preg_replace('/uu\.?event.xtype.blur/',           '16', $txt);
                 $txt = preg_replace('/uu\.?event.xtype.resize/',         '17', $txt);
+                $txt = preg_replace('/uu\.?event.xtype.scroll/',         '18', $txt);
+                $txt = preg_replace('/uu\.?event.xtype.online/',         '50', $txt);
+                $txt = preg_replace('/uu\.?event.xtype.offline/',        '51', $txt);
+                $txt = preg_replace('/uu\.?event.xtype.message/',        '52', $txt);
                 $txt = preg_replace('/uu\.?event.xtype.losecapture/',    '0x102', $txt);
                 $txt = preg_replace('/uu\.?event.xtype.DOMMouseScroll/', '0x104', $txt);
 
