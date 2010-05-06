@@ -43,6 +43,9 @@ function xwin(uu) {
 </body></html>
 }}}
 
+== RUN ==
+http://uupaa-js.googlecode.com/svn/trunk/0.8/test/uu.node/normalize.htm
+
 == 実行結果 ==
   * Firefox3.6
 {{{
