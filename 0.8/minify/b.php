@@ -129,29 +129,29 @@ function joinSourceFiles($package,      // @param Array:
                 $txt = preg_replace('/uu\.?node.DOCUMENT_FRAGMENT_NODE/', '11', $txt);
 
                 // Event.type alias
-                $txt = preg_replace('/uu\.?event.xtype.mousedown/',      '1', $txt);
-                $txt = preg_replace('/uu\.?event.xtype.mouseup/',        '2', $txt);
-                $txt = preg_replace('/uu\.?event.xtype.mousemove/',      '3', $txt);
-                $txt = preg_replace('/uu\.?event.xtype.mousewheel/',     '4', $txt);
-                $txt = preg_replace('/uu\.?event.xtype.click/',          '5', $txt);
-                $txt = preg_replace('/uu\.?event.xtype.dblclick/',       '6', $txt);
-                $txt = preg_replace('/uu\.?event.xtype.keydown/',        '7', $txt);
-                $txt = preg_replace('/uu\.?event.xtype.keypress/',       '8', $txt);
-                $txt = preg_replace('/uu\.?event.xtype.keyup/',          '9', $txt);
-                $txt = preg_replace('/uu\.?event.xtype.mouseenter/',     '10', $txt);
-                $txt = preg_replace('/uu\.?event.xtype.mouseleave/',     '11', $txt);
-                $txt = preg_replace('/uu\.?event.xtype.mouseover/',      '12', $txt);
-                $txt = preg_replace('/uu\.?event.xtype.mouseout/',       '13', $txt);
-                $txt = preg_replace('/uu\.?event.xtype.contextmenu/',    '14', $txt);
-                $txt = preg_replace('/uu\.?event.xtype.focus/',          '15', $txt);
-                $txt = preg_replace('/uu\.?event.xtype.blur/',           '16', $txt);
-                $txt = preg_replace('/uu\.?event.xtype.resize/',         '17', $txt);
-                $txt = preg_replace('/uu\.?event.xtype.scroll/',         '18', $txt);
-                $txt = preg_replace('/uu\.?event.xtype.online/',         '50', $txt);
-                $txt = preg_replace('/uu\.?event.xtype.offline/',        '51', $txt);
-                $txt = preg_replace('/uu\.?event.xtype.message/',        '52', $txt);
-                $txt = preg_replace('/uu\.?event.xtype.losecapture/',    '0x102', $txt);
-                $txt = preg_replace('/uu\.?event.xtype.DOMMouseScroll/', '0x104', $txt);
+                $txt = preg_replace('/uu\.?event.xtypes.mousedown/',      '1', $txt);
+                $txt = preg_replace('/uu\.?event.xtypes.mouseup/',        '2', $txt);
+                $txt = preg_replace('/uu\.?event.xtypes.mousemove/',      '3', $txt);
+                $txt = preg_replace('/uu\.?event.xtypes.mousewheel/',     '4', $txt);
+                $txt = preg_replace('/uu\.?event.xtypes.click/',          '5', $txt);
+                $txt = preg_replace('/uu\.?event.xtypes.dblclick/',       '6', $txt);
+                $txt = preg_replace('/uu\.?event.xtypes.keydown/',        '7', $txt);
+                $txt = preg_replace('/uu\.?event.xtypes.keypress/',       '8', $txt);
+                $txt = preg_replace('/uu\.?event.xtypes.keyup/',          '9', $txt);
+                $txt = preg_replace('/uu\.?event.xtypes.mouseenter/',     '10', $txt);
+                $txt = preg_replace('/uu\.?event.xtypes.mouseleave/',     '11', $txt);
+                $txt = preg_replace('/uu\.?event.xtypes.mouseover/',      '12', $txt);
+                $txt = preg_replace('/uu\.?event.xtypes.mouseout/',       '13', $txt);
+                $txt = preg_replace('/uu\.?event.xtypes.contextmenu/',    '14', $txt);
+                $txt = preg_replace('/uu\.?event.xtypes.focus/',          '15', $txt);
+                $txt = preg_replace('/uu\.?event.xtypes.blur/',           '16', $txt);
+                $txt = preg_replace('/uu\.?event.xtypes.resize/',         '17', $txt);
+                $txt = preg_replace('/uu\.?event.xtypes.scroll/',         '18', $txt);
+                $txt = preg_replace('/uu\.?event.xtypes.online/',         '50', $txt);
+                $txt = preg_replace('/uu\.?event.xtypes.offline/',        '51', $txt);
+                $txt = preg_replace('/uu\.?event.xtypes.message/',        '52', $txt);
+                $txt = preg_replace('/uu\.?event.xtypes.losecapture/',    '0x102', $txt);
+                $txt = preg_replace('/uu\.?event.xtypes.DOMMouseScroll/', '0x104', $txt);
 
                 // fakeToArray(...) -> Array.prototype.slice.call(...)
                 if ($mobile) {
