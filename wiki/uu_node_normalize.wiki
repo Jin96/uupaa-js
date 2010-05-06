@@ -6,7 +6,9 @@ uu.node.normalize(_parent_:Node = {{{<body>}}}, _depth_:Number = 1):Number は�
 最大何階層まで辿るかは、_depth_ で指定します。_depth_ に 1 を指定すると、_parent_ の childNode だけが検索対象になります。
 {{{<body>}}}以下の全てのノードを検索対象とする場合は、uu.node.normalize(document.body, 999) のように十分に大きな数を指定します。
 
-== test code ==
+== Test ==
+http://uupaa-js.googlecode.com/svn/trunk/0.8/test/uu.node/normalize.htm
+
 {{{
 <!doctype html><html><head><title></title>
 <script src="../../src/uupaa.js"></script>
@@ -42,9 +44,6 @@ function xwin(uu) {
 </div>
 </body></html>
 }}}
-
-== RUN ==
-http://uupaa-js.googlecode.com/svn/trunk/0.8/test/uu.node/normalize.htm
 
 == 実行結果 ==
   * Firefox3.6
