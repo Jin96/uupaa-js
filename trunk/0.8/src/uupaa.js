@@ -39,7 +39,11 @@ var _versions = detectVersions(0.7),
     // --- HTML5: EMBEDDING CUSTOM NON-VISIBLE DATA ---
     DATA_UUGUID = "data-uuguid",
     DATA_UUEVENT = "data-uuevent",
-    DATA_UUOPACITY = "data-uuopacity";
+//{{{!mb
+    DATA_UUOPACITY = "data-uuopacity",
+//}}}!mb
+    // --- short code ---
+    PROTOTYPE = "prototype";
 
 // --- ENHANCE ---
 doc.head || (doc.head = uutag("head")[0]); // document.head = <head> via WebKit
@@ -49,6 +53,7 @@ uu = uumix(uufactory, {             // uu(expression:Jam/Node/NodeArray/String/w
                                     //  [1][Class factory]   uu("MyClass", arg1, arg2) -> new uu.Clas.MyClass(arg1, arg2)
                                     //  [2][NodeSet factory] uu("div>ul>li", <body>) -> Jam
     load:           uuload,         // uu.load(url:String):AjaxResultHash
+    snippet:        uusnippet,      // uu.snippet(id:String, arg:Hash/Array):String/Mix
     habits:         _habits,        // uu.habits - Hash: detected browser habits informations
     ver:            _versions,      // uu.ver - Hash: detected version and plugin informations
     ie:             _versions.ie,
@@ -99,7 +104,7 @@ uu = uumix(uufactory, {             // uu(expression:Jam/Node/NodeArray/String/w
         has:        uuhas,          //    uu.array.has(source:Array, search:Array):Boolean
         nth:        uunth,          //    uu.array.nth(source:Array, index:Number):Array
         size:       uusize,         //   uu.array.size(source:Array):Number
-        sort:       uusort,         //   uu.array.sort(source:Array, method:String/Function = "0-9"):Array
+        sort:       uusort,         //   uu.array.sort(source:Array, method:String/Function = "A-Z"):Array
         clean:      uuclean,        //  uu.array.clean(source:Array):Array
         clone:      uuclone,        //  uu.array.clone(source:Array):Array
         toHash:     uutohash,       // uu.array.toHash(key:Array, value:Array/Mix, toNumber:Boolean = false):Hash
@@ -209,12 +214,11 @@ uu = uumix(uufactory, {             // uu(expression:Jam/Node/NodeArray/String/w
                                     //  [4][find lastSibling]  uu.node.find(document.head, "$") -> <body>
                                     //  [5][find firstChild]   uu.node.find(document.body, ".^") -> <h1> in <body><h1></h1><div></div></body>
                                     //  [6][find lastChild]    uu.node.find(document.body, ".$") -> <div> in <body><h1></h1><div></div></body>
-        path:       uunodepath,     // uu.node.path(node:Node):String
         swap:       uunodeswap,     // uu.node.swap(swapin:Node, swapout:Node):Node (swapout node)
         wrap:       uunodewrap,     // uu.node.wrap(innerNode:Node, outerNode:Node):Node (innerNode)
         clear:      uunodeclear,    // uu.node.clear(parent:Node):Node
-        clone:      uunodeclone,    // uu.node.clone(node:Node):Node
         count:      uunodecount,    // uu.node.count(parent:Node):Number, child element count
+        xpath:      uunodexpath,    // uu.node.xpath(elementNode:Node):String
         remove:     uunoderemove,   // uu.node.remove(node:Node):Node
         indexOf:    uunodeindexof,  // uu.node.indexOf(node:Node):Number
         // --- nodeType alias ---
@@ -318,7 +322,7 @@ uu.config.baseDir|| (uu.config.baseDir =
     }));
 
 // --- MessagePump class ---
-MessagePump.prototype = {
+MessagePump[PROTOTYPE] = {
     send:           uumsgsend,      // MessagePump.send(address:Array/Mix, message:String, param:Mix = void):Array/Mix
                                     //  [1][multicast] MessagePump.send([instance, ...], "hello") -> ["world!", ...]
                                     //  [2][unicast  ] MessagePump.send(instance, "hello") -> ["world!"]
@@ -334,51 +338,53 @@ MessagePump.prototype = {
 uu.msg = new MessagePump();         // uu.msg - MessagePump instance
 
 // --- ECMAScript-262 5th ---
-isArray || (Array.isArray = isArray = _isArray);
+isArray || (Array.isArray = isArray = function(search) { // @param Mix: search
+                                                         // @return Boolean:
+    return toString.call(search) === "[object Array]";
+});
 
+uumix(Array[PROTOTYPE], {
 //{{{!mb
-uumix(Array.prototype, {
     map:            arraymap,       //         map(evaluator:Function, that:this = void):Array
     some:           arraysome,      //        some(evaluator:Function, that:this = void):Boolean
     every:          arrayevery,     //       every(evaluator:Function, that:this = void):Boolean
     filter:         arrayfilter,    //      filter(evaluator:Function, that:this = void):Array
     forEach:        arrayforeach,   //     forEach(evaluator:Function, that:this = void)
     indexOf:        arrayindexof,   //     indexOf(search:Mix, fromIndex:Number = 0):Number
-    lastIndexOf:    arraylastindexof// lastIndexOf(search:Mix, fromIndex:Number = this.length):Number
-}, 0, 0);
+    lastIndexOf:                    // lastIndexOf(search:Mix, fromIndex:Number = this.length):Number
+                    arraylastindexof,
 //}}}!mb
-
-uumix(Array.prototype, {
     reduce:         arrayreduce,    //      reduce(evaluator:Function, initialValue:Mix = void):Mix
-    reduceRight:    arrayreduceright// reduceRight(evaluator:Function, initialValue:Mix = void):Mix
+    reduceRight:                    // reduceRight(evaluator:Function, initialValue:Mix = void):Mix
+                    arrayreduceright
 }, 0, 0);
 
-uumix(Boolean.prototype, {
+uumix(Boolean[PROTOTYPE], {
     toJSON:         numbertojson    //      toJSON():String
 }, 0, 0);
 
-uumix(Date.prototype, {
+uumix(Date[PROTOTYPE], {
     toISOString:    datetoisostring,// toISOString():String
     toJSON:         datetoisostring //      toJSON():String
 }, 0, 0);
 
-uumix(Number.prototype, {
+uumix(Number[PROTOTYPE], {
     toJSON:         numbertojson    //      toJSON():String
 }, 0, 0);
 
-uumix(String.prototype, {
+uumix(String[PROTOTYPE], {
     trim:           stringtrim,     //        trim():String
     toJSON:         stringtojson    //      toJSON():String
 }, 0, 0);
 
 //{{{!mb
-uu.ver.gecko && !win.HTMLElement.prototype.innerText &&
+uu.ver.gecko && !win.HTMLElement[PROTOTYPE].innerText &&
 (function(proto) {
     proto.__defineGetter__("innerText", innertextgetter);
     proto.__defineSetter__("innerText", innertextsetter);
     proto.__defineGetter__("outerHTML", outerhtmlgetter);
     proto.__defineSetter__("outerHTML", outerhtmlsetter);
-})(win.HTMLElement.prototype);
+})(win.HTMLElement[PROTOTYPE]);
 //}}}!mb
 
 // ===================================================================
@@ -421,12 +427,73 @@ function uuload(url) { // @param String: url
     } catch (err) {}
 
     return {
-        ok: ok, url: url, xhr: xhr || {}, guid: uuguid(), status: status,
+        ok: ok,
+        url: url,
+        xhr: xhr || {},
+        guid: uuguid(),
+        status: status,
         isXMLContent: function() {
             return /xml/i.test(this.xhr.getResponseHeader("Content-Type") || "");
         }
     };
 }
+
+// --- code snippet ---
+// uu.snippet - evaluate snippet
+function uusnippet(id,    // @param String: snippet id. <script id="...">
+                   arg) { // @param Mix(= void): arg
+                          // @return String/Mix:
+    function normalize(str) {
+        return str.replace(/("|')/g, "\\$1").replace(/\n/g, "\\n");
+    }
+
+    function toBrace(all, ident) {
+        return ident.indexOf("arg.") ? '{(' + ident + ')}'  // "{{ident}}"     -> "{(ident)}"
+                                     : '"+' + ident + '+"'; // "{{arg.ident}}" -> "+ident+"
+    }
+
+    function toText(all, match) {
+        return '"' + normalize(uutrim(match)).replace(dualBrace, toBrace) + '"';
+    }
+
+    function each(all, match) {
+        match = normalize(match.replace(/^\s+|\s+$/gm, "")).
+                replace(eachBlock, toEachBlock).
+                replace(dualBrace, toBrace);
+        return 'uu.node.bulk("' + match + '");';
+    }
+
+    function toEachBlock(all, hash, block) {
+        return '" + uu.snippet.each(' + hash + ',"' +
+                    block.replace(dualBrace, toBrace) + '") + "';
+    }
+
+    var js = uusnippet.js[id] || "", node, // {
+        dualBrace = /\{\{([^\}]+)\}\}/g,
+        eachBlock = /<each ([^>]+)>([\s\S]*?)<\/each>/;
+
+    if (!js) {
+        node = uu.id(id);
+        if (node) {
+            uusnippet.js[id] = js = node.text.replace(/\r\n|\r|\n/g, "\n").
+                    replace(/<text>\n([\s\S]*?)^<\/text>$/gm, toText). // <text>...</text>
+                    replace(/<>\n([\s\S]*?)^<\/>$/gm, each).           // <>...</>
+                    replace(/^\s*\n|\n$/g, "");
+        }
+    }
+    return js ? (new Function("arg", js))(arg) : "";
+}
+uusnippet.js = {}; // { id: JavaScriptExpression, ... }
+uusnippet.each = function(hash, fragment) { // (
+    var i = 0, iz = hash.length, block = [], eachBrace = /\{\(([^\)]+)\)\}/g;
+
+    for (; i < iz; ++i) {
+        block.push(fragment.replace(eachBrace, function(all, ident) {
+            return hash[ident][i];
+        }));
+    }
+    return block.join("");
+};
 
 // --- type ---
 
@@ -502,12 +569,6 @@ function isFunction(search) { // @param Mix: search
     return toString.call(search) === "[object Function]";
 }
 
-// Array.isArray
-function _isArray(search) { // @param Mix: search
-                            // @return Boolean:
-    return toString.call(search) === "[object Array]";
-}
-
 // --- hash / array ---
 
 // [1][supply args]         uu.arg({ a: 1 }, { b: 2 }) -> { a: 1, b: 2 }
@@ -531,7 +592,7 @@ function uumix(base,       // @param Hash: mixin base
                            // @return Hash: base
     var i;
 
-    if (override === void 0 || override) { // [1][3]
+    if (override === i || override) { // [1][3]
         for (i in flavor) {
             base[i] = flavor[i];
         }
@@ -675,8 +736,8 @@ function uuhas(source,   // @param Hash/Array: source
 function uunth(source,  // @param Hash/Array: source
                index) { // @param Number: index
                         // @return Array: [key, value]
-                        //                or [void, void] (not found)
-    var i, j = 0;
+                        //                or [undefined, undefined] (not found)
+    var i, j = 0, undef;
 
     if (isArray(source)) {
         if (i in source) {
@@ -689,7 +750,7 @@ function uunth(source,  // @param Hash/Array: source
             }
         }
     }
-    return [void 0, void 0];
+    return [undef, undef];
 }
 
 // [1][Hash.length]         uu.size({ a: 1, b: 2 }) -> 2
@@ -724,19 +785,19 @@ function uuindexof(source,   // @param Hash: source
     return void 0;
 }
 
-// [1][numeric sort 0-9]    uu.sort([0,1,2], "0-9")   -> [0, 1, 2]
-// [2][numeric sort 9-0]    uu.sort([0,1,2], "9-0")   -> [2, 1, 0]
-// [3][ascii sort a-z]      uu.sort(["a","z"], "A-Z") -> ["a", "z"]
-// [4][ascii sort a-z]      uu.sort(["a","z"], "Z-A") -> ["z", "a"]
+// [1][ascii sort a-z]      uu.sort(["a","z"], "A-Z") -> ["a", "z"]
+// [2][ascii sort a-z]      uu.sort(["a","z"], "Z-A") -> ["z", "a"]
+// [3][numeric sort 0-9]    uu.sort([0,1,2], "0-9")   -> [0, 1, 2]
+// [4][numeric sort 9-0]    uu.sort([0,1,2], "9-0")   -> [2, 1, 0]
 
 // uu.sort - sort array
 function uusort(source,   // @param Array: source
-                method) { // @param String/Function(= "0-9"): method
+                method) { // @param String/Function(= "A-Z"): method
                           //                   sort method or callback-function
                           // @return Array:
     // 0x1 = numeric sort
     // 0x2 = reverse
-    var r = { "0-9": 1, "9-0": 3, "A-Z": 0, "Z-A": 2 }[method || "0-9"];
+    var r = { "A-Z": 0, "Z-A": 2, "0-9": 1, "9-0": 3 }[method] || 0;
 
     (r & 1) ? source.sort(function(a, b) { return a - b; })
             : source.sort();
@@ -921,13 +982,13 @@ function uucss(node,    // @param Node:
                key,     // @param Boolean/String/Hash(= void): key
                value) { // @param String(= void): value
                         // @return Hash/String/Node:
-    var style, informal, formal, fix, care;
+    var style, informal, formal, fix, care, getStyle = win.getComputedStyle;
 
-    if (key === void 0) { // [1] uu.css(node)
+    if (key === care) { // [1] uu.css(node)
 //{{{!mb
-        if (_habits.computedStyle) {
+        if (getStyle) {
 //}}}!mb
-            return win.getComputedStyle(node, null);
+            return getStyle(node, null);
 //{{{!mb
         }
         return node.currentStyle || {};
@@ -936,9 +997,9 @@ function uucss(node,    // @param Node:
 
     if (key === true) { // [2] uu.css(node, true)
 //{{{!mb
-        if (_habits.computedStyle) {
+        if (getStyle) {
 //}}}!mb
-            return win.getComputedStyle(node, null);
+            return getStyle(node, null);
 //{{{!mb
         }
         return !node.currentStyle ? {}
@@ -951,9 +1012,9 @@ function uucss(node,    // @param Node:
         key = uuhash(key, value);
     } else if (typeof key === "string") { // [3] uu.css(node, key)
 //{{{!mb
-        if (_habits.computedStyle) {
+        if (getStyle) {
 //}}}!mb
-            return win.getComputedStyle(node, null)[fix[key] || key] || "";
+            return getStyle(node, null)[fix[key] || key] || "";
 //{{{!mb
         }
         return (node.currentStyle || {})[fix[key] || key] || "";
@@ -1016,14 +1077,13 @@ function setOpacity(node,      // @param Node:
 //}}}!mb
 
     // relative
-    if (typeof opacity === "string") {
+    if (typeof opacity === "string") { // "+0.1" or "-0.1"
         opacity = getOpacity(node) + parseFloat(opacity);
     }
 
     // normalize
-    opacity = (opacity > 0.999) ? 1
-            : (opacity < 0.001) ? 0 : opacity;
-    style.opacity = opacity;
+    style.opacity = opacity = (opacity > 0.999) ? 1
+                            : (opacity < 0.001) ? 0 : opacity;
 
 //{{{!mb
     if (!_habits.opacity) {
@@ -1048,7 +1108,7 @@ function uutopixel(node,   // @param Node: context
                    prop) { // @param String(= "left"): property
     prop = prop || "left";
 
-    var fontSize, ratio, judge = uutopixel.judge;
+    var fontSize, ratio, judge = uutopixel.judge, _float = parseFloat;
 
     if (typeof value === "number") {
         return value;
@@ -1058,49 +1118,56 @@ function uutopixel(node,   // @param Node: context
     if (judge.px.test(value)) {
         return parseInt(value) || 0;
     }
-    if (value === "auto" && uutopixel.autoIsZero.test(prop)) {
-        return 0;
+    if (value === "auto") {
+        if (!prop.indexOf("bor") || !prop.indexOf("pad")) { // /^border|^padding/g
+            return 0;
+        }
     }
     if (!quick) {
         return uutopixel.calc(node, prop, value);
     }
     if (judge.pt.test(value)) {
-        return (parseFloat(value) * 4 / 3) | 0; // 12pt * 1.333 = 16px
+        return (_float(value) * 4 / 3) | 0; // 12pt * 1.333 = 16px
     } else if (judge.em.test(value)) {
         fontSize = uucss(node).fontSize;
         ratio = judge.pt.test(fontSize) ? 4 / 3 : 1;
-        return (parseFloat(value) * parseFloat(fontSize) * ratio) | 0;
+        return (_float(value) * _float(fontSize) * ratio) | 0;
     }
     return parseInt(value) || 0;
 }
 uutopixel.calc = _calcPixel;
 uutopixel.judge = { px: /px$/, pt: /pt$/, em: /em$/ };
-uutopixel.autoIsZero = /^border|^padding/g;
 
 // inner - convert unit
 function _calcPixel(node,    // @param Node:
                     prop,    // @param String: property, "left", "width", ...
                     value) { // @param CSSUnitString: "10em", "10pt", "10px", "auto"
                              // @return Number: pixel value
-    var style = node.style, mem = [style.left, 0, 0]; // [left, position, display]
+    var style = node.style, mem = [style.left, 0, 0], // [left, position, display]
+        display = "display",
+        position = "position",
+        important = "important",
+        setProperty = "setProperty",
+        removeProperty = "removeProperty",
+        getPropertyValue = "getPropertyValue";
 
     if (uu.webkit) {
-        mem[1] = style.getPropertyValue("position");
-        mem[2] = style.getPropertyValue("display");
-        style.setProperty("position", "absolute", "important");
-        style.setProperty("display",  "block",    "important");
+        mem[1] = style[getPropertyValue](position);
+        mem[2] = style[getPropertyValue](display);
+        style[setProperty](position, "absolute", important);
+        style[setProperty](display,  "block",    important);
     }
-    style.setProperty(prop, value, "important");
+    style[setProperty](prop, value, important);
     // get pixel
     value = parseInt(win.getComputedStyle(node, null).left);
     // restore
-    style.removeProperty(prop);
-    style.setProperty(prop, mem[0], "");
+    style[removeProperty](prop);
+    style[setProperty](prop, mem[0], "");
     if (uu.webkit) {
-        style.removeProperty("position");
-        style.removeProperty("display");
-        style.setProperty("position", mem[1], "");
-        style.setProperty("display",  mem[2], "");
+        style[removeProperty](position);
+        style[removeProperty](display);
+        style[setProperty](position, mem[1], "");
+        style[setProperty](display,  mem[2], "");
     }
     return value || 0;
 }
@@ -1129,7 +1196,7 @@ function _calcPixelIE(node,    // @param Node:
     return value || 0;
 }
 
-if (!_habits.computedStyle) {
+if (!win.getComputedStyle) {
     uutopixel.calc = _calcPixelIE;
 }
 
@@ -1139,12 +1206,14 @@ function _getComputedStyleIE(node) { // @param Node:
     // http://d.hatena.ne.jp/uupaa/20091212
     var rv, rect, ut, v, w, x, i = -1, mem,
         style = node.style,
+        _parseInt = parseInt,
+        _parseFloat = parseFloat,
         currentStyle = node.currentStyle,
         runtimeStyle = node.runtimeStyle,
         UNITS = { m: 1, t: 2, "%": 3, o: 3 }, // em, pt, %, auto,
         RECTANGLE = { top: 1, left: 2, width: 3, height: 4 },
         fontSize = currentStyle.fontSize,
-        em = parseFloat(fontSize) * (/pt$/.test(fontSize) ? 4 / 3 : 1),
+        em = _parseFloat(fontSize) * (/pt$/.test(fontSize) ? 4 / 3 : 1),
         boxProperties = _getComputedStyleIE.boxs,
         cache = { "0px": "0px", "1px": "1px", "2px": "2px", "5px": "5px",
                   thin: "1px", medium: "3px",
@@ -1158,8 +1227,8 @@ function _getComputedStyleIE(node) { // @param Node:
         if (!(v in cache)) {
             x = v;
             switch (ut = UNITS[v.slice(-1)]) {
-            case 1: x = parseFloat(v) * em; break;    // "12em"
-            case 2: x = parseFloat(v) * 4 / 3; break; // "12pt"
+            case 1: x = _parseFloat(v) * em; break;    // "12em"
+            case 2: x = _parseFloat(v) * 4 / 3; break; // "12pt"
             case 3: // %, auto
                     mem = [style.left, runtimeStyle.left];
                     runtimeStyle.left = currentStyle.left;
@@ -1176,26 +1245,26 @@ function _getComputedStyleIE(node) { // @param Node:
     for (w in RECTANGLE) {
         v = currentStyle[w];
         switch (ut = UNITS[v.slice(-1)]) {
-        case 1: v = parseFloat(v) * em; break;    // "12em"
-        case 2: v = parseFloat(v) * 4 / 3; break; // "12pt"
+        case 1: v = _parseFloat(v) * em; break;    // "12em"
+        case 2: v = _parseFloat(v) * 4 / 3; break; // "12pt"
         case 3: // %, auto
             switch (RECTANGLE[w]) {
             case 1: v = node.offsetTop; break;  // style.top
             case 2: v = node.offsetLeft; break; // style.left
             case 3: rect || (rect = node.getBoundingClientRect());
                     v = (node.offsetWidth  || rect.right - rect.left) // style.width
-                      - parseInt(rv.borderLeftWidth)
-                      - parseInt(rv.borderRightWidth)
-                      - parseInt(rv.paddingLeft)
-                      - parseInt(rv.paddingRight);
+                      - _parseInt(rv.borderLeftWidth)
+                      - _parseInt(rv.borderRightWidth)
+                      - _parseInt(rv.paddingLeft)
+                      - _parseInt(rv.paddingRight);
                     v = v > 0 ? v : 0;
                     break;
             case 4: rect || (rect = node.getBoundingClientRect());
                     v = (node.offsetHeight || rect.bottom - rect.top) // style.height
-                      - parseInt(rv.borderTopWidth)
-                      - parseInt(rv.borderBottomWidth)
-                      - parseInt(rv.paddingTop)
-                      - parseInt(rv.paddingBottom);
+                      - _parseInt(rv.borderTopWidth)
+                      - _parseInt(rv.borderBottomWidth)
+                      - _parseInt(rv.paddingTop)
+                      - _parseInt(rv.paddingBottom);
                     v = v > 0 ? v : 0;
             }
         }
@@ -1275,7 +1344,7 @@ function uuklasstoggle(node,         // @param Node:
                                          : uuklassadd)(node, classNames);
 }
 
-// --- oop ---
+// --- OOP ---
 // uu.Class - create a generic class
 function uuclass(className, // @param String: "Class"
                             //             or "Class : SuperClass"  (inherit)
@@ -1299,19 +1368,19 @@ function uuclass(className, // @param String: "Class"
         Super && Super.init && Super.init.apply(that, arguments);
                   that.init &&  that.init.apply(that, arguments);
     };
-    uuclass[Class].prototype = protoIsFunction ? { init: proto }
-                                               : proto || {};
+    uuclass[Class][PROTOTYPE] = protoIsFunction ? { init: proto }
+                                                : proto || {};
 
     if (Super && proto && !protoIsFunction) { // [2]
         tmp = function() {};
-        tmp.prototype = uu.Class[Super].prototype;
-        classPrototype = uuclass[Class].prototype = new tmp;
+        tmp[PROTOTYPE] = uu.Class[Super][PROTOTYPE];
+        classPrototype = uuclass[Class][PROTOTYPE] = new tmp;
 
         for (i in proto) {
             classPrototype[i] = proto[i];
         }
         classPrototype.constructor = uuclass[Class];
-        classPrototype.superClass = uu.Class[Super].prototype;
+        classPrototype.superClass = uu.Class[Super][PROTOTYPE];
         classPrototype.superMethod = superMethod;
     }
 
@@ -1337,8 +1406,8 @@ function uuclasssingleton(className, // @param String: class name
         }
         return self.instance || (self.instance = that);
     };
-    uuclass[className].prototype = proto && isFunction(proto) ? { init: proto }
-                                                              : proto || {};
+    uuclass[className][PROTOTYPE] = proto && isFunction(proto) ? { init: proto }
+                                                               : proto || {};
 }
 
 // --- message pump ---
@@ -1416,7 +1485,7 @@ function uuevent(node,        // @param Node:
         if (!event.xtarget) {
             var target = event.target || event.srcElement || doc;
 
-            event.xtype = (uuevent.xtype[event.type] || 0) & 255;
+            event.xtype = (uuevent.xtypes[event.type] || 0) & 255;
             event.xbutton = event.button || 0;
             event.xtarget = (target.nodeType === uu.node.TEXT_NODE)
                           ? target.parentNode : target;
@@ -1426,16 +1495,16 @@ function uuevent(node,        // @param Node:
                     event.currentTarget = node;
 
                     switch (event.xtype) {
-                    case uuevent.xtype.mousedown:
-                    case uuevent.xtype.mouseup:
+                    case uuevent.xtypes.mousedown:
+                    case uuevent.xtypes.mouseup:
                         event.xbutton = (event.button & 1) ? 0
                                       : (event.button & 2) ? 2 : 1;
                         break;
-                    case uuevent.xtype.contextmenu:
+                    case uuevent.xtypes.contextmenu:
                         event.xbutton = 2;
                         break;
-                    case uuevent.xtype.mouseover:
-                    case uuevent.xtype.mouseout:
+                    case uuevent.xtypes.mouseover:
+                    case uuevent.xtypes.mouseout:
                         event.relatedTarget = target === event.fromElement
                                             ? event.toElement
                                             : event.fromElement;
@@ -1455,7 +1524,7 @@ function uuevent(node,        // @param Node:
                 }
             }
 //}}}!mb
-            if (event.xtype === uuevent.xtype.mousewheel) {
+            if (event.xtype === uuevent.xtypes.mousewheel) {
                 event.xwheel = (event.detail ? (event.detail / 3)
                                              : (event.wheelDelta / -120)) | 0;
             }
@@ -1476,7 +1545,7 @@ function uuevent(node,        // @param Node:
 
     var eventTypeExArray = eventTypeEx.split(","),
         eventData = node[DATA_UUEVENT],
-        ex, token, bound,
+        ex, token, bound, types = "types",
         eventType, capture, closure, handler, i = -1, pos,
         isInstance = false;
 
@@ -1498,7 +1567,7 @@ function uuevent(node,        // @param Node:
         token = uuevent.parse.exec(ex);
         eventType = token[2]; // "click"
         capture   = token[3]; // "+"
-        bound     = eventData["types"].indexOf("," + ex + ",") >= 0;
+        bound     = eventData[types].indexOf("," + ex + ",") >= 0;
 
 //{{{!mb
         // IE mouse capture [IE6][IE7][IE8]
@@ -1524,8 +1593,8 @@ function uuevent(node,        // @param Node:
 
                         // ",dblclick," <- ",namespace.click+,dblclick,".
                         //                      replace(",namespace.click+,", ",")
-                        eventData["types"] =
-                            eventData["types"].replace("," + ex + ",", ",");
+                        eventData[types] =
+                            eventData[types].replace("," + ex + ",", ",");
                     }
                     uueventdetach(node, eventType, closure, capture);
                 }
@@ -1533,7 +1602,7 @@ function uuevent(node,        // @param Node:
         } else {
             // ",namespace.click+,dblclick," <- ",namespace.click+," + "dblclick" + ,"
             if (!bound) {
-                eventData["types"] += ex + ",";
+                eventData[types] += ex + ",";
                 eventData[ex] = [];
             }
             eventData[ex].push(closure);
@@ -1544,19 +1613,26 @@ function uuevent(node,        // @param Node:
     return node;
 }
 uuevent.parse = /^(?:(\w+)\.)?(\w+)(\+)?$/; // ^[NameSpace.]EvntType[Capture]$
-uuevent.xtype = {
+uuevent.xtypes = {
+//{{{!mb
+    // Cross Browser Event Bits
+    losecapture: 0x102, // [IE]
+    DOMMouseScroll: 0x104, // [GECKO]
+//}}}!mb
+
+    // DOM Level2 Events
     mousedown: 1, mouseup: 2, mousemove: 3, mousewheel: 4, click: 5,
     dblclick: 6, keydown: 7, keypress: 8, keyup: 9, mouseenter: 10,
     mouseleave: 11, mouseover: 12, mouseout: 13, contextmenu: 14,
     focus: 15, blur: 16, resize: 17, scroll: 18,
-    // iPhone events
+
+    // iPhone Events
     touchstart: 32, touchend: 33, touchmove: 34, touchcancel: 35,
     gesturestart: 36, gesturechange: 37, gestureend: 38,
     orientationchange: 39,
-    // HTML5 events
-    online: 50, offline: 51, message: 52,
-    // Cross Browser
-    losecapture: 0x102, DOMMouseScroll: 0x104
+
+    // HTML5 Events
+    online: 50, offline: 51, message: 52
 };
 
 // uu.event.getKeyCode - get key and keyCode (cross browse keyCode)
@@ -1707,8 +1783,12 @@ function uueventattach(node,         // @param Node:
     }
 //}}}!mb
 }
-uueventattach._FIX = uu.gecko ? { mousewheel: "DOMMouseScroll" } :
-                     uu.opera ? { contextmenu: "mousedown" } : {};
+uueventattach._FIX =
+//{{{!mb
+    uu.gecko ? { mousewheel: "DOMMouseScroll" } :
+    uu.opera ? { contextmenu: "mousedown" } :
+//}}}!mb
+    {};
 
 // uu.event.detach - detach event - Raw Level API wrapper
 function uueventdetach(node,         // @param Node:
@@ -1764,15 +1844,16 @@ function uunodeadd(source,     // @param Node/DocumentFragment/HTMLFragment/TagN
              : source.nodeType ? source                  // [3][5] uu.node.add(Node or DocumentFragment)
              : !source.indexOf("<") ? uunodebulk(source, context) // [4] uu.node.add(HTMLFragmentString)
              : doc.createElement(source),                // [2] uu.node.add("p")
+        firstChild = "firstChild",
         reference = null,
-        rv = (node.nodeType === 11) ? node.firstChild : node; // 11: DOCUMENT_FRAGMENT_NODE
+        rv = (node.nodeType === 11) ? node[firstChild] : node; // 11: DOCUMENT_FRAGMENT_NODE
 
     switch (uunodefind.pos[position] || 8) {
-    case 1: reference = context.parentNode.firstChild;
+    case 1: reference = context.parentNode[firstChild];
     case 2: reference || (reference = context);
     case 3: reference || (reference = context.nextSibling);
     case 4: context.parentNode.insertBefore(node, reference); break;
-    case 5: reference = context.firstChild;
+    case 5: reference = context[firstChild];
     case 8: context.insertBefore(node, reference);
     }
     return rv;
@@ -1785,7 +1866,10 @@ function uunodefind(parent,     // @param Node: parent node
     parent = parent || doc.body;
 
     var rv, num = uunodefind.pos[position] || 8,
-        iters = uunodefind.iters[num > 4 ? num - 4 : num], iter;
+//{{{!mb
+        iter,
+//}}}!mb
+        iters = uunodefind.iters[num > 4 ? num - 4 : num];
 
 //{{{!mb
     if (_habits.traversal) {
@@ -1810,8 +1894,8 @@ function uunodefind(parent,     // @param Node: parent node
 uunodefind.pos = { "^": 1, "-": 2, "+": 3, "$": 4, ".^": 5, ".$": 8 };
 uunodefind.iters = {
     1: ["firstElementChild",      "nextSibling",     "firstChild"], // FIRST_SIBLING, FIRST_CHILD
-    2: ["previousElementSibling", "previousSibling", ""],           // PREV_SIBLING
-    3: ["nextElementSibling",     "nextSibling",     ""],           // NEXT_SIBLING
+    2: ["previousElementSibling", "previousSibling"],               // PREV_SIBLING
+    3: ["nextElementSibling",     "nextSibling"],                   // NEXT_SIBLING
     4: ["lastElementChild",       "previousSibling", "lastChild"]   // LAST_SIBLING, LAST_CHILD
 };
 
@@ -1868,17 +1952,10 @@ function uunodebulk(source,    // @param Node/HTMLFragment: source
     return rv;
 }
 
-// uu.nod.path - get node path (xpath)
-function uunodepath(node) { // @param Node: ELEMENT_NODE
-                            // @return XPathString: "/html[1]/body[1]/div[5]"
-    if (!node.parentNode) {
-        return "";
-    }
-    if (node.nodeType !== uu.node.ELEMENT_NODE) {
-        node = node.parentNode;
-    }
-
-    var rv = [], n = node;
+// uu.nod.xpath - get node xpath
+function uunodexpath(elementNode) { // @param Node: ELEMENT_NODE
+                                    // @return XPathString: "/html[1]/body[1]/div[5]"
+    var rv = [], n = elementNode;
 
     while (n && n.nodeType === uu.node.ELEMENT_NODE) {
         rv.push(n.tagName.toLowerCase() +
@@ -1954,59 +2031,18 @@ function uunodeclear(parent) { // @param Node: parent node
         uunodeidremove(v);
         uueventunbind(v);
     }
-    rv = []; // gc
     while (parent.lastChild) {
         parent.removeChild(parent.lastChild);
     }
     return parent;
 }
 
-// uu.node.clone - clone node and clone attached events
-function uunodeclone(node) { // @param Node:
-                             // @return Node: cloned node
-    // clone  node["data-uu***"]
-    function copyNodeData(sourceNode, clonedNode) {
-        var nodeArray = sourceNode.attributes, attr, i = -1;
-
-        while ( (attr = nodeArray[++i]) ) {
-            if (!attr.name.indexOf("data-uu")) {
-                clonedNode[attr.name] = attr.value;
-            }
-        }
-        uunodeid.db[clonedNode[DATA_UUGUID] = ++uunodeid.num] = clonedNode;
-    }
-
-    function drillDown(sourceNode, clonedNode) {
-        var source = sourceNode.firstChild,
-            cloned = clonedNode.firstChild;
-
-        if (sourceNode.nodeType === uu.node.ELEMENT_NODE) {
-            copyNodeData(sourceNode, clonedNode);
-
-            for (; source; source = source.nextSibling,
-                           cloned = cloned.nextSibling) {
-                if (source.nodeType === uu.node.ELEMENT_NODE) {
-                    copyNodeData(source, cloned);
-                }
-            }
-        }
-    }
-
-    var cloneNode = node.cloneNode(true);
-
-    drillDown(node, cloneNode);
-
-    return cloneNode;
-}
-
 // uu.node.remove - remove node
 function uunoderemove(node) { // @param Node:
                               // @return Node: node
-    if (node && node.parentNode) {
-        uunodeidremove(node);
-        return node.parentNode.removeChild(node);
-    }
-    return node;
+    return node && node.parentNode
+                ? uunodeidremove(node.parentNode.removeChild(node))
+                : node;
 }
 
 // uu.node.count - child element count
@@ -2031,7 +2067,7 @@ function uunodecount(parent) { // @param Node: parentNode
 // uu.node.indexOf - find ELEMENT_NODE index
 function uunodeindexof(node,          // @param Node: ELEMENT_NODE
                        __tagName__) { // @hidden String: TagName
-                                      // @return Number: 0+ or -1(not found)
+                                      // @return Number: 0~ or -1(not found)
     var rv = 0, n = node.parentNode.firstChild;
 
     for (; n; n = n.nextSibling) {
@@ -2073,7 +2109,11 @@ function uutext(node,   // @param Node/String: node or text string
         return doc.createTextNode(node);
     }
     if (text === void 0) {
-        return node[uu.gecko ? "textContent" : "innerText"];
+        return node[
+//{{{!mb
+                    uu.gecko ? "textContent" :
+//}}}!mb
+                               "innerText"];
     }
     uunodeadd(doc.createTextNode(isArray(text) ? text.join("") : text),
               uunodeclear(node));
@@ -2095,7 +2135,7 @@ function uuquery(expression, // @param String: expression, "css > expr"
     }
     return uu.query.selectorAll(expression, context); // depend: uu.query
 }
-uuquery.ngword = /(:(a|b|co|dig|first-l|li|mom|ne|p|sc|t|v))|!=|\/=|<=|>=|&=|x7b/;
+uuquery.ngword = /(?:\:(a|b|co|dig|first-l|li|mom|ne|p|sc|t|v))|!=|\/=|<=|>=|&=|x7b/;
 // uu.query(":a***");
 // uu.query(":b***");
 // uu.query(":co***");
@@ -2546,7 +2586,7 @@ function uuviewportsize() { // @return Hash: { innerWidth, innerHeight,
 
 // uu.viewport.getOrientation - get viewport orientation (for iPhone)
 function getOrientation() { // @return Number: 90(<|), 0(|A|), -90(|>), -180(|V|)
-    return win.orientation;
+    return win.orientation || 0;
 }
 
 // uu.guid - get unique number
@@ -2894,26 +2934,36 @@ function _camelhash(rv, props) {
     function _camelize(m, c) {
         return c.toUpperCase();
     }
+
+//{{{!mb
     function _decamelize(m, c, C) {
         return c + "-" + C.toLowerCase();
     }
-    var k, v, CAMELIZE = /-([a-z])/g, DECAMELIZE = /([a-z])([A-Z])/g;
+//}}}!mb
+
+    var k, v,
+//{{{!mb
+        DECAMELIZE = /([a-z])([A-Z])/g,
+//}}}!mb
+        CAMELIZE = /-([a-z])/g;
 
     for (k in props) {
         if (typeof props[k] === "string") {
+//{{{!mb
             if (uu.webkit) {
+//}}}!mb
                 v = k = props.item(k); // k = "-webkit-...", "z-index"
                 k.indexOf("-") >= 0 && (v = k.replace(CAMELIZE, _camelize));
                 (k !== v) && (rv[k] = v);
+//{{{!mb
             } else {
                 v = ((uu.gecko && !k.indexOf("Moz")) ? "-moz" + k.slice(3) :
-//{{{!mb
                      (uu.ie    && !k.indexOf("ms"))  ? "-ms"  + k.slice(2) :
-//}}}!mb
                      (uu.opera && !k.indexOf("O"))   ? "-o"   + k.slice(1) : k).
                     replace(DECAMELIZE, _decamelize);
                 (k !== v) && (rv[v] = k);
             }
+//}}}!mb
         }
     }
     return rv;
@@ -3049,7 +3099,7 @@ function detectVersions(libraryVersion) { // @param Number: Library version
 function fakeToArray(fakeArray) { // @param FakeArray: NodeList, Arguments
                                   // @return Array:
     if (_habits.slice) {
-        return Array.prototype.slice.call(fakeArray);
+        return Array[PROTOTYPE].slice.call(fakeArray);
     }
 
     var rv = [], i = 0, iz = fakeArray.length;
@@ -3076,8 +3126,7 @@ function detectHabits() {
             tamperedURL: x,     // node.href tampered [IE6][IE7][IE8]
             transparent: o,     // border-color:transparent ready?
             syntaxSugar: x,     // getAttribute("class") syntax sugar [IE6][IE7]
-            stripComment: x,    // strip comment node [IE6][IE7][IE8]
-            computedStyle: o    // window.getComputedStyle ready?
+            stripComment: x     // strip comment node [IE6][IE7][IE8]
         };
 
 //{{{!mb
@@ -3100,7 +3149,6 @@ function detectHabits() {
     rv.syntaxSugar = node.getAttribute("class") !== "a";
     rv.transparent = /tran|rgba/.test(style.borderTopColor);
     rv.stripComment = node.firstChild.nodeType === 3;
-    rv.computedStyle = !!win.getComputedStyle;
 //}}}!mb
     return rv;
 }
