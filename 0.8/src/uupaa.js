@@ -83,13 +83,20 @@ uu = uumix(uufactory, {             // uu(expression:Jam/Node/NodeArray/String/w
     keys:           uukeys,         // uu.keys(source:Hash/Array):Array
     values:         uuvalues,       // uu.values(source:Hash/Array):Array
     hash:     uumix(uuhash, {       // uu.hash(key:Hash/String, value:Mix = void):Hash
+                                    //  [1][through Hash]           uu.hash({ key: "val" }) -> { key: "val" }
+                                    //  [2][key/value pair to hash] uu.hash("key", mix)     -> { key: mix }
         has:        uuhas,          //     uu.hash.has(source:Hash, search:Hash):Boolean
         nth:        uunth,          //     uu.hash.nth(source:Hash, index:Number):Array
         size:       uusize,         //    uu.hash.size(source:Hash):Number
         clone:      uuclone,        //   uu.hash.clone(source:Hash):Hash
         indexOf:    uuindexof       // uu.hash.indexOf(source:Hash, search:Mix):String/void
     }),
-    array:    uumix(uuarray, {      // uu.array(source:Array/Mix/NodeList/Arguments):Array
+    array:    uumix(uuarray, {      // uu.array(source:Array/Mix/NodeList/Arguments, sliceStart:Number = void, sliceEnd:Number = void):Array
+                                    //  [1][through Array]      uu.array([1, 2])    -> [1, 2]
+                                    //  [2][mix to Array]       uu.array(mix)       -> [mix]
+                                    //  [3][NodeList to Array]  uu.array(NodeList)  -> [node, ...]
+                                    //  [4][arguments to Array] uu.array(arguments) -> [arg, ...]
+                                    //  [5][to Array + slice]   uu.array(uu.tag("*"), 1, 3) -> [<head>, <meta>]
         has:        uuhas,          //    uu.array.has(source:Array, search:Array):Boolean
         nth:        uunth,          //    uu.array.nth(source:Array, index:Number):Array
         size:       uusize,         //   uu.array.size(source:Array):Number
@@ -593,8 +600,8 @@ function uuvalues(source) { // @param Hash/Array: source
     return uukeys(source, true);
 }
 
-// [1][hash to hash(through)]   uu.hash({ key: "val" }) -> { key: "val" }
-// [2][key/value pair to hash]  uu.hash("key", mix)     -> { key: mix }
+//  [1][through Hash]           uu.hash({ key: "val" }) -> { key: "val" }
+//  [2][key/value pair to hash] uu.hash("key", mix)     -> { key: mix }
 
 // uu.hash - to hash, convert hash from key value pair
 function uuhash(key,     // @param Hash/String: key
@@ -616,18 +623,22 @@ _makeMapping("0123456789",       uuhash.dd2num = {}, uuhash.num2dd = {});
 // uu.hash.num2hh = {    0: "00", ...  255: "ff" }; Number -> Zero-filled hex string
 _makeMapping("0123456789abcdef", uuhash.hh2num = {}, uuhash.num2hh = {});
 
-// [1][ary to ary (through)]    uu.ary([1, 2])    -> [1, 2]
-// [2][mix to ary]              uu.ary(mix)       -> [mix]
-// [3][NodeList to ary]         uu.ary(NodeList)  -> [node, ...]
-// [4][arguments to ary]        uu.ary(arguments) -> [arg, ...]
+//  [1][through Array]      uu.array([1, 2])    -> [1, 2]
+//  [2][mix to Array]       uu.array(mix)       -> [mix]
+//  [3][NodeList to Array]  uu.array(NodeList)  -> [node, ...]
+//  [4][arguments to Array] uu.array(arguments) -> [arg, ...]
+//  [5][to Array + slice]   uu.array(uu.tag("*"), 1, 3) -> [<head>, <meta>]
 
-// uu.array - to array, convert array
-function uuarray(source) { // @param Array/Mix/NodeList/Arguments: source
-                           // @return Array:
-    var type = uutype(source);
+// uu.array - to array + slice
+function uuarray(source,     // @param Array/Mix/NodeList/Arguments: source
+                 sliceStart, // @param Number(= void): Array.slice(start, end)
+                 sliceEnd) { // @param Number(= void): Array.slice(start, end)
+                             // @return Array:
+    var type = uutype(source),
+        rv = (type === uutype.FAKEARRAY) ? fakeToArray(source) // [3][4]
+           : (type === uutype.ARRAY)     ? source : [source];  // [1][2]
 
-    return (type === uutype.FAKEARRAY) ? fakeToArray(source) // [3][4]
-         : (type === uutype.ARRAY)     ? source : [source];  // [1][2]
+    return sliceStart ? rv.slice(sliceStart, sliceEnd) : rv;
 }
 
 // [1][Hash has Hash]       uu.has({ a: 1, b: 2 }, { a: 1 }) -> true
