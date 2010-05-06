@@ -355,7 +355,7 @@ function _parseAudioTags(audioNodes, callback) {
  */
 
 function _xaudio() {
-    uu.lazy("audio", function() {
+    uu.ready(function() {
         uu.state.AudioReady = true;
 
         win.xaudio && win.xaudio(uu, uu.tag("audio"));

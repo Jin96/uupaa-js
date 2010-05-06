@@ -48,7 +48,6 @@ doc.head || (doc.head = uutag("head")[0]); // document.head = <head> via WebKit
 uu = uumix(uufactory, {             // uu(expression:Jam/Node/NodeArray/String/window, arg1:Jam/Node/Mix = void, arg2:Mix = void, arg3:Mix = void, arg4:Mix = void):Jam/Instance
                                     //  [1][Class factory]   uu("MyClass", arg1, arg2) -> new uu.Clas.MyClass(arg1, arg2)
                                     //  [2][NodeSet factory] uu("div>ul>li", <body>) -> Jam
-    plugin:         uuplugin,       // uu.plugin():Array
     load:           uuload,         // uu.load(url:String):AjaxResultHash
     habits:         _habits,        // uu.habits - Hash: detected browser habits informations
     ver:            _versions,      // uu.ver - Hash: detected version and plugin informations
@@ -123,7 +122,7 @@ uu = uumix(uufactory, {             // uu(expression:Jam/Node/NodeArray/String/w
                                     //  [2][clear pair]     uu.data.clear(node, key) -> node
     }),
 
-    // --- CSS / STYLE ---
+    // --- CSS / STYLE / VIEW PORT ---
     css:      uumix(uucss, {        // uu.css(node:Node, key:Boolean/String/Hash = void, value:String = void):Hash/String/Node
                                     //  [1][getComputedStyle(or currentStyle)] uu.css(node)       -> { key: value, ... }
                                     //  [2][getComputedStyle(or emulate API) ] uu.css(node, true) -> { key: value, ... }
@@ -140,6 +139,11 @@ uu = uumix(uufactory, {             // uu(expression:Jam/Node/NodeArray/String/w
                                     //  [4][convert pixel]   uu.toPixel(<div>, "12pt") -> 16
                                     //  [5][convert pixel]   uu.toPixel(<div>, "auto") -> 100
                                     //  [6][convert pixel]   uu.toPixel(<div>, "auto", 0, "borderTopWidth") -> 0
+    viewport: {
+        size:       uuviewportsize, // uu.viewport.size():Hash { innerWidth, innerHeight, pageXOffset, pageYOffset }
+        getOrientation:             // uu.viewport.getOrientation():Number (-90, 0, 90)
+                    getOrientation
+    },
     // --- QUERY ---
     id:             uuid,           //    uu.id(expression:String, context:Node = document):Node/null
     tag:            uutag,          //   uu.tag(expression:String, context:Node = document):NodeArray
@@ -169,7 +173,6 @@ uu = uumix(uufactory, {             // uu(expression:Jam/Node/NodeArray/String/w
         unbind:     uueventunbind,  // uu.event.unbind(node:Node, eventTypeEx:String = void):Node
         attach:     uueventattach,  // uu.event.attach(node:Node, eventType:String, evaluator:Function, useCapture:Boolean = false)
         detach:     uueventdetach,  // uu.event.detach(node:Node, eventType:String, evaluator:Function, useCapture:Boolean = false)
-        getTouch:   getTouch,       // uu.event.getTouch(event:EventObjectEx):Hash { touches }
         getKeyCode: getKeyCode,     // uu.event.getKeyCode(event:EventObjectEx):Hash { key, code }
         getPaddingEdge:             // uu.event.getPaddingEdge(event:EventObjectEx):Hash { x, y }
                     getPaddingEdge
@@ -197,9 +200,9 @@ uu = uumix(uufactory, {             // uu(expression:Jam/Node/NodeArray/String/w
                                     //        <div id="lastSibling">$</div>
                                     //    </div>
                                     //
-        has:        uunodehas,      // uu.node.has(node:Node, context:Node):Boolean
+        has:        uunodehas,      // uu.node.has(node:Node, parent:Node):Boolean
         bulk:       uunodebulk,     // uu.node.bulk(source:Node/HTMLFragment, context:Node = <div>):DocumentFragment
-        find:       uunodefind,     // uu.node.find(context:Node, position:String = ".$"):Node/null
+        find:       uunodefind,     // uu.node.find(parent:Node, position:String = ".$"):Node/null
                                     //  [1][find firstSibling] uu.node.find(document.body, "^") -> <head>
                                     //  [2][find prevSibling]  uu.node.find(document.body, "-") -> <head>
                                     //  [3][find nextSibling]  uu.node.find(document.head, "+") -> <body>
@@ -209,9 +212,9 @@ uu = uumix(uufactory, {             // uu(expression:Jam/Node/NodeArray/String/w
         path:       uunodepath,     // uu.node.path(node:Node):String
         swap:       uunodeswap,     // uu.node.swap(swapin:Node, swapout:Node):Node (swapout node)
         wrap:       uunodewrap,     // uu.node.wrap(innerNode:Node, outerNode:Node):Node (innerNode)
-        clear:      uunodeclear,    // uu.node.clear(context:Node):Node
+        clear:      uunodeclear,    // uu.node.clear(parent:Node):Node
         clone:      uunodeclone,    // uu.node.clone(node:Node):Node
-        count:      uunodecount,    // uu.node.count(context:Node):Number ELEMENT_NODE count
+        count:      uunodecount,    // uu.node.count(parent:Node):Number, child element count
         remove:     uunoderemove,   // uu.node.remove(node:Node):Node
         indexOf:    uunodeindexof,  // uu.node.indexOf(node:Node):Number
         // --- nodeType alias ---
@@ -271,13 +274,14 @@ uu = uumix(uufactory, {             // uu(expression:Jam/Node/NodeArray/String/w
                                     //  [4][DateString to hash]      uu.date("2000-01-01T00:00:00[.000]Z") -> DateHash
                                     //  [5][ISO8601String to hash]   uu.date("2000-01-01T00:00:00[.000]Z") -> DateHash
                                     //  [6][RFC1123String to hash]   uu.date("Wed, 16 Sep 2009 16:18:14 GMT") -> DateHash
+    // --- NUMBER ---
+    guid:           uuguid,         // uu.guid():Number - build GUID
     // --- DEBUG ---
     puff:           uupuff,         // uu.puff(source:Mix)
     log:      uumix(uulog, {        // uu.log(log:Mix)
         clear:      uulogclear      // uu.log.clear()
     }),
     // --- EVALUATION ---
-    evaljs:         uuevaljs,       // uu.evaljs(javascriptExpression:String):Mix
     ready:          uuready,        // uu.ready(evaluator:Function = void, order:Number = 0)
     lazy:     uumix(uulazy, {       // uu.lazy(id:String, evaluator:Function, order:Number = 0)
         fire:       uulazyfire      // uu.lazy.fire(id:String)
@@ -293,12 +297,6 @@ uu = uumix(uufactory, {             // uu(expression:Jam/Node/NodeArray/String/w
         Blackout:       false       // true is blackout (css3 cache reload)
     },
     // --- OTHER ---
-    guid:           uuguid,         // uu.guid():Number - build GUID
-    viewport: {
-        size:       uuviewportsize, // uu.viewport.size():Hash { innerWidth, innerHeight, pageXOffset, pageYOffset }
-        getOrientation:             // uu.viewport.getOrientation():Number (-90, 0, 90)
-                    getOrientation
-    },
     dmz:            {},             // uu.dmz - DeMilitarized Zone(proxy)
     nop:            function() {}   // uu.nop() - none operation
 });
@@ -403,12 +401,7 @@ function uufactory(expression, // @param Jam/Node/NodeArray/String/window: expre
     return new uu.jam(expression, arg1, arg2, arg3, arg4); // depend: uu.jam
 }
 
-// --- plugin / plugin name space ---
-// uu.plugin - enum plugins
-function uuplugin() { // @return Array: ["plugin-name", ...]
-    return uukeys(uuplugin);
-}
-
+// --- reuqire file ---
 // uu.load - load file from Sjax
 function uuload(url) { // @param String: url
                        // @return AjaxResultHash:
@@ -1566,17 +1559,6 @@ uuevent.xtype = {
     losecapture: 0x102, DOMMouseScroll: 0x104
 };
 
-// uu.event.getTouch - get touch info
-function getTouch(event) { // @param EventObjectEx:
-                           // @return Hash: { touches }
-                           //   touches - Array: [touchHash, ...]  (max length = 5)
-                           //   touchHash - Hash: { pageX, pageY }
-    if (uu.ver.iphone) {
-        return { touches: event.touches };
-    }
-    return { touches: [] };
-}
-
 // uu.event.getKeyCode - get key and keyCode (cross browse keyCode)
 function getKeyCode(event) { // @param EventObjectEx:
                              // @return Hash: { key, code }
@@ -1797,27 +1779,25 @@ function uunodeadd(source,     // @param Node/DocumentFragment/HTMLFragment/TagN
 }
 
 // uu.node.find - find node
-function uunodefind(context,    // @param Node: context
+function uunodefind(parent,     // @param Node: parent node
                     position) { // @param String(= ".$"): position
                                 // @return Node: node or null
-    context = context || doc.body;
+    parent = parent || doc.body;
 
     var rv, num = uunodefind.pos[position] || 8,
-        around = num === 2 || num === 3,
-        child = num > 4,
-        iters = uunodefind.iters[child ? num - 4 : num], iter;
+        iters = uunodefind.iters[num > 4 ? num - 4 : num], iter;
 
 //{{{!mb
     if (_habits.traversal) {
 //}}}!mb
-        rv = (around || child) ? context[iters[0]]
-                               : context.parentNode[iters[0]];
+        rv = (num === 1 || num === 4) ? parent.parentNode[iters[0]]
+                                      : parent[iters[0]];
 //{{{!mb
     } else {
         iter = iters[1];
-        rv = around ? context[iter] :
-             child  ? context[iters[2]]
-                    : context.parentNode[iters[2]];
+        rv = (num === 2 || num === 3) ? parent[iter] :
+             (num > 4) ? parent[iters[2]]
+                       : parent.parentNode[iters[2]];
         for (; rv; rv = rv[iter]) {
             if (rv.nodeType === uu.node.ELEMENT_NODE) {
                 break;
@@ -1861,13 +1841,13 @@ function uunodeidremove(node) { // @param Node:
 }
 
 // uu.node.has - has child node
-function uunodehas(node,      // @param Node: child node
-                   context) { // @param Node: context(parent) node
-                              // @return Boolean:
-    for (var c = node; c && c !== context;) {
+function uunodehas(node,     // @param Node: child node
+                   parent) { // @param Node: parent node
+                             // @return Boolean:
+    for (var c = node; c && c !== parent;) {
         c = c.parentNode;
     }
-    return node !== context && c === context;
+    return node !== parent && c === parent;
 }
 
 // [1][clone]           uu.node.bulk(Node) -> DocumentFragment
@@ -1888,50 +1868,14 @@ function uunodebulk(source,    // @param Node/HTMLFragment: source
     return rv;
 }
 
-// uu.node.bros - find sibling
-function uunodebros(context,    // @param Node: context node
-                    position) { // @param Number(= uu.node.LAST_SIBLING): find position
-                                // @return Node/null: found node or null
-    position = position || uu.node.LAST_SIBLING;
-
-    var rv, iter,
-        around = position === uu.node.NEXT_SIBLING ||
-                 position === uu.node.PREV_SIBLING;
-
-//{{{!mb
-    if (_habits.traversal) {
-//}}}!mb
-        iter = uunodebros.iter[position][0];
-        rv = around ? context[iter]
-                    : context.parentNode[iter];
-//{{{!mb
-    } else {
-        iter = uunodebros.iter[position][1];
-        rv = around ? context[iter]
-                    : context.parentNode[uunodebros.iter[position][2]];
-
-        for (; rv; rv = rv[iter]) {
-            if (rv.nodeType === uu.node.ELEMENT_NODE) {
-                break;
-            }
-        }
-    }
-//}}}!mb
-    return rv;
-}
-uunodebros.iter = {
-    1: ["firstElementChild",      "nextSibling",      "firstChild"], // FIRST_SIBLING
-    2: ["previousElementSibling", "previousSibling",  ""],           // PREV_SIBLING
-    3: ["nextElementSibling",     "nextSibling",      ""],           // NEXT_SIBLING
-    4: ["lastElementChild",       "previousSibling",  "lastChild"]   // LAST_SIBLING
-};
-
 // uu.nod.path - get node path (xpath)
 function uunodepath(node) { // @param Node: ELEMENT_NODE
                             // @return XPathString: "/html[1]/body[1]/div[5]"
-                            // @throws Error("NOT_ELEMENT_NODE")
-    if (!node.parentNode || node.nodeType !== uu.node.ELEMENT_NODE) {
-        throw new Error("NOT_ELEMENT_NODE");
+    if (!node.parentNode) {
+        return "";
+    }
+    if (node.nodeType !== uu.node.ELEMENT_NODE) {
+        node = node.parentNode;
     }
 
     var rv = [], n = node;
@@ -2002,19 +1946,19 @@ function buildNode(node,   // @param Node/TagString: <div> or "div"
 // [1][clear children]      uu.node.clear(<body>)
 
 // uu.node.clear - clear all children
-function uunodeclear(context) { // @param Node: parent node
-                                // @return Node: context
-    var rv = uutag("*", context), v, i = -1;
+function uunodeclear(parent) { // @param Node: parent node
+                               // @return Node: parent
+    var rv = uutag("*", parent), v, i = -1;
 
     while ( (v = rv[++i]) ) {
         uunodeidremove(v);
         uueventunbind(v);
     }
     rv = []; // gc
-    while (context.lastChild) {
-        context.removeChild(context.lastChild);
+    while (parent.lastChild) {
+        parent.removeChild(parent.lastChild);
     }
-    return context;
+    return parent;
 }
 
 // uu.node.clone - clone node and clone attached events
@@ -2065,17 +2009,17 @@ function uunoderemove(node) { // @param Node:
     return node;
 }
 
-// uu.node.count - element node count
-function uunodecount(context) { // @param Node:
-                                // @return Number
+// uu.node.count - child element count
+function uunodecount(parent) { // @param Node: parentNode
+                               // @return Number
 //{{{!mb
     if (_habits.traversal) {
 //}}}!mb
-        return context.childElementCount;
+        return parent.childElementCount;
 //{{{!mb
     }
 
-    var rv = 0, n = context.firstChild;
+    var rv = 0, n = parent.firstChild;
 
     for (; n; n = n.nextSibling) {
         (n.nodeType === uu.node.ELEMENT_NODE) && ++rv;
@@ -2151,6 +2095,7 @@ function uuquery(expression, // @param String: expression, "css > expr"
     }
     return uu.query.selectorAll(expression, context); // depend: uu.query
 }
+uuquery.ngword = /(:(a|b|co|dig|first-l|li|mom|ne|p|sc|t|v))|!=|\/=|<=|>=|&=|x7b/;
 // uu.query(":a***");
 // uu.query(":b***");
 // uu.query(":co***");
@@ -2169,7 +2114,6 @@ function uuquery(expression, // @param String: expression, "css > expr"
 // uu.query("E[A>=V]");
 // uu.query("E[A&=V]");
 // uu.query("E{A:V}");
-uuquery.ngword = /(:(a|b|co|dig|first-l|li|mom|ne|p|sc|t|v))|!=|\/=|<=|>=|&=|x7b/;
 
 // uu.id - query id
 function uuid(expression, // @param String: id
@@ -2356,11 +2300,9 @@ function uuentitydecode(str) { // @param String:
 function _entity(code) {
     return _entity.hash[code];
 }
-uumix(_entity, {
-    to:     /[&<>"]/g,
-    from:   /&(?:amp|lt|gt|quot);/g,
-    hash:   uusplittohash('&,&amp;,<,&lt;,>,&gt;,",&quot;,&amp;,&,&lt;,<,&gt;,>,&quot;,"')
-});
+_entity.to   = /[&<>"]/g;
+_entity.from = /&(?:amp|lt|gt|quot);/g;
+_entity.hash = uusplittohash('&,&amp;,<,&lt;,>,&gt;,",&quot;,&amp;,&,&lt;,<,&gt;,>,&quot;,"');
 
 // [1][placeholder]             uu.format("? dogs and ?", 101, "cats") -> "101 dogs and cats"
 
@@ -2423,8 +2365,10 @@ function uujsondecode(jsonString,      // @param JSONString:
     if (useNativeJSON && win.JSON) {
         return win.JSON.parse(str);
     }
-    return uujsondecode.ngword.test(str.replace(uujsondecode.unescape, ""))
-                ? false : uuevaljs("return " + str + ";");
+    if (uujsondecode.ngword.test(str.replace(uujsondecode.unescape, ""))) {
+        return false;
+    }
+    return (new Function("return " + str + ";"))();
 }
 uujsondecode.ngword = /[^,:{}\[\]0-9.\-+Eaeflnr-u \n\r\t]/;
 uujsondecode.unescape = /"(\\.|[^"\\])*"/g;
@@ -2513,9 +2457,9 @@ function uudate(source) { // @param DateHash/Date/Number/String(= void):
 
 // inner - convert Date to DateHash
 function _date2hash(date) { // @param Date:
-                            // @return Hash: { Y: 2010, M: 12, D: 31,
-                            //                 h: 23, m: 59, s: 59, ms: 999,
-                            //                 time: xxxxxxx, ISO, RFC, GMT }
+                            // @return Hash: { Y: 2010, M: 1~12, D: 1~31,
+                            //                 h: 0~23, m: 0~59, s: 0~59, ms: 0~999,
+                            //                 time: xxxxxxx, ISO(), RFC(), GMT() }
     return {
         Y:      date.getUTCFullYear(),      M:      date.getUTCMonth() + 1,
         D:      date.getUTCDate(),          h:      date.getUTCHours(),
@@ -2556,7 +2500,8 @@ _str2date.date = /^([\w]+) (\w+) (\w+)/;
 
 // DateHash.ISO - encode DateHash To ISO8601String
 function datehashiso() { // @return ISO8601DateString: "2000-01-01T00:00:00.000Z"
-    var padZero = (this.ms < 10) ? "00" : (this.ms < 100) ? "0" : "",
+    var padZero = (this.ms < 10) ? "00"
+                : (this.ms < 100) ? "0" : "",
         dd = uuhash.num2dd;
 
     return uuformat("?-?-?T?:?:?.?Z", this.Y, dd[this.M], dd[this.D],
@@ -2579,12 +2524,6 @@ function datehashrfc() { // @return RFC1123DateString: "Wed, 16 Sep 2009 16:18:1
 }
 
 // --- other ---
-// uu.evaljs - JavaScript Expression
-function uuevaljs(javascriptExpression) { // @param String:
-                                          // @return Mix: new Function(expression) result
-    return (new Function(javascriptExpression))();
-}
-
 // uu.viewport.size
 function uuviewportsize() { // @return Hash: { innerWidth, innerHeight,
                             //                 pageXOffset, pageYOffset }
@@ -2602,7 +2541,7 @@ function uuviewportsize() { // @return Hash: { innerWidth, innerHeight,
                  pageYOffset: iebody.scrollTop };
     }
 //}}}!mb
-    return win; // [WebKit][ALIAS] window.pageXOffset = document.body.scrollLeft
+    return win;
 }
 
 // uu.viewport.getOrientation - get viewport orientation (for iPhone)
@@ -2834,11 +2773,11 @@ function outerhtmlsetter(html) {
  "change,submit,focus,blur,contextmenu").split(",").forEach(function(eventType) {
 
     uu[eventType] = function(node, fn) { // uu.click(node, fn) -> node
-        return uuevent(node, eventType, fn); // attach
+        return uuevent(node, eventType, fn); // bind
     };
 
     uu["un" + eventType] = function(node) { // uu.unclick(node) -> node
-        return uuevent(node, eventType, 0, true); // detach
+        return uuevent(node, eventType, 0, true); // unbind
     };
 });
 
@@ -2877,9 +2816,6 @@ function _windowonload() {
     _DOMContentLoaded();
     win.xwin && win.xwin(uu); // window.xwin(uu) callback
     uulazyfire("canvas");
-    uulazyfire("audio");
-    uulazyfire("video");
-
 }
 uueventattach(win, "load", _windowonload);
 
@@ -2897,7 +2833,7 @@ function _DOMContentLoaded() {
 function _IEDOMContentLoaded() {
     try {
         // trick -> http://d.hatena.ne.jp/uupaa/20100410/1270882150
-        new Image.doScroll();
+        (new Image).doScroll();
         _DOMContentLoaded();
     } catch(err) {
         setTimeout(_IEDOMContentLoaded, 64);
@@ -2936,9 +2872,12 @@ uu.ie && win.attachEvent("onunload", _windowonunload);
 uuready(function() {
     var html = doc.documentElement,
         nodeList = uutag("*", html), v, i = -1,
-        styles = uusplittohash((uu.ie ? "float,styleFloat,cssFloat,styleFloat"
-                                      : "float,cssFloat,styleFloat,cssFloat") +
-                ",pos,position,w,width,h,height,x,left,y,top,o,opacity," +
+        styles = uusplittohash((
+//{{{!mb
+                 uu.ie ? "float,styleFloat,cssFloat,styleFloat" :
+//}}}!mb
+                         "float,cssFloat,styleFloat,cssFloat"
+                ) + ",pos,position,w,width,h,height,x,left,y,top,o,opacity," +
                 "bg,background,bgcolor,backgroundColor,bgimg,backgroundImage," +
                 "bgrpt,backgroundRepeat,bgpos,backgroundPosition");
 
@@ -3054,34 +2993,41 @@ function detectVersions(libraryVersion) { // @param Number: Library version
     }
 //}}}!mb
 
-    var rv = { library: libraryVersion, flash: 0, silverlight: 0 },
-        ie = !!doc.uniqueID, userAgent = navigator.userAgent;
+    function test(rex) {
+        return rex.test(userAgent);
+    }
 
-    rv.render       = detectRenderingEngineVersion(userAgent);
-    rv.browser      = detectUserAgentVersion(userAgent);
+    var rv = { library: libraryVersion, flash: 0, silverlight: 0 },
+        ie = !!doc.uniqueID, documentMode = doc.documentMode,
+        userAgent = navigator.userAgent,
+        render    = detectRenderingEngineVersion(userAgent),
+        browser   = detectUserAgentVersion(userAgent);
+
+    rv.render       = render;
+    rv.browser      = browser;
     rv.ie           = ie;
-    rv.ie6          = ie && rv.browser === 6;
-    rv.ie7          = ie && rv.browser === 7;
-    rv.ie8          = ie && doc.documentMode === 8;
-    rv.ie9          = ie && doc.documentMode === 9;
+    rv.ie6          = ie && browser === 6;
+    rv.ie7          = ie && browser === 7;
+    rv.ie8          = ie && documentMode === 8;
+    rv.ie9          = ie && documentMode === 9;
     rv.ie67         = rv.ie6 || rv.ie7;
     rv.ie678        = rv.ie6 || rv.ie7 || rv.ie8;
     rv.ie89         = rv.ie8 || rv.ie9;
     rv.opera        = !!(win.opera || 0);
-    rv.gecko        = /Gecko\//.test(userAgent);
-    rv.webkit       = /WebKit/.test(userAgent);
-    rv.chrome       = /Chrome/.test(userAgent);
-    rv.safari       = !rv.chrome && /Safari/.test(userAgent);
-    rv.iphone       = /iPad|iPod|iPhone/.test(userAgent);
-    rv.android      = /Android/.test(userAgent);
-    rv.mobile       = rv.iphone || rv.android || /Opera Mini/.test(userAgent);
-    rv.os           = /Win/.test(userAgent) ? "windows"
-                    : /Mac/.test(userAgent) ? "mac"
-                    : /X11|Linux/.test(userAgent) ? "unix" : "unknown";
-    rv.jit          = (ie        && rv.browser >= 9)   || // IE 9+
-                      (rv.gecko  && rv.render  >  1.9) || // Firefox 3.5+(1.91)
-                      (rv.webkit && rv.render  >= 528) || // Safari 4+, Google Chrome 2+
-                      (rv.opera  && rv.browser >= 10.5);  // Opera10.50+
+    rv.gecko        = test(/Gecko\//);
+    rv.webkit       = test(/WebKit/);
+    rv.chrome       = test(/Chrome/);
+    rv.safari       = !rv.chrome && test(/Safari/);
+    rv.iphone       = test(/iPad|iPod|iPhone/);
+    rv.android      = test(/Android/);
+    rv.mobile       = rv.iphone || rv.android || test(/Opera Mini/);
+    rv.os           = test(/Win/) ? "windows"
+                    : test(/Mac/) ? "mac"
+                    : test(/X11|Linux/) ? "unix" : "unknown";
+    rv.jit          = (ie        && browser >= 9)   || // IE 9+
+                      (rv.gecko  && render  >  1.9) || // Firefox 3.5+(1.91)
+                      (rv.webkit && render  >= 528) || // Safari 4+, Google Chrome 2+
+                      (rv.opera  && browser >= 10.5);  // Opera10.50+
 //{{{!mb
     rv.flash        = detectFlashPlayerVersion(ie, 9); // FlashPlayer 9+
     rv.silverlight  = detectSilverlightVersion(ie, 3); // Silverlight 3+
