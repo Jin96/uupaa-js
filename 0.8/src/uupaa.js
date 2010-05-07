@@ -122,9 +122,12 @@ uu = uumix(uufactory, {             // uu(expression:Jam/Node/NodeArray/String/w
                                     //  [2][get value]      uu.data(node, key) -> value
                                     //  [3][set pair]       uu.data(node, key, value) -> node
                                     //  [4][set pair]       uu.data(node, { key: value, ... }) -> node
-        clear:      uudataclear     // uu.data.clear(node:Node, key:String = void):Node
+        clear:      uudataclear,    // uu.data.clear(node:Node, key:String = void):Node
                                     //  [1][clear all pair] uu.data.clear(node) -> node
                                     //  [2][clear pair]     uu.data.clear(node, key) -> node
+        clone:      uudataclone,    // [PROTECTED] uu.data.clone(sourceNode:Node, clonedNode:Node, copiedAttr:Boolean)
+        duplicator:                 // [PROTECTED] uu.data.duplicator(id:String, callback:Function)
+                    uudataduplicator
     }),
 
     // --- CSS / STYLE / VIEW PORT ---
@@ -217,6 +220,7 @@ uu = uumix(uufactory, {             // uu(expression:Jam/Node/NodeArray/String/w
         swap:       uunodeswap,     // uu.node.swap(swapin:Node, swapout:Node):Node (swapout node)
         wrap:       uunodewrap,     // uu.node.wrap(innerNode:Node, outerNode:Node):Node (innerNode)
         clear:      uunodeclear,    // uu.node.clear(parent:Node):Node
+        clone:      uunodeclone,    // uu.node.clone(node:Node):Node
         count:      uunodecount,    // uu.node.count(parent:Node):Number, child element count
         xpath:      uunodexpath,    // uu.node.xpath(elementNode:Node):String
         remove:     uunoderemove,   // uu.node.remove(node:Node):Node
@@ -935,7 +939,7 @@ function uudata(node,    // @param Node:
                          // @return Hash/Mix/Node/undefined:
     var rv, i;
 
-    if (key === void 0) { // [1] uu.data(node)
+    if (key === i) { // [1] uu.data(node)
         rv = {};
         for (key in node) {
             key.indexOf("data-") || (rv[key.slice(5)] = node[key]);
@@ -969,6 +973,43 @@ function uudataclear(node,  // @param Node:
                             // @return Node:
     return uudata(node, key || "*", null);
 }
+
+// [PROTECTED] uu.data.clone - clone data. node["data-uu***"]
+function uudataclone(sourceNode,   // @param Node:
+                     clonedNode,   // @param Node:
+                     copiedAttr) { // @param Boolean: attr, event copied
+    var key, data, callback;
+
+    for (key in sourceNode) {
+        if (!key.indexOf("data-uu")) {
+            switch (key) {
+            case DATA_UUGUID: // clone nodeid
+                copiedAttr && (clonedNode[DATA_UUGUID] = 0); // reset nodeid
+                uunodeid(clonedNode);
+                break;
+            case DATA_UUEVENT: // clone event
+                data = sourceNode[DATA_UUEVENT];
+                !copiedAttr && data &&
+                    data.types.replace(/^,|,$/g, "").split(",").forEach(function(ex) {
+                        data[ex].forEach(function(evaluator) {
+                            uuevent(clonedNode, ex, evaluator);
+                        });
+                    });
+                break;
+            default:
+                callback = uudataduplicator[key];
+                callback && callback(sourceNode, clonedNode);
+            }
+        }
+    }
+}
+
+// [PROTECTED] uu.data.duplicator - register duplicator
+function uudataduplicator(id,         // @param String: "data-uu..."
+                          callback) { // @param Function: callback function
+    uudataduplicator.db[id] = callback;
+}
+uudataduplicator.db = {}; // { id: callback }
 
 // --- css ---
 //  [1][getComputedStyle(or currentStyle)] uu.css(node)       -> { key: value, ... }
@@ -1550,7 +1591,7 @@ function uuevent(node,        // @param Node:
         isInstance = false;
 
     if (unbind) {
-        closure = evaluator.eventClosure || evaluator;
+        closure = evaluator.eventClosure;
     } else {
         handler = isFunction(evaluator)
                 ? evaluator
@@ -1573,7 +1614,7 @@ function uuevent(node,        // @param Node:
         // IE mouse capture [IE6][IE7][IE8]
         if (uu.ver.ie678) {
             if (eventType === "mousemove") {
-                capture && uuevent(node, "losecapture", closure, unbind);
+                capture && uuevent(node, "losecapture", evaluator, unbind);
             } else if (eventType === "losecapture") {
                 if (node.setCapture) {
                     bound ? node.setCapture()
@@ -1605,7 +1646,7 @@ function uuevent(node,        // @param Node:
                 eventData[types] += ex + ",";
                 eventData[ex] = [];
             }
-            eventData[ex].push(closure);
+            eventData[ex].push(evaluator);
 
             uueventattach(node, eventType, closure, capture);
         }
@@ -1738,14 +1779,13 @@ function uueventunbind(node,          // @param Node: target node
 
         if (!ex.indexOf(ns)) {
             node[DATA_UUEVENT][ex].forEach(function(evaluator) {
-                uuevent(node, ex, evaluator, true); // unbind mode
+                uuevent(node, ex, evaluator, true); // unbind
             });
         }
     }
 
-    if (eventTypeEx === void 0) { // [1]
-        eventTypeEx = node[DATA_UUEVENT]["types"]; // ",click,MyNamespace.mousemove+,"
-    }
+    eventTypeEx = eventTypeEx ? "," + eventTypeEx + ","   // [2] ",click,"
+                              : node[DATA_UUEVENT].types; // [1] ",click,MyNamespace.mousemove+,"
 
     var ns, ary = uusplitcomma(eventTypeEx), ex, i = -1;
 
@@ -1758,7 +1798,7 @@ function uueventunbind(node,          // @param Node: target node
             if (eventTypeEx.indexOf("," + ex + ",") >= 0) {
 
                 node[DATA_UUEVENT][ex].forEach(function(evaluator) {
-                    uuevent(node, ex, evaluator, true); // unbind mode
+                    uuevent(node, ex, evaluator, true); // unbind
                 });
             }
         }
@@ -2035,6 +2075,28 @@ function uunodeclear(parent) { // @param Node: parent node
         parent.removeChild(parent.lastChild);
     }
     return parent;
+}
+
+// uu.node.clone - clone node, clone data, clone attached events
+function uunodeclone(node) { // @param Node:
+                             // @return Node: cloned node
+
+    var clonedNode = node.cloneNode(true),
+        sn = node.firstChild,
+        cn = clonedNode.firstChild,
+        copiedAttr = uunodeid(node) === clonedNode[DATA_UUGUID]; // IE is true
+
+    if (node.nodeType === uu.node.ELEMENT_NODE) {
+        uudataclone(node, clonedNode, copiedAttr);
+
+        for (; sn; sn = sn.nextSibling,
+                   cn = cn.nextSibling) {
+            if (sn.nodeType === uu.node.ELEMENT_NODE) {
+                uudataclone(sn, cn, copiedAttr);
+            }
+        }
+    }
+    return clonedNode;
 }
 
 // uu.node.remove - remove node
