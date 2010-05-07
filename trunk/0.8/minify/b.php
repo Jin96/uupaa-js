@@ -78,7 +78,7 @@ function joinSourceFiles($package,      // @param Array:
 
             // strip {{{!debug ... }}}!debug
             if (!array_key_exists('debug', $optimize)) {
-                $txt = preg_replace('/\{\{\{\!debug([^\n]*)\n.*?\}\}\}\!debug/ms',
+                $txt = preg_replace('/\{\{\{\+debug([^\n]*)\n.*?\}\}\}\+debug/ms',
                                     '', $txt);
             }
 
