@@ -110,12 +110,16 @@ uu = uumix(uufactory, {             // uu(expression:Jam/Node/NodeArray/String/w
         toHash:     uutohash,       // uu.array.toHash(key:Array, value:Array/Mix, toNumber:Boolean = false):Hash
         unique:     uuunique        // uu.array.unique(source:Array, literalOnly:Boolean = false):Array
     }),
+    sequence:       uusequence,     // uu.sequence(start:Number, end:Number, increment:Number = 1):Array
+                                    //  [1][++1] uu.sequence( 0,  5,  1) -> [0, 1, 2, 3, 4]
+                                    //  [2][--1] uu.sequence(-2, -5, -1) -> [-2, -3, -4]
+                                    //  [3][++2] uu.sequence( 5, 10,  2) -> [ 5,  7,  9]
     // --- ATTRIBUTE ---
-    attr:           uuattr,         // uu.attr(node:Node, key:String/Hash = void, value:String = void):Hash/Mix/Node
+    attr:           uuattr,         // uu.attr(node:Node, key:String/Hash = void, value:String = void):String/Hash/Node
                                     //  [1][get all pair]   uu.attr(node) -> { key: value, ... }
-                                    //  [2][get value]      uu.attr(node, key) -> value
-                                    //  [3][set pair]       uu.attr(node, key, value) -> node
-                                    //  [4][set pair]       uu.attr(node, { key: value, ... }) -> node
+                                    //  [2][get value]      uu.attr(node, key) -> "value"
+                                    //  [3][set pair]       uu.attr(node, key, "value") -> node
+                                    //  [4][set pair]       uu.attr(node, { key: "value", ... }) -> node
                                     //  [5][remove attr]    uu.attr(node, key, null) -> node
     data:     uumix(uudata, {       // uu.data(node:Node, key:String/Hash = void, value:Mix: = void):Hash/Mix/Node/undefined
                                     //  [1][get all pair]   uu.data(node) -> { key: value, ... }
@@ -125,9 +129,10 @@ uu = uumix(uufactory, {             // uu(expression:Jam/Node/NodeArray/String/w
         clear:      uudataclear,    // uu.data.clear(node:Node, key:String = void):Node
                                     //  [1][clear all pair] uu.data.clear(node) -> node
                                     //  [2][clear pair]     uu.data.clear(node, key) -> node
-        clone:      uudataclone,    // [PROTECTED] uu.data.clone(sourceNode:Node, clonedNode:Node, copiedAttr:Boolean)
-        duplicator:                 // [PROTECTED] uu.data.duplicator(id:String, callback:Function)
-                    uudataduplicator
+        registerHandler:            // uu.data.registerHandler(key:String, callback:Function)
+                    registerDataHandler,
+        unregisterHandler:          // uu.data.unregisterHandler(key:String)
+                    unregisterDataHandler
     }),
 
     // --- CSS / STYLE / VIEW PORT ---
@@ -171,7 +176,7 @@ uu = uumix(uufactory, {             // uu(expression:Jam/Node/NodeArray/String/w
                     uuclasssingleton
     }),
     // --- EVENT ---
-    event:    uumix(uuevent, {      // uu.event(node:Node, eventTypeEx:String, evaluator:Function, detach:Boolean = false):Node
+    event:    uumix(uuevent, {      // uu.event(node:Node, eventTypeEx:String, evaluator:Function):Node
                                     //  [1][bind a event]            uu.event(node, "click", fn)             -> node
                                     //  [2][bind multi events]       uu.event(node, "click,dblclick", fn)    -> node
                                     //  [3][bind a capture event]    uu.event(node, "mousemove+", fn)        -> node
@@ -220,7 +225,6 @@ uu = uumix(uufactory, {             // uu(expression:Jam/Node/NodeArray/String/w
         swap:       uunodeswap,     // uu.node.swap(swapin:Node, swapout:Node):Node (swapout node)
         wrap:       uunodewrap,     // uu.node.wrap(innerNode:Node, outerNode:Node):Node (innerNode)
         clear:      uunodeclear,    // uu.node.clear(parent:Node):Node
-        clone:      uunodeclone,    // uu.node.clone(node:Node):Node
         count:      uunodecount,    // uu.node.count(parent:Node):Number, child element count
         xpath:      uunodexpath,    // uu.node.xpath(elementNode:Node):String
         remove:     uunoderemove,   // uu.node.remove(node:Node):Node
@@ -858,6 +862,29 @@ function uuunique(source,        // @param Array: source
     return source;
 }
 
+//  [1][++1] uu.sequence( 0,  5,  1) -> [0, 1, 2, 3, 4]
+//  [2][--1] uu.sequence(-2, -5, -1) -> [-2, -3, -4]
+//  [3][++2] uu.sequence( 5, 10,  2) -> [ 5,  7,  9]
+
+// uu.sequence - create sequence array
+function uusequence(start,       // @param Number:
+                    end,         // @param Number:
+                    increment) { // @param Number(= 1):
+                                 // @return Array:
+    var rv = [], ri = -1, i = start, inc = increment || 1;
+
+    if (start < end && inc > 0) {
+        for (; i < end; i += inc) {
+            rv[++ri] = i;
+        }
+    } else if (start > end && inc < 0) {
+        for (; i > end; i += inc) {
+            rv[++ri] = i;
+        }
+    }
+    return rv;
+}
+
 // [1][Array x 2 = Hash]    uu.array.toHash(["a", "b"], [1, 2]) -> { a: 1, b: 2 }
 // [2][Array + Mix = Hash]  uu.array.toHash(["a", "b"], 1)      -> { a: 1, b: 1 }
 
@@ -883,16 +910,16 @@ function uutohash(key,        // @param Array: key array
 }
 
 // --- attribute ---
-//  [1][get all pair]   uu.attr(node) -> { key: value, ... }
-//  [2][get value]      uu.attr(node, key) -> value
-//  [3][set pair]       uu.attr(node, key, value) -> node
-//  [4][set pair]       uu.attr(node, { key: value, ... }) -> node
+//  [1][get all pair]   uu.attr(node) -> { key: "value", ... }
+//  [2][get value]      uu.attr(node, key) -> "value"
+//  [3][set pair]       uu.attr(node, key, "value") -> node
+//  [4][set pair]       uu.attr(node, { key: "value", ... }) -> node
 //  [5][remove attr]    uu.attr(node, key, null) -> node
 
 // uu.attr - attribute accessor
 function uuattr(node,    // @param Node:
                 key,     // @param String/Hash(= void): key
-                value) { // @param String(= void): value
+                value) { // @param String(= void): "value"
                          // @return String/Hash/Node:
     var rv, ary, v, i = -1,
         fix = uuattr.fix;
@@ -912,7 +939,8 @@ function uuattr(node,    // @param Node:
     if (arguments.length === 3) { // [3] uu.attr(node, key, value)
         key = uuhash(key, value);
     } else if (typeof key === "string") { // [2] uu.attr(node, key)
-        return node.getAttribute(fix[key] || key, 2) || "";
+        rv = node.getAttribute(fix[key] || key, 2) || "";
+        return typeof rv !== "string" ? rv + "" : rv; // [IE6] tagindex, colspan is number
     }
     for (i in key) {
         key[i] === null ? node.removeAttribute(fix[i] || i)       // [5]
@@ -963,6 +991,7 @@ function uudata(node,    // @param Node:
     }
     return node;
 }
+uudata.handler = {}; // { key: callback }
 
 //  [1][clear all pair] uu.data.clear(node) -> node
 //  [2][clear pair]     uu.data.clear(node, key) -> node
@@ -974,42 +1003,16 @@ function uudataclear(node,  // @param Node:
     return uudata(node, key || "*", null);
 }
 
-// [PROTECTED] uu.data.clone - clone data. node["data-uu***"]
-function uudataclone(sourceNode,   // @param Node:
-                     clonedNode,   // @param Node:
-                     copiedAttr) { // @param Boolean: attr, event copied
-    var key, data, callback;
-
-    for (key in sourceNode) {
-        if (!key.indexOf("data-uu")) {
-            switch (key) {
-            case DATA_UUGUID: // clone nodeid
-                copiedAttr && (clonedNode[DATA_UUGUID] = 0); // reset nodeid
-                uunodeid(clonedNode);
-                break;
-            case DATA_UUEVENT: // clone event
-                data = sourceNode[DATA_UUEVENT];
-                !copiedAttr && data &&
-                    data.types.replace(/^,|,$/g, "").split(",").forEach(function(ex) {
-                        data[ex].forEach(function(evaluator) {
-                            uuevent(clonedNode, ex, evaluator);
-                        });
-                    });
-                break;
-            default:
-                callback = uudataduplicator[key];
-                callback && callback(sourceNode, clonedNode);
-            }
-        }
-    }
+// uu.data.registerHandler - register data handler
+function registerDataHandler(key,        // @param String: "data-uu..."
+                             callback) { // @param Function: callback function
+    uudata.handler[key] = callback;
 }
 
-// [PROTECTED] uu.data.duplicator - register duplicator
-function uudataduplicator(id,         // @param String: "data-uu..."
-                          callback) { // @param Function: callback function
-    uudataduplicator.db[id] = callback;
+// uu.data.unregisterHandler - unregister data handler
+function unregisterDataHandler(key) { // @param String: "data-uu..."
+    delete uudata.handler[key];
 }
-uudataduplicator.db = {}; // { id: callback }
 
 // --- css ---
 //  [1][getComputedStyle(or currentStyle)] uu.css(node)       -> { key: value, ... }
@@ -1254,7 +1257,7 @@ function _getComputedStyleIE(node) { // @param Node:
         UNITS = { m: 1, t: 2, "%": 3, o: 3 }, // em, pt, %, auto,
         RECTANGLE = { top: 1, left: 2, width: 3, height: 4 },
         fontSize = currentStyle.fontSize,
-        em = _parseFloat(fontSize) * (/pt$/.test(fontSize) ? 4 / 3 : 1),
+        em = _parseFloat(fontSize) * (uutopixel.judge.pt.test(fontSize) ? 4 / 3 : 1),
         boxProperties = _getComputedStyleIE.boxs,
         cache = { "0px": "0px", "1px": "1px", "2px": "2px", "5px": "5px",
                   thin: "1px", medium: "3px",
@@ -1520,7 +1523,7 @@ function uumsgunregister(instance) { // @param Instance: class instance
 function uuevent(node,        // @param Node:
                  eventTypeEx, // @param EventTypeExString: some EventTypeEx, "click,click+,..."
                  evaluator,   // @param Function/Instance: callback function
-                 unbind) {    // @param Boolean(= false): true is unbind, false is bind
+                 unbind) {    // @hidden Boolean(= false): true is unbind, false is bind
                               // @return Node:
     function _eventClosure(event) {
         if (!event.xtarget) {
@@ -1587,16 +1590,14 @@ function uuevent(node,        // @param Node:
     var eventTypeExArray = eventTypeEx.split(","),
         eventData = node[DATA_UUEVENT],
         ex, token, bound, types = "types",
-        eventType, capture, closure, handler, i = -1, pos,
+        eventType, capture, handler, i = -1, pos,
         isInstance = false;
 
-    if (unbind) {
-        closure = evaluator.eventClosure;
-    } else {
+    if (!unbind) {
         handler = isFunction(evaluator)
                 ? evaluator
                 : (isInstance = true, evaluator.handleEvent);
-        closure = evaluator.eventClosure = _eventClosure;
+        evaluator.eventClosure = _eventClosure;
     }
 
     while ( (ex = eventTypeExArray[++i]) ) { // ex = "namespace.click+"
@@ -1630,6 +1631,8 @@ function uuevent(node,        // @param Node:
                 if (pos >= 0) {
 
                     eventData[ex].splice(pos, 1); // remove evaluator
+
+                    // removed all handlers in a type
                     if (!eventData[ex].length) {
 
                         // ",dblclick," <- ",namespace.click+,dblclick,".
@@ -1637,7 +1640,9 @@ function uuevent(node,        // @param Node:
                         eventData[types] =
                             eventData[types].replace("," + ex + ",", ",");
                     }
-                    uueventdetach(node, eventType, closure, capture);
+                    uueventdetach(node, eventType,
+                                  evaluator.eventClosure, capture);
+                    evaluator.eventClosure = null;
                 }
             }
         } else {
@@ -1647,8 +1652,8 @@ function uuevent(node,        // @param Node:
                 eventData[ex] = [];
             }
             eventData[ex].push(evaluator);
-
-            uueventattach(node, eventType, closure, capture);
+            uueventattach(node, eventType,
+                          evaluator.eventClosure, capture);
         }
     }
     return node;
@@ -1784,22 +1789,24 @@ function uueventunbind(node,          // @param Node: target node
         }
     }
 
-    eventTypeEx = eventTypeEx ? "," + eventTypeEx + ","   // [2] ",click,"
-                              : node[DATA_UUEVENT].types; // [1] ",click,MyNamespace.mousemove+,"
+    if (node[DATA_UUEVENT]) {
+        eventTypeEx = eventTypeEx ? "," + eventTypeEx + ","   // [2] ",click,"
+                                  : node[DATA_UUEVENT].types; // [1] ",click,MyNamespace.mousemove+,"
 
-    var ns, ary = uusplitcomma(eventTypeEx), ex, i = -1;
+        var ns, ary = uusplitcomma(eventTypeEx), ex, i = -1;
 
-    while ( (ex = ary[++i]) ) {
-        if (ex.lastIndexOf(".*") > 1) { // [3] "namespace.*"
+        while ( (ex = ary[++i]) ) {
+            if (ex.lastIndexOf(".*") > 1) { // [3] "namespace.*"
 
-            ns = ex.slice(0, -1);       // "namespace.*" -> "namespace."
-            uusplitcomma(eventTypeEx).forEach(_unbindall);
-        } else { // [2][4]
-            if (eventTypeEx.indexOf("," + ex + ",") >= 0) {
+                ns = ex.slice(0, -1);       // "namespace.*" -> "namespace."
+                uusplitcomma(eventTypeEx).forEach(_unbindall);
+            } else { // [2][4]
+                if (eventTypeEx.indexOf("," + ex + ",") >= 0) {
 
-                node[DATA_UUEVENT][ex].forEach(function(evaluator) {
-                    uuevent(node, ex, evaluator, true); // unbind
-                });
+                    node[DATA_UUEVENT][ex].forEach(function(evaluator) {
+                        uuevent(node, ex, evaluator, true); // unbind
+                    });
+                }
             }
         }
     }
@@ -2077,34 +2084,20 @@ function uunodeclear(parent) { // @param Node: parent node
     return parent;
 }
 
-// uu.node.clone - clone node, clone data, clone attached events
-function uunodeclone(node) { // @param Node:
-                             // @return Node: cloned node
-
-    var clonedNode = node.cloneNode(true),
-        sn = node.firstChild,
-        cn = clonedNode.firstChild,
-        copiedAttr = uunodeid(node) === clonedNode[DATA_UUGUID]; // IE is true
-
-    if (node.nodeType === uu.node.ELEMENT_NODE) {
-        uudataclone(node, clonedNode, copiedAttr);
-
-        for (; sn; sn = sn.nextSibling,
-                   cn = cn.nextSibling) {
-            if (sn.nodeType === uu.node.ELEMENT_NODE) {
-                uudataclone(sn, cn, copiedAttr);
-            }
-        }
-    }
-    return clonedNode;
-}
-
-// uu.node.remove - remove node
+// uu.node.remove - remove node, remove nodeid, remove data, remove events
 function uunoderemove(node) { // @param Node:
                               // @return Node: node
-    return node && node.parentNode
-                ? uunodeidremove(node.parentNode.removeChild(node))
-                : node;
+    uueventunbind(node);
+    uunodeidremove(node);
+
+    // extras data handler
+    var key, handler = uudata.handler;
+
+    for (key in handler) {
+        node[key] && handler(key, node, "removeNode");
+    }
+    node.parentNode && node.parentNode.removeChild(node);
+    return node;
 }
 
 // uu.node.count - child element count
@@ -3179,16 +3172,16 @@ function detectHabits() {
         div, node, style,
 //}}}!mb
         rv = {
-            rgb: o,             // rgb color ready?
-            hsla: o,            // hsla color ready?
-            slice: o,           // Array.prototype.slice.call(NodeList) ready?
-            indexer: o,         // String[indexer] ready ?
-            opacity: x,         // node.style.opacity ready? [IE6][IE7][IE8]
-            traversal: o,       // Element Traversal ready? - http://www.w3.org/TR/ElementTraversal/
-            tamperedURL: x,     // node.href tampered [IE6][IE7][IE8]
-            transparent: o,     // border-color:transparent ready?
-            syntaxSugar: x,     // getAttribute("class") syntax sugar [IE6][IE7]
-            stripComment: x     // strip comment node [IE6][IE7][IE8]
+            rgb: o,                 // rgb color ready?
+            hsla: o,                // hsla color ready?
+            slice: o,               // Array.prototype.slice.call(NodeList) ready?
+            indexer: o,             // String[indexer] ready ?
+            opacity: x,             // node.style.opacity ready? [IE6][IE7][IE8]
+            traversal: o,           // Element Traversal ready? - http://www.w3.org/TR/ElementTraversal/
+            tamperedURL: x,         // node.href tampered [IE6][IE7][IE8]
+            transparent: o,         // border-color:transparent ready?
+            syntaxSugar: x,         // getAttribute("class") syntax sugar [IE6][IE7]
+            stripComment: x         // strip comment node [IE6][IE7][IE8]
         };
 
 //{{{!mb
