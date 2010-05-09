@@ -13,6 +13,17 @@ uu.node.clone(_parent_:Node):Node は、_parent_ ノード以下のノードツ�
     * node.onclick = function(){} などの DOM Level0 イベントハンドラはクローンされません。
   * {{{<input type="checkbox" checked="checked">}}} 等の、UIの状態も可能な限り引き継がれています。
 
+== Example ==
+{{{
+
+<div id="source">
+  <p>clone target</p>
+</div>
+
+alert(uu.node.clone(uu.id("source")).outerHTML);
+    -> <div id="source"> <p>clone target</p> </div>
+}}}
+
 == Test ==
 http://uupaa-js.googlecode.com/svn/trunk/0.8/test/uu.node/clone.htm
 {{{
