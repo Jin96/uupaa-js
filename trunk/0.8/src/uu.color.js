@@ -384,8 +384,6 @@ function hslaToColorHash(hsla) { // @param HSLAHash:
 
 // --- initialize ---
 // add W3C Named Color
-// add FAMICOM(R) Named Color(from "fc00" to "fc3f")
-// add CUD Named Color(from "cudred" to "cudblack")
 uucoloradd("000000black,888888gray,ccccccsilver,ffffffwhite,ff0000red,ffff00" +
 "yellow,00ff00lime,00ffffaqua,00ffffcyan,0000ffblue,ff00fffuchsia,ff00ffmage" +
 "nta,880000maroon,888800olive,008800green,008888teal,000088navy,880088purple" +
@@ -418,25 +416,6 @@ uucoloradd("000000black,888888gray,ccccccsilver,ffffffwhite,ff0000red,ffff00" +
 "tiquewhite,faf0e6linen,fdf5e6oldlace,fffaf0floralwhite,fffff0ivory,a9a9a9da" +
 "rkgrey,2f4f4fdarkslategrey,696969dimgrey,808080grey,d3d3d3lightgrey,778899l" +
 "ightslategrey,708090slategrey,8b4513saddlebrown");
-
-// fc00 ~ fc3f
-uucoloradd("7b7b7bfc00,0000fffc01,0000bdfc02,4229bdfc03,940084fc04,ad0021fc05,"+
-"8c1000fc06,8c1000fc07,522900fc08,007300fc09,006b00fc0a,005a00fc0b,004252fc0c,"+
-"000000fc0d,000000fc0e,000000fc0f,bdbdbdfc10,0073f7fc11,0052f7fc12,6b42fffc13,"+
-"de00cefc14,e7005afc15,f73100fc16,e75a10fc17,ad7b00fc18,00ad00fc19,00ad00fc1a,"+
-"00ad42fc1b,008c8cfc1c,000000fc1d,000000fc1e,000000fc1f,f7f7f7fc20,39bdfffc20,"+
-"6b84fffc22,9473f7fc23,f773f7fc24,f75294fc25,f77352fc26,ffa542fc27,f7b500fc28,"+
-"b5f710fc29,5ade52fc2a,52f794fc2b,00efdefc2c,737373fc2d,000000fc2e,000000fc2f,"+
-"fffffffc30,a5e7fffc31,b5b5f7fc32,d6b5f7fc33,f7b5f7fc34,ffa5c6fc35,efceadfc36,"+
-"ffe7adfc37,ffde7bfc38,d6f773fc39,b5f7b5fc3a,b5f7d6fc3b,00fffffc3c,f7d6f7fc3d,"+
-"000000fc3e,000000fc3f");
-
-// cudred ~ cudblack
-uucoloradd("eb6110cudred,fff100cudyellow,06af7acudgreen,316ab3cudblue,f5a100cu"+
-"dorange,68c8f2cudskyblue,f0908acudpink,8b3b2ccudbrown,a53d92cudviolet,f7c6c6c"+
-"udlightpink,fff4aecudcream,87c9a5cudlightgreen,b9e3f9cudlightskyblue,facd88cu"+
-"dlightbeige,d2cce6cudlightviolet,cede4acudlightyellowgreen,ffffffcudwhite,dee"+
-"1e4cudlightgray,7d818dcudgray,0a0000cudblack");
 
 })(window, document, uu);
 
