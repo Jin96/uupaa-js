@@ -1,0 +1,74 @@
+<!doctype html><html><head><meta charset="utf-8" />
+<title>uu.color</title>
+<script src="../../src/uupaa.js"></script>
+<script src="../../src/uu.color.js"></script>
+<style>
+html, body {
+  margin: 0; padding: 0;
+  text-shadow: 3px 3px 5px red;
+  font-size: small;
+}
+#div1 { width: 300px; height: 100px; border: 3px outset gray; padding: 3px; }
+#span1 { background-color: white; color: black; }
+</style>
+</head>
+<body>
+<!--
+<input type="button" value="#000" onclick="set('#000')" />
+<input type="button" value="#111" onclick="set('#111')" />
+ -->
+<input type="button" value="#9aB" onclick="set('#9aB')" />
+<!--
+<input type="button" value="#FFF" onclick="set('#FFF')" />
+<input type="button" value="#000000" onclick="set('#000000')" />
+<input type="button" value="#121314" onclick="set('#121314')" />
+ -->
+<input type="button" value="#090a0B" onclick="set('#090a0B')" />
+<!--
+<input type="button" value="#FFFFFF" onclick="set('#FFFFFF')" />
+<br />
+ -->
+<input type="button" value="Red" onclick="set('Red')" />
+<input type="button" value="ToMato" onclick="set('ToMato')" />
+<input type="button" value="transparent" onclick="set('transparent')" />
+<input type="button" value="rgb(255, 255, 255)" onclick="set('rgb(255, 255, 255)')" />
+<!--
+<input type="button" value="rgb ( 100 , 100 , 100 )" onclick="set('rgb ( 100 , 100 , 100 )')" />
+ -->
+<input type="button" value="rgba(10.0%,11.23%,0.0%,1.0)" onclick="set('rgba(10.0%,11.23%,0.0%,1.0)')" />
+<input type="button" value="rgba(0,100%,255,1.0)" onclick="set('rgba(0,100%,255,1.0)')" />
+<!--
+<br />
+ -->
+<input type="button" value="RGBAHash( { r: 255, g: 255, b: 255, a: 1.0 } )" onclick="set({ r: 255, g: 255, b: 255, a: 1.0 })" />
+<input type="button" value="HSVAHash( { h: 0, s: 100, v: 100, a: 1.0 } )" onclick="set({ h: 0, s: 100, v: 100, a: 1.0 })" />
+<input type="button" value="HSLAHash( { h: 120, s: 100, v: 50, a: 1.0 } )" onclick="set({ h: 120, s: 100, l: 50, a: 1.0 })" />
+<!-- for debug
+<hr />
+Boundary condition Color:
+<input type="button" value="rgb ( 100 , 100 , 100 , 1.0 )" onclick="set('rgb ( 100 , 100 , 100 , 1.0 )')" />
+<input type="button" value="rgb ( 300 , 300 , 300 , 3.0 )" onclick="set('rgb ( 300 , 300 , 300 , 3.0 )')" />
+<input type="button" value="rgba(0.00%,101.23%,256,1.0)" onclick="set('rgba(0.00%,101.23%,256,1.0)')" />
+<hr />
+Invalid Color:
+<input type="button" value="#" onclick="set('#')" />
+<input type="button" value="#0" onclick="set('#0')" />
+<input type="button" value="#AA" onclick="set('#AA')" />
+<input type="button" value="#AAAA" onclick="set('#AAAA')" />
+<input type="button" value="#AAAAA" onclick="set('#AAAAA')" />
+<input type="button" value="#RGB" onclick="set('#RGB')" />
+<input type="button" value="#red" onclick="set('#red')" />
+<input type="button" value="rgb ( -100 , +100 , 100.1 , -2.0 )" onclick="set('rgb ( -100 , +100 , 100.1 , -2.0 )')" />
+<hr />
+ -->
+<div id="div1"><span id="span1">COLOR</span></div>
+<script>
+function set(color) {
+  var c = uu.color(color);
+  var hex = c.hex;
+  document.getElementById("div1").style.backgroundColor = c.hex;
+  document.getElementById("span1").innerHTML = c.hex + "<br />" + c.rgba + "<br />" + c.hsva() + "<br />" + c.hsla();
+}
+</script>
+</body>
+</html>

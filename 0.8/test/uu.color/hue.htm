@@ -1,0 +1,106 @@
+<!doctype html><html><head><meta charset="utf-8" />
+<title>color - hue</title>
+<script src="../../src/uupaa.js"></script>
+<script src="../../src/uu.color.js"></script>
+<style>
+html, body {
+  margin: 0; padding: 0;
+  text-shadow: 3px 3px 5px red;
+  font-size: small;
+}
+table { border: 3px outset gray; }
+td { width: 15px; height: 15px; }
+</style>
+</head>
+<body>
+step1. Select Mode:
+<input type="button" value="HSV" onclick="HSV();draw(lastColorHash)" />
+<input type="button" value="HSL" onclick="HSL();draw(lastColorHash)" />
+<input type="button" value="Gray" onclick="Gray();draw(lastColorHash)" />
+<input type="button" value="Sepia" onclick="Sepia();draw(lastColorHash)" />
+<input type="button" value="Complementary" onclick="Comp();draw(lastColorHash)" />
+<hr />
+step2. Select Hue(0 ~ 360):
+<input type="range" value="0" min="0" max="360"
+       onchange="draw({ h: this.value, s: 100, v: 100, l: 50, a: 1 })" />
+<span id="rangeValue">0</span>
+
+<hr />
+<div id="colorTable"></div>
+
+<script>
+var colortype = "HSV";
+var colormethod = "rgb";
+var lastColorHash = uu.color("#000");
+
+function draw(hash) {
+    if (hash.h < 0 || hash.h > 360) {
+        hash = 0;
+    }
+    // update range.text
+    uu.text(uu.id("rangeValue"), hash.h);
+    lastColorHash = hash;
+
+    // build color table
+    var colorTable = uu.id("colorTable");
+
+    colorTable.innerHTML = "";
+    colorTable.appendChild(uu.snippet("colorTableSnippet"));
+
+    var y = 0, yz = 10, x = 0, xz = 5;
+    var e;
+    var sary = [100, 75, 50, 25, 0];
+    var vary = [100, 90, 80, 70, 60, 50, 40, 30, 20, 10, 0];
+    var bg;
+    for (; y < yz; ++y) {
+        for (x = 0; x < xz; ++x) {
+            e = document.getElementById("id" + y + x);
+            if (colortype === "HSL") {
+                bg = uu.color({ h: hash.h, s: sary[x], l: vary[y], a: 1.0 })[colormethod]();
+            } else {
+                bg = uu.color({ h: hash.h, s: sary[x], v: vary[y], a: 1.0 })[colormethod]();
+            }
+            e.style.backgroundColor = bg.toString();
+        }
+    }
+}
+function HSL() { colortype = 'HSL'; colormethod = 'rgb'; }
+function HSV() { colortype = 'HSV'; colormethod = 'rgb'; }
+function Gray() { colortype = 'Gray'; colormethod = 'gray'; }
+function Sepia() { colortype = 'Sepia'; colormethod = 'sepia'; }
+function Comp() { colortype = 'Complementary'; colormethod = 'comple'; }
+</script>
+</body>
+</html>
+<script id="sliderSnippet" type="text/html">
+    return <>
+    <input type="button" value="0" onclick="draw({ h:  0, s: 100, v: 100, l: 50, a: 1 })" />
+    <input type="button" value="30" onclick="draw({ h: 30, s: 100, v: 100, l: 50, a: 1 })" />
+    <input type="button" value="60" onclick="draw({ h: 60, s: 100, v: 100, l: 50, a: 1 })" />
+    <input type="button" value="90" onclick="draw({ h: 90, s: 100, v: 100, l: 50, a: 1 })" />
+    <input type="button" value="120" onclick="draw({ h: 120, s: 100, v: 100, l: 50, a: 1 })" />
+    <input type="button" value="150" onclick="draw({ h: 150, s: 100, v: 100, l: 50, a: 1 })" />
+    <input type="button" value="180" onclick="draw({ h: 180, s: 100, v: 100, l: 50, a: 1 })" />
+    <input type="button" value="210" onclick="draw({ h: 210, s: 100, v: 100, l: 50, a: 1 })" />
+    <input type="button" value="240" onclick="draw({ h: 240, s: 100, v: 100, l: 50, a: 1 })" />
+    <input type="button" value="270" onclick="draw({ h: 270, s: 100, v: 100, l: 50, a: 1 })" />
+    <input type="button" value="300" onclick="draw({ h: 300, s: 100, v: 100, l: 50, a: 1 })" />
+    <input type="button" value="330" onclick="draw({ h: 330, s: 100, v: 100, l: 50, a: 1 })" />
+</>
+</script>
+<script id="colorTableSnippet" type="text/html">
+    return <>
+    <table>
+    <tr><td id="id00"></td><td id="id01"></td><td id="id02"></td><td id="id03"></td><td id="id04"></td></tr>
+    <tr><td id="id10"></td><td id="id11"></td><td id="id12"></td><td id="id13"></td><td id="id14"></td></tr>
+    <tr><td id="id20"></td><td id="id21"></td><td id="id22"></td><td id="id23"></td><td id="id24"></td></tr>
+    <tr><td id="id30"></td><td id="id31"></td><td id="id32"></td><td id="id33"></td><td id="id34"></td></tr>
+    <tr><td id="id40"></td><td id="id41"></td><td id="id42"></td><td id="id43"></td><td id="id44"></td></tr>
+    <tr><td id="id50"></td><td id="id51"></td><td id="id52"></td><td id="id53"></td><td id="id54"></td></tr>
+    <tr><td id="id60"></td><td id="id61"></td><td id="id62"></td><td id="id63"></td><td id="id64"></td></tr>
+    <tr><td id="id70"></td><td id="id71"></td><td id="id72"></td><td id="id73"></td><td id="id74"></td></tr>
+    <tr><td id="id80"></td><td id="id81"></td><td id="id82"></td><td id="id83"></td><td id="id84"></td></tr>
+    <tr><td id="id90"></td><td id="id91"></td><td id="id92"></td><td id="id93"></td><td id="id94"></td></tr>
+    </table>
+</>
+</script>

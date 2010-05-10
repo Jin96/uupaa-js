@@ -243,9 +243,11 @@ uu = uumix(uufactory, {             // uu(expression:Jam/Node/NodeArray/String/w
     head:           uuhead,         // uu.head(node, attr, style, buildid) -> <head>
     body:           uubody,         // uu.body(node, attr, style, buildid) -> <body>
     text:           uutext,         // uu.text(node:Node/String, text:String(= void)):Array/String/Node
-                                    //  [1][create node] uu.text("text")       -> createTextNode("text")
-                                    //  [2][get text]    uu.text(node)         -> text or [text, ...]
-                                    //  [3][set text]    uu.text(node, "text") -> node
+                                    //  [1][create text node] uu.text("text")          -> createTextNode("text")
+                                    //  [2][get text]         uu.text(node)            -> "text" or ["text", ...]
+                                    //  [3][set text]         uu.text(node, "text")    -> node
+                                    //  [4][set text]         uu.text(node, ["a","b"]) -> node
+    textf:          uutextf,        // uu.textf(format:String, var_args, ...):TextNode
     // --- STRING ---
     fix:      uumix(uufix, {        // uu.fix(source:String):String
                                     //  [1][css-prop to js-css-prop] uu.fix("background-color") -> "backgroundColor"
@@ -1994,7 +1996,8 @@ function uunodebulk(source,    // @param Node/HTMLFragment: source
     placeholder.innerHTML = source.nodeType ? source.outerHTML // [1] node
                                             : source;          // [2] "<p>html</p>"
     while (placeholder.firstChild) {
-        rv.appendChild(placeholder.removeChild(placeholder.firstChild));
+//      rv.appendChild(placeholder.removeChild(placeholder.firstChild));
+        rv.appendChild(placeholder.firstChild);
     }
     return rv;
 }
@@ -2153,26 +2156,34 @@ function uubody(/* var_args */) { // @param Mix: var_args
     return buildNode(doc.body, arguments);
 }
 
-// [1][get text] uu.text(node)         -> text or [text, ...]
-// [2][set text] uu.text(node, "text") -> node
+//  [1][create text node] uu.text("text")          -> createTextNode("text")
+//  [2][get text]         uu.text(node)            -> "text" or ["text", ...]
+//  [3][set text]         uu.text(node, "text")    -> node
+//  [4][set text]         uu.text(node, ["a","b"]) -> node
 
 // uu.text - node.text / node.innerText accessor
 function uutext(node,   // @param Node/String: node or text string
-                text) { // @param String(= void):
+                text) { // @param String/Array(= void): "textContent" or ["textContent", ...]
                         // @return Array/String/Node:
     if (isString(node)) {
-        return doc.createTextNode(node);
+        return doc.createTextNode(node); // [1]
     }
-    if (text === void 0) {
+    if (text === void 0) { // [2]
         return node[
 //{{{!mb
                     uu.gecko ? "textContent" :
 //}}}!mb
                                "innerText"];
     }
-    uunodeadd(doc.createTextNode(isArray(text) ? text.join("") : text),
+    uunodeadd(doc.createTextNode(isArray(text) ? text.join("") : text), // [3]
               uunodeclear(node));
     return node;
+}
+
+// uu.textf - uu.text + uu.format
+function uutextf(format) { // @param String: formatted string with "?" placeholder
+                           // @return TextNode: <text>formatted string</text>
+    return uutext(uuformat.apply(this, arguments));
 }
 
 // --- query ---
