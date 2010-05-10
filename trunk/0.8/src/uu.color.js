@@ -20,6 +20,7 @@ uu.color = uu.mix(uucolor, {    // uu.color(source:ColorHash/HSVAHash/HSLAHash/R
 // [7]["#000000" to hash]       uu.color("#000000") -> ColorHash
 // [8]["rgba(,,,,) to hash]     uu.color("rgba(0,0,0,1)")         -> ColorHash
 // [9]["hsla(,,,,) to hash]     uu.color("hsla(360,100%,100%,1)") -> ColorHash
+// [10][number to hash]         uu.color(123)       -> ColorHash
 
 // uu.color - parse color
 function uucolor(source) { // @parem ColorHash/HSLAHash/HSVAHash/RGBAHash/String/Number: "black", "#fff", "rgba(0,0,0,0)" ...
@@ -29,16 +30,17 @@ function uucolor(source) { // @parem ColorHash/HSLAHash/HSVAHash/RGBAHash/String
         if (typeof source === "number") {
             return fixColorHash({ r: (source >> 16) & 255,
                                   g: (source >>  8) & 255,
-                                  b:  source        & 255 });
+                                  b:  source        & 255,
+                                  a: 1 });
         }
         if (source.argb) {
             return source;
         }
         if ("l" in source) { // HSLAHash
-            return fixColorHash(hslaToColorHash(source));
+            return hslaToColorHash(source);
         }
         if ("v" in source) { // HSVAHash
-            return fixColorHash(hsvaToColorHash(source));
+            return hsvaToColorHash(source);
         }
         if ("a" in source) { // RGBAHash
             return fixColorHash(source);
@@ -115,15 +117,15 @@ function fixColorHash(c) { // @param ColorHash: source
                                   c.b + "," + c.a + ")");
     // --- add methods ---
     if (!c.argb) {
-        c.rgb       = ColorHashRGB;
-        c.argb      = ColorHashARGB;
-        c.hsva      = ColorHashHSVA;
-        c.hsla      = ColorHashHSLA;
-        c.gray      = ColorHashGray;
-        c.sepia     = ColorHashSepia;
-        c.comple    = ColorHashComple;
-        c.arrange   = ColorHashArrange;
-        c.toString  = ColorHashToString;
+        c.rgb       = ColorHashRGB;     // @return "rgb(0,0,0)"
+        c.argb      = ColorHashARGB;    // @return "#ffffffff"
+        c.hsva      = ColorHashHSVA;    // @return HSVAHash
+        c.hsla      = ColorHashHSLA;    // @return HSLAHash
+        c.gray      = ColorHashGray;    // @return ColorHash
+        c.sepia     = ColorHashSepia;   // @return ColorHash
+        c.comple    = ColorHashComple;  // @return ColorHash
+        c.arrange   = ColorHashArrange; // @return ColorHash
+        c.toString  = ColorHashToString;// @return "#000000" or "rgba(0,0,0,0)"
     }
     return c;
 }
@@ -297,7 +299,7 @@ function hsvaToColorHash(hsva) { // @param HSVAHash:
     } else {
         r = g = b = (v + 0.5) | 0;
     }
-    return { r: r, g: g, b: b, a: hsva.a };
+    return fixColorHash({ r: r, g: g, b: b, a: hsva.a });
 }
 
 // ColorHash.hsla
@@ -374,10 +376,10 @@ function hslaToColorHash(hsla) { // @param HSLAHash:
         g = l1 * g + l2;
         b = l1 * b + l2;
     }
-    return { r: ((r * 255) + 0.5) | 0,
-             g: ((g * 255) + 0.5) | 0,
-             b: ((b * 255) + 0.5) | 0,
-             a: hsla.a };
+    return fixColorHash({ r: ((r * 255) + 0.5) | 0,
+                          g: ((g * 255) + 0.5) | 0,
+                          b: ((b * 255) + 0.5) | 0,
+                          a: hsla.a });
 }
 
 // --- initialize ---
