@@ -34,12 +34,13 @@ var uu; // window.uu - uupaa.js library namespace
 
 uu || (function(win, doc, toString, isArray) {
 
-var _versions = detectVersions(0.7),
-    _habits   = detectHabits(),
+var _ver = detectVersions(0.7),
+    _bias = detectBias(),
     // --- HTML5: EMBEDDING CUSTOM NON-VISIBLE DATA ---
     DATA_UUGUID = "data-uuguid",
     DATA_UUEVENT = "data-uuevent",
     DATA_UUTWEEN = "data-uutween",
+    DATA_UUIMAGE = "data-uuimage",
 //{{{!mb
     DATA_UUOPACITY = "data-uuopacity",
 //}}}!mb
@@ -53,14 +54,14 @@ doc.head || (doc.head = uutag("head")[0]); // document.head = <head> via WebKit
 uu = uumix(uufactory, {             // uu(expression:Jam/Node/NodeArray/String/window, arg1:Jam/Node/Mix = void, arg2:Mix = void, arg3:Mix = void, arg4:Mix = void):Jam/Instance
                                     //  [1][Class factory]   uu("MyClass", arg1, arg2) -> new uu.Clas.MyClass(arg1, arg2)
                                     //  [2][NodeSet factory] uu("div>ul>li", <body>) -> Jam
-    load:           uuload,         // uu.load(url:String):AjaxResultHash
+    ver:            _ver,           // uu.ver - Hash: detected version and plugin informations
+    bias:           _bias,          // uu.bias - Hash: detected browser bias informations
+    ie:             _ver.ie,
+    opera:          _ver.opera,
+    gecko:          _ver.gecko,
+    webkit:         _ver.webkit,
+    file:           uufile,         // uu.file(url:String):AjaxResultHash
     snippet:        uusnippet,      // uu.snippet(id:String, arg:Hash/Array):String/Mix
-    habits:         _habits,        // uu.habits - Hash: detected browser habits informations
-    ver:            _versions,      // uu.ver - Hash: detected version and plugin informations
-    ie:             _versions.ie,
-    opera:          _versions.opera,
-    gecko:          _versions.gecko,
-    webkit:         _versions.webkit,
     // --- TYPE ---
     like:           uulike,         // uu.like(lhs:Date/Hash/Fake/Array, rhs:Date/Hash/Fake/Array):Boolean
     type:     uumix(uutype, {       // uu.type(search:Mix, match:Number = 0):Boolean/Number
@@ -298,6 +299,12 @@ uu = uumix(uufactory, {             // uu(expression:Jam/Node/NodeArray/String/w
                                     //  [4][DateString to hash]      uu.date("2000-01-01T00:00:00[.000]Z") -> DateHash
                                     //  [5][ISO8601String to hash]   uu.date("2000-01-01T00:00:00[.000]Z") -> DateHash
                                     //  [6][RFC1123String to hash]   uu.date("Wed, 16 Sep 2009 16:18:14 GMT") -> DateHash
+    // --- IMAGE ---
+    image:    uumix(uuimage, {      // uu.image(url:String, callback:Function):Image
+        size:       uuimagesize
+    }),
+    // --- FLASH ---
+    flash:          uuflash,        // uu.flash(url:String, option:FlashOptionHash):Node
     // --- NUMBER ---
     guid:           uuguid,         // uu.guid():Number - build GUID
     // --- DEBUG ---
@@ -428,8 +435,8 @@ function uufactory(expression, // @param Jam/Node/NodeArray/String/window: expre
 }
 
 // --- reuqire file ---
-// uu.load - load file from Sjax
-function uuload(url) { // @param String: url
+// uu.file - load file from Sjax
+function uufile(url) { // @param String: url
                        // @return AjaxResultHash:
     var xhr, status = 400, ok = false;
 
@@ -962,9 +969,9 @@ function uuattr(node,    // @param Node:
 }
 uuattr.fix = uusplittohash(
 //{{{!mb
-    _habits.syntaxSugar ? "for,htmlFor,class,className" : // [IE6][IE7]
+    _bias.syntaxSugar ? "for,htmlFor,class,className" : // [IE6][IE7]
 //}}}!mb
-                          "className,class,htmlFor,for"
+                        "className,class,htmlFor,for"
 );
 
 //  [1][get all pair]   uu.data(node) -> { key: value, ... }
@@ -1156,13 +1163,13 @@ uutween.build = function(node, param) {
                 v0 = getOpacity(node);
 //{{{!mb
                 // init opacity [IE6][IE7][IE8]
-                _habits.opacity || setOpacity(node, v0);
+                _bias.opacity || setOpacity(node, v0);
 //}}}!mb
                 v1 = unitNormalize(v0, v1, parseFloat);
                 rv += uuformat('o=??;o=(o>0.999)?1:(o<0.001)?0:o;',
                                ezfn(v0, v1, ez));
 //{{{!mb
-                if (!_habits.opacity) { // [IE6][IE7][IE8]
+                if (!_bias.opacity) { // [IE6][IE7][IE8]
                     rv += uuformat('s.filter=((o>0&&o<1)?"alpha(??="+(o*100)+")":"");' +
                                    'f&&uu.css.setOpacity(n,??)&&(s.filter+=" ??");',
                                    w, v1, node.style.filter.replace(uutween.alpha, ""));
@@ -1231,7 +1238,7 @@ function uutweenisrunning(node) { // @param Node:
 function getOpacity(node) { // @param Node:
                             // @return Number: opacity (from 0.0 to 1.0)
 //{{{!mb
-    if (!_habits.opacity) {
+    if (!_bias.opacity) {
         var opacity = node[DATA_UUOPACITY]; // undefined or 1.0 ~ 2.0
 
         return opacity ? (opacity - 1): 1;
@@ -1249,7 +1256,7 @@ function setOpacity(node,      // @param Node:
     var style = node.style;
 
 //{{{!mb
-    if (!_habits.opacity) {
+    if (!_bias.opacity) {
         if (!node[DATA_UUOPACITY]) {
             // at first time
             if (uu.ver.ie67) { // [FIX][IE6][IE7]
@@ -1271,7 +1278,7 @@ function setOpacity(node,      // @param Node:
                             : (opacity < 0.001) ? 0 : opacity;
 
 //{{{!mb
-    if (!_habits.opacity) {
+    if (!_bias.opacity) {
         node[DATA_UUOPACITY] = opacity + 1; // (1.0 ~ 2.0)
         style.visibility = opacity ? "" : "hidden";
         style.filter = ((opacity > 0 && opacity < 1)
@@ -2064,7 +2071,7 @@ function uunodefind(parent,     // @param Node: parent node
         iters = uunodefind.iters[num > 4 ? num - 4 : num];
 
 //{{{!mb
-    if (_habits.traversal) {
+    if (_bias.traversal) {
 //}}}!mb
         rv = (num === 1 || num === 4) ? parent.parentNode[iters[0]]
                                       : parent[iters[0]];
@@ -2250,7 +2257,7 @@ function uunoderemove(node) { // @param Node:
 function uunodecount(parent) { // @param Node: parentNode
                                // @return Number
 //{{{!mb
-    if (_habits.traversal) {
+    if (_bias.traversal) {
 //}}}!mb
         return parent.childElementCount;
 //{{{!mb
@@ -2376,7 +2383,7 @@ function uutag(expression, // @param String: "*" or "tag"
                context) {  // @param Node(= document): query context
                            // @return NodeArray: [Node, ...]
 //{{{!mb
-    if (!_versions.ie) {
+    if (!_ver.ie) {
 //}}}!mb
         return fakeToArray((context || doc).getElementsByTagName(expression));
 //{{{!mb
@@ -2772,7 +2779,151 @@ function datehashrfc() { // @return RFC1123DateString: "Wed, 16 Sep 2009 16:18:1
     return rv;
 }
 
-// --- other ---
+// --- IMAGE ---
+// uu.image - image loader
+function uuimage(url,        // @param String:
+                 callback) { // @param Function: callback({ img, ok, url, status, width, height })
+                             //     ok     - Boolean: true is success
+                             //     img    - Object: image object
+                             //     status - Number: status code, 0(loading...),
+                             //                                   200(ok), 404(ng)
+                             //     width  - Number: width
+                             //     height - Number: height
+                             // @return Image:
+    function after(ok) {
+        var v, i = -1, ary = uuimage.fn[url].concat(),
+            arg = { img: img, status: ok ? 200 : 404, ok: ok,
+                    width: img.width, height: img.height };
+
+        uuimage.fn[url] = []; // pre clear
+        while ( (v = ary[++i]) ) {
+            v(arg);
+        }
+    }
+
+    var img = uuimage.db[url];
+
+    if (img) { // cached or scheduled
+        uuimage.fn[url].push(callback);
+        img.ok && after(true);
+    } else {
+        uuimage.db[url] = img = new Image();
+        uuimage.fn[url] = [callback];
+        img.ok = false;
+        img.onerror = function() {
+            img.width = img.height = 0;
+            after(img.ok = false);
+            img.onerror = img.onload = null;
+        };
+        img.onload = function() {
+            if (img.complete || img.readyState === "complete") { // [IE8] readyState
+                after(img.ok = true);
+            }
+            img.onerror = img.onload = null;
+        };
+        img.setAttribute("src", url);
+    }
+    return img;
+}
+uuimage.db = {}; // { url: Image, ... }
+uuimage.fn = {}; // { url: [callback, ...] }
+
+// uu.image.size - get image actual dimension
+function uuimagesize(node) { // @param HTMLImageElement/HTMLCanvasElement:
+                             // @return Hash: { width, height }
+    if (node.naturalWidth) { // [Gecko][WebKit]
+        return { width: node.naturalWidth, height: node.naturalHeight };
+    }
+//{{{!mb
+    // http://d.hatena.ne.jp/uupaa/20090602
+    var rs, rw, rh, w, h, hide, width = "width", height = "height";
+
+    if (node.src) { // HTMLImageElement
+        if (node[DATA_UUIMAGE] && node[DATA_UUIMAGE].src === node.src) {
+            return node[DATA_UUIMAGE];
+        }
+        if (uu.ie) { // [IE]
+            if (node.currentStyle) {
+                hide = node.currentStyle.display === "none";
+                hide && (node.style.display = "block");
+            }
+            rs = node.runtimeStyle;
+            w = rs[width], h = rs[height]; // keep runtimeStyle
+            rs[width] = rs[height] = "auto"; // override
+            rw = node[width];
+            rh = node[height];
+            rs[width] = w, rs[height] = h; // restore
+            hide && (node.style.display = "none");
+        } else { // [Opera]
+            w = node[width], h = node[height]; // keep current style
+            node.removeAttribute(width);
+            node.removeAttribute(height);
+            rw = node[width];
+            rh = node[height];
+            node[width] = w, node[height] = h; // restore
+        }
+        return node[DATA_UUIMAGE] = { width: rw, height: rh, src: node.src }; // bond
+    }
+//}}}!mb
+    return node;
+}
+
+// --- FLASH ---
+//  <object id="external..." width="..." height="..." data="***.swf"
+//      type="application/x-shockwave-flash">
+//      <param name="allowScriptAccess" value="always" />
+//      <param name="movie" value="{{url}}" />
+//      <param name="flashVars" value="uuexid={{id}}&key=value&..." />
+//      <embed name="external..." src="***.swf" width="..." height="..."
+//          type="application/x-shockwave-flash" allowScriptAccess="always">
+//      </embed>
+//  </object>
+// uu.flash - create flash <object> node
+function uuflash(url,      // @param String: url
+                 option) { // @param FlashOptionHash(= { allowScriptAccess: "always" }):
+                           // @return Node: <object>
+//{{{!mb
+    option = uuarg(option, {
+        id: "external" + uuguid(),
+        param: [],
+        width: "100%",
+        height: "100%",
+        marker: null,
+        flashVars: ""
+    });
+
+    var param = option.param, paramArray = [], i, iz, object;
+
+    // add default <param name="allowScriptAccess" value="always" />
+    if (param.indexOf("allowScriptAccess") < 0) {
+        param.push("allowScriptAccess", "always");
+    }
+
+    // add <param name="movie" value="{{url}}" />
+    param.push("movie", url);
+
+    // add <param name="flashVars" value="uuexid={{id}}&key=value&..." />
+    option.flashVars && (option.flashVars += "&");
+    option.flashVars += "uuexid=" + option.id;
+    param.push("flashVars", option.flashVars);
+
+    option.marker || (option.marker = uunodeadd()); // <body>...<div/></body>
+
+    for (i = 0, iz = param.length; i < iz; i += 2) {
+        paramArray.push(uuformat('<param name="??" value="??" />',
+                                 param[i], param[i + 1]));
+    }
+    object = uuformat(
+        '<object id="??" width="??" height="??" data="??" ??>??</object>',
+        option.id, option.width, option.height, url,
+        uu.ie ? 'classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000"'
+              : 'type="application/x-shockwave-flash"', paramArray.join(""));
+    uunodeswap(uunodebulk(object), option.marker);
+//}}}!mb
+    return uuid(option.id) || uu.node("object");
+}
+
+// --- OTHER ---
 // uu.viewport.size
 function uuviewportsize() { // @return Hash: { innerWidth, innerHeight,
                             //                 pageXOffset, pageYOffset }
@@ -3030,11 +3181,6 @@ uuevent.shortcut.forEach(function(eventType) {
 
 // inner - setup node builder - uu.div(), uu.a(), ...
 uutag.html4.forEach(function(tagName) {
-    // skip "img", "canvas"
-    if (tagName === "img" || tagName === "canvas") {
-        return;
-    }
-
     uu[tagName] = function() { // @param Mix: var_args
         return buildNode(tagName, arguments);
     };
@@ -3254,7 +3400,12 @@ function detectVersions(libraryVersion) { // @param Number: Library version
         return rex.test(userAgent);
     }
 
-    var rv = { library: libraryVersion, flash: 0, silverlight: 0 },
+    var o = true, x = false,
+        rv = { library: libraryVersion, flash: 0, silverlight: 0,
+               ie: x, ie6: x, ie7: x, ie8: x, ie9: x,
+               ie67: x, ie678: x, ie89: x, opera: x, gecko: x,
+               webkit: o, chrome: x, safari: o, iphone: o, android: x,
+               mobile: o, os: "iphone", jit: o },
         ie = !!doc.uniqueID, documentMode = doc.documentMode,
         userAgent = navigator.userAgent,
         render    = detectRenderingEngineVersion(userAgent),
@@ -3262,6 +3413,7 @@ function detectVersions(libraryVersion) { // @param Number: Library version
 
     rv.render       = render;
     rv.browser      = browser;
+//{{{!mb
     rv.ie           = ie;
     rv.ie6          = ie && browser === 6;
     rv.ie7          = ie && browser === 7;
@@ -3278,14 +3430,16 @@ function detectVersions(libraryVersion) { // @param Number: Library version
     rv.iphone       = test(/iPad|iPod|iPhone/);
     rv.android      = test(/Android/);
     rv.mobile       = rv.iphone || rv.android || test(/Opera Mini/);
-    rv.os           = test(/Win/) ? "windows"
+    rv.os           = rv.iphone ? "iphone"
+                    : rv.android ? "android"
+                    : test(/Win/) ? "windows"
                     : test(/Mac/) ? "mac"
-                    : test(/X11|Linux/) ? "unix" : "unknown";
+                    : test(/X11|Linux/) ? "unix"
+                    : "unknown";
     rv.jit          = (ie        && browser >= 9)   || // IE 9+
                       (rv.gecko  && render  >  1.9) || // Firefox 3.5+(1.91)
                       (rv.webkit && render  >= 528) || // Safari 4+, Google Chrome 2+
                       (rv.opera  && browser >= 10.5);  // Opera10.50+
-//{{{!mb
     rv.flash        = detectFlashPlayerVersion(ie, 9); // FlashPlayer 9+
     rv.silverlight  = detectSilverlightVersion(ie, 3); // Silverlight 3+
 //}}}!mb
@@ -3305,7 +3459,7 @@ function detectVersions(libraryVersion) { // @param Number: Library version
 //{{{!mb
 function fakeToArray(fakeArray) { // @param FakeArray: NodeList, Arguments
                                   // @return Array:
-    if (_habits.slice) {
+    if (_bias.slice) {
         return Array[PROTOTYPE].slice.call(fakeArray);
     }
 
@@ -3318,7 +3472,7 @@ function fakeToArray(fakeArray) { // @param FakeArray: NodeList, Arguments
 }
 //}}}!mb
 
-function detectHabits() {
+function detectBias() {
     var o = true, x = false,
 //{{{!mb
         div, node, style,
