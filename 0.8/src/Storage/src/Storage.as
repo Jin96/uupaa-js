@@ -21,7 +21,7 @@
             _DISK_SPACE = this.detectDiskSpace();
 
             var flashVars:Object = stage.loaderInfo.parameters;
-            var OBJECT_ID:String = flashVars.ExternalInterfaceObjectID;
+            var OBJECT_ID:String = flashVars.uuexid;
 
             trace(OBJECT_ID);
 

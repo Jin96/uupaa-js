@@ -50,7 +50,7 @@ function xboot() {
     uu.Class("Button", {
         handleEvent: function(event) {
             uu.text(uu.id("log"),
-                    uu.format("type:?, xtype:?, xbutton:?",
+                    uu.format("type:??, xtype:??, xbutton:??",
                               event.type, event.xtype, event.xbutton));
         }
     });
@@ -61,7 +61,7 @@ function xboot() {
             var edge = uu.event.getPaddingEdge(event);
 
             uu.text(uu.id("log"),
-                    uu.format("paddingEdgeX:?, paddingEdgeY:?, pageX:?, pageY:?",
+                    uu.format("paddingEdgeX:??, paddingEdgeY:??, pageX:??, pageY:??",
                                                     edge.x, edge.y,
                                                     event.pageX, event.pageY));
         }
@@ -70,7 +70,7 @@ function xboot() {
     uu.Class("Wheel", {
         handleEvent: function(event) {
             uu.text(uu.id("log"),
-                    uu.format("type:?, xtype:?, xwheel:?",
+                    uu.format("type:??, xtype:??, xwheel:??",
                               event.type, event.xtype, event.xwheel));
         }
     });
@@ -80,7 +80,7 @@ function xboot() {
             var keyCode = uu.event.getKeyCode(event);
 
             uu.text(uu.id("log"),
-                    uu.format("type:?, xtype:?, keyCode:?, key:?",
+                    uu.format("type:??, xtype:??, keyCode:??, key:??",
                               event.type, event.xtype, keyCode.code, keyCode.key));
         }
     });

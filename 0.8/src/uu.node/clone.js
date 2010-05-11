@@ -18,7 +18,7 @@ function uunodeclone(parent) { // @param Node: parent node
             handler = uu.data.handler, i, iz;
 
         // new nodeid
-        habits.copyNodeData && (clonedNode[DATA_UUGUID] = 0); // reset
+        bias.copyNodeData && (clonedNode[DATA_UUGUID] = 0); // reset
         uu.nodeid(clonedNode);
 
         // bind event
@@ -31,7 +31,7 @@ function uunodeclone(parent) { // @param Node: parent node
         }
 
         // clone UI state
-        if (!habits.copyUIState) {
+        if (!bias.copyUIState) {
             if (/^(?:checkbox|radio)$/.test(sourceNode.type || "")) {
                 clonedNode.checked = sourceNode.checked;
             }
@@ -67,10 +67,10 @@ function uunodeclone(parent) { // @param Node: parent node
         }
     }
 
-    var habits = uu.habits.cloneNode, rv;
+    var bias = uu.bias.cloneNode, rv;
 
     if (parent.nodeType === uu.node.ELEMENT_NODE) {
-        if (habits.copyEvent || habits.copyNodeData) {
+        if (bias.copyEvent || bias.copyNodeData) {
             rv = uu.div();
             rv.innerHTML = parent.cloneNode(true).outerHTML;
             reverseFetch(parent, rv);
@@ -120,7 +120,7 @@ uu.ready(function() {
                                 (button[nodeData].ref === clone[nodeData].ref);
     rv.copyUIState = button.checked && (button.checked === clone.checked);
 
-    uu.habits.cloneNode = rv;
+    uu.bias.cloneNode = rv;
 }, 2); // 2: High order
 
 })(uu);

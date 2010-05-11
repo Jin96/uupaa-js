@@ -32,7 +32,7 @@
 
             var flashVars:Object = stage.loaderInfo.parameters;
 
-            _OBJECT_ID = flashVars.ExternalInterfaceObjectID;
+            _OBJECT_ID = flashVars.uuexid;
             trace(_OBJECT_ID);
 
             ExternalInterface.call("uu.dmz." + _OBJECT_ID);
