@@ -17,13 +17,13 @@ uu.ver はブラウザやブラウザプラグイン等の情報を保持する�
   * uu.ver.ie9 - Boolean: Internet Explorer 9 で document.documentMode が 9 なら true になります。IE5,IE7,IE8互換表示モードでは false になります。
   * uu.ver.opera - Boolean: Opera, Opera Mini で true になります。
   * uu.ver.gecko - Boolean: Gecko ベースのブラウザ(Firefox等)で true になります。
-  * uu.ver.webkit - Boolean: WebKit ベースのブラウザ(Safari, iPhone, iPad, iPod, Android,  Google Chrome等)で true になります。
+  * uu.ver.webkit - Boolean: !WebKit ベースのブラウザ(Safari, iPhone, iPad, iPod, Android,  Google Chrome等)で true になります。
   * uu.ver.chrome - Boolean: Google Chrome で true になります。
   * uu.ver.safari - Boolean: Safari, iPhone, iPad, iPod, Android で true になります。
   * uu.ver.iphone - Boolean: iPhone, iPad, iPod で true になります。
   * uu.ver.android - Boolean: Android で true になります。
-  * uu.ver.mobile - Boolean: iPhone, iPad, iPod, Android, で true になります。
-    * Window Phone, Mobile Firefox(Fennec), Opera Mini では false になります。
+  * uu.ver.mobile - Boolean: iPhone, iPad, iPod, Android で true になります。
+    * Windows Phone, Mobile Firefox(Fennec), Opera Mini では false になります。
   * uu.ver.os - String: "iphone", "android", "windows", "mac", "unix", "unknown" を返します。
   * uu.ver.jit - Boolean: IE9+, Firefox3.5+, Safari4+, Google Chrome, Opera10.50+ で true になります。
   * uu.ver.browser - Number: ブラウザバージョンを返します。 [http://d.hatena.ne.jp/uupaa/20090603]
