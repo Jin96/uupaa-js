@@ -67,7 +67,7 @@ function uutest(testCase) { // @param Hash: { title: evaluator, ... }
     }
     iz && (ol.style.backgroundColor = "red");
 
-    uu.node.add(uu.div("class,score", uu.format("? / ?", ok, total)), info);
+    uu.node.add(uu.div("class,score", uu.format("?? / ??", ok, total)), info);
 }
 uutest.type = {}; // { operator: callback, ... }
 uutest.trimOperator = /NOT|!|IS/ig;
@@ -86,7 +86,7 @@ function one(title,       // @param String:
         if (result === 2) { // bad operator
             rv = [result, "bad operator: " + param[1]];
         } else {
-            rv = [result, uu.format("? ? ?", uu.json(param[0]), param[1],
+            rv = [result, uu.format("?? ?? ??", uu.json(param[0]), param[1],
                                     param[2] === void 0 ? "" : uu.json(param[2]))];
             callback = param[3] || param[2];
             uu.isFunction(callback) && callback(); // after callback

@@ -39,6 +39,7 @@ var _versions = detectVersions(0.7),
     // --- HTML5: EMBEDDING CUSTOM NON-VISIBLE DATA ---
     DATA_UUGUID = "data-uuguid",
     DATA_UUEVENT = "data-uuevent",
+    DATA_UUTWEEN = "data-uutween",
 //{{{!mb
     DATA_UUOPACITY = "data-uuopacity",
 //}}}!mb
@@ -152,6 +153,15 @@ uu = uumix(uufactory, {             // uu(expression:Jam/Node/NodeArray/String/w
                                     //  [4][convert pixel]   uu.toPixel(<div>, "12pt") -> 16
                                     //  [5][convert pixel]   uu.toPixel(<div>, "auto") -> 100
                                     //  [6][convert pixel]   uu.toPixel(<div>, "auto", 0, "borderTopWidth") -> 0
+    tween:    uumix(uutween, {      // uu.tween(node:Node, duration:Number, param:Hash, callback:Function = void):Node
+                                    //  [1][abs]            uu.tween(node, 500, { o: 0.5, x: 200 })
+                                    //  [2][rel]            uu.tween(node, 500, { o: "=+0.5" })
+                                    //  [3][with "px" unit] uu.tween(node, 500, { h: "=-100px" })
+                                    //  [4][with easing fn] uu.tween(node, 500, { h: [200, "easing function name"] })
+        skip:       uutweenskip,    // uu.tween.skip(node:Node = void, all:Boolean = false):Node/NodeArray
+        isRunning:                  // uu.tween.running(node:Node):Boolean
+                    uutweenisrunning
+    }),
     viewport: {
         size:       uuviewportsize, // uu.viewport.size():Hash { innerWidth, innerHeight, pageXOffset, pageYOffset }
         getOrientation:             // uu.viewport.getOrientation():Number (-90, 0, 90)
@@ -271,7 +281,7 @@ uu = uumix(uufactory, {             // uu(expression:Jam/Node/NodeArray/String/w
                                     //  [1][hash from string] uu.split.toHash("key,1,key2,1", ",") -> { key: 0, key2: 1 }
     }),
     format:         uuformat,       // uu.format(format:String, var_args, ...):String
-                                    // [1][placeholder] uu.format("? dogs and ?", 101, "cats") -> "101 dogs and cats"
+                                    // [1][placeholder] uu.format("?? dogs and ??", 101, "cats") -> "101 dogs and cats"
     entity:   uumix(uuentity, {     // uu.entity(str:String):String
         decode:     uuentitydecode  // uu.entity.decode(str:String):String
     }),
@@ -1028,28 +1038,16 @@ function uucss(node,    // @param Node:
                key,     // @param Boolean/String/Hash(= void): key
                value) { // @param String(= void): value
                         // @return Hash/String/Node:
-    var style, informal, formal, fix, care, getStyle = win.getComputedStyle;
+    var rv, style, informal, formal, fix, care, getStyle = win.getComputedStyle;
 
-    if (key === care) { // [1] uu.css(node)
+    if (key === care || key === true) { // [1][2] uu.css(node), uu.css(node, true)
 //{{{!mb
         if (getStyle) {
 //}}}!mb
             return getStyle(node, null);
 //{{{!mb
         }
-        return node.currentStyle || {};
-//}}}!mb
-    }
-
-    if (key === true) { // [2] uu.css(node, true)
-//{{{!mb
-        if (getStyle) {
-//}}}!mb
-            return getStyle(node, null);
-//{{{!mb
-        }
-        return !node.currentStyle ? {}
-                                  : _getComputedStyleIE(node);
+        return key ? _getComputedStyleIE(node) : node.currentStyle;
 //}}}!mb
     }
 
@@ -1087,6 +1085,147 @@ function uucss(node,    // @param Node:
 }
 uucss.care = { lineHeight: 1, fontWeight: 1,
                fontSizeAdjust: 1, zIndex: 1, zoom: 1 };
+
+// uu.tween - add queue
+function uutween(node,       // @param Node: animation target node
+                 duration,   // @param Number: duration (unit ms)
+                 param,      // @param Hash: { cssprop: endValue, ... }
+                             //           or { cssprop: [endValue, easing], ... }
+                             //           or { fps: 60, cssprop: ... }
+                             //    endValue - Number/String: end value,
+                             //    easing   - String(= void): easing function name, "easeInOutQuad"
+                             //    fps      - Number: fps
+                 callback) { // @param Function(= void 0): after callback(node, style)
+                             // @return Node:
+    function loop() {
+        var q = node[DATA_UUTWEEN].q[0],
+            tm = q.tm ? +new Date
+                      : (q.js = uutween.build(node, q.param), q.tm = +new Date),
+            finished = q.fin || (tm >= q.tm + q.dur);
+
+        q.js(node, node.style, finished, tm - q.tm, q.dur); // js(node, node.style, finished, gain, duration)
+        if (finished) { // finished
+            q.fn && q.fn(node, node.style); // after callback(node, node.style)
+            node[DATA_UUTWEEN].q.shift();       // remove first queue data
+            node[DATA_UUTWEEN].q.length ||      // stop timer
+                (clearInterval(node[DATA_UUTWEEN].id), node[DATA_UUTWEEN].id = 0);
+        }
+    }
+
+    node.style.overflow = "hidden";
+    node[DATA_UUTWEEN] || (node[DATA_UUTWEEN] = { q: [], id: 0 }); // init tween queue
+
+    // append queue data
+    node[DATA_UUTWEEN].q.push({ tm: 0, fn: callback, dur: Math.max(duration, 1),
+                                param: param, fin: 0 }); // true/1 is finished
+    // start timer
+    node[DATA_UUTWEEN].id ||
+        (node[DATA_UUTWEEN].id = setInterval(loop, ((1000 / param.fps) | 0) || 1));
+    return node;
+}
+uutween.props = { opacity: 1, color: 2, backgroundColor: 2,
+                  width: 3, height: 3, left: 4, top: 4 };
+uutween.alpha = /^alpha\([^\x29]+\) ?/;
+uutween.build = function(node, param) {
+    function ezfn(v0, v1, ez) {
+        return ez ? uuformat('Math.??(g,??,??,d)', ez, v0, v1 - v0)
+                  : uuformat('(t=g,b=??,c=??,(t/=d2)<1?c/2*t*t+b:-c/2*((--t)*(t-2)-1)+b)',
+                             v0, v1 - v0);
+    }
+    function unitNormalize(curt, end, fn) {
+        if (typeof end === "number") {
+            return end;
+        }
+        var operator = end.slice(0, 2);
+
+        return (operator === "+=") ? curt + fn(end.slice(2))
+             : (operator === "-=") ? curt - fn(end.slice(2)) : fn(end);
+    }
+
+    var rv = 'var t,b,c,d2=d/2,w,o,gd,h;',
+        i, v0, v1, ez, w, n, fixdb = uufix.db, cs = uucss(node, true);
+
+    for (i in param) {
+        if (i !== "fps") {
+            ez = 0;
+            Array.isArray(param[i]) ? (v1 = param[i][0], ez = param[i][1]) // val, easing
+                                    : (v1 = param[i]); // param.val
+
+            switch (n = uutween.props[w = fixdb[i] || i]) {
+            case 1: // opacity
+                v0 = getOpacity(node);
+//{{{!mb
+                // init opacity [IE6][IE7][IE8]
+                _habits.opacity || setOpacity(node, v0);
+//}}}!mb
+                v1 = unitNormalize(v0, v1, parseFloat);
+                rv += uuformat('o=??;o=(o>0.999)?1:(o<0.001)?0:o;',
+                               ezfn(v0, v1, ez));
+//{{{!mb
+                if (!_habits.opacity) { // [IE6][IE7][IE8]
+                    rv += uuformat('s.filter=((o>0&&o<1)?"alpha(??="+(o*100)+")":"");' +
+                                   'f&&uu.css.setOpacity(n,??)&&(s.filter+=" ??");',
+                                   w, v1, node.style.filter.replace(uutween.alpha, ""));
+                } else {
+//}}}!mb
+                    rv += uuformat('s.??=f? ??:o;', w, v1);
+//{{{!mb
+                }
+//}}}!mb
+                break;
+            case 2: // color, backgroundColor
+                v0 = uu.color(cs[w]); // depend: uu.color.js
+                v1 = uu.color(v1);    // depend: uu.color.js
+                rv += uuformat('gd=g/d;h=uu.hash.num2hh;s.??="#"+' +
+                               '(h[(f? ??:(??-??)*gd+??)|0]||0)+' +
+                               '(h[(f? ??:(??-??)*gd+??)|0]||0)+' +
+                               '(h[(f? ??:(??-??)*gd+??)|0]||0);',
+                               w, v1.r, v1.r, v0.r, v0.r,
+                                  v1.g, v1.g, v0.g, v0.g,
+                                  v1.b, v1.b, v0.b, v0.b);
+                break;
+            case 3: // width, height:
+                v0 = parseInt(cs[w]) || 0;
+                v1 = unitNormalize(v0, v1, parseInt);
+                rv += uuformat('w=f? ??:??;w=w<0?0:w;s.??=w+"px";',
+                               v1, ezfn(v0, v1, ez), w);
+                break;
+            default: // top, left, other...
+                if (n === 4) {
+                    v0 = (w === "top") ? node.offsetTop : node.offsetLeft;
+                } else {
+                    v0 = parseInt(cs[w]) || 0;
+                }
+                v1 = unitNormalize(v0, v1, parseInt);
+                rv += uuformat('s.??=(f? ??:??)+"px";',
+                               w, v1, ezfn(v0, v1, ez));
+            }
+        }
+    }
+    return new Function("n,s,f,g,d", rv); // node, node.style, finished, gain, duration
+};
+
+// uu.tween.skip
+function uutweenskip(node,  // @param Node(= void 0): void 0 is all node
+                     all) { // @param Boolean(= false): true is skip all
+                            // @return Node/NodeArray:
+    var nodeArray = node ? [node] : uutag("*", doc.body), v, i = -1, j, jz;
+
+    while( (v = nodeArray[++i]) ) {
+        if (v[DATA_UUTWEEN].id) {
+            for (j = 0, jz = all ? v[DATA_UUTWEEN].q.length : 1; j < jz; ++j) {
+                v[DATA_UUTWEEN].q[j].fin = 1; // finished bit
+            }
+        }
+    }
+    return node || nodeArray;
+}
+
+// uu.tween.isRunning
+function uutweenisrunning(node) { // @param Node:
+                                  // @return Boolean:
+    return !!node[DATA_UUTWEEN].id;
+}
 
 // uu.css.getOpacity
 function getOpacity(node) { // @param Node:
@@ -1333,7 +1472,8 @@ _getComputedStyleIE.getProps = (function(props) {
         js.push(prop + ":style." + prop); // "{{prop}}: style.{{prop}}"
     }
     return new Function("style", "return {" + js.join(",") + "}");
-})( ("borderBottomColor,borderBottomStyle,borderLeftColor,borderLeftStyle," +
+})( ("backgroundColor,backgroundImage,backgroundPosition,backgroundRepeat," +
+     "borderBottomColor,borderBottomStyle,borderLeftColor,borderLeftStyle," +
      "borderRightColor,borderRightStyle,borderTopColor,borderTopStyle," +
      "bottom,clear,clipBottom,clipLeft,clipRight,clipTop,color,cursor," +
      "direction,display,fontFamily,fontSize,fontStyle,fontWeight," +
@@ -1672,7 +1812,7 @@ uuevent.xtypes = {
     mousedown: 1, mouseup: 2, mousemove: 3, mousewheel: 4, click: 5,
     dblclick: 6, keydown: 7, keypress: 8, keyup: 9, mouseenter: 10,
     mouseleave: 11, mouseover: 12, mouseout: 13, contextmenu: 14,
-    focus: 15, blur: 16, resize: 17, scroll: 18,
+    focus: 15, blur: 16, resize: 17, scroll: 18, change: 19, submit: 20,
 
     // iPhone Events
     touchstart: 32, touchend: 33, touchmove: 34, touchcancel: 35,
@@ -1682,6 +1822,9 @@ uuevent.xtypes = {
     // HTML5 Events
     online: 50, offline: 51, message: 52
 };
+uuevent.shortcut =
+    ("mousedown,mouseup,mousemove,mousewheel,click,dblclick,keydown," +
+     "keypress,keyup,change,submit,focus,blur,contextmenu").split(",")
 
 // uu.event.getKeyCode - get key and keyCode (cross browse keyCode)
 function getKeyCode(event) { // @param EventObjectEx:
@@ -2181,7 +2324,7 @@ function uutext(node,   // @param Node/String: node or text string
 }
 
 // uu.textf - uu.text + uu.format
-function uutextf(format) { // @param String: formatted string with "?" placeholder
+function uutextf(format) { // @param String: formatted string with "??" placeholder
                            // @return TextNode: <text>formatted string</text>
     return uutext(uuformat.apply(this, arguments));
 }
@@ -2410,10 +2553,10 @@ _entity.to   = /[&<>"]/g;
 _entity.from = /&(?:amp|lt|gt|quot);/g;
 _entity.hash = uusplittohash('&,&amp;,<,&lt;,>,&gt;,",&quot;,&amp;,&,&lt;,<,&gt;,>,&quot;,"');
 
-// [1][placeholder]             uu.format("? dogs and ?", 101, "cats") -> "101 dogs and cats"
+// [1][placeholder]             uu.format("?? dogs and ??", 101, "cats") -> "101 dogs and cats"
 
-// uu.format - placeholder( "?" ) replacement
-function uuformat(format) { // @param String: formatted string with "?" placeholder
+// uu.format - placeholder( "??" ) replacement
+function uuformat(format) { // @param String: formatted string with "??" placeholder
                             // @return String: "formatted string"
     var i = 0, args = arguments;
 
@@ -2421,7 +2564,7 @@ function uuformat(format) { // @param String: formatted string with "?" placehol
         return args[++i];
     });
 }
-uuformat.q = /\?/g;
+uuformat.q = /\?\?/g;
 
 // --- debug ---
 // uu.puff - uu.puff(mix) -> alert( uu.json(mix) )
@@ -2610,9 +2753,9 @@ function datehashiso() { // @return ISO8601DateString: "2000-01-01T00:00:00.000Z
                 : (this.ms < 100) ? "0" : "",
         dd = uuhash.num2dd;
 
-    return uuformat("?-?-?T?:?:?.?Z", this.Y, dd[this.M], dd[this.D],
-                                      dd[this.h], dd[this.m], dd[this.s],
-                                      padZero + this.ms);
+    return uuformat("??-??-??T??:??:??.??Z",
+                    this.Y, dd[this.M], dd[this.D],
+                    dd[this.h], dd[this.m], dd[this.s], padZero + this.ms);
 }
 
 // DateHash.RFC - encode DateHash To RFC1123String
@@ -2875,9 +3018,7 @@ function outerhtmlsetter(html) {
 // --- initialize ---
 
 // inner - build DOM Lv2 event handler - uu.click(), ...
-("mousedown,mouseup,mousemove,mousewheel,click,dblclick,keydown,keypress,keyup," +
- "change,submit,focus,blur,contextmenu").split(",").forEach(function(eventType) {
-
+uuevent.shortcut.forEach(function(eventType) {
     uu[eventType] = function(node, fn) { // uu.click(node, fn) -> node
         return uuevent(node, eventType, fn); // bind
     };
@@ -3198,7 +3339,7 @@ function detectHabits() {
 //{{{!mb
     div = uunode();
     div.innerHTML =
-        '<a href="/z" class="a" style="border:0 solid transparent;opacity:0.1;' +
+        '<a href="/z" class="a" style="border:0 solid transparent;opacity:.1;' +
         'color:rgb(255,0,0);background:hsla(100,100%,100%,1)"><!-- -->c</a>';
     node = div.firstChild;
     style = node.style;

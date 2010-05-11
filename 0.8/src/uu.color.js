@@ -265,7 +265,7 @@ function ColorHashHSVA() { // @return HSVAHash: { h:360, s:100, v:100, a:1.0 }
 
 // HSVAHash.toString
 function HSVAHashToString() {
-    return uu.format("hsva(?,?%,?%,?)", this.h | 0, this.s, this.v, this.a);
+    return uu.format("hsva(??,??%,??%,??)", this.h | 0, this.s, this.v, this.a);
 }
 
 // hsvaToColorHash
@@ -336,7 +336,7 @@ function ColorHashHSLA() { // @return HSLAHash: { h, s, l, a }
 
 // HSLAHash.toString
 function HSLAHashToString() {
-    return uu.format("hsla(?,?%,?%,?)", this.h | 0, this.s, this.l, this.a);
+    return uu.format("hsla(??,??%,??%,??)", this.h | 0, this.s, this.l, this.a);
 }
 
 // hslaToColorHash - ( h: 0-360, s: 0-100%, l: 0-100%, a: alpha )
