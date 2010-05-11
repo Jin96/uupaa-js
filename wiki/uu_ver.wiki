@@ -6,8 +6,8 @@ uu.ver はブラウザやブラウザプラグイン等の情報を保持する�
 
   * uu.ver.library - Number: uupaa.js のバージョン番号です。
     * 0.81 は major=0, minor=8, revision=1 を表現しています。
-  * uu.ver.flash - Number: [FlashPlayer] のバージョン番号です。0 または 9以上の値になります。
-    * [FlashPlayer] が利用できないか、version 8以下がインストールされている場合は 0 になります。
+  * uu.ver.flash - Number: !FlashPlayer のバージョン番号です。0 または 9以上の値になります。
+    * !FlashPlayer が利用できないか、version 8以下がインストールされている場合は 0 になります。
   * uu.ver.silverlight - Number: Silverlight のバージョン番号です。0 または 3以上の値になります。
     * Silverlight が利用できないか、version 2以下がインストールされている場合は 0 になります。
   * uu.ver.ie - Boolean: Internet Explorer で true になります。
