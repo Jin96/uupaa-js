@@ -1105,7 +1105,7 @@ function uutween(node,       // @param Node: animation target node
                  callback) { // @param Function(= void 0): after callback(node, style)
                              // @return Node:
     function loop() {
-        var q = node[DATA_UUTWEEN].q[0],
+        var data = node[DATA_UUTWEEN], q = data.q[0],
             tm = q.tm ? +new Date
                       : (q.js = uutween.build(node, q.param), q.tm = +new Date),
             finished = q.fin || (tm >= q.tm + q.dur);
@@ -1113,21 +1113,20 @@ function uutween(node,       // @param Node: animation target node
         q.js(node, node.style, finished, tm - q.tm, q.dur); // js(node, node.style, finished, gain, duration)
         if (finished) { // finished
             q.fn && q.fn(node, node.style); // after callback(node, node.style)
-            node[DATA_UUTWEEN].q.shift();       // remove first queue data
-            node[DATA_UUTWEEN].q.length ||      // stop timer
-                (clearInterval(node[DATA_UUTWEEN].id), node[DATA_UUTWEEN].id = 0);
+            data.q.shift(); // remove first queue data
+            data.q.length || (clearInterval(data.id), data.id = 0);
         }
     }
 
+    var data = node[DATA_UUTWEEN];
+
     node.style.overflow = "hidden";
-    node[DATA_UUTWEEN] || (node[DATA_UUTWEEN] = { q: [], id: 0 }); // init tween queue
+    data || (node[DATA_UUTWEEN] = data = { q: [], id: 0 }); // init tween queue
 
     // append queue data
-    node[DATA_UUTWEEN].q.push({ tm: 0, fn: callback, dur: Math.max(duration, 1),
-                                param: param, fin: 0 }); // true/1 is finished
-    // start timer
-    node[DATA_UUTWEEN].id ||
-        (node[DATA_UUTWEEN].id = setInterval(loop, ((1000 / param.fps) | 0) || 1));
+    data.q.push({ tm: 0, fn: callback, dur: Math.max(duration, 1),
+                  param: param, fin: 0 }); // true/1 is finished
+    data.id || (data.id = setInterval(loop, ((1000 / param.fps) | 0) || 1));
     return node;
 }
 uutween.props = { opacity: 1, color: 2, backgroundColor: 2,
@@ -1216,12 +1215,14 @@ uutween.build = function(node, param) {
 function uutweenskip(node,  // @param Node(= void 0): void 0 is all node
                      all) { // @param Boolean(= false): true is skip all
                             // @return Node/NodeArray:
-    var nodeArray = node ? [node] : uutag("*", doc.body), v, i = -1, j, jz;
+    var nodeArray = node ? [node] : uutag("*", doc.body),
+        v, i = -1, j, jz, data;
 
     while( (v = nodeArray[++i]) ) {
-        if (v[DATA_UUTWEEN].id) {
-            for (j = 0, jz = all ? v[DATA_UUTWEEN].q.length : 1; j < jz; ++j) {
-                v[DATA_UUTWEEN].q[j].fin = 1; // finished bit
+        data = v[DATA_UUTWEEN];
+        if (data && data.id) {
+            for (j = 0, jz = all ? data.q.length : 1; j < jz; ++j) {
+                data.q[j].fin = 1; // finished bit
             }
         }
     }
@@ -1231,7 +1232,9 @@ function uutweenskip(node,  // @param Node(= void 0): void 0 is all node
 // uu.tween.isRunning
 function uutweenisrunning(node) { // @param Node:
                                   // @return Boolean:
-    return !!node[DATA_UUTWEEN].id;
+    var data = node[DATA_UUTWEEN];
+
+    return data && data.id;
 }
 
 // uu.css.getOpacity
