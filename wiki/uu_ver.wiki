@@ -1,0 +1,35 @@
+#summary uu.ver はブラウザやブラウザプラグイン等の情報を保持します
+
+uu.ver はブラウザやブラウザプラグイン等の情報を保持するオブジェクトです。
+
+= uu.ver properties =
+
+  * uu.ver.library - Number: uupaa.js のバージョン番号です。
+    * uu.ver.library = 0.81 は major version が 0, minor version が 8, revision が 1 を意味します。
+  * uu.ver.flash - Number: FlashPlayer のバージョン番号です。0 または 9以上の値になります。
+    * FlashPlayer が利用できないか、version 8以下がインストールされている場合は 0 になります。
+  * uu.ver.silverlight - Number: Silverlight のバージョン番号です。0 または 3以上の値になります。
+    * Silverlight が利用できないか、version 2以下がインストールされている場合は 0 になります。
+  * uu.ver.ie - Boolean: Internet Explorer で true になります。
+  * uu.ver.ie6 - Boolean: Internet Explorer 6 で true になります。
+  * uu.ver.ie7 - Boolean: Internet Explorer 7 で true になります。
+  * uu.ver.ie8 - Boolean: Internet Explorer 8 で document.documentMode が 8 なら true になります。IE5,IE7互換表示モードでは false になります。
+  * uu.ver.ie9 - Boolean: Internet Explorer 9 で document.documentMode が 9 なら true になります。IE5,IE7,IE8互換表示モードでは false になります。
+  * uu.ver.opera - Boolean: Opera, Opera Mini で true になります。
+  * uu.ver.gecko - Boolean: Gecko ベースのブラウザ(Firefox等)で true になります。
+  * uu.ver.webkit - Boolean: WebKit ベースのブラウザ(Safari, iPhone, iPad, iPod, Android,  Google Chrome等)で true になります。
+  * uu.ver.chrome - Boolean: Google Chrome で true になります。
+  * uu.ver.safari - Boolean: Safari, iPhone, iPad, iPod, Android で true になります。
+  * uu.ver.iphone - Boolean: iPhone, iPad, iPod で true になります。
+  * uu.ver.android - Boolean: Android で true になります。
+  * uu.ver.mobile - Boolean: iPhone, iPad, iPod, Android, で true になります。
+    * Window Phone, Mobile Firefox(Fennec), Opera Mini では false になります。
+  * uu.ver.os - String: "iphone", "android", "windows", "mac", "unix", "unknown" を返します。
+  * uu.ver.jit - Boolean: IE9+, Firefox3.5+, Safari4+, Google Chrome, Opera10.50+ で true になります。
+  * uu.ver.browser - Number: ブラウザバージョンを返します。 [http://d.hatena.ne.jp/uupaa/20090603]
+  * uu.ver.render - Number: レンダリングエンジンのバージョンを返します。
+[http://d.hatena.ne.jp/uupaa/20090603]
+
+= uu.ver methods =
+  * uu.ver.valueOf() - Number: uu.ver.browser を返します。
+    * if (uu.ver.ie && uu.ver < 9) {...} とすると、uu.ver.valueOf()が暗黙のうちに呼ばれるため、 if (uu.ver.ie6 || uu.ver.ie7 || uu.ver.ie8) {...} と同じ結果になります。
