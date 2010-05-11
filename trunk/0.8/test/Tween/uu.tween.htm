@@ -62,15 +62,10 @@ function xskip() {
 function xfinish() {
     uu.tween.skip(0, 1);
 }
-
-function xlog() {
-    uu.puff(log);
-}
-
 </script>
 </head><body>
-<input type="button" value="skip" onclick="xskip()" />
-<input type="button" value="finish" onclick="xfinish()" />
-<input type="button" value="add queue" onclick="xaddqueue()" />
+<input type="button" value="uu.tween() - add queue" onclick="xaddqueue()" />
+<input type="button" value="uu.tween.skip() - skip" onclick="xskip()" />
+<input type="button" value="uu.tween.skip(0,1) - finish all" onclick="xfinish()" />
 
 </body></html>
