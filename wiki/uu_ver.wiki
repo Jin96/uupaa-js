@@ -2,12 +2,12 @@
 
 uu.ver はブラウザやブラウザプラグイン等の情報を保持するオブジェクトです。
 
-= uu.ver properties =
+= uu.ver - properties =
 
   * uu.ver.library - Number: uupaa.js のバージョン番号です。
-    * uu.ver.library = 0.81 は major version が 0, minor version が 8, revision が 1 を意味します。
-  * uu.ver.flash - Number: FlashPlayer のバージョン番号です。0 または 9以上の値になります。
-    * FlashPlayer が利用できないか、version 8以下がインストールされている場合は 0 になります。
+    * 0.81 は major=0, minor=8, revision=1 を表現しています。
+  * uu.ver.flash - Number: [FlashPlayer] のバージョン番号です。0 または 9以上の値になります。
+    * [FlashPlayer] が利用できないか、version 8以下がインストールされている場合は 0 になります。
   * uu.ver.silverlight - Number: Silverlight のバージョン番号です。0 または 3以上の値になります。
     * Silverlight が利用できないか、version 2以下がインストールされている場合は 0 になります。
   * uu.ver.ie - Boolean: Internet Explorer で true になります。
@@ -27,9 +27,8 @@ uu.ver はブラウザやブラウザプラグイン等の情報を保持する�
   * uu.ver.os - String: "iphone", "android", "windows", "mac", "unix", "unknown" を返します。
   * uu.ver.jit - Boolean: IE9+, Firefox3.5+, Safari4+, Google Chrome, Opera10.50+ で true になります。
   * uu.ver.browser - Number: ブラウザバージョンを返します。 [http://d.hatena.ne.jp/uupaa/20090603]
-  * uu.ver.render - Number: レンダリングエンジンのバージョンを返します。
-[http://d.hatena.ne.jp/uupaa/20090603]
+  * uu.ver.render - Number: レンダリングエンジンのバージョンを返します。[http://d.hatena.ne.jp/uupaa/20090603]
 
-= uu.ver methods =
+= uu.ver - methods =
   * uu.ver.valueOf() - Number: uu.ver.browser を返します。
-    * if (uu.ver.ie && uu.ver < 9) {...} とすると、uu.ver.valueOf()が暗黙のうちに呼ばれるため、 if (uu.ver.ie6 || uu.ver.ie7 || uu.ver.ie8) {...} と同じ結果になります。
+    * if (uu.ver.ie && uu.ver < 9) {} とすると、uu.ver.valueOf()が自動的に評価され、if (uu.ver.ie6 `||` uu.ver.ie7 `||` uu.ver.ie8) {} と同じ結果になります。
