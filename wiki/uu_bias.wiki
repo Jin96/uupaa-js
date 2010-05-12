@@ -1,0 +1,27 @@
+#summary uu.bias はブラウザの癖や互換性に関する情報を保持するオブジェクトです。
+
+= uu.bias - properties =
+  * uu.bias.color.rgb - Boolean: { color: rgb(0,0,0) } をサポートするブラウザで true になります。
+  * uu.bias.color.rgba - Boolean: { color: rgba(0,0,0,0) } をサポートするブラウザで true になります。
+  * uu.bias.color.hsla - Boolean: { color: hsla(0,0%,0%,0) } をサポートするブラウザで true になります。
+  * uu.bias.color.transparent - Boolean: { color: transparent } をサポートするブラウザで true になります。
+    * Opera9.2x では false になります。
+  * uu.bias.border.rgb - Boolean: { border-color: rgb(0,0,0) } をサポートするブラウザで true になります。
+  * uu.bias.border.rgba - Boolean: { border-color: rgba(0,0,0,0) } をサポートするブラウザで true になります。
+  * uu.bias.border.hsla - Boolean: { border-color: hsla(0,0%,0%,0) } をサポートするブラウザで true になります。
+  * uu.bias.border.transparent - Boolean: { border-color: transparent } をサポートするブラウザで true になります。
+    * IE6 では false になります。
+  * uu.bias.background.rgb - Boolean: { background: rgb(0,0,0) } をサポートするブラウザで true になります。
+  * uu.bias.background.rgba - Boolean: { background: rgba(0,0,0,0) } をサポートするブラウザで true になります。
+  * uu.bias.background.hsla - Boolean: { background: hsla(0,0%,0%,0) } をサポートするブラウザで true になります。
+  * uu.bias.background.transparent - Boolean: { background: transparent } をサポートするブラウザで true になります。
+  * uu.bias.slice - Boolean: Array.prototype.slice.call(NodeList) をサポートするブラウザで true になります。
+    * IE や 古い Opera では false になります。
+  * uu.bias.indexer - Boolean: String[indexer] をサポートするブラウザで true になります。
+    * IE6, IE7 では false になります。false なブラウザでは "abc"[1] で undefined が返ります。
+  * uu.bias.opacity - Boolean: { opacity: 1.0 } をサポートするブラウザで true になります。
+    * IE6, IE7, IE8, Opera9.2x で false になります。
+  * uu.bias.traversal - Boolean: Element Traversal( http://www.w3.org/TR/ElementTraversal/ ) をサポートするブラウザで true になります。
+    * Firefox3.0, IE6, IE7, IE8, IE9, Opera9.2x で false になります。false なブラウザでは、node.firstElementChild などが undefined になります。
+  * uu.bias.tamperedURL - Boolean: {{{<a href="...">}}} の href属性の値を、ブラウザが完全URLに展開してしまう場合に true になります。
+    * IE6, IE7, IE8 で true になります。IE では node.getAttribute("href", 2) とすることで相対URLを取得できます。
