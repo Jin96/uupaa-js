@@ -1,4 +1,4 @@
-#summary uu.ver はブラウザやブラウザプラグイン等の情報を保持するオブジェクトです。
+#summary uu.ver はブラウザやブラウザプラグイン等の情報を保持するオブジェクトです
 
 = uu.ver - properties =
 
