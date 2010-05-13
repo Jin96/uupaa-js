@@ -8,7 +8,8 @@ uu.node.clone || (function(uu) {
 uu.node.clone = uunodeclone;  // uu.node.clone(parent:Node):Node
 
 var DATA_UUGUID = "data-uuguid",
-    DATA_UUEVENT = "data-uuevent";
+    DATA_UUEVENT = "data-uuevent",
+    _ready;
 
 // uu.node.clone - clone node, clone data, clone attached events
 function uunodeclone(parent) { // @param Node: parent node
@@ -18,7 +19,7 @@ function uunodeclone(parent) { // @param Node: parent node
             handler = uu.data.handler, i, iz;
 
         // new nodeid
-        bias.copyNodeData && (clonedNode[DATA_UUGUID] = 0); // reset
+        _ready.copyNodeData && (clonedNode[DATA_UUGUID] = 0); // reset
         uu.nodeid(clonedNode);
 
         // bind event
@@ -31,7 +32,7 @@ function uunodeclone(parent) { // @param Node: parent node
         }
 
         // clone UI state
-        if (!bias.copyUIState) {
+        if (!_ready.copyUIState) {
             if (/^(?:checkbox|radio)$/.test(sourceNode.type || "")) {
                 clonedNode.checked = sourceNode.checked;
             }
@@ -47,7 +48,7 @@ function uunodeclone(parent) { // @param Node: parent node
 
     function drillDown(node, clone) { // recursive
         for (; node; node = node.nextSibling) {
-            if (node.nodeType === uu.node.ELEMENT_NODE) {
+            if (node.nodeType === 1) { // 1: ELEMENT_NODE
                 cloneData(node, clone);
                 drillDown(node.firstChild, clone.firstChild);
             }
@@ -67,10 +68,10 @@ function uunodeclone(parent) { // @param Node: parent node
         }
     }
 
-    var bias = uu.bias.cloneNode, rv;
+    var rv;
 
-    if (parent.nodeType === uu.node.ELEMENT_NODE) {
-        if (bias.copyEvent || bias.copyNodeData) {
+    if (parent.nodeType === 1) { // 1: ELEMENT_NODE
+        if (_ready.copyEvent || _ready.copyNodeData) {
             rv = uu.div();
             rv.innerHTML = parent.cloneNode(true).outerHTML;
             reverseFetch(parent, rv);
@@ -85,13 +86,14 @@ function uunodeclone(parent) { // @param Node: parent node
 
 uu.ready(function() {
     var o = true, x = false,
-        button, clone, evt, fired = 0, nodeData = "data-mydata",
-        rv = {
-            copyAttr: o,        //  copy node.setAttribute(attr)
-            copyEvent: x,       //  copy node.addEventListener/attachEvent("click") [IE6][IE7][IE8]
-            copyUIState: x,     //  copy node.checked
-            copyNodeData: x     //  copy node["data-***"] [IE6][IE7][IE8][IE9]
-        };
+        button, clone, evt, fired = 0, nodeData = "data-mydata";
+
+    _ready = {
+        copyAttr: o,        //  copy node.setAttribute(attr)
+        copyEvent: x,       //  copy node.addEventListener/attachEvent("click") [IE6][IE7][IE8]
+        copyUIState: x,     //  copy node.checked
+        copyNodeData: x     //  copy node["data-***"] [IE6][IE7][IE8][IE9]
+    };
 
     button = uu.node("input", { type: "checkbox", checked: o });
     button.setAttribute("Z", "1");
@@ -114,13 +116,11 @@ uu.ready(function() {
     }
     clone[nodeData] && (clone[nodeData].ref = 2);
 
-    rv.copyAttr = button.getAttribute("Z") === clone.getAttribute("Z");
-    rv.copyEvent = !!fired;
-    rv.copyNodeData = clone[nodeData] &&
+    _ready.copyAttr = button.getAttribute("Z") === clone.getAttribute("Z");
+    _ready.copyEvent = !!fired;
+    _ready.copyNodeData = clone[nodeData] &&
                                 (button[nodeData].ref === clone[nodeData].ref);
-    rv.copyUIState = button.checked && (button.checked === clone.checked);
-
-    uu.bias.cloneNode = rv;
+    _ready.copyUIState = button.checked && (button.checked === clone.checked);
 }, 2); // 2: High order
 
 })(uu);

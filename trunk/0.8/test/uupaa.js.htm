@@ -1,25 +1,23 @@
 <!doctype html><html class="ifnojs addua addos"><head><meta charset="UTF-8" />
 <title></title>
 <style>
-.unittest ol { background-color:dodgerblue;color:white }
-.unittest li { padding:5px;border:1px solid #ccc }
-.unittest .li0 { background-color:red   }
-.unittest .li1 { background-color:green }
-.unittest .li2 { background-color:red   }
-.unittest .li3 { background-color:#0c0  }
-.unittestinfo { position:fixed;top:10px;right:10px;font-size:xx-large }
-.unittestinfo a { border: 3px outset gray;padding:3px;background-color:red;color:white }
-.unittestinfo .score { color:black;text-shadow:gray 1px 1px 1px }
-.unittestinfo .ngzone {}
+.uutest ol { background-color:dodgerblue;color:white }
+.uutest li { padding:5px;border:1px solid #ccc }
+.uutest .li0 { background-color:red   }
+.uutest .li1 { background-color:green }
+.uutest .li2 { background-color:red   }
+.uutest .li3 { background-color:#0c0  }
+.uutestinfo { position:fixed;top:10px;right:10px;font-size:xx-large }
+.uutestinfo a { border: 3px outset gray;padding:3px;background-color:red;color:white }
+.uutestinfo .score { color:black;text-shadow:gray 1px 1px 1px }
+.uutestinfo .ngzone {}
 </style>
 
 <script src="../src/uupaa.js"></script>
 <script src="../src/Codec/uu.Class.Codec.js"></script>
-<script src="../src/uu.string.js"></script>
-<script src="../src/uu.css.js"></script>
-<script src="../src/uu.query.js"></script>
-<script src="../src/uu.url.js"></script>
-<script src="../src/uu.img.js"></script>
+<script src="../src/CSS/uu.css.js"></script>
+<script src="../src/Query/uu.query.js"></script>
+<script src="../src/Ajax/uu.url.js"></script>
 <script src="../src/uu.test.js"></script>
 </head><body>
 <div style="display:none">
@@ -31,7 +29,7 @@
     <table><tr id="_tr" rowspan="2"><td id="_td" colspan="2">aa</td></tr></table>
 </div>
 <script>
-function xboot(uu) {
+function xready(uu) {
   uu.test({
     "uu.array()": "",
       "[1][through] uu.array([1,2]) は引数で与えられた [1,2] をそのまま返す(複製しない)": function() {
@@ -639,13 +637,13 @@ function xboot(uu) {
         return [uu.fix("float"), "==", uu.ie ? "styleFloat" : "cssFloat"];
       },
       'uu.fix("for") == "for"': function() {
-        if (uu.ver.ie67) {
+        if (uu.ver.ie6 || uu.ver.ie7) {
             return [uu.fix("for"), "!=", "for"];
         }
         return [uu.fix("for"), "==", "for"];
       },
       'uu.fix("htmlFor") == "for"': function() {
-        if (uu.ver.ie67) {
+        if (uu.ver.ie6 || uu.ver.ie7) {
             return [uu.fix("htmlFor"), "!=", "for"];
         }
         return [uu.fix("htmlFor"), "==", "for"];
