@@ -1,9 +1,20 @@
-#summary uu.ready はブラウザの癖や互換性に関する情報を保持するオブジェクトです。
+#summary uu.ready は状態や互換性に関する情報を保持するオブジェクトです。
 
 = uu.ready - properties =
 
+== event status ==
+||                                                              || *initial value* ||
+|| *uu.ready.dom*         <br/>DOMContentLoaded event fired     || false           ||
+|| *uu.ready.window*      <br/>window.onload event fired        || false           ||
+|| *uu.ready.audio*       <br/>`<`audio`>` ready event fired    || false           ||
+|| *uu.ready.video*       <br/>`<`video`>` ready event fired    || false           ||
+|| *uu.ready.canvas*      <br/>`<`canvas`>` ready event fired   || false           ||
+|| *uu.ready.storage*     <br/>window.localStorage ready event fired  || false           ||
+|| *uu.ready.reload*      <br/>cache reload event fired         || false           ||
+
+== function status ==
 o = true, space = false
-|| *uu.ready*                                                                || *IE6* || *IE7* || *IE8* || *IE9*    || *Gecko1.9.0+* || *!WebKit525+* || *Opera9.5+* ||
+||                                                                           || *IE6* || *IE7* || *IE8* || *IE9*    || *Gecko1.9.0+* || *!WebKit525+* || *Opera9.5+* ||
 || *uu.ready.color.rgba*  <br/>support { color: rgba(0,0,0,0) }              ||       ||       ||       || o        || o         || o        || o(10+)   ||
 || *uu.ready.color.hsla*  <br/>support { color: hsla(0,0%,0%,0) }            ||       ||       ||       ||          || o         || o        || o(10+)   ||
 || *uu.ready.color.transparent*  <br/>support { color: transparent }         ||       ||       ||       || o        || o         || o        || o(10+)   ||
@@ -36,3 +47,12 @@ o = true, space = false
   * Safari3.1 (!WebKit525)
   * Safari4.0 (!WebKit528)
   * Google Chrome 1.0 (!WebKit528)
+
+= uu.ready - methods =
+
+== uu.ready ==
+uu.ready(_evaluator_:Function = void, _order_:Number = 0) は DOMContentLoaded イベント成立時にコールバックする関数(_evaluator_)を登録します。
+_order_ には 0, 1 または 2 を指定でき、数値が大きく、先に登録されたものほど優先的にコールバックします。
+2 はシステムレベルのコールバック用です、ユーザレベルのコールバックを利用する場合は 0 または 1 を使用します。
+DOMContentLoaded イベント成立後に uu.ready(_evaluator_) を呼び出すと、即座に _evaluator_ をコールバックします。
+DOMContentLoaded イベント成立後は、uu.ready.dom が true になります。
