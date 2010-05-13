@@ -24,20 +24,20 @@
 
 # o = true, space = false
 ||                                                                           || *IE6* || *IE7* || *IE8* || *IE9*    || *Gecko1.9.0+* || *!WebKit525+* || *Opera9.5+* ||
-|| *uu.ready.color.rgba*  <br/>support { color: rgba(0,0,0,0) }              ||       ||       ||       || o        || o         || o        || o(10+)   ||
-|| *uu.ready.color.hsla*  <br/>support { color: hsla(0,0%,0%,0) }            ||       ||       ||       ||          || o         || o        || o(10+)   ||
-|| *uu.ready.color.transparent*  <br/>support { color: transparent }         ||       ||       ||       || o        || o         || o        || o(10+)   ||
-|| *uu.ready.border.rgba* <br/>support { border: rgb(0,0,0) }                ||       ||       ||       || o        || o         || o        || o(10+)   ||
-|| *uu.ready.border.hsla* <br/>support { border: hsla(0,0%,0%,0) }           ||       ||       ||       ||          || o         || o        || o(10+)   ||
-|| *uu.ready.border.transparent* <br/>support { border: transparent }        ||       || o     || o     || o        || o         || o        || o        ||
-|| *uu.ready.background.rgba* <br/>support { background: rgb(0,0,0) }        ||       ||       ||       || o        || o         || o        || o(10+)   ||
-|| *uu.ready.background.hsla* <br/>support { background: hsla(0,0%,0%,0) }   ||       ||       ||       ||          || o         || o        || o(10+)   ||
-|| *uu.ready.background.transparent* <br/>support { background: transparent }|| o     || o     || o     || o        || o         || o        || o        ||
-|| *uu.ready.opacity*           <br />support { opacity: 1.0 }               ||       ||       ||       || o        || o         || o        || o        ||
-|| *uu.ready.!ArraySlice*       <br />support Array.prototype.slice.call(!FakeArray) || ||     ||       || o        || o         || o        || o        ||
+|| *uu.ready.color.rgba*  <br/>{ color: rgba(0,0,0,0) } ready                ||       ||       ||       || o        || o         || o        || o(10+)   ||
+|| *uu.ready.color.hsla*  <br/>{ color: hsla(0,0%,0%,0) } ready              ||       ||       ||       ||          || o         || o        || o(10+)   ||
+|| *uu.ready.color.transparent*  <br/>{ color: transparent } ready           ||       ||       ||       || o        || o         || o        || o(10+)   ||
+|| *uu.ready.border.rgba* <br/>{ border: rgb(0,0,0) } ready                  ||       ||       ||       || o        || o         || o        || o(10+)   ||
+|| *uu.ready.border.hsla* <br/>{ border: hsla(0,0%,0%,0) } ready             ||       ||       ||       ||          || o         || o        || o(10+)   ||
+|| *uu.ready.border.transparent* <br/>{ border: transparent } ready          ||       || o     || o     || o        || o         || o        || o        ||
+|| *uu.ready.background.rgba* <br/>{ background: rgb(0,0,0) } ready          ||       ||       ||       || o        || o         || o        || o(10+)   ||
+|| *uu.ready.background.hsla* <br/>{ background: hsla(0,0%,0%,0) } ready     ||       ||       ||       ||          || o         || o        || o(10+)   ||
+|| *uu.ready.background.transparent* <br/>{ background: transparent } ready  || o     || o     || o     || o        || o         || o        || o        ||
+|| *uu.ready.opacity*           <br />{ opacity: 1.0 } ready                 ||       ||       ||       || o        || o         || o        || o        ||
+|| *uu.ready.!ArraySlice*       <br />Array.prototype.slice.call(!FakeArray) ready|| ||     ||       || o        || o         || o        || o        ||
 || *uu.ready.getAttribute*      <br />right getAttribute                     ||       ||       ||       || o        || o         || o        || o        ||
-|| *uu.ready.!StringIndexer*    <br />support String`[`indexer`]`            ||       ||       || o     || o        || o         || o        || o        ||
-|| *uu.ready.!ElementTraversal* <br />support Element Traversal              ||       ||       ||       || o(maybe) || o(1.9.1+) || o(528+)  || o        ||
+|| *uu.ready.!StringIndexer*    <br />String`[`indexer`]` ready              ||       ||       || o     || o        || o         || o        || o        ||
+|| *uu.ready.!ElementTraversal* <br />Element Traversal ready                ||       ||       ||       || o(maybe) || o(1.9.1+) || o(528+)  || o        ||
 
   * uu.ready.!ArraySlice - Array.prototype.slice.call(_!FakeArray_) をサポートするブラウザで true になります。
     * !FakeArray には !NodeList や arguments などが入ります。
