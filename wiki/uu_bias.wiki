@@ -19,9 +19,11 @@ o = true, space = false
 || *uu.bias.!StringIndexer*    <br />support String`[`indexer`]`            ||       ||       || o     || o        || o         || o        || o        ||
 || *uu.bias.!ElementTraversal* <br />support Element Traversal              ||       ||       ||       || o(maybe) || o(1.9.1+) || o(528+)  || o        ||
 
-  * uu.bias.!ArraySlice - Array.prototype.slice.call(!NodeList) をサポートするブラウザで true になります。
+  * uu.bias.!ArraySlice - Array.prototype.slice.call(!_FakeArray_) サポートするブラウザで true になります。
+    * FakeArray には !NodeList や arguments などが入ります。
+    * IE6, IE7, IE8 で false になります。
   * uu.bias.getAttribute - `<`a href="/a" class="a"`>` において、getAttribute("href") == "/a" && getAttribute("class") == "a" が成立すると true になります。
-    * IE6, IE7, IE8 で true になります。IE では node.getAttribute("href", 2) とすることで相対URLを取得できます。また getAttribute("className") とすることで className を取得できます。
+    * IE6, IE7, IE8 で false になります。IE では node.getAttribute("href", 2) とすることで相対URLを取得できます。また getAttribute("className") とすることで className を取得できます。
   * uu.bias.!StringIndexer - String`[`indexer`]` をサポートするブラウザで true になります。
     * IE6,IE7 は "abc"`[`1`]` で undefined が返ります。
   * uu.bias.!ElementTraversal - [http://www.w3.org/TR/ElementTraversal/ Element Traversal] をサポートするブラウザで true になります。
