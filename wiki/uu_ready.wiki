@@ -52,7 +52,7 @@ o = true, space = false
 
 == uu.ready ==
 uu.ready(_evaluator_:Function = void, _order_:Number = 0) は DOMContentLoaded イベント成立時にコールバックする関数(_evaluator_)を登録します。
-_order_ には 0, 1 または 2 を指定でき、数値が大きく、先に登録されたものほど優先的にコールバックします。
-2 はシステムレベルのコールバック用です、ユーザレベルのコールバックを利用する場合は 0 または 1 を使用します。
+_order_ には 0, 1 または 2 を指定でき、数値が大きく先に登録されたものほど優先的にコールバックします。
+2 はシステムレベルのコールバック用です、通常は 0 または 1 を指定してください。
 DOMContentLoaded イベント成立後に uu.ready(_evaluator_) を呼び出すと、即座に _evaluator_ をコールバックします。
 DOMContentLoaded イベント成立後は、uu.ready.dom が true になります。
