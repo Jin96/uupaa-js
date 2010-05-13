@@ -8,11 +8,11 @@ o = true, space = false
 || *uu.bias.color.hsla*  <br/>support { color: hsla(0,0%,0%,0) }            ||       ||       ||       ||          || o         || o        || o(10+)   ||
 || *uu.bias.color.transparent*  <br/>support { color: transparent }         ||       ||       ||       || o        || o         || o        || o(10+)   ||
 || *uu.bias.border.rgba* <br/>support { border: rgb(0,0,0) }                ||       ||       ||       || o        || o         || o        || o(10+)   ||
-|| *uu.bias.border.hsla* <br/>support { border: rgb(0,0,0) }                ||       ||       ||       ||          || o         || o        || o(10+)   ||
+|| *uu.bias.border.hsla* <br/>support { border: hsla(0,0%,0%,0) }           ||       ||       ||       ||          || o         || o        || o(10+)   ||
 || *uu.bias.border.transparent* <br/>support { border: transparent }        ||       || o     || o     || o        || o         || o        || o        ||
 || *uu.bias.background.rgba* <br/>support { background: rgb(0,0,0) }        ||       ||       ||       || o        || o         || o        || o(10+)   ||
-|| *uu.bias.background.hsla* <br/>support { background: rgb(0,0,0) }        ||       ||       ||       ||          || o         || o        || o(10+)   ||
-|| *uu.bias.background.transparent* <br/>support { background: rgb(0,0,0) } || o     || o     || o     || o        || o         || o        || o        ||
+|| *uu.bias.background.hsla* <br/>support { background: hsla(0,0%,0%,0) }   ||       ||       ||       ||          || o         || o        || o(10+)   ||
+|| *uu.bias.background.transparent* <br/>support { background: transparent }|| o     || o     || o     || o        || o         || o        || o        ||
 || *uu.bias.opacity*           <br />support { opacity: 1.0 }               ||       ||       ||       || o        || o         || o        || o        ||
 || *uu.bias.!ArraySlice*       <br />support Array.prototype.slice.call(!FakeArray) || ||     ||       || o        || o         || o        || o        ||
 || *uu.bias.getAttribute*      <br />right getAttribute                     ||       ||       ||       || o        || o         || o        || o        ||
