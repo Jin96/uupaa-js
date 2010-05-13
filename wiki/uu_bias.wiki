@@ -25,3 +25,25 @@
     * Firefox3.0, IE6, IE7, IE8, IE9, Opera9.2x で false になります。false なブラウザでは、node.firstElementChild などが undefined になります。
   * uu.bias.tamperedURL - Boolean: {{{<a href="...">}}} の href属性の値を、ブラウザが完全URLに展開してしまう場合に true になります。
     * IE6, IE7, IE8 で true になります。IE では node.getAttribute("href", 2) とすることで相対URLを取得できます。
+
+||*uu.bias*                 ||*IE6*||*IE7*||*IE8*||*IE9*||
+||css.color.rgb             ||true ||true ||true ||true ||
+||css.color.rgba            ||false||false||false||*true*||
+||css.color.hsla            ||false||false||false||false||
+||css.color.transparent     ||false||false||false||*true*||
+||css.border.rgb            ||true ||true ||true ||true ||
+||css.border.rgba           ||false||false||false||*true*||
+||css.border.hsla           ||false||false||false||false||
+||css.border.transparent    ||false||*true*||true ||true ||
+||css.background.rgb        ||true ||true ||true ||true ||
+||css.background.rgba       ||false||false||false||*true*||
+||css.background.hsla       ||false||false||false||false||
+||css.background.transparent||true ||true ||true ||true ||
+||css.opacity               ||false||false||false||*true* ||
+||attr.tamperedURL          ||true ||true ||*false*||*false*||
+||attr.laxity               ||true ||true ||*false*||*false*||
+||node.traversal            ||false||false||false||*true(maybe)*||
+||node.ignoreComment        ||true ||true ||true ||true ||
+||syntax.sliceable          ||false||false||false||*true*||
+||syntax.stringIndexer      ||false||false||*true*||*true*||
+
