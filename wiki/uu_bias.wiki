@@ -1,49 +1,31 @@
 #summary uu.bias はブラウザの癖や互換性に関する情報を保持するオブジェクトです。
 
 = uu.bias - properties =
-  * uu.bias.color.rgb - Boolean: { color: rgb(0,0,0) } をサポートするブラウザで true になります。
-  * uu.bias.color.rgba - Boolean: { color: rgba(0,0,0,0) } をサポートするブラウザで true になります。
-  * uu.bias.color.hsla - Boolean: { color: hsla(0,0%,0%,0) } をサポートするブラウザで true になります。
-  * uu.bias.color.transparent - Boolean: { color: transparent } をサポートするブラウザで true になります。
-  * uu.bias.border.rgb - Boolean: { border-color: rgb(0,0,0) } をサポートするブラウザで true になります。
-  * uu.bias.border.rgba - Boolean: { border-color: rgba(0,0,0,0) } をサポートするブラウザで true になります。
-  * uu.bias.border.hsla - Boolean: { border-color: hsla(0,0%,0%,0) } をサポートするブラウザで true になります。
-  * uu.bias.border.transparent - Boolean: { border-color: transparent } をサポートするブラウザで true になります。
-  * uu.bias.background.rgb - Boolean: { background: rgb(0,0,0) } をサポートするブラウザで true になります。
-  * uu.bias.background.rgba - Boolean: { background: rgba(0,0,0,0) } をサポートするブラウザで true になります。
-  * uu.bias.background.hsla - Boolean: { background: hsla(0,0%,0%,0) } をサポートするブラウザで true になります。
-  * uu.bias.background.transparent - Boolean: { background: transparent } をサポートするブラウザで true になります。
-  * uu.bias.slice - Boolean: Array.prototype.slice.call(!NodeList) をサポートするブラウザで true になります。
-  * uu.bias.indexer - Boolean: String`[`indexer`]` をサポートするブラウザで true になります。
-    * IE6,IE7 は "abc"`[`1`]` で undefined が返ります。
-  * uu.bias.opacity - Boolean: { opacity: 1.0 } をサポートするブラウザで true になります。
-  * uu.bias.traversal - Boolean: Element Traversal( http://www.w3.org/TR/ElementTraversal/ ) をサポートするブラウザで true になります。
-    * サポートしてないブラウザでは、node.firstElementChild 等が undefined になります。
-  * uu.bias.tamperedURL - Boolean: {{{<a href="...">}}} の href属性の値を、ブラウザが完全URLに展開してしまう場合に true になります。
-    * IE6, IE7, IE8 で true になります。IE では node.getAttribute("href", 2) とすることで相対URLを取得できます。
-
 
 o = true, space = false
-||*uu.bias*                 || *IE6* || *IE7* || *IE8* || *IE9*    || *Gecko1.9.0+* || *!WebKit525+* || *Opera9.5+* ||
-||css.color.rgb             || o     || o     || o     || o        || o         || o        || o        ||
-||css.color.rgba            ||       ||       ||       || o        || o         || o        || o(10+)   ||
-||css.color.hsla            ||       ||       ||       ||          || o         || o        || o(10+)   ||
-||css.color.transparent     ||       ||       ||       || o        || o         || o        || o(10+)   ||
-||css.border.rgb            || o     || o     || o     || o        || o         || o        || o        ||
-||css.border.rgba           ||       ||       ||       || o        || o         || o        || o(10+)   ||
-||css.border.hsla           ||       ||       ||       ||          || o         || o        || o(10+)   ||
-||css.border.transparent    ||       || o     || o     || o        || o         || o        || o        ||
-||css.background.rgb        || o     || o     || o     || o        || o         || o        || o        ||
-||css.background.rgba       ||       ||       ||       || o        || o         || o        || o(10+)   ||
-||css.background.hsla       ||       ||       ||       ||          || o         || o        || o(10+)   ||
-||css.background.transparent|| o     || o     || o     || o        || o         || o        || o        ||
-||css.opacity               ||       ||       ||       || o        || o         || o        || o        ||
-||attr.tamperedURL          || o     || o     ||       ||          ||           ||          ||          ||
-||attr.laxity               || o     || o     ||       ||          ||           ||          ||          ||
-||node.traversal            ||       ||       ||       || o(maybe) || o(1.9.1+) || o(528+)  || o        ||
-||node.ignoreComment        || o     || o     || o     || o        ||           ||          ||          ||
-||syntax.sliceable          ||       ||       ||       || o        || o         || o        || o        ||
-||syntax.stringIndexer      ||       ||       || o     || o        || o         || o        || o        ||
+|| *uu.bias*                                                                || *IE6* || *IE7* || *IE8* || *IE9*    || *Gecko1.9.0+* || *!WebKit525+* || *Opera9.5+* ||
+|| *uu.bias.color.rgba*  <br/>support { color: rgba(0,0,0,0) }              ||       ||       ||       || o        || o         || o        || o(10+)   ||
+|| *uu.bias.color.hsla*  <br/>support { color: hsla(0,0%,0%,0) }            ||       ||       ||       ||          || o         || o        || o(10+)   ||
+|| *uu.bias.color.transparent*  <br/>support { color: transparent }         ||       ||       ||       || o        || o         || o        || o(10+)   ||
+|| *uu.bias.border.rgba* <br/>support { border: rgb(0,0,0) }                ||       ||       ||       || o        || o         || o        || o(10+)   ||
+|| *uu.bias.border.hsla* <br/>support { border: rgb(0,0,0) }                ||       ||       ||       ||          || o         || o        || o(10+)   ||
+|| *uu.bias.border.transparent* <br/>support { border: transparent }        ||       || o     || o     || o        || o         || o        || o        ||
+|| *uu.bias.background.rgba* <br/>support { background: rgb(0,0,0) }        ||       ||       ||       || o        || o         || o        || o(10+)   ||
+|| *uu.bias.background.hsla* <br/>support { background: rgb(0,0,0) }        ||       ||       ||       ||          || o         || o        || o(10+)   ||
+|| *uu.bias.background.transparent* <br/>support { background: rgb(0,0,0) } || o     || o     || o     || o        || o         || o        || o        ||
+|| *uu.bias.opacity*           <br />support { opacity: 1.0 }               ||       ||       ||       || o        || o         || o        || o        ||
+|| *uu.bias.!ArraySlice*       <br />support Array.prototype.slice.call(!FakeArray) || ||     ||       || o        || o         || o        || o        ||
+|| *uu.bias.getAttribute*      <br />right getAttribute                     ||       ||       ||       || o        ||           ||          ||          ||
+|| *uu.bias.!StringIndexer*    <br />support String`[`indexer`]`            ||       ||       || o     || o        || o         || o        || o        ||
+|| *uu.bias.!ElementTraversal* <br />support Element Traversal              ||       ||       ||       || o(maybe) || o(1.9.1+) || o(528+)  || o        ||
+
+  * uu.bias.ArraySlice - Array.prototype.slice.call(!NodeList) をサポートするブラウザで true になります。
+  * uu.bias.getAttribute - `<`a href="/a" class="a"`>` において、getAttribute("href") == "/a" && getAttribute("class") == "a" が成立すると true になります。
+    * IE6, IE7, IE8 で true になります。IE では node.getAttribute("href", 2) とすることで相対URLを取得できます。また getAttribute("className") とすることで className を取得できます。
+  * uu.bias.StringIndexer - String`[`indexer`]` をサポートするブラウザで true になります。
+    * IE6,IE7 は "abc"`[`1`]` で undefined が返ります。
+  * uu.bias.ElementTraversal - [http://www.w3.org/TR/ElementTraversal/ Element Traversal] をサポートするブラウザで true になります。
+    * サポートしてないブラウザでは、node.firstElementChild 等が undefined になります。
 
   * Firefox3.0 (Gecko1.9.0)
   * Firefox3.5 (Gecko1.9.1)
