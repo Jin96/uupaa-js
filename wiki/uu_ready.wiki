@@ -3,6 +3,9 @@
 = uu.ready - properties =
 
 == event status ==
+イベントの発火状態を保持するプロパティの一覧です。
+
+全て Boolean 型です。
 ||                                                              || *initial value* ||
 || *uu.ready.dom*         <br/>DOMContentLoaded event fired     || false           ||
 || *uu.ready.window*      <br/>window.onload event fired        || false           ||
@@ -13,7 +16,11 @@
 || *uu.ready.reload*      <br/>cache reload event fired         || false           ||
 
 == function status ==
-o = true, space = false
+機能の実装状況を保持するプロパティの一覧です。
+
+全て Boolean 型です。利用可能な機能は true になり、利用できない機能は false になります。
+
+# o = true, space = false
 ||                                                                           || *IE6* || *IE7* || *IE8* || *IE9*    || *Gecko1.9.0+* || *!WebKit525+* || *Opera9.5+* ||
 || *uu.ready.color.rgba*  <br/>support { color: rgba(0,0,0,0) }              ||       ||       ||       || o        || o         || o        || o(10+)   ||
 || *uu.ready.color.hsla*  <br/>support { color: hsla(0,0%,0%,0) }            ||       ||       ||       ||          || o         || o        || o(10+)   ||
@@ -54,5 +61,6 @@ o = true, space = false
 uu.ready(_evaluator_:Function = void, _order_:Number = 0) は DOMContentLoaded イベント成立時にコールバックする関数(_evaluator_)を登録します。
 _order_ には 0, 1 または 2 を指定でき、数値が大きく先に登録されたものほど優先的にコールバックします。
 2 はシステムレベルのコールバック用です、通常は 0 または 1 を指定してください。
-DOMContentLoaded イベント成立後に uu.ready(_evaluator_) を呼び出すと、即座に _evaluator_ をコールバックします。
-DOMContentLoaded イベント成立後は、uu.ready.dom が true になります。
+
+DOMContentLoaded イベント発火後に uu.ready(_evaluator_) を呼び出すと、即座に _evaluator_ をコールバックします。
+uu.ready.dom = true なら、DOMContentLoaded イベントは発火済みです。
