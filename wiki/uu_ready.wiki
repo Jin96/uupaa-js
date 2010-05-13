@@ -18,7 +18,7 @@
 || *uu.ready.reload*      <br/>cache reload event fired         || false           ||
 
 == function status ==
-機能の実装状況を保持するプロパティの一覧です。
+機能の実装状況(互換性)を保持するプロパティの一覧です。
 
 全て Boolean 型です。機能が利用可能なら true になり、利用できない場合は false になります。
 
