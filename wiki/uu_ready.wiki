@@ -1,0 +1,38 @@
+#summary uu.ready はブラウザの癖や互換性に関する情報を保持するオブジェクトです。
+
+= uu.ready - properties =
+
+o = true, space = false
+|| *uu.ready*                                                                || *IE6* || *IE7* || *IE8* || *IE9*    || *Gecko1.9.0+* || *!WebKit525+* || *Opera9.5+* ||
+|| *uu.ready.color.rgba*  <br/>support { color: rgba(0,0,0,0) }              ||       ||       ||       || o        || o         || o        || o(10+)   ||
+|| *uu.ready.color.hsla*  <br/>support { color: hsla(0,0%,0%,0) }            ||       ||       ||       ||          || o         || o        || o(10+)   ||
+|| *uu.ready.color.transparent*  <br/>support { color: transparent }         ||       ||       ||       || o        || o         || o        || o(10+)   ||
+|| *uu.ready.border.rgba* <br/>support { border: rgb(0,0,0) }                ||       ||       ||       || o        || o         || o        || o(10+)   ||
+|| *uu.ready.border.hsla* <br/>support { border: hsla(0,0%,0%,0) }           ||       ||       ||       ||          || o         || o        || o(10+)   ||
+|| *uu.ready.border.transparent* <br/>support { border: transparent }        ||       || o     || o     || o        || o         || o        || o        ||
+|| *uu.ready.background.rgba* <br/>support { background: rgb(0,0,0) }        ||       ||       ||       || o        || o         || o        || o(10+)   ||
+|| *uu.ready.background.hsla* <br/>support { background: hsla(0,0%,0%,0) }   ||       ||       ||       ||          || o         || o        || o(10+)   ||
+|| *uu.ready.background.transparent* <br/>support { background: transparent }|| o     || o     || o     || o        || o         || o        || o        ||
+|| *uu.ready.opacity*           <br />support { opacity: 1.0 }               ||       ||       ||       || o        || o         || o        || o        ||
+|| *uu.ready.!ArraySlice*       <br />support Array.prototype.slice.call(!FakeArray) || ||     ||       || o        || o         || o        || o        ||
+|| *uu.ready.getAttribute*      <br />right getAttribute                     ||       ||       ||       || o        || o         || o        || o        ||
+|| *uu.ready.!StringIndexer*    <br />support String`[`indexer`]`            ||       ||       || o     || o        || o         || o        || o        ||
+|| *uu.ready.!ElementTraversal* <br />support Element Traversal              ||       ||       ||       || o(maybe) || o(1.9.1+) || o(528+)  || o        ||
+
+  * uu.ready.!ArraySlice - Array.prototype.slice.call(_!FakeArray_) をサポートするブラウザで true になります。
+    * !FakeArray には !NodeList や arguments などが入ります。
+    * IE6, IE7, IE8 で false になります。
+  * uu.ready.getAttribute - `<`a href="/b" class="c"`>` において、getAttribute("href") == "/b" && getAttribute("class") == "c" が成立すると true になります。
+    * IE6, IE7, IE8 で false になります。
+    * IE では node.getAttribute("href", 2) とすることで相対URLを取得できます。また getAttribute("className") とすることで className を取得できます。
+  * uu.ready.!StringIndexer - String`[`indexer`]` をサポートするブラウザで true になります。
+    * IE6, IE7 は "abc"`[`1`]` で undefined が返ります。
+  * uu.ready.!ElementTraversal - [http://www.w3.org/TR/ElementTraversal/ Element Traversal] をサポートするブラウザで true になります。
+    * サポートしてないブラウザでは、node.firstElementChild 等が undefined になります。
+
+  * Firefox3.0 (Gecko1.9.0)
+  * Firefox3.5 (Gecko1.9.1)
+  * Firefox3.6 (Gecko1.9.2)
+  * Safari3.1 (!WebKit525)
+  * Safari4.0 (!WebKit528)
+  * Google Chrome 1.0 (!WebKit528)
