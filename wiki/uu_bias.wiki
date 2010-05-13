@@ -44,8 +44,10 @@ o = true, space = false
 ||node.ignoreComment        || o     || o     || o     || o        ||           ||          ||          ||
 ||syntax.sliceable          ||       ||       ||       || o        || o         || o        || o        ||
 ||syntax.stringIndexer      ||       ||       || o     || o        || o         || o        || o        ||
+
   * Firefox3.0 (Gecko1.9.0)
   * Firefox3.5 (Gecko1.9.1)
   * Firefox3.6 (Gecko1.9.2)
   * Safari3.1 (WebKit525)
   * Safari4.0 (WebKit528)
+  * Google Chrome 1.0 (WebKit528)
