@@ -126,7 +126,7 @@ function init(source,     // @param String: "music.mp3"
         '</object>'].join("");
 
     // fixed memory leak [IE6][IE7][IE8]
-    uu.ver.ie678 && win.attachEvent("onunload", function() {
+    uu.ie && uu.ver < 9 && win.attachEvent("onunload", function() {
         win.detachEvent("onunload", arguments.callee);
         win[onload] = null;
     });

@@ -121,13 +121,6 @@ function joinSourceFiles($package,      // @param Array:
                 $txt = preg_replace('/uu\.?node.LAST_CHILD/',       '8', $txt);
  */
 
-                // nodeType alias
-                $txt = preg_replace('/uu\.?node.ELEMENT_NODE/',         '1', $txt);
-                $txt = preg_replace('/uu\.?node.TEXT_NODE/',            '3', $txt);
-                $txt = preg_replace('/uu\.?node.COMMENT_NODE/',         '8', $txt);
-                $txt = preg_replace('/uu\.?node.DOCUMENT_NODE/',        '9', $txt);
-                $txt = preg_replace('/uu\.?node.DOCUMENT_FRAGMENT_NODE/', '11', $txt);
-
                 // Event.type alias
                 $txt = preg_replace('/uu\.?event.xtypes.mousedown/',      '1', $txt);
                 $txt = preg_replace('/uu\.?event.xtypes.mouseup/',        '2', $txt);

@@ -5,16 +5,16 @@
 
 /*
 <style>
-.unittest ol { background-color:dodgerblue;color:white }
-.unittest li { padding:5px;border:1px solid #ccc }
-.unittest .li0 { background-color:red   }
-.unittest .li1 { background-color:green }
-.unittest .li2 { background-color:red   }
-.unittest .li3 { background-color:#0c0  }
-.unittestinfo { position:fixed;top:10px;right:10px;font-size:xx-large }
-.unittestinfo a { border: 3px outset gray;padding:3px;background-color:red;color:white }
-.unittestinfo .score { color:black;text-shadow:gray 1px 1px 1px }
-.unittestinfo .ngzone {}
+.uutest ol { background-color:dodgerblue;color:white }
+.uutest li { padding:5px;border:1px solid #ccc }
+.uutest .li0 { background-color:red   }
+.uutest .li1 { background-color:green }
+.uutest .li2 { background-color:red   }
+.uutest .li3 { background-color:#0c0  }
+.uutestinfo { position:fixed;top:10px;right:10px;font-size:xx-large }
+.uutestinfo a { border: 3px outset gray;padding:3px;background-color:red;color:white }
+.uutestinfo .score { color:black;text-shadow:gray 1px 1px 1px }
+.uutestinfo .ngzone {}
 </style>
 
   uu.test({
@@ -38,10 +38,10 @@ function uutest(testCase) { // @param Hash: { title: evaluator, ... }
         info, ngzone, ol;
 
     uu.node.add(
-        info = uu.div("class,unittestinfo",
+        info = uu.div("class,uutestinfo",
             ngzone = uu.div("class,ngzone")));
     uu.node.add(
-        uu.div("class,unittest",
+        uu.div("class,uutest",
             ol = uu.ol()));
 
     for (title in testCase) {
