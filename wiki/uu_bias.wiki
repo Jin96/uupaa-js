@@ -30,6 +30,7 @@ o = true, space = false
   * uu.bias.!ElementTraversal - [http://www.w3.org/TR/ElementTraversal/ Element Traversal] をサポートするブラウザで true になります。
     * サポートしてないブラウザでは、node.firstElementChild 等が undefined になります。
 
+  * IE9 (IE9pp2)
   * Firefox3.0 (Gecko1.9.0)
   * Firefox3.5 (Gecko1.9.1)
   * Firefox3.6 (Gecko1.9.2)
