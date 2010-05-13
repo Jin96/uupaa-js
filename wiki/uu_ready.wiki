@@ -27,9 +27,9 @@
 || *uu.ready.color.rgba*  <br/>{ color: rgba(0,0,0,0) } ready                ||       ||       ||       || o        || o         || o        || o(10+)   ||
 || *uu.ready.color.hsla*  <br/>{ color: hsla(0,0%,0%,0) } ready              ||       ||       ||       ||          || o         || o        || o(10+)   ||
 || *uu.ready.color.transparent*  <br/>{ color: transparent } ready           ||       ||       ||       || o        || o         || o        || o(10+)   ||
-|| *uu.ready.border.rgba* <br/>{ border: rgb(0,0,0) } ready                  ||       ||       ||       || o        || o         || o        || o(10+)   ||
-|| *uu.ready.border.hsla* <br/>{ border: hsla(0,0%,0%,0) } ready             ||       ||       ||       ||          || o         || o        || o(10+)   ||
-|| *uu.ready.border.transparent* <br/>{ border: transparent } ready          ||       || o     || o     || o        || o         || o        || o        ||
+|| *uu.ready.border.rgba* <br/>{ border-color: rgb(0,0,0) } ready                  ||       ||       ||       || o        || o         || o        || o(10+)   ||
+|| *uu.ready.border.hsla* <br/>{ border-color: hsla(0,0%,0%,0) } ready             ||       ||       ||       ||          || o         || o        || o(10+)   ||
+|| *uu.ready.border.transparent* <br/>{ border-color: transparent } ready          ||       || o     || o     || o        || o         || o        || o        ||
 || *uu.ready.background.rgba* <br/>{ background: rgb(0,0,0) } ready          ||       ||       ||       || o        || o         || o        || o(10+)   ||
 || *uu.ready.background.hsla* <br/>{ background: hsla(0,0%,0%,0) } ready     ||       ||       ||       ||          || o         || o        || o(10+)   ||
 || *uu.ready.background.transparent* <br/>{ background: transparent } ready  || o     || o     || o     || o        || o         || o        || o        ||
