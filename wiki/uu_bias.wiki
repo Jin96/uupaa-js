@@ -26,23 +26,30 @@
   * uu.bias.tamperedURL - Boolean: {{{<a href="...">}}} の href属性の値を、ブラウザが完全URLに展開してしまう場合に true になります。
     * IE6, IE7, IE8 で true になります。IE では node.getAttribute("href", 2) とすることで相対URLを取得できます。
 
-||*uu.bias*                 || *IE6*   || *IE7*   || *IE8*   || *IE9*   ||
-||css.color.rgb             || true    || true    || true    || true    ||
-||css.color.rgba            || false   || false   || false   || *true*  ||
-||css.color.hsla            || false   || false   || false   || false   ||
-||css.color.transparent     || false   || false   || false   || *true*  ||
-||css.border.rgb            || true    || true    || true    || true    ||
-||css.border.rgba           || false   || false   || false   || *true*  ||
-||css.border.hsla           || false   || false   || false   || false   ||
-||css.border.transparent    || false   || *true*  || true    || true    ||
-||css.background.rgb        || true    || true    || true    || true    ||
-||css.background.rgba       || false   || false   || false   || *true*  ||
-||css.background.hsla       || false   || false   || false   || false   ||
-||css.background.transparent|| true    || true    || true    || true    ||
-||css.opacity               || false   || false   || false   || *true*  ||
-||attr.tamperedURL          || true    || true    || *false* || *false* ||
-||attr.laxity               || true    || true    || *false* || *false* ||
-||node.traversal            || false   || false   || false   || *true(maybe)* ||
-||node.ignoreComment        || true    || true    || true    || true    ||
-||syntax.sliceable          || false   || false   || false   || *true*  ||
-||syntax.stringIndexer      || false   || false   || *true*  || *true*  ||
+
+o = true, space = false
+||*uu.bias*                 || *IE6* || *IE7* || *IE8* || *IE9*    || *Gecko1.9.0+* || *!WebKit525+* || *Opera9.5+* ||
+||css.color.rgb             || o     || o     || o     || o        || o         || o        || o        ||
+||css.color.rgba            ||       ||       ||       || o        || o         || o        || o(10+)   ||
+||css.color.hsla            ||       ||       ||       ||          || o         || o        || o(10+)   ||
+||css.color.transparent     ||       ||       ||       || o        || o         || o        || o(10+)   ||
+||css.border.rgb            || o     || o     || o     || o        || o         || o        || o        ||
+||css.border.rgba           ||       ||       ||       || o        || o         || o        || o(10+)   ||
+||css.border.hsla           ||       ||       ||       ||          || o         || o        || o(10+)   ||
+||css.border.transparent    ||       || o     || o     || o        || o         || o        || o        ||
+||css.background.rgb        || o     || o     || o     || o        || o         || o        || o        ||
+||css.background.rgba       ||       ||       ||       || o        || o         || o        || o(10+)   ||
+||css.background.hsla       ||       ||       ||       ||          || o         || o        || o(10+)   ||
+||css.background.transparent|| o     || o     || o     || o        || o         || o        || o        ||
+||css.opacity               ||       ||       ||       || o        || o         || o        || o        ||
+||attr.tamperedURL          || o     || o     ||       ||          ||           ||          ||          ||
+||attr.laxity               || o     || o     ||       ||          ||           ||          ||          ||
+||node.traversal            ||       ||       ||       || o(maybe) || o(1.9.1+) || o(528+)  || o        ||
+||node.ignoreComment        || o     || o     || o     || o        ||           ||          ||          ||
+||syntax.sliceable          ||       ||       ||       || o        || o         || o        || o        ||
+||syntax.stringIndexer      ||       ||       || o     || o        || o         || o        || o        ||
+  * Firefox3.0 (Gecko1.9.0)
+  * Firefox3.5 (Gecko1.9.1)
+  * Firefox3.6 (Gecko1.9.2)
+  * Safari3.1 (WebKit525)
+  * Safari4.0 (WebKit528)
