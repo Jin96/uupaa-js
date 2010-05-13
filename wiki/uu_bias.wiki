@@ -14,7 +14,7 @@
   * uu.bias.background.hsla - Boolean: { background: hsla(0,0%,0%,0) } をサポートするブラウザで true になります。
   * uu.bias.background.transparent - Boolean: { background: transparent } をサポートするブラウザで true になります。
   * uu.bias.slice - Boolean: Array.prototype.slice.call(!NodeList) をサポートするブラウザで true になります。
-  * uu.bias.indexer - Boolean: String[indexer] をサポートするブラウザで true になります。
+  * uu.bias.indexer - Boolean: String`[`indexer`]` をサポートするブラウザで true になります。
     * IE6,IE7 は "abc"`[`1`]` で undefined が返ります。
   * uu.bias.opacity - Boolean: { opacity: 1.0 } をサポートするブラウザで true になります。
   * uu.bias.traversal - Boolean: Element Traversal( http://www.w3.org/TR/ElementTraversal/ ) をサポートするブラウザで true になります。
