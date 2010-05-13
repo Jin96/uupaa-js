@@ -23,7 +23,7 @@
 全て Boolean 型です。機能が利用可能なら true になり、利用できない場合は false になります。
 
 # o = true, space = false
-||                                                                           || *IE6* || *IE7* || *IE8* || *IE9*    || *Gecko1.9.0+* || *!WebKit525+* || *Opera9.5+* ||
+||                                                                           || *IE6* || *IE7* || *IE8* || *IE9pp2*    || *Gecko1.9.0+* || *!WebKit525+* || *Opera9.5+* ||
 || *uu.ready.color.rgba*  <br/>{ color: rgba(0,0,0,0) } ready                ||       ||       ||       || o        || o         || o        || o(10+)   ||
 || *uu.ready.color.hsla*  <br/>{ color: hsla(0,0%,0%,0) } ready              ||       ||       ||       ||          || o         || o        || o(10+)   ||
 || *uu.ready.color.transparent*  <br/>{ color: transparent } ready           ||       ||       ||       || o        || o         || o        || o(10+)   ||
