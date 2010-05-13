@@ -1,4 +1,4 @@
-#summary uu.ready は状態や互換性に関する情報を保持するオブジェクトです。
+#summary uu.ready は状態や互換性に関する情報を保持するオブジェクトです
 
 = uu.ready - properties =
 
