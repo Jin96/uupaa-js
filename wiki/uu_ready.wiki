@@ -20,7 +20,7 @@
 == function status ==
 機能の実装状況を保持するプロパティの一覧です。
 
-全て Boolean 型です。利用可能な機能は true になり、利用できない機能は false になります。
+全て Boolean 型です。機能が利用可能なら true になり、利用できない場合は false になります。
 
 # o = true, space = false
 ||                                                                           || *IE6* || *IE7* || *IE8* || *IE9*    || *Gecko1.9.0+* || *!WebKit525+* || *Opera9.5+* ||
@@ -39,16 +39,16 @@
 || *uu.ready.!StringIndexer*    <br />String`[`indexer`]` ready              ||       ||       || o     || o        || o         || o        || o        ||
 || *uu.ready.!ElementTraversal* <br />Element Traversal ready                ||       ||       ||       || o(maybe) || o(1.9.1+) || o(528+)  || o        ||
 
-  * uu.ready.!ArraySlice - Array.prototype.slice.call(_!FakeArray_) をサポートするブラウザで true になります。
+  * uu.ready.!ArraySlice - Array.prototype.slice.call(_!FakeArray_) が利用可能なら true になります。
     * !FakeArray には !NodeList や arguments などが入ります。
     * IE6, IE7, IE8 で false になります。
   * uu.ready.getAttribute - `<`a href="/b" class="c"`>` において、getAttribute("href") == "/b" && getAttribute("class") == "c" が成立すると true になります。
     * IE6, IE7, IE8 で false になります。
     * IE では node.getAttribute("href", 2) とすることで相対URLを取得できます。また getAttribute("className") とすることで className を取得できます。
-  * uu.ready.!StringIndexer - String`[`indexer`]` をサポートするブラウザで true になります。
+  * uu.ready.!StringIndexer - String`[`indexer`]` が利用可能なら true になります。
     * IE6, IE7 は "abc"`[`1`]` で undefined が返ります。
-  * uu.ready.!ElementTraversal - [http://www.w3.org/TR/ElementTraversal/ Element Traversal] をサポートするブラウザで true になります。
-    * サポートしてないブラウザでは、node.firstElementChild 等が undefined になります。
+  * uu.ready.!ElementTraversal - [http://www.w3.org/TR/ElementTraversal/ Element Traversal] が利用可能なら true になります。
+    * 利用できない場合は node.firstElementChild 等が undefined になります。
 
   * Firefox3.0 (Gecko1.9.0)
   * Firefox3.5 (Gecko1.9.1)
