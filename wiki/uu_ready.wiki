@@ -1,5 +1,7 @@
 #summary uu.ready は状態や互換性に関する情報を保持するオブジェクトです
 
+<wiki:toc max_depth="2" />
+
 = uu.ready - properties =
 
 == event status ==
