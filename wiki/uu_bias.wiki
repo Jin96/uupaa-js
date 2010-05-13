@@ -15,16 +15,16 @@ o = true, space = false
 || *uu.bias.background.transparent* <br/>support { background: rgb(0,0,0) } || o     || o     || o     || o        || o         || o        || o        ||
 || *uu.bias.opacity*           <br />support { opacity: 1.0 }               ||       ||       ||       || o        || o         || o        || o        ||
 || *uu.bias.!ArraySlice*       <br />support Array.prototype.slice.call(!FakeArray) || ||     ||       || o        || o         || o        || o        ||
-|| *uu.bias.getAttribute*      <br />right getAttribute                     ||       ||       ||       || o        ||           ||          ||          ||
+|| *uu.bias.getAttribute*      <br />right getAttribute                     ||       ||       ||       || o        || o         || o        || o        ||
 || *uu.bias.!StringIndexer*    <br />support String`[`indexer`]`            ||       ||       || o     || o        || o         || o        || o        ||
 || *uu.bias.!ElementTraversal* <br />support Element Traversal              ||       ||       ||       || o(maybe) || o(1.9.1+) || o(528+)  || o        ||
 
-  * uu.bias.ArraySlice - Array.prototype.slice.call(!NodeList) をサポートするブラウザで true になります。
+  * uu.bias.!ArraySlice - Array.prototype.slice.call(!NodeList) をサポートするブラウザで true になります。
   * uu.bias.getAttribute - `<`a href="/a" class="a"`>` において、getAttribute("href") == "/a" && getAttribute("class") == "a" が成立すると true になります。
     * IE6, IE7, IE8 で true になります。IE では node.getAttribute("href", 2) とすることで相対URLを取得できます。また getAttribute("className") とすることで className を取得できます。
-  * uu.bias.StringIndexer - String`[`indexer`]` をサポートするブラウザで true になります。
+  * uu.bias.!StringIndexer - String`[`indexer`]` をサポートするブラウザで true になります。
     * IE6,IE7 は "abc"`[`1`]` で undefined が返ります。
-  * uu.bias.ElementTraversal - [http://www.w3.org/TR/ElementTraversal/ Element Traversal] をサポートするブラウザで true になります。
+  * uu.bias.!ElementTraversal - [http://www.w3.org/TR/ElementTraversal/ Element Traversal] をサポートするブラウザで true になります。
     * サポートしてないブラウザでは、node.firstElementChild 等が undefined になります。
 
   * Firefox3.0 (Gecko1.9.0)
