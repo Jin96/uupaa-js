@@ -79,3 +79,6 @@ o = true, x/space = false
         }
     }
 }}}
+
+== Test Code ==
+http://uupaa-js.googlecode.com/svn/trunk/0.8/test/Version/uu.ver.htm
