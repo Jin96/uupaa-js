@@ -146,3 +146,6 @@ _readyEventType_ は省略できます。省略した場合は *"dom"* が指定
 == uu.ready.fire ==
 uu.ready.fire(_eventType_:String, _param_:Mix = void) は uu.ready() で登録済みのイベントをコールバックします。
 コールバック引数は、callback(uu, _param_) となります。
+
+= Test Code =
+http://uupaa-js.googlecode.com/svn/trunk/0.8/test/Ready/uu.ready.htm
