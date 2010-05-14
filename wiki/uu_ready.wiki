@@ -1,6 +1,6 @@
 #summary uu.ready は状態や互換性に関する情報を保持するオブジェクトです
 
-<wiki:toc max_depth="2" />
+<wiki:toc max_depth="3" />
 
 = uu.ready - properties =
 
@@ -27,14 +27,14 @@
 || *uu.ready.color.rgba*  <br/>{ color: rgba(0,0,0,0) } ready                ||       ||       ||       || o        || o         || o        || o(10+)   ||
 || *uu.ready.color.hsla*  <br/>{ color: hsla(0,0%,0%,0) } ready              ||       ||       ||       ||          || o         || o        || o(10+)   ||
 || *uu.ready.color.transparent*  <br/>{ color: transparent } ready           ||       ||       ||       || o        || o         || o        || o(10+)   ||
-|| *uu.ready.border.rgba* <br/>{ border-color: rgb(0,0,0) } ready                  ||       ||       ||       || o        || o         || o        || o(10+)   ||
-|| *uu.ready.border.hsla* <br/>{ border-color: hsla(0,0%,0%,0) } ready             ||       ||       ||       ||          || o         || o        || o(10+)   ||
-|| *uu.ready.border.transparent* <br/>{ border-color: transparent } ready          ||       || o     || o     || o        || o         || o        || o        ||
+|| *uu.ready.border.rgba* <br/>{ border-color: rgb(0,0,0) } ready            ||       ||       ||       || o        || o         || o        || o(10+)   ||
+|| *uu.ready.border.hsla* <br/>{ border-color: hsla(0,0%,0%,0) } ready       ||       ||       ||       ||          || o         || o        || o(10+)   ||
+|| *uu.ready.border.transparent* <br/>{ border-color: transparent } ready    ||       || o     || o     || o        || o         || o        || o        ||
 || *uu.ready.background.rgba* <br/>{ background: rgb(0,0,0) } ready          ||       ||       ||       || o        || o         || o        || o(10+)   ||
 || *uu.ready.background.hsla* <br/>{ background: hsla(0,0%,0%,0) } ready     ||       ||       ||       ||          || o         || o        || o(10+)   ||
 || *uu.ready.background.transparent* <br/>{ background: transparent } ready  || o     || o     || o     || o        || o         || o        || o        ||
 || *uu.ready.opacity*           <br />{ opacity: 1.0 } ready                 ||       ||       ||       || o        || o         || o        || o        ||
-|| *uu.ready.!ArraySlice*       <br />Array.prototype.slice.call(!FakeArray) ready|| ||     ||       || o        || o         || o        || o        ||
+|| *uu.ready.!ArraySlice*       <br />Array.prototype.slice.call(!FakeArray) ready|| ||        ||       || o        || o         || o        || o        ||
 || *uu.ready.getAttribute*      <br />right getAttribute                     ||       ||       ||       || o        || o         || o        || o        ||
 || *uu.ready.!StringIndexer*    <br />String`[`indexer`]` ready              ||       ||       || o     || o        || o         || o        || o        ||
 || *uu.ready.!ElementTraversal* <br />Element Traversal ready                ||       ||       ||       || o(maybe) || o(1.9.1+) || o(528+)  || o        ||
@@ -60,9 +60,89 @@
 = uu.ready - methods =
 
 == uu.ready ==
-uu.ready(_evaluator_:Function = void, _order_:Number = 0) は DOMContentLoaded イベント成立時にコールバックする関数(_evaluator_)を登録します。
-_order_ には 0, 1 または 2 を指定でき、数値が大きく先に登録されたものほど優先的にコールバックします。
-2 はシステムレベルのコールバック用です、通常は 0 または 1 を指定してください。
+uu.ready(_readyEventType_:IgnoreCaseString = "dom", _callback_:Function, ...) は条件成立後にコールバックする関数を登録します。
+コールバック関数は複数指定可能です。_readyEventType_ でコールバック対象とするイベントを指定できます。大小文字は区別しません。
+  * *"dom"* - DOMContentLoaded event (low order)
+  * *"window"* - window.onload event
+  * *"audio"* - `<`audio`>` ready event
+  * *"video"* - `<`video`>` ready event
+  * *"canvas"* - `<`canvas`>` ready event
+  * *"storage"* - window.localStorage ready event
+  * *"reload"* - location.reload() event
+  * *"system"* - DOMContentLoaded event (high order)
+  * *"middle"* - DOMContentLoaded event (middle order)
+_readyEventType_ は省略できます。省略した場合は *"dom"* が指定されたものとみなします。
+先に登録されたイベントほど優先的にコールバックします。
+条件成立後(イベント発火後)に uu.ready(_callback_) を実行すると、コールバック関数を溜め込まず、即座に _callback_ をコールバックします。
+イベント発火済みかどうかを調べるには、uu.ready.dom や uu.ready.window を調べます。true なら、それらイベントは発火済みです。
 
-DOMContentLoaded イベント発火後に uu.ready(_evaluator_) を呼び出すと、即座に _evaluator_ をコールバックします。
-uu.ready.dom = true なら、DOMContentLoaded イベントは発火済みです。
+=== DOMContentLoaded イベントハンドラの使い方 ===
+{{{
+    uu.ready(function(uu) {
+        alert("DOMContentLoaded ready");
+    });
+
+    // ハンドラは複数指定できます
+    uu.ready(function(uu) {
+        alert("DOMContentLoaded ready1");
+    }, function(uu) {
+        alert("DOMContentLoaded ready2");
+    });
+
+}}}
+=== window.onload イベントハンドラの使い方 ===
+{{{
+    uu.ready("window", function(uu) {
+        alert("window.onload ready");
+    });
+
+    // 引数の順番は任意です。"window" を後から指定できます。
+    uu.ready(function(uu) {
+        alert("window.onload ready");
+    }, "window");
+}}}
+
+=== !WebStorage イベントハンドラの使い方 ===
+{{{
+    // WebStorage イベントハンドラは、第二引数に、Storage クラスのインスタンスが渡されます。
+    uu.ready("storage", function(uu, storageObject) {
+        alert("WebStorage ready");
+    });
+}}}
+
+=== `<`canvas`>` イベントハンドラの使い方 ===
+{{{
+    // <canvas> イベントハンドラは、第二引数に、uu.tag("canvas") の結果が渡されます。
+    uu.ready("canvas", function(uu, canvasNodeArray) {
+        alert("canvas ready");
+    });
+}}}
+
+=== `<`audio`>` イベントハンドラの使い方 ===
+{{{
+    // <audio> イベントハンドラは、第二引数に、uu.tag("audio") の結果が渡されます。
+    uu.ready("audio", function(uu, audioNodeArray) {
+        alert("audio ready");
+    });
+}}}
+
+=== ユーザ独自イベントタイプの使い方 ===
+ユーザが独自に定義したイベントタイプも指定可能です。適当なタイミングで uu.ready.fire() を呼び出し手動でコールバックします。
+{{{
+    var param = { counter: 0 };
+
+    uu.ready("com.example.oreore", function(uu, param) {
+
+        alert("oreore fire" + (++param.counter)); // oreore fire1
+
+    }, function(uu) {
+
+        alert("oreore fire" + (++param.counter)); // oreore fire2
+
+    });
+    uu.ready.fire("com.example.oreore", param);
+}}}
+
+== uu.ready.fire ==
+uu.ready.fire(_eventType_:String, _param_:Mix = void) は uu.ready() で登録済みのイベントをコールバックします。
+コールバック引数は、callback(uu, _param_) となります。
