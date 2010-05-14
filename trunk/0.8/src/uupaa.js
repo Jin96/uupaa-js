@@ -1,7 +1,7 @@
 
 // === Core ===
 
-// * WebKit based Cording-Style ( doc/cording-style.txt )
+// * Manual http://code.google.com/p/uupaa-js/w/list
 //
 // * User configrations ( doc/user-configrations.txt )
 //
@@ -13,31 +13,32 @@
 //  - EventObjectEx, DateHash, AjaxOptionHash, AjaxResultHash
 //  - JSONPOptionHash, FlashOptionHash
 //
-// * Version and plugin detection ( doc/version-detection.txt )
-//
-//  - uu.ver = { library, silverlight, flash, browser, render, ie,
-//               ie6, ie7, ie8, ie9,
-//               opera, gecko, webkit, chrome, safari, iphone,
-//               android, mobile, os, jit }
 
 var uu; // window.uu - uupaa.js library namespace
 
 uu || (function(win,   // @param GlobalObject: as window
                 doc) { // @param DocumentObject: as document
 
-var _isArray = Array.isArray || (Array.isArray = ArrayIsArray), // ES5 spec
-    _toString = Object.prototype.toString,
+var _prototype = "prototype",
     _rootNode = doc.documentElement,
+    _toString = Object[_prototype].toString,
+    _isArray = Array.isArray || (Array.isArray = ArrayIsArray), // ES5 spec
+    _false = !1,
+    _true = !0,
     _ver = detectVersions(0.7),
+    _ie = _ver.ie,
+    _gecko = _ver.gecko,
+    _opera = _ver.opera,
+    _webkit = _ver.webkit,
     // --- HTML5: EMBEDDING CUSTOM NON-VISIBLE DATA ---
-    DATA_UUGUID = "data-uuguid",
-    DATA_UUEVENT = "data-uuevent",
-    DATA_UUTWEEN = "data-uutween",
+    _uuguid = "data-uuguid",
+    _uuevent = "data-uuevent",
+    _uutween = "data-uutween",
 //{{{!mb
-    DATA_UUIMAGE = "data-uuimage",
-    DATA_UUOPACITY = "data-uuopacity",
+    _uuimage = "data-uuimage",
+    _uuopacity = "data-uuopacity",
 //}}}!mb
-    PROTOTYPE = "prototype";
+    _getComputedStyle = "getComputedStyle";
 
 // --- HTML5 NEXT ---
 // http://www.whatwg.org/specs/web-apps/current-work/multipage/dom.html
@@ -45,14 +46,18 @@ doc.html || (doc.html = _rootNode);        // document.html = <html>
 doc.head || (doc.head = uutag("head")[0]); // document.head = <head>
 
 // --- LIBRARY STRUCTURE ---
-uu = uumix(uufactory, {             // uu(expression:Jam/Node/NodeArray/String/window, arg1:Jam/Node/Mix = void, arg2:Mix = void, arg3:Mix = void, arg4:Mix = void):Jam/Instance
+uu = uumix(uufactory, {             // uu(expression:Jam/Node/NodeArray/String/window, arg1:Jam/Node/Mix = void, arg2:Mix = void, arg3:Mix = void, arg4:Mix = void):Instance/Jam
                                     //  [1][Class factory]   uu("MyClass", arg1, arg2) -> new uu.Clas.MyClass(arg1, arg2)
                                     //  [2][NodeSet factory] uu("div>ul>li", <body>) -> Jam
+    config:   uuarg(win.xconfig, {  // uu.config - Hash: user configurations
+        log:        "log",          //  uu.log() target node
+        baseDir:    ""              //  base directory
+    }),
     ver:            _ver,           // uu.ver - Hash: detected version and plugin informations
-    ie:             _ver.ie,
-    opera:          _ver.opera,
-    gecko:          _ver.gecko,
-    webkit:         _ver.webkit,
+    ie:             _ie,
+    gecko:          _gecko,
+    opera:          _opera,
+    webkit:         _webkit,
     file:           uufile,         // uu.file(url:String):AjaxResultHash
     snippet:        uusnippet,      // uu.snippet(id:String, arg:Hash/Array):String/Mix
     // --- TYPE ---
@@ -155,14 +160,12 @@ uu = uumix(uufactory, {             // uu(expression:Jam/Node/NodeArray/String/w
                     uutweenisrunning
     }),
     viewport: {
-        size:       uuviewportsize, // uu.viewport.size():Hash { innerWidth, innerHeight, pageXOffset, pageYOffset }
-        getOrientation:             // uu.viewport.getOrientation():Number (-90, 0, 90)
-                    getOrientation
+        size:       uuviewportsize  // uu.viewport.size():Hash { innerWidth, innerHeight, pageXOffset, pageYOffset }
     },
     // --- QUERY ---
     id:             uuid,           //    uu.id(expression:String, context:Node = document):Node/null
     tag:            uutag,          //   uu.tag(expression:String, context:Node = document):NodeArray
-    query:          uuquery,        // uu.query(expression:String, context:NodeArray/Node = document):NodeArray
+    query:          uuquery,        // uu.query(expression:String, context:NodeArray/Node = document, useJS:Boolean = false):NodeArray
     // --- Node.className, Node.classList ---
     klass:    uumix(uuklass, {      // uu.klass(expression:String, context:Node = document):NodeArray
         has:        uuklasshas,     //    uu.klass.has(node:Node, classNames:String):Boolean
@@ -303,13 +306,13 @@ uu = uumix(uufactory, {             // uu(expression:Jam/Node/NodeArray/String/w
     // --- EVALUATION ---
     ready:    uumix(uuready, {      // uu.ready(readyEventType:IgnoreCaseString = "dom", callback:Function, ...)
         fire:       uureadyfire,    // uu.ready.fire(readyEventType:String, param:Mix = void)
-        dom:        false,          // true is DOMContentLoaded event fired
-        window:     false,          // true is window.onload event fired
-        audio:      false,          // true is <audio> ready event fired
-        video:      false,          // true is <video> ready event fired
-        canvas:     false,          // true is <canvas> ready event fired
-        storage:    false,          // true is window.localStorage ready event fired
-        reload:     false           // true is blackout (css3 cache reload)
+        dom:        _false,         // true is DOMContentLoaded event fired
+        window:     _false,         // true is window.onload event fired
+        audio:      _false,         // true is <audio> ready event fired
+        video:      _false,         // true is <video> ready event fired
+        canvas:     _false,         // true is <canvas> ready event fired
+        storage:    _false,         // true is window.localStorage ready event fired
+        reload:     _false          // true is blackout (css3 cache reload)
     }, detectFeatures(_ver)),
     // --- OTHER ---
     dmz:            {},             // uu.dmz - DeMilitarized Zone(proxy)
@@ -317,23 +320,13 @@ uu = uumix(uufactory, {             // uu(expression:Jam/Node/NodeArray/String/w
 });
 
 // --- CONSTRUCTION ---
-uu.config = uuarg(win.xconfig, {    // uu.config - Hash: user configurations
-    log:        "log", // <div id="log"></div>
-    aria:       false,
-    debug:      false,
-    right:      false,
-    altcss:     0,
-    storage:    0,
-    baseDir:    ""
-});
-
-uu.config.baseDir|| (uu.config.baseDir =
+uu.config.baseDir || (uu.config.baseDir =
     uutag("script").pop().src.replace(/[^\/]+$/, function(file) {
-        return file === "uupaa.js" ? "../" : "";
+        return file == "uupaa.js" ? "../" : "";
     }));
 
 // --- MessagePump class ---
-MessagePump[PROTOTYPE] = {
+MessagePump[_prototype] = {
     send:           uumsgsend,      // MessagePump.send(address:Array/Mix, message:String, param:Mix = void):Array/Mix
                                     //  [1][multicast] MessagePump.send([instance, ...], "hello") -> ["world!", ...]
                                     //  [2][unicast  ] MessagePump.send(instance, "hello") -> ["world!"]
@@ -342,8 +335,8 @@ MessagePump[PROTOTYPE] = {
                                     //  [1][multicast] MessagePump.post([instance, ...], "hello")
                                     //  [2][unicast  ] MessagePump.post(instance, "hello")
                                     //  [3][broadcast] MessagePump.post(null, "hello")
-    register:       uumsgregister,  // MessagePump.register(instance:Instance)
-    unregister:     uumsgunregister // MessagePump.unregister(instance:Instance)
+    bind:           uumsgbind,      // MessagePump.bind(instance:Instance)
+    unbind:         uumsgunbind     // MessagePump.unbind(instance:Instance)
 };
 
 uu.msg = new MessagePump();         // uu.msg - MessagePump instance
@@ -354,7 +347,7 @@ function ArrayIsArray(search) { // @param Mix: search
     return _toString.call(search) === "[object Array]";
 }
 
-uumix(Array[PROTOTYPE], {
+uumix(Array[_prototype], {
 //{{{!mb
     map:            ArrayMap,       //         map(evaluator:Function, that:this = void):Array
     some:           ArraySome,      //        some(evaluator:Function, that:this = void):Boolean
@@ -370,32 +363,32 @@ uumix(Array[PROTOTYPE], {
                     ArrayReduceRight
 }, 0, 0);
 
-uumix(Boolean[PROTOTYPE], {
+uumix(Boolean[_prototype], {
     toJSON:         NumberToJson    //      toJSON():String
 }, 0, 0);
 
-uumix(Date[PROTOTYPE], {
+uumix(Date[_prototype], {
     toISOString:    DateToISOString,// toISOString():String
     toJSON:         DateToISOString //      toJSON():String
 }, 0, 0);
 
-uumix(Number[PROTOTYPE], {
+uumix(Number[_prototype], {
     toJSON:         NumberToJson    //      toJSON():String
 }, 0, 0);
 
-uumix(String[PROTOTYPE], {
+uumix(String[_prototype], {
     trim:           StringTrim,     //        trim():String
     toJSON:         StringToJson    //      toJSON():String
 }, 0, 0);
 
 //{{{!mb
-_ver.gecko && !win.HTMLElement[PROTOTYPE].innerText &&
+_gecko && !win.HTMLElement[_prototype].innerText &&
 (function(proto) {
     proto.__defineGetter__("innerText", innerTextGetter);
     proto.__defineSetter__("innerText", innerTextSetter);
     proto.__defineGetter__("outerHTML", outerHTMLGetter);
     proto.__defineSetter__("outerHTML", outerHTMLSetter);
-})(win.HTMLElement[PROTOTYPE]);
+})(win.HTMLElement[_prototype]);
 //}}}!mb
 
 // ===================================================================
@@ -409,7 +402,7 @@ function uufactory(expression, // @param Jam/Node/NodeArray/String/window: expre
                    arg2,       // @param Mix(= void): ClassName.init arg2
                    arg3,       // @param Mix(= void): ClassName.init arg3
                    arg4) {     // @param Mix(= void): ClassName.init arg4
-                               // @return Jam/Instance:
+                               // @return Instance/Jam:
     // class factory
     if (typeof expression === "string" && uuclass[expression]) {
         return new uuclass[expression](arg1, arg2, arg3, arg4);
@@ -433,7 +426,7 @@ function uufile(url) { // @param String: url
         xhr.open("GET", url, false); // sync
         xhr.send(null);
 
-        status = xhr.status || 200;
+        status = xhr.status || 200; // fix "file:///" scheme
         ok = status >= 200 && status < 300;
     } catch (err) {}
 
@@ -443,7 +436,7 @@ function uufile(url) { // @param String: url
         xhr: xhr || {},
         guid: uuguid(),
         status: status,
-        isXMLContent: function() {
+        isXML: function() {
             return /xml/i.test(this.xhr.getResponseHeader("Content-Type") || "");
         }
     };
@@ -484,7 +477,7 @@ function uusnippet(id,    // @param String: snippet id. <script id="...">
         eachBlock = /<each ([^>]+)>([\s\S]*?)<\/each>/;
 
     if (!js) {
-        node = uu.id(id);
+        node = uuid(id);
         if (node) {
             uusnippet.js[id] = js = node.text.replace(/\r\n|\r|\n/g, "\n").
                     replace(/<text>\n([\s\S]*?)^<\/text>$/gm, toText). // <text>...</text>
@@ -603,7 +596,7 @@ function uumix(base,       // @param Hash: mixin base
                            // @return Hash: base
     var i;
 
-    if (override === i || override) { // [1][3]
+    if (override || override === i) { // override === void 0 // [1][3]
         for (i in flavor) {
             base[i] = flavor[i];
         }
@@ -714,23 +707,21 @@ function uuhas(source,   // @param Hash/Array: source
                search) { // @param Hash/Array: search element
                          // @return Boolean:
     if (source && search) {
-        var i, iz;
+        var i = 0, iz;
 
         if (_isArray(source)) {
             search = uuarray(search);
 
-            for (i = 0, iz = search.length; i < iz; ++i) {
+            for (iz = search.length; i < iz; ++i) {
                 if (i in search && source.indexOf(search[i]) < 0) {
                     return false;
                 }
             }
         } else {
             for (i in search) {
-                if (!(i in source)) {
-                    return false;
-                }
-                if (source[i] !== search[i]
-                    && _jsoninspect(source[i], 0, 1) !== _jsoninspect(search[i], 0, 1)) {
+                if (!(i in source)
+                    || (source[i] !== search[i]
+                        && _json(source[i], 0) !== _json(search[i], 0))) {
                     return false;
                 }
             }
@@ -810,7 +801,9 @@ function uusort(source,   // @param Array: source
     // 0x2 = reverse
     var r = { "A-Z": 0, "Z-A": 2, "0-9": 1, "9-0": 3 }[method] || 0;
 
-    (r & 1) ? source.sort(function(a, b) { return a - b; })
+    (r & 1) ? source.sort(function(a, b) {
+                            return a - b;
+                          })
             : source.sort();
     return (r & 2) ? source.reverse() : source;
 }
@@ -929,7 +922,7 @@ function uuattr(node,    // @param Node:
     // [IE6][IE7] key=for -> key=htmlFor, key=class -> key=className
     // [OTHER]    key=htmlFor -> key=for, key=className -> key=class
 
-    if (key === void 0) { // [1] uu.attr(node)
+    if (key === rv) { // key === void 0 // [1] uu.attr(node)
         rv = {};
         ary = node.attributes;
 
@@ -950,12 +943,11 @@ function uuattr(node,    // @param Node:
     }
     return node;
 }
-uuattr.fix = uusplittohash(
+uuattr.fix =
 //{{{!mb
-    !uuready.getAttribute ? "for,htmlFor,class,className" : // [IE6][IE7]
+    !uuready.getAttribute ? { "for": "htmlFor", "class": "className" } : // [IE6][IE7]
 //}}}!mb
-                            "className,class,htmlFor,for"
-);
+                            { className: "class", htmlFor: "for" };
 
 //  [1][get all pair]   uu.data(node) -> { key: value, ... }
 //  [2][get value]      uu.data(node, key) -> value
@@ -967,28 +959,28 @@ function uudata(node,    // @param Node:
                 key,     // @param String/Hash(= void): key
                 value) { // @param Mix(= void): value
                          // @return Hash/Mix/Node/undefined:
-    var rv, i;
+    var rv, i, prefix = "data-";
 
-    if (key === i) { // [1] uu.data(node)
+    if (key === rv) { // key === void 0 // [1] uu.data(node)
         rv = {};
         for (key in node) {
-            key.indexOf("data-") || (rv[key.slice(5)] = node[key]);
+            key.indexOf(prefix) || (rv[key.slice(5)] = node[key]);
         }
         return rv; // Hash
     }
     if (arguments.length === 3) { // [3] uu.data(node, key or "*", value)
         if (key === "*") {
             for (key in uudata(node)) {
-                node["data-" + key] = value;
+                node[prefix + key] = value;
             }
         } else {
-            node["data-" + key] = value;
+            node[prefix + key] = value;
         }
     } else if (typeof key === "string") { // [2]
-        return node["data-" + key]; // Mix or undefined
+        return node[prefix + key]; // Mix or undefined
     } else {
         for (i in key) {
-            node["data-" + i] = key[i]; // [4]
+            node[prefix + i] = key[i]; // [4]
         }
     }
     return node;
@@ -1028,9 +1020,9 @@ function uucss(node,    // @param Node:
                key,     // @param Boolean/String/Hash(= void): key
                value) { // @param String(= void): value
                         // @return Hash/String/Node:
-    var style, informal, formal, fix, care, getStyle = win.getComputedStyle;
+    var style, informal, formal, fix, care, getStyle = win[_getComputedStyle];
 
-    if (key === care || key === true) { // [1][2] uu.css(node), uu.css(node, true)
+    if (key === true || key === fix) { // key === void 0 // [1][2] uu.css(node), uu.css(node, true)
 //{{{!mb
         if (getStyle) {
 //}}}!mb
@@ -1073,8 +1065,12 @@ function uucss(node,    // @param Node:
     }
     return node;
 }
-uucss.care = { lineHeight: 1, fontWeight: 1,
-               fontSizeAdjust: 1, zIndex: 1, zoom: 1 };
+uucss.care = {
+//{{{!mb
+    zoom: 1, fontSizeAdjust: 1, // [CSS3]
+//}}}!mb
+    lineHeight: 1, fontWeight: 1, zIndex: 1
+};
 
 // uu.tween - add queue
 function uutween(node,       // @param Node: animation target node
@@ -1088,7 +1084,7 @@ function uutween(node,       // @param Node: animation target node
                  callback) { // @param Function(= void 0): after callback(node, style)
                              // @return Node:
     function loop() {
-        var data = node[DATA_UUTWEEN], q = data.q[0],
+        var data = node[_uutween], q = data.q[0],
             tm = q.tm ? +new Date
                       : (q.js = uutween.build(node, q.param), q.tm = +new Date),
             finished = q.fin || (tm >= q.tm + q.dur);
@@ -1101,10 +1097,10 @@ function uutween(node,       // @param Node: animation target node
         }
     }
 
-    var data = node[DATA_UUTWEEN];
+    var data = node[_uutween];
 
     node.style.overflow = "hidden";
-    data || (node[DATA_UUTWEEN] = data = { q: [], id: 0 }); // init tween queue
+    data || (node[_uutween] = data = { q: [], id: 0 }); // init tween queue
 
     // append queue data
     data.q.push({ tm: 0, fn: callback, dur: Math.max(duration, 1),
@@ -1202,7 +1198,7 @@ function uutweenskip(node,  // @param Node(= void 0): void 0 is all node
         v, i = -1, j, jz, data;
 
     while( (v = nodeArray[++i]) ) {
-        data = v[DATA_UUTWEEN];
+        data = v[_uutween];
         if (data && data.id) {
             for (j = 0, jz = all ? data.q.length : 1; j < jz; ++j) {
                 data.q[j].fin = 1; // finished bit
@@ -1215,7 +1211,7 @@ function uutweenskip(node,  // @param Node(= void 0): void 0 is all node
 // uu.tween.isRunning
 function uutweenisrunning(node) { // @param Node:
                                   // @return Boolean:
-    var data = node[DATA_UUTWEEN];
+    var data = node[_uutween];
 
     return data && data.id;
 }
@@ -1225,13 +1221,13 @@ function getOpacity(node) { // @param Node:
                             // @return Number: opacity (from 0.0 to 1.0)
 //{{{!mb
     if (!uuready.opacity) {
-        var opacity = node[DATA_UUOPACITY]; // undefined or 1.0 ~ 2.0
+        var opacity = node[_uuopacity]; // undefined or 1.0 ~ 2.0
 
         return opacity ? (opacity - 1): 1;
     }
 //}}}!mb
     return parseFloat(node.style.opacity ||
-                      win.getComputedStyle(node, null).opacity);
+                      win[_getComputedStyle](node, null).opacity);
 }
 
 // uu.css.setOpacity
@@ -1243,7 +1239,7 @@ function setOpacity(node,      // @param Node:
 
 //{{{!mb
     if (!uuready.opacity) {
-        if (!node[DATA_UUOPACITY]) {
+        if (!node[_uuopacity]) {
             // at first time
             if (_ver.ie6 || _ver.ie7) { // [FIX][IE6][IE7]
                 if ((node.currentStyle || {}).width === "auto") {
@@ -1265,7 +1261,7 @@ function setOpacity(node,      // @param Node:
 
 //{{{!mb
     if (!uuready.opacity) {
-        node[DATA_UUOPACITY] = opacity + 1; // (1.0 ~ 2.0)
+        node[_uuopacity] = opacity + 1; // (1.0 ~ 2.0)
         style.visibility = opacity ? "" : "hidden";
         style.filter = ((opacity > 0 && opacity < 1)
                      ? "alpha(opacity=" + (opacity * 100) + ") " : "")
@@ -1329,7 +1325,7 @@ function _calcPixel(node,    // @param Node:
         removeProperty = "removeProperty",
         getPropertyValue = "getPropertyValue";
 
-    if (uu.webkit) {
+    if (_webkit) {
         mem[1] = style[getPropertyValue](position);
         mem[2] = style[getPropertyValue](display);
         style[setProperty](position, "absolute", important);
@@ -1337,11 +1333,11 @@ function _calcPixel(node,    // @param Node:
     }
     style[setProperty](prop, value, important);
     // get pixel
-    value = parseInt(win.getComputedStyle(node, null).left);
+    value = parseInt(win[_getComputedStyle](node, null).left);
     // restore
     style[removeProperty](prop);
     style[setProperty](prop, mem[0], "");
-    if (uu.webkit) {
+    if (_webkit) {
         style[removeProperty](position);
         style[removeProperty](display);
         style[setProperty](position, mem[1], "");
@@ -1374,7 +1370,7 @@ function _calcPixelIE(node,    // @param Node:
     return value || 0;
 }
 
-if (!win.getComputedStyle) {
+if (!win[_getComputedStyle]) {
     uuunit.calc = _calcPixelIE;
 }
 
@@ -1535,37 +1531,36 @@ function uuclass(className, // @param String: "Class"
         Class = ary[0], Super = ary[1] || "";
 
     uuclass[Class] = function() {
-        var that = this,
+        var that = this, args = arguments,
             Super = that.superClass || 0;
 
-        // register MessagePump
         that.uuguid = uu.guid();
         that.msgbox || (that.msgbox = uu.nop);
-        uu.msg.register(that);
+        uu.msg.bind(that); // bind MessagePump
 
         // constructor(Super -> that)
-        Super && Super.init && Super.init.apply(that, arguments);
-                  that.init &&  that.init.apply(that, arguments);
+        Super && Super.init && Super.init.apply(that, args);
+                  that.init &&  that.init.apply(that, args);
     };
-    uuclass[Class][PROTOTYPE] = protoIsFunction ? { init: proto }
-                                                : proto || {};
+    uuclass[Class][_prototype] = protoIsFunction ? { init: proto }
+                                                 : proto || {};
 
     if (Super && proto && !protoIsFunction) { // [2]
         tmp = function() {};
-        tmp[PROTOTYPE] = uu.Class[Super][PROTOTYPE];
-        classPrototype = uuclass[Class][PROTOTYPE] = new tmp;
+        tmp[_prototype] = uu.Class[Super][_prototype];
+        classPrototype = uuclass[Class][_prototype] = new tmp;
 
         for (i in proto) {
             classPrototype[i] = proto[i];
         }
         classPrototype.constructor = uuclass[Class];
-        classPrototype.superClass = uu.Class[Super][PROTOTYPE];
+        classPrototype.superClass = uu.Class[Super][_prototype];
         classPrototype.superMethod = superMethod;
     }
 
     function superMethod(method              // @param String: method name
                          /*, var_args */ ) { // @param Mix: args
-        return this.superClass[method].apply(this, uuarray(arguments).slice(1));
+        return this.superClass[method].apply(this, uuarray(arguments, 1));
     }
 }
 
@@ -1581,12 +1576,12 @@ function uuclasssingleton(className, // @param String: class name
             that.uuguid = uu.guid();
             that.init && that.init.apply(that, arg);
             that.msgbox || (that.msgbox = uu.nop);
-            uu.msg.register(that);
+            uu.msg.bind(that); // bind MessagePump
         }
         return self.instance || (self.instance = that);
     };
-    uuclass[className][PROTOTYPE] = proto && isFunction(proto) ? { init: proto }
-                                                               : proto || {};
+    uuclass[className][_prototype] = proto && isFunction(proto) ? { init: proto }
+                                                                : proto || {};
 }
 
 // --- message pump ---
@@ -1636,14 +1631,14 @@ function uumsgpost(address, // @param Array/Mix: address or guid
     }, 0);
 }
 
-// MessagePump.register - register the destination of the message
-function uumsgregister(instance) { // @param Instance: class instance
+// MessagePump.bind - register the destination of the message
+function uumsgbind(instance) { // @param Instance: class instance
     this.addr[instance.uuguid] = instance;
     this.cast = uukeys(this.addr);
 }
 
-// MessagePump.unregister
-function uumsgunregister(instance) { // @param Instance: class instance
+// MessagePump.unbind
+function uumsgunbind(instance) { // @param Instance: class instance
     delete this.db[instance.uuguid];
     this.cast = uukeys(this.addr);
 }
@@ -1662,14 +1657,17 @@ function uuevent(node,        // @param Node:
                               // @return Node:
     function _eventClosure(event) {
         if (!event.xtarget) {
-            var target = event.target || event.srcElement || doc;
+            var target = event.target
+//{{{!mb
+                                      || event.srcElement || doc;
+//}}}!mb
 
             event.xtype = (uuevent.xtypes[event.type] || 0) & 255;
             event.xbutton = event.button || 0;
             event.xtarget = (target.nodeType === 3) // 3: TEXT_NODE
                           ? target.parentNode : target;
 //{{{!mb
-            if (uu.ie) {
+            if (_ie) {
                 if (!event.target) { // [IE6][IE7][IE8]
                     event.currentTarget = node;
 
@@ -1718,12 +1716,13 @@ function uuevent(node,        // @param Node:
     }
 
     // --- setup event database ---
-    if (!(DATA_UUEVENT in node)) {
-        node[DATA_UUEVENT] = { types: "," };
+    if (!(_uuevent in node)) {
+        node[_uuevent] = { types: "," };
     }
 
     var eventTypeExArray = eventTypeEx.split(","),
-        eventData = node[DATA_UUEVENT],
+        eventClosure = "eventClosure",
+        eventData = node[_uuevent],
         ex, token, bound, types = "types",
         eventType, capture, handler, i = -1, pos,
         isInstance = false;
@@ -1732,7 +1731,7 @@ function uuevent(node,        // @param Node:
         handler = isFunction(evaluator)
                 ? evaluator
                 : (isInstance = true, evaluator.handleEvent);
-        evaluator.eventClosure = _eventClosure;
+        evaluator[eventClosure] = _eventClosure;
     }
 
     while ( (ex = eventTypeExArray[++i]) ) { // ex = "namespace.click+"
@@ -1748,7 +1747,7 @@ function uuevent(node,        // @param Node:
 
 //{{{!mb
         // IE mouse capture [IE6][IE7][IE8]
-        if (uu.ie && !node.addEventListener) {
+        if (_ie && !node.addEventListener) {
             if (eventType === "mousemove") {
                 capture && uuevent(node, "losecapture", evaluator, unbind);
             } else if (eventType === "losecapture") {
@@ -1776,8 +1775,8 @@ function uuevent(node,        // @param Node:
                             eventData[types].replace("," + ex + ",", ",");
                     }
                     uueventdetach(node, eventType,
-                                  evaluator.eventClosure, capture);
-                    evaluator.eventClosure = null;
+                                  evaluator[eventClosure], capture);
+                    evaluator[eventClosure] = null;
                 }
             }
         } else {
@@ -1788,7 +1787,7 @@ function uuevent(node,        // @param Node:
             }
             eventData[ex].push(evaluator);
             uueventattach(node, eventType,
-                          evaluator.eventClosure, capture);
+                          evaluator[eventClosure], capture);
         }
     }
     return node;
@@ -1846,23 +1845,27 @@ function getPaddingEdge(event) { // @param EventObjectEx:
                                  //     x - Number: fixed offsetX
                                  //     y - Number: fixed offsetY
     // http://d.hatena.ne.jp/uupaa/20100430/1272561922
-    var style = uu.ie ? null : win.getComputedStyle(event.xtarget, null),
+    var style =
+//{{{!mb
+                _ie ? null :
+//}}}!mb
+                win[_getComputedStyle](event.xtarget, null),
         x = event.offsetX || 0,
         y = event.offsetY || 0;
 
 //{{{!mb
-    if (uu.webkit) {
+    if (_webkit) {
 //}}}!mb
         x -= parseInt(style.borderTopWidth)  || 0; // "auto" -> 0
         y -= parseInt(style.borderLeftWidth) || 0;
 //{{{!mb
-    } else if (uu.opera) {
+    } else if (_opera) {
         x += parseInt(style.paddingTop)  || 0;
         y += parseInt(style.paddingLeft) || 0;
-    } else if (uu.gecko || event.layer !== void 0) {
+    } else if (_gecko || event.layer !== void 0) {
         x = (event.layerX || 0) - (parseInt(style.borderTopWidth)  || 0);
         y = (event.layerY || 0) - (parseInt(style.borderLeftWidth) || 0);
-    } else if (uu.ie && _ver.browser > 8) { // [IE9+]
+    } else if (_ie && _ver.browser > 8) { // [IE9+]
         x = win.event.offsetX;
         y = win.event.offsetY;
     }
@@ -1874,7 +1877,7 @@ function getPaddingEdge(event) { // @param EventObjectEx:
 function uueventhas(node,          // @param Node: target node
                     eventTypeEx) { // @param EventTypeExString: namespace and event types, "click", "namespace.mousemove+"
                                    // @return Boolean:
-    var types = node[DATA_UUEVENT] ? node[DATA_UUEVENT]["types"] : 0;
+    var types = node[_uuevent] ? node[_uuevent]["types"] : 0;
 
     return (types || "").indexOf("," + eventTypeEx + ",") >= 0;
 }
@@ -1901,7 +1904,7 @@ function uueventfire(node,      // @param Node: target node
                 stopPropagation:uu.nop
             };
 
-        node[DATA_UUEVENT][eventType].forEach(function(evaluator) {
+        node[_uuevent][eventType].forEach(function(evaluator) {
             evaluator.call(node, fakeEventObjectEx);
         });
     }
@@ -1921,15 +1924,15 @@ function uueventunbind(node,          // @param Node: target node
         // closure vars: node, ns
 
         if (!ex.indexOf(ns)) {
-            node[DATA_UUEVENT][ex].forEach(function(evaluator) {
+            node[_uuevent][ex].forEach(function(evaluator) {
                 uuevent(node, ex, evaluator, true); // unbind
             });
         }
     }
 
-    if (node[DATA_UUEVENT]) {
-        eventTypeEx = eventTypeEx ? "," + eventTypeEx + ","   // [2] ",click,"
-                                  : node[DATA_UUEVENT].types; // [1] ",click,MyNamespace.mousemove+,"
+    if (node[_uuevent]) {
+        eventTypeEx = eventTypeEx ? "," + eventTypeEx + "," // [2] ",click,"
+                                  : node[_uuevent].types;   // [1] ",click,MyNamespace.mousemove+,"
 
         var ns, ary = uusplitcomma(eventTypeEx), ex, i = -1;
 
@@ -1941,7 +1944,7 @@ function uueventunbind(node,          // @param Node: target node
             } else { // [2][4]
                 if (eventTypeEx.indexOf("," + ex + ",") >= 0) {
 
-                    node[DATA_UUEVENT][ex].forEach(function(evaluator) {
+                    node[_uuevent][ex].forEach(function(evaluator) {
                         uuevent(node, ex, evaluator, true); // unbind
                     });
                 }
@@ -1952,45 +1955,40 @@ function uueventunbind(node,          // @param Node: target node
 }
 
 // uu.event.attach - attach event - Raw Level API wrapper
-function uueventattach(node,         // @param Node:
-                       eventType,    // @param String: event type
-                       evaluator,    // @param Function: evaluator
-                       useCapture) { // @param Boolean(= false):
-    eventType = uueventattach._FIX[eventType] || eventType;
+function uueventattach(node,       // @param Node:
+                       eventType,  // @param String: event type
+                       evaluator,  // @param Function: evaluator
+                       useCapture, // @param Boolean(= false):
+                       detach) {   // @hidden Boolean(= false): true is detach
+//{{{!mb
+    eventType = uueventattach.fix[eventType] || eventType;
+//}}}!mb
+
+    var method = "addEventListener";
 
 //{{{!mb
-    if (node.addEventListener) {
+    if (node[method]) {
 //}}}!mb
-        node.addEventListener(eventType, evaluator, !!(useCapture || 0));
+        node[detach ? "removeEventListener"
+                    : method](eventType, evaluator, !!useCapture);
 //{{{!mb
     } else {
-        node.attachEvent("on" + eventType, evaluator); // [IE]
+        node[detach ? "detachEvent"
+                    : "attachEvent"]("on" + eventType, evaluator);
     }
 //}}}!mb
 }
-uueventattach._FIX =
 //{{{!mb
-    uu.gecko ? { mousewheel: "DOMMouseScroll" } :
-    uu.opera ? { contextmenu: "mousedown" } :
+uueventattach.fix = _gecko ? { mousewheel: "DOMMouseScroll" } :
+                    _opera ? { contextmenu: "mousedown" } : {};
 //}}}!mb
-    {};
 
 // uu.event.detach - detach event - Raw Level API wrapper
 function uueventdetach(node,         // @param Node:
                        eventType,    // @param String: event type
                        evaluator,    // @param Function: evaluator
                        useCapture) { // @param Boolean(= false):
-    eventType = uueventattach._FIX[eventType] || eventType;
-
-//{{{!mb
-    if (node.removeEventListener) {
-//}}}!mb
-        node.removeEventListener(eventType, evaluator, !!(useCapture || 0));
-//{{{!mb
-    } else {
-        node.detachEvent("on" + eventType, evaluator); // [IE]
-    }
-//}}}!mb
+    uueventattach(node, eventType, evaluator, useCapture, 1);
 }
 
 // uu.ready - hook event
@@ -2037,9 +2035,9 @@ function uureadyfire(readyEventType, // @param String: readyEventType
 function uunode(tagName, // @param String(= "div"):
                 attr) {  // @param Hash(= void):
                          // @return Node: <node>
-    var rv = doc.createElement(tagName || "div");
+    var rv = doc.createElement(tagName || "div"), undef;
 
-    return attr === void 0 ? rv : uumix(rv, attr);
+    return attr === undef ? rv : uumix(rv, attr);
 }
 
 //  [1][add div node]          uu.node.add()         -> <body><div /></body>
@@ -2108,19 +2106,35 @@ function uunodefind(parent,     // @param Node: parent node
 }
 uunodefind.pos = { "^": 1, "-": 2, "+": 3, "$": 4, ".^": 5, ".$": 8 };
 uunodefind.iters = {
-    1: ["firstElementChild",      "nextSibling",     "firstChild"], // FIRST_SIBLING, FIRST_CHILD
-    2: ["previousElementSibling", "previousSibling"],               // PREV_SIBLING
-    3: ["nextElementSibling",     "nextSibling"],                   // NEXT_SIBLING
-    4: ["lastElementChild",       "previousSibling", "lastChild"]   // LAST_SIBLING, LAST_CHILD
+    1: ["firstElementChild"
+//{{{!mb
+                                , "nextSibling",    "firstChild"
+//}}}!mb
+                                                                ], // FIRST_SIBLING, FIRST_CHILD
+    2: ["previousElementSibling"
+//{{{!mb
+                                , "previousSibling"
+//}}}!mb
+                                                                ], // PREV_SIBLING
+    3: ["nextElementSibling"
+//{{{!mb
+                                , "nextSibling"
+//}}}!mb
+                                                                ], // NEXT_SIBLING
+    4: ["lastElementChild"
+//{{{!mb
+                                , "previousSibling", "lastChild"
+//}}}!mb
+                                                                ]  // LAST_SIBLING, LAST_CHILD
 };
 
 // uu.nodeid - get nodeid
 function uunodeid(node) { // @param Node:
                           // @return Number: nodeid, from 1
-    if (!node[DATA_UUGUID]) {
-        uunodeid.db[node[DATA_UUGUID] = ++uunodeid.num] = node;
+    if (!node[_uuguid]) {
+        uunodeid.db[node[_uuguid] = ++uunodeid.num] = node;
     }
-    return node[DATA_UUGUID];
+    return node[_uuguid];
 }
 uunodeid.num = 0; // node id counter
 uunodeid.db = {}; // { nodeid: node, ... }
@@ -2134,8 +2148,8 @@ function uunodeidtonode(nodeid) { // @param String: nodeid
 // uu.nodeid.remove - remove from node db
 function uunodeidremove(node) { // @param Node:
                                 // @return Node: removed node
-    node[DATA_UUGUID] && (uunodeid.db[node[DATA_UUGUID]] = null,
-                                      node[DATA_UUGUID] = null);
+    node[_uuguid] && (uunodeid.db[node[_uuguid]] = null,
+                                  node[_uuguid] = null);
     return node;
 }
 
@@ -2222,16 +2236,16 @@ function buildNode(node,   // @param Node/TagString: <div> or "div"
             } else if (isNumber(arg)) { // [8]
                 callback = arg;
             } else if (isString(arg) && arg.indexOf(",") < 0) { // [2]
-                node.appendChild(doc.createTextNode(arg)); // uu.div("hello")
+                node.appendChild(uutext(arg)); // uu.div("hello")
             } else if (++token < 2) {
-                uu.attr(node, isString(arg) ? uusplittohash(arg) : arg); // [4][5]
+                uuattr(node, isString(arg) ? uusplittohash(arg) : arg); // [4][5]
             } else if (token < 3) {
-                uu.css(node, isString(arg) ? uusplittohash(arg) : arg); // [6][7]
+                uucss(node, isString(arg) ? uusplittohash(arg) : arg); // [6][7]
             }
         }
     }
     callback && uunodebuilder.handler &&
-            uunodebuilder.handler(uu, node, callback, uu.nodeid(node));
+            uunodebuilder.handler(uu, node, callback, uunodeid(node));
     return node;
 }
 
@@ -2315,7 +2329,7 @@ function uusvg(tagName, // @param String(= "svg"):
     var rv = doc.createElementNS("http://www.w3.org/2000/svg", tagName || "svg"),
         key;
 
-    if (attr !== key) {
+    if (attr !== key) { // attr === void 0
         for (key in attr) {
             rv.setAttribute(key, attr[key]);
         }
@@ -2356,9 +2370,9 @@ function uutext(node,   // @param Node/String: node or text string
     if (text === void 0) { // [2]
         return node[
 //{{{!mb
-                    uu.gecko ? "textContent" :
+                    _gecko ? "textContent" :
 //}}}!mb
-                               "innerText"];
+                             "innerText"];
     }
     uunodeadd(doc.createTextNode(_isArray(text) ? text.join("") : text), // [3]
               uunodeclear(node));
@@ -2374,19 +2388,27 @@ function uutextf(format) { // @param String: formatted string with "??" placehol
 // --- query ---
 // uu.query - querySelectorAll
 function uuquery(expression, // @param String: expression, "css > expr"
-                 context) {  // @param NodeArray/Node(= document): query context
+                 context,    // @param NodeArray/Node(= document): query context
+                 useJS) {    // @param Boolean(= false): true is use js impl
                              // @return NodeArray: [Node, ...]
     context = context || doc;
 
-    if (context.querySelectorAll && context.nodeType
-        && !uuquery.ngword.test(expression)) { // [:scope] guard
+    if (!useJS
+        && context.nodeType
+//{{{!mb
+        && context.querySelectorAll
+        && !uuquery.ngword.test(expression)    // [:scope] guard
+//}}}!mb
+                                           ) {
         try {
             return fakeToArray(context.querySelectorAll(expression));
         } catch(err) {} // case: extend pseudo class / operators
     }
     return uu.query.selectorAll(expression, context); // depend: uu.query
 }
+//{{{!mb
 uuquery.ngword = /(?:\:(a|b|co|dig|first-l|li|mom|ne|p|sc|t|v))|!=|\/=|<=|>=|&=|x7b/;
+//}}}!mb
 // uu.query(":a***");
 // uu.query(":b***");
 // uu.query(":co***");
@@ -2675,15 +2697,15 @@ uuformat.q = /\?\?/g;
 // --- debug ---
 // uu.puff - uu.puff(mix) -> alert( uu.json(mix) )
 function uupuff(source) { // @param Mix: source object
-    alert(_jsoninspect(source));
+    alert(_json(source));
 }
 
 // uu.log - add log
 function uulog(log) { // @param Mix: log data
-    var context = uuid(uu.config.log);
+    var id = uu.config.log, context = uuid(id);
 
-    context || uunodeadd(context = uu.ol({ id: uu.config.log }));
-    uunodeadd(uu.li(uu.text(uufixunicode(_jsoninspect(log)))), context);
+    context || uunodeadd(context = uu.ol({ id: id }));
+    uunodeadd(uu.li(uutext(uufixunicode(_json(log)))), context);
 }
 
 // uu.log.clear - clear log
@@ -2706,7 +2728,7 @@ function uujson(source,        // @param Mix:
                 callback) {    // @param Function(= void): error callback
                                // @return JSONString:
     return useNativeJSON && win.JSON ? win.JSON.stringify(source) || ""
-                                     : _jsoninspect(source, callback, 1);
+                                     : _json(source, callback);
 }
 
 // uu.json.decode - decode JSONString
@@ -2723,7 +2745,7 @@ function uujsondecode(jsonString,      // @param JSONString:
     if (uujsondecode.ngword.test(str.replace(uujsondecode.unescape, ""))) {
         return false;
     }
-    return (new Function("return " + str + ";"))();
+    return (new Function("return " + str))();
 }
 uujsondecode.ngword = /[^,:{}\[\]0-9.\-+Eaeflnr-u \n\r\t]/;
 uujsondecode.unescape = /"(\\.|[^"\\])*"/g;
@@ -2748,7 +2770,7 @@ _str2json.escape = /(?:\"|\\[bfnrt\\])/g; // escape
 _str2json.encode = /[\x00-\x1F\u0080-\uFFEE]/g;
 
 // inner - json inspect
-function _jsoninspect(mix, callback) {
+function _json(mix, callback) {
     var ary, type = uutype(mix), w, ai = -1, i, iz;
 
     if (mix === win) {
@@ -2768,14 +2790,14 @@ function _jsoninspect(mix, callback) {
     case uutype.ARRAY:
     case uutype.FAKEARRAY:
         for (ary = [], i = 0, iz = mix.length; i < iz; ++i) {
-            ary[++ai] = _jsoninspect(mix[i], callback);
+            ary[++ai] = _json(mix[i], callback);
         }
         return "[" + ary + "]";
     default:
         return callback ? (callback(mix) || "") : "";
     }
     if (_toString.call(type).slice(-3) === "on]") { // [object CSSStyleDeclaration]
-        w = uu.webkit;
+        w = _webkit;
         for (i in mix) {
             if (typeof mix[i] === "string" && (w || i != (+i + ""))) { // !isNaN(i)
                 w && (i = mix.item(i));
@@ -2785,7 +2807,7 @@ function _jsoninspect(mix, callback) {
     } else { // type === uutype.HASH
         for (i in mix) {
             ary[++ai] = _str2json(i, 1) + ":"
-                      + _jsoninspect(mix[i], callback);
+                      + _json(mix[i], callback);
         }
     }
     return "{" + ary + "}";
@@ -2843,7 +2865,7 @@ function _str2date(str) { // @param ISO8601DateString/RFC1123DateString:
                                  +m[4], +m[5], +m[6], +m[7])); // hh:mm:ss.ms
     }
 //{{{!mb
-    if (uu.ie && str.indexOf("GMT") > 0) {
+    if (_ie && str.indexOf("GMT") > 0) {
         str = str.replace(/GMT/, "UTC");
     }
 //}}}!mb
@@ -2869,7 +2891,7 @@ function datehashrfc() { // @return RFC1123DateString: "Wed, 16 Sep 2009 16:18:1
     var rv = (new Date(this.time)).toUTCString();
 
 ///{{{!mb
-    if (uu.ie && rv.indexOf("UTC") > 0) {
+    if (_ie && rv.indexOf("UTC") > 0) {
         // http://d.hatena.ne.jp/uupaa/20080515
         rv = rv.replace(/UTC/, "GMT");
         (rv.length < 29) && (rv = rv.replace(/, /, ", 0")); // [IE] fix format
@@ -2915,7 +2937,11 @@ function uuimage(url,        // @param String:
             img.onerror = img.onload = null;
         };
         img.onload = function() {
-            if (img.complete || img.readyState === "complete") { // [IE8] readyState
+            if (img.complete
+//{{{!mb
+                || img.readyState === "complete"    // [IE8] readyState
+//}}}!mb
+                                                ) {
                 after(img.ok = true);
             }
             img.onerror = img.onload = null;
@@ -2938,10 +2964,10 @@ function uuimagesize(node) { // @param HTMLImageElement/HTMLCanvasElement:
     var rs, rw, rh, w, h, hide, width = "width", height = "height";
 
     if (node.src) { // HTMLImageElement
-        if (node[DATA_UUIMAGE] && node[DATA_UUIMAGE].src === node.src) {
-            return node[DATA_UUIMAGE];
+        if (node[_uuimage] && node[_uuimage].src === node.src) {
+            return node[_uuimage];
         }
-        if (uu.ie) { // [IE]
+        if (_ie) { // [IE]
             if (node.currentStyle) {
                 hide = node.currentStyle.display === "none";
                 hide && (node.style.display = "block");
@@ -2961,7 +2987,7 @@ function uuimagesize(node) { // @param HTMLImageElement/HTMLCanvasElement:
             rh = node[height];
             node[width] = w, node[height] = h; // restore
         }
-        return node[DATA_UUIMAGE] = { width: rw, height: rh, src: node.src }; // bond
+        return node[_uuimage] = { width: rw, height: rh, src: node.src }; // bond
     }
 //}}}!mb
     return node;
@@ -3015,8 +3041,8 @@ function uuflash(url,      // @param String: url
     object = uuformat(
         '<object id="??" width="??" height="??" data="??" ??>??</object>',
         option.id, option.width, option.height, url,
-        uu.ie ? 'classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000"'
-              : 'type="application/x-shockwave-flash"', paramArray.join(""));
+        _ie ? 'classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000"'
+            : 'type="application/x-shockwave-flash"', paramArray.join(""));
     uunodeswap(uunodebulk(object), option.marker);
 //}}}!mb
     return uuid(option.id) || uu.node("object");
@@ -3031,7 +3057,7 @@ function uuviewportsize() { // @return Hash: { innerWidth, innerHeight,
                             //   pageXOffset - Number:
                             //   pageYOffset - Number:
 //{{{!mb
-    if (uu.ie) {
+    if (_ie) {
         return { innerWidth:  _rootNode.clientWidth,
                  innerHeight: _rootNode.clientHeight,
                  pageXOffset: _rootNode.scrollLeft,
@@ -3039,14 +3065,6 @@ function uuviewportsize() { // @return Hash: { innerWidth, innerHeight,
     }
 //}}}!mb
     return win;
-}
-
-// TODO: window.addEventListener("MozOrientation", handleOrientation, true);
-// https://developer.mozilla.org/en/Detecting_device_orientation
-
-// uu.viewport.getOrientation - get viewport orientation (for iPhone)
-function getOrientation() { // @return Number: 90(<|), 0(|A|), -90(|>), -180(|V|)
-    return win.orientation || 0;
 }
 
 // uu.guid - get unique number
@@ -3161,11 +3179,10 @@ function ArrayReduce(evaluator,      // @param Function: evaluator
         i in this && (rv = f ? evaluator(rv, this[i], i, this) : (++f, this[i]));
     }
     if (!f) {
-        throw new Error(ArrayReduce.msg);
+        throw new Error("INVALID_PARAM");
     }
     return rv;
 }
-ArrayReduce.msg = "reduce of empty array with no initial value";
 
 // Array.prototype.reduceRight
 function ArrayReduceRight(evaluator,      // @param Function: evaluator
@@ -3178,7 +3195,7 @@ function ArrayReduceRight(evaluator,      // @param Function: evaluator
         i in this && (rv = f ? evaluator(rv, this[i], i, this) : (++f, this[i]));
     }
     if (!f) {
-        throw new Error(ArrayReduce.msg);
+        throw new Error("INVALID_PARAM");
     }
     return rv;
 }
@@ -3263,7 +3280,7 @@ uutag.html4.forEach(function(tagName) {
 
 uutag.html5.forEach(function(tagName) {
 //{{{!mb
-    uu.ie && doc.createElement(tagName); // [IE6][IE7][IE8][IE9]
+    _ie && doc.createElement(tagName); // [IE6][IE7][IE8][IE9]
 //}}}!mb
 
     uu[tagName] = function() { // @param Mix: var_args
@@ -3274,13 +3291,13 @@ uutag.html5.forEach(function(tagName) {
 //{{{!mb
 try {
     // Internet Explorer 6 flicker fix
-    _ver.ie6 && doc.execCommand("BackgroundImageCache", false, true);
+    _ver.ie6 && doc.execCommand("BackgroundImageCache", _false, _true);
 } catch(err) {} // ignore error(IETester / stand alone IE too)
 //}}}!mb
 
 // --- window.onload handler ---
 function _windowonload() {
-    uuready.window = true;
+    uuready.window = _true;
     _DOMContentLoaded();
     uureadyfire("window");
 }
@@ -3289,7 +3306,7 @@ uueventattach(win, "load", _windowonload);
 // --- DOMContentLoaded handler ---
 function _DOMContentLoaded() {
     if (!uuready.reload && !uuready.dom) {
-        uuready.dom = true;
+        uuready.dom = _true;
         uureadyfire("dom");
     }
 }
@@ -3304,7 +3321,7 @@ function _IEDOMContentLoaded() {
         setTimeout(_IEDOMContentLoaded, 64);
     }
 }
-(uu.ie && _ver < 9) ? _IEDOMContentLoaded() : // [IE6][IE7][IE8]
+(_ie && _ver < 9) ? _IEDOMContentLoaded() : // [IE6][IE7][IE8]
 //}}}!mb
     uueventattach(doc, "DOMContentLoaded", _DOMContentLoaded);
 
@@ -3320,15 +3337,15 @@ function _windowonunload() {
             node = uunodeid.db[nodeid];
             ary = node.attributes, i = -1;
             while ( (v = ary[++i]) ) {
-                !v.name.indexOf("data-uu") && (node[v.name] = null);
+                !v.name.indexOf("data-") && (node[v.name] = null);
             }
         } catch (err) {}
     }
-    doc.head = null;
-    win.detachEvent("onload", _windowonload);
-    win.detachEvent("onunload", _windowonunload);
+    doc.html = doc.head = null;
+    uueventdetach(win, "onload", _windowonload);
+    uueventdetach(win, "onunload", _windowonunload);
 }
-uu.ie && win.attachEvent("onunload", _windowonunload);
+_ie && _ver < 9 && uueventdetach(win, "onunload", _windowonunload);
 //}}}!mb
 
 // inner -
@@ -3342,11 +3359,10 @@ uuready(function() {
 //}}}!mb
                          "float,cssFloat"
                 ) + ",pos,position,w,width,h,height,x,left,y,top,o,opacity," +
-                "bg,background,bgcolor,backgroundColor,bgimg,backgroundImage," +
-                "bgrpt,backgroundRepeat,bgpos,backgroundPosition");
+                "bg,background,bgcolor,backgroundColor,bgimg,backgroundImage");
 
-    uumix(_camelhash(uufix.db, uu.webkit ? win.getComputedStyle(_rootNode, null)
-                                         : _rootNode.style), styles, uuattr.fix);
+    uumix(_camelhash(uufix.db, _webkit ? win[_getComputedStyle](_rootNode, null)
+                                       : _rootNode.style), styles, uuattr.fix);
     uunodeid(_rootNode);
     while ( (v = nodeList[++i]) ) {
         uunodeid(v);
@@ -3365,7 +3381,7 @@ function _camelhash(rv, props) {
     }
 //}}}!mb
 
-    var k, v,
+    var k, v, webkit = _webkit,
 //{{{!mb
         DECAMELIZE = /([a-z])([A-Z])/g,
 //}}}!mb
@@ -3374,16 +3390,16 @@ function _camelhash(rv, props) {
     for (k in props) {
         if (typeof props[k] === "string") {
 //{{{!mb
-            if (uu.webkit) {
+            if (webkit) {
 //}}}!mb
                 v = k = props.item(k); // k = "-webkit-...", "z-index"
                 k.indexOf("-") >= 0 && (v = k.replace(CAMELIZE, _camelize));
                 (k !== v) && (rv[k] = v);
 //{{{!mb
             } else {
-                v = ((uu.gecko && !k.indexOf("Moz")) ? "-moz" + k.slice(3) :
-                     (uu.ie    && !k.indexOf("ms"))  ? "-ms"  + k.slice(2) :
-                     (uu.opera && !k.indexOf("O"))   ? "-o"   + k.slice(1) : k).
+                v = ((_gecko && !k.indexOf("Moz")) ? "-moz" + k.slice(3) :
+                     (_ie    && !k.indexOf("ms"))  ? "-ms"  + k.slice(2) :
+                     (_opera && !k.indexOf("O"))   ? "-o"   + k.slice(1) : k).
                     replace(DECAMELIZE, _decamelize);
                 (k !== v) && (rv[v] = k);
             }
@@ -3471,12 +3487,11 @@ function detectVersions(libraryVersion) { // @param Number: Library version
     }
 //}}}!mb
 
-    var ooo = true, xxx = false,
-        rv = { library: libraryVersion, flash: 0, silverlight: 0,
-               ie: xxx, ie6: xxx, ie7: xxx, ie8: xxx, ie9: xxx,
-               opera: xxx, gecko: xxx, webkit: ooo,
-               chrome: xxx, safari: ooo, iphone: ooo, android: xxx,
-               mobile: ooo, os: "iphone", jit: ooo },
+    var rv = { library: libraryVersion, flash: 0, silverlight: 0,
+               ie: _false, ie6: _false, ie7: _false, ie8: _false, ie9: _false,
+               opera: _false, gecko: _false, webkit: _true,
+               chrome: _false, safari: _true, iphone: _true, android: _false,
+               mobile: _true, os: "iphone", jit: _true },
 //{{{!mb
         ie = !!doc.uniqueID, documentMode = doc.documentMode,
 //}}}!mb
@@ -3491,7 +3506,7 @@ function detectVersions(libraryVersion) { // @param Number: Library version
     rv.ie7          = ie && browser === 7;
     rv.ie8          = ie && documentMode === 8;
     rv.ie9          = ie && documentMode === 9;
-    rv.opera        = win.opera ? ooo : xxx;
+    rv.opera        = win.opera ? _true : _false;
     rv.gecko        = test(/Gecko\//);
     rv.webkit       = test(/WebKit/);
     rv.chrome       = test(/Chrome/);
@@ -3501,6 +3516,7 @@ function detectVersions(libraryVersion) { // @param Number: Library version
     rv.mobile       = test(/Mobile/) || test(/Opera Mini/);
     rv.os           = rv.iphone ? "iphone"
                     : rv.android ? "android"
+                    : test(/CrOS/) ? "chrome"
                     : test(/Win/) ? "windows"
                     : test(/Mac/) ? "mac"
                     : test(/X11|Linux/) ? "unix"
@@ -3511,7 +3527,6 @@ function detectVersions(libraryVersion) { // @param Number: Library version
                       (rv.opera  && browser >= 10.5);  // Opera10.50+
     rv.flash        = detectFlashPlayerVersion(ie, 9); // FlashPlayer 9+
     rv.silverlight  = detectSilverlightVersion(ie, 3); // Silverlight 3+
-//}}}!mb
 //{{{+debug
     if (rv.ie9 && (rv.ie6 || rv.ie7 || rv.ie8)) {
         throw new Error("UNKNOWN_BROWSER_MODE");
@@ -3522,6 +3537,7 @@ function detectVersions(libraryVersion) { // @param Number: Library version
         rv.browser = 9;
     }
 //}}}+debug
+//}}}!mb
     return rv;
 }
 
@@ -3529,7 +3545,7 @@ function detectVersions(libraryVersion) { // @param Number: Library version
 function fakeToArray(fakeArray) { // @param FakeArray: NodeList, Arguments
                                   // @return Array:
     if (uuready.ArraySlice) {
-        return Array[PROTOTYPE].slice.call(fakeArray);
+        return Array[_prototype].slice.call(fakeArray);
     }
 
     var rv = [], i = 0, iz = fakeArray.length;
@@ -3542,26 +3558,21 @@ function fakeToArray(fakeArray) { // @param FakeArray: NodeList, Arguments
 //}}}!mb
 
 function detectFeatures() {
-    var ooo = true,
+    var hash = { rgba: _true, hsla: _true, transparent: _true },
 //{{{!mb
-        xxx = false,
         transparent = "transparent",
+        getAttribute = "getAttribute",
         node = uunode(), child, style = node.style,
 //}}}!mb
-        hash = {
-            rgba: ooo,               // { color: rgba(0,0,0,0) }
-            hsla: ooo,               // { color: hsla(0,0%,0%,0) }
-            transparent: ooo         // { color: transparent }
-        },
         rv = {
-            opacity: ooo,            // opacity ready
-            color: uumix({}, hash),     // color: rgba, hsla, transparent ready
-            border: uumix({}, hash),    // border: rgba, hsla, transparent ready
-            background: uumix({}, hash),// background: rgba, hsla, transparent ready
-            ArraySlice: ooo,         // Array.prototype.slice.call(FakeArray) ready
-            getAttribute: ooo,       // getAttribute("href"), getAttribute("class") ready
-            StringIndexer: ooo,      // String[indexer] ready
-            ElementTraversal: ooo    // Element Traversal ready - http://www.w3.org/TR/ElementTraversal/
+            opacity: _true,         // opacity ready
+            color: uuarg(hash),     // color: rgba, hsla, transparent ready
+            border: uuarg(hash),    // border: rgba, hsla, transparent ready
+            background: uuarg(hash),// background: rgba, hsla, transparent ready
+            ArraySlice: _true,      // Array.prototype.slice.call(FakeArray) ready
+            getAttribute: _true,    // getAttribute("href"), getAttribute("class") ready
+            StringIndexer: _true,   // String[indexer] ready
+            ElementTraversal: _true // Element Traversal ready - http://www.w3.org/TR/ElementTraversal/
         };
 
 //{{{!mb
@@ -3569,28 +3580,28 @@ function detectFeatures() {
              hsla: ["hsla(100,100%,100%,0.5)", /rgba.2|hsla.1/],
              transparent: [transparent, /tran|rgba/] }, function(v, i) {
         style.cssText = 'color:' + v[0] + ';background:' + v[0] +
-                        ';border:1px solid ' + v[0] + ';opacity:.25';
+                        ';border:0 none ' + v[0];
         rv.color[i] = v[1].test(style.color);
         rv.border[i] = v[1].test(style.borderTopColor);
         rv.background[i] = v[1].test(style.backgroundColor);
     });
-    // IE is typeof opacity == number
-    rv.opacity = style.opacity == "0.25"; // need [==]
+    // detect opacity - http://d.hatena.ne.jp/uupaa/20100513
+    rv.opacity = style.opacity != child; // opacity != void 0
 
     node.innerHTML = '<a href="/a" class="a"></a>';
     child = node.firstChild;
     try {
-        Array[PROTOTYPE].slice.call(doc.getElementsByTagName("head"));
+        Array[_prototype].slice.call(doc.getElementsByTagName("head"));
     } catch(err) { rv.ArraySlice = false; }
-    rv.getAttribute = child.getAttribute("class") === "a" &&
-                      child.getAttribute("href") === "/a";
+    rv[getAttribute] = child[getAttribute]("class") === "a" &&
+                       child[getAttribute]("href") === "/a";
     rv.StringIndexer = !!"0"[0];
-    rv.ElementTraversal = !!doc.documentElement.firstElementChild;
+    rv.ElementTraversal = !!_rootNode.firstElementChild;
 
     // revise
     if (_ver.ie) {
-        _ver < 9 && (rv.color[transparent] = xxx);
-        _ver < 7 && (rv.border[transparent] = xxx);
+        _ver < 9 && (rv.color[transparent] = _false);
+        _ver < 7 && (rv.border[transparent] = _false);
     }
 //}}}!mb
     return rv;
