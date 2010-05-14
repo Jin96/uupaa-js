@@ -3544,6 +3544,7 @@ function fakeToArray(fakeArray) { // @param FakeArray: NodeList, Arguments
 function detectFeatures() {
     var ooo = true,
 //{{{!mb
+        xxx = false,
         transparent = "transparent",
         node = uunode(), child, style = node.style,
 //}}}!mb
