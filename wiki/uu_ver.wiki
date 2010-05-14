@@ -24,7 +24,7 @@
   * uu.ver.android - Boolean: Android で true になります。
   * uu.ver.mobile - Boolean: iPhone, iPad, iPod, Android で true になります。
     * Windows Phone, Mobile Firefox(Fennec), Opera Mini では false になります。
-  * uu.ver.os - String: "iphone", "android", "windows", "mac", "unix", "unknown" を返します。
+  * uu.ver.os - String: "iphone", "android", "windows", "mac", "unix", "chrome", "unknown" を返します。
   * uu.ver.jit - Boolean: IE9+, Firefox3.5+, Safari4+, Google Chrome, Opera10.50+ で true になります。
   * uu.ver.browser - Number: ブラウザバージョンを返します。 [http://d.hatena.ne.jp/uupaa/20090603]
   * uu.ver.render - Number: レンダリングエンジンのバージョンを返します。[http://d.hatena.ne.jp/uupaa/20090603]
