@@ -1,0 +1,113 @@
+<!doctype html><html><head><meta charset="utf-8" />
+<title>uu.ready</title>
+<style>
+pre { border: 2px dotted gray; background: #eee;
+</style>
+<script src="../../src/uupaa.js"></script>
+<script>
+uu.ready(function(uu) {
+    uu.log("DOMContentLoaded ready");
+});
+
+uu.ready("window", function(uu) {
+    uu.log("window.onload ready1");
+    uu.body(
+        uu.ul(
+            uu.li("uu.ready.color.rgba - " + uu.ready.color.rgba),
+            uu.li("uu.ready.color.hsla - " + uu.ready.color.hsla),
+            uu.li("uu.ready.color.transparent - " + uu.ready.color.transparent),
+            uu.li("uu.ready.border.rgba - " + uu.ready.border.rgba),
+            uu.li("uu.ready.border.hsla - " + uu.ready.border.hsla),
+            uu.li("uu.ready.border.transparent - " + uu.ready.border.transparent),
+            uu.li("uu.ready.background.rgba - " + uu.ready.background.rgba),
+            uu.li("uu.ready.background.hsla - " + uu.ready.background.hsla),
+            uu.li("uu.ready.background.transparent - " + uu.ready.background.transparent),
+            uu.li("uu.ready.opacity - " + uu.ready.opacity),
+            uu.li("uu.ready.ArraySlice - " + uu.ready.ArraySlice),
+            uu.li("uu.ready.getAttribute - " + uu.ready.getAttribute),
+            uu.li("uu.ready.StringIndexer - " + uu.ready.StringIndexer),
+            uu.li("uu.ready.ElementTraversal - " + uu.ready.ElementTraversal),
+            uu.li("uu.ready.dom - " + uu.ready.dom),
+            uu.li("uu.ready.window - " + uu.ready.window),
+            uu.li("uu.ready.audio - " + uu.ready.audio),
+            uu.li("uu.ready.video - " + uu.ready.video),
+            uu.li("uu.ready.canvas - " + uu.ready.canvas),
+            uu.li("uu.ready.storage - " + uu.ready.storage),
+            uu.li("uu.ready.reload - " + uu.ready.reload)
+        ));
+}, function(uu) {
+    uu.log("window.onload ready2");
+
+    var param = { counter: 0 };
+
+    uu.ready("com.example.oreore", function(uu, param) {
+
+        uu.log("oreore fire" + (++param.counter)); // oreore fire1
+
+    }, function(uu) {
+
+        uu.log("oreore fire" + (++param.counter)); // oreore fire2
+
+    });
+    uu.ready.fire("com.example.oreore", param)
+});
+
+</script></head><body>
+<ul id="log"></ul>
+
+
+<pre>
+
+uu.ready(function(uu) {
+    uu.log("DOMContentLoaded ready");
+});
+
+uu.ready("window", function(uu) {
+    uu.log("window.onload ready1");
+    uu.body(
+        uu.ul(
+            uu.li("uu.ready.color.rgba - " + uu.ready.color.rgba),
+            uu.li("uu.ready.color.hsla - " + uu.ready.color.hsla),
+            uu.li("uu.ready.color.transparent - " + uu.ready.color.transparent),
+            uu.li("uu.ready.border.rgba - " + uu.ready.border.rgba),
+            uu.li("uu.ready.border.hsla - " + uu.ready.border.hsla),
+            uu.li("uu.ready.border.transparent - " + uu.ready.border.transparent),
+            uu.li("uu.ready.background.rgba - " + uu.ready.background.rgba),
+            uu.li("uu.ready.background.hsla - " + uu.ready.background.hsla),
+            uu.li("uu.ready.background.transparent - " + uu.ready.background.transparent),
+            uu.li("uu.ready.opacity - " + uu.ready.opacity),
+            uu.li("uu.ready.ArraySlice - " + uu.ready.ArraySlice),
+            uu.li("uu.ready.getAttribute - " + uu.ready.getAttribute),
+            uu.li("uu.ready.StringIndexer - " + uu.ready.StringIndexer),
+            uu.li("uu.ready.ElementTraversal - " + uu.ready.ElementTraversal),
+            uu.li("uu.ready.dom - " + uu.ready.dom),
+            uu.li("uu.ready.window - " + uu.ready.window),
+            uu.li("uu.ready.audio - " + uu.ready.audio),
+            uu.li("uu.ready.video - " + uu.ready.video),
+            uu.li("uu.ready.canvas - " + uu.ready.canvas),
+            uu.li("uu.ready.storage - " + uu.ready.storage),
+            uu.li("uu.ready.reload - " + uu.ready.reload)
+        ));
+}, function(uu) {
+    uu.log("window.onload ready2");
+
+    var param = { counter: 0 };
+
+    uu.ready("com.example.oreore", function(uu, param) {
+
+        uu.log("oreore fire" + (++param.counter)); // oreore fire1
+
+    }, function(uu) {
+
+        uu.log("oreore fire" + (++param.counter)); // oreore fire2
+
+    });
+    uu.ready.fire("com.example.oreore", param)
+});
+
+</pre>
+
+
+
+
+</body></html>

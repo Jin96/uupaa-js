@@ -355,10 +355,9 @@ function _parseAudioTags(audioNodes, callback) {
  */
 
 function _xaudio() {
-    uu.ready(function() {
+    uu.ready("window", function() {
         uu.ready.audio = true;
-
-        win.xaudio && win.xaudio(uu, uu.tag("audio"));
+        uu.ready.fire("audio", uu.tag("audio"));
     });
 }
 

@@ -7,16 +7,6 @@
 //
 //  - uu.config = { aria, debug, right, trace, altcss, storage }
 //
-// * User callback functions ( doc/user-callback-functions.txt )
-//
-//  - window.xready(uu:Function)
-//  - window.xwindow(uu:Function)
-//  - window.xcanvas(uu:Function, canvasNodeArray:NodeArray)
-//  - window.xaudio(uu:Function, audioNodeArray:NodeArray)
-//  - window.xvideo(uu:Function, videoNodeArray:NodeArray)
-//  - window.xstorage(uu:Function, storage:StorageObject)
-//  - window.xbuild(uu:Function, node:Node, buildid:Number)
-//
 // * Predefined types ( doc/predefined-types.txt )
 //
 //  - ColorHash, RGBAHash, HSLAHash, HSVAHash, W3CNamedColor
@@ -134,10 +124,8 @@ uu = uumix(uufactory, {             // uu(expression:Jam/Node/NodeArray/String/w
         clear:      uudataclear,    // uu.data.clear(node:Node, key:String = void):Node
                                     //  [1][clear all pair] uu.data.clear(node) -> node
                                     //  [2][clear pair]     uu.data.clear(node, key) -> node
-        registerHandler:            // uu.data.registerHandler(key:String, callback:Function)
-                    registerDataHandler,
-        unregisterHandler:          // uu.data.unregisterHandler(key:String)
-                    unregisterDataHandler
+        bind:       uudatabind,     // uu.data.bind(key:String, callback:Function)
+        unbind:     undataunbind    // uu.data.unbind(key:String)
     }),
 
     // --- CSS / STYLE / VIEW PORT ---
@@ -243,6 +231,7 @@ uu = uumix(uufactory, {             // uu(expression:Jam/Node/NodeArray/String/w
         count:      uunodecount,    // uu.node.count(parent:Node):Number, child element count
         xpath:      uunodexpath,    // uu.node.xpath(elementNode:Node):String
         remove:     uunoderemove,   // uu.node.remove(node:Node):Node
+        builder:    uunodebuilder,  // uu.node.builder(handler:Function)
         indexOf:    uunodeindexof   // uu.node.indexOf(node:Node):Number
     }),
     nodeid:   uumix(uunodeid, {     // uu.nodeid(node:Node):Number (nodeid)
@@ -312,7 +301,8 @@ uu = uumix(uufactory, {             // uu(expression:Jam/Node/NodeArray/String/w
         clear:      uulogclear      // uu.log.clear()
     }),
     // --- EVALUATION ---
-    ready:    uumix(uuready, {      // uu.ready(evaluator:Function = void, order:Number = 0)
+    ready:    uumix(uuready, {      // uu.ready(readyEventType:IgnoreCaseString = "dom", callback:Function, ...)
+        fire:       uureadyfire,    // uu.ready.fire(readyEventType:String, param:Mix = void)
         dom:        false,          // true is DOMContentLoaded event fired
         window:     false,          // true is window.onload event fired
         audio:      false,          // true is <audio> ready event fired
@@ -321,9 +311,6 @@ uu = uumix(uufactory, {             // uu(expression:Jam/Node/NodeArray/String/w
         storage:    false,          // true is window.localStorage ready event fired
         reload:     false           // true is blackout (css3 cache reload)
     }, detectFeatures(_ver)),
-    lazy:     uumix(uulazy, {       // uu.lazy(id:String, evaluator:Function, order:Number = 0)
-        fire:       uulazyfire      // uu.lazy.fire(id:String)
-    }),
     // --- OTHER ---
     dmz:            {},             // uu.dmz - DeMilitarized Zone(proxy)
     nop:            function() {}   // uu.nop() - none operation
@@ -1018,14 +1005,14 @@ function uudataclear(node,  // @param Node:
     return uudata(node, key || "*", null);
 }
 
-// uu.data.registerHandler - register data handler
-function registerDataHandler(key,        // @param String: "data-uu..."
-                             callback) { // @param Function: callback function
+// uu.data.bind - bind data handler
+function uudatabind(key,        // @param String: "data-uu..."
+                    callback) { // @param Function: callback function
     uudata.handler[key] = callback;
 }
 
-// uu.data.unregisterHandler - unregister data handler
-function unregisterDataHandler(key) { // @param String: "data-uu..."
+// uu.data.unbind - unbind data handler
+function undataunbind(key) { // @param String: "data-uu..."
     delete uudata.handler[key];
 }
 
@@ -2006,12 +1993,42 @@ function uueventdetach(node,         // @param Node:
 //}}}!mb
 }
 
-// uu.ready - hook DOMContentLoaded event
-function uuready(evaluator, // @param Function(= void): callback function
-                 order) {   // @param Number(= 0): 0=low, 1=mid, 2=high(system)
-    if (evaluator !== void 0 && !uuready.reload) {
-        uuready.dom ? evaluator(uu) // fired -> callback
-                    : uulazy("dom", evaluator, order || 0); // [1] stock
+// uu.ready - hook event
+function uuready(/* readyEventType, */  // @param String(= "dom"): readyEventType
+                 /* callback, ... */) { // @param Function: callback functions
+    if (!uuready.reload) {
+        var args = arguments, v, i = 0, iz = args.length,
+            type = "dom", order, fired;
+
+        for (; i < iz; ++i) {
+            isString(v = args[i]) && (type = v.toLowerCase());
+        }
+        fired = uuready[type];
+        order = { dom: 0, middle: 1, system: 2 }[type] || 0;
+
+        for (i = 0; i < iz; ++i) {
+            if (isFunction(v = args[i])) {
+                fired ? v(uu) // callback(uu)
+                      : (uuready.uudb[type] || (uuready.uudb[type] = [[], [], []]),
+                         uuready.uudb[type][order].push(v));
+            }
+        }
+    }
+}
+uuready.uudb = {}; // { readyEventType: [[low], [middle], [system]], ... } event stock
+
+// uu.ready.fire
+function uureadyfire(readyEventType, // @param String: readyEventType
+                     param) {        // @param Mix(= void): callback(uu, param)
+    var db = uuready.uudb[readyEventType], ary, callback, i = -1;
+
+    if (db) {
+        ary = db[2].concat(db[1], db[0]); // join
+        uuready.uudb[readyEventType] = null; // pre clear
+
+        while ( (callback = ary[++i]) ) {
+            callback(uu, param);
+        }
     }
 }
 
@@ -2188,7 +2205,7 @@ function uunodewrap(innerNode,   // @param Node: inner node
 //  [5][set attr]       uu.div({ title: "hello" })   -> uu.node("div", { title: "hello" })
 //  [6][set css]        uu.div("", "color,red")      -> uu.css(uu.node("div"), { color: "red" })
 //  [7][set css]        uu.div("", { color: "red" }) -> uu.css(uu.node("div"), { color: "red" })
-//  [8][set event]      uu.div(1) -> uu.node("div") + window.xbuild(uu:Function, node:Node, buildid:Number)
+//  [8][call handler]   uu.node.builder(fn), uu.div(1) -> fn(uu, <div>, 1, nodeid)
 
 // inner - build node
 function buildNode(node,   // @param Node/TagString: <div> or "div"
@@ -2213,9 +2230,8 @@ function buildNode(node,   // @param Node/TagString: <div> or "div"
             }
         }
     }
-    if (callback !== void 0) {
-        win.xbuild(uu, node, callback, uu.nodeid(node));
-    }
+    callback && uunodebuilder.handler &&
+            uunodebuilder.handler(uu, node, callback, uu.nodeid(node));
     return node;
 }
 
@@ -2269,6 +2285,11 @@ function uunodecount(parent) { // @param Node: parentNode
     }
     return rv;
 //}}}!mb
+}
+
+// uu.node.builder - set node builder handler
+function uunodebuilder(handler) { // @param Function: handler
+    uunodebuilder.handler = handler;
 }
 
 // uu.node.indexOf - find ELEMENT_NODE index
@@ -3034,31 +3055,6 @@ function uuguid() { // @return Number: unique number, from 1
 }
 uuguid.num = 0; // guid counter
 
-// uu.lazy - lazy evaluate
-function uulazy(id,        // @param String: id
-                evaluator, // @param Function: callback function
-                order) {   // @param Number(= 0): 0=low, 1=mid, 2=high(system)
-    uulazy.db[id] || (uulazy.db[id] = [[], [], []]);
-    uulazy.db[id][order || 0].push(evaluator);
-}
-uulazy.db = {}; // { id: [[low], [mid], [high]], ... } job db
-
-// uu.lazy.fire
-function uulazyfire(id) { // @param String: lazy id
-    if (uulazy.db[id]) {
-        var fn, i = -1, db = uulazy.db[id],
-            ary = db[2].concat(db[1], db[0]); // join
-
-        // pre clear
-        uulazy.db[id] = null;
-
-        // callback
-        while ( (fn = ary[++i]) ) {
-            fn(uu);
-        }
-    }
-}
-
 // --- ECMAScript-262 5th ---
 //{{{!mb
 
@@ -3286,8 +3282,7 @@ try {
 function _windowonload() {
     uuready.window = true;
     _DOMContentLoaded();
-    win.xwindow && win.xwindow(uu); // window.xwindow(uu) callback
-    uulazyfire("canvas");
+    uureadyfire("window");
 }
 uueventattach(win, "load", _windowonload);
 
@@ -3295,9 +3290,7 @@ uueventattach(win, "load", _windowonload);
 function _DOMContentLoaded() {
     if (!uuready.reload && !uuready.dom) {
         uuready.dom = true;
-
-        uulazyfire("dom");
-        win.xready && win.xready(uu); // window.xready(uu) callback
+        uureadyfire("dom");
     }
 }
 //{{{!mb
@@ -3549,7 +3542,7 @@ function fakeToArray(fakeArray) { // @param FakeArray: NodeList, Arguments
 //}}}!mb
 
 function detectFeatures() {
-    var ooo = true, xxx = false,
+    var ooo = true,
 //{{{!mb
         transparent = "transparent",
         node = uunode(), child, style = node.style,
@@ -3587,7 +3580,7 @@ function detectFeatures() {
     child = node.firstChild;
     try {
         Array[PROTOTYPE].slice.call(doc.getElementsByTagName("head"));
-    } catch(err) { rv.ArraySlice = xxx; }
+    } catch(err) { rv.ArraySlice = false; }
     rv.getAttribute = child.getAttribute("class") === "a" &&
                       child.getAttribute("href") === "/a";
     rv.StringIndexer = !!"0"[0];
