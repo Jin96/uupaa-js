@@ -1,0 +1,60 @@
+#summary Cording Style
+
+<wiki:toc max_depth="2" />
+
+uupaa.js では、[http://webkit.org/coding/coding-style.html WebKit]のコーディングスタイルをベースにしています。
+
+= 独自ルール =
+以下は uupaa.js の独自ルールです。
+
+== if や for のブレス( {} )は省略禁止 ==
+ブレスの省略は禁止します。
+文法レベルでコードを短縮するのは Minifier の仕事です。
+{{{
+    // good
+    if (expression) {
+        ...
+    }
+
+    // bad
+    if (expression) ...
+}}}
+{{{
+    // good
+    for (;;) {
+        ...
+    }
+
+    // bad
+    for (;;) ...
+}}}
+
+== function と { を同じ行に書く ==
+function のブレス( { ) は、理由が無い限り function と同じ行に記述します。
+また、function() { ... } とワンライナーで記述すると、ブレークポイントが張れずデバッグ効率低下の原因になるため避けてください。
+{{{
+    // good
+    function() {
+        ...
+    }
+
+    // wrong
+    function()
+    {
+        ...
+    }
+
+    // bad
+    function() { ... }
+}}}
+
+== Scrict Mode セーフにする ==
+Strict Mode セーフなコードを記述してください。
+行末のセミコロンの省略や arguments.callee の利用は、理由が無い限りそうすべきではありません。
+{{{
+    // bad
+    var a = 3 * 200
+}}}
+
+== uu や data-uu で始まる識別子は予約語 ==
+uu や data-uu で始まる識別子は uupaa.js の予約語です。
