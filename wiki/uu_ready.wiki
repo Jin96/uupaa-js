@@ -35,7 +35,7 @@
 || *uu.ready.background.transparent* <br/>{ background: transparent } ready  || o     || o     || o     || o        || o         || o        || o        ||
 || *uu.ready.opacity*           <br />{ opacity: 1.0 } ready                 ||       ||       ||       || o        || o         || o        || o        ||
 || *uu.ready.!ArraySlice*       <br />Array.prototype.slice.call(!FakeArray) ready|| ||        ||       || o        || o         || o        || o        ||
-|| *uu.ready.getAttribute*      <br />right getAttribute                     ||       ||       ||       || o        || o         || o        || o        ||
+|| *uu.ready.getAttribute*      <br />right getAttribute                     ||       ||       || o     || o        || o         || o        || o        ||
 || *uu.ready.!StringIndexer*    <br />String`[`indexer`]` ready              ||       ||       || o     || o        || o         || o        || o        ||
 || *uu.ready.!ElementTraversal* <br />Element Traversal ready                ||       ||       ||       || o(maybe) || o(1.9.1+) || o(528+)  || o        ||
 
