@@ -386,9 +386,6 @@ uu.ready(function(uu) {
       },
 
 // -----------------------
-    "Event": "",
-
-// -----------------------
     "uu.hash()": "",
       "[1][through] uu.hash({ key: 'value' }) はハッシュをそのままスルーし { key: 'value' } を返す": function() {
         var hash1 = { key: 'value' };
@@ -759,11 +756,6 @@ uu.ready(function(uu) {
         var hash = uu.split.toHash('key,0,key2,1', ',', 1);
 
         return [hash, "==", { key: 0, key2: 1 }];
-      },
-
-    "uu.split.token()": "",
-      "uu.split.token('url( http:// ) rgba(0, 0, 0, 0) center center') == ['url( http:// )', 'rgba(0, 0, 0, 0)', 'center', 'center'] CSS のトークンを正しく切り出せる": function() {
-        return [uu.split.token('url( http:// ) rgba(0, 0, 0, 0) center center'), "==", ['url( http:// )', 'rgba(0, 0, 0, 0)', 'center', 'center']];
       },
 
     "uu.entity()": "",

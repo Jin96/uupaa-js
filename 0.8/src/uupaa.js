@@ -23,13 +23,6 @@ var _prototype = "prototype",
     _rootNode = doc.documentElement,
     _toString = Object[_prototype].toString,
     _isArray = Array.isArray || (Array.isArray = ArrayIsArray), // ES5 spec
-    _false = !1,
-    _true = !0,
-    _ver = detectVersions(0.7),
-    _ie = _ver.ie,
-    _gecko = _ver.gecko,
-    _opera = _ver.opera,
-    _webkit = _ver.webkit,
     // --- HTML5: EMBEDDING CUSTOM NON-VISIBLE DATA ---
     _uuguid = "data-uuguid",
     _uuevent = "data-uuevent",
@@ -38,7 +31,18 @@ var _prototype = "prototype",
     _uuimage = "data-uuimage",
     _uuopacity = "data-uuopacity",
 //}}}!mb
-    _getComputedStyle = "getComputedStyle";
+    // --- manual minify ---
+    _getComputedStyle = "getComputedStyle",
+    _replace = "replace",
+    _indexOf = "indexOf",
+    _false = !1,
+    _true = !0,
+    // --- version detection ---
+    _ver = detectVersions(0.7),
+    _ie = _ver.ie,
+    _gecko = _ver.gecko,
+    _opera = _ver.opera,
+    _webkit = _ver.webkit;
 
 // --- HTML5 NEXT ---
 // http://www.whatwg.org/specs/web-apps/current-work/multipage/dom.html
@@ -46,9 +50,9 @@ doc.html || (doc.html = _rootNode);        // document.html = <html>
 doc.head || (doc.head = uutag("head")[0]); // document.head = <head>
 
 // --- LIBRARY STRUCTURE ---
-uu = uumix(uufactory, {             // uu(expression:Jam/Node/NodeArray/String/window, arg1:Jam/Node/Mix = void, arg2:Mix = void, arg3:Mix = void, arg4:Mix = void):Instance/Jam
+uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/String/window, arg1:NodeSet/Node/Mix = void, arg2:Mix = void, arg3:Mix = void, arg4:Mix = void):Instance/NodeSet
                                     //  [1][Class factory]   uu("MyClass", arg1, arg2) -> new uu.Clas.MyClass(arg1, arg2)
-                                    //  [2][NodeSet factory] uu("div>ul>li", <body>) -> Jam
+                                    //  [2][NodeSet factory] uu("div>ul>li", <body>) -> NodeSet
     config:   uuarg(win.xconfig, {  // uu.config - Hash: user configurations
         log:        "log",          //  uu.log() target node
         baseDir:    ""              //  base directory
@@ -83,7 +87,7 @@ uu = uumix(uufactory, {             // uu(expression:Jam/Node/NodeArray/String/w
     // --- HASH / ARRAY ---
     arg:            uuarg,          // uu.arg(arg1:Hash = {}, arg2:Hash, arg3:Hash = void):Hash
     mix:            uumix,          // uu.mix(base:Hash, flavor:Hash, aroma:Hash = void, override:Boolean = true):Hash
-    each:           uueach,         // uu.each(source:Hash/Array, callback:Function)
+    each:           uueach,         // uu.each(source:Hash/Array, evaluator:Function)
     keys:           uukeys,         // uu.keys(source:Hash/Array):Array
     values:         uuvalues,       // uu.values(source:Hash/Array):Array
     hash:     uumix(uuhash, {       // uu.hash(key:Hash/String, value:Mix = void):Hash
@@ -181,21 +185,21 @@ uu = uumix(uufactory, {             // uu(expression:Jam/Node/NodeArray/String/w
                     uuclasssingleton
     }),
     // --- EVENT ---
-    event:    uumix(uuevent, {      // uu.event(node:Node, eventTypeEx:String, evaluator:Function):Node
+    event:    uumix(uuevent, {      // uu.event(node:Node, eventTypeEx:EventTypeExString, evaluator:Function/Instance):Node
                                     //  [1][bind a event]            uu.event(node, "click", fn)             -> node
                                     //  [2][bind multi events]       uu.event(node, "click,dblclick", fn)    -> node
                                     //  [3][bind a capture event]    uu.event(node, "mousemove+", fn)        -> node
                                     //  [4][bind a namespace.event]  uu.event(node, "MyNameSpace.click", fn) -> node
-        has:        uueventhas,     // uu.event.has(node:Node, eventTypeEx:String):Boolean
+        has:        uueventhas,     // uu.event.has(node:Node, eventTypeEx:EventTypeExString):Boolean
         fire:       uueventfire,    // uu.event.fire(node:Node, eventType:String, param:Mix = void):Node
-        unbind:     uueventunbind,  // uu.event.unbind(node:Node, eventTypeEx:String = void):Node
+        unbind:     uueventunbind,  // uu.event.unbind(node:Node, eventTypeEx:EventTypeExString = void):Node
         attach:     uueventattach,  // uu.event.attach(node:Node, eventType:String, evaluator:Function, useCapture:Boolean = false)
         detach:     uueventdetach,  // uu.event.detach(node:Node, eventType:String, evaluator:Function, useCapture:Boolean = false)
         getKeyCode: getKeyCode,     // uu.event.getKeyCode(event:EventObjectEx):Hash { key, code }
         getPaddingEdge:             // uu.event.getPaddingEdge(event:EventObjectEx):Hash { x, y }
                     getPaddingEdge
     }),
-    // --- Node / NodeList ---
+    // --- NODE / NodeList ---
     svg:            uusvg,          //  uu.svg(tagName:String = "svg", attr:Hash = void):SVGNode
     node:     uumix(uunode, {       // uu.node(tagName:String = "div", attr:Hash = void):Node
         add:        uunodeadd,      // uu.node.add(source:Node/DocumentFragment/HTMLFragment/TagName = "div",
@@ -237,13 +241,22 @@ uu = uumix(uufactory, {             // uu(expression:Jam/Node/NodeArray/String/w
         builder:    uunodebuilder,  // uu.node.builder(handler:Function)
         indexOf:    uunodeindexof   // uu.node.indexOf(node:Node):Number
     }),
+    // --- NodeSet ---
+    nodeset:  uumix(NodeSet, {      // uu.nodeset(NodeSet alias)
+        plug:                       // uu.nodeset.plug - plugin point(NodeSet.prototype alias)
+                    NodeSet[_prototype]
+    }),
+    // --- NodeID ---
     nodeid:   uumix(uunodeid, {     // uu.nodeid(node:Node):Number (nodeid)
         toNode:     uunodeidtonode, // uu.nodeid.toNode(nodeid:Number):Node
         remove:     uunodeidremove  // uu.nodeid.remove(node:Node):Node (removed node)
     }),
-    html:           uuhtml,         // uu.html(node, attr, style, buildid) -> <html>
-    head:           uuhead,         // uu.head(node, attr, style, buildid) -> <head>
-    body:           uubody,         // uu.body(node, attr, style, buildid) -> <body>
+    // --- NodeBuilder ---
+    html:           uuhtml,         // uu.html(node:Node, html:HTMLFragmentString = ""):HTMLFragmentString/Node
+                                    //  [1][get innerHTML] uu.html(node) -> "<div>...</div>"
+                                    //  [2][set innerHTML] uu.html(node, "<div>...</div>") -> node
+    head:           uuhead,         // uu.head(/* var_args(node,attr,css,buildid) */):<head>
+    body:           uubody,         // uu.body(/* var_args(node,attr,css,buildid) */):<body>
     text:           uutext,         // uu.text(node:Node/String, text:String(= void)):Array/String/Node
                                     //  [1][create text node] uu.text("text")          -> createTextNode("text")
                                     //  [2][get text]         uu.text(node)            -> "text" or ["text", ...]
@@ -268,7 +281,6 @@ uu = uumix(uufactory, {             // uu(expression:Jam/Node/NodeArray/String/w
     }),
     split:    uumix(uusplit, {      // uu.split(" A  B  C ") -> ["A", "B", "C"]
         comma:      uusplitcomma,   // uu.split.comma(",,, ,,A,,,B,C,, ") -> ["A","B","C"]
-        token:      uusplittoken,   // uu.split.token(expression:String, splitter:String = " ", notrim:Boolean = false):Array
         toHash:     uusplittohash   // uu.split.toHash(source:String, splitter:String = ",", toNumber:Boolean = false):Hash
                                     //  [1][hash from string] uu.split.toHash("key,1,key2,1", ",") -> { key: 0, key2: 1 }
     }),
@@ -321,7 +333,7 @@ uu = uumix(uufactory, {             // uu(expression:Jam/Node/NodeArray/String/w
 
 // --- CONSTRUCTION ---
 uu.config.baseDir || (uu.config.baseDir =
-    uutag("script").pop().src.replace(/[^\/]+$/, function(file) {
+    uutag("script").pop().src[_replace](/[^\/]+$/, function(file) {
         return file == "uupaa.js" ? "../" : "";
     }));
 
@@ -394,28 +406,28 @@ _gecko && !win.HTMLElement[_prototype].innerText &&
 // ===================================================================
 
 // [1][Class factory]   uu("MyClass", arg1, arg2) -> new uu.Clas.MyClass(arg1, arg2)
-// [2][NodeSet factory] uu("div>ul>li", <body>) -> Jam
+// [2][NodeSet factory] uu("div>ul>li", <body>) -> NodeSet
 
 // uu - factory
-function uufactory(expression, // @param Jam/Node/NodeArray/String/window: expression or ClassName
-                   arg1,       // @param Jam/Node/Mix(= void): context or ClassName.init arg1
+function uufactory(expression, // @param NodeSet/Node/NodeArray/String/window: expression or ClassName
+                   arg1,       // @param NodeSet/Node/Mix(= void): context or ClassName.init arg1
                    arg2,       // @param Mix(= void): ClassName.init arg2
                    arg3,       // @param Mix(= void): ClassName.init arg3
                    arg4) {     // @param Mix(= void): ClassName.init arg4
-                               // @return Instance/Jam:
+                               // @return Instance/NodeSet:
     // class factory
     if (typeof expression === "string" && uuclass[expression]) {
         return new uuclass[expression](arg1, arg2, arg3, arg4);
     }
-    // jam factory
-    return new uu.jam(expression, arg1, arg2, arg3, arg4); // depend: uu.jam
+    // NodeSet factory
+    return new NodeSet(expression, arg1, arg2, arg3, arg4);
 }
 
 // --- reuqire file ---
 // uu.file - load file from Sjax
 function uufile(url) { // @param String: url
                        // @return AjaxResultHash:
-    var xhr, status = 400, ok = false;
+    var xhr, status = 400, ok = _false;
 
     try {
 //{{{!mb
@@ -423,7 +435,7 @@ function uufile(url) { // @param String: url
 //}}}!mb
         xhr || (xhr = new XMLHttpRequest());
 
-        xhr.open("GET", url, false); // sync
+        xhr.open("GET", url, _false); // sync
         xhr.send(null);
 
         status = xhr.status || 200; // fix "file:///" scheme
@@ -448,28 +460,28 @@ function uusnippet(id,    // @param String: snippet id. <script id="...">
                    arg) { // @param Mix(= void): arg
                           // @return String/Mix:
     function normalize(str) {
-        return str.replace(/("|')/g, "\\$1").replace(/\n/g, "\\n");
+        return str[_replace](/("|')/g, "\\$1")[_replace](/\n/g, "\\n");
     }
 
     function toBrace(all, ident) {
-        return ident.indexOf("arg.") ? '{(' + ident + ')}'  // "{{ident}}"     -> "{(ident)}"
-                                     : '"+' + ident + '+"'; // "{{arg.ident}}" -> "+ident+"
+        return ident[_indexOf]("arg.") ? '{(' + ident + ')}'  // "{{ident}}"     -> "{(ident)}"
+                                       : '"+' + ident + '+"'; // "{{arg.ident}}" -> "+ident+"
     }
 
     function toText(all, match) {
-        return '"' + normalize(uutrim(match)).replace(dualBrace, toBrace) + '"';
+        return '"' + normalize(uutrim(match))[_replace](dualBrace, toBrace) + '"';
     }
 
     function each(all, match) {
-        match = normalize(match.replace(/^\s+|\s+$/gm, "")).
-                replace(eachBlock, toEachBlock).
-                replace(dualBrace, toBrace);
+        match = normalize(match[_replace](/^\s+|\s+$/gm, ""))
+                [_replace](eachBlock, toEachBlock)
+                [_replace](dualBrace, toBrace);
         return 'uu.node.bulk("' + match + '");';
     }
 
     function toEachBlock(all, hash, block) {
         return '" + uu.snippet.each(' + hash + ',"' +
-                    block.replace(dualBrace, toBrace) + '") + "';
+                    block[_replace](dualBrace, toBrace) + '") + "';
     }
 
     var js = uusnippet.js[id] || "", node, // {
@@ -479,10 +491,10 @@ function uusnippet(id,    // @param String: snippet id. <script id="...">
     if (!js) {
         node = uuid(id);
         if (node) {
-            uusnippet.js[id] = js = node.text.replace(/\r\n|\r|\n/g, "\n").
-                    replace(/<text>\n([\s\S]*?)^<\/text>$/gm, toText). // <text>...</text>
-                    replace(/<>\n([\s\S]*?)^<\/>$/gm, each).           // <>...</>
-                    replace(/^\s*\n|\n$/g, "");
+            uusnippet.js[id] = js = node.text[_replace](/\r\n|\r|\n/g, "\n")
+                    [_replace](/<text>\n([\s\S]*?)^<\/text>$/gm, toText) // <text>...</text>
+                    [_replace](/<>\n([\s\S]*?)^<\/>$/gm, each)           // <>...</>
+                    [_replace](/^\s*\n|\n$/g, "");
         }
     }
     return js ? (new Function("arg", js))(arg) : "";
@@ -492,7 +504,7 @@ uusnippet.each = function(hash, fragment) { // (
     var i = 0, iz = hash.length, block = [], eachBrace = /\{\(([^\)]+)\)\}/g;
 
     for (; i < iz; ++i) {
-        block.push(fragment.replace(eachBrace, function(all, ident) {
+        block.push(fragment[_replace](eachBrace, function(all, ident) {
             return hash[ident][i];
         }));
     }
@@ -514,10 +526,10 @@ function uulike(lhs,   // @param Date/Hash/Fake/Array: lhs
     var type1 = uutype(lhs);
 
     if (type1 !== uutype(rhs)) {
-        return false;
+        return _false;
     }
     switch (type1) {
-    case uutype.FUNCTION:   return false;
+    case uutype.FUNCTION:   return _false;
     case uutype.DATE:       return uudate(lhs).ISO() === uudate(rhs).ISO();
     case uutype.HASH:       return (uusize(lhs) === uusize(rhs) && uuhas(lhs, rhs));
     case uutype.FAKEARRAY:  // http://d.hatena.ne.jp/uupaa/20091223
@@ -538,8 +550,10 @@ function uutype(search,  // @param Mix: search literal/object
     var types = uutype.types,
         rv = types[typeof search] ||
              types[_toString.call(search)] ||
-             (!search ? uutype.NULL : search.nodeType ? uutype.NODE :
-             "length" in search ? uutype.FAKEARRAY : uutype.HASH);
+             (!search ? uutype.NULL
+                      : search.nodeType ? uutype.NODE
+                                        : "length" in search ? uutype.FAKEARRAY
+                                                             : uutype.HASH);
 
     return match ? !!(match & rv) : rv;
 }
@@ -612,13 +626,13 @@ function uumix(base,       // @param Hash: mixin base
 // [2][Hash.forEach ]       uu.each({ a: 1, b: 2 }, function(v, i) {...})
 
 // uu.each - for each
-function uueach(source,     // @param Hash/Array: source
-                callback) { // @param Function: callback
+function uueach(source,      // @param Hash/Array: source
+                evaluator) { // @param Function: evaluator
     if (_isArray(source)) {
-        source.forEach(callback);
+        source.forEach(evaluator);
     } else {
         for (var i in source) {
-            callback(source[i], i); // callback(value, index)
+            evaluator(source[i], i); // evaluator(value, index)
         }
     }
 }
@@ -713,8 +727,8 @@ function uuhas(source,   // @param Hash/Array: source
             search = uuarray(search);
 
             for (iz = search.length; i < iz; ++i) {
-                if (i in search && source.indexOf(search[i]) < 0) {
-                    return false;
+                if (i in search && source[_indexOf](search[i]) < 0) {
+                    return _false;
                 }
             }
         } else {
@@ -722,13 +736,13 @@ function uuhas(source,   // @param Hash/Array: source
                 if (!(i in source)
                     || (source[i] !== search[i]
                         && _json(source[i], 0) !== _json(search[i], 0))) {
-                    return false;
+                    return _false;
                 }
             }
         }
-        return true;
+        return _true;
     }
-    return false;
+    return _false;
 }
 
 // [1][Hash nth ]           uu.nth({ a: 1, b: 2 }, 1) -> ["b", 2]
@@ -761,7 +775,7 @@ function uunth(source,  // @param Hash/Array: source
 // uu.size - get length
 function uusize(source) { // @param Hash/Array: source
                           // @return Number:
-    return _isArray(source) ? source.length : uukeys(source).length;
+    return (_isArray(source) ? source : uukeys(source)).length;
 }
 
 // [1][Hash.clone]          uu.clone({ a: 1, b: 2 }) -> { a: 1, b: 2 }
@@ -933,9 +947,9 @@ function uuattr(node,    // @param Node:
     }
     if (arguments.length === 3) { // [3] uu.attr(node, key, value)
         key = uuhash(key, value);
-    } else if (typeof key === "string") { // [2] uu.attr(node, key)
+    } else if (isString(key)) { // [2] uu.attr(node, key)
         rv = node.getAttribute(fix[key] || key, 2) || "";
-        return typeof rv !== "string" ? rv + "" : rv; // [IE6] tagindex, colspan is number
+        return isString(rv) ? rv : rv + ""; // [IE6] tagindex, colspan is number
     }
     for (i in key) {
         key[i] === null ? node.removeAttribute(fix[i] || i)       // [5]
@@ -964,7 +978,7 @@ function uudata(node,    // @param Node:
     if (key === rv) { // key === void 0 // [1] uu.data(node)
         rv = {};
         for (key in node) {
-            key.indexOf(prefix) || (rv[key.slice(5)] = node[key]);
+            key[_indexOf](prefix) || (rv[key.slice(5)] = node[key]);
         }
         return rv; // Hash
     }
@@ -976,7 +990,7 @@ function uudata(node,    // @param Node:
         } else {
             node[prefix + key] = value;
         }
-    } else if (typeof key === "string") { // [2]
+    } else if (isString(key)) { // [2]
         return node[prefix + key]; // Mix or undefined
     } else {
         for (i in key) {
@@ -1022,7 +1036,7 @@ function uucss(node,    // @param Node:
                         // @return Hash/String/Node:
     var style, informal, formal, fix, care, getStyle = win[_getComputedStyle];
 
-    if (key === true || key === fix) { // key === void 0 // [1][2] uu.css(node), uu.css(node, true)
+    if (key === _true || key === fix) { // key === void 0 // [1][2] uu.css(node), uu.css(node, true)
 //{{{!mb
         if (getStyle) {
 //}}}!mb
@@ -1128,7 +1142,7 @@ uutween.build = function(node, param) {
     }
 
     var rv = 'var t,b,c,d2=d/2,w,o,gd,h;',
-        i, v0, v1, ez, w, n, fixdb = uufix.db, cs = uucss(node, true);
+        i, v0, v1, ez, w, n, fixdb = uufix.db, cs = uucss(node, _true);
 
     for (i in param) {
         if (i !== "fps") {
@@ -1150,7 +1164,7 @@ uutween.build = function(node, param) {
                 if (!uuready.opacity) { // [IE6][IE7][IE8]
                     rv += uuformat('s.filter=((o>0&&o<1)?"alpha(??="+(o*100)+")":"");' +
                                    'f&&uu.css.setOpacity(n,??)&&(s.filter+=" ??");',
-                                   w, v1, node.style.filter.replace(uutween.alpha, ""));
+                                   w, v1, node.style.filter[_replace](uutween.alpha, ""));
                 } else {
 //}}}!mb
                     rv += uuformat('s.??=f? ??:o;', w, v1);
@@ -1265,7 +1279,7 @@ function setOpacity(node,      // @param Node:
         style.visibility = opacity ? "" : "hidden";
         style.filter = ((opacity > 0 && opacity < 1)
                      ? "alpha(opacity=" + (opacity * 100) + ") " : "")
-                     + style.filter.replace(setOpacity.alpha, "");
+                     + style.filter[_replace](setOpacity.alpha, "");
     }
 //}}}!mb
     return node;
@@ -1293,7 +1307,7 @@ function uuunit(node,   // @param Node: context
         return parseInt(value) || 0;
     }
     if (value === "auto") {
-        if (!prop.indexOf("bor") || !prop.indexOf("pad")) { // /^border|^padding/g
+        if (!prop[_indexOf]("bor") || !prop[_indexOf]("pad")) { // /^border|^padding/g
             return 0;
         }
     }
@@ -1480,10 +1494,10 @@ function uuklasshas(node,         // @param Node:
     var m, ary, cn = node.className;
 
     if (!classNames || !cn) {
-        return false;
+        return _false;
     }
-    if (classNames.indexOf(" ") < 0) {
-        return (" " + cn + " ").indexOf(" " + classNames + " ") >= 0; // single
+    if (classNames[_indexOf](" ") < 0) {
+        return (" " + cn + " ")[_indexOf](" " + classNames + " ") >= 0; // single
     }
     ary = uusplit(classNames); // multi
     m = cn.match(_classNameMatcher(ary));
@@ -1507,7 +1521,7 @@ function uuklassremove(node,         // @param Node:
                        classNames) { // @param String(= ""): "class1 class2 ..."
                                      // @return Node:
     node.className = uutriminner(
-            node.className.replace(_classNameMatcher(uusplit(classNames)), ""));
+            node.className[_replace](_classNameMatcher(uusplit(classNames)), ""));
     return node;
 }
 
@@ -1688,11 +1702,11 @@ function uuevent(node,        // @param Node:
                     }
                     // Event.stopPropagation
                     event.stopPropagation = function() {
-                        event.cancelBubble = true;
+                        event.cancelBubble = _true;
                     };
                     // Event.preventDefault
                     event.preventDefault = function() {
-                        event.returnValue = false;
+                        event.returnValue = _false;
                     };
                 }
                 if (event.pageX === void 0) { // [IE6][IE7][IE8][IE9]
@@ -1725,12 +1739,12 @@ function uuevent(node,        // @param Node:
         eventData = node[_uuevent],
         ex, token, bound, types = "types",
         eventType, capture, handler, i = -1, pos,
-        isInstance = false;
+        isInstance = _false;
 
     if (!unbind) {
         handler = isFunction(evaluator)
                 ? evaluator
-                : (isInstance = true, evaluator.handleEvent);
+                : (isInstance = _true, evaluator.handleEvent);
         evaluator[eventClosure] = _eventClosure;
     }
 
@@ -1743,7 +1757,7 @@ function uuevent(node,        // @param Node:
         token = uuevent.parse.exec(ex);
         eventType = token[2]; // "click"
         capture   = token[3]; // "+"
-        bound     = eventData[types].indexOf("," + ex + ",") >= 0;
+        bound     = eventData[types][_indexOf]("," + ex + ",") >= 0;
 
 //{{{!mb
         // IE mouse capture [IE6][IE7][IE8]
@@ -1761,7 +1775,7 @@ function uuevent(node,        // @param Node:
         if (unbind) {
             if (bound) {
 
-                pos = eventData[ex].indexOf(evaluator);
+                pos = eventData[ex][_indexOf](evaluator);
                 if (pos >= 0) {
 
                     eventData[ex].splice(pos, 1); // remove evaluator
@@ -1772,7 +1786,7 @@ function uuevent(node,        // @param Node:
                         // ",dblclick," <- ",namespace.click+,dblclick,".
                         //                      replace(",namespace.click+,", ",")
                         eventData[types] =
-                            eventData[types].replace("," + ex + ",", ",");
+                            eventData[types][_replace]("," + ex + ",", ",");
                     }
                     uueventdetach(node, eventType,
                                   evaluator[eventClosure], capture);
@@ -1879,7 +1893,7 @@ function uueventhas(node,          // @param Node: target node
                                    // @return Boolean:
     var types = node[_uuevent] ? node[_uuevent]["types"] : 0;
 
-    return (types || "").indexOf("," + eventTypeEx + ",") >= 0;
+    return (types || "")[_indexOf]("," + eventTypeEx + ",") >= 0;
 }
 
 // uu.event.fire - fire event / fire custom event(none capture event only)
@@ -1897,7 +1911,7 @@ function uueventfire(node,      // @param Node: target node
                 target:         node,
                 button:         0,
                 detail:         0,
-                customEvent:    true,
+                customEvent:    _true,
                 currentTarget:  node,
                 relatedTarget:  node,
                 preventDefault: uu.nop,
@@ -1923,9 +1937,9 @@ function uueventunbind(node,          // @param Node: target node
     function _unbindall(ex) { // @param EventTypeExString: "MyNamespace.mousemove+"
         // closure vars: node, ns
 
-        if (!ex.indexOf(ns)) {
+        if (!ex[_indexOf](ns)) {
             node[_uuevent][ex].forEach(function(evaluator) {
-                uuevent(node, ex, evaluator, true); // unbind
+                uuevent(node, ex, evaluator, _true); // unbind
             });
         }
     }
@@ -1942,10 +1956,10 @@ function uueventunbind(node,          // @param Node: target node
                 ns = ex.slice(0, -1);       // "namespace.*" -> "namespace."
                 uusplitcomma(eventTypeEx).forEach(_unbindall);
             } else { // [2][4]
-                if (eventTypeEx.indexOf("," + ex + ",") >= 0) {
+                if (eventTypeEx[_indexOf]("," + ex + ",") >= 0) {
 
                     node[_uuevent][ex].forEach(function(evaluator) {
-                        uuevent(node, ex, evaluator, true); // unbind
+                        uuevent(node, ex, evaluator, _true); // unbind
                     });
                 }
             }
@@ -2055,7 +2069,7 @@ function uunodeadd(source,     // @param Node/DocumentFragment/HTMLFragment/TagN
 
     var node = !source ? doc.createElement("div")        // [1] uu.node.add()
              : source.nodeType ? source                  // [3][5] uu.node.add(Node or DocumentFragment)
-             : !source.indexOf("<") ? uunodebulk(source, context) // [4] uu.node.add(HTMLFragmentString)
+             : !source[_indexOf]("<") ? uunodebulk(source, context) // [4] uu.node.add(HTMLFragmentString)
              : doc.createElement(source),                // [2] uu.node.add("p")
         firstChild = "firstChild",
         reference = null,
@@ -2227,7 +2241,7 @@ function buildNode(node,   // @param Node/TagString: <div> or "div"
                            // @return Node:
     node.nodeType || (node = uunode(node)); // "div" -> <div>
 
-    var arg, i = 0, token = 0, callback;
+    var arg, i = 0, token = 0, callback, isstr;
 
     while ( (arg = args[i++]) ) {
         if (arg) {
@@ -2235,12 +2249,16 @@ function buildNode(node,   // @param Node/TagString: <div> or "div"
                 node.appendChild(arg);
             } else if (isNumber(arg)) { // [8]
                 callback = arg;
-            } else if (isString(arg) && arg.indexOf(",") < 0) { // [2]
-                node.appendChild(uutext(arg)); // uu.div("hello")
-            } else if (++token < 2) {
-                uuattr(node, isString(arg) ? uusplittohash(arg) : arg); // [4][5]
-            } else if (token < 3) {
-                uucss(node, isString(arg) ? uusplittohash(arg) : arg); // [6][7]
+            } else {
+                isstr = isString(arg);
+
+                if (isstr && arg[_indexOf](",") < 0) { // [2]
+                    node.appendChild(uutext(arg)); // uu.div("hello")
+                } else if (++token < 2) {
+                    uuattr(node, isstr ? uusplittohash(arg) : arg); // [4][5]
+                } else if (token < 3) {
+                    uucss(node, isstr ? uusplittohash(arg) : arg); // [6][7]
+                }
             }
         }
     }
@@ -2337,10 +2355,15 @@ function uusvg(tagName, // @param String(= "svg"):
     return rv;
 }
 
-// uu.html
-function uuhtml(/* var_args */) { // @param Mix: var_args
-                                  // @return Node: <html> node
-    return buildNode(_rootNode, arguments);
+//  [1][get innerHTML] uu.html(node) -> "<div>...</div>"
+//  [2][set innerHTML] uu.html(node, "<div>...</div>") -> node
+
+// uu.html - innerHTML accessor
+function uuhtml(node,   // @param Node:
+                html) { // @param HTMLFragmentString(= ""): HTMLFragment
+                        // @return HTMLFragmentString/Node:
+    return html ? (uunodeadd(html, uunodeclear(node)), node)
+                : node.innerHTML;
 }
 
 // uu.head
@@ -2515,7 +2538,7 @@ uufix.db = {}; // { "background-color": "backgroundColor", ... }
 // uu.fix.unicode - UnicodeString("\u0041\u0042") to String("AB")
 function uufixunicode(str) { // @param String: "\u0041\u0042"
                              // @return String: "AB"
-    return str.replace(uufixunicode.uffff, function(m, hex) {
+    return str[_replace](uufixunicode.uffff, function(m, hex) {
         return String.fromCharCode(parseInt(hex, 16));
     });
 }
@@ -2524,7 +2547,7 @@ uufixunicode.uffff = /\\u([0-9a-f]{4})/g; // \u0000 ~ \uffff
 // uu.trim - trim both side whitespace
 function uutrim(source) { // @param String:  "  has  space  "
                           // @return String: "has  space"
-    return source.replace(uutrim.trim, "");
+    return source[_replace](uutrim.trim, "");
 }
 uutrim.tags   = /<\/?[^>]+>/g; // <div> or </div>
 uutrim.trim   = /^\s+|\s+$/g;
@@ -2534,42 +2557,42 @@ uutrim.spaces = /\s\s+/g;
 // uu.trim.tag - trim.inner + strip tags
 function uutrimtag(source) { // @param String:  "  <h1>A</h1>  B  <p>C</p>  "
                              // @return String: "A B C"
-    return source.replace(uutrim.trim, "").
-                  replace(uutrim.tags, "").
-                  replace(uutrim.spaces, " ");
+    return source[_replace](uutrim.trim, "")
+                 [_replace](uutrim.tags, "")
+                 [_replace](uutrim.spaces, " ");
 }
 
 // uu.trim.url - trim.inner + strip "url(" ... ")" + trim.quote
 function uutrimurl(source) { // @param String:   '  url("http://...")  '
                              // @return String:  "http://..."
-    return (!source.indexOf("url(") && source.indexOf(")") === source.length - 1) ?
-            source.slice(4, -1).replace(uutrim.quotes, "") : source;
+    return (!source[_indexOf]("url(") && source[_indexOf](")") === source.length - 1) ?
+            source.slice(4, -1)[_replace](uutrim.quotes, "") : source;
 }
 
 // uu.trim.inner - trim + diet inside multi spaces
 function uutriminner(source) { // @param String:  "  diet  inner  space  "
                                // @return String: "diet inner space"
-    return source.replace(uutrim.trim, "").replace(uutrim.spaces, " ");
+    return source[_replace](uutrim.trim, "")[_replace](uutrim.spaces, " ");
 }
 
 // uu.trim.quote - trim + strip "double" 'single' quote
 function uutrimquote(source) { // @param String:  ' "quote string" '
                                // @return String: 'quote string'
-    return source.replace(uutrim.quotes, "");
+    return source[_replace](uutrim.quotes, "");
 }
 
 // uu.trim.bracket - trim + strip brackets () [] {} <>
 function uutrimbracket(source) { // @param String:  " <bracket>  (this)  [and]  {this} "
                                  // @return String: "bracket this and this"
-    return source.replace(uutrimbracket.brackets, "");
+    return source[_replace](uutrimbracket.brackets, "");
 }
 uutrimbracket.brackets = /^\s*[\(\[\{<]?|[>\}\]\)]?\s*$/g; // [br](ac){ke}<ts>
 
 // uu.split - split space
 function uusplit(source) { // @param String: " split  space  token "
                            // @return Array: ["split", "space", "token"]
-    return source.replace(uutrim.spaces, " ").
-                  replace(uutrim.trim, "").split(" ");
+    return source[_replace](uutrim.spaces, " ")
+                 [_replace](uutrim.trim, "").split(" ");
 }
 uusplit.commas     = /,,+/g; // many commas
 uusplit.trimCommas = /^[ ,]+|[ ,]+$/g; // trim space and comma
@@ -2577,72 +2600,8 @@ uusplit.trimCommas = /^[ ,]+|[ ,]+$/g; // trim space and comma
 // uu.split.comma - split commas
 function uusplitcomma(source) { // @param String: ",,, ,,A,,,B,C,, "
                                 // @return Array: ["A", "B", "C"]
-    return source.replace(uusplit.commas, ",").
-                  replace(uusplit.trimCommas, "").split(",");
-}
-
-// uu.split.token - split token, split css properties
-function uusplittoken(expression, // @param String: expression
-                      splitter,   // @param String(= " "):
-                      notrim) {   // @param Boolean(= false): false is trim both space
-                                  // @return Array: ["token", ...]
-    splitter = splitter || " ";
-    if (expression.indexOf(splitter) < 0) {
-        return [expression];
-    }
-
-    var rv = [], ary = expression.split(""), v, w, i = -1,
-        nest = 0, quote = 0, q, tmp = [], ti = -1, esc = 0,
-        token = { "(": 2, ")": 3, '"': 4, "'": 4, "\\": 5 }; // [!]keep local
-
-    token[splitter] = 1;
-
-    while ( (v = ary[++i]) ) {
-        if (esc) {
-            esc = 0;
-            tmp[++ti] = v;
-        } else {
-            switch (token[v] || 0) {
-            case 0: tmp[++ti] = v;  // any char
-                    break;
-            case 1: if (!quote) {   // splitter
-                        if (nest) {
-                            tmp[++ti] = v;
-                        } else {
-                            w = tmp.join(""),
-                            rv.push(notrim ? w : w.trim());
-                            tmp = [];
-                            ti = -1;
-                        }
-                    } else {
-                        tmp[++ti] = v;
-                    }
-                    break;
-            case 2: tmp[++ti] = v;  // "("
-                    !quote && ++nest;
-                    break;
-            case 3: tmp[++ti] = v;  // ")"
-                    !quote && --nest;
-                    break;
-            case 4: if (!quote) {   // "..." or '...'
-                        quote = 1;
-                        q = v;
-                    } else if (v === q) {
-                        quote = 0;
-                    }
-                    tmp[++ti] = v;
-                    break;
-            case 5: esc = 1;        // \\
-                    tmp[++ti] = v;
-            }
-        }
-    }
-    // remain
-    if (tmp.length) {
-        w = tmp.join("");
-        rv.push(notrim ? w : w.trim());
-    }
-    return rv;
+    return source[_replace](uusplit.commas, ",")
+                 [_replace](uusplit.trimCommas, "").split(",");
 }
 
 // [1][hash from string]        uu.split.toHash("key,1,key2,1", ",") -> { key: 0, key2: 1 }
@@ -2664,13 +2623,13 @@ function uusplittohash(source,     // @param String: "key,0,key2,1"
 // uu.entity - encode String to HTML Entity
 function uuentity(str) { // @param String:
                          // @return String:
-    return str.replace(_entity.to, _entity);
+    return str[_replace](_entity.to, _entity);
 }
 
 // uu.entity.decode - decode String from HTML Entity
 function uuentitydecode(str) { // @param String:
                                // @return String:
-    return str.replace(_entity.from, _entity);
+    return str[_replace](_entity.from, _entity);
 }
 
 // inner - to/from entity
@@ -2688,7 +2647,7 @@ function uuformat(format) { // @param String: formatted string with "??" placeho
                             // @return String: "formatted string"
     var i = 0, args = arguments;
 
-    return format.replace(uuformat.q, function() {
+    return format[_replace](uuformat.q, function() {
         return args[++i];
     });
 }
@@ -2742,8 +2701,8 @@ function uujsondecode(jsonString,      // @param JSONString:
     if (useNativeJSON && win.JSON) {
         return win.JSON.parse(str);
     }
-    if (uujsondecode.ngword.test(str.replace(uujsondecode.unescape, ""))) {
-        return false;
+    if (uujsondecode.ngword.test(str[_replace](uujsondecode.unescape, ""))) {
+        return _false;
     }
     return (new Function("return " + str))();
 }
@@ -2754,9 +2713,9 @@ uujsondecode.unescape = /"(\\.|[^"\\])*"/g;
 function _str2json(str,        // @param String:
                    addQuote) { // @param Boolean(= false): true is add quote(")
                                // @return String: '\u0000' or '"\u0000"'
-    var rv = str.replace(_str2json.escape, function(m) {
+    var rv = str[_replace](_str2json.escape, function(m) {
                 return _str2json.swap[m];
-            }).replace(_str2json.encode, function(str, c) {
+            })[_replace](_str2json.encode, function(str, c) {
                 // String("AB") to UnicodeString("\u0041\u0042")
                 c = str.charCodeAt(0);
                 return "\\u" + uuhash.num2hh[(c >> 8) & 255]
@@ -2865,12 +2824,12 @@ function _str2date(str) { // @param ISO8601DateString/RFC1123DateString:
                                  +m[4], +m[5], +m[6], +m[7])); // hh:mm:ss.ms
     }
 //{{{!mb
-    if (_ie && str.indexOf("GMT") > 0) {
-        str = str.replace(/GMT/, "UTC");
+    if (_ie && str[_indexOf]("GMT") > 0) {
+        str = str[_replace](/GMT/, "UTC");
     }
 //}}}!mb
-    return new Date(str.replace(",", "").
-                        replace(_str2date.date, _toDate));
+    return new Date(str[_replace](",", "")
+                       [_replace](_str2date.date, _toDate));
 }
 _str2date.parse = /^(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d):(\d\d)(?:\.(\d*))?Z$/;
 _str2date.date = /^([\w]+) (\w+) (\w+)/;
@@ -2891,10 +2850,10 @@ function datehashrfc() { // @return RFC1123DateString: "Wed, 16 Sep 2009 16:18:1
     var rv = (new Date(this.time)).toUTCString();
 
 ///{{{!mb
-    if (_ie && rv.indexOf("UTC") > 0) {
+    if (_ie && rv[_indexOf]("UTC") > 0) {
         // http://d.hatena.ne.jp/uupaa/20080515
-        rv = rv.replace(/UTC/, "GMT");
-        (rv.length < 29) && (rv = rv.replace(/, /, ", 0")); // [IE] fix format
+        rv = rv[_replace](/UTC/, "GMT");
+        (rv.length < 29) && (rv = rv[_replace](/, /, ", 0")); // [IE] fix format
     }
 ///}}}!mb
     return rv;
@@ -2926,14 +2885,14 @@ function uuimage(url,        // @param String:
 
     if (img) { // cached or scheduled
         uuimage.fn[url].push(callback);
-        img.ok && after(true);
+        img.ok && after(_true);
     } else {
         uuimage.db[url] = img = new Image();
         uuimage.fn[url] = [callback];
-        img.ok = false;
+        img.ok = _false;
         img.onerror = function() {
             img.width = img.height = 0;
-            after(img.ok = false);
+            after(img.ok = _false);
             img.onerror = img.onload = null;
         };
         img.onload = function() {
@@ -2942,7 +2901,7 @@ function uuimage(url,        // @param String:
                 || img.readyState === "complete"    // [IE8] readyState
 //}}}!mb
                                                 ) {
-                after(img.ok = true);
+                after(img.ok = _true);
             }
             img.onerror = img.onload = null;
         };
@@ -3020,7 +2979,7 @@ function uuflash(url,      // @param String: url
     var param = option.param, paramArray = [], i, iz, object;
 
     // add default <param name="allowScriptAccess" value="always" />
-    if (param.indexOf("allowScriptAccess") < 0) {
+    if (param[_indexOf]("allowScriptAccess") < 0) {
         param.push("allowScriptAccess", "always");
     }
 
@@ -3112,10 +3071,10 @@ function ArrayEvery(evaluator, // @param Function: evaluator
                                // @return Boolean:
     for (var i = 0, iz = this.length; i < iz; ++i) {
         if (i in this && !evaluator.call(that, this[i], i, this)) {
-            return false;
+            return _false;
         }
     }
-    return true;
+    return _true;
 }
 
 // Array.prototype.some
@@ -3124,10 +3083,10 @@ function ArraySome(evaluator, // @param Function: evaluator
                               // @return Boolean:
     for (var i = 0, iz = this.length; i < iz; ++i) {
         if (i in this && evaluator.call(that, this[i], i, this)) {
-            return true;
+            return _true;
         }
     }
-    return false;
+    return _false;
 }
 
 // Array.prototype.forEach
@@ -3212,7 +3171,7 @@ function NumberToJson() { // @return String: "123", "true", "false"
 
 // String.prototype.trim
 function StringTrim() { // @return String: "has  space"
-    return this.replace(uutrim.trim, "");
+    return this[_replace](uutrim.trim, "");
 }
 
 // String.prototype.toJSON
@@ -3258,27 +3217,192 @@ function outerHTMLSetter(html) {
 }
 //}}}!mb
 
+// --- NodeSet ---
+// NodeSet class
+function NodeSet(expression, // @param NodeSet/Node/NodeArray/String/window:
+                 context) {  // @param NodeSet/Node(= void 0): context
+    this.stack = [[]]; // [NodeSet, ...]
+
+    this.nodeSet = !expression ? [] // empty NodeSet
+        : (expression === win || expression.nodeType) ? [expression] // window / node
+        : typeof expression === "string" ?
+            (!expression[_indexOf]("<") ? [uunodebulk(expression)]  // <div> -> fragment
+                                        : uuquery(expression, context && context._NodeSet ? context.nodeSet.concat()
+                                                                                        : context)) // query
+        : _isArray(expression) ? expression.concat() // clone NodeArray
+        : (expression instanceof NodeSet) ? expression.nodeSet.concat() // copy constructor
+        : []; // bad expr
+}
+
+NodeSet[_prototype] = {
+    // --- STACK ---
+    back:           NodeSetBack,        // NodeSet.back() -> NodeSet
+    find:           NodeSetFind,        // NodeSet.find(expression:String) -> NodeSet
+    // --- NodeSet MANIPULATOR ---
+    nth:            NodeSetNth,         // NodeSet.nth(indexer:Number = 0) -> Node / void
+    each:           NodeSetEach,        // NodeSet.each(evaluator:Function) -> NodeSet
+    size:           NodeSetSize,        // NodeSet.size() -> Number
+    clone:          NodeSetClone,       // NodeSet.clone() -> Array
+    indexOf:        NodeSetIndexOf,     // NodeSet.indexOf(node) -> Number(index or -1)
+    add:            NodeSetAdd,         // NodeSet.add(source:Node/DocumentFragment/HTMLFragment/TagName = "div",
+                                        //             position:String = ".$"):NodeSet
+//  remove:         NodeSetRemove,      // NodeSet.remove() -> NodeSet
+    // --- ATTRIBUTE, CSS, Node.className ---
+//  attr:           NodeSetAttr,        // NodeSet.attr(key:String/Hash = void, value:String = void):NodeSet/Array
+//  css:            NodeSetCSS,         // NodeSet.css(key:String/Hash = void, value:String = void):NodeSet/Array
+    klass:          NodeSetKlass,       // NodeSet.klass(expression:String = ""):NodeSet
+//  html:           NodeSetHTML,        // NodeSet.html(html:HTMLFragment = ""):NodeSet/StringArray
+//  text:           NodeSetText,        // NodeSet.text(text:String = ""):NodeSet/StringArray
+//  bind:           NodeSetBind,        // NodeSet.bind(eventTypeEx:EventTypeExString, evaluator:Function/Instance) -> NodeSet
+//  unbind:         NodeSetUnbind,      // NodeSet.unbind(eventTypeEx:EventTypeExString) -> NodeSet
+//  tween:          NodeSetTween,       // NodeSet.tween(duration:Number, param:Hash, callback:Function = void) -> NodeSet
+    iter:           NodeSetIter         // [PROTECTED]
+};
+
+// NodeSet.back
+function NodeSetBack() { // @return NodeSet:
+    this.nodeSet = this.stack.pop() || [];
+    return this;
+}
+
+// NodeSet.find
+function NodeSetFind(expression) { // @param String: expression, "css > expr"
+                                   // @return NodeSet:
+    this.stack.push(this.nodeSet); // add stack
+    this.nodeSet = uuquery("! " + expression, this.nodeSet); // ":scope expr"
+    return this;
+}
+
+// NodeSet.nth - nodeSet[indexer]
+function NodeSetNth(indexer) { // @param Number(= 0): indexer,
+                               //                   :  0 is first element
+                               //                   : -1 is last element
+                               //                   : indexer < 0 is negative index
+                               // @return Node:
+    return this.nodeSet[indexer < 0 ? indexer + this.nodeSet.length
+                                    : indexer || 0];
+}
+
+// NodeSet.each
+function NodeSetEach(evaluator) { // @param Function: evaluator
+                                  // @return NodeSet:
+    this.nodeSet.forEach(fn);
+    return this;
+}
+
+// NodeSet.size - get nodeSet.length
+function NodeSetSize() { // @return Number:
+    return this.nodeSet.length;
+}
+
+// NodeSet.clone - clone nodeSet Array
+function NodeSetClone() { // @return Array: nodeSet
+    return this.nodeSet.concat();
+}
+
+// NodeSet.indexOf - NodeSet.indexOf(node)
+function NodeSetIndexOf(node) { // @param Node:
+                                // @return Number: found index or -1
+    return this.nodeSet[_indexOf](node);
+}
+
+// NodeSet.add - add node or fragment
+function NodeSetAdd(source,     // @param Node/DocumentFragment/HTMLFragment/TagName(= "div"):
+                    position) { // @param String(= ".$"): insert position
+                                // @return NodeSet:
+    var ary = this.nodeSet, context, i = -1;
+
+    if (ary.length === 1) {
+        uunodeadd(source, ary[0], position);
+    } else {
+        while ( (context = ary[++i]) ) {
+            uunodeadd(uunodebulk(source), context, position); // clone node
+        }
+    }
+    return this;
+}
+
+// NodeSet.klass
+function NodeSetKlass(expression) { // @param String(= ""):
+                                    // @return NodeSet:
+    var method = NodeSetKlass.cmd[expression.charAt(0)] || uuklassadd;
+
+    return NodeSetIter(1, this, method, expression.slice(1)) // + - !
+}
+NodeSetKlass.cmd = { "+": uuklassadd,      // [add]    "+class"
+                     "-": uuklassremove,   // [remove] "-class"
+                     "!": uuklasstoggle }; // [toggle] "!class"
+
+// NodeSet.iter - NodeSet iterator
+function NodeSetIter(iterType,  // @param Number: 0 is forEach, 1 is map
+                     that,      // @param NodeSet:
+                     evaluator, // @param Function: evaluator
+                     param1,    // @param Mix: param
+                     param2,    // @param Mix: param
+                     param3,    // @param Mix: param
+                     param4) {  // @param Mix: param
+                                    // @return NodeSet:
+    var node, ary = that.NodeSet, i = -1,
+        rv = [], r, arrayResult = 0;
+
+    while ( (node = ary[++i]) ) {
+        if (node && node.nodeType === 11) { // 11: DocumentFragment
+            node = node.firstChild || node;
+        }
+        r = evaluator(node, param1, param2, param3, param4);
+        i || !iterType || r === node || ++arrayResult;
+        arrayResult && (rv[i] = r);
+    }
+    return (iterType && resultType > 1) ? rv : that;
+}
+
+// forEach(iter = 0)
+uueach({ bind: uuevent, unbind: uueventunbind,
+         tween: uutween, remove: uunoderemove }, function(fn, name) {
+    NodeSet[_prototype][name] = function(a, b, c) {
+        return NodeSetIter(0, this, fn, a, b, c);
+    }
+});
+
+// map(iter = 1)
+uueach({ attr: uuattr, css: uucss,
+         html: uuhtml, text: uutext }, function(fn, name) {
+    NodeSet[_prototype][name] = function(a, b) {
+        return NodeSetIter(1, this, fn, a, b);
+    }
+});
+
 // --- initialize ---
 
 // inner - build DOM Lv2 event handler - uu.click(), ...
-uuevent.shortcut.forEach(function(eventType) {
+uueach(uuevent.shortcut, function(eventType) {
     uu[eventType] = function(node, fn) { // uu.click(node, fn) -> node
         return uuevent(node, eventType, fn); // bind
     };
 
     uu["un" + eventType] = function(node) { // uu.unclick(node) -> node
-        return uuevent(node, eventType, 0, true); // unbind
+        return uuevent(node, eventType, 0, 1); // unbind
+    };
+
+    var ns = NodeSet[_prototype];
+
+    ns[eventType] = function(fn) { // uu("li").click(fn) -> NodeSet
+        return NodeSetIter(0, this, uuevent, eventType, fn);
+    };
+
+    ns["un" + eventType] = function() { // uu("li").unclick() -> NodeSet
+        return NodeSetIter(0, this, uuevent, eventType, 0, 1);
     };
 });
 
 // inner - setup node builder - uu.div(), uu.a(), ...
-uutag.html4.forEach(function(tagName) {
+uueach(uutag.html4, function(tagName) {
     uu[tagName] = function() { // @param Mix: var_args
         return buildNode(tagName, arguments);
     };
 });
 
-uutag.html5.forEach(function(tagName) {
+uueach(uutag.html5, function(tagName) {
 //{{{!mb
     _ie && doc.createElement(tagName); // [IE6][IE7][IE8][IE9]
 //}}}!mb
@@ -3337,7 +3461,7 @@ function _windowonunload() {
             node = uunodeid.db[nodeid];
             ary = node.attributes, i = -1;
             while ( (v = ary[++i]) ) {
-                !v.name.indexOf("data-") && (node[v.name] = null);
+                !v.name[_indexOf]("data-") && (node[v.name] = null);
             }
         } catch (err) {}
     }
@@ -3393,14 +3517,14 @@ function _camelhash(rv, props) {
             if (webkit) {
 //}}}!mb
                 v = k = props.item(k); // k = "-webkit-...", "z-index"
-                k.indexOf("-") >= 0 && (v = k.replace(CAMELIZE, _camelize));
+                k[_indexOf]("-") >= 0 && (v = k[_replace](CAMELIZE, _camelize));
                 (k !== v) && (rv[k] = v);
 //{{{!mb
             } else {
-                v = ((_gecko && !k.indexOf("Moz")) ? "-moz" + k.slice(3) :
-                     (_ie    && !k.indexOf("ms"))  ? "-ms"  + k.slice(2) :
-                     (_opera && !k.indexOf("O"))   ? "-o"   + k.slice(1) : k).
-                    replace(DECAMELIZE, _decamelize);
+                v = ((_gecko && !k[_indexOf]("Moz")) ? "-moz" + k.slice(3) :
+                     (_ie    && !k[_indexOf]("ms"))  ? "-ms"  + k.slice(2) :
+                     (_opera && !k[_indexOf]("O"))   ? "-o"   + k.slice(1) : k)
+                    [_replace](DECAMELIZE, _decamelize);
                 (k !== v) && (rv[v] = k);
             }
 //}}}!mb
@@ -3437,14 +3561,14 @@ function detectVersions(libraryVersion) { // @param Number: Library version
         var ver = ((/(?:rv\:|ari\/|sto\/)(\d+\.\d+(\.\d+)?)/.exec(userAgent)
                         || [,0])[1]).toString()
 
-        return parseFloat(ver.replace(/[^\d\.]/g, "").
-                              replace(/^(\d+\.\d+)(\.(\d+))?$/,"$1$3"));
+        return parseFloat(ver[_replace](/[^\d\.]/g, "")
+                             [_replace](/^(\d+\.\d+)(\.(\d+))?$/,"$1$3"));
     }
 
     function detectUserAgentVersion(userAgent) {
-        var opera = win.opera || false;
+        var opera = win.opera || _false;
 
-        return opera ? +(opera.version().replace(/\d$/, ""))
+        return opera ? +(opera.version()[_replace](/\d$/, ""))
                      : parseFloat((/(?:IE |fox\/|ome\/|ion\/)(\d+\.\d)/.
                                   exec(userAgent) || [,0])[1]);
     }
@@ -3456,7 +3580,7 @@ function detectVersions(libraryVersion) { // @param Number: Library version
 
         try {
             ver = ie ? (new ActiveXObject("ShockwaveFlash.ShockwaveFlash")).
-                            GetVariable("$version").replace(/,/g, ".")
+                            GetVariable("$version")[_replace](/,/g, ".")
                      : navigator.plugins["Shockwave Flash"].description;
             m = /\d+\.\d+/.exec(ver);
             rv = m ? parseFloat(m[0]) : 0;
@@ -3592,7 +3716,7 @@ function detectFeatures() {
     child = node.firstChild;
     try {
         Array[_prototype].slice.call(doc.getElementsByTagName("head"));
-    } catch(err) { rv.ArraySlice = false; }
+    } catch(err) { rv.ArraySlice = _false; }
     rv[getAttribute] = child[getAttribute]("class") === "a" &&
                        child[getAttribute]("href") === "/a";
     rv.StringIndexer = !!"0"[0];
