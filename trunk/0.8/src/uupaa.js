@@ -182,7 +182,10 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Stri
                                     //  [1][base]    uu.Class("A",   { proto: ... })
                                     //  [2][inherit] uu.Class("B:A", { proto: ... })
         singleton:                  // uu.Class.singleton(className:String, proto:Hash/Function = void)
-                    uuclasssingleton
+                    uuclasssingleton,
+        NodeSet:    NodeSet,
+        MessagePump:
+                    MessagePump
     }),
     // --- EVENT ---
     event:    uumix(uuevent, {      // uu.event(node:Node, eventTypeEx:EventTypeExString, evaluator:Function/Instance):Node
@@ -240,11 +243,6 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Stri
         remove:     uunoderemove,   // uu.node.remove(node:Node):Node
         builder:    uunodebuilder,  // uu.node.builder(handler:Function)
         indexOf:    uunodeindexof   // uu.node.indexOf(node:Node):Number
-    }),
-    // --- NodeSet ---
-    nodeset:  uumix(NodeSet, {      // uu.nodeset(NodeSet alias)
-        plug:                       // uu.nodeset.plug - plugin point(NodeSet.prototype alias)
-                    NodeSet[_prototype]
     }),
     // --- NodeID ---
     nodeid:   uumix(uunodeid, {     // uu.nodeid(node:Node):Number (nodeid)
