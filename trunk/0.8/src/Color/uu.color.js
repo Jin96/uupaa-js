@@ -172,7 +172,7 @@ function uucolorexpire() {
 
 // ColorHash.toString - "#000000" or "rgba(0,0,0,0)"
 function ColorHashToString() { // @return String: "#000000" or "rgba(0,0,0,0)"
-    return uu.ver.jit ? this.rgba : this.hex;
+    return uu.ready.color.rgba ? this.rgba : this.hex;
 }
 
 // ColorHash.argb - "#ffffffff"

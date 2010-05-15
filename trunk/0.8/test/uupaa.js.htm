@@ -86,6 +86,11 @@ uu.ready(function(uu) {
         return [uu.array.has([document, document.body, document.getElementsByTagName('head')[0]], [document, document.body]), "is true"];
       },
 
+    "uu.array.size()": "",
+      "配列サイズは2": function() {
+        return [uu.array.size([ 1, 2 ]), "==", 2];
+      },
+
     "uu.array.sort()": "",
       "[1][num 0-9] uu.array.sort([11, 222, 4], '0-9') は 数字順(0→9)([4, 11, 222])にソートされる": function() {
         return [uu.array.sort([4, 11, 222], "0-9"), "==", [4, 11, 222]];
@@ -384,9 +389,6 @@ uu.ready(function(uu) {
 
         return [uu.id('div').className, "==", 'A1 B1 A2 B2'];
       },
-
-// -----------------------
-    "Event": "",
 
 // -----------------------
     "uu.hash()": "",
@@ -759,11 +761,6 @@ uu.ready(function(uu) {
         var hash = uu.split.toHash('key,0,key2,1', ',', 1);
 
         return [hash, "==", { key: 0, key2: 1 }];
-      },
-
-    "uu.split.token()": "",
-      "uu.split.token('url( http:// ) rgba(0, 0, 0, 0) center center') == ['url( http:// )', 'rgba(0, 0, 0, 0)', 'center', 'center'] CSS のトークンを正しく切り出せる": function() {
-        return [uu.split.token('url( http:// ) rgba(0, 0, 0, 0) center center'), "==", ['url( http:// )', 'rgba(0, 0, 0, 0)', 'center', 'center']];
       },
 
     "uu.entity()": "",

@@ -146,10 +146,10 @@ function joinSourceFiles($package,      // @param Array:
                 $txt = preg_replace('/uu\.?event.xtypes.losecapture/',    '0x102', $txt);
                 $txt = preg_replace('/uu\.?event.xtypes.DOMMouseScroll/', '0x104', $txt);
 
-                // fakeToArray(...) -> Array.prototype.slice.call(...)
+                // fakeToArray(...) -> Array[_prototype].slice.call(...)
                 if ($mobile) {
                     $txt = preg_replace('/fakeToArray/',
-                                        'Array.prototype.slice.call', $txt);
+                                        'Array[_prototype].slice.call', $txt);
                 }
 
                 // strip comment line  "//..." -> ""
