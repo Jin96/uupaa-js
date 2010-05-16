@@ -21,7 +21,15 @@ uupaa.js では、[http://webkit.org/coding/coding-style.html WebKit]のコー�
   * Element は配列の要素を意味します。DOM Element は Node と呼び区別します。
   * !NodeList は document.getElementsByTagName() などが返す 動的な(liveな)ノードリストです。
   * !NodeArray は uu.tag(), uu.klass(), uu.query() などが返す 静的な(staticな)ノードの配列です。
-  * !StringArray は文字列を要素に持つ配列です。 `[` "string", ... `]`
+  * !FakeArray は !NodeList や arguments などを総称する型です。!FakeArray は Array ではありませんが、 !FakeArray`[`indexer`]` でアクセスが可能で length プロパティを持ちます。uu.array(!FakeArray) で Array に変換できます。
+{{{
+    function() {
+        var fakeArray1 = arguments,
+            fakeArray2 = document.getElementByTagName("*"); // = NodeList型
+    }
+}}}
+  * !StringArray は文字列だけを要素に持つ配列です。 `[` "string", ... `]`
+  * !NumberArray は数値だけを要素に持つ配列です。`[` 123, ... `]`
   * !IgnoreCaseString は大小文字を区別しない文字列を意味する便宜上の型です。
 
 == if や for のブレス( {} )は省略禁止 ==
