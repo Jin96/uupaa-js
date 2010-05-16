@@ -2,7 +2,7 @@
 
 <wiki:toc max_depth="2" />
 
-uupaa.js では、[http://webkit.org/coding/coding-style.html WebKit]のコーディングスタイルをベースにしています。
+uupaa.js は [http://webkit.org/coding/coding-style.html WebKit]のコーディングスタイルをベースにしています。
 
 = 独自ルール =
 以下は uupaa.js の独自ルールです。
