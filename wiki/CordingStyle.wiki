@@ -7,6 +7,24 @@ uupaa.js では、[http://webkit.org/coding/coding-style.html WebKit]のコー�
 = 独自ルール =
 以下は uupaa.js の独自ルールです。
 
+== 語彙(ボキャブラリ) ==
+以下の用語があります。
+
+  * Mix はあらゆる型の変数を受け取り可能な引数を示す便宜上の型です。
+{{{
+    function uuhash(key,     // @param Hash/String: key
+                    value) { // @param Mix(= void): value
+    }
+}}}
+  * void は undefined の別名です。
+  * Hash は Object の別名です。データの入れ物として意識する場合に Hash と呼びます。
+  * Element は配列の要素を意味します。DOM Element は node と呼び区別します。
+  * NodeList は document.getElementsByTagName() などが返す 動的な(liveな)ノードリストです。
+  * NodeArray は uu.tag(), uu.klass(), uu.query() などが返す 静的な(staticな)ノードの配列です。
+  * StringArray は文字列を要素に持つ配列です。 [ "string", ... ]
+  * IgnoreCaseString は大小文字を区別しない文字列を意味する便宜上の型です。
+}}}
+
 == if や for のブレス( {} )は省略禁止 ==
 ブレスの省略は禁止します。
 文法レベルでコードを短縮するのは Minifier の仕事です。
