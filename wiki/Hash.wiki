@@ -1,9 +1,0 @@
-#summary Hash は key/value ストアに特化した Object の別名です
-
-= Hash =
-
-Hash は Object と同じものです。key / value pair を格納する機能に特化した Object を Hash と呼びます。
-
-{{{
-    var hash = { key: "value" };
-}}}
