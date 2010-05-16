@@ -1,0 +1,193 @@
+#summary uu.value, NodeSet.value は、フォーム要素の値を取得/設定します
+
+<wiki:toc max_depth="2" />
+
+uu.value(), !NodeSet.value() は、フォーム要素への value 属性へのアクセスを簡単にします。
+
+uu.value(_node_) で取得し、uu.value(_ndoe_, _"value"_) で設定します。
+
+uu(_CSSセレクタ_).value() でまとめて取得し、uu(_CSSセレクタ_).value("value") でまとめて設定します。
+
+= `<`textarea`>` =
+uu.value(_textareaNode_:Node, _value_:String = void):String/Node は、_textareaNode_.value 属性にアクセスします。
+
+uu.value(_textareaNode_) で value 属性の値を取得し、uu.value(_textareaNode_, "value") で値を設定し、_textareaNode_ を返します。
+
+!NodeSet.value(_value_:String = void):!StringArray/!NodeSet は、カレントノードセットの value 属性にアクセスします。
+
+uu("textarea").value() で !StringArray( `[` "value" , ... `]` ) を取得します。配列の要素数はノード数になります。
+uu("textarea").value("value") でカレントノードセット全ての要素に "value" を設定し、!NodeSet を返します。
+
+{{{
+<textarea>1</textarea>
+<textarea>2</textarea>
+
+var node = uu.tag("textarea")[0];
+
+// set uu.value()
+uu.value(node, "new value");
+
+// get uu.value
+uu.puff(uu.value(node)); // "new value"
+
+// set NodeSet.value
+uu("textarea").value("aa");
+
+// get NodeSet.value
+uu.puff(uu("textarea").value()); // ["aa", "aa"]
+}}}
+
+= `<`button`>` =
+uu.value(_buttonNode_:Node, _value_:String = void):String/Node は、_buttonNode_.value 属性にアクセスします。
+
+uu.value(_buttonNode_) で value 属性の値を取得し、uu.value(_buttonNode_, "value") で値を設定し、_buttonNode_ を返します。
+
+!NodeSet.value(_value_:String = void):!StringArray/!NodeSet は、カレントノードセットの value 属性にアクセスします。
+
+uu("button").value() で !StringArray( `[` "value" , ... `]` ) を取得します。配列の要素数はノード数になります。
+uu("button").value("value") でカレントノードセット全ての要素に "value" を設定し、!NodeSet を返します。
+
+{{{
+<button value="1">1</button>
+<button value="2">2</button>
+
+var node = uu.tag("button")[0];
+
+// set uu.value()
+uu.value(node, "new value");
+
+// get uu.value
+uu.puff(uu.value(node)); // "new value"
+
+// set NodeSet.value
+uu("button").value("aa");
+
+// get NodeSet.value
+uu.puff(uu("button").value()); // ["aa", "aa"]
+}}}
+
+= `<`option`>` =
+uu.value(_optionNode_:Node, _value_:String = void):String/Node は、_optionNode_.value 属性にアクセスします。
+
+uu.value(_optionNode_) で value 属性の値を取得し、uu.value(_optionNode_, "value") で値を設定し、_optionNode_ を返します。
+
+!NodeSet.value(_value_:String = void):!StringArray/!NodeSet は、カレントノードセットの value 属性にアクセスします。
+
+uu("option").value() で !StringArray( `[` "value" , ... `]` ) を取得します。配列の要素数はノード数になります。
+uu("option").value("value") でカレントノードセット全ての要素に "value" を設定し、!NodeSet を返します。
+
+{{{
+<select>
+    <option value="1">text1</option>
+    <option value="2">text2</option>
+</select>
+
+var node = uu.tag("option")[0];
+
+// set uu.value()
+uu.value(node, "new value");
+
+// get uu.value
+uu.puff(uu.value(node)); // "new value"
+
+// set NodeSet.value
+uu("option").value("aa");
+
+// get NodeSet.value
+uu.puff(uu("option").value()); // ["aa", "aa"]
+}}}
+
+= `<`input type="radio"`>` =
+uu.value(_inputNode_:Node, _value_:String = void):String/Node は、_inputNode_.value や checked 属性にアクセスします。
+
+uu.value(_inputNode_) で _inputNode_ と name属性の値が同じ要素を検索し、その中からチェックされている要素の value 属性の値を String で返します。
+
+uu.value(_inputNode_, _findValue_) で _inputNode_ と name属性の値が同じ要素を検索し、_findValue_ と value 属性の値が*一致する要素をチェック*し、_inputNode_ を返します(value 属性の設定ではなく、checked 属性の値を設定します)。
+ _findValue_ と一致する値が存在しなければ*何も選択されていない状態*にします。
+
+!NodeSet.value(_value_:String = void):!StringArray/!NodeSet は、カレントノードセットの value 属性 や checked 属性にアクセスします。
+
+uu("input`[`type=radio`]`").value() で カレントノードセットのそれぞれについて uu.value(_inputNode_) を実行し、!StringArray を返します。
+uu("input`[`type=radio`]`").value(_findValue_) でカレントノードセットのそれぞれについて uu.value(_inputNode_, _findValue_) を実行し、!NodeSet を返します。
+
+{{{
+<div>
+    <input id="A"
+           name="radioA" type="radio" value="A1" />A1
+    <input name="radioA" type="radio" value="A2" />A2
+    <input name="radioA" type="radio" value="A3" />A3
+</div>
+<div>
+    <input id="B"
+           name="radioB" type="radio" value="B1" />A1
+    <input name="radioB" type="radio" value="B2" />A2
+    <input name="radioB" type="radio" value="B3" />A3
+</div>
+
+var node = uu.tag("input")[0]; // <input name="radioA" value="A1">
+
+// A3 check
+uu.value(node, "A3");
+
+// get check value
+uu.puff(uu.value(node)); // "A3"
+
+// A系をアンチェックにし + B2をチェック
+uu("#A,#B").value("B2");
+
+// get NodeSet.value
+uu.puff(uu("#A,#B").value()); // ["", "B2"]
+}}}
+
+
+
+
+
+= `<`input type="checked"`>` =
+uu.value(_inputNode_:Node, _value_:String = void):String/Node は、_inputNode_.value や checked 属性にアクセスします。
+
+uu.value(_inputNode_) で _inputNode_ と name属性の値が同じ要素を検索し、その中からチェックされている要素の value 属性の値を !StringArray で返します。一つもチェックされていない場合は、空の配列( `[` `]` )を返します。
+
+uu.value(_inputNode_, _findValue_ or Array( _findValue_ )) で _inputNode_ と name属性の値が同じ要素を検索し、_findValue_ と value 属性の値が*一致する全ての要素をチェック*し、_inputNode_ を返します(value 属性の設定ではなく、checked 属性の値を設定します)。
+ _findValue_ と一致しない値を持つ要素は全て*アンチェック*にします。
+
+!NodeSet.value(_value_:String = void):!StringArray/!NodeSet は、カレントノードセットの value 属性 や checked 属性にアクセスします。
+
+uu("input`[`type=checked`]`").value() で カレントノードセットのそれぞれについて uu.value(_inputNode_) を実行し、!StringArray を返します。
+uu("input`[`type=checked`]`").value(_findValue_ or Array( _findValue_ )) でカレントノードセットのそれぞれについて uu.value(_inputNode_, _findValue_) を実行し、!NodeSet を返します。
+
+{{{
+<div>
+    <input id="A"
+           name="checkboxA" type="checkbox" value="A1" />A1
+    <input name="checkboxA" type="checkbox" value="A2" />A2
+    <input name="checkboxA" type="checkbox" value="A3" />A3
+    <input name="checkboxA" type="checkbox" value="A4" />A4
+    <input name="checkboxA" type="checkbox" value="A5" />A5
+</div>
+<div>
+    <input id="B"
+           name="checkboxB" type="checkbox" value="B1" />A1
+    <input name="checkboxB" type="checkbox" value="B2" />A2
+    <input name="checkboxB" type="checkbox" value="B3" />A3
+</div>
+
+var node = uu.tag("input")[0]; // <input name="checkboxA" value="A1">
+
+// A2 をチェック
+uu.value(node, "A2"); // Stringで指定
+
+// A2 がアンチェックになり A4 と A5 がチェックされる
+uu.value(node, ["A4", "A5"]); // 配列で指定
+
+// get check value
+uu.puff(uu.value(node)); // ["A4", "A5"]
+
+// A系を全てアンチェックにし + B2 だけをチェック
+uu("#A,#B").value("B2");
+
+// get NodeSet.value
+uu.puff(uu("#A,#B").value()); // [ [], ["B2"] ] - それぞれの系列について配列が返る
+}}}
+
+
