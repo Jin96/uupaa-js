@@ -79,6 +79,49 @@ function のブレス( { ) は、理由が無い限り function と同じ行に�
 
 なお、ショートコードを目的とした == の利用も合法です。
 
+== var はスコープ内に一つだけ ==
+var はスコープ内に一つだけ設置できます。工夫してください。
+{{{
+    // good
+    function() {
+        var nodeList, node, i = -1;
+        
+        nodeList = document.getElementByTagName("*");
+        while ( (node = nodeList[++i]) ) {
+            ...
+        } 
+    }
+
+    // bad
+    function() {
+        var nodeList;
+
+        nodeList = document.getElementByTagName("*");
+
+        var i = 0;
+        var length = nodeList.length;
+       
+        for (; i < length; i++) {
+            var node = nodeList[i];
+            
+            ...
+        }  
+    }
+}}}
+
+== var の後ろには空行を置く ==
+var の後ろには一つ以上の空行をおきます。
+{{{
+    // good
+    var a = 1, b = 2, c;
+ 
+    c = a * b;
+
+    // bad
+    var a = 1, b = 2, c;
+    c = a * b;
+}}}
+
 == Scrict Mode セーフにする ==
 Strict Mode セーフなコードを記述してください。
 行末のセミコロンの省略や arguments.callee の利用は、理由が無い限りそうすべきではありません。
