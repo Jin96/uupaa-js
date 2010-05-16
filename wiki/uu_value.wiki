@@ -140,9 +140,6 @@ uu.puff(uu("#A,#B").value()); // ["", "B2"]
 }}}
 
 
-
-
-
 = `<`input type="checked"`>` =
 uu.value(_inputNode_:Node, _value_:String = void):String/Node は、_inputNode_.value や checked 属性にアクセスします。
 
@@ -190,4 +187,124 @@ uu("#A,#B").value("B2");
 uu.puff(uu("#A,#B").value()); // [ [], ["B2"] ] - それぞれの系列について配列が返る
 }}}
 
+= `<`input type="file"`>`=
+uu.value(_inputNode_:Node, _value_:String = void):String/Node は、_inputNode_.value 属性にアクセスします。
 
+uu.value(_inputNode_) で value 属性の値を取得します。値の設定はできません。
+
+!NodeSet.value(_value_:String = void):!StringArray/!NodeSet は、カレントノードセットの value 属性にアクセスします。
+
+uu("input").value() で !StringArray( `[` "value" , ... `]` ) を取得します。配列の要素数はノード数になります。
+
+{{{
+<div>
+    <input type="file" value="" />
+    <input type="file" value="" />
+</div>
+
+var node = uu.tag("input")[0]; // <input type="file" value"">
+
+uu.puff(uu.value(node)); // ""
+
+uu.puff(uu("input").value()); // ["", ""]
+}}}
+
+
+= `<`input type="text"`>` =
+= `<`input type="image"`>`=
+= `<`input type="button"`>`=
+= `<`input type="hidden"`>`=
+= `<`input type="submit"`>`=
+= `<`input type="password"`>` =
+uu.value(_inputNode_:Node, _value_:String = void):String/Node は、_inputNode_.value 属性にアクセスします。
+
+uu.value(_inputNode_) で value 属性の値を取得し、uu.value(_inputNode_, "value") で値を設定し、_inputNode_ を返します。
+
+!NodeSet.value(_value_:String = void):!StringArray/!NodeSet は、カレントノードセットの value 属性にアクセスします。
+
+uu("input").value() で !StringArray( `[` "value" , ... `]` ) を取得します。配列の要素数はノード数になります。
+uu("input").value("value") でカレントノードセット全ての要素に "value" を設定し、!NodeSet を返します。
+
+{{{
+<div>
+    <input type="text" value="text" />
+    <input type="image" src="" value="" />
+    <input type="button" value="button" />
+    <input type="hidden" value="hidden" />
+    <input type="submit" value="submit" />
+    <input type="password" value="password" />
+</div>
+
+var nodeList = uu.tag("input");
+
+// set values
+uu.value(nodeList[0], "new text value"); // <input type="text">
+uu.value(nodeList[1], "new image value"); // <input type="image">
+uu.value(nodeList[2], "new button value"); // <input type="button">
+uu.value(nodeList[3], "new hidden value"); // <input type="hidden">
+uu.value(nodeList[4], "new submit value"); // <input type="submit">
+uu.value(nodeList[5], "new password value"); // <input type="password">
+
+// get values
+uu.puff([                   // [
+    uu.value(nodeList[0]),  //   "new text value",
+    uu.value(nodeList[1]),  //   "new image value",
+    uu.value(nodeList[2]),  //   "new button value",
+    uu.value(nodeList[3]),  //   "new hidden value",
+    uu.value(nodeList[4]),  //   "new submit value",
+    uu.value(nodeList[5])   //   "new password value"
+]);                         // ]
+
+// set values
+uu("input").value("new value");
+
+// get values
+uu.puff(uu("input").value());  // ["new value" x 6]
+}}}
+
+
+
+
+
+= `<`select`>`=
+uu.value(_selectNode_:Node, _value_:String = void):String/Node は、現在選択されている option要素の value 属性にアクセスします。
+
+uu.value(_selectNode_) で、現在選択されている option 要素の value 属性の値を取得します。
+uu.value(_selectNode_, _findValue_) で、_selectNode.selected 属性を変更し、_findValue_ と一致する option要素を 選択した状態にします。
+
+!NodeSet.value(_value_:String = void):!StringArray/!NodeSet は、カレントノードセットについてそれぞれ処理します。
+
+uu("select").value() で カレントノードセットのそれぞれについて uu.value(_selectNode_) を実行し、!StringArray を返します。
+uu("select").value(_findValue_ or Array( _findValue_ )) でカレントノードセットのそれぞれについて uu.value(_selectNode_, _findValue_) を実行し、!NodeSet を返します。
+
+{{{
+<div>
+    <select>
+        <option value="value1">text1</option>
+        <option value="value2" selected="selected">text2</option>
+        <option value="value3">text3</option>
+    </select>
+    <select>
+        <option>text1</option>
+        <option selected="selected">text2</option>
+        <option>text3</option>
+    </select>
+</div>
+
+var node = uu.tag("select")[0];
+
+// set selected
+uu.value(node, "value3");
+
+// get selected value
+uu.puff(uu.value(node)); // "value3"
+
+// set selected
+uu("select").value(node, "value1");
+
+uu.puff(uu("select").value()); // ["value1", ""]
+
+}}}
+
+
+= `<`select multiple="multiple"`>`=
