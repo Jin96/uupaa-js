@@ -10,7 +10,7 @@ uupaa.js では、[http://webkit.org/coding/coding-style.html WebKit]のコー�
 == 語彙(ボキャブラリ) ==
 以下の用語があります。
 
-  * Mix はあらゆる型の変数を受け取り可能な引数を示す便宜上の型です。
+  * Mix はあらゆる型を意味します。
 {{{
     function uuhash(key,     // @param Hash/String: key
                     value) { // @param Mix(= void): value
@@ -30,7 +30,7 @@ uupaa.js では、[http://webkit.org/coding/coding-style.html WebKit]のコー�
 }}}
   * !StringArray は文字列だけを要素に持つ配列です。 `[` "string", ... `]`
   * !NumberArray は数値だけを要素に持つ配列です。`[` 123, ... `]`
-  * !IgnoreCaseString は大小文字を区別しない文字列を意味する便宜上の型です。
+  * !IgnoreCaseString は大小文字を区別しない文字列です。
 
 == if や for のブレス( {} )は省略禁止 ==
 ブレスの省略は禁止します。
