@@ -49,7 +49,7 @@ function のブレス( { ) は、理由が無い限り function と同じ行に�
 }}}
 
 == 厳密比較演算子を使う ==
-理由が無い限り、== ではなく === を使ってください。== は === に比べて遅くなり、大抵のケースでデメリットがメリットを上回ります。
+理由が無い限り、== ではなく === を使ってください。== は === に比べて実行速度が遅くなり、大抵のケースでデメリットがメリットを上回ります。
 
 {{{
     // good
@@ -122,6 +122,30 @@ var の後ろには一つ以上の空行をおきます。
     // bad
     var a = 1, b = 2, c;
     c = a * b;
+}}}
+
+== 状態をnode.classNameに保存しない ==
+内部的な状態を node.className に保存することを禁止します。変数を使ってください。
+{{{
+     // good
+     var hit = false;
+
+     function eventHandler(evt) {
+         if (evt.target === node) {
+             hit = true;
+         } else {
+             hit = false;
+         }
+     }
+
+     // bad
+     function eventHandler(evt) {
+         if (evt.target === node) {
+             node.className += " hit ";
+         } else {
+             node.className = (" " + node.className + " ").replace(/ hit /, "");
+         }
+     }
 }}}
 
 == Scrict Mode セーフにする ==
