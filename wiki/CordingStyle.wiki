@@ -17,7 +17,10 @@ uupaa.js は [http://webkit.org/coding/coding-style.html WebKit]のコーディ�
     }
 }}}
   * void は undefined の別名です。
-  * Hash は Object の別名です。データの入れ物として意識する場合に Hash と呼びます。
+  * Hash は key/value ストアに特化した Object の別名です。データの入れ物として意識する場合に Hash と呼びます。
+{{{
+    var hash = { key: "value" };
+}}}
   * Element は配列の要素を意味します。DOM Element は Node と呼び区別します。
   * !NodeList は document.getElementsByTagName() などが返す 動的な(liveな)ノードリストです。
   * !NodeArray は uu.tag(), uu.klass(), uu.query() などが返す 静的な(staticな)ノードの配列です。
