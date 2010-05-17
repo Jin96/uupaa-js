@@ -635,8 +635,8 @@ uu.ready(function(uu) {
       'uu.fix("background-color") == "backgroundColor"': function() {
         return [uu.fix("background-color"), "==", "backgroundColor"];
       },
-      'uu.fix("float") == "cssFloat" or "styleFloat"': function() {
-        return [uu.fix("float"), "==", uu.ie ? "styleFloat" : "cssFloat"];
+      'uu.fix("float") == "cssFloat" or "styleFloat"(IE6, IE7)': function() {
+        return [uu.fix("float"), "==", uu.ie && uu.ver < 8 ? "styleFloat" : "cssFloat"];
       },
       'uu.fix("for") == "for"': function() {
         if (uu.ver.ie6 || uu.ver.ie7) {
