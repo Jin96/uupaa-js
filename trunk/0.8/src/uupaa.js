@@ -148,19 +148,19 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Stri
         setOpacity: setOpacity      // uu.css.setOpacity(node:Node, value:Number/String):Node
     }),
     unit:           uuunit,         // uu.unit(node:Node, value:Number/CSSUnitString, quick:Boolean = false, prop:String = "left"):Number
-                                    //  [1][convert pixel]   uu.unit(<div>, 123) -> 123
-                                    //  [2][convert pixel]   uu.unit(<div>, "12px") -> 12
-                                    //  [3][convert pixel]   uu.unit(<div>, "12em") -> 192
-                                    //  [4][convert pixel]   uu.unit(<div>, "12pt") -> 16
-                                    //  [5][convert pixel]   uu.unit(<div>, "auto") -> 100
-                                    //  [6][convert pixel]   uu.unit(<div>, "auto", 0, "borderTopWidth") -> 0
+                                    //  [1][convert pixel]  uu.unit(<div>, 123) -> 123
+                                    //  [2][convert pixel]  uu.unit(<div>, "12px") -> 12
+                                    //  [3][convert pixel]  uu.unit(<div>, "12em") -> 192
+                                    //  [4][convert pixel]  uu.unit(<div>, "12pt") -> 16
+                                    //  [5][convert pixel]  uu.unit(<div>, "auto") -> 100
+                                    //  [6][convert pixel]  uu.unit(<div>, "auto", 0, "borderTopWidth") -> 0
     tween:    uumix(uutween, {      // uu.tween(node:Node, duration:Number, param:Hash, callback:Function = void):Node
                                     //  [1][abs]            uu.tween(node, 500, { o: 0.5, x: 200 })
                                     //  [2][rel]            uu.tween(node, 500, { o: "=+0.5" })
                                     //  [3][with "px" unit] uu.tween(node, 500, { h: "=-100px" })
                                     //  [4][with easing fn] uu.tween(node, 500, { h: [200, "easing function name"] })
         skip:       uutweenskip,    // uu.tween.skip(node:Node = void, all:Boolean = false):Node/NodeArray
-        isRunning:                  // uu.tween.running(node:Node):Boolean
+        isRunning:                  // uu.tween.isRunning(node:Node):Boolean
                     uutweenisrunning
     }),
     viewport: {
@@ -184,8 +184,7 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Stri
         singleton:                  // uu.Class.singleton(className:String, proto:Hash/Function = void)
                     uuclasssingleton,
         NodeSet:    NodeSet,
-        MessagePump:
-                    MessagePump
+        MsgPump:    MsgPump
     }),
     // --- EVENT ---
     event:    uumix(uuevent, {      // uu.event(node:Node, eventTypeEx:EventTypeExString, evaluator:Function/Instance):Node
@@ -215,15 +214,15 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Stri
                                     //  [5][from DocumentFragment] uu.node.add(DocumentFragment)        -> <body>{{fragment}}</body>
                                     //   --- uu.node.add / uu.node.find position ---
                                     //    <div id="parentNode">
-                                    //        <div id="firstSibling">^</div>
-                                    //        <div id="prevSibling">-</div>
+                                    //        <div id="firstSibling">    ^  </div>
+                                    //        <div id="prevSibling">     -  </div>
                                     //        <div id="contextNode">
-                                    //            <div id="firstChild">.^</div>
+                                    //            <div id="firstChild">  .^ </div>
                                     //            <div>-----</div>
-                                    //            <div id="lastChild">.$</div>
+                                    //            <div id="lastChild">   .$ </div>
                                     //        </div>
-                                    //        <div id="nextSibling">+</div>
-                                    //        <div id="lastSibling">$</div>
+                                    //        <div id="nextSibling">     +  </div>
+                                    //        <div id="lastSibling">     $  </div>
                                     //    </div>
                                     //
         has:        uunodehas,      // uu.node.has(node:Node, parent:Node):Boolean
@@ -242,6 +241,8 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Stri
         xpath:      uunodexpath,    // uu.node.xpath(elementNode:Node):String
         remove:     uunoderemove,   // uu.node.remove(node:Node):Node
         builder:    uunodebuilder,  // uu.node.builder(handler:Function)
+                                    //  [1][set   handler] uu.node.builder(function(uu, node, ticket, nodeid) {...})
+                                    //  [2][clear handler] uu.node.builder(null)
         indexOf:    uunodeindexof   // uu.node.indexOf(node:Node):Number
     }),
     // --- NodeID ---
@@ -332,24 +333,24 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Stri
 // --- CONSTRUCTION ---
 uu.config.baseDir || (uu.config.baseDir =
     uutag("script").pop().src[_replace](/[^\/]+$/, function(file) {
-        return file == "uupaa.js" ? "../" : "";
+        return file === "uupaa.js" ? "../" : "";
     }));
 
-// --- MessagePump class ---
-MessagePump[_prototype] = {
-    send:           uumsgsend,      // MessagePump.send(address:Array/Mix, message:String, param:Mix = void):Array/Mix
-                                    //  [1][multicast] MessagePump.send([instance, ...], "hello") -> ["world!", ...]
-                                    //  [2][unicast  ] MessagePump.send(instance, "hello") -> ["world!"]
-                                    //  [3][broadcast] MessagePump.send(null, "hello") -> ["world!", ...]
-    post:           uumsgpost,      // MessagePump.post(address:Array/Mix, message:String, param:Mix = void)
-                                    //  [1][multicast] MessagePump.post([instance, ...], "hello")
-                                    //  [2][unicast  ] MessagePump.post(instance, "hello")
-                                    //  [3][broadcast] MessagePump.post(null, "hello")
-    bind:           uumsgbind,      // MessagePump.bind(instance:Instance)
-    unbind:         uumsgunbind     // MessagePump.unbind(instance:Instance)
+// --- MsgPump class ---
+MsgPump[_prototype] = {
+    send:           uumsgsend,      // MsgPump.send(address:Array/Mix, message:String, param:Mix = void):Array/Mix
+                                    //  [1][multicast] MsgPump.send([instance, ...], "hello") -> ["world!", ...]
+                                    //  [2][unicast  ] MsgPump.send(instance, "hello") -> ["world!"]
+                                    //  [3][broadcast] MsgPump.send(null, "hello") -> ["world!", ...]
+    post:           uumsgpost,      // MsgPump.post(address:Array/Mix, message:String, param:Mix = void)
+                                    //  [1][multicast] MsgPump.post([instance, ...], "hello")
+                                    //  [2][unicast  ] MsgPump.post(instance, "hello")
+                                    //  [3][broadcast] MsgPump.post(null, "hello")
+    bind:           uumsgbind,      // MsgPump.bind(instance:Instance)
+    unbind:         uumsgunbind     // MsgPump.unbind(instance:Instance)
 };
 
-uu.msg = new MessagePump();         // uu.msg - MessagePump instance
+uu.msg = new MsgPump();         // uu.msg - MsgPump instance
 
 // --- ECMAScript-262 5th ---
 function ArrayIsArray(search) { // @param Mix: search
@@ -733,7 +734,7 @@ function uuhas(source,   // @param Hash/Array: source
             for (i in search) {
                 if (!(i in source)
                     || (source[i] !== search[i]
-                        && _json(source[i], 0) !== _json(search[i], 0))) {
+                        && _json(source[i]) !== _json(search[i]))) {
                     return _false;
                 }
             }
@@ -1548,7 +1549,7 @@ function uuclass(className, // @param String: "Class"
 
         that.uuguid = uu.guid();
         that.msgbox || (that.msgbox = uu.nop);
-        uu.msg.bind(that); // bind MessagePump
+        uu.msg.bind(that); // bind MsgPump
 
         // constructor(Super -> that)
         Super && Super.init && Super.init.apply(that, args);
@@ -1588,7 +1589,7 @@ function uuclasssingleton(className, // @param String: class name
             that.uuguid = uu.guid();
             that.init && that.init.apply(that, arg);
             that.msgbox || (that.msgbox = uu.nop);
-            uu.msg.bind(that); // bind MessagePump
+            uu.msg.bind(that); // bind MsgPump
         }
         return self.instance || (self.instance = that);
     };
@@ -1596,18 +1597,18 @@ function uuclasssingleton(className, // @param String: class name
                                                                 : proto || {};
 }
 
-// --- message pump ---
-// MessagePump
-function MessagePump() {
+// --- MsgPump ---
+// MsgPump
+function MsgPump() {
     this.addr = {}; // AddressMap { guid: instance, ... }
     this.cast = []; // Broadcast AddressMap [guid, ...]
 }
 
-// [1][multicast] MessagePump.send([instance, ...], "hello") -> ["world!", ...]
-// [2][unicast  ] MessagePump.send(instance, "hello") -> ["world!"]
-// [3][broadcast] MessagePump.send(null, "hello") -> ["world!", ...]
+// [1][multicast] MsgPump.send([instance, ...], "hello") -> ["world!", ...]
+// [2][unicast  ] MsgPump.send(instance, "hello") -> ["world!"]
+// [3][broadcast] MsgPump.send(null, "hello") -> ["world!", ...]
 
-// MessagePump.send - send a message synchronously
+// MsgPump.send - send a message synchronously
 function uumsgsend(address, // @param Array/Mix: address or guid
                             //           [instance, ...] is multicast
                             //           instance is unicast
@@ -1625,11 +1626,11 @@ function uumsgsend(address, // @param Array/Mix: address or guid
     return rv;
 }
 
-// [1][multicast] MessagePump.post([instance, ...], "hello")
-// [2][unicast  ] MessagePump.post(instance, "hello")
-// [3][broadcast] MessagePump.post(null, "hello")
+// [1][multicast] MsgPump.post([instance, ...], "hello")
+// [2][unicast  ] MsgPump.post(instance, "hello")
+// [3][broadcast] MsgPump.post(null, "hello")
 
-// MessagePump.post - send a message asynchronously
+// MsgPump.post - send a message asynchronously
 function uumsgpost(address, // @param Array/Mix: address or guid
                             //           [instance, ...] is multicast
                             //           instance is unicast
@@ -1643,13 +1644,13 @@ function uumsgpost(address, // @param Array/Mix: address or guid
     }, 0);
 }
 
-// MessagePump.bind - register the destination of the message
+// MsgPump.bind - register the destination of the message
 function uumsgbind(instance) { // @param Instance: class instance
     this.addr[instance.uuguid] = instance;
     this.cast = uukeys(this.addr);
 }
 
-// MessagePump.unbind
+// MsgPump.unbind
 function uumsgunbind(instance) { // @param Instance: class instance
     delete this.db[instance.uuguid];
     this.cast = uukeys(this.addr);
@@ -2231,7 +2232,7 @@ function uunodewrap(innerNode,   // @param Node: inner node
 //  [5][set attr]       uu.div({ title: "hello" })   -> uu.node("div", { title: "hello" })
 //  [6][set css]        uu.div("", "color,red")      -> uu.css(uu.node("div"), { color: "red" })
 //  [7][set css]        uu.div("", { color: "red" }) -> uu.css(uu.node("div"), { color: "red" })
-//  [8][call handler]   uu.node.builder(fn), uu.div(1) -> fn(uu, <div>, 1, nodeid)
+//  [8][call handler]   uu.node.builder(handler), uu.div(1) -> handler(uu, <div>, 1, nodeid)
 
 // inner - build node
 function buildNode(node,   // @param Node/TagString: <div> or "div"
@@ -2239,14 +2240,14 @@ function buildNode(node,   // @param Node/TagString: <div> or "div"
                            // @return Node:
     node.nodeType || (node = uunode(node)); // "div" -> <div>
 
-    var arg, i = 0, token = 0, callback, isstr;
+    var arg, i = 0, token = 0, ticket, isstr;
 
     while ( (arg = args[i++]) ) {
         if (arg) {
             if (arg.nodeType) { // [1][3]
                 node.appendChild(arg);
             } else if (isNumber(arg)) { // [8]
-                callback = arg;
+                ticket = arg;
             } else {
                 isstr = isString(arg);
 
@@ -2260,8 +2261,8 @@ function buildNode(node,   // @param Node/TagString: <div> or "div"
             }
         }
     }
-    callback && uunodebuilder.handler &&
-            uunodebuilder.handler(uu, node, callback, uunodeid(node));
+    ticket && uunodebuilder.handler
+           && uunodebuilder.handler(uu, node, ticket, uunodeid(node));
     return node;
 }
 
@@ -2662,7 +2663,7 @@ function uulog(log) { // @param Mix: log data
     var id = uu.config.log, context = uuid(id);
 
     context || uunodeadd(context = uu.ol({ id: id }));
-    uunodeadd(uu.li(uutext(uufixunicode(_json(log)))), context);
+    uunodeadd(uu.li(uutext(_json(log))), context);
 }
 
 // uu.log.clear - clear log
@@ -2685,7 +2686,7 @@ function uujson(source,        // @param Mix:
                 callback) {    // @param Function(= void): error callback
                                // @return JSONString:
     return useNativeJSON && win.JSON ? win.JSON.stringify(source) || ""
-                                     : _json(source, callback);
+                                     : _json(source, 1, callback);
 }
 
 // uu.json.decode - decode JSONString
@@ -2727,7 +2728,7 @@ _str2json.escape = /(?:\"|\\[bfnrt\\])/g; // escape
 _str2json.encode = /[\x00-\x1F\u0080-\uFFEE]/g;
 
 // inner - json inspect
-function _json(mix, callback) {
+function _json(mix, esc, callback) {
     var ary, type = uutype(mix), w, ai = -1, i, iz;
 
     if (mix === win) {
@@ -2743,11 +2744,11 @@ function _json(mix, callback) {
     case uutype.BOOLEAN:
     case uutype.FUNCTION:
     case uutype.NUMBER: return mix.toString();
-    case uutype.STRING: return _str2json(mix, 1);
+    case uutype.STRING: return esc ? _str2json(mix, 1) : '"' + mix + '"';
     case uutype.ARRAY:
     case uutype.FAKEARRAY:
         for (ary = [], i = 0, iz = mix.length; i < iz; ++i) {
-            ary[++ai] = _json(mix[i], callback);
+            ary[++ai] = _json(mix[i], esc, callback);
         }
         return "[" + ary + "]";
     default:
@@ -2758,13 +2759,15 @@ function _json(mix, callback) {
         for (i in mix) {
             if (typeof mix[i] === "string" && (w || i != (+i + ""))) { // !isNaN(i)
                 w && (i = mix.item(i));
-                ary[++ai] = '"' + i + '":' + _str2json(mix[i], 1);
+                ary[++ai] = '"' + i + '":'
+                                + (esc ? _str2json(mix[i], 1)
+                                       : '"' + mix[i] + '"');
             }
         }
     } else { // type === uutype.HASH
         for (i in mix) {
-            ary[++ai] = _str2json(i, 1) + ":"
-                      + _json(mix[i], callback);
+            ary[++ai] = (esc ? _str2json(i, 1) : '"' + i + '"') + ":"
+                      + _json(mix[i], esc, callback);
         }
     }
     return "{" + ary + "}";
@@ -3221,14 +3224,15 @@ function NodeSet(expression, // @param NodeSet/Node/NodeArray/String/window:
                  context) {  // @param NodeSet/Node(= void 0): context
     this.stack = [[]]; // [NodeSet, ...]
 
-    this.nodeSet = !expression ? [] // empty NodeSet
+    this.nodeArray = !expression ? [] // empty nodeArray
         : (expression === win || expression.nodeType) ? [expression] // window / node
         : typeof expression === "string" ?
             (!expression[_indexOf]("<") ? [uunodebulk(expression)]  // <div> -> fragment
-                                        : uuquery(expression, context && context._NodeSet ? context.nodeSet.concat()
-                                                                                        : context)) // query
+                                        : uuquery(expression, context &&
+                                                  context.nodeArray ? context.nodeArray.concat()
+                                                                    : context)) // query
         : _isArray(expression) ? expression.concat() // clone NodeArray
-        : (expression instanceof NodeSet) ? expression.nodeSet.concat() // copy constructor
+        : (expression instanceof NodeSet) ? expression.nodeArray.concat() // copy constructor
         : []; // bad expr
 }
 
@@ -3256,18 +3260,19 @@ NodeSet[_prototype] = {
 //  tween:          NodeSetTween,       // NodeSet.tween(duration:Number, param:Hash, callback:Function = void) -> NodeSet
     iter:           NodeSetIter         // [PROTECTED]
 };
+uu.nodeSet = NodeSet[_prototype];       // uu.nodeset - uu.Class.NodeSet.prototype alias
 
 // NodeSet.back
 function NodeSetBack() { // @return NodeSet:
-    this.nodeSet = this.stack.pop() || [];
+    this.nodeArray = this.stack.pop() || [];
     return this;
 }
 
 // NodeSet.find
 function NodeSetFind(expression) { // @param String: expression, "css > expr"
                                    // @return NodeSet:
-    this.stack.push(this.nodeSet); // add stack
-    this.nodeSet = uuquery("! " + expression, this.nodeSet); // ":scope expr"
+    this.stack.push(this.nodeArray); // add stack
+    this.nodeArray = uuquery("! " + expression, this.nodeArray); // ":scope expr"
     return this;
 }
 
@@ -3277,38 +3282,38 @@ function NodeSetNth(indexer) { // @param Number(= 0): indexer,
                                //                   : -1 is last element
                                //                   : indexer < 0 is negative index
                                // @return Node:
-    return this.nodeSet[indexer < 0 ? indexer + this.nodeSet.length
-                                    : indexer || 0];
+    return this.nodeArray[indexer < 0 ? indexer + this.nodeArray.length
+                                      : indexer || 0];
 }
 
 // NodeSet.each
 function NodeSetEach(evaluator) { // @param Function: evaluator
                                   // @return NodeSet:
-    this.nodeSet.forEach(fn);
+    this.nodeArray.forEach(fn);
     return this;
 }
 
 // NodeSet.size - get nodeSet.length
 function NodeSetSize() { // @return Number:
-    return this.nodeSet.length;
+    return this.nodeArray.length;
 }
 
 // NodeSet.clone - clone nodeSet Array
 function NodeSetClone() { // @return Array: nodeSet
-    return this.nodeSet.concat();
+    return this.nodeArray.concat();
 }
 
 // NodeSet.indexOf - NodeSet.indexOf(node)
 function NodeSetIndexOf(node) { // @param Node:
                                 // @return Number: found index or -1
-    return this.nodeSet[_indexOf](node);
+    return this.nodeArray[_indexOf](node);
 }
 
 // NodeSet.add - add node or fragment
 function NodeSetAdd(source,     // @param Node/DocumentFragment/HTMLFragment/TagName(= "div"):
                     position) { // @param String(= ".$"): insert position
                                 // @return NodeSet:
-    var ary = this.nodeSet, context, i = -1;
+    var ary = this.nodeArray, context, i = -1;
 
     if (ary.length === 1) {
         uunodeadd(source, ary[0], position);
@@ -3340,7 +3345,7 @@ function NodeSetIter(iterType,  // @param Number: 0 is forEach, 1 is map
                      param3,    // @param Mix: param
                      param4) {  // @param Mix: param
                                     // @return NodeSet:
-    var node, ary = that.NodeSet, i = -1,
+    var node, ary = that.nodeArray, i = -1,
         rv = [], r, arrayResult = 0;
 
     while ( (node = ary[++i]) ) {
@@ -3351,7 +3356,7 @@ function NodeSetIter(iterType,  // @param Number: 0 is forEach, 1 is map
         i || !iterType || r === node || ++arrayResult;
         arrayResult && (rv[i] = r);
     }
-    return (iterType && resultType > 1) ? rv : that;
+    return (iterType && arrayResult) ? rv : that;
 }
 
 // forEach(iter = 0)
