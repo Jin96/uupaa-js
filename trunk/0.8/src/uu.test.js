@@ -28,11 +28,12 @@
 
 uu.test || (function(uu) {
 
-uu.test = uutest; // uu.test(testCase:Hash)
+uu.test = uutest; // uu.test(testCase:Hash, throwsError:Boolean = false)
 uu.test.addType = uutestaddtype; // uu.test.addType(operator:String, callback:Function):Boolean
 
 // uu.test
-function uutest(testCase) { // @param Hash: { title: evaluator, ... }
+function uutest(testCase,      // @param Hash: { title: evaluator, ... }
+                throwsError) { // @param Boolean(= false): true is throws
     var rv, title, index = 0, i, iz,
         ok = 0, total = 0, ng = [], br = /\n/g,
         info, ngzone, ol;
@@ -48,7 +49,7 @@ function uutest(testCase) { // @param Hash: { title: evaluator, ... }
         ++index;
 
         if (uu.isFunction(testCase[title])) {
-            rv = one(title, testCase[title]);
+            rv = question(title, testCase[title], throwsError);
             rv[0] === 1 ? ++ok : ng.push(index);
             ++total;
         } else {
@@ -72,11 +73,12 @@ function uutest(testCase) { // @param Hash: { title: evaluator, ... }
 uutest.type = {}; // { operator: callback, ... }
 uutest.trimOperator = /NOT|!|IS/ig;
 
-function one(title,       // @param String:
-             evaluator) { // @param Function:
-                          // @return Array: [state, msg]
-                          //    state - Number: 0 is false, 1 is true, 2 is error
-                          //    msg - String:
+function question(title,         // @param String:
+                  evaluator,     // @param Function:
+                  throwsError) { // @param Boolean:
+                                 // @return Array: [state, msg]
+                                 //    state - Number: 0 is false, 1 is true, 2 is error
+                                 //    msg - String:
     var rv, param, result, callback;
 
     try {
@@ -92,6 +94,9 @@ function one(title,       // @param String:
             uu.isFunction(callback) && callback(); // after callback
         }
     } catch(err) {
+        if (throwsError) {
+            throw err;
+        }
         rv = [2, err.message]; // -1: error
     }
     return rv;
