@@ -1,0 +1,121 @@
+<!doctype html><html><head><meta charset="UTF-8" />
+<style>
+.uutest ol { background-color:dodgerblue;color:white }
+.uutest li { padding:5px;border:1px solid #ccc }
+.uutest .li0 { background-color:red   }
+.uutest .li1 { background-color:green }
+.uutest .li2 { background-color:red   }
+.uutest .li3 { background-color:#0c0  }
+.uutestinfo { position:fixed;top:10px;right:10px;font-size:xx-large }
+.uutestinfo a { border: 3px outset gray;padding:3px;background-color:red;color:white }
+.uutestinfo .score { color:black;text-shadow:gray 1px 1px 1px }
+.uutestinfo .ngzone {}
+</style>
+<script src="../../src/uupaa.js"></script>
+<script src="../../src/Form/uu.form.js"></script>
+<script src="../../src/Query/uu.query.js"></script>
+<script src="../../src/uu.test.js"></script>
+<script>
+uu.ready(function(uu) {
+    uu.test({
+        '<select multiple size="1"> phase': "",
+            '<select multiple size="1"><option selected></select> + 実在する値(value3)を指定する -> ["value3"] が選択される': function() {
+                var node = uu.query("#selectedTestGroupSize1>select:nth-child(1)");
+                return [uu.value(uu.value(node[0], "value3")), "==", ["value3"]];
+            },
+            '<select multiple size="1"><option></select> + 実在する値(value3)を指定する -> ["value3"] が選択される': function() {
+                var node = uu.query("#selectedTestGroupSize1>select:nth-child(2)");
+                return [uu.value(uu.value(node[0], "value3")), "==", ["value3"]];
+            },
+            '<select multiple size="1"><option selected></select> + 実在しない値(hoge)を指定する -> 未選択状態になる': function() {
+                var node = uu.query("#selectedTestGroupSize1>select:nth-child(3)");
+                return [uu.value(uu.value(node[0], "hoge")), "==", []];
+            },
+            '<select multiple size="1"><option></select> + 実在しない値(hoge)を指定する -> 未選択状態になる': function() {
+                var node = uu.query("#selectedTestGroupSize1>select:nth-child(4)");
+                return [uu.value(uu.value(node[0], "hoge")), "==", []];
+            },
+        '<select multiple size="4"> phase': "",
+            '<select multiple size="4"><option selected></select> + 実在する値(value3)を指定する -> ["value3"] が選択される': function() {
+                var node = uu.query("#selectedTestGroupSize3>select:nth-child(1)");
+                return [uu.value(uu.value(node[0], "value3")), "==", ["value3"]];
+            },
+            '<select multiple size="4"><option></select> + 実在する値(value3)を指定する -> ["value3"] が選択される': function() {
+                var node = uu.query("#selectedTestGroupSize3>select:nth-child(2)");
+                return [uu.value(uu.value(node[0], "value3")), "==", ["value3"]];
+            },
+            '<select multiple size="4"><option selected></select> + 実在しない値(hoge)を指定する -> 未選択状態になる': function() {
+                var node = uu.query("#selectedTestGroupSize3>select:nth-child(3)");
+                return [uu.value(uu.value(node[0], "hoge")), "==", []];
+            },
+            '<select multiple size="4"><option></select> + 実在しない値(hoge)を指定する -> 未選択状態になる': function() {
+                var node = uu.query("#selectedTestGroupSize3>select:nth-child(4)");
+                return [uu.value(uu.value(node[0], "hoge")), "==", []];
+            },
+
+        "End Of Test": ""
+    });
+});
+</script><body>
+
+<div id="selectedTestGroupSize1">
+    <select multiple="multiple" size="1">
+        <option value="value1">text1</option>
+        <option value="value2" selected="selected">text2</option>
+        <option value="value3" selected="selected">text3</option>
+        <option value="value4">text4</option>
+    </select>
+
+    <select multiple="multiple" size="1">
+        <option value="value1">text1</option>
+        <option value="value2">text2</option>
+        <option value="value3">text3</option>
+        <option value="value4">text4</option>
+    </select>
+
+    <select multiple="multiple" size="1">
+        <option value="value1">text1</option>
+        <option value="value2" selected="selected">text2</option>
+        <option value="value3" selected="selected">text3</option>
+        <option value="value4">text4</option>
+    </select>
+
+    <select multiple="multiple" size="1">
+        <option value="value1">text1</option>
+        <option value="value2">text2</option>
+        <option value="value3">text3</option>
+        <option value="value4">text4</option>
+    </select>
+</div>
+
+<div id="selectedTestGroupSize3">
+    <select multiple="multiple" size="4">
+        <option value="value1">text1</option>
+        <option value="value2" selected="selected">text2</option>
+        <option value="value3" selected="selected">text3</option>
+        <option value="value4">text4</option>
+    </select>
+
+    <select multiple="multiple" size="4">
+        <option value="value1">text1</option>
+        <option value="value2">text2</option>
+        <option value="value3">text3</option>
+        <option value="value4">text4</option>
+    </select>
+
+    <select multiple="multiple" size="4">
+        <option value="value1">text1</option>
+        <option value="value2" selected="selected">text2</option>
+        <option value="value3" selected="selected">text3</option>
+        <option value="value4">text4</option>
+    </select>
+
+    <select multiple="multiple" size="4">
+        <option value="value1">text1</option>
+        <option value="value2">text2</option>
+        <option value="value3">text3</option>
+        <option value="value4">text4</option>
+    </select>
+</div>
+
+</body></html>

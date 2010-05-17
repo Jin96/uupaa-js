@@ -3641,13 +3641,13 @@ function detectVersions(libraryVersion) { // @param Number: Library version
     rv.iphone       = test(/iPad|iPod|iPhone/);
     rv.android      = test(/Android/);
     rv.mobile       = test(/Mobile/) || test(/Opera Mini/);
-    rv.os           = rv.iphone ? "iphone"
-                    : rv.android ? "android"
-                    : test(/CrOS/) ? "chrome"
-                    : test(/Win/) ? "windows"
-                    : test(/Mac/) ? "mac"
-                    : test(/X11|Linux/) ? "unix"
-                    : "unknown";
+    rv.os           = rv.iphone         ? "iphone"  // iPhone OS    -> "iphone"
+                    : rv.android        ? "android" // Android OS   -> "android"
+                    : test(/CrOS/)      ? "chrome"  // Chrome OS    -> "chrome"
+                    : test(/Win/)       ? "windows" // Windows OS   -> "windows"
+                    : test(/Mac/)       ? "mac"     // Mac OS       -> "mac"
+                    : test(/X11|Linux/) ? "unix"    // Unix Base OS -> "unix"
+                    : "unknown";                    // Unknown OS   -> "unknown"
     rv.jit          = (ie        && browser >= 9)   || // IE 9+
                       (rv.gecko  && render  >  1.9) || // Firefox 3.5+(1.91)
                       (rv.webkit && render  >= 528) || // Safari 4+, Google Chrome(2+)
