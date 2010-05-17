@@ -308,6 +308,12 @@ uu.value(_selectNode_:Node, _value_:String = void):String/Node は、現在選�
 uu.value(_selectNode_) で、現在選択されている option 要素の value 属性の値を取得します。
 uu.value(_selectNode_, _findValue_) で、_selectNode.selected 属性を変更し、_findValue_ と一致する option要素を 選択した状態にします。
 
+_findValue_ で指定された値が存在しない場合は、選択状態がリセットされます。
+  * `<`option selected`>` が有れば、その項目が選択される。
+  * `<`option selected`>` が無い場合は、size == 1 かどうかで結果が変化する。
+    * size = 1 なら*一番上の項目が選択*される。
+    * size = n なら*未選択の状態*になる。
+
 {{{
 <!doctype html><html><head><meta charset="UTF-8" />
 <script src="../../src/uupaa.js"></script>
@@ -345,13 +351,17 @@ uu.ready(function(uu) {
 </body></html>
 }}}
 
+== Test Code ==
+http://uupaa-js.googlecode.com/svn/trunk/0.8/test/Form/select.htm
 
 = `<`select multiple="multiple"`>`=
 
 uu.value(_selectNode_:Node, _value_:String = void):StringArray/Node は、現在選択されている option要素の value 属性にアクセスします。
 
 uu.value(_selectNode_) で、現在選択されている option 要素の value 属性の値を !StringArray( `[` "_selectedValue_", ... `]` ) で取得します。
-uu.value(_selectNode_, _findValue_ or `[`_findValue_, ...`]`) で、_selectNode.selected 属性を変更し、_findValue_ と一致する option要素を 選択した状態にします。_findValue_ と一致しない option要素は*選択されていない状態*にします。
+uu.value(_selectNode_, _findValue_ or `[`_findValue_, ...`]`) で、_selectNode.selected 属性を変更し、_findValue_ と一致する option要素を 選択した状態にします。
+
+_findValue_ で指定された値が存在しない場合は*未選択状態*になります。これは `<`select`>` と異なります。
 
 {{{
 <!doctype html><html><head><meta charset="UTF-8" />
@@ -410,3 +420,6 @@ uu.ready(function(uu) {
 
 </body></html>
 }}}
+
+== Test Code ==
+http://uupaa-js.googlecode.com/svn/trunk/0.8/test/Form/select-multiple.htm
