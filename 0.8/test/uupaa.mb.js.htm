@@ -14,7 +14,7 @@
 </style>
 
 <script src="../uupaa.mb.js"></script>
-<script src="../src/Codec/uu.Class.Codec.js"></script>
+<script src="../src/Codec/Codec.js"></script>
 <script src="../src/CSS/uu.css.js"></script>
 <script src="../src/Query/uu.query.js"></script>
 <script src="../src/Ajax/uu.url.js"></script>
@@ -84,6 +84,11 @@ uu.ready(function(uu) {
       },
       "[3][has node] uu.array.has([document, document.body, document.getElementsByTagName('head')[0]], [document, document.body]) は true": function() {
         return [uu.array.has([document, document.body, document.getElementsByTagName('head')[0]], [document, document.body]), "is true"];
+      },
+
+    "uu.array.size()": "",
+      "配列サイズは2": function() {
+        return [uu.array.size([ 1, 2 ]), "==", 2];
       },
 
     "uu.array.sort()": "",
@@ -630,8 +635,8 @@ uu.ready(function(uu) {
       'uu.fix("background-color") == "backgroundColor"': function() {
         return [uu.fix("background-color"), "==", "backgroundColor"];
       },
-      'uu.fix("float") == "cssFloat" or "styleFloat"': function() {
-        return [uu.fix("float"), "==", uu.ie ? "styleFloat" : "cssFloat"];
+      'uu.fix("float") == "cssFloat" or "styleFloat"(IE6, IE7)': function() {
+        return [uu.fix("float"), "==", uu.ie && uu.ver < 8 ? "styleFloat" : "cssFloat"];
       },
       'uu.fix("for") == "for"': function() {
         if (uu.ver.ie6 || uu.ver.ie7) {
@@ -738,8 +743,8 @@ uu.ready(function(uu) {
       "uu.split.comma(' A,B,C ') == ['A', 'B', 'C'] カンマ区切りでトークンを切り出す(左右のスペースをトリムする)": function() {
         return [uu.split.comma(' A,B,C '), "==", ['A', 'B', 'C']];
       },
-      "uu.split.comma(',,, ,,A,,,B,C,, ') == ['A', 'B', 'C'] カンマ区切りでトークンを切り出す(左右のスペースをトリムする)": function() {
-        return [uu.split.comma(',,, ,,A,,,B,C,, '), "==", ['A', 'B', 'C']];
+      "uu.split.comma(' ,A, B ,C, ') == ['A', 'B', 'C'] カンマ区切りでトークンを切り出す(左右のスペースをトリムする)": function() {
+        return [uu.split.comma(' ,A, B ,C, '), "==", ['A', 'B', 'C']];
       },
     "uu.split.toHash()": "",
       "[3][split , str] uu.split.toHash('key,a,key2,b') == { key: 'a', key2: 'b' }": function() {
