@@ -2117,12 +2117,14 @@ function uulive(selector,    // @param String "css > selector"
         if (uumatch(selector, event.xtarget)) {
             event.xtype = (uuevent.xtypes[event.type] || 0) & 255;
 //{{{!mb
-            if (!event.target) { // [IE6][IE7][IE8]
-                event.currentTarget = doc;
-            }
-            if (event.pageX === void 0) { // [IE6][IE7][IE8][IE9]
-                event.pageX = event.clientX + doc.html.scrollLeft;
-                event.pageY = event.clientY + doc.html.scrollTop;
+            if (_ie) {
+                if (!event.target) { // [IE6][IE7][IE8]
+                    event.currentTarget = doc;
+                }
+                if (event.pageX === void 0) { // [IE6][IE7][IE8][IE9]
+                    event.pageX = event.clientX + doc.html.scrollLeft;
+                    event.pageY = event.clientY + doc.html.scrollTop;
+                }
             }
 //}}}!mb
             instance ? handler.call(evaluator, event) : evaluator(event);
@@ -2647,7 +2649,7 @@ function uuquery(cssSelector, // @param String: "css > selector"
             return fakeToArray(context.querySelectorAll(cssSelector));
         } catch(err) {} // case: extend pseudo class / operators
     }
-    return uuquery.selectorAll(cssSelector, context); // depend: uu.query
+    return uuquery.selectorAll(cssSelector, context); // depend: uu.query.js
 }
 //{{{!mb
 uuquery.ngword = /(?:\:(a|b|co|dig|first-l|li|mom|ne|p|sc|t|v))|!=|\/=/;
