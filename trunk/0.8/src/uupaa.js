@@ -51,7 +51,7 @@ doc.head || (doc.head = uutag("head")[0]); // document.head = <head>
 uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/String/window, arg1:NodeSet/Node/Mix = void, arg2:Mix = void, arg3:Mix = void, arg4:Mix = void):Instance/NodeSet
                                     //  [1][Class factory]   uu("MyClass", arg1, arg2) -> new uu.Clas.MyClass(arg1, arg2)
                                     //  [2][NodeSet factory] uu("div>ul>li", <body>) -> NodeSet
-    config:   uuarg(win.xconfig, {  // uu.config - Hash: user configurations
+    config:   uuarg(win.uuconfig, { // uu.config - Hash: user configurations
         log:        "log",          //  uu.log() target node
         baseDir:    ""              //  base directory
     }),
@@ -1758,11 +1758,11 @@ function uumsgunbind(instance) { // @param Instance: class instance
 // [4][bind a namespace.event]  uu.event(node, "MyNameSpace.click", fn) -> node
 
 // uu.event - bind event
-function uuevent(node,        // @param Node:
-                 eventTypeEx, // @param EventTypeExString: some EventTypeEx, "click,click+,..."
-                 evaluator,   // @param Function/Instance: callback function
-                 unbind) {    // @hidden Boolean(= false): true is unbind, false is bind
-                              // @return Node:
+function uuevent(node,         // @param Node:
+                 eventTypeEx,  // @param EventTypeExString: some EventTypeEx, "click,click+,..."
+                 evaluator,    // @param Function/Instance: callback function
+                 __unbind__) { // @hidden Boolean(= false): true is unbind, false is bind
+                               // @return Node:
     function _eventClosure(event) {
         if (!event.xtarget) {
             var target = event.target
@@ -1838,7 +1838,7 @@ function uuevent(node,        // @param Node:
 //}}}!mb
         instance = 0;
 
-    if (!unbind) {
+    if (!__unbind__) {
         handler = isFunction(evaluator) ? evaluator
                                         : (instance = 1, evaluator.handleEvent);
         evaluator[eventClosure] = _eventClosure;
@@ -1859,7 +1859,7 @@ function uuevent(node,        // @param Node:
         // IE mouse capture [IE6][IE7][IE8]
         if (_ie && !node.addEventListener) {
             if (eventType === "mousemove") {
-                capture && uuevent(node, "losecapture", evaluator, unbind);
+                capture && uuevent(node, "losecapture", evaluator, __unbind__);
             } else if (eventType === "losecapture") {
                 if (node.setCapture) {
                     bound ? node.setCapture()
@@ -1868,7 +1868,7 @@ function uuevent(node,        // @param Node:
             }
         }
 //}}}!mb
-        if (unbind) {
+        if (__unbind__) {
             if (bound) {
 
                 pos = eventData[ex][_indexOf](evaluator);
@@ -1940,6 +1940,8 @@ function getKeyCode(event) { // @param EventObjectEx:
 //}}}!mb
     return { key: getKeyCode.ident[code] || "", code: code };
 }
+// ::event.keyCode
+//    http://www.w3.org/TR/DOM-Level-3-Events/#events-keyboardevents
 getKeyCode.ident = uusplittohash( // virtual keycode -> "KEY IDENTIFIER"
     "8,BS,9,TAB,13,ENTER,16,SHIFT,17,CTRL,18,ALT,27,ESC," +
     "32,SP,33,PGUP,34,PGDN,35,END,36,HOME,37,LEFT,38,UP,39,RIGHT,40,DOWN," +
@@ -2063,11 +2065,11 @@ function uueventunbind(node,          // @param Node: target node
 }
 
 // uu.event.attach - attach event - Raw Level API wrapper
-function uueventattach(node,       // @param Node:
-                       eventType,  // @param String: event type
-                       evaluator,  // @param Function: evaluator
-                       useCapture, // @param Boolean(= false):
-                       detach) {   // @hidden Boolean(= false): true is detach
+function uueventattach(node,         // @param Node:
+                       eventType,    // @param String: event type
+                       evaluator,    // @param Function: evaluator
+                       useCapture,   // @param Boolean(= false):
+                       __detach__) { // @hidden Boolean(= false): true is detach
 //{{{!mb
     eventType = uueventattach.fix[eventType] || eventType;
 //}}}!mb
@@ -2075,12 +2077,12 @@ function uueventattach(node,       // @param Node:
 //{{{!mb
     if (node.addEventListener) {
 //}}}!mb
-        node[detach ? "removeEventListener"
-                    : "addEventListener"](eventType, evaluator, !!useCapture);
+        node[__detach__ ? "removeEventListener"
+                        : "addEventListener"](eventType, evaluator, !!useCapture);
 //{{{!mb
     } else {
-        node[detach ? "detachEvent"
-                    : "attachEvent"]("on" + eventType, evaluator);
+        node[__detach__ ? "detachEvent"
+                        : "attachEvent"]("on" + eventType, evaluator);
     }
 //}}}!mb
 }
