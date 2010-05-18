@@ -9,23 +9,20 @@
         private var _so:SharedObject = null;
 
         public function Storage() {
-            ExternalInterface.addCallback("ex_nth", ex_nth);
-            ExternalInterface.addCallback("ex_get", ex_get);
-            ExternalInterface.addCallback("ex_set", ex_set);
+            ExternalInterface.addCallback("ex_key", ex_key);
             ExternalInterface.addCallback("ex_size", ex_size);
-            ExternalInterface.addCallback("ex_pairs", ex_pairs);
             ExternalInterface.addCallback("ex_clear", ex_clear);
-            ExternalInterface.addCallback("ex_remove", ex_remove);
-            ExternalInterface.addCallback("ex_getAll", ex_getAll);
+            ExternalInterface.addCallback("ex_getItem", ex_getItem);
+            ExternalInterface.addCallback("ex_setItem", ex_setItem);
+            ExternalInterface.addCallback("ex_getLength", ex_getLength);
+            ExternalInterface.addCallback("ex_removeItem", ex_removeItem);
+            ExternalInterface.addCallback("ex_getAllItems", ex_getAllItems);
 
             _DISK_SPACE = this.detectDiskSpace();
 
-            var flashVars:Object = stage.loaderInfo.parameters;
-            var OBJECT_ID:String = flashVars.uuexid;
+            trace(ExternalInterface.objectID);
 
-            trace(OBJECT_ID);
-
-            ExternalInterface.call("uu.dmz." + OBJECT_ID);
+            ExternalInterface.call("uu.dmz." + ExternalInterface.objectID);
         }
 
         private function detectDiskSpace():uint {
@@ -71,7 +68,7 @@
         private function netStatusHandler(event:NetStatusEvent):void {
         }
 
-        public function ex_nth(index:Number):String {
+        public function ex_key(index:Number):String {
             var so:SharedObject = getSharedObject(), i:Number = -1, key:String;
 
             for (key in so.data) {
@@ -82,14 +79,27 @@
             return "";
         }
 
-        public function ex_get(key:String):String {
+        public function ex_size():Object {
+            var so:SharedObject = getSharedObject();
+
+            return { used: so.size, max: _DISK_SPACE };
+        }
+
+
+        public function ex_clear():void {
+            var so:SharedObject = getSharedObject();
+
+            so.clear();
+        }
+
+        public function ex_getItem(key:String):String {
             var rv:String = getSharedObject().data[key];
 
             return (rv === null) ? "" : rv;
         }
 
-        public function ex_set(key:String,
-                               value:String):Boolean {
+        public function ex_setItem(key:String,
+                                   value:String):Boolean {
             var so:SharedObject = getSharedObject();
 
             try {
@@ -107,13 +117,7 @@
             return so.data[key] === value;
         }
 
-        public function ex_size():Object {
-            var so:SharedObject = getSharedObject();
-
-            return { used: so.size, max: _DISK_SPACE };
-        }
-
-        public function ex_pairs():Number {
+        public function ex_getLength():Number {
             var so:SharedObject = getSharedObject(), i:String, j:Number = 0;
 
             for (i in so.data) {
@@ -122,20 +126,14 @@
             return j;
         }
 
-        public function ex_clear():void {
-            var so:SharedObject = getSharedObject();
-
-            so.clear();
-        }
-
-        public function ex_remove(key:String):void {
+        public function ex_removeItem(key:String):void {
             var so:SharedObject = getSharedObject();
 
             delete so.data[key];
             so.flush();
         }
 
-        public function ex_getAll():Object {
+        public function ex_getAllItems():Object {
             var so:SharedObject = getSharedObject(),
                 rv:Object = {}, key:String, value:String;
 
