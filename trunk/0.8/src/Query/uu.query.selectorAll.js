@@ -1,5 +1,5 @@
 
-// === CSS3 Selector(as document.querySelectorAll) ===
+// === uu.query.selectorAll ===
 //{{{!depend uu, uu.css, uu.ready.getAttribute, doc.html,
 //           uu.attr.fix, uu.style
 //}}}!depend
