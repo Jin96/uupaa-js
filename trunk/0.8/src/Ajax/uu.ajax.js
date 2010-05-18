@@ -27,7 +27,7 @@ uu.mix(uu, {
 function uuajax(url,          // @param String: url
                 option,       // @param AjaxOptionHash(= {}):
                 callback,     // @param Function(= void): callback(AjaxResultHash)
-                ngCallback    // @param Function(= void): ngCallBack(AjaxResultHash)
+                ngCallback,   // @param Function(= void): ngCallBack(AjaxResultHash)
                 __fn2__) {    // @hidden Function(= void): callback for queue
                               // @return Number: guid(request atom)
     option = option || {};

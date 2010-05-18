@@ -46,7 +46,12 @@ html,body {
 </style>
 <script src="../../src/uupaa.js"></script>
 <script>
-function xready() {
+uu.ready(function(uu) {
+    uu.node.builder(function(uu, node) {
+        uu.event(node, "mousedown", uu("Button"));
+        uu.event(node, "mousewheel", uu("Wheel"));
+    });
+
     uu.Class("Button", {
         handleEvent: function(event) {
             uu.text(uu.id("log"),
@@ -94,12 +99,7 @@ function xready() {
 
     uu.event(document.body, "mousemove+", uu("MousePosition"));
     uu.event(uu.id("box"), "keydown,keypress,keyup", uu("Key"));
-}
-
-function xbuild(uu, node) {
-    uu.event(node, "mousedown", uu("Button"));
-    uu.event(node, "mousewheel", uu("Wheel"));
-}
+});
 </script>
 </head><body>
 <h1>Cross Browser Event Test</h1>

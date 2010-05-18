@@ -128,13 +128,15 @@ function store(hash,   // @param Hash:
 function save(url,        // @param String: url
               option,     // @param AjaxOptionHash(= void):
               callback) { // @param Function(= void): callback(AjaxResultHash)
-    uu.Class.Storage.save(this, url, option, callback);
+    uu.Class.Storage &&
+        uu.Class.Storage.save(this, url, option, callback);
 }
 
 function load(url,        // @param String: url
               option,     // @param JSONPOptionHash:
               callback) { // @param Function(= void): callback(JSONPResultHash)
-    uu.Class.Storage.load(this, url, option, callback);
+    uu.Class.Storage &&
+        uu.Class.Storage.load(this, url, option, callback);
 }
 
 function toString() {

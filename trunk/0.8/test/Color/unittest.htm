@@ -17,7 +17,7 @@
 <script src="../../src/uu.test.js"></script>
 </head><body>
 <script>
-function xready(uu) {
+uu.ready(function(uu) {
     // is ColorHash
     uu.test.addType("is ColorHash", function(lhs, operator) {
         var rv = false;
@@ -140,5 +140,5 @@ function xready(uu) {
 
         "End Of Test": ""
     });
-}
+});
 </script></body></html>
