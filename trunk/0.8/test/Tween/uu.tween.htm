@@ -24,9 +24,8 @@
 <script src="../../src/uupaa.js"></script>
 <script src="../../src/Tween/easing.js"></script>
 <script src="../../src/Color/uu.color.js"></script>
-<script src="../../src/uu.jam.js"></script>
 <script>
-function xready(uu) {
+uu.ready(function(uu) {
     var i, iz = 1;
 
     for (i = 0; i < iz; ++i) {
@@ -34,7 +33,7 @@ function xready(uu) {
         uu.node.add(uu.div("class,tgt2", "x," + (i * 5) + "px", ":tgt2"));
         uu.node.add(uu.div("class,tgt3", "x," + (i * 5) + "px", ":tgt3"));
     }
-}
+});
 function xaddqueue() {
     uu(".tgt1").tween(2000, { left: [400, "easeOutBack"],
                               top: 400,
