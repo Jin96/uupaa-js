@@ -8,7 +8,7 @@
 <script src="../../src/Node/uu.node.clone.js"></script>
 <script src="../../src/Color/uu.color.js"></script>
 <script>
-function xwindow() {
+uu.ready(function(uu) {
     function handler(evt) {
         var node = evt.currentTarget;
 
@@ -32,7 +32,7 @@ function xwindow() {
     uu.event(uu.id("radio"), "click", handler);
     uu.event(uu.id("password"), "click", handler);
     uu.event(uu.id("text"), "click", handler);
-}
+});
 </script>
 </head><body>
 <h1>cloneNode test</h1>

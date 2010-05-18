@@ -2,7 +2,7 @@
 <script src="../../src/uupaa.js"></script>
 <script src="../../src/Node/uu.node.normalize.js"></script>
 <script>
-function xwindow(uu) {
+uu.ready(function(uu) {
     var beforeNode = uu.text(document.body.outerHTML);
 
     var removed = uu.node.normalize(document.body, 10);
@@ -14,7 +14,7 @@ function xwindow(uu) {
     uu.body( uu.br(), "--------------------", uu.br() );
     uu.body( uu.h1("after"), afterNode );
     uu.body( uu.h2("removed node count=" + removed) );
-}
+});
 </script>
 </head><body>
 <!-- first comment node -->

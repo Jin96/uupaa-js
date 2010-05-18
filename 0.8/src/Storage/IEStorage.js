@@ -5,6 +5,8 @@
 
 // http://msdn.microsoft.com/en-us/library/ms531424(VS.85).aspx
 
+//{{{!mb
+
 uu.Class.IEStorage || (function(uu) {
 
 var _STORE_NAME     = "uustorage",
@@ -154,3 +156,4 @@ uu.Class.IEStorage.isReady = function() { // @return Boolean
 
 })(uu);
 
+//}}}!mb
