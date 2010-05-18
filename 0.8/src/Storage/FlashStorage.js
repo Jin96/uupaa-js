@@ -1,44 +1,30 @@
-// === FlashStorage ===
-//{{{!depend uu, uu.class, uu.flash, uu.Class.Storage
+
+// === uu.Class.FlashStorage ===
+//{{{!depend uu, Storage
 //}}}!depend
 
 //{{{!mb
 
-uu.Class.FlashStorage || (function(win, doc, uu) {
+uu.Class.FlashStorage || (function(uu) {
 
-var _SWF_PATH = uu.config.baseDir + "uu.storage.swf",
+var _swfPath = uu.config.baseDir + "uu.storage.swf",
     _already = null;
 
 uu.Class.singleton("FlashStorage", {
-    init:           init,       // init(callback:Function = void)
-    nth:            nth,        // nth(index:Number):String
-    get:            get,        // get(key:String):String
-    set:            set,        // set(key:String, value:String):Boolean
+    init:           init,       // init()
+    key:            key,        // key(index:Number):String
     size:           size,       // size():Hash { used, max }
-    pairs:          pairs,      // pairs():Number
     clear:          clear,      // clear()
-    remove:         remove,     // remove(key:String)
-    getAll:         getAll,     // getAll():Hash
-    saveToServer:   saveToServer,   // saveToServer(url:String, option:AjaxOptionHash = void, callback:Function = void)
-    loadFromServer: loadFromServer, // loadFromServer(url:String, option:JSONPOptionHash = void, callback:Function = void)
-    toString:       toString,   // toString():String
-    // --- W3C spec API set ---
-    getLength:      pairs,      // [ALIAS]
-    key:            nth,        // [ALIAS]
-    getItem:        get,        // [ALIAS]
-    setItem:        set,        // [ALIAS]
-    removeItem:     remove      // [ALIAS]
+    getItem:        getItem,    // getItem(key:String):String
+    setItem:        setItem,    // setItem(key:String, value:String):Boolean
+    getLength:      getLength,  // getLength():Number - pairs
+    removeItem:     removeItem, // removeItem(key:String)
+    getAllItems:    getAllItems,// getAllItems():Hash
+    toString:       toString,   // toString():String - storage identity
+    save:           save,       // saveToServer(url:String, option:AjaxOptionHash = void, callback:Function = void)
+    load:           load        // loadFromServer(url:String, option:JSONPOptionHash = void, callback:Function = void)
 });
 
-// uu.Class.FlashStorage.isReady - static method
-uu.Class.FlashStorage.isReady = function() { // @return Boolean
-    if (_already === null) {
-        _already = uu.ver.flash && uu.file(_SWF_PATH).ok;
-    }
-    return _already;
-};
-
-// FlashStorage.init
 function init(callback) { // @param Function(= void): callback
     var that = this,
         OBJECT_ID = "externalflashstorage";
@@ -53,89 +39,76 @@ function init(callback) { // @param Function(= void): callback
 
     uu.dmz[OBJECT_ID] = flashStorageReadyCallback;
 
-    this.storage = uu.flash(_SWF_PATH, {
+    this.storage = uu.flash(_swfPath, {
                         id:     OBJECT_ID,
                         width:  1,
-                        height: 1,
-                        param:  [
-//                            "loop", "false",
-//                            "menu", "false",
-//                            "play", "true",
-//                            "scale", "noScale",
-//                            "wmode", "transparent",
-//                            "allowFullscreen", "false",
-//                            "allowScriptAccess", "sameDomain",
-//                            "allowScriptAccess", "always"
-                        ]
+                        height: 1
                    });
 }
 
-// FlashStorage.nth - get nth key
-function nth(index) { // @param Number: index
+function key(index) { // @param Number:
                       // @return String: "key" or ""
-    return this.storage.ex_nth(index);
+    return this.storage.ex_key(index);
 }
 
-// FlashStorage.get - get value
-function get(key) { // @param String: key
-                    // @return String: "value" or ""
-    return this.storage.ex_get(key);
-}
-
-// FlashStorage.getAll
-function getAll() { // @return Hash: { key: "value", ... }
-    return this.storage.ex_getAll();
-}
-
-// FlashStorage.set
-function set(key,     // @param String:
-             value) { // @param String:
-                      // @return Boolean: false is quota exceeded
-    return this.storage.ex_set(key, value);
-}
-
-// FlashStorage.size
 function size() { // @return Hash: { used, max }
                   //    used - Number: bytes
                   //    max  - Number: bytes
     return this.storage.ex_size();
 }
 
-// FlashStorage.pairs
-function pairs() { // @return Number: pairs
-    return this.storage.ex_pairs();
-}
-
-// FlashStorage.clear
 function clear() {
     this.storage.ex_clear();
 }
 
-// FlashStorage.remove
-function remove(key) { // @param String: key
-    this.storage.ex_remove(key);
+function getItem(key) { // @param String:
+                        // @return String: "value" or ""
+    return this.storage.ex_getItem(key);
 }
 
-// FlashStorage.saveToServer
-function saveToServer(url,        // @param String: url
-                      option,     // @param AjaxOptionHash(= void):
-                      callback) { // @param Function(= void): callback(AjaxResultHash)
-    uu.Class.Storage.saveToServer(this, url, option, callback);
+function setItem(key,     // @param String:
+                 value) { // @param String:
+                          // @return Boolean: false is quota exceeded
+    return this.storage.ex_setItem(key, value);
 }
 
-// FlashStorage.loadFromServer
-function loadFromServer(url,        // @param String: url
-                        option,     // @param JSONPOptionHash:
-                        callback) { // @param Function(= void): callback(JSONPResultHash)
-    uu.Class.Storage.loadFromServer(this, url, option, callback);
+function getLength() { // @return Number: pairs
+    return this.storage.ex_getLength();
 }
 
-// FlashStorage.toString
+function removeItem(key) { // @param String:
+    this.storage.ex_removeItem(key);
+}
+
+function getAllItems() { // @return Hash: { key: "value", ... }
+    return this.storage.ex_getAllItems();
+}
+
+function save(url,        // @param String: url
+              option,     // @param AjaxOptionHash(= void):
+              callback) { // @param Function(= void): callback(AjaxResultHash)
+    uu.Class.Storage.save(this, url, option, callback);
+}
+
+function load(url,        // @param String: url
+              option,     // @param JSONPOptionHash:
+              callback) { // @param Function(= void): callback(JSONPResultHash)
+    uu.Class.Storage.load(this, url, option, callback);
+}
+
 function toString() {
     return "FlashStorage";
 }
 
-})(window, document, uu);
+// uu.Class.FlashStorage.isReady - static method
+uu.Class.FlashStorage.isReady = function() { // @return Boolean
+    if (_already === null) {
+        _already = uu.ver.flash && uu.file(_swfPath).ok;
+    }
+    return _already;
+};
+
+})(uu);
 
 //}}}!mb
 

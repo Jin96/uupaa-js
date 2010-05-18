@@ -311,7 +311,7 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Stri
                                     //  [5][ISO8601String to hash]   uu.date("2000-01-01T00:00:00[.000]Z") -> DateHash
                                     //  [6][RFC1123String to hash]   uu.date("Wed, 16 Sep 2009 16:18:14 GMT") -> DateHash
     // --- FLASH ---
-    flash:          uuflash,        // uu.flash(url:String, option:FlashOptionHash):Node
+    flash:          uuflash,        // uu.flash(url:String, option:FlashOptionHash):Node/null/void
     // --- NUMBER ---
     guid:           uuguid,         // uu.guid():Number - build GUID
     // --- DEBUG ---
@@ -442,7 +442,7 @@ function uufile(url) { // @param String: url
 
     try {
 //{{{!mb
-        xhr = ActiveXObject ? new ActiveXObject("Microsoft.XMLHTTP") : 0;
+        xhr = win["ActiveXObject"] ? new ActiveXObject("Microsoft.XMLHTTP") : 0;
 //}}}!mb
         xhr || (xhr = new XMLHttpRequest());
 
@@ -451,7 +451,9 @@ function uufile(url) { // @param String: url
 
         status = xhr.status || 200; // fix "file:///" scheme
         ok = status >= 200 && status < 300;
-    } catch (err) {}
+    } catch (err) {
+        uulog(err + "");
+    }
 
     return {
         ok: ok,
@@ -3122,47 +3124,38 @@ function datehashrfc() { // @return RFC1123DateString: "Wed, 16 Sep 2009 16:18:1
 //  </object>
 // uu.flash - create flash <object> node
 function uuflash(url,      // @param String: url
-                 option) { // @param FlashOptionHash(= { allowScriptAccess: "always" }):
-                           // @return Node: <object>
+                 option) { // @param FlashOptionHash(= { param: { allowScriptAccess: "always" } }):
+                           // @return Node/null/void: <object>
 //{{{!mb
-    option = uuarg(option, {
-        id: "external" + uuguid(),
-        param: [],
-        width: "100%",
-        height: "100%",
-        marker: null,
-        flashVars: ""
-    });
+    var opt = uuarg(option, { width: "100%", height: "100%" }),
+        param = opt.param || {}, id = opt.id || ("external" + uuguid()),
+        paramArray = [], i, fragment;
 
-    var param = option.param, paramArray = [], i, iz, object;
-
-    // add default <param name="allowScriptAccess" value="always" />
-    if (param[_indexOf]("allowScriptAccess") < 0) {
-        param.push("allowScriptAccess", "always");
-    }
+    // add <param name="allowScriptAccess" value="always" />
+    param.allowScriptAccess || (param.allowScriptAccess = "always");
 
     // add <param name="movie" value="{{url}}" />
-    param.push("movie", url);
+    param.movie = url;
 
-    // add <param name="flashVars" value="uuexid={{id}}&key=value&..." />
-    option.flashVars && (option.flashVars += "&");
-    option.flashVars += "uuexid=" + option.id;
-    param.push("flashVars", option.flashVars);
-
-    option.marker || (option.marker = uunodeadd()); // <body>...<div/></body>
-
-    for (i = 0, iz = param.length; i < iz; i += 2) {
-        paramArray.push(uuformat('<param name="??" value="??" />',
-                                 param[i], param[i + 1]));
+    for (i in param) {
+        paramArray.push(uuformat(_ie ? '<param name="??" value="??" />'
+                                     : '??="??"', i, param[i]));
     }
-    object = uuformat(
-        '<object id="??" width="??" height="??" data="??" ??>??</object>',
-        option.id, option.width, option.height, url,
+    fragment = uuformat(
+        _ie ? '<object id="??" width="??" height="??" data="??" ??>??</object>'
+            : '<embed name="??" width="??" height="??" src="??" ?? ?? />',
+        id,
+        opt.width,
+        opt.height,
+        url,
         _ie ? 'classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000"'
-            : 'type="application/x-shockwave-flash"', paramArray.join(""));
-    uunodeswap(uunodebulk(object), option.marker);
+            : 'type="application/x-shockwave-flash"',
+        paramArray.join(" "));
+
+    uunodeswap(uunodebulk(fragment), opt.marker || uunodeadd());
+
+    return _ie ? uuid(id) : doc.getElementsByName(id)[0];
 //}}}!mb
-    return uuid(option.id) || uu.node("object");
 }
 
 // --- OTHER ---
