@@ -3,10 +3,6 @@
 
 // * Manual http://code.google.com/p/uupaa-js/w/list
 //
-// * User configrations ( doc/user-configrations.txt )
-//
-//  - uu.config = { aria, debug, right, trace, altcss, storage }
-//
 // * Predefined types ( doc/predefined-types.txt )
 //
 //  - ColorHash, RGBAHash, HSLAHash, HSVAHash, W3CNamedColor
@@ -28,11 +24,8 @@ var _prototype = "prototype",
     _uuguid = "data-uuguid",
     _uuevent = "data-uuevent",
     _uutween = "data-uutween",
-//{{{!mb
-    _uuimage = "data-uuimage",
-    _uuopacity = "data-uuopacity",
-//}}}!mb
     // --- minify ---
+    _createElement = "createElement",
     _appendChild = "appendChild",
     _nextSibling = "nextSibling",
     _parentNode = "parentNode",
@@ -193,7 +186,7 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Stri
         NodeSet:    NodeSet,
         MsgPump:    MsgPump
     }),
-    // --- EVENT ---
+    // --- EVENT / LIVE EVENT ---
     event:    uumix(uuevent, {      // uu.event(node:Node, eventTypeEx:EventTypeExString, evaluator:Function/Instance):Node
                                     //  [1][bind a event]            uu.event(node, "click", fn)             -> node
                                     //  [2][bind multi events]       uu.event(node, "click,dblclick", fn)    -> node
@@ -207,6 +200,15 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Stri
         getKeyCode: getKeyCode,     // uu.event.getKeyCode(event:EventObjectEx):Hash { key, code }
         getPaddingEdge:             // uu.event.getPaddingEdge(event:EventObjectEx):Hash { x, y }
                     getPaddingEdge
+    }),
+    live:     uumix(uulive, {       // uu.live("css > selector", "namespace.click", evaluator)
+        has:        uulivehas,      // uu.live.has("css > selector", "namespace.click") -> Boolean
+        unbind:     uuliveunbind    // uu.live.unbind("css > selector" = void 0, "namespace.click" = void 0)
+                                    //  [1][unbind all]           uu.live.unbind()
+                                    //  [2][unbind all]           uu.live.unbind("selector")
+                                    //  [3][unbind one]           uu.live.unbind("selector", "click")
+                                    //  [4][unbind namespace all] uu.live.unbind("selector", "namespace.*")
+                                    //  [5][unbind namespace one] uu.live.unbind("selector", "namespace.click")
     }),
     // --- NODE / NodeList ---
     svg:            uusvg,          //  uu.svg(tagName:String = "svg", attr:Hash = void):SVGNode
@@ -308,10 +310,6 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Stri
                                     //  [4][DateString to hash]      uu.date("2000-01-01T00:00:00[.000]Z") -> DateHash
                                     //  [5][ISO8601String to hash]   uu.date("2000-01-01T00:00:00[.000]Z") -> DateHash
                                     //  [6][RFC1123String to hash]   uu.date("Wed, 16 Sep 2009 16:18:14 GMT") -> DateHash
-    // --- IMAGE ---
-    image:    uumix(uuimage, {      // uu.image(url:String, callback:Function):Image
-        size:       uuimagesize
-    }),
     // --- FLASH ---
     flash:          uuflash,        // uu.flash(url:String, option:FlashOptionHash):Node
     // --- NUMBER ---
@@ -1252,7 +1250,7 @@ function getOpacity(node) { // @param Node:
                             // @return Number: opacity (from 0.0 to 1.0)
 //{{{!mb
     if (!uuready.opacity) {
-        var opacity = node[_uuopacity]; // undefined or 1.0 ~ 2.0
+        var opacity = node["data-uuopacity"]; // undefined or 1.0 ~ 2.0
 
         return opacity ? (opacity - 1): 1;
     }
@@ -1270,7 +1268,7 @@ function setOpacity(node,      // @param Node:
 
 //{{{!mb
     if (!uuready.opacity) {
-        if (!node[_uuopacity]) {
+        if (!node["data-uuopacity"]) {
             // at first time
             if (_ver.ie6 || _ver.ie7) { // [FIX][IE6][IE7]
                 if ((node.currentStyle || {}).width === "auto") {
@@ -1292,7 +1290,7 @@ function setOpacity(node,      // @param Node:
 
 //{{{!mb
     if (!uuready.opacity) {
-        node[_uuopacity] = opacity + 1; // (1.0 ~ 2.0)
+        node["data-uuopacity"] = opacity + 1; // (1.0 ~ 2.0)
         style.visibility = opacity ? "" : "hidden";
         style.filter = ((opacity > 0 && opacity < 1)
                      ? "alpha(opacity=" + (opacity * 100) + ") " : "")
@@ -1835,7 +1833,9 @@ function uuevent(node,        // @param Node:
         eventData = node[_uuevent],
         ex, token, eventType, capture, bound, types = "types",
         handler, i = -1, pos,
+//{{{!mb
         owner = node.ownerDocument || doc,
+//}}}!mb
         instance = 0;
 
     if (!unbind) {
@@ -2097,6 +2097,136 @@ function uueventdetach(node,         // @param Node:
     uueventattach(node, eventType, evaluator, useCapture, 1);
 }
 
+// --- LIVE EVENT ---
+// uu.live
+function uulive(selector,    // @param String "css > selector"
+                eventTypeEx, // @param EventTypeExString: "namespace.click"
+                evaluator,   // @param Function/Instance: callback function
+                __data__) {  // @hidden Hash: data for recursive call
+    function _liveClosure(event) { // @param EventObject:
+        var target = event.target
+//{{{!mb
+                                  || event.srcElement || doc;
+//}}}!mb
+
+        event.xtarget = (target.nodeType === 3) ? target[_parentNode]
+                                                : target;
+
+        if (uumatch(selector, event.xtarget)) {
+            event.xtype = (uuevent.xtypes[event.type] || 0) & 255;
+//{{{!mb
+            if (!event.target) { // [IE6][IE7][IE8]
+                event.currentTarget = doc;
+            }
+            if (event.pageX === void 0) { // [IE6][IE7][IE8][IE9]
+                event.pageX = event.clientX + doc.html.scrollLeft;
+                event.pageY = event.clientY + doc.html.scrollTop;
+            }
+//}}}!mb
+            instance ? handler.call(evaluator, event) : evaluator(event);
+        }
+    }
+
+    var instance = 0,
+        handler = isFunction(evaluator) ? evaluator
+                                        : (instance = 1, evaluator.handleEvent),
+        // split token (ignore capture[+])
+        //      "namespace.click+"
+        //              v
+        //      ["namespace.click+", "namespace", "click", "+"]
+        token     = uuevent.parse.exec(eventTypeEx),
+        ns        = token[1], // "namespace"
+        eventType = token[2], // "click"
+        capture   = 0,
+        fixEventType = uulive.fix[eventType] || eventType;
+
+    evaluator.liveClosure = _liveClosure;
+
+    __data__ || (__data__ = uulive.db[selector + "\v" + eventTypeEx] = {
+        s: selector,
+        ns: ns,
+        ex: eventTypeEx,
+        unbind: []
+    });
+
+//{{{!mb
+    if (_gecko) {
+        if (eventType === "focus" || eventType === "blur") {
+            capture = 1;
+        }
+    }
+//}}}!mb
+
+    __data__.unbind.push(function() {
+        uueventdetach(doc, fixEventType, _liveClosure, capture);
+    });
+    uueventattach(doc, fixEventType, _liveClosure, capture);
+
+//{{{!mb
+    if (_ie) {
+        if (/submit$/.test(eventType)) {
+            uulive(selector + " input[type=submit]," +
+                   selector + " input[type=image]",
+                   eventTypeEx[_replace](/submit$/, "click"), evaluator, __data__);
+
+        } else if (/change$/.test(eventType)) { // "change"
+            uulive(selector,
+                   eventTypeEx[_replace](/change$/, "focus"), function(event) {
+                       uuevent(event.srcElement, "uulivehook.change", evaluator);
+                   }, __data__);
+
+            uulive(selector,
+                   eventTypeEx[_replace](/change$/, "blur"), function(event) {
+                       uueventunbind(event.srcElement, "uulivehook.change");
+                   }, __data__);
+        }
+    }
+//}}}!mb
+}
+uulive.db = {}; // { "selector\vnamespace.click": {...}, ... }
+uulive.fix =
+//{{{!mb
+             _ie ? { focus: "focusin", blur: "focusout" } :
+//}}}!mb
+             _webkit ? { focus: "DOMFocusIn", blur: "DOMFocusOut" } : {};
+
+// uu.live.has
+function uulivehas(selector,      // @param String: "css > selector"
+                   eventTypeEx) { // @param EventTypeExString: "namespace.click"
+    var db = uulive.db[selector + "\v" + eventTypeEx];
+
+    return db && selector === db.s && eventTypeEx === db.ex;
+}
+
+// uu.live.unbind
+function uuliveunbind(selector,      // @param String(= void 0): "css > selector"
+                      eventTypeEx) { // @param String(= void 0): "namespace.click"
+    function run(fn) {
+        fn();
+    }
+    var db = uulive.db,
+        ns, data, i, unbind,
+        mode = !selector    ? 1 : // [1]
+               !eventTypeEx ? 2 : // [2]
+               eventTypeEx[_indexOf]("*") < 0 ? 3 :  // [3][5]
+               (ns = eventTypeEx.slice(0, -2), 4); // [4] "namespace.*" -> "namespace"
+
+    for (i in db) { // i = "selector\vnamespace.click"
+        data = db[i]; // data = { s:selector, ns:ns, ex:eventTypeEx, unbind:[closure] }
+        unbind = 1;
+        switch (mode) {
+        case 2: unbind = selector === data.s; break; // [2]
+        case 3: unbind = selector === data.s && eventTypeEx === data.ex; break; // [3][5]
+        case 4: unbind = selector === data.s && ns === data.ns; // [4]
+        }
+        if (unbind) {
+            uueach(data.unbind, run);
+            delete db[i];
+        }
+    }
+}
+
+// --- READY ---
 // uu.ready - hook event
 function uuready(/* readyEventType, */  // @param String(= "dom"): readyEventType
                  /* callback, ... */) { // @param Function: callback functions
@@ -2142,7 +2272,7 @@ function uunode(tagName           // @param String(= "div"):
                 /* var_args */) { // @param Node/String/Number/Hash(= void):
                                   // @return Node: <node>
     return arguments.length > 1 ? buildNode(tagName, uuarray(arguments, 1))
-                                : doc.createElement(tagName || "div");
+                                : doc[_createElement](tagName || "div");
 }
 
 //  [1][add div node]          uu.node.add()         -> <body><div /></body>
@@ -2158,10 +2288,10 @@ function uunodeadd(source,     // @param Node/DocumentFragment/HTMLFragment/TagN
                                // @return Node: node or first node
     context = context || doc.body;
 
-    var node = !source ? doc.createElement("div")        // [1] uu.node.add()
+    var node = !source ? doc[_createElement]("div")      // [1] uu.node.add()
              : source.nodeType ? source                  // [3][5] uu.node.add(Node or DocumentFragment)
              : !source[_indexOf]("<") ? uunodebulk(source, context) // [4] uu.node.add(HTMLFragmentString)
-             : doc.createElement(source),                // [2] uu.node.add("p")
+             : doc[_createElement](source),              // [2] uu.node.add("p")
         reference = null,
         rv = (node.nodeType === 11) ? node[_firstChild] : node; // 11: DOCUMENT_FRAGMENT_NODE
 
@@ -2328,7 +2458,7 @@ function uunodewrap(innerNode,   // @param Node: inner node
 function buildNode(node,   // @param Node/TagString: <div> or "div"
                    args) { // @param Array/Arguments: [Node/String/Number/Hash, ...]
                            // @return Node:
-    node.nodeType || (node = doc.createElement(node)); // "div" -> <div>
+    node.nodeType || (node = doc[_createElement](node)); // "div" -> <div>
 
     var arg, i = 0, token = 0, ticket, isstr;
 
@@ -2976,99 +3106,6 @@ function datehashrfc() { // @return RFC1123DateString: "Wed, 16 Sep 2009 16:18:1
     return rv;
 }
 
-// --- IMAGE ---
-// uu.image - image loader
-function uuimage(url,        // @param String:
-                 callback) { // @param Function: callback({ img, ok, url, status, width, height })
-                             //     ok     - Boolean: true is success
-                             //     img    - Object: image object
-                             //     status - Number: status code, 0(loading...),
-                             //                                   200(ok), 404(ng)
-                             //     width  - Number: width
-                             //     height - Number: height
-                             // @return Image:
-    function after(ok) {
-        var v, i = -1, ary = uuimage.fn[url].concat(),
-            arg = { img: img, status: ok ? 200 : 404, ok: ok,
-                    width: img.width, height: img.height };
-
-        uuimage.fn[url] = []; // pre clear
-        while ( (v = ary[++i]) ) {
-            v(arg);
-        }
-    }
-
-    var img = uuimage.db[url];
-
-    if (img) { // cached or scheduled
-        uuimage.fn[url].push(callback);
-        img.ok && after(_true);
-    } else {
-        uuimage.db[url] = img = new Image();
-        uuimage.fn[url] = [callback];
-        img.ok = _false;
-        img.onerror = function() {
-            img.width = img.height = 0;
-            after(img.ok = _false);
-            img.onerror = img.onload = null;
-        };
-        img.onload = function() {
-            if (img.complete
-//{{{!mb
-                || img.readyState === "complete"    // [IE8] readyState
-//}}}!mb
-                                                ) {
-                after(img.ok = _true);
-            }
-            img.onerror = img.onload = null;
-        };
-        img.setAttribute("src", url);
-    }
-    return img;
-}
-uuimage.db = {}; // { url: Image, ... }
-uuimage.fn = {}; // { url: [callback, ...] }
-
-// uu.image.size - get image actual dimension
-function uuimagesize(node) { // @param HTMLImageElement/HTMLCanvasElement:
-                             // @return Hash: { width, height }
-    if (node.naturalWidth) { // [Gecko][WebKit]
-        return { width: node.naturalWidth, height: node.naturalHeight };
-    }
-//{{{!mb
-    // http://d.hatena.ne.jp/uupaa/20090602
-    var rs, rw, rh, w, h, hide, width = "width", height = "height";
-
-    if (node.src) { // HTMLImageElement
-        if (node[_uuimage] && node[_uuimage].src === node.src) {
-            return node[_uuimage];
-        }
-        if (_ie) { // [IE]
-            if (node.currentStyle) {
-                hide = node.currentStyle.display === "none";
-                hide && (node.style.display = "block");
-            }
-            rs = node.runtimeStyle;
-            w = rs[width], h = rs[height]; // keep runtimeStyle
-            rs[width] = rs[height] = "auto"; // override
-            rw = node[width];
-            rh = node[height];
-            rs[width] = w, rs[height] = h; // restore
-            hide && (node.style.display = "none");
-        } else { // [Opera]
-            w = node[width], h = node[height]; // keep current style
-            node.removeAttribute(width);
-            node.removeAttribute(height);
-            rw = node[width];
-            rh = node[height];
-            node[width] = w, node[height] = h; // restore
-        }
-        return node[_uuimage] = { width: rw, height: rh, src: node.src }; // bond
-    }
-//}}}!mb
-    return node;
-}
-
 // --- FLASH ---
 //  <object id="external..." width="..." height="..." data="***.swf"
 //      type="application/x-shockwave-flash">
@@ -3315,7 +3352,7 @@ function innerTextSetter(text) {
 // HTMLElement.prototype.outerHTML getter
 function outerHTMLGetter() {
     var rv, that = this, p = that[_parentNode],
-        r = doc.createRange(), div = doc.createElement("div");
+        r = doc.createRange(), div = doc[_createElement]("div");
 
     p || doc.body[_appendChild](that); // orphan
     r.selectNode(that);
@@ -3523,7 +3560,7 @@ uueach(uutag.html4, function(tagName) {
 
 uueach(uutag.html5, function(tagName) {
 //{{{!mb
-    _ie && doc.createElement(tagName); // [IE6][IE7][IE8][IE9]
+    _ie && doc[_createElement](tagName); // [IE6][IE7][IE8][IE9]
 //}}}!mb
 
     uu[tagName] = function() { // @param Mix: var_args
@@ -3853,4 +3890,4 @@ function detectFeatures() {
     return rv;
 }
 
-})(this, document, parseInt, parseFloat, window.getComputedStyle || 0, window.JSON || 0);
+})(this, document, parseInt, parseFloat, window.getComputedStyle, window.JSON);
