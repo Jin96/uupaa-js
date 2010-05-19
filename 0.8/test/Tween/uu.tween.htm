@@ -7,7 +7,7 @@
   width: 100px;
   height: 100px;
 }
-.tgt2 {
+.tgt2, .tgt4 {
   background-color: gray;
   position: absolute;
   width: 100px;
@@ -24,34 +24,45 @@
 <script src="../../src/uupaa.js"></script>
 <script src="../../src/Tween/easing.js"></script>
 <script src="../../src/Color/uu.color.js"></script>
+<script src="../../src/Query/uu.query.js"></script>
 <script>
 uu.ready(function(uu) {
     var i, iz = 1;
 
     for (i = 0; i < iz; ++i) {
-        uu.node.add(uu.div("class,tgt1", "x," + (i * 5) + "px", ":tgt1"));
-        uu.node.add(uu.div("class,tgt2", "x," + (i * 5) + "px", ":tgt2"));
-        uu.node.add(uu.div("class,tgt3", "x," + (i * 5) + "px", ":tgt3"));
+        uu.body(uu.div("class,tgt1", "x," + (i * 5) + "px", "tgt1"),
+                uu.div("class,tgt2", "x," + (i * 5) + "px", "tgt2"),
+                uu.div("class,tgt3", "x," + (i * 5) + "px", "tgt3"),
+                uu.div("class,tgt4", "x," + (i * 5) + "px", "tgt4"));
     }
 });
 function xaddqueue() {
+    var color = [uu.color(uu.rand(0, 0xffffff) | 0).hex,
+                 uu.color(uu.rand(0, 0xffffff) | 0).hex,
+                 uu.color(uu.rand(0, 0xffffff) | 0).hex,
+                 uu.color(uu.rand(0, 0xffffff) | 0).hex];
+
     uu(".tgt1").tween(2000, { left: [400, "easeOutBack"],
                               top: 400,
                               width: 200,
                               bgcolor: "skyblue",
                               opacity: 0.5,
                               fontSize: 36 });
+
     uu(".tgt2").css({ o: 0.2 }).
         tween(1000, { x: ["+=400", "easeInBack"], y: "+=400", o: 1.0, w: 50, h: [50, "easeOutBack"] }).
         tween(1000, { x: ["-=400", "easeInBack"], y: "-=400", o: 0.2, w: 100, h: [100, "easeOutBack"] });
+
     uu(".tgt3").css({ o: 1   }).
-        tween(2000, { x: "+=500px", y: "+=500px", o: "-=0.9"
-                      ,bgcolor: "rgb(0,255,100)"
-                    }).
-        tween(2000, { x: "-=500px", y: "-=500px", o: 0.5
-                      ,w: 300
-                      ,bgcolor: "rgb(0,0,0)"
-                    });
+        tween(2000, { x: "+=500px", y: "+=500px", o: "-=0.9" ,bgcolor: "rgb(0,255,100)" }).
+        tween(400). // standby
+        tween(2000, { x: "-=500px", y: "-=500px", o: 0.5 ,w: 300 ,bgcolor: "rgb(0,0,0)" });
+
+    uu(".tgt4").css({ o: 1.0 }).
+        tween(1000, { x: ["+=400", "easeInBack"], y: ["+=230", "easeInBack"], o: 0.2, w:  10, h: [100, "easeOutBack"], bgcolor: color[0] }).
+        tween(1000, { x: ["+=30",  "easeInBack"], y: ["-=100", "easeInBack"], o: 1.0, w:  50, h: [ 10, "easeOutBack"], bgcolor: color[1] }).
+        tween(1000, { x: ["-=400", "easeInBack"], y: ["-=30",  "easeInBack"], o: 0.2, w:  10, h: [ 50, "easeOutBack"], bgcolor: color[2] }).
+        tween(1000, { x: ["-=20",  "easeInBack"], y: ["-=100", "easeInBack"], o: 1.0, w: 200, h: [200, "easeOutBack"], bgcolor: color[3] });
 }
 
 function xskip() {
