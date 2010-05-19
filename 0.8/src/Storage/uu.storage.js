@@ -1,17 +1,17 @@
 
-// === uu.Class.Storage ===
+// === uu.storage ===
 //{{{!depend uu, uu.ajax
 //}}}!depend
 
-// +-----------------+-----------------------+-----------+
-// | Backend string  | backend               |    Max    |
-// +-----------------+-----------------------+-----------+
-// | "LocalStorage"  | LocalStorage          | 1.8 ~ 8MB |
-// | "FlashStorage"  | SharedObject          |     100kB |
-// | "IEStorage"     | IE userData behavior  |      63kB |
-// | "CookieStorage" | Cookie                |     3.8kB |
-// | "MemStorage"    |                       |       ?   |
-// +-----------------+-----------------------+-----------+
+// +-----------------------+-----------+
+// | backend               |    Max    |
+// +-----------------------+-----------+
+// | LocalStorage          | 1.8 ~ 8MB |
+// | SharedObject          |     100kB |
+// | IE userData behavior  |      63kB |
+// | Cookie                |     3.8kB |
+// | MemStorage            |       ?   |
+// +-----------------------+-----------+
 
 uu.Class.Storage || (function(win, doc, uu) {
 
