@@ -108,9 +108,9 @@ window.uuconfig = { storage: _minimumStorageSize_ } を定義しておくと、�
 
 http://uupaa-js.googlecode.com/svn/trunk/0.8/test/Storage/uu.storage.htm
 
-== API ==
+= API =
 
-=== uu.Class.Storage.key ===
+== uu.Class.Storage.key ==
 Storage.key(_index_:Number):String は、_index_ で指定された添え字が示す _key_ を返します。
 
 このメソッドは
@@ -125,45 +125,45 @@ Storage.key(_index_:Number):String は、_index_ で指定された添え字が�
 
 存在しない添え字を指定すると空文字列( "" )を返します。
 
-=== uu.Class.Storage.size ===
+== uu.Class.Storage.size ==
 Storage.size():Hash は、{ used:Number, max:Number } を返します。
 
 used は使用済みの、max は利用可能な ストレージスペースのバイト数です。
 
 !MemStorage は常に { used: 0, max: Number.MAX_VALUE } を返します。
 
-=== uu.Class.Storage.clear ===
+== uu.Class.Storage.clear ==
 Storage.clear() は、ストレージをクリアします。
 
 !CookieStorage でクリアするデータは、!CookieStorage 経由で書き込んだデータに限定されます。
 
-=== uu.Class.Storage.getItem ===
+== uu.Class.Storage.getItem ==
 Storage.getItem(_key_:String):String は、 _key_ に対応する _value_ を返します。
 
 存在しない _key_ を指定すると空文字列( "" )を返します。
 
-=== uu.Class.Storage.setItem ===
+== uu.Class.Storage.setItem ==
 Storage.setItem(_key_:String, _value_:String):Boolean は、 _key_ と _value_ からなるペアを更新するか、新規に追加します。
 
 書き込みに失敗すると false を返します。多くの場合 false は、ストレージ容量の不足(QUOTA EXCEEDED)を意味します。
 
-=== uu.Class.Storage.getLength ===
+== uu.Class.Storage.getLength ==
 Storage.getLength():Number は、ペア数を返します。
 
-=== uu.Class.Storage.removeItem ===
+== uu.Class.Storage.removeItem ==
 Storage.removeItem(_key_:String) は、_key_ が示す key/value pair を削除します。
 
-=== uu.Class.Storage.getAllItems ===
+== uu.Class.Storage.getAllItems ==
 Storage.getAllItems():Hash は、全ての key/value pair を Hash で返します。
 
 pair が無い場合は 空の Hash ( {} ) を返します。
 
-=== uu.Class.Storage.save ===
+== uu.Class.Storage.save ==
 Storage.save(_url_:String, _option_:AjaxOptionHash = void, callback:Function = void) は、 全ての key/value pair を json データに変換しサーバに POST します。
 
 callback を指定すると POST 成功または失敗でコールバックします。callback の第一引数は、AjaxResultHash になります。
 
-=== uu.Class.Storage.load ===
+== uu.Class.Storage.load ==
 Storage.load(_url_:String, _option_:JSONPOptionHash = void, callback:Function = void) は、 サーバから返される key/value pair からなる json データを、ストレージにマージ(上書き)します。
 
 callback を指定すると POST 成功または失敗でコールバックします。callback の第一引数は、JSONPResultHash になります。
@@ -176,12 +176,12 @@ callback を指定すると POST 成功または失敗でコールバックし�
     });
 }}}
     
-=== uu.Class.Storage.toString ===
+== uu.Class.Storage.toString ==
 Storage.toString():String は、バックエンドを識別する文字列を返します。
 
 返される文字列は "!LocalStorage", "!FlashStorage", "IEStorage", "!CookieStorage", "!MemStorage" のいずれかになります。
 
-== Appendix A ==
+= Appendix A =
 
 !LocalStorage, !FlashStorage, IEStorage, !CookieStorage, !MemStorage はシングルトンクラスです。
 これらを直接インスタンス化し利用することもできます。
