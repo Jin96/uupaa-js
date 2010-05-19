@@ -1,0 +1,180 @@
+#summary uu.storage はクライアントサイドストレージへのアクセスを提供します。
+
+<wiki:toc max_depth="2" />
+
+= 導入 =
+uu.storage を使うと、クライアントサイドに永続的なデータを保存することができます。
+
+uu.storage を利用するには以下のファイルをロードします。
+  * src/uu.ajax.js
+  * src/uu.storage.js
+  * !FlashStorage が選択された場合は uu.storage.swf を自動的にロードします(ユーザが明示的にロードする必要はありません)。
+
+uu.storage.js をロードすると以下の機能が追加されます。
+
+  * uu.ready("storage", callback) を定義すると、ストレージが利用可能になったタイミングでコールバックします。
+    * コールバック引数は callback(uu, _storageInstance_) です。第二引数は uu.storage と同じものです。
+  * ストレージが利用可能になったタイミングで uu.storage に uu.Class.Storage のインスタンスが設定されます。
+
+ストレージが利用可能になるタイミングは、ストレージバックエンドにより異なります。
+
+== ストレージバックエンド ==
+環境に応じて !LocalStorage, !FlashStorage, IEStorage, !CookieStorage, !MemStorage といったバックエンドの中から適切なものを一つ自動的に選択します。
+妥当なバックエンドが利用できない場合は、!MemStorage が選択されます。
+
+== ストレージバックエンドの最大容量 ==
+
+|| !LocalStorage         || 1.8 ~ 8MB ||
+|| !FlashStorage         ||     100kB ||
+|| IEStorage             ||      63kB ||
+|| !CookieStorage        ||     3.8kB ||
+|| !MemStorage           ||       ?   ||
+
+== Storage ==
+Storage (uu.Class.Storage) は、自動的に利用可能なストレージバックエンドを判別し、バックエンドに対する参照を保持する機能を持ったシングルトンクラスです。 このクラスは自動的にインスタンス化され、 uu.storage により参照することができます。
+ストレージへのアクセスは、通常このクラスを通して行います。直接ストレージバックエンドを操作する必要はありません。
+
+{{{
+uu.Class.singleton("Storage", {
+    key,            // key(index:Number):String
+    size,           // size():Hash { used, max }
+    clear,          // clear()
+    getItem,        // getItem(key:String):String
+    setItem,        // setItem(key:String, value:String):Boolean
+    getLength,      // getLength():Number
+    removeItem,     // removeItem(key:String)
+    getAllItems,    // getAllItems():Hash
+    save,           // save(url:String, option:AjaxOptionHash = void, callback:Function = void)
+    load,           // load(url:String, option:JSONPOptionHash = void, callback:Function = void)
+    toString        // toString():String
+});
+}}}
+
+== !LocalStorage ==
+!LocalStorage は HTML5::!WebStorage(window.localStorage) をラップしたものです。古いブラウザでは利用できません。
+
+window.localStorage と window.sessionStorage は同じストレージを共有し容量を分け合うため、実際に利用可能なスペースは見た目よりも少ない可能性があります。
+
+容量の最大値はブラウザによって異なります。最大値は uu.storage.size().max で取得できます。
+
+|| iPhone OS 3.x        || 2.5MB ||
+|| Google Chrome        || 2.5MB ||
+|| Safari 4+            || 8.0MB ||
+|| Firefox 3.5+         || 5.0MB ||
+|| Opera 10.50+         || 1.8MB ||
+|| IE 8+                || 4.7MB ||
+
+== !FlashStorage ==
+!FlashStorage は Flash の !SharedObject をラップしたものです。!FlashPlayer 9以上が必要です。
+uu.storage.swf がロードできない場合は、!FlashStorage も利用できません。
+
+!SharedObject はユーザがストレージスペースを、なし(0byte), 10kB, 100kB, 1MB, 10MB または 制限しない(infinity) に 設定できるため、実際の容量がゼロのケースもありえます。
+!FlashStorage は最大 1MB のストレージとして機能します(デフォルトでは100kBまでのデータを保存できます)。
+1MB 以上のデータはストレージスペースに空きがあっても保存できません。
+
+Flash がローカル環境(`file://...`)で動かない場合は、 サーバにファイル一式をアップロードするか、[http://www.macromedia.com/support/documentation/jp/flashplayer/help/settings_manager04.html グローバルセキュリティ設定パネル]で、uu.storage.swf が設置されているフォルダに許可を与えてください。
+
+== IEStorage ==
+IEStorage は IE の独自機能(userData behavior) をラップしたものです。
+機能を OFF にされてしまう可能性があります。
+
+== !CookieStorage == 
+!CookieStorage は Cookie をラップしたものです。
+機能を OFF にされてしまう可能性があります。
+
+== !MemStorage ==
+!MemStorage の実体は、!JavaScript の Hash です。
+オンメモリのため見かけ上の容量制限はありませんが、ページを閉じるとデータは失われてしまいます。
+
+= 最低容量を指定し、バックエンドを選択する方法 =
+window.uuconfig = { storage: _minimumStorageSize_ } を定義すると、最低限必要とする ストレージスペース を byte 数で指定することができます。 要求を満たせないストレージバックエンドは選択されません。十分なストレージスペースを持ったバックエンドが利用できない場合は、!MemStorage が選択されます。
+
+= 使い方 =
+{{{
+    uu.ready("storage", function(uu, storage) {
+        storage.setItem("Hello", "Storage");
+
+        uu.puff(storage.size());
+    });
+}}}
+
+== Appendix A ==
+
+=== uu.Class.Storage.key ===
+Storage.key(_index_:Number):String は、_index_ で指定された添え字が示す _key_ を返します。
+
+このメソッドは
+{{{
+    for (index in storage) {
+        key = storage.key(index);
+    }
+}}}
+のような用法を意図したものです。
+
+バックエンドによっては、index が示す key が一定ではない場合があります(ループの都度取れてくる順番が変化する可能性がある)。
+
+存在しない添え字を指定すると空文字列( "" )を返します。
+
+=== uu.Class.Storage.size ===
+Storage.size():Hash は、{ used:Number, max:Number } を返します。
+
+used は使用済みの、max は利用可能な ストレージスペースのバイト数です。
+
+!MemStorage は常に { used: 0, max: Number.MAX_VALUE } を返します。
+
+=== uu.Class.Storage.clear ===
+Storage.clear() は、ストレージをクリアします。
+
+!CookieStorage でクリアするデータは、!CookieStorage 経由で書き込んだデータに限定されます。
+
+=== uu.Class.Storage.getItem ===
+Storage.getItem(_key_:String):String は、 _key_ に対応する _value_ を返します。
+
+存在しない _key_ を指定すると空文字列( "" )を返します。
+
+=== uu.Class.Storage.setItem ===
+Storage.setItem(_key_:String, _value_:String):Boolean は、 _key_ と _value_ からなるペアを更新するか、新規に追加します。
+
+書き込みに失敗すると false を返します。多くの場合 false は、ストレージ容量の不足(QUOTA EXCEEDED)を意味します。
+
+=== uu.Class.Storage.getLength ===
+Storage.getLength():Number は、ペア数を返します。
+
+=== uu.Class.Storage.removeItem ===
+Storage.removeItem(_key_:String) は、_key_ が示す key/value pair を削除します。
+
+=== uu.Class.Storage.getAllItems ===
+Storage.getAllItems():Hash は、全ての key/value pair を Hash で返します。
+
+pair が無い場合は 空の Hash ( {} ) を返します。
+
+=== uu.Class.Storage.save ===
+Storage.save(url:String, option:AjaxOptionHash = void, callback:Function = void) は、 全ての key/value pair を json データに変換しサーバに POST します。
+
+callback を指定すると POST 成功または失敗でコールバックします。callback の第一引数は、AjaxResultHash になります。
+
+=== uu.Class.Storage.load ===
+Storage.load(url:String, option:JSONPOptionHash = void, callback:Function = void) は、 サーバから返される key/value pair からなる json データを、ストレージにマージ(上書き)します。
+
+callback を指定すると POST 成功または失敗でコールバックします。callback の第一引数は、JSONPResultHash になります。
+
+{{{
+    storage.load("http://example.com/hoge?callback=??", {}, function(jsonpResultHash) {
+        if (jsonpResultHash.ok) {
+            uu.puff(jsonpResultHash.json);
+        }
+    });
+}}}
+    
+=== uu.Class.Storage.toString ===
+Storage.toString():String は、バックエンドを識別する文字列を返します。
+
+返される文字列は "!LocalStorage", "!FlashStorage", "IEStorage", "!CookieStorage", "!MemStorage" のいずれかになります。
+
+== Appendix B ==
+
+!LocalStorage, !FlashStorage, IEStorage, !CookieStorage, !MemStorage はシングルトンクラスです。
+これらを直接インスタンス化し利用することもできます。
+{{{
+    var cookieStorage = uu("CookieStorage");
+}}}
