@@ -68,7 +68,7 @@ function setValue(type,    // @param Number: nodeType
                   node,    // @param Node:
                   value) { // @param StringArray/Array:
                            // @return Node:
-    var v, i = -1, j, jz, prop, ary, selected = 0,
+    var v, i = -1, j, jz, prop, ary,
         valueArray = Array.isArray(value) ? value : [value];
 
     if (type) {
@@ -87,12 +87,8 @@ function setValue(type,    // @param Number: nodeType
                 for (j = 0; j < jz; ++j) {
                     if ((v.value || v.text) == valueArray[j]) { // 0 == "0"
                         v[prop] = true;
-                        ++selected;
                     }
                 }
-            }
-            if (!selected) {
-//alert("!");
             }
         }
     } else {
