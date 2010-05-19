@@ -17,32 +17,28 @@ var _diskSpace = uu.ver.iphone ? 2.5   * 1024 * 1024 - 260 // iPhone3.1.2 (2.5MB
                : uu.opera      ? 1.875 * 1024 * 1024 - 128 // Opera10.50  (1.875MB)
                : uu.ie         ? 5     * 1000 * 1000       // IE8+        (4.768MB)
 //}}}!mb
-               : 0;
+               : 0,
+    _inherit = uu.Class.Storage.prototype;
 
 uu.Class.singleton("LocalStorage", {
-    init:           init,       // init()
-    key:            key,        // key(index:Number):String
-    size:           size,       // size():Hash { used, max }
-    clear:          clear,      // clear()
-    getItem:        getItem,    // getItem(key:String):String
-    setItem:        setItem,    // setItem(key:String, value:String):Boolean
-    getLength:      getLength,  // getLength():Number - pairs
-    removeItem:     removeItem, // removeItem(key:String)
-    getAllItems:    getAllItems,// getAllItems():Hash
-    toString:       toString,   // toString():String - storage identity
-    save:           save,       // saveToServer(url:String, option:AjaxOptionHash = void, callback:Function = void)
-    load:           load        // loadFromServer(url:String, option:JSONPOptionHash = void, callback:Function = void)
+    init:           init,
+    key:            _inherit.key,
+    size:           size,
+    clear:          _inherit.clear,
+    getItem:        _inherit.getItem,
+    setItem:        setItem,
+    getLength:      getLength,
+    removeItem:     _inherit.removeItem,
+    getAllItems:    getAllItems,
+    toString:       toString,
+    save:           _inherit.save,
+    load:           _inherit.load
 });
 
 function init(callback) { // @param Function(= void): callback
     this.storage = window.localStorage;
 
     callback && callback(this);
-}
-
-function key(index) { // @param Number:
-                      // @return String: "key" or ""
-    return this.storage.key(index) || ""; // return null is W3C spec
 }
 
 function size() { // @return Hash: { used, max }
@@ -67,15 +63,6 @@ function size() { // @return Hash: { used, max }
     return { used: used, max: _diskSpace };
 }
 
-function clear() {
-    this.storage.clear();
-}
-
-function getItem(key) { // @param String:
-                        // @return String: "value" or ""
-    return this.storage[key] || ""; // return null is W3C spec
-}
-
 function setItem(key,     // @param String:
                  value) { // @param String:
                           // @return Boolean: false is quota exceeded
@@ -97,10 +84,6 @@ function getLength() { // @return Number: pairs
     return this.storage.length;
 }
 
-function removeItem(key) { // @param String:
-    this.storage.removeItem(key);
-}
-
 function getAllItems() { // @return Hash: { key: "value", ... }
     var rv = {}, key, index = 0, iz = this.storage.length;
 
@@ -109,18 +92,6 @@ function getAllItems() { // @return Hash: { key: "value", ... }
         rv[key] = this.storage.getItem(key);
     }
     return rv;
-}
-
-function save(url,        // @param String: url
-              option,     // @param AjaxOptionHash(= void):
-              callback) { // @param Function(= void): callback(AjaxResultHash)
-    uu.Class.Storage.save(this, url, option, callback);
-}
-
-function load(url,        // @param String: url
-              option,     // @param JSONPOptionHash:
-              callback) { // @param Function(= void): callback(JSONPResultHash)
-    uu.Class.Storage.load(this, url, option, callback);
 }
 
 function toString() {

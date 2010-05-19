@@ -9,14 +9,14 @@
         private var _so:SharedObject = null;
 
         public function Storage() {
-            ExternalInterface.addCallback("ex_key", ex_key);
-            ExternalInterface.addCallback("ex_size", ex_size);
-            ExternalInterface.addCallback("ex_clear", ex_clear);
-            ExternalInterface.addCallback("ex_getItem", ex_getItem);
-            ExternalInterface.addCallback("ex_setItem", ex_setItem);
-            ExternalInterface.addCallback("ex_getLength", ex_getLength);
-            ExternalInterface.addCallback("ex_removeItem", ex_removeItem);
-            ExternalInterface.addCallback("ex_getAllItems", ex_getAllItems);
+            ExternalInterface.addCallback("key", ex_key);
+            ExternalInterface.addCallback("size", ex_size);
+            ExternalInterface.addCallback("clear", ex_clear);
+            ExternalInterface.addCallback("getItem", ex_getItem);
+            ExternalInterface.addCallback("setItem", ex_setItem);
+            ExternalInterface.addCallback("getLength", ex_getLength);
+            ExternalInterface.addCallback("removeItem", ex_removeItem);
+            ExternalInterface.addCallback("getAllItems", ex_getAllItems);
 
             _DISK_SPACE = this.detectDiskSpace();
 

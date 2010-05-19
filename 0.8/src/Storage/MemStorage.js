@@ -5,6 +5,8 @@
 
 uu.Class.MemStorage || (function(uu) {
 
+var _inherit = uu.Class.Storage.prototype;
+
 uu.Class.singleton("MemStorage", {
     init:           init,       // init()
     key:            key,        // key(index:Number):String
@@ -16,8 +18,8 @@ uu.Class.singleton("MemStorage", {
     removeItem:     removeItem, // removeItem(key:String)
     getAllItems:    getAllItems,// getAllItems():Hash
     toString:       toString,   // toString():String - storage identity
-    save:           save,       // saveToServer(url:String, option:AjaxOptionHash = void, callback:Function = void)
-    load:           load        // loadFromServer(url:String, option:JSONPOptionHash = void, callback:Function = void)
+    save:           _inherit.save,
+    load:           _inherit.load
 });
 
 function init(callback) { // @param Function(= void): callback
@@ -63,18 +65,6 @@ function removeItem(key) { // @param String:
 
 function getAllItems() { // @return Hash: { key: "value", ... }
     return this.storage;
-}
-
-function save(url,        // @param String: url
-              option,     // @param AjaxOptionHash(= void):
-              callback) { // @param Function(= void): callback(AjaxResultHash)
-    uu.Class.Storage.save(this, url, option, callback);
-}
-
-function load(url,        // @param String: url
-              option,     // @param JSONPOptionHash:
-              callback) { // @param Function(= void): callback(JSONPResultHash)
-    uu.Class.Storage.load(this, url, option, callback);
 }
 
 function toString() {
