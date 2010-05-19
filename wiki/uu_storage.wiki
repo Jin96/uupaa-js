@@ -108,7 +108,7 @@ window.uuconfig = { storage: _minimumStorageSize_ } を定義しておくと、�
 
 http://uupaa-js.googlecode.com/svn/trunk/0.8/test/Storage/uu.storage.htm
 
-== Appendix A ==
+== API ==
 
 === uu.Class.Storage.key ===
 Storage.key(_index_:Number):String は、_index_ で指定された添え字が示す _key_ を返します。
@@ -181,7 +181,7 @@ Storage.toString():String は、バックエンドを識別する文字列を返
 
 返される文字列は "!LocalStorage", "!FlashStorage", "IEStorage", "!CookieStorage", "!MemStorage" のいずれかになります。
 
-== Appendix B ==
+== Appendix A ==
 
 !LocalStorage, !FlashStorage, IEStorage, !CookieStorage, !MemStorage はシングルトンクラスです。
 これらを直接インスタンス化し利用することもできます。
