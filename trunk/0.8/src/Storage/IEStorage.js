@@ -12,7 +12,8 @@ uu.Class.IEStorage || (function(uu) {
 var _STORE_NAME     = "uustorage",
     _INDEX          = "uuindex",
     _PERSIST_DATE   = (new Date(2032, 1, 1)).toUTCString(),
-    _DISK_SPACE     = 63 * 1024; // 63kB
+    _DISK_SPACE     = 63 * 1024, // 63kB
+    _inherit = uu.Class.Storage.prototype;
 
 uu.Class.singleton("IEStorage", {
     init:           init,       // init()
@@ -25,8 +26,8 @@ uu.Class.singleton("IEStorage", {
     removeItem:     removeItem, // removeItem(key:String)
     getAllItems:    getAllItems,// getAllItems():Hash
     toString:       toString,   // toString():String - storage identity
-    save:           save,       // saveToServer(url:String, option:AjaxOptionHash = void, callback:Function = void)
-    load:           load        // loadFromServer(url:String, option:JSONPOptionHash = void, callback:Function = void)
+    save:           _inherit.save,
+    load:           _inherit.load
 });
 
 function init(callback) { // @param Function(= void): callback
@@ -131,18 +132,6 @@ function getAllItems() { // @return Hash: { key: "value", ... }
         rv[key] = this.storage.getAttribute(key) || "";
     }
     return rv;
-}
-
-function save(url,        // @param String: url
-              option,     // @param AjaxOptionHash(= void):
-              callback) { // @param Function(= void): callback(AjaxResultHash)
-    uu.Class.Storage.saveToServer(this, url, option, callback);
-}
-
-function load(url,        // @param String: url
-              option,     // @param JSONPOptionHash:
-              callback) { // @param Function(= void): callback(JSONPResultHash)
-    uu.Class.Storage.loadFromServer(this, url, option, callback);
 }
 
 function toString() {

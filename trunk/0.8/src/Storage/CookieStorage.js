@@ -9,7 +9,8 @@ var _STORE_NAME     = "uustorage",
     _PERSIST_DATE   = (new Date(2032, 1, 1)).toUTCString(),
     _REMOVE_DATE    = (new Date(0)).toUTCString(),
     _DISK_SPACE     = 3800, // byte
-    _SECURE         = location.protocol === "https:" ? "; secure" : "";
+    _SECURE         = location.protocol === "https:" ? "; secure" : "",
+    _inherit = uu.Class.Storage.prototype;
 
 uu.Class.singleton("CookieStorage", {
     init:           init,       // init()
@@ -22,8 +23,8 @@ uu.Class.singleton("CookieStorage", {
     removeItem:     removeItem, // removeItem(key:String)
     getAllItems:    getAllItems,// getAllItems():Hash
     toString:       toString,   // toString():String - storage identity
-    save:           save,       // saveToServer(url:String, option:AjaxOptionHash = void, callback:Function = void)
-    load:           load,       // loadFromServer(url:String, option:JSONPOptionHash = void, callback:Function = void)
+    save:           _inherit.save,
+    load:           _inherit.load,
     store:          store,      // [PROTECTED]
     retrieve:       retrieve    // [PROTECTED]
 });
@@ -123,20 +124,6 @@ function store(hash,   // @param Hash:
         doc.cookie = rv + "; expires=" + date + _SECURE;
     }
     return rv.length;
-}
-
-function save(url,        // @param String: url
-              option,     // @param AjaxOptionHash(= void):
-              callback) { // @param Function(= void): callback(AjaxResultHash)
-    uu.Class.Storage &&
-        uu.Class.Storage.save(this, url, option, callback);
-}
-
-function load(url,        // @param String: url
-              option,     // @param JSONPOptionHash:
-              callback) { // @param Function(= void): callback(JSONPResultHash)
-    uu.Class.Storage &&
-        uu.Class.Storage.load(this, url, option, callback);
 }
 
 function toString() {

@@ -52,8 +52,7 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Stri
                                     //  [1][Class factory]   uu("MyClass", arg1, arg2) -> new uu.Clas.MyClass(arg1, arg2)
                                     //  [2][NodeSet factory] uu("div>ul>li", <body>) -> NodeSet
     config:   uuarg(win.uuconfig, { // uu.config - Hash: user configurations
-        log:        "log",          //  uu.log() target node
-        baseDir:    ""              //  base directory
+        log:        "log"           //  uu.log() target node
     }),
     ver:            _ver,           // uu.ver - Hash: detected version and plugin informations
     ie:             _ie,
@@ -145,7 +144,7 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Stri
         getOpacity: getOpacity,     // uu.css.getOpacity(node:Node):Number
         setOpacity: setOpacity      // uu.css.setOpacity(node:Node, value:Number/String):Node
     }),
-    style:          uustyle,        // uu.style(id:String):StyleSheetInstance
+    style:          uustyle,        // uu.style(id:String):StyleSheet
     unit:           uuunit,         // uu.unit(node:Node, value:Number/CSSUnitString, quick:Boolean = false, prop:String = "left"):Number
                                     //  [1][convert pixel]  uu.unit(<div>, 123) -> 123
                                     //  [2][convert pixel]  uu.unit(<div>, "12px") -> 12
@@ -311,7 +310,9 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Stri
                                     //  [5][ISO8601String to hash]   uu.date("2000-01-01T00:00:00[.000]Z") -> DateHash
                                     //  [6][RFC1123String to hash]   uu.date("Wed, 16 Sep 2009 16:18:14 GMT") -> DateHash
     // --- FLASH ---
+//{{{!mb
     flash:          uuflash,        // uu.flash(url:String, option:FlashOptionHash):Node/null/void
+//}}}!mb
     // --- NUMBER ---
     guid:           uuguid,         // uu.guid():Number - build GUID
     // --- DEBUG ---
@@ -2769,7 +2770,7 @@ function uuklass(expression, // @param String: "class", "class1, ..."
 ///}}}!mb
 }
 
-// --- string ---
+// --- STRING ---
 
 // [1][css-prop to js-css-prop] uu.fix("background-color") -> "backgroundColor"
 // [2][std-name to ie-name]     uu.fix("float")            -> "cssFloat" or "styleFloat"(IE)
@@ -3113,20 +3114,20 @@ function datehashrfc() { // @return RFC1123DateString: "Wed, 16 Sep 2009 16:18:1
 }
 
 // --- FLASH ---
-//  <object id="external..." width="..." height="..." data="***.swf"
-//      type="application/x-shockwave-flash">
+//  <object id="external..." width="..." height="..." data="*.swf" classid="...">
 //      <param name="allowScriptAccess" value="always" />
-//      <param name="movie" value="{{url}}" />
-//      <param name="flashVars" value="uuexid={{id}}&key=value&..." />
-//      <embed name="external..." src="***.swf" width="..." height="..."
-//          type="application/x-shockwave-flash" allowScriptAccess="always">
-//      </embed>
+//      <param name="movie" value="*.swf" />
 //  </object>
+//
+//  <embed name="external..." src="*.swf" width="..." height="..."
+//      type="application/x-shockwave-flash" allowScriptAccess="always">
+//  </embed>
+//
 // uu.flash - create flash <object> node
+//{{{!mb
 function uuflash(url,      // @param String: url
                  option) { // @param FlashOptionHash(= { param: { allowScriptAccess: "always" } }):
                            // @return Node/null/void: <object>
-//{{{!mb
     var opt = uuarg(option, { width: "100%", height: "100%" }),
         param = opt.param || {}, id = opt.id || ("external" + uuguid()),
         paramArray = [], i, fragment;
@@ -3155,8 +3156,8 @@ function uuflash(url,      // @param String: url
     uunodeswap(uunodebulk(fragment), opt.marker || uunodeadd());
 
     return _ie ? uuid(id) : doc.getElementsByName(id)[0];
-//}}}!mb
 }
+//}}}!mb
 
 // --- OTHER ---
 // uu.viewport.size
