@@ -153,12 +153,12 @@ Storage.getAllItems():Hash は、全ての key/value pair を Hash で返しま�
 pair が無い場合は 空の Hash ( {} ) を返します。
 
 === uu.Class.Storage.save ===
-Storage.save(url:String, option:AjaxOptionHash = void, callback:Function = void) は、 全ての key/value pair を json データに変換しサーバに POST します。
+Storage.save(_url_:String, _option_:AjaxOptionHash = void, callback:Function = void) は、 全ての key/value pair を json データに変換しサーバに POST します。
 
 callback を指定すると POST 成功または失敗でコールバックします。callback の第一引数は、AjaxResultHash になります。
 
 === uu.Class.Storage.load ===
-Storage.load(url:String, option:JSONPOptionHash = void, callback:Function = void) は、 サーバから返される key/value pair からなる json データを、ストレージにマージ(上書き)します。
+Storage.load(_url_:String, _option_:JSONPOptionHash = void, callback:Function = void) は、 サーバから返される key/value pair からなる json データを、ストレージにマージ(上書き)します。
 
 callback を指定すると POST 成功または失敗でコールバックします。callback の第一引数は、JSONPResultHash になります。
 
