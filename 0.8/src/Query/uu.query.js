@@ -995,7 +995,7 @@ function actionFilter(fid, negate, elms, pusedo) {
 // --- initialize ---
 // create tag dictionary
 (function() {
-    var ary = uutag.html4, i = 0, iz;
+    var ary = uu.tag.html4, i = 0, iz;
 
     ary.push("*", "body", "style", "script");
     for (iz = ary.length; i < iz; ++i) {
