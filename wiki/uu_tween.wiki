@@ -7,8 +7,8 @@
 uu.tween は CSSプロパティを連続的に変化させるCSSアニメーション機能を提供します。
 
 uu.tween は uupaa.js に組み込まれています。
-easing 関数を利用するには以下のファイルをロードします。
-  * /src/Tween/easing.js
+easing 関数を利用するには以下のファイルが必要です。
+  * src/Tween/easing.js
 
 easing.js をロードすると、以下の機能が追加されます。
   * Math.linear
@@ -23,6 +23,11 @@ easing.js をロードすると、以下の機能が追加されます。
   * Math.easeInElastic, Math.easeOutElastic, Math.easeInOutElastic, Math.easeOutInElastic
   * Math.easeInBack, Math.easeOutBack, Math.easeInOutBack, Math.easeOutInBack
   * Math.easeInBounce, Math.easeOutBounce, Math.easeInOutBounce, Math.easeOutInBounce
+
+色を変化させるには以下のファイルが必要です。
+  * src/Color/uu.color.js
+
+uu.color.js をロードすると、色辞書や色調変換機能等が利用可能になります。
 
 = API =
 
