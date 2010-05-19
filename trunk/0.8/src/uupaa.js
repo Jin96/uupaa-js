@@ -2707,8 +2707,8 @@ function uutag(expression, // @param String: "*" or "tag"
 uutag.html4 = ("a,b,br,dd,div,dl,dt,h1,h2,h3,h4,h5,h6,i,img,iframe," +
                "input,li,ol,option,p,pre,select,span,table,tbody,tr," +
                "td,th,tfoot,textarea,u,ul").split(","); // exclude <html><head><body>
-uutag.html5 = ("abbr,article,aside,audio,bb,canvas,datagrid,datalist," +
-               "details,dialog,eventsource,figure,footer,header,hgroup," +
+uutag.html5 = ("abbr,article,aside,audio,canvas,datalist," +
+               "details,eventsource,figure,footer,header,hgroup," +
                "mark,menu,meter,nav,output,progress,section,time,video").split(",");
 
 // uu.match - as document.matchesSelector
