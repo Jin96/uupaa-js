@@ -1024,7 +1024,48 @@ uu.ready(function(uu) {
             return [obj1.val, "==", obj2.val];
         },
 
+    "Array.reduce": "",
+        "[0,1,2,3,4].reduce(function(p, c, i){ return p + c; })": function() {
+            var rv = [0,1,2,3,4].reduce(function(p, c, i){ return p + c; });
+            return [rv, "==", 10];
+        },
+        "[0,1,2,3,4].reduce(function(p, c, i){ return p + c; }, 10)": function() {
+            var rv = [0,1,2,3,4].reduce(function(p, c, i){ return p + c; }, 10);
+            return [rv, "==", 20];
+        },
+        "[0, 1, 2, 3].reduce(function(a, b){ return a + b; })": function() {
+            var rv = [0, 1, 2, 3].reduce(function(a, b){ return a + b; });
+            return [rv, "==", 6];
+        },
+        "[[0,1], [2,3], [4,5]].reduce(function(a,b) { return a.concat(b); }, [])": function() {
+            var rv = [[0,1], [2,3], [4,5]].reduce(function(a,b) { return a.concat(b); }, []);
+            return [rv, "==", [0, 1, 2, 3, 4, 5]];
+        },
 
+    "Array.reduceRight": "",
+        "[0,1,2,3,4].reduceRight(function(p, c, i){ return p + c; })": function() {
+            var rv = [0,1,2,3,4].reduceRight(function(p, c, i){ return p + c; });
+            return [rv, "==", 10];
+        },
+        "[0,1,2,3,4].reduceRight(function(p, c, i){ return p + c; }, 10)": function() {
+            var rv = [0,1,2,3,4].reduceRight(function(p, c, i){ return p + c; }, 10);
+            return [rv, "==", 20];
+        },
+        "[0, 1, 2, 3].reduceRight(function(a, b){ return a + b; })": function() {
+            var rv = [0, 1, 2, 3].reduceRight(function(a, b){ return a + b; });
+            return [rv, "==", 6];
+        },
+        "[[0,1], [2,3], [4,5]].reduceRight(function(a,b) { return a.concat(b); }, [])": function() {
+            var rv = [[0,1], [2,3], [4,5]].reduceRight(function(a,b) { return a.concat(b); }, []);
+            return [rv, "==", [4, 5, 2, 3, 0, 1] ];
+        },
+
+/*
+        "[].reduceRight(function(p, c, i){ return p + c; })": function() {
+            var rv = [].reduceRight(function(p, c, i){ return p + c; });
+            return [rv, "is FAIL"];
+        },
+ */
 
     "End Of Test": ""
   });

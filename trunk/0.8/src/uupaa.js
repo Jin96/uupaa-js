@@ -26,6 +26,7 @@ var _prototype = "prototype",
     _uutween = "data-uutween",
     // --- minify ---
     _createElement = "createElement",
+    _getAttribute = "getAttribute",
     _appendChild = "appendChild",
     _nextSibling = "nextSibling",
     _parentNode = "parentNode",
@@ -35,6 +36,7 @@ var _prototype = "prototype",
     _indexOf = "indexOf",
     _false = !1,
     _true = !0,
+    _nop = function() {},
     // --- version detection ---
     _ver = detectVersions(0.7),
     _ie = _ver.ie,
@@ -337,7 +339,7 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Stri
     }, detectFeatures(_ver)),
     // --- OTHER ---
     dmz:            {},             // uu.dmz - DeMilitarized Zone(proxy)
-    nop:            function() {}   // uu.nop() - none operation
+    nop:            _nop            // uu.nop() - none operation
 });
 
 // --- CONSTRUCTION ---
@@ -498,8 +500,8 @@ function uusnippet(id,    // @param String: snippet id. <script id="...">
     }
 
     function toEachBlock(all, hash, block) {
-        return '" + uu.snippet.each(' + hash + ',"' +
-                    block[_replace](dualBrace, toBrace) + '") + "';
+        return '"+uu.snippet.each(' + hash + ',"' +
+                                      block[_replace](dualBrace, toBrace) + '")+"';
     }
 
     var js = uusnippet.js[id] || "", node, // {
@@ -862,32 +864,29 @@ function uuclean(source) { // @param Array: source
 // [1][unique elements]     uu.unique([<body>, <body>]) -> [<body>]
 // [2][unique literals]     uu.unique([0,1,2,1,0], true) -> [0,1,2]
 
-// uu.unique - make array from unique element( trim null and undefined elements)
+// uu.unique - make array from unique element(trim null and undefined elements)
 function uuunique(source,        // @param Array: source
                   literalOnly) { // @param Boolean(= false): true is literal only(quickly)
                                  // @return Array:
-    if (_isArray(source)) {
-        var rv = [], ri = -1, v, i = 0, j, iz = source.length,
-            literal = !!literalOnly,
-            found,
-            unique = {};
+    var rv = [], ri = -1, v, i = 0, j, iz = source.length,
+        literal = !!literalOnly,
+        found,
+        unique = {};
 
-        for (; i < iz; ++i) {
-            v = source[i];
-            if (v != null) { // v === null or v === undefined
-                if (literal) { // [2]
-                    unique[v] || (unique[v] = 1, rv[++ri] = v);
-                } else { // [1]
-                    for (found = 0, j = i - 1; !found && j >= 0; --j) {
-                        found = (v === source[j]);
-                    }
-                    !found && (rv[++ri] = v);
+    for (; i < iz; ++i) {
+        v = source[i];
+        if (v != null) { // v === null or v === undefined
+            if (literal) { // [2]
+                unique[v] || (unique[v] = 1, rv[++ri] = v);
+            } else { // [1]
+                for (found = 0, j = i - 1; !found && j >= 0; --j) {
+                    found = (v === source[j]);
                 }
+                !found && (rv[++ri] = v);
             }
         }
-        return rv;
     }
-    return source;
+    return rv;
 }
 
 //  [1][++1] uu.array.seq( 0,  5,  1) -> [0, 1, 2, 3, 4]
@@ -967,7 +966,7 @@ function uuattr(node,    // @param Node:
     if (arguments.length === 3) {   // [3] uu.attr(node, key, value)
         key = uuhash(key, value);
     } else if (isString(key)) {     // [2] uu.attr(node, key)
-        rv = node.getAttribute(fix[key] || key, 2) || "";
+        rv = node[_getAttribute](fix[key] || key, 2) || "";
 //{{{!mb
         _ver.ie && (rv += ""); // [IE6] tagindex, colspan is number
 //}}}!mb
@@ -981,9 +980,9 @@ function uuattr(node,    // @param Node:
 }
 uuattr.fix =
 //{{{!mb
-    !uuready.getAttribute ? { "for": "htmlFor", "class": "className" } : // [IE6][IE7]
+    !uuready[_getAttribute] ? { "for": "htmlFor", "class": "className" } : // [IE6][IE7]
 //}}}!mb
-                            { className: "class", htmlFor: "for" };
+                              { className: "class", htmlFor: "for" };
 
 //  [1][get all pair]   uu.data(node) -> { key: value, ... }
 //  [2][get value]      uu.data(node, key) -> value
@@ -1125,17 +1124,19 @@ function uutween(node,       // @param Node: animation target node
                  callback) { // @param Function(= void): after callback(node, style)
                              // @return Node:
     function loop() {
-        var data = node[_uutween], q = data.q[0],
+        var data = node[_uutween], q = data.q[0], style = node.style,
             tm = q.tm ? +new Date
-                      : (q.js = q.param ? uutween.build(node, q.param)
-                                        : uu.nop, q.tm = +new Date),
+                      : (q.js = q.param ? uutweenbuild(node, q.param)
+                                        : _nop, q.tm = +new Date),
             finished = q.fin || (tm >= q.tm + q.dur);
 
-        q.js(node, node.style, finished, tm - q.tm, q.dur); // js(node, node.style, finished, gain, duration)
+        q.js(node, style, finished, tm - q.tm, q.dur); // js(node, node.style, finished, gain, duration)
         if (finished) { // finished
-            q.fn && q.fn(node, node.style); // after callback(node, node.style)
+            q.fn && q.fn(node, style); // after callback(node, node.style)
             data.q.shift(); // remove first queue data
-            data.q.length || (clearInterval(data.id), data.id = 0);
+            data.q.length || (clearInterval(data.id),
+                              data.id = 0,
+                              q.fin && (style.visibility = "")); // avoid flicker
         }
     }
 
@@ -1153,7 +1154,8 @@ function uutween(node,       // @param Node: animation target node
 uutween.props = { opacity: 1, color: 2, backgroundColor: 2,
                   width: 3, height: 3, left: 4, top: 4 };
 uutween.alpha = /^alpha\([^\x29]+\) ?/;
-uutween.build = function(node, param) {
+
+function uutweenbuild(node, param) {
     function ezfn(v0, v1, ez) {
         return ez ? uuformat('Math.??(g,??,??,d)', ez, v0, v1 - v0)
                   : uuformat('(t=g,b=??,c=??,(t/=d2)<1?c/2*t*t+b:-c/2*((--t)*(t-2)-1)+b)',
@@ -1214,23 +1216,23 @@ uutween.build = function(node, param) {
             case 3: // width, height:
                 v0 = parseInt(cs[w]) || 0;
                 v1 = unitNormalize(v0, v1, parseInt);
-                rv += uuformat('w=f? ??:??;w=w<0?0:w;s.??=w+"px";',
+                rv += uuformat('w=f? ??:??;w=w<0?0:w;s.??=(w|0)+"px";',
                                v1, ezfn(v0, v1, ez), w);
                 break;
             default: // top, left, other...
-                if (n === 4) {
+                if (n === 4) { // 4: left, top
                     v0 = (w === "top") ? node.offsetTop : node.offsetLeft;
                 } else {
                     v0 = parseInt(cs[w]) || 0;
                 }
                 v1 = unitNormalize(v0, v1, parseInt);
-                rv += uuformat('s.??=(f? ??:??)+"px";',
+                rv += uuformat('s.??=((f? ??:??)|0)+"px";',
                                w, v1, ezfn(v0, v1, ez));
             }
         }
     }
     return new Function("n,s,f,g,d", rv); // node, node.style, finished, gain, duration
-};
+}
 
 // uu.tween.skip
 function uutweenskip(node,  // @param Node(= void 0): void 0 is all node
@@ -1244,6 +1246,7 @@ function uutweenskip(node,  // @param Node(= void 0): void 0 is all node
         if (data && data.id) {
             for (j = 0, jz = all ? data.q.length : 1; j < jz; ++j) {
                 data.q[j].fin = 1; // finished bit
+                all && (v.style.visibility = "hidden"); // avoid flicker
             }
         }
     }
@@ -1268,8 +1271,7 @@ function getOpacity(node) { // @param Node:
         return opacity ? (opacity - 1): 1;
     }
 //}}}!mb
-    return parseFloat(node.style.opacity ||
-                      getComputedStyle(node, 0).opacity);
+    return parseFloat(getComputedStyle(node, 0).opacity);
 }
 
 // uu.css.setOpacity
@@ -1654,7 +1656,7 @@ function uuclass(className, // @param String: "Class"
             Super = that.superClass || 0;
 
         that.uuguid = uu.guid();
-        that.msgbox || (that.msgbox = uu.nop);
+        that.msgbox || (that.msgbox = _nop);
         uu.msg.bind(that); // bind MsgPump
 
         // constructor(Super -> that)
@@ -1695,7 +1697,7 @@ function uuclasssingleton(className, // @param String: class name
         if (!self[instance]) {
             that.uuguid = uu.guid();
             that.init && that.init.apply(that, arg);
-            that.msgbox || (that.msgbox = uu.nop);
+            that.msgbox || (that.msgbox = _nop);
             uu.msg.bind(that); // bind MsgPump
         }
         return self[instance] || (self[instance] = that);
@@ -2023,8 +2025,8 @@ function uueventfire(node,      // @param Node: target node
                 customEvent:    _true,
                 currentTarget:  node,
                 relatedTarget:  node,
-                preventDefault: uu.nop,
-                stopPropagation:uu.nop
+                preventDefault: _nop,
+                stopPropagation:_nop
             };
 
         node[_uuevent][eventType].forEach(function(evaluator) {
@@ -3100,13 +3102,14 @@ _str2date.date = /^([\w]+) (\w+) (\w+)/;
 
 // DateHash.ISO - encode DateHash To ISO8601String
 function datehashiso() { // @return ISO8601DateString: "2000-01-01T00:00:00.000Z"
-    var padZero = (this.ms < 10) ? "00"
-                : (this.ms < 100) ? "0" : "",
+    var that = this,
+        padZero = (that.ms < 10) ? "00"
+                : (that.ms < 100) ? "0" : "",
         dd = uuhash.num2dd;
 
     return uuformat("??-??-??T??:??:??.??Z",
-                    this.Y, dd[this.M], dd[this.D],
-                    dd[this.h], dd[this.m], dd[this.s], padZero + this.ms);
+                    that.Y, dd[that.M], dd[that.D],
+                    dd[that.h], dd[that.m], dd[that.s], padZero + that.ms);
 }
 
 // DateHash.RFC - encode DateHash To RFC1123String
@@ -3297,17 +3300,20 @@ function ArrayFilter(evaluator, // @param Function: evaluator
 //}}}!mb
 
 // Array.prototype.reduce
-function ArrayReduce(evaluator,      // @param Function: evaluator
-                     initialValue) { // @param Mix(= void): initial value
-                                     // @return Mix:
-    var z, f = 0, rv = initialValue === z ? z : (++f, initialValue),
-        i = 0, iz = this.length;
+function ArrayReduce(evaluator,    // @param Function: evaluator
+                     initialValue, // @param Mix(= void): initial value
+                     __right__) {  // @hidden Number(= 0): 1 is right
+                                   // @return Mix:
+    var that = this, r = !!__right__, undef, f = 0,
+        rv = initialValue === undef ? undef : (++f, initialValue),
+        iz = that.length, i = r ? --iz : 0;
 
-    for (; i < iz; ++i) {
-        i in this && (rv = f ? evaluator(rv, this[i], i, this) : (++f, this[i]));
+    for (; r ? i >= 0 : i < iz; r ? --i : ++i) {
+        i in that && (rv = f ? evaluator(rv, that[i], i, that)
+                             : (++f, that[i]));
     }
     if (!f) {
-        throw new Error("INVALID_PARAM");
+        throw new Error("BAD_PARAM");
     }
     return rv;
 }
@@ -3316,16 +3322,7 @@ function ArrayReduce(evaluator,      // @param Function: evaluator
 function ArrayReduceRight(evaluator,      // @param Function: evaluator
                           initialValue) { // @param Mix(= void): initial value
                                           // @return Mix:
-    var z, f = 0, rv = initialValue === z ? z : (++f, initialValue),
-        i = this.length;
-
-    while (--i >= 0) {
-        i in this && (rv = f ? evaluator(rv, this[i], i, this) : (++f, this[i]));
-    }
-    if (!f) {
-        throw new Error("INVALID_PARAM");
-    }
-    return rv;
+    return ArrayReduce.call(this, evaluator, initialValue, 1);
 }
 
 // Date.prototype.toISOString - to ISO8601 string
@@ -3528,15 +3525,16 @@ function NodeSetIter(iterType,  // @param Number: 0 is forEach, 1 is map
 }
 
 // forEach(iter = 0)
-uueach({ bind: uuevent, unbind: uueventunbind,
-         tween: uutween, remove: uunoderemove }, function(fn, name) {
+uueach({ bind:  uuevent, unbind: uueventunbind,
+         tween: uutween, remove: uunoderemove,
+         live:  uulive,  unlive: uuliveunbind }, function(fn, name) {
     NodeSet[_prototype][name] = function(a, b, c) {
         return NodeSetIter(0, this, fn, a, b, c);
     }
 });
 
 // map(iter = 1)
-uueach({ attr: uuattr, css: uucss,
+uueach({ attr: uuattr, css:  uucss,
          html: uuhtml, text: uutext }, function(fn, name) {
     NodeSet[_prototype][name] = function(a, b) {
         return NodeSetIter(1, this, fn, a, b);
@@ -3650,7 +3648,7 @@ uuready(function() {
     var nodeList = uutag("*", _rootNode), v, i = -1,
         styles = uusplittohash((
 //{{{!mb
-                 !uuready.getAttribute ? "float,styleFloat,cssFloat,styleFloat" :
+                 !uuready[_getAttribute] ? "float,styleFloat,cssFloat,styleFloat" :
 //}}}!mb
                          "float,cssFloat"
                 ) + ",pos,position,w,width,h,height,x,left,y,top,o,opacity," +
@@ -3859,7 +3857,6 @@ function detectFeatures() {
     var hash = { rgba: _true, hsla: _true, transparent: _true },
 //{{{!mb
         transparent = "transparent",
-        getAttribute = "getAttribute",
         node = uunode(), child, style = node.style,
 //}}}!mb
         rv = {
@@ -3891,8 +3888,8 @@ function detectFeatures() {
     try {
         Array[_prototype].slice.call(doc.getElementsByTagName("head"));
     } catch(err) { rv.ArraySlice = _false; }
-    rv[getAttribute] = child[getAttribute]("class") === "a" &&
-                       child[getAttribute]("href") === "/a";
+    rv[_getAttribute] = child[_getAttribute]("class") === "a" &&
+                        child[_getAttribute]("href") === "/a";
     rv.StringIndexer = !!"0"[0];
     rv.ElementTraversal = !!_rootNode.firstElementChild;
 
