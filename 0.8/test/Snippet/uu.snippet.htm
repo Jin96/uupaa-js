@@ -1,0 +1,43 @@
+<!doctype html><html><head><meta charset="utf-8" />
+<title></title>
+<script src="../../src/uupaa.js"></script>
+<script>
+uu.ready(function(uu) {
+    var arg = {
+        DualBraceStyle: 'style="color: green; background-color: #ccc"',
+        ListStyle: 'style="color: #3d3; background-color: #ddd"',
+        list: {
+            length: 3,
+            key: ["key1", "key2", "key3", "key4"],
+            value: ["value1", "value2", "value3", "value4"]
+        }
+    };
+
+    uu.body( uu.snippet("snippet3", arg) );
+
+    uu.body( uu.snippet("snippet4", arg) );
+});
+</script>
+</head><body></body></html>
+
+<script id="snippet3" type="text/html">
+    return <text>
+        text here document.
+        text only; <div> does't work.
+        implement {{arg.DualBraceStyleArgs}} args
+</text>
+</script>
+
+<script id="snippet4" type="text/html">
+    return <>
+    <div {{arg.DualBraceStyle}}>
+        <ul>
+            <each arg.list>
+                <li {{arg.ListStyle}}>{{key}}</li>
+                <li>{{value}}</li>
+            </each>
+        </ul>
+    </div>
+</>
+</script>
+
