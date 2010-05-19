@@ -87,7 +87,13 @@ IEStorage は IE の独自機能(userData behavior) をラップしたもので�
 オンメモリのため見かけ上の容量制限はありませんが、ページを閉じるとデータは失われてしまいます。
 
 = 最低容量を指定し、バックエンドを選択する方法 =
-window.uuconfig = { storage: _minimumStorageSize_ } を定義すると、最低限必要とする ストレージスペース を byte 数で指定することができます。 要求を満たせないストレージバックエンドは選択されません。十分なストレージスペースを持ったバックエンドが利用できない場合は、!MemStorage が選択されます。
+window.uuconfig = { storage: _minimumStorageSize_ } を定義しておくと、最低限必要とする ストレージスペース を byte 数で指定することができます。 要求を満たせないストレージバックエンドは選択されません。十分なストレージスペースを持ったバックエンドが利用できない場合は、!MemStorage が選択されます。
+{{{
+<script>
+    window.uuconfig = { storage: 100 * 1024; }; // require 100kB
+</script>
+<script src="uupaa.js"></script>
+}}}
 
 = 使い方 =
 {{{
