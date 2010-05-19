@@ -98,6 +98,10 @@ window.uuconfig = { storage: _minimumStorageSize_ } を定義すると、最低�
     });
 }}}
 
+= Test Code =
+
+http://uupaa-js.googlecode.com/svn/trunk/0.8/test/Storage/uu.storage.htm
+
 == Appendix A ==
 
 === uu.Class.Storage.key ===
