@@ -446,6 +446,7 @@ function ieStorageSetItem(key,     // @param String:
         this.so[_setAttribute](key, value);
         this.so.save(_storeName);
     } catch(err) {
+        uu.log(err + "");
         return _false;
     }
 
@@ -455,7 +456,11 @@ function ieStorageSetItem(key,     // @param String:
 
 function ieStorageGetLength() { // @return Number: pairs
     this.so.load(_storeName);
-    return (this.so[_getAttribute](_ieIndex) || "").split("\t").length;
+
+    var index = this.so[_getAttribute](_ieIndex) || "";
+
+    return index ? (this.so[_getAttribute](_ieIndex) || "").split("\t").length
+                 : 0;
 }
 
 function ieStorageRemoveItem(key) { // @param String:
@@ -540,7 +545,8 @@ function cookieStorageSetItem(key,     // @param String:
     }
     before += this.store(uu.hash(key, value), _persistDate);
 
-    if (before !== doc.cookie.length) { // before !== after -> !damage!
+    if (before !== doc.cookie.length) { // before !== after
+        uu.log("COOKIE DAMAGE");
         return _false;
     }
     this._shadowCookie[key] = value;
