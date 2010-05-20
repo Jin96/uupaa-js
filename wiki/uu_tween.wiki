@@ -119,4 +119,5 @@ _all_ に true を指定すると、全てのアニメーションキューを�
 uu.tween.isRunning(_node_:Node) は _node_ がアニメーションキューを持ち、アニメーション中なら true を返します。
 
 = Test Code =
-http://uupaa-js.googlecode.com/svn/trunk/0.8/test/Tween/uu.tween.htm
+  * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/Tween/uu.tween.htm
+  * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/Tween/uu.tween.dance.htm
