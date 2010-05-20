@@ -1,5 +1,8 @@
 #summary EventObjectEx は 独自のプロパティを拡張した EventObject です
 
+= このページには古い情報が含まれています =
+
+
 = EventObjectEx =
 
 EventObjectEx は、クロスブラウザ用のプロパティを拡張した !EventObject です。
