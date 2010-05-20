@@ -47,7 +47,7 @@ _param_ にHashを指定すると、一定時間内に変化させるCSSプロ�
 _param_ は { key: endValue, ...  } または { key: `[`endValue, easing`]`, ... } のように指定します。
   * key には color, opacity といった CSSプロパティを指定します。
   * endValue には 文字列または数値を指定します
-    * 現在の値を基準に、増減した値を指定するには "+=100" や "-=100px" とします。
+    * 現在の値を基準に、増減した値を指定するには "+100" や "-100px" とします。
     * top, left, width, height 等のCSSプロパティは px 単位で指定します。em や pt 等は速度的な理由から指定できません。
     * "px" の指定はオプションです。{ width: 100 } と { width: "100px" } は同じ結果になります。
   * _easing_ は文字列で指定します。Math`[`_easing_`]` として解釈します。
@@ -72,9 +72,9 @@ _param_ は { key: endValue, ...  } または { key: `[`endValue, easing`]`, ...
 === 位置の変化 ===
 位置(left, top)を連続的に変化させます。変化方法も指定します。x, y は left, top の別名です。
 {{{
-    // left と top を 500ms かけて left = 100, top += 200(現在位置 + 200) の位置に連続的に変化させる
+    // left と top を 500ms かけて left = 100, top + 200(現在位置 + 200) の位置に連続的に変化させる
     // top は Math.easeInOutQuad の計算結果を使用する
-    uu("div").css({ x: 0 }).tween(500, { x: 100, y: ["+=200", "easeInOutQuad"] });
+    uu("div").css({ x: 0 }).tween(500, { x: 100, y: ["+200", "easeInOutQuad"] });
 }}}
 
 === 大きさの変化 ===
