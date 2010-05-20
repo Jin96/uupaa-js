@@ -11,9 +11,8 @@ uu.tween() と NodeSet.tween() は uupaa.js に最初から組み込まれてい
 easing 関数を利用するには以下のファイルが必要です。
   * src/Tween/easing.js
 
-easing.js をロードすると、以下の機能が追加されます。
-  * Math.linear
-  * Math.linearTween
+easing.js をロードすると、以下の関数が追加されます。
+  * Math.linear, Math.linearTween
   * Math.easeInQuad, Math.easeOutQuad, Math.easeInOutQuad
   * Math.easeInCubic, Math.easeOutCubic, Math.easeInOutCubic, Math.easeOutInCubic
   * Math.easeInQuart, Math.easeOutQuart, Math.easeInOutQuart, Math.easeOutInQuart
