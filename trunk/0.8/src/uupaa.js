@@ -50,7 +50,11 @@ doc.html || (doc.html = _rootNode);        // document.html = <html>
 doc.head || (doc.head = uutag("head")[0]); // document.head = <head>
 
 // --- LIBRARY STRUCTURE ---
-uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/String/window, arg1:NodeSet/Node/Mix = void, arg2:Mix = void, arg3:Mix = void, arg4:Mix = void):Instance/NodeSet
+uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/String/window,
+                                    //    arg1:NodeSet/Node/Mix = void,
+                                    //    arg2:Mix = void,
+                                    //    arg3:Mix = void,
+                                    //    arg4:Mix = void):Instance/NodeSet
                                     //  [1][Class factory]   uu("MyClass", arg1, arg2) -> new uu.Clas.MyClass(arg1, arg2)
                                     //  [2][NodeSet factory] uu("div>ul>li", <body>) -> NodeSet
     config:   uuarg(win.uuconfig, { // uu.config - Hash: user configurations
@@ -85,7 +89,8 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Stri
     isFunction:     isFunction,     // uu.isFunction(search:Mix):Boolean
     // --- HASH / ARRAY ---
     arg:            uuarg,          // uu.arg(arg1:Hash = {}, arg2:Hash, arg3:Hash = void):Hash
-    mix:            uumix,          // uu.mix(base:Hash, flavor:Hash, aroma:Hash = void, override:Boolean = true):Hash
+    mix:            uumix,          // uu.mix(base:Hash, flavor:Hash, aroma:Hash = void,
+                                    //        override:Boolean = true):Hash
     each:           uueach,         // uu.each(source:Hash/Array, evaluator:Function)
     keys:           uukeys,         // uu.keys(source:Hash/Array):Array
     values:         uuvalues,       // uu.values(source:Hash/Array):Array
@@ -98,7 +103,9 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Stri
         clone:      uuclone,        //   uu.hash.clone(source:Hash):Hash
         indexOf:    uuindexof       // uu.hash.indexOf(source:Hash, search:Mix):String/void
     }),
-    array:    uumix(uuarray, {      // uu.array(source:Array/Mix/NodeList/Arguments, sliceStart:Number = void, sliceEnd:Number = void):Array
+    array:    uumix(uuarray, {      // uu.array(source:Array/Mix/NodeList/Arguments,
+                                    //          sliceStart:Number = void,
+                                    //          sliceEnd:Number = void):Array
                                     //  [1][through Array]      uu.array([1, 2])    -> [1, 2]
                                     //  [2][mix to Array]       uu.array(mix)       -> [mix]
                                     //  [3][NodeList to Array]  uu.array(NodeList)  -> [node, ...]
@@ -118,13 +125,15 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Stri
         unique:     uuunique        // uu.array.unique(source:Array, literalOnly:Boolean = false):Array
     }),
     // --- ATTRIBUTE ---
-    attr:           uuattr,         // uu.attr(node:Node, key:String/Hash = void, value:String = void):String/Hash/Node
+    attr:           uuattr,         // uu.attr(node:Node, key:String/Hash = void,
+                                    //                    value:String = void):String/Hash/Node
                                     //  [1][get all pair]   uu.attr(node) -> { key: value, ... }
                                     //  [2][get value]      uu.attr(node, key) -> "value"
                                     //  [3][set pair]       uu.attr(node, key, "value") -> node
                                     //  [4][set pair]       uu.attr(node, { key: "value", ... }) -> node
                                     //  [5][remove attr]    uu.attr(node, key, null) -> node
-    data:     uumix(uudata, {       // uu.data(node:Node, key:String/Hash = void, value:Mix: = void):Hash/Mix/Node/undefined
+    data:     uumix(uudata, {       // uu.data(node:Node, key:String/Hash = void,
+                                    //                    value:Mix: = void):Hash/Mix/Node/undefined
                                     //  [1][get all pair]   uu.data(node) -> { key: value, ... }
                                     //  [2][get value]      uu.data(node, key) -> value
                                     //  [3][set pair]       uu.data(node, key, value) -> node
@@ -137,9 +146,10 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Stri
     }),
 
     // --- CSS / STYLE / STYLESHEET / VIEW PORT ---
-    css:      uumix(uucss, {        // uu.css(node:Node, key:Boolean/String/Hash = void, value:String = void):Hash/String/Node
+    css:      uumix(uucss, {        // uu.css(node:Node, key:Boolean/String/Hash = void,
+                                    //                   value:String = void):Hash/String/Node
                                     //  [1][getComputedStyle(or currentStyle)] uu.css(node)       -> { key: value, ... }
-                                    //  [2][getComputedStyle(or emulate API) ] uu.css(node, true) -> { key: value, ... }
+                                    //  [2][getComputedStyle(+ px unitize)   ] uu.css(node, true) -> { key: value, ... }
                                     //  [3][get value]                         uu.css(node, key)  -> value
                                     //  [4][set pair]                          uu.css(node, key, value) -> node
                                     //  [5][set pair]                          uu.css(node, { key: value, ... }) -> node
@@ -147,14 +157,18 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Stri
         setOpacity: setOpacity      // uu.css.setOpacity(node:Node, value:Number/String):Node
     }),
     style:          uustyle,        // uu.style(id:String):StyleSheet
-    unit:           uuunit,         // uu.unit(node:Node, value:Number/CSSUnitString, quick:Boolean = false, prop:String = "left"):Number
+    unit:           uuunit,         // uu.unit(node:Node, value:Number/CSSUnitString,
+                                    //                    quick:Boolean = false,
+                                    //                    prop:String = "left"):Number
                                     //  [1][convert pixel]  uu.unit(<div>, 123) -> 123
                                     //  [2][convert pixel]  uu.unit(<div>, "12px") -> 12
                                     //  [3][convert pixel]  uu.unit(<div>, "12em") -> 192
                                     //  [4][convert pixel]  uu.unit(<div>, "12pt") -> 16
                                     //  [5][convert pixel]  uu.unit(<div>, "auto") -> 100
                                     //  [6][convert pixel]  uu.unit(<div>, "auto", 0, "borderTopWidth") -> 0
-    tween:    uumix(uutween, {      // uu.tween(node:Node, duration:Number, param:Hash = void, callback:Function = void):Node
+    tween:    uumix(uutween, {      // uu.tween(node:Node, duration:Number,
+                                    //                     param:Hash = void,
+                                    //                     callback:Function = void):Node
                                     //  [1][abs]            uu.tween(node, 500, { o: 0.5, x: 200 })
                                     //  [2][rel]            uu.tween(node, 500, { h: "+100", o: "+0.5" })
                                     //  [3][with "px" unit] uu.tween(node, 500, { h: "-100px" })
@@ -190,7 +204,8 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Stri
         MsgPump:    MsgPump
     }),
     // --- EVENT / LIVE EVENT ---
-    event:    uumix(uuevent, {      // uu.event(node:Node, eventTypeEx:EventTypeExString, evaluator:Function/Instance):Node
+    event:    uumix(uuevent, {      // uu.event(node:Node, eventTypeEx:EventTypeExString,
+                                    //                     evaluator:Function/Instance):Node
                                     //  [1][bind a event]            uu.event(node, "click", fn)             -> node
                                     //  [2][bind multi events]       uu.event(node, "click,dblclick", fn)    -> node
                                     //  [3][bind a capture event]    uu.event(node, "mousemove+", fn)        -> node
@@ -198,15 +213,19 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Stri
         has:        uueventhas,     // uu.event.has(node:Node, eventTypeEx:EventTypeExString):Boolean
         fire:       uueventfire,    // uu.event.fire(node:Node, eventType:String, param:Mix = void):Node
         unbind:     uueventunbind,  // uu.event.unbind(node:Node, eventTypeEx:EventTypeExString = void):Node
-        attach:     uueventattach,  // uu.event.attach(node:Node, eventType:String, evaluator:Function, useCapture:Boolean = false)
-        detach:     uueventdetach,  // uu.event.detach(node:Node, eventType:String, evaluator:Function, useCapture:Boolean = false)
+        attach:     uueventattach,  // uu.event.attach(node:Node, eventType:String, evaluator:Function,
+                                    //                                              useCapture:Boolean = false)
+        detach:     uueventdetach,  // uu.event.detach(node:Node, eventType:String, evaluator:Function,
+                                    //                                              useCapture:Boolean = false)
         getKeyCode: getKeyCode,     // uu.event.getKeyCode(event:EventObjectEx):Hash { key, code }
         getPaddingEdge:             // uu.event.getPaddingEdge(event:EventObjectEx):Hash { x, y }
                     getPaddingEdge
     }),
-    live:     uumix(uulive, {       // uu.live("css > selector", "namespace.click", evaluator)
-        has:        uulivehas,      // uu.live.has("css > selector", "namespace.click") -> Boolean
-        unbind:     uuliveunbind    // uu.live.unbind("css > selector" = void 0, "namespace.click" = void 0)
+    live:     uumix(uulive, {       // uu.live(cssSelector:String, eventTypeEx:EventTypeExString,
+                                    //                             evaluator:Function/Instance)
+                                    //  [1][bind] uu.live("css > selector", "namespace.click", callback)
+        has:        uulivehas,      // uu.live.has(cssSelector:String, eventTypeEx:EventTypeExString):Boolean
+        unbind:     uuliveunbind    // uu.live.unbind(cssSelector:String = void, eventTypeEx:EventTypeExString = void)
                                     //  [1][unbind all]           uu.live.unbind()
                                     //  [2][unbind all]           uu.live.unbind("selector")
                                     //  [3][unbind one]           uu.live.unbind("selector", "click")
@@ -215,7 +234,8 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Stri
     }),
     // --- NODE / NodeList ---
     svg:            uusvg,          //  uu.svg(tagName:String = "svg", attr:Hash = void):SVGNode
-    node:     uumix(uunode, {       // uu.node(tagName:String = "div", var_args:Node/String/Number/Hash = void, ...):Node
+    node:     uumix(uunode, {       // uu.node(tagName:String = "div",
+                                    //         var_args:Node/String/Number/Hash = void, ...):Node
         add:        uunodeadd,      // uu.node.add(source:Node/DocumentFragment/HTMLFragment/TagName = "div",
                                     //             context:Node = <body>,
                                     //             position:String = ".$"):Node
@@ -244,8 +264,8 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Stri
                                     //  [2][find prevSibling]  uu.node.find(document.body, "-") -> <head>
                                     //  [3][find nextSibling]  uu.node.find(document.head, "+") -> <body>
                                     //  [4][find lastSibling]  uu.node.find(document.head, "$") -> <body>
-                                    //  [5][find firstChild]   uu.node.find(document.body, ".^") -> <h1> in <body><h1></h1><div></div></body>
-                                    //  [6][find lastChild]    uu.node.find(document.body, ".$") -> <div> in <body><h1></h1><div></div></body>
+                                    //  [5][find firstChild]   uu.node.find(document.body, ".^") -> <h1>  in <body><h1 /><div /></body>
+                                    //  [6][find lastChild]    uu.node.find(document.body, ".$") -> <div> in <body><h1 /><div /></body>
         swap:       uunodeswap,     // uu.node.swap(swapin:Node, swapout:Node):Node (swapout node)
         wrap:       uunodewrap,     // uu.node.wrap(innerNode:Node, outerNode:Node):Node (innerNode)
         clear:      uunodeclear,    // uu.node.clear(parent:Node):Node
@@ -301,7 +321,8 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Stri
         decode:     uuentitydecode  // uu.entity.decode(str:String):String
     }),
     // --- JSON ---
-    json:     uumix(uujson, {       // uu.json(source:Mix, useNativeJSON:Boolean = false, callback:Function = void):JSONString
+    json:     uumix(uujson, {       // uu.json(source:Mix, useNativeJSON:Boolean = false,
+                                    //                     callback:Function = void):JSONString
         decode:     uujsondecode    // uu.json.decode(jsonString:JSONString, useNativeJSON:Boolean = false):Mix/Boolean
     }),
     // --- DATE ---
@@ -1043,7 +1064,7 @@ function undataunbind(key) { // @param String: "data-uu..."
 
 // --- css ---
 //  [1][getComputedStyle(or currentStyle)] uu.css(node)       -> { key: value, ... }
-//  [2][getComputedStyle(or emulate API) ] uu.css(node, true) -> { key: value, ... }
+//  [2][getComputedStyle(+ px unitize)   ] uu.css(node, true) -> { key: value, ... }
 //  [3][get value]                         uu.css(node, key)  -> value
 //  [4][set pair]                          uu.css(node, key, value) -> node
 //  [5][set pair]                          uu.css(node, { key: value, ... }) -> node
@@ -3409,9 +3430,11 @@ NodeSet[_prototype] = {
     klass:          NodeSetKlass,       // NodeSet.klass(expression:String = ""):NodeSet
 //  html:           NodeSetHTML,        // NodeSet.html(html:HTMLFragment = ""):NodeSet/StringArray
 //  text:           NodeSetText,        // NodeSet.text(text:String = ""):NodeSet/StringArray
-//  bind:           NodeSetBind,        // NodeSet.bind(eventTypeEx:EventTypeExString, evaluator:Function/Instance) -> NodeSet
-//  unbind:         NodeSetUnbind,      // NodeSet.unbind(eventTypeEx:EventTypeExString) -> NodeSet
-//  tween:          NodeSetTween,       // NodeSet.tween(duration:Number, param:Hash, callback:Function = void) -> NodeSet
+//  bind:           NodeSetBind,        // NodeSet.bind(eventTypeEx:EventTypeExString, evaluator:Function/Instance):NodeSet
+//  unbind:         NodeSetUnbind,      // NodeSet.unbind(eventTypeEx:EventTypeExString):NodeSet
+//  tween:          NodeSetTween,       // NodeSet.tween(duration:Number, param:Hash, callback:Function = void):NodeSet
+//  live:           NodeSetLive,        // NodeSet.live(cssSelector:String, eventTypeEx:EventTypeExString, evaluator:Function/Instance):NodeSet
+//  unlive:         NodeSetUnlive,      // NodeSet.unlive(cssSelector:String = void, eventTypeEx:EventTypeExString = void):NodeSet
     iter:           NodeSetIter         // [PROTECTED]
 };
 uu.nodeSet = NodeSet[_prototype];       // uu.nodeset - uu.Class.NodeSet.prototype alias
