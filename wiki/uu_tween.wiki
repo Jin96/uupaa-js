@@ -98,10 +98,10 @@ uu.tween(_node_, _duration_) とすることで、_duration_ の間だけ何も�
 }}}
 
 == uu.tween.skip ==
-uu.tween.skip(_node_:Node = void, _all_:Boolean = false):Node/!NodeArray は、_node_ のキューに積まれたアニメーションを一つだけスキップし _node_ を返します。
+uu.tween.skip(_node_:Node = null, _all_:Boolean = false):Node/!NodeArray は、_node_ のキューに積まれたアニメーションを一つだけスキップし _node_ を返します。
 スキップすると、各CSSプロパティの値は、アニメーション開始時にuu.tween で指定した endValue の値になります。
 
-_node_ に 0 や null, undefined を指定すると、アニメーションキューを持つ全てのノードを一つだけスキップし、!NodeArray を返します。
+_node_ が falsy(0, null, undefined) なら、アニメーションキューを持つ全てのノードを一つだけスキップし、!NodeArray を返します。
 _all_ に true を指定すると、全てのアニメーションキューをスキップします。
 {{{
     // node のアニメーションを一つスキップする
