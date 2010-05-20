@@ -31,9 +31,13 @@ var _prototype = "prototype",
     _nextSibling = "nextSibling",
     _parentNode = "parentNode",
     _firstChild = "firstChild",
+    _visibility = "visibility",
     _lastChild = "lastChild",
     _replace = "replace",
     _indexOf = "indexOf",
+    _display = "display",
+    _number = "number",
+    _string = "string",
     _false = !1,
     _true = !0,
     _nop = function() {},
@@ -150,9 +154,12 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Stri
                                     //                   value:String = void):Hash/String/Node
                                     //  [1][getComputedStyle(or currentStyle)] uu.css(node)       -> { key: value, ... }
                                     //  [2][getComputedStyle(+ px unitize)   ] uu.css(node, true) -> { key: value, ... }
-                                    //  [3][get value]                         uu.css(node, key)  -> value
-                                    //  [4][set pair]                          uu.css(node, key, value) -> node
-                                    //  [5][set pair]                          uu.css(node, { key: value, ... }) -> node
+                                    //  [3][get node.style value]              uu.css(node, key)  -> value
+                                    //  [4][set node.style pair]               uu.css(node, key, value) -> node
+                                    //  [5][set node.style pair]               uu.css(node, { key: value, ... }) -> node
+        show:       uucssshow,      // uu.css.show(node:Node, duration:Number = 0, displayValue:String= "block"):Node
+        hide:       uucsshide,      // uu.css.hide(node:Node, duration:Number = 0):Node
+        isShown:    uucssisshown,   // uu.css.isShown(node:Node/CSSProperties):Boolean
         getOpacity: getOpacity,     // uu.css.getOpacity(node:Node):Number
         setOpacity: setOpacity      // uu.css.setOpacity(node:Node, value:Number/String):Node
     }),
@@ -168,13 +175,15 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Stri
                                     //  [6][convert pixel]  uu.unit(<div>, "auto", 0, "borderTopWidth") -> 0
     tween:    uumix(uutween, {      // uu.tween(node:Node, duration:Number,
                                     //                     param:Hash = void,
-                                    //                     callback:Function = void):Node
-                                    //  [1][abs]            uu.tween(node, 500, { o: 0.5, x: 200 })
-                                    //  [2][rel]            uu.tween(node, 500, { h: "+100", o: "+0.5" })
-                                    //  [3][with "px" unit] uu.tween(node, 500, { h: "-100px" })
-                                    //  [4][with easing fn] uu.tween(node, 500, { h: [200, "easeInOutQuad"] })
-                                    //  [5][set fps]        uu.tween(node, 500, { fps: 30, w: 40 })
-                                    //  [6][standby]        uu.tween(node, 2000)
+                                    //                     callback:Function/FunctionArray = void):Node
+                                    //  [1][abs]             uu.tween(node, 500, { o: 0.5, x: 200 })
+                                    //  [2][rel]             uu.tween(node, 500, { h: "+100", o: "+0.5" })
+                                    //  [3][with "px" unit]  uu.tween(node, 500, { h: "-100px" })
+                                    //  [4][with easing fn]  uu.tween(node, 500, { h: [200, "easeInOutQuad"] })
+                                    //  [5][set fps]         uu.tween(node, 500, { fps: 30, w: 40 })
+                                    //  [6][standby]         uu.tween(node, 2000)
+                                    //  [7][after callback]  uu.tween(node, 500, { o: 1 }, afterCallback)
+                                    //  [8][before callback] uu.tween(node, 500, { o: 1 }, [afterCallback, beforeCallback])
         skip:       uutweenskip,    // uu.tween.skip(node:Node = null, all:Boolean = false):Node/NodeArray
         isRunning:                  // uu.tween.isRunning(node:Node):Boolean
                     uutweenisrunning
@@ -203,7 +212,7 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Stri
         NodeSet:    NodeSet,
         MsgPump:    MsgPump
     }),
-    // --- EVENT / LIVE EVENT ---
+    // --- EVENT ---
     event:    uumix(uuevent, {      // uu.event(node:Node, eventTypeEx:EventTypeExString,
                                     //                     evaluator:Function/Instance):Node
                                     //  [1][bind a event]            uu.event(node, "click", fn)             -> node
@@ -220,17 +229,6 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Stri
         getKeyCode: getKeyCode,     // uu.event.getKeyCode(event:EventObjectEx):Hash { key, code }
         getPaddingEdge:             // uu.event.getPaddingEdge(event:EventObjectEx):Hash { x, y }
                     getPaddingEdge
-    }),
-    live:     uumix(uulive, {       // uu.live(cssSelector:String, eventTypeEx:EventTypeExString,
-                                    //                             evaluator:Function/Instance)
-                                    //  [1][bind] uu.live("css > selector", "namespace.click", callback)
-        has:        uulivehas,      // uu.live.has(cssSelector:String, eventTypeEx:EventTypeExString):Boolean
-        unbind:     uuliveunbind    // uu.live.unbind(cssSelector:String = void, eventTypeEx:EventTypeExString = void)
-                                    //  [1][unbind all]           uu.live.unbind()
-                                    //  [2][unbind all]           uu.live.unbind("selector")
-                                    //  [3][unbind one]           uu.live.unbind("selector", "click")
-                                    //  [4][unbind namespace all] uu.live.unbind("selector", "namespace.*")
-                                    //  [5][unbind namespace one] uu.live.unbind("selector", "namespace.click")
     }),
     // --- NODE / NodeList ---
     svg:            uusvg,          //  uu.svg(tagName:String = "svg", attr:Hash = void):SVGNode
@@ -453,7 +451,7 @@ function uufactory(expression, // @param NodeSet/Node/NodeArray/String/window: e
                    arg4) {     // @param Mix(= void): ClassName.init arg4
                                // @return Instance/NodeSet:
     // class factory
-    if (typeof expression === "string" && uuclass[expression]) {
+    if (typeof expression === _string && uuclass[expression]) {
         return new uuclass[expression](arg1, arg2, arg3, arg4);
     }
     // NodeSet factory
@@ -611,13 +609,13 @@ uutype.types = {
 // uu.isNumber - is number
 function isNumber(search) { // @param Mix: search
                             // @return Boolean:
-    return typeof search === "number";
+    return typeof search === _number;
 }
 
 // uu.isString - is string
 function isString(search) { // @param Mix: search
                             // @return Boolean:
-    return typeof search === "string";
+    return typeof search === _string;
 }
 
 // uu.isFunction - is function
@@ -1065,9 +1063,9 @@ function undataunbind(key) { // @param String: "data-uu..."
 // --- css ---
 //  [1][getComputedStyle(or currentStyle)] uu.css(node)       -> { key: value, ... }
 //  [2][getComputedStyle(+ px unitize)   ] uu.css(node, true) -> { key: value, ... }
-//  [3][get value]                         uu.css(node, key)  -> value
-//  [4][set pair]                          uu.css(node, key, value) -> node
-//  [5][set pair]                          uu.css(node, { key: value, ... }) -> node
+//  [3][get node.style value]              uu.css(node, key)  -> value
+//  [4][set node.style pair]               uu.css(node, key, value) -> node
+//  [5][set node.style pair]               uu.css(node, { key: value, ... }) -> node
 
 // uu.css - css accessor
 function uucss(node,    // @param Node:
@@ -1090,7 +1088,7 @@ function uucss(node,    // @param Node:
     fix = uufix.db;
     if (arguments.length === 3) { // [4] uu.css(node, key, value)
         key = uuhash(key, value);
-    } else if (typeof key === "string") { // [3] uu.css(node, key)
+    } else if (typeof key === _string) { // [3] uu.css(node, key)
 //{{{!mb
         if (getComputedStyle) {
 //}}}!mb
@@ -1108,7 +1106,7 @@ function uucss(node,    // @param Node:
         value = key[informal];
         formal = fix[informal] || informal; // formal = "textAlign"
 
-        if (typeof value === "number") {
+        if (typeof value === _number) {
             if (formal === "opacity") {
                 setOpacity(node, value);
                 continue;
@@ -1126,12 +1124,14 @@ uucss.care = {
     lineHeight: 1, fontWeight: 1, zIndex: 1
 };
 
-//  [1][abs]            uu.tween(node, 500, { o: 0.5, x: 200 })
-//  [2][rel]            uu.tween(node, 500, { h: "+100", o: "+0.5" })
-//  [3][with "px" unit] uu.tween(node, 500, { h: "-100px" })
-//  [4][with easing fn] uu.tween(node, 500, { h: [200, "easeInOutQuad"] })
-//  [5][set fps]        uu.tween(node, 500, { fps: 30, w: 40 })
-//  [6][standby]        uu.tween(node, 2000)
+//  [1][abs]             uu.tween(node, 500, { o: 0.5, x: 200 })
+//  [2][rel]             uu.tween(node, 500, { h: "+100", o: "+0.5" })
+//  [3][with "px" unit]  uu.tween(node, 500, { h: "-100px" })
+//  [4][with easing fn]  uu.tween(node, 500, { h: [200, "easeInOutQuad"] })
+//  [5][set fps]         uu.tween(node, 500, { fps: 30, w: 40 })
+//  [6][standby]         uu.tween(node, 2000)
+//  [7][after callback]  uu.tween(node, 500, { o: 1 }, afterCallback)
+//  [8][before callback] uu.tween(node, 500, { o: 1 }, [afterCallback, beforeCallback])
 
 // uu.tween - add queue
 function uutween(node,       // @param Node: animation target node
@@ -1140,22 +1140,24 @@ function uutween(node,       // @param Node: animation target node
                              //     key      - CSSPropertyString/String: "color", "opacity"
                              //     endValue - String/Number: end value, "red", "+0.5", "+100px"
                              //     easing   - String: easing function name, "easeInOutQuad"
-                 callback) { // @param Function(= void): after callback(node, style)
+                 callback) { // @param Function/FunctionArray(= void): after callback(node, style)
+                             //                                        [after, before] callback
                              // @return Node:
     function loop() {
         var data = node[_uutween], q = data.q[0], style = node.style,
             tm = q.tm ? +new Date
-                      : (q.js = q.param ? uutweenbuild(node, q.param)
+                      : (q.fn[1] && q.fn[1](node, style), // before callback(node, node.style)
+                         q.js = q.param ? uutweenbuild(node, q.param)
                                         : _nop, q.tm = +new Date),
             finished = q.fin || (tm >= q.tm + q.dur);
 
         q.js(node, style, finished, tm - q.tm, q.dur); // js(node, node.style, finished, gain, duration)
         if (finished) { // finished
-            q.fn && q.fn(node, style); // after callback(node, node.style)
+            q.fn[0] && q.fn[0](node, style); // after callback(node, node.style)
             data.q.shift(); // remove first queue data
             data.q.length || (clearInterval(data.id),
                               data.id = 0,
-                              q.fin && (style.visibility = "")); // avoid flicker
+                              q.fin && (style[_visibility] = "visible")); // avoid flicker
         }
     }
 
@@ -1165,9 +1167,10 @@ function uutween(node,       // @param Node: animation target node
     data || (node[_uutween] = data = { q: [], id: 0 }); // init tween queue
 
     // append queue data
-    data.q.push({ tm: 0, fn: callback, dur: Math.max(duration, 1),
+    data.q.push({ tm: 0, fn: uuarray(callback || 0),
+                  dur: Math.max(duration, 1),
                   param: param, fin: 0 }); // true/1 is finished
-    data.id || (data.id = setInterval(loop, ((1000 / fps) | 0) || 1));
+    data.id || (data.id = setInterval(loop, ((1000 / fps) | 0) || 1)); // [IE] setInterval(0) is Error
     return node;
 }
 uutween.props = { opacity: 1, color: 2, backgroundColor: 2,
@@ -1189,62 +1192,64 @@ function uutweenbuild(node, param) {
     }
 
     var rv = 'var t,b,c,d2=d/2,w,o,gd,h;',
-        i, v0, v1, ez, w, n, fixdb = uufix.db, cs = uucss(node, _true);
+        i, startValue, endValue, ez, w, n,
+        fixdb = uufix.db, cs = uucss(node, _true);
 
     for (i in param) {
         if (i !== "fps") {
             ez = 0;
-            _isArray(param[i]) ? (v1 = param[i][0], ez = param[i][1]) // val, easing
-                               : (v1 = param[i]); // param.val
+            _isArray(param[i]) ? (endValue = param[i][0], ez = param[i][1]) // val, easing
+                               : (endValue = param[i]); // param.val
 
             switch (n = uutween.props[w = fixdb[i] || i]) {
             case 1: // opacity
-                v0 = getOpacity(node);
+                startValue = getOpacity(node);
 //{{{!mb
                 // init opacity [IE6][IE7][IE8]
-                uuready.opacity || setOpacity(node, v0);
+                uuready.opacity || (setOpacity(node, startValue),
+                                    node.style[_visibility] = "visible"); // BugFix
 //}}}!mb
-                v1 = unitNormalize(v0, v1, parseFloat);
+                endValue = unitNormalize(startValue, endValue, parseFloat);
                 rv += uuformat('o=??;o=(o>0.999)?1:(o<0.001)?0:o;',
-                               ezfn(v0, v1, ez));
+                               ezfn(startValue, endValue, ez));
 //{{{!mb
                 if (!uuready.opacity) { // [IE6][IE7][IE8]
                     rv += uuformat('s.filter=((o>0&&o<1)?"alpha(??="+(o*100)+")":"");' +
                                    'f&&uu.css.setOpacity(n,??)&&(s.filter+=" ??");',
-                                   w, v1, node.style.filter[_replace](uutween.alpha, ""));
+                                   w, endValue, node.style.filter[_replace](uutween.alpha, ""));
                 } else {
 //}}}!mb
-                    rv += uuformat('s.??=f? ??:o;', w, v1);
+                    rv += uuformat('s.??=f? ??:o;', w, endValue);
 //{{{!mb
                 }
 //}}}!mb
                 break;
             case 2: // color, backgroundColor
-                v0 = uu.color(cs[w]); // depend: uu.color.js
-                v1 = uu.color(v1);    // depend: uu.color.js
+                startValue = uu.color(cs[w]);    // depend: uu.color.js
+                endValue   = uu.color(endValue); // depend: uu.color.js
                 rv += uuformat('gd=g/d;h=uu.hash.num2hh;s.??="#"+' +
                                '(h[(f? ??:(??-??)*gd+??)|0]||0)+' +
                                '(h[(f? ??:(??-??)*gd+??)|0]||0)+' +
                                '(h[(f? ??:(??-??)*gd+??)|0]||0);',
-                               w, v1.r, v1.r, v0.r, v0.r,
-                                  v1.g, v1.g, v0.g, v0.g,
-                                  v1.b, v1.b, v0.b, v0.b);
+                               w, endValue.r, endValue.r, startValue.r, startValue.r,
+                                  endValue.g, endValue.g, startValue.g, startValue.g,
+                                  endValue.b, endValue.b, startValue.b, startValue.b);
                 break;
             case 3: // width, height:
-                v0 = parseInt(cs[w]) || 0;
-                v1 = unitNormalize(v0, v1, parseInt);
+                startValue = parseInt(cs[w]) || 0;
+                endValue   = unitNormalize(startValue, endValue, parseInt);
                 rv += uuformat('w=f? ??:??;w=w<0?0:w;s.??=(w|0)+"px";',
-                               v1, ezfn(v0, v1, ez), w);
+                               endValue, ezfn(startValue, endValue, ez), w);
                 break;
             default: // top, left, other...
                 if (n === 4) { // 4: left, top
-                    v0 = (w === "top") ? node.offsetTop : node.offsetLeft;
+                    startValue = (w === "top") ? node.offsetTop : node.offsetLeft;
                 } else {
-                    v0 = parseInt(cs[w]) || 0;
+                    startValue = parseInt(cs[w]) || 0;
                 }
-                v1 = unitNormalize(v0, v1, parseInt);
+                endValue = unitNormalize(startValue, endValue, parseInt);
                 rv += uuformat('s.??=((f? ??:??)|0)+"px";',
-                               w, v1, ezfn(v0, v1, ez));
+                               w, endValue, ezfn(startValue, endValue, ez));
             }
         }
     }
@@ -1263,7 +1268,7 @@ function uutweenskip(node,  // @param Node(= null): null is all node
         if (data && data.id) {
             for (j = 0, jz = all ? data.q.length : 1; j < jz; ++j) {
                 data.q[j].fin = 1; // finished bit
-                all && (v.style.visibility = "hidden"); // avoid flicker
+                all && (v.style[_visibility] = "hidden"); // avoid flicker
             }
         }
     }
@@ -1312,7 +1317,7 @@ function setOpacity(node,      // @param Node:
 //}}}!mb
 
     // relative
-    if (typeof opacity === "string") { // "+0.1" or "-0.1"
+    if (typeof opacity === _string) { // "+0.1" or "-0.1"
         opacity = getOpacity(node) + parseFloat(opacity);
     }
 
@@ -1323,7 +1328,7 @@ function setOpacity(node,      // @param Node:
 //{{{!mb
     if (!uuready.opacity) {
         node["data-uuopacity"] = opacity + 1; // (1.0 ~ 2.0)
-        style.visibility = opacity ? "" : "hidden";
+        style[_visibility] = opacity ? "visible" : "hidden";
         style.filter = ((opacity > 0 && opacity < 1)
                      ? "alpha(opacity=" + (opacity * 100) + ") " : "")
                      + style.filter[_replace](setOpacity.alpha, "");
@@ -1334,6 +1339,51 @@ function setOpacity(node,      // @param Node:
 //{{{!mb
 setOpacity.alpha = /^alpha\([^\x29]+\) ?/;
 //}}}!mb
+
+// uu.css.show - show node
+function uucssshow(node,           // @param Node:
+                   duration,       // @param Number(= 0): fadein tween duration
+                   displayValue) { // @param String(= "block"): applied at display "none"
+                                   // @return Node:
+    var cs = uucss(node), disp = displayValue || "block",
+        w = cs.width, h = cs.height, o = getOpacity(node) || 1;
+
+//{{{!mb
+    // [Opera] getComputedStyle(node).display === "none" -> width and height = "0px"
+    if (cs[_display] === "none" && w === "0px" && w === h) { // [Opera] fix
+        node.style[_display] = disp;
+        cs = uucss(node);
+        w = cs.width;
+        h = cs.height;
+        node.style[_display] = "none";
+    }
+//}}}!mb
+    return uutween(node, duration || 0, { w: w, h: h, o: o },
+        [_nop, function(node, style) {
+            setOpacity(node, 0);
+            style.width = style.height = "0";
+            style[_visibility] = "visible";
+            if (uucss(node)[_display] === "none") {
+                style[_display] = disp;
+            }
+        }]);
+}
+
+// uu.css.hide - hide node
+function uucsshide(node,       // @param Node:
+                   duration) { // @param Number(= 0): fadeout tween duration
+                               // @return Node:
+    uucssisshown(node) || (node.style[_display] = "none");
+    return uutween(node, duration || 0, { w: 0, h: 0, o: 0 });
+}
+
+// uu.css.isShown
+function uucssisshown(node) { // @param Node/CSSProperties:
+                              // @return Boolean:
+    var style = node.nodeType ? uucss(node) : node;
+
+    return style[_display] !== "none" && style[_visibility] !== "hidden";
+}
 
 // uu.style - create StyleSheet handler class
 function uustyle(id) { // @param String(= ""): style sheet id
@@ -1422,14 +1472,14 @@ function uuunit(node,   // @param Node: context
                 prop) { // @param String(= "left"): property
     prop = prop || "left";
 
-    var fontSize, ratio, units = uuunit.units, _float = parseFloat;
+    var fontSize, ratio, _float = parseFloat;
 
-    if (typeof value === "number") {
+    if (typeof value === _number) {
         return value;
     }
 
     // "123px" -> 123
-    if (units.px.test(value)) {
+    if (uuunit.px.test(value)) {
         return parseInt(value) || 0;
     }
     if (value === "auto") {
@@ -1440,17 +1490,16 @@ function uuunit(node,   // @param Node: context
     if (!quick) {
         return uuunit.calc(node, prop, value);
     }
-    if (units.pt.test(value)) {
+    if (uuunit.pt.test(value)) {
         return (_float(value) * 4 / 3) | 0; // 12pt * 1.333 = 16px
-    } else if (units.em.test(value)) {
+    } else if (uuunit.em.test(value)) {
         fontSize = uucss(node).fontSize;
-        ratio = units.pt.test(fontSize) ? 4 / 3 : 1;
+        ratio = uuunit.pt.test(fontSize) ? 4 / 3 : 1;
         return (_float(value) * _float(fontSize) * ratio) | 0;
     }
     return parseInt(value) || 0;
 }
-uuunit.calc = _calcPixel;
-uuunit.units = { px: /px$/, pt: /pt$/, em: /em$/ };
+uumix(uuunit, { px: /px$/, pt: /pt$/, em: /em$/, calc: _calcPixel });
 
 // inner - convert unit
 function _calcPixel(node,    // @param Node:
@@ -1458,7 +1507,6 @@ function _calcPixel(node,    // @param Node:
                     value) { // @param CSSUnitString: "10em", "10pt", "10px", "auto"
                              // @return Number: pixel value
     var style = node.style, mem = [style.left, 0, 0], // [left, position, display]
-        display = "display",
         position = "position",
         important = "important",
         setProperty = "setProperty",
@@ -1467,9 +1515,9 @@ function _calcPixel(node,    // @param Node:
 
     if (_webkit) {
         mem[1] = style[getPropertyValue](position);
-        mem[2] = style[getPropertyValue](display);
+        mem[2] = style[getPropertyValue](_display);
         style[setProperty](position, "absolute", important);
-        style[setProperty](display,  "block",    important);
+        style[setProperty](_display,  "block",   important);
     }
     style[setProperty](prop, value, important);
     // get pixel
@@ -1479,9 +1527,9 @@ function _calcPixel(node,    // @param Node:
     style[setProperty](prop, mem[0], "");
     if (_webkit) {
         style[removeProperty](position);
-        style[removeProperty](display);
+        style[removeProperty](_display);
         style[setProperty](position, mem[1], "");
-        style[setProperty](display,  mem[2], "");
+        style[setProperty](_display, mem[2], "");
     }
     return value || 0;
 }
@@ -1525,11 +1573,11 @@ function getComputedStyleIE(node) { // @param Node:
         UNITS = { m: 1, t: 2, "%": 3, o: 3 }, // em, pt, %, auto,
         RECTANGLE = { top: 1, left: 2, width: 3, height: 4 },
         fontSize = currentStyle.fontSize,
-        em = parseFloat(fontSize) * (uuunit.units.pt.test(fontSize) ? 4 / 3 : 1),
+        em = parseFloat(fontSize) * (uuunit.pt.test(fontSize) ? 4 / 3 : 1),
         boxProperties = getComputedStyleIE.boxs,
         cache = { "0px": "0px", "1px": "1px", "2px": "2px", "5px": "5px",
                   thin: "1px", medium: "3px",
-                  thick: _ver.ie8 ? "5px" : "6px" }; // [IE6][IE7]
+                  thick: _ver.ie8 ? "5px" : "6px" }; // [IE6][IE7] thick = "6px"
 
     rv = getComputedStyleIE.getProps(currentStyle);
 
@@ -2129,137 +2177,6 @@ function uueventdetach(node,         // @param Node:
                        evaluator,    // @param Function: evaluator
                        useCapture) { // @param Boolean(= false):
     uueventattach(node, eventType, evaluator, useCapture, 1);
-}
-
-// --- LIVE EVENT ---
-// uu.live
-function uulive(selector,    // @param String "css > selector"
-                eventTypeEx, // @param EventTypeExString: "namespace.click"
-                evaluator,   // @param Function/Instance: callback function
-                __data__) {  // @hidden Hash: data for recursive call
-    function _liveClosure(event) { // @param EventObject:
-        var target = event.target
-//{{{!mb
-                                  || event.srcElement || doc;
-//}}}!mb
-
-        event.xtarget = (target.nodeType === 3) ? target[_parentNode]
-                                                : target;
-
-        if (uumatch(selector, event.xtarget)) {
-            event.xtype = (uuevent.xtypes[event.type] || 0) & 255;
-//{{{!mb
-            if (_ie) {
-                if (!event.target) { // [IE6][IE7][IE8]
-                    event.currentTarget = doc;
-                }
-                if (event.pageX === void 0) { // [IE6][IE7][IE8][IE9]
-                    event.pageX = event.clientX + doc.html.scrollLeft;
-                    event.pageY = event.clientY + doc.html.scrollTop;
-                }
-            }
-//}}}!mb
-            instance ? handler.call(evaluator, event) : evaluator(event);
-        }
-    }
-
-    var instance = 0,
-        handler = isFunction(evaluator) ? evaluator
-                                        : (instance = 1, evaluator.handleEvent),
-        // split token (ignore capture[+])
-        //      "namespace.click+"
-        //              v
-        //      ["namespace.click+", "namespace", "click", "+"]
-        token     = uuevent.parse.exec(eventTypeEx),
-        ns        = token[1], // "namespace"
-        eventType = token[2], // "click"
-        capture   = 0,
-        fixEventType = uulive.fix[eventType] || eventType;
-
-    evaluator.liveClosure = _liveClosure;
-
-    __data__ || (__data__ = uulive.db[selector + "\v" + eventTypeEx] = {
-        s: selector,
-        ns: ns,
-        ex: eventTypeEx,
-        unbind: []
-    });
-
-//{{{!mb
-    if (_gecko) {
-        if (eventType === "focus" || eventType === "blur") {
-            capture = 1;
-        }
-    }
-//}}}!mb
-
-    __data__.unbind.push(function() {
-        uueventdetach(doc, fixEventType, _liveClosure, capture);
-    });
-    uueventattach(doc, fixEventType, _liveClosure, capture);
-
-//{{{!mb
-    if (_ie) {
-        if (/submit$/.test(eventType)) {
-            uulive(selector + " input[type=submit]," +
-                   selector + " input[type=image]",
-                   eventTypeEx[_replace](/submit$/, "click"), evaluator, __data__);
-
-        } else if (/change$/.test(eventType)) { // "change"
-            uulive(selector,
-                   eventTypeEx[_replace](/change$/, "focus"), function(event) {
-                       uuevent(event.srcElement, "uulivehook.change", evaluator);
-                   }, __data__);
-
-            uulive(selector,
-                   eventTypeEx[_replace](/change$/, "blur"), function(event) {
-                       uueventunbind(event.srcElement, "uulivehook.change");
-                   }, __data__);
-        }
-    }
-//}}}!mb
-}
-uulive.db = {}; // { "selector\vnamespace.click": {...}, ... }
-uulive.fix =
-//{{{!mb
-             _ie ? { focus: "focusin", blur: "focusout" } :
-//}}}!mb
-             _webkit ? { focus: "DOMFocusIn", blur: "DOMFocusOut" } : {};
-
-// uu.live.has
-function uulivehas(selector,      // @param String: "css > selector"
-                   eventTypeEx) { // @param EventTypeExString: "namespace.click"
-    var db = uulive.db[selector + "\v" + eventTypeEx];
-
-    return db && selector === db.s && eventTypeEx === db.ex;
-}
-
-// uu.live.unbind
-function uuliveunbind(selector,      // @param String(= void 0): "css > selector"
-                      eventTypeEx) { // @param String(= void 0): "namespace.click"
-    function run(fn) {
-        fn();
-    }
-    var db = uulive.db,
-        ns, data, i, unbind,
-        mode = !selector    ? 1 : // [1]
-               !eventTypeEx ? 2 : // [2]
-               eventTypeEx[_indexOf]("*") < 0 ? 3 :  // [3][5]
-               (ns = eventTypeEx.slice(0, -2), 4); // [4] "namespace.*" -> "namespace"
-
-    for (i in db) { // i = "selector\vnamespace.click"
-        data = db[i]; // data = { s:selector, ns:ns, ex:eventTypeEx, unbind:[closure] }
-        unbind = 1;
-        switch (mode) {
-        case 2: unbind = selector === data.s; break; // [2]
-        case 3: unbind = selector === data.s && eventTypeEx === data.ex; break; // [3][5]
-        case 4: unbind = selector === data.s && ns === data.ns; // [4]
-        }
-        if (unbind) {
-            uueach(data.unbind, run);
-            delete db[i];
-        }
-    }
 }
 
 // --- READY ---
@@ -3039,7 +2956,7 @@ function _json(mix, esc, callback) {
     if (_toString.call(type).slice(-3) === "on]") { // [object CSSStyleDeclaration]
         w = _webkit;
         for (i in mix) {
-            if (typeof mix[i] === "string" && (w || i != (+i + ""))) { // !isNaN(i)
+            if (typeof mix[i] === _string && (w || i != (+i + ""))) { // !isNaN(i)
                 w && (i = mix.item(i));
                 ary[++ai] = '"' + i + '":'
                                 + (esc ? _str2json(mix[i], 1)
@@ -3401,7 +3318,7 @@ function NodeSet(expression, // @param NodeSet/Node/NodeArray/String/window:
 
     this.nodeArray = !expression ? [] // empty nodeArray
         : (expression === win || expression.nodeType) ? [expression] // window / node
-        : typeof expression === "string" ?
+        : typeof expression === _string ?
             (!expression[_indexOf]("<") ? [uunodebulk(expression)]  // <div> -> fragment
                                         : uuquery(expression, context &&
                                                   context.nodeArray ? context.nodeArray.concat()
@@ -3413,28 +3330,30 @@ function NodeSet(expression, // @param NodeSet/Node/NodeArray/String/window:
 
 NodeSet[_prototype] = {
     // --- STACK ---
-    back:           NodeSetBack,        // NodeSet.back() -> NodeSet
-    find:           NodeSetFind,        // NodeSet.find(expression:String) -> NodeSet
+    back:           NodeSetBack,        // NodeSet.back():NodeSet
+    find:           NodeSetFind,        // NodeSet.find(expression:String):NodeSet
     // --- NodeSet MANIPULATOR ---
-    nth:            NodeSetNth,         // NodeSet.nth(indexer:Number = 0) -> Node / void
-    each:           NodeSetEach,        // NodeSet.each(evaluator:Function) -> NodeSet
-    size:           NodeSetSize,        // NodeSet.size() -> Number
-    clone:          NodeSetClone,       // NodeSet.clone() -> Array
-    indexOf:        NodeSetIndexOf,     // NodeSet.indexOf(node) -> Number(index or -1)
+    nth:            NodeSetNth,         // NodeSet.nth(indexer:Number = 0,
+                                        //             evaluator:Function = void):Node/NodeSet
+    each:           NodeSetEach,        // NodeSet.each(evaluator:Function):NodeSet
+    size:           NodeSetSize,        // NodeSet.size():Number
+    clone:          NodeSetClone,       // NodeSet.clone():Array
+    indexOf:        NodeSetIndexOf,     // NodeSet.indexOf(node):Number(index or -1)
     add:            NodeSetAdd,         // NodeSet.add(source:Node/DocumentFragment/HTMLFragment/TagName = "div",
                                         //             position:String = ".$"):NodeSet
 //  remove:         NodeSetRemove,      // NodeSet.remove() -> NodeSet
     // --- ATTRIBUTE, CSS, Node.className ---
-//  attr:           NodeSetAttr,        // NodeSet.attr(key:String/Hash = void, value:String = void):NodeSet/Array
-//  css:            NodeSetCSS,         // NodeSet.css(key:String/Hash = void, value:String = void):NodeSet/Array
+//  attr:           NodeSetAttr,        // NodeSet.attr(key:String/Hash = void,
+                                        //              value:String = void):NodeSet/Array
+//  css:            NodeSetCSS,         // NodeSet.css(key:String/Hash = void,
+                                        //             value:String = void):NodeSet/Array
     klass:          NodeSetKlass,       // NodeSet.klass(expression:String = ""):NodeSet
 //  html:           NodeSetHTML,        // NodeSet.html(html:HTMLFragment = ""):NodeSet/StringArray
 //  text:           NodeSetText,        // NodeSet.text(text:String = ""):NodeSet/StringArray
-//  bind:           NodeSetBind,        // NodeSet.bind(eventTypeEx:EventTypeExString, evaluator:Function/Instance):NodeSet
+//  bind:           NodeSetBind,        // NodeSet.bind(eventTypeEx:EventTypeExString,
+                                        //              evaluator:Function/Instance):NodeSet
 //  unbind:         NodeSetUnbind,      // NodeSet.unbind(eventTypeEx:EventTypeExString):NodeSet
 //  tween:          NodeSetTween,       // NodeSet.tween(duration:Number, param:Hash, callback:Function = void):NodeSet
-//  live:           NodeSetLive,        // NodeSet.live(cssSelector:String, eventTypeEx:EventTypeExString, evaluator:Function/Instance):NodeSet
-//  unlive:         NodeSetUnlive,      // NodeSet.unlive(cssSelector:String = void, eventTypeEx:EventTypeExString = void):NodeSet
     iter:           NodeSetIter         // [PROTECTED]
 };
 uu.nodeSet = NodeSet[_prototype];       // uu.nodeset - uu.Class.NodeSet.prototype alias
@@ -3454,13 +3373,17 @@ function NodeSetFind(expression) { // @param String: expression, "css > expr"
 }
 
 // NodeSet.nth - nodeSet[indexer]
-function NodeSetNth(indexer) { // @param Number(= 0): indexer,
-                               //                   :  0 is first element
-                               //                   : -1 is last element
-                               //                   : indexer < 0 is negative index
-                               // @return Node:
-    return this.nodeArray[indexer < 0 ? indexer + this.nodeArray.length
-                                      : indexer || 0];
+function NodeSetNth(indexer,     // @param Number(= 0): indexer,
+                                 //                   :  0 is first element
+                                 //                   : -1 is last element
+                                 //                   : indexer < 0 is negative index
+                    evaluator) { // @param Function(= void): callback function
+                                 //                          evaluator(node, index)
+                                 // @return Node/NodeSet: evaluator == void is return Node
+    var rv = this.nodeArray[indexer < 0 ? indexer + this.nodeArray.length
+                                        : indexer || 0];
+
+    return evaluator ? (evaluator(rv, indexer), this) : rv;
 }
 
 // NodeSet.each
@@ -3537,9 +3460,9 @@ function NodeSetIter(iterType,  // @param Number: 0 is forEach, 1 is map
 }
 
 // forEach(iter = 0)
-uueach({ bind:  uuevent, unbind: uueventunbind,
-         tween: uutween, remove: uunoderemove,
-         live:  uulive,  unlive: uuliveunbind }, function(fn, name) {
+uueach({ bind:  uuevent,   unbind: uueventunbind,
+         tween: uutween,   remove: uunoderemove,
+         show:  uucssshow, hide:   uucsshide }, function(fn, name) {
     NodeSet[_prototype][name] = function(a, b, c) {
         return NodeSetIter(0, this, fn, a, b, c);
     }
@@ -3694,7 +3617,7 @@ function _camelhash(rv, props) {
         CAMELIZE = /-([a-z])/g;
 
     for (k in props) {
-        if (typeof props[k] === "string") {
+        if (typeof props[k] === _string) {
 //{{{!mb
             if (_webkit) {
 //}}}!mb

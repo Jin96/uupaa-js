@@ -38,7 +38,7 @@ var _backendOrder = "LocalStorage,FlashStorage,IEStorage,CookieStorage,MemStorag
     _storeName   = "uustorage", // IEStorage, CookieStorage
     _persistDate = (new Date(2032, 1, 1)).toUTCString(), // IEStorage, CookieStorage
     _cookieDiskSpace = 3800, // byte
-    // minify
+    // --- minify ---
 //{{{!mb
     _getAttribute = "getAttribute",
     _setAttribute = "setAttribute",
