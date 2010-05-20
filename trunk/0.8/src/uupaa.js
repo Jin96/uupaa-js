@@ -154,14 +154,14 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Stri
                                     //  [4][convert pixel]  uu.unit(<div>, "12pt") -> 16
                                     //  [5][convert pixel]  uu.unit(<div>, "auto") -> 100
                                     //  [6][convert pixel]  uu.unit(<div>, "auto", 0, "borderTopWidth") -> 0
-    tween:    uumix(uutween, {      // uu.tween(node:Node, duration:Number, param:Hash, callback:Function = void):Node
+    tween:    uumix(uutween, {      // uu.tween(node:Node, duration:Number, param:Hash = void, callback:Function = void):Node
                                     //  [1][abs]            uu.tween(node, 500, { o: 0.5, x: 200 })
                                     //  [2][rel]            uu.tween(node, 500, { h: "+=100", o: "+=0.5" })
                                     //  [3][with "px" unit] uu.tween(node, 500, { h: "-=100px" })
                                     //  [4][with easing fn] uu.tween(node, 500, { h: [200, "easeInOutQuad"] })
                                     //  [5][set fps]        uu.tween(node, 500, { fps: 30, w: 40 })
                                     //  [6][standby]        uu.tween(node, 2000)
-        skip:       uutweenskip,    // uu.tween.skip(node:Node = void, all:Boolean = false):Node/NodeArray
+        skip:       uutweenskip,    // uu.tween.skip(node:Node = null, all:Boolean = false):Node/NodeArray
         isRunning:                  // uu.tween.isRunning(node:Node):Boolean
                     uutweenisrunning
     }),
@@ -1235,7 +1235,7 @@ function uutweenbuild(node, param) {
 }
 
 // uu.tween.skip
-function uutweenskip(node,  // @param Node(= void 0): void 0 is all node
+function uutweenskip(node,  // @param Node(= null): null is all node
                      all) { // @param Boolean(= false): true is skip all
                             // @return Node/NodeArray:
     var nodeArray = node ? [node] : uutag("*", doc.body),
