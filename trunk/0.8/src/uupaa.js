@@ -156,8 +156,8 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Stri
                                     //  [6][convert pixel]  uu.unit(<div>, "auto", 0, "borderTopWidth") -> 0
     tween:    uumix(uutween, {      // uu.tween(node:Node, duration:Number, param:Hash = void, callback:Function = void):Node
                                     //  [1][abs]            uu.tween(node, 500, { o: 0.5, x: 200 })
-                                    //  [2][rel]            uu.tween(node, 500, { h: "+=100", o: "+=0.5" })
-                                    //  [3][with "px" unit] uu.tween(node, 500, { h: "-=100px" })
+                                    //  [2][rel]            uu.tween(node, 500, { h: "+100", o: "+0.5" })
+                                    //  [3][with "px" unit] uu.tween(node, 500, { h: "-100px" })
                                     //  [4][with easing fn] uu.tween(node, 500, { h: [200, "easeInOutQuad"] })
                                     //  [5][set fps]        uu.tween(node, 500, { fps: 30, w: 40 })
                                     //  [6][standby]        uu.tween(node, 2000)
@@ -319,8 +319,6 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Stri
 //}}}!mb
     // --- NUMBER ---
     guid:           uuguid,         // uu.guid():Number - build GUID
-    rand:           uurand,         // uu.rand(min, max):Number
-                                    //  [1][random value] uu.rand(0, 0xffffff) -> 123.45
     // --- DEBUG ---
     puff:           uupuff,         // uu.puff(source:Mix)
     log:      uumix(uulog, {        // uu.log(log:Mix)
@@ -1108,8 +1106,8 @@ uucss.care = {
 };
 
 //  [1][abs]            uu.tween(node, 500, { o: 0.5, x: 200 })
-//  [2][rel]            uu.tween(node, 500, { h: "+=100", o: "+=0.5" })
-//  [3][with "px" unit] uu.tween(node, 500, { h: "-=100px" })
+//  [2][rel]            uu.tween(node, 500, { h: "+100", o: "+0.5" })
+//  [3][with "px" unit] uu.tween(node, 500, { h: "-100px" })
 //  [4][with easing fn] uu.tween(node, 500, { h: [200, "easeInOutQuad"] })
 //  [5][set fps]        uu.tween(node, 500, { fps: 30, w: 40 })
 //  [6][standby]        uu.tween(node, 2000)
@@ -1119,7 +1117,7 @@ function uutween(node,       // @param Node: animation target node
                  duration,   // @param Number: duration (unit ms)
                  param,      // @param Hash(= void): { key: endValue, key: [endValue, easing], ... }
                              //     key      - CSSPropertyString/String: "color", "opacity"
-                             //     endValue - String/Number: end value, "red", "+0.5", "+=100px"
+                             //     endValue - String/Number: end value, "red", "+0.5", "+100px"
                              //     easing   - String: easing function name, "easeInOutQuad"
                  callback) { // @param Function(= void): after callback(node, style)
                              // @return Node:
@@ -1161,14 +1159,12 @@ function uutweenbuild(node, param) {
                   : uuformat('(t=g,b=??,c=??,(t/=d2)<1?c/2*t*t+b:-c/2*((--t)*(t-2)-1)+b)',
                              v0, v1 - v0);
     }
+    // 123.4  -> 123.4
+    // "+123" -> curt + 123
+    // "-123" -> curt - 123
     function unitNormalize(curt, end, fn) {
-        if (typeof end === "number") {
-            return end;
-        }
-        var operator = end.slice(0, 2);
-
-        return (operator === "+=") ? curt + fn(end.slice(2))
-             : (operator === "-=") ? curt - fn(end.slice(2)) : fn(end);
+        return isNumber(end) ? end :
+               (end.charCodeAt(0) < 46 ? curt : 0) + fn(end); // "+": 43, "-": 45, ".": 46
     }
 
     var rv = 'var t,b,c,d2=d/2,w,o,gd,h;',
@@ -3196,13 +3192,6 @@ function uuguid() { // @return Number: unique number, from 1
     return ++uuguid.num;
 }
 uuguid.num = 0; // guid counter
-
-// uu.rand - get random value
-function uurand(min,   // @param Number: min value
-                max) { // @param Number: max value
-                       // @return Number:
-    return Math.random() * max + min;
-}
 
 // --- ECMAScript-262 5th ---
 //{{{!mb

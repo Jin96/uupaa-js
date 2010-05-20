@@ -9,6 +9,7 @@ uu.color = uu.mix(uucolor, {    // uu.color(source:ColorHash/HSVAHash/HSLAHash/R
     add:        uucoloradd,     // uu.color.add(source:String)
     expire:     uucolorexpire   // uu.color.expire()
 });
+uu.color.random = uucolorrandom; // uu.color.random():ColorHash
 
 // --- COLOR ---
 // [1][ColorHash]               uu.color(ColorHash) -> ColorHash
@@ -380,6 +381,11 @@ function hslaToColorHash(hsla) { // @param HSLAHash:
                           g: ((g * 255) + 0.5) | 0,
                           b: ((b * 255) + 0.5) | 0,
                           a: hsla.a });
+}
+
+// uu.color.random
+function uucolorrandom() { // @return ColorHash:
+    return uucolor((Math.random() * 0xffffff) | 0);
 }
 
 // --- initialize ---
