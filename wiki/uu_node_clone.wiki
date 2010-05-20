@@ -1,5 +1,16 @@
 #summary uu.node.clone はノードのクローンを作成します
 
+<wiki:toc max_depth="2" />
+
+= 導入 =
+
+uu.node.clone は ノード以下のノードツリーを複製し返します。Node.cloneNode(true) クロスブラウザにラップし、イベントハンドラの複製や、uu.data() により付与しているノード特有のデータを適切にコピーします。
+
+uu.node.clone() は uupaa.js に最初から組み込まれています。
+
+= API =
+
+== uu.node.clone ==
 uu.node.clone(_parent_:Node):Node は、_parent_ ノード以下のノードツリーを複製し返します。
 
 返される各ノードは
@@ -13,9 +24,8 @@ uu.node.clone(_parent_:Node):Node は、_parent_ ノード以下のノードツ�
     * node.onclick = function(){} などの DOM Level0 イベントハンドラはクローンされません。
   * {{{<input type="checkbox" checked="checked">}}} 等の、UIの状態も可能な限り引き継がれています。
 
-== Example ==
-{{{
 
+{{{
 <div id="source">
   <p>clone target</p>
 </div>
@@ -24,7 +34,7 @@ alert(uu.node.clone(uu.id("source")).outerHTML);
     -> <div id="source"> <p>clone target</p> </div>
 }}}
 
-== Test ==
+= Test Code =
 http://uupaa-js.googlecode.com/svn/trunk/0.8/test/uu.node/clone.htm
 {{{
 <!doctype html><html><head><title></title>
