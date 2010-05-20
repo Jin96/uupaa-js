@@ -1,4 +1,4 @@
-#summary uu.tween は CSSプロパティを連続的に変化させます
+#summary uu.tween はアニメーション機能を提供します
 
 <wiki:toc max_depth="2" />
 
