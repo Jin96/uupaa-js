@@ -1,5 +1,7 @@
 #summary uu.node.normalize は空行だけのノードやコメントノードを除去します
 
+<wiki:toc max_depth="2" />
+
 = 導入 =
 
 uu.node.normalize は指定されたノード以下から、空行だけのノードやコメントノードを除去します。
@@ -16,7 +18,7 @@ uu.node.normalize(_parent_:Node = {{{<body>}}}, _depth_:Number = 1):Number は�
 最大何階層まで辿るかは、_depth_ で指定します。_depth_ に 1 を指定すると、_parent_ の childNode だけが検索対象になります。
 {{{<body>}}}以下の全てのノードを検索対象とする場合は、uu.node.normalize(document.body, 999) のように十分に大きな数を指定します。
 
-== Test Code ==
+= Test Code =
 http://uupaa-js.googlecode.com/svn/trunk/0.8/test/Node/uu.node.normalize.htm
 
 {{{
@@ -56,6 +58,8 @@ function xwin(uu) {
 }}}
 
 == 実行結果 ==
+実行結果はブラウザ毎に異なります。
+
   * Firefox3.6
 {{{
 H1
