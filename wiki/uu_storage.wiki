@@ -1,4 +1,4 @@
-#summary uu.storage はクライアントサイドストレージへのアクセスを提供します。
+#summary uu.storage はクライアントサイドストレージへのアクセスを提供します
 
 <wiki:toc max_depth="2" />
 
