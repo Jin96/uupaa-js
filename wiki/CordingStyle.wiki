@@ -27,7 +27,7 @@ uupaa.js は [http://webkit.org/coding/coding-style.html WebKit]のコーディ�
   * !FakeArray は !NodeList や arguments などを総称する型です。!FakeArray は Array ではありませんが、 !FakeArray`[`indexer`]` でアクセスが可能で length プロパティを持ちます。uu.array(!FakeArray) で Array に変換できます。
 {{{
     function() {
-        var fakeArray1 = arguments,
+        var fakeArray1 = arguments, // Arguments型
             fakeArray2 = document.getElementByTagName("*"); // = NodeList型
     }
 }}}
