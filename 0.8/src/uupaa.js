@@ -3738,23 +3738,6 @@ function _makeMapping(seed,  // @param String: "0123456789" or "0123456789abcdef
 // inner - detect versions and meta informations
 function detectVersions(libraryVersion) { // @param Number: Library version
                                           // @return VersionHash:
-    // http://d.hatena.ne.jp/uupaa/20090603
-    function detectRenderingEngineVersion(userAgent) {
-        var ver = ((/(?:rv\:|ari\/|sto\/)(\d+\.\d+(\.\d+)?)/.exec(userAgent)
-                        || [,0])[1]).toString()
-
-        return parseFloat(ver[_replace](/[^\d\.]/g, "")
-                             [_replace](/^(\d+\.\d+)(\.(\d+))?$/,"$1$3"));
-    }
-
-    function detectUserAgentVersion(userAgent) {
-        var opera = win.opera || _false;
-
-        return opera ? +(opera.version()[_replace](/\d$/, ""))
-                     : parseFloat((/(?:IE |fox\/|ome\/|ion\/)(\d+\.\d)/.
-                                  exec(userAgent) || [,0])[1]);
-    }
-
 //{{{!mb
     // detect FlashPlayer version
     function detectFlashPlayerVersion(ie, minimumVersion) {
@@ -3801,10 +3784,19 @@ function detectVersions(libraryVersion) { // @param Number: Library version
 //{{{!mb
         ie = !!doc.uniqueID, documentMode = doc.documentMode,
 //}}}!mb
-        userAgent = navigator.userAgent, render, browser;
+        opera = win.opera || _false,
+        userAgent = navigator.userAgent,
+        // http://d.hatena.ne.jp/uupaa/20090603
+        rennum = ((/(?:rv\:|ari\/|sto\/)(\d+\.\d+(\.\d+)?)/.exec(userAgent)
+                   || [,0])[1]).toString(),
+        render = parseFloat(rennum[_replace](/[^\d\.]/g, "")
+                            [_replace](/^(\d+\.\d+)(\.(\d+))?$/,"$1$3")),
+        browser = opera ? +(opera.version()[_replace](/\d$/, ""))
+                        : parseFloat((/(?:IE |fox\/|ome\/|ion\/)(\d+\.\d)/.
+                                     exec(userAgent) || [,0])[1]);
 
-    rv.render       = render  = detectRenderingEngineVersion(userAgent);
-    rv.browser      = browser = detectUserAgentVersion(userAgent);
+    rv.render       = render;
+    rv.browser      = browser;
     rv.valueOf      = function() {
                           return browser;
                       };
