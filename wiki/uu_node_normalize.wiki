@@ -1,18 +1,28 @@
-#summary uu.node.normalize は空行やコメントを除去します
+#summary uu.node.normalize は空行だけのノードやコメントノードを除去します
 
-= uu.node.normalize =
+= 導入 =
+
+uu.node.normalize は指定されたノード以下から、空行だけのノードやコメントノードを除去します。
+
+uu.node.normalize を利用するには以下のファイルが必要です。
+
+  * src/Node/uu.node.normalize.js
+
+= API =
+
+== uu.node.normalize ==
 
 uu.node.normalize(_parent_:Node = {{{<body>}}}, _depth_:Number = 1):Number は、_parent_ 以下のノードを辿り、空行やコメントノードを検索し、まとめて除去します。
 最大何階層まで辿るかは、_depth_ で指定します。_depth_ に 1 を指定すると、_parent_ の childNode だけが検索対象になります。
 {{{<body>}}}以下の全てのノードを検索対象とする場合は、uu.node.normalize(document.body, 999) のように十分に大きな数を指定します。
 
-== Test ==
-http://uupaa-js.googlecode.com/svn/trunk/0.8/test/uu.node/normalize.htm
+== Test Code ==
+http://uupaa-js.googlecode.com/svn/trunk/0.8/test/Node/uu.node.normalize.htm
 
 {{{
 <!doctype html><html><head><title></title>
 <script src="../../src/uupaa.js"></script>
-<script src="../../src/uu.node/normalize.js"></script>
+<script src="../../src/Node/uu.node.normalize.js"></script>
 <script>
 function xwin(uu) {
     var beforeNode = uu.text(document.body.outerHTML);
