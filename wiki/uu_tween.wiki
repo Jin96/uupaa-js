@@ -34,11 +34,10 @@ uu.color.js をロードすると、色辞書や色調変換機能等が利用�
 
 == uu.tween ==
 
-uu.tween(_node_:Node, _duration_:Number, _param_:Hash = void, _callback_:Function = void):Node で
+uu.tween(_node_:Node, _duration_:Number, _param_:Hash = void, _callback_:Function/!FunctionArray = void):Node で
 _node_ で指定したノードにアニメーションキューを設定し _node_ を返します。
 _duration_ で指定した時間が経過するまで、_param_ で指定した幾つかのCSSプロパティを連続的に変化させます。
 _duration_ で指定した時間が経過すると、アニメーションを停止し、_callback_ をコールバックします。
-コールバック引数は、_callback_(node, node.style) です。
 
 _duration_ には 0 以上の数値を ms 単位で指定します。
 
@@ -52,6 +51,10 @@ _param_ は { key: endValue, ...  } または { key: `[`endValue, easing`]`, ...
     * top, left, width, height 等のCSSプロパティは px 単位で指定します。em や pt 等は速度的な理由から指定できません。
     * "px" の指定はオプションです。{ width: 100 } と { width: "100px" } は同じ結果になります。
   * _easing_ は文字列で指定します。Math`[`_easing_`]` として解釈します。
+
+_callback_ には コールバック関数または `[`_after_, _before_`]` のように、
+処理後にコールバックする関数(_after_)と、処理直前にコールバックする関数(_before_)を指定できます。
+コールバック時の引数は、_callback_(node, node.style) になります。
 
 === 色の変化 ===
 色を連続的に変化させます。
