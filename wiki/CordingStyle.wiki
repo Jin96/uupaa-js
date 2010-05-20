@@ -72,7 +72,7 @@ function のブレス( { ) は、理由が無い限り function と同じ行に�
         ...
     }
 
-    // bad
+    // wrong
     function() { ... }
 }}}
 
