@@ -1,0 +1,41 @@
+<!doctype html><html><head><meta charset="utf-8" />
+<title>uu.css.show / uu.css.hide test</title>
+<style>
+/*
+.nodisp {
+    display: none;
+}
+.hidden {
+    visibility: hidden;
+}
+ */
+div {
+    position: absolute;
+    left: 100px;
+    top: 100px;
+    width: 100px;
+    height: 100px;
+    color: "white";
+    background-color: #a3d1fc;
+    border: 10px double skyblue;
+}
+</style>
+<script src="../../src/uupaa.js"></script>
+<script src="../../src/Color/uu.color.js"></script>
+<script>
+uu.ready(function(uu) {
+    uu("div").css({ o: 0.5 }).each(function(node, i) {
+        uu.tween(node, 1000, { x: i * 100, y: i * 100 });
+    }).tween(1000, { x: 0, y: 0 }).each(function(node, i) {
+        uu.tween(node, 1000, { x: 400, y: 400 });
+        uu.tween(node, 1000, { x: i * 100, y: i * 100 });
+    }).tween(1000, { x: 0, y: 0 });
+});
+</script></head><body>
+
+<div> test1 </div>
+<div class="nodisp"> test2 </div>
+<div class="hidden"> test3 </div>
+<div class="nodisp hidden"> test4 </div>
+
+</body></html>
