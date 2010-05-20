@@ -1,6 +1,15 @@
 <!doctype html><html><head><meta charset="utf-8" />
 <title>uu.css.show / uu.css.hide test</title>
 <style>
+.nodisp {
+    display: none;
+}
+.hidden {
+    visibility: hidden;
+}
+.opacity0 {
+    opacity: 0;
+}
 div {
     position: absolute;
     left: 100px;
@@ -8,8 +17,7 @@ div {
     width: 100px;
     height: 100px;
     color: white;
-    background-color: #a3d1fc;
-    border: 10px double skyblue;
+    background-color: gray;
 }
 </style>
 <script src="../../src/uupaa.js"></script>
@@ -17,18 +25,20 @@ div {
 <script src="../../src/Query/uu.query.js"></script>
 <script>
 uu.ready(function(uu) {
-    uu("div").css({ o: 0.5 }).each(function(node, i) {
+    uu("div").nth(3, function(node, i) {
+        uu.css.setOpacity(node, 0);
+    }).each(function(node, i) {
         uu.tween(node, 1000, { x: i * 100, y: i * 100 });
-    }).tween(1000, { x: 0, y: 0 }).each(function(node, i) {
-        uu.tween(node, 1000, { x: 400, y: 400 });
-        uu.tween(node, 1000, { x: i * 100, y: i * 100 });
-    }).tween(1000, { x: 0, y: 0 });
+    }).hide(1000).show(1000).hide(1000).show();
 });
 </script></head><body>
 
 <div> test1 </div>
-<div> test2 </div>
-<div> test3 </div>
-<div> test4 </div>
+<div class="nodisp"> test2 </div>
+<div class="hidden"> test3 </div>
+<div class="opacity0"> test4 </div>
+<div class="nodisp hidden"> test5 </div>
+<div class="nodisp opacity0"> test6 </div>
+<div class="hidden opacity0"> test7 </div>
 
 </body></html>
