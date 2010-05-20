@@ -4,9 +4,10 @@
 
 = 導入 =
 
-uu.tween は CSSプロパティを連続的に変化させるCSSアニメーション機能を提供します。
+uu.tween() と NodeSet.tween() は CSSプロパティを連続的に変化させるCSSアニメーション機能を提供します。
 
-uu.tween は uupaa.js に組み込まれています。
+uu.tween() と NodeSet.tween() は uupaa.js に最初から組み込まれています。
+
 easing 関数を利用するには以下のファイルが必要です。
   * src/Tween/easing.js
 
@@ -94,6 +95,7 @@ _param_ は { key: endValue, ...  } または { key: `[`endValue, easing`]`, ...
 === スタンバイキュー ===
 uu.tween(_node_, _duration_) とすることで、_duration_ の間だけ何もしないスタンバイキューを作成できます。
 {{{
+    // 500ms かけて不透明にし、500ms なにもせず、その後 500ms かけて透明にする
     uu("div").tween(500, { o: 1.0 }).tween(500).tween(500, { o: 0 });
 }}}
 
