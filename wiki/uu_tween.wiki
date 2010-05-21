@@ -87,6 +87,13 @@ _callback_ には コールバック関数または `[`_after_, _before_`]` の�
     uu("div").css({ w: 100, h: 100 }).tween(500, { w: 0, h: 0 });
 }}}
 
+=== revert の指定 ===
+r: 1 を指定するとアニメーションの撒き戻しを行います。
+{{{
+    // opacity を 0.2 → 1.0 → 0.2 に戻す
+    uu("div").css({ o: 0.2 }).tween(500, { o: 1.0, r: 1 });
+}}}
+
 === fps の指定 ===
 アニメーションが停止している状態(キューが存在しない状態)で、_param_ に { fps: Number } を指定すると、キュー全体の fps を指定できます。
 {{{
@@ -102,11 +109,14 @@ uu.tween(_node_, _duration_) とすることで、_duration_ の間だけ何も�
 }}}
 
 == uu.tween.skip ==
-uu.tween.skip(_node_:Node = null, _all_:Boolean = false):Node/!NodeArray は、_node_ のキューに積まれたアニメーションを一つだけスキップし _node_ を返します。
+uu.tween.skip(_node_:Node = null, _all_:Boolean = false, _avoidFlicker_:Boolean = false):Node/!NodeArray は、_node_ のキューに積まれたアニメーションを一つだけスキップし _node_ を返します。
 スキップすると、各CSSプロパティの値は、アニメーション開始時にuu.tween で指定した endValue の値になります。
 
 _node_ が falsy(0, null, undefined) なら、アニメーションキューを持つ全てのノードを一つだけスキップし、!NodeArray を返します。
 _all_ に true を指定すると、全てのアニメーションキューをスキップします。
+_avoidFlicker_ に true を指定すると、複数の一連のアニメーションをスキップする前に style.visibility = "hidden" を設定し、スキップ後に、 "visible" に設定する特別な処理が行われます。
+skip によりちらつきが発生する場合は、_avoidFlicker_ を試してみてください。
+
 {{{
     // node のアニメーションを一つスキップする
     uu.tween.skip(node);
@@ -115,6 +125,11 @@ _all_ に true を指定すると、全てのアニメーションキューを�
     // アニメーションしている全てのノードで、アニメーションキューを全てスキップし、
     // アニメーションを終了させる
     uu.tween.skip(0, true);
+}}}
+{{{
+    // ちらつきが発生している場合に、ちらつきを抑える
+    // アニメーションを終了させる
+    uu.tween.skip(0, true, true);
 }}}
 
 == uu.tween.isRunning ==
