@@ -1,5 +1,5 @@
 
-// === Unit Test ===
+// === uu.test ===
 //{{{!depend uu
 //}}}!depend
 

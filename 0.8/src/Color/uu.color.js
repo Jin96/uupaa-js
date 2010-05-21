@@ -1,6 +1,6 @@
 
-// === Color ===
-//{{{!depend uu, uu.hash
+// === uu.color ===
+//{{{!depend uu
 //}}}!depend
 
 uu.color || (function(win, doc, uu) {
