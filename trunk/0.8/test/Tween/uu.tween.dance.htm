@@ -5,8 +5,6 @@ div {
     position: absolute;
     left: 100px;
     top: 100px;
-    width: 100px;
-    height: 100px;
     color: white;
     background-color: #a3d1fc;
     border: 10px double skyblue;
@@ -16,19 +14,26 @@ div {
 <script src="../../src/Color/uu.color.js"></script>
 <script src="../../src/Query/uu.query.js"></script>
 <script>
-uu.ready(function(uu) {
-    uu("div").css({ o: 0.5 }).each(function(node, i) {
-        uu.tween(node, 1000, { x: i * 100, y: i * 100 });
-    }).tween(1000, { x: 0, y: 0 }).each(function(node, i) {
-        uu.tween(node, 1000, { x: 400, y: 400 });
-        uu.tween(node, 1000, { x: i * 100, y: i * 100 });
-    }).tween(1000, { x: 0, y: 0 });
-});
-</script></head><body>
 
-<div> test1 </div>
-<div> test2 </div>
-<div> test3 </div>
-<div> test4 </div>
+uu.ready(function(uu) {
+    uu("div").css({ o: 0.5 }).click(function(evt, node) {
+        uu("div").unclick();
+        uu.tween.skip(0, 1, 1);
+        action();
+    }).tween(800, { o: 0.1 }).tween(800, { o: 0.5 });
+});
+function action() {
+    uu("div").each(function(node, i) {
+        uu.tween(node, 1000, { x: i * 100, y: i * 100, r: 1 });
+    }).tween(1000, { x: 0, y: 0, r: 1 }).each(function(node, i) {
+        uu.tween(node, 1000, { x: 400, y: 400, r: 1 });
+        uu.tween(node, 1000, { x: i * 100, y: i * 100, r: 1 });
+    }).tween(1000, { x: 0, y: 0, r: 1 });
+}
+</script></head><body>
+<div><img src="../images/cover0.jpg" /></div>
+<div><img src="../images/cover0.jpg" /></div>
+<div><img src="../images/cover0.jpg" /></div>
+<div><img src="../images/cover0.jpg" /></div>
 
 </body></html>

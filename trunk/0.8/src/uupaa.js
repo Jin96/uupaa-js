@@ -92,9 +92,9 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Stri
     isString:       isString,       //   uu.isString(search:Mix):Boolean
     isFunction:     isFunction,     // uu.isFunction(search:Mix):Boolean
     // --- HASH / ARRAY ---
-    arg:            uuarg,          // uu.arg(arg1:Hash = {}, arg2:Hash, arg3:Hash = void):Hash
-    mix:            uumix,          // uu.mix(base:Hash, flavor:Hash, aroma:Hash = void,
-                                    //        override:Boolean = true):Hash
+    arg:            uuarg,          // uu.arg(arg1:Hash/Function = {}, arg2:Hash, arg3:Hash = void):Hash/Function
+    mix:            uumix,          // uu.mix(base:Hash/Function, flavor:Hash, aroma:Hash = void,
+                                    //        override:Boolean = true):Hash/Function
     each:           uueach,         // uu.each(source:Hash/Array, evaluator:Function)
     keys:           uukeys,         // uu.keys(source:Hash/Array):Array
     values:         uuvalues,       // uu.values(source:Hash/Array):Array
@@ -182,8 +182,9 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Stri
                                     //  [4][with easing fn]  uu.tween(node, 500, { h: [200, "easeInOutQuad"] })
                                     //  [5][set fps]         uu.tween(node, 500, { fps: 30, w: 40 })
                                     //  [6][standby]         uu.tween(node, 2000)
-                                    //  [7][after callback]  uu.tween(node, 500, { o: 1 }, afterCallback)
-                                    //  [8][before callback] uu.tween(node, 500, { o: 1 }, [afterCallback, beforeCallback])
+                                    //  [7][after callback]  uu.tween(node, 500, { o: 1 }, after)
+                                    //  [8][before callback] uu.tween(node, 500, { o: 1 }, [after, before])
+                                    //  [9][revert]          uu.tween(node, 500, { o: 1, r: 1 })
         skip:       uutweenskip,    // uu.tween.skip(node:Node = null, all:Boolean = false):Node/NodeArray
         isRunning:                  // uu.tween.isRunning(node:Node):Boolean
                     uutweenisrunning
@@ -629,22 +630,23 @@ function isFunction(search) { // @param Mix: search
 // [1][supply args]         uu.arg({ a: 1 }, { b: 2 }) -> { a: 1, b: 2 }
 
 // uu.arg - supply default arguments
-function uuarg(arg1,   // @param Hash(= {}): arg1
+function uuarg(arg1,   // @param Hash/Function(= {}): arg1
                arg2,   // @param Hash: arg2
                arg3) { // @param Hash(= void): arg3
-                       // @return Hash: new Hash(mixed arg)
-    return uumix(uumix({}, arg1 || {}), arg2, arg3, 0);
+                       // @return Hash/Function: new Hash(mixed args) or arg1 + args
+    return isFunction(arg1) ? uumix(arg1, arg2, arg3)
+                            : uumix(uumix({}, arg1 || {}), arg2, arg3, 0);
 }
 
 // [1][override value]      uu.mix({a:9, b:9}, {a:1}, {b:2})    -> { a: 1, b: 2 }
 // [2][stable value]        uu.mix({a:9, b:9}, {a:1}, {b:2}, 0) -> { a: 9, b: 9 }
 
 // uu.mix - mixin
-function uumix(base,       // @param Hash: mixin base
+function uumix(base,       // @param Hash/Function: mixin base
                flavor,     // @param Hash: add flavor
                aroma,      // @param Hash(= void): add aroma
                override) { // @param Boolean(= true): true is override
-                           // @return Hash: base
+                           // @return Hash/Function: base
     var i;
 
     if (override || override === i) { // override === void 0 // [1][3]
@@ -1132,6 +1134,7 @@ uucss.care = {
 //  [6][standby]         uu.tween(node, 2000)
 //  [7][after callback]  uu.tween(node, 500, { o: 1 }, afterCallback)
 //  [8][before callback] uu.tween(node, 500, { o: 1 }, [afterCallback, beforeCallback])
+//  [9][revert]          uu.tween(node, 500, { o: 1, r: 1 })
 
 // uu.tween - add queue
 function uutween(node,       // @param Node: animation target node
@@ -1140,44 +1143,60 @@ function uutween(node,       // @param Node: animation target node
                              //     key      - CSSPropertyString/String: "color", "opacity"
                              //     endValue - String/Number: end value, "red", "+0.5", "+100px"
                              //     easing   - String: easing function name, "easeInOutQuad"
-                 callback) { // @param Function/FunctionArray(= void): after callback(node, style)
-                             //                                        [after, before] callback
+                 callback) { // @param Function/FunctionArray(= void): after callback or [after, before],
+                             //                                        callback(node, style, reverse)
                              // @return Node:
     function loop() {
         var data = node[_uutween], q = data.q[0], style = node.style,
+            reverse = data.r,
             tm = q.tm ? +new Date
-                      : (q.fn[1] && q.fn[1](node, style), // before callback(node, node.style)
-                         q.js = q.param ? uutweenbuild(node, q.param)
-                                        : _nop, q.tm = +new Date),
+                      : (q.fn[1] && q.fn[1](node, style, reverse), // before callback(node, node.style, reverse)
+                         q.js = isFunction(q.param) ? q.param
+                              : q.param ? uutweenbuild(node, data, q) : _nop,
+                         q.tm = +new Date),
             finished = q.fin || (tm >= q.tm + q.dur);
 
-        q.js(node, style, finished, tm - q.tm, q.dur); // js(node, node.style, finished, gain, duration)
+        q.js(node, style, reverse, finished, tm - q.tm, q.dur); // js(node, node.style, reverse, finished, gain, duration)
         if (finished) { // finished
-            q.fn[0] && q.fn[0](node, style); // after callback(node, node.style)
+            q.fn[0] && q.fn[0](node, style, reverse); // after callback(node, node.style, reverse)
             data.q.shift(); // remove first queue data
-            data.q.length || (clearInterval(data.id),
-                              data.id = 0,
-                              q.fin && (style[_visibility] = "visible")); // avoid flicker
+
+            if (!data.q.length) {
+                if (!data.r && data.rq.length) {
+                    data.q = data.q.concat(data.rq.reverse()); // data.q <- data.rq
+                    data.rq = []; // clear
+                    data.r = 1; // reverse
+                    return;
+                }
+                clearInterval(data.id);
+                data.id = data.r = 0;
+            }
         }
     }
 
-    var data = node[_uutween], fps = (param || {}).fps || 0;
+    var data = node[_uutween], p = uuarg(param, { r: 0, fps: 0 });
 
     node.style.overflow = "hidden";
-    data || (node[_uutween] = data = { q: [], id: 0 }); // init tween queue
+    data || (node[_uutween] = data = { q: [], rq: [], id: 0, r: 0 }); // init tween queue
+
+    // Queue was added while reverse-action -> move queue
+    if (data.r && data.rq.length) {
+        data.q = data.q.concat(data.rq.reverse()); // data.q <- data.rq
+        data.rq = []; // clear
+    }
 
     // append queue data
-    data.q.push({ tm: 0, fn: uuarray(callback || 0),
+    data.q.push({ tm: 0, fn: uuarray(callback || 0), guid: uuguid(),
                   dur: Math.max(duration, 1),
-                  param: param, fin: 0 }); // true/1 is finished
-    data.id || (data.id = setInterval(loop, ((1000 / fps) | 0) || 1)); // [IE] setInterval(0) is Error
+                  param: p, fin: 0 }); // true/1 is finished
+    data.id || (data.id = setInterval(loop, ((1000 / p.fps) | 0) || 1)); // [IE] setInterval(0) is Error
     return node;
 }
 uutween.props = { opacity: 1, color: 2, backgroundColor: 2,
                   width: 3, height: 3, left: 4, top: 4 };
 uutween.alpha = /^alpha\([^\x29]+\) ?/;
 
-function uutweenbuild(node, param) {
+function uutweenbuild(node, data, queue) {
     function ezfn(v0, v1, ez) {
         return ez ? uuformat('Math.??(g,??,??,d)', ez, v0, v1 - v0)
                   : uuformat('(t=g,b=??,c=??,(t/=d2)<1?c/2*t*t+b:-c/2*((--t)*(t-2)-1)+b)',
@@ -1192,6 +1211,7 @@ function uutweenbuild(node, param) {
     }
 
     var rv = 'var t,b,c,d2=d/2,w,o,gd,h;',
+        param = queue.param, revertParam = {},
         i, startValue, endValue, ez, w, n,
         fixdb = uufix.db, cs = uucss(node, _true);
 
@@ -1251,24 +1271,53 @@ function uutweenbuild(node, param) {
                 rv += uuformat('s.??=((f? ??:??)|0)+"px";',
                                w, endValue, ezfn(startValue, endValue, ez));
             }
+            revertParam[w] = ez ? [startValue, ez] : startValue;
         }
     }
-    return new Function("n,s,f,g,d", rv); // node, node.style, finished, gain, duration
+
+    // add revert queue data
+    if (!data.r && param.r) {
+        data.rq.push({ tm: 0, fn: uuclone(queue.fn), guid: queue.guid, // copy guid
+                       dur: queue.dur,
+                       param: revertParam, fin: 0 });
+    }
+
+    return new Function("n,s,r,f,g,d", rv); // node, node.style, reverse, finished, gain, duration
 }
 
 // uu.tween.skip
-function uutweenskip(node,  // @param Node(= null): null is all node
-                     all) { // @param Boolean(= false): true is skip all
-                            // @return Node/NodeArray:
+function uutweenskip(node,           // @param Node(= null): null is all node
+                     all,            // @param Boolean(= false): true is skip all
+                     avoidFlicker) { // @param Boolean(= false): true is avoid flicker
+                                     // @return Node/NodeArray:
     var nodeArray = node ? [node] : uutag("*", doc.body),
-        v, i = -1, j, jz, data;
+        v, i = -1, j, k, jz, kz, data, guid;
 
     while( (v = nodeArray[++i]) ) {
         data = v[_uutween];
         if (data && data.id) {
+
+            guid = [];
             for (j = 0, jz = all ? data.q.length : 1; j < jz; ++j) {
-                data.q[j].fin = 1; // finished bit
-                all && (v.style[_visibility] = "hidden"); // avoid flicker
+                data.q[j].fin = 1;
+                data.q[j].param.r && guid.push(data.q[j].param.guid);
+            }
+            for (j = 0, jz = guid.length; j < jz; ++j) {
+                for (k = 0, kz = data.rq.length; k < kz; ++k) {
+                    if (data.rq[k].param.guid === guid[j]) {
+                        data.rq[k].fin = 1;
+                        data.q.push(data.rq.splice(k, 1)[0]); // data.q <- data.rq
+                    }
+                }
+            }
+            if (data.q.length > 2 && avoidFlicker) {
+                data.q.push({
+                    tm: 0, fn: [], guid: 0, fin: 1, dur: 0,
+                    param: function(node, style) {
+                        style[_visibility] = "visible";
+                    }});
+
+                v.style[_visibility] = "hidden";
             }
         }
     }
@@ -1900,7 +1949,9 @@ function uuevent(node,         // @param Node:
                 event.preventDefault();
             };
         }
-        instance ? handler.call(evaluator, event) : evaluator(event);
+        // callback(event, node)
+        instance ? handler.call(evaluator, event, node)
+                 : evaluator(event, node);
     }
 
     // --- setup event database ---
@@ -1909,19 +1960,20 @@ function uuevent(node,         // @param Node:
     }
 
     var eventTypeExArray = eventTypeEx.split(","),
-        eventClosure = "eventClosure",
         eventData = node[_uuevent],
-        ex, token, eventType, capture, bound, types = "types",
+        ex, token, eventType, capture, closure, bound, types = "types",
         handler, i = -1, pos,
 //{{{!mb
         owner = node.ownerDocument || doc,
 //}}}!mb
         instance = 0;
 
-    if (!__unbind__) {
+    if (__unbind__) {
+        closure = evaluator;
+    } else {
         handler = isFunction(evaluator) ? evaluator
                                         : (instance = 1, evaluator.handleEvent);
-        evaluator[eventClosure] = _eventClosure;
+        closure = _eventClosure;
     }
 
     while ( (ex = eventTypeExArray[++i]) ) { // ex = "namespace.click+"
@@ -1939,7 +1991,7 @@ function uuevent(node,         // @param Node:
         // IE mouse capture [IE6][IE7][IE8]
         if (_ie && !node.addEventListener) {
             if (eventType === "mousemove") {
-                capture && uuevent(node, "losecapture", evaluator, __unbind__);
+                capture && uuevent(node, "losecapture", closure, __unbind__);
             } else if (eventType === "losecapture") {
                 if (node.setCapture) {
                     bound ? node.setCapture()
@@ -1964,8 +2016,7 @@ function uuevent(node,         // @param Node:
                         eventData[types] =
                             eventData[types][_replace]("," + ex + ",", ",");
                     }
-                    uueventdetach(node, eventType, _eventClosure, capture);
-                    evaluator[eventClosure] = null;
+                    uueventattach(node, eventType, closure, capture, _true); // detach
                 }
             }
         } else {
@@ -1974,8 +2025,8 @@ function uuevent(node,         // @param Node:
                 eventData[types] += ex + ",";
                 eventData[ex] = [];
             }
-            eventData[ex].push(evaluator);
-            uueventattach(node, eventType, _eventClosure, capture);
+            eventData[ex].push(closure);
+            uueventattach(node, eventType, closure, capture);
         }
     }
     return node;
@@ -2153,6 +2204,24 @@ function uueventattach(node,         // @param Node:
 //{{{!mb
     eventType = uueventattach.fix[eventType] || eventType;
 //}}}!mb
+
+/* event log
+    if (uu.ready.dom) {
+        var fnguid;
+
+        if (evaluator.fnguid) {
+            fnguid = evaluator.fnguid;
+        } else {
+            evaluator.fnguid = uuguid();
+            fnguid = evaluator.fnguid;
+        }
+        if (__detach__) {
+            uulog("detach(" + eventType + ")" + fnguid);
+        } else {
+            uulog("attach(" + eventType + ")" + fnguid);
+        }
+    }
+ */
 
 //{{{!mb
     if (node.addEventListener) {
@@ -3461,7 +3530,8 @@ function NodeSetIter(iterType,  // @param Number: 0 is forEach, 1 is map
 
 // forEach(iter = 0)
 uueach({ bind:  uuevent,   unbind: uueventunbind,
-         tween: uutween,   remove: uunoderemove,
+         tween: uutween,   skip: uutweenskip,
+         remove: uunoderemove,
          show:  uucssshow, hide:   uucsshide }, function(fn, name) {
     NodeSet[_prototype][name] = function(a, b, c) {
         return NodeSetIter(0, this, fn, a, b, c);
@@ -3481,11 +3551,11 @@ uueach({ attr: uuattr, css:  uucss,
 // inner - build DOM Lv2 event handler - uu.click(), ...
 uueach(uuevent.shortcut, function(eventType) {
     uu[eventType] = function(node, fn) { // uu.click(node, fn) -> node
-        return uuevent(node, eventType, fn); // bind
+        return uuevent(node, eventType, fn);
     };
 
     uu["un" + eventType] = function(node) { // uu.unclick(node) -> node
-        return uuevent(node, eventType, 0, 1); // unbind
+        return uueventunbind(node, eventType);
     };
 
     var ns = NodeSet[_prototype];
@@ -3495,7 +3565,7 @@ uueach(uuevent.shortcut, function(eventType) {
     };
 
     ns["un" + eventType] = function() { // uu("li").unclick() -> NodeSet
-        return NodeSetIter(0, this, uuevent, eventType, 0, 1);
+        return NodeSetIter(0, this, uueventunbind, eventType);
     };
 });
 
@@ -3583,11 +3653,12 @@ uuready(function() {
     var nodeList = uutag("*", _rootNode), v, i = -1,
         styles = uusplittohash((
 //{{{!mb
-                 !uuready[_getAttribute] ? "float,styleFloat,cssFloat,styleFloat" :
+                !uuready[_getAttribute] ? "float,styleFloat,cssFloat,styleFloat" :
 //}}}!mb
-                         "float,cssFloat"
-                ) + ",pos,position,w,width,h,height,x,left,y,top,o,opacity," +
-                "bg,background,bgcolor,backgroundColor,bgimg,backgroundImage");
+                                          "float,cssFloat"
+            ) + ",d,display,pos,position,w,width,h,height,x,left,y,top,o,opacity," +
+                "c,color,b,background,bc,backgroundColor,bi,backgroundImage," +
+                "z,zIndex,fs,fontSize");
 
     uumix(_camelhash(uufix.db,
                      _webkit ? getComputedStyle(_rootNode, 0)
