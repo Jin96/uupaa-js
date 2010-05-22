@@ -40,6 +40,8 @@ var _prototype = "prototype",
     _display = "display",
     _number = "number",
     _string = "string",
+    _height = "height",
+    _width = "width",
     _false = !1,
     _true = !0,
     _nop = function() {},
@@ -1364,7 +1366,7 @@ function setOpacity(node,      // @param Node:
         if (!node["data-uuopacity"]) {
             // at first time
             if (_ver.ie6 || _ver.ie7) { // [FIX][IE6][IE7]
-                if ((node.currentStyle || {}).width === "auto") {
+                if ((node.currentStyle || {})[_width] === "auto") {
                     style.zoom = 1;
                 }
             }
@@ -1402,22 +1404,22 @@ function uucssshow(node,           // @param Node:
                    displayValue) { // @param String(= "block"): applied at display "none"
                                    // @return Node:
     var cs = uucss(node), disp = displayValue || "block",
-        w = cs.width, h = cs.height, o = getOpacity(node) || 1;
+        w = cs[_width], h = cs[_height], o = getOpacity(node) || 1;
 
 //{{{!mb
     // [Opera] getComputedStyle(node).display === "none" -> width and height = "0px"
     if (cs[_display] === "none" && w === "0px" && w === h) { // [Opera] fix
         node.style[_display] = disp;
         cs = uucss(node);
-        w = cs.width;
-        h = cs.height;
+        w = cs[_width];
+        h = cs[_height];
         node.style[_display] = "none";
     }
 //}}}!mb
     return uutween(node, duration || 0, { w: w, h: h, o: o },
         [_nop, function(node, style) {
             setOpacity(node, 0);
-            style.width = style.height = "0";
+            style[_width] = style[_height] = "0";
             style[_visibility] = "visible";
             if (uucss(node)[_display] === "none") {
                 style[_display] = disp;
@@ -3167,8 +3169,8 @@ function uuflash(url,      // @param String: url
         _ie ? '<object id="??" width="??" height="??" data="??" ??>??</object>'
             : '<embed name="??" width="??" height="??" src="??" ?? ?? />',
         id,
-        opt.width,
-        opt.height,
+        opt[_width],
+        opt[_height],
         url,
         _ie ? 'classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000"'
             : 'type="application/x-shockwave-flash"',
