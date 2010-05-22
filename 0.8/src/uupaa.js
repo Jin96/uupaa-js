@@ -25,6 +25,7 @@ var _prototype = "prototype",
     _uuevent = "data-uuevent",
     _uutween = "data-uutween",
     // --- minify ---
+    _createTextNode = "createTextNode",
     _createElement = "createElement",
     _getAttribute = "getAttribute",
     _appendChild = "appendChild",
@@ -33,6 +34,7 @@ var _prototype = "prototype",
     _firstChild = "firstChild",
     _visibility = "visibility",
     _lastChild = "lastChild",
+    _nodeType = "nodeType",
     _replace = "replace",
     _indexOf = "indexOf",
     _display = "display",
@@ -287,12 +289,12 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Stri
                                     //  [2][set innerHTML] uu.html(node, "<div>...</div>") -> node
     head:           uuhead,         // uu.head(/* var_args(node,attr,css,buildid) */):<head>
     body:           uubody,         // uu.body(/* var_args(node,attr,css,buildid) */):<body>
-    text:           uutext,         // uu.text(node:Node/String, text:String(= void)):Array/String/Node
-                                    //  [1][create text node] uu.text("text")          -> createTextNode("text")
-                                    //  [2][get text]         uu.text(node)            -> "text" or ["text", ...]
-                                    //  [3][set text]         uu.text(node, "text")    -> node
-                                    //  [4][set text]         uu.text(node, ["a","b"]) -> node
-    textf:          uutextf,        // uu.textf(format:String, var_args = void, ...):TextNode
+    text:           uutext,         // uu.text(data:String/FormatString/Node,
+                                    //         text:String/Mix(= void), var_args:Mix, ...):String/Node
+                                    //  [1][create text node]          uu.text("text")            -> createTextNode("text")
+                                    //  [2][create formated text node] uu.text("?? ??", "a", "b") -> createTextNode("a b")
+                                    //  [3][get text]                  uu.text(node)              -> "text"
+                                    //  [4][set text]                  uu.text(node, "text")      -> node
     // --- STRING ---
     fix:      uumix(uufix, {        // uu.fix(source:String):String
                                     //  [1][css-prop to js-css-prop] uu.fix("background-color") -> "backgroundColor"
@@ -314,8 +316,8 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Stri
         toHash:     uusplittohash   // uu.split.toHash(source:String, splitter:String = ",", toNumber:Boolean = false):Hash
                                     //  [1][hash from string] uu.split.toHash("key,1,key2,1", ",") -> { key: 0, key2: 1 }
     }),
-    format:         uuformat,       // uu.format(format:String, var_args, ...):String
-                                    // [1][placeholder] uu.format("?? dogs and ??", 101, "cats") -> "101 dogs and cats"
+    format:         uuformat,       // uu.format(format:FormatString, var_args, ...):String
+                                    //  [1][placeholder] uu.format("?? dogs and ??", 101, "cats") -> "101 dogs and cats"
     entity:   uumix(uuentity, {     // uu.entity(str:String):String
         decode:     uuentitydecode  // uu.entity.decode(str:String):String
     }),
@@ -340,7 +342,7 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Stri
     // --- NUMBER ---
     guid:           uuguid,         // uu.guid():Number - build GUID
     // --- DEBUG ---
-    puff:           uupuff,         // uu.puff(source:Mix)
+    puff:           uupuff,         // uu.puff(source:Mix/FormatString, var_args:Mix, ...)
     log:      uumix(uulog, {        // uu.log(log:Mix)
         clear:      uulogclear      // uu.log.clear()
     }),
@@ -589,9 +591,9 @@ function uutype(search,  // @param Mix: search literal/object
         rv = types[typeof search] ||
              types[_toString.call(search)] ||
              (!search ? uutype.NULL
-                      : search.nodeType ? uutype.NODE
-                                        : "length" in search ? uutype.FAKEARRAY
-                                                             : uutype.HASH);
+                      : search[_nodeType] ? uutype.NODE
+                                          : "length" in search ? uutype.FAKEARRAY
+                                                               : uutype.HASH);
 
     return match ? !!(match & rv) : rv;
 }
@@ -1193,7 +1195,7 @@ function uutween(node,       // @param Node: animation target node
     return node;
 }
 uutween.props = { opacity: 1, color: 2, backgroundColor: 2,
-                  width: 3, height: 3, left: 4, top: 4 };
+                  width: 3, height: 3, left: 4, top: 5 };
 uutween.alpha = /^alpha\([^\x29]+\) ?/;
 
 function uutweenbuild(node, data, queue) {
@@ -1206,8 +1208,15 @@ function uutweenbuild(node, data, queue) {
     // "+123" -> curt + 123
     // "-123" -> curt - 123
     function unitNormalize(curt, end, fn) {
-        return isNumber(end) ? end :
-               (end.charCodeAt(0) < 46 ? curt : 0) + fn(end); // "+": 43, "-": 45, ".": 46
+        if (isNumber(end)) {
+            return end;
+        }
+        var c = end.charCodeAt(0) - 42;
+
+        // 0: "*", 1: "+", 3: "-", 5: "/"
+        return !c    ? fn(curt * parseFloat(end.slice(1))) :
+               c < 4 ? curt + fn(end) :
+               c < 6 ? fn(curt / parseFloat(end.slice(1))) : fn(end);
     }
 
     var rv = 'var t,b,c,d2=d/2,w,o,gd,h;',
@@ -1234,7 +1243,8 @@ function uutweenbuild(node, data, queue) {
                                ezfn(startValue, endValue, ez));
 //{{{!mb
                 if (!uuready.opacity) { // [IE6][IE7][IE8]
-                    rv += uuformat('s.filter=((o>0&&o<1)?"alpha(??="+(o*100)+")":"");' +
+                    rv += uuformat('s.visibility=o?"visible":"hidden";' +
+                                   's.filter=((o>0&&o<1)?"alpha(??="+(o*100)+")":"");' +
                                    'f&&uu.css.setOpacity(n,??)&&(s.filter+=" ??");',
                                    w, endValue, node.style.filter[_replace](uutween.alpha, ""));
                 } else {
@@ -1262,12 +1272,9 @@ function uutweenbuild(node, data, queue) {
                                endValue, ezfn(startValue, endValue, ez), w);
                 break;
             default: // top, left, other...
-                if (n === 4) { // 4: left, top
-                    startValue = (w === "top") ? node.offsetTop : node.offsetLeft;
-                } else {
-                    startValue = parseInt(cs[w]) || 0;
-                }
-                endValue = unitNormalize(startValue, endValue, parseInt);
+                startValue = n ? (n > 4 ? node.offsetTop : node.offsetLeft)
+                               : parseInt(cs[w]) || 0;
+                endValue   = unitNormalize(startValue, endValue, parseInt);
                 rv += uuformat('s.??=((f? ??:??)|0)+"px";',
                                w, endValue, ezfn(startValue, endValue, ez));
             }
@@ -1429,7 +1436,7 @@ function uucsshide(node,       // @param Node:
 // uu.css.isShown
 function uucssisshown(node) { // @param Node/CSSProperties:
                               // @return Boolean:
-    var style = node.nodeType ? uucss(node) : node;
+    var style = node[_nodeType] ? uucss(node) : node;
 
     return style[_display] !== "none" && style[_visibility] !== "hidden";
 }
@@ -1447,7 +1454,7 @@ uustyle.db = {}; // { id: styleSheetObject }
 function StyleSheetInit(id) { // @param String:
     var node = uunode("style", "id," + id);
 
-    _webkit && node[_appendChild](uutext(""));
+    _webkit && node[_appendChild](doc[_createTextNode](""));
     uuhead(node);
 
     this.ss = node.sheet
@@ -1901,7 +1908,7 @@ function uuevent(node,         // @param Node:
 
             event.xtype = (uuevent.xtypes[event.type] || 0) & 255;
             event.xbutton = event.button || 0;
-            event.xtarget = (target.nodeType === 3) // 3: TEXT_NODE
+            event.xtarget = (target[_nodeType] === 3) // 3: TEXT_NODE
                           ? target[_parentNode] : target;
 //{{{!mb
             if (_ie) {
@@ -2311,11 +2318,11 @@ function uunodeadd(source,     // @param Node/DocumentFragment/HTMLFragment/TagN
     context = context || doc.body;
 
     var node = !source ? doc[_createElement]("div")      // [1] uu.node.add()
-             : source.nodeType ? source                  // [3][5] uu.node.add(Node or DocumentFragment)
+             : source[_nodeType] ? source                // [3][5] uu.node.add(Node or DocumentFragment)
              : !source[_indexOf]("<") ? uunodebulk(source, context) // [4] uu.node.add(HTMLFragmentString)
              : doc[_createElement](source),              // [2] uu.node.add("p")
         reference = null,
-        rv = (node.nodeType === 11) ? node[_firstChild] : node; // 11: DOCUMENT_FRAGMENT_NODE
+        rv = (node[_nodeType] === 11) ? node[_firstChild] : node; // 11: DOCUMENT_FRAGMENT_NODE
 
     switch (uunodefind.pos[position] || 8) {
     case 1: reference = context[_parentNode][_firstChild];
@@ -2352,7 +2359,7 @@ function uunodefind(parent,     // @param Node: parent node
              (num > 4) ? parent[iters[2]]
                        : parent[_parentNode][iters[2]];
         for (; rv; rv = rv[iter]) {
-            if (rv.nodeType === 1) { // 1: ELEMENT_NODE
+            if (rv[_nodeType] === 1) { // 1: ELEMENT_NODE
                 break;
             }
         }
@@ -2429,8 +2436,8 @@ function uunodebulk(source,    // @param Node/HTMLFragment: source
     var rv = doc.createDocumentFragment(),
         placeholder = uunode((context || {}).tagName);
 
-    placeholder.innerHTML = source.nodeType ? source.outerHTML // [1] node
-                                            : source;          // [2] "<p>html</p>"
+    placeholder.innerHTML = source[_nodeType] ? source.outerHTML // [1] node
+                                              : source;          // [2] "<p>html</p>"
     while (placeholder[_firstChild]) {
         rv[_appendChild](placeholder[_firstChild]);
     }
@@ -2442,7 +2449,7 @@ function uunodexpath(elementNode) { // @param Node: ELEMENT_NODE
                                     // @return XPathString: "/html[1]/body[1]/div[5]"
     var rv = [], n = elementNode;
 
-    while (n && n.nodeType === 1) { // 1: ELEMENT_NODE
+    while (n && n[_nodeType] === 1) { // 1: ELEMENT_NODE
         rv.push(n.tagName.toLowerCase() +
                 "[" + (uunodeindexof(n, n.tagName) + 1) + "]");
         n = n[_parentNode];
@@ -2480,13 +2487,13 @@ function uunodewrap(innerNode,   // @param Node: inner node
 function buildNode(node,   // @param Node/TagString: <div> or "div"
                    args) { // @param Array/Arguments: [Node/String/Number/Hash, ...]
                            // @return Node:
-    node.nodeType || (node = doc[_createElement](node)); // "div" -> <div>
+    node[_nodeType] || (node = doc[_createElement](node)); // "div" -> <div>
 
     var arg, i = 0, token = 0, ticket, isstr;
 
     while ( (arg = args[i++]) ) {
         if (arg) {
-            if (arg.nodeType) { // [1][3]
+            if (arg[_nodeType]) { // [1][3]
                 node[_appendChild](arg);
             } else if (isNumber(arg)) { // [8]
                 ticket = arg;
@@ -2494,7 +2501,7 @@ function buildNode(node,   // @param Node/TagString: <div> or "div"
                 isstr = isString(arg);
 
                 if (isstr && arg[_indexOf](",") < 0) { // [2]
-                    node[_appendChild](uutext(arg)); // uu.div("hello")
+                    node[_appendChild](doc[_createTextNode](arg)); // uu.div("hello")
                 } else if (++token < 2) {
                     uuattr(node, isstr ? uusplittohash(arg) : arg); // [4][5]
                 } else if (token < 3) {
@@ -2554,7 +2561,7 @@ function uunodecount(parent) { // @param Node: parentNode
     var rv = 0, n = parent[_firstChild];
 
     for (; n; n = n[_nextSibling]) {
-        (n.nodeType === 1) && ++rv; // 1: ELEMENT_NODE
+        (n[_nodeType] === 1) && ++rv; // 1: ELEMENT_NODE
     }
     return rv;
 //}}}!mb
@@ -2573,7 +2580,7 @@ function uunodeindexof(node,          // @param Node: ELEMENT_NODE
 
     for (; n; n = n[_nextSibling]) {
         __tagName__ ? (n.tagName === __tagName__) && ++rv
-                    : (n.nodeType === 1) && ++rv; // 1: ELEMENT_NODE
+                    : (n[_nodeType] === 1) && ++rv; // 1: ELEMENT_NODE
         if (n === node) {
             return rv - 1;
         }
@@ -2619,35 +2626,30 @@ function uubody(/* var_args */) { // @param Mix: var_args
     return buildNode(doc.body, arguments);
 }
 
-//  [1][create text node] uu.text("text")          -> createTextNode("text")
-//  [2][get text]         uu.text(node)            -> "text" or ["text", ...]
-//  [3][set text]         uu.text(node, "text")    -> node
-//  [4][set text]         uu.text(node, ["a","b"]) -> node
+//  [1][create text node]          uu.text("text")            -> createTextNode("text")
+//  [2][create formated text node] uu.text("?? ??", "a", "b") -> createTextNode("a b")
+//  [3][get text]                  uu.text(node)              -> "text"
+//  [4][set text]                  uu.text(node, "text")      -> node
 
 // uu.text - node.text / node.innerText accessor
-function uutext(node,   // @param Node/String: node or text string
-                text) { // @param String/Array(= void): "textContent" or ["textContent", ...]
-                        // @return Array/String/Node:
-    if (isString(node)) {
-        return doc.createTextNode(node); // [1]
+function uutext(data,             // @param String/FormatString/Node: "string" or "format ?? string" or node
+                text              // @param String/Mix(= void): "textContent"
+                /* var_args */) { // @param Mix(= void):
+                                  // @return String/Node:
+    if (isString(data)) {
+        return doc[_createTextNode](
+                    arguments.length < 2 ? data // [1]
+                                         : uuformat.apply(this, arguments)); // [2]
     }
-    if (text === void 0) { // [2]
-        return node[
+    if (text === void 0) { // [3]
+        return data[
 //{{{!mb
                     _gecko ? "textContent" :
 //}}}!mb
                              "innerText"];
     }
-    uunodeadd(doc.createTextNode(_isArray(text) ? text.join("") : text), // [3]
-              uunodeclear(node));
-    return node;
-}
-
-// uu.textf - uu.text + uu.format
-function uutextf(/* format, */      // @param String: formatted string with "??" placeholder
-                 /* var_args */ ) { // @param Mix(= void): param
-                                    // @return TextNode: <text>formatted string</text>
-    return uutext(uuformat.apply(this, arguments));
+    uunodeadd(doc[_createTextNode](text), uunodeclear(data)); // [4]
+    return data;
 }
 
 // --- QUERY ---
@@ -2657,7 +2659,7 @@ function uuquery(cssSelector, // @param String: "css > selector"
                               // @return NodeArray: [Node, ...]
     context = context || doc;
 
-    if (context.nodeType
+    if (context[_nodeType]
 //{{{!mb
         && context.querySelectorAll
         && !uuquery.ngword.test(cssSelector)    // [:scope] guard
@@ -2712,7 +2714,7 @@ function uutag(expression, // @param String: "*" or "tag"
     // [IE] getElementsByTagName("*") has comment nodes
     for (; i < iz; ++i) {
         v = nodeList[i];
-        if (!skip || v.nodeType === 1) { // 1: ELEMENT_NODE
+        if (!skip || v[_nodeType] === 1) { // 1: ELEMENT_NODE
             rv[++ri] = v;
         }
     }
@@ -2907,7 +2909,7 @@ _entity.hash = uusplittohash('&,&amp;,<,&lt;,>,&gt;,",&quot;,&amp;,&,&lt;,<,&gt;
 // [1][placeholder]             uu.format("?? dogs and ??", 101, "cats") -> "101 dogs and cats"
 
 // uu.format - placeholder( "??" ) replacement
-function uuformat(format) { // @param String: formatted string with "??" placeholder
+function uuformat(format) { // @param FormatString: formatted string with "??" placeholder
                             // @return String: "formatted string"
     var i = 0, args = arguments;
 
@@ -2919,8 +2921,11 @@ uuformat.q = /\?\?/g;
 
 // --- debug ---
 // uu.puff - uu.puff(mix) -> alert( uu.json(mix) )
-function uupuff(source) { // @param Mix: source object
-    alert(_json(source));
+function uupuff(source                   // @param Mix/FormatString: source object
+                                         //                          or "format ?? string"
+                /* , var_args, ... */) { // @param Mix:
+    alert(arguments.length < 2 ? _json(source)
+                               : uuformat.apply(this, arguments));
 }
 
 // uu.log - add log
@@ -2928,7 +2933,7 @@ function uulog(log) { // @param Mix: log data
     var id = uu.config.log, context = uuid(id);
 
     context || uunodeadd(context = uu.ol({ id: id }));
-    uunodeadd(uu.li(uutext(_json(log))), context);
+    uunodeadd(uu.li(doc[_createTextNode](_json(log))), context);
 }
 
 // uu.log.clear - clear log
@@ -3354,7 +3359,7 @@ function innerTextSetter(text) {
     while (this.hasChildNodes()) {
         this.removeChild(this[_lastChild]);
     }
-    this[_appendChild](doc.createTextNode(text));
+    this[_appendChild](doc[_createTextNode](text));
 }
 
 // HTMLElement.prototype.outerHTML getter
@@ -3386,7 +3391,7 @@ function NodeSet(expression, // @param NodeSet/Node/NodeArray/String/window:
     this.stack = [[]]; // [NodeSet, ...]
 
     this.nodeArray = !expression ? [] // empty nodeArray
-        : (expression === win || expression.nodeType) ? [expression] // window / node
+        : (expression === win || expression[_nodeType]) ? [expression] // window / node
         : typeof expression === _string ?
             (!expression[_indexOf]("<") ? [uunodebulk(expression)]  // <div> -> fragment
                                         : uuquery(expression, context &&
@@ -3518,7 +3523,7 @@ function NodeSetIter(iterType,  // @param Number: 0 is forEach, 1 is map
         rv = [], r, arrayResult = 0;
 
     while ( (node = ary[++i]) ) {
-        if (node && node.nodeType === 11) { // 11: DocumentFragment
+        if (node && node[_nodeType] === 11) { // 11: DocumentFragment
             node = node[_firstChild] || node;
         }
         r = evaluator(node, param1, param2, param3, param4);
