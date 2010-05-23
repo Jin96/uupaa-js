@@ -11,24 +11,27 @@ namespace.utf8 = {
 };
 
 // utf8.encode - String to UTF8ByteArray
-function utf8encode(str) { // @param String: JavaScript string
-                           // @return UTF8ByteArray: [ Number(utf8), ... ]
-    var rv = [], iz = str.length, c = 0, i = 0;
+function utf8encode(str,      // @param String: JavaScript string
+                    __rv__) { // @hidden Array: result
+                              // @return UTF8ByteArray: [ Number(utf8), ... ]
+    __rv__ = __rv__ || [];
+
+    var iz = str.length, c = 0, i = 0;
 
     for (; i < iz; ++i) {
         c = str.charCodeAt(i);
         if (c < 0x80) { // ASCII(0x00 ~ 0x7f)
-            rv.push(c & 0x7f);
+            __rv__.push(c & 0x7f);
         } else if (c < 0x0800) {
-            rv.push(((c >>>  6) & 0x1f) | 0xc0, (c & 0x3f) | 0x80);
+            __rv__.push(((c >>>  6) & 0x1f) | 0xc0, (c & 0x3f) | 0x80);
         } else if (c < 0x10000) {
-            rv.push(((c >>> 12) & 0x0f) | 0xe0,
-                    ((c >>>  6) & 0x3f) | 0x80, (c & 0x3f) | 0x80);
+            __rv__.push(((c >>> 12) & 0x0f) | 0xe0,
+                        ((c >>>  6) & 0x3f) | 0x80, (c & 0x3f) | 0x80);
         } else {
             throw new Error("OUT_OF_RANGE");
         }
     }
-    return rv;
+    return __rv__;
 }
 
 // utf8.decode - UTF8ByteArray to String
