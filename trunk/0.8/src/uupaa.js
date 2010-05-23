@@ -2988,10 +2988,7 @@ function _str2json(str,        // @param String:
                 return _str2json.swap[m];
             })[_replace](_str2json.encode, function(str, c) {
                 // String("AB") to UnicodeString("\u0041\u0042")
-                c = str[0]
-//{{{!mb
-                           || str.charCodeAt(0); // [IE6][IE7]
-//}}}!mb
+                c = str.charCodeAt(0);
                 return "\\u" + uuhash.num2hh[(c >> 8) & 255]
                              + uuhash.num2hh[c & 255];
             });
