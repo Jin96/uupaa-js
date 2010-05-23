@@ -1,0 +1,140 @@
+<!doctype html><html><head><meta charset="UTF-8" />
+<title></title>
+<style>
+.uutest ol { background-color:dodgerblue;color:white }
+.uutest li { padding:5px;border:1px solid #ccc }
+.uutest .li0 { background-color:red   }
+.uutest .li1 { background-color:green }
+.uutest .li2 { background-color:red   }
+.uutest .li3 { background-color:#0c0  }
+.uutestinfo { position:fixed;top:10px;right:10px;font-size:xx-large }
+.uutestinfo a { border: 3px outset gray;padding:3px;background-color:red;color:white }
+.uutestinfo .score { color:black;text-shadow:gray 1px 1px 1px }
+.uutestinfo .ngzone {}
+</style>
+<script src="../../src/uupaa.js"></script>
+<script src="../../src/uu.test.js"></script>
+<script src="../../src/Misc/uu.msgpack.js"></script>
+<script src="../../src/Misc/uu.utf8.js"></script>
+<script>
+uu.ready(function(uu) {
+    uu.test({
+        "Positive FixNum": "",
+            "0x00 == 0": function() {
+                var rv = uu.msgpack.unpack(unescape("%00"));
+
+                return [rv, "==", 0];
+            },
+        "Negative FixNum": "",
+            "0xFF == -1": function() {
+                var rv = uu.msgpack.unpack(unescape("%FF"));
+
+                return [rv, "==", -1];
+            },
+        "Variable": "",
+            "nil(0xc0)": function() {
+                var rv = uu.msgpack.unpack(unescape("%c0"));
+
+                return [rv, "is null"];
+            },
+            "true(0xc3)": function() {
+                var rv = uu.msgpack.unpack(unescape("%c3"));
+
+                return [rv, "is true"];
+            },
+            "false(0xc2)": function() {
+                var rv = uu.msgpack.unpack(unescape("%c2"));
+
+                return [rv, "is false"];
+            },
+            "uint8(0xcc, 0xff)": function() {
+                var rv = uu.msgpack.unpack(unescape("%CC%FF"));
+
+                return [rv, "==", 255];
+            },
+            "uint16(0xcd, 0x80, 0x00)": function() {
+                var rv = uu.msgpack.unpack(unescape("%cd%80%00"));
+
+                return [rv, "==", 32768];
+            },
+            "uint32(0xce, 0x00, 0x10, 0x00, 0x00)": function() {
+                var rv = uu.msgpack.unpack(unescape("%ce%00%10%00%00"));
+
+                return [rv, "==", 1048576];
+            },
+            "uint64(0xcf, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00)": function() {
+                var rv = uu.msgpack.unpack(unescape("%cf%00%00%01%00%00%00%00%00"));
+
+                return [rv, "==", 1099511627776];
+            },
+            "int8(0xd0, 0xc0)": function() {
+                var rv = uu.msgpack.unpack(unescape("%d0%c0"));
+
+                return [rv, "==", -64];
+            },
+            "int16(0xd1, 0xfc, 0x00)": function() {
+                var rv = uu.msgpack.unpack(unescape("%d1%fc%00"));
+
+                return [rv, "==", -1024];
+            },
+            "int32(0xd2, 0xff, 0xf0, 0x00, 0x00)": function() {
+                var rv = uu.msgpack.unpack(unescape("%d2%ff%f0%00%00"));
+
+                return [rv, "==", -1048576];
+            },
+            "int64(0xd3, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00)": function() {
+                var rv = uu.msgpack.unpack(unescape("%d3%ff%ff%ff%00%00%00%00%00"));
+
+                return [rv, "==", -1099511627776];
+            },
+            "float(0xca, 0xc2, 0xed, 0x40, 0x00)": function() {
+                var rv = uu.msgpack.unpack(unescape("%ca%c2%ed%40%00"));
+
+                return [rv, "==", -118.625];
+            },
+            "double(0xcb3fb999999999999a)": function() {
+                var rv = uu.msgpack.unpack(unescape("%cb%3f%b9%99%99%99%99%99%9a"));
+
+                return [rv, "==", 0.1];
+            },
+
+            "FixRaw(0xA161)": function() {
+                var rv = uu.msgpack.unpack(unescape("%a1%61"));
+
+                return [rv, "==", 'a'];
+            },
+
+            "FixMap(0x8100c0)": function() {
+                var rv = uu.msgpack.unpack(unescape("%81%00%c0"));
+
+                return [rv, "==", { 0: null }];
+            },
+
+            "FixArray(0x9100)": function() {
+                var rv = uu.msgpack.unpack(unescape("%91%00"));
+
+                return [rv, "==", [0]];
+            },
+
+            "raw16": function() {
+                var data = unescape("%da%00%28%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20");
+                var rv = uu.msgpack.unpack(data);
+
+                return [rv, "==", "                                        "];
+            },
+            "array16": function() {
+                var data = unescape("%dc%00%10%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00");
+                var rv = uu.msgpack.unpack(data);
+
+                return [rv, "==", [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]];
+            },
+            "hiragana ai (あい)": function() {
+                var data = unescape("%a6%e3%81%82%e3%81%84");
+                var rv = uu.msgpack.unpack(data, uu.utf8.decode);
+
+                return [rv, "==", "あい"];
+            }
+    });
+});
+</script>
+</head><body></body></html>
