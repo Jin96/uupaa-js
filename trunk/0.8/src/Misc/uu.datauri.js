@@ -3,7 +3,7 @@
 //{{{!depend uu, uu.base64
 //}}}!depend
 
-(function(namespace) {
+(this.uu || this).datauri || (function(namespace) {
 
 namespace.datauri = {
     decode:  datauridecode // datauri.decode(data:String, toString:Boolean = false):Hash

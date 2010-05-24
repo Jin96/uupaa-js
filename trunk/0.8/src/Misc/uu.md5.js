@@ -3,7 +3,7 @@
 //{{{!depend uu
 //}}}!depend
 
-(function(namespace) {
+(this.uu || this).md5 || (function(namespace) {
 
 var _S11 =  7,
     _S12 = 12,
@@ -26,7 +26,7 @@ var _S11 =  7,
     _STATE2 = 0x98badcfe,
     _STATE3 = 0x10325476;
 
-namespace.datauri = {
+namespace.md5 = {
     encode:     encode, // md5.encode(str:String, unicode:Boolean = false):String
     test:       selfTest
 };

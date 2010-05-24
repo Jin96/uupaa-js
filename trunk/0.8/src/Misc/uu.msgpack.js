@@ -4,7 +4,7 @@
 //{{{!depend uu, uu.utf8
 //}}}!depend
 
-(function(namespace) {
+(this.uu || this).msgpack || (function(namespace) {
 
 var _sign = { 8: 0x80, 16: 0x8000, 32: 0x80000000, 64: 0x8000000000000000 },
     // --- minify ---

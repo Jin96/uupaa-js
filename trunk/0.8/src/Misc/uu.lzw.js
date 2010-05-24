@@ -3,7 +3,7 @@
 //{{{!depend uu
 //}}}!depend
 
-(function(namespace) {
+(this.uu || this).lzw || (function(namespace) {
 
 namespace.lzw = {
     decode: decode  // lzw.decode(byteArray:ByteArray,
