@@ -3,7 +3,7 @@
 //{{{!depend uu, uu.utf8
 //}}}!depend
 
-(function(namespace) {
+(this.uu || this).base64 || (function(namespace) {
 
 var _encodeArray, // ["A", "B", ...]
     _decodeHash = { "=": 0 };

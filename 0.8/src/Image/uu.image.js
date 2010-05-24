@@ -1,16 +1,16 @@
 
-// === uu.image ===
+// === uu.image / window.image ===
 //{{{!depend uu
 //}}}!depend
 
-uu.image || (function(uu) {
+(this.uu || this).image || (function(namespace) {
 
 //{{{!mb
 var _uuimage = "data-uuimage";
 //}}}!mb
 
-uu.image      = uuimage;     // uu.image(url:String, callback:Function):Image
-uu.image.size = uuimagesize; // uu.image.size(node:HTMLImageElement/HTMLCanvasElement):Hash
+namespace.image      = uuimage;     // uu.image(url:String, callback:Function):Image
+namespace.image.size = uuimagesize; // uu.image.size(node:HTMLImageElement/HTMLCanvasElement):Hash
 
 // uu.image - image loader
 function uuimage(url,        // @param String:
@@ -107,5 +107,4 @@ function uuimagesize(node) { // @param HTMLImageElement/HTMLCanvasElement:
     return node;
 }
 
-})(uu);
-
+})(this.uu || this);

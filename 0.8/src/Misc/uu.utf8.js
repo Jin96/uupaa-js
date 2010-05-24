@@ -3,7 +3,7 @@
 //{{{!depend uu
 //}}}!depend
 
-(function(namespace) {
+(this.uu || this).utf8 || (function(namespace) {
 
 namespace.utf8 = {
     encode: utf8encode, // utf8.encode(str:String):UTF8ByteArray
