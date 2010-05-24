@@ -18,236 +18,389 @@
 <script src="../../src/Misc/uu.utf8.js"></script>
 <script>
 uu.ready(function(uu) {
+    var hex = uu.test.toHexString;
+
     uu.test({
-        "DECODE": "",
-        "Positive FixNum": "",
-            "0x00 == 0": function() {
-                var rv = uu.msgpack.unpack(unescape("%00"));
+        "FixNum and uint": "",
+            "Number(0) -> [0x00] (Positive FixNum)": function() {
+                var pack = uu.msgpack.pack(0);
+                var rv = uu.msgpack.unpack(pack);
 
-                return [rv, "==", 0];
+                return [rv, "==", 0, hex(pack)];
             },
-        "Negative FixNum": "",
-            "0xFF == -1": function() {
-                var rv = uu.msgpack.unpack(unescape("%FF"));
+            "Number(1) -> [0x01] (Positive FixNum)": function() {
+                var pack = uu.msgpack.pack(1);
+                var rv = uu.msgpack.unpack(pack);
 
-                return [rv, "==", -1];
+                return [rv, "==", 1, hex(pack)];
             },
-        "Variable": "",
-            "nil(0xc0)": function() {
-                var rv = uu.msgpack.unpack(unescape("%c0"));
+            "Number(31) -> [0x1f] (Positive FixNum)": function() {
+                var pack = uu.msgpack.pack(31);
+                var rv = uu.msgpack.unpack(pack);
 
-                return [rv, "is null"];
+                return [rv, "==", 31, hex(pack)];
             },
-            "true(0xc3)": function() {
-                var rv = uu.msgpack.unpack(unescape("%c3"));
+            "Number(32) -> [0x20] (Positive FixNum)": function() {
+                var pack = uu.msgpack.pack(32);
+                var rv = uu.msgpack.unpack(pack);
 
-                return [rv, "is true"];
+                return [rv, "==", 32, hex(pack)];
             },
-            "false(0xc2)": function() {
-                var rv = uu.msgpack.unpack(unescape("%c2"));
+            "Number(33) -> [0x21] (Positive FixNum)": function() {
+                var pack = uu.msgpack.pack(33);
+                var rv = uu.msgpack.unpack(pack);
 
-                return [rv, "is false"];
+                return [rv, "==", 33, hex(pack)];
             },
-            "uint8(0xcc, 0xff)": function() {
-                var rv = uu.msgpack.unpack(unescape("%CC%FF"));
+            "Number(126) -> [0x7e] (Positive FixNum)": function() {
+                var pack = uu.msgpack.pack(126);
+                var rv = uu.msgpack.unpack(pack);
 
-                return [rv, "==", 255];
+                return [rv, "==", 126, hex(pack)];
             },
-            "uint16(0xcd, 0x80, 0x00)": function() {
-                var rv = uu.msgpack.unpack(unescape("%cd%80%00"));
+            "Number(127) -> [0x7f] (Positive FixNum)": function() {
+                var pack = uu.msgpack.pack(127);
+                var rv = uu.msgpack.unpack(pack);
 
-                return [rv, "==", 32768];
+                return [rv, "==", 127, hex(pack)];
             },
-            "uint32(0xce, 0x00, 0x10, 0x00, 0x00)": function() {
-                var rv = uu.msgpack.unpack(unescape("%ce%00%10%00%00"));
+            "Number(128) -> [0xcc, 0x80] (unit8)": function() {
+                var pack = uu.msgpack.pack(128);
+                var rv = uu.msgpack.unpack(pack);
 
-                return [rv, "==", 1048576];
+                return [rv, "==", 128, hex(pack)];
             },
-            "uint64(0xcf, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00)": function() {
-                var rv = uu.msgpack.unpack(unescape("%cf%00%00%01%00%00%00%00%00"));
+            "Number(129) -> [0xcc, 0x81] (unit8)": function() {
+                var pack = uu.msgpack.pack(129);
+                var rv = uu.msgpack.unpack(pack);
 
-                return [rv, "==", 1099511627776];
+                return [rv, "==", 129, hex(pack)];
             },
-            "int8(0xd0, 0xc0)": function() {
-                var rv = uu.msgpack.unpack(unescape("%d0%c0"));
+            "Number(0xfe) -> [0xcc, 0xfe] (unit8)": function() {
+                var pack = uu.msgpack.pack(0xfe);
+                var rv = uu.msgpack.unpack(pack);
 
-                return [rv, "==", -64];
+                return [rv, "==", 0xfe, hex(pack)];
             },
-            "int16(0xd1, 0xfc, 0x00)": function() {
-                var rv = uu.msgpack.unpack(unescape("%d1%fc%00"));
+            "Number(0xff) -> [0xcc, 0xff] (unit8)": function() {
+                var pack = uu.msgpack.pack(0xff);
+                var rv = uu.msgpack.unpack(pack);
 
-                return [rv, "==", -1024];
+                return [rv, "==", 0xff, hex(pack)];
             },
-            "int32(0xd2, 0xff, 0xf0, 0x00, 0x00)": function() {
-                var rv = uu.msgpack.unpack(unescape("%d2%ff%f0%00%00"));
+            "Number(0x100) -> [0xcd, 0x1, 0x0] (unit16)": function() {
+                var pack = uu.msgpack.pack(0x100);
+                var rv = uu.msgpack.unpack(pack);
 
-                return [rv, "==", -1048576];
+                return [rv, "==", 0x100, hex(pack)];
             },
-            "int64(0xd3, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00)": function() {
-                var rv = uu.msgpack.unpack(unescape("%d3%ff%ff%ff%00%00%00%00%00"));
+            "Number(0x101) -> [0xcd, 0x1, 0x1] (unit16)": function() {
+                var pack = uu.msgpack.pack(0x101);
+                var rv = uu.msgpack.unpack(pack);
 
-                return [rv, "==", -1099511627776];
+                return [rv, "==", 0x101, hex(pack)];
             },
-            "float(0xca, 0xc2, 0xed, 0x40, 0x00)": function() {
+            "Number(0xfffe) -> [0xcd, 0xff, 0xfe] (unit16)": function() {
+                var pack = uu.msgpack.pack(0xfffe);
+                var rv = uu.msgpack.unpack(pack);
+
+                return [rv, "==", 0xfffe, hex(pack)];
+            },
+            "Number(0xffff) -> [0xcd, 0xff, 0xff] (unit16)": function() {
+                var pack = uu.msgpack.pack(0xffff);
+                var rv = uu.msgpack.unpack(pack);
+
+                return [rv, "==", 0xffff, hex(pack)];
+            },
+            "Number(0x10000) -> [0xcd, 0xff, 0xff] (unit32)": function() {
+                var pack = uu.msgpack.pack(0x10000);
+                var rv = uu.msgpack.unpack(pack);
+
+                return [rv, "==", 0x10000, hex(pack)];
+            },
+            "Number(0x10001) -> [0xce, 0x0, 0x1, 0x0, 0x1] (unit32)": function() {
+                var pack = uu.msgpack.pack(0x10001);
+                var rv = uu.msgpack.unpack(pack);
+
+                return [rv, "==", 0x10001, hex(pack)];
+            },
+            "Number(0xffffffff) -> [0xce, 0xff, 0xff, 0xff, 0xff] (unit32)": function() {
+                var pack = uu.msgpack.pack(0xffffffff);
+                var rv = uu.msgpack.unpack(pack);
+
+                return [rv, "==", 0xffffffff, hex(pack)];
+            },
+            "Number(0x100000000) -> [0xcf, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00] (unit64)": function() {
+                var pack = uu.msgpack.pack(0x100000000);
+                var rv = uu.msgpack.unpack(pack);
+
+                return [rv, "==", 0x100000000, hex(pack)];
+            },
+            "Number(0x10000000000) -> [0xcf, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00] (unit64)": function() {
+                var pack = uu.msgpack.pack(0x10000000000);
+                var rv = uu.msgpack.unpack(pack);
+
+                return [rv, "==", 0x10000000000, hex(pack)];
+            },
+            "Number(0x1000000000000) -> [0xcf, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00] (unit64)": function() {
+                var pack = uu.msgpack.pack(0x1000000000000);
+                var rv = uu.msgpack.unpack(pack);
+
+                return [rv, "==", 0x1000000000000, hex(pack), "281474976710656"];
+            },
+            "Number(0x1fffffffffffff) -> [0xcf, 0x00, 0x1f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff] (unit64)": function() {
+                var pack = uu.msgpack.pack(0x1fffffffffffff);
+                var rv = uu.msgpack.unpack(pack);
+
+                return [rv, "==", 0x1fffffffffffff, hex(pack), "9007199254740991"];
+            },
+            "Number(0x20000000000000) -> [0xcf, 0x00, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00] (unit64)": function() {
+                var pack = uu.msgpack.pack(0x20000000000000);
+                var rv = uu.msgpack.unpack(pack);
+
+                return [rv, "==", 0x20000000000000, hex(pack), "9007199254740992"];
+            },
+            "Number(0x40000000000000) -> [0xcf, 0x00, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00] (unit64)": function() {
+                var pack = uu.msgpack.pack(0x40000000000000);
+                var rv = uu.msgpack.unpack(pack);
+
+                return [rv, "==", 0x40000000000000, hex(pack), "18014398509481984"];
+            },
+            "JavaScriptのNumber型は、内部的にIEEE754なので、0x20000000000000 以上の整数は正しく保持できず、int64 や uint64 の上位14bitを使った巨大な値は表現不能": "",
+            "本来は 0x80000000000000 = 36028797018963968 なはずだが、Number型の丸め誤差のため 36028797018963970 が表示されてしまう": "",
+            "(Accuracy problems) Number(0x80000000000000) -> [] (unit64)": function() {
+                var pack = uu.msgpack.pack(0x80000000000000);
+                var rv = uu.msgpack.unpack(pack);
+
+                return [rv, "==", 0x80000000000000, hex(pack)];
+            },
+            "Number型の表現力の限界を超えているため実装不能(デコーダは実装できてもNumber型に代入すると情報落ちする)": "",
+            "Number(0xffffffffffffffff) -> [] (unit64)": function() {
+                var pack = uu.msgpack.pack(0xffffffffffffffff);
+                var rv = uu.msgpack.unpack(pack);
+
+                return [rv, "==", 0xffffffffffffffff, hex(pack), "18446744073709551615"];
+            },
+
+            "Number(-0) -> [0x00] (Negative FixNum)": function() {
+                var pack = uu.msgpack.pack(-0);
+                var rv = uu.msgpack.unpack(pack);
+
+                return [rv, "==", -0, hex(pack)];
+            },
+            "Number(-1) -> [0xff] (Negative FixNum)": function() {
+                var pack = uu.msgpack.pack(-1);
+                var rv = uu.msgpack.unpack(pack);
+
+                return [rv, "==", -1, hex(pack)];
+            },
+            "Number(-31) -> [0xe1] (Negative FixNum)": function() {
+                var pack = uu.msgpack.pack(-31);
+                var rv = uu.msgpack.unpack(pack);
+
+                return [rv, "==", -31, hex(pack)];
+            },
+            "Number(-32) -> [0xe0] (Negative FixNum)": function() {
+                var pack = uu.msgpack.pack(-32);
+                var rv = uu.msgpack.unpack(pack);
+
+                return [rv, "==", -32, hex(pack)];
+            },
+            "Number(-33) -> [0xd0, 0x21] (int 8)": function() {
+                var pack = uu.msgpack.pack(-33);
+                var rv = uu.msgpack.unpack(pack);
+
+                return [rv, "==", -33, hex(pack)];
+            },
+            "Number(-126) -> [0xd0, 0x7e] (int 8)": function() {
+                var pack = uu.msgpack.pack(-126);
+                var rv = uu.msgpack.unpack(pack);
+
+                return [rv, "==", -126, hex(pack)];
+            },
+            "Number(-127) -> [0xd0, 0x7f] (int 8)": function() {
+                var pack = uu.msgpack.pack(-127);
+                var rv = uu.msgpack.unpack(pack);
+
+                return [rv, "==", -127, hex(pack)];
+            },
+            "Number(-128) -> [0xd0, 0x80] (int 8)": function() {
+                var pack = uu.msgpack.pack(-128);
+                var rv = uu.msgpack.unpack(pack);
+
+                return [rv, "==", -128, hex(pack)];
+            },
+            "Number(-129) -> [0xd0, 0x81] (int 8)": function() {
+                var pack = uu.msgpack.pack(-129);
+                var rv = uu.msgpack.unpack(pack);
+
+                return [rv, "==", -129, hex(pack)];
+            },
+            "Number(-254) -> [0xd0, 0xfe] (int 8)": function() {
+                var pack = uu.msgpack.pack(-254);
+                var rv = uu.msgpack.unpack(pack);
+
+                return [rv, "==", -254, hex(pack)];
+            },
+            "Number(-255) -> [0xd0, 0xff] (int 8)": function() {
+                var pack = uu.msgpack.pack(-255);
+                var rv = uu.msgpack.unpack(pack);
+
+                return [rv, "==", -255, hex(pack)];
+            },
+            "Number(-256) -> [0xd0, 0x00] (int 16)": function() {
+                var pack = uu.msgpack.pack(-256);
+                var rv = uu.msgpack.unpack(pack);
+
+                return [rv, "==", -256, hex(pack)];
+            },
+            "Number(-257) -> [0xd1, 0x02, 0xff] (int 16)": function() {
+                var pack = uu.msgpack.pack(-257);
+                var rv = uu.msgpack.unpack(pack);
+
+                return [rv, "==", -257, hex(pack)];
+            },
+            "Number(-65534) -> [0xd1, 0x00, 0x02] (int 16)": function() {
+                var pack = uu.msgpack.pack(-65534);
+                var rv = uu.msgpack.unpack(pack);
+
+                return [rv, "==", -65534, hex(pack)];
+            },
+            "Number(-65535) -> [0xd1, 0x00, 0x01] (int 16)": function() {
+                var pack = uu.msgpack.pack(-65535);
+                var rv = uu.msgpack.unpack(pack);
+
+                return [rv, "==", -65535, hex(pack)];
+            },
+            "Number(-65536) -> [0xd1, 0x00, 0x00] (int 16)": function() {
+                var pack = uu.msgpack.pack(-65536);
+                var rv = uu.msgpack.unpack(pack);
+
+                return [rv, "==", -65536, hex(pack)];
+            },
+            "Number(-65537) -> [0xd2, 0xff, 0xfe, 0xff, 0xff] (int 32)": function() {
+                var pack = uu.msgpack.pack(-65537);
+                var rv = uu.msgpack.unpack(pack);
+
+                return [rv, "==", -65537, hex(pack)];
+            },
+
+            "Number(-1048576) -> [0xd2, 0xff, 0xf0, 0x00, 0x00] (int 32)": function() {
+                var pack = uu.msgpack.pack(-1048576);
+                var rv = uu.msgpack.unpack(pack);
+
+                return [rv, "==", -1048576, hex(pack)];
+            },
+            "Number(-2147483646) -> [0xd2, 0x80, 0x00, 0x00, 0x02] (int 32)": function() {
+                var pack = uu.msgpack.pack(-2147483646);
+                var rv = uu.msgpack.unpack(pack);
+
+                return [rv, "==", -2147483646, hex(pack)];
+            },
+            "Number(-2147483647) -> [0xd2, 0x80, 0x00, 0x00, 0x01] (int 32)": function() {
+                var pack = uu.msgpack.pack(-2147483647);
+                var rv = uu.msgpack.unpack(pack);
+
+                return [rv, "==", -2147483647, hex(pack)];
+            },
+            "未解決": "",
+            "TODO Number(-4294967294) -> [] ()": function() {
+                var pack = uu.msgpack.pack(-4294967294);
+                var rv = uu.msgpack.unpack(pack);
+
+                return [rv, "==", -4294967294, hex(pack)];
+            },
+
+        "Nil": "",
+            "null -> [0xc0] (nil)": function() {
+                var pack = uu.msgpack.pack(null);
+                var rv = uu.msgpack.unpack(pack);
+
+                return [rv, "==", null, hex(pack)];
+            },
+
+        "Boolean": "",
+            "true -> [0xc3]": function() {
+                var pack = uu.msgpack.pack(true);
+                var rv = uu.msgpack.unpack(pack);
+
+                return [rv, "==", true, hex(pack)];
+            },
+            "false -> [0xc2]": function() {
+                var pack = uu.msgpack.pack(false);
+                var rv = uu.msgpack.unpack(pack);
+
+                return [rv, "==", false, hex(pack)];
+            },
+            "Number(123.456) -> [0xcb, 0x40, 0x5e, 0xdd, 0x2f, 0x1a, 0x9f, 0xbe, 0x77] (double)": function() {
+                var pack = uu.msgpack.pack(123.456);
+                var rv = uu.msgpack.unpack(pack);
+
+                return [rv, "==", 123.456, hex(pack)];
+            },
+            "Number(0.1) -> [0xcb, 0x3f, 0xb9, 0x99, 0x99, 0x99, 0x99, 0x99, 0x9a] (double)": function() {
+                var pack = uu.msgpack.pack(0.1);
+                var rv = uu.msgpack.unpack(pack);
+
+                return [rv, "==", 0.1, hex(pack)];
+            },
+
+            "String('abc') -> [0xa3, 0x61, 0x62, 0x63] (FixRaw)": function() {
+                var pack = uu.msgpack.pack("abc");
+                var rv = uu.msgpack.unpack(pack);
+
+                return [rv, "==", "abc", hex(pack)];
+            },
+            "String('あいう') -> [0xa9, 0xe3, 0x81, 0x82, 0xe3, 0x81, 0x84, 0xe3, 0x81, 0x86] (FixRaw)": function() {
+                var pack = uu.msgpack.pack("あいう", true);
+                var rv = uu.msgpack.unpack(pack, true);
+
+                return [rv, "==", "あいう", hex(pack)];
+            },
+            "String('カルビx3, ハラミx2, ブタバラ, T-BORNx500g, ライス大盛りで') -> [] (Raw16)": function() {
+                var pack = uu.msgpack.pack("カルビx3, ハラミx2, ブタバラ, T-BORNx500g, ライス大盛りで", true);
+                var rv = uu.msgpack.unpack(pack, true);
+
+                return [rv, "==", "カルビx3, ハラミx2, ブタバラ, T-BORNx500g, ライス大盛りで", hex(pack)];
+            },
+
+            "Hash({ 'abc': [123] }) -> [0x81, 0xa3, 0x61, 0x62, 0x63, 0x91, 0x7b] (FixMap)": function() {
+                var pack = uu.msgpack.pack({ "abc": [123] });
+                var rv = uu.msgpack.unpack(pack);
+
+                return [rv, "==", { "abc": [123] }, hex(pack)];
+            },
+            "Hash({ abc: [123, 456], a: 1, b: 2, c: 3, d: 4, e: 5, f: 6, g: 7, h: 8, i: 9, j: 10, k: 11, l: 12, l: 13, m: 14, n: 15, o: 16, p: 17 }) -> [0xde, 0x00, ...] (Map16)": function() {
+                var hash = { abc: [123, 456], a: 1, b: 2, c: 3, d: 4, e: 5,
+                                              f: 6, g: 7, h: 8, i: 9, j: 10,
+                                              k: 11, l: 12, l: 13, m: 14,
+                                              n: 15, o: 16, p: 17 };
+                var pack = uu.msgpack.pack(hash);
+                var rv = uu.msgpack.unpack(pack);
+
+                return [rv, "==", hash, hex(pack)];
+            },
+
+            "Array([123]) -> [0x91, 0x7b] (FixArray)": function() {
+                var pack = uu.msgpack.pack([123]);
+                var rv = uu.msgpack.unpack(pack);
+
+                return [rv, "==", [123], hex(pack)];
+            },
+            "Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 'hoge']) -> [0xdc, 0x00, ...] (Array16)": function() {
+                var ary = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 'hoge'];
+                var pack = uu.msgpack.pack(ary);
+                var rv = uu.msgpack.unpack(pack);
+
+                return [rv, "==", ary, hex(pack)];
+            },
+
+
+            "Number(-118.625) -> [0xca, 0xc2, 0xed, 0x40, 0x00] (float)": function() {
                 var rv = uu.msgpack.unpack(unescape("%ca%c2%ed%40%00"));
 
                 return [rv, "==", -118.625];
-            },
-            "double(0xcb3fb999999999999a)": function() {
-                var rv = uu.msgpack.unpack(unescape("%cb%3f%b9%99%99%99%99%99%9a"));
-
-                return [rv, "==", 0.1];
-            },
-
-            "FixRaw(0xA161)": function() {
-                var rv = uu.msgpack.unpack(unescape("%a1%61"));
-
-                return [rv, "==", 'a'];
-            },
-
-            "FixMap(0x8100c0)": function() {
-                var rv = uu.msgpack.unpack(unescape("%81%00%c0"));
-
-                return [rv, "==", { 0: null }];
-            },
-
-            "FixArray(0x9100)": function() {
-                var rv = uu.msgpack.unpack(unescape("%91%00"));
-
-                return [rv, "==", [0]];
-            },
-
-            "raw16": function() {
-                var data = unescape("%da%00%28%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20");
-                var rv = uu.msgpack.unpack(data);
-
-                return [rv, "==", "                                        "];
-            },
-            "array16": function() {
-                var data = unescape("%dc%00%10%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00");
-                var rv = uu.msgpack.unpack(data);
-
-                return [rv, "==", [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]];
-            },
-            "hiragana ai (あい)": function() {
-                var data = unescape("%a6%e3%81%82%e3%81%84");
-                var rv = uu.msgpack.unpack(data, true);
-
-                return [rv, "==", "あい"];
-            },
-
-        "ENCODE": "",
-        " Positive FixNum": "",
-            " 0x00 == 0": function() {
-                var rv = uu.msgpack.unpack(uu.msgpack.pack(0));
-
-                return [rv, "==", 0];
-            },
-        " Negative FixNum": "",
-            " 0xFF == -1": function() {
-                var rv = uu.msgpack.unpack(uu.msgpack.pack(-1));
-
-                return [rv, "==", -1];
-            },
-        " Variable": "",
-            " nil(0xc0)": function() {
-                var rv = uu.msgpack.unpack(uu.msgpack.pack(null));
-
-                return [rv, "is null"];
-            },
-            " true(0xc3)": function() {
-                var rv = uu.msgpack.unpack(uu.msgpack.pack(true));
-
-                return [rv, "is true"];
-            },
-            " false(0xc2)": function() {
-                var rv = uu.msgpack.unpack(uu.msgpack.pack(false));
-
-                return [rv, "is false"];
-            },
-            " uint8(0xcc, 0xff)": function() {
-                var rv = uu.msgpack.unpack(uu.msgpack.pack(255));
-
-                return [rv, "==", 255];
-            },
-            " uint16(0xcd, 0x80, 0x00)": function() {
-                var rv = uu.msgpack.unpack(uu.msgpack.pack(32768));
-
-                return [rv, "==", 32768];
-            },
-            " uint32(0x100000000 - 1)": function() {
-                var rv = uu.msgpack.unpack(uu.msgpack.pack(0x100000000 - 1));
-
-                return [rv, "==", 0x100000000 - 1];
-            },
-            " uint64(0xcf, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00)": function() {
-                var rv = uu.msgpack.unpack(uu.msgpack.pack(1099511627776));
-
-                return [rv, "==", 1099511627776];
-            },
-            " int8(0xd0, 0xc0)": function() {
-                var rv = uu.msgpack.unpack(uu.msgpack.pack(-64));
-
-                return [rv, "==", -64];
-            },
-            " int16(0xd1, 0xfc, 0x00)": function() {
-                var rv = uu.msgpack.unpack(uu.msgpack.pack(-1024));
-
-                return [rv, "==", -1024];
-            },
-            " int32(0xd2, 0xff, 0xf0, 0x00, 0x00)": function() {
-                var rv = uu.msgpack.unpack(uu.msgpack.pack(-1048576));
-
-                return [rv, "==", -1048576];
-            },
-            " int64(0xd3, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00)": function() {
-                var rv = uu.msgpack.unpack(uu.msgpack.pack(-1099511627776));
-
-                return [rv, "==", -1099511627776];
-            },
-            " double(0xcb3fb999999999999a)": function() {
-                var rv = uu.msgpack.unpack(uu.msgpack.pack(0.1));
-
-                return [rv, "==", 0.1];
-            },
-
-            " FixRaw(0xA161)": function() {
-                var rv = uu.msgpack.unpack(uu.msgpack.pack('a'));
-
-                return [rv, "==", 'a'];
-            },
-
-            " FixMap(0x8100c0)": function() {
-                var rv = uu.msgpack.unpack(uu.msgpack.pack({ 0: null }));
-
-                return [rv, "==", { 0: null }];
-            },
-
-            " FixArray(0x9100)": function() {
-                var rv = uu.msgpack.unpack(uu.msgpack.pack([0]));
-
-                return [rv, "==", [0]];
-            },
-
-            " raw16": function() {
-                var data = uu.msgpack.pack("                                        ");
-                var rv = uu.msgpack.unpack(data);
-
-                return [rv, "==", "                                        "];
-            },
-            " array16": function() {
-                var data = uu.msgpack.pack([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
-                var rv = uu.msgpack.unpack(data);
-
-                return [rv, "==", [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]];
-            },
-            " hiragana ai (あい)": function() {
-                var data = uu.msgpack.pack("あい", true); // utf8
-                var rv = uu.msgpack.unpack(data, true); // utf8
-
-                return [rv, "==", "あい"];
             }
-
     });
 });
 </script>
