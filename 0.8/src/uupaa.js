@@ -297,6 +297,7 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Stri
                                     //  [2][create formated text node] uu.text("?? ??", "a", "b") -> createTextNode("a b")
                                     //  [3][get text]                  uu.text(node)              -> "text"
                                     //  [4][set text]                  uu.text(node, "text")      -> node
+                                    //  [5][set formated text]         uu.text(node, "??", "a")   -> node
     // --- STRING ---
     fix:      uumix(uufix, {        // uu.fix(source:String):String
                                     //  [1][css-prop to js-css-prop] uu.fix("background-color") -> "backgroundColor"
@@ -732,11 +733,14 @@ function uuhash(key,     // @param Hash/String: key
 }
 // uu.hash.dd2num = { "00":   0 , ... "99":  99  }; Zero-filled dec string -> Number
 // uu.hash.num2dd = {    0: "00", ...   99: "99" }; Number -> Zero-filled dec string
-_makeMapping("0123456789",       uuhash.dd2num = {}, uuhash.num2dd = {});
+_makeMapping("0123456789", uuhash.dd2num = {},
+                           uuhash.num2dd = {});
 
 // uu.hash.hh2num = { "00":   0 , ... "ff": 255  }; Zero-filled hex string -> Number
 // uu.hash.num2hh = {    0: "00", ...  255: "ff" }; Number -> Zero-filled hex string
-_makeMapping("0123456789abcdef", uuhash.hh2num = {}, uuhash.num2hh = {});
+//_makeMapping("0123456789abcdef", uuhash.hh2num = {}, uuhash.num2hh = {});
+_makeMapping("0123456789abcdef", uuhash.hh2num = {},
+                                 uuhash.num2hh = { 256: "00" });
 
 //  [1][through Array]      uu.array([1, 2])    -> [1, 2]
 //  [2][mix to Array]       uu.array(mix)       -> [mix]
@@ -977,7 +981,7 @@ function uuattr(node,    // @param Node:
     // [IE6][IE7] key=for -> key=htmlFor, key=class -> key=className
     // [OTHER]    key=htmlFor -> key=for, key=className -> key=class
 
-    if (key === rv) { // key === void 0 // [1] uu.attr(node)
+    if (key === void 0) { // [1] uu.attr(node)
         rv = {};
         ary = node.attributes;
 
@@ -1019,7 +1023,7 @@ function uudata(node,    // @param Node:
                          // @return Hash/Mix/Node/undefined:
     var rv, i, prefix = "data-";
 
-    if (key === rv) { // key === void 0 // [1] uu.data(node)
+    if (key === void 0) { // [1] uu.data(node)
         rv = {};
         for (key in node) {
             key[_indexOf](prefix) || (rv[key.slice(5)] = node[key]);
@@ -1152,17 +1156,17 @@ function uutween(node,       // @param Node: animation target node
                              // @return Node:
     function loop() {
         var data = node[_uutween], q = data.q[0], style = node.style,
-            reverse = data.r,
+            fn = q.fn, reverse = data.r,
             tm = q.tm ? +new Date
-                      : (q.fn[1] && q.fn[1](node, style, reverse), // before callback(node, node.style, reverse)
-                         q.js = isFunction(q.param) ? q.param
-                              : q.param ? uutweenbuild(node, data, q) : _nop,
+                      : (fn[1] && fn[1](node, style, reverse), // before callback(node, node.style, reverse)
+                         q.js = isFunction(q.pz) ? q.pz
+                              : q.pz ? uutweenbuild(node, data, q) : _nop,
                          q.tm = +new Date),
             finished = q.fin || (tm >= q.tm + q.dur);
 
         q.js(node, style, reverse, finished, tm - q.tm, q.dur); // js(node, node.style, reverse, finished, gain, duration)
         if (finished) { // finished
-            q.fn[0] && q.fn[0](node, style, reverse); // after callback(node, node.style, reverse)
+            fn[0] && fn[0](node, style, reverse); // after callback(node, node.style, reverse)
             data.q.shift(); // remove first queue data
 
             if (!data.q.length) {
@@ -1192,7 +1196,7 @@ function uutween(node,       // @param Node: animation target node
     // append queue data
     data.q.push({ tm: 0, fn: uuarray(callback || 0), guid: uuguid(),
                   dur: Math.max(duration, 1),
-                  param: p, fin: 0 }); // true/1 is finished
+                  pz: p, fin: 0 }); // true/1 is finished
     data.id || (data.id = setInterval(loop, ((1000 / p.fps) | 0) || 1)); // [IE] setInterval(0) is Error
     return node;
 }
@@ -1222,7 +1226,7 @@ function uutweenbuild(node, data, queue) {
     }
 
     var rv = 'var t,b,c,d2=d/2,w,o,gd,h;',
-        param = queue.param, revertParam = {},
+        param = queue.pz, revertParam = {},
         i, startValue, endValue, ez, w, n,
         fixdb = uufix.db, cs = uucss(node, _true);
 
@@ -1288,7 +1292,7 @@ function uutweenbuild(node, data, queue) {
     if (!data.r && param.r) {
         data.rq.push({ tm: 0, fn: uuclone(queue.fn), guid: queue.guid, // copy guid
                        dur: queue.dur,
-                       param: revertParam, fin: 0 });
+                       pz: revertParam, fin: 0 });
     }
 
     return new Function("n,s,r,f,g,d", rv); // node, node.style, reverse, finished, gain, duration
@@ -1300,29 +1304,31 @@ function uutweenskip(node,           // @param Node(= null): null is all node
                      avoidFlicker) { // @param Boolean(= false): true is avoid flicker
                                      // @return Node/NodeArray:
     var nodeArray = node ? [node] : uutag("*", doc.body),
-        v, i = -1, j, k, jz, kz, data, guid;
+        v, i = -1, j, k, jz, kz, data, guid, q, rq;
 
     while( (v = nodeArray[++i]) ) {
         data = v[_uutween];
         if (data && data.id) {
 
+            q = data.q;
+            rq = data.rq;
             guid = [];
-            for (j = 0, jz = all ? data.q.length : 1; j < jz; ++j) {
-                data.q[j].fin = 1;
-                data.q[j].param.r && guid.push(data.q[j].param.guid);
+            for (j = 0, jz = all ? q.length : 1; j < jz; ++j) {
+                q[j].fin = 1;
+                q[j].pz.r && guid.push(q[j].pz.guid);
             }
             for (j = 0, jz = guid.length; j < jz; ++j) {
-                for (k = 0, kz = data.rq.length; k < kz; ++k) {
-                    if (data.rq[k].param.guid === guid[j]) {
-                        data.rq[k].fin = 1;
-                        data.q.push(data.rq.splice(k, 1)[0]); // data.q <- data.rq
+                for (k = 0, kz = rq.length; k < kz; ++k) {
+                    if (rq[k].pz.guid === guid[j]) {
+                        rq[k].fin = 1;
+                        q.push(rq.splice(k, 1)[0]); // data.q <- data.rq
                     }
                 }
             }
-            if (data.q.length > 2 && avoidFlicker) {
-                data.q.push({
+            if (q.length > 2 && avoidFlicker) {
+                q.push({
                     tm: 0, fn: [], guid: 0, fin: 1, dur: 0,
-                    param: function(node, style) {
+                    pz: function(node, style) {
                         style[_visibility] = "visible";
                     }});
 
@@ -1571,24 +1577,32 @@ function _calcPixel(node,    // @param Node:
         removeProperty = "removeProperty",
         getPropertyValue = "getPropertyValue";
 
+//{{{!mb
     if (_webkit) {
+//}}}!mb
         mem[1] = style[getPropertyValue](position);
         mem[2] = style[getPropertyValue](_display);
         style[setProperty](position, "absolute", important);
-        style[setProperty](_display,  "block",   important);
+        style[setProperty](_display, "block",    important);
+//{{{!mb
     }
+//}}}!mb
     style[setProperty](prop, value, important);
     // get pixel
     value = parseInt(getComputedStyle(node, 0).left);
     // restore
     style[removeProperty](prop);
     style[setProperty](prop, mem[0], "");
+//{{{!mb
     if (_webkit) {
+//}}}!mb
         style[removeProperty](position);
         style[removeProperty](_display);
         style[setProperty](position, mem[1], "");
         style[setProperty](_display, mem[2], "");
+//{{{!mb
     }
+//}}}!mb
     return value || 0;
 }
 
@@ -2597,7 +2611,7 @@ function uusvg(tagName, // @param String(= "svg"):
     var rv = doc.createElementNS("http://www.w3.org/2000/svg", tagName || "svg"),
         key;
 
-    if (attr !== key) { // attr === void 0
+    if (attr !== void 0) {
         for (key in attr) {
             rv.setAttribute(key, attr[key]);
         }
@@ -2632,16 +2646,19 @@ function uubody(/* var_args */) { // @param Mix: var_args
 //  [2][create formated text node] uu.text("?? ??", "a", "b") -> createTextNode("a b")
 //  [3][get text]                  uu.text(node)              -> "text"
 //  [4][set text]                  uu.text(node, "text")      -> node
+//  [5][set formated text]         uu.text(node, "??", "a")   -> node
 
 // uu.text - node.text / node.innerText accessor
 function uutext(data,             // @param String/FormatString/Node: "string" or "format ?? string" or node
                 text              // @param String/Mix(= void): "textContent"
                 /* var_args */) { // @param Mix(= void):
                                   // @return String/Node:
+    var args = arguments, az = args.length;
+
     if (isString(data)) {
         return doc[_createTextNode](
-                    arguments.length < 2 ? data // [1]
-                                         : uuformat.apply(this, arguments)); // [2]
+                    az < 2 ? data // [1]
+                           : uuformat.apply(this, args)); // [2]
     }
     if (text === void 0) { // [3]
         return data[
@@ -2650,7 +2667,9 @@ function uutext(data,             // @param String/FormatString/Node: "string" o
 //}}}!mb
                              "innerText"];
     }
-    uunodeadd(doc[_createTextNode](text), uunodeclear(data)); // [4]
+    uunodeadd(doc[_createTextNode](az < 3 ? text // [4]
+                                          : uuformat.apply(this, uuarray(args, 1))), // [5]
+              uunodeclear(data));
     return data;
 }
 
@@ -3883,7 +3902,7 @@ function detectFeatures() {
         rv.background[i] = v[1].test(style.backgroundColor);
     });
     // detect opacity - http://d.hatena.ne.jp/uupaa/20100513
-    rv.opacity = style.opacity != child; // opacity != void 0
+    rv.opacity = style.opacity != void 0;
 
     node.innerHTML = '<a href="/a" class="a"></a>';
     child = node[_firstChild];
@@ -3904,4 +3923,4 @@ function detectFeatures() {
     return rv;
 }
 
-})(this, document, parseInt, parseFloat, window.getComputedStyle, window.JSON);
+})(this, document, parseInt, parseFloat, this.getComputedStyle, this.JSON);

@@ -149,7 +149,7 @@ function joinSourceFiles($package,      // @param Array:
                 // fakeToArray(...) -> Array[_prototype].slice.call(...)
                 if ($mobile) {
                     $txt = preg_replace('/fakeToArray/',
-                                        'Array[_prototype].slice.call', $txt);
+                                        'Array[_prototype][_slice].call', $txt);
                 }
 
                 // strip comment line  "//..." -> ""
