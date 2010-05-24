@@ -45,7 +45,7 @@ function xaddqueue() {
     uu(".tgt1").tween(2000, { x: [400, "easeOutBack"],
                               y: 400,
                               w: 200,
-                              bc: "skyblue",
+                              bgc: "skyblue",
                               o: 0.5,
                               fs: 36 });
 
@@ -54,15 +54,15 @@ function xaddqueue() {
         tween(1000, { x: ["-400", "easeInBack"], y: "-400", o: 0.2, w: 100, h: [100, "easeOutBack"] });
 
     uu(".tgt3").css({ o: 1   }).
-        tween(2000, { x: "+500px", y: "+500px", o: "-0.9" ,bc: "rgb(0,255,100)" }).
+        tween(2000, { x: "+500px", y: "+500px", o: "-0.9" ,bgc: "rgb(0,255,100)" }).
         tween(400). // standby
-        tween(2000, { x: "-500px", y: "-500px", o: 0.5 ,w: 300 ,bc: "rgb(0,0,0)" });
+        tween(2000, { x: "-500px", y: "-500px", o: 0.5 ,w: 300 ,bgc: "rgb(0,0,0)" });
 
     uu(".tgt4").css({ o: 1.0 }).
-        tween(1000, { x: ["+400", "easeInBack"], y: ["+230", "easeInBack"], o: 0.2, w:  10, h: [100, "easeOutBack"], bc: color[0] }).
-        tween(1000, { x: ["+30",  "easeInBack"], y: ["-100", "easeInBack"], o: 1.0, w:  50, h: [ 10, "easeOutBack"], bc: color[1] }).
-        tween(1000, { x: ["-400", "easeInBack"], y: ["-30",  "easeInBack"], o: 0.2, w:  10, h: [ 50, "easeOutBack"], bc: color[2] }).
-        tween(1000, { x: ["-20",  "easeInBack"], y: ["-100", "easeInBack"], o: 1.0, w: 200, h: [200, "easeOutBack"], bc: color[3] });
+        tween(1000, { x: ["+400", "easeInBack"], y: ["+230", "easeInBack"], o: 0.2, w:  10, h: [100, "easeOutBack"], bgc: color[0] }).
+        tween(1000, { x: ["+30",  "easeInBack"], y: ["-100", "easeInBack"], o: 1.0, w:  50, h: [ 10, "easeOutBack"], bgc: color[1] }).
+        tween(1000, { x: ["-400", "easeInBack"], y: ["-30",  "easeInBack"], o: 0.2, w:  10, h: [ 50, "easeOutBack"], bgc: color[2] }).
+        tween(1000, { x: ["-20",  "easeInBack"], y: ["-100", "easeInBack"], o: 1.0, w: 200, h: [200, "easeOutBack"], bgc: color[3] });
 }
 
 function xskip() {

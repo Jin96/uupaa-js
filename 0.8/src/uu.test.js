@@ -79,7 +79,7 @@ function question(title,         // @param String:
                                  // @return Array: [state, msg]
                                  //    state - Number: 0 is false, 1 is true, 2 is error
                                  //    msg - String:
-    var rv, param, result, callback;
+    var rv, param, result, callback, lhs, rhs;
 
     try {
         param = evaluator(); // param = [lhs, operator, rhs]
@@ -88,8 +88,14 @@ function question(title,         // @param String:
         if (result === 2) { // bad operator
             rv = [result, "bad operator: " + param[1]];
         } else {
-            rv = [result, uu.format("?? ?? ??", uu.json(param[0]), param[1],
-                                    param[2] === void 0 ? "" : uu.json(param[2]))];
+            lhs = param[0];
+            lhs = uu.isString(lhs) ? ('"' + lhs + '"') : uu.json(lhs);
+
+            rhs = param[2] === void 0 ? "" : param[2];
+            rhs = uu.isString(rhs) ? ('"' + rhs + '"') : uu.json(rhs);
+
+            rv = [result, uu.format("?? ?? ??", lhs, param[1], rhs)];
+
             callback = param[3] || param[2];
             uu.isFunction(callback) && callback(); // after callback
         }

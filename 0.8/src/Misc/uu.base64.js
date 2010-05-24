@@ -5,8 +5,8 @@
 
 (function(namespace) {
 
-var _encodeArray,             // ["A", "B", ...]
-    _decodeHash = { "=": 0 }; // { =: 0 }
+var _encodeArray, // ["A", "B", ...]
+    _decodeHash = { "=": 0 };
 
 // init data
 (function() {
@@ -15,7 +15,7 @@ var _encodeArray,             // ["A", "B", ...]
 
     _encodeArray = base.split("");
     for (; i < iz; ++i) {
-        _decodeHash[_base.charAt(i)] = i;
+        _decodeHash[base.charAt(i)] = i;
     }
 })();
 
@@ -52,6 +52,8 @@ function base64encode(data,          // @param String/ByteArray:
     pad > 0 && ary.pop();
 
     if (toURLSafe64) {
+        pad > 1 && rv.pop();
+        pad > 0 && rv.pop();
         return rv.join("").replace(/\+/g, "-").replace(/\//g, "_"); // URLSafe64String
     }
     pad > 1 && (rv[rv.length - 2] = "=");

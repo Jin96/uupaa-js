@@ -651,14 +651,47 @@ uu.ready(function(uu) {
         return [uu.fix("htmlFor"), "==", "for"];
       },
 
+      'uu.fix("d") == "display"': function() {
+        return [uu.fix("d"), "==", "display"];
+      },
+      'uu.fix("w") == "width"': function() {
+        return [uu.fix("w"), "==", "width"];
+      },
+      'uu.fix("h") == "height"': function() {
+        return [uu.fix("h"), "==", "height"];
+      },
+      'uu.fix("x") == "left"': function() {
+        return [uu.fix("x"), "==", "left"];
+      },
+      'uu.fix("l") == "left"': function() {
+        return [uu.fix("l"), "==", "left"];
+      },
+      'uu.fix("y") == "top"': function() {
+        return [uu.fix("y"), "==", "top"];
+      },
+      'uu.fix("t") == "top"': function() {
+        return [uu.fix("t"), "==", "top"];
+      },
       'uu.fix("o") == "opacity"': function() {
         return [uu.fix("o"), "==", "opacity"];
+      },
+      'uu.fix("c") == "color"': function() {
+        return [uu.fix("c"), "==", "color"];
       },
       'uu.fix("bg") == "background"': function() {
         return [uu.fix("bg"), "==", "background"];
       },
-      'uu.fix("bgimg") == "backgroundImage"': function() {
-        return [uu.fix("bgimg"), "==", "backgroundImage"];
+      'uu.fix("bgc") == "backgroundColor"': function() {
+        return [uu.fix("bgc"), "==", "backgroundColor"];
+      },
+      'uu.fix("bgi") == "backgroundImage"': function() {
+        return [uu.fix("bgi"), "==", "backgroundImage"];
+      },
+      'uu.fix("z") == "zIndex"': function() {
+        return [uu.fix("z"), "==", "zIndex"];
+      },
+      'uu.fix("fs") == "fontSize"': function() {
+        return [uu.fix("fs"), "==", "fontSize"];
       },
 
     "uu.fix.unicode()": "",

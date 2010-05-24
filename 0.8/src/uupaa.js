@@ -3660,9 +3660,9 @@ uuready(function() {
                 !uuready[_getAttribute] ? "float,styleFloat,cssFloat,styleFloat" :
 //}}}!mb
                                           "float,cssFloat"
-            ) + ",d,display,pos,position,w,width,h,height,x,left,y,top,o,opacity," +
-                "c,color,b,background,bc,backgroundColor,bi,backgroundImage," +
-                "z,zIndex,fs,fontSize");
+            ) + ",d,display,w,width,h,height,x,left,y,top,l,left,t,top," +
+                "c,color,bg,background,bgc,backgroundColor,bgi,backgroundImage," +
+                "o,opacity,z,zIndex,fs,fontSize");
 
     uumix(_camelhash(uufix.db,
                      _webkit ? getComputedStyle(_rootNode, 0)
