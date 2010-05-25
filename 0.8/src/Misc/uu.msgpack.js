@@ -6,9 +6,19 @@
 
 (this.uu || this).msgpack || (function(namespace) {
 
-var _sign = { 8: 0x80, 16: 0x8000, 32: 0x80000000, 64: 0x8000000000000000 },
+var _sign = { 8: 0x80, 16: 0x8000, 32: 0x80000000 },
     _bin2num = {}, // { "00000000": 0, "00000001": 1, ... }
     // --- minify ---
+    _0x100000000000000 = 0x100000000000000,
+    _0x1000000000000 =     0x1000000000000,
+    _0x10000000000 =         0x10000000000,
+    _0x100000000 =             0x100000000,
+    _0x1000000 =                 0x1000000,
+    _0x10000 =                     0x10000,
+    _0x100 =                         0x100,
+    _0xff =                           0xff,
+    _pow = Math.pow,
+    _floor = Math.floor,
     _charCodeAt = "charCodeAt";
 
 namespace.msgpack = {
@@ -26,7 +36,7 @@ function msgpackpack(data) { // @param Mix:
 // uu.msgpack.unpack
 function msgpackunpack(data) { // @param String/ByteArray:
                                // @return Mix:
-    return { data: data, index: -1, byte: isArray(data),
+    return { data: data, index: -1, isArray: isArray(data),
              decode: decode }.decode();
 }
 
@@ -83,11 +93,11 @@ function decode() { // @return Mix:
     var rv, size, i = 0, msb = 0, exp, key,
         that = this,
         data = that.data,
-        type = that.byte ? data[++that.index]
-                         : data[_charCodeAt](++that.index);
+        type = that.isArray ? data[++that.index]
+                            : data[_charCodeAt](++that.index);
 
     if (type >= 0xe0) {         // negative fixnum (111x xxxx) (-32 ~ -1)
-        return type - 0x100;
+        return type - _0x100;
     }
     if (type < 0x80) {          // positive fixnum (0xxx xxxx) (0 ~ 127)
         return type;
@@ -104,14 +114,14 @@ function decode() { // @return Mix:
     case 0xc2:  return false;
     case 0xc3:  return true;
     case 0xca:  rv = readByte(that, 4);      // float
-                exp = ((rv >> 23) & 0xff) - 127; // exp bias
+                exp = ((rv >> 23) & _0xff) - 127; // exp bias
                 return (rv & _sign[32] ? -1 : 1)
-                        * (rv & 0x7fffff | 0x800000) * Math.pow(2, exp - 23);
+                        * (rv & 0x7fffff | 0x800000) * _pow(2, exp - 23);
     case 0xcb:  rv = readByte(that, 4);      // double
                 exp = ((rv >> 20) & 0x7ff) - 1023; // exp bias
                 return (rv & _sign[32] ? -1 : 1)
-                        * ((rv & 0xfffff | 0x100000) * Math.pow(2, exp - 20)
-                            + readByte(that, 4) * Math.pow(2, exp - 52));
+                        * ((rv & 0xfffff | 0x100000) * _pow(2, exp - 20)
+                            + readByte(that, 4) * _pow(2, exp - 52));
     case 0xcf:  return readByte(that, 8);    // uint 64
     case 0xce:  return readByte(that, 4);    // uint 32
     case 0xcd:  return readByte(that, 2);    // uint 16
@@ -120,13 +130,13 @@ function decode() { // @return Mix:
     case 0xd2:  rv === void 0 && (rv = readByte(that, 4));      // int 32
     case 0xd1:  rv === void 0 && (rv = readByte(that, 2));      // int 16
     case 0xd0:  rv === void 0 && (rv = readByte(that, 1));      // int 8
-                msb = 4 << ((type & 0x3) + 1); // 8, 16, 32, 64
+                msb = 4 << ((type & 0x3) + 1); // 8, 16, 32
                 return rv < _sign[msb] ? rv : rv - _sign[msb] * 2;
     case 0xdb:  size = readByte(that, 4);                       // raw 32
     case 0xda:  size === void 0 && (size = readByte(that, 2));  // raw 16
     case 0xa0:  for (rv = []; i < size; ++i) {                  // raw
-                    rv[i] = that.byte ? data[++that.index]
-                                      : data[_charCodeAt](++that.index);
+                    rv[i] = that.isArray ? data[++that.index]
+                                         : data[_charCodeAt](++that.index);
                 }
 //              return utf8 ? namespace.utf8.decode(rv)
 //                          : String.fromCharCode.apply(null, rv);
@@ -152,17 +162,17 @@ function decode() { // @return Mix:
 function readByte(that,   // @param Object:
                   size) { // @param Number:
                           // @return Number:
-    var rv = 0, data = that.data, i = that.index, byte = that.byte;
+    var rv = 0, data = that.data, i = that.index, ary = that.isArray;
 
     switch (size) {
-    case 8: rv += (byte ? data[++i] : data[_charCodeAt](++i)) * 0x100000000000000; // << 56
-            rv += (byte ? data[++i] : data[_charCodeAt](++i)) *   0x1000000000000; // << 48
-            rv += (byte ? data[++i] : data[_charCodeAt](++i)) *     0x10000000000; // << 40
-            rv += (byte ? data[++i] : data[_charCodeAt](++i)) *       0x100000000; // << 32
-    case 4: rv += (byte ? data[++i] : data[_charCodeAt](++i)) *         0x1000000; // << 24 (msb)
-            rv += (byte ? data[++i] : data[_charCodeAt](++i)) *           0x10000; // << 16
-    case 2: rv += (byte ? data[++i] : data[_charCodeAt](++i)) *             0x100; // << 8
-    case 1: rv += (byte ? data[++i] : data[_charCodeAt](++i));
+    case 8: rv += (ary ? data[++i] : data[_charCodeAt](++i)) * _0x100000000000000; // << 56
+            rv += (ary ? data[++i] : data[_charCodeAt](++i)) *   _0x1000000000000; // << 48
+            rv += (ary ? data[++i] : data[_charCodeAt](++i)) *     _0x10000000000; // << 40
+            rv += (ary ? data[++i] : data[_charCodeAt](++i)) *       _0x100000000; // << 32
+    case 4: rv += (ary ? data[++i] : data[_charCodeAt](++i)) *         _0x1000000; // << 24 (msb)
+            rv += (ary ? data[++i] : data[_charCodeAt](++i)) *           _0x10000; // << 16
+    case 2: rv += (ary ? data[++i] : data[_charCodeAt](++i)) *             _0x100; // << 8
+    case 1: rv += (ary ? data[++i] : data[_charCodeAt](++i));
     }
     that.index = i;
     return rv;
@@ -171,9 +181,9 @@ function readByte(that,   // @param Object:
 // inner - decode int64
 function decodeInt64(that) { // @param Object:
                              // @return Number:
-    var rv = 0, bytes, data = that.data, underflow = 0;
+    var rv = 0, bytes, data = that.data, overflow = 0;
 
-    if (that.byte) {
+    if (that.isArray) {
         bytes = data.slice(that.index + 1, that.index + 9);
     } else {
         bytes = [];
@@ -188,29 +198,29 @@ function decodeInt64(that) { // @param Object:
     }
     that.index += 8;
 
-    // avoid underflow
+    // avoid overflow
     if (bytes[0] & 0x80) {
 
-        ++underflow;
-        bytes[0] ^= 0xff;
-        bytes[1] ^= 0xff;
-        bytes[2] ^= 0xff;
-        bytes[3] ^= 0xff;
-        bytes[4] ^= 0xff;
-        bytes[5] ^= 0xff;
-        bytes[6] ^= 0xff;
-        bytes[7] ^= 0xff;
+        ++overflow;
+        bytes[0] ^= _0xff;
+        bytes[1] ^= _0xff;
+        bytes[2] ^= _0xff;
+        bytes[3] ^= _0xff;
+        bytes[4] ^= _0xff;
+        bytes[5] ^= _0xff;
+        bytes[6] ^= _0xff;
+        bytes[7] ^= _0xff;
     }
-    rv += bytes[0] * 0x100000000000000;
-    rv += bytes[1] *   0x1000000000000;
-    rv += bytes[2] *     0x10000000000;
-    rv += bytes[3] *       0x100000000;
-    rv += bytes[4] *         0x1000000;
-    rv += bytes[5] *           0x10000;
-    rv += bytes[6] *             0x100;
+    rv += bytes[0] * _0x100000000000000;
+    rv += bytes[1] *   _0x1000000000000;
+    rv += bytes[2] *     _0x10000000000;
+    rv += bytes[3] *       _0x100000000;
+    rv += bytes[4] *         _0x1000000;
+    rv += bytes[5] *           _0x10000;
+    rv += bytes[6] *             _0x100;
     rv += bytes[7];
 
-    if (underflow) {
+    if (overflow) {
         rv += 1;
         rv *= -1;
     }
@@ -220,48 +230,48 @@ function decodeInt64(that) { // @param Object:
 // inner - encode number
 function encodeNumber(rv,    // @param ByteArray: result
                       mix) { // @param Number:
-    if (Math.floor(mix) === mix) { // bugfix // (mix | 0 == mix)
+    if (_floor(mix) === mix) { // bugfix // (mix | 0 == mix)
         if (mix < 0) { // int
             if (mix >= -32) { // negative fixnum
                 rv.push(0xe0 + mix + 32);
             } else if (mix >= -0x7f) {
-                rv.push(0xd0, mix + 256);
+                rv.push(0xd0, mix + _0x100);
             } else if (mix >= -0x7fff) {
-                mix += 0x10000;
-                rv.push(0xd1, mix >> 8, mix & 0xff);
+                mix += _0x10000;
+                rv.push(0xd1, mix >> 8, mix & _0xff);
             } else if (mix >= -0x7fffffff) {
-                mix += 0x100000000;
-                rv.push(0xd2, mix >>> 24, (mix >> 16) & 0xff,
-                                          (mix >>  8) & 0xff, mix & 0xff);
+                mix += _0x100000000;
+                rv.push(0xd2, mix >>> 24, (mix >> 16) & _0xff,
+                                          (mix >>  8) & _0xff, mix & _0xff);
             } else {
-                rv.push(0xd3, Math.floor(mix / 0x100000000000000) & 0xff,
-                              Math.floor(mix /   0x1000000000000) & 0xff,
-                              Math.floor(mix /     0x10000000000) & 0xff,
-                              Math.floor(mix /       0x100000000) & 0xff,
-                              Math.floor(mix /         0x1000000) & 0xff,
-                              (mix >>  16) & 0xff,
-                              (mix >>   8) & 0xff,
-                                       mix & 0xff);
+                rv.push(0xd3, _floor(mix / _0x100000000000000) & _0xff,
+                              _floor(mix /   _0x1000000000000) & _0xff,
+                              _floor(mix /     _0x10000000000) & _0xff,
+                              _floor(mix /       _0x100000000) & _0xff,
+                              _floor(mix /         _0x1000000) & _0xff,
+                              (mix >>  16) & _0xff,
+                              (mix >>   8) & _0xff,
+                                       mix & _0xff);
             }
         } else { // uint
             if (mix < 128) {
                 rv.push(mix); // positive fixnum
-            } else if (mix < 0x100) { // uint 8
+            } else if (mix < _0x100) { // uint 8
                 rv.push(0xcc, mix);
-            } else if (mix < 0x10000) { // uint 16
-                rv.push(0xcd, mix >> 8, mix & 0xff);
-            } else if (mix < 0x100000000) { // uint 32
-                rv.push(0xce, mix >>> 24, (mix >> 16) & 0xff,
-                                          (mix >>  8) & 0xff, mix & 0xff);
+            } else if (mix < _0x10000) { // uint 16
+                rv.push(0xcd, mix >> 8, mix & _0xff);
+            } else if (mix < _0x100000000) { // uint 32
+                rv.push(0xce, mix >>> 24, (mix >> 16) & _0xff,
+                                          (mix >>  8) & _0xff, mix & _0xff);
             } else {
-                rv.push(0xcf, Math.floor(mix / 0x100000000000000) & 0xff,
-                              Math.floor(mix /   0x1000000000000) & 0xff,
-                              Math.floor(mix /     0x10000000000) & 0xff,
-                              Math.floor(mix /       0x100000000) & 0xff,
-                              (mix >>> 24) & 0xff,
-                              (mix >>  16) & 0xff,
-                              (mix >>   8) & 0xff,
-                                       mix & 0xff);
+                rv.push(0xcf, _floor(mix / _0x100000000000000) & _0xff,
+                              _floor(mix /   _0x1000000000000) & _0xff,
+                              _floor(mix /     _0x10000000000) & _0xff,
+                              _floor(mix /       _0x100000000) & _0xff,
+                              (mix >>> 24) & _0xff,
+                              (mix >>  16) & _0xff,
+                              (mix >>   8) & _0xff,
+                                       mix & _0xff);
             }
         }
     } else { // double
@@ -322,11 +332,11 @@ function setType(rv,      // @param ByteArray: result
                  types) { // @param ByteArray: type formats. eg: [0x90, 0xdc, 0xdd]
     if (size < fixSize) {
         rv.push(types[0] + size);
-    } else if (size < 0x10000) { // 16
-        rv.push(types[1], size >> 8, size & 0xff);
-    } else if (size < 0x100000000) { // 32
-        rv.push(types[2], size >>> 24, (size >> 16) & 0xff,
-                                       (size >>  8) & 0xff, size & 0xff);
+    } else if (size < _0x10000) { // 16
+        rv.push(types[1], size >> 8, size & _0xff);
+    } else if (size < _0x100000000) { // 32
+        rv.push(types[2], size >>> 24, (size >> 16) & _0xff,
+                                       (size >>  8) & _0xff, size & _0xff);
     } else {
         throw new Error("OVERFLOW");
     }
@@ -357,7 +367,7 @@ function isArray(mix) { // @param Mix:
 (function() {
     var i = 0, s;
 
-    for (; i < 256; ++i) {
+    for (; i < _0x100; ++i) {
         s = ("0000000" + i.toString(2)).slice(-8);
         _bin2num[s] = i;
     }
