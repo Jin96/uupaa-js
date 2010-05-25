@@ -1,0 +1,102 @@
+<!doctype html><html><head><meta charset="UTF-8" />
+<title>uu.base64.test</title>
+<style>
+body { background-color: #eee }
+.uutest ol { background-color:dodgerblue;color:white }
+.uutest li { padding:5px;border:1px solid #ccc }
+.uutest .li0 { background-color:red   }
+.uutest .li1 { background-color:green }
+.uutest .li2 { background-color:red   }
+.uutest .li3 { background-color:#0b0  }
+.uutestinfo { position:fixed;top:10px;right:10px;font-size:xx-large }
+.uutestinfo a { border: 3px outset gray;padding:3px;background-color:red;color:white }
+.uutestinfo .score { color:black;text-shadow:gray 1px 1px 1px }
+.uutestinfo .ngzone {}
+</style>
+<script src="../../src/uupaa.js"></script>
+<script src="../../src/uu.test.js"></script>
+<script src="../../src/Misc/uu.base64.js"></script>
+<script src="../../src/Misc/uu.utf8.js"></script>
+<script>
+uu.ready(function(uu) {
+    var short = "a!1=2/3*4~";
+    var long = "カルビx3, ハラミx2, ブタバラ, T-BORNx500g, ライス大盛りで";
+
+    uu.test({
+        "var short = 'a!1=2/3*4~'": "",
+        "var long = 'カルビx3, ハラミx2, ブタバラ, T-BORNx500g, ライス大盛りで'": "",
+        "Base64 encode": "",
+            "uu.base64.encode(short) - base64": function() {
+                var enc = uu.base64.encode(short);
+
+                return [enc, "is string"];
+            },
+            "uu.base64.encode(long) - base64": function() {
+                var enc = uu.base64.encode(long);
+
+                return [enc, "is string"];
+            },
+            "uu.base64.encode('') - base64": function() {
+                var enc = uu.base64.encode('');
+
+                return [enc, "is string"];
+            },
+        "URLSafe64 encode": "",
+            "uu.base64.encode(short, true)": function() {
+                var enc = uu.base64.encode(short, true);
+
+                return [enc, "is string"];
+            },
+
+            "uu.base64.encode(long, true)": function() {
+                var enc = uu.base64.encode(long, true);
+
+                return [enc, "is string"];
+            },
+            "uu.base64.encode('', true)": function() {
+                var enc = uu.base64.encode('', true);
+
+                return [enc, "is string"];
+            },
+        "Base64 decode": "",
+            "uu.base64.decode(short)": function() {
+                var enc = uu.base64.encode(short);
+                var dec = uu.base64.decode(enc);
+
+                return [dec, "==", short];
+            },
+            "uu.base64.decode(long)": function() {
+                var enc = uu.base64.encode(long);
+                var dec = uu.base64.decode(enc);
+
+                return [dec, "==", long];
+            },
+            "uu.base64.decode('')": function() {
+                var enc = uu.base64.encode('');
+                var dec = uu.base64.decode(enc);
+
+                return [dec, "==", ''];
+            },
+        "URLSafe64 decode": "",
+            "uu.base64.decode(short, true)": function() {
+                var enc = uu.base64.encode(short, true);
+                var dec = uu.base64.decode(enc);
+
+                return [dec, "==", short];
+            },
+            "uu.base64.decode(long, true)": function() {
+                var enc = uu.base64.encode(long, true);
+                var dec = uu.base64.decode(enc);
+
+                return [dec, "==", long];
+            },
+            "uu.base64.decode('', true)": function() {
+                var enc = uu.base64.encode('', true);
+                var dec = uu.base64.decode(enc);
+
+                return [dec, "==", ''];
+            }
+    });
+});
+</script>
+</head><body></body></html>
