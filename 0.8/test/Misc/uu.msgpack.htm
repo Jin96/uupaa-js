@@ -350,24 +350,31 @@ uu.ready(function(uu) {
 
                 return [rv, "==", -4294967297, hex(pack)];
             },
-            "Number(-0x1fffffffffffff) -> [] (int64)": function() {
+            "Number(-0x1fffffffffffff) -> [0xd3, 0xff, 0xe0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01] (int64)": function() {
                 var pack = uu.msgpack.pack(-0x1fffffffffffff);
                 var rv = uu.msgpack.unpack(pack);
 
                 return [rv, "==", -0x1fffffffffffff, hex(pack), "-9007199254740991"];
             },
-            "Number(-0x20000000000000) -> [] (int64)": function() {
+            "Number(-0x20000000000000) -> [0xd3, 0xff, 0xe0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00] (int64)": function() {
                 var pack = uu.msgpack.pack(-0x20000000000000);
                 var rv = uu.msgpack.unpack(pack);
 
                 return [rv, "==", -0x20000000000000, hex(pack), "-9007199254740992"];
             },
-            "Number(-0x40000000000000) -> [] (int64)": function() {
+            "Number(-0x40000000000000) -> [0xd3, 0xff, 0xc0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00] (int64)": function() {
                 var pack = uu.msgpack.pack(-0x40000000000000);
                 var rv = uu.msgpack.unpack(pack);
 
                 return [rv, "==", -0x40000000000000, hex(pack), "-18014398509481984"];
             },
+
+            "unpack(unescape('%d3%ff%e0%00%00%00%00%00%01')) -> -9007199254740991 (int64)": function() {
+                var rv = uu.msgpack.unpack(unescape("%d3%ff%e0%00%00%00%00%00%01"));
+
+                return [rv, "==", -0x1fffffffffffff, "-9007199254740991"];
+            },
+
         "Nil (as null)": "",
             "null -> [0xc0] (nil)": function() {
                 var pack = uu.msgpack.pack(null);
@@ -390,7 +397,7 @@ uu.ready(function(uu) {
                 return [rv, "==", false, hex(pack)];
             },
         "Float (as Number, decode only)": "",
-            "Number(-118.625) -> [0xca, 0xc2, 0xed, 0x40, 0x00] (float)": function() {
+            "unpack(unescape('%ca%c2%ed%40%00')) -> -118.625 (float)": function() {
                 var rv = uu.msgpack.unpack(unescape("%ca%c2%ed%40%00"));
 
                 return [rv, "==", -118.625];
@@ -421,13 +428,13 @@ uu.ready(function(uu) {
                 return [rv, "==", -0.1, hex(pack)];
             },
 
-            "Number(1.11) -> [] (double)": function() {
+            "Number(1.11) -> [0xcb, 0xbf, 0xf1, 0xc2, 0x8f, 0x5c, 0x28, 0xf5, 0xc3] (double)": function() {
                 var pack = uu.msgpack.pack(1.11);
                 var rv = uu.msgpack.unpack(pack);
 
                 return [rv, "==", 1.11, hex(pack)];
             },
-            "Number(-1.11) -> [] (double)": function() {
+            "Number(-1.11) -> [0xcb, 0xbf, 0xf1, 0xc2, 0x8f, 0x5c, 0x28, 0xf5, 0xc3] (double)": function() {
                 var pack = uu.msgpack.pack(-1.11);
                 var rv = uu.msgpack.unpack(pack);
 

@@ -171,22 +171,26 @@ function readByte(that,   // @param Object:
 // inner - decode int64
 function decodeInt64(that) { // @param Object:
                              // @return Number:
-    var rv = 0, bytes = [], data = that.data, i = that.index,
-        byte = that.byte, underflow = 0;
+    var rv = 0, bytes, data = that.data, underflow = 0;
 
-    bytes[0] = (byte ? data[++i] : data[_charCodeAt](++i)); // << 56
-    bytes[1] = (byte ? data[++i] : data[_charCodeAt](++i)); // << 48
-    bytes[2] = (byte ? data[++i] : data[_charCodeAt](++i)); // << 40
-    bytes[3] = (byte ? data[++i] : data[_charCodeAt](++i)); // << 32
-    bytes[4] = (byte ? data[++i] : data[_charCodeAt](++i)); // << 24 (msb)
-    bytes[5] = (byte ? data[++i] : data[_charCodeAt](++i)); // << 16
-    bytes[6] = (byte ? data[++i] : data[_charCodeAt](++i)); // << 8
-    bytes[7] = (byte ? data[++i] : data[_charCodeAt](++i));
-
-    that.index = i;
+    if (that.byte) {
+        bytes = data.slice(that.index + 1, that.index + 9);
+    } else {
+        bytes = [];
+        bytes[0] = data[_charCodeAt](1); // << 56
+        bytes[1] = data[_charCodeAt](2); // << 48
+        bytes[2] = data[_charCodeAt](3); // << 40
+        bytes[3] = data[_charCodeAt](4); // << 32
+        bytes[4] = data[_charCodeAt](5); // << 24 (msb)
+        bytes[5] = data[_charCodeAt](6); // << 16
+        bytes[6] = data[_charCodeAt](7); // << 8
+        bytes[7] = data[_charCodeAt](8);
+    }
+    that.index += 8;
 
     // avoid underflow
     if (bytes[0] & 0x80) {
+
         ++underflow;
         bytes[0] ^= 0xff;
         bytes[1] ^= 0xff;
