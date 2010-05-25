@@ -16,7 +16,6 @@
 <script src="../../src/uu.test.js"></script>
 <script src="../../src/Misc/uu.msgpack.js"></script>
 <script src="../../src/Misc/uu.utf8.js"></script>
-<script src="../../src/MessagePack/MessagePack.js"></script>
 <script>
 uu.ready(function(uu) {
     var hex = uu.test.toHexString;
@@ -528,7 +527,37 @@ uu.ready(function(uu) {
                 var rv = uu.msgpack.unpack(pack);
 
                 return [rv, "==", data, hex(pack)];
+            },
+        "Unofficial Objects": "",
+            "Math": function() {
+                var data = Math;
+                var pack = uu.msgpack.pack(data);
+                var rv = uu.msgpack.unpack(pack);
+
+                return [rv, "==", data, hex(pack)];
+            },
+            "Date": function() {
+                var data = new Date;
+                var pack = uu.msgpack.pack(data);
+                var rv = uu.msgpack.unpack(pack);
+
+                return [rv, "is hash", void 0, hex(pack)];
+            },
+            "Function": function() {
+                var data = function hoge() {};
+                var pack = uu.msgpack.pack(data);
+                var rv = uu.msgpack.unpack(pack);
+
+                return [rv, "is hash", void 0, hex(pack)];
+            },
+            "RegExp": function() {
+                var data = /^aaa/;
+                var pack = uu.msgpack.pack(data);
+                var rv = uu.msgpack.unpack(pack);
+
+                return [rv, "is hash", void 0, hex(pack)];
             }
+
     });
 });
 </script>
