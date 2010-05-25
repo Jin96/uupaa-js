@@ -80,7 +80,7 @@ function encode(rv,    // @param ByteArray: result
 
 // inner - decoder
 function decode() { // @return Mix:
-    var rv = 0, size = 0, i = 0, msb = 0, exp, key, nv,
+    var rv, size, i = 0, msb = 0, exp, key,
         that = this,
         data = that.data,
         type = that.byte ? data[++that.index]
@@ -104,7 +104,7 @@ function decode() { // @return Mix:
     case 0xc2:  return false;
     case 0xc3:  return true;
     case 0xca:  rv = readByte(that, 4);      // float
-                exp = ((rv >> 23) & 0xff) - 0x7f;
+                exp = ((rv >> 23) & 0xff) - 127; // exp bias
                 return (rv & _sign[32] ? -1 : 1)
                         * (rv & 0x7fffff | 0x800000) * Math.pow(2, exp - 23);
     case 0xcb:  rv = readByte(that, 4);      // double
@@ -116,31 +116,31 @@ function decode() { // @return Mix:
     case 0xce:  return readByte(that, 4);    // uint 32
     case 0xcd:  return readByte(that, 2);    // uint 16
     case 0xcc:  return readByte(that, 1);    // uint 8
-    case 0xd3:  nv = readByte(that, 8);                     // int 64
-    case 0xd2:  nv === void 0 && (nv = readByte(that, 4));  // int 32
-    case 0xd1:  nv === void 0 && (nv = readByte(that, 2));  // int 16
-    case 0xd0:  nv === void 0 && (nv = readByte(that, 1));  // int 8
+    case 0xd3:  return decodeInt64(that);
+    case 0xd2:  rv === void 0 && (rv = readByte(that, 4));      // int 32
+    case 0xd1:  rv === void 0 && (rv = readByte(that, 2));      // int 16
+    case 0xd0:  rv === void 0 && (rv = readByte(that, 1));      // int 8
                 msb = 4 << ((type & 0x3) + 1); // 8, 16, 32, 64
-                return nv < _sign[msb] ? nv : nv - _sign[msb] * 2;
-    case 0xdb:  size = readByte(that, 4);           // raw 32
-    case 0xda:  size || (size = readByte(that, 2)); // raw 16
-    case 0xa0:  for (rv = []; i < size; ++i) {      // raw
+                return rv < _sign[msb] ? rv : rv - _sign[msb] * 2;
+    case 0xdb:  size = readByte(that, 4);                       // raw 32
+    case 0xda:  size === void 0 && (size = readByte(that, 2));  // raw 16
+    case 0xa0:  for (rv = []; i < size; ++i) {                  // raw
                     rv[i] = that.byte ? data[++that.index]
                                       : data[_charCodeAt](++that.index);
                 }
 //              return utf8 ? namespace.utf8.decode(rv)
 //                          : String.fromCharCode.apply(null, rv);
                 return namespace.utf8.decode(rv);
-    case 0xdf:  size = readByte(that, 4);           // map 32
-    case 0xde:  size || (size = readByte(that, 2)); // map 16
-    case 0x80:  for (rv = {}; i < size; ++i) {      // map
+    case 0xdf:  size = readByte(that, 4);                       // map 32
+    case 0xde:  size === void 0 && (size = readByte(that, 2));  // map 16
+    case 0x80:  for (rv = {}; i < size; ++i) {                  // map
                     key = that.decode();
                     rv[key] = that.decode(); // key/value pair
                 }
                 return rv;
-    case 0xdd:  size = readByte(that, 4);           // array 32
-    case 0xdc:  size || (size = readByte(that, 2)); // array 16
-    case 0x90:  for (rv = []; i < size; ++i) {      // array
+    case 0xdd:  size = readByte(that, 4);                       // array 32
+    case 0xdc:  size === void 0 && (size = readByte(that, 2));  // array 16
+    case 0x90:  for (rv = []; i < size; ++i) {                  // array
                     rv.push(that.decode());
                 }
                 return rv;
@@ -163,9 +163,53 @@ function readByte(that,   // @param Object:
             rv += (byte ? data[++i] : data[_charCodeAt](++i)) *           0x10000; // << 16
     case 2: rv += (byte ? data[++i] : data[_charCodeAt](++i)) *             0x100; // << 8
     case 1: rv += (byte ? data[++i] : data[_charCodeAt](++i));
-
     }
     that.index = i;
+    return rv;
+}
+
+// inner - decode int64
+function decodeInt64(that) { // @param Object:
+                             // @return Number:
+    var rv = 0, bytes = [], data = that.data, i = that.index,
+        byte = that.byte, underflow = 0;
+
+    bytes[0] = (byte ? data[++i] : data[_charCodeAt](++i)); // << 56
+    bytes[1] = (byte ? data[++i] : data[_charCodeAt](++i)); // << 48
+    bytes[2] = (byte ? data[++i] : data[_charCodeAt](++i)); // << 40
+    bytes[3] = (byte ? data[++i] : data[_charCodeAt](++i)); // << 32
+    bytes[4] = (byte ? data[++i] : data[_charCodeAt](++i)); // << 24 (msb)
+    bytes[5] = (byte ? data[++i] : data[_charCodeAt](++i)); // << 16
+    bytes[6] = (byte ? data[++i] : data[_charCodeAt](++i)); // << 8
+    bytes[7] = (byte ? data[++i] : data[_charCodeAt](++i));
+
+    that.index = i;
+
+    // avoid underflow
+    if (bytes[0] & 0x80) {
+        ++underflow;
+        bytes[0] ^= 0xff;
+        bytes[1] ^= 0xff;
+        bytes[2] ^= 0xff;
+        bytes[3] ^= 0xff;
+        bytes[4] ^= 0xff;
+        bytes[5] ^= 0xff;
+        bytes[6] ^= 0xff;
+        bytes[7] ^= 0xff;
+    }
+    rv += bytes[0] * 0x100000000000000;
+    rv += bytes[1] *   0x1000000000000;
+    rv += bytes[2] *     0x10000000000;
+    rv += bytes[3] *       0x100000000;
+    rv += bytes[4] *         0x1000000;
+    rv += bytes[5] *           0x10000;
+    rv += bytes[6] *             0x100;
+    rv += bytes[7];
+
+    if (underflow) {
+        rv += 1;
+        rv *= -1;
+    }
     return rv;
 }
 
@@ -175,20 +219,22 @@ function encodeNumber(rv,    // @param ByteArray: result
     if (Math.floor(mix) === mix) { // bugfix // (mix | 0 == mix)
         if (mix < 0) { // int
             if (mix >= -32) { // negative fixnum
-                rv.push(0xe0 + mix + 32); // 0xff = -1, 0xe0 = -32
-            } else if (mix >= -0x100) {
-                rv.push(0xd0, mix);
-            } else if (mix >= -0x10000) {
+                rv.push(0xe0 + mix + 32);
+            } else if (mix >= -0x7f) {
+                rv.push(0xd0, mix + 256);
+            } else if (mix >= -0x7fff) {
+                mix += 0x10000;
                 rv.push(0xd1, mix >> 8, mix & 0xff);
-            } else if (mix >= -0x100000000) {
+            } else if (mix >= -0x7fffffff) {
+                mix += 0x100000000;
                 rv.push(0xd2, mix >>> 24, (mix >> 16) & 0xff,
                                           (mix >>  8) & 0xff, mix & 0xff);
             } else {
-                rv.push(0xd3, (mix / 0x100000000000000) & 0xff,
-                              (mix /   0x1000000000000) & 0xff,
-                              (mix /     0x10000000000) & 0xff,
-                              (mix /       0x100000000) & 0xff,
-                              (mix >>> 24) & 0xff,
+                rv.push(0xd3, Math.floor(mix / 0x100000000000000) & 0xff,
+                              Math.floor(mix /   0x1000000000000) & 0xff,
+                              Math.floor(mix /     0x10000000000) & 0xff,
+                              Math.floor(mix /       0x100000000) & 0xff,
+                              Math.floor(mix /         0x1000000) & 0xff,
                               (mix >>  16) & 0xff,
                               (mix >>   8) & 0xff,
                                        mix & 0xff);
@@ -204,10 +250,10 @@ function encodeNumber(rv,    // @param ByteArray: result
                 rv.push(0xce, mix >>> 24, (mix >> 16) & 0xff,
                                           (mix >>  8) & 0xff, mix & 0xff);
             } else {
-                rv.push(0xcf, (mix / 0x100000000000000) & 0xff,
-                              (mix /   0x1000000000000) & 0xff,
-                              (mix /     0x10000000000) & 0xff,
-                              (mix /       0x100000000) & 0xff,
+                rv.push(0xcf, Math.floor(mix / 0x100000000000000) & 0xff,
+                              Math.floor(mix /   0x1000000000000) & 0xff,
+                              Math.floor(mix /     0x10000000000) & 0xff,
+                              Math.floor(mix /       0x100000000) & 0xff,
                               (mix >>> 24) & 0xff,
                               (mix >>  16) & 0xff,
                               (mix >>   8) & 0xff,
