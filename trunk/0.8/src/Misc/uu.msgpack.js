@@ -300,7 +300,7 @@ function toIEEE754(rv,    // @param ByteArray: result, [0xcb, ...]
 
             fraction = fraction.slice(2); // "1.xxx" -> "xxx"
         } else { // /^0\./
-            exp = 1023 - fraction.indexOf("1") + 1; // "0.00011000..." -> -5 + 1 = 4
+            exp = 1023 - fraction.indexOf("1") + 1; // "0.00011000..." -> -5 + 1 = -4
             exp = ("00000000000" + exp.toString(2)).slice(-11); // pad zero
 
             fraction = fraction.slice(6); // "0.00011000..." -> "1000..."
@@ -314,7 +314,7 @@ function toIEEE754(rv,    // @param ByteArray: result, [0xcb, ...]
     fraction += "0000000000000000000000000000000000000000000000000000"; // x52
 
 
-    // TODO: Rounding modes
+    // TODO: Rounding
 
 
     var s = (sign + exp + fraction).slice(0, 64);
@@ -327,7 +327,7 @@ function toIEEE754(rv,    // @param ByteArray: result, [0xcb, ...]
 
 // inner - set type and fixed size
 function setType(rv,      // @param ByteArray: result
-                 fixSize, // @param Number: fix size. eg: 16 or 32
+                 fixSize, // @param Number: fix size. 16 or 32
                  size,    // @param Number: size
                  types) { // @param ByteArray: type formats. eg: [0x90, 0xdc, 0xdd]
     if (size < fixSize) {

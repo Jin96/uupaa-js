@@ -796,15 +796,6 @@ uu.ready(function(uu) {
         return [hash, "==", { key: 0, key2: 1 }];
       },
 
-    "uu.entity()": "",
-      "uu.entity('<a href=\"&\">') == '&lt;a href=&quot;&amp;&quot;&gt;'": function() {
-        return [uu.entity('<a href="&">'), "==", '&lt;a href=&quot;&amp;&quot;&gt;'];
-      },
-    "uu.entity.decode()": "",
-      "uu.entity.decode('&lt;a href=&quot;&amp;&quot;&gt;') == '<a href=\"&\">'": function() {
-        return [uu.entity.decode('&lt;a href=&quot;&amp;&quot;&gt;'), "==", '<a href="&">'];
-      },
-
     "uu.date": "",
       "uu.date() は DateHash を返す": function() {
         var dateHash = uu.date();

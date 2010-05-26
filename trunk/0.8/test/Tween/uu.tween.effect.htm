@@ -1,0 +1,107 @@
+<!doctype html><html><head><meta charset="utf-8" />
+<title>uu.tween.effect test</title>
+<script src="../../src/uupaa.js"></script>
+<script src="../../src/Tween/easing.js"></script>
+<script src="../../src/Tween/uu.tween.effect.js"></script>
+<script src="../../src/Color/uu.color.js"></script>
+<script src="../../src/Query/uu.query.js"></script>
+<style>
+html, body {
+  overflow: hidden;
+}
+.box {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  outline: 0px silver solid;
+  background-color: turquoise;
+  color: white;
+  text-align: center;
+}
+
+.margin10  { margin:  10px; }
+.padding10 { padding: 10px; }
+.border10  { border:  10px double lawngreen; }
+.outline10 { outline: 10px solid springgreen; }
+
+</style>
+</head><body id="body">
+<div>
+  <div>
+    STYLE:
+    <input type="button" value="margin" onclick="toggleMargin()" />
+    <input type="button" value="padding" onclick="togglePadding()" />
+    <input type="button" value="border" onclick="toggleBorder()" />
+    <input type="button" value="outline" onclick="toggleOutline()" /> |
+  </div>
+</div>
+
+DURATION: <input type="range" step="50" value="800" min="0" max="2000" onchange="onRange(this)" />
+    <span id="rangeValue">800</span>
+
+<script>
+var speed = 800;
+var degree = 270;
+
+function onRange(that) {
+    speed = that.value
+    uu.text(uu.id("rangeValue"), speed);
+}
+
+function fade(evt, node) {
+    uu.tween.fade(node, speed, { r: 1 });
+}
+
+function movein(evt, node) {
+    degree += 10;
+    if (degree > 360) {
+        degree = 0;
+    }
+
+    uu.tween.movein(node, speed, { degree: degree });
+}
+
+function moveout(evt, node) {
+    degree += 10;
+    if (degree > 360) {
+        degree = 0;
+    }
+
+    uu.tween.moveout(node, speed, { r: 1, degree: degree });
+}
+
+function puff(evt, node) {
+    uu.tween.puff(node, speed, { r: 1 });
+}
+
+function shrink(evt, node) {
+    uu.tween.shrink(node, speed, { r: 1 });
+}
+
+uu.ready(function(uu) {
+    var i = 0;
+
+    uu.each({ fade: fade, puff: puff, shrink: shrink,
+              movein: movein, moveout: moveout }, function(fn, key) {
+
+        uu.body(uu.click(uu.div("class,box", { x: 100 + i, y: 100 + i }, key), fn));
+
+        i += 100;
+    });
+});
+
+function toggleMargin() {
+    uu("div.box").klass("!margin10");
+}
+function togglePadding() {
+    uu("div.box").klass("!padding10");
+}
+function toggleBorder() {
+    uu("div.box").klass("!border10");
+}
+function toggleOutline() {
+    uu("div.box").klass("!outline10");
+}
+
+</script>
+</body></html>
