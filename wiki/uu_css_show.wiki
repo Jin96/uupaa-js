@@ -4,7 +4,7 @@
 
 = 導入 =
 
-uu.css.show() は style.display, style.visibility, style.opacity, style.width, style.height を調整し、要素を見える状態にします。uu.css.hide() は要素を見えない状態にします。uu.css.isShown() は要素が見えている場合に true を返します。
+uu.css.show() は style.display, style.visibility, style.opacity, style.width, style.height を調整し、要素を見える状態にします。uu.css.hide() は要素を見えない状態にします。uu.css.isShow() は要素が見えている場合に true を返します。
 
 !NodeSet.show() と !NodeSet.hide() もあります。
 
@@ -39,14 +39,12 @@ _duration_ には処理時間を ms 単位で指定します。 0 を指定す�
     uu.css.hide(node, 1000);
 }}}
 
-== uu.css.isShown ===
+== uu.css.isShow ===
 
-uu.css.isShown(node:Node/CSSProperties):Boolean は、要素が見えている場合に true を返します。
+uu.css.isShow(node:Node/CSSProperties):Boolean は、要素が見えている場合に true を返します。
 
 要素が見えている状態とは、 style.display が "none" 以外で、style.visibility が "hidden" 以外の状態のことです。
 
 = Test Code =
 
   * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/CSS/uu.css.show.htm
-
-
