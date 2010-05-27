@@ -20,7 +20,7 @@ body { background-color: #eee }
 uu.ready(function(uu) {
 
     uu.test({
-        "uu.url() - get current absolute url": function() {
+        "uu.url() - current abs-dir": function() {
             var url = uu.url();
 
             return [url, "is string"];
@@ -93,6 +93,7 @@ uu.ready(function(uu) {
 
             return [hash, "==", '/'];
         },
+/*
         "uu.url.build(URLHash)": function() {
             var result = "http://example.com:8080/dir/file.ext?query=string;more=value#fragment";
             var hash = {
@@ -131,6 +132,7 @@ uu.ready(function(uu) {
 
             return [hash, "==", result];
         },
+ */
         "uu.url.split('http://example.com/dir/file.ext') -> ['http://example.com/dir/', 'file.ext']": function() {
             var ary = uu.url.split('http://example.com/dir/file.ext');
 
