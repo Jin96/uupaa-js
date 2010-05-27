@@ -1,4 +1,4 @@
-#summary uu.tween はアニメーション機能を提供します
+#summary uu.tween は基本的なアニメーション機能を提供します
 
 <wiki:toc max_depth="2" />
 
