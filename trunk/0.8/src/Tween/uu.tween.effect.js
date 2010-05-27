@@ -1,6 +1,6 @@
 
 // === uu.tween ===
-//{{{!depend uu, uu.node.clone(in uu.tween.flare)
+//{{{!depend uu, uu.color, uu.node.clone(in uu.tween.flare)
 //}}}!depend
 
 uu.tween.fade || (function(uu) {
@@ -46,26 +46,23 @@ function uutweenflare(node,     // @param Node:
                       duration, // @param Number: duration
                       param) {  // @param Hash(= { parts: 10, range: 200 }):
     return uu.tween(node, duration, uu.arg(param, {
-        parts: 10,
-        range: 200,
+        o:      0,
+        parts:  10,
+        range:  200,
         init: function(node, param) {
             var cs = uu.css(node, true),
-                opacity = cs.opacity,
                 x = parseInt(cs.left),
                 y = parseInt(cs.top),
                 newNode, i = 0, angle,
                 p = uu.mix({}, param, {
                     w: parseInt(cs.width)  * 1.5,
                     h: parseInt(cs.height) * 1.5,
-                    o: 0,
                     css: cs,
                     init: 0 // disable
                 }),
                 parts = (360 / p.parts) | 0;
 
             uu.ver.jit && (p.fs = parseInt(cs.fontSize) * 1.5);
-
-            uu.css.setOpacity(node, 0.5);
 
             for (; i < 360; i += parts) {
                 newNode = node.parentNode.appendChild(uu.node.clone(node, true));
@@ -74,14 +71,14 @@ function uutweenflare(node,     // @param Node:
                 uu.tween(newNode, duration, uu.mix(p, {
                     x: Math.cos(angle) * p.range + x,
                     y: Math.sin(angle) * p.range + y,
-                    after: function(newNode) {
-                        node.parentNode.removeChild(newNode);
+                    init: function(newNode) {
+                        uu.css.setOpacity(newNode, 0.5);
+                    },
+                    after: function(newNode, param, reverse) {
+                        reverse || node.parentNode.removeChild(newNode);
                     }
                 }));
             }
-            uu.tween(node, speed, function() {
-                uu.css.setOpacity(node, opacity);
-            });
         }
     }));
 }

@@ -178,7 +178,7 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Stri
                                     //  [4][convert pixel]  uu.unit(<div>, "12pt") -> 16
                                     //  [5][convert pixel]  uu.unit(<div>, "auto") -> 100
                                     //  [6][convert pixel]  uu.unit(<div>, "auto", 0, "borderTopWidth") -> 0
-    tween:    uumix(uutween, {      // uu.tween(node:Node, duration:Number, param:Hash = void):Node
+    tween:    uumix(uutween, {      // uu.tween(node:Node, duration:Number, param:Hash/Function = void):Node
                                     //  [1][abs]             uu.tween(node, 500, { o: 0.5, x: 200 })
                                     //  [2][rel]             uu.tween(node, 500, { h: "+100", o: "+0.5" })
                                     //  [3][with "px" unit]  uu.tween(node, 500, { h: "-100px" })
@@ -1147,7 +1147,7 @@ uucss.care = {
 // uu.tween - add queue
 function uutween(node,     // @param Node: animation target node
                  duration, // @param Number: duration (unit ms)
-                 param) {  // @param Hash(= void): { key: endValue, key: [endValue, easing], key: callback, ... }
+                 param) {  // @param Hash/Function(= void): { key: endValue, key: [endValue, easing], key: callback, ... }
                            //     key      - CSSPropertyString/String: "color", "opacity", "before", "after", ...
                            //     endValue - String/Number: end value, "red", "+0.5", "+100px"
                            //     easing   - String: easing function name, "easeInOutQuad"
