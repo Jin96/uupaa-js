@@ -4,9 +4,9 @@
 
 = 導入 =
 
-uu.tween() と NodeSet.tween() は CSSプロパティを連続的に変化させるCSSアニメーション機能を提供します。
+uu.tween() と !NodeSet.tween() は CSSプロパティを連続的に変化させるCSSアニメーション機能を提供します。
 
-uu.tween() と NodeSet.tween() は uupaa.js に最初から組み込まれています。
+uu.tween() と !NodeSet.tween() は uupaa.js に最初から組み込まれています。
 
 easing 関数を利用するには以下のファイルが必要です。
   * src/Tween/easing.js
