@@ -4,7 +4,7 @@
 
 = 導入 =
 
-uu.tween.effect は CSSプロパティを連続的に変化させる拡張アニメーション機能を提供します。
+uu.tween.effect は CSSプロパティを連続的に変化させるアニメーション機能を提供します。
 
 uu.tween.effect を利用するには以下のファイルが必要です。
   * src/Tween/uu.tween.effect.js
