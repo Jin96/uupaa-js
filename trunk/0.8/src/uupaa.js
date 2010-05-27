@@ -342,7 +342,7 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Stri
     guid:           uuguid,         // uu.guid():Number - build GUID
     // --- DEBUG ---
     puff:           uupuff,         // uu.puff(source:Mix/FormatString, var_args:Mix, ...)
-    log:      uumix(uulog, {        // uu.log(log:Mix)
+    log:      uumix(uulog, {        // uu.log(log:Mix, var_args:Mix, ...)
         clear:      uulogclear      // uu.log.clear()
     }),
     // --- EVALUATION ---
@@ -1211,7 +1211,7 @@ function uutween(node,     // @param Node: animation target node
 uutween.props = { opacity: 1, color: 2, backgroundColor: 2,
                   width: 3, height: 3, left: 4, top: 5 };
 uutween.alpha = /^alpha\([^\x29]+\) ?/;
-uutween.ignore = { fps: 1, degree: 1, range: 1,
+uutween.ignore = { fps: 1, degree: 1, range: 1, css: 1,
                    init: 1, before: 1, after: 1, r: 1 };
 
 function uutweenbuild(node, data, queue) {
@@ -1239,7 +1239,7 @@ function uutweenbuild(node, data, queue) {
         param = queue.pz,
         revertParam = { before: param.before, after: param.after },
         i, startValue, endValue, ez, w, n,
-        fixdb = uufix.db, cs = uucss(node, _true);
+        fixdb = uufix.db, cs = param.css || uucss(node, _true);
 
     for (i in param) {
         if (!uutween.ignore[i]) {
@@ -2937,17 +2937,20 @@ uuformat.q = /\?\?/g;
 // uu.puff - uu.puff(mix) -> alert( uu.json(mix) )
 function uupuff(source                   // @param Mix/FormatString: source object
                                          //                          or "format ?? string"
-                /* , var_args, ... */) { // @param Mix:
+                /* , var_args, ... */) { // @param Mix: var_args
     alert(arguments.length < 2 ? _json(source)
                                : uuformat.apply(this, arguments));
 }
 
 // uu.log - add log
-function uulog(log) { // @param Mix: log data
-    var id = uu.config.log, context = uuid(id);
+function uulog(log                      // @param Mix: log data
+               /* , var_args, ... */) { // @param Mix: var_args
+    var id = uu.config.log, context = uuid(id),
+        txt = arguments.length < 2 ? _json(log)
+                                   : uuformat.apply(this, arguments);
 
     context || uunodeadd(context = uu.ol({ id: id }));
-    uunodeadd(uu.li(doc[_createTextNode](_json(log))), context);
+    uunodeadd(uu.li(doc[_createTextNode](txt)), context);
 }
 
 // uu.log.clear - clear log
