@@ -33,27 +33,29 @@ uu.color.js をロードすると、色辞書や色調変換機能等が利用�
 
 == uu.tween ==
 
-uu.tween(_node_:Node, _duration_:Number, _param_:Hash = void, _callback_:Function/!FunctionArray = void):Node で
+uu.tween(_node_:Node, _duration_:Number, _param_:Hash/Function = void):Node で
 _node_ で指定したノードにアニメーションキューを設定し _node_ を返します。
 _duration_ で指定した時間が経過するまで、_param_ で指定した幾つかのCSSプロパティを連続的に変化させます。
-_duration_ で指定した時間が経過すると、アニメーションを停止し、_callback_ をコールバックします。
+_duration_ で指定した時間が経過すると、アニメーションを停止し、_param_.after をコールバックします。
 
 _duration_ には 0 以上の数値を ms 単位で指定します。
 
 _param_ は省略できます。省略すると一定時間何もしないキュー(スタンバイキュー)を作成します。
 _param_ にHashを指定すると、一定時間内に変化させるCSSプロパティと変化させる方法を指定できます。
+_param_ にFunctionを指定すると、一定間隔で _param_ を評価します。
 
-_param_ は { key: endValue, ...  } または { key: `[`endValue, easing`]`, ... } のように指定します。
-  * key には color, opacity といった CSSプロパティを指定します。
+_param_ がHashなら { key: endValue, ...  } または { key: `[`endValue, easing`]`, ... } のように指定します。
+  * key には color, opacity といった CSSプロパティ や before, after, r, css などのキーワードを指定します。
+    * { before: beforeCallback } を指定すると、アニメーション開始前に beforeCallback(_node_, _param_, reverse) の形でコールバックします。
+    * { after: afterCallback } を指定すると、アニメーション終了後に afterCallback(_node_, _param_, reverse) の形でコールバックします。
+      * 逆再生中は reverse に 1 が渡されます。
+    * { r: 1 } を指定すると、アニメーションの終了後に逆再生(撒き戻し)を行います。
+    * { css: cssProp } は内部用です。
   * endValue には 文字列または数値を指定します
-    * 現在の値を基準に、増減した値を指定するには "+100" や "-100px" とします。
+    * 現在の値を基準に、増減した値を指定するには "+100" "-100" "*100" "/100" とします。
     * top, left, width, height 等のCSSプロパティは px 単位で指定します。em や pt 等は速度的な理由から指定できません。
     * "px" の指定はオプションです。{ width: 100 } と { width: "100px" } は同じ結果になります。
   * _easing_ は文字列で指定します。Math`[`_easing_`]` として解釈します。
-
-_callback_ には コールバック関数または `[`_after_, _before_`]` のように、
-処理後にコールバックする関数(_after_)と、処理直前にコールバックする関数(_before_)を指定できます。
-コールバック時の引数は、_callback_(node, node.style) になります。
 
 === 色の変化 ===
 色を連続的に変化させます。
