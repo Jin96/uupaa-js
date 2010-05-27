@@ -1434,7 +1434,7 @@ function uucssshow(node,           // @param Node:
         node.style[_display] = "none";
     }
 //}}}!mb
-    return uutween(node, duration || 0, { w: w, h: h, o: o, after: function(node) {
+    return uutween(node, duration || 0, { w: w, h: h, o: o, before: function(node) {
                 var style = node.style;
 
                 setOpacity(node, 0);
