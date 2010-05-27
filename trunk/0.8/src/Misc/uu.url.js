@@ -25,25 +25,19 @@
 (this.uu || this).url || (function(namespace) {
 
 // --- url / query string / path ---
-namespace.url       = uuurl;        // uu.url(value:URLHash/URLString = ""):URLString/URLHash/null
-                                    //  [1][get current page abs-url] uu.url() -> "http://example.com/index.htm"
-                                    //  [2][parse url]                uu.url("http://example.com/dir/file.ext") -> { schme: "http", ... }
-                                    //  [3][build url]                uu.url({ schme: "http", ... }) -> "http://example.com/..."
+namespace.url       = uuurl;        // uu.url(url:URLHash/URLString = ""):URLString/URLHash/null
+                                    //  [1][current abs-dir] uu.url() -> "http://example.com/index.htm"
+                                    //  [2][parse url]       uu.url("http://example.com/dir/file.ext") -> { schme: "http", ... }
+                                    //  [3][build url]       uu.url({ schme: "http", ... }) -> "http://example.com/..."
 namespace.url.abs   = uuurlabs;     // uu.url.abs(url:URLString = ".", currentDir = ""):URLString
-                                    //  [1][get abs-url]              uu.url.abs("./index.htm") -> "http://example.com/index.htm"
-namespace.url.dir   = uuurldir;     // uu.url.dir(path:URLString/PathString):String
+                                    //  [1][get abs-url]   uu.url.abs("./index.htm") -> "http://example.com/index.htm"
+namespace.url.dir   = uuurldir;     // uu.url.dir(url:URLString/PathString):String
                                     //  [1][chop filename] uu.url.dir("http://example.com/dir/file.ext") -> "http://example.com/dir/"
                                     //  [2][chop filename] uu.url.dir("/root/dir/file.ext")              -> "/root/dir/"
                                     //  [3][chop filename] uu.url.dir("/file.ext")                       -> "/"
                                     //  [4][through]       uu.url.dir("/")                               -> "/"
                                     //  [5][supply slash]  uu.url.dir("")                                -> "/"
-namespace.url.build = uuurlbuild;   // uu.url.build(hash:URLHash):URLString
-                                    //  [1][build url]      uu.url.build({ ... }) -> "scheme://domain:port/path?query#fragment"
-namespace.url.parse = uuurlparse;   // uu.url.parse(url:URLString):URLHash/null
-                                    //  [1][parse url]         uu.url.parse("http://...") -> { url, scheme, domain, port, base, path,
-                                    //                                                         dir, file, query, hash, fragment }
-                                    //  [2][parse current url] uu.url.parse(".") -> { url, ... }
-namespace.url.split = uuurlsplit;   // uu.url.split(URLString/PathString):Array
+namespace.url.split = uuurlsplit;   // uu.url.split(url:URLString/PathString):Array
                                     //  [1][split dir | file.ext] uu.url.split("http://example.com/dir/file.ext") -> ["http://example.com/dir/", "file.ext"]
 
 namespace.url.query = uuurlquery;   // uu.url.query(queryString:QueryString/Hash, add:Hash):QueryString/Hash
@@ -54,11 +48,10 @@ namespace.url.query = uuurlquery;   // uu.url.query(queryString:QueryString/Hash
 
 // --- url / path ---
 // uu.url - url accessor
-function uuurl(value) { // @param URLHash/URLString(= ""):
-                        // @return URLString/URLHash/null:
-    return !value ? uuurlabs() :                            // [1]
-           typeof value === "string" ? uuurlparse(value)    // [2]
-                                     : uuurlbuild(value);   // [3]
+function uuurl(url) { // @param URLHash/URLString(= ""):
+                      // @return URLString/URLHash/null:
+    return !url ? uuurlabs() : // [1]
+           (typeof url === "string" ? parseURL : buildURL)(url); // [2][3]
 }
 
 // uu.url.abs - convert relative URL to absolute URL
@@ -83,29 +76,29 @@ uuurlabs.href   = /href\="([^"]+)"/;
 uuurlabs.cache  = ""; // current absolute-url cache
 
 // uu.url.dir - absolute path to absolute directory(chop filename)
-function uuurldir(path) { // @param URLString/PathString: path
-                          // @return String: directory path, has tail "/"
-    var ary = path.split("/");
+function uuurldir(url) { // @param URLString/PathString: url or path
+                         // @return String: directory path, has tail "/"
+    var ary = url.split("/");
 
     ary.pop(); // chop "file.ext"
     return ary.join("/") + "/";
 }
 
-// uu.url.build - build URL
-function uuurlbuild(hash) { // @param URLHash:
-                            // @return URLString: "scheme://domain:port/path?query#fragment"
+// inner - build URL
+function buildURL(hash) { // @param URLHash:
+                          // @return URLString: "scheme://domain:port/path?query#fragment"
     return [hash.scheme, "://", hash.domain,
             hash.port     ? ":" + hash.port     : "", hash.path || "/",
             hash.query    ? "?" + hash.query    : "",
             hash.fragment ? "#" + hash.fragment : ""].join("");
 }
 
-// uu.url.parse - parse URL
-function uuurlparse(url) { // @param URLString:
-                           // @return URLHash/null: null is fail,
+// inner - parse URL
+function parseURL(url) { // @param URLString:
+                         // @return URLHash/null: null is fail,
     var m, w = ["/", ""], abs = uuurlabs(url);
 
-    m = uuurlparse.fileScheme.exec(abs);
+    m = parseURL.fileScheme.exec(abs);
     if (m) {
         w = uuurlsplit(m[1]);
         return { url: abs, scheme: "file", domain: "", port: "",
@@ -113,7 +106,7 @@ function uuurlparse(url) { // @param URLString:
                  file: w[1], query: "", hash: m[2] ? parseQueryString(m[2]) : {},
                  fragment: m[3] || "" };
     }
-    m = uuurlparse.scheme.exec(abs);
+    m = parseURL.scheme.exec(abs);
     if (m) {
         m[4] && (w = uuurlsplit(m[4]));
         return { url: abs, scheme: m[1], domain: m[2], port: m[3] || "",
@@ -123,13 +116,13 @@ function uuurlparse(url) { // @param URLString:
     }
     return null;
 }
-uuurlparse.fileScheme = /^file:\/\/(?:\/)?(?:loc\w+\/)?([^ ?#]*)(?:\?([^#]*))?(?:#(.*))?/i;
-uuurlparse.scheme     = /^(\w+):\/\/([^\/:]+)(?::(\d*))?([^ ?#]*)(?:\?([^#]*))?(?:#(.*))?/i;
+parseURL.fileScheme = /^file:\/\/(?:\/)?(?:loc\w+\/)?([^ ?#]*)(?:\?([^#]*))?(?:#(.*))?/i;
+parseURL.scheme     = /^(\w+):\/\/([^\/:]+)(?::(\d*))?([^ ?#]*)(?:\?([^#]*))?(?:#(.*))?/i;
 
 // uu.url.split - split dir/file "dir/file.ext" -> ["dir/", "file.ext"]
-function uuurlsplit(path) { // @param URLString/PathString: path
-                            // @return Array: ["dir/", "file.ext"]
-    var rv = [], ary = path.split("/");
+function uuurlsplit(url) { // @param URLString/PathString: url or path
+                           // @return Array: ["dir/", "file.ext"]
+    var rv = [], ary = url.split("/");
 
     rv[1] = ary.pop(); // file
     rv[0] = ary.join("/") + "/";
@@ -173,7 +166,7 @@ function parseQueryString(queryString) { // @param URLString/QueryString: "key=v
     var rv = {}, fn = decodeURIComponent;
 
     if (queryString.indexOf("?") >= 0) { // [1]
-        return uuurlparse(queryString).hash;
+        return parseURL(queryString).hash;
     }
     queryString.replace(/&amp;|&/g, ";").
                 replace(/(?:([^\=]+)\=([^\;]+);?)/g, _parse); // [2]
