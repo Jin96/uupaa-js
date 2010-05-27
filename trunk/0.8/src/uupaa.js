@@ -990,7 +990,7 @@ function uuattr(node,    // @param Node:
         }
         return rv; // Hash
     }
-    if (arguments.length === 3) {   // [3] uu.attr(node, key, value)
+    if (arguments.length > 2) {     // [3] uu.attr(node, key, value)
         key = uuhash(key, value);
     } else if (isString(key)) {     // [2] uu.attr(node, key)
         rv = node[_getAttribute](fix[key] || key, 2) || "";
@@ -1030,7 +1030,7 @@ function uudata(node,    // @param Node:
         }
         return rv; // Hash
     }
-    if (arguments.length === 3) { // [3] uu.data(node, key or "*", value)
+    if (arguments.length > 2) { // [3] uu.data(node, key or "*", value)
         if (key === "*") {
             for (key in uudata(node)) {
                 node[prefix + key] = value;
@@ -1096,7 +1096,7 @@ function uucss(node,    // @param Node:
     }
 
     fix = uufix.db;
-    if (arguments.length === 3) { // [4] uu.css(node, key, value)
+    if (arguments.length > 2) { // [4] uu.css(node, key, value)
         key = uuhash(key, value);
     } else if (typeof key === _string) { // [3] uu.css(node, key)
 //{{{!mb
@@ -1211,7 +1211,8 @@ function uutween(node,     // @param Node: animation target node
 uutween.props = { opacity: 1, color: 2, backgroundColor: 2,
                   width: 3, height: 3, left: 4, top: 5 };
 uutween.alpha = /^alpha\([^\x29]+\) ?/;
-uutween.ignore = { fps: 1, degree: 1, init: 1, before: 1, after: 1, r: 1 };
+uutween.ignore = { fps: 1, degree: 1, range: 1,
+                   init: 1, before: 1, after: 1, r: 1 };
 
 function uutweenbuild(node, data, queue) {
     function ezfn(v0, v1, ez) {
@@ -3544,18 +3545,24 @@ function NodeSetIter(iterType,  // @param Number: 0 is forEach, 1 is map
 }
 
 // forEach(iter = 0)
-uueach({ bind:  uuevent,   unbind: uueventunbind,
-         tween: uutween,   skip: uutweenskip,
-         remove: uunoderemove,
-         show:  uucssshow, hide:   uucsshide }, function(fn, name) {
+uueach({    bind:       uuevent,
+            unbind:     uueventunbind,
+            tween:      uutween,
+            skip:       uutweenskip,
+            remove:     uunoderemove,
+            show:       uucssshow,
+            hide:       uucsshide       }, function(fn, name) {
+
     NodeSet[_prototype][name] = function(a, b, c) {
         return NodeSetIter(0, this, fn, a, b, c);
     }
 });
 
 // map(iter = 1)
-uueach({ attr: uuattr, css:  uucss,
-         html: uuhtml, text: uutext }, function(fn, name) {
+uueach({    attr:   uuattr,
+            css:    uucss,
+            html:   uuhtml,
+            text:   uutext      }, function(fn, name) {
     NodeSet[_prototype][name] = function(a, b) {
         return NodeSetIter(1, this, fn, a, b);
     }

@@ -5,6 +5,7 @@
 <script src="../../src/Tween/uu.tween.effect.js"></script>
 <script src="../../src/Color/uu.color.js"></script>
 <script src="../../src/Query/uu.query.js"></script>
+<script src="../../src/Node/uu.node.clone.js"></script>
 <style>
 html, body {
   overflow: hidden;
@@ -14,14 +15,14 @@ html, body {
   width: 100px;
   height: 100px;
   outline: 0px silver solid;
-  background-color: turquoise;
+  background-color: #73ff00;
   color: white;
   text-align: center;
 }
 
 .margin10  { margin:  10px; }
 .padding10 { padding: 10px; }
-.border10  { border:  10px double lawngreen; }
+.border10  { border:  10px double turquoise; }
 .outline10 { outline: 10px solid springgreen; }
 
 </style>
@@ -36,16 +37,36 @@ html, body {
   </div>
 </div>
 
-DURATION: <input type="range" step="50" value="800" min="0" max="2000" onchange="onRange(this)" />
-    <span id="rangeValue">800</span>
+DURATION: <input type="range" step="50" value="800" min="0" max="2000" onchange="moveDuration(this)" />
+    <span id="durationValue">800</span>
+    <br />
+RANGE: <input type="range" step="50" value="200" min="100" max="400" onchange="moveRange(this)" />
+    <span id="rangeValue">200</span>
+    <br />
+PARTS: <input type="range" step="1" value="10" min="1" max="20" onchange="moveParts(this)" />
+    <span id="partsValue">10</span>
 
 <script>
 var speed = 800;
+var range = 200;
+var parts = 10;
 var degree = 270;
+var bgcolor = uu.color("#73ff00");
 
-function onRange(that) {
+function moveDuration(that) {
     speed = that.value
-    uu.text(uu.id("rangeValue"), speed);
+    uu.text(uu.id("durationValue"), speed);
+    bgcolor = bgcolor.arrange(3, 100, 100);
+
+    uu("div.box").css("bgc", bgcolor + "");
+}
+function moveRange(that) {
+    range = that.value
+    uu.text(uu.id("rangeValue"), range);
+}
+function moveParts(that) {
+    parts = that.value
+    uu.text(uu.id("partsValue"), parts);
 }
 
 function fade(evt, node) {
@@ -57,8 +78,7 @@ function movein(evt, node) {
     if (degree > 360) {
         degree = 0;
     }
-
-    uu.tween.movein(node, speed, { degree: degree });
+    uu.tween.movein(node, speed, { degree: degree, range: range });
 }
 
 function moveout(evt, node) {
@@ -66,8 +86,30 @@ function moveout(evt, node) {
     if (degree > 360) {
         degree = 0;
     }
+    uu.tween.moveout(node, speed, { r: 1, degree: degree, range: range });
+}
 
-    uu.tween.moveout(node, speed, { r: 1, degree: degree });
+/*
+function flare(evt, node) {
+    var opacity = uu.css.getOpacity(node), newNode;
+
+    uu.css.setOpacity(node, 0.5);
+
+    for (var i = 0; i < 360; i += 24) {
+        newNode = uu.node.add(uu.node.clone(node));
+
+        uu.tween.moveout(newNode, speed, { degree: i, after: function(newNode) {
+            uu.node.remove(newNode);
+        }});
+    }
+
+    uu.tween(node, speed, function() {
+        uu.css.setOpacity(node, opacity);
+    });
+}
+ */
+function flare(evt, node) {
+    uu.tween.flare(node, speed, { parts: 10, range: range, parts: parts });
 }
 
 function puff(evt, node) {
@@ -78,15 +120,26 @@ function shrink(evt, node) {
     uu.tween.shrink(node, speed, { r: 1 });
 }
 
+function highlight(evt, node) {
+    uu.tween.highlight(node, speed, { r: 1 });
+}
+
 uu.ready(function(uu) {
-    var i = 0;
+    var x = 0;
+    var y = 0;
+    var margin = 10;
 
-    uu.each({ fade: fade, puff: puff, shrink: shrink,
-              movein: movein, moveout: moveout }, function(fn, key) {
+    uu.each({ movein: movein, moveout: moveout, flare: flare,
+              fade: fade, puff: puff, shrink: shrink,
+              highlight: highlight }, function(fn, key) {
 
-        uu.body(uu.click(uu.div("class,box", { x: 100 + i, y: 100 + i }, key), fn));
+        uu.body(uu.click(uu.div("class,box", { x: x + 100, y: y + 200 }, key), fn));
 
-        i += 100;
+        x += 100 + margin;
+        if (x > (100 + margin) * 5) {
+            y += 100 + margin;
+            x = 0;
+        }
     });
 });
 
