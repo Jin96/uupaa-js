@@ -89,27 +89,8 @@ function moveout(evt, node) {
     uu.tween.moveout(node, speed, { r: 1, degree: degree, range: range });
 }
 
-/*
 function flare(evt, node) {
-    var opacity = uu.css.getOpacity(node), newNode;
-
-    uu.css.setOpacity(node, 0.5);
-
-    for (var i = 0; i < 360; i += 24) {
-        newNode = uu.node.add(uu.node.clone(node));
-
-        uu.tween.moveout(newNode, speed, { degree: i, after: function(newNode) {
-            uu.node.remove(newNode);
-        }});
-    }
-
-    uu.tween(node, speed, function() {
-        uu.css.setOpacity(node, opacity);
-    });
-}
- */
-function flare(evt, node) {
-    uu.tween.flare(node, speed, { parts: 10, range: range, parts: parts });
+    uu.tween.flare(node, speed, { parts: 10, range: range, parts: parts, r: 1 });
 }
 
 function puff(evt, node) {
