@@ -35,8 +35,8 @@ function uutweenpuff(node,     // @param Node:
             var cs = uu.css(node, true);
 
             uu.mix(param, { w: "*1.5", h: "*1.5", o: 0,
-                            x: "-" + parseInt(cs.width)  / 3,
-                            y: "-" + parseInt(cs.height) / 3 },
+                            x: "-" + parseInt(cs.width)  * 0.25,
+                            y: "-" + parseInt(cs.height) * 0.25 },
                           uu.ver.jit ? { fs: "*1.5" } : {});
         }}));
 }
@@ -91,8 +91,8 @@ function uutweenshrink(node,     // @param Node:
             var cs = uu.css(node, true);
 
             uu.mix(param, { w: 0, h: 0, o: 0,
-                            x: "-" + parseInt(cs.width)  / 2,
-                            y: "-" + parseInt(cs.height) / 2, fs: "/2" });
+                            x: "-" + parseInt(cs.width)  * 0.5,
+                            y: "-" + parseInt(cs.height) * 0.5, fs: "*0.5" });
         }}));
 }
 

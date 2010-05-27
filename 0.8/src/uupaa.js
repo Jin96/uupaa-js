@@ -1231,7 +1231,9 @@ function uutweenbuild(node, data, queue) {
 
         // 0: "*", 1: "+", 3: "-", 5: "/"
         return !c    ? fn(curt * parseFloat(end.slice(1))) :
-               c < 4 ? curt + fn(end) :
+               c < 4 ? curt + fn(end[_replace](/^\+/, "")) : //  "+10".replace() ->  "10"
+                                                             // "+-10".replace() -> "-10"
+                                                             //  "-10".replace() -> "-10"
                c < 6 ? fn(curt / parseFloat(end.slice(1))) : fn(end);
     }
 
