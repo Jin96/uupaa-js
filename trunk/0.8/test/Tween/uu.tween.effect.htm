@@ -69,8 +69,19 @@ function moveParts(that) {
     uu.text(uu.id("partsValue"), parts);
 }
 
+var toggle = 1;
 function fade(evt, node) {
-    uu.tween.fade(node, speed, { r: 1 });
+    if (toggle) {
+        uu.tween.fade(node, speed, { r: 0, after: function() {
+            uu.tween(node, 1000, { o: 0.1 });
+        }});
+        toggle = 0;
+    } else {
+        uu.tween.fade(node, speed, { r: 0, before: function() {
+            uu.tween(node, 1000, { o: 1 });
+        }});
+        toggle = 1;
+    }
 }
 
 function movein(evt, node) {
