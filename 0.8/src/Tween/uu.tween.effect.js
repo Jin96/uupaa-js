@@ -150,13 +150,8 @@ function uutweenmoveout(node,     // @param Node:
 // uu.tween.highlight - highlight color
 function uutweenhighlight(node,     // @param Node:
                           duration, // @param Number: duration
-                          param) {  // @param Hash(= { degree: 0 }):
-    return uu.tween(node, duration, uu.arg(param, { init: function(node, param) {
-            var comple = uu.color(uu.css(node).backgroundColor).comple();
-
-            uu.mix(param, { bgc: comple + "" });
-            uu.tween(node, duration, uu.mix({}, param, { bgc: "#fff", init: 0 }));
-        }}));
+                          param) {  // @param Hash(= { bgc: "#ff9", r: 1 }):
+    return uu.tween(node, duration, uu.arg(param, { bgc: "#ff9", r: 1 }));
 }
 
 })(uu);
