@@ -1,6 +1,6 @@
 
-// === uu.test ===
-//{{{!depend uu
+// === uu.tween ===
+//{{{!depend uu, uu.node.clone(in uu.tween.flare)
 //}}}!depend
 
 uu.tween.fade || (function(uu) {
@@ -46,23 +46,39 @@ function uutweenflare(node,     // @param Node:
                       duration, // @param Number: duration
                       param) {  // @param Hash(= { parts: 10, range: 200 }):
     return uu.tween(node, duration, uu.arg(param, {
+        parts: 10,
+        range: 200,
         init: function(node, param) {
-            var opacity = uu.css.getOpacity(node), newNode, i = 0,
-                parts = (360 / (param.parts || 10)) | 0,
-                range = param.range || 200;
+            var cs = uu.css(node, true),
+                opacity = cs.opacity,
+                x = parseInt(cs.left),
+                y = parseInt(cs.top),
+                newNode, i = 0, angle,
+                p = uu.mix({}, param, {
+                    w: parseInt(cs.width)  * 1.5,
+                    h: parseInt(cs.height) * 1.5,
+                    o: 0,
+                    css: cs,
+                    init: 0 // disable
+                }),
+                parts = (360 / p.parts) | 0;
+
+            uu.ver.jit && (p.fs = parseInt(cs.fontSize) * 1.5);
 
             uu.css.setOpacity(node, 0.5);
 
             for (; i < 360; i += parts) {
-                newNode = document.body.appendChild(node.cloneNode(true));
+                newNode = node.parentNode.appendChild(uu.node.clone(node, true));
+                angle = i * Math.PI / 180;
 
-                uutweenmoveout(newNode, speed, { degree: i, range: range,
+                uu.tween(newNode, duration, uu.mix(p, {
+                    x: Math.cos(angle) * p.range + x,
+                    y: Math.sin(angle) * p.range + y,
                     after: function(newNode) {
-                        newNode.parentNode.removeChild(newNode);
+                        node.parentNode.removeChild(newNode);
                     }
-                });
+                }));
             }
-
             uu.tween(node, speed, function() {
                 uu.css.setOpacity(node, opacity);
             });
@@ -87,7 +103,10 @@ function uutweenshrink(node,     // @param Node:
 function uutweenmovein(node,     // @param Node:
                        duration, // @param Number: duration
                        param) {  // @param Hash(= { degree: 0, range: 200 }):
-    return uu.tween(node, duration, uu.arg(param, { init: function(node, param) {
+    return uu.tween(node, duration, uu.arg(param, {
+            degree: 0,
+            o:      1,
+            init:   function(node, param) {
                 var cs = uu.css(node, true), style = node.style,
                     angle, endX, endY, fs, w, h, o, range = param.range || 200;
 
@@ -100,18 +119,18 @@ function uutweenmovein(node,     // @param Node:
                 w = parseInt(cs.width);
                 h = parseInt(cs.height);
                 o = uu.css.getOpacity(node);
-                style.left     = (Math.cos(angle) * range + endX) + "px";
-                style.top      = (Math.sin(angle) * range + endY) + "px";
-                style.width    = (w * 1.5) + "px";
-                style.height   = (h * 1.5) + "px";
+                style.left   = (Math.cos(angle) * range + endX) + "px";
+                style.top    = (Math.sin(angle) * range + endY) + "px";
+                style.width  = (w * 1.5) + "px";
+                style.height = (h * 1.5) + "px";
                 if (uu.ver.jit) {
                     style.fontSize = (fs * 1.5) + "px";
                 }
                 uu.css.setOpacity(node, 0);
 
-                uu.mix(param, { w: w, h: h, x: endX, y: endY },
-                              uu.ver.jit ? { fs: fs } : {});
-            }, degree: 0, o: 1 }));
+                uu.ver.jit && (param.fs = fs);
+                uu.mix(param, { w: w, h: h, x: endX, y: endY });
+            }}));
 }
 
 // uu.tween.moveout - moveout + fadeout

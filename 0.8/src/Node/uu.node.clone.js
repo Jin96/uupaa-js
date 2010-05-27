@@ -9,11 +9,12 @@ uu.node.clone = uunodeclone;  // uu.node.clone(parent:Node):Node
 
 var DATA_UUGUID = "data-uuguid",
     DATA_UUEVENT = "data-uuevent",
-    _ready;
+    _ready = uu.ready;
 
 // uu.node.clone - clone node, clone data, clone attached events
-function uunodeclone(parent) { // @param Node: parent node
-                               // @return Node: cloned node
+function uunodeclone(parent,  // @param Node: parent node
+                     quick) { // @param Boolean(= false): true is quick clone
+                              // @return Node: cloned node
     function cloneData(sourceNode, clonedNode) {
         var key, data = sourceNode[DATA_UUEVENT],
             handler = uu.data.handler, i, iz;
@@ -71,14 +72,20 @@ function uunodeclone(parent) { // @param Node: parent node
     var rv;
 
     if (parent.nodeType === 1) { // 1: ELEMENT_NODE
-        if (_ready.copyEvent || _ready.copyNodeData) {
+        if (_ready.copyEvent || _ready.copyNodeData) { // [IE] bugfix
             rv = uu.div();
             rv.innerHTML = parent.cloneNode(true).outerHTML;
-            reverseFetch(parent, rv);
+            if (quick) {
+                rv = rv.firstChild;
+            } else {
+                reverseFetch(parent, rv);
+            }
         } else {
             rv = parent.cloneNode(true);
-            cloneData(parent, rv);
-            drillDown(parent.firstChild, rv.firstChild);
+            if (!quick) {
+                cloneData(parent, rv);
+                drillDown(parent.firstChild, rv.firstChild);
+            }
         }
     }
     return rv;
@@ -88,12 +95,12 @@ uu.ready(function() {
     var o = true, x = false,
         button, clone, evt, fired = 0, nodeData = "data-mydata";
 
-    _ready = {
+    uu.mix(_ready, {
         copyAttr: o,        //  copy node.setAttribute(attr)
         copyEvent: x,       //  copy node.addEventListener/attachEvent("click") [IE6][IE7][IE8]
         copyUIState: x,     //  copy node.checked
         copyNodeData: x     //  copy node["data-***"] [IE6][IE7][IE8][IE9]
-    };
+    });
 
     button = uu.node("input", { type: "checkbox", checked: o });
     button.setAttribute("Z", "1");
