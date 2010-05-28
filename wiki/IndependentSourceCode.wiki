@@ -1,0 +1,18 @@
+#summary 単体利用可能なソースコード
+
+一部のソースコードは、uupaa.js ライブラリの一部でありながら、単体での利用も可能にする工夫を施しています。
+
+= 単体利用可能なソースコードの一覧 =
+  * src/Misc/uu.base64.js
+  * src/Misc/uu.base64.js
+  * src/Misc/uu.datauri.js
+  * src/Misc/uu.entity.js
+  * src/Misc/uu.lzw.js
+  * src/Misc/uu.matrix2d.js
+  * src/Misc/uu.md5.js
+  * src/Misc/uu.msgpack.js
+  * src/Misc/uu.sprintf.js
+  * src/Misc/uu.url.js
+  * src/Misc/uu.utf8.js
+
+解説: http://d.hatena.ne.jp/uupaa/20100524/1274684311
