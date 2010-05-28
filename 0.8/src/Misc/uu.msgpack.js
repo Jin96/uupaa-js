@@ -6,8 +6,7 @@
 
 (this.uu || this).msgpack || (function(namespace) {
 
-var _sign = { 8: 0x80, 16: 0x8000, 32: 0x80000000 },
-    _bin2num = {}, // { "00000000": 0, "00000001": 1, ... }
+var _bin2num = {}, // { "00000000": 0, "00000001": 1, ... }
     // --- minify ---
     _0x100000000000000 = 0x100000000000000,
     _0x1000000000000 =     0x1000000000000,
@@ -17,6 +16,14 @@ var _sign = { 8: 0x80, 16: 0x8000, 32: 0x80000000 },
     _0x10000 =                     0x10000,
     _0x100 =                         0x100,
     _0xff =                           0xff,
+    _0x80 =                           0x80,
+    _0x8000 =                       0x8000,
+    _0x80000000 =               0x80000000,
+    _sign = {
+        8: _0x80,
+        16: _0x8000,
+        32: _0x80000000
+    },
     _pow = Math.pow,
     _floor = Math.floor,
     _charCodeAt = "charCodeAt";
@@ -43,7 +50,7 @@ function msgpackunpack(data) { // @param String/ByteArray:
 // inner - encoder
 function encode(rv,    // @param ByteArray: result
                 mix) { // @param Mix: source data
-    var size = 0, i = 0, rr;
+    var size = 0, i = 0, utf8byteArray;
 
     if (mix == null) { // null or undefined
         rv.push(0xc0);
@@ -65,11 +72,9 @@ function encode(rv,    // @param ByteArray: result
             size = mix.length;
 
 //          if (utf8) {
-                for (rr = [], i = 0; i < size; ++i) {
-                    namespace.utf8.encode(mix.charAt(i), rr);
-                }
-                setType(rv, 32, rr.length, [0xa0, 0xda, 0xdb]);
-                Array.prototype.push.apply(rv, rr);
+                namespace.utf8.encode(mix, utf8byteArray = []);
+                setType(rv, 32, utf8byteArray.length, [0xa0, 0xda, 0xdb]);
+                Array.prototype.push.apply(rv, utf8byteArray);
 //          } else { // ucs2(unicode)
 //              setType(rv, 32, size, [0xa0, 0xda, 0xdb]);
 //              for (i = 0; i < size; ++i) {
@@ -78,7 +83,7 @@ function encode(rv,    // @param ByteArray: result
 //          }
             break;
         default: // hash
-            setType(rv, 16, hashSize(mix), [0x80, 0xde, 0xdf]);
+            setType(rv, 16, hashSize(mix), [_0x80, 0xde, 0xdf]);
             for (i in mix) {
                 encode(rv, i);
                 encode(rv, mix[i]);
@@ -99,11 +104,11 @@ function decode() { // @return Mix:
     if (type >= 0xe0) {         // negative fixnum (111x xxxx) (-32 ~ -1)
         return type - _0x100;
     }
-    if (type < 0x80) {          // positive fixnum (0xxx xxxx) (0 ~ 127)
+    if (type < _0x80) {         // positive fixnum (0xxx xxxx) (0 ~ 127)
         return type;
     }
     if (type < 0x90) {          // FixMap (1000 xxxx)
-        size = type - 0x80, type = 0x80;
+        size = type - _0x80, type = _0x80;
     } else if (type < 0xa0) {   // FixArray (1001 xxxx)
         size = type - 0x90, type = 0x90;
     } else if (type < 0xc0) {   // FixRaw (101x xxxx)
@@ -127,7 +132,7 @@ function decode() { // @return Mix:
     case 0xcd:  return readByte(that, 2);    // uint 16
     case 0xcc:  return readByte(that, 1);    // uint 8
     case 0xd3:  return decodeInt64(that);
-    case 0xd2:  rv === void 0 && (rv = readByte(that, 4));      // int 32
+    case 0xd2:  rv = readByte(that, 4);      // int 32
     case 0xd1:  rv === void 0 && (rv = readByte(that, 2));      // int 16
     case 0xd0:  rv === void 0 && (rv = readByte(that, 1));      // int 8
                 msb = 4 << ((type & 0x3) + 1); // 8, 16, 32
@@ -169,7 +174,7 @@ function readByte(that,   // @param Object:
             rv += (ary ? data[++i] : data[_charCodeAt](++i)) *   _0x1000000000000; // << 48
             rv += (ary ? data[++i] : data[_charCodeAt](++i)) *     _0x10000000000; // << 40
             rv += (ary ? data[++i] : data[_charCodeAt](++i)) *       _0x100000000; // << 32
-    case 4: rv += (ary ? data[++i] : data[_charCodeAt](++i)) *         _0x1000000; // << 24 (msb)
+    case 4: rv += (ary ? data[++i] : data[_charCodeAt](++i)) *         _0x1000000; // << 24
             rv += (ary ? data[++i] : data[_charCodeAt](++i)) *           _0x10000; // << 16
     case 2: rv += (ary ? data[++i] : data[_charCodeAt](++i)) *             _0x100; // << 8
     case 1: rv += (ary ? data[++i] : data[_charCodeAt](++i));
@@ -191,7 +196,7 @@ function decodeInt64(that) { // @param Object:
         bytes[1] = data[_charCodeAt](2); // << 48
         bytes[2] = data[_charCodeAt](3); // << 40
         bytes[3] = data[_charCodeAt](4); // << 32
-        bytes[4] = data[_charCodeAt](5); // << 24 (msb)
+        bytes[4] = data[_charCodeAt](5); // << 24
         bytes[5] = data[_charCodeAt](6); // << 16
         bytes[6] = data[_charCodeAt](7); // << 8
         bytes[7] = data[_charCodeAt](8);
@@ -199,7 +204,7 @@ function decodeInt64(that) { // @param Object:
     that.index += 8;
 
     // avoid overflow
-    if (bytes[0] & 0x80) {
+    if (bytes[0] & _0x80) {
 
         ++overflow;
         bytes[0] ^= _0xff;
@@ -234,12 +239,12 @@ function encodeNumber(rv,    // @param ByteArray: result
         if (mix < 0) { // int
             if (mix >= -32) { // negative fixnum
                 rv.push(0xe0 + mix + 32);
-            } else if (mix >= -0x7f) {
+            } else if (mix >= -_0x80) {
                 rv.push(0xd0, mix + _0x100);
-            } else if (mix >= -0x7fff) {
+            } else if (mix >= -_0x8000) {
                 mix += _0x10000;
                 rv.push(0xd1, mix >> 8, mix & _0xff);
-            } else if (mix >= -0x7fffffff) {
+            } else if (mix >= -_0x80000000) {
                 mix += _0x100000000;
                 rv.push(0xd2, mix >>> 24, (mix >> 16) & _0xff,
                                           (mix >>  8) & _0xff, mix & _0xff);
