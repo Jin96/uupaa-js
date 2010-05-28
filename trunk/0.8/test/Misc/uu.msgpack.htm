@@ -21,7 +21,7 @@ uu.ready(function(uu) {
     var hex = uu.test.toHexString;
 
     uu.test({
-        "FixNum and uint": "",
+        "FixNum, uint and int": "",
             "Number(0) -> [0x00] (Positive FixNum)": function() {
                 var pack = uu.msgpack.pack(0);
                 var rv = uu.msgpack.unpack(pack);
@@ -228,7 +228,7 @@ uu.ready(function(uu) {
 
                 return [rv, "==", -127, hex(pack)];
             },
-            "Number(-128) -> [0xd1, 0xff, 0x80] (int 16)": function() {
+            "Number(-128) -> [0xd0, 0x80] (int 8)": function() {
                 var pack = uu.msgpack.pack(-128);
                 var rv = uu.msgpack.unpack(pack);
 
@@ -263,6 +263,24 @@ uu.ready(function(uu) {
                 var rv = uu.msgpack.unpack(pack);
 
                 return [rv, "==", -257, hex(pack)];
+            },
+            "Number(-32767) -> [0xd1, 0x80, 0x01] (int 16)": function() {
+                var pack = uu.msgpack.pack(-32767);
+                var rv = uu.msgpack.unpack(pack);
+
+                return [rv, "==", -32767, hex(pack)];
+            },
+            "Number(-32768) -> [0xd1, 0x80, 0x00] (int 16)": function() {
+                var pack = uu.msgpack.pack(-32768);
+                var rv = uu.msgpack.unpack(pack);
+
+                return [rv, "==", -32768, hex(pack)];
+            },
+            "Number(-32769) -> [0xd2, 0xff, 0xff, 0x7f, 0xff] (int 32)": function() {
+                var pack = uu.msgpack.pack(-32769);
+                var rv = uu.msgpack.unpack(pack);
+
+                return [rv, "==", -32769, hex(pack)];
             },
             "Number(-65534) -> [0xd2, 0xff, 0xff, 0x00, 0x02] (int 32)": function() {
                 var pack = uu.msgpack.pack(-65534);
@@ -534,7 +552,7 @@ uu.ready(function(uu) {
                 var pack = uu.msgpack.pack(data);
                 var rv = uu.msgpack.unpack(pack);
 
-                return [rv, "==", data, hex(pack)];
+                return [rv, "is hash", void 0, hex(pack)];
             },
             "Date": function() {
                 var data = new Date;

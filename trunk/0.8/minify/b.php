@@ -46,9 +46,22 @@ function joinSourceFiles($package,      // @param Array:
         $ary = file($packagePath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 
         foreach($ary as $value) {
+            $debugMode = !array_key_exists('debug', $optimize);
+            $mobileMode = array_key_exists('mb', $optimize);
+
             // skip blank and C++ comment line
-            if (preg_match('/^\s*$/', $value) // blank
-                || preg_match('/^\/\//', $value)) { // C++ comment
+            if (preg_match('/^\s*$/', $value)) { // blank
+                continue;
+            }
+            if (preg_match('/^\/\//', $value)) { // C++ comment
+                continue;
+            }
+
+            // -mb が指定され、ファイルパスの終わりに //!mb があるならスキップする。
+            //      "src/Misc/uu.matrix2d.js //!mb"
+            //
+            //  スクリプト全体を //{{{!mb ～ //}}}!mb でコメントアウトするのと同じ効果がある
+            if ($mobileMode && preg_match('/\s+\/\/!mb\s*$/', $value)) {
                 continue;
             }
 
@@ -77,13 +90,13 @@ function joinSourceFiles($package,      // @param Array:
             $txt = preg_replace('/(\r\n|\r|\n)/m', "\n", $txt);
 
             // strip {{{!debug ... }}}!debug
-            if (!array_key_exists('debug', $optimize)) {
+            if ($debugMode) {
                 $txt = preg_replace('/\{\{\{\+debug([^\n]*)\n.*?\}\}\}\+debug/ms',
                                     '', $txt);
             }
 
             // strip {{{!mb ... }}}!mb
-            if (array_key_exists('mb', $optimize)) {
+            if ($mobileMode) {
                 $txt = preg_replace('/\{\{\{\!mb([^\n]*)\n.*?\}\}\}\!mb/ms',
                                     "/*{{{!mb$1 }}}!mb*/", $txt);
             }

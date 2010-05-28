@@ -1,26 +1,24 @@
 
 // === uu.url / window.url ===
-/*
-    URLString = "scheme://domain[:port][/path][?query#fragment]"
 
-    URLHash = {
-        url      - AbsoluteURLString: "http://example.com:8080/dir/file.ext?query=string;more=value#fragment"
-        scheme   - SchemeString:      "http"                           or "https", "file"
-        domain   - DomainNameString:  "example.com"
-        port     - PortNumberString:  "8080"                           or ""
-        base     - BaseURLString:     "http://example.com:8080/dir/"
-        path     - PathString:        "/dir/file.ext"                  or "/"
-        dir      - DirString:         "/dir/"                          or "/"
-        file     - FileNameString:    "file.ext"                       or ""
-        query    - QueryString:       "query=string;more=value"        or ""
-        hash     - QueryStringHash:   { query: "string", more: "value" } or {}
-        fragment - FragmentString:    "fragment"                       or ""
-    }
-
-    QueryString = "query=string;more=value"
-
-    QueryStringHash = { query: "string", more: "value" }
- */
+//  type URLString = "scheme://domain[:port][/path][?query#fragment]"
+//
+//  type URLHash = {
+//        url      - AbsoluteURLString: "http://example.com:8080/dir/file.ext?query=string;more=value#fragment"
+//        scheme   - SchemeString:      "http"                           or "https", "file"
+//        domain   - DomainNameString:  "example.com"
+//        port     - PortNumberString:  "8080"                           or ""
+//        base     - BaseURLString:     "http://example.com:8080/dir/"
+//        path     - PathString:        "/dir/file.ext"                  or "/"
+//        dir      - DirString:         "/dir/"                          or "/"
+//        file     - FileNameString:    "file.ext"                       or ""
+//        query    - QueryString:       "query=string;more=value"        or ""
+//        hash     - QueryStringHash:   { query: "string", more: "value" } or {}
+//        fragment - FragmentString:    "fragment"                       or ""
+//    }
+//
+//  type QueryString = "query=string;more=value"
+//  type QueryStringHash = { query: "string", more: "value" }
 
 (this.uu || this).url || (function(namespace) {
 
