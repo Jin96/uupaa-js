@@ -1,6 +1,6 @@
 #summary 単体利用可能なソースコード
 
-一部のソースコードは、uupaa.js ライブラリの一部でありながら、単体での利用も可能にする工夫を施しています。
+一部のソースコードは、単体利用も可能です。
 
 = 単体利用可能なソースコードの一覧 =
   * src/Misc/uu.base64.js
@@ -15,4 +15,24 @@
   * src/Misc/uu.url.js
   * src/Misc/uu.utf8.js
 
-解説: http://d.hatena.ne.jp/uupaa/20100524/1274684311
+= this + namespace による工夫 =
+{{{
+// === uu.base64 / window.base64 ===
+(function(namespace) {
+
+namespace.base64 = {
+    encode: base64encode,
+    decode: base64decode
+};
+
+function base64encode() { ... }
+function base64decode() { ... }
+
+})(this.uu || this);
+}}}
+
+こうすることで、window.uu があれば uu.base64 が追加され、無ければ window.base64 が追加されるため、ソースコードが単体でも利用できます。
+
+最後の行を window.uu `||` window とせず this.uu `||` this とすることでサーバサイドからの利用も、ちょっとだけ考慮しています。
+
+詳しくは http://d.hatena.ne.jp/uupaa/20100524/1274684311 を参照してください。
