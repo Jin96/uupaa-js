@@ -3,17 +3,16 @@
 一部のソースコードは、単体利用も可能です。
 
 = 単体利用可能なソースコードの一覧 =
-  * src/Misc/uu.base64.js
-  * src/Misc/uu.base64.js
-  * src/Misc/uu.datauri.js
-  * src/Misc/uu.entity.js
-  * src/Misc/uu.lzw.js
-  * src/Misc/uu.matrix2d.js
-  * src/Misc/uu.md5.js
-  * src/Misc/uu.msgpack.js
-  * src/Misc/uu.sprintf.js
-  * src/Misc/uu.url.js
-  * src/Misc/uu.utf8.js
+  * [uu_base64 src/Misc/uu.base64.js]
+  * [uu_datauri src/Misc/uu.datauri.js]
+  * [uu_entity src/Misc/uu.entity.js]
+  * [uu_lzw src/Misc/uu.lzw.js]
+  * [uu_matrix2d src/Misc/uu.matrix2d.js]
+  * [uu_md5 src/Misc/uu.md5.js]
+  * [uu_msgpack src/Misc/uu.msgpack.js]
+  * [uu_sprintf src/Misc/uu.sprintf.js]
+  * [uu_url src/Misc/uu.url.js]
+  * [uu_utf8 src/Misc/uu.utf8.js]
 
 = this + namespace による工夫 =
 {{{
