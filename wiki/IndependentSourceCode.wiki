@@ -14,7 +14,7 @@
   * [uu_url src/Misc/uu.url.js]
   * [uu_utf8 src/Misc/uu.utf8.js]
 
-= this + namespace による工夫 =
+= 単体利用を可能にする工夫 =
 {{{
 // === uu.base64 / window.base64 ===
 (function(namespace) {
@@ -30,8 +30,6 @@ function base64decode() { ... }
 })(this.uu || this);
 }}}
 
-こうすることで、window.uu があれば uu.base64 が追加され、無ければ window.base64 が追加されるため、ソースコードが単体でも利用できます。
+このように window.uu があれば uu.base64 が追加され、window.uu が無ければ window.base64 として追加されるため、単体でも利用できます。
 
-最後の行を window.uu `||` window とせず this.uu `||` this とすることでサーバサイドからの利用も、ちょっとだけ考慮しています。
-
-詳しくは http://d.hatena.ne.jp/uupaa/20100524/1274684311 を参照してください。
+より詳しくは http://d.hatena.ne.jp/uupaa/20100524/1274684311 を参照してください。
