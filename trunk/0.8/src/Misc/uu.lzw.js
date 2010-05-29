@@ -1,7 +1,5 @@
 
 // === uu.lzw / window.lzw ===
-//{{{!depend uu
-//}}}!depend
 
 (this.uu || this).lzw || (function(namespace) {
 

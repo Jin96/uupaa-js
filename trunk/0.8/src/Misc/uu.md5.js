@@ -1,7 +1,5 @@
 
 // === uu.md5 / window.md5 ===
-//{{{!depend uu
-//}}}!depend
 
 (this.uu || this).md5 || (function(namespace) {
 
