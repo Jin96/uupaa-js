@@ -1,7 +1,7 @@
 
 // === uu.msgpack / window.msgpack ===
 // http://msgpack.sourceforge.net/
-//{{{!depend uu, uu.utf8
+//{{{!depend uu.utf8
 //}}}!depend
 
 (this.uu || this).msgpack || (function(namespace) {
@@ -19,6 +19,7 @@ var _bin2num = {}, // { "00000000": 0, "00000001": 1, ... }
     _0x80 =                           0x80,
     _0x8000 =                       0x8000,
     _0x80000000 =               0x80000000,
+    _00000000000 =           "00000000000",
     _sign = {
         8: _0x80,
         16: _0x8000,
@@ -298,6 +299,7 @@ function toIEEE754(rv,    // @param ByteArray: result, [0xcb, ...]
     //      = "0.0001100110011001100110011001100110011001100110011001101"
     var exp;
 
+    // case "1.xxx" or "0.xxxx"
     if (fraction.charAt(1) === ".") {
         if (fraction.charAt(0) === "1") { // /^1\./
             exp = 1023;
@@ -306,13 +308,14 @@ function toIEEE754(rv,    // @param ByteArray: result, [0xcb, ...]
             fraction = fraction.slice(2); // "1.xxx" -> "xxx"
         } else { // /^0\./
             exp = 1023 - fraction.indexOf("1") + 1; // "0.00011000..." -> -5 + 1 = -4
-            exp = ("00000000000" + exp.toString(2)).slice(-11); // pad zero
+            exp = (_00000000000 + exp.toString(2)).slice(-11); // pad zero
 
             fraction = fraction.slice(6); // "0.00011000..." -> "1000..."
         }
     } else {
+        // case "11.xxxx"
         exp = 1023 + fraction.indexOf(".") - 1;
-        exp = ("00000000000" + exp.toString(2)).slice(-11); // pad zero
+        exp = (_00000000000 + exp.toString(2)).slice(-11); // pad zero
 
         fraction = fraction.slice(1).replace(/\./, "");
     }

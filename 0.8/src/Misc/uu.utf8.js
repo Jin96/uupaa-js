@@ -1,7 +1,5 @@
 
 // === uu.utf8 / window.utf8 ===
-//{{{!depend uu
-//}}}!depend
 
 (this.uu || this).utf8 || (function(namespace) {
 

@@ -1,7 +1,5 @@
 
 // === uu.entity / window.entity ===
-//{{{!depend uu
-//}}}!depend
 
 (this.uu || this).entity || (function(namespace) {
 

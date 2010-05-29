@@ -1,41 +1,47 @@
 // === uu.matrix2d / window.matrix2d ===
 
-//
-//  type Matrix2D = [m11, m12, m13,
-//                   m21, m22, m23,
-//                   m31, m32, m33]
+//  type Matrix2DArray = [m11, m12, m13,
+//                        m21, m22, m23,
+//                        m31, m32, m33]
 
 (this.uu || this).matrix2d || (function(namespace) {
 
 namespace.matrix2d = {
-    multiply:     multiply,    // matrix2d.multiply(a, b) -> Array(Matrix)
-    scale:        scale,       // matrix2d.scale(x, y, m) -> Array(Matrix)
-    rotate:       rotate,      // matrix2d.rotate(angle, m) -> Array(Matrix)
-    transform:    transform,   // matrix2d.transform(m11, m12, m21, m22, dx, dy, m)
-                               //                           -> Array(Matrix)
-    translate:    translate    // matrix2d.translate(x, y, m) -> Array(Matrix)
+    multiply:     multiply,    // matrix2d.multiply(ma:Matrix2DArray,
+                               //                   mb:Matrix2DArray):Matrix2DArray
+    scale:        scale,       // matrix2d.scale(x:Number,
+                               //                y:Number,
+                               //                m:Matrix2DArray):Matrix2DArray
+    rotate:       rotate,      // matrix2d.rotate(angle:Number,
+                               //                 m:Matrix2DArray):Matrix2DArray
+    transform:    transform,   // matrix2d.transform(m11:Number, m12:Number, m21:Number,
+                               //                    m22:Number,  dx:Number,  dy:Number,
+                               //                      m:Matrix2DArray):Matrix2DArray
+    translate:    translate    // matrix2d.translate(x:Number,
+                               //                    y:Number,
+                               //                    m:Matrix2DArray):Matrix2DArray
 };
 
 // matrix2d.multiply - 2D Matrix multiply
-function multiply(a,   // @param Array: matrix A
-                  b) { // @param Array: matrix B
-                       // @return Array: A x B
-    return [a[0] * b[0] + a[1] * b[3] + a[2] * b[6],  // m11
-            a[0] * b[1] + a[1] * b[4] + a[2] * b[7],  // m12
-            0,                                        // m13
-            a[3] * b[0] + a[4] * b[3] + a[5] * b[6],  // m21
-            a[3] * b[1] + a[4] * b[4] + a[5] * b[7],  // m22
-            0,                                        // m23
-            a[6] * b[0] + a[7] * b[3] + a[8] * b[6],  // m31(dx)
-            a[6] * b[1] + a[7] * b[4] + a[8] * b[7],  // m32(dy)
-            a[6] * b[2] + a[7] * b[5] + a[8] * b[8]]; // m33
+function multiply(ma,   // @param Matrix2DArray: matrix A
+                  mb) { // @param Matrix2DArray: matrix B
+                        // @return Matrix2DArray: A x B
+    return [ma[0] * mb[0] + ma[1] * mb[3] + ma[2] * mb[6],  // m11
+            ma[0] * mb[1] + ma[1] * mb[4] + ma[2] * mb[7],  // m12
+            0,                                              // m13
+            ma[3] * mb[0] + ma[4] * mb[3] + ma[5] * mb[6],  // m21
+            ma[3] * mb[1] + ma[4] * mb[4] + ma[5] * mb[7],  // m22
+            0,                                              // m23
+            ma[6] * mb[0] + ma[7] * mb[3] + ma[8] * mb[6],  // m31(dx)
+            ma[6] * mb[1] + ma[7] * mb[4] + ma[8] * mb[7],  // m32(dy)
+            ma[6] * mb[2] + ma[7] * mb[5] + ma[8] * mb[8]]; // m33
 }
 
 // matrix2d.scale - 2D Matrix multiply x scale
 function scale(x,   // @param Number:
                y,   // @param Number:
-               m) { // @param Array: matrix
-                    // @return Array:
+               m) { // @param Matrix2DArray: matrix
+                    // @return Matrix2DArray:
     // [x, 0, 0,
     //  0, y, 0,
     //  0, 0, 1]
@@ -46,8 +52,8 @@ function scale(x,   // @param Number:
 
 // matrix2d.rotate - 2D Matrix multiply x rotate
 function rotate(angle, // @param Number:
-                m) {   // @param Array: matrix
-                       // @return Array:
+                m) {   // @param Matrix2DArray: matrix
+                       // @return Matrix2DArray:
     // [ c, s, 0,
     //  -s, c, 0,
     //   0, 0, 1]
@@ -66,8 +72,8 @@ function transform(m11, // @param Number:
                    m22, // @param Number:
                    dx,  // @param Number:
                    dy,  // @param Number:
-                   m) { // @param Array: matrix
-                        // @return Array:
+                   m) { // @param Matrix2DArray: matrix
+                        // @return Matrix2DArray:
     // [m11, m12, 0,
     //  m21, m22, 0,
     //   dx,  dy, 1]
@@ -81,8 +87,8 @@ function transform(m11, // @param Number:
 // matrix2d.translate - 2D Matrix multiply x translate
 function translate(x,   // @param Number:
                    y,   // @param Number:
-                   m) { // @param Array: matrix
-                        // @return Array:
+                   m) { // @param Matrix2DArray: matrix
+                        // @return Matrix2DArray:
     // [1, 0, 0,
     //  0, 1, 0,
     //  x, y, 1]
