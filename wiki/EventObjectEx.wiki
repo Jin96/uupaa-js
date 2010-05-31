@@ -24,7 +24,7 @@ EventObjectEx = {
   * EventObjectEx.xbutton は、IEとそれ以外で異なる event.button を正規化した情報を保持します。
     * xbutton = 0 で クリック。xbutton = 1 でミドルクリック。 xbutton = 2 で右クリックです。
     * xbutton は mousedown, mouseup, contextmenu イベントで利用できます。
-  * EventObject.xwheel は、マウスホイールの移動量を保持します。0 は無回転です。値は標準で +2 から -2 の範囲に収まりますが、OSやブラウザの設定を変更している場合はその限りではありません。
+  * EventObjectEx.xwheel は、マウスホイールの移動量を保持します。0 は無回転です。値は標準で +2 から -2 の範囲に収まりますが、OSやブラウザの設定を変更している場合はその限りではありません。
 
 == IE6～IE8 限定で以下の情報が EventObjectEx に追加されます ==
   * EventObjectEx.currentTarget は、event.currentTarget 相当の情報として uu.event(node) の node を保持します。
