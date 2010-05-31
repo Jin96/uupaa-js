@@ -35,7 +35,7 @@ EventObjectEx = {
   * EventObjectEx.pageX は、event.pageX 相当の情報を保持します。
     * pageX, pageY はブラウザの原点(左上)からの絶対座標です。スクロールオフセットを含みます。
   * EventObjectEx.pageY は、event.pageY 相当の情報を保持します。
-== EventObejctEx.xtype value ==
+== EventObjectEx.xtype value ==
 {{{
 uu.event.xtypes = {
     // --- DOM Lv2 and Lv3 Events ---
