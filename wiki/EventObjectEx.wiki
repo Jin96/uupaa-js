@@ -19,18 +19,22 @@ EventObjectEx = {
 }
 }}}
 == クロスブラウザ化された以下の情報が EventObjectEx に追加されます ==
-  * EventObjectEx.xtarget は、クロスブラウザ化された event.target を保持します。
-  * EventObjectEx.xtype は、ブラウザ毎に異なるイベントタイプ(event.type)を正規化し数値を保持します。値の一覧は uu.event.xtypes を参照してください。
-  * EventObjectEx.xbutton は、IEとそれ以外で異なる event.button を正規化した情報を保持します。
+  * EventObjectEx.xtarget は、クロスブラウザ化された event.target 相当の情報を保持します。
+  * EventObjectEx.xtype は、ブラウザ毎に異なるイベントタイプ(event.type)を正規化した数値を保持します。
+  * EventObjectEx.xbutton は、event.button を正規化した数値を保持します。
     * xbutton = 0 で クリック。xbutton = 1 でミドルクリック。 xbutton = 2 で右クリックです。
     * xbutton は mousedown, mouseup, contextmenu イベントで利用できます。
-  * EventObjectEx.xwheel は、マウスホイールの移動量を保持します。0 は無回転です。値は標準で +2 から -2 の範囲に収まりますが、OSやブラウザの設定を変更している場合はその限りではありません。
+  * EventObjectEx.xwheel は、マウスホイールの回転数を保持します。0 で無回転です。
+    * 値は通常 +2 から -2 の範囲に収まりますが、OSやブラウザの設定を変更している場合はその限りではありません。
 
 == IE6～IE8 限定で以下の情報が EventObjectEx に追加されます ==
-  * EventObjectEx.currentTarget は、event.currentTarget 相当の情報として uu.event(node) の node を保持します。
-  * EventObjectEx.relatedTarget は、event.relatedTarget 相当の情報を保持します。このプロパティは mouseover または mouseout イベントで利用できます。
-  * EventObjectEx.pageX は、event.pageX 相当の情報を保持します。これはブラウザの原点(左上)からの絶対座標です。スクロールオフセットを含みます。
-  * EventObjectEx.pageY は、event.pageY 相当の情報を保持します。これはブラウザの原点(左上)からの絶対座標です。スクロールオフセットを含みます。
+  * EventObjectEx.currentTarget は、uu.event(node) の node を保持します。
+    * これは DOM Events Lv2 の event.currentTarget に相当します。
+  * EventObjectEx.relatedTarget は、event.relatedTarget 相当の情報を保持します。
+    * このプロパティは mouseover または mouseout イベントで利用できます。
+  * EventObjectEx.pageX は、event.pageX 相当の情報を保持します。
+    * pageX, pageY はブラウザの原点(左上)からの絶対座標です。スクロールオフセットを含みます。
+  * EventObjectEx.pageY は、event.pageY 相当の情報を保持します。
 == EventObejct.xtype value ==
 {{{
 uu.event.xtypes = {
@@ -72,6 +76,12 @@ uu.event.xtypes = {
     DOMMouseScroll: 4
 }
 }}}
+
+== ヘルパー関数 ==
+キーコードや、PaddingEdgeを取得するヘルパー関数も存在します。
+
+  * [uu_event_getKeyCode uu.event.getKeyCode](event) → { key, code }
+  * [uu_event_getPaddingEdge uu.event.getPaddingEdge](event) → { x, y }
 
 == 例 ==
 
