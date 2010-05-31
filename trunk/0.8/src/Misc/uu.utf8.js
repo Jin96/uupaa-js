@@ -5,7 +5,9 @@
 
 namespace.utf8 = {
     encode: utf8encode, // utf8.encode(str:String):UTF8ByteArray
-    decode: utf8decode  // utf8.decode(byteArray:UTF8ByteArray):String
+    decode: utf8decode  // utf8.decode(byteArray:UTF8ByteArray,
+                        //             startIndex:Number = 0,
+                        //             endIndex:Number = void):String
 };
 
 // utf8.encode - String to UTF8ByteArray
@@ -33,10 +35,16 @@ function utf8encode(str,      // @param String: JavaScript string
 }
 
 // utf8.decode - UTF8ByteArray to String
-function utf8decode(byteArray) { // @param UTF8ByteArray: [ Number(utf8), ... ]
-                                 // @return String: JavaScript string
-    var rv = [], ri = -1, iz = byteArray.length, c = 0, i = 0,
-        fromCharCode = String.fromCharCode;
+function utf8decode(byteArray,  // @param UTF8ByteArray: [ Number(utf8), ... ]
+                    startIndex, // @param Number(= 0):
+                    endIndex) { // @param Number(= void):
+                                // @return String: JavaScript string
+    var rv = [], ri = -1, iz = endIndex || byteArray.length, c = 0,
+        i = startIndex || 0, fromCharCode = String.fromCharCode;
+
+    if (iz > byteArray.length) {
+        iz = byteArray.length;
+    }
 
     for (; i < iz; ++i) {
         c = byteArray[i]; // first byte
