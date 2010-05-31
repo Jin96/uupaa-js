@@ -1,0 +1,121 @@
+<!doctype html><html><head><meta charset="utf-8" />
+<title>uu.tween.effect test</title>
+<script src="../../src/uupaa.js"></script>
+<script src="../../src/UI/uu.ui.dragbase.js"></script>
+<script src="../../src/UI/uu.ui.drag.js"></script>
+<script src="../../src/CSS/uu.css.box.js"></script>
+<style>
+html, body {
+/*
+  overflow: hidden;
+ */
+}
+.box {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  background-color: #73ff00;
+  color: white;
+  text-align: center;
+  top: 0px;
+  left: 0px;
+/*
+  border: 20px solid navy;
+  padding: 40px;
+  margin: 10px;
+  outline: 10px solid skyblue;
+ */
+}
+.grip {
+  background-color: green;
+}
+</style>
+</head><body id="body">
+
+<script>
+
+uu.ready(function(uu) {
+
+    uu("Drag", uu.id("tgt1"));
+    uu("Drag", uu.id("tgt2"));
+//    uu("Drag", uu.id("tgt3"), uu.id("tgt3").firstChild);
+    uu("Drag", uu.id("tgt3"));
+
+});
+
+</script>
+<!--
+<div style="position: relative">
+ -->
+<div class="box" id="tgt1">basic drag and drop</div>
+<div class="box" id="tgt2">basic drag and drop</div>
+<div class="box" id="tgt3">basic drag and drop</div>
+<!--
+<div class="box" id="tgt3"><span class="grip">grip</span>basic drag and drop</div>
+</div>
+ -->
+<select>
+<option>111111111111111111111111111111111</option>
+<option>222222222222222222222222222222222</option>
+</select>
+<!--
+<pre>
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+</pre>
+-->
+</body></html>

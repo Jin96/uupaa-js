@@ -225,6 +225,7 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Stri
                                     //  [4][bind a namespace.event]  uu.event(node, "MyNameSpace.click", fn) -> node
         has:        uueventhas,     // uu.event.has(node:Node, eventTypeEx:EventTypeExString):Boolean
         fire:       uueventfire,    // uu.event.fire(node:Node, eventType:String, param:Mix = void):Node
+        stop:       uueventstop,    // uu.event.stop(event:EventObjectEx)
         unbind:     uueventunbind,  // uu.event.unbind(node:Node, eventTypeEx:EventTypeExString = void):Node
         attach:     uueventattach,  // uu.event.attach(node:Node, eventType:String, evaluator:Function,
                                     //                                              useCapture:Boolean = false)
@@ -357,6 +358,7 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Stri
         reload:     _false          // true is blackout (css3 cache reload)
     }, detectFeatures(_ver)),
     // --- OTHER ---
+    ui:             {},             // uu.ui
     dmz:            {},             // uu.dmz - DeMilitarized Zone(proxy)
     nop:            _nop            // uu.nop() - none operation
 });
@@ -1961,31 +1963,20 @@ function uuevent(node,         // @param Node:
                                             ? event.toElement
                                             : event.fromElement;
                     }
-                    // Event.stopPropagation
-                    event.stopPropagation = function() {
-                        event.cancelBubble = _true;
-                    };
-                    // Event.preventDefault
-                    event.preventDefault = function() {
-                        event.returnValue = _false;
-                    };
                 }
                 if (event.pageX === void 0) { // [IE6][IE7][IE8][IE9]
-                    event.pageX = event.clientX + owner.scrollLeft;
-                    event.pageY = event.clientY + owner.scrollTop;
+                    event.pageX = event.clientX + (owner.scrollLeft || 0);
+                    event.pageY = event.clientY + (owner.scrollTop  || 0);
                 }
             }
 //}}}!mb
             if (event.xtype === uuevent.xtypes.mousewheel) {
-                event.xwheel = (event.detail ? (event.detail / 3)
-                                             : (event.wheelDelta / -120)) | 0;
+                event.xwheel = (
+//{{{!mb
+                                event.detail ? (event.detail / 3) :
+//}}}!mb
+                                               (event.wheelDelta / -120)) | 0;
             }
-
-            // EventObjectEx.stop - stopPropagation and preventDefault
-            event.stop = function() {
-                event.stopPropagation();
-                event.preventDefault();
-            };
         }
         // callback(event, node)
         instance ? handler.call(evaluator, event, node)
@@ -2032,8 +2023,8 @@ function uuevent(node,         // @param Node:
                 capture && uuevent(node, "losecapture", closure, __unbind__);
             } else if (eventType === "losecapture") {
                 if (node.setCapture) {
-                    bound ? node.setCapture()
-                          : node.releaseCapture();
+                    __unbind__ ? node.releaseCapture()
+                               : node.setCapture();
                 }
             }
         }
@@ -2178,9 +2169,7 @@ function uueventfire(node,      // @param Node: target node
                 detail:         0,
                 customEvent:    _true,
                 currentTarget:  node,
-                relatedTarget:  node,
-                preventDefault: _nop,
-                stopPropagation:_nop
+                relatedTarget:  node
             };
 
         node[_uuevent][eventType].forEach(function(evaluator) {
@@ -2188,6 +2177,21 @@ function uueventfire(node,      // @param Node: target node
         });
     }
     return node;
+}
+
+// uu.event.stop - stopPropagation and preventDefault
+function uueventstop(event) { // @param EventObjectEx:
+//{{{!mb
+    if (event.stopPropagation) {
+//}}}!mb
+        event.stopPropagation();
+        event.preventDefault();
+//{{{!mb
+    } else {
+        event.cancelBubble = _true;
+        event.returnValue = _false;
+    }
+//}}}!mb
 }
 
 // [1][unbind all]              uu.event.unbind(node) -> node
