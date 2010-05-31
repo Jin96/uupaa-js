@@ -8,18 +8,27 @@ uu.event() で登録した evaluator のコールバック第一引数が EventO
 
 {{{
 EventObjectEx = {
-    xtarget - Node:   as event.target (DOMLv2) or event.srcElement (IE6, IE7, IE8) or document (IE6, IE7, IE8)
-    xtype   - Number: as event.type (uu.event.xtypes.nnn)
-    xbutton - Number: as event.button
-    currentTarget - Node: as event.currentTarget (IE6, IE7, IE8 only)
-    relatedTarget - Node: as event.relatedTarget (IE6, IE7, IE8 only)
-    pageX   - Number: as event.pageX (IE6, IE7, IE8 only)
-    pageY   - Number: as event.pageY (IE6, IE7, IE8 only)
-    xwheel  - Number: as event.detail (Gecko, IE) or event.wheelDelta (WebKit)
+    xtarget       - Node:   as event.target or event.srcElement or document
+    xtype         - Number: as event.type
+    xbutton       - Number: as event.button
+    xwheel        - Number: as event.detail (Gecko, IE) or event.wheelDelta (WebKit)
+    currentTarget - Node:   as event.currentTarget (IE6, IE7, IE8 only)
+    relatedTarget - Node:   as event.relatedTarget (IE6, IE7, IE8 only)
+    pageX         - Number: as event.pageX (IE6, IE7, IE8 only)
+    pageY         - Number: as event.pageY (IE6, IE7, IE8 only)
 }
 }}}
+== クロスブラウザ化された以下の情報が EventObjectEx に追加されます ==
   * EventObjectEx.xtarget は、クロスブラウザ化された event.target を保持します。
-  * EventObjectEx.xtype は、イベントタイプ(event.type)を数値化した情報を保持します。値の一覧は uu.event.xtypes にあります。
+  * EventObjectEx.xtype は、ブラウザ毎に異なるイベントタイプ(event.type)を正規化し、数値化した情報を保持します。値の一覧は uu.event.xtypes にあります。
+  * EventObjectEx.xbutton は、IEとそれ以外で異なる event.button を正規化した情報を保持します。
+    * xbutton = 0 で クリック。xbutton = 1 でミドルクリック。 xbutton = 2 で右クリックです。
+    * xbutton は mousedown, mouseup, contextmenu イベントで利用できます。
+  * EventObject.xwheel は、マウスホイールの移動量を保持します。0 は無回転です。値は標準で +2 から -2 の範囲に収まりますが、OSやブラウザの設定を変更している場合はその限りではありません。
+
+== IE6～IE8 限定で以下の情報が EventObjectEx に追加されます ==
+  * EventObject.currentTarget は、currentTarget相当の情報として uu.event(node) の node を保持します。
+  * EventObject.relatedTarget は、relatedTarget相当の情報を保持します。このプロパティは mouseover または mouseout イベントで利用できます。
 {{{
 uu.event.xtypes = {
     // --- DOM Lv2 and Lv3 Events ---
