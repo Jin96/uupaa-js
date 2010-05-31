@@ -20,7 +20,7 @@ EventObjectEx = {
 }}}
 == クロスブラウザ化された以下の情報が EventObjectEx に追加されます ==
   * EventObjectEx.xtarget は、クロスブラウザ化された event.target を保持します。
-  * EventObjectEx.xtype は、ブラウザ毎に異なるイベントタイプ(event.type)を正規化し、数値化した情報を保持します。値の一覧は uu.event.xtypes にあります。
+  * EventObjectEx.xtype は、ブラウザ毎に異なるイベントタイプ(event.type)を正規化し数値を保持します。値の一覧は uu.event.xtypes を参照してください。
   * EventObjectEx.xbutton は、IEとそれ以外で異なる event.button を正規化した情報を保持します。
     * xbutton = 0 で クリック。xbutton = 1 でミドルクリック。 xbutton = 2 で右クリックです。
     * xbutton は mousedown, mouseup, contextmenu イベントで利用できます。
@@ -78,8 +78,8 @@ uu.event.xtypes = {
 関数をイベントハンドラとして登録する。
 {{{
     var div = uu.node.add();
-    var evaluator = function(event) {
-        alert(event.code); // 5
+    var evaluator = function(eventObjectEx) {
+        alert(eventObjectEx.xtype); // 5 = uu.event.xtypes.click
     };
 
     uu.event(div, "click", evaluator);
@@ -92,8 +92,8 @@ uu.event.xtypes = {
 クラスインスタンスをイベントハンドラとして登録する。
 {{{
     uu.Class("Drag", {
-        handleEvent: function(event) {
-            alert(event.code); // 5
+        handleEvent: function(eventObjectEx) {
+            alert(eventObjectEx.xtype); // 5 = uu.event.xtypes.click
         }
     });
 
