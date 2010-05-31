@@ -1,0 +1,69 @@
+<!doctype html><html><head><meta charset="utf-8" />
+<title>IE8 and IE9pp2 outline + z-index bug test</title>
+<script src="../../../src/uupaa.js"></script>
+<script src="../../../src/UI/uu.ui.dragbase.js"></script>
+<script src="../../../src/UI/uu.ui.drag.js"></script>
+<script src="../../../src/CSS/uu.css.box.js"></script>
+<script src="../../../src/Query/uu.query.js"></script>
+<style>
+.box {
+  position: absolute; top: 200px; left: 200px;
+  width: 80px; height: 80px;
+  background-color: #73ff00;
+  text-align: center;
+  border: 10px solid blue;
+}
+.outline {
+  outline: 10px solid skyblue;
+}
+</style>
+</head><body>
+<script>
+uu.ready(function(uu) {
+    var zview = function(evt, node, option, dragInfo) {
+                    setTimeout(function() {
+                        uu(".box").each(function(node) {
+                            uu.text(node, "z-index: ??", node.style.zIndex);
+                        })
+                    }, 200);
+                };
+
+    var option = { mousedown: zview,
+                   mouseup: zview };
+
+    uu("Drag", uu.id("tgt1"), null, option);
+    uu("Drag", uu.id("tgt2"), null, option);
+    uu("Drag", uu.id("tgt3"), null, option);
+});
+uu.ready(function(uu) {
+    if (window.name === "outline") {
+        uu(".box").klass("+outline");
+    }
+});
+function toggleOutline() {
+    var name = window.name || "none";
+
+    if (name === "none") {
+        window.name = "outline";
+    } else {
+        window.name = "none";
+    }
+    location.reload(false);
+}
+</script>
+<div class="box" id="tgt1">drag and drop</div>
+<div class="box" id="tgt2">drag and drop</div>
+<div class="box" id="tgt3">drag and drop</div>
+
+<input type="button" value="toggle outline" onclick="toggleOutline()" />
+<h2>IE8 や IE9pp2 で outline を設定すると z-index が機能不全を起こすバグのテストページ</h2>
+<p>青枠で囲まれた要素は Drag &amp; Drop で動かすことができます。これら要素には z-index が設定され、要素の前後関係をコントロールしています。</p>
+<p>toggle outline ボタンを押下すると、空色の outline が表示されます。もう一度押すと隠れます。</p>
+<p>IE8 や IE9pp2 には、outline が設定されている要素に対して z-index が適切に機能せず、要素が裏側に隠れるというバグあります。</p>
+<p>解決方法としては、</p>
+<ol>
+    <li>outline を使わない</li>
+    <li>親要素に position:absolute や relative を設定する</li>
+</ol>
+<p>などがあります。</p>
+</body></html>

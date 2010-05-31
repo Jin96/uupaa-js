@@ -88,11 +88,13 @@ function zbind(node) { // @param Node:
 
     // [IE8][FIX] z-index bug
     // http://twitter.com/uupaa/statuses/15075513615
+/*
     if (uu.ver.ie8) {
         if (node.parentNode.currentStyle.position === "static") {
             node.parentNode.style.position = "relative";
         }
     }
+ */
     this._db[id] || (this._db[id] = node,
                      node.style.zIndex = ++this._ztop); // top + 1
 }
