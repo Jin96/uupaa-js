@@ -61,8 +61,6 @@ function draginit(node,     // @param Node: move target node
 
 // uu.Class.Drag.handleEvent
 function dragHandleEvent(evt) {
-    window.status = uu.format("evt.pageX=?? evt.pageY=??", evt.pageX, evt.pageY);
-
     uu.event.stop(evt);
 
     uu.ui.dragbase(evt, this.node, this.grip, this.option);

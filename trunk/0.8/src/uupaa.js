@@ -1372,8 +1372,13 @@ function getOpacity(node) { // @param Node:
 
         return opacity ? (opacity - 1): 1;
     }
+    if (getComputedStyle) {
 //}}}!mb
-    return parseFloat(getComputedStyle(node, 0).opacity);
+        return parseFloat(getComputedStyle(node, 0).opacity);
+//{{{!mb
+    }
+    return 1;
+//}}}!mb
 }
 
 // uu.css.setOpacity
