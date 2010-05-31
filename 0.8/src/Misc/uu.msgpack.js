@@ -344,10 +344,10 @@ function setType(rv,      // @param ByteArray: result
     }
 }
 
-// inner - conver number to binary string
+// inner - convert number to binary string
 function numberToBinaryString(num) { // @param Number:
-                                     // @return BinaryString:
-    var rv = [], decimal = _floor(num), fraction, n, x;
+                                     // @return BinaryString: "0.11001100..."
+    var rv = [], decimal = _floor(num), fraction, n, x, x2;
 
     rv.push(decimal.toString(2));
 
@@ -357,14 +357,15 @@ function numberToBinaryString(num) { // @param Number:
         n = 1;
         x = fraction;
         while (n < 56) {
-            if (x * 2 < 1) {
+            x2 = x * 2;
+            if (x2 < 1) {
                 rv.push("0");
-                x *= 2;
-            } else if (x * 2 > 1) {
+                x = x2;
+            } else if (x2 > 1) {
                 rv.push("1");
-                x = x * 2 - 1;
-            } else if (x * 2 === 1) {
-                rv.push("1"); // tiny round
+                x = x2 - 1;
+            } else if (x2 === 1) {
+                rv.push("1"); // tiny Rounding
                 break;
             }
             ++n;
