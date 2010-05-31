@@ -1,28 +1,28 @@
 #summary EventObjectEx は 独自のプロパティを拡張した EventObject です
 
-= このページには古い情報が含まれています =
-
-
 = EventObjectEx =
 
 EventObjectEx は、クロスブラウザ用のプロパティを拡張した !EventObject です。
 
-uu.event() で登録した evaluator のコールバック時の第一引数が EventObjectEx になります。
+uu.event() で登録した evaluator のコールバック第一引数が EventObjectEx になります。
 
 {{{
 EventObjectEx = {
-    node    - Node:   uu.event(node), event listener node
-    code    - Number: event code (uu.event.code)
-    target  - Node:   event target, srcElement(in IE) or event target
-    pageX   - Number: page X (Absolute position in WebPage)
-    pageY   - Number: page Y (Absolute position in WebPage)
-    ...
+    xtarget - Node:   as event.target (DOMLv2) or event.srcElement (IE6, IE7, IE8) or document (IE6, IE7, IE8)
+    xtype   - Number: as event.type (uu.event.xtypes.nnn)
+    xbutton - Number: as event.button
+    currentTarget - Node: as event.currentTarget (IE6, IE7, IE8 only)
+    relatedTarget - Node: as event.relatedTarget (IE6, IE7, IE8 only)
+    pageX   - Number: as event.pageX (IE6, IE7, IE8 only)
+    pageY   - Number: as event.pageY (IE6, IE7, IE8 only)
+    xwheel  - Number: as event.detail (Gecko, IE) or event.wheelDelta (WebKit)
 }
 }}}
-  * EventObjectEx.node は、uu.event(node) で指定した node です。
-  * EventObjectEx.code は、uu.event.code`[`event.type`]` の値を格納しています。
+  * EventObjectEx.xtarget は、クロスブラウザ化された event.target を保持します。
+  * EventObjectEx.xtype は、イベントタイプ(event.type)を数値化した情報を保持します。値の一覧は uu.event.xtypes にあります。
 {{{
-uu.event.code = {
+uu.event.xtypes = {
+    // --- DOM Lv2 and Lv3 Events ---
     mousedown:   1,
     mouseup:     2,
     mousemove:   3,
@@ -40,14 +40,26 @@ uu.event.code = {
     focus:       15,
     blur:        16,
     resize:      17,
-    custom:      99, // uu.event.fire
+    scroll:      18,
+    change:      19,
+    submit:      20,
+    // --- iPhone Events ---
+    touchstart:  32,
+    touchend:    33,
+    touchmove:   34,
+    touchcancel: 35,
+    gesturestart: 36,
+    gesturechange: 37,
+    gestureend:      38,
+    orientationchange: 39,
+    // --- HTML5 Events ---
+    online:      50,
+    offline:     51,
+    message:     52
     losecapture:    2,
     DOMMouseScroll: 4
 }
 }}}
-  * EventObjectEx.target は、イベント発生元の Node です。この値は event.target または event.srcElement (IE6～8) です。
-  * EventObjectEx.pageX, EventObjectEx.pageY はWebページの左上隅を基準とした座標です。スクロール成分が不要な場合は EventObjectEx.clientX, clientY で取得できます。
-
 
 == 例 ==
 
@@ -59,6 +71,10 @@ uu.event.code = {
     };
 
     uu.event(div, "click", evaluator);
+
+              または
+
+    uu.click(div, evaluator);
 }}}
 
 クラスインスタンスをイベントハンドラとして登録する。
@@ -72,4 +88,8 @@ uu.event.code = {
     var div = uu.node.add();
 
     uu.event(div, "click", uu("Drag"));
+
+              または
+
+    uu.click(div, uu("Drag"));
 }}}
