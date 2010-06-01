@@ -1,37 +1,37 @@
 
-// === uu.tween ===
-//{{{!depend uu, uu.color, uu.node.clone(in uu.tween.flare)
+// === uu.fx ===
+//{{{!depend uu, uu.color, uu.node.clone(in uu.fx.flare)
 //}}}!depend
 
-uu.tween.fade || (function(uu) {
+uu.fx.fade || (function(uu) {
 
-uu.each({ fade:         uutweenfade,
-          puff:         uutweenpuff,
-          flare:        uutweenflare,
-          shrink:       uutweenshrink,
-          movein:       uutweenmovein,
-          moveout:      uutweenmoveout,
-          highlight:    uutweenhighlight }, function(fn, name) {
-    uu.tween[name] = fn;
+uu.each({ fade:         uufxfade,
+          puff:         uufxpuff,
+          flare:        uufxflare,
+          shrink:       uufxshrink,
+          movein:       uufxmovein,
+          moveout:      uufxmoveout,
+          highlight:    uufxhighlight }, function(fn, name) {
+    uu.fx[name] = fn;
     uu.nodeSet[name] = function(node, duration, param) {
         return uu.nodeSet(0, this, fn, node, duration, param);
     }
 });
 
-// uu.tween.fade - fadeout / fadein
-function uutweenfade(node,     // @param Node:
-                     duration, // @param Number: duration
-                     param) {  // @param Hash(= {}):
-    return uu.tween(node, duration, uu.arg(param, { init: function(node, param) {
+// uu.fx.fade - fadeout / fadein
+function uufxfade(node,     // @param Node:
+                  duration, // @param Number: duration
+                  param) {  // @param Hash(= {}):
+    return uu.fx(node, duration, uu.arg(param, { init: function(node, param) {
             uu.mix(param, { o: uu.css.getOpacity(node) < 0.5 ? 1 : 0 });
         }}));
 }
 
-// uu.tween.puff - zoom out and fadeout
-function uutweenpuff(node,     // @param Node:
-                     duration, // @param Number: duration
-                     param) {  // @param Hash(= {}):
-    return uu.tween(node, duration, uu.arg(param, { init: function(node, param) {
+// uu.fx.puff - zoom out and fadeout
+function uufxpuff(node,     // @param Node:
+                  duration, // @param Number: duration
+                  param) {  // @param Hash(= {}):
+    return uu.fx(node, duration, uu.arg(param, { init: function(node, param) {
             var cs = uu.css(node, true);
 
             uu.mix(param, { w: "*1.5", h: "*1.5", o: 0,
@@ -41,11 +41,11 @@ function uutweenpuff(node,     // @param Node:
         }}));
 }
 
-// uu.tween.flare - flare
-function uutweenflare(node,     // @param Node:
-                      duration, // @param Number: duration
-                      param) {  // @param Hash(= { parts: 10, range: 200 }):
-    return uu.tween(node, duration, uu.arg(param, {
+// uu.fx.flare - flare
+function uufxflare(node,     // @param Node:
+                   duration, // @param Number: duration
+                   param) {  // @param Hash(= { parts: 10, range: 200 }):
+    return uu.fx(node, duration, uu.arg(param, {
         o:      0,
         parts:  10,
         range:  200,
@@ -68,7 +68,7 @@ function uutweenflare(node,     // @param Node:
                 newNode = node.parentNode.appendChild(uu.node.clone(node, true));
                 angle = i * Math.PI / 180;
 
-                uu.tween(newNode, duration, uu.mix(p, {
+                uu.fx(newNode, duration, uu.mix(p, {
                     x: Math.cos(angle) * p.range + x,
                     y: Math.sin(angle) * p.range + y,
                     init: function(newNode) {
@@ -83,11 +83,11 @@ function uutweenflare(node,     // @param Node:
     }));
 }
 
-// uu.tween.shrink - shrink
-function uutweenshrink(node,     // @param Node:
-                       duration, // @param Number: duration
-                       param) {  // @param Hash(= {}):
-    return uu.tween(node, duration, uu.arg(param, { init: function(node, param) {
+// uu.fx.shrink - shrink
+function uufxshrink(node,     // @param Node:
+                    duration, // @param Number: duration
+                    param) {  // @param Hash(= {}):
+    return uu.fx(node, duration, uu.arg(param, { init: function(node, param) {
             var cs = uu.css(node, true);
 
             uu.mix(param, { w: 0, h: 0, o: 0,
@@ -96,11 +96,11 @@ function uutweenshrink(node,     // @param Node:
         }}));
 }
 
-// uu.tween.movein - movein + fadein
-function uutweenmovein(node,     // @param Node:
-                       duration, // @param Number: duration
-                       param) {  // @param Hash(= { degree: 0, range: 200 }):
-    return uu.tween(node, duration, uu.arg(param, {
+// uu.fx.movein - movein + fadein
+function uufxmovein(node,     // @param Node:
+                    duration, // @param Number: duration
+                    param) {  // @param Hash(= { degree: 0, range: 200 }):
+    return uu.fx(node, duration, uu.arg(param, {
             degree: 0,
             o:      1,
             init:   function(node, param) {
@@ -130,11 +130,11 @@ function uutweenmovein(node,     // @param Node:
             }}));
 }
 
-// uu.tween.moveout - moveout + fadeout
-function uutweenmoveout(node,     // @param Node:
-                        duration, // @param Number: duration
-                        param) {  // @param Hash(= { degree: 0, range: 200 }):
-    return uu.tween(node, duration, uu.arg(param, { init: function(node, param) {
+// uu.fx.moveout - moveout + fadeout
+function uufxmoveout(node,     // @param Node:
+                     duration, // @param Number: duration
+                     param) {  // @param Hash(= { degree: 0, range: 200 }):
+    return uu.fx(node, duration, uu.arg(param, { init: function(node, param) {
                 var cs = uu.css(node, true), angle, endX, endY,
                     range = param.range || 200;
 
@@ -147,11 +147,11 @@ function uutweenmoveout(node,     // @param Node:
             }, degree: 0, o: 0 }));
 }
 
-// uu.tween.highlight - highlight color
-function uutweenhighlight(node,     // @param Node:
-                          duration, // @param Number: duration
-                          param) {  // @param Hash(= { bgc: "#ff9", r: 1 }):
-    return uu.tween(node, duration, uu.arg(param, { bgc: "#ff9", r: 1 }));
+// uu.fx.highlight - highlight color
+function uufxhighlight(node,     // @param Node:
+                       duration, // @param Number: duration
+                       param) {  // @param Hash(= { bgc: "#ff9", r: 1 }):
+    return uu.fx(node, duration, uu.arg(param, { bgc: "#ff9", r: 1 }));
 }
 
 })(uu);

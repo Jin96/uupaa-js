@@ -21,9 +21,9 @@ var _prototype = "prototype",
     _toString = Object[_prototype].toString,
     _isArray = Array.isArray || (Array.isArray = ArrayIsArray), // ES5 spec
     // --- HTML5: EMBEDDING CUSTOM NON-VISIBLE DATA ---
+    _uufx = "data-uufx",
     _uuguid = "data-uuguid",
     _uuevent = "data-uuevent",
-    _uutween = "data-uutween",
     // --- minify ---
     _createTextNode = "createTextNode",
     _createElement = "createElement",
@@ -178,19 +178,18 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Stri
                                     //  [4][convert pixel]  uu.unit(<div>, "12pt") -> 16
                                     //  [5][convert pixel]  uu.unit(<div>, "auto") -> 100
                                     //  [6][convert pixel]  uu.unit(<div>, "auto", 0, "borderTopWidth") -> 0
-    tween:    uumix(uutween, {      // uu.tween(node:Node, duration:Number, param:Hash/Function = void):Node
-                                    //  [1][abs]             uu.tween(node, 500, { o: 0.5, x: 200 })
-                                    //  [2][rel]             uu.tween(node, 500, { h: "+100", o: "+0.5" })
-                                    //  [3][with "px" unit]  uu.tween(node, 500, { h: "-100px" })
-                                    //  [4][with easing fn]  uu.tween(node, 500, { h: [200, "easeInOutQuad"] })
-                                    //  [5][set fps]         uu.tween(node, 500, { fps: 30, w: 40 })
-                                    //  [6][standby]         uu.tween(node, 2000)
-                                    //  [7][after callback]  uu.tween(node, 500, { o: 1, after: afterCallback })
-                                    //  [8][before callback] uu.tween(node, 500, { o: 1, before: beforeCallback })
-                                    //  [9][revert]          uu.tween(node, 500, { o: 1, r: 1 })
-        skip:       uutweenskip,    // uu.tween.skip(node:Node = null, all:Boolean = false):Node/NodeArray
-        isRunning:                  // uu.tween.isRunning(node:Node):Boolean
-                    uutweenisrunning
+    fx:       uumix(uufx, {         // uu.fx(node:Node, duration:Number, param:Hash/Function = void):Node
+                                    //  [1][abs]             uu.fx(node, 500, { o: 0.5, x: 200 })
+                                    //  [2][rel]             uu.fx(node, 500, { h: "+100", o: "+0.5" })
+                                    //  [3][with "px" unit]  uu.fx(node, 500, { h: "-100px" })
+                                    //  [4][with easing fn]  uu.fx(node, 500, { h: [200, "easeInOutQuad"] })
+                                    //  [5][set fps]         uu.fx(node, 500, { fps: 30, w: 40 })
+                                    //  [6][standby]         uu.fx(node, 2000)
+                                    //  [7][after callback]  uu.fx(node, 500, { o: 1, after: afterCallback })
+                                    //  [8][before callback] uu.fx(node, 500, { o: 1, before: beforeCallback })
+                                    //  [9][revert]          uu.fx(node, 500, { o: 1, r: 1 })
+        skip:       uufxskip,       // uu.fx.skip(node:Node = null, all:Boolean = false):Node/NodeArray
+        isBusy:     uufxisbusy      // uu.fx.isBusy(node:Node):Boolean
     }),
     viewport: {
         size:       uuviewportsize  // uu.viewport.size():Hash { innerWidth, innerHeight, pageXOffset, pageYOffset }
@@ -1136,27 +1135,27 @@ uucss.care = {
     lineHeight: 1, fontWeight: 1, zIndex: 1
 };
 
-//  [1][abs]             uu.tween(node, 500, { o: 0.5, x: 200 })
-//  [2][rel]             uu.tween(node, 500, { h: "+100", o: "+0.5" })
-//  [3][with "px" unit]  uu.tween(node, 500, { h: "-100px" })
-//  [4][with easing fn]  uu.tween(node, 500, { h: [200, "easeInOutQuad"] })
-//  [5][set fps]         uu.tween(node, 500, { fps: 30, w: 40 })
-//  [6][standby]         uu.tween(node, 2000)
-//  [7][after callback]  uu.tween(node, 500, { o: 1, after: afterCallback })
-//  [8][before callback] uu.tween(node, 500, { o: 1, before: beforeCallback })
-//  [9][revert]          uu.tween(node, 500, { o: 1, r: 1 })
+//  [1][abs]             uu.fx(node, 500, { o: 0.5, x: 200 })
+//  [2][rel]             uu.fx(node, 500, { h: "+100", o: "+0.5" })
+//  [3][with "px" unit]  uu.fx(node, 500, { h: "-100px" })
+//  [4][with easing fn]  uu.fx(node, 500, { h: [200, "easeInOutQuad"] })
+//  [5][set fps]         uu.fx(node, 500, { fps: 30, w: 40 })
+//  [6][standby]         uu.fx(node, 2000)
+//  [7][after callback]  uu.fx(node, 500, { o: 1, after: afterCallback })
+//  [8][before callback] uu.fx(node, 500, { o: 1, before: beforeCallback })
+//  [9][revert]          uu.fx(node, 500, { o: 1, r: 1 })
 
-// uu.tween - add queue
-function uutween(node,     // @param Node: animation target node
-                 duration, // @param Number: duration (unit ms)
-                 param) {  // @param Hash/Function(= void): { key: endValue, key: [endValue, easing], key: callback, ... }
-                           //     key      - CSSPropertyString/String: "color", "opacity", "before", "after", ...
-                           //     endValue - String/Number: end value, "red", "+0.5", "+100px"
-                           //     easing   - String: easing function name, "easeInOutQuad"
-                           //     callback - Function: before or after callback function
-                           // @return Node:
+// uu.fx - add effect queue
+function uufx(node,     // @param Node: animation target node
+              duration, // @param Number: duration (unit ms)
+              param) {  // @param Hash/Function(= void): { key: endValue, key: [endValue, easing], key: callback, ... }
+                        //     key      - CSSPropertyString/String: "color", "opacity", "before", "after", ...
+                        //     endValue - String/Number: end value, "red", "+0.5", "+100px"
+                        //     easing   - String: easing function name, "easeInOutQuad"
+                        //     callback - Function: before or after callback function
+                        // @return Node:
     function loop() {
-        var data = node[_uutween], q = data.q[0],
+        var data = node[_uufx], q = data.q[0],
             pz = q.pz, reverse = data.r, tw, finished;
 
         if (q.tm) {
@@ -1168,7 +1167,7 @@ function uutween(node,     // @param Node: animation target node
                 pz.before && pz.before(node, pz, reverse); // before callback(node, param, reverse)
             }
             q.js = isFunction(pz) ? pz
-                                  : pz ? uutweenbuild(node, data, q)
+                                  : pz ? uufxbuild(node, data, q)
                                        : _nop;
             tm = q.tm = +new Date;
         }
@@ -1192,10 +1191,10 @@ function uutween(node,     // @param Node: animation target node
         }
     }
 
-    var data = node[_uutween], p = uuarg(param, { r: 0, fps: 0 });
+    var data = node[_uufx], p = uuarg(param, { r: 0, fps: 0 });
 
     node.style.overflow = "hidden";
-    data || (node[_uutween] = data = { q: [], rq: [], id: 0, r: 0 }); // init tween queue
+    data || (node[_uufx] = data = { q: [], rq: [], id: 0, r: 0 }); // init effect queue
 
     if (data.r || data.rq.length) {
         data.q = data.q.concat(data.rq.reverse()); // data.q <- data.rq
@@ -1210,13 +1209,13 @@ function uutween(node,     // @param Node: animation target node
     data.id || (data.id = setInterval(loop, ((1000 / p.fps) | 0) || 1)); // [IE] setInterval(0) is Error
     return node;
 }
-uutween.props = { opacity: 1, color: 2, backgroundColor: 2,
-                  width: 3, height: 3, left: 4, top: 5 };
-uutween.alpha = /^alpha\([^\x29]+\) ?/;
-uutween.ignore = { fps: 1, degree: 1, range: 1, css: 1,
-                   init: 1, before: 1, after: 1, r: 1 };
+uufx.props = { opacity: 1, color: 2, backgroundColor: 2,
+               width: 3, height: 3, left: 4, top: 5 };
+uufx.alpha = /^alpha\([^\x29]+\) ?/;
+uufx.ignore = { fps: 1, degree: 1, range: 1, css: 1,
+                init: 1, before: 1, after: 1, r: 1 };
 
-function uutweenbuild(node, data, queue) {
+function uufxbuild(node, data, queue) {
     function ezfn(v0, v1, ez) {
         return ez ? uuformat('Math.??(g,??,??,d)', ez, v0, v1 - v0)
                   : uuformat('(t=g,b=??,c=??,(t/=d2)<1?c/2*t*t+b:-c/2*((--t)*(t-2)-1)+b)',
@@ -1246,12 +1245,12 @@ function uutweenbuild(node, data, queue) {
         fixdb = uufix.db, cs = param.css || uucss(node, _true);
 
     for (i in param) {
-        if (!uutween.ignore[i]) {
+        if (!uufx.ignore[i]) {
             ez = 0;
             _isArray(param[i]) ? (endValue = param[i][0], ez = param[i][1]) // val, easing
                                : (endValue = param[i]); // param.val
 
-            switch (n = uutween.props[w = fixdb[i] || i]) {
+            switch (n = uufx.props[w = fixdb[i] || i]) {
             case 1: // opacity
                 startValue = getOpacity(node);
 //{{{!mb
@@ -1267,7 +1266,7 @@ function uutweenbuild(node, data, queue) {
                     rv += uuformat('s.visibility=o?"visible":"hidden";' +
                                    's.filter=((o>0&&o<1)?"alpha(??="+(o*100)+")":"");' +
                                    'f&&uu.css.setOpacity(n,??)&&(s.filter+=" ??");',
-                                   w, endValue, node.style.filter[_replace](uutween.alpha, ""));
+                                   w, endValue, node.style.filter[_replace](uufx.alpha, ""));
                 } else {
 //}}}!mb
                     rv += uuformat('s.??=f? ??:o;', w, endValue);
@@ -1314,16 +1313,16 @@ function uutweenbuild(node, data, queue) {
     return new Function("n,r,f,g,d", rv); // node, reverse, finished, gain, duration
 }
 
-// uu.tween.skip
-function uutweenskip(node,           // @param Node(= null): null is all node
-                     all,            // @param Boolean(= false): true is skip all
-                     avoidFlicker) { // @param Boolean(= false): true is avoid flicker
-                                     // @return Node/NodeArray:
+// uu.fx.skip
+function uufxskip(node,           // @param Node(= null): null is all node
+                  all,            // @param Boolean(= false): true is skip all
+                  avoidFlicker) { // @param Boolean(= false): true is avoid flicker
+                                  // @return Node/NodeArray:
     var nodeArray = node ? [node] : uutag("*", doc.body),
         v, i = -1, j, k, jz, kz, data, guid, q, rq;
 
     while( (v = nodeArray[++i]) ) {
-        data = v[_uutween];
+        data = v[_uufx];
         if (data && data.id) {
 
             q = data.q;
@@ -1355,10 +1354,10 @@ function uutweenskip(node,           // @param Node(= null): null is all node
     return node || nodeArray;
 }
 
-// uu.tween.isRunning
-function uutweenisrunning(node) { // @param Node:
-                                  // @return Boolean:
-    var data = node[_uutween];
+// uu.fx.isBusy
+function uufxisbusy(node) { // @param Node:
+                            // @return Boolean:
+    var data = node[_uufx];
 
     return data && data.id;
 }
@@ -1427,7 +1426,7 @@ setOpacity.alpha = /^alpha\([^\x29]+\) ?/;
 
 // uu.css.show - show node
 function uucssshow(node,           // @param Node:
-                   duration,       // @param Number(= 0): fadein tween duration
+                   duration,       // @param Number(= 0): fadein effect duration
                    displayValue) { // @param String(= "block"): applied at display "none"
                                    // @return Node:
     var cs = uucss(node), disp = displayValue || "block",
@@ -1443,7 +1442,7 @@ function uucssshow(node,           // @param Node:
         node.style[_display] = "none";
     }
 //}}}!mb
-    return uutween(node, duration || 0, { w: w, h: h, o: o, before: function(node) {
+    return uufx(node, duration || 0, { w: w, h: h, o: o, before: function(node) {
                 var style = node.style;
 
                 setOpacity(node, 0);
@@ -1457,10 +1456,10 @@ function uucssshow(node,           // @param Node:
 
 // uu.css.hide - hide node
 function uucsshide(node,       // @param Node:
-                   duration) { // @param Number(= 0): fadeout tween duration
+                   duration) { // @param Number(= 0): fadeout effect duration
                                // @return Node:
     uucssisshow(node) || (node.style[_display] = "none");
-    return uutween(node, duration || 0, { w: 0, h: 0, o: 0 });
+    return uufx(node, duration || 0, { w: 0, h: 0, o: 0 });
 }
 
 // uu.css.isShow - is shown
@@ -3452,7 +3451,7 @@ NodeSet[_prototype] = {
 //  bind:           NodeSetBind,        // NodeSet.bind(eventTypeEx:EventTypeExString,
                                         //              evaluator:Function/Instance):NodeSet
 //  unbind:         NodeSetUnbind,      // NodeSet.unbind(eventTypeEx:EventTypeExString):NodeSet
-//  tween:          NodeSetTween,       // NodeSet.tween(duration:Number, param:Hash, callback:Function = void):NodeSet
+//  fx:             NodeSetFx,          // NodeSet.fx(duration:Number, param:Hash, callback:Function = void):NodeSet
     iter:           NodeSetIter         // [PROTECTED]
 };
 uu.nodeSet = NodeSet[_prototype];       // uu.nodeset - uu.Class.NodeSet.prototype alias
@@ -3561,8 +3560,8 @@ function NodeSetIter(iterType,  // @param Number: 0 is forEach, 1 is map
 // forEach(iter = 0)
 uueach({    bind:       uuevent,
             unbind:     uueventunbind,
-            tween:      uutween,
-            skip:       uutweenskip,
+            fx:         uufx,
+            skip:       uufxskip,
             remove:     uunoderemove,
             show:       uucssshow,
             hide:       uucsshide       }, function(fn, name) {

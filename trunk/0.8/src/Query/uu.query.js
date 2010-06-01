@@ -76,7 +76,7 @@ var _uuguid = "data-uuguid",
         contains:           [0x18, contains],
         digit:              [0x40, extendFilter],
         negative:           [0x41, extendFilter],
-        tween:              [0x42, extendFilter],
+        fx:                 [0x42, extendFilter],
         boxeffect:          [0x43, extendFilter],
         mom:                [0x44, parentFilter],
         // bit information
@@ -902,7 +902,7 @@ function nth(anb) {
     };
 }
 
-// inner - :digit(0x40)  :negative(0x41)  :tween(0x42)
+// inner - :digit(0x40)  :negative(0x41)  :fx(0x42)
 //         :boxeffect(0x43)
 function extendFilter(fid, negate, elms) {
     var rv = [], ri = -1, v, i = 0, ok;
@@ -912,7 +912,7 @@ function extendFilter(fid, negate, elms) {
         switch (fid) {
         case 0x40: ok = _DIGIT_FILTER.test(v[_innerText] || ""); break;
         case 0x41: ok = _NEGATIVE_FILTER.test(v[_innerText] || ""); break;
-        case 0x42: ok = !!v.uutween; break;
+        case 0x42: ok = v["data-uufx"] && v["data-uufx"].id; break;
         case 0x43: ok = !!v.uucss3bfx;
         }
         if (ok ^ negate) {

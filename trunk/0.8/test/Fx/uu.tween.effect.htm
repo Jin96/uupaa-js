@@ -1,11 +1,5 @@
 <!doctype html><html><head><meta charset="utf-8" />
 <title>uu.tween.effect test</title>
-<script src="../../src/uupaa.js"></script>
-<script src="../../src/Tween/easing.js"></script>
-<script src="../../src/Tween/uu.tween.effect.js"></script>
-<script src="../../src/Color/uu.color.js"></script>
-<script src="../../src/Query/uu.query.js"></script>
-<script src="../../src/Node/uu.node.clone.js"></script>
 <style>
 html, body {
   overflow: hidden;
@@ -15,43 +9,30 @@ html, body {
   width: 100px;
   height: 100px;
   outline: 0px silver solid;
-  background-color: #73ff00;
+  background-color: #ff4100;
   color: white;
   text-align: center;
 }
-
+.static {
+  position: static;
+}
 .margin10  { margin:  10px; }
 .padding10 { padding: 10px; }
 .border10  { border:  10px double turquoise; }
 .outline10 { outline: 10px solid springgreen; }
-
 </style>
-</head><body id="body">
-<div>
-  <div>
-    STYLE:
-    <input type="button" value="margin" onclick="toggleMargin()" />
-    <input type="button" value="padding" onclick="togglePadding()" />
-    <input type="button" value="border" onclick="toggleBorder()" />
-    <input type="button" value="outline" onclick="toggleOutline()" /> |
-  </div>
-</div>
-
-DURATION: <input type="range" step="50" value="300" min="0" max="2000" onchange="moveDuration(this)" />
-    <span id="durationValue">300</span>
-    <br />
-RANGE: <input type="range" step="50" value="200" min="100" max="400" onchange="moveRange(this)" />
-    <span id="rangeValue">200</span>
-    <br />
-PARTS: <input type="range" step="1" value="10" min="1" max="20" onchange="moveParts(this)" />
-    <span id="partsValue">10</span>
-
+<script src="../../src/uupaa.js"></script>
+<script src="../../src/Tween/easing.js"></script>
+<script src="../../src/Tween/uu.tween.effect.js"></script>
+<script src="../../src/Color/uu.color.js"></script>
+<script src="../../src/Query/uu.query.js"></script>
+<script src="../../src/Node/uu.node.clone.js"></script>
 <script>
 var speed = 300;
 var range = 200;
 var parts = 10;
 var degree = 270;
-var bgcolor = uu.color("#73ff00");
+var bgcolor = uu.color("#ff4100");
 
 function moveDuration(that) {
     speed = that.value
@@ -121,17 +102,23 @@ uu.ready(function(uu) {
     var y = 0;
     var margin = 10;
 
+    // position: absolute
     uu.each({ movein: movein, moveout: moveout, flare: flare,
               fade: fade, puff: puff, shrink: shrink,
               highlight: highlight }, function(fn, key) {
 
-        uu.body(uu.click(uu.div("class,box", { x: x + 100, y: y + 200 }, key), fn));
+        uu.node.add(uu.click(uu.div("class,box", { x: x, y: y + 40 }, key), fn), uu.id("absolutebox"));
 
         x += 100 + margin;
         if (x > (100 + margin) * 5) {
             y += 100 + margin;
             x = 0;
         }
+    });
+    // position: static
+    uu.each({ fade: fade, puff: puff, shrink: shrink }, function(fn, key) {
+
+        uu.node.add(uu.click(uu.div("class,box static", { cssFloat: "left" }, key), fn), uu.id("staticbox"));
     });
 });
 
@@ -149,4 +136,28 @@ function toggleOutline() {
 }
 
 </script>
+</head><body id="body">
+<div>
+  <div>
+    TOGGLE:
+    <input type="button" value="margin" onclick="toggleMargin()" />
+    <input type="button" value="padding" onclick="togglePadding()" />
+    <input type="button" value="border" onclick="toggleBorder()" />
+    <input type="button" value="outline" onclick="toggleOutline()" /> |
+  </div>
+</div>
+DURATION: <input type="range" step="50" value="300" min="0" max="2000" onchange="moveDuration(this)" />
+    <span id="durationValue">300</span>
+    <br />
+RANGE: <input type="range" step="50" value="200" min="100" max="400" onchange="moveRange(this)" />
+    <span id="rangeValue">200</span>
+    <br />
+PARTS: <input type="range" step="1" value="10" min="1" max="20" onchange="moveParts(this)" />
+    <span id="partsValue">10</span>
+<div id="absolutebox" style="position:absolute;top:120px;left:100px">
+    <p><b>position:absolute</b></p>
+</div>
+<div id="staticbox" style="position:absolute;top:360px;left:100px">
+    <p><b>position:static</b></p>
+</div>
 </body></html>
