@@ -228,7 +228,7 @@ uu.ready(function(uu) {
 
                 return [rv, "==", -127, hex(pack)];
             },
-            "Number(-128) -> [0xd0, 0x80] (int 8)": function() {
+            "Number(-128) -> [0xd1, 0xff, 0x80] (int 16)": function() {
                 var pack = uu.msgpack.pack(-128);
                 var rv = uu.msgpack.unpack(pack);
 
@@ -270,7 +270,7 @@ uu.ready(function(uu) {
 
                 return [rv, "==", -32767, hex(pack)];
             },
-            "Number(-32768) -> [0xd1, 0x80, 0x00] (int 16)": function() {
+            "Number(-32768) -> [0xd2, 0xff, 0xff, 0x80, 0x00] (int 32)": function() {
                 var pack = uu.msgpack.pack(-32768);
                 var rv = uu.msgpack.unpack(pack);
 
@@ -574,8 +574,309 @@ uu.ready(function(uu) {
                 var rv = uu.msgpack.unpack(pack);
 
                 return [rv, "is hash", void 0, hex(pack)];
-            }
+            },
 
+        "Compatibility (http://github.com/msgpack/msgpack/blob/master/test/cases_gen.rb)": "",
+            "[cc 00] 0 uint8": function() {
+                var data = unescape('%cc%00');
+                var result = [0xcc, 0x00];
+                var rv = uu.msgpack.unpack(data);
+
+                return [rv, "==", 0, hex(result)];
+            },
+            "[cd 00 00] 0 uint16": function() {
+                var data = unescape('%cd%00%00');
+                var result = [0xcd, 0x00, 0x00];
+                var rv = uu.msgpack.unpack(data);
+
+                return [rv, "==", 0, hex(result)];
+            },
+            "[ce 00 00 00 00] 0 uint32": function() {
+                var data = unescape('%ce%00%00%00%00');
+                var result = [0xce, 0x00, 0x00, 0x00];
+                var rv = uu.msgpack.unpack(data);
+
+                return [rv, "==", 0, hex(result)];
+            },
+            "[cf 00 00 00 00 00 00 00 00] 0 uint64": function() {
+                var data = unescape('%cf%00%00%00%00%00%00%00%00');
+                var result = [0xcf, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00];
+                var rv = uu.msgpack.unpack(data);
+
+                return [rv, "==", 0, hex(result)];
+            },
+            "[d0 00] 0 int8": function() {
+                var data = unescape('%d0%00');
+                var result = [0xd0, 0x00];
+                var rv = uu.msgpack.unpack(data);
+
+                return [rv, "==", 0, hex(result)];
+            },
+            "[d1 00 00] 0 int16": function() {
+                var data = unescape('%d1%00%00');
+                var result = [0xd1, 0x00, 0x00];
+                var rv = uu.msgpack.unpack(data);
+
+                return [rv, "==", 0, hex(result)];
+            },
+            "[d2 00 00 00 00] 0 int32": function() {
+                var data = unescape('%d2%00%00%00%00');
+                var result = [0xd2, 0x00, 0x00, 0x00, 0x00];
+                var rv = uu.msgpack.unpack(data);
+
+                return [rv, "==", 0, hex(result)];
+            },
+            "[d3 00 00 00 00 00 00 00 00 ] 0 int64": function() {
+                var data = unescape('%d3%00%00%00%00%00%00%00%00');
+                var result = [0xd3, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00];
+                var rv = uu.msgpack.unpack(data);
+
+                return [rv, "==", 0, hex(result)];
+            },
+            "[7f] 127 Positive FixNum": function() {
+                var data = unescape('%7f');
+                var result = [0x7f];
+                var rv = uu.msgpack.unpack(data);
+
+                return [rv, "==", 127, hex(result)];
+            },
+            "[cc 7f] 127 uint8": function() {
+                var data = unescape('%cc%7f');
+                var result = [0xcc, 0x7f];
+                var rv = uu.msgpack.unpack(data);
+
+                return [rv, "==", 127, hex(result)];
+            },
+            "[cd 00 ff] 255 uint16": function() {
+                var data = unescape('%cd%00%ff');
+                var result = [0xcd, 0x00, 0xff];
+                var rv = uu.msgpack.unpack(data);
+
+                return [rv, "==", 255, hex(result)];
+            },
+            "[ce 00 00 ff ff] 65535 uint32": function() {
+                var data = unescape('%ce%00%00%ff%ff');
+                var result = [0xce, 0x00, 0x00, 0xff, 0xff];
+                var rv = uu.msgpack.unpack(data);
+
+                return [rv, "==", 65535, hex(result)];
+            },
+            "[cf 00 00 00 00 ff ff ff ff] 4294967295 uint64": function() {
+                var data = unescape('%cf%00%00%00%00%ff%ff%ff%ff');
+                var result = [0xcf, 0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff];
+                var rv = uu.msgpack.unpack(data);
+
+                return [rv, "==", 4294967295, hex(result)];
+            },
+            "[e0] -32 Negative FixNum": function() {
+                var data = unescape('%e0');
+                var result = [0xe0];
+                var rv = uu.msgpack.unpack(data);
+
+                return [rv, "==", -32, hex(result)];
+            },
+            "[d0 e0] -32 int8": function() {
+                var data = unescape('%d0%e0');
+                var result = [0xd0, 0xe0];
+                var rv = uu.msgpack.unpack(data);
+
+                return [rv, "==", -32, hex(result)];
+            },
+            "[d1 ff 80] -128 int16": function() {
+                var data = unescape('%d1%ff%80');
+                var result = [0xd1, 0xff, 0x80];
+                var rv = uu.msgpack.unpack(data);
+
+                return [rv, "==", -128, hex(result)];
+            },
+            "[d2 ff ff 80 00] -32768 int32": function() {
+                var data = unescape('%d2%ff%ff%80%00');
+                var result = [0xd2, 0xff, 0xff, 0x80, 0x00];
+                var rv = uu.msgpack.unpack(data);
+
+                return [rv, "==", -32768, hex(result)];
+            },
+            "[d3 ff ff ff ff 80 00 00 00] -2147483648 int64": function() {
+                var data = unescape('%d3%ff%ff%ff%ff%80%00%00%00');
+                var result = [0xd3, 0xff, 0xff, 0xff, 0xff, 0x80, 0x00, 0x00, 0x00];
+                var rv = uu.msgpack.unpack(data);
+
+                return [rv, "==", -2147483648, hex(result)];
+            },
+            "[d3 ff ff ff ff 80 00 00 00] -2147483648 int64": function() {
+                var data = unescape('%d3%ff%ff%ff%ff%80%00%00%00');
+                var result = [0xd3, 0xff, 0xff, 0xff, 0xff, 0x80, 0x00, 0x00, 0x00];
+                var rv = uu.msgpack.unpack(data);
+
+                return [rv, "==", -2147483648, hex(result)];
+            },
+            "[ca 00 00 00 00] 0.0 float": function() {
+                var data = unescape('%ca%00%00%00%00');
+                var result = [0xca, 0x00, 0x00, 0x00, 0x00];
+                var rv = uu.msgpack.unpack(data);
+
+                return [rv, "==", 0.0, hex(result)];
+            },
+            "[cb 00 00 00 00 00 00 00 00] 0.0 double": function() {
+                var data = unescape('%cb%00%00%00%00%00%00%00%00');
+                var result = [0xca, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00];
+                var rv = uu.msgpack.unpack(data);
+
+                return [rv, "==", 0.0, hex(result)];
+            },
+            "[ca 80 00 00 00] -0.0 float": function() {
+                var data = unescape('%ca%80%00%00%00');
+                var result = [0xca, 0x80, 0x00, 0x00, 0x00];
+                var rv = uu.msgpack.unpack(data);
+
+                return [rv, "==", -0.0, hex(result)];
+            },
+            "[cb 80 00 00 00 00 00 00 00] -0.0 double": function() {
+                var data = unescape('%cb%80%00%00%00%00%00%00%00');
+                var result = [0xca, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00];
+                var rv = uu.msgpack.unpack(data);
+
+                return [rv, "==", -0.0, hex(result)];
+            },
+            "[cb 3f f0 00 00 00 00 00 00] 1.0 double": function() {
+                var data = unescape('%cb%3f%f0%00%00%00%00%00%00');
+                var result = [0xcb, 0x3f, 0xf0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00];
+                var rv = uu.msgpack.unpack(data);
+
+                return [rv, "==", 1.0, hex(result)];
+            },
+            "[cb bf f0 00 00 00 00 00 00] -1.0 double": function() {
+                var data = unescape('%cb%bf%f0%00%00%00%00%00%00');
+                var result = [0xcb, 0xbf, 0xf0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00];
+                var rv = uu.msgpack.unpack(data);
+
+                return [rv, "==", -1.0, hex(result)];
+            },
+
+            '[a1 61] "a" FixRaw': function() {
+                var data = unescape('%a1%61');
+                var result = [0xa1, 0x61];
+                var rv = uu.msgpack.unpack(data);
+
+                return [rv, "==", "a", hex(result)];
+            },
+            '[da 00 01 61] "a" raw 16': function() {
+                var data = unescape('%da%00%01%61');
+                var result = [0xda, 0x00, 0x01, 0x61];
+                var rv = uu.msgpack.unpack(data);
+
+                return [rv, "==", "a", hex(result)];
+            },
+            '[db 00 00 00 01 61] "a" raw 32': function() {
+                var data = unescape('%db%00%00%00%01%61');
+                var result = [0xdb, 0x00, 0x00, 0x00, 0x01, 0x61];
+                var rv = uu.msgpack.unpack(data);
+
+                return [rv, "==", "a", hex(result)];
+            },
+
+            '[a0] "" FixRaw': function() {
+                var data = unescape('%a0');
+                var result = [0xa0];
+                var rv = uu.msgpack.unpack(data);
+
+                return [rv, "==", "", hex(result)];
+            },
+            '[da 00 00] "" raw 16': function() {
+                var data = unescape('%da%00%00');
+                var result = [0xda, 0x00, 0x00];
+                var rv = uu.msgpack.unpack(data);
+
+                return [rv, "==", "", hex(result)];
+            },
+            '[db 00 00 00 00] "" raw 32': function() {
+                var data = unescape('%db%00%00%00%00');
+                var result = [0xdb, 0x00, 0x00, 0x00, 0x00];
+                var rv = uu.msgpack.unpack(data);
+
+                return [rv, "==", "", hex(result)];
+            },
+
+            '[91 00] [0] FixArray': function() {
+                var data = unescape('%91%00');
+                var result = [0x91, 0x00];
+                var rv = uu.msgpack.unpack(data);
+
+                return [rv, "==", [0], hex(result)];
+            },
+            '[dc 00 01 00] [0] array 16': function() {
+                var data = unescape('%dc%00%01%00');
+                var result = [0xdc, 0x00, 0x01, 0x00];
+                var rv = uu.msgpack.unpack(data);
+
+                return [rv, "==", [0], hex(result)];
+            },
+            '[dd 00 00 00 01 00] [0] array 32': function() {
+                var data = unescape('%dd%00%00%00%01%00');
+                var result = [0xdd, 0x00, 0x00, 0x00, 0x01, 0x00];
+                var rv = uu.msgpack.unpack(data);
+
+                return [rv, "==", [0], hex(result)];
+            },
+
+            '[80] {} FixMap': function() {
+                var data = unescape('%80');
+                var result = [0x80];
+                var rv = uu.msgpack.unpack(data);
+
+                return [rv, "==", {}, hex(result)];
+            },
+            '[de 00 00] {} map 16': function() {
+                var data = unescape('%de%00%00');
+                var result = [0xde, 0x00, 0x00];
+                var rv = uu.msgpack.unpack(data);
+
+                return [rv, "==", {}, hex(result)];
+            },
+            '[df 00 00 00 00] {} map 32': function() {
+                var data = unescape('%df%00%00%00%00');
+                var result = [0xdf, 0x00, 0x00, 0x00, 0x00];
+                var rv = uu.msgpack.unpack(data);
+
+                return [rv, "==", {}, hex(result)];
+            },
+
+            '[81 a1 61 61] {"a"=>97} FixMap': function() {
+                var data = unescape('%81%a1%61%61');
+                var result = [0x81, 0xa1, 0x61, 0x61];
+                var rv = uu.msgpack.unpack(data);
+
+                return [rv, "==", { a: 97 }, hex(result)];
+            },
+            '[de 00 01 a1 61 61] {"a"=>97} map 16': function() {
+                var data = unescape('%de%00%01%a1%61%61');
+                var result = [0xde, 0x00, 0x01, 0xa1, 0x61, 0x61];
+                var rv = uu.msgpack.unpack(data);
+
+                return [rv, "==", { a: 97 }, hex(result)];
+            },
+            '[df 00 00 00 01 a1 61 61] {"a"=>97} map 32': function() {
+                var data = unescape('%df%00%00%00%01%a1%61%61');
+                var result = [0xdf, 0x00, 0x00, 0x00, 0x01, 0xa1, 0x61, 0x61];
+                var rv = uu.msgpack.unpack(data);
+
+                return [rv, "==", { a: 97 }, hex(result)];
+            },
+
+            '[91 90] [[]]': function() {
+                var data = unescape('%91%90');
+                var result = [0x91, 0x90];
+                var rv = uu.msgpack.unpack(data);
+
+                return [rv, "==", [[]], hex(result)];
+            },
+            '[91 91 a1 61] [["a"]]': function() {
+                var data = unescape('%91%91%a1%61');
+                var result = [0x91, 0x91, 0xa1, 0x61];
+                var rv = uu.msgpack.unpack(data);
+
+                return [rv, "==", [["a"]], hex(result)];
+            }
     });
 });
 </script>
