@@ -1,0 +1,56 @@
+#summary uu.fx.slide は uu.fx の機能を拡張します
+
+<wiki:toc max_depth="2" />
+
+= 導入 =
+
+uu.fx.slide は [uu_fx uu.fx] の機能を拡張します。
+
+uu.fx.slide を利用するには以下のファイルが必要です。
+  * src/Node/uu.node.normalize.js
+  * src/Image/uu.image.js
+
+uu.fx.slide.js をロードすると、以下の関数が追加されます。
+  * uu.fx.slide
+  * !NodeSet.slide
+
+= API =
+_node_, _duration_, _param_ の説明は [uu_fx uu.fx] を参照してください。
+
+_param_ にCSSプロパティを追加すると、ユーザ独自の変化を付け加えることも可能です。
+
+== uu.fx.slide ==
+
+uu.fx.slide(_node_:Node, _duration_:Number, _param_:Hash/Function = { degree: 0 }):Node は、
+画像を含むHTMLフラグメントをドレスアップし、スライダーに仕立てます。
+
+もう一度、uu.fx.slide() を呼ぶとスライドアニメーションが実行されます。
+
+_degree_ には 0, 45 または 90 を指定できます。0 なら横方向に、45 なら斜めに、90 なら縦方向にスライドします。
+
+=== ドレスアップ用のHTML ===
+このようなHTMLフラグメントを用意し、uu.fx.slide() を呼ぶとドレスアップが行われます。
+{{{
+        <div>
+            <div>
+                <img src="...">
+                <img src="...">
+                    :
+            </div>
+        </div>
+}}}
+ドレスアップ後はこのような形になります。
+{{{
+        <div style="width:??px;height:??px;overflow:hidden">
+            <div style="width:??px;height:??px;margin:0;position:relative">
+                <img src="..." style="position:absolute;top:?px;left:?px" />
+                <img src="..." style="position:absolute;top:?px;left:?px" />
+                    :
+            </div>
+        </div>
+}}}
+  * スライダーの大きさは、先頭画像の大きさで決まります。
+    * 画像サイズをあらかじめ統一しておいてください。
+
+= Test Code =
+  * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/Fx/uu.fx.plus.htm
