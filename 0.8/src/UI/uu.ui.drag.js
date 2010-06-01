@@ -71,12 +71,7 @@ function dragHandleEvent(evt) {
             fn = xtype === 1 ? uu.event : uu.event.unbind;
 
             fn(_ie678 ? this.grip : doc, "mousemove+,mouseup+", this);
-        } else if (xtype === 3) { // [3] mousemove
-/*
-            this._shim &&
-                this._shim.resize({ x: rv.px, y: rv.py, w: this._tgt.offsetWidth,
-                                                        h: this._tgt.offsetHeight });
- */
+        } else if (xtype === 3) { // 3: mousemove
         } else if (xtype === 4) { // 4: wheel
 //            this.option.wheel && this.mousewheel(evt);
         }
