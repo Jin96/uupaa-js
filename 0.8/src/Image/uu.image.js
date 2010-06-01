@@ -14,20 +14,26 @@ namespace.image.size = uuimagesize; // uu.image.size(node:HTMLImageElement/HTMLC
 
 // uu.image - image loader
 function uuimage(url,        // @param String:
-                 callback) { // @param Function: callback({ img, ok, url, status, width, height })
-                             //     ok     - Boolean: true is success
-                             //     img    - Object: image object
-                             //     status - Number: status code, 0(loading...),
-                             //                                   200(ok), 404(ng)
-                             //     width  - Number: width
-                             //     height - Number: height
+                 callback) { // @param Function: callback({ img, ok, url, status, w, h })
+                             //     ok      - Boolean: true is success
+                             //     img     - Object: image object
+                             //     status  - Number: status code, 0(loading...),
+                             //                       200(ok), 404(ng)
+                             //     w       - Number: width
+                             //     h       - Number: height
                              // @return Image:
     function after(ok) {
         var v, i = -1, ary = uuimage.fn[url].concat(),
-            arg = { img: img, status: ok ? 200 : 404, ok: ok,
-                    width: img.width, height: img.height };
+            arg = {
+                img: img,
+                status: ok ? 200 : 404,
+                ok: ok,
+                width: img.width,
+                height: img.height
+            };
 
         uuimage.fn[url] = []; // pre clear
+
         while ( (v = ary[++i]) ) {
             v(arg);
         }
@@ -66,11 +72,12 @@ uuimage.fn = {}; // { url: [callback, ...] }
 
 // uu.image.size - get image actual dimension
 function uuimagesize(node) { // @param HTMLImageElement/HTMLCanvasElement:
-                             // @return Hash: { width, height }
-    if (node.naturalWidth) { // [Gecko][WebKit]
+                             // @return Hash: { w, h }
+    // [Gecko][WebKit]
+    if ("naturalWidth" in node) {
         return {
-            width: node.naturalWidth,
-            height: node.naturalHeight
+            w: node.naturalWidth,
+            h: node.naturalHeight
         };
     }
 //{{{!mb
@@ -81,30 +88,47 @@ function uuimagesize(node) { // @param HTMLImageElement/HTMLCanvasElement:
         if (node[_uuimage] && node[_uuimage].src === node.src) {
             return node[_uuimage];
         }
-        if (_ie) { // [IE]
+        if (uu.ie) { // [IE]
             if (node.currentStyle) {
                 hide = node.currentStyle.display === "none";
                 hide && (node.style.display = "block");
             }
             rs = node.runtimeStyle;
-            w = rs[width], h = rs[height]; // keep runtimeStyle
-            rs[width] = rs[height] = "auto"; // override
+
+            // keep runtimeStyle
+            w = rs[width];
+            h = rs[height];
+
+            // override
+            rs[width] = rs[height] = "auto";
+
             rw = node[width];
             rh = node[height];
-            rs[width] = w, rs[height] = h; // restore
+
+            // restore
+            rs[width] = w;
+            rs[height] = h;
+
             hide && (node.style.display = "none");
         } else { // [Opera]
-            w = node[width], h = node[height]; // keep current style
+            // keep current style
+            w = node[width];
+            h = node[height];
+
             node.removeAttribute(width);
             node.removeAttribute(height);
+
             rw = node[width];
             rh = node[height];
-            node[width] = w, node[height] = h; // restore
+
+            // restore
+            node[width] = w;
+            node[height] = h;
         }
-        return node[_uuimage] = { width: rw, height: rh, src: node.src }; // bond
+        return node[_uuimage] = { w: rw, h: rh, src: node.src }; // bond
     }
 //}}}!mb
-    return node;
+    return { w: node[width], h: node[height] };
 }
 
 })(this.uu || this);
