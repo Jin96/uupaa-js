@@ -1,5 +1,5 @@
 <!doctype html><html><head><meta charset="utf-8" />
-<title>uu.tween.effect test</title>
+<title>uu.fx.effect test</title>
 <style>
 html, body {
   overflow: hidden;
@@ -22,8 +22,8 @@ html, body {
 .outline10 { outline: 10px solid springgreen; }
 </style>
 <script src="../../src/uupaa.js"></script>
-<script src="../../src/Tween/easing.js"></script>
-<script src="../../src/Tween/uu.tween.effect.js"></script>
+<script src="../../src/Fx/easing.js"></script>
+<script src="../../src/Fx/uu.fx.effect.js"></script>
 <script src="../../src/Color/uu.color.js"></script>
 <script src="../../src/Query/uu.query.js"></script>
 <script src="../../src/Node/uu.node.clone.js"></script>
@@ -53,13 +53,13 @@ function moveParts(that) {
 var toggle = 1;
 function fade(evt, node) {
     if (toggle) {
-        uu.tween.fade(node, speed, { r: 0, after: function() {
-            uu.tween(node, 1000, { o: 0.1 });
+        uu.fx.fade(node, speed, { r: 0, after: function() {
+            uu.fx(node, 1000, { o: 0.1 });
         }});
         toggle = 0;
     } else {
-        uu.tween.fade(node, speed, { r: 0, before: function() {
-            uu.tween(node, 1000, { o: 1 });
+        uu.fx.fade(node, speed, { r: 0, before: function() {
+            uu.fx(node, 1000, { o: 1 });
         }});
         toggle = 1;
     }
@@ -70,7 +70,7 @@ function movein(evt, node) {
     if (degree > 360) {
         degree = 0;
     }
-    uu.tween.movein(node, speed, { degree: degree, range: range });
+    uu.fx.movein(node, speed, { degree: degree, range: range });
 }
 
 function moveout(evt, node) {
@@ -78,23 +78,23 @@ function moveout(evt, node) {
     if (degree > 360) {
         degree = 0;
     }
-    uu.tween.moveout(node, speed, { r: 1, degree: degree, range: range });
+    uu.fx.moveout(node, speed, { r: 1, degree: degree, range: range });
 }
 
 function flare(evt, node) {
-    uu.tween.flare(node, speed, { parts: 10, range: range, parts: parts, r: 1 });
+    uu.fx.flare(node, speed, { parts: 10, range: range, parts: parts, r: 1 });
 }
 
 function puff(evt, node) {
-    uu.tween.puff(node, speed, { r: 1 });
+    uu.fx.puff(node, speed, { r: 1 });
 }
 
 function shrink(evt, node) {
-    uu.tween.shrink(node, speed, { r: 1 });
+    uu.fx.shrink(node, speed, { r: 1 });
 }
 
 function highlight(evt, node) {
-    uu.tween.highlight(node, speed, { r: 1 });
+    uu.fx.highlight(node, speed, { r: 1 });
 }
 
 uu.ready(function(uu) {
