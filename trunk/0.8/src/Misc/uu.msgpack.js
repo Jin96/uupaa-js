@@ -126,10 +126,16 @@ function decode() { // @return Mix:
     case 0xc2:  return false;
     case 0xc3:  return true;
     case 0xca:  rv = readByte(that, 4);      // float
+                if (!rv || rv === 0x80000000) { // 0.0 or -0.0
+                    return 0;
+                }
                 exp = ((rv >> 23) & _0xff) - 127; // exp bias
                 return (rv & _sign[32] ? -1 : 1)
                         * (rv & 0x7fffff | 0x800000) * _pow(2, exp - 23);
     case 0xcb:  rv = readByte(that, 4);      // double
+                if (!rv || rv === 0x80000000) { // 0.0 or -0.0
+                    return 0;
+                }
                 exp = ((rv >> 20) & 0x7ff) - 1023; // exp bias
                 return (rv & _sign[32] ? -1 : 1)
                         * ((rv & 0xfffff | 0x100000) * _pow(2, exp - 20)
@@ -230,12 +236,12 @@ function encodeNumber(rv,    // @param ByteArray: result
         if (mix < 0) { // int
             if (mix >= -32) { // negative fixnum
                 rv.push(0xe0 + mix + 32);
-            } else if (mix >= -_0x80) {
+            } else if (mix > -_0x80) {
                 rv.push(0xd0, mix + _0x100);
-            } else if (mix >= -_0x8000) {
+            } else if (mix > -_0x8000) {
                 mix += _0x10000;
                 rv.push(0xd1, mix >> 8, mix & _0xff);
-            } else if (mix >= -_0x80000000) {
+            } else if (mix > -_0x80000000) {
                 mix += _0x100000000;
                 rv.push(0xd2, mix >>> 24, (mix >> 16) & _0xff,
                                           (mix >>  8) & _0xff, mix & _0xff);
