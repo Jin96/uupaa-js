@@ -1,9 +1,11 @@
 <!doctype html><html><head><meta charset="utf-8" />
 <title>uu.fx.plus test</title>
 <style>
+/*
 html, body {
   overflow: hidden;
 }
+ */
 .box {
   position: absolute;
   width: 100px;
@@ -24,19 +26,22 @@ html, body {
 <script src="../../src/uupaa.js"></script>
 <script src="../../src/Fx/easing.js"></script>
 <script src="../../src/Fx/uu.fx.plus.js"></script>
+<script src="../../src/Fx/uu.fx.slide.js"></script>
 <script src="../../src/Color/uu.color.js"></script>
 <script src="../../src/Query/uu.query.js"></script>
+<script src="../../src/Image/uu.image.js"></script>
 <script src="../../src/Node/uu.node.clone.js"></script>
+<script src="../../src/Node/uu.node.normalize.js"></script>
 <script>
-var speed = 300;
+var duration = 300;
 var range = 200;
 var parts = 10;
 var degree = 270;
 var bgcolor = uu.color("#ff4100");
 
 function moveDuration(that) {
-    speed = that.value
-    uu.text(uu.id("durationValue"), speed);
+    duration = that.value
+    uu.text(uu.id("durationValue"), duration);
     bgcolor = bgcolor.arrange(3, 100, 100);
 
     uu("div.box").css("bgc", bgcolor + "");
@@ -53,12 +58,12 @@ function moveParts(that) {
 var toggle = 1;
 function fade(evt, node) {
     if (toggle) {
-        uu.fx.fade(node, speed, { r: 0, after: function() {
+        uu.fx.fade(node, duration, { r: 0, after: function() {
             uu.fx(node, 1000, { o: 0.1 });
         }});
         toggle = 0;
     } else {
-        uu.fx.fade(node, speed, { r: 0, before: function() {
+        uu.fx.fade(node, duration, { r: 0, before: function() {
             uu.fx(node, 1000, { o: 1 });
         }});
         toggle = 1;
@@ -70,7 +75,7 @@ function movein(evt, node) {
     if (degree > 360) {
         degree = 0;
     }
-    uu.fx.movein(node, speed, { degree: degree, range: range });
+    uu.fx.movein(node, duration, { degree: degree, range: range });
 }
 
 function moveout(evt, node) {
@@ -78,23 +83,23 @@ function moveout(evt, node) {
     if (degree > 360) {
         degree = 0;
     }
-    uu.fx.moveout(node, speed, { r: 1, degree: degree, range: range });
+    uu.fx.moveout(node, duration, { r: 1, degree: degree, range: range });
 }
 
 function flare(evt, node) {
-    uu.fx.flare(node, speed, { parts: 10, range: range, parts: parts, r: 1 });
+    uu.fx.flare(node, duration, { parts: 10, range: range, parts: parts, r: 1 });
 }
 
 function puff(evt, node) {
-    uu.fx.puff(node, speed, { r: 1 });
+    uu.fx.puff(node, duration, { r: 1 });
 }
 
 function shrink(evt, node) {
-    uu.fx.shrink(node, speed, { r: 1 });
+    uu.fx.shrink(node, duration, { r: 1 });
 }
 
 function highlight(evt, node) {
-    uu.fx.highlight(node, speed, { r: 1 });
+    uu.fx.highlight(node, duration, { r: 1 });
 }
 
 uu.ready(function(uu) {
@@ -116,9 +121,9 @@ uu.ready(function(uu) {
         }
     });
     // position: static
-    uu.each({ fade: fade, puff: puff, shrink: shrink }, function(fn, key) {
+    uu.each({ puff: puff, shrink: shrink }, function(fn, key) {
 
-        uu.node.add(uu.click(uu.div("class,box static", { cssFloat: "left" }, key), fn), uu.id("staticbox"));
+        uu.node.add(uu.click(uu.div("class,box static", { cssFloat: "left" }, key), fn), uu.id("staticbox"), "+");
     });
 });
 
@@ -135,6 +140,24 @@ function toggleOutline() {
     uu("div.box").klass("!outline10");
 }
 
+uu.ready(function() {
+    // init
+    uu.fx.slide(uu.id("slide1"), 0, { degree: 0  });
+    uu.fx.slide(uu.id("slide2"), 0, { degree: 45 });
+    uu.fx.slide(uu.id("slide3"), 0, { degree: 90 });
+
+    uu.click(uu.id("slide1"), function(evt, node) {
+        uu.fx.slide(node, duration);
+    });
+    uu.click(uu.id("slide2"), function(evt, node) {
+        uu.fx.slide(node, duration);
+    });
+    uu.click(uu.id("slide3"), function(evt, node) {
+        uu.fx.slide(node, duration);
+    });
+
+});
+
 </script>
 </head><body id="body">
 <div>
@@ -146,6 +169,8 @@ function toggleOutline() {
     <input type="button" value="outline" onclick="toggleOutline()" /> |
   </div>
 </div>
+
+
 DURATION: <input type="range" step="50" value="300" min="0" max="2000" onchange="moveDuration(this)" />
     <span id="durationValue">300</span>
     <br />
@@ -154,10 +179,40 @@ RANGE: <input type="range" step="50" value="200" min="100" max="400" onchange="m
     <br />
 PARTS: <input type="range" step="1" value="10" min="1" max="20" onchange="moveParts(this)" />
     <span id="partsValue">10</span>
+
+
 <div id="absolutebox" style="position:absolute;top:120px;left:100px">
     <p><b>position:absolute</b></p>
 </div>
-<div id="staticbox" style="position:absolute;top:360px;left:100px">
-    <p><b>position:static</b></p>
+
+
+<div style="position:absolute;top:360px;left:100px">
+    <p id="staticbox"><b>position:static</b></p>
+
+    <div id="slide1" style="float:left">
+        <div>
+            <img src="../images/cover01.jpg" />
+            <img src="../images/cover02.jpg" />
+            <img src="../images/cover03.jpg" />
+            <img src="../images/cover04.jpg" />
+        </div>
+    </div>
+    <div id="slide2" style="float:left">
+        <div>
+            <img src="../images/cover05.jpg" />
+            <img src="../images/cover06.jpg" />
+            <img src="../images/cover07.jpg" />
+            <img src="../images/cover08.jpg" />
+        </div>
+    </div>
+    <div id="slide3" style="float:left">
+        <div>
+            <img src="../images/cover09.jpg" />
+            <img src="../images/cover10.jpg" />
+            <img src="../images/cover11.jpg" />
+            <img src="../images/cover12.jpg" />
+        </div>
+    </div>
 </div>
+
 </body></html>

@@ -1250,56 +1250,60 @@ function uufxbuild(node, data, queue) {
             _isArray(param[i]) ? (endValue = param[i][0], ez = param[i][1]) // val, easing
                                : (endValue = param[i]); // param.val
 
-            switch (n = uufx.props[w]) {
-            case 1: // opacity
-                startValue = getOpacity(node);
+            // skip { marginLeft: "", marginTop: null }
+            if (endValue !== "" && endValue !== null) {
+
+                switch (n = uufx.props[w]) {
+                case 1: // opacity
+                    startValue = getOpacity(node);
 //{{{!mb
-                // init opacity [IE6][IE7][IE8]
-                uuready.opacity || (setOpacity(node, startValue),
-                                    node.style[_visibility] = "visible"); // BugFix
+                    // init opacity [IE6][IE7][IE8]
+                    uuready.opacity || (setOpacity(node, startValue),
+                                        node.style[_visibility] = "visible"); // BugFix
 //}}}!mb
-                endValue = unitNormalize(startValue, endValue, parseFloat);
-                rv += uuformat('o=??;o=(o>0.999)?1:(o<0.001)?0:o;',
-                               ezfn(startValue, endValue, ez));
+                    endValue = unitNormalize(startValue, endValue, parseFloat);
+                    rv += uuformat('o=??;o=(o>0.999)?1:(o<0.001)?0:o;',
+                                   ezfn(startValue, endValue, ez));
 //{{{!mb
-                if (!uuready.opacity) { // [IE6][IE7][IE8]
-                    rv += uuformat('s.visibility=o?"visible":"hidden";' +
-                                   's.filter=((o>0&&o<1)?"alpha(??="+(o*100)+")":"");' +
-                                   'f&&uu.css.setOpacity(n,??)&&(s.filter+=" ??");',
-                                   w, endValue, node.style.filter[_replace](uufx.alpha, ""));
-                } else {
+                    if (!uuready.opacity) { // [IE6][IE7][IE8]
+                        rv += uuformat('s.visibility=o?"visible":"hidden";' +
+                                       's.filter=((o>0&&o<1)?"alpha(??="+(o*100)+")":"");' +
+                                       'f&&uu.css.setOpacity(n,??)&&(s.filter+=" ??");',
+                                       w, endValue, node.style.filter[_replace](uufx.alpha, ""));
+                    } else {
 //}}}!mb
-                    rv += uuformat('s.??=f? ??:o;', w, endValue);
+                        rv += uuformat('s.??=f? ??:o;', w, endValue);
 //{{{!mb
+                    }
+//}}}!mb
+                    break;
+                case 2: // color, backgroundColor
+                    startValue = uu.color(cs[w]);    // depend: uu.color.js
+                    endValue   = uu.color(endValue); // depend: uu.color.js
+                    rv += uuformat('gd=g/d;h=uu.hash.num2hh;s.??="#"+' +
+                                   '(h[(f? ??:(??-??)*gd+??)|0]||0)+' +
+                                   '(h[(f? ??:(??-??)*gd+??)|0]||0)+' +
+                                   '(h[(f? ??:(??-??)*gd+??)|0]||0);',
+                                   w, endValue.r, endValue.r, startValue.r, startValue.r,
+                                      endValue.g, endValue.g, startValue.g, startValue.g,
+                                      endValue.b, endValue.b, startValue.b, startValue.b);
+                    break;
+                case 3: // width, height:
+                    startValue = parseInt(cs[w]) || 0;
+                    endValue   = unitNormalize(startValue, endValue, parseInt);
+                    rv += uuformat('w=f? ??:??;w=w<0?0:w;s.??=(w|0)+"px";',
+                                   endValue, ezfn(startValue, endValue, ez), w);
+                    break;
+                default: // top, left, other...
+                    startValue = n ? (n > 4 ? node.offsetTop  - parseInt(cs.marginTop)
+                                            : node.offsetLeft - parseInt(cs.marginLeft))
+                                   : parseInt(cs[w]) || 0;
+                    endValue   = unitNormalize(startValue, endValue, parseInt);
+                    rv += uuformat('s.??=((f? ??:??)|0)+"px";',
+                                   w, endValue, ezfn(startValue, endValue, ez));
                 }
-//}}}!mb
-                break;
-            case 2: // color, backgroundColor
-                startValue = uu.color(cs[w]);    // depend: uu.color.js
-                endValue   = uu.color(endValue); // depend: uu.color.js
-                rv += uuformat('gd=g/d;h=uu.hash.num2hh;s.??="#"+' +
-                               '(h[(f? ??:(??-??)*gd+??)|0]||0)+' +
-                               '(h[(f? ??:(??-??)*gd+??)|0]||0)+' +
-                               '(h[(f? ??:(??-??)*gd+??)|0]||0);',
-                               w, endValue.r, endValue.r, startValue.r, startValue.r,
-                                  endValue.g, endValue.g, startValue.g, startValue.g,
-                                  endValue.b, endValue.b, startValue.b, startValue.b);
-                break;
-            case 3: // width, height:
-                startValue = parseInt(cs[w]) || 0;
-                endValue   = unitNormalize(startValue, endValue, parseInt);
-                rv += uuformat('w=f? ??:??;w=w<0?0:w;s.??=(w|0)+"px";',
-                               endValue, ezfn(startValue, endValue, ez), w);
-                break;
-            default: // top, left, other...
-                startValue = n ? (n > 4 ? node.offsetTop  - parseInt(cs.marginTop)
-                                        : node.offsetLeft - parseInt(cs.marginLeft))
-                               : parseInt(cs[w]) || 0;
-                endValue   = unitNormalize(startValue, endValue, parseInt);
-                rv += uuformat('s.??=((f? ??:??)|0)+"px";',
-                               w, endValue, ezfn(startValue, endValue, ez));
+                revertParam[w] = ez ? [startValue, ez] : startValue;
             }
-            revertParam[w] = ez ? [startValue, ez] : startValue;
         }
     }
 
@@ -3693,7 +3697,8 @@ uuready(function() {
                                           "float,cssFloat"
             ) + ",d,display,w,width,h,height,x,left,y,top,l,left,t,top," +
                 "c,color,bg,background,bgc,backgroundColor,bgi,backgroundImage," +
-                "o,opacity,z,zIndex,fs,fontSize");
+                "o,opacity,z,zIndex,fs,fontSize," +
+                "pos,position,m,margin,b,border,p,padding");
 
     uumix(_camelhash(uufix.db,
                      _webkit ? getComputedStyle(_rootNode, 0)
