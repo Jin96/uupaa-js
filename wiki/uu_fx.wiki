@@ -1,0 +1,142 @@
+#summary uu.tween は基本的なアニメーション機能を提供します
+
+<wiki:toc max_depth="2" />
+
+= 導入 =
+
+uu.fx() と !NodeSet.fx() は CSSプロパティを連続的に変化させるCSSアニメーション機能を提供します。
+
+uu.fx() と !NodeSet.fx() は uupaa.js に最初から組み込まれています。
+
+easing 関数を利用するには以下のファイルが必要です。
+  * src/Fx/easing.js
+
+easing.js をロードすると、以下の関数が追加されます。
+  * Math.linear, Math.linearTween
+  * Math.easeInQuad, Math.easeOutQuad, Math.easeInOutQuad
+  * Math.easeInCubic, Math.easeOutCubic, Math.easeInOutCubic, Math.easeOutInCubic
+  * Math.easeInQuart, Math.easeOutQuart, Math.easeInOutQuart, Math.easeOutInQuart
+  * Math.easeInQuint, Math.easeOutQuint, Math.easeInOutQuint, Math.easeOutInQuint
+  * Math.easeInSine, Math.easeOutSine, Math.easeInOutSine, Math.easeOutInSine
+  * Math.easeInExpo, Math.easeOutExpo, Math.easeInOutExpo, Math.easeOutInExpo
+  * Math.easeInCirc, Math.easeOutCirc, Math.easeInOutCirc, Math.easeOutInCirc
+  * Math.easeInElastic, Math.easeOutElastic, Math.easeInOutElastic, Math.easeOutInElastic
+  * Math.easeInBack, Math.easeOutBack, Math.easeInOutBack, Math.easeOutInBack
+  * Math.easeInBounce, Math.easeOutBounce, Math.easeInOutBounce, Math.easeOutInBounce
+
+色を変化させるには以下のファイルが必要です。
+  * src/Color/uu.color.js
+
+uu.color.js をロードすると、色辞書や色調変換機能等が利用可能になります。
+
+= API =
+
+== uu.fx ==
+
+uu.fx(_node_:Node, _duration_:Number, _param_:Hash/Function = void):Node で
+_node_ で指定したノードにアニメーションキューを設定し _node_ を返します。
+_duration_ で指定した時間が経過するまで、_param_ で指定した幾つかのCSSプロパティを連続的に変化させます。
+_duration_ で指定した時間が経過すると、アニメーションを停止し、_param_.after をコールバックします。
+
+_duration_ には 0 以上の数値を ms 単位で指定します。
+
+_param_ は省略できます。省略すると一定時間何もしないキュー(スタンバイキュー)を作成します。
+_param_ にHashを指定すると、一定時間内に変化させるCSSプロパティと変化させる方法を指定できます。
+_param_ にFunctionを指定すると、一定間隔で _param_ を評価します。
+
+_param_ がHashなら { key: endValue, ...  } または { key: `[`endValue, easing`]`, ... } のように指定します。
+  * key には color, opacity といった CSSプロパティ や before, after, r, css などのキーワードを指定します。
+    * { before: beforeCallback } を指定すると、アニメーション開始前に beforeCallback(_node_, _param_, reverse) の形でコールバックします。
+    * { after: afterCallback } を指定すると、アニメーション終了後に afterCallback(_node_, _param_, reverse) の形でコールバックします。
+      * 逆再生中は reverse に 1 が渡されます。
+    * { r: 1 } を指定すると、アニメーションの終了後に逆再生(撒き戻し)を行います。
+    * { css: cssProp } は内部用です。
+  * endValue には 文字列または数値を指定します
+    * 現在の値を基準に、増減した値を指定するには "+100" "-100" "*100" "/100" とします。
+    * top, left, width, height 等のCSSプロパティは px 単位で指定します。em や pt 等は速度的な理由から指定できません。
+    * "px" の指定はオプションです。{ width: 100 } と { width: "100px" } は同じ結果になります。
+  * _easing_ は文字列で指定します。Math`[`_easing_`]` として解釈します。
+
+=== 色の変化 ===
+色を連続的に変化させます。
+{{{
+    var color = uu.color(uu.rand(0, 0xffffff)).hex,
+        bgcolor = uu.color(uu.rand(0, 0xffffff)).hex;
+
+    // 色と背景色を 500ms かけて、変化させる
+    uu.fx(node, 500, { color: color, bgcolor: bgcolor });
+}}}
+
+=== 不透明度の変化 ===
+不透明度(opacity)を連続的に変化させます。o は opacity の別名です。
+{{{
+    // 不透明度を 500ms かけて 0 ～ 1 に連続的に変化させる
+    uu("div").css({ o: 0 }).fx(500, { o: 1 });
+}}}
+
+=== 位置の変化 ===
+位置(left, top)を連続的に変化させます。変化方法も指定します。x, y は left, top の別名です。
+{{{
+    // left と top を 500ms かけて left = 100, top + 200(現在位置 + 200) の位置に連続的に変化させる
+    // top は Math.easeInOutQuad の計算結果を使用する
+    uu("div").css({ x: 0 }).fx(500, { x: 100, y: ["+200", "easeInOutQuad"] });
+}}}
+
+=== 大きさの変化 ===
+大きさ(width, height)を連続的に変化させます。w, h は width, height の別名です。
+{{{
+    // width と height を 500ms かけて width = 0, height 0 に連続的に変化させる
+    uu("div").css({ w: 100, h: 100 }).fx(500, { w: 0, h: 0 });
+}}}
+
+=== revert の指定 ===
+r: 1 を指定するとアニメーションの撒き戻しを行います。
+{{{
+    // opacity を 0.2 → 1.0 → 0.2 に戻す
+    uu("div").css({ o: 0.2 }).fx(500, { o: 1.0, r: 1 });
+}}}
+
+=== fps の指定 ===
+アニメーションが停止している状態(キューが存在しない状態)で、_param_ に { fps: Number } を指定すると、キュー全体の fps を指定できます。
+{{{
+    // fps を 30 にする
+    uu("div").fx(500, { fps: 30, o: 1.0 });
+}}}
+
+=== スタンバイキュー ===
+uu.fx(_node_, _duration_) とすることで、_duration_ の間だけ何もしないスタンバイキューを作成できます。
+{{{
+    // 500ms かけて不透明にし、500ms なにもせず、その後 500ms かけて透明にする
+    uu("div").fx(500, { o: 1.0 }).fx(500).fx(500, { o: 0 });
+}}}
+
+== uu.fx.skip ==
+uu.fx.skip(_node_:Node = null, _all_:Boolean = false, _avoidFlicker_:Boolean = false):Node/!NodeArray は、_node_ のキューに積まれたアニメーションを一つだけスキップし _node_ を返します。
+スキップすると、各CSSプロパティの値は、アニメーション開始時にuu.fx で指定した endValue の値になります。
+
+_node_ が falsy(0, null, undefined) なら、アニメーションキューを持つ全てのノードを一つだけスキップし、!NodeArray を返します。
+_all_ に true を指定すると、全てのアニメーションキューをスキップします。
+_avoidFlicker_ に true を指定すると、複数の一連のアニメーションをスキップする前に style.visibility = "hidden" を設定し、スキップ後に、 "visible" に設定する特別な処理が行われます。
+skip によりちらつきが発生する場合は、_avoidFlicker_ を試してみてください。
+
+{{{
+    // node のアニメーションを一つスキップする
+    uu.fx.skip(node);
+}}}
+{{{
+    // アニメーションしている全てのノードで、アニメーションキューを全てスキップし、
+    // アニメーションを終了させる
+    uu.fx.skip(0, true);
+}}}
+{{{
+    // ちらつきが発生している場合に、ちらつきを抑える
+    // アニメーションを終了させる
+    uu.fx.skip(0, true, true);
+}}}
+
+== uu.fx.isBusy ==
+uu.fx.isBusy(_node_:Node) は _node_ がアニメーション中かアニメーションキューが積まれている状態で true を返します。
+
+= Test Code =
+  * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/Fx/uu.fx.htm
+  * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/Fx/uu.fx.dance.htm
