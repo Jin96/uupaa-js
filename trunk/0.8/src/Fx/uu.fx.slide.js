@@ -6,22 +6,24 @@
     1| uu.fx.slide(<div>, 0, { degree: 90 })  -> dress up
 
 
-        <div>       ------------- plain --+
-            <div>                         |
-                <img src="...">           |
-                <img src="...">           |
-            </div>                        |
-        </div>      ----------------------+
+        <div style="visibility:hidden">   --- plain --+
+            <div>                                     |
+                <img src="...">                       |
+                <img src="...">                       |
+            </div>                                    |
+        </div>      ----------------------------------+
 
                   |
                   V
 
-        <div style="width:??px;height:??px;overflow:hidden">   ----------- dress up --+
-            <div style="width:??px;height:??px;margin:0;position:relative">           |
-                <img src="..." style="position:absolute;top:?px;left:?px" />          |
-                <img src="..." style="position:absolute;top:?px;left:?px" />          |
-            </div>                                                                    |
-        </div>      ------------------------------------------------------------------+
+        <div style="visibility:visible;             --------------- dress up --+
+                    width:??px;height:??px;overflow:hidden">                   |
+            <div style="width:??px;height:??px;                                |
+                        margin:0;position:relative">                           |
+                <img src="..." style="position:absolute;top:?px;left:?px" />   |
+                <img src="..." style="position:absolute;top:?px;left:?px" />   |
+            </div>                                                             |
+        </div>      -----------------------------------------------------------+
 
 
     2| uu.fx.slide(<div>, 3000)   -> do animation
@@ -101,6 +103,7 @@ function initSlide(node,     // @param Node:
 
     node.style.width = data.w + "px";
     node.style.height = data.h + "px";
+    node.style.visibility = "visible";
     node.style.overflow = "hidden";
 
     w = data.w;
