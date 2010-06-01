@@ -44,7 +44,7 @@ function uufxslide(node,     // @param Node:
     uu.ready("window", function(uu) {
         param = param || {};
 
-        var data = node["data-uufxslide"], deg, x = "", y = "";
+        var data = node["data-uufxslide"], deg, x, y;
 
         data || (data = initSlide(node, param.degree || 0));
 
@@ -55,7 +55,7 @@ function uufxslide(node,     // @param Node:
                 data.moved = 0;
                 x = y = 0;
             } else {
-                x = y = "";
+                x = y = null;
                 deg < 90 && (x = -(data.w * data.moved));
                 deg >  0 && (y = -(data.h * data.moved));
             }
@@ -71,7 +71,7 @@ function initSlide(node,     // @param Node:
                    degree) { // @param Number: move direction. 0 or 45 or 90
                              // @return Hash: node data
     var data = node["data-uufxslide"],
-        imageNodeArray, target, x = "", y = "", w, h;
+        imageNodeArray, target, w, h;
 
     if (data) {
         return;
