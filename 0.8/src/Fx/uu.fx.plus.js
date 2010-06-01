@@ -23,7 +23,7 @@ function uufxfade(node,     // @param Node:
                   duration, // @param Number: duration
                   param) {  // @param Hash(= {}):
     return uu.fx(node, duration, uu.arg(param, { init: function(node, param) {
-            uu.mix(param, { o: uu.css.getOpacity(node) < 0.5 ? 1 : 0 });
+            uu.mix(param, { o: uu.css.opacity(node) < 0.5 ? 1 : 0 });
         }}));
 }
 
@@ -72,7 +72,7 @@ function uufxflare(node,     // @param Node:
                     x: Math.cos(angle) * p.range + x,
                     y: Math.sin(angle) * p.range + y,
                     init: function(newNode) {
-                        uu.css.setOpacity(newNode, 0.5);
+                        uu.css.opacity(newNode, 0.5);
                     },
                     after: function(newNode, param, reverse) {
                         reverse || node.parentNode.removeChild(newNode);
@@ -115,7 +115,7 @@ function uufxmovein(node,     // @param Node:
                 }
                 w = parseInt(cs.width);
                 h = parseInt(cs.height);
-                o = uu.css.getOpacity(node);
+                o = uu.css.opacity(node);
                 style.left   = (Math.cos(angle) * range + endX) + "px";
                 style.top    = (Math.sin(angle) * range + endY) + "px";
                 style.width  = (w * 1.5) + "px";
@@ -123,7 +123,7 @@ function uufxmovein(node,     // @param Node:
                 if (uu.ver.jit) {
                     style.fontSize = (fs * 1.5) + "px";
                 }
-                uu.css.setOpacity(node, 0);
+                uu.css.opacity(node, 0);
 
                 uu.ver.jit && (param.fs = fs);
                 uu.mix(param, { w: w, h: h, x: endX, y: endY });

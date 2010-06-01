@@ -165,8 +165,11 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Stri
         show:       uucssshow,      // uu.css.show(node:Node, duration:Number = 0, displayValue:String= "block"):Node
         hide:       uucsshide,      // uu.css.hide(node:Node, duration:Number = 0):Node
         isShow:     uucssisshow,    // uu.css.isShow(node:Node/CSSProperties):Boolean
-        getOpacity: getOpacity,     // uu.css.getOpacity(node:Node):Number
-        setOpacity: setOpacity      // uu.css.setOpacity(node:Node, value:Number/String):Node
+        opacity:    uucssopacity,   // uu.css.opacity(node:Node, value:Number/String):Number/Node
+                                    //  [1][get opacity] uu.css.opacity(node) -> 0.5
+                                    //  [2][set opacity] uu.css.opacity(node, 0.5) -> node
+        textSelectable:
+                    textSelectable  // uu.css.textSelectable(node:Node, allow:Boolean = false):Node
     }),
     style:          uustyle,        // uu.style(id:String):StyleSheet
     unit:           uuunit,         // uu.unit(node:Node, value:Number/CSSUnitString,
@@ -1119,7 +1122,7 @@ function uucss(node,    // @param Node:
 
         if (typeof value === _number) {
             if (formal === "opacity") {
-                setOpacity(node, value);
+                uucssopacity(node, value);
                 continue;
             }
             !care[formal] && (value += "px"); // number -> pixel value
@@ -1250,15 +1253,15 @@ function uufxbuild(node, data, queue) {
             _isArray(param[i]) ? (endValue = param[i][0], ez = param[i][1]) // val, easing
                                : (endValue = param[i]); // param.val
 
-            // skip { marginLeft: "", marginTop: null }
-            if (endValue !== "" && endValue !== null) {
+            // skip { marginLeft: undefined, marginTop: null }
+            if (endValue != null) {
 
                 switch (n = uufx.props[w]) {
                 case 1: // opacity
-                    startValue = getOpacity(node);
+                    startValue = uucssopacity(node);
 //{{{!mb
                     // init opacity [IE6][IE7][IE8]
-                    uuready.opacity || (setOpacity(node, startValue),
+                    uuready.opacity || (uucssopacity(node, startValue),
                                         node.style[_visibility] = "visible"); // BugFix
 //}}}!mb
                     endValue = unitNormalize(startValue, endValue, parseFloat);
@@ -1268,7 +1271,7 @@ function uufxbuild(node, data, queue) {
                     if (!uuready.opacity) { // [IE6][IE7][IE8]
                         rv += uuformat('s.visibility=o?"visible":"hidden";' +
                                        's.filter=((o>0&&o<1)?"alpha(??="+(o*100)+")":"");' +
-                                       'f&&uu.css.setOpacity(n,??)&&(s.filter+=" ??");',
+                                       'f&&uu.css.opacity(n,??)&&(s.filter+=" ??");',
                                        w, endValue, node.style.filter[_replace](uufx.alpha, ""));
                     } else {
 //}}}!mb
@@ -1347,8 +1350,8 @@ function uufxskip(node,           // @param Node(= null): null is all node
             if (q.length > 2 && avoidFlicker) {
                 q.push({
                     tm: 0, guid: 0, fin: 1, dur: 0,
-                    pz: function(node, style) {
-                        style[_visibility] = "visible";
+                    pz: function(node) {
+                        node.style[_visibility] = "visible";
                     }});
 
                 v.style[_visibility] = "hidden";
@@ -1366,29 +1369,27 @@ function uufxisbusy(node) { // @param Node:
     return data && data.id;
 }
 
-// uu.css.getOpacity
-function getOpacity(node) { // @param Node:
-                            // @return Number: opacity (from 0.0 to 1.0)
+// uu.css.uucssopacity
+function uucssopacity(node,      // @param Node:
+                      opacity) { // @param Number/String(= void): Number(0.0 - 1.0) absolute
+                                 //                               String("+0.5", "-0.5") relative
+                                 // @return Number/Node:
+    if (opacity === void 0) {
 //{{{!mb
-    if (!uuready.opacity) {
-        var opacity = node["data-uuopacity"]; // undefined or 1.0 ~ 2.0
+        if (!uuready.opacity) {
+            opacity = node["data-uuopacity"]; // undefined or 1.0 ~ 2.0
 
-        return opacity ? (opacity - 1): 1;
-    }
-    if (getComputedStyle) {
+            return opacity ? (opacity - 1): 1;
+        }
+        if (getComputedStyle) {
 //}}}!mb
-        return parseFloat(getComputedStyle(node, 0).opacity);
+            return parseFloat(getComputedStyle(node, 0).opacity);
 //{{{!mb
-    }
-    return 1;
+        }
+        return 1;
 //}}}!mb
-}
+    }
 
-// uu.css.setOpacity
-function setOpacity(node,      // @param Node:
-                    opacity) { // @param Number/String: Number(0.0 - 1.0) absolute
-                               //                       String("+0.5", "-0.5") relative
-                               // @return Node:
     var style = node.style;
 
 //{{{!mb
@@ -1406,7 +1407,7 @@ function setOpacity(node,      // @param Node:
 
     // relative
     if (typeof opacity === _string) { // "+0.1" or "-0.1"
-        opacity = getOpacity(node) + parseFloat(opacity);
+        opacity = uucssopacity(node) + parseFloat(opacity);
     }
 
     // normalize
@@ -1419,14 +1420,35 @@ function setOpacity(node,      // @param Node:
         style[_visibility] = opacity ? "visible" : "hidden";
         style.filter = ((opacity > 0 && opacity < 1)
                      ? "alpha(opacity=" + (opacity * 100) + ") " : "")
-                     + style.filter[_replace](setOpacity.alpha, "");
+                     + style.filter[_replace](uucssopacity.alpha, "");
     }
 //}}}!mb
     return node;
 }
 //{{{!mb
-setOpacity.alpha = /^alpha\([^\x29]+\) ?/;
+uucssopacity.alpha = /^alpha\([^\x29]+\) ?/;
 //}}}!mb
+
+// uu.css.textSelectable - set text selectable
+function textSelectable(node,    // @param Node:
+                        allow) { // @param Boolean(= false):
+                                 // @return Node:
+//{{{!mb
+    if (_webkit) {
+//}}}!mb
+        node.style["-webkit-user-select"] = allow ? "" : "none";
+//{{{!mb
+    } else if (_gecko) {
+        node.style["-moz-user-select"] = allow ? "" : "none";
+    } else if (_ie || _opera) {
+        node.unselectable  = allow ? "" : "on";
+        node.onselectstart = allow ? "" : "return false";
+//      node = node.parentNode;
+    }
+    node.style["user-select"] = allow ? "" : "none";
+//}}}!mb
+    return node;
+}
 
 // uu.css.show - show node
 function uucssshow(node,           // @param Node:
@@ -1434,7 +1456,7 @@ function uucssshow(node,           // @param Node:
                    displayValue) { // @param String(= "block"): applied at display "none"
                                    // @return Node:
     var cs = uucss(node), disp = displayValue || "block",
-        w = cs[_width], h = cs[_height], o = getOpacity(node) || 1;
+        w = cs[_width], h = cs[_height], o = uucssopacity(node) || 1;
 
 //{{{!mb
     // [Opera] getComputedStyle(node).display === "none" -> width and height = "0px"
@@ -1449,7 +1471,7 @@ function uucssshow(node,           // @param Node:
     return uufx(node, duration || 0, { w: w, h: h, o: o, before: function(node) {
                 var style = node.style;
 
-                setOpacity(node, 0);
+                uucssopacity(node, 0);
                 style[_width] = style[_height] = "0";
                 style[_visibility] = "visible";
                 if (uucss(node)[_display] === "none") {
@@ -1727,7 +1749,7 @@ function getComputedStyleIE(node) { // @param Node:
         }
         rv[w] = ut ? (v + "px") : v;
     }
-    rv.opacity = getOpacity(node);
+    rv.opacity = uucssopacity(node);
     rv.fontSize = em + "px";
     rv.cssFloat = currentStyle.styleFloat; // compat
     return rv;

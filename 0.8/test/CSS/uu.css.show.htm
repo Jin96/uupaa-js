@@ -26,9 +26,9 @@ div {
 <script>
 uu.ready(function(uu) {
     uu("div").nth(3, function(node, i) {
-        uu.css.setOpacity(node, 0);
+        uu.css.opacity(node, 0);
     }).each(function(node, i) {
-        uu.tween(node, 1000, { x: i * 100, y: i * 100 });
+        uu.fx(node, 1000, { x: i * 100, y: i * 100 });
     }).hide(1000).show(1000).hide(1000).show();
 });
 </script></head><body>
