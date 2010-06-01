@@ -32,7 +32,7 @@ _degree_ には 0, 45 または 90 を指定できます。0 なら横方向に�
 このようなHTMLフラグメントを用意し、uu.fx.slide() を呼ぶとドレスアップが行われます。
 {{{
         <div>
-            <div>
+            <div style="visibility:hidden">
                 <img src="...">
                 <img src="...">
                     :
@@ -42,7 +42,7 @@ _degree_ には 0, 45 または 90 を指定できます。0 なら横方向に�
 ドレスアップ後はこのような形になります。
 {{{
         <div style="width:??px;height:??px;overflow:hidden">
-            <div style="width:??px;height:??px;margin:0;position:relative">
+            <div style="visibility:visible;width:??px;height:??px;margin:0;position:relative">
                 <img src="..." style="position:absolute;top:?px;left:?px" />
                 <img src="..." style="position:absolute;top:?px;left:?px" />
                     :
