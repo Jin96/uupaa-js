@@ -103,7 +103,7 @@ function encode(rv,    // @param ByteArray: result
 
 // inner - decoder
 function decode() { // @return Mix:
-    var rv, size, i = 0, msb = 0, exp, key,
+    var rv, size, i = 0, msb = 0, sign, exp, fraction, key,
         that = this,
         data = that.data,
         type = data[++that.index];
@@ -125,21 +125,31 @@ function decode() { // @return Mix:
     case 0xc0:  return null;
     case 0xc2:  return false;
     case 0xc3:  return true;
-    case 0xca:  rv = readByte(that, 4);      // float
-                if (!rv || rv === 0x80000000) { // 0.0 or -0.0
+    case 0xca:  rv = readByte(that, 4);     // float
+                sign = rv & _sign[32];      //  1bit
+                exp = (rv >> 23) & _0xff;   //  8bits
+                fraction = rv & 0x7fffff;   // 23bits
+                if (!rv || rv === _0x80000000) { // 0.0 or -0.0
                     return 0;
                 }
-                exp = ((rv >> 23) & _0xff) - 127; // exp bias
-                return (rv & _sign[32] ? -1 : 1)
-                        * (rv & 0x7fffff | 0x800000) * _pow(2, exp - 23);
-    case 0xcb:  rv = readByte(that, 4);      // double
-                if (!rv || rv === 0x80000000) { // 0.0 or -0.0
+                if (exp === 0xff) { // NaN or Infinity
+                    return fraction ? NaN : Infinity;
+                }
+                return (sign ? -1 : 1) *
+                            (fraction | 0x800000) * _pow(2, exp - 127 - 23); // 127: bias
+    case 0xcb:  rv = readByte(that, 4);     // double
+                sign = rv & _sign[32];      //  1bit
+                exp = (rv >> 20) & 0x7ff;   // 11bits
+                fraction = rv & 0xfffff;    // 52bits - 32bits (high word)
+                if (!rv || rv === _0x80000000) { // 0.0 or -0.0
                     return 0;
                 }
-                exp = ((rv >> 20) & 0x7ff) - 1023; // exp bias
-                return (rv & _sign[32] ? -1 : 1)
-                        * ((rv & 0xfffff | 0x100000) * _pow(2, exp - 20)
-                            + readByte(that, 4) * _pow(2, exp - 52));
+                if (exp === 0x7ff) { // NaN or Infinity
+                    return fraction ? NaN : Infinity;
+                }
+                return (sign ? -1 : 1) *
+                            ((fraction | 0x100000)  * _pow(2, exp - 1023 - 20) // 1023: bias
+                                + readByte(that, 4) * _pow(2, exp - 1023 - 52));
     case 0xcf:  return readByte(that, 8);    // uint 64
     case 0xce:  return readByte(that, 4);    // uint 32
     case 0xcd:  return readByte(that, 2);    // uint 16
@@ -232,7 +242,15 @@ function decodeInt64(that) { // @param Object:
 // inner - encode number
 function encodeNumber(rv,    // @param ByteArray: result
                       mix) { // @param Number:
-    if (_floor(mix) === mix) { // bugfix // (mix | 0 == mix)
+    if (mix !== mix) { // isNaN
+
+        rv.push(0xcb, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff); // quiet NaN
+
+    } else if (!isFinite(mix)) { // Infinity
+
+        rv.push(0xcb, 0x7f, 0xf0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00); // positive infinity
+
+    } else if (_floor(mix) === mix) { // bugfix // (mix | 0 == mix)
         if (mix < 0) { // int
             if (mix >= -32) { // negative fixnum
                 rv.push(0xe0 + mix + 32);
