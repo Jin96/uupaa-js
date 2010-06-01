@@ -876,6 +876,47 @@ uu.ready(function(uu) {
                 var rv = uu.msgpack.unpack(data);
 
                 return [rv, "==", [["a"]], hex(result)];
+            },
+        "NaN or Infinity": "",
+            '[ca 7f bf ff ff] NaN float': function() {
+                var data = unescape('%ca%7F%BF%FF%FF');
+                var result = [0xca, 0x7f, 0xbf, 0xff, 0xff];
+                var rv = uu.msgpack.unpack(data);
+
+                return [rv, "is NaN", void 0, hex(result)];
+            },
+            '[cb ff f7 ff ff ff ff ff ff] NaN double': function() {
+                var data = unescape('%cb%ff%f7%ff%ff%ff%ff%ff%ff');
+                var result = [0xcb, 0xff, 0xf7, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff];
+                var rv = uu.msgpack.unpack(data);
+
+                return [rv, "is NaN", void 0, hex(result)];
+            },
+            '[ca ff 80 00 00] Infinity float': function() {
+                var data = unescape('%ca%ff%80%00%00');
+                var result = [0xca, 0xff, 0x80, 0x00, 0x00];
+                var rv = uu.msgpack.unpack(data);
+
+                return [rv, "is Infinity", void 0, hex(result)];
+            },
+            '[cb ff f0 00 00 00 00 00 00] Infinity double': function() {
+                var data = unescape('%cb%ff%f0%00%00%00%00%00%00');
+                var result = [0xcb, 0xff, 0xf0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00];
+                var rv = uu.msgpack.unpack(data);
+
+                return [rv, "is Infinity", void 0, hex(result)];
+            },
+            'Number(NaN) -> [0xcb, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff]': function() {
+                var pack = uu.msgpack.pack(NaN);
+                var rv = uu.msgpack.unpack(pack);
+
+                return [rv, "is NaN", void 0, hex(pack)];
+            },
+            'Number(Infinity) -> [0xcb, 0x7f, 0xf0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]': function() {
+                var pack = uu.msgpack.pack(Infinity);
+                var rv = uu.msgpack.unpack(pack);
+
+                return [rv, "is Infinity", void 0, hex(pack)];
             }
     });
 });

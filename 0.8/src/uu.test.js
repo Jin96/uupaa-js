@@ -152,6 +152,7 @@ function judge(lhs,      // @param Mix: left hand set
         case "FALSE":   rv =  !lhs; break;
         case "NAN":     rv = isNaN(lhs); break;
         case "FAIL":    rv = false; break;
+        case "INFINITY":rv = !isFinite(lhs); break;
         case "INSTANCE":rv = !!lhs.msgbox; break;
         default:
             if (uu.type[ope]) {
