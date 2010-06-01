@@ -1206,7 +1206,7 @@ function uufx(node,     // @param Node: animation target node
     data.q.push({ tm: 0, guid: uuguid(),
                   dur: Math.max(duration, 1),
                   pz: p, fin: 0 }); // true/1 is finished
-    data.id || (data.id = setInterval(loop, ((1000 / p.fps) | 0) || 1)); // [IE] setInterval(0) is Error
+    data.id || (data.id = setInterval(loop, ((1000 / p.fps) | 0) || +_ie)); // [IE] setInterval(0) is Error
     return node;
 }
 uufx.props = { opacity: 1, color: 2, backgroundColor: 2,
