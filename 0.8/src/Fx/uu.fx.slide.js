@@ -3,24 +3,28 @@
 //{{{!depend uu, uu.node.normalize, uu.image.size
 //}}}!depend
 /*
-    --- setup node ---
+    1| uu.fx.slide(<div>, 0, { degree: 90 })  -> dress up
 
-    1| uu.fx.slide(uu.id("a"), 0, { degree: 0 })
 
-        <div id="a">
-            <div>
-                <img src="...">
-                <img src="...">
-            </div>
-        </div>
+        <div>       ------------- plain --+
+            <div>                         |
+                <img src="...">           |
+                <img src="...">           |
+            </div>                        |
+        </div>      ----------------------+
+
                   |
                   V
-        <div style="width:??px;height:??px;overflow:hidden">
-            <div style="width:??px;height:??px;margin:0;position:relative">
-                <img src="...">
-                <img src="...">
-            </div>
-        </div>
+
+        <div style="width:??px;height:??px;overflow:hidden">   ----------- dress up --+
+            <div style="width:??px;height:??px;margin:0;position:relative">           |
+                <img src="..." style="position:absolute;top:?px;left:?px" />          |
+                <img src="..." style="position:absolute;top:?px;left:?px" />          |
+            </div>                                                                    |
+        </div>      ------------------------------------------------------------------+
+
+
+    2| uu.fx.slide(<div>, 3000)   -> do animation
  */
 
 uu.fx.slide || (function(uu) {
