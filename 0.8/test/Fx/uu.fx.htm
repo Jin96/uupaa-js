@@ -1,5 +1,5 @@
 <!doctype html><html><head><meta charset="UTF-8" />
-<title>uu.tween test</title>
+<title>uu.fx test</title>
 <style>
 .tgt1 {
   background-color: gray;
@@ -22,7 +22,7 @@
 
 </style>
 <script src="../../src/uupaa.js"></script>
-<script src="../../src/Tween/easing.js"></script>
+<script src="../../src/Fx/easing.js"></script>
 <script src="../../src/Color/uu.color.js"></script>
 <script src="../../src/Query/uu.query.js"></script>
 <script>
@@ -42,7 +42,7 @@ function xaddqueue() {
                  uu.color.random().hex,
                  uu.color.random().hex];
 
-    uu(".tgt1").tween(2000, { x: [400, "easeOutBack"],
+    uu(".tgt1").fx(2000, { x: [400, "easeOutBack"],
                               y: 400,
                               w: 200,
                               bgc: "skyblue",
@@ -50,33 +50,33 @@ function xaddqueue() {
                               fs: 36 });
 
     uu(".tgt2").css({ o: 0.2 }).
-        tween(1000, { x: ["+400", "easeInBack"], y: "+400", o: 1.0, w: 50, h: [50, "easeOutBack"] }).
-        tween(1000, { x: ["-400", "easeInBack"], y: "-400", o: 0.2, w: 100, h: [100, "easeOutBack"] });
+        fx(1000, { x: ["+400", "easeInBack"], y: "+400", o: 1.0, w: 50, h: [50, "easeOutBack"] }).
+        fx(1000, { x: ["-400", "easeInBack"], y: "-400", o: 0.2, w: 100, h: [100, "easeOutBack"] });
 
     uu(".tgt3").css({ o: 1   }).
-        tween(2000, { x: "+500px", y: "+500px", o: "-0.9" ,bgc: "rgb(0,255,100)" }).
-        tween(400). // standby
-        tween(2000, { x: "-500px", y: "-500px", o: 0.5 ,w: 300 ,bgc: "rgb(0,0,0)" });
+        fx(2000, { x: "+500px", y: "+500px", o: "-0.9" ,bgc: "rgb(0,255,100)" }).
+        fx(400). // standby
+        fx(2000, { x: "-500px", y: "-500px", o: 0.5 ,w: 300 ,bgc: "rgb(0,0,0)" });
 
     uu(".tgt4").css({ o: 1.0 }).
-        tween(1000, { x: ["+400", "easeInBack"], y: ["+230", "easeInBack"], o: 0.2, w:  10, h: [100, "easeOutBack"], bgc: color[0] }).
-        tween(1000, { x: ["+30",  "easeInBack"], y: ["-100", "easeInBack"], o: 1.0, w:  50, h: [ 10, "easeOutBack"], bgc: color[1] }).
-        tween(1000, { x: ["-400", "easeInBack"], y: ["-30",  "easeInBack"], o: 0.2, w:  10, h: [ 50, "easeOutBack"], bgc: color[2] }).
-        tween(1000, { x: ["-20",  "easeInBack"], y: ["-100", "easeInBack"], o: 1.0, w: 200, h: [200, "easeOutBack"], bgc: color[3] });
+        fx(1000, { x: ["+400", "easeInBack"], y: ["+230", "easeInBack"], o: 0.2, w:  10, h: [100, "easeOutBack"], bgc: color[0] }).
+        fx(1000, { x: ["+30",  "easeInBack"], y: ["-100", "easeInBack"], o: 1.0, w:  50, h: [ 10, "easeOutBack"], bgc: color[1] }).
+        fx(1000, { x: ["-400", "easeInBack"], y: ["-30",  "easeInBack"], o: 0.2, w:  10, h: [ 50, "easeOutBack"], bgc: color[2] }).
+        fx(1000, { x: ["-20",  "easeInBack"], y: ["-100", "easeInBack"], o: 1.0, w: 200, h: [200, "easeOutBack"], bgc: color[3] });
 }
 
 function xskip() {
-    uu.tween.skip();
+    uu.fx.skip();
 }
 
 function xfinish(flicker) {
-    uu.tween.skip(0, true, flicker);
+    uu.fx.skip(0, true, flicker);
 }
 </script>
 </head><body>
-<input type="button" value="uu.tween() - add queue" onclick="xaddqueue()" />
-<input type="button" value="uu.tween.skip() - skip" onclick="xskip()" />
-<input type="button" value="uu.tween.skip(0, true) - finish all" onclick="xfinish(0)" />
-<input type="button" value="uu.tween.skip(0, true, true) - finish all + avoid flicker" onclick="xfinish(1)" />
+<input type="button" value="uu.fx() - add queue" onclick="xaddqueue()" />
+<input type="button" value="uu.fx.skip() - skip" onclick="xskip()" />
+<input type="button" value="uu.fx.skip(0, true) - finish all" onclick="xfinish(0)" />
+<input type="button" value="uu.fx.skip(0, true, true) - finish all + avoid flicker" onclick="xfinish(1)" />
 
 </body></html>

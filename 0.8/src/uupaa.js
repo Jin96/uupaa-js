@@ -1212,8 +1212,6 @@ function uufx(node,     // @param Node: animation target node
 uufx.props = { opacity: 1, color: 2, backgroundColor: 2,
                width: 3, height: 3, left: 4, top: 5 };
 uufx.alpha = /^alpha\([^\x29]+\) ?/;
-uufx.ignore = { fps: 1, degree: 1, range: 1, css: 1,
-                init: 1, before: 1, after: 1, r: 1 };
 
 function uufxbuild(node, data, queue) {
     function ezfn(v0, v1, ez) {
@@ -1245,12 +1243,14 @@ function uufxbuild(node, data, queue) {
         fixdb = uufix.db, cs = param.css || uucss(node, _true);
 
     for (i in param) {
-        if (!uufx.ignore[i]) {
+        w = fixdb[i] || i;
+
+        if (w in cs) {
             ez = 0;
             _isArray(param[i]) ? (endValue = param[i][0], ez = param[i][1]) // val, easing
                                : (endValue = param[i]); // param.val
 
-            switch (n = uufx.props[w = fixdb[i] || i]) {
+            switch (n = uufx.props[w]) {
             case 1: // opacity
                 startValue = getOpacity(node);
 //{{{!mb
