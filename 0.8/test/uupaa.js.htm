@@ -15,9 +15,7 @@
 
 <script src="../src/uupaa.js"></script>
 <script src="../src/Codec/Codec.js"></script>
-<script src="../src/CSS/uu.css.js"></script>
 <script src="../src/Query/uu.query.js"></script>
-<script src="../src/Ajax/uu.url.js"></script>
 <script src="../src/uu.test.js"></script>
 </head><body>
 <div style="display:none">
@@ -509,14 +507,14 @@ uu.ready(function(uu) {
         return [uu.node.add(fg), "is node"];
       },
     "uu.nore.has()": "",
-      "uu.node.has(uu.id('tgt'), uu.id('ctx')) == true": function() {
-        return [uu.node.has(uu.id('tgt'), uu.id('ctx')), "is true"];
+      "uu.node.has(uu.id('ctx'), uu.id('tgt')) == true": function() {
+        return [uu.node.has(uu.id('ctx'), uu.id('tgt')), "is true"];
       },
       "uu.node.has(uu.id('ctx'), uu.id('ctx')) == false": function() {
         return [uu.node.has(uu.id('ctx'), uu.id('ctx')), "is false"];
       },
-      "uu.node.has(document.body, uu.id('ctx')) == false": function() {
-        return [uu.node.has(document.body, uu.id('ctx')), "is false"];
+      "uu.node.has(uu.id('ctx'), document.body) == false": function() {
+        return [uu.node.has(uu.id('ctx'), document.body), "is false"];
       },
 
 

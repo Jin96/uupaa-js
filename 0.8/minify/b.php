@@ -1,31 +1,54 @@
 <?php
 // usage:
-//  >b.php [-g | -y | -m] [-s] [-mb] [+debug] [-noverbose] package [more-packages...]
-//    -g    use Google Closure Compiler
-//    -y    use Microsoft Ajax Minifier
-//    -m    use YUI Compressor
-//    -s    separate build, uupaa.jsを別のファイルとしてビルドします。
-//    -mb   mobile
+//  >b.php [-g | -m | -y] [-s] [-mb] [+debug] [-noverbose] [*.js ...] [*.pkg ...] [*.head]
+//    -g    use Google Closure Compiler (default)
+//    -m    use Microsoft Ajax Minifier
+//    -y    use YUI Compressor
+//    -s    separate build. {$libraryCore} に指定されたファイルを別個にビルドします(2回ビルドします)。
+//    -mb   mobile. {{{!mb ～ }}}!mb を削除し、iPhone/iPad用にビルドします。
 //    +debug コードブロック {{{!debug ～ }}}!debug を残します
-//    -noverbose 結果表示画面で一時停止しません。バッチビルドに利用できます。
+//    -noverbose 結果表示画面で一時停止しません。バッチビルドが可能になります。
+//    *.js  JavaScriptソースコードファイルパスです。
+//          相対パスで指定した場合は {$sourceDir} 以下からファイルを読み取ります。
+//    *.pkg 一連のJavaScriptソースコードが記載されたパッケージファイルパスです。
+//          相対パスで指定した場合は {$packageDir} 以下からファイルを読み取ります。
+//    *.head リリースビルド用のヘッダファイルパスです。
+//          相対パスで指定した場合は {$headerDir} 以下からファイルを読み取ります。
 //
-//  1. パッケージをビルドする
-//      >b パッケージ名
+//  1. JavaScriptソースコードをビルドする。
+//     ソースコード.js を相対パスで指定しているため {$sourceDir}/ソースコード.js が読み取られる
 //
-//  2. 複数のパッケージを結合し一つのファイルとしてビルドする
-//      >b パッケージ名 パッケージ名
+//          >b ソースコード.js
 //
-//  3. モバイル用にcore(uupaa.js)を別ファイルに分けて分割ビルドする
-//      >b パッケージ名 パッケージ名 -s
+//  2. パッケージをビルドする
+//     パッケージ.pkg を相対パスで指定しているため {$packageDir}/パッケージ.pkg が読み取られる
 //
-//  4. Microsoft Ajax Minifier でビルド(Windows環境のみ)
-//      >b パッケージ名 パッケージ名 -m
+//          >b パッケージ.pkg
 //
-//  5. YUI Compressor でビルド
-//      >b パッケージ名 パッケージ名 -y
+//  3. 複数のパッケージを結合し一つのファイルとしてビルドする
 //
-//  6. Google Closure Compiler でビルド
-//      >b パッケージ名 パッケージ名 -g
+//          >b パッケージ.pkg パッケージ.pkg
+//
+//  4. iPhone/iPad用に {$libraryCore} とそれ以外を分割ビルドする
+//
+//          >b パッケージ.pkg -s -mb
+//
+//  5. Microsoft Ajax Minifier でビルドする(Windows環境のみ)
+//
+//          >b パッケージ.pkg -m
+//
+//  6. YUI Compressor でビルドする
+//
+//          >b パッケージ.pkg -y
+//
+//  7. Google Closure Compiler でビルドする
+//
+//          >b パッケージ.pkg -g
+//
+//  8. リリース用に署名(ヘッダ)を追加してビルドする
+//     ヘッダファイル.head を相対パスで指定しているため {$headerDir}/ヘッダファイル.head が読み取られる
+//
+//          >b ヘッダファイル.head パッケージ.pkg パッケージ.pkg -g
 
 // join source files and strip comments
 function joinSourceFiles($package,      // @param Array:
@@ -307,6 +330,7 @@ function doit() {
 }
 
 // --- global ---
+$libraryCore = "uupaa.js";
 $v = "";
 $minify = true;
 $package = array();
