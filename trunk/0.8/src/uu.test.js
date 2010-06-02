@@ -68,7 +68,7 @@ function uutest(testCase,      // @param Hash: { title: evaluator, ... }
                     uu.a("name,uutest" + data.index,
                         uu.text(title.replace(/\n/g, "<br />"))),
                     uu.br(),
-                    uu.text(rv.slice(1).join(" // ")))), ol);
+                    uu.text(rv.slice(1).join(" # ")))), ol);
     }
     // RED BGCOLOR
     ol.style.backgroundColor = data.ng ? "red" : "";

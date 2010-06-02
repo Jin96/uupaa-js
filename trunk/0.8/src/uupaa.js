@@ -1,3 +1,4 @@
+/*!{id:"uupaa.js",ver:0.8,license:"MIT",author:"uupaa.js@gmail.com"}*/
 
 // === Core ===
 
@@ -39,7 +40,7 @@ var _prototype = "prototype",
     _true = !0,
     _nop = function() {},
     // --- version detection ---
-    _ver = detectVersions(0.7),
+    _ver = detectVersions(0.8),
     _ie = _ver.ie,
     _gecko = _ver.gecko,
     _opera = _ver.opera,
@@ -224,11 +225,8 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Stri
         unbind:     uueventunbind,  // uu.event.unbind(node:Node, eventTypeEx:EventTypeExString = void):Node
         attach:     uueventattach,  // uu.event.attach(node:Node, eventType:String, evaluator:Function,
                                     //                                              useCapture:Boolean = false)
-        detach:     uueventdetach,  // uu.event.detach(node:Node, eventType:String, evaluator:Function,
+        detach:     uueventdetach   // uu.event.detach(node:Node, eventType:String, evaluator:Function,
                                     //                                              useCapture:Boolean = false)
-        getKeyCode: getKeyCode,     // uu.event.getKeyCode(event:EventObjectEx):Hash { key, code }
-        getPaddingEdge:             // uu.event.getPaddingEdge(event:EventObjectEx):Hash { x, y }
-                    getPaddingEdge
     }),
     // --- NODE / NodeList ---
     svg:            uusvg,          //  uu.svg(tagName:String = "svg", attr:Hash = void):SVGNode
@@ -2123,62 +2121,6 @@ uuevent.shortcut =
     ("mousedown,mouseup,mousemove,mousewheel,click,dblclick,keydown," +
      "keypress,keyup,change,submit,focus,blur,contextmenu").split(",")
 
-// uu.event.getKeyCode - get key and keyCode (cross browse keyCode)
-function getKeyCode(event) { // @param EventObjectEx:
-                             // @return Hash: { key, code }
-                             //     key  - String: "UP", "1", "A"
-                             //     code - Number: 38,   49,  65
-    var code = event.keyCode || event.charCode || 0;
-
-//{{{!mb
-    if (!code && win.event) { // [IE9]
-        code = win.event.keyCode || 0;
-    }
-//}}}!mb
-    return { key: getKeyCode.ident[code] || "", code: code };
-}
-// ::event.keyCode
-//    http://www.w3.org/TR/DOM-Level-3-Events/#events-keyboardevents
-getKeyCode.ident = uusplittohash( // virtual keycode -> "KEY IDENTIFIER"
-    "8,BS,9,TAB,13,ENTER,16,SHIFT,17,CTRL,18,ALT,27,ESC," +
-    "32,SP,33,PGUP,34,PGDN,35,END,36,HOME,37,LEFT,38,UP,39,RIGHT,40,DOWN," +
-    "45,INS,46,DEL,48,0,49,1,50,2,51,3,52,4,53,5,54,6,55,7,56,8,57,9," +
-    "65,A,66,B,67,C,68,D,69,E,70,F,71,G,72,H,73,I,74,J,75,K,76,L,77,M," +
-    "78,N,79,O,80,P,81,Q,82,R,83,S,84,T,85,U,86,V,87,W,88,X,89,Y,90,Z");
-
-// uu.event.getPaddingEdge - get padding edge (cross browse offsetX/Y)
-function getPaddingEdge(event) { // @param EventObjectEx:
-                                 // @return Hash: { x, y }
-                                 //     x - Number: fixed offsetX
-                                 //     y - Number: fixed offsetY
-    // http://d.hatena.ne.jp/uupaa/20100430/1272561922
-    var style =
-//{{{!mb
-                _ie ? null :
-//}}}!mb
-                getComputedStyle(event.xtarget, 0),
-        x = event.offsetX || 0,
-        y = event.offsetY || 0;
-
-//{{{!mb
-    if (_webkit) {
-//}}}!mb
-        x -= parseInt(style.borderTopWidth)  || 0; // "auto" -> 0
-        y -= parseInt(style.borderLeftWidth) || 0;
-//{{{!mb
-    } else if (_opera) {
-        x += parseInt(style.paddingTop)  || 0;
-        y += parseInt(style.paddingLeft) || 0;
-    } else if (_gecko || event.layer !== void 0) {
-        x = (event.layerX || 0) - (parseInt(style.borderTopWidth)  || 0);
-        y = (event.layerY || 0) - (parseInt(style.borderLeftWidth) || 0);
-    } else if (_ie && _ver.browser > 8) { // [IE9+]
-        x = win.event.offsetX;
-        y = win.event.offsetY;
-    }
-//}}}!mb
-    return { x: x, y: y };
-}
 
 // uu.event.fire - fire event / fire custom event(none capture event only)
 function uueventfire(node,      // @param Node: target node
@@ -3815,16 +3757,16 @@ function detectVersions(libraryVersion) { // @param Number: Library version
         return rv < minimumVersion ? 0 : rv;
     }
 
+//}}}!mb
     function test(rex) {
         return rex.test(userAgent);
     }
-//}}}!mb
 
-    var rv = { library: libraryVersion, flash: 0, silverlight: 0,
+    var rv = { library: libraryVersion,
                ie: _false, ie6: _false, ie7: _false, ie8: _false, ie9: _false,
                opera: _false, gecko: _false, webkit: _true,
-               chrome: _false, safari: _true, iphone: _true, android: _false,
-               mobile: _true, os: "iphone", jit: _true },
+               chrome: _false, safari: _true, mobile: _true, jit: _true,
+               flash: 0, silverlight: 0 },
 //{{{!mb
         ie = !!doc.uniqueID, documentMode = doc.documentMode,
 //}}}!mb
@@ -3855,16 +3797,20 @@ function detectVersions(libraryVersion) { // @param Number: Library version
     rv.webkit       = test(/WebKit/);
     rv.chrome       = test(/Chrome/);
     rv.safari       = !rv.chrome && test(/Safari/);
+    rv.mobile       = test(/Mobile/) || test(/Opera Mini/);
+//}}}!mb
     rv.iphone       = test(/iPad|iPod|iPhone/);
     rv.android      = test(/Android/);
-    rv.mobile       = test(/Mobile/) || test(/Opera Mini/);
     rv.os           = rv.iphone         ? "iphone"  // iPhone OS    -> "iphone"
                     : rv.android        ? "android" // Android OS   -> "android"
+//{{{!mb
                     : test(/CrOS/)      ? "chrome"  // Chrome OS    -> "chrome"
                     : test(/Win/)       ? "windows" // Windows OS   -> "windows"
                     : test(/Mac/)       ? "mac"     // Mac OS       -> "mac"
                     : test(/X11|Linux/) ? "unix"    // Unix Base OS -> "unix"
-                    : "unknown";                    // Unknown OS   -> "unknown"
+//}}}!mb
+                    : "";                           // Unknown OS   -> ""
+//{{{!mb
     rv.jit          = (ie        && browser >= 9)   || // IE 9+
                       (rv.gecko  && render  >  1.9) || // Firefox 3.5+(1.91)
                       (rv.webkit && render  >= 528) || // Safari 4+, Google Chrome(2+)

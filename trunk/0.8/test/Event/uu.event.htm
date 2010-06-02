@@ -82,7 +82,7 @@ uu.ready(function(uu) {
 
     uu.Class("Key", {
         handleEvent: function(event) {
-            var keyCode = uu.event.getKeyCode(event);
+            var keyCode = uu.event.key(event);
 
             uu.text(uu.id("log"),
                     uu.format("type:??, xtype:??, keyCode:??, key:??",
