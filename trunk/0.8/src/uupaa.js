@@ -1436,16 +1436,16 @@ function textSelectable(node,    // @param Node:
 //{{{!mb
     if (_webkit) {
 //}}}!mb
-        node.style["-webkit-user-select"] = allow ? "" : "none";
+        node.style.WebkitUserSelect = allow ? "" : "none";
 //{{{!mb
     } else if (_gecko) {
-        node.style["-moz-user-select"] = allow ? "" : "none";
+        node.style.MozUserSelect = allow ? "" : "none";
     } else if (_ie || _opera) {
         node.unselectable  = allow ? "" : "on";
         node.onselectstart = allow ? "" : "return false";
 //      node = node.parentNode;
     }
-    node.style["user-select"] = allow ? "" : "none";
+    node.style.userSelect = allow ? "" : "none";
 //}}}!mb
     return node;
 }
