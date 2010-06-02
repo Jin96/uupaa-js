@@ -29,13 +29,13 @@ function loadFiles($inputFiles) { // @param Array:
         $js = preg_replace('/\{\{\{\!mb([^\n]*)\n.*?\}\}\}\!mb/ms',
                            "/*{{{!mb$1 }}}!mb*/", $js);
     }
+    // #include "source.js"
+    $js = preg_replace_callback('/#include\s*[\("\']?([ \/\w\.\-\+]+)["\'\)]?/ms',
+                                includeSource, $js);
     // pre-process
     if (function_exists('preProcess')) {
         $js = preProcess($js, $mobile);
     }
-    // #include "source.js"
-    $js = preg_replace_callback('/#include\s*[\("\']?([ \w\.\-\+]+)["\'\)]?/ms',
-                                includeSource, $js);
     // create catfood
     $fp = fopen($catfood, 'w') or die($catfood . " file open fail");
 
@@ -126,12 +126,11 @@ function isFullPath($path) { // @param FilePathString:
     return preg_match('/^\/|\:/', $path) ? true : false;
 }
 
-function minify($outfile) { // @param FilePathString: output filename
-    global $compiler, $skipCore, $verbose, $catfood, $mobile;
+function minify() {
+    global $compiler, $skipCore, $verbose, $catfood, $mobile, $libraryCore;
 
     $command = '';
-    $outfile = stripFileExtension($outfile);
-    $optimize = $mobile ? ".mb" : "";
+    $outfile = stripFileExtension($libraryCore);
 
     if ($mobile) {
         $outfile .= $skipCore ? '.mb2.js' : '.mb.js';
@@ -196,7 +195,7 @@ while ($v = array_shift($argv)) {
 
 if ($mobile) {
     loadFiles(array($libraryCore));
-    minify($libraryCore);
+    minify();
 
     if (count($inputFiles) < 2) {
         return;
@@ -204,6 +203,6 @@ if ($mobile) {
     $skipCore = true;
 }
 loadFiles($inputFiles);
-minify($inputFiles[0]);
+minify();
 
 ?>
