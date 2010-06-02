@@ -112,7 +112,10 @@ uu.ready(function(uu) {
               fade: fade, puff: puff, shrink: shrink,
               highlight: highlight }, function(fn, key) {
 
-        uu.node.add(uu.click(uu.div("class,box", { x: x, y: y + 40 }, key), fn), uu.id("absolutebox"));
+        uu.node.add(
+            uu.css.textSelectable(
+                uu.click(
+                    uu.div("class,box", { x: x, y: y + 40 }, key), fn)), uu.id("absolutebox"));
 
         x += 100 + margin;
         if (x > (100 + margin) * 5) {
@@ -123,7 +126,10 @@ uu.ready(function(uu) {
     // position: static
     uu.each({ puff: puff, shrink: shrink }, function(fn, key) {
 
-        uu.node.add(uu.click(uu.div("class,box static", { cssFloat: "left" }, key), fn), uu.id("staticbox"), "+");
+        uu.node.add(
+            uu.css.textSelectable(
+                uu.click(
+                    uu.div("class,box static", { cssFloat: "left" }, key), fn)), uu.id("staticbox"), "+");
     });
 });
 
@@ -142,9 +148,9 @@ function toggleOutline() {
 
 uu.ready(function() {
     // init
-    uu.fx.slide(uu.id("slide1"), 0, { degree: 0  });
-    uu.fx.slide(uu.id("slide2"), 0, { degree: 45 });
-    uu.fx.slide(uu.id("slide3"), 0, { degree: 90 });
+    uu.fx.slide(uu.css.textSelectable(uu.id("slide1")), 0, { degree: 0  });
+    uu.fx.slide(uu.css.textSelectable(uu.id("slide2")), 0, { degree: 45 });
+    uu.fx.slide(uu.css.textSelectable(uu.id("slide3")), 0, { degree: 90 });
 
     uu.click(uu.id("slide1"), function(evt, node) {
         uu.fx.slide(node, duration);
