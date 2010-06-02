@@ -1,7 +1,8 @@
 
 // === uu.fx ===
-//{{{!depend uu, uu.color, uu.node.clone(in uu.fx.flare)
-//}}}!depend
+//#include uupaa.js
+//#include Color/uu.color.js
+//#include Node/uu.node.clone.js
 
 uu.fx.fade || (function(uu) {
 
