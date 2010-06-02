@@ -2,13 +2,6 @@
 // === Core ===
 
 // * Manual http://code.google.com/p/uupaa-js/w/list
-//
-// * Predefined types ( doc/predefined-types.txt )
-//
-//  - ColorHash, RGBAHash, HSLAHash, HSVAHash, W3CNamedColor
-//  - EventObjectEx, DateHash, AjaxOptionHash, AjaxResultHash
-//  - JSONPOptionHash, FlashOptionHash
-//
 
 var uu; // window.uu - uupaa.js library namespace
 
@@ -225,7 +218,7 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Stri
                                     //  [2][bind multi events]       uu.event(node, "click,dblclick", fn)    -> node
                                     //  [3][bind a capture event]    uu.event(node, "mousemove+", fn)        -> node
                                     //  [4][bind a namespace.event]  uu.event(node, "MyNameSpace.click", fn) -> node
-        has:        uueventhas,     // uu.event.has(node:Node, eventTypeEx:EventTypeExString):Boolean
+        has:        uuhas,          // uu.event.has(node:Node, eventTypeEx:EventTypeExString):Boolean
         fire:       uueventfire,    // uu.event.fire(node:Node, eventType:String, param:Mix = void):Node
         stop:       uueventstop,    // uu.event.stop(event:EventObjectEx)
         unbind:     uueventunbind,  // uu.event.unbind(node:Node, eventTypeEx:EventTypeExString = void):Node
@@ -262,7 +255,7 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Stri
                                     //        <div id="lastSibling">     $  </div>
                                     //    </div>
                                     //
-        has:        uunodehas,      // uu.node.has(node:Node, parent:Node):Boolean
+        has:        uuhas,          // uu.node.has(parent:Node, child:Node):Boolean
         bulk:       uunodebulk,     // uu.node.bulk(source:Node/HTMLFragment, context:Node = <div>):DocumentFragment
         find:       uunodefind,     // uu.node.find(parent:Node, position:String = ".$"):Node/null
                                     //  [1][find firstSibling] uu.node.find(document.body, "^") -> <head>
@@ -765,17 +758,31 @@ function uuarray(source,     // @param Array/Mix/NodeList/Arguments: source
                                   : rv.slice(sliceStart)) : rv;
 }
 
-// [1][Hash has Hash]       uu.has({ a: 1, b: 2 }, { a: 1 }) -> true
-// [2][Array has Array]     uu.has([1, 2], [1]) -> true
+// [1][Array has Array] uu.has([1, 2], [1]) -> true
+// [2][Hash has Hash]   uu.has({ a: 1, b: 2 }, { a: 1 }) -> true
+// [3][Node has Event]  uu.has(node, "namespace.click") -> true
+// [4][Node has Node]   uu.has(parentNode, childNode) -> true
 
 // uu.has - has
-function uuhas(source,   // @param Hash/Array: source
-               search) { // @param Hash/Array: search element
+function uuhas(source,   // @param Hash/Array/Node: source
+               search) { // @param Hash/Array/Node/String: search element
                          // @return Boolean:
     if (source && search) {
         var i = 0, iz;
 
-        if (_isArray(source)) {
+        if (source[_nodeType]) {
+            // [3]
+            if (isString(search)) {
+                i = source[_uuevent];
+                return (i ? i.types : "")[_indexOf]("," + search + ",") >= 0;
+            }
+            // [4]
+            for (i = search; i && i !== source; i = i[_parentNode]) {
+            }
+            return search !== source && i === source;
+        }
+
+        if (_isArray(source)) { // [1]
             search = uuarray(search);
 
             for (iz = search.length; i < iz; ++i) {
@@ -783,7 +790,7 @@ function uuhas(source,   // @param Hash/Array: source
                     return _false;
                 }
             }
-        } else {
+        } else { // [2]
             for (i in search) {
                 if (!(i in source)
                     || (source[i] !== search[i]
@@ -1328,7 +1335,7 @@ function uufxskip(node,           // @param Node(= null): null is all node
     var nodeArray = node ? [node] : uutag("*", doc.body),
         v, i = -1, j, k, jz, kz, data, guid, q, rq;
 
-    while( (v = nodeArray[++i]) ) {
+    while ( (v = nodeArray[++i]) ) {
         data = v[_uufx];
         if (data && data.id) {
 
@@ -2173,21 +2180,12 @@ function getPaddingEdge(event) { // @param EventObjectEx:
     return { x: x, y: y };
 }
 
-// uu.event.has - has event
-function uueventhas(node,          // @param Node: target node
-                    eventTypeEx) { // @param EventTypeExString: namespace and event types, "click", "namespace.mousemove+"
-                                   // @return Boolean:
-    var types = node[_uuevent] ? node[_uuevent]["types"] : 0;
-
-    return (types || "")[_indexOf]("," + eventTypeEx + ",") >= 0;
-}
-
 // uu.event.fire - fire event / fire custom event(none capture event only)
 function uueventfire(node,      // @param Node: target node
                      eventType, // @param String: "click", "custom"
                      param) {   // @param Mix(= void): param
                                 // @return Node:
-    if (uueventhas(node, eventType)) {
+    if (uuhas(node, eventType)) {
 
         var fakeEventObjectEx = {
                 type:           eventType,
@@ -2479,16 +2477,6 @@ function uunodeidremove(node) { // @param Node:
     node[_uuguid] && (uunodeid.db[node[_uuguid]] = null,
                                   node[_uuguid] = null);
     return node;
-}
-
-// uu.node.has - has child node
-function uunodehas(node,     // @param Node: child node
-                   parent) { // @param Node: parent node
-                             // @return Boolean:
-    for (var c = node; c && c !== parent;) {
-        c = c[_parentNode];
-    }
-    return node !== parent && c === parent;
 }
 
 // [1][clone]           uu.node.bulk(Node) -> DocumentFragment
