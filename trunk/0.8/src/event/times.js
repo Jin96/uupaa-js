@@ -1,9 +1,8 @@
 
 // === uu.event.times ===
-//{{{!depend uu
-//}}}!depend
+//#include uupaa.js
 
-uu.event.times || (function(win, doc, uu) {
+uu.event.times || (function(win, uu) {
 
 uu.event.times = uueventtimes; // uu.event.times(node:Node, eventTypeEx:EventTypeExString,
                                //                cyclic:Number, var_args:Function, ...):Node
@@ -33,5 +32,5 @@ function uueventtimes(node,             // @param Node: target node
     return node;
 }
 
-})(window, document, uu);
+})(this, uu);
 

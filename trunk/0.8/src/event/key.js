@@ -1,7 +1,6 @@
 
 // === uu.event.key ===
-//{{{!depend uu
-//}}}!depend
+//#include uupaa.js
 
 uu.event.key || (function(win, uu) {
 
@@ -25,7 +24,7 @@ function uueventkey(event) { // @param EventObjectEx:
 // ::event.keyCode
 //    http://www.w3.org/TR/DOM-Level-3-Events/#events-keyboardevents
 
-uueventkey.ident = uusplittohash( // virtual keycode -> "KEY IDENTIFIER"
+uueventkey.ident = uu.split.toHash( // virtual keycode -> "KEY IDENTIFIER"
     "8,BS,9,TAB,13,ENTER,16,SHIFT,17,CTRL,18,ALT,27,ESC," +
     "32,SP,33,PGUP,34,PGDN,35,END,36,HOME,37,LEFT,38,UP,39,RIGHT,40,DOWN," +
     "45,INS,46,DEL,48,0,49,1,50,2,51,3,52,4,53,5,54,6,55,7,56,8,57,9," +

@@ -1,7 +1,7 @@
 
 // === uu.color.cud ===
-//{{{!depend uu, uu.color
-//}}}!depend
+//#include uupaa.js
+//#include color/color.js
 
 uu.color.cud || (function() {
 

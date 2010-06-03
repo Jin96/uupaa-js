@@ -45,6 +45,8 @@ html,body {
 
 </style>
 <script src="../../src/uupaa.js"></script>
+<script src="../../src/event/edge.js"></script>
+<script src="../../src/event/key.js"></script>
 <script>
 uu.ready(function(uu) {
     uu.node.builder(function(uu, node) {
@@ -62,8 +64,8 @@ uu.ready(function(uu) {
 
     uu.Class("MousePosition", {
         handleEvent: function(event) {
-            event.stop();
-            var edge = uu.event.getPaddingEdge(event);
+            uu.event.stop(event);
+            var edge = uu.event.edge(event);
 
             uu.text(uu.id("log"),
                     uu.format("paddingEdgeX:??, paddingEdgeY:??, pageX:??, pageY:??",

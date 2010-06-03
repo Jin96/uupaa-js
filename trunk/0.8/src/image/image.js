@@ -1,7 +1,6 @@
 
 // === uu.image / window.image ===
-//{{{!depend uu
-//}}}!depend
+//#include uupaa.js
 
 (this.uu || this).image || (function(namespace) {
 

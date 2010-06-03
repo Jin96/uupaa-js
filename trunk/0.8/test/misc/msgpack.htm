@@ -13,12 +13,13 @@
 .uutestinfo .ngzone {}
 </style>
 <script src="../../src/uupaa.js"></script>
-<script src="../../src/uu.test.js"></script>
-<script src="../../src/Misc/uu.msgpack.js"></script>
-<script src="../../src/Misc/uu.utf8.js"></script>
+<script src="../../src/test/test.js"></script>
+<script src="../../src/misc/msgpack.js"></script>
+<script src="../../src/misc/utf8.js"></script>
+<script src="../../src/misc/byteArray.js"></script>
 <script>
 uu.ready(function(uu) {
-    var hex = uu.test.toHexString;
+    var hex = uu.byteArray.toHexString;
 
     uu.test({
         "FixNum, uint and int": "",

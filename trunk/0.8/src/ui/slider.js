@@ -1,9 +1,10 @@
 
 // === uu.ui.slider ===
 //#include uupaa.js
-//#include Node/uu.node.normalize.js
-//#include Image/uu.image.js
-//#include Color/uu.color.js
+//#include node/normalize.js
+//#include image/image.js
+//#include color/color.js
+//#include css/text.js
 /*
     1| uu.ui.slider.dressup(<div>, { degree: 90 })  -> dress up
 

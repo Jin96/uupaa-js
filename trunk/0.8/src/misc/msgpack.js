@@ -1,8 +1,9 @@
 
 // === uu.msgpack / window.msgpack ===
-// http://msgpack.sourceforge.net/
-//{{{!depend uu.utf8
-//}}}!depend
+//#include uupaa.js
+//#include misc/utf8.js
+
+// MessagePack -> http://msgpack.sourceforge.net/
 
 (this.uu || this).msgpack || (function(namespace) {
 

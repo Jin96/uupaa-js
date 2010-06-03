@@ -1,7 +1,6 @@
 
 // === uu.test ===
-//{{{!depend uu
-//}}}!depend
+//#include uupaa.js
 
 /*
 <style>
@@ -28,9 +27,8 @@
 
 uu.test || (function(uu) {
 
-uu.test = uutest;                   // uu.test(testCase:Hash, throwsError:Boolean = false)
-uu.test.addType     = addType;      // uu.test.addType(operator:String, callback:Function):Boolean
-uu.test.toHexString = toHexString;  // uu.test.toHexString(source:ByteArray):String
+uu.test = uutest;           // uu.test(testCase:Hash, throwsError:Boolean = false)
+uu.test.addType = addType;  // uu.test.addType(operator:String, callback:Function):Boolean
 uu.test.data = { index: 0, ok: 0, ng: 0, total: 0, run: 0 };
 
 // uu.test
@@ -176,18 +174,6 @@ function addType(operator,   // @param String:
     uutest.type[operator.toUpperCase().
                          replace(/\s+/g, "").
                          replace(uutest.trimOperator, "")] = callback;
-}
-
-// uu.test.toHexString - array to HexString
-function toHexString(source) { // @param ByteArray:
-                               // @return String: "[0xnn, 0xnn, ... ]"
-    var rv = [], v, i = 0, iz = source.length;
-
-    for (; i < iz; ++i) {
-        v = source[i];
-        rv.push("0x" + uu.hash.num2hh[v * (v < 0 ? -1 : 1)]);
-    }
-    return "[" + rv.join(", ") + "]";
 }
 
 })(uu);

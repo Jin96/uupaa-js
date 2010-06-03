@@ -1,7 +1,6 @@
 
 // === uu.value ===
-//{{{!depend uu
-//}}}!depend
+//#include uupaa.js
 
 uu.value || (function(win, doc, uu) {
 
