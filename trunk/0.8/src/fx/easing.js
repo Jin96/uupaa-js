@@ -97,11 +97,11 @@ mix(Math, {
   easeInBounce:       bk,
   easeOutBounce:      bl,
   easeInOutBounce:    bm,
-  easeOutInBounce:    bn 
+  easeOutInBounce:    bn
 });
 
 // t:Number - current time
-// b:Number - beginning value 
+// b:Number - beginning value
 // c:Number - change in value(delta)
 // d:Number - duration(unit: ms)
 function aa(t,b,c,d) { return c*t/d+b; }
@@ -131,7 +131,7 @@ function ao(t,b,c,d) { var n1=t*t*t*t,n2=c/2;
 function ap(t,b,c,d) { var n1=t*2,n2=c/2;
                        return t<d/2?an(n1,b,n2,d)
                                    :am(n1-d,b+n2,n2,d); }
-  
+
 function aq(t,b,c,d) { return -c*_cos(t/d*_hpi)+c+b; }
 function ar(t,b,c,d) { return c*_sin(t/d*_hpi)+b; }
 function as(t,b,c,d) { return -c/2*(_cos(_math.PI*t/d)-1)+b; }
