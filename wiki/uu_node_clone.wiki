@@ -39,7 +39,7 @@ alert(uu.node.clone(uu.id("source")).outerHTML);
 }}}
 
 = Test Code =
-http://uupaa-js.googlecode.com/svn/trunk/0.8/test/Node/uu.node.clone.htm
+http://uupaa-js.googlecode.com/svn/trunk/0.8/test/node/clone.htm
 {{{
 <!doctype html><html><head><title></title>
 <style>

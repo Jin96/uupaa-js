@@ -198,5 +198,5 @@ uu.fx.highlight(_node_:Node, _duration_:Number, _param_:Hash/Function = { bgc: "
 
 = Test Code =
   * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/fx/fx.htm
-  * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/fx/fx.dance.htm
-  * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/fx/fx.plus.htm
+  * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/fx/dance.htm
+  * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/fx/plus.htm
