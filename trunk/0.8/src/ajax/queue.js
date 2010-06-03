@@ -1,7 +1,7 @@
 
 // === uu.ajax.queue ===
-//{{{!depend uu, uu.ajax
-//}}}!depend
+//#include uupaa.js
+//#include ajax/ajax.js
 
 uu.ajax.queue || (function(uu) {
 
