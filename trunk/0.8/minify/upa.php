@@ -1,9 +1,8 @@
 <?php
-include 'pre-process.php';
 
 // --- user setting ---
 $libraryCore = "uupaa.js";
-$packageDir  = "pkg/";
+$preprosess  = "js.pp";         // pre-processor
 $sourceDir   = "../src/";
 $compiler    = "g";             // default compiler
 $catfood     = "../catfood.js"; // temporary file
@@ -21,17 +20,13 @@ function loadFiles($inputFiles) { // @param Array:
 
     $js = '';
     foreach($inputFiles as $src) {
-        $js .= preg_match('/\.pkg$/', $src) ? loadPackage($src)
-                                            : loadSource($src);
+        $js .= loadSource($src);
     }
     // strip {{{!mb ... }}}!mb code block
     if ($mobile) {
         $js = preg_replace('/\{\{\{\!mb([^\n]*)\n.*?\}\}\}\!mb/ms',
                            "/*{{{!mb$1 }}}!mb*/", $js);
     }
-    // #include "source.js"
-    $js = preg_replace_callback('/#include\s*([\/\w\.\-\+]+)/ms',
-                                includeSource, $js);
     // pre-process
     if (function_exists('preProcess')) {
         $js = preProcess($js, $mobile);
@@ -44,48 +39,31 @@ function loadFiles($inputFiles) { // @param Array:
     fclose($fp);
 }
 
-function loadPackage($pkg) { // @param FilePathString:
-                             // @return JavaScriptExpressionString:
-    $js = '';
-    $lines = file(pathNormalize(trim($pkg)),
-                  FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-
-    foreach($lines as $src) {
-        if (preg_match('/^\s*$/', $src)) { // strip blank
-            continue;
-        }
-        if (preg_match('/^\/\//', $src)) { // strip C++ comment
-            continue;
-        }
-        $js .= preg_match('/\.pkg$/', $src) ? loadPackage($src)
-                                            : loadSource($src);
-    }
-    return $js;
-}
-
 function loadSource($src) { // @param FilePathString:
                             // @return JavaScriptExpressionString:
     global $verbose, $skipCore, $libraryCore, $loadedFiles;
 
     $src = pathNormalize(trim($src));
     // skip libraryCore file
-    if ($skipCore) {
-        if (preg_match('/' . $libraryCore . '$/', $src)) {
-            return '';
-        }
+    if ($skipCore && preg_match('/' . $libraryCore . '$/', $src)) {
+        return '';
     }
-    // skip duplicate file
+    // avoid duplicate source
     if (in_array($src, $loadedFiles)) {
         return '';
     }
     $loadedFiles[] = $src;
 
     if ($verbose) {
-        echo '<script src="' . '..' . slash() . $src . '"></script>' . "\n";
+        $slash = isWindows() ? '\\' : '/';
+        echo '<script src="' . '..' . $slash . $src . '"></script>' . "\n";
     }
-
     // normalize line break
-    return preg_replace('/(\r\n|\r|\n)/m', "\n", file_get_contents($src));
+    $js = preg_replace('/(\r\n|\r|\n)/m', "\n", file_get_contents($src));
+
+    // #include "source.js"
+    return preg_replace_callback('/#include\s+["\'<]?([\w\.\-\+\/]+)[>"\']?/ms',
+                                 includeSource, $js);
 }
 
 function includeSource($match) { // @param String: match word
@@ -93,31 +71,17 @@ function includeSource($match) { // @param String: match word
     return "\n" . loadSource($match[1]) . "\n//";
 }
 
-function slash() {
-    return isWindows() ? '\\' : '/';
-}
-
 function isWindows() { // @return Boolean:
     return substr(PHP_OS, 0, 3) == 'WIN';
 }
 
-function stripFileExtension($path) { // @param FilePathString: "file.ext"
-                                     // @return FilePathString: "file"
-    return preg_replace('/\.[\w\.]+$/', '', $path);
-}
-
 function pathNormalize($path) { // @param FilePathString:  "..\dir/file.ext"
                                 // @return FilePathString: "../dir/file.ext"
-    global $packageDir, $sourceDir;
+    global $sourceDir;
 
-    if (preg_match('/\.js$/', $path)) {
-        if (!isFullPath($path)) {
-            $path = $sourceDir . $path;     //  uupaa.js    ->  ../src/uupaa.js
-        }
-    } else if (preg_match('/\.pkg$/', $path)) {
-        if (!isFullPath($path)) {
-            $path = $packageDir . $path;    //  uupaa.pkg   ->  pkg/uupaa.pkg
-        }
+    if (!preg_match('/^\/|\:/', $path)) { // rel-path?
+        // add dir
+        $path = $sourceDir . $path;     //  uupaa.js    ->  ../src/uupaa.js
     }
     if (isWindows()) {
         $path = preg_replace('/\//', '\\', $path);
@@ -125,17 +89,13 @@ function pathNormalize($path) { // @param FilePathString:  "..\dir/file.ext"
     return $path;
 }
 
-function isFullPath($path) { // @param FilePathString:
-                             // @return Boolean:
-    return preg_match('/^\/|\:/', $path) ? true : false;
-}
-
 function minify() {
     global $compiler, $skipCore, $verbose, $catfood, $mobile, $libraryCore;
 
     $command = '';
-    $outfile = stripFileExtension($libraryCore);
 
+    // strip file extension
+    $outfile = preg_replace('/\.[\w\.]+$/', '', $libraryCore);
     if ($mobile) {
         $outfile .= $skipCore ? '.mb2.js' : '.mb.js';
     } else {
@@ -146,16 +106,16 @@ function minify() {
     case "g":
 //      $options = '--warning_level=VERBOSE '
 //               . '--compilation_level=ADVANCED_OPTIMIZATIONS ';
-        $command = 'java -jar tool/lib.g.jar ' . $options . ' --js=' . $catfood
+        $command = 'java -jar tool.g.jar ' . $options . ' --js=' . $catfood
                  . ' --js_output_file=../' . $outfile;
         break;
     case "y":
         $options = '--charset "utf-8" ';
-        $command = 'java -jar tool/lib.y.jar -v ' . $options . ' -o ../'
+        $command = 'java -jar tool.y.jar -v ' . $options . ' -o ../'
                  . $outfile . ' ' . $catfood;
         break;
     case "m":
-        $command = 'tool\lib.m.exe -w5 -hc ' . $catfood . ' -o ../'
+        $command = 'tool.m.exe -w5 -hc ' . $catfood . ' -o ../'
                  . $outfile;
     }
 
@@ -186,16 +146,21 @@ array_shift($argv);
 
 while ($v = array_shift($argv)) {
     switch ($v) {
-    case "-g":  $compiler = "g"; break;
-    case "-y":  $compiler = "y"; break;
-    case "-m":  $compiler = "m"; break;
-    case "-mb": $mobile  = true; break;
-    case "-v":  $verbose = true; break;
-    default:    if (!in_array($v, $inputFiles)) {
-                    $inputFiles[] = $v;
-                }
+    case "-g":      $compiler = "g"; break;
+    case "-y":      $compiler = "y"; break;
+    case "-m":      $compiler = "m"; break;
+    case "-mb":     $mobile  = true; break;
+    case "-v":      $verbose = true; break;
+    case "-pp":     $preprosess = array_shift($argv); break;
+    case "-core":   $libraryCore = array_shift($argv);
+                    $inputFiles = array($libraryCore); break;
+    default:        if (!in_array($v, $inputFiles)) {
+                        $inputFiles[] = $v;
+                    }
     }
 }
+
+include $preprosess;
 
 if ($mobile) {
     loadFiles(array($libraryCore));

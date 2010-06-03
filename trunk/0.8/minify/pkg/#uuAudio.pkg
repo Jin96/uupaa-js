@@ -1,9 +1,0 @@
-minify/header/uuAudio.js
-
-src/uupaa.js
-src/uu.flash.js
-src/Audio/uu.Class.Audio.js
-src/Audio/uu.Class.HTML5Audio.js
-src/Audio/uu.Class.SilverlightAudio.js
-src/Audio/uu.Class.FlashAudio.js
-src/Audio/uu.Class.NoAudio.js
