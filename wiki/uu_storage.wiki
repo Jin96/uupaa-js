@@ -6,11 +6,11 @@
 uu.storage を使うと、クライアントサイドに永続的なデータを保存することができます。
 
 uu.storage を利用するには以下のファイルをロードします。
-  * src/uu.ajax.js
-  * src/uu.storage.js
+  * src/ajax/ajax.js
+  * src/storage/storage.js
   * !FlashStorage が選択された場合は uu.storage.swf を自動的にロードします(ユーザが明示的にロードする必要はありません)。
 
-uu.storage.js をロードすると以下の機能が追加されます。
+src/storage/storage.js をロードすると以下の機能が追加されます。
 
   * uu.ready("storage", callback) を定義すると、ストレージが利用可能になったタイミングでコールバックします。
     * コールバック引数は callback(uu, _storageInstance_) です。第二引数は uu.storage と同じものです。
@@ -78,7 +78,7 @@ Flash がローカル環境(`file://...`)で動かない場合は、 サーバ�
 IEStorage は IE の独自機能(userData behavior) をラップしたものです。
 機能を OFF にされてしまう可能性があります。
 
-== !CookieStorage == 
+== !CookieStorage ==
 !CookieStorage は Cookie をラップしたものです。
 機能を OFF にされてしまう可能性があります。
 
@@ -106,7 +106,7 @@ window.uuconfig = { storage: _minimumStorageSize_ } を定義しておくと、�
 
 = Test Code =
 
-http://uupaa-js.googlecode.com/svn/trunk/0.8/test/Storage/uu.storage.htm
+http://uupaa-js.googlecode.com/svn/trunk/0.8/test/storage/storage.htm
 
 = API =
 
@@ -175,7 +175,7 @@ callback を指定すると POST 成功または失敗でコールバックし�
         }
     });
 }}}
-    
+
 == uu.Class.Storage.toString ==
 Storage.toString():String は、バックエンドを識別する文字列を返します。
 

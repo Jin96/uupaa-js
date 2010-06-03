@@ -47,4 +47,4 @@ uu.css.isShow(node:Node/CSSProperties):Boolean は、要素が見えている場
 
 = Test Code =
 
-  * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/CSS/uu.css.show.htm
+  * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/css/show.htm

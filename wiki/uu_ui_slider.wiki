@@ -1,31 +1,25 @@
-#summary uu.fx.slide は uu.fx の機能を拡張します
+#summary uu.ui.slider は 複数の画像からなるスライダーUIを提供します
 
 <wiki:toc max_depth="2" />
 
 = 導入 =
 
-uu.fx.slide は [uu_fx uu.fx] の機能を拡張します。
+uu.ui.slider を利用するには以下のファイルが必要です。
+  * src/ui/slider.js
+  * src/node/normalize.js
+  * src/image/image.js
 
-uu.fx.slide を利用するには以下のファイルが必要です。
-  * src/Node/uu.node.normalize.js
-  * src/Image/uu.image.js
-
-uu.fx.slide.js をロードすると、以下の関数が追加されます。
-  * uu.fx.slide
-  * !NodeSet.slide
+src/ui/slider.js をロードすると、以下の関数が追加されます。
+  * uu.ui.slider
+  * uu.ui.slider.dressup
 
 = API =
-_node_, _duration_, _param_ の説明は [uu_fx uu.fx] を参照してください。
 
-_param_ にCSSプロパティを追加すると、ユーザ独自の変化を付け加えることも可能です。
+== uu.ui.slider.dressup ==
+uu.ui.slider.dressup(_node_:Node, _param_:Hash/Function = { degree: 0 }) は、
+uu.ui.sliderを呼ぶ前に、一度だけ実行する必要がある初期化関数です。
 
-== uu.fx.slide ==
-
-uu.fx.slide(_node_:Node, _duration_:Number, _param_:Hash/Function = { degree: 0 }):Node は、
-画像を含むHTMLフラグメントをドレスアップし、スライダーに仕立てます。
-
-もう一度、uu.fx.slide() を呼ぶとスライドアニメーションが実行されます。
-
+uu.ui.slider.dressup を呼ぶと、画像を含むHTMLフラグメントをドレスアップし、スライダーに仕立てます。
 _degree_ には 0, 45 または 90 を指定できます。0 なら横方向に、45 なら斜めに、90 なら縦方向にスライドします。
 
 === ドレスアップ用のHTML ===
@@ -52,5 +46,10 @@ _degree_ には 0, 45 または 90 を指定できます。0 なら横方向に�
   * スライダーの大きさは、先頭画像の大きさで決まります。
     * 画像サイズをあらかじめ統一しておいてください。
 
+== uu.ui.slider ==
+
+uu.ui.slider(_node_:Node, _duration_:Number, _param_:Hash/Function = {}):Node は、
+スライドアニメーションを実行します。
+
 = Test Code =
-  * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/Fx/uu.fx.plus.htm
+  * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/ui/slider.htm

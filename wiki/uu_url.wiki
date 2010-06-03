@@ -7,9 +7,9 @@
 uu.url は URL や !QueryString をパースし、ビルドする機能を提供します。
 
 uu.url を利用するには以下のファイルが必要です。
-  * src/Misc/uu.url.js
+  * src/misc/url.js
 
-uu.url.js をロードすると、以下の関数が追加されます。
+src/misc/url.js をロードすると、以下の関数が追加されます。
   * uu.url
   * uu.url.abs
   * uu.url.dir
@@ -80,7 +80,7 @@ uu.url.query(_queryString_:!QueryString/Hash, _add_:Hash):!QueryString/Hash は�
 }}}
 
 = Test Code =
-  * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/Misc/uu.url.htm
+  * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/misc/url.htm
 
 = TYPES =
 

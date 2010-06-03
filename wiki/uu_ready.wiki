@@ -148,4 +148,4 @@ uu.ready.fire(_eventType_:String, _param_:Mix = void) は uu.ready() で登録�
 コールバック引数は、callback(uu, _param_) となります。
 
 = Test Code =
-http://uupaa-js.googlecode.com/svn/trunk/0.8/test/Ready/uu.ready.htm
+http://uupaa-js.googlecode.com/svn/trunk/0.8/test/ready/ready.htm

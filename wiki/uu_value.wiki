@@ -1,6 +1,6 @@
 #summary uu.value, NodeSet.value は、フォーム要素の値を取得/設定します
 
-src/Form/uu.form.js をロードすると、uu.value() と uu.Class.NodeSet.prototype.value() が利用可能になります。
+src/form/form.js をロードすると、uu.value() と uu.Class.NodeSet.prototype.value() が利用可能になります。
 
 <wiki:toc max_depth="2" />
 
@@ -21,7 +21,7 @@ uu.value(_textareaNode_) で value 属性の値を取得し、uu.value(_textarea
 {{{
 <!doctype html><html><head><meta charset="UTF-8" />
 <script src="../../src/uupaa.js"></script>
-<script src="../../src/Form/uu.form.js"></script>
+<script src="../../src/form/form.js"></script>
 <script>
 uu.ready(function(uu) {
     var node = uu.tag("textarea")[0];
@@ -56,7 +56,7 @@ uu.value(_buttonNode_) で value 属性の値を取得し、uu.value(_buttonNode
 {{{
 <!doctype html><html><head><meta charset="UTF-8" />
 <script src="../../src/uupaa.js"></script>
-<script src="../../src/Form/uu.form.js"></script>
+<script src="../../src/form/form.js"></script>
 <script>
 uu.ready(function(uu) {
     var node = uu.tag("button")[0];
@@ -91,7 +91,7 @@ uu.value(_optionNode_) で value 属性の値を取得し、uu.value(_optionNode
 {{{
 <!doctype html><html><head><meta charset="UTF-8" />
 <script src="../../src/uupaa.js"></script>
-<script src="../../src/Form/uu.form.js"></script>
+<script src="../../src/form/form.js"></script>
 <script>
 uu.ready(function(uu) {
     var node = uu.tag("option")[0];
@@ -131,7 +131,7 @@ _findValue_ と一致する値が存在しなければ*何も選択されてい�
 {{{
 <!doctype html><html><head><meta charset="UTF-8" />
 <script src="../../src/uupaa.js"></script>
-<script src="../../src/Form/uu.form.js"></script>
+<script src="../../src/form/form.js"></script>
 <script>
 uu.ready(function(uu) {
     var node = uu.tag("input")[0]; // <input name="radioA" value="A1">
@@ -178,7 +178,7 @@ _findValue_ と一致しない値を持つ要素は全て*アンチェック*に
 {{{
 <!doctype html><html><head><meta charset="UTF-8" />
 <script src="../../src/uupaa.js"></script>
-<script src="../../src/Form/uu.form.js"></script>
+<script src="../../src/form/form.js"></script>
 <script>
 uu.ready(function(uu) {
     var node = uu.tag("input")[0]; // <input name="checkboxA" value="A1">
@@ -226,7 +226,7 @@ uu.value(_inputNode_) で value 属性の値を取得します。値の設定は
 {{{
 <!doctype html><html><head><meta charset="UTF-8" />
 <script src="../../src/uupaa.js"></script>
-<script src="../../src/Form/uu.form.js"></script>
+<script src="../../src/form/form.js"></script>
 <script>
 uu.ready(function(uu) {
     var node = uu.tag("input")[0]; // <input type="file" value"">
@@ -259,7 +259,7 @@ uu.value(_inputNode_) で value 属性の値を取得し、uu.value(_inputNode_,
 {{{
 <!doctype html><html><head><meta charset="UTF-8" />
 <script src="../../src/uupaa.js"></script>
-<script src="../../src/Form/uu.form.js"></script>
+<script src="../../src/form/form.js"></script>
 <script>
 uu.ready(function(uu) {
     var nodeList = uu.tag("input");
@@ -317,7 +317,7 @@ _findValue_ で指定された値が存在しない場合は、選択状態が�
 {{{
 <!doctype html><html><head><meta charset="UTF-8" />
 <script src="../../src/uupaa.js"></script>
-<script src="../../src/Form/uu.form.js"></script>
+<script src="../../src/form/form.js"></script>
 <script>
 uu.ready(function(uu) {
     var node = uu.tag("select")[0];
@@ -352,7 +352,7 @@ uu.ready(function(uu) {
 }}}
 
 == Test Code ==
-http://uupaa-js.googlecode.com/svn/trunk/0.8/test/Form/select.htm
+http://uupaa-js.googlecode.com/svn/trunk/0.8/test/form/select.htm
 
 = `<`select multiple="multiple"`>`=
 
@@ -366,7 +366,7 @@ _findValue_ で指定された値が存在しない場合は*未選択状態*に
 {{{
 <!doctype html><html><head><meta charset="UTF-8" />
 <script src="../../src/uupaa.js"></script>
-<script src="../../src/Form/uu.form.js"></script>
+<script src="../../src/form/form.js"></script>
 <script>
 uu.ready(function(uu) {
     var node = uu.tag("select")[0];
@@ -422,4 +422,4 @@ uu.ready(function(uu) {
 }}}
 
 == Test Code ==
-http://uupaa-js.googlecode.com/svn/trunk/0.8/test/Form/select-multiple.htm
+http://uupaa-js.googlecode.com/svn/trunk/0.8/test/form/select-multiple.htm

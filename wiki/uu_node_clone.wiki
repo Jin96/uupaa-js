@@ -10,7 +10,7 @@ Node.cloneNode(true) をクロスブラウザに対応させ、イベントハ�
 
 uu.node.clone を利用するには以下のファイルが必要です。
 
-  * src/Node/uu.node.clone.js
+  * src/node/clone.js
 
 = API =
 
@@ -48,10 +48,10 @@ http://uupaa-js.googlecode.com/svn/trunk/0.8/test/Node/uu.node.clone.htm
 }
 </style>
 <script src="../../src/uupaa.js"></script>
-<script src="../../src/Node/uu.node.clone.js"></script>
-<script src="../../src/Color/uu.color.js"></script>
+<script src="../../src/node/clone.js"></script>
+<script src="../../src/color/color.js"></script>
 <script>
-function xwin() {
+uu.ready(function() {
     function handler(evt) {
         var node = evt.currentTarget;
 
@@ -75,7 +75,7 @@ function xwin() {
     uu.event(uu.id("radio"), "click", handler);
     uu.event(uu.id("password"), "click", handler);
     uu.event(uu.id("text"), "click", handler);
-}
+});
 </script>
 </head><body>
 <h1>cloneNode test</h1>

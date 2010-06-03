@@ -1,4 +1,4 @@
-#summary uu.tween は基本的なアニメーション機能を提供します
+#summary uu.fx はアニメーションエフェクトを提供します
 
 <wiki:toc max_depth="2" />
 
@@ -8,8 +8,8 @@ uu.fx() と !NodeSet.fx() は CSSプロパティを連続的に変化させるCS
 
 uu.fx() と !NodeSet.fx() は uupaa.js に最初から組み込まれています。
 
-easing 関数を利用するには以下のファイルが必要です。
-  * src/Fx/easing.js
+uu.fx で easing 関数を利用するには以下のファイルが必要です。
+  * src/fx/easing.js
 
 easing.js をロードすると、以下の関数が追加されます。
   * Math.linear, Math.linearTween
@@ -25,9 +25,27 @@ easing.js をロードすると、以下の関数が追加されます。
   * Math.easeInBounce, Math.easeOutBounce, Math.easeInOutBounce, Math.easeOutInBounce
 
 色を変化させるには以下のファイルが必要です。
-  * src/Color/uu.color.js
+  * src/color/color.js
 
-uu.color.js をロードすると、色辞書や色調変換機能等が利用可能になります。
+より多くのアニメーションを利用するには以下のファイルが必要です。
+  * src/fx/fx.js
+  * src/node/clone.js
+
+src/fx/fx.js をロードすると、以下の関数が追加されます。
+  * uu.fx.fade
+  * uu.fx.puff
+  * uu.fx.flare
+  * uu.fx.shrink
+  * uu.fx.movein
+  * uu.fx.moveout
+  * uu.fx.highlight
+  * !NodeSet.fade
+  * !NodeSet.puff
+  * !NodeSet.flare
+  * !NodeSet.shrink
+  * !NodeSet.movein
+  * !NodeSet.moveout
+  * !NodeSet.highlight
 
 = API =
 
@@ -137,6 +155,48 @@ skip によりちらつきが発生する場合は、_avoidFlicker_ を試して
 == uu.fx.isBusy ==
 uu.fx.isBusy(_node_:Node) は _node_ がアニメーション中かアニメーションキューが積まれている状態で true を返します。
 
+== uu.fx.fade ==
+
+uu.fx.fade(_node_:Node, _duration_:Number, _param_:Hash/Function = void):Node は、
+opacity が 0.5以上ならフェードアウトし、0.5未満ならフェードインします。
+
+== uu.fx.puff ==
+
+uu.fx.puff(_node_:Node, _duration_:Number, _param_:Hash/Function = void):Node は、
+その場で拡大しながら消えます。
+
+== uu.fx.flare ==
+
+uu.fx.flare(_node_:Node, _duration_:Number, _param_:Hash/Function = { parts: 10, range: 200 }):Node は、
+フレア状に拡散し消えます。
+  * _param_.parts にはフレアの数を 1以上の値で指定します。
+  * _param_.range にはフレアの飛距離を 100以上の値で指定します。
+
+== uu.fx.shrink ==
+
+uu.fx.shrink(_node_:Node, _duration_:Number, _param_:Hash/Function = void):Node は、
+縮小し消えます。
+
+== uu.fx.movein ==
+
+uu.fx.movein(_node_:Node, _duration_:Number, _param_:Hash/Function = { degree: 0, range: 200 }):Node は、
+離れた場所から登場します。
+  * _param_.degree には登場位置を、角度(0～360)で指定します。
+  * _param_.range には飛距離を 100以上の値で指定します。
+
+== uu.fx.moveout ==
+
+uu.fx.moveout(_node_:Node, _duration_:Number, _param_:Hash/Function = { degree: 0, range: 200 }):Node は、
+離れた場所に消えます。
+  * _param_.degree には登場位置を、角度(0～360)で指定します。
+  * _param_.range には飛距離を 100以上の値で指定します。
+
+== uu.fx.highlight ==
+
+uu.fx.highlight(_node_:Node, _duration_:Number, _param_:Hash/Function = { bgc: "#ff9", r: 1 }):Node は、
+背景色をハイライトカラー(#ff9)にし、元の背景色に戻します。
+
 = Test Code =
-  * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/Fx/uu.fx.htm
-  * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/Fx/uu.fx.dance.htm
+  * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/fx/fx.htm
+  * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/fx/fx.dance.htm
+  * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/fx/fx.plus.htm

@@ -8,7 +8,7 @@ uu.node.normalize は指定されたノード以下から、空行だけのノ�
 
 uu.node.normalize を利用するには以下のファイルが必要です。
 
-  * src/Node/uu.node.normalize.js
+  * src/node/normalize.js
 
 = API =
 
@@ -19,14 +19,14 @@ uu.node.normalize(_parent_:Node = {{{<body>}}}, _depth_:Number = 1):Number は�
 {{{<body>}}}以下の全てのノードを検索対象とする場合は、uu.node.normalize(document.body, 999) のように十分に大きな数を指定します。
 
 = Test Code =
-http://uupaa-js.googlecode.com/svn/trunk/0.8/test/Node/uu.node.normalize.htm
+http://uupaa-js.googlecode.com/svn/trunk/0.8/test/node/normalize.htm
 
 {{{
 <!doctype html><html><head><title></title>
 <script src="../../src/uupaa.js"></script>
-<script src="../../src/Node/uu.node.normalize.js"></script>
+<script src="../../src/node/normalize.js"></script>
 <script>
-function xwin(uu) {
+uu.ready(function(uu) {
     var beforeNode = uu.text(document.body.outerHTML);
 
     var removed = uu.node.normalize(document.body, 10); // 10階層まで
@@ -38,7 +38,7 @@ function xwin(uu) {
     uu.body( uu.br(), "--------------------", uu.br() );
     uu.body( uu.h1("after"), afterNode );
     uu.body( uu.h2("removed node count=" + removed) );
-}
+});
 </script>
 </head><body>
 <!-- first comment node -->
@@ -99,9 +99,9 @@ removed node count=13
 {{{
 H1
 
-a 
+a
 
-b 
+b
 
 
 --------------------
@@ -124,9 +124,9 @@ removed node count=2
 H1
 
 
-a 
+a
 
-b 
+b
 
 --------------------
 before
