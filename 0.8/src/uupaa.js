@@ -52,8 +52,8 @@ doc.html || (doc.html = _rootNode);        // document.html = <html>
 doc.head || (doc.head = uutag("head")[0]); // document.head = <head>
 
 // --- LIBRARY STRUCTURE ---
-uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/String/window,
-                                    //    arg1:NodeSet/Node/Mix = void,
+uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/ClassNameString/window,
+                                    //    arg1:NodeSet/Node/Expression/Mix = void,
                                     //    arg2:Mix = void,
                                     //    arg3:Mix = void,
                                     //    arg4:Mix = void):Instance/NodeSet
@@ -159,11 +159,9 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Stri
         show:       uucssshow,      // uu.css.show(node:Node, duration:Number = 0, displayValue:String= "block"):Node
         hide:       uucsshide,      // uu.css.hide(node:Node, duration:Number = 0):Node
         isShow:     uucssisshow,    // uu.css.isShow(node:Node/CSSProperties):Boolean
-        opacity:    uucssopacity,   // uu.css.opacity(node:Node, value:Number/String):Number/Node
+        opacity:    uucssopacity    // uu.css.opacity(node:Node, value:Number/String):Number/Node
                                     //  [1][get opacity] uu.css.opacity(node) -> 0.5
                                     //  [2][set opacity] uu.css.opacity(node, 0.5) -> node
-        textSelectable:
-                    textSelectable  // uu.css.textSelectable(node:Node, allow:Boolean = false):Node
     }),
     style:          uustyle,        // uu.style(id:String):StyleSheet
     unit:           uuunit,         // uu.unit(node:Node, value:Number/CSSUnitString,
@@ -292,14 +290,11 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Stri
                                     //  [4][set text]                  uu.text(node, "text")      -> node
                                     //  [5][set formated text]         uu.text(node, "??", "a")   -> node
     // --- STRING ---
-    fix:      uumix(uufix, {        // uu.fix(source:String):String
+    fix:            uufix,          // uu.fix(source:String):String
                                     //  [1][css-prop to js-css-prop] uu.fix("background-color") -> "backgroundColor"
                                     //  [2][std-name to ie-name]     uu.fix("float")            -> "cssFloat" or "styleFloat"(IE)
                                     //  [3][html-attr to js-attr]    uu.fix("for")              -> "htmlFor"
                                     //  [4][through]                 uu.fix("-webkit-shadow")   -> "-webkit-shadow"
-        unicode:    uufixunicode    // uu.fix.unicode(source:String):String
-                                    //  [1][UnicodeString to String] uu.fix.unicode("\u0041\u0042") -> "AB"
-    }),
     trim:     uumix(uutrim, {       // uu.trim("  has  space  ") -> "has  space"
         tag:        uutrimtag,      // uu.trim.tag("  <h1>A</h1>  B  <p>C</p>  ") -> "A B C"
         url:        uutrimurl,      // uu.trim.url('  url("http://...")  ') -> "http://..."
@@ -351,7 +346,7 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Stri
         reload:     _false          // true is blackout (css3 cache reload)
     }, detectFeatures(_ver)),
     // --- OTHER ---
-    ui:             {},             // uu.ui
+    ui:             {},             // uu.ui - ui namespace
     dmz:            {},             // uu.dmz - DeMilitarized Zone(proxy)
     nop:            _nop            // uu.nop() - none operation
 });
@@ -441,8 +436,8 @@ _gecko && !HTMLElement[_prototype].innerText &&
 // [2][NodeSet factory] uu("div>ul>li", <body>) -> NodeSet
 
 // uu - factory
-function uufactory(expression, // @param NodeSet/Node/NodeArray/String/window: expression or ClassName
-                   arg1,       // @param NodeSet/Node/Mix(= void): context or ClassName.init arg1
+function uufactory(expression, // @param NodeSet/Node/NodeArray/ClassNameString/window: ClassName or Expression
+                   arg1,       // @param NodeSet/Node/Expression/Mix(= void): ClassName.init arg1 or Expression.context
                    arg2,       // @param Mix(= void): ClassName.init arg2
                    arg3,       // @param Mix(= void): ClassName.init arg3
                    arg4) {     // @param Mix(= void): ClassName.init arg4
@@ -1433,27 +1428,6 @@ function uucssopacity(node,      // @param Node:
 //{{{!mb
 uucssopacity.alpha = /^alpha\([^\x29]+\) ?/;
 //}}}!mb
-
-// uu.css.textSelectable - set text selectable
-function textSelectable(node,    // @param Node:
-                        allow) { // @param Boolean(= false):
-                                 // @return Node:
-//{{{!mb
-    if (_webkit) {
-//}}}!mb
-        node.style.WebkitUserSelect = allow ? "" : "none";
-//{{{!mb
-    } else if (_gecko) {
-        node.style.MozUserSelect = allow ? "" : "none";
-    } else if (_ie || _opera) {
-        node.unselectable  = allow ? "" : "on";
-        node.onselectstart = allow ? "" : "return false";
-//      node = node.parentNode;
-    }
-    node.style.userSelect = allow ? "" : "none";
-//}}}!mb
-    return node;
-}
 
 // uu.css.show - show node
 function uucssshow(node,           // @param Node:
@@ -2800,15 +2774,6 @@ function uufix(source) { // @param String: source
     return uufix.db[source] || source;
 }
 uufix.db = {}; // { "background-color": "backgroundColor", ... }
-
-// uu.fix.unicode - UnicodeString("\u0041\u0042") to String("AB")
-function uufixunicode(str) { // @param String: "\u0041\u0042"
-                             // @return String: "AB"
-    return str[_replace](uufixunicode.uffff, function(m, hex) {
-        return String.fromCharCode(parseInt(hex, 16));
-    });
-}
-uufixunicode.uffff = /\\u([0-9a-f]{4})/g; // \u0000 ~ \uffff
 
 // uu.trim - trim both side whitespace
 function uutrim(source) { // @param String:  "  has  space  "

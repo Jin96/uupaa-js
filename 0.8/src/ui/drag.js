@@ -1,9 +1,10 @@
 
 // === uu.ui.drag ===
-//{{{!depend uu, uu.ui.dragbase, uu.ui.zindex
-//}}}!depend
+//#include uupaa.js
+//#include css/box.js
+//#include ui/dragbase.js
 
-uu.Class.Drag || (function(doc, uu) {
+uu.Class.Drag || (function(uu) {
 
 // uu.Class.Drag - Generic Drag and Drop manage class
 uu.Class("Drag", {
@@ -70,7 +71,7 @@ function dragHandleEvent(evt) {
         if (xtype < 3) { // 1: mousedown, 2: mouseup
             fn = xtype === 1 ? uu.event : uu.event.unbind;
 
-            fn(_ie678 ? this.grip : doc, "mousemove+,mouseup+", this);
+            fn(_ie678 ? this.grip : document, "mousemove+,mouseup+", this);
         } else if (xtype === 3) { // 3: mousemove
         } else if (xtype === 4) { // 4: wheel
 //            this.option.wheel && this.mousewheel(evt);
@@ -109,5 +110,5 @@ function uueventdraglimit(min,   // @param Number:
 }
  */
 
-})(document, uu);
+})(uu);
 

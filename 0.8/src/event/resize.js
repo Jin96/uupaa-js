@@ -1,9 +1,8 @@
 
 // === uu.event.resize ===
-//{{{!depend uu
-//}}}!depend
+//#include uupaa.js
 
-uu.event.resize || (function(win, doc, uu) {
+uu.event.resize || (function(win, uu) {
 
 uu.event.resize        = uueventresize;       // uu.event.resize(evaluator)
 uu.event.resize.unbind = uueventresizeunbind; // uu.event.resize.unbind()
@@ -85,5 +84,5 @@ function createFakeEvent(event) {
     });
 }
 
-})(window, document, uu);
+})(this, uu);
 

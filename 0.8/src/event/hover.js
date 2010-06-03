@@ -1,7 +1,6 @@
 
 // === uu.event.hover ===
-//{{{!depend uu
-//}}}!depend
+//#include uupaa.js
 
 uu.event.hover || (function(uu) {
 

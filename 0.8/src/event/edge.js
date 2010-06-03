@@ -1,7 +1,6 @@
 
 // === uu.event.edge ===
-//{{{!depend uu
-//}}}!depend
+//#include uupaa.js
 
 uu.event.edge || (function(win, uu) {
 

@@ -1,7 +1,7 @@
 
 // === uu.storage ===
-//{{{!depend uu, uu.ajax
-//}}}!depend
+//#include uupaa.js
+//#include ajax/ajax.js
 
 // +-----------------------+-----------+
 // | backend               |    Max    |
@@ -666,4 +666,4 @@ uu.Class.MemStorage.isReady = function() { // @return Boolean
     return _true;
 };
 
-})(window, document, uu);
+})(this, document, uu);

@@ -1,7 +1,6 @@
 
 // === uu.event.live ===
-//{{{!depend uu
-//}}}!depend
+//#include uupaa.js
 
 uu.event.live || (function(doc, uu) {
 
@@ -54,8 +53,8 @@ function live(selector,    // @param String "css > selector"
     }
 
     var instance = 0,
-        handler = isFunction(evaluator) ? evaluator
-                                        : (instance = 1, evaluator.handleEvent),
+        handler = uu.isFunction(evaluator) ? evaluator
+                                           : (instance = 1, evaluator.handleEvent),
         // split token (ignore capture[+])
         //      "namespace.click+"
         //              v

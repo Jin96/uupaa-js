@@ -1,0 +1,96 @@
+<!doctype html><html><head><meta charset="utf-8" />
+<title>uu.ui.slider test</title>
+<style>
+/*
+html, body {
+  overflow: hidden;
+}
+ */
+.box {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  outline: 0px silver solid;
+  background-color: #ff4100;
+  color: white;
+  text-align: center;
+}
+.static {
+  position: static;
+}
+.margin10  { margin:  10px; }
+.padding10 { padding: 10px; }
+.border10  { border:  10px double turquoise; }
+.outline10 { outline: 10px solid springgreen; }
+</style>
+<script src="../../src/uupaa.js"></script>
+<script src="../../src/fx/easing.js"></script>
+<script src="../../src/fx/fx.js"></script>
+<script src="../../src/ui/slider.js"></script>
+<script src="../../src/color/color.js"></script>
+<script src="../../src/image/image.js"></script>
+<script src="../../src/node/normalize.js"></script>
+<script src="../../src/css/text.js"></script>
+<script src="../../uupaa.mb.js"></script>
+<script src="../../uupaa.mb2.js"></script>
+<script src="../../uupaa.js"></script>
+
+<script>
+var duration = 300;
+
+function moveDuration(that) {
+    duration = that.value
+    uu.text(uu.id("durationValue"), duration);
+}
+
+uu.ready(function() {
+    // init
+    uu.ui.slider.dressup(uu.css.textSelectable(uu.id("slide1")), { degree: 0  });
+    uu.ui.slider.dressup(uu.css.textSelectable(uu.id("slide2")), { degree: 45 });
+    uu.ui.slider.dressup(uu.css.textSelectable(uu.id("slide3")), { degree: 90 });
+
+    uu.click(uu.id("slide1"), function(evt, node) {
+        uu.ui.slider(node, duration);
+    });
+    uu.click(uu.id("slide2"), function(evt, node) {
+        uu.ui.slider(node, duration);
+    });
+    uu.click(uu.id("slide3"), function(evt, node) {
+        uu.ui.slider(node, duration);
+    });
+
+});
+
+</script>
+</head><body id="body">
+DURATION: <input type="range" step="50" value="300" min="0" max="2000" onchange="moveDuration(this)" />
+    <span id="durationValue">300</span>
+    <br />
+
+
+    <div id="slide1" style="float:left;visibility:hidden">
+        <div>
+            <img src="../images/cover01.jpg" />
+            <img src="../images/cover02.jpg" />
+            <img src="../images/cover03.jpg" />
+            <img src="../images/cover04.jpg" />
+        </div>
+    </div>
+    <div id="slide2" style="float:left;visibility:hidden">
+        <div>
+            <img src="../images/cover05.jpg" />
+            <img src="../images/cover06.jpg" />
+            <img src="../images/cover07.jpg" />
+            <img src="../images/cover08.jpg" />
+        </div>
+    </div>
+    <div id="slide3" style="float:left;visibility:hidden">
+        <div>
+            <img src="../images/cover09.jpg" />
+            <img src="../images/cover10.jpg" />
+            <img src="../images/cover11.jpg" />
+            <img src="../images/cover12.jpg" />
+        </div>
+    </div>
+
+</body></html>

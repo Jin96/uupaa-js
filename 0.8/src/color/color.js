@@ -1,15 +1,13 @@
 
-// === uu.color ===
-//{{{!depend uu
-//}}}!depend
+// === uu.color / window.color ===
+//#include uupaa.js
 
-uu.color || (function(win, doc, uu) {
+(this.uu || this).color || (function(namespace) {
 
-uu.color = uu.mix(uucolor, {    // uu.color(source:ColorHash/HSVAHash/HSLAHash/RGBAHash/String/Number):ColorHash
-    add:        uucoloradd,     // uu.color.add(source:String)
-    expire:     uucolorexpire   // uu.color.expire()
-});
-uu.color.random = uucolorrandom; // uu.color.random():ColorHash
+namespace.color        = uucolor;       // uu.color(source:ColorHash/HSVAHash/HSLAHash/RGBAHash/String/Number):ColorHash
+namespace.color.add    = uucoloradd;    // uu.color.add(source:String)
+namespace.color.expire = uucolorexpire; // uu.color.expire()
+namespace.color.random = uucolorrandom; // uu.color.random():ColorHash
 
 // --- COLOR ---
 // [1][ColorHash]               uu.color(ColorHash) -> ColorHash
@@ -266,7 +264,7 @@ function ColorHashHSVA() { // @return HSVAHash: { h:360, s:100, v:100, a:1.0 }
 
 // HSVAHash.toString
 function HSVAHashToString() {
-    return uu.format("hsva(??,??%,??%,??)", this.h | 0, this.s, this.v, this.a);
+    return "hsva(" + (this.h | 0) + "," + this.s + "%," + this.v + "%," + this.a + ")";
 }
 
 // hsvaToColorHash
@@ -337,7 +335,7 @@ function ColorHashHSLA() { // @return HSLAHash: { h, s, l, a }
 
 // HSLAHash.toString
 function HSLAHashToString() {
-    return uu.format("hsla(??,??%,??%,??)", this.h | 0, this.s, this.l, this.a);
+    return "hsla(" + (this.h | 0) + "," + this.s + "%," + this.l + "%," + this.a + ")";
 }
 
 // hslaToColorHash - ( h: 0-360, s: 0-100%, l: 0-100%, a: alpha )
@@ -423,5 +421,5 @@ uucoloradd("000000black,888888gray,ccccccsilver,ffffffwhite,ff0000red,ffff00" +
 "rkgrey,2f4f4fdarkslategrey,696969dimgrey,808080grey,d3d3d3lightgrey,778899l" +
 "ightslategrey,708090slategrey,8b4513saddlebrown");
 
-})(window, document, uu);
+})(this.uu || this);
 

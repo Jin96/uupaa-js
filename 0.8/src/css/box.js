@@ -1,7 +1,6 @@
 
 // === CSS BoxModel ===
-//{{{!depend uu
-//}}}!depend
+//#include uupaa.js
 
 // clientWidth           = node.style.width + padding
 // offsetWidth           = node.style.width + padding + border

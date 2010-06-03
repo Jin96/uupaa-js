@@ -1,7 +1,7 @@
 
 // === uu.base64 / window.base64 ===
-//{{{!depend uu.utf8
-//}}}!depend
+//#include uupaa.js
+//#include misc/utf8.js
 
 (this.uu || this).base64 || (function(namespace) {
 

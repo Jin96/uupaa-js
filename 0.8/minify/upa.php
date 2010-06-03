@@ -12,7 +12,7 @@ $catfood     = "../catfood.js"; // temporary file
 $mobile      = false;
 $verbose     = false;
 $skipCore    = false;
-$inputFiles  = array();
+$inputFiles  = array($libraryCore);
 $loadedFiles = array(); // avoid duplicate load
 
 // load source and packages
@@ -30,7 +30,7 @@ function loadFiles($inputFiles) { // @param Array:
                            "/*{{{!mb$1 }}}!mb*/", $js);
     }
     // #include "source.js"
-    $js = preg_replace_callback('/#include\s*[\("\']?([ \/\w\.\-\+]+)["\'\)]?/ms',
+    $js = preg_replace_callback('/#include\s*([\/\w\.\-\+]+)/ms',
                                 includeSource, $js);
     // pre-process
     if (function_exists('preProcess')) {
@@ -81,7 +81,7 @@ function loadSource($src) { // @param FilePathString:
     $loadedFiles[] = $src;
 
     if ($verbose) {
-        echo "file(" . $src . ")\n";
+        echo '<script src="' . '..' . slash() . $src . '"></script>' . "\n";
     }
 
     // normalize line break
@@ -90,7 +90,11 @@ function loadSource($src) { // @param FilePathString:
 
 function includeSource($match) { // @param String: match word
                                  // @return JavaScriptExpressionString:
-    return "\n" . loadSource($match[1]);
+    return "\n" . loadSource($match[1]) . "\n//";
+}
+
+function slash() {
+    return isWindows() ? '\\' : '/';
 }
 
 function isWindows() { // @return Boolean:
