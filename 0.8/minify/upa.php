@@ -19,7 +19,7 @@ function loadFiles($inputFiles) { // @param Array:
     global $catfood, $mobile;
 
     $js = '';
-    foreach($inputFiles as $src) {
+    foreach ($inputFiles as $src) {
         $js .= loadSource($src);
     }
     // strip {{{!mb ... }}}!mb code block
@@ -62,8 +62,15 @@ function loadSource($src) { // @param FilePathString:
     $js = preg_replace('/(\r\n|\r|\n)/m', "\n", file_get_contents($src));
 
     // #include "source.js"
-    return preg_replace_callback('/#include\s+["\'<]?([\w\.\-\+\/]+)[>"\']?/ms',
-                                 includeSource, $js);
+    $js = preg_replace_callback('/#include\s+["\'<]?([\w\.\-\+\/]+)[>"\']?/ms',
+                                includeSource, $js);
+/*
+    // auto include
+    if (function_exists('autoInclude')) {
+        $js = autoInclude($js);
+    }
+ */
+    return $js;
 }
 
 function includeSource($match) { // @param String: match word

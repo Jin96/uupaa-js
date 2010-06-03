@@ -14,6 +14,7 @@ namespace.utf8 = {
 function utf8encode(str,      // @param String: JavaScript string
                     __rv__) { // @hidden Array: result
                               // @return UTF8ByteArray: [ Number(utf8), ... ]
+                              // @throws Error("OUT_OF_RANGE")
     __rv__ = __rv__ || [];
 
     var iz = str.length, c = 0, i = 0;

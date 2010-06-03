@@ -1,7 +1,6 @@
 
 // === uu.ajax / uu.jsonp ===
-//{{{!depend uu, uu.date, uu.event, uu.node
-//}}}!depend
+//#include uupaa.js
 
 uu.ajax || (function(win, doc, uu) {
 

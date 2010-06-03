@@ -57,7 +57,7 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Clas
                                     //    arg2:Mix = void,
                                     //    arg3:Mix = void,
                                     //    arg4:Mix = void):Instance/NodeSet
-                                    //  [1][Class factory]   uu("MyClass", arg1, arg2) -> new uu.Clas.MyClass(arg1, arg2)
+                                    //  [1][Class factory]   uu("MyClass", arg1, arg2) -> new uu.Class.MyClass(arg1, arg2)
                                     //  [2][NodeSet factory] uu("div>ul>li", <body>) -> NodeSet
     config:   uuarg(win.uuconfig, { // uu.config - Hash: user configurations
         log:        "log"           //  uu.log() target node
@@ -432,7 +432,7 @@ _gecko && !HTMLElement[_prototype].innerText &&
 
 // ===================================================================
 
-// [1][Class factory]   uu("MyClass", arg1, arg2) -> new uu.Clas.MyClass(arg1, arg2)
+// [1][Class factory]   uu("MyClass", arg1, arg2) -> new uu.Class.MyClass(arg1, arg2)
 // [2][NodeSet factory] uu("div>ul>li", <body>) -> NodeSet
 
 // uu - factory
@@ -751,12 +751,12 @@ function uuarray(source,     // @param Array/Mix/NodeList/Arguments: source
                                   : rv.slice(sliceStart)) : rv;
 }
 
-// [1][Array has Array] uu.has([1, 2], [1]) -> true
-// [2][Hash has Hash]   uu.has({ a: 1, b: 2 }, { a: 1 }) -> true
-// [3][Node has Event]  uu.has(node, "namespace.click") -> true
-// [4][Node has Node]   uu.has(parentNode, childNode) -> true
+// [1][Array has Array] uuhas([1, 2], [1]) -> true
+// [2][Hash has Hash]   uuhas({ a: 1, b: 2 }, { a: 1 }) -> true
+// [3][Node has Event]  uuhas(node, "namespace.click") -> true
+// [4][Node has Node]   uuhas(parentNode, childNode) -> true
 
-// uu.has - has
+// inner - has
 function uuhas(source,   // @param Hash/Array/Node: source
                search) { // @param Hash/Array/Node/String: search element
                          // @return Boolean:
@@ -797,10 +797,10 @@ function uuhas(source,   // @param Hash/Array/Node: source
     return _false;
 }
 
-// [1][Hash nth ]           uu.nth({ a: 1, b: 2 }, 1) -> ["b", 2]
-// [2][Array nth]           uu.nth(["a", 100], 1)     -> [1, 100]
+// [1][Hash nth ]           uunth({ a: 1, b: 2 }, 1) -> ["b", 2]
+// [2][Array nth]           uunth(["a", 100], 1)     -> [1, 100]
 
-// uu.nth - nth pair
+// inner - nth pair
 function uunth(source,  // @param Hash/Array: source
                index) { // @param Number: index
                         // @return Array: [key, value]
@@ -821,19 +821,19 @@ function uunth(source,  // @param Hash/Array: source
     return [undef, undef];
 }
 
-// [1][Hash.length]         uu.size({ a: 1, b: 2 }) -> 2
-// [2][Array.length]        uu.size([1,2]) -> [1,2]
+// [1][Hash.length]         uusize({ a: 1, b: 2 }) -> 2
+// [2][Array.length]        uusize([1,2]) -> [1,2]
 
-// uu.size - get length
+// inner - get length
 function uusize(source) { // @param Hash/Array: source
                           // @return Number:
     return (_isArray(source) ? source : uukeys(source)).length;
 }
 
-// [1][Hash.clone]          uu.clone({ a: 1, b: 2 }) -> { a: 1, b: 2 }
-// [2][Array.clone]         uu.clone([1,2]) -> [1,2]
+// [1][Hash.clone]          uuclone({ a: 1, b: 2 }) -> { a: 1, b: 2 }
+// [2][Array.clone]         uuclone([1,2]) -> [1,2]
 
-// uu.clone - clone hash, clone array
+// inner - clone hash, clone array
 function uuclone(source) { // @param Hash/Array: source
                            // @return Hash/Array: cloned hash/array
     return _isArray(source) ? source.concat() : uumix({}, source);
@@ -853,12 +853,12 @@ function uuindexof(source,   // @param Hash: source
     return void 0;
 }
 
-// [1][ascii sort a-z]      uu.sort(["a","z"], "A-Z") -> ["a", "z"]
-// [2][ascii sort a-z]      uu.sort(["a","z"], "Z-A") -> ["z", "a"]
-// [3][numeric sort 0-9]    uu.sort([0,1,2], "0-9")   -> [0, 1, 2]
-// [4][numeric sort 9-0]    uu.sort([0,1,2], "9-0")   -> [2, 1, 0]
+// [1][ascii sort a-z]      uusort(["a","z"], "A-Z") -> ["a", "z"]
+// [2][ascii sort a-z]      uusort(["a","z"], "Z-A") -> ["z", "a"]
+// [3][numeric sort 0-9]    uusort([0,1,2], "0-9")   -> [0, 1, 2]
+// [4][numeric sort 9-0]    uusort([0,1,2], "9-0")   -> [2, 1, 0]
 
-// uu.sort - sort array
+// inner - sort array
 function uusort(source,   // @param Array: source
                 method) { // @param String/Function(= "A-Z"): method
                           //                   sort method or callback-function
@@ -874,9 +874,9 @@ function uusort(source,   // @param Array: source
     return (r & 2) ? source.reverse() : source;
 }
 
-// [1][Array.clean]         uu.clone([,,1,2,,]) -> [1,2]
+// [1][Array.clean]         uuclean([,,1,2,,]) -> [1,2]
 
-// uu.clean - array compaction, trim null and undefined elements
+// inner -array compaction, trim null and undefined elements
 function uuclean(source) { // @param Array: source
                            // @return Array: clean Array
     if (_isArray(source)) {
@@ -892,10 +892,10 @@ function uuclean(source) { // @param Array: source
     return source;
 }
 
-// [1][unique elements]     uu.unique([<body>, <body>]) -> [<body>]
-// [2][unique literals]     uu.unique([0,1,2,1,0], true) -> [0,1,2]
+// [1][unique elements]     uuunique([<body>, <body>]) -> [<body>]
+// [2][unique literals]     uuunique([0,1,2,1,0], true) -> [0,1,2]
 
-// uu.unique - make array from unique element(trim null and undefined elements)
+// inner - make array from unique element(trim null and undefined elements)
 function uuunique(source,        // @param Array: source
                   literalOnly) { // @param Boolean(= false): true is literal only(quickly)
                                  // @return Array:
@@ -2413,7 +2413,7 @@ function uunodebulk(source,    // @param Node/HTMLFragment: source
     return rv;
 }
 
-// uu.nod.xpath - get node xpath
+// uu.node.xpath - get node xpath
 function uunodexpath(elementNode) { // @param Node: ELEMENT_NODE
                                     // @return XPathString: "/html[1]/body[1]/div[5]"
     var rv = [], n = elementNode;
@@ -2876,12 +2876,13 @@ function uupuff(source                   // @param Mix/FormatString: source obje
 // uu.log - add log
 function uulog(log                      // @param Mix: log data
                /* , var_args, ... */) { // @param Mix: var_args
-    var id = uu.config.log, context = uuid(id),
+    var id = uu.config.log, context = uuid(id), tag,
         txt = arguments.length < 2 ? _json(log)
                                    : uuformat.apply(this, arguments);
 
     context || uunodeadd(context = uu.ol({ id: id }));
-    uunodeadd(uu.li(doc[_createTextNode](txt)), context);
+    tag = /OL|UL/.test(context.tagName) ? "li" : "p";
+    uunodeadd(uu[tag](doc[_createTextNode](txt)), context);
 }
 
 // uu.log.clear - clear log
@@ -3375,7 +3376,7 @@ NodeSet[_prototype] = {
 //  fx:             NodeSetFx,          // NodeSet.fx(duration:Number, param:Hash, callback:Function = void):NodeSet
     iter:           NodeSetIter         // [PROTECTED]
 };
-uu.nodeSet = NodeSet[_prototype];       // uu.nodeset - uu.Class.NodeSet.prototype alias
+uu.nodeSet = NodeSet[_prototype];       // uu.nodeSet - uu.Class.NodeSet.prototype alias
 
 // NodeSet.back
 function NodeSetBack() { // @return NodeSet:

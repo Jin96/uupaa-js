@@ -1,4 +1,73 @@
 <?php
+
+function addLibraryNamespacePrefix($name) {
+    global $ignoreAPIHasDots;
+
+    $ignoreAPIHasDots[] = "uu." . $name;
+}
+
+$unknownAPI = array();
+$ignoreAPIHasDots = array();
+$ignoreAPIWithoutDots = array();
+
+$coreAPI = array(
+    "config", "ver", "ie", "gecko", "opera", "webkit",
+    "file", "snippet", "like", "type",
+    "isNumber", "isString", "isFunction",
+    "arg", "mix", "each", "keys", "values", "hash",
+    "array", "attr", "data", "css", "style", "unit",
+    "fx", "viewport", "id", "tag", "match", "query", "klass",
+    "Class", "event", "svg", "node", "nodeid",
+    "html", "head", "body", "text", "fix", "trim", "split", "format",
+    "json", "date", "flash", "guid", "puff", "log", "ready",
+    "ui", "dmz", "nop",
+    "msg", "nodeSet",
+
+    "snippet.each"
+);
+$HTML4API = explode(",", "a,b,br,dd,div,dl,dt,h1,h2,h3,h4,h5,h6,i,img,iframe,input,li,ol,option,p,pre,select,span,table,tbody,tr,td,th,tfoot,textarea,u,ul");
+$HTML5API = explode(",", "abbr,article,aside,audio,canvas,datalist,details,eventsource,figure,footer,header,hgroup,mark,menu,meter,nav,output,progress,section,time,video");
+$EVENTAPI = explode(",", "mousedown,mouseup,mousemove,mousewheel,click,dblclick,keydown,keypress,keyup,change,submit,focus,blur,contextmenu" .
+                         "unmousedown,unmouseup,unmousemove,unmousewheel,unclick,undblclick,unkeydown,unkeypress,unkeyup,unchange,unsubmit,unfocus,unblur,uncontextmenu");
+
+array_walk($coreAPI,  addLibraryNamespacePrefix);
+array_walk($HTML4API, addLibraryNamespacePrefix);
+array_walk($HTML5API, addLibraryNamespacePrefix);
+array_walk($EVENTAPI, addLibraryNamespacePrefix);
+
+function enumAPI($js) {
+    global $ignoreAPIHasDots, $ignoreAPIWithoutDots, $unknownAPI, $verbose;
+
+    // find "uu.hoge.huga("
+    if (preg_match_all('/uu\.\w+(?:\.\w+(?:\.\w+(?:\.\w+)?)?)?(?:\()/', $js, $matches)) {
+        $ary = array_unique($matches[0]);
+
+        foreach ($ary as $value) {
+            // trim "("
+            $value = preg_replace('/\(/', '', $value); // ))
+
+            if (!in_array($value, $ignoreAPIHasDots)) {
+
+                // array("uu.hoge.huga" => "uuhogehuga")
+                $ignoreAPIWithoutDots[$value] = preg_replace('/\./', '', $value);
+            }
+        }
+    }
+
+    // find "function uuhogehuga("
+    foreach ($ignoreAPIWithoutDots as $key => $value) {
+        if (!preg_match('/function ' . $value . '\(/', $js)) { // )
+            $unknownAPI[] = $key;
+        }
+    }
+
+    if ($verbose && count($unknownAPI)) {
+        echo "Unknown APIs\n";
+        print_r($unknownAPI);
+    }
+    return $js;
+}
+
 function preProcess($js,       // @param String: JavaScript source code
                     $mobile) { // @param Boolean: true is "-mb" option
                                // @return String:
@@ -96,6 +165,8 @@ function preProcess($js,       // @param String: JavaScript source code
                        "($1, $2, $3)", $js);
     $js = preg_replace('/\((?:\n\s+)?(\w+),\n\s+(\w+)\)/',
                        "($1, $2)", $js);
+
+    enumAPI($js);
 
     return $js;
 }
