@@ -21,7 +21,7 @@ function loadFiles($inputFiles) { // @param Array:
 
     $js = '';
     foreach ($inputFiles as $src) {
-        $js .= loadSource(pathNormalize(trim($src)));
+        $js .= loadSource($src);
     }
     if (function_exists('autoInclude')) {
         $js = autoInclude($js);
@@ -39,6 +39,8 @@ function loadSource($src) { // @param FilePathString:
                             // @return JavaScriptExpressionString:
     global $verbose, $skipCore, $libraryCore, $loadedFiles, $slash,
            $mobile;
+
+    $src = pathNormalize(trim($src));
 
     // skip libraryCore file
     if ($skipCore && preg_match('/' . $libraryCore . '$/', $src)) {
@@ -68,7 +70,7 @@ function loadSource($src) { // @param FilePathString:
 
 function includeSource($match) { // @param String: match word
                                  // @return JavaScriptExpressionString:
-    return "\n" . loadSource(pathNormalize(trim($match[1]))) . "\n//";
+    return "\n" . loadSource($match[1]) . "\n//";
 }
 
 function isWindows() { // @return Boolean:

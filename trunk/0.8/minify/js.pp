@@ -197,20 +197,20 @@ function autoInclude($js) {
 
         $base = $ary[0];
 
-        $src1 = $sourceDir . $base . $slash . $base . ".js"; // $src = "../src/color/color.js"
+        $src1 = $base . $slash . $base . ".js"; // $src1 = "../src/color/color.js"
         $src2 = '';
 
         if (count($ary) > 1) {
-            $src2 = $sourceDir . $base . $slash . $ary[1] . ".js"; // $src = "../src/color/api.js"
+            $src2 = $base . $slash . $ary[1] . ".js"; // $src2 = "../src/color/api.js"
         }
 
-        if (file_exists($src1)) { // "../src/color/color.js"
+        if (file_exists($sourceDir . $src1)) { // "../src/color/color.js"
             if ($verbose) {
                 echo "  AutoInclude - " . $value . "()\n";
             }
             $js .= loadSource($src1);
-        } else {
-            if (file_exists($src2)) { // "../src/color/api.js"
+        } else if ($src2) {
+            if (file_exists($sourceDir . $src2)) { // "../src/color/api.js"
                 if ($verbose) {
                     echo "  AutoInclude - " . $value . "()\n";
                 }
