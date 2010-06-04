@@ -6,7 +6,7 @@ function addLibraryNamespacePrefix($name) {
     $ignoreAPIHasDots[] = "uu." . $name;
 }
 
-$unknownAPI = array();
+$unknownAPI = array(); // array([0] => "uu.color")
 $ignoreAPIHasDots = array();
 $ignoreAPIWithoutDots = array();
 
@@ -21,7 +21,7 @@ $coreAPI = array(
     "html", "head", "body", "text", "fix", "trim", "split", "format",
     "json", "date", "flash", "guid", "puff", "log", "ready",
     "ui", "dmz", "nop",
-    "msg", "nodeSet",
+    "msg", "nodeset",
 
     "snippet.each"
 );
@@ -46,7 +46,7 @@ function enumAPI($js) {
             // trim "("
             $value = preg_replace('/\(/', '', $value); // ))
 
-            if (!in_array($value, $ignoreAPIHasDots)) {
+            if (!in_array(strtolower($value), $ignoreAPIHasDots)) {
 
                 // array("uu.hoge.huga" => "uuhogehuga")
                 $ignoreAPIWithoutDots[$value] = preg_replace('/\./', '', $value);
@@ -56,21 +56,23 @@ function enumAPI($js) {
 
     // find "function uuhogehuga("
     foreach ($ignoreAPIWithoutDots as $key => $value) {
-        if (!preg_match('/function ' . $value . '\(/', $js)) { // )
+        if (!preg_match('/function ' . $value . '\(/i', $js)) { // )
             $unknownAPI[] = $key;
         }
     }
 
-    if ($verbose && count($unknownAPI)) {
-        echo "Unknown APIs\n";
-        print_r($unknownAPI);
-    }
     return $js;
 }
 
 function preProcess($js,       // @param String: JavaScript source code
                     $mobile) { // @param Boolean: true is "-mb" option
                                // @return String:
+    // strip {{{!mb ... }}}!mb code block
+    if ($mobile) {
+        $js = preg_replace('/\{\{\{\!mb([^\n]*)\n.*?\}\}\}\!mb/ms',
+                           "/*{{{!mb$1 }}}!mb*/", $js);
+    }
+
     // typeof alias
     $js = preg_replace('/uu\.?type.HASH/',         '1', $js); // uu.?type.HASH -> 1
     $js = preg_replace('/uu\.?type.NODE/',         '2', $js);
@@ -166,8 +168,6 @@ function preProcess($js,       // @param String: JavaScript source code
     $js = preg_replace('/\((?:\n\s+)?(\w+),\n\s+(\w+)\)/',
                        "($1, $2)", $js);
 
-    enumAPI($js);
-
     return $js;
 }
 
@@ -178,4 +178,50 @@ function convert4SpacesTo1Tab($match) { // @param Array: matchs
     return str_repeat("\t", $length / 4) . ($length % 4 ? " " : "");
 }
 
+function autoInclude($js) {
+    global $sourceDir, $slash, $unknownAPI, $verbose;
+
+    enumAPI($js);
+    if (!count($unknownAPI)) {
+        return $js;
+    }
+
+    foreach ($unknownAPI as $value) { // $value = "uu.color", "uu.color.api"
+        if ($value === "uu.color") {
+            continue; // skip
+        }
+
+        $keyword = preg_replace('/^uu\./', '', $value); // $keyword = "color", "color.api"
+
+        $ary = preg_split('/\./', strtolower($keyword)); // $ary[0] = "color", $ary[2] = "api"
+
+        $base = $ary[0];
+
+        $src1 = $sourceDir . $base . $slash . $base . ".js"; // $src = "../src/color/color.js"
+        $src2 = '';
+
+        if (count($ary) > 1) {
+            $src2 = $sourceDir . $base . $slash . $ary[1] . ".js"; // $src = "../src/color/api.js"
+        }
+
+        if (file_exists($src1)) { // "../src/color/color.js"
+            if ($verbose) {
+                echo "  AutoInclude - " . $value . "()\n";
+            }
+            $js .= loadSource($src1);
+        } else {
+            if (file_exists($src2)) { // "../src/color/api.js"
+                if ($verbose) {
+                    echo "  AutoInclude - " . $value . "()\n";
+                }
+                $js .= loadSource($src2);
+            } else {
+                if ($verbose) {
+                    echo "  UnknownAPI - " . $value . "()\n";
+                }
+            }
+        }
+    }
+    return $js;
+}
 ?>

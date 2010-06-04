@@ -33,9 +33,9 @@ uu.css.box || (function(win, doc, uu, getComputedStyle) {
 uu.mix(uu.css, {
     box:            uucssbox,       // uu.css.box(node:Node, mode:Number = 0):Hash
     rect:           uucssrect,      // uu.css.rect(node:Node):Hash { x, y, offsetWidth, offsetHeight }
-    toStatic:       toStatic,       // uu.css.toStatic(node:Node):Node
-    toAbsolute:     toAbsolute,     // uu.css.toAbsolute(node:Node):Node
-    toRelative:     toRelative      // uu.css.toRelative(node:Node):Node
+    toStatic:       uucsstostatic,  // uu.css.toStatic(node:Node):Node
+    toAbsolute:     uucsstoabsolute,// uu.css.toAbsolute(node:Node):Node
+    toRelative:     uucsstorelative // uu.css.toRelative(node:Node):Node
 });
 
 var _uucssbox = "data-uucssbox";
@@ -164,15 +164,15 @@ function uucssrect(node,           // @param Node:
 }
 
 // uu.css.toStatic - to static
-function toStatic(node) { // @param Node:
-                          // @return Node:
+function uucsstostatic(node) { // @param Node:
+                               // @return Node:
     node.style.position = "static";
     return node;
 }
 
 // uu.css.toAbsolute - to absolute
-function toAbsolute(node) { // @param Node:
-                            // @return Node:
+function uucsstoabsolute(node) { // @param Node:
+                                 // @return Node:
     var ns = node.style,
         rect = uucssrect(node), // offset from foster
         box = uucssbox(node, false, 0x4); // margin only
@@ -184,8 +184,8 @@ function toAbsolute(node) { // @param Node:
 }
 
 // uu.css.toRelative - to relative
-function toRelative(node) { // @param Node:
-                            // @return Node:
+function uucsstorelative(node) { // @param Node:
+                                 // @return Node:
     var ns = node.style, cs = uu.css(node);
 
     ns.position = "relative";
