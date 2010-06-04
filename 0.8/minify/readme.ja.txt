@@ -1,6 +1,6 @@
 
 usage:
-  >uap.php [-g | -m | -y] [-mb] [-v] [-pp file] [-core file] [*.js ...]
+  >uap.php [-g | -m | -y] [-mb] [-v] [-pp file] [-src dir] [-core file] [*.js ...]
 
         -g    use Google Closure Compiler (default)
         -m    use Microsoft Ajax Minifier
@@ -10,8 +10,9 @@ usage:
                 生成されるコードは MobileWebKit(iPhone,iPad, iPod)専用になります。
                 {$libraryCore} に指定されたファイルを別個にビルドします(最大で2回ビルドします)。
         -v    verbose mode. ビルド対象一覧を表示します。ビルド結果を表示し一時停止します。
-        -pp   preprocessor file. プロプロセスで使用するPHPコードを指定します。デフォルトは js.php です。
-        -core library core. ライブラリの核となるファイルを指定します。デフォルトは uupaa.js です。
+        -pp   preprocessor file. プロプロセスで使用するPHPコードを指定します。デフォルトは "js.php" です。
+        -src  source directory. ソースコードの読み込む基準ディレクトリを指定します。デフォルトは "../src/" です。
+        -core library core. ライブラリの核となるファイルを指定します。デフォルトは "uupaa.js" です。
               ビルドで生成するファイル名も -core で指定したファイル名になります。
         *.js  JavaScriptソースコードファイルパスです。
               相対パスで指定した場合は {$sourceDir} 以下からファイルを読み取ります。
