@@ -8,6 +8,7 @@ $compiler    = "g";             // default compiler
 $catfood     = "../catfood.js"; // temporary file
 
 // --- global ---
+$slash       = '/';
 $mobile      = false;
 $verbose     = false;
 $skipCore    = false;
@@ -16,21 +17,16 @@ $loadedFiles = array(); // avoid duplicate load
 
 // load source and packages
 function loadFiles($inputFiles) { // @param Array:
-    global $catfood, $mobile;
+    global $catfood;
 
     $js = '';
     foreach ($inputFiles as $src) {
-        $js .= loadSource($src);
+        $js .= loadSource(pathNormalize(trim($src)));
     }
-    // strip {{{!mb ... }}}!mb code block
-    if ($mobile) {
-        $js = preg_replace('/\{\{\{\!mb([^\n]*)\n.*?\}\}\}\!mb/ms',
-                           "/*{{{!mb$1 }}}!mb*/", $js);
+    if (function_exists('autoInclude')) {
+        $js = autoInclude($js);
     }
-    // pre-process
-    if (function_exists('preProcess')) {
-        $js = preProcess($js, $mobile);
-    }
+
     // create catfood
     $fp = fopen($catfood, 'w') or die($catfood . " file open fail");
 
@@ -41,9 +37,9 @@ function loadFiles($inputFiles) { // @param Array:
 
 function loadSource($src) { // @param FilePathString:
                             // @return JavaScriptExpressionString:
-    global $verbose, $skipCore, $libraryCore, $loadedFiles;
+    global $verbose, $skipCore, $libraryCore, $loadedFiles, $slash,
+           $mobile;
 
-    $src = pathNormalize(trim($src));
     // skip libraryCore file
     if ($skipCore && preg_match('/' . $libraryCore . '$/', $src)) {
         return '';
@@ -55,7 +51,6 @@ function loadSource($src) { // @param FilePathString:
     $loadedFiles[] = $src;
 
     if ($verbose) {
-        $slash = isWindows() ? '\\' : '/';
         echo '<script src="' . '..' . $slash . $src . '"></script>' . "\n";
     }
     // normalize line break
@@ -64,18 +59,16 @@ function loadSource($src) { // @param FilePathString:
     // #include "source.js"
     $js = preg_replace_callback('/#include\s+["\'<]?([\w\.\-\+\/]+)[>"\']?/ms',
                                 includeSource, $js);
-/*
-    // auto include
-    if (function_exists('autoInclude')) {
-        $js = autoInclude($js);
+    // pre-process
+    if (function_exists('preProcess')) {
+        $js = preProcess($js, $mobile);
     }
- */
     return $js;
 }
 
 function includeSource($match) { // @param String: match word
                                  // @return JavaScriptExpressionString:
-    return "\n" . loadSource($match[1]) . "\n//";
+    return "\n" . loadSource(pathNormalize(trim($match[1]))) . "\n//";
 }
 
 function isWindows() { // @return Boolean:
@@ -127,7 +120,7 @@ function minify() {
     }
 
     if ($verbose) {
-        echo "command: {$command}\n";
+        echo "\n\ncommand: {$command}\n\n";
     }
 
     if (isWindows()) {
@@ -148,6 +141,9 @@ function minify() {
     }
 }
 
+// --- init ---
+$slash = isWindows() ? '\\' : '/';
+
 // --- reading commandline args ---
 array_shift($argv);
 
@@ -161,6 +157,7 @@ while ($v = array_shift($argv)) {
     case "-pp":     $preprosess = array_shift($argv); break;
     case "-core":   $libraryCore = array_shift($argv);
                     $inputFiles = array($libraryCore); break;
+    case "-src":    $sourceDir = array_shift($argv); break;
     default:        if (!in_array($v, $inputFiles)) {
                         $inputFiles[] = $v;
                     }
