@@ -37,7 +37,6 @@
 || *uu.ready.!ArraySlice*       <br />Array.prototype.slice.call(!FakeArray) ready|| ||        ||       || o        || o         || o        || o        ||
 || *uu.ready.getAttribute*      <br />right getAttribute                     ||       ||       || o     || o        || o         || o        || o        ||
 || *uu.ready.!StringIndexer*    <br />String`[`indexer`]` ready              ||       ||       || o     || o        || o         || o        || o        ||
-|| *uu.ready.!ElementTraversal* <br />Element Traversal ready                ||       ||       ||       || o(maybe) || o(1.9.1+) || o(528+)  || o        ||
 
   * uu.ready.!ArraySlice - Array.prototype.slice.call(_!FakeArray_) が利用可能なら true になります。
     * !FakeArray には !NodeList や arguments などが入ります。
@@ -47,8 +46,6 @@
     * IE では node.getAttribute("href", 2) とすることで相対URLを取得できます。また getAttribute("className") とすることで className を取得できます。
   * uu.ready.!StringIndexer - String`[`indexer`]` が利用可能なら true になります。
     * IE6, IE7 は "abc"`[`1`]` で undefined が返ります。
-  * uu.ready.!ElementTraversal - [http://www.w3.org/TR/ElementTraversal/ Element Traversal] が利用可能なら true になります。
-    * 利用できない場合は node.firstElementChild 等が undefined になります。
 
   * Firefox3.0 (Gecko1.9.0)
   * Firefox3.5 (Gecko1.9.1)
