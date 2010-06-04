@@ -53,7 +53,8 @@ function loadSource($src) { // @param FilePathString:
     $loadedFiles[] = $src;
 
     if ($verbose) {
-        echo '<script src="' . '..' . $slash . $src . '"></script>' . "\n";
+        $tmpsrc = preg_replace('/\\\\/', '/', '..' . $slash . $src);
+        echo '<script src="' . $tmpsrc . '"></script>' . "\n";
     }
     // normalize line break
     $js = preg_replace('/(\r\n|\r|\n)/m', "\n", file_get_contents($src));
