@@ -6,7 +6,7 @@
 .uutest .li0 { background-color:red   }
 .uutest .li1 { background-color:green }
 .uutest .li2 { background-color:red   }
-.uutest .li3 { background-color:#0b0  }
+.uutest .li3 { background-color:#0a0  }
 .uutestinfo { position:fixed;top:10px;right:10px;font-size:xx-large }
 .uutestinfo a { border: 3px outset gray;padding:3px;background-color:red;color:white }
 .uutestinfo .score { color:black;text-shadow:gray 1px 1px 1px }
@@ -102,7 +102,7 @@ uu.ready(function(uu) {
         return [uu.array.sort(['z', 'a', 'b', 'c'], "Z-A"), "==", ['z', 'c', 'b', 'a']];
       },
       "[5][user func] uu.array.clean([,,1,2,,]) は [1, 2]": function() {
-        return [uu.array.clean([,,1,2,,]), "is", [1, 2]];
+        return [uu.array.clean([,,1,2,,]), "==", [1, 2]];
       },
     "uu.array.clean()": "",
       "uu.array.clean(var ary=[1,2,3]; delete ary[1]) == [1,3]。uu.array.clean は 欠落(delete)した要素や null をスキップする": function() {
@@ -154,18 +154,18 @@ uu.ready(function(uu) {
 /*
     "uu.array.indexOf()": "",
       "uu.array.indexOf([1,2,3], 1) は 0 を返す": function() {
-        return [uu.array.indexOf([1,2,3], 1), "is", 0];
+        return [uu.array.indexOf([1,2,3], 1), "==", 0];
       },
       "uu.array.indexOf([<body>, <head>], <head>) は 1 を返す": function() {
-        return [uu.array.indexOf([document.body, document.head], document.head), "is", 1];
+        return [uu.array.indexOf([document.body, document.head], document.head), "==", 1];
       },
       "uu.array.indexOf([<body>, <head>], <html>) は -1 (not found) を返す": function() {
-        return [uu.array.indexOf([document.body, document.head], document.documentElement), "is", -1];
+        return [uu.array.indexOf([document.body, document.head], document.documentElement), "==", -1];
       },
  */
     "Array.filter()": "",
       "Array.filter([12, 5, 8, 130, 44], function(v) { return v >= 10; }) は [12, 130, 44] を返す": function() {
-        return [[12, 5, 8, 130, 44].filter(function(v) { return v >= 10; }), "is", [12, 130, 44]];
+        return [[12, 5, 8, 130, 44].filter(function(v) { return v >= 10; }), "==", [12, 130, 44]];
       },
     "Array.every()": "",
       "Array.every([12, 5, 8, 130, 44], function(v) { return v >= 10; }) は false を返す": function() {
@@ -183,7 +183,7 @@ uu.ready(function(uu) {
       },
     "Array.map()": "",
       "Array.map([1, 2, 3, 4, 5], function(v) { return v * 2; }) は [2, 4, 6, 8, 10] を返す": function() {
-        return [[1, 2, 3, 4, 5].map(function(v) { return v * 2; }), "is", [2, 4, 6, 8, 10]];
+        return [[1, 2, 3, 4, 5].map(function(v) { return v * 2; }), "==", [2, 4, 6, 8, 10]];
       },
     "uu.attr()": "",
       "[1][get all pair] uu.attr(uu.id('div')) は Hash を返す(結果はブラウザ依存)": function() {
