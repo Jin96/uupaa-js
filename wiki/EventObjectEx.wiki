@@ -12,11 +12,11 @@ EventObjectEx = {
     node          - Node:   as uu.event(_node_)
     code          - Number: as event.type
     mouse         - Number: as event.button
+    pageX         - Number: as event.pageX (IE6, IE7, IE8 only)
+    pageY         - Number: as event.pageY (IE6, IE7, IE8 only)
     wheel         - Number: as event.detail (Gecko, IE) or event.wheelDelta (WebKit)
     currentTarget - Node:   as event.currentTarget (IE6, IE7, IE8 only)
     relatedTarget - Node:   as event.relatedTarget (IE6, IE7, IE8 only)
-    pageX         - Number: as event.pageX (IE6, IE7, IE8 only)
-    pageY         - Number: as event.pageY (IE6, IE7, IE8 only)
 }
 }}}
 == クロスブラウザ化された以下の情報が EventObjectEx に追加されます ==
