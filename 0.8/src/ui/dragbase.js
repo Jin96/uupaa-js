@@ -23,10 +23,10 @@ function uuuidragbase(evt,      // @param event:
     var opt = option || {},
         pageX = evt.pageX,
         pageY = evt.pageY,
-        xtype = evt.xtype,
+        code  = evt.code,
         dragInfo = grip[_uuuidrag] || {};
 
-    if (xtype === 1 && !dragInfo.dragging) { // mousedown
+    if (code === 1 && !dragInfo.dragging) { // mousedown
 
         dragInfo = grip[_uuuidrag] = {
             x: pageX - (parseInt(node.style.left) || 0),
@@ -38,7 +38,7 @@ function uuuidragbase(evt,      // @param event:
 
         uu.ui.zindex.beginDrag(node);
 
-    } else if (xtype === 2 && dragInfo.dragging) { // mouseup
+    } else if (code === 2 && dragInfo.dragging) { // mouseup
 
         dragInfo.dragging = 0;
 
@@ -46,7 +46,7 @@ function uuuidragbase(evt,      // @param event:
 
         uu.ui.zindex.endDrag(node);
 
-    } else if (xtype === 3 && dragInfo.dragging) { // mousemove
+    } else if (code === 3 && dragInfo.dragging) { // mousemove
 
         node.style.left = (pageX - dragInfo.x) + "px";
         node.style.top  = (pageY - dragInfo.y) + "px";

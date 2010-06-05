@@ -19,7 +19,9 @@
 <script src="../../src/misc/byteArray.js"></script>
 <script>
 uu.ready(function(uu) {
-    var hex = uu.byteArray.toHexString;
+    var hex = function(byteArray) {
+        return uu.byteArray.toHexString(byteArray, true);
+    };
 
     uu.test({
         "FixNum, uint and int": "",
