@@ -8,10 +8,11 @@ uu.event() で登録した evaluator のコールバック第一引数が EventO
 
 {{{
 EventObjectEx = {
-    xtarget       - Node:   as event.target or event.srcElement or document
-    xtype         - Number: as event.type
-    xbutton       - Number: as event.button
-    xwheel        - Number: as event.detail (Gecko, IE) or event.wheelDelta (WebKit)
+    at            - Node:   as event.target or event.srcElement or document
+    node          - Node:   as uu.event(_node_)
+    code          - Number: as event.type
+    mouse         - Number: as event.button
+    wheel         - Number: as event.detail (Gecko, IE) or event.wheelDelta (WebKit)
     currentTarget - Node:   as event.currentTarget (IE6, IE7, IE8 only)
     relatedTarget - Node:   as event.relatedTarget (IE6, IE7, IE8 only)
     pageX         - Number: as event.pageX (IE6, IE7, IE8 only)
@@ -19,12 +20,13 @@ EventObjectEx = {
 }
 }}}
 == クロスブラウザ化された以下の情報が EventObjectEx に追加されます ==
-  * EventObjectEx.xtarget は、クロスブラウザ化された event.target 相当の情報を保持します。
-  * EventObjectEx.xtype は、ブラウザ毎に異なるイベントタイプ(event.type)を正規化した数値を保持します。
-  * EventObjectEx.xbutton は、event.button を正規化した数値を保持します。
-    * xbutton = 0 で クリック。xbutton = 1 でミドルクリック。 xbutton = 2 で右クリックです。
-    * xbutton は mousedown, mouseup, contextmenu イベントで利用できます。
-  * EventObjectEx.xwheel は、マウスホイールの回転数を保持します。0 で無回転です。
+  * EventObjectEx.at は、Actually event Target の略です。クロスブラウザ化された event.target 相当の情報を保持します。
+  * EventObjectEx.node は uu.event(_node_) です。
+  * EventObjectEx.code は、ブラウザ毎に異なるイベントタイプ(event.type)を正規化した数値を保持します。
+  * EventObjectEx.mouse は、event.button を正規化した数値を保持します。
+    * mouse = 0 で クリック。mouse = 1 でミドルクリック。 mouse = 2 で右クリックです。
+    * mouse は mousedown, mouseup, contextmenu イベントで利用できます。
+  * EventObjectEx.wheel は、マウスホイールの回転数を保持します。0 で無回転です。
     * 値は通常 +2 から -2 の範囲に収まりますが、OSやブラウザの設定を変更している場合はその限りではありません。
 
 == IE6～IE8 限定で以下の情報が EventObjectEx に追加されます ==
@@ -35,9 +37,9 @@ EventObjectEx = {
   * EventObjectEx.pageX は、event.pageX 相当の情報を保持します。
     * pageX, pageY はブラウザの原点(左上)からの絶対座標です。スクロールオフセットを含みます。
   * EventObjectEx.pageY は、event.pageY 相当の情報を保持します。
-== EventObjectEx.xtype value ==
+== EventObjectEx.code value ==
 {{{
-uu.event.xtypes = {
+uu.event.codes = {
     // --- DOM Lv2 and Lv3 Events ---
     mousedown:   1,
     mouseup:     2,
@@ -80,8 +82,8 @@ uu.event.xtypes = {
 == ヘルパー関数 ==
 キーコードや、PaddingEdgeを取得するヘルパー関数も存在します。
 
-  * [uu_event_getKeyCode uu.event.getKeyCode](event) → { key, code }
-  * [uu_event_getPaddingEdge uu.event.getPaddingEdge](event) → { x, y }
+  * [uu_event_key uu.event.key](event) → { key, code }
+  * [uu_event_edge uu.event.edge](event) → { x, y }
 
 == 例 ==
 
@@ -89,7 +91,7 @@ uu.event.xtypes = {
 {{{
     var div = uu.node.add();
     var evaluator = function(eventObjectEx) {
-        alert(eventObjectEx.xtype); // 5 = uu.event.xtypes.click
+        alert(eventObjectEx.code); // 5 = uu.event.codes.click
     };
 
     uu.event(div, "click", evaluator);
@@ -103,7 +105,7 @@ uu.event.xtypes = {
 {{{
     uu.Class("Drag", {
         handleEvent: function(eventObjectEx) {
-            alert(eventObjectEx.xtype); // 5 = uu.event.xtypes.click
+            alert(eventObjectEx.code); // 5 = uu.event.codes.click
         }
     });
 
