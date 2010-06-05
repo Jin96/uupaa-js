@@ -16,9 +16,6 @@
 <script src="../src/uupaa.js"></script>
 <script src="../src/query/query.js"></script>
 <script src="../src/test/test.js"></script>
-<script src="../uupaa.mb.js"></script>
-<script src="../uupaa.mb2.js"></script>
-<script src="../uupaa.js"></script>
 </head><body>
 <div style="display:none">
     <div id="div" class="class" title="title">text</div>
@@ -508,7 +505,7 @@ uu.ready(function(uu) {
 </div>';
         return [uu.node.add(fg), "is node"];
       },
-    "uu.nore.has()": "",
+    "uu.node.has()": "",
       "uu.node.has(uu.id('ctx'), uu.id('tgt')) == true": function() {
         return [uu.node.has(uu.id('ctx'), uu.id('tgt')), "is true"];
       },
@@ -520,39 +517,39 @@ uu.ready(function(uu) {
       },
 
 
-    "uu.nore.find(firstSibling)": "",
+    "uu.node.find(firstSibling)": "",
       "uu.node.find(uu.id('tgt'), '^') == uu.id('first')": function() {
         return [uu.node.find(uu.id('tgt'), '^'), "==", uu.id('first')];
       },
-    "uu.nore.find(previousSibling)": "",
+    "uu.node.find(previousSibling)": "",
       "uu.node.find(uu.id('tgt'), '-') == uu.id('prev')": function() {
         return [uu.node.find(uu.id('tgt'), '-'), "==", uu.id('prev')];
       },
-    "uu.nore.find(nextSibling)": "",
+    "uu.node.find(nextSibling)": "",
       "uu.node.find(uu.id('tgt'), '+') == uu.id('next')": function() {
         return [uu.node.find(uu.id('tgt'), '+'), "==", uu.id('next')];
       },
-    "uu.nore.find(lastSibling)": "",
+    "uu.node.find(lastSibling)": "",
       "uu.node.find(uu.id('tgt'), '$') == uu.id('last')": function() {
         return [uu.node.find(uu.id('tgt'), '$'), "==", uu.id('last')];
       },
-    "uu.nore.find(firstChild)": "",
+    "uu.node.find(firstChild)": "",
       "uu.node.find(uu.id('tgt'), '.^') == uu.id('firstChild')": function() {
         return [uu.node.find(uu.id('tgt'), '.^'), "==", uu.id('firstChild')];
       },
-    "uu.nore.find(lastChild)": "",
+    "uu.node.find(lastChild)": "",
       "uu.node.find(uu.id('tgt'), '.$') == uu.id('lastChild')": function() {
         return [uu.node.find(uu.id('tgt'), '.$'), "==", uu.id('lastChild')];
       },
 
 
-    "uu.nore.count()": "",
-      "uu.node.count(uu.id('tgt'))": function() {
-        return [uu.node.count(uu.id('tgt')), "==", 3];
+    "uu.node.children()": "",
+      "uu.node.children(uu.id('tgt'))": function() {
+        return [uu.node.children(uu.id('tgt')).length, "==", 3];
       },
 
 
-    "uu.nore.remove()": "",
+    "uu.node.remove()": "",
       "uu.node.remove(uu.id('ctx'))": function() {
         return [uu.node.remove(uu.id('ctx')), "is node"];
       },

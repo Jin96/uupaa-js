@@ -65,15 +65,15 @@ function dragHandleEvent(evt) {
     uu.event.stop(evt);
 
     uu.ui.dragbase(evt, this.node, this.grip, this.option);
-    var xtype = evt.xtype, fn;
+    var code = evt.code, fn;
 
-    if (xtype < 5) {
-        if (xtype < 3) { // 1: mousedown, 2: mouseup
-            fn = xtype === 1 ? uu.event : uu.event.unbind;
+    if (code < 5) {
+        if (code < 3) { // 1: mousedown, 2: mouseup
+            fn = code === 1 ? uu.event : uu.event.unbind;
 
             fn(_ie678 ? this.grip : document, "mousemove+,mouseup+", this);
-        } else if (xtype === 3) { // 3: mousemove
-        } else if (xtype === 4) { // 4: wheel
+        } else if (code === 3) { // 3: mousemove
+        } else if (code === 4) { // 4: wheel
 //            this.option.wheel && this.mousewheel(evt);
         }
     }

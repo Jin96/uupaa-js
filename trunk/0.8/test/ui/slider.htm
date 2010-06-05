@@ -49,14 +49,14 @@ uu.ready(function() {
     uu.ui.slider.dressup(uu.css.textSelectable(uu.id("slide2")), { degree: 45 });
     uu.ui.slider.dressup(uu.css.textSelectable(uu.id("slide3")), { degree: 90 });
 
-    uu.click(uu.id("slide1"), function(evt, node) {
-        uu.ui.slider(node, duration);
+    uu.click(uu.id("slide1"), function(evt) {
+        uu.ui.slider(evt.node, duration);
     });
-    uu.click(uu.id("slide2"), function(evt, node) {
-        uu.ui.slider(node, duration);
+    uu.click(uu.id("slide2"), function(evt) {
+        uu.ui.slider(evt.node, duration);
     });
-    uu.click(uu.id("slide3"), function(evt, node) {
-        uu.ui.slider(node, duration);
+    uu.click(uu.id("slide3"), function(evt) {
+        uu.ui.slider(evt.node, duration);
     });
 
 });

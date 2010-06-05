@@ -160,7 +160,7 @@ function quickQuery(expr, match, context) {
 }
 
 // uu.query.selectorAll
-function selectorAll(expr,      // @param String: expr
+function selectorAll(expr,      // @param CSSQueryString: expr
                      context) { // @param Node/NodeArray(= document):
     context = context || doc;
     expr = uu.trim(expr);
