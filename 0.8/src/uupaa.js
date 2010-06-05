@@ -756,6 +756,8 @@ function uuarray(source,     // @param Array/Mix/NodeList/Arguments: source
 // [2][Hash has Hash]   uuhas({ a: 1, b: 2 }, { a: 1 }) -> true
 // [3][Node has Event]  uuhas(node, "namespace.click") -> true
 // [4][Node has Node]   uuhas(parentNode, childNode) -> true
+// [5][Array has Mix]   uuhas([1, 2], 1) -> true
+// [6][Array has Mix]   uuhas([1, "a"], "a") -> true
 
 // inner - has
 function uuhas(source,   // @param Hash/Array/Node: source
@@ -1819,6 +1821,7 @@ function uuclass(className, // @param String: "Class"
         var that = this, args = arguments,
             Super = that.superClass || 0;
 
+        that.name = Class;
         that.uuguid = uu.guid();
         that.msgbox || (that.msgbox = _nop);
         uu.msg.bind(that); // bind MsgPump
@@ -1859,6 +1862,7 @@ function uuclasssingleton(className, // @param String: class name
             instance = "instance";
 
         if (!self[instance]) {
+            that.name = Class;
             that.uuguid = uu.guid();
             that.init && that.init.apply(that, arg);
             that.msgbox || (that.msgbox = _nop);
@@ -2970,8 +2974,9 @@ function _json(mix, esc, callback) {
     case uutype.NULL:   return "null";
     case uutype.VOID:   return "undefined";
     case uutype.DATE:   return uudate(mix).ISO();
-    case uutype.BOOLEAN:
     case uutype.FUNCTION:
+                        return '"' + mix.name + '"';
+    case uutype.BOOLEAN:
     case uutype.NUMBER: return mix.toString();
     case uutype.STRING: return esc ? _str2json(mix, 1) : '"' + mix + '"';
     case uutype.ARRAY:
@@ -2982,6 +2987,9 @@ function _json(mix, esc, callback) {
         return "[" + ary + "]";
     default:
         return callback ? (callback(mix) || "") : "";
+    }
+    if (mix.msgbox) {
+        return '"' + mix.name + '"';
     }
     if (_toString.call(type).slice(-3) === "on]") { // [object CSSStyleDeclaration]
         w = _webkit;

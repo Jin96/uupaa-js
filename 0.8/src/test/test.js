@@ -28,12 +28,32 @@
 uu.test || (function(uu) {
 
 uu.test = uutest;           // uu.test(testCase:Hash, throwsError:Boolean = false)
-uu.test.addType = addType;  // uu.test.addType(operator:String, callback:Function):Boolean
-uu.test.data = { index: 0, ok: 0, ng: 0, total: 0, run: 0 };
+uu.test.ignoreError = true; // uu.test.ignoreError
+uu.test.data = {
+    index: 0, ok: 0, ng: 0, total: 0, run: 0
+};
+
+//  [1][quick test] uu.test("title", lhs, "operator", rhs, callbackOrComments...)
+//  [2][multi test] uu.test({ "title": function() { return [lhs, "operator", rhs, callbackOrComments...] }, ... })
 
 // uu.test
-function uutest(testCase,      // @param Hash: { title: evaluator, ... }
-                throwsError) { // @param Boolean(= false): true is throws
+function uutest(testCase) { // @param String/Hash: title or { title: evaluator, ... }
+    var args, hash = {};
+
+    if (uu.isString(testCase)) {
+        args = uu.array(arguments, 1);
+        if (uu.isString(args[0])) {
+            run(uu.hash(testCase, args[0]));
+        } else {
+            run(uu.hash(testCase, function() { return args; }));
+        }
+    } else {
+        run(testCase);
+    }
+}
+
+// inner -
+function run(hash) { // @param Hash: { title: evaluator, ... }
     var rv, data = uu.test.data, title, ngzone, ol;
 
     if (!data.run++) {
@@ -45,11 +65,11 @@ function uutest(testCase,      // @param Hash: { title: evaluator, ... }
     ngzone = uu.klass("ngzone")[0];
     ol = uu.klass("uutest")[0].firstChild;
 
-    for (title in testCase) {
+    for (title in hash) {
         ++data.index;
 
-        if (uu.isFunction(testCase[title])) {
-            rv = question(title, testCase[title], throwsError);
+        if (uu.isFunction(hash[title])) {
+            rv = question(title, hash[title]);
             if (rv[0] === 1) {
                 ++data.ok;
             } else {
@@ -73,16 +93,13 @@ function uutest(testCase,      // @param Hash: { title: evaluator, ... }
 
     uu.text(uu.klass("score")[0], "?? / ??", data.ok, data.total);
 }
-uutest.type = {}; // { operator: callback, ... }
-uutest.trimOperator = /NOT|!|IS/ig;
 
-function question(title,         // @param String:
-                  evaluator,     // @param Function:
-                  throwsError) { // @param Boolean:
-                                 // @return Array: [state, msg, ...]
-                                 //    state - Number: 0 is false, 1 is true, 2 is error
-                                 //    msg - String:
-    var rv, param, result, callback, lhs, rhs;
+function question(title,       // @param String:
+                  evaluator) { // @param Function:
+                               // @return Array: [state, msg, ...]
+                               //    state - Number: 0 is false, 1 is true, 2 is error
+                               //    msg - String:
+    var rv, param, result;
 
     try {
         param = evaluator(); // param = [lhs, operator, rhs]
@@ -91,25 +108,18 @@ function question(title,         // @param String:
         if (result === 2) { // bad operator
             rv = [result, "bad operator: " + param[1]];
         } else {
-            lhs = param[0];
-            lhs = uu.isString(lhs) ? ('"' + lhs + '"') : uu.json(lhs);
-
-            rhs = param[2] === void 0 ? "" : param[2];
-            rhs = uu.isString(rhs) ? ('"' + rhs + '"') : uu.json(rhs);
-
-            rv = [result, uu.format("?? ?? ??", lhs, param[1], rhs)];
-
-            // after callback
-            param.slice(param[2] === void 0 ? 2 : 3).forEach(function(v, i) {
+            rv = [result, uu.format("?? ?? ??", uu.json(param[0]), param[1],
+                                                param[2] ? uu.json(param[2]) : "")];
+            param.slice(3).forEach(function(v, i) {
                 uu.isFunction(v) ? v() // after callback
                                  : rv.push(v);
             });
         }
     } catch(err) {
-        if (throwsError) {
+        if (uu.test.ignoreError) {
             throw err;
         }
-        rv = [2, err.message]; // -1: error
+        rv = [2, err.message]; // 2: error
     }
     return rv;
 }
@@ -119,61 +129,37 @@ function judge(lhs,      // @param Mix: left hand set
                operator, // @param String: operator
                rhs) {    // @param Mix(= void): right hand set
                          // @return Number: 0 is false, 1 is true, 2 is bad operator
-    var rv,
-        ope = operator.toUpperCase().replace(/\s+/g, "");
-        negate = /NOT|!/i.test(ope) ? 1 : 0;
+    var rv, ope = operator.toUpperCase().replace(/\s+/g, "");
 
-    if (ope === "!==" || ope === "===") {
+    if (ope === "===") {
         rv = lhs.valueOf() == rhs.valueOf();
+    } else if (ope === "!==") {
+        rv = lhs.valueOf() != rhs.valueOf();
     } else {
-        // strip "NOT", "!", "IS"
-        ope = ope.replace(uutest.trimOperator, "");
-
         switch (ope) {
-        case "":
-        case "=":
-        case "==":
-        case "LIKE":    rv = uu.like(lhs, rhs); break;
-        case ">":       rv = lhs >  rhs; break;
-        case ">=":      rv = lhs >= rhs; break;
-        case "<":       rv = lhs <  rhs; break;
-        case "<=":      rv = lhs <= rhs; break;
-        case "&":       rv = lhs &  rhs; break;
-        case "&&":
-        case "AND":     rv = lhs && rhs; break;
-        case "|":       rv = lhs |  rhs; break;
-        case "||":
-        case "OR":      rv = lhs || rhs; break;
-        case "HAS":     rv = uu.isString(lhs) ? lhs.indexOf(rhs) > 0
-                                              : uu.hash.has(lhs, rhs); break;
-        case "TRUE":    rv = !!lhs; break;
-        case "FALSE":   rv =  !lhs; break;
-        case "NAN":     rv = isNaN(lhs); break;
-        case "FAIL":    rv = false; break;
-        case "INFINITY":rv = !isFinite(lhs); break;
-        case "INSTANCE":rv = !!lhs.msgbox; break;
+        case "IS":
+        case "==":  rv =  uu.like(lhs, rhs); break;
+        case "!=":  rv = !uu.like(lhs, rhs); break;
+        case ">":   rv = lhs >  rhs; break;
+        case ">=":  rv = lhs >= rhs; break;
+        case "<":   rv = lhs <  rhs; break;
+        case "<=":  rv = lhs <= rhs; break;
+        case "&&":  rv = !!(lhs && rhs); break;
+        case "||":  rv = !!(lhs || rhs); break;
+        case "HAS": rv = uu.isString(lhs) ? lhs.indexOf(rhs) > 0
+                                          : uu.hash.has(lhs, rhs); break;
+        case "ISNAN":     rv = isNaN(lhs); break;
+        case "ISTRUE":    rv = !!lhs; break;
+        case "ISFALSE":   rv =  !lhs; break;
+        case "ISERROR":   try { fn(), rv = 0; } catch(err) { rv = 1; } break;
+        case "ISINFINITY":rv = !isFinite(lhs); break;
+        case "ISINSTANCE":rv = !!lhs.msgbox; break;
         default:
-            if (uu.type[ope]) {
-                rv = !!uu.type(lhs, uu.type[ope]);
-            } else {
-                if (uutest.type[ope]) {
-                    rv = uutest.type[ope](lhs, operator);
-                } else {
-                    return 2;
-                }
-            }
+            ope = ope.replace(/IS/, "");
+            rv = uu.type[ope] ? uu.type(lhs, uu.type[ope]) : 2;
         }
     }
-    return rv ^ negate;
-}
-
-// uu.test.addType - register type detective operator
-function addType(operator,   // @param String:
-                 callback) { // @param Function:
-                             // @return Boolean:
-    uutest.type[operator.toUpperCase().
-                         replace(/\s+/g, "").
-                         replace(uutest.trimOperator, "")] = callback;
+    return +rv;
 }
 
 })(uu);
