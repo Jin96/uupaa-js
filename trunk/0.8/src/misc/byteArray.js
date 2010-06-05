@@ -11,14 +11,16 @@ uu.byteArray.toHexString = uubyteArraytoHexString; // uu.byteArray.toHexString(s
 // uu.byteArray - HexString to ByteArray
 function uubyteArray(source) { // @param String: "00010203"
                                // @return ByteArray: [0, 1, 2, 3]
-                               // @return throws Error("BAD_DATA")
+                               // @throws Error("BAD_DATA")
     var rv = [], ri = -1, v, i = 0, iz = source.length,
         hh2num = uu.hash.hh2num;
 
     if (iz % 2) {
         throw new Error("BAD_DATA");
     }
+
     v = source.split("");
+
     for (; i < iz; i += 2) {
         rv[++ri] = hh2num[v[i] + v[i + 1]];
     }
