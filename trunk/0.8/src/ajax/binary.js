@@ -5,11 +5,38 @@
 
 uu.ajax.binary || (function(uu) {
 
-uu.ajax.binary = uuajaxbinary; // uu.ajax.binary(xhr:XMLHttpRequest):ByteArray
+uu.ajax.binary = uuajaxbinary; // uu.ajax.binary(url:String, callback:Function, option:Hash = {})
 
 // uu.ajax.binary
-function uuajaxbinary(xhr) { // @param XMLHttpRequest:
-                             // @return ByteArray:
+function uuajaxbinary(url,      // @param String:
+                      callback, // @param Function: callback function
+                      option) { // @param Hash(= {}):
+    function readyStateChange() {
+        if (xhr.readyState === 4) {
+            var ok = xhr.status >= 200 && xhr.status < 300;
+
+            callback({ ok: ok, xhr: xhr, data: ok ? toBinary(xhr) : [] });
+        }
+    }
+
+    var xhr = uu.ajax.create();
+
+    xhr.onreadystatechange = readyStateChange;
+
+    if (!uu.ie) {
+        if (xhr.overrideMimeType) {
+            xhr.overrideMimeType("text/plain; charset=x-user-defined");
+        } else {
+            xhr.setRequestHeader("Accept-Charset", "x-user-defined");
+        }
+    }
+    xhr.open("GET", url, true); // ASync
+    xhr.send(null);
+}
+
+// inner - to binary
+function toBinary(xhr) { // @param XMLHttpRequest:
+                         // @return ByteArray:
     var rv = [], data,
 //{{{!mb
         loop, remain, v0, v1, v2, v3, v4, v5, v6, v7,
