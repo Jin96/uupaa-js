@@ -32,36 +32,34 @@ function uuajax(url,          // @param String: url
     option = option || {};
 
     function _onReadyStateChange() {
-        if (xhr.readyState !== 4) {
-            return;
-        }
+        if (xhr.readyState === 4) {
+            var status = xhr.status || 0,
+                lastModified,
+                result;
 
-        var status = xhr.status || 0,
-            lastModified,
-            result;
+            if ((status >= 200 && status < 300)
+                || (!status && !url.indexOf("file:"))) {
 
-        if ((status >= 200 && status < 300)
-            || (!status && !url.indexOf("file:"))) {
+                // --- callback phase ---
+                if (callback && !run++) {
+                    result = _createAjaxResultHash(true, status || 200);
+                    callback(result);
 
-            // --- callback phase ---
-            if (callback && !run++) {
-                result = _createAjaxResultHash(true, status || 200);
-                callback(result);
-
-                _fn2 && _fn2(result); // callback uu.ajax.queue
-            }
-            // --- "Last-Modified" phase ---
-            if (option.ifmod) {
-                lastModified = xhr.getResponseHeader("Last-Modified");
-                if (lastModified) {
-                    uuajax.cache[url] =
-                            uu.date(Date.parse(lastModified)).GMT(); // add cache
+                    _fn2 && _fn2(result); // callback uu.ajax.queue
                 }
+                // --- "Last-Modified" phase ---
+                if (option.ifmod) {
+                    lastModified = xhr.getResponseHeader("Last-Modified");
+                    if (lastModified) {
+                        uuajax.cache[url] =
+                                uu.date(Date.parse(lastModified)).GMT(); // add cache
+                    }
+                }
+            } else {
+                _ngCallback(status || ((uu.opera && option.ifmod) ? 304 : 400)); // [Opera]
             }
-        } else {
-            _ngCallback(status || ((uu.opera && option.ifmod) ? 304 : 400)); // [Opera]
+            _garbageCollection();
         }
-        _garbageCollection();
     }
     function _createAjaxResultHash(ok, status) {
         return {

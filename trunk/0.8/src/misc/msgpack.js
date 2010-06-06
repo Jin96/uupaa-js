@@ -50,7 +50,7 @@ function msgpackunpack(data) { // @param String/ByteArray:
     // convert String to ByteArray
     if (typeof data === "string") {
         for (ary = [], i = 0, iz = data.length; i < iz; ++i) {
-            ary[i] = data.charCodeAt(i);
+            ary[i] = data.charCodeAt(i) & 0xff;
         }
     }
     return { data: ary || data, index: -1, decode: decode }.decode();
