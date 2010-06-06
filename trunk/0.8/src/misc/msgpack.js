@@ -28,7 +28,6 @@ var _bin2num = {}, // { "00000000": 0, "00000001": 1, ... }
     },
     _pow = Math.pow,
     _floor = Math.floor,
-    _toString = Object.prototype.toString,
     _buggyToString2 = /2/.test((1.2).toString(2)); // [OPERA][FIX]
 
 namespace.msgpack = {
@@ -151,7 +150,8 @@ function decode() { // @return Mix:
                 return (sign ? -1 : 1) *
                             ((fraction | 0x100000)  * _pow(2, exp - 1023 - 20) // 1023: bias
                                 + readByte(that, 4) * _pow(2, exp - 1023 - 52));
-    case 0xcf:  return readByte(that, 8);    // uint 64
+    case 0xcf:  return readByte(that, 4) * _pow(2, 32) +
+                       readByte(that, 4);    // uint 64
     case 0xce:  return readByte(that, 4);    // uint 32
     case 0xcd:  return readByte(that, 2);    // uint 16
     case 0xcc:  return readByte(that, 1);    // uint 8
@@ -190,13 +190,9 @@ function readByte(that,   // @param Object:
     var rv = 0, data = that.data, i = that.index;
 
     switch (size) {
-    case 8: rv += data[++i] * _0x100000000000000; // << 56
-            rv += data[++i] *   _0x1000000000000; // << 48
-            rv += data[++i] *     _0x10000000000; // << 40
-            rv += data[++i] *       _0x100000000; // << 32
-    case 4: rv += data[++i] *         _0x1000000; // << 24
-            rv += data[++i] *           _0x10000; // << 16
-    case 2: rv += data[++i] *             _0x100; // << 8
+    case 4: rv += data[++i] * _0x1000000
+               + (data[++i] << 16);
+    case 2: rv += data[++i] << 8;
     case 1: rv += data[++i];
     }
     that.index = i;
@@ -252,6 +248,8 @@ function encodeNumber(rv,    // @param ByteArray: result
         rv.push(0xcb, 0x7f, 0xf0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00); // positive infinity
 
     } else if (_floor(mix) === mix) { // bugfix // (mix | 0 == mix)
+        var high, low, i64 = 0;
+
         if (mix < 0) { // int
             if (mix >= -32) { // negative fixnum
                 rv.push(0xe0 + mix + 32);
@@ -265,14 +263,7 @@ function encodeNumber(rv,    // @param ByteArray: result
                 rv.push(0xd2, mix >>> 24, (mix >> 16) & _0xff,
                                           (mix >>  8) & _0xff, mix & _0xff);
             } else {
-                rv.push(0xd3, _floor(mix / _0x100000000000000) & _0xff,
-                              _floor(mix /   _0x1000000000000) & _0xff,
-                              _floor(mix /     _0x10000000000) & _0xff,
-                              _floor(mix /       _0x100000000) & _0xff,
-                              _floor(mix /         _0x1000000) & _0xff,
-                              (mix >>  16) & _0xff,
-                              (mix >>   8) & _0xff,
-                                       mix & _0xff);
+                ++i64;
             }
         } else { // uint
             if (mix < 128) {
@@ -285,15 +276,17 @@ function encodeNumber(rv,    // @param ByteArray: result
                 rv.push(0xce, mix >>> 24, (mix >> 16) & _0xff,
                                           (mix >>  8) & _0xff, mix & _0xff);
             } else {
-                rv.push(0xcf, _floor(mix / _0x100000000000000) & _0xff,
-                              _floor(mix /   _0x1000000000000) & _0xff,
-                              _floor(mix /     _0x10000000000) & _0xff,
-                              _floor(mix /       _0x100000000) & _0xff,
-                              (mix >>> 24) & _0xff,
-                              (mix >>  16) & _0xff,
-                              (mix >>   8) & _0xff,
-                                       mix & _0xff);
+                ++i64;
             }
+        }
+        if (i64) {
+            high = _floor(mix / _0x100000000);
+            low = mix & (_0x100000000 - 1);
+            rv.push(mix < 0 ? 0xd3 : 0xcf,
+                          (high >> 24) & _0xff, (high >> 16) & _0xff,
+                          (high >>  8) & _0xff,         high & _0xff,
+                          (low  >> 24) & _0xff, (low  >> 16) & _0xff,
+                          (low  >>  8) & _0xff,          low & _0xff);
         }
     } else { // double
         toIEEE754(rv, mix);
