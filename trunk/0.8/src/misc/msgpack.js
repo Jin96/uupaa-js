@@ -8,7 +8,7 @@
 (this.uu || this).msgpack || (function(namespace, win) {
 
 var _WebWorker = "msgpack.worker.js",
-    _ie678 = !!document.uniqueID,
+    _ie = /MSIE/.test(navigator.userAgent),
     _bin2num = {}, // { "00000000": 0, "00000001": 1, ... }
     _hex2num = {},
     // --- minify ---
@@ -403,7 +403,7 @@ function msgpackload(url,        // @param String:
                        status: status, option: option, data: [] };
 
             if (rv.ok) {
-                if (!_ie678 && option.worker && win.Worker) {
+                if (!_ie && option.worker && win.Worker) {
                     var worker = new Worker(_WebWorker);
 
                     worker.onmessage = function(event) {
@@ -412,8 +412,8 @@ function msgpackload(url,        // @param String:
                     };
                     worker.postMessage(xhr.responseText);
                 } else {
-                    rv.data = msgpackunpack(_ie678 ? toByteArrayIE(xhr.responseBody)
-                                                   : toByteArray(xhr.responseText));
+                    rv.data = msgpackunpack(_ie ? toByteArrayIE(xhr.responseBody)
+                                                : toByteArray(xhr.responseText));
                     callback(rv);
                 }
             } else {
@@ -433,7 +433,7 @@ function msgpackload(url,        // @param String:
 
     xhr.open("GET", url, true); // ASync
 
-    if (!_ie678) {
+    if (!_ie) {
         if (xhr.overrideMimeType) {
             xhr.overrideMimeType("text/plain; charset=x-user-defined");
         } else {
@@ -526,7 +526,7 @@ function toByteArrayIE(unknownData) {
 })();
 
 //{{{!mb
-_ie678 && document.write('<script type="text/vbscript">\
+_ie && document.write('<script type="text/vbscript">\
 Function vblen(b)vblen=LenB(b)End Function\n\
 Function vbstr(b)vbstr=CStr(b)+chr(0)End Function</'+'script>');
 //}}}!mb
