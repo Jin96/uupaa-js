@@ -9,5 +9,6 @@ msgpack || importScripts("src/misc/msgpack.js");
 onmessage = function(event) {
     var mix = msgpack.unpack(event.data);
 
-    postMessage(JSON.stringify(mix));
+//  postMessage(JSON.stringify(mix));
+    postMessage(mix);
 };

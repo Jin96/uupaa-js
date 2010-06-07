@@ -31,7 +31,6 @@ var _WebWorker = "msgpack.worker.js",
     },
     _pow = Math.pow,
     _floor = Math.floor,
-    _charCodeAt = "charCodeAt",
     _buggyToString2 = /2/.test((1.2).toString(2)); // [OPERA][FIX]
 
 namespace.msgpack = {
@@ -407,7 +406,7 @@ function msgpackload(url,        // @param String:
                     var worker = new Worker(_WebWorker);
 
                     worker.onmessage = function(event) {
-                        rv.data = JSON.parse(event.data);
+                        rv.data = event.data;
                         callback(rv);
                     };
                     worker.postMessage(xhr.responseText);
@@ -470,7 +469,7 @@ function toByteArray(data) { // @param String:
 // inner - to toByteArray
 function toByteArrayIE(xhr) {
     var rv = [], data, remain,
-        charCodeAt = _charCodeAt, _0xff = 0xff,
+        charCodeAt = "charCodeAt", _0xff = 0xff,
         loop, v0, v1, v2, v3, v4, v5, v6, v7,
         i = -1, iz;
 
