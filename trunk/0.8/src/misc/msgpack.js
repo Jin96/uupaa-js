@@ -5,9 +5,12 @@
 
 // MessagePack -> http://msgpack.sourceforge.net/
 
-(this.uu || this).msgpack || (function(namespace) {
+(this.uu || this).msgpack || (function(namespace, win) {
 
-var _bin2num = {}, // { "00000000": 0, "00000001": 1, ... }
+var _WebWorker = "msgpack.worker.js",
+    _ie678 = !!document.uniqueID,
+    _bin2num = {}, // { "00000000": 0, "00000001": 1, ... }
+    _hex2num = {},
     // --- minify ---
     _0x100000000000000 = 0x100000000000000,
     _0x1000000000000 =     0x1000000000000,
@@ -28,9 +31,11 @@ var _bin2num = {}, // { "00000000": 0, "00000001": 1, ... }
     },
     _pow = Math.pow,
     _floor = Math.floor,
+    _charCodeAt = "charCodeAt",
     _buggyToString2 = /2/.test((1.2).toString(2)); // [OPERA][FIX]
 
 namespace.msgpack = {
+    load:   msgpackload,  // uu.msgpack.load(url:String, option:Hash, callback:Function)
     pack:   msgpackpack,  // uu.msgpack.pack(data:Mix):ByteArray
     unpack: msgpackunpack // uu.msgpack.unpack(data:String/ByteArray):Mix
 };
@@ -44,15 +49,9 @@ function msgpackpack(data) { // @param Mix:
 // uu.msgpack.unpack
 function msgpackunpack(data) { // @param String/ByteArray:
                                // @return Mix:
-    var ary, i, iz;
-
-    // convert String to ByteArray
-    if (typeof data === "string") {
-        for (ary = [], i = 0, iz = data.length; i < iz; ++i) {
-            ary[i] = data.charCodeAt(i) & 0xff;
-        }
-    }
-    return { data: ary || data, index: -1, decode: decode }.decode();
+    return { data: typeof data === "string" ? toByteArray(data)
+                                            : data,
+             index: -1, decode: decode }.decode();
 }
 
 // inner - encoder
@@ -392,15 +391,144 @@ function numberToBinaryString(num) { // @param Number:
     return rv.join("");
 }
 
+// uu.msgpack.load
+function msgpackload(url,        // @param String:
+                     option,     // @param Hash: { worker }
+                                 //    option.worker - Boolean:
+                     callback) { // @param Function: callback function
+    function readyStateChange() {
+        if (xhr.readyState === 4) {
+            var status = xhr.status,
+                rv = { ok: status >= 200 && status < 300,
+                       status: status, option: option, data: [] };
+
+            if (rv.ok) {
+                if (!_ie678 && option.worker && win.Worker) {
+                    var worker = new Worker(_WebWorker);
+
+                    worker.onmessage = function(event) {
+                        rv.data = JSON.parse(event.data);
+                        callback(rv);
+                    };
+                    worker.postMessage(xhr.responseText);
+                } else {
+                    rv.data = msgpackunpack(_ie678 ? toByteArrayIE(xhr.responseBody)
+                                                   : toByteArray(xhr.responseText));
+                    callback(rv);
+                }
+            } else {
+                callback(rv);
+            }
+            xhr = null;
+        }
+    }
+
+    var xhr =
+//{{{!mb
+              win.ActiveXObject  ? new ActiveXObject("Microsoft.XMLHTTP") :
+//}}}!mb
+              win.XMLHttpRequest ? new XMLHttpRequest() : null;
+
+    xhr.onreadystatechange = readyStateChange;
+
+    xhr.open("GET", url, true); // ASync
+
+    if (!_ie678) {
+        if (xhr.overrideMimeType) {
+            xhr.overrideMimeType("text/plain; charset=x-user-defined");
+        } else {
+            xhr.setRequestHeader("Accept-Charset", "x-user-defined");
+        }
+    }
+    xhr.send(null);
+}
+
+// inner - to toByteArray
+function toByteArray(data) { // @param String:
+                             // @return ByteArray:
+    var rv = [], hex2num = _hex2num, remain,
+        i = -1, iz;
+
+    iz = data.length;
+    remain = iz % 8;
+
+    while (remain--) {
+        ++i;
+        rv[i] = hex2num[data[i]];
+    }
+    remain = iz >> 3;
+    while (remain--) {
+        rv.push(hex2num[data[++i]], hex2num[data[++i]],
+                hex2num[data[++i]], hex2num[data[++i]],
+                hex2num[data[++i]], hex2num[data[++i]],
+                hex2num[data[++i]], hex2num[data[++i]]);
+    }
+    return rv;
+}
+
+//{{{!mb
+// inner - to toByteArray
+function toByteArrayIE(unknownData) {
+    var rv = [], data, remain,
+        charCodeAt = _charCodeAt, _0xff = 0xff,
+        loop, v0, v1, v2, v3, v4, v5, v6, v7,
+        i = -1, iz;
+
+    iz = vblen(unknownData);
+    data = vbstr(unknownData);
+    loop = Math.ceil(iz / 2);
+    remain = loop % 8;
+
+    while (remain--) {
+        v0 = data[charCodeAt](++i); // 0x00,0x01 -> 0x0100
+        rv.push(v0 & _0xff, v0 >> 8);
+    }
+    remain = loop >> 3;
+    while (remain--) {
+        v0 = data[charCodeAt](++i);
+        v1 = data[charCodeAt](++i);
+        v2 = data[charCodeAt](++i);
+        v3 = data[charCodeAt](++i);
+        v4 = data[charCodeAt](++i);
+        v5 = data[charCodeAt](++i);
+        v6 = data[charCodeAt](++i);
+        v7 = data[charCodeAt](++i);
+        rv.push(v0 & _0xff, v0 >> 8, v1 & _0xff, v1 >> 8,
+                v2 & _0xff, v2 >> 8, v3 & _0xff, v3 >> 8,
+                v4 & _0xff, v4 >> 8, v5 & _0xff, v5 >> 8,
+                v6 & _0xff, v6 >> 8, v7 & _0xff, v7 >> 8);
+    }
+    iz % 2 && rv.pop();
+
+    return rv;
+}
+//}}}!mb
+
 // --- init ---
-// inner - create binaryToNumber hash
+// inner - create BinaryToNumber Hash, create HexToNumber Hash
 (function() {
-    var i = 0, s;
+    var i = 0, s, high = 0xf7 << 8;
 
     for (; i < _0x100; ++i) {
         s = ("0000000" + i.toString(2)).slice(-8);
         _bin2num[s] = i;
     }
+
+    // http://twitter.com/edvakf/statuses/15576483807
+    // http://twitter.com/uupaa/statuses/15580457017
+
+    for (i = 0; i < 256; ++i) {
+        _hex2num[String.fromCharCode(i)] = i;        // "\00" -> 0x00
+    }
+    for (i = 128; i < 256; ++i) { // [WEBKIT][GECKO][BAD KNOWHOW]
+        _hex2num[String.fromCharCode(high + i)] = i; // "\7f80" -> 0x80
+    }
 })();
 
-})(this.uu || this);
+//{{{!mb
+_ie678 && document.write('<script type="text/vbscript">\
+Function vblen(b)vblen=LenB(b)End Function\n\
+Function vbstr(b)vbstr=CStr(b)+chr(0)End Function</'+'script>');
+//}}}!mb
+
+})(this.uu || this, this);
