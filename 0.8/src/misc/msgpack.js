@@ -412,7 +412,7 @@ function msgpackload(url,        // @param String:
                     };
                     worker.postMessage(xhr.responseText);
                 } else {
-                    rv.data = msgpackunpack(_ie ? toByteArrayIE(xhr.responseBody)
+                    rv.data = msgpackunpack(_ie ? toByteArrayIE(xhr)
                                                 : toByteArray(xhr.responseText));
                     callback(rv);
                 }
@@ -468,14 +468,14 @@ function toByteArray(data) { // @param String:
 
 //{{{!mb
 // inner - to toByteArray
-function toByteArrayIE(unknownData) {
+function toByteArrayIE(xhr) {
     var rv = [], data, remain,
         charCodeAt = _charCodeAt, _0xff = 0xff,
         loop, v0, v1, v2, v3, v4, v5, v6, v7,
         i = -1, iz;
 
-    iz = vblen(unknownData);
-    data = vbstr(unknownData);
+    iz = vblen(xhr);
+    data = vbstr(xhr);
     loop = Math.ceil(iz / 2);
     remain = loop % 8;
 
@@ -527,8 +527,8 @@ function toByteArrayIE(unknownData) {
 
 //{{{!mb
 _ie && document.write('<script type="text/vbscript">\
-Function vblen(b)vblen=LenB(b)End Function\n\
-Function vbstr(b)vbstr=CStr(b)+chr(0)End Function</'+'script>');
+Function vblen(b)vblen=LenB(b.responseBody)End Function\n\
+Function vbstr(b)vbstr=CStr(b.responseBody)+chr(0)End Function</'+'script>');
 //}}}!mb
 
 })(this.uu || this, this);
