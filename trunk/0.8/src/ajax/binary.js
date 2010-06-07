@@ -13,15 +13,24 @@ function uuajaxbinary(url,      // @param String:
                       option) { // @param Hash(= {}):
     function readyStateChange() {
         if (xhr.readyState === 4) {
-            var ok = xhr.status >= 200 && xhr.status < 300;
+            var status = xhr.status,
+                rv = { ok: status >= 200 && status < 300,
+                       status: status, option: option, data: [] };
 
-            callback({ ok: ok, xhr: xhr, data: ok ? toBinary(xhr) : [] });
+            if (rv.ok) {
+                rv.data = uu.ie ? toByteArrayIE(xhr)
+                                : toByteArray(xhr.responseText);
+            }
+            callback(rv);
+            xhr = null;
         }
     }
 
     var xhr = uu.ajax.create();
 
     xhr.onreadystatechange = readyStateChange;
+
+    xhr.open("GET", url, true); // ASync
 
     if (!uu.ie) {
         if (xhr.overrideMimeType) {
@@ -30,65 +39,81 @@ function uuajaxbinary(url,      // @param String:
             xhr.setRequestHeader("Accept-Charset", "x-user-defined");
         }
     }
-    xhr.open("GET", url, true); // ASync
     xhr.send(null);
 }
 
-// inner - to binary
-function toBinary(xhr) { // @param XMLHttpRequest:
-                         // @return ByteArray:
-    var rv = [], data,
-//{{{!mb
-        loop, remain, v0, v1, v2, v3, v4, v5, v6, v7,
-//}}}!mb
-        i = 0, iz;
 
-//{{{!mb
-    if (!uu.ie) {
-//}}}!mb
-        data = xhr.responseText;
-        iz = data.length;
-        for (; i < iz; ++i) {
-            rv[i] = data.charCodeAt(i) & 0xff;
-        }
-//{{{!mb
-    } else {
-        data = vbstr(xhr.responseBody);
-        iz = vblen(xhr.responseBody);
+// inner - to toByteArray
+function toByteArray(data) { // @param String:
+                             // @return ByteArray:
+    var rv = [], remain,
+        charCodeAt = "charCodeAt", _0xff = 0xff,
+        i = -1, iz;
 
-        loop = Math.ceil(iz / 2);
-        remain = loop % 8;
-        i = -1;
+    iz = data.length;
+    remain = iz % 8;
 
-        while (remain--) {
-            v = data.charCodeAt(++i); // 0x00,0x01 -> 0x0100
-            rv.push(v & 255, v >> 8);
-        }
-        remain = loop >> 3;
-        while (remain--) {
-            v0 = data.charCodeAt(++i);
-            v1 = data.charCodeAt(++i);
-            v2 = data.charCodeAt(++i);
-            v3 = data.charCodeAt(++i);
-            v4 = data.charCodeAt(++i);
-            v5 = data.charCodeAt(++i);
-            v6 = data.charCodeAt(++i);
-            v7 = data.charCodeAt(++i);
-            rv.push(v0 & 255, v0 >> 8, v1 & 255, v1 >> 8,
-                    v2 & 255, v2 >> 8, v3 & 255, v3 >> 8,
-                    v4 & 255, v4 >> 8, v5 & 255, v5 >> 8,
-                    v6 & 255, v6 >> 8, v7 & 255, v7 >> 8);
-        }
+    while (remain--) {
+        ++i;
+        rv[i] = data[charCodeAt](i) & _0xff;
     }
-//}}}!mb
+    remain = iz >> 3;
+    while (remain--) {
+        rv.push(data[charCodeAt](++i) & _0xff,
+                data[charCodeAt](++i) & _0xff,
+                data[charCodeAt](++i) & _0xff,
+                data[charCodeAt](++i) & _0xff,
+                data[charCodeAt](++i) & _0xff,
+                data[charCodeAt](++i) & _0xff,
+                data[charCodeAt](++i) & _0xff,
+                data[charCodeAt](++i) & _0xff);
+    }
     return rv;
 }
 
+//{{{!mb
+// inner - to toByteArray
+function toByteArrayIE(xhr) {
+    var rv = [], data, remain,
+        charCodeAt = "charCodeAt", _0xff = 0xff,
+        loop, v0, v1, v2, v3, v4, v5, v6, v7,
+        i = -1, iz;
+
+    iz = vblen(xhr);
+    data = vbstr(xhr);
+    loop = Math.ceil(iz / 2);
+    remain = loop % 8;
+
+    while (remain--) {
+        v0 = data[charCodeAt](++i); // 0x00,0x01 -> 0x0100
+        rv.push(v0 & _0xff, v0 >> 8);
+    }
+    remain = loop >> 3;
+    while (remain--) {
+        v0 = data[charCodeAt](++i);
+        v1 = data[charCodeAt](++i);
+        v2 = data[charCodeAt](++i);
+        v3 = data[charCodeAt](++i);
+        v4 = data[charCodeAt](++i);
+        v5 = data[charCodeAt](++i);
+        v6 = data[charCodeAt](++i);
+        v7 = data[charCodeAt](++i);
+        rv.push(v0 & _0xff, v0 >> 8, v1 & _0xff, v1 >> 8,
+                v2 & _0xff, v2 >> 8, v3 & _0xff, v3 >> 8,
+                v4 & _0xff, v4 >> 8, v5 & _0xff, v5 >> 8,
+                v6 & _0xff, v6 >> 8, v7 & _0xff, v7 >> 8);
+    }
+    iz % 2 && rv.pop();
+
+    return rv;
+}
+//}}}!mb
+
 // --- init ---
 //{{{!mb
-uu.ie && document.write('<script type="text/vbscript">\
-Function vblen(b)vblen=LenB(b)End Function\n\
-Function vbstr(b)vbstr=CStr(b)+chr(0)End Function</'+'script>');
+_ie && document.write('<script type="text/vbscript">\
+Function vblen(b)vblen=LenB(b.responseBody)End Function\n\
+Function vbstr(b)vbstr=CStr(b.responseBody)+chr(0)End Function</'+'script>');
 //}}}!mb
 
 })(uu);
