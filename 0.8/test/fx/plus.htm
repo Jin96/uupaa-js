@@ -55,50 +55,50 @@ function moveParts(that) {
 }
 
 var toggle = 1;
-function fade(evt, node) {
+function fade(evt) {
     if (toggle) {
-        uu.fx.fade(node, duration, { r: 0, after: function() {
-            uu.fx(node, 1000, { o: 0.1 });
+        uu.fx.fade(evt.node, duration, { r: 0, after: function() {
+            uu.fx(evt.node, 1000, { o: 0.1 });
         }});
         toggle = 0;
     } else {
-        uu.fx.fade(node, duration, { r: 0, before: function() {
-            uu.fx(node, 1000, { o: 1 });
+        uu.fx.fade(evt.node, duration, { r: 0, before: function() {
+            uu.fx(evt.node, 1000, { o: 1 });
         }});
         toggle = 1;
     }
 }
 
-function movein(evt, node) {
+function movein(evt) {
     degree += 10;
     if (degree > 360) {
         degree = 0;
     }
-    uu.fx.movein(node, duration, { degree: degree, range: range });
+    uu.fx.movein(evt.node, duration, { degree: degree, range: range });
 }
 
-function moveout(evt, node) {
+function moveout(evt) {
     degree += 10;
     if (degree > 360) {
         degree = 0;
     }
-    uu.fx.moveout(node, duration, { r: 1, degree: degree, range: range });
+    uu.fx.moveout(evt.node, duration, { r: 1, degree: degree, range: range });
 }
 
-function flare(evt, node) {
-    uu.fx.flare(node, duration, { parts: 10, range: range, parts: parts, r: 1 });
+function flare(evt) {
+    uu.fx.flare(evt.node, duration, { parts: 10, range: range, parts: parts, r: 1 });
 }
 
-function puff(evt, node) {
-    uu.fx.puff(node, duration, { r: 1 });
+function puff(evt) {
+    uu.fx.puff(evt.node, duration, { r: 1 });
 }
 
-function shrink(evt, node) {
-    uu.fx.shrink(node, duration, { r: 1 });
+function shrink(evt) {
+    uu.fx.shrink(evt.node, duration, { r: 1 });
 }
 
-function highlight(evt, node) {
-    uu.fx.highlight(node, duration, { r: 1 });
+function highlight(evt) {
+    uu.fx.highlight(evt.node, duration, { r: 1 });
 }
 
 uu.ready(function(uu) {
