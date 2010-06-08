@@ -1862,7 +1862,7 @@ function uuclasssingleton(className, // @param String: class name
             instance = "instance";
 
         if (!self[instance]) {
-            that.name = Class;
+            that.name = className;
             that.uuguid = uu.guid();
             that.init && that.init.apply(that, arg);
             that.msgbox || (that.msgbox = _nop);
