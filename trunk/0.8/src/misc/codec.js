@@ -1,17 +1,16 @@
 
-// === uu.base64, uu.utf8, uu.byteArray / window.base64, window.utf8, window.byteArray ===
+// === uu.base64, uu.utf8j/ window.base64, window.utf8 ===
 //#include uupaa.js
 
 (this.uu || this).base64 || (function(nameSpace, globalScope, base) {
 
-nameSpace.base64    = base64encode; // base64(data:ByteArray/String,
-                                    //        toURLSafe64:Boolean = false):Base64String/URLSafe64String
-nameSpace.base64.decode             // base64.decode(data:Base64String/URLSafe64String):ByteArray
-                    = base64decode;
-nameSpace.utf8      = utf8encode;   // utf8.encode(str:String):UTF8ByteArray
-nameSpace.utf8.decode               // utf8.decode(byteArray:UTF8ByteArray,
-                    = utf8decode;   //             startIndex:Number = 0,
-                                    //             endIndex:Number = void):String
+nameSpace.base64 = base64encode;        // base64(data:ByteArray/String,
+                                        //        toURLSafe64:Boolean = false):Base64String/URLSafe64String
+nameSpace.base64.decode = base64decode; // base64.decode(data:Base64String/URLSafe64String):ByteArray
+nameSpace.utf8 = utf8encode;            // utf8.encode(str:String):UTF8ByteArray
+nameSpace.utf8.decode = utf8decode;     // utf8.decode(byteArray:UTF8ByteArray,
+                                        //             startIndex:Number = 0,
+                                        //             endIndex:Number = void):String
 
 // base64 - encode ByteArray to Base64 formated String
 function base64encode(data,          // @param ByteArray/String:
