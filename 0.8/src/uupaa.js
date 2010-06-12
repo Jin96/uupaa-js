@@ -119,6 +119,7 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Clas
                                     //  [1][++1] uu.array.seq( 0,  5,  1) -> [0, 1, 2, 3, 4]
                                     //  [2][--1] uu.array.seq(-2, -5, -1) -> [-2, -3, -4]
                                     //  [3][++2] uu.array.seq( 5, 10,  2) -> [ 5,  7,  9]
+        dump:       uudump,         // uu.array.dump(source:ByteArray, type:String = "HEX"):String
         size:       uusize,         // uu.array.size(source:Array):Number
         sort:       uusort,         // uu.array.sort(source:Array, method:String/Function = "A-Z"):Array
         clean:      uuclean,        // uu.array.clean(source:Array):Array
@@ -944,6 +945,22 @@ function uuseq(start,       // @param Number:
         }
     }
     return rv;
+}
+
+// uu.array.dump - dump ByteArray
+function uudump(source,     // @param ByteArray: [0x00, ... 0xff]
+                prefix,     // @param String(= "0x"):
+                splitter) { // @param String(= ", 0x"):
+                            // @return String: "00010203" or "0x00, 0x01, 0x02, 0x03"
+    var rv = [], i = 0, iz = source.length, num2hh = uuhash.num2hh;
+
+    if (!iz) {
+        return "";
+    }
+    for (; i < iz; ++i) {
+        rv[i] = num2hh[source[i]];
+    }
+    return (prefix || "0x") + rv.join(splitter || ", 0x");
 }
 
 // [1][Array x 2 = Hash]    uu.array.toHash(["a", "b"], [1, 2]) -> { a: 1, b: 2 }
@@ -3704,6 +3721,15 @@ function _makeMapping(seed,  // @param String: "0123456789" or "0123456789abcdef
         }
     }
 }
+
+// uu.hash.num2bin - ["\00", "\01", ... "\ff"]
+// uu.hash.bin2num - { "\00": 0, "\01": 1, ... "\ff": 255 }
+(function(num2bin, bin2num, i, v) {
+    for (; i < 256; ++i) {
+        num2bin[i] = v = String.fromCharCode(i);
+        bin2num[v] = i;
+    }
+})(uuhash.num2bin = [], uuhash.bin2num = {}, 0);
 
 // inner - detect versions and meta informations
 function detectVersions(libraryVersion) { // @param Number: Library version
