@@ -1,16 +1,29 @@
 
 // === uu.msgpack / window.msgpack ===
-//#include uupaa.js
-//#include misc/utf8.js
-
 // MessagePack -> http://msgpack.sourceforge.net/
 
-(this.uu || this).msgpack || (function(namespace, win) {
+(this.uu || this).msgpack || (function(globalScope) {
 
-var _WebWorker = "msgpack.worker.js",
-    _ie = /MSIE/.test(navigator.userAgent),
-    _bin2num = {}, // { "00000000": 0, "00000001": 1, ... }
-    _hex2num = {},
+globalScope.msgpack = {
+    pack:       msgpackpack,    // msgpack.pack(data:Mix):ByteArray
+    unpack:     msgpackunpack,  // msgpack.unpack(data:BinaryString/ByteArray):Mix
+    worker:     "msgpack.js",   // msgpack.worker - WebWorkers script filename
+    upload:     msgpackupload,  // msgpack.upload(url:String, option:Hash, callback:Function)
+    download:   msgpackdownload // msgpack.download(url:String, option:Hash, callback:Function)
+};
+
+var _ie         = /MSIE/.test(navigator.userAgent),
+    _bit2num    = {}, // BitStringToNumber      { "00000000": 0, ... "11111111": 255 }
+    _bin2num    = {}, // BinaryStringToNumber   { "\00": 0, ... "\ff": 255 }
+    _num2bin    = {}, // NumberToBinaryString   { 0: "\00", ... 255: "\ff" }
+    _num2b64    = ("ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
+                   "abcdefghijklmnopqrstuvwxyz0123456789+/").split(""),
+    // http://twitter.com/uupaa/statuses/15870126840
+    // http://twitter.com/uupaa/statuses/15876185346
+    // http://twitter.com/uupaa/statuses/15876986379
+    _toString2  = !/2/.test((1.2).toString(2)) && // [Opera][FIX]
+                  (0.250223099719733).toString(2)
+                        === "0.0100000000001110100111101111111", // [Safari][FIX]
     // --- minify ---
     _0x100000000000000 = 0x100000000000000,
     _0x1000000000000 =     0x1000000000000,
@@ -19,34 +32,36 @@ var _WebWorker = "msgpack.worker.js",
     _0x1000000 =                 0x1000000,
     _0x10000 =                     0x10000,
     _0x100 =                         0x100,
-    _0xff =                           0xff,
+    _0xff =    /*              */     0xff,
     _0x80 =                           0x80,
     _0x8000 =                       0x8000,
     _0x80000000 =               0x80000000,
-    _00000000000 =           "00000000000",
+    _00000000000 =            "00000000000",
     _sign = {
         8: _0x80,
         16: _0x8000,
         32: _0x80000000
     },
     _pow = Math.pow,
-    _floor = Math.floor,
-    _buggyToString2 = /2/.test((1.2).toString(2)); // [OPERA][FIX]
+    _floor = Math.floor;
 
-namespace.msgpack = {
-    load:   msgpackload,  // uu.msgpack.load(url:String, option:Hash, callback:Function)
-    pack:   msgpackpack,  // uu.msgpack.pack(data:Mix):ByteArray
-    unpack: msgpackunpack // uu.msgpack.unpack(data:String/ByteArray):Mix
-};
+// for WebWorkers Code Block
+self.importScripts && (onmessage = function(event) {
+    if (event.data.method === "pack") {
+        postMessage(base64encode(msgpackpack(event.data.data)));
+    } else {
+        postMessage(msgpackunpack(event.data.data));
+    }
+});
 
-// uu.msgpack.pack
+// msgpack.pack
 function msgpackpack(data) { // @param Mix:
                              // @return ByteArray:
     return encode([], data);
 }
 
-// uu.msgpack.unpack
-function msgpackunpack(data) { // @param String/ByteArray:
+// msgpack.unpack
+function msgpackunpack(data) { // @param BinaryString/ByteArray:
                                // @return Mix:
     return { data: typeof data === "string" ? toByteArray(data)
                                             : data,
@@ -69,7 +84,7 @@ function encode(rv,    // @param ByteArray: result
             encodeNumber(rv, mix);
             break;
         case "string":
-            namespace.utf8.encode(mix, utf8byteArray = []);
+            utf8byteArray = utf8encode(mix);
             setType(rv, 32, utf8byteArray.length, [0xa0, 0xda, 0xdb]);
             Array.prototype.push.apply(rv, utf8byteArray);
             break;
@@ -101,23 +116,26 @@ function encode(rv,    // @param ByteArray: result
 
 // inner - decoder
 function decode() { // @return Mix:
-    var rv, size, i = 0, msb = 0, sign, exp, fraction, key,
+    var rv, undef, size, i = 0, msb = 0, sign, exp, fraction, key,
         that = this,
         data = that.data,
         type = data[++that.index];
 
-    if (type >= 0xe0) {         // negative fixnum (111x xxxx) (-32 ~ -1)
+    if (type >= 0xe0) {         // Negative FixNum (111x xxxx) (-32 ~ -1)
         return type - _0x100;
     }
-    if (type < _0x80) {         // positive fixnum (0xxx xxxx) (0 ~ 127)
+    if (type < _0x80) {         // Positive FixNum (0xxx xxxx) (0 ~ 127)
         return type;
     }
     if (type < 0x90) {          // FixMap (1000 xxxx)
-        size = type - _0x80, type = _0x80;
+        size = type - _0x80;
+        type = _0x80;
     } else if (type < 0xa0) {   // FixArray (1001 xxxx)
-        size = type - 0x90, type = 0x90;
+        size = type - 0x90;
+        type = 0x90;
     } else if (type < 0xc0) {   // FixRaw (101x xxxx)
-        size = type - 0xa0, type = 0xa0;
+        size = type - 0xa0;
+        type = 0xa0;
     }
     switch (type) {
     case 0xc0:  return null;
@@ -130,7 +148,7 @@ function decode() { // @return Mix:
                 if (!rv || rv === _0x80000000) { // 0.0 or -0.0
                     return 0;
                 }
-                if (exp === 0xff) { // NaN or Infinity
+                if (exp === _0xff) { // NaN or Infinity
                     return fraction ? NaN : Infinity;
                 }
                 return (sign ? -1 : 1) *
@@ -149,36 +167,35 @@ function decode() { // @return Mix:
                             ((fraction | 0x100000)  * _pow(2, exp - 1023 - 20) // 1023: bias
                                 + readByte(that, 4) * _pow(2, exp - 1023 - 52));
     case 0xcf:  return readByte(that, 4) * _pow(2, 32) +
-                       readByte(that, 4);    // uint 64
-    case 0xce:  return readByte(that, 4);    // uint 32
-    case 0xcd:  return readByte(that, 2);    // uint 16
-    case 0xcc:  return readByte(that, 1);    // uint 8
-    case 0xd3:  return decodeInt64(that);
-    case 0xd2:  rv = readByte(that, 4);      // int 32
-    case 0xd1:  rv === void 0 && (rv = readByte(that, 2));      // int 16
-    case 0xd0:  rv === void 0 && (rv = readByte(that, 1));      // int 8
+                       readByte(that, 4);                       // uint 64
+    case 0xce:  return readByte(that, 4);                       // uint 32
+    case 0xcd:  return readByte(that, 2);                       // uint 16
+    case 0xcc:  return readByte(that, 1);                       // uint 8
+    case 0xd3:  return decodeInt64(that);                       // int 64
+    case 0xd2:  rv = readByte(that, 4);                         // int 32
+    case 0xd1:  rv === undef && (rv = readByte(that, 2));       // int 16
+    case 0xd0:  rv === undef && (rv = readByte(that, 1));       // int 8
                 msb = 4 << ((type & 0x3) + 1); // 8, 16, 32
                 return rv < _sign[msb] ? rv : rv - _sign[msb] * 2;
     case 0xdb:  size = readByte(that, 4);                       // raw 32
-    case 0xda:  size === void 0 && (size = readByte(that, 2));  // raw 16
+    case 0xda:  size === undef && (size = readByte(that, 2));   // raw 16
     case 0xa0:  i = that.index + 1;                             // raw
                 that.index += size;
-                return namespace.utf8.decode(data, i, i + size);
+                return utf8decode(data, i, i + size);
     case 0xdf:  size = readByte(that, 4);                       // map 32
-    case 0xde:  size === void 0 && (size = readByte(that, 2));  // map 16
+    case 0xde:  size === undef && (size = readByte(that, 2));   // map 16
     case 0x80:  for (rv = {}; i < size; ++i) {                  // map
                     key = that.decode();
                     rv[key] = that.decode(); // key/value pair
                 }
                 return rv;
     case 0xdd:  size = readByte(that, 4);                       // array 32
-    case 0xdc:  size === void 0 && (size = readByte(that, 2));  // array 16
+    case 0xdc:  size === undef && (size = readByte(that, 2));   // array 16
     case 0x90:  for (rv = []; i < size; ++i) {                  // array
                     rv.push(that.decode());
                 }
-                return rv;
     }
-    return;
+    return rv;
 }
 
 // inner - read byte
@@ -188,8 +205,7 @@ function readByte(that,   // @param Object:
     var rv = 0, data = that.data, i = that.index;
 
     switch (size) {
-    case 4: rv += data[++i] * _0x1000000
-               + (data[++i] << 16);
+    case 4: rv += data[++i] * _0x1000000 + (data[++i] << 16);
     case 2: rv += data[++i] << 8;
     case 1: rv += data[++i];
     }
@@ -200,8 +216,8 @@ function readByte(that,   // @param Object:
 // inner - decode int64
 function decodeInt64(that) { // @param Object:
                              // @return Number:
-    var rv = 0, data = that.data, overflow = 0,
-        bytes = data.slice(that.index + 1, that.index + 9);
+    var rv, overflow = 0,
+        bytes = that.data.slice(that.index + 1, that.index + 9);
 
     that.index += 8;
 
@@ -218,14 +234,14 @@ function decodeInt64(that) { // @param Object:
         bytes[6] ^= _0xff;
         bytes[7] ^= _0xff;
     }
-    rv += bytes[0] * _0x100000000000000;
-    rv += bytes[1] *   _0x1000000000000;
-    rv += bytes[2] *     _0x10000000000;
-    rv += bytes[3] *       _0x100000000;
-    rv += bytes[4] *         _0x1000000;
-    rv += bytes[5] *           _0x10000;
-    rv += bytes[6] *             _0x100;
-    rv += bytes[7];
+    rv = bytes[0] * _0x100000000000000
+       + bytes[1] *   _0x1000000000000
+       + bytes[2] *     _0x10000000000
+       + bytes[3] *       _0x100000000
+       + bytes[4] *         _0x1000000
+       + bytes[5] *           _0x10000
+       + bytes[6] *             _0x100
+       + bytes[7];
 
     if (overflow) {
         rv += 1;
@@ -238,14 +254,10 @@ function decodeInt64(that) { // @param Object:
 function encodeNumber(rv,    // @param ByteArray: result
                       mix) { // @param Number:
     if (mix !== mix) { // isNaN
-
-        rv.push(0xcb, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff); // quiet NaN
-
+        rv.push(0xcb, _0xff, _0xff, _0xff, _0xff, _0xff, _0xff, _0xff, _0xff); // quiet NaN
     } else if (!isFinite(mix)) { // Infinity
-
         rv.push(0xcb, 0x7f, 0xf0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00); // positive infinity
-
-    } else if (_floor(mix) === mix) { // bugfix // (mix | 0 == mix)
+    } else if (_floor(mix) === mix) {
         var high, low, i64 = 0;
 
         if (mix < 0) { // int
@@ -264,7 +276,7 @@ function encodeNumber(rv,    // @param ByteArray: result
                 ++i64;
             }
         } else { // uint
-            if (mix < 128) {
+            if (mix < _0x80) {
                 rv.push(mix); // positive fixnum
             } else if (mix < _0x100) { // uint 8
                 rv.push(0xcc, mix);
@@ -297,52 +309,37 @@ function toIEEE754(rv,    // @param ByteArray: result, [0xcb, ...]
 
     // see -> http://pc.nikkeibp.co.jp/pc21/special/gosa/eg4.shtml
 
-    var sign = num < 0 ? "1" : "0";
-    var fraction;
     //  (123.456).toString(2)
     //      = "1111011.0111010010111100011010100111111011111001110111"
     //  (0.1).toString(2)
     //      = "0.0001100110011001100110011001100110011001100110011001101"
-    var exp;
+    var ary, sign = num < 0 ? "1" : "0", exp, bit2num = _bit2num,
+        fraction = _toString2 ? Math.abs(num).toString(2)
+                 : numberToBinaryString(Math.abs(num));
 
-    if (_buggyToString2) {
-        fraction = numberToBinaryString(Math.abs(num));
-    } else {
-        fraction = Math.abs(num).toString(2);
-    }
-
-    // case "1.xxx" or "0.xxxx"
-    if (fraction.charAt(1) === ".") {
+    if (fraction.charAt(1) === ".") { // case "1.xxx" or "0.xxxx"
         if (fraction.charAt(0) === "1") { // /^1\./
             exp = 1023;
-            exp = "0" + exp.toString(2); // pad zero
-
+            exp = "0" + exp.toString(2);  // pad zero
             fraction = fraction.slice(2); // "1.xxx" -> "xxx"
         } else { // /^0\./
             exp = 1023 - fraction.indexOf("1") + 1; // "0.00011000..." -> -5 + 1 = -4
-            exp = (_00000000000 + exp.toString(2)).slice(-11); // pad zero
-
-            fraction = fraction.slice(6); // "0.00011000..." -> "1000..."
+            exp = (_00000000000 + exp.toString(2)).slice(-11);    // pad zero
+            fraction = fraction.slice(fraction.indexOf("1") + 1); // "0.00011000..." -> "1000..."
         }
-    } else {
-        // case "11.xxxx"
+    } else { // case "11.xxxx"
         exp = 1023 + fraction.indexOf(".") - 1;
         exp = (_00000000000 + exp.toString(2)).slice(-11); // pad zero
-
         fraction = fraction.slice(1).replace(/\./, "");
     }
-    fraction += "0000000000000000000000000000000000000000000000000000"; // x52
-
-
-    // TODO: Rounding
-
-
-    var s = (sign + exp + fraction).slice(0, 64);
-
-    rv.push(0xcb, _bin2num[s.slice(0,  8) ], _bin2num[s.slice(8,  16)],
-                  _bin2num[s.slice(16, 24)], _bin2num[s.slice(24, 32)],
-                  _bin2num[s.slice(32, 40)], _bin2num[s.slice(40, 48)],
-                  _bin2num[s.slice(48, 56)], _bin2num[s.slice(56, 64)]);
+    // http://twitter.com/uupaa/statuses/15912478013
+    ary = (sign + exp + fraction
+                + "0000000000000000000000000000000000000000000000000000"). // x52
+                slice(0, 64).match(/.{8}/g);
+    rv.push(0xcb, bit2num[ary[0]], bit2num[ary[1]],
+                  bit2num[ary[2]], bit2num[ary[3]],
+                  bit2num[ary[4]], bit2num[ary[5]],
+                  bit2num[ary[6]], bit2num[ary[7]]);
 }
 
 // inner - set type and fixed size
@@ -360,28 +357,30 @@ function setType(rv,      // @param ByteArray: result
     }
 }
 
-// inner - convert number to binary string
+// inner - Number to BinaryString
 function numberToBinaryString(num) { // @param Number:
                                      // @return BinaryString: "0.11001100..."
-    var rv = [], decimal = _floor(num), fraction, n, x, x2;
-
-    rv.push(decimal.toString(2));
+    var decimal = _floor(num), fraction, n = 1, x, x2,
+        rv = [decimal.toString(2)], ri = 0,
+        found1 = 0, depth = 54;
 
     if (decimal !== num) {
-        rv.push(".");
+        rv[++ri] = ".";
         fraction = num - decimal;
-        n = 1;
         x = fraction;
-        while (n < 56) {
+
+        while (n < depth) {
             x2 = x * 2;
             if (x2 < 1) {
-                rv.push("0");
+                rv[++ri] = "0";
+                found1 || ++depth;
                 x = x2;
             } else if (x2 > 1) {
-                rv.push("1");
+                rv[++ri] = "1";
+                ++found1;
                 x = x2 - 1;
             } else if (x2 === 1) {
-                rv.push("1"); // tiny Rounding
+                rv[++ri] = "1"; // tiny Rounding
                 break;
             }
             ++n;
@@ -390,83 +389,169 @@ function numberToBinaryString(num) { // @param Number:
     return rv.join("");
 }
 
-// uu.msgpack.load
-function msgpackload(url,        // @param String:
-                     option,     // @param Hash: { worker }
-                                 //    option.worker - Boolean:
-                     callback) { // @param Function: callback function
-    function readyStateChange() {
-        if (xhr.readyState === 4) {
-            var status = xhr.status,
-                rv = { ok: status >= 200 && status < 300,
-                       status: status, option: option, data: [] };
+// msgpack.download - load from server
+function msgpackdownload(url,        // @param String:
+                         option,     // @param Hash: { worker, timeout }
+                                     //    option.worker - Boolean(= false): true is use WebWorkers
+                                     //    option.timeout - Number(= 10): timeout sec
+                         callback) { // @param Function: callback function
+                                     //    callback(response = { ok, status, option, data, length })
+                                     //        response.ok - Boolean:
+                                     //        response.status - Number: HTTP status code
+                                     //        response.option - Hash:
+                                     //        response.data   - Mix/null:
+                                     //        response.length - Number: downloaded data.length
 
-            if (rv.ok) {
-                if (!_ie && option.worker && win.Worker) {
-                    var worker = new Worker(_WebWorker);
-
-                    worker.onmessage = function(event) {
-                        rv.data = event.data;
-                        callback(rv);
-                    };
-                    worker.postMessage(xhr.responseText);
-                } else {
-                    rv.data = msgpackunpack(_ie ? toByteArrayIE(xhr)
-                                                : toByteArray(xhr.responseText));
-                    callback(rv);
-                }
-            } else {
-                callback(rv);
-            }
-            xhr = null;
-        }
-    }
-
-    var xhr =
-//{{{!mb
-              win.ActiveXObject  ? new ActiveXObject("Microsoft.XMLHTTP") :
-//}}}!mb
-              win.XMLHttpRequest ? new XMLHttpRequest() : null;
-
-    xhr.onreadystatechange = readyStateChange;
-
-    xhr.open("GET", url, true); // ASync
-
-    if (!_ie) {
-        if (xhr.overrideMimeType) {
-            xhr.overrideMimeType("text/plain; charset=x-user-defined");
-        } else {
-            xhr.setRequestHeader("Accept-Charset", "x-user-defined");
-        }
-    }
-    xhr.send(null);
+    option.method = "GET";
+    ajax(url, option, callback);
 }
 
-// inner - to toByteArray
-function toByteArray(data) { // @param String:
-                             // @return ByteArray:
-    var rv = [], hex2num = _hex2num, remain,
+// msgpack.upload - save to server
+function msgpackupload(url,        // @param String:
+                       option,     // @param Hash: { data, worker, timeout }
+                                   //    option.data - Mix:
+                                   //    option.worker - Boolean(= false): true is use WebWorkers
+                                   //    option.timeout - Number(= 10): timeout sec
+                       callback) { // @param Function: callback function
+                                   //    callback(response = { ok, status, option, data, length })
+                                   //        response.ok - Boolean:
+                                   //        response.status - Number: HTTP status code
+                                   //        response.option - Hash:
+                                   //        response.data   - String:
+                                   //        response.length - Number: uploaded data.length
+    option.method = "PUT";
+
+    if (option.worker && globalScope.Worker) {
+        var worker = new Worker(msgpack.worker);
+
+        worker.onmessage = function(event) {
+            option.data = event.data;
+            ajax(url, option, callback);
+        };
+        worker.postMessage({ method: "pack", data: option.data });
+    } else {
+        // pack and base64 encode
+        option.data = base64encode(msgpackpack(option.data));
+        ajax(url, option, callback);
+    }
+}
+
+// inner -
+function ajax(url,        // @param String:
+              option,     // @param Hash: { worker, timeout, data, method }
+                          //    option.data - Mix: upload data
+                          //    option.worker - Boolean(= false): true is use WebWorkers
+                          //    option.method - String: "GET" or "PUT"
+                          //    option.timeout - Number(= 10): timeout sec
+              callback) { // @param Function: callback function
+                          //    callback(response = { ok, status, option, data, length })
+                          //        response.ok - Boolean:
+                          //        response.status - Number: HTTP status code
+                          //        response.option - Hash:
+                          //        response.data   - String/Mix/null:
+                          //        response.length - Number:
+    function readyStateChange() {
+        if (xhr.readyState === 4) {
+            var status = xhr.status, worker, byteArray,
+                rv = { ok: status >= 200 && status < 300,
+                       status: status, option: option, data: null, length: 0 };
+
+            if (!run++) {
+                if (upload) {
+                    rv.data = rv.ok ? xhr.responseText : "";
+                    rv.length = option.data.length;
+                } else {
+                    if (rv.ok) {
+                        rv.length = xhr.getResponseHeader("Content-Length");
+                        if (option.worker && globalScope.Worker) {
+                            worker = new Worker(msgpack.worker);
+                            worker.onmessage = function(event) {
+                                rv.data = event.data;
+                                callback(rv);
+                            };
+                            worker.postMessage({ method: "unpack",
+                                                 data: xhr.responseText });
+                            gc();
+                            return;
+                        } else {
+                            byteArray = _ie ? toByteArrayIE(xhr)
+                                            : toByteArray(xhr.responseText)
+                            rv.data = msgpackunpack(byteArray);
+                        }
+                    }
+                }
+                callback(rv);
+                gc();
+            }
+        }
+    }
+
+    function ng(abort, status) {
+        if (!run++) {
+            callback({ ok: false, status: status || 400, option: option,
+                       data: upload ? "" : null });
+            gc(abort);
+        }
+    }
+
+    function gc(abort) {
+        abort && xhr && xhr.abort && xhr.abort();
+        watchdog && (clearTimeout(watchdog), watchdog = 0);
+        xhr = null;
+        globalScope.addEventListener &&
+            globalScope.removeEventListener("beforeunload", ng, false);
+    }
+
+    var run = 0, watchdog = 0,
+        upload = option.method === "PUT",
+        xhr = globalScope.XMLHttpRequest ? new XMLHttpRequest() :
+              globalScope.ActiveXObject  ? new ActiveXObject("Microsoft.XMLHTTP") :
+              null;
+
+    try {
+        xhr.onreadystatechange = readyStateChange;
+        xhr.open(option.method, url, true); // ASync
+
+        if (!upload && xhr.overrideMimeType) {
+            xhr.overrideMimeType("text/plain; charset=x-user-defined");
+        }
+        globalScope.addEventListener &&
+            globalScope.addEventListener("beforeunload", ng, false); // 400: Bad Request
+
+        xhr.send(upload ? option.data : null);
+        watchdog = setTimeout(function() {
+            ng(1, 408); // 408: Request Time-out
+        }, (option.timeout || 10) * 1000);
+    } catch (err) {
+        ng(0, 400); // 400: Bad Request
+    }
+}
+
+// inner - BinaryString To ByteArray
+function toByteArray(data) { // @param BinaryString: "\00\01"
+                             // @return ByteArray: [0x00, 0x01]
+    var rv = [], bin2num = _bin2num, remain,
+        ary = data.split(""),
         i = -1, iz;
 
-    iz = data.length;
+    iz = ary.length;
     remain = iz % 8;
 
     while (remain--) {
         ++i;
-        rv[i] = hex2num[data[i]];
+        rv[i] = bin2num[ary[i]];
     }
     remain = iz >> 3;
     while (remain--) {
-        rv.push(hex2num[data[++i]], hex2num[data[++i]],
-                hex2num[data[++i]], hex2num[data[++i]],
-                hex2num[data[++i]], hex2num[data[++i]],
-                hex2num[data[++i]], hex2num[data[++i]]);
+        rv.push(bin2num[ary[++i]], bin2num[ary[++i]],
+                bin2num[ary[++i]], bin2num[ary[++i]],
+                bin2num[ary[++i]], bin2num[ary[++i]],
+                bin2num[ary[++i]], bin2num[ary[++i]]);
     }
     return rv;
 }
 
-//{{{!mb
-// inner - to toByteArray
+// inner - BinaryString to ByteArray
 function toByteArrayIE(xhr) {
     var rv = [], data, remain,
         charCodeAt = "charCodeAt", _0xff = 0xff,
@@ -501,33 +586,101 @@ function toByteArrayIE(xhr) {
 
     return rv;
 }
-//}}}!mb
+
+// inner - String to UTF8ByteArray
+function utf8encode(str) { // @param String: JavaScript string
+                           // @return UTF8ByteArray: [ Number(utf8), ... ]
+    var rv = [], iz = str.length, c = 0, i = -1;
+
+    while (i < iz) {
+        c = str.charCodeAt(++i);
+        if (c < _0x80) { // ASCII(0x00 ~ 0x7f)
+            rv.push(c & 0x7f);
+        } else if (c < 0x0800) {
+            rv.push(((c >>>  6) & 0x1f) | 0xc0, (c & 0x3f) | _0x80);
+        } else if (c < 0x10000) {
+            rv.push(((c >>> 12) & 0x0f) | 0xe0,
+                    ((c >>>  6) & 0x3f) | 0x80, (c & 0x3f) | _0x80);
+        }
+    }
+    return rv;
+}
+
+// inner - UTF8ByteArray to String
+function utf8decode(byteArray,  // @param UTF8ByteArray: [ Number(utf8), ... ]
+                    startIndex, // @param Number(= 0):
+                    endIndex) { // @param Number(= void):
+                                // @return String: JavaScript string(UNICODE)
+    var rv = [], ri = -1, iz = endIndex || byteArray.length, c = 0,
+        i = startIndex || 0;
+
+    if (iz > byteArray.length) {
+        iz = byteArray.length;
+    }
+
+    for (; i < iz; ++i) {
+        c = byteArray[i]; // first byte
+        if (c < _0x80) { // ASCII(0x00 ~ 0x7f)
+            rv[++ri] = c;
+        } else if (c < 0xe0) {
+            rv[++ri] = (c & 0x1f) <<  6 | (byteArray[++i] & 0x3f);
+        } else if (c < 0xf0) {
+            rv[++ri] = (c & 0x0f) << 12 | (byteArray[++i] & 0x3f) << 6
+                                        | (byteArray[++i] & 0x3f);
+        }
+    }
+    return String.fromCharCode.apply(null, rv);
+}
+
+// inner - base64.encode
+function base64encode(data) { // @param ByteArray:
+                              // @return Base64String:
+    var rv = [], pad = 0, c = 0, i = -1, iz, num2b64 = _num2b64;
+
+    if (globalScope.btoa) {
+        iz = data.length;
+        while (i < iz) {
+            rv.push(_num2bin[data[++i]]);
+        }
+        return btoa(rv.join(""));
+    }
+
+    switch (data.length % 3) {
+    case 1: data.push(0); ++pad;
+    case 2: data.push(0); ++pad;
+    }
+    iz = data.length - 1;
+
+    while (i < iz) {
+        c = (data[++i] << 16) | (data[++i] << 8) | (data[++i]); // 24bit
+        rv.push(num2b64[(c >> 18) & 0x3f],
+                num2b64[(c >> 12) & 0x3f],
+                num2b64[(c >>  6) & 0x3f],
+                num2b64[ c        & 0x3f]);
+    }
+    pad > 1 && (rv[rv.length - 2] = "=", data.pop());
+    pad > 0 && (rv[rv.length - 1] = "=", data.pop());
+    return rv.join("");
+}
 
 // --- init ---
-// inner - create BinaryToNumber Hash, create HexToNumber Hash
 (function() {
-    var i = 0, s, high = 0xf7 << 8;
+    var i = 0, v;
 
     for (; i < _0x100; ++i) {
-        s = ("0000000" + i.toString(2)).slice(-8);
-        _bin2num[s] = i;
+        v = String.fromCharCode(i);
+        _bit2num[("0000000" + i.toString(2)).slice(-8)] = i;
+        _bin2num[v] = i; // "\00" -> 0x00
+        _num2bin[i] = v; //     0 -> "\00"
     }
-
     // http://twitter.com/edvakf/statuses/15576483807
-    // http://twitter.com/uupaa/statuses/15580457017
-
-    for (i = 0; i < 256; ++i) {
-        _hex2num[String.fromCharCode(i)] = i;        // "\00" -> 0x00
-    }
-    for (i = 128; i < 256; ++i) { // [WEBKIT][GECKO][BAD KNOWHOW]
-        _hex2num[String.fromCharCode(high + i)] = i; // "\7f80" -> 0x80
+    for (i = _0x80; i < _0x100; ++i) { // [Webkit][Gecko]
+        _bin2num[String.fromCharCode(0xf700 + i)] = i; // "\f780" -> 0x80
     }
 })();
 
-//{{{!mb
 _ie && document.write('<script type="text/vbscript">\
 Function vblen(b)vblen=LenB(b.responseBody)End Function\n\
 Function vbstr(b)vbstr=CStr(b.responseBody)+chr(0)End Function</'+'script>');
-//}}}!mb
 
-})(this.uu || this, this);
+})(this.uu || this);

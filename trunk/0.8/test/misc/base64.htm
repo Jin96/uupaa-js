@@ -1,5 +1,5 @@
 <!doctype html><html><head><meta charset="UTF-8" />
-<title>uu.base64.test</title>
+<title>uu.base64 test</title>
 <style>
 body { background-color: #eee }
 .uutest ol { background-color:dodgerblue;color:white }
@@ -15,8 +15,7 @@ body { background-color: #eee }
 </style>
 <script src="../../src/uupaa.js"></script>
 <script src="../../src/test/test.js"></script>
-<script src="../../src/misc/base64.js"></script>
-<script src="../../src/misc/utf8.js"></script>
+<script src="../../src/misc/codec.js"></script>
 <script>
 uu.ready(function(uu) {
     var short = "a!1=2/3*4~";
@@ -26,72 +25,111 @@ uu.ready(function(uu) {
         "var short = 'a!1=2/3*4~'": "",
         "var long = 'カルビx3, ハラミx2, ブタバラ, T-BORNx500g, ライス大盛りで'": "",
         "Base64 encode": "",
-            "uu.base64.encode(short) - base64": function() {
-                var enc = uu.base64.encode(short);
+            "uu.base64(short) - base64": function() {
+                var enc = uu.base64(short);
 
                 return [enc, "is string"];
             },
-            "uu.base64.encode(long) - base64": function() {
-                var enc = uu.base64.encode(long);
+            "uu.base64(long) - base64": function() {
+                var enc = uu.base64(long);
 
                 return [enc, "is string"];
             },
-            "uu.base64.encode('') - base64": function() {
-                var enc = uu.base64.encode('');
+            "uu.base64('') - base64": function() {
+                var enc = uu.base64('');
 
-                return [enc, "is string"];
+                return [enc, "==", ""];
+            },
+            "uu.base64('a')": function() {
+                var data = "a";
+                var enc = uu.base64(data);
+
+                return [enc, "==", "YQ=="];
+            },
+            "uu.base64('ab')": function() {
+                var data = "ab";
+                var enc = uu.base64(data);
+
+                return [enc, "==", "YWI="];
+            },
+            "uu.base64('abc')": function() {
+                var data = "abc";
+                var enc = uu.base64(data);
+
+                return [enc, "==", "YWJj"];
             },
         "URLSafe64 encode": "",
-            "uu.base64.encode(short, true)": function() {
-                var enc = uu.base64.encode(short, true);
+            "uu.base64(short, true)": function() {
+                var enc = uu.base64(short, true);
 
                 return [enc, "is string"];
             },
 
-            "uu.base64.encode(long, true)": function() {
-                var enc = uu.base64.encode(long, true);
+            "uu.base64(long, true)": function() {
+                var enc = uu.base64(long, true);
 
                 return [enc, "is string"];
             },
-            "uu.base64.encode('', true)": function() {
-                var enc = uu.base64.encode('', true);
+            "uu.base64('', true)": function() {
+                var enc = uu.base64('', true);
 
                 return [enc, "is string"];
             },
         "Base64 decode": "",
             "uu.base64.decode(short)": function() {
-                var enc = uu.base64.encode(short);
+                var enc = uu.base64(short);
                 var dec = uu.base64.decode(enc);
 
                 return [dec, "==", short];
             },
             "uu.base64.decode(long)": function() {
-                var enc = uu.base64.encode(long);
+                var enc = uu.base64(long);
                 var dec = uu.base64.decode(enc);
 
                 return [dec, "==", long];
             },
             "uu.base64.decode('')": function() {
-                var enc = uu.base64.encode('');
+                var enc = uu.base64('');
                 var dec = uu.base64.decode(enc);
 
                 return [dec, "==", ''];
             },
+            "uu.base64.decode('a')": function() {
+                var data = "a";
+                var enc = uu.base64(data);
+                var dec = uu.base64.decode(enc);
+
+                return [dec, "==", data];
+            },
+            "uu.base64.decode('ab')": function() {
+                var data = "ab";
+                var enc = uu.base64(data);
+                var dec = uu.base64.decode(enc);
+
+                return [dec, "==", data];
+            },
+            "uu.base64.decode('abc')": function() {
+                var data = "abc";
+                var enc = uu.base64(data);
+                var dec = uu.base64.decode(enc);
+
+                return [dec, "==", data];
+            },
         "URLSafe64 decode": "",
             "uu.base64.decode(short, true)": function() {
-                var enc = uu.base64.encode(short, true);
+                var enc = uu.base64(short, true);
                 var dec = uu.base64.decode(enc);
 
                 return [dec, "==", short];
             },
             "uu.base64.decode(long, true)": function() {
-                var enc = uu.base64.encode(long, true);
+                var enc = uu.base64(long, true);
                 var dec = uu.base64.decode(enc);
 
                 return [dec, "==", long];
             },
             "uu.base64.decode('', true)": function() {
-                var enc = uu.base64.encode('', true);
+                var enc = uu.base64('', true);
                 var dec = uu.base64.decode(enc);
 
                 return [dec, "==", ''];
