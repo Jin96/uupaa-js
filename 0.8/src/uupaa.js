@@ -39,6 +39,12 @@ var _prototype = "prototype",
     _false = !1,
     _true = !0,
     _nop = function() {},
+    _dd2num = {},               // dd2num = { "00":   0 , ... "99":  99  }
+    _num2dd = {},               // num2dd = {    0: "00", ...   99: "99" }
+    _bb2num = {},               // bb2num = { "\00": 0, ... "\ff": 255 }
+    _num2bb = {},               // num2bb = { 0: "\00", ... 255: "\ff" }
+    _hh2num = {},               // hh2num = { "00": 0, ... "ff": 255 }
+    _num2hh = { 256: "00" },    // num2hh = { 0: "00", ... 255: "ff" }
     // --- version detection ---
     _ver = detectVersions(0.8),
     _ie = _ver.ie,
@@ -67,8 +73,12 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Clas
     gecko:          _gecko,
     opera:          _opera,
     webkit:         _webkit,
-    file:           uufile,         // uu.file(url:String):AjaxResultHash
-    snippet:        uusnippet,      // uu.snippet(id:String, arg:Hash/Array):String/Mix
+    // --- AJAX ---
+    ajax:     uumix(uuajax, {       // uu.ajax(url:String, option:Hash, callback:Function)
+        xhr:        uuajaxxhr,      // uu.ajax.xhr():XMLHttpRequest
+        binary:     uuajaxbinary    // uu.ajax.binary(url:String, option:Hash, callback:Function)
+    }),
+    require:        uurequire,      // uu.require(url:String):AjaxResultHash
     // --- TYPE ---
     like:           uulike,         // uu.like(lhs:Date/Hash/Fake/Array, rhs:Date/Hash/Fake/Array):Boolean
     type:     uumix(uutype, {       // uu.type(search:Mix, match:Number = 0):Boolean/Number
@@ -84,7 +94,8 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Clas
         NUMBER:     0x100,          // uu.type.NUMBER       - Number
         STRING:     0x200,          // uu.type.STRING       - String
         ARRAY:      0x400,          // uu.type.ARRAY        - Array
-        REGEXP:     0x800           // uu.type.REGEXP       - RegExp
+        REGEXP:     0x800,          // uu.type.REGEXP       - RegExp
+        types:      {}
     }),
     isNumber:       isNumber,       //   uu.isNumber(search:Mix):Boolean
     isString:       isString,       //   uu.isString(search:Mix):Boolean
@@ -103,7 +114,13 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Clas
         nth:        uunth,          //     uu.hash.nth(source:Hash, index:Number):Array
         size:       uusize,         //    uu.hash.size(source:Hash):Number
         clone:      uuclone,        //   uu.hash.clone(source:Hash):Hash
-        indexOf:    uuindexof       // uu.hash.indexOf(source:Hash, search:Mix):String/void
+        indexOf:    uuindexof,      // uu.hash.indexOf(source:Hash, search:Mix):String/void
+        dd2num:     _dd2num,        // uu.hash.dd2num - { "00":   0 , ... "99":  99  }
+        num2dd:     _num2dd,        // uu.hash.num2dd - {    0: "00", ...   99: "99" }
+        bb2num:     _bb2num,        // uu.hash.bb2num - { "\00": 0, ... "\ff": 255 }
+        num2bb:     _num2bb,        // uu.hash.num2bb - { 0: "\00", ... 255: "\ff" }
+        hh2num:     _hh2num,        // uu.hash.hh2num - { "00": 0, ... "ff": 255 }
+        num2hh:     _num2hh         // uu.hash.num2hh - { 0: "00", ... 255: "ff" }
     }),
     array:    uumix(uuarray, {      // uu.array(source:Array/Mix/NodeList/Arguments,
                                     //          sliceStart:Number = void,
@@ -115,11 +132,9 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Clas
                                     //  [5][to Array + slice]   uu.array(uu.tag("*"), 1, 3) -> [<head>, <meta>]
         has:        uuhas,          // uu.array.has(source:Array, search:Array):Boolean
         nth:        uunth,          // uu.array.nth(source:Array, index:Number):Array
-        seq:        uuseq,          // uu.array.seq(start:Number, end:Number, increment:Number = 1):Array
-                                    //  [1][++1] uu.array.seq( 0,  5,  1) -> [0, 1, 2, 3, 4]
-                                    //  [2][--1] uu.array.seq(-2, -5, -1) -> [-2, -3, -4]
-                                    //  [3][++2] uu.array.seq( 5, 10,  2) -> [ 5,  7,  9]
         dump:       uudump,         // uu.array.dump(source:ByteArray, type:String = "HEX"):String
+                                    //  [1][ByteArray dump] uu.array.dump([1, 2, 3]) -> "010203"
+                                    //  [2][ByteArray dump] uu.array.dump([1, 2, 3], "0x", ", 0x") -> "0x01, 0x02, 0x03"
         size:       uusize,         // uu.array.size(source:Array):Number
         sort:       uusort,         // uu.array.sort(source:Array, method:String/Function = "A-Z"):Array
         clean:      uuclean,        // uu.array.clean(source:Array):Array
@@ -432,6 +447,23 @@ _gecko && !HTMLElement[_prototype].innerText &&
 })(HTMLElement[_prototype]);
 //}}}!mb
 
+(function(map, ary1, ary2, n, i, j, v) {
+    for (; i < 16; ++i) {
+        for (j = 0; j < 16; ++n, ++j) {
+            _num2hh[n] = v = ary1[i] + ary1[j];
+            _hh2num[v] = n;
+            _num2bb[n] = v = String.fromCharCode(n);
+            _bb2num[v] = n;
+        }
+    }
+    for (n = i = 0; i < 10; ++i) {
+        for (j = 0; j < 10; ++n, ++j) {
+            _num2dd[n] = v = ary2[i] + ary2[j];
+            _dd2num[v] = n;
+        }
+    }
+})("0123456789abcdef".split(""), "0123456789".split(""), 0, 0);
+
 // ===================================================================
 
 // [1][Class factory]   uu("MyClass", arg1, arg2) -> new uu.Class.MyClass(arg1, arg2)
@@ -452,95 +484,159 @@ function uufactory(expression, // @param NodeSet/Node/NodeArray/ClassNameString/
     return new NodeSet(expression, arg1, arg2, arg3, arg4);
 }
 
-// --- reuqire file ---
-// uu.file - load file from Sjax
-function uufile(url) { // @param String: url
-                       // @return AjaxResultHash:
-    var xhr, status = 400, ok = _false;
+// --- AJAX ---
+// uu.ajax
+function uuajax(url,        // @param String: url
+                option,     // @param Hash: { timeout, header, data, ifmod, method,
+                            //                binary, before, after }
+                            //    option.data    - Mix: upload data
+                            //    option.method  - String: "GET", "POST", "PUT"
+                            //    option.timeout - Number(= 10): timeout sec
+                            //    option.binary  - Boolean(= false): true is binary data
+                            //    option.before  - Function: before({ option }, xhr)
+                            //    option.after   - Function: after({ option, ok }, xhr)
+                callback) { // @param Function: callback({ data, option, ok })
+                            //    data   - String: xhr.responseText
+                            //    option - Hash:
+                            //    ok     - Boolean:
+    function readyStateChange() {
+        if (xhr.readyState === 4) {
+            var code = xhr.status, lastModified,
+                rv = { data: null, option: option,
+                       ok: code >= 200 && code < 300 };
+
+            if (!run++) {
+                if (rv.ok) {
+                    rv.data = getbinary
+                            ? (
+//{{{!mb
+                               _ie ? toByteArrayIE(xhr) :
+//}}}!mb
+                                     toByteArray(xhr.responseText))
+                            : (xhr.responseText || "");
+                    // --- "Last-Modified" ---
+                    if (ifmod) {
+                        lastModified = xhr.getResponseHeader("Last-Modified");
+                        if (lastModified) {
+                            cache[url] = uudate(Date.parse(lastModified)).GMT(); // add cache
+                        }
+                    }
+                }
+                after && after(rv, xhr);
+                callback(rv);
+                gc();
+            }
+        }
+    }
+
+    function ng(abort) {
+        if (!run++) {
+            var rv = { ok: _false, data: null, option: option };
+
+            after && after(rv, xhr);
+            callback(rv);
+            gc(abort);
+        }
+    }
+
+    function gc(abort) {
+        abort && xhr && xhr.abort && xhr.abort();
+        watchdog && (clearTimeout(watchdog), watchdog = 0);
+        xhr = null;
+//{{{!mb
+        uueventdetach(win, "beforeunload", ng); // [Gecko]
+//}}}!mb
+    }
+
+    var watchdog = 0,
+        method = option.method || "GET",
+        header = option.header || [],
+        before = option.before,
+        after = option.after,
+        ifmod = option.ifmod,
+        cache = uuajax.cache,
+        xhr = uuajaxxhr(),
+        run = 0, v, i = -1,
+        override = xhr.overrideMimeType,
+        getbinary = method === "GET" && option.binary;
 
     try {
-//{{{!mb
-        xhr = win["ActiveXObject"] ? new ActiveXObject("Microsoft.XMLHTTP") : 0;
-//}}}!mb
-        xhr || (xhr = new XMLHttpRequest());
+        xhr.onreadystatechange = readyStateChange;
+        xhr.open(method, url, _true); // ASync
 
+        before && before({ option: option }, xhr);
+
+        if (getbinary && override) {
+            override("text/plain; charset=x-user-defined");
+        }
+        if (ifmod && cache[url]) { // cached
+            header.push("If-Modified-Since", cache[url]); // GMT
+        }
+        if (option.data) {
+            header.push("Content-Type", "application/x-www-form-urlencoded");
+        }
+        while ( (v = header[++i]) ) {
+            xhr.setRequestHeader(v, header[++i]);
+        }
+//{{{!mb
+        uueventattach(win, "beforeunload", ng); // [Gecko]
+//}}}!mb
+
+        xhr.send(option.data || null);
+        watchdog = setTimeout(function() {
+            ng(1); // 408: Request Time-out
+        }, (option.timeout || 10) * 1000);
+    } catch (err) {
+        xhr = { status: 400 };
+        ng(); // 400: Bad Request
+    }
+}
+uuajax.cache = {}; // { "url": DateHash(lastModified), ... }
+
+// uu.ajax.xhr - create XMLHttpRequest object
+function uuajaxxhr() { // @return XMLHttpRequest:
+    var xhr = win["XMLHttpRequest"];
+
+    return xhr ? new xhr
+//{{{!mb
+               : win["ActiveXObject"] ? new ActiveXObject("Msxml2.XMLHTTP")
+//}}}!mb
+               : null;
+}
+
+// uu.ajax.binary - upload / download binary data
+function uuajaxbinary(url, option, callback) {
+    option.method = option.data ? "GET" : "PUT";
+    option.binary = _true;
+    uuajax(url, option, callback);
+}
+
+// uu.require - require
+function uurequire(url,      // @param String: url
+                   option) { // @param Hash: { before, after }
+                             //     option.before - Function: before({ option }, xhr)
+                             //     option.after  - Function: after({ option, ok }, xhr)
+                             // @return Hash: { data, option, ok }
+    var rv = { data: "", option: option, ok: _true },
+        xhr = uuajaxxhr(), code,
+        before = option.before,
+        after = option.after;
+
+    try {
         xhr.open("GET", url, _false); // sync
+        before && before(rv, xhr);
         xhr.send(null);
 
-        status = xhr.status || 200; // fix "file:///" scheme
-        ok = status >= 200 && status < 300;
+        code = xhr.status;
+        rv.ok = code >= 200 && code < 300;
+        rv.data = xhr.responseText;
+        after && after(rv, xhr);
+        xhr = null;
     } catch (err) {
-        uulog(err + "");
+        rv.ok = _false;
     }
-
-    return {
-        ok: ok,
-        url: url,
-        xhr: xhr || {},
-        guid: uuguid(),
-        status: status,
-        isXML: function() {
-            return /xml/i.test(this.xhr.getResponseHeader("Content-Type") || "");
-        }
-    };
+    return rv;
 }
-
-// --- code snippet ---
-// uu.snippet - evaluate snippet
-function uusnippet(id,    // @param String: snippet id. <script id="...">
-                   arg) { // @param Mix(= void): arg
-                          // @return String/Mix:
-    function normalize(str) {
-        return str[_replace](/("|')/g, "\\$1")[_replace](/\n/g, "\\n");
-    }
-
-    function toBrace(all, ident) {
-        return ident[_indexOf]("arg.") ? '{(' + ident + ')}'  // "{{ident}}"     -> "{(ident)}"
-                                       : '"+' + ident + '+"'; // "{{arg.ident}}" -> "+ident+"
-    }
-
-    function toText(all, match) {
-        return '"' + normalize(uutrim(match))[_replace](dualBrace, toBrace) + '"';
-    }
-
-    function each(all, match) {
-        match = normalize(match[_replace](/^\s+|\s+$/gm, ""))
-                [_replace](eachBlock, toEachBlock)
-                [_replace](dualBrace, toBrace);
-        return 'uu.node.bulk("' + match + '");';
-    }
-
-    function toEachBlock(all, hash, block) {
-        return '"+uu.snippet.each(' + hash + ',"' +
-                                      block[_replace](dualBrace, toBrace) + '")+"';
-    }
-
-    var js = uusnippet.js[id] || "", node, // {
-        dualBrace = /\{\{([^\}]+)\}\}/g,
-        eachBlock = /<each ([^>]+)>([\s\S]*?)<\/each>/;
-
-    if (!js) {
-        node = uuid(id);
-        if (node) {
-            uusnippet.js[id] = js = node.text[_replace](/\r\n|\r|\n/g, "\n")
-                    [_replace](/<text>\n([\s\S]*?)^<\/text>$/gm, toText) // <text>...</text>
-                    [_replace](/<>\n([\s\S]*?)^<\/>$/gm, each)           // <>...</>
-                    [_replace](/^\s*\n|\n$/g, "");
-        }
-    }
-    return js ? (new Function("arg", js))(arg) : "";
-}
-uusnippet.js = {}; // { id: JavaScriptExpression, ... }
-uusnippet.each = function(hash, fragment) { // (
-    var i = 0, iz = hash.length, block = [], eachBrace = /\{\(([^\)]+)\)\}/g;
-
-    for (; i < iz; ++i) {
-        block.push(fragment[_replace](eachBrace, function(all, ident) {
-            return hash[ident][i];
-        }));
-    }
-    return block.join("");
-};
 
 // --- type ---
 
@@ -554,12 +650,12 @@ uusnippet.each = function(hash, fragment) { // (
 function uulike(lhs,   // @param Date/Hash/Fake/Array: lhs
                 rhs) { // @param Date/Hash/Fake/Array: rhs
                        // @return Boolean:
-    var type1 = uutype(lhs);
+    var ltype = uutype(lhs);
 
-    if (type1 !== uutype(rhs)) {
+    if (ltype !== uutype(rhs)) {
         return _false;
     }
-    switch (type1) {
+    switch (ltype) {
     case uutype.FUNCTION:   return _false;
     case uutype.DATE:       return uudate(lhs).ISO() === uudate(rhs).ISO();
     case uutype.HASH:       return (uusize(lhs) === uusize(rhs) && uuhas(lhs, rhs));
@@ -588,17 +684,14 @@ function uutype(search,  // @param Mix: search literal/object
 
     return match ? !!(match & rv) : rv;
 }
-uutype.types = {
-    "undefined":        uutype.VOID,
-    "[object Boolean]": uutype.BOOLEAN,     "boolean":   uutype.BOOLEAN,
-    "[object Number]":  uutype.NUMBER,      "number":    uutype.NUMBER,
-    "[object String]":  uutype.STRING,      "string":    uutype.STRING,
-    "[object Function]":uutype.FUNCTION, // "function":  uutype.FUNCTION,
-    "[object NodeList]":uutype.FAKEARRAY, // [Safari]
-    "[object RegExp]":  uutype.REGEXP,
-    "[object Array]":   uutype.ARRAY,
-    "[object Date]":    uutype.DATE
-};
+
+uueach({ 0x20: void 0, 0x40: _true, 0x100: 0, 0x200: "" }, function(v, i) {
+    uutype.types[typeof v] = +i;
+});
+uueach({ 0x40: _true, 0x80: _nop, 0x100: 0, 0x200: "", 0x400: [],
+         0x8: new Date, 0x800: /0/, 0x4: doc.links }, function(v, i) {
+    i & 4 || (uutype.types[_toString.call(v)] = +i);
+});
 
 // uu.isNumber - is number
 function isNumber(search) { // @param Mix: search
@@ -680,15 +773,15 @@ function uueach(source,    // @param Hash/Array: source
 function uukeys(source,           // @param Hash/Array: source
                 __enumValues__) { // @hidden Number(= 0): 1 is enum values
                         // @return Array: [key, ... ]
-    var rv = [], ri = -1, i, iz;
+    var rv = [], ri = -1, i, iz, keys = Object.keys;
 
     if (_isArray(source)) {
         for (i = 0, iz = source.length; i < iz; ++i) {
             i in source && (rv[++ri] = __enumValues__ ? source[i] : i);
         }
     } else {
-        if (!__enumValues__ && Object.keys) {
-            return Object.keys(source);
+        if (!__enumValues__ && keys) {
+            return keys(source);
         }
         for (i in source) {
             if (source.hasOwnProperty(i)) {
@@ -723,16 +816,6 @@ function uuhash(key,     // @param Hash/String: key
     rv[key] = value; // [2]
     return rv;
 }
-// uu.hash.dd2num = { "00":   0 , ... "99":  99  }; Zero-filled dec string -> Number
-// uu.hash.num2dd = {    0: "00", ...   99: "99" }; Number -> Zero-filled dec string
-_makeMapping("0123456789", uuhash.dd2num = {},
-                           uuhash.num2dd = { 256: "00" });
-
-// uu.hash.hh2num = { "00":   0 , ... "ff": 255  }; Zero-filled hex string -> Number
-// uu.hash.num2hh = {    0: "00", ...  255: "ff" }; Number -> Zero-filled hex string
-//_makeMapping("0123456789abcdef", uuhash.hh2num = {}, uuhash.num2hh = {});
-_makeMapping("0123456789abcdef", uuhash.hh2num = {},
-                                 uuhash.num2hh = { 256: "00" });
 
 //  [1][through Array]      uu.array([1, 2])    -> [1, 2]
 //  [2][mix to Array]       uu.array(mix)       -> [mix]
@@ -887,9 +970,8 @@ function uuclean(source) { // @param Array: source
         var rv = [], i = 0, iz = source.length;
 
         for (; i < iz; ++i) {
-            if (i in source && source[i] != null) { // skip null or undefined
-                rv.push(source[i]);
-            }
+            i in source && source[i] != null // skip null or undefined
+                        && rv.push(source[i]);
         }
         return rv;
     }
@@ -924,43 +1006,20 @@ function uuunique(source,        // @param Array: source
     return rv;
 }
 
-//  [1][++1] uu.array.seq( 0,  5,  1) -> [0, 1, 2, 3, 4]
-//  [2][--1] uu.array.seq(-2, -5, -1) -> [-2, -3, -4]
-//  [3][++2] uu.array.seq( 5, 10,  2) -> [ 5,  7,  9]
-
-// uu.array.seq - create sequence array
-function uuseq(start,       // @param Number:
-               end,         // @param Number:
-               increment) { // @param Number(= 1):
-                            // @return Array:
-    var rv = [], ri = -1, i = start, inc = increment || 1;
-
-    if (start < end && inc > 0) {
-        for (; i < end; i += inc) {
-            rv[++ri] = i;
-        }
-    } else if (start > end && inc < 0) {
-        for (; i > end; i += inc) {
-            rv[++ri] = i;
-        }
-    }
-    return rv;
-}
+//  [1][ByteArray dump] uu.array.dump([1, 2, 3]) -> "010203"
+//  [2][ByteArray dump] uu.array.dump([1, 2, 3], "0x", ", 0x") -> "0x01, 0x02, 0x03"
 
 // uu.array.dump - dump ByteArray
 function uudump(source,     // @param ByteArray: [0x00, ... 0xff]
-                prefix,     // @param String(= "0x"):
-                splitter) { // @param String(= ", 0x"):
-                            // @return String: "00010203" or "0x00, 0x01, 0x02, 0x03"
-    var rv = [], i = 0, iz = source.length, num2hh = uuhash.num2hh;
+                prefix,     // @param String(= ""):
+                splitter) { // @param String(= ""):
+                            // @return String: "00010203"
+    var rv = [], i = 0, iz = source.length, num2hh = _num2hh;
 
-    if (!iz) {
-        return "";
-    }
     for (; i < iz; ++i) {
         rv[i] = num2hh[source[i]];
     }
-    return (prefix || "0x") + rv.join(splitter || ", 0x");
+    return iz ? (prefix || "") + rv.join(splitter || "") : "";
 }
 
 // [1][Array x 2 = Hash]    uu.array.toHash(["a", "b"], [1, 2]) -> { a: 1, b: 2 }
@@ -2170,31 +2229,24 @@ function uueventstop(event) { // @param EventObjectEx:
 function uueventunbind(node,          // @param Node: target node
                        eventTypeEx) { // @param EventTypeExString(= void): namespace and event types, "click,click+,..."
                                       // @return Node:
-    function _unbindall(ex) { // @param EventTypeExString: "MyNamespace.mousemove+"
-        // closure vars: node, ns
+    var eventData = node[_uuevent], ns, ary = uusplitcomma(eventTypeEx), ex, i = -1;
 
-        if (!ex[_indexOf](ns)) {
-            node[_uuevent][ex].forEach(function(evaluator) {
-                uuevent(node, ex, evaluator, _true); // unbind
-            });
-        }
-    }
-
-    if (node[_uuevent]) {
+    if (eventData) {
         eventTypeEx = eventTypeEx ? "," + eventTypeEx + "," // [2] ",click,"
-                                  : node[_uuevent].types;   // [1] ",click,MyNamespace.mousemove+,"
-
-        var ns, ary = uusplitcomma(eventTypeEx), ex, i = -1;
-
+                                  : eventData.types;        // [1] ",click,MyNamespace.mousemove+,"
         while ( (ex = ary[++i]) ) {
             if (ex.lastIndexOf(".*") > 1) { // [3] "namespace.*"
-
                 ns = ex.slice(0, -1);       // "namespace.*" -> "namespace."
-                uusplitcomma(eventTypeEx).forEach(_unbindall);
+                uueach(uusplitcomma(eventTypeEx), function(ex) { // @param EventTypeExString: "MyNamespace.mousemove+"
+                    if (!ex[_indexOf](ns)) {
+                        uueach(eventData[ex], function(evaluator) {
+                            uuevent(node, ex, evaluator, _true); // unbind
+                        });
+                    }
+                });
             } else { // [2][4]
                 if (eventTypeEx[_indexOf]("," + ex + ",") >= 0) {
-
-                    node[_uuevent][ex].forEach(function(evaluator) {
+                    uueach(eventData[ex], function(evaluator) {
                         uuevent(node, ex, evaluator, _true); // unbind
                     });
                 }
@@ -2967,8 +3019,8 @@ function _str2json(str,        // @param String:
             })[_replace](_str2json.encode, function(str, c) {
                 // String("AB") to UnicodeString("\u0041\u0042")
                 c = str.charCodeAt(0);
-                return "\\u" + uuhash.num2hh[(c >> 8) & 255]
-                             + uuhash.num2hh[c & 255];
+                return "\\u" + _num2hh[(c >> 8) & 255]
+                             + _num2hh[c & 255];
             });
 
     return addQuote ? '"' + rv + '"' : rv;
@@ -3093,12 +3145,12 @@ _str2date.date = /^([\w]+) (\w+) (\w+)/;
 function datehashiso() { // @return ISO8601DateString: "2000-01-01T00:00:00.000Z"
     var that = this,
         padZero = (that.ms < 10) ? "00"
-                : (that.ms < 100) ? "0" : "",
-        dd = uuhash.num2dd;
+                : (that.ms < 100) ? "0" : "";
 
     return uuformat("??-??-??T??:??:??.??Z",
-                    that.Y, dd[that.M], dd[that.D],
-                    dd[that.h], dd[that.m], dd[that.s], padZero + that.ms);
+                    that.Y, _num2dd[that.M], _num2dd[that.D],
+                    _num2dd[that.h], _num2dd[that.m],
+                    _num2dd[that.s], padZero + that.ms);
 }
 
 // DateHash.RFC - encode DateHash To RFC1123String
@@ -3707,29 +3759,70 @@ function _classNameMatcher(ary) {
     return RegExp("(?:^| )(" + ary.join("|") + ")(?:$|(?= ))", "g");
 }
 
-// inner - make String <-> Number mapping table
-function _makeMapping(seed,  // @param String: "0123456789" or "0123456789abcdef"
-                      s2n,   // @param Hash: String to Number
-                      n2s) { // @param Hash: Number to String
-    var i = 0, j, k = -1, v, ary = seed.split(""), iz = ary.length;
+// inner - BinaryString To ByteArray
+function toByteArray(data) { // @param BinaryString: "\00\01"
+                             // @return ByteArray: [0x00, 0x01]
+    var rv = [], bb2num = _bb2num, remain,
+        ary = data.split(""),
+        i = -1, iz;
 
-    for (; i < iz; ++i) {
-        for (j = 0; j < iz; ++j) {
-            v = ary[i] + ary[j];
-            s2n[v] = ++k; // { "00": 0, "01": 1, ... "ff": 255  }
-            n2s[k] = v;   // {    0: 0,    1: 1, ...  255: "ff" }
-        }
+    iz = ary.length;
+    remain = iz % 8;
+
+    while (remain--) {
+        ++i;
+        rv[i] = bb2num[ary[i]];
     }
+    remain = iz >> 3;
+    while (remain--) {
+        rv.push(bb2num[ary[++i]], bb2num[ary[++i]],
+                bb2num[ary[++i]], bb2num[ary[++i]],
+                bb2num[ary[++i]], bb2num[ary[++i]],
+                bb2num[ary[++i]], bb2num[ary[++i]]);
+    }
+    return rv;
 }
 
-// uu.hash.num2bin - ["\00", "\01", ... "\ff"]
-// uu.hash.bin2num - { "\00": 0, "\01": 1, ... "\ff": 255 }
-(function(num2bin, bin2num, i, v) {
-    for (; i < 256; ++i) {
-        num2bin[i] = v = String.fromCharCode(i);
-        bin2num[v] = i;
+//{{{!mb
+// inner - BinaryString to ByteArray
+function toByteArrayIE(xhr) {
+    var rv = [], data, remain,
+        charCodeAt = "charCodeAt", _0xff = 0xff,
+        loop, v0, v1, v2, v3, v4, v5, v6, v7,
+        i = -1, iz;
+
+    iz = vblen(xhr);
+    data = vbstr(xhr);
+    loop = Math.ceil(iz / 2);
+    remain = loop % 8;
+
+    while (remain--) {
+        v0 = data[charCodeAt](++i); // 0x00,0x01 -> 0x0100
+        rv.push(v0 & _0xff, v0 >> 8);
     }
-})(uuhash.num2bin = [], uuhash.bin2num = {}, 0);
+    remain = loop >> 3;
+    while (remain--) {
+        v0 = data[charCodeAt](++i);
+        v1 = data[charCodeAt](++i);
+        v2 = data[charCodeAt](++i);
+        v3 = data[charCodeAt](++i);
+        v4 = data[charCodeAt](++i);
+        v5 = data[charCodeAt](++i);
+        v6 = data[charCodeAt](++i);
+        v7 = data[charCodeAt](++i);
+        rv.push(v0 & _0xff, v0 >> 8, v1 & _0xff, v1 >> 8,
+                v2 & _0xff, v2 >> 8, v3 & _0xff, v3 >> 8,
+                v4 & _0xff, v4 >> 8, v5 & _0xff, v5 >> 8,
+                v6 & _0xff, v6 >> 8, v7 & _0xff, v7 >> 8);
+    }
+    iz % 2 && rv.pop();
+
+    return rv;
+}
+_ie && document.write('<script type="text/vbscript">\
+Function vblen(b)vblen=LenB(b.responseBody)End Function\n\
+Function vbstr(b)vbstr=CStr(b.responseBody)+chr(0)End Function</'+'script>');
+//}}}!mb
 
 // inner - detect versions and meta informations
 function detectVersions(libraryVersion) { // @param Number: Library version

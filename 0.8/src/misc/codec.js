@@ -76,7 +76,7 @@ function utf8encode(str) { // @param String: JavaScript string
             rv.push(((c >>>  6) & 0x1f) | 0xc0, (c & 0x3f) | 0x80);
         } else if (c < 0x10000) {
             rv.push(((c >>> 12) & 0x0f) | 0xe0,
-                        ((c >>>  6) & 0x3f) | 0x80, (c & 0x3f) | 0x80);
+                    ((c >>>  6) & 0x3f) | 0x80, (c & 0x3f) | 0x80);
         }
     }
     return rv;
@@ -88,7 +88,7 @@ function utf8decode(byteArray,  // @param UTF8ByteArray: [ Number(utf8), ... ]
                     endIndex) { // @param Number(= void):
                                 // @return String: JavaScript string
     var rv = [], ri = -1, iz = endIndex || byteArray.length, c = 0,
-        i = startIndex || 0, fromCharCode = String.fromCharCode;
+        i = startIndex || 0;
 
     if (iz > byteArray.length) {
         iz = byteArray.length;
@@ -97,15 +97,15 @@ function utf8decode(byteArray,  // @param UTF8ByteArray: [ Number(utf8), ... ]
     for (; i < iz; ++i) {
         c = byteArray[i]; // first byte
         if (c < 0x80) { // ASCII(0x00 ~ 0x7f)
-            rv[++ri] = fromCharCode(c);
+            rv[++ri] = c;
         } else if (c < 0xe0) {
-            rv[++ri] = fromCharCode((c & 0x1f) <<  6 | (byteArray[++i] & 0x3f));
+            rv[++ri] = (c & 0x1f) <<  6 | (byteArray[++i] & 0x3f);
         } else if (c < 0xf0) {
-            rv[++ri] = fromCharCode((c & 0x0f) << 12 | (byteArray[++i] & 0x3f) << 6
-                                                     | (byteArray[++i] & 0x3f));
+            rv[++ri] = (c & 0x0f) << 12 | (byteArray[++i] & 0x3f) << 6
+                                        | (byteArray[++i] & 0x3f);
         }
     }
-    return rv.join("");
+    return String.fromCharCode.apply(null, rv);
 }
 
 // --- init ---

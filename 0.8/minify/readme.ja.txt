@@ -1,6 +1,6 @@
 
 usage:
-  >uap.php [-g | -m | -y] [-mb] [-v] [-pp file] [-src dir] [-core file] [*.js ...]
+  >uap.php [-g | -m | -y] [-mb] [-v] [-pp file] [-src dir] [-core file] [-nocore] [*.js ...]
 
         -g    use Google Closure Compiler (default)
         -m    use Microsoft Ajax Minifier
@@ -14,6 +14,7 @@ usage:
         -src  source directory. ソースコードの読み込む基準ディレクトリを指定します。デフォルトは "../src/" です。
         -core library core. ライブラリの核となるファイルを指定します。デフォルトは "uupaa.js" です。
               ビルドで生成するファイル名も -core で指定したファイル名になります。
+        -nocore no library core. ライブラリの核となるファイルをマージせずにビルドします。
         *.js  JavaScriptソースコードファイルパスです。
               相対パスで指定した場合は {$sourceDir} 以下からファイルを読み取ります。
 
@@ -46,3 +47,7 @@ usage:
   7. -pp でプリプロセス用のPHPコードを指定してビルドする
 
           >upa src.js -pp c.pp
+
+  8. -nocore でコアをマージせずにビルドする
+
+          >upa -nocore src.js src2.js
