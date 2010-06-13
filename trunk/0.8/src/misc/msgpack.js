@@ -181,7 +181,7 @@ function decode() { // @return Mix:
     case 0xda:  size === undef && (size = readByte(that, 2));   // raw 16
     case 0xa0:  i = that.index + 1;                             // raw
                 that.index += size;
-                return utf8decode(data, i, i + size);
+                return utf8decode(data.slice(i, i + size));
     case 0xdf:  size = readByte(that, 4);                       // map 32
     case 0xde:  size === undef && (size = readByte(that, 2));   // map 16
     case 0x80:  for (rv = {}; i < size; ++i) {                  // map
@@ -462,7 +462,7 @@ function ajax(url,        // @param String:
                     rv.length = option.data.length;
                 } else {
                     if (rv.ok) {
-                        rv.length = xhr.getResponseHeader("Content-Length");
+                        rv.length = xhr.getResponseHeader("Content-Length") * 1;
                         if (option.worker && globalScope.Worker) {
                             worker = new Worker(msgpack.worker);
                             worker.onmessage = function(event) {
@@ -475,7 +475,7 @@ function ajax(url,        // @param String:
                             return;
                         } else {
                             byteArray = _ie ? toByteArrayIE(xhr)
-                                            : toByteArray(xhr.responseText)
+                                            : toByteArray(xhr.responseText);
                             rv.data = msgpackunpack(byteArray);
                         }
                     }
@@ -590,37 +590,30 @@ function toByteArrayIE(xhr) {
 // inner - String to UTF8ByteArray
 function utf8encode(str) { // @param String: JavaScript string
                            // @return UTF8ByteArray: [ Number(utf8), ... ]
-    var rv = [], iz = str.length, c = 0, i = -1;
+    var rv = [], iz = str.length, c = 0, i = 0;
 
-    while (i < iz) {
-        c = str.charCodeAt(++i);
-        if (c < _0x80) { // ASCII(0x00 ~ 0x7f)
+    for (; i < iz; ++i) {
+        c = str.charCodeAt(i);
+        if (c < 0x80) { // ASCII(0x00 ~ 0x7f)
             rv.push(c & 0x7f);
         } else if (c < 0x0800) {
-            rv.push(((c >>>  6) & 0x1f) | 0xc0, (c & 0x3f) | _0x80);
+            rv.push(((c >>>  6) & 0x1f) | 0xc0, (c & 0x3f) | 0x80);
         } else if (c < 0x10000) {
             rv.push(((c >>> 12) & 0x0f) | 0xe0,
-                    ((c >>>  6) & 0x3f) | 0x80, (c & 0x3f) | _0x80);
+                    ((c >>>  6) & 0x3f) | 0x80, (c & 0x3f) | 0x80);
         }
     }
     return rv;
 }
 
 // inner - UTF8ByteArray to String
-function utf8decode(byteArray,  // @param UTF8ByteArray: [ Number(utf8), ... ]
-                    startIndex, // @param Number(= 0):
-                    endIndex) { // @param Number(= void):
-                                // @return String: JavaScript string(UNICODE)
-    var rv = [], ri = -1, iz = endIndex || byteArray.length, c = 0,
-        i = startIndex || 0;
-
-    if (iz > byteArray.length) {
-        iz = byteArray.length;
-    }
+function utf8decode(byteArray) { // @param UTF8ByteArray: [ Number(utf8), ... ]
+                                 // @return String: JavaScript string(UNICODE)
+    var rv = [], ri = -1, i = 0, iz = byteArray.length, c = 0;
 
     for (; i < iz; ++i) {
         c = byteArray[i]; // first byte
-        if (c < _0x80) { // ASCII(0x00 ~ 0x7f)
+        if (c < 0x80) { // ASCII(0x00 ~ 0x7f)
             rv[++ri] = c;
         } else if (c < 0xe0) {
             rv[++ri] = (c & 0x1f) <<  6 | (byteArray[++i] & 0x3f);
@@ -635,22 +628,19 @@ function utf8decode(byteArray,  // @param UTF8ByteArray: [ Number(utf8), ... ]
 // inner - base64.encode
 function base64encode(data) { // @param ByteArray:
                               // @return Base64String:
-    var rv = [], pad = 0, c = 0, i = -1, iz, num2b64 = _num2b64;
+    var rv = [],
+        c = 0, i = -1, iz = data.length,
+        pad = [0, 2, 1][data.length % 3],
+        num2bin = _num2bin,
+        num2b64 = _num2b64;
 
     if (globalScope.btoa) {
-        iz = data.length;
         while (i < iz) {
-            rv.push(_num2bin[data[++i]]);
+            rv.push(num2bin[data[++i]]);
         }
         return btoa(rv.join(""));
     }
-
-    switch (data.length % 3) {
-    case 1: data.push(0); ++pad;
-    case 2: data.push(0); ++pad;
-    }
-    iz = data.length - 1;
-
+    --iz;
     while (i < iz) {
         c = (data[++i] << 16) | (data[++i] << 8) | (data[++i]); // 24bit
         rv.push(num2b64[(c >> 18) & 0x3f],
@@ -658,8 +648,8 @@ function base64encode(data) { // @param ByteArray:
                 num2b64[(c >>  6) & 0x3f],
                 num2b64[ c        & 0x3f]);
     }
-    pad > 1 && (rv[rv.length - 2] = "=", data.pop());
-    pad > 0 && (rv[rv.length - 1] = "=", data.pop());
+    pad > 1 && (rv[rv.length - 2] = "=");
+    pad > 0 && (rv[rv.length - 1] = "=");
     return rv.join("");
 }
 

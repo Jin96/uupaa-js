@@ -116,6 +116,7 @@ function question(title,       // @param String:
             });
         }
     } catch(err) {
+        debugger;
         if (uu.test.ignoreError) {
             throw err;
         }
