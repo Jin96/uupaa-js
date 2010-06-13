@@ -447,7 +447,7 @@ _gecko && !HTMLElement[_prototype].innerText &&
 })(HTMLElement[_prototype]);
 //}}}!mb
 
-(function(map, ary1, ary2, n, i, j, v) {
+(function(ary1, ary2, n, i, j, v) {
     for (; i < 16; ++i) {
         for (j = 0; j < 16; ++n, ++j) {
             _num2hh[n] = v = ary1[i] + ary1[j];
