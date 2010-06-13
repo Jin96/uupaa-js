@@ -2229,11 +2229,13 @@ function uueventstop(event) { // @param EventObjectEx:
 function uueventunbind(node,          // @param Node: target node
                        eventTypeEx) { // @param EventTypeExString(= void): namespace and event types, "click,click+,..."
                                       // @return Node:
-    var eventData = node[_uuevent], ns, ary = uusplitcomma(eventTypeEx), ex, i = -1;
+    var eventData = node[_uuevent], ns, ary, ex, i = -1;
 
     if (eventData) {
         eventTypeEx = eventTypeEx ? "," + eventTypeEx + "," // [2] ",click,"
                                   : eventData.types;        // [1] ",click,MyNamespace.mousemove+,"
+        ary = uusplitcomma(eventTypeEx);
+
         while ( (ex = ary[++i]) ) {
             if (ex.lastIndexOf(".*") > 1) { // [3] "namespace.*"
                 ns = ex.slice(0, -1);       // "namespace.*" -> "namespace."
@@ -3044,6 +3046,12 @@ function _json(mix, esc, callback) {
     case uutype.VOID:   return "undefined";
     case uutype.DATE:   return uudate(mix).ISO();
     case uutype.FUNCTION:
+//{{{!mb
+                        if (_ie) {
+                            w = mix + "";
+                            return '"' + w.slice(9, w.indexOf("(")) + '"'; // )
+                        }
+//}}}!mb
                         return '"' + mix.name + '"';
     case uutype.BOOLEAN:
     case uutype.NUMBER: return mix.toString();
