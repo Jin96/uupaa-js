@@ -102,7 +102,7 @@ uu.ready(function(uu) {
         return [uu.array.sort(['z', 'a', 'b', 'c'], "Z-A"), "==", ['z', 'c', 'b', 'a']];
       },
       "[5][user func] uu.array.clean([,,1,2,,]) は [1, 2]": function() {
-        return [uu.array.clean([,,1,2,,]), "is", [1, 2]];
+        return [uu.array.clean([,,1,2,,]), "==", [1, 2]];
       },
     "uu.array.clean()": "",
       "uu.array.clean(var ary=[1,2,3]; delete ary[1]) == [1,3]。uu.array.clean は 欠落(delete)した要素や null をスキップする": function() {
@@ -150,22 +150,31 @@ uu.ready(function(uu) {
         return [uu.array.unique(ary), "==", [1, 3, 2, 0]];
       },
 
+    "uu.array.dump()": "",
+      'uu.array.dump([1, 2, 3]) == "010203"': function() {
+        var ary = [1, 2, 3];
+        return [uu.array.dump(ary), "==", "010203"];
+      },
+      'uu.array.dump([1, 2, 3], "0x", ", 0x") == "0x01, 0x02, 0x03"': function() {
+        var ary = [1, 2, 3];
+        return [uu.array.dump(ary, "0x", ", 0x"), "==", "0x01, 0x02, 0x03"];
+      },
 
 /*
     "uu.array.indexOf()": "",
       "uu.array.indexOf([1,2,3], 1) は 0 を返す": function() {
-        return [uu.array.indexOf([1,2,3], 1), "is", 0];
+        return [uu.array.indexOf([1,2,3], 1), "==", 0];
       },
       "uu.array.indexOf([<body>, <head>], <head>) は 1 を返す": function() {
-        return [uu.array.indexOf([document.body, document.head], document.head), "is", 1];
+        return [uu.array.indexOf([document.body, document.head], document.head), "==", 1];
       },
       "uu.array.indexOf([<body>, <head>], <html>) は -1 (not found) を返す": function() {
-        return [uu.array.indexOf([document.body, document.head], document.documentElement), "is", -1];
+        return [uu.array.indexOf([document.body, document.head], document.documentElement), "==", -1];
       },
  */
     "Array.filter()": "",
       "Array.filter([12, 5, 8, 130, 44], function(v) { return v >= 10; }) は [12, 130, 44] を返す": function() {
-        return [[12, 5, 8, 130, 44].filter(function(v) { return v >= 10; }), "is", [12, 130, 44]];
+        return [[12, 5, 8, 130, 44].filter(function(v) { return v >= 10; }), "==", [12, 130, 44]];
       },
     "Array.every()": "",
       "Array.every([12, 5, 8, 130, 44], function(v) { return v >= 10; }) は false を返す": function() {
@@ -183,7 +192,7 @@ uu.ready(function(uu) {
       },
     "Array.map()": "",
       "Array.map([1, 2, 3, 4, 5], function(v) { return v * 2; }) は [2, 4, 6, 8, 10] を返す": function() {
-        return [[1, 2, 3, 4, 5].map(function(v) { return v * 2; }), "is", [2, 4, 6, 8, 10]];
+        return [[1, 2, 3, 4, 5].map(function(v) { return v * 2; }), "==", [2, 4, 6, 8, 10]];
       },
     "uu.attr()": "",
       "[1][get all pair] uu.attr(uu.id('div')) は Hash を返す(結果はブラウザ依存)": function() {
@@ -343,15 +352,6 @@ uu.ready(function(uu) {
 
 
     "uu.klass.add()": "",
-/*
-      "uu.klass.add(uu.id('div')) ( 'A1 A2 A3' ) に 'A4　　　A1　' を足すと 'A1 A2 A3 A4 A1' になる": function() {
-        uu.id('div').className = "";
-        uu.klass.add(uu.id('div'), "A1 A2 A3");
-        uu.klass.add(uu.id('div'), "A4   A1 ");
-
-        return [uu.id('div').className, "==", 'A1 A2 A3 A4 A1'];
-      },
- */
       "uu.klass.add(uu.id('div')) ( ' A1 A2 A3' ) に 'A4 A1' を足すと ' A1 A2 A3 A4 A1' になる": function() {
         uu.id('div').className = "";
         uu.klass.add(uu.id('div'), "A1 A2 A3");
@@ -401,15 +401,6 @@ uu.ready(function(uu) {
         return [hash, "==", { key: 123 }];
       },
 
-/*
-    "uu.hash.num()": "",
-      "uu.hash.num('key,0,key2,1') == { key: 0, key2: 1 }": function() {
-        var hash = uu.hash.num('key,0,key2,1');
-
-        return [hash, "==", { key: 0, key2: 1 }];
-      },
- */
-
     "uu.hash.has()": "",
       "uu.hash.has({ a: 1, b: 2, c: 3 }, { a: 1, b: 2 }) == true": function() {
         return [uu.hash.has({ a: 1, b: 2, c: 3 }, { a: 1, b: 2 }), "is true"];
@@ -420,9 +411,19 @@ uu.ready(function(uu) {
       "uu.hash.has({ a: function() { return 'a'}, b: 2, c: 3 }, { a: function() { return 'a'}, b: 2 }) == true": function() {
         return [uu.hash.has({ a: function() { return 'a'}, b: 2, c: 3 }, { a: function() { return 'a'}, b: 2 }), "is true"];
       },
-      "uu.hash.has({ a: function() { return 'b'}, b: 2, c: 3 }, { a: function() { return 'a'}, b: 2 }) == false": function() {
-        return [uu.hash.has({ a: function() { return 'b'}, b: 2, c: 3 }, { a: function() { return 'a'}, b: 2 }), "is false"];
+      "uu.hash.has({ a: function() { return 'b'}, b: 2, c: 3 }, { a: function() { return 'a'}, b: 2 }) == true  無名関数は同じものとして比較するため true になる": function() {
+        return [uu.hash.has({ a: function() { return 'b'}, b: 2, c: 3 }, { a: function() { return 'a'}, b: 2 }), "is true"];
       },
+      "uu.hash.has({ a: function hoge() { return 'b'}, b: 2, c: 3 }, { a: function huga() { return 'a'}, b: 2 }) == false  有名関数はfunction.name を比較するため false になる": function() {
+            function hoge() {
+                return "b";
+            }
+            function huga() {
+                return "c";
+            }
+        return [uu.hash.has({ a: hoge, b: 2, c: 3 }, { a: huga, b: 2 }), "is false"];
+      },
+
     "uu.hash.size()": "",
       "ハッシュサイズは2": function() {
         return [uu.hash.size({ aaa: 1, bbb: 2 }), "==", 2];
@@ -843,8 +844,10 @@ uu.ready(function(uu) {
                                 function() { return [document.getElementsByTagName('body'), "is FakeArray"]; },
 
       "new Date は date 型":    function() { return [new Date, "is date"]; },
-      "uu.type(123, uu.type.STRING | uu.type.NUMBER) は boolean 型 の戻り値を返す":
-                                function() { return [uu.type(123, uu.type.STRING | uu.type.NUMBER), "is boolean"]; },
+      "uu.type(123, uu.type.NUMBER) は boolean 型 の戻り値を返す":
+                                function() { return [uu.type(123, uu.type.NUMBER), "is boolean"]; },
+      "uu.type(123, uu.type.STRING) は false":
+                                function() { return [uu.type(123, uu.type.STRING), "is false"]; },
       "new Boolean(false) は boolean 型":
                                 function() { return [new Boolean(false), "is boolean"];   },
       "new Number(1) は number 型":
