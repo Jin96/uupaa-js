@@ -844,8 +844,10 @@ uu.ready(function(uu) {
                                 function() { return [document.getElementsByTagName('body'), "is FakeArray"]; },
 
       "new Date は date 型":    function() { return [new Date, "is date"]; },
-      "uu.type(123, uu.type.STRING | uu.type.NUMBER) は boolean 型 の戻り値を返す":
-                                function() { return [uu.type(123, uu.type.STRING | uu.type.NUMBER), "is boolean"]; },
+      "uu.type(123, uu.type.NUMBER) は boolean 型 の戻り値を返す":
+                                function() { return [uu.type(123, uu.type.NUMBER), "is boolean"]; },
+      "uu.type(123, uu.type.STRING) は false":
+                                function() { return [uu.type(123, uu.type.STRING), "is false"]; },
       "new Boolean(false) は boolean 型":
                                 function() { return [new Boolean(false), "is boolean"];   },
       "new Number(1) は number 型":

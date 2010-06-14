@@ -39,6 +39,7 @@ var _prototype = "prototype",
     _false = !1,
     _true = !0,
     _nop = function() {},
+    _types = { "undefined": 8 },
     _dd2num = {},               // dd2num = { "00":   0 , ... "99":  99  }
     _num2dd = {},               // num2dd = {    0: "00", ...   99: "99" }
     _bb2num = {},               // bb2num = { "\00": 0, ... "\ff": 255 }
@@ -81,24 +82,21 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Clas
     require:        uurequire,      // uu.require(url:String):AjaxResultHash
     // --- TYPE ---
     like:           uulike,         // uu.like(lhs:Date/Hash/Fake/Array, rhs:Date/Hash/Fake/Array):Boolean
-    type:     uumix(uutype, {       // uu.type(search:Mix, match:Number = 0):Boolean/Number
-        HASH:       0x001,          // uu.type.HASH         - Hash (Object)
-        NODE:       0x002,          // uu.type.NODE         - Node (HTMLElement)
-        FAKEARRAY:  0x004,          // uu.type.FAKEARRAY    - FakeArray (Arguments, NodeList, ...)
-        DATE:       0x008,          // uu.type.DATE         - Date
-        NULL:       0x010,          // uu.type.NULL         - null
-        VOID:       0x020,          // uu.type.VOID         - undefined / void
-        UNDEFINED:  0x020,          // uu.type.UNDEFINED    - undefined / void
-        BOOLEAN:    0x040,          // uu.type.BOOLEAN      - Boolean
-        FUNCTION:   0x080,          // uu.type.FUNCTION     - Function
-        NUMBER:     0x100,          // uu.type.NUMBER       - Number
-        STRING:     0x200,          // uu.type.STRING       - String
-        ARRAY:      0x400,          // uu.type.ARRAY        - Array
-        REGEXP:     0x800,          // uu.type.REGEXP       - RegExp
-        types:      {}
-    }),
-    isNumber:       isNumber,       //   uu.isNumber(search:Mix):Boolean
-    isString:       isString,       //   uu.isString(search:Mix):Boolean
+    type:           uutype,         // uu.type(search:Mix, match:Number = 0):Boolean/Number
+                                    //  uu.type.BOOLEAN      -  1: Boolean
+                                    //  uu.type.NUMBER       -  2: Number
+                                    //  uu.type.STRING       -  3: String
+                                    //  uu.type.FUNCTION     -  4: Function
+                                    //  uu.type.ARRAY        -  5: Array
+                                    //  uu.type.DATE         -  6: Date
+                                    //  uu.type.REGEXP       -  7: RegExp
+                                    //  uu.type.UNDEFINED    -  8: undefined
+                                    //  uu.type.NULL         -  9: null
+                                    //  uu.type.HASH         - 10: Hash (Object)
+                                    //  uu.type.NODE         - 11: Node (HTMLElement)
+                                    //  uu.type.FAKEARRAY    - 12: FakeArray (Arguments, NodeList, ...)
+    isNumber:       isNumber,       // uu.isNumber(search:Mix):Boolean
+    isString:       isString,       // uu.isString(search:Mix):Boolean
     isFunction:     isFunction,     // uu.isFunction(search:Mix):Boolean
     // --- HASH / ARRAY ---
     arg:            uuarg,          // uu.arg(arg1:Hash/Function = {}, arg2:Hash, arg3:Hash = void):Hash/Function
@@ -374,6 +372,33 @@ uu.config.baseDir || (uu.config.baseDir =
         return file === "uupaa.js" ? "../" : "";
     }));
 
+uueach(("BOOLEAN,NUMBER,STRING,FUNCTION,ARRAY,DATE," +
+        "REGEXP,UNDEFINED,NULL,HASH,NODE,FAKEARRAY").split(","), function(v, i) {
+    uutype[v] = i + 1;
+});
+
+uueach([!0, 0, "", _nop, [], new Date, /0/], function(v, i) {
+    ++i < 4 && (_types[typeof v] = i);
+    _types[_toString.call(v)] = i;
+});
+
+(function(ary1, ary2, n, i, j, v) {
+    for (; i < 16; ++i) {
+        for (j = 0; j < 16; ++n, ++j) {
+            _num2hh[n] = v = ary1[i] + ary1[j];
+            _hh2num[v] = n;
+            _num2bb[n] = v = String.fromCharCode(n);
+            _bb2num[v] = n;
+        }
+    }
+    for (n = i = 0; i < 10; ++i) {
+        for (j = 0; j < 10; ++n, ++j) {
+            _num2dd[n] = v = ary2[i] + ary2[j];
+            _dd2num[v] = n;
+        }
+    }
+})("0123456789abcdef".split(""), "0123456789".split(""), 0, 0);
+
 // --- MsgPump class ---
 MsgPump[_prototype] = {
     send:           uumsgsend,      // MsgPump.send(address:Array/Mix, message:String, param:Mix = void):Array/Mix
@@ -447,23 +472,6 @@ _gecko && !HTMLElement[_prototype].innerText &&
 })(HTMLElement[_prototype]);
 //}}}!mb
 
-(function(ary1, ary2, n, i, j, v) {
-    for (; i < 16; ++i) {
-        for (j = 0; j < 16; ++n, ++j) {
-            _num2hh[n] = v = ary1[i] + ary1[j];
-            _hh2num[v] = n;
-            _num2bb[n] = v = String.fromCharCode(n);
-            _bb2num[v] = n;
-        }
-    }
-    for (n = i = 0; i < 10; ++i) {
-        for (j = 0; j < 10; ++n, ++j) {
-            _num2dd[n] = v = ary2[i] + ary2[j];
-            _dd2num[v] = n;
-        }
-    }
-})("0123456789abcdef".split(""), "0123456789".split(""), 0, 0);
-
 // ===================================================================
 
 // [1][Class factory]   uu("MyClass", arg1, arg2) -> new uu.Class.MyClass(arg1, arg2)
@@ -487,54 +495,56 @@ function uufactory(expression, // @param NodeSet/Node/NodeArray/ClassNameString/
 // --- AJAX ---
 // uu.ajax
 function uuajax(url,        // @param String: url
-                option,     // @param Hash: { timeout, header, data, ifmod, method,
-                            //                binary, before, after }
+                option,     // @param Hash: { data, ifmod, method, timeout,
+                            //                header, binary, before, after }
                             //    option.data    - Mix: upload data
+                            //    option.ifmod   - Boolean: true is "If-Modified-Since" header
                             //    option.method  - String: "GET", "POST", "PUT"
                             //    option.timeout - Number(= 10): timeout sec
-                            //    option.binary  - Boolean(= false): true is binary data
-                            //    option.before  - Function: before({ option }, xhr)
-                            //    option.after   - Function: after({ option, ok }, xhr)
-                callback) { // @param Function: callback({ data, option, ok })
+                            //    option.header  - Hash(= {}): { key: "value", ... }
+                            //    option.binary  - Boolean(= false): true is "GET" binary data
+                            //    option.before  - Function: before(xhr, option)
+                            //    option.after   - Function: after(xhr, option, { status, ok })
+                callback) { // @param Function: callback(data, option, { status, ok })
                             //    data   - String: xhr.responseText
                             //    option - Hash:
+                            //    status - Number: xhr.status
                             //    ok     - Boolean:
     function readyStateChange() {
         if (xhr.readyState === 4) {
-            var code = xhr.status, lastModified,
-                rv = { data: null, option: option,
-                       ok: code >= 200 && code < 300 };
+            var data, status = xhr.status, lastMod,
+                rv = { status: status, ok: status >= 200 && status < 300 };
 
             if (!run++) {
                 if (rv.ok) {
-                    rv.data = getbinary
-                            ? (
+                    data = getbinary
+                         ? (
 //{{{!mb
-                               _ie ? toByteArrayIE(xhr) :
+                            _ie ? toByteArrayIE(xhr) :
 //}}}!mb
-                                     toByteArray(xhr.responseText))
-                            : (xhr.responseText || "");
+                                  toByteArray(xhr.responseText))
+                         : (xhr.responseText || "");
                     // --- "Last-Modified" ---
                     if (ifmod) {
-                        lastModified = xhr.getResponseHeader("Last-Modified");
-                        if (lastModified) {
-                            cache[url] = uudate(Date.parse(lastModified)).GMT(); // add cache
+                        lastMod = xhr.getResponseHeader("Last-Modified");
+                        if (lastMod) {
+                            cache[url] = uudate(Date.parse(lastMod)).GMT(); // add cache
                         }
                     }
                 }
-                after && after(rv, xhr);
-                callback(rv);
+                after && after(xhr, option, rv);
+                callback(data, option, rv);
                 gc();
             }
         }
     }
 
-    function ng(abort) {
+    function ng(abort, status) {
         if (!run++) {
-            var rv = { ok: _false, data: null, option: option };
+            var rv = { status: status || 400, ok: _false };
 
-            after && after(rv, xhr);
-            callback(rv);
+            after && after(xhr, option, rv);
+            callback(null, option, rv);
             gc(abort);
         }
     }
@@ -550,48 +560,112 @@ function uuajax(url,        // @param String: url
 
     var watchdog = 0,
         method = option.method || "GET",
-        header = option.header || [],
+        header = option.header || {},
         before = option.before,
         after = option.after,
         ifmod = option.ifmod,
         cache = uuajax.cache,
+        data = option.data || null,
         xhr = uuajaxxhr(),
-        run = 0, v, i = -1,
-        override = xhr.overrideMimeType,
+        run = 0, i,
+        overrideMimeType = "overrideMimeType",
+        setRequestHeader = "setRequestHeader",
         getbinary = method === "GET" && option.binary;
 
     try {
         xhr.onreadystatechange = readyStateChange;
         xhr.open(method, url, _true); // ASync
 
-        before && before({ option: option }, xhr);
+        before && before(xhr, option);
 
-        if (getbinary && override) {
-            override("text/plain; charset=x-user-defined");
-        }
-        if (ifmod && cache[url]) { // cached
-            header.push("If-Modified-Since", cache[url]); // GMT
-        }
-        if (option.data) {
-            header.push("Content-Type", "application/x-www-form-urlencoded");
-        }
-        while ( (v = header[++i]) ) {
-            xhr.setRequestHeader(v, header[++i]);
+        getbinary && xhr[overrideMimeType] &&
+            xhr[overrideMimeType]("text/plain; charset=x-user-defined");
+        data &&
+            xhr[setRequestHeader]("Content-Type",
+                                  "application/x-www-form-urlencoded");
+        ifmod && cache[url] &&
+            xhr[setRequestHeader]("If-Modified-Since", cache[url]); // GMT
+
+        for (i in header) {
+            xhr[setRequestHeader](i, header[i]);
         }
 //{{{!mb
         uueventattach(win, "beforeunload", ng); // [Gecko]
 //}}}!mb
-
-        xhr.send(option.data || null);
+        xhr.send(data);
         watchdog = setTimeout(function() {
-            ng(1); // 408: Request Time-out
+            ng(1, 408); // 408: Request Time-out
         }, (option.timeout || 10) * 1000);
     } catch (err) {
-        xhr = { status: 400 };
         ng(); // 400: Bad Request
     }
 }
 uuajax.cache = {}; // { "url": DateHash(lastModified), ... }
+
+// inner - BinaryString To ByteArray
+function toByteArray(data) { // @param BinaryString: "\00\01"
+                             // @return ByteArray: [0x00, 0x01]
+    var rv = [], bb2num = _bb2num, remain,
+        ary = data.split(""),
+        i = -1, iz;
+
+    iz = ary.length;
+    remain = iz % 8;
+
+    while (remain--) {
+        ++i;
+        rv[i] = bb2num[ary[i]];
+    }
+    remain = iz >> 3;
+    while (remain--) {
+        rv.push(bb2num[ary[++i]], bb2num[ary[++i]],
+                bb2num[ary[++i]], bb2num[ary[++i]],
+                bb2num[ary[++i]], bb2num[ary[++i]],
+                bb2num[ary[++i]], bb2num[ary[++i]]);
+    }
+    return rv;
+}
+
+//{{{!mb
+// inner - BinaryString to ByteArray
+function toByteArrayIE(xhr) {
+    var rv = [], data, remain,
+        charCodeAt = "charCodeAt", _0xff = 0xff,
+        loop, v0, v1, v2, v3, v4, v5, v6, v7,
+        i = -1, iz;
+
+    iz = vblen(xhr);
+    data = vbstr(xhr);
+    loop = Math.ceil(iz / 2);
+    remain = loop % 8;
+
+    while (remain--) {
+        v0 = data[charCodeAt](++i); // 0x00,0x01 -> 0x0100
+        rv.push(v0 & _0xff, v0 >> 8);
+    }
+    remain = loop >> 3;
+    while (remain--) {
+        v0 = data[charCodeAt](++i);
+        v1 = data[charCodeAt](++i);
+        v2 = data[charCodeAt](++i);
+        v3 = data[charCodeAt](++i);
+        v4 = data[charCodeAt](++i);
+        v5 = data[charCodeAt](++i);
+        v6 = data[charCodeAt](++i);
+        v7 = data[charCodeAt](++i);
+        rv.push(v0 & _0xff, v0 >> 8, v1 & _0xff, v1 >> 8,
+                v2 & _0xff, v2 >> 8, v3 & _0xff, v3 >> 8,
+                v4 & _0xff, v4 >> 8, v5 & _0xff, v5 >> 8,
+                v6 & _0xff, v6 >> 8, v7 & _0xff, v7 >> 8);
+    }
+    iz % 2 && rv.pop();
+
+    return rv;
+}
+_ie && document.write('<script type="text/vbscript">\
+Function vblen(b)vblen=LenB(b.responseBody)End Function\n\
+Function vbstr(b)vbstr=CStr(b.responseBody)+chr(0)End Function</'+'script>');
+//}}}!mb
 
 // uu.ajax.xhr - create XMLHttpRequest object
 function uuajaxxhr() { // @return XMLHttpRequest:
@@ -606,7 +680,7 @@ function uuajaxxhr() { // @return XMLHttpRequest:
 
 // uu.ajax.binary - upload / download binary data
 function uuajaxbinary(url, option, callback) {
-    option.method = option.data ? "GET" : "PUT";
+    option.method = option.data ? "PUT" : "GET";
     option.binary = _true;
     uuajax(url, option, callback);
 }
@@ -614,27 +688,28 @@ function uuajaxbinary(url, option, callback) {
 // uu.require - require
 function uurequire(url,      // @param String: url
                    option) { // @param Hash: { before, after }
-                             //     option.before - Function: before({ option }, xhr)
-                             //     option.after  - Function: after({ option, ok }, xhr)
-                             // @return Hash: { data, option, ok }
-    var rv = { data: "", option: option, ok: _true },
-        xhr = uuajaxxhr(), code,
+                             //     option.before - Function: before(xhr, option)
+                             //     option.after  - Function: after(xhr, option, { status, ok })
+                             // @return Hash: { data, option, status, ok }
+    var rv = { ok: _false, status: 400 },
+        xhr = uuajaxxhr(), data, status,
         before = option.before,
         after = option.after;
 
     try {
         xhr.open("GET", url, _false); // sync
-        before && before(rv, xhr);
+        before && before(xhr, option);
         xhr.send(null);
 
-        code = xhr.status;
-        rv.ok = code >= 200 && code < 300;
-        rv.data = xhr.responseText;
-        after && after(rv, xhr);
+        status = xhr.status;
+        data = xhr.responseText;
+        after && after(xhr, option,
+                       rv = { ok: status >= 200 && status < 300, status: status });
         xhr = null;
     } catch (err) {
-        rv.ok = _false;
     }
+    rv.data = data;
+    rv.option = option;
     return rv;
 }
 
@@ -650,12 +725,12 @@ function uurequire(url,      // @param String: url
 function uulike(lhs,   // @param Date/Hash/Fake/Array: lhs
                 rhs) { // @param Date/Hash/Fake/Array: rhs
                        // @return Boolean:
-    var ltype = uutype(lhs);
+    var type = uutype(lhs);
 
-    if (ltype !== uutype(rhs)) {
+    if (type !== uutype(rhs)) {
         return _false;
     }
-    switch (ltype) {
+    switch (type) {
     case uutype.FUNCTION:   return _false;
     case uutype.DATE:       return uudate(lhs).ISO() === uudate(rhs).ISO();
     case uutype.HASH:       return (uusize(lhs) === uusize(rhs) && uuhas(lhs, rhs));
@@ -665,33 +740,24 @@ function uulike(lhs,   // @param Date/Hash/Fake/Array: lhs
     return lhs === rhs;
 }
 
-// [1][typeof]                  uu.type("str") -> 0x100(uu.type.STRING)
-// [2][typeof matched bits]     uu.type("str", uu.type.STRING | uu.type.NUMBER) -> true
+// [1][typeof]                  uu.type("str") -> uu.type.STRING
+// [2][typeof matched bits]     uu.type("str", uu.type.STRING) -> true
 
 // uu.type - type detection
 function uutype(search,  // @param Mix: search literal/object
-                match) { // @param Number(= 0): match types
+                match) { // @param Number(= 0): match type
                          // @return Boolean/Number: true is match,
                          //                         false is unmatch,
-                         //                         Number is matched bits
-    var types = uutype.types,
-        rv = types[typeof search] ||
-             types[_toString.call(search)] ||
+                         //                         Number is type
+    var rv = _types[typeof search] ||
+             _types[_toString.call(search)] ||
              (!search ? uutype.NULL
                       : search[_nodeType] ? uutype.NODE
                                           : "length" in search ? uutype.FAKEARRAY
                                                                : uutype.HASH);
 
-    return match ? !!(match & rv) : rv;
+    return match ? match === rv : rv;
 }
-
-uueach({ 0x20: void 0, 0x40: _true, 0x100: 0, 0x200: "" }, function(v, i) {
-    uutype.types[typeof v] = +i;
-});
-uueach({ 0x40: _true, 0x80: _nop, 0x100: 0, 0x200: "", 0x400: [],
-         0x8: new Date, 0x800: /0/, 0x4: doc.links }, function(v, i) {
-    i & 4 || (uutype.types[_toString.call(v)] = +i);
-});
 
 // uu.isNumber - is number
 function isNumber(search) { // @param Mix: search
@@ -3766,71 +3832,6 @@ function _camelhash(rv, props) {
 function _classNameMatcher(ary) {
     return RegExp("(?:^| )(" + ary.join("|") + ")(?:$|(?= ))", "g");
 }
-
-// inner - BinaryString To ByteArray
-function toByteArray(data) { // @param BinaryString: "\00\01"
-                             // @return ByteArray: [0x00, 0x01]
-    var rv = [], bb2num = _bb2num, remain,
-        ary = data.split(""),
-        i = -1, iz;
-
-    iz = ary.length;
-    remain = iz % 8;
-
-    while (remain--) {
-        ++i;
-        rv[i] = bb2num[ary[i]];
-    }
-    remain = iz >> 3;
-    while (remain--) {
-        rv.push(bb2num[ary[++i]], bb2num[ary[++i]],
-                bb2num[ary[++i]], bb2num[ary[++i]],
-                bb2num[ary[++i]], bb2num[ary[++i]],
-                bb2num[ary[++i]], bb2num[ary[++i]]);
-    }
-    return rv;
-}
-
-//{{{!mb
-// inner - BinaryString to ByteArray
-function toByteArrayIE(xhr) {
-    var rv = [], data, remain,
-        charCodeAt = "charCodeAt", _0xff = 0xff,
-        loop, v0, v1, v2, v3, v4, v5, v6, v7,
-        i = -1, iz;
-
-    iz = vblen(xhr);
-    data = vbstr(xhr);
-    loop = Math.ceil(iz / 2);
-    remain = loop % 8;
-
-    while (remain--) {
-        v0 = data[charCodeAt](++i); // 0x00,0x01 -> 0x0100
-        rv.push(v0 & _0xff, v0 >> 8);
-    }
-    remain = loop >> 3;
-    while (remain--) {
-        v0 = data[charCodeAt](++i);
-        v1 = data[charCodeAt](++i);
-        v2 = data[charCodeAt](++i);
-        v3 = data[charCodeAt](++i);
-        v4 = data[charCodeAt](++i);
-        v5 = data[charCodeAt](++i);
-        v6 = data[charCodeAt](++i);
-        v7 = data[charCodeAt](++i);
-        rv.push(v0 & _0xff, v0 >> 8, v1 & _0xff, v1 >> 8,
-                v2 & _0xff, v2 >> 8, v3 & _0xff, v3 >> 8,
-                v4 & _0xff, v4 >> 8, v5 & _0xff, v5 >> 8,
-                v6 & _0xff, v6 >> 8, v7 & _0xff, v7 >> 8);
-    }
-    iz % 2 && rv.pop();
-
-    return rv;
-}
-_ie && document.write('<script type="text/vbscript">\
-Function vblen(b)vblen=LenB(b.responseBody)End Function\n\
-Function vbstr(b)vbstr=CStr(b.responseBody)+chr(0)End Function</'+'script>');
-//}}}!mb
 
 // inner - detect versions and meta informations
 function detectVersions(libraryVersion) { // @param Number: Library version

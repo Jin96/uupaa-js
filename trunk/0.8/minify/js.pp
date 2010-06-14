@@ -74,19 +74,18 @@ function preProcess($js,       // @param String: JavaScript source code
     }
 
     // typeof alias
-    $js = preg_replace('/uu\.?type.HASH/',         '1', $js); // uu.?type.HASH -> 1
-    $js = preg_replace('/uu\.?type.NODE/',         '2', $js);
-    $js = preg_replace('/uu\.?type.FAKEARRAY/',    '4', $js);
-    $js = preg_replace('/uu\.?type.DATE/',         '8', $js);
-    $js = preg_replace('/uu\.?type.NULL/',         '16', $js);
-    $js = preg_replace('/uu\.?type.UNDEFINED/',    '32', $js);
-    $js = preg_replace('/uu\.?type.VOID/',         '32', $js);
-    $js = preg_replace('/uu\.?type.BOOLEAN/',      '64', $js);
-    $js = preg_replace('/uu\.?type.FUNCTION/',     '128', $js);
-    $js = preg_replace('/uu\.?type.NUMBER/',       '256', $js);
-    $js = preg_replace('/uu\.?type.STRING/',       '512', $js);
-    $js = preg_replace('/uu\.?type.ARRAY/',        '1024', $js);
-    $js = preg_replace('/uu\.?type.REGEXP/',       '2048', $js);
+    $js = preg_replace('/uu\.?type.BOOLEAN/',      '1', $js); // uu.?type.BOOLEAN -> 1
+    $js = preg_replace('/uu\.?type.NUMBER/',       '2', $js);
+    $js = preg_replace('/uu\.?type.STRING/',       '3', $js);
+    $js = preg_replace('/uu\.?type.FUNCTION/',     '4', $js);
+    $js = preg_replace('/uu\.?type.ARRAY/',        '5', $js);
+    $js = preg_replace('/uu\.?type.DATE/',         '6', $js);
+    $js = preg_replace('/uu\.?type.REGEXP/',       '7', $js);
+    $js = preg_replace('/uu\.?type.UNDEFINED/',    '8', $js);
+    $js = preg_replace('/uu\.?type.NULL/',         '9', $js);
+    $js = preg_replace('/uu\.?type.HASH/',         '10', $js);
+    $js = preg_replace('/uu\.?type.NODE/',         '11', $js);
+    $js = preg_replace('/uu\.?type.FAKEARRAY/',    '12', $js);
 
     // Event.type alias
     $js = preg_replace('/uu\.?event.xtypes.mousedown/',      '1', $js);

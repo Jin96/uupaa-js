@@ -401,8 +401,8 @@ function msgpackdownload(url,        // @param String:
                                      //        response.option - Hash:
                                      //        response.data   - Mix/null:
                                      //        response.length - Number: downloaded data.length
-
     option.method = "GET";
+    option.binary = true;
     ajax(url, option, callback);
 }
 
@@ -420,6 +420,7 @@ function msgpackupload(url,        // @param String:
                                    //        response.data   - String:
                                    //        response.length - Number: uploaded data.length
     option.method = "PUT";
+    option.binary = true;
 
     if (option.worker && globalScope.Worker) {
         var worker = new Worker(msgpack.worker);
@@ -438,36 +439,36 @@ function msgpackupload(url,        // @param String:
 
 // inner -
 function ajax(url,        // @param String:
-              option,     // @param Hash: { worker, timeout, data, method }
-                          //    option.data - Mix: upload data
-                          //    option.worker - Boolean(= false): true is use WebWorkers
-                          //    option.method - String: "GET" or "PUT"
+              option,     // @param Hash: { data, ifmod, method, timeout,
+                          //                header, binary, before, after, worker }
+                          //    option.data    - Mix: upload data
+                          //    option.ifmod   - Boolean: true is "If-Modified-Since" header
+                          //    option.method  - String: "GET", "POST", "PUT"
                           //    option.timeout - Number(= 10): timeout sec
-              callback) { // @param Function: callback function
-                          //    callback(response = { ok, status, option, data, length })
-                          //        response.ok - Boolean:
-                          //        response.status - Number: HTTP status code
-                          //        response.option - Hash:
-                          //        response.data   - String/Mix/null:
-                          //        response.length - Number:
+                          //    option.header  - Hash(= {}): { key: "value", ... }
+                          //    option.binary  - Boolean(= false): true is binary data
+                          //    option.before  - Function: before(xhr, option)
+                          //    option.after   - Function: after(xhr, option, { status, ok })
+                          //    option.worker  - Boolean(= false): true is use WebWorkers
+              callback) { // @param Function: callback(data, option, { ok, status })
+                          //    data   - String/Mix/null:
+                          //    option - Hash:
+                          //    status - Number: HTTP status code
+                          //    ok     - Boolean:
     function readyStateChange() {
         if (xhr.readyState === 4) {
-            var status = xhr.status, worker, byteArray,
-                rv = { ok: status >= 200 && status < 300,
-                       status: status, option: option, data: null, length: 0 };
+            var data, status = xhr.status, worker, byteArray,
+                rv = { status: status, ok: status >= 200 && status < 300 };
 
             if (!run++) {
-                if (upload) {
-                    rv.data = rv.ok ? xhr.responseText : "";
-                    rv.length = option.data.length;
+                if (method === "PUT") {
+                    data = rv.ok ? xhr.responseText : "";
                 } else {
                     if (rv.ok) {
-                        rv.length = xhr.getResponseHeader("Content-Length") * 1;
                         if (option.worker && globalScope.Worker) {
                             worker = new Worker(msgpack.worker);
                             worker.onmessage = function(event) {
-                                rv.data = event.data;
-                                callback(rv);
+                                callback(event.data, option, rv);
                             };
                             worker.postMessage({ method: "unpack",
                                                  data: xhr.responseText });
@@ -476,11 +477,12 @@ function ajax(url,        // @param String:
                         } else {
                             byteArray = _ie ? toByteArrayIE(xhr)
                                             : toByteArray(xhr.responseText);
-                            rv.data = msgpackunpack(byteArray);
+                            data = msgpackunpack(byteArray);
                         }
                     }
                 }
-                callback(rv);
+                after && after(xhr, option, rv);
+                callback(data, option, rv);
                 gc();
             }
         }
@@ -488,8 +490,10 @@ function ajax(url,        // @param String:
 
     function ng(abort, status) {
         if (!run++) {
-            callback({ ok: false, status: status || 400, option: option,
-                       data: upload ? "" : null });
+            var rv = { status: status || 400, ok: false };
+
+            after && after(xhr, option, rv);
+            callback(null, option, rv);
             gc(abort);
         }
     }
@@ -502,23 +506,40 @@ function ajax(url,        // @param String:
             globalScope.removeEventListener("beforeunload", ng, false);
     }
 
-    var run = 0, watchdog = 0,
-        upload = option.method === "PUT",
+    var watchdog = 0,
+        method = option.method || "GET",
+        header = option.header || {},
+        before = option.before,
+        after = option.after,
+        data = option.data || null,
         xhr = globalScope.XMLHttpRequest ? new XMLHttpRequest() :
               globalScope.ActiveXObject  ? new ActiveXObject("Microsoft.XMLHTTP") :
-              null;
+              null,
+        run = 0, i,
+        overrideMimeType = "overrideMimeType",
+        setRequestHeader = "setRequestHeader",
+        getbinary = method === "GET" && option.binary;
 
     try {
         xhr.onreadystatechange = readyStateChange;
-        xhr.open(option.method, url, true); // ASync
+        xhr.open(method, url, true); // ASync
 
-        if (!upload && xhr.overrideMimeType) {
-            xhr.overrideMimeType("text/plain; charset=x-user-defined");
+        before && before(xhr, option);
+
+        getbinary && xhr[overrideMimeType] &&
+            xhr[overrideMimeType]("text/plain; charset=x-user-defined");
+        data &&
+            xhr[setRequestHeader]("Content-Type",
+                                  "application/x-www-form-urlencoded");
+
+        for (i in header) {
+            xhr[setRequestHeader](i, header[i]);
         }
+
         globalScope.addEventListener &&
             globalScope.addEventListener("beforeunload", ng, false); // 400: Bad Request
 
-        xhr.send(upload ? option.data : null);
+        xhr.send(data);
         watchdog = setTimeout(function() {
             ng(1, 408); // 408: Request Time-out
         }, (option.timeout || 10) * 1000);
