@@ -36,7 +36,6 @@ var _prototype = "prototype",
     _number = "number",
     _string = "string",
     _height = "height",
-    _stack = "stack",
     _width = "width",
     _false = !1,
     _true = !0,
@@ -631,11 +630,13 @@ function uuajax(url,        // @param String: url
 
         getbinary && xhr[overrideMimeType] &&
             xhr[overrideMimeType]("text/plain; charset=x-user-defined");
+        // Content-Type:       "application/x-www-form-urlencoded"
         data &&
             xhr[setRequestHeader]("Content-Type",
                                   "application/x-www-form-urlencoded");
+        // If-Modified-Since:  "Wed, 16 Sep 2009 16:18:14 GMT"
         ifmod && cache[url] &&
-            xhr[setRequestHeader]("If-Modified-Since", cache[url]); // GMT
+            xhr[setRequestHeader]("If-Modified-Since", cache[url]);
 
         for (i in header) {
             xhr[setRequestHeader](i, header[i]);
@@ -693,7 +694,7 @@ function uurequire(url,      // @param String: url
     return rv;
 }
 
-// --- type ---
+// --- TYPE ---
 
 // [1][literal like literal]    uu.like("abcdef", "abcdef")              -> true
 // [2][Date like Date]          uu.like(new Date(123), new Date(123))    -> true
@@ -3427,7 +3428,7 @@ function outerHTMLSetter(html) {
 // NodeSet class
 function NodeSet(expression, // @param NodeSet/Node/NodeArray/String/window:
                  context) {  // @param NodeSet/Node(= void 0): context
-    this[_stack] = [[]]; // [NodeSet, ...]
+    this.stack = [[]]; // [NodeSet, ...]
 
     this[_nodeArray] = !expression ? [] // empty nodeArray
         : (expression === win || expression[_nodeType]) ? [expression] // window / node
@@ -3473,14 +3474,14 @@ uu.nodeSet = NodeSet[_prototype];       // uu.nodeSet - uu.Class.NodeSet.prototy
 
 // NodeSet.back
 function NodeSetBack() { // @return NodeSet:
-    this[_nodeArray] = this[_stack].pop() || [];
+    this[_nodeArray] = this.stack.pop() || [];
     return this;
 }
 
 // NodeSet.find
 function NodeSetFind(expression) { // @param String: expression, "css > expr"
                                    // @return NodeSet:
-    this[_stack].push(this[_nodeArray]); // add stack
+    this.stack.push(this[_nodeArray]); // add stack
     this[_nodeArray] = uuquery("! " + expression, this[_nodeArray]); // ":scope expr"
     return this;
 }
