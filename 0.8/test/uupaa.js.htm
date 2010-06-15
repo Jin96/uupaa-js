@@ -700,11 +700,15 @@ uu.ready(function(uu) {
         return [uu.trim('has space'), "==", 'has space'];
       },
       "uu.trim('  has  space  ') == 'has  space'": function() {
-        return [uu.trim('  has  space  '), "==", 'has  space'];
+        return [uu.trim('  has  space  '), "==", 'has space'];
       },
       "uu.trim('') == ''": function() {
         return [uu.trim(''), "==", ''];
       },
+      "uu.trim('  diet  inner  space  ') == 'diet inner space'": function() {
+        return [uu.trim('  diet  inner  space  '), "==", 'diet inner space'];
+      },
+
     "uu.trim.tag()": "",
       'uu.trim.tag(" <h1>A</h1>  B  <p>C</p> ") == "A B C"': function() {
         return [uu.trim.tag(" <h1>A</h1>  B  <p>C</p> "), "==", "A B C"];
@@ -718,20 +722,25 @@ uu.ready(function(uu) {
       'uu.trim.tag("<div><p>A</p></div> B<p>  C</p> ") == "A B C"': function() {
         return [uu.trim.tag("<div><p>A</p></div> B<p>  C</p> "), "==", "A B C"];
       },
-    "uu.trim.url()": "",
-      "uu.trim.url('url(\"http://...\")') == \"http://...\"": function() {
-        return [uu.trim.url('url("http://...")'), "==", "http://..."];
+    "uu.trim.func()": "",
+      'uu.trim.func(\' url("http://...") \') == \'"http://..."\'': function() {
+        return [uu.trim.func(' url("http://...")' ), "==", '"http://..."'];
       },
-      "uu.trim.url(\"url('http://...')\") == \"http://...\"": function() {
-        return [uu.trim.url("url('http://...')"), "==", "http://..."];
+      "uu.trim.func(\"url('http://...')\") == \"'http://...'\"": function() {
+        return [uu.trim.func("url('http://...')"), "==", "'http://...'"];
       },
-      "uu.trim.url('http://...') == \"http://...\"": function() {
-        return [uu.trim.url('http://...'), "==", "http://..."];
+      "uu.trim.quote(uu.trim.func(\"url('http://...')\")) == 'http://...'": function() {
+        return [uu.trim.quote(uu.trim.func("url('http://...')")), "==", "http://..."];
       },
-    "uu.trim.inner()": "",
-      "uu.trim.inner('  diet  inner  space  ') == 'diet inner space'": function() {
-        return [uu.trim.inner('  diet  inner  space  '), "==", 'diet inner space'];
+      "uu.trim.func('rgba(1, 2, 3, 0)') == \"1, 2, 3, 0\"": function() {
+        return [uu.trim.func('rgba(1, 2, 3, 0)'), "==", "1, 2, 3, 0"];
       },
+      "uu.trim.func('http://...') == \"http://...\" 関数() で囲まれていない場合は何もしない": function() {
+debugger;
+        return [uu.trim.func('http://...'), "==", "http://..."];
+      },
+
+
     "uu.trim.quote()": "",
       "uu.trim.quote(\" 'has  space' \") == \"has  space\"": function() {
         return [uu.trim.quote(" 'has  space' "), "==", "has  space"];
@@ -739,6 +748,7 @@ uu.ready(function(uu) {
       'uu.trim.quote(\' "has  space" \') == "has  space"': function() {
         return [uu.trim.quote(' "has  space" '), "==", "has  space"];
       },
+/*
     "uu.trim.bracket()": "",
       "uu.trim.bracket('  div  ') == 'div'": function() {
         return [uu.trim.bracket('  div  '), "==", 'div'];
@@ -755,10 +765,16 @@ uu.ready(function(uu) {
       "uu.trim.bracket('  {bracket}  ') == 'div'": function() {
         return [uu.trim.bracket('  {bracket}  '), "==", 'bracket'];
       },
+ */
+
+
+/*
     "uu.split()": "",
       "uu.split(' A  B  C ') == ['A', 'B', 'C'] スペース区切りでトークンを切り出す(左右のスペースをトリムするので、IEの String.split() バグを無視できる)": function() {
         return [uu.split(' A  B  C '), "==", ['A', 'B', 'C']];
       },
+ */
+/*
     "uu.split.comma()": "",
       "uu.split.comma(' A,B,C ') == ['A', 'B', 'C'] カンマ区切りでトークンを切り出す(左右のスペースをトリムする)": function() {
         return [uu.split.comma(' A,B,C '), "==", ['A', 'B', 'C']];
@@ -766,21 +782,12 @@ uu.ready(function(uu) {
       "uu.split.comma(' ,A, B ,C, ') == ['A', 'B', 'C'] カンマ区切りでトークンを切り出す(左右のスペースをトリムする)": function() {
         return [uu.split.comma(' ,A, B ,C, '), "==", ['A', 'B', 'C']];
       },
-    "uu.split.toHash()": "",
-      "[3][split , str] uu.split.toHash('key,a,key2,b') == { key: 'a', key2: 'b' }": function() {
-        var hash = uu.split.toHash('key,a,key2,b');
+ */
+    "uu.hash()": "",
+      "[3][split , str] uu.hash('key,a,key2,b') == { key: 'a', key2: 'b' }": function() {
+        var hash = uu.hash('key,a,key2,b');
 
         return [hash, "==", { key: 'a', key2: 'b' }];
-      },
-      "[4][split ; str] uu.split.toHash('key;a;key2;b', ';', 0) == { key: 'a', key2: 'b' }": function() {
-        var hash = uu.split.toHash('key;a;key2;b', ';', 0);
-
-        return [hash, "==", { key: 'a', key2: 'b' }];
-      },
-      "[5][split , num] uu.split.toHash('key,0,key2,1', ',', 1) == { key: 0, key2: 1 }": function() {
-        var hash = uu.split.toHash('key,0,key2,1', ',', 1);
-
-        return [hash, "==", { key: 0, key2: 1 }];
       },
 
     "uu.date": "",

@@ -1,7 +1,7 @@
 
 // === uu.query.selectorAll ===
 //{{{!depend uu, uu.css, uu.ready.getAttribute, doc.html,
-//           uu.attr.fix, uu.style
+//           uu.attr.fix
 //}}}!depend
 
 uu.query.selectorAll || (function(win, doc, uu) {
@@ -938,7 +938,7 @@ function parentFilter(fid, negate, elms) {
 // inner - :link(0x0e)  :visited(0x0f)
 function visitedFilter(fid, negate, elms) {
     var rv = [], ri = -1, v, i = 0, ok, cs, idx,
-        ss = uu.style("uuquery");
+        ss = uu.css("uuquery");
 
     // http://d.hatena.ne.jp/uupaa/20080928
     idx = ss.add("a:visited", uu.ie ? "ruby-align:center"
@@ -971,7 +971,7 @@ function visitedFilter(fid, negate, elms) {
 // inner - :hover(0x10)  :focus(0x11)
 function actionFilter(fid, negate, elms, pusedo) {
     var rv = [], ri = -1, v, i = 0, ok, cs,
-        ss = uu.style("uuquery");
+        ss = uu.css("uuquery");
 
     // http://d.hatena.ne.jp/uupaa/20080928
     ss.add(":" + pusedo, uu.ie ? "ruby-align:center"

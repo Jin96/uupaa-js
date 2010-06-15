@@ -728,9 +728,9 @@ uu.ready(function(uu) {
       "uu.trim.url('http://...') == \"http://...\"": function() {
         return [uu.trim.url('http://...'), "==", "http://..."];
       },
-    "uu.trim.inner()": "",
-      "uu.trim.inner('  diet  inner  space  ') == 'diet inner space'": function() {
-        return [uu.trim.inner('  diet  inner  space  '), "==", 'diet inner space'];
+    "uu.trim()": "",
+      "uu.trim('  diet  inner  space  ') == 'diet inner space'": function() {
+        return [uu.trim('  diet  inner  space  '), "==", 'diet inner space'];
       },
     "uu.trim.quote()": "",
       "uu.trim.quote(\" 'has  space' \") == \"has  space\"": function() {
@@ -759,6 +759,7 @@ uu.ready(function(uu) {
       "uu.split(' A  B  C ') == ['A', 'B', 'C'] スペース区切りでトークンを切り出す(左右のスペースをトリムするので、IEの String.split() バグを無視できる)": function() {
         return [uu.split(' A  B  C '), "==", ['A', 'B', 'C']];
       },
+/*
     "uu.split.comma()": "",
       "uu.split.comma(' A,B,C ') == ['A', 'B', 'C'] カンマ区切りでトークンを切り出す(左右のスペースをトリムする)": function() {
         return [uu.split.comma(' A,B,C '), "==", ['A', 'B', 'C']];
@@ -766,21 +767,12 @@ uu.ready(function(uu) {
       "uu.split.comma(' ,A, B ,C, ') == ['A', 'B', 'C'] カンマ区切りでトークンを切り出す(左右のスペースをトリムする)": function() {
         return [uu.split.comma(' ,A, B ,C, '), "==", ['A', 'B', 'C']];
       },
-    "uu.split.toHash()": "",
-      "[3][split , str] uu.split.toHash('key,a,key2,b') == { key: 'a', key2: 'b' }": function() {
-        var hash = uu.split.toHash('key,a,key2,b');
+ */
+    "uu.hash()": "",
+      "[3][split , str] uu.hash('key,a,key2,b') == { key: 'a', key2: 'b' }": function() {
+        var hash = uu.hash('key,a,key2,b');
 
         return [hash, "==", { key: 'a', key2: 'b' }];
-      },
-      "[4][split ; str] uu.split.toHash('key;a;key2;b', ';', 0) == { key: 'a', key2: 'b' }": function() {
-        var hash = uu.split.toHash('key;a;key2;b', ';', 0);
-
-        return [hash, "==", { key: 'a', key2: 'b' }];
-      },
-      "[5][split , num] uu.split.toHash('key,0,key2,1', ',', 1) == { key: 0, key2: 1 }": function() {
-        var hash = uu.split.toHash('key,0,key2,1', ',', 1);
-
-        return [hash, "==", { key: 0, key2: 1 }];
       },
 
     "uu.date": "",
