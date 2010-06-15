@@ -55,7 +55,7 @@ function uucssbox(node,  // @param Node:
     var rv = node[_uucssbox];
 
     if (!rv || !quick) {
-        var zero = "0px", uuunit = uu.unit, bw = uucssbox.bw,
+        var zero = "0px", uucssunit = uu.css.unit, bw = uucssbox.bw,
             mbp = mbp || 0x7,
             ns = uu.css(node, true), // computed pixel unit
             mt = ns.marginTop,
@@ -72,22 +72,22 @@ function uucssbox(node,  // @param Node:
             bb = ns.borderBottomWidth;
 
         if (mbp & 0x4) { // margin
-            mt = mt === zero ? 0 : uuunit(node, mt, 1);
-            ml = ml === zero ? 0 : uuunit(node, ml, 1);
-            mr = mr === zero ? 0 : uuunit(node, mr, 1);
-            mb = mb === zero ? 0 : uuunit(node, mb, 1);
+            mt = mt === zero ? 0 : uucssunit(node, mt, 1);
+            ml = ml === zero ? 0 : uucssunit(node, ml, 1);
+            mr = mr === zero ? 0 : uucssunit(node, mr, 1);
+            mb = mb === zero ? 0 : uucssunit(node, mb, 1);
         }
         if (mbp & 0x2) { // border
-            bt = bw[bt] || (bt === zero ? 0 : uuunit(node, bt, 1));
-            bl = bw[bl] || (bl === zero ? 0 : uuunit(node, bl, 1));
-            br = bw[br] || (br === zero ? 0 : uuunit(node, br, 1));
-            bb = bw[bb] || (bb === zero ? 0 : uuunit(node, bb, 1));
+            bt = bw[bt] || (bt === zero ? 0 : uucssunit(node, bt, 1));
+            bl = bw[bl] || (bl === zero ? 0 : uucssunit(node, bl, 1));
+            br = bw[br] || (br === zero ? 0 : uucssunit(node, br, 1));
+            bb = bw[bb] || (bb === zero ? 0 : uucssunit(node, bb, 1));
         }
         if (mbp & 0x1) { // padding
-            pt = pt === zero ? 0 : uuunit(node, pt, 1);
-            pl = pl === zero ? 0 : uuunit(node, pl, 1);
-            pr = pr === zero ? 0 : uuunit(node, pr, 1);
-            pb = pb === zero ? 0 : uuunit(node, pb, 1);
+            pt = pt === zero ? 0 : uucssunit(node, pt, 1);
+            pl = pl === zero ? 0 : uucssunit(node, pl, 1);
+            pr = pr === zero ? 0 : uucssunit(node, pr, 1);
+            pb = pb === zero ? 0 : uucssunit(node, pb, 1);
         }
         rv = node[_uucssbox] = {
             width:   ns.width,

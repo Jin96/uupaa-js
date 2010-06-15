@@ -5,8 +5,8 @@
 <script src="../../src/uupaa.js"></script>
 <script>
 uu.ready(function(uu) {
-    var ss1 = uu.style("ss1"),
-        ss2 = uu.style("ss2");
+    var ss1 = uu.css("ss1"),
+        ss2 = uu.css("ss2");
 
     ss1.add({ "h1,h2": "background-color: red" });
     ss2.add({ "div>p": "background-color: green" });
@@ -17,8 +17,8 @@ uu.ready(function(uu) {
     ss2.clear();
 });
 </script></head><body>
-<h1>uu.style test</h1>
-<h2>uu.style test</h2>
+<h1>uu.css test</h1>
+<h2>uu.css test</h2>
 <div>
     div
     <p>
