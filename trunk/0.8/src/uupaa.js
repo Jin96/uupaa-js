@@ -79,11 +79,14 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Clas
     webkit:         _webkit,
     // --- CODE SNIPPET ---
     snippet:        uusnippet,      // uu.snippet(id:String, arg:Hash/Array):String/Mix
-    // --- AJAX ---
+    // --- AJAX / JSONP ---
     ajax:           uuajax,         // uu.ajax(url:String, option:Hash, callback:Function)
                                     //  [1][load aync] uu.ajax("http://...", { method: "POST", data: ... }, callback)
+
     require:        uurequire,      // uu.require(url:String, option:Hash = {}):Hash - { data, option, status, ok }
                                     //  [1][load sync] uu.require("http://...") -> { data, option, status, ok }
+    jsonp:          uujsonp,        // uu.jsonp(url:String, option:Hash, callback:Function)
+                                    //  [1][load aync] uu.jsonp("http://...callback=??", { method: "mycallback" }, callback)
     // --- TYPE MATCH / TYPE DETECTION ---
     like:           uulike,         // uu.like(lhs:Date/Hash/Fake/Array, rhs:Date/Hash/Fake/Array):Boolean
     type:           uutype,         // uu.type(search:Mix, match:Number = 0):Boolean/Number
@@ -242,7 +245,6 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Clas
                                     //                                              useCapture:Boolean = false)
     }),
     // --- NODE / NodeList / NodeID ---
-    svg:            uusvg,          // uu.svg(tagName:String = "svg", attr:Hash = void):SVGNode
     node:     uumix(uunode, {       // uu.node(tagName:String = "div",
                                     //         var_args:Node/String/Number/Hash = void, ...):Node
         add:        uunodeadd,      // uu.node.add(source:Node/DocumentFragment/HTMLFragment/TagName = "div",
@@ -370,33 +372,6 @@ uu.config.baseDir || (uu.config.baseDir =
         return file === "uupaa.js" ? "../" : "";
     }));
 
-uueach(("BOOLEAN,NUMBER,STRING,FUNCTION,ARRAY,DATE," +
-        "REGEXP,UNDEFINED,NULL,HASH,NODE,FAKEARRAY").split(","), function(v, i) {
-    uutype[v] = i + 1;
-});
-
-uueach([!0, 0, "", _nop, [], new Date, /0/], function(v, i) {
-    ++i < 4 && (_types[typeof v] = i);
-    _types[_toString.call(v)] = i;
-});
-
-(function(ary1, ary2, n, i, j, v) {
-    for (; i < 16; ++i) {
-        for (j = 0; j < 16; ++n, ++j) {
-            _num2hh[n] = v = ary1[i] + ary1[j];
-            _hh2num[v] = n;
-            _num2bb[n] = v = String.fromCharCode(n);
-            _bb2num[v] = n;
-        }
-    }
-    for (n = i = 0; i < 10; ++i) {
-        for (j = 0; j < 10; ++n, ++j) {
-            _num2dd[n] = v = ary2[i] + ary2[j];
-            _dd2num[v] = n;
-        }
-    }
-})("0123456789abcdef".split(""), "0123456789".split(""), 0, 0);
-
 // --- MsgPump class ---
 MsgPump[_prototype] = {
     send:           uumsgsend,      // MsgPump.send(address:Array/Mix, message:String, param:Mix = void):Array/Mix
@@ -469,6 +444,32 @@ _gecko && !HTMLElement[_prototype].innerText &&
     proto.__defineSetter__("outerHTML", outerHTMLSetter);
 })(HTMLElement[_prototype]);
 //}}}!mb
+
+// --- CREATE HASH TABLES ---
+uueach(("BOOLEAN,NUMBER,STRING,FUNCTION,ARRAY,DATE," +
+        "REGEXP,UNDEFINED,NULL,HASH,NODE,FAKEARRAY").split(","), function(v, i) {
+    uutype[v] = i + 1;
+});
+
+uueach([!0, 0, "", _nop, [], new Date, /0/], function(v, i) {
+    ++i < 4 && (_types[typeof v] = i);
+    _types[_toString.call(v)] = i;
+});
+
+(function(i, n, v) {
+    for (; i < 0x200; ++i) {
+        n = i - 0x100;
+        _num2hh[n] = v = i.toString(16).slice(1);
+        _hh2num[v] = n;
+        _num2bb[n] = v = String.fromCharCode(n);
+        _bb2num[v] = n;
+    }
+    for (i = 100; i < 200; ++i) {
+        n = i - 100;
+        _num2dd[n] = v = i.toString().slice(1);
+        _dd2num[v] = n;
+    }
+})(0x100);
 
 // ===================================================================
 
@@ -671,9 +672,10 @@ function uurequire(url,      // @param String: url
                              //     option.before - Function: before(xhr, option)
                              //     option.after  - Function: after(xhr, option, { status, ok })
                              // @return Hash: { data, option, status, ok }
+    option = option || {};
+
     var rv = { ok: _false, status: 400 },
         xhr = uuajax.xhr(), data, status,
-        option = option || {},
         before = option.before,
         after = option.after;
 
@@ -693,6 +695,51 @@ function uurequire(url,      // @param String: url
     rv.option = option;
     return rv;
 }
+
+// uu.jsonp - Async JSONP request
+function uujsonp(url,        // @param String: "http://example.com?callback=??"
+                 option,     // @param Hash: { timeout, method }
+                             //     timeout - Number(= 10):
+                             //     method  - String(= "callback")
+                 callback) { // @param Function: callback(JSONPResultHash)
+    var timeout = option.timeout || 10,
+        method = option.method || "callback",
+        before = option.before,
+        after = option.after,
+        guid = uuguid(),
+        tag = uunode("script", { type: "text/javascript", charset: "utf-8",
+                                 run: 0 });
+
+    url = uuformat(url, method);
+    uujsonp.db[guid] = method;
+
+    // build callback global function
+    win[method] = function(data, rv) { // @param Mix: json data
+        if (!tag.run++) {
+            rv = { ok: !!data, status: data ? 200 : 408 };
+
+            after && after(tag, option, rv);
+            callback(data, option, rv);
+
+            setTimeout(function() {
+                uunoderemove(tag);
+                win[method] = null;
+                delete uujsonp.db[guid];
+            }, (timeout + 10) * 1000);
+        }
+    };
+
+    uunodeadd(tag, doc.head);
+
+    before && before(tag, option);
+
+    tag.setAttribute("src", url);
+
+    setTimeout(function() {
+        uujsonp.db[guid](); // 408 "Request Time-out"
+    }, timeout * 1000);
+}
+uujsonp.db = {}; // { guid: callbackMethod, ... }
 
 // --- TYPE ---
 
@@ -2709,21 +2756,6 @@ function uunodeindexof(node) { // @param Node: ELEMENT_NODE
         }
     }
     return -1;
-}
-
-// uu.svg - create SVG node wrapper
-function uusvg(tagName, // @param String(= "svg"):
-               attr) {  // @param Hash(= void):
-                        // @return SVGNode: new <svg> element
-    var rv = doc.createElementNS("http://www.w3.org/2000/svg", tagName || "svg"),
-        key;
-
-    if (attr !== void 0) {
-        for (key in attr) {
-            rv.setAttribute(key, attr[key]);
-        }
-    }
-    return rv;
 }
 
 //  [1][get innerHTML] uu.html(node) -> "<div>...</div>"
