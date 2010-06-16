@@ -36,6 +36,8 @@ var _prototype = "prototype",
     _number = "number",
     _string = "string",
     _height = "height",
+    _before = "before",
+    _after = "after",
     _width = "width",
     _false = !1,
     _true = !0,
@@ -582,7 +584,7 @@ function uuajax(url,        // @param String: url
                         }
                     }
                 }
-                after && after(xhr, option, rv);
+                option[_after] && option[_after](xhr, option, rv);
                 callback(data, option, rv);
                 gc();
             }
@@ -593,7 +595,7 @@ function uuajax(url,        // @param String: url
         if (!run++) {
             var rv = { status: status || 400, ok: _false };
 
-            after && after(xhr, option, rv);
+            option[_after] && option[_after](xhr, option, rv);
             callback(null, option, rv);
             gc(abort);
         }
@@ -612,8 +614,6 @@ function uuajax(url,        // @param String: url
         method = option.method || "GET",
         header = option.header || {},
         binary = option.binary,
-        before = option.before,
-        after = option.after,
         ifmod = option.ifmod,
         cache = uuajax.cache,
         data = option.data || null,
@@ -627,7 +627,7 @@ function uuajax(url,        // @param String: url
         xhr.onreadystatechange = readyStateChange;
         xhr.open(method, url, _true); // ASync
 
-        before && before(xhr, option);
+        option[_before] && option[_before](xhr, option);
 
         getbinary && xhr[overrideMimeType] &&
             xhr[overrideMimeType]("text/plain; charset=x-user-defined");
@@ -675,19 +675,18 @@ function uurequire(url,      // @param String: url
     option = option || {};
 
     var rv = { ok: _false, status: 400 },
-        xhr = uuajax.xhr(), data, status,
-        before = option.before,
-        after = option.after;
+        xhr = uuajax.xhr(), data, status;
 
     try {
         xhr.open("GET", url, _false); // sync
-        before && before(xhr, option);
+        option[_before] && option[_before](xhr, option);
         xhr.send(null);
 
         status = xhr.status;
         data = xhr.responseText;
-        after && after(xhr, option,
-                       rv = { ok: status >= 200 && status < 300, status: status });
+        option[_after] && option[_after](xhr, option,
+                                         rv = { ok: status >= 200 && status < 300,
+                                                status: status });
         xhr = null;
     } catch (err) {
     }
@@ -704,8 +703,6 @@ function uujsonp(url,        // @param String: "http://example.com?callback=??"
                  callback) { // @param Function: callback(JSONPResultHash)
     var timeout = option.timeout || 10,
         method = option.method || "callback",
-        before = option.before,
-        after = option.after,
         guid = uuguid(),
         tag = uunode("script", { type: "text/javascript", charset: "utf-8",
                                  run: 0 });
@@ -718,7 +715,7 @@ function uujsonp(url,        // @param String: "http://example.com?callback=??"
         if (!tag.run++) {
             rv = { ok: !!data, status: data ? 200 : 408 };
 
-            after && after(tag, option, rv);
+            option[_after] && option[_after](tag, option, rv);
             callback(data, option, rv);
 
             setTimeout(function() {
@@ -731,7 +728,7 @@ function uujsonp(url,        // @param String: "http://example.com?callback=??"
 
     uunodeadd(tag, doc.head);
 
-    before && before(tag, option);
+    option[_before] && option[_before](tag, option);
 
     tag.setAttribute("src", url);
 
@@ -1343,85 +1340,97 @@ uucss.care = {
     lineHeight: 1, fontWeight: 1, zIndex: 1
 };
 
-//  [1][abs]             uu.fx(node, 500, { o: 0.5, x: 200 })
-//  [2][rel]             uu.fx(node, 500, { h: "+100", o: "+0.5" })
-//  [3][with "px" unit]  uu.fx(node, 500, { h: "-100px" })
-//  [4][with easing fn]  uu.fx(node, 500, { h: [200, "easeInOutQuad"] })
-//  [5][set fps]         uu.fx(node, 500, { fps: 30, w: 40 })
-//  [6][standby]         uu.fx(node, 2000)
-//  [7][after callback]  uu.fx(node, 500, { o: 1, after: afterCallback })
-//  [8][before callback] uu.fx(node, 500, { o: 1, before: beforeCallback })
-//  [9][revert]          uu.fx(node, 500, { o: 1, r: 1 })
+//  [1][abs]              uu.fx(node, 500, { o: 0.5, x: 200 })
+//  [2][rel]              uu.fx(node, 500, { h: "+100", o: "+0.5" })
+//  [3][with "px" unit]   uu.fx(node, 500, { h: "-100px" })
+//  [4][with easing fn]   uu.fx(node, 500, { h: [200, "easeInOutQuad"] })
+//  [5][set fps]          uu.fx(node, 500, { fps: 30, w: 40 })
+//  [6][after callback]   uu.fx(node, 500, { o: 1, after: afterCallback })
+//  [7][before callback]  uu.fx(node, 500, { o: 1, before: beforeCallback })
+//  [8][mark begin]       uu.fx(node, 500, { o: 1, begin: 1 })
+//  [9][reverse to begin] uu.fx(node, 500, { o: 1, reverse: 1 })
+//  [10][delay or sleep]  uu.fx(node, 500, callback)
 
 // uu.fx - add effect queue
 function uufx(node,     // @param Node: animation target node
               duration, // @param Number: duration (unit ms)
-              param) {  // @param Hash/Function(= void): { key: endValue, key: [endValue, easing], key: callback, ... }
+              option) { // @param Hash/Function: { key: endValue, key: [endValue, easing], key: callback, ... }
                         //     key      - CSSPropertyString/String: "color", "opacity", "before", "after", ...
                         //     endValue - String/Number: end value, "red", "+0.5", "+100px"
                         //     easing   - String: easing function name, "easeInOutQuad"
                         //     callback - Function: before or after callback function
                         // @return Node:
     function loop() {
-        var data = node[_uufx], q = data.q[0],
-            pz = q.pz, reverse = data.r, tm, finished;
+        var data = node[_uufx], q = data.q[0], // fetch current queue
+            option = q.option, back = !!option.back,
+            tm, nextChain, finished;
 
         if (q.tm) {
+            // already running
             tm = +new Date;
         } else {
-            if (pz) {
-                pz.init && pz.init(node, pz);
-                pz.init = 0;
-                pz.before && pz.before(node, pz, reverse); // before callback(node, param, reverse)
-            }
-            q.js = isFunction(pz) ? pz
-                                  : pz ? uufxbuild(node, data, q)
-                                       : _nop;
-            tm = q.tm = +new Date;
+            // first time
+            option.init && (option.init(node, option, back), option.init = 0);
+            option[_before] && option[_before](node, option, back);
+            q.js = isFunction(option) ? option
+                                      : uufxbuild(node, data, q, option);
+            q.tm = tm = +new Date;
         }
         finished = q.fin || (tm >= q.tm + q.dur);
 
-        q.js(node, reverse, finished, tm - q.tm, q.dur); // js(node, node.style, reverse, finished, gain, duration)
+        q.js(node, back, finished, tm - q.tm, q.dur); // js(node, back, finished, gain, duration)
         if (finished) { // finished
-            pz && pz.after && pz.after(node, pz, reverse); // after callback(node, param, reverse)
-            data.q.shift(); // remove first queue data
+            option && option[_after] && option[_after](node, option, back);
+            data.q.shift(); // remove current queue
 
+            if (!option.back && option.reverse && data.rq.length) {
+                data.q = data.rq.reverse().concat(data.q); // insert reverse queue
+                data.rq = []; // clear
+                data.begin = 0; // off
+            }
             if (!data.q.length) {
-                if (!data.r && data.rq.length) {
-                    data.q = data.q.concat(data.rq.reverse()); // data.q <- data.rq
-                    data.rq = []; // clear
-                    data.r = 1; // reverse
-                    return;
+                // remove chain
+                nextChain = uufx.chain.shift();
+                if (nextChain) {
+                    uufx.apply(null, nextChain);
+                } else {
+                    clearInterval(data.id);
+                    data.id = 0;
                 }
-                clearInterval(data.id);
-                data.id = data.r = 0;
             }
         }
     }
 
-    var data = node[_uufx], p = uuarg(param, { r: 0, fps: 0 });
-
     node.style.overflow = "hidden";
-    data || (node[_uufx] = data = { q: [], rq: [], id: 0, r: 0 }); // init effect queue
 
-    if (data.r || data.rq.length) {
-        data.q = data.q.concat(data.rq.reverse()); // data.q <- data.rq
-        data.rq = []; // clear
-        data.r && (data.r = 0); // reset reverse flag
+    var data = node[_uufx] || (node[_uufx] = { q: [], rq: [], id: 0, begin: 0 }), // init fx queue
+        fps = option.fps || 60;
+
+    // add chain
+    if (data.begin) {
+        uufx.chain.push([node, duration, option]);
+        return node;
     }
-
     // append queue data
-    data.q.push({ tm: 0, guid: uuguid(),
-                  dur: Math.max(duration, 1),
-                  pz: p, fin: 0 }); // true/1 is finished
-    data.id || (data.id = setInterval(loop, ((1000 / p.fps) | 0) || +_ie)); // [IE] setInterval(0) is Error
+    data.q.push({
+        tm:       0,
+        dur:      Math.max(duration, 1),
+        fin:      0,      // true/1 is finished
+        guid:     uuguid(),
+        option:   option
+    });
+    if (option.begin) {
+        data.begin = 1;
+    }
+    data.id || (data.id = setInterval(loop, ((1000 / fps) | 0) || +_ie)); // [IE] setInterval(0) is Error
     return node;
 }
+uufx.chain = [];
 uufx.props = { opacity: 1, color: 2, backgroundColor: 2,
                width: 3, height: 3, left: 4, top: 5 };
 uufx.alpha = /^alpha\([^\x29]+\) ?/;
 
-function uufxbuild(node, data, queue) {
+function uufxbuild(node, data, queue, option) {
     function ezfn(v0, v1, ez) {
         return ez ? uuformat('Math.??(g,??,??,d)', ez, v0, v1 - v0)
                   : uuformat('(t=g,b=??,c=??,(t/=d2)<1?c/2*t*t+b:-c/2*((--t)*(t-2)-1)+b)',
@@ -1445,18 +1454,19 @@ function uufxbuild(node, data, queue) {
     }
 
     var rv = 'var s=n.style,t,b,c,d2=d/2,w,o,gd,h;',
-        param = queue.pz,
-        revertParam = { before: param.before, after: param.after },
+        reverseOption = { before: option[_before],
+                          after: option[_after],
+                          back: 1 },
         i, startValue, endValue, ez, w, n,
-        fixdb = uufix.db, cs = param.css || uucss(node, _true);
+        fixdb = uufix.db, cs = option.css || uucss(node, _true);
 
-    for (i in param) {
+    for (i in option) {
         w = fixdb[i] || i;
 
         if (w in cs) {
             ez = 0;
-            _isArray(param[i]) ? (endValue = param[i][0], ez = param[i][1]) // val, easing
-                               : (endValue = param[i]); // param.val
+            _isArray(option[i]) ? (endValue = option[i][0], ez = option[i][1]) // val, easing
+                                : (endValue = option[i]); // option.val
 
             // skip { marginLeft: undefined, marginTop: null }
             if (endValue != null) {
@@ -1510,16 +1520,20 @@ function uufxbuild(node, data, queue) {
                     rv += uuformat('s.??=((f? ??:??)|0)+"px";',
                                    w, endValue, ezfn(startValue, endValue, ez));
                 }
-                revertParam[w] = ez ? [startValue, ez] : startValue;
+                reverseOption[w] = ez ? [startValue, ez] : startValue;
             }
         }
     }
 
     // add revert queue data
-    if (!data.r && param.r) {
-        data.rq.push({ tm: 0, guid: queue.guid, // copy guid
-                       dur: queue.dur,
-                       pz: revertParam, fin: 0 });
+    if (data.begin) {
+        data.rq.push({
+            tm: 0,
+            dur: queue.dur,
+            fin: 0,
+            guid: queue.guid, // copy guid
+            option: reverseOption
+        });
     }
 
     return new Function("n,r,f,g,d", rv); // node, reverse, finished, gain, duration
@@ -1542,11 +1556,12 @@ function uufxskip(node,           // @param Node(= null): null is all node
             guid = [];
             for (j = 0, jz = all ? q.length : 1; j < jz; ++j) {
                 q[j].fin = 1;
-                q[j].pz.r && guid.push(q[j].pz.guid);
+//              q[j].option.re && guid.push(q[j].option.guid);
+                data.begin && guid.push(q[j].option.guid);
             }
             for (j = 0, jz = guid.length; j < jz; ++j) {
                 for (k = 0, kz = rq.length; k < kz; ++k) {
-                    if (rq[k].pz.guid === guid[j]) {
+                    if (rq[k].option.guid === guid[j]) {
                         rq[k].fin = 1;
                         q.push(rq.splice(k, 1)[0]); // data.q <- data.rq
                     }
@@ -1555,7 +1570,7 @@ function uufxskip(node,           // @param Node(= null): null is all node
             if (q.length > 2 && avoidFlicker) {
                 q.push({
                     tm: 0, guid: 0, fin: 1, dur: 0,
-                    pz: function(node) {
+                    option: function(node) {
                         node.style[_visibility] = "visible";
                     }});
 
