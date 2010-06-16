@@ -51,26 +51,25 @@ src/fx/fx.js をロードすると、以下の関数が追加されます。
 
 == uu.fx ==
 
-uu.fx(_node_:Node, _duration_:Number, _param_:Hash/Function = void):Node で
+uu.fx(_node_:Node, _duration_:Number, _option_:Hash/Function):Node で
 _node_ で指定したノードにアニメーションキューを設定し _node_ を返します。
-_duration_ で指定した時間が経過するまで、_param_ で指定した幾つかのCSSプロパティを連続的に変化させます。
-_duration_ で指定した時間が経過すると、アニメーションを停止し、_param_.after をコールバックします。
+_duration_ で指定した時間が経過するまで、_option_ で指定した幾つかのCSSプロパティを連続的に変化させます。
+_duration_ で指定した時間が経過すると、アニメーションを停止し、_option_.after をコールバックします。
 
 _duration_ には 0 以上の数値を ms 単位で指定します。
 
-_param_ は省略できます。省略すると一定時間何もしないキュー(スタンバイキュー)を作成します。
-_param_ にHashを指定すると、一定時間内に変化させるCSSプロパティと変化させる方法を指定できます。
-_param_ にFunctionを指定すると、一定間隔で _param_ を評価します。
+_option_ にHashを指定すると、一定時間内に変化させるCSSプロパティと変化させる方法を指定できます。
+_option_ にFunctionを指定すると、一定間隔で _option_ を評価します。
 
-_param_ がHashなら { key: endValue, ...  } または { key: `[`endValue, easing`]`, ... } のように指定します。
+_option_ がHashなら { key: endValue, ...  } または { key: `[`endValue, easing`]`, ... } のように指定します。
   * key には color, opacity といった CSSプロパティ や before, after, r, css などのキーワードを指定します。
-    * { before: beforeCallback } を指定すると、アニメーション開始前に beforeCallback(_node_, _param_, reverse) の形でコールバックします。
-    * { after: afterCallback } を指定すると、アニメーション終了後に afterCallback(_node_, _param_, reverse) の形でコールバックします。
-      * 逆再生中は reverse に 1 が渡されます。
-    * { r: 1 } を指定すると、アニメーションの終了後に逆再生(撒き戻し)を行います。
+    * { before: beforeCallback } を指定すると、アニメーション開始前に beforeCallback(_node_, _option_, _back_) の形でコールバックします。
+    * { after: afterCallback } を指定すると、アニメーション終了後に afterCallback(_node_, _option_, _back_) の形でコールバックします。
+      * 逆再生中は _back_ に true が渡されます。
+    * アニメーションの逆再生を行うには、開始するキューに{ begin: 1 }を指定し、終了するキューに{ reverse: 1 } を指定します。{ begin: 1 } から { reverse: 1 } までのキューを逆再生します。
     * { css: cssProp } は内部用です。
   * endValue には 文字列または数値を指定します
-    * 現在の値を基準に、増減した値を指定するには "+100" "-100" "*100" "/100" とします。
+    * 現在の値を基準に、増減した値を指定するには "+100" "-100" "`*`100" "/100" とします。
     * top, left, width, height 等のCSSプロパティは px 単位で指定します。em や pt 等は速度的な理由から指定できません。
     * "px" の指定はオプションです。{ width: 100 } と { width: "100px" } は同じ結果になります。
   * _easing_ は文字列で指定します。Math`[`_easing_`]` として解釈します。
@@ -107,25 +106,25 @@ _param_ がHashなら { key: endValue, ...  } または { key: `[`endValue, easi
     uu("div").css({ w: 100, h: 100 }).fx(500, { w: 0, h: 0 });
 }}}
 
-=== revert の指定 ===
-r: 1 を指定するとアニメーションの撒き戻しを行います。
+=== reverse の指定 ===
+reverse: 1 を指定するとアニメーションの撒き戻しを行います。begin: 1 と同時に指定すると、そのキューを実行後に逆再生します。
 {{{
     // opacity を 0.2 → 1.0 → 0.2 に戻す
-    uu("div").css({ o: 0.2 }).fx(500, { o: 1.0, r: 1 });
+    uu("div").css({ o: 0.2 }).fx(500, { o: 1.0, begin: 1, reverse: 1 });
 }}}
 
 === fps の指定 ===
-アニメーションが停止している状態(キューが存在しない状態)で、_param_ に { fps: Number } を指定すると、キュー全体の fps を指定できます。
+アニメーションが停止している状態(キューが存在しない状態)で、_option_ に { fps: Number } を指定すると、キュー全体の fps を指定できます。
 {{{
     // fps を 30 にする
     uu("div").fx(500, { fps: 30, o: 1.0 });
 }}}
 
 === スタンバイキュー ===
-uu.fx(_node_, _duration_) とすることで、_duration_ の間だけ何もしないスタンバイキューを作成できます。
+uu.fx(_node_, _duration_, uu.nop) とすることで、_duration_ の間だけ何もしないスタンバイキューを作成できます。
 {{{
     // 500ms かけて不透明にし、500ms なにもせず、その後 500ms かけて透明にする
-    uu("div").fx(500, { o: 1.0 }).fx(500).fx(500, { o: 0 });
+    uu("div").fx(500, { o: 1.0 }).fx(500, uu.nop).fx(500, { o: 0 });
 }}}
 
 == uu.fx.skip ==
@@ -157,43 +156,43 @@ uu.fx.isBusy(_node_:Node) は _node_ がアニメーション中かアニメー�
 
 == uu.fx.fade ==
 
-uu.fx.fade(_node_:Node, _duration_:Number, _param_:Hash/Function = void):Node は、
+uu.fx.fade(_node_:Node, _duration_:Number, _option_:Hash/Function = void):Node は、
 opacity が 0.5以上ならフェードアウトし、0.5未満ならフェードインします。
 
 == uu.fx.puff ==
 
-uu.fx.puff(_node_:Node, _duration_:Number, _param_:Hash/Function = void):Node は、
+uu.fx.puff(_node_:Node, _duration_:Number, _option_:Hash/Function = void):Node は、
 その場で拡大しながら消えます。
 
 == uu.fx.flare ==
 
-uu.fx.flare(_node_:Node, _duration_:Number, _param_:Hash/Function = { parts: 10, range: 200 }):Node は、
+uu.fx.flare(_node_:Node, _duration_:Number, _option_:Hash/Function = { parts: 10, range: 200 }):Node は、
 フレア状に拡散し消えます。
-  * _param_.parts にはフレアの数を 1以上の値で指定します。
-  * _param_.range にはフレアの飛距離を 100以上の値で指定します。
+  * _option_.parts にはフレアの数を 1以上の値で指定します。
+  * _option_.range にはフレアの飛距離を 100以上の値で指定します。
 
 == uu.fx.shrink ==
 
-uu.fx.shrink(_node_:Node, _duration_:Number, _param_:Hash/Function = void):Node は、
+uu.fx.shrink(_node_:Node, _duration_:Number, _option_:Hash/Function = void):Node は、
 縮小し消えます。
 
 == uu.fx.movein ==
 
-uu.fx.movein(_node_:Node, _duration_:Number, _param_:Hash/Function = { degree: 0, range: 200 }):Node は、
+uu.fx.movein(_node_:Node, _duration_:Number, _option_:Hash/Function = { degree: 0, range: 200 }):Node は、
 離れた場所から登場します。
-  * _param_.degree には登場位置を、角度(0～360)で指定します。
-  * _param_.range には飛距離を 100以上の値で指定します。
+  * _option_.degree には登場位置を、角度(0～360)で指定します。
+  * _option_.range には飛距離を 100以上の値で指定します。
 
 == uu.fx.moveout ==
 
-uu.fx.moveout(_node_:Node, _duration_:Number, _param_:Hash/Function = { degree: 0, range: 200 }):Node は、
+uu.fx.moveout(_node_:Node, _duration_:Number, _option_:Hash/Function = { degree: 0, range: 200 }):Node は、
 離れた場所に消えます。
-  * _param_.degree には登場位置を、角度(0～360)で指定します。
-  * _param_.range には飛距離を 100以上の値で指定します。
+  * _option_.degree には登場位置を、角度(0～360)で指定します。
+  * _option_.range には飛距離を 100以上の値で指定します。
 
 == uu.fx.highlight ==
 
-uu.fx.highlight(_node_:Node, _duration_:Number, _param_:Hash/Function = { bgc: "#ff9", r: 1 }):Node は、
+uu.fx.highlight(_node_:Node, _duration_:Number, _option_:Hash/Function = { bgc: "#ff9", r: 1 }):Node は、
 背景色をハイライトカラー(#ff9)にし、元の背景色に戻します。
 
 = Test Code =
