@@ -3,16 +3,14 @@
 一部のソースコードは、単体利用も可能です。
 
 = 単体利用可能なソースコードの一覧 =
-  * [uu_base64 src/misc/base64.js]
+  * src/misc/codec.js
   * [uu_datauri src/misc/datauri.js]
   * [uu_entity src/misc/entity.js]
   * [uu_lzw src/misc/lzw.js]
   * [uu_matrix2d src/misc/matrix2d.js]
-  * [uu_md5 src/misc/md5.js]
   * [uu_msgpack src/misc/msgpack.js]
   * [uu_sprintf src/misc/sprintf.js]
   * [uu_url src/misc/url.js]
-  * [uu_utf8 src/misc/utf8.js]
 
 = 単体利用を可能にする工夫 =
 {{{
