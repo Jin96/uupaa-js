@@ -1,5 +1,5 @@
 <!doctype html><html><head><meta charset="utf-8" />
-<title>uu.css.show / uu.css.hide test</title>
+<title>uu.fx demo</title>
 <style>
 div {
     position: absolute;
@@ -14,10 +14,9 @@ div {
 <script src="../../src/color/color.js"></script>
 <script src="../../src/query/query.js"></script>
 <script>
-
 uu.ready(function(uu) {
-    uu("div").css({ o: 0.5 }).click(function(evt, node) {
-        uu("div").unclick();
+    uu("div").css({ o: 0.5 }).click(function() {
+        uu("div").unclick(); // unclick all
         uu.fx.skip(0, 1, 1);
         action();
     }).fx(800, { o: 0.1 }).fx(800, { o: 0.5 });
@@ -35,5 +34,15 @@ function action() {
 <div><img src="../images/cover0.jpg" /></div>
 <div><img src="../images/cover0.jpg" /></div>
 <div><img src="../images/cover0.jpg" /></div>
+<pre>
+function action() {
+    uu("div").each(function(node, i) {
+        uu.fx(node, 1000, { x: i * 100, y: i * 100, chain: 1 });
+    }).fx(1000, { x: 0, y: 0, chain: 1 }).each(function(node, i) {
+        uu.fx(node, 1000, { x: 400, y: 400, chain: 1 });
+        uu.fx(node, 1000, { x: i * 100, y: i * 100, chain: 1 });
+    }).fx(1000, { x: 0, y: 0, reverse: 1 });
+}
+</pre>
 
 </body></html>
