@@ -1347,9 +1347,10 @@ uucss.care = {
 //  [5][set fps]          uu.fx(node, 500, { fps: 30, w: 40 })
 //  [6][after callback]   uu.fx(node, 500, { o: 1, after: afterCallback })
 //  [7][before callback]  uu.fx(node, 500, { o: 1, before: beforeCallback })
-//  [8][mark begin]       uu.fx(node, 500, { o: 1, begin: 1 })
-//  [9][reverse to begin] uu.fx(node, 500, { o: 1, reverse: 1 })
+//  [8][chain]            uu.fx(node, 500, { o: 1, chain: 1 })
+//  [9][reverse chain]    uu.fx(node, 500, { o: 1, reverse: 1 })
 //  [10][delay or sleep]  uu.fx(node, 500, callback)
+//  [11][deny]            uu.fx(node, 500, { deny: 1 })
 
 // uu.fx - add effect queue
 function uufx(node,     // @param Node: animation target node
@@ -1362,14 +1363,11 @@ function uufx(node,     // @param Node: animation target node
                         // @return Node:
     function loop() {
         var data = node[_uufx], q = data.q[0], // fetch current queue
-            option = q.option, back = !!option.back,
-            tm, nextChain, finished;
+            option = q.option, back = !!option.back, tm, finished;
 
         if (q.tm) {
-            // already running
             tm = +new Date;
         } else {
-            // first time
             option.init && (option.init(node, option, back), option.init = 0);
             option[_before] && option[_before](node, option, back);
             q.js = isFunction(option) ? option
@@ -1380,37 +1378,30 @@ function uufx(node,     // @param Node: animation target node
 
         q.js(node, back, finished, tm - q.tm, q.dur); // js(node, back, finished, gain, duration)
         if (finished) { // finished
-            option && option[_after] && option[_after](node, option, back);
+            option[_after] && option[_after](node, option, back);
             data.q.shift(); // remove current queue
 
             if (!option.back && option.reverse && data.rq.length) {
                 data.q = data.rq.reverse().concat(data.q); // insert reverse queue
                 data.rq = []; // clear
-                data.begin = 0; // off
             }
             if (!data.q.length) {
-                // remove chain
-                nextChain = uufx.chain.shift();
-                if (nextChain) {
-                    uufx.apply(null, nextChain);
-                } else {
-                    clearInterval(data.id);
-                    data.id = 0;
-                }
+                clearInterval(data.id);
+                data.id = 0;
             }
         }
     }
 
     node.style.overflow = "hidden";
+    option = option || {};
 
-    var data = node[_uufx] || (node[_uufx] = { q: [], rq: [], id: 0, begin: 0 }), // init fx queue
+    var data = node[_uufx] || (node[_uufx] = { q: [], rq: [], id: 0 }), // init fx queue
         fps = option.fps || 60;
 
-    // add chain
-    if (data.begin) {
-        uufx.chain.push([node, duration, option]);
+    if (data.q[0] && data.q[0].option.deny) {
         return node;
     }
+
     // append queue data
     data.q.push({
         tm:       0,
@@ -1419,13 +1410,9 @@ function uufx(node,     // @param Node: animation target node
         guid:     uuguid(),
         option:   option
     });
-    if (option.begin) {
-        data.begin = 1;
-    }
     data.id || (data.id = setInterval(loop, ((1000 / fps) | 0) || +_ie)); // [IE] setInterval(0) is Error
     return node;
 }
-uufx.chain = [];
 uufx.props = { opacity: 1, color: 2, backgroundColor: 2,
                width: 3, height: 3, left: 4, top: 5 };
 uufx.alpha = /^alpha\([^\x29]+\) ?/;
@@ -1525,8 +1512,8 @@ function uufxbuild(node, data, queue, option) {
         }
     }
 
-    // add revert queue data
-    if (data.begin) {
+    // add reverse queue
+    if (option.chain || option.reverse) {
         data.rq.push({
             tm: 0,
             dur: queue.dur,
@@ -1545,7 +1532,7 @@ function uufxskip(node,           // @param Node(= null): null is all node
                   avoidFlicker) { // @param Boolean(= false): true is avoid flicker
                                   // @return Node/NodeArray:
     var nodeArray = node ? [node] : uutag("*", doc.body),
-        v, i = -1, j, k, jz, kz, data, guid, q, rq;
+        v, i = -1, j, k, jz, kz, data, guid, option, q, rq;
 
     while ( (v = nodeArray[++i]) ) {
         data = v[_uufx];
@@ -1556,8 +1543,8 @@ function uufxskip(node,           // @param Node(= null): null is all node
             guid = [];
             for (j = 0, jz = all ? q.length : 1; j < jz; ++j) {
                 q[j].fin = 1;
-//              q[j].option.re && guid.push(q[j].option.guid);
-                data.begin && guid.push(q[j].option.guid);
+                option = q[j].option;
+                (option.chain || option.reverse) && guid.push(option.guid);
             }
             for (j = 0, jz = guid.length; j < jz; ++j) {
                 for (k = 0, kz = rq.length; k < kz; ++k) {

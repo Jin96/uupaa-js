@@ -40,33 +40,33 @@ uu.ui.slider.dressup = uuuisliderdressup;
 // uu.ui.slider - slider
 function uuuislider(node,     // @param Node:
                     duration, // @param Number: duration
-                    param) {  // @param Hash(= {}):
+                    option) { // @param Hash(= { allow: 1 }):
                               // @return Node:
-    var data = node["data-uuuislider"], x = null, y = null;
+    var data = node["data-uuuislider"], x = null, y = null,
+        opt = uu.arg(option, { allow: 1 });
 
     if (data) {
-        if (!uu.fx.isBusy(data.target)) {
+        if (opt.allow || !uu.fx.isBusy(data.target)) {
             if (++data.moved >= data.images) {
-                data.moved = 0;
-                x = y = 0;
+                data.moved = x = y = 0;
             } else {
                 data.degree < 90 && (x = -(data.w * data.moved));
                 data.degree >  0 && (y = -(data.h * data.moved));
             }
             uu.fx(data.target, duration,
-                  uu.arg(data.param, { marginLeft: x, marginTop: y }));
+                  uu.arg(option, { marginLeft: x, marginTop: y }));
         }
     }
     return node;
 }
 
 // uu.ui.slider.dressup
-function uuuisliderdressup(node,    // @param Node:
-                           param) { // @param Hash(= { degree: 0 }):
-                                    //  degree - Number: move direction. 0 or 45 or 90
+function uuuisliderdressup(node,     // @param Node:
+                           option) { // @param Hash(= { degree: 0 }):
+                                     //  degree - Number: move direction. 0 or 45 or 90
     uu.ready("window", function(uu) {
         var data = node["data-uuuislider"],
-            pr = uu.arg(param, { degree: 0 }), degree = pr.degree,
+            pr = uu.arg(option, { degree: 0 }), degree = pr.degree,
             imageNodeArray, target, w, h;
 
         if (data) {

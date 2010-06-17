@@ -24,11 +24,11 @@ uu.ready(function(uu) {
 });
 function action() {
     uu("div").each(function(node, i) {
-        uu.fx(node, 1000, { x: i * 100, y: i * 100, r: 1 });
-    }).fx(1000, { x: 0, y: 0, r: 1 }).each(function(node, i) {
-        uu.fx(node, 1000, { x: 400, y: 400, r: 1 });
-        uu.fx(node, 1000, { x: i * 100, y: i * 100, r: 1 });
-    }).fx(1000, { x: 0, y: 0, r: 1 });
+        uu.fx(node, 1000, { x: i * 100, y: i * 100, chain: 1 });
+    }).fx(1000, { x: 0, y: 0, chain: 1 }).each(function(node, i) {
+        uu.fx(node, 1000, { x: 400, y: 400, chain: 1 });
+        uu.fx(node, 1000, { x: i * 100, y: i * 100, chain: 1 });
+    }).fx(1000, { x: 0, y: 0, reverse: 1 });
 }
 </script></head><body>
 <div><img src="../images/cover0.jpg" /></div>
