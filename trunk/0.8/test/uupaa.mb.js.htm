@@ -700,11 +700,15 @@ uu.ready(function(uu) {
         return [uu.trim('has space'), "==", 'has space'];
       },
       "uu.trim('  has  space  ') == 'has  space'": function() {
-        return [uu.trim('  has  space  '), "==", 'has  space'];
+        return [uu.trim('  has  space  '), "==", 'has space'];
       },
       "uu.trim('') == ''": function() {
         return [uu.trim(''), "==", ''];
       },
+      "uu.trim('  diet  inner  space  ') == 'diet inner space'": function() {
+        return [uu.trim('  diet  inner  space  '), "==", 'diet inner space'];
+      },
+
     "uu.trim.tag()": "",
       'uu.trim.tag(" <h1>A</h1>  B  <p>C</p> ") == "A B C"': function() {
         return [uu.trim.tag(" <h1>A</h1>  B  <p>C</p> "), "==", "A B C"];
@@ -718,20 +722,25 @@ uu.ready(function(uu) {
       'uu.trim.tag("<div><p>A</p></div> B<p>  C</p> ") == "A B C"': function() {
         return [uu.trim.tag("<div><p>A</p></div> B<p>  C</p> "), "==", "A B C"];
       },
-    "uu.trim.url()": "",
-      "uu.trim.url('url(\"http://...\")') == \"http://...\"": function() {
-        return [uu.trim.url('url("http://...")'), "==", "http://..."];
+    "uu.trim.func()": "",
+      'uu.trim.func(\' url("http://...") \') == \'"http://..."\'': function() {
+        return [uu.trim.func(' url("http://...")' ), "==", '"http://..."'];
       },
-      "uu.trim.url(\"url('http://...')\") == \"http://...\"": function() {
-        return [uu.trim.url("url('http://...')"), "==", "http://..."];
+      "uu.trim.func(\"url('http://...')\") == \"'http://...'\"": function() {
+        return [uu.trim.func("url('http://...')"), "==", "'http://...'"];
       },
-      "uu.trim.url('http://...') == \"http://...\"": function() {
-        return [uu.trim.url('http://...'), "==", "http://..."];
+      "uu.trim.quote(uu.trim.func(\"url('http://...')\")) == 'http://...'": function() {
+        return [uu.trim.quote(uu.trim.func("url('http://...')")), "==", "http://..."];
       },
-    "uu.trim()": "",
-      "uu.trim('  diet  inner  space  ') == 'diet inner space'": function() {
-        return [uu.trim('  diet  inner  space  '), "==", 'diet inner space'];
+      "uu.trim.func('rgba(1, 2, 3, 0)') == \"1, 2, 3, 0\"": function() {
+        return [uu.trim.func('rgba(1, 2, 3, 0)'), "==", "1, 2, 3, 0"];
       },
+      "uu.trim.func('http://...') == \"http://...\" 関数() で囲まれていない場合は何もしない": function() {
+debugger;
+        return [uu.trim.func('http://...'), "==", "http://..."];
+      },
+
+
     "uu.trim.quote()": "",
       "uu.trim.quote(\" 'has  space' \") == \"has  space\"": function() {
         return [uu.trim.quote(" 'has  space' "), "==", "has  space"];
@@ -739,6 +748,7 @@ uu.ready(function(uu) {
       'uu.trim.quote(\' "has  space" \') == "has  space"': function() {
         return [uu.trim.quote(' "has  space" '), "==", "has  space"];
       },
+/*
     "uu.trim.bracket()": "",
       "uu.trim.bracket('  div  ') == 'div'": function() {
         return [uu.trim.bracket('  div  '), "==", 'div'];
@@ -755,10 +765,15 @@ uu.ready(function(uu) {
       "uu.trim.bracket('  {bracket}  ') == 'div'": function() {
         return [uu.trim.bracket('  {bracket}  '), "==", 'bracket'];
       },
+ */
+
+
+/*
     "uu.split()": "",
       "uu.split(' A  B  C ') == ['A', 'B', 'C'] スペース区切りでトークンを切り出す(左右のスペースをトリムするので、IEの String.split() バグを無視できる)": function() {
         return [uu.split(' A  B  C '), "==", ['A', 'B', 'C']];
       },
+ */
 /*
     "uu.split.comma()": "",
       "uu.split.comma(' A,B,C ') == ['A', 'B', 'C'] カンマ区切りでトークンを切り出す(左右のスペースをトリムする)": function() {
@@ -784,9 +799,6 @@ uu.ready(function(uu) {
       "uu.date().ISO() は現在時刻を ISO8601 形式で返す": function() {
         return [uu.date().ISO(), "is string"];
       },
-      "uu.date().RFC() は現在時刻を RFC1123 形式で返す": function() {
-        return [uu.date().RFC(), "is string"];
-      },
       "uu.date().GMT() は現在時刻を GMT (RFC1123) 形式で返す": function() {
         return [uu.date().GMT(), "is string"];
       },
@@ -802,17 +814,123 @@ uu.ready(function(uu) {
 
         return [dateHash.time, "==", rv.time];
       },
-      "uu.date(uu.date(new Date).RFC()) で元に戻る": function() {
+      "uu.date(uu.date(new Date).GMT()) で元に戻る": function() {
         var now = new Date;
         now.setMilliseconds(0); // ms を切り落として比較する
 
         var dateHash = uu.date(now);
 
-        var isoString = dateHash.RFC();
+        var isoString = dateHash.GMT();
         var rv = uu.date(isoString);
 
         return [dateHash.time, "==", rv.time];
       },
+    "uu.json": "",
+        "uu.json({a:1})": function() {
+            return [uu.json({a:1}), "==", '{"a":1}'];
+        },
+        "uu.json(document.body)": function() {
+            return [uu.json(document.body), "==", '"body"'];
+        },
+        "uu.json(null)": function() {
+            return [uu.json(null), "==", 'null'];
+        },
+        "uu.json(undefined)": function() {
+            return [uu.json(undefined), "==", ''];
+        },
+        "uu.json(true)": function() {
+            return [uu.json(true), "==", 'true'];
+        },
+        "uu.json(false)": function() {
+            return [uu.json(false), "==", 'false'];
+        },
+        "uu.json(123.45)": function() {
+            return [uu.json(123.45), "==", '123.45'];
+        },
+        "uu.json(new Date)": function() {
+            return [uu.json(new Date), "is string"];
+        },
+        "uu.json(uu.nop)": function() {
+            return [uu.json(uu.nop), "==", '"nop"'];
+        },
+        "uu.json('string')": function() {
+            return [uu.json('string'), "==", '"string"'];
+        },
+        "uu.json([1,2])": function() {
+            return [uu.json([1,2]), "==", '[1,2]'];
+        },
+        "uu.json(document.links)": function() {
+            return [uu.json(document.links), "is string"];
+        },
+        "uu.json(window.getComputedStyle(document.body, null))": function() {
+            var cs = window.getComputedStyle ? window.getComputedStyle(document.body, null)
+                                             : document.body.currentStyle;
+
+            return [uu.json(cs), "is string"];
+        },
+        "uu.json(NaN)": function() {
+            return [uu.json(NaN), "is string"];
+        },
+        "uu.json(Infinity)": function() {
+            return [uu.json(Infinity), "is string"];
+        },
+
+    "uu.json(NativeJSON)": "",
+        "uu.json({a:1}, true)": function() {
+            return [uu.json({a:1}, true), "==", '{"a":1}'];
+        },
+/*
+        "uu.json(document.body, true)": function() {
+            return [uu.json(document.body, true), "==", '"body"'];
+        },
+ */
+        "uu.json(null, true)": function() {
+            return [uu.json(null, true), "==", 'null'];
+        },
+        "uu.json(undefined, true)": function() {
+            return [uu.json(undefined, true), "==", ''];
+        },
+        "uu.json(true, true)": function() {
+            return [uu.json(true, true), "==", 'true'];
+        },
+        "uu.json(false, true)": function() {
+            return [uu.json(false, true), "==", 'false'];
+        },
+        "uu.json(123.45, true)": function() {
+            return [uu.json(123.45, true), "==", '123.45'];
+        },
+        "uu.json(new Date, true)": function() {
+            return [uu.json(new Date, true), "is string"];
+        },
+/*
+        "uu.json(uu.nop, true)": function() {
+            return [uu.json(uu.nop, true), "==", '"nop"'];
+        },
+ */
+        "uu.json('string', true)": function() {
+            return [uu.json('string', true), "==", '"string"'];
+        },
+        "uu.json([1,2], true)": function() {
+            return [uu.json([1,2], true), "==", '[1,2]'];
+        },
+/*
+        "uu.json(document.links, true)": function() {
+            return [uu.json(document.links, true), "is string"];
+        },
+        "uu.json(window.getComputedStyle(document.body, null), true)": function() {
+            var cs = window.getComputedStyle ? window.getComputedStyle(document.body, null)
+                                             : document.body.currentStyle;
+
+            return [uu.json(cs, true), "is string"];
+        },
+ */
+        "uu.json(NaN, true)": function() {
+            return [uu.json(NaN, true), "is string"];
+        },
+        "uu.json(Infinity, true)": function() {
+            return [uu.json(Infinity, true), "is string"];
+        },
+
 
 // -----------------------
     "Type": "",

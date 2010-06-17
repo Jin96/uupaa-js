@@ -41,7 +41,6 @@ var _prototype = "prototype",
     _width = "width",
     _false = !1,
     _true = !0,
-    _nop = function() {},
     _types = { "undefined": 8 },
     _dd2num = {},               // dd2num = { "00":   0 , ... "99":  99  }
     _num2dd = {},               // num2dd = {    0: "00", ...   99: "99" }
@@ -122,13 +121,7 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Clas
         nth:        uunth,          // uu.hash.nth(source:Hash, index:Number):Array
         size:       uusize,         // uu.hash.size(source:Hash):Number
         clone:      uuclone,        // uu.hash.clone(source:Hash):Hash
-        indexOf:    uuindexof,      // uu.hash.indexOf(source:Hash, search:Mix):String/void
-        dd2num:     _dd2num,        // uu.hash.dd2num - { "00":   0 , ... "99":  99  }
-        num2dd:     _num2dd,        // uu.hash.num2dd - {    0: "00", ...   99: "99" }
-        bb2num:     _bb2num,        // uu.hash.bb2num - { "\00": 0, ... "\ff": 255 }
-        num2bb:     _num2bb,        // uu.hash.num2bb - { 0: "\00", ... 255: "\ff" }
-        hh2num:     _hh2num,        // uu.hash.hh2num - { "00": 0, ... "ff": 255 }
-        num2hh:     _num2hh         // uu.hash.num2hh - { 0: "00", ... 255: "ff" }
+        indexOf:    uuindexof       // uu.hash.indexOf(source:Hash, search:Mix):String/void
     }),
     array:    uumix(uuarray, {      // uu.array(source:Array/Mix/NodeList/Arguments,
                                     //          sliceStart:Number = void,
@@ -309,8 +302,7 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Clas
                                     //  [4][set text]                  uu.text(node, "text")      -> node
                                     //  [5][set formated text]         uu.text(node, "??", "a")   -> node
     // --- JSON ---
-    json:     uumix(uujson, {       // uu.json(source:Mix, useNativeJSON:Boolean = false,
-                                    //                     callback:Function = void):JSONString
+    json:     uumix(uujson, {       // uu.json(source:Mix, useNativeJSON:Boolean = false):JSONString
         decode:     uujsondecode    // uu.json.decode(jsonString:JSONString, useNativeJSON:Boolean = false):Mix/Boolean
     }),
     // --- STRING ---
@@ -365,8 +357,12 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Clas
     // --- OTHER ---
     ui:             {},             // uu.ui - ui namespace
     dmz:            {},             // uu.dmz - DeMilitarized Zone(proxy)
-    nop:            _nop            // uu.nop() - none operation
+    nop:            nop             // uu.nop - none operation
 });
+
+// uu.nop - none operation
+function nop() {
+}
 
 // --- CONSTRUCTION ---
 uu.config.baseDir || (uu.config.baseDir =
@@ -453,7 +449,7 @@ uueach(("BOOLEAN,NUMBER,STRING,FUNCTION,ARRAY,DATE," +
     uutype[v] = i + 1;
 });
 
-uueach([!0, 0, "", _nop, [], new Date, /0/], function(v, i) {
+uueach([!0, 0, "", nop, [], new Date, /0/], function(v, i) {
     ++i < 4 && (_types[typeof v] = i);
     _types[_toString.call(v)] = i;
 });
@@ -471,6 +467,14 @@ uueach([!0, 0, "", _nop, [], new Date, /0/], function(v, i) {
         _num2dd[n] = v = i.toString().slice(1);
         _dd2num[v] = n;
     }
+    uumix(uuhash, {
+        dd2num:     _dd2num,        // uu.hash.dd2num - { "00":   0 , ... "99":  99  }
+        num2dd:     _num2dd,        // uu.hash.num2dd - {    0: "00", ...   99: "99" }
+        bb2num:     _bb2num,        // uu.hash.bb2num - { "\00": 0, ... "\ff": 255 }
+        num2bb:     _num2bb,        // uu.hash.num2bb - { 0: "\00", ... 255: "\ff" }
+        hh2num:     _hh2num,        // uu.hash.hh2num - { "00": 0, ... "ff": 255 }
+        num2hh:     _num2hh         // uu.hash.num2hh - { 0: "00", ... 255: "ff" }
+    });
 })(0x100);
 
 // ===================================================================
@@ -2019,7 +2023,7 @@ function uuclass(className, // @param String: "Class"
 
         that.name = Class;
         that.uuguid = uu.guid();
-        that.msgbox || (that.msgbox = _nop);
+        that.msgbox || (that.msgbox = nop);
         uu.msg.bind(that); // bind MsgPump
 
         // constructor(Super -> that)
@@ -2061,7 +2065,7 @@ function uuclasssingleton(className, // @param String: class name
             that.name = className;
             that.uuguid = uu.guid();
             that.init && that.init.apply(that, arg);
-            that.msgbox || (that.msgbox = _nop);
+            that.msgbox || (that.msgbox = nop);
             uu.msg.bind(that); // bind MsgPump
         }
         return self[instance] || (self[instance] = that);
@@ -3034,15 +3038,20 @@ function uulogclear() {
 
 // --- JSON ---
 // uu.json - mix to JSONString
-function uujson(source,        // @param Mix:
-                useNativeJSON, // @param Boolean(= false): switch native impl or js impl
-                               //                          true is use native JSON
-                               //                          false is use js JSON
-                callback) {    // @param Function(= void): error callback
-                               // @return JSONString:
+function uujson(source,          // @param Mix:
+                useNativeJSON) { // @param Boolean(= false): switch native impl or js impl
+                                 //                          true is use native JSON
+                                 //                          false is use js JSON
+                                 // @return JSONString:
     return useNativeJSON && JSON ? JSON.stringify(source) || ""
-                                 : _json(source, 1, callback);
+                                 : _json(source, 1);
 }
+uujson.x = [
+    /[^,:{}\[\]0-9.\-+Eaeflnr-u \n\r\t]/,                       // x[0] NGWORDS
+    /"(\\.|[^"\\])*"/g,                                         // x[1] ESCAPE JSON STRING
+    uuhash('",\\",\b,\\b,\f,\\f,\n,\\n,\r,\\r,\t,\\t,\\,\\\\'), // x[2] SWAP ENTITY
+    /(?:\"|\\[bfnrt\\])/g,                                      // x[3] ESCAPE
+    /[\x00-\x1F\u0080-\uFFEE]/g];                               // x[4] ENCODE UNICODE ENTITY
 
 // uu.json.decode - decode JSONString
 function uujsondecode(jsonString,      // @param JSONString:
@@ -3050,89 +3059,75 @@ function uujsondecode(jsonString,      // @param JSONString:
                                        //                          true is use native JSON
                                        //                          false is use js JSON
                                        // @return Mix/Boolean: false is error
-    var str = jsonString.trim();
+    var str = jsonString.trim(), x = uujson.x;
 
-    if (useNativeJSON && JSON) {
-        return JSON.parse(str);
-    }
-    if (uujsondecode.ngword.test(str[_replace](uujsondecode.unescape, ""))) {
-        return _false;
-    }
-    return (new Function("return " + str))();
+    return useNativeJSON && JSON ? JSON.parse(str)
+                                 : x[0].test(str[_replace](x[1], ""))
+                                        ? _false
+                                        : (new Function("return " + str))();
 }
-uujsondecode.ngword = /[^,:{}\[\]0-9.\-+Eaeflnr-u \n\r\t]/;
-uujsondecode.unescape = /"(\\.|[^"\\])*"/g;
 
 // inner - convert string to JSON formatted string
-function _str2json(str,        // @param String:
-                   addQuote) { // @param Boolean(= false): true is add quote(")
-                               // @return String: '\u0000' or '"\u0000"'
-    var rv = str[_replace](_str2json.escape, function(m) {
-                return _str2json.swap[m];
-            })[_replace](_str2json.encode, function(str, c) {
-                // String("AB") to UnicodeString("\u0041\u0042")
-                c = str.charCodeAt(0);
-                return "\\u" + _num2hh[(c >> 8) & 255]
-                             + _num2hh[c & 255];
-            });
+function _str2json(str) { // @param String:
+                          // @return String: '\u0000'
+    var x = uujson.x;
 
-    return addQuote ? '"' + rv + '"' : rv;
+    return str[_replace](x[3], function(m) { return x[2][m]; })
+              [_replace](x[4], function(s, c) {
+                // NonASCIIString to UnicodeString("\u0041\u0042")
+                c = s.charCodeAt(0);
+                return "\\u" + _num2hh[(c >> 8) & 255] + _num2hh[c & 255];
+           });
 }
-_str2json.swap = uuhash('",\\",\b,\\b,\f,\\f,\n,\\n,\r,\\r,\t,\\t,\\,\\\\');
-_str2json.escape = /(?:\"|\\[bfnrt\\])/g; // escape
-_str2json.encode = /[\x00-\x1F\u0080-\uFFEE]/g;
 
 // inner - json inspect
-function _json(mix, esc, callback) {
-    var ary, type = uutype(mix), w, ai = -1, i, iz;
+function _json(mix, esc) {
+    var ary, type = uutype(mix), w, ai = -1, i, iz, q = '"';
 
     if (mix === win) {
         return '"window"'; // window -> String("window")
     }
-
     switch (type) {
-    case uutype.HASH:   ary = []; break;
-    case uutype.NODE:   return '"' + uunodepath(mix) + '"';
-    case uutype.NULL:   return "null";
-    case uutype.VOID:   return "undefined";
-    case uutype.DATE:   return uudate(mix).ISO();
+    case uutype.HASH:       ary = []; break;
+    case uutype.NODE:       return q + uunodepath(mix) + q; // node path
+    case uutype.NUMBER:     return isFinite(mix) ? mix + "" : "null";
+    case uutype.DATE:       return uudate(mix).ISO();
     case uutype.FUNCTION:
 //{{{!mb
-                        if (_ie) {
-                            w = mix + "";
-                            return '"' + w.slice(9, w[_indexOf]("(")) + '"'; // )
-                        }
+                            if (_ie) {
+                                w = mix + ""; // mix.toString()
+                                return q + w.slice(9, w[_indexOf]("(")) + q; // )
+                            }
 //}}}!mb
-                        return '"' + mix.name + '"';
+                            return q + mix.name + q;
     case uutype.BOOLEAN:
-    case uutype.NUMBER: return mix.toString();
-    case uutype.STRING: return esc ? _str2json(mix, 1) : '"' + mix + '"';
+    case uutype.NULL:       return mix + "";
+    case uutype.STRING:     return q + (esc ? _str2json(mix) : mix) + q;
     case uutype.ARRAY:
     case uutype.FAKEARRAY:
         for (ary = [], i = 0, iz = mix.length; i < iz; ++i) {
-            ary[++ai] = _json(mix[i], esc, callback);
+            ary[++ai] = _json(mix[i], esc);
         }
         return "[" + ary + "]";
-    default:
-        return callback ? (callback(mix) || "") : "";
+    default: // UNDEFINED
+        return "";
     }
     if (mix.msgbox) {
-        return '"' + mix.name + '"';
+        return q + mix.name + q;
     }
     if (_toString.call(type).slice(-3) === "on]") { // [object CSSStyleDeclaration]
         w = _webkit;
         for (i in mix) {
-            if (typeof mix[i] === _string && (w || i != (+i + ""))) { // !isNaN(i)
+            if (typeof mix[i] === _string && (w || i != (+i + ""))) { // isFinite(i)
                 w && (i = mix.item(i));
-                ary[++ai] = '"' + i + '":'
-                                + (esc ? _str2json(mix[i], 1)
-                                       : '"' + mix[i] + '"');
+                ary[++ai] = q + i + q + ':'
+                          + q + (esc ? _str2json(mix[i]) : mix[i]) + q;
             }
         }
     } else { // type === uutype.HASH
         for (i in mix) {
-            ary[++ai] = (esc ? _str2json(i, 1) : '"' + i + '"') + ":"
-                      + _json(mix[i], esc, callback);
+            ary[++ai] = q + (esc ? _str2json(i) : i) + q + ":"
+                          + _json(mix[i], esc);
         }
     }
     return "{" + ary + "}";
@@ -3153,23 +3148,24 @@ function uudate(source) { // @param DateHash/Date/Number/String(= void):
     return source === void 0           ? _date2hash(new Date())       // [1] uu.date()
          : uutype(source, uutype.DATE) ? _date2hash(source)           // [3] uu.date(new Date())
          : isNumber(source)            ? _date2hash(new Date(source)) // [4] uu.date(1234567)
-         : source.GMT                  ? uuclone(source)              // [2] uu.date(DateHash)
+         : source.ISO                  ? uuclone(source)              // [2] uu.date(DateHash)
          : _date2hash(_str2date(source) || new Date(source));         // [5][6][7]
 }
+uudate.x = [
+    /^(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d):(\d\d)(?:\.(\d*))?Z$/, // x[0] PARSE
+    /^([\w]+) (\w+) (\w+)/];                                     // x[1] DATE FORMAT
 
 // inner - convert Date to DateHash
 function _date2hash(date) { // @param Date:
                             // @return Hash: { Y: 2010, M: 1~12, D: 1~31,
                             //                 h: 0~23, m: 0~59, s: 0~59, ms: 0~999,
-                            //                 time: unix_time, ISO(), RFC(), GMT() }
+                            //                 time: unix_time, ISO(), GMT() }
     return {
         Y:      date.getUTCFullYear(),      M:      date.getUTCMonth() + 1,
         D:      date.getUTCDate(),          h:      date.getUTCHours(),
         m:      date.getUTCMinutes(),       s:      date.getUTCSeconds(),
         ms:     date.getUTCMilliseconds(),  time:   date.getTime(),
-        ISO:    datehashiso,
-        RFC:    datehashrfc,
-        GMT:    datehashrfc
+        ISO:    datehashiso,                GMT:    datehashgmt
     };
 }
 
@@ -3183,7 +3179,7 @@ function _str2date(str) { // @param ISO8601DateString/RFC1123DateString:
         return dayOfWeek + " " + month + " " + day;
     }
 
-    var m = _str2date.parse.exec(str);
+    var x = uudate.x, m = x[0].exec(str);
 
     if (m) {
         return new Date(Date.UTC(+m[1], +m[2] - 1, +m[3],      // yyyy-mm-dd
@@ -3195,25 +3191,21 @@ function _str2date(str) { // @param ISO8601DateString/RFC1123DateString:
     }
 //}}}!mb
     return new Date(str[_replace](",", "")
-                       [_replace](_str2date.date, _toDate));
+                       [_replace](x[1], _toDate));
 }
-_str2date.parse = /^(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d):(\d\d)(?:\.(\d*))?Z$/;
-_str2date.date = /^([\w]+) (\w+) (\w+)/;
 
 // DateHash.ISO - encode DateHash To ISO8601String
 function datehashiso() { // @return ISO8601DateString: "2000-01-01T00:00:00.000Z"
-    var that = this,
-        padZero = (that.ms < 10) ? "00"
-                : (that.ms < 100) ? "0" : "";
+    var that = this;
 
     return uuformat("??-??-??T??:??:??.??Z",
                     that.Y, _num2dd[that.M], _num2dd[that.D],
                     _num2dd[that.h], _num2dd[that.m],
-                    _num2dd[that.s], padZero + that.ms);
+                    _num2dd[that.s], ("00" + that.ms).slice(-3) + that.ms);
 }
 
-// DateHash.RFC - encode DateHash To RFC1123String
-function datehashrfc() { // @return RFC1123DateString: "Wed, 16 Sep 2009 16:18:14 GMT"
+// DateHash.GMT - encode DateHash To RFC1123String
+function datehashgmt() { // @return RFC1123DateString: "Wed, 16 Sep 2009 16:18:14 GMT"
     var rv = (new Date(this.time)).toUTCString();
 
 ///{{{!mb
@@ -3462,17 +3454,20 @@ function outerHTMLSetter(html) {
 // NodeSet class
 function NodeSet(expression, // @param NodeSet/Node/NodeArray/String/window:
                  context) {  // @param NodeSet/Node(= void 0): context
+    var exp = expression;
+
     this.stack = [[]]; // [NodeSet, ...]
 
-    this[_nodeArray] = !expression ? [] // empty nodeArray
-        : (expression === win || expression[_nodeType]) ? [expression] // window / node
-        : typeof expression === _string ?
-            (!expression[_indexOf]("<") ? [uunodebulk(expression)]  // <div> -> fragment
-                                        : uuquery(expression, context &&
-                                                  context[_nodeArray] ? context[_nodeArray].concat()
-                                                                      : context)) // query
-        : _isArray(expression) ? expression.concat() // clone NodeArray
-        : (expression instanceof NodeSet) ? expression[_nodeArray].concat() // copy constructor
+    this[_nodeArray] = !exp ? [] // empty nodeArray
+        : (exp === win || exp[_nodeType]) ? [exp] // window / node
+        : typeof exp === _string ?
+            (!exp[_indexOf]("<")
+                ? [uunodebulk(exp)]  // <div> -> fragment
+                : uuquery(exp, context &&
+                               context[_nodeArray] ? context[_nodeArray].concat()
+                                                   : context)) // query
+        : _isArray(exp) ? exp.concat() // clone NodeArray
+        : (exp instanceof NodeSet) ? exp[_nodeArray].concat() // copy constructor
         : []; // bad expr
 }
 
@@ -3746,9 +3741,8 @@ uuready(function() {
                 "o,opacity,z,zIndex,fs,fontSize," +
                 "pos,position,m,margin,b,border,p,padding");
 
-    uumix(_camelhash(uufix.db,
-                     _webkit ? getComputedStyle(_rootNode, 0)
-                             : _rootNode.style), styles, uuattr.fix);
+    uumix(_camelhash(uufix.db, _webkit ? getComputedStyle(_rootNode, 0)
+                                       : _rootNode.style), styles, uuattr.fix);
     uunodeid(_rootNode);
     while ( (v = nodeList[++i]) ) {
         uunodeid(v);

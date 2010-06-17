@@ -142,6 +142,10 @@ function minify() {
     } else {
         shell_exec($command);
     }
+    if (1) { // $verbose
+        $fz = filesize('../' . $outfile);
+        printf("filesize = %.02fkB(%dbyte)\n", $fz / 1024, $fz);
+    }
 }
 
 // --- init ---
