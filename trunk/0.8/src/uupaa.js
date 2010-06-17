@@ -1396,7 +1396,7 @@ function uufx(node,     // @param Node: animation target node
     option = option || {};
 
     var data = node[_uufx] || (node[_uufx] = { q: [], rq: [], id: 0 }), // init fx queue
-        fps = option.fps || 60;
+        fps = ((1000 / option.fps) | 0) || +_ie; // [IE] setInterval(0) is Error
 
     if (data.q[0] && data.q[0].option.deny) {
         return node;
@@ -1410,7 +1410,7 @@ function uufx(node,     // @param Node: animation target node
         guid:     uuguid(),
         option:   option
     });
-    data.id || (data.id = setInterval(loop, ((1000 / fps) | 0) || +_ie)); // [IE] setInterval(0) is Error
+    data.id || (data.id = setInterval(loop, fps));
     return node;
 }
 uufx.props = { opacity: 1, color: 2, backgroundColor: 2,
