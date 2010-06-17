@@ -1,12 +1,12 @@
 
-// === uu.ui.slider ===
+// === uu.ui.imageSlider ===
 //#include uupaa.js
 //#include node/normalize.js
 //#include image/image.js
 //#include color/color.js
 //#include css/text.js
 /*
-    1| uu.ui.slider.dressup(<div>, { degree: 90 })  -> dress up
+    1| uu.ui.imageSlider.dressup(<div>, { degree: 90 })  -> dress up
 
 
         <div style="visibility:hidden">   --- plain --+
@@ -29,20 +29,22 @@
         </div>      -----------------------------------------------------------+
 
 
-    2| uu.ui.slider(<div>, 3000)   -> do animation
+    2| uu.ui.imageSlider(<div>, 3000)   -> do animation
  */
 
-uu.ui.slider || (function(uu) {
+uu.ui.imageSlider || (function(uu) {
 
-uu.ui.slider = uuuislider;
-uu.ui.slider.dressup = uuuisliderdressup;
+uu.ui.imageSlider = uuuiimageslider;
+uu.ui.imageSlider.dressup = uuuiimagesliderdressup;
 
-// uu.ui.slider - slider
-function uuuislider(node,     // @param Node:
-                    duration, // @param Number: duration
-                    option) { // @param Hash(= { allow: 1 }):
-                              // @return Node:
-    var data = node["data-uuuislider"], x = null, y = null,
+var _dataset = "data-uuuiimageslider";
+
+// uu.ui.imageSlider - slider
+function uuuiimageslider(node,     // @param Node:
+                         duration, // @param Number: duration
+                         option) { // @param Hash(= { allow: 1 }):
+                                   // @return Node:
+    var data = node[_dataset], x = null, y = null,
         opt = uu.arg(option, { allow: 1 });
 
     if (data) {
@@ -60,12 +62,12 @@ function uuuislider(node,     // @param Node:
     return node;
 }
 
-// uu.ui.slider.dressup
-function uuuisliderdressup(node,     // @param Node:
-                           option) { // @param Hash(= { degree: 0 }):
-                                     //  degree - Number: move direction. 0 or 45 or 90
+// uu.ui.imageSlider.dressup
+function uuuiimagesliderdressup(node,     // @param Node:
+                                option) { // @param Hash(= { degree: 0 }):
+                                          //    degree - Number: move direction. 0 or 45 or 90
     uu.ready("window", function(uu) {
-        var data = node["data-uuuislider"],
+        var data = node[_dataset],
             pr = uu.arg(option, { degree: 0 }), degree = pr.degree,
             imageNodeArray, target, w, h;
 
@@ -112,7 +114,7 @@ function uuuisliderdressup(node,     // @param Node:
                 uu.format("width:??px;height:??px;margin:0;position:relative", w, h);
 
         // store
-        node["data-uuuislider"] = data;
+        node[_dataset] = data;
     });
 }
 
