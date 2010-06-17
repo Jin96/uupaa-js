@@ -1,5 +1,5 @@
 <!doctype html><html><head><meta charset="utf-8" />
-<title>uu.ui.slider test</title>
+<title>uu.ui.imageSlider test</title>
 <style>
 /*
 html, body {
@@ -26,7 +26,7 @@ html, body {
 <script src="../../src/uupaa.js"></script>
 <script src="../../src/fx/easing.js"></script>
 <script src="../../src/fx/fx.js"></script>
-<script src="../../src/ui/slider.js"></script>
+<script src="../../src/ui/imageSlider.js"></script>
 <script src="../../src/color/color.js"></script>
 <script src="../../src/image/image.js"></script>
 <script src="../../src/node/normalize.js"></script>
@@ -42,34 +42,34 @@ function moveDuration(that) {
 
 uu.ready(function() {
     // --- init ---
-    uu.ui.slider.dressup(uu.css.textSelectable(uu.id("slide1")), { degree: 0  });
-    uu.ui.slider.dressup(uu.css.textSelectable(uu.id("slide2")), { degree: 45 });
-    uu.ui.slider.dressup(uu.css.textSelectable(uu.id("slide3")), { degree: 90 });
+    uu.ui.imageSlider.dressup(uu.css.textSelectable(uu.id("slide1")), { degree: 0  });
+    uu.ui.imageSlider.dressup(uu.css.textSelectable(uu.id("slide2")), { degree: 45 });
+    uu.ui.imageSlider.dressup(uu.css.textSelectable(uu.id("slide3")), { degree: 90 });
 
     uu.click(uu.id("slide1"), function(evt) {
-        uu.ui.slider(evt.node, duration);
+        uu.ui.imageSlider(evt.node, duration);
     });
     uu.click(uu.id("slide2"), function(evt) {
-        uu.ui.slider(evt.node, duration);
+        uu.ui.imageSlider(evt.node, duration);
     });
     uu.click(uu.id("slide3"), function(evt) {
-        uu.ui.slider(evt.node, duration);
+        uu.ui.imageSlider(evt.node, duration);
     });
 
 
     // --- init ---
-    uu.ui.slider.dressup(uu.css.textSelectable(uu.id("slideDeny1")), { degree: 0  });
-    uu.ui.slider.dressup(uu.css.textSelectable(uu.id("slideDeny2")), { degree: 45 });
-    uu.ui.slider.dressup(uu.css.textSelectable(uu.id("slideDeny3")), { degree: 90 });
+    uu.ui.imageSlider.dressup(uu.css.textSelectable(uu.id("slideDeny1")), { degree: 0  });
+    uu.ui.imageSlider.dressup(uu.css.textSelectable(uu.id("slideDeny2")), { degree: 45 });
+    uu.ui.imageSlider.dressup(uu.css.textSelectable(uu.id("slideDeny3")), { degree: 90 });
 
     uu.click(uu.id("slideDeny1"), function(evt) {
-        uu.ui.slider(evt.node, duration, { allow: 0 });
+        uu.ui.imageSlider(evt.node, duration, { allow: 0 });
     });
     uu.click(uu.id("slideDeny2"), function(evt) {
-        uu.ui.slider(evt.node, duration, { allow: 0 });
+        uu.ui.imageSlider(evt.node, duration, { allow: 0 });
     });
     uu.click(uu.id("slideDeny3"), function(evt) {
-        uu.ui.slider(evt.node, duration, { allow: 0 });
+        uu.ui.imageSlider(evt.node, duration, { allow: 0 });
     });
 });
 
@@ -82,7 +82,7 @@ DURATION: <input type="range" step="50" value="300" min="0" max="2000" onchange=
 
 <p>動作中に連続クリック可能<br />
     先行入力を<b>受け付ける</b>
-    uu.ui.slider(node, duration, { <b>allow: 1</b> })</p>
+    uu.ui.imageSlider(node, duration, { <b>allow: 1</b> })</p>
 <div>
     <div id="slide1" style="float:left;visibility:hidden">
         <div>
@@ -113,7 +113,7 @@ DURATION: <input type="range" step="50" value="300" min="0" max="2000" onchange=
 
 <p>動作中にクリックしてもスライドは連続で動作しない<br />
     先行入力を<b>受け付けない</b><br />
-    uu.ui.slider(node, duration, { <b>allow: 0</b> })</p>
+    uu.ui.imageSlider(node, duration, { <b>allow: 0</b> })</p>
 <div>
     <div id="slideDeny1" style="float:left;visibility:hidden">
         <div>
