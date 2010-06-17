@@ -107,11 +107,20 @@ _option_ がHashなら { key: endValue, ...  } または { key: `[`endValue, eas
 }}}
 
 === reverse の指定 ===
-reverse: 1 を指定するとアニメーションの撒き戻しを行います。begin: 1 と同時に指定すると、そのキューを実行後に逆再生します。
+事前に chain: 1 を指定したキューを幾つか積み、reverse: 1 を指定すると、それまでに積まれたアニメーションキューの逆再生を行います。
+
 {{{
-    // opacity を 0.2 → 1.0 → 0.2 に戻す
-    uu("div").css({ o: 0.2 }).fx(500, { o: 1.0, begin: 1, reverse: 1 });
+    // width を 現在の値 → 0px → 300px → 0px → 現在の値 に戻す
+    uu(".box").fx(500, { w: 0, chain: 1 }).fx(500, { w: 300, reverse: 1 });
 }}}
+  * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/fx/fx.wiki.reverse.htm
+
+単一のキューを再生し逆再生するには、 reverse: 1 を指定します。
+{{{
+    // opacity を 現在の値 → 1.0 → 現在の値 に戻す
+    uu(".box").css({ o: 0.2 }).fx(500, { o: 1.0, reverse: 1 });
+}}}
+  * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/fx/fx.wiki.reverse.htm
 
 === fps の指定 ===
 アニメーションが停止している状態(キューが存在しない状態)で、_option_ に { fps: Number } を指定すると、キュー全体の fps を指定できます。
