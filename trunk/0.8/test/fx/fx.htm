@@ -55,7 +55,7 @@ function xaddqueue() {
 
     uu(".tgt3").css({ o: 1   }).
         fx(2000, { x: "+500px", y: "+500px", o: "-0.9" ,bgc: "rgb(0,255,100)" }).
-        fx(400). // standby
+        fx(400, uu.nop). // standby
         fx(2000, { x: "-500px", y: "-500px", o: 0.5 ,w: 300 ,bgc: "rgb(0,0,0)" });
 
     uu(".tgt4").css({ o: 1.0 }).
