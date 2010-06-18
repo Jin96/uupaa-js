@@ -11,7 +11,6 @@ uu || (function(win, // @param GlobalObject: as window
                 parseInt, parseFloat, getComputedStyle, JSON) { // minify
 
 var _prototype = "prototype",
-    _rootNode = doc.documentElement,
     _toString = Object[_prototype].toString,
     _isArray = Array.isArray || (Array.isArray = ArrayIsArray), // ES5 spec
     // --- HTML5: EMBEDDING CUSTOM NON-VISIBLE DATA ---
@@ -19,6 +18,7 @@ var _prototype = "prototype",
     _uuguid = "data-uuguid",
     _uuevent = "data-uuevent",
     // --- minify ---
+    _documentElement = "documentElement",
     _createTextNode = "createTextNode",
     _createElement = "createElement",
     _getAttribute = "getAttribute",
@@ -42,6 +42,7 @@ var _prototype = "prototype",
     _false = !1,
     _true = !0,
     _types = { "undefined": 8 },
+    _rootNode = doc[_documentElement],
     _dd2num = {},               // dd2num = { "00":   0 , ... "99":  99  }
     _num2dd = {},               // num2dd = {    0: "00", ...   99: "99" }
     _bb2num = {},               // bb2num = { "\00": 0, ... "\ff": 255 }
@@ -352,7 +353,7 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Clas
     // --- DEBUG ---
     puff:           uupuff,         // uu.puff(source:Mix/FormatString, var_args:Mix, ...)
     log:      uumix(uulog, {        // uu.log(log:Mix, var_args:Mix, ...)
-        clear:      uulogclear      // uu.log.clear()
+        clear:      uulogclear      // uu.log.clear(threshold:Number = 0)
     }),
     // --- OTHER ---
     ui:             {},             // uu.ui - ui namespace
@@ -2208,7 +2209,7 @@ function uuevent(node,         // @param Node:
         ex, token, eventType, capture, closure, bound, types = "types",
         handler, i = -1, pos,
 //{{{!mb
-        owner = node.ownerDocument || doc,
+        owner = (node.ownerDocument || doc)[_documentElement],
 //}}}!mb
         instance = 0;
 
@@ -2353,10 +2354,12 @@ function uueventstop(event) { // @param EventObjectEx:
 function uueventunbind(node,          // @param Node: target node
                        eventTypeEx) { // @param EventTypeExString(= void): namespace and event types, "click,click+,..."
                                       // @return Node:
-    var eventData = node[_uuevent], ns, ary, ex, i = -1;
+    var eventData = node[_uuevent], ns, ary, ex, i = -1, c = ",";
 
     if (eventData) {
-        ary = (eventTypeEx || eventData.types.replace(/^,|,$/g, "")).split(",");
+        eventTypeEx = eventTypeEx ? c + eventTypeEx + c     // [2] ",click,"
+                                  : node[_uuevent].types;   // [1] ",click,MyNamespace.mousemove+,"
+        ary = eventTypeEx[_replace](/^,|,$/g, "").split(c);
 
         while ( (ex = ary[++i]) ) {
             if (ex.lastIndexOf(".*") > 1) { // [3] "namespace.*"
@@ -2369,7 +2372,7 @@ function uueventunbind(node,          // @param Node: target node
                     }
                 });
             } else { // [2][4]
-                if (eventTypeEx[_indexOf]("," + ex + ",") >= 0) {
+                if (eventTypeEx[_indexOf](c + ex + c) >= 0) {
                     uueach(eventData[ex], function(evaluator) {
                         uuevent(node, ex, evaluator, _true); // unbind
                     });
@@ -3026,10 +3029,12 @@ function uulog(log                      // @param Mix: log data
 }
 
 // uu.log.clear - clear log
-function uulogclear() {
+function uulogclear(threshold) { // @param Number(= 0):
     var context = uuid(uu.config.log);
 
-    if (context) {
+    if (context
+        && (!threshold || threshold < uunodechildren(context).length)) {
+
         while (context[_lastChild]) {
             context.removeChild(context[_lastChild]);
         }
