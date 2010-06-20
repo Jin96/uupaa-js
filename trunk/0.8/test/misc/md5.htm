@@ -1,0 +1,56 @@
+<!doctype html><html><head><meta charset="UTF-8" />
+<title>uu.base64 test</title>
+<style>
+body { background-color: #eee }
+.uutest ol { background-color:dodgerblue;color:white }
+.uutest li { padding:5px;border:1px solid #ccc }
+.uutest .li0 { background-color:red   }
+.uutest .li1 { background-color:green }
+.uutest .li2 { background-color:red   }
+.uutest .li3 { background-color:#0a0  }
+.uutestinfo { position:fixed;top:10px;right:10px;font-size:xx-large }
+.uutestinfo a { border: 3px outset gray;padding:3px;background-color:red;color:white }
+.uutestinfo .score { color:black;text-shadow:gray 1px 1px 1px }
+.uutestinfo .ngzone {}
+</style>
+<script src="../../src/uupaa.js"></script>
+<script src="../../src/test/test.js"></script>
+<script src="../../src/misc/codec.js"></script>
+<script src="../../src/misc/md5.js"></script>
+<script src="../../src/misc/codec.js"></script>
+<script>
+uu.ready(function(uu) {
+    var longData = "1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111"
+                 + "1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111";
+
+    uu.test({
+        "MD5 encode": "",
+            'md5("hoge")': function() {
+                var enc = uu.md5("hoge");
+
+                return [enc, "==", "ea703e7aa1efda0064eaa507d9e8ab7e"];
+            },
+            'md5("ascii")': function() {
+                var enc = uu.md5("ascii");
+
+                return [enc, "==", "5b7f33be48f19c25e1af2f96cffc569f"];
+            },
+            'md5("user-password")': function() {
+                var enc = uu.md5("user-password");
+
+                return [enc, "==", "9a3729201fdd376c76ded01f986481b1"];
+            },
+            'md5(longData)': function() {
+                var enc = uu.md5(longData);
+
+                return [enc, "==", "3eb5de4c3f5768c373d2fde0df1dff7e"];
+            },
+            'md5(utf8("こんにちはこんにちは"))': function() {
+                var enc = uu.md5(uu.utf8("こんにちはこんにちは"));
+
+                return [enc, "==", "6870d8dd4b4bc38db9b094f1a959eae2"];
+            }
+    });
+});
+</script>
+</head><body></body></html>

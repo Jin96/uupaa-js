@@ -1,0 +1,265 @@
+<!DOCTYPE HTML><html lang="ja"><head><meta charset="UTF-8" />
+<title></title>
+<style>
+.uutest ol { background-color:dodgerblue;color:white }
+.uutest li { padding:5px;border:1px solid #ccc }
+.uutest .li0 { background-color:red   }
+.uutest .li1 { background-color:green }
+.uutest .li2 { background-color:red   }
+.uutest .li3 { background-color:#0a0  }
+.uutestinfo { position:fixed;top:10px;right:10px;font-size:xx-large }
+.uutestinfo a { border: 3px outset gray;padding:3px;background-color:red;color:white }
+.uutestinfo .score { color:black;text-shadow:gray 1px 1px 1px }
+.uutestinfo .ngzone {}
+</style>
+
+<script src="../../src/uupaa.js"></script>
+<script src="../../src/test/test.js"></script>
+</head><body>
+<script>
+uu.ready(function(uu) {
+    uu.test({
+        "Native JSON.stringify + JSON.parse": "",
+            "uu.json({a:1})": function() {
+
+                return [uu.json({a:1}), "==", '{"a":1}'];
+            },
+  //        "uu.json(document.body)": function() {
+  //            return [uu.json(document.body), "==", '"body"'];
+  //        },
+            "uu.json(null)": function() {
+                return [uu.json(null), "==", 'null'];
+            },
+            "uu.json(undefined)": function() {
+                return [uu.json(undefined), "==", ''];
+            },
+            "uu.json(true)": function() {
+                return [uu.json(true), "==", 'true'];
+            },
+            "uu.json(false)": function() {
+                return [uu.json(false), "==", 'false'];
+            },
+            "uu.json(123.45)": function() {
+                return [uu.json(123.45), "==", '123.45'];
+            },
+            "uu.json(new Date)": function() {
+                return [uu.json(new Date), "is string"];
+            },
+  //        "uu.json(uu.nop)": function() {
+  //            return [uu.json(uu.nop), "==", '"nop"'];
+  //        },
+            "uu.json('string')": function() {
+                return [uu.json('string'), "==", '"string"'];
+            },
+            "uu.json([1,2])": function() {
+                return [uu.json([1,2]), "==", '[1,2]'];
+            },
+  //        "uu.json(document.links)": function() {
+  //            return [uu.json(document.links), "is string"];
+  //        },
+  //        "uu.json(window.getComputedStyle(document.body, null))": function() {
+  //            var cs = window.getComputedStyle ? window.getComputedStyle(document.body, null)
+  //                                             : document.body.currentStyle;
+  //
+  //            return [uu.json(cs), "is string"];
+  //        },
+            "uu.json(NaN)": function() {
+                return [uu.json(NaN), "is string"];
+            },
+            "uu.json(Infinity)": function() {
+                return [uu.json(Infinity), "is string"];
+            },
+
+        "Alternative uu.json(mix, true), uu.json.decode(jsonString, true)": "",
+            "uu.json(new Date, true)": function() {
+                var data = new Date;
+                return [uu.json(data, true), "is string"];
+            },
+            "uu.json({a:1}, true)": function() {
+                return [uu.json({a:1}, true), "==", '{"a":1}'];
+            },
+            "uu.json(document.body, true)": function() {
+                return [uu.json(document.body, true), "==", '"body"'];
+            },
+            "uu.json(null, true)": function() {
+                return [uu.json(null, true), "==", 'null'];
+            },
+            "uu.json(undefined, true)": function() {
+                return [uu.json(undefined, true), "==", ''];
+            },
+            "uu.json(true, true)": function() {
+                return [uu.json(true, true), "==", 'true'];
+            },
+            "uu.json(false, true)": function() {
+                return [uu.json(false, true), "==", 'false'];
+            },
+            "uu.json(123.45, true)": function() {
+                return [uu.json(123.45, true), "==", '123.45'];
+            },
+            "uu.json(new Date, true)": function() {
+                return [uu.json(new Date, true), "is string"];
+            },
+            "uu.json(uu.nop, true)": function() {
+                return [uu.json(uu.nop, true), "==", '"nop"'];
+            },
+            "uu.json('string', true)": function() {
+                return [uu.json('string', true), "==", '"string"'];
+            },
+            "uu.json([1,2], true)": function() {
+                return [uu.json([1,2], true), "==", '[1,2]'];
+            },
+            "uu.json(document.links, true)": function() {
+                return [uu.json(document.links, true), "is string"];
+            },
+            "uu.json(window.getComputedStyle(document.body, null), true)": function() {
+                var cs = window.getComputedStyle ? window.getComputedStyle(document.body, null)
+                                                 : document.body.currentStyle;
+
+                return [uu.json(cs, true), "is string"];
+            },
+            "uu.json(NaN, true)": function() {
+                return [uu.json(NaN, true), "is string"];
+            },
+            "uu.json(Infinity, true)": function() {
+                return [uu.json(Infinity, true), "is string"];
+            }
+    });
+
+    if (!window.JSON) {
+        return;
+    }
+    uu.test({
+        "Compare": "",
+            'uu.json.decode(uu.json(\'"\')) == \'"\'': function() {
+                var data = '"', rhs = '"\""';
+                var jstr = uu.json(data);
+                var nstr = JSON.stringify(data);
+
+                var lhs = uu.json.decode(jstr);
+                return [[lhs, jstr], "==", [data, jstr]];
+            },
+            'uu.json.decode(uu.json("\\b")) == "\\b"': function() {
+                var data = "\b", rhs = '"\\b"';
+                var jstr = uu.json(data);
+                var lhs = uu.json.decode(jstr);
+                return [[lhs, jstr], "==", [data, jstr]];
+            },
+            'uu.json.decode(uu.json("\\f")) == "\\f"': function() {
+                var data = "\f", rhs = '"\\f"';
+                var jstr = uu.json(data);
+                var lhs = uu.json.decode(jstr);
+                return [[lhs, jstr], "==", [data, jstr]];
+            },
+            'uu.json.decode(uu.json("\\n")) == "\\n"': function() {
+                var data = "\n", rhs = '"\\n"';
+                var jstr = uu.json(data);
+                var lhs = uu.json.decode(jstr);
+                return [[lhs, jstr], "==", [data, jstr]];
+            },
+            'uu.json.decode(uu.json("\\r")) == "\\r"': function() {
+                var data = "\r", rhs = '"\\r"';
+                var jstr = uu.json(data);
+                var lhs = uu.json.decode(jstr);
+                return [[lhs, jstr], "==", [data, jstr]];
+            },
+            'uu.json.decode(uu.json("\\t")) == "\\t"': function() {
+                var data = "\t", rhs = '"\\t"';
+                var jstr = uu.json(data);
+                var lhs = uu.json.decode(jstr);
+                return [[lhs, jstr], "==", [data, jstr]];
+            },
+            'uu.json.decode(uu.json("\\")) == "\\"': function() {
+                var data = "\\", rhs = '"\\\\"';
+                var jstr = uu.json(data);
+                var lhs = uu.json.decode(jstr);
+                return [[lhs, jstr], "==", [data, jstr]];
+            }
+    });
+
+    uu.test({
+        "JSON.stringify": "",
+            "Date.toISOString() == Date.toJSON": function() {
+                var data = new Date;
+
+                return [data.toISOString(), "==", data.toJSON()];
+            },
+            "(true).toJSON()": function() {
+                return [(true).toJSON(), "==", true];
+            },
+            "(false).toJSON()": function() {
+                return [(false).toJSON(), "==", false];
+            },
+            "(NaN).toJSON()": function() {
+                return [(NaN).toJSON(), "is NaN"];
+            },
+            "(Infinity).toJSON()": function() {
+                return [(Infinity).toJSON(), "is Infinity"];
+            },
+            "(0).toJSON()": function() {
+                return [(0).toJSON(), "==", 0];
+            },
+            "(-0).toJSON()": function() {
+                return [(-0).toJSON(), "==", 0];
+            },
+            "(-12.3).toJSON()": function() {
+                return [(-12.3).toJSON(), "==", -12.3];
+            },
+            "('string').toJSON()": function() {
+                return [('string').toJSON(), "==", 'string'];
+            },
+            "('あa').toJSON()": function() {
+                return [('あa').toJSON(), "==", 'あa'];
+            }
+    });
+
+    uu.test({
+        "": "",
+
+            'JSON.parse(JSON.stringify(\'"\')) == \'"\'': function() {
+                var data = '"', rhs = '"\""';
+                var jstr = JSON.stringify(data);
+                var lhs = JSON.parse(jstr);
+
+                return [[lhs, jstr], "==", [data, jstr]];
+            },
+            'JSON.parse(JSON.stringify("\\b")) == "\\b"': function() {
+                var data = "\b", rhs = '"\\b"';
+                var jstr = JSON.stringify(data);
+                var lhs = JSON.parse(jstr);
+                return [[lhs, jstr], "==", [data, jstr]];
+            },
+            'JSON.parse(JSON.stringify("\\f")) == "\\f"': function() {
+                var data = "\f", rhs = '"\\f"';
+                var jstr = JSON.stringify(data);
+                var lhs = JSON.parse(jstr);
+                return [[lhs, jstr], "==", [data, jstr]];
+            },
+            'JSON.parse(JSON.stringify("\\n")) == "\\n"': function() {
+                var data = "\n", rhs = '"\\n"';
+                var jstr = JSON.stringify(data);
+                var lhs = JSON.parse(jstr);
+                return [[lhs, jstr], "==", [data, jstr]];
+            },
+            'JSON.parse(JSON.stringify("\\r")) == "\\r"': function() {
+                var data = "\r", rhs = '"\\r"';
+                var jstr = JSON.stringify(data);
+                var lhs = JSON.parse(jstr);
+                return [[lhs, jstr], "==", [data, jstr]];
+            },
+            'JSON.parse(JSON.stringify("\\t")) == "\\t"': function() {
+                var data = "\t", rhs = '"\\t"';
+                var jstr = JSON.stringify(data);
+                var lhs = JSON.parse(jstr);
+                return [[lhs, jstr], "==", [data, jstr]];
+            },
+            'JSON.parse(JSON.stringify("\\\\")) == "\\\\"': function() {
+                var data = "\\", rhs = '"\\\\"';
+                var jstr = JSON.stringify(data);
+                var lhs = JSON.parse(jstr);
+                return [[lhs, jstr], "==", [data, jstr]];
+            },
+
+        "End Of Test": ""
+    });
+});
+</script></body></html>
