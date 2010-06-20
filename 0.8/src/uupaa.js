@@ -303,8 +303,8 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Clas
                                     //  [4][set text]                  uu.text(node, "text")      -> node
                                     //  [5][set formated text]         uu.text(node, "??", "a")   -> node
     // --- JSON ---
-    json:     uumix(uujson, {       // uu.json(source:Mix, useNativeJSON:Boolean = false):JSONString
-        decode:     uujsondecode    // uu.json.decode(jsonString:JSONString, useNativeJSON:Boolean = false):Mix/Boolean
+    json:     uumix(uujson, {       // uu.json(source:Mix, alt:Boolean = false):JSONString
+        decode:     uujsondecode    // uu.json.decode(jsonString:JSONString, alt:Boolean = false):Mix/Boolean
     }),
     // --- STRING ---
     fix:            uufix,          // uu.fix(source:String):String
@@ -417,21 +417,21 @@ uumix(Array[_prototype], {
 }, 0, 0);
 
 uumix(Boolean[_prototype], {
-    toJSON:         NumberToJson    //      toJSON():String
+    toJSON:         ObjectToJson    //      toJSON():Boolean
 }, 0, 0);
 
 uumix(Date[_prototype], {
     toISOString:    DateToISOString,// toISOString():String
-    toJSON:         DateToISOString //      toJSON():String
+    toJSON:         DateToJSON      //      toJSON():String
 }, 0, 0);
 
 uumix(Number[_prototype], {
-    toJSON:         NumberToJson    //      toJSON():String
+    toJSON:         ObjectToJson    //      toJSON():Number
 }, 0, 0);
 
 uumix(String[_prototype], {
     trim:           StringTrim,     //        trim():String
-    toJSON:         StringToJson    //      toJSON():String
+    toJSON:         ObjectToJson    //      toJSON():String
 }, 0, 0);
 
 //{{{!mb
@@ -978,7 +978,7 @@ function uuhas(source,   // @param Hash/Array/Node: source
             for (i in search) {
                 if (!(i in source)
                     || (source[i] !== search[i]
-                        && _json(source[i]) !== _json(search[i]))) {
+                        && uujsonencode(source[i]) !== uujsonencode(search[i]))) {
                     return _false;
                 }
             }
@@ -3012,7 +3012,7 @@ uuformat.q = /\?\?/g;
 function uupuff(source                   // @param Mix/FormatString: source object
                                          //                          or "format ?? string"
                 /* , var_args, ... */) { // @param Mix: var_args
-    alert(arguments.length < 2 ? _json(source)
+    alert(arguments.length < 2 ? uujsonencode(source)
                                : uuformat.apply(this, arguments));
 }
 
@@ -3020,7 +3020,7 @@ function uupuff(source                   // @param Mix/FormatString: source obje
 function uulog(log                      // @param Mix: log data
                /* , var_args, ... */) { // @param Mix: var_args
     var id = uu.config.log, context = uuid(id), tag,
-        txt = arguments.length < 2 ? _json(log)
+        txt = arguments.length < 2 ? uujsonencode(log)
                                    : uuformat.apply(this, arguments);
 
     context || uunodeadd(context = uu.ol({ id: id }));
@@ -3043,75 +3043,66 @@ function uulogclear(threshold) { // @param Number(= 0):
 
 // --- JSON ---
 // uu.json - mix to JSONString
-function uujson(source,          // @param Mix:
-                useNativeJSON) { // @param Boolean(= false): switch native impl or js impl
-                                 //                          true is use native JSON
-                                 //                          false is use js JSON
-                                 // @return JSONString:
-    return useNativeJSON && JSON ? JSON.stringify(source) || ""
-                                 : _json(source, 1);
+function uujson(source, // @param Mix:
+                alt) {  // @param Boolean(= false): false is JSON.stringify
+                        //                          true is js impl(uu.json.encode)
+                        // @return JSONString:
+    return (alt || !JSON) ? uujsonencode(source, 1)
+                          : JSON.stringify(source) || "";
 }
 uujson.x = [
-    /[^,:{}\[\]0-9.\-+Eaeflnr-u \n\r\t]/,                       // x[0] NGWORDS
-    /"(\\.|[^"\\])*"/g,                                         // x[1] ESCAPE JSON STRING
-    uuhash('",\\",\b,\\b,\f,\\f,\n,\\n,\r,\\r,\t,\\t,\\,\\\\'), // x[2] SWAP ENTITY
-    /(?:\"|\\[bfnrt\\])/g,                                      // x[3] ESCAPE
-    /[\x00-\x1F\u0080-\uFFEE]/g];                               // x[4] ENCODE UNICODE ENTITY
+    /[^,:{}\[\]0-9\.\-+Eaeflnr-u \n\r\t]/,                      // x[0] NGWORDS
+    /"(\\.|[^"\\])*"/g,                                         // x[1] UNESCAPE
+    /(?:\"|\\[bfnrt\\])/g,                                      // x[2] ESCAPE
+    uuhash('",\\",\b,\\b,\f,\\f,\n,\\n,\r,\\r,\t,\\t,\\,\\\\'), // x[3] SWAP ENTITY
+    /[\x00-\x1f]/g];                                            // x[4] NON-ASCII TO UNICODE ENTITY
 
 // uu.json.decode - decode JSONString
-function uujsondecode(jsonString,      // @param JSONString:
-                      useNativeJSON) { // @param Boolean(= false): switch native impl or js impl
-                                       //                          true is use native JSON
-                                       //                          false is use js JSON
-                                       // @return Mix/Boolean: false is error
+function uujsondecode(jsonString, // @param JSONString:
+                      alt) {      // @param Boolean(= false): false is JSON.parse
+                                  //                          true is js impl(uu.json.decode)
+                                  // @return Mix/Boolean: false is error
     var str = jsonString.trim(), x = uujson.x;
 
-    return useNativeJSON && JSON ? JSON.parse(str)
-                                 : x[0].test(str[_replace](x[1], ""))
-                                        ? _false
-                                        : (new Function("return " + str))();
-}
-
-// inner - convert string to JSON formatted string
-function _str2json(str) { // @param String:
-                          // @return String: '\u0000'
-    var x = uujson.x;
-
-    return str[_replace](x[3], function(m) { return x[2][m]; })
-              [_replace](x[4], function(s, c) {
-                // NonASCIIString to UnicodeString("\u0041\u0042")
-                c = s.charCodeAt(0);
-                return "\\u" + _num2hh[(c >> 8) & 255] + _num2hh[c & 255];
-           });
+    return (alt || !JSON) ? (x[0].test(str[_replace](x[1], ""))
+                                ? _false
+                                : (new Function("return " + str))())
+                          : JSON.parse(str);
 }
 
 // inner - json inspect
-function _json(mix, esc) {
-    var ary, type = uutype(mix), w, ai = -1, i, iz, q = '"';
+function uujsonencode(mix, esc) {
+    var ary, type = uutype(mix), w, ai = -1, i, iz, q = '"', x;
 
     if (mix === win) {
         return '"window"'; // window -> String("window")
     }
     switch (type) {
     case uutype.HASH:       ary = []; break;
+    case uutype.NULL:
+    case uutype.BOOLEAN:    return mix + "";
     case uutype.NODE:       return q + uunodepath(mix) + q; // node path
+    case uutype.DATE:       return mix.toJSON();
     case uutype.NUMBER:     return isFinite(mix) ? mix + "" : "null";
-    case uutype.DATE:       return uudate(mix).ISO();
     case uutype.FUNCTION:
 //{{{!mb
-                            if (_ie) {
-                                w = mix + ""; // mix.toString()
-                                return q + w.slice(9, w[_indexOf]("(")) + q; // )
-                            }
+        if (_ie) {
+            w = mix + ""; // mix.toString()
+            return q + w.slice(9, w[_indexOf]("(")) + q; // )
+        }
 //}}}!mb
-                            return q + mix.name + q;
-    case uutype.BOOLEAN:
-    case uutype.NULL:       return mix + "";
-    case uutype.STRING:     return q + (esc ? _str2json(mix) : mix) + q;
+        return q + mix.name + q;
+    case uutype.STRING:
+        x = uujson.x;
+        return q + mix.replace(x[2], function(m) {
+                       return x[3][m] || m;
+                   }).replace(x[4], function(s) {
+                       return "\\u00" + _num2hh[s.charCodeAt(0)];
+                   }) + q;
     case uutype.ARRAY:
     case uutype.FAKEARRAY:
         for (ary = [], i = 0, iz = mix.length; i < iz; ++i) {
-            ary[++ai] = _json(mix[i], esc);
+            ary[++ai] = uujsonencode(mix[i], esc);
         }
         return "[" + ary + "]";
     default: // UNDEFINED
@@ -3125,14 +3116,12 @@ function _json(mix, esc) {
         for (i in mix) {
             if (typeof mix[i] === _string && (w || i != (+i + ""))) { // isFinite(i)
                 w && (i = mix.item(i));
-                ary[++ai] = q + i + q + ':'
-                          + q + (esc ? _str2json(mix[i]) : mix[i]) + q;
+                ary[++ai] = q + i + q + ':' + q + mix[i] + q;
             }
         }
     } else { // type === uutype.HASH
         for (i in mix) {
-            ary[++ai] = q + (esc ? _str2json(i) : i) + q + ":"
-                          + _json(mix[i], esc);
+            ary[++ai] = q + i + q + ":" + uujsonencode(mix[i], esc);
         }
     }
     return "{" + ary + "}";
@@ -3399,22 +3388,24 @@ function ArrayReduceRight(evaluator,      // @param Function: evaluator
 
 // Date.prototype.toISOString - to ISO8601 string
 function DateToISOString() { // @return String:
+    return this.toJSON ? this.toJSON() : uudate(this).ISO();
+}
+
+// Date.prototype.toJSON
+function DateToJSON() { // @return String:
     return uudate(this).ISO();
 }
 
-// Number.prototype.toJSON, Boolean.prototype.toJSON
-function NumberToJson() { // @return String: "123", "true", "false"
-    return this.toString();
+// Boolean.prototype.toJSON
+// Number.prototype.toJSON
+// String.prototype.toJSON
+function ObjectToJson() { // @return Mix:
+    return this.valueOf();
 }
 
 // String.prototype.trim
 function StringTrim() { // @return String: "has  space"
     return this[_replace](_trimSpace, "");
-}
-
-// String.prototype.toJSON
-function StringToJson() { // @return String: "string"
-    return _str2json(this);
 }
 
 // --- HTMLElement.prototype ---

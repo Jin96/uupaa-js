@@ -52,11 +52,13 @@ function uuuidragbase(evt,      // @param event:
         node.style.top  = (pageY - dragInfo.y) + "px";
 
         opt.mousemove && opt.mousemove(evt, node, option, dragInfo);
+//{{{!mb
         opt.shim &&
             opt.shim.resize(pageX - dragInfo.x,
                             pageY - dragInfo.y,
                             node.offsetWidth,
                             node.offsetHeight);
+//}}}!mb
     }
 }
 

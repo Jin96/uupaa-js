@@ -108,8 +108,10 @@ function question(title,       // @param String:
         if (result === 2) { // bad operator
             rv = [result, "bad operator: " + param[1]];
         } else {
-            rv = [result, uu.format("?? ?? ??", uu.json(param[0]), param[1],
-                                                param[2] ? uu.json(param[2]) : "")];
+            rv = [result, uu.format("?? ?? ??", uu.json(param[0], true),
+                                                param[1],
+                                                param[2] ? uu.json(param[2], true)
+                                                         : "")];
             param.slice(3).forEach(function(v, i) {
                 uu.isFunction(v) ? v() // after callback
                                  : rv.push(v);
