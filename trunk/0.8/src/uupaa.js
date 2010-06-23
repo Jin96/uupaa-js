@@ -240,6 +240,8 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Clas
         detach:     uueventdetach   // uu.event.detach(node:Node, eventType:String, evaluator:Function,
                                     //                                              useCapture:Boolean = false)
     }),
+    bind:           uuevent,        // uu.bind() as uu.event()
+    unbind:         uueventunbind,  // uu.unbind() as uu.event.unbind()
     // --- NODE / NodeList / NodeID ---
     node:     uumix(uunode, {       // uu.node(tagName:String = "div",
                                     //         var_args:Node/String/Number/Hash = void, ...):Node
@@ -2283,6 +2285,10 @@ uuevent.codes = {
     losecapture: 0x102, // [IE]
     DOMMouseScroll: 0x104, // [GECKO]
 //}}}!mb
+    // Touch Events
+    touchstart: 0x101, // as mousedown
+    touchend:   0x102, // as mouseup
+    touchmove:  0x103, // as mousemove
 
     // DOM Level2 Events
     mousedown: 1, mouseup: 2, mousemove: 3, mousewheel: 4, click: 5,
@@ -2291,9 +2297,10 @@ uuevent.codes = {
     focus: 15, blur: 16, resize: 17, scroll: 18, change: 19, submit: 20,
 
     // iPhone Events
-    touchstart: 32, touchend: 33, touchmove: 34, touchcancel: 35,
-    gesturestart: 36, gesturechange: 37, gestureend: 38,
-    orientationchange: 39,
+//  touchstart: 32, touchend: 33, touchmove: 34,
+//    touchcancel: 35,
+//    gesturestart: 36, gesturechange: 37, gestureend: 38,
+//    orientationchange: 39,
 
     // HTML5 Events
     online: 50, offline: 51, message: 52
@@ -3835,7 +3842,7 @@ function detectVersions(libraryVersion) { // @param Number: Library version
                ie: _false, ie6: _false, ie7: _false, ie8: _false, ie9: _false,
                opera: _false, gecko: _false, webkit: _true,
                chrome: _false, safari: _true, mobile: _true, jit: _true,
-               flash: 0, silverlight: 0 },
+               touch: _true, flash: 0, silverlight: 0 },
 //{{{!mb
         ie = !!doc.uniqueID, documentMode = doc.documentMode,
 //}}}!mb
@@ -3880,6 +3887,7 @@ function detectVersions(libraryVersion) { // @param Number: Library version
 //}}}!mb
                     : "";                           // Unknown OS   -> ""
 //{{{!mb
+    rv.touch        = rv.iphone || rv.android;
     rv.jit          = (ie        && browser >= 9)   || // IE 9+
                       (rv.gecko  && render  >  1.9) || // Firefox 3.5+(1.91)
                       (rv.webkit && render  >= 528) || // Safari 4+, Google Chrome(2+)

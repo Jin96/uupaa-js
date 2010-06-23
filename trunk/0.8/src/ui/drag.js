@@ -56,7 +56,10 @@ function draginit(node,     // @param Node: move target node
     this.shim = (uu.ver.ie6 && !this.option.rel
                             && !this.option.noshim) ? uu("Shim", tgt) : 0;
  */
-    uu.mousedown(grip, this);
+
+    uu.event(grip, uu.ver.touch ? "touchstart"
+                                : "mousedown", this)
+
 //    this.option.zoom && uu.mousewheel(node, this);
 }
 
@@ -68,10 +71,13 @@ function dragHandleEvent(evt) {
     var code = evt.code, fn;
 
     if (code < 5) {
-        if (code < 3) { // 1: mousedown, 2: mouseup
+        if (code < 3) { // 1: mousedown, touchstart
+                        // 2: mouseup,   touchend
             fn = code === 1 ? uu.event : uu.event.unbind;
 
-            fn(_ie678 ? this.grip : document, "mousemove+,mouseup+", this);
+            fn(_ie678 ? this.grip : document,
+               uu.ver.touch ? "touchmove+,touchend+"
+                            : "mousemove+,mouseup+", this);
         } else if (code === 3) { // 3: mousemove
         } else if (code === 4) { // 4: wheel
 //            this.option.wheel && this.mousewheel(evt);

@@ -1,0 +1,47 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8" />
+<title>uu.ui.drag multi touch</title>
+<script src="../../src/uupaa.js"></script>
+<script src="../../src/ui/dragbase.js"></script>
+<script src="../../src/ui/zindex.js"></script>
+<script src="../../src/ui/shim.js"></script>
+<script src="../../src/ui/drag.js"></script>
+<script src="../../src/css/box.js"></script>
+<script src="../../src/css/text.js"></script>
+<style>
+html, body {
+/*
+  overflow: hidden;
+ */
+}
+.box {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  background-color: #73ff00;
+  color: white;
+  text-align: center;
+  top: 0px;
+  left: 0px;
+  border: 2px solid navy;
+}
+.grip {
+  background-color: green;
+}
+</style>
+</head><body id="body">
+
+<script>
+
+uu.ready(function(uu) {
+
+    uu("Drag", uu.id("tgt1"));
+    uu("Drag", uu.id("tgt2"));
+    uu("Drag", uu.id("tgt3"));
+
+});
+
+</script>
+<div class="box" id="tgt1">basic drag and drop</div>
+<div class="box" id="tgt2">basic drag and drop</div>
+<div class="box" id="tgt3">basic drag and drop</div>
+</body></html>
