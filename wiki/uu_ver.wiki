@@ -82,5 +82,5 @@ o = true, x/space = false
     }
 }}}
 
-== Test Code ==
+= Test Code =
 http://uupaa-js.googlecode.com/svn/trunk/0.8/test/ver/ver.htm
