@@ -14,14 +14,6 @@ html, body {
  */
   background-color: #333;
 }
-.box {
-  position: absolute;
-  top: 300px;
-  left: 300px;
-}
-.grip {
-  background-color: green;
-}
 </style>
 </head><body id="body">
 
@@ -34,14 +26,15 @@ uu.ready("window", function(uu) {
             uu.fx(node, 100, { o: 1 });
         },
         mouseup: function(evt, node, option, dragInfo) {
-            uu.fx(node, 600, { o: 0.4 });
+            uu.fx(node, 400, { o: 0.4 });
         }
     };
 
     uu.tag("img").forEach(function(node, i) {
-        node.className = "box";
-        uu.fx(node, 200, { o: 0.4, x: (i % 5) * 80 + i * 20,
-                                   y: (i % 5) * 80 + i * 20 });
+        uu.css.toAbsolute(node);
+        uu.fx(node, 500, { o: 0.4, x: 400, y: 400 });
+        uu.fx(node, 500, { x: (i % 5) * 80 + i * 20,
+                            y: (i % 5) * 80 + i * 20 });
         uu("Drag", node, null, option);
     });
 
