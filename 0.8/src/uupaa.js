@@ -2151,13 +2151,16 @@ function uuevent(node,         // @param Node:
                                // @return Node:
     function _eventClosure(event) {
         if (!event.node) {
-            var target = event.target
+            var fullcode = uuevent.codes[event.type] || 0,
+                target = event.target
 //{{{!mb
                                       || event.srcElement || doc;
 //}}}!mb
 
             event.node = node;
-            event.code = (uuevent.codes[event.type] || 0) & 255;
+            event.code = fullcode & 0xff; // half code
+            event.touch = fullcode & 0x0200;
+            event.gesture = fullcode & 0x0400;
             event.mouse = event.button || 0;
             event.at = (target[_nodeType] === 3) // 3: TEXT_NODE
                      ? target[_parentNode] : target;
@@ -2281,29 +2284,37 @@ function uuevent(node,         // @param Node:
 uuevent.parse = /^(?:(\w+)\.)?(\w+)(\+)?$/; // ^[NameSpace.]EvntType[Capture]$
 uuevent.codes = {
 //{{{!mb
-    // Cross Browser Event Bits
-    losecapture: 0x102, // [IE]
-    DOMMouseScroll: 0x104, // [GECKO]
+    // Cross Browser Event
+    losecapture:    0x102, // as mouseup    [IE]
+    DOMMouseScroll: 0x104, // as mousewheel [GECKO]
 //}}}!mb
-    // Touch Events
-    touchstart: 0x101, // as mousedown
-    touchend:   0x102, // as mouseup
-    touchmove:  0x103, // as mousemove
-
-    // DOM Level2 Events
-    mousedown: 1, mouseup: 2, mousemove: 3, mousewheel: 4, click: 5,
-    dblclick: 6, keydown: 7, keypress: 8, keyup: 9, mouseenter: 10,
-    mouseleave: 11, mouseover: 12, mouseout: 13, contextmenu: 14,
-    focus: 15, blur: 16, resize: 17, scroll: 18, change: 19, submit: 20,
-
-    // iPhone Events
-//  touchstart: 32, touchend: 33, touchmove: 34,
-//    touchcancel: 35,
-//    gesturestart: 36, gesturechange: 37, gestureend: 38,
-//    orientationchange: 39,
-
+    // DOM Level2 Events    iPhone Touch Events         iPhone Gesture Events
+    mousedown:      1,      touchstart:     0x201,      gesturestart:   0x401,
+    mouseup:        2,      touchend:       0x202,      gestureend:     0x402,
+    mousemove:      3,      touchmove:      0x203,      gesturechange:  0x403,
+    mousewheel:     4,
+    click:          10,
+    dblclick:       11,
+    keydown:        12,
+    keypress:       13,
+    keyup:          14,
+    mouseenter:     15,
+    mouseleave:     16,
+    mouseover:      17,
+    mouseout:       18,
+    contextmenu:    19,
+    focus:          20,
+    blur:           21,
+    resize:         22,
+    scroll:         23,
+    change:         24,
+    submit:         25,
     // HTML5 Events
-    online: 50, offline: 51, message: 52
+    online:         50,
+    offline:        51,
+    message:        52,
+    // iPhone Events
+    orientationchange: 60
 };
 uuevent.shortcut =
     ("mousedown,mouseup,mousemove,mousewheel,click,dblclick,keydown," +

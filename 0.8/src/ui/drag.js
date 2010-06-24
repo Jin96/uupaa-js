@@ -13,7 +13,9 @@ uu.Class("Drag", {
 //    mousewheel:   dragmousewheel    // mousewheel(evt)
 });
 
-var _ie678 = uu.ie && !uu.ver.jit;
+var _ie678 = uu.ie && !uu.ver.jit,
+    _moveup = uu.ver.touch ? "touchmove+,touchend+"
+                           : "mousemove+,mouseup+";
 
 // --- drag ---
 // uu.Class.Drag.init
@@ -34,6 +36,7 @@ function draginit(node,     // @param Node: move target node
     this.option = uu.arg(option, {
 //        ghost:      0,
 //        relative:   0,
+        tripletap: true,
         shim: 0,
         zoom: {
             width:  { min: 0, max: 2000 },
@@ -57,7 +60,7 @@ function draginit(node,     // @param Node: move target node
                             && !this.option.noshim) ? uu("Shim", tgt) : 0;
  */
 
-    uu.event(grip, uu.ver.touch ? "touchstart"
+    uu.event(grip, uu.ver.touch ? "touchstart,gesturestart"
                                 : "mousedown", this)
 
 //    this.option.zoom && uu.mousewheel(node, this);
@@ -68,20 +71,29 @@ function dragHandleEvent(evt) {
     uu.event.stop(evt);
 
     uu.ui.dragbase(evt, this.node, this.grip, this.option);
-    var code = evt.code, fn;
+    var code = evt.code;
 
-    if (code < 5) {
-        if (code < 3) { // 1: mousedown, touchstart
-                        // 2: mouseup,   touchend
-            fn = code === 1 ? uu.event : uu.event.unbind;
+//this.node.textContent = evt.type;
 
-            fn(_ie678 ? this.grip : document,
-               uu.ver.touch ? "touchmove+,touchend+"
-                            : "mousemove+,mouseup+", this);
-        } else if (code === 3) { // 3: mousemove
-        } else if (code === 4) { // 4: wheel
-//            this.option.wheel && this.mousewheel(evt);
+    switch (code) {
+    case uu.event.codes.mousedown:  // mousedown, touchstart, gesturestart
+        if (evt.gesture) {
+            uu.unbind(document, "touchmove+,touchend+", this);
+            uu.bind(document, "gesturechange+,gestureend+", this);
+        } else {
+            uu.bind(_ie678 ? this.grip : document, _moveup, this);
         }
+        break;
+    case uu.event.codes.mouseup:    // mouseup, touchend, gestureend
+        if (evt.gesture) {
+            uu.unbind(document, "gesturechange+,gestureend+", this);
+            uu.bind(document, "touchmove+,touchend+", this);
+        } else {
+            uu.unbind(_ie678 ? this.grip : document, _moveup, this);
+        }
+        break;
+//  case uu.event.codes.wheel:
+//      this.option.wheel && this.mousewheel(evt);
     }
 }
 

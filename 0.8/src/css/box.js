@@ -55,8 +55,9 @@ function uucssbox(node,  // @param Node:
     var rv = node[_uucssbox];
 
     if (!rv || !quick) {
+        mbp = mbp || 0x7;
+
         var zero = "0px", uucssunit = uu.css.unit, bw = uucssbox.bw,
-            mbp = mbp || 0x7,
             ns = uu.css(node, true), // computed pixel unit
             mt = ns.marginTop,
             ml = ns.marginLeft,
@@ -65,7 +66,7 @@ function uucssbox(node,  // @param Node:
             pt = ns.paddingTop,
             pl = ns.paddingLeft,
             pr = ns.paddingRight,
-            pb = ns.paddingBottom;
+            pb = ns.paddingBottom,
             bt = ns.borderTopWidth,
             bl = ns.borderLeftWidth,
             br = ns.borderRightWidth,
