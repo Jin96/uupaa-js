@@ -17,58 +17,95 @@ function uuuidragbase(evt,      // @param event:
                       node,     // @param Node: move target node
                       grip,     // @param Node: grip target node
                       option) { // @param Hash(= {}): { mouseup, mousemove, mousedown, shim }
-                                //  option.mouseup   - Function: mouseup callback
-                                //  option.mousemove - Function: mousemove callback
-                                //  option.mousedown - Function: mousedown callback
+                                //  option.mouseup   - Function: mouseup/touchend/gestureend callback
+                                //  option.mousemove - Function: mousemove/touchmove/gesturechange callback
+                                //  option.mousedown - Function: mousedown/touchstart/gesturestart callback
+                                //  option.tripletap - Boolean/Function: true is reset
+                                //                                       triple tap callback
                                 //  option.shim      - Object: shim object
     var opt = option || {},
         pageX = evt.pageX,
         pageY = evt.pageY,
         code  = evt.code,
         dragInfo = grip[_uuuidrag] || {},
-        touches, finger, identifier, i, iz; // for iPhone
+        touches, finger, identifier, i; // for iPhone
 
-    if (code === 1 && !dragInfo.dragging) { // 1: mousedown, touchstart
+    // mousedown, touchstart, gesturestart
+    if (code === uu.event.codes.mousedown && !dragInfo.dragging) {
 
-        if (_touch) {
-            finger = evt.touches[evt.touches.length - 1];
-            identifier = finger.identifier;
-            pageX = finger.pageX;
-            pageY = finger.pageY;
+        // init
+        if (!grip[_uuuidrag]) {
+            grip[_uuuidrag] = dragInfo = { tap: 0, scale: 1, rotate: 0 };
+
+            fetchTransform(node, dragInfo);
         }
 
-        dragInfo = grip[_uuuidrag] = {
-            x: pageX - (parseInt(node.style.left) || 0),
-            y: pageY - (parseInt(node.style.top)  || 0),
-            id: identifier, // touch.identifier
-            dragging: 1
-        };
+        if (_touch) {
+            if (evt.touches) {
+                finger = evt.touches[evt.touches.length - 1];
+                pageX = finger.pageX;
+                pageY = finger.pageY;
+                identifier = finger.identifier;
+            }
+        }
+        dragInfo.x = pageX - (parseInt(node.style.left) || 0);
+        dragInfo.y = pageY - (parseInt(node.style.top)  || 0);
+        dragInfo.id = identifier;     // touch.identifier
+        ++dragInfo.tap;
+        dragInfo.dragging = 1;
 
         opt.mousedown && opt.mousedown(evt, node, option, dragInfo);
 
         uu.ui.zindex.beginDrag(node);
 
-    } else if (code === 2 && dragInfo.dragging) { // 2: mouseup, touchend
+    // mouseup, touchend, gestureend
+    } else if (code === uu.event.codes.mouseup && dragInfo.dragging) {
 
+        if (_touch) {
+            fetchTransform(node, dragInfo);
+
+            // triple tap -> reset transform matrix
+            if (option.tripletap && dragInfo.tap > 2) {
+                if (option.tripletap === true) {
+                    node.style.webkitTransform = "";
+                    dragInfo.rotate = 0;
+                    dragInfo.scale = 1;
+                    dragInfo.tap = 0;
+                } else {
+                    option.tripletap(evt, node, option, dragInfo);
+                }
+            }
+        }
         dragInfo.dragging = 0;
 
         opt.mouseup && opt.mouseup(evt, node, option, dragInfo);
 
         uu.ui.zindex.endDrag(node);
 
-    } else if (code === 3 && dragInfo.dragging) { // 3: mousemove, touchmove
+    // mousemove, touchmove, gesturechange
+    } else if (code === uu.event.codes.mousemove && dragInfo.dragging) {
 
         if (_touch) {
+            if (evt.gesture) {
+//              node.style.webkitTransformOrigin = ""
+                node.style.webkitTransform =
+                    "scale(" + (dragInfo.scale + evt.scale - 1) +
+                    ") rotate(" + (dragInfo.rotate + evt.rotation) + "deg)";
+                return;
+            }
             touches = evt.touches;
-            for (i = 0, iz = touches.length; i < iz; ++i) {
-                finger = touches[i];
-                if (dragInfo.id === finger.identifier) {
-                    pageX = finger.pageX;
-                    pageY = finger.pageY;
+            if (touches) {
+                i = touches.length;
+                while (i--) {
+                    finger = touches[i];
+                    if (dragInfo.id === finger.identifier) {
+                        pageX = finger.pageX;
+                        pageY = finger.pageY;
+                        break;
+                    }
                 }
             }
         }
-
         node.style.left = (pageX - dragInfo.x) + "px";
         node.style.top  = (pageY - dragInfo.y) + "px";
 
@@ -80,7 +117,21 @@ function uuuidragbase(evt,      // @param event:
                             node.offsetWidth,
                             node.offsetHeight);
 //}}}!mb
+        dragInfo.tap = 0;
     }
+
+}
+
+// inner - fetch transform params
+function fetchTransform(node,       // @param Node:
+                        dragInfo) { // @param Hash:
+    var style = node.style.webkitTransform, m
+
+    m = /scale\(([\d\.]+)\)/.exec(style);
+    m && (dragInfo.scale = +m[1]);
+
+    m = /rotate\(([\d\.]+)deg\)/.exec(style);
+    m && (dragInfo.rotate = +m[1]);
 }
 
 })(uu);

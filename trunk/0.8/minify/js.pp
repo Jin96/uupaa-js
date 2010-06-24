@@ -88,29 +88,39 @@ function preProcess($js,       // @param String: JavaScript source code
     $js = preg_replace('/uu\.?type.FAKEARRAY/',    '12', $js);
 
     // Event.type alias
-    $js = preg_replace('/uu\.?event.xtypes.mousedown/',      '1', $js);
-    $js = preg_replace('/uu\.?event.xtypes.mouseup/',        '2', $js);
-    $js = preg_replace('/uu\.?event.xtypes.mousemove/',      '3', $js);
-    $js = preg_replace('/uu\.?event.xtypes.mousewheel/',     '4', $js);
-    $js = preg_replace('/uu\.?event.xtypes.click/',          '5', $js);
-    $js = preg_replace('/uu\.?event.xtypes.dblclick/',       '6', $js);
-    $js = preg_replace('/uu\.?event.xtypes.keydown/',        '7', $js);
-    $js = preg_replace('/uu\.?event.xtypes.keypress/',       '8', $js);
-    $js = preg_replace('/uu\.?event.xtypes.keyup/',          '9', $js);
-    $js = preg_replace('/uu\.?event.xtypes.mouseenter/',     '10', $js);
-    $js = preg_replace('/uu\.?event.xtypes.mouseleave/',     '11', $js);
-    $js = preg_replace('/uu\.?event.xtypes.mouseover/',      '12', $js);
-    $js = preg_replace('/uu\.?event.xtypes.mouseout/',       '13', $js);
-    $js = preg_replace('/uu\.?event.xtypes.contextmenu/',    '14', $js);
-    $js = preg_replace('/uu\.?event.xtypes.focus/',          '15', $js);
-    $js = preg_replace('/uu\.?event.xtypes.blur/',           '16', $js);
-    $js = preg_replace('/uu\.?event.xtypes.resize/',         '17', $js);
-    $js = preg_replace('/uu\.?event.xtypes.scroll/',         '18', $js);
-    $js = preg_replace('/uu\.?event.xtypes.online/',         '50', $js);
-    $js = preg_replace('/uu\.?event.xtypes.offline/',        '51', $js);
-    $js = preg_replace('/uu\.?event.xtypes.message/',        '52', $js);
-    $js = preg_replace('/uu\.?event.xtypes.losecapture/',    '0x102', $js);
-    $js = preg_replace('/uu\.?event.xtypes.DOMMouseScroll/', '0x104', $js);
+    $js = preg_replace('/uu\.?event.codes.mousedown/',      '1', $js);
+    $js = preg_replace('/uu\.?event.codes.mouseup/',        '2', $js);
+    $js = preg_replace('/uu\.?event.codes.mousemove/',      '3', $js);
+    $js = preg_replace('/uu\.?event.codes.mousewheel/',     '4', $js);
+    $js = preg_replace('/uu\.?event.codes.touchstart/',     '0x201', $js);
+    $js = preg_replace('/uu\.?event.codes.touchend/',       '0x202', $js);
+    $js = preg_replace('/uu\.?event.codes.touchmove/',      '0x203', $js);
+    $js = preg_replace('/uu\.?event.codes.gesturestart/',   '0x401', $js);
+    $js = preg_replace('/uu\.?event.codes.gestureend/',     '0x402', $js);
+    $js = preg_replace('/uu\.?event.codes.gesturechange/',  '0x403', $js);
+
+    $js = preg_replace('/uu\.?event.codes.click/',          '10', $js);
+    $js = preg_replace('/uu\.?event.codes.dblclick/',       '11', $js);
+    $js = preg_replace('/uu\.?event.codes.keydown/',        '12', $js);
+    $js = preg_replace('/uu\.?event.codes.keypress/',       '13', $js);
+    $js = preg_replace('/uu\.?event.codes.keyup/',          '14', $js);
+    $js = preg_replace('/uu\.?event.codes.mouseenter/',     '15', $js);
+    $js = preg_replace('/uu\.?event.codes.mouseleave/',     '16', $js);
+    $js = preg_replace('/uu\.?event.codes.mouseover/',      '17', $js);
+    $js = preg_replace('/uu\.?event.codes.mouseout/',       '18', $js);
+    $js = preg_replace('/uu\.?event.codes.contextmenu/',    '19', $js);
+    $js = preg_replace('/uu\.?event.codes.focus/',          '20', $js);
+    $js = preg_replace('/uu\.?event.codes.blur/',           '21', $js);
+    $js = preg_replace('/uu\.?event.codes.resize/',         '22', $js);
+    $js = preg_replace('/uu\.?event.codes.scroll/',         '23', $js);
+    $js = preg_replace('/uu\.?event.codes.change/',         '24', $js);
+    $js = preg_replace('/uu\.?event.codes.submit/',         '25', $js);
+    $js = preg_replace('/uu\.?event.codes.online/',         '50', $js);
+    $js = preg_replace('/uu\.?event.codes.offline/',        '51', $js);
+    $js = preg_replace('/uu\.?event.codes.message/',        '52', $js);
+    $js = preg_replace('/uu\.?event.codes.orientationchange/', '60', $js);
+    $js = preg_replace('/uu\.?event.codes.losecapture/',    '0x102', $js);
+    $js = preg_replace('/uu\.?event.codes.DOMMouseScroll/', '0x104', $js);
 
     // fakeToArray(...) -> Array[_prototype].slice.call(...)
     if ($mobile) {
@@ -139,8 +149,7 @@ function preProcess($js,       // @param String: JavaScript source code
     $js = preg_replace('/(\w+):\s+false/m', "$1: false", $js);    // xxx: false
     $js = preg_replace('/(\w+):\s+true/m', "$1: true", $js);      // xxx: true
     $js = preg_replace('/(\w+):\s+(uu\.?\w+)/m', "$1: $2", $js);  // xxx: uuxxx
-    $js = preg_replace('/(\w+):\s+(jam\w+)/m', "$1: $2", $js);    // xxx: jamxxx
-    $js = preg_replace('/(\w+):\s+(bite\w+)/m', "$1: $2", $js);   // xxx: bitexxx
+    $js = preg_replace('/(\w+):\s+(NodeSet\w+)/m', "$1: $2", $js);// xxx: NodeSetxxx
     $js = preg_replace('/(\w+):\s+(_\w+)/m', "$1: $2", $js);      // xxx: _xxx
     $js = preg_replace('/(\w+):\s+\{\}/m', "$1: {}", $js);        // xxx: {}
     $js = preg_replace('/(\w+):\s+0/m', "$1: 0", $js);            // xxx: 0
