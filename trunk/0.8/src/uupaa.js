@@ -17,6 +17,8 @@ var _prototype = "prototype",
     _uufx = "data-uufx",
     _uuguid = "data-uuguid",
     _uuevent = "data-uuevent",
+    // --- global vars ---
+    _lastOrientation = 0,
     // --- minify ---
     _documentElement = "documentElement",
     _createTextNode = "createTextNode",
@@ -168,14 +170,13 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Clas
     // --- CSS / STYLE / STYLESHEET / VIEW PORT ---
     css:      uumix(uucss, {        // uu.css(expression:Node/StyleSheetIDString/ReserveWordString,
                                     //        key:Boolean/String/Hash = void,
-                                    //        value:String = void):Hash/String/Node/StyleSheet/ViewPortHash
+                                    //        value:String = void):Hash/String/Node/StyleSheet
                                     //  [1][getComputedStyle(or currentStyle)] uu.css(node)       -> { key: value, ... }
                                     //  [2][getComputedStyle(+ px unitize)   ] uu.css(node, true) -> { key: value, ... }
                                     //  [3][get node.style value]              uu.css(node, key)  -> value
                                     //  [4][set node.style pair]               uu.css(node, key, value) -> node
                                     //  [5][set node.style pair]               uu.css(node, { key: value, ... }) -> node
                                     //  [6][get StyleSheet object]             uu.css("myStyleSheet") -> StyleSheet
-                                    //  [7][get viewport style]                uu.css("viewport") -> { innerWidth, innerHeight, pageXOffset, pageYOffset }
         show:       uucssshow,      // uu.css.show(node:Node, duration:Number = 0, displayValue:String= "block"):Node
         hide:       uucsshide,      // uu.css.hide(node:Node, duration:Number = 0):Node
         isShow:     uucssisshow,    // uu.css.isShow(node:Node/CSSProperties):Boolean
@@ -192,6 +193,7 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Clas
                                     //  [5][convert pixel]  uu.css.unit(<div>, "auto") -> 100
                                     //  [6][convert pixel]  uu.css.unit(<div>, "auto", 0, "borderTopWidth") -> 0
     }),
+    viewport:       uuviewport,
     // --- EFFECT / ANIMATION ---
     fx:       uumix(uufx, {         // uu.fx(node:Node, duration:Number, param:Hash/Function = void):Node
                                     //  [1][abs]             uu.fx(node, 500, { o: 0.5, x: 200 })
@@ -1266,32 +1268,15 @@ function undataunbind(key) { // @param String: "data-uu..."
 //  [4][set node.style pair]               uu.css(node, key, value) -> node
 //  [5][set node.style pair]               uu.css(node, { key: value, ... }) -> node
 //  [6][get StyleSheet object]             uu.css("myStyleSheet") -> StyleSheet
-//  [7][get viewport style]                uu.css("viewport") -> { innerWidth, innerHeight, pageXOffset, pageYOffset }
 
 // uu.css - css and StyleSheet accessor
 function uucss(expression, // @param Node/StyleSheetIDString/ReserveWordString:
                key,        // @param Boolean/String/Hash(= void): key
                value) {    // @param String(= void): value
-                           // @return Hash/String/Node/StyleSheet/ViewPortHash:
-                           //   ViewPortHash = { innerWidth, innerHeight, pageXOffset, pageYOffset }
-                           //       innerWidth  - Number:
-                           //       innerHeight - Number:
-                           //       pageXOffset - Number:
-                           //       pageYOffset - Number:
+                           // @return Hash/String/Node/StyleSheet:
     var rv, style, informal, formal, fix, care;
 
     if (typeof expression === _string) {
-        if (expression === "viewport") {
-//{{{!mb
-            if (_ie) {
-                return { innerWidth:  _rootNode.clientWidth,
-                         innerHeight: _rootNode.clientHeight,
-                         pageXOffset: _rootNode.scrollLeft,
-                         pageYOffset: _rootNode.scrollTop };
-            }
-//}}}!mb
-            return win; // { innerWidth, innerHeight, pageXOffset, pageYOffset }
-        }
         rv = uucss.db[expression];
         return rv || (uucss.db[expression] = uu("StyleSheet", expression)); // [6] StyleSheet object
     }
@@ -1346,6 +1331,31 @@ uucss.care = {
 //}}}!mb
     lineHeight: 1, fontWeight: 1, zIndex: 1
 };
+
+// uu.viewport
+function uuviewport() { // @return Hash: { x, y, w, h }
+                        //      x - Number: pageXOffset
+                        //      y - Number: pageYOffset
+                        //      w - Number: innerWidth
+                        //      h - Number: innerHeight
+    var rv = {
+            x: win.pageXOffset,
+            y: win.pageYOffset,
+            w: win.innerWidth,
+            h: win.innerHeight,
+            orientation: _lastOrientation
+        };
+
+//{{{!mb
+    if (_ie) {
+        rv.x = _rootNode.scrollLeft;
+        rv.y = _rootNode.scrollTop;
+        rv.w = _rootNode.clientWidth;
+        rv.h = _rootNode.clientHeight;
+    }
+//}}}!mb
+    return rv;
+}
 
 //  [1][abs]              uu.fx(node, 500, { o: 0.5, x: 200 })
 //  [2][rel]              uu.fx(node, 500, { h: "+100", o: "+0.5" })
@@ -3744,7 +3754,8 @@ _ie && _ver < 9 && uueventdetach(win, "onunload", _windowonunload);
 // 1. prebuild camelized hash - http://handsout.jp/slide/1894
 // 2. prebuild nodeid
 uuready(function() {
-    var nodeList = uutag("*", _rootNode), v, i = -1,
+    var orientationchange = "orientationchange",
+        nodeList = uutag("*", _rootNode), v, i = -1,
         styles = uuhash((
 //{{{!mb
                 !uuready[_getAttribute] ? "float,styleFloat,cssFloat,styleFloat" :
@@ -3761,6 +3772,11 @@ uuready(function() {
     while ( (v = nodeList[++i]) ) {
         uunodeid(v);
     }
+
+    // orientation change event handler
+    uueventattach(win, orientationchange, function() {
+        _lastOrientation = win.orientation;
+    });
 }, 2); // 2: high(system) order
 
 // inner - make camelized hash( { "text-align": "TextAlign", ...}) from getComputedStyle

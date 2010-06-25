@@ -12,7 +12,7 @@ function uueventresize(evaluator) { // @param Function: callback function
     var db = uueventresize.db;
 
     if (!db.fn.length) { // init
-        uueventresize.unsafe ? (db.dim = uu.css("viewport");
+        uueventresize.unsafe ? (db.vp = uu.viewport();
                                 db.tmid = setInterval(onagent, db.delay))
                              : uu.event.attach(win, "resize", onresize);
     }
@@ -55,17 +55,16 @@ function onresize() {
 
 // inner - resize handler(resize agent) for unsafe browser
 function onagent() {
-    var db = uueventresize.db, i = 0, iz, dim;
+    var db = uueventresize.db, i = 0, iz, vp;
 
     if (!db.lock++) {
         //
         // peek innerWidth and innerHeight
         //
-        dim = uu.css("viewport");
-        if (db.dim.innerWidth !== dim.innerWidth
-            || db.dim.innerHeight !== dim.innerHeight) { // resized?
+        vp = uu.viewport();
+        if (db.vp.w !== vp.innerWidth || db.vp.h !== vp.innerHeight) { // resized?
 
-            db.dim = dim; // store
+            db.vp = vp; // store
             for (iz = db.fn.length; i < iz; ++i) {
                 db.fn[i] && db.fn[i](createFakeEvent({}), win); // callback(event)
             }
