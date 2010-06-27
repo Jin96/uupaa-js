@@ -1,10 +1,11 @@
 
 // === uu.ui.svgdrag ===
 //#include uupaa.js
-//#include css/box.js
+//#include svg/svg.js
 //#include ui/svgdragbase.js
+//#include css/box.js
 
-uu.Class.SVGDrag || (function(uu) {
+uu.Class.SVGDrag || (function(doc, uu) {
 
 // uu.Class.Drag - Generic Drag and Drop manage class
 uu.Class("SVGDrag", {
@@ -42,11 +43,11 @@ function draginit(node,     // @param Node: move target node
 
 // uu.Class.SVGDrag.fin
 function dragfin() {
-    uu.unbind(document, "touchmove+,touchend+", this);
-    uu.unbind(document, "gesturechange+,gestureend+", this);
-    uu.unbind(_ie678 ? this.grip : document, _moveup, this);
+    uu.unbind(doc, "touchmove+,touchend+", this);
+    uu.unbind(doc, "gesturechange+,gestureend+", this);
+    uu.unbind(_ie678 ? this.grip : doc, _moveup, this);
 
-    uu.css.toStatic(node);
+    uu.css.toStatic(this.node);
 }
 
 // uu.Class.SVGDrag.handleEvent
@@ -59,18 +60,18 @@ function dragHandleEvent(evt) {
     switch (code) {
     case uu.event.codes.mousedown:  // mousedown, touchstart, gesturestart
         if (evt.gesture) {
-            uu.unbind(document, "touchmove+,touchend+", this);
-            uu.bind(document, "gesturechange+,gestureend+", this);
+            uu.unbind(doc, "touchmove+,touchend+", this);
+            uu.bind(doc, "gesturechange+,gestureend+", this);
         } else {
-            uu.bind(_ie678 ? this.grip : document, _moveup, this);
+            uu.bind(_ie678 ? this.grip : doc, _moveup, this);
         }
         break;
     case uu.event.codes.mouseup:    // mouseup, touchend, gestureend
         if (evt.gesture) {
-            uu.unbind(document, "gesturechange+,gestureend+", this);
-            uu.bind(document, "touchmove+,touchend+", this);
+            uu.unbind(doc, "gesturechange+,gestureend+", this);
+            uu.bind(doc, "touchmove+,touchend+", this);
         } else {
-            uu.unbind(_ie678 ? this.grip : document, _moveup, this);
+            uu.unbind(_ie678 ? this.grip : doc, _moveup, this);
         }
         break;
 //    case uu.event.codes.wheel:
@@ -78,5 +79,5 @@ function dragHandleEvent(evt) {
     }
 }
 
-})(uu);
+})(document, uu);
 

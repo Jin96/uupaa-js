@@ -23,7 +23,7 @@ svg {
     uu.body(
         svg(100, 100, 600, 600,
             n[0] = svg.g(100, 10,
-                svg.g({ transform: "scale(2) rotate(45)" },
+                svg.g(
                     n[1] = svg.circle({ cx: 50, cy: 50, r: 40, fill: "skyblue" }),
                     n[2] = svg.circle(60, 60, 25, { fill: "springgreen" }),
                     n[3] = svg.rect(60, 60, 100, 100, 20, 20, { fill: "hotpink" }),
@@ -36,10 +36,9 @@ svg {
                                 svg.circle(60, 60, 25, { fill: "springgreen" })),
                     n[13] = svg.g(0, 0,
                                 svg.rect(60, 60, 100, 100, 20, 20,
-                                         { fill: "hotpink", transform: "scale(2) rotate(45)" })),
+                                         { fill: "hotpink" })),
                     n[14] = svg.g(0, 0,
-                                svg.text({ transform: "scale(2) rotate(45)" },
-                                         "drag me !", 30, 50, { stroke: "none", fill: "#000" })))));
+                                svg.text("drag me !", 30, 50, { stroke: "none", fill: "#000" })))));
 
 
     var option = {

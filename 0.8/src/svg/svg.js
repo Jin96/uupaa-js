@@ -101,7 +101,7 @@ function uusvgattr(node,    // @param Node:
                    key,     // @param String/Hash(= void): key
                    value) { // @param String(= void): "value"
                             // @return String/Hash/Node:
-    var i, v, fix, tx = 0, ty = 0, mtx;
+    var rv, ary, i, v, fix, tx = 0, ty = 0, mtx;
 
     if (key === void 0) { // [1] uu.svg.attr(node)
         rv = {};
@@ -185,8 +185,8 @@ function buildNode(tagName, // @param TagNameString: "svg"
                    args) {  // @param Array/Arguments: [Node/String/Number/Hash, ...]
                             // @return Node:
     var node = doc.createElementNS("http://www.w3.org/2000/svg", tagName),
-        ai = 0, attr, css, txt,
-        arg, i = 0, j, iz = args.length, token = 0, type;
+        ai = 0, attr, css,
+        arg, i = 0, iz = args.length, token = 0, type;
 
     for (; i < iz; ++i) {
         arg = args[i];

@@ -1,6 +1,7 @@
 
 // === uu.ui.dragbase, uu.ui.zindex ===
 //#include uupaa.js
+//#include svg/svg.js
 //#include css/text.js
 //#include ui/zindex.js
 
@@ -92,7 +93,7 @@ function uuuisvgdragbase(evt,      // @param event:
             if (evt.gesture) {
                 dragInfo.scale = evt.scale;
                 dragInfo.rotate = evt.rotation;
-                modMatrix(node, dragInfo);
+                modMatrix(node, dragInfo, evt.scale, evt.rotation);
                 return;
             }
             touches = evt.touches;
@@ -123,18 +124,18 @@ function uuuisvgdragbase(evt,      // @param event:
             dragInfo.scale < 0.5 && (dragInfo.scale = 0.5);
         }
     }
-    modMatrix(node, dragInfo);
+    modMatrix(node, dragInfo, 1, 0);
 }
 
-function modMatrix(node, dragInfo) {
+function modMatrix(node, dragInfo, scale, rotate) {
     var mtx = node.ownerSVGElement.createSVGMatrix(),
         base = node.transform.baseVal;
 
     base.replaceItem(
         base.createSVGTransformFromMatrix(
             mtx.translate(dragInfo.x, dragInfo.y).
-                scale(dragInfo.scale).
-                rotate(dragInfo.rotate)), base.numberOfItems - 1);
+                scale(dragInfo.scale + scale - 1).
+                rotate(dragInfo.rotate + rotate)), base.numberOfItems - 1);
 }
 
 })(this, document, uu);
