@@ -3,44 +3,43 @@
 //#include uupaa.js
 //#include css/text.js
 //#include ui/zindex.js
-//#include ui/shim.js
 
-uu.ui.dragbase || (function(uu) {
+uu.ui.svgdragbase || (function(win, doc, uu) {
 
-uu.ui.dragbase = uuuidragbase; // drag & drop base handler
+uu.ui.svgdragbase = uuuisvgdragbase; // drag & drop base handler
 
 var _uuuidrag = "data-uuuidrag", // node["data-uuuidrag"] = { dragging: Boolean, x, y }
-    _touch = uu.ver.touch,
-    _transform = uu.webkit ? "webkitTransform"
-               : uu.gecko  ? "mozTransform"
-               : uu.opera  ? "oTransform" : "transform";
+    _touch = uu.ver.touch;
 
-// uu.ui.dragbase -
-function uuuidragbase(evt,      // @param event:
-                      node,     // @param Node: move target node
-                      grip,     // @param Node: grip target node
-                      option) { // @param Hash(= {}): { mouseup, mousemove, mousedown, shim }
-                                //  option.mouseup    - Function: mouseup/touchend/gestureend callback
-                                //  option.mousemove  - Function: mousemove/touchmove/gesturechange callback
-                                //  option.mousedown  - Function: mousedown/touchstart/gesturestart callback
-                                //  option.mousewheel - Function: mousewheel callback
-                                //  option.tripletap  - Boolean/Function: true is reset
-                                //                                       triple tap callback
-                                //  option.shim       - Object: shim object
-    var opt = option || {},
+// uu.ui.svgdragbase -
+function uuuisvgdragbase(evt,      // @param event:
+                         node,     // @param Node: move target node
+                         grip,     // @param Node: grip target node
+                         option) { // @param Hash: { mouseup, mousemove, mousedown, shim }
+                                    //  option.mouseup    - Function: mouseup/touchend/gestureend callback
+                                    //  option.mousemove  - Function: mousemove/touchmove/gesturechange callback
+                                    //  option.mousedown  - Function: mousedown/touchstart/gesturestart callback
+                                    //  option.mousewheel - Function: mousewheel callback
+                                    //  option.tripletap  - Boolean/Function: true is reset
+                                    //                                        triple tap callback
+    var opt = option, mtx, trans,
         code = evt.code,
         pageX = evt.pageX,
         pageY = evt.pageY,
         dragInfo = grip[_uuuidrag],
+        base = node.transform.baseVal,
         touches, finger, identifier, i; // for iPhone
 
     // init
     if (!dragInfo) {
-        grip[_uuuidrag] = dragInfo = {
-            tap: 0, scale: 1, rotate: 0, ox: 0, oy: 0
-        };
+        trans = uu.svg.attr.transform(node);
 
-        parseMatrix(node, dragInfo);
+        grip[_uuuidrag] = dragInfo = {
+            tap: 0,
+            scale: trans.scale, rotate: trans.rotate,
+            tx: trans.tx, ty: trans.tx, ox: 0, oy: 0,
+            x: trans.tx, y: trans.ty
+        };
     }
 
     // mousedown, touchstart, gesturestart
@@ -54,9 +53,9 @@ function uuuidragbase(evt,      // @param event:
                 identifier = finger.identifier;
             }
         }
-
-        dragInfo.ox = pageX - (parseInt(node.style.left) || 0);
-        dragInfo.oy = pageY - (parseInt(node.style.top)  || 0);
+        mtx = base.getItem(base.numberOfItems - 1).matrix;
+        dragInfo.ox = pageX - mtx.e;
+        dragInfo.oy = pageY - mtx.f;
         dragInfo.id = identifier;     // touch.identifier
         ++dragInfo.tap;
         dragInfo.dragging = 1;
@@ -68,16 +67,14 @@ function uuuidragbase(evt,      // @param event:
     // mouseup, touchend, gestureend
     } else if (code === uu.event.codes.mouseup && dragInfo.dragging) {
 
-        if (_touch) {
-            parseMatrix(node, dragInfo);
-        }
         // triple tap -> reset transform matrix
         if (option.tripletap && dragInfo.tap > 2) {
             if (option.tripletap === true) {
                 dragInfo.tap = 0;
                 dragInfo.scale = 1;
                 dragInfo.rotate = 0;
-                node.style.webkitTransform = "";
+                dragInfo.x = 0;
+                dragInfo.y = 0;
             } else {
                 option.tripletap(evt, node, option, dragInfo);
             }
@@ -93,7 +90,9 @@ function uuuidragbase(evt,      // @param event:
 
         if (_touch) {
             if (evt.gesture) {
-                modMatrix(node, dragInfo, evt.scale, evt.rotation);
+                dragInfo.scale = evt.scale;
+                dragInfo.rotate = evt.rotation;
+                modMatrix(node, dragInfo);
                 return;
             }
             touches = evt.touches;
@@ -109,18 +108,12 @@ function uuuidragbase(evt,      // @param event:
                 }
             }
         }
-        node.style.left = (pageX - dragInfo.ox) + "px";
-        node.style.top  = (pageY - dragInfo.oy) + "px";
+        dragInfo.x = pageX - dragInfo.ox;
+        dragInfo.y = pageY - dragInfo.oy;
 
         opt.mousemove && opt.mousemove(evt, node, option, dragInfo);
         dragInfo.tap = 0;
-//{{{!mb
-        opt.shim &&
-            opt.shim.resize(pageX - dragInfo.x,
-                            pageY - dragInfo.y,
-                            node.offsetWidth,
-                            node.offsetHeight);
-//}}}!mb
+
     // mousewheel
     } else if (code === uu.event.codes.mousewheel) {
         if (evt.shiftKey) {
@@ -129,30 +122,20 @@ function uuuidragbase(evt,      // @param event:
             dragInfo.scale += evt.wheel * 0.1; // scale
             dragInfo.scale < 0.5 && (dragInfo.scale = 0.5);
         }
-        modMatrix(node, dragInfo, 1, 0);
     }
+    modMatrix(node, dragInfo);
 }
 
-// inner -
-function modMatrix(node, dragInfo, scale, rotate) {
-//  node.style.webkitTransformOrigin = ""
+function modMatrix(node, dragInfo) {
+    var mtx = node.ownerSVGElement.createSVGMatrix(),
+        base = node.transform.baseVal;
 
-    node.style[_transform] =
-        "scale(" + (dragInfo.scale + scale - 1) +
-        ") rotate(" + (dragInfo.rotate + rotate) + "deg)";
+    base.replaceItem(
+        base.createSVGTransformFromMatrix(
+            mtx.translate(dragInfo.x, dragInfo.y).
+                scale(dragInfo.scale).
+                rotate(dragInfo.rotate)), base.numberOfItems - 1);
 }
 
-// inner - parse matrix
-function parseMatrix(node,       // @param Node:
-                     dragInfo) { // @param Hash:
-    var style = node.style[_transform], m
-
-    m = /scale\(([\d\.]+)\)/.exec(style);
-    m && (dragInfo.scale = +m[1]);
-
-    m = /rotate\(([\d\.]+)deg\)/.exec(style);
-    m && (dragInfo.rotate = +m[1]);
-}
-
-})(uu);
+})(this, document, uu);
 

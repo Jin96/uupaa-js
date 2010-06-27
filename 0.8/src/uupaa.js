@@ -57,7 +57,8 @@ var _prototype = "prototype",
     _ie = _ver.ie,
     _gecko = _ver.gecko,
     _opera = _ver.opera,
-    _webkit = _ver.webkit;
+    _webkit = _ver.webkit,
+    _work;
 
 // --- HTML5 NEXT ---
 // http://www.whatwg.org/specs/web-apps/current-work/multipage/dom.html
@@ -1333,11 +1334,16 @@ uucss.care = {
 };
 
 // uu.viewport
-function uuviewport() { // @return Hash: { x, y, w, h }
+function uuviewport() { // @return Hash: { x, y, w, h, orientation }
                         //      x - Number: pageXOffset
                         //      y - Number: pageYOffset
                         //      w - Number: innerWidth
                         //      h - Number: innerHeight
+                        //      orientation - Number: last orientation
+                        //            0 is Portrait
+                        //          -90 is Landscape
+                        //           90 is Landscape
+                        //          180 is Portrait
     var rv = {
             x: win.pageXOffset,
             y: win.pageYOffset,
@@ -3657,34 +3663,20 @@ uueach(uuevent.shortcut, function(eventType) {
     uu[eventType] = function(node, fn) { // uu.click(node, fn) -> node
         return uuevent(node, eventType, fn);
     };
-
-    uu["un" + eventType] = function(node) { // uu.unclick(node) -> node
-        return uueventunbind(node, eventType);
-    };
-
-    var ns = NodeSet[_prototype];
-
-    ns[eventType] = function(fn) { // uu("li").click(fn) -> NodeSet
+    NodeSet[_prototype][eventType] = function(fn) { // uu("li").click(fn) -> NodeSet
         return NodeSetIter(0, this, uuevent, eventType, fn);
-    };
-
-    ns["un" + eventType] = function() { // uu("li").unclick() -> NodeSet
-        return NodeSetIter(0, this, uueventunbind, eventType);
     };
 });
 
 // inner - setup node builder - uu.div(), uu.a(), ...
-uueach(uutag.html4, function(tagName) {
-    uu[tagName] = function() { // @param Mix: var_args
-        return buildNode(tagName, arguments);
-    };
-});
-
-uueach(uutag.html5, function(tagName) {
 //{{{!mb
-    _ie && doc[_createElement](tagName); // [IE6][IE7][IE8][IE9]
+_work = 0;
 //}}}!mb
-
+uueach(uutag.html4.concat(uutag.html5), function(tagName) {
+//{{{!mb
+    tagName === "abbr" && ++_work;
+    _work && _ie && doc[_createElement](tagName); // [IE6][IE7][IE8][IE9]
+//}}}!mb
     uu[tagName] = function() { // @param Mix: var_args
         return buildNode(tagName, arguments);
     };

@@ -1,13 +1,13 @@
 
-// === uu.ui.drag ===
+// === uu.ui.svgdrag ===
 //#include uupaa.js
 //#include css/box.js
-//#include ui/dragbase.js
+//#include ui/svgdragbase.js
 
-uu.Class.Drag || (function(uu) {
+uu.Class.SVGDrag || (function(uu) {
 
 // uu.Class.Drag - Generic Drag and Drop manage class
-uu.Class("Drag", {
+uu.Class("SVGDrag", {
     init:           draginit,       // init(tgt, grip, option = {})
     fin:            dragfin,        // fin()
     handleEvent:    dragHandleEvent // handleEvent(evt)
@@ -18,38 +18,29 @@ var _ie678 = uu.ie && !uu.ver.jit,
                            : "mousemove+,mouseup+";
 
 // --- drag ---
-// uu.Class.Drag.init
+// uu.Class.SVGDrag.init
 function draginit(node,     // @param Node: move target node
                   grip,     // @param Node(= null): grip target node
-                  option) { // @param Hash(= {}): { wheel, noshim }
+                  option) { // @param Hash(= {}): { wheel, minw, maxw, minh, maxh }
                             //      option.wheel  - Number/Function: wheel, 0 is off
                             //                                1 is resize
                             //                                fn is callback
-                            //      option.noshim - Number: noshim, 1 is disable shim(in IE6)
+                            //      option.minw   - Number: min width
+                            //      option.maxw   - Number: max width
+                            //      option.minh   - Number: min height
+                            //      option.maxh   - Number: max height
     grip = grip || node;
     this.option = uu.arg(option, { tripletap: true, shim: 0 });
     this.node = node;
     this.grip = grip;
     grip.style.cursor = "move";
 
-    uu.css.toAbsolute(node);
-
-    if (this.option.shim && uu.ver.ie6) {
-        this.option.shim = uu("Shim", node);
-    }
-/*
-    this.shim = (uu.ver.ie6 && !this.option.rel
-                            && !this.option.noshim) ? uu("Shim", tgt) : 0;
- */
-
     uu.event(grip, uu.ver.touch ? "touchstart,gesturestart"
                                 : "mousedown", this)
     uu.mousewheel(node, this);
-
-//    this.option.zoom && uu.mousewheel(node, this);
 }
 
-// uu.Class.Drag.fin
+// uu.Class.SVGDrag.fin
 function dragfin() {
     uu.unbind(document, "touchmove+,touchend+", this);
     uu.unbind(document, "gesturechange+,gestureend+", this);
@@ -58,14 +49,12 @@ function dragfin() {
     uu.css.toStatic(node);
 }
 
-// uu.Class.Drag.handleEvent
+// uu.Class.SVGDrag.handleEvent
 function dragHandleEvent(evt) {
     uu.event.stop(evt);
 
-    uu.ui.dragbase(evt, this.node, this.grip, this.option);
+    uu.ui.svgdragbase(evt, this.node, this.grip, this.option);
     var code = evt.code;
-
-//this.node.textContent = evt.type;
 
     switch (code) {
     case uu.event.codes.mousedown:  // mousedown, touchstart, gesturestart
@@ -84,8 +73,8 @@ function dragHandleEvent(evt) {
             uu.unbind(_ie678 ? this.grip : document, _moveup, this);
         }
         break;
-//  case uu.event.codes.wheel:
-//      this.option.wheel && this.mousewheel(evt);
+//    case uu.event.codes.wheel:
+//        this.mousewheel(evt);
     }
 }
 

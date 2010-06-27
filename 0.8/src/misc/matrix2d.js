@@ -1,25 +1,29 @@
 // === uu.matrix2d / window.matrix2d ===
 
-//  type Matrix2DArray = [m11, m12, m13,
-//                        m21, m22, m23,
-//                        m31, m32, m33]
+//  type Matrix2DArray = [m11, m12, m13,     [1, 0, 0,
+//                        m21, m22, m23,      0, 1, 0,
+//                        m31, m32, m33]      x, y, 1]
 
-(this.uu || this).matrix2d || (function(namespace) {
+//  type SVGMatrix2DHash = { a, c, e,        [m11,    m21,    m31(x)
+//                           b, d, f,    ->   m12,    m22,    m32(y)
+//                           0, 0, 1 }        m13(0), m23(0), m33(1)]
 
-namespace.matrix2d = {
-    multiply:     multiply,    // matrix2d.multiply(ma:Matrix2DArray,
-                               //                   mb:Matrix2DArray):Matrix2DArray
-    scale:        scale,       // matrix2d.scale(x:Number,
-                               //                y:Number,
-                               //                m:Matrix2DArray):Matrix2DArray
-    rotate:       rotate,      // matrix2d.rotate(angle:Number,
-                               //                 m:Matrix2DArray):Matrix2DArray
-    transform:    transform,   // matrix2d.transform(m11:Number, m12:Number, m21:Number,
-                               //                    m22:Number,  dx:Number,  dy:Number,
-                               //                      m:Matrix2DArray):Matrix2DArray
-    translate:    translate    // matrix2d.translate(x:Number,
-                               //                    y:Number,
-                               //                    m:Matrix2DArray):Matrix2DArray
+(this.uu || this).matrix2d || (function(nameSpace) {
+
+nameSpace.matrix2d = {
+    multiply:   multiply,   // matrix2d.multiply(ma:Matrix2DArray,
+                            //                   mb:Matrix2DArray):Matrix2DArray
+    scale:      scale,      // matrix2d.scale(x:Number,
+                            //                y:Number,
+                            //                m:Matrix2DArray):Matrix2DArray
+    rotate:     rotate,     // matrix2d.rotate(angle:Number,
+                            //                 m:Matrix2DArray):Matrix2DArray
+    transform:  transform,  // matrix2d.transform(m11:Number, m12:Number, m21:Number,
+                            //                    m22:Number,  dx:Number,  dy:Number,
+                            //                      m:Matrix2DArray):Matrix2DArray
+    translate:  translate   // matrix2d.translate(x:Number,
+                            //                    y:Number,
+                            //                    m:Matrix2DArray):Matrix2DArray
 };
 
 // matrix2d.multiply - 2D Matrix multiply
