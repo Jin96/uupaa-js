@@ -2,12 +2,12 @@
 // === uu.color / window.color ===
 //#include uupaa.js
 
-(this.uu || this).color || (function(namespace) {
+(this.uu || this).color || (function(nameSpace) {
 
-namespace.color        = uucolor;       // uu.color(source:ColorHash/HSVAHash/HSLAHash/RGBAHash/String/Number):ColorHash
-namespace.color.add    = uucoloradd;    // uu.color.add(source:String)
-namespace.color.expire = uucolorexpire; // uu.color.expire()
-namespace.color.random = uucolorrandom; // uu.color.random():ColorHash
+nameSpace.color        = uucolor;       // uu.color(source:ColorHash/HSVAHash/HSLAHash/RGBAHash/String/Number):ColorHash
+nameSpace.color.add    = uucoloradd;    // uu.color.add(source:String)
+nameSpace.color.expire = uucolorexpire; // uu.color.expire()
+nameSpace.color.random = uucolorrandom; // uu.color.random():ColorHash
 
 // --- COLOR ---
 // [1][ColorHash]               uu.color(ColorHash) -> ColorHash
