@@ -7,12 +7,16 @@
 <script src="../../src/ui/drag.js"></script>
 <script src="../../src/css/box.js"></script>
 <script src="../../src/css/text.js"></script>
+<script src="../../src/misc/matrix2d.js"></script>
 <style>
 html, body {
 /*
   overflow: hidden;
  */
   background-color: #333;
+}
+img {
+    border: 10px solid white;
 }
 </style>
 </head><body id="body">
@@ -22,11 +26,15 @@ html, body {
 uu.ready("window", function(uu) {
     var option = {
         mousedown: function(evt, node, option, dragInfo) {
-            uu.fx.skip(node, 1, 1);
-            uu.fx(node, 100, { o: 1 });
+            if (!uu.ie) {
+                uu.fx.skip(node, 1, 1);
+                uu.fx(node, 100, { o: 1 });
+            }
         },
         mouseup: function(evt, node, option, dragInfo) {
-            uu.fx(node, 400, { o: 0.4 });
+            if (!uu.ie) {
+                uu.fx(node, 400, { o: 0.4 });
+            }
         }
     };
 

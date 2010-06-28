@@ -1,8 +1,8 @@
 // === uu.matrix2d / window.matrix2d ===
 
-//  type Matrix2DArray = [m11, m12, m13,     [1, 0, 0,
-//                        m21, m22, m23,      0, 1, 0,
-//                        m31, m32, m33]      x, y, 1]
+//  type Matrix2DArray = [m11, m12, m13,     [1, 0, 0,     [m[0], m[1], m[2],
+//                        m21, m22, m23,      0, 1, 0,      m[3], m[4], m[5],
+//                        m31, m32, m33]      x, y, 1]      m[6], m[7], m[8]]
 
 //  type SVGMatrix2DHash = { a, c, e,        [m11,    m21,    m31(x)
 //                           b, d, f,    ->   m12,    m22,    m32(y)
@@ -11,6 +11,7 @@
 (this.uu || this).matrix2d || (function(nameSpace) {
 
 nameSpace.matrix2d = {
+    identify:   identify,   // matrix2d.identify():Matrix2DArray - [1,0,0, 0,1,0, 0,0,1]
     multiply:   multiply,   // matrix2d.multiply(ma:Matrix2DArray,
                             //                   mb:Matrix2DArray):Matrix2DArray
     scale:      scale,      // matrix2d.scale(x:Number,
@@ -25,6 +26,13 @@ nameSpace.matrix2d = {
                             //                    y:Number,
                             //                    m:Matrix2DArray):Matrix2DArray
 };
+
+// matrix2d.identify - 2D Matrix identify
+function identify() { // @return Matrix2DArray: [1,0,0, 0,1,0, 0,0,1]
+    return [1, 0, 0,
+            0, 1, 0,
+            0, 0, 1];
+}
 
 // matrix2d.multiply - 2D Matrix multiply
 function multiply(ma,   // @param Matrix2DArray: matrix A
@@ -55,7 +63,7 @@ function scale(x,   // @param Number:
 }
 
 // matrix2d.rotate - 2D Matrix multiply x rotate
-function rotate(angle, // @param Number:
+function rotate(angle, // @param Number: radian
                 m) {   // @param Matrix2DArray: matrix
                        // @return Matrix2DArray:
     // [ c, s, 0,

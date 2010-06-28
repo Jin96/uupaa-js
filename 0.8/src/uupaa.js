@@ -1463,7 +1463,7 @@ function uufxbuild(node, data, queue, option) {
                c < 6 ? fn(curt / parseFloat(end.slice(1))) : fn(end);
     }
 
-    var rv = 'var s=n.style,t,b,c,d2=d/2,w,o,gd,h;',
+    var rv = 'var s=n.style,t,b,c,d2=d/2,w,o,gd,h,fo;', // fo = filterObject
         reverseOption = { before: option[_before],
                           after: option[_after],
                           back: 1 },
@@ -1494,10 +1494,24 @@ function uufxbuild(node, data, queue, option) {
                                    ezfn(startValue, endValue, ez));
 //{{{!mb
                     if (!uuready.opacity) { // [IE6][IE7][IE8]
+if (0) {
                         rv += uuformat('s.visibility=o?"visible":"hidden";' +
                                        's.filter=((o>0&&o<1)?"alpha(??="+(o*100)+")":"");' +
                                        'f&&uu.css.opacity(n,??)&&(s.filter+=" ??");',
                                        w, endValue, node.style.filter[_replace](uufx.alpha, ""));
+
+} else {
+
+                        rv += uuformat(
+//                                       's.visibility=o?"visible":"hidden";' +
+                                       'fo=n.filters.item("DXImageTransform.Microsoft.Alpha");' +
+//                                       'debugger;' +
+//                                       'if(o>0&&o<1){fo.Enabled=true;fo.Opacity=o*100;}else{fo.Enabled=false;}' +
+                                       'fo.Enabled=true;fo.Opacity=(o*100)|0;' +
+//                                       'fo.Opacity=o*100;' +
+                                       'f&&uu.css.opacity(n,??);',
+                                       endValue);
+}
                     } else {
 //}}}!mb
                         rv += uuformat('s.??=f? ??:o;', w, endValue);
@@ -1625,7 +1639,9 @@ function uucssopacity(node,      // @param Node:
 //{{{!mb
     if (!uuready.opacity) {
         if (!node["data-uuopacity"]) {
-            // at first time
+            // init opacity
+            node.style.filter +=
+                    " progid:DXImageTransform.Microsoft.Alpha()";
             if (_ver.ie6 || _ver.ie7) { // [FIX][IE6][IE7]
                 if ((node.currentStyle || {})[_width] === "auto") {
                     style.zoom = 1;
@@ -1647,10 +1663,24 @@ function uucssopacity(node,      // @param Node:
 //{{{!mb
     if (!uuready.opacity) {
         node["data-uuopacity"] = opacity + 1; // (1.0 ~ 2.0)
+if (0) {
         style[_visibility] = opacity ? "visible" : "hidden";
         style.filter = ((opacity > 0 && opacity < 1)
                      ? "alpha(opacity=" + (opacity * 100) + ") " : "")
                      + style.filter[_replace](uucssopacity.alpha, "");
+
+} else {
+//        style[_visibility] = opacity ? "visible" : "hidden";
+        var filter = node.filters.item("DXImageTransform.Microsoft.Alpha");
+
+        if (opacity > 0 && opacity < 1) {
+            filter.Enabled = _true;
+            filter.Opacity = (opacity * 100) | 0;
+        } else {
+            filter.Enabled = _false;
+            style[_visibility] = opacity ? "visible" : "hidden";
+        }
+}
     }
 //}}}!mb
     return node;
@@ -2210,7 +2240,7 @@ function uuevent(node,         // @param Node:
             if (event.code === uuevent.codes.mousewheel) {
                 event.wheel = (
 //{{{!mb
-                               event.detail ? (event.detail / 3) :
+                               event.detail ? event.detail :
 //}}}!mb
                                               (event.wheelDelta / -120)) | 0;
             }
