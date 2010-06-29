@@ -17,6 +17,7 @@ var _prototype = "prototype",
     _uufx = "data-uufx",
     _uuguid = "data-uuguid",
     _uuevent = "data-uuevent",
+    _uutrans = "data-uutrans", // for uu.css.transform
     // --- global vars ---
     _lastOrientation = 0,
     // --- minify ---
@@ -184,6 +185,9 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Clas
         opacity:    uucssopacity,   // uu.css.opacity(node:Node, value:Number/String):Number/Node
                                     //  [1][get opacity] uu.css.opacity(node) -> 0.5
                                     //  [2][set opacity] uu.css.opacity(node, 0.5) -> node
+        transform:  uucsstransform, // uu.css.transform(node:Node):Node/NumberArray
+                                    //  [1][get transform] uu.css.transform(node) -> [scaleX, scaleY, rotate, translateX, translateY ]
+                                    //  [2][set transform] uu.css.transform(node, 1, 1, 0, 0, 0) -> node
         unit:       uucssunit       // uu.css.unit(node:Node, value:Number/CSSUnitString,
                                     //                    quick:Boolean = false,
                                     //                    prop:String = "left"):Number
@@ -1689,6 +1693,78 @@ if (0) {
 uucssopacity.alpha = /^alpha\([^\x29]+\) ?/;
 //}}}!mb
 
+//  [1][get transform] uu.css.transform(node) -> [scaleX, scaleY, rotate, translateX, translateY ]
+//  [2][set transform] uu.css.transform(node, 1, 1, 0, 0, 0) -> node
+
+// uu.css.transform
+function uucsstransform(node,    // @param Node:
+                        param) { // @param NumberArray(= void): [scaleX, scaleY,
+                                 //                              rotate(degree),
+                                 //                              translateX, translateY]
+                                 // @return Node/NumberArray:
+    if (!param) {
+        return node[_uutrans] || [1, 1, 0, 0, 0];
+    }
+
+//{{{!mb
+    if (_ie) {
+        var ident = "DXImageTransform.Microsoft.Matrix",
+            data = "data-uutransie",
+            rotate = param[2] * Math.PI / 180, // deg2rad
+            cos = Math.cos(-rotate),
+            sin = Math.sin(-rotate),
+            // scale * rotate * translate
+            mtx = [ cos * param[0], sin * param[0], 0,
+                   -sin * param[1], cos * param[1], 0,
+                          param[3],       param[4], 1],
+            filter, rect, cx, cy;
+
+        if (!node[_uutrans]) {
+            // init - get center position
+            rect = node.getBoundingClientRect();
+            cx = (rect.right  - rect.left) / 2; // center x
+            cy = (rect.bottom - rect.top)  / 2; // center y
+
+            node.style.filter += " progid:" + ident + "(sizingMethod='auto expand')";
+            node[data] = { cx: cx, cy: cy };
+        }
+        filter = node.filters.item(ident),
+
+        filter.M11 = mtx[0];
+        filter.M12 = mtx[1];
+        filter.M21 = mtx[3];
+        filter.M22 = mtx[4];
+        filter.Dx  = mtx[6];
+        filter.Dy  = mtx[7];
+
+        // recalc center
+        rect = node.getBoundingClientRect();
+        cx = (rect.right  - rect.left) / 2;
+        cy = (rect.bottom - rect.top)  / 2;
+
+        node.style.marginLeft = node[data].cx - cx + "px";
+        node.style.marginTop  = node[data].cy - cy + "px";
+    } else {
+//}}}!mb
+
+    //  node.style.webkitTransformOrigin = ""
+        node.style[_webkit ? "webkitTransform" :
+//{{{!mb
+                   _gecko  ? "MozTransform" :
+                   _opera  ? "OTransform" :
+//}}}!mb
+                   ""] =
+            "scale(" + param[0] + "," + param[1] + ") rotate("
+                     + param[2] + "deg) translate("
+                     + param[3] + "," + param[4] + ")";
+
+//{{{!mb
+    }
+//}}}!mb
+    node[_uutrans] = param.concat();
+    return node;
+}
+
 // uu.css.show - show node
 function uucssshow(node,           // @param Node:
                    duration,       // @param Number(= 0): fadein effect duration
@@ -2364,8 +2440,7 @@ uuevent.codes = {
 };
 uuevent.shortcut =
     ("mousedown,mouseup,mousemove,mousewheel,click,dblclick,keydown," +
-     "keypress,keyup,change,submit,focus,blur,contextmenu").split(",")
-
+     "keypress,keyup,change,submit,focus,blur,contextmenu").split(",");
 
 // uu.event.fire - fire event / fire custom event(none capture event only)
 function uueventfire(node,      // @param Node: target node
@@ -3633,7 +3708,7 @@ function NodeSetKlass(expression) { // @param String(= ""):
                                     // @return NodeSet:
     var method = NodeSetKlass.cmd[expression.charAt(0)] || uuklassadd;
 
-    return NodeSetIter(1, this, method, expression.slice(1)) // + - !
+    return NodeSetIter(1, this, method, expression.slice(1)); // + - !
 }
 NodeSetKlass.cmd = { "+": uuklassadd,      // [add]    "+class"
                      "-": uuklassremove,   // [remove] "-class"
@@ -3673,7 +3748,7 @@ uueach({    bind:       uuevent,
 
     NodeSet[_prototype][name] = function(a, b, c) {
         return NodeSetIter(0, this, fn, a, b, c);
-    }
+    };
 });
 
 // map(iter = 1)
@@ -3683,7 +3758,7 @@ uueach({    attr:   uuattr,
             text:   uutext      }, function(fn, name) {
     NodeSet[_prototype][name] = function(a, b) {
         return NodeSetIter(1, this, fn, a, b);
-    }
+    };
 });
 
 // --- initialize ---
@@ -3759,7 +3834,8 @@ function _windowonunload() {
     for (nodeid in uunodeid.db) {
         try {
             node = uunodeid.db[nodeid];
-            ary = node.attributes, i = -1;
+            ary = node.attributes;
+            i = -1;
             while ( (v = ary[++i]) ) {
                 !v.name[_indexOf]("data-") && (node[v.name] = null);
             }
