@@ -1442,7 +1442,9 @@ function uufx(node,     // @param Node: animation target node
 }
 uufx.props = { opacity: 1, color: 2, backgroundColor: 2,
                width: 3, height: 3, left: 4, top: 5 };
+//{{{!mb
 uufx.alpha = /^alpha\([^\x29]+\) ?/;
+//}}}!mb
 
 function uufxbuild(node, data, queue, option) {
     function ezfn(v0, v1, ez) {
@@ -3852,7 +3854,7 @@ _ie && _ver < 9 && uueventdetach(win, "onunload", _windowonunload);
 // 1. prebuild camelized hash - http://handsout.jp/slide/1894
 // 2. prebuild nodeid
 uuready(function() {
-    var orientationchange = "orientationchange",
+    var orientation = "orientation",
         nodeList = uutag("*", _rootNode), v, i = -1,
         styles = uuhash((
 //{{{!mb
@@ -3872,28 +3874,18 @@ uuready(function() {
     }
 
     // orientation change event handler
-    uueventattach(win, orientationchange, function() {
-        _lastOrientation = win.orientation;
+    uueventattach(win, orientation + "change", function() {
+        _lastOrientation = win[orientation];
     });
 }, 2); // 2: high(system) order
 
 // inner - make camelized hash( { "text-align": "TextAlign", ...}) from getComputedStyle
 function _camelhash(rv, props) {
-    function _camelize(m, c) {
-        return c.toUpperCase();
-    }
-
-//{{{!mb
-    function _decamelize(m, c, C) {
-        return c + "-" + C.toLowerCase();
-    }
-//}}}!mb
-
-    var k, v,
+    var
 //{{{!mb
         DECAMELIZE = /([a-z])([A-Z])/g,
 //}}}!mb
-        CAMELIZE = /-([a-z])/g;
+        k, v;
 
     for (k in props) {
         if (typeof props[k] === _string) {
@@ -3901,14 +3893,18 @@ function _camelhash(rv, props) {
             if (_webkit) {
 //}}}!mb
                 v = k = props.item(k); // k = "-webkit-...", "z-index"
-                k[_indexOf]("-") >= 0 && (v = k[_replace](CAMELIZE, _camelize));
+                k[_indexOf]("-") >= 0 && (v = k[_replace](/-[a-z]/g, function(m) {
+                    return m[1].toUpperCase();
+                }));
                 (k !== v) && (rv[k] = v);
 //{{{!mb
             } else {
                 v = ((_gecko && !k[_indexOf]("Moz")) ? "-moz" + k.slice(3) :
                      (_ie    && !k[_indexOf]("ms"))  ? "-ms"  + k.slice(2) :
                      (_opera && !k[_indexOf]("O"))   ? "-o"   + k.slice(1) : k)
-                    [_replace](DECAMELIZE, _decamelize);
+                    [_replace](DECAMELIZE, function(m, c, C) {
+                        return c + "-" + C.toLowerCase();
+                    });
                 (k !== v) && (rv[v] = k);
             }
 //}}}!mb

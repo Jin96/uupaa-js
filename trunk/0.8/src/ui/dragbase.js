@@ -48,9 +48,9 @@ function uuuidragbase(evt,      // @param event:
         if (option.transform) {
             if (!_touch && evt.mouse == 1) { // 1 is middle click
                 dragInfo.mode = dragInfo.mode ? 0 : 1;
-                node.style.cursor = dragInfo.mode
-                                  ? "url(rotate.cur),url(rotate.gif),default"
-                                  : "move";
+                if (!uu.ie) { // [IE] buggy
+                    node.style.outline = dragInfo.mode ? "2px solid blue" : "";
+                }
                 return;
             }
         }
