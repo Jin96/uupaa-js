@@ -11,10 +11,7 @@ uu.ui.dragbase || (function(uu) {
 uu.ui.dragbase = uuuidragbase; // drag & drop base handler
 
 var _uuuidrag = "data-uuuidrag", // node["data-uuuidrag"] = { dragging: Boolean, x, y }
-    _touch = uu.ver.touch,
-    _transform = uu.webkit ? "webkitTransform"
-               : uu.gecko  ? "MozTransform"
-               : uu.opera  ? "OTransform" : "transform";
+    _touch = uu.ver.touch;
 
 // uu.ui.dragbase -
 function uuuidragbase(evt,      // @param event:
@@ -25,43 +22,37 @@ function uuuidragbase(evt,      // @param event:
                                 //  option.mousemove  - Function: mousemove/touchmove/gesturechange callback
                                 //  option.mousedown  - Function: mousedown/touchstart/gesturestart callback
                                 //  option.mousewheel - Function: mousewheel callback
-                                //  option.tripletap  - Boolean/Function: true is reset
-                                //                                       triple tap callback
+                                //  option.transform  - Boolean: true is use transform
                                 //  option.shim       - Object: shim object
     var opt = option || {},
         code = evt.code,
         pageX = evt.pageX,
         pageY = evt.pageY,
         dragInfo = grip[_uuuidrag],
+        scale, rotate, // for transform
         touches, finger, identifier, i; // for iPhone
 
     // init
     if (!dragInfo) {
         grip[_uuuidrag] = dragInfo = {
-            tap: 0, scale: 1, rotate: 0, ox: 0, oy: 0,
+            tap: 0, ox: 0, oy: 0, trans: [1, 1, 0, 0, 0],
             mode: 0 // 0=zoom, 1=rotate
         };
-//{{{!mb
-        if (uu.ie) {
-            uu.mix(dragInfo, getCenterPosition(node));
-            node.style.filter +=
-                " progid:DXImageTransform.Microsoft.Matrix(sizingMethod='auto expand')";
-        }
-//}}}!mb
-
-        parseMatrix(node, dragInfo);
+        dragInfo.trans = uu.css.transform(node).concat();
     }
 
     // mousedown, touchstart, gesturestart
     if (code === uu.event.codes.mousedown && !dragInfo.dragging) {
 
         // toggle zoom/rotate mode
-        if (!_touch && evt.mouse == 1) { // 1 is middle click
-            dragInfo.mode = dragInfo.mode ? 0 : 1;
-            node.style.cursor = dragInfo.mode
-                              ? "url(rotate.cur),url(rotate.gif),default"
-                              : "move";
-            return;
+        if (option.transform) {
+            if (!_touch && evt.mouse == 1) { // 1 is middle click
+                dragInfo.mode = dragInfo.mode ? 0 : 1;
+                node.style.cursor = dragInfo.mode
+                                  ? "url(rotate.cur),url(rotate.gif),default"
+                                  : "move";
+                return;
+            }
         }
 
         if (_touch) {
@@ -86,20 +77,18 @@ function uuuidragbase(evt,      // @param event:
     // mouseup, touchend, gestureend
     } else if (code === uu.event.codes.mouseup && dragInfo.dragging) {
 
-        if (_touch) {
-            parseMatrix(node, dragInfo);
-        }
-        // triple tap -> reset transform matrix
-        if (option.tripletap && dragInfo.tap > 2) {
-            if (option.tripletap === true) {
+        if (option.transform) {
+            if (_touch) {
+                // store current state
+                dragInfo.trans = uu.css.transform(node).concat();
+            }
+            // triple tap -> reset transform matrix
+            if (dragInfo.tap > 2) {
                 dragInfo.tap = 0;
-                dragInfo.scale = 1;
-                dragInfo.rotate = 0;
-                modMatrix(node, dragInfo, 1, 0);
-            } else {
-                option.tripletap(evt, node, option, dragInfo);
+                uu.css.transform(node, dragInfo.trans = [1, 1, 0, 0, 0]);
             }
         }
+
         dragInfo.dragging = 0;
 
         opt.mouseup && opt.mouseup(evt, node, option, dragInfo);
@@ -111,7 +100,11 @@ function uuuidragbase(evt,      // @param event:
 
         if (_touch) {
             if (evt.gesture) {
-                modMatrix(node, dragInfo, evt.scale, evt.rotation);
+                if (option.transform) {
+                    scale  = dragInfo.trans[0] + evt.scale - 1,
+                    rotate = dragInfo.trans[2] + evt.rotation;
+                    uu.css.transform(node, [scale, scale, rotate, 0, 0]);
+                }
                 return;
             }
             touches = evt.touches;
@@ -141,70 +134,19 @@ function uuuidragbase(evt,      // @param event:
 //}}}!mb
     // mousewheel
     } else if (code === uu.event.codes.mousewheel) {
-        if (evt.shiftKey || dragInfo.mode) {
-            dragInfo.rotate += evt.wheel * 5;  // rotate
-        } else {
-            dragInfo.scale += evt.wheel * 0.1; // scale
-            dragInfo.scale < 0.5 && (dragInfo.scale = 0.5);
+        if (option.transform) {
+            if (evt.shiftKey || dragInfo.mode) {
+                dragInfo.trans[2] += evt.wheel * 5;  // rotate
+            } else {
+                scale = dragInfo.trans[0];
+                scale += evt.wheel * 0.1;
+                scale < 0.5 && (scale = 0.5);
+                dragInfo.trans[0] = dragInfo.trans[1] = scale;
+            }
+            uu.css.transform(node, dragInfo.trans);
         }
-        modMatrix(node, dragInfo, 1, 0);
     }
 }
-
-// inner -
-function modMatrix(node, dragInfo, scale, rotate) {
-//{{{!mb
-    if (uu.ie) {
-        var mtx, filter, pos;
-
-        scale = dragInfo.scale + scale - 1;
-        rotate = (dragInfo.rotate + rotate) * Math.PI / 180; // deg2rad
-
-        mtx = uu.matrix2d.scale(scale, scale, uu.matrix2d.identify());
-        mtx = uu.matrix2d.rotate(-rotate, mtx);
-
-        filter = node.filters.item("DXImageTransform.Microsoft.Matrix");
-        filter.M11 = mtx[0];
-        filter.M12 = mtx[1];
-        filter.M21 = mtx[3];
-        filter.M22 = mtx[4];
-
-        // recalc center
-        pos = getCenterPosition(node);
-        node.style.marginLeft = dragInfo.cx - pos.cx + "px";
-        node.style.marginTop  = dragInfo.cy - pos.cy + "px";
-        return;
-    }
-//}}}!mb
-
-//  node.style.webkitTransformOrigin = ""
-
-    node.style[_transform] =
-        "scale(" + (dragInfo.scale + scale - 1) +
-        ") rotate(" + (dragInfo.rotate + rotate) + "deg)";
-}
-
-// inner - parse matrix
-function parseMatrix(node,       // @param Node:
-                     dragInfo) { // @param Hash:
-    var style = node.style[_transform] || "", m
-
-    m = /scale\(([\d\.]+)\)/.exec(style);
-    m && (dragInfo.scale = +m[1]);
-
-    m = /rotate\(([\d\.]+)deg\)/.exec(style);
-    m && (dragInfo.rotate = +m[1]);
-}
-
-//{{{!mb
-// inner -
-function getCenterPosition(node) {
-    var rect = node.getBoundingClientRect();
-
-    return { cx: (rect.right  - rect.left) / 2,
-             cy: (rect.bottom - rect.top)  / 2 };
-}
-//}}}!mb
 
 })(uu);
 

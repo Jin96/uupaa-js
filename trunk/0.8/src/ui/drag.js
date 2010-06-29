@@ -27,7 +27,7 @@ function draginit(node,     // @param Node: move target node
                             //                                fn is callback
                             //      option.noshim - Number: noshim, 1 is disable shim(in IE6)
     grip = grip || node;
-    this.option = uu.arg(option, { tripletap: true, shim: 0 });
+    this.option = uu.arg(option, { transform: true, shim: 0 });
     this.node = node;
     this.grip = grip;
     grip.style.cursor = "move";
