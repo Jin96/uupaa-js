@@ -138,7 +138,7 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Clas
                                     //  [5][to Array + slice]   uu.array(uu.tag("*"), 1, 3) -> [<head>, <meta>]
         has:        uuhas,          // uu.array.has(source:Array, search:Array):Boolean
         nth:        uunth,          // uu.array.nth(source:Array, index:Number):Array
-        dump:       uudump,         // uu.array.dump(source:ByteArray, type:String = "HEX"):String
+        dump:       uuarraydump,    // uu.array.dump(source:ByteArray, type:String = "HEX"):String
                                     //  [1][ByteArray dump] uu.array.dump([1, 2, 3]) -> "010203"
                                     //  [2][ByteArray dump] uu.array.dump([1, 2, 3], "0x", ", 0x") -> "0x01, 0x02, 0x03"
         size:       uusize,         // uu.array.size(source:Array):Number
@@ -198,7 +198,7 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Clas
                                     //  [5][convert pixel]  uu.css.unit(<div>, "auto") -> 100
                                     //  [6][convert pixel]  uu.css.unit(<div>, "auto", 0, "borderTopWidth") -> 0
     }),
-    viewport:       uuviewport,
+    viewport:       uuviewport,     // uu.viewport():Hash - { x, y, w, h, orientation }
     // --- EFFECT / ANIMATION ---
     fx:       uumix(uufx, {         // uu.fx(node:Node, duration:Number, param:Hash/Function = void):Node
                                     //  [1][abs]             uu.fx(node, 500, { o: 0.5, x: 200 })
@@ -210,7 +210,7 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Clas
                                     //  [7][after callback]  uu.fx(node, 500, { o: 1, after: afterCallback })
                                     //  [8][before callback] uu.fx(node, 500, { o: 1, before: beforeCallback })
                                     //  [9][revert]          uu.fx(node, 500, { o: 1, r: 1 })
-        skip:       uufxskip,       // uu.fx.skip(node:Node = null, all:Boolean = false):Node/NodeArray
+        skip:       uufxskip,       // uu.fx.skip(node:Node = null, skipAll:Boolean = false):Node/NodeArray
         isBusy:     uufxisbusy      // uu.fx.isBusy(node:Node):Boolean
     }),
     // --- QUERY ---
@@ -333,6 +333,7 @@ uu = uumix(uufactory, {             // uu(expression:NodeSet/Node/NodeArray/Clas
     }),
     format:         uuformat,       // uu.format(format:FormatString, var_args, ...):String
                                     //  [1][placeholder] uu.format("?? dogs and ??", 101, "cats") -> "101 dogs and cats"
+    f:              uuformat,       // uu.f() as uu.format
     // --- DATE ---
     date:           uudate,         // uu.date(source:DateHash/Date/Number/String= void):DateHash
                                     //  [1][get now]                 uu.date() -> DateHash
@@ -398,9 +399,10 @@ uu.msg = new MsgPump();             // uu.msg - MsgPump instance
 
 // --- StyleSheet class ---
 uuclass("StyleSheet", {
-    init:           StyleSheetInit, //
-    add:            StyleSheetAdd,  //
-    clear:          StyleSheetClear //
+    init:           StyleSheetInit, // uu("StyleSheet", id:String)
+    add:            StyleSheetAdd,  // styleSheet.add(rule:Hash)
+                                    //  [1] styleSheet.add({ "div>p": "color:red;font-weight:bold", ... })
+    clear:          StyleSheetClear // styleSheet.clear()
 });
 
 // --- ECMAScript-262 5th ---
@@ -512,21 +514,15 @@ function uufactory(expression, // @param NodeSet/Node/NodeArray/ClassNameString/
 function uusnippet(id,    // @param String: snippet id. <script id="...">
                    arg) { // @param Mix(= void): arg
                           // @return String/Mix:
-    function normalize(str) {
-        return str[_replace](/("|')/g, "\\$1")[_replace](/\n/g, "\\n");
-    }
-
     function toBrace(all, ident) {
         return ident[_indexOf]("arg.") ? '{(' + ident + ')}'  // "{{ident}}"     -> "{(ident)}"
                                        : '"+' + ident + '+"'; // "{{arg.ident}}" -> "+ident+"
     }
 
-    function toText(all, match) {
-        return '"' + normalize(match.trim())[_replace](dualBrace, toBrace) + '"';
-    }
-
     function each(all, match) {
-        match = normalize(match[_replace](/^\s+|\s+$/gm, ""))
+        match = match[_replace](/^\s+|\s+$/gm, "")
+                [_replace](/("|')/g, "\\$1")
+                [_replace](/\n/g, "\\n")
                 [_replace](eachBlock, toEachBlock)
                 [_replace](dualBrace, toBrace);
         return 'uu.node.bulk("' + match + '");';
@@ -545,7 +541,6 @@ function uusnippet(id,    // @param String: snippet id. <script id="...">
         node = uuid(id);
         if (node) {
             uusnippet.js[id] = js = node.text[_replace](/\r\n|\r|\n/g, "\n")
-                    [_replace](/<text>\n([\s\S]*?)^<\/text>$/gm, toText) // <text>...</text>
                     [_replace](/<>\n([\s\S]*?)^<\/>$/gm, each)           // <>...</>
                     [_replace](/^\s*\n|\n$/g, "");
         }
@@ -1123,10 +1118,10 @@ function uuunique(source,        // @param Array: source
 //  [2][ByteArray dump] uu.array.dump([1, 2, 3], "0x", ", 0x") -> "0x01, 0x02, 0x03"
 
 // uu.array.dump - dump ByteArray
-function uudump(source,     // @param ByteArray: [0x00, ... 0xff]
-                prefix,     // @param String(= ""):
-                splitter) { // @param String(= ""):
-                            // @return String: "00010203"
+function uuarraydump(source,     // @param ByteArray: [0x00, ... 0xff]
+                     prefix,     // @param String(= ""):
+                     splitter) { // @param String(= ""):
+                                 // @return String: "00010203"
     var rv = [], i = 0, iz = source.length, num2hh = _num2hh;
 
     for (; i < iz; ++i) {
@@ -1323,7 +1318,7 @@ function uucss(expression, // @param Node/StyleSheetIDString/ReserveWordString:
                 uucssopacity(expression, value);
                 continue;
             }
-            !care[formal] && (value += "px"); // number -> pixel value
+            care[formal] || (value += "px"); // number -> pixel value
         }
         style[formal] = value;
     }
@@ -1500,24 +1495,10 @@ function uufxbuild(node, data, queue, option) {
                                    ezfn(startValue, endValue, ez));
 //{{{!mb
                     if (!uuready.opacity) { // [IE6][IE7][IE8]
-if (0) {
-                        rv += uuformat('s.visibility=o?"visible":"hidden";' +
-                                       's.filter=((o>0&&o<1)?"alpha(??="+(o*100)+")":"");' +
-                                       'f&&uu.css.opacity(n,??)&&(s.filter+=" ??");',
-                                       w, endValue, node.style.filter[_replace](uufx.alpha, ""));
-
-} else {
-
-                        rv += uuformat(
-//                                       's.visibility=o?"visible":"hidden";' +
-                                       'fo=n.filters.item("DXImageTransform.Microsoft.Alpha");' +
-//                                       'debugger;' +
-//                                       'if(o>0&&o<1){fo.Enabled=true;fo.Opacity=o*100;}else{fo.Enabled=false;}' +
+                        rv += uuformat('fo=n.filters.item("DXImageTransform.Microsoft.Alpha");' +
                                        'fo.Enabled=true;fo.Opacity=(o*100)|0;' +
-//                                       'fo.Opacity=o*100;' +
                                        'f&&uu.css.opacity(n,??);',
                                        endValue);
-}
                     } else {
 //}}}!mb
                         rv += uuformat('s.??=f? ??:o;', w, endValue);
@@ -1570,10 +1551,9 @@ if (0) {
 }
 
 // uu.fx.skip
-function uufxskip(node,           // @param Node(= null): null is all node
-                  all,            // @param Boolean(= false): true is skip all
-                  avoidFlicker) { // @param Boolean(= false): true is avoid flicker
-                                  // @return Node/NodeArray:
+function uufxskip(node,      // @param Node(= null): null is all node
+                  skipAll) { // @param Boolean(= false): true is skip all
+                             // @return Node/NodeArray:
     var nodeArray = node ? [node] : uutag("*", doc.body),
         v, i = -1, j, k, jz, kz, data, guid, option, q, rq;
 
@@ -1584,7 +1564,7 @@ function uufxskip(node,           // @param Node(= null): null is all node
             q = data.q;
             rq = data.rq;
             guid = [];
-            for (j = 0, jz = all ? q.length : 1; j < jz; ++j) {
+            for (j = 0, jz = skipAll ? q.length : 1; j < jz; ++j) {
                 q[j].fin = 1;
                 option = q[j].option;
                 (option.chain || option.reverse) && guid.push(option.guid);
@@ -1597,7 +1577,9 @@ function uufxskip(node,           // @param Node(= null): null is all node
                     }
                 }
             }
-            if (q.length > 2 && avoidFlicker) {
+
+            // avoid flicker
+            if (q.length > 2 && skipAll) {
                 q.push({
                     tm: 0, guid: 0, fin: 1, dur: 0,
                     option: function(node) {
@@ -1619,7 +1601,7 @@ function uufxisbusy(node) { // @param Node:
     return data && data.id;
 }
 
-// uu.css.uucssopacity
+// uu.css.opacity
 function uucssopacity(node,      // @param Node:
                       opacity) { // @param Number/String(= void): Number(0.0 - 1.0) absolute
                                  //                               String("+0.5", "-0.5") relative
@@ -1684,8 +1666,8 @@ if (0) {
             filter.Opacity = (opacity * 100) | 0;
         } else {
             filter.Enabled = _false;
-            style[_visibility] = opacity ? "visible" : "hidden";
         }
+        style[_visibility] = opacity ? "visible" : "hidden";
 }
     }
 //}}}!mb
@@ -1814,7 +1796,7 @@ function uucssisshow(node) { // @param Node/CSSProperties:
 }
 
 // StyleSheet.init
-function StyleSheetInit(id) { // @param String:
+function StyleSheetInit(id) { // @param String: style sheet id
     var node = uunode("style", "id," + id);
 
     _webkit && node[_appendChild](doc[_createTextNode](""));

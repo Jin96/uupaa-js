@@ -16,7 +16,7 @@ div {
 <script>
 uu.ready(function(uu) {
     uu("div").css({ o: 0.5 }).click(function() {
-        uu("div").unclick(); // unclick all
+        uu("div").unbind("click"); // unclick all
         uu.fx.skip(0, 1, 1);
         action();
     }).fx(800, { o: 0.1 }).fx(800, { o: 0.5 });

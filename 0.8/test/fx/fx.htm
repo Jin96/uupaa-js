@@ -65,18 +65,10 @@ function xaddqueue() {
         fx(1000, { x: ["-20",  "easeInBack"], y: ["-100", "easeInBack"], o: 1.0, w: 200, h: [200, "easeOutBack"], bgc: color[3] });
 }
 
-function xskip() {
-    uu.fx.skip();
-}
-
-function xfinish(flicker) {
-    uu.fx.skip(0, true, flicker);
-}
 </script>
 </head><body>
 <input type="button" value="uu.fx() - add queue" onclick="xaddqueue()" />
-<input type="button" value="uu.fx.skip() - skip" onclick="xskip()" />
-<input type="button" value="uu.fx.skip(0, true) - finish all" onclick="xfinish(0)" />
-<input type="button" value="uu.fx.skip(0, true, true) - finish all + avoid flicker" onclick="xfinish(1)" />
+<input type="button" value="uu.fx.skip() - skip" onclick="uu.fx.skip()" />
+<input type="button" value="uu.fx.skip(0, true) - skip all" onclick="uu.fx.skip(0, true)" />
 
 </body></html>
