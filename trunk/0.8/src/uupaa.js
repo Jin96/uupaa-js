@@ -2694,17 +2694,16 @@ function uunode(node,       // @param Node/TagNameString(= "div"): "div" or "svg
                                                   node.slice(4))); // "svg:g" -> <svg:g>
 
     if (args) {
-        var arg, ai, i, iz, token, type, ary;
-        for (i = ai = token = 0, iz = args.length; i < iz; ++i) {
+        var arg, i = 0, iz = args.length, token = 0, type,
+            ai = 0, hash = {};
+
+        for (; i < iz; ++i) {
             arg = args[i];
-            if (arg) {
+            if (arg != null) { // null or undefined
                 type = typeof arg;
 
                 if (type === _number || type === _string) {
-                    if (typical) {
-                        ary || (ary = {});
-                        ary[typical[ai++] || 0] = arg;
-                    }
+                    typical && (hash[typical[ai++]] = arg); // [!] raise Error("MISSMATCH TYPICAL LENGTH")
                 } else if (arg[_nodeType]) { // [1][2]
                     node[_appendChild](arg);
                 } else if (++token < 2) {
@@ -2714,7 +2713,7 @@ function uunode(node,       // @param Node/TagNameString(= "div"): "div" or "svg
                 }
             }
         }
-        callback && ary && callback(node, ary);
+        callback && ai && callback(node, hash);
     }
     return node;
 }
