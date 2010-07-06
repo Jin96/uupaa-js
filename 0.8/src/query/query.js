@@ -1,8 +1,6 @@
 
-// === uu.query.selectorAll ===
-//{{{!depend uu, uu.css, uu.ready.getAttribute, doc.html,
-//           uu.attr.fix
-//}}}!depend
+// === uu.query ===
+//#include uupaa.js
 
 uu.query.selectorAll || (function(win, doc, uu) {
 var _uuguid = "data-uuguid",
