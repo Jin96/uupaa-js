@@ -33,7 +33,7 @@ function uuuisvgdragbase(evt,      // @param event:
 
     // init
     if (!dragInfo) {
-        trans = uu.svg.attr.transform(node);
+        trans = uu.svg.css.transform(node);
 
         grip[_uuuidrag] = dragInfo = {
             tap: 0,

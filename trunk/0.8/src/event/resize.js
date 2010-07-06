@@ -62,7 +62,8 @@ function onagent() {
         // peek innerWidth and innerHeight
         //
         vp = uu.viewport();
-        if (db.vp.w !== vp.innerWidth || db.vp.h !== vp.innerHeight) { // resized?
+        if (db.vp.innerWidth !== vp.innerWidth
+            || db.vp.innerHeight !== vp.innerHeight) { // resized?
 
             db.vp = vp; // store
             for (iz = db.fn.length; i < iz; ++i) {

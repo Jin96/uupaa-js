@@ -118,7 +118,7 @@ function preProcess($js,       // @param String: JavaScript source code
     $js = preg_replace('/uu\.?event.codes.online/',         '50', $js);
     $js = preg_replace('/uu\.?event.codes.offline/',        '51', $js);
     $js = preg_replace('/uu\.?event.codes.message/',        '52', $js);
-    $js = preg_replace('/uu\.?event.codes.orientationchange/', '60', $js);
+//  $js = preg_replace('/uu\.?event.codes.orientationchange/', '60', $js);
     $js = preg_replace('/uu\.?event.codes.losecapture/',    '0x102', $js);
     $js = preg_replace('/uu\.?event.codes.DOMMouseScroll/', '0x104', $js);
 

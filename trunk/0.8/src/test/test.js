@@ -57,10 +57,10 @@ function run(hash) { // @param Hash: { title: evaluator, ... }
     var rv, data = uu.test.data, title, ngzone, ol;
 
     if (!data.run++) {
-        uu.node.add(uu.div("class,uutestinfo",
-                        uu.div("class,ngzone"),
-                            uu.div("class,score", "0 / 0")));
-        uu.node.add(uu.div("class,uutest", uu.ol()));
+        uu.node.add(uu.div({ cn: "uutestinfo" },
+                        uu.div({ cn: "ngzone" }),
+                            uu.div({ cn: "score" }, uu.text("0 / 0"))));
+        uu.node.add(uu.div({ cn: "uutest" }, uu.ol()));
     }
     ngzone = uu.klass("ngzone")[0];
     ol = uu.klass("uutest")[0].firstChild;
@@ -74,16 +74,16 @@ function run(hash) { // @param Hash: { title: evaluator, ... }
                 ++data.ok;
             } else {
                 ++data.ng;
-                uu.node.add(uu.a("href,#uutest" + data.index, data.index + ""), ngzone);
+                uu.node.add(uu.a({ href: "#uutest" + data.index }, uu.text(data.index + "")), ngzone);
             }
             ++data.total;
         } else {
             rv = [3, ""]; // { title: "" }
         }
         uu.node.add(
-            uu.li("class,li" + rv[0], // .li0, .li1, .li2, .li3
-                uu.p("class,p",
-                    uu.a("name,uutest" + data.index,
+            uu.li({ cn: "li" + rv[0] }, // .li0, .li1, .li2, .li3
+                uu.p({ cn: "p" },
+                    uu.a({ name: "uutest" + data.index },
                         uu.text(title.replace(/\n/g, "<br />"))),
                     uu.br(),
                     uu.text(rv.slice(1).join(" # ")))), ol);
@@ -159,7 +159,7 @@ function judge(lhs,      // @param Mix: left hand set
         case "ISINSTANCE":rv = !!lhs.msgbox; break;
         default:
             ope = ope.replace(/IS/, "");
-            rv = uu.type[ope] ? uu.type(lhs, uu.type[ope]) : 2;
+            rv = uu.type[ope] ? uu.type(lhs) === uu.type[ope] : 2;
         }
     }
     return +rv;

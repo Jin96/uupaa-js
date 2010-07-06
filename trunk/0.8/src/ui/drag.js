@@ -17,7 +17,6 @@ var _ie678 = uu.ie && !uu.ver.jit,
     _moveup = uu.ver.touch ? "touchmove+,touchend+"
                            : "mousemove+,mouseup+";
 
-// --- drag ---
 // uu.Class.Drag.init
 function draginit(node,     // @param Node: move target node
                   grip,     // @param Node(= null): grip target node
