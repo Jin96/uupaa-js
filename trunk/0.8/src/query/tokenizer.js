@@ -41,15 +41,15 @@ var _A_TAG          = 1,  // E               [_A_TAG,        "DIV"]
     };
 
 function tokenizer(expr) {
-    var rv = { token: [], group: 1, err: false, msg: "" },
+    var rv = { item: [], group: 1, err: false, msg: "", expr: expr },
         m, outer, inner;
 
     expr = expr.trim();
     while (!rv.err && expr && outer !== expr) { // outer loop
         m = _COMB.exec(outer = expr);
         if (m) {
-            m[1] && rv.token.push(_A_COMBINATOR, m[1]); // >+~
-                    rv.token.push(_A_TAG, m[2].toUpperCase() || "*"); // "DIV" or "*"
+            m[1] && rv.item.push(_A_COMBINATOR, m[1]); // >+~
+                    rv.item.push(_A_TAG, m[2] || "*"); // "DIV" or "*"
             expr = expr.slice(m[0].length);
         }
         while (!rv.err && expr && inner !== expr) { // inner loop
@@ -58,24 +58,28 @@ function tokenizer(expr) {
         m = _COMMA.exec(expr);
         if (m) {
             ++rv.group;
-            rv.token.push(_A_COMMA);
+            rv.item.push(_A_COMMA);
             expr = expr.slice(m[0].length);
         }
     }
+    expr && (rv.err = !!(rv.msg = expr + " syntax error")); // remain
     return rv;
 }
 
 function innerLoop(expr, rv, not) {
-    var m, num, anb, a, b, c;
+    var m, num, mm, anb, a, b, c;
 
     switch (_MARK[expr.charAt(0)] || 0) {
-    case 1: (m = _IDENT.exec(expr)) && rv.token.push(_A_ID, m[1]); break;
-    case 2: (m = _IDENT.exec(expr)) && rv.token.push(_A_CLASS, m[1]); break;
+    case 1: (m = _IDENT.exec(expr)) && rv.item.push(_A_ID, m[1]); break;
+    case 2: (m = _IDENT.exec(expr)) && rv.item.push(_A_CLASS, m[1]); break;
     case 3: m = _ATTR.exec(expr); // [1]ATTR, [2]OPERATOR, [3]"VALUE" [5]ATTR
             if (m) {
-                m[5] ? rv.token.push(_A_ATTR, m[5])
-                     : rv.token.push(_A_ATTR_VALUE, m[1], num = _OPE[m[2]], m[3]);
-                m[5] || num || (rv.err = !!(rv.msg = ope + " unsupported"));
+                m[5] ? rv.item.push(_A_ATTR, m[5])
+                     : rv.item.push(_A_ATTR_VALUE, m[1], num = _OPE[m[2]], m[3]);
+                m[5] || num || (rv.err = !!(rv.msg = ope));
+                // [FIX] Attribute multivalue selector. css3_id7b.html
+                //  <p title="hello world"></p> -> query('[title~="hello world"]') -> unmatch
+                num === 5 && m[3].indexOf(" ") >= 0 && (rv.err = !!(rv.msg = ope));
             }
             break;
     case 4: m = _PSEUDO.FIND.exec(expr);
@@ -84,48 +88,48 @@ function innerLoop(expr, rv, not) {
                 if (!num) {
                     rv.err || (rv.err = !!(rv.msg = m[0]));
                 } else if (num < 30) {   // pseudo (30 is magic number)
-                    rv.token.push(_A_PSEUDO, num);
+                    rv.item.push(_A_PSEUDO, num);
                 } else if (num === 30) { // :not   (30 is magic number)
                     if (not) {
                         rv.err = !!(rv.msg = ":not(:not(...))");
                         break;
                     }
-                    rv.token.push(_A_PSEUDO_NOT);
+                    rv.item.push(_A_PSEUDO_NOT);
                     expr = expr.slice(m[0].length);
                     m = _PSEUDO.E.exec(expr);
                     if (m) {
-                        rv.token.push(_A_TAG, m[1].toUpperCase()); // "DIV"
+                        rv.item.push(_A_TAG, m[1].toUpperCase()); // "DIV"
                     } else {
                         expr = innerLoop(expr, rv, 1); // :not(simple selector)
                         m = _PSEUDO.END.exec(expr);
                         m || (rv.err ? 0 : (rv.err = !!(rv.msg = ":not()")));
                     }
                 } else { // pseudo nth-functions
-                    rv.token.push(num < 35 ? _A_PSEUDO_NTH : _A_PSEUDO_FUNC, num);
+                    rv.item.push(num < 35 ? _A_PSEUDO_NTH : _A_PSEUDO_FUNC, num);
                     expr = expr.slice(m[0].length);
                     m = _PSEUDO.FUNC.exec(expr);
                     if (m && num < 35) {
-                        m = _NTH_ANB.exec(m[1]);
-                        if (m) {
-                            if (m[2]) {
+                        mm = _NTH.exec(m[1]);
+                        if (mm) {
+                            if (mm[2]) {
                                 anb = { a: 2, b: 0, k: 3 }; // nth(even)
-                            } else if (m[3]) {
+                            } else if (mm[3]) {
                                 anb = { a: 2, b: 1, k: 3 }; // nth(odd)
-                            } else if (m[4]) {
+                            } else if (mm[4]) {
                                 anb = { a: 0, b: 0, k: 2, all: 1 }; // nth(1n+0), nth(n+0), nth(n)
-                            } else if (m[5]) {
-                                anb = { a: 0, b: parseInt(m[5], 10), k: 1 }; // nth(1)
+                            } else if (mm[5]) {
+                                anb = { a: 0, b: parseInt(mm[5], 10), k: 1 }; // nth(1)
                             } else {
-                                a = (m[7] === "-" ? -1 : m[7] || 1) - 0;
-                                b = (m[8] || 0) - 0;
+                                a = (mm[7] === "-" ? -1 : mm[7] || 1) - 0;
+                                b = (mm[8] || 0) - 0;
                                 c = a < 2;
                                 anb = { a: c ? 0 : a, b: b, k: c ? a + 1 : 3 };
                             }
                         }
-                        anb ? rv.token.push(anb)  // pseudo function arg
-                            : rv.err ? 0 : (rv.err = !!(rv.msg = "nth"));
+                        anb ? rv.item.push(anb)  // pseudo function arg
+                            : rv.err ? 0 : (rv.err = !!(rv.msg = m[0]));
                     } else {
-                        m ? rv.token.push(m[1]) // pseudo function arg
+                        m ? rv.item.push(m[1]) // pseudo function arg
                           : rv.err ? 0 : (rv.err = !!(rv.msg = m[0]));
                     }
                 }

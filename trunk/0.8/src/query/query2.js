@@ -2,20 +2,26 @@
 // === uu.query ===
 //#include query/tokenizer.js
 
+// - Function Limits
+// -- unsupported Impossible rules (:root:first-child, etc) in W3C Test Suite - css3_id27a
+// -- unsupported Impossible rules (* html, * :root)        in W3C Test Suite - css3_id27b
+// -- unsupported Case sensitivity '.cs P'                  in W3C Test Suite - css3_id181
+
 uu.query.selectorAll || (function(doc, uu) {
 
 uu.query.selectorAll = selectorAll;
 
-var _A_TAG          = 1, // E               [_A_TAG,        "DIV"]
-    _A_COMBINATOR   = 2, // E > F           [_A_COMBINATOR, ">", _A_TAG, "DIV"]
-    _A_ID           = 3, // #ID             [_A_ID,         "ID"]
-    _A_CLASS        = 4, // .CLASS          [_A_CLASS,      "CLASS"]
-    _A_ATTR         = 5, // [ATTR]          [_A_ATTR,       "ATTR"]
-    _A_ATTR_VALUE   = 6, // [ATTR="VALUE"]  [_A_ATTR_VALUE, "ATTR", 1~6, "VALUE"]
-    _A_PSEUDO       = 7, // :target         [_A_PSEUDO,      1~29]
-    _A_PSEUDO_FUNC  = 8, // :nth-child(...) [_A_PSEUDO_FUNC, 31~99, arg]
-    _A_PSEUDO_NOT   = 9, // :not(...)       [_A_PSEUDO_NOT, _A_ID/_A_CLASS/_ATTR/_A_PSEUDO/_A_PSEUDO_FUNC, ...]
-    _A_COMMA        = 10, // E,F
+var _A_TAG          = 1,  // E               [_A_TAG,        "DIV"]
+    _A_COMBINATOR   = 2,  // E > F           [_A_COMBINATOR, ">", _A_TAG, "DIV"]
+    _A_ID           = 3,  // #ID             [_A_ID,         "ID"]
+    _A_CLASS        = 4,  // .CLASS          [_A_CLASS,      "CLASS"]
+    _A_ATTR         = 5,  // [ATTR]          [_A_ATTR,       "ATTR"]
+    _A_ATTR_VALUE   = 6,  // [ATTR="VALUE"]  [_A_ATTR_VALUE, "ATTR", 1~6, "VALUE"]
+    _A_PSEUDO       = 7,  // :target         [_A_PSEUDO,      1~29]
+    _A_PSEUDO_NTH   = 8,  // :nth-child(...) [_A_PSEUDO_FUNC, 31~34, { a,b,k }]
+    _A_PSEUDO_FUNC  = 9,  // :lang(...)      [_A_PSEUDO_FUNC, 35~99, arg]
+    _A_PSEUDO_NOT   = 10, // :not(...)       [_A_PSEUDO_NOT, _A_ID/_A_CLASS/_ATTR/_A_PSEUDO/_A_PSEUDO_FUNC, ...]
+    _A_COMMA        = 11, // E,F
     _COMBINATOR = { ">": 1, "+": 2, "~": 3 },
     _CASESENS = { title: 0, id: 0, name: 0, "class": 0, "for": 0 },
     _uunid  = "data-uunodeid",
@@ -30,35 +36,49 @@ var _A_TAG          = 1, // E               [_A_TAG,        "DIV"]
 
 // uu.query.selectorAll
 function selectorAll(context, // @param Node: context
-                     hash) {  // @param Hash: QueryTokenHash
+                     token) { // @param Hash: QueryTokenHash
                               // @return NodeArray:
 
-    var owner = context.ownerDocument,
+    var owner = context.ownerDocument || doc,
         xmldoc = owner.createElement("a").tagName !==
                  owner.createElement("A").tagName,
-        ctx = [context], nodeList,
-        lock = {}, mixinLock = {}, word, match, negate = 0,
-        i = 0, iz = hash.token.length, j, jz, k, kz, r, ri,
+        ctx = [context], result, nodeList,
+        lock, mixed = 0, mixinLock = {}, word, match, negate = 0,
+        i = 0, iz = token.item.length, j, jz, k, kz, r, ri,
         ident, node, universal, nid, type,
         attr, ope, val, rex, // for attr
         pseudo, arg; // for pseudo
 
     for (; i < iz; ++i) {
+        lock = {}; // unlock
         r  = [];
         ri = -1;
         j  = type = 0;
         jz = ctx.length;
 
-        switch (hash.token[i]) {
+        if (!jz) {
+            break;
+        }
+
+        switch (token.item[i]) {
         case _A_COMBINATOR: // [_A_COMBINATOR, ">", _A_TAG, "DIV"]
-            type = _COMBINATOR[hash.token[++i]];
+            type = _COMBINATOR[token.item[++i]];
             ++i;
         case _A_TAG:        // [_A_TAG, "DIV"]
-            ident = hash.token[++i]; // "DIV" or "*"
-            xmldoc && (ident = ident.toLowerCase()); // "DIV" -> "div"
+            ident = token.item[++i]; // "DIV" or "*"
             universal = ident === "*";
+            xmldoc || (ident = ident.toUpperCase());
 
             if (!type) { // TAG
+                if (negate) {
+                    if (universal) { break; } // :not(*) -> NOT ALL
+                    for (; j < jz; ++j) {
+                        node = ctx[j];
+                        (node.tagName !== ident) && (r[++ri] = node);
+                    }
+                    ctx = r;
+                    break;
+                }
                 for (; j < jz; ++j) {
                     nodeList = ctx[j].getElementsByTagName(ident);
 
@@ -98,7 +118,7 @@ function selectorAll(context, // @param Node: context
         case _A_ID:     // [_A_ID, "ID"]
             type = 1;
         case _A_CLASS:  // [_A_CLASS, "CLASS"]
-            ident = type ? hash.token[++i] : (" " + hash.token[++i] + " "); // "ID" or " CLASS "
+            ident = type ? token.item[++i] : (" " + token.item[++i] + " "); // "ID" or " CLASS "
             for (; j < jz; ++j) {
                 node = ctx[j];
                 if (type) { // ID
@@ -113,7 +133,7 @@ function selectorAll(context, // @param Node: context
             ctx = r;
             break;
         case _A_ATTR: // [_A_ATTR, "ATTR"]
-            attr = hash.token[++i];
+            attr = token.item[++i];
 
             for (; j < jz; ++j) {
                 node = ctx[j];
@@ -130,9 +150,9 @@ function selectorAll(context, // @param Node: context
             ctx = r;
             break;
         case _A_ATTR_VALUE: // [_A_ATTR_VALUE, "ATTR", "OPERATOR", "VALUE"]
-            attr = hash.token[++i];
-            ope  = hash.token[++i];
-            val  = uu.trim.quote(hash.token[++i]);
+            attr = token.item[++i];
+            ope  = token.item[++i];
+            val  = uu.trim.quote(token.item[++i]);
 //{{{!mb
             uu.ready.getAttribute || (attr = uu.attr.fix[attr] || attr);
 //}}}!mb
@@ -144,7 +164,7 @@ function selectorAll(context, // @param Node: context
             case 6: val = "^" + val + "\\-|^" + val + "$";    // [attr |= value]
             }
             rex = RegExp(val, attr in _CASESENS ? "" : "i"); // ignore case
-            for (; j < jz; ++i) {
+            for (; j < jz; ++j) {
                 node = ctx[j];
                 word = node.getAttribute(attr, 2);
                 ((word && rex.test(word)) ^ negate) && (r[++ri] = node);
@@ -152,7 +172,7 @@ function selectorAll(context, // @param Node: context
             ctx = r;
             break;
         case _A_PSEUDO: // [_A_PSEUDO, 1~29]
-            pseudo = hash.token[++i];
+            pseudo = token.item[++i];
             ctx = (pseudo < 4  ? childFilter
                  : pseudo < 7  ? ofTypeFilter
                  : pseudo < 10 ? actionFilter
@@ -161,14 +181,14 @@ function selectorAll(context, // @param Node: context
                                : _userFilter)(ctx, j, jz, negate, pseudo, xmldoc);
             break;
         case _A_PSEUDO_NTH:  // [_A_PSEUDO_FUNC, 31~34, { a,b,k }]
-            pseudo = hash.token[++i];
-            arg    = hash.token[++i];
+            pseudo = token.item[++i];
+            arg    = token.item[++i];
             ctx = (pseudo < 33 ? nthFilter
                                : nthTypeFilter)(ctx, j, jz, negate, pseudo, arg, xmldoc);
             break;
         case _A_PSEUDO_FUNC: // [_A_PSEUDO_FUNC, 31~99, arg]
-            pseudo = hash.token[++i];
-            arg    = hash.token[++i];
+            pseudo = token.item[++i];
+            arg    = token.item[++i];
             ctx = (pseudo < 36 ? langFilter
                                : _userFunctionFilter)(ctx, j, jz, negate, pseudo, arg, xmldoc);
             break;
@@ -176,25 +196,25 @@ function selectorAll(context, // @param Node: context
             negate = 2;
             break;
         case _A_COMMA:
-            mixed++ && mixin(ctx, rv, mixinLock);
+            mixed++ ? mixin(result, ctx, mixinLock) : (result = ctx);
             ctx = [context];
         }
         negate && --negate;
     }
-    return mixed ? mixin(ctx, rv, mixinLock) : ctx;
+    return mixed ? mixin(result, ctx, mixinLock) : ctx;
 }
 
 // inner - mix results
-function mixin(ctx, rv, mixinLock) {
-    var ri = rv.length - 1, i = 0, node, nid;
+function mixin(result, add, mixinLock) {
+    var ri = result.length - 1, i = 0, iz = add.length, node, nid;
 
     for (; i < iz; ++i) {
-        node = ctx[i];
+        node = add[i];
         nid = node[_uunid] || (_nid.db[nid = ++_nid.n] = node,
                                node[_uunid] = nid);
-        mixinLock[nid] || (rv[++ri] = node, mixinLock[nid] = 1);
+        mixinLock[nid] || (result[++ri] = node, mixinLock[nid] = 1);
     }
-    return rv;
+    return result;
 }
 
 // inner - 1:first-child  2:last-child  3:only-child
