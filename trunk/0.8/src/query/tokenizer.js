@@ -1,34 +1,43 @@
-(function() {
-window.tokenizer = tokenizer;
 
-var _A_TAG          = 1, // E
-    _A_COMBINATOR   = 2, // E > F
-    _A_ID           = 3, // #ID
-    _A_CLASS        = 4, // .CLASS
-    _A_ATTR         = 5, // [ATTR]
-    _A_ATTR_VALUE   = 6, // [ATTR="VALUE"]
-    _A_PSEUDO       = 7, // :target
-    _A_PSEUDO_FUNC  = 8, // :lang(...)  :nth-child(...)
-    _A_PSEUDO_NOT   = 9, // :not(...)
-    _A_COMMA        = 10, // E,F
+// === query.tokenizer ===
+
+uu.query.tokenizer || (function(doc, uu) {
+
+uu.query.tokenizer = tokenizer;
+
+var _A_TAG          = 1,  // E               [_A_TAG,        "DIV"]
+    _A_COMBINATOR   = 2,  // E > F           [_A_COMBINATOR, ">", _A_TAG, "DIV"]
+    _A_ID           = 3,  // #ID             [_A_ID,         "ID"]
+    _A_CLASS        = 4,  // .CLASS          [_A_CLASS,      "CLASS"]
+    _A_ATTR         = 5,  // [ATTR]          [_A_ATTR,       "ATTR"]
+    _A_ATTR_VALUE   = 6,  // [ATTR="VALUE"]  [_A_ATTR_VALUE, "ATTR", 1~6, "VALUE"]
+    _A_PSEUDO       = 7,  // :target         [_A_PSEUDO,      1~29]
+    _A_PSEUDO_NTH   = 8,  // :nth-child(...) [_A_PSEUDO_FUNC, 31~34, { a,b,k }]
+    _A_PSEUDO_FUNC  = 9,  // :lang(...)      [_A_PSEUDO_FUNC, 35~99, arg]
+    _A_PSEUDO_NOT   = 10, // :not(...)       [_A_PSEUDO_NOT, _A_ID/_A_CLASS/_ATTR/_A_PSEUDO/_A_PSEUDO_FUNC, ...]
+    _A_COMMA        = 11, // E,F
     _COMB  = /^\s*(?:([>+~])\s*)?(\*|\w*)/, // "E > F"  "E + F"  "E ~ F"  "E"  "E F" "*"
     _ATTR  = /^\[\s*(?:([^~\^$*|=\s]+)\s*([~\^$*|]?\=)\s*((["'])?.*?\4)|([^\]\s]+))\s*\]/,
+    _NTH   = /^((even)|(odd)|(1n\+0|n\+0|n)|(\d+)|((-?\d*)n([+\-]?\d*)))$/,
+    _OPE   = { "=": 1, "*=": 2, "^=": 3, "$=": 4, "~=": 5, "|=": 6 },
     _MARK  = { "#": 1, ".": 2, "[": 3, ":": 4 }, // ]
-    _COMMA = /^\s*,\s*/,
+    _COMMA = /^\s*,\s*/, // (((
     _IDENT = /^[#\.]([a-z_\u00C0-\uFFEE\-][\w\u00C0-\uFFEE\-]*)/i, // #ID or .CLASS
     _PSEUDO = { E: /^(\w+|\*)\s*\)/, END: /^\s*\)/, FUNC: /^\s*([\+\-\w]+)\s*\)/,
-                FIND: /^:([\w\-]+\(?)/ },
+                FIND: /^:([\w\-]+\(?)/ }, // )
     _PSEUDOS = {
         // pseudo
-        root:               1, "first-child":      2, "last-child":       3,
-        "first-of-type":    4, "last-of-type":     5, "only-child":       6,
-        "only-of-type":     7, empty:              8, link:               9,
-        visited:           10, active:            11, hover:             12,
-        focus:             13, target:            14, enabled:           15,
-        disabled:          16, checked:           17,
+        "first-child":      1, "last-child":       2, "only-child":       3, // childFilter
+        "first-of-type":    4, "last-of-type":     5, "only-of-type":     6, // ofTypeFilter
+        hover:              7, focus:              8, /////active:             9, // actionFilter
+        enabled:           10, disabled:          11, checked:           12, // formFilter
+        link:              13, visited:           14,                        // otherFilter
+        empty:             15, root:              16, target:            17, // otherFilter
         // pseudo functions
-        "not(":            18, "lang(":           19, "nth-child(":      20,
-        "nth-of-type(":    21, "nth-last-child(": 22, "nth-last-of-type(": 23 // ))))))
+        "not(":            30,
+        "nth-child(":      31, "nth-last-child(": 32,                        // nthFilter
+        "nth-of-type(":    33, "nth-last-of-type(": 34,                      // nthFilter
+        "lang(":           35                                                // langFilter ))))))
     };
 
 function tokenizer(expr) {
@@ -40,7 +49,7 @@ function tokenizer(expr) {
         m = _COMB.exec(outer = expr);
         if (m) {
             m[1] && rv.token.push(_A_COMBINATOR, m[1]); // >+~
-                    rv.token.push(_A_TAG,        m[2]); // tag
+                    rv.token.push(_A_TAG, m[2].toUpperCase() || "*"); // "DIV" or "*"
             expr = expr.slice(m[0].length);
         }
         while (!rv.err && expr && inner !== expr) { // inner loop
@@ -57,7 +66,7 @@ function tokenizer(expr) {
 }
 
 function innerLoop(expr, rv, not) {
-    var m, num;
+    var m, num, anb, a, b, c;
 
     switch (_MARK[expr.charAt(0)] || 0) {
     case 1: (m = _IDENT.exec(expr)) && rv.token.push(_A_ID, m[1]); break;
@@ -65,7 +74,8 @@ function innerLoop(expr, rv, not) {
     case 3: m = _ATTR.exec(expr); // [1]ATTR, [2]OPERATOR, [3]"VALUE" [5]ATTR
             if (m) {
                 m[5] ? rv.token.push(_A_ATTR, m[5])
-                     : rv.token.push(_A_ATTR_VALUE, m[1], m[2], m[3]);
+                     : rv.token.push(_A_ATTR_VALUE, m[1], num = _OPE[m[2]], m[3]);
+                m[5] || num || (rv.err = !!(rv.msg = ope + " unsupported"));
             }
             break;
     case 4: m = _PSEUDO.FIND.exec(expr);
@@ -73,29 +83,51 @@ function innerLoop(expr, rv, not) {
                 num = _PSEUDOS[m[1]] || 0;
                 if (!num) {
                     rv.err || (rv.err = !!(rv.msg = m[0]));
-                } else if (num <= 17) { // 17: checked
-                    rv.token.push(_A_PSEUDO, m[1]);
-                } else if (num === 18) { // 18: not
+                } else if (num < 30) {   // pseudo (30 is magic number)
+                    rv.token.push(_A_PSEUDO, num);
+                } else if (num === 30) { // :not   (30 is magic number)
                     if (not) {
                         rv.err = !!(rv.msg = ":not(:not(...))");
                         break;
                     }
-                    rv.token.push(_A_PSEUDO_FUNC, "not");
+                    rv.token.push(_A_PSEUDO_NOT);
                     expr = expr.slice(m[0].length);
                     m = _PSEUDO.E.exec(expr);
                     if (m) {
-                        rv.token.push(_A_TAG, m[1]);
+                        rv.token.push(_A_TAG, m[1].toUpperCase()); // "DIV"
                     } else {
                         expr = innerLoop(expr, rv, 1); // :not(simple selector)
                         m = _PSEUDO.END.exec(expr);
                         m || (rv.err ? 0 : (rv.err = !!(rv.msg = ":not()")));
                     }
-                } else { // :lang(fr)
-                    rv.token.push(_A_PSEUDO_FUNC, m[1].slice(0, -1));
+                } else { // pseudo nth-functions
+                    rv.token.push(num < 35 ? _A_PSEUDO_NTH : _A_PSEUDO_FUNC, num);
                     expr = expr.slice(m[0].length);
                     m = _PSEUDO.FUNC.exec(expr);
-                    m ? rv.token.push(m[1])
-                      : rv.err ? 0 : (rv.err = !!(rv.msg = m[0]));
+                    if (m && num < 35) {
+                        m = _NTH_ANB.exec(m[1]);
+                        if (m) {
+                            if (m[2]) {
+                                anb = { a: 2, b: 0, k: 3 }; // nth(even)
+                            } else if (m[3]) {
+                                anb = { a: 2, b: 1, k: 3 }; // nth(odd)
+                            } else if (m[4]) {
+                                anb = { a: 0, b: 0, k: 2, all: 1 }; // nth(1n+0), nth(n+0), nth(n)
+                            } else if (m[5]) {
+                                anb = { a: 0, b: parseInt(m[5], 10), k: 1 }; // nth(1)
+                            } else {
+                                a = (m[7] === "-" ? -1 : m[7] || 1) - 0;
+                                b = (m[8] || 0) - 0;
+                                c = a < 2;
+                                anb = { a: c ? 0 : a, b: b, k: c ? a + 1 : 3 };
+                            }
+                        }
+                        anb ? rv.token.push(anb)  // pseudo function arg
+                            : rv.err ? 0 : (rv.err = !!(rv.msg = "nth"));
+                    } else {
+                        m ? rv.token.push(m[1]) // pseudo function arg
+                          : rv.err ? 0 : (rv.err = !!(rv.msg = m[0]));
+                    }
                 }
             }
     }
@@ -103,4 +135,4 @@ function innerLoop(expr, rv, not) {
     return expr;
 }
 
-})();
+})(document, uu);
