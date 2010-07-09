@@ -25,7 +25,6 @@ html, body {
 <script src="../../src/fx/easing.js"></script>
 <script src="../../src/fx/fx.js"></script>
 <script src="../../src/color/color.js"></script>
-<script src="../../src/query/query.js"></script>
 <script src="../../src/image/image.js"></script>
 <script src="../../src/node/clone.js"></script>
 <script src="../../src/css/text.js"></script>
@@ -114,7 +113,7 @@ uu.ready(function(uu) {
         uu.node.add(
             uu.css.textSelectable(
                 uu.click(
-                    uu.div("class,box", { x: x, y: y + 40 }, key), fn)), uu.id("absolutebox"));
+                    uu.div({ cn: "box" }, { x: x, y: y + 40 }, uu.text(key)), fn)), uu.id("absolutebox"));
 
         x += 100 + margin;
         if (x > (100 + margin) * 5) {
@@ -128,7 +127,7 @@ uu.ready(function(uu) {
         uu.node.add(
             uu.css.textSelectable(
                 uu.click(
-                    uu.div("class,box static", { cssFloat: "left" }, key), fn)), uu.id("staticbox"), "+");
+                    uu.div({ cn: "box static" }, { cssFloat: "left" }, uu.text(key)), fn)), uu.id("staticbox"), "+");
     });
 });
 

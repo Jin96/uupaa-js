@@ -24,16 +24,15 @@
 <script src="../../src/uupaa.js"></script>
 <script src="../../src/fx/easing.js"></script>
 <script src="../../src/color/color.js"></script>
-<script src="../../src/query/query.js"></script>
 <script>
 uu.ready(function(uu) {
     var i, iz = 1;
 
     for (i = 0; i < iz; ++i) {
-        uu.body(uu.div("class,tgt1", "x," + (i * 5) + "px", "tgt1"),
-                uu.div("class,tgt2", "x," + (i * 5) + "px", "tgt2"),
-                uu.div("class,tgt3", "x," + (i * 5) + "px", "tgt3"),
-                uu.div("class,tgt4", "x," + (i * 5) + "px", "tgt4"));
+        uu.body(uu.div({ cn: "tgt1" }, { x: (i * 5) + "px" }, uu.text("tgt1")),
+                uu.div({ cn: "tgt2" }, { x: (i * 5) + "px" }, uu.text("tgt2")),
+                uu.div({ cn: "tgt3" }, { x: (i * 5) + "px" }, uu.text("tgt3")),
+                uu.div({ cn: "tgt4" }, { x: (i * 5) + "px" }, uu.text("tgt4")));
     }
 });
 function xaddqueue() {
