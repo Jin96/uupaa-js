@@ -2974,7 +2974,9 @@ function uuhead(/* var_args */) { // @param Mix: var_args
 // uu.body
 function uubody(/* var_args */) { // @param Mix: var_args
                                   // @return Node: <body> node
-    return uunode(doc.body, arguments);
+    return uunode(doc.body, arguments, ["t"], function(node, hash) {
+        node[_appendChild](uutext(hash.t));
+    });
 }
 
 //  [1][create text node]          uu.text("text")            -> createTextNode("text")
@@ -3940,7 +3942,9 @@ uueach(uuevent.shortcut, function(eventType) {
 // inner - setup node builder - uu.div(), uu.a(), ...
 uueach((uutag.html4 + "," + uutag.html5).split(","), function(tag) {
     uu[tag] || (uu[tag] = function() { // @param Mix: var_args
-        return uunode(tag, arguments);
+        return uunode(tag, arguments, ["t"], function(node, hash) {
+            node[_appendChild](uutext(hash.t));
+        });
     });
 });
 
