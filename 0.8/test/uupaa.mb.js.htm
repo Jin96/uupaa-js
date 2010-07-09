@@ -131,24 +131,6 @@ uu.ready(function(uu) {
       "uu.array.clean([]) == []": function() {
         return [uu.array.clean([]), "==", []];
       },
-    "uu.array.unique()": "",
-      "[1][unique elements] uu.array.unique([<body>, <head>, <body>]) は [<body>, <head>]": function() {
-        var body = document.body,
-            head = document.head;
-        return [uu.array.unique([body, head, body]), "==", [body, head]];
-      },
-      "[1][unique elements] uu.array.unique([0, 1, 2, 3, 3, 2, 1, 0]) は [0, 1, 2, 3]": function() {
-        return [uu.array.unique([0, 1, 2, 3, 3, 2, 1, 0]), "==", [0, 1, 2, 3]];
-      },
-      "[2][unique literals] uu.array.unique([0, 1, 2, 3, 3, 2, 1, 0], 1) は [0, 1, 2, 3]": function() {
-        return [uu.array.unique([0, 1, 2, 3, 3, 2, 1, 0], 1), "==", [0, 1, 2, 3]];
-      },
-      "uu.array.unique(var ary=[1,2,,null,3,3,2,1,0]; delete ary[1]) は [1, 3, 2, 0]。\nuu.array.unique は 欠落(delete)した要素や null をスキップする": function() {
-        var ary = [1,2,,null,3,3,2,1,0];
-        delete ary[1];
-
-        return [uu.array.unique(ary), "==", [1, 3, 2, 0]];
-      },
 
     "uu.array.dump()": "",
       'uu.array.dump([1, 2, 3]) == "010203"': function() {

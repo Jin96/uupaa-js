@@ -3,8 +3,10 @@
 //#include uupaa.js
 
 uu.query.selectorAll || (function(win, doc, uu) {
-var _uuguid = "data-uuguid",
-    _innerText = uu.gecko ? "textContent" : "innerText",
+
+var _uunodeid = "data-uunodeid",
+    _textContent = uu.ie ? "innerText" : "textContent",
+
     // --- content-type cache (1: HTML, 2: XHTML) ---
     _ctypedb      = {}, // { quid: contentType }
     _htmltagdb    = {}, // tag dict( { a: "A", A: "A", ... } )
@@ -142,14 +144,14 @@ function quickQuery(expr, match, context) {
                 nodeList3 = nodeList2[j].getElementsByTagName(m3); // "E F G"
                 for (k = 0, kz = nodeList3.length; k < kz; ++k) {
                     v = nodeList3[k];
-                    uid = v[_uuguid] ||
-                        (_nodeid.db[v[_uuguid] = newid = ++_nodeid.num] = v, newid);
+                    uid = v[_uunodeid] ||
+                        (_nodeid.db[v[_uunodeid] = newid = ++_nodeid.n] = v, newid);
                     uid in unq || (rv[++ri] = v, unq[uid] = 1);
                 }
             } else {
                 v = nodeList2[j];
-                uid = v[_uuguid] ||
-                    (_nodeid.db[v[_uuguid] = newid = ++_nodeid.num] = v, newid);
+                uid = v[_uunodeid] ||
+                    (_nodeid.db[v[_uunodeid] = newid = ++_nodeid.n] = v, newid);
                 uid in unq || (rv[++ri] = v, unq[uid] = 1);
             }
         }
@@ -282,8 +284,8 @@ function selectorAll(expr,      // @param CSSQueryString: expr
                         for (v = ctx[i].nextSibling; v; v = v.nextSibling) {
                             if (v.nodeType === 1) {
                                 if (isUniversal || v.tagName === tag) {
-                                    uid = v[_uuguid] ||
-                                          (_nodeid.db[v[_uuguid] = w = ++_nodeid.num] = v, w);
+                                    uid = v[_uunodeid] ||
+                                          (_nodeid.db[v[_uunodeid] = w = ++_nodeid.n] = v, w);
                                     if (uid in unq) {
                                         break;
                                     } else {
@@ -308,8 +310,8 @@ function selectorAll(expr,      // @param CSSQueryString: expr
                         while ( (v = nodeList[j++]) ) {
                             if (!uu.ie || !isUniversal || v.nodeType === 1) {
                                 if (isUniversal || v.tagName === tag) {
-                                    uid = v[_uuguid] ||
-                                          (_nodeid.db[v[_uuguid] = w = ++_nodeid.num] = v, w);
+                                    uid = v[_uunodeid] ||
+                                          (_nodeid.db[v[_uunodeid] = w = ++_nodeid.n] = v, w);
                                     uid in unq || (r[++ri] = v, unq[uid] = 1);
                                 }
                             }
@@ -366,7 +368,7 @@ function selectorAll(expr,      // @param CSSQueryString: expr
                 }
                 break;
 
-            case 3: // 3: pseudo
+            case 3: // 3: ":pseudo"
                 match = _PSEUDO.exec(expr);
                 if (match) {
                     iz = ctx.length;
@@ -496,8 +498,8 @@ function mixin(ctx, rv, guard) {
     var ri = rv.length - 1, i = 0, v, uid, newid;
 
     while ( (v = ctx[i++]) ) {
-        uid = v[_uuguid] ||
-              (_nodeid.db[v[_uuguid] = newid = ++_nodeid.num] = v, newid);
+        uid = v[_uunodeid] ||
+              (_nodeid.db[v[_uunodeid] = newid = ++_nodeid.n] = v, newid);
         uid in guard || (rv[++ri] = v, guard[uid] = 1);
     }
     return rv;
@@ -626,8 +628,8 @@ function nthChildFilter(fid, negate, elms, pseudo, value, tags, contentType) {
 
     for (; i < iz; ++i) {
         pn = elms[i].parentNode;
-        uid = pn[_uuguid] ||
-              (_nodeid.db[pn[_uuguid] = newid = ++_nodeid.num] = pn, newid);
+        uid = pn[_uunodeid] ||
+              (_nodeid.db[pn[_uunodeid] = newid = ++_nodeid.n] = pn, newid);
         if (!(uid in unq)) {
             unq[uid] = 1;
             idx = 0;
@@ -777,7 +779,7 @@ function contains(fid, negate, elms, pseudo, value) {
     var rv = [], ri = -1, v, i = 0;
 
     while ( (v = elms[i++]) ) {
-        if ((v[_innerText].indexOf(value) >= 0) ^ negate) {
+        if ((v[_textContent].indexOf(value) >= 0) ^ negate) {
             rv[++ri] = v;
         }
     }
@@ -816,7 +818,7 @@ function empty(fid, negate, elms) {
             }
         }
         // touch(v.textContent) very slowly
-        if ((!missMatch && !v[_innerText]) ^ negate) {
+        if ((!missMatch && !v[_textContent]) ^ negate) {
             rv[++ri] = v;
         }
     }
@@ -908,8 +910,8 @@ function extendFilter(fid, negate, elms) {
     while ( (v = elms[i++]) ) {
         ok = 0;
         switch (fid) {
-        case 0x40: ok = _DIGIT_FILTER.test(v[_innerText] || ""); break;
-        case 0x41: ok = _NEGATIVE_FILTER.test(v[_innerText] || ""); break;
+        case 0x40: ok = _DIGIT_FILTER.test(v[_textContent] || ""); break;
+        case 0x41: ok = _NEGATIVE_FILTER.test(v[_textContent] || ""); break;
         case 0x42: ok = v["data-uufx"] && v["data-uufx"].id; break;
         case 0x43: ok = !!v.uucss3bfx;
         }
@@ -967,12 +969,12 @@ function visitedFilter(fid, negate, elms) {
 }
 
 // inner - :hover(0x10)  :focus(0x11)
-function actionFilter(fid, negate, elms, pusedo) {
+function actionFilter(fid, negate, elms, pseudo) {
     var rv = [], ri = -1, v, i = 0, ok, cs,
         ss = uu.css("uuquery");
 
     // http://d.hatena.ne.jp/uupaa/20080928
-    ss.add(":" + pusedo, uu.ie ? "ruby-align:center"
+    ss.add(":" + pseudo, uu.ie ? "ruby-align:center"
                                : "outline:0 solid #000");
     while ( (v = elms[i++]) ) {
         if (uu.ie) {

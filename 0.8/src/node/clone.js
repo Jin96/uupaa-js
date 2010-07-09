@@ -58,9 +58,9 @@ function uunodeclone(parent,  // @param Node: parent node
 
     function reverseFetch(node, clone) {
         var cloneList = uu.tag("*", clone),
-            i = -1, nodeid, sourceNode, clonedNode;
+            i = 0, nodeid, sourceNode, clonedNode;
 
-        while ( (clonedNode = cloneList[++i]) ) {
+        while ( (clonedNode = cloneList[i++]) ) {
             nodeid = clonedNode[DATA_UUGUID];
             if (nodeid) {
                 sourceNode = uu.nodeid.toNode(nodeid); // nodeid -> node
@@ -102,7 +102,7 @@ uu.ready(function() {
         copyNodeData: x     //  copy node["data-***"] [IE6][IE7][IE8][IE9]
     });
 
-    button = uu.node("input", { type: "checkbox", checked: o });
+    button = uu.node("input", [{ type: "checkbox", checked: o }]);
     button.setAttribute("Z", "1");
     button[nodeData] = { ref: 1 };
     if (button.addEventListener) {
