@@ -4326,8 +4326,13 @@ var _A_TAG          = 1,  // E               [_A_TAG,         "DIV"]
     _nodeCount      = 0;
 
 // uu.query.tokenizer
-function tokenizer(expr) { // @param CSSSelectorExpressionString:
-                           // @return Hash: QueryTokenHash
+function tokenizer(expr) { // @param CSSSelectorExpressionString: "E > F"
+                           // @return QueryTokenHash: { item, group, err, msg, expr }
+                           //   item  - Array: [_A_TOKEN, data, ...]
+                           //   group - Number: groups from 1
+                           //   err   - Boolean: true is error
+                           //   msg   - String: error message
+                           //   expr  - String: original expression
     var rv = { item: [], group: 1, err: false, msg: "", expr: expr },
         m, outer, inner;
 
@@ -4451,7 +4456,7 @@ function innerLoop(expr, rv, not) {
 // uu.query.selector
 function selector(token,     // @param Hash: QueryTokenHash
                   context) { // @param Node: context
-                             // @return NodeArray:
+                             // @return NodeArray: [node, ...]
     var owner = context.ownerDocument || doc, xmldoc,
         ctx = [context], result = [], ary,
         lock, word, match, negate = 0,
