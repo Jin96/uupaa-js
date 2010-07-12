@@ -13,6 +13,7 @@ uu || (function(win, // @param GlobalObject: as window
 var _prototype = "prototype",
     _toString = Object[_prototype].toString,
     _isArray = Array.isArray || (Array.isArray = ArrayIsArray), // ES5 spec
+    _slice = Array[_prototype].slice,
     // --- HTML5: EMBEDDING CUSTOM NON-VISIBLE DATA ---
     _uufx = "data-uufx",
     _uuevent = "data-uuevent",
@@ -50,12 +51,12 @@ var _prototype = "prototype",
     _types = { "undefined": 8 },
     _trimSpace = /^\s+|\s+$/g,
     _rootNode = doc[_documentElement],
-    _dd2num = {},               // dd2num = { "00":   0 , ... "99":  99  }
-    _num2dd = {},               // num2dd = {    0: "00", ...   99: "99" }
-    _bb2num = {},               // bb2num = { "\00": 0, ... "\ff": 255 }
-    _num2bb = {},               // num2bb = { 0: "\00", ... 255: "\ff" }
-    _hh2num = {},               // hh2num = { "00": 0, ... "ff": 255 }
-    _num2hh = { 256: "00" },    // num2hh = { 0: "00", ... 255: "ff" }
+    _dd2num = {},               // dd2num = {  "00":    0 , ...  "99":   99  }
+    _num2dd = {},               // num2dd = {    0 :  "00", ...   99 :  "99" }
+    _bb2num = {},               // bb2num = { "\00":    0 , ... "\ff":  255  }
+    _num2bb = {},               // num2bb = {    0 : "\00", ...  255 : "\ff" }
+    _hh2num = {},               // hh2num = {  "00":    0 , ...  "ff":  255  }
+    _num2hh = { 256: "00" },    // num2hh = {    0 :  "00", ...  255 :  "ff", 256: "00" }
     _guidnum = 0,       // guid counter
     _nodeiddb = {},     // { nodeid: node, ... }
     _nodeidnum = 0,     // nodeid counter
@@ -149,7 +150,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/ClassNameS
                                     //  [1][ByteArray dump] uu.array.dump([1, 2, 3]) -> "010203"
                                     //  [2][ByteArray dump] uu.array.dump([1, 2, 3], "0x", ", 0x") -> "0x01, 0x02, 0x03"
         size:       uusize,         // uu.array.size(source:Array):Number
-        sort:       uusort,         // uu.array.sort(source:Array, method:String/Function = "A-Z"):Array
+        sort:       uuarraysort,    // uu.array.sort(source:Array, method:String/Function = "A-Z"):Array
         clean:      uuclean,        // uu.array.clean(source:Array):Array
         clone:      uuclone,        // uu.array.clone(source:Array):Array - shallow copy
         toHash:     uutohash        // uu.array.toHash(key:Array, value:Array/Mix, toNumber:Boolean = false):Hash
@@ -296,6 +297,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/ClassNameS
                                     //  [6][find lastChild]    uu.node.find(document.body, ".$") -> <div> in <body><h1 /><div /></body>
         path:       uunodepath,     // uu.node.path(node:Node):CSSQueryString
                                     //  [1][get CSSQueryString] uu.node.path(<div>) -> "body>div"
+        sort:       uunodesort,     // uu.node.sort(ary:NodeArray, context:Node = <body>):Array - sort by document order
         swap:       uunodeswap,     // uu.node.swap(swapin:Node, swapout:Node):Node (swapout node)
         wrap:       uunodewrap,     // uu.node.wrap(innerNode:Node, outerNode:Node):Node (innerNode)
         clear:      uunodeclear,    // uu.node.clear(parent:Node):Node
@@ -437,7 +439,7 @@ uu.msg = new MsgPump();             // uu.msg - MsgPump instance
 // --- StyleSheet class ---
 uuclass("StyleSheet", {
     init:           StyleSheetInit, // uu("StyleSheet", id:String)
-    add:            StyleSheetAdd,  // styleSheet.add(rule:Hash)
+    add:            StyleSheetAdd,  // styleSheet.add(expr:Hash/String, decl:String = void)
                                     //  [1] styleSheet.add({ "div>p": "color:red;font-weight:bold", ... })
     clear:          StyleSheetClear // styleSheet.clear()
 });
@@ -1080,16 +1082,16 @@ function uuindexof(source,        // @param Hash: source
 //}}}!mb
 }
 
-// [1][ascii sort a-z]      uusort(["a","z"], "A-Z") -> ["a", "z"]
-// [2][ascii sort a-z]      uusort(["a","z"], "Z-A") -> ["z", "a"]
-// [3][numeric sort 0-9]    uusort([0,1,2], "0-9")   -> [0, 1, 2]
-// [4][numeric sort 9-0]    uusort([0,1,2], "9-0")   -> [2, 1, 0]
+// [1][ascii sort a-z]   uu.array.sort(["a","z"], "A-Z") -> ["a", "z"]
+// [2][ascii sort a-z]   uu.array.sort(["a","z"], "Z-A") -> ["z", "a"]
+// [3][numeric sort 0-9] uu.array.sort([0,1,2], "0-9")   -> [0, 1, 2]
+// [4][numeric sort 9-0] uu.array.sort([0,1,2], "9-0")   -> [2, 1, 0]
 
 // inner - sort array
-function uusort(source,   // @param Array: source
-                method) { // @param String/Function(= "A-Z"): method
-                          //                   sort method or callback-function
-                          // @return Array:
+function uuarraysort(source,   // @param Array: source
+                     method) { // @param String/Function(= "A-Z"): method
+                               //                   sort method or callback-function
+                               // @return Array: source
     // 0x1 = numeric sort
     // 0x2 = reverse
     var r = { "A-Z": 0, "Z-A": 2, "0-9": 1, "9-0": 3 }[method] || 0;
@@ -1803,7 +1805,8 @@ function StyleSheetInit(id) { // @param String: style sheet id
 }
 
 // StyleSheet.add
-function StyleSheetAdd(rule) { // @param Hash: { selector: declaration, ... }
+function StyleSheetAdd(expr,   // @param Hash/String: { selector: declaration, ... } or a "selector"
+                       decl) { // @param Hash(= void): "declaration"
     var ss = this.ss,
 //{{{!mb
         ary, i, iz,
@@ -1812,7 +1815,8 @@ function StyleSheetAdd(rule) { // @param Hash: { selector: declaration, ... }
 
     clearAllRules(this);
 
-    for (selector in uumix(this.rules, rule)) {
+    for (selector in uumix(this.rules, isString(expr) ? uuhash(expr, decl)
+                                                      : expr)) {
         declaration = this.rules[selector];
 
 //{{{!mb
@@ -1895,7 +1899,7 @@ function uucssunit(node,   // @param Node: context
 }
 uumix(uucssunit, { px: /px$/, pt: /pt$/, em: /em$/, calc: _calcPixel });
 
-// inner - convert unit
+// inner - convert CSS unit
 function _calcPixel(node,    // @param Node:
                     prop,    // @param String: property, "left", "width", ...
                     value) { // @param CSSUnitString: "10em", "10pt", "10px", "auto"
@@ -1937,7 +1941,7 @@ function _calcPixel(node,    // @param Node:
 }
 
 //{{{!mb
-// inner - convert unit
+// inner - convert CSS unit
 function _calcPixelIE(node,    // @param Node:
                       prop,    // @param String: property, "left", "width", ...
                       value) { // @param CSSUnitString: "10em", "10pt", "10px", "auto"
@@ -2061,21 +2065,39 @@ getComputedStyleIE.getProps = (function(props) {
 //}}}!mb
 
 // --- className(klass) ---
+// uu.klass - as document.getElementsByClassName
+function uuklass(expr,      // @param String: "class", "class1, ..."
+                 context) { // @param Node(= document): query context
+                            // @return NodeArray: [Node, ...]
+//{{{!mb
+    if (doc.getElementsByClassName) {
+//}}}!mb
+        return _slice.call((context || doc).getElementsByClassName(expr));
+//{{{!mb
+    }
+
+    var rv = [], ri = -1, i = 0, iz, m, v, w,
+        ary = uutrim(expr).split(" "), az = ary.length,
+        rex = _matcher(ary),
+        nodeList = (context || doc).getElementsByTagName("*");
+
+    for (i = 0, iz = nodeList.length; i < iz; ++i) {
+        v = nodeList[i];
+        (w = v[_className]) && ((m = w.match(rex)) && m.length >= az)
+                            && (rv[++ri] = v);
+    }
+    return rv;
+//}}}!mb
+}
+
 // uu.klass.has - has className
 function uuklasshas(node,         // @param Node:
                     classNames) { // @param String: "class1 class2 ..." (joint space)
                                   // @return Boolean:
-    var m, ary, cn = node[_className];
+    var m, w = node[_className], ary = uutrim(classNames).split(" ");
 
-    if (!classNames || !cn) {
-        return _false;
-    }
-    if (classNames[_indexOf](" ") < 0) {
-        return (" " + cn + " ")[_indexOf](" " + classNames + " ") >= 0; // single
-    }
-    ary = uutrim(classNames).split(" "); // multi
-    m = cn.match(_classNameMatcher(ary));
-    return m && m.length >= ary.length;
+    return w ? ((m = w.match(_matcher(ary))) && (m.length >= ary.length))
+             : _false;
 }
 
 // [1][add className] uu.klass.add(node, "class1 class2") -> node
@@ -2095,8 +2117,7 @@ function uuklassremove(node,         // @param Node:
                        classNames) { // @param String(= ""): "class1 class2 ..."
                                      // @return Node:
     node[_className] = uutrim(
-            node[_className][_replace](
-                _classNameMatcher(uutrim(classNames).split(" ")), ""));
+        node[_className][_replace](_matcher(uutrim(classNames).split(" ")), ""));
     return node;
 }
 
@@ -2106,6 +2127,11 @@ function uuklasstoggle(node,         // @param Node:
                                      // @return Node:
     return (uuklasshas(node, classNames) ? uuklassremove
                                          : uuklassadd)(node, classNames);
+}
+
+// inner - className matcher
+function _matcher(ary) {
+    return RegExp("(?:^| )(" + ary.join("|") + ")(?:$|(?= ))", "g");
 }
 
 // --- OOP ---
@@ -2691,6 +2717,37 @@ function uunode(node,       // @param Node/TagNameString(= "div"): "div" or "svg
     }
     return node;
 }
+// HTML4(a ~ ul) exclude <html><head><body>
+uutag.html4 = "a,b,br,dd,div,dl,dt,form,h1,h2,h3,h4,h5,h6,i,img,iframe," +
+              "input,li,ol,option,p,pre,select,span,table,tbody,tr," +
+              "td,th,tfoot,textarea,u,ul";
+// HTML5(abbr ~ video)
+uutag.html5 = "abbr,article,aside,audio,canvas,datalist," +
+              "details,eventsource,figure,footer,header,hgroup," +
+              "mark,menu,meter,nav,output,progress,section,time,video";
+
+// inner - setup node builder - uu.div(), uu.a(), ...
+uueach((uutag.html4 + "," + uutag.html5).split(","), function(tag) {
+    uu[tag] || (uu[tag] = function() { // @param Mix: var_args
+        return uunode(tag, arguments, ["t"], function(node, hash) {
+            node[_appendChild](uutext(hash.t));
+        });
+    });
+});
+
+// uu.head
+function uuhead(/* var_args */) { // @param Mix: var_args
+                                  // @return Node: <head> node
+    return uunode(doc.head, arguments);
+}
+
+// uu.body
+function uubody(/* var_args */) { // @param Mix: var_args
+                                  // @return Node: <body> node
+    return uunode(doc.body, arguments, ["t"], function(node, hash) {
+        node[_appendChild](uutext(hash.t));
+    });
+}
 
 //  [1][add div node]          uu.node.add()         -> <body><div /></body>
 //  [2][from tagName]          uu.node.add("p")      -> <body><p /></body>
@@ -2730,9 +2787,6 @@ function uunodefind(parent,     // @param Node: parent node
     parent = parent || doc.body;
 
     var rv, num = uunodefind.pos[position] || 8,
-//{{{!mb
-        iter,
-//}}}!mb
         iters = uunodefind.iters[num > 4 ? num - 4 : num];
 
 //{{{!mb
@@ -2742,7 +2796,8 @@ function uunodefind(parent,     // @param Node: parent node
                                       : parent[iters[0]];
 //{{{!mb
     } else {
-        iter = iters[1];
+        var iter = iters[1];
+
         rv = (num === 2 || num === 3) ? parent[iter] :
              (num > 4) ? parent[iters[2]]
                        : parent[_parentNode][iters[2]];
@@ -2844,6 +2899,35 @@ function uunodepath(node) {  // @param Node: ELEMENT_NODE
     return rv.reverse().join(">")[_toLowerCase]();
 }
 uunodepath.vip = /^(?:html|head|body)$/i;
+
+// uu.node.sort - sort by document order, detect duplicate
+function uunodesort(ary,       // @param NodeArray:
+                    context) { // @hidden Node(= <body>): search context
+                               // @return Array: [SortedNodeArray, DuplicatedNodeArray]
+    var rv = [], ri = -1, i = 0, iz = ary.length, hash = { length: iz },
+        val, min = 0xfffffff, max = 0, node, dups = [], di = -1,
+        all =
+//{{{!mb
+              _ie ? 0 :
+//}}}!mb
+                        uu.tag("*", context || doc.body);
+
+    for (; i < iz; ++i) {
+        node = ary[i];
+        val =
+//{{{!mb
+              _ie ? node.sourceIndex :
+//}}}!mb
+                                       all[_indexOf](node);
+        min > val && (min = val);
+        max < val && (max = val);
+        hash[val] ? (dups[++di] = node) : (hash[val] = node); // judge duplicate
+    }
+    for (i = min; i <= max; ++i) {
+        (node = hash[i]) && (rv[++ri] = node);
+    }
+    return [rv, dups];
+}
 
 // uu.node.swap - swap node
 function uunodeswap(swapin,    // @param Node: swapin
@@ -2965,20 +3049,6 @@ function uuhtml(node,   // @param Node:
                 : node.innerHTML;
 }
 
-// uu.head
-function uuhead(/* var_args */) { // @param Mix: var_args
-                                  // @return Node: <head> node
-    return uunode(doc.head, arguments);
-}
-
-// uu.body
-function uubody(/* var_args */) { // @param Mix: var_args
-                                  // @return Node: <body> node
-    return uunode(doc.body, arguments, ["t"], function(node, hash) {
-        node[_appendChild](uutext(hash.t));
-    });
-}
-
 //  [1][create text node]          uu.text("text")            -> createTextNode("text")
 //  [2][create formated text node] uu.text("?? ??", "a", "b") -> createTextNode("a b")
 //  [3][get text]                  uu.text(node)              -> "text"
@@ -3045,7 +3115,7 @@ function getNodeValue(node,  // @param Node:
                       type,  // @param Number: nodeType
                       ary) { // @param NodeArray: [node, ...]
                              // @return StringArray/String:
-    var rv = [], v, i = 0, iz, multi = type & 1;
+    var rv = [], v, i = 0, multi = type & 1;
 
     if (type) {
         if (type & 2) { // 2:<select>, 3:<select multiple>
@@ -3111,7 +3181,8 @@ function uuquery(expr,      // @param CSSSelectorExpressionString: "css > select
 
 //{{{!mb
     if (context.querySelectorAll) {
-        if (!_ie || (_ver.ie8 && expr.indexOf(":") < 0)) { // IE8 unsupported CSS3 pseudo-class
+        if (!_ie || (_ver.ie8 && expr[_indexOf](":") < 0)
+                 || (_ver.ie8 && uuquery.ie8ready.test(expr))) { // IE8 unsupported CSS3 pseudo-class
 //}}}!mb
             return fakeToArray(context.querySelectorAll(expr));
 //{{{!mb
@@ -3123,6 +3194,9 @@ function uuquery(expr,      // @param CSSSelectorExpressionString: "css > select
     return token.err ? [] : uuquery.selector(token, context);
 //}}}!mb
 }
+//{{{!mb
+uuquery.ie8ready = /:(?:focus|hover|link|visited)/;
+//}}}!mb
 
 // uu.id - as document.getElementById
 function uuid(expr,      // @param String: id
@@ -3138,7 +3212,7 @@ function uutag(expr,      // @param String: "*" or "tag"
 //{{{!mb
     if (!_ie) {
 //}}}!mb
-        return fakeToArray((context || doc).getElementsByTagName(expr));
+        return _slice.call((context || doc).getElementsByTagName(expr));
 //{{{!mb
     }
 
@@ -3156,14 +3230,6 @@ function uutag(expr,      // @param String: "*" or "tag"
     return rv;
 //}}}!mb
 }
-// HTML4(a ~ ul) exclude <html><head><body>
-uutag.html4 = "a,b,br,dd,div,dl,dt,form,h1,h2,h3,h4,h5,h6,i,img,iframe," +
-              "input,li,ol,option,p,pre,select,span,table,tbody,tr," +
-              "td,th,tfoot,textarea,u,ul";
-// HTML5(abbr ~ video)
-uutag.html5 = "abbr,article,aside,audio,canvas,datalist," +
-              "details,eventsource,figure,footer,header,hgroup," +
-              "mark,menu,meter,nav,output,progress,section,time,video";
 
 // uu.match - as document.matchesSelector
 function uumatch(expr,      // @param CSSSelectorExpressionString: "css > selector"
@@ -3195,43 +3261,6 @@ function uumatch(expr,      // @param CSSSelectorExpressionString: "css > select
     }
     return _false;
 //}}}!mb
-}
-
-// uu.klass - as document.getElementsByClassName
-function uuklass(expr,      // @param String: "class", "class1, ..."
-                 context) { // @param Node(= document): query context
-                            // @return NodeArray: [Node, ...]
-///{{{!mb
-    if (doc.getElementsByClassName) {
-///}}}!mb
-        return fakeToArray((context || doc).getElementsByClassName(expr));
-///{{{!mb
-    }
-
-    var rv = [], ri = -1, v, i = 0, iz, match, cn, rex, lock,
-        ary = uutrim(expr).split(" "), // " class1  class2 " -> ["class1", "class2"]
-        az = ary.length,
-        nodeList = (context || doc).getElementsByTagName("*");
-
-    if (az > 1) { // [FIX] W3C TestSuite #170b
-        for (lock = {}, i = 0; i < az; ++i) {
-            lock[v = ary[i]] ? ary.splice(i--, 1)
-                             : (lock[v] = 1);
-        }
-        az = ary.length;
-    }
-    rex = _classNameMatcher(ary);
-
-    for (i = 0, iz = nodeList.length; i < iz; ++i) {
-        v = nodeList[i];
-        cn = v[_className];
-        if (cn) {
-            match = cn.match(rex); // [!] KEEP IT
-            (match && match.length >= az) && (rv[++ri] = v);
-        }
-    }
-    return rv;
-///}}}!mb
 }
 
 // --- STRING ---
@@ -3939,21 +3968,10 @@ uueach(uuevent.shortcut, function(eventType) {
     };
 });
 
-// inner - setup node builder - uu.div(), uu.a(), ...
-uueach((uutag.html4 + "," + uutag.html5).split(","), function(tag) {
-    uu[tag] || (uu[tag] = function() { // @param Mix: var_args
-        return uunode(tag, arguments, ["t"], function(node, hash) {
-            node[_appendChild](uutext(hash.t));
-        });
-    });
-});
-
 //{{{!mb
 // [IE6][IE7][IE8]
 _ie && _ver < 9 && uueach(uutag.html5.split(","), doc[_createElement]);
-//}}}!mb
 
-//{{{!mb
 try {
     // [IE6] flicker fix
     _ver.ie6 && doc.execCommand("BackgroundImageCache", _false, _true);
@@ -4071,11 +4089,6 @@ function _camelhash(rv, props) {
     return rv;
 }
 
-// inner - make className matcher from array
-function _classNameMatcher(ary) {
-    return RegExp("(?:^| )(" + ary.join("|") + ")(?:$|(?= ))", "g");
-}
-
 // inner - detect versions and meta informations
 function detectVersions(libraryVersion) { // @param Number: Library version
                                           // @return VersionHash:
@@ -4191,7 +4204,7 @@ function detectVersions(libraryVersion) { // @param Number: Library version
 function fakeToArray(fakeArray) { // @param FakeArray: NodeList, Arguments
                                   // @return Array:
     if (uuready.ArraySlice) {
-        return Array[_prototype].slice.call(fakeArray);
+        return _slice.call(fakeArray);
     }
 
     var rv = [], i = 0, iz = fakeArray.length;
@@ -4235,7 +4248,7 @@ function detectFeatures() {
     node.innerHTML = '<a href="/a" class="a"></a>';
     child = node[_firstChild];
     try {
-        Array[_prototype].slice.call(doc.getElementsByTagName("head"));
+        _slice.call(doc.getElementsByTagName("head"));
     } catch(err) { rv.ArraySlice = _false; }
     rv[_getAttribute] = child[_getAttribute]("class") === "a" &&
                         child[_getAttribute]("href") === "/a";
@@ -4254,12 +4267,13 @@ function detectFeatures() {
 
 // === query.selector ===
 // - Function Limits
-// -- unsupported Impossible rules (:root:first-child, etc) in W3C Test Suite - css3_id27a
-// -- unsupported Impossible rules (* html, * :root)        in W3C Test Suite - css3_id27b
-// -- unsupported Case sensitivity '.cs P'                  in W3C Test Suite - css3_id181
+// -- unsupported Impossible rules ( :root:first-child, etc ) in W3C Test Suite - css3_id27a
+// -- unsupported Impossible rules ( * html, * :root )        in W3C Test Suite - css3_id27b
+// -- unsupported Case sensitivity '.cs P'                    in W3C Test Suite - css3_id181
+// -- unsupported not ( :not(), :not(*) ) in WebKit
 
 //{{{!mb
-uu.query.selector || (function(doc, uu) {
+uu.query.selector || (function(doc, uu, _ie) {
 
 uu.query.selector  = selector;
 uu.query.tokenizer = tokenizer;
@@ -4275,22 +4289,22 @@ var _A_TAG          = 1,  // E               [_A_TAG,         "DIV"]
     _A_PSEUDO_FUNC  = 9,  // :lang(...)      [_A_PSEUDO_FUNC, 35~99, arg]
     _A_PSEUDO_NOT   = 10, // :not(...)       [_A_PSEUDO_NOT,  _A_ID/_A_CLASS/_ATTR/_A_PSEUDO/_A_PSEUDO_FUNC, ...]
     _A_GROUP        = 11, // E,F
-    _A_QUICK_ID     = 12, // #ID             [_A_QUICK_ID,    "ID"]
-    _A_QUICK_CLASS  = 13, // .CLASS          [_A_QUICK_CLASS, "CLASS"]
-    _A_QUICK_EFG    = 14, // E,F or E,F,G    [_A_QUICK_EFG,   ["E", "F"] or ["E", "F", "G"]]
-    _TK_COMB    = /^\s*(?:([>+~])\s*)?(\*|\w*)/, // "E > F"  "E + F"  "E ~ F"  "E"  "E F" "*"
-    _TK_ATTR    = /^\[\s*(?:([^~\^$*|=\s]+)\s*([~\^$*|]?\=)\s*((["'])?.*?\4)|([^\]\s]+))\s*\]/,
-    _TK_NTH     = /^((even)|(odd)|(1n\+0|n\+0|n)|(\d+)|((-?\d*)n([+\-]?\d*)))$/,
-    _TK_OPE     = { "=": 1, "*=": 2, "^=": 3, "$=": 4, "~=": 5, "|=": 6 },
-    _TK_MARK    = { "#": 1, ".": 2, "[": 3, ":": 4 }, // ]
-    _TK_COMMA   = /^\s*,\s*/, // (((
-    _TK_IDENT   = /^[#\.]([a-z_\u00C0-\uFFEE\-][\w\u00C0-\uFFEE\-]*)/i, // #ID or .CLASS
-    _TK_PSREX   = { E: /^(\w+|\*)\s*\)/, END: /^\s*\)/, FUNC: /^\s*([\+\-\w]+)\s*\)/,
-                    FIND: /^:([\w\-]+\(?)/ }, // )
-    _TK_PSEUDOS = {
+    _A_QUICK_ID     = 12, // #ID             [_A_QUICK_ID,    true or false, "ID" or "CLASS"]
+    _A_QUICK_EFG    = 13, // E,F or E,F,G    [_A_QUICK_EFG,   ["E", "F"] or ["E", "F", "G"]]
+    _TOKEN_COMB     = /^\s*(?:([>+~])\s*)?(\*|\w*)/, // "E > F"  "E + F"  "E ~ F"  "E"  "E F" "*"
+    _TOKEN_ATTR     = /^\[\s*(?:([^~\^$*|=\s]+)\s*([~\^$*|]?\=)\s*((["'])?.*?\4)|([^\]\s]+))\s*\]/,
+    _TOKEN_NTH      = /^(?:(even|odd)|(1n\+0|n\+0|n)|(\d+)|(?:(-?\d*)n([+\-]?\d*)))$/,
+    _TOKEN_OPERATOR = { "=": 1, "*=": 2, "^=": 3, "$=": 4, "~=": 5, "|=": 6 },
+    _TOKEN_KIND     = { "#": 1, ".": 2, "[": 3, ":": 4 }, // ]
+    _TOKEN_GROUP    = /^\s*,\s*/, // (((
+    _TOKEN_ERROR    = /^[>+~]|[>+~*]{2}|[>+~]$/,
+    _TOKEN_IDENT    = /^[#\.]([a-z_\u00C0-\uFFEE\-][\w\u00C0-\uFFEE\-]*)/i, // #ID or .CLASS
+    _TOKEN_PSEUDO   = { E: /^(\w+|\*)\s*\)/, END: /^\s*\)/, FUNC: /^\s*([\+\-\w]+)\s*\)/,
+                        FIND: /^:([\w\-]+\(?)/ }, // )
+    _TOKEN_PSEUDO_LIST = {
         // pseudo
         "first-child":      1, "last-child":       2, "only-child":       3, // childFilter
-        "first-of-type":    4, "last-of-type":     5, "only-of-type":     6, // ofTypeFilter
+        "first-of-type":    4, "last-of-type":     5, "only-of-type":     6, // nthTypeFilter
         hover:              7, focus:              8, active:             0, // actionFilter
         enabled:           10, disabled:          11, checked:           12, // formFilter
         link:              13, visited:           14,                        // otherFilter
@@ -4298,19 +4312,18 @@ var _A_TAG          = 1,  // E               [_A_TAG,         "DIV"]
         // pseudo functions
         "not(":            30,
         "nth-child(":      31, "nth-last-child(": 32,                        // nthFilter
-        "nth-of-type(":    33, "nth-last-of-type(": 34,                      // nthFilter
+        "nth-of-type(":    33, "nth-last-of-type(": 34,                      // nthTypeFilter
         "lang(":           35                                                // otherFunctionFilter ))))))
     },
-    _TK_QUICK_EFG   = /^(\w+)\s*,\s*(\w+)(?:\s*,\s*(\w+))?$/,
-    _SL_COMBINATOR  = { ">": 1, "+": 2, "~": 3 },
-    _SL_CASESENS    = { title: 0, id: 0, name: 0, "class": 0, "for": 0 },
-    _SL_FORMTAG     = /^(input|button|select|option|textarea)$/i,
+    _QUICK_E        = /^\w+$/,
+    _QUICK_EFG      = /^(\w+)\s*,\s*(\w+)(?:\s*,\s*(\w+))?$/, // E,F[,G]
+    _QUICK_ID       = /^([#\.])([a-z_\-][\w\-]*)/i, // #ID or .CLASS
+    _QUERY_COMB     = { ">": 1, "+": 2, "~": 3 },
+    _QUERY_FORM     = /^(input|button|select|option|textarea)$/i,
+    _QUERY_CASESENS = { title: 0, id: 0, name: 0, "class": 0, "for": 0 },
     _uuqid          = "data-uuqueryid",
     _uudoctype      = "data-uudoctype", // 1: XMLDocument, 2: HTMLDocument
-    _nodeCount      = 1,
-    _ie             = uu.ie,
-    _nextSibling    = "nextSibling",
-    _previousSibling = "previousSibling";
+    _nodeCount      = 0;
 
 // uu.query.tokenizer
 function tokenizer(expr) { // @param CSSSelectorExpressionString:
@@ -4321,36 +4334,34 @@ function tokenizer(expr) { // @param CSSSelectorExpressionString:
     expr = expr.trim();
 
     // --- QUICK PHASE ---
-    m = _TK_IDENT.exec(expr);
-    if (m && m[0].length === expr.length) {
-        rv.item = [m[0].charAt(0) === "#" ? _A_QUICK_ID : _A_QUICK_CLASS, m[1]];
-        return rv;
-    }
-    m = _TK_QUICK_EFG.exec(expr);
-    if (m && m[1] !== m[2] && m[1] !== m[3] && m[2] !== m[3]) {
-        rv.item = [_A_QUICK_EFG, m[3] ? [m[1], m[2], m[3]] : [m[1], m[2]]];
-        return rv;
-    }
+    (m = _QUICK_E.exec(expr))  ? (rv.item = [_A_TAG, m[0]]) :
+    (m = _QUICK_ID.exec(expr)) ? (rv.item = [_A_QUICK_ID, m[1] === "#", m[2]]) :
+    ((m = _QUICK_EFG.exec(expr)) && m[1] !== m[2] && m[1] !== m[3] && m[2] !== m[3])
+                               ? (rv.item = [_A_QUICK_EFG, m[3] ? [m[1], m[2], m[3]]
+                                                                : [m[1], m[2]]]) :
+    _TOKEN_ERROR.test(expr)    ? (rv.err = true) : 0;
 
     // --- GENERIC PHASE ---
-    while (!rv.err && expr && outer !== expr) { // outer loop
-        m = _TK_COMB.exec(outer = expr);
-        if (m) {
-            m[1] && rv.item.push(_A_COMBINATOR, m[1]); // >+~
-                    rv.item.push(_A_TAG, m[2] || "*"); // "DIV" or "*"
-            expr = expr.slice(m[0].length);
+    if (!rv.item.length) {
+        while (!rv.err && expr && outer !== expr) { // outer loop
+            m = _TOKEN_COMB.exec(outer = expr);
+            if (m) {
+                m[1] && rv.item.push(_A_COMBINATOR, m[1]); // >+~
+                        rv.item.push(_A_TAG, m[2] || "*"); // "DIV" or "*"
+                expr = expr.slice(m[0].length);
+            }
+            while (!rv.err && expr && inner !== expr) { // inner loop
+                expr = innerLoop(inner = expr, rv);
+            }
+            m = _TOKEN_GROUP.exec(expr);
+            if (m) {
+                ++rv.group;
+                rv.item.push(_A_GROUP);
+                expr = expr.slice(m[0].length);
+            }
         }
-        while (!rv.err && expr && inner !== expr) { // inner loop
-            expr = innerLoop(inner = expr, rv);
-        }
-        m = _TK_COMMA.exec(expr);
-        if (m) {
-            ++rv.group;
-            rv.item.push(_A_GROUP);
-            expr = expr.slice(m[0].length);
-        }
+        expr && (rv.err = !!(rv.msg = expr + " syntax error")); // remain
     }
-    expr && (rv.err = !!(rv.msg = expr + " syntax error")); // remain
     return rv;
 }
 
@@ -4358,66 +4369,75 @@ function tokenizer(expr) { // @param CSSSelectorExpressionString:
 function innerLoop(expr, rv, not) {
     var m, num, mm, anb, a, b, c;
 
-    switch (_TK_MARK[expr.charAt(0)] || 0) {
-    case 1: (m = _TK_IDENT.exec(expr)) && rv.item.push(_A_ID, m[1]); break;
-    case 2: (m = _TK_IDENT.exec(expr)) && rv.item.push(_A_CLASS, m[1]); break;
-    case 3: m = _TK_ATTR.exec(expr); // [1]ATTR, [2]OPERATOR, [3]"VALUE" [5]ATTR
+    switch (_TOKEN_KIND[expr.charAt(0)] || 0) {
+    case 1: (m = _TOKEN_IDENT.exec(expr)) && rv.item.push(_A_ID,    m[1]); break;
+    case 2: (m = _TOKEN_IDENT.exec(expr)) && rv.item.push(_A_CLASS, m[1]); break;
+    case 3: m = _TOKEN_ATTR.exec(expr); // [1]ATTR, [2]OPERATOR, [3]"VALUE" [5]ATTR
             if (m) {
                 m[5] ? rv.item.push(_A_ATTR, m[5])
-                     : rv.item.push(_A_ATTR_VALUE, m[1], num = _TK_OPE[m[2]], m[3]);
-                m[5] || num || (rv.err = !!(rv.msg = ope));
+                     : rv.item.push(_A_ATTR_VALUE,
+                                    m[1], num = _TOKEN_OPERATOR[m[2]], m[3]);
+                m[5] || num || (rv.err = !!(rv.msg = m[0]));
                 // [FIX] Attribute multivalue selector. css3_id7b.html
                 //  <p title="hello world"></p> -> query('[title~="hello world"]') -> unmatch
-                num === 5 && m[3].indexOf(" ") >= 0 && (rv.err = !!(rv.msg = ope));
+                num === 5 && m[3].indexOf(" ") >= 0 && (rv.err = !!(rv.msg = m[0]));
             }
             break;
-    case 4: m = _TK_PSREX.FIND.exec(expr);
+    case 4: m = _TOKEN_PSEUDO.FIND.exec(expr);
             if (m) {
-                num = _TK_PSEUDOS[m[1]] || 0;
+                num = _TOKEN_PSEUDO_LIST[m[1]] || 0;
                 if (!num) {
                     rv.err || (rv.err = !!(rv.msg = m[0]));
                 } else if (num < 30) {   // pseudo (30 is magic number)
-                    rv.item.push(_A_PSEUDO, num);
+                    // 4:first-of-type -> 33:nth-of-type(1)
+                    // 5:last-of-type  -> 34:nth-last-of-type(1)
+                    // 6:only-of-type  -> 33:nth-of-type(1) + 34:nth-last-of-type(1)
+                    num === 4 ? rv.item.push(_A_PSEUDO_NTH, 33, { a: 0, b: 1, k: 1 }) :
+                    num === 5 ? rv.item.push(_A_PSEUDO_NTH, 34, { a: 0, b: 1, k: 1 }) :
+                    num === 6 ? rv.item.push(_A_PSEUDO_NTH, 33, { a: 0, b: 1, k: 1 },
+                                             _A_PSEUDO_NTH, 34, { a: 0, b: 1, k: 1 }) :
+                                rv.item.push(_A_PSEUDO, num);
                 } else if (num === 30) { // :not   (30 is magic number)
                     if (not) {
                         rv.err = !!(rv.msg = ":not(:not(...))");
                         break;
                     }
+                    (expr === ":not()" ||
+                     expr === ":not(*)") && (rv.err ? 0 : (rv.err = !!(rv.msg = ":not()")));
+
                     rv.item.push(_A_PSEUDO_NOT);
                     expr = expr.slice(m[0].length);
-                    m = _TK_PSREX.E.exec(expr);
+                    m = _TOKEN_PSEUDO.E.exec(expr);
                     if (m) {
                         rv.item.push(_A_TAG, m[1].toUpperCase()); // "DIV"
                     } else {
                         expr = innerLoop(expr, rv, 1); // :not(simple selector)
-                        m = _TK_PSREX.END.exec(expr);
+                        m = _TOKEN_PSEUDO.END.exec(expr);
                         m || (rv.err ? 0 : (rv.err = !!(rv.msg = ":not()")));
                     }
                 } else { // pseudo nth-functions
                     rv.item.push(num < 35 ? _A_PSEUDO_NTH : _A_PSEUDO_FUNC, num);
                     expr = expr.slice(m[0].length);
-                    m = _TK_PSREX.FUNC.exec(expr);
+                    m = _TOKEN_PSEUDO.FUNC.exec(expr);
                     if (m && num < 35) {
-                        mm = _TK_NTH.exec(m[1]);
+                        mm = _TOKEN_NTH.exec(m[1]);
                         if (mm) {
-                            if (mm[2]) {
-                                anb = { a: 2, b: 0, k: 3 }; // nth(even)
-                            } else if (mm[3]) {
-                                anb = { a: 2, b: 1, k: 3 }; // nth(odd)
-                            } else if (mm[4]) {
+                            if (mm[1]) { // :nth(even) or :nth(odd)
+                                anb = { a: 2, b: mm[1] === "odd" ? 1 : 0, k: 3 };
+                            } else if (mm[2]) {
                                 anb = { a: 0, b: 0, k: 2, all: 1 }; // nth(1n+0), nth(n+0), nth(n)
-                            } else if (mm[5]) {
-                                anb = { a: 0, b: parseInt(mm[5], 10), k: 1 }; // nth(1)
+                            } else if (mm[3]) {
+                                anb = { a: 0, b: parseInt(mm[3], 10), k: 1 }; // nth(1)
                             } else {
-                                a = (mm[7] === "-" ? -1 : mm[7] || 1) - 0;
-                                b = (mm[8] || 0) - 0;
+                                a = (mm[4] === "-" ? -1 : mm[4] || 1) - 0;
+                                b = (mm[5] || 0) - 0;
                                 c = a < 2;
                                 anb = { a: c ? 0 : a, b: b, k: c ? a + 1 : 3 };
                             }
                         }
                         anb ? rv.item.push(anb)  // pseudo function arg
                             : rv.err ? 0 : (rv.err = !!(rv.msg = m[0]));
-                    } else {
+                    } else { // :lang
                         m ? rv.item.push(m[1]) // pseudo function arg
                           : rv.err ? 0 : (rv.err = !!(rv.msg = m[0]));
                     }
@@ -4448,22 +4468,28 @@ function selector(token,     // @param Hash: QueryTokenHash
         r = [], ri = -1, j = type = 0;
 
         switch (token.item[i]) {
-        case _A_QUICK_ID:       // [_A_QUICK_ID,    "ID"]
-            node = doc.getElementById(token.item[++i]);
-            return node ? [node] : [];
-
-        case _A_QUICK_CLASS:    // [_A_QUICK_CLASS, "CLASS"]
-            return uu.klass(token.item[++i], context);
+        case _A_QUICK_ID:       // [_A_QUICK_ID,    true or false, "ID" or "CLASS"]
+            if (token.item[++i]) { // ID
+                node = doc.getElementById(token.item[++i]);
+                return node ? [node] : [];
+            } // CLASS
+            ary = context.getElementsByTagName("*");
+            ident = " " + token.item[++i] + " ";
+            for (jz = ary.length; j < jz; ++j) {
+                node = ary[j];
+                ((word = node.className) && ((" " + word + " ").indexOf(ident) >= 0))
+                                         && (r[++ri] = node);
+            }
+            return r;
 
         case _A_QUICK_EFG:      // [_A_QUICK_EFG,  ["E", "F"] or ["E", "F", "G"]]
             ary = token.item[++i];
-            return uu.tag(ary[0], context).concat(uu.tag(ary[1], context),
-                                        ary[2] ? uu.tag(ary[2], context) : []);
+            return uu.node.sort(uu.tag(ary[0], context).concat(uu.tag(ary[1], context),
+                                               ary[2] ? uu.tag(ary[2], context) : []))[0];
 
         case _A_COMBINATOR:     // [_A_COMBINATOR, ">", _A_TAG, "DIV"]
-            type = _SL_COMBINATOR[token.item[++i]];
+            type = _QUERY_COMB[token.item[++i]];
             ++i;
-
         case _A_TAG:            // [_A_TAG, "DIV"]
             ident = token.item[++i]; // "DIV" or "*"
             universal = ident === "*";
@@ -4514,7 +4540,6 @@ function selector(token,     // @param Hash: QueryTokenHash
 
         case _A_ID:             // [_A_ID, "ID"]
             type = 1;
-
         case _A_CLASS:          // [_A_CLASS, "CLASS"]
             ident = type ? token.item[++i] : (" " + token.item[++i] + " "); // "ID" or " CLASS "
             for (; j < jz; ++j) {
@@ -4536,9 +4561,8 @@ function selector(token,     // @param Hash: QueryTokenHash
 
             for (; j < jz; ++j) {
                 node = ctx[j];
-                match = _ie ? (word = node.getAttributeNode(attr),
-                               word && word.specified) :
-                              node.hasAttribute(attr);
+                match = _ie ? ((word = node.getAttributeNode(attr)) && word.specified)
+                            : node.hasAttribute(attr);
                 (match ^ negate) && (r[++ri] = node);
             }
             ctx = r;
@@ -4556,7 +4580,7 @@ function selector(token,     // @param Hash: QueryTokenHash
             case 5: val = "(?:^| )" + val + "(?:$| )"; break; // [attr ~= value]
             case 6: val = "^" + val + "\\-|^" + val + "$";    // [attr |= value]
             }
-            rex = RegExp(val, attr in _SL_CASESENS ? "" : "i"); // ignore case
+            rex = RegExp(val, attr in _QUERY_CASESENS ? "" : "i"); // ignore case
             for (; j < jz; ++j) {
                 node = ctx[j];
                 word = node.getAttribute(attr, 2);
@@ -4568,7 +4592,6 @@ function selector(token,     // @param Hash: QueryTokenHash
         case _A_PSEUDO:         // [_A_PSEUDO, 1~29]
             pseudo = token.item[++i];
             ctx = (pseudo < 4  ? childFilter
-                 : pseudo < 7  ? ofTypeFilter
                  : pseudo < 10 ? actionFilter
                  : pseudo < 13 ? formFilter
                                : otherFilter)(ctx, j, jz, negate, pseudo, xmldoc);
@@ -4610,7 +4633,7 @@ function selector(token,     // @param Hash: QueryTokenHash
                 lock[nid] || (r[++ri] = node, lock[nid] = 1);
             }
         }
-        return r;
+        return uu.node.sort(r)[0];
     }
     return ctx;
 }
@@ -4620,15 +4643,16 @@ function childFilter(ctx, j, jz, negate, pseudo) {
     var rv = [], ri = -1, node, cn, found;
 
     for (; j < jz; ++j) {
-        node = ctx[j];
+        cn = node = ctx[j];
         found = 0;
         if (pseudo & 1) { // first-child and only-child
-            for (cn = node[_previousSibling]; !found && cn; cn = cn[_previousSibling]) {
+            while (!found && (cn = cn.previousSibling)) {
                 cn.nodeType === 1 && ++found;
             }
         }
         if (pseudo & 2) { // last-child and only-child
-            for (cn = node[_nextSibling]; !found && cn; cn = cn[_nextSibling]) {
+            cn = node;
+            while (!found && (cn = cn.nextSibling)) {
                 cn.nodeType === 1 && ++found;
             }
         }
@@ -4637,47 +4661,15 @@ function childFilter(ctx, j, jz, negate, pseudo) {
     return rv;
 }
 
-// inner - 4:first-of-type  5:last-of-type  6:only-of-type
-function ofTypeFilter(ctx, j, jz, negate, pseudo, xmldoc) {
-    var rv = [], ri = -1, node, lock = {}, tag, parent = null, cn, found, tag;
-
-    if (pseudo < 6) { // 4:first-of-type  5:last-of-type
-        (pseudo === 5) && ctx.reverse();
-
-        for (; j < jz; ++j) {
-            node = ctx[j];
-            parent !== node.parentNode && (parent = node.parentNode, lock = {});
-            tag = node.tagName;
-            lock[tag] ? ++lock[tag] : (lock[tag] = 1);
-            ((lock[tag] === 1) ^ negate) && (rv[++ri] = node);
-        }
-    } else { // 6:only-of-type
-        for (; j < jz; ++j) {
-            node = ctx[j];
-            tag = node.tagName,
-            xmldoc || (tag = tag.toUpperCase());
-
-            for (found = 0, cn = node[_nextSibling]; !found && cn; cn = cn[_nextSibling]) {
-                (cn.tagName === tag) && ++found;
-            }
-            for (cn = node[_previousSibling]; !found && cn; cn = cn[_previousSibling]) {
-                (cn.tagName === tag) && ++found;
-            }
-            ((!found) ^ negate) && (rv[++ri] = node);
-        }
-    }
-    return rv;
-}
-
 // inner - 7:hover  8:focus  x:active
 function actionFilter(ctx, j, jz, negate, pseudo) {
     var rv = [], ri = -1, node, ok, cs,
+        decl = _ie ? "ruby-align:center" : "outline:0 solid #000",
         ss = uu.css("uuquery2"); // get StyleSheet object
 
     // http://d.hatena.ne.jp/uupaa/20080928
-    ss.add(pseudo < 8 ? ":hover" : ":focus",
-           _ie ? "ruby-align:center" :
-                 "outline:0 solid #000");
+    ss.add(pseudo < 8 ? ":hover" : ":focus", decl);
+
     for (; j < jz; ++j) {
         node = ctx[j];
         ok = _ie ? node.currentStyle.rubyAlign === "center" :
@@ -4697,7 +4689,7 @@ function formFilter(ctx, j, jz, negate, pseudo) {
         node = ctx[j];
         ok = (pseudo === 10) ? !node.disabled
            : (pseudo === 11) ? !!node.disabled : !!node.checked;
-        _SL_FORMTAG.test(node.tagName) ? ((ok ^ negate) && (rv[++ri] = node))
+        _QUERY_FORM.test(node.tagName) ? ((ok ^ negate) && (rv[++ri] = node))
                                        : (negate && (rv[++ri] = node));
     }
     return rv;
@@ -4705,28 +4697,28 @@ function formFilter(ctx, j, jz, negate, pseudo) {
 
 // inner - 13:link  14:visited  15:empty  16:root  17:target
 function otherFilter(ctx, j, jz, negate, pseudo, xmldoc) {
-    var rv = [], ri = -1, node, cn, ok, found, word, rex = /^a$/i,
+    var rv = [], ri = -1, node, cn, ok, found, word, rex = /^(?:a|area)$/i,
         textContent = _ie ? "innerText" : "textContent";
 
-    if (pseudo === 16 && !negate) {
-        return [doc.html];
-    }
     if (pseudo === 17) {
         word = location.hash.slice(1);
         word || (jz = 0); // loop out
+    } else  if (pseudo === 16 && !negate) {
+        return [doc.html];
     }
     for (; j < jz; ++j) {
         node = ctx[j];
 
         switch (pseudo) {
-        case 15: for (found = 0, cn = node.firstChild; !found && cn; cn = cn.nextSibling) {
+        case 15: found = 0;
+                 for (cn = node.firstChild; !found && cn; cn = cn.nextSibling) {
                     cn.nodeType === 1 && ++found;
                  }
                  ok = !found && !node[textContent]; break;
         case 16: ok = node !== doc.html; break;
         case 17: ok = xmldoc ? (node.id === word)
                              : ((node.id || node.name) === word); break;
-        default: ok = rex.test(node.tagName); // :link, :visited
+        default: ok = rex.test(node.tagName) && !!node.href; // :link, :visited
         }
         (ok ^ negate) && (rv[++ri] = node);
     }
@@ -4771,27 +4763,66 @@ function nthFilter(ctx, j, jz, negate, pseudo, anb, xmldoc) {
 function nthTypeFilter(ctx, j, jz, negate, pseudo, anb) {
     (pseudo === 34) && ctx.reverse();
 
-    var rv = [], ri = -1, node, lock = {},
-        idx, parent = null, tag, ok, a = anb.a, b = anb.b, k = anb.k;
+    var rv = [], ri = -1, node, tag, parent, parentnid, nid,
+        idx, ok, a = anb.a, b = anb.b, k = anb.k,
+        tagdb = createTagDB(ctx, 0, jz, pseudo === 34);
+
+    for (; j < jz; ++j) {
+        ok = 0;
+
+        node = ctx[j];
+        tag = node.tagName;
+        parent = node.parentNode;
+        parentnid = parent[_uuqid] || (parent[_uuqid] = ++_nodeCount);
+        nid = node[_uuqid] || (node[_uuqid] = ++_nodeCount);
+
+        if (tagdb[parentnid][nid].tag === tag) {
+            idx = tagdb[parentnid][nid].pos;
+            ok = k === 1 ? (idx === b)
+               : k === 2 ? (idx >=  b)
+               : k === 3 ? (!((idx - b) % a) && (idx - b) / a >= 0)
+                         : (idx <=  b);
+        }
+        (ok ^ negate) && (rv[++ri] = node);
+    }
+    (pseudo === 34) && rv.reverse(); // to document order
+    return rv;
+}
+
+// tagdb = { parent-nodeid: { child-nodeid: { tag: "DIV", pos: 1 }, ... },
+//           parent-nodeid: { child-nodeid: { tag: "DIV", pos: 1 }, ... }, ... }
+// inner -
+function createTagDB(ctx, j, jz, reverse) { // @param NodeArray:
+                                            // @return Hash: tagdb
+    var rv = {}, node, parent, parentnid, cn, nid, tagcount, tag, pos,
+        iter1 = reverse ? "lastChild" : "firstChild",
+        iter2 = reverse ? "previousSibling" : "nextSibling";
 
     for (; j < jz; ++j) {
         node = ctx[j];
-        parent !== node.parentNode && (parent = node.parentNode, lock = {});
-        tag = node.tagName;
-        lock[tag] ? ++lock[tag] : (lock[tag] = 1);
-        idx = lock[tag];
-        ok = k === 1 ? (idx === b)
-           : k === 2 ? (idx >=  b)
-           : k === 3 ? (!((idx - b) % a) && (idx - b) / a >= 0)
-                     : (idx <=  b);
-        (ok ^ negate) && (rv[++ri] = node);
+        parent = ctx[j].parentNode;
+        parentnid = parent[_uuqid] || (parent[_uuqid] = ++_nodeCount);
+
+        if (!rv[parentnid]) {
+            rv[parentnid] = {};
+            tagcount = {}; // { "DIV": count }
+            for (cn = parent[iter1]; cn; cn = cn[iter2]) {
+                if (cn.nodeType === 1) {
+                    tag = cn.tagName;
+                    pos = tagcount[tag] ? ++tagcount[tag] : (tagcount[tag] = 1);
+
+                    nid = cn[_uuqid] || (cn[_uuqid] = ++_nodeCount);
+                    rv[parentnid][nid] = { tag: tag, pos: pos };
+                }
+            }
+        }
     }
     return rv;
 }
 
 // inner - 35:lang
 function otherFunctionFilter(ctx, j, jz, negate, pseudo, arg) {
-    var rv = [], ri = -1, rex = RegExp("^(" + arg + "$|" + arg + "-)", "i");
+    var rv = [], ri = -1, node, rex = RegExp("^(" + arg + "$|" + arg + "-)", "i");
 
     for (; j < jz; ++j) { // [!] KEEP IT
         node = ctx[j];
@@ -4805,6 +4836,6 @@ function otherFunctionFilter(ctx, j, jz, negate, pseudo, arg) {
     return rv;
 }
 
-})(document, uu);
+})(document, uu, uu.ie);
 //}}}!mb
 

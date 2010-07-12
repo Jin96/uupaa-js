@@ -306,12 +306,6 @@ uu.ready(function(uu) {
 
         return [uu.klass.has(uu.id('div'), "A1 A3"), "is true"];
       },
-      "uu.klass.has(uu.id('div')) ( '') は '' を含んでいない": function() {
-        uu.id('div').className = "";
-        uu.klass.add(uu.id('div'), "");
-
-        return [uu.klass.has(uu.id('div'), ""), "is false"];
-      },
       "uu.klass.has(uu.id('div')) ( 'A1 A2 A3') は ' A2 ' を含んでいる": function() {
         uu.id('div').className = "";
         uu.klass.add(uu.id('div'), "A1 A2 A3");
