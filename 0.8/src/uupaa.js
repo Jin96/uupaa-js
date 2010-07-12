@@ -3183,9 +3183,11 @@ function uuquery(expr,      // @param CSSSelectorExpressionString: "css > select
     if (context.querySelectorAll) {
         if (!_ie || (_ver.ie8 && expr[_indexOf](":") < 0)
                  || (_ver.ie8 && uuquery.ie8ready.test(expr))) { // IE8 unsupported CSS3 pseudo-class
+            if (!uuquery.ngword.test(expr)) {
 //}}}!mb
-            return fakeToArray(context.querySelectorAll(expr));
+                return fakeToArray(context.querySelectorAll(expr));
 //{{{!mb
+            }
         }
     }
 
@@ -3195,6 +3197,7 @@ function uuquery(expr,      // @param CSSSelectorExpressionString: "css > select
 //}}}!mb
 }
 //{{{!mb
+uuquery.ngword = /\!\=|\:con/;
 uuquery.ie8ready = /:(?:focus|hover|link|visited)/;
 //}}}!mb
 
@@ -4292,15 +4295,15 @@ var _A_TAG          = 1,  // E               [_A_TAG,         "DIV"]
     _A_QUICK_ID     = 12, // #ID             [_A_QUICK_ID,    true or false, "ID" or "CLASS"]
     _A_QUICK_EFG    = 13, // E,F or E,F,G    [_A_QUICK_EFG,   ["E", "F"] or ["E", "F", "G"]]
     _TOKEN_COMB     = /^\s*(?:([>+~])\s*)?(\*|\w*)/, // "E > F"  "E + F"  "E ~ F"  "E"  "E F" "*"
-    _TOKEN_ATTR     = /^\[\s*(?:([^~\^$*|=\s]+)\s*([~\^$*|]?\=)\s*((["'])?.*?\4)|([^\]\s]+))\s*\]/,
+    _TOKEN_ATTR     = /^\[\s*(?:([^~\^$*|=!\s]+)\s*([~\^$*|!]?\=)\s*((["'])?.*?\4)|([^\]\s]+))\s*\]/,
     _TOKEN_NTH      = /^(?:(even|odd)|(1n\+0|n\+0|n)|(\d+)|(?:(-?\d*)n([+\-]?\d*)))$/,
-    _TOKEN_OPERATOR = { "=": 1, "*=": 2, "^=": 3, "$=": 4, "~=": 5, "|=": 6 },
+    _TOKEN_OPERATOR = { "=": 1, "*=": 2, "^=": 3, "$=": 4, "~=": 5, "|=": 6, "!=": 7 },
     _TOKEN_KIND     = { "#": 1, ".": 2, "[": 3, ":": 4 }, // ]
     _TOKEN_GROUP    = /^\s*,\s*/, // (((
     _TOKEN_ERROR    = /^[>+~]|[>+~*]{2}|[>+~]$/,
     _TOKEN_IDENT    = /^[#\.]([a-z_\u00C0-\uFFEE\-][\w\u00C0-\uFFEE\-]*)/i, // #ID or .CLASS
     _TOKEN_PSEUDO   = { E: /^(\w+|\*)\s*\)/, END: /^\s*\)/, FUNC: /^\s*([\+\-\w]+)\s*\)/,
-                        FIND: /^:([\w\-]+\(?)/ }, // )
+                        FIND: /^:([\w\-]+\(?)/, STR: /^\s*(["'])?(.*?)\1\)/ }, // )
     _TOKEN_PSEUDO_LIST = {
         // pseudo
         "first-child":      1, "last-child":       2, "only-child":       3, // childFilter
@@ -4313,46 +4316,47 @@ var _A_TAG          = 1,  // E               [_A_TAG,         "DIV"]
         "not(":            30,
         "nth-child(":      31, "nth-last-child(": 32,                        // nthFilter
         "nth-of-type(":    33, "nth-last-of-type(": 34,                      // nthTypeFilter
-        "lang(":           35                                                // otherFunctionFilter ))))))
+        "lang(":           35, "contains(":       36                         // otherFunctionFilter )))))))
     },
     _QUICK_E        = /^\w+$/,
     _QUICK_EFG      = /^(\w+)\s*,\s*(\w+)(?:\s*,\s*(\w+))?$/, // E,F[,G]
-    _QUICK_ID       = /^([#\.])([a-z_\-][\w\-]*)/i, // #ID or .CLASS
+    _QUICK_ID       = /^([#\.])([a-z_\-][\w\-]*)$/i, // #ID or .CLASS
     _QUERY_COMB     = { ">": 1, "+": 2, "~": 3 },
     _QUERY_FORM     = /^(input|button|select|option|textarea)$/i,
     _QUERY_CASESENS = { title: 0, id: 0, name: 0, "class": 0, "for": 0 },
     _uuqid          = "data-uuqueryid",
     _uudoctype      = "data-uudoctype", // 1: XMLDocument, 2: HTMLDocument
-    _nodeCount      = 0;
+    _nodeCount      = 0,
+    _textContent    = _ie ? "innerText" : "textContent";
 
 // uu.query.tokenizer
 function tokenizer(expr) { // @param CSSSelectorExpressionString: "E > F"
-                           // @return QueryTokenHash: { item, group, err, msg, expr }
-                           //   item  - Array: [_A_TOKEN, data, ...]
+                           // @return QueryTokenHash: { data, group, err, msg, expr }
+                           //   data  - Array: [_A_TOKEN, data, ...]
                            //   group - Number: groups from 1
                            //   err   - Boolean: true is error
                            //   msg   - String: error message
                            //   expr  - String: original expression
-    var rv = { item: [], group: 1, err: false, msg: "", expr: expr },
+    var rv = { data: [], group: 1, err: false, msg: "", expr: expr },
         m, outer, inner;
 
     expr = expr.trim();
 
     // --- QUICK PHASE ---
-    (m = _QUICK_E.exec(expr))  ? (rv.item = [_A_TAG, m[0]]) :
-    (m = _QUICK_ID.exec(expr)) ? (rv.item = [_A_QUICK_ID, m[1] === "#", m[2]]) :
+    (m = _QUICK_E.exec(expr))  ? (rv.data = [_A_TAG, m[0]]) :
+    (m = _QUICK_ID.exec(expr)) ? (rv.data = [_A_QUICK_ID, m[1] === "#", m[2]]) :
     ((m = _QUICK_EFG.exec(expr)) && m[1] !== m[2] && m[1] !== m[3] && m[2] !== m[3])
-                               ? (rv.item = [_A_QUICK_EFG, m[3] ? [m[1], m[2], m[3]]
+                               ? (rv.data = [_A_QUICK_EFG, m[3] ? [m[1], m[2], m[3]]
                                                                 : [m[1], m[2]]]) :
     _TOKEN_ERROR.test(expr)    ? (rv.err = true) : 0;
 
     // --- GENERIC PHASE ---
-    if (!rv.item.length) {
+    if (!rv.data.length) {
         while (!rv.err && expr && outer !== expr) { // outer loop
             m = _TOKEN_COMB.exec(outer = expr);
             if (m) {
-                m[1] && rv.item.push(_A_COMBINATOR, m[1]); // >+~
-                        rv.item.push(_A_TAG, m[2] || "*"); // "DIV" or "*"
+                m[1] && rv.data.push(_A_COMBINATOR, m[1]); // >+~
+                        rv.data.push(_A_TAG, m[2] || "*"); // "DIV" or "*"
                 expr = expr.slice(m[0].length);
             }
             while (!rv.err && expr && inner !== expr) { // inner loop
@@ -4361,7 +4365,7 @@ function tokenizer(expr) { // @param CSSSelectorExpressionString: "E > F"
             m = _TOKEN_GROUP.exec(expr);
             if (m) {
                 ++rv.group;
-                rv.item.push(_A_GROUP);
+                rv.data.push(_A_GROUP);
                 expr = expr.slice(m[0].length);
             }
         }
@@ -4375,12 +4379,12 @@ function innerLoop(expr, rv, not) {
     var m, num, mm, anb, a, b, c;
 
     switch (_TOKEN_KIND[expr.charAt(0)] || 0) {
-    case 1: (m = _TOKEN_IDENT.exec(expr)) && rv.item.push(_A_ID,    m[1]); break;
-    case 2: (m = _TOKEN_IDENT.exec(expr)) && rv.item.push(_A_CLASS, m[1]); break;
+    case 1: (m = _TOKEN_IDENT.exec(expr)) && rv.data.push(_A_ID,    m[1]); break;
+    case 2: (m = _TOKEN_IDENT.exec(expr)) && rv.data.push(_A_CLASS, m[1]); break;
     case 3: m = _TOKEN_ATTR.exec(expr); // [1]ATTR, [2]OPERATOR, [3]"VALUE" [5]ATTR
             if (m) {
-                m[5] ? rv.item.push(_A_ATTR, m[5])
-                     : rv.item.push(_A_ATTR_VALUE,
+                m[5] ? rv.data.push(_A_ATTR, m[5])
+                     : rv.data.push(_A_ATTR_VALUE,
                                     m[1], num = _TOKEN_OPERATOR[m[2]], m[3]);
                 m[5] || num || (rv.err = !!(rv.msg = m[0]));
                 // [FIX] Attribute multivalue selector. css3_id7b.html
@@ -4397,11 +4401,11 @@ function innerLoop(expr, rv, not) {
                     // 4:first-of-type -> 33:nth-of-type(1)
                     // 5:last-of-type  -> 34:nth-last-of-type(1)
                     // 6:only-of-type  -> 33:nth-of-type(1) + 34:nth-last-of-type(1)
-                    num === 4 ? rv.item.push(_A_PSEUDO_NTH, 33, { a: 0, b: 1, k: 1 }) :
-                    num === 5 ? rv.item.push(_A_PSEUDO_NTH, 34, { a: 0, b: 1, k: 1 }) :
-                    num === 6 ? rv.item.push(_A_PSEUDO_NTH, 33, { a: 0, b: 1, k: 1 },
+                    num === 4 ? rv.data.push(_A_PSEUDO_NTH, 33, { a: 0, b: 1, k: 1 }) :
+                    num === 5 ? rv.data.push(_A_PSEUDO_NTH, 34, { a: 0, b: 1, k: 1 }) :
+                    num === 6 ? rv.data.push(_A_PSEUDO_NTH, 33, { a: 0, b: 1, k: 1 },
                                              _A_PSEUDO_NTH, 34, { a: 0, b: 1, k: 1 }) :
-                                rv.item.push(_A_PSEUDO, num);
+                                rv.data.push(_A_PSEUDO, num);
                 } else if (num === 30) { // :not   (30 is magic number)
                     if (not) {
                         rv.err = !!(rv.msg = ":not(:not(...))");
@@ -4410,40 +4414,46 @@ function innerLoop(expr, rv, not) {
                     (expr === ":not()" ||
                      expr === ":not(*)") && (rv.err ? 0 : (rv.err = !!(rv.msg = ":not()")));
 
-                    rv.item.push(_A_PSEUDO_NOT);
+                    rv.data.push(_A_PSEUDO_NOT);
                     expr = expr.slice(m[0].length);
                     m = _TOKEN_PSEUDO.E.exec(expr);
                     if (m) {
-                        rv.item.push(_A_TAG, m[1].toUpperCase()); // "DIV"
+                        rv.data.push(_A_TAG, m[1].toUpperCase()); // "DIV"
                     } else {
                         expr = innerLoop(expr, rv, 1); // :not(simple selector)
                         m = _TOKEN_PSEUDO.END.exec(expr);
                         m || (rv.err ? 0 : (rv.err = !!(rv.msg = ":not()")));
                     }
                 } else { // pseudo nth-functions
-                    rv.item.push(num < 35 ? _A_PSEUDO_NTH : _A_PSEUDO_FUNC, num);
+                    rv.data.push(num < 35 ? _A_PSEUDO_NTH : _A_PSEUDO_FUNC, num);
                     expr = expr.slice(m[0].length);
                     m = _TOKEN_PSEUDO.FUNC.exec(expr);
-                    if (m && num < 35) {
-                        mm = _TOKEN_NTH.exec(m[1]);
-                        if (mm) {
-                            if (mm[1]) { // :nth(even) or :nth(odd)
-                                anb = { a: 2, b: mm[1] === "odd" ? 1 : 0, k: 3 };
-                            } else if (mm[2]) {
-                                anb = { a: 0, b: 0, k: 2, all: 1 }; // nth(1n+0), nth(n+0), nth(n)
-                            } else if (mm[3]) {
-                                anb = { a: 0, b: parseInt(mm[3], 10), k: 1 }; // nth(1)
-                            } else {
-                                a = (mm[4] === "-" ? -1 : mm[4] || 1) - 0;
-                                b = (mm[5] || 0) - 0;
-                                c = a < 2;
-                                anb = { a: c ? 0 : a, b: b, k: c ? a + 1 : 3 };
+                    if (m) {
+                        if (num < 35) {
+                            mm = _TOKEN_NTH.exec(m[1]);
+                            if (mm) {
+                                if (mm[1]) { // :nth(even) or :nth(odd)
+                                    anb = { a: 2, b: mm[1] === "odd" ? 1 : 0, k: 3 };
+                                } else if (mm[2]) {
+                                    anb = { a: 0, b: 0, k: 2, all: 1 }; // nth(1n+0), nth(n+0), nth(n)
+                                } else if (mm[3]) {
+                                    anb = { a: 0, b: parseInt(mm[3], 10), k: 1 }; // nth(1)
+                                } else {
+                                    a = (mm[4] === "-" ? -1 : mm[4] || 1) - 0;
+                                    b = (mm[5] || 0) - 0;
+                                    c = a < 2;
+                                    anb = { a: c ? 0 : a, b: b, k: c ? a + 1 : 3 };
+                                }
                             }
+                            anb ? rv.data.push(anb)  // pseudo function arg
+                                : rv.err ? 0 : (rv.err = !!(rv.msg = m[0]));
+                        } else { // :lang
+                            m ? rv.data.push(m[1]) // pseudo function arg
+                              : rv.err ? 0 : (rv.err = !!(rv.msg = m[0]));
                         }
-                        anb ? rv.item.push(anb)  // pseudo function arg
-                            : rv.err ? 0 : (rv.err = !!(rv.msg = m[0]));
-                    } else { // :lang
-                        m ? rv.item.push(m[1]) // pseudo function arg
+                    } else { // :contains
+                        m = _TOKEN_PSEUDO.STR.exec(expr);
+                        m ? rv.data.push(m[2]) // pseudo function arg
                           : rv.err ? 0 : (rv.err = !!(rv.msg = m[0]));
                     }
                 }
@@ -4457,52 +4467,48 @@ function innerLoop(expr, rv, not) {
 function selector(token,     // @param Hash: QueryTokenHash
                   context) { // @param Node: context
                              // @return NodeArray: [node, ...]
-    var owner = context.ownerDocument || doc, xmldoc,
+    var node = context.ownerDocument || doc, // owner node
+        xmldoc = !((node[_uudoctype] ||
+                   (node[_uudoctype] = (node.createElement("a").tagName ===
+                                        node.createElement("A").tagName) ? 2 : 1)) - 1),
         ctx = [context], result = [], ary,
-        lock, word, match, negate = 0,
-        i = 0, iz = token.item.length, j, jz = 1, k, kz, r, ri,
-        ident, node, universal, nid, type,
-        attr, ope, val, rex, // for attr
-        pseudo, arg; // for pseudo
-
-    xmldoc = !((owner[_uudoctype] ||
-               (owner[_uudoctype] = (owner.createElement("a").tagName ===
-                                     owner.createElement("A").tagName) ? 2 : 1)) - 1);
+        lock, word, match, negate = 0, data = token.data,
+        i = 0, iz = data.length, j, jz = 1, k, kz, r, ri,
+        ident, nid, type, attr, ope, val, rex; // for attr
 
     for (; i < iz && jz; jz = ctx.length, ++i) {
         r = [], ri = -1, j = type = 0;
 
-        switch (token.item[i]) {
+        switch (data[i]) {
         case _A_QUICK_ID:       // [_A_QUICK_ID,    true or false, "ID" or "CLASS"]
-            if (token.item[++i]) { // ID
-                node = doc.getElementById(token.item[++i]);
+            if (data[++i]) { // ID
+                node = doc.getElementById(data[++i]);
                 return node ? [node] : [];
             } // CLASS
             ary = context.getElementsByTagName("*");
-            ident = " " + token.item[++i] + " ";
+            ident = " " + data[++i] + " ";
             for (jz = ary.length; j < jz; ++j) {
                 node = ary[j];
                 ((word = node.className) && ((" " + word + " ").indexOf(ident) >= 0))
                                          && (r[++ri] = node);
             }
             return r;
-
         case _A_QUICK_EFG:      // [_A_QUICK_EFG,  ["E", "F"] or ["E", "F", "G"]]
-            ary = token.item[++i];
-            return uu.node.sort(uu.tag(ary[0], context).concat(uu.tag(ary[1], context),
-                                               ary[2] ? uu.tag(ary[2], context) : []))[0];
-
+            ary = data[++i];
+            return uu.node.sort(
+                        uu.tag(ary[0], context).concat(
+                            uu.tag(ary[1], context),
+                            ary[2] ? uu.tag(ary[2], context) : []))[0];
         case _A_COMBINATOR:     // [_A_COMBINATOR, ">", _A_TAG, "DIV"]
-            type = _QUERY_COMB[token.item[++i]];
+            type = _QUERY_COMB[data[++i]];
             ++i;
         case _A_TAG:            // [_A_TAG, "DIV"]
-            ident = token.item[++i]; // "DIV" or "*"
-            universal = ident === "*";
+            ident = data[++i]; // "DIV" or "*"
+            match = ident === "*";
             xmldoc || (ident = ident.toUpperCase());
 
             if (!type) { // TAG
                 if (negate) {
-                    if (universal) { break; } // :not(*) -> NOT ALL
                     for (; j < jz; ++j) {
                         node = ctx[j];
                         (node.tagName !== ident) && (r[++ri] = node);
@@ -4515,7 +4521,7 @@ function selector(token,     // @param Hash: QueryTokenHash
 
                     for (k = 0, kz = ary.length; k < kz; ++k) {
                         node = ary[k];
-                        if ((universal && node.nodeType === 1) || node.tagName === ident) {
+                        if ((match && node.nodeType === 1) || node.tagName === ident) {
                             nid = node[_uuqid] || (node[_uuqid] = ++_nodeCount);
                             lock[nid] || (r[++ri] = node, lock[nid] = 1);
                         }
@@ -4527,7 +4533,7 @@ function selector(token,     // @param Hash: QueryTokenHash
                     for (; node; node = node.nextSibling) {
                         if (node.nodeType === 1) {
                             if (_ie && !node.tagName.indexOf("/")) { continue; } // fix #25
-                            if (universal || node.tagName === ident) {
+                            if (match || node.tagName === ident) {
                                 if (type > 2) {
                                     nid = node[_uuqid] || (node[_uuqid] = ++_nodeCount);
                                     if (lock[nid]) { break; }
@@ -4542,11 +4548,10 @@ function selector(token,     // @param Hash: QueryTokenHash
             }
             ctx = r;
             break;
-
         case _A_ID:             // [_A_ID, "ID"]
             type = 1;
         case _A_CLASS:          // [_A_CLASS, "CLASS"]
-            ident = type ? token.item[++i] : (" " + token.item[++i] + " "); // "ID" or " CLASS "
+            ident = type ? data[++i] : (" " + data[++i] + " "); // "ID" or " CLASS "
             for (; j < jz; ++j) {
                 node = ctx[j];
                 if (type) { // ID
@@ -4560,11 +4565,8 @@ function selector(token,     // @param Hash: QueryTokenHash
             }
             ctx = r;
             break;
-
         case _A_ATTR:           // [_A_ATTR, "ATTR"]
-            attr = token.item[++i];
-
-            for (; j < jz; ++j) {
+            for (attr = data[++i]; j < jz; ++j) {
                 node = ctx[j];
                 match = _ie ? ((word = node.getAttributeNode(attr)) && word.specified)
                             : node.hasAttribute(attr);
@@ -4572,18 +4574,18 @@ function selector(token,     // @param Hash: QueryTokenHash
             }
             ctx = r;
             break;
-
         case _A_ATTR_VALUE:     // [_A_ATTR_VALUE, "ATTR", "OPERATOR", "VALUE"]
-            attr = token.item[++i];
-            ope  = token.item[++i];
-            val  = uu.trim.quote(token.item[++i]);
+            attr = data[++i];
+            ope  = data[++i];
+            val  = uu.trim.quote(data[++i]);
             uu.ready.getAttribute || (attr = uu.attr.fix[attr] || attr);
             switch (ope) {
-            case 1: val = "^" + val + "$"; break;             // [attr  = value]
-            case 3: val = "^" + val;       break;             // [attr ^= value]
-            case 4: val =       val + "$"; break;             // [attr $= value]
-            case 5: val = "(?:^| )" + val + "(?:$| )"; break; // [attr ~= value]
-            case 6: val = "^" + val + "\\-|^" + val + "$";    // [attr |= value]
+            case 1: val = "^" + val + "$"; break;                 // [attr  = value]
+            case 3: val = "^" + val;       break;                 // [attr ^= value]
+            case 4: val =       val + "$"; break;                 // [attr $= value]
+            case 5: val = "(?:^| )" + val + "(?:$| )"; break;     // [attr ~= value]
+            case 6: val = "^" + val + "\\-|^" + val + "$"; break; // [attr |= value]
+            case 7: negate = +!negate;                            // [attr != value]
             }
             rex = RegExp(val, attr in _QUERY_CASESENS ? "" : "i"); // ignore case
             for (; j < jz; ++j) {
@@ -4591,42 +4593,35 @@ function selector(token,     // @param Hash: QueryTokenHash
                 word = node.getAttribute(attr, 2);
                 ((word && rex.test(word)) ^ negate) && (r[++ri] = node);
             }
+            ope === 7 && (negate = +!negate); // restore
             ctx = r;
             break;
-
         case _A_PSEUDO:         // [_A_PSEUDO, 1~29]
-            pseudo = token.item[++i];
-            ctx = (pseudo < 4  ? childFilter
-                 : pseudo < 10 ? actionFilter
-                 : pseudo < 13 ? formFilter
-                               : otherFilter)(ctx, j, jz, negate, pseudo, xmldoc);
+            type = data[++i];
+            ctx = (type < 4  ? childFilter
+                 : type < 10 ? actionFilter
+                 : type < 13 ? formFilter
+                             : otherFilter)(ctx, j, jz, negate, type, xmldoc);
             break;
-
         case _A_PSEUDO_NTH:     // [_A_PSEUDO_FUNC, 31~34, { a,b,k }]
-            pseudo = token.item[++i];
-            arg    = token.item[++i];
-            ctx = (pseudo < 33 ? nthFilter
-                               : nthTypeFilter)(ctx, j, jz, negate, pseudo, arg, xmldoc);
+            type = data[++i];
+            ctx = (type < 33 ? nthFilter
+                             : nthTypeFilter)(ctx, j, jz, negate, type, data[++i], xmldoc);
             break;
-
         case _A_PSEUDO_FUNC:    // [_A_PSEUDO_FUNC, 31~99, arg]
-            pseudo = token.item[++i];
-            arg    = token.item[++i];
-            ctx = otherFunctionFilter(ctx, j, jz, negate, pseudo, arg, xmldoc);
+            type = data[++i];
+            ctx = otherFunctionFilter(ctx, j, jz, negate, type, data[++i]);
             break;
-
         case _A_PSEUDO_NOT:     // [_A_PSEUDO_NOT, _A_ID/_A_CLASS/_ATTR/_A_PSEUDO/_A_PSEUDO_FUNC, ...]
             negate = 2;
             break;
-
         case _A_GROUP:
             result.push(ctx);
             ctx = [context];
         }
         negate && --negate;
     }
-
-    // mixin group
+    // --- mixin group ---
     iz = result.length;
     if (iz) {
         result.push(ctx);
@@ -4638,24 +4633,23 @@ function selector(token,     // @param Hash: QueryTokenHash
                 lock[nid] || (r[++ri] = node, lock[nid] = 1);
             }
         }
-        return uu.node.sort(r)[0];
+        return uu.node.sort(r)[0]; // to document order
     }
     return ctx;
 }
 
 // inner - 1:first-child  2:last-child  3:only-child
-function childFilter(ctx, j, jz, negate, pseudo) {
-    var rv = [], ri = -1, node, cn, found;
+function childFilter(ctx, j, jz, negate, ps) {
+    var rv = [], ri = -1, node, cn, found = 0;
 
-    for (; j < jz; ++j) {
+    for (; j < jz; found = 0, ++j) {
         cn = node = ctx[j];
-        found = 0;
-        if (pseudo & 1) { // first-child and only-child
+        if (ps & 1) { // first-child and only-child
             while (!found && (cn = cn.previousSibling)) {
                 cn.nodeType === 1 && ++found;
             }
         }
-        if (pseudo & 2) { // last-child and only-child
+        if (ps & 2) { // last-child and only-child
             cn = node;
             while (!found && (cn = cn.nextSibling)) {
                 cn.nodeType === 1 && ++found;
@@ -4667,13 +4661,13 @@ function childFilter(ctx, j, jz, negate, pseudo) {
 }
 
 // inner - 7:hover  8:focus  x:active
-function actionFilter(ctx, j, jz, negate, pseudo) {
+function actionFilter(ctx, j, jz, negate, ps) {
     var rv = [], ri = -1, node, ok, cs,
         decl = _ie ? "ruby-align:center" : "outline:0 solid #000",
         ss = uu.css("uuquery2"); // get StyleSheet object
 
     // http://d.hatena.ne.jp/uupaa/20080928
-    ss.add(pseudo < 8 ? ":hover" : ":focus", decl);
+    ss.add(ps < 8 ? ":hover" : ":focus", decl);
 
     for (; j < jz; ++j) {
         node = ctx[j];
@@ -4687,13 +4681,13 @@ function actionFilter(ctx, j, jz, negate, pseudo) {
 }
 
 // inner - 10:enabled  11:disabled  12:checked
-function formFilter(ctx, j, jz, negate, pseudo) {
+function formFilter(ctx, j, jz, negate, ps) {
     var rv = [], ri = -1, node, ok;
 
     for (; j < jz; ++j) {
         node = ctx[j];
-        ok = (pseudo === 10) ? !node.disabled
-           : (pseudo === 11) ? !!node.disabled : !!node.checked;
+        ok = (ps === 10) ? !node.disabled
+           : (ps === 11) ? !!node.disabled : !!node.checked;
         _QUERY_FORM.test(node.tagName) ? ((ok ^ negate) && (rv[++ri] = node))
                                        : (negate && (rv[++ri] = node));
     }
@@ -4701,29 +4695,28 @@ function formFilter(ctx, j, jz, negate, pseudo) {
 }
 
 // inner - 13:link  14:visited  15:empty  16:root  17:target
-function otherFilter(ctx, j, jz, negate, pseudo, xmldoc) {
-    var rv = [], ri = -1, node, cn, ok, found, word, rex = /^(?:a|area)$/i,
-        textContent = _ie ? "innerText" : "textContent";
+function otherFilter(ctx, j, jz, negate, ps, xmldoc) {
+    var rv = [], ri = -1, node, cn, ok = 0, found, word, rex;
 
-    if (pseudo === 17) {
-        word = location.hash.slice(1);
-        word || (jz = 0); // loop out
-    } else  if (pseudo === 16 && !negate) {
-        return [doc.html];
+    switch (ps) {
+    case 13: rex = /^(?:a|area)$/i; break;
+    case 14: jz = 0; break;
+    case 16: negate || (jz = 0, rv = [doc.html]); break;
+    case 17: (word = location.hash.slice(1)) || (jz = 0);
     }
-    for (; j < jz; ++j) {
-        node = ctx[j];
 
-        switch (pseudo) {
+    for (; j < jz; ok = 0, ++j) {
+        node = ctx[j];
+        switch (ps) {
+        case 13: ok = rex.test(node.tagName) && !!node.href; break;
         case 15: found = 0;
                  for (cn = node.firstChild; !found && cn; cn = cn.nextSibling) {
                     cn.nodeType === 1 && ++found;
                  }
-                 ok = !found && !node[textContent]; break;
+                 ok = !found && !node[_textContent]; break;
         case 16: ok = node !== doc.html; break;
         case 17: ok = xmldoc ? (node.id === word)
-                             : ((node.id || node.name) === word); break;
-        default: ok = rex.test(node.tagName) && !!node.href; // :link, :visited
+                             : ((node.id || node.name) === word);
         }
         (ok ^ negate) && (rv[++ri] = node);
     }
@@ -4731,15 +4724,15 @@ function otherFilter(ctx, j, jz, negate, pseudo, xmldoc) {
 }
 
 // inner - 31:nth-child  32:nth-last-child
-function nthFilter(ctx, j, jz, negate, pseudo, anb, xmldoc) {
+function nthFilter(ctx, j, jz, negate, ps, anb, xmldoc) {
     if (anb.all) {
         return negate ? [] : ctx;
     }
 
     var rv = [], ri = -1, nid, lock = {},
         parent, cn, idx, ok, a = anb.a, b = anb.b, k = anb.k,
-        iter1 = (pseudo === 32) ? "lastChild" : "firstChild",
-        iter2 = (pseudo === 32) ? "previousSibling" : "nextSibling",
+        iter1 = (ps === 32) ? "lastChild" : "firstChild",
+        iter2 = (ps === 32) ? "previousSibling" : "nextSibling",
         tag = ctx[0].tagName;
 
     xmldoc || (tag = tag.toUpperCase());
@@ -4765,16 +4758,14 @@ function nthFilter(ctx, j, jz, negate, pseudo, anb, xmldoc) {
 }
 
 // inner - 33:nth-of-type  34:nth-last-of-type
-function nthTypeFilter(ctx, j, jz, negate, pseudo, anb) {
-    (pseudo === 34) && ctx.reverse();
+function nthTypeFilter(ctx, j, jz, negate, ps, anb) {
+    (ps === 34) && ctx.reverse();
 
     var rv = [], ri = -1, node, tag, parent, parentnid, nid,
-        idx, ok, a = anb.a, b = anb.b, k = anb.k,
-        tagdb = createTagDB(ctx, 0, jz, pseudo === 34);
+        idx, ok = 0, a = anb.a, b = anb.b, k = anb.k,
+        tagdb = createTagDB(ctx, 0, jz, ps === 34);
 
-    for (; j < jz; ++j) {
-        ok = 0;
-
+    for (; j < jz; ok = 0, ++j) {
         node = ctx[j];
         tag = node.tagName;
         parent = node.parentNode;
@@ -4790,7 +4781,7 @@ function nthTypeFilter(ctx, j, jz, negate, pseudo, anb) {
         }
         (ok ^ negate) && (rv[++ri] = node);
     }
-    (pseudo === 34) && rv.reverse(); // to document order
+    (ps === 34) && rv.reverse(); // to document order
     return rv;
 }
 
@@ -4825,18 +4816,19 @@ function createTagDB(ctx, j, jz, reverse) { // @param NodeArray:
     return rv;
 }
 
-// inner - 35:lang
-function otherFunctionFilter(ctx, j, jz, negate, pseudo, arg) {
-    var rv = [], ri = -1, node, rex = RegExp("^(" + arg + "$|" + arg + "-)", "i");
+// inner - 35:lang  36:contains
+function otherFunctionFilter(ctx, j, jz, negate, ps, arg) {
+    var rv = [], ri = -1, ok = 0, node,
+        rex = ps === 35 ? RegExp("^(" + arg + "$|" + arg + "-)", "i") : 0;
 
-    for (; j < jz; ++j) { // [!] KEEP IT
+    for (; j < jz; ok = 0, ++j) { // [!] KEEP IT
         node = ctx[j];
-        while (node && node !== doc && !node.getAttribute("lang")) {
-            node = node.parentNode;
+        switch (ps) {
+        case 35:while (!node.getAttribute("lang") && (node = node.parentNode)) {}
+                ok = node && rex.test(node.getAttribute("lang")); break;
+        case 36:ok = node[_textContent].indexOf(arg) >= 0;
         }
-        if (((node && node !== doc) && rex.test(node.getAttribute("lang"))) ^ negate) {
-            rv[++ri] = ctx[j];
-        }
+        (ok ^ negate) && (rv[++ri] = node);
     }
     return rv;
 }
