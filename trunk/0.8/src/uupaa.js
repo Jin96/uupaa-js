@@ -4268,18 +4268,18 @@ function detectFeatures() {
 
 })(this, document, parseInt, parseFloat, this.getComputedStyle, this.JSON);
 
-// === query.selector ===
-// - Function Limits
+// === query.tokenizer, query.selector ===
+// - query.selector() function limits
 // -- unsupported Impossible rules ( :root:first-child, etc ) in W3C Test Suite - css3_id27a
 // -- unsupported Impossible rules ( * html, * :root )        in W3C Test Suite - css3_id27b
 // -- unsupported Case sensitivity '.cs P'                    in W3C Test Suite - css3_id181
-// -- unsupported not ( :not(), :not(*) ) in WebKit
+// -- unsupported :not(), :not(*)                             in WebKit querySelectorAll()
 
 //{{{!mb
-uu.query.selector || (function(doc, uu, _ie) {
+uu.query.tokenizer || (function(doc, uu, _ie) {
 
-uu.query.selector  = selector;
 uu.query.tokenizer = tokenizer;
+uu.query.selector  = selector;
 
 var _A_TAG          = 1,  // E               [_A_TAG,         "DIV"]
     _A_COMBINATOR   = 2,  // E > F           [_A_COMBINATOR,  ">", _A_TAG, "DIV"]
@@ -4291,7 +4291,7 @@ var _A_TAG          = 1,  // E               [_A_TAG,         "DIV"]
     _A_PSEUDO_NTH   = 8,  // :nth-child(...) [_A_PSEUDO_FUNC, 31~34, { a,b,k }]
     _A_PSEUDO_FUNC  = 9,  // :lang(...)      [_A_PSEUDO_FUNC, 35~99, arg]
     _A_PSEUDO_NOT   = 10, // :not(...)       [_A_PSEUDO_NOT,  _A_ID/_A_CLASS/_ATTR/_A_PSEUDO/_A_PSEUDO_FUNC, ...]
-    _A_GROUP        = 11, // E,F
+    _A_GROUP        = 11, // E,F             [_A_GROUP]
     _A_QUICK_ID     = 12, // #ID             [_A_QUICK_ID,    true or false, "ID" or "CLASS"]
     _A_QUICK_EFG    = 13, // E,F or E,F,G    [_A_QUICK_EFG,   ["E", "F"] or ["E", "F", "G"]]
     _TOKEN_COMB     = /^\s*(?:([>+~])\s*)?(\*|\w*)/, // "E > F"  "E + F"  "E ~ F"  "E"  "E F" "*"
@@ -4299,11 +4299,12 @@ var _A_TAG          = 1,  // E               [_A_TAG,         "DIV"]
     _TOKEN_NTH      = /^(?:(even|odd)|(1n\+0|n\+0|n)|(\d+)|(?:(-?\d*)n([+\-]?\d*)))$/,
     _TOKEN_OPERATOR = { "=": 1, "*=": 2, "^=": 3, "$=": 4, "~=": 5, "|=": 6, "!=": 7 },
     _TOKEN_KIND     = { "#": 1, ".": 2, "[": 3, ":": 4 }, // ]
+    _TOKEN_NTH_1    = { a: 0, b: 1, k: 1 }, // nth-child(1)
     _TOKEN_GROUP    = /^\s*,\s*/, // (((
     _TOKEN_ERROR    = /^[>+~]|[>+~*]{2}|[>+~]$/,
     _TOKEN_IDENT    = /^[#\.]([a-z_\u00C0-\uFFEE\-][\w\u00C0-\uFFEE\-]*)/i, // #ID or .CLASS
     _TOKEN_PSEUDO   = { E: /^(\w+|\*)\s*\)/, END: /^\s*\)/, FUNC: /^\s*([\+\-\w]+)\s*\)/,
-                        FIND: /^:([\w\-]+\(?)/, STR: /^\s*(["'])?(.*?)\1\)/ }, // )
+                        FIND: /^:([\w\-]+\(?)/, STR: /^\s*(["'])?(.*?)\1\)/ },
     _TOKEN_PSEUDO_LIST = {
         // pseudo
         "first-child":      1, "last-child":       2, "only-child":       3, // childFilter
@@ -4318,9 +4319,8 @@ var _A_TAG          = 1,  // E               [_A_TAG,         "DIV"]
         "nth-of-type(":    33, "nth-last-of-type(": 34,                      // nthTypeFilter
         "lang(":           35, "contains(":       36                         // otherFunctionFilter )))))))
     },
-    _QUICK_E        = /^\w+$/,
-    _QUICK_EFG      = /^(\w+)\s*,\s*(\w+)(?:\s*,\s*(\w+))?$/, // E,F[,G]
-    _QUICK_ID       = /^([#\.])([a-z_\-][\w\-]*)$/i, // #ID or .CLASS
+    _QUICK          = { E: /^\w+$/, ID: /^([#\.])([a-z_\-][\w\-]*)$/i, // #ID or .CLASS
+                        EFG: /^(\w+)\s*,\s*(\w+)(?:\s*,\s*(\w+))?$/ }, // E,F[,G]
     _QUERY_COMB     = { ">": 1, "+": 2, "~": 3 },
     _QUERY_FORM     = /^(input|button|select|option|textarea)$/i,
     _QUERY_CASESENS = { title: 0, id: 0, name: 0, "class": 0, "for": 0 },
@@ -4332,100 +4332,97 @@ var _A_TAG          = 1,  // E               [_A_TAG,         "DIV"]
 // uu.query.tokenizer
 function tokenizer(expr) { // @param CSSSelectorExpressionString: "E > F"
                            // @return QueryTokenHash: { data, group, err, msg, expr }
-                           //   data  - Array: [_A_TOKEN, data, ...]
-                           //   group - Number: groups from 1
+                           //   data  - Array:   [_A_TOKEN, data, ...]
+                           //   group - Number:  groups from 1
                            //   err   - Boolean: true is error
-                           //   msg   - String: error message
-                           //   expr  - String: original expression
-    var rv = { data: [], group: 1, err: false, msg: "", expr: expr },
-        m, outer, inner;
-
-    expr = expr.trim();
+                           //   msg   - String:  error message
+                           //   expr  - String:  expression
+    var rv = { data: [], group: 1, err: false, msg: "", expr: expr = expr.trim() },
+        data = rv.data, m, outer, inner;
 
     // --- QUICK PHASE ---
-    (m = _QUICK_E.exec(expr))  ? (rv.data = [_A_TAG, m[0]]) :
-    (m = _QUICK_ID.exec(expr)) ? (rv.data = [_A_QUICK_ID, m[1] === "#", m[2]]) :
-    ((m = _QUICK_EFG.exec(expr)) && m[1] !== m[2] && m[1] !== m[3] && m[2] !== m[3])
-                               ? (rv.data = [_A_QUICK_EFG, m[3] ? [m[1], m[2], m[3]]
-                                                                : [m[1], m[2]]]) :
-    _TOKEN_ERROR.test(expr)    ? (rv.err = true) : 0;
+    (m = _QUICK.E.exec(expr))  ? (data.push(_A_TAG, m[0])) :
+    (m = _QUICK.ID.exec(expr)) ? (data.push(_A_QUICK_ID, m[1] === "#", m[2])) :
+    ((m = _QUICK.EFG.exec(expr)) && m[1] !== m[2] && m[1] !== m[3] && m[2] !== m[3])
+                               ? (data.push(_A_QUICK_EFG, m[3] ? [m[1], m[2], m[3]]
+                                                               : [m[1], m[2]])) :
+    _TOKEN_ERROR.test(expr)    ? (rv.msg = expr) : 0;
 
     // --- GENERIC PHASE ---
-    if (!rv.data.length) {
-        while (!rv.err && expr && outer !== expr) { // outer loop
+    if (!data.length) {
+        while (!rv.msg && expr && outer !== expr) { // outer loop
             m = _TOKEN_COMB.exec(outer = expr);
             if (m) {
-                m[1] && rv.data.push(_A_COMBINATOR, m[1]); // >+~
-                        rv.data.push(_A_TAG, m[2] || "*"); // "DIV" or "*"
+                m[1] && data.push(_A_COMBINATOR, m[1]); // >+~
+                        data.push(_A_TAG, m[2] || "*"); // "DIV" or "*"
                 expr = expr.slice(m[0].length);
             }
-            while (!rv.err && expr && inner !== expr) { // inner loop
+            while (!rv.msg && expr && inner !== expr) { // inner loop
                 expr = innerLoop(inner = expr, rv);
             }
             m = _TOKEN_GROUP.exec(expr);
             if (m) {
                 ++rv.group;
-                rv.data.push(_A_GROUP);
+                data.push(_A_GROUP);
                 expr = expr.slice(m[0].length);
             }
         }
-        expr && (rv.err = !!(rv.msg = expr + " syntax error")); // remain
+        expr && (rv.msg = expr); // remain
     }
+    rv.msg && (rv.err = true);
     return rv;
 }
 
 // inner -
 function innerLoop(expr, rv, not) {
-    var m, num, mm, anb, a, b, c;
+    var data = rv.data, m, num, mm, anb, a, b, c;
 
     switch (_TOKEN_KIND[expr.charAt(0)] || 0) {
-    case 1: (m = _TOKEN_IDENT.exec(expr)) && rv.data.push(_A_ID,    m[1]); break;
-    case 2: (m = _TOKEN_IDENT.exec(expr)) && rv.data.push(_A_CLASS, m[1]); break;
+    case 1: (m = _TOKEN_IDENT.exec(expr)) && data.push(_A_ID,    m[1]); break;
+    case 2: (m = _TOKEN_IDENT.exec(expr)) && data.push(_A_CLASS, m[1]); break;
     case 3: m = _TOKEN_ATTR.exec(expr); // [1]ATTR, [2]OPERATOR, [3]"VALUE" [5]ATTR
             if (m) {
-                m[5] ? rv.data.push(_A_ATTR, m[5])
-                     : rv.data.push(_A_ATTR_VALUE,
+                m[5] ? data.push(_A_ATTR, m[5])
+                     : data.push(_A_ATTR_VALUE,
                                     m[1], num = _TOKEN_OPERATOR[m[2]], m[3]);
-                m[5] || num || (rv.err = !!(rv.msg = m[0]));
+                m[5] || num || (rv.msg = m[0]);
                 // [FIX] Attribute multivalue selector. css3_id7b.html
                 //  <p title="hello world"></p> -> query('[title~="hello world"]') -> unmatch
-                num === 5 && m[3].indexOf(" ") >= 0 && (rv.err = !!(rv.msg = m[0]));
+                num === 5 && m[3].indexOf(" ") >= 0 && (rv.msg = m[0]);
             }
             break;
     case 4: m = _TOKEN_PSEUDO.FIND.exec(expr);
             if (m) {
                 num = _TOKEN_PSEUDO_LIST[m[1]] || 0;
                 if (!num) {
-                    rv.err || (rv.err = !!(rv.msg = m[0]));
+                    rv.msg || (rv.msg = m[0]);
                 } else if (num < 30) {   // pseudo (30 is magic number)
                     // 4:first-of-type -> 33:nth-of-type(1)
                     // 5:last-of-type  -> 34:nth-last-of-type(1)
                     // 6:only-of-type  -> 33:nth-of-type(1) + 34:nth-last-of-type(1)
-                    num === 4 ? rv.data.push(_A_PSEUDO_NTH, 33, { a: 0, b: 1, k: 1 }) :
-                    num === 5 ? rv.data.push(_A_PSEUDO_NTH, 34, { a: 0, b: 1, k: 1 }) :
-                    num === 6 ? rv.data.push(_A_PSEUDO_NTH, 33, { a: 0, b: 1, k: 1 },
-                                             _A_PSEUDO_NTH, 34, { a: 0, b: 1, k: 1 }) :
-                                rv.data.push(_A_PSEUDO, num);
+                    num === 4 ? data.push(_A_PSEUDO_NTH, 33, _TOKEN_NTH_1) :
+                    num === 5 ? data.push(_A_PSEUDO_NTH, 34, _TOKEN_NTH_1) :
+                    num === 6 ? data.push(_A_PSEUDO_NTH, 33, _TOKEN_NTH_1,
+                                          _A_PSEUDO_NTH, 34, _TOKEN_NTH_1) :
+                                data.push(_A_PSEUDO, num);
                 } else if (num === 30) { // :not   (30 is magic number)
-                    if (not) {
-                        rv.err = !!(rv.msg = ":not(:not(...))");
-                        break;
-                    }
-                    (expr === ":not()" ||
-                     expr === ":not(*)") && (rv.err ? 0 : (rv.err = !!(rv.msg = ":not()")));
+                    (not || expr === ":not()"
+                         || expr === ":not(*)") && (rv.msg = ":not()");
 
-                    rv.data.push(_A_PSEUDO_NOT);
-                    expr = expr.slice(m[0].length);
-                    m = _TOKEN_PSEUDO.E.exec(expr);
-                    if (m) {
-                        rv.data.push(_A_TAG, m[1].toUpperCase()); // "DIV"
-                    } else {
-                        expr = innerLoop(expr, rv, 1); // :not(simple selector)
-                        m = _TOKEN_PSEUDO.END.exec(expr);
-                        m || (rv.err ? 0 : (rv.err = !!(rv.msg = ":not()")));
+                    if (!rv.msg) {
+                        data.push(_A_PSEUDO_NOT);
+                        expr = expr.slice(m[0].length);
+                        m = _TOKEN_PSEUDO.E.exec(expr);
+                        if (m) {
+                            data.push(_A_TAG, m[1].toUpperCase()); // "DIV"
+                        } else {
+                            expr = innerLoop(expr, rv, 1); // :not(simple selector)
+                            m = _TOKEN_PSEUDO.END.exec(expr);
+                            m || rv.msg || (rv.msg = ":not()");
+                        }
                     }
                 } else { // pseudo nth-functions
-                    rv.data.push(num < 35 ? _A_PSEUDO_NTH : _A_PSEUDO_FUNC, num);
+                    data.push(num < 35 ? _A_PSEUDO_NTH : _A_PSEUDO_FUNC, num);
                     expr = expr.slice(m[0].length);
                     m = _TOKEN_PSEUDO.FUNC.exec(expr);
                     if (m) {
@@ -4445,16 +4442,16 @@ function innerLoop(expr, rv, not) {
                                     anb = { a: c ? 0 : a, b: b, k: c ? a + 1 : 3 };
                                 }
                             }
-                            anb ? rv.data.push(anb)  // pseudo function arg
-                                : rv.err ? 0 : (rv.err = !!(rv.msg = m[0]));
+                            anb ? data.push(anb)  // pseudo function arg
+                                : rv.msg ? 0 : (rv.msg = m[0]);
                         } else { // :lang
-                            m ? rv.data.push(m[1]) // pseudo function arg
-                              : rv.err ? 0 : (rv.err = !!(rv.msg = m[0]));
+                            m ? data.push(m[1]) // pseudo function arg
+                              : rv.msg ? 0 : (rv.msg = m[0]);
                         }
                     } else { // :contains
                         m = _TOKEN_PSEUDO.STR.exec(expr);
-                        m ? rv.data.push(m[2]) // pseudo function arg
-                          : rv.err ? 0 : (rv.err = !!(rv.msg = m[0]));
+                        m ? data.push(m[2]) // pseudo function arg
+                          : rv.msg ? 0 : (rv.msg = m[0]);
                     }
                 }
             }
@@ -4474,13 +4471,13 @@ function selector(token,     // @param Hash: QueryTokenHash
         ctx = [context], result = [], ary,
         lock, word, match, negate = 0, data = token.data,
         i = 0, iz = data.length, j, jz = 1, k, kz, r, ri,
-        ident, nid, type, attr, ope, val, rex; // for attr
+        ident, nid, type, attr, ope, val, rex;
 
     for (; i < iz && jz; jz = ctx.length, ++i) {
         r = [], ri = -1, j = type = 0;
 
         switch (data[i]) {
-        case _A_QUICK_ID:       // [_A_QUICK_ID,    true or false, "ID" or "CLASS"]
+        case _A_QUICK_ID:       // [_A_QUICK_ID, true or false, "ID" or "CLASS"]
             if (data[++i]) { // ID
                 node = doc.getElementById(data[++i]);
                 return node ? [node] : [];
@@ -4493,7 +4490,7 @@ function selector(token,     // @param Hash: QueryTokenHash
                                          && (r[++ri] = node);
             }
             return r;
-        case _A_QUICK_EFG:      // [_A_QUICK_EFG,  ["E", "F"] or ["E", "F", "G"]]
+        case _A_QUICK_EFG:      // [_A_QUICK_EFG, ["E", "F"] or ["E", "F", "G"]]
             ary = data[++i];
             return uu.node.sort(
                         uu.tag(ary[0], context).concat(
@@ -4821,7 +4818,7 @@ function otherFunctionFilter(ctx, j, jz, negate, ps, arg) {
     var rv = [], ri = -1, ok = 0, node,
         rex = ps === 35 ? RegExp("^(" + arg + "$|" + arg + "-)", "i") : 0;
 
-    for (; j < jz; ok = 0, ++j) { // [!] KEEP IT
+    for (; j < jz; ok = 0, ++j) {
         node = ctx[j];
         switch (ps) {
         case 35:while (!node.getAttribute("lang") && (node = node.parentNode)) {}
