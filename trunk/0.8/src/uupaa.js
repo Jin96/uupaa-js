@@ -20,6 +20,7 @@ var _prototype = "prototype",
     _uutrans = "data-uutrans", // for uu.css.transform
     _uunodeid = "data-uunodeid",
     // --- minify ---
+    _addEventListener = "addEventListener",
     _documentElement = "documentElement",
     _createTextNode = "createTextNode",
     _createElement = "createElement",
@@ -301,6 +302,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/ClassNameS
         swap:       uunodeswap,     // uu.node.swap(swapin:Node, swapout:Node):Node (swapout node)
         wrap:       uunodewrap,     // uu.node.wrap(innerNode:Node, outerNode:Node):Node (innerNode)
         clear:      uunodeclear,    // uu.node.clear(parent:Node):Node
+        clone:      uunodeclone,    // uu.node.clone(parent:Node, quick:Boolean = false):Node
         remove:     uunoderemove,   // uu.node.remove(node:Node):Node
         indexOf:    uunodeindexof,  // uu.node.indexOf(node:Node):Number
         children:   uunodechildren, // uu.node.children(parent:Node):NodeArray
@@ -2364,7 +2366,7 @@ function uuevent(node,         // @param Node:
 
 //{{{!mb
         // IE mouse capture [IE6][IE7][IE8]
-        if (_ie && !node.addEventListener) {
+        if (_ie && !node[_addEventListener]) {
             if (eventType === "mousemove") {
                 capture && uuevent(node, "losecapture", closure, __unbind__);
             } else if (eventType === "losecapture") {
@@ -2552,10 +2554,10 @@ function uueventattach(node,         // @param Node:
  */
 
 //{{{!mb
-    if (node.addEventListener) {
+    if (node[_addEventListener]) {
 //}}}!mb
         node[__detach__ ? "removeEventListener"
-                        : "addEventListener"](eventType, evaluator, !!useCapture);
+                        : _addEventListener](eventType, evaluator, !!useCapture);
 //{{{!mb
     } else {
         node[__detach__ ? "detachEvent"
@@ -2905,7 +2907,7 @@ function uunodesort(ary,       // @param NodeArray:
                     context) { // @hidden Node(= <body>): search context
                                // @return Array: [SortedNodeArray, DuplicatedNodeArray]
     var rv = [], ri = -1, i = 0, iz = ary.length, hash = { length: iz },
-        val, min = 0xfffffff, max = 0, node, dups = [], di = -1,
+        idx, min = 0xfffffff, max = 0, node, dups = [], di = -1,
         all =
 //{{{!mb
               _ie ? 0 :
@@ -2914,14 +2916,14 @@ function uunodesort(ary,       // @param NodeArray:
 
     for (; i < iz; ++i) {
         node = ary[i];
-        val =
+        idx =
 //{{{!mb
               _ie ? node.sourceIndex :
 //}}}!mb
                                        all[_indexOf](node);
-        min > val && (min = val);
-        max < val && (max = val);
-        hash[val] ? (dups[++di] = node) : (hash[val] = node); // judge duplicate
+        min > idx && (min = idx);
+        max < idx && (max = idx);
+        hash[idx] ? (dups[++di] = node) : (hash[idx] = node); // judge duplicate
     }
     for (i = min; i <= max; ++i) {
         (node = hash[i]) && (rv[++ri] = node);
@@ -2961,6 +2963,84 @@ function uunodeclear(parent) { // @param Node: parent node
         parent[_removeChild](parent[_lastChild]);
     }
     return parent;
+}
+
+// uu.node.clone - clone node, clone Attribute, HTML5 DATA-SET, DOM Events
+function uunodeclone(parent,  // @param Node: parent node (ElementNode)
+                     quick) { // @param Boolean(= false): true is quick clone
+                              // @return Node: cloned node
+    function cloneData(source,   // @param Node: source node
+                       cloned) { // @param Node: cloned node
+        var key, i, iz, data = source[_uuevent], handler = uudata.handler;
+
+        // new nodeid
+//{{{!mb
+        ready.data && (cloned[_uunodeid] = 0); // reset
+//}}}!mb
+        uunodeid(cloned);
+
+        // bind event
+        for (key in data) {
+            if (key !== "types") { // skip node["data-uuevent"].types
+                for (i = 0, iz = data[key].length; i < iz; ++i) {
+                    uuevent(cloned, key, data[key][i]);
+                }
+            }
+        }
+        // clone UI state (node.checked)
+        if ("checked" in source && source.checked) {
+            cloned.checked = source.checked;
+        } else if ("selected" in source) {
+            cloned.selected = source.selected;
+        }
+        // extras data handler
+        for (key in handler) {
+            source[key] && handler(key, source, "cloneNode",
+                                       { copiedAttr: copiedAttr,
+                                         clonedNode: cloned });
+        }
+    }
+
+//{{{!mb
+    function reverseFetch(nodeArray) { // [IE]
+        var i = 0, nodeid, cloned;
+
+        while ( (cloned = nodeArray[i++]) ) {
+            (nodeid = cloned[_uunodeid]) &&
+                cloneData(source = uunodeidtonode(nodeid), cloned);
+        }
+    }
+//}}}!mb
+
+    function drillDown(node, cloned) { // recursive
+        for (; node; node = node[_nextSibling], cloned = cloned[_nextSibling]) {
+            if (node[_nodeType] === 1) { // 1: ELEMENT_NODE
+                cloneData(node, cloned);
+                drillDown(node[_firstChild], cloned[_firstChild]);
+            }
+        }
+    }
+
+    var rv, ready = uuready.cloneNode;
+
+//{{{!mb
+    if (parent[_nodeType] === 1) { // 1: ELEMENT_NODE
+        if (ready.event || ready.data) { // [IE] cloneNode bugfix
+            rv = uu.div();
+            rv.innerHTML = parent.cloneNode(_true).outerHTML;
+            quick ? (rv = rv[_firstChild]) : reverseFetch(uutag("*", rv));
+        } else {
+//}}}!mb
+            rv = parent.cloneNode(_true);
+            if (!quick) {
+                cloneData(parent, rv);
+                drillDown(parent[_firstChild], rv[_firstChild]);
+            }
+//{{{!mb
+        }
+    }
+//}}}!mb
+    return rv;
 }
 
 // uu.node.remove - remove node, remove nodeid, remove data, remove events
@@ -3377,26 +3457,25 @@ function uujsondecode(jsonString, // @param JSONString:
 
 // inner - json inspect
 function uujsonencode(mix, esc) {
-    var ary, type = uutype(mix), w, ai = -1, i, iz, q = '"', x;
+    var ary, type = uutype(mix), w, ai = -1, i, iz, q = '"', x, prefix = "";
 
     if (mix === win) {
         return '"window"'; // window -> String("window")
     }
     switch (type) {
+    case uutype.FUNCTION:  // Function -> "FunctionName():": { ... }
+                            w =
+//{{{!mb
+                                _ie ? (w = mix + "").slice(9, w[_indexOf]("(")) : // )
+//}}}!mb
+                                      mix.name;
+                            prefix = q + w + "()" + q + ": ";
     case uutype.HASH:       ary = []; break;
     case uutype.NULL:
     case uutype.BOOLEAN:    return mix + "";
     case uutype.NODE:       return q + uunodepath(mix) + q; // node path
     case uutype.DATE:       return mix.toJSON();
     case uutype.NUMBER:     return isFinite(mix) ? mix + "" : "null";
-    case uutype.FUNCTION:
-//{{{!mb
-        if (_ie) {
-            w = mix + ""; // mix.toString()
-            return q + w.slice(9, w[_indexOf]("(")) + q; // )
-        }
-//}}}!mb
-        return q + mix.name + q;
     case uutype.STRING:
         x = uujson.x;
         return q + mix.replace(x[2], function(m) {
@@ -3413,7 +3492,7 @@ function uujsonencode(mix, esc) {
     default: // UNDEFINED
         return "";
     }
-    if (mix.msgbox) {
+    if (mix.msgbox) { // is Class Instance
         return q + mix.name + q;
     }
     if (_toString.call(type).slice(-3) === "on]") { // [object CSSStyleDeclaration]
@@ -3424,12 +3503,12 @@ function uujsonencode(mix, esc) {
                 ary[++ai] = q + i + q + ':' + q + mix[i] + q;
             }
         }
-    } else { // type === uutype.HASH
+    } else { // is Hash
         for (i in mix) {
             ary[++ai] = q + i + q + ":" + uujsonencode(mix[i], esc);
         }
     }
-    return "{" + ary + "}";
+    return prefix + "{" + ary + "}";
 }
 
 // --- date ---
@@ -4232,7 +4311,12 @@ function detectFeatures() {
             background: uuarg(hash),// background: rgba, hsla, transparent ready
             ArraySlice: _true,      // Array.prototype.slice.call(FakeArray) ready
             getAttribute: _true,    // getAttribute("href"), getAttribute("class") ready
-            StringIndexer: _true    // String[indexer] ready
+            StringIndexer: _true,   // String[indexer] ready
+            cloneNode: {            // cloneNode:
+                attr: _true,        //  clone attribute
+                data: _false,       //  clone node["data-*"] [IE6-IE8][IE9pp3] is true
+                event: _false       //  clone DOM Event      [IE6-IE8][IE9pp3] is true
+            }
         };
 
 //{{{!mb
@@ -4265,6 +4349,37 @@ function detectFeatures() {
 //}}}!mb
     return rv;
 }
+
+//{{{!mb
+uuready(function() {
+    var cloned, evt, fired = 0, nodeData = "aa",
+        body = doc.body, cloneNode = uuready.cloneNode, div = uunode();
+
+    div.setAttribute("Z", "1");
+    div[nodeData] = { ref: 1 };
+    if (div[_addEventListener]) { // [GECKO][WEBKIT][OPERA]
+        div[_addEventListener]("click", function() { fired += 1 }, _false);
+        cloned = div.cloneNode(_false);
+        (evt = doc.createEvent("MouseEvents")).initEvent("click", _false, _true);
+        cloned.dispatchEvent(evt);
+    } else if (div.attachEvent) { // [IE]
+        body[_appendChild](div);
+        div.attachEvent("onclick", function() { fired += 2 });
+        cloned = div.cloneNode(_true);
+        body[_appendChild](cloned);
+        cloned.fireEvent("onclick");
+
+        body[_removeChild](div);
+        body[_removeChild](cloned);
+    }
+    cloned[nodeData] && (cloned[nodeData].ref = 2);
+
+    cloneNode.attr = div[_getAttribute]("Z") === cloned[_getAttribute]("Z");
+    cloneNode.data = (!!cloned[nodeData] &&
+                      (div[nodeData].ref === cloned[nodeData].ref));
+    cloneNode.event = !!fired;
+}, 2); // 2: High order
+//}}}!mb
 
 })(this, document, parseInt, parseFloat, this.getComputedStyle, this.JSON);
 

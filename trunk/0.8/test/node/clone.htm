@@ -5,7 +5,9 @@
 }
 </style>
 <script src="../../src/uupaa.js"></script>
+<!--
 <script src="../../src/node/clone.js"></script>
+ -->
 <script src="../../src/color/color.js"></script>
 <script>
 uu.ready(function(uu) {
@@ -27,6 +29,8 @@ uu.ready(function(uu) {
         }
     }
 
+    uu.event(uu.id("selectbox"), "click", handler);
+    uu.event(uu.id("multiple-selectbox"), "click", handler);
     uu.event(uu.id("p"), "click", handler);
     uu.event(uu.id("checkbox"), "click", handler);
     uu.event(uu.id("radio"), "click", handler);
@@ -41,9 +45,25 @@ uu.ready(function(uu) {
 
 <p id="p">click me</p>
 
+<div id="selectbox">clickme
+    <select>
+    <option value="1">1</option>
+    <option value="2" selected="selected">2</option>
+    <option value="3">3</option>
+    </select>
+</div>
+<div id="multiple-selectbox">clickme
+    <select multiple="multiple" size="3">
+    <option value="1" selected="selected">1</option>
+    <option value="2" selected="selected">2</option>
+    <option value="3">3</option>
+    </select>
+</div>
+
 <div id="checkbox">click me<input name="a" type="checkbox" value="1" /></div>
 <div id="radio">click me<input name="b" type="radio" value="1" /><input name="b" type="radio" value="1" /></div>
 <div id="password">click me(readonly)<input name="c" type="password" value="1" readonly="readonly" /></div>
+<div id="text">click me(read/write)<input name="c" type="text" value="1" /></div>
 <div id="text">click me(disabled)<input name="c" type="text" value="1" disabled="disabled" /></div>
 
 </body></html>
