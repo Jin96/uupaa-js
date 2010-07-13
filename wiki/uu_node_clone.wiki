@@ -8,14 +8,14 @@ uu.node.clone は指定されたノード以下のノードツリーを複製し
 
 Node.cloneNode(true) をクロスブラウザに対応させ、イベントハンドラの複製と、uu.data() で付与したノードデータのコピーを行います。
 
-uu.node.clone を利用するには以下のファイルが必要です。
-
-  * src/node/clone.js
+uu.node.clone は uupaa.js に最初から組み込まれています。
 
 = API =
 
 == uu.node.clone ==
-uu.node.clone(_parent_:Node):Node は、_parent_ ノード以下のノードツリーを複製し返します。
+uu.node.clone(_parent_:Node, _quick_:Boolean = _false_):Node は、_parent_ ノード以下のノードツリーを複製し返します。
+_quick_ に true を指定すると _parent_ ノードをクローンし、イベントやノードデータのコピー等の特別な処理を行わずに _parent_ ノードのクローンを返します。
+_quick_ に false を指定すると _parent_ ノード以下の子要素をクローンし、イベントハンドラの複製やノードデータのこピーを行います。
 
 返される各ノードは
   * id, style, className 属性などの、主要な属性値がコピーされています。(その結果id属性が重複します)
@@ -48,7 +48,6 @@ http://uupaa-js.googlecode.com/svn/trunk/0.8/test/node/clone.htm
 }
 </style>
 <script src="../../src/uupaa.js"></script>
-<script src="../../src/node/clone.js"></script>
 <script src="../../src/color/color.js"></script>
 <script>
 uu.ready(function() {
