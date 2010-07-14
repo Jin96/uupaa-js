@@ -64,13 +64,23 @@ function enumAPI($js) {
     return $js;
 }
 
-function preProcess($js,       // @param String: JavaScript source code
-                    $mobile) { // @param Boolean: true is "-mb" option
-                               // @return String:
+function preProcess($js,        // @param String: JavaScript source code
+                    $mobile,    // @param Boolean: true is "-mb" option
+                    $castoff) { // @param Array: castoff idents
+                                // @return String:
     // strip {{{!mb ... }}}!mb code block
     if ($mobile) {
         $js = preg_replace('/\{\{\{\!mb([^\n]*)\n.*?\}\}\}\!mb/ms',
                            "/*{{{!mb$1 }}}!mb*/", $js);
+    }
+
+    if (in_array("form", $castoff)) {
+        $js = preg_replace('/\{\{\{\!form([^\n]*)\n.*?\}\}\}\!form/ms',
+                           "/*{{{!form$1 }}}!form*/", $js);
+    }
+    if (in_array("snippet", $castoff)) {
+        $js = preg_replace('/\{\{\{\!snippet([^\n]*)\n.*?\}\}\}\!snippet/ms',
+                           "/*{{{!snippet$1 }}}!snippet*/", $js);
     }
 
     // typeof alias

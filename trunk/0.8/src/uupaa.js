@@ -93,7 +93,9 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/ClassNameS
     opera:          _opera,
     webkit:         _webkit,
     // --- CODE SNIPPET ---
+//{{{!snippet
     snippet:        uusnippet,      // uu.snippet(id:String, arg:Hash/Array):String/Mix
+//}}}!snippet
     // --- AJAX / JSONP ---
     ajax:           uuajax,         // uu.ajax(url:String, option:Hash, callback:Function)
                                     //  [1][load aync] uu.ajax("http://...", { method: "POST", data: ... }, callback)
@@ -326,6 +328,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/ClassNameS
                                     //  [4][set text]                  uu.text(node, "text")      -> node
                                     //  [5][set formated text]         uu.text(node, "??", "a")   -> node
     // --- FORM.VALUE ---
+//{{{!form
     value:          uuvalue,        // uu.value(node:Node, value:String = void):StringArray/Node
                                     //  [1][get] uu.value(node) -> value or [value, ...]
                                     //  [2][set] uu.value(node, "value") -> node
@@ -337,6 +340,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/ClassNameS
                                     //  [7][get <selet multiple>] uu.value(node) -> ["value", ...]
                                     //  [8][get <input checkbox>] uu.value(node) -> ["value", ...]
                                     //  [9][get <input radio>]    uu.value(node) -> "value"
+//}}}!form
     // --- JSON ---
     json:     uumix(uujson, {       // uu.json(source:Mix, alt:Boolean = false):JSONString
         decode:     uujsondecode    // uu.json.decode(jsonString:JSONString, alt:Boolean = false):Mix/Boolean
@@ -551,6 +555,7 @@ function uufactory(expr,   // @param NodeSet/Node/NodeArray/ClassNameString/wind
 }
 
 // --- SNIPPET ---
+//{{{!snippet
 // uusnippet - evaluate snippet
 function uusnippet(id,    // @param String: snippet id. <script id="...">
                    arg) { // @param Mix(= void): arg
@@ -599,6 +604,7 @@ uusnippet.each = function(hash, fragment) { // (
     }
     return block.join("");
 };
+//}}}!snippet
 
 // --- AJAX ---
 // uu.ajax
@@ -3085,7 +3091,7 @@ function uunodeindexof(node) { // @param Node: ELEMENT_NODE
 
 // uu.node.normalize - removes CRLF/blank-text/white-space/comment node
 function uunodenormalize(parent, // @param Node(= <body>): parent node
-                         max) {  // @param Number(= 1): max depth
+                         max) {  // @param Number(= 0): max depth, 0 is infinity
                                  // @return Number: removed node count
     // markup blank and comment nodes
     function markup(node, dig, n) {
@@ -3100,10 +3106,10 @@ function uunodenormalize(parent, // @param Node(= <body>): parent node
         }
     }
 
-    max = max || 1;
+    max = max || 9999;
     var nodeArray = [], node, i = 0, KEEP = /\S/;
 
-    markup(parent, 0);
+    markup(parent || doc.body, 0);
     while ( ( node = nodeArray[i++]) ) {
         node[_parentNode][_removeChild](node); // remove
     }
@@ -3163,6 +3169,7 @@ function uutext(data,             // @param String/FormatString/Node: "string" o
 //  [8][get <input checkbox>] uu.value(node) -> ["value", ...]
 //  [9][get <input radio>]    uu.value(node) -> "value"
 
+//{{{!form
 // uu.value - value accessor
 function uuvalue(node,    // @param Node:
                  value) { // @param String(= void 0):
@@ -3243,6 +3250,7 @@ function setNodeValue(node,    // @param Node:
     }
     return node;
 }
+//}}}!form
 
 // --- QUERY ---
 // uu.query - as document.querySelectorAll
