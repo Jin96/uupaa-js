@@ -8,8 +8,6 @@ uu.node.clone は指定されたノード以下のノードツリーを複製し
 
 Node.cloneNode(true) をクロスブラウザに対応させ、イベントハンドラの複製と、uu.data() で付与したノードデータのコピーを行います。
 
-uu.node.clone は uupaa.js に最初から組み込まれています。
-
 = API =
 
 == uu.node.clone ==
