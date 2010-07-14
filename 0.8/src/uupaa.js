@@ -2639,26 +2639,19 @@ function uueventcyclic(node,         // @param Node: target node
 // uu.ready - hook event
 function uuready(/* readyEventType, */  // @param String(= "dom"): readyEventType
                  /* callback, ... */) { // @param Function: callback functions
-    if (!uuready.reload) {
-        var args = arguments, v, i = 0, iz = args.length,
-            type = "dom", order, fired;
+    var args = arguments, v, i = 0, iz = args.length, db = uuready.uudb,
+        m, type = "dom", order = 0, rex = /^([^\:]+)(\:[0-2])?$/; // "dom", "dom:1", "dom:2"
 
-        for (; i < iz; ++i) {
-            isString(v = args[i]) && (type = v[_toLowerCase]());
-        }
-        fired = uuready[type];
-        order = { dom: 0, middle: 1, system: 2 }[type] || 0;
-
-        for (i = 0; i < iz; ++i) {
-            if (isFunction(v = args[i])) {
-                fired ? v(uu) // callback(uu)
-                      : (uuready.uudb[type] || (uuready.uudb[type] = [[], [], []]),
-                         uuready.uudb[type][order].push(v));
-            }
-        }
+    for (; !uuready.reload && i < iz; ++i) {
+        isString(v = args[i])
+                ? ((m = rex.exec(v)) && (type = m[1][_toLowerCase](),
+                                         order = +m[2] || 0))
+                : uuready[type] ? v(uu) // callback(uu)
+                                : (db[type] || (db[type] = [[], [], []]),
+                                   db[type][order].push(v));
     }
 }
-uuready.uudb = {}; // { readyEventType: [[low], [middle], [system]], ... } event stock
+uuready.uudb = {}; // { readyEventType: [[low order], [mid order], [high order]], ... }
 
 // uu.ready.fire
 function uureadyfire(readyEventType, // @param String: readyEventType
@@ -2971,7 +2964,8 @@ function uunodeclone(parent,  // @param Node: parent node (ElementNode)
                               // @return Node: cloned node
     function cloneData(source,   // @param Node: source node
                        cloned) { // @param Node: cloned node
-        var key, i, iz, data = source[_uuevent], handler = uudata.handler;
+        var key, i, iz, data = source[_uuevent], handler = uudata.handler,
+            checked = "checked", selected = "selected";
 
         // new nodeid
 //{{{!mb
@@ -2988,14 +2982,12 @@ function uunodeclone(parent,  // @param Node: parent node (ElementNode)
             }
         }
         // clone UI state (node.checked)
-        if ("checked" in source && source.checked) {
-            cloned.checked = source.checked;
-        } else if ("selected" in source) {
-            cloned.selected = source.selected;
-        }
+        checked in source && source[checked] && (cloned[checked] = source[checked]);
+        selected in source && (cloned[selected] = source[selected]);
+
         // extras data handler
         for (key in handler) {
-            source[key] && handler(key, source, "cloneNode",
+            source[key] && handler(key, source, cloneNode,
                                        { copiedAttr: copiedAttr,
                                          clonedNode: cloned });
         }
@@ -3021,17 +3013,17 @@ function uunodeclone(parent,  // @param Node: parent node (ElementNode)
         }
     }
 
-    var rv, ready = uuready.cloneNode;
+    var rv, cloneNode = "cloneNode", ready = uuready[cloneNode];
 
 //{{{!mb
     if (parent[_nodeType] === 1) { // 1: ELEMENT_NODE
         if (ready.event || ready.data) { // [IE] cloneNode bugfix
-            rv = uu.div();
-            rv.innerHTML = parent.cloneNode(_true).outerHTML;
+            rv = doc[_createElement]("div");
+            rv.innerHTML = parent[cloneNode](_true).outerHTML;
             quick ? (rv = rv[_firstChild]) : reverseFetch(uutag("*", rv));
         } else {
 //}}}!mb
-            rv = parent.cloneNode(_true);
+            rv = parent[cloneNode](_true);
             if (!quick) {
                 cloneData(parent, rv);
                 drillDown(parent[_firstChild], rv[_firstChild]);
@@ -4117,7 +4109,7 @@ _ie && _ver < 9 && uueventdetach(win, "onunload", _windowonunload);
 // inner -
 // 1. prebuild camelized hash - http://handsout.jp/slide/1894
 // 2. prebuild nodeid
-uuready(function() {
+uuready("dom:2", function() {
     var nodeList = uutag("*", _rootNode), v, i = -1,
         styleFix = uuhash((
 //{{{!mb
@@ -4135,7 +4127,7 @@ uuready(function() {
     while ( (v = nodeList[++i]) ) {
         uunodeid(v);
     }
-}, 2); // 2: high(system) order
+});
 
 // inner - make camelized hash( { "text-align": "TextAlign", ...}) from getComputedStyle
 function _camelhash(rv, props) {
@@ -4313,9 +4305,9 @@ function detectFeatures() {
             getAttribute: _true,    // getAttribute("href"), getAttribute("class") ready
             StringIndexer: _true,   // String[indexer] ready
             cloneNode: {            // cloneNode:
-                attr: _true,        //  clone attribute
-                data: _false,       //  clone node["data-*"] [IE6-IE8][IE9pp3] is true
-                event: _false       //  clone DOM Event      [IE6-IE8][IE9pp3] is true
+                attr: _false,       //  ref attribute [GECKO][WEBKIT][OPERA][IE] is false
+                data: _false,       //  ref node["data-*"] [IE6-IE8][IE9pp3] is true
+                event: _false       //  ref DOM Event      [IE6-IE8][IE9pp3] is true
             }
         };
 
@@ -4351,34 +4343,33 @@ function detectFeatures() {
 }
 
 //{{{!mb
-uuready(function() {
-    var cloned, evt, fired = 0, nodeData = "aa",
-        body = doc.body, cloneNode = uuready.cloneNode, div = uunode();
+uuready("dom:2", function() {
+    var cloned, evt, fired = 0, attr = "uuz", data = "data-uuz",
+        body = doc.body, cloneNode = uuready.cloneNode, div = uunode(),
+        onfire = function() {
+            fired += 1;
+        };
 
-    div.setAttribute("Z", "1");
-    div[nodeData] = { ref: 1 };
-    if (div[_addEventListener]) { // [GECKO][WEBKIT][OPERA]
-        div[_addEventListener]("click", function() { fired += 1 }, _false);
+    div.setAttribute(attr, "1"); // node.setAttribute("uuz", "1")
+    div[data] = { ref: 1 };      // node["data-uuz"] = { ref: 1 }
+    if (div[_addEventListener]) { // [GECKO][WEBKIT][OPERA][IE9]
+        div[_addEventListener]("click", onfire, _false);
         cloned = div.cloneNode(_false);
         (evt = doc.createEvent("MouseEvents")).initEvent("click", _false, _true);
-        cloned.dispatchEvent(evt);
+        cloned.dispatchEvent(evt); // fire
     } else if (div.attachEvent) { // [IE]
-        body[_appendChild](div);
-        div.attachEvent("onclick", function() { fired += 2 });
-        cloned = div.cloneNode(_true);
-        body[_appendChild](cloned);
-        cloned.fireEvent("onclick");
-
-        body[_removeChild](div);
+        body[_appendChild](div).attachEvent("onclick", onfire);
+        body[_appendChild](cloned = div.cloneNode(_false)).fireEvent("onclick");
         body[_removeChild](cloned);
+        body[_removeChild](div);
     }
-    cloned[nodeData] && (cloned[nodeData].ref = 2);
+    cloned.setAttribute(attr, "2"); // clonedNode.setAttribute("uuz", "2")
+    cloned[data] && (cloned[data].ref = 2); // clonedNode["data-uuz"].ref = 2
 
-    cloneNode.attr = div[_getAttribute]("Z") === cloned[_getAttribute]("Z");
-    cloneNode.data = (!!cloned[nodeData] &&
-                      (div[nodeData].ref === cloned[nodeData].ref));
+    cloneNode.attr  = div[_getAttribute](attr) === cloned[_getAttribute](attr);
+    cloneNode.data  = (!!cloned[data] && (div[data].ref === cloned[data].ref));
     cloneNode.event = !!fired;
-}, 2); // 2: High order
+});
 //}}}!mb
 
 })(this, document, parseInt, parseFloat, this.getComputedStyle, this.JSON);
