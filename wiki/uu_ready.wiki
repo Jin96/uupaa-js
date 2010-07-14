@@ -66,36 +66,45 @@ uu.ready(_readyEventType_:IgnoreCaseString = "dom", _callback_:Function, ...) �
   * *"canvas"* - `<`canvas`>` ready event
   * *"storage"* - window.localStorage ready event
   * *"reload"* - location.reload() event
-  * *"system"* - DOMContentLoaded event (high order)
-  * *"middle"* - DOMContentLoaded event (middle order)
-_readyEventType_ は省略できます。省略した場合は *"dom"* が指定されたものとみなします。
 先に登録されたイベントほど優先的にコールバックします。
+_readyEventType_ は省略できます。省略した場合は *"dom:0"* が指定されたものとみなします。
+_readyEventType_ には 0～2までの数字で優先度を指定できます、値が大きいほど先に実行します。省略した場合の優先度は *0* です。優先度は "dom:2" のように イベントタイプ + ":" + 数字で指定します。
 条件成立後(イベント発火後)に uu.ready(_callback_) を実行すると、コールバック関数を溜め込まず、即座に _callback_ をコールバックします。
 イベント発火済みかどうかを調べるには、uu.ready.dom や uu.ready.window を調べます。true なら、それらイベントは発火済みです。
 
 === DOMContentLoaded イベントハンドラの使い方 ===
 {{{
     uu.ready(function(uu) {
-        alert("DOMContentLoaded ready");
+        alert("DOMReady");
     });
 
-    // ハンドラは複数指定できます
+    // ハンドラは複数指定できます(DOMReady1 → DOMReady2 の順に発火)
     uu.ready(function(uu) {
-        alert("DOMContentLoaded ready1");
+        alert("DOMReady1");
     }, function(uu) {
-        alert("DOMContentLoaded ready2");
+        alert("DOMReady2");
+    });
+
+    // 引数の途中で別のイベントタイプや優先度の変更指定できます(DOMReady2 → DOMReady1 → WindowReady3 の順に発火)
+    uu.ready(function(uu) {
+        alert("DOMReady1");
+    }, "dom:2", function(uu) {
+        alert("DOMReady2");
+    }, "window", function(uu) {
+        alert("WindowReady3");
     });
 
 }}}
 === window.onload イベントハンドラの使い方 ===
 {{{
+    // イベントタイプは先に指定します。
     uu.ready("window", function(uu) {
         alert("window.onload ready");
     });
 
-    // 引数の順番は任意です。"window" を後から指定できます。
+    // 【注意】イベントタイプを後から指定すると、デフォルトのイベントタイプ "dom:0" として解釈されてしまいます。
     uu.ready(function(uu) {
-        alert("window.onload ready");
+        alert("window.onload ready"); // WindowReady ではなく DOMReady のタイミングで発火
     }, "window");
 }}}
 
@@ -141,7 +150,7 @@ _readyEventType_ は省略できます。省略した場合は *"dom"* が指定
 }}}
 
 == uu.ready.fire ==
-uu.ready.fire(_eventType_:String, _param_:Mix = void) は uu.ready() で登録済みのイベントをコールバックします。
+uu.ready.fire(_readyEventType_:String, _param_:Mix = void) は uu.ready() で登録済みのイベントをコールバックします。
 コールバック引数は、callback(uu, _param_) となります。
 
 = Test Code =
