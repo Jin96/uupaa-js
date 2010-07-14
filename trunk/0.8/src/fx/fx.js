@@ -2,7 +2,6 @@
 // === uu.fx ===
 //#include uupaa.js
 //#include color/color.js
-//#include node/clone.js
 
 uu.fx.fade || (function(uu) {
 
