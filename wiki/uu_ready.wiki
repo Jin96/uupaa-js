@@ -68,7 +68,11 @@ uu.ready(_readyEventType_:IgnoreCaseString = "dom", _callback_:Function, ...) �
   * *"reload"* - location.reload() event
 先に登録されたイベントほど優先的にコールバックします。
 _readyEventType_ は省略できます。省略した場合は *"dom:0"* が指定されたものとみなします。
+
+=== 優先度の指定 ===
 _readyEventType_ には 0～2までの数字で優先度を指定できます、値が大きいほど先に実行します。省略した場合の優先度は *0* です。優先度は "dom:2" のように イベントタイプ + ":" + 数字で指定します。
+
+=== 既に発火済みのイベントの扱い ===
 条件成立後(イベント発火後)に uu.ready(_callback_) を実行すると、コールバック関数を溜め込まず、即座に _callback_ をコールバックします。
 イベント発火済みかどうかを調べるには、uu.ready.dom や uu.ready.window を調べます。true なら、それらイベントは発火済みです。
 
