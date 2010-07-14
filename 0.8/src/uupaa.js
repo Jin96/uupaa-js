@@ -16,6 +16,9 @@ var _prototype = "prototype",
     _slice = Array[_prototype].slice,
     // --- HTML5: EMBEDDING CUSTOM NON-VISIBLE DATA ---
     _uufx = "data-uufx",
+//{{{!image
+    _uuimage = "data-uuimage",
+//}}}!image
     _uuevent = "data-uuevent",
     _uutrans = "data-uutrans", // for uu.css.transform
     _uunodeid = "data-uunodeid",
@@ -25,6 +28,7 @@ var _prototype = "prototype",
     _createTextNode = "createTextNode",
     _createElement = "createElement",
     _getAttribute = "getAttribute",
+    _setAttribute = "setAttribute",
     _toLowerCase = "toLowerCase",
     _appendChild = "appendChild",
     _nextSibling = "nextSibling",
@@ -61,8 +65,9 @@ var _prototype = "prototype",
     _guidnum = 0,       // guid counter
     _nodeiddb = {},     // { nodeid: node, ... }
     _nodeidnum = 0,     // nodeid counter
+//{{{!mb
     _tokenCache = {},   // { css-selector-expression: token, ... }
-
+//}}}!mb
     // --- version detection ---
     _ver = detectVersions(0.8),
     _ie = _ver.ie,
@@ -386,6 +391,12 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/ClassNameS
         storage:    _false,         // true is window.localStorage ready event fired
         reload:     _false          // true is blackout (css3 cache reload)
     }, detectFeatures(_ver)),
+    // --- IMAGE ---
+//{{{!image
+    image:    uumix(uuimage, {      // uu.image(url:String, callback:Function)
+        size:       uuimagesize     // uu.image.size(node:HTMLImageElement):Hash - { w, h }
+    }),
+//}}}!image
     // --- SVG ---
     svg:      uumix(uusvg, {        // uu.svg(x:Number, y:Number, width:Number, height:Number,
                                     //        *attr:Hash, *css:Hash):<svg:svg>
@@ -786,7 +797,7 @@ function uujsonp(url,        // @param String: "http://example.com?callback=??"
 
     option[_before] && option[_before](tag, option);
 
-    tag.setAttribute("src", url);
+    tag[_setAttribute]("src", url);
 
     setTimeout(function() {
         uujsonp.db[guid](); // 408 "Request Time-out"
@@ -1198,7 +1209,7 @@ function uuattr(node,    // @param Node:
     }
 
     for (attr in key) {
-        node.setAttribute(fix[attr] || attr, key[attr]); // [4]
+        node[_setAttribute](fix[attr] || attr, key[attr]); // [4]
     }
     return node; // Node
 }
@@ -1246,7 +1257,7 @@ function uudata(node,    // @param Node:
     }
     return node;
 }
-uudata.handler = {}; // { key: callback }
+uudata.handler = {}; // { "data-uu***": callback }
 
 //  [1][clear all pair] uu.data.clear(node) -> node
 //  [2][clear pair]     uu.data.clear(node, key) -> node
@@ -2993,9 +3004,7 @@ function uunodeclone(parent,  // @param Node: parent node (ElementNode)
 
         // extras data handler
         for (key in handler) {
-            source[key] && handler(key, source, cloneNode,
-                                       { copiedAttr: copiedAttr,
-                                         clonedNode: cloned });
+            source[key] && handler[key](source, key, cloneNode, { clonedNode: cloned });
         }
     }
 
@@ -3019,7 +3028,11 @@ function uunodeclone(parent,  // @param Node: parent node (ElementNode)
         }
     }
 
-    var rv, cloneNode = "cloneNode", ready = uuready[cloneNode];
+    var rv,
+//{{{!mb
+        ready = uuready[cloneNode],
+//}}}!mb
+        cloneNode = "cloneNode";
 
 //{{{!mb
     if (parent[_nodeType] === 1) { // 1: ELEMENT_NODE
@@ -3048,10 +3061,10 @@ function uunoderemove(node) { // @param Node:
     uunodeidremove(node);
 
     // extras data handler
-    var key, handler = uudata.handler;
+    var data, handler = uudata.handler;
 
-    for (key in handler) {
-        node[key] && handler(key, node, "removeNode");
+    for (data in handler) {
+        node[data] && handler[data](node, data, "removeNode");
     }
     node[_parentNode] && node[_parentNode][_removeChild](node);
     return node;
@@ -3596,6 +3609,99 @@ function datehashgmt() { // @return RFC1123DateString: "Wed, 16 Sep 2009 16:18:1
     return rv;
 }
 
+// --- IMAGE ---
+// uu.image - image loader
+//{{{!image
+function uuimage(url,        // @param String:
+                 callback) { // @param Function: callback(img, ok)
+                             //     img - Node: <img>
+                             //     ok  - Boolean: true is success
+    function after(ok) {
+        while ( (fn = uuimage.fn[url].shift()) ) {
+            fn(img, ok);
+        }
+    }
+
+    var img = uuimage.db[url];
+
+    if (img) { // cached or scheduled
+        uuimage.fn[url].push(callback);
+        img.ok && after(_true);
+    } else {
+        uuimage.db[url] = img = new Image();
+        uuimage.fn[url] = [callback]; // init
+        img.ok = _false;
+        img.onerror = function() {
+            img[_width] = img[_height] = 0;
+            after(img.ok = _false);
+            img.onerror = img.onload = null;
+        };
+        img.onload = function() {
+            // [IE8+] readyState === "complete"
+            (img.complete || img.readyState === "complete") && after(img.ok = _true);
+            img.onerror = img.onload = null;
+        };
+        img[_setAttribute]("src", url);
+    }
+}
+uuimage.db = {}; // { url: Image, ... }
+uuimage.fn = {}; // { url: [callback, ...] }
+
+// uu.image.size - get image natural dimension
+function uuimagesize(node) { // @param HTMLImageElement:
+                             // @return Hash: { w, h }
+//{{{!mb
+    if ("naturalWidth" in node) { // [HTML5][GECKO][WEBKIT]
+//}}}!mb
+        return { w: node.naturalWidth, h: node.naturalHeight };
+//{{{!mb
+    }
+    // http://d.hatena.ne.jp/uupaa/20090602
+    var rs, rw, rh, w, h, hide;
+
+    if (node.src) { // HTMLImageElement
+        if (node[_uuimage] && node[_uuimage].src === node.src) {
+            return node[_uuimage];
+        }
+        if (_ie) { // [IE]
+            if (node.currentStyle) {
+                hide = node.currentStyle[_display] === "none";
+                hide && (node.style[_display] = "block");
+            }
+            rs = node.runtimeStyle;
+            // keep runtimeStyle
+            w = rs[_width];
+            h = rs[_height];
+            // override
+            rs[_width] = rs[_height] = "auto";
+            rw = node[_width];
+            rh = node[_height];
+            // restore
+            rs[_width]  = w;
+            rs[_height] = h;
+
+            hide && (node.style[_display] = "none");
+        } else { // [OPERA]
+            // keep current style
+            w = node[_width];
+            h = node[_height];
+
+            node.removeAttribute(_width);
+            node.removeAttribute(_height);
+
+            rw = node[_width];
+            rh = node[_height];
+            // restore
+            node[_width]  = w;
+            node[_height] = h;
+        }
+        return node[_uuimage] = { w: rw, h: rh, src: node.src }; // bond
+    }
+    return { w: node[_width], h: node[_height] };
+//}}}!mb
+}
+//}}}!image
+
 // --- SVG ---
 // uu.svg - <svg:svg>
 function uusvg(x,        // @param Number: Has no meaning or effect on outermost 'svg' elements
@@ -4027,11 +4133,12 @@ uueach({    bind:       uuevent,
 });
 
 // map(iter = 1)
-uueach({    attr:   uuattr,
-            css:    uucss,
-            html:   uuhtml,
-            text:   uutext,
-            value:  uuvalue     }, function(fn, name) {
+uueach( {
+//{{{!form
+            value: uuvalue,
+//}}}!form
+            attr: uuattr, css: uucss,
+            html: uuhtml, text: uutext }, function(fn, name) {
 
     NodeSet[_prototype][name] = function(a, b) {
         return NodeSetIter(1, this, fn, a, b);
@@ -4358,7 +4465,7 @@ uuready("dom:2", function() {
             fired += 1;
         };
 
-    div.setAttribute(attr, "1"); // node.setAttribute("uuz", "1")
+    div[_setAttribute](attr, "1"); // node.setAttribute("uuz", "1")
     div[data] = { ref: 1 };      // node["data-uuz"] = { ref: 1 }
     if (div[_addEventListener]) { // [GECKO][WEBKIT][OPERA][IE9]
         div[_addEventListener]("click", onfire, _false);
@@ -4371,7 +4478,7 @@ uuready("dom:2", function() {
         body[_removeChild](cloned);
         body[_removeChild](div);
     }
-    cloned.setAttribute(attr, "2"); // clonedNode.setAttribute("uuz", "2")
+    cloned[_setAttribute](attr, "2"); // clonedNode.setAttribute("uuz", "2")
     cloned[data] && (cloned[data].ref = 2); // clonedNode["data-uuz"].ref = 2
 
     cloneNode.attr  = div[_getAttribute](attr) === cloned[_getAttribute](attr);
@@ -4881,7 +4988,7 @@ function nthTypeFilter(ctx, j, jz, negate, ps, anb) {
         tag = node.tagName;
         parent = node.parentNode;
         parentnid = parent[_uuqid] || (parent[_uuqid] = ++_nodeCount);
-        nid = node[_uuqid] || (node[_uuqid] = ++_nodeCount);
+              nid =   node[_uuqid] || (  node[_uuqid] = ++_nodeCount);
 
         if (tagdb[parentnid][nid].tag === tag) {
             idx = tagdb[parentnid][nid].pos;
@@ -4935,9 +5042,9 @@ function otherFunctionFilter(ctx, j, jz, negate, ps, arg) {
     for (; j < jz; ok = 0, ++j) {
         node = ctx[j];
         switch (ps) {
-        case 35:while (!node.getAttribute("lang") && (node = node.parentNode)) {}
-                ok = node && rex.test(node.getAttribute("lang")); break;
-        case 36:ok = node[_textContent].indexOf(arg) >= 0;
+        case 35: while (!node.getAttribute("lang") && (node = node.parentNode)) {}
+                 ok = node && rex.test(node.getAttribute("lang")); break;
+        case 36: ok = node[_textContent].indexOf(arg) >= 0;
         }
         (ok ^ negate) && (rv[++ri] = node);
     }

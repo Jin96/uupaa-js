@@ -68,19 +68,25 @@ function preProcess($js,        // @param String: JavaScript source code
                     $mobile,    // @param Boolean: true is "-mb" option
                     $castoff) { // @param Array: castoff idents
                                 // @return String:
-    // strip {{{!mb ... }}}!mb code block
-    if ($mobile) {
-        $js = preg_replace('/\{\{\{\!mb([^\n]*)\n.*?\}\}\}\!mb/ms',
-                           "/*{{{!mb$1 }}}!mb*/", $js);
-    }
-
+    // strip {{{!form ... }}}!form code block
     if (in_array("form", $castoff)) {
         $js = preg_replace('/\{\{\{\!form([^\n]*)\n.*?\}\}\}\!form/ms',
                            "/*{{{!form$1 }}}!form*/", $js);
     }
+    // strip {{{!snippet ... }}}!snippet code block
     if (in_array("snippet", $castoff)) {
         $js = preg_replace('/\{\{\{\!snippet([^\n]*)\n.*?\}\}\}\!snippet/ms',
                            "/*{{{!snippet$1 }}}!snippet*/", $js);
+    }
+    // strip {{{!image ... }}}!image code block
+    if (in_array("image", $castoff)) {
+        $js = preg_replace('/\{\{\{\!image([^\n]*)\n.*?\}\}\}\!image/ms',
+                           "/*{{{!image$1 }}}!image*/", $js);
+    }
+    // strip {{{!mb ... }}}!mb code block
+    if ($mobile) {
+        $js = preg_replace('/\{\{\{\!mb([^\n]*)\n.*?\}\}\}\!mb/ms',
+                           "/*{{{!mb$1 }}}!mb*/", $js);
     }
 
     // typeof alias
