@@ -6,6 +6,7 @@ $preprosess  = "js.pp";         // pre-processor
 $sourceDir   = "../src/";
 $compiler    = "g";             // default compiler
 $catfood     = "../catfood.js"; // temporary file
+$castoff     = array();         // "form,canvas,..."
 
 // --- global ---
 $slash       = '/';
@@ -38,7 +39,7 @@ function loadFiles($inputFiles) { // @param Array:
 function loadSource($src) { // @param FilePathString:
                             // @return JavaScriptExpressionString:
     global $verbose, $skipCore, $libraryCore, $loadedFiles, $slash,
-           $mobile;
+           $mobile, $castoff;
 
     $src = pathNormalize(trim($src));
 
@@ -64,7 +65,7 @@ function loadSource($src) { // @param FilePathString:
                                 includeSource, $js);
     // pre-process
     if (function_exists('preProcess')) {
-        $js = preProcess($js, $mobile);
+        $js = preProcess($js, $mobile, $castoff);
     }
     return $js;
 }
@@ -164,7 +165,8 @@ while ($v = array_shift($argv)) {
     case "-pp":     $preprosess = array_shift($argv); break;
     case "-core":   $libraryCore = array_shift($argv);
                     $inputFiles = array($libraryCore); break;
-    case "-src":    $sourceDir = array_shift($argv); break;
+    case "-srcdir": $sourceDir = array_shift($argv); break;
+    case "-off":    $castoff = explode("/", array_shift($argv)); break;
     default:        if (!in_array($v, $inputFiles)) {
                         $inputFiles[] = $v;
                     }
