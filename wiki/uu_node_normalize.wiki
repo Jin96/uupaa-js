@@ -6,10 +6,6 @@
 
 uu.node.normalize は指定されたノード以下から、空行だけのノードやコメントノードを除去します。
 
-uu.node.normalize を利用するには以下のファイルが必要です。
-
-  * src/node/normalize.js
-
 = API =
 
 == uu.node.normalize ==
