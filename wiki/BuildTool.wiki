@@ -16,7 +16,7 @@ usage:
 || -srcdir || source directory || ソースコードを読み込む基準ディレクトリを指定します。デフォルトは "../src/" です ||
 || -core || library core || ライブラリの核となるファイルを指定します。デフォルトは "uupaa.js" です。<br /> ビルドで生成するファイル名も -core で指定したファイル名になります ||
 || -nocore || no library core || ライブラリの核となるファイルをマージせずにビルドします ||
-|| -off || castoff || コメントアウトする機能名をスラッシュで連結し指定します。例: -off form/snippet <br /> 指定可能な文字列は "form" "snippet" です ||
+|| -off || castoff || コメントアウトする機能名をスラッシュで連結し指定します。例: -off form/snippet <br /> 指定可能な文字列は "form" "snippet" "image" です ||
 || *.js || JavaScript source code file path || ソースコードファイルパスを指定します。相対パスで指定した場合は -srcdir 以下からファイルを読み取ります ||
 
 === JavaScriptソースコードをビルドする ===
@@ -35,9 +35,9 @@ usage:
 
 === iPhone/iPad用に最小構成でビルドする ===
  生成されるファイルは uupaa.mb.js と uupaa.mb2.js
- この構成では uu.value() と uu.snippet が利用不能に
+ この構成では uu.value(), uu.snippet(), uu.image() が利用不能に
 
- *upa src.js -mb -off form/snippet
+ *upa src.js -mb -off form/snippet/image
 
 === Microsoft Ajax Minifier でビルドする(Windows環境のみ) ===
 
