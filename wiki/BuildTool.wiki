@@ -39,11 +39,17 @@ build/upa.php はプリプロセスとMinifyを施し最適化された.jsファ
  -off オプションに指定可能な文字列の一覧です
 
 || *ident*   || 説明 || 削減されるファイルサイズ<br />(Minify適用後の値) ||
-|| form      || uu.value() と NodeSet.value() をコメントアウトします || -0.6kB ||
+|| all       || 以下の機能を一括でコメントアウトします。 || -13.6kB ||
+|| form      || uu.value(), NodeSet.value() をコメントアウトします || -0.6kB ||
 || snippet   || uu.snippet() をコメントアウトします || -0.7kB ||
 || image     || uu.image() をコメントアウトします || -0.9kB ||
 || color     || uu.color() をコメントアウトします。<br />uu.fx でカラーアニメーションが利用できなくなります || -5.1kB ||
 || colordict || 色辞書をコメントアウトします。<br />uu.color() は利用可能ですが "black" や "skyblue" などの W3C Named Color は利用できません || -2.3kB ||
+|| unittest  || uu.ok() をコメントアウトします。|| -1.3kB ||
+|| ajax      || uu.ajax(), uu.require(), uu.jsonp() をコメントアウトします。 || -1.8kB ||
+|| svg       || uu.svg() をコメントアウトします。 || -0.2kB ||
+|| canvas    || uu.canvas() をコメントアウトします。 || -0.1kB ||
+|| flash     || uu.flash() をコメントアウトします。 || -0.6kB ||
 
 = 例 =
 各オプションの利用方法について説明します。
