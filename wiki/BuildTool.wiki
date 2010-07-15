@@ -66,6 +66,6 @@ usage:
  *upa -nocore src.js src2.js
 
 
-== 中間ファイル ==
+== 中間ファイル(catfood.js) ==
 各ファイルをマージした中間ファイルを catfood.js として生成します。
 Minifier が行番号付きでエラーや警告を出した場合は catfood.js の行番号と照らし合わせソースコードを修正してください。
