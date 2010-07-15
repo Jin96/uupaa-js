@@ -395,14 +395,10 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/ClassNameS
 //{{{!color
     color:    uumix(uucolor, {      // uu.color(source:Color/HSVAHash/HSLAHash/RGBAHash/String/Number):ColorHash
                                     //  [1][Color]             uu.color(ColorHash) -> ColorHash
-                                    //  [2][HSVAHash]              uu.color(HSVAHash)  -> Color
-                                    //  [3][HSLAHash]              uu.color(HSLAHash)  -> Color
-                                    //  [4][RGBAHash]              uu.color(RGBAHash)  -> Color
-                                    //  [5][W3CNamedColor to hash] uu.color("black")   -> Color
-                                    //  [6]["#000..." to hash]     uu.color("#000")    -> Color
-                                    //  [7]["rgba(,,,,)" to hash]  uu.color("rgba(0,0,0,1)")         -> Color
-                                    //  [8]["hsla(,,,,)" to hash]  uu.color("hsla(360,100%,100%,1)") -> Color
-                                    //  [9][number to hash]        uu.color(123)       -> Color
+                                    //  [2][W3CNamedColor to hash] uu.color("black")   -> Color
+                                    //  [3]["#000..." to hash]     uu.color("#000")    -> Color
+                                    //  [4]["rgba(,,,,)" to hash]  uu.color("rgba(0,0,0,1)") -> Color
+                                    //  [5]["hsla(,,,,) to hash]   uu.color("hsla(360,100%,100%,1)") -> Color
         add:        uucoloradd,     // uu.color.add(source:String)
         random:     uucolorrandom   // uu.color.random():Color
     }),
@@ -3826,6 +3822,7 @@ function fromHSLA(h, s, l, a) { // @return Color:
 }
 
 // --- initialize ---
+//{{{!colordict
 // add W3C Named Color
 uucoloradd("000000black,888888gray,ccccccsilver,ffffffwhite,ff0000red,ffff00" +
 "yellow,00ff00lime,00ffffaqua,00ffffcyan,0000ffblue,ff00fffuchsia,ff00ffmage" +
@@ -3859,6 +3856,7 @@ uucoloradd("000000black,888888gray,ccccccsilver,ffffffwhite,ff0000red,ffff00" +
 "tiquewhite,faf0e6linen,fdf5e6oldlace,fffaf0floralwhite,fffff0ivory,a9a9a9da" +
 "rkgrey,2f4f4fdarkslategrey,696969dimgrey,808080grey,d3d3d3lightgrey,778899l" +
 "ightslategrey,708090slategrey,8b4513saddlebrown");
+//}}}!colordict
 //}}}!color
 
 // --- IMAGE ---
