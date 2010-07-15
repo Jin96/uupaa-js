@@ -19,7 +19,7 @@ usage:
 || -off || castoff || コメントアウトする機能名をスラッシュで連結し指定します。例: -off form/snippet ||
 || *.js || JavaScript source code file path || ソースコードファイルパスを指定します。相対パスで指定した場合は -srcdir 以下からファイルを読み取ります ||
 
-= -off =
+== -off ==
  -off オプションに指定可能な文字列の一覧です
 
 || *ident*   || 説明 || 削減されるファイルサイズ<br />(Minify適用後の値) ||
@@ -29,45 +29,45 @@ usage:
 || color     || uu.color() をコメントアウトします。<br />uu.fx でカラーアニメーションが利用できなくなります || -5.1kB ||
 || colordict || 色辞書をコメントアウトします。<br />uu.color() は利用可能ですが "black" や "skyblue" などの W3C Named Color は利用できません || -2.3kB ||
 
-== 例 ==
+= 例 =
 各オプションの利用方法について説明します。
 
-=== JavaScriptソースコードをビルドする ===
+== JavaScriptソースコードをビルドする ==
  *upa src.js
  src.js を相対パスで指定しているため {$sourceDir}/src.js がロードされます。
 
 
-=== 複数のソースコードを結合し一つのファイルにビルドする ===
+== 複数のソースコードを結合し一つのファイルにビルドする ==
  *upa a.js b.js c.js
 
-=== iPhone/iPad用にビルドする ===
+== iPhone/iPad用にビルドする ==
  *upa src.js -mb
  uupaa.mb.js と uupaa.mb2.js の2つのファイルが生成されます。
  uupaa.mb.js には uupaa.js を Minify したものが。uupaa.mb2.js にはそれ以外のファイルを結合し Minify したものが格納されています。
 
-=== iPhone/iPad用に最小構成でビルドする ===
+== iPhone/iPad用に最小構成でビルドする ==
  *upa src.js -mb -off form/snippet/image/color
  uupaa.mb.js と uupaa.mb2.js の2つのファイルが生成されます。
  この構成では uu.value(), uu.snippet(), uu.image(), uu.color() 等が利用できませんが、ファイルサイズを最小に留めることができます。
 
-=== Microsoft Ajax Minifier でビルドする(Windows環境のみ) ===
+== Microsoft Ajax Minifier でビルドする(Windows環境のみ) ==
  *upa src.js -m
 
-=== YUI Compressor でビルドする ===
+== YUI Compressor でビルドする ==
  *upa src.js -y
 
-=== -core でライブラリコアを指定してビルドする ===
+== -core でライブラリコアを指定してビルドする ==
  *upa src.js -core anotherLibrary.js
  生成されるファイルは anotherLibrary.js という名前になります。
  uupaa.js ライブラリ以外のライブラリやファイルをビルドできます。
 
-=== -pp でプリプロセス用のPHPコードを指定してビルドする ===
+== -pp でプリプロセス用のPHPコードを指定してビルドする ==
  *upa src.js -pp c.pp
 
-=== -nocore でコアをマージせずにビルドする ===
+== -nocore でコアをマージせずにビルドする ==
  *upa -nocore src.js src2.js
 
 
-== 中間ファイル(catfood.js) ==
+= 中間ファイル(catfood.js) =
 各ファイルをマージした中間ファイルを catfood.js として生成します。
 Minifier が行番号付きでエラーや警告を出した場合は catfood.js の行番号と照らし合わせソースコードを修正してください。
