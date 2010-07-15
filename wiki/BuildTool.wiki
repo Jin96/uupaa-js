@@ -12,7 +12,7 @@ build/upa.php はプリプロセスとMinifyを施し最適化された.jsファ
 
 === Windows でビルドする ===
   * PHP CLI をインストールします。XAMPP を代わりにインストールしてもよいでしょう。
-  * Javaの実行環境をインストールします。
+  * Javaの実行環境をインストールします。既にインストールされている場合は不要です。
   * http://pigs.sourceforge.jp/uupaa.js/build/minifier.zip をダウンロードし(*.exe, *.jar)ファイルを build ディレクトリ以下に設置してください。
   * 必要に応じてシステムの環境変数に php へのパスを追加します。
   * build ディレクトリに移動し、upa -v とタイプしエラーがでなければビルド可能な状態です。
