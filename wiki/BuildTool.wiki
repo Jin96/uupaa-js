@@ -4,7 +4,8 @@
 
 = upa =
 
-usage:
+minify/upa はプリプロセスとMinifyを施し最適化された.jsファイルを生成します。
+
   `uap [`*-g*` | -m | -y] [-mb] [-v] [-pp file] [-src dir] [-core file] [-nocore] [-off ident[/ident[/..]]] [*.js ...]`
 
 || *-g*   || use Google Closure Compiler || (default) ||
