@@ -356,7 +356,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/ClassNameS
                                     //  [2][std-name to ie-name]     uu.fix("float")            -> "cssFloat" or "styleFloat"(IE)
                                     //  [3][html-attr to js-attr]    uu.fix("for")              -> "htmlFor"
                                     //  [4][through]                 uu.fix("-webkit-shadow")   -> "-webkit-shadow"
-    trim:     uumix(uutrim, {       // uu.trim(source:String):String
+    trim:     uumix(uutrim, {       // uu.trim(source:String, replacement:String = " "):String
                                     //  [1][trim and inner space] uu.trim("  has  space  ") -> "has  space"
         tag:        uutrimtag,      // uu.trim.tag("  <h1>A</h1>  B  <p>C</p>  ") -> "A B C"
                                     //  [1][trim tags]            uu.trim.tag("  <h1>A</h1>  B  <p>C</p>  ") -> "A B C"
@@ -391,6 +391,22 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/ClassNameS
         storage:    _false,         // true is window.localStorage ready event fired
         reload:     _false          // true is blackout (css3 cache reload)
     }, detectFeatures(_ver)),
+    // --- COLOR ---
+//{{{!color
+    color:    uumix(uucolor, {      // uu.color(source:Color/HSVAHash/HSLAHash/RGBAHash/String/Number):ColorHash
+                                    //  [1][Color]             uu.color(ColorHash) -> ColorHash
+                                    //  [2][HSVAHash]              uu.color(HSVAHash)  -> Color
+                                    //  [3][HSLAHash]              uu.color(HSLAHash)  -> Color
+                                    //  [4][RGBAHash]              uu.color(RGBAHash)  -> Color
+                                    //  [5][W3CNamedColor to hash] uu.color("black")   -> Color
+                                    //  [6]["#000..." to hash]     uu.color("#000")    -> Color
+                                    //  [7]["rgba(,,,,)" to hash]  uu.color("rgba(0,0,0,1)")         -> Color
+                                    //  [8]["hsla(,,,,)" to hash]  uu.color("hsla(360,100%,100%,1)") -> Color
+                                    //  [9][number to hash]        uu.color(123)       -> Color
+        add:        uucoloradd,     // uu.color.add(source:String)
+        random:     uucolorrandom   // uu.color.random():Color
+    }),
+//}}}!color
     // --- IMAGE ---
 //{{{!image
     image:    uumix(uuimage, {      // uu.image(url:String, callback:Function)
@@ -1521,8 +1537,8 @@ function uufxbuild(node, data, queue, option) {
 //}}}!mb
                     break;
                 case 2: // color, backgroundColor
-                    startValue = uu.color(cs[w]);    // depend: uu.color.js
-                    endValue   = uu.color(endValue); // depend: uu.color.js
+                    startValue = uucolor(cs[w]);
+                    endValue   = uucolor(endValue);
                     rv += uuf('gd=g/d;h=uu.hash.num2hh;s.??="#"+' +
                               '(h[(f? ??:(??-??)*gd+??)|0]||0)+' +
                               '(h[(f? ??:(??-??)*gd+??)|0]||0)+' +
@@ -3028,11 +3044,11 @@ function uunodeclone(parent,  // @param Node: parent node (ElementNode)
         }
     }
 
-    var rv,
+    var cloneNode = "cloneNode",
 //{{{!mb
         ready = uuready[cloneNode],
 //}}}!mb
-        cloneNode = "cloneNode";
+        rv;
 
 //{{{!mb
     if (parent[_nodeType] === 1) { // 1: ELEMENT_NODE
@@ -3374,9 +3390,11 @@ function uufix(source) { // @param String: source
 uufix.db = {}; // { "background-color": "backgroundColor", ... }
 
 // uu.trim - trim both side and inner whitespace
-function uutrim(source) { // @param String:
-                          // @return String:
-    return source.trim()[_replace](/\s\s+/g, " ");
+function uutrim(source,        // @param String: " a   b  c "
+                replacement) { // @param String(= " "): replacement
+                               // @return String: "a b c"
+    return source.trim()[_replace](/\s+/g,
+                                   replacement === void 0 ? " " : replacement);
 }
 
 // uu.trim.tag - uu.trim() + strip tags
@@ -3608,6 +3626,240 @@ function datehashgmt() { // @return RFC1123DateString: "Wed, 16 Sep 2009 16:18:1
 ///}}}!mb
     return rv;
 }
+
+// --- COLOR ---
+//{{{!color
+// uu.Class.Color
+function Color(r, g, b, a) {
+    this.r = r = r & 255;
+    this.g = g = g & 255;
+    this.b = b = b & 255;
+    this.a = a = (a < 0) ? 0 : (a > 1) ? 1 : a;
+    this.hex = "#" + _num2hh[r] + _num2hh[g] + _num2hh[b];
+    this.rgba = "rgba(" + r + "," + g + "," + b + "," + a + ")";
+}
+Color[_prototype] = {
+    toString:   function() { // @return String: "#000000" or "rgba(0,0,0,0)"
+                    return uuready.color.rgba ? this.rgba : this.hex;
+                },
+    toGray:     function() { // @return Color:
+                    return new Color(this.g, this.g, this.g, this.a);
+                },
+    toSepia:    function() { // @return Color:
+                    var r = this.r, g = this.g, b = this.b,
+                        y = 0.2990 * r + 0.5870 * g + 0.1140 * b,
+                        u = -0.091, v = 0.056;
+
+                    r = y + 1.4026 * v;
+                    g = y - 0.3444 * u - 0.7114 * v;
+                    b = y + 1.7330 * u;
+                    return new Color(r * 1.2, g, b * 0.8, this.a);
+                },
+    toComple:   function() { // @return Color:
+                    return new Color(this.r ^ 255, this.g ^ 255,
+                                     this.b ^ 255, this.a);
+                },
+    arrange:    // Color.arrange - arrangemented color(Hue, Saturation and Value)
+                //    Hue is absolure value,
+                //    Saturation and Value is relative value.
+                function(h,   // @param Number(= 0): Hue (-360~360)
+                         s,   // @param Number(= 0): Saturation (-100~100)
+                         v) { // @param Number(= 0): Value (-100~100)
+                              // @return Color:
+                    var rv = toHSVA(this.r, this.g, this.b);
+
+                    rv.h += h;
+                    rv.h = (rv.h > 360) ? rv.h - 360 : (rv.h < 0) ? rv.h + 360 : rv.h;
+                    rv.s += s;
+                    rv.s = (rv.s > 100) ? 100 : (rv.s < 0) ? 0 : rv.s;
+                    rv.v += v;
+                    rv.v = (rv.v > 100) ? 100 : (rv.v < 0) ? 0 : rv.v;
+                    return hsvaToColor(rv.h, rv.s, rv.v, this.a);
+                }
+};
+uuclass.Color = Color;
+
+//  [1][Color]             uu.color(ColorHash) -> ColorHash
+//  [2][W3CNamedColor to hash] uu.color("black")   -> Color
+//  [3]["#000..." to hash]     uu.color("#000")    -> Color
+//  [4]["rgba(,,,,)" to hash]  uu.color("rgba(0,0,0,1)") -> Color
+//  [5]["hsla(,,,,) to hash]   uu.color("hsla(360,100%,100%,1)") -> Color
+
+// uu.color - parse color
+function uucolor(expr) { // @parem Color/String: "black", "#fff", "rgba(0,0,0,0)"
+                         // @return Color:
+    var rv, m, n, r, g, b, a = 1;
+
+    if (expr instanceof Color) {
+        return expr;
+    }
+    if ( (rv = uucolor.db[expr] || uucolor.cache[expr]) ) {
+        return rv;
+    }
+    if (expr.length < 8 && (m = uucolor.rex.hex.exec(expr)) ) { // #fff or #ffffff
+        n = expr.length > 4 ? parseInt(m[1], 16)
+                            : (m = m[1].split(""),
+                               parseInt(m[0]+m[0] + m[1]+m[1] + m[2]+m[2], 16));
+        r = n >> 16, g = n >> 8, b = n;
+    } else if ( (m = uucolor.rex.rgba.exec(uutrim(expr, "")) ) ) {
+        n = m[1] === "rgb" ? 2.555 : 1;
+        r = m[3] ? m[2] * n : m[2];
+        g = m[5] ? m[4] * n : m[4];
+        b = m[7] ? m[6] * n : m[6];
+        a = m[8] ? parseFloat(m[8]) : 1;
+        if (n === 1) {
+            return fromHSLA(r, g, b, a);
+        }
+    }
+    return uucolor.cache[expr] = new Color(r, g, b, a);
+}
+uucolor.db = { transparent: new Color(0, 0, 0, 0) };
+uucolor.cache = {}; // { "#123": Color, ... }
+uucolor.rex = {
+    hex: /^#([\da-f]{3}(?:[\da-f]{3})?)$/i, // #fff or #ffffff
+    rgba: /^(rgb|hsl)a?\(([\d\.]+)(%)?,([\d\.]+)(%)?,([\d\.]+)(%)?(?:,([\d\.]+))?\)$/i,
+    trim: /\s+/g
+};
+
+// uu.color.random - create random color
+function uucolorrandom(a) { // @param Number(= 1): alpha
+                            // @return Color:
+    var n = (Math.random() * 0xffffff) | 0;
+
+    return new Color(n >> 16, n >> 8, n, a || 1);
+}
+
+// uu.color.add
+function uucoloradd(src) { // @param String: "000000black,..."
+    var ary = src.split(","), i = 0, iz = ary.length, v, num;
+
+    for (; i < iz; ++i) {
+        v = ary[i];
+        num = parseInt(v.slice(0, 6), 16);
+        uucolor.db[v.slice(6)] = new Color(num >> 16, num >> 8, num, 1);
+    }
+}
+
+// inner RGB to HSVAHash
+function toHSVA(r, g, b) { // @return HSVAHash: { h:360, s:100, v:100, a:1.0 }
+    r = r / 255;
+    g = g / 255;
+    b = b / 255;
+
+    var max = (r > g && r > b) ? r : g > b ? g : b,
+        min = (r < g && r < b) ? r : g < b ? g : b,
+        diff = max - min,
+        h = 0,
+        s = max ? ((diff / max * 100) + 0.5) | 0 : 0,
+        v = ((max * 100) + 0.5) | 0;
+
+    if (s) {
+        h = (r === max) ? ((g - b) * 60 / diff) :
+            (g === max) ? ((b - r) * 60 / diff + 120)
+                        : ((r - g) * 60 / diff + 240);
+    }
+    return { h: h < 0 ? h + 360 : h, s: s, v: v };
+}
+
+// inner - HSVA to Color
+function hsvaToColor(h, s, v, a) { // @param HSVAHash:
+                                       // @return Color:
+    h = (h >= 360) ? 0 : h;
+    s = s * 0.01;
+    v = v * 2.55;
+
+    var r = 0, g = 0, b = 0, f, p, q, t, w;
+
+    h = h / 60;
+    f = h - (h | 0);
+    if (s) {
+        p = (((1 - s)             * v) + 0.5) | 0;
+        q = (((1 - (s * f))       * v) + 0.5) | 0;
+        t = (((1 - (s * (1 - f))) * v) + 0.5) | 0;
+        w = (                       v  + 0.5) | 0;
+        switch (h | 0) {
+        case 0: r = w; g = t; b = p; break;
+        case 1: r = q; g = w; b = p; break;
+        case 2: r = p; g = w; b = t; break;
+        case 3: r = p; g = q; b = w; break;
+        case 4: r = t; g = p; b = w; break;
+        case 5: r = w; g = p; b = q;
+        }
+    } else {
+        r = g = b = (v + 0.5) | 0;
+    }
+    return new Color(r, g, b, a);
+}
+
+// inner - fromHSLA to Color - ( h: 0-360, s: 0-100, l: 0-100, a: alpha )
+function fromHSLA(h, s, l, a) { // @return Color:
+    h = (h === 360) ? 0 : h;
+    s = s / 100;
+    l = l / 100;
+
+    var r = 0, g = 0, b = 0, s1, s2, l1, l2;
+
+    if (h < 120) {
+        r = (120 - h) / 60, g = h / 60;
+    } else if (h < 240) {
+        g = (240 - h) / 60, b = (h - 120) / 60;
+    } else {
+        r = (h - 240) / 60, b = (360 - h) / 60;
+    }
+    s1 = 1 - s;
+    s2 = s * 2;
+
+    r = s2 * (r > 1 ? 1 : r) + s1;
+    g = s2 * (g > 1 ? 1 : g) + s1;
+    b = s2 * (b > 1 ? 1 : b) + s1;
+
+    if (l < 0.5) {
+        r *= l, g *= l, b *= l;
+    } else {
+        l1 = 1 - l;
+        l2 = l * 2 - 1;
+        r = l1 * r + l2;
+        g = l1 * g + l2;
+        b = l1 * b + l2;
+    }
+    return new Color(r * 255 + 0.5, g * 255 + 0.5, b * 255 + 0.5, a);
+}
+
+// --- initialize ---
+// add W3C Named Color
+uucoloradd("000000black,888888gray,ccccccsilver,ffffffwhite,ff0000red,ffff00" +
+"yellow,00ff00lime,00ffffaqua,00ffffcyan,0000ffblue,ff00fffuchsia,ff00ffmage" +
+"nta,880000maroon,888800olive,008800green,008888teal,000088navy,880088purple" +
+",696969dimgray,808080gray,a9a9a9darkgray,c0c0c0silver,d3d3d3lightgrey,dcdcd" +
+"cgainsboro,f5f5f5whitesmoke,fffafasnow,708090slategray,778899lightslategray" +
+",b0c4delightsteelblue,4682b4steelblue,5f9ea0cadetblue,4b0082indigo,483d8bda" +
+"rkslateblue,6a5acdslateblue,7b68eemediumslateblue,9370dbmediumpurple,f8f8ff" +
+"ghostwhite,00008bdarkblue,0000cdmediumblue,4169e1royalblue,1e90ffdodgerblue" +
+",6495edcornflowerblue,87cefalightskyblue,add8e6lightblue,f0f8ffaliceblue,19" +
+"1970midnightblue,00bfffdeepskyblue,87ceebskyblue,b0e0e6powderblue,2f4f4fdar" +
+"kslategray,00ced1darkturquoise,afeeeepaleturquoise,f0ffffazure,008b8bdarkcy" +
+"an,20b2aalightseagreen,48d1ccmediumturquoise,40e0d0turquoise,7fffd4aquamari" +
+"ne,e0fffflightcyan,00fa9amediumspringgreen,7cfc00lawngreen,00ff7fspringgree" +
+"n,7fff00chartreuse,adff2fgreenyellow,2e8b57seagreen,3cb371mediumseagreen,66" +
+"cdaamediumaquamarine,98fb98palegreen,f5fffamintcream,006400darkgreen,228b22" +
+"forestgreen,32cd32limegreen,90ee90lightgreen,f0fff0honeydew,556b2fdarkolive" +
+"green,6b8e23olivedrab,9acd32yellowgreen,8fbc8fdarkseagreen,9400d3darkviolet" +
+",8a2be2blueviolet,dda0ddplum,d8bfd8thistle,8b008bdarkmagenta,9932ccdarkorch" +
+"id,ba55d3mediumorchid,da70d6orchid,ee82eeviolet,e6e6falavender,c71585medium" +
+"violetred,bc8f8frosybrown,ff69b4hotpink,ffc0cbpink,ffe4e1mistyrose,ff1493de" +
+"eppink,db7093palevioletred,e9967adarksalmon,ffb6c1lightpink,fff0f5lavenderb" +
+"lush,cd5c5cindianred,f08080lightcoral,f4a460sandybrown,fff5eeseashell,dc143" +
+"ccrimson,ff6347tomato,ff7f50coral,fa8072salmon,ffa07alightsalmon,ffdab9peac" +
+"hpuff,ffffe0lightyellow,b22222firebrick,ff4500orangered,ff8c00darkorange,ff" +
+"a500orange,ffd700gold,fafad2lightgoldenrodyellow,8b0000darkred,a52a2abrown," +
+"a0522dsienna,b8860bdarkgoldenrod,daa520goldenrod,deb887burlywood,f0e68ckhak" +
+"i,fffacdlemonchiffon,d2691echocolate,cd853fperu,bdb76bdarkkhaki,bdb76btan,e" +
+"ee8aapalegoldenrod,f5f5dcbeige,ffdeadnavajowhite,ffe4b5moccasin,ffe4c4bisqu" +
+"e,ffebcdblanchedalmond,ffefd5papayawhip,fff8dccornsilk,f5deb3wheat,faebd7an" +
+"tiquewhite,faf0e6linen,fdf5e6oldlace,fffaf0floralwhite,fffff0ivory,a9a9a9da" +
+"rkgrey,2f4f4fdarkslategrey,696969dimgrey,808080grey,d3d3d3lightgrey,778899l" +
+"ightslategrey,708090slategrey,8b4513saddlebrown");
+//}}}!color
 
 // --- IMAGE ---
 // uu.image - image loader
