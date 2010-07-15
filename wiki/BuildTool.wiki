@@ -16,8 +16,19 @@ usage:
 || -srcdir || source directory || ソースコードを読み込む基準ディレクトリを指定します。デフォルトは "../src/" です ||
 || -core || library core || ライブラリの核となるファイルを指定します。デフォルトは "uupaa.js" です。<br /> ビルドで生成するファイル名も -core で指定したファイル名になります ||
 || -nocore || no library core || ライブラリの核となるファイルをマージせずにビルドします ||
-|| -off || castoff || コメントアウトする機能名をスラッシュで連結し指定します。例: -off form/snippet <br /> 指定可能な文字列は "form" "snippet" "image" です ||
+|| -off || castoff || コメントアウトする機能名をスラッシュで連結し指定します。例: -off form/snippet ||
 || *.js || JavaScript source code file path || ソースコードファイルパスを指定します。相対パスで指定した場合は -srcdir 以下からファイルを読み取ります ||
+
+= -off =
+ -off オプションに指定可能な文字列の一覧です
+
+|| *ident*   || 説明 || 削減されるファイルサイズ<br />(Minify適用後の値) ||
+|| form      || uu.value() と NodeSet.value() をコメントアウトします || -0.6kB ||
+|| snippet   || uu.snippet() をコメントアウトします || -0.7kB ||
+|| image     || uu.image() をコメントアウトします || -0.9kB ||
+|| color     || uu.color() をコメントアウトします。<br />uu.fx でカラーアニメーションが利用できなくなります || -5.1kB ||
+|| colordict || 色辞書をコメントアウトします。<br />uu.color() は利用可能ですが "black" や "skyblue" などの W3C Named Color は利用できません || -2.3kB ||
+
 
 === JavaScriptソースコードをビルドする ===
  src.js を相対パスで指定しているため {$sourceDir}/src.js が読み取られる
@@ -59,3 +70,4 @@ usage:
 === -nocore でコアをマージせずにビルドする ===
 
  *upa -nocore src.js src2.js
+
