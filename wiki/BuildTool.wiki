@@ -75,5 +75,5 @@ build/upa.php はプリプロセスとMinifyを施し最適化された.jsファ
 
 
 = 中間ファイル(catfood.js) =
-各ファイルを結合し、Minifyを行う前のファイルが uupaa.js/catfood.js に生成されます。
+uupaa.js が生成されるディレクトリと同じディレクトリに、各ソースコードを結合し、Minifyを行う直前の状態のファイルが catfood.js という名前で生成されます。
 Minifier が行番号付きでエラーや警告を出した場合は catfood.js の行番号と照らし合わせソースコードを修正してください。
