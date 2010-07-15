@@ -1,12 +1,17 @@
-#summary minify/upa はプリプロセスとMinifyを施し最適化された.jsファイルを生成します
+#summary build/upa.php はプリプロセスとMinifyを施し最適化された.jsファイルを生成します
 
 <wiki:toc max_depth="3" />
 
 = upa =
 
-minify/upa はプリプロセスとMinifyを施し最適化された.jsファイルを生成します。
+build/upa.php はプリプロセスとMinifyを施し最適化された.jsファイルを生成します。
 
-  `uap [`*-g*` | -m | -y] [-mb] [-v] [-pp file] [-src dir] [-core file] [-nocore] [-off ident[/ident[/..]]] [*.js ...]`
+`uap.php [`*-g*` | -m | -y] [-mb] [-v] [-pp file] [-src dir] [-core file] [-nocore] [-off ident[/ident[/..]]] [*.js ...]`
+
+== Windows でビルドする ==
+  * PHP cli をインストールします。
+  * http://pigs.sourceforge.jp/uupaa.js/build/minifier.zip をダウンロードし(*.exe, *.jar)ファイルを build ディレクトリ以下に設置してください。
+
 
 || *-g*   || use Google Closure Compiler || (default) ||
 || -m   || use Microsoft Ajax Minifier || ||
@@ -70,5 +75,5 @@ minify/upa はプリプロセスとMinifyを施し最適化された.jsファイ
 
 
 = 中間ファイル(catfood.js) =
-各ファイルをマージした中間ファイルを catfood.js として生成します。
+各ファイルを結合し、Minifyを行う前のファイルが uupaa.js/catfood.js に生成されます。
 Minifier が行番号付きでエラーや警告を出した場合は catfood.js の行番号と照らし合わせソースコードを修正してください。
