@@ -39,7 +39,7 @@ build/upa.php はプリプロセスとMinifyを施し最適化された.jsファ
  -off オプションに指定可能な文字列の一覧です
 
 || *ident*   || 説明 || 削減されるファイルサイズ<br />(Minify適用後の値) ||
-|| all       || 以下の機能を一括でコメントアウトします。 || -13.6kB ||
+|| all       || 以下の機能を一括でコメントアウトします。 || -15.1kB ||
 || form      || uu.value(), NodeSet.value() をコメントアウトします || -0.6kB ||
 || snippet   || uu.snippet() をコメントアウトします || -0.7kB ||
 || image     || uu.image() をコメントアウトします || -0.9kB ||
@@ -51,6 +51,7 @@ build/upa.php はプリプロセスとMinifyを施し最適化された.jsファ
 || svg       || uu.svg() をコメントアウトします。 || -0.2kB ||
 || canvas    || uu.canvas() をコメントアウトします。 || -0.1kB ||
 || flash     || uu.flash() をコメントアウトします。 || -0.6kB ||
+|| nodeset   || NodeSet I/F 全体をコメントアウトします。<br /> uu("div > p").add("div") などが利用できなくなります。 || -1.4kB ||
 
 = 例 =
 各オプションの利用方法について説明します。
