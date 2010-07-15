@@ -6,12 +6,22 @@
 
 build/upa.php はプリプロセスとMinifyを施し最適化された.jsファイルを生成します。
 
-`uap.php [`*-g*` | -m | -y] [-mb] [-v] [-pp file] [-src dir] [-core file] [-nocore] [-off ident[/ident[/..]]] [*.js ...]`
+`upa.php [`*-g*` | -m | -y] [-mb] [-v] [-pp file] [-src dir] [-core file] [-nocore] [-off ident[/ident[/..]]] [*.js ...]`
 
-== Windows でビルドする ==
-  * PHP cli をインストールします。
+== 導入 ==
+
+=== Windows でビルドする ===
+  * PHP CLI をインストールします。XAMPP を代わりにインストールしてもよいでしょう。
+  * Javaの実行環境をインストールします。
   * http://pigs.sourceforge.jp/uupaa.js/build/minifier.zip をダウンロードし(*.exe, *.jar)ファイルを build ディレクトリ以下に設置してください。
+  * 必要に応じてシステムの環境変数に php へのパスを追加します。
+  * build ディレクトリに移動し、upa -v とタイプしエラーがでなければビルド可能な状態です。
 
+=== Mac OS X / Ubuntu でビルドする ===
+  * PHP CLI をインストールします。既にインストールされている場合は不要です。
+  * Javaの実行環境をインストールします。既にインストールされている場合は不要です。
+  * http://pigs.sourceforge.jp/uupaa.js/build/minifier.zip をダウンロードし(*.exe, *.jar)ファイルを build ディレクトリ以下に設置してください。
+  * build ディレクトリに移動し、upa.php -v とタイプしエラーがでなければビルド可能な状態です。
 
 || *-g*   || use Google Closure Compiler || (default) ||
 || -m   || use Microsoft Ajax Minifier || ||
