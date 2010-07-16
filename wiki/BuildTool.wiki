@@ -39,7 +39,7 @@ build/upa.php はプリプロセスとMinifyを施し最適化された.jsファ
  -off オプションに指定可能な文字列の一覧です
 
 || *ident*   || 説明 || 削減されるファイルサイズ<br />(Minify適用後の値) ||
-|| all       || 以下の機能を一括でコメントアウトします。 || -17.6kB ||
+|| all       || 以下の機能を一括でコメントアウトします。 || -18.5kB ||
 || form      || uu.value(), NodeSet.value() をコメントアウトします || -0.6kB ||
 || snippet   || uu.snippet() をコメントアウトします || -0.7kB ||
 || image     || uu.image() をコメントアウトします || -0.9kB ||
@@ -47,7 +47,7 @@ build/upa.php はプリプロセスとMinifyを施し最適化された.jsファ
 || colordict || 色辞書をコメントアウトします。<br />uu.color() は利用可能ですが<br /> "black" や "skyblue" などの W3C Named Color は利用できなくなります || -2.3kB ||
 || unittest  || uu.ok() をコメントアウトします。|| -1.3kB ||
 || fx        || uu.fx() をコメントアウトします。<br />uu.css.show() と uu.css.hide() も利用できなくなります || -3.1kB ||
-|| ajax      || uu.ajax(), uu.require(), uu.jsonp() をコメントアウトします || -1.8kB ||
+|| ajax      || uu.ajax(), uu.require(), uu.jsonp() をコメントアウトします || -2.6kB ||
 || svg       || uu.svg() をコメントアウトします || -0.2kB ||
 || canvas    || uu.canvas() をコメントアウトします || -0.1kB ||
 || flash     || uu.flash() をコメントアウトします || -0.6kB ||
