@@ -1,6 +1,5 @@
 // === SVG ===
 //#include uupaa.js
-//#include color/color.js
 
 uu.svg.g || (function(win, doc, uu) {
 

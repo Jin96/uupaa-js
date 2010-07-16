@@ -1,10 +1,6 @@
 <!doctype html><html><head><meta charset="utf-8" />
 <title>uu.color</title>
 <script src="../../src/uupaa.js"></script>
-<script src="../../src/color/color.js"></script>
-<script src="../../uupaa.mb.js"></script>
-<script src="../../uupaa.mb2.js"></script>
-<script src="../../uupaa.js"></script>
 <style>
 html, body {
   margin: 0; padding: 0;
@@ -35,18 +31,13 @@ html, body {
 <input type="button" value="ToMato" onclick="set('ToMato')" />
 <input type="button" value="transparent" onclick="set('transparent')" />
 <input type="button" value="rgb(255, 255, 255)" onclick="set('rgb(255, 255, 255)')" />
-<!--
 <input type="button" value="rgb ( 100 , 100 , 100 )" onclick="set('rgb ( 100 , 100 , 100 )')" />
- -->
-<input type="button" value="rgba(10.0%,11.23%,0.0%,1.0)" onclick="set('rgba(10.0%,11.23%,0.0%,1.0)')" />
-<input type="button" value="rgba(0,100%,255,1.0)" onclick="set('rgba(0,100%,255,1.0)')" />
+<input type="button" value="rgba(20.0%,21.23%,0.0%,0.5)" onclick="set('rgba(20.0%,21.23%,0.0%,0.5)')" />
+<input type="button" value="rgba(0,100%,255,0)" onclick="set('rgba(0,100%,255,0)')" />
 <!--
 <br />
  -->
-<input type="button" value="RGBAHash( { r: 255, g: 255, b: 255, a: 1.0 } )" onclick="set({ r: 255, g: 255, b: 255, a: 1.0 })" />
-<input type="button" value="HSVAHash( { h: 0, s: 100, v: 100, a: 1.0 } )" onclick="set({ h: 0, s: 100, v: 100, a: 1.0 })" />
-<input type="button" value="HSLAHash( { h: 120, s: 100, v: 50, a: 1.0 } )" onclick="set({ h: 120, s: 100, l: 50, a: 1.0 })" />
-<!-- for debug
+<input type="button" value="hsla(120,100%,50%,1.0)" onclick="set('hsla(120,100%,50%,1.0)')" />
 <hr />
 Boundary condition Color:
 <input type="button" value="rgb ( 100 , 100 , 100 , 1.0 )" onclick="set('rgb ( 100 , 100 , 100 , 1.0 )')" />
@@ -63,14 +54,14 @@ Invalid Color:
 <input type="button" value="#red" onclick="set('#red')" />
 <input type="button" value="rgb ( -100 , +100 , 100.1 , -2.0 )" onclick="set('rgb ( -100 , +100 , 100.1 , -2.0 )')" />
 <hr />
- -->
 <div id="div1"><span id="span1">COLOR</span></div>
 <script>
 function set(color) {
   var c = uu.color(color);
   var hex = c.hex;
   document.getElementById("div1").style.backgroundColor = c.hex;
-  document.getElementById("span1").innerHTML = c.hex + "<br />" + c.rgba + "<br />" + c.hsva() + "<br />" + c.hsla();
+  document.getElementById("span1").innerHTML =
+    c.hex + "<br />" + c.rgba + "<br />" + uu.json(c.hsla());
 }
 </script>
 </body>

@@ -172,6 +172,12 @@ while ($v = array_shift($argv)) {
                     }
     }
 }
+if ($castoff[0] === "all") {
+    $castoff = array("form", "snippet", "image", "color",
+                     "unittest", "fx", "ajax",
+                     "svg", "canvas", "flash", "nodeset",
+                     "live", "resize");
+}
 
 include $preprosess;
 

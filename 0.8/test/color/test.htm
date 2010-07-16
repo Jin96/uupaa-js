@@ -13,73 +13,24 @@
 .uutestinfo .ngzone {}
 </style>
 <script src="../../src/uupaa.js"></script>
-<script src="../../src/color/color.js"></script>
 <script src="../../src/test/test.js"></script>
-<script src="../../uupaa.mb.js"></script>
-<script src="../../uupaa.mb2.js"></script>
-<script src="../../uupaa.js"></script>
 
 </head><body>
 <script>
 uu.ready(function(uu) {
-    // is ColorHash
-    uu.test.addType("is ColorHash", function(lhs, operator) {
-        var rv = false;
-
-        if ("r" in lhs && "g" in lhs && "b" in lhs && "a" in lhs) {
-            if ("num" in lhs && "hex" in lhs && "rgba" in lhs) {
-                if ("rgb" in lhs && "argb" in lhs) {
-                    if ("hsva" in lhs && "hsla" in lhs) {
-                        if ("gray" in lhs && "sepia" in lhs) {
-                            if ("comple" in lhs && "arrange" in lhs) {
-                                rv = true;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return rv;
-    });
-    uu.test.addType("is HSVAHash", function(lhs, operator) {
-        var rv = false;
-
-        if ("h" in lhs && "s" in lhs && "v" in lhs && "a" in lhs) {
-            rv = true;
-        }
-        return rv;
-    });
-    uu.test.addType("is HSLAHash", function(lhs, operator) {
-        var rv = false;
-
-        if ("h" in lhs && "s" in lhs && "l" in lhs && "a" in lhs) {
-            rv = true;
-        }
-        return rv;
-    });
+    // extend type Color
+    uu.type.COLOR = function(lhs, operator) {
+        return lhs instanceof uu.Class.Color;
+    };
+    // extend type HSLAHASH
+    uu.type.HSLAHASH = function(lhs, operator) {
+        return "h" in lhs && "s" in lhs && "l" in lhs && "a" in lhs;
+    };
 
     uu.test({
         "uu.color()": "",
-            "uu.color(123).hex で HexColorString( '#00007b' ) を取得できる": function() {
-                return [uu.color(123).hex, "==", "#00007b"];
-            },
-        "uu.color(16777215).hex で HexColorString( '#ffffff' ) を取得できる": function() {
-            return [uu.color(16777215).hex, "==", "#ffffff"];
-        },
-        "uu.color('#00007b').num で Number( 123 ) を取得できる": function() {
-            return [uu.color('#00007b').num, "==", 123];
-        },
         "uu.color('#00007b').rgba で RGBAString( 'rgba(0,0,123,1)' ) を取得できる": function() {
             return [uu.color('#00007b').rgba, "==", 'rgba(0,0,123,1)'];
-        },
-        "uu.color('#00007b').rgb() で RGBString( 'rgb(0,0,123)' ) を取得できる": function() {
-            return [uu.color('#00007b').rgb(), "==", 'rgb(0,0,123)'];
-        },
-        "uu.color('#00007b').argb() で ARGBString( '#ff00007b' ) を取得できる": function() {
-            return [uu.color('#00007b').argb(), "==", '#ff00007b'];
-        },
-        "uu.color('#00007b').hsva() で HSVAHash( {h:240,s:100,v:48,a:1} ) を取得できる": function() {
-            return [uu.color('#00007b').hsva(), "has", {h:240,s:100,v:48,a:1}];
         },
         "uu.color('#00007b').hsla() で HSLAHash( {h:240,s:100,l:24,a:1} ) を取得できる": function() {
             return [uu.color('#00007b').hsla(), "has", {h:240,s:100,l:24,a:1}];
@@ -93,53 +44,44 @@ uu.ready(function(uu) {
         "uu.color('tomato').comple().hex で #009cb8 を取得できる": function() {
             return [uu.color('tomato').comple().hex, "==", "#009cb8"];
         },
-        "uu.color('tomato').arrange(100, +50, +50).hex で #2eff00 を取得できる": function() {
-            return [uu.color('tomato').arrange(100, +50, +50).hex, "==", "#2eff00"];
+        "uu.color('tomato').arrange(100, 10, 10).hex で #92ff7a を取得できる": function() {
+            return [uu.color('tomato').arrange(100, 10, 10).hex, "==", "#92ff7a"];
         },
-        "uu.color('tomato') は ColorHash を返す": function() {
-            return [uu.color('tomato'), "is ColorHash"];
+        "uu.color('tomato') は Color を返す": function() {
+            return [uu.color('tomato'), "is Color"];
         },
         "uu.color(uu.color('tomato')) と uu.color('tomato') は同じ結果になる": function() {
             return [uu.color(uu.color('tomato')), "==", uu.color('tomato')];
         },
-        "uu.color('tomato').hsva() は HSVAHash を返す": function() {
-            return [uu.color('tomato').hsva(), "is HSVAHash"];
-        },
         "uu.color('tomato').hsla() は HSLAHash を返す": function() {
             return [uu.color('tomato').hsla(), "is HSLAHash"];
         },
-        "uu.color(ColorHash) は ColorHash を返す": function() {
-            return [uu.color('tomato'), "is ColorHash"];
-        },
-        "uu.color(HSVAHash) は ColorHash を返す": function() {
-            return [uu.color(uu.color('tomato').hsva()), "is ColorHash"];
+        "uu.color(Color) は Color を返す": function() {
+            return [uu.color('tomato'), "is Color"];
         },
         "uu.color(HSLAHash) は ColorHash を返す": function() {
-            return [uu.color(uu.color('tomato').hsla()), "is ColorHash"];
+            return [uu.color(uu.color('tomato').hsla()), "is Color"];
         },
-        "uu.color(RGBAHash) は ColorHash を返す": function() {
-            return [uu.color({r:0,g:0,b:0,a:0}), "is ColorHash"];
+        "uu.color(RGBAHash) は Color を返す": function() {
+            return [uu.color({r:0,g:0,b:0,a:0}), "is Color"];
         },
-        "uu.color(W3CNamedColor) は ColorHash を返す": function() {
-            return [uu.color('skyblue'), "is ColorHash"];
+        "uu.color(W3CNamedColor) は Color を返す": function() {
+            return [uu.color('skyblue'), "is Color"];
         },
-        "uu.color('#000') は ColorHash を返す": function() {
-            return [uu.color('#000'), "is ColorHash"];
+        "uu.color('#000') は Color を返す": function() {
+            return [uu.color('#000'), "is Color"];
         },
-        "uu.color('#000000') は ColorHash を返す": function() {
-            return [uu.color('#000000'), "is ColorHash"];
+        "uu.color('#000000') は Color を返す": function() {
+            return [uu.color('#000000'), "is Color"];
         },
-        "uu.color('rgba(0,0,0,0)') は ColorHash を返す": function() {
-            return [uu.color('rgba(0,0,0,0)'), "is ColorHash"];
+        "uu.color('rgba(0,0,0,0)') は Color を返す": function() {
+            return [uu.color('rgba(0,0,0,0)'), "is Color"];
         },
-        "uu.color('rgba( 100%, 100%, 100%, 0.5 )') は ColorHash を返す": function() {
-            return [uu.color('rgba( 100%, 100%, 100%, 0.5 )'), "is ColorHash"];
+        "uu.color('rgba( 100%, 100%, 100%, 0.5 )') は Color を返す": function() {
+            return [uu.color('rgba( 100%, 100%, 100%, 0.5 )'), "is Color"];
         },
-        "uu.color('hsla( 360, 100%, 100%, 0.5 )') は ColorHash を返す": function() {
-            return [uu.color('hsla( 360, 100%, 100%, 0.5 )'), "is ColorHash"];
-        },
-        "uu.color(123456) は ColorHash を返す": function() {
-            return [uu.color(123456), "is ColorHash"];
+        "uu.color('hsla( 360, 100%, 100%, 0.5 )') は Color を返す": function() {
+            return [uu.color('hsla( 360, 100%, 100%, 0.5 )'), "is Color"];
         },
 
         "End Of Test": ""
