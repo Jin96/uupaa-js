@@ -2,11 +2,7 @@
 <title>color - hue</title>
 
 <script src="../../src/uupaa.js"></script>
-<script src="../../src/color/color.js"></script>
 <script src="../../src/test/test.js"></script>
-<script src="../../uupaa.mb.js"></script>
-<script src="../../uupaa.mb2.js"></script>
-<script src="../../uupaa.js"></script>
 
 <style>
 html, body {
@@ -15,16 +11,15 @@ html, body {
   font-size: small;
 }
 table { border: 3px outset gray; }
-td { width: 15px; height: 15px; }
+td { border: 0px none; margin: 0; padding: 0; width: 15px; height: 15px; }
 </style>
 </head>
 <body>
 step1. Select Mode:
-<input type="button" value="HSV" onclick="HSV();draw(lastColorHash)" />
-<input type="button" value="HSL" onclick="HSL();draw(lastColorHash)" />
-<input type="button" value="Gray" onclick="Gray();draw(lastColorHash)" />
-<input type="button" value="Sepia" onclick="Sepia();draw(lastColorHash)" />
-<input type="button" value="Complementary" onclick="Comp();draw(lastColorHash)" />
+<input type="button" value="HSL" onclick="HSL();draw(lastColor)" />
+<input type="button" value="Gray" onclick="Gray();draw(lastColor)" />
+<input type="button" value="Sepia" onclick="Sepia();draw(lastColor)" />
+<input type="button" value="Complementary" onclick="Comp();draw(lastColor)" />
 <hr />
 step2. Select Hue(0 ~ 360):
 <input type="range" value="0" min="0" max="360"
@@ -35,17 +30,17 @@ step2. Select Hue(0 ~ 360):
 <div id="colorTable"></div>
 
 <script>
-var colortype = "HSV";
-var colormethod = "rgb";
-var lastColorHash = uu.color("#000");
+var type = "HSV";
+var method = "toString";
+var lastColor = uu.color("#000").hsla();
 
 function draw(hash) {
     if (hash.h < 0 || hash.h > 360) {
-        hash = 0;
+        hash.h = 0;
     }
     // update range.text
     uu.text(uu.id("rangeValue"), hash.h);
-    lastColorHash = hash;
+    lastColor = hash;
 
     // build color table
     var colorTable = uu.id("colorTable");
@@ -53,60 +48,72 @@ function draw(hash) {
     colorTable.innerHTML = "";
     colorTable.appendChild(uu.snippet("colorTableSnippet"));
 
-    var y = 0, yz = 10, x = 0, xz = 5;
+    var y = 0, yz, x = 0, xz;
     var e;
-    var sary = [100, 75, 50, 25, 0];
-    var vary = [100, 90, 80, 70, 60, 50, 40, 30, 20, 10, 0];
+    var sary = [100, 90, 80, 70, 60, 50, 40, 30, 20, 10, 0];
+    var lary = [100 - 1, 95, 90, 85, 80, 75, 70, 65, 60, 55, 50, 45, 40, 35, 30, 25, 20, 15, 10, 5, 0];
     var bg;
-    for (; y < yz; ++y) {
+    for (xz = sary.length, yz = lary.length; y < yz; ++y) {
         for (x = 0; x < xz; ++x) {
-            e = document.getElementById("id" + y + x);
-            if (colortype === "HSL") {
-                bg = uu.color({ h: hash.h, s: sary[x], l: vary[y], a: 1.0 })[colormethod]();
-            } else {
-                bg = uu.color({ h: hash.h, s: sary[x], v: vary[y], a: 1.0 })[colormethod]();
-            }
-            e.style.backgroundColor = bg.toString();
+            e = document.getElementById("id" + uu.hash.num2dd[y] + x);
+            bg = uu.color(uu.f("hsl(??,??%,??%)", hash.h || 0, sary[x], lary[y]))[method]();
+            e.style.backgroundColor = bg + ""; // .toString();
         }
     }
 }
-function HSL() { colortype = 'HSL'; colormethod = 'rgb'; }
-function HSV() { colortype = 'HSV'; colormethod = 'rgb'; }
-function Gray() { colortype = 'Gray'; colormethod = 'gray'; }
-function Sepia() { colortype = 'Sepia'; colormethod = 'sepia'; }
-function Comp() { colortype = 'Complementary'; colormethod = 'comple'; }
+function HSL()   { type = 'HSL'; method = 'toString'; }
+function Gray()  { type = 'Gray'; method = 'gray'; }
+function Sepia() { type = 'Sepia'; method = 'sepia'; }
+function Comp()  { type = 'Complementary'; method = 'comple'; }
 </script>
 </body>
 </html>
-<script id="sliderSnippet" type="text/html">
-    return <>
-    <input type="button" value="0" onclick="draw({ h:  0, s: 100, v: 100, l: 50, a: 1 })" />
-    <input type="button" value="30" onclick="draw({ h: 30, s: 100, v: 100, l: 50, a: 1 })" />
-    <input type="button" value="60" onclick="draw({ h: 60, s: 100, v: 100, l: 50, a: 1 })" />
-    <input type="button" value="90" onclick="draw({ h: 90, s: 100, v: 100, l: 50, a: 1 })" />
-    <input type="button" value="120" onclick="draw({ h: 120, s: 100, v: 100, l: 50, a: 1 })" />
-    <input type="button" value="150" onclick="draw({ h: 150, s: 100, v: 100, l: 50, a: 1 })" />
-    <input type="button" value="180" onclick="draw({ h: 180, s: 100, v: 100, l: 50, a: 1 })" />
-    <input type="button" value="210" onclick="draw({ h: 210, s: 100, v: 100, l: 50, a: 1 })" />
-    <input type="button" value="240" onclick="draw({ h: 240, s: 100, v: 100, l: 50, a: 1 })" />
-    <input type="button" value="270" onclick="draw({ h: 270, s: 100, v: 100, l: 50, a: 1 })" />
-    <input type="button" value="300" onclick="draw({ h: 300, s: 100, v: 100, l: 50, a: 1 })" />
-    <input type="button" value="330" onclick="draw({ h: 330, s: 100, v: 100, l: 50, a: 1 })" />
-</>
-</script>
 <script id="colorTableSnippet" type="text/html">
     return <>
-    <table>
-    <tr><td id="id00"></td><td id="id01"></td><td id="id02"></td><td id="id03"></td><td id="id04"></td></tr>
-    <tr><td id="id10"></td><td id="id11"></td><td id="id12"></td><td id="id13"></td><td id="id14"></td></tr>
-    <tr><td id="id20"></td><td id="id21"></td><td id="id22"></td><td id="id23"></td><td id="id24"></td></tr>
-    <tr><td id="id30"></td><td id="id31"></td><td id="id32"></td><td id="id33"></td><td id="id34"></td></tr>
-    <tr><td id="id40"></td><td id="id41"></td><td id="id42"></td><td id="id43"></td><td id="id44"></td></tr>
-    <tr><td id="id50"></td><td id="id51"></td><td id="id52"></td><td id="id53"></td><td id="id54"></td></tr>
-    <tr><td id="id60"></td><td id="id61"></td><td id="id62"></td><td id="id63"></td><td id="id64"></td></tr>
-    <tr><td id="id70"></td><td id="id71"></td><td id="id72"></td><td id="id73"></td><td id="id74"></td></tr>
-    <tr><td id="id80"></td><td id="id81"></td><td id="id82"></td><td id="id83"></td><td id="id84"></td></tr>
-    <tr><td id="id90"></td><td id="id91"></td><td id="id92"></td><td id="id93"></td><td id="id94"></td></tr>
-    </table>
+    <table border="0"><tbody>
+    <tr><td id="id000"></td><td id="id001"></td><td id="id002"></td><td id="id003"></td><td id="id004"></td>
+        <td id="id005"></td><td id="id006"></td><td id="id007"></td><td id="id008"></td><td id="id009"></td><td id="id0010"></td></tr>
+    <tr><td id="id010"></td><td id="id011"></td><td id="id012"></td><td id="id013"></td><td id="id014"></td>
+        <td id="id015"></td><td id="id016"></td><td id="id017"></td><td id="id018"></td><td id="id019"></td><td id="id0110"></td></tr>
+    <tr><td id="id020"></td><td id="id021"></td><td id="id022"></td><td id="id023"></td><td id="id024"></td>
+        <td id="id025"></td><td id="id026"></td><td id="id027"></td><td id="id028"></td><td id="id029"></td><td id="id0210"></td></tr>
+    <tr><td id="id030"></td><td id="id031"></td><td id="id032"></td><td id="id033"></td><td id="id034"></td>
+        <td id="id035"></td><td id="id036"></td><td id="id037"></td><td id="id038"></td><td id="id039"></td><td id="id0310"></td></tr>
+    <tr><td id="id040"></td><td id="id041"></td><td id="id042"></td><td id="id043"></td><td id="id044"></td>
+        <td id="id045"></td><td id="id046"></td><td id="id047"></td><td id="id048"></td><td id="id049"></td><td id="id0410"></td></tr>
+    <tr><td id="id050"></td><td id="id051"></td><td id="id052"></td><td id="id053"></td><td id="id054"></td>
+        <td id="id055"></td><td id="id056"></td><td id="id057"></td><td id="id058"></td><td id="id059"></td><td id="id0510"></td></tr>
+    <tr><td id="id060"></td><td id="id061"></td><td id="id062"></td><td id="id063"></td><td id="id064"></td>
+        <td id="id065"></td><td id="id066"></td><td id="id067"></td><td id="id068"></td><td id="id069"></td><td id="id0610"></td></tr>
+    <tr><td id="id070"></td><td id="id071"></td><td id="id072"></td><td id="id073"></td><td id="id074"></td>
+        <td id="id075"></td><td id="id076"></td><td id="id077"></td><td id="id078"></td><td id="id079"></td><td id="id0710"></td></tr>
+    <tr><td id="id080"></td><td id="id081"></td><td id="id082"></td><td id="id083"></td><td id="id084"></td>
+        <td id="id085"></td><td id="id086"></td><td id="id087"></td><td id="id088"></td><td id="id089"></td><td id="id0810"></td></tr>
+    <tr><td id="id090"></td><td id="id091"></td><td id="id092"></td><td id="id093"></td><td id="id094"></td>
+        <td id="id095"></td><td id="id096"></td><td id="id097"></td><td id="id098"></td><td id="id099"></td><td id="id0910"></td></tr>
+    <tr><td id="id100"></td><td id="id101"></td><td id="id102"></td><td id="id103"></td><td id="id104"></td>
+        <td id="id105"></td><td id="id106"></td><td id="id107"></td><td id="id108"></td><td id="id109"></td><td id="id1010"></td></tr>
+    <tr><td id="id110"></td><td id="id111"></td><td id="id112"></td><td id="id113"></td><td id="id114"></td>
+        <td id="id115"></td><td id="id116"></td><td id="id117"></td><td id="id118"></td><td id="id119"></td><td id="id1110"></td></tr>
+    <tr><td id="id120"></td><td id="id121"></td><td id="id122"></td><td id="id123"></td><td id="id124"></td>
+        <td id="id125"></td><td id="id126"></td><td id="id127"></td><td id="id128"></td><td id="id129"></td><td id="id1210"></td></tr>
+    <tr><td id="id130"></td><td id="id131"></td><td id="id132"></td><td id="id133"></td><td id="id134"></td>
+        <td id="id135"></td><td id="id136"></td><td id="id137"></td><td id="id138"></td><td id="id139"></td><td id="id1310"></td></tr>
+    <tr><td id="id140"></td><td id="id141"></td><td id="id142"></td><td id="id143"></td><td id="id144"></td>
+        <td id="id145"></td><td id="id146"></td><td id="id147"></td><td id="id148"></td><td id="id149"></td><td id="id1410"></td></tr>
+    <tr><td id="id150"></td><td id="id151"></td><td id="id152"></td><td id="id153"></td><td id="id154"></td>
+        <td id="id155"></td><td id="id156"></td><td id="id157"></td><td id="id158"></td><td id="id159"></td><td id="id1510"></td></tr>
+    <tr><td id="id160"></td><td id="id161"></td><td id="id162"></td><td id="id163"></td><td id="id164"></td>
+        <td id="id165"></td><td id="id166"></td><td id="id167"></td><td id="id168"></td><td id="id169"></td><td id="id1610"></td></tr>
+    <tr><td id="id170"></td><td id="id171"></td><td id="id172"></td><td id="id173"></td><td id="id174"></td>
+        <td id="id175"></td><td id="id176"></td><td id="id177"></td><td id="id178"></td><td id="id179"></td><td id="id1710"></td></tr>
+    <tr><td id="id180"></td><td id="id181"></td><td id="id182"></td><td id="id183"></td><td id="id184"></td>
+        <td id="id185"></td><td id="id186"></td><td id="id187"></td><td id="id188"></td><td id="id189"></td><td id="id1810"></td></tr>
+    <tr><td id="id190"></td><td id="id191"></td><td id="id192"></td><td id="id193"></td><td id="id194"></td>
+        <td id="id195"></td><td id="id196"></td><td id="id197"></td><td id="id198"></td><td id="id199"></td><td id="id1910"></td></tr>
+    <tr><td id="id200"></td><td id="id201"></td><td id="id202"></td><td id="id203"></td><td id="id204"></td>
+        <td id="id205"></td><td id="id206"></td><td id="id207"></td><td id="id208"></td><td id="id209"></td><td id="id2010"></td></tr>
+
+    </tbody></table>
 </>
 </script>

@@ -27,10 +27,6 @@ html, body {
 <script src="../../src/fx/easing.js"></script>
 <script src="../../src/fx/fx.js"></script>
 <script src="../../src/ui/imageSlider.js"></script>
-<script src="../../src/color/color.js"></script>
-<script src="../../src/image/image.js"></script>
-<script src="../../src/node/normalize.js"></script>
-<script src="../../src/css/text.js"></script>
 
 <script>
 var duration = 300;
@@ -42,9 +38,9 @@ function moveDuration(that) {
 
 uu.ready(function() {
     // --- init ---
-    uu.ui.imageSlider.dressup(uu.css.textSelectable(uu.id("slide1")), { degree: 0  });
-    uu.ui.imageSlider.dressup(uu.css.textSelectable(uu.id("slide2")), { degree: 45 });
-    uu.ui.imageSlider.dressup(uu.css.textSelectable(uu.id("slide3")), { degree: 90 });
+    uu.ui.imageSlider.dressup(uu.css.selectable(uu.id("slide1")), { degree: 0  });
+    uu.ui.imageSlider.dressup(uu.css.selectable(uu.id("slide2")), { degree: 45 });
+    uu.ui.imageSlider.dressup(uu.css.selectable(uu.id("slide3")), { degree: 90 });
 
     uu.click(uu.id("slide1"), function(evt) {
         uu.ui.imageSlider(evt.node, duration);
@@ -58,9 +54,9 @@ uu.ready(function() {
 
 
     // --- init ---
-    uu.ui.imageSlider.dressup(uu.css.textSelectable(uu.id("slideDeny1")), { degree: 0  });
-    uu.ui.imageSlider.dressup(uu.css.textSelectable(uu.id("slideDeny2")), { degree: 45 });
-    uu.ui.imageSlider.dressup(uu.css.textSelectable(uu.id("slideDeny3")), { degree: 90 });
+    uu.ui.imageSlider.dressup(uu.css.selectable(uu.id("slideDeny1")), { degree: 0  });
+    uu.ui.imageSlider.dressup(uu.css.selectable(uu.id("slideDeny2")), { degree: 45 });
+    uu.ui.imageSlider.dressup(uu.css.selectable(uu.id("slideDeny3")), { degree: 90 });
 
     uu.click(uu.id("slideDeny1"), function(evt) {
         uu.ui.imageSlider(evt.node, duration, { allow: 0 });

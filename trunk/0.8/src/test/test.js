@@ -159,7 +159,8 @@ function judge(lhs,      // @param Mix: left hand set
         case "ISINSTANCE":rv = !!lhs.msgbox; break;
         default:
             ope = ope.replace(/IS/, "");
-            rv = uu.type[ope] ? uu.type(lhs) === uu.type[ope] : 2;
+            rv = uu.isFunction(uu.type[ope]) ? uu.type[ope](lhs, ope) // extend types
+               : uu.type[ope] ? uu.type(lhs) === uu.type[ope] : 2;
         }
     }
     return +rv;

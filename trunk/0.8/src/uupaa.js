@@ -15,7 +15,9 @@ var _prototype = "prototype",
     _isArray = Array.isArray || (Array.isArray = ArrayIsArray), // ES5 spec
     _slice = Array[_prototype].slice,
     // --- HTML5: EMBEDDING CUSTOM NON-VISIBLE DATA ---
+//{{{!fx
     _uufx = "data-uufx",
+//}}}!fx
 //{{{!image
     _uuimage = "data-uuimage",
 //}}}!image
@@ -56,12 +58,12 @@ var _prototype = "prototype",
     _types = { "undefined": 8 },
     _trimSpace = /^\s+|\s+$/g,
     _rootNode = doc[_documentElement],
-    _dd2num = {},               // dd2num = {  "00":    0 , ...  "99":   99  }
-    _num2dd = {},               // num2dd = {    0 :  "00", ...   99 :  "99" }
-    _bb2num = {},               // bb2num = { "\00":    0 , ... "\ff":  255  }
-    _num2bb = {},               // num2bb = {    0 : "\00", ...  255 : "\ff" }
-    _hh2num = {},               // hh2num = {  "00":    0 , ...  "ff":  255  }
-    _num2hh = { 256: "00" },    // num2hh = {    0 :  "00", ...  255 :  "ff", 256: "00" }
+    _dd2num = {},               // uu.hash.dd2num = {  "00":    0 , ...  "99":   99  }
+    _num2dd = {},               // uu.hash.num2dd = {    0 :  "00", ...   99 :  "99" }
+    _bb2num = {},               // uu.hash.bb2num = { "\00":    0 , ... "\ff":  255  }
+    _num2bb = {},               // uu.hash.num2bb = {    0 : "\00", ...  255 : "\ff" }
+    _hh2num = {},               // uu.hash.hh2num = {  "00":    0 , ...  "ff":  255  }
+    _num2hh = { 256: "00" },    // uu.hash.num2hh = {    0 :  "00", ...  255 :  "ff", 256: "00" }
     _guidnum = 0,       // guid counter
     _nodeiddb = {},     // { nodeid: node, ... }
     _nodeidnum = 0,     // nodeid counter
@@ -102,13 +104,17 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/ClassNameS
     snippet:        uusnippet,      // uu.snippet(id:String, arg:Hash/Array):String/Mix
 //}}}!snippet
     // --- AJAX / JSONP ---
-    ajax:           uuajax,         // uu.ajax(url:String, option:Hash, callback:Function)
+//{{{!ajax
+    ajax:     uumix(uuajax, {       // uu.ajax(url:String, option:Hash, callback:Function)
                                     //  [1][load aync] uu.ajax("http://...", { method: "POST", data: ... }, callback)
-
+        binary:     uuajaxbinary,   // uu.ajax.binary(url:String, option:Hash, callback:Function)
+        clear:      uuajaxclear     // uu.ajax.clear() - cache clear
+    }),
     require:        uurequire,      // uu.require(url:String, option:Hash = {}):Hash - { data, option, status, ok }
                                     //  [1][load sync] uu.require("http://...") -> { data, option, status, ok }
     jsonp:          uujsonp,        // uu.jsonp(url:String, option:Hash, callback:Function)
                                     //  [1][load aync] uu.jsonp("http://...callback=??", { method: "mycallback" }, callback)
+//}}}!ajax
     // --- TYPE MATCH / TYPE DETECTION ---
     like:           uulike,         // uu.like(lhs:Date/Hash/Fake/Array, rhs:Date/Hash/Fake/Array):Boolean
     type:           uutype,         // uu.type(mix:Mix):Number
@@ -193,16 +199,11 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/ClassNameS
                                     //  [4][set node.style pair]               uu.css(node, key, value) -> node
                                     //  [5][set node.style pair]               uu.css(node, { key: value, ... }) -> node
                                     //  [6][get StyleSheet object]             uu.css("myStyleSheet") -> StyleSheet
+//{{{!fx
         show:       uucssshow,      // uu.css.show(node:Node, duration:Number = 0, displayValue:String= "block"):Node
         hide:       uucsshide,      // uu.css.hide(node:Node, duration:Number = 0):Node
-        isShow:     uucssisshow,    // uu.css.isShow(node:Node/CSSProperties):Boolean
-        opacity:    uucssopacity,   // uu.css.opacity(node:Node, value:Number/String):Number/Node
-                                    //  [1][get opacity] uu.css.opacity(node) -> 0.5
-                                    //  [2][set opacity] uu.css.opacity(node, 0.5) -> node
-        transform:  uucsstransform, // uu.css.transform(node:Node):Node/NumberArray
-                                    //  [1][get transform] uu.css.transform(node) -> [scaleX, scaleY, rotate, translateX, translateY ]
-                                    //  [2][set transform] uu.css.transform(node, 1, 1, 0, 0, 0) -> node
-        unit:       uucssunit       // uu.css.unit(node:Node, value:Number/CSSUnitString,
+//}}}!fx
+        unit:       uucssunit,      // uu.css.unit(node:Node, value:Number/CSSUnitString,
                                     //                    quick:Boolean = false,
                                     //                    prop:String = "left"):Number
                                     //  [1][convert pixel]  uu.css.unit(<div>, 123) -> 123
@@ -211,9 +212,18 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/ClassNameS
                                     //  [4][convert pixel]  uu.css.unit(<div>, "12pt") -> 16
                                     //  [5][convert pixel]  uu.css.unit(<div>, "auto") -> 100
                                     //  [6][convert pixel]  uu.css.unit(<div>, "auto", 0, "borderTopWidth") -> 0
+        isShow:     uucssisshow,    // uu.css.isShow(node:Node/CSSProperties):Boolean
+        opacity:    uucssopacity,   // uu.css.opacity(node:Node, value:Number/String):Number/Node
+                                    //  [1][get opacity] uu.css.opacity(node) -> 0.5
+                                    //  [2][set opacity] uu.css.opacity(node, 0.5) -> node
+        transform:  uucsstransform, // uu.css.transform(node:Node):Node/NumberArray
+                                    //  [1][get transform] uu.css.transform(node) -> [scaleX, scaleY, rotate, translateX, translateY ]
+                                    //  [2][set transform] uu.css.transform(node, 1, 1, 0, 0, 0) -> node
+        selectable: uucssselectable // uu.css.selectable(node:Node, allow:Boolean = false):Node
     }),
-    viewport:       uuviewport,     // uu.viewport():Hash - { pageXOffset, pageYOffset, innerWidth, innerHeight }
+    viewport:       uuviewport,     // uu.viewport():Hash - { innerWidth, innerHeight, pageXOffset, pageYOffset, orientation }
     // --- EFFECT / ANIMATION ---
+//{{{!fx
     fx:       uumix(uufx, {         // uu.fx(node:Node, duration:Number, param:Hash/Function = void):Node
                                     //  [1][abs]             uu.fx(node, 500, { o: 0.5, x: 200 })
                                     //  [2][rel]             uu.fx(node, 500, { h: "+100", o: "+0.5" })
@@ -227,6 +237,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/ClassNameS
         skip:       uufxskip,       // uu.fx.skip(node:Node = null, skipAll:Boolean = false):Node/NodeArray
         isBusy:     uufxisbusy      // uu.fx.isBusy(node:Node):Boolean
     }),
+//}}}!fx
     // --- QUERY ---
     id:             uuid,           // uu.id(expr:String, context:Node = document):Node/null
     tag:            uutag,          // uu.tag(expr:String, context:Node = document):NodeArray
@@ -253,6 +264,8 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/ClassNameS
                                     //  [3][bind a capture event]    uu.event(node, "mousemove+", fn)        -> node
                                     //  [4][bind a namespace.event]  uu.event(node, "MyNameSpace.click", fn) -> node
         has:        uuhas,          // uu.event.has(node:Node, eventTypeEx:EventTypeExString):Boolean
+        key:        uueventkey,     // uu.event.key(event:EventObjectEx):Hash - { key, code }
+        edge:       uueventedge,    // uu.event.edge(event:EventObjectEx):Hash - { x, y }
         fire:       uueventfire,    // uu.event.fire(node:Node, eventType:String, param:Mix = void):Node
         stop:       uueventstop,    // uu.event.stop(event:EventObjectEx)
         hover:      uueventhover,   // uu.event.hover(node:Node, expr:Function/ClassNameString):Node
@@ -268,6 +281,25 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/ClassNameS
     }),
     bind:           uuevent,        // uu.bind() as uu.event()
     unbind:         uueventunbind,  // uu.unbind() as uu.event.unbind()
+    // --- RESIZE EVENT ---
+//{{{!resize
+    resize:         uuresize,       // uu.resize(evaluator)
+    unresize:       uuunresize,     // uu.unresize()
+//}}}!resize
+    // --- LIVE EVENT ---
+//{{{!live
+    live:     uumix(uulive, {       // uu.live(expr:CSSSelectorExpressionString, eventTypeEx:EventTypeExString,
+                                    //         evaluator:Function/Instance)
+                                    //  [1][bind] uu.live("css > selector", "namespace.click", callback)
+        has:        uulivehas       // uu.live.has(expr:CSSSelectorExpressionString, eventTypeEx:EventTypeExString):Boolean
+    }),
+    unlive:         uuunlive,       // uu.unlive(expr:CSSSelectorExpressionString = void, eventTypeEx:EventTypeExString = void)
+                                    //  [1][unbind all]           uu.unlive()
+                                    //  [2][unbind all]           uu.unlive("selector")
+                                    //  [3][unbind one]           uu.unlive("selector", "click")
+                                    //  [4][unbind namespace all] uu.unlive("selector", "namespace.*")
+                                    //  [5][unbind namespace one] uu.unlive("selector", "namespace.click")
+//}}}!live
     // --- NODE / NodeList / NodeID ---
     node:     uumix(uunode, {       // uu.node(tag:TagNameString = "div",
                                     //         args:Array/Argeumtns = void,
@@ -393,12 +425,13 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/ClassNameS
     }, detectFeatures(_ver)),
     // --- COLOR ---
 //{{{!color
-    color:    uumix(uucolor, {      // uu.color(source:Color/HSVAHash/HSLAHash/RGBAHash/String/Number):ColorHash
-                                    //  [1][Color]             uu.color(ColorHash) -> ColorHash
-                                    //  [2][W3CNamedColor to hash] uu.color("black")   -> Color
-                                    //  [3]["#000..." to hash]     uu.color("#000")    -> Color
-                                    //  [4]["rgba(,,,,)" to hash]  uu.color("rgba(0,0,0,1)") -> Color
-                                    //  [5]["hsla(,,,,) to hash]   uu.color("hsla(360,100%,100%,1)") -> Color
+    color:    uumix(uucolor, {      // uu.color(expr:Color/RGBAHash/HSLAHash/String):Color
+                                    //  [1][Color]                     uu.color(Color)               -> Color
+                                    //  [2][RGBAHash/HSLAHash to hash] uu.color({ h:0,s:0,l:0,a:1 }) -> Color
+                                    //  [3][W3CNamedColor to hash]     uu.color("black")             -> Color
+                                    //  [4]["#000..." to hash]         uu.color("#000")              -> Color
+                                    //  [5]["rgba(,,,,)" to hash]      uu.color("rgba(0,0,0,1)")     -> Color
+                                    //  [6]["hsla(,,,,) to hash]       uu.color("hsla(360,1%,1%,1)") -> Color
         add:        uucoloradd,     // uu.color.add(source:String)
         random:     uucolorrandom   // uu.color.random():Color
     }),
@@ -410,6 +443,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/ClassNameS
     }),
 //}}}!image
     // --- SVG ---
+//{{{!svg
     svg:      uumix(uusvg, {        // uu.svg(x:Number, y:Number, width:Number, height:Number,
                                     //        *attr:Hash, *css:Hash):<svg:svg>
         attr:       uuattr,         // uu.svg.attr(node:SVGNode, key:String/Hash = void,
@@ -423,16 +457,28 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/ClassNameS
         bind:       uuevent,        // uu.svg.bind(...)
         unbind:     uueventunbind   // uu.svg.unbind(...)
     }),
+//}}}!svg
     // --- CANVAS ---
+//{{{!canvas
     canvas:         uucanvas,       // uu.canvas(width:Number = 300, height:Number = 150,
                                     //           *attr:Hash, *css:Hash):<canvas>
+//}}}!canvas
     // --- FLASH ---
+//{{{!flash
 //{{{!mb
     flash:          uuflash,        // uu.flash(url:String, option:FlashOptionHash):Node/null/void
 //}}}!mb
+//}}}!flash
     // --- DEBUG ---
     puff:           uupuff,         // uu.puff(source:Mix/FormatString, var_args:Mix, ...)
     log:            uulog,          // uu.log(log:Mix, var_args:Mix, ...)
+    // --- UNIT TEST ---
+//{{{!unittest
+    ok:             uuok,           // uu.ok(lhs:Mix, operator:String, rhs:Mix = void, more:String = void)
+                                    //  [1][test]           uu.ok("title", 1, "===", 1, "more info")
+                                    //  [2][add separater]  uu.ok("separater comment")
+                                    //  [3][get/show score] uu.ok() -> { ok, ng, total, ms }
+//}}}!unittest
     // --- OTHER ---
     ui:             {},             // uu.ui - ui namespace
     dmz:            {},             // uu.dmz - DeMilitarized Zone(proxy)
@@ -573,8 +619,10 @@ function uufactory(expr,   // @param NodeSet/Node/NodeArray/ClassNameString/wind
     if (typeof expr === _string && uuclass[expr]) {
         return new uuclass[expr](arg1, arg2, arg3, arg4);
     }
+//{{{!nodeset
     // NodeSet factory
     return new NodeSet(expr, arg1, arg2, arg3, arg4);
+//}}}!nodeset
 }
 
 // --- SNIPPET ---
@@ -631,6 +679,7 @@ uusnippet.each = function(hash, fragment) { // (
 
 // --- AJAX ---
 // uu.ajax
+//{{{!ajax
 function uuajax(url,        // @param String: url
                 option,     // @param Hash: { data, ifmod, method, timeout,
                             //                header, binary, before, after }
@@ -745,6 +794,88 @@ uuajax.xhr = function() { // @return XMLHttpRequest:
                : null;
 };
 
+// uu.ajax.binary - upload / download binary data
+function uuajaxbinary(url, option, callback) {
+    option.method = option.data ? "PUT" : "GET";
+    option.binary =
+//{{{!mb
+                    _ie ? toByteArrayIE(xhr) :
+//}}}!mb
+                          toByteArray(xhr);
+
+    uuajax(url, option, callback);
+}
+
+// inner - BinaryString To ByteArray
+function toByteArray(xhr) { // @param XMLHttpRequest:
+                            // @return ByteArray: [0x00, 0x01]
+    var rv = [], bb2num = _bb2num, remain,
+        ary = xhr.responseText.split(""), // "\00\01"
+        i = -1, iz;
+
+    iz = ary.length;
+    remain = iz % 8;
+
+    while (remain--) {
+        ++i;
+        rv[i] = bb2num[ary[i]];
+    }
+    remain = iz >> 3;
+    while (remain--) {
+        rv.push(bb2num[ary[++i]], bb2num[ary[++i]],
+                bb2num[ary[++i]], bb2num[ary[++i]],
+                bb2num[ary[++i]], bb2num[ary[++i]],
+                bb2num[ary[++i]], bb2num[ary[++i]]);
+    }
+    return rv;
+}
+
+//{{{!mb
+// inner - BinaryString to ByteArray
+function toByteArrayIE(xhr) {
+    var rv = [], data, remain,
+        charCodeAt = "charCodeAt", _0xff = 0xff,
+        loop, v0, v1, v2, v3, v4, v5, v6, v7,
+        i = -1, iz;
+
+    iz = vblen(xhr);
+    data = vbstr(xhr);
+    loop = Math.ceil(iz / 2);
+    remain = loop % 8;
+
+    while (remain--) {
+        v0 = data[charCodeAt](++i); // 0x00,0x01 -> 0x0100
+        rv.push(v0 & _0xff, v0 >> 8);
+    }
+    remain = loop >> 3;
+    while (remain--) {
+        v0 = data[charCodeAt](++i);
+        v1 = data[charCodeAt](++i);
+        v2 = data[charCodeAt](++i);
+        v3 = data[charCodeAt](++i);
+        v4 = data[charCodeAt](++i);
+        v5 = data[charCodeAt](++i);
+        v6 = data[charCodeAt](++i);
+        v7 = data[charCodeAt](++i);
+        rv.push(v0 & _0xff, v0 >> 8, v1 & _0xff, v1 >> 8,
+                v2 & _0xff, v2 >> 8, v3 & _0xff, v3 >> 8,
+                v4 & _0xff, v4 >> 8, v5 & _0xff, v5 >> 8,
+                v6 & _0xff, v6 >> 8, v7 & _0xff, v7 >> 8);
+    }
+    iz % 2 && rv.pop();
+
+    return rv;
+}
+_ie && document.write('<script type="text/vbscript">\
+Function vblen(b)vblen=LenB(b.responseBody)End Function\n\
+Function vbstr(b)vbstr=CStr(b.responseBody)+chr(0)End Function</'+'script>');
+//}}}!mb
+
+// uu.ajax.clear - clear "If-Modified-Since" request cache
+function uuajaxclear() {
+    uuajax.cache = {};
+}
+
 // uu.require - require
 function uurequire(url,      // @param String: url
                    option) { // @param Hash(= {}): { before, after }
@@ -816,6 +947,7 @@ function uujsonp(url,        // @param String: "http://example.com?callback=??"
     }, timeout * 1000);
 }
 uujsonp.db = {}; // { guid: callbackMethod, ... }
+//}}}!ajax
 
 // --- TYPE ---
 
@@ -1364,25 +1496,25 @@ uucss.care = {
 };
 
 // uu.viewport
-function uuviewport() { // @return Hash: { pageXOffset, pageYOffset,
-                        //                 innerWidth, innerHeight,
+function uuviewport() { // @return Hash: { innerWidth, innerHeight,
+                        //                 pageXOffset, pageYOffset,
                         //                 orientation }
-                        //      pageXOffset - Number:
-                        //      pageYOffset - Number:
                         //      innerWidth  - Number:
                         //      innerHeight - Number:
+                        //      pageXOffset - Number:
+                        //      pageYOffset - Number:
                         //      orientation - Number: last orientation
                         //            0 is Portrait
                         //          -90 is Landscape
                         //           90 is Landscape
                         //          180 is Portrait
 //{{{!mb
-    if (_ie) {
-        return { pageXOffset: _rootNode.scrollLeft,
-                 pageYOffset: _rootNode.scrollTop,
-                 innerWidth:  _rootNode.clientWidth,
-                 innerHeight: _rootNode.clientHeight,
-                 orientation: 0 };
+    if (!win.innerWidth) { // [IE6][IE7][IE8] CSSOM View Module
+        return { innerWidth:  _rootNode.clientWidth,    // [IE9] supported
+                 innerHeight: _rootNode.clientHeight,   // [IE9] supported
+                 pageXOffset: _rootNode.scrollLeft,     // [IE9] supported
+                 pageYOffset: _rootNode.scrollTop,      // [IE9] supported
+                 orientation: 0 };                      // [IPHONE] only
     }
 //}}}!mb
     return win;
@@ -1401,6 +1533,7 @@ function uuviewport() { // @return Hash: { pageXOffset, pageYOffset,
 //  [11][deny]            uu.fx(node, 500, { deny: 1 })
 
 // uu.fx - add effect queue
+//{{{!fx
 function uufx(node,     // @param Node: animation target node
               duration, // @param Number: duration (unit ms)
               option) { // @param Hash/Function: { key: endValue, key: [endValue, easing], key: callback, ... }
@@ -1626,6 +1759,7 @@ function uufxisbusy(node) { // @param Node:
 
     return data && data.id;
 }
+//}}}!fx
 
 // uu.css.opacity
 function uucssopacity(node,      // @param Node:
@@ -1776,6 +1910,7 @@ function uucsstransform(node,    // @param Node:
 }
 
 // uu.css.show - show node
+//{{{!fx
 function uucssshow(node,           // @param Node:
                    duration,       // @param Number(= 0): fadein effect duration
                    displayValue) { // @param String(= "block"): applied at display "none"
@@ -1804,14 +1939,17 @@ function uucssshow(node,           // @param Node:
                 }
             }});
 }
+//}}}!fx
 
 // uu.css.hide - hide node
+//{{{!fx
 function uucsshide(node,       // @param Node:
                    duration) { // @param Number(= 0): fadeout effect duration
                                // @return Node:
     uucssisshow(node) || (node.style[_display] = "none");
     return uufx(node, duration || 0, { w: 0, h: 0, o: 0 });
 }
+//}}}!fx
 
 // uu.css.isShow - is shown
 function uucssisshow(node) { // @param Node/CSSProperties:
@@ -1819,6 +1957,27 @@ function uucssisshow(node) { // @param Node/CSSProperties:
     var style = node[_nodeType] ? uucss(node) : node;
 
     return style[_display] !== "none" && style[_visibility] !== "hidden";
+}
+
+// uu.css.selectable - text selectable
+function uucssselectable(node,    // @param Node:
+                         allow) { // @param Boolean(= false):
+                                  // @return Node:
+    node.style.userSelect = allow ? "" : "none"; // CSS3
+//{{{!mb
+    if (_webkit) {
+//}}}!mb
+        node.style.WebkitUserSelect = allow ? "" : "none";
+//{{{!mb
+    } else if (_gecko) {
+        node.style.MozUserSelect = allow ? "" : "none";
+    } else if (_ie || _opera) {
+        node.unselectable  = allow ? "" : "on";
+        node.onselectstart = allow ? "" : "return false";
+//      node = node.parentNode;
+    }
+//}}}!mb
+    return node;
 }
 
 // StyleSheet.init
@@ -2607,6 +2766,57 @@ function uueventdetach(node,         // @param Node:
     uueventattach(node, eventType, evaluator, useCapture, 1);
 }
 
+// uu.event.key - get key and keyCode (cross browse keyCode)
+function uueventkey(event) { // @param EventObjectEx:
+                             // @return Hash: { key, code }
+                             //     key  - String: "UP", "1", "A"
+                             //     code - Number:   38,  49,  65
+    var code = event.keyCode || event.charCode || 0;
+
+    return { key: uueventkey.ident[code] || "", code: code };
+}
+
+// ::event.keyCode
+//    http://www.w3.org/TR/DOM-Level-3-Events/#events-keyboardevents
+
+uueventkey.ident = uuhash( // virtual keycode -> "KEY IDENTIFIER"
+    "8,BS,9,TAB,13,ENTER,16,SHIFT,17,CTRL,18,ALT,27,ESC," +
+    "32,SP,33,PGUP,34,PGDN,35,END,36,HOME,37,LEFT,38,UP,39,RIGHT,40,DOWN," +
+    "45,INS,46,DEL,48,0,49,1,50,2,51,3,52,4,53,5,54,6,55,7,56,8,57,9," +
+    "65,A,66,B,67,C,68,D,69,E,70,F,71,G,72,H,73,I,74,J,75,K,76,L,77,M," +
+    "78,N,79,O,80,P,81,Q,82,R,83,S,84,T,85,U,86,V,87,W,88,X,89,Y,90,Z");
+
+// uu.event.edge - get padding edge (cross browse offsetX/Y)
+function uueventedge(event) { // @param EventObjectEx:
+                              // @return Hash: { x, y }
+                              //     x - Number: fixed offsetX
+                              //     y - Number: fixed offsetY
+    // http://d.hatena.ne.jp/uupaa/20100430/1272561922
+    var style =
+//{{{!mb
+                _ie ? null :
+//}}}!mb
+                             getComputedStyle(event.at, 0),
+        x = event.offsetX || 0,
+        y = event.offsetY || 0;
+
+//{{{!mb
+    if (_webkit) {
+//}}}!mb
+        x -= parseInt(style.borderTopWidth)  || 0; // "auto" -> 0
+        y -= parseInt(style.borderLeftWidth) || 0;
+//{{{!mb
+    } else if (_opera) {
+        x += parseInt(style.paddingTop)  || 0;
+        y += parseInt(style.paddingLeft) || 0;
+    } else if (_gecko || event.layer !== void 0) {
+        x = (event.layerX || 0) - (parseInt(style.borderTopWidth)  || 0);
+        y = (event.layerY || 0) - (parseInt(style.borderLeftWidth) || 0);
+    }
+//}}}!mb
+    return { x: x, y: y };
+}
+
 // uu.event.hover - enter / leave event handler
 function uueventhover(node,   // @param Node:
                       expr) { // @param Function/ClassNameString: enter/leave-callback or toggle-className
@@ -2663,6 +2873,222 @@ function uueventcyclic(node,         // @param Node: target node
 
     return uuevent(node, eventTypeEx, wrapper);
 }
+
+// --- RESIZE EVENT ---
+//{{{!resize
+
+// uu.resize
+function uuresize(evaluator) { // @param Function: callback function
+    var db = uuresize.db;
+
+    if (!db.fn.length) { // init
+//{{{!mb
+        uuresize.unsafe ? (db.vp = uuviewport(),
+                           db.tm = setInterval(onresizeagent, db.delay)) : // [IE6][IE7][IE8]
+//}}}!mb
+                          uueventattach(win, "resize", onresize);          // [W3C]
+    }
+    db.fn.push(evaluator);
+}
+uuresize.unsafe = _ie && _ver < 9; // [IE6][IE7][IE8]
+uuresize.db = {
+    fn:     [],
+    tm:     0,  // setInterval timer id
+    lock:   0,
+    delay:  uuresize.unsafe ? 100 : 40  // 100ms(unsafe) or 40ms(safe)
+};
+
+// uu.unresize
+function uuunresize() {
+    var db = uuresize.db;
+
+    db.fn = [];
+//{{{!mb
+    uuresize.unsafe ? (db.tm && (clearInterval(db.tm), db.tm = 0)) : // [IE6][IE7][IE8]
+//}}}!mb
+                      uueventdetach(win, "resize", onresize);        // [W3C]
+    db.lock = 0;
+}
+
+// inner - resize event handler
+function onresize(event) {
+    var db = uuresize.db,
+        evt = uumix(event, { node: win, code: uuevent.codes.resize, at: win });
+
+    if (!db.lock++) {
+        setTimeout(function() {
+            for (var i = 0, iz = db.fn.length; i < iz; ++i) {
+                db.fn[i] && db.fn[i](evt); // callback(event)
+            }
+            setTimeout(function() { // [lazy] unlock
+                db.lock = 0;
+            }, 0);
+        }, db.delay); // event-intensive
+    }
+}
+
+// inner - resize handler(resize agent) for unsafe browser
+//{{{!mb
+function onresizeagent() {
+    var db = uuresize.db, i = 0, iz, vp,
+        evt = { node: win, code: uuevent.codes.resize, at: win };
+
+    if (!db.lock++) {
+        //
+        // peek innerWidth and innerHeight
+        //
+        vp = uuviewport();
+        if (db.vp.innerWidth !== vp.innerWidth
+            || db.vp.innerHeight !== vp.innerHeight) { // resized?
+
+            db.vp = vp; // store
+            for (iz = db.fn.length; i < iz; ++i) {
+                db.fn[i] && db.fn[i](evt); // callback(event)
+            }
+        }
+        setTimeout(function() { // [lazy] unlock
+            db.lock = 0;
+        }, 0);
+    }
+}
+//}}}!mb
+//}}}!resize
+
+// --- LIVE EVENT ---
+//{{{!live
+
+// uu.event.live
+function uulive(expr,        // @param CSSSelectorExpressionString "css > selector"
+                eventTypeEx, // @param EventTypeExString: "namespace.click"
+                evaluator,   // @param Function/Instance: callback function
+                __data__) {  // @hidden Hash: data for recursive call
+    function _liveClosure(event) { // @param EventObject:
+        var fullcode = uuevent.codes[event.type] || 0,
+            target = event.target
+//{{{!mb
+                                  || event.srcElement || doc;
+//}}}!mb
+
+        event.at = (target[_nodeType] === 3) ? target[_parentNode]
+                                             : target;
+
+        if (uumatch(expr, event.at)) {
+            event.code = fullcode & 0xff; // half code
+//{{{!mb
+            if (_ie) {
+                if (!event.target) { // [IE6][IE7][IE8]
+                    event.currentTarget = doc;
+                }
+                if (event.pageX === void 0) { // [IE6][IE7][IE8][IE9]
+                    event.pageX = event.clientX + (doc.html.scrollLeft || 0);
+                    event.pageY = event.clientY + (doc.html.scrollTop  || 0);
+                }
+            }
+//}}}!mb
+            instance ? handler.call(evaluator, event)
+                     : evaluator(event);
+        }
+    }
+
+    var instance = 0,
+        handler = isFunction(evaluator) ? evaluator
+                                        : (instance = 1, evaluator.handleEvent),
+        // split token (ignore capture[+])
+        //      "namespace.click+"
+        //              v
+        //      ["namespace.click+", "namespace", "click", "+"]
+        token     = uuevent.parse.exec(eventTypeEx),
+        ns        = token[1], // "namespace"
+        eventType = token[2], // "click"
+        capture   = 0,
+        fixEventType = uulive.fix[eventType] || eventType;
+
+    evaluator.liveClosure = _liveClosure;
+
+    __data__ || (__data__ = live.db[expr + "\v" + eventTypeEx] = {
+        s: expr,
+        ns: ns,
+        ex: eventTypeEx,
+        unbind: []
+    });
+
+//{{{!mb
+    if (_gecko) {
+        if (eventType === "focus" || eventType === "blur") {
+            capture = 1;
+        }
+    }
+//}}}!mb
+
+    __data__.unbind.push(function() {
+        uueventdetach(doc, fixEventType, _liveClosure, capture);
+    });
+    uueventattach(doc, fixEventType, _liveClosure, capture);
+
+//{{{!mb
+    if (_ie) {
+        if (/submit$/.test(eventType)) {
+            uulive(expr + " input[type=submit]," +
+                   expr + " input[type=image]",
+                   eventTypeEx.replace(/submit$/, "click"), evaluator, __data__);
+
+        } else if (/change$/.test(eventType)) { // "change"
+            uulive(expr,
+                   eventTypeEx.replace(/change$/, "focus"), function(event) {
+                       uuevent(event.srcElement, "uulive.change", evaluator);
+                   }, __data__);
+
+            uulive(expr,
+                   eventTypeEx.replace(/change$/, "blur"), function(event) {
+                       uueventunbind(event.srcElement, "uulive.change");
+                   }, __data__);
+        }
+    }
+//}}}!mb
+}
+uulive.db = {}; // { "expr\vnamespace.click": {...}, ... }
+uulive.fix =
+//{{{!mb
+            _ie ? { focus: "focusin", blur: "focusout" } :
+//}}}!mb
+            _webkit ? { focus: "DOMFocusIn", blur: "DOMFocusOut" } : {};
+
+// uu.live.has
+function uulivehas(expr,          // @param CSSSelectorExpressionString: "css > selector"
+                   eventTypeEx) { // @param EventTypeExString: "namespace.click"
+    var db = uulive.db[expr + "\v" + eventTypeEx];
+
+    return db && expr === db.s && eventTypeEx === db.ex;
+}
+
+// uu.unlive
+function uuunlive(expr,          // @param CSSSelectorExpressionString(= void 0): "css > selector"
+                  eventTypeEx) { // @param String(= void 0): "namespace.click"
+    function run(fn) {
+        fn();
+    }
+    var db = uulive.db,
+        ns, data, i, unbind,
+        mode = !expr    ? 1 : // [1]
+               !eventTypeEx ? 2 : // [2]
+               eventTypeEx.indexOf("*") < 0 ? 3 :  // [3][5]
+               (ns = eventTypeEx.slice(0, -2), 4); // [4] "namespace.*" -> "namespace"
+
+    for (i in db) { // i = "expr\vnamespace.click"
+        data = db[i]; // data = { s:expr, ns:ns, ex:eventTypeEx, unbind:[closure] }
+        unbind = 1;
+        switch (mode) {
+        case 2: unbind = expr === data.s; break; // [2]
+        case 3: unbind = expr === data.s && eventTypeEx === data.ex; break; // [3][5]
+        case 4: unbind = expr === data.s && ns === data.ns; // [4]
+        }
+        if (unbind) {
+            uueach(data.unbind, run);
+            delete db[i];
+        }
+    }
+}
+//}}}!live
 
 // --- READY ---
 // uu.ready - hook event
@@ -3453,6 +3879,96 @@ function uulog(log                      // @param Mix: log data
 }
 uulog.max = 30; // max items
 
+//  [1][test]           uu.ok("title", 1, "===", 1, "more info")
+//  [2][add separater]  uu.ok("separater comment")
+//  [3][get/show score] uu.ok() -> { ok, ng, total, ms }
+
+// uu.ok - unit test
+//{{{!unittest
+function uuok(title,    // @param String: title
+              lhs,      // @param Mix: left handset
+              operator, // @param String: operator
+              rhs,      // @param Mix(= void): right handset
+              more) {   // @param String(= void): more info
+                        // @throws Error from judge()
+    var rv, r, tm, db = uuok.db, ary, i, iz, v, ol;
+
+    if (operator) {
+        tm = +new Date;
+        r = judge(lhs, operator, rhs);
+        tm = ((+new Date) - tm);
+        ++db[r ? "ok" : "ng"];
+        ++db.total;
+        db.ms += tm;
+        db.row.push([title, r, uuf("{ ?? ?? ?? }( ??ms )",
+                                   uujson(lhs, _true), operator,
+                                   rhs ? uujson(rhs, _true) : "", tm),
+                               more || ""]);
+    } else if (isString(title)) {
+        db.row.push([title, 2, "", ""]);
+    } else {
+        rv = uuclone(db);
+        db.ng && uucss(doc.body, { bgc: uuok.bgc[0] });
+        ol = uuid("uuok") || doc.body[_appendChild](uu.ol({ id: "uuok" }));
+
+        for (ary = db.row, i = 0, iz = ary.length; i < iz; ++i) {
+            v = ary[i];
+            uunodeadd(
+                uu.li({}, { bgc: uuok.bgc[v[1] + ((i % 2) * 4)] },
+                    uu.span({}, { "font-weight": "bold" }, uutext(v[0] + ":")),
+                    uutext(v[2] + " " + v[3])), ol);
+        }
+        uuok.db = { ok: 0, ng: 0, total: 0, ms: 0, row: [] }; // reset
+        return rv;
+    }
+}
+uuok.db = { ok: 0, ng: 0, total: 0, ms: 0, row: [] };
+uuok.bgc = { 0: "#fcd", 1: "#dfc", 2: "#80c65a", 4: "#fac", 5: "#cfa", 6: "#72bf47" };
+
+// inner -
+function judge(lhs,      // @param Mix: left hand set
+               operator, // @param String: operator
+               rhs) {    // @param Mix(= void): right hand set
+                         // @return Number: 0 is false, 1 is true
+                         // @throws Error("BAD_OPERATOR")
+    var rv, ope = uutrim(operator.toUpperCase(), "");
+
+    if (ope === "===") {
+        rv = lhs.valueOf() == rhs.valueOf();
+    } else if (ope === "!==") {
+        rv = lhs.valueOf() != rhs.valueOf();
+    } else {
+        switch (ope) {
+        case "IS":
+        case "==":  rv =  uulike(lhs, rhs); break;
+        case "!=":  rv = !uulike(lhs, rhs); break;
+        case ">":   rv = lhs >  rhs; break;
+        case ">=":  rv = lhs >= rhs; break;
+        case "<":   rv = lhs <  rhs; break;
+        case "<=":  rv = lhs <= rhs; break;
+        case "&&":  rv = !!(lhs && rhs); break;
+        case "||":  rv = !!(lhs || rhs); break;
+        case "HAS": rv = isString(lhs) ? lhs.indexOf(rhs) > 0
+                                       : uuhas(lhs, rhs); break;
+        case "ISNAN":     rv = isNaN(lhs); break;
+        case "ISTRUE":    rv = !!lhs; break;
+        case "ISFALSE":   rv =  !lhs; break;
+        case "ISERROR":   try { fn(), rv = 0; } catch(err) { rv = 1; } break;
+        case "ISINFINITY":rv = !isFinite(lhs); break;
+        case "INSTANCEOF":rv = lhs instanceof rhs; break;
+        default:
+            ope = ope[_replace](/IS/, "");
+            rv = isFunction(uutype[ope]) ? uutype[ope](lhs, ope) // extend types
+               : uutype[ope] ? uutype(lhs) === uutype[ope] : 2;
+            if (rv === 2) {
+                throw new Error("BAD_OPERATOR " + operator);
+            }
+        }
+    }
+    return +rv;
+}
+//}}}!unittest
+
 // --- JSON ---
 // uu.json - mix to JSONString
 function uujson(source, // @param Mix:
@@ -3627,10 +4143,10 @@ function datehashgmt() { // @return RFC1123DateString: "Wed, 16 Sep 2009 16:18:1
 //{{{!color
 // uu.Class.Color
 function Color(r, g, b, a) {
-    this.r = r = r & 255;
-    this.g = g = g & 255;
-    this.b = b = b & 255;
-    this.a = a = (a < 0) ? 0 : (a > 1) ? 1 : a;
+    this.r = r = (r < 0 ? 0 : r > 255 ? 255 : r) | 0;
+    this.g = g = (g < 0 ? 0 : g > 255 ? 255 : g) | 0;
+    this.b = b = (b < 0 ? 0 : b > 255 ? 255 : b) | 0;
+    this.a = a =  a < 0 ? 0 : a >   1 ?   1 : a;
     this.hex = "#" + _num2hh[r] + _num2hh[g] + _num2hh[b];
     this.rgba = "rgba(" + r + "," + g + "," + b + "," + a + ")";
 }
@@ -3638,57 +4154,64 @@ Color[_prototype] = {
     toString:   function() { // @return String: "#000000" or "rgba(0,0,0,0)"
                     return uuready.color.rgba ? this.rgba : this.hex;
                 },
-    toGray:     function() { // @return Color:
+    hsla:       function() { // @return Hash: { h, s, l, a }
+                    return rgba2hsla(this.r, this.g, this.b, this.a);
+                },
+    gray:       function() { // @return Color:
                     return new Color(this.g, this.g, this.g, this.a);
                 },
-    toSepia:    function() { // @return Color:
-                    var r = this.r, g = this.g, b = this.b,
-                        y = 0.2990 * r + 0.5870 * g + 0.1140 * b,
+    sepia:      function() { // @return Color:
+                    var y = 0.2990 * this.r + 0.5870 * this.g + 0.1140 * this.b,
                         u = -0.091, v = 0.056;
 
-                    r = y + 1.4026 * v;
-                    g = y - 0.3444 * u - 0.7114 * v;
-                    b = y + 1.7330 * u;
-                    return new Color(r * 1.2, g, b * 0.8, this.a);
+                    return new Color((y + 1.4026 * v) * 1.2,
+                                      y - 0.3444 * u - 0.7114 * v,
+                                     (y + 1.7330 * u) * 0.8, this.a);
                 },
-    toComple:   function() { // @return Color:
+    comple:     function() { // @return Color:
                     return new Color(this.r ^ 255, this.g ^ 255,
                                      this.b ^ 255, this.a);
                 },
-    arrange:    // Color.arrange - arrangemented color(Hue, Saturation and Value)
+    arrange:    // Color.arrange - arrangemented color(Hue, Saturation and Lightness)
                 //    Hue is absolure value,
-                //    Saturation and Value is relative value.
+                //    Saturation and Lightness is relative value.
                 function(h,   // @param Number(= 0): Hue (-360~360)
                          s,   // @param Number(= 0): Saturation (-100~100)
-                         v) { // @param Number(= 0): Value (-100~100)
+                         l) { // @param Number(= 0): Lightness (-100~100)
                               // @return Color:
-                    var rv = toHSVA(this.r, this.g, this.b);
+                    var rv = rgba2hsla(this.r, this.g, this.b, this.a);
 
                     rv.h += h;
                     rv.h = (rv.h > 360) ? rv.h - 360 : (rv.h < 0) ? rv.h + 360 : rv.h;
                     rv.s += s;
                     rv.s = (rv.s > 100) ? 100 : (rv.s < 0) ? 0 : rv.s;
-                    rv.v += v;
-                    rv.v = (rv.v > 100) ? 100 : (rv.v < 0) ? 0 : rv.v;
-                    return hsvaToColor(rv.h, rv.s, rv.v, this.a);
+                    rv.l += l;
+                    rv.l = (rv.l > 100) ? 100 : (rv.l < 0) ? 0 : rv.l;
+                    return hsla2color(rv.h, rv.s, rv.l, rv.a);
                 }
 };
-uuclass.Color = Color;
+uuclass.Color = Color; // uu.Class.Color
 
-//  [1][Color]             uu.color(ColorHash) -> ColorHash
-//  [2][W3CNamedColor to hash] uu.color("black")   -> Color
-//  [3]["#000..." to hash]     uu.color("#000")    -> Color
-//  [4]["rgba(,,,,)" to hash]  uu.color("rgba(0,0,0,1)") -> Color
-//  [5]["hsla(,,,,) to hash]   uu.color("hsla(360,100%,100%,1)") -> Color
+//  [1][Color]                     uu.color(Color)               -> Color
+//  [2][RGBAHash/HSLAHash to hash] uu.color({ h:0,s:0,l:0,a:1 }) -> Color
+//  [3][W3CNamedColor to hash]     uu.color("black")             -> Color
+//  [4]["#000..." to hash]         uu.color("#000")              -> Color
+//  [5]["rgba(,,,,)" to hash]      uu.color("rgba(0,0,0,1)")     -> Color
+//  [6]["hsla(,,,,) to hash]       uu.color("hsla(360,1%,1%,1)") -> Color
 
 // uu.color - parse color
-function uucolor(expr) { // @parem Color/String: "black", "#fff", "rgba(0,0,0,0)"
+function uucolor(expr) { // @parem Color/HSLAHash/RGBAHash/String: "black", "#fff", "rgba(0,0,0,0)"
                          // @return Color:
     var rv, m, n, r, g, b, a = 1;
 
     if (expr instanceof Color) {
         return expr;
     }
+    if (typeof expr !== _string) {
+        return "l" in expr ? hsla2color(expr.h, expr.s, expr.l, expr.a) // HSLAHash
+                           : new Color(expr.r, expr.g, expr.b, expr.a); // RGBAHash
+    }
+    expr = expr[_toLowerCase]();
     if ( (rv = uucolor.db[expr] || uucolor.cache[expr]) ) {
         return rv;
     }
@@ -3696,7 +4219,7 @@ function uucolor(expr) { // @parem Color/String: "black", "#fff", "rgba(0,0,0,0)
         n = expr.length > 4 ? parseInt(m[1], 16)
                             : (m = m[1].split(""),
                                parseInt(m[0]+m[0] + m[1]+m[1] + m[2]+m[2], 16));
-        r = n >> 16, g = n >> 8, b = n;
+        r = n >> 16, g = (n >> 8) & 255, b = n & 255;
     } else if ( (m = uucolor.rex.rgba.exec(uutrim(expr, "")) ) ) {
         n = m[1] === "rgb" ? 2.555 : 1;
         r = m[3] ? m[2] * n : m[2];
@@ -3704,7 +4227,7 @@ function uucolor(expr) { // @parem Color/String: "black", "#fff", "rgba(0,0,0,0)
         b = m[7] ? m[6] * n : m[6];
         a = m[8] ? parseFloat(m[8]) : 1;
         if (n === 1) {
-            return fromHSLA(r, g, b, a);
+            return hsla2color(r, g, b, a);
         }
     }
     return uucolor.cache[expr] = new Color(r, g, b, a);
@@ -3712,8 +4235,9 @@ function uucolor(expr) { // @parem Color/String: "black", "#fff", "rgba(0,0,0,0)
 uucolor.db = { transparent: new Color(0, 0, 0, 0) };
 uucolor.cache = {}; // { "#123": Color, ... }
 uucolor.rex = {
-    hex: /^#([\da-f]{3}(?:[\da-f]{3})?)$/i, // #fff or #ffffff
-    rgba: /^(rgb|hsl)a?\(([\d\.]+)(%)?,([\d\.]+)(%)?,([\d\.]+)(%)?(?:,([\d\.]+))?\)$/i,
+//  hex: /^#([\da-f]{3}(?:[\da-f]{3})?)$/, // #fff or #ffffff
+    hex: /^#([\da-f]{3}([\da-f]{3})?)$/, // #fff or #ffffff [OPERA10+] bugfix
+    rgba: /^(rgb|hsl)a?\(([\d\.]+)(%)?,([\d\.]+)(%)?,([\d\.]+)(%)?(?:,([\d\.]+))?\)$/,
     trim: /\s+/g
 };
 
@@ -3722,76 +4246,48 @@ function uucolorrandom(a) { // @param Number(= 1): alpha
                             // @return Color:
     var n = (Math.random() * 0xffffff) | 0;
 
-    return new Color(n >> 16, n >> 8, n, a || 1);
+    return new Color(n >> 16, (n >> 8) & 255, n & 255, a === 0 ? 0 : (a || 1));
 }
 
 // uu.color.add
 function uucoloradd(src) { // @param String: "000000black,..."
-    var ary = src.split(","), i = 0, iz = ary.length, v, num;
+    var ary = src.split(","), i = 0, iz = ary.length, v, n;
 
     for (; i < iz; ++i) {
         v = ary[i];
-        num = parseInt(v.slice(0, 6), 16);
-        uucolor.db[v.slice(6)] = new Color(num >> 16, num >> 8, num, 1);
+        n = parseInt(v.slice(0, 6), 16);
+        uucolor.db[v.slice(6)] = new Color(n >> 16, (n >> 8) & 255, n & 255, 1);
     }
 }
 
-// inner RGB to HSVAHash
-function toHSVA(r, g, b) { // @return HSVAHash: { h:360, s:100, v:100, a:1.0 }
-    r = r / 255;
-    g = g / 255;
-    b = b / 255;
+// inner - RGBA to HSLAHash
+function rgba2hsla(r, g, b, a) { // @return Hash: { h, s, l, a }
+    r = r / 255, g = g / 255, b = b / 255;
 
     var max = (r > g && r > b) ? r : g > b ? g : b,
         min = (r < g && r < b) ? r : g < b ? g : b,
         diff = max - min,
-        h = 0,
-        s = max ? ((diff / max * 100) + 0.5) | 0 : 0,
-        v = ((max * 100) + 0.5) | 0;
+        h = 0, s = 0, l = (min + max) * 0.5;
 
-    if (s) {
-        h = (r === max) ? ((g - b) * 60 / diff) :
-            (g === max) ? ((b - r) * 60 / diff + 120)
-                        : ((r - g) * 60 / diff + 240);
+    if (l > 0 && l < 1) {
+        s = diff / (l < 0.5 ? l * 2 : 2 - (l * 2));
     }
-    return { h: h < 0 ? h + 360 : h, s: s, v: v };
-}
-
-// inner - HSVA to Color
-function hsvaToColor(h, s, v, a) { // @param HSVAHash:
-                                       // @return Color:
-    h = (h >= 360) ? 0 : h;
-    s = s * 0.01;
-    v = v * 2.55;
-
-    var r = 0, g = 0, b = 0, f, p, q, t, w;
-
-    h = h / 60;
-    f = h - (h | 0);
-    if (s) {
-        p = (((1 - s)             * v) + 0.5) | 0;
-        q = (((1 - (s * f))       * v) + 0.5) | 0;
-        t = (((1 - (s * (1 - f))) * v) + 0.5) | 0;
-        w = (                       v  + 0.5) | 0;
-        switch (h | 0) {
-        case 0: r = w; g = t; b = p; break;
-        case 1: r = q; g = w; b = p; break;
-        case 2: r = p; g = w; b = t; break;
-        case 3: r = p; g = q; b = w; break;
-        case 4: r = t; g = p; b = w; break;
-        case 5: r = w; g = p; b = q;
+    if (diff > 0) {
+        if (max === r && max !== g) {
+            h += (g - b) / diff;
+        } else if (max === g && max !== b) {
+            h += (b - r) / diff + 2;
+        } else if (max === b && max !== r) {
+            h += (r - g) / diff + 4;
         }
-    } else {
-        r = g = b = (v + 0.5) | 0;
+        h *= 60;
     }
-    return new Color(r, g, b, a);
+    return { h: h, s: (s * 100 + 0.5) | 0, l: (l * 100 + 0.5) | 0, a: a };
 }
 
-// inner - fromHSLA to Color - ( h: 0-360, s: 0-100, l: 0-100, a: alpha )
-function fromHSLA(h, s, l, a) { // @return Color:
-    h = (h === 360) ? 0 : h;
-    s = s / 100;
-    l = l / 100;
+// inner - HSLA to Color - ( h: 0-360, s: 0-100, l: 0-100, a: alpha )
+function hsla2color(h, s, l, a) { // @return Color:
+    h = (h === 360) ? 0 : h, s = s / 100, l = l / 100;
 
     var r = 0, g = 0, b = 0, s1, s2, l1, l2;
 
@@ -3954,6 +4450,7 @@ function uuimagesize(node) { // @param HTMLImageElement:
 
 // --- SVG ---
 // uu.svg - <svg:svg>
+//{{{!svg
 function uusvg(x,        // @param Number: Has no meaning or effect on outermost 'svg' elements
                y,        // @param Number: Has no meaning or effect on outermost 'svg' elements
                width,    // @param Number: For outermost 'svg' elements, the intrinsic
@@ -3967,14 +4464,17 @@ function uusvg(x,        // @param Number: Has no meaning or effect on outermost
                          // @return SVGNode: <svg:svg>
     return uunode("svg:svg", arguments, ["x", "y", "w", "h"], uuattr);
 }
+//}}}!svg
 
 // --- CANVAS ---
 // uu.canvas - <canvas>
+//{{{!canvas
 function uucanvas(width,    // @param Number(= 300):
                   height) { // @param Number(= 150):
                             // @return Node: <canvas>
     return uunode("canvas", arguments, ["w", "h"], uuattr);
 }
+//}}}!canvas
 
 // --- FLASH ---
 //  <object id="external..." width="..." height="..." data="*.swf" classid="...">
@@ -3987,6 +4487,7 @@ function uucanvas(width,    // @param Number(= 300):
 //  </embed>
 //
 // uu.flash - create flash <object> node
+//{{{!flash
 //{{{!mb
 function uuflash(url,      // @param String: url
                  option) { // @param FlashOptionHash(= { param: { allowScriptAccess: "always" } }):
@@ -4021,6 +4522,7 @@ function uuflash(url,      // @param String: url
     return _ie ? uuid(id) : doc.getElementsByName(id)[0];
 }
 //}}}!mb
+//}}}!flash
 
 // --- OTHER ---
 // uu.guid - get unique number
@@ -4211,6 +4713,7 @@ function outerHTMLSetter(html) {
 
 // --- NodeSet ---
 // NodeSet class
+//{{{!nodeset
 function NodeSet(expr,      // @param NodeSet/Node/NodeArray/String/window:
                  context) { // @param NodeSet/Node(= void 0): context
     this.stack = [[]]; // [NodeSet, ...]
@@ -4242,6 +4745,12 @@ NodeSet[_prototype] = {
     add:            NodeSetAdd,         // NodeSet.add(source:Node/DocumentFragment/HTMLFragment/TagName = "div",
                                         //             position:String = ".$"):NodeSet
 //  remove:         NodeSetRemove,      // NodeSet.remove() -> NodeSet
+    // --- LIVE EVENT ---
+//  live:           NodeSetLive,        // NodeSet.live(CSSSelectorExpressionString:String,
+//                                      //              eventTypeEx:EventTypeExString,
+//                                      //              evaluator:Function/Instance):NodeSet
+//  unlive:         NodeSetUnlive,      // NodeSet.unlive(CSSSelectorExpressionString:String = void,
+//                                      //                eventTypeEx:EventTypeExString = void):NodeSet
     // --- ATTRIBUTE, CSS, Node.className ---
 //  attr:           NodeSetAttr,        // NodeSet.attr(key:String/Hash = void,
                                         //              value:String = void):NodeSet/Array
@@ -4369,6 +4878,10 @@ function NodeSetIter(iterType,  // @param Number: 0 is forEach, 1 is map
 // forEach(iter = 0)
 uueach({    bind:       uuevent,
             unbind:     uueventunbind,
+//{{{!live
+            live:       uulive,
+            unlive:     uuunlive,
+//}}}!live
             hover:      uueventhover,
             cyclic:     uueventcyclic,
             fx:         uufx,
@@ -4394,6 +4907,7 @@ uueach( {
         return NodeSetIter(1, this, fn, a, b);
     };
 });
+//}}}!nodeset
 
 // --- initialize ---
 
@@ -4402,9 +4916,11 @@ uueach(uuevent.shortcut, function(eventType) {
     uu[eventType] = function(node, fn) { // uu.click(node, fn) -> node
         return uuevent(node, eventType, fn);
     };
+//{{{!nodeset
     NodeSet[_prototype][eventType] = function(fn) { // uu("li").click(fn) -> NodeSet
         return NodeSetIter(0, this, uuevent, eventType, fn);
     };
+//}}}!nodeset
 });
 
 //{{{!mb

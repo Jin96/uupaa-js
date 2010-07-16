@@ -24,7 +24,6 @@ html, body {
 <script src="../../src/uupaa.js"></script>
 <script src="../../src/fx/easing.js"></script>
 <script src="../../src/fx/fx.js"></script>
-<script src="../../src/css/text.js"></script>
 <script>
 var duration = 300;
 var range = 200;
@@ -108,7 +107,7 @@ uu.ready(function(uu) {
               highlight: highlight }, function(fn, key) {
 
         uu.node.add(
-            uu.css.textSelectable(
+            uu.css.selectable(
                 uu.click(
                     uu.div({ cn: "box" }, { x: x, y: y + 40 }, uu.text(key)), fn)), uu.id("absolutebox"));
 
@@ -122,7 +121,7 @@ uu.ready(function(uu) {
     uu.each({ puff: puff, shrink: shrink }, function(fn, key) {
 
         uu.node.add(
-            uu.css.textSelectable(
+            uu.css.selectable(
                 uu.click(
                     uu.div({ cn: "box static" }, { cssFloat: "left" }, uu.text(key)), fn)), uu.id("staticbox"), "+");
     });

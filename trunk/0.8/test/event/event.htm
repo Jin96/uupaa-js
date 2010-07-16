@@ -45,20 +45,14 @@ html,body {
 
 </style>
 <script src="../../src/uupaa.js"></script>
-<script src="../../src/event/edge.js"></script>
-<script src="../../src/event/key.js"></script>
 <script>
 uu.ready(function(uu) {
-    uu.node.builder(function(uu, node) {
-        uu.event(node, "mousedown", uu("Button"));
-        uu.event(node, "mousewheel", uu("Wheel"));
-    });
 
     uu.Class("Button", {
         handleEvent: function(event) {
             uu.text(uu.id("log"),
-                    uu.format("type:??, xtype:??, xbutton:??",
-                              event.type, event.xtype, event.xbutton));
+                    uu.format("type:??, code:??, button:??",
+                              event.type, event.code, event.button));
         }
     });
 
@@ -77,8 +71,8 @@ uu.ready(function(uu) {
     uu.Class("Wheel", {
         handleEvent: function(event) {
             uu.text(uu.id("log"),
-                    uu.format("type:??, xtype:??, xwheel:??",
-                              event.type, event.xtype, event.xwheel));
+                    uu.format("code:??, wheel:??, type:??",
+                              event.code, event.wheel, event.type));
         }
     });
 
@@ -87,17 +81,40 @@ uu.ready(function(uu) {
             var keyCode = uu.event.key(event);
 
             uu.text(uu.id("log"),
-                    uu.format("type:??, xtype:??, keyCode:??, key:??",
-                              event.type, event.xtype, keyCode.code, keyCode.key));
+                    uu.format("code:??, keyCode:??, key:??, type:??",
+                              event.code, keyCode.code, keyCode.key, event.type));
         }
     });
 
+/*
+    uu.node.builder(function(uu, node) {
+        uu.event(node, "mousedown", uu("Button"));
+        uu.event(node, "mousewheel", uu("Wheel"));
+    });
+ */
+
+/*
     var div;
     uu.body(
             div = uu.div("class,ans", "ans",
                 uu.div("class,absolute", "absolute", 1),
                 uu.div("class,relative", "relative", 2),
                 uu.div("class,fixed",    "fixed",    3)));
+ */
+    var div1, div2, div3;
+    uu.body(
+        uu.div({cn: "ans"}, "ans",
+            div1 = uu.div({cn:"absolute"}, uu.text("absolute")),
+            div2 = uu.div({cn:"relative"}, uu.text("relative")),
+            div3 = uu.div({cn:"fixed"},    uu.text("fixed"))));
+
+    uu.event(div1, "mousedown", uu("Button"));
+    uu.event(div1, "mousewheel", uu("Wheel"));
+    uu.event(div2, "mousedown", uu("Button"));
+    uu.event(div2, "mousewheel", uu("Wheel"));
+    uu.event(div3, "mousedown", uu("Button"));
+    uu.event(div3, "mousewheel", uu("Wheel"));
+
 
     uu.event(document.body, "mousemove+", uu("MousePosition"));
     uu.event(uu.id("box"), "keydown,keypress,keyup", uu("Key"));
