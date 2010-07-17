@@ -8,8 +8,17 @@ uu.fx() と !NodeSet.fx() は CSSプロパティを連続的に変化させるCS
 
 uu.fx() と !NodeSet.fx() は uupaa.js に最初から組み込まれています。
 
+uu.fxを特殊化した以下の関数があります。
+  * uu.fx.fade        !NodeSet.fade
+  * uu.fx.puff        !NodeSet.puff
+  * uu.fx.flare       !NodeSet.flare
+  * uu.fx.shrink      !NodeSet.shrink
+  * uu.fx.movein      !NodeSet.movein
+  * uu.fx.moveout     !NodeSet.moveout
+  * uu.fx.highlight   !NodeSet.highlight
+
 uu.fx で easing 関数を利用するには以下のファイルが必要です。
-  * src/fx/easing.js
+  * src/misc/easing.js
 
 easing.js をロードすると、以下の関数が追加されます。
   * Math.linear, Math.linearTween
@@ -23,29 +32,6 @@ easing.js をロードすると、以下の関数が追加されます。
   * Math.easeInElastic, Math.easeOutElastic, Math.easeInOutElastic, Math.easeOutInElastic
   * Math.easeInBack, Math.easeOutBack, Math.easeInOutBack, Math.easeOutInBack
   * Math.easeInBounce, Math.easeOutBounce, Math.easeInOutBounce, Math.easeOutInBounce
-
-色を変化させるには以下のファイルが必要です。
-  * src/color/color.js
-
-より多くのアニメーションを利用するには以下のファイルが必要です。
-  * src/fx/fx.js
-  * src/node/clone.js
-
-src/fx/fx.js をロードすると、以下の関数が追加されます。
-  * uu.fx.fade
-  * uu.fx.puff
-  * uu.fx.flare
-  * uu.fx.shrink
-  * uu.fx.movein
-  * uu.fx.moveout
-  * uu.fx.highlight
-  * !NodeSet.fade
-  * !NodeSet.puff
-  * !NodeSet.flare
-  * !NodeSet.shrink
-  * !NodeSet.movein
-  * !NodeSet.moveout
-  * !NodeSet.highlight
 
 = API =
 
