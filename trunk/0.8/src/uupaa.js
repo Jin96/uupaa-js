@@ -1778,6 +1778,158 @@ function uufxisbusy(node) { // @param Node:
 
     return data && data.id;
 }
+
+// uu.fx.fade - fadeout / fadein
+function uufxfade(node,     // @param Node:
+                  duration, // @param Number: duration
+                  option) { // @param Hash(= {}):
+    return uufx(node, duration, uuarg(option, { init: function(node, option) {
+            uumix(option, { o: uucssopacity(node) < 0.5 ? 1 : 0 });
+        }}));
+}
+
+// uu.fx.puff - zoom out and fadeout
+function uufxpuff(node,     // @param Node:
+                  duration, // @param Number: duration
+                  option) { // @param Hash(= {}):
+    return uufx(node, duration, uuarg(option, { init: function(node, option) {
+            var cs = uucss(node, _true);
+
+            uumix(option, { w: "*1.5", h: "*1.5", o: 0,
+                            x: "-" + parseInt(cs[_width])  * 0.25,
+                            y: "-" + parseInt(cs[_height]) * 0.25 },
+                  _ver.jit ? { fs: "*1.5" } : {});
+        }}));
+}
+
+// uu.fx.flare - flare
+function uufxflare(node,     // @param Node:
+                   duration, // @param Number: duration
+                   option) { // @param Hash(= { parts: 10, range: 200 }):
+    return uufx(node, duration, uuarg(option, {
+        o:      0,
+        parts:  10,
+        range:  200,
+        init: function(node, option) {
+            var cs = uucss(node, _true),
+                x = parseInt(cs.left),
+                y = parseInt(cs.top),
+                newNode, i = 0, angle,
+                p = uumix({}, option, {
+                    w: parseInt(cs[_width])  * 1.5,
+                    h: parseInt(cs[_height]) * 1.5,
+                    css: cs,
+                    init: 0 // disable
+                }),
+                parts = (360 / p.parts) | 0;
+
+            _ver.jit && (p.fs = parseInt(cs.fontSize) * 1.5);
+
+            for (; i < 360; i += parts) {
+                newNode = node[_parentNode][_appendChild](uunodeclone(node, _true));
+                angle = i * Math.PI / 180;
+
+                uufx(newNode, duration, uuarg(p, {
+                    x: Math.cos(angle) * p.range + x,
+                    y: Math.sin(angle) * p.range + y,
+                    init: function(newNode) {
+                        uucssopacity(newNode, 0.5);
+                    },
+                    after: function(newNode, option, back) {
+                        back || node[_parentNode].removeChild(newNode);
+                    }
+                }));
+            }
+        }
+    }));
+}
+
+// uu.fx.shrink - shrink
+function uufxshrink(node,     // @param Node:
+                    duration, // @param Number: duration
+                    option) { // @param Hash(= {}):
+    return uufx(node, duration, uuarg(option, { init: function(node, option) {
+            var cs = uucss(node, _true);
+
+            uumix(option, { w: 0, h: 0, o: 0,
+                            x: "-" + parseInt(cs[_width])  * 0.5,
+                            y: "-" + parseInt(cs[_height]) * 0.5, fs: "*0.5" });
+        }}));
+}
+
+// uu.fx.movein - movein + fadein
+function uufxmovein(node,     // @param Node:
+                    duration, // @param Number: duration
+                    option) { // @param Hash(= { degree: 0, range: 200 }):
+    return uufx(node, duration, uuarg(option, {
+            degree: 0,
+            o:      1,
+            init:   function(node, option) {
+                var cs = uucss(node, _true), style = node.style,
+                    angle, endX, endY, fs, w, h, o, range = option.range || 200;
+
+                angle = option.degree * Math.PI / 180;
+                endX = parseInt(cs.left);
+                endY = parseInt(cs.top);
+                if (_ver.jit) {
+                    fs = parseInt(cs.fontSize);
+                }
+                w = parseInt(cs[_width]);
+                h = parseInt(cs[_height]);
+                o = uucssopacity(node);
+                style.left   = (Math.cos(angle) * range + endX) + "px";
+                style.top    = (Math.sin(angle) * range + endY) + "px";
+                style[_width]  = (w * 1.5) + "px";
+                style[_height] = (h * 1.5) + "px";
+                if (_ver.jit) {
+                    style.fontSize = (fs * 1.5) + "px";
+                }
+                uucssopacity(node, 0);
+
+                _ver.jit && (option.fs = fs);
+                uumix(option, { w: w, h: h, x: endX, y: endY });
+            }}));
+}
+
+// uu.fx.moveout - moveout + fadeout
+function uufxmoveout(node,     // @param Node:
+                     duration, // @param Number: duration
+                     option) { // @param Hash(= { degree: 0, range: 200 }):
+    return uufx(node, duration, uuarg(option, { init: function(node, option) {
+                var cs = uucss(node, _true), angle, endX, endY,
+                    range = option.range || 200;
+
+                angle = option.degree * Math.PI / 180;
+                endX = Math.cos(angle) * range + parseInt(cs.left);
+                endY = Math.sin(angle) * range + parseInt(cs.top);
+
+                uumix(option, { w: "*1.5", h: "*1.5", x: endX, y: endY },
+                      _ver.jit ? { fs: "*1.5" } : {});
+            }, degree: 0, o: 0 }));
+}
+
+// uu.fx.highlight - highlight color
+function uufxhighlight(node,     // @param Node:
+                       duration, // @param Number: duration
+                       option) {  // @param Hash(= { bgc: "#ff9", re: 1 }):
+    return uufx(node, duration,
+                uuarg(option, { bgc: "#ff9", begin: 1, reverse: 1 }));
+}
+
+uueach({
+        fade:           uufxfade,
+        puff:           uufxpuff,
+        flare:          uufxflare,
+        shrink:         uufxshrink,
+        movein:         uufxmovein,
+        moveout:        uufxmoveout,
+        highlight:      uufxhighlight
+    }, function(fn, name) {
+        uufx[name] = fn;
+        NodeSet[_prototype] = function(node, duration, option) {
+            return NodeSetIter(0, this, fn, node, duration, option);
+        }
+    });
 //}}}!fx
 
 // uu.css.opacity
