@@ -301,13 +301,19 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/ClassNameS
                                     //  [5][unbind namespace one] uu.unlive("selector", "namespace.click")
 //}}}!live
     // --- NODE / NodeList / NodeID ---
-    node:     uumix(uunode, {       // uu.node(tag:TagNameString = "div",
-                                    //         args:Array/Argeumtns = void,
-                                    //         typical:StringArray = void,
-                                    //         callback:Function = void):Node
+    node:     uumix(uunode, {       // uu.node(tag:TagNameString = "div", args:Array/Argeumtns = void,
+                                    //         typical:StringArray = void, callback:Function = void):Node
+                                    //  [1][add node]           uu.div(uu.div())         -> <div><div></div></div>
+                                    //  [2][add text node]      uu.div(uu.text("hello")) -> <div>hello</div>
+                                    //  [2][add text by string] uu.div("hello")          -> <div>hello</div>
+                                    //  [4][set attr by string] uu.div("class,hello")    -> <div class="hello"></div>
+                                    //  [5][set attr by hash]   uu.div({ cn: "hello" })  -> <div class="hello"></div>
+                                    //  [6][set css by string]  uu.div("", "color,red")  -> <div style="color:red"></div>
+                                    //  [7][set css by hash]    uu.div("", { c: "red" }) -> <div style="color:red"></div>
+                                    //  [8][callback]           uu.node.builder(callback)
+                                    //                          uu.div("@123")           -> callback(<div>, "123")
         add:        uunodeadd,      // uu.node.add(source:Node/DocumentFragment/HTMLFragment/TagName = "div",
-                                    //             context:Node = <body>,
-                                    //             position:String = ".$"):Node
+                                    //             context:Node = <body>, position:String = ".$"):Node
                                     //  [1][add div node]          uu.node.add()         -> <body><div /></body>
                                     //  [2][from tagName]          uu.node.add("p")      -> <body><p /></body>
                                     //  [3][from node]             uu.node.add(uu.div()) -> <body><div /></body>
@@ -342,6 +348,9 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/ClassNameS
         wrap:       uunodewrap,     // uu.node.wrap(innerNode:Node, outerNode:Node):Node (innerNode)
         clear:      uunodeclear,    // uu.node.clear(parent:Node):Node
         clone:      uunodeclone,    // uu.node.clone(parent:Node, quick:Boolean = false):Node
+        builder:    uunodebuilder,  // uu.node.builder(callback:Function)
+                                    //  [1][set   callback] uu.node.builder(callback(node, idnet))
+                                    //  [2][clear callback] uu.node.builder(null)
         remove:     uunoderemove,   // uu.node.remove(node:Node):Node
         indexOf:    uunodeindexof,  // uu.node.indexOf(node:Node):Number
         children:   uunodechildren, // uu.node.children(parent:Node):NodeArray
@@ -444,19 +453,8 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/ClassNameS
 //}}}!image
     // --- SVG ---
 //{{{!svg
-    svg:      uumix(uusvg, {        // uu.svg(x:Number, y:Number, width:Number, height:Number,
+    svg:            uusvg,          // uu.svg(x:Number, y:Number, width:Number, height:Number,
                                     //        *attr:Hash, *css:Hash):<svg:svg>
-        attr:       uuattr,         // uu.svg.attr(node:SVGNode, key:String/Hash = void,
-                                    //             value:String = void):String/Hash/Node
-                                    //  [1][get all pair]   uu.svg.attr(node) -> { key: value, ... }
-                                    //  [2][get value]      uu.svg.attr(node, key) -> "value"
-                                    //  [3][set pair]       uu.svg.attr(node, key, "value") -> node
-                                    //  [4][set pair]       uu.svg.attr(node, { key: "value", ... }) -> node
-                                    //  [5][remove attr]    uu.svg.attr(node, key, null) -> node
-        css:        uucss,          // uu.svg.css(...)
-        bind:       uuevent,        // uu.svg.bind(...)
-        unbind:     uueventunbind   // uu.svg.unbind(...)
-    }),
 //}}}!svg
     // --- CANVAS ---
 //{{{!canvas
@@ -1982,15 +1980,15 @@ function uucssselectable(node,    // @param Node:
 
 // StyleSheet.init
 function StyleSheetInit(id) { // @param String: style sheet id
-    var node = uunode("style", [{ id: id }]);
+    var node;
 
-    _webkit && node[_appendChild](doc[_createTextNode](""));
-    uuhead(node);
+    uuhead(node = uunode("style", [{ id: id }, _webkit ? " " : null]));
 
     this.ss = node.sheet
 //{{{!mb
-                         || node.styleSheet;
+                         || node.styleSheet; // [IE]
 //}}}!mb
+
     this.rules = {};
 }
 
@@ -1999,11 +1997,9 @@ function StyleSheetAdd(expr,   // @param Hash/String: { selector: declaration, .
                        decl) { // @param Hash(= void): "declaration"
     var ss = this.ss,
 //{{{!mb
-        ary, i, iz,
+        ary, i, iz, rex,
 //}}}!mb
         selector, declaration;
-
-    clearAllRules(this);
 
     for (selector in uumix(this.rules, isString(expr) ? uuhash(expr, decl)
                                                       : expr)) {
@@ -2016,8 +2012,13 @@ function StyleSheetAdd(expr,   // @param Hash/String: { selector: declaration, .
                           ss.cssRules.length);
 //{{{!mb
         } else { // [IE]
+            rex = _ver.ie6 ? /(?:\+>~)/ : 0;
             ary = selector.split(",");
             for (i = 0, iz = ary.length; i < iz; ++i) {
+                if (rex && rex.test(ary[i])) {
+                    // http://d.hatena.ne.jp/uupaa/20100717/1279297903
+                    throw new Error("BAD_SELECTOR");
+                }
                 ss.addRule(ary[i], declaration.trim());
             }
         }
@@ -3125,18 +3126,22 @@ function uureadyfire(readyEventType, // @param String: readyEventType
 
 // --- node ---
 
-//  [1][add node]       uu.node("div")                         -> <div>
-//  [2][add text node]  uu.node("div", [uu.text("hello")])     -> <div>hello</div>
-//  [3][set attr]       uu.node("div", [{ title: "hello" }])   -> <div title="hello">
-//  [4][set css]        uu.node("div", [{}, { color: "red" }]) -> <div style="color: red">
-//  [5][short cut]      uu.node("img", [100, 100], ["x", "y"], callback) -> <img x="100" y="100">
+//  [1][add node]           uu.div(uu.div())         -> <div><div></div></div>
+//  [2][add text node]      uu.div(uu.text("hello")) -> <div>hello</div>
+//  [2][add text by string] uu.div("hello")          -> <div>hello</div>
+//  [4][set attr by string] uu.div("class,hello")    -> <div class="hello"></div>
+//  [5][set attr by hash]   uu.div({ cn: "hello" })  -> <div class="hello"></div>
+//  [6][set css by string]  uu.div("", "color,red")  -> <div style="color:red"></div>
+//  [7][set css by hash]    uu.div("", { c: "red" }) -> <div style="color:red"></div>
+//  [8][callback]           uu.node.builder(callback)
+//                          uu.div("@123")           -> callback(<div>, "123")
 
 // uu.node - node builder
-function uunode(node,       // @param Node/TagNameString(= "div"): "div" or "svg:svg"
+function uunode(node,       // @param Node/SVGNode/TagNameString(= "div"): "div" or "svg:svg"
                 args,       // @param Array/Arguments(= void): [Node/String/Number/Hash, ...]
                 typical,    // @param StringArray(= void): ["x", "y"]
                 callback) { // @param Function(= void):
-                            // @return Node:
+                            // @return Node/SVGNode:
     node || (node = "div");
     node[_nodeType] || (node = node[_indexOf]("svg:")
                             ? doc[_createElement](node) // "div" -> <div>
@@ -3144,25 +3149,37 @@ function uunode(node,       // @param Node/TagNameString(= "div"): "div" or "svg
                                                   node.slice(4))); // "svg:g" -> <svg:g>
 
     if (args) {
-        var arg, i = 0, iz = args.length, token = 0, type,
+        var arg, i = 0, iz = args.length, token = 0, type, isstr, ident,
             ai = 0, hash = {};
 
         for (; i < iz; ++i) {
             arg = args[i];
             if (arg != null) { // null or undefined
-                type = typeof arg;
-
-                if (type === _number || type === _string) {
-                    typical && (hash[typical[ai++]] = arg); // [!] raise Error("MISSMATCH TYPICAL LENGTH")
-                } else if (arg[_nodeType]) { // [1][2]
+                if (arg[_nodeType]) { // node -> appendChild(node)
                     node[_appendChild](arg);
-                } else if (++token < 2) {
-                    uuattr(node, arg);
-                } else if (token < 3) {
-                    uucss(node, arg);
+                } else {
+                    isstr = (type = typeof arg) === _string;
+
+                    if (isstr && !arg[_indexOf]("@")) { // "@ident" -> callback(node, "ident")
+                        ident = arg.slice(1);
+                    } else {
+                        if (type === _number || (isstr && arg[_indexOf](",") < 0)) {
+                            if (typical) {
+                                hash[typical[ai++]] = arg; // uu.svg.svg("svg:svg", 100, 100)
+                            } else {
+                                node[_appendChild](doc[_createTextNode](arg)); // uu.div("hello")
+                            }
+                        } else if (++token < 2) {
+                            uuattr(node, isstr ? uuhash(arg) : arg);
+                        } else if (token < 3) {
+                            uucss(node,  isstr ? uuhash(arg) : arg);
+                        }
+                    }
                 }
             }
         }
+        ident && uunodebuilder.callback
+              && uunodebuilder.callback(node, ident);
         callback && ai && callback(node, hash);
     }
     return node;
@@ -3170,7 +3187,7 @@ function uunode(node,       // @param Node/TagNameString(= "div"): "div" or "svg
 // HTML4(a ~ ul) exclude <html><head><body>
 uutag.html4 = "a,b,br,dd,div,dl,dt,form,h1,h2,h3,h4,h5,h6,i,img,iframe," +
               "input,li,ol,option,p,pre,select,span,table,tbody,tr," +
-              "td,th,tfoot,textarea,u,ul";
+              "td,th,thead,tfoot,textarea,u,ul";
 // HTML5(abbr ~ video)
 uutag.html5 = "abbr,article,aside,audio,canvas,datalist," +
               "details,eventsource,figure,footer,header,hgroup," +
@@ -3179,11 +3196,14 @@ uutag.html5 = "abbr,article,aside,audio,canvas,datalist," +
 // inner - setup node builder - uu.div(), uu.a(), ...
 uueach((uutag.html4 + "," + uutag.html5).split(","), function(tag) {
     uu[tag] || (uu[tag] = function() { // @param Mix: var_args
-        return uunode(tag, arguments, ["t"], function(node, hash) {
-            node[_appendChild](uutext(hash.t));
-        });
+        return uunode(tag, arguments);
     });
 });
+
+// uu.node.builder - set Node builder callback
+function uunodebuilder(callback) { // @param Function: callback
+    uunodebuilder.callback = callback;
+}
 
 // uu.head
 function uuhead(/* var_args */) { // @param Mix: var_args
@@ -3194,9 +3214,7 @@ function uuhead(/* var_args */) { // @param Mix: var_args
 // uu.body
 function uubody(/* var_args */) { // @param Mix: var_args
                                   // @return Node: <body> node
-    return uunode(doc.body, arguments, ["t"], function(node, hash) {
-        node[_appendChild](uutext(hash.t));
-    });
+    return uunode(doc.body, arguments);
 }
 
 //  [1][add div node]          uu.node.add()         -> <body><div /></body>
