@@ -23,6 +23,9 @@ var _prototype = "prototype",
 //}}}!image
     _uuevent = "data-uuevent",
     _uutrans = "data-uutrans", // for uu.css.transform
+//{{{!cssbox
+    _uucssbox = "data-uucssbox", // for uu.css.box
+//}}}!cssbox
     _uunodeid = "data-uunodeid",
     // --- minify ---
     _addEventListener = "addEventListener",
@@ -213,6 +216,15 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/ClassNameS
                                     //  [5][convert pixel]  uu.css.unit(<div>, "auto") -> 100
                                     //  [6][convert pixel]  uu.css.unit(<div>, "auto", 0, "borderTopWidth") -> 0
         isShow:     uucssisshow,    // uu.css.isShow(node:Node/CSSProperties):Boolean
+        // --- CSS BOX MODEL ---
+//{{{!cssbox
+        box:        uucssbox,       // uu.css.box(node:Node, quick:Boolean = false, mbp:Number = 0x7):Hash
+        rect:       uucssrect,      // uu.css.rect(node:Node):Hash { x, y, offsetWidth, offsetHeight }
+        toStatic:   uucsstostatic,  // uu.css.toStatic(node:Node):Node
+        toAbsolute: uucsstoabsolute,// uu.css.toAbsolute(node:Node):Node
+        toRelative: uucsstorelative,// uu.css.toRelative(node:Node):Node
+//}}}!cssbox
+        // --- CSS3 ---
         opacity:    uucssopacity,   // uu.css.opacity(node:Node, value:Number/String):Number/Node
                                     //  [1][get opacity] uu.css.opacity(node) -> 0.5
                                     //  [2][set opacity] uu.css.opacity(node, 0.5) -> node
@@ -303,15 +315,24 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/ClassNameS
     // --- NODE / NodeList / NodeID ---
     node:     uumix(uunode, {       // uu.node(tag:TagNameString = "div", args:Array/Argeumtns = void,
                                     //         typical:StringArray = void, callback:Function = void):Node
-                                    //  [1][add node]           uu.div(uu.div())         -> <div><div></div></div>
-                                    //  [2][add text node]      uu.div(uu.text("hello")) -> <div>hello</div>
-                                    //  [2][add text by string] uu.div("hello")          -> <div>hello</div>
-                                    //  [4][set attr by string] uu.div("class,hello")    -> <div class="hello"></div>
-                                    //  [5][set attr by hash]   uu.div({ cn: "hello" })  -> <div class="hello"></div>
-                                    //  [6][set css by string]  uu.div("", "color,red")  -> <div style="color:red"></div>
-                                    //  [7][set css by hash]    uu.div("", { c: "red" }) -> <div style="color:red"></div>
-                                    //  [8][callback]           uu.node.builder(callback)
-                                    //                          uu.div("@123")           -> callback(<div>, "123")
+                                    //  [1][add node]            uu.div(uu.div())         -> <div><div></div></div>
+                                    //  [2][add text node]       uu.div(uu.text("hello")) -> <div>hello</div>
+                                    //  [2][add text by string]  uu.div("hello")          -> <div>hello</div>
+                                    //  [4][set attr by string]  uu.div("class,hello")    -> <div class="hello"></div>
+                                    //  [5][set attr by hash]    uu.div({ cn: "hello" })  -> <div class="hello"></div>
+                                    //  [6][set css by string]   uu.div("", "color,red")  -> <div style="color:red"></div>
+                                    //  [7][set css by hash]     uu.div("", { c: "red" }) -> <div style="color:red"></div>
+                                    //  [8][callback]            uu.node.builder(callback)
+                                    //                           uu.div("@123")           -> callback(<div>, "123")
+                                    //  [9][add SVGNode]         uu.svg.svg(uu.svg.g())       -> <svg:svg><svg:g></svg:g></svg:svg>
+                                    //  [10][add SVGText node]   uu.svg.svg(uu.svg.text("!")) -> <svg:svg><svg:text>!</svg:text></svg:svg>
+                                    //  [11][set attr by string] uu.svg.svg("class,hello")    -> <svg:svg class="hello"></svg:svg>
+                                    //  [12][set attr by hash]   uu.svg.svg({ cn: "hello" })  -> <svg:svg class="hello"></svg:svg>
+                                    //  [13][set typical attr]   uu.svg.svg(100, 100)         -> <svg:svg x="100" y="100"></svg:svg>
+                                    //  [14][set css by string]  uu.svg.svg("", "color,red")  -> <svg:svg style="color:red"></svg:svg>
+                                    //  [15][set css by hash]    uu.svg.svg("", { c: "red" }) -> <svg:svg style="color:red"></svg:svg>
+                                    //  [16][callback]           uu.node.builder(callback)
+                                    //                           uu.svg.svg("@123")           -> callback(<svg:svg>, "123")
         add:        uunodeadd,      // uu.node.add(source:Node/DocumentFragment/HTMLFragment/TagName = "div",
                                     //             context:Node = <body>, position:String = ".$"):Node
                                     //  [1][add div node]          uu.node.add()         -> <body><div /></body>
@@ -1957,6 +1978,201 @@ function uucssisshow(node) { // @param Node/CSSProperties:
     return style[_display] !== "none" && style[_visibility] !== "hidden";
 }
 
+// --- CSS BOX MODEL ---
+
+// clientWidth           = node.style.width + padding
+// offsetWidth           = node.style.width + padding + border
+// getBoundingClientRect = node.style.width + padding + border
+//
+//   [CSS2.1 box model] http://www.w3.org/TR/CSS2/box.html
+//
+//       B-------border--------+ -> border edge [CSS2.1 KEYWORD]
+//       |                     |
+//       |  P----padding----+  | -> padding edge [CSS2.1 KEYWORD]
+//       |  |               |  |
+//       |  |  C-content-+  |  | -> content edge [CSS2.1 KEYWORD]
+//       |  |  |         |  |  |
+//       |  |  |         |  |  |
+//       |  |  +---------+  |  |
+//       |  |               |  |
+//       |  +---------------+  |
+//       |                     |
+//       +---------------------+
+//
+//       B = event.offsetX/Y in WebKit
+//           event.layerX/Y  in Gecko
+//       P = event.offsetX/Y in IE6 ~ IE8
+//       C = event.offsetX/Y in Opera
+
+//{{{!cssbox
+
+// uu.css.box - get box size(margin, padding, border, width, height)
+function uucssbox(node,  // @param Node:
+                  quick, // @param Boolean(= false): false is use-cache, true is quick-mode
+                  mbp) { // @param Number(= 0x7): select properties, 0x7 is all,
+                         //                       0x4 is margin only,
+                         //                       0x2 is border only,
+                         //                       0x1 is padding only
+                         // @return Hash: { w: style.width,
+                         //                 h: style.height,
+                         //                 m: { t, l, r, b },  // margin:  { top, left, right, bottom }
+                         //                 b: { t, l, r, b },  // border:  { top, left, right, bottom }
+                         //                 p: { t, l, r, b } } // padding: { top, left, right, bottom }
+    var rv = node[_uucssbox];
+
+    if (!rv || !quick) {
+        mbp = mbp || 0x7;
+
+        var zero = "0px", bw = uucssbox.bw, prop = uucssbox.prop,
+            ns = uucss(node, _true), // computed pixel unit
+            mt = ns[prop[0]],   // ns.marginTop
+            ml = ns[prop[1]],   // ns.marginLeft
+            mr = ns[prop[2]],   // ns.marginRight
+            mb = ns[prop[3]],   // ns.marginBottom
+            pt = ns[prop[4]],   // ns.paddingTop
+            pl = ns[prop[5]],   // ns.paddingLeft
+            pr = ns[prop[6]],   // ns.paddingRight
+            pb = ns[prop[7]],   // ns.paddingBottom
+            bt = ns[prop[8]],   // ns.borderTopWidth
+            bl = ns[prop[9]],   // ns.borderLeftWidth
+            br = ns[prop[10]],  // ns.borderRightWidth
+            bb = ns[prop[11]];  // ns.borderBottomWidth
+
+        if (mbp & 0x4) { // margin
+            mt = mt === zero ? 0 : uucssunit(node, mt, 1);
+            ml = ml === zero ? 0 : uucssunit(node, ml, 1);
+            mr = mr === zero ? 0 : uucssunit(node, mr, 1);
+            mb = mb === zero ? 0 : uucssunit(node, mb, 1);
+        }
+        if (mbp & 0x2) { // border
+            bt = bw[bt] || (bt === zero ? 0 : uucssunit(node, bt, 1));
+            bl = bw[bl] || (bl === zero ? 0 : uucssunit(node, bl, 1));
+            br = bw[br] || (br === zero ? 0 : uucssunit(node, br, 1));
+            bb = bw[bb] || (bb === zero ? 0 : uucssunit(node, bb, 1));
+        }
+        if (mbp & 0x1) { // padding
+            pt = pt === zero ? 0 : uucssunit(node, pt, 1);
+            pl = pl === zero ? 0 : uucssunit(node, pl, 1);
+            pr = pr === zero ? 0 : uucssunit(node, pr, 1);
+            pb = pb === zero ? 0 : uucssunit(node, pb, 1);
+        }
+        rv = node[_uucssbox] = {
+            w: ns.width,
+            h: ns.height,
+            m: { t: mt, l: ml, r: mr, b: mb },
+            b: { t: bt, l: bl, r: br, b: bb },
+            p: { t: pt, l: pl, r: pr, b: pb }
+        };
+    }
+    return rv;
+}
+uucssbox.prop = ("marginTop,marginLeft,marginRight,marginBottom," +
+                 "paddingTop,paddingLeft,paddingRight,paddingBottom," +
+                 "borderTopWidth,borderLeftWidth," +
+                 "borderRightWidth,borderBottomWidth").split(",");
+uucssbox.bw = { // border-width
+    thin: 1, medium: 3, thick: (_ver.ie6 || _ver.ie7 || _opera) ? 6 : 5
+};
+
+//  [1][offset from foster node(layout parent)] uu.css.getBorderEdge(<div>) -> { x: 100, y: 100, w: 100, h: 100 }
+//  [2][offset from ancestor node]              uu.css.getBorderEdge(<div>, <html>) -> { x: 200, y: 200, w: 100, h: 100 }
+
+// uu.css.rect - get offset from foster node(layout parent)
+function uucssrect(node,           // @param Node:
+                   ancestorNode) { // @param Node(= null): null is layout parent
+                                   // @return Hash: { x, y, w, h }
+                                   // @test test/core/uu.css.rect.htm
+    var cs = uucss(node), position,
+        x = 0,
+        y = 0,
+        w = 0, // offsetWidth  = node.style.width  + padding + border
+        h = 0, // offsetHeight = node.style.height + padding + border
+        n = node,
+        root = doc.html, quick = 0;
+
+    if (cs) {
+        position = cs.position;
+        w = node.offsetWidth  || 0; // offsetWidth  = node.style.width  + padding + border
+        h = node.offsetHeight || 0; // offsetHeight = node.style.height + padding + border
+
+        if (position === "relative" || position === "absolute") {
+            if (cs.left !== "auto" && cs.top !== "auto") {
+                quick = 1;
+            }
+//{{{!mb
+            if (_gecko) {
+                if (cs.left === "0px" || cs.top === "0px") { // [GECKO][FIX] left:auto -> "0px"
+                    quick = 0;
+                }
+            }
+//}}}!mb
+        }
+
+        if (ancestorNode == null) {
+            // offset from foster node(layout parent)
+            if (quick) {
+                x = parseInt(cs.left);
+                y = parseInt(cs.top);
+            } else {
+                while (n && n !== root) {
+                    x += n.offsetLeft || 0;
+                    y += n.offsetTop  || 0;
+                    n  = n.offsetParent;
+                    if (n) {
+                        cs = (getComputedStyle ? getComputedStyle(n, 0)
+                                               : n.currentStyle).position;
+                        if (cs === "relative" || cs === "absolute") {
+                            break;
+                        }
+                    }
+                }
+            }
+        } else {
+            // offset from ancestor node
+            while (n && n !== root) {
+                x += n.offsetLeft || 0;
+                y += n.offsetTop  || 0;
+                n  = n.offsetParent;
+            }
+        }
+    }
+    return { x: x, y: y, w: w, h: h };
+}
+
+// uu.css.toStatic - to static
+function uucsstostatic(node) { // @param Node:
+                               // @return Node:
+    node.style.position = "static";
+    return node;
+}
+
+// uu.css.toAbsolute - to absolute
+function uucsstoabsolute(node) { // @param Node:
+                                 // @return Node:
+    var ns = node.style,
+        rect = uucssrect(node), // offset from foster
+        box = uucssbox(node, _false, 0x4); // margin only
+
+    ns.position = "absolute";
+    ns.left = (rect.x - box.m.l) + "px"; // margin.left
+    ns.top  = (rect.y - box.m.t)  + "px"; // margin.top
+    return node;
+}
+
+// uu.css.toRelative - to relative
+function uucsstorelative(node) { // @param Node:
+                                 // @return Node:
+    var ns = node.style, cs = uucss(node);
+
+    ns.position = "relative";
+    ns.left = cs.left;
+    ns.top  = cs.top;
+    return node;
+}
+//}}}!cssbox
+
+// --- CSS3 ---
+
 // uu.css.selectable - text selectable
 function uucssselectable(node,    // @param Node:
                          allow) { // @param Boolean(= false):
@@ -1977,6 +2193,8 @@ function uucssselectable(node,    // @param Node:
 //}}}!mb
     return node;
 }
+
+// --- STYLE SHEET ---
 
 // StyleSheet.init
 function StyleSheetInit(id) { // @param String: style sheet id
@@ -3126,15 +3344,24 @@ function uureadyfire(readyEventType, // @param String: readyEventType
 
 // --- node ---
 
-//  [1][add node]           uu.div(uu.div())         -> <div><div></div></div>
-//  [2][add text node]      uu.div(uu.text("hello")) -> <div>hello</div>
-//  [2][add text by string] uu.div("hello")          -> <div>hello</div>
-//  [4][set attr by string] uu.div("class,hello")    -> <div class="hello"></div>
-//  [5][set attr by hash]   uu.div({ cn: "hello" })  -> <div class="hello"></div>
-//  [6][set css by string]  uu.div("", "color,red")  -> <div style="color:red"></div>
-//  [7][set css by hash]    uu.div("", { c: "red" }) -> <div style="color:red"></div>
-//  [8][callback]           uu.node.builder(callback)
-//                          uu.div("@123")           -> callback(<div>, "123")
+//  [1][add node]            uu.div(uu.div())         -> <div><div></div></div>
+//  [2][add text node]       uu.div(uu.text("hello")) -> <div>hello</div>
+//  [2][add text by string]  uu.div("hello")          -> <div>hello</div>
+//  [4][set attr by string]  uu.div("class,hello")    -> <div class="hello"></div>
+//  [5][set attr by hash]    uu.div({ cn: "hello" })  -> <div class="hello"></div>
+//  [6][set css by string]   uu.div("", "color,red")  -> <div style="color:red"></div>
+//  [7][set css by hash]     uu.div("", { c: "red" }) -> <div style="color:red"></div>
+//  [8][callback]            uu.node.builder(callback)
+//                           uu.div("@123")           -> callback(<div>, "123")
+//  [9][add SVGNode]         uu.svg.svg(uu.svg.g())       -> <svg:svg><svg:g></svg:g></svg:svg>
+//  [10][add SVGText node]   uu.svg.svg(uu.svg.text("!")) -> <svg:svg><svg:text>!</svg:text></svg:svg>
+//  [11][set attr by string] uu.svg.svg("class,hello")    -> <svg:svg class="hello"></svg:svg>
+//  [12][set attr by hash]   uu.svg.svg({ cn: "hello" })  -> <svg:svg class="hello"></svg:svg>
+//  [13][set typical attr]   uu.svg.svg(100, 100)         -> <svg:svg x="100" y="100"></svg:svg>
+//  [14][set css by string]  uu.svg.svg("", "color,red")  -> <svg:svg style="color:red"></svg:svg>
+//  [15][set css by hash]    uu.svg.svg("", { c: "red" }) -> <svg:svg style="color:red"></svg:svg>
+//  [16][callback]           uu.node.builder(callback)
+//                           uu.svg.svg("@123")           -> callback(<svg:svg>, "123")
 
 // uu.node - node builder
 function uunode(node,       // @param Node/SVGNode/TagNameString(= "div"): "div" or "svg:svg"
