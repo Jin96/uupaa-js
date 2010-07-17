@@ -10,8 +10,8 @@ uu.mix(uu.svg, {
     text:       uusvgtext
 });
 
-uu.svg.css.transform = uusvgcsstransform; // uu.svg.css.transform(node:SVGNode):Hash
-                                          //  [1][get transform]  uu.svg.attr.transform(node) -> { scale: 2, tx: 100, ty: 100, rotate: 45 }
+uu.svg.transform = uusvgtransform; // uu.svg.transform(node:SVGNode):Hash
+                                   //  [1][get transform]  uu.svg.transform(node) -> { scale: 2, tx: 100, ty: 100, rotate: 45 }
 
 var _getAttribute = "getAttribute",
     _setAttribute = "setAttribute";
@@ -46,7 +46,7 @@ function uusvgrect(x,      // @param Number:
                    ry) {   // @param Number: radius
                            // @return SVGNode: <svg:rect>
     return uu.node("svg:rect", arguments,
-                     ["x", "y", "width", "height", "rx", "ry"], uu.svg.attr);
+                     ["x", "y", "width", "height", "rx", "ry"], uu.attr);
 }
 
 // uu.svg.circle - <svg:circle>
@@ -54,7 +54,7 @@ function uusvgcircle(cx,  // @param Number:
                      cy,  // @param Number:
                      r) { // @param Number: radius
                           // @return SVGNode: <svg:circle>
-    return uu.node("svg:circle", arguments, ["cx", "cy", "r"], uu.svg.attr);
+    return uu.node("svg:circle", arguments, ["cx", "cy", "r"], uu.attr);
 }
 
 // uu.svg.text - <svg:text>
@@ -72,11 +72,11 @@ function uusvgtext(txt, // @param String:
     return rv;
 }
 
-//  [1][get transform]  uu.svg.attr.transform(node) -> { scale: 2, tx: 100, ty: 100, rotate: 45 }
+//  [1][get transform]  uu.svg.transform(node) -> { scale: 2, tx: 100, ty: 100, rotate: 45 }
 
-// uu.svg.css.transform - parse transform
-function uusvgcsstransform(node) { // @param SVGNode:
-                                   // @return Hash:
+// uu.svg.transform - parse transform
+function uusvgtransform(node) { // @param SVGNode:
+                                // @return Hash:
     var v = (node[_getAttribute]("transform") || "").replace(/\s+/, ""),
         m, scale = 1, rotate = 0, tx = 0, ty = 0;
 
