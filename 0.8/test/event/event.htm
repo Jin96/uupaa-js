@@ -85,7 +85,7 @@ uu.ready(function(uu) {
         }
     });
 
-    uu.node.builder(function(node, ident) {
+    uu.node.at(function(node, ident) {
         uu.event(node, "mousedown", uu("Button"));
         uu.event(node, "mousewheel", uu("Wheel"));
     });

@@ -26,7 +26,7 @@ function shiminit(node) { // @param Node:
             '<iframe scrolling="no" src="javascript:void 0" frameborder="0"' +
             ' style="position:absolute;top:0;left:0;filter:alpha(opacity=0)">' +
             '</iframe>');
-        uu.node.add(this.shim, node, "-"); // add prev sibl
+        uu.node.add(this.shim, node, "prev"); // add prev sibl
 
         this.resize(parseInt(cs.left),
                     parseInt(cs.top),
