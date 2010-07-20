@@ -83,4 +83,4 @@ o = true, x/space = false
 }}}
 
 = Test Code =
-http://uupaa-js.googlecode.com/svn/trunk/0.8/test/ver/ver.htm
+http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/ver.htm
