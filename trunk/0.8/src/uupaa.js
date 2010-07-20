@@ -978,11 +978,12 @@ function uurequire(url,      // @param String: url
         option[_before] && option[_before](xhr, option);
         xhr.send(null);
 
-        status = xhr.status;
+        rv.status = status = xhr.status;
+        rv.ok = status >= 200 && status < 300;
         data = xhr.responseText;
-        option[_after] && option[_after](xhr, option,
-                                         rv = { ok: status >= 200 && status < 300,
-                                                status: status });
+
+        option[_after] && option[_after](xhr, option, rv);
+
         xhr = null;
     } catch (err) {
     }
