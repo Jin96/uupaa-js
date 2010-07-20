@@ -8,6 +8,19 @@ build/upa.php はプリプロセスとMinifyを施し最適化された.jsファ
 
 `upa.php [`*-g*` | -m | -y] [-mb] [-v] [-pp file] [-src dir] [-core file] [-nocore] [-off ident[/ident[/..]]] [*.js ...]`
 
+== #include ==
+`#include` _sourcecode_ を見つけるとファイルを読み込みその場に展開します。
+
+#include をそのまま記述すると JavaScript の構文エラーになるため、先頭に一行コメントを追加し以下のように記述して下さい。ソースコードパスが空白や記号を含む場合は、前後にクォートを追加してください。
+{{{
+//#include sourcecode.js
+
+//#include "source code.js"
+
+//#include 'source + code.js'
+}}}
+
+
 == 導入 ==
 
 === Windows でビルドする ===
