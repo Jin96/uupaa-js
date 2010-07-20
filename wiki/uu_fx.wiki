@@ -99,14 +99,14 @@ _option_ がHashなら { key: endValue, ...  } または { key: `[`endValue, eas
     // width を 現在の値 → 0px → 300px → 0px → 現在の値 に戻す
     uu(".box").fx(500, { w: 0, chain: 1 }).fx(500, { w: 300, reverse: 1 });
 }}}
-  * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/fx/fx.wiki.reverse.htm
+  * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/fx.wiki.reverse.htm
 
 単一のキューを再生し逆再生するには、 reverse: 1 を指定します。
 {{{
     // opacity を 現在の値 → 1.0 → 現在の値 に戻す
     uu(".box").css({ o: 0.2 }).fx(500, { o: 1.0, reverse: 1 });
 }}}
-  * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/fx/fx.wiki.reverse.htm
+  * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/fx.wiki.reverse.htm
 
 === fps の指定 ===
 アニメーションが停止している状態(キューが存在しない状態)で、_option_ に { fps: Number } を指定すると、キュー全体の fps を指定できます。
@@ -191,6 +191,6 @@ uu.fx.highlight(_node_:Node, _duration_:Number, _option_:Hash/Function = { bgc: 
 背景色をハイライトカラー(#ff9)にし、元の背景色に戻します。
 
 = Test Code =
-  * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/fx/fx.htm
-  * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/fx/dance.htm
-  * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/fx/plus.htm
+  * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/fx.htm
+  * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/fx.dance.htm
+  * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/fx.plus.htm
