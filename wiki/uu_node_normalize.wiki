@@ -15,7 +15,7 @@ uu.node.normalize(_parent_:Node = {{{<body>}}}, _depth_:Number = 1):Number は�
 {{{<body>}}}以下の全てのノードを検索対象とする場合は、uu.node.normalize(document.body, 999) のように十分に大きな数を指定します。
 
 = Test Code =
-http://uupaa-js.googlecode.com/svn/trunk/0.8/test/node/normalize.htm
+http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/node.normalize.htm
 
 {{{
 <!doctype html><html><head><title></title>
