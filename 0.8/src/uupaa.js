@@ -67,11 +67,15 @@ var _prototype = "prototype",
     _num2bb = {},               // uu.hash.num2bb = {    0 : "\00", ...  255 : "\ff" }
     _hh2num = {},               // uu.hash.hh2num = {  "00":    0 , ...  "ff":  255  }
     _num2hh = { 256: "00" },    // uu.hash.num2hh = {    0 :  "00", ...  255 :  "ff", 256: "00" }
-    _guidnum = 0,       // guid counter
-    _nodeiddb = {},     // { nodeid: node, ... }
-    _nodeidnum = 0,     // nodeid counter
+//{{{!codec
+    _num2b64,                   // uu.hash.num2b64 = ["A", "B", ... "/"]
+    _b642num,                   // uu.hash.b642num = { "=": 0, "-": 62, "_": 63 }; // URLSafe64 chars("-", "_")
+//}}}!codec
+    _guidnum = 0,               // guid counter
+    _nodeiddb = {},             // { nodeid: node, ... }
+    _nodeidnum = 0,             // nodeid counter
 //{{{!mb
-    _tokenCache = {},   // { css-selector-expression: token, ... }
+    _tokenCache = {},           // { css-selector-expression: token, ... }
 //}}}!mb
     // --- version detection ---
     _ver = detectVersions(0.8),
@@ -170,7 +174,8 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/ClassNameS
         sort:       uuarraysort,    // uu.array.sort(source:Array, method:String/Function = "A-Z"):Array
         clean:      uuclean,        // uu.array.clean(source:Array):Array
         clone:      uuclone,        // uu.array.clone(source:Array):Array - shallow copy
-        toHash:     uutohash        // uu.array.toHash(key:Array, value:Array/Mix, toNumber:Boolean = false):Hash
+        toHash:     uutohash,       // uu.array.toHash(key:Array, value:Array/Mix, toNumber:Boolean = false):Hash
+        unique:     uuarrayunique   // uu.array.unique(source:Array, literalOnly:Boolean = false):Array
     }),
     // --- ATTRIBUTE ---
     attr:           uuattr,         // uu.attr(node:Node, key:String/Hash = void,
@@ -427,12 +432,36 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/ClassNameS
     f:              uuf,            // uu.f(format:FormatString, var_args, ...):String
                                     //  [1][placeholder] uu.format("?? dogs and ??", 101, "cats") -> "101 dogs and cats"
     format:         uuf,            // uu.format(...) as uu.f
+//{{{!sprintf
+    sf:             uusf,           // uu.sf(format:FormatString, var_args ...):String
+    sprintf:        uusf,           // uu.sprintf(...) as uu.sf
+//}}}!sprintf
+    // --- CODEC ---
+//{{{!codec
     entity:   uumix(uuentity, {     // uu.entity(str:String):String
                                     //  [1][to Entity]           uu.entity("<html>") -> "&lt;html&gt;"
         decode:     uuentitydecode  // uu.entity.decode(str:String):String
                                     //  [1][from Entity]         uu.entity.decode("&lt;html&gt;") -> "<html>"
                                     //  [2][from UNICODE Entity] uu.entity.decode("\u0041\u0042") -> "AB"
     }),
+    base64:   uumix(uubase64, {     // uu.base64(data:ByteArray/String,
+                                    //           toURLSafe64:Boolean = false):Base64String/URLSafe64String
+        decode:     uubase64decode  // uu.base64.decode(data:Base64String/URLSafe64String):ByteArray
+    }),
+    utf8:     uumix(uuutf8, {       // uu.utf8(str:String):UTF8ByteArray
+        decode:     uuutf8decode    // uu.utf8.decode(byteArray:UTF8ByteArray,
+                                    //             startIndex:Number = 0,
+                                    //             endIndex:Number = void):String
+    }),
+//{{{!md5
+    md5:            uumd5,          // uu.md5(ASCIIString/ByteArray):HexString
+                                    //   uu.md5("")              -> "d41d8cd98f00b204e9800998ecf8427e"
+                                    //   uu.md5("hoge")          -> "ea703e7aa1efda0064eaa507d9e8ab7e"
+                                    //   uu.md5("ascii")         -> "5b7f33be48f19c25e1af2f96cffc569f"
+                                    //   uu.md5("user-password") -> "9a3729201fdd376c76ded01f986481b1"
+                                    //   uu.md5(uu.utf8("CJK chars")) -> ...
+//}}}!md5
+//}}}!codec
     // --- DATE ---
     date:           uudate,         // uu.date(source:DateHash/Date/Number/String= void):DateHash
                                     //  [1][get now]                 uu.date() -> DateHash
@@ -490,6 +519,29 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/ClassNameS
     flash:          uuflash,        // uu.flash(url:String, option:FlashOptionHash):Node/null/void
 //}}}!mb
 //}}}!flash
+    // --- URL ---
+//{{{!url
+    url:      uumix(uuurl, {        // uu.url(url:URLHash/URLString = ""):URLString/URLHash/null
+                                    //  [1][current abs-dir] uu.url() -> "http://example.com/index.htm"
+                                    //  [2][parse url]       uu.url("http://example.com/dir/file.ext") -> { schme: "http", ... }
+                                    //  [3][build url]       uu.url({ schme: "http", ... }) -> "http://example.com/..."
+        abs:        uuurlabs,       // uu.url.abs(url:URLString = ".", currentDir = ""):URLString
+                                    //  [1][get abs-url]   uu.url.abs("./index.htm") -> "http://example.com/index.htm"
+        dir:        uuurldir,       // uu.url.dir(url:URLString/PathString):String
+                                    //  [1][chop filename] uu.url.dir("http://example.com/dir/file.ext") -> "http://example.com/dir/"
+                                    //  [2][chop filename] uu.url.dir("/root/dir/file.ext")              -> "/root/dir/"
+                                    //  [3][chop filename] uu.url.dir("/file.ext")                       -> "/"
+                                    //  [4][through]       uu.url.dir("/")                               -> "/"
+                                    //  [5][supply slash]  uu.url.dir("")                                -> "/"
+        split:      uuurlsplit      // uu.url.split(url:URLString/PathString):Array
+                                    //  [1][split dir | file.ext] uu.url.split("http://example.com/dir/file.ext") -> ["http://example.com/dir/", "file.ext"]
+    }),
+    qs:             uuqs,           // uu.qs(queryString:QueryString/Hash, add:Hash):QueryString/Hash
+                                    //  [1][parse] uu.qs("key=val;key2=val2")              -> { key: "val", key2: "val2" }
+                                    //  [2][build] uu.qs({ key: "val",     key2: "val2" }) -> "key=val;key2=val2"
+                                    //  [3][add]   uu.qs( "key=val",     { key2: "val2" }) -> "key=val;key2=val2"
+                                    //  [4][add]   uu.qs({ key: "val" }, { key2: "val2" }) -> "key=val;key2=val2"
+//}}}!url
     // --- DEBUG ---
     puff:           uupuff,         // uu.puff(source:Mix/FormatString, var_args:Mix, ...)
     log:            uulog,          // uu.log(log:Mix, var_args:Mix, ...)
@@ -1336,6 +1388,32 @@ function uutohash(key,        // @param Array: key array
         val = num ? +(value) : value;
         for (; i < iz; ++i) {
             rv[key[i]] = val;
+        }
+    }
+    return rv;
+}
+
+// [1][unique elements]     uu.array.unique([<body>, <body>]) -> [<body>]
+// [2][unique literals]     uu.array.unique([0,1,2,1,0], true) -> [0,1,2]
+
+// inner - make array from unique element(trim null and undefined elements)
+function uuarrayunique(source,        // @param Array: source
+                       literalOnly) { // @param Boolean(= false): true is literal only(quickly)
+                                      // @return Array:
+    var rv = [], ri = -1, v, i = 0, j, iz = source.length,
+        literal = !!literalOnly, found, unique = {};
+
+    for (; i < iz; ++i) {
+        v = source[i];
+        if (v != null) { // v === null or v === undefined
+            if (literal) { // [2]
+                unique[v] || (unique[v] = 1, rv[++ri] = v);
+            } else { // [1]
+                for (found = 0, j = i - 1; !found && j >= 0; --j) {
+                    found = (v === source[j]);
+                }
+                found || (rv[++ri] = v);
+            }
         }
     }
     return rv;
@@ -4203,6 +4281,53 @@ function uuf(format) { // @param FormatString: formatted string with "??" placeh
 }
 uuf.q = /\?\?/g;
 
+// {{{!sprintf
+// uu.sprintf - sprintf (PHP::sprintf like function)
+function uusf(format            // @param String: sprintf format string
+              /* var_args */) { // @param Mix: sprintf var_args
+                                // @return String: "formatted string"
+    // http://d.hatena.ne.jp/uupaa/20091214
+    function parse(m, argidx, flag, width, prec, size, types) {
+        if (types === "%") {
+            return types;
+        }
+        idx = argidx ? parseInt(argidx) : next++;
+
+        var w = uusf.bits[types], ovf, pad, undef,
+            v = (av[idx] === undef) ? "" : av[idx];
+
+        w & 3 && (v = w & 1 ? parseInt(v) : parseFloat(v), v = isNaN(v) ? "": v);
+        w & 4 && (v = ((types === "s" ? v : types) || "").toString());
+        w & 0x20  && (v = v >= 0 ? v : v % 0x100000000 + 0x100000000);
+        w & 0x300 && (v = v.toString(w & 0x100 ? 8 : 16));
+        w & 0x40  && flag === "#" && (v = (w & 0x100 ? "0" : "0x") + v);
+        w & 0x80  && prec && (v = w & 2 ? v.toFixed(prec) : v.slice(0, prec));
+        w & 0x400 && (v = uujsonencode(v)); // "%j"
+        w & 0x6000 && (ovf = (typeof v !== _number || v < 0));
+        w & 0x2000 && (v = ovf ? "" : String.fromCharCode(v));
+        w & 0x8000 && (flag = flag === "0" ? "" : flag);
+        v = w & 0x1000 ? v.toString().toUpperCase() : v.toString();
+        // padding
+        if (!(w & 0x800 || width === undef || v.length >= width)) {
+            pad = Array(width - v.length + 1).join((!flag ||
+                                                    flag === "#") ? " " : flag);
+            v = ((w & 0x10 && flag === "0") && !v[_indexOf]("-")) ?
+                ("-" + pad + v.slice(1)) : (pad + v);
+        }
+        return v;
+    }
+
+    var next = 1, idx = 0, av = arguments;
+
+    return format[_replace](uusf.format, parse);
+}
+uusf.bits = { i: 0x8011, d: 0x8011, u: 0x8021, o: 0x8161, x: 0x8261,
+              X: 0x9261, f: 0x92, c: 0x2800, s: 0x84, j: 0xC00 };
+uusf.format = /%(?:(\d+)\$)?(#|0)?(\d+)?(?:\.(\d+))?(l)?([%iduoxXfcsj])/g;
+// }}}!sprintf
+
+// --- CODEC ---
+//{{{!codec
 // uu.entity - encode String to HTML Entity
 function uuentity(str) { // @param String:
                          // @return String:
@@ -4229,7 +4354,359 @@ function toEntityHash(code) {
     return uuentity.hash[code];
 }
 
-// --- debug ---
+// uu.base64 - encode ByteArray to Base64 formated String
+function uubase64(data,          // @param ByteArray/String:
+                  toURLSafe64) { // @param Boolean(= false):
+                                 // @return Base64String/URLSafe64String:
+    var rv = [],
+        ary = isString(data) ? uuutf8(data) : data,
+        c = 0, i = -1, iz = ary.length,
+        pad = [0, 2, 1][ary.length % 3],
+        num2bb = _num2bb,
+        num2b64 = _num2b64;
+
+    if (win.btoa && !toURLSafe64) {
+        while (i < iz) {
+            rv.push(num2bb[ary[++i]]);
+        }
+        return btoa(rv.join(""));
+    }
+    --iz;
+    while (i < iz) {
+        c = (ary[++i] << 16) | (ary[++i] << 8) | (ary[++i]); // 24bit
+        rv.push(num2b64[(c >> 18) & 0x3f], num2b64[(c >> 12) & 0x3f],
+                num2b64[(c >>  6) & 0x3f], num2b64[ c        & 0x3f]);
+    }
+    pad > 1 && (rv[rv.length - 2] = "=");
+    pad > 0 && (rv[rv.length - 1] = "=");
+    return toURLSafe64 ? rv.join("")[_replace](/\=+$/g, "")[_replace](/\+/g, "-")
+                                                           [_replace](/\//g, "_")
+                       : rv.join("");
+}
+
+// uu.base64.decode - decode Base64 formated String to ByteArray
+function uubase64decode(data,          // @param Base64String/URLSafe64String:
+                        toByteArray) { // @param Boolean(= false): true is ByteArray result
+                                       // @return String/ByteArray:
+    var rv = [], c = 0, i = -1,
+        ary = data.split(""),
+        iz = data.length - 1,
+        b642num = _b642num;
+
+    while (i < iz) {                  // 00000000|00000000|00000000 (24bit)
+        c = (b642num[ary[++i]] << 18) // 111111  |        |
+          | (b642num[ary[++i]] << 12) //       11|1111    |
+          | (b642num[ary[++i]] <<  6) //         |    1111|11
+          |  b642num[ary[++i]]        //         |        |  111111
+        rv.push((c >> 16) & 0xff, (c >> 8) & 0xff, c & 0xff);
+    }
+    rv.length -= [0, 0, 2, 1][data[_replace](/\=+$/, "").length % 4]; // cut tail
+
+    return toByteArray ? rv : uuutf8decode(rv);
+}
+
+// uu.utf8 - String to UTF8ByteArray
+function uuutf8(str) { // @param String: JavaScript string
+                       // @return UTF8ByteArray: [ Number(utf8), ... ]
+    var rv = [], iz = str.length, c = 0, i = 0;
+
+    for (; i < iz; ++i) {
+        c = str.charCodeAt(i);
+        if (c < 0x80) { // ASCII(0x00 ~ 0x7f)
+            rv.push(c & 0x7f);
+        } else if (c < 0x0800) {
+            rv.push(((c >>>  6) & 0x1f) | 0xc0, (c & 0x3f) | 0x80);
+        } else if (c < 0x10000) {
+            rv.push(((c >>> 12) & 0x0f) | 0xe0,
+                    ((c >>>  6) & 0x3f) | 0x80, (c & 0x3f) | 0x80);
+        }
+    }
+    return rv;
+}
+
+// uu.utf8.decode - UTF8ByteArray to String
+function uuutf8decode(byteArray,  // @param UTF8ByteArray: [ Number(utf8), ... ]
+                      startIndex, // @param Number(= 0):
+                      endIndex) { // @param Number(= void):
+                                  // @return String: JavaScript string
+    var rv = [], ri = -1, iz = endIndex || byteArray.length, c = 0,
+        i = startIndex || 0;
+
+    if (iz > byteArray.length) {
+        iz = byteArray.length;
+    }
+
+    for (; i < iz; ++i) {
+        c = byteArray[i]; // first byte
+        if (c < 0x80) { // ASCII(0x00 ~ 0x7f)
+            rv[++ri] = c;
+        } else if (c < 0xe0) {
+            rv[++ri] = (c & 0x1f) <<  6 | (byteArray[++i] & 0x3f);
+        } else if (c < 0xf0) {
+            rv[++ri] = (c & 0x0f) << 12 | (byteArray[++i] & 0x3f) << 6
+                                        | (byteArray[++i] & 0x3f);
+        }
+    }
+    return String.fromCharCode.apply(null, rv);
+}
+
+//{{{!md5
+// uu.md5 - encode
+function uumd5(data) { // @param ASCIIString/ByteArray:
+                       // @return HexString:
+    var rv = [], i = 0, iz = data.length, c;
+
+    // --- String to ByteArray ---
+    if (isString(data)) {
+        for (; i < iz; ++i) {
+            rv[i] = data.charCodeAt(i) & 0xff;
+        }
+    } else {
+        rv = data.concat(); // clone
+    }
+
+    // --- padding ---
+    c = i = rv.length;
+    rv.push(0x80);
+    while (++i % 64 !== 56) {
+        rv.push(0);
+    }
+    c *= 8;
+    rv.push(c & 0xff, c >> 8 & 0xff, c >> 16 & 0xff, c >> 24 & 0xff, 0, 0, 0, 0);
+
+    return toHexString(calcMD5(rv));
+}
+uumix(uumd5, {
+    AC: [
+        0xd76aa478, 0xe8c7b756, 0x242070db, 0xc1bdceee, 0xf57c0faf, 0x4787c62a,
+        0xa8304613, 0xfd469501, 0x698098d8, 0x8b44f7af, 0xffff5bb1, 0x895cd7be,
+        0x6b901122, 0xfd987193, 0xa679438e, 0x49b40821, 0xf61e2562, 0xc040b340,
+        0x265e5a51, 0xe9b6c7aa, 0xd62f105d, 0x02441453, 0xd8a1e681, 0xe7d3fbc8,
+        0x21e1cde6, 0xc33707d6, 0xf4d50d87, 0x455a14ed, 0xa9e3e905, 0xfcefa3f8,
+        0x676f02d9, 0x8d2a4c8a, 0xfffa3942, 0x8771f681, 0x6d9d6122, 0xfde5380c,
+        0xa4beea44, 0x4bdecfa9, 0xf6bb4b60, 0xbebfbc70, 0x289b7ec6, 0xeaa127fa,
+        0xd4ef3085, 0x04881d05, 0xd9d4d039, 0xe6db99e5, 0x1fa27cf8, 0xc4ac5665,
+        0xf4292244, 0x432aff97, 0xab9423a7, 0xfc93a039, 0x655b59c3, 0x8f0ccc92,
+        0xffeff47d, 0x85845dd1, 0x6fa87e4f, 0xfe2ce6e0, 0xa3014314, 0x4e0811a1,
+        0xf7537e82, 0xbd3af235, 0x2ad7d2bb, 0xeb86d391 ],
+    S: [
+        7, 12, 17, 22,  7, 12, 17, 22,  7, 12, 17, 22,  7, 12, 17, 22,
+        5,  9, 14, 20,  5,  9, 14, 20,  5,  9, 14, 20,  5,  9, 14, 20,
+        4, 11, 16, 23,  4, 11, 16, 23,  4, 11, 16, 23,  4, 11, 16, 23,
+        6, 10, 15, 21,  6, 10, 15, 21,  6, 10, 15, 21,  6, 10, 15, 21 ],
+    X: [
+        0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15,
+        1,  6, 11,  0,  5, 10, 15,  4,  9, 14,  3,  8, 13,  2,  7, 12,
+        5,  8, 11, 14,  1,  4,  7, 10, 13,  0,  3,  6,  9, 12, 15,  2,
+        0,  7, 14,  5, 12,  3, 10,  1,  8, 15,  6, 13,  4, 11,  2,  9 ]
+});
+
+// inner -
+function calcMD5(data) { // @param ByteArray:
+                         // @return ByteArray:
+    var a = 0x67452301, b = 0xefcdab89, c = 0x98badcfe, d = 0x10325476,
+        aa, bb, cc, dd, ra, rb, rc,
+        AC = uumd5.AC, S = uumd5.S, X = uumd5.X,
+        i = 0, iz = data.length, j, k, n, word = [];
+
+    for (; i < iz; i += 64) {
+        for (j = 0; j < 16; ++j) {
+            k = i + j * 4;
+            word[j] = data[k] + (data[k + 1] <<  8)
+                              + (data[k + 2] << 16)
+                              + (data[k + 3] << 24);
+        }
+        aa = a;
+        bb = b;
+        cc = c;
+        dd = d;
+        for (j = 0; j < 64; ++j) {
+            if (j < 16) {
+                n = (b & c) | (~b & d); // ff - Round 1
+            } else if (j < 32) {
+                n = (b & d) | (c & ~d); // gg - Round 2
+            } else if (j < 48) {
+                n = b ^ c ^ d;          // hh - Round 3
+            } else {
+                n = c ^ (b | ~d);       // ii - Round 4
+            }
+            n += a + word[X[j]] + AC[j];
+
+            ra = b + ((n << S[j]) | (n >>> (32 - S[j])));
+            rb = b;
+            rc = c;
+            // rotate
+            a = d;
+            b = ra;
+            c = rb;
+            d = rc;
+        }
+        a += aa;
+        b += bb;
+        c += cc;
+        d += dd;
+    }
+    return [a, b, c, d];
+}
+
+// inner - ByteArray to HexString
+function toHexString(byteArray) { // @param ByteArray:
+                                  // @return HexString:
+    var rv = [], i = 0, iz = byteArray.length,
+        num2hh = _num2hh;
+
+    for (; i < iz; ++i) {
+        rv.push(num2hh[byteArray[i]       & 0xff],
+                num2hh[byteArray[i] >>  8 & 0xff],
+                num2hh[byteArray[i] >> 16 & 0xff],
+                num2hh[byteArray[i] >> 24 & 0xff]);
+    }
+    return rv.join("");
+}
+//}}}!md5
+
+// --- init ---
+(function(base, i) {
+    _num2b64 = base.split(""); // ["A", "B", ... "/"]
+    _b642num = { "=": 0, "-": 62, "_": 63 }; // URLSafe64 chars("-", "_")
+
+    for (; i < 64; ++i) {
+        _b642num[base.charAt(i)] = i;
+    }
+})("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/", 0);
+//}}}!codec
+
+// --- URL ---
+//{{{!url
+// uu.url - url accessor
+function uuurl(url) { // @param URLHash/URLString(= ""):
+                      // @return URLString/URLHash/null:
+    return !url ? uuurlabs.curt // [1]
+                : (isString(url) ? parseURL
+                                 : buildURL)(url); // [2][3]
+}
+
+// uu.url.abs - convert relative URL to absolute URL
+function uuurlabs(url,          // @param URLString(= "."): rel/abs URL
+                  currentDir) { // @param URLString(= ""): current dir
+                                // @return URLString: absolute URL
+    return (!url || url === ".") ? uuurlabs.curt : toAbsURL(url, currentDir);
+}
+uuurlabs.curt = toAbsURL("."); // current absolute-url cache
+
+// inner - to absolute url
+function toAbsURL(url,          // @param String:
+                  currentDir) { // @param String:
+                                // @return String:
+    if (!/^(?:file|https?):/.test(url)) {
+        var div = doc[_createElement]("div");
+
+        div.innerHTML = '<a href="' + (currentDir || "") + url + '" />';
+        url = div[_firstChild] ? div[_firstChild].href
+                               : /href\="([^"]+)"/.exec(div.innerHTML)[1];
+    }
+    return url[_replace](/&amp;|&/g, ";"); // "&" -> ";"
+}
+
+// uu.url.dir - absolute path to absolute directory(chop filename)
+function uuurldir(url) { // @param URLString/PathString: url or path
+                         // @return String: directory path, has tail "/"
+    var ary = url.split("/");
+
+    ary.pop(); // chop "file.ext"
+    return ary.join("/") + "/";
+}
+
+// inner - build URL
+function buildURL(hash) { // @param URLHash:
+                          // @return URLString: "scheme://domain:port/path?qs#fragment"
+    return [hash.scheme, "://", hash.domain,
+            hash.port     ? ":" + hash.port     : "", hash.path || "/",
+            hash.qs       ? "?" + hash.qs       : "",
+            hash.fragment ? "#" + hash.fragment : ""].join("");
+}
+
+// inner - parse URL
+function parseURL(url) { // @param URLString:
+                         // @return URLHash/null: null is fail,
+    var m, w = ["/", ""], abs = uuurlabs(url);
+
+    m = parseURL.file.exec(abs);
+    if (m) {
+        w = uuurlsplit(m[1]);
+        return { url: abs, scheme: "file", domain: "", port: "",
+                 base: "file:///" + w[0], path: m[1], dir: w[0],
+                 file: w[1], qs: "", hash: m[2] ? parseQueryString(m[2]) : {},
+                 fragment: m[3] || "" };
+    }
+    m = parseURL.http.exec(abs);
+    if (m) {
+        m[4] && (w = uuurlsplit(m[4]));
+        return { url: abs, scheme: m[1], domain: m[2], port: m[3] || "",
+                 base: (m[1] + "://" + m[2]) + (m[3] ? ":" + m[3] : "") + w[0],
+                 path: m[4] || "/", dir: w[0], file: w[1], qs: m[5] || "",
+                 hash: m[5] ? parseQueryString(m[5]) : {}, fragment: m[6] || "" };
+    }
+    return null;
+}
+parseURL.file = /^file:\/\/(?:\/)?(?:loc\w+\/)?([^ ?#]*)(?:\?([^#]*))?(?:#(.*))?/i;
+parseURL.http = /^(\w+):\/\/([^\/:]+)(?::(\d*))?([^ ?#]*)(?:\?([^#]*))?(?:#(.*))?/i;
+
+// uu.url.split - split dir/file "dir/file.ext" -> ["dir/", "file.ext"]
+function uuurlsplit(url) { // @param URLString/PathString: url or path
+                           // @return Array: ["dir/", "file.ext"]
+    var rv = [], ary = url.split("/");
+
+    rv[1] = ary.pop(); // file
+    rv[0] = ary.join("/") + "/";
+    return rv;
+}
+
+// uu.qs - query string accessor
+function uuqs(queryString, // @param QueryString/Hash:
+              add) {       // @param Hash:
+                           // @return QueryString/Hash:
+    var rv, isstr = isString(queryString), i;
+
+    if (add) {
+        rv = isstr ? parseQueryString(queryString) : queryString;
+        for (i in add) {
+            rv[i] = add[i];
+        }
+        return buildQueryString(rv);
+    }
+    return (isstr ? parseQueryString : buildQueryString)(queryString); // [1][2]
+}
+
+// inner - build query string
+function buildQueryString(queryString) { // @param Hash: { key: "val", key2: "val2" }
+                                         // @return QueryString: "key=val;key2=val2"
+    var rv = [], i, fn = encodeURIComponent;
+
+    for (i in queryString) {
+        rv.push(fn(i) + "=" + fn(queryString[i]));
+    }
+    return rv.join(";");
+}
+
+// inner - parse query string
+function parseQueryString(queryString) { // @param URLString/QueryString: "key=val;key2=val2"
+                                         // @return Hash: { key: value, ... }
+    function _parse(m, key, value) {
+        return rv[fn(key)] = fn(value);
+    }
+    var rv = {}, fn = decodeURIComponent;
+
+    if (queryString[_indexOf]("?") >= 0) { // [1]
+        return parseURL(queryString).hash;
+    }
+    queryString[_replace](/&amp;|&/g, ";")
+               [_replace](/(?:([^\=]+)\=([^\;]+);?)/g, _parse); // [2]
+    return rv;
+}
+//}}}!url
+
+// --- DEBUG ---
 // uu.puff - uu.puff(mix) -> alert( uu.json(mix) )
 function uupuff(source                   // @param Mix/FormatString: source object
                                          //                          or "format ?? string"
@@ -4288,7 +4765,7 @@ function uuok(title,    // @param String: title
             uuf(uuok.fmt.join(""),
                 uuok.bgc[r + (db.row.length % 2) * 4], uuentity(title),
                 tm > 0 ? "<b>(" + tm + " ms)</b>" : "",
-                uujson(lval, _true), operator, rval ? uujson(rval, _true) : "",
+                uujsonencode(lval, 1), operator, rval ? uujsonencode(rval, 1) : "",
                 more || ""));
 
     } else if (isString(title)) {
@@ -4363,7 +4840,8 @@ function uujson(source, // @param Mix:
                         //                          true is js impl(uu.json.encode)
                         // @return JSONString:
     return (alt || !JSON) ? uujsonencode(source, 1)
-                          : JSON.stringify(source) || "";
+                          : source === void 0 ? "" // [IE8] undefined -> "undefined" bugfix
+                                              : (JSON.stringify(source) || "");
 }
 uujson.x = [
     /[^,:{}\[\]0-9\.\-+Eaeflnr-u \n\r\t]/,                      // x[0] NGWORDS
@@ -4402,11 +4880,13 @@ function uujsonencode(mix, esc) {
                                 return mix + "";
                             }
                             // Function -> "FunctionName():": { ... }
-                            w =
+                            w = mix.name;
 //{{{!mb
-                                _ie ? (w = mix + "").slice(9, w[_indexOf]("(")) : // )
+                            if (!w && (_ie || _opera)) { // [IE][OPERA] IE or Opera9.6x~10.10
+                                w = mix + ""; // Function.toString()
+                                w = w.slice(9, w[_indexOf]("(")); // )
+                            }
 //}}}!mb
-                                      mix.name;
                             prefix = q + w + "()" + q + ": ";
     case uutype.HASH:       ary = []; break;
     case uutype.NULL:
