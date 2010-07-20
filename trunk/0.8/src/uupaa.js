@@ -723,16 +723,29 @@ function uusnippet(id,    // @param String: snippet id. <script id="...">
                                       block[_replace](dualBrace, toBrace) + '")+"';
     }
 
-    var js = uusnippet.js[id] || "", node, // {
+    var xhr, js = uusnippet.js[id] || "", node, // {
         dualBrace = /\{\{([^\}]+)\}\}/g,
         eachBlock = /<each ([^>]+)>([\s\S]*?)<\/each>/;
 
     if (!js) {
         node = uuid(id);
         if (node) {
-            uusnippet.js[id] = js = node.text[_replace](/\r\n|\r|\n/g, "\n")
-                    [_replace](/<>\n([\s\S]*?)^<\/>$/gm, each)           // <>...</>
-                    [_replace](/^\s*\n|\n$/g, "");
+            if (node.src) { // <script type="text/html" src="..."></script>
+                if (uurequire) {
+                    xhr = uurequire(node.src);
+                    if (xhr.ok) {
+                        js = xhr.data;
+                    }
+                }
+            } else {
+                js = node.text;
+            }
+            if (js) {
+                js = js[_replace](/\r\n|\r|\n/g, "\n")
+                        [_replace](/<>\n([\s\S]*?)^<\/>$/gm, each)  // <>...</>
+                        [_replace](/^\s*\n|\n$/g, "");
+                uusnippet.js[id] = js;
+            }
         }
     }
     return js ? (new Function("arg", js))(arg) : "";
