@@ -4211,7 +4211,7 @@ function uuentity(str) { // @param String:
 uumix(uuentity, {
     to:     /[&<>"]/g,
     from:   /&(?:amp|lt|gt|quot);/g,
-    hash:   uuhash('&,&amp;,<,&lt;,>,&gt;,",&quot;,&amp;,&,&lt;,<,&gt;,>,&quot;"'),
+    hash:   uuhash('&,&amp;,<,&lt;,>,&gt;,",&quot;,&amp;,&,&lt;,<,&gt;,>,&quot;,"'),
     uffff:  /\\u([0-9a-f]{4})/g // \u0000 ~ \uffff
 });
 
