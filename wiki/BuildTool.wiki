@@ -55,7 +55,6 @@ build/upa.php はプリプロセスとMinifyを施し最適化された.jsファ
 || live      || uu.live(), uu.unlive(), NodeSet.live(), NodeSet.unlive() をコメントアウトします。 || -1.3kB ||
 || resize    || uu.resize(), uu.unresize() をコメントアウトします。 || -0.8kB ||
 || cssbox    || uu.css.box(), uu.css.rect(), <br />uu.css.toStatic(), uu.css.toAbsolute(), uu.css.toRelative() をコメントアウトします。 || -1.7kB ||
-
 || codec     || uu.entity(), uu.base64(), <br />uu.utf8(), uu.md5() をコメントアウトします。 || -3.5kB ||
 || md5       || uu.md5() をコメントアウトします。 || -1.8kB ||
 
