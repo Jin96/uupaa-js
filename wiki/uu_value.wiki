@@ -351,9 +351,6 @@ uu.ready(function(uu) {
 </body></html>
 }}}
 
-== Test Code ==
-http://uupaa-js.googlecode.com/svn/trunk/0.8/test/form/select.htm
-
 = `<`select multiple="multiple"`>`=
 
 uu.value(_selectNode_:Node, _value_:String = void):StringArray/Node は、現在選択されている option要素の value 属性にアクセスします。
@@ -420,6 +417,3 @@ uu.ready(function(uu) {
 
 </body></html>
 }}}
-
-== Test Code ==
-http://uupaa-js.googlecode.com/svn/trunk/0.8/test/form/select-multiple.htm
