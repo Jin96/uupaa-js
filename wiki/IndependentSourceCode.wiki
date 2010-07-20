@@ -5,7 +5,6 @@
 = 単体利用可能なソースコードの一覧 =
   * src/misc/codec.js
   * [uu_datauri src/misc/datauri.js]
-  * [uu_entity src/misc/entity.js]
   * [uu_lzw src/misc/lzw.js]
   * [uu_matrix2d src/misc/matrix2d.js]
   * [uu_msgpack src/misc/msgpack.js]
