@@ -119,7 +119,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/ClassNameS
                                     //  [1][load aync] uu.jsonp("http://...callback=??", { method: "mycallback" }, callback)
 //}}}!ajax
     // --- TYPE MATCH / TYPE DETECTION ---
-    like:           uulike,         // uu.like(lhs:Date/Hash/Fake/Array, rhs:Date/Hash/Fake/Array):Boolean
+    like:           uulike,         // uu.like(lval:Date/Hash/Fake/Array, rval:Date/Hash/Fake/Array):Boolean
     type:           uutype,         // uu.type(mix:Mix):Number
                                     //  uu.type.BOOLEAN      -  1: Boolean
                                     //  uu.type.NUMBER       -  2: Number
@@ -427,6 +427,12 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/ClassNameS
     f:              uuf,            // uu.f(format:FormatString, var_args, ...):String
                                     //  [1][placeholder] uu.format("?? dogs and ??", 101, "cats") -> "101 dogs and cats"
     format:         uuf,            // uu.format(...) as uu.f
+    entity:   uumix(uuentity, {     // uu.entity(str:String):String
+                                    //  [1][to Entity]           uu.entity("<html>") -> "&lt;html&gt;"
+        decode:     uuentitydecode  // uu.entity.decode(str:String):String
+                                    //  [1][from Entity]         uu.entity.decode("&lt;html&gt;") -> "<html>"
+                                    //  [2][from UNICODE Entity] uu.entity.decode("\u0041\u0042") -> "AB"
+    }),
     // --- DATE ---
     date:           uudate,         // uu.date(source:DateHash/Date/Number/String= void):DateHash
                                     //  [1][get now]                 uu.date() -> DateHash
@@ -489,7 +495,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/ClassNameS
     log:            uulog,          // uu.log(log:Mix, var_args:Mix, ...)
     // --- UNIT TEST ---
 //{{{!unittest
-    ok:             uuok,           // uu.ok(lhs:Mix, operator:String, rhs:Mix = void, more:String = void)
+    ok:             uuok,           // uu.ok(lval:Mix, operator:String, rval:Mix = void, more:String = void)
                                     //  [1][test]           uu.ok("title", 1, "===", 1, "more info")
                                     //  [2][add separater]  uu.ok("separater comment")
                                     //  [3][get/show score] uu.ok() -> { ok, ng, total, ms }
@@ -973,22 +979,22 @@ uujsonp.db = {}; // { guid: callbackMethod, ... }
 // [5][FakeArray like FakeArray] uu.like(document.links, document.links) -> true
 
 // uu.like - like and deep matching
-function uulike(lhs,   // @param Date/Hash/Fake/Array: lhs
-                rhs) { // @param Date/Hash/Fake/Array: rhs
-                       // @return Boolean:
-    var type = uutype(lhs);
+function uulike(lval,   // @param Date/Hash/Fake/Array: lval
+                rval) { // @param Date/Hash/Fake/Array: rval
+                        // @return Boolean:
+    var type = uutype(lval);
 
-    if (type !== uutype(rhs)) {
+    if (type !== uutype(rval)) {
         return _false;
     }
     switch (type) {
     case uutype.FUNCTION:   return _false;
-    case uutype.DATE:       return uudate(lhs).ISO() === uudate(rhs).ISO();
-    case uutype.HASH:       return (uusize(lhs) === uusize(rhs) && uuhas(lhs, rhs));
+    case uutype.DATE:       return uudate(lval).ISO() === uudate(rval).ISO();
+    case uutype.HASH:       return (uusize(lval) === uusize(rval) && uuhas(lval, rval));
     case uutype.FAKEARRAY:  // http://d.hatena.ne.jp/uupaa/20091223
-    case uutype.ARRAY:      return uuarray(lhs) + "" == uuarray(rhs);
+    case uutype.ARRAY:      return uuarray(lval) + "" == uuarray(rval);
     }
-    return lhs === rhs;
+    return lval === rval;
 }
 
 // [1][typeof]                  uu.type("str") -> uu.type.STRING
@@ -4197,6 +4203,32 @@ function uuf(format) { // @param FormatString: formatted string with "??" placeh
 }
 uuf.q = /\?\?/g;
 
+// uu.entity - encode String to HTML Entity
+function uuentity(str) { // @param String:
+                         // @return String:
+    return str[_replace](uuentity.to, toEntityHash);
+}
+uumix(uuentity, {
+    to:     /[&<>"]/g,
+    from:   /&(?:amp|lt|gt|quot);/g,
+    hash:   uuhash('&,&amp;,<,&lt;,>,&gt;,",&quot;,&amp;,&,&lt;,<,&gt;,>,&quot;"'),
+    uffff:  /\\u([0-9a-f]{4})/g // \u0000 ~ \uffff
+});
+
+// uu.entity.decode - decode String from HTML Entity
+function uuentitydecode(str) { // @param String:
+                               // @return String:
+    return str[_replace](uuentity.from, toEntityHash)
+              [_replace](uuentity.uffff, function(m, hex) {
+        return String.fromCharCode(parseInt(hex, 16));
+    });
+}
+
+// inner - to/from entity
+function toEntityHash(code) {
+    return uuentity.hash[code];
+}
+
 // --- debug ---
 // uu.puff - uu.puff(mix) -> alert( uu.json(mix) )
 function uupuff(source                   // @param Mix/FormatString: source object
@@ -4233,35 +4265,40 @@ uulog.max = 30; // max items
 // uu.ok - unit test
 //{{{!unittest
 function uuok(title,    // @param String: title
-              lhs,      // @param Mix: left handset
+              lval,     // @param Mix: left handset
               operator, // @param String: operator
-              rhs,      // @param Mix(= void): right handset
+              rval,     // @param Mix(= void): right handset
               more) {   // @param String(= void): more info
                         // @throws Error from judge()
     var rv, r, tm, db = uuok.db, ol;
 
     if (operator) {
         tm = +new Date;
-        r = judge(lhs, operator, rhs);
+        r = judge(lval, operator, rval);
         tm = ((+new Date) - tm);
         ++db[r ? "ok" : "ng"];
         ++db.total;
         db.ms += tm;
+        //  <li style="...">
+        //      <span>title</span><b>(.. ms)</b><br />
+        //      <span>lval operator rval</span><br />
+        //      <span>more</span>
+        //  </li>
         db.row.push(
             uuf(uuok.fmt.join(""),
-                uuok.bgc[r + (db.row.length % 2) * 4], title,
+                uuok.bgc[r + (db.row.length % 2) * 4], uuentity(title),
                 tm > 0 ? "<b>(" + tm + " ms)</b>" : "",
-                uujson(lhs, _true), operator, rhs ? uujson(rhs, _true) : "",
+                uujson(lval, _true), operator, rval ? uujson(rval, _true) : "",
                 more || ""));
 
     } else if (isString(title)) {
         db.row.push(
             uuf(uuok.fmt[0] + uuok.fmt[2],
-                uuok.bgc[2 + (db.row.length % 2) * 4], title));
+                uuok.bgc[2 + (db.row.length % 2) * 4], uuentity(title)));
     } else {
         rv = uuclone(db);
         db.ng && uucss(doc.body, { bgc: uuok.bgc[0] });
-        ol = uuid("uuok") || doc.body[_appendChild](uu.ol({ id: "uuok" }));
+        ol = uuid("uuok") || doc.body[_appendChild](uu.ol("id,uuok"));
         ol.innerHTML += db.row.join("");
 
         uuok.db = { ok: 0, ng: 0, total: 0, ms: 0, row: [] }; // reset
@@ -4276,40 +4313,40 @@ uuok.bgc = { 0: "#fcd", 1: "#dfc", 2: "#80c65a",   // 0 is ng, 1 is ok, 2 is tit
              4: "#fac", 5: "#cfa", 6: "#72bf47" };
 
 // inner -
-function judge(lhs,      // @param Mix: left hand set
+function judge(lval,     // @param Mix: left hand set
                operator, // @param String: operator
-               rhs) {    // @param Mix(= void): right hand set
+               rval) {   // @param Mix(= void): right hand set
                          // @return Number: 0 is false, 1 is true
                          // @throws Error("BAD_OPERATOR")
     var rv, ope = uutrim(operator.toUpperCase(), "");
 
     if (ope === "===") {
-        rv = lhs.valueOf() == rhs.valueOf();
+        rv = lval.valueOf() == rval.valueOf();
     } else if (ope === "!==") {
-        rv = lhs.valueOf() != rhs.valueOf();
+        rv = lval.valueOf() != rval.valueOf();
     } else {
         switch (ope) {
         case "IS":
-        case "==":  rv =  uulike(lhs, rhs); break;
-        case "!=":  rv = !uulike(lhs, rhs); break;
-        case ">":   rv = lhs >  rhs; break;
-        case ">=":  rv = lhs >= rhs; break;
-        case "<":   rv = lhs <  rhs; break;
-        case "<=":  rv = lhs <= rhs; break;
-        case "&&":  rv = !!(lhs && rhs); break;
-        case "||":  rv = !!(lhs || rhs); break;
-        case "HAS": rv = isString(lhs) ? lhs.indexOf(rhs) > 0
-                                       : uuhas(lhs, rhs); break;
-        case "ISNAN":     rv = isNaN(lhs); break;
-        case "ISTRUE":    rv = !!lhs; break;
-        case "ISFALSE":   rv =  !lhs; break;
-        case "ISERROR":   try { lhs(), rv = 0; } catch(err) { rv = 1; } break;
-        case "ISINFINITY":rv = !isFinite(lhs); break;
-        case "INSTANCEOF":rv = lhs instanceof rhs; break;
+        case "==":  rv =  uulike(lval, rval); break;
+        case "!=":  rv = !uulike(lval, rval); break;
+        case ">":   rv = lval >  rval; break;
+        case ">=":  rv = lval >= rval; break;
+        case "<":   rv = lval <  rval; break;
+        case "<=":  rv = lval <= rval; break;
+        case "&&":  rv = !!(lval && rval); break;
+        case "||":  rv = !!(lval || rval); break;
+        case "HAS": rv = isString(lval) ? lval.indexOf(rval) > 0
+                                       : uuhas(lval, rval); break;
+        case "ISNAN":     rv = isNaN(lval); break;
+        case "ISTRUE":    rv = !!lval; break;
+        case "ISFALSE":   rv =  !lval; break;
+        case "ISERROR":   try { lval(), rv = 0; } catch(err) { rv = 1; } break;
+        case "ISINFINITY":rv = !isFinite(lval); break;
+        case "INSTANCEOF":rv = lval instanceof rval; break;
         default:
             ope = ope[_replace](/IS/, "");
-            rv = isFunction(uutype[ope]) ? uutype[ope](lhs, ope) // extend types
-               : uutype[ope] ? uutype(lhs) === uutype[ope] : 2;
+            rv = isFunction(uutype[ope]) ? uutype[ope](lval, ope) // extend types
+               : uutype[ope] ? uutype(lval) === uutype[ope] : 2;
             if (rv === 2) {
                 throw new Error("BAD_OPERATOR " + operator);
             }
@@ -5586,6 +5623,7 @@ function detectFeatures() {
 }
 
 //{{{!mb
+// --- detect uu.ready.cloneNode.* features ---
 uuready("dom:2", function() {
     var cloned, evt, fired = 0, attr = "uuz", data = "data-uuz",
         body = doc.body, cloneNode = uuready.cloneNode, div = uunode(),
@@ -5593,14 +5631,14 @@ uuready("dom:2", function() {
             fired += 1;
         };
 
-    div[_setAttribute](attr, "1"); // node.setAttribute("uuz", "1")
-    div[data] = { ref: 1 };      // node["data-uuz"] = { ref: 1 }
-    if (div[_addEventListener]) { // [GECKO][WEBKIT][OPERA][IE9]
+    div[_setAttribute](attr, "1");  // node.setAttribute("uuz", "1")
+    div[data] = { ref: 1 };         // node["data-uuz"] = { ref: 1 }
+    if (div[_addEventListener]) {   // [GECKO][WEBKIT][OPERA][IE9]
         div[_addEventListener]("click", onfire, _false);
         cloned = div.cloneNode(_false);
         (evt = doc.createEvent("MouseEvents")).initEvent("click", _false, _true);
-        cloned.dispatchEvent(evt); // fire
-    } else if (div.attachEvent) { // [IE]
+        cloned.dispatchEvent(evt);  // fire
+    } else if (div.attachEvent) {   // [IE]
         body[_appendChild](div).attachEvent("onclick", onfire);
         body[_appendChild](cloned = div.cloneNode(_false)).fireEvent("onclick");
         body[_removeChild](cloned);
