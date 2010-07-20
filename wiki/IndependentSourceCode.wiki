@@ -3,7 +3,6 @@
 一部のソースコードは、単体利用も可能です。
 
 = 単体利用可能なソースコードの一覧 =
-  * src/misc/codec.js
   * [uu_datauri src/misc/datauri.js]
   * [uu_lzw src/misc/lzw.js]
   * [uu_matrix2d src/misc/matrix2d.js]
