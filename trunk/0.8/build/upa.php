@@ -176,7 +176,7 @@ if ($castoff[0] === "all") {
     $castoff = array("form", "snippet", "image", "color",
                      "unittest", "fx", "ajax",
                      "svg", "canvas", "flash", "nodeset",
-                     "live", "resize", "cssbox");
+                     "live", "resize", "cssbox", "codec");
 }
 
 include $preprosess;
