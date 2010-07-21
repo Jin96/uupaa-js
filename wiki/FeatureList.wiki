@@ -42,17 +42,20 @@ Hash(Object)とArrayを操作する一連の機能です。
   * [uu_mix uu.mix] Mixin を行います。
   * [uu_has uu.has] Hash が Array が 要素や要素の集合を含んでいるかを検索します。Hash A が Hash B を内包しているか、Array A が Array B を内包しているかなども比較できます。
   * [uu_nth uu.nth] Hash または Array の n 番目の key/value ペアを返します。Array の場合は欠落している要素をカウントしません。
-  * [uu_each uu.each] 型に応じて for (i in Hash) または Array#forEach を行ないます。
-  * [uu_size uu.size] Hash / Array の要素数を返します。
-  * [uu_keys uu.keys] Hash のキー一覧 または Array の添字一覧を返します。
-  * [uu_values uu.values] Hash の値一覧 または Array の値一覧を返します。
-  * [uu_hash uu.hash] Hash 化します。Key/Value ペアや、カンマで結合された文字列から Hash を作成します。
-  * [uu_hash_clone uu.hash.clone] Hash のクローン(シャローコピー/浅いコピー)を返します。
-  * [uu_hash_indexOf uu.hash.indexOf] Hash の値を検索し一致する Key を返します。Array#indexOf の Hash 版です。
+  * [uu_each uu.each] for (i in Hash) または Array#forEach を行ないます。
+  * [uu_keys uu.keys] Hash または Array のKey(添字)一覧を返します。
+  * [uu_size uu.size] Hash または Array の要素数を返します。
+  * [uu_clone uu.clone] Hash または Array のクローン(シャローコピー/浅いコピー)を返します。
+  * [uu_values uu.values] Hash または Array の値一覧を返します。
+  * [uu_indexOf uu.indexOf] Hash または Array の値を検索し一致する Key を返します。
 
+  * [uu_hash uu.hash] Hash 化します。Key/Value ペアや、カンマで結合された文字列から Hash を作成します。
   * [uu_array uu.array] Array 化します。リテラル値や FakeArray を Array に変換します。変換と同時に slice もできます。
   * [uu_array_dump uu.array.dump] ByteArray を10進/16進文字列化します。
-
+  * [uu_array_sort uu.array.clean] Array をソートします。
+  * [uu_array_clean uu.array.clean] Array から null / undefined などの値を削除し密な配列を作成します。Indexをリナンバリングします。
+  * [uu_array_toHash uu.array.toHash] Array と値 または Array と Array からHashを作成します。
+  * [uu_array_unique uu.array.unique] 重複した値を除去した配列を作成します。
 
 
 
