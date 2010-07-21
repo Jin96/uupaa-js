@@ -1,0 +1,59 @@
+#summary Feature List / 機能一覧
+
+<wiki:toc max_depth="3" />
+
+= NAMESPACE / FACTORY =
+[uu] は uupaa.js のネームスペースであり、factory機能を持ちます。
+
+  * uu(Class, arg, ...) はクラスファクトリです。uu.Class 以下のクラスをインスタンス化し返します。
+  * uu(CSSセレクタ, context) はNodeSetファクトリです、CSSセレクタに一致する要素を保持する NodeSet オブジェクトを返します。
+  
+= READY =
+[uu_ready uu.ready] は利用可能な機能の一覧と [DOMReady], WindowReady, StorageReady などのタイミングでコールバックする仕組みを提供します。
+
+= VERSION DETECTION =
+[uu_ver uu.ver] は ブラウザのバージョンと動作環境(JIT、OS, モバイル, Touch, プラグイン)についての情報を提供します。
+
+  * uu.ie は uu.ver.ie の Alias です
+  * uu.gecko は uu.ver.gecko の Alias です
+  * uu.opera は uu.ver.opera の Alias です
+  * uu.webkit は uu.ver.webkit の Alias です
+
+= CODE SNIPPET =
+[uu_snippet uu.snippet] は 簡易テンプレートです。静的なHTMLを読み込み、ループを展開し変数を適用します。
+
+= AJAX / JSONP =
+  * [uu_ajax uu.ajax] は Ajax 機能を提供します。非同期専用です。
+  * [uu_require uu.require] は 同期読み込み(Sjax)機能を提供します。
+  * [uu_jsonp uu.jsonp] は jsonp による非同期読み込み機能を提供します。
+
+= TYPE MATCH / TYPE DETECTION =
+  * [uu_like uu.like] は 一致するものを含むかどうかを判定します。Like検索とディープ検索を行ないます。
+  * [uu_type uu.type] は 型を判定します。
+  * [uu_isNumber uu.isNumber] は Number型かどうかを判定します。
+  * [uu_isString uu.isString] は String型かどうかを判定します。
+  * [uu_isFunction uu.isFunction] は Function型かどうかを判定します。
+  * uu.isArray はありません。Array型の比較は Array.isArray を使います。
+
+= HASH / ARRAY =
+Hash(Object)とArrayを操作する一連の機能です。
+
+  * [uu_arg uu.arg] 関数のデフォルト引数を補完します。
+  * [uu_mix uu.mix] Mixin を行います。
+  * [uu_has uu.has] Hash が Array が 要素や要素の集合を含んでいるかを検索します。Hash A が Hash B を内包しているか、Array A が Array B を内包しているかなども比較できます。
+  * [uu_nth uu.nth] Hash または Array の n 番目の key/value ペアを返します。Array の場合は欠落している要素をカウントしません。
+  * [uu_each uu.each] 型に応じて for (i in Hash) または Array#forEach を行ないます。
+  * [uu_size uu.size] Hash / Array の要素数を返します。
+  * [uu_keys uu.keys] Hash のキー一覧 または Array の添字一覧を返します。
+  * [uu_values uu.values] Hash の値一覧 または Array の値一覧を返します。
+  * [uu_hash uu.hash] Hash 化します。Key/Value ペアや、カンマで結合された文字列から Hash を作成します。
+  * [uu_hash_clone uu.hash.clone] Hash のクローン(シャローコピー/浅いコピー)を返します。
+  * [uu_hash_indexOf uu.hash.indexOf] Hash の値を検索し一致する Key を返します。Array#indexOf の Hash 版です。
+
+  * [uu_array uu.array] Array 化します。リテラル値や FakeArray を Array に変換します。変換と同時に slice もできます。
+  * [uu_array_dump uu.array.dump] ByteArray を10進/16進文字列化します。
+
+
+
+
+
