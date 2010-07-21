@@ -38,24 +38,92 @@
 = HASH / ARRAY =
 Hash(Object)とArrayを操作する一連の機能です。
 
-  * [uu_arg uu.arg] 関数のデフォルト引数を補完します。
-  * [uu_mix uu.mix] Mixin を行います。
-  * [uu_has uu.has] Hash が Array が 要素や要素の集合を含んでいるかを検索します。Hash A が Hash B を内包しているか、Array A が Array B を内包しているかなども比較できます。
-  * [uu_nth uu.nth] Hash または Array の n 番目の key/value ペアを返します。Array の場合は欠落している要素をカウントしません。
-  * [uu_each uu.each] for (i in Hash) または Array#forEach を行ないます。
-  * [uu_keys uu.keys] Hash または Array のKey(添字)一覧を返します。
-  * [uu_size uu.size] Hash または Array の要素数を返します。
-  * [uu_clone uu.clone] Hash または Array のクローン(シャローコピー/浅いコピー)を返します。
-  * [uu_values uu.values] Hash または Array の値一覧を返します。
-  * [uu_indexOf uu.indexOf] Hash または Array の値を検索し一致する Key を返します。
+  * [uu_arg uu.arg] は関数のデフォルト引数を補完します。
+  * [uu_mix uu.mix] は Mixin を行います。
+  * [uu_has uu.has] は Hash が Array が 要素や要素の集合を含んでいるかを検索します。Hash A が Hash B を内包しているか、Array A が Array B を内包しているかなども比較できます。
+  * [uu_nth uu.nth] は Hash または Array の n 番目の key/value ペアを返します。Array の場合は欠落している要素をカウントしません。
+  * [uu_each uu.each] は for (i in Hash) または Array#forEach を行ないます。
+  * [uu_keys uu.keys] は Hash または Array のKey(添字)一覧を返します。
+  * [uu_size uu.size] は Hash または Array の要素数を返します。
+  * [uu_clone uu.clone] は Hash または Array のクローン(シャローコピー/浅いコピー)を返します。
+  * [uu_values uu.values] は Hash または Array の値一覧を返します。
+  * [uu_indexOf uu.indexOf] は Hash または Array の値を検索し一致する Key を返します。
 
-  * [uu_hash uu.hash] Hash 化します。Key/Value ペアや、カンマで結合された文字列から Hash を作成します。
-  * [uu_array uu.array] Array 化します。リテラル値や FakeArray を Array に変換します。変換と同時に slice もできます。
-  * [uu_array_dump uu.array.dump] ByteArray を10進/16進文字列化します。
-  * [uu_array_sort uu.array.clean] Array をソートします。
-  * [uu_array_clean uu.array.clean] Array から null / undefined などの値を削除し密な配列を作成します。Indexをリナンバリングします。
-  * [uu_array_toHash uu.array.toHash] Array と値 または Array と Array からHashを作成します。
-  * [uu_array_unique uu.array.unique] 重複した値を除去した配列を作成します。
+  * [uu_hash uu.hash] は Hash 化します。Key/Value ペアや、カンマで結合された文字列から Hash を作成します。
+  * [uu_array uu.array] は Array 化します。リテラル値や FakeArray を Array に変換します。変換と同時に slice もできます。
+  * [uu_array_dump uu.array.dump] は ByteArray を10進/16進文字列化します。
+  * [uu_array_sort uu.array.clean] は Array をソートします。
+  * [uu_array_clean uu.array.clean] は Array から null / undefined などの値を削除し密な配列を作成します。Indexをリナンバリングします。
+  * [uu_array_toHash uu.array.toHash] は Array と値 または Array と Array からHashを作成します。
+  * [uu_array_unique uu.array.unique] は 重複した値を除去した配列を作成します。
+
+= ATTRIBUTE =
+  * [uu_attr uu.attr] は Node の属性値にアクセスします。
+
+= DATASET =
+  * [uu_data uu.data] は Node のデータセット(HTML5 - EMBEDDING CUSTOM NON-VISIBLE DATA)にアクセスします。
+
+= CSS / STYLE / STYLESHEET / VIEW PORT =
+  * [uu_css uu.css] は Node のスタイル属性値にアクセスします。また getComputedStyle 互換機能の提供や、StyleSheetクラスのインスタンスを作成する機能もあります。
+  * [uu_css_show uu.css.show] は 隠されている Node を見せます。
+  * [uu_css_hide uu.css.hide] は 見えている Node を隠します。
+  * [uu_css_unit uu.css.unit] は CSS の様々な単位系をピクセル単位に変換します。"12em" や "auto" 等をpixelに変換します。
+  * [uu_css_isShow uu.css.isShow] は Node が見えているか判定します。
+
+== CSS BOX MODEL ==
+CSS Box Model に関する機能を提供します。
+  * [uu_css_box uu.css.box] は Margin, Border, Padding 幅を計算し、コンテントボックスの大きさを返します。
+  * [uu_css_rect uu.css.rect] は コンテントボックスの絶対座標とオフセットサイズ(style.width + padding + border)を返します。
+  * [uu_css_toStatic uu.css.toStatic] は style="position:static" 相当です。
+  * [uu_css_toAbsolute uu.css.toAbsolute] は style="position:absolute" 相当です。オフセット値を自動的に解決します。
+  * [uu_css_toRelative uu.css.toRelative] は style="position:relative" 相当です。
+
+== CSS 3 ==
+  * [uu_css_opacity uu.css.opacity] は Node の不透明度にアクセスします。
+  * [uu_css_transform uu.css.transform] は Node の回転/拡大/移動に関する情報にアクセスします。
+  * [uu_css_selectable uu.css.selectable] は !DragDrop でテキストやノードが選択されないようにします。
+
+== VIEW PORT ==
+  * [uu_viewport uu.viewport] は ViewPortの大きさ/スクロール/回転に関する情報を取得します。
+
+= EFFECT / ANIMATION =
+  * [uu_fx uu.fx] は CSS ベースのアニメーション機能を提供します。
+  * [uu_fx_skip uu.fx.skip] は 現在のアニメーションキューをスキップ(即終了)し実行を次のキューに移します。
+  * [uu_fx_isBusy uu.fx.isBusy] は Node がアニメーション中かどうかを判定します。
+
+= QUERY =
+  * [uu_id uu.id] は Node の ID 属性が一致する最初の要素を検索します。
+  * [uu_tag uu.tag] は Node の tagName 属性が一致する要素を全て検索します。コメントノードは除外します。
+  * [uu_match uu.match] は Node が CSS セレクタと一致するかどうかを判定します。
+  * [uu_query uu.query] は CSS セレクタと一致する Node を検索します。
+  * [uu_klass uu.klass] は Node の className 属性が値を含んでいる要素を全て検索します。
+
+= CLASSNAME =
+  * [uu_klass_has uu.klass.has] は Node の className 属性が値を含んでいるか判定します。
+  * [uu_klass_add uu.klass.add] は Node の className 属性に値を追加します。
+  * [uu_klass_remove uu.klass.remove] は Node の className 属性から値を削除します。
+  * [uu_klass_toggle uu.klass.toggle] は Node の className 属性が値を含んでいれば削除し、無ければ追加します。
+
+= OOP =
+必要最小限のクラスベースOOPと、メッセージポンプによるインスタンス間の同期/非同期通信, ユニキャスト/ブロードキャスト機能を提供します。
+  * [uu_Class uu.Class] は クラスを定義します。一段階の継承が可能です。
+  * [uu_Class_singleton uu.Class.singleton] は シングルトンクラスを定義します。継承はできません。
+
+= EVENT =
+  * [uu_event uu.event] は イベントハンドラの設定ができます。
+  * [uu_event_has uu.event.has] は Node がイベントハンドラを持っているか判定します。
+  * [uu_event_key uu.event.key] は Key イベントに関する情報を補強します。
+  * [uu_event_edge uu.event.edge] は Mouse オフセット座標に関する情報を補強します。
+  * [uu_event_fire uu.event.fire] は カスタムイベントを発火します。
+  * [uu_event_stop uu.event.stop] は イベントの伝播とデフォルトアクションを抑止します。
+  * [uu_event_hover uu.event.hover] は ホバーイベントハンドラの設定ができます。
+  * [uu_event_unhover uu.event.unhover] は ホバーイベントハンドラの解除ができます。
+  * [uu_event_cyclic uu.event.cyclic] は サイクリックイベントハンドラの設定ができます。現在、解除はできません。
+
+
+
+
+
 
 
 
