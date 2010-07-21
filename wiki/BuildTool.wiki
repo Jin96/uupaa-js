@@ -46,7 +46,7 @@ build/upa.php はプリプロセスとMinifyを施し最適化された.jsファ
 || -core || library core || ライブラリの核となるファイルを指定します。デフォルトは "uupaa.js" です。<br /> ビルドで生成するファイル名も -core で指定したファイル名になります ||
 || -nocore || no library core || ライブラリの核となるファイルをマージせずにビルドします ||
 || -off || castoff || コメントアウトする機能名をスラッシュで連結し指定します。例: -off form/snippet ||
-|| *.js || JavaScript source code file path || ソースコードファイルパスを指定します。相対パスで指定した場合は -srcdir 以下からファイルを読み取ります ||
+|| `*`.js || JavaScript source code file path || ソースコードファイルパスを指定します。相対パスで指定した場合は -srcdir 以下からファイルを読み取ります ||
 
 == -off ==
  -off オプションに指定可能な文字列の一覧です
@@ -60,18 +60,18 @@ build/upa.php はプリプロセスとMinifyを施し最適化された.jsファ
 || colordict || 色辞書をコメントアウトします。<br />uu.color() は利用可能ですが<br /> "black" や "skyblue" などの W3C Named Color は利用できなくなります || -2.3kB ||
 || unittest  || uu.ok() をコメントアウトします。|| -1.3kB ||
 || fx        || uu.fx() をコメントアウトします。<br />uu.css.show() と uu.css.hide() も利用できなくなります || -4.5kB ||
-|| ajax      || uu.ajax(), uu.require(), uu.jsonp() をコメントアウトします || -2.6kB ||
+|| ajax      || uu.ajax(), uu.require(), uu.jsonp() をコメントアウトします。<br />uu.snippet で外部リソース `<`script src="..."`>` の利用ができなくなります|| -2.6kB ||
 || svg       || uu.svg() をコメントアウトします || -0.2kB ||
 || canvas    || uu.canvas() をコメントアウトします || -0.1kB ||
 || flash     || uu.flash() をコメントアウトします || -0.6kB ||
 || nodeset   || NodeSet I/F 全体をコメントアウトします。<br /> uu("div > p").add("div") などが利用できなくなります || -1.4kB ||
-|| live      || uu.live(), uu.unlive(), NodeSet.live(), NodeSet.unlive() をコメントアウトします。 || -1.3kB ||
-|| resize    || uu.resize(), uu.unresize() をコメントアウトします。 || -0.8kB ||
-|| cssbox    || uu.css.box(), uu.css.rect(), <br />uu.css.toStatic(), uu.css.toAbsolute(), uu.css.toRelative() をコメントアウトします。 || -1.7kB ||
-|| codec     || uu.entity(), uu.base64(), <br />uu.utf8(), uu.md5() をコメントアウトします。 || -3.5kB ||
-|| md5       || uu.md5() をコメントアウトします。 || -1.8kB ||
-|| sprintf   || uu.sf(), uu.sprintf() をコメントアウトします。 || -0.8kB ||
-|| url       || uu.url(), uu.qs() をコメントアウトします。 || -1.6kB ||
+|| live      || uu.live(), uu.unlive(), NodeSet.live(), NodeSet.unlive() をコメントアウトします || -1.3kB ||
+|| resize    || uu.resize(), uu.unresize() をコメントアウトします || -0.8kB ||
+|| cssbox    || uu.css.box(), uu.css.rect(), <br />uu.css.toStatic(), uu.css.toAbsolute(), uu.css.toRelative() をコメントアウトします || -1.7kB ||
+|| codec     || uu.entity(), uu.base64(), <br />uu.utf8(), uu.md5() をコメントアウトします || -3.5kB ||
+|| md5       || uu.md5() をコメントアウトします || -1.8kB ||
+|| sprintf   || uu.sf(), uu.sprintf() をコメントアウトします || -0.8kB ||
+|| url       || uu.url(), uu.qs() をコメントアウトします || -1.6kB ||
 
 
 = 例 =
