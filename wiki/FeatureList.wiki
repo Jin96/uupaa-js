@@ -1,3 +1,4 @@
+
 #summary Feature List / 機能一覧
 
 <wiki:toc max_depth="3" />
@@ -9,51 +10,51 @@ uupaa.js の全機能は [uu] で始まります。また [uu] は factory 機�
   * uu(CSSセレクタ, context) はNodeSetファクトリです、CSSセレクタに一致する要素を保持する NodeSet オブジェクトを返します。
 
 = Node Set =
-  * [NodeSet_back NodeSet.back] は スタックを一つ巻き戻します。
-  * [NodeSet_find NodeSet.find] は 現在のノードセットを絞り込み新しいノードセットを作成します。古いノードセットはスタックに移動します。
-  * [NodeSet_nth NodeSet.nth] は 現在のノードセットのn番目のノードを取得するか、n番目のノードに対しコールバック関数を適用します。
-  * [NodeSet_each NodeSet.each] は 現在のノードセットに対しコールバック関数を順番に適用します。ループの途中でfalseを返すとループアウトします。
-  * [NodeSet_size NodeSet.size] は 現在のノードセットの要素数を返します。
-  * [NodeSet_indexOf NodeSet.indexOf] は 現在のノードセットから一致するノードのインデックス(nth)を返します。
-  * [NodeSet_add NodeSet.add] は 現在のノードセットの各要素を基準にして、ノードを追加/挿入します。
-  * [NodeSet_remove NodeSet.remove] は 現在のノードセットを親要素から切り離します。切り離したノードの NodeArray を返します。
-  * [NodeSet_bind NodeSet.bind] は 現在のノードセットに対しイベントを設定します。
-  * [NodeSet_unbind NodeSet.unbind] は 現在のノードセットに対しイベントを解除します。
-  * [NodeSet_live NodeSet.live] は 現在のノードセットに対し Live イベントを設定します。
-  * [NodeSet_unlive NodeSet.unlive] は 現在のノードセットに対し Live イベントを解除します。
-  * [NodeSet_hover NodeSet.hover] は 現在のノードセットに対し hover イベントを設定します。
-  * [NodeSet_unhover NodeSet.unhover] は 現在のノードセットに対し hover イベントを解除します。
-  * [NodeSet_cyclic NodeSet.cyclic] は 現在のノードセットに対し cyclic イベントを設定します。
-  * [NodeSet_uncyclic NodeSet.uncyclic] は 現在のノードセットに対し cyclic イベントを解除します。
-  * [NodeSet_attr NodeSet.attr] は 現在のノードセットの属性にアクセスします。
-  * [NodeSet_css NodeSet.css] は 現在のノードセットのスタイルにアクセスします。
-  * [NodeSet_show NodeSet.show] は 現在のノードセットの各要素が非表示なら表示します。
-  * [NodeSet_hide NodeSet.hide] は 現在のノードセットの各要素を隠します。
-  * [NodeSet_klass NodeSet.klass] は 現在のノードセットの className 属性にアクセスします。
-  * [NodeSet_text NodeSet.text] は 現在のノードセットの textContent 属性にアクセスします。
-  * [NodeSet_value NodeSet.value] は 現在のノードセットの value 属性にアクセスします。
-  * [NodeSet_fx NodeSet.fx] は 現在のノードセットに対しアニメーションを設定します。
-  * [NodeSet_skip NodeSet.skip] は 現在のノードセットに対し設定されているアニメーションをスキップします。
+  * [NodeSet_back NodeSet.back()] は スタックを一つ巻き戻します。
+  * [NodeSet_find NodeSet.find()] は 現在のノードセットを絞り込み新しいノードセットを作成します。古いノードセットはスタックに移動します。
+  * [NodeSet_nth NodeSet.nth()] は 現在のノードセットのn番目のノードを取得するか、n番目のノードに対しコールバック関数を適用します。
+  * [NodeSet_each NodeSet.each()] は 現在のノードセットに対しコールバック関数を順番に適用します。ループの途中でfalseを返すとループアウトします。
+  * [NodeSet_size NodeSet.size()] は 現在のノードセットの要素数を返します。
+  * [NodeSet_indexOf NodeSet.indexOf()] は 現在のノードセットから一致するノードのインデックス(nth)を返します。
+  * [NodeSet_add NodeSet.add()] は 現在のノードセットの各要素を基準にして、ノードを追加/挿入します。
+  * [NodeSet_remove NodeSet.remove()] は 現在のノードセットを親要素から切り離します。切り離したノードの NodeArray を返します。
+  * [NodeSet_bind NodeSet.bind()] は 現在のノードセットに対しイベントを設定します。
+  * [NodeSet_unbind NodeSet.unbind()] は 現在のノードセットに対しイベントを解除します。
+  * [NodeSet_live NodeSet.live()] は 現在のノードセットに対し Live イベントを設定します。
+  * [NodeSet_unlive NodeSet.unlive()] は 現在のノードセットに対し Live イベントを解除します。
+  * [NodeSet_hover NodeSet.hover()] は 現在のノードセットに対し hover イベントを設定します。
+  * [NodeSet_unhover NodeSet.unhover()] は 現在のノードセットに対し hover イベントを解除します。
+  * [NodeSet_cyclic NodeSet.cyclic()] は 現在のノードセットに対し cyclic イベントを設定します。
+  * [NodeSet_uncyclic NodeSet.uncyclic()] は 現在のノードセットに対し cyclic イベントを解除します。
+  * [NodeSet_attr NodeSet.attr()] は 現在のノードセットの属性にアクセスします。
+  * [NodeSet_css NodeSet.css()] は 現在のノードセットのスタイルにアクセスします。
+  * [NodeSet_show NodeSet.show()] は 現在のノードセットの各要素が非表示なら表示します。
+  * [NodeSet_hide NodeSet.hide()] は 現在のノードセットの各要素を隠します。
+  * [NodeSet_klass NodeSet.klass()] は 現在のノードセットの className 属性にアクセスします。
+  * [NodeSet_text NodeSet.text()] は 現在のノードセットの textContent 属性にアクセスします。
+  * [NodeSet_value NodeSet.value()] は 現在のノードセットの value 属性にアクセスします。
+  * [NodeSet_fx NodeSet.fx()] は 現在のノードセットに対しアニメーションを設定します。
+  * [NodeSet_skip NodeSet.skip()] は 現在のノードセットに対し設定されているアニメーションをスキップします。
 
-  * [NodeSet_click NodeSet.click] は NodeSet.event.bind(node, "click") と同じです。
+  * [NodeSet_click NodeSet.click()] は NodeSet.event.bind(node, "click") と同じです。
 
 以下のショートカットイベントも利用できます。
-  * [NodeSet_mouseup NodeSet.mouseup]
-  * [NodeSet_mousemove NodeSet.mousemove]
-  * [NodeSet_mousewheel NodeSet.mousewheel]
-  * [NodeSet_dblclick NodeSet.dblclick]
-  * [NodeSet_keydown NodeSet.keydown]
-  * [NodeSet_keypress NodeSet.keypress]
-  * [NodeSet_keyup NodeSet.keyup]
-  * [NodeSet_change NodeSet.change]
-  * [NodeSet_submit NodeSet.submit]
-  * [NodeSet_focus NodeSet.focus]
-  * [NodeSet_blur NodeSet.blur]
-  * [NodeSet_contextmenu NodeSet.contextmenu]
+  * [NodeSet_mouseup NodeSet.mouseup()]
+  * [NodeSet_mousemove NodeSet.mousemove()]
+  * [NodeSet_mousewheel NodeSet.mousewheel()]
+  * [NodeSet_dblclick NodeSet.dblclick()]
+  * [NodeSet_keydown NodeSet.keydown()]
+  * [NodeSet_keypress NodeSet.keypress()]
+  * [NodeSet_keyup NodeSet.keyup()]
+  * [NodeSet_change NodeSet.change()]
+  * [NodeSet_submit NodeSet.submit()]
+  * [NodeSet_focus NodeSet.focus()]
+  * [NodeSet_blur NodeSet.blur()]
+  * [NodeSet_contextmenu NodeSet.contextmenu()]
 
 
 = Ready =
-[uu_ready uu.ready] は利用可能な機能の一覧と [DOMReady], WindowReady, StorageReady などのタイミングでコールバックする仕組みを提供します。
+[uu_ready uu.ready()] は利用可能な機能の一覧と [DOMReady], WindowReady, StorageReady などのタイミングでコールバックする仕組みを提供します。
 
 = Version Detection =
 [uu_ver uu.ver] は ブラウザのバージョンと動作環境(JIT、OS, モバイル, Touch, プラグイン)についての情報を提供します。
@@ -64,255 +65,262 @@ uupaa.js の全機能は [uu] で始まります。また [uu] は factory 機�
   * uu.webkit は uu.ver.webkit の Alias です
 
 = Code Snippet =
-[uu_snippet uu.snippet] は 簡易テンプレートです。静的なHTMLを読み込み、ループを展開し変数を適用します。
+[uu_snippet uu.snippet()] は 簡易テンプレートです。静的なHTMLを読み込み、ループを展開し変数を適用します。
 
 = Ajax / JSONP =
-  * [uu_ajax uu.ajax] は Ajax 機能を提供します。非同期専用です。
-  * [uu_require uu.require] は 同期読み込み(Sjax)機能を提供します。
-  * [uu_jsonp uu.jsonp] は jsonp による非同期読み込み機能を提供します。
+  * [uu_ajax uu.ajax()] は Ajax 機能を提供します。非同期専用です。
+  * [uu_require uu.require()] は 同期読み込み(Sjax)機能を提供します。
+  * [uu_jsonp uu.jsonp()] は jsonp による非同期読み込み機能を提供します。
 
 = Type Match / Type Detection =
-  * [uu_like uu.like] は 一致するものを含むかどうかを判定します。Like検索とディープ検索を行ないます。
-  * [uu_type uu.type] は 型を判定します。
-  * [uu_isNumber uu.isNumber] は Number型かどうかを判定します。
-  * [uu_isString uu.isString] は String型かどうかを判定します。
-  * [uu_isFunction uu.isFunction] は Function型かどうかを判定します。
-  * uu.isArray はありません。Array型の比較は Array.isArray を使います。
+  * [uu_like uu.like()] は 一致するものを含むかどうかを判定します。曖昧検索とディープチェックを行ないます。
+  * [uu_type uu.type()] は 型を判定します。
+  * [uu_isNumber uu.isNumber()] は Number型かどうかを判定します。
+  * [uu_isString uu.isString()] は String型かどうかを判定します。
+  * [uu_isFunction uu.isFunction()] は Function型かどうかを判定します。
+  * uu.isArray() はありません。Array型の比較は Array.isArray() を使います。
 
 = Hash / Array =
 Hash(Object)とArrayを操作する一連の機能です。
 
-  * [uu_arg uu.arg] は関数のデフォルト引数を補完します。
-  * [uu_mix uu.mix] は Mixin を行います。
-  * [uu_has uu.has] は Hash または Array が 要素や要素の集合を含んでいるかを検索します。Hash A が Hash B を内包しているか、Array A が Array B を内包しているかなども比較できます。
-  * [uu_nth uu.nth] は Hash または Array の n 番目の key/value ペアを返します。Array の場合は欠落している要素をカウントしません。
-  * [uu_each uu.each] は for (i in Hash) または Array#forEach を行ないます。
-  * [uu_keys uu.keys] は Hash または Array のKey(添字)一覧を返します。
-  * [uu_size uu.size] は Hash または Array の要素数を返します。
-  * [uu_clone uu.clone] は Hash または Array のクローン(シャローコピー/浅いコピー)を返します。
-  * [uu_values uu.values] は Hash または Array の値一覧を返します。
-  * [uu_indexOf uu.indexOf] は Hash または Array の値を検索し一致する Key を返します。
+  * [uu_arg uu.arg()] は関数のデフォルト引数を補完します。
+  * [uu_mix uu.mix()] は Mixin を行います。
+  * [uu_has uu.has()] は Hash または Array が 要素や要素の集合を含んでいるかを検索します。Hash A が Hash B を内包しているか、Array A が Array B を内包しているかなども比較できます。
+  * [uu_nth uu.nth()] は Hash または Array の n 番目の key/value ペアを返します。Array の場合は欠落している要素をカウントしません。
+  * [uu_each uu.each()] は for (i in Hash) または Array#forEach を行ないます。
+  * [uu_keys uu.keys()] は Hash または Array のKey(添字)一覧を返します。
+  * [uu_size uu.size()] は Hash または Array の要素数を返します。
+  * [uu_clone uu.clone()] は Hash または Array のクローン(シャローコピー/浅いコピー)を返します。
+  * [uu_values uu.values()] は Hash または Array の値一覧を返します。
+  * [uu_indexOf uu.indexOf()] は Hash または Array の値を検索し一致する Key を返します。
 
-  * [uu_hash uu.hash] は Hash 化します。Key/Value ペアや、カンマで結合された文字列から Hash を作成します。
-  * [uu_array uu.array] は Array 化します。リテラル値や FakeArray を Array に変換します。変換と同時に slice もできます。
-  * [uu_array_dump uu.array.dump] は ByteArray を10進/16進文字列化します。
-  * [uu_array_sort uu.array.sort] は Array をソートします。
-  * [uu_array_clean uu.array.clean] は Array から null / undefined などの値を削除し密な配列を作成します。Indexをリナンバリングします。
-  * [uu_array_toHash uu.array.toHash] は Array と値 または Array と Array からHashを作成します。
-  * [uu_array_unique uu.array.unique] は 重複した値を除去した配列を作成します。
+  * [uu_hash uu.hash()] は Hash 化します。Key/Value ペアや、カンマで結合された文字列から Hash を作成します。
+  * [uu_array uu.array()] は Array 化します。リテラル値や FakeArray を Array に変換します。変換と同時に slice もできます。
+  * [uu_array_dump uu.array.dump()] は ByteArray を10進/16進文字列化します。
+  * [uu_array_sort uu.array.sort()] は Array をソートします。
+  * [uu_array_clean uu.array.clean()] は Array から null / undefined などの値を削除し密な配列を作成します。Indexをリナンバリングします。
+  * [uu_array_toHash uu.array.toHash()] は Array と値 または Array と Array からHashを作成します。
+  * [uu_array_unique uu.array.unique()] は 重複した値を除去した配列を作成します。
 
 = Attribute =
-  * [uu_attr uu.attr] は Node の属性値にアクセスします。
+  * [uu_attr uu.attr()] は Node の属性値にアクセスします。
 
 = Data Set =
-  * [uu_data uu.data] は Node のデータセット(HTML5 - EMBEDDING CUSTOM NON-VISIBLE DATA)にアクセスします。
+  * [uu_data uu.data()] は Node のデータセット(HTML5 - EMBEDDING CUSTOM NON-VISIBLE DATA)にアクセスします。
 
 = CSS / Style / Style Sheet / Viewport =
-  * [uu_css uu.css] は Node のスタイル属性値にアクセスします。また getComputedStyle 互換機能の提供や、StyleSheetクラスのインスタンスを作成する機能もあります。
-  * [uu_css_show uu.css.show] は 隠されている Node を見せます。
-  * [uu_css_hide uu.css.hide] は 見えている Node を隠します。
-  * [uu_css_unit uu.css.unit] は CSS の様々な単位系をピクセル単位に変換します。"12em" や "auto" 等をpixelに変換します。
-  * [uu_css_isShow uu.css.isShow] は Node が見えているか判定します。
+  * [uu_css uu.css()] は Node のスタイル属性値にアクセスします。また getComputedStyle 互換機能の提供や、StyleSheetクラスのインスタンスを作成する機能もあります。
+  * [uu_css_show uu.css.show()] は 隠されている Node を見せます。
+  * [uu_css_hide uu.css.hide()] は 見えている Node を隠します。
+  * [uu_css_unit uu.css.unit()] は CSS の様々な単位系をピクセル単位に変換します。"12em" や "auto" 等をpixelに変換します。
+  * [uu_css_isShow uu.css.isShow()] は Node が見えているか判定します。
 
 == CSS Box Model ==
 CSS Box Model に関する機能を提供します。
-  * [uu_css_box uu.css.box] は Margin, Border, Padding 幅を計算し、コンテントボックスの大きさを返します。
-  * [uu_css_rect uu.css.rect] は コンテントボックスの絶対座標とオフセットサイズ(style.width + padding + border)を返します。
-  * [uu_css_toStatic uu.css.toStatic] は style="position:static" 相当です。
-  * [uu_css_toAbsolute uu.css.toAbsolute] は style="position:absolute" 相当です。オフセット値を自動的に解決します。
-  * [uu_css_toRelative uu.css.toRelative] は style="position:relative" 相当です。
+  * [uu_css_box uu.css.box()] は Margin, Border, Padding 幅を計算し、コンテントボックスの大きさを返します。
+  * [uu_css_rect uu.css.rect()] は コンテントボックスの絶対座標とオフセットサイズ(style.width + padding + border)を返します。
+  * [uu_css_toStatic uu.css.toStatic()] は style="position:static" 相当です。
+  * [uu_css_toAbsolute uu.css.toAbsolute()] は style="position:absolute" 相当です。オフセット値を自動的に解決します。
+  * [uu_css_toRelative uu.css.toRelative()] は style="position:relative" 相当です。
 
 == CSS 3 ==
-  * [uu_css_opacity uu.css.opacity] は Node の不透明度にアクセスします。
-  * [uu_css_transform uu.css.transform] は Node の回転/拡大/移動に関する情報にアクセスします。
-  * [uu_css_selectable uu.css.selectable] は !DragDrop でテキストやノードが選択されないようにします。
+  * [uu_css_opacity uu.css.opacity()] は Node の不透明度にアクセスします。
+  * [uu_css_transform uu.css.transform()] は Node の回転/拡大/移動に関する情報にアクセスします。
+  * [uu_css_selectable uu.css.selectable()] は !DragDrop でテキストやノードが選択されないようにします。
 
 == Viewport ==
-  * [uu_viewport uu.viewport] は ViewPortの大きさ/スクロール/回転に関する情報を取得します。
+  * [uu_viewport uu.viewport()] は ViewPortの大きさ/スクロール/回転に関する情報を取得します。
 
 = Effect / Animation =
-  * [uu_fx uu.fx] は CSS ベースのアニメーション機能を提供します。
-  * [uu_fx_skip uu.fx.skip] は 現在のアニメーションキューをスキップ(即終了)し実行を次のキューに移します。
-  * [uu_fx_isBusy uu.fx.isBusy] は Node がアニメーション中かどうかを判定します。
+  * [uu_fx uu.fx()] は CSS ベースのアニメーション機能を提供します。
+  * [uu_fx_skip uu.fx.skip()] は 現在のアニメーションキューをスキップ(即終了)し実行を次のキューに移します。
+  * [uu_fx_isBusy uu.fx.isBusy()] は Node がアニメーション中かどうかを判定します。
 
 = Query =
-  * [uu_id uu.id] は Node の ID 属性が一致する最初の要素を検索します。
-  * [uu_tag uu.tag] は Node の tagName 属性が一致する要素を全て検索します。コメントノードは除外します。
-  * [uu_match uu.match] は Node が CSS セレクタと一致するかどうかを判定します。
-  * [uu_query uu.query] は CSS セレクタと一致する Node を検索します。
-  * [uu_klass uu.klass] は Node の className 属性が値を含んでいる要素を全て検索します。
+  * [uu_id uu.id()] は Node の ID 属性が一致する最初の要素を検索します。
+  * [uu_tag uu.tag()] は Node の tagName 属性が一致する要素を全て検索します。コメントノードは除外します。
+  * [uu_match uu.match()] は Node が CSS セレクタと一致するかどうかを判定します。
+  * [uu_query uu.query()] は CSS セレクタと一致する Node を検索します。
+  * [uu_klass uu.klass()] は Node の className 属性が値を含んでいる要素を全て検索します。
 
 = Class Name =
-  * [uu_klass_has uu.klass.has] は Node の className 属性が値を含んでいるか判定します。
-  * [uu_klass_add uu.klass.add] は Node の className 属性に値を追加します。
-  * [uu_klass_remove uu.klass.remove] は Node の className 属性から値を削除します。
-  * [uu_klass_toggle uu.klass.toggle] は Node の className 属性が値を含んでいれば削除し、無ければ追加します。
+  * [uu_klass_has uu.klass.has()] は Node の className 属性が値を含んでいるか判定します。
+  * [uu_klass_add uu.klass.add()] は Node の className 属性に値を追加します。
+  * [uu_klass_remove uu.klass.remove()] は Node の className 属性から値を削除します。
+  * [uu_klass_toggle uu.klass.toggle()] は Node の className 属性が値を含んでいれば削除し、無ければ追加します。
 
 = OOP =
 必要最小限のクラスベースOOPと、メッセージポンプによるインスタンス間の同期/非同期通信, ユニキャスト/ブロードキャスト機能を提供します。
-  * [uu_Class uu.Class] は クラスを定義します。一段階の継承が可能です。
-  * [uu_Class_singleton uu.Class.singleton] は シングルトンクラスを定義します。継承はできません。
+  * [uu_Class uu.Class()] は クラスを定義します。一段階の継承が可能です。
+  * [uu_Class_singleton uu.Class.singleton()] は シングルトンクラスを定義します。継承はできません。
 
 = Event =
-  * [uu_event uu.event] は イベントハンドラの設定ができます。
-  * [uu_event_has uu.event.has] は Node がイベントハンドラを持っているか判定します。
-  * [uu_event_key uu.event.key] は Key イベントに関する情報を補強します。
-  * [uu_event_edge uu.event.edge] は Mouse オフセット座標に関する情報を補強します。
-  * [uu_event_fire uu.event.fire] は カスタムイベントを発火します。
-  * [uu_event_stop uu.event.stop] は イベントの伝播とデフォルトアクションを抑止します。
-  * [uu_event_hover uu.event.hover] は ホバーイベントハンドラの設定ができます。
-  * [uu_event_unhover uu.event.unhover] は ホバーイベントハンドラを解除します。
-  * [uu_event_cyclic uu.event.cyclic] は サイクリックイベントハンドラの設定ができます。
-  * [uu_event_uncyclic uu.event.uncyclic] は サイクリックイベントハンドラを解除します。
-  * [uu_event_unbind uu.event.unbind] は イベントハンドラを解除します。
-  * [uu_event_attach uu.event.attach] は イベントハンドラを設定します。この関数でイベントを登録すると uu.event.bind や uu.event.unbind の管理対象外となります。
-  * [uu_event_detach uu.event.detach] は uu.event.attach で設定したイベントハンドラを解除します。
-  * [uu_bind uu.bind] は uu.event.bind の alias です。
-  * [uu_unbind uu.unbind] は uu.event.unbind の alias です。
+  * [uu_event uu.event()] は イベントハンドラの設定ができます。
+  * [uu_event_has uu.event.has()] は Node がイベントハンドラを持っているか判定します。
+  * [uu_event_key uu.event.key()] は Key イベントに関する情報を補強します。
+  * [uu_event_edge uu.event.edge()] は Mouse オフセット座標に関する情報を補強します。
+  * [uu_event_fire uu.event.fire()] は カスタムイベントを発火します。
+  * [uu_event_stop uu.event.stop()] は イベントの伝播とデフォルトアクションを抑止します。
+  * [uu_event_hover uu.event.hover()] は ホバーイベントハンドラの設定ができます。
+  * [uu_event_unhover uu.event.unhover()] は ホバーイベントハンドラを解除します。
+  * [uu_event_cyclic uu.event.cyclic()] は サイクリックイベントハンドラの設定ができます。
+  * [uu_event_uncyclic uu.event.uncyclic()] は サイクリックイベントハンドラを解除します。
+  * [uu_event_unbind uu.event.unbind()] は イベントハンドラを解除します。
+  * [uu_event_attach uu.event.attach()] は イベントハンドラを設定します。この関数でイベントを登録すると uu.event.bind や uu.event.unbind の管理対象外となります。
+  * [uu_event_detach uu.event.detach()] は uu.event.attach で設定したイベントハンドラを解除します。
+  * [uu_bind uu.bind()] は uu.event.bind の alias です。
+  * [uu_unbind uu.unbind()] は uu.event.unbind の alias です。
 
-  * [uu_click uu.click] は uu.event.bind(node, "click") と同じです。
+  * [uu_click uu.click()] は uu.event.bind(node, "click") と同じです。
 
 以下のショートカットイベントも利用できます。
-  * [uu_mouseup uu.mouseup]
-  * [uu_mousemove uu.mousemove]
-  * [uu_mousewheel uu.mousewheel]
-  * [uu_dblclick uu.dblclick]
-  * [uu_keydown uu.keydown]
-  * [uu_keypress uu.keypress]
-  * [uu_keyup uu.keyup]
-  * [uu_change uu.change]
-  * [uu_submit uu.submit]
-  * [uu_focus uu.focus]
-  * [uu_blur uu.blur]
-  * [uu_contextmenu uu.contextmenu]
+  * [uu_mouseup uu.mouseup()]
+  * [uu_mousemove uu.mousemove()]
+  * [uu_mousewheel uu.mousewheel()]
+  * [uu_dblclick uu.dblclick()]
+  * [uu_keydown uu.keydown()]
+  * [uu_keypress uu.keypress()]
+  * [uu_keyup uu.keyup()]
+  * [uu_change uu.change()]
+  * [uu_submit uu.submit()]
+  * [uu_focus uu.focus()]
+  * [uu_blur uu.blur()]
+  * [uu_contextmenu uu.contextmenu()]
 
 == Resize Event ==
-  * [uu_resize uu.resize] は resize イベントハンドラを設定します。
-  * [uu_unresize uu.unresize] は resize イベントハンドラを解除します。
+  * [uu_resize uu.resize()] は resize イベントハンドラを設定します。
+  * [uu_unresize uu.unresize()] は resize イベントハンドラを解除します。
 == Live Event ==
-  * [uu_live uu.live] は イベントをバブルフェーズで補足するイベントハンドラを設定します。
-  * [uu_live_has uu.live.has] は Node が live イベントハンドラを持っているか判定します。
-  * [uu_unlive uu.unlive] は live イベントハンドラを解除します。
+  * [uu_live uu.live()] は イベントをバブルフェーズで補足するイベントハンドラを設定します。
+  * [uu_live_has uu.live.has()] は Node が live イベントハンドラを持っているか判定します。
+  * [uu_unlive uu.unlive()] は live イベントハンドラを解除します。
 = Node / Node List / NodeID =
-  * [uu_node uu.node] は DOM ノード または SVG ノード を構築します。
-  * [uu_node_at uu.node.at] は uu.node でコールバックする関数を登録します。
-  * [uu_node_add uu.node.add] は ノードを追加/挿入します。
-  * [uu_node_has uu.node.has] は ノードの親子関係を判定します。
-  * [uu_node_bulk uu.node.bulk] は HTML 文字列の断片から DocumentFragment を作成します。
-  * [uu_node_path uu.node.path] は ノードの場所を示す文字列(ノードパス)を CSS セレクタ文字列で返します。
-  * [uu_node_sort uu.node.sort] は NodeArray をドキュメントオーダーにソートし、重複を取り除いた NodeArray を返します。
-  * [uu_node_swap uu.node.swap] は ノードを入れ替えます。
-  * [uu_node_wrap uu.node.wrap] は ノードをラップします。
-  * [uu_node_clear uu.node.clear] は 子ノード削除します。
-  * [uu_node_clone uu.node.clone] は ノードのクローンを作成します。属性、DATASET、幾つかのイベントハンドラはコピーされます。
-  * [uu_node_remove uu.node.remove] は 子ノードを親ノードから切り離し子ノードを返します。
-  * [uu_node_indexOf uu.node.indeOf] は 親ノードからみた子ノードの順番を返します。TetxtNode や CommentNode はカウントしません。
-  * [uu_node_children uu.node.children] は 親ノードが持つ子ノードの数を返します。TetxtNode や CommentNode はカウントしません。
-  * [uu_node_normalize uu.node.normalize] は ノード以下のブランクノード(空行や空のテキストノード)やコメントノードを除去します。
-  * [uu_add uu.add] は uu.node.add の alias です。
+  * [uu_node uu.node()] は DOM ノード または SVG ノード を構築します。
+  * [uu_node_at uu.node.at()] は uu.node でコールバックする関数を登録します。
+  * [uu_node_add uu.node.add()] は ノードを追加/挿入します。
+  * [uu_node_has uu.node.has()] は ノードの親子関係を判定します。
+  * [uu_node_bulk uu.node.bulk()] は HTML 文字列の断片から DocumentFragment を作成します。
+  * [uu_node_path uu.node.path()] は ノードの場所を示す文字列(ノードパス)を CSS セレクタ文字列で返します。
+  * [uu_node_sort uu.node.sort()] は NodeArray をドキュメントオーダーにソートし、重複を取り除いた NodeArray を返します。
+  * [uu_node_swap uu.node.swap()] は ノードを入れ替えます。
+  * [uu_node_wrap uu.node.wrap()] は ノードをラップします。
+  * [uu_node_clear uu.node.clear()] は 子ノード削除します。
+  * [uu_node_clone uu.node.clone()] は ノードのクローンを作成します。属性、DATASET、幾つかのイベントハンドラはコピーされます。
+  * [uu_node_remove uu.node.remove()] は 子ノードを親ノードから切り離し子ノードを返します。
+  * [uu_node_indexOf uu.node.indeOf()] は 親ノードからみた子ノードの順番を返します。TetxtNode や CommentNode はカウントしません。
+  * [uu_node_children uu.node.children()] は 親ノードが持つ子ノードの数を返します。TetxtNode や CommentNode はカウントしません。
+  * [uu_node_normalize uu.node.normalize()] は ノード以下のブランクノード(空行や空のテキストノード)やコメントノードを除去します。
+  * [uu_add uu.add()] は uu.node.add の alias です。
 == NodeID ==
-  * [uu_nodeid uu.nodeid] は ノードのユニークな番号(ID)を返します。
-  * [uu_nodeid_toNode uu.nodeid.toNode] は ノードID からノードを取得します。
-  * [uu_nodeid_remove uu.nodeid.remove] は ノード を管理対象から外します。
+  * [uu_nodeid uu.nodeid()] は ノードのユニークな番号(ID)を返します。
+  * [uu_nodeid_toNode uu.nodeid.toNode()] は ノードID からノードを取得します。
+  * [uu_nodeid_remove uu.nodeid.remove()] は ノード を管理対象から外します。
 = Node Builder =
 ノードビルダーは、簡単にノードツリーを作成する機能です。
-  * [uu_head uu.head] は 引数で与えられたノードを、headノードに追加し head ノードを返します。
-  * [uu_body uu.body] は 引数で与えられたノードを、bodyノードに追加し body ノードを返します。
-  * [uu_text uu.text] は 引数で与えられた文字列を元にテキストノードを構築し返します。または テキストノードの値を取得します。
+  * [uu_head uu.head()] は 引数で与えられたノードを、headノードに追加し head ノードを返します。
+  * [uu_body uu.body()] は 引数で与えられたノードを、bodyノードに追加し body ノードを返します。
+  * [uu_text uu.text()] は 引数で与えられた文字列を元にテキストノードを構築し返します。または テキストノードの値を取得します。
 
-uu.head, uu.body 以外にも、
-    uu.a, uu.b, uu.br, uu.dd, uu.div, uu.dl, uu.dt, uu.form, uu.h1, uu.h2, uu.h3, uu.h4, uu.h5, uu.h6, uu.i, uu.img, uu.iframe,
-    uu.input, uu.li, uu.ol, uu.option, uu.p, uu.pre, uu.select, uu.span, uu.table, uu.tbody, uu.tr,
-    uu.td, uu.th, uu.thead, uu.tfoot, uu.textarea, uu.u, uu.ul,
-    uu.abbr, uu.article, uu.aside, uu.audio, uu.canvas, uu.datalist,
-    uu.details, uu.eventsource, uu.figure, uu.footer, uu.header, uu.hgroup,
-    uu.mark, uu.menu, uu.meter, uu.nav, uu.output, uu.progress, uu.section, uu.time, uu.video
-等が存在します。これらは uu.body と同様の機能を持っています。
+uu.head(), uu.body() 以外にも、
+    uu.a(), uu.b(), uu.br(), uu.dd(), uu.div(), uu.dl(), uu.dt(), uu.form(),
+    uu.h1(), uu.h2(), uu.h3(), uu.h4(), uu.h5(), uu.h6(), uu.i(), uu.img(), uu.iframe(),
+    uu.input(), uu.li(), uu.ol(), uu.option(), uu.p(), uu.pre(), uu.select(), uu.span(),
+    uu.table(), uu.tbody(), uu.tr(), uu.td(), uu.th(), uu.thead(), uu.tfoot(),
+    uu.textarea(), uu.u(), uu.ul(),
+    uu.abbr(), uu.article(), uu.aside(), uu.audio(), uu.canvas(), uu.datalist(),
+    uu.details(), uu.eventsource(), uu.figure(), uu.footer(), uu.header(), uu.hgroup(),
+    uu.mark(), uu.menu(), uu.meter(), uu.nav(), uu.output(), uu.progress(), uu.section(),
+    uu.time(), uu.video
+等が存在します。これらは uu.body() と同様の機能を持っています。
 
 = Form.Value =
-  * [uu_value uu.value] は form系要素(input, select, option, textarea)の値にアクセスします。
+  * [uu_value uu.value()] は form系要素(input, select, option, textarea)の値にアクセスします。
 
 = JSON =
-  * [uu_json uu.json] は JavaScript オブジェクトをJSON 文字列に変換します。
-  * [uu_json_decode uu.json.decode] は JSON 文字列を JavaScript オブジェクトに戻します。
+  * [uu_json uu.json()] は JavaScript オブジェクトをJSON 文字列に変換します。
+  * [uu_json_decode uu.json.decode()] は JSON 文字列を JavaScript オブジェクトに戻します。
 
 = String =
-  * [uu_fix uu.fix] は CSS プロパティのキャメライズ、属性名のノーライズ、ベンダープリフィクスのノーマライズなどを行ないます。
-  * [uu_trim uu.trim] は文字列の左右から空白を除去し、内側の連続した空白を一つの空白にします。
-  * [uu_trim_tag uu.trim.tag] は文字列の `<` と `>` を除去し、さらに uu.trim() を行います。
-  * [uu_trim_func uu.trim.func] は `" url(http://example.com) "` といった文字列から左右の空白を除去し、さらに `"url("` と `")"` を除去します。
-  * [uu_trim_quote uu.trim.quote] は `" 'http://example.com' "` といった文字列から左右の空白を除去し、さらに クォート文字列(`"` と `'`)を除去します。
-  * [uu_f uu.f] はプレースホルダ(`??`)を含むフォーマット文字列と可変長引数を受け取り、文字列化した引数をプレースホルダに埋め込みます。
-  * [uu_format uu.format] は uu.f の alias です。
-  * [uu_sf uu.sf] は [http://php.net/manual/ja/function.sprintf.php PHP の sprintf]のサブセットです。%i, %d, %u, %o, %x, %X, %f, %c, %s, %j(JSON), %1$d(インデックスによる引数の再利用)や、パディング、桁あわせ、精度の指定などをサポートします。
-  * [uu_sprintf uu.sprintf] は uu.sf の alias です。
+  * [uu_fix uu.fix()] は CSS プロパティのキャメライズ、属性名のノーライズ、ベンダープリフィクスのノーマライズなどを行ないます。
+  * [uu_trim uu.trim()] は文字列の左右から空白を除去し、内側の連続した空白を一つの空白にします。
+  * [uu_trim_tag uu.trim.tag()] は文字列の `<` と `>` を除去し、さらに uu.trim() を行います。
+  * [uu_trim_func uu.trim.func()] は `" url(http://example.com) "` といった文字列から左右の空白を除去し、さらに `"url("` と `")"` を除去します。
+  * [uu_trim_quote uu.trim.quote()] は `" 'http://example.com' "` といった文字列から左右の空白を除去し、さらに クォート文字列(`"` と `'`)を除去します。
+  * [uu_f uu.f()] はプレースホルダ(`??`)を含むフォーマット文字列と可変長引数を受け取り、文字列化した引数をプレースホルダに埋め込みます。
+  * [uu_format uu.format()] は uu.f の alias です。
+  * [uu_sf uu.sf()] は [http://php.net/manual/ja/function.sprintf.php PHP の sprintf]のサブセットです。%i, %d, %u, %o, %x, %X, %f, %c, %s, %j(JSON), %1$d(インデックスによる引数の再利用)や、パディング、桁あわせ、精度の指定などをサポートします。
+  * [uu_sprintf uu.sprintf()] は uu.sf の alias です。
 
 = Codec =
-  * [uu_entity uu.entity] は 記号(`<` `>` `&` `"`)を HTMLエンティティ文字列(`&lt;` `&gt;` `&amp;` `&quot;`)に変換します。
-  * [uu_entity_decode uu.entity.decode] は HTMLエンティティを含む文字列を復号します。
-  * [uu_base64 uu.base64] は 文字列または ByteArray を Base64 文字列に変換します。
-  * [uu_base64_decode uu.base64.decode] は Base64 文字列を 文字列または ByteArray に複合します。
-  * [uu_utf8 uu.utf8] は 文字列を UTF8ByteArray に変換します。
-  * [uu_utf8_decode uu.utf8.decode] は UTF8ByteArray を文字列に複合します。slice も可能です。
-  * [uu_md5 uu.md5utf8] は ASCIIString または ByteArrayを HexString(MD5 ハッシュ)に変換します。
+  * [uu_entity uu.entity()] は 記号(`<` `>` `&` `"`)を HTMLエンティティ文字列(`&lt;` `&gt;` `&amp;` `&quot;`)に変換します。
+  * [uu_entity_decode uu.entity.decode()] は HTMLエンティティを含む文字列を復号します。
+  * [uu_base64 uu.base64()] は 文字列または ByteArray を Base64 文字列に変換します。
+  * [uu_base64_decode uu.base64.decode()] は Base64 文字列を 文字列または ByteArray に複合します。
+  * [uu_utf8 uu.utf8()] は 文字列を UTF8ByteArray に変換します。
+  * [uu_utf8_decode uu.utf8.decode()] は UTF8ByteArray を文字列に複合します。slice も可能です。
+  * [uu_md5 uu.md5()] は ASCIIString または ByteArrayを HexString(MD5 ハッシュ)に変換します。
 
 = Date =
-  * [uu_date uu.date] は DateHash, Date, Number または String を DateHash に変換します
+  * [uu_date uu.date()] は DateHash, Date, Number または String を DateHash に変換します
 
 = Number =
-  * [uu_guid uu.guid] は ユニークな数字を返します。
+  * [uu_guid uu.guid()] は ユニークな数字を返します。
 
 = Evaluation =
-  * [uu_ready uu.ready] は 機能が使用可能になったタイミングでコールバックする関数を登録します。
+  * [uu_ready uu.ready()] は 機能が使用可能になったタイミングでコールバックする関数を登録します。
 
 = Color =
 uu.color は色辞書、色の相互変換、カラーエフェクト機能を提供します。またパース済みのカラーをキャッシュするため素早くアクセスすることができます。
-  * [uu_Class_Color uu.Class.Color] は r, g, b, a, hex, rgba といったパブリックデータメンバを持ち、toString(), hsla(), gray(), sepia(), comple(), arrange() を提供します。
-  * [uu_color uu.color] は Color, HSLAHash, RGBAHash または String をパースし Color クラスのインスタンスを返します。
-  * [uu_color_add uu.color.add] は 色辞書にユーザー独自の色を追加します。
-  * [uu_color_random uu.color.random] は ランダムな色を生成し、Color インスタンスを返します。
+  * [uu_Class_Color uu.Class.Color()] は r, g, b, a, hex, rgba といったパブリックデータメンバを持ち、toString(), hsla(), gray(), sepia(), comple(), arrange() を提供します。
+  * [uu_color uu.color()] は Color, HSLAHash, RGBAHash または String をパースし Color クラスのインスタンスを返します。
+  * [uu_color_add uu.color.add()] は 色辞書にユーザー独自の色を追加します。
+  * [uu_color_random uu.color.random()] は ランダムな色を生成し、Color インスタンスを返します。
   * [uu_color_cache uu.color.cache] は カラーキャッシュを保持する Hash です。カラーアニメーションを多用するケースでは、時々クリアする必要があるかもしれません。
 
 = Image =
 canvas.drawImage() では、予め画像をロードしておく必要があります。uu.image はそのような場合に有用です。
-  * [uu_image uu.image] は URL とコールバック関数を受け取り画像を読み込みます。読み込み完了/失敗でコールバックします。
-  * [uu_image_size uu.image.size] は 画像本来のサイズを返します。
+  * [uu_image uu.image()] は URL とコールバック関数を受け取り画像を読み込みます。読み込み完了/失敗でコールバックします。
+  * [uu_image_size uu.image.size()] は 画像本来のサイズを返します。
 
 = SVG =
-  * [uu_svg uu.svg] は `<`svg:svg`>` を生成します。
+  * [uu_svg uu.svg()] は `<`svg:svg`>` を生成します。
 
 = Canvas =
-  * [uu_canvas uu.canvas] は `<`canvas`>` を生成します。
+  * [uu_canvas uu.canvas()] は `<`canvas`>` を生成します。
 
 = Flash =
-  * [uu_flash uu.flash] は `<`object`>`を生成し swf ファイルをロードします。
+  * [uu_flash uu.flash()] は `<`object`>`を生成し swf ファイルをロードします。
 
 = URL =
-  * [uu_url uu.url] は URL の分解と再構築を行います。
-  * [uu_url_abs uu.url.abs] は 相対 URL を絶対 URL に変換します。
-  * [uu_url_dir uu.url.dir] は URL から ディレクトリパスを取り出します。
-  * [uu_url_split uu.url.split] は URL から ディレクトリパスとファイルパスを別々に取り出します。
-  * [uu_qs uu.qs] は !QueryString の分解/再構築および追加を行ないます。
+  * [uu_url uu.url()] は URL の分解と再構築を行います。
+  * [uu_url_abs uu.url.abs()] は 相対 URL を絶対 URL に変換します。
+  * [uu_url_dir uu.url.dir()] は URL から ディレクトリパスを取り出します。
+  * [uu_url_split uu.url.split()] は URL から ディレクトリパスとファイルパスを別々に取り出します。
+  * [uu_qs uu.qs()] は !QueryString の分解/再構築および追加を行ないます。
 
 = Debug =
-  * [uu_puff uu.puff] は オブジェクトまたは、フォーマット文字列と幾つかの引数を受け取り、人の目で理解できる形でアラートボックスを表示します。
-  * [uu_log uu.log] は オブジェクトまたは、フォーマット文字列と幾つかの引数を受け取り、人の目で理解できる形で画面に追記します。
+  * [uu_puff uu.puff()] は オブジェクトまたは、フォーマット文字列と幾つかの引数を受け取り、人の目で理解できる形でアラートボックスを表示します。
+  * [uu_log uu.log()] は オブジェクトまたは、フォーマット文字列と幾つかの引数を受け取り、人の目で理解できる形で画面に追記します。
 
 = Unit Test =
-  * [uu_ok uu.ok] は ユニットテストを実行し結果をストックします。引数なしで呼び出すと結果を画面に一覧表示し、スコア(ok, ng, total, ms)を返します。
+  * [uu_ok uu.ok()] は ユニットテストを実行し結果をストックします。引数なしで呼び出すと結果を画面に一覧表示し、スコア(ok, ng, total, ms)を返します。
 
 = Other =
-  * [uu_nop uu.nop] は 何もしない関数です。
+  * [uu_nop uu.nop()] は 何もしない関数です。
 
 = Cross Browser =
 == ECMAScript-262 5th edition ==
 ES5(ECMAScript-262 5th edition)で追加された機能の一部が、IE6などのレガシーな環境でも利用できます。
 
-  * Array#map, Array#some, Array#every, Array#filter, Array#forEach, Array#indexOf, Array#lastIndexOf, Array#reduce, Array#reduceRight が利用できます。
-  * Boolean#toJSON, Date#toISOString, Date#toJSON, Number#toJSON, String#toJSON が利用できます。
-  * String#trim が利用できます。
+  * Array#map(), Array#some(), Array#every(), Array#filter(), Array#forEach(), Array#indexOf(), Array#lastIndexOf(), Array#reduce(), Array#reduceRight() が利用できます。
+  * Boolean#toJSON(), Date#toISOString(), Date#toJSON(), Number#toJSON(), String#toJSON() が利用できます。
+  * String#trim() が利用できます。
 
 == Extends ==
 IE 発祥で Firefox だけがサポートしていない HTMLElement#innerText と HTMLElement#outerHTML を利用できます。
   * HTMLElement#innerText が利用できます。オーバーヘッドが気になる場合は innerText ではなく textContent を利用してください。
   * HTMLElement#outerHTML が利用できます。
+
+== getComputedStyle ==
+  * uu.css(node) または uu.css(node, true) により、IE でも getComputedStyle() 相当の情報を取得できます。
+  * uu.json() は window.JSON 互換性のある結果を取得できます。また window.JSON が本来サポートしていない Function や Node なども理解するため人間が理解しやすい形でオブジェクトの情報を出力できます。
