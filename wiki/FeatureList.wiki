@@ -7,7 +7,51 @@ uupaa.js の全機能は [uu] で始まります。また [uu] は factory 機�
 
   * uu(Class, arg, ...) はクラスファクトリです。uu.Class 以下のクラスをインスタンス化し返します。
   * uu(CSSセレクタ, context) はNodeSetファクトリです、CSSセレクタに一致する要素を保持する NodeSet オブジェクトを返します。
-  
+
+= Node Set =
+  * [NodeSet_back NodeSet.back] は スタックを一つ巻き戻します。
+  * [NodeSet_find NodeSet.find] は 現在のノードセットを絞り込み新しいノードセットを作成します。古いノードセットはスタックに移動します。
+  * [NodeSet_nth NodeSet.nth] は 現在のノードセットのn番目のノードを取得するか、n番目のノードに対しコールバック関数を適用します。
+  * [NodeSet_each NodeSet.each] は 現在のノードセットに対しコールバック関数を順番に適用します。ループの途中でfalseを返すとループアウトします。
+  * [NodeSet_size NodeSet.size] は 現在のノードセットの要素数を返します。
+  * [NodeSet_indexOf NodeSet.indexOf] は 現在のノードセットから一致するノードのインデックス(nth)を返します。
+  * [NodeSet_add NodeSet.add] は 現在のノードセットの各要素を基準にして、ノードを追加/挿入します。
+  * [NodeSet_remove NodeSet.remove] は 現在のノードセットを親要素から切り離します。切り離したノードの NodeArray を返します。
+  * [NodeSet_bind NodeSet.bind] は 現在のノードセットに対しイベントを設定します。
+  * [NodeSet_unbind NodeSet.unbind] は 現在のノードセットに対しイベントを解除します。
+  * [NodeSet_live NodeSet.live] は 現在のノードセットに対し Live イベントを設定します。
+  * [NodeSet_unlive NodeSet.unlive] は 現在のノードセットに対し Live イベントを解除します。
+  * [NodeSet_hover NodeSet.hover] は 現在のノードセットに対し hover イベントを設定します。
+  * [NodeSet_unhover NodeSet.unhover] は 現在のノードセットに対し hover イベントを解除します。
+  * [NodeSet_cyclic NodeSet.cyclic] は 現在のノードセットに対し cyclic イベントを設定します。
+  * [NodeSet_uncyclic NodeSet.uncyclic] は 現在のノードセットに対し cyclic イベントを解除します。
+  * [NodeSet_attr NodeSet.attr] は 現在のノードセットの属性にアクセスします。
+  * [NodeSet_css NodeSet.css] は 現在のノードセットのスタイルにアクセスします。
+  * [NodeSet_show NodeSet.show] は 現在のノードセットの各要素が非表示なら表示します。
+  * [NodeSet_hide NodeSet.hide] は 現在のノードセットの各要素を隠します。
+  * [NodeSet_klass NodeSet.klass] は 現在のノードセットの className 属性にアクセスします。
+  * [NodeSet_text NodeSet.text] は 現在のノードセットの textContent 属性にアクセスします。
+  * [NodeSet_value NodeSet.value] は 現在のノードセットの value 属性にアクセスします。
+  * [NodeSet_fx NodeSet.fx] は 現在のノードセットに対しアニメーションを設定します。
+  * [NodeSet_skip NodeSet.skip] は 現在のノードセットに対し設定されているアニメーションをスキップします。
+
+  * [NodeSet_click NodeSet.click] は NodeSet.event.bind(node, "click") と同じです。
+
+以下のショートカットイベントも利用できます。
+  * [NodeSet_mouseup NodeSet.mouseup]
+  * [NodeSet_mousemove NodeSet.mousemove]
+  * [NodeSet_mousewheel NodeSet.mousewheel]
+  * [NodeSet_dblclick NodeSet.dblclick]
+  * [NodeSet_keydown NodeSet.keydown]
+  * [NodeSet_keypress NodeSet.keypress]
+  * [NodeSet_keyup NodeSet.keyup]
+  * [NodeSet_change NodeSet.change]
+  * [NodeSet_submit NodeSet.submit]
+  * [NodeSet_focus NodeSet.focus]
+  * [NodeSet_blur NodeSet.blur]
+  * [NodeSet_contextmenu NodeSet.contextmenu]
+
+
 = Ready =
 [uu_ready uu.ready] は利用可能な機能の一覧と [DOMReady], WindowReady, StorageReady などのタイミングでコールバックする仕組みを提供します。
 
@@ -125,6 +169,23 @@ CSS Box Model に関する機能を提供します。
   * [uu_event_detach uu.event.detach] は uu.event.attach で設定したイベントハンドラを解除します。
   * [uu_bind uu.bind] は uu.event.bind の alias です。
   * [uu_unbind uu.unbind] は uu.event.unbind の alias です。
+
+  * [uu_click uu.click] は uu.event.bind(node, "click") と同じです。
+
+以下のショートカットイベントも利用できます。
+  * [uu_mouseup uu.mouseup]
+  * [uu_mousemove uu.mousemove]
+  * [uu_mousewheel uu.mousewheel]
+  * [uu_dblclick uu.dblclick]
+  * [uu_keydown uu.keydown]
+  * [uu_keypress uu.keypress]
+  * [uu_keyup uu.keyup]
+  * [uu_change uu.change]
+  * [uu_submit uu.submit]
+  * [uu_focus uu.focus]
+  * [uu_blur uu.blur]
+  * [uu_contextmenu uu.contextmenu]
+
 == Resize Event ==
   * [uu_resize uu.resize] は resize イベントハンドラを設定します。
   * [uu_unresize uu.unresize] は resize イベントハンドラを解除します。
