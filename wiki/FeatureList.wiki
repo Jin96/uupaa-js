@@ -52,7 +52,7 @@ Hash(Object)とArrayを操作する一連の機能です。
   * [uu_hash uu.hash] は Hash 化します。Key/Value ペアや、カンマで結合された文字列から Hash を作成します。
   * [uu_array uu.array] は Array 化します。リテラル値や FakeArray を Array に変換します。変換と同時に slice もできます。
   * [uu_array_dump uu.array.dump] は ByteArray を10進/16進文字列化します。
-  * [uu_array_sort uu.array.clean] は Array をソートします。
+  * [uu_array_sort uu.array.sort] は Array をソートします。
   * [uu_array_clean uu.array.clean] は Array から null / undefined などの値を削除し密な配列を作成します。Indexをリナンバリングします。
   * [uu_array_toHash uu.array.toHash] は Array と値 または Array と Array からHashを作成します。
   * [uu_array_unique uu.array.unique] は 重複した値を除去した配列を作成します。
