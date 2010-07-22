@@ -9,7 +9,7 @@ uupaa.js の全機能は [uu] で始まります。また [uu] は factory 機�
   * uu(CSSセレクタ, context) はNodeSetファクトリです、CSSセレクタに一致する要素を保持する NodeSet オブジェクトを返します。
 
 = Node Set =
-NodeSet は Query 文字列を元に要素を抽出し、ノードの集合(ノードセット)を一括管理する機能を提供します。
+NodeSet は CSSセレクタを元に要素を抽出し、ノードの集合(ノードセット)を一括管理する機能を提供します。
   * [NodeSet_back NodeSet.back()] は スタックを一つ巻き戻します。
   * [NodeSet_find NodeSet.find()] は 現在のノードセットを絞り込み新しいノードセットを作成します。古いノードセットはスタックに移動します。
   * [NodeSet_nth NodeSet.nth()] は 現在のノードセットのn番目のノードを取得するか、n番目のノードに対しコールバック関数を適用します。
