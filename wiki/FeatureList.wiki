@@ -2,16 +2,16 @@
 
 <wiki:toc max_depth="3" />
 
-= NAMESPACE / FACTORY =
+= Namespace / Factory =
 [uu] は uupaa.js のネームスペースであり、factory機能を持ちます。
 
   * uu(Class, arg, ...) はクラスファクトリです。uu.Class 以下のクラスをインスタンス化し返します。
   * uu(CSSセレクタ, context) はNodeSetファクトリです、CSSセレクタに一致する要素を保持する NodeSet オブジェクトを返します。
   
-= READY =
+= Ready =
 [uu_ready uu.ready] は利用可能な機能の一覧と [DOMReady], WindowReady, StorageReady などのタイミングでコールバックする仕組みを提供します。
 
-= VERSION DETECTION =
+= Version Detection =
 [uu_ver uu.ver] は ブラウザのバージョンと動作環境(JIT、OS, モバイル, Touch, プラグイン)についての情報を提供します。
 
   * uu.ie は uu.ver.ie の Alias です
@@ -19,15 +19,15 @@
   * uu.opera は uu.ver.opera の Alias です
   * uu.webkit は uu.ver.webkit の Alias です
 
-= CODE SNIPPET =
+= Code Snippet =
 [uu_snippet uu.snippet] は 簡易テンプレートです。静的なHTMLを読み込み、ループを展開し変数を適用します。
 
-= AJAX / JSONP =
+= Ajax / JSONP =
   * [uu_ajax uu.ajax] は Ajax 機能を提供します。非同期専用です。
   * [uu_require uu.require] は 同期読み込み(Sjax)機能を提供します。
   * [uu_jsonp uu.jsonp] は jsonp による非同期読み込み機能を提供します。
 
-= TYPE MATCH / TYPE DETECTION =
+= Type Match / Type Detection =
   * [uu_like uu.like] は 一致するものを含むかどうかを判定します。Like検索とディープ検索を行ないます。
   * [uu_type uu.type] は 型を判定します。
   * [uu_isNumber uu.isNumber] は Number型かどうかを判定します。
@@ -35,12 +35,12 @@
   * [uu_isFunction uu.isFunction] は Function型かどうかを判定します。
   * uu.isArray はありません。Array型の比較は Array.isArray を使います。
 
-= HASH / ARRAY =
+= Hash / Array =
 Hash(Object)とArrayを操作する一連の機能です。
 
   * [uu_arg uu.arg] は関数のデフォルト引数を補完します。
   * [uu_mix uu.mix] は Mixin を行います。
-  * [uu_has uu.has] は Hash が Array が 要素や要素の集合を含んでいるかを検索します。Hash A が Hash B を内包しているか、Array A が Array B を内包しているかなども比較できます。
+  * [uu_has uu.has] は Hash または Array が 要素や要素の集合を含んでいるかを検索します。Hash A が Hash B を内包しているか、Array A が Array B を内包しているかなども比較できます。
   * [uu_nth uu.nth] は Hash または Array の n 番目の key/value ペアを返します。Array の場合は欠落している要素をカウントしません。
   * [uu_each uu.each] は for (i in Hash) または Array#forEach を行ないます。
   * [uu_keys uu.keys] は Hash または Array のKey(添字)一覧を返します。
@@ -57,20 +57,20 @@ Hash(Object)とArrayを操作する一連の機能です。
   * [uu_array_toHash uu.array.toHash] は Array と値 または Array と Array からHashを作成します。
   * [uu_array_unique uu.array.unique] は 重複した値を除去した配列を作成します。
 
-= ATTRIBUTE =
+= Attribute =
   * [uu_attr uu.attr] は Node の属性値にアクセスします。
 
-= DATASET =
+= DataSet =
   * [uu_data uu.data] は Node のデータセット(HTML5 - EMBEDDING CUSTOM NON-VISIBLE DATA)にアクセスします。
 
-= CSS / STYLE / STYLESHEET / VIEW PORT =
+= CSS / Style / StyleSheet / Viewport =
   * [uu_css uu.css] は Node のスタイル属性値にアクセスします。また getComputedStyle 互換機能の提供や、StyleSheetクラスのインスタンスを作成する機能もあります。
   * [uu_css_show uu.css.show] は 隠されている Node を見せます。
   * [uu_css_hide uu.css.hide] は 見えている Node を隠します。
   * [uu_css_unit uu.css.unit] は CSS の様々な単位系をピクセル単位に変換します。"12em" や "auto" 等をpixelに変換します。
   * [uu_css_isShow uu.css.isShow] は Node が見えているか判定します。
 
-== CSS BOX MODEL ==
+== CSS Box Model ==
 CSS Box Model に関する機能を提供します。
   * [uu_css_box uu.css.box] は Margin, Border, Padding 幅を計算し、コンテントボックスの大きさを返します。
   * [uu_css_rect uu.css.rect] は コンテントボックスの絶対座標とオフセットサイズ(style.width + padding + border)を返します。
@@ -83,22 +83,22 @@ CSS Box Model に関する機能を提供します。
   * [uu_css_transform uu.css.transform] は Node の回転/拡大/移動に関する情報にアクセスします。
   * [uu_css_selectable uu.css.selectable] は !DragDrop でテキストやノードが選択されないようにします。
 
-== VIEW PORT ==
+== Viewport ==
   * [uu_viewport uu.viewport] は ViewPortの大きさ/スクロール/回転に関する情報を取得します。
 
-= EFFECT / ANIMATION =
+= Effect / Animation =
   * [uu_fx uu.fx] は CSS ベースのアニメーション機能を提供します。
   * [uu_fx_skip uu.fx.skip] は 現在のアニメーションキューをスキップ(即終了)し実行を次のキューに移します。
   * [uu_fx_isBusy uu.fx.isBusy] は Node がアニメーション中かどうかを判定します。
 
-= QUERY =
+= Query =
   * [uu_id uu.id] は Node の ID 属性が一致する最初の要素を検索します。
   * [uu_tag uu.tag] は Node の tagName 属性が一致する要素を全て検索します。コメントノードは除外します。
   * [uu_match uu.match] は Node が CSS セレクタと一致するかどうかを判定します。
   * [uu_query uu.query] は CSS セレクタと一致する Node を検索します。
   * [uu_klass uu.klass] は Node の className 属性が値を含んでいる要素を全て検索します。
 
-= CLASSNAME =
+= ClassName =
   * [uu_klass_has uu.klass.has] は Node の className 属性が値を含んでいるか判定します。
   * [uu_klass_add uu.klass.add] は Node の className 属性に値を追加します。
   * [uu_klass_remove uu.klass.remove] は Node の className 属性から値を削除します。
@@ -109,7 +109,7 @@ CSS Box Model に関する機能を提供します。
   * [uu_Class uu.Class] は クラスを定義します。一段階の継承が可能です。
   * [uu_Class_singleton uu.Class.singleton] は シングルトンクラスを定義します。継承はできません。
 
-= EVENT =
+= Event =
   * [uu_event uu.event] は イベントハンドラの設定ができます。
   * [uu_event_has uu.event.has] は Node がイベントハンドラを持っているか判定します。
   * [uu_event_key uu.event.key] は Key イベントに関する情報を補強します。
@@ -125,14 +125,14 @@ CSS Box Model に関する機能を提供します。
   * [uu_event_detach uu.event.detach] は uu.event.attach で設定したイベントハンドラを解除します。
   * [uu_bind uu.bind] は uu.event.bind の alias です。
   * [uu_unbind uu.unbind] は uu.event.unbind の alias です。
-== RESIZE EVENT ==
+== Resize Event ==
   * [uu_resize uu.resize] は resize イベントハンドラを設定します。
   * [uu_unresize uu.unresize] は resize イベントハンドラを解除します。
-== LIVE EVENT ==
+== Live Event ==
   * [uu_live uu.live] は イベントをバブルフェーズで補足するイベントハンドラを設定します。
   * [uu_live_has uu.live.has] は Node が live イベントハンドラを持っているか判定します。
   * [uu_unlive uu.unlive] は live イベントハンドラを解除します。
-= NODE / NodeList / NodeID =
+= Node / NodeList / NodeID =
   * [uu_node uu.node] は DOM ノード または SVG ノード を構築します。
   * [uu_node_at uu.node.at] は uu.node でコールバックする関数を登録します。
   * [uu_node_add uu.node.add] は ノードを追加/挿入します。
@@ -153,7 +153,7 @@ CSS Box Model に関する機能を提供します。
   * [uu_nodeid uu.nodeid] は ノードのユニークな番号(ID)を返します。
   * [uu_nodeid_toNode uu.nodeid.toNode] は ノードID からノードを取得します。
   * [uu_nodeid_remove uu.nodeid.remove] は ノード を管理対象から外します。
-= NODE BUILDER =
+= Node Builder =
 ノードビルダーは、簡単にノードツリーを作成する機能です。
   * [uu_head uu.head] は 引数で与えられたノードを、headノードに追加し head ノードを返します。
   * [uu_body uu.body] は 引数で与えられたノードを、bodyノードに追加し body ノードを返します。
@@ -168,19 +168,90 @@ uu.head, uu.body 以外にも、
     uu.mark, uu.menu, uu.meter, uu.nav, uu.output, uu.progress, uu.section, uu.time, uu.video
 等が存在します。これらは uu.body と同様の機能を持っています。
 
-= FORM.VALUE =
+= Form.Value =
   * [uu_value uu.value] は form系要素(input, select, option, textarea)の値にアクセスします。
 
 = JSON =
   * [uu_json uu.json] は JavaScript オブジェクトをJSON 文字列に変換します。
   * [uu_json_decode uu.json.decode] は JSON 文字列を JavaScript オブジェクトに戻します。
 
-= STRING =
+= String =
   * [uu_fix uu.fix] は CSS プロパティのキャメライズ、属性名のノーライズ、ベンダープリフィクスのノーマライズなどを行ないます。
   * [uu_trim uu.trim] は文字列の左右から空白を除去し、内側の連続した空白を一つの空白にします。
   * [uu_trim_tag uu.trim.tag] は文字列の `<` と `>` を除去し、さらに uu.trim() を行います。
   * [uu_trim_func uu.trim.func] は `" url(http://example.com) "` といった文字列から左右の空白を除去し、さらに `"url("` と `")"` を除去します。
   * [uu_trim_quote uu.trim.quote] は `" 'http://example.com' "` といった文字列から左右の空白を除去し、さらに クォート文字列(`"` と `'`)を除去します。
-  * [uu_f uu.f] はプレースホルダ(`??`)を含むフォーマット文字列と可変長引数を受け取り、プレースホルダに文字列化した引数を埋め込みます。
+  * [uu_f uu.f] はプレースホルダ(`??`)を含むフォーマット文字列と可変長引数を受け取り、文字列化した引数をプレースホルダに埋め込みます。
   * [uu_format uu.format] は uu.f の alias です。
+  * [uu_sf uu.sf] は [http://php.net/manual/ja/function.sprintf.php PHP の sprintf]のサブセットです。%i, %d, %u, %o, %x, %X, %f, %c, %s, %j(JSON), %1$d(インデックスによる引数の再利用)や、パディング、桁あわせ、精度の指定などをサポートします。
+  * [uu_sprintf uu.sprintf] は uu.sf の alias です。
 
+= Codec =
+  * [uu_entity uu.entity] は 記号(`<` `>` `&` `"`)を HTMLエンティティ文字列(`&lt;` `&gt;` `&amp;` `&quot;`)に変換します。
+  * [uu_entity_decode uu.entity.decode] は HTMLエンティティを含む文字列を復号します。
+  * [uu_base64 uu.base64] は 文字列または ByteArray を Base64 文字列に変換します。
+  * [uu_base64_decode uu.base64.decode] は Base64 文字列を 文字列または ByteArray に複合します。
+  * [uu_utf8 uu.utf8] は 文字列を UTF8ByteArray に変換します。
+  * [uu_utf8_decode uu.utf8.decode] は UTF8ByteArray を文字列に複合します。slice も可能です。
+  * [uu_md5 uu.md5utf8] は ASCIIString または ByteArrayを HexString(MD5 ハッシュ)に変換します。
+
+= Date =
+  * [uu_date uu.date] は DateHash, Date, Number または String を DateHash に変換します
+
+= Number =
+  * [uu_guid uu.guid] は ユニークな数字を返します。
+
+= Evaluation =
+  * [uu_ready uu.ready] は 機能が使用可能になったタイミングでコールバックする関数を登録します。
+
+= Color =
+uu.color は色辞書、色の相互変換、カラーエフェクト機能を提供します。またパース済みのカラーをキャッシュするため素早くアクセスすることができます。
+  * [uu_Class_Color uu.Class.Color] は r, g, b, a, hex, rgba といったパブリックデータメンバを持ち、toString(), hsla(), gray(), sepia(), comple(), arrange() を提供します。
+  * [uu_color uu.color] は Color, HSLAHash, RGBAHash または String をパースし Color クラスのインスタンスを返します。
+  * [uu_color_add uu.color.add] は 色辞書にユーザー独自の色を追加します。
+  * [uu_color_random uu.color.random] は ランダムな色を生成し、Color インスタンスを返します。
+  * [uu_color_cache uu.color.cache] は カラーキャッシュを保持する Hash です。カラーアニメーションを多用するケースでは、時々クリアする必要があるかもしれません。
+
+= Image =
+canvas.drawImage() では、予め画像をロードしておく必要があります。uu.image はそのような場合に有用です。
+  * [uu_image uu.image] は URL とコールバック関数を受け取り画像を読み込みます。読み込み完了/失敗でコールバックします。
+  * [uu_image_size uu.image.size] は 画像本来のサイズを返します。
+
+= SVG =
+  * [uu_svg uu.svg] は `<`svg:svg`>` を生成します。
+
+= Canvas =
+  * [uu_canvas uu.canvas] は `<`canvas`>` を生成します。
+
+= Flash =
+  * [uu_flash uu.flash] は `<`object`>`を生成し swf ファイルをロードします。
+
+= URL =
+  * [uu_url uu.url] は URL の分解と再構築を行います。
+  * [uu_url_abs uu.url.abs] は 相対 URL を絶対 URL に変換します。
+  * [uu_url_dir uu.url.dir] は URL から ディレクトリパスを取り出します。
+  * [uu_url_split uu.url.split] は URL から ディレクトリパスとファイルパスを別々に取り出します。
+  * [uu_qs uu.qs] は !QueryString の分解/再構築および追加を行ないます。
+
+= Debug =
+  * [uu_puff uu.puff] は オブジェクトまたは、フォーマット文字列と幾つかの引数を受け取り、人の目で理解できる形でアラートボックスを表示します。
+  * [uu_log uu.log] は オブジェクトまたは、フォーマット文字列と幾つかの引数を受け取り、人の目で理解できる形で画面に追記します。
+
+= Unit Test =
+  * [uu_ok uu.ok] は ユニットテストを実行し結果をストックします。引数なしで呼び出すと結果を画面に一覧表示し、スコア(ok, ng, total, ms)を返します。
+
+= Other =
+  * [uu_nop uu.nop] は 何もしない関数です。
+
+= Cross Browser =
+== ECMAScript-262 5th edition ==
+ES5(ECMAScript-262 5th edition)で追加された機能の一部が、IE6などのレガシーな環境でも利用できます。
+
+  * Array#map, Array#some, Array#every, Array#filter, Array#forEach, Array#indexOf, Array#lastIndexOf, Array#reduce, Array#reduceRight が利用できます。
+  * Boolean#toJSON, Date#toISOString, Date#toJSON, Number#toJSON, String#toJSON が利用できます。
+  * String#trim が利用できます。
+
+== Extends ==
+IE 発祥で Firefox だけがサポートしていない HTMLElement#innerText と HTMLElement#outerHTML を利用できます。
+  * HTMLElement#innerText が利用できます。オーバーヘッドが気になる場合は innerText ではなく textContent を利用してください。
+  * HTMLElement#outerHTML が利用できます。
