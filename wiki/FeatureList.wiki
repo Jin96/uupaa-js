@@ -52,6 +52,7 @@ NodeSet は CSSセレクタを元に要素を抽出し、ノードの集合(ノ�
   * [NodeSet_blur NodeSet.blur()]
   * [NodeSet_contextmenu NodeSet.contextmenu()]
 
+NodeSet に機能を追加するには、uu.Class.NodeSet.prototype に対してメソッドを定義します。
 
 = Ready =
 [uu_ready uu.ready()] は利用可能な機能の一覧と [DOMReady], WindowReady, StorageReady などのタイミングでコールバックする仕組みを提供します。
@@ -153,6 +154,12 @@ CSS Box Model に関する機能を提供します。
 必要最小限のクラスベースOOPと、メッセージポンプによるインスタンス間の同期/非同期通信, ユニキャスト/ブロードキャスト機能を提供します。
   * [uu_Class uu.Class()] は クラスを定義します。一段階の継承が可能です。
   * [uu_Class_singleton uu.Class.singleton()] は シングルトンクラスを定義します。継承はできません。
+
+以下の組み込みクラスがあります。
+
+  * uu.Class.NodeSet は ノードセットを管理します。
+  * uu.Class.MessagePump は インスタンス間のメッセージングを管理します。
+  * uu.Class.Color は 色を管理します。
 
 = Event =
   * [uu_event uu.event()] は イベントハンドラの設定ができます。
