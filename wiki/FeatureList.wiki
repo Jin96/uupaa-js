@@ -60,10 +60,10 @@ Hash(Object)とArrayを操作する一連の機能です。
 = Attribute =
   * [uu_attr uu.attr] は Node の属性値にアクセスします。
 
-= DataSet =
+= Data Set =
   * [uu_data uu.data] は Node のデータセット(HTML5 - EMBEDDING CUSTOM NON-VISIBLE DATA)にアクセスします。
 
-= CSS / Style / StyleSheet / Viewport =
+= CSS / Style / Style Sheet / Viewport =
   * [uu_css uu.css] は Node のスタイル属性値にアクセスします。また getComputedStyle 互換機能の提供や、StyleSheetクラスのインスタンスを作成する機能もあります。
   * [uu_css_show uu.css.show] は 隠されている Node を見せます。
   * [uu_css_hide uu.css.hide] は 見えている Node を隠します。
@@ -98,7 +98,7 @@ CSS Box Model に関する機能を提供します。
   * [uu_query uu.query] は CSS セレクタと一致する Node を検索します。
   * [uu_klass uu.klass] は Node の className 属性が値を含んでいる要素を全て検索します。
 
-= ClassName =
+= Class Name =
   * [uu_klass_has uu.klass.has] は Node の className 属性が値を含んでいるか判定します。
   * [uu_klass_add uu.klass.add] は Node の className 属性に値を追加します。
   * [uu_klass_remove uu.klass.remove] は Node の className 属性から値を削除します。
@@ -132,7 +132,7 @@ CSS Box Model に関する機能を提供します。
   * [uu_live uu.live] は イベントをバブルフェーズで補足するイベントハンドラを設定します。
   * [uu_live_has uu.live.has] は Node が live イベントハンドラを持っているか判定します。
   * [uu_unlive uu.unlive] は live イベントハンドラを解除します。
-= Node / NodeList / NodeID =
+= Node / Node List / NodeID =
   * [uu_node uu.node] は DOM ノード または SVG ノード を構築します。
   * [uu_node_at uu.node.at] は uu.node でコールバックする関数を登録します。
   * [uu_node_add uu.node.add] は ノードを追加/挿入します。
