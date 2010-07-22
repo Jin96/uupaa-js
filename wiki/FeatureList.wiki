@@ -3,7 +3,7 @@
 <wiki:toc max_depth="3" />
 
 = Namespace / Factory =
-[uu] は uupaa.js のネームスペースであり、factory機能を持ちます。
+uupaa.js の全機能は [uu] で始まります。また [uu] は factory 機能を持ちます。
 
   * uu(Class, arg, ...) はクラスファクトリです。uu.Class 以下のクラスをインスタンス化し返します。
   * uu(CSSセレクタ, context) はNodeSetファクトリです、CSSセレクタに一致する要素を保持する NodeSet オブジェクトを返します。
