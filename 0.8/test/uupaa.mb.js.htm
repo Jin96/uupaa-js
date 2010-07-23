@@ -1,6 +1,33 @@
 <!DOCTYPE HTML><html lang="ja"><head><meta charset="UTF-8" />
 <title>uupaa.js - unittest</title>
+<style>
+.absolute {
+    position: absolute; left: 406px; top: 7px;
+    width: 98px; height: 99px;
+    background-color: gray;
+    opacity: 0.2;
+}
+.relative {
+    position: relative; left: 406px; top: 7px;
+    width: 98px; height: 99px;
+    background-color: gray;
+    opacity: 0.2;
+}
+.static {
+    position: static; left: 406px; top: 7px;
+    width: 98px; height: 99px;
+    background-color: gray;
+    opacity: 0.2;
+}
+.margin { margin: 5px; }
+.border { border: 5px solid navy; }
+.padding { padding: 5px; }
 
+/* test for left: auto; top: auto */
+.auto {
+    left: auto; top: auto;
+}
+</style>
 <script src="../uupaa.mb.js"></script>
 </head><body>
 <div style="display:none">
@@ -11,8 +38,127 @@
     <label id="_label" for="a" accesskey="a" tabindex="1"></label>
     <table><tr id="_tr" rowspan="2"><td id="_td" colspan="2">aa</td></tr></table>
 </div>
+<div style="position: relative; max-height: 0px;">
+    <div style="position: relative; left: 100px; top: 100px">
+        <div id="abs"       class="absolute">absolute</div>
+        <div id="absm"      class="absolute margin">absolute margin</div>
+        <div id="absmb"     class="absolute margin border">absolute margin border</div>
+        <div id="absmbp"    class="absolute margin border padding">absolute margin border padding</div>
+        <div id="absb"      class="absolute border">absolute border</div>
+        <div id="absbp"     class="absolute border padding">absolute border padding</div>
+        <div id="absp"      class="absolute padding">absolute padding</div>
+
+        <div id="rel"       class="relative">relative</div>
+        <div id="relm"      class="relative margin">relative margin</div>
+        <div id="relmb"     class="relative margin border">relative margin border</div>
+        <div id="relmbp"    class="relative margin border padding">relative margin border padding</div>
+        <div id="relb"      class="relative border">relative border</div>
+        <div id="relbp"     class="relative border padding">relative border padding</div>
+        <div id="relp"      class="relative padding">relative padding</div>
+
+        <div id="sta"       class="static">static</div>
+        <div id="stam"      class="static margin">static margin</div>
+        <div id="stamb"     class="static margin border">static margin border</div>
+        <div id="stambp"    class="static margin border padding">static margin border padding</div>
+        <div id="stab"      class="static border">static border</div>
+        <div id="stabp"     class="static border padding">static border padding</div>
+        <div id="stap"      class="static padding">static padding</div>
+    </div>
+    <div style="position: relative; left: 100px; top: 100px">
+        <div id="autoabs"       class="absolute auto">absolute</div>
+        <div id="autoabsm"      class="absolute margin auto">absolute margin</div>
+        <div id="autoabsmb"     class="absolute margin border auto">absolute margin border</div>
+        <div id="autoabsmbp"    class="absolute margin border padding auto">absolute margin border padding</div>
+        <div id="autoabsb"      class="absolute border auto">absolute border</div>
+        <div id="autoabsbp"     class="absolute border padding auto">absolute border padding</div>
+        <div id="autoabsp"      class="absolute padding auto">absolute padding</div>
+
+        <div id="autorel"       class="relative auto">relative</div>
+        <div id="autorelm"      class="relative margin auto">relative margin</div>
+        <div id="autorelmb"     class="relative margin border auto">relative margin border</div>
+        <div id="autorelmbp"    class="relative margin border padding auto">relative margin border padding</div>
+        <div id="autorelb"      class="relative border auto">relative border</div>
+        <div id="autorelbp"     class="relative border padding auto">relative border padding</div>
+        <div id="autorelp"      class="relative padding auto">relative padding</div>
+
+        <div id="autosta"       class="static auto">static</div>
+        <div id="autostam"      class="static margin auto">static margin</div>
+        <div id="autostamb"     class="static margin border auto">static margin border</div>
+        <div id="autostambp"    class="static margin border padding auto">static margin border padding</div>
+        <div id="autostab"      class="static border auto">static border</div>
+        <div id="autostabp"     class="static border padding auto">static border padding</div>
+        <div id="autostap"      class="static padding auto">static padding</div>
+    </div>
+</div>
 <script>
-uu.ready(function(uu) {
+uu.ready("window", function() {
+    var margin = 5 * 2;
+    var border = 5 * 2;
+    var padding = 5 * 2;
+
+    uu.ok("uu.css.rect() は style.width + border + padding を取得する");
+    uu.ok("position: absolute");
+    uu.ok('uu.css.rect("abs")', uu.css.rect(uu.id("abs")), "==", { x: 406, y: 7, w: 98, h: 99 });
+    uu.ok('uu.css.rect("absm")', uu.css.rect(uu.id("absm")), "==", { x: 406, y: 7, w: 98, h: 99 });
+    uu.ok('uu.css.rect("absmb")', uu.css.rect(uu.id("absmb")), "==", { x: 406, y: 7, w: 98 + border, h: 99 + border });
+    uu.ok('uu.css.rect("absmbp")', uu.css.rect(uu.id("absmbp")), "==", { x: 406, y: 7, w: 98 + border + padding, h: 99 + border + padding });
+    uu.ok('uu.css.rect("absb")', uu.css.rect(uu.id("absb")), "==", { x: 406, y: 7, w: 98 + border, h: 99 + border });
+    uu.ok('uu.css.rect("absbp")', uu.css.rect(uu.id("absbp")), "==", { x: 406, y: 7, w: 98 + border + padding, h: 99 + border + padding });
+    uu.ok('uu.css.rect("absp")', uu.css.rect(uu.id("absp")), "==", { x: 406, y: 7, w: 98 + padding, h: 99 + padding });
+    uu.ok("position: relative");
+    uu.ok('uu.css.rect("rel")', uu.css.rect(uu.id("rel")), "==", { x: 406, y: 7, w: 98, h: 99 });
+    uu.ok('uu.css.rect("relm")', uu.css.rect(uu.id("relm")), "==", { x: 406, y: 7, w: 98, h: 99 });
+    uu.ok('uu.css.rect("relmb")', uu.css.rect(uu.id("relmb")), "==", { x: 406, y: 7, w: 98 + border, h: 99 + border });
+    uu.ok('uu.css.rect("relmbp")', uu.css.rect(uu.id("relmbp")), "==", { x: 406, y: 7, w: 98 + border + padding, h: 99 + border + padding });
+    uu.ok('uu.css.rect("relb")', uu.css.rect(uu.id("relb")), "==", { x: 406, y: 7, w: 98 + border, h: 99 + border });
+    uu.ok('uu.css.rect("relbp")', uu.css.rect(uu.id("relbp")), "==", { x: 406, y: 7, w: 98 + border + padding, h: 99 + border + padding });
+    uu.ok('uu.css.rect("relp")', uu.css.rect(uu.id("relp")), "==", { x: 406, y: 7, w: 98 + padding, h: 99 + padding });
+    uu.ok("position: static");
+    uu.ok('uu.css.rect("sta")', uu.css.rect(uu.id("sta")), "has", { w: 98, h: 99 });
+    uu.ok('uu.css.rect("stam")', uu.css.rect(uu.id("stam")), "has", { w: 98, h: 99 });
+    uu.ok('uu.css.rect("stamb")', uu.css.rect(uu.id("stamb")), "has", { w: 98 + border, h: 99 + border });
+    uu.ok('uu.css.rect("stambp")', uu.css.rect(uu.id("stambp")), "has", { w: 98 + border + padding, h: 99 + border + padding });
+    uu.ok('uu.css.rect("stab")', uu.css.rect(uu.id("stab")), "has", { w: 98 + border, h: 99 + border });
+    uu.ok('uu.css.rect("stabp")', uu.css.rect(uu.id("stabp")), "has", { w: 98 + border + padding, h: 99 + border + padding });
+    uu.ok('uu.css.rect("stap")', uu.css.rect(uu.id("stap")), "has", { w: 98 + padding, h: 99 + padding });
+    uu.ok("parentNode が null なら rect は { x:0, y:0, w:0, h:0 } を返す");
+    (function() {
+        var div = uu.div();
+
+        div.style.width = "101px";
+        div.style.height = "102px";
+
+        uu.ok('uu.css.rect(no parentNode)', uu.css.rect(div), "==", { x:0, y:0, w:0, h:0 });
+    })();
+    uu.ok("left: auto, top: auto のテスト");
+    uu.ok("position: absolute + auto");
+    uu.ok('uu.css.rect("autoabs")', uu.css.rect(uu.id("autoabs")), "==", { x: 0, y: 0, w: 98, h: 99 });
+    uu.ok('uu.css.rect("autoabsm")', uu.css.rect(uu.id("autoabsm")), "==", { x: 5, y: 5, w: 98, h: 99 });
+    uu.ok('uu.css.rect("autoabsmb")', uu.css.rect(uu.id("autoabsmb")), "==", { x: 5, y: 5, w: 98 + border, h: 99 + border });
+    uu.ok('uu.css.rect("autoabsmbp")', uu.css.rect(uu.id("autoabsmbp")), "==", { x: 5, y: 5, w: 98 + border + padding, h: 99 + border + padding });
+    uu.ok('uu.css.rect("autoabsb")', uu.css.rect(uu.id("autoabsb")), "==", { x: 0, y: 0, w: 98 + border, h: 99 + border });
+    uu.ok('uu.css.rect("autoabsbp")', uu.css.rect(uu.id("autoabsbp")), "==", { x: 0, y: 0, w: 98 + border + padding, h: 99 + border + padding });
+    uu.ok('uu.css.rect("autoabsp")', uu.css.rect(uu.id("autoabsp")), "==", { x: 0, y: 0, w: 98 + padding, h: 99 + padding });
+    uu.ok("position: relative + auto");
+    uu.ok('uu.css.rect("autorel")', uu.css.rect(uu.id("autorel")), "==", { x: 0, y: 0, w: 98, h: 99 });
+    uu.ok('uu.css.rect("autorelm")', uu.css.rect(uu.id("autorelm")), "has", { x: 5, w: 98, h: 99 });
+    uu.ok('uu.css.rect("autorelmb")', uu.css.rect(uu.id("autorelmb")), "has", { x: 5, w: 98 + border, h: 99 + border });
+    uu.ok('uu.css.rect("autorelmbp")', uu.css.rect(uu.id("autorelmbp")), "has", { x: 5, w: 98 + border + padding, h: 99 + border + padding });
+    uu.ok('uu.css.rect("autorelb")', uu.css.rect(uu.id("autorelb")), "has", { x: 0, w: 98 + border, h: 99 + border });
+    uu.ok('uu.css.rect("autorelbp")', uu.css.rect(uu.id("autorelbp")), "has", { x: 0, w: 98 + border + padding, h: 99 + border + padding });
+    uu.ok('uu.css.rect("autorelp")', uu.css.rect(uu.id("autorelp")), "has", { x: 0, w: 98 + padding, h: 99 + padding });
+    uu.ok("position: static + auto");
+    uu.ok('uu.css.rect("autosta")', uu.css.rect(uu.id("autosta")), "has", { w: 98, h: 99 });
+    uu.ok('uu.css.rect("autostam")', uu.css.rect(uu.id("autostam")), "has", { w: 98, h: 99 });
+    uu.ok('uu.css.rect("autostamb")', uu.css.rect(uu.id("autostamb")), "has", { w: 98 + border, h: 99 + border });
+    uu.ok('uu.css.rect("autostambp")', uu.css.rect(uu.id("autostambp")), "has", { w: 98 + border + padding, h: 99 + border + padding });
+    uu.ok('uu.css.rect("autostab")', uu.css.rect(uu.id("autostab")), "has", { w: 98 + border, h: 99 + border });
+    uu.ok('uu.css.rect("autostabp")', uu.css.rect(uu.id("autostabp")), "has", { w: 98 + border + padding, h: 99 + border + padding });
+    uu.ok('uu.css.rect("autostap")', uu.css.rect(uu.id("autostap")), "has", { w: 98 + padding, h: 99 + padding });
+    uu.ok();
+});
+
+uu.ready("window", function(uu) {
 
     uu.ok("uu.array()");
     (function() {
@@ -37,19 +183,19 @@ uu.ready(function(uu) {
                 rv, "==", [1, 2, 3]);
     })();
 
-    uu.ok("uu.array.has()");
-    uu.ok("[1][has array] uu.array.has([1, 2, 3], 1) は true", uu.array.has([1, 2, 3], 1), "is true");
-    uu.ok("[1][has array] uu.array.has([1, 2, 3], '1') は false", uu.array.has([1, 2, 3], '1'), "is false");
-    uu.ok("[1][has array] uu.array.has(['1', 2, 3], '1') は true", uu.array.has(['1', 2, 3], '1'), "is true");
-    uu.ok("[1][has array] uu.array.has(['1', , 2, 3], 2) は true (粗い配列でもとりあえずOK)", uu.array.has(['1', , 2, 3], 2), "is true");
-    uu.ok("[1][has array] uu.array.has(['1', , 2, 3], undefined) は false (undefined は検索できない)", uu.array.has(['1', , 2, 3], undefined), "is false");
-    uu.ok("[1][has array] uu.array.has(['1', undefined, 2, 3], undefined) は false (undefined は検索できない)", uu.array.has(['1', undefined, 2, 3], undefined), "is false");
-    uu.ok("[1][has array] uu.array.has([1, 2, 3], [1, 2]) は true", uu.array.has([1, 2, 3], [1, 2]), "is true");
-    uu.ok("[2][has node] uu.array.has([document, document.body], document.body) は true", uu.array.has([document, document.body], document.body), "is true");
-    uu.ok("[3][has node] uu.array.has([document, document.body, document.getElementsByTagName('head')[0]], [document, document.body]) は true", uu.array.has([document, document.body, document.getElementsByTagName('head')[0]], [document, document.body]), "is true");
+    uu.ok("uu.has()");
+    uu.ok("[1][has array] uu.has([1, 2, 3], 1) は true", uu.has([1, 2, 3], 1), "is true");
+    uu.ok("[1][has array] uu.has([1, 2, 3], '1') は false", uu.has([1, 2, 3], '1'), "is false");
+    uu.ok("[1][has array] uu.has(['1', 2, 3], '1') は true", uu.has(['1', 2, 3], '1'), "is true");
+    uu.ok("[1][has array] uu.has(['1', , 2, 3], 2) は true (粗い配列でもとりあえずOK)", uu.has(['1', , 2, 3], 2), "is true");
+    uu.ok("[1][has array] uu.has(['1', , 2, 3], undefined) は false (undefined は検索できない)", uu.has(['1', , 2, 3], undefined), "is false");
+    uu.ok("[1][has array] uu.has(['1', undefined, 2, 3], undefined) は false (undefined は検索できない)", uu.has(['1', undefined, 2, 3], undefined), "is false");
+    uu.ok("[1][has array] uu.has([1, 2, 3], [1, 2]) は true", uu.has([1, 2, 3], [1, 2]), "is true");
+    uu.ok("[2][has node] uu.has([document, document.body], document.body) は true", uu.has([document, document.body], document.body), "is true");
+    uu.ok("[3][has node] uu.has([document, document.body, document.getElementsByTagName('head')[0]], [document, document.body]) は true", uu.has([document, document.body, document.getElementsByTagName('head')[0]], [document, document.body]), "is true");
 
-    uu.ok("uu.array.size()");
-    uu.ok("配列サイズは2", uu.array.size([ 1, 2 ]), "==", 2);
+    uu.ok("uu.size()");
+    uu.ok("配列サイズは2", uu.size([ 1, 2 ]), "==", 2);
     uu.ok("uu.array.sort()");
     uu.ok("[1][num 0-9] uu.array.sort([11, 222, 4], '0-9') は 数字順(0→9)([4, 11, 222])にソートされる",
             uu.array.sort([4, 11, 222], "0-9"), "==", [4, 11, 222]);
@@ -286,16 +432,16 @@ uu.ready(function(uu) {
             uu.hash('key', 123), "==", { key: 123 });
     })();
 
-    uu.ok("uu.hash.has()");
+    uu.ok("uu.has()");
     (function() {
-        uu.ok("uu.hash.has({ a: 1, b: 2, c: 3 }, { a: 1, b: 2 }) == true",
-            uu.hash.has({ a: 1, b: 2, c: 3 }, { a: 1, b: 2 }), "is true");
-        uu.ok("uu.hash.has({ a: 1, b: 2, c: 3 }, { a: '1', b: 2 }) == false",
-            uu.hash.has({ a: 1, b: 2, c: 3 }, { a: '1', b: 2 }), "is false");
-        uu.ok("uu.hash.has({ a: function() { return 'a'}, b: 2, c: 3 }, { a: function() { return 'a'}, b: 2 }) == true",
-            uu.hash.has({ a: function() { return 'a'}, b: 2, c: 3 }, { a: function() { return 'a'}, b: 2 }), "is true");
-        uu.ok("uu.hash.has({ a: function() { return 'b'}, b: 2, c: 3 }, { a: function() { return 'a'}, b: 2 }) == true  無名関数は同じものとして比較するため true になる",
-            uu.hash.has({ a: function() { return 'b'}, b: 2, c: 3 }, { a: function() { return 'a'}, b: 2 }), "is true");
+        uu.ok("uu.has({ a: 1, b: 2, c: 3 }, { a: 1, b: 2 }) == true",
+            uu.has({ a: 1, b: 2, c: 3 }, { a: 1, b: 2 }), "is true");
+        uu.ok("uu.has({ a: 1, b: 2, c: 3 }, { a: '1', b: 2 }) == false",
+            uu.has({ a: 1, b: 2, c: 3 }, { a: '1', b: 2 }), "is false");
+        uu.ok("uu.has({ a: function() { return 'a'}, b: 2, c: 3 }, { a: function() { return 'a'}, b: 2 }) == true",
+            uu.has({ a: function() { return 'a'}, b: 2, c: 3 }, { a: function() { return 'a'}, b: 2 }), "is true");
+        uu.ok("uu.has({ a: function() { return 'b'}, b: 2, c: 3 }, { a: function() { return 'a'}, b: 2 }) == true  無名関数は同じものとして比較するため true になる",
+            uu.has({ a: function() { return 'b'}, b: 2, c: 3 }, { a: function() { return 'a'}, b: 2 }), "is true");
 
         function hoge() {
             return "b";
@@ -304,13 +450,13 @@ uu.ready(function(uu) {
             return "c";
         }
 
-        uu.ok("uu.hash.has({ a: function hoge() { return 'b'}, b: 2, c: 3 }, { a: function huga() { return 'a'}, b: 2 }) == false  有名関数はfunction.name を比較するため false になる",
-            uu.hash.has({ a: hoge, b: 2, c: 3 }, { a: huga, b: 2 }), "is false");
+        uu.ok("uu.has({ a: function hoge() { return 'b'}, b: 2, c: 3 }, { a: function huga() { return 'a'}, b: 2 }) == false  名前を持っている関数はfunction.name を比較するため false になる",
+            uu.has({ a: hoge, b: 2, c: 3 }, { a: huga, b: 2 }), "is false");
     })();
 
-    uu.ok("uu.hash.size()");
+    uu.ok("uu.size()");
     uu.ok("ハッシュサイズは2",
-            uu.hash.size({ aaa: 1, bbb: 2 }), "==", 2);
+            uu.size({ aaa: 1, bbb: 2 }), "==", 2);
 
     uu.ok("uu.keys()");
     uu.ok("{ key: 1, key2: 2 } から key の配列[key, key2]を生成する",
@@ -319,9 +465,9 @@ uu.ready(function(uu) {
     uu.ok("uu.values()");
     uu.ok("{ key: 1, key2: 2 } から値の配列[1,2]を生成する",
             uu.values({ key: 1, key2: 2 }), "==", [1, 2]);
-    uu.ok("uu.hash.indexOf()");
-    uu.ok("uu.hash.indexOf({ a: 1, b: 2, c: 2 }, 2) == 'b'",
-            uu.hash.indexOf({ a: 1, b: 2, c: 2 }, 2), "==", 'b');
+    uu.ok("uu.indexOf()");
+    uu.ok("uu.indexOf({ a: 1, b: 2, c: 2 }, 2) == 'b'",
+            uu.indexOf({ a: 1, b: 2, c: 2 }, 2), "==", 'b');
     uu.ok("uu.array.toHash()");
     uu.ok("['key', 'key2'] と ['1', '2'] から { key: '1', key2: '2' } を生成する",
             uu.array.toHash(['key', 'key2'], ['1', '2']), "==", { key: '1', key2: '2' });
@@ -455,11 +601,11 @@ uu.ready(function(uu) {
         uu.ok('uu.fix("-moz-appearance") == "MozAppearance"',
                 uu.fix("-moz-appearance"), "==", "MozAppearance");
     }
-    if (uu.ie) {
+    if (uu.ie && uu.ver >= 8) {
         uu.ok('uu.fix("-ms-block-progression") == "msBlockProgression"',
                 uu.fix("-ms-block-progression"), "==", "msBlockProgression");
     }
-    if (uu.opera) {
+    if (uu.opera && uu.ver >= 10.50) {
         uu.ok('uu.fix("-o-transition-property") == "OTransitionProperty"',
                 uu.fix("-o-transition-property"), "==", "OTransitionProperty");
     }
@@ -711,7 +857,645 @@ uu.ready(function(uu) {
             rv, "==", [4, 5, 2, 3, 0, 1] );
     })();
 
-    uu.ok("End Of Test");
+
+    uu.ok("uu.color()");
+    (function() {
+        // extend type Color
+        uu.type.COLOR = function(lhs, operator) {
+            return lhs instanceof uu.Class.Color;
+        };
+        // extend type HSLAHASH
+        uu.type.HSLAHASH = function(lhs, operator) {
+            return "h" in lhs && "s" in lhs && "l" in lhs && "a" in lhs;
+        };
+
+        uu.ok("uu.color('#00007b').rgba で RGBAString( 'rgba(0,0,123,1)' ) を取得できる",
+                uu.color('#00007b').rgba, "==", 'rgba(0,0,123,1)');
+        uu.ok("uu.color('#00007b').hsla() で HSLAHash( {h:240,s:100,l:24,a:1} ) を取得できる",
+                uu.color('#00007b').hsla(), "has", {h:240,s:100,l:24,a:1});
+        uu.ok("uu.color('tomato').gray().hex で #636363 を取得できる",
+                uu.color('tomato').gray().hex, "==", "#636363");
+        uu.ok("uu.color('tomato').sepia().hex で #ab8e71 を取得できる",
+                uu.color('tomato').sepia().hex, "==", "#ab8e71");
+        uu.ok("uu.color('tomato').comple().hex で #009cb8 を取得できる",
+                uu.color('tomato').comple().hex, "==", "#009cb8");
+        uu.ok("uu.color('tomato').arrange(100, 10, 10).hex で #92ff7a を取得できる",
+                uu.color('tomato').arrange(100, 10, 10).hex, "==", "#92ff7a");
+        uu.ok("uu.color('tomato') は Color を返す",
+                uu.color('tomato'), "is Color");
+        uu.ok("uu.color(uu.color('tomato')) と uu.color('tomato') は同じ結果になる",
+                uu.color(uu.color('tomato')), "==", uu.color('tomato'));
+        uu.ok("uu.color('tomato').hsla() は HSLAHash を返す",
+                uu.color('tomato').hsla(), "is HSLAHash");
+        uu.ok("uu.color(Color) は Color を返す",
+                uu.color('tomato'), "is Color");
+        uu.ok("uu.color(HSLAHash) は ColorHash を返す",
+                uu.color(uu.color('tomato').hsla()), "is Color");
+        uu.ok("uu.color(RGBAHash) は Color を返す",
+                uu.color({r:0,g:0,b:0,a:0}), "is Color");
+        uu.ok("uu.color(W3CNamedColor) は Color を返す",
+                uu.color('skyblue'), "is Color");
+        uu.ok("uu.color('#000') は Color を返す",
+                uu.color('#000'), "is Color");
+        uu.ok("uu.color('#000000') は Color を返す",
+                uu.color('#000000'), "is Color");
+        uu.ok("uu.color('rgba(0,0,0,0)') は Color を返す",
+                uu.color('rgba(0,0,0,0)'), "is Color");
+        uu.ok("uu.color('rgba( 100%, 100%, 100%, 0.5 )') は Color を返す",
+                uu.color('rgba( 100%, 100%, 100%, 0.5 )'), "is Color");
+        uu.ok("uu.color('hsla( 360, 100%, 100%, 0.5 )') は Color を返す",
+                uu.color('hsla( 360, 100%, 100%, 0.5 )'), "is Color");
+    })();
+
+
+    uu.ok("uu.entity()");
+    uu.ok("uu.entity('<a href=\"&\">') == '&lt;a href=&quot;&amp;&quot;&gt;'",
+                uu.entity('<a href="&">'), "==", '&lt;a href=&quot;&amp;&quot;&gt;');
+
+    uu.ok("uu.entity.decode()");
+
+    uu.ok("uu.entity.decode('&lt;a href=&quot;&amp;&quot;&gt;&lt;/a&gt;') == '<a href=\"&\"></a>'",
+                uu.entity.decode('&lt;a href=&quot;&amp;&quot;&gt;&lt;/a&gt;'), "==", '<a href="&"></a>');
+
+    uu.ok("uu.entity.decode('\\u0073\\u0074\\u0072\\u0069\\u006e\\u0067', 0) == 'string'",
+                uu.entity.decode('\\u0073\\u0074\\u0072\\u0069\\u006e\\u0067', 0), "==", 'string');
+    uu.ok("uu.entity.decode('st\\u0073\\u0074\\u0072\\u0069\\u006e\\u0067', 0) == 'ststring'",
+                uu.entity.decode('st\\u0073\\u0074\\u0072\\u0069\\u006e\\u0067', 0), "==", 'ststring');
+    uu.ok("uu.entity.decode('\\u3043\\u3044\\u3045', 0) == 'ぃいぅ'",
+                uu.entity.decode('\\u3043\\u3044\\u3045', 0), "==", 'ぃいぅ');
+    uu.ok("uu.entity.decode('&amp;\\u3043\\u3044\\u3045&amp;', 0) == '&ぃいぅ&'",
+                uu.entity.decode('&amp;\\u3043\\u3044\\u3045&amp;', 0), "==", '&ぃいぅ&');
+
+
+
+    uu.ok("uu.array.unique");
+    (function() {
+        var body = document.body,
+            head = document.head;
+
+        var ary = [1,2,,null,3,3,2,1,0];
+        delete ary[1];
+
+        uu.ok("[1][unique elements] uu.array.unique([<body>, <head>, <body>]) は [<body>, <head>]",
+                uu.array.unique([body, head, body]), "==", [body, head]);
+
+        uu.ok("[1][unique elements] uu.array.unique([0, 1, 2, 3, 3, 2, 1, 0]) は [0, 1, 2, 3]",
+                uu.array.unique([0, 1, 2, 3, 3, 2, 1, 0]), "==", [0, 1, 2, 3]);
+
+        uu.ok("[2][unique literals] uu.array.unique([0, 1, 2, 3, 3, 2, 1, 0], 1) は [0, 1, 2, 3]",
+                uu.array.unique([0, 1, 2, 3, 3, 2, 1, 0], 1), "==", [0, 1, 2, 3]);
+
+        uu.ok("uu.array.unique(var ary=[1,2,,null,3,3,2,1,0]; delete ary[1]) は [1, 3, 2, 0]。\nuu.array.unique は 欠落(delete)した要素や null をスキップする",
+                uu.array.unique(ary), "==", [1, 3, 2, 0]);
+    })();
+
+    uu.ok("uu.base64");
+    (function() {
+        var short = "a!1=2/3*4~";
+        var long = "カルビx3, ハラミx2, ブタバラ, T-BORNx500g, ライス大盛りで";
+
+        uu.ok("Base64 encode");
+        uu.ok("uu.base64(short) - base64",  uu.base64(short),   "is string");
+        uu.ok("uu.base64(long) - base64",   uu.base64(long),    "is string");
+        uu.ok("uu.base64('') - base64",     uu.base64(''),      "==", "");
+        uu.ok("uu.base64('a')",             uu.base64("a"),     "==", "YQ==");
+        uu.ok("uu.base64('ab')",            uu.base64("ab"),    "==", "YWI=");
+        uu.ok("uu.base64('abc')",           uu.base64("abc"),   "==", "YWJj");
+
+        uu.ok("URLSafe64 encode");
+        uu.ok("uu.base64(short, true)",     uu.base64(short, true), "is string");
+        uu.ok("uu.base64(long, true)",      uu.base64(long, true),  "is string");
+        uu.ok("uu.base64('', true)",        uu.base64('', true),    "is string");
+
+        uu.ok("Base64 decode")
+        uu.ok("uu.base64.decode(short)",    uu.base64.decode(uu.base64(short)), "==", short);
+        uu.ok("uu.base64.decode(long)",     uu.base64.decode(uu.base64(long)), "==", long);
+        uu.ok("uu.base64.decode('')",       uu.base64.decode(uu.base64('')), "==", '');
+        uu.ok("uu.base64.decode('a')",      uu.base64.decode(uu.base64("a")), "==", "a");
+        uu.ok("uu.base64.decode('ab')",     uu.base64.decode(uu.base64("ab")), "==", "ab");
+        uu.ok("uu.base64.decode('abc')",    uu.base64.decode(uu.base64("abc")), "==", "abc");
+
+        uu.ok("URLSafe64 decode");
+        uu.ok("uu.base64.decode(short, true)",  uu.base64.decode(uu.base64(short, true)), "==", short);
+        uu.ok("uu.base64.decode(long, true)",   uu.base64.decode(uu.base64(long, true)), "==", long);
+        uu.ok("uu.base64.decode('', true)",     uu.base64.decode(uu.base64('', true)), "==", '');
+    })();
+
+    uu.ok("MD5");
+    (function() {
+        var longData = "1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111"
+                     + "1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111";
+
+        uu.ok('uu.md5("hoge")',
+            uu.md5("hoge"), "==", "ea703e7aa1efda0064eaa507d9e8ab7e");
+        uu.ok('uu.md5("ascii")',
+            uu.md5("ascii"), "==", "5b7f33be48f19c25e1af2f96cffc569f");
+        uu.ok('uu.md5("user-password")',
+            uu.md5("user-password"), "==", "9a3729201fdd376c76ded01f986481b1");
+        uu.ok('uu.md5(longData)',
+            uu.md5(longData), "==", "3eb5de4c3f5768c373d2fde0df1dff7e");
+        uu.ok('uu.md5(uu.utf8("こんにちはこんにちは"))',
+            uu.md5(uu.utf8("こんにちはこんにちは")), "==", "6870d8dd4b4bc38db9b094f1a959eae2");
+    })();
+
+    uu.ok("uu.url");
+    (function() {
+        var url, hash, result, ary;
+
+        uu.ok("get absolute directory");
+
+
+        url = uu.url();
+        uu.ok("uu.url() - current abs-dir", url, "is string");
+
+        hash = uu.url(uu.url());
+        uu.ok("uu.url(uu.url()) to URLHash", hash, "is hash");
+
+        uu.ok("parse url");
+
+
+
+
+        url = "http://example.com:8080/dir/file.ext?qs=string;more=value#fragment";
+        result = {
+            url:        "http://example.com:8080/dir/file.ext?qs=string;more=value#fragment",
+            scheme:     "http",
+            domain:     "example.com",
+            port:       "8080",
+            base:       "http://example.com:8080/dir/",
+            path:       "/dir/file.ext",
+            dir:        "/dir/",
+            file:       "file.ext",
+            qs:         "qs=string;more=value",
+            hash:       { qs: "string", more: "value" },
+            fragment:   "fragment"
+        };
+        hash = uu.url(url);
+        uu.ok("uu.url('http://example.com:8080/dir/file.ext?qs=string;more=value#fragment') - parse url",
+                hash, "==", result);
+
+        uu.ok("build url");
+
+
+
+        result = "http://example.com:8080/dir/file.ext?qs=string;more=value#fragment";
+        hash = {
+            url:        "http://example.com:8080/dir/file.ext?qs=string;more=value#fragment",
+            scheme:     "http",
+            domain:     "example.com",
+            port:       "8080",
+            base:       "http://example.com:8080/dir/",
+            path:       "/dir/file.ext",
+            dir:        "/dir/",
+            file:       "file.ext",
+            qs:      "qs=string;more=value",
+            hash:       { qs: "string", more: "value" },
+            fragment:   "fragment"
+        };
+        url = uu.url(hash);
+        uu.ok("uu.url(URLHash) -> build url",
+                url, "==", result);
+
+
+        uu.ok("rebuild url(parse + build)");
+
+
+        url = "http://example.com:8080/dir/file.ext?qs=string;more=value#fragment";
+        uu.ok("uu.url(uu.url('http://example.com:8080/dir/file.ext?qs=string;more=value#fragment'))",
+                uu.url(uu.url(url)), "==", url);
+
+        uu.ok("get absolute path");
+        uu.ok("uu.url.abs('../dir/file.ext') は 相対URL を絶対URLに変換する",
+                uu.url.abs('../dir/file.ext'), "is string");
+
+
+        uu.ok("get directory");
+
+        hash = uu.url.dir("http://example.com/dir/file.ext");
+        uu.ok("uu.url.dir('http://example.com/dir/file.ext') -> 'http://example.com/dir/'",
+                hash, "==", "http://example.com/dir/");
+
+
+        hash = uu.url.dir('/root/dir/file.ext');
+        uu.ok("uu.url.dir('/root/dir/file.ext') -> '/root/dir/'",
+                hash, "==", '/root/dir/');
+
+
+        hash = uu.url.dir('/file.ext');
+        uu.ok("uu.url.dir('/file.ext') -> '/'",
+                hash, "==", '/');
+
+        hash = uu.url.dir('/');
+        uu.ok("uu.url.dir('/') -> '/'",
+                hash, "==", '/');
+
+
+        hash = uu.url.dir('');
+        uu.ok("uu.url.dir('') -> '/'",
+                hash, "==", '/');
+
+
+        uu.ok("split directory, file");
+
+        ary = uu.url.split('http://example.com/dir/file.ext');
+        uu.ok("uu.url.split('http://example.com/dir/file.ext') -> ['http://example.com/dir/', 'file.ext']",
+                ary, "==", ['http://example.com/dir/', 'file.ext']);
+
+
+        uu.ok("uu.qs");
+
+        result = uu.qs("key=val;key2=val2");
+        uu.ok('uu.qs("key=val;key2=val2") -> { key: "val", key2: "val2" }',
+                result, "==", { key: "val", key2: "val2" });
+
+
+        result = uu.qs({ key: "val",     key2: "val2" });
+        uu.ok('uu.qs({ key: "val",     key2: "val2" }) -> "key=val;key2=val2"',
+                result, "==", "key=val;key2=val2");
+
+
+        result = uu.qs( "key=val",     { key2: "val2" });
+        uu.ok('uu.qs( "key=val",     { key2: "val2" }) -> "key=val;key2=val2"',
+                result, "==", "key=val;key2=val2");
+
+
+        result = uu.qs({ key: "val" }, { key2: "val2" });
+        uu.ok('uu.qs({ key: "val" }, { key2: "val2" }) -> "key=val;key2=val2"',
+                result, "==", "key=val;key2=val2");
+
+
+        uu.ok("boundary");
+
+
+        url = 'http://example.com:8080/dir/file.ext?key=val&key2=val2#fragment';
+        uu.ok("uu.qs('http://example.com:8080/dir/file.ext?key=val&key2=val2#fragment') は URL から QueryString を取り出しパース可能",
+                uu.qs(url), "==", { key: "val", key2: "val2" });
+
+
+        uu.ok("uu.qs('key=val&key2=val2#frag') はパースに失敗する",
+                uu.qs('key=val&key2=val2#frag'), "!=", { key: "val", key2: "val2" });
+    })();
+
     uu.ok();
 });
-</script></body></html>
+</script>
+<div id="selectedTestGroupSize1">
+    <select size="1">
+        <option value="value1">text1</option>
+        <option value="value2" selected="selected">text2</option>
+        <option value="value3">text3</option>
+    </select>
+
+    <select size="1">
+        <option value="value1">text1</option>
+        <option value="value2">text2</option>
+        <option value="value3">text3</option>
+    </select>
+
+    <select size="1">
+        <option value="value1">text1</option>
+        <option value="value2" selected="selected">text2</option>
+        <option value="value3">text3</option>
+    </select>
+
+    <select size="1">
+        <option value="value1">text1</option>
+        <option value="value2">text2</option>
+        <option value="value3">text3</option>
+    </select>
+</div>
+
+<div id="selectedTestGroupSize3">
+    <select size="3">
+        <option value="value1">text1</option>
+        <option value="value2" selected="selected">text2</option>
+        <option value="value3">text3</option>
+    </select>
+
+    <select size="3">
+        <option value="value1">text1</option>
+        <option value="value2">text2</option>
+        <option value="value3">text3</option>
+    </select>
+
+    <select size="3">
+        <option value="value1">text1</option>
+        <option value="value2" selected="selected">text2</option>
+        <option value="value3">text3</option>
+    </select>
+
+    <select size="3">
+        <option value="value1">text1</option>
+        <option value="value2">text2</option>
+        <option value="value3">text3</option>
+    </select>
+</div>
+<script>
+uu.ready("window", function() {
+    uu.ok('<select size="1"> phase');
+
+    var node;
+
+    node = uu.query("#selectedTestGroupSize1>select:nth-child(1)");
+    uu.ok('<select size="1"><option selected></select> + 実在する値(value3)を指定する -> "value3" が選択される',
+        uu.value(uu.value(node[0], "value3")), "==", "value3");
+
+
+    node = uu.query("#selectedTestGroupSize1>select:nth-child(2)");
+    uu.ok('<select size="1"><option></select> + 実在する値(value3)を指定する -> "value3" が選択される',
+        uu.value(uu.value(node[0], "value3")), "==", "value3");
+
+
+    node = uu.query("#selectedTestGroupSize1>select:nth-child(3)");
+    uu.ok('<select size="1"><option selected></select> + 実在しない値(hoge)を指定する -> 初期選択状態になり、上から二番目(value2)が選択される',
+        uu.value(uu.value(node[0], "hoge")), "==", "value2");
+
+
+    node = uu.query("#selectedTestGroupSize1>select:nth-child(4)");
+    uu.ok('<select size="1"><option></select> + 実在しない値(hoge)を指定する -> 初期選択状態になり一番上が選択される',
+        uu.value(uu.value(node[0], "hoge")), "==", "value1");
+
+    uu.ok('<select size="3"> phase');
+
+    node = uu.query("#selectedTestGroupSize3>select:nth-child(1)");
+    uu.ok('<select size="3"><option selected></select> + 実在する値(value3)を指定する -> "value3" が選択される',
+        uu.value(uu.value(node[0], "value3")), "==", "value3");
+
+
+    node = uu.query("#selectedTestGroupSize3>select:nth-child(2)");
+    uu.ok('<select size="3"><option></select> + 実在する値(value3)を指定する -> "value3" が選択される',
+        uu.value(uu.value(node[0], "value3")), "==", "value3");
+
+
+    node = uu.query("#selectedTestGroupSize3>select:nth-child(3)");
+    uu.ok('<select size="3"><option selected></select> + 実在しない値(hoge)を指定する -> 初期選択状態になり、上から二番目(value2)が選択される',
+        uu.value(uu.value(node[0], "hoge")), "==", "value2");
+
+
+    node = uu.query("#selectedTestGroupSize3>select:nth-child(4)");
+    uu.ok('<select size="3"><option></select> + 実在しない値(hoge)を指定する -> 未選択状態になる',
+        uu.value(uu.value(node[0], "hoge")), "==", "");
+
+    uu.ok();
+});
+</script>
+<div id="multipleSelectedTestGroupSize1">
+    <select multiple="multiple" size="1">
+        <option value="value1">text1</option>
+        <option value="value2" selected="selected">text2</option>
+        <option value="value3" selected="selected">text3</option>
+        <option value="value4">text4</option>
+    </select>
+
+    <select multiple="multiple" size="1">
+        <option value="value1">text1</option>
+        <option value="value2">text2</option>
+        <option value="value3">text3</option>
+        <option value="value4">text4</option>
+    </select>
+
+    <select multiple="multiple" size="1">
+        <option value="value1">text1</option>
+        <option value="value2" selected="selected">text2</option>
+        <option value="value3" selected="selected">text3</option>
+        <option value="value4">text4</option>
+    </select>
+
+    <select multiple="multiple" size="1">
+        <option value="value1">text1</option>
+        <option value="value2">text2</option>
+        <option value="value3">text3</option>
+        <option value="value4">text4</option>
+    </select>
+</div>
+
+<div id="multipleSelectedTestGroupSize3">
+    <select multiple="multiple" size="4">
+        <option value="value1">text1</option>
+        <option value="value2" selected="selected">text2</option>
+        <option value="value3" selected="selected">text3</option>
+        <option value="value4">text4</option>
+    </select>
+
+    <select multiple="multiple" size="4">
+        <option value="value1">text1</option>
+        <option value="value2">text2</option>
+        <option value="value3">text3</option>
+        <option value="value4">text4</option>
+    </select>
+
+    <select multiple="multiple" size="4">
+        <option value="value1">text1</option>
+        <option value="value2" selected="selected">text2</option>
+        <option value="value3" selected="selected">text3</option>
+        <option value="value4">text4</option>
+    </select>
+
+    <select multiple="multiple" size="4">
+        <option value="value1">text1</option>
+        <option value="value2">text2</option>
+        <option value="value3">text3</option>
+        <option value="value4">text4</option>
+    </select>
+</div>
+<script>
+uu.ready("window", function(uu) {
+    uu.ok('<select multiple size="1"> phase');
+
+    var node;
+
+
+    node = uu.query("#multipleSelectedTestGroupSize1>select:nth-child(1)");
+    uu.ok('<select multiple size="1"><option selected></select> + 実在する値(value3)を指定する -> ["value3"] が選択される',
+        uu.value(uu.value(node[0], "value3")), "==", ["value3"]);
+
+
+    node = uu.query("#multipleSelectedTestGroupSize1>select:nth-child(2)");
+    uu.ok('<select multiple size="1"><option></select> + 実在する値(value3)を指定する -> ["value3"] が選択される',
+        uu.value(uu.value(node[0], "value3")), "==", ["value3"]);
+
+
+    node = uu.query("#multipleSelectedTestGroupSize1>select:nth-child(3)");
+    uu.ok('<select multiple size="1"><option selected></select> + 実在しない値(hoge)を指定する -> 未選択状態になる',
+          uu.value(uu.value(node[0], "hoge")), "==", []);
+
+
+    node = uu.query("#multipleSelectedTestGroupSize1>select:nth-child(4)");
+    uu.ok('<select multiple size="1"><option></select> + 実在しない値(hoge)を指定する -> 未選択状態になる',
+          uu.value(uu.value(node[0], "hoge")), "==", []);
+
+
+    uu.ok('<select multiple size="4"> phase');
+
+    node = uu.query("#multipleSelectedTestGroupSize3>select:nth-child(1)");
+    uu.ok('<select multiple size="4"><option selected></select> + 実在する値(value3)を指定する -> ["value3"] が選択される',
+        uu.value(uu.value(node[0], "value3")), "==", ["value3"]);
+
+
+    node = uu.query("#multipleSelectedTestGroupSize3>select:nth-child(2)");
+    uu.ok('<select multiple size="4"><option></select> + 実在する値(value3)を指定する -> ["value3"] が選択される',
+        uu.value(uu.value(node[0], "value3")), "==", ["value3"]);
+
+
+    node = uu.query("#multipleSelectedTestGroupSize3>select:nth-child(3)");
+    uu.ok('<select multiple size="4"><option selected></select> + 実在しない値(hoge)を指定する -> 未選択状態になる',
+        uu.value(uu.value(node[0], "hoge")), "==", []);
+
+
+    node = uu.query("#multipleSelectedTestGroupSize3>select:nth-child(4)");
+    uu.ok('<select multiple size="4"><option></select> + 実在しない値(hoge)を指定する -> 未選択状態になる',
+        uu.value(uu.value(node[0], "hoge")), "==", []);
+});
+</script>
+<script>
+uu.ready("window", function() {
+
+    uu.ok("Native JSON.stringify + JSON.parse");
+    uu.ok("uu.json({a:1})",         uu.json({a:1}), "==", '{"a":1}');
+    uu.ok("uu.json(null)",          uu.json(null), "==", 'null');
+    uu.ok("uu.json(undefined)",     uu.json(undefined), "==", '');
+    uu.ok("uu.json(true)",          uu.json(true), "==", 'true');
+    uu.ok("uu.json(false)",         uu.json(false), "==", 'false');
+    uu.ok("uu.json(123.45)",        uu.json(123.45), "==", '123.45');
+    uu.ok("uu.json(new Date)",      uu.json(new Date), "is string");
+    uu.ok("uu.json('string')",      uu.json('string'), "==", '"string"');
+    uu.ok("uu.json([1,2])",         uu.json([1,2]), "==", '[1,2]');
+    uu.ok("uu.json(NaN)",           uu.json(NaN), "is string");
+    uu.ok("uu.json(Infinity)",      uu.json(Infinity), "is string");
+
+    uu.ok("Alternative uu.json(mix, true),  uu.json.decode(jsonString, true)");
+    uu.ok("uu.json(new Date, true)",        uu.json(new Date, true), "is string");
+    uu.ok("uu.json({a:1}, true)",           uu.json({a:1}, true), "==", '{"a":1}');
+    uu.ok("uu.json(document.body, true)",   uu.json(document.body, true), "==", '"body"');
+    uu.ok("uu.json(null, true)",            uu.json(null, true), "==", 'null');
+    uu.ok("uu.json(undefined, true)",       uu.json(undefined, true), "==", '');
+    uu.ok("uu.json(true, true)",            uu.json(true, true), "==", 'true');
+    uu.ok("uu.json(false, true)",           uu.json(false, true), "==", 'false');
+    uu.ok("uu.json(123.45, true)",          uu.json(123.45, true), "==", '123.45');
+    uu.ok("uu.json(new Date, true)",        uu.json(new Date, true), "is string");
+    uu.ok("uu.json(uu.nop, true)",          uu.json(uu.nop, true), "is string");
+    uu.ok("uu.json('string', true)",        uu.json('string', true), "==", '"string"');
+    uu.ok("uu.json([1,2], true)",           uu.json([1,2], true), "==", '[1,2]');
+    uu.ok("uu.json(document.links, true)",  uu.json(document.links, true), "is string");
+
+    var cs = window.getComputedStyle ? window.getComputedStyle(document.body, null)
+                                     : document.body.currentStyle;
+    uu.ok("uu.json(window.getComputedStyle(document.body, null), true)",
+                                            uu.json(cs, true), "is string");
+    uu.ok("uu.json(NaN, true)",             uu.json(NaN, true), "is string");
+    uu.ok("uu.json(Infinity, true)",        uu.json(Infinity, true), "is string");
+
+    if (!window.JSON) {
+        return;
+    }
+    uu.ok("Compare");
+
+    var data = '"', rhs = '"\""';
+    var jstr = uu.json(data);
+    var nstr = JSON.stringify(data);
+
+    var lhs = uu.json.decode(jstr);
+
+    uu.ok('uu.json.decode(uu.json(\'"\')) == \'"\'', [lhs, jstr], "==", [data, jstr]);
+
+    var data = "\b", rhs = '"\\b"';
+    var jstr = uu.json(data);
+    var lhs = uu.json.decode(jstr);
+
+    uu.ok('uu.json.decode(uu.json("\\b")) == "\\b"', [lhs, jstr], "==", [data, jstr]);
+
+                var data = "\f", rhs = '"\\f"';
+                var jstr = uu.json(data);
+                var lhs = uu.json.decode(jstr);
+
+    uu.ok('uu.json.decode(uu.json("\\f")) == "\\f"', [lhs, jstr], "==", [data, jstr]);
+
+                var data = "\n", rhs = '"\\n"';
+                var jstr = uu.json(data);
+                var lhs = uu.json.decode(jstr);
+
+    uu.ok('uu.json.decode(uu.json("\\n")) == "\\n"', [lhs, jstr], "==", [data, jstr]);
+
+                var data = "\r", rhs = '"\\r"';
+                var jstr = uu.json(data);
+                var lhs = uu.json.decode(jstr);
+
+    uu.ok('uu.json.decode(uu.json("\\r")) == "\\r"', [lhs, jstr], "==", [data, jstr]);
+
+                var data = "\t", rhs = '"\\t"';
+                var jstr = uu.json(data);
+                var lhs = uu.json.decode(jstr);
+
+    uu.ok('uu.json.decode(uu.json("\\t")) == "\\t"', [lhs, jstr], "==", [data, jstr]);
+
+                var data = "\\", rhs = '"\\\\"';
+                var jstr = uu.json(data);
+                var lhs = uu.json.decode(jstr);
+
+    uu.ok('uu.json.decode(uu.json("\\")) == "\\"', [lhs, jstr], "==", [data, jstr]);
+
+    uu.ok("JSON.stringify");
+
+                var data = new Date;
+
+    uu.ok("Date.toISOString() == Date.toJSON",  data.toISOString(), "==", data.toJSON());
+    uu.ok("(true).toJSON()",                    (true).toJSON(), "==", true);
+    uu.ok("(false).toJSON()",                   (false).toJSON(), "==", false);
+    uu.ok("(NaN).toJSON()",                     (NaN).toJSON(), "is NaN");
+    uu.ok("(Infinity).toJSON()",                (Infinity).toJSON(), "is Infinity");
+    uu.ok("(0).toJSON()",                       (0).toJSON(), "==", 0);
+    uu.ok("(-0).toJSON()",                      (-0).toJSON(), "==", 0);
+    uu.ok("(-12.3).toJSON()",                   (-12.3).toJSON(), "==", -12.3);
+    uu.ok("('string').toJSON()",                ('string').toJSON(), "==", 'string');
+    uu.ok("('あa').toJSON()",                   ('あa').toJSON(), "==", 'あa');
+
+
+
+                var data = '"', rhs = '"\""';
+                var jstr = JSON.stringify(data);
+                var lhs = JSON.parse(jstr);
+
+    uu.ok('JSON.parse(JSON.stringify(\'"\')) == \'"\'',  [lhs, jstr], "==", [data, jstr]);
+
+                var data = "\b", rhs = '"\\b"';
+                var jstr = JSON.stringify(data);
+                var lhs = JSON.parse(jstr);
+
+    uu.ok('JSON.parse(JSON.stringify("\\b")) == "\\b"', [lhs, jstr], "==", [data, jstr]);
+
+                var data = "\f", rhs = '"\\f"';
+                var jstr = JSON.stringify(data);
+                var lhs = JSON.parse(jstr);
+
+    uu.ok('JSON.parse(JSON.stringify("\\f")) == "\\f"', [lhs, jstr], "==", [data, jstr]);
+
+                var data = "\n", rhs = '"\\n"';
+                var jstr = JSON.stringify(data);
+                var lhs = JSON.parse(jstr);
+
+    uu.ok('JSON.parse(JSON.stringify("\\n")) == "\\n"', [lhs, jstr], "==", [data, jstr]);
+
+                var data = "\r", rhs = '"\\r"';
+                var jstr = JSON.stringify(data);
+                var lhs = JSON.parse(jstr);
+
+    uu.ok('JSON.parse(JSON.stringify("\\r")) == "\\r"', [lhs, jstr], "==", [data, jstr]);
+
+                var data = "\t", rhs = '"\\t"';
+                var jstr = JSON.stringify(data);
+                var lhs = JSON.parse(jstr);
+
+    uu.ok('JSON.parse(JSON.stringify("\\t")) == "\\t"', [lhs, jstr], "==", [data, jstr]);
+
+                var data = "\\", rhs = '"\\\\"';
+                var jstr = JSON.stringify(data);
+                var lhs = JSON.parse(jstr);
+
+    uu.ok('JSON.parse(JSON.stringify("\\\\")) == "\\\\"', [lhs, jstr], "==", [data, jstr]);
+
+    uu.ok();
+});
+</script>
+
+
+</body></html>

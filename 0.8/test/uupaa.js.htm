@@ -183,19 +183,19 @@ uu.ready("window", function(uu) {
                 rv, "==", [1, 2, 3]);
     })();
 
-    uu.ok("uu.array.has()");
-    uu.ok("[1][has array] uu.array.has([1, 2, 3], 1) は true", uu.array.has([1, 2, 3], 1), "is true");
-    uu.ok("[1][has array] uu.array.has([1, 2, 3], '1') は false", uu.array.has([1, 2, 3], '1'), "is false");
-    uu.ok("[1][has array] uu.array.has(['1', 2, 3], '1') は true", uu.array.has(['1', 2, 3], '1'), "is true");
-    uu.ok("[1][has array] uu.array.has(['1', , 2, 3], 2) は true (粗い配列でもとりあえずOK)", uu.array.has(['1', , 2, 3], 2), "is true");
-    uu.ok("[1][has array] uu.array.has(['1', , 2, 3], undefined) は false (undefined は検索できない)", uu.array.has(['1', , 2, 3], undefined), "is false");
-    uu.ok("[1][has array] uu.array.has(['1', undefined, 2, 3], undefined) は false (undefined は検索できない)", uu.array.has(['1', undefined, 2, 3], undefined), "is false");
-    uu.ok("[1][has array] uu.array.has([1, 2, 3], [1, 2]) は true", uu.array.has([1, 2, 3], [1, 2]), "is true");
-    uu.ok("[2][has node] uu.array.has([document, document.body], document.body) は true", uu.array.has([document, document.body], document.body), "is true");
-    uu.ok("[3][has node] uu.array.has([document, document.body, document.getElementsByTagName('head')[0]], [document, document.body]) は true", uu.array.has([document, document.body, document.getElementsByTagName('head')[0]], [document, document.body]), "is true");
+    uu.ok("uu.has()");
+    uu.ok("[1][has array] uu.has([1, 2, 3], 1) は true", uu.has([1, 2, 3], 1), "is true");
+    uu.ok("[1][has array] uu.has([1, 2, 3], '1') は false", uu.has([1, 2, 3], '1'), "is false");
+    uu.ok("[1][has array] uu.has(['1', 2, 3], '1') は true", uu.has(['1', 2, 3], '1'), "is true");
+    uu.ok("[1][has array] uu.has(['1', , 2, 3], 2) は true (粗い配列でもとりあえずOK)", uu.has(['1', , 2, 3], 2), "is true");
+    uu.ok("[1][has array] uu.has(['1', , 2, 3], undefined) は false (undefined は検索できない)", uu.has(['1', , 2, 3], undefined), "is false");
+    uu.ok("[1][has array] uu.has(['1', undefined, 2, 3], undefined) は false (undefined は検索できない)", uu.has(['1', undefined, 2, 3], undefined), "is false");
+    uu.ok("[1][has array] uu.has([1, 2, 3], [1, 2]) は true", uu.has([1, 2, 3], [1, 2]), "is true");
+    uu.ok("[2][has node] uu.has([document, document.body], document.body) は true", uu.has([document, document.body], document.body), "is true");
+    uu.ok("[3][has node] uu.has([document, document.body, document.getElementsByTagName('head')[0]], [document, document.body]) は true", uu.has([document, document.body, document.getElementsByTagName('head')[0]], [document, document.body]), "is true");
 
-    uu.ok("uu.array.size()");
-    uu.ok("配列サイズは2", uu.array.size([ 1, 2 ]), "==", 2);
+    uu.ok("uu.size()");
+    uu.ok("配列サイズは2", uu.size([ 1, 2 ]), "==", 2);
     uu.ok("uu.array.sort()");
     uu.ok("[1][num 0-9] uu.array.sort([11, 222, 4], '0-9') は 数字順(0→9)([4, 11, 222])にソートされる",
             uu.array.sort([4, 11, 222], "0-9"), "==", [4, 11, 222]);
@@ -432,16 +432,16 @@ uu.ready("window", function(uu) {
             uu.hash('key', 123), "==", { key: 123 });
     })();
 
-    uu.ok("uu.hash.has()");
+    uu.ok("uu.has()");
     (function() {
-        uu.ok("uu.hash.has({ a: 1, b: 2, c: 3 }, { a: 1, b: 2 }) == true",
-            uu.hash.has({ a: 1, b: 2, c: 3 }, { a: 1, b: 2 }), "is true");
-        uu.ok("uu.hash.has({ a: 1, b: 2, c: 3 }, { a: '1', b: 2 }) == false",
-            uu.hash.has({ a: 1, b: 2, c: 3 }, { a: '1', b: 2 }), "is false");
-        uu.ok("uu.hash.has({ a: function() { return 'a'}, b: 2, c: 3 }, { a: function() { return 'a'}, b: 2 }) == true",
-            uu.hash.has({ a: function() { return 'a'}, b: 2, c: 3 }, { a: function() { return 'a'}, b: 2 }), "is true");
-        uu.ok("uu.hash.has({ a: function() { return 'b'}, b: 2, c: 3 }, { a: function() { return 'a'}, b: 2 }) == true  無名関数は同じものとして比較するため true になる",
-            uu.hash.has({ a: function() { return 'b'}, b: 2, c: 3 }, { a: function() { return 'a'}, b: 2 }), "is true");
+        uu.ok("uu.has({ a: 1, b: 2, c: 3 }, { a: 1, b: 2 }) == true",
+            uu.has({ a: 1, b: 2, c: 3 }, { a: 1, b: 2 }), "is true");
+        uu.ok("uu.has({ a: 1, b: 2, c: 3 }, { a: '1', b: 2 }) == false",
+            uu.has({ a: 1, b: 2, c: 3 }, { a: '1', b: 2 }), "is false");
+        uu.ok("uu.has({ a: function() { return 'a'}, b: 2, c: 3 }, { a: function() { return 'a'}, b: 2 }) == true",
+            uu.has({ a: function() { return 'a'}, b: 2, c: 3 }, { a: function() { return 'a'}, b: 2 }), "is true");
+        uu.ok("uu.has({ a: function() { return 'b'}, b: 2, c: 3 }, { a: function() { return 'a'}, b: 2 }) == true  無名関数は同じものとして比較するため true になる",
+            uu.has({ a: function() { return 'b'}, b: 2, c: 3 }, { a: function() { return 'a'}, b: 2 }), "is true");
 
         function hoge() {
             return "b";
@@ -450,13 +450,13 @@ uu.ready("window", function(uu) {
             return "c";
         }
 
-        uu.ok("uu.hash.has({ a: function hoge() { return 'b'}, b: 2, c: 3 }, { a: function huga() { return 'a'}, b: 2 }) == false  名前を持っている関数はfunction.name を比較するため false になる",
-            uu.hash.has({ a: hoge, b: 2, c: 3 }, { a: huga, b: 2 }), "is false");
+        uu.ok("uu.has({ a: function hoge() { return 'b'}, b: 2, c: 3 }, { a: function huga() { return 'a'}, b: 2 }) == false  名前を持っている関数はfunction.name を比較するため false になる",
+            uu.has({ a: hoge, b: 2, c: 3 }, { a: huga, b: 2 }), "is false");
     })();
 
-    uu.ok("uu.hash.size()");
+    uu.ok("uu.size()");
     uu.ok("ハッシュサイズは2",
-            uu.hash.size({ aaa: 1, bbb: 2 }), "==", 2);
+            uu.size({ aaa: 1, bbb: 2 }), "==", 2);
 
     uu.ok("uu.keys()");
     uu.ok("{ key: 1, key2: 2 } から key の配列[key, key2]を生成する",
@@ -465,9 +465,9 @@ uu.ready("window", function(uu) {
     uu.ok("uu.values()");
     uu.ok("{ key: 1, key2: 2 } から値の配列[1,2]を生成する",
             uu.values({ key: 1, key2: 2 }), "==", [1, 2]);
-    uu.ok("uu.hash.indexOf()");
-    uu.ok("uu.hash.indexOf({ a: 1, b: 2, c: 2 }, 2) == 'b'",
-            uu.hash.indexOf({ a: 1, b: 2, c: 2 }, 2), "==", 'b');
+    uu.ok("uu.indexOf()");
+    uu.ok("uu.indexOf({ a: 1, b: 2, c: 2 }, 2) == 'b'",
+            uu.indexOf({ a: 1, b: 2, c: 2 }, 2), "==", 'b');
     uu.ok("uu.array.toHash()");
     uu.ok("['key', 'key2'] と ['1', '2'] から { key: '1', key2: '2' } を生成する",
             uu.array.toHash(['key', 'key2'], ['1', '2']), "==", { key: '1', key2: '2' });
