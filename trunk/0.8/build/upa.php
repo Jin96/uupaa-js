@@ -177,7 +177,7 @@ if ($castoff[0] === "all") {
                      "unittest", "fx", "ajax",
                      "svg", "canvas", "flash", "nodeset",
                      "live", "resize", "cssbox", "codec",
-                     "md5", "sprintf");
+                     "md5", "sprintf", "url");
 }
 
 include $preprosess;

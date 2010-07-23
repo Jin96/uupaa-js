@@ -43,7 +43,9 @@ var _prototype = "prototype",
     _visibility = "visibility",
     _lastChild = "lastChild",
     _className = "className",
+//{{{!nodeset
     _nodeArray = "nodeArray",
+//}}}!nodeset
     _nodeType = "nodeType",
     _replace = "replace",
     _indexOf = "indexOf",
@@ -247,7 +249,14 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/ClassNameS
                                     //  [8][before callback] uu.fx(node, 500, { o: 1, before: beforeCallback })
                                     //  [9][revert]          uu.fx(node, 500, { o: 1, r: 1 })
         skip:       uufxskip,       // uu.fx.skip(node:Node = null, skipAll:Boolean = false):Node/NodeArray
-        isBusy:     uufxisbusy      // uu.fx.isBusy(node:Node):Boolean
+        isBusy:     uufxisbusy,     // uu.fx.isBusy(node:Node):Boolean
+        fade:       uufxfade,       // uu.fx.fade(node:Node, duration:Number, option:Hash = {}):Node
+        puff:       uufxpuff,       // uu.fx.puff(node:Node, duration:Number, option:Hash = {}):Node
+        flare:      uufxflare,      // uu.fx.flare(node:Node, duration:Number, option:Hash = { parts: 10, range: 200 }):Node
+        shrink:     uufxshrink,     // uu.fx.shrink(node:Node, duration:Number, option:Hash = {}):Node
+        movein:     uufxmovein,     // uu.fx.movein(node:Node, duration:Number, option:Hash = { degree: 0, range: 200 }):Node
+        moveout:    uufxmoveout,    // uu.fx.moveout(node:Node, duration:Number, option:Hash = { degree: 0, range: 200 }):Node
+        highlight:  uufxhighlight   // uu.fx.highlight(node:Node, duration:Number, option:Hash = { bgc: "#ff9", reverse: 1 }):Node
     }),
 //}}}!fx
     // --- QUERY ---
@@ -731,7 +740,7 @@ function uusnippet(id,    // @param String: snippet id. <script id="...">
         node = uuid(id);
         if (node) {
             if (node.src) { // <script type="text/html" src="..."></script>
-                if (uurequire) {
+                if (uurequire) { // [!] KEEP IT
                     xhr = uurequire(node.src);
                     if (xhr.ok) {
                         js = xhr.data;
@@ -1787,6 +1796,7 @@ function uufxbuild(node, data, queue, option) {
 //}}}!mb
                     break;
                 case 2: // color, backgroundColor
+//{{{!color
                     startValue = uucolor(cs[w]);
                     endValue   = uucolor(endValue);
                     rv += uuf('gd=g/d;h=uu.hash.num2hh;s.??="#"+' +
@@ -1796,6 +1806,7 @@ function uufxbuild(node, data, queue, option) {
                               w, endValue.r, endValue.r, startValue.r, startValue.r,
                                  endValue.g, endValue.g, startValue.g, startValue.g,
                                  endValue.b, endValue.b, startValue.b, startValue.b);
+//}}}!color
                     break;
                 case 3: // width, height:
                     startValue = parseInt(cs[w]) || 0;
@@ -1885,6 +1896,7 @@ function uufxisbusy(node) { // @param Node:
 function uufxfade(node,     // @param Node:
                   duration, // @param Number: duration
                   option) { // @param Hash(= {}):
+                            // @return Node:
     return uufx(node, duration, uuarg(option, { init: function(node, option) {
             uumix(option, { o: uucssopacity(node) < 0.5 ? 1 : 0 });
         }}));
@@ -1894,6 +1906,7 @@ function uufxfade(node,     // @param Node:
 function uufxpuff(node,     // @param Node:
                   duration, // @param Number: duration
                   option) { // @param Hash(= {}):
+                            // @return Node:
     return uufx(node, duration, uuarg(option, { init: function(node, option) {
             var cs = uucss(node, _true);
 
@@ -1908,6 +1921,7 @@ function uufxpuff(node,     // @param Node:
 function uufxflare(node,     // @param Node:
                    duration, // @param Number: duration
                    option) { // @param Hash(= { parts: 10, range: 200 }):
+                             // @return Node:
     return uufx(node, duration, uuarg(option, {
         o:      0,
         parts:  10,
@@ -1950,6 +1964,7 @@ function uufxflare(node,     // @param Node:
 function uufxshrink(node,     // @param Node:
                     duration, // @param Number: duration
                     option) { // @param Hash(= {}):
+                              // @return Node:
     return uufx(node, duration, uuarg(option, { init: function(node, option) {
             var cs = uucss(node, _true);
 
@@ -1963,6 +1978,7 @@ function uufxshrink(node,     // @param Node:
 function uufxmovein(node,     // @param Node:
                     duration, // @param Number: duration
                     option) { // @param Hash(= { degree: 0, range: 200 }):
+                              // @return Node:
     return uufx(node, duration, uuarg(option, {
             degree: 0,
             o:      1,
@@ -1997,6 +2013,7 @@ function uufxmovein(node,     // @param Node:
 function uufxmoveout(node,     // @param Node:
                      duration, // @param Number: duration
                      option) { // @param Hash(= { degree: 0, range: 200 }):
+                               // @return Node:
     return uufx(node, duration, uuarg(option, { init: function(node, option) {
                 var cs = uucss(node, _true), angle, endX, endY,
                     range = option.range || 200;
@@ -2013,25 +2030,11 @@ function uufxmoveout(node,     // @param Node:
 // uu.fx.highlight - highlight color
 function uufxhighlight(node,     // @param Node:
                        duration, // @param Number: duration
-                       option) {  // @param Hash(= { bgc: "#ff9", re: 1 }):
+                       option) { // @param Hash(= { bgc: "#ff9", reverse: 1 }):
+                                 // @return Node:
     return uufx(node, duration,
-                uuarg(option, { bgc: "#ff9", begin: 1, reverse: 1 }));
+                uuarg(option, { bgc: "#ff9", reverse: 1 }));
 }
-
-uueach({
-    fade:           uufxfade,
-    puff:           uufxpuff,
-    flare:          uufxflare,
-    shrink:         uufxshrink,
-    movein:         uufxmovein,
-    moveout:        uufxmoveout,
-    highlight:      uufxhighlight
-}, function(fn, name) {
-    uufx[name] = fn;
-    NodeSet[_prototype] = function(node, duration, option) {
-        return NodeSetIter(0, this, fn, node, duration, option);
-    }
-});
 //}}}!fx
 
 // uu.css.opacity
@@ -3678,16 +3681,13 @@ function uunode(node,       // @param Node/SVGNode/TagNameString(= "div"): "div"
                     if (isstr && !arg[_indexOf]("@")) { // "@ident" -> callback(node, "ident")
                         ident = arg.slice(1);
                     } else {
+                        // typical arguments(Number, String)
                         if (type === _number || (isstr && arg[_indexOf](",") < 0)) {
-                            if (typical) {
-                                hash[typical[ai++]] = arg; // uu.svg.svg("svg:svg", 100, 100)
-                            } else {
-                                node[_appendChild](doc[_createTextNode](arg)); // uu.div("hello")
-                            }
-                        } else if (++token < 2) {
-                            uuattr(node, isstr ? uuhash(arg) : arg);
-                        } else if (token < 3) {
-                            uucss(node,  isstr ? uuhash(arg) : arg);
+                            typical ? (hash[typical[ai++]] = arg) // uu.svg(100, 100)
+                                    : node[_appendChild](doc[_createTextNode](arg)); // uu.div("text")
+                        } else if (++token < 3) {
+                            (token < 2 ? uuattr
+                                       : uucss)(node, isstr ? uuhash(arg) : arg);
                         }
                     }
                 }
@@ -5516,7 +5516,7 @@ function ArrayForEach(evaluator, // @param Function: evaluator
             i in this && evaluator(this[i], i, this);
         }
     }
-} // [OPTIMIZED]
+}
 
 // Array.prototype.map
 function ArrayMap(evaluator, // @param Function: evaluator
@@ -5682,6 +5682,13 @@ uueach({
     skip:           uufxskip,
     show:           uucssshow,
     hide:           uucsshide,
+    fade:           uufxfade,
+    puff:           uufxpuff,
+    flare:          uufxflare,
+    shrink:         uufxshrink,
+    movein:         uufxmovein,
+    moveout:        uufxmoveout,
+    highlight:      uufxhighlight,
 //}}}!fx
     remove:         uunoderemove
 }, function(fn, name) {
@@ -5747,22 +5754,15 @@ function NodeSetEach(evaluator, // @param Function: evaluator
 
         for (; i < iz; ++i) {
             if (i in ary) {
-                r = evaluator.call(null, ary[i], i);
+                r = evaluator.call(null, ary[i], i); // evaluator(value, index)
                 if (r === false) {
                     break;
                 }
             }
         }
     } else {
-        this[_nodeArray].forEach(evaluator);
+        this[_nodeArray].forEach(evaluator); // evaluator(value, index)
     }
-    return this;
-}
-
-// NodeSet.forEach
-function NodeSetEach(evaluator) { // @param Function: evaluator
-                                  // @return NodeSet:
-    this[_nodeArray].forEach(evaluator);
     return this;
 }
 
