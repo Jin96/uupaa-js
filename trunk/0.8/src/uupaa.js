@@ -1235,7 +1235,7 @@ function uuarray(source,     // @param Array/Mix/NodeList/Arguments: source
 // [5][Array has Mix]   uuhas([1, 2], 1) -> true
 // [6][Array has Mix]   uuhas([1, "a"], "a") -> true
 
-// inner - has
+// uu.has
 function uuhas(source,   // @param Hash/Array/Node: context, parentNode
                search) { // @param Hash/Array/Node/String: search element, childNode
                          // @return Boolean:
@@ -1277,7 +1277,7 @@ function uuhas(source,   // @param Hash/Array/Node: context, parentNode
 // [1][Hash nth ]           uunth({ a: 1, b: 2 }, 1) -> ["b", 2]
 // [2][Array nth]           uunth(["a", 100], 1)     -> [1, 100]
 
-// inner - nth pair
+// uu.nth - nth pair
 function uunth(source,  // @param Hash/Array: source
                index) { // @param Number: index
                         // @return Array: [key, value]
@@ -1310,7 +1310,7 @@ function uusize(source) { // @param Hash/Array: source
 // [1][Hash.clone]          uuclone({ a: 1, b: 2 }) -> { a: 1, b: 2 }
 // [2][Array.clone]         uuclone([1,2]) -> [1,2]
 
-// inner - clone hash, clone array - shallow copy
+// uu.clone - clone hash, clone array - shallow copy
 function uuclone(source) { // @param Hash/Array: source
                            // @return Hash/Array: cloned hash/array
     return _isArray(source) ? source[_concat]() : uumix({}, source);
@@ -5646,11 +5646,10 @@ function NodeSet(expr,      // @param NodeSet/Node/NodeArray/String/window:
         : []; // bad expr
 }
 
-NodeSet[_prototype] = {
-    // --- STACK ---
+// uu.Class.NodeSet - uu.Class.NodeSet.prototype alias
+uu.Class.NodeSet = NodeSet[_prototype] = {
     back:           NodeSetBack,        // NodeSet.back():NodeSet
     find:           NodeSetFind,        // NodeSet.find(expr:String):NodeSet
-    // --- NodeSet MANIPULATOR ---
     nth:            NodeSetNth,         // NodeSet.nth(indexer:Number = 0,
                                         //             evaluator:Function = void):Node/NodeSet
     each:           NodeSetEach,        // NodeSet.each(evaluator:Function,
@@ -5660,28 +5659,50 @@ NodeSet[_prototype] = {
     indexOf:        NodeSetIndexOf,     // NodeSet.indexOf(node):Number(index or -1)
     add:            NodeSetAdd,         // NodeSet.add(source:Node/DocumentFragment/HTMLFragment/TagName = "div",
                                         //             position:String = "./last"):NodeSet
-//  remove:         NodeSetRemove,      // NodeSet.remove() -> NodeSet
-    // --- EVENT ---
-//  bind:           NodeSetBind,        // NodeSet.bind(eventTypeEx:EventTypeExString,
-                                        //              evaluator:Function/Instance):NodeSet
-//  unbind:         NodeSetUnbind,      // NodeSet.unbind(eventTypeEx:EventTypeExString):NodeSet
-    // --- LIVE EVENT ---
-//  live:           NodeSetLive,        // NodeSet.live(CSSSelectorExpressionString:String,
-//                                      //              eventTypeEx:EventTypeExString,
-//                                      //              evaluator:Function/Instance):NodeSet
-//  unlive:         NodeSetUnlive,      // NodeSet.unlive(CSSSelectorExpressionString:String = void,
-//                                      //                eventTypeEx:EventTypeExString = void):NodeSet
-    // --- ATTRIBUTE, CSS, Node.className ---
-//  attr:           NodeSetAttr,        // NodeSet.attr(key:String/Hash = void,
-                                        //              value:String = void):NodeSet/Array
-//  css:            NodeSetCSS,         // NodeSet.css(key:String/Hash = void,
-                                        //             value:String = void):NodeSet/Array
     klass:          NodeSetKlass,       // NodeSet.klass(expr:String = ""):NodeSet
-//  text:           NodeSetText,        // NodeSet.text(text:String = ""):NodeSet/StringArray
-//  fx:             NodeSetFx,          // NodeSet.fx(duration:Number, param:Hash, callback:Function = void):NodeSet
     iter:           NodeSetIter         // [PROTECTED]
 };
-uu.Class.NodeSet = NodeSet[_prototype]; // uu.nodeSet - uu.Class.NodeSet.prototype alias
+
+// NodeSetIter(0) - Array#forEach
+uueach({
+    bind:           uuevent,
+    unbind:         uueventunbind,
+//{{{!live
+    live:           uulive,
+    unlive:         uuunlive,
+//}}}!live
+//{{{!mb
+    hover:          uueventhover,
+    unhover:        uueventunhover,
+//}}}!mb
+    cyclic:         uueventcyclic,
+    uncyclic:       uueventuncyclic,
+//{{{!fx
+    fx:             uufx,
+    skip:           uufxskip,
+    show:           uucssshow,
+    hide:           uucsshide,
+//}}}!fx
+    remove:         uunoderemove
+}, function(fn, name) {
+    NodeSet[_prototype][name] = function(a, b, c) {
+        return NodeSetIter(0, this, fn, a, b, c);
+    };
+});
+
+// NodeSetIter(1) - Array#map
+uueach({
+//{{{!form
+    value:          uuvalue,
+//}}}!form
+    attr:           uuattr,
+    css:            uucss,
+    text:           uutext
+}, function(fn, name) {
+    NodeSet[_prototype][name] = function(a, b) {
+        return NodeSetIter(1, this, fn, a, b);
+    };
+});
 
 // NodeSet.back
 function NodeSetBack() { // @return NodeSet:
@@ -5823,43 +5844,6 @@ function NodeSetIter(iterType,  // @param Number: 0 is forEach, 1 is map
     }
     return (iterType && arrayResult) ? rv : that;
 }
-
-// forEach(iter = 0)
-uueach({
-    bind:       uuevent,
-    unbind:     uueventunbind,
-//{{{!live
-    live:       uulive,
-    unlive:     uuunlive,
-//}}}!live
-    hover:      uueventhover,
-    unhover:    uueventunhover,
-    cyclic:     uueventcyclic,
-    uncyclic:   uueventuncyclic,
-    fx:         uufx,
-    skip:       uufxskip,
-    remove:     uunoderemove,
-    show:       uucssshow,
-    hide:       uucsshide
-}, function(fn, name) {
-    NodeSet[_prototype][name] = function(a, b, c) {
-        return NodeSetIter(0, this, fn, a, b, c);
-    };
-});
-
-// map(iter = 1)
-uueach({
-//{{{!form
-    value: uuvalue,
-//}}}!form
-    attr: uuattr,
-    css: uucss,
-    text: uutext
-}, function(fn, name) {
-    NodeSet[_prototype][name] = function(a, b) {
-        return NodeSetIter(1, this, fn, a, b);
-    };
-});
 //}}}!nodeset
 
 // --- initialize ---
