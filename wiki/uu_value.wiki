@@ -1,7 +1,5 @@
 #summary uu.value, NodeSet.value は、フォーム要素の値を取得/設定します
 
-src/form/form.js をロードすると、uu.value() と uu.Class.NodeSet.prototype.value() が利用可能になります。
-
 <wiki:toc max_depth="2" />
 
 uu.value() は、フォーム要素への value 属性へのアクセスを簡単にします。
