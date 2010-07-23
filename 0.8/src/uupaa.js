@@ -6178,7 +6178,7 @@ function detectFeatures() {
 
 //{{{!mb
 // --- detect uu.ready.cloneNode.* features ---
-uuready("dom:2", function() { <iframe> body is null
+uuready("dom:2", function() {
     var cloned, evt, fired = 0, attr = "uuz", data = "data-uuz",
         body = doc.body, cloneNode = uuready.cloneNode, div = uunode(),
         onfire = function() {
