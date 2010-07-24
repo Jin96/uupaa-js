@@ -60,7 +60,7 @@ var _prototype = "prototype",
     _width = "width",
     _false = !1,
     _true = !0,
-    _types = { "undefined": 8 },
+    _types = { "NaN": 2 },
     _trimSpace = /^\s+|\s+$/g,
     _rootNode = doc[_documentElement],
     _dd2num = {},               // uu.hash.dd2num = {  "00":    0 , ...  "99":   99  }
@@ -1077,12 +1077,18 @@ function uulike(lval,   // @param Date/Hash/Fake/Array: lval
 // uu.type - type detection
 function uutype(mix) { // @param Mix: search literal/object
                           // @return Number: uu.types
+    if (mix == null) {
+        return mix === null ? uutype.NULL : uutype.UNDEFINED;
+    }
+    if (mix === win) {
+        return uutype.OBJECT;
+    }
+    if (mix[_nodeType]) {
+        return uutype.NODE;
+    }
     return _types[typeof mix] ||
            _types[_toString.call(mix)] ||
-           (!mix ? uutype.NULL
-                 : mix[_nodeType] ? uutype.NODE
-                                  : "length" in mix ? uutype.FAKEARRAY
-                                                    : uutype.HASH);
+           ("length" in mix ? uutype.FAKEARRAY : uutype.HASH);
 }
 
 // uu.isNumber - is number
