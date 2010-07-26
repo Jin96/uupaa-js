@@ -1,0 +1,174 @@
+<!doctype html><html><head>
+    <title>A canvas globalCompositeOperation example</title>
+    <meta name="DC.creator" content="Kamiel Martinet, http://www.martinet.nl/">
+    <meta name="DC.publisher" content="Mozilla Developer Center, http://developer.mozilla.org">
+
+<script src="../../src/uupaa.js"></script>
+<script src="../../src/canvas/canvas.js"></script>
+
+<script>
+var compositeTypes = [
+    'source-over','source-in','source-out','source-atop',
+    'destination-over','destination-in','destination-out','destination-atop',
+    'lighter','darker','copy','xor'];
+
+uu.ready("canvas", function() {
+    draw(0, 0);
+    draw(0, 1);
+    draw(0, 2);
+});
+function matrix() {
+    draw(1, 0);
+    draw(1, 1);
+    draw(1, 2);
+}
+function draw(matrix, type){
+    for (var i=0;i<compositeTypes.length;i++){
+        var label = document.createTextNode(compositeTypes[i]);
+
+        if (!type) {
+            document.getElementById('sllab'+i).appendChild(label);
+            var ctx = document.getElementById('sltut'+i).getContext('2d');
+        } else if (type === 1) {
+            document.getElementById('vmllab'+i).appendChild(label);
+            var ctx = document.getElementById('vmltut'+i).getContext('2d');
+        } else if (type === 2) {
+            document.getElementById('flashlab'+i).appendChild(label);
+            var ctx = document.getElementById('flashtut'+i).getContext('2d');
+        }
+
+        if (matrix) {
+            ctx.clear();
+            ctx.translate(-10, 5);
+            ctx.scale(1.2, 0.8);
+            ctx.rotate(5 * Math.PI / 180);
+        }
+
+        // draw rectangle
+        ctx.fillStyle = "#09f";
+        ctx.fillRect(15,15,70,70);
+
+        // set composite property
+        ctx.globalCompositeOperation = compositeTypes[i];
+
+        // draw circle
+        ctx.fillStyle = "#f30";
+        ctx.beginPath();
+        ctx.arc(75,75,35,0,Math.PI*2,true);
+        ctx.fill();
+    }
+}
+</script>
+    <style type="text/css">
+      body { margin: 20px; font-family: arial,verdana,helvetica; background: #fff;}
+      h1 { font-size: 140%; font-weight:normal; color: #036; border-bottom: 1px solid #ccc; }
+      canvas { border: 2px solid #000; margin-bottom: 5px; }
+      td { padding: 7px; }
+      pre { float:left; display:block; background: rgb(238,238,238); border: 1px dashed #666; padding: 15px 20px; margin: 0 0 10px 0; }
+    </style>
+  </head>
+  <body>
+    <h1>A canvas <code>globalCompositeOperation</code> example</h1>
+    <div>
+      <input type="button" value="matrix effect" onclick="matrix()" />
+
+      <table>
+        <caption>Silverlight</caption>
+        <tr>
+          <td><canvas id="sltut0" class="sl" width="125" height="125"></canvas><br/><label id="sllab0"></label></td>
+          <td><canvas id="sltut1" class="sl" width="125" height="125"></canvas><br/><label id="sllab1"></label></td>
+          <td><canvas id="sltut2" class="sl" width="125" height="125"></canvas><br/><label id="sllab2"></label></td>
+          <td><canvas id="sltut3" class="sl" width="125" height="125"></canvas><br/><label id="sllab3"></label></td>
+        </tr>
+        <tr>
+          <td><canvas id="sltut4" class="sl" width="125" height="125"></canvas><br/><label id="sllab4"></label></td>
+          <td><canvas id="sltut5" class="sl" width="125" height="125"></canvas><br/><label id="sllab5"></label></td>
+          <td><canvas id="sltut6" class="sl" width="125" height="125"></canvas><br/><label id="sllab6"></label></td>
+          <td><canvas id="sltut7" class="sl" width="125" height="125"></canvas><br/><label id="sllab7"></label></td>
+        </tr>
+        <tr>
+          <td><canvas id="sltut8" class="sl" width="125" height="125"></canvas><br/><label id="sllab8"></label></td>
+          <td><canvas id="sltut9" class="sl" width="125" height="125"></canvas><br/><label id="sllab9"></label></td>
+          <td><canvas id="sltut10" class="sl" width="125" height="125"></canvas><br/><label id="sllab10"></label></td>
+          <td><canvas id="sltut11" class="sl" width="125" height="125"></canvas><br/><label id="sllab11"></label></td>
+        </tr>
+      </table>
+      <br />
+      <table>
+        <caption>VML</caption>
+        <tr>
+          <td><canvas id="vmltut0" class="vml" width="125" height="125"></canvas><br/><label id="vmllab0"></label></td>
+          <td><canvas id="vmltut1" class="vml" width="125" height="125"></canvas><br/><label id="vmllab1"></label></td>
+          <td><canvas id="vmltut2" class="vml" width="125" height="125"></canvas><br/><label id="vmllab2"></label></td>
+          <td><canvas id="vmltut3" class="vml" width="125" height="125"></canvas><br/><label id="vmllab3"></label></td>
+        </tr>
+        <tr>
+          <td><canvas id="vmltut4" class="vml" width="125" height="125"></canvas><br/><label id="vmllab4"></label></td>
+          <td><canvas id="vmltut5" class="vml" width="125" height="125"></canvas><br/><label id="vmllab5"></label></td>
+          <td><canvas id="vmltut6" class="vml" width="125" height="125"></canvas><br/><label id="vmllab6"></label></td>
+          <td><canvas id="vmltut7" class="vml" width="125" height="125"></canvas><br/><label id="vmllab7"></label></td>
+        </tr>
+        <tr>
+          <td><canvas id="vmltut8" class="vml" width="125" height="125"></canvas><br/><label id="vmllab8"></label></td>
+          <td><canvas id="vmltut9" class="vml" width="125" height="125"></canvas><br/><label id="vmllab9"></label></td>
+          <td><canvas id="vmltut10" class="vml" width="125" height="125"></canvas><br/><label id="vmllab10"></label></td>
+          <td><canvas id="vmltut11" class="vml" width="125" height="125"></canvas><br/><label id="vmllab11"></label></td>
+        </tr>
+      </table>
+      <br />
+      <table>
+        <caption>Flash</caption>
+        <tr>
+          <td><canvas id="flashtut0" class="flash" width="125" height="125"></canvas><br/><label id="flashlab0"></label></td>
+          <td><canvas id="flashtut1" class="flash" width="125" height="125"></canvas><br/><label id="flashlab1"></label></td>
+          <td><canvas id="flashtut2" class="flash" width="125" height="125"></canvas><br/><label id="flashlab2"></label></td>
+          <td><canvas id="flashtut3" class="flash" width="125" height="125"></canvas><br/><label id="flashlab3"></label></td>
+        </tr>
+        <tr>
+          <td><canvas id="flashtut4" class="flash" width="125" height="125"></canvas><br/><label id="flashlab4"></label></td>
+          <td><canvas id="flashtut5" class="flash" width="125" height="125"></canvas><br/><label id="flashlab5"></label></td>
+          <td><canvas id="flashtut6" class="flash" width="125" height="125"></canvas><br/><label id="flashlab6"></label></td>
+          <td><canvas id="flashtut7" class="flash" width="125" height="125"></canvas><br/><label id="flashlab7"></label></td>
+        </tr>
+        <tr>
+          <td><canvas id="flashtut8" class="flash" width="125" height="125"></canvas><br/><label id="flashlab8"></label></td>
+          <td><canvas id="flashtut9" class="flash" width="125" height="125"></canvas><br/><label id="flashlab9"></label></td>
+          <td><canvas id="flashtut10" class="flash" width="125" height="125"></canvas><br/><label id="flashlab10"></label></td>
+          <td><canvas id="flashtut11" class="flash" width="125" height="125"></canvas><br/><label id="flashlab11"></label></td>
+        </tr>
+      </table>
+      <pre>
+var compositeTypes = [
+  'source-over','source-in','source-out','source-atop',
+  'destination-over','destination-in','destination-out','destination-atop',
+  'lighter','darker','copy','xor'
+];
+function draw(vml) {
+  for (var i=0;i&lt;compositeTypes.length;i++){
+    var label = document.createTextNode(compositeTypes[i]);
+    if (!vml) {
+      document.getElementById('lab'+i).appendChild(label);
+      var ctx = document.getElementById('tut'+i).getContext('2d');
+    } else {
+      document.getElementById('vmllab'+i).appendChild(label);
+      var ctx = document.getElementById('vmltut'+i).getContext('2d');
+    }
+
+    // draw rectangle
+    ctx.fillStyle = "#09f";
+    ctx.fillRect(15,15,70,70);
+
+    // set composite property
+    ctx.globalCompositeOperation = compositeTypes[i];
+
+    // draw circle
+    ctx.fillStyle = "#f30";
+    ctx.beginPath();
+    ctx.arc(75,75,35,0,Math.PI*2,true);
+    ctx.fill();
+  }
+}
+      </pre>
+    </div>
+  </body>
+</html>

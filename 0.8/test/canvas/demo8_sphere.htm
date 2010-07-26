@@ -1,0 +1,50 @@
+<!doctype html><head><title>Canvas sphere</title>
+<!-- http://www.canvasdemos.com/2010/02/06/canvas-sphere/ -->
+<style>
+body {
+    background-color: #000000;
+    margin: 0px;
+    padding: 0px;
+}
+canvas {
+    background: #000000;
+}
+</style>
+<script src="../../src/uupaa.js"></script>
+<script src="../../src/canvas/canvas.js"></script>
+<script src="demo8_sphere.js"></script>
+<script>
+uu.ready("dom", function(uu) {
+    uu.id("sphere").className = window.name || "sl";
+}, "canvas", function() {
+
+    var ctx = document.getElementById("sphere").getContext("2d");
+
+    document.title = "Backend: " + (ctx.xBackend || "Canvas");
+    ctx.xFlyweight = 1;
+
+    new Sphere();
+});
+
+function switchBackend() {
+    var n = window.name || "";
+
+    if (!n) {
+        window.name = "flash";
+    } else {
+        switch (n) {
+        case "sl":      window.name = "flash"; break;
+        case "flash":   window.name = "vml"; break;
+        case "vml":     window.name = "sl"; break;
+        }
+    }
+    location.reload(false);
+}
+
+</script>
+</head><body>
+    <input type="button" value="Silverlight/Flash/VML" onclick="switchBackend()" />
+    <div align="center">
+        <canvas id="sphere" width="600" height="600"></canvas>
+    </div>
+</body></html>

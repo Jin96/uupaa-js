@@ -1,0 +1,119 @@
+<!doctype html><html><head>
+    <title>A canvas clearRect example</title>
+
+<script src="../../src/uupaa.js"></script>
+<script src="../../src/canvas/canvas.js"></script>
+
+<script>
+uu.ready("canvas", function() {
+    document.body.style.backgroundColor = "#eee";
+    document.getElementById('slcanvas').style.backgroundColor = "#008888";
+    document.getElementById('vmlcanvas').style.backgroundColor = "#880088";
+    document.getElementById('flashcanvas').style.backgroundColor = "#888800";
+
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+});
+function matrix() {
+    drawShape(document.getElementById('slcanvas'), 1);
+    drawShape(document.getElementById('vmlcanvas'), 1);
+    drawShape(document.getElementById('flashcanvas'), 1);
+}
+
+var globalAlpha = 1.0
+function switchAlpha() {
+    globalAlpha -= 0.2;
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+}
+
+function drawShape(canvas, matrix){
+    if (!canvas.getContext){ return; }
+
+    var ctx = canvas.getContext('2d');
+
+    ctx.clear();
+    if (matrix) {
+        ctx.translate(-10, 5);
+        ctx.scale(1.2, 0.8);
+        ctx.rotate(5 * Math.PI / 180);
+    }
+    ctx.globalAlpha = globalAlpha;
+
+    ctx.beginPath();
+    ctx.fillStyle = "pink";
+    ctx.arc(50, 50, 50, 0, Math.PI * 2, 1);
+    ctx.fill();
+    ctx.beginPath();
+
+    ctx.fillStyle = "skyblue";
+    ctx.arc(80, 80, 50, 0, Math.PI * 2, 1);
+    ctx.fill();
+
+    ctx.clearRect(20, 40, 60, 20);
+}
+</script>
+    <style type="text/css">
+      body { margin: 20px; font-family: arial,verdana,helvetica; background: #fff;}
+      h1 { font-size: 140%; font-weight:normal; color: #036; border-bottom: 1px solid #ccc; }
+      canvas { border: 2px solid #000; float: left; margin-right: 20px; margin-bottom: 20px; }
+      pre { float:left; display:block; background: rgb(238,238,238); border: 1px dashed #666; padding: 15px 20px; margin: 0 0 10px 0; }
+    </style>
+  </head>
+
+  <body>
+    <h1>An example of <code>clearRect</code></h1>
+    <div>
+      <input type="button" value="matrix effect" onclick="matrix()" />
+      <input type="button" value="alpha -0.2" onclick="switchAlpha()" />
+      <br />
+      <canvas id="slcanvas" class="sl" width="150" height="150"></canvas>
+      <canvas id="vmlcanvas" class="vml" width="150" height="150"></canvas>
+      <canvas id="flashcanvas" class="flash" width="150" height="150"></canvas>
+<pre>
+function matrix() {
+    draw(document.getElementById('slcanvas'), 1);
+    draw(document.getElementById('vmlcanvas'), 1);
+    draw(document.getElementById('flashcanvas'), 1);
+}
+
+var globalAlpha = 1.0
+function switchAlpha() {
+    globalAlpha -= 0.2;
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+}
+
+function draw(canvas, matrix){
+    if (!canvas.getContext){ return; }
+
+    var ctx = canvas.getContext('2d');
+
+    ctx.clear();
+    if (matrix) {
+        ctx.translate(-10, 5);
+        ctx.scale(1.2, 0.8);
+        ctx.rotate(5 * Math.PI / 180);
+    }
+    ctx.globalAlpha = globalAlpha;
+
+    ctx.beginPath();
+    ctx.fillStyle = "pink";
+    ctx.arc(50, 50, 50, 0, Math.PI * 2, 1);
+    ctx.fill();
+    ctx.beginPath();
+
+    ctx.fillStyle = "skyblue";
+    ctx.arc(80, 80, 50, 0, Math.PI * 2, 1);
+    ctx.fill();
+
+    ctx.clearRect(20, 40, 60, 20);
+}
+</pre>
+    </div>
+  </body>
+
+</html>
