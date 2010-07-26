@@ -2971,8 +2971,10 @@ uu.ie && uu.ver.silverlight && uu.ready(function() {
 //      </object>
 //  </canvas>
 
-
 !window["CanvasRenderingContext2D"] && (function(win, doc, uu) {
+var _useFlashVars = uu.ver.flash < 10.1,
+    _msgprefix = '<invoke name="send" returntype="javascript"><arguments><string>',
+    _msgsuffix = '</string></arguments></invoke>';
 
 uu.mix(uu.canvas.Flash.prototype, {
     arc:                    arc,
@@ -3069,10 +3071,10 @@ function build(canvas) { // @param Node: <canvas>
             ctx._state = 1; // 1: draw ready
 
             // [SYNC] send "init" command. init(width, heigth, xFlyweight)
-            ctx._view.CallFunction(send._prefix + "in\t" +
+            ctx._view.CallFunction(_msgprefix + "in\t" +
                     ctx.canvas.width + "\t" +
                     ctx.canvas.height + "\t" +
-                    ctx.xFlyweight + send._suffix);
+                    ctx.xFlyweight + _msgsuffix);
 
             if (canvas.currentStyle.direction === "rtl") {
                 ctx._stock.push("rt");
@@ -3821,38 +3823,39 @@ function send(ctx,      // @param Context:
             clearance(ctx);
         }
         if (ctx._state === 2) {
+            if (_useFlashVars) {
+                // <param name="flashVars" param="i={msgid}&b={msgbody}" />
+                if (!ctx._lastTimerID) {
+                    ctx._lastTimerID = setTimeout(function() {
+                        if (ctx._lastTimerID) {
+                            if (ctx._stock.length) {
+                                // http://twitter.com/uupaa/status/9182387840
+                                // http://twitter.com/uupaa/status/9195030504
+                                // http://twitter.com/uupaa/status/9195279662
+                                // http://twitter.com/uupaa/status/9196237383
+                                // http://twitter.com/uupaa/status/9196368732
+                                var message = "i=" + ctx._lastMessageID +
+                                              "&b=" + ctx._stock.join("\t");
 
-            // <param name="flashVars" param="i={msgid}&b={msgbody}" />
-            if (!ctx._lastTimerID) {
-                ctx._lastTimerID = setTimeout(function() {
-                    if (ctx._lastTimerID) {
-                        if (ctx._stock.length) {
-                            // http://twitter.com/uupaa/status/9182387840
-                            // http://twitter.com/uupaa/status/9195030504
-                            // http://twitter.com/uupaa/status/9195279662
-                            // http://twitter.com/uupaa/status/9196237383
-                            // http://twitter.com/uupaa/status/9196368732
-                            var message = "i=" + ctx._lastMessageID +
-                                          "&b=" + ctx._stock.join("\t");
+                                // pre clear
+                                ctx._stock = [];
 
-                            // pre clear
-                            ctx._stock = [];
+                                // [ASYNC] There might be a packet loss
+                                ctx._view.flashVars = message;
 
-                            // [ASYNC] There might be a packet loss
-                            ctx._view.flashVars = message;
-
-                            // round-trip
-                            ++ctx._lastMessageID > 9 && (ctx._lastMessageID = 1);
+                                // round-trip
+                                ++ctx._lastMessageID > 9 && (ctx._lastMessageID = 1);
+                            }
+                            ctx._lastTimerID = 0;
                         }
-                        ctx._lastTimerID = 0;
-                    }
-                }, 0); // http://twitter.com/uupaa/status/9837157309
+                    }, 0); // http://twitter.com/uupaa/status/9837157309
+                }
+            } else {
+                clearance(ctx);
             }
         }
     }
 }
-send._prefix = '<invoke name="send" returntype="javascript"><arguments><string>';
-send._suffix = '</string></arguments></invoke>';
 
 // inner - stocked messages clearance
 function clearance(ctx) {
@@ -3861,7 +3864,7 @@ function clearance(ctx) {
 
         ctx._stock = []; // pre clear
         // [SYNC]
-        ctx._view.CallFunction(send._prefix + msg + send._suffix);
+        ctx._view.CallFunction(_msgprefix + msg + _msgsuffix);
     }
 }
 

@@ -102,6 +102,7 @@ package {
             canvasCopy  = new CanvasCopy(this);
             canvasDrawImage = new CanvasDrawImage(this);
 
+            // send "initialized" message
             ExternalInterface.call("uu.dmz." + ExternalInterface.objectID);
         }
 
