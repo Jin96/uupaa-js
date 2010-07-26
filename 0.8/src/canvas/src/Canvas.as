@@ -61,7 +61,7 @@ package {
         private var _mode:int = 0; // 1: xFlyweight
         // --- JavaScript <- -> ActionScript ---
         private var _lastMessageID:String = "";
-        private var _state:int = 0;     // 0: not ready(locked)
+        private var _state:int = 0;     // 0: not ready(locked) or (image loading...)
                                         // 1: not ready -> ready
                                         // 2: ready
         private var _jscallback:Array = [];
@@ -413,6 +413,7 @@ package {
             if (_buff) {
 //                clearAll();
                 _buff.dispose();
+                _buff = null; // self [GC]
                 _buff = new BitmapData(width, height, true, 0); // 300 x 150
                 _view.bitmapData = _buff;
             } else {
@@ -751,14 +752,17 @@ if (0) {
         private function drawImage(args:Number, // 3, 5, 9
                                    url:String,
                                    param:Array):void {
+            //                         _state
+            // load(new image)     -> 0 -> 1 -> 2
+            // load(cached image)  ->        -> 2
             var me:* = this;
             var canvasImage:CanvasImage = new CanvasImage(this);
-            var rv:Boolean = canvasImage.load(url, function():void {
+            var cached:Boolean = canvasImage.load(url, function():void {
                 me.canvasDrawImage.draw(args, param, canvasImage.bitmapData);
                 me.next(1);
             });
 
-            next(rv ? 2 : 0);
+            next(cached ? 2 : 0);
         }
 
         private function save(): void {

@@ -16,7 +16,7 @@ uu.canvas.Flash = FlashCanvas;              // uu.canvas.Flash class
 uu.canvas.Silverlight = SilverlightCanvas;  // uu.canvas.Silverlight class
 uu.canvas.init = uucanvasinit;
 uu.canvas.build = uucanvasbuild;
-uu.canvas.bgcolor = uucanvasbgcolor; // uu.canvas.bgcolor(node:Node):ColorHash
+uu.canvas.bgcolor = uucanvasbgcolor;        // uu.canvas.bgcolor(node:Node):ColorHash [VML][SL]
 
 // class SilverlightCanvas
 function SilverlightCanvas(node) { // @param Node: <canvas>
@@ -2961,8 +2961,8 @@ uu.ie && uu.ver.silverlight && uu.ready(function() {
 //{{{!canvasfl
 // === Flash Canvas ===
 
-//  <canvas width="300" height="150">   <- canvas
-//      <object id="external{n}"        <- view
+//  <canvas width="300" height="150">   <- this.canvas
+//      <object id="external{n}"        <- this._view
 //          width="300" height="150" classid="...">
 //          <param name="allowScriptAccess" value="always" />
 //          <param name="flashVars" value="" />
@@ -2972,7 +2972,7 @@ uu.ie && uu.ver.silverlight && uu.ready(function() {
 //  </canvas>
 
 !window["CanvasRenderingContext2D"] && (function(win, doc, uu) {
-var _useFlashVars = uu.ver.flash < 10.1,
+var _useFlashVars = uu.ver.flash < 10.1, // [FLASH10.1] cannot flashVars
     _msgprefix = '<invoke name="send" returntype="javascript"><arguments><string>',
     _msgsuffix = '</string></arguments></invoke>';
 
@@ -3072,7 +3072,7 @@ function build(canvas) { // @param Node: <canvas>
 
             // [SYNC] send "init" command. init(width, heigth, xFlyweight)
             ctx._view.CallFunction(_msgprefix + "in\t" +
-                    ctx.canvas.width + "\t" +
+                    ctx.canvas.width  + "\t" +
                     ctx.canvas.height + "\t" +
                     ctx.xFlyweight + _msgsuffix);
 
@@ -3119,7 +3119,7 @@ function build(canvas) { // @param Node: <canvas>
             canvas.style.pixelWidth  = width  < 0 ? 0 : width;
             canvas.style.pixelHeight = height < 0 ? 0 : height;
 
-            // resize view
+            // resize view(aka <object>)
             ctx._view.width  = width  <= 0 ? 10 : width;
             ctx._view.height = height <= 0 ? 10 : height;
 
@@ -3331,7 +3331,7 @@ function getImageData(sx,   // @param Number:
                       sy,   // @param Number:
                       sw,   // @param Number:
                       sh) { // @param Number:
-    if (isNaN(sx) || isNaN(sy) || isNaN(sw) || isNaN(sh)) {
+    if (sx !== sx || sy !== sy || sw !== sw || sh !== sh) {
         throw new Error("NOT_SUPPORTED_ERR");
     }
     if (!sw || !sh) {
@@ -3593,24 +3593,27 @@ function putImageData(imagedata,     // @param ImageData:
                       dirtyY,        // @param Number:
                       dirtyWidth,    // @param Number:
                       dirtyHeight) { // @param Number:
-    if (isNaN(dx) || isNaN(dy)) {
+    var rawdata, undef;
+
+    if (dx !== dx || dy !== dy) {
         throw new Error("NOT_SUPPORTED_ERR");
     }
     if (!imagedata) {
         throw new Error("TYPE_MISMATCH_ERR");
     }
 
-    dirtyX      = dirtyX      === void 0 ? 0 : dirtyX;
-    dirtyY      = dirtyY      === void 0 ? 0 : dirtyY;
-    dirtyWidth  = dirtyWidth  === void 0 ? imagedata.width  : dirtyWidth;
-    dirtyHeight = dirtyHeight === void 0 ? imagedata.height : dirtyHeight;
+    dirtyX      = dirtyX      === undef ? 0 : dirtyX;
+    dirtyY      = dirtyY      === undef ? 0 : dirtyY;
+    dirtyWidth  = dirtyWidth  === undef ? imagedata.width  : dirtyWidth;
+    dirtyHeight = dirtyHeight === undef ? imagedata.height : dirtyHeight;
 
-    if (isNaN(dirtyX) || isNaN(dirtyY)
-        || isNaN(dirtyWidth) || isNaN(dirtyHeight)) {
+    if (dirtyX !== dirtyX || dirtyY !== dirtyY
+        || dirtyWidth  !== dirtyWidth
+        || dirtyHeight !== dirtyHeight) {
         throw new Error("NOT_SUPPORTED_ERR");
     }
 
-    var rawdata = imagedata.build().join(",");
+    rawdata = imagedata.build().join(",");
 
     send(this, "pI\t" + imagedata.width  + "\t" +
                         imagedata.height + "\t" +
