@@ -120,6 +120,7 @@ trace(" sw="+param.sw);
                 _copyBuff.setPixels(_copyBuff.rect, packet);
                 proxy(args, param);
                 _copyBuff.dispose();
+                _copyBuff = null; // self [GC]
 
                 _canvas.next(1); // unlock
             } else {
@@ -139,6 +140,7 @@ trace(" sw="+param.sw);
                     _copyBuff.setPixels(_copyBuff.rect, _unzip);
                     proxy(args, param);
                     _copyBuff.dispose();
+                    _copyBuff = null; // self [GC]
 
                     _canvas.next(1); // unlock
                 }

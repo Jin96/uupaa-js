@@ -38,6 +38,7 @@ package {
 
             for (url in _cache) {
                 _cache[url].dispose();
+                _cache[url] = null; // self [GC]
             }
         }
     }
