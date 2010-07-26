@@ -1,5 +1,22 @@
 /*!{id:"uupaa.js",ver:0.8,license:"MIT",author:"uupaa.js@gmail.com"}*/
 
+// Firefox3.5(end of 2010-08)
+//      <audio>, <video>, offline, DnD API, @font-face, MediaQuery,
+//      text-shadow:, word-wrap: box-shadow:, box-image:,
+//      column-rule:, CSS Transforms, localStorage, Web Workers,
+//      Geolocation API, Canvas Text API, Canvas Shadow API,
+//      Canvas ImageData API, (canvas.moz-opaque)
+//      MozAfterPaint Event, window.JSON
+// Firefox3.6(Gecko 1.9.2)
+//      Background Gradient(-moz-linear-gradient, -moz-radial-gradient),
+//      Multiple background, File API, DnD File API,
+//      orientation,
+// Firefox4.0(Gecko 2.0)
+//      <article> <section> <nav> <aside> <hgroup> <header> <footer>,
+//      WebSockets, D2D, WebM, IndexedDB( window.moz_indexedDB ),
+//      FormData, SVG Background, <img src="svg">, CSS transitions,
+//      WebGL, :-moz-any(S, ...), CSS calc(),  -moz-image-rect
+
 // === Core ===
 
 // * Manual http://code.google.com/p/uupaa-js/w/list
@@ -28,10 +45,10 @@ var _prototype = "prototype",
 //}}}!cssbox
     _uunodeid = "data-uunodeid",
     // --- minify ---
+//{{{!canvas
+    _CanvasRenderingContext2D = "CanvasRenderingContext2D",
+//}}}!canvas
     _addEventListener = "addEventListener",
-    _documentElement = "documentElement",
-    _createTextNode = "createTextNode",
-    _createElement = "createElement",
     _getAttribute = "getAttribute",
     _setAttribute = "setAttribute",
     _toLowerCase = "toLowerCase",
@@ -62,7 +79,7 @@ var _prototype = "prototype",
     _true = !0,
     _types = { "NaN": 2 },
     _trimSpace = /^\s+|\s+$/g,
-    _rootNode = doc[_documentElement],
+    _rootNode = doc.documentElement,
     _dd2num = {},               // uu.hash.dd2num = {  "00":    0 , ...  "99":   99  }
     _num2dd = {},               // uu.hash.num2dd = {    0 :  "00", ...   99 :  "99" }
     _bb2num = {},               // uu.hash.bb2num = { "\00":    0 , ... "\ff":  255  }
@@ -100,7 +117,9 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/ClassNameS
                                     //  [1][Class factory]   uu("MyClass", arg1, arg2) -> new uu.Class.MyClass(arg1, arg2)
                                     //  [2][NodeSet factory] uu("div>ul>li", <body>) -> NodeSet
     config:   uuarg(win.uuconfig, { // uu.config - Hash: user configurations
-        log:        "log"           //  uu.log - target node
+//{{{!canvas
+        FlashCanvas: "uu.canvas.swf"
+//}}}!canvas
     }),
     // --- VERSION DETECTION ---
     ver:            _ver,           // uu.ver - Hash: detected version and plugin informations
@@ -119,11 +138,12 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/ClassNameS
         binary:     uuajaxbinary,   // uu.ajax.binary(url:String, option:Hash, callback:Function)
         clear:      uuajaxclear     // uu.ajax.clear() - cache clear
     }),
-    require:        uurequire,      // uu.require(url:String, option:Hash = {}):Hash - { data, option, status, ok }
-                                    //  [1][load sync] uu.require("http://...") -> { data, option, status, ok }
     jsonp:          uujsonp,        // uu.jsonp(url:String, option:Hash, callback:Function)
                                     //  [1][load aync] uu.jsonp("http://...callback=??", { method: "mycallback" }, callback)
 //}}}!ajax
+    stat:           uustat,         // uu.stat(url:String):Boolean
+    require:        uurequire,      // uu.require(url:String, option:Hash = {}):Hash - { data, option, status, ok }
+                                    //  [1][load sync] uu.require("http://...") -> { data, option, status, ok }
     // --- TYPE MATCH / TYPE DETECTION ---
     like:           uulike,         // uu.like(lval:Date/Hash/Fake/Array, rval:Date/Hash/Fake/Array):Boolean
     type:           uutype,         // uu.type(mix:Mix):Number
@@ -510,6 +530,14 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/ClassNameS
         size:       uuimagesize     // uu.image.size(node:HTMLImageElement):Hash - { w, h }
     }),
 //}}}!image
+    // --- FONT ---
+//{{{!font
+    font:     uumix(uufont, {       // uu.font(font, embase) -> Hash
+        list:       uufontlist,     // uu.font.list(fonts) -> Array
+        detect:     uufontdetect,   // uu.font.detect(node) -> String("Alial")
+        metric:     uufontmetric    // uu.font.text(font, text) -> { w, h }
+    }),
+//}}}!font
     // --- SVG ---
 //{{{!svg
     svg:            uusvg,          // uu.svg(x:Number, y:Number, width:Number, height:Number,
@@ -569,6 +597,18 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/ClassNameS
 
 // uu.nop - none operation
 function nop() {
+}
+
+// inner - new node
+function newNode(tag) { // @param TagNameString(= "div"):
+                        // @return Node:
+    return doc.createElement(tag || "div");
+}
+
+// inner - new text node
+function newText(text) { // @param String:
+                         // @return TextNode:
+    return doc.createTextNode(text);
 }
 
 // --- CONSTRUCTION ---
@@ -740,11 +780,9 @@ function uusnippet(id,    // @param String: snippet id. <script id="...">
         node = uuid(id);
         if (node) {
             if (node.src) { // <script type="text/html" src="..."></script>
-                if (uurequire) { // [!] KEEP IT
-                    xhr = uurequire(node.src);
-                    if (xhr.ok) {
-                        js = xhr.data;
-                    }
+                xhr = uurequire(node.src);
+                if (xhr.ok) {
+                    js = xhr.data;
                 }
             } else {
                 js = node.text;
@@ -794,7 +832,8 @@ function uuajax(url,        // @param String: url
     function readyStateChange() {
         if (xhr.readyState === 4) {
             var data, status = xhr.status, lastMod,
-                rv = { status: status, ok: status >= 200 && status < 300 };
+                rv = { status: status,
+                       ok: !status || (status >= 200 && status < 300) };
 
             if (!run++) {
                 if (rv.ok) {
@@ -840,7 +879,7 @@ function uuajax(url,        // @param String: url
         ifmod = option.ifmod,
         cache = uuajax.cache,
         data = option.data || null,
-        xhr = uuajax.xhr(),
+        xhr = createXHR(url),
         run = 0, i,
         overrideMimeType = "overrideMimeType",
         setRequestHeader = "setRequestHeader",
@@ -877,17 +916,6 @@ function uuajax(url,        // @param String: url
     }
 }
 uuajax.cache = {}; // { "url": DateHash(lastModified), ... }
-
-// inner - create XMLHttpRequest object
-uuajax.xhr = function() { // @return XMLHttpRequest:
-    var xhr = win["XMLHttpRequest"];
-
-    return xhr ? new xhr
-//{{{!mb
-               : win["ActiveXObject"] ? new ActiveXObject("Msxml2.XMLHTTP")
-//}}}!mb
-               : null;
-};
 
 // uu.ajax.binary - upload / download binary data
 function uuajaxbinary(url, option, callback) {
@@ -970,17 +998,41 @@ Function vbstr(b)vbstr=CStr(b.responseBody)+chr(0)End Function</'+'script>');
 function uuajaxclear() {
     uuajax.cache = {};
 }
+//}}}!ajax
+
+// inner - create XMLHttpRequest object
+function createXHR(url) { // @param String: url
+                          // @return XMLHttpRequest:
+//{{{!mb
+    if (_ie) {
+        // support file: scheme
+        var ident = !url.indexOf("file:") ? "Microsoft.XMLHTTP"
+                                          : "Msxml2.XMLHTTP";
+
+        return win["ActiveXObject"] ? new ActiveXObject(ident)
+             : win["XMLHttpRequest"] ? new win["XMLHttpRequest"] : null;
+    }
+//}}}!mb
+    return new win["XMLHttpRequest"];
+}
+
+// uu.stat - stat()
+function uustat(url) { // @param String: url
+                       // @return Boolean: true is file exists
+    return uurequire(url, { stat: _true }).ok;
+}
 
 // uu.require - require
 function uurequire(url,      // @param String: url
-                   option) { // @param Hash(= {}): { before, after }
+                   option) { // @param Hash(= {}): { stat, before, after }
+                             //     option.stat   - Boolean: check whether a file exists
                              //     option.before - Function: before(xhr, option)
                              //     option.after  - Function: after(xhr, option, { status, ok })
                              // @return Hash: { data, option, status, ok }
     option = option || {};
 
     var rv = { ok: _false, status: 400 },
-        xhr = uuajax.xhr(), data, status;
+        xhr = createXHR(url), data, status;
 
     try {
         xhr.open("GET", url, _false); // sync
@@ -988,8 +1040,10 @@ function uurequire(url,      // @param String: url
         xhr.send(null);
 
         rv.status = status = xhr.status;
-        rv.ok = status >= 200 && status < 300;
-        data = xhr.responseText;
+        rv.ok = !status || (status >= 200 && status < 300);
+        if (!option.stat) {
+            data = xhr.responseText;
+        }
 
         option[_after] && option[_after](xhr, option, rv);
 
@@ -1001,6 +1055,7 @@ function uurequire(url,      // @param String: url
     return rv;
 }
 
+//{{{!ajax
 // uu.jsonp - Async JSONP request
 function uujsonp(url,        // @param String: "http://example.com?callback=??"
                  option,     // @param Hash: { timeout, method }
@@ -1936,7 +1991,7 @@ function uufxflare(node,     // @param Node:
             var cs = uucss(node, _true),
                 x = parseInt(cs.left),
                 y = parseInt(cs.top),
-                newNode, i = 0, angle,
+                cloneNode, i = 0, angle,
                 p = uumix({}, option, {
                     w: parseInt(cs[_width])  * 1.5,
                     h: parseInt(cs[_height]) * 1.5,
@@ -1948,17 +2003,17 @@ function uufxflare(node,     // @param Node:
             _ver.jit && (p.fs = parseInt(cs.fontSize) * 1.5);
 
             for (; i < 360; i += parts) {
-                newNode = node[_parentNode][_appendChild](uunodeclone(node, _true));
+                cloneNode = node[_parentNode][_appendChild](uunodeclone(node, _true));
                 angle = i * Math.PI / 180;
 
-                uufx(newNode, duration, uuarg(p, {
+                uufx(cloneNode, duration, uuarg(p, {
                     x: Math.cos(angle) * p.range + x,
                     y: Math.sin(angle) * p.range + y,
-                    init: function(newNode) {
-                        uucssopacity(newNode, 0.5);
+                    init: function(cloneNode) {
+                        uucssopacity(cloneNode, 0.5);
                     },
-                    after: function(newNode, option, back) {
-                        back || node[_parentNode].removeChild(newNode);
+                    after: function(cloneNode, option, back) {
+                        back || node[_parentNode].removeChild(cloneNode);
                     }
                 }));
             }
@@ -3017,7 +3072,7 @@ function uuevent(node,         // @param Node:
         ex, token, eventType, capture, closure, bound, types = "types",
         handler, i = -1, pos,
 //{{{!mb
-        owner = (node.ownerDocument || doc)[_documentElement],
+        owner = (node.ownerDocument || doc).documentElement,
 //}}}!mb
         instance = 0;
 
@@ -3614,12 +3669,21 @@ function uuready(/* readyEventType, */  // @param String(= "dom"): readyEventTyp
         m, type = "dom", order = 0, rex = /^([^\:]+)(\:[0-2])?$/; // "dom", "dom:1", "dom:2"
 
     for (; !uuready.reload && i < iz; ++i) {
-        isString(v = args[i])
-                ? ((m = rex.exec(v)) && (type = m[1][_toLowerCase](),
-                                         order = +m[2] || 0))
-                : uuready[type] ? v(uu) // callback(uu)
-                                : (db[type] || (db[type] = [[], [], []]),
-                                   db[type][order].push(v));
+        v = args[i];
+        if (isString(v)) {
+            m = rex.exec(v);
+            if (m) {
+                type = m[1][_toLowerCase]();
+                order = +m[2] || 0;
+            }
+        } else {
+            if (uuready[type]) {
+                v(uu); // callback(uu)
+            } else {
+                db[type] || (db[type] = [[], [], []]);
+                db[type][order].push(v);
+            }
+        }
     }
 }
 uuready.uudb = {}; // { readyEventType: [[low order], [mid order], [high order]], ... }
@@ -3668,7 +3732,7 @@ function uunode(node,       // @param Node/SVGNode/TagNameString(= "div"): "div"
                             // @return Node/SVGNode:
     node || (node = "div");
     node[_nodeType] || (node = node[_indexOf]("svg:")
-                            ? doc[_createElement](node) // "div" -> <div>
+                            ? newNode(node) // "div" -> <div>
                             : doc.createElementNS("http://www.w3.org/2000/svg",
                                                   node.slice(4))); // "svg:g" -> <svg:g>
 
@@ -3690,7 +3754,7 @@ function uunode(node,       // @param Node/SVGNode/TagNameString(= "div"): "div"
                         // typical arguments(Number, String)
                         if (type === _number || (isstr && arg[_indexOf](",") < 0)) {
                             typical ? (hash[typical[ai++]] = arg) // uu.svg(100, 100)
-                                    : node[_appendChild](doc[_createTextNode](arg)); // uu.div("text")
+                                    : node[_appendChild](newText(arg)); // uu.div("text")
                         } else if (++token < 3) {
                             (token < 2 ? uuattr
                                        : uucss)(node, isstr ? uuhash(arg) : arg);
@@ -3752,10 +3816,11 @@ function uunodeadd(source,     // @param Node/DocumentFragment/HTMLFragment/TagN
                                // @return Node: node
     context = context || doc.body;
 
-    var node = !source ? doc[_createElement]("div")      // [1] uu.node.add()
-             : source[_nodeType] ? source                // [3][5] uu.node.add(Node or DocumentFragment)
-             : !source[_indexOf]("<") ? uunodebulk(source, context) // [4] uu.node.add(HTMLFragmentString)
-             : doc[_createElement](source),              // [2] uu.node.add("p")
+    var node = !source ? newNode()          // [1] uu.node.add()
+             : source[_nodeType] ? source   // [3][5] uu.node.add(Node or DocumentFragment)
+             : !source[_indexOf]("<") ? uunodebulk(source, context)
+                                            // [4] uu.node.add(HTMLFragmentString)
+             : newNode(source),             // [2] uu.node.add("p")
         reference = null,
         rv = (node[_nodeType] === 11) ? node[_firstChild] : node; // 11: DOCUMENT_FRAGMENT_NODE
 
@@ -3962,7 +4027,7 @@ function uunodeclone(parent,  // @param Node: parent node (ElementNode)
 //{{{!mb
     if (parent[_nodeType] === 1) { // 1: ELEMENT_NODE
         if (ready.event || ready.data) { // [IE] cloneNode bugfix
-            rv = doc[_createElement]("div");
+            rv = newNode();
             rv.innerHTML = parent[cloneNode](_true).outerHTML;
             quick ? (rv = rv[_firstChild]) : reverseFetch(uutag("*", rv));
         } else {
@@ -4068,8 +4133,8 @@ function uutext(data,             // @param String/FormatString/Node: "string" o
     var args = arguments, az = args.length, undef;
 
     if (isString(data)) {
-        return doc[_createTextNode](az < 2 ? data // [1]
-                                           : uuf.apply(this, args)); // [2]
+        return newText(az < 2 ? data // [1]
+                              : uuf.apply(this, args)); // [2]
     }
     if (text === undef) { // [3]
 //{{{!mb
@@ -4079,8 +4144,8 @@ function uutext(data,             // @param String/FormatString/Node: "string" o
 //}}}!mb
         return data.textContent;
     }
-    uunodeadd(doc[_createTextNode](az < 3 ? text // [4]
-                                          : uuf.apply(this, uuarray(args, 1))), // [5]
+    uunodeadd(newText(az < 3 ? text // [4]
+                             : uuf.apply(this, uuarray(args, 1))), // [5]
               uunodeclear(data));
     return data;
 }
@@ -4644,7 +4709,7 @@ function toAbsURL(url,          // @param String:
                   currentDir) { // @param String:
                                 // @return String:
     if (!/^(?:file|https?):/.test(url)) {
-        var div = doc[_createElement]("div");
+        var div = newNode();
 
         div.innerHTML = '<a href="' + (currentDir || "") + url + '" />';
         url = div[_firstChild] ? div[_firstChild].href
@@ -4765,17 +4830,15 @@ function uupuff(source                   // @param Mix/FormatString: source obje
 // uu.log - add log
 function uulog(log                      // @param Mix: log data
                /* , var_args, ... */) { // @param Mix: var_args
-    var args = arguments,
-        id = uu.config.log, context = uuid(id),
+    var args = arguments, context = uuid("uulog"),
         txt = args.length > 1 || isString(log) ? uuf.apply(this, args)
                                                : uujsonencode(log);
 
-    context || uunodeadd(context = uu.ol({ id: id }));
+    context || uunodeadd(context = uu.ol({ id: "uulog" }));
 
     uulog.max < uutag("*", context).length && (context.innerHTML = "");
 
-    uunodeadd(uu[/OL|UL/.test(context[_tagName]) ? "li"
-                                                 : "p"](doc[_createTextNode](txt)),
+    uunodeadd(uu[/OL|UL/.test(context[_tagName]) ? "li" : "p"](newText(txt)),
               context);
 }
 uulog.max = 30; // max items
@@ -5065,11 +5128,16 @@ function Color(r, g, b, a) {
     this.b = b = (b < 0 ? 0 : b > 255 ? 255 : b) | 0;
     this.a = a =  a < 0 ? 0 : a >   1 ?   1 : a;
     this.hex = "#" + _num2hh[r] + _num2hh[g] + _num2hh[b];
+    this.num = (r << 16) + (g << 8) + b;
     this.rgba = "rgba(" + r + "," + g + "," + b + "," + a + ")";
 }
 Color[_prototype] = {
     toString:   function() { // @return String: "#000000" or "rgba(0,0,0,0)"
                     return uuready.color.rgba ? this.rgba : this.hex;
+                },
+    argb:       function() { // @return String: "#ffffffff"
+                    return "#" + _num2hh[(this.a * 255) & 0xff] +
+                           _num2hh[this.r] + _num2hh[this.g] + _num2hh[this.b];
                 },
     hsla:       function() { // @return Hash: { h, s, l, a }
                     return rgba2hsla(this.r, this.g, this.b, this.a);
@@ -5369,6 +5437,154 @@ function uuimagesize(node) { // @param HTMLImageElement:
 }
 //}}}!image
 
+// --- FONT ---
+//{{{!font
+
+// uu.font - parse CSS::font style
+function uufont(font,     // @param String: font string, eg: "12pt Arial"
+                embase) { // @param Node: The em base node
+                          // @return Hash: { style, weight, variant, rawfamily,
+                          //                 family, formal }
+                          //    style     - String: "normal", "italic", "oblique"
+                          //    weight    - String: "normal", "bold", "bolder",
+                          //                        "lighter", "100" ~ "900"
+                          //    variant   - String: "normal", "small-caps"
+                          //    rawfamily - String: "Times New Roman,Arial"
+                          //    family    - String: "'Times New Roman','Arial'"
+                          //    formal    - String: "{style} {variant} {weight} {size}px {family}"
+                          // @throws Error("UNKNOWN_FONT_UNIT")
+    // inner - measure em unit
+    function _em(node) {
+        var rv, div = node[_appendChild](newNode());
+
+        div.style.cssText = uufont.BASE_STYLE + "width:12em";
+        rv = div.clientWidth / 12;
+        node.removeChild(div);
+        return rv;
+    }
+
+    var rv = {}, fontSize, style,
+        cache = embase.uucanvascache ||
+                (embase.uucanvascache = { font: {}, em: _em(embase) });
+
+    if (!cache.font[font]) {
+        // --- parse font string ---
+        style = newNode().style; // dummy(div) node
+        try {
+            style.font = font; // parse
+        } catch (err) {
+            throw err;
+        }
+        fontSize = style.fontSize; // get font-size
+
+        rv.size = uufont.SIZES[fontSize];
+        if (rv.size) { // "small", "large" ...
+            rv.size *= 16;
+        } else if (fontSize.lastIndexOf("px") > 0) { // "12px"
+            rv.size = parseFloat(fontSize);
+        } else if (fontSize.lastIndexOf("pt") > 0) { // "12.3pt"
+            rv.size = parseFloat(fontSize) * 1.33;
+        } else if (fontSize.lastIndexOf("em") > 0) { // "10.5em"
+            rv.size = parseFloat(fontSize) * cache.em;
+        } else {
+            throw new Error("UNKNOWN_FONT_UNIT");
+        }
+        rv.style = style.fontStyle; // normal, italic, oblique
+        rv.weight = style.fontWeight; // normal, bold, bolder, lighter, 100~900
+        rv.variant = style.fontVariant; // normal, small-caps
+        rv.rawfamily = style.fontFamily.replace(/[\"\']/g, "");
+        rv.family = "'" + rv.rawfamily.replace(/\s*,\s*/g, "','") + "'";
+        rv.formal = [rv.style,
+                     rv.variant,
+                     rv.weight,
+                     rv.size.toFixed(2) + "px",
+                     rv.family].join(" ");
+        cache.font[font] = rv; // add cache
+    }
+    return cache.font[font];
+}
+uufont.BASE_STYLE = "position:absolute;border:0 none;margin:0;padding:0;";
+uufont.SCALE = {
+//{{{!mb
+    ARIAL: 1.55, "ARIAL BLACK": 1.07, "COMIC SANS MS": 1.15,
+    "COURIER NEW": 1.6, GEORGIA: 1.6, "LUCIDA GRANDE": 1,
+    "LUCIDA SANS UNICODE": 1, "TIMES NEW ROMAN": 1.65,
+    "TREBUCHET MS": 1.55, VERDANA: 1.4,
+    "MS UI GOTHIC": 2, "MS PGOTHIC": 2, MEIRYO: 1,
+//}}}!mb
+    "SANS-SERIF": 1, SERIF: 1, MONOSPACE: 1, FANTASY: 1, CURSIVE: 1
+};
+uufont.SIZES = {
+    "xx-small": 0.512,
+    "x-small":  0.64,
+    smaller:    0.8,
+    small:      0.8,
+    medium:     1,
+    large:      1.2,
+    larger:     1.2,
+    "x-large":  1.44,
+    "xx-large": 1.728
+};
+
+// uu.font.list - enum usable font lists
+function uufontlist(fonts) { // @param FontNameArray: ["Arial", "Times New Roman",
+                             //                        "DeviceDependencyFont",
+                             //                        "UnknownUserFont"]
+                             // @return Array: [UsableFontArray, UnusableFontArray]
+                             //                eg: [["Arial", "Times New Roman"],
+                             //                     ["DeviceDependencyFont", "UnknownUserFont"]]
+    var usable = [], unusable = [], i = 0, iz = fonts.length, a, b;
+
+    for (; i < iz; ++i) {
+        a = uufontmetric("72pt dummy");
+        b = uufontmetric("72pt " + fonts[i]);
+
+        if (a.w !== b.w || a.h !== b.h) {
+            usable.push(fonts[i]);
+        } else {
+            unusable.push(fonts[i]);
+        }
+    }
+    return [usable, unusable];
+}
+
+// uu.font.detect - detect the rendering font
+function uufontdetect(node) { // @param Node:
+                              // @return String: detected font, eg: "serif"
+    var fam = uucss(node, true).fontFamily,
+        ary = fam.trim().split(","), v, i = -1,
+        a, b = uufontmetric("72pt " + fam);
+
+    while ( (v = ary[++i]) ) {
+        a = uufontmetric("72pt " + v);
+        if (a.w === b.w && a.h === b.h) {
+            return v; // match
+        }
+    }
+    return "";
+}
+
+// uu.font.metric - measure text rect(width, height)
+function uufontmetric(font,   // @param CSSFronString: "12pt Arial"
+                      text) { // @param String(= "aABCDEFGHIJKLMm"):
+                              // @return Hash: { w, h }
+    var node = uufontmetric.cache;
+
+    if (!node) {
+        uufontmetric.cache = node = uu.add();
+
+        node.style.cssText = uufont.BASE_STYLE +
+            "top:-10000px;left:-10000px;text-align:left;visibility:hidden";
+    }
+    node.style.font = font;
+    node[_ie ? "innerText"
+             : "textContent"] = text || "aABCDEFGHIJKLMm";
+    return { w: node.offsetWidth,
+             h: node.offsetHeight };
+}
+uufontmetric.cache = 0; // [lazy] measure node
+//}}}!font
+
 // --- SVG ---
 // uu.svg - <svg:svg>
 //{{{!svg
@@ -5388,13 +5604,150 @@ function uusvg(x,        // @param Number: Has no meaning or effect on outermost
 //}}}!svg
 
 // --- CANVAS ---
-// uu.canvas - <canvas>
 //{{{!canvas
-function uucanvas(width,    // @param Number(= 300):
-                  height) { // @param Number(= 150):
-                            // @return Node: <canvas>
-    return uunode("canvas", arguments, ["w", "h"], uuattr);
+
+// uu.canvas - <canvas>
+function uucanvas(width,         // @param Number(= 300):
+                  height,        // @param Number(= 150):
+                  order,         // @param String(= "svg sl fl vml"): backend order
+                  placeHolder) { // @param Node(= <div>): placeholder Node
+                                 // @return Node: <canvas>
+    var canvas = newNode(
+//{{{!mb
+                         (_ie && _ver < 9) ? "CANVAS" : // [IE][!] need upper case
+//}}}!mb
+                                             "canvas");
+
+    canvas[_width]  = width  == null ? 300 : width;
+    canvas[_height] = height == null ? 150 : height;
+
+    placeHolder || (placeHolder = doc.body[_appendChild](newNode()));
+    placeHolder[_parentNode].replaceChild(canvas, placeHolder);
+
+//{{{!mb
+    if (_ie) {
+        return uu.canvas.build(canvas, order || "svg sl fl vml");
+    }
+//}}}!mb
+    return canvas;
 }
+
+if (win[_CanvasRenderingContext2D]) {
+    // extend functions and properties
+    uumix(win[_CanvasRenderingContext2D][_prototype], {
+        lock:           canvasLock,
+        clear:          canvasClear,
+        unlock:         nop,
+        drawCircle:     canvasDrawCircle,
+        drawRoundRect:  canvasDrawRoundRect,
+        xBackend:       "Canvas"
+    }, 0, 0);
+}
+
+// CanvasRenderingContext2D.prototype.lock
+function canvasLock(clear) { // @param Boolean: clear screen
+    clear && this.clearRect(0, 0, this.canvas[_width], this.canvas[_height]);
+}
+
+// CanvasRenderingContext2D.prototype.clear
+function canvasClear() {
+    this.clearRect(0, 0, this.canvas[_width], this.canvas[_height]);
+}
+
+// CanvasRenderingContext2D.prototype.drawCircle
+function canvasDrawCircle(x,           // @param Number:
+                          y,           // @param Number:
+                          raduis,      // @param Number: radius
+                          fillColor,   // @param ColorHash(= void 0): fillColor
+                          strokeColor, // @param ColorHash(= void 0): strokeColor
+                          lineWidth) { // @param Number(= 1): stroke lineWidth
+    if (fillColor || strokeColor) {
+        var undef, lw = lineWidth === undef ? 1 : lineWidth;
+
+        this.save();
+        if (fillColor) {
+            this.fillStyle = fillColor.rgba;
+        }
+        if (strokeColor && lw) {
+            this.strokeStyle = strokeColor.rgba;
+            this.lineWidth = lw;
+        }
+        this.beginPath();
+        this.arc(x, y, raduis, 0, 2 * Math.PI, _true);
+        this.closePath();
+        if (fillColor) {
+            this.fill();
+        }
+        if (strokeColor && lw) {
+            this.stroke();
+        }
+        this.restore();
+    }
+}
+
+// CanvasRenderingContext2D.prototype.drawRoundRect - round rect
+function canvasDrawRoundRect(x,           // @param Number:
+                             y,           // @param Number:
+                             width,       // @param Number:
+                             height,      // @param Number:
+                             radius,      // @param Array: [top-left, top-right, bottom-right, bottom-left]
+                             fillColor,   // @param ColorHash(= void 0): fillColor
+                             strokeColor, // @param ColorHash(= void 0): strokeColor
+                             lineWidth) { // @param Number(= 1): stroke lineWidth
+    if (fillColor || strokeColor) {
+        var undef,
+            lw = lineWidth === undef ? 1 : lineWidth, w = width, h = height,
+            r0 = radius[0], r1 = radius[1], r2 = radius[2], r3 = radius[3],
+            w2 = (width  / 2) | 0, h2 = (height / 2) | 0;
+
+        r0 < 0 && (r0 = 0);
+        r1 < 0 && (r1 = 0);
+        r2 < 0 && (r2 = 0);
+        r3 < 0 && (r3 = 0);
+        (r0 >= w2 || r0 >= h2) && (r0 = Math.min(w2, h2) - 2);
+        (r1 >= w2 || r1 >= h2) && (r1 = Math.min(w2, h2) - 2);
+        (r2 >= w2 || r2 >= h2) && (r2 = Math.min(w2, h2) - 2);
+        (r3 >= w2 || r3 >= h2) && (r3 = Math.min(w2, h2) - 2);
+
+        this.save();
+        this.setTransform(1, 0, 0, 1, 0, 0);
+
+        if (fillColor) {
+            this.fillStyle = fillColor.rgba;
+        }
+        if (strokeColor && lw) {
+            this.strokeStyle = strokeColor.rgba;
+            this.lineWidth = lw;
+        }
+
+        this.beginPath();
+        this.moveTo(x, y + h2);
+        this.lineTo(x, y + h - r3);
+        this.quadraticCurveTo(x, y + h, x + r3, y + h); // bottom-left
+        this.lineTo(x + w - r2, y + h);
+        this.quadraticCurveTo(x + w, y + h, x + w, y + h - r2); // bottom-right
+        this.lineTo(x + w, y + r1);
+        this.quadraticCurveTo(x + w, y, x + w - r1, y); // top-left
+        this.lineTo(x + r0, y);
+        this.quadraticCurveTo(x, y, x, y + r0); // top-right
+        this.closePath();
+
+        if (fillColor) {
+            this.fill();
+        }
+        if (strokeColor && lw) {
+            this.stroke();
+        }
+        this.restore();
+    }
+}
+
+// --- initialize ---
+uuready("window", function() {
+    uu.canvas.init && uu.canvas.init();
+    uuready.window = uuready.canvas = _true;
+    uuready.fire("canvas", uutag("canvas"));
+});
 //}}}!canvas
 
 // --- FLASH ---
@@ -5607,13 +5960,13 @@ function innerTextSetter(text) {
     while (this.hasChildNodes()) {
         this[_removeChild](this[_lastChild]);
     }
-    this[_appendChild](doc[_createTextNode](text));
+    this[_appendChild](newText(text));
 }
 
 // HTMLElement.prototype.outerHTML getter
 function outerHTMLGetter() {
     var rv, that = this, p = that[_parentNode],
-        r = doc.createRange(), div = doc[_createElement]("div");
+        r = doc.createRange(), div = newNode();
 
     p || doc.body[_appendChild](that); // orphan
     r.selectNode(that);
@@ -5868,7 +6221,7 @@ uueach(uuevent.shortcut, function(eventType) {
 
 //{{{!mb
 // [IE6][IE7][IE8]
-_ie && _ver < 9 && uueach(uutag.html5.split(","), doc[_createElement]);
+_ie && _ver < 9 && uueach(uutag.html5.split(","), newNode);
 
 try {
     // [IE6] flicker fix
@@ -5882,7 +6235,8 @@ function _windowonload() {
     _DOMContentLoaded();
     uureadyfire("window");
 }
-uueventattach(win, "load", _windowonload);
+doc.readyState === "complete" ? _windowonload()
+                              : uueventattach(win, "load", _windowonload);
 
 // --- DOMContentLoaded handler ---
 function _DOMContentLoaded() {
@@ -6118,7 +6472,7 @@ function detectFeatures() {
     var hash = { rgba: _true, hsla: _true, transparent: _true },
 //{{{!mb
         transparent = "transparent",
-        node = uunode(), child, style = node.style,
+        node = newNode(), child, style = node.style,
 //}}}!mb
         rv = {
             opacity: _true,         // opacity ready
@@ -6170,7 +6524,7 @@ function detectFeatures() {
 // --- detect uu.ready.cloneNode.* features ---
 uuready("dom:2", function() {
     var cloned, evt, fired = 0, attr = "uuz", data = "data-uuz",
-        body = doc.body, cloneNode = uuready.cloneNode, div = uunode(),
+        body = doc.body, cloneNode = uuready.cloneNode, div = newNode(),
         onfire = function() {
             fired += 1;
         };

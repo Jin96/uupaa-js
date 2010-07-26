@@ -1,0 +1,31 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html xmlns:v="urn:schemas-microsoft-com:vml">
+<head>
+<title>VML stroke</title>
+<style>
+    v\:* { behavior: url(#default#VML); }
+</style>
+</head>
+<body>
+
+<div style="position:relative">
+<!--
+    <v:shape style="width:100px; height:100px; left:100px; top:100px; position:absolute; rotation:0;"
+        coordsize="100,100" filled="f" strokecolor="black" strokeweight="1" path="m 0 0 l 100 0 l 100 100 l 0 100 l 0 0">
+//        <v:stroke opacity="0.2" weight="300px" filltype="frame" src="rhino.jpg" imagesize="0.5.0,0.5" on="t" />
+        <v:stroke filltype="tile" opacity="0.2" weight="300px" filltype="frame" src="rhino.jpg" imagesize="0.2,0.2" on="t" />
+    </v:shape>
+ -->
+    <v:shape style="width:200px; height:100px; left:100px; top:100px; position:absolute; rotation:0;"
+        coordsize="100,100" filled="t" stroked="f" path="m 0 0 l 200 0 l 200 100 l 0 200 l 0 0">
+        <v:fill type="tile" opacity="0.2" src="rhino.jpg" />
+    </v:shape>
+
+</div>
+<div style="position:relative; left:0; top: 300px">
+
+    <img src="rhino.jpg" style="filter:alpha(opacity=20)"/>
+</div>
+
+</body>
+</html>

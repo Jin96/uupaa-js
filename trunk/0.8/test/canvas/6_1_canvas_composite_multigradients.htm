@@ -1,0 +1,168 @@
+<!doctype html><html><head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<script src="../../src/uupaa.js"></script>
+<script src="../../src/canvas/canvas.js"></script>
+
+<script>
+uu.ready("canvas", function() {
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+});
+function matrix() {
+    drawShape(document.getElementById('slcanvas'), 1);
+    drawShape(document.getElementById('vmlcanvas'), 1);
+    drawShape(document.getElementById('flashcanvas'), 1);
+}
+var globalAlpha = 1.0
+function switchAlpha() {
+    globalAlpha -= 0.2;
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+}
+var shadowBlur = 5;
+function switchBlur() {
+    shadowBlur += 5;
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+}
+
+function drawShape(canvas, matrix){
+    if (!canvas.getContext){ return; }
+
+    var ctx = canvas.getContext('2d');
+
+    ctx.clear();
+    if (matrix) {
+        ctx.translate(-10, 5);
+        ctx.scale(1.2, 0.8);
+        ctx.rotate(5 * Math.PI / 180);
+    }
+    ctx.globalCompositeOperation = "destination-over";
+    ctx.globalAlpha = globalAlpha;
+    ctx.shadowColor = "gray";
+    ctx.shadowOffsetX = 10;
+    ctx.shadowOffsetY = 10;
+    ctx.shadowBlur = shadowBlur;
+
+    var grad1 = ctx.createLinearGradient(0,0, 100,100);
+    grad1.addColorStop(0,    'yellow');
+    grad1.addColorStop(0.25, 'red');
+    grad1.addColorStop(0.75, 'blue');
+    grad1.addColorStop(1,    'limegreen');
+    ctx.fillStyle = grad1;
+    ctx.fillRect(0,0, 100,100);
+
+    var grad2 = ctx.createRadialGradient(100,100,10,100,100,50);
+    grad2.addColorStop(0,    'yellow');
+    grad2.addColorStop(0.25, 'red');
+    grad2.addColorStop(0.75, 'blue');
+    grad2.addColorStop(1,    'limegreen');
+    ctx.fillStyle = grad2;
+    ctx.fillRect(50,50, 100,100);
+
+    var img1 = new Image();
+    img1.onload = function() {
+//      alert("img onload");
+        var pat1 = ctx.createPattern(img1, "repeat");
+        ctx.fillStyle = pat1;
+        ctx.fillRect(100,100, 100,100);
+    };
+    img1.onerror = function() {
+        alert("img onerror");
+    }
+    img1.src = "img/i32.png?" + new Date().getTime();
+}
+</script>
+    <style type="text/css">
+      body { margin: 20px; font-family: arial,verdana,helvetica; background: #fff;}
+      h1 { font-size: 140%; font-weight:normal; color: #036; border-bottom: 1px solid #ccc; }
+      canvas { border: 2px solid #000; float: left; margin-right: 20px; margin-bottom: 20px; }
+      pre { float:left; display:block; background: rgb(238,238,238); border: 1px dashed #666; padding: 15px 20px; margin: 0 0 10px 0; }
+    </style>
+  </head>
+  <body>
+    <h1>A canvas <code>globalCompositeOperation</code> example2</h1>
+    <div>
+      <input type="button" value="matrix effect" onclick="matrix()" />
+      <input type="button" value="alpha -0.2" onclick="switchAlpha()" />
+      <input type="button" value="blur +5" onclick="switchBlur()" />
+      <br />
+
+      <canvas id="slcanvas" class="sl" width="220" height="220"></canvas>
+      <canvas id="vmlcanvas" class="vml" width="220" height="220"></canvas>
+      <canvas id="flashcanvas" class="flash" width="220" height="220"></canvas>
+      <pre>
+function matrix() {
+    drawShape(document.getElementById('slcanvas'), 1);
+    drawShape(document.getElementById('vmlcanvas'), 1);
+    drawShape(document.getElementById('flashcanvas'), 1);
+}
+var globalAlpha = 1.0
+function switchAlpha() {
+    globalAlpha -= 0.2;
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+}
+var shadowBlur = 5;
+function switchBlur() {
+    shadowBlur += 5;
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+}
+
+function drawShape(canvas, matrix){
+    if (!canvas.getContext){ return; }
+
+    var ctx = canvas.getContext('2d');
+
+    ctx.clear();
+    if (matrix) {
+        ctx.translate(-10, 5);
+        ctx.scale(1.2, 0.8);
+        ctx.rotate(5 * Math.PI / 180);
+    }
+    ctx.globalCompositeOperation = "destination-over";
+    ctx.globalAlpha = globalAlpha;
+    ctx.shadowColor = "gray";
+    ctx.shadowOffsetX = 10;
+    ctx.shadowOffsetY = 10;
+    ctx.shadowBlur = shadowBlur;
+
+    var grad1 = ctx.createLinearGradient(0,0, 100,100);
+    grad1.addColorStop(0,    'yellow');
+    grad1.addColorStop(0.25, 'red');
+    grad1.addColorStop(0.75, 'blue');
+    grad1.addColorStop(1,    'limegreen');
+    ctx.fillStyle = grad1;
+    ctx.fillRect(0,0, 100,100);
+
+    var grad2 = ctx.createRadialGradient(100,100,10,100,100,50);
+    grad2.addColorStop(0,    'yellow');
+    grad2.addColorStop(0.25, 'red');
+    grad2.addColorStop(0.75, 'blue');
+    grad2.addColorStop(1,    'limegreen');
+    ctx.fillStyle = grad2;
+    ctx.fillRect(50,50, 100,100);
+
+    var img1 = new Image();
+    img1.onload = function() {
+//      alert("img onload");
+        var pat1 = ctx.createPattern(img1, "repeat");
+        ctx.fillStyle = pat1;
+        ctx.fillRect(100,100, 100,100);
+    };
+    img1.onerror = function() {
+        alert("img onerror");
+    }
+    img1.src = "img/i32.png?" + new Date().getTime();
+}
+      </pre>
+    </div>
+  </body>
+</html>

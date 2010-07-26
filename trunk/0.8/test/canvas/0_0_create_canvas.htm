@@ -1,0 +1,33 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8" />
+<title></title>
+<script src="../../src/uupaa.js"></script>
+<script src="../../src/canvas/canvas.js"></script>
+<script>
+uu.ready(function(uu) {
+  var width = 300;
+  var height = 150;
+  var backendOrder = "flash sl vml";
+
+  if (1) {
+    // 挿入位置を placeholder で指定
+    var canvas = uu.canvas(width, height, backendOrder,
+                           uu.id("placeholder"));
+  } else {
+    // <body>に追加
+    var canvas = uu.canvas();
+  }
+
+  var ctx = canvas.getContext("2d");
+
+  ctx.textBaseline = "top";
+  ctx.font = "32pt 'Times New Roman'";
+  ctx.fillStyle = "black";
+  ctx.shadowColor = "gray";
+  ctx.shadowOffsetX = 10;
+  ctx.shadowOffsetY = 10;
+  ctx.shadowBlur = 5;
+  ctx.fillText("Hello Canvas", 0, 0);
+});
+</script></head><body>
+    <div id="placeholder"></div>
+</body></html>

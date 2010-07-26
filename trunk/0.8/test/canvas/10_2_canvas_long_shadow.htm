@@ -1,0 +1,165 @@
+<!doctype html><html><head>
+    <title>Canvas long shadow example</title>
+
+<script src="../../src/uupaa.js"></script>
+<script src="../../src/canvas/canvas.js"></script>
+
+<script>
+uu.ready("canvas", function() {
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+});
+function matrix() {
+    drawShape(document.getElementById('slcanvas'), 1);
+    drawShape(document.getElementById('vmlcanvas'), 1);
+    drawShape(document.getElementById('flashcanvas'), 1);
+}
+
+var globalAlpha = 1.0
+function switchAlpha() {
+    globalAlpha -= 0.2;
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+}
+
+var shadowBlur = 2;
+function switchBlur() {
+    shadowBlur += 2;
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+}
+
+function drawShape(canvas, matrix){
+    if (!canvas.getContext){ return; }
+
+    var ctx = canvas.getContext('2d');
+
+    ctx.clear();
+    if (matrix) {
+        ctx.translate(-10, 5);
+        ctx.scale(1.2, 0.8);
+        ctx.rotate(5 * Math.PI / 180);
+    }
+    ctx.globalAlpha   = globalAlpha;
+    ctx.font          = "12pt Arial";
+    ctx.textBaseline  = "top";
+    ctx.fillStyle     = "blue";
+
+    ctx.shadowBlur = 4;
+    ctx.shadowOffsetX = 10;
+    ctx.shadowOffsetY = 10;
+    ctx.shadowColor = "gray";
+
+    var text = setShadow(ctx, "skyblue", -5, -10, 10);
+    ctx.fillText("a long long long long long long long shadow, set param: " +
+                 text, 10, 20);
+    ctx.fillText("a long long long long long long long shadow, get param: " +
+                 getShadow(ctx), 10, 60);
+
+    text = setShadow(ctx, "gray", 4, 4, 4);
+}
+function setShadow(ctx, color, ox, oy, blur) {
+    ctx.shadowColor = color;
+    ctx.shadowOffsetX = ox;
+    ctx.shadowOffsetY = oy;
+    ctx.shadowBlur = blur + shadowBlur;
+    return [color, ox, oy, blur].join(", ");
+}
+function getShadow(ctx) {
+    return [ ctx.shadowColor,
+             ctx.shadowOffsetX,
+             ctx.shadowOffsetY,
+             ctx.shadowBlur ].join(", ");
+}
+</script>
+    <style type="text/css">
+      body { margin: 20px; font-family: arial,verdana,helvetica; background: #fff;}
+      h1 { font-size: 140%; font-weight:normal; color: #036; border-bottom: 1px solid #ccc; }
+      h2 { font-size: 100%; color: #036; }
+      canvas { float: left; margin-right: 20px; margin-bottom: 20px; }
+      pre { float:left; display:block; background: rgb(238,238,238); border: 1px dashed #666; padding: 15px 20px; margin: 0 0 10px 0; }
+    </style>
+  </head>
+  <body>
+    <div>
+      <h1>Canvas <code>long shadow</code> example</h1>
+      <input type="button" value="matrix effect" onclick="matrix()" />
+      <input type="button" value="alpha -0.2" onclick="switchAlpha()" />
+      <input type="button" value="blur +2" onclick="switchBlur()" />
+      <br />
+      <canvas id="slcanvas" class="sl" width="600" height="150"></canvas>
+      <canvas id="vmlcanvas" class="vml" width="600" height="150"></canvas>
+      <canvas id="flashcanvas" class="flash" width="600" height="150"></canvas>
+
+<pre>
+function matrix() {
+    drawShape(document.getElementById('slcanvas'), 1);
+    drawShape(document.getElementById('vmlcanvas'), 1);
+    drawShape(document.getElementById('flashcanvas'), 1);
+}
+
+var globalAlpha = 1.0
+function switchAlpha() {
+    globalAlpha -= 0.2;
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+}
+
+var shadowBlur = 2;
+function switchBlur() {
+    shadowBlur += 2;
+    drawShape(document.getElementById('slcanvas'));
+    drawShape(document.getElementById('vmlcanvas'));
+    drawShape(document.getElementById('flashcanvas'));
+}
+
+function drawShape(canvas, matrix){
+    if (!canvas.getContext){ return; }
+
+    var ctx = canvas.getContext('2d');
+
+    ctx.clear();
+    if (matrix) {
+        ctx.translate(-10, 5);
+        ctx.scale(1.2, 0.8);
+        ctx.rotate(5 * Math.PI / 180);
+    }
+    ctx.globalAlpha   = globalAlpha;
+    ctx.font          = "12pt Arial";
+    ctx.textBaseline  = "top";
+    ctx.fillStyle     = "blue";
+
+    ctx.shadowBlur = 4;
+    ctx.shadowOffsetX = 10;
+    ctx.shadowOffsetY = 10;
+    ctx.shadowColor = "gray";
+
+    var text = setShadow(ctx, "skyblue", -5, -10, 10);
+    ctx.fillText("a long long long long long long long shadow, set param: " +
+                 text, 10, 20);
+    ctx.fillText("a long long long long long long long shadow, get param: " +
+                 getShadow(ctx), 10, 60);
+
+    text = setShadow(ctx, "gray", 4, 4, 4);
+}
+function setShadow(ctx, color, ox, oy, blur) {
+    ctx.shadowColor = color;
+    ctx.shadowOffsetX = ox;
+    ctx.shadowOffsetY = oy;
+    ctx.shadowBlur = blur + shadowBlur;
+    return [color, ox, oy, blur].join(", ");
+}
+function getShadow(ctx) {
+    return [ ctx.shadowColor,
+             ctx.shadowOffsetX,
+             ctx.shadowOffsetY,
+             ctx.shadowBlur ].join(", ");
+}
+</pre>
+    </div>
+  </body>
+</html>
