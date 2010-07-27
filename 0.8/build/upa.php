@@ -178,7 +178,7 @@ if ($castoff[0] === "all") {
                      "svg", "canvas", "canvasvml", "canvassl", "canvasfl",
                      "flash", "nodeset",
                      "live", "resize", "cssbox", "codec",
-                     "md5", "sprintf", "url", "font");
+                     "md5", "sprintf", "url", "font", "storage");
 }
 
 include $preprosess;

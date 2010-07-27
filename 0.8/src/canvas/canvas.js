@@ -8,7 +8,7 @@
 var _enableFlashCanvas = 0;
 
 if (uu.require && uu.ie && uu.ver.flash > 8) {
-    _enableFlashCanvas = uu.stat(uu.config.baseDir + uu.config.FlashCanvas);
+    _enableFlashCanvas = uu.stat(uu.config.baseDir + "uu.canvas.swf");
 }
 
 uu.canvas.VML = VMLCanvas;                  // uu.canvas.VML class
@@ -3086,7 +3086,7 @@ function build(canvas) { // @param Node: <canvas>
             '<param name="movie" value="??" /></object>',
          ctx._id, canvas.width, canvas.height,
          "clsid:d27cdb6e-ae6d-11cf-96b8-444553540000",
-         uu.config.baseDir + uu.config.FlashCanvas);
+         uu.config.baseDir + "uu.canvas.swf");
 
     ctx._view = canvas.firstChild; // <object>
 
