@@ -52,7 +52,7 @@ build/upa.php はプリプロセスとMinifyを施し最適化された.jsファ
  -off オプションに指定可能な文字列の一覧です
 
 || *ident*   || 説明 || 削減されるファイルサイズ<br />(Minify適用後の値) ||
-|| all       || 以下の機能を一括でコメントアウトします。 || -88.6kB ||
+|| all       || 以下の機能を一括でコメントアウトします。 || -94.8kB ||
 || form      || uu.value(), NodeSet.value() をコメントアウトします || -0.6kB ||
 || snippet   || uu.snippet() をコメントアウトします || -0.7kB ||
 || image     || uu.image() をコメントアウトします || -0.9kB ||
@@ -64,6 +64,7 @@ build/upa.php はプリプロセスとMinifyを施し最適化された.jsファ
 || svg       || uu.svg() をコメントアウトします || -0.2kB ||
 || canvas    || uu.canvas() をコメントアウトします || -59.0kB ||
 || flash     || uu.flash() をコメントアウトします || -0.6kB ||
+|| storage   || uu.Class.Storage() をコメントアウトします。<br />uu.storage は null になり利用できなくなります。 || -6.1kB ||
 || nodeset   || NodeSet I/F 全体をコメントアウトします。<br /> uu("div > p").add("div") などが利用できなくなります || -1.4kB ||
 || live      || uu.live(), uu.unlive(), NodeSet.live(), NodeSet.unlive() をコメントアウトします || -1.3kB ||
 || resize    || uu.resize(), uu.unresize() をコメントアウトします || -0.8kB ||
