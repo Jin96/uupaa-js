@@ -18,7 +18,13 @@ package {
             return _bitmapData;
         }
 
-        public function load(url:String, callback:Function):Boolean {
+        public function isCached(url:String):Boolean {
+            var cache:CanvasImageCache = CanvasImageCache.getInstance();
+
+            return cache.isCached(url);
+        }
+
+        public function load(url:String, callback:Function = undefined):Boolean {
             function onload(evt:Event):void {
                 loader.contentLoaderInfo.removeEventListener(Event.COMPLETE, onload);
 
@@ -31,18 +37,19 @@ package {
                 // [GC]
                 loader.unload();
 
-                callback();
+                callback && callback();
             }
 
             var loader:Loader = new Loader();
             var cache:CanvasImageCache = CanvasImageCache.getInstance();
 
-            if (cache.find(url)) {
+            if (cache.isCached(url)) {
+                // cached
                 _bitmapData = cache.ref(url);
-                callback();
+                callback && callback();
             } else {
                 _bitmapData = cache.ref(url);
-                // load
+                // loading...
                 loader.contentLoaderInfo.addEventListener(Event.COMPLETE, onload);
                 loader.load(new URLRequest(url));
             }

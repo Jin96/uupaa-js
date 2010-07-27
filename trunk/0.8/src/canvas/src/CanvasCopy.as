@@ -35,7 +35,13 @@ package {
         public function draw(args:int, // 3, 5, 9
                              id:String,   // copy source canvas id
                              param:Object):void {
+/*
             _canvas.next(0); // lock
+            _localConnection.send(id,
+                                  "sendBack",
+                                  ExternalInterface.objectID,
+                                  args, param);
+ */
             _localConnection.send(id,
                                   "sendBack",
                                   ExternalInterface.objectID,
@@ -44,6 +50,7 @@ package {
 
         // client side function
         public function sendBack(id:String, args:int, param:Object):void {
+/*
             var me:* = this;
 
             _canvas.callback = function():void {
@@ -51,10 +58,14 @@ package {
                 me.readySendBack(id, args, param);
             };
             _canvas.next();
+ */
+            this.readySendBack(id, args, param);
+
         }
 
         // client side function
         private function readySendBack(id:String, args:int, param:Object):void {
+/*
             var index:int  = 0;
             var blocks:int = 0;
             var packetSize:int = 40760; // 40kB - 200B
@@ -85,6 +96,17 @@ package {
                     ++index;
                 }
             }
+ */
+
+            var imgs = _loadingImageHistory.join("\t");
+            var cmds = _commandHistory.join("\t");
+            var zip:ByteArray;
+            ary.writeUTFBytes(cmds);
+            ary.writeUTFBytes(cmds);
+            zip.compress();
+trace( zip.bytesAvailable + " bytes ->" );
+            _localConnection.send(id, "recvBack",
+                                  args, param, index, blocks, width, height, zip);
         }
 
         // server side function
@@ -112,6 +134,7 @@ trace(" sw="+param.sw);
                 _canvasDrawImage.draw(args, ary, _copyBuff);
             }
 
+/*
             if (blocks < 2) {
                 if (_compress) {
                     packet.uncompress();
@@ -145,6 +168,7 @@ trace(" sw="+param.sw);
                     _canvas.next(1); // unlock
                 }
             }
+ */
         }
     }
 }
