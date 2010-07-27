@@ -1,14 +1,16 @@
-﻿<!doctype html><html><head><meta charset="utf-8" />
+﻿<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8" />
 <title>uu.storage</title>
+<script>
+window.uuconfig = {
+    storageBackend: "LocalStorage,FlashStorage,IEStorage,CookieStorage,MemStorage"
+};
+</script>
 <script src="../../src/uupaa.js"></script>
-<script src="../../src/form/form.js"></script>
-<script src="../../src/storage/storage.js"></script>
 <script>
 uu.ready(function(uu) {
     uu.id("setpair").disabled = false;
     uu.id("refresh").disabled = false;
-});
-uu.ready("storage", function(uu, storage) {
+}, "storage", function(uu, storage) {
     uu.text(uu.id("backend"), storage.toString());
     updateSize();
 });

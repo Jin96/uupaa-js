@@ -136,9 +136,11 @@ package {
             if (!_commandBuffer.length || _loadingImage.length) {
                 return;
             }
+/*
             if (_copyCanvas.length) {
                 return;
             }
+ */
 
             var a:Array = _commandBuffer;
             var i:int = 0;
