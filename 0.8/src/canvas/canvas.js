@@ -2972,9 +2972,6 @@ uu.ie && uu.ver.silverlight && uu.ready(function() {
 //  </canvas>
 
 !window["CanvasRenderingContext2D"] && (function(win, doc, uu) {
-var _useFlashVars = uu.ver.flash < 10.1, // [FLASH10.1] cannot flashVars
-    _msgprefix = '<invoke name="send" returntype="javascript"><arguments><string>',
-    _msgsuffix = '</string></arguments></invoke>';
 
 uu.mix(uu.canvas.Flash.prototype, {
     arc:                    arc,
@@ -3026,7 +3023,6 @@ function init(ctx, node) { // @param Node: <canvas>
     ctx.canvas = node;
     ctx._view = null;
     ctx._state = 0; // 0x0: not ready
-                    // 0x1: draw ready(initialized)
                     // 0x2: command ready
 }
 
@@ -3068,18 +3064,16 @@ function build(canvas) { // @param Node: <canvas>
     // wait for response from flash initializer
     function flashCanvasReadyCallback() {
         setTimeout(function() {
-            ctx._state = 1; // 1: draw ready
+            // [SYNC] ExternalInterface.initCanvas
+            ctx._view.initCanvas(ctx.canvas.width, ctx.canvas.height,
+                                 false, ctx.xFlyweight);
 
-            // [SYNC] send "init" command. init(width, heigth, xFlyweight)
-            ctx._view.CallFunction(_msgprefix + "in\t" +
-                    ctx.canvas.width  + "\t" +
-                    ctx.canvas.height + "\t" +
-                    ctx.xFlyweight + _msgsuffix);
+            ctx._state = 2; // 2: command ready
 
             if (canvas.currentStyle.direction === "rtl") {
                 ctx._stock.push("rt");
             }
-            send(ctx, "XX", 0xf);
+            send(ctx, "XX", 0xf); // send all state
         }, 0);
     }
 
@@ -3123,10 +3117,12 @@ function build(canvas) { // @param Node: <canvas>
             ctx._view.width  = width  <= 0 ? 10 : width;
             ctx._view.height = height <= 0 ? 10 : height;
 
-            // [SYNC] ExternalInterface.resize
-            ctx._view.resize(width  <= 0 ? 10 : width,
-                             height <= 0 ? 10 : height, ctx.xFlyweight);
-            ctx._lastMessageID = 100 + uu.guid(); // [!] next command force send
+            // [SYNC] ExternalInterface.initCanvas
+            if (ctx._state === 2) {
+                ctx._view.initCanvas(width  <= 0 ? 10 : width,
+                                     height <= 0 ? 10 : height, true,
+                                     ctx.xFlyweight);
+            }
         }
     }
 
@@ -3173,7 +3169,6 @@ function initSurface(ctx) {
     ctx._stock          = [];   // lock stock
     ctx._lockState      = 0;    // lock state, 0: unlock, 1: lock, 2: lock + clear
     ctx._lastTimerID    = 0;
-    ctx._lastMessageID  = 1;
     ctx._id             = "";   // "external{n}..."
     ctx._innerLock      = 0;    // lock for copy ready
     // --- extend properties ---
@@ -3258,12 +3253,12 @@ function imagedatabuild() {
 
 // CanvasRenderingContext2D.prototype.arc
 function arc(x, y, radius, startAngle, endAngle, anticlockwise) {
-    send(this,
-         "ar\t" + x + "\t" + y + "\t" +
-         radius     + "\t" +
-         startAngle + "\t" +
-         endAngle   + "\t" +
-         (anticlockwise ? 1 : 0));
+    send(this, "ar\t" + ((x * 1000) | 0) + "\t" +
+                        ((y * 1000) | 0) + "\t" +
+                        ((radius * 1000) | 0) + "\t" +
+                        startAngle + "\t" +
+                        endAngle + "\t" +
+                        (anticlockwise ? 1 : 0));
 }
 
 // CanvasRenderingContext2D.prototype.arcTo
@@ -3281,8 +3276,12 @@ function beginPath() {
 
 // CanvasRenderingContext2D.prototype.bezierCurveTo
 function bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y) {
-    send(this, "bC\t" + cp1x + "\t" + cp1y + "\t" +
-                        cp2x + "\t" + cp2y + "\t" + x + "\t" + y);
+    send(this, "bC\t" + ((cp1x * 1000) | 0) + "\t"
+                      + ((cp1y * 1000) | 0) + "\t"
+                      + ((cp2x * 1000) | 0) + "\t"
+                      + ((cp2y * 1000) | 0) + "\t"
+                      + ((x * 1000) | 0) + "\t"
+                      + ((y * 1000) | 0));
 }
 
 // CanvasRenderingContext2D.prototype.clear
@@ -3419,6 +3418,9 @@ function createPattern(image,    // @param HTMLImageElement/HTMLCanvasElement:
     if (!("src" in image)) { // HTMLCanvasElement unsupported
         throw new Error("NOT_SUPPORTED_ERR");
     }
+    // [SYNC] ExternalInterface.loadImage
+    this._view.loadImage(image.src);
+
     return new CanvasPattern(image, repeat);
 }
 
@@ -3473,6 +3475,9 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
         dx, dy, dw, dh, sx, sy, sw, sh, canvas, guid, ctx = this;
 
     if (image.src) { // HTMLImageElement
+        // [SYNC] ExternalInterface.loadImage
+        this._view.loadImage(image.src);
+
         send(this, "d0\t" + args + "\t" + image.src + "\t" +
                    a1 + "\t" + a2 + "\t" +
                    (a3 || 0) + "\t" + (a4 || 0) + "\t" +
@@ -3492,10 +3497,15 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
         case 9: sx = a1, sy = a2, sw = a3, sh = a4;
                 dx = a5, dy = a6, dw = a7, dh = a8;
         }
+
+//        // [SYNC] ExternalInterface.copyCanvas
+//        this._view.copyCanvas(canvas.id);
+
         send(this, "d1\t" + args + "\t" + canvas.id + "\t" +
                   sx + "\t" + sy + "\t" + sw + "\t" + sh + "\t" +
                   dx + "\t" + dy + "\t" + dw + "\t" + dh, 0x5);
 
+/*
         // peek copy ready state
         //   js -> as -> js callback
         ++this._innerLock;
@@ -3505,6 +3515,7 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
             --ctx._innerLock; // unlock
             send(ctx, "XX");
         };
+ */
     }
 }
 
@@ -3628,7 +3639,10 @@ function putImageData(imagedata,     // @param ImageData:
 
 // CanvasRenderingContext2D.prototype.quadraticCurveTo
 function quadraticCurveTo(cpx, cpy, x, y) {
-    send(this, "qC\t" + cpx + "\t" + cpy + "\t" + x + "\t" + y);
+    send(this, "qC\t" + ((cpx * 1000) | 0) + "\t"
+                      + ((cpy * 1000) | 0) + "\t"
+                      + ((x * 1000) | 0) + "\t"
+                      + ((y * 1000) | 0));
 }
 
 // CanvasRenderingContext2D.prototype.rect
@@ -3737,7 +3751,7 @@ function send(ctx,      // @param Context:
             if (typeof ctx.strokeStyle === "string") {
                 ctx.__strokeStyle = uu.color(ctx._strokeStyle = ctx.strokeStyle);
                 ary[++i] = "s0\t" + ctx.__strokeStyle.num + "\t" +
-                                    ctx.__strokeStyle.a;
+                                    ((ctx.__strokeStyle.a * 1000) | 0);
             } else {
                 // "s1" = LinerStroke
                 // "s2" = RadialStroke
@@ -3750,7 +3764,7 @@ function send(ctx,      // @param Context:
             if (typeof ctx.fillStyle === "string") {
                 ctx.__fillStyle = uu.color(ctx._fillStyle = ctx.fillStyle);
                 ary[++i] = "f0\t" + ctx.__fillStyle.num + "\t" +
-                                    ctx.__fillStyle.a;
+                                    ((ctx.__fillStyle.a * 1000) | 0);
             } else {
                 // "f1" = LinerFill
                 // "f2" = RadialFill
@@ -3791,7 +3805,7 @@ function send(ctx,      // @param Context:
 
             ary[++i] = "sh\t" + ctx.shadowBlur        + "\t" +
                                 ctx.__shadowColor.num + "\t" +
-                                ctx.__shadowColor.a   + "\t" +
+                                ((ctx.__shadowColor.a * 1000) | 0) + "\t" +
                                 ctx.shadowOffsetX     + "\t" +
                                 ctx.shadowOffsetY;
         }
@@ -3820,41 +3834,14 @@ function send(ctx,      // @param Context:
     ary[++i] = commands;
 
     if (!ctx._lockState && ctx._innerLock <= 0) {
-        if (ctx._state === 1) {
-            ctx._state = 2;
-
-            clearance(ctx);
-        }
         if (ctx._state === 2) {
-            if (_useFlashVars) {
-                // <param name="flashVars" param="i={msgid}&b={msgbody}" />
-                if (!ctx._lastTimerID) {
-                    ctx._lastTimerID = setTimeout(function() {
-                        if (ctx._lastTimerID) {
-                            if (ctx._stock.length) {
-                                // http://twitter.com/uupaa/status/9182387840
-                                // http://twitter.com/uupaa/status/9195030504
-                                // http://twitter.com/uupaa/status/9195279662
-                                // http://twitter.com/uupaa/status/9196237383
-                                // http://twitter.com/uupaa/status/9196368732
-                                var message = "i=" + ctx._lastMessageID +
-                                              "&b=" + ctx._stock.join("\t");
-
-                                // pre clear
-                                ctx._stock = [];
-
-                                // [ASYNC] There might be a packet loss
-                                ctx._view.flashVars = message;
-
-                                // round-trip
-                                ++ctx._lastMessageID > 9 && (ctx._lastMessageID = 1);
-                            }
-                            ctx._lastTimerID = 0;
-                        }
-                    }, 0); // http://twitter.com/uupaa/status/9837157309
-                }
-            } else {
-                clearance(ctx);
+            if (!ctx._lastTimerID) {
+                ctx._lastTimerID = setTimeout(function() {
+                    if (ctx._lastTimerID) {
+                        clearance(ctx);
+                        ctx._lastTimerID = 0;
+                    }
+                }, 0);
             }
         }
     }
@@ -3866,8 +3853,12 @@ function clearance(ctx) {
         var msg = ctx._stock.join("\t");
 
         ctx._stock = []; // pre clear
-        // [SYNC]
-        ctx._view.CallFunction(_msgprefix + msg + _msgsuffix);
+
+        // [SYNC] ExternalInterface.toDataURL
+        ctx._view.CallFunction(
+            '<invoke name="msg" returntype="javascript"><arguments><string>' +
+            msg +
+            '</string></arguments></invoke>');
     }
 }
 

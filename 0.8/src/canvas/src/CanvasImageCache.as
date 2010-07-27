@@ -20,7 +20,7 @@ package {
             return _instance;
         }
 
-        public function find(url:String):Boolean {
+        public function isCached(url:String):Boolean {
             return url in _cache;
         }
 

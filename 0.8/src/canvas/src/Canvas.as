@@ -60,10 +60,7 @@ package {
         private var _shadowFilter:BitmapFilter; // shadow filter
         private var _mode:int = 0; // 1: xFlyweight
         // --- JavaScript <- -> ActionScript ---
-        private var _lastMessageID:String = "";
-        private var _state:int = 0;     // 0: not ready(locked) or (image loading...)
-                                        // 1: not ready -> ready
-                                        // 2: ready
+//      private var _lastMessageID:String = "";
         private var _jscallback:Array = [];
         // --- command stock ---
         public  var _stock:Array = [];
@@ -76,12 +73,24 @@ package {
         private var canvasBezier:CanvasBezier = new CanvasBezier();
         private var canvasPixel:CanvasPixel;
         private var canvasText:CanvasText;
-        private var canvasCopy:CanvasCopy;
+//      private var canvasCopy:CanvasCopy;
         private var canvasDrawImage:CanvasDrawImage;
 
+        // --- command history ---
+        private var _commandHistoryLength:int = 0;
+        public  var _commandHistory:Array = []; // [msg, ...]
+        private var _commandBuffer:Array = [];  // [cmd, ...]
+        // --- image loader ---
+        public  var _loadingImageHistory:Array = []; // [url, ... ]
+        private var _loadingImage:Array = [];        // [url, ... ]
+        // --- copy canvas ---
+        private var _copyCanvas:Array = []; // [canvasid, ... ]
+
         public function Canvas() {
-            ExternalInterface.addCallback("send", recv);
-            ExternalInterface.addCallback("resize", resize);
+            ExternalInterface.addCallback("initCanvas", initCanvas);
+            ExternalInterface.addCallback("msg", msg);
+            ExternalInterface.addCallback("loadImage", loadImage);
+//            ExternalInterface.addCallback("copyCanvas", copyCanvas);
             ExternalInterface.addCallback("toDataURL", toDataURL);
             ExternalInterface.addCallback("getImageData", getImageData);
             ExternalInterface.addCallback("isPointInPath", isPointInPath);
@@ -91,7 +100,8 @@ package {
             _gfx = _shape.graphics;
             _shape.mask = null;
 
-            stage.frameRate = 62.5;
+//          stage.frameRate = 62.5;
+            stage.frameRate = 60; // [FLASH10.1]
             stage.scaleMode = StageScaleMode.NO_SCALE;
             stage.align     = StageAlign.TOP_LEFT;
 
@@ -99,7 +109,7 @@ package {
             strokeImage = new CanvasImage(this);
             canvasPixel = new CanvasPixel(this);
             canvasText  = new CanvasText(this);
-            canvasCopy  = new CanvasCopy(this);
+//          canvasCopy  = new CanvasCopy(this);
             canvasDrawImage = new CanvasDrawImage(this);
 
             // send "initialized" message
@@ -123,95 +133,23 @@ package {
         }
 
         private function onEnterFrame(event:Event):void {
-            var message:Object = stage.loaderInfo.parameters;
-            var messageID:String = message.i;
-            var messageBody:String = message.b;
-            var commands:String;
-
-            if (messageID) {
-                if (_lastMessageID !== messageID) {
-                    _lastMessageID = messageID; // update
-
-0 && trace(ExternalInterface.objectID + ", valid message=" + messageID + ":" + messageBody);
-
-                    switch (_state) {
-                    case 0: // not ready(locked)
-                            _stock.push(messageBody);
-                            break;
-                    case 1: // not ready(locked) -> ready
-                            _state = 2;
-                            _buff && _buff.lock();
-
-                                messageBody && _stock.push(messageBody);
-                                commands = _stock.join("\t").replace(/^\t+/, ""); // trim head(\t)
-
-                                _stock = []; // pre clear
-                                commands && recv(commands);
-
-                            _buff && _buff.unlock();
-                            break;
-                    case 2: // ready
-                            _buff && _buff.lock();
-
-                                recv(messageBody);
-
-                            _buff && _buff.unlock();
-                    }
-                }
+            if (!_commandBuffer.length || _loadingImage.length) {
+                return;
+            }
+            if (_copyCanvas.length) {
+                return;
             }
 
-
-            // copy ready
-            if (_state && !_stock.length && _jscallback.length) {
-                var timer:Timer = new Timer(10, 1);
-
-                timer.addEventListener(TimerEvent.TIMER, execJsCallback);
-                timer.start();
-            }
-
-        }
-
-        public function next(state:int = -1):void {
-            if (state !== -1) {
-                _state = state;
-            }
-
-            if (_state) {
-                _buff && _buff.lock();
-
-                    var commands:String = _stock.join("\t").replace(/^\t+/, "");
-
-                    _stock = []; // pre clear
-                    commands && recv(commands);
-
-                _buff && _buff.unlock();
-            }
-
-            // wait for copyCanvas
-            if (_callback !== null && !_stock.length) {
-                _callback();
-            }
-        }
-
-        public function recv(commands:String):void {
-            var a:Array = commands.split("\t"); // command array
-            var i:int = -1;
+            var a:Array = _commandBuffer;
+            var i:int = 0;
             var iz:int = a.length;
+            var x:int, y:int, w:int, h:int;
             var fill:int;
             var loopout:int = 0;
-            var modify:int = 0; // canvas updated
 
-0 && trace(ExternalInterface.objectID + "[recv] "+commands);
-
-            while (++i < iz) {
+            for (; !loopout && i < iz; ++i) {
                 fill = 0;
                 switch (a[i]) { // COMMAND
-                case "in":  init(+a[++i], +a[++i], +a[++i]);
-                            _state = 1; // not ready(locked) -> ready
-                            addEventListener("enterFrame", onEnterFrame);
-                            break;
-                case "xp":  CanvasImageCache.getInstance().clear(); break;
-                case "rt":  canvasText.direction = 1; break; // direction = rtl
                 case "gA":  globalAlpha = +a[++i]; break;
                 case "gC":  mix = 0;
                             switch (mixMode = a[++i]) {
@@ -230,30 +168,26 @@ package {
                             }
                             break;
                 case "s0":  strokeStyle = 0;
-                            strokeColor = [+a[++i], +a[++i]]; break;
+                            strokeColor = [+a[++i], +a[++i] * 0.001]; break;
                 case "s1":  strokeStyle = 1;
                             i = strokeGradient.setLiner(a, i); break;
                 case "s2":  strokeStyle = 2;
                             i = strokeGradient.setRadial(a, i); break;
                 case "s3":  strokeStyle = 3;
-                            loadPatternImage(a[++i], a[++i], 0);
-                            if (_state < 2) {
-                                _stock.push(a.slice(++i).join("\t")); // push remain commands
-                                ++loopout;
-                            }
+                            strokeImage.load(a[++i]);  // url
+                            strokePattern[0] = a[i];   // url
+                            strokePattern[1] = a[++i]; // repeation
                             break;
                 case "f0":  fillStyle = 0;
-                            fillColor = [+a[++i], +a[++i]]; break;
+                            fillColor = [+a[++i], +a[++i] * 0.001]; break;
                 case "f1":  fillStyle = 1;
                             i = fillGradient.setLiner(a, i); break;
                 case "f2":  fillStyle = 2;
                             i = fillGradient.setRadial(a, i); break;
                 case "f3":  fillStyle = 3;
-                            loadPatternImage(a[++i], a[++i], 1);
-                            if (_state < 2) {
-                                _stock.push(a.slice(++i).join("\t")); // push remain commands
-                                ++loopout;
-                            }
+                            fillImage.load(a[++i]);  // url
+                            fillPattern[0] = a[i];   // url
+                            fillPattern[1] = a[++i]; // repeation
                             break;
                 case "lC":  lineCap = a[++i];
                             lineCap === "butt" && (lineCap = "none"); break;
@@ -261,7 +195,7 @@ package {
                 case "lW":  lineWidth = +a[++i]; break;
                 case "mL":  miterLimit = +a[++i]; break;
                 case "sh":  shadowBlur = +a[++i];
-                            shadowColor = [+a[++i], +a[++i]];
+                            shadowColor = [+a[++i], +a[++i] * 0.001];
                             shadowOffsetX = +a[++i];
                             shadowOffsetY = +a[++i];
                             setShadow(); break;
@@ -271,47 +205,61 @@ package {
                 case "re":  rect(+a[++i], +a[++i], +a[++i], +a[++i]); break;
                 case "bP":  _path = []; break; // reset path
                 case "cP":  closePath(); break;
-                case "cR":  ++modify;
-                            clearRect(+a[++i], +a[++i], +a[++i], +a[++i]); break;
-                case "cA":  ++modify;
-                            clearAll(); break;
+                case "cR":  x = +a[++i];
+                            y = +a[++i];
+                            w = +a[++i];
+                            h = +a[++i];
+                            if (x || y || w < canvasWidth || h < canvasHeight) {
+                                clearRect(x, y, w, h);
+                                break;
+                            }
+                case "cA":  // clear command history
+                            _commandHistoryLength = 1;
+                            _commandHistory = [_commandBuffer.slice(i + 1).join("\t")];
+
+// 1 && trace(ExternalInterface.objectID + "[cA] " + _commandHistory);
+
+                            // clear canvas
+                            _buff.copyPixels(_clearBitmap, _clearBitmap.rect, new Point());
+                            break;
                 case "mT":  moveTo(a[++i] * 0.001, a[++i] * 0.001); break;
                 case "lT":  lineTo(a[++i] * 0.001, a[++i] * 0.001); break;
-                case "ar":  arc(+a[++i], +a[++i], +a[++i],
+                case "ar":  arc(+a[++i] * 0.001, +a[++i] * 0.001, +a[++i] * 0.001,
                                 +a[++i], +a[++i], +a[++i]); break;
                 case "at":  arcTo(+a[++i], +a[++i], +a[++i],
                                   +a[++i], +a[++i]); break;
-                case "qC":  quadraticCurveTo(+a[++i], +a[++i],
-                                             +a[++i], +a[++i]); break;
-                case "bC":  bezierCurveTo(+a[++i], +a[++i],
-                                          +a[++i], +a[++i],
-                                          +a[++i], +a[++i]); break;
+                case "qC":  quadraticCurveTo(+a[++i] * 0.001, +a[++i] * 0.001,
+                                             +a[++i] * 0.001, +a[++i] * 0.001); break;
+                case "bC":  bezierCurveTo(+a[++i] * 0.001, +a[++i] * 0.001,
+                                          +a[++i] * 0.001, +a[++i] * 0.001,
+                                          +a[++i] * 0.001, +a[++i] * 0.001); break;
                 case "fi":  fill = 1; // [THROUGH]
-                case "st":  ++modify;
-                            stroke(fill); break;
+                case "st":  stroke(fill); break;
                 case "fR":  fill = 1; // [THROUGH]
-                case "sR":  ++modify;
-                            strokeRect(+a[++i], +a[++i], +a[++i], +a[++i], fill); break;
+                case "sR":  strokeRect(+a[++i], +a[++i], +a[++i], +a[++i], fill); break;
                 case "fT":  fill = 1; // [THROUGH]
-                case "sT":  ++modify;
-                            canvasText.draw(a[++i], +a[++i], +a[++i], +a[++i], fill); break;
+                case "sT":  canvasText.draw(a[++i], +a[++i], +a[++i], +a[++i], fill); break;
                 case "cl":  clip(); break;
-                case "d0":  ++modify;
-                            drawImage(+a[++i], a[++i],
+                case "d0":  drawImage(+a[++i], a[++i],
                                       [+a[++i], +a[++i], +a[++i], +a[++i],
-                                       +a[++i], +a[++i], +a[++i], +a[++i]]);
-                            if (_state < 2) {
-                                _stock.push(a.slice(++i).join("\t")); // push remain commands
-                                ++loopout;
-                            }
-                            break;
-                case "d1":  if (modify) {
-                                modify = 0;
-                                canvasCopy.purge();
-                            }
-                            canvasCopy.draw(+a[++i], a[++i], // <object id>
+                                       +a[++i], +a[++i], +a[++i], +a[++i]]); break;
+/*
+                case "d1":  // copy canvas
+//                          canvasCopy.purge();
+//                            canvasCopy.draw(+a[++i], a[++i], // <object id>
+//                                            { sx: +a[++i], sy: +a[++i], sw: +a[++i], sh: +a[++i],
+ //                                             dx: +a[++i], dy: +a[++i], dw: +a[++i], dh: +a[++i] });
+ */
+                case "d1":  // copy canvas
+/*
+                            _copyCanvas.push(a[i + 2]); // <canvas id>
+
+//                          canvasCopy.purge();
+                            canvasCopy.draw(+a[++i], a[++i], // <canvas id>
                                             { sx: +a[++i], sy: +a[++i], sw: +a[++i], sh: +a[++i],
                                               dx: +a[++i], dy: +a[++i], dw: +a[++i], dh: +a[++i] });
+ */
+
                             break;
                 case "ro":  rotate(a[++i] * 0.000001); break;
                 case "sc":  scale(+a[++i], +a[++i]); break;
@@ -333,14 +281,12 @@ package {
                                 +a[++i],    // dirtyHeight,
                                  a[++i]);   // "rawdata,..."
                             break;
-                case "X0":  ++modify;
-                            drawCircle(+a[++i], +a[++i], +a[++i], // x, y, r
+                case "X0":  drawCircle(+a[++i], +a[++i], +a[++i], // x, y, r
                                        +a[++i], +a[++i],          // fillColor.hex, fillColor.a
                                        +a[++i], +a[++i],          // strokeColor.hex, strokeColor.a
                                        +a[++i]);                  // lineWidth
                             break;
-                case "X1":  ++modify;
-                            drawRoundRect(+a[++i], +a[++i],          // x, y,
+                case "X1":  drawRoundRect(+a[++i], +a[++i],          // x, y,
                                           +a[++i], +a[++i],          // width, height
                                           [+a[++i], +a[++i],         // round[0], round[1]
                                            +a[++i], +a[++i]],        // round[2], round[3]
@@ -350,6 +296,9 @@ package {
                             break;
                 case "XX":  // dummy
                             break;
+                case "xp":  CanvasImageCache.getInstance().clear(); break;
+                case "rt":  canvasText.direction = 1; break; // direction = rtl
+
                 case "undefined": // [!] undefined trap
                             trace("[!] undefined trap");
                             ++loopout;
@@ -358,12 +307,48 @@ package {
                             ExternalInterface.call("uu.flash.alert", "Unknown command=" + a[i]);
                             ++loopout;
                 }
-                if (loopout) {
-                    break;
-                }
             }
-            if (modify) {
+/*
                 canvasCopy.purge();
+ */
+            // shift
+            _commandBuffer = _commandBuffer.slice(i + 1);
+        }
+
+        // [SYNC] ExternalInterface.msg
+        public function msg(message:String):void {
+0 && trace(ExternalInterface.objectID + "[msg] " + message);
+
+            if (++_commandHistoryLength >= 3000) {
+                // GC history
+                _commandHistoryLength = 1;
+                _commandHistory = [message];
+0 && trace(ExternalInterface.objectID + "[msg] [GC]");
+            } else {
+                _commandHistory.push(message);
+            }
+            _commandBuffer = _commandBuffer.concat(message.split("\t"));
+        }
+
+        // [SYNC] ExternalInterface.loadImage
+        public function loadImage(url:String):void {
+
+// 1 && trace(ExternalInterface.objectID + "[loadImage] " + url);
+
+            var canvasImage:CanvasImage = new CanvasImage(this);
+
+            _loadingImageHistory.push(url);
+
+            if (!canvasImage.isCached(url)) {
+                _loadingImage.push(url); // add url
+
+                canvasImage.load(url, function():void {
+                    var index:int = _loadingImage.indexOf(url);
+
+                    _loadingImage.splice(index, 1); // remove url
+// 1 && trace(ExternalInterface.objectID + "[loadImage] " + url + " loaded");
+
+                });
             }
         }
 
@@ -372,6 +357,7 @@ package {
             _jscallback.push(guid);
         }
 
+/*
         // callback javascript functions
         private function execJsCallback(event:TimerEvent):void {
             var ary:Array = _jscallback.concat(),
@@ -390,12 +376,22 @@ package {
             }
 
         }
+ */
 
-        private function init(width:int, height:int, mode:int):void {
-//trace(ExternalInterface.objectID + " init(), width="+width+",height="+height);
+        // [SYNC] ExternalInterface.initCanvas
+        // init/resize canvas
+        public function initCanvas(width:int,
+                                   height:int,
+                                   resize:Boolean,
+                                   mode:int):void {
+1 && trace(ExternalInterface.objectID + "[initCanvas] " + width + ", " + height + ", " + resize);
             _mode = mode;
-            canvasWidth = width;
-            canvasHeight = height;
+
+            _commandHistoryLength = 0;
+            _commandHistory = [];
+            _commandBuffer  = [];
+            canvasWidth     = width;
+            canvasHeight    = height;
 
             // reset matrix
             _matrix = new Matrix();
@@ -411,7 +407,6 @@ package {
 
             // reset canvas
             if (_buff) {
-//                clearAll();
                 _buff.dispose();
                 _buff = null; // self [GC]
                 _buff = new BitmapData(width, height, true, 0); // 300 x 150
@@ -426,17 +421,10 @@ package {
 
             // build clearAll params
             _clearBitmap = _buff.clone();
-        }
 
-        public function resize(width:int, height:int, mode:int):void {
-//trace("resize(), width="+width+",height="+height);
-            canvasCopy.purge();
-            CanvasImageCache.getInstance().clear();
-            init(width, height, mode);
-        }
-
-        private function clearAll():void {
-            _buff.copyPixels(_clearBitmap, _clearBitmap.rect, new Point());
+            if (!resize) {
+                addEventListener("enterFrame", onEnterFrame);
+            }
         }
 
         public function toDataURL(mimeType:String,
@@ -622,16 +610,12 @@ if (0) {
         }
 
         private function clearRect(x:Number, y:Number, w:Number, h:Number):void {
-            if (!x && !y && w >= canvasWidth && h >= canvasHeight) {
-                clearAll();
-            } else {
-                _gfx.beginFill(0);
-                _gfx.drawRect(x, y, w, h);
-                _gfx.endFill();
+            _gfx.beginFill(0);
+            _gfx.drawRect(x, y, w, h);
+            _gfx.endFill();
 
-                _buff.draw(_shape, _matrix, null, BlendMode.ERASE, null, true);
-                _gfx.clear();
-            }
+            _buff.draw(_shape, _matrix, null, BlendMode.ERASE, null, true);
+            _gfx.clear();
         }
 
         private function stroke(fill:int):void {
@@ -752,17 +736,11 @@ if (0) {
         private function drawImage(args:Number, // 3, 5, 9
                                    url:String,
                                    param:Array):void {
-            //                         _state
-            // load(new image)     -> 0 -> 1 -> 2
-            // load(cached image)  ->        -> 2
             var me:* = this;
             var canvasImage:CanvasImage = new CanvasImage(this);
             var cached:Boolean = canvasImage.load(url, function():void {
                 me.canvasDrawImage.draw(args, param, canvasImage.bitmapData);
-                me.next(1);
             });
-
-            next(cached ? 2 : 0);
         }
 
         private function save(): void {
@@ -872,21 +850,6 @@ if (0) {
             } else { // pattern
                 _gfx.beginBitmapFill(fillImage.bitmapData, _matrix);
             }
-        }
-
-        private function loadPatternImage(url:String, repeation:String, fill:int):void {
-            var param:Array = fill ? fillPattern : strokePattern;
-
-            param[0] = url;
-            param[1] = repeation;
-
-            var canvasImage:CanvasImage = fill ? fillImage : strokeImage;
-            var me:Canvas = this;
-            var rv:Boolean = canvasImage.load(url, function():void {
-                me.next(1);
-            });
-
-            next(rv ? 2 : 0);
         }
 
         private function drawCircle(x:Number, y:Number, radius:Number,
