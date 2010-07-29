@@ -1066,7 +1066,9 @@ uu.ready("window", function(uu) {
 
         uu.ok("get absolute path");
         uu.ok("uu.url.abs('../dir/file.ext') は 相対URL を絶対URLに変換する",
-                uu.url.abs('../dir/file.ext'), "is string");
+                uu.url.abs('../dir/file.ext'), "!=", "../dir/file.ext");
+        uu.ok("uu.url.abs('http://example.com/dir/file.ext') は 絶対URL なのでそのまま",
+                uu.url.abs('http://example.com/dir/file.ext'), "==", 'http://example.com/dir/file.ext');
 
 
         uu.ok("get directory");

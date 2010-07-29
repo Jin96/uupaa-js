@@ -2,10 +2,14 @@
 <title>uu.storage</title>
 <script>
 window.uuconfig = {
-    storageBackend: "LocalStorage,FlashStorage,IEStorage,CookieStorage,MemStorage"
+    storage:    {
+        order:  "LFICM",        // String: storage order
+        space:  63 * 1000       // Number: require free space(unit: byte)
+    }
 };
 </script>
 <script src="../../src/uupaa.js"></script>
+<script src="../../src/storage.js"></script>
 <script>
 uu.ready(function(uu) {
     uu.id("setpair").disabled = false;
@@ -22,14 +26,14 @@ function getRandomKeyValuePair() {
 
 function updateView() {
     var storage = uu("Storage");
-    var hash = storage.getAllItems();
+    var hash = storage.getItem();
 
     uu.value(uu.id("all"), uu.json(hash));
 
 
-    var pairs = storage.getLength();
+    var size = storage.size();
 
-    uu.text(uu.id("pairs"), pairs + " pairs");
+    uu.text(uu.id("pairs"), size.pair + " pairs");
 }
 
 function updateSize() {
@@ -92,8 +96,8 @@ function setPair(rand, norefresh) {
 
 function removeEdgePair(last) {
     var storage = uu("Storage");
-    var pairs = storage.getLength();
-    var key = storage.key(last ? pairs - 1 : 0) || "", val = "";
+    var size = storage.size();
+    var key = storage.key(last ? size.pair - 1 : 0) || "", val = "";
 
     if (key) {
         val = storage.getItem(key);
