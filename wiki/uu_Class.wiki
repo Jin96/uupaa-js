@@ -9,14 +9,16 @@ uu.Class はカプセル化, 継承, ポリモーフィズム機能を提供し�
 
 = uu.Class =
 
-  * uu.Class("_!ClassName_", _prototypeObject_) は汎用的なクラスを定義します。
+  * uu.Class(_!ClassName_:String, _protoMember_:Hash/Function = void, _staticMember_:Hash = void) は汎用的なクラスを定義します。
     * _!ClassName_ にはクラス名を指定します。*:* と *<* はクラス名としては使用できません。
     * 継承は "_!ClassName_ : _!SuperClass_" や _!ClassName_ < _!SuperClass_" とします。
 
-    * _prototypeObject_ には public なプロパティやメソッドを[Hash]で指定します。省略も可能です。
-    * _prototypeObject_ に *init*: function(_var_args_:[Mix], ...) を定義すると、コンストラクタとして機能します。init メソッドは初期化に必要な引数を受け取ることができます。
-    * _prototypeObject_ に *msgbox*: function(msg:String, param:[Mix] = undefined) を定義すると、メッセージハンドラとして機能します。msg にはメッセージ文字列が渡され、param にはパラメタが渡されます。
-    * _prototypeObject_ に *handleEvent*: function(event:[EventObjectEx]) を定義すると、イベントハンドラとして機能します。
+    * _protoMember_ には public なプロパティやメソッドを[Hash]で指定します。省略も可能です。
+    * _protoMember_ に *init*: function(_var_args_:[Mix], ...) を定義すると、コンストラクタとして機能します。init メソッドは初期化に必要な引数を受け取ることができます。
+    * _protoMember_ に *msgbox*: function(msg:String, param:[Mix] = undefined) を定義すると、メッセージハンドラとして機能します。msg にはメッセージ文字列が渡され、param にはパラメタが渡されます。
+    * _protoMember_ に *handleEvent*: function(event:[EventObjectEx]) を定義すると、イベントハンドラとして機能します。
+    * _staticMember_ には static なメソッドを[Hash]で定義します。省略も可能です。
+    * _staticMember_ で指定したメソッドは、uu.Class._クラス名_._静的メソッド名_ の形で呼び出せます。
 
 {{{
 uu.Class("MySuperClass", {
@@ -70,7 +72,7 @@ uu.event("click", div, obj1);
 }}}
 
 = uu.Class.singleton =
-  * uu.Class.singleton("_!ClassName_", _prototypeObject_) は何度生成しても実体が一つしか存在しないシングルトンクラスを定義します。
+  * uu.Class.singleton(_!ClassName_:String, _protoMember_:Hash/Function = void, _staticMember_:Hash = void) は何度生成しても実体が一つしか存在しないシングルトンクラスを定義します。
 
 {{{
 uu.Class.singleton("MySingletonClass", {
