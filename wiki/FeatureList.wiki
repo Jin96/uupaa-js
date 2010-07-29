@@ -2,6 +2,13 @@
 
 <wiki:toc max_depth="3" />
 
+= Supported Browsers =
+uupaa.js は以下のブラウザをサポートします。
+  * Aグレード: IE8+, Firefox3.6+, Opera10.50+, Google Chrome4+, Safari4+, iPhone3+
+  * Bグレード: IE6, IE7, Firefox3.5
+
+Bグレードのブラウザでは一部機能が制限されます。
+
 = Namespace / Factory =
 uupaa.js の全機能は [uu] で始まります。また [uu] は factory 機能を持ちます。
 
