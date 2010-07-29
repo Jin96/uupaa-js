@@ -64,7 +64,7 @@ build/upa.php はプリプロセスとMinifyを施し最適化された.jsファ
 || svg       || uu.svg() をコメントアウトします || -0.2kB ||
 || canvas    || uu.canvas() をコメントアウトします || -59.0kB ||
 || flash     || uu.flash() をコメントアウトします || -0.6kB ||
-|| storage   || uu.Class.Storage() をコメントアウトします。<br />uu.storage は null になり利用できなくなります。 || -6.1kB ||
+|| storage   || uu.Class.Storage() をコメントアウトします。<br />uu.storage は null になり利用できなくなります。 || -5.8kB ||
 || nodeset   || NodeSet I/F 全体をコメントアウトします。<br /> uu("div > p").add("div") などが利用できなくなります || -1.4kB ||
 || live      || uu.live(), uu.unlive(), NodeSet.live(), NodeSet.unlive() をコメントアウトします || -1.3kB ||
 || resize    || uu.resize(), uu.unresize() をコメントアウトします || -0.8kB ||
