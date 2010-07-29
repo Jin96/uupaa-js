@@ -1,4 +1,4 @@
-#summary uu.Class はクラスに関する機能を提供します
+#summary uu.Class はクラスの定義と継承に関する機能を提供します
 
 <wiki:toc max_depth="1" />
 
