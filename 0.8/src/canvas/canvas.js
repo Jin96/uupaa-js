@@ -2965,7 +2965,6 @@ uu.ie && uu.ver.silverlight && uu.ready(function() {
 //      <object id="external{n}"        <- this._view
 //          width="300" height="150" classid="...">
 //          <param name="allowScriptAccess" value="always" />
-//          <param name="flashVars" value="" />
 //          <param name="wmode" value="transparent" />
 //          <param name="movie" value="../uu.canvas.swf" />
 //      </object>
@@ -3029,7 +3028,7 @@ function init(ctx, node) { // @param Node: <canvas>
 // uu.canvas.Flash.build
 function build(canvas) { // @param Node: <canvas>
                          // @return Node:
-    var ctx;
+    var ctx, fragment;
 
     // CanvasRenderingContext.getContext
     canvas.getContext = function() {
@@ -3078,16 +3077,16 @@ function build(canvas) { // @param Node: <canvas>
     }
 
     // create swf <object>
-    canvas.innerHTML = uu.format(
+    fragment = uu.f(
         '<object id="??" width="??" height="??" classid="??">' +
             '<param name="allowScriptAccess" value="always" />' +
-            '<param name="flashVars" value="" />' +
             '<param name="wmode" value="transparent" />' +
             '<param name="movie" value="??" /></object>',
          ctx._id, canvas.width, canvas.height,
          "clsid:d27cdb6e-ae6d-11cf-96b8-444553540000",
          uu.config.baseDir + "uu.canvas.swf");
 
+    canvas.innerHTML = fragment;
     ctx._view = canvas.firstChild; // <object>
 
     // uncapture key events(release focus)

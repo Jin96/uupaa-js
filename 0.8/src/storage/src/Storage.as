@@ -12,11 +12,11 @@
             ExternalInterface.addCallback("key", ex_key);
             ExternalInterface.addCallback("size", ex_size);
             ExternalInterface.addCallback("clear", ex_clear);
+            ExternalInterface.addCallback("allItem", ex_allItem);
             ExternalInterface.addCallback("getItem", ex_getItem);
             ExternalInterface.addCallback("setItem", ex_setItem);
-            ExternalInterface.addCallback("getLength", ex_getLength);
+            ExternalInterface.addCallback("mixItem", ex_mixItem);
             ExternalInterface.addCallback("removeItem", ex_removeItem);
-            ExternalInterface.addCallback("getAllItems", ex_getAllItems);
 
             _DISK_SPACE = this.detectDiskSpace();
 
@@ -68,8 +68,8 @@
         private function netStatusHandler(event:NetStatusEvent):void {
         }
 
-        public function ex_key(index:Number):String {
-            var so:SharedObject = getSharedObject(), i:Number = -1, key:String;
+        public function ex_key(index:int):String {
+            var so:SharedObject = getSharedObject(), i:int = -1, key:String;
 
             for (key in so.data) {
                 if (++i === index) {
@@ -80,16 +80,32 @@
         }
 
         public function ex_size():Object {
-            var so:SharedObject = getSharedObject();
+            var so:SharedObject = getSharedObject(), i:String, j:int = 0;
 
-            return { used: so.size, max: _DISK_SPACE };
+            for (i in so.data) {
+                ++j;
+            }
+            return { used: so.size, max: _DISK_SPACE, pair: j };
         }
-
 
         public function ex_clear():void {
             var so:SharedObject = getSharedObject();
 
             so.clear();
+        }
+
+        public function ex_allItem():Object {
+            var so:SharedObject = getSharedObject(),
+                rv:Object = {}, key:String, value:String;
+
+            for (key in so.data) {
+                value = so.data[key];
+                if (value === null) {
+                    value = "";
+                }
+                rv[key] = value;
+            }
+            return rv;
         }
 
         public function ex_getItem(key:String):String {
@@ -117,13 +133,15 @@
             return so.data[key] === value;
         }
 
-        public function ex_getLength():Number {
-            var so:SharedObject = getSharedObject(), i:String, j:Number = 0;
+        // mixin items
+        public function ex_mixItem(hash:Object):Boolean {
+            var so:SharedObject = getSharedObject(), i:int = -1, key:String;
+            var rv:Object = {};
 
-            for (i in so.data) {
-                ++j;
+            for (key in hash) {
+                so.data[key] = hash[key];
             }
-            return j;
+            return rv;
         }
 
         public function ex_removeItem(key:String):void {
@@ -131,20 +149,6 @@
 
             delete so.data[key];
             so.flush();
-        }
-
-        public function ex_getAllItems():Object {
-            var so:SharedObject = getSharedObject(),
-                rv:Object = {}, key:String, value:String;
-
-            for (key in so.data) {
-                value = so.data[key];
-                if (value === null) {
-                    value = "";
-                }
-                rv[key] = value;
-            }
-            return rv;
         }
     }
 }
