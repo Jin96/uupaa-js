@@ -297,10 +297,12 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/ClassNameS
         toggle:     uuklasstoggle   // uu.klass.toggle(node:Node, classNames:String):Node
     }),
     // --- OOP ---
-    Class:    uumix(uuclass, {      // uu.Class(className:String, proto:Hash/Function = void)
+    Class:    uumix(uuclass, {      // uu.Class(className:String, protoMember:Hash/Function = void,
+                                    //                            staticMember = void)
                                     //  [1][base]    uu.Class("A",   { proto: ... })
                                     //  [2][inherit] uu.Class("B:A", { proto: ... })
-        singleton:  uuclasssingleton// uu.Class.singleton(className:String, proto:Hash/Function = void)
+        singleton:  uuclasssingleton// uu.Class.singleton(className:String, proto:Hash/Function = void,
+                                    //                                      staticMember = void)
     }),
     // --- EVENT ---
     event:    uumix(uuevent, {      // uu.event(node:Node, eventTypeEx:EventTypeExString,
@@ -559,6 +561,12 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/ClassNameS
     flash:          uuflash,        // uu.flash(url:String, option:FlashOptionHash):Node/null/void
 //}}}!mb
 //}}}!flash
+    // --- COOKIE ---
+//{{{!cookie
+    cookie:   uumix(uucookie, {     // uu.cookie(prefix:String):Hash
+        save:       uucookiesave    // uu.cookie.save(prefix:String, data:Hash, date:UTCDateString/Date = void):Number
+    }),
+//}}}!cookie
 //{{{!storage
     // --- STORAGE(HTML5 WebStorage) --
     storage:        null,           // uu.storage - uu.Class.Storage instance
@@ -590,14 +598,17 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/ClassNameS
     puff:           uupuff,         // uu.puff(source:Mix/FormatString, var_args:Mix, ...)
     log:            uulog,          // uu.log(log:Mix, var_args:Mix, ...)
     // --- UNIT TEST ---
-//{{{!unittest
+//{{{!test
     ok:             uuok,           // uu.ok(title:String = void,
                                     //       lval:Mix = void, operator:String = void, rval:Mix = void,
                                     //       more:String = void)
                                     //  [1][add separater]  uu.ok("group separater or comment")
                                     //  [2][judge]          uu.ok("test title", 1, "===", 1, "more info")
                                     //  [3][get/show score] uu.ok() -> { ok, ng, total, ms }
-//}}}!unittest
+    ng:             uung,           // uu.ng(title:String,
+                                    //       lval:Mix = void, operator:String = void, rval:Mix = void)
+                                    //  [1][assert]         uu.ng("123 == 123", 123, "===", 123)
+//}}}!test
     // --- OTHER ---
     ui:             {},             // uu.ui - ui namespace
     dmz:            {},             // uu.dmz - DeMilitarized Zone(proxy)
@@ -4895,12 +4906,13 @@ function uulog(log                      // @param Mix: log data
 }
 uulog.max = 30; // max items
 
+// --- UNIT TEST ---
+//{{{!test
 //  [1][test]           uu.ok("title", 1, "===", 1, "more info")
 //  [2][add separater]  uu.ok("separater comment")
 //  [3][get/show score] uu.ok() -> { ok, ng, total, ms }
 
 // uu.ok - unit test
-//{{{!unittest
 function uuok(title,    // @param String: title
               lval,     // @param Mix: left handset
               operator, // @param String: operator
@@ -4991,7 +5003,21 @@ function judge(lval,     // @param Mix: left hand set
     }
     return +rv;
 }
-//}}}!unittest
+// uu.ng - assert
+function uung(title,    // @param String: title
+              lval,     // @param Mix: left handset
+              operator, // @param String: operator
+              rval) {   // @param Mix(= void): right handset
+                        // @throws Error from judge()
+    var r = judge(lval, operator, rval);
+
+    if (!r) {
+        throw new Error(uuf("??: ?? ?? ??", title,
+                            uujsonencode(lval, 1), operator,
+                            rval ? uujsonencode(rval, 1) : ""));
+    }
+}
+//}}}!test
 
 // --- JSON ---
 // uu.json - mix to JSONString
@@ -5852,6 +5878,55 @@ function uuflash(url,      // @param String: url
 }
 //}}}!mb
 //}}}!flash
+
+// --- COOKIE ---
+//{{{!cookie
+// uu.cookie - load and parse cookie
+function uucookie(prefix) { // @param String: prefix, namespace
+                            // @return Hash: { key: "value", ... }
+    var rv = {}, i = -1, pairs, pair, kv, cut = prefix.length;
+
+    if (doc.cookie) {
+
+        // retrieve KeyValue pairs
+        //      collect: "{{prefix}}key=value"
+        //      ignore:  "key=value"
+        //
+        pairs = doc.cookie.split("; ");
+
+        while ( (pair = pairs[++i]) ) {
+            kv = pair.split("="); // ["{{prefix}}key", "value"]
+
+            if (!kv[0][_indexOf](prefix)) {
+                rv[kv[0].slice(cut)] = decodeURIComponent(kv[1] || "");
+            }
+        }
+    }
+    return rv;
+}
+uucookie.secure = location.protocol === "https:" ? "; secure" : "";
+
+//  [1][exipre +3days]    uu.cookie.save("my", { key: value }, +(new Date) + 86400 * 3);
+//  [2][temporary cookie] uu.cookie.save("my", { key: value }, +(new Date) + 86400 * 3);
+
+// uu.cookie.save - save cookie
+function uucookiesave(prefix, // @param String: prefix, namespace
+                      data,   // @param Hash: { key: "value", ... }
+                      date) { // @param UTCDateString/Date(= void):
+                              // @return Number: last KeyValue pair length
+    date = date ? "; expires=" + (isString(date) ? date
+                                                 : new Date(+date).toUTCString())
+                : "";
+    var rv = "", i;
+
+    for (i in data) {
+        rv = prefix + i + "=" + encodeURIComponent(data[i]);
+
+        doc.cookie = rv + date + uucookie.secure;
+    }
+    return rv.length;
+}
+//}}}!cookie
 
 // --- OTHER ---
 // uu.guid - get unique number
@@ -7275,6 +7350,7 @@ uu.Class.singleton("IEStorage", {
 });
 //}}}!mb
 
+//{{{!cookie
 uu.Class.singleton("CookieStorage", {
     init:           cookieStorageInit,
     key:            cookieStorageKey,
@@ -7283,12 +7359,11 @@ uu.Class.singleton("CookieStorage", {
     getItem:        cookieStorageGetItem,
     setItem:        cookieStorageSetItem,
     removeItem:     cookieStorageRemoveItem,
-    toString:       uu.pao("CookieStorage"),
-    store:          cookieStorageStore,
-    retrieve:       cookieStorageRetrieve
+    toString:       uu.pao("CookieStorage")
 }, {
     ready:          !!navigator.cookieEnabled
 });
+//}}}!cookie
 
 uu.Class.singleton("MemStorage", {
     init:           memStorageInit,
@@ -7313,14 +7388,18 @@ function init() {
     var that = this,
         names = {
             L: "LocalStorage",
+//{{{!mb
             F: "FlashStorage",
             I: "IEStorage",
+//}}}!mb
+//{{{!cookie
             C: "CookieStorage",
+//}}}!cookie
             M: "MemStorage"
         };
 
     _storageOrder.split("").some(function(backendName) {
-        backendName = names[backendName];
+        backendName = names[backendName] || "";
 
         var storageBackend = uu.Class[backendName]; // L -> LocalStorage
 
@@ -7434,11 +7513,11 @@ function localStorageGetItem(key) { // @param String(= void):
     var rv, i, iz;
 
     if (key !== rv) {
-        return this.so.getItem(key) || ""; // String
+        return this.so.getItem(key + "") || ""; // String
     }
     for (rv = {}, i = 0, iz = this.so.length; i < iz; ++i) {
         key = this.so.key(i);
-        rv[key] = this.so.getItem(key) || "";
+        rv[key] = this.so.getItem(key + "") || "";
     }
     return rv; // Hash
 }
@@ -7451,7 +7530,7 @@ function localStorageSetItem(key,     // @param String/Hash:
             // pre clear
             //  [iPhone][FIX] http://d.hatena.ne.jp/uupaa/2010/01/05
             so[key] = "";
-            so[key] = value;
+            so[key] = value + "";
         } catch(err) { // catch Error("QUOTA_EXCEEDED_ERR")
             return _false;
         }
@@ -7631,10 +7710,10 @@ function ieStorageRemoveItem(key) { // @param String:
 //}}}!mb
 
 // --- CookieStorage ---
+//{{{!cookie
 function cookieStorageInit(callback) { // @param Function(= void): callback
-    this._secure = location.protocol === "https:" ? "; secure" : "";
     this._removeDate = (new Date(0)).toUTCString();
-    this._shadowCookie = this.retrieve();
+    this._shadowCookie = uu.cookie(_storeName);
 
     callback && callback(this);
 }
@@ -7653,7 +7732,7 @@ function cookieStorageSize() { // @return Hash: { used, max, pairs }
 }
 
 function cookieStorageClear() {
-    this.store(this._shadowCookie, this._removeDate);
+    uu.cookie.save(_storeName, this._shadowCookie, this._removeDate);
     this._shadowCookie = {};
 }
 
@@ -7676,7 +7755,7 @@ function cookieStorageSetItem(key,     // @param String/Hash:
         if (before) {
             before += 2; // "; ".length
         }
-        before += that.store(uu.hash(key, value), _persistDate);
+        before += uu.cookie.save(_storeName, uu.hash(key, value), _persistDate);
 
         if (before !== doc.cookie.length) { // before !== after
             return _false;
@@ -7699,45 +7778,10 @@ function cookieStorageSetItem(key,     // @param String/Hash:
 }
 
 function cookieStorageRemoveItem(key) { // @param String:
-    this.store(uu.hash(key, ""), this._removeDate);
+    uu.cookie.save(_storeName, uu.hash(key, ""), this._removeDate);
     delete this._shadowCookie[key];
 }
-
-function cookieStorageRetrieve() { // @return Hash: { key: "value", ... }
-    var rv = {}, i = -1, pairs, pair, kv, cut = _storeName.length;
-
-    if (doc.cookie) {
-
-        // retrieve KeyValue pairs
-        //      collect: "{{_storeName}}key=value"
-        //      ignore:  "key=value"
-        //
-        pairs = doc.cookie.split("; ");
-
-        while ( (pair = pairs[++i]) ) {
-            kv = pair.split("="); // ["{{_storeName}}key", "value"]
-
-            if (!kv[0].indexOf(_storeName)) {
-                rv[kv[0].slice(cut)] = decodeURIComponent(kv[1] || "");
-            }
-        }
-    }
-    return rv;
-}
-
-function cookieStorageStore(hash,   // @param Hash:
-                            date) { // @param UTCDateString:
-                                    // @return Number: last KeyValue pair length
-    var rv = "", key;
-
-    for (key in hash) {
-        rv = _storeName + key + "=" + encodeURIComponent(hash[key]);
-
-        // store cookie
-        doc.cookie = rv + "; expires=" + date + this._secure;
-    }
-    return rv.length;
-}
+//}}}!cookie
 
 // --- MemStorage ---
 function memStorageInit(callback) { // @param Function(= void): callback
