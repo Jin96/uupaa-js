@@ -174,11 +174,11 @@ while ($v = array_shift($argv)) {
 }
 if ($castoff[0] === "all") {
     $castoff = array("form", "snippet", "image", "color",
-                     "unittest", "fx", "ajax",
+                     "test", "fx", "ajax",
                      "svg", "canvas", "canvasvml", "canvassl", "canvasfl",
                      "flash", "nodeset",
                      "live", "resize", "cssbox", "codec",
-                     "md5", "sprintf", "url", "font", "storage");
+                     "md5", "sprintf", "url", "font", "cookie", "storage");
 }
 
 include $preprosess;
