@@ -305,6 +305,20 @@ canvas.drawImage() では、予め画像をロードしておく必要があり�
 = Flash =
   * [uu_flash uu.flash()] は `<`object`>`を生成し swf ファイルをロードします。
 
+= Cookie =
+  * [uu_cookie uu.cookie()] は cookie を読み込み、パースした結果を返します。
+  * [uu_cookie uu.cookie.save()] は cookie を保存します。
+
+= Storage =
+HTML5::WebStorage(LocalStorage)互換機能を提供します。
+  * [uu_storage uu.storage] は Storage が利用可能な状態で、uu.Class.Storage クラスのインスタンスを保持します。利用不能なら null が設定されます。
+  * [uu_Class_Storage uu.Class.Storage] は [uu_Class_LocalStorage uu.Class.LocalStorage], [uu_Class_FlashStorage uu.Class.FlashStorage], [uu_Class_IEStorage uu.Class.IEStorage], [uu_Class_CookieStorage uu.Class.CookieStorage], [uu_Class_MemStorage uu.Class.MemStorage]から適切なクラスを選択しインスタンスを保持します。また統一されたI/Fを提供します。
+  * [uu_Class_LocalStorage uu.Class.LocalStorage] は window.localStorage へのアクセスを提供します。最小で1.8MB、最大で8MBのストレージを提供します。
+  * [uu_Class_FlashStorage uu.Class.FlashStorage] は Flash::SharedObject へのアクセスを提供します。100kBから最大で1MBのストレージを提供します。ユーザがストレージサイズをゼロに設定したり、Flashのバージョンが8以下なら利用できません。
+  * [uu_Class_IEStorage uu.Class.IEStorage] は IE::userData へのアクセスを提供します。最大で63kBのストレージを提供します。
+  * [uu_Class_CookieStorage uu.Class.CookieStorage] は Cookie へのアクセスを提供します([uu_cookie uu.cookie]を使役します)。最大で3.8kBのストレージを提供します。
+  * [uu_Class_MemStorage uu.Class.MemStorage] は 上記のクラスが選択されなかった場合のフォールバック機能を提供します。JavaScriptのHashに対しデータを格納するため容量は事実上無制限ですが、ブラウザを閉じるとデータは揮発します。
+
 = URL =
   * [uu_url uu.url()] は URL の分解と再構築を行います。
   * [uu_url_abs uu.url.abs()] は 相対 URL を絶対 URL に変換します。
