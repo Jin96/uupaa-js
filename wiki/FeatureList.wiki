@@ -330,6 +330,8 @@ ES5(ECMAScript-262 5th edition)で追加された機能の一部が、IE6など�
   * Boolean#toJSON(), Date#toISOString(), Date#toJSON(), Number#toJSON(), String#toJSON() が利用できます。
   * String#trim() が利用できます。
 
+*IEや古いブラウザでは、Array.prototype, Boolean.prototype, Date.prototype, Number.prototype, String.prototype を拡張することでこれらのメソッドを実装しています。prototypeを拡張しているため、Arrayをfor in ループでループさせると、forEach メソッドなどが列挙されてしまいます。ご注意ください。*
+
 == Extends ==
 IE 発祥で Firefox だけがサポートしていない HTMLElement#innerText と HTMLElement#outerHTML を利用できます。
   * HTMLElement#innerText が利用できます。オーバーヘッドが気になる場合は innerText ではなく textContent を利用してください。
