@@ -58,7 +58,7 @@ build/upa.php はプリプロセスとMinifyを施し最適化された.jsファ
 || image     || uu.image() をコメントアウトします || -0.9kB ||
 || color     || uu.color() をコメントアウトします。<br />uu.fx でカラーアニメーションが利用できなくなります || -5.1kB ||
 || colordict || 色辞書をコメントアウトします。<br />uu.color() は利用可能ですが<br /> "black" や "skyblue" などの W3C Named Color は利用できなくなります || -2.3kB ||
-|| unittest  || uu.ok() をコメントアウトします。|| -1.3kB ||
+|| unittest  || uu.ng(), uu.ok() が何もしない関数に置換されます(関数自体は存在します)。|| -1.5kB ||
 || fx        || uu.fx() をコメントアウトします。<br />uu.css.show() と uu.css.hide() も利用できなくなります || -4.5kB ||
 || ajax      || uu.ajax(), uu.jsonp() をコメントアウトします。|| -2.8kB ||
 || svg       || uu.svg() をコメントアウトします || -0.2kB ||
