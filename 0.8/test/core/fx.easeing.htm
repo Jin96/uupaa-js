@@ -30,7 +30,7 @@ uu.ready(function(uu) {
         uu.event.hover(node, function(evt, hover) {
             if (hover) {
                 uu.fx(node, 400, { o: 1.0 });
-                uu.fx(node, 500, { w: [  0, node.title], chain:   1 });
+                uu.fx(node, 500, { w: [ 50, node.title], chain:   1 });
                 uu.fx(node, 500, { w: [400, node.title], reverse: 1 });
             } else {
                 uu.fx(node, 400, { o: 0.5 });
@@ -45,7 +45,7 @@ function run() {
     uu.each(uu.klass("box"), function(node, i) {
 
 //      uu.fx.skip(node);
-        uu.fx(node, 500, { w: [  0, node.title], chain:   1 });
+        uu.fx(node, 500, { w: [ 50, node.title], chain:   1 });
         uu.fx(node, 500, { w: [400, node.title], reverse: 1 });
     });
 }
