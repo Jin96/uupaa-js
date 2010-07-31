@@ -68,16 +68,28 @@ function preProcess($js,        // @param String: JavaScript source code
                     $mobile,    // @param Boolean: true is "-mb" option
                     $castoff) { // @param Array: castoff idents
                                 // @return String:
-    // strip {{{!ident ... }}}!ident code block
-    foreach ($castoff as $value) {
-        $js = preg_replace('/\{\{\{\!' . $value . '([^\n]*)\n.*?\}\}\}\!' . $value . '/ms',
-                           '/*{{{!' . $value . '$1 }}}!' . $value . '*/', $js);
-    }
-    // strip {{{!mb ... }}}!mb code block
+/*
+    // strip code block
+    //
+    $copiedArray = $castoff; // copy array
     if ($mobile) {
-        $js = preg_replace('/\{\{\{\!mb([^\n]*)\n.*?\}\}\}\!mb/ms',
-                           "/*{{{!mb$1 }}}!mb*/", $js);
+        $copiedArray[] = "mb"; // add "mb"
     }
+
+    foreach ($copiedArray as $value) {
+        // "{{{!ident ... }}}!ident" -> ""
+        // one line
+        $js = preg_replace('/\{\{\{\!' . $value . '(?:[^\n]*)\}\}\}\!' . $value . '/', '', $js);
+        // multi line
+        $js = preg_replace('/\{\{\{\!' . $value . '(?:[^\n]*)\n.*?\}\}\}\!' . $value . '/ms', '', $js);
+
+        // "{@ident ... }@ident" -> ""
+        // one line
+        $js = preg_replace('/\{@' . $value . '(?:[^\n]*)\}@' . $value . '/', '', $js);
+        // multi line
+        $js = preg_replace('/\{@' . $value . '(?:[^\n]*)\n.*?\}@' . $value . '/ms', '', $js);
+    }
+ */
 
     // typeof alias
     $js = preg_replace('/uu\.?type.BOOLEAN/',      '1', $js); // uu.?type.BOOLEAN -> 1
@@ -138,8 +150,11 @@ function preProcess($js,        // @param String: JavaScript source code
     $js = preg_replace('/(^|\s)\/\/[^\n]*$/m', '', $js);
     $js = preg_replace('/\/\/\s+[^\n]*$/m', '', $js);
 
-    // strip comment line  "\n/**/" -> ""
-    $js = preg_replace('/\n\/\*\*\//m', '', $js);
+    // strip comment line  "\n/*  */" -> ""
+    $js = preg_replace('/\n\/\*(?:\s+)?\*\//m', '', $js);
+
+    // strip comment line  "/*  */\n" -> ""
+    $js = preg_replace('/\/\*(?:\s+)?\*\/\n/m', '', $js);
 
     // strip tail space
     $js = preg_replace('/\s+$/m', '', $js);

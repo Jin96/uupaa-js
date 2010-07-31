@@ -22,7 +22,6 @@
 
 </style>
 <script src="../../src/uupaa.js"></script>
-<script src="../../src/misc/easing.js"></script>
 <script>
 uu.ready(function(uu) {
     var i, iz = 1;
@@ -40,7 +39,7 @@ function xaddqueue() {
                  uu.color.random().hex,
                  uu.color.random().hex];
 
-    uu(".tgt1").fx(2000, { x: [400, "easeOutBack"],
+    uu(".tgt1").fx(2000, { x: [400, "OutBack"],
                               y: 400,
                               w: 200,
                               bgc: "skyblue",
@@ -48,8 +47,8 @@ function xaddqueue() {
                               fs: 36 });
 
     uu(".tgt2").css({ o: 0.2 }).
-        fx(1000, { x: ["+400", "easeInBack"], y: "+400", o: 1.0, w: 50, h: [50, "easeOutBack"] }).
-        fx(1000, { x: ["-400", "easeInBack"], y: "-400", o: 0.2, w: 100, h: [100, "easeOutBack"] });
+        fx(1000, { x: ["+400", "InBack"], y: "+400", o: 1.0, w: 50, h: [50, "OutBack"] }).
+        fx(1000, { x: ["-400", "InBack"], y: "-400", o: 0.2, w: 100, h: [100, "OutBack"] });
 
     uu(".tgt3").css({ o: 1   }).
         fx(2000, { x: "+500px", y: "+500px", o: "-0.9" ,bgc: "rgb(0,255,100)" }).
@@ -57,10 +56,10 @@ function xaddqueue() {
         fx(2000, { x: "-500px", y: "-500px", o: 0.5 ,w: 300 ,bgc: "rgb(0,0,0)" });
 
     uu(".tgt4").css({ o: 1.0 }).
-        fx(1000, { x: ["+400", "easeInBack"], y: ["+230", "easeInBack"], o: 0.2, w:  10, h: [100, "easeOutBack"], bgc: color[0] }).
-        fx(1000, { x: ["+30",  "easeInBack"], y: ["-100", "easeInBack"], o: 1.0, w:  50, h: [ 10, "easeOutBack"], bgc: color[1] }).
-        fx(1000, { x: ["-400", "easeInBack"], y: ["-30",  "easeInBack"], o: 0.2, w:  10, h: [ 50, "easeOutBack"], bgc: color[2] }).
-        fx(1000, { x: ["-20",  "easeInBack"], y: ["-100", "easeInBack"], o: 1.0, w: 200, h: [200, "easeOutBack"], bgc: color[3] });
+        fx(1000, { x: ["+400", "InBack"], y: ["+230", "InBack"], o: 0.2, w:  10, h: [100, "OutBack"], bgc: color[0] }).
+        fx(1000, { x: ["+30",  "InBack"], y: ["-100", "InBack"], o: 1.0, w:  50, h: [ 10, "OutBack"], bgc: color[1] }).
+        fx(1000, { x: ["-400", "InBack"], y: ["-30",  "InBack"], o: 0.2, w:  10, h: [ 50, "OutBack"], bgc: color[2] }).
+        fx(1000, { x: ["-20",  "InBack"], y: ["-100", "InBack"], o: 1.0, w: 200, h: [200, "OutBack"], bgc: color[3] });
 }
 
 </script>

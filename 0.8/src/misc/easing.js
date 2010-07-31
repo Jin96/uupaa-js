@@ -104,31 +104,31 @@ mix(Math, {
 // b:Number - beginning value
 // c:Number - change in value(delta)
 // d:Number - duration(unit: ms)
-function aa(t,b,c,d) { return c*t/d+b; }
-function ab(t,b,c,d) { return c*(t/=d)*t+b; }
-function ac(t,b,c,d) { return -c*(t/=d)*(t-2)+b; }
-function ad(t,b,c,d) { return (t/=d/2)<1?c/2*t*t+b
+function aa(t,b,c,d) { return c*t/d+b; } // linear, linearTween
+function ab(t,b,c,d) { return c*(t/=d)*t+b; } // easeInQuad
+function ac(t,b,c,d) { return -c*(t/=d)*(t-2)+b; } // easeOutQuad
+function ad(t,b,c,d) { return (t/=d/2)<1?c/2*t*t+b // easeInOutQuad
                                         :-c/2*((--t)*(t-2)-1)+b; }
-function ae(t,b,c,d) { return c*(t/=d)*t*t+b; }
-function af(t,b,c,d) { return c*((t=t/d-1)*t*t+1)+b; }
-function ag(t,b,c,d) { return (t/=d/2)<1?c/2*t*t*t+b
+function ae(t,b,c,d) { return c*(t/=d)*t*t+b; } // easeInCubic
+function af(t,b,c,d) { return c*((t=t/d-1)*t*t+1)+b; } // easeOutCubic
+function ag(t,b,c,d) { return (t/=d/2)<1?c/2*t*t*t+b // easeInOutCubic
                                         :c/2*((t-=2)*t*t+2)+b; }
-function ah(t,b,c,d) { var n1=t*2,n2=c/2;
+function ah(t,b,c,d) { var n1=t*2,n2=c/2; // easeOutInCubic
                        return t<d/2?af(n1,b,n2,d)
                                    :ae(n1-d,b+n2,n2,d); }
-function ai(t,b,c,d) { return c*(t/=d)*t*t*t+b; }
-function aj(t,b,c,d) { return -c*((t=t/d-1)*t*t*t-1)+b; }
-function ak(t,b,c,d) { return (t/=d/2)<1?c/2*t*t*t*t+b
+function ai(t,b,c,d) { return c*(t/=d)*t*t*t+b; } // easeInQuart
+function aj(t,b,c,d) { return -c*((t=t/d-1)*t*t*t-1)+b; } // easeOutQuart
+function ak(t,b,c,d) { return (t/=d/2)<1?c/2*t*t*t*t+b // easeInOutQuart
                                         :-c/2*((t-=2)*t*t*t-2)+b; }
-function al(t,b,c,d) { var n1=t*2,n2=c/2;
+function al(t,b,c,d) { var n1=t*2,n2=c/2; // easeOutInQuart
                        return t<d/2?aj(n1,b,n2,d)
                                    :ai(n1-d,b+n2,n2,d); }
-function am(t,b,c,d) { return c*(t/=d)*t*t*t*t+b; }
-function an(t,b,c,d) { return c*((t=t/d-1)*t*t*t*t+1)+b; }
-function ao(t,b,c,d) { var n1=t*t*t*t,n2=c/2;
+function am(t,b,c,d) { return c*(t/=d)*t*t*t*t+b; } // easeInQuint
+function an(t,b,c,d) { return c*((t=t/d-1)*t*t*t*t+1)+b; } // easeOutQuint
+function ao(t,b,c,d) { var n1=t*t*t*t,n2=c/2; // easeInOutQuint
                        return (t/=d/2)<1?n2*n1*t+b
                                         :n2*((t-=2)*n1+2)+b; }
-function ap(t,b,c,d) { var n1=t*2,n2=c/2;
+function ap(t,b,c,d) { var n1=t*2,n2=c/2; // easeOutInQuint
                        return t<d/2?an(n1,b,n2,d)
                                    :am(n1-d,b+n2,n2,d); }
 
