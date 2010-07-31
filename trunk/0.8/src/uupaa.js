@@ -80,7 +80,6 @@ var _prototype = "prototype",
     _types = { "NaN": 2 },
     _trimSpace = /^\s+|\s+$/g,
     _rootNode = doc.documentElement,
-    _easing,
     _dd2num = {},               // uu.hash.dd2num = {  "00":    0 , ...  "99":   99  }
     _num2dd = {},               // uu.hash.num2dd = {    0 :  "00", ...   99 :  "99" }
     _bb2num = {},               // uu.hash.bb2num = { "\00":    0 , ... "\ff":  255  }
@@ -274,7 +273,8 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/ClassNameS
                                     //  [7][after callback]  uu.fx(node, 500, { o: 1, after: afterCallback })
                                     //  [8][before callback] uu.fx(node, 500, { o: 1, before: beforeCallback })
                                     //  [9][revert]          uu.fx(node, 500, { o: 1, r: 1 })
-        skip:       uufxskip,       // uu.fx.skip(node:Node = null, skipAll:Boolean = false):NodeArray
+        easing:     {},             // uu.fx.easing - easing functions
+        skip:       uufxskip,       // uu.fx.skip(node:Node = null, skipAll:Boolean = false, invisible:Boolean = false):NodeArray
         isBusy:     uufxisbusy,     // uu.fx.isBusy(node:Node):Boolean
         fade:       uufxfade,       // uu.fx.fade(node:Node, duration:Number, option:Hash = {}):Node
         puff:       uufxpuff,       // uu.fx.puff(node:Node, duration:Number, option:Hash = {}):Node
@@ -1880,8 +1880,8 @@ uufx.props = { opacity: 1, color: 2, backgroundColor: 2,
 uufx.alpha = /^alpha\([^\x29]+\) ?/;
 //}}}!mb
 
-// easing functions
-_easing = {
+// uu.fx.easing - easing functions
+uu.fx.easing = {
         linear: "(c*g/d+b)", // linear(g,b,c,d)
 // Quad ---
         inquad: "(z1=g/d,c*z1*z1+b)",
@@ -1922,7 +1922,7 @@ _easing = {
 
 function uufxbuild(node, data, queue, option) {
     function ezfn(v0, v1, ez) {
-        return uuf("(b=??,c=??,??)", v0, v1 - v0, _easing[ez])
+        return uuf("(b=??,c=??,??)", v0, v1 - v0, uu.fx.easing[ez])
     }
     // 123.4  -> 123.4
     // "+123" -> curt + 123
@@ -1945,15 +1945,17 @@ function uufxbuild(node, data, queue, option) {
         reverseOption = { before: option[_before],
                           after: option[_after],
                           back: 1 },
-        i, startValue, endValue, ez, w, n,
+        i, startValue, endValue, ez, w, n, opt,
         fixdb = uufix.db, cs = option.css || uucss(node, _true);
 
     for (i in option) {
         w = fixdb[i] || i;
 
         if (w in cs) {
-            _isArray(option[i]) ? (endValue = option[i][0], ez = option[i][1][_toLowerCase]()) // val, easing
-                                : (endValue = option[i],    ez = "inoutquad"); // option.val
+            opt = option[i];
+            _isArray(opt) ? (endValue = opt[0], ez = opt[1])
+                          : (endValue = opt,    ez = "inoutquad");
+            ez = ez[_toLowerCase]();
 
             // skip { marginLeft: undefined, marginTop: null }
             if (endValue != null) {
@@ -2031,10 +2033,11 @@ function uufxbuild(node, data, queue, option) {
 }
 
 // uu.fx.skip
-function uufxskip(node,      // @param Node(= null): null is all node
-                  skipAll) { // @param Boolean(= false): true is skip all queue
-                             //                          false is skip top queue
-                             // @return NodeArray:
+function uufxskip(node,        // @param Node(= null): null is all node
+                  skipAll,     // @param Boolean(= false): true is skip all queue
+                               //                          false is skip top queue
+                  invisible) { // @param Boolean(= false): true is avoid flicker
+                               // @return NodeArray:
     var ary = node ? [node] : uutag("*", doc.body),
         i = 0, iz = ary.length,
         j, k, jz, kz, data, guid, option, q, rq;
@@ -2064,7 +2067,7 @@ function uufxskip(node,      // @param Node(= null): null is all node
             }
 
             // avoid flicker
-            if (q.length > 2 && skipAll) {
+            if (invisible && q.length > 2) {
                 q.push({
                     tm: 0, guid: 0, fin: 1, dur: 0,
                     option: function(node) {
