@@ -174,7 +174,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/ClassNameS
                                     //        override:Boolean = true):Hash/Function
     has:            uuhas,          // uu.has(source:Hash/Array, search:Hash/Array):Boolean
     nth:            uunth,          // uu.nth(source:Hash/Array, index:Number):Array
-    each:           uueach,         // uu.each(source:Hash/Array, evaluator:Function, arg:Mix = void)
+    each:           uueach,         // uu.each(source:Hash/Array/Number, evaluator:Function, arg:Mix = void)
     keys:           uukeys,         // uu.keys(source:Hash/Array):Array
     size:           uusize,         // uu.size(source:Hash/Array):Number
     clone:          uuclone,        // uu.clone(source:Hash/Array):Hash/Array - shallow copy
@@ -268,13 +268,13 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/ClassNameS
                                     //  [1][abs]             uu.fx(node, 500, { o: 0.5, x: 200 })
                                     //  [2][rel]             uu.fx(node, 500, { h: "+100", o: "+0.5" })
                                     //  [3][with "px" unit]  uu.fx(node, 500, { h: "-100px" })
-                                    //  [4][with easing fn]  uu.fx(node, 500, { h: [200, "easeInOutQuad"] })
+                                    //  [4][with easing fn]  uu.fx(node, 500, { h: [200, "InOutQuad"] })
                                     //  [5][set fps]         uu.fx(node, 500, { fps: 30, w: 40 })
                                     //  [6][standby]         uu.fx(node, 2000)
                                     //  [7][after callback]  uu.fx(node, 500, { o: 1, after: afterCallback })
                                     //  [8][before callback] uu.fx(node, 500, { o: 1, before: beforeCallback })
                                     //  [9][revert]          uu.fx(node, 500, { o: 1, r: 1 })
-        skip:       uufxskip,       // uu.fx.skip(node:Node = null, skipAll:Boolean = false):Node/NodeArray
+        skip:       uufxskip,       // uu.fx.skip(node:Node = null, skipAll:Boolean = false):NodeArray
         isBusy:     uufxisbusy,     // uu.fx.isBusy(node:Node):Boolean
         fade:       uufxfade,       // uu.fx.fade(node:Node, duration:Number, option:Hash = {}):Node
         puff:       uufxpuff,       // uu.fx.puff(node:Node, duration:Number, option:Hash = {}):Node
@@ -1249,21 +1249,28 @@ function uumix(base,       // @param Hash/Function: mixin base
     return aroma ? uumix(base, aroma, 0, override) : base;
 }
 
-// [1][Array.forEach]       uu.each([1, 2],         function(v, i) {...})
-// [2][Hash.forEach ]       uu.each({ a: 1, b: 2 }, function(v, i) {...})
+// [1][Array.forEach]  uu.each([1, 2],         function(v, i) {...})
+// [2][Hash.forEach ]  uu.each({ a: 1, b: 2 }, function(v, i) {...})
+// [3][Number.forEach] uu.each(3,              function(v, i) {...})
 
 // uu.each - for each
-function uueach(source,    // @param Hash/Array: source
+function uueach(source,    // @param Hash/Array/Number: source or loop count
                 evaluator, // @param Function: evaluator
                 arg) {     // @param Mix(= void):
     function each(v, i) {
         evaluator(v, i, arg);
     }
 
-    if (_isArray(source)) {
+    var i = 0;
+
+    if (typeof source === _number) {
+        for (; i < source; ++i) {
+            evaluator(i, i, arg); // evaluator(index, index, arg)
+        }
+    } else if (_isArray(source)) {
         source.forEach(arg ? each : evaluator);
     } else {
-        for (var i in source) {
+        for (i in source) {
             evaluator(source[i], i, arg); // evaluator(value, index, arg)
         }
     }
@@ -1763,7 +1770,7 @@ function uuviewport() { // @return Hash: { innerWidth, innerHeight,
 //  [1][abs]              uu.fx(node, 500, { o: 0.5, x: 200 })
 //  [2][rel]              uu.fx(node, 500, { h: "+100", o: "+0.5" })
 //  [3][with "px" unit]   uu.fx(node, 500, { h: "-100px" })
-//  [4][with easing fn]   uu.fx(node, 500, { h: [200, "easeInOutQuad"] })
+//  [4][with easing fn]   uu.fx(node, 500, { h: [200, "InOutQuad"] })
 //  [5][set fps]          uu.fx(node, 500, { fps: 30, w: 40 })
 //  [6][after callback]   uu.fx(node, 500, { o: 1, after: afterCallback })
 //  [7][before callback]  uu.fx(node, 500, { o: 1, before: beforeCallback })
@@ -1779,7 +1786,7 @@ function uufx(node,     // @param Node: animation target node
               option) { // @param Hash/Function: { key: endValue, key: [endValue, easing], key: callback, ... }
                         //     key      - CSSPropertyString/String: "color", "opacity", "before", "after", ...
                         //     endValue - String/Number: end value, "red", "+0.5", "+100px"
-                        //     easing   - String: easing function name, "easeInOutQuad"
+                        //     easing   - String: easing function name, "InOutQuad"
                         //     callback - Function: before or after callback function
                         // @return Node:
     function loop() {
@@ -1789,6 +1796,7 @@ function uufx(node,     // @param Node: animation target node
         if (q.tm) {
             tm = +new Date;
         } else {
+            // first time
             option.init && (option.init(node, option, back), option.init = 0);
             option[_before] && option[_before](node, option, back);
             q.js = isFunction(option) ? option
@@ -1816,18 +1824,50 @@ function uufx(node,     // @param Node: animation target node
 //    node.style.overflow = "hidden";
     option = option || {};
 
-    var data = node[_uufx] || (node[_uufx] = { q: [], rq: [], id: 0 }), // init fx queue
+    //
+    //  node["data-uufx"] = {
+    //       q: [FxQueueDataHash, ...]
+    //      rq: [FxQueueDataHash, ...]
+    //      id: 0  // intervel timer id
+    //  }
+    //
+    //  FxQueueDataHash = { js, tm, dur, fin, guid, option }
+    //      js     - String: JavaScript Expression
+    //      tm     - Number: start time
+    //      dur    - Number: duration
+    //      fin    - Boolean: force finish flag
+    //      guid   - Number:
+    //      option - FxOptionHash:
+    //
+    //  FxOptionHash = { key: endValue, key: [endValue, esaing], key: callback, ... }
+    //      key      - String: CSS Property or ReserveWord
+    //      endValue - Number/String: 1, "+1", "-1", "1px", "*1.5", "/1.5"
+    //      easing   - String: easing function name
+    //      callback - Function: callback function
+    //
+    //  ReserveWord
+    //      "init"   - init callback
+    //      "back"   - backward
+    //      "before" - before callback
+    //      "after"  - after callback
+    //      "reverse" - reverse
+    //      "chain"  - reverse chain
+    //      "fps"    - fps
+    //      "deny"   -
+
+    // init fx queue
+    var data = node[_uufx] || (node[_uufx] = { q: [], rq: [], id: 0 }),
         fps = ((1000 / option.fps) | 0) || +_ie; // [IE] setInterval(0) is Error
 
     if (data.q[0] && data.q[0].option.deny) {
         return node;
     }
 
-    // append queue data
+    // add queue
     data.q.push({
         tm:       0,
         dur:      Math.max(duration, 1),
-        fin:      0,      // true/1 is finished
+        fin:      _false,
         guid:     uuguid(),
         option:   option
     });
@@ -1840,36 +1880,41 @@ uufx.props = { opacity: 1, color: 2, backgroundColor: 2,
 uufx.alpha = /^alpha\([^\x29]+\) ?/;
 //}}}!mb
 
+// easing functions
 _easing = {
-    // linear(g,b,c,d)
-    linear:     "(c*g/d+b)",
-    inquad:     "(z1=g/d,c*z1*z1+b)",
-    outquad:    "(z1=g/d,-c*z1*(z1-2)+b)",
-    inoutquad:  "(z1=g/(d*0.5),z1<1?c*0.5*z1*z1+b:-c*0.5*((--z1)*(z1-2)-1)+b)",
-    incubic:    "(z1=g/d,c*z1*z1*z1+b)",
-    outcubic:   "(z1=g/d-1,c*(z1*z1*z1+1)+b)",
+        linear: "(c*g/d+b)", // linear(g,b,c,d)
+// Quad ---
+        inquad: "(z1=g/d,c*z1*z1+b)",
+       outquad: "(z1=g/d,-c*z1*(z1-2)+b)",
+     inoutquad: "(z1=g/(d*0.5),z1<1?c*0.5*z1*z1+b:-c*0.5*((--z1)*(z1-2)-1)+b)",
+// Cubic ---
+       incubic: "(z1=g/d,c*z1*z1*z1+b)",
+      outcubic: "(z1=g/d-1,c*(z1*z1*z1+1)+b)",
     inoutcubic: "(z1=g/(d*0.5),z1<1?c*0.5*z1*z1*z1+b:c*0.5*((z1-=2)*z1*z1+2)+b)",
     outincubic: "(z1=g*2,z2=c*0.5,g<d*0.5?(z3=z1/d-1,z2*(z3*z3*z3+1)+b)" +
                                         ":(z3=(z1-d)/d,z2*z3*z3*z3+b+z2))",
-    inquart:    "(z1=g/d,c*z1*g*g*g+b)",
-    outquart:   "(z1=g/d-1,-c*(z1*z1*z1*z1-1)+b)",
+// Quart ---
+       inquart: "(z1=g/d,c*z1*z1*z1*z1+b)",
+      outquart: "(z1=g/d-1,-c*(z1*z1*z1*z1-1)+b)",
     inoutquart: "(z1=g/(d*0.5),z1<1?c*0.5*z1*z1*z1*z1+b" +
                                   ":-c*0.5*((z1-=2)*z1*z1*z1-2)+b)",
     outinquart: "(z1=g*2,z2=c*0.5,g<d*0.5?(z3=z1/d-1,-z2*(z3*z3*z3*z3-1)+b)" +
-                                        ":(z4=z1-d,z3=z4/d,z2*z3*z4*z4*z4+b+z2))",
-    inback:     "(z1=g/d,z2=1.70158,c*z1*z1*((z2+1)*z1-z2)+b)",
-    outback:    "(z1=g/d-1,z2=1.70158,c*(z1*z1*((z2+1)*z1+z2)+1)+b)",
-    inoutback:  "(z1=g/(d*0.5),z2=1.525,z3=1.70158," +
+                                        ":(z4=z1-d,z3=z4/d,z2*z3*z3*z3*z3+b+z2))",
+// Back ---
+        inback: "(z1=g/d,z2=1.70158,c*z1*z1*((z2+1)*z1-z2)+b)",
+       outback: "(z1=g/d-1,z2=1.70158,c*(z1*z1*((z2+1)*z1+z2)+1)+b)",
+     inoutback: "(z1=g/(d*0.5),z2=1.525,z3=1.70158," +
                     "z1<1?(c*0.5*(z1*z1*(((z3*=z2)+1)*z1-z3))+b)" +
                         ":(c*0.5*((z1-=2)*z1*(((z3*=z2)+1)*z1+z3)+2)+b))",
-    outinback:  "(z1=g*2,z2=c*0.5," +
+     outinback: "(z1=g*2,z2=c*0.5," +
                     "g<d*0.5?(z3=z1/d-1,z4=1.70158,z2*(z3*z3*((z4+1)*z3+z4)+1)+b)" +
                            ":(z3=(z1-d)/d,z4=1.70158,z2*z3*z3*((z4+1)*z3-z4)+b+z2))",
-    inbounce:   "(z1=(d-g)/d,z2=7.5625,z3=2.75,c-(z1<(1/z3)?(c*(z2*z1*z1)+0)" +
+// Bounce ---
+      inbounce: "(z1=(d-g)/d,z2=7.5625,z3=2.75,c-(z1<(1/z3)?(c*(z2*z1*z1)+0)" +
                 ":(z1<(2/z3))?(c*(z2*(z1-=(1.5/z3))*z1+.75)+0):z1<(2.5/z3)" +
                 "?(c*(z2*(z1-=(2.25/z3))*z1+.9375)+0)" +
                 ":(c*(z2*(z1-=(2.625/z3))*z1+.984375)+0))+b)",
-    outbounce:  "(z1=    g/d,z2=7.5625,z3=2.75,   z1<(1/z3)?(c*(z2*z1*z1)+b)" +
+     outbounce: "(z1=    g/d,z2=7.5625,z3=2.75,   z1<(1/z3)?(c*(z2*z1*z1)+b)" +
                 ":(z1<(2/z3))?(c*(z2*(z1-=(1.5/z3))*z1+.75)+b):z1<(2.5/z3)" +
                 "?(c*(z2*(z1-=(2.25/z3))*z1+.9375)+b)" +
                 ":(c*(z2*(z1-=(2.625/z3))*z1+.984375)+b))"
@@ -1926,10 +1971,12 @@ function uufxbuild(node, data, queue, option) {
                               ezfn(startValue, endValue, ez));
 //{{{!mb
                     if (!uuready.opacity) { // [IE6][IE7][IE8]
-                        rv += uuf('fo=n.filters.item("DXImageTransform.Microsoft.Alpha");' +
-                                  'fo.Enabled=true;fo.Opacity=(o*100)|0;' +
-                                  'f&&uu.css.opacity(n,??);',
-                                  endValue);
+                        if (uuready.filter) {
+                            rv += uuf('fo=n.filters.item("DXImageTransform.Microsoft.Alpha");' +
+                                      'fo.Enabled=true;fo.Opacity=(o*100)|0;' +
+                                      'f&&uu.css.opacity(n,??);',
+                                      endValue);
+                        }
                     } else {
 //}}}!mb
                         rv += uuf('s.??=f? ??:o;', w, endValue);
@@ -1974,7 +2021,7 @@ function uufxbuild(node, data, queue, option) {
         data.rq.push({
             tm: 0,
             dur: queue.dur,
-            fin: 0,
+            fin: _false,
             guid: queue.guid, // copy guid
             option: reverseOption
         });
@@ -1985,28 +2032,33 @@ function uufxbuild(node, data, queue, option) {
 
 // uu.fx.skip
 function uufxskip(node,      // @param Node(= null): null is all node
-                  skipAll) { // @param Boolean(= false): true is skip all
-                             // @return Node/NodeArray:
-    var nodeArray = node ? [node] : uutag("*", doc.body),
-        v, i = -1, j, k, jz, kz, data, guid, option, q, rq;
+                  skipAll) { // @param Boolean(= false): true is skip all queue
+                             //                          false is skip top queue
+                             // @return NodeArray:
+    var ary = node ? [node] : uutag("*", doc.body),
+        i = 0, iz = ary.length,
+        j, k, jz, kz, data, guid, option, q, rq;
 
-    while ( (v = nodeArray[++i]) ) {
-        data = v[_uufx];
-        if (data && data.id) {
+    for (; i < iz; ++i) {
+        data = ary[i][_uufx];
 
-            q = data.q;
-            rq = data.rq;
+        if (data && data.id) { // running
+            q  = data.q;  // queue
+            rq = data.rq; // reverse queue
             guid = [];
+
+            // set finished flag
             for (j = 0, jz = skipAll ? q.length : 1; j < jz; ++j) {
-                q[j].fin = 1;
+                q[j].fin = _true;
                 option = q[j].option;
-                (option.chain || option.reverse) && guid.push(option.guid);
+                (option.chain || option.reverse) && guid.push(q[j].guid);
             }
+
+            // reverse queue
             for (j = 0, jz = guid.length; j < jz; ++j) {
                 for (k = 0, kz = rq.length; k < kz; ++k) {
-                    if (rq[k].option.guid === guid[j]) {
-                        rq[k].fin = 1;
-                        q.push(rq.splice(k, 1)[0]); // data.q <- data.rq
+                    if (rq[k].guid === guid[j]) {
+                        rq[k].fin = _true;
                     }
                 }
             }
@@ -2019,11 +2071,11 @@ function uufxskip(node,      // @param Node(= null): null is all node
                         node.style[_visibility] = "visible";
                     }});
 
-                v.style[_visibility] = "hidden";
+                ary[i].style[_visibility] = "hidden";
             }
         }
     }
-    return node || nodeArray;
+    return ary;
 }
 
 // uu.fx.isBusy
@@ -2205,9 +2257,11 @@ function uucssopacity(node,      // @param Node:
 //{{{!mb
     if (!uuready.opacity) {
         if (!node["data-uuopacity"]) {
-            // init opacity
-            node.style.filter +=
-                    " progid:DXImageTransform.Microsoft.Alpha()";
+            if (uuready.filter) {
+                // init opacity
+                node.style.filter +=
+                        " progid:DXImageTransform.Microsoft.Alpha()";
+            }
             if (_ver.ie6 || _ver.ie7) { // [FIX][IE6][IE7]
                 if ((node.currentStyle || {})[_width] === "auto") {
                     style.zoom = 1;
@@ -2236,14 +2290,15 @@ if (0) {
                      + style.filter[_replace](uucssopacity.alpha, "");
 
 } else {
-//        style[_visibility] = opacity ? "visible" : "hidden";
-        var filter = node.filters.item("DXImageTransform.Microsoft.Alpha");
+        if (uuready.filter) {
+            var filter = node.filters.item("DXImageTransform.Microsoft.Alpha");
 
-        if (opacity > 0 && opacity < 1) {
-            filter.Enabled = _true;
-            filter.Opacity = (opacity * 100) | 0;
-        } else {
-            filter.Enabled = _false;
+            if (opacity > 0 && opacity < 1) {
+                filter.Enabled = _true;
+                filter.Opacity = (opacity * 100) | 0;
+            } else {
+                filter.Enabled = _false;
+            }
         }
         style[_visibility] = opacity ? "visible" : "hidden";
 }
@@ -2270,42 +2325,45 @@ function uucsstransform(node,    // @param Node:
 
 //{{{!mb
     if (_ie) {
-        var ident = "DXImageTransform.Microsoft.Matrix",
-            data = "data-uutransie",
-            rotate = param[2] * Math.PI / 180, // deg2rad
-            cos = Math.cos(-rotate),
-            sin = Math.sin(-rotate),
-            // scale * rotate * translate
-            mtx = [ cos * param[0], sin * param[0], 0,
-                   -sin * param[1], cos * param[1], 0,
-                          param[3],       param[4], 1],
-            filter, rect, cx, cy;
+        if (uuready.filter) {
+            var ident = "DXImageTransform.Microsoft.Matrix",
+                data = "data-uutransie",
+                rotate = param[2] * Math.PI / 180, // deg2rad
+                cos = Math.cos(-rotate),
+                sin = Math.sin(-rotate),
+                // scale * rotate * translate
+                mtx = [ cos * param[0], sin * param[0], 0,
+                       -sin * param[1], cos * param[1], 0,
+                              param[3],       param[4], 1],
+                filter, rect, cx, cy;
 
-        if (!node[_uutrans]) {
-            // init - get center position
+            if (!node[_uutrans]) {
+                // init - get center position
+                rect = node.getBoundingClientRect();
+                cx = (rect.right  - rect.left) / 2; // center x
+                cy = (rect.bottom - rect.top)  / 2; // center y
+
+                node.style.filter += " progid:" + ident
+                                   + "(sizingMethod='auto expand')";
+                node[data] = { cx: cx, cy: cy };
+            }
+            filter = node.filters.item(ident),
+
+            filter.M11 = mtx[0];
+            filter.M12 = mtx[1];
+            filter.M21 = mtx[3];
+            filter.M22 = mtx[4];
+            filter.Dx  = mtx[6];
+            filter.Dy  = mtx[7];
+
+            // recalc center
             rect = node.getBoundingClientRect();
-            cx = (rect.right  - rect.left) / 2; // center x
-            cy = (rect.bottom - rect.top)  / 2; // center y
+            cx = (rect.right  - rect.left) / 2;
+            cy = (rect.bottom - rect.top)  / 2;
 
-            node.style.filter += " progid:" + ident + "(sizingMethod='auto expand')";
-            node[data] = { cx: cx, cy: cy };
+            node.style.marginLeft = node[data].cx - cx + "px";
+            node.style.marginTop  = node[data].cy - cy + "px";
         }
-        filter = node.filters.item(ident),
-
-        filter.M11 = mtx[0];
-        filter.M12 = mtx[1];
-        filter.M21 = mtx[3];
-        filter.M22 = mtx[4];
-        filter.Dx  = mtx[6];
-        filter.Dy  = mtx[7];
-
-        // recalc center
-        rect = node.getBoundingClientRect();
-        cx = (rect.right  - rect.left) / 2;
-        cy = (rect.bottom - rect.top)  / 2;
-
-        node.style.marginLeft = node[data].cx - cx + "px";
-        node.style.marginTop  = node[data].cy - cy + "px";
     } else {
 //}}}!mb
 
@@ -5937,7 +5995,6 @@ function uucookie(prefix) { // @param String: prefix, namespace
     }
     return rv;
 }
-uucookie.secure = location.protocol === "https:" ? "; secure" : "";
 
 //  [1][exipre +3days]    uu.cookie.save("my", { key: value }, +(new Date) + 86400 * 3);
 //  [2][temporary cookie] uu.cookie.save("my", { key: value }, +(new Date) + 86400 * 3);
@@ -5950,12 +6007,18 @@ function uucookiesave(prefix, // @param String: prefix, namespace
     date = date ? "; expires=" + (isString(date) ? date
                                                  : new Date(+date).toUTCString())
                 : "";
-    var rv = "", i;
+    var rv = "", i, secure = "";
+
+//{{{!mb
+    try {
+        location.protocol === "https:" && (secure = "; secure"); // [IE][FIX] stand alone
+    } catch(err) {}
+//}}}!mb
 
     for (i in data) {
         rv = prefix + i + "=" + encodeURIComponent(data[i]);
 
-        doc.cookie = rv + date + uucookie.secure;
+        doc.cookie = rv + date + secure;
     }
     return rv.length;
 }
@@ -6632,13 +6695,14 @@ function fakeToArray(fakeArray) { // @param FakeArray: NodeList, Arguments
 //}}}!mb
 
 function detectFeatures() {
-    var hash = { rgba: _true, hsla: _true, transparent: _true },
+    var undef, hash = { rgba: _true, hsla: _true, transparent: _true },
 //{{{!mb
         transparent = "transparent",
         node = newNode(), child, style = node.style,
 //}}}!mb
         rv = {
             opacity: _true,         // opacity ready
+            filter: _false,         // node.filters ready [IE]
             color: uuarg(hash),     // color: rgba, hsla, transparent ready
             border: uuarg(hash),    // border: rgba, hsla, transparent ready
             background: uuarg(hash),// background: rgba, hsla, transparent ready
@@ -6663,7 +6727,7 @@ function detectFeatures() {
         rv.background[i] = v[1].test(style.backgroundColor);
     });
     // detect opacity - http://d.hatena.ne.jp/uupaa/20100513
-    rv.opacity = style.opacity != void 0;
+    rv.opacity = style.opacity != undef;
 
     node.innerHTML = '<a href="/a" class="a"></a>';
     child = node[_firstChild];
@@ -6711,6 +6775,17 @@ uuready("dom:2", function() {
     cloneNode.attr  = div[_getAttribute](attr) === cloned[_getAttribute](attr);
     cloneNode.data  = (!!cloned[data] && (div[data].ref === cloned[data].ref));
     cloneNode.event = !!fired;
+}, function() {
+    // detect uu.ready.filter
+    if (_ie) {
+        var div = doc[_appendChild](newNode());
+
+        try {
+            div.filters;
+            uuready.filter = _true;
+        } catch(err) {}
+        uunoderemove(div);
+    }
 });
 //}}}!mb
 
