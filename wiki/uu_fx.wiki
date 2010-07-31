@@ -17,21 +17,25 @@ uu.fxを特殊化した以下の関数があります。
   * uu.fx.moveout     !NodeSet.moveout
   * uu.fx.highlight   !NodeSet.highlight
 
-uu.fx で easing 関数を利用するには以下のファイルが必要です。
-  * src/misc/easing.js
-
-easing.js をロードすると、以下の関数が追加されます。
-  * Math.linear, Math.linearTween
-  * Math.easeInQuad, Math.easeOutQuad, Math.easeInOutQuad
-  * Math.easeInCubic, Math.easeOutCubic, Math.easeInOutCubic, Math.easeOutInCubic
-  * Math.easeInQuart, Math.easeOutQuart, Math.easeInOutQuart, Math.easeOutInQuart
-  * Math.easeInQuint, Math.easeOutQuint, Math.easeInOutQuint, Math.easeOutInQuint
-  * Math.easeInSine, Math.easeOutSine, Math.easeInOutSine, Math.easeOutInSine
-  * Math.easeInExpo, Math.easeOutExpo, Math.easeInOutExpo, Math.easeOutInExpo
-  * Math.easeInCirc, Math.easeOutCirc, Math.easeInOutCirc, Math.easeOutInCirc
-  * Math.easeInElastic, Math.easeOutElastic, Math.easeInOutElastic, Math.easeOutInElastic
-  * Math.easeInBack, Math.easeOutBack, Math.easeInOutBack, Math.easeOutInBack
-  * Math.easeInBounce, Math.easeOutBounce, Math.easeInOutBounce, Math.easeOutInBounce
+以下の easing 関数が利用できます。
+  * linear
+  * InQuad
+  * OutQuad
+  * InOutQuad
+  * InCubic
+  * OutCubic
+  * InOutCubic
+  * OutInCubic
+  * InQuart
+  * OutQuart
+  * InOutQuart
+  * OutInQuart
+  * InBack
+  * OutBack
+  * InOutBack
+  * OutInBack
+  * InBounce
+  * OutBounce
 
 = API =
 
@@ -58,7 +62,7 @@ _option_ がHashなら { key: endValue, ...  } または { key: `[`endValue, eas
     * 現在の値を基準に、増減した値を指定するには "+100" "-100" "`*`100" "/100" とします。
     * top, left, width, height 等のCSSプロパティは px 単位で指定します。em や pt 等は速度的な理由から指定できません。
     * "px" の指定はオプションです。{ width: 100 } と { width: "100px" } は同じ結果になります。
-  * _easing_ は文字列で指定します。Math`[`_easing_`]` として解釈します。
+  * _easing_ は文字列で指定します。省略も可能です。大文字小文字は区別しません。デフォルトは InOutQuad です。
 
 === 色の変化 ===
 色を連続的に変化させます。
@@ -81,8 +85,8 @@ _option_ がHashなら { key: endValue, ...  } または { key: `[`endValue, eas
 位置(left, top)を連続的に変化させます。変化方法も指定します。x, y は left, top の別名です。
 {{{
     // left と top を 500ms かけて left = 100, top + 200(現在位置 + 200) の位置に連続的に変化させる
-    // top は Math.easeInOutQuad の計算結果を使用する
-    uu("div").css({ x: 0 }).fx(500, { x: 100, y: ["+200", "easeInOutQuad"] });
+    // top は InOutQuad の計算結果を使用する
+    uu("div").css({ x: 0 }).fx(500, { x: 100, y: ["+200", "InOutQuad"] });
 }}}
 
 === 大きさの変化 ===
