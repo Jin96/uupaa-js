@@ -7,6 +7,14 @@ $sourceDir   = "../src/";
 $compiler    = "g";             // default compiler
 $catfood     = "../catfood.js"; // temporary file
 $castoff     = array();         // "form,canvas,..."
+$castoffAll  = array(
+    "form", "snippet", "image", "color",
+    "test", "fx", "ajax",
+    "svg", "canvas", "canvasvml", "canvassl", "canvasfl",
+    "flash", "nodeset",
+    "live", "resize", "cssbox", "codec",
+    "md5", "sprintf", "url", "font", "cookie", "storage"
+);
 
 // --- global ---
 $slash       = '/';
@@ -65,7 +73,24 @@ function loadSource($src) { // @param FilePathString:
                                 includeSource, $js);
     // pre-process
     if (function_exists('preProcess')) {
+        $js = stripCodeBlock($js, $mobile, $castoff);
         $js = preProcess($js, $mobile, $castoff);
+    }
+    return $js;
+}
+
+// "{{{!ident ... }}}!ident" -> ""
+// "{@ident ... }@ident" -> ""
+function stripCodeBlock($js, $mobile, $castoff) {
+    $copiedArray = $castoff; // copy array
+    if ($mobile) {
+        $copiedArray[] = "mb"; // add "mb"
+    }
+    foreach ($copiedArray as $value) {
+        $js = preg_replace('/\{\{\{\!' . $value . '(?:[^\n]*)\}\}\}\!'      . $value . '/',   '', $js);
+        $js = preg_replace('/\{\{\{\!' . $value . '(?:[^\n]*)\n.*?\}\}\}\!' . $value . '/ms', '', $js);
+        $js = preg_replace('/\{@'      . $value . '(?:[^\n]*)\}@'           . $value . '/',   '', $js);
+        $js = preg_replace('/\{@'      . $value . '(?:[^\n]*)\n.*?\}@'      . $value . '/ms', '', $js);
     }
     return $js;
 }
@@ -173,12 +198,7 @@ while ($v = array_shift($argv)) {
     }
 }
 if ($castoff[0] === "all") {
-    $castoff = array("form", "snippet", "image", "color",
-                     "test", "fx", "ajax",
-                     "svg", "canvas", "canvasvml", "canvassl", "canvasfl",
-                     "flash", "nodeset",
-                     "live", "resize", "cssbox", "codec",
-                     "md5", "sprintf", "url", "font", "cookie", "storage");
+    $castoff = $castoffAll; // copy array
 }
 
 include $preprosess;

@@ -80,6 +80,7 @@ var _prototype = "prototype",
     _types = { "NaN": 2 },
     _trimSpace = /^\s+|\s+$/g,
     _rootNode = doc.documentElement,
+    _easing,
     _dd2num = {},               // uu.hash.dd2num = {  "00":    0 , ...  "99":   99  }
     _num2dd = {},               // uu.hash.num2dd = {    0 :  "00", ...   99 :  "99" }
     _bb2num = {},               // uu.hash.bb2num = { "\00":    0 , ... "\ff":  255  }
@@ -567,8 +568,8 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/ClassNameS
         save:       uucookiesave    // uu.cookie.save(prefix:String, data:Hash, date:UTCDateString/Date = void):Number
     }),
 //}}}!cookie
-//{{{!storage
     // --- STORAGE(HTML5 WebStorage) --
+//{{{!storage
     storage:        null,           // uu.storage - uu.Class.Storage instance
 //}}}!storage
     // --- URL ---
@@ -1839,11 +1840,44 @@ uufx.props = { opacity: 1, color: 2, backgroundColor: 2,
 uufx.alpha = /^alpha\([^\x29]+\) ?/;
 //}}}!mb
 
+_easing = {
+    // linear(g,b,c,d)
+    linear:     "(c*g/d+b)",
+    inquad:     "(z1=g/d,c*z1*z1+b)",
+    outquad:    "(z1=g/d,-c*z1*(z1-2)+b)",
+    inoutquad:  "(z1=g/(d*0.5),z1<1?c*0.5*z1*z1+b:-c*0.5*((--z1)*(z1-2)-1)+b)",
+    incubic:    "(z1=g/d,c*z1*z1*z1+b)",
+    outcubic:   "(z1=g/d-1,c*(z1*z1*z1+1)+b)",
+    inoutcubic: "(z1=g/(d*0.5),z1<1?c*0.5*z1*z1*z1+b:c*0.5*((z1-=2)*z1*z1+2)+b)",
+    outincubic: "(z1=g*2,z2=c*0.5,g<d*0.5?(z3=z1/d-1,z2*(z3*z3*z3+1)+b)" +
+                                        ":(z3=(z1-d)/d,z2*z3*z3*z3+b+z2))",
+    inquart:    "(z1=g/d,c*z1*g*g*g+b)",
+    outquart:   "(z1=g/d-1,-c*(z1*z1*z1*z1-1)+b)",
+    inoutquart: "(z1=g/(d*0.5),z1<1?c*0.5*z1*z1*z1*z1+b" +
+                                  ":-c*0.5*((z1-=2)*z1*z1*z1-2)+b)",
+    outinquart: "(z1=g*2,z2=c*0.5,g<d*0.5?(z3=z1/d-1,-z2*(z3*z3*z3*z3-1)+b)" +
+                                        ":(z4=z1-d,z3=z4/d,z2*z3*z4*z4*z4+b+z2))",
+    inback:     "(z1=g/d,z2=1.70158,c*z1*z1*((z2+1)*z1-z2)+b)",
+    outback:    "(z1=g/d-1,z2=1.70158,c*(z1*z1*((z2+1)*z1+z2)+1)+b)",
+    inoutback:  "(z1=g/(d*0.5),z2=1.525,z3=1.70158," +
+                    "z1<1?(c*0.5*(z1*z1*(((z3*=z2)+1)*z1-z3))+b)" +
+                        ":(c*0.5*((z1-=2)*z1*(((z3*=z2)+1)*z1+z3)+2)+b))",
+    outinback:  "(z1=g*2,z2=c*0.5," +
+                    "g<d*0.5?(z3=z1/d-1,z4=1.70158,z2*(z3*z3*((z4+1)*z3+z4)+1)+b)" +
+                           ":(z3=(z1-d)/d,z4=1.70158,z2*z3*z3*((z4+1)*z3-z4)+b+z2))",
+    inbounce:   "(z1=(d-g)/d,z2=7.5625,z3=2.75,c-(z1<(1/z3)?(c*(z2*z1*z1)+0)" +
+                ":(z1<(2/z3))?(c*(z2*(z1-=(1.5/z3))*z1+.75)+0):z1<(2.5/z3)" +
+                "?(c*(z2*(z1-=(2.25/z3))*z1+.9375)+0)" +
+                ":(c*(z2*(z1-=(2.625/z3))*z1+.984375)+0))+b)",
+    outbounce:  "(z1=    g/d,z2=7.5625,z3=2.75,   z1<(1/z3)?(c*(z2*z1*z1)+b)" +
+                ":(z1<(2/z3))?(c*(z2*(z1-=(1.5/z3))*z1+.75)+b):z1<(2.5/z3)" +
+                "?(c*(z2*(z1-=(2.25/z3))*z1+.9375)+b)" +
+                ":(c*(z2*(z1-=(2.625/z3))*z1+.984375)+b))"
+};
+
 function uufxbuild(node, data, queue, option) {
     function ezfn(v0, v1, ez) {
-        return ez ? uuf('Math.??(g,??,??,d)', ez, v0, v1 - v0)
-                  : uuf('(t=g,b=??,c=??,(t/=d2)<1?c/2*t*t+b:-c/2*((--t)*(t-2)-1)+b)',
-                        v0, v1 - v0);
+        return uuf("(b=??,c=??,??)", v0, v1 - v0, _easing[ez])
     }
     // 123.4  -> 123.4
     // "+123" -> curt + 123
@@ -1862,7 +1896,7 @@ function uufxbuild(node, data, queue, option) {
                c < 6 ? fn(curt / parseFloat(end.slice(1))) : fn(end);
     }
 
-    var rv = 'var s=n.style,t,b,c,d2=d/2,w,o,gd,h,fo;', // fo = filterObject
+    var rv = 'var s=n.style,t,b,c,w,o,gd,h,fo,z1,z2,z3,z4;', // fo = filterObject
         reverseOption = { before: option[_before],
                           after: option[_after],
                           back: 1 },
@@ -1873,9 +1907,8 @@ function uufxbuild(node, data, queue, option) {
         w = fixdb[i] || i;
 
         if (w in cs) {
-            ez = 0;
-            _isArray(option[i]) ? (endValue = option[i][0], ez = option[i][1]) // val, easing
-                                : (endValue = option[i]); // option.val
+            _isArray(option[i]) ? (endValue = option[i][0], ez = option[i][1][_toLowerCase]()) // val, easing
+                                : (endValue = option[i],    ez = "inoutquad"); // option.val
 
             // skip { marginLeft: undefined, marginTop: null }
             if (endValue != null) {
@@ -1931,7 +1964,7 @@ function uufxbuild(node, data, queue, option) {
                     rv += uuf('s.??=((f? ??:??)|0)+"px";',
                               w, endValue, ezfn(startValue, endValue, ez));
                 }
-                reverseOption[w] = ez ? [startValue, ez] : startValue;
+                reverseOption[w] = [startValue, ez];
             }
         }
     }
@@ -7822,10 +7855,6 @@ function memStorageSetItem(key,     // @param String/Hash:
 
 function memStorageRemoveItem(key) { // @param String:
     delete this.so[key];
-}
-
-function memStorageGetAllItems() { // @return Hash: { key: "value", ... }
-    return this.so;
 }
 
 })(this, document, uu);
