@@ -41,37 +41,36 @@ uu.fxを特殊化した以下の関数があります。
 
 == uu.fx ==
 
-uu.fx(_node_:Node, _duration_:Number, _option_:Hash/Function):Node で
+uu.fx(_node_:Node, _duration_:Number, _option_:Hash/Function):Node は
 _node_ で指定したノードにアニメーションキューを設定し _node_ を返します。
 _duration_ で指定した時間が経過するまで、_option_ で指定した幾つかのCSSプロパティを連続的に変化させます。
-_duration_ で指定した時間が経過すると、アニメーションを停止し、_option_.after をコールバックします。
+_duration_ で指定した時間が経過すると、アニメーションを停止し、_option_.after 関数が指定されていればコールバックします。
 
-_duration_ には 0 以上の数値を ms 単位で指定します。
+_duration_ には 0 以上の数値を指定します。単位は ms です。
 
-_option_ にHashを指定すると、一定時間内に変化させるCSSプロパティと変化させる方法を指定できます。
-_option_ にFunctionを指定すると、一定間隔で _option_ を評価します。
+_option_ にHashを指定すると、一定時間内に変化させるCSSプロパティと変化の割合わeasing関数により指定できます。
+_option_ にFunctionを指定すると、一定間隔で _option_ をコールバックします。
 
 _option_ がHashなら { key: endValue, ...  } または { key: `[`endValue, easing`]`, ... } のように指定します。
-  * key には color, opacity といった CSSプロパティ や before, after, r, css などのキーワードを指定します。
+  * key には color, opacity といった CSSプロパティ や、予約済みのキーワード( init, before, after, chain, reverse, fps, deny ) などのキーワードを指定します。
     * { before: beforeCallback } を指定すると、アニメーション開始前に beforeCallback(_node_, _option_, _back_) の形でコールバックします。
     * { after: afterCallback } を指定すると、アニメーション終了後に afterCallback(_node_, _option_, _back_) の形でコールバックします。
       * 逆再生中は _back_ に true が渡されます。
-    * アニメーションの逆再生を行うには、開始するキューに{ begin: 1 }を指定し、終了するキューに{ reverse: 1 } を指定します。{ begin: 1 } から { reverse: 1 } までのキューを逆再生します。
-    * { css: cssProp } は内部用です。
+    * アニメーションの逆再生を行うには、逆再生したいキュー全てに{ chain: 1 }を指定し、逆再生を開始するキューに{ reverse: 1 } を指定します。uu.fx は { chain: 1 } と { reverse: 1 } が指定されたキューのアニメーションを連続的に逆再生します。
   * endValue には 文字列または数値を指定します
-    * 現在の値を基準に、増減した値を指定するには "+100" "-100" "`*`100" "/100" とします。
-    * top, left, width, height 等のCSSプロパティは px 単位で指定します。em や pt 等は速度的な理由から指定できません。
+    * 現在の値を基準に、増減した値を指定するには "+100" "-100" "`*`100" "/100" のように指定します。
+    * top, left, width, height 等のCSSプロパティは、数値で指定するか "100px"のように指定します。em や pt 等は速度的な理由から指定できません。
     * "px" の指定はオプションです。{ width: 100 } と { width: "100px" } は同じ結果になります。
-  * _easing_ は文字列で指定します。省略も可能です。大文字小文字は区別しません。デフォルトは !InOutQuad です。
+  * _easing_ は uu.fx.easing に登録されている関数名を文字列で指定します。省略も可能です。大文字小文字は区別しません。デフォルトは !inoutquad です。
 
 === 色の変化 ===
 色を連続的に変化させます。
 {{{
-    var color = uu.color(uu.rand(0, 0xffffff)).hex,
-        bgcolor = uu.color(uu.rand(0, 0xffffff)).hex;
+    var c = uu.color.random().hex,
+        bgc = uu.color.random().hex;
 
-    // 色と背景色を 500ms かけて、変化させる
-    uu.fx(node, 500, { color: color, bgcolor: bgcolor });
+    // 色(color)と背景色(background-color)を 500ms かけて変化させる。c は color のエリアスで、bgc は background-color のエリアスです。
+    uu.fx(node, 500, { c: c, bgc: bgc });
 }}}
 
 === 不透明度の変化 ===
@@ -127,13 +126,12 @@ uu.fx(_node_, _duration_, uu.nop) とすることで、_duration_ の間だけ�
 }}}
 
 == uu.fx.skip ==
-uu.fx.skip(_node_:Node = null, _all_:Boolean = false, _avoidFlicker_:Boolean = false):Node/!NodeArray は、_node_ のキューに積まれたアニメーションを一つだけスキップし _node_ を返します。
-スキップすると、各CSSプロパティの値は、アニメーション開始時にuu.fx で指定した endValue の値になります。
+uu.fx.skip(_node_:Node = null, _skipAll_:Boolean = false, _invisible_:Boolean = false):!NodeArray は、_node_ のキューに積まれたアニメーションを一つだけスキップし、キューをスキップしたノードの配列 !NodeArray を返します。
+スキップすると、各CSSプロパティの値は、アニメーション開始時に uu.fx で指定した endValue の値になります。
 
-_node_ が falsy(0, null, undefined) なら、アニメーションキューを持つ全てのノードを一つだけスキップし、!NodeArray を返します。
-_all_ に true を指定すると、全てのアニメーションキューをスキップします。
-_avoidFlicker_ に true を指定すると、複数の一連のアニメーションをスキップする前に style.visibility = "hidden" を設定し、スキップ後に、 "visible" に設定する特別な処理が行われます。
-skip によりちらつきが発生する場合は、_avoidFlicker_ を試してみてください。
+_node_ に null を指定すると、アニメーションキューを持つ全てのノードから先頭のキューを一つだけスキップし、!NodeArray を返します。
+_skipAll_ に true を指定すると、全てのアニメーションキューをスキップします。
+_invisible_ に true を指定すると、2つ以上のアニメーションを連続でスキップする際に style.visibility = "hidden" を設定し、スキップ完了後に "visible" に戻す特別な処理が追加されます。この処理をいれるとフリッカー(点滅)を抑止できるケースがあります。
 
 {{{
     // node のアニメーションを一つスキップする
@@ -145,8 +143,7 @@ skip によりちらつきが発生する場合は、_avoidFlicker_ を試して
     uu.fx.skip(0, true);
 }}}
 {{{
-    // ちらつきが発生している場合に、ちらつきを抑える
-    // アニメーションを終了させる
+    // ちらつきを抑えつつ、アニメーションを終了させる
     uu.fx.skip(0, true, true);
 }}}
 
