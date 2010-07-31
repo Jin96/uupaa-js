@@ -17,7 +17,7 @@ uu.fxを特殊化した以下の関数があります。
   * uu.fx.moveout     !NodeSet.moveout
   * uu.fx.highlight   !NodeSet.highlight
 
-以下の easing 関数が利用できます。
+以下の easing 関数が利用できます。easing 関数の特性については http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/fx.easeing.htm を参照してください。
   * linear
   * !InQuad
   * !OutQuad
@@ -103,7 +103,7 @@ _option_ がHashなら { key: endValue, ...  } または { key: `[`endValue, eas
     // width を 現在の値 → 0px → 300px → 0px → 現在の値 に戻す
     uu(".box").fx(500, { w: 0, chain: 1 }).fx(500, { w: 300, reverse: 1 });
 }}}
-  * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/fx.wiki.reverse.htm
+  * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/fx.easeing.htm
 
 単一のキューを再生し逆再生するには、 reverse: 1 を指定します。
 {{{
@@ -198,3 +198,4 @@ uu.fx.highlight(_node_:Node, _duration_:Number, _option_:Hash/Function = { bgc: 
   * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/fx.htm
   * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/fx.dance.htm
   * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/fx.plus.htm
+  * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/fx.easeing.htm
