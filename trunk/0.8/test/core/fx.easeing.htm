@@ -1,0 +1,56 @@
+<!doctype html><html><head><meta charset="UTF-8" />
+<title>uu.fx test</title>
+<style>
+.box {
+  background-color: skyblue;
+  position: absolute;
+  width: 100px;
+  height: 15px;
+  overflow: hidden;
+}
+</style>
+<script src="../../src/uupaa.js"></script>
+<script>
+var easing = ("linear,inquad,outquad,inoutquad,incubic,outcubic,inoutcubic," +
+              "outincubic,inquart,outquart,inoutquart,outinquart,inback," +
+              "outback,inoutback,outinback,inbounce,outbounce").split(",");
+//var easing = ["linear"];
+
+uu.ready(function(uu) {
+    uu.each(easing, function(ezfn, i) {
+        var node;
+
+        // create node
+        uu.body(node = uu.div("class,box,title," + ezfn, ezfn));
+
+        // style
+        uu.css(node, { o: 0.5, x: 20, y: i * 20 + 50 });
+
+        // bind
+        uu.event.hover(node, function(evt, hover) {
+            if (hover) {
+                uu.fx(node, 400, { o: 1.0 });
+                uu.fx(node, 500, { w: [  0, node.title], chain:   1 });
+                uu.fx(node, 500, { w: [400, node.title], reverse: 1 });
+            } else {
+                uu.fx(node, 400, { o: 0.5 });
+            }
+        });
+    });
+});
+function run() {
+    // skip all
+    uu.fx.skip(null, true);
+
+    uu.each(uu.klass("box"), function(node, i) {
+
+//      uu.fx.skip(node);
+        uu.fx(node, 500, { w: [  0, node.title], chain:   1 });
+        uu.fx(node, 500, { w: [400, node.title], reverse: 1 });
+    });
+}
+
+</script>
+</head><body>
+    <input type="button" value="run" onclick="run()" />
+</body></html>

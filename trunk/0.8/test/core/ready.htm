@@ -7,9 +7,7 @@ pre { border: 2px dotted gray; background: #eee; }
 <script>
 uu.ready(function(uu) {
     uu.log("DOMContentLoaded ready");
-});
-
-uu.ready("window", function(uu) {
+}, "window", function(uu) {
     uu.log("window.onload ready1");
     uu.body(
         uu.ul(
@@ -23,6 +21,7 @@ uu.ready("window", function(uu) {
             uu.li("uu.ready.background.hsla - " + uu.ready.background.hsla),
             uu.li("uu.ready.background.transparent - " + uu.ready.background.transparent),
             uu.li("uu.ready.opacity - " + uu.ready.opacity),
+            uu.li("uu.ready.filter - " + uu.ready.filter),
             uu.li("uu.ready.ArraySlice - " + uu.ready.ArraySlice),
             uu.li("uu.ready.getAttribute - " + uu.ready.getAttribute),
             uu.li("uu.ready.StringIndexer - " + uu.ready.StringIndexer),
@@ -62,9 +61,7 @@ uu.ready("window", function(uu) {
 
 uu.ready(function(uu) {
     uu.log("DOMContentLoaded ready");
-});
-
-uu.ready("window", function(uu) {
+}, "window", function(uu) {
     uu.log("window.onload ready1");
     uu.body(
         uu.ul(
@@ -78,6 +75,7 @@ uu.ready("window", function(uu) {
             uu.li("uu.ready.background.hsla - " + uu.ready.background.hsla),
             uu.li("uu.ready.background.transparent - " + uu.ready.background.transparent),
             uu.li("uu.ready.opacity - " + uu.ready.opacity),
+            uu.li("uu.ready.filter - " + uu.ready.filter),
             uu.li("uu.ready.ArraySlice - " + uu.ready.ArraySlice),
             uu.li("uu.ready.getAttribute - " + uu.ready.getAttribute),
             uu.li("uu.ready.StringIndexer - " + uu.ready.StringIndexer),
