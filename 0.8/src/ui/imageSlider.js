@@ -17,8 +17,8 @@
                   V
 
         <div style="visibility:visible;             --------------- dress up --+
-                    width:??px;height:??px;overflow:hidden">                   |
-            <div style="width:??px;height:??px;                                |
+                    width:@px;height:@px;overflow:hidden">                     |
+            <div style="width:@px;height:@px;                                  |
                         margin:0;position:relative">                           |
                 <img src="..." style="position:absolute;top:?px;left:?px" />   |
                 <img src="..." style="position:absolute;top:?px;left:?px" />   |
@@ -108,7 +108,7 @@ function uuuiimagesliderdressup(node,     // @param Node:
         degree >  0 && (h = data.h * imageNodeArray.length);
 
         target.style.cssText =
-                uu.format("width:??px;height:??px;margin:0;position:relative", w, h);
+                uu.format("width:@px;height:@px;margin:0;position:relative", w, h);
 
         // store
         node[_dataset] = data;

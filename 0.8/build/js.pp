@@ -140,10 +140,9 @@ function preProcess($js,        // @param String: JavaScript source code
     $js = preg_replace('/uu\.?event.codes.losecapture/',    '0x102', $js);
     $js = preg_replace('/uu\.?event.codes.DOMMouseScroll/', '0x104', $js);
 
-    // fakeToArray(...) -> Array[_prototype].slice.call(...)
+    // fakeToArray(...) -> toArray.call(...)
     if ($mobile) {
-        $js = preg_replace('/fakeToArray/',
-                            'Array[_prototype].slice.call', $js);
+        $js = preg_replace('/fakeToArray/', 'toArray.call', $js);
     }
 
     // strip comment line  "//..." -> ""

@@ -23,7 +23,7 @@ function addPointAtEvent(e) {
   var x = e.offsetX || e.layerX;
   var y = e.offsetY || e.layerY;
 
-window.status = uu.f("x=?? y=?? px=?? py=??", x, y, e.pageX - left, e.pageY - top);
+window.status = uu.f("x=@ y=@ px=@ py=@", x, y, e.pageX - left, e.pageY - top);
  */
   var x = e.pageX - offsetX;
   var y = e.pageY - offsetY;

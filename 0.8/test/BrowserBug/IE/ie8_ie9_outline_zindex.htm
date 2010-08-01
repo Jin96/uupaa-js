@@ -24,7 +24,7 @@ uu.ready(function(uu) {
     var zview = function(evt, node, option, dragInfo) {
                     setTimeout(function() {
                         uu(".box").each(function(node) {
-                            uu.text(node, "z-index: ??", node.style.zIndex);
+                            uu.text(node, "z-index: @", node.style.zIndex);
                         })
                     }, 200);
                 };

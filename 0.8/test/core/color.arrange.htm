@@ -56,7 +56,7 @@ function draw(hash) {
     for (xz = sary.length, yz = lary.length; y < yz; ++y) {
         for (x = 0; x < xz; ++x) {
             e = document.getElementById("id" + uu.hash.num2dd[y] + x);
-            bg = uu.color(uu.f("hsl(??,??%,??%)", hash.h || 0, sary[x], lary[y]))[method]();
+            bg = uu.color(uu.f("hsl(@,@%,@%)", hash.h || 0, sary[x], lary[y]))[method]();
             e.style.backgroundColor = bg + ""; // .toString();
         }
     }

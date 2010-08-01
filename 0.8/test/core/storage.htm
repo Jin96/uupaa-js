@@ -53,7 +53,7 @@ function updateSize() {
 
     } else if (size.max > 1024 * 1024) {
         uu.text(node,
-            uu.format("used: ??bytes(??MB), max: ??MB, remain: ??bytes(??MB)",
+            uu.format("used: @bytes(@MB), max: @MB, remain: @bytes(@MB)",
                       size.used,
                       (size.used / 1024 / 1024).toFixed(2),
                       (size.max  / 1024 / 1024).toFixed(2),
@@ -62,7 +62,7 @@ function updateSize() {
 
     } else {
         uu.text(node,
-            uu.format("used: ??bytes, max: ??bytes, free: ??bytes",
+            uu.format("used: @bytes, max: @bytes, free: @bytes",
                       size.used,
                       size.max,
                       remain));

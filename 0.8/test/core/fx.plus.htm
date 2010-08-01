@@ -21,6 +21,22 @@ html, body {
 .border10  { border:  10px double turquoise; }
 .outline10 { outline: 10px solid springgreen; }
 </style>
+<script>
+var useTimer = (window.name + "") === "Timer";
+
+document.title = useTimer ? "Timer" : "setInterval";
+window.uuconfig = {
+    fx: {
+        tiemr:  useTimer,
+        fps:    10
+    }
+};
+
+function switchTimer() {
+    window.name = useTimer ? "setInterval" : "Timer";
+    location.reload(false);
+}
+</script>
 <script src="../../src/uupaa.js"></script>
 <script>
 var duration = 300;
@@ -104,10 +120,11 @@ uu.ready(function(uu) {
               fade: fade, puff: puff, shrink: shrink,
               highlight: highlight }, function(fn, key) {
 
-        uu.node.add(
-            uu.css.selectable(
+//      uu.css.userSelect(
+            uu.node.add(
                 uu.click(
-                    uu.div({ cn: "box" }, { x: x, y: y + 40 }, uu.text(key)), fn)), uu.id("absolutebox"));
+                    uu.div({ cn: "box" }, { x: x, y: y + 40 }, uu.text(key)), fn), uu.id("absolutebox"))
+//        );
 
         x += 100 + margin;
         if (x > (100 + margin) * 5) {
@@ -118,11 +135,14 @@ uu.ready(function(uu) {
     // position: static
     uu.each({ puff: puff, shrink: shrink }, function(fn, key) {
 
-        uu.node.add(
-            uu.css.selectable(
+//      uu.css.userSelect(
+            uu.node.add(
                 uu.click(
-                    uu.div({ cn: "box static" }, { cssFloat: "left" }, uu.text(key)), fn)), uu.id("staticbox"), "+");
+                    uu.div({ cn: "box static" }, { cssFloat: "left" }, uu.text(key)), fn), uu.id("staticbox"))
+//      );
     });
+
+    uu.css.userSelect();
 });
 
 function toggleMargin() {
@@ -140,6 +160,9 @@ function toggleOutline() {
 
 </script>
 </head><body id="body">
+
+    <input type="button" value="switch Timer" onclick="switchTimer()" />
+
 <div>
   <div>
     TOGGLE:
