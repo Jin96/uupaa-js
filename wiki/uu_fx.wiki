@@ -52,7 +52,7 @@ _option_ にHashを指定すると、一定時間内に変化させるCSSプロ�
 _option_ にFunctionを指定すると、一定間隔で _option_ をコールバックします。
 
 _option_ がHashなら { key: endValue, ...  } または { key: `[`endValue, easing`]`, ... } のように指定します。
-  * key には color, opacity といった CSSプロパティ や、予約済みのキーワード( init, before, after, chain, reverse, fps, deny ) などのキーワードを指定します。
+  * key には color, opacity といった CSSプロパティ や、予約済みのキーワード( init, before, after, chain, reverse, deny ) などのキーワードを指定します。
     * { before: beforeCallback } を指定すると、アニメーション開始前に beforeCallback(_node_, _option_, _back_) の形でコールバックします。
     * { after: afterCallback } を指定すると、アニメーション終了後に afterCallback(_node_, _option_, _back_) の形でコールバックします。
       * 逆再生中は _back_ に true が渡されます。
@@ -112,10 +112,14 @@ _option_ がHashなら { key: endValue, ...  } または { key: `[`endValue, eas
   * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/fx.wiki.reverse.htm
 
 === fps の指定 ===
-アニメーションが停止している状態(キューが存在しない状態)で、_option_ に { fps: Number } を指定すると、キュー全体の fps を指定できます。
+window.uuconfig.fx.fps に 1以上の数字を指定することでアニメーションの fps を調整できます。デフォルト値は 10 です。
 {{{
-    // fps を 30 にする
-    uu("div").fx(500, { fps: 30, o: 1.0 });
+<script>
+window.uuconfig = {
+    fx: {
+        fps: 10
+    }
+};
 }}}
 
 === スタンバイキュー ===
