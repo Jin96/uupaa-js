@@ -2,7 +2,7 @@
 // === uu.ui.shim ===
 //#include uupaa.js
 
-//{{{!mb
+//{@mb
 uu.Class.Shim || (function(uu) {
 
 // --- shim ---
@@ -57,5 +57,5 @@ function shimunbind() {
 }
 
 })(uu);
-//}}}!mb
+//}@mb
 

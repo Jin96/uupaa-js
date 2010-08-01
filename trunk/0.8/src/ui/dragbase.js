@@ -125,13 +125,13 @@ function uuuidragbase(evt,      // @param event:
 
         opt.mousemove && opt.mousemove(evt, node, option, dragInfo);
         dragInfo.tap = 0;
-//{{{!mb
+//{@mb
         opt.shim &&
             opt.shim.resize(pageX - dragInfo.x,
                             pageY - dragInfo.y,
                             node.offsetWidth,
                             node.offsetHeight);
-//}}}!mb
+//}@mb
     // mousewheel
     } else if (code === uu.event.codes.mousewheel) {
         if (option.transform) {

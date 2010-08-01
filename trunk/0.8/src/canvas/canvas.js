@@ -1,13 +1,124 @@
 
 // === Canvas ===
-//{{{!mb
-//{{{!canvas
+//{@mb
+//{@canvas
+window["CanvasRenderingContext2D"] && (function(uu) {
 
-!window["CanvasRenderingContext2D"] && (function(doc, uu) {
+// extend functions and properties
+uu.mix(window["CanvasRenderingContext2D"].prototype, {
+    lock:           canvasLock,
+    clear:          canvasClear,
+    unlock:         uu.nop,
+    drawCircle:     canvasDrawCircle,
+    drawRoundRect:  canvasDrawRoundRect,
+    xBackend:       "Canvas"
+}, 0, 0);
+
+// CanvasRenderingContext2D.prototype.lock
+function canvasLock(clear) { // @param Boolean: clear screen
+    clear && this.clearRect(0, 0, this.canvas.width, this.canvas.height);
+}
+
+// CanvasRenderingContext2D.prototype.clear
+function canvasClear() {
+    this.clearRect(0, 0, this.canvas.width, this.canvas.height);
+}
+
+// CanvasRenderingContext2D.prototype.drawCircle
+function canvasDrawCircle(x,           // @param Number:
+                          y,           // @param Number:
+                          raduis,      // @param Number: radius
+                          fillColor,   // @param ColorHash(= void 0): fillColor
+                          strokeColor, // @param ColorHash(= void 0): strokeColor
+                          lineWidth) { // @param Number(= 1): stroke lineWidth
+    if (fillColor || strokeColor) {
+        var undef, lw = lineWidth === undef ? 1 : lineWidth;
+
+        this.save();
+        if (fillColor) {
+            this.fillStyle = fillColor.rgba;
+        }
+        if (strokeColor && lw) {
+            this.strokeStyle = strokeColor.rgba;
+            this.lineWidth = lw;
+        }
+        this.beginPath();
+        this.arc(x, y, raduis, 0, 2 * Math.PI, true);
+        this.closePath();
+        if (fillColor) {
+            this.fill();
+        }
+        if (strokeColor && lw) {
+            this.stroke();
+        }
+        this.restore();
+    }
+}
+
+// CanvasRenderingContext2D.prototype.drawRoundRect - round rect
+function canvasDrawRoundRect(x,           // @param Number:
+                             y,           // @param Number:
+                             width,       // @param Number:
+                             height,      // @param Number:
+                             radius,      // @param Array: [top-left, top-right, bottom-right, bottom-left]
+                             fillColor,   // @param ColorHash(= void 0): fillColor
+                             strokeColor, // @param ColorHash(= void 0): strokeColor
+                             lineWidth) { // @param Number(= 1): stroke lineWidth
+    if (fillColor || strokeColor) {
+        var undef,
+            lw = lineWidth === undef ? 1 : lineWidth, w = width, h = height,
+            r0 = radius[0], r1 = radius[1], r2 = radius[2], r3 = radius[3],
+            w2 = (width  / 2) | 0, h2 = (height / 2) | 0;
+
+        r0 < 0 && (r0 = 0);
+        r1 < 0 && (r1 = 0);
+        r2 < 0 && (r2 = 0);
+        r3 < 0 && (r3 = 0);
+        (r0 >= w2 || r0 >= h2) && (r0 = Math.min(w2, h2) - 2);
+        (r1 >= w2 || r1 >= h2) && (r1 = Math.min(w2, h2) - 2);
+        (r2 >= w2 || r2 >= h2) && (r2 = Math.min(w2, h2) - 2);
+        (r3 >= w2 || r3 >= h2) && (r3 = Math.min(w2, h2) - 2);
+
+        this.save();
+        this.setTransform(1, 0, 0, 1, 0, 0);
+
+        if (fillColor) {
+            this.fillStyle = fillColor.rgba;
+        }
+        if (strokeColor && lw) {
+            this.strokeStyle = strokeColor.rgba;
+            this.lineWidth = lw;
+        }
+
+        this.beginPath();
+        this.moveTo(x, y + h2);
+        this.lineTo(x, y + h - r3);
+        this.quadraticCurveTo(x, y + h, x + r3, y + h); // bottom-left
+        this.lineTo(x + w - r2, y + h);
+        this.quadraticCurveTo(x + w, y + h, x + w, y + h - r2); // bottom-right
+        this.lineTo(x + w, y + r1);
+        this.quadraticCurveTo(x + w, y, x + w - r1, y); // top-left
+        this.lineTo(x + r0, y);
+        this.quadraticCurveTo(x, y, x, y + r0); // top-right
+        this.closePath();
+
+        if (fillColor) {
+            this.fill();
+        }
+        if (strokeColor && lw) {
+            this.stroke();
+        }
+        this.restore();
+    }
+}
+})(uu);
+
+// === VMLCanvas / FlashCanvas / SilverlightCanvas ===
+window["CanvasRenderingContext2D"] || (function(doc, uu) {
 
 var _enableFlashCanvas = 0;
 
-if (uu.require && uu.ie && uu.ver.flash > 8) {
+if (uu.ie && uu.ver.flash > 8) {
     _enableFlashCanvas = uu.stat(uu.config.baseDir + "uu.canvas.swf");
 }
 
@@ -35,7 +146,7 @@ function VMLCanvas(node) { // @param Node: <canvas>
 
 // uu.canvas.init - init canvas
 function uucanvasinit() {
-    uu.ie && uu.each(uu.tag("canvas"), function(node) {
+    uu.ie && uu.ver < 9 && uu.each(uu.tag("canvas"), function(node) {
         if (!node.getContext) { // already initialized (altcss and other)
             // remove fallback contents
             //      <canvas>fallback contents...</canvas> -> <canvas></canvas>
@@ -122,7 +233,7 @@ function uucanvasbgcolor(node) { // @param Node:
 
 })(document, uu);
 
-//{{{!canvasvml
+//{@canvasvml
 // === VML Canvas ===
 
 //  <canvas width="300" height="150">   <- canvas
@@ -136,27 +247,27 @@ function uucanvasbgcolor(node) { // @param Node:
 var _COMPOS = { "source-over": 0, "destination-over": 4, copy: 10 },
     _FILTER = uu.ver.ie8 ? ["-ms-filter:'progid:DXImageTransform.Microsoft.", "'"]
                          : ["filter:progid:DXImageTransform.Microsoft.", ""],
-    _CLIPPY         = '<v:shape style="position:absolute;width:10px;height:10px" filled="t" stroked="f" coordsize="100,100" path="??"><v:fill type="solid" color="??" /></v:shape>',
+    _CLIPPY         = '<v:shape style="position:absolute;width:10px;height:10px" filled="t" stroked="f" coordsize="100,100" path="@"><v:fill type="solid" color="@" /></v:shape>',
 
     // zindex(+shadowOffsetX +shadowOffsetY), path, color.hex, opacity(+strokeProps or +' type="solid"')
-    _COLOR_FILL     = '<v:shape style="position:absolute;width:10px;height:10px;z-index:??" filled="t" stroked="f" coordsize="100,100" path="??"><v:fill color="??" opacity="??" /></v:shape>',
-    _COLOR_STROKE   = '<v:shape style="position:absolute;width:10px;height:10px;z-index:??" filled="f" stroked="t" coordsize="100,100" path="??"><v:stroke color="??" opacity="??" /></v:shape>',
+    _COLOR_FILL     = '<v:shape style="position:absolute;width:10px;height:10px;z-index:@" filled="t" stroked="f" coordsize="100,100" path="@"><v:fill color="@" opacity="@" /></v:shape>',
+    _COLOR_STROKE   = '<v:shape style="position:absolute;width:10px;height:10px;z-index:@" filled="f" stroked="t" coordsize="100,100" path="@"><v:stroke color="@" opacity="@" /></v:shape>',
 
-    _IMAGE_FILL     = '<v:shape style="position:absolute;width:10px;height:10px;z-index:??;left:??px;top:??px" filled="t" stroked="f" coordsize="100,100" path="??"><v:fill type="tile" opacity="??" src="??" /></v:shape>',
-    _IMAGE_SHADOW   = '<v:shape style="position:absolute;width:10px;height:10px;z-index:??;left:??px;top:??px" filled="t" stroked="f" coordsize="100,100" path="??"><v:fill color="??" opacity="??" /></v:shape>',
+    _IMAGE_FILL     = '<v:shape style="position:absolute;width:10px;height:10px;z-index:@;left:@px;top:@px" filled="t" stroked="f" coordsize="100,100" path="@"><v:fill type="tile" opacity="@" src="@" /></v:shape>',
+    _IMAGE_SHADOW   = '<v:shape style="position:absolute;width:10px;height:10px;z-index:@;left:@px;top:@px" filled="t" stroked="f" coordsize="100,100" path="@"><v:fill color="@" opacity="@" /></v:shape>',
 
     // zindex(+shadowOffsetX +shadowOffsetY), path, color.hex, opacity(+strokeProps), angle
-    _LINER_FILL     = '<v:shape style="position:absolute;width:10px;height:10px;z-index:??" coordsize="100,100" filled="t" stroked="f" path="??"><v:fill type="gradient" method="sigma" focus="0%" opacity="??" angle="??" /></v:shape>',
-    _LINER_STROKE   = '<v:shape style="position:absolute;width:10px;height:10px;z-index:??" coordsize="100,100" filled="f" stroked="t" path="??"><v:stroke filltype="solid" opacity="??" angle="??" /></v:shape>',
+    _LINER_FILL     = '<v:shape style="position:absolute;width:10px;height:10px;z-index:@" coordsize="100,100" filled="t" stroked="f" path="@"><v:fill type="gradient" method="sigma" focus="0%" opacity="@" angle="@" /></v:shape>',
+    _LINER_STROKE   = '<v:shape style="position:absolute;width:10px;height:10px;z-index:@" coordsize="100,100" filled="f" stroked="t" path="@"><v:stroke filltype="solid" opacity="@" angle="@" /></v:shape>',
 
-    // zindex, left, top, width, height, opacity(+'" color="??' +focussize1, +focussize2, +focusposition1, +focusposition2)
-    _RADIAL_FILL    = '<v:oval style="position:absolute;z-index:??;left:??px;top:??px;width:??px;height:??px" filled="t" stroked="f" coordsize="11000,11000"><v:fill type="gradientradial" method="sigma" opacity="??" /></v:oval>',
+    // zindex, left, top, width, height, opacity(+'" color="@' +focussize1, +focussize2, +focusposition1, +focusposition2)
+    _RADIAL_FILL    = '<v:oval style="position:absolute;z-index:@;left:@px;top:@px;width:@px;height:@px" filled="t" stroked="f" coordsize="11000,11000"><v:fill type="gradientradial" method="sigma" opacity="@" /></v:oval>',
     // zindex, left, top, width, height, opacity(+strokeProps, +color)
-    _RADIAL_STROKE  = '<v:oval style="position:absolute;z-index:??;left:??px;top:??px;width:??px;height:??px" filled="f" stroked="t" coordsize="11000,11000"><v:stroke filltype="tile" opacity="??" /></v:oval>',
+    _RADIAL_STROKE  = '<v:oval style="position:absolute;z-index:@;left:@px;top:@px;width:@px;height:@px" filled="f" stroked="t" coordsize="11000,11000"><v:stroke filltype="tile" opacity="@" /></v:oval>',
 
     // zindex, left, top, path, type["solid" or "tile"], opacity(+color, +src, +strokeProps)
-    _PATTERN_FILL   = '<v:shape style="position:absolute;width:10px;height:10px;z-index:??;left:??px;top:??px" coordsize="100,100" filled="t" stroked="f" path="??"><v:fill type="??" opacity="??" /></v:shape>',
-    _PATTERN_STROKE = '<v:shape style="position:absolute;width:10px;height:10px;z-index:??;left:??px;top:??px" coordsize="100,100" filled="f" stroked="t" path="??"><v:stroke filltype="??" opacity="??" /></v:shape>';
+    _PATTERN_FILL   = '<v:shape style="position:absolute;width:10px;height:10px;z-index:@;left:@px;top:@px" coordsize="100,100" filled="t" stroked="f" path="@"><v:fill type="@" opacity="@" /></v:shape>',
+    _PATTERN_STROKE = '<v:shape style="position:absolute;width:10px;height:10px;z-index:@;left:@px;top:@px" coordsize="100,100" filled="f" stroked="t" path="@"><v:stroke filltype="@" opacity="@" /></v:shape>';
 
 uu.mix(uu.canvas.VML.prototype, {
     arc:                    arc,
@@ -1407,9 +1518,9 @@ function _radialGradientFill(ctx, obj, path, fill, zindex) {
         //                                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         //      </v:oval>
         //
-        more = fill ? uu.format('" color="??" focussize="??,??" focusposition="??,??',
+        more = fill ? uu.format('" color="@" focussize="@,@" focusposition="@,@',
                              ctx.__shadowColor.hex, fsize, fsize, fposX, fposY)
-                    : uu.format('" color="????', ctx.__shadowColor.hex, strokeProps);
+                    : uu.format('" color="@@', ctx.__shadowColor.hex, strokeProps);
         rv.push(uu.format(fill ? _RADIAL_FILL : _RADIAL_STROKE,
                         zindex,
                         Math.round(c0.x / 10) + ctx.shadowOffsetX + 1,
@@ -1452,10 +1563,10 @@ function _radialGradientFill(ctx, obj, path, fill, zindex) {
     //          <v:stroke filltype="tile" opacity="?" color="?" joinstyle="?" miterlimit="?" weight="?px" endcap="?" />
     //                                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     //      </v:oval>
-    more = fill ? uu.format('" o:opacity2="??" colors="??" focussize="??,??" focusposition="??,??',
+    more = fill ? uu.format('" o:opacity2="@" colors="@" focussize="@,@" focusposition="@,@',
                          ctx.globalAlpha, obj.colors || _gradationColor(obj),
                          fsize, fsize, fposX, fposY)
-                : uu.format('" color="????', uu.color(ctx.xMissColor).hex, strokeProps);
+                : uu.format('" color="@@', uu.color(ctx.xMissColor).hex, strokeProps);
 
     rv.push(uu.format(fill ? _RADIAL_FILL : _RADIAL_STROKE,
                     zindex,
@@ -1577,10 +1688,10 @@ uu.ie && uu.ready("canvas:0", function() {
         "{behavior:url(#default#VML);display:inline-block}"; // [!] inline-block
 });
 
-})(window, document, uu);
-//}}}!canvasvml
+})(this, document, uu);
+//}@canvasvml
 
-//{{{!canvassl
+//{@canvassl
 // === Silverlight Canvas ===
 
 //  <canvas width="300" height="150">   <- canvas
@@ -1590,7 +1701,6 @@ uu.ie && uu.ready("canvas:0", function() {
 //          </Canvas>
 //      </object>
 //  </canvas>
-
 
 !window["CanvasRenderingContext2D"] && (function(win, doc, uu) {
 var _COMPOS = { "source-over": 0, "destination-over": 4, copy: 10 },
@@ -2140,7 +2250,7 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
             shadow = renderShadow ? _dropShadow(this, "Image", this.__shadowColor) : "";
             matrix = _matrix("Image", uu.matrix2d.translate(dx, dy, this._matrix));
 
-            fg = uu.format('<Canvas Canvas.ZIndex="??"><Image Opacity="??" Source="??">????</Image></Canvas>',
+            fg = uu.format('<Canvas Canvas.ZIndex="@"><Image Opacity="@" Source="@">@@</Image></Canvas>',
                         zindex, this.globalAlpha, image.src, matrix, shadow);
             break;
         case 5:
@@ -2163,7 +2273,7 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
             shadow = renderShadow ? _dropShadow(this, "Image", this.__shadowColor) : "";
             matrix = _matrix("Image", uu.matrix2d.translate(dx, dy, this._matrix));
 
-            fg = uu.format('<Canvas Canvas.ZIndex="??"><Image Opacity="??" Source="??" Width="??" Height="??" Stretch="Fill">????</Image></Canvas>',
+            fg = uu.format('<Canvas Canvas.ZIndex="@"><Image Opacity="@" Source="@" Width="@" Height="@" Stretch="Fill">@@</Image></Canvas>',
                         zindex, this.globalAlpha, image.src, dw, dh, matrix, shadow);
             break;
         case 9:
@@ -2198,7 +2308,7 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
             shadow = renderShadow ? _dropShadow(this, "Canvas", this.__shadowColor) : "";
             matrix = _matrix("Canvas", uu.matrix2d.translate(x, y, this._matrix));
 
-            fg = uu.format('<Canvas Canvas.ZIndex="??"><Canvas><Image Opacity="??" Source="??" Width="??" Height="??" Stretch="Fill"><Image.Clip><RectangleGeometry Rect="??" /></Image.Clip></Image></Canvas>????</Canvas>',
+            fg = uu.format('<Canvas Canvas.ZIndex="@"><Canvas><Image Opacity="@" Source="@" Width="@" Height="@" Stretch="Fill"><Image.Clip><RectangleGeometry Rect="@" /></Image.Clip></Image></Canvas>@@</Canvas>',
                         zindex, this.globalAlpha, image.src, w, h, [dx - x, dy - y, dw, dh].join(" "), matrix, shadow);
         }
     } else { // HTMLCanvasElement
@@ -2229,7 +2339,7 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
             shadow = renderShadow ? _dropShadow(this, "Canvas", this.__shadowColor) : "";
             matrix = _matrix("Canvas", args === 3 ? m : uu.matrix2d.scale(dw / dim.w, dh / dim.h, m));
 
-            fg = uu.format('<Canvas Canvas.ZIndex="??" Opacity="??"><Canvas>??</Canvas>????</Canvas>',
+            fg = uu.format('<Canvas Canvas.ZIndex="@" Opacity="@"><Canvas>@</Canvas>@@</Canvas>',
                         zindex, this.globalAlpha, history, matrix, shadow);
             break;
         case 9:
@@ -2265,7 +2375,7 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
             shadow = renderShadow ? _dropShadow(this, "Canvas", this.__shadowColor) : "";
             matrix = _matrix("Canvas", uu.matrix2d.scale(bw, bh, m));
 
-            fg = uu.format('<Canvas Canvas.ZIndex="??" Opacity="??"><Canvas>??<Canvas.Clip><RectangleGeometry Rect="??" /></Canvas.Clip></Canvas>????</Canvas>',
+            fg = uu.format('<Canvas Canvas.ZIndex="@" Opacity="@"><Canvas>@<Canvas.Clip><RectangleGeometry Rect="@" /></Canvas.Clip></Canvas>@@</Canvas>',
                         zindex, this.globalAlpha, history,
                          [(dx - x) / bw, (dy - y) / bh, dw / bw, dh / bh].join(" "),
                         matrix, shadow);
@@ -2828,7 +2938,7 @@ function _patternFill(ctx, obj, path, fill, zindex) {
                          '" Source="', obj.src, '"></Image>');
             }
         }
-        return uu.format('<Canvas Canvas.ZIndex="??"><Canvas Canvas.ZIndex="??" Clip="??">??</Canvas>??</Canvas>',
+        return uu.format('<Canvas Canvas.ZIndex="@"><Canvas Canvas.ZIndex="@" Clip="@">@</Canvas>@</Canvas>',
                       zindex, zindex2, path, img.join(""), shadow);
     }
 
@@ -2955,10 +3065,10 @@ uu.ie && uu.ver.silverlight && uu.ready(function() {
     }));
 }, "system");
 
-})(window, document, uu);
-//}}}!canvassl
+})(this, document, uu);
+//}@canvassl
 
-//{{{!canvasfl
+//{@canvasfl
 // === Flash Canvas ===
 
 //  <canvas width="300" height="150">   <- this.canvas
@@ -3078,10 +3188,10 @@ function build(canvas) { // @param Node: <canvas>
 
     // create swf <object>
     fragment = uu.f(
-        '<object id="??" width="??" height="??" classid="??">' +
+        '<object id="@" width="@" height="@" classid="@">' +
             '<param name="allowScriptAccess" value="always" />' +
             '<param name="wmode" value="transparent" />' +
-            '<param name="movie" value="??" /></object>',
+            '<param name="movie" value="@" /></object>',
          ctx._id, canvas.width, canvas.height,
          "clsid:d27cdb6e-ae6d-11cf-96b8-444553540000",
          uu.config.baseDir + "uu.canvas.swf");
@@ -3861,8 +3971,8 @@ function clearance(ctx) {
     }
 }
 
-})(window, document, uu);
-//}}}!canvasfl
+})(this, document, uu);
+//}@canvasfl
 
 // === uu.matrix2d / window.matrix2d ===
 
@@ -3980,6 +4090,6 @@ function translate(x,   // @param Number:
 
 })(uu);
 
-//}}}!canvas
-//}}}!mb
+//}@canvas
+//}@mb
 

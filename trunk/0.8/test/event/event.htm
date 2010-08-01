@@ -51,7 +51,7 @@ uu.ready(function(uu) {
     uu.Class("Button", {
         handleEvent: function(event) {
             uu.text(uu.id("log"),
-                    uu.f("type:??, code:??, button:??",
+                    uu.f("type:@, code:@, button:@",
                          event.type, event.code, event.button));
         }
     });
@@ -62,7 +62,7 @@ uu.ready(function(uu) {
             var edge = uu.event.edge(event);
 
             uu.text(uu.id("log"),
-                    uu.f("paddingEdgeX:??, paddingEdgeY:??, pageX:??, pageY:??",
+                    uu.f("paddingEdgeX:@, paddingEdgeY:@, pageX:@, pageY:@",
                          edge.x, edge.y, event.pageX, event.pageY));
         }
     });
@@ -70,7 +70,7 @@ uu.ready(function(uu) {
     uu.Class("Wheel", {
         handleEvent: function(event) {
             uu.text(uu.id("log"),
-                    uu.f("code:??, wheel:??, type:??",
+                    uu.f("code:@, wheel:@, type:@",
                          event.code, event.wheel, event.type));
         }
     });
@@ -80,7 +80,7 @@ uu.ready(function(uu) {
             var keyCode = uu.event.key(event);
 
             uu.text(uu.id("log"),
-                    uu.f("code:??, keyCode:??, key:??, type:??",
+                    uu.f("code:@, keyCode:@, key:@, type:@",
                          event.code, keyCode.code, keyCode.key, event.type));
         }
     });
