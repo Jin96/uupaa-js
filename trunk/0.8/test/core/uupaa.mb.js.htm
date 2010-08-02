@@ -631,8 +631,6 @@ uu.ready("window", function(uu) {
                 uu.fix("htmlFor"), "==", "for");
     }
 
-    uu.ok('uu.fix("d") == "display"',
-            uu.fix("d"), "==", "display");
     uu.ok('uu.fix("w") == "width"',
             uu.fix("w"), "==", "width");
     uu.ok('uu.fix("h") == "height"',
@@ -649,14 +647,8 @@ uu.ready("window", function(uu) {
             uu.fix("o"), "==", "opacity");
     uu.ok('uu.fix("c") == "color"',
             uu.fix("c"), "==", "color");
-    uu.ok('uu.fix("bg") == "background"',
-            uu.fix("bg"), "==", "background");
     uu.ok('uu.fix("bgc") == "backgroundColor"',
             uu.fix("bgc"), "==", "backgroundColor");
-    uu.ok('uu.fix("bgi") == "backgroundImage"',
-            uu.fix("bgi"), "==", "backgroundImage");
-    uu.ok('uu.fix("z") == "zIndex"',
-            uu.fix("z"), "==", "zIndex");
     uu.ok('uu.fix("fs") == "fontSize"',
             uu.fix("fs"), "==", "fontSize");
 
@@ -1066,7 +1058,9 @@ uu.ready("window", function(uu) {
 
         uu.ok("get absolute path");
         uu.ok("uu.url.abs('../dir/file.ext') は 相対URL を絶対URLに変換する",
-                uu.url.abs('../dir/file.ext'), "is string");
+                uu.url.abs('../dir/file.ext'), "!=", "../dir/file.ext");
+        uu.ok("uu.url.abs('http://example.com/dir/file.ext') は 絶対URL なのでそのまま",
+                uu.url.abs('http://example.com/dir/file.ext'), "==", 'http://example.com/dir/file.ext');
 
 
         uu.ok("get directory");
