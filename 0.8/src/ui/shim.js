@@ -15,7 +15,7 @@ uu.Class("Shim", {
 
 // uu.Class.Shim.init
 function shiminit(node) { // @param Node:
-    var cs = uu.css(node, true);
+    var cs = uu.css(node, "px");
 
     this.node = node;
     this.marginTop  = parseInt(cs.marginTop)  || 0;
