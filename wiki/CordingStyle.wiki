@@ -36,6 +36,32 @@ uupaa.js は [http://webkit.org/coding/coding-style.html WebKit]のコーディ�
   * !IgnoreCaseString は大小文字を区別しない文字列です。
   * 上記以外にも多くの型が存在します。ほとんどのケースで 形容詞 + 基本型 + コレクション型の形をとっており、CSSSelectorExpressionString は CSSセレクタ式の文字列、TimerIDArray は幾つかの タイマーID を入れるための配列 となります。
 
+== 演算子の後ろで改行する ==
+JavaScriptはセミコロンを自動的に補完するため、複数行に改行する際に、演算子を行の先頭に置くと思わぬバグを発生させるケースがあります。これを回避するため演算子の後ろで改行します。
+
+{{{
+    // good
+    if (expression ||
+        expression) {
+        ...
+    }
+
+    // wrong
+    if (expression
+        || expression) {
+        ...
+    }
+
+    // good
+    return expression,
+           expression;
+
+    // bad
+    return expression
+           , expression;
+}}}
+
+
 == if や for のブレス( {} )は省略禁止 ==
 ブレスの省略は禁止します。
 文法レベルでコードを短縮するのは Minifier の仕事です。
