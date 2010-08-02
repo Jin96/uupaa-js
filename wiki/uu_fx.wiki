@@ -52,7 +52,7 @@ _option_ にHashを指定すると、一定時間内に変化させるCSSプロ�
 _option_ にFunctionを指定すると、一定間隔で _option_ をコールバックします。
 
 _option_ がHashなら { key: endValue, ...  } または { key: `[`endValue, easing`]`, ... } のように指定します。
-  * key には color, opacity といった CSSプロパティ や、予約済みのキーワード( init, before, after, chain, reverse, deny ) などのキーワードを指定します。
+  * key には color, opacity といった CSSプロパティ や、予約済みのキーワード( init, before, after, chain, reverse, deny, css ) などのキーワードを指定します。
     * { before: beforeCallback } を指定すると、アニメーション開始前に beforeCallback(_node_, _option_, _back_) の形でコールバックします。
     * { after: afterCallback } を指定すると、アニメーション終了後に afterCallback(_node_, _option_, _back_) の形でコールバックします。
       * 逆再生中は _back_ に true が渡されます。
