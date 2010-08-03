@@ -1,7 +1,7 @@
-#summary uu.fx はアニメーションエフェクトを提供します
+#summary uu.fx はエフェクトとアニメーションを提供します
 
 <wiki:toc max_depth="2" />
-
+a
 = 導入 =
 
 uu.fx() と !NodeSet.fx() は CSSプロパティを連続的に変化させるCSSアニメーション機能を提供します。
@@ -9,6 +9,8 @@ uu.fx() と !NodeSet.fx() は CSSプロパティを連続的に変化させるCS
 uu.fx() と !NodeSet.fx() は uupaa.js に最初から組み込まれています。
 
 uu.fxを特殊化した以下の関数があります。
+  * uu.fx.show        !NodeSet.show
+  * uu.fx.hide        !NodeSet.hide
   * uu.fx.fade        !NodeSet.fade
   * uu.fx.puff        !NodeSet.puff
   * uu.fx.flare       !NodeSet.flare
@@ -16,6 +18,9 @@ uu.fxを特殊化した以下の関数があります。
   * uu.fx.movein      !NodeSet.movein
   * uu.fx.moveout     !NodeSet.moveout
   * uu.fx.highlight   !NodeSet.highlight
+
+また、要素の表示/非表示状態を取得する関数もあります。
+  * uu.fx.isHide
 
 以下の easing 関数が利用できます。easing 関数の特性については http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/fx.easeing.htm を参照してください。
   * linear
@@ -62,6 +67,41 @@ _option_ がHashなら { key: endValue, ...  } または { key: `[`endValue, eas
     * top, left, width, height 等のCSSプロパティは、数値で指定するか "100px"のように指定します。em や pt 等は速度的な理由から指定できません。
     * "px" の指定はオプションです。{ width: 100 } と { width: "100px" } は同じ結果になります。
   * _easing_ は uu.fx.easing に登録されている関数名を文字列で指定します。省略も可能です。大文字小文字は区別しません。デフォルトは !inoutquad です。
+
+== uu.fx.show ==
+uu.fx.show(_node_:Node, _duration_:Number = 0, _displayValue_:String= "block"):Node は、_node_ を _duration_ 時間かけて表示し、_node_ を返します。
+
+_duration_ には処理時間を ms 単位で指定します。 0 を指定するとすぐに表示し、1000 を指定すると 1秒かけて表示します。
+
+_displayValue_ には style.display が "none" の場合に、display に設定する値を指定します。デフォルトは "block" です。
+
+{{{
+    uu.fx(node, { w: 100, h: 100, o: 0.5 });
+
+    // 1秒かけて要素を表示する
+    uu.fx.show(node, 1000);
+}}}
+
+== uu.fx.hide ==
+uu.fx.hide(_node_:Node, _duration_:Number = 0):Node は、_node_ を _duration_ 時間かけて隠し、_node_ を返します。
+
+_duration_ には処理時間を ms 単位で指定します。 0 を指定するとすぐに隠します、1000 を指定すると 1秒かけて隠します。
+
+{{{
+    uu.fx(node, { w: 100, h: 100, o: 1 });
+
+    // 1秒かけて要素を隠す
+    uu.fx.hide(node, 1000);
+}}}
+
+== uu.fx.isHide ===
+uu.fx.isHide(_node_:Node):Boolean は、要素が見えない状態で true を返します。
+
+  * style.opacity === 0
+  * style.display === "none"
+  * style.visibility === "hidden"
+
+上記のいずれかで true を返します。
 
 === 色の変化 ===
 色を連続的に変化させます。
@@ -196,6 +236,7 @@ uu.fx.highlight(_node_:Node, _duration_:Number, _option_:Hash/Function = { bgc: 
 背景色をハイライトカラー(#ff9)にし、元の背景色に戻します。
 
 = Test Code =
+  * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/fx.show.htm (uu.fx.show / uu.fx.hide)
   * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/fx.htm
   * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/fx.dance.htm
   * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/fx.plus.htm
