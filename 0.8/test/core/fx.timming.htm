@@ -10,70 +10,112 @@
 }
 </style>
 <script>
-var useTimer = (window.name + "") === "Timer";
+var useOpacity = /\+/i.test(window.name + "");
+var usejQuery  = /Q/i.test(window.name + "");
 
-document.title = useTimer ? "Timer" : "setInterval";
-window.uuconfig = {
-    fx: {
-        tiemr:  useTimer,
-        fps:    10
-    }
-};
+document.title = (usejQuery ? "jQuery" : "uupaa.js")
+               + (useOpacity ? " + " : " - ") + "opacity";
 
-function switchTimer() {
-    window.name = useTimer ? "setInterval" : "Timer";
+function switchOpacity() {
+    window.name = (usejQuery ? "jQuery" : "uupaa.js")
+                + (!useOpacity ? " + " : " - ") + "opacity";
+    location.reload(false);
+}
+function switchLibrary() {
+    window.name = (!usejQuery ? "jQuery" : "uupaa.js")
+                + (useOpacity ? " + " : " - ") + "opacity";
     location.reload(false);
 }
 </script>
+<!--
+<script src="jquery-1.4.2.js"></script>
+ -->
 <script src="../../src/uupaa.js"></script>
 <script>
 var easing = ("linear,linear,linear,linear,linear,linear,linear," +
               "linear,linear,linear,linear,linear,linear," +
               "linear,linear,linear,linear,linear").split(",");
 
-uu.ready(function(uu) {
-    function creator(ezfn, i) {
-        var node;
+if (!usejQuery) { // uupaa.js style
+    uu.ready(function(uu) {
+        function creator(easing, i) {
+            var node;
 
-        // create node
-        uu.body(node = uu.div("class,box,title," + ezfn, ezfn));
+            // create node
+            uu.body(node = uu.div("class,box,title," + easing, easing));
+            // style
+            uu(node).css({ o: useOpacity ? 0.5 : 1.0,
+                           x: offX, y: offY + i * 20 }).
+            // bind
+                 hover(function(evt, hover) {
+                    if (hover) {
+                        useOpacity && uu.fx(evt.node, 400, { o: 1.0 });
+                        uu.fx(evt.node, 500, { w: [ 50, node.title], chain:   1 });
+                        uu.fx(evt.node, 500, { w: [400, node.title], reverse: 1 });
+                    } else {
+                        useOpacity && uu.fx(evt.node, 400, { o: 0.5 });
+                    }
+                 });
+        }
+        var offX = 20, offY = 50;
 
-        // style
-        uu.css(node, { o: 0.5, x: offX, y: offY + i * 20 });
-
-        // bind
-        uu.event.hover(node, function(evt, hover) {
-            if (hover) {
-                uu.fx(node, 400, { o: 1.0 });
-                uu.fx(node, 500, { w: [ 50, node.title], chain:   1 });
-                uu.fx(node, 500, { w: [400, node.title], reverse: 1 });
-            } else {
-                uu.fx(node, 400, { o: 0.5 });
-            }
-        });
-    }
-
-    var offX = 20, offY = 50;
-
-    uu.each(easing, creator);
-
-    offX = 420;
-    uu.each(easing, creator);
-});
-function run() {
-    // skip all
-    uu.fx.skip(null, true);
-
-    uu.each(uu.klass("box"), function(node, i) {
-
-//      uu.fx.skip(node);
-        uu.fx(node, 500, { w: [ 50, node.title], chain:   1 });
-        uu.fx(node, 500, { w: [400, node.title], reverse: 1 });
+        uu.each(easing, creator);
+        offX = 420;
+        uu.each(easing, creator);
     });
+} else { // jQuery style
+    $(function() {
+        function creator(i, easing) {
+            // create node
+            $('<div class="box" title="' + easing + '">' + easing + '</div>').
+                appendTo(document.body).
+            // style
+                css({ opacity: useOpacity ? 0.5 : 1.0,
+                      left: offX, top: offY + i * 20 }).
+            // bind
+                hover(function(evt) {
+                    useOpacity && $(this).animate({ opacity: 1.0 }, 400);
+                    var easing = $(this).attr("title");
+
+                    $(this).animate({ width:  50 }, 500, easing).
+                            animate({ width: 400 }, 500, easing).
+                            animate({ width:  50 }, 500, easing).
+                            animate({ width: 100 }, 500, easing);
+                }, function() {
+                    useOpacity && $(this).animate({ opacity: 0.5 }, 400);
+                });
+        }
+        var offX = 20, offY = 50;
+
+        $(easing).each(creator);
+        offX = 420;
+        $(easing).each(creator);
+    });
+}
+
+if (!usejQuery) { // uupaa.js style
+    function run_uupaa() {
+        // skip all
+        uu.fx.skip(null, true);
+        uu(".box").fx(500, { w: [ 50, "linear"], chain:   1 })
+                  .fx(500, { w: [400, "linear"], reverse: 1 });
+    }
+} else { // jQuery style
+    function run_jQuery() {
+        // skip all
+        $(".box").stop(false, true).
+                animate({ width:  50 }, 500, "linear").
+                animate({ width: 400 }, 500, "linear").
+                animate({ width:  50 }, 500, "linear").
+                animate({ width: 100 }, 500, "linear");
+    }
 }
 
 </script>
 </head><body>
-    <input type="button" value="setInterval &lt;=&gt; Timer" onclick="switchTimer()" />
-    <input type="button" value="run" onclick="run()" />
+<!--
+    <input type="button" value="switch library" onclick="switchLibrary()" />
+ -->
+    <input type="button" value="switch opacity" onclick="switchOpacity()" />
+    <input type="button" value="run" onclick="usejQuery ? run_jQuery() : run_uupaa()" />
 </body></html>

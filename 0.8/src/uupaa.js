@@ -100,12 +100,8 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
         storage:    {
             order:  "LFICM",        // uu.config.storage.order - String: storage backends and detection order
             space:  0               // uu.config.storage.space - Number: require free space(unit: byte). 0 is no require
-        },
-//}@storage
-        fx:         {
-            timer:  _false,         // uu.config.fx.timer - Boolean: using Timer
-            fps:    10              // uu.config.fx.fps   - Number: fx fps
         }
+//}@storage
     }),
     // --- VERSION DETECTION ---
     ver:            _ver,           // uu.ver - Hash: detected version and plugin informations
@@ -146,6 +142,11 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //  uu.type.HASH         - 10: Hash (Object)
                                     //  uu.type.NODE         - 11: Node (HTMLElement)
                                     //  uu.type.FAKEARRAY    - 12: FakeArray (Arguments, NodeList, ...)
+    complex:        uucomplex,      // uu.complex(key:String/Hash = void, value:String/Number = void):Number
+                                    //  [1][get items] uu.complex() -> 1
+                                    //  [2][set items] uu.complex({}) -> 2
+                                    //  [3][get item]  uu.complex(key) -> 3
+                                    //  [4][set item]  uu.complex(key, value) -> 4
     isNumber:       isNumber,       // uu.isNumber(search:Mix):Boolean
     isString:       isString,       // uu.isString(search:Mix):Boolean
     isFunction:     isFunction,     // uu.isFunction(search:Mix):Boolean
@@ -185,36 +186,32 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
     // --- ATTRIBUTE ---
     attr:           uuattr,         // uu.attr(node:Node, key:String/Hash = void,
                                     //                    value:String = void):String/Hash/Node
-                                    //  [1][get all pair]   uu.attr(node) -> { key: value, ... }
-                                    //  [2][get value]      uu.attr(node, key) -> "value"
-                                    //  [3][set pair]       uu.attr(node, key, "value") -> node
-                                    //  [4][set pair]       uu.attr(node, { key: "value", ... }) -> node
+                                    //  [1][get items] uu.attr(node) -> { key: "value", ... }
+                                    //  [2][mix items] uu.attr(node, { key: "value", ... }) -> node
+                                    //  [3][get item]  uu.attr(node, key) -> "value"
+                                    //  [4][set item]  uu.attr(node, key, "value") -> node
     // --- DATASET ---
     data:     uumix(uudata, {       // uu.data(node:Node, key:String/Hash = void,
                                     //                    value:Mix: = void):Hash/Mix/Node/undefined
-                                    //  [1][get all pair]   uu.data(node) -> { key: value, ... }
-                                    //  [2][get value]      uu.data(node, key) -> value
-                                    //  [3][set pair]       uu.data(node, key, value) -> node
-                                    //  [4][set pair]       uu.data(node, { key: value, ... }) -> node
+                                    //  [1][get items] uu.data(node) -> { key: value, ... }
+                                    //  [2][mix items] uu.data(node, { key: value, ... }) -> node
+                                    //  [3][get item]  uu.data(node, key) -> value
+                                    //  [4][set item]  uu.data(node, key, value) -> node
         clear:      uudataclear     // uu.data.clear(node:Node, key:String = void):Node
-                                    //  [1][clear all pair] uu.data.clear(node) -> node
-                                    //  [2][clear pair]     uu.data.clear(node, key) -> node
+                                    //  [1][clear items] uu.data.clear(node) -> node
+                                    //  [2][clear item]  uu.data.clear(node, key) -> node
 //      bind:       uudatabind,     // uu.data.bind(key:String, callback:Function)
 //      unbind:     undataunbind    // uu.data.unbind(key:String)
     }),
     // --- CSS / STYLE ---
-    css:      uumix(uucss, {        // uu.css(expr:Node,
+    css:      uumix(uucss, {        // uu.css(node:Node,
                                     //        key:Boolean/String/Hash = void,
                                     //        value:String = void):Hash/String/Node
-                                    //  [1][getComputedStyle(or currentStyle)] uu.css(node)       -> { key: value, ... }
-                                    //  [2][getComputedStyle(+ px unitize)   ] uu.css(node, true) -> { key: value, ... }
-                                    //  [3][get node.style value]              uu.css(node, key)  -> value
-                                    //  [4][set node.style pair]               uu.css(node, key, value) -> node
-                                    //  [5][set node.style pair]               uu.css(node, { key: value, ... }) -> node
-//{@fx
-        show:       uucssshow,      // uu.css.show(node:Node, duration:Number = 0, displayValue:String= "block"):Node
-        hide:       uucsshide,      // uu.css.hide(node:Node, duration:Number = 0):Node
-//}@fx
+                                    //  [1][get computed items]              uu.css(node) -> { key: value, ... }
+                                    //  [2][mix items]                       uu.css(node, { key: value, ... }) -> node
+                                    //  [3][get item]                        uu.css(node, key)  -> value
+                                    //  [4][set item]                        uu.css(node, key, value) -> node
+                                    //  [5][get computed(px unitized) items] uu.css(node, "px") -> { key: value, ... }
         unit:       uucssunit,      // uu.css.unit(node:Node, value:Number/CSSUnitString,
                                     //                    quick:Boolean = false,
                                     //                    prop:String = "left"):Number
@@ -224,7 +221,6 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //  [4][convert pixel]  uu.css.unit(<div>, "12pt") -> 16
                                     //  [5][convert pixel]  uu.css.unit(<div>, "auto") -> 100
                                     //  [6][convert pixel]  uu.css.unit(<div>, "auto", 0, "borderTopWidth") -> 0
-        isShow:     uucssisshow,    // uu.css.isShow(node:Node/CSSProperties):Boolean
         // --- CSS BOX MODEL ---
 //{@cssbox
         box:        uucssbox,       // uu.css.box(node:Node, quick:Boolean = false, mbp:Number = 0x7):Hash
@@ -247,6 +243,8 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //  [1][get/create StyleSheet object] uu.ss("myStyleSheet") -> StyleSheet
     // --- VIEW PORT ---
     viewport:       uuviewport,     // uu.viewport():Hash - { innerWidth, innerHeight, pageXOffset, pageYOffset, orientation }
+    // --- TIMER ---
+    interval:       uuinterval,     // uu.interval(callback:Function, arg:Mix = void):Number
     // --- EFFECT / ANIMATION ---
 //{@fx
     fx:       uumix(uufx, {         // uu.fx(node:Node, duration:Number, param:Hash/Function = void):Node
@@ -261,6 +259,9 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
         easing:     {},             // uu.fx.easing - easing functions
         skip:       uufxskip,       // uu.fx.skip(node:Node = null, skipAll:Boolean = false, invisible:Boolean = false):NodeArray
         isBusy:     uufxisbusy,     // uu.fx.isBusy(node:Node):Boolean
+        isHide:     uufxishide,     // uu.fx.isHide(node:Node):Boolean
+        hide:       uufxhide,       // uu.fx.hide(node:Node, duration:Number = 0):Node
+        show:       uufxshow,       // uu.fx.show(node:Node, duration:Number = 0, displayValue:String= "block"):Node
         fade:       uufxfade,       // uu.fx.fade(node:Node, duration:Number, option:Hash = {}):Node
         puff:       uufxpuff,       // uu.fx.puff(node:Node, duration:Number, option:Hash = {}):Node
         flare:      uufxflare,      // uu.fx.flare(node:Node, duration:Number, option:Hash = { parts: 10, range: 200 }):Node
@@ -583,6 +584,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //  [4][add]   uu.qs({ key: "val" }, { key2: "val2" }) -> "key=val;key2=val2"
 //}@url
     // --- DEBUG ---
+    glow:           uuglow,         // uu.glow(node:Node/NodeArray/NodeSet/CSSSelectorExpressionString)
     puff:           uupuff,         // uu.puff(source:Mix/FormatString, var_args:Mix, ...)
     log:            uulog,          // uu.log(log:Mix, var_args:Mix, ...)
     // --- UNIT TEST ---
@@ -797,7 +799,7 @@ function uusnippet(id,    // @param String: snippet id. <script id="...">
     if (!js) {
         node = uuid(id);
         if (node) {
-            if (node.src) { // <script type="text/html" src="..."></script>
+            if (node.src) { // <script type="text/html" src="...">
                 xhr = uurequire(node.src);
                 if (xhr.ok) {
                     js = xhr.data;
@@ -1166,14 +1168,27 @@ function uutype(mix) { // @param Mix: search literal/object
         return mix === null ? uutype.NULL : uutype.UNDEFINED;
     }
     if (mix === win) {
-        return uutype.OBJECT;
+        return uutype.HASH;
     }
-    if (mix[_nodeType]) {
+    if (mix[_nodeType] && mix[_appendChild]) {
         return uutype.NODE;
     }
     return _types[typeof mix] ||
            _types[toString.call(mix)] ||
-           ("length" in mix ? uutype.FAKEARRAY : uutype.HASH);
+           ((mix.callee || mix.item) ? uutype.FAKEARRAY : uutype.HASH);
+}
+
+//  [1][get items] uu.complex() -> 1
+//  [2][set items] uu.complex({}) -> 2
+//  [3][get item]  uu.complex(key) -> 3
+//  [4][set item]  uu.complex(key, value) -> 4
+
+// uu.complex - complex type detection
+function uucomplex(key,     // @param String/Hash(= void):
+                   value) { // @param String/Number(= void): 1 ~ 4
+    return key === void 0 ? 1
+                          : value !== void 0 ? 4
+                                             : isString(key) ? 3 : 2;
 }
 
 // uu.isNumber - is number
@@ -1551,11 +1566,11 @@ function uuarrayunique(source,        // @param Array: source
     return rv;
 }
 
-// --- attribute ---
-//  [1][get all pair]   uu.attr(node) -> { key: "value", ... }
-//  [2][get value]      uu.attr(node, key) -> "value"
-//  [3][set pair]       uu.attr(node, key, "value") -> node
-//  [4][set pair]       uu.attr(node, { key: "value", ... }) -> node
+// --- ATTRIBUTE ---
+//  [1][get items] uu.attr(node) -> { key: "value", ... }
+//  [2][mix items] uu.attr(node, { key: "value", ... }) -> node
+//  [3][get item]  uu.attr(node, key) -> "value"
+//  [4][set item]  uu.attr(node, key, "value") -> node
 
 // uu.attr - attribute accessor
 function uuattr(node,    // @param Node:
@@ -1566,76 +1581,66 @@ function uuattr(node,    // @param Node:
 
     // [IE6][IE7] key=for -> key=htmlFor, key=class -> key=className
     // [OTHER]    key=htmlFor -> key=for, key=className -> key=class
-    if (key === attr) { // [1] uu.attr(node)
-        ary = node.attributes;
-        while ( (attr = ary[i++]) ) {
-            rv[attr.name] = attr.value;
-        }
-        return rv; // Hash
+    switch (uucomplex(key, value)) { // 1: (), 2: ({}), 3: (k), 4: (k,v)
+    case 1: ary = node.attributes;
+            while ( (attr = ary[i++]) ) {
+                rv[attr.name] = attr.value;
+            }
+            return rv;
+    case 2: for (attr in key) {
+                node[_setAttribute](fix[attr] || attr, key[attr]);
+            }
+            break;
+    case 3: // [IE6] tagindex, colspan is number
+            return (node[_getAttribute](fix[key] || key, 2) || "") + "";
+    case 4: node[_setAttribute](fix[key] || key, value);
     }
-    if (arguments.length > 2) {     // [3] uu.attr(node, key, value)
-        key = uuhash(key, value);
-    } else if (isString(key)) {     // [2] uu.attr(node, key)
-        rv = node[_getAttribute](fix[key] || key, 2) || "";
-//{@mb
-        _ie && (rv += ""); // [IE6] tagindex, colspan is number
-//}@mb
-        return rv; // String
-    }
-
-    for (attr in key) {
-        node[_setAttribute](fix[attr] || attr, key[attr]); // [4]
-    }
-    return node; // Node
+    return node;
 }
 
 // [SVG] w=width,h=height, [DOM] cn=class
 uuattr.fix = uuhash(
 //{@mb
-                    !uuready[_getAttribute] ? "for,htmlFor,class,className,cn,className" : // [IE6][IE7]
+        !uuready[_getAttribute] ? "for,htmlFor,class,className,cn,className" : // [IE6][IE7]
 //}@mb
-                    _className + ",class,cn,class,htmlFor,for,w,width,h,height");
+        _className + ",class,cn,class,htmlFor,for,w,width,h,height");
 
-//  [1][get all pair]   uu.data(node) -> { key: value, ... }
-//  [2][get value]      uu.data(node, key) -> value
-//  [3][set pair]       uu.data(node, key, value) -> node
-//  [4][set pair]       uu.data(node, { key: value, ... }) -> node
+//  [1][get items] uu.data(node) -> { key: value, ... }
+//  [2][mix items] uu.data(node, { key: value, ... }) -> node
+//  [3][get item]  uu.data(node, key) -> value
+//  [4][set item]  uu.data(node, key, value) -> node
 
 // uu.data - node data accessor [HTML5 spec - Embedding custom non-visible data]
 function uudata(node,    // @param Node:
                 key,     // @param String/Hash(= void): key
                 value) { // @param Mix(= void): value
                          // @return Hash/Mix/Node/undefined:
-    var rv, i, prefix = "data-", undef;
+    var rv = {}, i, prefix = "data-", undef;
 
-    if (key === undef) { // [1] uu.data(node)
-        rv = {};
-        for (key in node) {
-            key[_indexOf](prefix) || (rv[key.slice(5)] = node[key]);
-        }
-        return rv; // Hash
-    }
-    if (arguments.length > 2) { // [3] uu.data(node, key or "*", value)
-        if (key === "*") {
-            for (key in uudata(node)) {
+    switch (uucomplex(key, value)) { // 1: (), 2: ({}), 3: (k), 4: (k,v)
+    case 1: for (key in node) {
+                key[_indexOf](prefix) || (rv[key.slice(5)] = node[key]);
+            }
+            return rv;
+    case 2: for (i in key) {
+                node[prefix + i] = key[i];
+            }
+            break;
+    case 3: return node[prefix + key]; // Mix or undefined
+    case 4: if (key === "*") {
+                for (key in uudata(node)) {
+                    node[prefix + key] = value;
+                }
+            } else {
                 node[prefix + key] = value;
             }
-        } else {
-            node[prefix + key] = value;
-        }
-    } else if (isString(key)) { // [2]
-        return node[prefix + key]; // Mix or undefined
-    } else {
-        for (i in key) {
-            node[prefix + i] = key[i]; // [4]
-        }
     }
     return node;
 }
 uudata.handler = {}; // { "data-uu***": callback }
 
-//  [1][clear all pair] uu.data.clear(node) -> node
-//  [2][clear pair]     uu.data.clear(node, key) -> node
+//  [1][clear items] uu.data.clear(node) -> node
+//  [2][clear item]  uu.data.clear(node, key) -> node
 
 // uu.data.clear - clear/remove node data
 function uudataclear(node,  // @param Node:
@@ -1655,67 +1660,60 @@ function uudataclear(node,  // @param Node:
 //    delete uudata.handler[key];
 //}
 
-// --- css ---
-//  [1][getComputedStyle(or currentStyle)] uu.css(node)       -> { key: value, ... }
-//  [2][getComputedStyle(+ px unitize)   ] uu.css(node, "px") -> { key: value, ... }
-//  [3][get node.style value]              uu.css(node, key)  -> value
-//  [4][set node.style pair]               uu.css(node, key, value) -> node
-//  [5][set node.style pair]               uu.css(node, { key: value, ... }) -> node
+// --- CSS ---
+
+//  [1][get computed items]              uu.css(node) -> { key: value, ... }
+//  [2][mix items]                       uu.css(node, { key: value, ... }) -> node
+//  [3][get item]                        uu.css(node, key)  -> value
+//  [4][set item]                        uu.css(node, key, value) -> node
+//  [5][get computed(px unitized) items] uu.css(node, "px") -> { key: value, ... }
 
 // uu.css - css and StyleSheet accessor
-function uucss(expr,    // @param Node:
+function uucss(node,    // @param Node:
                key,     // @param Boolean/String/Hash(= void): key
                value) { // @param String(= void): value
                         // @return Hash/String/Node:
-    var style, informal, formal, fix, care, undef;
+    var style = node.style, fuzzy, formal, fix = uufix.db, undef,
+        opacity = "opacity";
 
-    if (key === undef || key === "px") { // [1][2] uu.css(node), uu.css(node, "px")
-/*{@mb*/if (getComputedStyle) { /*}@mb*/
-            return getComputedStyle(expr, 0);
-/*{@mb*/}
-        return key ? getComputedStyleIE(expr) : expr.currentStyle; /*}@mb*/
-    }
+    switch (uucomplex(key, value)) { // 1: (), 2: ({}), 3: (k), 4: (k,v)
+    case 4: key = uuhash(key, value);
+    case 2: for (fuzzy in key) { // fuzzy = "text-align" or "textAlign"
+                value = key[fuzzy];
+                formal = fix[fuzzy] || fuzzy; // formal = "textAlign"
 
-    fix = uufix.db;
-    if (value !== undef) { // [4] uu.css(node, key, value)
-        key = uuhash(key, value);
-    } else if (typeof key === _string) { // [3] uu.css(node, key)
-        formal = fix[key] || key;
-/*{@mb*/if (getComputedStyle) { /*}@mb*/
-            return getComputedStyle(expr, 0)[formal] || "";
-//{@mb
-        }
-        if (formal === "opacity") { // [IE6][IE7][IE8]
-            return expr.style.opacity || uucssopacity(expr);
-        }
-        return (expr.currentStyle || {})[formal] || "";
-//}@mb
-    }
-    // [5]
-    care = uucss.care;
-    style = expr.style;
-
-    for (informal in key) { // informal = "text-align" or "textAlign"
-        value = key[informal];
-        formal = fix[informal] || informal; // formal = "textAlign"
-
-        if (typeof value === _number) {
-            if (formal === "opacity") {
-                uucssopacity(expr, value);
-                continue;
+                if (typeof value === _number) {
+                    if (formal === opacity) {
+                        uucssopacity(node, value);
+                        continue;
+                    }
+                    uucss.care[formal] || (value += "px"); // number -> pixel value
+                }
+                style[formal] = value;
             }
-            care[formal] || (value += "px"); // number -> pixel value
-        }
-        style[formal] = value;
-    }
-    return expr;
-}
-uucss.care = {
+            break;
+    case 1:
+    case 3: if (key === undef || key === "px") {
+/*{@mb*/        if (getComputedStyle) { /*}@mb*/
+                    return getComputedStyle(node, 0);
+/*{@mb*/        }
+                return key ? getComputedStyleIE(node) : node.currentStyle; /*}@mb*/
+            }
+            formal = fix[key] || key;
+/*{@mb*/    if (getComputedStyle) { /*}@mb*/
+                return getComputedStyle(node, 0)[formal] || "";
 //{@mb
-    zoom: 1, fontSizeAdjust: 1, // [CSS3]
+            }
+            if (formal === opacity) { // [IE6][IE7][IE8]
+                return style[opacity] || uucssopacity(node);
+            }
+            return (node.currentStyle || {})[formal] || "";
 //}@mb
-    lineHeight: 1, fontWeight: 1, zIndex: 1
-};
+    }
+    return node;
+}
+uucss.care = { /*{@mb*/ zoom: 1, fontSizeAdjust: 1, /*}@mb*/ // [CSS3]
+               lineHeight: 1, fontWeight: 1, zIndex: 1 };
 
 // --- Style Sheet ---
 function uuss(id) { // @param StyleSheetIDString:
@@ -1750,6 +1748,38 @@ function uuviewport() { // @return Hash: { innerWidth, innerHeight,
     return win;
 }
 
+// --- TIMER ---
+// uu.interval - interval timer
+function uuinterval(callback, // @param Function: callback
+                    arg) {    // @param Mix: arg
+                              // @return Number: id
+    var id = uuguid();
+
+    uuinterval.ary.push(id, callback, arg);
+    if (uuinterval.base === null) {
+        uuinterval.base = setInterval(tick, _ver.chrome ? 4 : 12);
+    }
+    return id;
+}
+uuinterval.ary = [];    // [<id, callback, arg>, ...]
+uuinterval.base = null; // base interval timer id
+
+// inner - tick interval timer
+function tick() {
+    var ary = uuinterval.ary, i = 0, iz = ary.length;
+
+    for (; i < iz; i += 3) {
+        // callback(timer.id, arg) -> false is loopout
+        if (ary[i + 1](ary[i], ary[i + 2]) === _false) {
+            ary.splice(i, 3);
+            i  -= 3;
+            iz -= 3;
+        }
+    }
+}
+
+// --- EFFECT / ANIMATION ---
+
 //  [1][abs]              uu.fx(node, 500, { o: 0.5, x: 200 })
 //  [2][rel]              uu.fx(node, 500, { h: "+100", o: "+0.5" })
 //  [3][with "px" unit]   uu.fx(node, 500, { h: "-100px" })
@@ -1771,14 +1801,12 @@ function uufx(node,     // @param Node: animation target node
                         //     easing   - String: easing function name, "InOutQuad"
                         //     callback - Function: before or after callback function
                         // @return Node:
-//    node.style.overflow = "hidden";
-    option = option || {};
-
+    // --- DATA STRUCTURE ---
     //
     //  node["data-uufx"] = {
     //       q: [FxQueueDataHash, ...]
     //      rq: [FxQueueDataHash, ...]
-    //      id: 0  // intervel timer id
+    //      id: 0       // timer id
     //  }
     //
     //  FxQueueDataHash = { js, tm, dur, fin, guid, option }
@@ -1803,11 +1831,13 @@ function uufx(node,     // @param Node: animation target node
     //      "reverse" - reverse
     //      "chain"  - reverse chain
     //      "deny"   -
+    //      "cssCache" - cached css
+
+    option = option || {};
 
     // init fx queue
     var meta = "data-uufx",
-        data = node[meta] || (node[meta] = { q: [], rq: [], id: 0 }),
-        fps = _ie ? 1 : 0; // [IE] setInterval(0) is Error
+        data = node[meta] || (node[meta] = { q: [], rq: [], id: 0 });
 
     if (data.q[0] && data.q[0].option.deny) {
         return node;
@@ -1821,15 +1851,13 @@ function uufx(node,     // @param Node: animation target node
         guid:     uuguid(),
         option:   option
     });
-    data.id || (data.id = uu.config.fx.timer ? Timer(node, uufxloop)
-                                             : setInterval(function() {
-                                                  uufxloop(node);
-                                               }, uu.config.fx.fps));
+    data.id || (data.id = uuinterval(uufxloop, node));
     return node;
 }
 
 // inner - fx loop
-function uufxloop(node) {
+function uufxloop(id,     // @param Number: timer id
+                  node) { // @param Node:
     var data = node["data-uufx"], q = data.q[0], // fetch current queue
         option = q.option, back = !!option.back, tm, finished;
 
@@ -1845,67 +1873,24 @@ function uufxloop(node) {
     }
     finished = q.fin || (tm >= q.tm + q.dur);
 
-    q.js(node, back, finished, tm - q.tm, q.dur); // js(node, back, finished, gain, duration)
-    if (finished) { // finished
+    q.js(node, finished, tm - q.tm, q.dur); // js(node, finished, gain, duration)
+
+    if (finished) {
         option[_after] && option[_after](node, option, back);
         data.q.shift(); // remove current queue
 
         if (!option.back && option.reverse && data.rq.length) {
-            data.q = data.rq.reverse()[_concat](data.q); // insert reverse queue
+            data.q = data.rq.reverse()[_concat](data.q); // inject reverse queue
             data.rq = []; // clear
         }
         if (!data.q.length) {
-            uu.config.fx.timer ? Timer(data.id)
-                               : clearInterval(data.id);
             data.id = 0;
         }
     }
+    return !!data.id; // as clearInterval
 }
-
 uufx.props = { opacity: 1, color: 2, backgroundColor: 2,
                width: 3, height: 3, left: 4, top: 5 };
-//{@mb
-uufx.alpha = /^alpha\([^\x29]+\) ?/;
-//}@mb
-
-// inner - add/remove callback
-function Timer(ident,  // @param Function/Number: callback or id
-               node) { // @param Node:
-                       // @return Number: id or 0
-    var db = Timer.db, i, rv = [], ri = -1, id;
-
-    if (isNumber(ident)) {
-        delete db[ident];
-
-        for (i in db) {
-            rv[++ri] = db[i];
-        }
-        Timer.ary = rv;
-        Timer.aryz = rv.length;
-        return 0;
-    }
-    db[id = uuguid()] = ident;
-    Timer.ary.push(ident, node);
-    Timer.aryz = Timer.ary.length;
-
-    if (Timer.base === null) {
-        Timer.base = setInterval(walkTimer, uu.config.fx.fps);
-    }
-    return id;
-}
-Timer.base = null;  // base timer id
-Timer.db   = {};    // { id: [callback, node] ... }
-Timer.ary  = [];    // [<callback, node>, ...]
-Timer.aryz = 0;     // Timer.ary.length
-
-// inner -
-function walkTimer() {
-    var ary = Timer.ary, i = 0, iz = Timer.aryz;
-
-    for (; i < iz; i += 2) {
-        ary[i](ary[i + 1]); // callback(node)
-    }
-}
 
 // uu.fx.easing - easing functions
 uu.fx.easing = {
@@ -2008,7 +1993,8 @@ function uufxbuild(node, data, queue, option) {
                      *      : (fx1 < 0.001) ? 0
                      *      : fx1;
                      */
-                    rv += 'fx1=' + ezfn(sv, ev, ez) + ';fx1=fx1>0.999?1:fx1<0.001?0:fx1;';
+                    rv += 'fx1=' + ezfn(sv, ev, ez)
+                                 + ';fx1=fx1>0.999?1:fx1<0.001?0:fx1;';
 
 //{@mb
                     if (!uuready.opacity) { // [IE6][IE7][IE8]
@@ -2026,25 +2012,25 @@ function uufxbuild(node, data, queue, option) {
 //{@color
                     sv = uucolor(cs[w]);
                     ev = uucolor(ev);
-                    rv += ['fx1=gain/dur;fx2=uu.hash.num2hh;style.', w, '="#"+',
-                           '(fx2[(fin?', ev.r, ':(', ev.r, '-', sv.r, ')*fx1+', sv.r, ')|0]||0)+',
-                           '(fx2[(fin?', ev.g, ':(', ev.g, '-', sv.g, ')*fx1+', sv.g, ')|0]||0)+',
-                           '(fx2[(fin?', ev.b, ':(', ev.b, '-', sv.b, ')*fx1+', sv.b, ')|0]||0);'].join("");
+                    rv += ['fx1=gain/dur;fx2=uu.hash.num2hh;style.',w,'="#"+',
+                           '(fx2[(fin?',ev.r,':(',ev.r,'-',sv.r,')*fx1+',sv.r,')|0]||0)+',
+                           '(fx2[(fin?',ev.g,':(',ev.g,'-',sv.g,')*fx1+',sv.g,')|0]||0)+',
+                           '(fx2[(fin?',ev.b,':(',ev.b,'-',sv.b,')*fx1+',sv.b,')|0]||0);'
+                          ].join("");
 //}@color
                     break;
                 case 3: // width, height:
                     sv = parseInt(cs[w]) || 0;
                     ev = unitNormalize(sv, ev, parseInt);
-                    rv += 'fx1=fin?' + ev + ':' + ezfn(sv, ev, ez)
-                       +  ';fx1=fx1<0?0:fx1;style.' + w + '=(fx1|0)+"px";';
+                    rv += 'fx1=fin?'+ev+':'+ezfn(sv,ev,ez)
+                       +  ';fx1=fx1<0?0:fx1;style.'+w+'=(fx1|0)+"px";';
                     break;
                 default: // top, left, other...
                     sv = n ? (n > 4 ? node.offsetTop  - parseInt(cs.marginTop)
                                     : node.offsetLeft - parseInt(cs.marginLeft))
                            : parseInt(cs[w]) || 0;
                     ev = unitNormalize(sv, ev, parseInt);
-                    rv += 'style.' + w + '=((fin?' + ev + ':' + ezfn(sv, ev, ez) + ')|0)+"px";';
-
+                    rv += 'style.'+w+'=((fin?'+ev+':'+ezfn(sv,ev,ez)+')|0)+"px";';
                 }
                 reverseOption[w] = [sv, ez];
             }
@@ -2062,7 +2048,7 @@ function uufxbuild(node, data, queue, option) {
         });
     }
 
-    return new Function("node,reverse,fin,gain,dur", rv); // node, reverse, finished, gain, duration
+    return new Function("node,fin,gain,dur", rv); // node, finished, gain, duration
 }
 
 // uu.fx.skip
@@ -2120,6 +2106,56 @@ function uufxisbusy(node) { // @param Node:
     var data = node["data-uufx"];
 
     return data && data.id;
+}
+
+// uu.fx.show - show node
+function uufxshow(node,           // @param Node:
+                  duration,       // @param Number(= 0): fadein effect duration
+                  displayValue) { // @param String(= "block"): applied at display "none"
+                                  // @return Node:
+    var cs = uucss(node), disp = displayValue || "block",
+        w = cs[_width], h = cs[_height], o = uucssopacity(node) || 1;
+
+//{@mb
+    // [Opera] getComputedStyle(node).display === "none" -> width and height = "0px"
+    if (cs[_display] === "none" && w === "0px" && w === h) { // [Opera] fix
+        node.style[_display] = disp;
+        cs = uucss(node);
+        w = cs[_width];
+        h = cs[_height];
+        node.style[_display] = "none";
+    }
+//}@mb
+    return uufx(node, duration || 0, { w: w, h: h, o: o, before: function(node) {
+                var style = node.style;
+
+                uucssopacity(node, 0);
+                style[_width] = style[_height] = "0";
+                style[_visibility] = "visible";
+                if (uucss(node)[_display] === "none") {
+                    style[_display] = disp;
+                }
+            }});
+}
+
+// uu.fx.hide - hide node
+function uufxhide(node,       // @param Node:
+                  duration) { // @param Number(= 0): fadeout effect duration
+                              // @return Node:
+    if (uufxishide(node)) {
+        node.style[_display] = "none" // hidden -> force hide
+    }
+    return uufx(node, duration || 0, { w: 0, h: 0, o: 0 });
+}
+
+// uu.fx.isHide - is hidden
+function uufxishide(node) { // @param Node:
+                            // @return Boolean:
+    var style = uucss(node);
+
+    return style[_display] === "none" ||
+           style[_visibility] === "hidden" ||
+           uucssopacity(node) === 0;
 }
 
 // uu.fx.fade - fadeout / fadein
@@ -2322,13 +2358,6 @@ function uucssopacity(node,      // @param Node:
 //{@mb
     if (!uuready.opacity) {
         node["data-uuopacity"] = opacity + 1; // (1.0 ~ 2.0)
-if (0) {
-        style[_visibility] = opacity ? "visible" : "hidden";
-        style.filter = ((opacity > 0 && opacity < 1)
-                     ? "alpha(opacity=" + (opacity * 100) + ") " : "")
-                     + style.filter[_replace](uucssopacity.alpha, "");
-
-} else {
         if (uuready.filter) {
             var filter = node.filters.item("DXImageTransform.Microsoft.Alpha");
 
@@ -2340,14 +2369,10 @@ if (0) {
             }
         }
         style[_visibility] = opacity ? "visible" : "hidden";
-}
     }
 //}@mb
     return node;
 }
-//{@mb
-uucssopacity.alpha = /^alpha\([^\x29]+\) ?/;
-//}@mb
 
 //  [1][get transform] uu.css.transform(node) -> [scaleX, scaleY, rotate, translateX, translateY ]
 //  [2][set transform] uu.css.transform(node, 1, 1, 0, 0, 0) -> node
@@ -2424,56 +2449,6 @@ function uucsstransform(node,    // @param Node:
 //}@mb
     node[meta] = param[_concat]();
     return node;
-}
-
-// uu.css.show - show node
-//{@fx
-function uucssshow(node,           // @param Node:
-                   duration,       // @param Number(= 0): fadein effect duration
-                   displayValue) { // @param String(= "block"): applied at display "none"
-                                   // @return Node:
-    var cs = uucss(node), disp = displayValue || "block",
-        w = cs[_width], h = cs[_height], o = uucssopacity(node) || 1;
-
-//{@mb
-    // [Opera] getComputedStyle(node).display === "none" -> width and height = "0px"
-    if (cs[_display] === "none" && w === "0px" && w === h) { // [Opera] fix
-        node.style[_display] = disp;
-        cs = uucss(node);
-        w = cs[_width];
-        h = cs[_height];
-        node.style[_display] = "none";
-    }
-//}@mb
-    return uufx(node, duration || 0, { w: w, h: h, o: o, before: function(node) {
-                var style = node.style;
-
-                uucssopacity(node, 0);
-                style[_width] = style[_height] = "0";
-                style[_visibility] = "visible";
-                if (uucss(node)[_display] === "none") {
-                    style[_display] = disp;
-                }
-            }});
-}
-//}@fx
-
-// uu.css.hide - hide node
-//{@fx
-function uucsshide(node,       // @param Node:
-                   duration) { // @param Number(= 0): fadeout effect duration
-                               // @return Node:
-    uucssisshow(node) || (node.style[_display] = "none");
-    return uufx(node, duration || 0, { w: 0, h: 0, o: 0 });
-}
-//}@fx
-
-// uu.css.isShow - is shown
-function uucssisshow(node) { // @param Node/CSSProperties:
-                             // @return Boolean:
-    var style = node[_nodeType] ? uucss(node) : node;
-
-    return style[_display] !== "none" && style[_visibility] !== "hidden";
 }
 
 // --- CSS BOX MODEL ---
@@ -2719,11 +2694,7 @@ function StyleSheetInit(id) { // @param String: style sheet id
 
     uuhead(node = uunode("style", [{ id: id }, _webkit ? " " : null]));
 
-    this.ss = node.sheet
-//{@mb
-                         || node.styleSheet; // [IE]
-//}@mb
-
+    this.ss = node.sheet /*{@mb*/ || node.styleSheet /*}@mb*/ ; // [IE] node.styleSheet
     this.rules = {};
 }
 
@@ -2731,9 +2702,7 @@ function StyleSheetInit(id) { // @param String: style sheet id
 function StyleSheetAdd(expr,   // @param Hash/String: { selector: declaration, ... } or a "selector"
                        decl) { // @param Hash(= void): "declaration"
     var ss = this.ss,
-//{@mb
-        ary, i, iz, rex,
-//}@mb
+/*{@mb*/ary, i, iz, rex, /*}@mb*/
         selector, declaration;
 
     for (selector in uumix(this.rules, isString(expr) ? uuhash(expr, decl)
@@ -2823,13 +2792,13 @@ function uucssunit(node,   // @param Node: context
     }
     return parseInt(value) || 0;
 }
-uumix(uucssunit, { px: /px$/, pt: /pt$/, em: /em$/, calc: _calcPixel });
+uumix(uucssunit, { px: /px$/, pt: /pt$/, em: /em$/, calc: calcPixel });
 
 // inner - convert CSS unit
-function _calcPixel(node,    // @param Node:
-                    prop,    // @param String: property, "left", "width", ...
-                    value) { // @param CSSUnitString: "10em", "10pt", "10px", "auto"
-                             // @return Number: pixel value
+function calcPixel(node,    // @param Node:
+                   prop,    // @param String: property, "left", "width", ...
+                   value) { // @param CSSUnitString: "10em", "10pt", "10px", "auto"
+                            // @return Number: pixel value
     var style = node.style, mem = [style.left, 0, 0], // [left, position, display]
         position = "position",
         important = "important",
@@ -2868,10 +2837,10 @@ function _calcPixel(node,    // @param Node:
 
 //{@mb
 // inner - convert CSS unit
-function _calcPixelIE(node,    // @param Node:
-                      prop,    // @param String: property, "left", "width", ...
-                      value) { // @param CSSUnitString: "10em", "10pt", "10px", "auto"
-                               // @return Number: pixel value
+function calcPixelIE(node,    // @param Node:
+                     prop,    // @param String: property, "left", "width", ...
+                     value) { // @param CSSUnitString: "10em", "10pt", "10px", "auto"
+                              // @return Number: pixel value
     var style = node.style,
         runtimeStyle = node.runtimeStyle,
         mem = [style[prop], runtimeStyle[prop]]; // keep !important value
@@ -2891,7 +2860,7 @@ function _calcPixelIE(node,    // @param Node:
 }
 
 if (!getComputedStyle) {
-    uucssunit.calc = _calcPixelIE;
+    uucssunit.calc = calcPixelIE;
 }
 
 // inner - emulate getComputedStyle [IE6][IE7][IE8]
@@ -3069,12 +3038,15 @@ function uuclass(className,      // @param String: "Class"
                                  //                               or init function
                  staticMember) { // @param Hash(= void): static member
 
-    var ary = className.split(/\s*[\x3a\x3c]\s*/), tmp, i, classPrototype,
+    var ary = className.split(/\s*[\x3a\x3c]\s*/),
+        Class = ary[0],
+        Super = ary[1] || "",
         protoIsFunction = protoMember && isFunction(protoMember),
-        Class = ary[0], Super = ary[1] || "";
+        tmp, i, classPrototype;
 
     uuclass[Class] = function() {
-        var that = this, args = arguments,
+        var that = this,
+            args = arguments,
             Super = that.superClass || 0;
 
         that.name = Class;
@@ -3086,7 +3058,7 @@ function uuclass(className,      // @param String: "Class"
         Super && Super.init && Super.init.apply(that, args);
                   that.init &&  that.init.apply(that, args);
     };
-    uuclass[Class].toString = function() {
+    uuclass[Class].toString = function() { // uujsonencode()
         return Class;
     };
     uuclass[Class][_prototype] = protoIsFunction ? { init: protoMember }
@@ -3131,7 +3103,7 @@ function uuclasssingleton(className,      // @param String: class name
         }
         return self[instance] || (self[instance] = that);
     };
-    uuclass[className].toString = function() {
+    uuclass[className].toString = function() { // uujsonencode()
         return className;
     };
     uuclass[className][_prototype] =
@@ -3741,9 +3713,7 @@ function uulive(expr,        // @param CSSSelectorExpressionString "css > select
     function _liveClosure(event) { // @param EventObject:
         var fullcode = uuevent.codes[event.type] || 0,
             target = event.target
-//{@mb
-                                  || event.srcElement || doc;
-//}@mb
+/*{@mb*/                          || event.srcElement || doc; /*}@mb*/
 
         event.at = (target[_nodeType] === 3) ? target[_parentNode]
                                              : target;
@@ -3825,9 +3795,9 @@ function uulive(expr,        // @param CSSSelectorExpressionString "css > select
 uulive.db = {}; // { "expr\vnamespace.click": {...}, ... }
 uulive.fix =
 //{@mb
-            _ie ? { focus: "focusin", blur: "focusout" } :
+             _ie ? { focus: "focusin", blur: "focusout" } :
 //}@mb
-            _webkit ? { focus: "DOMFocusIn", blur: "DOMFocusOut" } : {};
+             _webkit ? { focus: "DOMFocusIn", blur: "DOMFocusOut" } : {};
 
 // uu.live.has
 function uulivehas(expr,          // @param CSSSelectorExpressionString: "css > selector"
@@ -5028,7 +4998,19 @@ function parseQueryString(queryString) { // @param URLString/QueryString: "key=v
 //}@url
 
 // --- DEBUG ---
-// uu.puff - uu.puff(mix) -> alert( uu.json(mix) )
+// uu.glow - glow node
+function uuglow(node) { // @param Node/NodeArray/NodeSet/CSSSelectorExpressionString:
+//{@fx
+    uueach(isString(node) ? uuquery(node)
+                          : node[_nodeArray] ? node[_nodeArray]
+                                             : node[_nodeType] ? [node] : node,
+        function(node, i) {
+        uufx(node, 200, { bgc: "#f33", reverse: 1 });
+    });
+//}@fx
+}
+
+// uu.puff - alert( uu.json(mix) )
 function uupuff(source                   // @param Mix/FormatString: source object
                                          //                          or "format @ string"
                 /* , var_args, ... */) { // @param Mix: var_args
@@ -5205,7 +5187,8 @@ function uujsonencode(mix, esc) {
         return '"window"'; // window -> String("window")
     }
     // Class Instance -> '"ClassName"'
-    if (type === uutype.HASH && mix.name && mix instanceof uu.Class[mix.name]) { // is Class Instance
+    if (type === uutype.HASH && mix.name && uu.Class[mix.name] &&
+        mix instanceof uu.Class[mix.name]) {
         return q + mix.name + q;
     }
     switch (type) {
@@ -6171,7 +6154,7 @@ function outerHTMLSetter(html) {
 // NodeSet class
 //{@nodeset
 function NodeSet(expr,      // @param NodeSet/Node/NodeArray/String/window:
-                 context) { // @param NodeSet/Node(= void 0): context
+                 context) { // @param NodeSet/Node(= void): context
     this.stack = [[]]; // [NodeSet, ...]
 
     this[_nodeArray] = !expr ? [] // empty nodeArray
@@ -6206,32 +6189,28 @@ uu.Class.NodeSet = NodeSet[_prototype] = {
 
 // NodeSetIter(0) - Array#forEach
 uueach({
-    bind:           uuevent,
-    unbind:         uueventunbind,
-//{@live
-    live:           uulive,
-    unlive:         uuunlive,
-//}@live
+    bind:           uuevent,            // NodeSet.bind(eventTypeEx, callback)
+    unbind:         uueventunbind,      // NodeSet.unbdin(eventTypeEx)
 //{@mb
-    hover:          uueventhover,
-    unhover:        uueventunhover,
+    hover:          uueventhover,       // NodeSet.hover(expr)
+    unhover:        uueventunhover,     // NodeSet.unhover()
 //}@mb
-    cyclic:         uueventcyclic,
-    uncyclic:       uueventuncyclic,
+    cyclic:         uueventcyclic,      // NodeSet.cyclic(eventTypeEx, callback, cyclic, loop)
+    uncyclic:       uueventuncyclic,    // NodeSet.cyclic(eventTypeEx)
 //{@fx
-    fx:             uufx,
-    skip:           uufxskip,
-    show:           uucssshow,
-    hide:           uucsshide,
-    fade:           uufxfade,
-    puff:           uufxpuff,
-    flare:          uufxflare,
-    shrink:         uufxshrink,
-    movein:         uufxmovein,
-    moveout:        uufxmoveout,
-    highlight:      uufxhighlight,
+    fx:             uufx,               // NodeSet.fx(duration, option)
+    skip:           uufxskip,           // NodeSet.skip(skipAll, invisible)
+    show:           uufxshow,           // NodeSet.show(duration, displayValue)
+    hide:           uufxhide,           // NodeSet.hide(duration)
+    fade:           uufxfade,           // NodeSet.fade(duration, option)
+    puff:           uufxpuff,           // NodeSet.puff(duration, option)
+    flare:          uufxflare,          // NodeSet.flare(duration, option)
+    shrink:         uufxshrink,         // NodeSet.shrink(duration, option)
+    movein:         uufxmovein,         // NodeSet.movein(duration, option)
+    moveout:        uufxmoveout,        // NodeSet.moveout(duration, option)
+    highlight:      uufxhighlight,      // NodeSet.highlight(duration, option)
 //}@fx
-    remove:         uunoderemove
+    remove:         uunoderemove        // NodeSet.remove()
 }, function(fn, name) {
     NodeSet[_prototype][name] = function(a, b, c) {
         return NodeSetIter(0, this, fn, a, b, c);
@@ -6241,11 +6220,11 @@ uueach({
 // NodeSetIter(1) - Array#map
 uueach({
 //{@form
-    value:          uuvalue,
+    value:          uuvalue,            // NodeSet.value(value = void)
 //}@form
-    attr:           uuattr,
-    css:            uucss,
-    text:           uutext
+    attr:           uuattr,             // NodeSet.attr(key = void, value = void)
+    css:            uucss,              // NodeSet.css(key = void, value = void)
+    text:           uutext              // NodeSet.text(text = void, arg...)
 }, function(fn, name) {
     NodeSet[_prototype][name] = function(a, b) {
         return NodeSetIter(1, this, fn, a, b);
@@ -7333,7 +7312,7 @@ function otherFunctionFilter(ctx, j, jz, negate, ps, arg) {
 
 (function(win, doc, uu) {
 
-var _storageOrder = uu.config.storage.order,
+var _storageOrder = uu.config.storage.order || "M",
     _requireFreeSpace = uu.config.storage.space || 0,
     _freeSpace = uu.ver.iphone ? 2.5   * 1024 * 1024 - 260 // iPhone3.1.2 (2.5MB)
                : uu.ver.chrome ? 2.5   * 1024 * 1024 - 260 // Chrome4+    (2.5MB)
@@ -7358,31 +7337,30 @@ var _storageOrder = uu.config.storage.order,
     _getAttribute = "getAttribute",
     _setAttribute = "setAttribute",
 //}@mb
+    _undef,
     _false = !1,
     _true = !0;
 
 uu.Class.singleton("Storage", {
     init:           init,           // init()
     key:            key,            // key(index:Number):String
-    size:           size,           // size():Hash { used, max }
-    clear:          clear,          // clear()
-    getItem:        getItem,        // getItem(key:String = void):String/Hash
-    setItem:        setItem,        // setItem(key:String/Hash, value:String = void):Boolean
-    removeItem:     removeItem,     // removeItem(key:String)
-    toString:       function() {
-                        return this.so.toString();
-                    }
+    info:           info,           // info():Hash { used, max, pair, backend }
+    item:           item,           // item(key:String/Hash = void, value:String = void):String/Hash/Boolean
+                                    //  [1][get all items]  item()                 -> { key: "value", ... }
+                                    //  [2][get a item]     item("key")            -> "value"
+                                    //  [3][set some items] item({ key, "value" }) -> true
+                                    //  [4][set a item]     item("key", "value")   -> true
+    clear:          clear           // clear(key:String = void)
+                                    //  [1][clear all]      clear()
+                                    //  [2][remove a item]  clear("key")
 });
 
 uu.Class.singleton("LocalStorage", {
     init:           localStorageInit,
     key:            localStorageKey,
-    size:           localStorageSize,
-    clear:          clear,
-    getItem:        localStorageGetItem,
-    setItem:        localStorageSetItem,
-    removeItem:     localStorageRemoveItem,
-    toString:       uu.pao("LocalStorage")
+    info:           localStorageInfo,
+    item:           localStorageItem,
+    clear:          localStorageClear
 }, {
     ready:          !!win.localStorage
 });
@@ -7391,12 +7369,9 @@ uu.Class.singleton("LocalStorage", {
 uu.Class.singleton("FlashStorage", {
     init:           flashStorageInit,
     key:            key,
-    size:           size,
-    clear:          clear,
-    getItem:        flashStorageGetItem,
-    setItem:        flashStorageSetItem,
-    removeItem:     removeItem,
-    toString:       uu.pao("FlashStorage")
+    info:           info,
+    item:           flashStorageItem,
+    clear:          flashStorageClear
 }, {
     ready:          function() {
                         return uu.ver.flash && uu.stat(_swf);
@@ -7406,12 +7381,9 @@ uu.Class.singleton("FlashStorage", {
 uu.Class.singleton("IEStorage", {
     init:           ieStorageInit,
     key:            ieStorageKey,
-    size:           ieStorageSize,
-    clear:          ieStorageClear,
-    getItem:        ieStorageGetItem,
-    setItem:        ieStorageSetItem,
-    removeItem:     ieStorageRemoveItem,
-    toString:       uu.pao("IEStorage")
+    info:           ieStorageInfo,
+    item:           ieStorageItem,
+    clear:          ieStorageClear
 }, {
     ready:          uu.ie
 });
@@ -7420,13 +7392,10 @@ uu.Class.singleton("IEStorage", {
 //{@cookie
 uu.Class.singleton("CookieStorage", {
     init:           cookieStorageInit,
-    key:            cookieStorageKey,
-    size:           cookieStorageSize,
-    clear:          cookieStorageClear,
-    getItem:        cookieStorageGetItem,
-    setItem:        cookieStorageSetItem,
-    removeItem:     cookieStorageRemoveItem,
-    toString:       uu.pao("CookieStorage")
+    key:            memStorageKey,
+    info:           cookieStorageInfo,
+    item:           cookieStorageItem,
+    clear:          cookieStorageClear
 }, {
     ready:          !!navigator.cookieEnabled
 });
@@ -7435,12 +7404,9 @@ uu.Class.singleton("CookieStorage", {
 uu.Class.singleton("MemStorage", {
     init:           memStorageInit,
     key:            memStorageKey,
-    size:           memStorageSize,
-    clear:          memStorageClear,
-    getItem:        memStorageGetItem,
-    setItem:        memStorageSetItem,
-    removeItem:     memStorageRemoveItem,
-    toString:       uu.pao("MemStorage")
+    info:           memStorageInfo,
+    item:           memStorageItem,
+    clear:          memStorageClear
 }, {
     ready:          _true
 });
@@ -7450,6 +7416,12 @@ uu.ready("window", function() {
     uu("Storage");
 });
 
+// --- utility ---
+function infoHash(used, max, pair, backend) {
+    return { used: used, max: max, pair: pair, backend: backend };
+}
+
+// --- uu.Class.Storage ---
 // uu.Class.Storage.init
 function init() {
     var that = this,
@@ -7470,9 +7442,9 @@ function init() {
             if (uu.ifFunction(storageBackend.ready)) {
                 try {
                     uu(backendName, function(backend) { // ready.callback
-                        var size = backend.size();
+                        var info = backend.info();
 
-                        if (_requireFreeSpace && _requireFreeSpace > size.max) {
+                        if (_requireFreeSpace && _requireFreeSpace > info.max) {
                             that.so = uu("MemStorage"); // not possible
                         } else {
                             that.so = backend;
@@ -7500,45 +7472,34 @@ function key(index) { // @param Number:
     return this.so.key(index) || "";
 }
 
-// uu.Class.Storage.size - get size
-function size() { // @return Hash: { used, max, pair }
+// uu.Class.Storage.info - get information
+function info() { // @return Hash: { used, max, pair, backend }
                   //    used - Number: bytes
                   //    max  - Number: bytes
                   //    pair - Number: pairs
-    return this.so.size();
+                  //    backend - String: backend name
+    return this.so.info();
+}
+
+// uu.Class.Storage.item - item accessor
+function item(key,     // @param String/Hash(= void):
+              value) { // @param String(= void):
+                       // @return String/Hash/Boolean:
+    return this.so.item(key, value);
 }
 
 // uu.Class.Storage.clear - clear all items
-function clear() {
-    this.so.clear();
-}
-
-// uu.Class.Storage.getItem - get a item or all items
-function getItem(key) { // @param String(= void):
-                        // @return String/Hash: value or "", { key: value, ... }
-    return this.so.getItem(key) || "";
-}
-
-// uu.Class.Storage.setItem - set a item or merge items
-function setItem(key,     // @param String/Hash:
-                 value) { // @param String(= void):
-                          // @return Boolean: false is quota exceeded
-    return this.so.setItem(key, value);
-}
-
-// uu.Class.Storage.removeItem - get length
-function removeItem(key) { // @param String:
-    this.so.removeItem(key);
+function clear(key) { // @param String(= void): key
+    this.so.clear(key);
 }
 
 // --- LocalStorage ---
-function localStorageInit(callback) { // @param Function: callback
+function localStorageInit(callback) {
     this.so = win.localStorage;
     callback(this);
 }
 
-function localStorageKey(index) { // @param Number:
-                                  // @return String: key or ""
+function localStorageKey(index) {
 //{@mb
     if (index < 0 || index >= this.so.length) { // [IE] trap
         return "";
@@ -7547,85 +7508,68 @@ function localStorageKey(index) { // @param Number:
     return this.so.key(index) || "";
 }
 
-function localStorageSize() { // @return Hash: { used, max, pair }
-                              //    used - Number: bytes
-                              //    max  - Number: bytes
-                              //    pair - Number: pairs
-    var used = 0, i = 0, iz, remain;
+function localStorageInfo() {
+    var so = this.so, used = 0, i = 0, iz, remain;
 
 //{@mb
-    if (uu.ie && "remainingSpace" in this.so) { // [IE8][IE9] storage.remainingSpace
-
-        remain = this.so.remainingSpace;
-
+    if (uu.ie && "remainingSpace" in so) { // [IE8][IE9] storage.remainingSpace
+        remain = so.remainingSpace;
         if (_freeSpace < remain) { // expand free space
             _freeSpace = 5 * 1000 * 1000; // 5MB
         }
-        return { used: _freeSpace - remain,
-                 max:  _freeSpace,
-                 pair: this.so.length };
+        used = _freeSpace - remain;
+    } else {
+//}@mb
+        for (iz = so.length; i < iz; ++i) {
+            used += so.getItem(so.key(i)).length;
+        }
+//{@mb
     }
 //}@mb
-    for (iz = this.so.length; i < iz; ++i) {
-        used += this.so.getItem(this.so.key(i)).length;
-    }
-    return { used: used, max: _freeSpace, pair: this.so.length };
+    return infoHash(used, _freeSpace, so.length, "LocalStorage");
 }
 
-function localStorageGetItem(key) { // @param String(= void):
-                                    // @return String/Hash: value or "", { key: value, ... }
-    var rv, i, iz;
-
-    if (key !== rv) {
-        return this.so.getItem(key + "") || ""; // String
-    }
-    for (rv = {}, i = 0, iz = this.so.length; i < iz; ++i) {
-        key = this.so.key(i);
-        rv[key] = this.so.getItem(key + "") || "";
-    }
-    return rv; // Hash
-}
-
-function localStorageSetItem(key,     // @param String/Hash:
-                             value) { // @param String(= void):
-                                      // @return Boolean: false is quota exceeded
+function localStorageItem(key, value) {
     function setItem(so, key, value) {
         try {
-            // pre clear
-            //  [iPhone][FIX] http://d.hatena.ne.jp/uupaa/2010/01/05
-            so[key] = "";
-            so[key] = value + "";
+            so[key] = ""; // [iPhone][FIX] pre clear. http://d.hatena.ne.jp/uupaa/20100106
+            so[key] = value + ""; // [IE][FIX] crash care
         } catch(err) { // catch Error("QUOTA_EXCEEDED_ERR")
             return _false;
         }
-
-        // verify
-        return so[key] === value;
+        return so[key] === value; // verify
     }
 
-    if (uu.isString(key)) {
-        return setItem(this.so, key, value); // set
-    }
-    var rv = true, k;
+    var rv = _true, so = this.so, i, iz;
 
-    for (k in key) { // merge
-        rv = setItem(this.so, k, key[k]);
-        if (!rv) {
+    switch (uu.complex(key, value)) { // 1: (), 2: ({}), 3: (k), 4: (k,v)
+    case 1: for (rv = {}, i = 0, iz = so.length; i < iz; ++i) {
+                key = so.key(i);
+                rv[key] = so.getItem(key + "") || "";
+            }
             break;
-        }
+    case 2: for (i in key) {
+                rv = setItem(so, i, key[i]);
+                if (!rv) {
+                    break;
+                }
+            }
+            break;
+    case 3: rv = so.getItem(key + "") || ""; break;
+    case 4: rv = setItem(so, key, value);
     }
     return rv;
 }
 
-function localStorageRemoveItem(key) { // @param String:
-    // [IE][FIX] crash care
-    // http://d.hatena.ne.jp/uupaa/20100729/1280337286
-    this.so.removeItem(key + "");
+function localStorageClear(key) {
+    key === _undef ? this.so.clear()
+                   : this.so.removeItem(key + ""); // [IE][FIX] crash care
+    // http://d.hatena.ne.jp/uupaa/20100729
 }
 
 //{@mb
 // --- FlashStorage ---
-function flashStorageInit(callback) { // @param Function: callback
+function flashStorageInit(callback) {
     var that = this;
 
     // wait for response from flash initializer
@@ -7636,132 +7580,115 @@ function flashStorageInit(callback) { // @param Function: callback
                        { width: 1, height: 1 }, wait);
 }
 
-function flashStorageGetItem(key) { // @param String(= void):
-                                    // @return String/Hash: value or "", { key: value, ... }
-    return key === void 0 ? this.so.allItem()
-                          : (this.so.getItem(key) || "");
-}
+function flashStorageItem(key, value) {
+    var rv = _true, so = this.so;
 
-function flashStorageSetItem(key,     // @param String/Hash:
-                             value) { // @param String(= void):
-                                      // @return Boolean: false is quota exceeded
-    return uu.isString(key) ? this.so.setItem(key, value)
-                            : this.so.mixItem(key);
-}
-
-// --- IEStorage ---
-function ieStorageInit(callback) { // @param Function: callback
-    this.so = uu.node.add("script", doc.head); // <script>
-    this.so.id = "uuiestorage";
-    this.so.addBehavior("#default#userData");
-    this.so.expires = _persistDate;
-
-    callback(this);
-}
-
-function ieStorageKey(index) { // @param Number:
-                               // @return String: "key" or ""
-    this.so.load(_storeName);
-    return (this.so[_getAttribute](_ieIndex) || "").split("\t")[index] || "";
-}
-
-function ieStorageSize() { // @return Hash: { used, max, pair }
-                           //    used - Number: bytes
-                           //    max  - Number: bytes
-                           //    pair - Number: pairs
-    this.so.load(_storeName);
-    var index = (this.so[_getAttribute](_ieIndex) || ""),
-        used = index.length,
-        indexes = index.split("\t"), key, i = -1;
-
-    while ( (key = indexes[++i]) ) {
-        used += (this.so[_getAttribute](key) || "").length;
-    }
-    return { used: used, max: _ieFreeSpace, pair: i };
-}
-
-function ieStorageClear() {
-    this.so.load(_storeName);
-
-    var indexes = (this.so[_getAttribute](_ieIndex) || "").split("\t"),
-        key, i = -1;
-
-    while ( (key = indexes[++i]) ) {
-        this.so.removeAttribute(key);
-    }
-    this.so[_setAttribute](_ieIndex, "");
-    this.so.save(_storeName);
-}
-
-function ieStorageGetItem(key) { // @param String(= void):
-                                 // @return String/Hash: value or "", { key: value, ... }
-    this.so.load(_storeName);
-
-    if (key !== void 0) {
-        return this.so[_getAttribute](key) || "";
-    }
-
-    var rv = {}, i = -1,
-        indexes = (this.so[_getAttribute](_ieIndex) || "").split("\t");
-
-    while ( (key = indexes[++i]) ) {
-        rv[key] = this.so[_getAttribute](key) || "";
+    switch (uu.complex(key, value)) { // 1: (), 2: ({}), 3: (k), 4: (k,v)
+    case 1: rv = so.allItem(); break;
+    case 2: rv = so.mixItem(key); break;
+    case 3: rv = so.getItem(key) || ""; break;
+    case 4: rv = so.setItem(key, value);
     }
     return rv;
 }
 
-function ieStorageSetItem(key,     // @param String/Hash:
-                          value) { // @param String(= void):
-                                   // @return Boolean: false is quota exceeded
+function flashStorageClear(key) {
+    key === void 0 ? this.so.clear() : this.so.removeItem(key);
+}
+
+// --- IEStorage ---
+function ieStorageInit(callback) {
+    var so = uu.add("script", doc.head); // <script>
+    so.id = "uuiestorage";
+    so.addBehavior("#default#userData");
+    so.expires = _persistDate;
+
+    this.so = so;
+    callback(this);
+}
+
+function ieStorageKey(index) {
+    this.so.load(_storeName);
+    return (this.so[_getAttribute](_ieIndex) || "").split("\t")[index] || "";
+}
+
+function ieStorageInfo() {
     this.so.load(_storeName);
 
+    var so = this.so, idx = (so[_getAttribute](_ieIndex) || ""),
+        ary = idx.split("\t"),
+        used = idx.length, key, i = -1;
+
+    while ( (key = ary[++i]) ) {
+        used += (so[_getAttribute](key) || "").length;
+    }
+    return infoHash(used, _ieFreeSpace, i, "IEStorage");
+}
+
+function ieStorageItem(key, value) {
     function setItem(so, key, value) {
-        var index = so[_getAttribute](_ieIndex);
+        var idx = so[_getAttribute](_ieIndex);
 
         try {
             // add index
-            if (!index) {
+            if (!idx) {
                 so[_setAttribute](_ieIndex, key); // first time
-            } else if (("\t" + index + "\t").indexOf("\t" + key + "\t") < 0) {
-                so[_setAttribute](_ieIndex, index + "\t" + key);
+            } else if (("\t" + idx + "\t").indexOf("\t" + key + "\t") < 0) {
+                so[_setAttribute](_ieIndex, idx + "\t" + key);
             }
             so[_setAttribute](key, value);
             so.save(_storeName);
         } catch(err) {
             return _false;
         }
-        // verify
-        return so[_getAttribute](key) === value;
+        return so[_getAttribute](key) === value; // verify
     }
 
-    if (uu.isString(key)) {
-        return setItem(this.so, key, value); // set
-    }
-    var rv = true, k;
+    var rv = _true, so = this.so, i = 0, idx;
 
-    for (k in key) { // merge
-        rv = setItem(this.so, k, key[k]);
-        if (!rv) {
+    so.load(_storeName);
+
+    switch (uu.complex(key, value)) { // 1: (), 2: ({}), 3: (k), 4: (k,v)
+    case 1: idx = (so[_getAttribute](_ieIndex) || "").split("\t");
+            rv = {};
+            while ( (key = idx[i++]) ) {
+                rv[key] = so[_getAttribute](key) || "";
+            }
             break;
-        }
+    case 2: for (i in key) {
+                rv = setItem(so, i, key[i]);
+                if (!rv) {
+                    break;
+                }
+            }
+            break;
+    case 3: rv = so[_getAttribute](key) || ""; break;
+    case 4: rv = setItem(so, key, value);
     }
     return rv;
 }
 
-function ieStorageRemoveItem(key) { // @param String:
-    if (key) {
-        this.so.load(_storeName);
+function ieStorageClear(key) {
+    this.so.load(_storeName);
 
-        var index = (this.so[_getAttribute](_ieIndex) || ""),
-            tabIndex = "\t" + index + "\t",
-            tabKey   = "\t" + key   + "\t";
+    var so = this.so, idx = (so[_getAttribute](_ieIndex) || ""),
+        tab, key, i = 0;
 
-        if (tabIndex.indexOf(tabKey) >= 0) {
-            index = tabIndex.replace(new RegExp(tabKey), "").trim();
+    if (key === _undef) {
+        idx = idx.split("\t");
+        while ( (key = idx[i++]) ) {
+            so.removeAttribute(key);
+        }
+        so[_setAttribute](_ieIndex, "");
+        so.save(_storeName);
+    } else if (key) {
+        i   = "\t" + idx + "\t";
+        tab = "\t" + key + "\t";
 
-            this.so[_setAttribute](_ieIndex, index);
-            this.so.removeAttribute(key);
-            this.so.save(_storeName);
+        if (i.indexOf(tab) >= 0) {
+            so[_setAttribute](_ieIndex, i.replace(new RegExp(tab), "").trim());
+            so.removeAttribute(key);
+            so.save(_storeName);
         }
     }
 }
@@ -7769,117 +7696,88 @@ function ieStorageRemoveItem(key) { // @param String:
 
 // --- CookieStorage ---
 //{@cookie
-function cookieStorageInit(callback) { // @param Function: callback
+function cookieStorageInit(callback) {
     this._removeDate = (new Date(0)).toUTCString();
-    this._shadowCookie = uu.cookie(_storeName);
-
+    this.so = uu.cookie(_storeName); // shadow cookie
     callback(this);
 }
 
-function cookieStorageKey(index) { // @param Number:
-                                   // @return String: "key" or ""
-    return uu.nth(this._shadowCookie, index)[0] || "";
+function cookieStorageInfo() {
+    return infoHash(doc.cookie.length, _cookieFreeSpace,
+                    uu.size(this.so), "CookieStorage");
 }
 
-function cookieStorageSize() { // @return Hash: { used, max, pairs }
-                               //    used - Number: bytes
-                               //    max  - Number: bytes
-                               //    pair - Nubmer: pairs
-    return { used: doc.cookie.length, max: _cookieFreeSpace,
-             pair: uu.size(this._shadowCookie) };
-}
-
-function cookieStorageClear() {
-    uu.cookie.save(_storeName, this._shadowCookie, this._removeDate);
-    this._shadowCookie = {};
-}
-
-function cookieStorageGetItem(key) { // @param String(= void):
-                                     // @return String/Hash: value or "", { key: value, ... }
-    return key === void 0 ? uu.clone(this._shadowCookie)
-                          : (this._shadowCookie[key] || "");
-}
-
-function cookieStorageSetItem(key,     // @param String/Hash:
-                              value) { // @param String(= void):
-                                       // @return Boolean: false is quota exceeded
-    function setItem(that, key, value) {
+function cookieStorageItem(key, value) {
+    function setItem(so, key, value) {
         var before = doc.cookie.length;
 
         if (before > _cookieFreeSpace) {
             return _false;
         }
-
-        if (before) {
-            before += 2; // "; ".length
-        }
+        before && (before += 2); // 2: "; ".length
         before += uu.cookie.save(_storeName, uu.hash(key, value), _persistDate);
 
         if (before !== doc.cookie.length) { // before !== after
             return _false;
         }
-        that._shadowCookie[key] = value;
+        so[key] = value;
         return _true;
     }
-    if (uu.isString(key)) {
-        return setItem(this, key, value); // set
-    }
-    var rv = true, k;
 
-    for (k in key) { // merge
-        rv = setItem(this, k, key[k]);
-        if (!rv) {
+    var rv = _true, i, iz, so = this.so;
+
+    switch (uu.complex(key, value)) { // 1: (), 2: ({}), 3: (k), 4: (k,v)
+    case 1: rv = uu.clone(so); break;
+    case 2: for (i in key) {
+                rv = setItem(so, i, key[i]);
+                if (!rv) {
+                    break;
+                }
+            }
             break;
-        }
+    case 3: rv = so[key] || ""; break;
+    case 4: rv = setItem(so, key, value);
     }
     return rv;
 }
 
-function cookieStorageRemoveItem(key) { // @param String:
-    uu.cookie.save(_storeName, uu.hash(key, ""), this._removeDate);
-    delete this._shadowCookie[key];
+function cookieStorageClear(key) {
+    var so = this.so, all = key === _undef;
+
+    uu.cookie.save(_storeName, all ? so : uu.hash(key, ""),
+                   (new Date(0)).toUTCString());
+    all ? (this.so = {}) : delete so[key];
 }
 //}@cookie
 
 // --- MemStorage ---
-function memStorageInit(callback) { // @param Function: callback
+function memStorageInit(callback) {
     this.so = {};
-
     callback(this);
 }
 
-function memStorageKey(index) { // @param Number:
-                                // @return String: "key" or ""
+function memStorageKey(index) {
     return uu.nth(this.so, index)[0] || "";
 }
 
-function memStorageSize() { // @return Hash: { used, max, pair }
-                            //    used - Number: bytes
-                            //    max  - Number: bytes
-                            //    pair - Number: pairs
-    return { used: 0, max: Number.MAX_VALUE, pair: uu.size(this.so) };
+function memStorageInfo() {
+    return infoHash(0, Number.MAX_VALUE, uu.size(this.so), "MemStorage");
 }
 
-function memStorageClear() {
-    this.so = {};
+function memStorageItem(key, value) {
+    var rv = _true, so = this.so;
+
+    switch (uu.complex(key, value)) { // 1: (), 2: ({}), 3: (k), 4: (k,v)
+    case 1: rv = uu.clone(so);  break;
+    case 2: uu.mix(so, key);    break;
+    case 3: rv = so[key] || ""; break;
+    case 4: so[key] = value;
+    }
+    return rv;
 }
 
-function memStorageGetItem(key) { // @param String(= void):
-                                  // @return String/Hash: value or "", { key: value, ... }
-    return key === void 0 ? uu.clone(this.so)
-                          : (this.so[key] || "");
-}
-
-function memStorageSetItem(key,     // @param String/Hash:
-                           value) { // @param String(= void):
-                                    // @return Boolean: false is quota exceeded
-    uu.isString(key) ? (this.so[key] = value) // set
-                     : uu.mix(this.so, key);
-    return _true;
-}
-
-function memStorageRemoveItem(key) { // @param String:
-    delete this.so[key];
+function memStorageClear(key) {
+    key === _undef ? (this.so = {}) : delete this.so[key];
 }
 
 })(this, document, uu);
