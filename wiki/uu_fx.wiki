@@ -34,7 +34,7 @@ uu.fxを特殊化した以下の関数があります。
   * !OutBack
   * !InOutBack
   * !OutInBack
-  * InBounce
+  * !InBounce
   * !OutBounce
 
 = API =
@@ -57,7 +57,7 @@ Hash には { key: endValue, ...  } または { key: `[`endValue, easing`]`, ...
     * top, left, width, height 等のCSSプロパティは、数値で指定するか "100px"のように指定します。em や pt 等は速度的な理由から指定できません。
       * px 以外の値は [uu_css uu.css()] や [uu_css_unit uu.css.unit()]で px 単位に変換してから指定します。
     * "px" の指定はオプションです。{ width: 100 } と { width: "100px" } は同じ結果になります。
-  * _easing_ は uu.fx.easing に登録されている関数名を文字列で指定します。大文字小文字は区別しません。省略も可能です。デフォルトは !inoutquad です。
+  * _easing_ は uu.fx.easing に登録されている関数名を文字列で指定します。大文字小文字は区別しません。省略も可能です。デフォルトは inoutquad です。
 
 == 予約済みキーワード ==
 key には、予約済みのキーワード( before, after, chain, reverse, deny ) も指定できます。
