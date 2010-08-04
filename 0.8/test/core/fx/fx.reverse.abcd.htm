@@ -1,0 +1,26 @@
+<!doctype html><html><head><meta charset="UTF-8" />
+<title>uu.fx reverse demo</title>
+<style>
+.box {
+  color: white;
+  background-color: #333;
+  position: absolute;
+  top: 50px;
+  left: 50px;
+  width: 100px;
+  height: 100px;
+}
+</style>
+<script src="../../src/uupaa.js"></script>
+<script>
+uu.ready("window", function(uu) {
+    uu(".box").fx(2000, { o: 0.5               }). // A
+               fx(2000, { w: 300,   chain:   1 }). // B
+               fx(2000, { h: 300,              }). // C
+               fx(2000, { fs: "*3", reverse: 1 }); // D
+});
+</script>
+</head><body>
+<div class="box">box</div>
+</pre>
+</body></html>
