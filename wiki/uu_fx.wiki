@@ -217,17 +217,6 @@ uu.fx.isHide(_node_:Node):Boolean は、要素が見えない状態で true を�
     uu("div").css({ w: 100, h: 100 }).fx(500, { w: 0, h: 0 });
 }}}
 
-=== fps の指定 ===
-window.uuconfig.fx.fps に 1以上の数字を指定することでアニメーションの fps を調整できます。デフォルト値は 10 です。
-{{{
-<script>
-window.uuconfig = {
-    fx: {
-        fps: 10
-    }
-};
-}}}
-
 === スタンバイキュー ===
 uu.fx(_node_, _duration_, uu.nop) とすることで、_duration_ の間だけ何もしないスタンバイキューを作成できます。
 {{{
