@@ -74,24 +74,24 @@ function moveout(evt) {
         degree = 0;
     }
     uu.fx.moveout(evt.node, duration, { degree: degree, range: range,
-                                        begin: 1, reverse: 1 });
+                                        reverse: 1 });
 }
 
 function flare(evt) {
     uu.fx.flare(evt.node, duration, { range: range, parts: parts,
-                                      begin: 1, reverse: 1 });
+                                      reverse: 1 });
 }
 
 function puff(evt) {
-    uu.fx.puff(evt.node, duration, { begin: 1, reverse: 1 });
+    uu.fx.puff(evt.node, duration, { reverse: 1 });
 }
 
 function shrink(evt) {
-    uu.fx.shrink(evt.node, duration, { begin: 1, reverse: 1 });
+    uu.fx.shrink(evt.node, duration, { reverse: 1 });
 }
 
 function highlight(evt) {
-    uu.fx.highlight(evt.node, duration, { begin: 1, reverse: 1 });
+    uu.fx.highlight(evt.node, duration, { reverse: 1 });
 }
 
 uu.ready(function(uu) {
