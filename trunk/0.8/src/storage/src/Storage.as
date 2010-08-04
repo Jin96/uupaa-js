@@ -10,7 +10,7 @@
 
         public function Storage() {
             ExternalInterface.addCallback("key", ex_key);
-            ExternalInterface.addCallback("size", ex_size);
+            ExternalInterface.addCallback("info", ex_info);
             ExternalInterface.addCallback("clear", ex_clear);
             ExternalInterface.addCallback("allItem", ex_allItem);
             ExternalInterface.addCallback("getItem", ex_getItem);
@@ -79,13 +79,14 @@
             return "";
         }
 
-        public function ex_size():Object {
+        public function ex_info():Object {
             var so:SharedObject = getSharedObject(), i:String, j:int = 0;
 
             for (i in so.data) {
                 ++j;
             }
-            return { used: so.size, max: _DISK_SPACE, pair: j };
+            return { used: so.size, max: _DISK_SPACE, pair: j,
+                     backend: "FlashStorage" };
         }
 
         public function ex_clear():void {

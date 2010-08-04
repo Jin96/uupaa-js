@@ -1,5 +1,5 @@
 <!doctype html><html><head><meta charset="utf-8" />
-<title>uu.css.show / uu.css.hide test</title>
+<title>uu.fx.show / uu.fx.hide test</title>
 <style>
 .nodisp {
     display: none;
@@ -14,8 +14,8 @@ div {
     position: absolute;
     left: 100px;
     top: 100px;
-    width: 100px;
-    height: 100px;
+    width: 120px;
+    height: 60px;
     color: white;
     background-color: gray;
 }
@@ -29,17 +29,17 @@ uu.ready(function(uu) {
     uu("div").nth(3, function(node, i) {
         uu.css.opacity(node, 0);
     }).each(function(node, i) {
-        uu.fx(node, 1000, { x: i * 100, y: i * 100 });
+        uu.fx(node, 1000, { x: i * 120, y: i * 60 });
     }).hide(1000).show(1000).hide(1000).show();
 });
 </script></head><body>
 
-<div> test1 </div>
-<div class="nodisp"> test2 </div>
-<div class="hidden"> test3 </div>
-<div class="opacity0"> test4 </div>
-<div class="nodisp hidden"> test5 </div>
-<div class="nodisp opacity0"> test6 </div>
-<div class="hidden opacity0"> test7 </div>
+<div> shown </div>
+<div class="nodisp"> display: none; </div>
+<div class="hidden"> visibility: hidden; </div>
+<div class="opacity0"> opacity: 0; </div>
+<div class="nodisp hidden"> display: none; visibility: hidden;</div>
+<div class="nodisp opacity0"> display: none; opacity: 0;</div>
+<div class="hidden opacity0"> visibility: hidden; opacity: 0;</div>
 
 </body></html>

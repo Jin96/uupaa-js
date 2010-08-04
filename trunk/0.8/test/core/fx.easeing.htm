@@ -10,18 +10,12 @@
 }
 </style>
 <script>
-var useTimer = (window.name + "") === "Timer";
+var useOpacity = (window.name + "") === "useOpacity";
 
-document.title = useTimer ? "Timer" : "setInterval";
-window.uuconfig = {
-    fx: {
-        tiemr:  useTimer,
-        fps:    10
-    }
-};
+document.title = useOpacity ? "useOpacity" : "noOpacity";
 
-function switchTimer() {
-    window.name = useTimer ? "setInterval" : "Timer";
+function switchOpacity() {
+    window.name = useOpacity ? "noOpacity" : "useOpacity";
     location.reload(false);
 }
 </script>
@@ -39,16 +33,17 @@ uu.ready(function(uu) {
         uu.body(node = uu.div("class,box,title," + ezfn, ezfn));
 
         // style
-        uu.css(node, { o: 0.5, x: offX, y: offY + i * 20 });
+        useOpacity && uu.css(node, { o: 0.5 });
+        uu.css(node, { x: offX, y: offY + i * 20 });
 
         // bind
         uu.event.hover(node, function(evt, hover) {
             if (hover) {
-                uu.fx(node, 400, { o: 1.0 });
+                useOpacity && uu.fx(node, 400, { o: 1.0 });
                 uu.fx(node, 500, { w: [ 50, node.title], chain:   1 });
                 uu.fx(node, 500, { w: [400, node.title], reverse: 1 });
             } else {
-                uu.fx(node, 400, { o: 0.5 });
+                useOpacity && uu.fx(node, 400, { o: 0.5 });
             }
         });
     }
@@ -74,6 +69,6 @@ function run() {
 
 </script>
 </head><body>
-    <input type="button" value="setInterval &lt;=&gt; Timer" onclick="switchTimer()" />
+    <input type="button" value="switch opacity" onclick="switchOpacity()" />
     <input type="button" value="run" onclick="run()" />
 </body></html>

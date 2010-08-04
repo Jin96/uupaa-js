@@ -9,13 +9,12 @@ window.uuconfig = {
 };
 </script>
 <script src="../../src/uupaa.js"></script>
-<script src="../../src/storage.js"></script>
 <script>
 uu.ready(function(uu) {
     uu.id("setpair").disabled = false;
     uu.id("refresh").disabled = false;
 }, "storage", function(uu, storage) {
-    uu.text(uu.id("backend"), storage.toString());
+    uu.text(uu.id("backend"), storage.info().backend);
     updateSize();
 });
 
@@ -25,53 +24,47 @@ function getRandomKeyValuePair() {
 }
 
 function updateView() {
-    var storage = uu("Storage");
-    var hash = storage.getItem();
+    var hash = uu.storage.item();
+    var info = uu.storage.info();
 
     uu.value(uu.id("all"), uu.json(hash));
-
-
-    var size = storage.size();
-
-    uu.text(uu.id("pairs"), size.pair + " pairs");
+    uu.text(uu.id("pairs"), info.pair + " pairs");
 }
 
 function updateSize() {
-    var storage = uu("Storage");
-    var size = storage.size();
+    var info = uu.storage.info();
     var node = uu.id("size");
-    var remain = size.max - size.used;
+    var remain = info.max - info.used;
 
     if (remain < 0) {
         node.style.color = "red";
     } else {
         node.style.color = "black";
     }
-    if (size.max === Number.MAX_VALUE) {
+    if (info.max === Number.MAX_VALUE) {
         uu.text(node, "used: 0bytes, max: Number.MAX_VALUE, free: unknown");
         uu.id("limittest").disabled = true;
 
-    } else if (size.max > 1024 * 1024) {
+    } else if (info.max > 1024 * 1024) {
         uu.text(node,
             uu.format("used: @bytes(@MB), max: @MB, remain: @bytes(@MB)",
-                      size.used,
-                      (size.used / 1024 / 1024).toFixed(2),
-                      (size.max  / 1024 / 1024).toFixed(2),
+                      info.used,
+                      (info.used / 1024 / 1024).toFixed(2),
+                      (info.max  / 1024 / 1024).toFixed(2),
                       remain,
                       (remain / 1024 / 1024).toFixed(2)));
 
     } else {
         uu.text(node,
             uu.format("used: @bytes, max: @bytes, free: @bytes",
-                      size.used,
-                      size.max,
+                      info.used,
+                      info.max,
                       remain));
     }
 }
 
 function getPair() {
-    var storage = uu("Storage");
-    var val = storage.getItem(uu.id("key").value);
+    var val = uu.storage.item(uu.id("key").value);
 
     uu.id("val").value = val;
 
@@ -79,12 +72,10 @@ function getPair() {
 }
 
 function setPair(rand, norefresh) {
-    var storage = uu("Storage");
-
     if (rand) {
         getRandomKeyValuePair();
     }
-    if (!storage.setItem(uu.id("key").value, uu.id("val").value)) {
+    if (!uu.storage.item(uu.id("key").value, uu.id("val").value)) {
         alert("fail");
         return;
     }
@@ -95,34 +86,30 @@ function setPair(rand, norefresh) {
 }
 
 function removeEdgePair(last) {
-    var storage = uu("Storage");
-    var size = storage.size();
-    var key = storage.key(last ? size.pair - 1 : 0) || "", val = "";
+    var info = uu.storage.info();
+    var key = uu.storage.key(last ? info.pair - 1 : 0) || "", val = "";
 
     if (key) {
-        val = storage.getItem(key);
+        val = uu.storage.item(key);
     }
     uu.id("key").value = key;
     uu.id("val").value = val;
 
-    storage.removeItem(key);
+    uu.storage.clear(key);
     updateView();
     updateSize();
 }
 
 function removePair() {
-    var storage = uu("Storage");
     var key = uu.id("key").value;
 
-    storage.removeItem(key);
+    uu.storage.clear(key);
     updateView();
     updateSize();
 }
 
 function clearAllPairs() {
-    var storage = uu("Storage");
-
-    storage.clear();
+    uu.storage.clear();
     updateView();
     updateSize();
     uu.id("setpair").disabled = false;
@@ -130,17 +117,13 @@ function clearAllPairs() {
 }
 
 function limitTest() {
-    var storage = uu("Storage");
-
     clearAllPairs();
 
-    var size = storage.size();
-    var spam;
-    var used = (size.max - size.used) - 80; // 80 margin
+    var info = uu.storage.info();
+    var used = (info.max - info.used) - 80; // 80 margin
+    var spam = Array(used + 1).join("0");
 
-    spam = Array(used + 1).join("0");
-
-    if (!storage.setItem("a", spam)) {
+    if (!uu.storage.item("a", spam)) {
         updateSize();
         alert("test fail");
     } else {
