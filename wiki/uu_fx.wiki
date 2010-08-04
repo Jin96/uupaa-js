@@ -90,21 +90,26 @@ uu.fx(node, 200, { x: 10, y: 200, o: 0.5 });
 === 逆再生 ===
 
 A{ reverse: 1 } は、A → !A の順に再生と逆再生を行ないます(`!`は逆再生を意味します)。
+http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/fx/reverse.a.htm
 {{{
     // A(width を 300px に変化させ), !A(元に戻す)
     uu(".box").fx(2000, { w: 300, reverse: 1 }); // A
 }}}
-http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/fx/reverse.a.htm
+
+
 
 A{ chain: 1 }, B{ reverse: 1 } は、A → B → !B → !A の順になります。
+http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/fx/reverse.ab.htm
 {{{
     // A(width を 300px に)、B(height を 300px に変化させ)、!B(height), !A(width の順に元に戻す)
     uu(".box").fx(2000, { w: 300, chain:   1 }). // A
                fx(2000, { h: 300, reverse: 1 }); // B
 }}}
-http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/fx/reverse.ab.htm
+
+
 
 A{ reverse: 1 }, B{ chain: 1 }, C{ reverse: 1 } は、A → !A → B → C → !C → !B の順になります。
+http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/fx/reverse.abc.htm
 {{{
     // A(不透明度(opacity)を0.2に変化させ)、!A(元に戻した後に)、
     // B(width を 300px に)、C(height を 300px に変化させ)、!C(height), !B(width の順に元に戻す)
@@ -112,9 +117,11 @@ A{ reverse: 1 }, B{ chain: 1 }, C{ reverse: 1 } は、A → !A → B → C → !
                fx(2000, { w: 300, chain:   1 }). // B
                fx(2000, { h: 300, reverse: 1 }); // C
 }}}
-http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/fx/reverse.abc.htm
+
+
 
 A{}, B{ chain: 1 }, C{}, D{ reverse: 1 } は、A → B → C → D → !D → !B の順になります。A と C は逆再生されません。
+http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/fx/reverse.abcd.htm
 {{{
     // A(不透明度(opacity)を0.5に変化させ)、
     // B(width を 300px に)、C(height を 300px に変化させ)、
@@ -125,9 +132,11 @@ A{}, B{ chain: 1 }, C{}, D{ reverse: 1 } は、A → B → C → D → !D → !B
                fx(2000, { h: 300,              }). // C
                fx(2000, { fs: "*3", reverse: 1 }); // D
 }}}
-http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/fx/reverse.abcd.htm
+
+
 
 A{ chain: 1 }, B{ reverse: 1 }, C{ chain: 1 }, D{ reverse: 1 }, E{ reverse: 1} は、A → B → !B → !A → C → D → !D → !C → E → !E の順になります。
+http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/fx/reverse.abcde.htm
 {{{
     // A(不透明度(opacity)を0.5に変化させ)、
     // B(width を 300px に変化させ)、!B(widthを元に戻し)、!A(不透明度を元に戻す)。
@@ -140,7 +149,6 @@ A{ chain: 1 }, B{ reverse: 1 }, C{ chain: 1 }, D{ reverse: 1 }, E{ reverse: 1} �
                fx(2000, { fs: "*3",   reverse: 1 }). // D
                fx(2000, { bgc: "red", reverse: 1 }); // E
 }}}
-http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/fx/reverse.abcde.htm
 
 == uu.fx.show ==
 uu.fx.show(_node_:Node, _duration_:Number = 0, _displayValue_:String= "block"):Node は、_node_ を _duration_ 時間かけて表示し、_node_ を返します。
