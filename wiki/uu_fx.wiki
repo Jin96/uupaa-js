@@ -47,7 +47,7 @@ _duration_ には 0 以上の数値を指定します。単位は ms です。
 _duration_ で指定した時間が経過するまで、_option_ で指定した幾つかの CSS プロパティを連続的に変化させます。
 _duration_ で指定した時間が経過するとアニメーションは終了します。_option_.after が指定されている場合はコールバックします。
 
-_option_ に Function を指定すると、一定間隔で _option_ をコールバックします。
+_option_ が関数なら、一定間隔でコールバックします。
 _option_ に Hash を指定すると、一定間隔で変化させる CSS プロパティと変化の割合を easing 関数により指定できます。
 
 Hash には { key: endValue, ...  } または { key: `[`endValue, easing`]`, ... } のように指定します。
