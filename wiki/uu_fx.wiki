@@ -140,7 +140,7 @@ A{ chain: 1 }, B{ reverse: 1 }, C{ chain: 1 }, D{ reverse: 1 }, E{ reverse: 1} �
                fx(2000, { fs: "*3",   reverse: 1 }). // D
                fx(2000, { bgc: "red", reverse: 1 }); // E
 }}}
-http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/fx/reverse.abcd.htm
+http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/fx/reverse.abcde.htm
 
 == uu.fx.show ==
 uu.fx.show(_node_:Node, _duration_:Number = 0, _displayValue_:String= "block"):Node は、_node_ を _duration_ 時間かけて表示し、_node_ を返します。
