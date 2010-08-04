@@ -1,12 +1,8 @@
 #summary uu.fx はエフェクトとアニメーションを提供します
 
 <wiki:toc max_depth="2" />
-a
-= 導入 =
 
 uu.fx() と !NodeSet.fx() は CSSプロパティを連続的に変化させるCSSアニメーション機能を提供します。
-
-uu.fx() と !NodeSet.fx() は uupaa.js に最初から組み込まれています。
 
 uu.fxを特殊化した以下の関数があります。
   * uu.fx.show        !NodeSet.show
@@ -19,10 +15,9 @@ uu.fxを特殊化した以下の関数があります。
   * uu.fx.moveout     !NodeSet.moveout
   * uu.fx.highlight   !NodeSet.highlight
 
-また、要素の表示/非表示状態を取得する関数もあります。
-  * uu.fx.isHide
+要素の非表示状態を調べる uu.fx.isHide もあります。
 
-以下の easing 関数が利用できます。easing 関数の特性については http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/fx.easeing.htm を参照してください。
+以下の easing 関数が利用できます。easing 関数の特性については http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/fx/easeing.htm を参照してください。
   * linear
   * !InQuad
   * !OutQuad
@@ -46,27 +41,106 @@ uu.fxを特殊化した以下の関数があります。
 
 == uu.fx ==
 
-uu.fx(_node_:Node, _duration_:Number, _option_:Hash/Function):Node は
-_node_ で指定したノードにアニメーションキューを設定し _node_ を返します。
-_duration_ で指定した時間が経過するまで、_option_ で指定した幾つかのCSSプロパティを連続的に変化させます。
-_duration_ で指定した時間が経過すると、アニメーションを停止し、_option_.after 関数が指定されていればコールバックします。
+uu.fx(_node_:Node, _duration_:Number, _option_:Hash/Function):Node は、アニメーションキューを作成し _node_ を返します。
 
 _duration_ には 0 以上の数値を指定します。単位は ms です。
+_duration_ で指定した時間が経過するまで、_option_ で指定した幾つかの CSS プロパティを連続的に変化させます。
+_duration_ で指定した時間が経過するとアニメーションは終了します。_option_.after が指定されている場合はコールバックします。
 
-_option_ にHashを指定すると、一定時間内に変化させるCSSプロパティと変化の割合わeasing関数により指定できます。
-_option_ にFunctionを指定すると、一定間隔で _option_ をコールバックします。
+_option_ に Function を指定すると、一定間隔で _option_ をコールバックします。
+_option_ に Hash を指定すると、一定間隔で変化させる CSS プロパティと変化の割合を easing 関数により指定できます。
 
-_option_ がHashなら { key: endValue, ...  } または { key: `[`endValue, easing`]`, ... } のように指定します。
-  * key には color, opacity といった CSSプロパティ や、予約済みのキーワード( init, before, after, chain, reverse, deny, cssCache ) などのキーワードを指定します。
-    * { before: beforeCallback } を指定すると、アニメーション開始前に beforeCallback(_node_, _option_, _back_) の形でコールバックします。
-    * { after: afterCallback } を指定すると、アニメーション終了後に afterCallback(_node_, _option_, _back_) の形でコールバックします。
-      * 逆再生中は _back_ に true が渡されます。
-    * アニメーションの逆再生を行うには、逆再生したいキュー全てに{ chain: 1 }を指定し、逆再生を開始するキューに{ reverse: 1 } を指定します。uu.fx は { chain: 1 } と { reverse: 1 } が指定されたキューのアニメーションを連続的に逆再生します。
+Hash には { key: endValue, ...  } または { key: `[`endValue, easing`]`, ... } のように指定します。
+  * key には color, opacity といった CSS プロパティや、後述する予約済みキーワードを指定します。
   * endValue には 文字列または数値を指定します
-    * 現在の値を基準に、増減した値を指定するには "+100" "-100" "`*`100" "/100" のように指定します。
+    * 現在の値を基準とした差分は "+100" "-100" "`*`100" "/100" のように演算子付きの値で指定します。
     * top, left, width, height 等のCSSプロパティは、数値で指定するか "100px"のように指定します。em や pt 等は速度的な理由から指定できません。
+      * px 以外の値は [uu_css uu.css()] や [uu_css_unit uu.css.unit()]で px 単位に変換してから指定します。
     * "px" の指定はオプションです。{ width: 100 } と { width: "100px" } は同じ結果になります。
-  * _easing_ は uu.fx.easing に登録されている関数名を文字列で指定します。省略も可能です。大文字小文字は区別しません。デフォルトは !inoutquad です。
+  * _easing_ は uu.fx.easing に登録されている関数名を文字列で指定します。大文字小文字は区別しません。省略も可能です。デフォルトは !inoutquad です。
+
+== 予約済みキーワード ==
+key には、予約済みのキーワード( before, after, chain, reverse, deny ) も指定できます。
+
+|| { after: afterCallback }   || アニメーション終了後に afterCallback(_node_, _option_, _back_) の形でコールバックします(逆再生中は _back_ に true が渡されます) ||
+|| { before: beforeCallback } || アニメーション開始前に beforeCallback(_node_, _option_, _back_) の形でコールバックします ||
+|| { chain: 1 }               || 逆再生用のキューを作成します ||
+|| { reverse: 1 }             || 逆再生用のキューを作成します。<br />また、アニメーション終了後に逆再生用のキューを通常のキューに割り込ませ逆再生を開始します ||
+
+key には、短い名前(Alias) も指定できます。
+
+|| alias || CSS property ||
+|| w    || width    ||
+|| h    || height   ||
+|| x    || left     ||
+|| y    || top      ||
+|| l    || left     ||
+|| t    || top      ||
+|| c    || color    ||
+|| bgc  || backgroundColor ||
+|| o    || opacity  ||
+|| fs   || fontSize ||
+|| m    || margin   ||
+|| b    || border   ||
+|| p    || padding  ||
+{{{
+uu.fx(node, 200, { x: 10, y: 200, o: 0.5 });
+}}}
+
+=== 逆再生 ===
+
+A{ reverse: 1 } は、A → !A の順に再生と逆再生を行ないます(`!`は逆再生を意味します)。
+{{{
+    // A(width を 300px に変化させ), !A(元に戻す)
+    uu(".box").fx(2000, { w: 300, reverse: 1 }); // A
+}}}
+http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/fx/reverse.a.htm
+
+A{ chain: 1 }, B{ reverse: 1 } は、A → B → !B → !A の順になります。
+{{{
+    // A(width を 300px に)、B(height を 300px に変化させ)、!B(height), !A(width の順に元に戻す)
+    uu(".box").fx(2000, { w: 300, chain:   1 }). // A
+               fx(2000, { h: 300, reverse: 1 }); // B
+}}}
+http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/fx/reverse.ab.htm
+
+A{ reverse: 1 }, B{ chain: 1 }, C{ reverse: 1 } は、A → !A → B → C → !C → !B の順になります。
+{{{
+    // A(不透明度(opacity)を0.2に変化させ)、!A(元に戻した後に)、
+    // B(width を 300px に)、C(height を 300px に変化させ)、!C(height), !B(width の順に元に戻す)
+    uu(".box").fx(2000, { o: 0.2, reverse: 1 }). // A
+               fx(2000, { w: 300, chain:   1 }). // B
+               fx(2000, { h: 300, reverse: 1 }); // C
+}}}
+http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/fx/reverse.abc.htm
+
+A{}, B{ chain: 1 }, C{}, D{ reverse: 1 } は、A → B → C → D → !D → !B の順になります。A と C は逆再生されません。
+{{{
+    // A(不透明度(opacity)を0.5に変化させ)、
+    // B(width を 300px に)、C(height を 300px に変化させ)、
+    // D(font-size を 3倍にし)、!D(元に戻し)、!B(width も元に戻す)
+    // 最終的に、不透明度は0.5になり、高さは 300 になり、それらは元に戻らない。
+    uu(".box").fx(2000, { o: 0.5               }). // A
+               fx(2000, { w: 300,   chain:   1 }). // B
+               fx(2000, { h: 300,              }). // C
+               fx(2000, { fs: "*3", reverse: 1 }); // D
+}}}
+http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/fx/reverse.abcd.htm
+
+A{ chain: 1 }, B{ reverse: 1 }, C{ chain: 1 }, D{ reverse: 1 }, E{ reverse: 1} は、A → B → !B → !A → C → D → !D → !C → E → !E の順になります。
+{{{
+    // A(不透明度(opacity)を0.5に変化させ)、
+    // B(width を 300px に変化させ)、!B(widthを元に戻し)、!A(不透明度を元に戻す)。
+    // C(height を 300px に変化させ)、
+    // D(font-size を 3倍にし)、!D(元に戻した後に)、!C(height を元に戻す)
+    // E(背景色を赤にし)、!E(元に戻す)
+    uu(".box").fx(2000, { o: 0.5,     chain:   1 }). // A
+               fx(2000, { w: 300,     reverse: 1 }). // B
+               fx(2000, { h: 300,     chain:   1 }). // C
+               fx(2000, { fs: "*3",   reverse: 1 }). // D
+               fx(2000, { bgc: "red", reverse: 1 }); // E
+}}}
+http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/fx/reverse.abcd.htm
 
 == uu.fx.show ==
 uu.fx.show(_node_:Node, _duration_:Number = 0, _displayValue_:String= "block"):Node は、_node_ を _duration_ 時間かけて表示し、_node_ を返します。
@@ -134,22 +208,6 @@ uu.fx.isHide(_node_:Node):Boolean は、要素が見えない状態で true を�
     // width と height を 500ms かけて width = 0, height 0 に連続的に変化させる
     uu("div").css({ w: 100, h: 100 }).fx(500, { w: 0, h: 0 });
 }}}
-
-=== reverse の指定 ===
-事前に chain: 1 を指定したキューを幾つか積み、reverse: 1 を指定すると、それまでに積まれたアニメーションキューの逆再生を行います。
-
-{{{
-    // width を 現在の値 → 0px → 300px → 0px → 現在の値 に戻す
-    uu(".box").fx(500, { w: 0, chain: 1 }).fx(500, { w: 300, reverse: 1 });
-}}}
-  * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/fx.easeing.htm
-
-単一のキューを再生し逆再生するには、 reverse: 1 を指定します。
-{{{
-    // opacity を 現在の値 → 1.0 → 現在の値 に戻す
-    uu(".box").css({ o: 0.2 }).fx(500, { o: 1.0, reverse: 1 });
-}}}
-  * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/fx.wiki.reverse.htm
 
 === fps の指定 ===
 window.uuconfig.fx.fps に 1以上の数字を指定することでアニメーションの fps を調整できます。デフォルト値は 10 です。
@@ -236,10 +294,10 @@ uu.fx.highlight(_node_:Node, _duration_:Number, _option_:Hash/Function = { bgc: 
 背景色をハイライトカラー(#ff9)にし、元の背景色に戻します。
 
 = Test Code =
-  * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/fx.show.htm (uu.fx.show / uu.fx.hide)
-  * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/fx.htm
-  * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/fx.dance.htm
-  * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/fx.plus.htm
-  * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/fx.easeing.htm
-  * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/fx.stress.htm
-  * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/fx.timming.htm
+  * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/fx/show.htm (uu.fx.show / uu.fx.hide)
+  * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/fx/base.htm
+  * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/fx/dance.htm
+  * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/fx/plus.htm
+  * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/fx/easeing.htm
+  * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/fx/stress.htm
+  * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/fx/timming.htm
