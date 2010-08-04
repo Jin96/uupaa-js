@@ -21,22 +21,6 @@ html, body {
 .border10  { border:  10px double turquoise; }
 .outline10 { outline: 10px solid springgreen; }
 </style>
-<script>
-var useTimer = (window.name + "") === "Timer";
-
-document.title = useTimer ? "Timer" : "setInterval";
-window.uuconfig = {
-    fx: {
-        tiemr:  useTimer,
-        fps:    10
-    }
-};
-
-function switchTimer() {
-    window.name = useTimer ? "setInterval" : "Timer";
-    location.reload(false);
-}
-</script>
 <script src="../../src/uupaa.js"></script>
 <script>
 var duration = 300;
@@ -160,9 +144,6 @@ function toggleOutline() {
 
 </script>
 </head><body id="body">
-
-    <input type="button" value="switch Timer" onclick="switchTimer()" />
-
 <div>
   <div>
     TOGGLE:

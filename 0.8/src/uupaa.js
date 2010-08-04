@@ -2694,7 +2694,7 @@ function StyleSheetInit(id) { // @param String: style sheet id
 
     uuhead(node = uunode("style", [{ id: id }, _webkit ? " " : null]));
 
-    this.ss = node.sheet /*{@mb*/ || node.styleSheet /*}@mb*/ ; // [IE] node.styleSheet
+    this.ss = node.sheet /*{@mb*/ || node.styleSheet /*}@mb */ ; // [IE] node.styleSheet
     this.rules = {};
 }
 
