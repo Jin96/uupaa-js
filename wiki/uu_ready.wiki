@@ -17,27 +17,31 @@
 || *uu.ready.storage*     <br/>window.localStorage ready event fired  || false           ||
 || *uu.ready.reload*      <br/>cache reload event fired         || false           ||
 
-== function status ==
+== functionally status ==
 機能の実装状況(互換性)を保持するプロパティの一覧です。
 
 全て Boolean 型です。機能が利用可能なら true になり、利用できない場合は false になります。
 
 # o = true, space = false
-||                                                                           || *IE6* || *IE7* || *IE8* || *IE9pp2* || *Gecko1.9.0+* || *!WebKit525+* || *Opera9.5+* ||
-|| *uu.ready.color.rgba*  <br/>{ color: rgba(0,0,0,0) } ready                ||       ||       ||       || o        || o         || o        || o(10+)   ||
-|| *uu.ready.color.hsla*  <br/>{ color: hsla(0,0%,0%,0) } ready              ||       ||       ||       ||          || o         || o        || o(10+)   ||
-|| *uu.ready.color.transparent*  <br/>{ color: transparent } ready           ||       ||       ||       || o        || o         || o        || o(10+)   ||
-|| *uu.ready.border.rgba* <br/>{ border-color: rgb(0,0,0) } ready            ||       ||       ||       || o        || o         || o        || o(10+)   ||
-|| *uu.ready.border.hsla* <br/>{ border-color: hsla(0,0%,0%,0) } ready       ||       ||       ||       ||          || o         || o        || o(10+)   ||
-|| *uu.ready.border.transparent* <br/>{ border-color: transparent } ready    ||       || o     || o     || o        || o         || o        || o        ||
-|| *uu.ready.background.rgba* <br/>{ background: rgb(0,0,0) } ready          ||       ||       ||       || o        || o         || o        || o(10+)   ||
-|| *uu.ready.background.hsla* <br/>{ background: hsla(0,0%,0%,0) } ready     ||       ||       ||       ||          || o         || o        || o(10+)   ||
-|| *uu.ready.background.transparent* <br/>{ background: transparent } ready  || o     || o     || o     || o        || o         || o        || o        ||
-|| *uu.ready.opacity*           <br />{ opacity: 1.0 } ready                 ||       ||       ||       || o        || o         || o        || o        ||
-|| *uu.ready.filter*            <br />node.filters ready                     || o / x || o / x || o / x || o / x    ||           ||          ||          ||
+||                                                                          || *IE6* || *IE7* || *IE8* || *IE9pp4* || *Gecko1.9.0+* || *!WebKit525+* || *Opera9.5+* ||
+|| *uu.ready.color.rgba*  <br/>{ color: rgba(0,0,0,0) } ready               ||       ||       ||       || o        || o         || o        || o(10+)   ||
+|| *uu.ready.color.hsla*  <br/>{ color: hsla(0,0%,0%,0) } ready             ||       ||       ||       ||          || o         || o        || o(10+)   ||
+|| *uu.ready.color.transparent*  <br/>{ color: transparent } ready          ||       ||       ||       || o        || o         || o        || o(10+)   ||
+|| *uu.ready.border.rgba* <br/>{ border-color: rgb(0,0,0) } ready           ||       ||       ||       || o        || o         || o        || o(10+)   ||
+|| *uu.ready.border.hsla* <br/>{ border-color: hsla(0,0%,0%,0) } ready      ||       ||       ||       ||          || o         || o        || o(10+)   ||
+|| *uu.ready.border.transparent* <br/>{ border-color: transparent } ready   ||       || o     || o     || o        || o         || o        || o        ||
+|| *uu.ready.background.rgba* <br/>{ background: rgb(0,0,0) } ready         ||       ||       ||       || o        || o         || o        || o(10+)   ||
+|| *uu.ready.background.hsla* <br/>{ background: hsla(0,0%,0%,0) } ready    ||       ||       ||       ||          || o         || o        || o(10+)   ||
+|| *uu.ready.background.transparent* <br/>{ background: transparent } ready || o     || o     || o     || o        || o         || o        || o        ||
+|| *uu.ready.opacity*           <br />{ opacity: 1.0 } ready                ||       ||       ||       || o        || o         || o        || o        ||
+|| *uu.ready.filter*            <br />node.filters ready                    || o / x || o / x || o / x || o / x    ||           ||          ||          ||
 || *uu.ready.!ArraySlice*       <br />Array.prototype.slice.call(!FakeArray) ready|| ||        ||       || o        || o         || o        || o        ||
-|| *uu.ready.getAttribute*      <br />right getAttribute                     ||       ||       || o     || o        || o         || o        || o        ||
-|| *uu.ready.!StringIndexer*    <br />String`[`indexer`]` ready              ||       ||       || o     || o        || o         || o        || o        ||
+|| *uu.ready.getAttribute*      <br />right getAttribute                    ||       ||       || o     || o        || o         || o        || o        ||
+|| *uu.ready.!StringIndexer*    <br />String`[`indexer`]` ready             ||       ||       || o     || o        || o         || o        || o        ||
+|| *uu.ready.innerHTML.style*   <br />hasNoParentNode.innerHTML = `"<style></style>"` ready ||       ||       ||       || ?        || o         || o        || o        ||
+|| *uu.ready.cloneNode.attr*    <br />ref attribute                         ||       ||       ||       || o        ||           ||          ||          ||
+|| *uu.ready.cloneNode.data*    <br />ref node["data-`*`"]                    || o     || o     || o     || o        ||           ||          ||          ||
+|| *uu.ready.cloneNode.event*   <br />ref DOM Event                         || o     || o     || o     || o        ||           ||          ||          ||
 
   * uu.ready.filter - スタンドアローン版のIEや、正規の手順以外でインストールされたIEではfalseになる可能性があります。
   * uu.ready.!ArraySlice - Array.prototype.slice.call(_!FakeArray_) が利用可能なら true になります。
@@ -48,6 +52,9 @@
     * IE では node.getAttribute("href", 2) とすることで相対URLを取得できます。また getAttribute("className") とすることで className を取得できます。
   * uu.ready.!StringIndexer - String`[`indexer`]` が利用可能なら true になります。
     * IE6, IE7 は "abc"`[`1`]` で undefined が返ります。
+
+  * uu.ready.innerHTML.style - 親が居ない(parentNode === null)なノードに対し node.innderHTML = "`<style></style>`" を行った場合に、スタイルが解釈されるなら true になります。
+    * IE6, IE7, IE8 では false になります。IE6～IE8でも parentNode !== null ならスタイルは解釈されます。
 
   * Firefox3.0 (Gecko1.9.0)
   * Firefox3.5 (Gecko1.9.1)
