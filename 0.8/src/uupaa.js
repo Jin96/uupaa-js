@@ -100,8 +100,14 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
         storage:    {
             order:  "LFICM",        // uu.config.storage.order - String: storage backends and detection order
             space:  0               // uu.config.storage.space - Number: require free space(unit: byte). 0 is no require
-        }
+        },
 //}@storage
+//{@audio
+        audio:      {
+            order:  "ASFN"          // uu.config.audio.order - String: audio backends and detection order
+        },
+//}@audio
+        0:0
     }),
     // --- VERSION DETECTION ---
     ver:            _ver,           // uu.ver - Hash: detected version and plugin informations
@@ -111,7 +117,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
     webkit:         _webkit,
     // --- CODE SNIPPET ---
 //{@snippet
-    snippet:        uusnippet,      // uu.snippet(id:String, arg:Hash/Array):String/Mix
+    snippet:        uusnippet,      // uu.snippet(id:String, arg:Hash/Array = void):String/Mix
 //}@snippet
     // --- AJAX / JSONP ---
 //{@ajax
@@ -159,8 +165,10 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
     nth:            uunth,          // uu.nth(source:Hash/Array, index:Number):Array
     each:           uueach,         // uu.each(source:Hash/Array/Number, evaluator:Function, arg:Mix = void)
     keys:           uukeys,         // uu.keys(source:Hash/Array):Array
+    last:           uulast,         // uu.last(source:Hash/Array):Array - last [key, value] pair
     size:           uusize,         // uu.size(source:Hash/Array):Number
     clone:          uuclone,        // uu.clone(source:Hash/Array):Hash/Array - shallow copy
+    first:          uufirst,        // uu.first(source:Hash):Array - first [key, value] pair
     values:         uuvalues,       // uu.values(source:Hash/Array):Array
     indexOf:        uuindexof,      // uu.indexOf(source:Hash/Array, searchValue:Mix):Number/String/void
     hash:           uuhash,         // uu.hash(key:Hash/String, value:Mix = void):Hash
@@ -258,6 +266,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //  [8][revert]          uu.fx(node, 500, { o: 1, r: 1 })
         easing:     {},             // uu.fx.easing - easing functions
         skip:       uufxskip,       // uu.fx.skip(node:Node = null, skipAll:Boolean = false, invisible:Boolean = false):NodeArray
+        stop:       uufxstop,       // uu.fx.stop(node:Node):Node
         isBusy:     uufxisbusy,     // uu.fx.isBusy(node:Node):Boolean
         isHide:     uufxishide,     // uu.fx.isHide(node:Node):Boolean
         hide:       uufxhide,       // uu.fx.hide(node:Node, duration:Number = 0):Node
@@ -392,11 +401,10 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
         sort:       uunodesort,     // uu.node.sort(ary:NodeArray, context:Node = <body>):Array - sort by document order
         swap:       uunodeswap,     // uu.node.swap(swapin:Node, swapout:Node):Node (swapout node)
         wrap:       uunodewrap,     // uu.node.wrap(innerNode:Node, outerNode:Node):Node (innerNode)
+        array:      uunodearray,    // uu.node.array(node:Node):NodeArray+Hash - { 0:node, ... first, prev, next, last, index }
         clear:      uunodeclear,    // uu.node.clear(parent:Node):Node
         clone:      uunodeclone,    // uu.node.clone(parent:Node, quick:Boolean = false):Node
         remove:     uunoderemove,   // uu.node.remove(node:Node):Node
-        indexOf:    uunodeindexof,  // uu.node.indexOf(node:Node):Number
-        children:   uunodechildren, // uu.node.children(parent:Node):NodeArray
         normalize:  uunodenormalize // uu.node.normalize(parent:Node = <body>, depth:Number = 0):Number
     }),
     add:            uunodeadd,      // uu.add as uu.node.add
@@ -496,7 +504,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
     guid:           uuguid,         // uu.guid():Number - build GUID
     // --- EVALUATION ---
     ready:    uumix(uuready, {      // uu.ready(readyEventType:IgnoreCaseString = "dom", callback:Function, ...)
-        fire:       uureadyfire,    // uu.ready.fire(readyEventType:String, param:Mix = void)
+        fire:       uureadyfire,    // uu.ready.fire(readyEventType:CaseInsenseString, param:Mix = void)
         dom:        _false,         // true is DOMContentLoaded event fired
         window:     _false,         // true is window.onload event fired
         audio:      _false,         // true is <audio> ready event fired
@@ -542,6 +550,10 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
     canvas:         uucanvas,       // uu.canvas(width:Number = 300, height:Number = 150,
                                     //           *attr:Hash, *css:Hash):<canvas>
 //}@canvas
+    // --- AUDIO ---
+//{@audio
+    audio:          uuaudio,        // uu.audio(url:String, option:Hash, callback:Function)
+//}@audio
     // --- FLASH ---
 //{@flash
 //{@mb
@@ -768,33 +780,57 @@ function uufactory(expr,   // @param NodeSet/Node/NodeArray/OOPClassNameString/w
 }
 
 // --- SNIPPET ---
+//  <script>
+//  var arg = {
+//      hoge: 'style="color:red"',
+//      listStyle: 'style="color: #3d3; background-color: #ddd"',
+//      list: {
+//          key: "a,b,c".split(",")   <-- "key" is <each> reserved word
+//          value: "value1,value2,value3".split(",")
+//      }
+//  };
+//  uu.snippet(snippetid, arg);
+//  </script>
+//  <script type="text/html" src="...">
+//  return <>
+//      <div {{arg.hoge}}>                              // {{arg.hoge}} -> style...
+//          <ul>
+//              <each arg.list>                         // <each arg.list> -> for (...)
+//                  <li {{arg.listStyle}}>{{key}}</li>  // {{key}}   -> arg.list.key[n]
+//                  <li>{{value}}</li>                  // {{value}} -> arg.list.value[n]
+//              </each>
+//          </ul>
+//      </div>
+//  </>
+//  </script>
+//
 //{@snippet
 // uusnippet - evaluate snippet
 function uusnippet(id,    // @param String: snippet id. <script id="...">
-                   arg) { // @param Mix(= void): arg
+                   arg) { // @param Array/Hash(= void): arg
                           // @return String/Mix:
     function toBrace(all, ident) {
-        return ident[_indexOf]("arg.") ? '{(' + ident + ')}'  // "{{ident}}"     -> "{(ident)}"
-                                       : '"+' + ident + '+"'; // "{{arg.ident}}" -> "+ident+"
+        return ident[_indexOf]("arg.") ? '{(' + ident + ')}'  // "{{ident}}"     -> "{(ident)}" // each brace
+                                       : "'+" + ident + "+'"; // "{{arg.ident}}" -> "+ident+"
     }
 
     function each(all, match) {
         match = match[_replace](/^\s+|\s+$/gm, "")
                 [_replace](/("|')/g, "\\$1")
                 [_replace](/\n/g, "\\n")
-                [_replace](eachBlock, toEachBlock)
-                [_replace](dualBrace, toBrace);
-        return 'uu.node.bulk("' + match + '");';
+                [_replace](eachBlock, toEachBlock)  // <each arg.list>...</each>
+                [_replace](dualBrace, toBrace);     // {{...}} ->
+        return "uu.node.bulk('" + match + "');";
     }
 
     function toEachBlock(all, hash, block) {
-        return '"+uu.snippet.each(' + hash + ',"' +
-                                      block[_replace](dualBrace, toBrace) + '")+"';
+        return "'+uu.snippet.each(" + hash + ",'" +
+                                      block[_replace](dualBrace, toBrace) + "')+'";
     }
 
     var xhr, js = uusnippet.js[id] || "", node, // {
         dualBrace = /\{\{([^\}]+)\}\}/g,
-        eachBlock = /<each ([^>]+)>([\s\S]*?)<\/each>/;
+        eachBlock = /<each ([^>]+)>([\s\S]*?)<\/each>/g;
 
     if (!js) {
         node = uuid(id);
@@ -819,11 +855,21 @@ function uusnippet(id,    // @param String: snippet id. <script id="...">
 }
 uusnippet.js = {}; // { id: JavaScriptExpression, ... }
 uusnippet.each = function(hash, fragment) { // (
-    var i = 0, iz = hash.length, block = [], eachBrace = /\{\(([^\)]+)\)\}/g;
+    var i = 0, iz = hash.key.length, // get each length from "key"
+        block = [], eachBrace = /\{\(([^\)]+)\)\}/g,
+        lastValue = {};
 
     for (; i < iz; ++i) {
         block.push(fragment[_replace](eachBrace, function(all, ident) {
-            return hash[ident][i];
+            if (ident === "n") {
+                return i;
+            }
+            var rv = isArray(hash[ident]) ? hash[ident][i]
+                                          : hash[ident],
+                undef;
+
+            return rv === undef ? lastValue[ident]
+                                : (lastValue[ident] = rv);
         }));
     }
     return block.join("");
@@ -1427,6 +1473,21 @@ function uunth(source,  // @param Hash/Array: source
     return [undef, undef];
 }
 
+// uu.last - get last [key, value] pair
+function uulast(source,      // @param Hash: source. Array is DenceArray
+                __first__) { // @hidden Boolean: true is first pair
+                             // @return Array: [key, value]
+    var key, ary;
+
+    if (isArray(source)) {
+        key = __first__ ? 0 : source.length - 1;
+        return [key, source[key]];
+    }
+    ary = uukeys(source); // { k0: 0, k1: 1 } -> ["k0", "k1"]
+    key = __first__ ? ary[0] : ary[ary.length - 1];
+    return [key, source[key]];
+}
+
 // [1][Hash.length]         uusize({ a: 1, b: 2 }) -> 2
 // [2][Array.length]        uusize([1,2]) -> [1,2]
 
@@ -1463,6 +1524,12 @@ function uuindexof(source,        // @param Hash/Array: source
 //{@mb
     return void 0;
 //}@mb
+}
+
+// uu.first - get first [key, value] pair
+function uufirst(source) { // @param Hash/Arra: source. Array is DenceArray
+                           // @return Array: [key, value]
+    return uulast(source, 1);
 }
 
 // [1][ascii sort a-z]   uu.array.sort(["a","z"], "A-Z") -> ["a", "z"]
@@ -1824,14 +1891,15 @@ function uufx(node,     // @param Node: animation target node
     //      callback - Function: callback function
     //
     //  ReserveWord
-    //      "init"   - init callback
-    //      "back"   - backward
-    //      "before" - before callback
-    //      "after"  - after callback
-    //      "reverse" - reverse
-    //      "chain"  - reverse chain
-    //      "deny"   -
-    //      "cssCache" - cached css
+    //      "before"    - Function: before callback
+    //      "after"     - Function: after callback
+    //      "reverse"   - Number/Boolean: reverse
+    //      "chain"     - Number/Boolean: reverse chain
+    //      "deny"      - Number/Boolean:
+    //      "stop"      - Number/Boolean: before uu.fx.stop()
+    //      "init"      - Function: init callback (system)
+    //      "back"      - Number/Boolean: backward (system)
+    //      "cssCache"  - Hash: cached css (system)
 
     option = option || {};
 
@@ -1842,6 +1910,9 @@ function uufx(node,     // @param Node: animation target node
     if (data.q[0] && data.q[0].option.deny) {
         return node;
     }
+
+    // before stop
+    option.stop && uufxstop(node);
 
     // add queue
     data.q.push({
@@ -1887,7 +1958,7 @@ function uufxloop(id,     // @param Number: timer id
             data.id = 0;
         }
     }
-    return !!data.id; // as clearInterval
+    return !!data.id; // return false -> clearInterval
 }
 uufx.props = { opacity: 1, color: 2, backgroundColor: 2,
                width: 3, height: 3, left: 4, top: 5 };
@@ -2098,6 +2169,18 @@ function uufxskip(node,        // @param Node(= null): null is all node
         }
     }
     return ary;
+}
+
+// uu.fx.stop
+function uufxstop(node) { // @param Node:
+                          // @return Node:
+    if (uufxisbusy(node)) {
+        var data = node["data-uufx"];
+
+        data.q[0].js = uunop; // clear function
+        data.q[0].tm = 1;     // past time
+    }
+    return node;
 }
 
 // uu.fx.isBusy
@@ -3546,9 +3629,9 @@ function uueventhover(node,         // @param Node:
     function hoverEventClosure(evt, rel) {
         // ignode mouse transit(mouseover, mouseout) in child node
         isString(expr) ? uuklasstoggle(node, expr)
-                       : _ie ? expr(evt, evt.code === uuevent.codes.mouseenter)
+                       : _ie ? expr(evt, evt.code === uuevent.codes.mouseenter, node)
                              : node !== (rel = evt.relatedTarget) && !uuhas(node, rel)
-                               && expr(evt, evt.code === uuevent.codes.mouseover);
+                               && expr(evt, evt.code === uuevent.codes.mouseover, node);
         uueventstop(evt);
     }
 
@@ -3838,7 +3921,7 @@ function uuunlive(expr,          // @param CSSSelectorExpressionString(= void 0)
 
 // --- READY ---
 // uu.ready - hook event
-function uuready(/* readyEventType, */  // @param String(= "dom"): readyEventType
+function uuready(/* readyEventType, */  // @param CaseInsenseString(= "dom"): readyEventType
                  /* callback, ... */) { // @param Function: callback functions
     var args = arguments, v, i = 0, iz = args.length, db = uuready.uudb,
         m, type = "dom", order = 0, rex = /^([^\:]+)(\:[0-2])?$/; // "dom", "dom:1", "dom:2"
@@ -3864,13 +3947,14 @@ function uuready(/* readyEventType, */  // @param String(= "dom"): readyEventTyp
 uuready.uudb = {}; // { readyEventType: [[low order], [mid order], [high order]], ... }
 
 // uu.ready.fire
-function uureadyfire(readyEventType, // @param String: readyEventType
+function uureadyfire(readyEventType, // @param CaseInsenseString: readyEventType
                      param) {        // @param Mix(= void): callback(uu, param)
-    var db = uuready.uudb[readyEventType], ary, callback, i = -1;
+    var type = readyEventType[_toLowerCase](),
+        db = uuready.uudb[type], ary, callback, i = -1;
 
     if (db) {
         ary = db[2][_concat](db[1], db[0]); // join
-        uuready.uudb[readyEventType] = null; // pre clear
+        uuready.uudb[type] = null; // pre clear
 
         while ( (callback = ary[++i]) ) {
             callback(uu, param);
@@ -4043,10 +4127,30 @@ function uunodebulk(source,    // @param Node/HTMLFragment: source
                     context) { // @param Node(= <div>): context
                                // @return DocumentFragment:
     var rv = doc.createDocumentFragment(),
+        pad = _false,
+        fragment = source[_nodeType] ? source.outerHTML // [1] node
+                                     : source,          // [2] "<p>html</p>"
         placeholder = uunode((context || {})[_tagName]);
 
-    placeholder.innerHTML = source[_nodeType] ? source.outerHTML // [1] node
-                                              : source;          // [2] "<p>html</p>"
+//{@mb
+    // [IE][FIX] node.innerHTML = "<style></style>" neglect
+    // http://twitter.com/uupaa/status/20443869519
+    if (/^<style/i.test(fragment)) {
+        if (!uu.ready.innerHTML.style && uu.ready.innerHTML.padStyle) { // [IE]
+            fragment = "<br/>" + fragment; // <br/><style>...</style>...
+            ++pad;
+        }
+    }
+//}@mb
+
+    placeholder.innerHTML = fragment;
+
+//{@mb
+    if (pad) {
+        placeholder.removeChild(placeholder[_firstChild]);
+    }
+//}@mb
+
     while (placeholder[_firstChild]) {
         rv[_appendChild](placeholder[_firstChild]);
     }
@@ -4065,9 +4169,9 @@ function uunodepath(node) {  // @param Node: ELEMENT_NODE
         } else {
             idx = "";
             if (n[_parentNode]) {
-                idx = (uunodechildren(n[_parentNode]).length < 2
-                              ? ""
-                              : ":nth-child(" + (uunodeindexof(n) + 1) + ")");
+                idx = (uunodearray(n).length < 2
+                    ? ""
+                    : ":nth-child(" + (uunodearray(n).index + 1) + ")");
             }
             rv.push(n[_tagName] + idx);
         }
@@ -4115,6 +4219,33 @@ function uunodewrap(innerNode,   // @param Node: inner node
                     outerNode) { // @param Node: wrapper, outer node
                                  // @return Node: innerNode
     return outerNode[_appendChild](uunodeswap(outerNode, innerNode));
+}
+
+// uu.node.array - collection siblings
+function uunodearray(node) { // @param Node: needle
+                        // @return NodeArray+Hash: { 0: node, ... first, prev, next, last, index }
+                        //      first - Node/null: firstElementSibling
+                        //      prev  - Node/null: previousElementSibling
+                        //      next  - Node/null: nextElementSibling
+                        //      last  - Node/null: lastElementSibling
+                        //      index - Number: position index or -1
+    var rv = [], i = 0, first = null, last = null, index = -1,
+        n = node[_parentNode][_firstChild];
+
+    for (; n; n = n[_nextSibling]) {
+        if (n[_nodeType] === 1) { // 1: ELEMENT_NODE
+            rv.push(last = n);
+            first || (first = n);
+            n === node && (index = i); // found index
+            ++i;
+        }
+    }
+    rv.first = first;
+    rv.prev  = rv[index - 1] || null;
+    rv.next  = rv[index + 1] || null;
+    rv.last  = last;
+    rv.index = index;
+    return rv;
 }
 
 // [1][clear children]      uu.node.clear(<body>)
@@ -4230,38 +4361,6 @@ function uunoderemove(node) { // @param Node:
     }
     node[_parentNode] && node[_parentNode][_removeChild](node);
     return node;
-}
-
-// uu.node.children - as childlen (returns a collection of child elements of the given element)
-function uunodechildren(parent) { // @param Node: parent node
-                                  // @return NodeArray:
-    var rv = parent.children; // Element.children [WebKit][Gecko]
-//{@mb
-    if (!rv) {
-        var n = parent[_firstChild];
-
-        for (rv = []; n; n = n[_nextSibling]) {
-            n[_nodeType] === 1 && rv.push(n); // 1: ELEMENT_NODE
-        }
-    }
-//}@mb
-    return rv;
-}
-
-// uu.node.indexOf - find ELEMENT_NODE index
-function uunodeindexof(node) { // @param Node: ELEMENT_NODE
-                               // @return Number: 0~ or -1(not found)
-    var rv = 0, n = node[_parentNode][_firstChild];
-
-    for (; n; n = n[_nextSibling]) {
-        if (n[_nodeType] === 1) { // 1: ELEMENT_NODE
-            if (n === node) {
-                return rv;
-            }
-            ++rv;
-        }
-    }
-    return -1;
 }
 
 // uu.node.normalize - removes CRLF/blank-text/white-space/comment node
@@ -5847,6 +5946,165 @@ uuready("window", function() {
 });
 //}@canvas
 
+// --- AUDIO ---
+//{@audio
+// uu.audio
+function uuaudio(url,        // @param URLString:
+                 option,     // @param Hash:
+                 callback) { // @param Function:
+    uu("Audio", url, uumix(option, {
+        auto:       _true,
+        loop:       _false,
+        start:      0,
+        parent:     doc.body,
+        volume:     0.5
+    }, 0, 0), callback);
+}
+
+uu.Class("Audio", {
+    init:           AudioInit,      // init(url:URLString, option:AudioOptionHash = {}, callback:Function)
+    play:           AudioPlay,      // play():Boolean
+    stop:           AudioStop,      // stop(close:Boolean = false)
+    info:           AudioInfo,      // info():Hash { text, loop, volume, start, current,
+                                    //               error, closed, playing, ended, paused,
+                                    //               url, backend }
+    option:         AudioOption,    // option(key:String, value:Number/Boolean):Number/Boolean
+                                    //  [1][set loop]    option("loop", true)
+                                    //  [2][get loop]    option("loop") -> tru
+                                    //  [3][set volume]  option("volume", 0.5)
+                                    //  [4][get volume]  option("volume") -> 0.5
+                                    //  [5][set start]   option("start", 10)
+                                    //  [6][get start]   option("start") -> 10
+                                    //  [7][set current] option("current", 10)
+                                    //  [8][get current] option("current") -> 10
+    bind:           AudioBind,      // bind(eventTypes:String, evaluator:Function)
+    unbind:         AudioUnbind     // unbind(eventTypes:String, evaluator:Function)
+});
+
+// Audio.init
+function AudioInit(url,        // @param URLString: "music.mp3"
+                   option,     // @param Hash: { auto, loop, start, parent, volume }
+                               //   option.auto - Boolean(= false): auto play
+                               //   option.loop - Boolean(= false):
+                               //   option.start - Number(= 0): start time
+                               //   option.parent - Node(= <body>): <object> parent node
+                               //   option.volume - Number(= 0.5): 0.0 ~ 1.0
+                   callback) { // @param Function(= void): callback(this)
+    var that = this,
+        names = {
+            A: "HTML5Audio",
+/*{@mb*/    S: "SilverlightAudio",
+            F: "FlashAudio",        /*}@mb*/
+            N: "NoAudio"
+        };
+
+    this.closed = _false;
+
+    (uu.config.audio.order || "N").split("").some(function(backendName) {
+        backendName = names[backendName] || "";
+
+        var backendClass = uuclass[backendName];
+
+        if (backendClass &&
+            ifFunction(backendClass.ready) && backendClass.isSupport(url)) {
+            uu(backendName, url, option, function(backend) {
+                that.ao = backend;
+                callback && callback(that);
+            });
+            return _true;
+        }
+        return _false;
+    });
+}
+
+// Audio.play
+function AudioPlay() { // @return Boolean: true is playing
+                       //                  false is paused
+    switch (this.info().text) {
+    case "ended":   this.ao.currentTime(0);
+    case "paused":  this.ao.play();
+                    return _true;
+    case "playing": this.ao.pause();
+    }
+    return _false;
+}
+
+// Audio.stop
+function AudioStop(close) { // @param Boolean(= false):
+    if (close) {
+        this.closed = _true;
+        this.ao.close();
+    } else {
+        this.ao.stop();
+    }
+}
+
+// Audio.info
+function AudioInfo() { // @return Hash: { text, loop, volume, start, current,
+                       //                 error, closed, playing, ended, paused,
+                       //                 url, backend }
+                       //   text    - String: status text
+                       //   loop    - Boolean:
+                       //   volume  - Number: 0.0 ~ 1.0
+                       //   start   - Number: start time
+                       //   current - Number: current time
+                       //   error   - Number: 0 is not error,
+                       //                     1 is MEDIA_ERR_ABORTED
+                       //                     2 is MEDIA_ERR_NETWORK
+                       //                     3 is MEDIA_ERR_DECODE,
+                       //                     4 is MEDIA_ERR_SRC_NOT_SUPPORTED
+                       //   closed  - Boolean:
+                       //   playing - Boolean:
+                       //   ended   - Boolean:
+                       //   url     - String:
+                       //   backend - String:
+    var rv = this.ao.info();
+
+    rv.closed = this.closed;
+    rv.playing = _false;
+
+    if (rv.closed) {
+        rv.text = "closed";
+    } else if (rv.error) {
+        rv.text = "error";
+    } else if (rv.paused) {
+        rv.text = "paused";
+    } else if (rv.ended) {
+        rv.text = "ended";
+    } else {
+        rv.playing = _true;
+        rv.text = "playing";
+    }
+    return rv;
+}
+
+// Audio.option
+function AudioOption(key,     // @param String: key
+                     value) { // @param Number/Boolean(= void):
+                              // @return Number/Boolean:
+    return value === void 0 ? this.ao.info[key]
+                            : this.ao[key](value);
+}
+
+// Audio.bind
+function AudioBind(eventTypes, // @param String:
+                   callback) { // @param Function:
+    this.ao.bind(eventTypes, callback);
+}
+
+// Audio.unbind
+function AudioUnbind(eventTypes, // @param String:
+                     callback) { // @param Function:
+    this.ao.unbind(eventTypes, callback);
+}
+
+// --- initialize ---
+uuready("window", function() {
+    uuready.window = uuready.audio = _true;
+    uuready.fire("audio", uutag("audio"));
+});
+//}@audio
+
 // --- FLASH ---
 //  <object id="external..." width="..." height="..." data="*.swf" classid="...">
 //      <param name="allowScriptAccess" value="always" />
@@ -6478,6 +6736,20 @@ function createCamelizedHash(rv, props) {
         k, v;
 
     for (k in props) {
+
+
+
+//[IE9pp4 SPECIAL] http://twitter.com/uupaa/status/20425511980
+//{@mb
+        if (_ie && _ver == 9) {
+            if (/^ms/i.test(k)) {
+                continue;
+            }
+        }
+//}@mb
+
+
+
         if (typeof props[k] === _string) {
 //{@mb
             if (_webkit) {
@@ -6645,6 +6917,10 @@ function detectFeatures() {
             ArraySlice: _true,      // Array.prototype.slice.call(FakeArray) ready
             getAttribute: _true,    // getAttribute("href"), getAttribute("class") ready
             StringIndexer: _true,   // String[indexer] ready
+            innerHTML: {            // node.innerHTML
+                style: _true,       //  node.innerHTML = "<style></style>" ready
+                padStyle: _true     //  node.innerHTML = "<dummyNode/><style></style>" ready
+            },
             cloneNode: {            // cloneNode:
                 attr: _false,       //  ref attribute [GECKO][WEBKIT][OPERA][IE] is false
                 data: _false,       //  ref node["data-*"] [IE6-IE8][IE9pp3] is true
@@ -6665,7 +6941,14 @@ function detectFeatures() {
     // detect opacity - http://d.hatena.ne.jp/uupaa/20100513
     rv.opacity = style.opacity != undef;
 
-    node.innerHTML = '<a href="/a" class="a"></a>';
+    // detect innerHTML = "<style>" bug
+    node.innerHTML = '<style></style>';
+    rv.innerHTML.style = !!node.childNodes.length;
+
+    // detect innerHTML = "<style>" bug + getAttribute bug
+    node.innerHTML = '<a href="/a" class="a"></a><br/><style>*{color:red}</style>';
+    rv.innerHTML.padStyle = node.childNodes.length === 3;
+
     child = node[_firstChild];
     try {
         toArray.call(doc.getElementsByTagName("head"));
@@ -6714,7 +6997,7 @@ uuready("dom:2", function() {
 }, function() {
     // detect uu.ready.filter
     if (_ie) {
-        var div = doc[_appendChild](newNode()), dummy;
+        var div = doc.body[_appendChild](newNode()), dummy;
 
         try {
             dummy = div.filters;
@@ -7312,8 +7595,7 @@ function otherFunctionFilter(ctx, j, jz, negate, ps, arg) {
 
 (function(win, doc, uu) {
 
-var _storageOrder = uu.config.storage.order || "M",
-    _requireFreeSpace = uu.config.storage.space || 0,
+var _requireFreeSpace = uu.config.storage.space || 0,
     _freeSpace = uu.ver.iphone ? 2.5   * 1024 * 1024 - 260 // iPhone3.1.2 (2.5MB)
                : uu.ver.chrome ? 2.5   * 1024 * 1024 - 260 // Chrome4+    (2.5MB)
                : uu.ver.safari ? 8     * 1024 * 1024       // Safari4+    (8.0MB)
@@ -7433,13 +7715,13 @@ function init() {
             M: "MemStorage"
         };
 
-    _storageOrder.split("").some(function(backendName) {
+    (uu.config.storage.order || "M").split("").some(function(backendName) {
         backendName = names[backendName] || "";
 
-        var storageBackend = uu.Class[backendName]; // L -> LocalStorage
+        var backendClass = uu.Class[backendName]; // L -> LocalStorage
 
-        if (storageBackend) {
-            if (uu.ifFunction(storageBackend.ready)) {
+        if (backendClass) {
+            if (uu.ifFunction(backendClass.ready)) {
                 try {
                     uu(backendName, function(backend) { // ready.callback
                         var info = backend.info();
