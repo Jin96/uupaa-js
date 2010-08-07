@@ -861,7 +861,7 @@ uusnippet.each = function(hash, fragment) { // (
 
     for (; i < iz; ++i) {
         block.push(fragment[_replace](eachBrace, function(all, ident) {
-            if (ident === "n") {
+            if (ident === "i") { // {{i}} is loop count
                 return i;
             }
             var rv = isArray(hash[ident]) ? hash[ident][i]
