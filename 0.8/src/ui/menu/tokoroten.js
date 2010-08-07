@@ -2,7 +2,7 @@
 var key = arg.list.key,
     keyz = key.length,
     width = arg.image.width,
-    border = 2,
+    border = arg.image.border,
     padding = arg.image.padding,
     lastNode = 0,
     userHover = 0,
@@ -10,7 +10,6 @@ var key = arg.list.key,
 
 arg.image.frameWidth = (padding + border) * keyz + width - padding * 0.5 - border;
 arg.image.innerWidth =  padding           * keyz + width * 2;
-arg.image.border = border;
 arg.image.last = key[keyz - 1];
 
 function hoverEvent(evt, hover, node) {
@@ -91,7 +90,7 @@ return <>
   <ul>
     <each arg.list>
         <li class="{{key}}"><a
-            href="{{href}}" data-uueachindex="{{n}}">{{text}}</a>
+            href="{{href}}" data-uueachindex="{{i}}">{{text}}</a>
         </li>
     </each>
   </ul>
