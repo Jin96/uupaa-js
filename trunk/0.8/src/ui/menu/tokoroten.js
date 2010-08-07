@@ -28,7 +28,7 @@ function hoverEvent(evt, hover, node) {
 
 uu.ready(arg.id, function() {
     uu("#" + arg.id + ">ul>li>a").hover(hoverEvent).click(function(evt) {
-        arg.click && arg.click(evt, evt.node, uu.attr(evt.node, "data-uueachindex"));
+        arg.onclick && arg.onclick(evt, evt.node, uu.attr(evt.node, "data-uueachindex"));
     });
 });
 
@@ -91,7 +91,7 @@ return <>
   <ul>
     <each arg.list>
         <li class="{{key}}"><a
-            href="{{href}}" data-uueachindex="{{n}}">{{link}}</a>
+            href="{{href}}" data-uueachindex="{{n}}">{{text}}</a>
         </li>
     </each>
   </ul>

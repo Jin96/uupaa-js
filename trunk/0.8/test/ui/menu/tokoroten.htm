@@ -20,7 +20,7 @@ uu.ready(function() {
         list:   {
             key:    "classA,classB,classC,classD,classE,classF,classG,classH,classI,classJ".split(","),
             href:   "#",
-            link:   "",
+            text:   "",
             src:    ["../../images/cover01.jpg",
                      "../../images/cover02.jpg",
                      "../../images/cover03.jpg",
@@ -32,7 +32,7 @@ uu.ready(function() {
                      "../../images/cover09.jpg",
                      "../../images/cover10.jpg"]
         },
-        click:  function(evt, node, index) {
+        onclick:  function(evt, node, index) {
             uu.log("click : " + index);
         }
     };
