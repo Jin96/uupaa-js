@@ -66,6 +66,9 @@ key には、予約済みのキーワード( before, after, chain, reverse, deny
 || { before: beforeCallback } || アニメーション開始前に beforeCallback(_node_, _option_, _back_) の形でコールバックします ||
 || { chain: 1 }               || 逆再生用のキューを作成します ||
 || { reverse: 1 }             || 逆再生用のキューを作成します。<br />また、アニメーション終了後に逆再生用のキューを通常のキューに割り込ませ逆再生を開始します ||
+|| { stop: 1 }                || アニメーションを再生する前に [uu_fx_stop uu.fx.stop] を呼び出し、現在実行中のアニメーションを停止します ||
+|| { junction: uu.junction()の戻り値 } || uu.junction() の戻り値を指定することで、アニメーション終了時に、自動的に Junction.join() を呼び出します ||
+
 
 key には、短い名前(Alias) も指定できます。
 
@@ -227,6 +230,9 @@ uu.fx(_node_, _duration_, uu.nop) とすることで、_duration_ の間だけ�
 == uu.fx.skip ==
 uu.fx.skip(_node_:Node = null, _skipAll_:Boolean = false, _invisible_:Boolean = false):!NodeArray は、_node_ のキューに積まれたアニメーションを一つだけスキップし、キューをスキップしたノードの配列 !NodeArray を返します。
 スキップすると、各CSSプロパティの値は、アニメーション開始時に uu.fx で指定した endValue の値になります。
+複数のキューが設定されている場合は、次のキューが再生されます。
+
+uu.fx.stop はアニメーションを途中で停止し、uu.fx.skip はアニメーションを最後まで実行した状態で次のキューを再生します。
 
 _node_ に null を指定すると、アニメーションキューを持つ全てのノードから先頭のキューを一つだけスキップし、!NodeArray を返します。
 _skipAll_ に true を指定すると、全てのアニメーションキューをスキップします。
@@ -245,6 +251,12 @@ _invisible_ に true を指定すると、2つ以上のアニメーションを�
     // ちらつきを抑えつつ、アニメーションを終了させる
     uu.fx.skip(0, true, true);
 }}}
+
+== uu.fx.stop ==
+uu.fx.stop(_node_:Node):!Node は、_node_ のキューに積まれたアニメーションを一つだけ途中で停止し、_node_ を返します。アニメーションが実行されていなければ何も起きません。
+複数のキューが設定されている場合は、次のキューが再生されます。
+
+uu.fx.stop はアニメーションを途中で停止し、uu.fx.skip はアニメーションを最後まで実行した状態で次のキューを再生します。
 
 == uu.fx.isBusy ==
 uu.fx.isBusy(_node_:Node) は _node_ がアニメーション中かアニメーションキューが積まれている状態で true を返します。
@@ -298,3 +310,4 @@ uu.fx.highlight(_node_:Node, _duration_:Number, _option_:Hash/Function = { bgc: 
   * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/fx/easeing.htm
   * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/fx/stress.htm
   * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/fx/timming.htm
+  * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/fx/junction.htm
