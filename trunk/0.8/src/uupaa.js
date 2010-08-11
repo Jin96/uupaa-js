@@ -1675,8 +1675,7 @@ function uuattr(node,    // @param Node:
     // [IE6][IE7] key=for -> key=htmlFor, key=class -> key=className
     // [OTHER]    key=htmlFor -> key=for, key=className -> key=class
     switch (uucomplex(key, value)) { // 1: (), 2: ({}), 3: (k), 4: (k,v)
-    case 1: ary = node.attributes;
-            while ( (attr = ary[i++]) ) {
+    case 1: for (ary = node.attributes; attr = ary[i++]; ) {
                 rv[attr.name] = attr.value;
             }
             return rv;
@@ -2978,7 +2977,7 @@ if (!getComputedStyle) {
 function getComputedStyleIE(node) { // @param Node:
                                     // @return Hash: { width: "123px", ... }
     // http://d.hatena.ne.jp/uupaa/20091212
-    var rv, rect, ut, v, w, x, i = -1, mem,
+    var rv, rect, ut, v, w, x, i = 0, mem,
         style = node.style,
         currentStyle = node.currentStyle,
         runtimeStyle = node.runtimeStyle,
@@ -2994,7 +2993,7 @@ function getComputedStyleIE(node) { // @param Node:
     rv = getComputedStyleIE.getProps(currentStyle);
 
     // calc: border***Width, padding***, margin***
-    while ( (w = boxProperties[++i]) ) {
+    for (; w = boxProperties[i++]; ) {
         v = currentStyle[w];
         if (!(v in cache)) {
             x = v;
@@ -3055,7 +3054,7 @@ getComputedStyleIE.boxs = // boxProperties
 getComputedStyleIE.getProps = (function(props) {
     var js = [], i = 0, prop;
 
-    while ( (prop = props[i++]) ) {
+    for (; prop = props[i++]; ) {
         js.push(prop + ":style." + prop); // "{{prop}}: style.{{prop}}"
     }
     return new Function("style", "return {" + js.join(",") + "}");
@@ -3242,10 +3241,10 @@ function uumsgsend(address, // @param Array/Mix: address or guid
                    message, // @param String: message
                    param) { // @param Mix(= void):
                             // @return Arra: [result, ...]
-    var rv = [], ri = -1, to, obj, i = -1,
+    var rv = [], ri = -1, to, obj, i = 0,
         ary = address ? uuarray(address) : this.cast;
 
-    while ( (to = ary[++i]) ) {
+    for (; to = ary[i++]; ) {
         obj = this.addr[to.uuguid || to || 0];
         obj && (rv[++ri] = obj.msgbox(message, param));
     }
@@ -3358,7 +3357,7 @@ function uuevent(node,         // @param Node:
     var eventTypeExArray = eventTypeEx.split(","),
         eventData = node[_data_uuevent],
         ex, token, eventType, capture, closure, bound, types = "types",
-        handler, i = -1, pos,
+        handler, i = 0, pos,
 //{@mb
         owner = (node.ownerDocument || doc).documentElement,
 //}@mb
@@ -3372,7 +3371,7 @@ function uuevent(node,         // @param Node:
         closure = eventClosure;
     }
 
-    while ( (ex = eventTypeExArray[++i]) ) { // ex = "namespace.click+"
+    for (; ex = eventTypeExArray[i++]; ) { // ex = "namespace.click+"
 
         // split token
         //      "namespace.click+"
@@ -3515,14 +3514,14 @@ function uueventstop(event) { // @param EventObjectEx:
 function uueventunbind(node,          // @param Node: target node
                        eventTypeEx) { // @param EventTypeExString(= void): namespace and event types, "click,click+,..."
                                       // @return Node:
-    var eventData = node[_data_uuevent], ns, ary, ex, i = -1, c = ",";
+    var eventData = node[_data_uuevent], ns, ary, ex, i = 0, c = ",";
 
     if (eventData) {
         eventTypeEx = eventTypeEx ? c + eventTypeEx + c        // [2] ",click,"
                                   : node[_data_uuevent].types; // [1] ",click,MyNamespace.mousemove+,"
         ary = eventTypeEx[_replace](/^,|,$/g, "").split(c);
 
-        while ( (ex = ary[++i]) ) {
+        for (; ex = ary[i++]; ) {
             if (ex.lastIndexOf(".*") > 1) { // [3] "namespace.*"
                 ns = ex.slice(0, -1);       // "namespace.*" -> "namespace."
                 uueach(ary, function(ex) {
@@ -4032,13 +4031,13 @@ uuready.uudb = {}; // { readyEventType: [[low order], [mid order], [high order]]
 function uureadyfire(readyEventType, // @param CaseInsenseString: readyEventType
                      param) {        // @param Mix(= void): callback(uu, param)
     var type = readyEventType[_toLowerCase](),
-        db = uuready.uudb[type], ary, callback, i = -1;
+        db = uuready.uudb[type], ary, callback, i = 0;
 
     if (db) {
         ary = db[2][_concat](db[1], db[0]); // join
         uuready.uudb[type] = null; // pre clear
 
-        while ( (callback = ary[++i]) ) {
+        for (; callback = ary[i++]; ) {
             callback(uu, param);
         }
     }
@@ -4335,9 +4334,9 @@ function uunodearray(node) { // @param Node: needle
 // uu.node.clear - clear all children
 function uunodeclear(parent) { // @param Node: parent node
                                // @return Node: parent
-    var rv = uutag("*", parent), v, i = -1;
+    var rv = uutag("*", parent), v, i = 0;
 
-    while ( (v = rv[++i]) ) {
+    for (; v = rv[i++]; ) {
         uunodeidremove(v);
         uueventunbind(v);
     }
@@ -4387,7 +4386,7 @@ function uunodeclone(parent,  // @param Node: parent node (ElementNode)
     function reverseFetch(nodeArray) { // [IE]
         var i = 0, nodeid, cloned;
 
-        while ( (cloned = nodeArray[i++]) ) {
+        for (; cloned = nodeArray[i++]; ) {
             (nodeid = cloned[_data_uunodeid]) &&
                 cloneData(uunodeidtonode(nodeid), cloned);
         }
@@ -4445,7 +4444,7 @@ function uunoderemove(node) { // @param Node:
     return node;
 }
 
-// uu.node.normalize - removes CRLF/blank-text/white-space/comment node
+// uu.node.normalize - remove CRLF/blank-text/white-space/comment nodes
 function uunodenormalize(parent, // @param Node(= <body>): parent node
                          max) {  // @param Number(= 0): max depth, 0 is infinity
                                  // @return Number: removed node count
@@ -4466,7 +4465,7 @@ function uunodenormalize(parent, // @param Node(= <body>): parent node
     var nodeArray = [], node, i = 0, KEEP = /\S/;
 
     markup(parent || doc.body, 0);
-    while ( ( node = nodeArray[i++]) ) {
+    for (; node = nodeArray[i++]; ) {
         node[_parentNode][_removeChild](node); // remove
     }
     return nodeArray.length;
@@ -4545,7 +4544,7 @@ function getNodeValue(node,  // @param Node:
         if (type & 2) { // 2:<select>, 3:<select multiple>
             i = node.selectedIndex;
             if (i >= 0) {
-                while ( (v = ary[i++]) ) {
+                for (; v = ary[i++]; ) {
                     v.selected && rv.push(v.value || v.text);
                     if (!multi) { // <select>
                         break;
@@ -4553,7 +4552,7 @@ function getNodeValue(node,  // @param Node:
                 }
             }
         } else if (type & 4) { // 4:<input type="radio">, 5:<input type="checkbox">
-            while ( (v = ary[i++]) ) {
+            for (; v = ary[i++]; ) {
                 v.checked && rv.push(v.value);
             }
         }
@@ -4579,11 +4578,11 @@ function setNodeValue(node,    // @param Node:
         // 4: <input type="radio">, 5: <input type="checkbox">
         if (ary) {
             if (type & 1) { // 3: <select multiple>, 5: <input type="checkbox">
-                while ( (v = ary[k++]) ) {
+                for (; v = ary[k++]; ) {
                     v[prop] = _false; // reset current state
                 }
             }
-            while ( (v = ary[i++]) ) {
+            for (; v = ary[i++]; ) {
                 for (j = 0; j < jz; ++j) {
                     (v.value || v.text) == valary[j] // 0 == "0"
                         && (v[prop] = _true);
@@ -4680,9 +4679,9 @@ function uumatch(expr,      // @param CSSSelectorExpressionString: "css > select
         return context.msMatchesSelector(expr);
     }
 
-    var node, i = -1, nodeArray = uuquery(expr, doc);
+    var node, i = 0, nodeArray = uuquery(expr, doc);
 
-    while ( (node = nodeArray[++i]) ) {
+    for (; node = nodeArray[i++]; ) {
         if (node === context) {
             return _true;
         }
@@ -5944,10 +5943,10 @@ function uufontlist(fonts) { // @param FontNameArray: ["Arial", "Times New Roman
 function uufontdetect(node) { // @param Node:
                               // @return String: detected font, eg: "serif"
     var fam = uucss(node, "px").fontFamily,
-        ary = fam.trim().split(","), v, i = -1,
+        ary = fam.trim().split(","), v, i = 0,
         a, b = uufontmetric("72pt " + fam);
 
-    while ( (v = ary[++i]) ) {
+    for (; v = ary[i++]; ) {
         a = uufontmetric("72pt " + v);
         if (a.w === b.w && a.h === b.h) {
             return v; // match
@@ -6256,7 +6255,7 @@ function uuflash(url,        // @param String: url
 // uu.cookie - load and parse cookie
 function uucookie(prefix) { // @param String: prefix, namespace
                             // @return Hash: { key: "value", ... }
-    var rv = {}, i = -1, pairs, pair, kv, cut = prefix.length;
+    var rv = {}, i = 0, pairs, pair, kv, cut = prefix.length;
 
     if (doc.cookie) {
 
@@ -6266,7 +6265,7 @@ function uucookie(prefix) { // @param String: prefix, namespace
         //
         pairs = doc.cookie.split("; ");
 
-        while ( (pair = pairs[++i]) ) {
+        for (; pair = pairs[i++]; ) {
             kv = pair.split("="); // ["{{prefix}}key", "value"]
 
             if (!kv[0][_indexOf](prefix)) {
@@ -6648,12 +6647,12 @@ function NodeSetIndexOf(node) { // @param Node:
 function NodeSetAdd(source,     // @param Node/DocumentFragment/HTMLFragment/TagName(= "div"):
                     position) { // @param Boolean(= "./last"): insert position
                                 // @return NodeSet:
-    var ary = this[_nodeArray], context, i = -1;
+    var ary = this[_nodeArray], context, i = 0;
 
     if (ary.length === 1) {
         uunodeadd(source, ary[0], position);
     } else {
-        while ( (context = ary[++i]) ) {
+        for (; context = ary[i++]; ) {
             uunodeadd(uunodebulk(source), context, position); // clone node
         }
     }
@@ -6774,8 +6773,7 @@ function _windowonunload() {
         try {
             node = _nodeiddb[nodeid];
             ary = node.attributes;
-            i = -1;
-            while ( (v = ary[++i]) ) {
+            for (i = 0; v = ary[i++]; ) {
                 !v.name[_indexOf]("data-") && (node[v.name] = null);
             }
         } catch (err) {}
@@ -6791,7 +6789,7 @@ _ie && _ver < 9 && uueventdetach(win, "onunload", _windowonunload);
 // 1. prebuild camelized hash - http://handsout.jp/slide/1894
 // 2. prebuild nodeid
 uuready("dom:2", function() {
-    var nodeList = uutag("*", root), v, i = -1,
+    var nodeList = uutag("*", root), v, i = 0,
         attrFix = "float,cssFloat",
         fxAlias = ",w,width,h,height,x,left,y,top,l,left,t,top," +
                   "c,color,bgc,backgroundColor," +
@@ -6806,7 +6804,7 @@ uuready("dom:2", function() {
                                                 : root.style),
           uuhash(attrFix + fxAlias), uuattr.fix);
     uunodeid(root);
-    while ( (v = nodeList[++i]) ) {
+    for (; v = nodeList[i++]; ) {
         uunodeid(v);
     }
 });
@@ -7985,9 +7983,9 @@ function ieStorageInfo() {
 
     var so = this.so, idx = (so[_getAttribute](_ieIndex) || ""),
         ary = idx.split("\t"),
-        used = idx.length, key, i = -1;
+        used = idx.length, key, i = 0;
 
-    while ( (key = ary[++i]) ) {
+    for (; key = ary[i++]; ) {
         used += (so[_getAttribute](key) || "").length;
     }
     return infoHash(used, _ieFreeSpace, i, "IEStorage");
@@ -8019,7 +8017,7 @@ function ieStorageItem(key, value) {
     switch (uu.complex(key, value)) { // 1: (), 2: ({}), 3: (k), 4: (k,v)
     case 1: idx = (so[_getAttribute](_ieIndex) || "").split("\t");
             rv = {};
-            while ( (key = idx[i++]) ) {
+            for (; key = idx[i++]; ) {
                 rv[key] = so[_getAttribute](key) || "";
             }
             break;
@@ -8044,7 +8042,7 @@ function ieStorageClear(key) {
 
     if (key === _undef) {
         idx = idx.split("\t");
-        while ( (key = idx[i++]) ) {
+        for (; key = idx[i++]; ) {
             so.removeAttribute(key);
         }
         so[_setAttribute](_ieIndex, "");
