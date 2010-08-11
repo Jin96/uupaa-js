@@ -10,6 +10,7 @@ uu.junction(_race_:Number, _items_:Number, _callback_:Function):Junction は、�
 
 == uu.Class.Junction ==
 new uu.Class.Junction(_race_:Number, _items_:Number, _callback_:Function) は終了条件 _race_ と、アイテム数 _items_ を比較し、条件を満たした場合にコールバックする _callback_ を設定し、ジャンクションを初期化します。
+
 _race_ や _items_ に ゼロを指定したり、 _race_ `>` _items_ な値を指定すると例外を発生させます。
 
 ==  uu.Class.Junction.ok ==
