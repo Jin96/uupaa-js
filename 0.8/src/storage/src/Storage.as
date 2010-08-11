@@ -22,7 +22,7 @@
 
             trace(ExternalInterface.objectID);
 
-            ExternalInterface.call("uu.dmz." + ExternalInterface.objectID);
+            ExternalInterface.call("uu.dmz." + ExternalInterface.objectID, ExternalInterface.objectID);
         }
 
         private function detectDiskSpace():uint {
