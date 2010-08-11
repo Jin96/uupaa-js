@@ -4310,7 +4310,7 @@ function uunodearray(node) { // @param Node: needle
                              //      prev  - Node/null: previousElementSibling
                              //      next  - Node/null: nextElementSibling
                              //      last  - Node/null: lastElementSibling
-                             //      index - Number: position index or -1 (node is TEXT_NODE)
+                             //      index - Number: position index or -1 (TEXT_NODE or COMMENT_NODE)
     var rv = [], i = 0, first = null, last = null, index = -1,
         n = node[_parentNode][_firstChild];
 
