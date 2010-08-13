@@ -2,12 +2,14 @@
 
 <wiki:toc max_depth="3" />
 
-uu.ready はブラウザで何ができるかどんな状態かといった情報を提供します。また各機能の初期化完了イベントハンドラを提供します。
+uu.ready はブラウザで何ができるかどんな状態かといった情報を提供します。また各機能の初期化完了をハンドリングします。
+
+uu.ready が扱うイベントは、System Event です。System Event は、DOM Event とは異なり、初期化のハンドリング等を目的とした特別なイベントです。
 
 = uu.ready - properties =
 
 == event status ==
-イベントの発火状態を保持するプロパティの一覧です。
+System Event の発火状態を保持するプロパティの一覧です。
 
 全て Boolean 型です。
 ||                                                              || *initial value* ||
@@ -69,7 +71,7 @@ uu.ready はブラウザで何ができるかどんな状態かといった情�
 
 == uu.ready ==
 uu.ready(_readyEventType_:IgnoreCaseString = "dom", _callback_:Function, ...) は条件成立後にコールバックする関数を登録します。
-コールバック関数は複数指定可能です。_readyEventType_ でコールバック対象とするイベントを指定できます。大小文字は区別しません。
+コールバック関数は複数指定可能です。_readyEventType_ でコールバック対象とする System Event を指定できます。大小文字は区別しません。
   * *"dom"* - DOMContentLoaded event (low order)
   * *"window"* - window.onload event
   * *"audio"* - `<`audio`>` ready event
@@ -77,15 +79,15 @@ uu.ready(_readyEventType_:IgnoreCaseString = "dom", _callback_:Function, ...) �
   * *"canvas"* - `<`canvas`>` ready event
   * *"storage"* - window.localStorage ready event
   * *"reload"* - location.reload() event
-先に登録されたイベントほど優先的にコールバックします。
+先に登録された System Event ほど優先的にコールバックします。
 _readyEventType_ は省略できます。省略した場合は *"dom:0"* が指定されたものとみなします。
 
 === 優先度の指定 ===
 _readyEventType_ には 0～2までの数字で優先度を指定できます、値が大きいほど先に実行します。省略した場合の優先度は *0* です。優先度は "dom:2" のように イベントタイプ + ":" + 数字で指定します。
 
-=== 既に発火済みのイベントの扱い ===
-条件成立後(イベント発火後)に uu.ready(_callback_) を実行すると、コールバック関数を溜め込まず、即座に _callback_ をコールバックします。
-イベント発火済みかどうかを調べるには、uu.ready.dom や uu.ready.window を調べます。true なら、それらイベントは発火済みです。
+=== 既に発火済みの System Event の扱い ===
+条件成立後(System Event発火後)に uu.ready(_callback_) を実行すると、コールバック関数を溜め込まず、即座に _callback_ をコールバックします。
+System Event 発火済みかどうかを調べるには、uu.ready.dom や uu.ready.window を調べます。true なら、それら System Event は発火済みです。
 
 === DOMContentLoaded イベントハンドラの使い方 ===
 {{{
@@ -147,8 +149,8 @@ _readyEventType_ には 0～2までの数字で優先度を指定できます、
     });
 }}}
 
-=== ユーザ独自イベントタイプの使い方 ===
-ユーザが独自に定義したイベントタイプも指定可能です。適当なタイミングで uu.ready.fire() を呼び出し手動でコールバックします。
+=== ユーザ独自の System Event の使い方 ===
+ユーザが独自に定義した System Event も指定可能です。適当なタイミングで uu.ready.fire() を呼び出し手動でコールバックします。
 {{{
     var param = { counter: 0 };
 
@@ -165,7 +167,7 @@ _readyEventType_ には 0～2までの数字で優先度を指定できます、
 }}}
 
 == uu.ready.fire ==
-uu.ready.fire(_readyEventType_:String, _param_:Mix = void) は uu.ready() で登録済みのイベントをコールバックします。
+uu.ready.fire(_readyEventType_:String, _param_:Mix = void) は uu.ready() で登録済みの System Event をコールバックします。
 コールバック引数は、callback(uu, _param_) となります。
 
 発火済みの場合は、何もしません。
