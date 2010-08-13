@@ -2,6 +2,8 @@
 
 <wiki:toc max_depth="3" />
 
+uu.ready はブラウザで何ができるかどんな状態かといった情報を提供します。また各機能の初期化完了イベントハンドラを提供します。
+
 = uu.ready - properties =
 
 == event status ==
@@ -165,6 +167,8 @@ _readyEventType_ には 0～2までの数字で優先度を指定できます、
 == uu.ready.fire ==
 uu.ready.fire(_readyEventType_:String, _param_:Mix = void) は uu.ready() で登録済みのイベントをコールバックします。
 コールバック引数は、callback(uu, _param_) となります。
+
+発火済みの場合は、何もしません。
 
 = Test Code =
 http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/ready.htm
