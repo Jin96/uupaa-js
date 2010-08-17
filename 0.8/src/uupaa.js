@@ -253,7 +253,9 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
     ss:             uuss,           // uu.ss(id:StyleSheetIDString):StyleSheetObject
                                     //  [1][get/create StyleSheet object] uu.ss("myStyleSheet") -> StyleSheet
     // --- VIEW PORT ---
-    viewport:       uuviewport,     // uu.viewport():Hash - { innerWidth, innerHeight, pageXOffset, pageYOffset, orientation }
+    viewport:       uuviewport,     // uu.viewport():Hash - { innerWidth, innerHeight,
+                                    //                        pageXOffset, pageYOffset,
+                                    //                        orientation, devicePixelRatio }
     // --- TIMER ---
     interval:       uuinterval,     // uu.interval(callback:Function, arg:Mix = void):Number
     // --- EFFECT / ANIMATION ---
@@ -427,6 +429,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //  [3][get text]                  uu.text(node)            -> "text"
                                     //  [4][set text]                  uu.text(node, "text")    -> node
                                     //  [5][set formated text]         uu.text(node, "@", "a")  -> node
+    script:         uuscript,       // uu.script(url:String):Node - <script src="url">
     // --- FORM.VALUE ---
 //{@form
     value:          uuvalue,        // uu.value(node:Node, value:String = void):StringArray/Node
@@ -1153,36 +1156,35 @@ function uujsonp(url,        // @param String: "http://example.com?callback=@"
     var timeout = option.timeout || 10,
         method = option.method || "callback",
         guid = uuguid(),
-        tag = uunode("script", [{ type: "text/javascript", charset: "utf-8",
-                                  run: 0 }]);
+        node = uumix(newNode("script"), uuscript.attr);
 
     url = uuf(url, method);
     uujsonp.db[guid] = method;
 
     // build callback global function
     win[method] = function(data, rv) { // @param Mix: json data
-        if (!tag.run++) {
+        if (!node.run++) {
             rv = { ok: !!data, status: data ? 200 : 408 };
 
-            option[_after] && option[_after](tag, option, rv);
+            option[_after] && option[_after](node, option, rv);
             callback(data, option, rv);
 
             setTimeout(function() {
-                uunoderemove(tag);
+                uunoderemove(node);
                 win[method] = null;
                 delete uujsonp.db[guid];
             }, (timeout + 10) * 1000);
         }
     };
 
-    uunodeadd(tag, doc.head);
+    uunodeadd(node, doc.head);
 
-    option[_before] && option[_before](tag, option);
+    option[_before] && option[_before](node, option);
 
-    tag[_setAttribute]("src", url);
+    node.src = url;
 
-    setTimeout(function() {
-        uujsonp.db[guid](); // 408 "Request Time-out"
+    setTimeout(function(fn) {
+        isFunction(fn = uujsonp.db[guid]) && fn(); // 408 "Request Time-out"
     }, timeout * 1000);
 }
 uujsonp.db = {}; // { guid: callbackMethod, ... }
@@ -1823,18 +1825,26 @@ function uuviewport() { // @return Hash: { innerWidth, innerHeight,
                         //      pageXOffset - Number:
                         //      pageYOffset - Number:
                         //      orientation - Number: last orientation
+                        //      devicePixelRatio - Number: 2 is iPhone4 Retina dispiay
                         //            0 is Portrait
                         //          -90 is Landscape
                         //           90 is Landscape
                         //          180 is Portrait
 //{@mb
+    var undef,
+        orientation = "orientation",
+        devicePixelRatio = "devicePixelRatio";
+
     if (!win.innerWidth) { // [IE6][IE7][IE8] CSSOM View Module
         return { innerWidth:  root.clientWidth,    // [IE9] supported
                  innerHeight: root.clientHeight,   // [IE9] supported
                  pageXOffset: root.scrollLeft,     // [IE9] supported
                  pageYOffset: root.scrollTop,      // [IE9] supported
-                 orientation: 0 };                 // [IPHONE] only
+                 orientation: 0,                   // [IPHONE] only
+                 devicePixelRatio: 1 };            // [IPHONE] only
     }
+    win[orientation] === undef && (win[orientation] = 0);
+    win[devicePixelRatio] === undef && (win[devicePixelRatio] = 1);
 //}@mb
     return win;
 }
@@ -3199,7 +3209,6 @@ function uuclasssingleton(className,      // @param String: class name
                           protoMember,    // @param Hash/Function(= void): prototype member
                                           //                               or init function
                           staticMember) { // @param Hash(= void): static member
-                                          // @return Object: singleton class instance
     uuclass[className] = function() {
         var that = this, arg = arguments, self = arg.callee,
             instance = "instance";
@@ -4007,20 +4016,22 @@ function uuready(/* readyEventType, */  // @param CaseInsenseString(= "dom"): re
     var args = arguments, v, i = 0, iz = args.length, db = uuready.uudb,
         m, type = "dom", order = 0, rex = /^([^\:]+)(\:[0-2])?$/; // "dom", "dom:1", "dom:2"
 
-    for (; !uuready.reload && i < iz; ++i) {
-        v = args[i];
-        if (isString(v)) {
-            m = rex.exec(v);
-            if (m) {
-                type = m[1][_toLowerCase]();
-                order = +m[2] || 0;
-            }
-        } else {
-            if (uuready[type]) {
-                v(uu); // callback(uu)
+    if (!uuready.reload) {
+        for (; i < iz; ++i) {
+            v = args[i];
+            if (isString(v)) {
+                m = rex.exec(v);
+                if (m) {
+                    type = m[1][_toLowerCase]();
+                    order = +m[2] || 0;
+                }
             } else {
-                db[type] || (db[type] = [[], [], []]);
-                db[type][order].push(v);
+                if (uuready[type]) { // already? -> fire
+                    v(uu); // callback(uu)
+                } else {
+                    db[type] || (db[type] = [[], [], []]);
+                    db[type][order].push(v);
+                }
             }
         }
     }
@@ -4093,8 +4104,11 @@ function uunode(node,       // @param Node/SVGNode/TagNameString(= "div"): "div"
                     } else {
                         // typical arguments(Number, String)
                         if (type === _number || (isstr && arg[_indexOf](",") < 0)) {
-                            typical ? (hash[typical[ai++]] = arg) // uu.svg(100, 100)
-                                    : node[_appendChild](newText(arg)); // uu.div("text")
+                            if (typical) {
+                                hash[typical[ai++]] = arg; // uu.svg(100, 100)
+                            } else if (arg !== "") {
+                                node[_appendChild](newText(arg)); // uu.div("text")
+                            }
                         } else if (++token < 3) {
                             (token < 2 ? uuattr
                                        : uucss)(node, isstr ? uuhash(arg) : arg);
@@ -4142,6 +4156,16 @@ function uubody(/* var_args */) { // @param Mix: var_args
                                   // @return Node: <body> node
     return uunode(doc.body, arguments);
 }
+
+// uuscript - add JavasScript
+function uuscript(url) { // @param String:
+                         // @return Node:
+    var rv = doc.head[_appendChild](uumix(newNode("script"), uuscript.attr));
+
+    rv.src = url;
+    return rv;
+}
+uuscript.attr = { type: "text/javascript", charset: "utf-8", run: 0 };
 
 //  [1][add div node]          uu.add()         -> <body><div /></body>
 //  [2][from tagName]          uu.add("p")      -> <body><p /></body>
@@ -6936,6 +6960,7 @@ function detectVersion(libraryVersion) { // @param Number: Library version
     rv.mobile       = test(/Mobile/) || test(/Opera Mini/);
 //}@mb
     rv.iphone       = test(/iPad|iPod|iPhone/);
+    rv.retina       = win.devicePixelRatio > 1;
     rv.android      = test(/Android/);
     rv.os           = rv.iphone         ? "iphone"  // iPhone OS    -> "iphone"
                     : rv.android        ? "android" // Android OS   -> "android"
@@ -7951,9 +7976,9 @@ function flashStorageItem(key, value) {
 
     switch (uu.complex(key, value)) { // 1: (), 2: ({}), 3: (k), 4: (k,v)
     case 1: rv = so.allItem(); break;
-    case 2: rv = so.mixItem(key); break;
+    case 2: rv = so.setItem(key); break;
     case 3: rv = so.getItem(key) || ""; break;
-    case 4: rv = so.setItem(key, value);
+    case 4: rv = so.setItem(uu.hash(key, value));
     }
     return rv;
 }
