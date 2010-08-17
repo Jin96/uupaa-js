@@ -20,6 +20,7 @@
   * uu.ver.webkit - Boolean: !WebKit ベースのブラウザ(Safari, iPhone, iPad, iPod, Android,  Google Chrome等)で true になります。
   * uu.ver.chrome - Boolean: Google Chrome で true になります。
   * uu.ver.safari - Boolean: Safari, iPhone, iPad, iPod, Android で true になります。
+  * uu.ver.retina - Boolean: Retina Display で true になります。
   * uu.ver.iphone - Boolean: iPhone, iPad, iPod で true になります。
   * uu.ver.android - Boolean: Android で true になります。
   * uu.ver.mobile - Boolean: iPhone, iPad, iPod, Android で true になります。
@@ -44,6 +45,7 @@ o = true, x/space = false
 || uu.ver.webkit   ||           ||          ||     o       ||        o         ||       o        ||                    ||                    ||
 || uu.ver.chrome   ||           ||          ||             ||                  ||       o        ||                    ||                    ||
 || uu.ver.safari   ||           ||          ||     o       ||        o         ||                ||                    ||                    ||
+|| uu.ver.retina   ||           ||          ||             ||    o(iPhone4)    ||                ||                    ||                    ||
 || uu.ver.iphone   ||           ||          ||             ||        o         ||                ||                    ||                    ||
 || uu.ver.android  ||           ||          ||             ||                  ||                ||                    ||                    ||
 || uu.ver.mobile   ||           ||          ||             ||        o         ||                ||                    ||                    ||
