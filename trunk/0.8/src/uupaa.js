@@ -1246,7 +1246,7 @@ function uucomplex(key,     // @param String/Hash(= void):
                    value) { // @param String/Number(= void): 1 ~ 4
     return key === void 0 ? 1
                           : value !== void 0 ? 4
-                                             : isString(key) ? 3 : 2;
+                                             : typeof key === _string ? 3 : 2;
 }
 
 // uu.isNumber - is number
@@ -1775,14 +1775,14 @@ function uucss(node,    // @param Node:
                 value = key[fuzzy];
                 right = fix[fuzzy] || fuzzy;
 
-                if (typeof value === _number) {
-                    if (right === opacity) {
-                        uucssopacity(node, value);
-                        continue;
+                if (right === opacity) {
+                    uucssopacity(node, +value);
+                } else {
+                    if (typeof value === _number) {
+                        uucss.care[right] || (value += "px"); // number -> pixel value
                     }
-                    uucss.care[right] || (value += "px"); // number -> pixel value
+                    style[right] = value;
                 }
-                style[right] = value;
             }
             break;
     case 1:                                         // uu.css(node)
@@ -2431,7 +2431,7 @@ function uucssopacity(node,      // @param Node:
                       opacity) { // @param Number/String(= void): Number(0.0 - 1.0) absolute
                                  //                               String("+0.5", "-0.5") relative
                                  // @return Number/Node:
-    var style = node.style, undef;
+    var style = node.style, undef /*{@mb*/, tmpParent /*}@mb*/;
 
     if (opacity === undef) {
 //{@mb
@@ -2479,6 +2479,11 @@ function uucssopacity(node,      // @param Node:
     if (!uuready.opacity) {
         node["data-uuopacity"] = opacity + 1; // (1.0 ~ 2.0)
         if (uuready.filter) {
+            // http://d.hatena.ne.jp/uupaa/20100819
+            if (!node[_parentNode]) {
+                tmpParent = doc.body;
+                tmpParent[_appendChild](node);
+            }
             var filter = node.filters.item("DXImageTransform.Microsoft.Alpha");
 
             if (opacity > 0 && opacity < 1) {
@@ -2487,6 +2492,7 @@ function uucssopacity(node,      // @param Node:
             } else {
                 filter.Enabled = _false;
             }
+            tmpParent && tmpParent.removeChild(node);
         }
         style[_visibility] = opacity ? "visible" : "hidden";
     }
