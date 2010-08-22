@@ -125,7 +125,7 @@ uu.log(base); // { a: 0, b: 1 }
       <caption>infoに指定可能な文字列と戻り値の一覧</caption>
       <tr><th><i>info</i></th><th>Return<br />戻り値</th></tr>
       <tr><td>uu.ua("")</td><td>ユーザエージェント文字列を返す</td></tr>
-      <tr><td><a name="uu.ua.opera">uu.ua("opear")</a></td><td><img src="./img/o32.png" alt="" />Opera9+ で true</td></tr>
+      <tr><td><a name="uu.ua.opera">uu.ua("opera")</a></td><td><img src="./img/o32.png" alt="" />Opera9+ で true</td></tr>
       <tr><td><a name="uu.ua.ie">uu.ua("ie")</a></td><td><img src="./img/i32.png" alt="" />Internet Explorer6+ で true</td></tr>
       <tr><td><a name="uu.ua.ie6">uu.ua("ie6")</a></td><td><img src="./img/i32.png" alt="" />Internet Explorer 6 で true</td></tr>
       <tr><td><a name="uu.ua.ie8">uu.ua("ie8")</a></td><td><img src="./img/i32.png" alt="" />Internet Explorer 8 で true</td></tr>
@@ -172,7 +172,7 @@ uu.log(base); // { a: 0, b: 1 }
     <p>uu.forEach(<i>mix</i>, <i>fn</i>, <i>me</i> = undefined) は、
         <i>mix</i>の各要素に対し、<i>fn</i>.call(<i>me, 要素の値, index, mix</i>) を実行します。</p>
     <p><a href="#Array.forEach">Array.forEach</a> は Array専用ですが、
-        uu.forEachは、<a href="./GLOSSARY.htm#TypeHash">Hash</a>, Array, 
+        uu.forEachは、<a href="./GLOSSARY.htm#TypeHash">Hash</a>, Array,
         <a href="./GLOSSARY.htm#FakeArray">FakeArray</a>に使用可能です。</p>
     <pre>
  @param Hash/Array/FakeArray mix - Hash, Array, FakeArrayを指定します。
@@ -199,7 +199,7 @@ uu.log(base); // { a: 0, b: 1 }
        mixの各要素に対し、<i>fn</i>.call(<i>me, 要素の値, index, mix</i>) を実行し、
           結果が真の要素を <b>Array</b> で返します。</p>
     <p><a href="#Array.filter">Array.filter</a> は Array専用ですが、
-        uu.filterは、<a href="./GLOSSARY.htm#TypeHash">Hash</a>, Array, 
+        uu.filterは、<a href="./GLOSSARY.htm#TypeHash">Hash</a>, Array,
         <a href="./GLOSSARY.htm#FakeArray">FakeArray</a>に使用可能です。</p>
     <pre>
  @param Hash/Array/FakeArray mix - Hash, Array, FakeArrayを指定します。
@@ -339,13 +339,13 @@ uu.log(rv); // [0, 2, 8]
         :  +- /FirstSibling   (親から見て長女) - pos = <b>UU.FIRST</b>
         :  +- /SecondSibling  (親から見て次女)
            +- /ThirdSibling   (親から見て三女) - pos = <b>UU.PREV</b>
-           | 
+           |
            +- /FourthSibling  (親から見て四女) - <b>context</b> - 基準ノード
            |  |
            |  +- /FirstChild  (親から見て四女の長男) - pos = <b>UU.FIRST_CHILD</b>
            |  +- /SecondChild (親から見て四女の次男)
            |  +- /ThirdChild  (親から見て四女の三男) - pos = <b>UU.LAST_CHILD</b>
-           | 
+           |
            +- /FifthSibling   (親から見て五女) - pos = <b>UU.NEXT</b>
            +- /SixthSibling   (親から見て六女)
            +- /SeventhSibling (親から見て七女) - pos = <b>UU.LAST</b>
@@ -1337,7 +1337,7 @@ elm.clientHeight = 14px = 4(padding) + 10(height)
  |         ├──┤
             elm.style.borderTopWidth
             elm.clientLeft
-  
+
  ├────┤
   elm.style.marginLeftWidth
   elm.offsetLeft
@@ -1990,10 +1990,10 @@ uu.ready(boot, "DMC"); // DomReady + ModuleReady + CanvasReady 成立でboot関�
 <!-- -->
   <dt><a name="uu.request.callback">CallBack</a> - コールバック</dt>
   <dd><p>
-          <a href="#uu.ajax">uu.ajax</a>, 
-          <a href="#uu.ajax.loadIfMod">uu.ajax.loadIfMod</a>, 
-          <a href="#uu.ajax.loadSync">uu.ajax.loadSync</a>, 
-          <a href="#uu.jsonp, uu.request.script">uu.jsonp</a>, uu.request.script, 
+          <a href="#uu.ajax">uu.ajax</a>,
+          <a href="#uu.ajax.loadIfMod">uu.ajax.loadIfMod</a>,
+          <a href="#uu.ajax.loadSync">uu.ajax.loadSync</a>,
+          <a href="#uu.jsonp, uu.request.script">uu.jsonp</a>, uu.request.script,
           <a href="./MODULE.htm#uu.module.image.load">uu.module.image.load</a>
           の引数で指定した <i>fn</i> は、
          通信/読み込み の各段階で <i>fn</i>(<i>uid</i>, <i>step</i>, <i>response</i>, <i>status</i>, <i>url</i>, <i>async</i>, <i>more arg, ...</i>) の形で
