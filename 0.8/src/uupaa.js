@@ -168,6 +168,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
     each:           uueach,         // uu.each(source:Hash/Array/Number, evaluator:Function, arg:Mix = void)
     keys:           uukeys,         // uu.keys(source:Hash/Array):Array
     last:           uulast,         // uu.last(source:Hash/Array):Array - last [key, value] pair
+    pair:           uupair,         // uu.pair(key:String, value:Mix):Hash
     size:           uusize,         // uu.size(source:Hash/Array):Number
     calls:          uucalls,        // uu.calls(func:FunctionArray)
     clone:          uuclone,        // uu.clone(source:Hash/Array):Hash/Array - shallow copy
@@ -623,6 +624,8 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
     dmz:            {},             // uu.dmz - DeMilitarized Zone(proxy)
     nop:            uunop,          // uu.nop - none operation
     pao:            uupao           // uu.pao - `function-producing` function
+                                    //  [1][pao literal ] uu.pao(false)  -> (function() { return false; })
+                                    //  [2][pao function] uu.pao(uu.nop) -> (function() { return uu.nop; })
 });
 
 // uu.nop - none operation
@@ -639,13 +642,13 @@ function uupao(arg) { // @param Mix:
 
 // inner - new node
 function newNode(tag) { // @param TagNameString(= "div"):
-                        // @return Node:
+                        // @return Node: <div>
     return doc.createElement(tag || "div");
 }
 
 // inner - new text node
 function newText(text) { // @param String:
-                         // @return TextNode:
+                         // @return TextNode: <textNode>text</textNode>
     return doc.createTextNode(text);
 }
 
@@ -675,7 +678,7 @@ uuclass("Junction", {
     init:           JunctionInit,   // uu.junction(race:Number, item:Number, callback:Function)
     ok:             JunctionOK,     // ok(value:Mix = void):this
     ng:             JunctionNG,     // ng(value:Mix = void):this
-    judge:          JunctionJudge   // Judge():this
+    judge:          JunctionJudge   // judge():this
 });
 
 // --- StyleSheet class ---
@@ -783,13 +786,11 @@ function uufactory(expr,   // @param NodeSet/Node/NodeArray/OOPClassNameString/w
                    arg3,   // @param Mix(= void): ClassName.init arg3
                    arg4) { // @param Mix(= void): ClassName.init arg4
                            // @return Instance/NodeSet:
-    // class factory
-    if (typeof expr === _string && uuclass[expr]) {
+    if (typeof expr === _string && uuclass[expr]) {     // Class factory
         return new uuclass[expr](arg1, arg2, arg3, arg4);
     }
 //{@nodeset
-    // NodeSet factory
-    return new NodeSet(expr, arg1, arg2, arg3, arg4);
+    return new NodeSet(expr, arg1, arg2, arg3, arg4);   // NodeSet factory
 //}@nodeset
 }
 
@@ -1149,10 +1150,10 @@ function uujsonp(url,        // @param String: "http://example.com?callback=@"
                              //     timeout - Number(= 10):
                              //     method  - String(= "callback")
                  callback) { // @param Function: callback(data, option, { ok, status })
-                             //    data   - JSONObject:
-                             //    option - Hash:
-                             //    status - Number: 200 or 408
-                             //    ok     - Boolean:
+                             //     data    - JSONObject:
+                             //     option  - Hash:
+                             //     status  - Number: 200 or 408
+                             //     ok      - Boolean:
     var timeout = option.timeout || 10,
         method = option.method || "callback",
         guid = uuguid(),
@@ -1507,6 +1508,16 @@ function uulast(source,      // @param Hash: source. Array is DenceArray
     ary = uukeys(source); // { k0: 0, k1: 1 } -> ["k0", "k1"]
     key = __first__ ? ary[0] : ary[ary.length - 1];
     return [key, source[key]];
+}
+
+// uu.pair - make pair
+function uupair(key,     // @param String: key
+                value) { // @param Mix: value
+                         // @return Hash: { key: value }
+    var rv = {};
+
+    rv[key] = value;
+    return rv;
 }
 
 // [1][Hash.length]         uusize({ a: 1, b: 2 }) -> 2
@@ -1902,12 +1913,12 @@ function uufx(node,     // @param Node: animation target node
                         //     easing   - String: easing function name, "InOutQuad"
                         //     callback - Function: before or after callback function
                         // @return Node:
-    // --- DATA STRUCTURE ---
+    // --- INTERNAL DATA STRUCTURE ---
     //
     //  node["data-uufx"] = {
-    //       q: [FxQueueDataHash, ...]
-    //      rq: [FxQueueDataHash, ...]
-    //      id: 0       // timer id
+    //       q: [FxQueueDataHash, ...]  // forward queue
+    //      rq: [FxQueueDataHash, ...]  // reverse queue
+    //      id: 0                       // timer id
     //  }
     //
     //  FxQueueDataHash = { js, tm, dur, fin, guid, option }
@@ -1967,10 +1978,10 @@ function uufxloop(id,     // @param Number: timer id
     var data = node["data-uufx"], q = data.q[0], // fetch current queue
         option = q.option, back = !!option.back, tm, finished;
 
-    if (q.tm) {
-        tm = +new Date;
+    if (q.tm) { // already running?
+        tm = +new Date; // running -> get current time
     } else {
-        // first time
+        // initialize
         option.init && (option.init(node, option, back), option.init = 0);
         option[_before] && option[_before](node, option, back);
         q.js = isFunction(option) ? option
@@ -2002,6 +2013,10 @@ uufx.props = { opacity: 1, color: 2, backgroundColor: 2,
 // uu.fx.easing - easing functions
 uu.fx.easing = {
         linear: "(c*t/d+b)", // linear(t,b,c,d)
+                             //     t:Number - current time
+                             //     b:Number - beginning value
+                             //     c:Number - change in value(delta)
+                             //     d:Number - duration(unit: ms)
 // Quad ---
         inquad: "(z1=t/d,c*z1*z1+b)",
        outquad: "(z1=t/d,-c*z1*(z1-2)+b)",
@@ -2039,6 +2054,72 @@ uu.fx.easing = {
                 ":(c*(z2*(z1-=(2.625/z3))*z1+.984375)+b))"
 };
 
+uu.fx.timing =  {
+    // uu.fx.timing["default"]
+    "default": function(t, duration) {
+        return uu.fx.timing.cubicBezier(t, duration, 0.25, 0.1, 0.25, 0.1);
+    },
+    // uu.fx.timing["ease-in"]
+    "ease-in": function(t, duration) {
+        return uu.fx.timing.cubicBezier(t, duration, 0.42, 0, 1, 1);
+    },
+    // uu.fx.timing["ease-out"]
+    "ease-out": function(t, duration) {
+        return uu.fx.timing.cubicBezier(t, duration, 0, 0, 0.58, 1);
+    },
+    // uu.fx.timing["ease-in-out"]
+    "ease-in-out": function(t, duration) {
+        return uu.fx.timing.cubicBezier(t, duration, 0.42, 0, 0.58, 1);
+    },
+    // uu.fx.timing.cubicBezier
+    cubicBezier: function(t,          // @param Number: current time
+                          duration,   // @param Number: unit ms
+                          p1x,        // @param Number: 0.0 ~ 1.0
+                          p1y,        // @param Number: 0.0 ~ 1.0
+                          p2x,        // @param Number: 0.0 ~ 1.0
+                          p2y) {      // @param Number: 0.0 ~ 1.0
+                                      // @return Number: 0.0 ~ 1.0
+        var cx = p1x * 3,
+            cy = p1y * 3,
+            bx = (p2x - p1x) * 3 - cx,
+            by = (p2y - p1y) * 3 - cy,
+            ax = 1 - cx - bx,
+            ay = 1 - cy - by,
+            xx, tt, fin = 0,
+            epsilon = 1 / (duration * 200),
+            t0 = 0, t1 = 1, t2 = t, x2, d2, i = 0;
+
+        for (; i < 8; ++i) {
+            x2 = ((ax * t2 + bx) * t2 + cx) * t2 - t;
+            if ((x2 >= 0 ? x2 : 0 - x2) < epsilon) {
+                fin = 1;
+                break;
+            }
+            d2 = (3 * ax * t2 + 2 * bx) * t2 + cx;
+            if ((d2 >= 0 ? d2 : 0 - d2) < 0.000001) {
+                break;
+            }
+            t2 = t2 - x2 / d2;
+        }
+        if (!fin) {
+            if (t < 0 || t > 1) {
+                return t < 0 ? 0 : 1;
+            }
+            for (t2 = t; t0 < t1; ) {
+                x2 = ((ax * t2 + bx) * t2 + cx) * t2;
+                xx = x2 - t;
+                if ((xx >= 0 ? xx : -xx) < epsilon) {
+                    break;
+                }
+                t > x2 ? (t0 = t2) : (t1 = t2);
+                t2 = (t1 - t0) * 0.5 + t0;
+            }
+        }
+        return ((ay * t2 + by) * t2 + cy) * t2;
+    }
+};
+
+// inner - build animation
 function uufxbuild(node, data, queue, option) {
     function ezfn(v0, v1, ez) {
         return "(b=" + v0 + ",c=" + (v1 - v0) + "," + uu.fx.easing[ez] + ")";
@@ -6045,7 +6126,7 @@ function uucanvas(width,         // @param Number(= 300):
 
 //{@mb
     if (_ie && _ver < 9) {
-        return uu.canvas.build(canvas, order || "svg sl fl vml");
+        return uucanvas.build(canvas, order || "svg sl fl vml");
     }
 //}@mb
     return canvas;
@@ -6053,7 +6134,7 @@ function uucanvas(width,         // @param Number(= 300):
 
 // --- initialize ---
 uuready("window", function() {
-    uu.canvas.init && uu.canvas.init();
+    uucanvas.init && uucanvas.init();
     uuready.window = uuready.canvas = _true;
     uuready.fire("canvas", uutag("canvas"));
 });
@@ -6752,8 +6833,7 @@ uueach(uuevent.shortcut, function(eventType) {
 });
 
 //{@mb
-// [IE6][IE7][IE8]
-_ie && _ver < 9 && uueach(uutag.html5.split(","), newNode);
+_ie && _ver < 9 && uueach(uutag.html5.split(","), newNode); // [IE6][IE7][IE8]
 
 try {
     // [IE6] flicker fix
@@ -6809,7 +6889,7 @@ function _windowonunload() {
         } catch (err) {}
     }
     doc.html = doc.head = null;
-    uueventdetach(win, "onload", _windowonload);
+    uueventdetach(win, "onload",   _windowonload);
     uueventdetach(win, "onunload", _windowonunload);
 }
 _ie && _ver < 9 && uueventdetach(win, "onunload", _windowonunload);
@@ -7696,57 +7776,58 @@ function otherFunctionFilter(ctx, j, jz, negate, ps, arg) {
 // WebStorage spec: http://www.w3.org/TR/webstorage/#storage
 // WebStorage IE spec: http://msdn.microsoft.com/en-us/library/cc197062(VS.85).aspx
 // UserData spec: http://msdn.microsoft.com/en-us/library/ms531424(VS.85).aspx
+// Storage Limit: http://d.hatena.ne.jp/uupaa/20100106
 
-// +---------------+---------------------+----+--------+---------------------+
-// | Storage Name  | Backend             | Min|    Max |Fx|GC|IE|Sa|iSa|Op   |
-// +---------------+---------------------+----+--------+--+--+--+--+---+-----+
-// | LocalStorage  | HTML5::WebStorage   |1.8M|     8M |3+|3+|8+|4+|3.1|10.5+|
-// | FlashStorage  | Flash::SharedObject |  0 |100k(1M)| o| o| o| o| o |  o  |
-// | IEStorage     | IE::userData        |    |    63k | x| x|6+| x| x |  x  |
-// | CookieStorage | Cookie              |  0 |   3.8k | o| o| o| o| o |  o  |
-// | MemStorage    | JavaScript::Object  |    |infinity| o| o| o| o| o |  o  |
-// +---------------+---------------------+----+--------+--+--+--+--+---+-----+
+// +---------------+---------------------+----+--------+----+----+----+----+----+-----+
+// | Storage Class | Storage Backend     | Min|    Max |Fx  |GC  |IE  |Sa  |iSa |Op   |
+// +---------------+---------------------+----+--------+----+----+----+----+----+-----+
+// | LocalStorage  | HTML5::WebStorage   |1.8M|     5M |  3+|3+  |8+  |  4+| 3.1|10.5+|
+// | FlashStorage  | Flash::SharedObject |  0 |100k(1M)|   o|   o|   o|   o|  o |  o  |
+// | IEStorage     | IE::userData        |    |    63k |   x|   x|  6+|   x|  x |  x  |
+// | CookieStorage | Cookie              |  0 |   3.8k |   o|   o|   o|   o|  o |  o  |
+// | MemStorage    | JavaScript::Object  |    |infinity|   o|   o|   o|   o|  o |  o  |
+// +---------------+---------------------+----+--------+----+----+----+----+----+-----+
 
-(function(win, doc, uu) {
+(function(win, doc, uu,
+          swf,      // @param String: swf path
+          expire,   // @param UTCDateString: expire date
+          config) { // @param Hash: uu.config.storage
 
-var _requireFreeSpace = uu.config.storage.space || 0,
-    _freeSpace = uu.ver.iphone ? 2.5   * 1024 * 1024 - 260 // iPhone3.1.2 (2.5MB)
-               : uu.ver.chrome ? 2.5   * 1024 * 1024 - 260 // Chrome4+    (2.5MB)
-               : uu.ver.safari ? 8     * 1024 * 1024       // Safari4+    (8.0MB)
-               : uu.webkit     ? 2.5   * 1024 * 1024 - 260 // WebKit      (2.5MB)
-//{@mb
-               : uu.gecko      ? 5     * 1024 * 1024 - 260 // Firefox3.5+ (5.0MB)
-               : uu.opera      ? 1.875 * 1024 * 1024 - 128 // Opera10.50  (1.875MB)
-               : uu.ie         ? 5     * 1000 * 1000       // IE8+        (4.768MB)
-//}@mb
+var _freeSpace = uu.webkit ? 2.5   * 1024 * 1024 - 260 // WebKit      (2.5MB)
+/*{@mb*/       : uu.gecko  ? 5     * 1024 * 1024 - 260 // Firefox3.5+ (5.0MB)
+               : uu.opera  ? 1.875 * 1024 * 1024 - 128 // Opera10.50  (1.875MB)
+               : uu.ie     ? 5     * 1000 * 1000       // IE8+        (4.768MB) /*}@mb*/
                : 0,
-//{@mb
-    _swf = uu.config.baseDir + "uu.storage.swf",
-    _ieIndex = "uuindex",
-    _ieFreeSpace = 63 * 1024, // 63kB
-//}@mb
-    _storeName   = "uustorage", // IEStorage, CookieStorage
-    _persistDate = (new Date(2032, 1, 1)).toUTCString(), // IEStorage, CookieStorage
-    _cookieFreeSpace = 3800, // byte
+    _storageBackend = {
+            L: "LocalStorage",
+/*{@mb*/    F: "FlashStorage",
+            I: "IEStorage",         /*}@mb*/
+/*{@cookie*/C: "CookieStorage",     /*}@cookie*/
+            M: "MemStorage"
+    },
     // --- minify ---
 //{@mb
     _getAttribute = "getAttribute",
     _setAttribute = "setAttribute",
+    _index = "uuindex",     // for IEStorage
 //}@mb
-    _undef,
+    _info = function(used, max, pair, backend) {
+        return { used: used, max: max, pair: pair, backend: backend };
+    },
+    _store = "uustore",     // for IEStorage, CookieStorage
     _false = !1,
     _true = !0;
 
 uu.Class.singleton("Storage", {
-    init:           init,           // init()
-    key:            key,            // key(index:Number):String
-    info:           info,           // info():Hash { used, max, pair, backend }
-    item:           item,           // item(key:String/Hash = void, value:String = void):String/Hash/Boolean
+    init:           storageInit,    // init()
+    key:            storageKey,     // key(index:Number):String
+    info:           storageInfo,    // info():Hash { used, max, pair, backend }
+    item:           storageItem,    // item(key:String/Hash = void, value:String = void):String/Hash/Boolean
                                     //  [1][get all items]  item()                 -> { key: "value", ... }
                                     //  [2][get a item]     item("key")            -> "value"
-                                    //  [3][set some items] item({ key, "value" }) -> true
+                                    //  [3][set some items] item({ key: "value" }) -> true
                                     //  [4][set a item]     item("key", "value")   -> true
-    clear:          clear           // clear(key:String = void)
+    clear:          storageClear    // clear(key:String = void)
                                     //  [1][clear all]      clear()
                                     //  [2][remove a item]  clear("key")
 });
@@ -7764,13 +7845,13 @@ uu.Class.singleton("LocalStorage", {
 //{@mb
 uu.Class.singleton("FlashStorage", {
     init:           flashStorageInit,
-    key:            key,
-    info:           info,
+    key:            storageKey,
+    info:           storageInfo,
     item:           flashStorageItem,
     clear:          flashStorageClear
 }, {
     ready:          function() {
-                        return uu.ver.flash && uu.stat(_swf);
+                        return uu.ver.flash && uu.stat(uu.config.baseDir + swf);
                     }
 });
 
@@ -7809,83 +7890,58 @@ uu.Class.singleton("MemStorage", {
 
 // --- init ---
 uu.ready("window", function() {
-    uu.config.storage.disable || uu("Storage");
+    config.disable || uu("Storage"); // -> uu.Class.Storage.Init()
 });
-
-// --- utility ---
-function infoHash(used, max, pair, backend) {
-    return { used: used, max: max, pair: pair, backend: backend };
-}
 
 // --- uu.Class.Storage ---
 // uu.Class.Storage.init
-function init() {
-    var that = this,
-        names = {
-            L: "LocalStorage",
-/*{@mb*/    F: "FlashStorage",
-            I: "IEStorage",         /*}@mb*/
-/*{@cookie*/C: "CookieStorage",     /*}@cookie*/
-            M: "MemStorage"
-        };
+function storageInit() {
+    var that = this;
 
-    (uu.config.storage.order || "M").split("").some(function(backendName) {
-        backendName = names[backendName] || "";
+    (config.order || "M").split("").some(function(klass) { // klass = "L"
+        klass = _storageBackend[klass] || ""; // "LocalStorage" <- "L"
 
-        var backendClass = uu.Class[backendName]; // L -> LocalStorage
-
-        if (backendClass) {
-            if (uu.ifFunction(backendClass.ready)) {
-                try {
-                    uu(backendName, function(backend) { // ready.callback
-                        var info = backend.info();
-
-                        if (_requireFreeSpace && _requireFreeSpace > info.max) {
-                            that.so = uu("MemStorage"); // not possible
-                        } else {
-                            that.so = backend;
-                        }
-                        uu.storage = that;
+        if (uu.Class[klass] && uu.ifFunction(uu.Class[klass].ready)) { // static method
+            try {
+                uu(klass, function(so) { // @param StorageObjectInstance:
+                    that.so = config.space &&
+                              config.space > so.info().max ? uu("MemStorage") : so;
+                    setTimeout(function() {
                         uu.ready.storage = _true;
-
-                        setTimeout(function() {
-                            uu.ready.fire("storage", that);
-                        }, 0);
-                    });
-                } catch(err) {
-                    return _false;
-                }
+                        uu.ready.fire("storage", uu.storage = that);
+                    }, 0);
+                });
                 return _true;
-            }
+            } catch(err) {}
         }
         return _false;
     });
 }
 
 // uu.Class.Storage.key - find key by index
-function key(index) { // @param Number:
-                      // @return String: key or ""
+function storageKey(index) { // @param Number:
+                             // @return String: key or ""
     return this.so.key(index) || "";
 }
 
 // uu.Class.Storage.info - get information
-function info() { // @return Hash: { used, max, pair, backend }
-                  //    used - Number: bytes
-                  //    max  - Number: bytes
-                  //    pair - Number: pairs
-                  //    backend - String: backend name
+function storageInfo() { // @return Hash: { used, max, pair, backend }
+                         //    used - Number: bytes
+                         //    max  - Number: bytes
+                         //    pair - Number: pairs
+                         //    backend - String: backend name
     return this.so.info();
 }
 
 // uu.Class.Storage.item - item accessor
-function item(key,     // @param String/Hash(= void):
-              value) { // @param String(= void):
-                       // @return String/Hash/Boolean:
+function storageItem(key,     // @param String/Hash(= void):
+                     value) { // @param String(= void):
+                              // @return String/Hash/Boolean:
     return this.so.item(key, value);
 }
 
 // uu.Class.Storage.clear - clear all items
-function clear(key) { // @param String(= void): key
+function storageClear(key) { // @param String(= void): key
     this.so.clear(key);
 }
 
@@ -7896,12 +7952,10 @@ function localStorageInit(callback) {
 }
 
 function localStorageKey(index) {
-//{@mb
-    if (index < 0 || index >= this.so.length) { // [IE] trap
-        return "";
-    }
-//}@mb
-    return this.so.key(index) || "";
+    return ( //{@mb
+             (index < 0 || index >= this.so.length) ? "" :
+             //}@mb
+             (this.so.key(index) || "") );
 }
 
 function localStorageInfo() {
@@ -7922,45 +7976,38 @@ function localStorageInfo() {
 //{@mb
     }
 //}@mb
-    return infoHash(used, _freeSpace, so.length, "LocalStorage");
+    return _info(used, _freeSpace, so.length, "LocalStorage");
 }
 
 function localStorageItem(key, value) {
-    function setItem(so, key, value) {
-        try {
-            so[key] = ""; // [iPhone][FIX] pre clear. http://d.hatena.ne.jp/uupaa/20100106
-            so[key] = value + ""; // [IE][FIX] crash care
-        } catch(err) { // catch Error("QUOTA_EXCEEDED_ERR")
-            return _false;
-        }
-        return so[key] === value; // verify
-    }
-
-    var rv = _true, so = this.so, i, iz;
+    var so = this.so, rv, i, iz;
 
     switch (uu.complex(key, value)) { // 1: (), 2: ({}), 3: (k), 4: (k,v)
     case 1: for (rv = {}, i = 0, iz = so.length; i < iz; ++i) {
                 key = so.key(i);
                 rv[key] = so.getItem(key + "") || "";
             }
-            break;
-    case 2: for (i in key) {
-                rv = setItem(so, i, key[i]);
-                if (!rv) {
-                    break;
-                }
-            }
-            break;
-    case 3: rv = so.getItem(key + "") || ""; break;
-    case 4: rv = setItem(so, key, value);
+            return rv;
+    case 3: return so.getItem(key + "") || "";
+    case 4: key = uu.pair(key, value);
     }
-    return rv;
+    for (i in key) {
+        try {
+            so[i] = ""; // [iPhone][FIX] pre clear. http://d.hatena.ne.jp/uupaa/20100106
+            so[i] = key[i] + ""; // [IE][FIX] crash care
+        } catch(err) { // catch Error("QUOTA_EXCEEDED_ERR")
+            return _false;
+        }
+        if (so[i] !== key[i]) { // verify
+            return _false;
+        }
+    }
+    return _true;
 }
 
 function localStorageClear(key) {
-    key === _undef ? this.so.clear()
+    key === void 0 ? this.so.clear()
                    : this.so.removeItem(key + ""); // [IE][FIX] crash care
-    // http://d.hatena.ne.jp/uupaa/20100729
 }
 
 //{@mb
@@ -7973,20 +8020,17 @@ function flashStorageInit(callback, // @param Function:
     function wait(id) { // @param String: ExternalInterface.objectID
         callback(that, id);
     }
-    this.so = uu.flash(_swf, id || "externalflashstorage",
+    this.so = uu.flash(uu.config.baseDir + swf, id || "externalflashstorage",
                        { width: 1, height: 1 }, wait);
 }
 
 function flashStorageItem(key, value) {
-    var rv = _true, so = this.so;
-
     switch (uu.complex(key, value)) { // 1: (), 2: ({}), 3: (k), 4: (k,v)
-    case 1: rv = so.allItem(); break;
-    case 2: rv = so.setItem(key); break;
-    case 3: rv = so.getItem(key) || ""; break;
-    case 4: rv = so.setItem(uu.hash(key, value));
+    case 1: return this.so.allItem();
+    case 3: return this.so.getItem(key) || "";
+    case 4: key = uu.pair(key, value);
     }
-    return rv;
+    return this.so.setItem(key);
 }
 
 function flashStorageClear(key) {
@@ -7998,94 +8042,87 @@ function ieStorageInit(callback) {
     var so = uu.add("script", doc.head); // <script>
     so.id = "uuiestorage";
     so.addBehavior("#default#userData");
-    so.expires = _persistDate;
+    so.expires = expire;
 
     this.so = so;
     callback(this);
 }
 
 function ieStorageKey(index) {
-    this.so.load(_storeName);
-    return (this.so[_getAttribute](_ieIndex) || "").split("\t")[index] || "";
+    this.so.load(_store);
+    return (this.so[_getAttribute](_index) || "").split("\t")[index] || "";
 }
 
 function ieStorageInfo() {
-    this.so.load(_storeName);
+    this.so.load(_store);
 
-    var so = this.so, idx = (so[_getAttribute](_ieIndex) || ""),
+    var so = this.so, idx = (so[_getAttribute](_index) || ""),
         ary = idx.split("\t"),
         used = idx.length, key, i = 0;
 
     for (; key = ary[i++]; ) {
         used += (so[_getAttribute](key) || "").length;
     }
-    return infoHash(used, _ieFreeSpace, i, "IEStorage");
+    return _info(used, 63 * 1024, i, "IEStorage");
 }
 
 function ieStorageItem(key, value) {
-    function setItem(so, key, value) {
-        var idx = so[_getAttribute](_ieIndex);
+    var rv = _true, so = this.so, i = 0, idx;
 
+    so.load(_store);
+
+    switch (uu.complex(key, value)) { // 1: (), 2: ({}), 3: (k), 4: (k,v)
+    case 1: idx = (so[_getAttribute](_index) || "").split("\t");
+            for (rv = {}; key = idx[i++]; ) {
+                rv[key] = so[_getAttribute](key) || "";
+            }
+            return rv;
+    case 3: return so[_getAttribute](key) || "";
+    case 4: key = uu.pair(key, value);
+    }
+    for (i in key) {
         try {
+            idx = so[_getAttribute](_index);
+            value = key[i];
+
             // add index
             if (!idx) {
-                so[_setAttribute](_ieIndex, key); // first time
-            } else if (("\t" + idx + "\t").indexOf("\t" + key + "\t") < 0) {
-                so[_setAttribute](_ieIndex, idx + "\t" + key);
+                so[_setAttribute](_index, i); // first time
+            } else if (("\t" + idx + "\t").indexOf("\t" + i + "\t") < 0) {
+                so[_setAttribute](_index, idx + "\t" + i);
             }
-            so[_setAttribute](key, value);
-            so.save(_storeName);
+            so[_setAttribute](i, value);
+            so.save(_store);
         } catch(err) {
             return _false;
         }
-        return so[_getAttribute](key) === value; // verify
+        if (so[_getAttribute](i) !== value) { // verify
+            return _false;
+        }
     }
-
-    var rv = _true, so = this.so, i = 0, idx;
-
-    so.load(_storeName);
-
-    switch (uu.complex(key, value)) { // 1: (), 2: ({}), 3: (k), 4: (k,v)
-    case 1: idx = (so[_getAttribute](_ieIndex) || "").split("\t");
-            rv = {};
-            for (; key = idx[i++]; ) {
-                rv[key] = so[_getAttribute](key) || "";
-            }
-            break;
-    case 2: for (i in key) {
-                rv = setItem(so, i, key[i]);
-                if (!rv) {
-                    break;
-                }
-            }
-            break;
-    case 3: rv = so[_getAttribute](key) || ""; break;
-    case 4: rv = setItem(so, key, value);
-    }
-    return rv;
+    return _true;
 }
 
 function ieStorageClear(key) {
-    this.so.load(_storeName);
+    this.so.load(_store);
 
-    var so = this.so, idx = (so[_getAttribute](_ieIndex) || ""),
-        tab, key, i = 0;
+    var so = this.so, idx = (so[_getAttribute](_index) || ""), tab, i = 0;
 
-    if (key === _undef) {
+    if (key === void 0) {
         idx = idx.split("\t");
         for (; key = idx[i++]; ) {
             so.removeAttribute(key);
         }
-        so[_setAttribute](_ieIndex, "");
-        so.save(_storeName);
+        so[_setAttribute](_index, "");
+        so.save(_store);
     } else if (key) {
         i   = "\t" + idx + "\t";
         tab = "\t" + key + "\t";
 
         if (i.indexOf(tab) >= 0) {
-            so[_setAttribute](_ieIndex, i.replace(new RegExp(tab), "").trim());
+            so[_setAttribute](_index, i.replace(new RegExp(tab), "").trim());
             so.removeAttribute(key);
-            so.save(_storeName);
+            so.save(_store);
         }
     }
 }
@@ -8094,56 +8131,42 @@ function ieStorageClear(key) {
 // --- CookieStorage ---
 //{@cookie
 function cookieStorageInit(callback) {
-    this._removeDate = (new Date(0)).toUTCString();
-    this.so = uu.cookie(_storeName); // shadow cookie
+    this.so = uu.cookie(_store); // shadow cookie
     callback(this);
 }
 
 function cookieStorageInfo() {
-    return infoHash(doc.cookie.length, _cookieFreeSpace,
-                    uu.size(this.so), "CookieStorage");
+    return _info(doc.cookie.length, 3800, uu.size(this.so), "CookieStorage");
 }
 
 function cookieStorageItem(key, value) {
-    function setItem(so, key, value) {
-        var before = doc.cookie.length;
+    var i, so = this.so, before;
 
-        if (before > _cookieFreeSpace) {
+    switch (uu.complex(key, value)) { // 1: (), 2: ({}), 3: (k), 4: (k,v)
+    case 1: return uu.clone(so);
+    case 3: return so[key] || "";
+    case 4: key = uu.pair(key, value);
+    }
+    for (i in key) {
+        before = doc.cookie.length;
+        if (before > 3800) { // 3.8kB
             return _false;
         }
         before && (before += 2); // 2: "; ".length
-        before += uu.cookie.save(_storeName, uu.hash(key, value), _persistDate);
+        before += uu.cookie.save(_store, uu.pair(i, key[i]), expire);
 
         if (before !== doc.cookie.length) { // before !== after
             return _false;
         }
-        so[key] = value;
-        return _true;
+        so[i] = key[i];
     }
-
-    var rv = _true, i, iz, so = this.so;
-
-    switch (uu.complex(key, value)) { // 1: (), 2: ({}), 3: (k), 4: (k,v)
-    case 1: rv = uu.clone(so); break;
-    case 2: for (i in key) {
-                rv = setItem(so, i, key[i]);
-                if (!rv) {
-                    break;
-                }
-            }
-            break;
-    case 3: rv = so[key] || ""; break;
-    case 4: rv = setItem(so, key, value);
-    }
-    return rv;
+    return _true;
 }
 
 function cookieStorageClear(key) {
-    var so = this.so, all = key === _undef;
-
-    uu.cookie.save(_storeName, all ? so : uu.hash(key, ""),
+    uu.cookie.save(_store, key === void 0 ? this.so : uu.pair(key, ""),
                    (new Date(0)).toUTCString());
-    all ? (this.so = {}) : delete so[key];
+    key === void 0 ? (this.so = {}) : delete this.so[key];
 }
 //}@cookie
 
@@ -8158,26 +8181,24 @@ function memStorageKey(index) {
 }
 
 function memStorageInfo() {
-    return infoHash(0, Number.MAX_VALUE, uu.size(this.so), "MemStorage");
+    return _info(0, Number.MAX_VALUE, uu.size(this.so), "MemStorage");
 }
 
 function memStorageItem(key, value) {
-    var rv = _true, so = this.so;
-
     switch (uu.complex(key, value)) { // 1: (), 2: ({}), 3: (k), 4: (k,v)
-    case 1: rv = uu.clone(so);  break;
-    case 2: uu.mix(so, key);    break;
-    case 3: rv = so[key] || ""; break;
-    case 4: so[key] = value;
+    case 1: return uu.clone(this.so);
+    case 2: uu.mix(this.so, key); break;
+    case 3: return this.so[key] || "";
+    case 4: this.so[key] = value;
     }
-    return rv;
+    return _true;
 }
 
 function memStorageClear(key) {
-    key === _undef ? (this.so = {}) : delete this.so[key];
+    key === void 0 ? (this.so = {}) : delete this.so[key];
 }
 
-})(this, document, uu);
-
+})(this, document, uu,
+   "uu.storage.swf", (new Date(2032, 1, 1)).toUTCString(), uu.config.storage);
 //}@storage
 

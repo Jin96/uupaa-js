@@ -1,14 +1,13 @@
-﻿<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8" />
+<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8" />
 <title>uu.storage</title>
 <script>
 window.uuconfig = {
     storage:    {
-        order:  "LFICM",        // String: storage order
-        space:  63 * 1000       // Number: require free space(unit: byte)
+        order:  "CM"            // String: storage order
     }
 };
 </script>
-<script src="../../src/uupaa.js"></script>
+<script src="../../../src/uupaa.js"></script>
 <script>
 uu.ready(function(uu) {
     uu.id("setpair").disabled = false;
@@ -135,6 +134,14 @@ function limitTest() {
 }
 </script>
 </head><body>
+<p>
+    <a href="Storage.htm">Storage</a> |
+    <a href="LocalStorage.htm">LocalStorage</a> |
+    <a href="FlashStorage.htm">FlashStorage</a> |
+    <a href="IEStorage.htm">IEStorage</a> |
+    <a href="CookieStorage.htm">CookieStorage</a> |
+    <a href="MemStorage.htm">MemStorage</a>
+</p>
 <h1 id="backend" style="text-shadow: gray 3px 3px 3px">Plz Wait...</h1>
 <input id="refresh" type="button" value="refresh" onclick="updateView(); updateSize();" />
 |
@@ -155,7 +162,7 @@ key/value: <input id="key" type="text" value="key" />
 <textarea id="all" cols="60" rows="5"></textarea><br />
 <br />
 <p>test:</p>
-<input id="limittest" type="button" value="limit test" onclick="limitTest()" /> →
+<input id="limittest" type="button" value="limit test" onclick="limitTest()" /> -&gt;
 <input type="button" value="add pair(no refresh)" onclick="setPair(1, 1)" />
 
 </body></html>
