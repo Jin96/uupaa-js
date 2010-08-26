@@ -7,7 +7,7 @@ function addLibraryNamespacePrefix($name) {
 }
 
 $unknownAPI = array(); // array([0] => "uu.color")
-$ignoreAPIHasDots = array();
+$ignoreAPIHasDots = array("uu.fx.timing.cubicBezier");
 $ignoreAPIWithoutDots = array();
 
 $coreAPI = array(
