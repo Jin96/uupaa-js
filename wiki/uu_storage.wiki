@@ -12,17 +12,20 @@ uu.ready("storage", function(uu, storage) {
 });
 }}}
 
+イベントはサポートしていません。
+共有メモリのようにストレージを利用し、データの更新を検知する直接的な方法はサポートしていません。
+
 = ストレージバックエンド =
 環境に応じて !LocalStorage, !FlashStorage, IEStorage, !CookieStorage, !MemStorage といったバックエンドの中から適切なものを一つ自動的に選択します。
 妥当なバックエンドが利用できない場合は、!MemStorage が選択されます。
 
 == ストレージバックエンドの最大容量 ==
 
-|| !LocalStorage         || 1.8 ~ 8MB ||
-|| !FlashStorage         ||     100kB ||
-|| IEStorage             ||      63kB ||
-|| !CookieStorage        ||     3.8kB ||
-|| !MemStorage           ||       ?   ||
+|| !LocalStorage         || 1.8 ~ 2.5MB ||
+|| !FlashStorage         ||       100kB ||
+|| IEStorage             ||        63kB ||
+|| !CookieStorage        ||       3.8kB ||
+|| !MemStorage           ||         ?   ||
 
 == コールバック ==
 uu.ready("storage", _callback_) を定義すると、ストレージが利用可能になったタイミングで _callback_ をコールバックします。
@@ -107,9 +110,7 @@ window.localStorage と window.sessionStorage は同じストレージを共有�
 
 容量の最大値はブラウザによって異なります。最大値は uu.storage.info().max で取得できます。
 
-|| iPhone OS 3.x        || 2.5MB ||
-|| Google Chrome        || 2.5MB ||
-|| Safari 4+            || 8.0MB ||
+|| WebKit               || 2.5MB ||
 || Firefox 3.5+         || 5.0MB ||
 || Opera 10.50+         || 1.8MB ||
 || IE 8+                || 4.7MB ||
@@ -154,4 +155,4 @@ window.uuconfig = {
 
 = Test Code =
 
-http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/storage.htm
+http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/storage/Storage.htm
