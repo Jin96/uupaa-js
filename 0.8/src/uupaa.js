@@ -76,6 +76,16 @@ var _addEventListener = "addEventListener",
     _nodeidnum = 0,                 // nodeid counter
     _tokenCache = {},               // { css-selector-expression: token, ... } for uu.query
     _guidCounter = 0,               // uu.guid
+//{@storage
+    _storage = {
+        info: function(used, max, pair, backend) {
+            return { used: used, max: max, pair: pair, backend: backend };
+        },
+/*{@mb*/index: "uuindex", /*}@mb*/  // for IEStorage
+        store: "uustore",           // for IEStorage, CookieStorage
+        expire: (new Date(2032, 1, 1)).toUTCString() // expire date
+    },
+//}@storage
     // --- version detection ---
     _ver = detectVersion(0.8),      // as uu.ver
     _ie = _ver.ie,                  // is IE
@@ -2433,7 +2443,7 @@ function uufxshrink(node,     // @param Node:
                     option) { // @param Hash(= {}):
                               // @return Node:
 //{@mb
-    _ver.ie6 && (node.style.overflow = "hidden");
+    _ver.ie6 && (node.style.overflow = "hidden"); // [IE6]
 //}@mb
     return uufx(node, duration, uuarg(option, { init: function(node, option) {
             var cs = uucss(node, "px");
@@ -3597,6 +3607,11 @@ function uueventstop(event) { // @param EventObjectEx:
     } else {
         event.cancelBubble = _true;
         event.returnValue = _false;
+        // [IE6][FIX]
+        if (_ver.ie6 && (event.type === "mouseover" ||
+                         event.type === "mouseout")) {
+            event.returnValue = _true; // preventDefault
+        }
     }
 //}@mb
 }
@@ -3751,15 +3766,16 @@ function uueventhover(node,         // @param Node:
                                     // @return Node:
     function hoverEventClosure(evt, rel) {
         // ignode mouse transit(mouseover, mouseout) in child node
-        isString(expr) ? uuklasstoggle(node, expr)
-                       : _ie ? expr(evt, evt.code === uuevent.codes.mouseenter, node)
-                             : node !== (rel = evt.relatedTarget) && !uuhas(node, rel)
-                               && expr(evt, evt.code === uuevent.codes.mouseover, node);
+        toggle ? uuklasstoggle(node, expr)
+               : _ie ? expr(evt, evt.code === uuevent.codes.mouseenter, node)
+                     : node !== (rel = evt.relatedTarget) && !uuhas(node, rel) &&
+                       expr(evt, evt.code === uuevent.codes.mouseover, node);
         uueventstop(evt);
     }
 
     var type = _ie ? "mouseenter,mouseleave"
                    : "mouseover+,mouseout+",
+        toggle = isString(expr),
         dataset = "uu-eventhover", handler = node[dataset];
 
     if (__unbind__) {
@@ -6415,6 +6431,335 @@ function uucookiesave(prefix, // @param String: prefix, namespace
 }
 //}@cookie
 
+// --- STORAGE ---
+// WebStorage spec: http://www.w3.org/TR/webstorage/#storage
+// WebStorage IE spec: http://msdn.microsoft.com/en-us/library/cc197062(VS.85).aspx
+// UserData spec: http://msdn.microsoft.com/en-us/library/ms531424(VS.85).aspx
+// Storage Limit: http://d.hatena.ne.jp/uupaa/20100106
+
+// +---------------+---------------------+----+--------+----+----+----+----+----+-----+
+// | Storage Class | Storage Backend     | Min|    Max |Fx  |GC  |IE  |Sa  |iSa |Op   |
+// +---------------+---------------------+----+--------+----+----+----+----+----+-----+
+// | LocalStorage  | HTML5::WebStorage   |1.8M|     5M |  3+|3+  |8+  |  4+| 3.1|10.5+|
+// | FlashStorage  | Flash::SharedObject |  0 |100k(1M)|   o|   o|   o|   o|  o |  o  |
+// | IEStorage     | IE::userData        |    |    63k |   x|   x|  6+|   x|  x |  x  |
+// | CookieStorage | Cookie              |  0 |   3.8k |   o|   o|   o|   o|  o |  o  |
+// | MemStorage    | JavaScript::Object  |    |infinity|   o|   o|   o|   o|  o |  o  |
+// +---------------+---------------------+----+--------+----+----+----+----+----+-----+
+//{@storage
+
+uu.Class.singleton("Storage", {
+    init: function() {
+        var that = this, config = uu.config.storage,
+            backends = {
+                L: "LocalStorage",
+/*{@mb*/        F: "FlashStorage",
+                I: "IEStorage",         /*}@mb*/
+/*{@cookie*/    C: "CookieStorage",     /*}@cookie*/
+                M: "MemStorage"
+            };
+
+        (config.order || "M").split("").some(function(klass) { // klass = "L"
+            klass = backends[klass] || ""; // "LocalStorage" <- "L"
+
+debugger;
+            if (uuclass[klass] && ifFunction(uuclass[klass].ready)) {
+                try {
+                    uu(klass, function(so) { // @param StorageObjectInstance:
+                        that.so = config.space &&
+                                  config.space > so.info().max ? uu("MemStorage")
+                                                               : so;
+                        setTimeout(function() {
+                            uuready.storage = _true;
+                            uuready.fire("storage", uu.storage = that);
+                        }, 0);
+                    });
+                    return _true;
+                } catch(err) {}
+            }
+            return _false;
+        });
+    },
+    key: function(index) {
+        return this.so.key(index) || "";
+    },
+    info: function() {
+        return this.so.info();
+    },
+    item: function(key, value) {
+        return this.so.item(key, value);
+    },
+    clear: function(key) {
+        this.so.clear(key);
+    }
+});
+
+uu.Class.singleton("LocalStorage", {
+    init: function(callback) {
+        this.so = win.localStorage;
+        callback(this);
+    },
+    key: function(index) {
+        return ( //{@mb
+                 (index < 0 || index >= this.so.length) ? "" :
+                 //}@mb
+                 (this.so.key(index) || "") );
+    },
+    info: function() {
+        var so = this.so, used = 0, i = 0, iz, remain,
+            limit = _webkit ? 2.5   * 1024 * 1024 - 260 // WebKit      (2.5MB)
+/*{@mb*/          : _gecko  ? 5     * 1024 * 1024 - 260 // Firefox3.5+ (5.0MB)
+                  : _opera  ? 1.875 * 1024 * 1024 - 128 // Opera10.50  (1.875MB)
+                  : _ie     ? 5     * 1000 * 1000       // IE8+        (4.768MB) /*}@mb*/
+                  : 0;
+/*{@mb*/
+        if (_ie && "remainingSpace" in so) { // [IE8][IE9] storage.remainingSpace
+            remain = so.remainingSpace;
+            if (limit < remain) { // expand free space
+                limit = 5 * 1000 * 1000; // 5MB
+            }
+            used = limit - remain;
+        } else { /*}@mb*/
+            for (iz = so.length; i < iz; ++i) {
+                used += so.getItem(so.key(i)).length;
+            }
+/*{@mb*/}/*}@mb*/
+        return _storage.info(used, limit, so.length, "LocalStorage");
+    },
+    item: function(key, value) {
+        var so = this.so, rv, i, iz;
+
+        switch (uucomplex(key, value)) { // 1: (), 2: ({}), 3: (k), 4: (k,v)
+        case 1: for (rv = {}, i = 0, iz = so.length; i < iz; ++i) {
+                    key = so.key(i);
+                    rv[key] = so.getItem(key + "") || "";
+                }
+                return rv;
+        case 3: return so.getItem(key + "") || "";
+        case 4: key = uupair(key, value);
+        }
+        for (i in key) {
+            try {
+                so[i] = ""; // [iPhone][FIX] pre clear. http://d.hatena.ne.jp/uupaa/20100106
+                so[i] = key[i] + ""; // [IE][FIX] crash care
+            } catch(err) { // catch Error("QUOTA_EXCEEDED_ERR")
+                return _false;
+            }
+            if (so[i] !== key[i]) { // verify
+                return _false;
+            }
+        }
+        return _true;
+    },
+    clear: function(key) {
+        key === void 0 ? this.so.clear()
+                       : this.so.removeItem(key + ""); // [IE][FIX] crash care
+    }
+}, {
+    ready: !!win.localStorage
+});
+
+//{@mb
+uu.Class.singleton("FlashStorage", {
+    init: function(callback, id) {
+        var that = this;
+
+        // wait for response from flash initializer
+        function wait(id) { // @param String: ExternalInterface.objectID
+            callback(that, id);
+        }
+        this.so = uuflash(uu.config.baseDir + "uu.storage.swf",
+                          id || "externalflashstorage",
+                          { width: 1, height: 1 }, wait);
+    },
+    key: function(index) {
+        return this.so.key(index) || "";
+    },
+    info: function() {
+        return this.so.info();
+    },
+    item: function(key, value) {
+        switch (uucomplex(key, value)) { // 1: (), 2: ({}), 3: (k), 4: (k,v)
+        case 1: return this.so.allItem();
+        case 3: return this.so.getItem(key) || "";
+        case 4: key = uupair(key, value);
+        }
+        return this.so.setItem(key);
+    },
+    clear: function(key) {
+        key === void 0 ? this.so.clear() : this.so.removeItem(key);
+    }
+},{ ready: function() {
+        return _ver.flash && uustat(uu.config.baseDir + "uu.storage.swf");
+    }
+});
+
+uu.Class.singleton("IEStorage", {
+    init: function(callback) {
+        var so = uunodeadd("script", doc.head); // <script>
+
+        so.id = "uuiestorage";
+        so.addBehavior("#default#userData");
+        so.expires = _storage.expire;
+
+        this.so = so;
+        callback(this);
+    },
+    key: function(index) {
+        this.so.load(_storage.store);
+        return (this.so[_getAttribute](_storage.index) || "").split("\t")[index] || "";
+    },
+    info: function() {
+        this.so.load(_storage.store);
+
+        var so = this.so, idx = (so[_getAttribute](_storage.index) || ""),
+            ary = idx.split("\t"),
+            used = idx.length, key, i = 0;
+
+        for (; key = ary[i++]; ) {
+            used += (so[_getAttribute](key) || "").length;
+        }
+        return _storage.info(used, 63 * 1024, i - 1, "IEStorage");
+    },
+    item: function ieStorageItem(key, value) {
+        var rv = _true, so = this.so, i = 0, idx;
+
+        so.load(_storage.store);
+
+        switch (uucomplex(key, value)) { // 1: (), 2: ({}), 3: (k), 4: (k,v)
+        case 1: idx = (so[_getAttribute](_storage.index) || "").split("\t");
+                for (rv = {}; key = idx[i++]; ) {
+                    rv[key] = so[_getAttribute](key) || "";
+                }
+                return rv;
+        case 3: return so[_getAttribute](key) || "";
+        case 4: key = uupair(key, value);
+        }
+        for (i in key) {
+            try {
+                idx = so[_getAttribute](_storage.index);
+                value = key[i];
+
+                // add index
+                if (!idx) {
+                    so[_setAttribute](_storage.index, i); // first time
+                } else if (("\t" + idx + "\t").indexOf("\t" + i + "\t") < 0) {
+                    so[_setAttribute](_storage.index, idx + "\t" + i);
+                }
+                so[_setAttribute](i, value);
+                so.save(_storage.store);
+            } catch(err) {
+                return _false;
+            }
+            if (so[_getAttribute](i) !== value) { // verify
+                return _false;
+            }
+        }
+        return _true;
+    },
+    clear: function(key) {
+        this.so.load(_storage.store);
+
+        var so = this.so, idx = (so[_getAttribute](_storage.index) || ""),
+            tab, i = 0;
+
+        if (key === void 0) { // clear all
+            idx = idx.split("\t");
+            for (; key = idx[i++]; ) {
+                so.removeAttribute(key);
+            }
+            so[_setAttribute](_storage.index, "");
+            so.save(_storage.store);
+        } else if (key) { // clear(item)
+            i   = "\t" + idx + "\t";
+            tab = "\t" + key + "\t";
+
+            if (i.indexOf(tab) >= 0) {
+                so[_setAttribute](_storage.index,
+                                  i.replace(new RegExp(tab), "").trim());
+                so.removeAttribute(key);
+                so.save(_storage.store);
+            }
+        }
+    }
+},{ ready: _ie });
+//}@mb
+
+//{@cookie
+uu.Class.singleton("CookieStorage", {
+    init: function(callback) {
+        this.so = uucookie(_storage.store); // shadow cookie
+        callback(this);
+    },
+    key: function(index) {
+        return uunth(this.so, index)[0] || "";
+    },
+    info: function() {
+        return _storage.info(doc.cookie.length, 3800,
+                             uusize(this.so), "CookieStorage");
+    },
+    item: function(key, value) {
+        var i, so = this.so, before;
+
+        switch (uucomplex(key, value)) { // 1: (), 2: ({}), 3: (k), 4: (k,v)
+        case 1: return uuclone(so);
+        case 3: return so[key] || "";
+        case 4: key = uupair(key, value);
+        }
+        for (i in key) {
+            before = doc.cookie.length;
+            if (before > 3800) { // 3.8kB
+                return _false;
+            }
+            before && (before += 2); // 2: "; ".length
+            before += uucookie.save(_storage.store, uupair(i, key[i]),
+                                    _storage.expire);
+
+            if (before !== doc.cookie.length) { // before !== after
+                return _false;
+            }
+            so[i] = key[i];
+        }
+        return _true;
+    },
+    clear: function(key) {
+        uucookie.save(_storage.store, key === void 0 ? this.so : uupair(key, ""),
+                      (new Date(0)).toUTCString());
+        key === void 0 ? (this.so = {}) : delete this.so[key];
+    }
+},{ ready: !!navigator.cookieEnabled });
+//}@cookie
+
+uu.Class.singleton("MemStorage", {
+    init: function(callback) {
+        this.so = {};
+        callback(this);
+    },
+    key: function(index) {
+        return uunth(this.so, index)[0] || "";
+    },
+    info: function() {
+        return _storage.info(0, Number.MAX_VALUE, uusize(this.so), "MemStorage");
+    },
+    item: function(key, value) {
+        switch (uucomplex(key, value)) { // 1: (), 2: ({}), 3: (k), 4: (k,v)
+        case 1: return uuclone(this.so);
+        case 2: uumix(this.so, key); break;
+        case 3: return this.so[key] || "";
+        case 4: this.so[key] = value;
+        }
+        return _true;
+    },
+    clear: function memStorageClear(key) {
+        key === void 0 ? (this.so = {}) : delete this.so[key];
+    }
+},{ ready: _true });
+
+uuready("window", function() {
+    uu.config.storage.disable || uu("Storage"); // -> uu.Class.Storage.Init()
+});
+//}@storage
+
 // --- OTHER ---
 // uu.guid - get unique number
 function uuguid() { // @return Number: unique number, from 1
@@ -7770,435 +8115,3 @@ function otherFunctionFilter(ctx, j, jz, negate, ps, arg) {
 
 })(document, uu, uu.ie);
 //}@mb
-
-//{@storage
-// === uu.storage ===
-// WebStorage spec: http://www.w3.org/TR/webstorage/#storage
-// WebStorage IE spec: http://msdn.microsoft.com/en-us/library/cc197062(VS.85).aspx
-// UserData spec: http://msdn.microsoft.com/en-us/library/ms531424(VS.85).aspx
-// Storage Limit: http://d.hatena.ne.jp/uupaa/20100106
-
-// +---------------+---------------------+----+--------+----+----+----+----+----+-----+
-// | Storage Class | Storage Backend     | Min|    Max |Fx  |GC  |IE  |Sa  |iSa |Op   |
-// +---------------+---------------------+----+--------+----+----+----+----+----+-----+
-// | LocalStorage  | HTML5::WebStorage   |1.8M|     5M |  3+|3+  |8+  |  4+| 3.1|10.5+|
-// | FlashStorage  | Flash::SharedObject |  0 |100k(1M)|   o|   o|   o|   o|  o |  o  |
-// | IEStorage     | IE::userData        |    |    63k |   x|   x|  6+|   x|  x |  x  |
-// | CookieStorage | Cookie              |  0 |   3.8k |   o|   o|   o|   o|  o |  o  |
-// | MemStorage    | JavaScript::Object  |    |infinity|   o|   o|   o|   o|  o |  o  |
-// +---------------+---------------------+----+--------+----+----+----+----+----+-----+
-
-(function(win, doc, uu,
-          swf,      // @param String: swf path
-          expire,   // @param UTCDateString: expire date
-          config) { // @param Hash: uu.config.storage
-
-var _freeSpace = uu.webkit ? 2.5   * 1024 * 1024 - 260 // WebKit      (2.5MB)
-/*{@mb*/       : uu.gecko  ? 5     * 1024 * 1024 - 260 // Firefox3.5+ (5.0MB)
-               : uu.opera  ? 1.875 * 1024 * 1024 - 128 // Opera10.50  (1.875MB)
-               : uu.ie     ? 5     * 1000 * 1000       // IE8+        (4.768MB) /*}@mb*/
-               : 0,
-    _storageBackend = {
-            L: "LocalStorage",
-/*{@mb*/    F: "FlashStorage",
-            I: "IEStorage",         /*}@mb*/
-/*{@cookie*/C: "CookieStorage",     /*}@cookie*/
-            M: "MemStorage"
-    },
-    // --- minify ---
-//{@mb
-    _getAttribute = "getAttribute",
-    _setAttribute = "setAttribute",
-    _index = "uuindex",     // for IEStorage
-//}@mb
-    _info = function(used, max, pair, backend) {
-        return { used: used, max: max, pair: pair, backend: backend };
-    },
-    _store = "uustore",     // for IEStorage, CookieStorage
-    _false = !1,
-    _true = !0;
-
-uu.Class.singleton("Storage", {
-    init:           storageInit,    // init()
-    key:            storageKey,     // key(index:Number):String
-    info:           storageInfo,    // info():Hash { used, max, pair, backend }
-    item:           storageItem,    // item(key:String/Hash = void, value:String = void):String/Hash/Boolean
-                                    //  [1][get all items]  item()                 -> { key: "value", ... }
-                                    //  [2][get a item]     item("key")            -> "value"
-                                    //  [3][set some items] item({ key: "value" }) -> true
-                                    //  [4][set a item]     item("key", "value")   -> true
-    clear:          storageClear    // clear(key:String = void)
-                                    //  [1][clear all]      clear()
-                                    //  [2][remove a item]  clear("key")
-});
-
-uu.Class.singleton("LocalStorage", {
-    init:           localStorageInit,
-    key:            localStorageKey,
-    info:           localStorageInfo,
-    item:           localStorageItem,
-    clear:          localStorageClear
-}, {
-    ready:          !!win.localStorage
-});
-
-//{@mb
-uu.Class.singleton("FlashStorage", {
-    init:           flashStorageInit,
-    key:            storageKey,
-    info:           storageInfo,
-    item:           flashStorageItem,
-    clear:          flashStorageClear
-}, {
-    ready:          function() {
-                        return uu.ver.flash && uu.stat(uu.config.baseDir + swf);
-                    }
-});
-
-uu.Class.singleton("IEStorage", {
-    init:           ieStorageInit,
-    key:            ieStorageKey,
-    info:           ieStorageInfo,
-    item:           ieStorageItem,
-    clear:          ieStorageClear
-}, {
-    ready:          uu.ie
-});
-//}@mb
-
-//{@cookie
-uu.Class.singleton("CookieStorage", {
-    init:           cookieStorageInit,
-    key:            memStorageKey,
-    info:           cookieStorageInfo,
-    item:           cookieStorageItem,
-    clear:          cookieStorageClear
-}, {
-    ready:          !!navigator.cookieEnabled
-});
-//}@cookie
-
-uu.Class.singleton("MemStorage", {
-    init:           memStorageInit,
-    key:            memStorageKey,
-    info:           memStorageInfo,
-    item:           memStorageItem,
-    clear:          memStorageClear
-}, {
-    ready:          _true
-});
-
-// --- init ---
-uu.ready("window", function() {
-    config.disable || uu("Storage"); // -> uu.Class.Storage.Init()
-});
-
-// --- uu.Class.Storage ---
-// uu.Class.Storage.init
-function storageInit() {
-    var that = this;
-
-    (config.order || "M").split("").some(function(klass) { // klass = "L"
-        klass = _storageBackend[klass] || ""; // "LocalStorage" <- "L"
-
-        if (uu.Class[klass] && uu.ifFunction(uu.Class[klass].ready)) { // static method
-            try {
-                uu(klass, function(so) { // @param StorageObjectInstance:
-                    that.so = config.space &&
-                              config.space > so.info().max ? uu("MemStorage") : so;
-                    setTimeout(function() {
-                        uu.ready.storage = _true;
-                        uu.ready.fire("storage", uu.storage = that);
-                    }, 0);
-                });
-                return _true;
-            } catch(err) {}
-        }
-        return _false;
-    });
-}
-
-// uu.Class.Storage.key - find key by index
-function storageKey(index) { // @param Number:
-                             // @return String: key or ""
-    return this.so.key(index) || "";
-}
-
-// uu.Class.Storage.info - get information
-function storageInfo() { // @return Hash: { used, max, pair, backend }
-                         //    used - Number: bytes
-                         //    max  - Number: bytes
-                         //    pair - Number: pairs
-                         //    backend - String: backend name
-    return this.so.info();
-}
-
-// uu.Class.Storage.item - item accessor
-function storageItem(key,     // @param String/Hash(= void):
-                     value) { // @param String(= void):
-                              // @return String/Hash/Boolean:
-    return this.so.item(key, value);
-}
-
-// uu.Class.Storage.clear - clear all items
-function storageClear(key) { // @param String(= void): key
-    this.so.clear(key);
-}
-
-// --- LocalStorage ---
-function localStorageInit(callback) {
-    this.so = win.localStorage;
-    callback(this);
-}
-
-function localStorageKey(index) {
-    return ( //{@mb
-             (index < 0 || index >= this.so.length) ? "" :
-             //}@mb
-             (this.so.key(index) || "") );
-}
-
-function localStorageInfo() {
-    var so = this.so, used = 0, i = 0, iz, remain;
-
-//{@mb
-    if (uu.ie && "remainingSpace" in so) { // [IE8][IE9] storage.remainingSpace
-        remain = so.remainingSpace;
-        if (_freeSpace < remain) { // expand free space
-            _freeSpace = 5 * 1000 * 1000; // 5MB
-        }
-        used = _freeSpace - remain;
-    } else {
-//}@mb
-        for (iz = so.length; i < iz; ++i) {
-            used += so.getItem(so.key(i)).length;
-        }
-//{@mb
-    }
-//}@mb
-    return _info(used, _freeSpace, so.length, "LocalStorage");
-}
-
-function localStorageItem(key, value) {
-    var so = this.so, rv, i, iz;
-
-    switch (uu.complex(key, value)) { // 1: (), 2: ({}), 3: (k), 4: (k,v)
-    case 1: for (rv = {}, i = 0, iz = so.length; i < iz; ++i) {
-                key = so.key(i);
-                rv[key] = so.getItem(key + "") || "";
-            }
-            return rv;
-    case 3: return so.getItem(key + "") || "";
-    case 4: key = uu.pair(key, value);
-    }
-    for (i in key) {
-        try {
-            so[i] = ""; // [iPhone][FIX] pre clear. http://d.hatena.ne.jp/uupaa/20100106
-            so[i] = key[i] + ""; // [IE][FIX] crash care
-        } catch(err) { // catch Error("QUOTA_EXCEEDED_ERR")
-            return _false;
-        }
-        if (so[i] !== key[i]) { // verify
-            return _false;
-        }
-    }
-    return _true;
-}
-
-function localStorageClear(key) {
-    key === void 0 ? this.so.clear()
-                   : this.so.removeItem(key + ""); // [IE][FIX] crash care
-}
-
-//{@mb
-// --- FlashStorage ---
-function flashStorageInit(callback, // @param Function:
-                          id) {     // @param String(= "externalflashstorage"): ExternalInterface.objectID
-    var that = this;
-
-    // wait for response from flash initializer
-    function wait(id) { // @param String: ExternalInterface.objectID
-        callback(that, id);
-    }
-    this.so = uu.flash(uu.config.baseDir + swf, id || "externalflashstorage",
-                       { width: 1, height: 1 }, wait);
-}
-
-function flashStorageItem(key, value) {
-    switch (uu.complex(key, value)) { // 1: (), 2: ({}), 3: (k), 4: (k,v)
-    case 1: return this.so.allItem();
-    case 3: return this.so.getItem(key) || "";
-    case 4: key = uu.pair(key, value);
-    }
-    return this.so.setItem(key);
-}
-
-function flashStorageClear(key) {
-    key === void 0 ? this.so.clear() : this.so.removeItem(key);
-}
-
-// --- IEStorage ---
-function ieStorageInit(callback) {
-    var so = uu.add("script", doc.head); // <script>
-    so.id = "uuiestorage";
-    so.addBehavior("#default#userData");
-    so.expires = expire;
-
-    this.so = so;
-    callback(this);
-}
-
-function ieStorageKey(index) {
-    this.so.load(_store);
-    return (this.so[_getAttribute](_index) || "").split("\t")[index] || "";
-}
-
-function ieStorageInfo() {
-    this.so.load(_store);
-
-    var so = this.so, idx = (so[_getAttribute](_index) || ""),
-        ary = idx.split("\t"),
-        used = idx.length, key, i = 0;
-
-    for (; key = ary[i++]; ) {
-        used += (so[_getAttribute](key) || "").length;
-    }
-    return _info(used, 63 * 1024, i, "IEStorage");
-}
-
-function ieStorageItem(key, value) {
-    var rv = _true, so = this.so, i = 0, idx;
-
-    so.load(_store);
-
-    switch (uu.complex(key, value)) { // 1: (), 2: ({}), 3: (k), 4: (k,v)
-    case 1: idx = (so[_getAttribute](_index) || "").split("\t");
-            for (rv = {}; key = idx[i++]; ) {
-                rv[key] = so[_getAttribute](key) || "";
-            }
-            return rv;
-    case 3: return so[_getAttribute](key) || "";
-    case 4: key = uu.pair(key, value);
-    }
-    for (i in key) {
-        try {
-            idx = so[_getAttribute](_index);
-            value = key[i];
-
-            // add index
-            if (!idx) {
-                so[_setAttribute](_index, i); // first time
-            } else if (("\t" + idx + "\t").indexOf("\t" + i + "\t") < 0) {
-                so[_setAttribute](_index, idx + "\t" + i);
-            }
-            so[_setAttribute](i, value);
-            so.save(_store);
-        } catch(err) {
-            return _false;
-        }
-        if (so[_getAttribute](i) !== value) { // verify
-            return _false;
-        }
-    }
-    return _true;
-}
-
-function ieStorageClear(key) {
-    this.so.load(_store);
-
-    var so = this.so, idx = (so[_getAttribute](_index) || ""), tab, i = 0;
-
-    if (key === void 0) {
-        idx = idx.split("\t");
-        for (; key = idx[i++]; ) {
-            so.removeAttribute(key);
-        }
-        so[_setAttribute](_index, "");
-        so.save(_store);
-    } else if (key) {
-        i   = "\t" + idx + "\t";
-        tab = "\t" + key + "\t";
-
-        if (i.indexOf(tab) >= 0) {
-            so[_setAttribute](_index, i.replace(new RegExp(tab), "").trim());
-            so.removeAttribute(key);
-            so.save(_store);
-        }
-    }
-}
-//}@mb
-
-// --- CookieStorage ---
-//{@cookie
-function cookieStorageInit(callback) {
-    this.so = uu.cookie(_store); // shadow cookie
-    callback(this);
-}
-
-function cookieStorageInfo() {
-    return _info(doc.cookie.length, 3800, uu.size(this.so), "CookieStorage");
-}
-
-function cookieStorageItem(key, value) {
-    var i, so = this.so, before;
-
-    switch (uu.complex(key, value)) { // 1: (), 2: ({}), 3: (k), 4: (k,v)
-    case 1: return uu.clone(so);
-    case 3: return so[key] || "";
-    case 4: key = uu.pair(key, value);
-    }
-    for (i in key) {
-        before = doc.cookie.length;
-        if (before > 3800) { // 3.8kB
-            return _false;
-        }
-        before && (before += 2); // 2: "; ".length
-        before += uu.cookie.save(_store, uu.pair(i, key[i]), expire);
-
-        if (before !== doc.cookie.length) { // before !== after
-            return _false;
-        }
-        so[i] = key[i];
-    }
-    return _true;
-}
-
-function cookieStorageClear(key) {
-    uu.cookie.save(_store, key === void 0 ? this.so : uu.pair(key, ""),
-                   (new Date(0)).toUTCString());
-    key === void 0 ? (this.so = {}) : delete this.so[key];
-}
-//}@cookie
-
-// --- MemStorage ---
-function memStorageInit(callback) {
-    this.so = {};
-    callback(this);
-}
-
-function memStorageKey(index) {
-    return uu.nth(this.so, index)[0] || "";
-}
-
-function memStorageInfo() {
-    return _info(0, Number.MAX_VALUE, uu.size(this.so), "MemStorage");
-}
-
-function memStorageItem(key, value) {
-    switch (uu.complex(key, value)) { // 1: (), 2: ({}), 3: (k), 4: (k,v)
-    case 1: return uu.clone(this.so);
-    case 2: uu.mix(this.so, key); break;
-    case 3: return this.so[key] || "";
-    case 4: this.so[key] = value;
-    }
-    return _true;
-}
-
-function memStorageClear(key) {
-    key === void 0 ? (this.so = {}) : delete this.so[key];
-}
-
-})(this, document, uu,
-   "uu.storage.swf", (new Date(2032, 1, 1)).toUTCString(), uu.config.storage);
-//}@storage
-
