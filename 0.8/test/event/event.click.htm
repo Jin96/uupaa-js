@@ -1,7 +1,8 @@
-<!doctype html><html><head><title></title>
-<script src="../../src/uu.js"></script>
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8" />
+<title>Click event handler</title>
+<script src="../../src/uupaa.js"></script>
 <script>
-function xboot() {
+uu.ready(function() {
 
     uu.Class.singleton("A1", {
         handleEvent:  function(evt, node, src) {
@@ -10,12 +11,8 @@ function xboot() {
         }
     });
 
-    uu.body(uu.div("click me", 1));
-}
-
-function xbuild(uu, node, id) {
-  uu.click(node, uu("A1"));
-}
+    uu.body(uu.click(uu.div("click me"), uu("A1")));
+})
 </script>
 </head><body>
 <div id="trace"></div>

@@ -3831,7 +3831,7 @@ function uueventcyclic(node,         // @param Node: target node
         data[eventTypeEx] = null;
         return node;
     }
-    data[eventTypeEx] && uueventunbind(node, eventTypeEx, data[eventTypeEx]); // bound? -> unbind
+    data && data[eventTypeEx] && uueventunbind(node, eventTypeEx, data[eventTypeEx]); // bound? -> unbind
 
     node[dataset] || (node[dataset] = {});
     node[dataset][eventTypeEx] = cyclicEventClosure;
@@ -6462,7 +6462,6 @@ uu.Class.singleton("Storage", {
         (config.order || "M").split("").some(function(klass) { // klass = "L"
             klass = backends[klass] || ""; // "LocalStorage" <- "L"
 
-debugger;
             if (uuclass[klass] && ifFunction(uuclass[klass].ready)) {
                 try {
                     uu(klass, function(so) { // @param StorageObjectInstance:
