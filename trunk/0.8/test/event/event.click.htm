@@ -1,0 +1,22 @@
+<!doctype html><html><head><title></title>
+<script src="../../src/uu.js"></script>
+<script>
+function xboot() {
+
+    uu.Class.singleton("A1", {
+        handleEvent:  function(evt, node, src) {
+            alert("click");
+            uu.event.unbind(node);
+        }
+    });
+
+    uu.body(uu.div("click me", 1));
+}
+
+function xbuild(uu, node, id) {
+  uu.click(node, uu("A1"));
+}
+</script>
+</head><body>
+<div id="trace"></div>
+</body></html>
