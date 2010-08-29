@@ -1,0 +1,91 @@
+#summary uu.env はブラウザやブラウザプラグイン等の情報を保持するオブジェクトです
+
+<wiki:toc max_depth="2" />
+
+= uu.env - properties =
+
+  * uu.env.library - Number: uupaa.js のバージョン番号です。
+    * 0.81 は major=0, minor=8, revision=1 を表現しています。
+  * uu.env.flash - Number: !FlashPlayer のバージョン番号です。0 または 9以上の値になります。
+    * !FlashPlayer が利用できないか、version 8以下がインストールされている場合は 0 になります。
+  * uu.env.silverlight - Number: Silverlight のバージョン番号です。0 または 3以上の値になります。
+    * Silverlight が利用できないか、version 2以下がインストールされている場合は 0 になります。
+  * uu.env.ie - Boolean: Internet Explorer で true になります。
+  * uu.env.ie6 - Boolean: Internet Explorer 6 で true になります。
+  * uu.env.ie7 - Boolean: Internet Explorer 7 で true になります。
+  * uu.env.ie8 - Boolean: Internet Explorer 8 で document.documentMode が 8 なら true になります。IE5,IE7互換表示モードでは false になります。
+  * uu.env.ie9 - Boolean: Internet Explorer 9 で document.documentMode が 9 なら true になります。IE5,IE7,IE8互換表示モードでは false になります。
+  * uu.env.opera - Boolean: Opera, Opera Mini で true になります。
+  * uu.env.gecko - Boolean: Gecko ベースのブラウザ(Firefox等)で true になります。
+  * uu.env.webkit - Boolean: !WebKit ベースのブラウザ(Safari, iPhone, iPad, iPod, Android,  Google Chrome等)で true になります。
+  * uu.env.chrome - Boolean: Google Chrome で true になります。
+  * uu.env.safari - Boolean: Safari, iPhone, iPad, iPod, Android で true になります。
+  * uu.env.retina - Boolean: Retina Display で true になります。
+  * uu.env.iphone - Boolean: iPhone, iPad, iPod で true になります。
+  * uu.env.android - Boolean: Android で true になります。
+  * uu.env.mobile - Boolean: iPhone, iPad, iPod, Android で true になります。
+    * Windows Phone, Mobile Firefox(Fennec), Opera Mini では false になります。
+  * uu.env.touch - Boolean: iPhone, iPad, iPod, Android で true になります。
+  * uu.env.os - String: "iphone", "android", "windows", "mac", "unix", "chrome", "unknown" を返します。
+  * uu.env.jit - Boolean: IE9+, Firefox3.5+, Safari4+, Google Chrome, Opera10.50+ で true になります。
+  * uu.env.browser - Number: ブラウザバージョンを返します。 [http://d.hatena.ne.jp/uupaa/20090603]
+  * uu.env.render - Number: レンダリングエンジンのバージョンを返します。[http://d.hatena.ne.jp/uupaa/20090603]
+
+== 例 ==
+
+o = true, x/space = false
+||                 ||   IE6     || IE9pp2   || Mac Safari4 || iPhone3GS(OS4.x) || Windows Google Chrome5 || Ubuntu Firefox3.6 || Windows Opera10.50 ||
+|| uu.env.ie       ||   o       ||   o      ||             ||                  ||                ||                    ||                    ||
+|| uu.env.ie6      ||   o       ||          ||             ||                  ||                ||                    ||                    ||
+|| uu.env.ie7      ||           ||          ||             ||                  ||                ||                    ||                    ||
+|| uu.env.ie8      ||           ||          ||             ||                  ||                ||                    ||                    ||
+|| uu.env.ie9      ||           ||   o      ||             ||                  ||                ||                    ||                    ||
+|| uu.env.opera    ||           ||          ||             ||                  ||                ||                    ||        o           ||
+|| uu.env.gecko    ||           ||          ||             ||                  ||                ||      o             ||                    ||
+|| uu.env.webkit   ||           ||          ||     o       ||        o         ||       o        ||                    ||                    ||
+|| uu.env.chrome   ||           ||          ||             ||                  ||       o        ||                    ||                    ||
+|| uu.env.safari   ||           ||          ||     o       ||        o         ||                ||                    ||                    ||
+|| uu.env.retina   ||           ||          ||             ||    o(iPhone4)    ||                ||                    ||                    ||
+|| uu.env.iphone   ||           ||          ||             ||        o         ||                ||                    ||                    ||
+|| uu.env.android  ||           ||          ||             ||                  ||                ||                    ||                    ||
+|| uu.env.mobile   ||           ||          ||             ||        o         ||                ||                    ||                    ||
+|| uu.env.touch    ||           ||          ||             ||        o         ||                ||                    ||                    ||
+|| uu.env.os       ||"windows"  ||"windows" ||   "mac"     ||    "iphone"      ||  "windows"     ||   "unix"           ||    "windows"       ||
+|| uu.env.jit      ||           ||    o     ||     o       ||        o         ||       o        ||      o             ||        o           ||
+|| uu.env.browser  ||   6       ||    9     ||     4       ||        4         ||      5         ||      3.6           ||        10.5        ||
+|| uu.env.render   ||   0       ||    0     ||  531.227    ||       531.211    ||    533.8       ||     1.92           ||       2.524        ||
+
+= uu.env - methods =
+  * uu.env.valueOf() - Number: uu.env.browser を返します。
+    * if (uu.env.ie && uu.env < 9) {} とすると、uu.env.valueOf()が自動的に評価され、if (uu.env.ie6 `||` uu.env.ie7 `||` uu.env.ie8) {} と同じ結果になります。
+
+= uu.ver について =
+uu.env と uu.ver は同じものです。uu.ver は廃止予定です。
+
+== IE6, IE7 用の処理を行う ==
+{{{
+    if (uu.env.ie && uu.env < 8) {
+        ...
+    }
+}}}
+
+== Mac Safari 用の処理を行う ==
+{{{
+    if (uu.env.safari && uu.env.os === "mac") {
+        ...
+    }
+}}}
+
+== iPhone OS4.x と OS3.x で処理を切り分ける ==
+{{{
+    if (uu.env.iphone) {
+        if (uu.env.render > 530) {
+            // OS4
+        } else {
+            // OS3
+        }
+    }
+}}}
+
+= Test Code =
+http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/env.htm
