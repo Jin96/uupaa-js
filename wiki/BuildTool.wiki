@@ -74,6 +74,7 @@ build/upa.php はプリプロセスとMinifyを施し最適化された.jsファ
 || md5       || uu.md5() をコメントアウトします || -1.8kB ||
 || sprintf   || uu.sf(), uu.sprintf() をコメントアウトします || -0.8kB ||
 || url       || uu.url(), uu.qs() をコメントアウトします || -1.6kB ||
+|| ui        || uu.ui() をコメントアウトします || --kB ||
 
 
 = 例 =
