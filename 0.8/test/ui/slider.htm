@@ -1,0 +1,28 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8" />
+<title>Slider demo</title>
+<script src="../../src/uupaa.js"></script>
+<script src="../../src/ui/slider.js"></script>
+<script src="../../src/ui/slider.snip.js" id="slider" type="text/html"></script>
+<script>
+var slider = [];
+
+function createSlider(vertical, short) {
+    var arg = {};
+
+    var rv = uu.snippet("slider", arg);
+
+    if (!arg.run) {
+        uu.body(rv.style());
+    }
+    rv.widget(null, { vertical: vertical, short: short, step: 50 });
+}
+</script>
+</head><body>
+
+<input type="button" value="Horizontal Short Slider" onclick="createSlider(0, 1)" />
+<input type="button" value="Horizontal Long Slider" onclick="createSlider(0)" />
+<input type="button" value="Vertical Short Slider" onclick="createSlider(1, 1)" />
+<input type="button" value="Vertical Long Slider" onclick="createSlider(1)" />
+<br />
+
+</body></html>

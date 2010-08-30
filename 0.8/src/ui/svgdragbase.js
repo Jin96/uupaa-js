@@ -10,7 +10,7 @@ uu.ui.svgdragbase || (function(win, doc, uu) {
 uu.ui.svgdragbase = uuuisvgdragbase; // drag & drop base handler
 
 var _uuuidrag = "data-uuuidrag", // node["data-uuuidrag"] = { dragging: Boolean, x, y }
-    _touch = uu.ver.touch;
+    _touch = uu.env.touch;
 
 // uu.ui.svgdragbase -
 function uuuisvgdragbase(evt,      // @param event:

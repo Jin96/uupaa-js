@@ -118,7 +118,7 @@ window["CanvasRenderingContext2D"] || (function(doc, uu) {
 
 var _enableFlashCanvas = 0;
 
-if (uu.ie && uu.ver.flash > 8) {
+if (uu.ie && uu.env.flash > 8) {
     _enableFlashCanvas = uu.stat(uu.config.baseDir + "uu.canvas.swf");
 }
 
@@ -146,7 +146,7 @@ function VMLCanvas(node) { // @param Node: <canvas>
 
 // uu.canvas.init - init canvas
 function uucanvasinit() {
-    uu.ie && uu.ver < 9 && uu.each(uu.tag("canvas"), function(node) {
+    uu.ie && uu.env < 9 && uu.each(uu.tag("canvas"), function(node) {
         if (!node.getContext) { // already initialized (altcss and other)
             // remove fallback contents
             //      <canvas>fallback contents...</canvas> -> <canvas></canvas>
@@ -196,7 +196,7 @@ function uucanvasbuild(node,    // @param Node: <canvas>
     while ( (v = ary[++i]) ) {
         switch (uu.canvas.build.backendOrder[v]) {
         case 1: break;
-        case 2: if (uu.ver.silverlight) {
+        case 2: if (uu.env.silverlight) {
                     return SilverlightCanvas.build(node);
                 }
                 break;
@@ -208,7 +208,7 @@ function uucanvasbuild(node,    // @param Node: <canvas>
         }
     }
     // backend detect order: Silverlight -> Flash -> VML
-    return (uu.ver.silverlight ? SilverlightCanvas
+    return (uu.env.silverlight ? SilverlightCanvas
                                : _enableFlashCanvas ? FlashCanvas
                                                     : VMLCanvas).build(node);
 }
@@ -245,7 +245,7 @@ function uucanvasbgcolor(node) { // @param Node:
 
 !window["CanvasRenderingContext2D"] && (function(win, doc, uu) {
 var _COMPOS = { "source-over": 0, "destination-over": 4, copy: 10 },
-    _FILTER = uu.ver.ie8 ? ["-ms-filter:'progid:DXImageTransform.Microsoft.", "'"]
+    _FILTER = uu.env.ie8 ? ["-ms-filter:'progid:DXImageTransform.Microsoft.", "'"]
                          : ["filter:progid:DXImageTransform.Microsoft.", ""],
     _CLIPPY         = '<v:shape style="position:absolute;width:10px;height:10px" filled="t" stroked="f" coordsize="100,100" path="@"><v:fill type="solid" color="@" /></v:shape>',
 
@@ -3056,7 +3056,7 @@ function _stroke(ctx) {
 }
 
 // add inline XAML source
-uu.ie && uu.ver.silverlight && uu.ready(function() {
+uu.ie && uu.env.silverlight && uu.ready(function() {
     uu.id("xaml") || doc.head.appendChild(uu.mix(uu.node("script"), {
             id:   "xaml",
             type: "text/xaml",

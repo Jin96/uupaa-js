@@ -601,11 +601,11 @@ uu.ready("window", function(uu) {
         uu.ok('uu.fix("-moz-appearance") == "MozAppearance"',
                 uu.fix("-moz-appearance"), "==", "MozAppearance");
     }
-    if (uu.ie && uu.ver >= 8) {
+    if (uu.ie && uu.env >= 8) {
         uu.ok('uu.fix("-ms-block-progression") == "msBlockProgression"',
                 uu.fix("-ms-block-progression"), "==", "msBlockProgression");
     }
-    if (uu.opera && uu.ver >= 10.50) {
+    if (uu.opera && uu.env >= 10.50) {
         uu.ok('uu.fix("-o-transition-property") == "OTransitionProperty"',
                 uu.fix("-o-transition-property"), "==", "OTransitionProperty");
     }
@@ -613,9 +613,9 @@ uu.ready("window", function(uu) {
     uu.ok('uu.fix("background-color") == "backgroundColor"',
             uu.fix("background-color"), "==", "backgroundColor");
     uu.ok('uu.fix("float") == "cssFloat" or "styleFloat"(IE6, IE7)',
-            uu.fix("float"), "==", uu.ie && uu.ver < 8 ? "styleFloat" : "cssFloat")
+            uu.fix("float"), "==", uu.ie && uu.env < 8 ? "styleFloat" : "cssFloat")
 
-    if (uu.ver.ie6 || uu.ver.ie7) {
+    if (uu.env.ie6 || uu.env.ie7) {
         uu.ok('uu.fix("for") == "for"',
                 uu.fix("for"), "!=", "for");
     } else {
@@ -623,7 +623,7 @@ uu.ready("window", function(uu) {
                 uu.fix("for"), "==", "for");
     }
 
-    if (uu.ver.ie6 || uu.ver.ie7) {
+    if (uu.env.ie6 || uu.env.ie7) {
         uu.ok('uu.fix("htmlFor") == "for"',
                 uu.fix("htmlFor"), "!=", "for");
     } else {
