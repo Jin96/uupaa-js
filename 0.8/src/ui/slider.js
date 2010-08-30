@@ -41,7 +41,7 @@ function init(rail,    // @param Node: rail node
     });
     param.railz = param.short ? 100 : 200;
     param.keyCode = param.vertical ? { 38: -1, 40: 1 } : { 37: -1, 39: 1 };
-    param.dpp = param.railz / (param.max - param.min); // dot per pitch
+    param.dpp = param.short ? 1 : 2; // dot per pitch
 /*
     if (uu.config.aria) {
         uu.attr(rail, { "aria-valuemin": param.min,
@@ -59,9 +59,10 @@ function init(rail,    // @param Node: rail node
     // key events
     uu.keydown(doc, function(evt) {
         if (rail === doc.activeElement) {
-            var key = param.keyCode[uu.event.key(evt).code];
+            var key = param.keyCode[uu.event.key(evt).code],
+                shift = evt.shiftKey ? 10 : 1; // x10
 
-            key && that.value(param.value + key * param.step);
+            key && that.value(param.value + key * param.step * shift);
         }
     });
 }
@@ -172,15 +173,18 @@ function value(val,  // @param Number(= void 0):
 
 // inner -
 function move(that, px, py, fx) {
-    var param = that.param, w = param.step * param.dpp, x = 0, y = 0,
+    var param = that.param, x = 0, y = 0,
+        dpp = param.dpp, w = param.step * dpp,
         arrange = param.step > 1 ? (param.step - 1) : 0;
 
     if (param.vertical) {
-        y = parseInt((uu.range(0, py, param.railz) + arrange) / w) * w;
-        param.value = y / param.dpp;
+        y = parseInt((py + arrange) / w) * w;
+        y = parseInt(uu.range(param.min * dpp, y, param.max * dpp));
+        param.value = y / dpp;
     } else {
-        x = parseInt((uu.range(0, px, param.railz) + arrange) / w) * w;
-        param.value = x / param.dpp;
+        x = parseInt((px + arrange) / w) * w;
+        x = parseInt(uu.range(param.min * dpp, x, param.max * dpp));
+        param.value = x / dpp;
     }
 
 //{@fx
