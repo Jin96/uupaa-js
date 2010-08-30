@@ -14,8 +14,8 @@ uu.Class("SVGDrag", {
     handleEvent:    dragHandleEvent // handleEvent(evt)
 });
 
-var _ie678 = uu.ie && !uu.ver.jit,
-    _moveup = uu.ver.touch ? "touchmove+,touchend+"
+var _ie678 = uu.ie && !uu.env.jit,
+    _moveup = uu.env.touch ? "touchmove+,touchend+"
                            : "mousemove+,mouseup+";
 
 // --- drag ---
@@ -36,7 +36,7 @@ function draginit(node,     // @param Node: move target node
     this.grip = grip;
     grip.style.cursor = "move";
 
-    uu.event(grip, uu.ver.touch ? "touchstart,gesturestart"
+    uu.event(grip, uu.env.touch ? "touchstart,gesturestart"
                                 : "mousedown", this)
     uu.mousewheel(node, this);
 }

@@ -11,7 +11,7 @@ uu.ui.dragbase || (function(uu) {
 uu.ui.dragbase = uuuidragbase; // drag & drop base handler
 
 var _uuuidrag = "data-uuuidrag", // node["data-uuuidrag"] = { dragging: Boolean, x, y }
-    _touch = uu.ver.touch;
+    _touch = uu.env.touch;
 
 // uu.ui.dragbase -
 function uuuidragbase(evt,      // @param event:
@@ -32,11 +32,12 @@ function uuuidragbase(evt,      // @param event:
         scale, rotate, // for transform
         touches, finger, identifier, i; // for iPhone
 
-    // init
+    // init drag information
     if (!dragInfo) {
         grip[_uuuidrag] = dragInfo = {
             tap: 0, ox: 0, oy: 0, trans: [1, 1, 0, 0, 0],
-            mode: 0 // 0=zoom, 1=rotate
+            mode: 0, // 0=zoom, 1=rotate
+            dragging: 0
         };
         dragInfo.trans = uu.css.transform(node).concat();
     }
@@ -67,8 +68,8 @@ function uuuidragbase(evt,      // @param event:
         dragInfo.ox = pageX - (parseInt(node.style.left) || 0);
         dragInfo.oy = pageY - (parseInt(node.style.top)  || 0);
         dragInfo.id = identifier;     // touch.identifier
-        ++dragInfo.tap;
         dragInfo.dragging = 1;
+        ++dragInfo.tap;
 
         opt.mousedown && opt.mousedown(evt, node, option, dragInfo);
 

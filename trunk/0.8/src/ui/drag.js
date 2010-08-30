@@ -13,8 +13,8 @@ uu.Class("Drag", {
     handleEvent:    dragHandleEvent // handleEvent(evt)
 });
 
-var _ie678 = uu.ie && !uu.ver.jit,
-    _moveup = uu.ver.touch ? "touchmove+,touchend+"
+var _ie678 = uu.ie && !uu.env.jit,
+    _moveup = uu.env.touch ? "touchmove+,touchend+"
                            : "mousemove+,mouseup+";
 
 // uu.Class.Drag.init
@@ -33,15 +33,15 @@ function draginit(node,     // @param Node: move target node
 
     uu.css.toAbsolute(node);
 
-    if (this.option.shim && uu.ver.ie6) {
+    if (this.option.shim && uu.env.ie6) {
         this.option.shim = uu("Shim", node);
     }
 /*
-    this.shim = (uu.ver.ie6 && !this.option.rel
+    this.shim = (uu.env.ie6 && !this.option.rel
                             && !this.option.noshim) ? uu("Shim", tgt) : 0;
  */
 
-    uu.event(grip, uu.ver.touch ? "touchstart,gesturestart"
+    uu.event(grip, uu.env.touch ? "touchstart,gesturestart"
                                 : "mousedown", this)
     uu.mousewheel(node, this);
 
