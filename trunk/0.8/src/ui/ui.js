@@ -1,17 +1,27 @@
-uu.Class.Slider || (function(doc, uu) {
+//{@ui
+
+// --- Slider ---
+(function(doc, uu) {
 
 // uu.Class.Slider - generic Slider Widget manage class
 uu.Class("Slider", {
-    init:         init,         // init(rail:Node, grip:Node, param:Hash = {})
-    handleEvent:  handleEvent,  // handleEvent(evt)
-    msgbox:       msgbox,       // msgbox(msg, value) -> mix
-                                //  [1][set] uu.msg.send(*, "set", value)
-                                //  [2][get] uu.msg.send(*, "get")
-    info:         info,         // info():Hash
-    value:        value         // value(val:Number = void, fx:Boolean = false):Number
-                                //  [1][set] value(50) -> 50
-                                //  [2][get] value()   -> 100
+    init:           init,           // init(rail:Node, grip:Node, param:Hash = {})
+    handleEvent:    handleEvent,    // handleEvent(evt)
+    msgbox:         msgbox,         // msgbox(msg, value) -> mix
+                                    //  [1][set] uu.msg.post(*, "set", 50)
+                                    //  [2][get] uu.msg.send(*, "get") -> 50
+    info:           info,           // info():Hash
+    value:          value           // value(val:Number = void, fx:Boolean = false):Number
+                                    //  [1][set] value(50) -> 50
+                                    //  [2][get] value()   -> 50
+}, {
+    activate:       activate,       // activate(param:Hash):Array
+    transrate:      transrate,      // transrate(node:Node):Array
+    isTransrate:    isTransrate     // isTransrate(node:Node)
 });
+uu.ui.bind("Slider", "activate",    activate);
+uu.ui.bind("Slider", "transrate",   transrate);
+uu.ui.bind("Slider", "isTransrate", isTransrate);
 
 // uu.Class.Slider.init
 function init(rail,    // @param Node: rail node
@@ -33,15 +43,14 @@ function init(rail,    // @param Node: rail node
     var that = this;
 
     this.param = param = uu.arg(param, {
-        kind: "silder", name: "slider",
+        kind: "UI", name: "Slider",
         rail: rail, grip: grip,
         vertical: 0, short: 0, min: 0, max: 100, step: 1, value: 0,
         change: null, mouseup: null, mousedown: null,
         gripWidth: 13, gripHeight: 18
     });
-    param.railz = param.short ? 100 : 200;
+    param.step < 1 && (param.step = 1);
     param.keyCode = param.vertical ? { 38: -1, 40: 1 } : { 37: -1, 39: 1 };
-    param.dpp = param.short ? 1 : 2; // dot per pitch
 /*
     if (uu.config.aria) {
         uu.attr(rail, { "aria-valuemin": param.min,
@@ -95,8 +104,8 @@ function handleEvent(evt) {
             }
         }
         rect = uu.css.rect(rail, doc.html); // offset from <html>
-        dragInfo.ox = rect.x;
-        dragInfo.oy = rect.y;
+        dragInfo.ox = rect.x - 3; // 3: magic word
+        dragInfo.oy = rect.y - 3;
         dragInfo.id = identifier; // touch.identifier
         dragInfo.dragging = 1;
         ++dragInfo.tap;
@@ -105,8 +114,8 @@ function handleEvent(evt) {
                 uu.env.touch ? "touchmove+,touchend+"
                              : "mousemove+,mouseup+", this);
         rail.focus();
-        move(this, pageX + param.ox - dragInfo.ox,
-                   pageY + param.oy - dragInfo.oy, 1); // 1: fx
+        moveGrip(this, pageX + param.ox - dragInfo.ox,
+                       pageY + param.oy - dragInfo.oy, 1); // 1: fx
 
         param.mousedown && param.mousedown(evt, node, param, dragInfo);
     } else if (code === uu.event.codes.mouseup && dragInfo.dragging) {
@@ -131,8 +140,8 @@ function handleEvent(evt) {
                 }
             }
         }
-        move(this, pageX + param.ox - dragInfo.ox,
-                   pageY + param.oy - dragInfo.oy);
+        moveGrip(this, (pageX + param.ox - dragInfo.ox),
+                       (pageY + param.oy - dragInfo.oy));
 
         param.mousemove && param.mousemove(evt, node, param, dragInfo);
         dragInfo.tap = 0;
@@ -149,7 +158,7 @@ function handleEvent(evt) {
 // uu.Class.Slider.msgbox
 function msgbox(msg, value) {
     switch (msg) {
-    case "set": this.value(value, 0); break;
+    case "set": this.value(value); break;
     case "get": return this.param.value;
     }
     return value;
@@ -165,26 +174,37 @@ function value(val,  // @param Number(= void 0):
                fx) { // @param Boolean(= false):
                      // @return Number: current value
     if (val !== void 0) {
-        val = uu.range(this.param.min, val, this.param.max) * this.param.dpp;
-        move(this, val, val, fx);
+        var param = this.param,
+            pp = 100 / (param.max - param.min);
+
+        val = (val - param.min) * pp * (param.short ? 1 : 2);
+        moveGrip(this, val, val, fx);
     }
     return this.param.value;
 }
 
 // inner -
-function move(that, px, py, fx) {
-    var param = that.param, x = 0, y = 0,
-        dpp = param.dpp, w = param.step * dpp,
-        arrange = param.step > 1 ? (param.step - 1) : 0;
+function moveGrip(that, // @param this:
+                  px,   // @param Number: pixel value
+                  py,   // @param Number: pixel value
+                  fx) { // @param Boolean: true is fx
+    var param = that.param,
+        x = 0,
+        y = 0,
+        w = param.max - param.min,
+        tm = param.short ? 1 : 2,
+        pp = 100 / w,
+        round = param.step * pp * tm,
+        threshold = pp * tm / 2;
 
     if (param.vertical) {
-        y = parseInt((py + arrange) / w) * w;
-        y = parseInt(uu.range(param.min * dpp, y, param.max * dpp));
-        param.value = y / dpp;
+        y = parseInt((py + threshold) / round) * round;
+        y = parseInt(uu.range(0, y, tm * 100));
+        param.value = (y / tm / pp + param.min) | 0;
     } else {
-        x = parseInt((px + arrange) / w) * w;
-        x = parseInt(uu.range(param.min * dpp, x, param.max * dpp));
-        param.value = x / dpp;
+        x = parseInt((px + threshold) / round) * round;
+        x = parseInt(uu.range(0, x, tm * 100));
+        param.value = (x / tm / pp + param.min) | 0;
     }
 
 //{@fx
@@ -218,4 +238,81 @@ function move(that, px, py, fx) {
     param.change && param.change(that, param.value);
 }
 
+// uu.Class.Slider.activate
+function activate(param) { // @param Hash(= {}):
+                           // @return Array: [SliderClassInstance, RailNode]
+    var rail, grip;
+
+    param = uu.arg(param, {
+        min: 0,
+        max: 100,
+        value: 0,
+        short: 0,
+        change: null,
+        mouseup: null,
+        mousedown: null
+    });
+    param.gripWidth  = param.vertical ? 18 : 13;
+    param.gripHeight = param.vertical ? 13 : 18;
+
+    rail = uu.div("role,slider,tabindex,0,aria-live,polite,aria-valuemin,0,aria-valuemax,0,aria-valuenow,0",
+                  "display,inline-block",
+            uu.div());
+    grip = rail.firstChild;;
+
+    rail.className = param.vertical ? (param.short ? "uiVSliderShortRail"
+                                                   : "uiVSliderLongRail")
+                                    : (param.short ? "uiHSliderShortRail"
+                                                   : "uiHSliderLongRail");
+    grip.className = param.vertical ? "uiVSliderGrip"
+                                    : "uiHSliderGrip";
+    return [uu("Slider", rail, grip, param), rail];
+}
+
+// uu.Class.Slider.transrate
+function transrate(node) { // @param Node:
+                           // @return Array: [SliderClassInstance, RailNode, InputHiddenNode]
+    // <input id="hogeid" class="hogeclass" type="range" />
+    //          v
+    //  <div id="hogeid-ui" class="hogeclass-ui slider" data-uuui="slider"><div class="grip" /></div>
+    //  <input type="hidden" id="hogeid" class="" data-uuui="slider" style="display:none" value="50" min="0" max="100" onchange="" />
+
+    // pick slider param
+    var attrs = uu.attr(node),
+        param = {
+            max:    parseInt(attrs.max   || 0),
+            min:    parseInt(attrs.min   || 0),
+            step:   parseInt(attrs.step  || 1),
+            short:  parseInt(attrs.short || 0),
+            value:  parseInt(attrs.value || 0),
+            change: node.onchange
+        }, ary = activate(param), rail = ary[1],
+        hidden = uu.input("type,hidden,data-uuui,silder", "display,none");
+
+    node.id        && (hidden.id        = node.id);
+    node.className && (hidden.className = node.className);
+    hidden.max = attrs.max;
+    hidden.min = attrs.min;
+    hidden.step = attrs.step;
+    hidden.value = attrs.value;
+    hidden.style.cssText = node.style.cssText;
+
+    node.id        && (rail.id        = node.id + "-ui");
+    node.className && (rail.className = node.className + "-ui");
+    uu.add(rail, node, "prev");
+    uu.add(hidden, node, "prev");
+    uu.node.remove(node);
+
+    return [ary[0], rail, hidden];
+}
+
+// uu.Class.Slider.isTransrate
+function isTransrate(node) { // @param Node
+    var realyNodeType = uu.attr(node, "type");
+
+    return (node.tagName + realyNodeType).toLowerCase() === "inputrange";
+}
+
 })(document, uu);
+
+//}@ui
