@@ -633,8 +633,15 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //       lval:Mix = void, operator:String = void, rval:Mix = void)
                                     //  [1][assert]         uu.ng("123 == 123", 123, "===", 123)
 //}@test
+    // --- UI ---
+//{@ui
+    ui:       uumix(uuui, {         // uu.ui(name:String = "", var_args ...):NodeArray
+                                    //  [1][activate] uu.ui() -> [<div ui="slider"><input type="range"/></div>, ...]
+                                    //  [2][create]   uu.ui("slider", null, { step: 2 }) -> [<div ui="slider" />]
+        bind:       uuuibind        // uu.ui.bind(name:String, method:String, callback:Function)
+    }),
+//}@ui
     // --- OTHER ---
-    ui:             {},             // uu.ui - ui namespace
     dmz:            {},             // uu.dmz - DeMilitarized Zone(proxy)
     nop:            uunop,          // uu.nop - none operation
     pao:            uupao           // uu.pao - `function-producing` function
@@ -6787,6 +6794,50 @@ function uurange(min,   // @param Number: min
     return value < min ? min :
            value > max ? max : value;
 }
+
+// --- UI ---
+//{@ui
+// uu.ui - activate or create UI component
+function uuui(uiname                  // @param String(= "")
+              /*, var_args, ... */) { // @param Mix(= void):
+                                      // @return NodeArray: [node, ...]
+    // activate
+    if (uiname) {
+        uiname = uiname + "activate";
+        if (uiname in uuui.db) {
+            return uuui.db[uiname].apply(null, uuarray(arguments, 1));
+        }
+        return [];
+    }
+
+    // transrate
+    var rv = [], ctrl = { Slider: uuquery("input[type=range]") },
+        ary, i = 0, iz, key, method;
+
+    for (key in ctrl) {
+        ary = ctrl[key];
+
+        for (i = 0, iz = ary.length; i < iz; ++i) {
+            method = key + "isTransrate";
+
+            if (uuui.db[method] && uuui.db[method](ary[i])) {
+                method = key + "transrate";
+
+                uuui.db[method] && rv.push(uuui.db[method](ary[i]));
+            }
+        }
+    }
+    return rv;
+}
+
+// uu.ui.bind - bind UI
+function uuuibind(name,       // @param String: UI name
+                  method,     // @param String: method. "activate", "transrate", "isTransrate"
+                  callback) { // @param Function: callback
+    uuui.db[name + method] = callback;
+}
+uuui.db = {}; // { name+method: callback, ... }
+//}@ui
 
 // --- ECMAScript-262 5th ---
 //{@mb
