@@ -26,9 +26,10 @@ uu.ui.bind("Slider", "isTransrate", isTransrate);
 // uu.Class.Slider.init
 function init(rail,    // @param Node: rail node
               grip,    // @param Node: grip node
-              param) { // @param Hash(= {}): { vertical, long, min, max, step,
+              param) { // @param Hash(= {}): { caption, vertical, long, min, max, step,
                        //                      value, change, mouseup, mousedown,
                        //                      gripWidth, gripHeight }
+                       //    caption    - Boolean(= false):
                        //    vertical   - Boolean(= false): true is vertical
                        //    long       - Boolean(= false):
                        //    node       - Node(= null): original node
@@ -49,7 +50,8 @@ function init(rail,    // @param Node: rail node
     };
     this.param = param = uu.arg(param, {
         name: "Slider", rail: rail, grip: grip,
-        vertical: 0, long: 0, min: 0, max: 100, step: 1, value: 0,
+        caption: 0, vertical: 0, long: 0,
+        min: 0, max: 100, step: 1, value: 0,
         change: null, mouseup: null, mousedown: null,
         gripWidth: 13, gripHeight: 18
     });
@@ -212,7 +214,7 @@ function move(that, // @param this:
     }
 //}@fx
     // update caption
-    param.rail.title = parseInt(param.value);
+    param.caption && (param.rail.title = parseInt(param.value));
 
     // sync
     if (param.node) {
