@@ -18,7 +18,7 @@ function newSlider() {
         rail = +uu.id("railValue").value,
         dir  = +uu.id("directionValue").value;
 
-    uu.body(uu.ui("Slider", { vertical: dir, long: rail, step: step,
+    uu.body(uu.ui("Slider", { vertical: dir, x2: rail, step: step,
                               min: min, max: max, value: min }));
 }
 
@@ -38,15 +38,15 @@ function range(that, id) {
 <input type="button" value="HTML5 Formnize" onclick="uu.ui()" />
 <input type="button" value="new Slider" onclick="newSlider()" />
 
-<p>step: <input type="range" value="1" min="1" max="10" id="stepValue" /><span>1</span>
+<p>step: <input type="range" value="1" min="1" max="10" id="stepValue" ui="Slider" /><span>1</span>
 </p>
-<p>min: <input type="range" value="0" min="0" max="10" id="minValue" /><span>0</span>
+<p>min: <input type="range" value="0" min="0" max="10" id="minValue" ui="Slider" /><span>0</span>
 </p>
-<p>max: <input type="range" value="100" min="90" max="100" id="maxValue" /><span>100</span>
+<p>max: <input type="range" value="100" min="90" max="100" id="maxValue" ui="Slider" /><span>100</span>
 </p>
-<p>rail size: <input type="range" value="0" min="0" max="1" id="railValue" /><span>0 (Short Rail)</span>
+<p>rail size: <input type="range" value="0" min="0" max="1" id="railValue" ui="Slider" /><span>0 (Short Rail)</span>
 </p>
-<p>direction: <input type="range" value="0" min="0" max="1" id="directionValue" /><span>0 (Horizontal)</span>
+<p>direction: <input type="range" value="0" min="0" max="1" id="directionValue" ui="Slider" /><span>0 (Horizontal)</span>
 </p>
 
 </body></html>

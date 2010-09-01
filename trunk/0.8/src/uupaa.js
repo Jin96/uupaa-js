@@ -6807,22 +6807,17 @@ function uuui(uiname                  // @param String(= "")
         return null;
     }
 
-    // transrate
-    var rv = [], ary, i = 0, iz, key, method,
-        ctrl = {
-//{@uislider
-            Slider: uuquery("input[type=range]")
-//}@uislider
-        };
+    // transform
+    var rv = [], ary = uutag("input"), i = 0, iz = ary.length,
+        ctrl, method;
 
-    for (key in ctrl) {
-        ary = ctrl[key];
-
-        for (i = 0, iz = ary.length; i < iz; ++i) {
-            method = key + "isTransrate";
+    for (; i < iz; ++i) {
+        ctrl = uu.attr(ary[i], "ui");
+        if (ctrl) {
+            method = ctrl + "isTransform";
 
             if (uuui.db[method] && uuui.db[method](ary[i])) {
-                method = key + "transrate";
+                method = ctrl + "transform";
 
                 uuui.db[method] && rv.push(uuui.db[method](ary[i]));
             }
@@ -6833,7 +6828,7 @@ function uuui(uiname                  // @param String(= "")
 
 // uu.ui.bind - bind UI
 function uuuibind(name,       // @param String: UI name
-                  method,     // @param String: method. "activate", "transrate", "isTransrate"
+                  method,     // @param String: method. "activate", "transform", "isTransform"
                   callback) { // @param Function: callback
     uuui.db[name + method] = callback;
 }
@@ -8207,22 +8202,19 @@ uu.Class("Slider", {
                                     //  [2][get] value()   -> 50
 }, {
     activate:       activate,       // activate(param:Hash):Array
-    transrate:      transrate,      // transrate(node:Node):Array
-    isTransrate:    isTransrate     // isTransrate(node:Node)
+    transform:      transform,      // transform(node:Node):Array
+    isTransform:    isTransform     // isTransform(node:Node)
 });
-uu.ui.bind("Slider", "activate",    activate);
-uu.ui.bind("Slider", "transrate",   transrate);
-uu.ui.bind("Slider", "isTransrate", isTransrate);
 
 // uu.Class.Slider.init
 function init(rail,    // @param Node: rail node
               grip,    // @param Node: grip node
-              param) { // @param Hash(= {}): { caption, vertical, long, min, max, step,
+              param) { // @param Hash(= {}): { caption, vertical, x2, min, max, step,
                        //                      value, change, mouseup, mousedown,
                        //                      gripWidth, gripHeight }
                        //    caption    - Boolean(= false):
                        //    vertical   - Boolean(= false): true is vertical
-                       //    long       - Boolean(= false):
+                       //    x2         - Boolean(= false):
                        //    node       - Node(= null): original node
                        //    min        - Number(= 0);
                        //    max        - Number(= 100):
@@ -8241,7 +8233,7 @@ function init(rail,    // @param Node: rail node
     };
     this.param = param = uu.arg(param, {
         name: "Slider", rail: rail, grip: grip,
-        caption: 0, vertical: 0, long: 0,
+        caption: 0, vertical: 0, x2: 0,
         min: 0, max: 100, step: 1, value: 0,
         change: null, mouseup: null, mousedown: null,
         gripWidth: 13, gripHeight: 18
@@ -8367,7 +8359,7 @@ function value(val,  // @param Number(= void 0):
     if (val !== void 0) {
         var param = this.param, pp = 100 / (param.max - param.min);
 
-        val = (val - param.min) * pp * (param.long ? 2 : 1);
+        val = (val - param.min) * pp * (param.x2 ? 2 : 1);
         move(this, val, val, fx);
     }
     return this.param.value;
@@ -8379,7 +8371,7 @@ function move(that, // @param this:
               py,   // @param Number: pixel value
               fx) { // @param Boolean: true is fx
     var param = that.param, x = 0, y = 0, w = param.max - param.min,
-        tm = param.long ? 2 : 1, pp = 100 / w,
+        tm = param.x2 ? 2 : 1, pp = 100 / w,
         round = param.step * pp * tm, threshold = pp * tm / 2;
 
     if (param.vertical) {
@@ -8423,7 +8415,7 @@ function move(that, // @param this:
 function activate(param) { // @param Hash(= {}):
                            // @return Array: [SliderClassInstance, RailNode]
 
-    param = uu.arg(param, { min: 0, max: 100, value: 0, long: 0,
+    param = uu.arg(param, { min: 0, max: 100, value: 0, x2: 0,
                             change: null, mouseup: null, mousedown: null });
     param.gripWidth  = param.vertical ? param.gripHeight : param.gripWidth;
     param.gripHeight = param.vertical ? param.gripWidth  : param.gripHeight;
@@ -8431,24 +8423,24 @@ function activate(param) { // @param Hash(= {}):
     var rail = uu.div("tabindex,0", "display,inline-block", uu.div()),
         grip = rail.firstChild;
 
-    rail.className = param.vertical ? (param.long ? "uiSliderVL" : "uiSliderVS")
-                                    : (param.long ? "uiSliderHL" : "uiSliderHS");
+    rail.className = param.vertical ? (param.x2 ? "uiSliderVL" : "uiSliderVS")
+                                    : (param.x2 ? "uiSliderHL" : "uiSliderHS");
     grip.className = param.vertical ? "uiSliderVGrip" : "uiSliderHGrip";
 
     uu("Slider", rail, grip, param);
     return rail;
 }
 
-// uu.Class.Slider.transrate
-function transrate(node) { // @param Node:
+// uu.Class.Slider.transform
+function transform(node) { // @param Node:
                            // @return Array: [SliderClassInstance, RailNode, InputRangeNode]
     //
-    // <input type="range" value="50" min="0" max="100" />
+    // <input type="range" value="50" min="0" max="100" ui="Slider" />
     //
     //          v
     //
     // <div class="uiSlider**"><div class="uiSlider*Grip" /></div>
-    // <input type="range" value="50" min="0" max="100" style="display:none" data-uuui="Slider" />
+    // <input type="range" value="50" min="0" max="100" style="display:none" ui="*Slider" />
     //
 
     // pick slider param
@@ -8456,7 +8448,7 @@ function transrate(node) { // @param Node:
         rail = activate({
             max:    parseInt(attrs.max   || 0),
             min:    parseInt(attrs.min   || 0),
-            long:   parseInt(attrs.long  || 0),
+            x2:     parseInt(attrs.x2    || 0),
             node:   node, // original node. <input type="range" />
             step:   parseInt(attrs.step  || 1),
             value:  parseInt(attrs.value || 0),
@@ -8464,19 +8456,21 @@ function transrate(node) { // @param Node:
         });
 
     node.style.display = "none";
-    uu.data(node, "uuui", "Slider"); // node["data-uuui"] = "Slider"
+    uu.attr(node, "ui", "*Slider"); // node.ui = "*Slider"
     uu.add(rail, node, "prev");
 
     return rail;
 }
 
-// uu.Class.Slider.isTransrate
-function isTransrate(node) { // @param Node
-//    return (node.tagName + uu.attr(node, "type")).toLowerCase() === "inputrange";
-
-    return ((node.tagName + uu.attr(node, "type")).toLowerCase() === "inputrange") &&
-           !uu.data(node, "uuui") // node["data-uuui"]
+// uu.Class.Slider.isTransform
+function isTransform(node) { // @param Node
+    return uu.attr(node, "ui") === "Slider";
 }
+
+// --- init ---
+uu.ui.bind("Slider", "activate",    activate);
+uu.ui.bind("Slider", "transform",   transform);
+uu.ui.bind("Slider", "isTransform", isTransform);
 
 })(document, uu);
 //}@uislider
