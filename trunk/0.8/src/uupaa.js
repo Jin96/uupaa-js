@@ -107,29 +107,31 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //  [1][Class factory]   uu("MyClass", arg1, arg2) -> new uu.Class.MyClass(arg1, arg2)
                                     //  [2][NodeSet factory] uu("div>ul>li", <body>) -> NodeSet
     config:   uuarg(win.uuconfig, { // uu.config - Hash: user configurations
-        img:        "http://uupaa-js.googlecode.com/svn/trunk/0.8/img/",
-//      img:        "./",
 //{@storage
         storage:    {
-            disable:_false,         // uu.config.storage.disable - Boolean:
-            order:  "LFICM",        // uu.config.storage.order - String: storage backends and detection order
-            space:  0               // uu.config.storage.space - Number: require free space(unit: byte). 0 is no require
+            disable:_false,         // uu.config.storage.disable(= false) - Boolean:
+            order:  "LFICM",        // uu.config.storage.order(= "LFICM") - String: storage backends and detection order
+                                    //  "L" = LocalStorage, "F" = FlashStorage,
+                                    //  "I" = IEStorage, "C" = CookieStorage, "M" = MemStorage
+            space:  0               // uu.config.storage.space(= 0) - Number: require free space(unit: byte). 0 is no require
         },
 //}@storage
 //{@audio
         audio:      {
-            order:  "ASFN"          // uu.config.audio.order - String: audio backends and detection order
+            disable:_false,         // uu.config.audio.disable(= false) - Boolean:
+            order:  "ASFN"          // uu.config.audio.order(= "ASFN") - String: audio backends and detection order
+                                    //  "A" = <audio>, "S" = SilverlightAudio, "F" = FlashAudio, "N" = NoAudio
         },
 //}@audio
-        0:0
+        img:        "http://uupaa-js.googlecode.com/svn/trunk/0.8/img/"  // image/css path
     }),
     // --- ENVIRONMENT ---
-    ver:            _env,           // uu.ver - Hash: as uu.ver. @deprecated
     env:            _env,           // uu.env - Hash: environment informations
-    ie:             _ie,
-    gecko:          _gecko,
-    opera:          _opera,
-    webkit:         _webkit,
+    ie:             _ie,            // uu.ie - as uu.env.ie
+    gecko:          _gecko,         // uu.gecko - as uu.env.gecko
+    opera:          _opera,         // uu.opera - as uu.env.opera
+    webkit:         _webkit,        // uu.webkit - as uu.env.webkit
+    ver:            _env,           // uu.ver - Hash: as uu.ver [DEPRECATED]
     // --- CODE SNIPPET ---
 //{@snippet
     snippet:        uusnippet,      // uu.snippet(id:String, arg:Hash/Array = void):String/Mix
@@ -137,17 +139,17 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
     // --- AJAX / JSONP ---
 //{@ajax
     ajax:     uumix(uuajax, {       // uu.ajax(url:String, option:Hash, callback:Function)
-                                    //  [1][load aync] uu.ajax("http://...", { method: "POST", data: ... }, callback)
+                                    //  [1][aync request] uu.ajax("http://...", { method: "POST", data: ... }, callback)
         post:       uuajaxpost,     // uu.ajax.post(url:String, option:Hash, callback:Function)
-        clear:      uuajaxclear,    // uu.ajax.clear() - clear cache
+        clear:      uuajaxclear,    // uu.ajax.clear() - clear "If-Modified-Since" cache
         binary:     uuajaxbinary    // uu.ajax.binary(url:String, option:Hash, callback:Function)
     }),
     jsonp:          uujsonp,        // uu.jsonp(url:String, option:Hash, callback:Function)
-                                    //  [1][load aync] uu.jsonp("http://...callback=@", { method: "mycallback" }, callback)
+                                    //  [1][aync request] uu.jsonp("http://...callback=@", { method: "mycallback" }, callback)
 //}@ajax
     stat:           uustat,         // uu.stat(url:String):Boolean
     require:        uurequire,      // uu.require(url:String, option:Hash = {}):Hash - { data, option, status, ok }
-                                    //  [1][load sync] uu.require("http://...") -> { data, option, status, ok }
+                                    //  [1][sync request] uu.require("http://...") -> { data, option, status, ok }
     // --- TYPE MATCH / TYPE DETECTION ---
     like:           uulike,         // uu.like(lval:Date/Hash/Fake/Array, rval:Date/Hash/Fake/Array):Boolean
     type:           uutype,         // uu.type(mix:Mix):Number
@@ -181,17 +183,15 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
     each:           uueach,         // uu.each(source:Hash/Array/Number, evaluator:Function, arg:Mix = void)
     keys:           uukeys,         // uu.keys(source:Hash/Array):Array
     last:           uulast,         // uu.last(source:Hash/Array):Array - last [key, value] pair
-    pair:           uupair,         // uu.pair(key:String, value:Mix):Hash
+    pair:           uupair,         // uu.pair(key:String, value:Mix):Hash - { key: value }
     size:           uusize,         // uu.size(source:Hash/Array):Number
-    calls:          uucalls,        // uu.calls(func:FunctionArray)
+    calls:          uucalls,        // uu.calls(fnary:FunctionArray)
     clone:          uuclone,        // uu.clone(source:Hash/Array):Hash/Array - shallow copy
     first:          uufirst,        // uu.first(source:Hash):Array - first [key, value] pair
     values:         uuvalues,       // uu.values(source:Hash/Array):Array
     indexOf:        uuindexof,      // uu.indexOf(source:Hash/Array, searchValue:Mix):Number/String/void
-    hash:           uuhash,         // uu.hash(key:Hash/String, value:Mix = void):Hash
-                                    //  [1][through Hash]                 uu.hash({ key: "val" })  -> { key: "val" }
-                                    //  [2][key/value pair to hash]       uu.hash("key", mix)      -> { key: mix }
-                                    //  [3][hash from comma joint string] uu.hash("key1,a,key2,b") -> { key1: "a", key2: "b" }
+    hash:           uuhash,         // uu.hash(source:String):Hash
+                                    //  [1][String to Hash] uu.hash("key1,a,key2,b") -> { key1: "a", key2: "b" }
     array:    uumix(uuarray, {      // uu.array(source:Array/Mix/NodeList/Arguments,
                                     //          sliceStart:Number = void,
                                     //          sliceEnd:Number = void):Array+Hash - Array + { first, last }
@@ -204,8 +204,8 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //  [1][ByteArray dump] uu.array.dump([1, 2, 3]) -> "010203"
                                     //  [2][ByteArray dump] uu.array.dump([1, 2, 3], "0x", ", 0x") -> "0x01, 0x02, 0x03"
         sort:       uuarraysort,    // uu.array.sort(source:Array, method:String/Function = "A-Z"):Array
-        clean:      uuclean,        // uu.array.clean(source:Array):Array
-        toHash:     uutohash,       // uu.array.toHash(key:Array, value:Array/Mix, toNumber:Boolean = false):Hash
+        clean:      uuarrayclean,   // uu.array.clean(source:Array):Array
+        toHash:     uuarraytohash,  // uu.array.toHash(key:Array, value:Array/Mix, toNumber:Boolean = false):Hash
         unique:     uuarrayunique   // uu.array.unique(source:Array, literalOnly:Boolean = false):Array
     }),
     // --- ATTRIBUTE ---
@@ -229,30 +229,30 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
 //      unbind:     undataunbind    // uu.data.unbind(key:String)
     }),
     // --- CSS / STYLE ---
-    css:      uumix(uucss, {        // uu.css(node:Node,
-                                    //        key:Boolean/String/Hash = void,
-                                    //        value:String = void):Hash/String/Node
+    css:      uumix(uucss, {        // uu.css(node:Node, key:String/Hash = void,
+                                    //                   value:String = void):Hash/String/Node
                                     //  [1][get computed items]              uu.css(node) -> { key: value, ... }
                                     //  [2][mix items]                       uu.css(node, { key: value, ... }) -> node
                                     //  [3][get item]                        uu.css(node, key)  -> value
                                     //  [4][set item]                        uu.css(node, key, value) -> node
                                     //  [5][get computed(px unitized) items] uu.css(node, "px") -> { key: value, ... }
         unit:       uucssunit,      // uu.css.unit(node:Node, value:Number/CSSUnitString,
-                                    //                    quick:Boolean = false,
-                                    //                    prop:String = "left"):Number
-                                    //  [1][convert pixel]  uu.css.unit(<div>, 123) -> 123
+                                    //             quick:Boolean = false,
+                                    //             prop:String = "left"):Number
+                                    //  [1][convert pixel]  uu.css.unit(<div>,  123  ) -> 123
                                     //  [2][convert pixel]  uu.css.unit(<div>, "12px") -> 12
                                     //  [3][convert pixel]  uu.css.unit(<div>, "12em") -> 192
                                     //  [4][convert pixel]  uu.css.unit(<div>, "12pt") -> 16
                                     //  [5][convert pixel]  uu.css.unit(<div>, "auto") -> 100
-                                    //  [6][convert pixel]  uu.css.unit(<div>, "auto", 0, "borderTopWidth") -> 0
+                                    //  [6][convert pixel]  uu.css.unit(<div>, "auto", false, "borderTopWidth") -> 12
         // --- CSS BOX MODEL ---
 //{@cssbox
         box:        uucssbox,       // uu.css.box(node:Node, quick:Boolean = false, mbp:Number = 0x7):Hash
         rect:       uucssrect,      // uu.css.rect(node:Node):Hash { x, y, offsetWidth, offsetHeight }
-        toStatic:   uucsstostatic,  // uu.css.toStatic(node:Node):Node
-        toAbsolute: uucsstoabsolute,// uu.css.toAbsolute(node:Node):Node
-        toRelative: uucsstorelative,// uu.css.toRelative(node:Node):Node
+        position:   uucssposition,  // uu.css.position(node:Node, pos:String = "s"):Node
+                                    //  [1][to static]   uu.css.position(<div>, "static")   -> <div style="position: static">
+                                    //  [2][to absolute] uu.css.position(<div>, "absolute") -> <div style="position: absolute">
+                                    //  [3][to relative] uu.css.position(<div>, "relative") -> <div style="position: relative">
 //}@cssbox
         // --- CSS 3 ---
         opacity:    uucssopacity,   // uu.css.opacity(node:Node, value:Number/String):Number/Node
@@ -340,6 +340,8 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
         cyclic:     uueventcyclic,  // uu.event.cyclic(node:Node, eventTypeEx:EventTypeExString,
                                     //                 cyclic:Number, callback:Function):Node
         uncyclic:   uueventuncyclic,// uu.event.uncyclic(node:Node, eventTypeEx:EventTypeExString)
+        evaluator:                  // uu.event.evaluator(node:Node, eventTypeEx:EventTypeExString):FunctionArray
+                    uueventevaluator,
         unbind:     uueventunbind,  // uu.event.unbind(node:Node, eventTypeEx:EventTypeExString = void):Node
         attach:     uueventattach,  // uu.event.attach(node:Node, eventType:String, evaluator:Function,
                                     //                                              useCapture:Boolean = false)
@@ -419,7 +421,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
         path:       uunodepath,     // uu.node.path(node:Node):CSSQueryString
                                     //  [1][get CSSQueryString] uu.node.path(<div>) -> "body>div"
         sort:       uunodesort,     // uu.node.sort(ary:NodeArray, context:Node = <body>):Array - sort by document order
-        swap:       uunodeswap,     // uu.node.swap(swapin:Node, swapout:Node):Node (swapout node)
+        swap:       uunodeswap,     // uu.node.swap(swapout:Node, swapin:Node):Node (swapout node)
         wrap:       uunodewrap,     // uu.node.wrap(innerNode:Node, outerNode:Node):Node (innerNode)
         array:      uunodearray,    // uu.node.array(node:Node):NodeArray+Hash - [node, ...] + { first, prev, next, last, index }
         clear:      uunodeclear,    // uu.node.clear(parent:Node):Node
@@ -428,6 +430,8 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
         normalize:  uunodenormalize // uu.node.normalize(parent:Node = <body>, depth:Number = 0):Number
     }),
     add:            uunodeadd,      // uu.add as uu.node.add
+    swap:           uunodeswap,     // uu.swap as uu.node.swap
+    remove:         uunoderemove,   // uu.remove as uu.node.remove
     // --- NODE ID ---
     nodeid:   uumix(uunodeid, {     // uu.nodeid(node:Node):Number (nodeid)
         toNode:     uunodeidtonode, // uu.nodeid.toNode(nodeid:Number):Node
@@ -635,7 +639,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
 //}@test
     // --- UI ---
 //{@ui
-    ui:       uumix(uuui, {         // uu.ui(name:String = "", var_args ...):NodeArray
+    ui:       uumix(uuui, {         // uu.ui(name:String = "", var_args ...):Node
                                     //  [1][activate] uu.ui() -> [<div ui="slider"><input type="range"/></div>, ...]
                                     //  [2][create]   uu.ui("slider", null, { step: 2 }) -> [<div ui="slider" />]
         bind:       uuuibind        // uu.ui.bind(name:String, method:String, callback:Function)
@@ -1405,27 +1409,14 @@ function uuvalues(source) { // @param Hash/Array: source
     return uukeys(source, 1);
 }
 
-//  [1][through Hash]                 uu.hash({ key: "val" })  -> { key: "val" }
-//  [2][key/value pair to hash]       uu.hash("key", mix)      -> { key: mix }
-//  [3][hash from comma joint string] uu.hash("key1,a,key2,b") -> { key1: "a", key2: "b" }
+// uu.hash - to hash
+function uuhash(source) { // @param String: "key1,a,key2,b"
+                          // @return Hash: { key1: "a", key2: "b" }
+    var rv = {}, ary = source.split(","), i = 0, iz = ary.length;
 
-// uu.hash - to hash, convert hash from key value pair
-function uuhash(key,     // @param Hash/String: key
-                value) { // @param Mix(= void): value
-                         // @return Hash: { key: value, ... }
-    var rv = {}, ary, i, iz;
-
-    if (arguments.length === 1) { // [1]
-        if (typeof key === _string && key[_indexOf](",") > 0) { // [3] "a,b" -> { a: "b" }
-            ary = key.split(",");
-            for (i = 0, iz = ary.length; i < iz; i += 2) {
-                rv[ary[i]] = ary[i + 1];
-            }
-            return rv;
-        }
-        return key;  // [1] hash -> through
+    for (; i < iz; i += 2) {
+        rv[ary[i]] = ary[i + 1];
     }
-    rv[key] = value; // [2]
     return rv;
 }
 
@@ -1472,7 +1463,8 @@ function uuhas(source,   // @param Hash/Array/Node: context, parentNode
         if (source[_nodeType]) {
             if (isString(search)) { // [3]
                 i = source[_data_uuevent];
-                return (i ? i.types : "")[_indexOf]("," + search + ",") >= 0;
+//              return (i ? i.types : "")[_indexOf]("," + search + ",") >= 0;
+                return (i ? i.t : "")[_indexOf]("," + search + ",") >= 0;
             }
             for (i = search; i && i !== source; i = i[_parentNode]) { // [4]
             }
@@ -1560,9 +1552,9 @@ function uusize(source) { // @param Hash/Array: source
 }
 
 // uu.calls - call functions
-function uucalls(func) { // @param FunctionArray:
-    for (var i = 0, iz = func.length; i < iz; ++i) {
-        func[i]();
+function uucalls(fnary) { // @param FunctionArray:
+    for (var i = 0, iz = fnary.length; i < iz; ++i) {
+        fnary[i]();
     }
 }
 
@@ -1622,11 +1614,11 @@ function uuarraysort(source,   // @param Array: source
     return (r & 2) ? source.reverse() : source;
 }
 
-// [1][Array.clean]         uuclean([,,1,2,,]) -> [1,2]
+// [1][Array.clean]         uuarrayclean([,,1,2,,]) -> [1,2]
 
 // inner - array compaction, trim null and undefined elements
-function uuclean(source) { // @param Array: source
-                           // @return Array: clean Array
+function uuarrayclean(source) { // @param Array: source
+                                // @return Array: clean Array
     var rv = [], i = 0, iz = source.length;
 
     for (; i < iz; ++i) {
@@ -1656,11 +1648,11 @@ function uuarraydump(source,     // @param ByteArray: [0x00, ... 0xff]
 // [2][Array + Mix = Hash]  uu.array.toHash(["a", "b"], 1)      -> { a: 1, b: 1 }
 
 // uu.array.toHash - make { key: value } pair from array
-function uutohash(key,        // @param Array: key array
-                  value,      // @param Array/Mix: value array or a mix value
-                  toNumber) { // @param Boolean(= false): true is numeric value
-                              //                          false is original value
-                              // @return Hash: { key: value, ... }
+function uuarraytohash(key,        // @param Array: key array
+                       value,      // @param Array/Mix: value array or a mix value
+                       toNumber) { // @param Boolean(= false): true is numeric value
+                                   //                          false is original value
+                                   // @return Hash: { key: value, ... }
     var rv = {}, i = 0, iz = key.length, val, num = !!toNumber;
 
     if (isArray(value)) { // [1]
@@ -1803,7 +1795,7 @@ function uudataclear(node,  // @param Node:
 
 // uu.css - css and StyleSheet accessor
 function uucss(node,    // @param Node:
-               key,     // @param Boolean/String/Hash(= void): key
+               key,     // @param String/Hash(= void): key
                value) { // @param String(= void): value
                         // @return Hash/String/Node:
     var style = node.style, undef, opacity = "opacity", fix = uufix.db,
@@ -1811,7 +1803,7 @@ function uucss(node,    // @param Node:
         right; // right "textAlign" style
 
     switch (uucomplex(key, value)) { // 1: (), 2: ({}), 3: (k), 4: (k,v)
-    case 4: key = uuhash(key, value);
+    case 4: key = uupair(key, value);
     case 2: for (fuzzy in key) {
                 value = key[fuzzy];
                 right = fix[fuzzy] || fuzzy;
@@ -1851,7 +1843,7 @@ uucss.care = { /*{@mb*/ zoom: 1, fontSizeAdjust: 1, /*}@mb*/ // [CSS3]
 
 // --- Style Sheet ---
 function uuss(id) { // @param StyleSheetIDString:
-                      // @return StyleSheetObject:
+                    // @return StyleSheetObject:
     return uuss.db[id] || (uuss.db[id] = uu("StyleSheet", id));
 }
 uuss.db = {}; // { id: styleSheetObject }
@@ -2850,34 +2842,26 @@ function uucssrect(node,           // @param Node:
     return { x: x, y: y, w: w, h: h };
 }
 
-// uu.css.toStatic - to static
-function uucsstostatic(node) { // @param Node:
-                               // @return Node:
-    node.style.position = "static";
-    return node;
-}
+// uu.css.position - to static / to absolute / to relative
+function uucssposition(node,  // @param Node:
+                       pos) { // @param String(= "s"): "static", "absolute", "relative"
+                              //                    or "s", "a", "r"
+                              // @return Node:
+    var ns = node.style, cs, rect, box;
 
-// uu.css.toAbsolute - to absolute
-function uucsstoabsolute(node) { // @param Node:
-                                 // @return Node:
-    var ns = node.style,
-        rect = uucssrect(node), // offset from foster
-        box = uucssbox(node, _false, 0x4); // margin only
-
-    ns.position = "absolute";
-    ns.left = (rect.x - box.m.l) + "px"; // margin.left
-    ns.top  = (rect.y - box.m.t) + "px"; // margin.top
-    return node;
-}
-
-// uu.css.toRelative - to relative
-function uucsstorelative(node) { // @param Node:
-                                 // @return Node:
-    var ns = node.style, cs = uucss(node);
-
-    ns.position = "relative";
-    ns.left = cs.left;
-    ns.top  = cs.top;
+    switch ((pos || "s").charAt(0)) {
+    case "s":   ns.position = "static"; break;
+    case "a":   rect = uucssrect(node); // offset from foster
+                box = uucssbox(node, _false, 0x4); // margin only
+                ns.position = "absolute";
+                ns.left = (rect.x - box.m.l) + "px"; // margin.left
+                ns.top  = (rect.y - box.m.t) + "px"; // margin.top
+                break;
+    case "r":   cs = uucss(node); // get computed style
+                ns.position = "relative";
+                ns.left = cs.left;
+                ns.top  = cs.top;
+    }
     return node;
 }
 //}@cssbox
@@ -2942,7 +2926,7 @@ function StyleSheetAdd(expr,   // @param Hash/String: { selector: declaration, .
 /*{@mb*/ary, i, iz, rex, /*}@mb*/
         selector, declaration;
 
-    for (selector in uumix(this.rules, isString(expr) ? uuhash(expr, decl)
+    for (selector in uumix(this.rules, isString(expr) ? uupair(expr, decl)
                                                       : expr)) {
         declaration = this.rules[selector];
 
@@ -3423,10 +3407,7 @@ function uuevent(node,         // @param Node:
     function eventClosure(event) {
         if (!event.node) {
             var fullcode = uuevent.codes[event.type] || 0,
-                target = event.target
-//{@mb
-                                      || event.srcElement || doc;
-//}@mb
+                target = event.target /*{@mb*/ || event.srcElement || doc; /*}@mb*/
 
             event.node = node;
             event.code = fullcode & 0xff; // half code
@@ -3463,40 +3444,43 @@ function uuevent(node,         // @param Node:
             }
 //}@mb
             if (event.code === uuevent.codes.mousewheel) {
-                event.wheel = (
-//{@mb
-                               event.detail ? event.detail :
-//}@mb
-                                              (event.wheelDelta / -120)) | 0;
+                event.wheel = (/*{@mb*/ event.detail ? event.detail : /*}@mb*/
+                               (event.wheelDelta / -120)) | 0;
             }
         }
         // callback(event, node)
-        (instance ? handler.call(evaluator, event)
-                  : evaluator(event)) === _false && uueventstop(event);
+        (isInstance ? handler.call(evaluator, event)
+                    : evaluator(event)) === _false && uueventstop(event);
     }
 
-    // --- setup event database ---
+    // --- init event database ---
     if (!(_data_uuevent in node)) {
-        node[_data_uuevent] = { types: "," };
+        node[_data_uuevent] = { t: ",", c: {}, e: {} }; // t:types, c:closure, e:evaluator
     }
 
     var eventTypeExArray = eventTypeEx.split(","),
         eventData = node[_data_uuevent],
-        ex, token, eventType, capture, closure, bound, types = "types",
+        ex, token, eventType, capture, closure, bound,
         handler, i = 0, pos,
-//{@mb
-        owner = (node.ownerDocument || doc).documentElement,
-//}@mb
-        instance = 0;
+/*{@mb*/owner = (node.ownerDocument || doc).documentElement,/*}@mb*/
+        isInstance = 0;
 
     if (__unbind__) {
         closure = evaluator;
     } else {
         handler = isFunction(evaluator) ? evaluator
-                                        : (instance = 1, evaluator.handleEvent);
+                                        : (isInstance = 1, evaluator.handleEvent);
         closure = eventClosure;
     }
 
+    //
+    // event database structure
+    //
+    //  node["data-uuevent"]                             // aka eventData
+    //  node["data-uuevent"].t = "," + eventTypeEx + "," // types
+    //  node["data-uuevent"].c[eventTypeEx] = closure    // closure db
+    //  node["data-uuevent"].e[eventTypeEx] = evaluator  // evaluator db
+    //
     for (; ex = eventTypeExArray[i++]; ) { // ex = "namespace.click+"
 
         // split token
@@ -3506,7 +3490,7 @@ function uuevent(node,         // @param Node:
         token = uuevent.parse.exec(ex);
         eventType = token[2]; // "click"
         capture   = token[3]; // "+"
-        bound     = eventData[types][_indexOf]("," + ex + ",") >= 0;
+        bound     = eventData.t[_indexOf]("," + ex + ",") >= 0;
 
 //{@mb
         // IE mouse capture [IE6][IE7][IE8]
@@ -3525,18 +3509,19 @@ function uuevent(node,         // @param Node:
         if (__unbind__) {
             if (bound) {
 
-                pos = eventData[ex][_indexOf](evaluator);
+                pos = eventData.c[ex][_indexOf](evaluator);
                 if (pos >= 0) {
 
-                    eventData[ex].splice(pos, 1); // remove evaluator
+                    eventData.c[ex].splice(pos, 1); // remove closure
+                    eventData.e[ex].splice(pos, 1); // remove evaluator
 
                     // removed all handlers in a type
-                    if (!eventData[ex].length) {
+                    if (!eventData.c[ex].length) {
 
                         // ",dblclick," <- ",namespace.click+,dblclick,".
                         //                      replace(",namespace.click+,", ",")
-                        eventData[types] =
-                            eventData[types][_replace]("," + ex + ",", ",");
+                        eventData.t =
+                            eventData.t[_replace]("," + ex + ",", ",");
                     }
                     uueventattach(node, eventType, closure, capture, _true); // detach
                 }
@@ -3544,10 +3529,13 @@ function uuevent(node,         // @param Node:
         } else {
             // ",namespace.click+,dblclick," <- ",namespace.click+," + "dblclick" + ,"
             if (!bound) {
-                eventData[types] += ex + ",";
-                eventData[ex] = [];
+                // --- init ---
+                eventData.t += ex + ",";
+                eventData.c[ex] = [];
+                eventData.e[ex] = [];
             }
-            eventData[ex].push(closure);
+            eventData.c[ex].push(closure);
+            eventData.e[ex].push(evaluator);
             uueventattach(node, eventType, closure, capture);
         }
     }
@@ -3610,8 +3598,8 @@ function uueventfire(node,      // @param Node: target node
                 relatedTarget:  node
             };
 
-        uueach(node[_data_uuevent][eventType], function(evaluator) {
-            evaluator.call(node, fakeEventObjectEx);
+        uueach(node[_data_uuevent].c[eventType], function(closure) {
+            closure.call(node, fakeEventObjectEx);
         });
     }
     return node;
@@ -3637,6 +3625,16 @@ function uueventstop(event) { // @param EventObjectEx:
 //}@mb
 }
 
+// uu.event.evaluator - get evaluator array
+function uueventevaluator(node,          // @param Node:
+                          eventTypeEx) { // @param EventTypeExString:
+                                         // @return FunctionArray:
+    var eventData = node[_data_uuevent];
+
+    return eventData && eventData.e[eventTypeEx] ? eventData.e[eventTypeEx].concat()
+                                                 : [];
+}
+
 // [1][unbind all]              uu.event.unbind(node) -> node
 // [2][unbind some]             uu.event.unbind(node, "click+,dblclick") -> node
 // [3][unbind namespace all]    uu.event.unbind(node, "namespace.*") -> node
@@ -3649,8 +3647,8 @@ function uueventunbind(node,          // @param Node: target node
     var eventData = node[_data_uuevent], ns, ary, ex, i = 0, c = ",";
 
     if (eventData) {
-        eventTypeEx = eventTypeEx ? c + eventTypeEx + c        // [2] ",click,"
-                                  : node[_data_uuevent].types; // [1] ",click,MyNamespace.mousemove+,"
+        eventTypeEx = eventTypeEx ? c + eventTypeEx + c    // [2] ",click,"
+                                  : node[_data_uuevent].t; // [1] ",click,MyNamespace.mousemove+,"
         ary = eventTypeEx[_replace](/^,|,$/g, "").split(c);
 
         for (; ex = ary[i++]; ) {
@@ -3658,15 +3656,15 @@ function uueventunbind(node,          // @param Node: target node
                 ns = ex.slice(0, -1);       // "namespace.*" -> "namespace."
                 uueach(ary, function(ex) {
                     if (!ex[_indexOf](ns)) {
-                        uueach(eventData[ex], function(evaluator) {
-                            uuevent(node, ex, evaluator, _true); // unbind
+                        uueach(eventData.c[ex], function(closure) {
+                            uuevent(node, ex, closure, _true); // unbind
                         });
                     }
                 });
             } else { // [2][4]
                 if (eventTypeEx[_indexOf](c + ex + c) >= 0) {
-                    uueach(eventData[ex], function(evaluator) {
-                        uuevent(node, ex, evaluator, _true); // unbind
+                    uueach(eventData.c[ex], function(closure) {
+                        uuevent(node, ex, closure, _true); // unbind
                     });
                 }
             }
@@ -4434,9 +4432,9 @@ function uunodesort(ary,       // @param NodeArray:
 }
 
 // uu.node.swap - swap node
-function uunodeswap(swapin,    // @param Node: swapin
-                    swapout) { // @param Node: swapout
-                               // @return Node: swapout
+function uunodeswap(swapout,  // @param Node: swapout
+                    swapin) { // @param Node: swapin
+                              // @return Node: swapout
     return swapout[_parentNode].replaceChild(swapin, swapout);
 }
 
@@ -4447,7 +4445,7 @@ function uunodeswap(swapin,    // @param Node: swapin
 function uunodewrap(innerNode,   // @param Node: inner node
                     outerNode) { // @param Node: wrapper, outer node
                                  // @return Node: innerNode
-    return outerNode[_appendChild](uunodeswap(outerNode, innerNode));
+    return outerNode[_appendChild](uunodeswap(innerNode, outerNode));
 }
 
 // uu.node.array - collection siblings
@@ -4501,10 +4499,11 @@ function uunodeclone(parent,  // @param Node: parent node (ElementNode)
     function cloneData(source,   // @param Node: source node
                        cloned) { // @param Node: cloned node
         var key, i, iz,
-            data = source[_data_uuevent],
             handler = uudata.handler,
             checked = "checked",
-            selected = "selected";
+            selected = "selected",
+            eventData = source[_data_uuevent],
+            evaluator = eventData ? eventData.e : {};
 
         // new nodeid
 //{@mb
@@ -4513,11 +4512,9 @@ function uunodeclone(parent,  // @param Node: parent node (ElementNode)
         uunodeid(cloned);
 
         // bind event
-        for (key in data) {
-            if (key !== "types") { // skip node["data-uuevent"].types
-                for (i = 0, iz = data[key].length; i < iz; ++i) {
-                    uuevent(cloned, key, data[key][i]);
-                }
+        for (key in evaluator) { // key = eventTypeEx
+            for (i = 0, iz = evaluator[key].length; i < iz; ++i) {
+                uuevent(cloned, key, evaluator[key][i]);
             }
         }
         // clone UI state (node.checked)
@@ -6800,14 +6797,14 @@ function uurange(min,   // @param Number: min
 // uu.ui - activate or create UI component
 function uuui(uiname                  // @param String(= "")
               /*, var_args, ... */) { // @param Mix(= void):
-                                      // @return NodeArray: [node, ...]
+                                      // @return Node/NodeArray: <div> or [<div>, ...]
     // activate
     if (uiname) {
         uiname = uiname + "activate";
         if (uiname in uuui.db) {
             return uuui.db[uiname].apply(null, uuarray(arguments, 1));
         }
-        return [];
+        return null;
     }
 
     // transrate

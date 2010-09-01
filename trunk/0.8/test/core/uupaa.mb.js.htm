@@ -423,13 +423,8 @@ uu.ready("window", function(uu) {
 
     uu.ok("uu.hash()");
     (function() {
-        var hash = { key: 'value' };
-
-        uu.ok("[1][through] uu.hash({ key: 'value' }) はハッシュをそのままスルーし { key: 'value' } を返す",
-            uu.hash(hash), "===", hash);
-
-        uu.ok("[2][to hash] uu.hash('key', 123) == { key: 123 }",
-            uu.hash('key', 123), "==", { key: 123 });
+        uu.ok("uu.hash('a,b,c,d') は文字列をパースし { a: 'b', c: 'd' } を返す",
+            uu.hash('a,b,c,d'), "==", { a: 'b', c: 'd' });
     })();
 
     uu.ok("uu.has()");
@@ -468,6 +463,19 @@ uu.ready("window", function(uu) {
     uu.ok("uu.indexOf()");
     uu.ok("uu.indexOf({ a: 1, b: 2, c: 2 }, 2) == 'b'",
             uu.indexOf({ a: 1, b: 2, c: 2 }, 2), "==", 'b');
+
+    uu.ok("uu.first()");
+    uu.ok("{ key: 1, key2: 2 } から先頭のpairを配列['key', 1]で取得する",
+            uu.first({ key: 1, key2: 2 }), "==", ["key", 1]);
+    uu.ok("[1, 2] から先頭のpairを配列[0, 1]で取得する",
+            uu.first([1, 2]), "==", [0, 1]);
+
+    uu.ok("uu.last()");
+    uu.ok("{ key: 1, key2: 2 } から末尾のpairを配列['key2', 2]で取得する",
+            uu.last({ key: 1, key2: 2 }), "==", ["key2", 2]);
+    uu.ok("[1, 2] から末尾のpairを配列[1, 2]で取得する",
+            uu.last([1, 2]), "==", [1, 2]);
+
     uu.ok("uu.array.toHash()");
     uu.ok("['key', 'key2'] と ['1', '2'] から { key: '1', key2: '2' } を生成する",
             uu.array.toHash(['key', 'key2'], ['1', '2']), "==", { key: '1', key2: '2' });
@@ -532,9 +540,22 @@ uu.ready("window", function(uu) {
             uu.node.has(uu.id('ctx'), document.body), "is false");
 
 
-    uu.ok("uu.node.children()");
-    uu.ok("uu.node.children(uu.id('tgt'))",
-            uu.node.children(uu.id('tgt')).length, "==", 3);
+    uu.ok("uu.node.array()");
+    uu.ok("uu.node.array(uu.id('tgt'))",
+            uu.node.array(uu.id('tgt')).length, "==", 5);
+    uu.ok("uu.node.array(uu.id('tgt'))",
+            uu.node.array(uu.id('tgt')).first, "==", uu.id("first"));
+    uu.ok("uu.node.array(uu.id('tgt'))",
+            uu.node.array(uu.id('tgt')).prev, "==", uu.id("prev"));
+    uu.ok("uu.node.array(uu.id('tgt'))",
+            uu.node.array(uu.id('tgt')).next, "==", uu.id("next"));
+    uu.ok("uu.node.array(uu.id('tgt'))",
+            uu.node.array(uu.id('tgt')).last, "==", uu.id("last"));
+    uu.ok("uu.node.array(uu.id('tgt'))",
+            uu.node.array(uu.id('tgt')).index, "==", 2);
+
+    uu.ok("uu.node.array(uu.id('firstChild'))",
+            uu.node.array(uu.id('firstChild')).length, "==", 3);
 
 
     uu.ok("uu.node.remove()");
@@ -694,12 +715,6 @@ uu.ready("window", function(uu) {
       uu.ok('uu.trim.quote(\' "has  space" \') == "has  space"',
         uu.trim.quote(' "has  space" '), "==", "has  space");
 
-
-    uu.ok("uu.hash()");
-
-    var hash = uu.hash('key,a,key2,b');
-    uu.ok("[3][split , str] uu.hash('key,a,key2,b') == { key: 'a', key2: 'b' }",
-        hash, "==", { key: 'a', key2: 'b' });
 
     var dateHash = uu.date();
     uu.ok("uu.date");
@@ -1488,6 +1503,59 @@ uu.ready("window", function() {
     uu.ok('JSON.parse(JSON.stringify("\\\\")) == "\\\\"', [lhs, jstr], "==", [data, jstr]);
 
     uu.ok();
+});
+</script>
+<script>
+uu.ready("window", function() {
+    var div;
+
+    uu.body(div = uu.div("", "x,0,y,0,position:absolute", "hello junction"));
+
+
+
+    var junc0 = uu.junction(5, 5, function(result, values) {
+        uu.ok("Junction");
+        uu.ok("uu.junction", true, "==", result);
+        uu.ok();
+    });
+
+    var junc1 = uu.junction(1, 1, function(result, values) { result ? junc0.ok("1 ok") : junc0.ng("1 ng"); });
+    var junc2 = uu.junction(1, 2, function(result, values) { result ? junc0.ok("2 ok") : junc0.ng("2 ng"); });
+    var junc3 = uu.junction(1, 3, function(result, values) { result ? junc0.ok("3 ok") : junc0.ng("3 ng"); });
+    var junc4 = uu.junction(2, 3, function(result, values) { result ? junc0.ok("4 ok") : junc0.ng("4 ng"); });
+    var junc5 = uu.junction(3, 3, function(result, values) { result ? junc0.ok("5 ok") : junc0.ng("5 ng"); });
+
+    uu.fx(div, 1000, { bgc: "lime",     junction: junc1 });
+    uu.fx(div, 1000, { c:   "yellow",   junction: junc2 });
+    uu.fx(div, 1000, { o:   0.5,        junction: junc3 });
+    uu.fx(div, 1000, { w:   100,        junction: junc4 });
+    uu.fx(div, 1000, { h:   200,        junction: junc4 });
+    uu.fx(div, 1000, { x:   300,        junction: junc5 });
+    uu.fx(div, 1000, { y:   400,        junction: junc5 });
+    uu.fx(div, 1000, { c:   "white",    junction: junc5 });
+
+
+    var juncNG = uu.junction(1, 5, function(result, values) {
+        uu.ok("Junction NG pattern");
+        uu.ok("uu.junction", false, "==", result);
+        uu.ok();
+    });
+
+    var junc11 = uu.junction(1, 1, function(result, values) { juncNG.ng("1 ng"); });
+    var junc12 = uu.junction(1, 2, function(result, values) { juncNG.ng("2 ng"); });
+    var junc13 = uu.junction(1, 3, function(result, values) { juncNG.ng("3 ng"); });
+    var junc14 = uu.junction(2, 3, function(result, values) { juncNG.ng("4 ng"); });
+    var junc15 = uu.junction(3, 3, function(result, values) { juncNG.ng("5 ng"); });
+
+    uu.fx(div, 10, { bgc: "lime",     junction: junc11 });
+    uu.fx(div, 10, { c:   "yellow",   junction: junc12 });
+    uu.fx(div, 10, { o:   0.5,        junction: junc13 });
+    uu.fx(div, 10, { w:   100,        junction: junc14 });
+    uu.fx(div, 10, { h:   200,        junction: junc14 });
+    uu.fx(div, 10, { x:   300,        junction: junc15 });
+    uu.fx(div, 10, { y:   400,        junction: junc15 });
+    uu.fx(div, 10, { c:   "white",    junction: junc15 });
+
 });
 </script>
 

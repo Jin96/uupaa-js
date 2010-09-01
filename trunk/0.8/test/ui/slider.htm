@@ -2,34 +2,40 @@
 <title>Slider demo</title>
 <script src="../../src/uupaa.js"></script>
 <script src="../../src/ui/ui.js"></script>
+<!--
 <script src="../../src/ui/ui.snip.js" id="ui" type="text/html"></script>
+ -->
 <script>
 uu.ready(function() {
-    uu.body(uu.snippet("ui"));
+    uu.each(uu.query("input[type=range]"), function(node) {
+        uu.bind(node, "change", function(evt) {
+            range(evt.node, evt.node.id);
+        });
+    });
+//    uu.body(uu.snippet("ui"));
 });
 
 function newSlider() {
     var rv,
-        step = +uu.id("stepValue").innerText,
-        min  = +uu.id("minValue").innerText,
-        max  = +uu.id("maxValue").innerText,
-        rail = parseInt(uu.id("railValue").innerText),
-        dir  = parseInt(uu.id("directionValue").innerText);
+        step = +uu.id("stepValue").value,
+        min  = +uu.id("minValue").value,
+        max  = +uu.id("maxValue").value,
+        rail = +uu.id("railValue").value,
+        dir  = +uu.id("directionValue").value;
 
-    rv = uu.ui("Slider", { vertical: dir, short: rail, step: step,
-                           min: min, max: max, value: min });
-    uu.body(rv[1]);
+    uu.body(uu.ui("Slider", { vertical: dir, long: rail, step: step,
+                              min: min, max: max, value: min }));
 }
 
 function range(that, id) {
     var val = +that.value;
 
     if (id === "railValue") {
-        uu.id(id).innerText = val ? "1 (Short Rail)" : "0 (Long Rail)";
+        uu.id(id).nextSibling.innerText = val ? "1 (Long Rail)" : "0 (Short Rail)";
     } else if (id === "directionValue") {
-        uu.id(id).innerText = val ? "1 (Vertical)" : "0 (Horizontal)";
+        uu.id(id).nextSibling.innerText = val ? "1 (Vertical)" : "0 (Horizontal)";
     } else {
-        uu.id(id).innerText = val;
+        uu.id(id).nextSibling.innerText = val;
     }
 }
 </script>
@@ -37,15 +43,15 @@ function range(that, id) {
 <input type="button" value="HTML5 Formnize" onclick="uu.ui()" />
 <input type="button" value="new Slider" onclick="newSlider()" />
 
-<p>step: <input type="range" value="1" min="1" max="10"" onchange="range(this, 'stepValue')" /><span id="stepValue">1</span>
+<p>step: <input type="range" value="1" min="1" max="10" id="stepValue" /><span>1</span>
 </p>
-<p>min: <input type="range" value="0" min="0" max="10" onchange="range(this, 'minValue')" /><span id="minValue">0</span>
+<p>min: <input type="range" value="0" min="0" max="10" id="minValue" /><span>0</span>
 </p>
-<p>max: <input type="range" value="100" min="90" max="100" onchange="range(this, 'maxValue')" /><span id="maxValue">100</span>
+<p>max: <input type="range" value="100" min="90" max="100" id="maxValue" /><span>100</span>
 </p>
-<p>rail size: <input type="range" value="0" min="0" max="1" short="1" onchange="range(this, 'railValue')" /><span id="railValue">0 (Long Rail)</span>
+<p>rail size: <input type="range" value="0" min="0" max="1" id="railValue" /><span>0 (Short Rail)</span>
 </p>
-<p>direction: <input type="range" value="0" min="0" max="1" short="1" onchange="range(this, 'directionValue')" /><span id="directionValue">0 (Horizontal)</span>
+<p>direction: <input type="range" value="0" min="0" max="1" id="directionValue" /><span>0 (Horizontal)</span>
 </p>
 
 </body></html>
