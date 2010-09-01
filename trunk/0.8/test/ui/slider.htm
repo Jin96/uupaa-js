@@ -1,10 +1,6 @@
 <!DOCTYPE html><html lang="ja"><head><meta charset="utf-8" />
 <title>Slider demo</title>
 <script src="../../src/uupaa.js"></script>
-<script src="../../src/ui/ui.js"></script>
-<!--
-<script src="../../src/ui/ui.snip.js" id="ui" type="text/html"></script>
- -->
 <script>
 uu.ready(function() {
     uu.each(uu.query("input[type=range]"), function(node) {
@@ -12,7 +8,6 @@ uu.ready(function() {
             range(evt.node, evt.node.id);
         });
     });
-//    uu.body(uu.snippet("ui"));
 });
 
 function newSlider() {
