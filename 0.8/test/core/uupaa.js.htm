@@ -423,13 +423,8 @@ uu.ready("window", function(uu) {
 
     uu.ok("uu.hash()");
     (function() {
-        var hash = { key: 'value' };
-
-        uu.ok("[1][through] uu.hash({ key: 'value' }) はハッシュをそのままスルーし { key: 'value' } を返す",
-            uu.hash(hash), "===", hash);
-
-        uu.ok("[2][to hash] uu.hash('key', 123) == { key: 123 }",
-            uu.hash('key', 123), "==", { key: 123 });
+        uu.ok("uu.hash('a,b,c,d') は文字列をパースし { a: 'b', c: 'd' } を返す",
+            uu.hash('a,b,c,d'), "==", { a: 'b', c: 'd' });
     })();
 
     uu.ok("uu.has()");
@@ -720,12 +715,6 @@ uu.ready("window", function(uu) {
       uu.ok('uu.trim.quote(\' "has  space" \') == "has  space"',
         uu.trim.quote(' "has  space" '), "==", "has  space");
 
-
-    uu.ok("uu.hash()");
-
-    var hash = uu.hash('key,a,key2,b');
-    uu.ok("[3][split , str] uu.hash('key,a,key2,b') == { key: 'a', key2: 'b' }",
-        hash, "==", { key: 'a', key2: 'b' });
 
     var dateHash = uu.date();
     uu.ok("uu.date");

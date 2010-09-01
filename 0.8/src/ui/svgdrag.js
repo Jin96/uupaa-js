@@ -47,7 +47,7 @@ function dragfin() {
     uu.unbind(doc, "gesturechange+,gestureend+", this);
     uu.unbind(_ie678 ? this.grip : doc, _moveup, this);
 
-    uu.css.toStatic(this.node);
+    uu.css.position(this.node); // to static
 }
 
 // uu.Class.SVGDrag.handleEvent

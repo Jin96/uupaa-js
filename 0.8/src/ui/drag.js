@@ -31,7 +31,7 @@ function draginit(node,     // @param Node: move target node
     this.grip = grip;
     grip.style.cursor = "move";
 
-    uu.css.toAbsolute(node);
+    uu.css.position(node, "a"); // to absolute
 
     if (this.option.shim && uu.env.ie6) {
         this.option.shim = uu("Shim", node);
@@ -54,7 +54,7 @@ function dragfin() {
     uu.unbind(doc, "gesturechange+,gestureend+", this);
     uu.unbind(_ie678 ? this.grip : doc, _moveup, this);
 
-    uu.css.toStatic(this.node);
+    uu.css.position(this.node); // to static
 }
 
 // uu.Class.Drag.handleEvent
