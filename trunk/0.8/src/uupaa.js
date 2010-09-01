@@ -8295,8 +8295,8 @@ function handleEvent(evt) {
             }
         }
         rect = uu.css.rect(rail, doc.html); // offset from <html>
-        dragInfo.ox = rect.x - 3; // 3: magic word
-        dragInfo.oy = rect.y - 3;
+        dragInfo.ox = rect.x + 3; // 3: magic word
+        dragInfo.oy = rect.y + 3;
         dragInfo.id = identifier; // touch.identifier
         dragInfo.dragging = 1;
         ++dragInfo.tap;
