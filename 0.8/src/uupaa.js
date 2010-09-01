@@ -8448,7 +8448,7 @@ function transrate(node) { // @param Node:
     //          v
     //
     // <div class="uiSlider**"><div class="uiSlider*Grip" /></div>
-    // <input type="range" value="50" min="0" max="100" style="display:none" />
+    // <input type="range" value="50" min="0" max="100" style="display:none" data-uuui="Slider" />
     //
 
     // pick slider param
@@ -8464,6 +8464,7 @@ function transrate(node) { // @param Node:
         });
 
     node.style.display = "none";
+    uu.data(node, "uuui", "Slider"); // node["data-uuui"] = "Slider"
     uu.add(rail, node, "prev");
 
     return rail;
@@ -8471,7 +8472,10 @@ function transrate(node) { // @param Node:
 
 // uu.Class.Slider.isTransrate
 function isTransrate(node) { // @param Node
-    return (node.tagName + uu.attr(node, "type")).toLowerCase() === "inputrange";
+//    return (node.tagName + uu.attr(node, "type")).toLowerCase() === "inputrange";
+
+    return ((node.tagName + uu.attr(node, "type")).toLowerCase() === "inputrange") &&
+           !uu.data(node, "uuui") // node["data-uuui"]
 }
 
 })(document, uu);
