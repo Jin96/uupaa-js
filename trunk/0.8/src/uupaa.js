@@ -1,21 +1,24 @@
 /*!{id:"uupaa.js",ver:0.8,license:"MIT",author:"uupaa.js@gmail.com"}*/
 
-// Firefox3.5(end of 2010-08)
+// Firefox 3.5(end of 2010-08)
 //      <audio>, <video>, offline, DnD API, @font-face, MediaQuery,
 //      text-shadow:, word-wrap: box-shadow:, box-image:,
 //      column-rule:, CSS Transforms, localStorage, Web Workers,
 //      Geolocation API, Canvas Text API, Canvas Shadow API,
 //      Canvas ImageData API, (canvas.moz-opaque)
 //      MozAfterPaint Event, window.JSON
-// Firefox3.6(Gecko 1.9.2)
+// Firefox 3.6(Gecko 1.9.2)
 //      Background Gradient(-moz-linear-gradient, -moz-radial-gradient),
 //      Multiple background, File API, DnD File API,
 //      orientation,
-// Firefox4.0(Gecko 2.0)
+// Firefox 4.0(Gecko 2.0)
 //      <article> <section> <nav> <aside> <hgroup> <header> <footer>,
 //      WebSockets, D2D, WebM, IndexedDB( window.moz_indexedDB ),
 //      FormData, SVG Background, <img src="svg">, CSS transitions,
-//      WebGL, :-moz-any(S, ...), CSS calc(),  -moz-image-rect
+//      WebGL, :-moz-any(S, ...), CSS calc(),  -moz-image-rect,
+//      background: -moz-element(#bg1)
+// Opera 10.70
+//      <g buffered-rendering="static">
 
 // === Core ===
 
@@ -95,8 +98,8 @@ var _addEventListener = "addEventListener",
 
 // --- HTML5 NEXT ---
 // http://www.whatwg.org/specs/web-apps/current-work/multipage/dom.html
-doc.html || (doc.html = root);             // document.html = <html>
-doc.head || (doc.head = uutag("head")[0]); // document.head = <head>
+doc.html || (doc.html = root);                   // document.html = <html>
+doc.head || (doc.head = uutag("head", root)[0]); // document.head = <head>
 
 // --- LIBRARY STRUCTURE ---
 uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNameString/window,
@@ -139,13 +142,13 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
     // --- AJAX / JSONP ---
 //{@ajax
     ajax:     uumix(uuajax, {       // uu.ajax(url:String, option:Hash, callback:Function)
-                                    //  [1][aync request] uu.ajax("http://...", { method: "POST", data: ... }, callback)
+                                    //  [1][async request] uu.ajax("http://...", { method: "POST", data: ... }, callback)
         post:       uuajaxpost,     // uu.ajax.post(url:String, option:Hash, callback:Function)
         clear:      uuajaxclear,    // uu.ajax.clear() - clear "If-Modified-Since" cache
         binary:     uuajaxbinary    // uu.ajax.binary(url:String, option:Hash, callback:Function)
     }),
     jsonp:          uujsonp,        // uu.jsonp(url:String, option:Hash, callback:Function)
-                                    //  [1][aync request] uu.jsonp("http://...callback=@", { method: "mycallback" }, callback)
+                                    //  [1][async request] uu.jsonp("http://...callback=@", { method: "mycallback" }, callback)
 //}@ajax
     stat:           uustat,         // uu.stat(url:String):Boolean
     require:        uurequire,      // uu.require(url:String, option:Hash = {}):Hash - { data, option, status, ok }
@@ -183,7 +186,9 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
     each:           uueach,         // uu.each(source:Hash/Array/Number, evaluator:Function, arg:Mix = void)
     keys:           uukeys,         // uu.keys(source:Hash/Array):Array
     last:           uulast,         // uu.last(source:Hash/Array):Array - last [key, value] pair
-    pair:           uupair,         // uu.pair(key:String, value:Mix):Hash - { key: value }
+    pair:           uupair,         // uu.pair(key:Number/String/Hash, value:Mix):Hash - { key: value }
+                                    //  [1][make pair]    uu.pair(1, 2)        -> { 1: 2 }
+                                    //  [2][through hash] uu.pair({ 1: 2 }, 3) -> { 1: 2 }
     size:           uusize,         // uu.size(source:Hash/Array):Number
     calls:          uucalls,        // uu.calls(fnary:FunctionArray)
     clone:          uuclone,        // uu.clone(source:Hash/Array):Hash/Array - shallow copy
@@ -199,7 +204,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //  [2][mix to Array]       uu.array(mix)       -> [mix]
                                     //  [3][NodeList to Array]  uu.array(NodeList)  -> [node, ...]
                                     //  [4][arguments to Array] uu.array(arguments) -> [arg, ...]
-                                    //  [5][to Array + slice]   uu.array(uu.tag("*"), 1, 3) -> [<head>, <meta>]
+                                    //  [5][to Array + slice]   uu.array(uu.tag("", document), 1, 3) -> [<head>, <meta>]
         dump:       uuarraydump,    // uu.array.dump(source:ByteArray, type:String = "HEX"):String
                                     //  [1][ByteArray dump] uu.array.dump([1, 2, 3]) -> "010203"
                                     //  [2][ByteArray dump] uu.array.dump([1, 2, 3], "0x", ", 0x") -> "0x01, 0x02, 0x03"
@@ -301,11 +306,11 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
 //}@fx
     // --- QUERY ---
     id:             uuid,           // uu.id(expr:String, context:Node = document):Node/null
-    tag:            uutag,          // uu.tag(expr:String, context:Node = document):NodeArray
-    match:          uumatch,        // uu.match(expr:CSSSelectorExpressionString, context:Node = document):Boolean
-    query:          uuquery,        // uu.query(expr:CSSSelectorExpressionString, context:NodeArray/Node = document):NodeArray
+    tag:            uutag,          // uu.tag(expr:String = "", context:Node = <body>):NodeArray
+    match:          uumatch,        // uu.match(expr:CSSSelectorExpressionString, context:Node = <body>):Boolean
+    query:          uuquery,        // uu.query(expr:CSSSelectorExpressionString, context:NodeArray/Node = <body>):NodeArray
     // --- CLASSNAME ---
-    klass:    uumix(uuklass, {      // uu.klass(expr:String, context:Node = document):NodeArray
+    klass:    uumix(uuklass, {      // uu.klass(expr:String, context:Node = <body>):NodeArray
         has:        uuklasshas,     // uu.klass.has(node:Node, classNames:String):Boolean
         add:        uuklassadd,     // uu.klass.add(node:Node, classNames:String):Node
         remove:     uuklassremove,  // uu.klass.remove(node:Node, classNames:String):Node
@@ -639,10 +644,16 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
 //}@test
     // --- UI ---
 //{@ui
-    ui:       uumix(uuui, {         // uu.ui(name:String = "", var_args ...):Node
-                                    //  [1][activate] uu.ui() -> [<div ui="slider"><input type="range"/></div>, ...]
-                                    //  [2][create]   uu.ui("slider", null, { step: 2 }) -> [<div ui="slider" />]
-        bind:       uuuibind        // uu.ui.bind(name:String, method:String, callback:Function)
+    ui:       uumix(uuui, {         // uu.ui(uiname:String = "", var_args ...):Node/NodeArray
+                                    //  [1][activate] uu.ui() -> [<div ui="Slider"><input type="range"/></div>, ...]
+                                    //  [2][create]   uu.ui("Slider", { step: 2 }) -> [<div ui="Slider" />]
+        bind:       uuuibind,       // uu.ui.bind(uiname:String, callback:Hash)
+        query:      uuuiquery       // uu.ui.query(expr:StringArray/String = "", context:Node = <body>):NodeArray
+                                    //  [1][query all UI]         uu.ui.query() -> [<div>, ...]
+                                    //  [2][query Slider]         uu.ui.query("Slider", <body>) -> [<div>, ...]
+                                    //  [3][query Slider and Tab] uu.ui.query(["Slider", "Tab"], <body>) -> [<div>, ...]
+                                    //  [4][query expression]     uu.ui.query("#ui>div[ui=Slider]", <body>) -> [<div>, ...]
+                                    //  [5][get UI instance]      uu.ui.query("Slider")[0].instance -> uu.Class.Slider instance
     }),
 //}@ui
     // --- OTHER ---
@@ -679,17 +690,17 @@ function newText(text) { // @param String:
 
 // --- CONSTRUCTION ---
 uu.config.baseDir || (uu.config.baseDir =
-    uutag("script").pop().src[_replace](/[^\/]+$/, function(file) {
+    uutag("script", doc).pop().src[_replace](/[^\/]+$/, function(file) {
         return file === "uupaa.js" ? "../" : "";
     }));
 
 // --- MsgPump class ---
 MsgPump[_prototype] = {
-    send:           uumsgsend,      // MsgPump.send(address:Array/Mix, message:String, param:Mix = void):Array/Mix
+    send:           uumsgsend,      // MsgPump.send(address:NodeArray/Array/Mix, message:String, param:Mix = void):Array/Mix
                                     //  [1][multicast] MsgPump.send([instance, ...], "hello") -> ["world!", ...]
                                     //  [2][unicast  ] MsgPump.send(instance, "hello") -> ["world!"]
                                     //  [3][broadcast] MsgPump.send(null, "hello") -> ["world!", ...]
-    post:           uumsgpost,      // MsgPump.post(address:Array/Mix, message:String, param:Mix = void)
+    post:           uumsgpost,      // MsgPump.post(address:NodeArray/Array/Mix, message:String, param:Mix = void)
                                     //  [1][multicast] MsgPump.post([instance, ...], "hello")
                                     //  [2][unicast  ] MsgPump.post(instance, "hello")
                                     //  [3][broadcast] MsgPump.post(null, "hello")
@@ -1424,7 +1435,7 @@ function uuhash(source) { // @param String: "key1,a,key2,b"
 //  [2][mix to Array]       uu.array(mix)       -> [mix]       + { first, last }
 //  [3][NodeList to Array]  uu.array(NodeList)  -> [node, ...] + { first, last }
 //  [4][arguments to Array] uu.array(arguments) -> [arg, ...]  + { first, last }
-//  [5][to Array + slice]   uu.array(uu.tag("*"), 1, 3) -> [<head>, <meta>] + { first, last }
+//  [5][to Array + slice]   uu.array(uu.tag("", document), 1, 3) -> [<head>, <meta>] + { first, last }
 
 // uu.array - to array + slice
 function uuarray(source,     // @param Array/Mix/NodeList/Arguments: source
@@ -1532,14 +1543,20 @@ function uulast(source,      // @param Hash: source. Array is DenceArray
     return [key, source[key]];
 }
 
+//  [1][make pair]    uu.pair(1, 2)        -> { 1: 2 }
+//  [2][through hash] uu.pair({ 1: 2 }, 3) -> { 1: 2 }
+
 // uu.pair - make pair
-function uupair(key,     // @param String: key
+function uupair(key,     // @param Number/String/Hash: key
                 value) { // @param Mix: value
                          // @return Hash: { key: value }
-    var rv = {};
+    if (typeof key !== "object") {
+        var rv = {};
 
-    rv[key] = value;
-    return rv;
+        rv[key] = value;
+        return rv;
+    }
+    return key; // Hash or Hash Like Object
 }
 
 // [1][Hash.length]         uusize({ a: 1, b: 2 }) -> 2
@@ -2268,7 +2285,7 @@ function uufxskip(node,        // @param Node(= null): null is all node
                                //                          false is skip top queue
                   invisible) { // @param Boolean(= false): true is avoid flicker
                                // @return NodeArray:
-    var ary = node ? [node] : uutag("*", doc.body),
+    var ary = node ? [node] : uutag(),
         i = 0, iz = ary.length,
         j, k, jz, kz, data, guid, option, q, rq;
 
@@ -2885,7 +2902,7 @@ function uucssuserSelect(node,    // @param Node(= null):
         style.WebkitUserSelect = val;
 //{@mb
     } else if (style.MozUserSelect !== undef) {
-        ary = all ? uu.tag("*", doc.body) : [node];
+        ary = all ? uutag("", doc.body) : [node];
         for (i = 0, iz = ary.length; i < iz; ++i) {
             ary[i].style.MozUserSelect = allow ? "" : "-moz-none";
         }
@@ -2896,7 +2913,7 @@ function uucssuserSelect(node,    // @param Node(= null):
             doc.unselectable  = allow ? "" : "on";
             doc.onselectstart = allow ? "" : uupao(false);
         } else { // [IE][OPERA]
-            ary = all ? uu.tag("*", doc.body) : [node];
+            ary = all ? uutag("", doc.body) : [node];
             for (i = 0, iz = ary.length; i < iz; ++i) {
                 ary[i].unselectable  = allow ? "" : "on";
                 ary[i].onselectstart = allow ? "" : uupao(false);
@@ -2924,10 +2941,11 @@ function StyleSheetAdd(expr,   // @param Hash/String: { selector: declaration, .
                        decl) { // @param Hash(= void): "declaration"
     var ss = this.ss,
 /*{@mb*/ary, i, iz, rex, /*}@mb*/
-        selector, declaration;
+        selector, declaration, pair = uupair(expr, decl);
 
-    for (selector in uumix(this.rules, isString(expr) ? uupair(expr, decl)
-                                                      : expr)) {
+    uumix(this.rules, pair);
+
+    for (selector in pair) {
         declaration = this.rules[selector];
 
 //{@mb
@@ -3183,19 +3201,19 @@ getComputedStyleIE.getProps = (function(props) {
 // --- className(klass) ---
 // uu.klass - as document.getElementsByClassName
 function uuklass(expr,      // @param String: "class", "class1, ..."
-                 context) { // @param Node(= document): query context
+                 context) { // @param Node(= <body>): query context
                             // @return NodeArray: [Node, ...]
 //{@mb
     if (doc.getElementsByClassName) {
 //}@mb
-        return toArray.call((context || doc).getElementsByClassName(expr));
+        return toArray.call((context || doc.body).getElementsByClassName(expr));
 //{@mb
     }
 
     var rv = [], ri = -1, i = 0, iz, m, v, w,
         ary = uutrim(expr).split(" "), az = ary.length,
         rex = _matcher(ary),
-        nodeList = (context || doc).getElementsByTagName("*");
+        nodeList = (context || doc.body).getElementsByTagName("*");
 
     for (i = 0, iz = nodeList.length; i < iz; ++i) {
         v = nodeList[i];
@@ -3344,7 +3362,7 @@ function MsgPump() {
 // [3][broadcast] MsgPump.send(null, "hello") -> ["world!", ...]
 
 // MsgPump.send - send a message synchronously
-function uumsgsend(address, // @param Array/Mix: address or guid
+function uumsgsend(address, // @param NodeArray/Array/Mix: address or guid or UINode
                             //           [instance, ...] is multicast
                             //           instance is unicast
                             //           null is broadcast
@@ -3355,7 +3373,8 @@ function uumsgsend(address, // @param Array/Mix: address or guid
         ary = address ? uuarray(address) : this.cast;
 
     for (; to = ary[i++]; ) {
-        obj = this.addr[to.uuguid || to || 0];
+        obj = this.addr[to.instance ? to.instance.uuguid
+                                    : (to.uuguid || to || 0)];
         obj && (rv[++ri] = obj.msgbox(message, param));
     }
     return rv;
@@ -3366,7 +3385,7 @@ function uumsgsend(address, // @param Array/Mix: address or guid
 // [3][broadcast] MsgPump.post(null, "hello")
 
 // MsgPump.post - send a message asynchronously
-function uumsgpost(address, // @param Array/Mix: address or guid
+function uumsgpost(address, // @param Array/Mix: address or guid or UINode
                             //           [instance, ...] is multicast
                             //           instance is unicast
                             //           null is broadcast
@@ -4415,7 +4434,7 @@ function uunodesort(ary,       // @param NodeArray:
     var rv = [], ri = -1, i = 0, iz = ary.length, hash = { length: iz },
         idx, min = 0xfffffff, max = 0, node, dups = [], di = -1,
         all = /*{@mb*/ _ie ? 0 : /*}@mb*/
-                       uu.tag("*", context || doc.body);
+                       uutag("", context || doc.body);
 
     for (; i < iz; ++i) {
         node = ary[i];
@@ -4467,6 +4486,7 @@ function uunodearray(node) { // @param Node: needle
             ++i;
         }
     }
+    // add property
     rv.first = first;
     rv.prev  = rv[index - 1] || null;
     rv.next  = rv[index + 1] || null;
@@ -4480,7 +4500,7 @@ function uunodearray(node) { // @param Node: needle
 // uu.node.clear - clear all children
 function uunodeclear(parent) { // @param Node: parent node
                                // @return Node: parent
-    var rv = uutag("*", parent), v, i = 0;
+    var rv = uutag("", parent), v, i = 0;
 
     for (; v = rv[i++]; ) {
         uunodeidremove(v);
@@ -4558,7 +4578,7 @@ function uunodeclone(parent,  // @param Node: parent node (ElementNode)
         if (ready.event || ready.data) { // [IE] cloneNode bugfix
             rv = newNode();
             rv.innerHTML = parent[cloneNode](_true).outerHTML;
-            quick ? (rv = rv[_firstChild]) : reverseFetch(uutag("*", rv));
+            quick ? (rv = rv[_firstChild]) : reverseFetch(uutag("", rv));
         } else {
 //}@mb
             rv = parent[cloneNode](_true);
@@ -4744,9 +4764,9 @@ function setNodeValue(node,    // @param Node:
 // --- QUERY ---
 // uu.query - as document.querySelectorAll
 function uuquery(expr,      // @param CSSSelectorExpressionString: "css > selector"
-                 context) { // @param Node(= document): query context
+                 context) { // @param Node(= <body>): query context
                             // @return NodeArray: [Node, ...]
-    context = context || doc;
+    context = context || doc.body;
 
 //{@mb
     if (context.querySelectorAll) {
@@ -4778,18 +4798,18 @@ function uuid(expr,      // @param String: id
 }
 
 // uu.tag - as document.getElementsByTaName
-function uutag(expr,      // @param String: "*" or "tag"
-               context) { // @param Node(= document): query context
+function uutag(expr,      // @param String(= ""): tag name, "" is all
+               context) { // @param Node(= <body>): query context
                           // @return NodeArray: [Node, ...]
 //{@mb
     if (!_ie) {
 //}@mb
-        return toArray.call((context || doc).getElementsByTagName(expr));
+        return toArray.call((context || doc.body).getElementsByTagName(expr || "*"));
 //{@mb
     }
 
-    var rv = [], ri = -1, v, i = 0, skip = expr === "*",
-        nodeList = (context || doc).getElementsByTagName(expr),
+    var rv = [], ri = -1, v, i = 0, skip = (!expr || expr === "*"),
+        nodeList = (context || doc.body).getElementsByTagName(expr || "*"),
         iz = nodeList.length;
 
     // [IE] getElementsByTagName("*") has comment nodes
@@ -4805,9 +4825,9 @@ function uutag(expr,      // @param String: "*" or "tag"
 
 // uu.match - as document.matchesSelector
 function uumatch(expr,      // @param CSSSelectorExpressionString: "css > selector"
-                 context) { // @param Node(= document): match context
+                 context) { // @param Node(= <body>): match context
                             // @return Boolean:
-    context = context || doc;
+    context = context || doc.body;
 //{@mb
     if (context.matchesSelector) {
         return context.matchesSelector(expr);
@@ -5354,7 +5374,7 @@ function uulog(log                      // @param Mix: log data
 
     context || uunodeadd(context = uu.ol({ id: "uulog" }));
 
-    uulog.max < uutag("*", context).length && (context.innerHTML = "");
+    uulog.max < uutag("", context).length && (context.innerHTML = "");
 
     uunodeadd(uu[/OL|UL/.test(context[_tagName]) ? "li" : "p"](newText(txt)),
               context);
@@ -6794,6 +6814,10 @@ function uurange(min,   // @param Number: min
 
 // --- UI ---
 //{@ui
+
+//  [1][activate]  uu.ui() -> [<div ui="Slider"><input type="range"/></div>, ...]
+//  [2][create]    uu.ui("Slider", { step: 2 }) -> [<div ui="Slider" />]
+
 // uu.ui - activate or create UI component
 function uuui(uiname                  // @param String(= "")
               /*, var_args, ... */) { // @param Mix(= void):
@@ -6808,7 +6832,7 @@ function uuui(uiname                  // @param String(= "")
     }
 
     // transform
-    var rv = [], ary = uutag("input"), i = 0, iz = ary.length,
+    var rv = [], ary = uutag(), i = 0, iz = ary.length,
         ctrl, method;
 
     for (; i < iz; ++i) {
@@ -6827,12 +6851,38 @@ function uuui(uiname                  // @param String(= "")
 }
 
 // uu.ui.bind - bind UI
-function uuuibind(name,       // @param String: UI name
-                  method,     // @param String: method. "activate", "transform", "isTransform"
-                  callback) { // @param Function: callback
-    uuui.db[name + method] = callback;
+function uuuibind(uiname,     // @param String: UI name
+                  callback) { // @param Hash: { method: callback, ...}
+                              //  method   - String:   "activate", "transform", "isTransform"
+                              //  callback - Function: callback function
+    for (var i in callback) {
+        uuui.db[uiname + i] = callback[i];
+    }
 }
 uuui.db = {}; // { name+method: callback, ... }
+
+//  [1][query all UI]         uu.ui.query() -> [<div>, ...]
+//  [2][query Slider]         uu.ui.query("Slider", <body>) -> [<div>, ...]
+//  [3][query Slider and Tab] uu.ui.query(["Slider", "Tab"], <body>) -> [<div>, ...]
+//  [4][query expression]     uu.ui.query("#ui>div[ui=Slider]", <body>) -> [<div>, ...]
+//  [5][get UI instance]      uu.ui.query("Slider")[0].instance -> uu.Class.Slider instance
+
+// uu.ui.query - query ui
+function uuuiquery(expr,      // @param CSSSelectorExpressionString/StringArray/String(= ""): UI name
+                   context) { // @param Node(= <body>): context
+                              // @return NodeArray: [Node, ...]
+    if (!expr) {
+        expr = "*[ui]";
+    } else if (!/\W/.test(expr)) {
+        var r = [], ary = uuarray(expr), i = 0, iz = ary.length;
+
+        for (; i < iz; ++i) {
+            r.push("div[ui=" + ary[i] + "]");
+        }
+        expr = r.join(",");
+    }
+    return uuquery(expr, context || doc.body);
+}
 //}@ui
 
 // --- ECMAScript-262 5th ---
@@ -7313,10 +7363,11 @@ _ie && _env < 9 && uueventdetach(win, "onunload", _windowonunload);
 // 1. prebuild camelized hash - http://handsout.jp/slide/1894
 // 2. prebuild nodeid
 uuready("dom:2", function() {
-    var nodeList = uutag("*", root), v, i = 0,
+    var nodeList = uutag("", root), v, i = 0,
         attrFix = "float,cssFloat",
         fxAlias = ",w,width,h,height,x,left,y,top,l,left,t,top," +
                   "c,color,bgc,backgroundColor," +
+                  "bgx,backgroundPositionX,bgy,backgroundPositionY" +
                   "o,opacity,fs,fontSize,m,margin,b,border,p,padding";
 
 //{@mb
@@ -8192,14 +8243,11 @@ function otherFunctionFilter(ctx, j, jz, negate, ps, arg) {
 // uu.Class.Slider - generic Slider Widget manage class
 uu.Class("Slider", {
     init:           init,           // init(rail:Node, grip:Node, param:Hash = {})
-    handleEvent:    handleEvent,    // handleEvent(evt)
-    msgbox:         msgbox,         // msgbox(msg, value) -> mix
-                                    //  [1][set] uu.msg.post(*, "set", 50)
-                                    //  [2][get] uu.msg.send(*, "get") -> 50
-    info:           info,           // info():Hash
-    value:          value           // value(val:Number = void, fx:Boolean = false):Number
-                                    //  [1][set] value(50) -> 50
-                                    //  [2][get] value()   -> 50
+    msgbox:         msgbox,         // msgbox(msg:String, param:Hash = void):Hash
+                                    //  [1][get value] uu.msg.send(*, "getValue") -> { value: 50 }
+                                    //  [2][set value] uu.msg.post(*, "setValue", { value: 50, fx: false })
+                                    //  [3][get param] uu.msg.send(*, "getParam") -> { ... }
+    handleEvent:    handleEvent     // handleEvent(evt:Event)
 }, {
     activate:       activate,       // activate(param:Hash):Array
     transform:      transform,      // transform(node:Node):Array
@@ -8209,15 +8257,16 @@ uu.Class("Slider", {
 // uu.Class.Slider.init
 function init(rail,    // @param Node: rail node
               grip,    // @param Node: grip node
-              param) { // @param Hash(= {}): { caption, vertical, x2, min, max, step,
-                       //                      value, change, mouseup, mousedown,
-                       //                      gripWidth, gripHeight }
+              param) { // @param Hash(= {}): { caption, vertical, toggle, min, max, size,
+                       //                      step, value, change, mouseup,
+                       //                      mousedown, gripWidth, gripHeight }
                        //    caption    - Boolean(= false):
                        //    vertical   - Boolean(= false): true is vertical
-                       //    x2         - Boolean(= false):
+                       //    toggle     - Boolean(= false):
                        //    node       - Node(= null): original node
                        //    min        - Number(= 0);
                        //    max        - Number(= 100):
+                       //    size       - Number(= 100): width or height
                        //    step       - Number(= 1):
                        //    value      - Number(= 0):
                        //    change     - Function(= null):
@@ -8227,27 +8276,26 @@ function init(rail,    // @param Node: rail node
                        //    gripHeight - Number(= 18):
     var that = this;
 
-    // node.ui - get UI instance
-    rail.ui = function() {
-        return that;
-    };
     this.param = param = uu.arg(param, {
         name: "Slider", rail: rail, grip: grip,
-        caption: 0, vertical: 0, x2: 0,
-        min: 0, max: 100, step: 1, value: 0,
+        caption: 0, vertical: 0, toggle: false,
+        min: 0, max: 100, size: 100, step: 1, value: 0,
         change: null, mouseup: null, mousedown: null,
         gripWidth: 13, gripHeight: 18
     });
+    rail.instance = that;
+
     param.step < 1 && (param.step = 1);
     param.keyCode = param.vertical ? { 38: -1, 40: 1 } : { 37: -1, 39: 1 };
     param.ox =  param.vertical ? 0 : -((param.gripHeight / 2) | 0);
     param.oy = !param.vertical ? 0 : -((param.gripWidth  / 2) | 0);
 
-    this.value(param.value);
+    value(this, param.value);
 
     // rail drag events
     uu.bind(rail, uu.env.touch ? "touchstart"
                                : "mousedown,mousewheel", this);
+
     // key events
     uu.keydown(doc, function(evt) {
         if (rail === doc.activeElement) {
@@ -8259,20 +8307,34 @@ function init(rail,    // @param Node: rail node
     });
 }
 
+// uu.Class.Slider.msgbox
+function msgbox(msg,     // @param String:
+                param) { // @param Hash(= void):
+                         // @return Hash:
+    switch (msg) {
+    case "getParam": return this.param;
+    case "getValue": return { value: this.param.value };
+    case "setValue": value(this, param.value || 0, param.fx || 0);
+    }
+    return {};
+}
+
 // uu.Class.Slider.handleEvent
 function handleEvent(evt) {
-    var code  = evt.code, rect,
+    var code  = evt.code, rect, threshold,
         param = this.param,
         rail  = param.rail,
         pageX = evt.pageX,
         pageY = evt.pageY,
         dragInfo = rail["data-uuuidrag"],
+        dragEvent = uu.env.touch ? "touchmove+,touchend+"
+                                 : "mousemove+,mouseup+",
         touches, finger, identifier, i; // for iPhone
 
     // init drag information
     if (!dragInfo) {
         rail["data-uuuidrag"] = dragInfo = {
-            ox: 0, oy: 0, dragging: 0,
+            ox: 0, oy: 0, dragging: 0, startValue: 0,
             id: 0, tap: 0 // for iPhone
         };
     }
@@ -8287,27 +8349,32 @@ function handleEvent(evt) {
             }
         }
         rect = uu.css.rect(rail, doc.html); // offset from <html>
+        threshold = param.value >= (param.max - param.min) * 0.5;
         dragInfo.ox = rect.x + 3; // 3: magic word
         dragInfo.oy = rect.y + 3;
         dragInfo.id = identifier; // touch.identifier
         dragInfo.dragging = 1;
+        dragInfo.startValue = threshold ? 1 : 0;
         ++dragInfo.tap;
 
-        uu.bind(uu.ie ? rail : doc,
-                uu.env.touch ? "touchmove+,touchend+"
-                             : "mousemove+,mouseup+", this);
+        uu.bind(uu.ie ? rail : doc, dragEvent, this);
         rail.focus();
         move(this, pageX + param.ox - dragInfo.ox,
                    pageY + param.oy - dragInfo.oy, 1); // 1: fx
 
         param.mousedown && param.mousedown(evt, node, param, dragInfo);
     } else if (code === uu.event.codes.mouseup && dragInfo.dragging) {
+        if (param.toggle) {
+            threshold = param.value >= (param.max - param.min) * 0.5;
+            // tap   -> toggle value
+            // slide -> magnet value
+            value(this, dragInfo.tap ? (dragInfo.startValue ? param.min : param.max)
+                                     : (threshold ? param.max : param.min), 1);
+        }
         dragInfo.dragging = 0;
         param.mouseup && param.mouseup(evt, node, param, dragInfo);
 
-        uu.unbind(uu.ie ? rail : doc,
-                  uu.env.touch ? "touchmove+,touchend+"
-                               : "mousemove+,mouseup+", this);
+        uu.unbind(uu.ie ? rail : doc, dragEvent, this);
     } else if (code === uu.event.codes.mousemove && dragInfo.dragging) {
         if (uu.env.touch) {
             touches = evt.touches;
@@ -8330,7 +8397,7 @@ function handleEvent(evt) {
         dragInfo.tap = 0;
     } else if (code === uu.event.codes.mousewheel) {
         rail.focus();
-        this.value(param.value + evt.wheel * 10);
+        value(this, param.value + evt.wheel * 10);
     } else if (code >= uu.event.codes.keydown && code <= uu.event.codes.keyup) {
         // keydown, keypress, keyup
         return;
@@ -8338,31 +8405,18 @@ function handleEvent(evt) {
     return false; // uu.event.stop(evt)
 }
 
-// uu.Class.Slider.msgbox
-function msgbox(msg, value) {
-    switch (msg) {
-    case "set": this.value(value); break;
-    case "get": return this.param.value;
+// inner - get value / set value
+function value(that,  // @param this:
+               value, // @param Number(= void 0):
+               fx) {  // @param Boolean(= false):
+                      // @return Number: current value
+    if (value !== void 0) {
+        var param = that.param, pp = 100 / (param.max - param.min);
+
+        value = (value - param.min) * pp * (param.size * 0.01);
+        move(that, value, value, fx);
     }
-    return value;
-}
-
-// uu.Class.Slider.info
-function info() { // @return Hash: param
-    return this.param;
-}
-
-// uu.Class.Slider.value
-function value(val,  // @param Number(= void 0):
-               fx) { // @param Boolean(= false):
-                     // @return Number: current value
-    if (val !== void 0) {
-        var param = this.param, pp = 100 / (param.max - param.min);
-
-        val = (val - param.min) * pp * (param.x2 ? 2 : 1);
-        move(this, val, val, fx);
-    }
-    return this.param.value;
+    return that.param.value;
 }
 
 // inner - move grip
@@ -8371,7 +8425,7 @@ function move(that, // @param this:
               py,   // @param Number: pixel value
               fx) { // @param Boolean: true is fx
     var param = that.param, x = 0, y = 0, w = param.max - param.min,
-        tm = param.x2 ? 2 : 1, pp = 100 / w,
+        tm = param.size * 0.01, pp = 100 / w,
         round = param.step * pp * tm, threshold = pp * tm / 2;
 
     if (param.vertical) {
@@ -8388,11 +8442,22 @@ function move(that, // @param this:
 
 //{@fx
     if (fx) {
-        uu.fx(param.grip, 150, { stop: 1, x: x, y: y });
+        if (param.toggle) {
+            x = uu.range(0, x, tm * 71);
+
+            uu.fx(param.rail, 150, { stop: 1, bgx: x - 36, bgy: y - 80 });
+        } else {
+            uu.fx(param.grip, 150, { stop: 1, x: x, y: y });
+        }
     } else {
 //}@fx
-        param.grip.style.left = x + "px";
-        param.grip.style.top  = y + "px";
+        if (param.toggle) {
+            param.rail.style.backgroundPositionX = (x - 36) + "px";
+            param.rail.style.backgroundPositionY = (y - 80) + "px";
+        } else {
+            param.grip.style.left = x + "px";
+            param.grip.style.top  = y + "px";
+        }
 //{@fx
     }
 //}@fx
@@ -8415,17 +8480,29 @@ function move(that, // @param this:
 function activate(param) { // @param Hash(= {}):
                            // @return Array: [SliderClassInstance, RailNode]
 
-    param = uu.arg(param, { min: 0, max: 100, value: 0, x2: 0,
+    param = uu.arg(param, { min: 0, max: 100, size: 100, value: 0,
                             change: null, mouseup: null, mousedown: null });
-    param.gripWidth  = param.vertical ? param.gripHeight : param.gripWidth;
-    param.gripHeight = param.vertical ? param.gripWidth  : param.gripHeight;
+    if (!param.toggle) {
+        param.gripWidth  = param.vertical ? param.gripHeight : param.gripWidth;
+        param.gripHeight = param.vertical ? param.gripWidth  : param.gripHeight;
+    }
 
-    var rail = uu.div("tabindex,0", "display,inline-block", uu.div()),
+    // <div class="Slider**" ui="Slider" tabindex="0"><div class="Slider*Grip" /></div>
+
+    var rail = uu.div("ui,Slider,tabindex,0", "display,inline-block", uu.div()),
         grip = rail.firstChild;
 
-    rail.className = param.vertical ? (param.x2 ? "uiSliderVL" : "uiSliderVS")
-                                    : (param.x2 ? "uiSliderHL" : "uiSliderHS");
-    grip.className = param.vertical ? "uiSliderVGrip" : "uiSliderHGrip";
+    if (param.toggle) {
+        param.min = 0;
+        param.max = 30;
+        param.size = 50;
+        param.step = 1;
+        rail.className = "SliderT50";
+    } else {
+        rail.className = param.vertical ? ("SliderV" + param.size)
+                                        : ("SliderH" + param.size);
+        grip.className = param.vertical ? "SliderVGrip" : "SliderHGrip";
+    }
 
     uu("Slider", rail, grip, param);
     return rail;
@@ -8439,24 +8516,24 @@ function transform(node) { // @param Node:
     //
     //          v
     //
-    // <div class="uiSlider**"><div class="uiSlider*Grip" /></div>
+    // <div class="Slider**" ui="Slider" tabindex="0"><div class="Slider*Grip" /></div>
     // <input type="range" value="50" min="0" max="100" style="display:none" ui="*Slider" />
     //
 
     // pick slider param
     var attrs = uu.attr(node),
         rail = activate({
-            max:    parseInt(attrs.max   || 0),
-            min:    parseInt(attrs.min   || 0),
-            x2:     parseInt(attrs.x2    || 0),
+            min:    parseInt(attrs.min  || 0),
+            max:    parseInt(attrs.max  || 100),
+            size:   parseInt(attrs.size || 100),
             node:   node, // original node. <input type="range" />
-            step:   parseInt(attrs.step  || 1),
-            value:  parseInt(attrs.value || 0),
+            step:   parseInt(attrs.step || 1),
+            value:  parseInt(node.value || 0),
             change: uu.event.evaluator(node, "change").length
         });
 
     node.style.display = "none";
-    uu.attr(node, "ui", "*Slider"); // node.ui = "*Slider"
+    uu.attr(node, "ui", "*Slider");  // node.ui = "*Slider"
     uu.add(rail, node, "prev");
 
     return rail;
@@ -8468,12 +8545,15 @@ function isTransform(node) { // @param Node
 }
 
 // --- init ---
-uu.ui.bind("Slider", "activate",    activate);
-uu.ui.bind("Slider", "transform",   transform);
-uu.ui.bind("Slider", "isTransform", isTransform);
+uu.ui.bind("Slider", { activate:    activate,
+                       transform:   transform,
+                       isTransform: isTransform });
 
 })(document, uu);
 //}@uislider
+
+// UI Styles
+uu.image && uu.image(uu.config.img + "ui.png"); // pre-load
 
 uu.ready(function(uu) {
     var ss = uu.ss("ui"),
@@ -8483,14 +8563,23 @@ uu.ready(function(uu) {
         absolute = "absolute";
 
 //{@uislider
-    // Slider StyleSheet
-    fmt = "background:url(@) no-repeat @px @px;position:@;width:@px;height:@px";
-    ss.add(".uiSliderHL",    uu.f(fmt, img,  -15,   0, relative, 214,  20));
-    ss.add(".uiSliderHS",    uu.f(fmt, img,  -15, -20, relative, 114,  20));
-    ss.add(".uiSliderHGrip", uu.f(fmt, img,    0,   0, absolute,  13,  18));
-    ss.add(".uiSliderVL",    uu.f(fmt, img, -230, -15, relative,  20, 214));
-    ss.add(".uiSliderVS",    uu.f(fmt, img, -250, -15, relative,  20, 114));
-    ss.add(".uiSliderVGrip", uu.f(fmt, img, -250,   0, absolute,  18,  13));
+    // Slider
+    fmt = 'background:url(@) no-repeat @px @px;position:@;width:@px;height:@px';
+    ss.add({ ".SliderH200":  uu.f(fmt, img,  -15,   0, relative, 214,  20),
+             ".SliderH150":  uu.f(fmt, img,  -15, -20, relative, 164,  20),
+             ".SliderH100":  uu.f(fmt, img,  -15, -40, relative, 114,  20),
+             ".SliderH50":   uu.f(fmt, img,  -15, -60, relative,  64,  20),
+             ".SliderHGrip": uu.f(fmt, img,    0,   0, absolute,  13,  18),
+             ".SliderV200":  uu.f(fmt, img, -230, -15, relative,  20, 214),
+             ".SliderV150":  uu.f(fmt, img, -250, -15, relative,  20, 164),
+             ".SliderV100":  uu.f(fmt, img, -270, -15, relative,  20, 114),
+             ".SliderV50":   uu.f(fmt, img, -290, -15, relative,  20,  64),
+             ".SliderVGrip": uu.f(fmt, img, -250,   0, absolute,  18,  13),
+             ".SliderHGrip": uu.f(fmt, img,    0,   0, absolute,  13,  18),
+
+             ".SliderT50":   uu.f(fmt, img,  -36, -80, absolute,  64,  20) +
+                             ";border:1px solid gray;-webkit-border-radius:5px"
+              });
 //}@uislider
 });
 
