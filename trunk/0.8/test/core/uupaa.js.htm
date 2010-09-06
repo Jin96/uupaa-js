@@ -170,7 +170,7 @@ uu.ready("window", function(uu) {
     uu.ok("[2][to ary] uu.array(12) は [12] を返す", uu.array(12), "==", [12]);
     uu.ok("[2][to ary] uu.array('12') は ['12'] を返す", uu.array('12'), "==", ['12']);
     uu.ok("[3][convert NodeList] uu.array(document.getElementsByTagName('HTML')) は NodeList を配列に変換できる。その結果は uu.query('html') と等しい",
-            uu.array(document.getElementsByTagName('HTML')), "==", uu.query('html'));
+            uu.array(document.getElementsByTagName('HTML')), "==", uu.query('html', document));
     uu.ok("[3][convert NodeList] uu.array(document.getElementsByTagName('HTML')) は NodeList を配列に変換できる。その結果は [document.documentElement] と等しい",
             uu.array(document.getElementsByTagName('HTML')), "==", [document.documentElement]);
     (function() {
@@ -1003,6 +1003,23 @@ uu.ready("window", function(uu) {
             uu.md5(longData), "==", "3eb5de4c3f5768c373d2fde0df1dff7e");
         uu.ok('uu.md5(uu.utf8("こんにちはこんにちは"))',
             uu.md5(uu.utf8("こんにちはこんにちは")), "==", "6870d8dd4b4bc38db9b094f1a959eae2");
+    })();
+
+    uu.ok("SHA1");
+    (function() {
+        var longData = "1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111"
+                     + "1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111";
+
+        uu.ok('uu.sha1("hoge")',
+            uu.sha1("hoge"), "==", "31f30ddbcb1bf8446576f0e64aa4c88a9f055e3c");
+        uu.ok('uu.sha1("ascii")',
+            uu.sha1("ascii"), "==", "51c066b36ea8b32076964c766f8a0324ca4eb4b9");
+        uu.ok('uu.sha1("user-password")',
+            uu.sha1("user-password"), "==", "691ca1151748ae7b52b1c82eaaacc60f8d41db82");
+        uu.ok('uu.sha1(longData)',
+            uu.sha1(longData), "==", "741f8afc3ebbb102642006a632d571651f87d40c");
+        uu.ok('uu.sha1(uu.utf8("こんにちはこんにちは"))',
+            uu.sha1(uu.utf8("こんにちはこんにちは")), "==", "86f21e69d24fa04f2dc2926a08d183eee9afae2c");
     })();
 
     uu.ok("uu.url");

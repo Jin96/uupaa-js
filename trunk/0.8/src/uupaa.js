@@ -16,7 +16,16 @@
 //      WebSockets, D2D, WebM, IndexedDB( window.moz_indexedDB ),
 //      FormData, SVG Background, <img src="svg">, CSS transitions,
 //      WebGL, :-moz-any(S, ...), CSS calc(),  -moz-image-rect,
-//      background: -moz-element(#bg1)
+//      background: -moz-element(#bg1), document.mozSetImageElement()
+//      :-moz-touch, :-moz-focusring
+//      :valid and :invalid for <input type="*"> (tel, color, email...)
+//      :optional and :required for <input type="*" required>
+//      :-moz-placeholder
+//      window.mozPaintCount, window.mozRequestAnimationFrame(),
+//                            window.mozAnimationStartTime
+//      TouchMediaQuery(  @media all and (-moz-touch-enabled) { ... }  )
+//      [Gecko]event.streamId <---> [iOS]event.touches[finger].identifier
+//             event.clientX  <-!->      event.touches[finger].pageX
 // Opera 10.70
 //      <g buffered-rendering="static">
 
@@ -520,6 +529,14 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //   uu.md5("user-password") -> "9a3729201fdd376c76ded01f986481b1"
                                     //   uu.md5(uu.utf8("CJK chars")) -> ...
 //}@md5
+//{@sha1
+    sha1:           uusha1,         // uu.sha1(ASCIIString/ByteArray):HexString
+                                    //   uu.sha1("")              -> "da39a3ee5e6b4b0d3255bfef95601890afd80709"
+                                    //   uu.sha1("hoge")          -> "31f30ddbcb1bf8446576f0e64aa4c88a9f055e3c"
+                                    //   uu.sha1("ascii")         -> "51c066b36ea8b32076964c766f8a0324ca4eb4b9"
+                                    //   uu.sha1("user-password") -> "691ca1151748ae7b52b1c82eaaacc60f8d41db82"
+                                    //   uu.sha1(uu.utf8("CJK chars")) -> ...
+//}@sha1
 //}@codec
     // --- DATE ---
     date:           uudate,         // uu.date(source:DateHash/Date/Number/String = void):DateHash
@@ -1059,15 +1076,15 @@ function uuajaxclear() {
 // uu.ajax.binary - upload / download binary data
 function uuajaxbinary(url, option, callback) {
     option.method = option.data ? "PUT" : "GET";
-    option.binary = /*{@mb*/ _ie ? toByteArrayIE : /*}@mb*/
-                    toByteArray;
+    option.binary = /*{@mb*/ _ie ? xhr2baryIE : /*}@mb*/
+                                   xhr2bary;
 
     uuajax(url, option, callback);
 }
 
-// inner - BinaryString To ByteArray
-function toByteArray(xhr) { // @param XMLHttpRequest:
-                            // @return ByteArray: [0x00, 0x01]
+// inner - XHR To ByteArray
+function xhr2bary(xhr) { // @param XMLHttpRequest:
+                         // @return ByteArray: [0x00, 0x01]
     var rv = [], bb2num = _bb2num, remain,
         ary = xhr.responseText.split(""), // "\00\01"
         i = -1, iz;
@@ -1090,8 +1107,9 @@ function toByteArray(xhr) { // @param XMLHttpRequest:
 }
 
 //{@mb
-// inner - BinaryString to ByteArray
-function toByteArrayIE(xhr) {
+// inner - XHR to ByteArray
+function xhr2baryIE(xhr) { // @param XMLHttpRequest:
+                           // @return ByteArray: [0x00, 0x01]
     var rv = [], data, remain,
         charCodeAt = "charCodeAt", _0xff = 0xff,
         loop, v0, v1, v2, v3, v4, v5, v6, v7,
@@ -1815,7 +1833,7 @@ function uucss(node,    // @param Node:
                key,     // @param String/Hash(= void): key
                value) { // @param String(= void): value
                         // @return Hash/String/Node:
-    var style = node.style, undef, opacity = "opacity", fix = uufix.db,
+    var style = node.style, undef, opacity = "opacity", fix = uufix._,
         fuzzy, // either "text-align" or "textAlign"
         right; // right "textAlign" style
 
@@ -2192,7 +2210,7 @@ function uufxbuild(node, data, queue, option) {
         sv, // start value
         ev, // end value
         cs = option.cssCache || uucss(node, "px"), // current style
-        fixdb = uufix.db;
+        fixdb = uufix._;
 
     for (i in option) {
         w = fixdb[i] || i;
@@ -3288,10 +3306,10 @@ function uuclass(className,      // @param String: "Class"
             args = arguments,
             Super = that.superClass || 0;
 
-        that.name = Class;
-        that.uuguid = uu.guid();
+        that.name = Class;       // class name
+        that.uuguid = uu.guid(); // instance guid
         that.msgbox || (that.msgbox = uunop);
-        uu.msg.bind(that); // bind MsgPump
+        uu.msg.bind(that);       // bind MsgPump
 
         // constructor(Super -> that)
         Super && Super.init && Super.init.apply(that, args);
@@ -3333,11 +3351,11 @@ function uuclasssingleton(className,      // @param String: class name
             instance = "instance";
 
         if (!self[instance]) {
-            that.name = className;
-            that.uuguid = uu.guid();
+            that.name = className;   // class name
+            that.uuguid = uu.guid(); // instance guid
             that.init && that.init.apply(that, arg);
             that.msgbox || (that.msgbox = uunop);
-            uu.msg.bind(that); // bind MsgPump
+            uu.msg.bind(that);       // bind MsgPump
         }
         return self[instance] || (self[instance] = that);
     };
@@ -3435,6 +3453,23 @@ function uuevent(node,         // @param Node:
             event.mouse = event.button || 0;
             event.at = (target[_nodeType] === 3) // 3: TEXT_NODE
                      ? target[_parentNode] : target;
+
+/* Gecko2 multitouch events support
+            if (_gecko && event.touch) { // [Gecko2][Firefox4]
+                if (event.mozInputSource === 5) { // 5: MOZ_SOURCE_TOUCH
+                    switch (fullcode) {
+                    case uuevent.codes.MozTouchDown:
+                        uuevent.finger[event.streamId] = 1;
+                        uuevent.finger.length += 1;
+                        break;
+                    case uuevent.codes.MozTouchUp:
+                        uuevent.finger[event.streamId] = 0;
+                        uuevent.finger.length -= 1;
+                    }
+                }
+            }
+ */
+
 //{@mb
             if (_ie) {
                 if (!event.target) { // [IE6][IE7][IE8]
@@ -3500,20 +3535,23 @@ function uuevent(node,         // @param Node:
     //  node["data-uuevent"].c[eventTypeEx] = closure    // closure db
     //  node["data-uuevent"].e[eventTypeEx] = evaluator  // evaluator db
     //
+
     for (; ex = eventTypeExArray[i++]; ) { // ex = "namespace.click+"
 
-        // split token
-        //      "namespace.click+"
-        //              v
-        //      ["namespace.click+", "namespace", "click", "+"]
-        token = uuevent.parse.exec(ex);
+        //
+        // parse EventTypeExString( "namespace.click+" )
+        //                                v
+        // token = ["namespace.click+", "namespace", "click", "+"]
+        //
+
+        token = uuevent._.parse.exec(ex);
         eventType = token[2]; // "click"
         capture   = token[3]; // "+"
         bound     = eventData.t[_indexOf]("," + ex + ",") >= 0;
 
 //{@mb
         // IE mouse capture [IE6][IE7][IE8]
-        if (_ie && !node[_addEventListener]) {
+        if (_ie && !node[_addEventListener]) { // exclude [IE9]
             if (eventType === "mousemove") {
                 capture && (__unbind__ ? uueventunbind
                                        : uuevent)(node, "losecapture", closure);
@@ -3560,7 +3598,24 @@ function uuevent(node,         // @param Node:
     }
     return node;
 }
-uuevent.parse = /^(?:(\w+)\.)?(\w+)(\+)?$/; // ^[NameSpace.]EvntType[Capture]$
+uuevent._ = {
+    // uuevent._.parse - parse EventTypeEx
+    parse:  /^(?:(\w+)\.)?(\w+)(\+)?$/, // ^[NameSpace.]EvntType[Capture]$
+//{@mb
+    // uuevent._.fix - crossbrowse event names
+    fix:    _gecko ? { mousewheel: "DOMMouseScroll",
+                       touchstart: "MozTouchDown",
+                       touchend:   "MozTouchUp",
+                       touchmove:  "MozTouchMove" } :
+            _opera ? { contextmenu: "mousedown" } : {},
+//}@mb
+    // uuevent._.as - shortcuts, uu.mousedown as uu.event.mousedown
+    as:     ("mousedown,mouseup,mousemove,mousewheel,click,dblclick,keydown," +
+             "keypress,keyup,change,submit,focus,blur,contextmenu").split(",")
+};
+//{@mb
+//uuevent.finger = { length: 0 }; // [Gecko] touch event fingers
+//}@mb
 uuevent.codes = {
 //{@mb
     // Cross Browser Event
@@ -3572,6 +3627,14 @@ uuevent.codes = {
     mouseup:        2,      touchend:       0x202,      gestureend:     0x402,
     mousemove:      3,      touchmove:      0x203,      gesturechange:  0x403,
     mousewheel:     4,
+//{@mb
+/*
+    //                      Gecko Touch Events
+                            MozTouchDown:   0x201,
+                            MozTouchUp:     0x202,
+                            MozTouchMove:   0x203,
+ */
+//}@mb
     click:          10,
     dblclick:       11,
     keydown:        12,
@@ -3593,9 +3656,6 @@ uuevent.codes = {
     offline:        51,
     message:        52
 };
-uuevent.shortcut =
-    ("mousedown,mouseup,mousemove,mousewheel,click,dblclick,keydown," +
-     "keypress,keyup,change,submit,focus,blur,contextmenu").split(",");
 
 // uu.event.fire - fire event / fire custom event(none capture event only)
 function uueventfire(node,      // @param Node: target node
@@ -3699,7 +3759,7 @@ function uueventattach(node,         // @param Node:
                        useCapture,   // @param Boolean(= false):
                        __detach__) { // @hidden Boolean(= false): true is detach
 //{@mb
-    eventType = uueventattach.fix[eventType] || eventType;
+    eventType = uuevent._.fix[eventType] || eventType;
 //}@mb
 
 /* event log
@@ -3732,10 +3792,6 @@ function uueventattach(node,         // @param Node:
     }
 //}@mb
 }
-//{@mb
-uueventattach.fix = _gecko ? { mousewheel: "DOMMouseScroll" } :
-                    _opera ? { contextmenu: "mousedown" } : {};
-//}@mb
 
 // uu.event.detach - detach event - Raw Level API wrapper
 function uueventdetach(node,         // @param Node:
@@ -4003,7 +4059,7 @@ function uulive(expr,        // @param CSSSelectorExpressionString "css > select
         //      "namespace.click+"
         //              v
         //      ["namespace.click+", "namespace", "click", "+"]
-        token     = uuevent.parse.exec(eventTypeEx),
+        token     = uuevent._.parse.exec(eventTypeEx),
         ns        = token[1], // "namespace"
         eventType = token[2], // "click"
         capture   = 0,
@@ -4865,9 +4921,9 @@ function uumatch(expr,      // @param CSSSelectorExpressionString: "css > select
 // uu.fix - fix style property, attribute name
 function uufix(source) { // @param String: source
                          // @return String:
-    return uufix.db[source] || source;
+    return uufix._[source] || source;
 }
-uufix.db = {}; // { "background-color": "backgroundColor", ... }
+uufix._ = {}; // { "background-color": "backgroundColor", ... }
 
 // uu.trim - trim both side and inner whitespace
 function uutrim(source,        // @param String: " a   b  c "
@@ -5081,31 +5137,72 @@ function uuutf8decode(byteArray,  // @param UTF8ByteArray: [ Number(utf8), ... ]
 // uu.md5 - encode
 function uumd5(data) { // @param ASCIIString/ByteArray:
                        // @return HexString:
-    var rv = [], i = 0, iz = data.length, c;
+    return calcHash(data, "MD5");
+}
+//}@md5
+
+//{@sha1
+// uu.sha1 - encode
+function uusha1(data) { // @param ASCIIString/ByteArray:
+                        // @return HexString:
+    return calcHash(data, "SHA1");
+}
+//}@sha1
+
+// inner - calc hash
+function calcHash(data,   // @param ASCIIString/ByteArray:
+                  type) { // @param String: Hash Type
+    var rv = [], hash, i, iz, c, _0xff = 0xff, n2h = _num2hh;
 
     // --- String to ByteArray ---
     if (isString(data)) {
-        for (; i < iz; ++i) {
-            rv[i] = data.charCodeAt(i) & 0xff;
+        for (i = 0, iz = data.length; i < iz; ++i) {
+            rv[i] = data.charCodeAt(i) & _0xff;
         }
     } else {
         rv = data.concat(); // clone
     }
+    i = rv.length, c = i;
 
     // --- padding ---
-    c = i = rv.length;
-    rv.push(0x80);
-    while (++i % 64 !== 56) {
-        rv.push(0);
+    rv[i++] = 0x80;
+
+    while (i % 64 !== 56) {
+        rv[i++] = 0;
     }
     c *= 8;
-    rv.push(c & 0xff, c >> 8 & 0xff, c >> 16 & 0xff, c >> 24 & 0xff, 0, 0, 0, 0);
-
-    return toHexString(calcMD5(rv));
+    switch (type) {
+//{@md5
+    case "MD5":
+        rv.push(c & _0xff, c >> 8 & _0xff, c >> 16 & _0xff, c >> 24 & _0xff,
+                0, 0, 0, 0);
+        hash = MD5(rv);
+        for (rv = [], i = 0, iz = hash.length; i < iz; ++i) {
+            rv.push(n2h[hash[i]       & _0xff], n2h[hash[i] >>  8 & _0xff],
+                    n2h[hash[i] >> 16 & _0xff], n2h[hash[i] >> 24 & _0xff]);
+        }
+        break;
+//}@md5
+//{@sha1
+    case "SHA1":
+        rv.push(0, 0, 0, 0,
+                c >> 24 & _0xff, c >> 16 & _0xff, c >> 8 & _0xff, c & _0xff);
+        hash = SHA1(rv);
+        for (rv = [], i = 0, iz = hash.length; i < iz; ++i) {
+            rv.push(n2h[hash[i] >> 24 & _0xff], n2h[hash[i] >> 16 & _0xff],
+                    n2h[hash[i] >>  8 & _0xff], n2h[hash[i]       & _0xff]);
+        }
+        break;
+//}@sha1
+    default:
+        rv = [];
+    }
+    return rv.join("");
 }
+
+//{@md5
 uumix(uumd5, {
-    AC: [
-        0xd76aa478, 0xe8c7b756, 0x242070db, 0xc1bdceee, 0xf57c0faf, 0x4787c62a,
+    A: [0xd76aa478, 0xe8c7b756, 0x242070db, 0xc1bdceee, 0xf57c0faf, 0x4787c62a,
         0xa8304613, 0xfd469501, 0x698098d8, 0x8b44f7af, 0xffff5bb1, 0x895cd7be,
         0x6b901122, 0xfd987193, 0xa679438e, 0x49b40821, 0xf61e2562, 0xc040b340,
         0x265e5a51, 0xe9b6c7aa, 0xd62f105d, 0x02441453, 0xd8a1e681, 0xe7d3fbc8,
@@ -5115,25 +5212,23 @@ uumix(uumd5, {
         0xd4ef3085, 0x04881d05, 0xd9d4d039, 0xe6db99e5, 0x1fa27cf8, 0xc4ac5665,
         0xf4292244, 0x432aff97, 0xab9423a7, 0xfc93a039, 0x655b59c3, 0x8f0ccc92,
         0xffeff47d, 0x85845dd1, 0x6fa87e4f, 0xfe2ce6e0, 0xa3014314, 0x4e0811a1,
-        0xf7537e82, 0xbd3af235, 0x2ad7d2bb, 0xeb86d391 ],
-    S: [
-        7, 12, 17, 22,  7, 12, 17, 22,  7, 12, 17, 22,  7, 12, 17, 22,
+        0xf7537e82, 0xbd3af235, 0x2ad7d2bb, 0xeb86d391],
+    S: [7, 12, 17, 22,  7, 12, 17, 22,  7, 12, 17, 22,  7, 12, 17, 22,
         5,  9, 14, 20,  5,  9, 14, 20,  5,  9, 14, 20,  5,  9, 14, 20,
         4, 11, 16, 23,  4, 11, 16, 23,  4, 11, 16, 23,  4, 11, 16, 23,
-        6, 10, 15, 21,  6, 10, 15, 21,  6, 10, 15, 21,  6, 10, 15, 21 ],
-    X: [
-        0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15,
+        6, 10, 15, 21,  6, 10, 15, 21,  6, 10, 15, 21,  6, 10, 15, 21],
+    X: [0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15,
         1,  6, 11,  0,  5, 10, 15,  4,  9, 14,  3,  8, 13,  2,  7, 12,
         5,  8, 11, 14,  1,  4,  7, 10, 13,  0,  3,  6,  9, 12, 15,  2,
-        0,  7, 14,  5, 12,  3, 10,  1,  8, 15,  6, 13,  4, 11,  2,  9 ]
+        0,  7, 14,  5, 12,  3, 10,  1,  8, 15,  6, 13,  4, 11,  2,  9]
 });
 
-// inner -
-function calcMD5(data) { // @param ByteArray:
-                         // @return ByteArray:
+// inner - calc MD5
+function MD5(data) { // @param ByteArray:
+                     // @return ByteArray:
     var a = 0x67452301, b = 0xefcdab89, c = 0x98badcfe, d = 0x10325476,
         aa, bb, cc, dd, ra, rb, rc,
-        AC = uumd5.AC, S = uumd5.S, X = uumd5.X,
+        A = uumd5.A, S = uumd5.S, X = uumd5.X,
         i = 0, iz = data.length, j, k, n, word = [];
 
     for (; i < iz; i += 64) {
@@ -5143,54 +5238,60 @@ function calcMD5(data) { // @param ByteArray:
                               + (data[k + 2] << 16)
                               + (data[k + 3] << 24);
         }
-        aa = a;
-        bb = b;
-        cc = c;
-        dd = d;
+        aa = a, bb = b, cc = c, dd = d;
+
         for (j = 0; j < 64; ++j) {
-            if (j < 16) {
-                n = (b & c) | (~b & d); // ff - Round 1
-            } else if (j < 32) {
-                n = (b & d) | (c & ~d); // gg - Round 2
-            } else if (j < 48) {
-                n = b ^ c ^ d;          // hh - Round 3
-            } else {
-                n = c ^ (b | ~d);       // ii - Round 4
-            }
-            n += a + word[X[j]] + AC[j];
+            n = j < 16 ? (b & c) | (~b & d) // ff - Round 1
+              : j < 32 ? (b & d) | (c & ~d) // gg - Round 2
+              : j < 48 ?  b ^ c ^ d         // hh - Round 3
+                       :  c ^ (b | ~d);     // ii - Round 4
+            n += a + word[X[j]] + A[j];
 
             ra = b + ((n << S[j]) | (n >>> (32 - S[j])));
             rb = b;
             rc = c;
             // rotate
-            a = d;
-            b = ra;
-            c = rb;
-            d = rc;
+            a = d, b = ra, c = rb, d = rc;
         }
-        a += aa;
-        b += bb;
-        c += cc;
-        d += dd;
+        a += aa, b += bb, c += cc, d += dd;
     }
     return [a, b, c, d];
 }
-
-// inner - ByteArray to HexString
-function toHexString(byteArray) { // @param ByteArray:
-                                  // @return HexString:
-    var rv = [], i = 0, iz = byteArray.length,
-        num2hh = _num2hh;
-
-    for (; i < iz; ++i) {
-        rv.push(num2hh[byteArray[i]       & 0xff],
-                num2hh[byteArray[i] >>  8 & 0xff],
-                num2hh[byteArray[i] >> 16 & 0xff],
-                num2hh[byteArray[i] >> 24 & 0xff]);
-    }
-    return rv.join("");
-}
 //}@md5
+
+//{@sha1
+// inner - calc SHA-1
+function SHA1(data) { // @param ByteArray:
+                      // @return ByteArray:
+    var a = 0x67452301, b = 0xefcdab89, c = 0x98badcfe, d = 0x10325476,
+        e = 0xc3d2e1f0, aa, bb, cc, dd, ee,
+        i = 0, iz = data.length, j, jz, n, n16 = [];
+
+    for (; i < iz; i += 64) {
+        aa = a, bb = b, cc = c, dd = d, ee = e;
+
+        for (j = i, jz = i + 64, n = 0; j < jz; j += 4, ++n) {
+            n16[n] = (data[j]     << 24) | (data[j + 1] << 16) |
+                     (data[j + 2] <<  8) |  data[j + 3];
+        }
+        for (j = 16; j < 80; ++j) {
+            n = n16[j - 3] ^ n16[j - 8] ^ n16[j - 14] ^ n16[j - 16];
+            n16[j] = (n << 1) | (n >>> 31);
+        }
+        for (j = 0; j < 80; ++j) {
+            n = j < 20 ? ((b & c) ^ (~b & d))           + 0x5a827999
+              : j < 40 ?  (b ^ c ^ d)                   + 0x6ed9eba1
+              : j < 60 ? ((b & c) ^  (b & d) ^ (c & d)) + 0x8f1bbcdc
+                       :  (b ^ c ^ d)                   + 0xca62c1d6;
+            n += ((a << 5) | (a >>> 27)) + n16[j] + e;
+
+            e = d, d = c, c = (b << 30) | (b >>> 2), b = a, a = n;
+        }
+        a += aa, b += bb, c += cc, d += dd, e += ee;
+    }
+    return [a, b, c, d, e];
+}
+//}@sha1
 
 // --- init ---
 (function(base, i) {
@@ -7285,7 +7386,7 @@ function NodeSetIter(iterType,  // @param Number: 0 is forEach, 1 is map
 // --- initialize ---
 
 // inner - build DOM Lv2 event handler - uu.click(), ...
-uueach(uuevent.shortcut, function(eventType) {
+uueach(uuevent._.as, function(eventType) {
     uu[eventType] = function(node, fn) { // uu.click(node, fn) -> node
         return uuevent(node, eventType, fn);
     };
@@ -7367,7 +7468,7 @@ uuready("dom:2", function() {
         attrFix = "float,cssFloat",
         fxAlias = ",w,width,h,height,x,left,y,top,l,left,t,top," +
                   "c,color,bgc,backgroundColor," +
-                  "bgx,backgroundPositionX,bgy,backgroundPositionY" +
+                  "bgx,backgroundPositionX,bgy,backgroundPositionY," +
                   "o,opacity,fs,fontSize,m,margin,b,border,p,padding";
 
 //{@mb
@@ -7375,8 +7476,8 @@ uuready("dom:2", function() {
         attrFix = "float,styleFloat,cssFloat,styleFloat";
     }
 //}@mb
-    uumix(createCamelizedHash(uufix.db, _webkit ? getComputedStyle(root, 0)
-                                                : root.style),
+    uumix(createCamelizedHash(uufix._, _webkit ? getComputedStyle(root, 0)
+                                               : root.style),
           uuhash(attrFix + fxAlias), uuattr.fix);
     uunodeid(root);
     for (; v = nodeList[i++]; ) {
@@ -8367,7 +8468,7 @@ function handleEvent(evt) {
         if (param.toggle) {
             threshold = param.value >= (param.max - param.min) * 0.5;
             // tap   -> toggle value
-            // slide -> magnet value
+            // slide -> magnetic value (1~10 -> 0), (90~99 -> 100)
             value(this, dragInfo.tap ? (dragInfo.startValue ? param.min : param.max)
                                      : (threshold ? param.max : param.min), 1);
         }
@@ -8541,7 +8642,8 @@ function transform(node) { // @param Node:
 
 // uu.Class.Slider.isTransform
 function isTransform(node) { // @param Node
-    return uu.attr(node, "ui") === "Slider";
+    return node.tagName.toLowerCase() === "input" &&
+           uu.attr(node, "ui") === "Slider";
 }
 
 // --- init ---
@@ -8577,7 +8679,7 @@ uu.ready(function(uu) {
              ".SliderVGrip": uu.f(fmt, img, -250,   0, absolute,  18,  13),
              ".SliderHGrip": uu.f(fmt, img,    0,   0, absolute,  13,  18),
 
-             ".SliderT50":   uu.f(fmt, img,  -36, -80, absolute,  64,  20) +
+             ".SliderT50":   uu.f(fmt, img,  -36, -80, relative,  64,  20) +
                              ";border:1px solid gray;-webkit-border-radius:5px"
               });
 //}@uislider
