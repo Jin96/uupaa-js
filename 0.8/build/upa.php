@@ -12,8 +12,9 @@ $castoffAll  = array(
     "test", "fx", "ajax",
     "svg", "canvas", "canvasvml", "canvassl", "canvasfl",
     "flash", "nodeset", "audio",
-    "live", "resize", "cssbox", "codec",
-    "md5", "sprintf", "url", "font", "cookie", "storage",
+    "live", "resize", "cssbox",
+    "codec", "md5", "sha1",
+    "sprintf", "url", "font", "cookie", "storage",
     "ui", "uislider",
 );
 
