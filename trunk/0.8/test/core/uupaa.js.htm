@@ -464,17 +464,17 @@ uu.ready("window", function(uu) {
     uu.ok("uu.indexOf({ a: 1, b: 2, c: 2 }, 2) == 'b'",
             uu.indexOf({ a: 1, b: 2, c: 2 }, 2), "==", 'b');
 
-    uu.ok("uu.first()");
+    uu.ok("uu.nth(first)");
     uu.ok("{ key: 1, key2: 2 } から先頭のpairを配列['key', 1]で取得する",
-            uu.first({ key: 1, key2: 2 }), "==", ["key", 1]);
+            uu.nth({ key: 1, key2: 2 }), "==", ["key", 1]);
     uu.ok("[1, 2] から先頭のpairを配列[0, 1]で取得する",
-            uu.first([1, 2]), "==", [0, 1]);
+            uu.nth([1, 2]), "==", [0, 1]);
 
-    uu.ok("uu.last()");
+    uu.ok("uu.nth(last)");
     uu.ok("{ key: 1, key2: 2 } から末尾のpairを配列['key2', 2]で取得する",
-            uu.last({ key: 1, key2: 2 }), "==", ["key2", 2]);
+            uu.nth({ key: 1, key2: 2 }, -1), "==", ["key2", 2]);
     uu.ok("[1, 2] から末尾のpairを配列[1, 2]で取得する",
-            uu.last([1, 2]), "==", [1, 2]);
+            uu.nth([1, 2], -1), "==", [1, 2]);
 
     uu.ok("uu.array.toHash()");
     uu.ok("['key', 'key2'] と ['1', '2'] から { key: '1', key2: '2' } を生成する",
