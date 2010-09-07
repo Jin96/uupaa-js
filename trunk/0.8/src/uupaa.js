@@ -84,6 +84,7 @@ var _addEventListener = "addEventListener",
     _num2b64,                       // uu.hash.num2b64 = ["A", "B", ... "/"]
     _b642num,                       // uu.hash.b642num = { "=": 0, "-": 62, "_": 63 }; // URLSafe64 chars("-", "_")
 //}@codec
+    _backyard = null,               // uu.backyard
     _nodeiddb = {},                 // { nodeid: node, ... }
     _nodeidnum = 0,                 // nodeid counter
     _tokenCache = {},               // { css-selector-expression: token, ... } for uu.query
@@ -264,12 +265,14 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
         // --- CSS BOX MODEL ---
 //{@cssbox
         box:        uucssbox,       // uu.css.box(node:Node, quick:Boolean = false, mbp:Number = 0x7):Hash
-        rect:       uucssrect,      // uu.css.rect(node:Node):Hash { x, y, offsetWidth, offsetHeight }
+        rect:       uucssrect,      // uu.css.rect(node:Node, ancestorNode:Node = null):Hash { x, y, w, h, from }
         position:   uucssposition,  // uu.css.position(node:Node, pos:String = "s"):Node
                                     //  [1][to static]   uu.css.position(<div>, "static")   -> <div style="position: static">
                                     //  [2][to absolute] uu.css.position(<div>, "absolute") -> <div style="position: absolute">
                                     //  [3][to relative] uu.css.position(<div>, "relative") -> <div style="position: relative">
 //}@cssbox
+        // --- CSS 2 ---
+        bgcolor:    uucssbgcolor,   // uu.css.bgcolor(node:Node):ColorHash
         // --- CSS 3 ---
         opacity:    uucssopacity,   // uu.css.opacity(node:Node, value:Number/String):Number/Node
                                     //  [1][get opacity] uu.css.opacity(node) -> 0.5
@@ -286,6 +289,8 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
     viewport:       uuviewport,     // uu.viewport():Hash - { innerWidth, innerHeight,
                                     //                        pageXOffset, pageYOffset,
                                     //                        orientation, devicePixelRatio }
+    // --- BACKYARD ---
+    backyard:       _backyard,      // uu.backyard - hidden <div> Node
     // --- TIMER ---
     interval:       uuinterval,     // uu.interval(callback:Function, arg:Mix = void):Number
     // --- EFFECT / ANIMATION ---
@@ -650,6 +655,9 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //  [4][add]   uu.qs({ key: "val" }, { key2: "val2" }) -> "key=val;key2=val2"
 //}@url
     // --- DEBUG ---
+//{@canvas
+    hatch:          uuhatch,        // uu.hatch(size = 10, unit = 5, color = "skyblue", color2 = "steelblue")
+//}@canvas
     glow:           uuglow,         // uu.glow(node:Node/NodeArray/NodeSet/CSSSelectorExpressionString)
     puff:           uupuff,         // uu.puff(source:Mix/FormatString, var_args:Mix, ...)
     log:            uulog,          // uu.log(log:Mix, var_args:Mix, ...)
@@ -1992,6 +2000,8 @@ function uufx(node,     // @param Node: animation target node
     //  ReserveWord
     //      "before"    - Function: before callback
     //      "after"     - Function: after callback
+    //      "_before"   - Function: before callback (system reserved)
+    //      "_after"    - Function: after callback (system reserved)
     //      "reverse"   - Number/Boolean: reverse
     //      "chain"     - Number/Boolean: reverse chain
     //      "deny"      - Number/Boolean:
@@ -2037,6 +2047,7 @@ function uufxloop(id,     // @param Number: timer id
     } else {
         // initialize
         option.init && (option.init(node, option, back), option.init = 0);
+        option["_before"] && option["_before"](node, option, back);
         option[_before] && option[_before](node, option, back);
         q.js = isFunction(option) ? option
                                   : uufxbuild(node, data, q, option);
@@ -2048,6 +2059,7 @@ function uufxloop(id,     // @param Number: timer id
 
     if (finished) {
         option[_after] && option[_after](node, option, back);
+        option["_after"] && option["_after"](node, option, back);
         option.junction && option.junction.ok();
         data.q.shift(); // remove current queue
 
@@ -2556,11 +2568,35 @@ function uufxhighlight(node,     // @param Node:
                        duration, // @param Number: duration
                        option) { // @param Hash(= { bgc: "#ff9", reverse: 1 }):
                                  // @return Node:
+    var bgc = uucssbgcolor(node, "transparent"),
+        undo = function(node, option, back) {
+            back && uucss(node, { bgc: bgc });
+        };
+
     return uufx(node, duration,
-                uuarg(option, { bgc: "#ff9", reverse: 1 }));
+                uuarg(option, { bgc: "#ff9", reverse: 1, _after: undo }));
 }
 //}@fx
 
+// --- CSS 2 ---
+// uu.css.bgcolor - get inherit background color
+function uucssbgcolor(node,           // @param Node:
+                      defaultColor) { // @param ColorString(= "#fff"):
+                                      // @return ColorHash:
+    var n = node, bgc = "transparent",
+        zero = { transparent: 1, "rgba(0, 0, 0, 0)": 1 };
+
+    while (n && n !== doc && zero[bgc]) {
+        if (_ie && !n.currentStyle) {
+            break;
+        }
+        bgc = uucss(n).backgroundColor;
+        n = n.parentNode;
+    }
+    return uucolor(zero[bgc] ? defaultColor : bgc);
+}
+
+// --- CSS 3 ---
 // uu.css.opacity
 function uucssopacity(node,      // @param Node:
                       opacity) { // @param Number/String(= void): Number(0.0 - 1.0) absolute
@@ -2810,14 +2846,19 @@ uucssbox.bw = { // border-width
     thin: 1, medium: 3, thick: (_env.ie6 || _env.ie7 || _opera) ? 6 : 5
 };
 
-// uu.css.rect - get offset from foster node(layout parent)
+// uu.css.rect - get offset from AncestorNode/LayoutParentNode
 function uucssrect(node,           // @param Node:
-                   ancestorNode) { // @param Node(= null): null is layout parent
-                                   // @return Hash: { x, y, w, h }
-                                   // @test test/core/uu.css.rect.htm
+                   ancestorNode) { // @param Node(= null): AncestorNode,
+                                   //                      null is detect LayoutParentNode
+                                   // @return Hash: { x, y, w, h, parent }
+                                   //   x - Number: total offset
+                                   //   y - Number: total offset
+                                   //   w - Number: offsetWidth  (style.width  + padding + border)
+                                   //   h - Number: offsetHeight (style.height + padding + border)
+                                   //   from - Node: AncestorNode or LayoutParentNode
 
-    //  [1][offset from foster node(layout parent)] uu.css.rect(<div>)         -> { x: 100, y: 100, w: 100, h: 100 }
-    //  [2][offset from ancestor node]              uu.css.rect(<div>, <html>) -> { x: 200, y: 200, w: 100, h: 100 }
+    //  [1][offset from LayoutParentNode] uu.css.rect(<div>)         -> { x: 100, y: 100, w: 100, h: 100, from: <?> }
+    //  [2][offset from AncestorNode]     uu.css.rect(<div>, <html>) -> { x: 200, y: 200, w: 100, h: 100, from: <html> }
 
     var cs = uucss(node), position,
         x = 0,
@@ -2825,6 +2866,7 @@ function uucssrect(node,           // @param Node:
         w = 0, // offsetWidth  = node.style.width  + padding + border
         h = 0, // offsetHeight = node.style.height + padding + border
         n = node,
+        from = null,
         quick = 0;
 
     if (cs) {
@@ -2846,10 +2888,11 @@ function uucssrect(node,           // @param Node:
         }
 
         if (ancestorNode == null) {
-            // offset from foster node(layout parent)
+            // offset from LayoutParentNode
             if (quick) {
                 x = parseInt(cs.left);
                 y = parseInt(cs.top);
+                from = n.offsetParent;
             } else {
                 while (n && n !== root) {
                     x += n.offsetLeft || 0;
@@ -2859,21 +2902,26 @@ function uucssrect(node,           // @param Node:
                         cs = (getComputedStyle ? getComputedStyle(n, 0)
                                                : n.currentStyle).position;
                         if (cs === "relative" || cs === "absolute") {
+                            from = n;
                             break;
                         }
                     }
                 }
             }
         } else {
-            // offset from ancestor node
+            // offset from AncestorNode
             while (n && n !== root) {
                 x += n.offsetLeft || 0;
                 y += n.offsetTop  || 0;
                 n  = n.offsetParent;
+                if (n && n === ancestorNode) {
+                    from = n;
+                    break;
+                }
             }
         }
     }
-    return { x: x, y: y, w: w, h: h };
+    return { x: x, y: y, w: w, h: h, from: from };
 }
 
 // uu.css.position - to static / to absolute / to relative
@@ -5483,14 +5531,72 @@ function parseQueryString(queryString) { // @param URLString/QueryString: "key=v
 //}@url
 
 // --- DEBUG ---
+
+//{@canvas
+// uu.hatch - draw hatch pattern
+function uuhatch(param) { // @param Hash: { size, unit, color, color2 }
+                          //   size - Number(= 10):
+                          //   unit - Number(= 5):
+                          //   color - String(= "skyblue"):
+                          //   color2 - String(= "steelblue"):
+                          // @return Boolean: trus is draw, false is ng
+    if (uuready.canvas) {
+        var p = uuarg(param, { size: 10, unit: 5,
+                               color: "#87ceeb", color2: "#4682b4" }),
+            x = p.size, y = p.size, i = 1, j = 1,
+            vp = uuviewport(),
+            w = parseInt(vp.innerWidth),
+            h = parseInt(vp.innerHeight),
+            canvas, ctx;
+
+        try {
+            canvas = newNode("canvas");
+            canvas.width = w;
+            canvas.height = h;
+            canvas.style.cssText = "position:absolute;z-index:-100";
+            uunodeadd(canvas, doc.body, "first");
+
+            ctx = canvas.getContext("2d");
+            ctx.lineWidth = 0.2;
+
+            for (; x < w; ++i, x += p.size) {
+                ctx.strokeStyle = (i % p.unit) ? p.color : p.color2;
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, h);
+                ctx.stroke();
+                ctx.closePath();
+            }
+            for (; y < h; ++j, y += p.size) {
+                ctx.strokeStyle = (j % p.unit) ? p.color : p.color2;
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(w, y);
+                ctx.stroke();
+                ctx.closePath();
+            }
+            return _true;
+        } catch(err) {}
+    }
+    return _false;
+}
+//}@canvas
+
 // uu.glow - glow node
 function uuglow(node) { // @param Node/NodeArray/NodeSet/CSSSelectorExpressionString:
 //{@fx
-    uueach(isString(node) ? uuquery(node)
-                          : node[_nodeArray] ? node[_nodeArray]
-                                             : node[_nodeType] ? [node] : node,
-        function(node, i) {
-        uufx(node, 200, { bgc: "#f33", reverse: 1 });
+    var ary = isString(node) ? uuquery(node)
+                             : node[_nodeArray] ? node[_nodeArray]
+                                                : node[_nodeType] ? [node]
+                                                                  : node;
+
+    uueach(ary, function(node) {
+        var bgc = uucssbgcolor(node, "transparent"),
+            undo = function(node, option, back) {
+                back && uucss(node, { bgc: bgc });
+            };
+
+        uufx(node, 200, { bgc: "#f33", reverse: 1, _after: undo });
     });
 //}@fx
 }
@@ -6976,7 +7082,7 @@ function uuui(uiname                  // @param String(= "")
 
     // transform
     var rv = [], ary = uutag(), i = 0, iz = ary.length,
-        ctrl, method;
+        fn, ctrl, method;
 
     for (; i < iz; ++i) {
         ctrl = uu.attr(ary[i], "ui");
@@ -6986,7 +7092,10 @@ function uuui(uiname                  // @param String(= "")
             if (uuui.db[method] && uuui.db[method](ary[i])) {
                 method = ctrl + "transform";
 
-                uuui.db[method] && rv.push(uuui.db[method](ary[i]));
+                if (uuui.db[method]) {
+                    fn = uuui.db[method];
+                    rv.push(fn(ary[i]));
+                }
             }
         }
     }
@@ -7504,14 +7613,15 @@ function _windowonunload() {
 _ie && _env < 9 && uueventdetach(win, "onunload", _windowonunload);
 //}@mb
 
-// inner -
+// inner - init
 // 1. prebuild camelized hash - http://handsout.jp/slide/1894
 // 2. prebuild nodeid
+// 3. prebuild backyard
 uuready("dom:2", function() {
     var nodeList = uutag("", root), v, i = 0,
         attrFix = "float,cssFloat",
         fxAlias = ",w,width,h,height,x,left,y,top,l,left,t,top," +
-                  "c,color,bgc,backgroundColor," +
+                  "c,color,bgc,backgroundColor,bgcolor,backgroundColor," +
                   "bgx,backgroundPositionX,bgy,backgroundPositionY," +
                   "o,opacity,fs,fontSize,m,margin,b,border,p,padding";
 
@@ -7527,6 +7637,12 @@ uuready("dom:2", function() {
     for (; v = nodeList[i++]; ) {
         uunodeid(v);
     }
+
+    // backyard
+    _backyard = doc.body[_appendChild](newNode());
+    _backyard.id = "uubackyard";
+    _backyard.style.cssText = "position:absolute;top:-9999px;left:-9999px;" +
+                              "margin:0;padding:0;border:0 solid";
 });
 
 // inner - create camelized hash( { "text-align": "TextAlign", ...}) from getComputedStyle
@@ -8394,7 +8510,7 @@ uu.Class("Slider", {
                                     //  [3][get param] uu.msg.send(*, "getParam") -> { ... }
     handleEvent:    handleEvent     // handleEvent(evt:Event)
 }, {
-    activate:       activate,       // activate(param:Hash):Array
+    activate:       activate,       // activate(param:Hash, backyard:Node = uu.backyard):Array
     transform:      transform,      // transform(node:Node):Array
     isTransform:    isTransform     // isTransform(node:Node)
 });
@@ -8432,8 +8548,8 @@ function init(rail,    // @param Node: rail node
 
     param.step < 1 && (param.step = 1);
     param.keyCode = param.vertical ? { 38: -1, 40: 1 } : { 37: -1, 39: 1 };
-    param.ox =  param.vertical ? 0 : -((param.gripHeight / 2) | 0);
-    param.oy = !param.vertical ? 0 : -((param.gripWidth  / 2) | 0);
+    param.ox =  param.vertical ? 0 : -parseInt((param.gripWidth  + 1) / 2) + 2;
+    param.oy = !param.vertical ? 0 : -parseInt((param.gripHeight + 1) / 2) + 2;
 
     value(this, param.value);
 
@@ -8625,10 +8741,12 @@ function move(that, // @param this:
 }
 
 // uu.Class.Slider.activate
-function activate(param) { // @param Hash(= {}):
-                           // @return Array: [SliderClassInstance, RailNode]
-
-    param = uu.arg(param, { min: 0, max: 100, size: 100, value: 0,
+function activate(param,      // @param Hash(= {}):
+                  backyard) { // @param Node(= uu.backyard): backyard Node
+                              // @return Array: [SliderClassInstance, RailNode]
+    param = uu.arg(param, { min: 0, max: 100, size: 100, step: 1, value: 0,
+                            vertical: 0, toggle: 0,
+                            gripWidth: 13, gripHeight: 18,
                             change: null, mouseup: null, mousedown: null });
     if (!param.toggle) {
         param.gripWidth  = param.vertical ? param.gripHeight : param.gripWidth;
@@ -8641,6 +8759,9 @@ function activate(param) { // @param Hash(= {}):
 
     var rail = uu.div("ui,Slider,tabindex,0", "display,inline-block", uu.div()),
         grip = rail.firstChild;
+
+    // add to backyard
+    uu.add(rail, backyard || uu.backyard);
 
     if (param.toggle) {
         param.min = 0;
@@ -8674,17 +8795,17 @@ function transform(node) { // @param Node:
     //
 
     // pick slider param
-    var attrs = uu.attr(node),
-        rail = activate({
-            min:    parseInt(attrs.min  || 0),
-            max:    parseInt(attrs.max  || 100),
-            size:   parseInt(attrs.size || 100),
-            node:   node, // original node. <input type="range" />
-            step:   parseInt(attrs.step || 1),
-            value:  parseInt(node.value || 0),
-            change: uu.event.evaluator(node, "change").length
-        });
+    var attrs = uu.attr(node), rail;
 
+    rail = activate({
+        min:    parseInt(attrs.min  || 0),
+        max:    parseInt(attrs.max  || 100),
+        size:   parseInt(attrs.size || 100),
+        node:   node, // original node. <input type="range" />
+        step:   parseInt(attrs.step || 1),
+        value:  parseInt(node.value || 0),
+        change: uu.event.evaluator(node, "change").length
+    });
     node.style.display = "none";
     uu.attr(node, "ui", "*Slider");   // node.ui = "*Slider"
     uu.data(node, "uurefnode", rail); // node["data-uurefnode"] = <div>
