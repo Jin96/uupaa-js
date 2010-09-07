@@ -39,7 +39,7 @@
     <table><tr id="_tr" rowspan="2"><td id="_td" colspan="2">aa</td></tr></table>
 </div>
 <div style="position: relative; max-height: 0px;">
-    <div style="position: relative; left: 100px; top: 100px">
+    <div style="position: relative; left: 100px; top: 100px; z-index: -1">
         <div id="abs"       class="absolute">absolute</div>
         <div id="absm"      class="absolute margin">absolute margin</div>
         <div id="absmb"     class="absolute margin border">absolute margin border</div>
@@ -64,7 +64,7 @@
         <div id="stabp"     class="static border padding">static border padding</div>
         <div id="stap"      class="static padding">static padding</div>
     </div>
-    <div style="position: relative; left: 100px; top: 100px">
+    <div style="position: relative; left: 100px; top: 100px; z-index: -1">
         <div id="autoabs"       class="absolute auto">absolute</div>
         <div id="autoabsm"      class="absolute margin auto">absolute margin</div>
         <div id="autoabsmb"     class="absolute margin border auto">absolute margin border</div>
@@ -98,21 +98,21 @@ uu.ready("window", function() {
 
     uu.ok("uu.css.rect() は style.width + border + padding を取得する");
     uu.ok("position: absolute");
-    uu.ok('uu.css.rect("abs")', uu.css.rect(uu.id("abs")), "==", { x: 406, y: 7, w: 98, h: 99 });
-    uu.ok('uu.css.rect("absm")', uu.css.rect(uu.id("absm")), "==", { x: 406, y: 7, w: 98, h: 99 });
-    uu.ok('uu.css.rect("absmb")', uu.css.rect(uu.id("absmb")), "==", { x: 406, y: 7, w: 98 + border, h: 99 + border });
-    uu.ok('uu.css.rect("absmbp")', uu.css.rect(uu.id("absmbp")), "==", { x: 406, y: 7, w: 98 + border + padding, h: 99 + border + padding });
-    uu.ok('uu.css.rect("absb")', uu.css.rect(uu.id("absb")), "==", { x: 406, y: 7, w: 98 + border, h: 99 + border });
-    uu.ok('uu.css.rect("absbp")', uu.css.rect(uu.id("absbp")), "==", { x: 406, y: 7, w: 98 + border + padding, h: 99 + border + padding });
-    uu.ok('uu.css.rect("absp")', uu.css.rect(uu.id("absp")), "==", { x: 406, y: 7, w: 98 + padding, h: 99 + padding });
+    uu.ok('uu.css.rect("abs")', uu.css.rect(uu.id("abs")), "==", { x: 406, y: 7, w: 98, h: 99, from: "body>div:nth-child(2)>div:nth-child(1)" });
+    uu.ok('uu.css.rect("absm")', uu.css.rect(uu.id("absm")), "==", { x: 406, y: 7, w: 98, h: 99, from: "body>div:nth-child(2)>div:nth-child(1)" });
+    uu.ok('uu.css.rect("absmb")', uu.css.rect(uu.id("absmb")), "==", { x: 406, y: 7, w: 98 + border, h: 99 + border, from: "body>div:nth-child(2)>div:nth-child(1)" });
+    uu.ok('uu.css.rect("absmbp")', uu.css.rect(uu.id("absmbp")), "==", { x: 406, y: 7, w: 98 + border + padding, h: 99 + border + padding, from: "body>div:nth-child(2)>div:nth-child(1)" });
+    uu.ok('uu.css.rect("absb")', uu.css.rect(uu.id("absb")), "==", { x: 406, y: 7, w: 98 + border, h: 99 + border, from: "body>div:nth-child(2)>div:nth-child(1)" });
+    uu.ok('uu.css.rect("absbp")', uu.css.rect(uu.id("absbp")), "==", { x: 406, y: 7, w: 98 + border + padding, h: 99 + border + padding, from: "body>div:nth-child(2)>div:nth-child(1)" });
+    uu.ok('uu.css.rect("absp")', uu.css.rect(uu.id("absp")), "==", { x: 406, y: 7, w: 98 + padding, h: 99 + padding, from: "body>div:nth-child(2)>div:nth-child(1)" });
     uu.ok("position: relative");
-    uu.ok('uu.css.rect("rel")', uu.css.rect(uu.id("rel")), "==", { x: 406, y: 7, w: 98, h: 99 });
-    uu.ok('uu.css.rect("relm")', uu.css.rect(uu.id("relm")), "==", { x: 406, y: 7, w: 98, h: 99 });
-    uu.ok('uu.css.rect("relmb")', uu.css.rect(uu.id("relmb")), "==", { x: 406, y: 7, w: 98 + border, h: 99 + border });
-    uu.ok('uu.css.rect("relmbp")', uu.css.rect(uu.id("relmbp")), "==", { x: 406, y: 7, w: 98 + border + padding, h: 99 + border + padding });
-    uu.ok('uu.css.rect("relb")', uu.css.rect(uu.id("relb")), "==", { x: 406, y: 7, w: 98 + border, h: 99 + border });
-    uu.ok('uu.css.rect("relbp")', uu.css.rect(uu.id("relbp")), "==", { x: 406, y: 7, w: 98 + border + padding, h: 99 + border + padding });
-    uu.ok('uu.css.rect("relp")', uu.css.rect(uu.id("relp")), "==", { x: 406, y: 7, w: 98 + padding, h: 99 + padding });
+    uu.ok('uu.css.rect("rel")', uu.css.rect(uu.id("rel")), "==", { x: 406, y: 7, w: 98, h: 99, from: "body>div:nth-child(2)>div:nth-child(1)" });
+    uu.ok('uu.css.rect("relm")', uu.css.rect(uu.id("relm")), "==", { x: 406, y: 7, w: 98, h: 99, from: "body>div:nth-child(2)>div:nth-child(1)" });
+    uu.ok('uu.css.rect("relmb")', uu.css.rect(uu.id("relmb")), "==", { x: 406, y: 7, w: 98 + border, h: 99 + border, from: "body>div:nth-child(2)>div:nth-child(1)" });
+    uu.ok('uu.css.rect("relmbp")', uu.css.rect(uu.id("relmbp")), "==", { x: 406, y: 7, w: 98 + border + padding, h: 99 + border + padding, from: "body>div:nth-child(2)>div:nth-child(1)" });
+    uu.ok('uu.css.rect("relb")', uu.css.rect(uu.id("relb")), "==", { x: 406, y: 7, w: 98 + border, h: 99 + border, from: "body>div:nth-child(2)>div:nth-child(1)" });
+    uu.ok('uu.css.rect("relbp")', uu.css.rect(uu.id("relbp")), "==", { x: 406, y: 7, w: 98 + border + padding, h: 99 + border + padding, from: "body>div:nth-child(2)>div:nth-child(1)" });
+    uu.ok('uu.css.rect("relp")', uu.css.rect(uu.id("relp")), "==", { x: 406, y: 7, w: 98 + padding, h: 99 + padding, from: "body>div:nth-child(2)>div:nth-child(1)" });
     uu.ok("position: static");
     uu.ok('uu.css.rect("sta")', uu.css.rect(uu.id("sta")), "has", { w: 98, h: 99 });
     uu.ok('uu.css.rect("stam")', uu.css.rect(uu.id("stam")), "has", { w: 98, h: 99 });
@@ -128,19 +128,19 @@ uu.ready("window", function() {
         div.style.width = "101px";
         div.style.height = "102px";
 
-        uu.ok('uu.css.rect(no parentNode)', uu.css.rect(div), "==", { x:0, y:0, w:0, h:0 });
+        uu.ok('uu.css.rect(no parentNode)', uu.css.rect(div), "==", { x:0, y:0, w:0, h:0, from: null });
     })();
     uu.ok("left: auto, top: auto のテスト");
     uu.ok("position: absolute + auto");
-    uu.ok('uu.css.rect("autoabs")', uu.css.rect(uu.id("autoabs")), "==", { x: 0, y: 0, w: 98, h: 99 });
-    uu.ok('uu.css.rect("autoabsm")', uu.css.rect(uu.id("autoabsm")), "==", { x: 5, y: 5, w: 98, h: 99 });
-    uu.ok('uu.css.rect("autoabsmb")', uu.css.rect(uu.id("autoabsmb")), "==", { x: 5, y: 5, w: 98 + border, h: 99 + border });
-    uu.ok('uu.css.rect("autoabsmbp")', uu.css.rect(uu.id("autoabsmbp")), "==", { x: 5, y: 5, w: 98 + border + padding, h: 99 + border + padding });
-    uu.ok('uu.css.rect("autoabsb")', uu.css.rect(uu.id("autoabsb")), "==", { x: 0, y: 0, w: 98 + border, h: 99 + border });
-    uu.ok('uu.css.rect("autoabsbp")', uu.css.rect(uu.id("autoabsbp")), "==", { x: 0, y: 0, w: 98 + border + padding, h: 99 + border + padding });
-    uu.ok('uu.css.rect("autoabsp")', uu.css.rect(uu.id("autoabsp")), "==", { x: 0, y: 0, w: 98 + padding, h: 99 + padding });
+    uu.ok('uu.css.rect("autoabs")', uu.css.rect(uu.id("autoabs")), "==", { x: 0, y: 0, w: 98, h: 99, from: "body>div:nth-child(2)>div:nth-child(2)" });
+    uu.ok('uu.css.rect("autoabsm")', uu.css.rect(uu.id("autoabsm")), "==", { x: 5, y: 5, w: 98, h: 99, from: "body>div:nth-child(2)>div:nth-child(2)" });
+    uu.ok('uu.css.rect("autoabsmb")', uu.css.rect(uu.id("autoabsmb")), "==", { x: 5, y: 5, w: 98 + border, h: 99 + border, from: "body>div:nth-child(2)>div:nth-child(2)" });
+    uu.ok('uu.css.rect("autoabsmbp")', uu.css.rect(uu.id("autoabsmbp")), "==", { x: 5, y: 5, w: 98 + border + padding, h: 99 + border + padding, from: "body>div:nth-child(2)>div:nth-child(2)" });
+    uu.ok('uu.css.rect("autoabsb")', uu.css.rect(uu.id("autoabsb")), "==", { x: 0, y: 0, w: 98 + border, h: 99 + border, from: "body>div:nth-child(2)>div:nth-child(2)" });
+    uu.ok('uu.css.rect("autoabsbp")', uu.css.rect(uu.id("autoabsbp")), "==", { x: 0, y: 0, w: 98 + border + padding, h: 99 + border + padding, from: "body>div:nth-child(2)>div:nth-child(2)" });
+    uu.ok('uu.css.rect("autoabsp")', uu.css.rect(uu.id("autoabsp")), "==", { x: 0, y: 0, w: 98 + padding, h: 99 + padding, from: "body>div:nth-child(2)>div:nth-child(2)" });
     uu.ok("position: relative + auto");
-    uu.ok('uu.css.rect("autorel")', uu.css.rect(uu.id("autorel")), "==", { x: 0, y: 0, w: 98, h: 99 });
+    uu.ok('uu.css.rect("autorel")', uu.css.rect(uu.id("autorel")), "==", { x: 0, y: 0, w: 98, h: 99, from: "body>div:nth-child(2)>div:nth-child(2)" });
     uu.ok('uu.css.rect("autorelm")', uu.css.rect(uu.id("autorelm")), "has", { x: 5, w: 98, h: 99 });
     uu.ok('uu.css.rect("autorelmb")', uu.css.rect(uu.id("autorelmb")), "has", { x: 5, w: 98 + border, h: 99 + border });
     uu.ok('uu.css.rect("autorelmbp")', uu.css.rect(uu.id("autorelmbp")), "has", { x: 5, w: 98 + border + padding, h: 99 + border + padding });

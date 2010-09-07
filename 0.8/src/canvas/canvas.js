@@ -127,7 +127,7 @@ uu.canvas.Flash = FlashCanvas;              // uu.canvas.Flash class
 uu.canvas.Silverlight = SilverlightCanvas;  // uu.canvas.Silverlight class
 uu.canvas.init = uucanvasinit;
 uu.canvas.build = uucanvasbuild;
-uu.canvas.bgcolor = uucanvasbgcolor;        // uu.canvas.bgcolor(node:Node):ColorHash [VML][SL]
+//uu.canvas.bgcolor = uucanvasbgcolor;        // uu.canvas.bgcolor(node:Node):ColorHash [VML][SL]
 
 // class SilverlightCanvas
 function SilverlightCanvas(node) { // @param Node: <canvas>
@@ -215,6 +215,7 @@ function uucanvasbuild(node,    // @param Node: <canvas>
 uucanvasbuild.backendOrder = { svg: 1, sl: 2, silver: 2, silverlight: 2,
                                fl: 3, flash: 3, vml: 4 };
 
+/*
 // uu.canvas.bgcolor - get canvas background-color
 function uucanvasbgcolor(node) { // @param Node:
                                  // @return ColorHash:
@@ -230,6 +231,7 @@ function uucanvasbgcolor(node) { // @param Node:
     }
     return uu.color(zero[color] ? "white" : color);
 }
+ */
 
 })(document, uu);
 
@@ -604,7 +606,8 @@ function clearRect(x, y, w, h) {
             this.__mix = _COMPOS[this._mix = this.globalCompositeOperation];
         }
 
-        var color = uu.canvas.bgcolor(this.canvas),
+//      var color = uu.canvas.bgcolor(this.canvas),
+        var color = uu.css.bgcolor(this.canvas),
             zindex = (this.__mix ===  4) ? --this._zindex
                    : (this.__mix === 10) ? (this.clear(), 0) : 0,
             fg = uu.format(_COLOR_FILL,
@@ -1623,7 +1626,8 @@ function _patternFill(ctx, obj, path, fill, zindex) {
 // inner -
 function _clippy(ctx, fg) {
     if (!ctx._clipStyle) {
-        ctx._clipStyle = uu.canvas.bgcolor(ctx.canvas);
+//      ctx._clipStyle = uu.canvas.bgcolor(ctx.canvas);
+        ctx._clipStyle = uu.css.bgcolor(ctx.canvas);
     }
     return fg + uu.format(_CLIPPY, ctx._clipPath, ctx._clipStyle.hex);
 }
@@ -2082,7 +2086,8 @@ function clearRect(x, y, w, h) {
             this.__mix = _COMPOS[this._mix = this.globalCompositeOperation];
         }
 
-        var color = uu.canvas.bgcolor(this.canvas),
+//      var color = uu.canvas.bgcolor(this.canvas),
+        var color = uu.css.bgcolor(this.canvas),
             zindex = (this.__mix ===  4) ? --this._zindex
                    : (this.__mix === 10) ? (this.clear(), 0) : 0,
             fg = '<Path Opacity="' + (this.globalAlpha * color.a) +
