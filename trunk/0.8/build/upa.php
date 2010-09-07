@@ -10,6 +10,7 @@ $castoff     = array();         // "form,canvas,..."
 $castoffAll  = array(
     "form", "snippet", "image", "color",
     "test", "fx", "ajax",
+    "junction",
     "svg", "canvas", "canvasvml", "canvassl", "canvasfl",
     "flash", "nodeset", "audio",
     "live", "resize", "cssbox",
