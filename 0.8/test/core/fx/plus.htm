@@ -29,19 +29,19 @@ var parts = 10;
 var degree = 270;
 var bgcolor = uu.color("#ff4100");
 
-function moveDuration(that) {
-    duration = that.value
+function moveDuration(evt) {
+    duration = (evt.target || evt.srcElement).value
     uu.text(uu.id("durationValue"), duration);
     bgcolor = bgcolor.arrange(3, 0, 0);
 
     uu("div.box").css("bgc", bgcolor + "");
 }
-function moveRange(that) {
-    range = that.value
+function moveRange(evt) {
+    range = (evt.target || evt.srcElement).value
     uu.text(uu.id("rangeValue"), range);
 }
-function moveParts(that) {
-    parts = that.value
+function moveParts(evt) {
+    parts = (evt.target || evt.srcElement).value
     uu.text(uu.id("partsValue"), parts);
 }
 
@@ -95,6 +95,16 @@ function highlight(evt) {
 }
 
 uu.ready(function(uu) {
+    // onchange handler
+    var nodes = uu.ids("durationSlider,rangeSlider,partsSlider")
+
+    uu.bind(nodes[0], "change", moveDuration);
+    uu.bind(nodes[1], "change", moveRange);
+    uu.bind(nodes[2], "change", moveParts);
+
+    // Slider activate
+    uu.ui();
+
     var x = 0;
     var y = 0;
     var margin = 10;
@@ -155,13 +165,16 @@ function toggleOutline() {
 </div>
 
 
-DURATION: <input type="range" step="50" value="300" min="0" max="2000" onchange="moveDuration(this)" />
+DURATION: <input id="durationSlider" ui="Slider" type="range" step="50" value="300"
+            min="0" max="2000" />
     <span id="durationValue">300</span>
     <br />
-RANGE: <input type="range" step="50" value="200" min="100" max="400" onchange="moveRange(this)" />
+RANGE: <input id="rangeSlider" ui="Slider" type="range" step="50" value="200"
+            min="100" max="400" />
     <span id="rangeValue">200</span>
     <br />
-PARTS: <input type="range" step="1" value="10" min="1" max="20" onchange="moveParts(this)" />
+PARTS: <input id="partsSlider" ui="Slider" type="range" step="1" value="10"
+            min="1" max="20" />
     <span id="partsValue">10</span>
 
 

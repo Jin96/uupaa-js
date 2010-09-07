@@ -317,6 +317,8 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
 //}@fx
     // --- QUERY ---
     id:             uuid,           // uu.id(expr:String, context:Node = document):Node/null
+    ids:            uuids,          // uu.ids(expr:CommaJointString, context:Node = document):NodeArray
+                                    //  [1] uu.ids("A,B,C") -> [<a id="A">, <li id="B">, <div id="C">]
     tag:            uutag,          // uu.tag(expr:String = "", context:Node = <body>):NodeArray
     match:          uumatch,        // uu.match(expr:CSSSelectorExpressionString, context:Node = <body>):Boolean
     query:          uuquery,        // uu.query(expr:CSSSelectorExpressionString, context:NodeArray/Node = <body>):NodeArray
@@ -366,7 +368,9 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
     }),
     bind:           uuevent,        // uu.bind() as uu.event()
     unbind:         uueventunbind,  // uu.unbind() as uu.event.unbind()
+//{@junction
     junction:       uujunction,     // uu.junction(race:Number, items:Number, callback:Function):Junction
+//}@junction
     // --- RESIZE EVENT ---
 //{@resize
     resize:         uuresize,       // uu.resize(evaluator)
@@ -1880,7 +1884,7 @@ uuss.db = {}; // { id: styleSheetObject }
 // uu.viewport
 function uuviewport() { // @return Hash: { innerWidth, innerHeight,
                         //                 pageXOffset, pageYOffset,
-                        //                 orientation }
+                        //                 orientation, devicePixelRatio }
                         //      innerWidth  - Number:
                         //      innerHeight - Number:
                         //      pageXOffset - Number:
@@ -3790,6 +3794,25 @@ function uueventattach(node,         // @param Node:
                         : "attachEvent"]("on" + eventType, evaluator);
     }
 //}@mb
+
+//{@ui
+    var refnode = uu.data(node, "uurefnode"); // node["data-uurefnode"]
+
+    if (refnode) {
+        //
+        // uu.bind(<input type="range" data-uurefnode=<div instance={uu.Class.Slider}> />)
+        //
+        //              | post message
+        //              v
+        //
+        // <div class="Slider**" ui="Slider" instance={uu.Class.Slider}>
+        //      <div class="Slider*Grip" />
+        // </div>
+        //
+        uu.msg.post(refnode, "event", { bind: !__detach__, node: node,
+                                        type: eventType, callback: evaluator });
+    }
+//}@ui
 }
 
 // uu.event.detach - detach event - Raw Level API wrapper
@@ -4151,6 +4174,7 @@ function uuunlive(expr,          // @param CSSSelectorExpressionString(= void 0)
 }
 //}@live
 
+//{@junction
 // uu.junction -
 function uujunction(race,       // @param Number: race conditions
                     items,      // @param Number: items
@@ -4204,6 +4228,7 @@ function JunctionJudge() {
     }
     return this;
 }
+//}@junction
 
 // --- READY ---
 // uu.ready - hook event
@@ -4850,6 +4875,21 @@ function uuid(expr,      // @param String: id
               context) { // @param Node(= document): query context
                          // @return Node/null:
     return (context || doc).getElementById(expr);
+}
+
+// uu.ids - multiple uu.id
+function uuids(expr,      // @param CommaJointString: "id1,id2,..."
+               context) { // @param Node(= document): query context
+                          // @return Node/null:
+    //  [1] uu.ids("A,B,C") -> [<a id="A">, <li id="B">, <div id="C">]
+
+    var rv = [], ary = expr.split(","), i = 0, iz = ary.length,
+        ctx = context || doc;
+
+    for (; i < iz; ++i) {
+        rv.push(ctx.getElementById(ary[i]));
+    }
+    return rv;
 }
 
 // uu.tag - as document.getElementsByTaName
@@ -7243,6 +7283,7 @@ uueach({
     value:          uuvalue,            // NodeSet.value(value = void)
 //}@form
     attr:           uuattr,             // NodeSet.attr(key = void, value = void)
+    data:           uudata,             // NodeSet.data(key = void, value = void)
     css:            uucss,              // NodeSet.css(key = void, value = void)
     text:           uutext              // NodeSet.text(text = void, arg...)
 }, function(fn, name) {
@@ -8406,7 +8447,7 @@ function init(rail,    // @param Node: rail node
             var key = param.keyCode[uu.event.key(evt).code],
                 shift = evt.shiftKey ? 10 : 1; // x10
 
-            key && that.value(param.value + key * param.step * shift);
+            key && value(that, param.value + key * param.step * shift);
         }
     });
 }
@@ -8416,6 +8457,9 @@ function msgbox(msg,     // @param String:
                 param) { // @param Hash(= void):
                          // @return Hash:
     switch (msg) {
+    case "event":
+        (param.type === "change") && (this.param.change = param.bind ? 1 : 0);
+        break;
     case "getParam": return this.param;
     case "getValue": return { value: this.param.value };
     case "setValue": value(this, param.value || 0, param.fx || 0);
@@ -8591,7 +8635,9 @@ function activate(param) { // @param Hash(= {}):
         param.gripHeight = param.vertical ? param.gripWidth  : param.gripHeight;
     }
 
-    // <div class="Slider**" ui="Slider" tabindex="0"><div class="Slider*Grip" /></div>
+    // <div class="Slider**" ui="Slider" tabindex="0" instance={uu.Class.Slider}>
+    //      <div class="Slider*Grip" />
+    // </div>
 
     var rail = uu.div("ui,Slider,tabindex,0", "display,inline-block", uu.div()),
         grip = rail.firstChild;
@@ -8620,8 +8666,11 @@ function transform(node) { // @param Node:
     //
     //          v
     //
-    // <div class="Slider**" ui="Slider" tabindex="0"><div class="Slider*Grip" /></div>
-    // <input type="range" value="50" min="0" max="100" style="display:none" ui="*Slider" />
+    // <div class="Slider**" ui="Slider" tabindex="0" instance={uu.Class.Slider}   <+ refnode(<div>)
+    //      <div class="Slider*Grip" />                                             |
+    // </div>                                                                       |
+    // <input type="range" value="50"                                               |
+    //         min="0" max="100" style="display:none" ui="*Slider" data-uurefnode=<div> />
     //
 
     // pick slider param
@@ -8637,7 +8686,8 @@ function transform(node) { // @param Node:
         });
 
     node.style.display = "none";
-    uu.attr(node, "ui", "*Slider");  // node.ui = "*Slider"
+    uu.attr(node, "ui", "*Slider");   // node.ui = "*Slider"
+    uu.data(node, "uurefnode", rail); // node["data-uurefnode"] = <div>
     uu.add(rail, node, "prev");
 
     return rail;
