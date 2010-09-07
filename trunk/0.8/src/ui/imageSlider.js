@@ -93,7 +93,12 @@ function uuuiimagesliderdressup(node,     // @param Node:
 
             degree < 90 && (x = data.w * i);
             degree > 0  && (y = data.h * i);
-            uu.css(node, { pos: "absolute", m: 0, b: 0, p: 0, x: x, y: y });
+            uu.css(node, { position: "absolute",
+                           margin: 0,
+                           border: 0,
+                           padding: 0,
+                           x: x,
+                           y: y });
         });
 
         node.style.width = data.w + "px";
@@ -107,8 +112,7 @@ function uuuiimagesliderdressup(node,     // @param Node:
         degree < 90 && (w = data.w * imageNodeArray.length);
         degree >  0 && (h = data.h * imageNodeArray.length);
 
-        target.style.cssText =
-                uu.format("width:@px;height:@px;margin:0;position:relative", w, h);
+        target.style.cssText = uu.f("width:@px;height:@px;margin:0;position:relative", w, h);
 
         // store
         node[_dataset] = data;
