@@ -358,66 +358,77 @@ uu.ready("window", function(uu) {
     uu.ok("uu.klass.has()");
     (function() {
         uu.id('div').className = "";
-        uu.klass.add(uu.id('div'), "A1 A2 A3");
+        uu.klass(uu.id('div'), "A1 A2 A3");
         uu.ok("uu.klass.has(uu.id('div')) ( 'A1 A2 A3') は 'A1 A3' を含んでいる",
             uu.klass.has(uu.id('div'), "A1 A3"), "is true");
 
 
         uu.id('div').className = "";
-        uu.klass.add(uu.id('div'), "A1 A2 A3");
+        uu.klass(uu.id('div'), "A1 A2 A3");
         uu.ok("uu.klass.has(uu.id('div')) ( 'A1 A2 A3') は ' A2 ' を含んでいる",
             uu.klass.has(uu.id('div'), " A2 "), "is true");
 
 
         uu.id('div').className = "";
-        uu.klass.add(uu.id('div'), "あ い う");
+        uu.klass(uu.id('div'), "あ い う");
         uu.ok("uu.klass.has(uu.id('div')) ( 'あ い う') は ' い ' を含んでいる",
             uu.klass.has(uu.id('div'), " い "), "is true");
 
 
         uu.id('div').className = "";
-        uu.klass.add(uu.id('div'), "うい");
+        uu.klass(uu.id('div'), "うい");
         uu.ok("uu.klass.has(uu.id('div')) ( 'うい') は 'い' を含んでいない",
             uu.klass.has(uu.id('div'), "い"), "is false");
     })();
 
 
-    uu.ok("uu.klass.add()");
+    uu.ok("uu.klass() add className");
     (function() {
         uu.id('div').className = "";
-        uu.klass.add(uu.id('div'), "A1 A2 A3");
-        uu.klass.add(uu.id('div'), "A4 A1");
+        uu.klass(uu.id('div'), "A1 A2 A3");
+        uu.klass(uu.id('div'), "A4 A1");
 
-        uu.ok("uu.klass.add(uu.id('div')) ( ' A1 A2 A3' ) に 'A4 A1' を足すと ' A1 A2 A3 A4 A1' になる",
+        uu.ok("uu.klass(uu.id('div')) ( ' A1 A2 A3' ) に 'A4 A1' を足すと ' A1 A2 A3 A4 A1' になる",
             uu.id('div').className, "==", ' A1 A2 A3 A4 A1');
     })();
 
-    uu.ok("uu.klass.remove()");
+    uu.ok("uu.klass() add className +");
+    (function() {
+        uu.id('div').className = "";
+        uu.klass(uu.id('div'), "+A1 A2 A3");
+        uu.klass(uu.id('div'), "+A4 A1");
+
+        uu.ok("uu.klass(uu.id('div')) ( ' A1 A2 A3' ) に 'A4 A1' を足すと ' A1 A2 A3 A4 A1' になる",
+            uu.id('div').className, "==", ' A1 A2 A3 A4 A1');
+    })();
+
+
+    uu.ok("uu.klass() remove className -");
     (function() {
         uu.id('div').className = "A1 A2 A3 A4 A1";
-        uu.klass.remove(uu.id('div'), "A1  A4");
-        uu.ok("uu.klass.remove(uu.id('div')) ( 'A1 A2 A3 A4 A1' )から( 'A1　　A4' )を引くと 'A2 A3' になる",
+        uu.klass(uu.id('div'), "-A1  A4");
+        uu.ok("uu.klass(uu.id('div')) ( 'A1 A2 A3 A4 A1' )から( 'A1　　A4' )を引くと 'A2 A3' になる",
             uu.id('div').className, "==", 'A2 A3');
 
 
         uu.id('div').className = "B1 B2";
-        uu.klass.remove(uu.id('div'), "A1 A2 A3 A4 A1");
-        uu.ok("uu.klass.remove(uu.id('div')) ( 'B1 B2' )から 存在しないクラス( 'A1 A2 A3 A4 A1' )を引いてもエラーにならない",
+        uu.klass(uu.id('div'), "-A1 A2 A3 A4 A1");
+        uu.ok("uu.klass(uu.id('div')) ( 'B1 B2' )から 存在しないクラス( 'A1 A2 A3 A4 A1' )を引いてもエラーにならない",
             uu.id('div').className, "==", 'B1 B2');
     })();
 
 
-    uu.ok("uu.klass.toggle()");
+    uu.ok("uu.klass() toggle className !");
     (function() {
         uu.id('div').className = "A1 A2 B1 B2";
-        uu.klass.toggle(uu.id('div'), "A2 B2");
-        uu.ok("uu.klass.toggle(uu.id('div')) ( 'A1 A2 B1 B2' ) から 'A2 B2' をトグルすると、'A1 B1' になる",
+        uu.klass(uu.id('div'), "!A2 B2");
+        uu.ok("uu.klass(uu.id('div')) ( 'A1 A2 B1 B2' ) から 'A2 B2' をトグルすると、'A1 B1' になる",
             uu.id('div').className, "==", 'A1 B1');
 
 
         uu.id('div').className = "A1 B1";
-        uu.klass.toggle(uu.id('div'), "A2 B2");
-        uu.ok("uu.klass.toggle(uu.id('div')) ( 'A1 B1' ) から 'A2 B2' をトグルすると、'A1 B1 A2 B2' になる",
+        uu.klass(uu.id('div'), "!A2 B2");
+        uu.ok("uu.klass(uu.id('div')) ( 'A1 B1' ) から 'A2 B2' をトグルすると、'A1 B1 A2 B2' になる",
             uu.id('div').className, "==", 'A1 B1 A2 B2');
     })();
 
@@ -540,22 +551,22 @@ uu.ready("window", function(uu) {
             uu.node.has(uu.id('ctx'), document.body), "is false");
 
 
-    uu.ok("uu.node.array()");
-    uu.ok("uu.node.array(uu.id('tgt'))",
-            uu.node.array(uu.id('tgt')).length, "==", 5);
-    uu.ok("uu.node.array(uu.id('tgt'))",
-            uu.node.array(uu.id('tgt')).first, "==", uu.id("first"));
-    uu.ok("uu.node.array(uu.id('tgt'))",
-            uu.node.array(uu.id('tgt')).prev, "==", uu.id("prev"));
-    uu.ok("uu.node.array(uu.id('tgt'))",
-            uu.node.array(uu.id('tgt')).next, "==", uu.id("next"));
-    uu.ok("uu.node.array(uu.id('tgt'))",
-            uu.node.array(uu.id('tgt')).last, "==", uu.id("last"));
-    uu.ok("uu.node.array(uu.id('tgt'))",
-            uu.node.array(uu.id('tgt')).index, "==", 2);
+    uu.ok("uu.node.bros()");
+    uu.ok("uu.node.bros(uu.id('tgt'))",
+            uu.node.bros(uu.id('tgt')).length, "==", 5);
+    uu.ok("uu.node.bros(uu.id('tgt'))",
+            uu.node.bros(uu.id('tgt')).first, "==", uu.id("first"));
+    uu.ok("uu.node.bros(uu.id('tgt'))",
+            uu.node.bros(uu.id('tgt')).prev, "==", uu.id("prev"));
+    uu.ok("uu.node.bros(uu.id('tgt'))",
+            uu.node.bros(uu.id('tgt')).next, "==", uu.id("next"));
+    uu.ok("uu.node.bros(uu.id('tgt'))",
+            uu.node.bros(uu.id('tgt')).last, "==", uu.id("last"));
+    uu.ok("uu.node.bros(uu.id('tgt'))",
+            uu.node.bros(uu.id('tgt')).index, "==", 2);
 
-    uu.ok("uu.node.array(uu.id('firstChild'))",
-            uu.node.array(uu.id('firstChild')).length, "==", 3);
+    uu.ok("uu.node.bros(uu.id('firstChild'))",
+            uu.node.bros(uu.id('firstChild')).length, "==", 3);
 
 
     uu.ok("uu.node.remove()");
