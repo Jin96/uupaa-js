@@ -50,7 +50,7 @@ o = true, x/space = false
 || uu.env.android  ||           ||          ||             ||                  ||                ||                    ||                    ||
 || uu.env.mobile   ||           ||          ||             ||        o         ||                ||                    ||                    ||
 || uu.env.touch    ||           ||          ||             ||        o         ||                ||                    ||                    ||
-|| uu.env.os       ||"windows"  ||"windows" ||   "mac"     ||    "iphone"      ||  "windows"     ||   "unix"           ||    "windows"       ||
+|| uu.env.os       ||"windows"  ||"windows" ||   "mac"     ||    "ios"         ||  "windows"     ||   "unix"           ||    "windows"       ||
 || uu.env.jit      ||           ||    o     ||     o       ||        o         ||       o        ||      o             ||        o           ||
 || uu.env.browser  ||   6       ||    9     ||     4       ||        4         ||      5         ||      3.6           ||        10.5        ||
 || uu.env.render   ||   0       ||    0     ||  531.227    ||       531.211    ||    533.8       ||     1.92           ||       2.524        ||
