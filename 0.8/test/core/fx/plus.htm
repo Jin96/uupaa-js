@@ -94,6 +94,36 @@ function highlight(evt) {
     uu.fx.highlight(evt.node, duration, { reverse: 1 });
 }
 
+var toggleSlide = false;
+
+function slide(evt) {
+    toggleSlide = !toggleSlide;
+
+    if (toggleSlide) {
+        evt.node.innerText = "SlideUp";
+        uu.fx.slide(evt.node, duration);
+        uu.fx(evt.node, 1000);
+        uu.fx.slide(evt.node, 0, { after: function(node) {
+            node.innerText = "Slide";
+        }});
+    } else {
+        evt.node.innerText = "SlideDown";
+        uu.fx.slide(evt.node, 0);
+        uu.fx(evt.node, 1000);
+        uu.fx.slide(evt.node, duration, { after: function(node) {
+            node.innerText = "Slide";
+        }});
+    }
+}
+
+/*
+function slideDown(evt) {
+    uu.fx.slideUp(evt.node, 0);
+    uu.fx(evt.node, 100);
+    uu.fx.slideDown(evt.node, duration);
+}
+ */
+
 uu.ready(function(uu) {
     // onchange handler
     var nodes = uu.ids("durationSlider,rangeSlider,partsSlider")
@@ -112,13 +142,11 @@ uu.ready(function(uu) {
     // position: absolute
     uu.each({ movein: movein, moveout: moveout, flare: flare,
               fade: fade, puff: puff, shrink: shrink,
-              highlight: highlight }, function(fn, key) {
+              highlight: highlight, slide: slide }, function(fn, key) {
 
-//      uu.css.userSelect(
-            uu.node.add(
-                uu.click(
-                    uu.div({ cn: "box" }, { x: x, y: y + 40 }, uu.text(key)), fn), uu.id("absolutebox"))
-//        );
+        uu.node.add(
+            uu.click(
+                uu.div({ cn: "box" }, { x: x, y: y + 40 }, uu.text(key)), fn), uu.id("absolutebox"))
 
         x += 100 + margin;
         if (x > (100 + margin) * 5) {
@@ -127,13 +155,11 @@ uu.ready(function(uu) {
         }
     });
     // position: static
-    uu.each({ puff: puff, shrink: shrink }, function(fn, key) {
+    uu.each({ puff: puff, shrink: shrink, slide: slide }, function(fn, key) {
 
-//      uu.css.userSelect(
-            uu.node.add(
-                uu.click(
-                    uu.div({ cn: "box static" }, { cssFloat: "left" }, uu.text(key)), fn), uu.id("staticbox"))
-//      );
+        uu.node.add(
+            uu.click(
+                uu.div({ cn: "box static" }, { cssFloat: "left" }, uu.text(key)), fn), uu.id("staticbox"))
     });
 
     uu.css.userSelect();
