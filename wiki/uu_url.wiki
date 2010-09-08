@@ -79,8 +79,10 @@ uu.url.query(_queryString_:!QueryString/Hash, _add_:Hash):!QueryString/Hash ã¯ã
     uu.url.query({ key: "val" }, { key2: "val2" }) -> "key=val;key2=val2"
 }}}
 
+<wiki:comment>
 = Test Code =
   * http://uupaa-js.googlecode.com/svn/trunk/0.8/test/misc/url.htm
+</wiki:comment>
 
 = TYPES =
 
