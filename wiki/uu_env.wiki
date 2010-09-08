@@ -26,7 +26,7 @@
   * uu.env.mobile - Boolean: iPhone, iPad, iPod, Android で true になります。
     * Windows Phone, Mobile Firefox(Fennec), Opera Mini では false になります。
   * uu.env.touch - Boolean: iPhone, iPad, iPod, Android で true になります。
-  * uu.env.os - String: "iphone", "android", "windows", "mac", "unix", "chrome", "unknown" を返します。
+  * uu.env.os - String: "ios", "android", "windows", "mac", "unix", "chrome", "unknown" を返します。
   * uu.env.jit - Boolean: IE9+, Firefox3.5+, Safari4+, Google Chrome, Opera10.50+ で true になります。
   * uu.env.browser - Number: ブラウザバージョンを返します。 [http://d.hatena.ne.jp/uupaa/20090603]
   * uu.env.render - Number: レンダリングエンジンのバージョンを返します。[http://d.hatena.ne.jp/uupaa/20090603]
