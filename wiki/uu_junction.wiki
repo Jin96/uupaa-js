@@ -34,4 +34,5 @@ judge() は、ok(), ng() が呼び出された回数で条件を判断し、_cal
 
 = Test Code =
 http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/junction.htm
+
 http://uupaa-js.googlecode.com/svn/trunk/0.8/test/core/fx/junction.htm
