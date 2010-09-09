@@ -276,7 +276,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //  [3][to relative] uu.css.position(<div>, "relative") -> <div style="position: relative">
 //}@cssbox
         // --- CSS 2 ---
-        bgcolor:    uucssbgcolor,   // uu.css.bgcolor(node:Node):ColorHash
+        bgcolor:    uucssbgcolor,   // uu.css.bgcolor(node:Node):Color
         // --- CSS 3 ---
         opacity:    uucssopacity,   // uu.css.opacity(node:Node, value:Number/String):Number/Node
                                     //  [1][get opacity] uu.css.opacity(node) -> 0.5
@@ -568,6 +568,10 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //  [4][DateString to hash]      uu.date("2000-01-01T00:00:00[.000]Z") -> DateHash
                                     //  [5][ISO8601String to hash]   uu.date("2000-01-01T00:00:00[.000]Z") -> DateHash
                                     //  [6][RFC1123String to hash]   uu.date("Wed, 16 Sep 2009 16:18:14 GMT") -> DateHash
+                                    //
+                                    // DateHash - { Y: 2010, M: 12, D: 31,
+                                    //              h: 23, m: 59, s: 59, ms: 999,
+                                    //              time: unix_time, ISO(), GMT() }
     // --- NUMBER ---
     guid:           uuguid,         // uu.guid():Number - build GUID
     range:          uurange,        // uu.range(min:Number, value:Number, max:Number):Number
@@ -668,17 +672,17 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
 //{@canvas
     hatch:          uuhatch,        // uu.hatch(size = 10, unit = 5, color = "skyblue", color2 = "steelblue")
 //}@canvas
-    glow:           uuglow,         // uu.glow(node:Node/NodeArray/NodeSet/CSSSelectorExpressionString)
+    glow:           uuglow,         // uu.glow(node:Node/NodeArray/NodeList/NodeSet/CSSSelectorExpressionString)
     puff:           uupuff,         // uu.puff(source:Mix/FormatString, var_args:Mix, ...)
     log:            uulog,          // uu.log(log:Mix, var_args:Mix, ...)
     // --- UNIT TEST ---
 //{@test
     ok:             uuok,           // uu.ok(title:String = void,
                                     //       lval:Mix = void, operator:String = void, rval:Mix = void,
-                                    //       more:String = void)
+                                    //       more:String = void):Hash/void - { ok, ng, ms, total }
                                     //  [1][add separater]  uu.ok("group separater or comment")
                                     //  [2][judge]          uu.ok("test title", 1, "===", 1, "more info")
-                                    //  [3][get/show score] uu.ok() -> { ok, ng, total, ms }
+                                    //  [3][get/show score] uu.ok() -> { ok, ng, ms, total }
     ng:             uung,           // uu.ng(title:String,
                                     //       lval:Mix = void, operator:String = void, rval:Mix = void)
                                     //  [1][assert]         uu.ng("123 == 123", 123, "===", 123)
@@ -2696,7 +2700,7 @@ function uufxhighlight(node,     // @param Node:
 // uu.css.bgcolor - get inherit background color
 function uucssbgcolor(node,           // @param Node:
                       defaultColor) { // @param ColorString(= "#fff"):
-                                      // @return ColorHash:
+                                      // @return Color:
     var n = node, bgc = "transparent",
         zero = { transparent: 1, "rgba(0, 0, 0, 0)": 1 };
 
@@ -5684,12 +5688,13 @@ function uuhatch(param) { // @param Hash: { size, unit, color, color2 }
 //}@canvas
 
 // uu.glow - glow node
-function uuglow(node) { // @param Node/NodeArray/NodeSet/CSSSelectorExpressionString:
+function uuglow(node) { // @param Node/NodeArray/NodeList/NodeSet/CSSSelectorExpressionString:
 //{@fx
     var ary = isString(node) ? uuquery(node)
                              : node[_nodeArray] ? node[_nodeArray]
                                                 : node[_nodeType] ? [node]
                                                                   : node;
+    Array.isArray(ary) || (ary = uuarray(ary));
 
     uueach(ary, function(node) {
         var bgc = uucssbgcolor(node, "transparent"),
@@ -5737,10 +5742,15 @@ function uuok(title,    // @param String: title
               operator, // @param String: operator
               rval,     // @param Mix(= void): right handset
               more) {   // @param String(= void): more info
+                        // @return Hash/void: { ok, ng, ms, total }
+                        //  ok - Number: truly count
+                        //  ng - Number: falsy count
+                        //  ms - Number: Elapsed time (unit: ms)
+                        //  total - Number: ok + ng
                         // @throws Error from judge()
     //  [1][test]           uu.ok("title", 1, "===", 1, "more info")
     //  [2][add separater]  uu.ok("separater comment")
-    //  [3][get/show score] uu.ok() -> { ok, ng, total, ms }
+    //  [3][get/show score] uu.ok() -> { ok, ng, ms, total }
 
     var rv, r, tm, db = uuok.db, ol, undef;
 
@@ -5965,13 +5975,19 @@ uudate.x = [
 function _date2hash(date) { // @param Date:
                             // @return Hash: { Y: 2010, M: 1~12, D: 1~31,
                             //                 h: 0~23, m: 0~59, s: 0~59, ms: 0~999,
-                            //                 time: unix_time, ISO(), GMT() }
+                            //                 time: unix_time, ISO: func(), GMT: func() }
     return {
         Y:      date.getUTCFullYear(),      M:      date.getUTCMonth() + 1,
         D:      date.getUTCDate(),          h:      date.getUTCHours(),
         m:      date.getUTCMinutes(),       s:      date.getUTCSeconds(),
         ms:     date.getUTCMilliseconds(),  time:   date.getTime(),
-        ISO:    datehashiso,                GMT:    datehashgmt
+        ISO:    datehashiso,                GMT:    datehashgmt,
+        valueOf: function() { // @return Number:
+            return date.getTime();
+        },
+        toString: function() { // @return ISODateString:
+            return this.ISO();
+        }
     };
 }
 
@@ -6037,6 +6053,9 @@ function Color(r, g, b, a) {
     this.rgba = "rgba(" + r + "," + g + "," + b + "," + a + ")";
 }
 Color[_prototype] = {
+    valueOf:    function() { // @return Number: 0xRRGGBB.AA
+                    return (this.r << 16) + (this.g <<  8) + this.b + this.a;
+                },
     toString:   function() { // @return String: "#000000" or "rgba(0,0,0,0)"
                     return uuready.color.rgba ? this.rgba : this.hex;
                 },
