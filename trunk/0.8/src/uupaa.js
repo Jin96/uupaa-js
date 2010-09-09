@@ -1866,7 +1866,7 @@ function uudata(node,    // @param Node:
     //  [3][get item]   uu.data(node, key) -> value
     //  [4][set item]   uu.data(node, key, value) -> node
 
-    var rv = {}, i, prefix = "data-", undef;
+    var rv = {}, i, prefix = "data-";
 
     switch (uucomplex(key, value)) { // 1: (), 2: ({}), 3: (k), 4: (k,v)
     case 1: for (key in node) {
@@ -2237,7 +2237,7 @@ uu.fx.timing =  {
             by = (p2y - p1y) * 3 - cy,
             ax = 1 - cx - bx,
             ay = 1 - cy - by,
-            xx, tt, fin = 0,
+            xx, fin = 0,
             epsilon = 1 / (duration * 200),
             t0 = 0, t1 = 1, t2 = t, x2, d2, i = 0;
 
@@ -2480,7 +2480,7 @@ function uufxshow(node,            // @param Node:
         node.style[_display] = "none";
     }
 //}@mb
-    return uufx(node, duration || 0, { init: function(node, opion) {
+    return uufx(node, duration || 0, { init: function(node, option) {
                 var style = node.style;
 
                 uucssopacity(node, 0);
@@ -4045,7 +4045,7 @@ function uueventhover(node,         // @param Node:
                                     // @return Node:
     function hoverEventClosure(evt, rel) {
         // ignode mouse transit(mouseover, mouseout) in child node
-        toggle ? uuklasstoggle(node, expr)
+        toggle ? uuklass(node, "!" + expr) // toggle className
                : _ie ? expr(evt, evt.code === uuevent.codes.mouseenter, node)
                      : node !== (rel = evt.relatedTarget) && !uuhas(node, rel) &&
                        expr(evt, evt.code === uuevent.codes.mouseover, node);
@@ -4782,7 +4782,7 @@ function uunodeclone(parent,  // @param Node: parent node (ElementNode)
 
         for (; cloned = nodeArray[i++]; ) {
             (nodeid = cloned[_data_uunodeid]) &&
-                cloneData(uunodeidtonode(nodeid), cloned);
+                cloneData(uunodeid(nodeid), cloned); // NodeID -> Node
         }
     }
 //}@mb
@@ -5834,7 +5834,7 @@ function uung(title,    // @param String: title
               operator, // @param String: operator
               rval) {   // @param Mix(= void): right handset
                         // @throws Error from judge()
-    var r = judge(lval, operator, rval);
+    var r = uuokjudge(lval, operator, rval);
 
     if (!r) {
         throw new Error(uuf("@: @ @ @", title,
@@ -8651,7 +8651,7 @@ function handleEvent(evt) {
         move(this, pageX + param.ox - dragInfo.ox,
                    pageY + param.oy - dragInfo.oy, 1); // 1: fx
 
-        param.mousedown && param.mousedown(evt, node, param, dragInfo);
+        param.mousedown && param.mousedown(evt, rail, param, dragInfo);
     } else if (code === uu.event.codes.mouseup && dragInfo.dragging) {
         if (param.toggle) {
             threshold = param.value >= (param.max - param.min) * 0.5;
@@ -8661,7 +8661,7 @@ function handleEvent(evt) {
                                      : (threshold ? param.max : param.min), 1);
         }
         dragInfo.dragging = 0;
-        param.mouseup && param.mouseup(evt, node, param, dragInfo);
+        param.mouseup && param.mouseup(evt, rail, param, dragInfo);
 
         uu.unbind(uu.ie ? rail : doc, dragEvent, this);
     } else if (code === uu.event.codes.mousemove && dragInfo.dragging) {
@@ -8682,7 +8682,7 @@ function handleEvent(evt) {
         move(this, (pageX + param.ox - dragInfo.ox),
                    (pageY + param.oy - dragInfo.oy));
 
-        param.mousemove && param.mousemove(evt, node, param, dragInfo);
+        param.mousemove && param.mousemove(evt, rail, param, dragInfo);
         dragInfo.tap = 0;
     } else if (code === uu.event.codes.mousewheel) {
         rail.focus();
