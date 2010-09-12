@@ -7040,7 +7040,7 @@ uu.Class.singleton("IEStorage", {
         }
         return _storage.info(used, 63 * 1024, i - 1, "IEStorage");
     },
-    item: function ieStorageItem(key, value) {
+    item: function(key, value) {
         var rv = _true, so = this.so, i = 0, idx;
 
         so.load(_storage.store);
@@ -7169,7 +7169,7 @@ uu.Class.singleton("MemStorage", {
         }
         return _true;
     },
-    clear: function memStorageClear(key) {
+    clear: function(key) {
         key === void 0 ? (this.so = {}) : delete this.so[key];
     }
 },{ ready: _true });
@@ -7907,6 +7907,9 @@ function detectFeatures() {
             ArraySlice: _true,      // Array.prototype.slice.call(FakeArray) ready
             getAttribute: _true,    // getAttribute("href"), getAttribute("class") ready
             StringIndexer: _true,   // String[indexer] ready
+            style: {                // style
+                inlineBlock: _true  //  style.inlineBlock ready
+            },
             innerHTML: {            // node.innerHTML
                 style: _true,       //  node.innerHTML = "<style></style>" ready
                 padStyle: _true     //  node.innerHTML = "<dummyNode/><style></style>" ready
@@ -7951,6 +7954,7 @@ function detectFeatures() {
     if (_ie) {
         _env < 9 && (rv.color[transparent] = _false);
         _env < 7 && (rv.border[transparent] = _false);
+        _env < 8 && (rv.style.inlineBlock = _false);
     }
 //}@mb
     return rv;
@@ -8310,7 +8314,7 @@ function selector(token,     // @param Hash: QueryTokenHash
             attr = data[++i];
             ope  = data[++i];
             val  = uu.trim.quote(data[++i]);
-            uu.ready.getAttribute || (attr = uu.attr_[attr] || attr);
+            uu.ready.getAttribute || (attr = uu.attr._[attr] || attr);
             switch (ope) {
             case 1: val = "^" + val + "$"; break;                 // [attr  = value]
             case 3: val = "^" + val;       break;                 // [attr ^= value]
@@ -8828,7 +8832,10 @@ function activate(param,      // @param Hash(= {}):
     //      <div class="Slider*Grip" />
     // </div>
 
-    var rail = uu.div("ui,Slider,tabindex,0", "display,inline-block", uu.div()),
+    var rail = uu.div("ui,Slider,tabindex,0",
+/*{@mb*/              !uu.ready.style.inlineBlock ? "display,inline,zoom,1" : /*}@mb*/ // [IE6][IE7] hasLayout
+                      "display,inline-block",
+                      uu.div()),
         grip = rail.firstChild;
 
     // add to backyard
