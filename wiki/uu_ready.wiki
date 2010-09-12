@@ -168,7 +168,7 @@ System Event 発火済みかどうかを調べるには、uu.ready.dom や uu.re
 }}}
 
 == uu.ready.fire ==
-uu.ready.fire(_readyEventType_:String, _param_:Mix = void) は uu.ready() で登録済みの System Event をコールバックします。
+uu.ready.fire(_readyEventType_:String, _param_:Mix = document) は uu.ready() で登録済みの System Event をコールバックします。
 コールバック引数は、callback(uu, _param_) となります。
 
 発火済みの場合は、何もしません。
