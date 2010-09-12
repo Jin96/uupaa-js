@@ -8310,7 +8310,7 @@ function selector(token,     // @param Hash: QueryTokenHash
             attr = data[++i];
             ope  = data[++i];
             val  = uu.trim.quote(data[++i]);
-            uu.ready.getAttribute || (attr = uu.attr.fix[attr] || attr);
+            uu.ready.getAttribute || (attr = uu.attr_[attr] || attr);
             switch (ope) {
             case 1: val = "^" + val + "$"; break;                 // [attr  = value]
             case 3: val = "^" + val;       break;                 // [attr ^= value]
