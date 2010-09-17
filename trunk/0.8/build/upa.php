@@ -13,21 +13,24 @@ $castoffAll  = array(
     "junction",
     "svg", "canvas", "canvasvml", "canvassl", "canvasfl",
     "flash", "nodeset", "audio",
-    "live", "resize", "cssbox",
+    "eventresize", "eventcyclic",
+    "live", "cssbox",
     "codec", "md5", "sha1",
     "sprintf", "url", "font", "cookie", "storage",
     "ui", "uislider",
 );
 
 // --- global ---
+$perfPoint   = time(); // keep current time
 $slash       = '/';
 $mobile      = false;
 $verbose     = false;
 $skipCore    = false;
 $inputFiles  = array($libraryCore);
 $loadedFiles = array(); // avoid duplicate load
+$loadedFileSize = 0;
 
-// load source and packages
+// load source
 function loadFiles($inputFiles) { // @param Array:
     global $catfood;
 
@@ -50,7 +53,7 @@ function loadFiles($inputFiles) { // @param Array:
 function loadSource($src) { // @param FilePathString:
                             // @return JavaScriptExpressionString:
     global $verbose, $skipCore, $libraryCore, $loadedFiles, $slash,
-           $mobile, $castoff;
+           $mobile, $castoff, $loadedFileSize;
 
     $src = pathNormalize(trim($src));
 
@@ -69,6 +72,7 @@ function loadSource($src) { // @param FilePathString:
         echo '<script src="' . $tmpsrc . '"></script>' . "\n";
     }
     // normalize line break
+    $loadedFileSize = $loadedFileSize + filesize($src);
     $js = preg_replace('/(\r\n|\r|\n)/m', "\n", file_get_contents($src));
 
     // #include "source.js"
@@ -122,7 +126,8 @@ function pathNormalize($path) { // @param FilePathString:  "..\dir/file.ext"
 }
 
 function minify() {
-    global $compiler, $skipCore, $verbose, $catfood, $mobile, $libraryCore;
+    global $compiler, $skipCore, $verbose, $catfood, $mobile, $libraryCore,
+           $loadedFileSize, $perfPoint;
 
     $command = '';
 
@@ -136,11 +141,16 @@ function minify() {
 
     switch ($compiler) {
     case "g":
-//      $options = '--warning_level=VERBOSE '
-//               . '--compilation_level=ADVANCED_OPTIMIZATIONS ';
-        $command = 'java -jar tool.g.jar ' . $options . ' --js=' . $catfood
-                 . ' --js_output_file=../' . $outfile;
+//      $options = '--warning_level VERBOSE ';
+        $command = 'java -jar tool.g.jar ' . $options . ' --js ' . $catfood
+                 . ' --js_output_file ../' . $outfile;
         break;
+    case "G":
+        $options = '--compilation_level ADVANCED_OPTIMIZATIONS ';
+        $command = 'java -jar tool.g.jar ' . $options . ' --js ' . $catfood
+                 . ' --js_output_file ../' . $outfile;
+        break;
+
     case "y":
         $options = '--charset "utf-8" ';
         $command = 'java -jar tool.y.jar -v ' . $options . ' -o ../'
@@ -173,7 +183,12 @@ function minify() {
     }
     if (1) { // $verbose
         $fz = filesize('../' . $outfile);
-        printf("filesize = %.02fkB(%dbyte)\n", $fz / 1024, $fz);
+
+        printf("minified: %.02fk(%d)byte / %.02fk(%d)byte = %.02f%%, elapsed: %.02f(sec) \n",
+              $fz / 1024, $fz, // minified size
+              $loadedFileSize / 1024, $loadedFileSize, // source size
+              ($fz / ($loadedFileSize + 1)) * 100, // size optimization
+              time() - $perfPoint); // elapsed time
     }
 }
 
@@ -186,6 +201,7 @@ array_shift($argv);
 while ($v = array_shift($argv)) {
     switch ($v) {
     case "-g":      $compiler = "g"; break;
+    case "-G":      $compiler = "G"; break;
     case "-y":      $compiler = "y"; break;
     case "-m":      $compiler = "m"; break;
     case "-mb":     $mobile  = true; break;

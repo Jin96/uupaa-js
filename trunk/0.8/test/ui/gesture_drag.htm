@@ -5,7 +5,6 @@
 <script src="../../src/ui/zindex.js"></script>
 <script src="../../src/ui/shim.js"></script>
 <script src="../../src/ui/dragbase.js"></script>
-<script src="../../src/css/box.js"></script>
 <script src="../../src/misc/matrix2d.js"></script>
 <style>
 html, body {
@@ -38,7 +37,8 @@ uu.ready("window", function(uu) {
     };
 
     uu.tag("img").forEach(function(node, i) {
-        uu.css.toAbsolute(node);
+        uu.css.position(node, "absolute");
+
         uu.fx(node, 500, { o: 0.4, x: 400, y: 400 });
         uu.fx(node, 500, { x: (i % 5) * 80 + i * 20,
                            y: (i % 5) * 80 + i * 20 });
