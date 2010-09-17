@@ -5,9 +5,9 @@
 uu.ready(function() {
 
     uu.Class.singleton("A1", {
-        handleEvent:  function(evt, node, src) {
+        handleEvent:  function(evt) {
             alert("click");
-            uu.event.unbind(node);
+            uu.event.unbind(evt.node);
         }
     });
 

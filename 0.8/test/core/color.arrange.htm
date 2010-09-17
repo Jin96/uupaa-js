@@ -2,7 +2,6 @@
 <title>color - hue</title>
 
 <script src="../../src/uupaa.js"></script>
-<script src="../../src/test/test.js"></script>
 
 <style>
 html, body {
@@ -22,14 +21,19 @@ step1. Select Mode:
 <input type="button" value="Complementary" onclick="Comp();draw(lastColor)" />
 <hr />
 step2. Select Hue(0 ~ 360):
-<input type="range" value="0" min="0" max="360"
-       onchange="draw({ h: this.value, s: 100, v: 100, l: 50, a: 1 })" />
+<input id="range" type="range" value="0" min="0" max="360" ui="Slider">
 <span id="rangeValue">0</span>
 
 <hr />
 <div id="colorTable"></div>
 
 <script>
+uu.ready(function(uu) {
+    uu.change(uu.id("range"), function(evt) {
+        draw({ h: evt.node.value, s: 100, v: 100, l: 50, a: 1 });
+    });
+    uu.ui();
+});
 var type = "HSV";
 var method = "toString";
 var lastColor = uu.color("#000").hsla();
@@ -57,7 +61,7 @@ function draw(hash) {
         for (x = 0; x < xz; ++x) {
             e = document.getElementById("id" + uu.hash.num2dd[y] + x);
             bg = uu.color(uu.f("hsl(@,@%,@%)", hash.h || 0, sary[x], lary[y]))[method]();
-            e.style.backgroundColor = bg + ""; // .toString();
+            e.style.backgroundColor = bg.toString();
         }
     }
 }
