@@ -2999,7 +2999,7 @@ function uucssrect(node,           // @param Node:
     //  [1][offset from LayoutParentNode] uu.css.rect(<div>)         -> { x: 100, y: 100, w: 100, h: 100, from: <?> }
     //  [2][offset from AncestorNode]     uu.css.rect(<div>, <html>) -> { x: 200, y: 200, w: 100, h: 100, from: <html> }
 
-    var cs = uucss(node), position,
+    var cs = uucss(node), position, body = doc.body,
         x = 0,
         y = 0,
         w = 0, // offsetWidth  = node.style.width  + padding + border
@@ -3033,7 +3033,7 @@ function uucssrect(node,           // @param Node:
                 y = parseInt(cs.top);
                 from = n.offsetParent;
             } else {
-                while (n && n !== root) {
+                while (n && n !== body) {
                     x += n.offsetLeft || 0;
                     y += n.offsetTop  || 0;
                     n  = n.offsetParent;
@@ -3049,7 +3049,7 @@ function uucssrect(node,           // @param Node:
             }
         } else {
             // offset from AncestorNode
-            while (n && n !== root) {
+            while (n && n !== body) {
                 x += n.offsetLeft || 0;
                 y += n.offsetTop  || 0;
                 n  = n.offsetParent;
@@ -3074,14 +3074,14 @@ function uucssposition(node,  // @param Node:
     case "s":   ns.position = "static"; break;
     case "a":   rect = uucssrect(node); // offset from foster
                 box = uucssbox(node, _false, 0x4); // margin only
-                ns.position = "absolute";
                 ns.left = (rect.x - box.m.l) + "px"; // margin.left
                 ns.top  = (rect.y - box.m.t) + "px"; // margin.top
+                ns.position = "absolute";
                 break;
     case "r":   cs = uucss(node); // get computed style
-                ns.position = "relative";
                 ns.left = cs.left;
                 ns.top  = cs.top;
+                ns.position = "relative";
     }
     return node;
 }

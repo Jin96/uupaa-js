@@ -49,7 +49,7 @@ function uuuidragbase(evt,      // @param event:
         if (option.transform) {
             if (!_touch && evt.mouse == 1) { // 1 is middle click
                 dragInfo.mode = dragInfo.mode ? 0 : 1;
-                if (!uu.ie) { // [IE] buggy
+                if (!uu.ie678) { // [IE] buggy
                     node.style.outline = dragInfo.mode ? "2px solid blue" : "";
                 }
                 return;
