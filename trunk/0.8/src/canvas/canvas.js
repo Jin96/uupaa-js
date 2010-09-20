@@ -1778,7 +1778,7 @@ function build(canvas) { // @param Node: <canvas>
                          // @return Node:
     var ctx,
         // [ASYNC] initialized notify callback handler
-        onload = "uuCanvasSilverlightOnLoad" + uu.guid();
+        onload = "uuCanvasSilverlightOnLoad" + uu.number();
 
     // CanvasRenderingContext.getContext
     canvas.getContext = function() {
@@ -3171,7 +3171,7 @@ function build(canvas) { // @param Node: <canvas>
     };
 
     ctx = new uu.canvas.Flash(canvas);
-    ctx._id = "external" + uu.guid() + "x" + (+new Date).toString(16);
+    ctx._id = "external" + uu.number() + "x" + (+new Date).toString(16);
 
     uu.dmz[ctx._id] = flashCanvasReadyCallback;
 
@@ -3623,7 +3623,7 @@ function drawImage(image, a1, a2, a3, a4, a5, a6, a7, a8) {
         // peek copy ready state
         //   js -> as -> js callback
         ++this._innerLock;
-        this._view.addJsCallback(guid = uu.guid());
+        this._view.addJsCallback(guid = uu.number());
 
         uu.dmz[this._id + guid] = function() {
             --ctx._innerLock; // unlock

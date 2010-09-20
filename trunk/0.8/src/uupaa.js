@@ -45,6 +45,7 @@ isArray || (isArray = Array.isArray = fallbackIsArray); // [FALLBACK]
 
 // --- minify (http://d.hatena.ne.jp/uupaa/20100730) ---
 var _addEventListener = "addEventListener",
+    _hasOwnProperty = "hasOwnProperty",
     _getAttribute = "getAttribute",
     _setAttribute = "setAttribute",
     _toLowerCase = "toLowerCase",
@@ -85,7 +86,7 @@ var _addEventListener = "addEventListener",
     _nodeiddb = {},                 // { nodeid: node, ... }
     _nodeidnum = 0,                 // nodeid counter
     _tokenCache = {},               // { css-selector-expression: token, ... } for uu.query
-    _guidCounter = 0,               // uu.guid
+    _guidCounter = 0,               // uu.number
 //{@storage
     _storage = {
         info: function(used, max, pair, backend) {
@@ -182,10 +183,10 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //  uu.type.NODE         - 11: Node (HTMLElement)
                                     //  uu.type.FAKEARRAY    - 12: FakeArray (Arguments, NodeList, ...)
     complex:        uucomplex,      // uu.complex(key:String/Hash = void, value:String/Number = void):Number
-                                    //  [1][get items] uu.complex() -> 1
-                                    //  [2][set items] uu.complex({ key: value, ... }) -> 2
-                                    //  [3][get item]  uu.complex(key) -> 3
-                                    //  [4][set item]  uu.complex(key, value) -> 4
+                                    //  [1][get items]  uu.complex() -> 1
+                                    //  [2][get item]   uu.complex(key) -> 2
+                                    //  [3][set item]   uu.complex(key, value) -> 3
+                                    //  [4][set items]  uu.complex({ key: value, ... }) -> 4
     isNumber:       isNumber,       // uu.isNumber(search:Mix):Boolean
     isString:       isString,       // uu.isString(search:Mix):Boolean
     isFunction:     isFunction,     // uu.isFunction(search:Mix):Boolean
@@ -210,8 +211,10 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
     clone:          uuclone,        // uu.clone(source:Hash/Array):Hash/Array - shallow copy
     values:         uuvalues,       // uu.values(source:Hash/Array):Array
     indexOf:        uuindexof,      // uu.indexOf(source:Hash/Array, searchValue:Mix):Number/String/void
-    hash:           uuhash,         // uu.hash(source:String):Hash
-                                    //  [1][String to Hash] uu.hash("key1,a,key2,b") -> { key1: "a", key2: "b" }
+    hash:           uuhash,         // uu.hash(source:JointString, splitter:String/RegExp = /[,;:]/):Hash
+                                    //  [1][String to Hash] uu.hash("a,1,b,2") -> { a: "1", b: "2" }
+                                    //  [2][String to Hash] uu.hash("a:1,b:2") -> { a: "1", b: "2" }
+                                    //  [3][String to Hash] uu.hash("a:1;b:2") -> { a: "1", b: "2" }
     array:    uumix(uuarray, {      // uu.array(source:Array/Mix/NodeList/Arguments,
                                     //          sliceStart:Number = void,
                                     //          sliceEnd:Number = void):Array+Hash - Array + { first, last }
@@ -573,8 +576,10 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //              h: 23, m: 59, s: 59, ms: 999,
                                     //              time: unix_time, ISO(), GMT() }
     // --- NUMBER ---
-    guid:           uuguid,         // uu.guid():Number - build GUID
-    range:          uurange,        // uu.range(min:Number, value:Number, max:Number):Number
+    number:   uumix(uunumber, {     // uu.number():Number - unique number(guid)
+        range:      uunumberrange,  // uu.number.range(min:Number, value:Number, max:Number):Number
+        expand:     uunumberexpand  // uu.number.expand(current:Number, value:String/Number, fn:Function = parseFloat):Number
+    }),
     // --- EVALUATION ---
     ready:    uumix(uuready, {      // uu.ready(readyEventType:IgnoreCaseString = "dom", callback:Function, ...)
         fire:       uureadyfire,    // uu.ready.fire(readyEventType:CaseInsenseString, param:Mix = document)
@@ -659,7 +664,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //  [3][chop filename] uu.url.dir("/file.ext")                       -> "/"
                                     //  [4][through]       uu.url.dir("/")                               -> "/"
                                     //  [5][supply slash]  uu.url.dir("")                                -> "/"
-        split:      uuurlsplit      // uu.url.split(url:URLString/PathString):Array
+        split:      uuurlsplit      // uu.url.split(url:URLString/PathString):Array+Hash - { dir, file }
                                     //  [1][split dir | file.ext] uu.url.split("http://example.com/dir/file.ext") -> ["http://example.com/dir/", "file.ext"]
     }),
     qs:             uuqs,           // uu.qs(queryString:QueryString/Hash, add:Hash):QueryString/Hash
@@ -689,16 +694,15 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
 //}@test
     // --- UI ---
 //{@ui
-    ui:       uumix(uuui, {         // uu.ui(uiname:String = "", var_args ...):Node/NodeArray
-                                    //  [1][activate] uu.ui() -> [<div ui="Slider"><input type="range"/></div>, ...]
-                                    //  [2][create]   uu.ui("Slider", { step: 2 }) -> [<div ui="Slider" />]
+    ui:       uumix(uuui, {         // uu.ui(expr:StringArray/String = "", context:Node = <body>):InstanceArray
+                                    //  [1][query all UI]         uu.ui.query() -> [<div>.instance, ...]
+                                    //  [2][query Slider]         uu.ui.query("Slider", <body>) -> [<div>.instance, ...]
+                                    //  [3][query Slider and Tab] uu.ui.query(["Slider", "Tab"], <body>) -> [<div>.instance, ...]
+                                    //  [4][query expression]     uu.ui.query("#ui>div[ui=Slider]", <body>) -> [<div>.instance, ...]
         bind:       uuuibind,       // uu.ui.bind(uiname:String, callback:Hash)
-        query:      uuuiquery       // uu.ui.query(expr:StringArray/String = "", context:Node = <body>):NodeArray
-                                    //  [1][query all UI]         uu.ui.query() -> [<div>, ...]
-                                    //  [2][query Slider]         uu.ui.query("Slider", <body>) -> [<div>, ...]
-                                    //  [3][query Slider and Tab] uu.ui.query(["Slider", "Tab"], <body>) -> [<div>, ...]
-                                    //  [4][query expression]     uu.ui.query("#ui>div[ui=Slider]", <body>) -> [<div>, ...]
-                                    //  [5][get UI instance]      uu.ui.query("Slider")[0].instance -> uu.Class.Slider instance
+        build:      uuuibuild       // uu.ui.build(uiname:String = "", var_args ...):Node/NodeArray
+                                    //  [1][build]      uu.ui("Slider", { step: 2 }) -> [<div ui="Slider" />]
+                                    //  [2][transform]  uu.ui() -> [<div ui="Slider"><input type="range"/></div>, ...]
     }),
 //}@ui
     // --- OTHER ---
@@ -811,11 +815,17 @@ uu.config.baseDir || (uu.config.baseDir =
 
 // --- MsgPump class ---
 MsgPump[_prototype] = {
-    send:           uumsgsend,      // MsgPump.send(address:NodeArray/Array/Mix, message:String, param:Mix = void):Array/Mix
+    send:           uumsgsend,      // MsgPump.send(address:NodeArray/InstanceArray/Array/Mix,
+                                    //              message:String,
+                                    //              param1:Mix = void,
+                                    //              param2:Mix = void):Array/Mix
                                     //  [1][multicast] MsgPump.send([instance, ...], "hello") -> ["world!", ...]
                                     //  [2][unicast  ] MsgPump.send(instance, "hello") -> ["world!"]
                                     //  [3][broadcast] MsgPump.send(null, "hello") -> ["world!", ...]
-    post:           uumsgpost,      // MsgPump.post(address:NodeArray/Array/Mix, message:String, param:Mix = void)
+    post:           uumsgpost,      // MsgPump.post(address:NodeArray/InstanceArray/Array/Mix,
+                                    //              message:String,
+                                    //              param1:Mix = void,
+                                    //              param2:Mix = void)
                                     //  [1][multicast] MsgPump.post([instance, ...], "hello")
                                     //  [2][unicast  ] MsgPump.post(instance, "hello")
                                     //  [3][broadcast] MsgPump.post(null, "hello")
@@ -1328,7 +1338,7 @@ function uujsonp(url,        // @param String: "http://example.com?callback=@"
                              //     ok      - Boolean:
     var timeout = option.timeout || 10,
         method = option.method || "callback",
-        guid = uuguid(),
+        guid = uunumber(),
         node = uumix(newNode("script"), uujs.attr);
 
     url = uuf(url, method);
@@ -1414,14 +1424,14 @@ function uutype(mix) { // @param Mix: search literal/object
 // uu.complex - complex type detection
 function uucomplex(key,     // @param String/Hash(= void):
                    value) { // @param String/Number(= void): 1 ~ 4
-    //  [1][get items] uu.complex() -> 1
-    //  [2][set items] uu.complex({}) -> 2
-    //  [3][get item]  uu.complex(key) -> 3
-    //  [4][set item]  uu.complex(key, value) -> 4
+    //  [1][get items]  uu.complex() -> 1
+    //  [2][get item]   uu.complex(key) -> 2
+    //  [3][set item]   uu.complex(key, value) -> 3
+    //  [4][set items]  uu.complex({ key: value, ... }) -> 4
 
     return key === void 0 ? 1
-                          : value !== void 0 ? 4
-                                             : typeof key === _string ? 3 : 2;
+                          : value !== void 0 ? 3
+                                             : typeof key === _string ? 2 : 4;
 }
 
 // uu.isNumber - is number
@@ -1533,9 +1543,8 @@ function uukeys(source,           // @param Hash/Array: source
             return keys(source);
         }
         for (i in source) {
-            if (source.hasOwnProperty(i)) {
-                rv[++ri] = __enumValues__ ? source[i] : i;
-            }
+            source[_hasOwnProperty](i) &&
+                (rv[++ri] = __enumValues__ ? source[i] : i);
         }
     }
     return rv;
@@ -1551,15 +1560,22 @@ function uuvalues(source) { // @param Hash/Array: source
 }
 
 // uu.hash - to hash
-function uuhash(source) { // @param String: "key1,a,key2,b"
-                          // @return Hash: { key1: "a", key2: "b" }
-    var rv = {}, ary = source.split(","), i = 0, iz = ary.length;
+function uuhash(source,     // @param JointString: "a,1,b,2"
+                splitter) { // @param String/RegExp(= /[,;:]/): splitter
+                            // @return Hash: { a: "1", b: "2" }
+
+    //  [1][String to Hash] uu.hash("a,1,b,2") -> { a: "1", b: "2" }
+    //  [2][String to Hash] uu.hash("a:1,b:2") -> { a: "1", b: "2" }
+    //  [3][String to Hash] uu.hash("a:1;b:2") -> { a: "1", b: "2" }
+
+    var rv = {}, ary = source.split(splitter || uuhash._), i = 0, iz = ary.length;
 
     for (; i < iz; i += 2) {
         rv[ary[i]] = ary[i + 1];
     }
     return rv;
 }
+uuhash._ = /[,;:]/; // default splitter
 
 // uu.array - to array + slice
 function uuarray(source,     // @param Array/Mix/NodeList/Arguments: source
@@ -1720,7 +1736,7 @@ function uuindexof(source,        // @param Hash/Array: source
         return source[_indexOf](searchValue);
     }
     for (var key in source) {
-        if (source[key] === searchValue && source.hasOwnProperty(key)) {
+        if (source[key] === searchValue && source[_hasOwnProperty](key)) {
             return key; // String
         }
     }
@@ -1845,7 +1861,7 @@ function uuattr(node,    // @param Node:
 
     // [IE6][IE7] for     -> htmlFor   class     -> className
     // [WEB STD]  htmlFor -> for       className -> class
-    switch (uucomplex(key, value)) { // 1: (), 2: ({}), 3: (k), 4: (k,v)
+    switch (uucomplex(key, value)) { // 1: (), 2: (k), 3: (k,v), 4: ({})
     case 1:
 /*{@mb*/    if (!uuready[_getAttribute]) { // [IE6][IE7][IE8]
                 for (ary = node.attributes; attr = ary[i++]; ) {
@@ -1859,13 +1875,13 @@ function uuattr(node,    // @param Node:
                 }
 /*{@mb*/    } /*}@mb*/
             return rv;
-    case 2: for (attr in key) {
+    case 2: // [IE6] tagindex, colspan is number
+            return (node[_getAttribute](fix[key] || key, 2) || "") + "";
+    case 3: node[_setAttribute](fix[key] || key, value);
+            break;
+    case 4: for (attr in key) {
                 node[_setAttribute](fix[attr] || attr, key[attr]);
             }
-            break;
-    case 3: // [IE6] tagindex, colspan is number
-            return (node[_getAttribute](fix[key] || key, 2) || "") + "";
-    case 4: node[_setAttribute](fix[key] || key, value);
     }
     return node;
 }
@@ -1889,22 +1905,22 @@ function uudata(node,    // @param Node:
 
     var rv = {}, i, prefix = "data-";
 
-    switch (uucomplex(key, value)) { // 1: (), 2: ({}), 3: (k), 4: (k,v)
+    switch (uucomplex(key, value)) { // 1: (), 2: (k), 3: (k,v), 4: ({})
     case 1: for (key in node) {
                 key[_indexOf](prefix) || (rv[key.slice(5)] = node[key]); // "data-*" -> "*"
             }
             return rv;
-    case 2: for (i in key) {
-                node[prefix + i] = key[i];
-            }
-            break;
-    case 3: return node[prefix + key]; // Mix or undefined
-    case 4: if (key === "*") {
+    case 2: return node[prefix + key]; // Mix or undefined
+    case 3: if (key === "*") {
                 for (key in uudata(node)) {
                     node[prefix + key] = value;
                 }
             } else {
                 node[prefix + key] = value;
+            }
+            break;
+    case 4: for (i in key) {
+                node[prefix + i] = key[i];
             }
     }
     return node;
@@ -1949,24 +1965,9 @@ function uucss(node,    // @param Node:
         fuzzy, // either "text-align" or "textAlign"
         right; // right "textAlign" style
 
-    switch (uucomplex(key, value)) { // 1: (), 2: ({}), 3: (k), 4: (k,v)
-    case 4: key = uupair(key, value);
-    case 2: for (fuzzy in key) {
-                value = key[fuzzy];
-                right = fix[fuzzy] || fuzzy;
-
-                if (right === opacity) {
-                    uucssopacity(node, +value);
-                } else {
-                    if (typeof value === _number) {
-                        uucss.care[right] || (value += "px"); // number -> pixel value
-                    }
-                    style[right] = value;
-                }
-            }
-            break;
+    switch (uucomplex(key, value)) { // 1: (), 2: (k), 3: (k,v), 4: ({})
     case 1:                                         // uu.css(node)
-    case 3: if (key === undef || key === "px") {    // uu.css(node, "px")
+    case 2: if (key === undef || key === "px") {    // uu.css(node, "px")
 /*{@mb*/        if (getComputedStyle) { /*}@mb*/
                     return getComputedStyle(node, 0);
 /*{@mb*/        }
@@ -1982,6 +1983,20 @@ function uucss(node,    // @param Node:
             }
             return (node.currentStyle || {})[right] || "";
 //}@mb
+    case 3: key = uupair(key, value);
+    case 4: for (fuzzy in key) {
+                value = key[fuzzy];
+                right = fix[fuzzy] || fuzzy;
+
+                if (right === opacity) {
+                    uucssopacity(node, +value);
+                } else {
+                    if (typeof value === _number) {
+                        uucss.care[right] || (value += "px"); // number -> pixel value
+                    }
+                    style[right] = value;
+                }
+            }
     }
     return node;
 }
@@ -2035,7 +2050,7 @@ function uuviewport() { // @return Hash: { innerWidth, innerHeight,
 function uuinterval(callback, // @param Function: callback
                     arg) {    // @param Mix(= void): arg
                               // @return Number: id
-    var id = uuguid();
+    var id = uunumber();
 
     uuinterval.ary.push(id, callback, arg);
     if (uuinterval.base === null) {
@@ -2137,7 +2152,7 @@ function uufx(node,     // @param Node: animation target node
         tm:       0,
         dur:      Math.max(duration, 1),
         fin:      _false,
-        guid:     uuguid(),
+        guid:     uunumber(),
         option:   option
     });
     data.id || (data.id = uuinterval(uufxloop, node));
@@ -2298,6 +2313,7 @@ function uufxbuild(node, data, queue, option) {
     function ezfn(v0, v1, ez) {
         return "(b=" + v0 + ",c=" + (v1 - v0) + "," + uu.fx.easing[ez] + ")";
     }
+/*
     // 123.4  -> 123.4
     // "+123" -> curt + 123
     // "-123" -> curt - 123
@@ -2314,6 +2330,7 @@ function uufxbuild(node, data, queue, option) {
                                                              //  "-10".replace() -> "-10"
                c < 6 ? fn(curt / parseFloat(end.slice(1))) : fn(end);
     }
+ */
 
     // fx1 = opacity, gain/dur, width, height
     // fx2 = node.filters, uu.hash.num2hh,
@@ -2347,7 +2364,8 @@ function uufxbuild(node, data, queue, option) {
                     uuready.opacity || (uucssopacity(node, sv),
                                         node.style[_visibility] = "visible"); // [FIX]
 //}@mb
-                    ev = unitNormalize(sv, ev, parseFloat);
+//                  ev = unitNormalize(sv, ev, parseFloat);
+                    ev = uunumberexpand(sv, ev);
                     /*
                      *  b = sv;
                      *  c = ev - sv;
@@ -2384,7 +2402,8 @@ function uufxbuild(node, data, queue, option) {
                     break;
                 case 3: // width, height:
                     sv = parseInt(cs[w]) || 0;
-                    ev = unitNormalize(sv, ev, parseInt);
+//                  ev = unitNormalize(sv, ev, parseInt);
+                    ev = uunumberexpand(sv, ev, parseInt);
                     rv += 'fx1=fin?'+ev+':'+ezfn(sv,ev,ez)
                        +  ';fx1=fx1<0?0:fx1;style.'+w+'=(fx1|0)+"px";';
                     break;
@@ -2392,7 +2411,8 @@ function uufxbuild(node, data, queue, option) {
                     sv = n ? (n > 4 ? node.offsetTop  - parseInt(cs.marginTop)
                                     : node.offsetLeft - parseInt(cs.marginLeft))
                            : parseInt(cs[w]) || 0;
-                    ev = unitNormalize(sv, ev, parseInt);
+//                  ev = unitNormalize(sv, ev, parseInt);
+                    ev = uunumberexpand(sv, ev, parseInt);
                     rv += 'style.'+w+'=((fin?'+ev+':'+ezfn(sv,ev,ez)+')|0)+"px";';
                 }
                 reverseOption[w] = [sv, ez];
@@ -3494,8 +3514,8 @@ function uuclass(className,      // @param String: "Class"
             args = arguments,
             Super = that.superClass || 0;
 
-        that.name = Class;       // class name
-        that.uuguid = uu.guid(); // instance guid
+        that.name = Class;        // class name
+        that.uuguid = uunumber(); // instance guid
         that.msgbox || (that.msgbox = uunop);
         uu.msg.bind(that);       // bind MsgPump
 
@@ -3539,8 +3559,8 @@ function uuclasssingleton(className,      // @param String: class name
             instance = "instance";
 
         if (!self[instance]) {
-            that.name = className;   // class name
-            that.uuguid = uu.guid(); // instance guid
+            that.name = className;    // class name
+            that.uuguid = uunumber(); // instance guid
             that.init && that.init.apply(that, arg);
             that.msgbox || (that.msgbox = uunop);
             uu.msg.bind(that);       // bind MsgPump
@@ -3564,12 +3584,13 @@ function MsgPump() {
 }
 
 // MsgPump.send - send a message synchronously
-function uumsgsend(address, // @param NodeArray/Array/Mix: address or guid or UINode
-                            //           [instance, ...] is multicast
-                            //           instance is unicast
-                            //           null is broadcast
-                   message, // @param String: message
-                   param) { // @param Mix(= void):
+function uumsgsend(address,  // @param NodeArray/InstanceArray/Array/Mix: address or guid or UINode
+                             //           [instance, ...] is multicast
+                             //           instance is unicast
+                             //           null is broadcast
+                   message,  // @param String: message
+                   param1,   // @param Mix(= void): param1
+                   param2) { // @param Mix(= void): param2
                             // @return Arra: [result, ...]
 
     //  [1][multicast] MsgPump.send([instance, ...], "hello") -> ["world!", ...]
@@ -3582,18 +3603,19 @@ function uumsgsend(address, // @param NodeArray/Array/Mix: address or guid or UI
     for (; to = ary[i++]; ) {
         obj = this.addr[to.instance ? to.instance.uuguid
                                     : (to.uuguid || to || 0)];
-        obj && (rv[++ri] = obj.msgbox(message, param));
+        obj && (rv[++ri] = obj.msgbox(message, param1, param2));
     }
     return rv;
 }
 
 // MsgPump.post - send a message asynchronously
-function uumsgpost(address, // @param Array/Mix: address or guid or UINode
-                            //           [instance, ...] is multicast
-                            //           instance is unicast
-                            //           null is broadcast
-                   message, // @param String: message
-                   param) { // @param Mix(= void): param
+function uumsgpost(address,  // @param NodeArray/InstanceArray/Array/Mix: address or guid or UINode
+                             //           [instance, ...] is multicast
+                             //           instance is unicast
+                             //           null is broadcast
+                   message,  // @param String: message
+                   param1,   // @param Mix(= void): param1
+                   param2) { // @param Mix(= void): param2
 
     //  [1][multicast] MsgPump.post([instance, ...], "hello")
     //  [2][unicast  ] MsgPump.post(instance, "hello")
@@ -3603,7 +3625,7 @@ function uumsgpost(address, // @param Array/Mix: address or guid or UINode
 
     setTimeout(function() {
         that.send(address ? uuarray(address) : that.cast,
-                  message, param);
+                  message, param1, param2);
     }, 0);
 }
 
@@ -3960,7 +3982,7 @@ function uueventattach(node,         // @param Node:
         if (evaluator.fnguid) {
             fnguid = evaluator.fnguid;
         } else {
-            evaluator.fnguid = uuguid();
+            evaluator.fnguid = uunumber();
             fnguid = evaluator.fnguid;
         }
         if (__detach__) {
@@ -3984,11 +4006,9 @@ function uueventattach(node,         // @param Node:
 //}@mb
 
 //{@ui
-    var refnode = uu.data(node, "uurefnode"); // node["data-uurefnode"]
-
-    if (refnode) {
+    if (node.instance) {
         //
-        // uu.bind(<input type="range" data-uurefnode=<div instance={uu.Class.Slider}> />)
+        // uu.bind(<input type="range" instance={uu.Class.Slider} />)
         //
         //              | post message
         //              v
@@ -3997,8 +4017,9 @@ function uueventattach(node,         // @param Node:
         //      <div class="Slider*Grip" />
         // </div>
         //
-        uu.msg.post(refnode, "event", { bind: !__detach__, node: node,
-                                        type: eventType, callback: evaluator });
+        uu.msg.post(node.instance, "event",
+                    { bind: !__detach__, node: node,
+                      type: eventType, callback: evaluator });
     }
 //}@ui
 }
@@ -5237,7 +5258,7 @@ function uuentity(str) { // @param String:
 uumix(uuentity, {
     to:     /[&<>"]/g,
     from:   /&(?:amp|lt|gt|quot);/g,
-    hash:   uuhash('&,&amp;,<,&lt;,>,&gt;,",&quot;,&amp;,&,&lt;,<,&gt;,>,&quot;,"'),
+    hash:   uuhash('&,&amp;,<,&lt;,>,&gt;,",&quot;,&amp;,&,&lt;,<,&gt;,>,&quot;,"', ","),
     uffff:  /\\u([0-9a-f]{4})/g // \u0000 ~ \uffff
 });
 
@@ -5609,11 +5630,11 @@ parseURL.http = /^(\w+):\/\/([^\/:]+)(?::(\d*))?([^ ?#]*)(?:\?([^#]*))?(?:#(.*))
 
 // uu.url.split - split dir/file "dir/file.ext" -> ["dir/", "file.ext"]
 function uuurlsplit(url) { // @param URLString/PathString: url or path
-                           // @return Array: ["dir/", "file.ext"]
+                           // @return Array+Hash: ["dir/", "file.ext"] + { dir: "dir/", file: "file.ext" }
     var rv = [], ary = url.split("/");
 
-    rv[1] = ary.pop(); // file
-    rv[0] = ary.join("/") + "/";
+    rv[1] = rv.file = ary.pop(); // file
+    rv[0] = rv.dir  = ary.join("/") + "/";
     return rv;
 }
 
@@ -5740,7 +5761,7 @@ function uupuff(source                   // @param Mix/FormatString: source obje
     var args = arguments;
 
     alert(args.length > 1 || isString(source) ? uuf.apply(this, args)
-                                              : uujsonencode(source));
+                                              : uujsonencode(source, 0, 1));
 }
 
 // uu.log - add log
@@ -5748,7 +5769,7 @@ function uulog(log                      // @param Mix: log data
                /* , var_args, ... */) { // @param Mix: var_args
     var args = arguments, context = uuid("uulog"),
         txt = args.length > 1 || isString(log) ? uuf.apply(this, args)
-                                               : uujsonencode(log);
+                                               : uujsonencode(log, 0, 1);
 
     context || uunodeadd(context = uu.ol({ id: "uulog" }));
 
@@ -5783,6 +5804,11 @@ function uuok(title,    // @param String: title
     if (operator) {
         tm = +new Date;
         r = uuokjudge(lval, operator, rval);
+//{@debug
+        if (!r) {
+            debugger;
+        }
+//}@debug
         tm = ((+new Date) - tm);
         ++db[r ? "ok" : "ng"];
         ++db.total;
@@ -5864,6 +5890,7 @@ function uuokjudge(lval,     // @param Mix: left hand set
     }
     return +rv;
 }
+
 // uu.ng - assert
 function uung(title,    // @param String: title
               lval,     // @param Mix: left handset
@@ -5873,6 +5900,9 @@ function uung(title,    // @param String: title
     var r = uuokjudge(lval, operator, rval);
 
     if (!r) {
+//{@debug
+        debugger;
+//}@debug
         throw new Error(uuf("@: @ @ @", title,
                             uujsonencode(lval, 1), operator,
                             rval ? uujsonencode(rval, 1) : ""));
@@ -5911,8 +5941,11 @@ function uujsondecode(jsonString, // @param JSONString:
 }
 
 // inner - json inspect
-function uujsonencode(mix, esc) {
-    var ary, type = uutype(mix), w, ai = -1, i, iz, q = '"', x, prefix = "";
+function uujsonencode(mix,     // @param Mix: value
+                      esc,     // @param Boolean(= false): escape
+                      space) { // @param Boolean(= false): add space
+    var ary = [], type = uutype(mix), w, ai = -1, i, iz, q = '"', x,
+        sp = space ? " " : "";
 
     if (mix === win) {
         return '"window"'; // window -> String("window")
@@ -5935,8 +5968,9 @@ function uujsonencode(mix, esc) {
                                 w = w.slice(9, w[_indexOf]("(")); // )
                             }
 //}@mb
-                            prefix = q + w + "()" + q;
-    case uutype.HASH:       ary = []; break;
+                            ary.push('"function"' + ":" + sp + q + w + q);
+                            ++ai;
+    case uutype.HASH:       break;
     case uutype.NULL:
     case uutype.BOOLEAN:    return mix + "";
     case uutype.NODE:       return q + uunodepath(mix) + q; // node path
@@ -5951,10 +5985,10 @@ function uujsonencode(mix, esc) {
                    }) + q;
     case uutype.ARRAY:
     case uutype.FAKEARRAY:
-        for (ary = [], i = 0, iz = mix.length; i < iz; ++i) {
-            ary[++ai] = uujsonencode(mix[i], esc);
+        for (i = 0, iz = mix.length; i < iz; ++i) {
+            ary[++ai] = uujsonencode(mix[i], esc, space);
         }
-        return "[" + ary + "]";
+        return "[" + ary.join("," + sp) + "]";
     default: // UNDEFINED
         return "";
     }
@@ -5963,15 +5997,16 @@ function uujsonencode(mix, esc) {
         for (i in mix) {
             if (typeof mix[i] === _string && (w || i != (+i + ""))) { // isFinite(i)
                 w && (i = mix.item(i));
-                ary[++ai] = q + i + q + ':' + q + mix[i] + q;
+                ary[++ai] = q + i + q + ':' + sp + q + mix[i] + q;
             }
         }
     } else { // is Hash
         for (i in mix) {
-            ary[++ai] = q + i + q + ":" + uujsonencode(mix[i], esc);
+            mix[_hasOwnProperty](i) &&
+                (ary[++ai] = q + i + q + ":" + sp + uujsonencode(mix[i], esc, space));
         }
     }
-    return prefix + "{" + ary + "}";
+    return "{" + sp + ary.join("," + sp) + sp + "}";
 }
 
 // --- date ---
@@ -6086,9 +6121,6 @@ function Color(r,   // @param Number: red   (0 ~ 255)
     this.rgba = "rgba(" + r + "," + g + "," + b + "," + a + ")";
 }
 Color[_prototype] = {
-    valueOf:    function() { // @return Number: 0xRRGGBB.AA
-                    return (this.r << 16) + (this.g <<  8) + this.b + this.a;
-                },
     toString:   function() { // @return String: "#000000" or "rgba(0,0,0,0)"
                     return uuready.color.rgba ? this.rgba : this.hex;
                 },
@@ -6604,40 +6636,49 @@ uuready("window", function() {
 // --- AUDIO ---
 //{@audio
 // uu.audio
-function uuaudio(url,        // @param URLString:
-                 option,     // @param Hash:
+function uuaudio(src,        // @param URLString:
+                 option,     // @param Hash: { auto, loop, start, parent, volume }
+                             //     auto - Boolean(= true):
+                             //     loop - Boolean(= false):
+                             //     start - Number(= 0): start time
+                             //     parent - Node: parent Node
+                             //     volume - Number(= 0.5): 0.0 ~ 1.0
                  callback) { // @param Function:
-    uu("Audio", url, uumix(option, {
+    uu("Audio", src, uuarg(option, {
         auto:       _true,
         loop:       _false,
         start:      0,
         parent:     doc.body,
         volume:     0.5
-    }, 0, 0), callback);
+    }), callback);
 }
 
 uu.Class("Audio", {
-    init:           AudioInit,      // init(url:URLString, option:AudioOptionHash = {}, callback:Function)
+    init:           AudioInit,      // init(src:URLString, option:Hash, callback:Function)
     play:           AudioPlay,      // play():Boolean
+    pause:          AudioPause,     // pause()
     stop:           AudioStop,      // stop(close:Boolean = false)
-    info:           AudioInfo,      // info():Hash { text, loop, volume, start, current,
-                                    //               error, closed, playing, ended, paused,
-                                    //               url, backend }
-    option:         AudioOption,    // option(key:String, value:Number/Boolean):Number/Boolean
-                                    //  [1][set loop]    option("loop", true)
-                                    //  [2][get loop]    option("loop") -> tru
-                                    //  [3][set volume]  option("volume", 0.5)
-                                    //  [4][get volume]  option("volume") -> 0.5
-                                    //  [5][set start]   option("start", 10)
-                                    //  [6][get start]   option("start") -> 10
-                                    //  [7][set current] option("current", 10)
-                                    //  [8][get current] option("current") -> 10
+    attr:           AudioAttr,      // attr(key:String/Hash = void,
+                                    //      value:Number/Boolean = void):String/Hash/Number/Boolean
+                                    //  [1][get items] attr() -> { loop, start, volume, current,
+                                    //                             duration, status, src, backend }
+                                    //  [2][mix items] attr({ key: value, ... })
+                                    //  [3][get item]  attr(key) -> value
+                                    //  [4][set item]  attr(key, value)
+                                    //      loop - Boolean: true is loop
+                                    //      start - Nunber: 0 ~
+                                    //      volume - Number: 0.0 ~ 1.0
+                                    //      current - Nunber: 0 ~
     bind:           AudioBind,      // bind(eventTypes:String, evaluator:Function)
-    unbind:         AudioUnbind     // unbind(eventTypes:String, evaluator:Function)
+    unbind:         AudioUnbind,    // unbind(eventTypes:String, evaluator:Function)
+    msgbox:         AudioMsgBox,    // msgbox(msg:String, param:Hash):Boolean/Hash/void
+    toString:       function() {
+        return this.ao.name;
+    }
 });
 
 // Audio.init
-function AudioInit(url,        // @param URLString: "music.mp3"
+function AudioInit(src,        // @param URLString: "http://.../music.mp3", "music.mp3"
                    option,     // @param Hash: { auto, loop, start, parent, volume }
                                //   option.auto - Boolean(= false): auto play
                                //   option.loop - Boolean(= false):
@@ -6645,8 +6686,8 @@ function AudioInit(url,        // @param URLString: "music.mp3"
                                //   option.parent - Node(= <body>): <object> parent node
                                //   option.volume - Number(= 0.5): 0.0 ~ 1.0
                    callback) { // @param Function(= void): callback(this)
-    var that = this,
-        names = {
+    var that = this, config = uu.config.audio,
+        backends = {
             A: "HTML5Audio",
 /*{@mb*/    S: "SilverlightAudio",
             F: "FlashAudio",        /*}@mb*/
@@ -6655,15 +6696,16 @@ function AudioInit(url,        // @param URLString: "music.mp3"
 
     this.closed = _false;
 
-    (uu.config.audio.order || "N").split("").some(function(backendName) {
-        backendName = names[backendName] || "";
+    (config.order || "N").split("").some(function(klass) { // klass = "A"
+        klass = backends[klass] || ""; // "HTML5Audio" <- "A"
 
-        var backendClass = uuclass[backendName];
+        var backendClass = uuclass[klass];
 
         if (backendClass &&
-            ifFunction(backendClass.ready) && backendClass.isSupport(url)) {
-            uu(backendName, url, option, function(backend) {
-                that.ao = backend;
+            ifFunction(backendClass.ready) && backendClass.isSupport(src)) {
+
+            uu(klass, src, option, function(ao) { // @param AudioObjectInstance:
+                that.ao = ao;
                 callback && callback(that);
             });
             return _true;
@@ -6672,11 +6714,50 @@ function AudioInit(url,        // @param URLString: "music.mp3"
     });
 }
 
-// Audio.play
+// Audio.attr
+function AudioAttr(key,     // @param String/Hash(= void): key
+                   value) { // @param String/Number/Boolean(= void): value
+                            // @return Hash: { loop, start, volume, current,
+                            //                 status, src, backend }
+                            //   loop    - Boolean:
+                            //   start   - Number: start time
+                            //   volume  - Number/String: 0.0 ~ 1.0, "+0.1", "-0.1"
+                            //   current - Number/String: current time, 0 ~, "+10", "-10"
+                            //   status  - String: status text
+                            //   src     - String:
+                            //   backend - String: "HTML5Audio", "FlashAudio"
+    var rv = this.ao.attr(), i, val, undef;
+
+    switch (uucomplex(key, value)) { // 1: (), 2: (k), 3: (k,v), 4: ({})
+    case 1:
+    case 2: rv.closed = this.closed;
+            rv.status = rv.closed ? "closed"
+                      : rv.error  ? "error"
+                      : rv.paused ? "paused"
+                      : rv.ended  ? "ended" : "playing";
+            rv.playing = (rv.status === "playing");
+            break;
+    case 3: key = uupair(key, value);
+    case 4: for (i in key) {
+                val = key[i];
+                switch (i) {
+                case "start":
+                case "current":
+                    val = uunumberexpand(rv[i], val); break;
+                case "volume":
+                    val = uunumberrange(0, uunumberexpand(rv[i], val), 1);
+                }
+                this.ao.attr(i, val); // set(key, value)
+            }
+    }
+    return key === undef ? rv : rv[key];
+}
+
+// Audio.play - toggle play/pause
 function AudioPlay() { // @return Boolean: true is playing
                        //                  false is paused
-    switch (this.info().text) {
-    case "ended":   this.ao.currentTime(0);
+    switch (this.attr().status) {
+    case "ended":   this.ao.attr("current", 0);
     case "paused":  this.ao.play();
                     return _true;
     case "playing": this.ao.pause();
@@ -6684,75 +6765,51 @@ function AudioPlay() { // @return Boolean: true is playing
     return _false;
 }
 
+// Audio.pause - pause
+function AudioPause() {
+    if (this.attr().status === "playing") {
+        this.ao.pause();
+    }
+}
+
 // Audio.stop
 function AudioStop(close) { // @param Boolean(= false):
-    if (close) {
-        this.closed = _true;
-        this.ao.close();
-    } else {
-        this.ao.stop();
-    }
-}
-
-// Audio.info
-function AudioInfo() { // @return Hash: { text, loop, volume, start, current,
-                       //                 error, closed, playing, ended, paused,
-                       //                 url, backend }
-                       //   text    - String: status text
-                       //   loop    - Boolean:
-                       //   volume  - Number: 0.0 ~ 1.0
-                       //   start   - Number: start time
-                       //   current - Number: current time
-                       //   error   - Number: 0 is not error,
-                       //                     1 is MEDIA_ERR_ABORTED
-                       //                     2 is MEDIA_ERR_NETWORK
-                       //                     3 is MEDIA_ERR_DECODE,
-                       //                     4 is MEDIA_ERR_SRC_NOT_SUPPORTED
-                       //   closed  - Boolean:
-                       //   playing - Boolean:
-                       //   ended   - Boolean:
-                       //   url     - String:
-                       //   backend - String:
-    var rv = this.ao.info();
-
-    rv.closed = this.closed;
-    rv.playing = _false;
-
-    if (rv.closed) {
-        rv.text = "closed";
-    } else if (rv.error) {
-        rv.text = "error";
-    } else if (rv.paused) {
-        rv.text = "paused";
-    } else if (rv.ended) {
-        rv.text = "ended";
-    } else {
-        rv.playing = _true;
-        rv.text = "playing";
-    }
-    return rv;
-}
-
-// Audio.option
-function AudioOption(key,     // @param String: key
-                     value) { // @param Number/Boolean(= void):
-                              // @return Number/Boolean:
-    return value === void 0 ? this.ao.info[key]
-                            : this.ao[key](value);
+    close && (this.closed = _true);
+    this.ao.stop(close);
 }
 
 // Audio.bind
 function AudioBind(eventTypes, // @param String:
                    callback) { // @param Function:
-    this.ao.bind(eventTypes, callback);
+//  this.ao.bind(eventTypes, callback);
+    uu.bind(this.ao.audio, eventTypes, callback);
 }
 
 // Audio.unbind
 function AudioUnbind(eventTypes, // @param String:
                      callback) { // @param Function:
-    this.ao.unbind(eventTypes, callback);
+//  this.ao.unbind(eventTypes, callback);
+    uu.unbind(this.ao.audio, eventTypes, callback);
 }
 
+// Audio.msgbox
+function AudioMsgBox(msg,      // @param String: msg
+                     param1,   // @param Mix(= void): param1
+                     param2) { // @param Mix(= void): param2
+                               // @return Boolean/Hash/void:
+
+    //   [1][attr]  msgbox("attr", key:String/Hash = void,
+    //                             value:Number/Boolean = void):Boolean/String/Number
+    //   [2][play]  msgbox("play"):Boolean - true is playing, false is paused
+    //   [3][stop]  msgbox("stop", close:Boolean = false)
+
+    switch (msg) {
+    case "attr": return this.attr(param1, param2);
+    case "play": return this.play();
+    case "stop": return this.stop(param1);
+    }
+    return;
+}
 // --- initialize ---
 uuready("window", function() {
     uuready.window = uuready.audio = _true;
@@ -6973,16 +7030,16 @@ uu.Class.singleton("LocalStorage", {
     item: function(key, value) {
         var so = this.so, rv, i, iz;
 
-        switch (uucomplex(key, value)) { // 1: (), 2: ({}), 3: (k), 4: (k,v)
+        switch (uucomplex(key, value)) { // 1: (), 2: (k), 3: (k,v), 4: ({})
         case 1: for (rv = {}, i = 0, iz = so.length; i < iz; ++i) {
                     key = so.key(i);
                     rv[key] = so.getItem(key + "") || "";
                 }
                 return rv;
-        case 3: return so.getItem(key + "") || "";
-        case 4: key = uupair(key, value);
+        case 2: return so.getItem(key + "") || "";
+        case 3: key = uupair(key, value);
         }
-        for (i in key) {
+        for (i in key) { // [4]
             try {
                 so[i] = ""; // [iPhone][FIX] pre clear. http://d.hatena.ne.jp/uupaa/20100106
                 so[i] = key[i] + ""; // [IE][FIX] crash care
@@ -7023,10 +7080,10 @@ uu.Class.singleton("FlashStorage", {
         return this.so.info();
     },
     item: function(key, value) {
-        switch (uucomplex(key, value)) { // 1: (), 2: ({}), 3: (k), 4: (k,v)
+        switch (uucomplex(key, value)) { // 1: (), 2: (k), 3: (k,v), 4: ({})
         case 1: return this.so.allItem();
-        case 3: return this.so.getItem(key) || "";
-        case 4: key = uupair(key, value);
+        case 2: return this.so.getItem(key) || "";
+        case 3: key = uupair(key, value);
         }
         return this.so.setItem(key);
     },
@@ -7070,14 +7127,14 @@ uu.Class.singleton("IEStorage", {
 
         so.load(_storage.store);
 
-        switch (uucomplex(key, value)) { // 1: (), 2: ({}), 3: (k), 4: (k,v)
+        switch (uucomplex(key, value)) { // 1: (), 2: (k), 3: (k,v), 4: ({})
         case 1: idx = (so[_getAttribute](_storage.index) || "").split("\t");
                 for (rv = {}; key = idx[i++]; ) {
                     rv[key] = so[_getAttribute](key) || "";
                 }
                 return rv;
-        case 3: return so[_getAttribute](key) || "";
-        case 4: key = uupair(key, value);
+        case 2: return so[_getAttribute](key) || "";
+        case 3: key = uupair(key, value);
         }
         for (i in key) {
             try {
@@ -7145,10 +7202,10 @@ uu.Class.singleton("CookieStorage", {
     item: function(key, value) {
         var i, so = this.so, before;
 
-        switch (uucomplex(key, value)) { // 1: (), 2: ({}), 3: (k), 4: (k,v)
+        switch (uucomplex(key, value)) { // 1: (), 2: (k), 3: (k,v), 4: ({})
         case 1: return uuclone(so);
-        case 3: return so[key] || "";
-        case 4: key = uupair(key, value);
+        case 2: return so[key] || "";
+        case 3: key = uupair(key, value);
         }
         for (i in key) {
             before = doc.cookie.length;
@@ -7186,11 +7243,11 @@ uu.Class.singleton("MemStorage", {
         return _storage.info(0, Number.MAX_VALUE, uusize(this.so), "MemStorage");
     },
     item: function(key, value) {
-        switch (uucomplex(key, value)) { // 1: (), 2: ({}), 3: (k), 4: (k,v)
+        switch (uucomplex(key, value)) { // 1: (), 2: (k), 3: (k,v), 4: ({})
         case 1: return uuclone(this.so);
-        case 2: uumix(this.so, key); break;
-        case 3: return this.so[key] || "";
-        case 4: this.so[key] = value;
+        case 2: return this.so[key] || "";
+        case 3: this.so[key] = value; break;
+        case 4: uumix(this.so, key);
         }
         return _true;
     },
@@ -7205,58 +7262,74 @@ uuready("window", function() {
 //}@storage
 
 // --- NUMBER ---
-// uu.guid - get unique number
-function uuguid() { // @return Number: unique number, from 1
+// uu.number - get unique number
+function uunumber() { // @return Number: unique number, from 1
     return ++_guidCounter;
 }
 
-// uu.range - clipping value
-function uurange(min,   // @param Number: min
-                 value, // @param Number: value
-                 max) { // @param Number: max
-                        // @return Number:
+// uu.number.range - clipping value
+function uunumberrange(min,   // @param Number: min
+                       value, // @param Number: value
+                       max) { // @param Number: max
+                              // @return Number:
     return value < min ? min :
            value > max ? max : value;
+}
+
+// uu.number.expand - number expand(normalize)
+function uunumberexpand(base,  // @param Number: base / current value
+                        value, // @param String/Number: value or "{{operator}}value"
+                               //     operator - String: "+" or "-" or "*" or "/"
+                        fn) {  // @param Function(= parseFloat):
+                               // @return Number:
+    //  [1][through]       uu.number.expand(10, 20)    -> 20
+    //  [2][base + value]  uu.number.expand(10, "+10") ->  20
+    //  [3][base - value]  uu.number.expand(10, "-10") ->   0
+    //  [4][base * value]  uu.number.expand(10, "*10") -> 100
+    //  [5][base / value]  uu.number.expand(10, "/10") ->   1
+    //  [6][parseInt]      uu.number.expand(0, 1.234, parseInt) -> 1
+
+    fn = fn || parseFloat;
+    var op, rv = value, n;
+
+    if (typeof value !== _number) {
+        n  = parseFloat(value.slice(1)); // "+10.1" -> 10.1
+        op = value.charCodeAt(0) - 42;
+        rv = !op    ? base * n :     // 0 is "*"
+             op < 2 ? base + n :     // 1 is "+"
+             op < 4 ? base - n :     // 3 is "-"
+             op < 6 ? base / n : rv; // 5 is "/"
+    }
+    return fn(rv);
 }
 
 // --- UI ---
 //{@ui
 
-// uu.ui - activate or create UI component
-function uuui(uiname                  // @param String(= "")
-              /*, var_args, ... */) { // @param Mix(= void):
-                                      // @return Node/NodeArray: <div> or [<div>, ...]
+// uu.ui - query ui instance
+function uuui(expr,      // @param CSSSelectorExpressionString/StringArray/String(= ""): UI name
+              context) { // @param Node(= <body>): context
+                         // @return InstanceArray: [instance, ...]
 
-    //  [1][activate]  uu.ui() -> [<div ui="Slider"><input type="range"/></div>, ...]
-    //  [2][create]    uu.ui("Slider", { step: 2 }) -> [<div ui="Slider" />]
+    //  [1][query all UI]         uu.ui() -> [instance, ...]
+    //  [2][query Slider]         uu.ui("Slider", <body>) -> [instance, ...]
+    //  [3][query Slider and Tab] uu.ui(["Slider", "Tab"], <body>) -> [instance, ...]
+    //  [4][query expression]     uu.ui("#ui>div[ui=Slider]", <body>) -> [instance, ...]
 
-    // activate
-    if (uiname) {
-        uiname = uiname + "activate";
-        if (uiname in uuui.db) {
-            return uuui.db[uiname].apply(null, uuarray(arguments, 1));
+    var rv = [], ary, v, i = 0, r;
+
+    if (!expr) {
+        expr = "*[ui]";
+    } else if (!/\W/.test(expr)) {
+        for (r = [], ary = uuarray(expr); v = ary[i++]; ) {
+            r.push("div[ui=" + v + "]");
         }
-        return null;
+        expr = r.join(",");
     }
+    ary = uuquery(expr, context || doc.body);
 
-    // transform
-    var rv = [], ary = uutag(), i = 0, iz = ary.length,
-        fn, ctrl, method;
-
-    for (; i < iz; ++i) {
-        ctrl = uu.attr(ary[i], "ui");
-        if (ctrl) {
-            method = ctrl + "isTransform";
-
-            if (uuui.db[method] && uuui.db[method](ary[i])) {
-                method = ctrl + "transform";
-
-                if (uuui.db[method]) {
-                    fn = uuui.db[method];
-                    rv.push(fn(ary[i]));
-                }
-            }
-        }
+    for (i = 0; v = ary[i++]; ) {
+        rv.push(v.instance);
     }
     return rv;
 }
@@ -7264,36 +7337,52 @@ function uuui(uiname                  // @param String(= "")
 // uu.ui.bind - bind UI
 function uuuibind(uiname,     // @param String: UI name
                   callback) { // @param Hash: { method: callback, ...}
-                              //  method   - String:   "activate", "transform", "isTransform"
+                              //  method   - String: "build", "transform", "isTransform"
                               //  callback - Function: callback function
     for (var i in callback) {
-        uuui.db[uiname + i] = callback[i];
+        uuuibind.db[uiname + i] = callback[i];
     }
 }
-uuui.db = {}; // { name+method: callback, ... }
+uuuibind.db = {}; // { name+method: callback, ... }
 
-// uu.ui.query - query ui
-function uuuiquery(expr,      // @param CSSSelectorExpressionString/StringArray/String(= ""): UI name
-                   context) { // @param Node(= <body>): context
-                              // @return NodeArray: [Node, ...]
+// uu.ui.build - build / transform UI component
+function uuuibuild(uiname                  // @param String(= "")
+                   /*, var_args, ... */) { // @param Mix(= void):
+                                           // @return Node/NodeArray: <div> or [<div>, ...]
 
-    //  [1][query all UI]         uu.ui.query() -> [<div>, ...]
-    //  [2][query Slider]         uu.ui.query("Slider", <body>) -> [<div>, ...]
-    //  [3][query Slider and Tab] uu.ui.query(["Slider", "Tab"], <body>) -> [<div>, ...]
-    //  [4][query expression]     uu.ui.query("#ui>div[ui=Slider]", <body>) -> [<div>, ...]
-    //  [5][get UI instance]      uu.ui.query("Slider")[0].instance -> uu.Class.Slider instance
+    //  [1][build]      uu.ui("Slider", { step: 2 }) -> [<div ui="Slider" />]
+    //  [2][transform]  uu.ui() -> [<div ui="Slider"><input type="range"/></div>, ...]
 
-    if (!expr) {
-        expr = "*[ui]";
-    } else if (!/\W/.test(expr)) {
-        var r = [], ary = uuarray(expr), i = 0, iz = ary.length;
-
-        for (; i < iz; ++i) {
-            r.push("div[ui=" + ary[i] + "]");
+    // [1] build
+    if (uiname) {
+        uiname = uiname + "build";
+        if (uiname in uuuibind.db) {
+            return uuuibind.db[uiname].apply(null, uuarray(arguments, 1));
         }
-        expr = r.join(",");
+        return null;
     }
-    return uuquery(expr, context || doc.body);
+
+    // [2] transform
+    var rv = [], ary = uutag(), i = 0, iz = ary.length,
+        fn, ctrl, method,
+        db = uuuibind.db;
+
+    for (; i < iz; ++i) {
+        ctrl = uuattr(ary[i], "ui");
+        if (ctrl) {
+            method = ctrl + "isTransform";
+
+            if (db[method] && db[method](ary[i])) {
+                method = ctrl + "transform";
+
+                if (db[method]) {
+                    fn = db[method];
+                    rv.push(fn(ary[i]));
+                }
+            }
+        }
+    }
+    return rv;
 }
 //}@ui
 
@@ -7553,7 +7642,7 @@ function NodeSetEach(evaluator, // @param Function: evaluator
 
         for (; i < iz; ++i) {
             if (i in ary) {
-                r = evaluator.call(null, ary[i], i); // evaluator(value, index)
+                r = evaluator(ary[i], i); // evaluator(value, index)
                 if (r === false) {
                     break;
                 }
@@ -8584,46 +8673,58 @@ function otherFunctionFilter(ctx, j, jz, negate, ps, arg) {
 
 // uu.Class.Slider - generic Slider Widget manage class
 uu.Class("Slider", {
-    init:           init,           // init(rail:Node, grip:Node, param:Hash = {})
-    msgbox:         msgbox,         // msgbox(msg:String, param:Hash = void):Hash
-                                    //  [1][get value] uu.msg.send(*, "getValue") -> { value: 50 }
-                                    //  [2][set value] uu.msg.post(*, "setValue", { value: 50, fx: false })
-                                    //  [3][get param] uu.msg.send(*, "getParam") -> { ... }
-    handleEvent:    handleEvent     // handleEvent(evt:Event)
+    init:           SliderInit,         // init(rail:Node, grip:Node, param:Hash = {})
+    attr:           SliderAttr,         // attr(key:String/Hash = void, value:String/Number/Boolean = void):Mix/void
+    msgbox:         SliderMsgBox,       // msgbox(msg:String, param:Hash = void):Hash
+                                        //  [1][get value] uu.msg.send(*, "getValue") -> { value: 50 }
+                                        //  [2][set value] uu.msg.post(*, "setValue", { value: 50, fx: false })
+                                        //  [3][get param] uu.msg.send(*, "getParam") -> { ... }
+    handleEvent:    SliderHandleEvent   // handleEvent(evt:Event)
 }, {
-    activate:       activate,       // activate(param:Hash, backyard:Node = uu.backyard):Array
-    transform:      transform,      // transform(node:Node):Array
-    isTransform:    isTransform     // isTransform(node:Node)
+    build:          SliderBuild,        // build(param:Hash, backyard:Node = uu.backyard):Array
+    transform:      SliderTransform,    // transform(node:Node):Array
+    isTransform:    SliderIsTransform   // isTransform(node:Node)
 });
 
 // uu.Class.Slider.init
-function init(rail,    // @param Node: rail node. <div class="Slider*">
-              grip,    // @param Node: grip node. <div><div class="Slider*Grip" /></div>
-              param) { // @param Hash(= {}): { caption, vertical, toggle, min, max, size,
-                       //                      step, value, change, mouseup,
-                       //                      mousedown, gripWidth, gripHeight }
-                       //    caption    - Boolean(= false):
-                       //    vertical   - Boolean(= false): true is vertical
-                       //    toggle     - Boolean(= false):
-                       //    node       - Node(= null): original node
-                       //    min        - Number(= 0);
-                       //    max        - Number(= 100):
-                       //    size       - Number(= 100): width or height
-                       //    step       - Number(= 1):
-                       //    value      - Number(= 0):
-                       //    change     - Function(= null):
-                       //    mouseup    - Function(= null):
-                       //    mousedown  - Function(= null):
-                       //    gripWidth  - Number(= 13):
-                       //    gripHeight - Number(= 18):
+function SliderInit(rail,    // @param Node: rail node. <div class="Slider*">
+                    grip,    // @param Node: grip node. <div><div class="Slider*Grip" /></div>
+                    param) { // @param Hash(= {}): { caption, vertical, toggle, min, max, size,
+                             //                      step, value, change, mouseup,
+                             //                      mousedown, gripWidth, gripHeight }
+                             //    caption    - Boolean(= false):
+                             //    vertical   - Boolean(= false): true is vertical
+                             //    toggle     - Boolean(= false):
+                             //    node       - Node(= null): original node
+                             //    min        - Number(= 0);
+                             //    max        - Number(= 100):
+                             //    size       - Number(= 100): width or height
+                             //    step       - Number(= 1):
+                             //    value      - Number(= 0):
+                             //    change     - Function(= null):
+                             //    mouseup    - Function(= null):
+                             //    mousedown  - Function(= null):
+                             //    gripWidth  - Number(= 13):
+                             //    gripHeight - Number(= 18):
     var that = this;
 
     this.param = param = uu.arg(param, {
-        name: "Slider", rail: rail, grip: grip,
-        caption: 0, vertical: 0, toggle: false,
-        min: 0, max: 100, size: 100, step: 1, value: 0,
-        change: null, mouseup: null, mousedown: null,
-        gripWidth: 13, gripHeight: 18
+        name: "Slider",
+        rail: rail,
+        grip: grip,
+        toggle: false,
+        caption: 0,
+        vertical: 0,
+        min: 0,
+        max: 100,
+        size: 100,
+        step: 1,
+        value: 0,
+        change: null,
+        mouseup: null,
+        mousedown: null,
+        gripWidth: 13,
+        gripHeight: 18
     });
     rail.instance = that;
 
@@ -8632,7 +8733,7 @@ function init(rail,    // @param Node: rail node. <div class="Slider*">
     param.ox =  param.vertical ? 0 : -parseInt((param.gripWidth  + 1) / 2) + 2;
     param.oy = !param.vertical ? 0 : -parseInt((param.gripHeight + 1) / 2) + 2;
 
-    value(this, param.value);
+    SliderValue(this, param.value);
 
     // rail drag events
     uu.bind(rail, uu.env.touch ? "touchstart"
@@ -8644,28 +8745,62 @@ function init(rail,    // @param Node: rail node. <div class="Slider*">
             var key = param.keyCode[uu.event.key(evt).code],
                 shift = evt.shiftKey ? 10 : 1; // x10
 
-            key && value(that, param.value + key * param.step * shift);
+            key && SliderValue(that, param.value + key * param.step * shift);
         }
     });
 }
 
-// uu.Class.Slider.msgbox
-function msgbox(msg,     // @param String:
-                param) { // @param Hash(= void):
-                         // @return Hash:
-    switch (msg) {
-    case "event":
-        (param.type === "change") && (this.param.change = param.bind ? 1 : 0);
-        break;
-    case "getParam": return this.param;
-    case "getValue": return { value: this.param.value };
-    case "setValue": value(this, param.value || 0, param.fx || 0);
+// uu.Class.Slider.attr
+function SliderAttr(key,     // @param String/Hash(= void):
+                    value) { // @param Mix(= void):
+                             // @return Hash/void:
+    var i, v, mem = {};
+
+    switch (uu.complex(key, value)) { // 1: (), 2: (k), 3: (k,v), 4: ({})
+    case 1: return this.param;
+    case 2: return this.param[key];
+    case 3: key = uu.pair(key, value);
+    case 4: for (i in key) {
+                v = key[i];
+                switch (i) {
+                case "fx":      mem.fx = v; break;
+                case "value":   mem.value = v; break;
+                default:        this.param[i] = v;
+                }
+            }
+            if (mem.value !== void 0) {
+                SliderValue(this, mem.value, mem.fx || 0);
+            }
     }
-    return {};
+    return;
+}
+
+// uu.Class.Slider.msgbox
+function SliderMsgBox(msg,      // @param String:
+                      param1,   // @param Mix(= void):
+                      param2) { // @param Mix(= void):
+                                // @return Hash/void:
+    //  [1][get attr]     uu.msg.post(instance, "attr") -> Hash
+    //  [2][bind/unbind]  uu.msg.post(instance, "event", { bind, node, type, callback })
+    //  [3][set value]    uu.msg.post(instance, "value", 100)
+    //  [4][set value fx] uu.msg.post(instance, "value", 100, 100)
+    //  [5][get value]    uu.msg.post(instance, "value") -> 100
+
+    switch (msg) {
+    case "attr":    return this.attr(param1, param2);
+    case "event":   (param1.type === "change") && (this.param.change = +param1.bind);
+                    break;
+    case "value":   if (param1 !== void 0) {
+                        SliderValue(this, param1 || 0, param2 || 0);
+                    } else {
+                        return this.param.value;
+                    }
+    }
+    return;
 }
 
 // uu.Class.Slider.handleEvent
-function handleEvent(evt) {
+function SliderHandleEvent(evt) {
     var code  = evt.code, rect, threshold,
         param = this.param,
         rail  = param.rail,
@@ -8707,8 +8842,8 @@ function handleEvent(evt) {
         if (rail !== doc.activeElement) {
             rail.focus();
         }
-        move(this, pageX + param.ox - dragInfo.ox,
-                   pageY + param.oy - dragInfo.oy, 1); // 1: fx
+        SliderMove(this, pageX + param.ox - dragInfo.ox,
+                         pageY + param.oy - dragInfo.oy, 1); // 1: fx
 
         param.mousedown && param.mousedown(evt, rail, param, dragInfo);
     } else if (code === uu.event.codes.mouseup && dragInfo.dragging) {
@@ -8716,7 +8851,8 @@ function handleEvent(evt) {
             threshold = param.value >= (param.max - param.min) * 0.5;
             // tap   -> toggle value
             // slide -> magnetic value (1~10 -> 0), (90~99 -> 100)
-            value(this, dragInfo.tap ? (dragInfo.startValue ? param.min : param.max)
+            SliderValue(this,
+                        dragInfo.tap ? (dragInfo.startValue ? param.min : param.max)
                                      : (threshold ? param.max : param.min), 1);
         }
         dragInfo.dragging = 0;
@@ -8738,8 +8874,8 @@ function handleEvent(evt) {
                 }
             }
         }
-        move(this, (pageX + param.ox - dragInfo.ox),
-                   (pageY + param.oy - dragInfo.oy));
+        SliderMove(this, (pageX + param.ox - dragInfo.ox),
+                         (pageY + param.oy - dragInfo.oy));
 
         param.mousemove && param.mousemove(evt, rail, param, dragInfo);
         dragInfo.tap = 0;
@@ -8747,7 +8883,7 @@ function handleEvent(evt) {
         if (rail !== doc.activeElement) {
             rail.focus();
         }
-        value(this, param.value + evt.wheel * 10);
+        SliderValue(this, param.value + evt.wheel * 10);
     } else if (code >= uu.event.codes.keydown && code <= uu.event.codes.keyup) {
         // keydown, keypress, keyup
         return;
@@ -8756,36 +8892,36 @@ function handleEvent(evt) {
 }
 
 // inner - get value / set value
-function value(that,  // @param this:
-               value, // @param Number(= void 0):
-               fx) {  // @param Boolean(= false):
-                      // @return Number: current value
+function SliderValue(that,  // @param this:
+                     value, // @param Number(= void 0):
+                     fx) {  // @param Boolean(= false):
+                            // @return Number: current value
     if (value !== void 0) {
         var param = that.param, pp = 100 / (param.max - param.min);
 
         value = (value - param.min) * pp * (param.size * 0.01);
-        move(that, value, value, fx);
+        SliderMove(that, value, value, fx);
     }
     return that.param.value;
 }
 
 // inner - move grip
-function move(that, // @param this:
-              px,   // @param Number: pixel value
-              py,   // @param Number: pixel value
-              fx) { // @param Boolean: true is fx
+function SliderMove(that, // @param this:
+                    px,   // @param Number: pixel value
+                    py,   // @param Number: pixel value
+                    fx) { // @param Boolean: true is fx
     var param = that.param, x = 0, y = 0, w = param.max - param.min,
         tm = param.size * 0.01, pp = 100 / w,
         round = param.step * pp * tm, threshold = pp * tm / 2;
 
     if (param.vertical) {
         y = parseInt((py + threshold) / round) * round;
-        y = uu.range(0, y, tm * 100);
+        y = uu.number.range(0, y, tm * 100);
         param.value = Math.round(y / tm / pp + param.min);
         y |= 0;
     } else {
         x = parseInt((px + threshold) / round) * round;
-        x = uu.range(0, x, tm * 100);
+        x = uu.number.range(0, x, tm * 100);
         param.value = Math.round(x / tm / pp + param.min);
         x |= 0;
     }
@@ -8793,9 +8929,9 @@ function move(that, // @param this:
 //{@fx
     if (fx) {
         if (param.toggle) {
-            x = uu.range(0, x, tm * 71);
+            x = uu.number.range(0, x, tm * 71); // magic number
 
-            uu.fx(param.rail, 150, { stop: 1, bgx: x - 36, bgy: y - 80 });
+            uu.fx(param.rail, 150, { stop: 1, bgx: x - 36, bgy: y - 80 }); // magic number
         } else {
             uu.fx(param.grip, 150, { stop: 1, x: x, y: y });
         }
@@ -8826,10 +8962,10 @@ function move(that, // @param this:
     }
 }
 
-// uu.Class.Slider.activate
-function activate(param,      // @param Hash(= {}):
-                  backyard) { // @param Node(= uu.backyard): backyard Node
-                              // @return Array: [SliderClassInstance, RailNode]
+// uu.Class.Slider.build
+function SliderBuild(param,      // @param Hash(= {}):
+                     backyard) { // @param Node(= uu.backyard): backyard Node
+                                 // @return Array: [SliderClassInstance, RailNode]
     param = uu.arg(param, { min: 0, max: 100, size: 100, step: 1, value: 0,
                             vertical: 0, toggle: 0,
                             gripWidth: 13, gripHeight: 18,
@@ -8845,7 +8981,7 @@ function activate(param,      // @param Hash(= {}):
 
     var rail = uu.div("ui,Slider,tabindex,0",
 /*{@mb*/              !uu.ready.style.inlineBlock ? "display,inline,zoom,1" : /*}@mb*/ // [IE6][IE7] hasLayout
-                      "display,inline-block",
+                      "display,inline-block,top,6px",
                       uu.div()),
         grip = rail.firstChild;
 
@@ -8853,8 +8989,8 @@ function activate(param,      // @param Hash(= {}):
     uu.add(rail, backyard || uu.backyard);
 
     if (param.toggle) {
-        param.min = 0;
-        param.max = 30;
+        param.min  = 0;
+        param.max  = 30;
         param.size = 50;
         param.step = 1;
         rail.className = "SliderT50";
@@ -8869,27 +9005,30 @@ function activate(param,      // @param Hash(= {}):
 }
 
 // uu.Class.Slider.transform
-function transform(node) { // @param Node:
-                           // @return Array: [SliderClassInstance, RailNode, InputRangeNode]
+function SliderTransform(node) { // @param Node:
+                                 // @return Array: [SliderClassInstance, RailNode, InputRangeNode]
     //
     // <input type="range" value="50" min="0" max="100" ui="Slider" />
-    //
+    //                                                  ~~~~~~~~~~~
+    //          |
+    //          |  transform
     //          v
     //
-    // <div class="Slider**" ui="Slider" tabindex="0" instance={uu.Class.Slider}   <+ refnode(<div>)
-    //      <div class="Slider*Grip" />                                             |
-    // </div>                                                                       |
-    // <input type="range" value="50"                                               |
-    //         min="0" max="100" style="display:none" ui="*Slider" data-uurefnode=<div> />
+    // <div class="Slider**" ui="Slider" tabindex="0" instance={uu.Class.Slider} />  <- add
+    //      <div class="Slider*Grip" />                                              <- add
+    // </div>
+    // <input type="range" value="50" min="0" max="100"                              <- modify
+    //        instance={uu.Class.Slider} style="display:none" />
+    //        ~~~~~~~~~~~~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~~~~~~
     //
 
     // pick slider param
     var attrs = uu.attr(node), rail,
-        size = parseInt(attrs.size || 100);
+        size = parseInt(attrs.size  || 100);
 
-    size = uu.range(50, size, 200);
+    size = uu.number.range(50, size, 200);
 
-    rail = activate({
+    rail = SliderBuild({
         min:    parseInt(attrs.min  || 0),
         max:    parseInt(attrs.max  || 100),
         size:   size,
@@ -8899,23 +9038,23 @@ function transform(node) { // @param Node:
         change: uu.event.evaluator(node, "change").length
     });
     node.style.display = "none";
-    uu.attr(node, "ui", "*Slider");   // node.ui = "*Slider"
-    uu.data(node, "uurefnode", rail); // node["data-uurefnode"] = <div>
+    node.removeAttribute("ui");
+    node.instance = rail;
     uu.add(rail, node, "prev");
 
     return rail;
 }
 
 // uu.Class.Slider.isTransform
-function isTransform(node) { // @param Node
+function SliderIsTransform(node) { // @param Node
     return node.tagName.toLowerCase() === "input" &&
            uu.attr(node, "ui") === "Slider";
 }
 
 // --- init ---
-uu.ui.bind("Slider", { activate:    activate,
-                       transform:   transform,
-                       isTransform: isTransform });
+uu.ui.bind("Slider", { build:       SliderBuild,
+                       transform:   SliderTransform,
+                       isTransform: SliderIsTransform });
 
 })(document, uu);
 //}@uislider

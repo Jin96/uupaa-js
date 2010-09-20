@@ -434,8 +434,9 @@ uu.ready("window", function(uu) {
 
     uu.ok("uu.hash()");
     (function() {
-        uu.ok("uu.hash('a,b,c,d') は文字列をパースし { a: 'b', c: 'd' } を返す",
-            uu.hash('a,b,c,d'), "==", { a: 'b', c: 'd' });
+        uu.ok("uu.hash('a,b,c,d') は文字列をパースし { a: 'b', c: 'd' } を返す", uu.hash('a,b,c,d'), "==", { a: 'b', c: 'd' });
+        uu.ok("uu.hash('a:b,c:d') は文字列をパースし { a: 'b', c: 'd' } を返す", uu.hash('a:b,c:d'), "==", { a: 'b', c: 'd' });
+        uu.ok("uu.hash('a:b;c:d') は文字列をパースし { a: 'b', c: 'd' } を返す", uu.hash('a:b;c:d'), "==", { a: 'b', c: 'd' });
     })();
 
     uu.ok("uu.has()");
@@ -944,7 +945,17 @@ uu.ready("window", function(uu) {
     uu.ok("uu.entity.decode('&amp;\\u3043\\u3044\\u3045&amp;', 0) == '&ぃいぅ&'",
                 uu.entity.decode('&amp;\\u3043\\u3044\\u3045&amp;', 0), "==", '&ぃいぅ&');
 
-
+    uu.ok("uu.number");
+    (function() {
+        uu.ok("uu.number", uu.number(), "is number");
+        uu.ok('uu.number.expand(10, 10), "==", 10', uu.number.expand(10, 10), "==", 10);
+        uu.ok('uu.number.expand(10, "+10"), "==",  20', uu.number.expand(10, "+10"), "==",  20);
+        uu.ok('uu.number.expand(10, "-10"), "==",   0', uu.number.expand(10, "-10"), "==",   0);
+        uu.ok('uu.number.expand(10, "*10"), "==", 100', uu.number.expand(10, "*10"), "==", 100);
+        uu.ok('uu.number.expand(10, "/10"), "==",   1', uu.number.expand(10, "/10"), "==",   1);
+        uu.ok('uu.number.expand(0, 10.1, parseInt), "==", 10', uu.number.expand(0, 10.1, parseInt), "==", 10);
+        uu.ok('uu.number.expand(0, 10.1, parseFloat), "==", 10.1', uu.number.expand(0, 10.1, parseFloat), "==", 10.1);
+    })();
 
     uu.ok("uu.array.unique");
     (function() {

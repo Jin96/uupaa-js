@@ -19,7 +19,7 @@ uu.ready(function(uu) {
             var colorHash = uu.color.random();
             clonedNode.style.backgroundColor = colorHash.hex;
             clonedNode.style.color = colorHash.comple().hex;
-            clonedNode.firstChild.nodeValue = clonedNode.uniqueID || uu.guid();
+            clonedNode.firstChild.nodeValue = clonedNode.uniqueID || uu.number();
 
         }
     }
