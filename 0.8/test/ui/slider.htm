@@ -21,8 +21,8 @@ function newSlider() {
         dir  = +uu.id("directionValue").value,
         toggle = +uu.id("toggleValue").value;
 
-    uu.add(uu.ui("Slider", { vertical: dir, step: step, toggle: toggle,
-                             min: min, max: max, size: size, value: min }),
+    uu.add(uu.ui.build("Slider", { vertical: dir, step: step, toggle: toggle,
+                                   min: min, max: max, size: size, value: min }),
            uu.id("ui-pool"));
 }
 
@@ -36,11 +36,11 @@ function range(that, id) {
     }
 }
 function moveMasterSlider(value) {
-    uu.msg.post(uu.ui.query("#ui-pool>[ui=Slider]"), "setValue", { value: value });
+    uu.msg.post(uu.ui("#ui-pool>[ui=Slider]"), "value", value);
 }
 </script>
 </head><body>
-<input type="button" value="HTML5 Formnize" onclick="uu.ui()" />
+<input type="button" value="HTML5 Formnize" onclick="uu.ui.build()" />
 <input type="button" value="new Slider" onclick="newSlider()" />
 Master: <input id="master" type="range" value="0" onchange="moveMasterSlider(this.value)" />
 

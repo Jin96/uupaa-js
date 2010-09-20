@@ -91,6 +91,9 @@ function preProcess($js,        // @param String: JavaScript source code
     }
  */
 
+    // trim debugger; statement
+    $js = preg_replace('/debugger;/', '', $js);
+
     // typeof alias
     $js = preg_replace('/uu\.?type.BOOLEAN/',      '1', $js); // uu.?type.BOOLEAN -> 1
     $js = preg_replace('/uu\.?type.NUMBER/',       '2', $js);
