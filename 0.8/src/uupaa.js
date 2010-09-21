@@ -28,6 +28,26 @@
 //             event.clientX  <-!->      event.touches[finger].pageX
 // Opera 10.70
 //      <g buffered-rendering="static">
+// iPhone
+//      Portrait - 320 x 356
+//      Landscape - 480 x 208
+//      /favicon.png -> /apple-touch-icon.png (57x57)
+//                      or <link rel="apple-touch-icon" href="{{icon url}}" />
+//      FullScreen Mode (from Home Screen)
+//          <meta name="apple-mobile-web-app-capable" content="yes" />
+//                  content = "yes" / "no"
+//          <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+//                  content = "default" / "black" / "black-translucent"
+//      Viewport
+//          <meta name="viewport" content="width=device-width, user-scalable=no, inicial-scale=1, maximum-scale=1" />
+//      Format-detection:
+//          <meta name="format-detection" content="telephone=no" />
+//      Impl.Font:
+//          HiraKakuProN-W3, HiraKakuProN-W6
+//      Magic:
+//          --text-size-adjust:none;
+//      autocapitalize, autocorrect
+//          <input type="text" autocapitalize="off" autocorrect="off">
 
 // === Core ===
 
@@ -100,7 +120,7 @@ var _addEventListener = "addEventListener",
     // --- environment ---
     _env = detectEnvironment(0.8),  // as uu.env
     _ie = _env.ie,                  // is IE
-    _ie678 = _env < 9,              // is IE6, IE7, IE8
+    _ie678 = _ie && _env < 9,       // is IE6, IE7, IE8
     _gecko = _env.gecko,            // is Gecko (Firefox, ...)
     _opera = _env.opera,            // is Opera (Opera, Opera Mini)
     _webkit = _env.webkit;          // is WebKit (Safari, iPhone, iPad, Google Chrome)
@@ -295,8 +315,6 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
     viewport:       uuviewport,     // uu.viewport():Hash - { innerWidth, innerHeight,
                                     //                        pageXOffset, pageYOffset,
                                     //                        orientation, devicePixelRatio }
-    // --- BACKYARD ---
-    backyard:       null,           // uu.backyard - hidden <div> Node
     // --- TIMER ---
     interval:       uuinterval,     // uu.interval(callback:Function, arg:Mix = void):Number
     // --- EFFECT / ANIMATION ---
@@ -456,6 +474,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
         has:        uuhas,          // uu.node.has(parent:Node, child:Node):Boolean
         bros:       uunodebros,     // uu.node.bros(node:Node):NodeArray+Hash - [node, ...] + { first, prev, next, last, index }
         bulk:       uunodebulk,     // uu.node.bulk(source:Node/HTMLFragment, context:Node = <div>):DocumentFragment
+        glue:       uunodeglue,     // uu.node.glue(node:Node, work:Function):Node
         path:       uunodepath,     // uu.node.path(node:Node):CSSQueryString
                                     //  [1][get CSSQueryString] uu.node.path(<div>) -> "body>div"
         sort:       uunodesort,     // uu.node.sort(ary:NodeArray, context:Node = <body>):Array - sort by document order
@@ -679,7 +698,9 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
 //}@canvas
     glow:           uuglow,         // uu.glow(node:Node/NodeArray/NodeList/NodeSet/CSSSelectorExpressionString)
     puff:           uupuff,         // uu.puff(source:Mix/FormatString, var_args:Mix, ...)
-    log:            uulog,          // uu.log(log:Mix, var_args:Mix, ...)
+    log:      uumix(uulog, {        // uu.log(log:Mix, var_args:Mix, ...)
+        clear:      uulogclear      // uu.log.clear()
+    }),
     // --- UNIT TEST ---
 //{@test
     ok:             uuok,           // uu.ok(title:String = void,
@@ -4678,6 +4699,19 @@ function uunodebulk(source,    // @param Node/HTMLFragment: source
     return rv;
 }
 
+// uu.node.glue - temporarily glued to <body>
+function uunodeglue(node,   // @param Node: target node
+                    work) { // @param Function: work(node)
+                            // @return Node: node
+    var div;
+
+    uu.body(div = uu.div({}, "position:absolute;top:-9999px;left:-9999px;" +
+                             "margin:0;padding:0;border:0 none", node));
+    work(node);
+    doc.body[_removeChild](node);
+    return node;
+}
+
 // uu.node.path - get CSSQueryString fro node
 function uunodepath(node) {  // @param Node: ELEMENT_NODE
                              // @return CSSQueryString: "body>div:nth-child(5)
@@ -5779,6 +5813,13 @@ function uulog(log                      // @param Mix: log data
               context);
 }
 uulog.max = 30; // max items
+
+// uu.log.clear
+function uulogclear() {
+    var context = uuid("uulog");
+
+    context && uunodeclear(context);
+}
 
 // --- UNIT TEST ---
 //{@test
@@ -7800,10 +7841,8 @@ _ie678 && uueventdetach(win, "onunload", _windowonunload);
 // inner - init
 // 1. prebuild camelized hash - http://handsout.jp/slide/1894
 // 2. prebuild nodeid
-// 3. prebuild backyard
 uuready("dom:2", function() {
     var nodeList = uutag("", root), v, i = 0,
-        backyard = doc.body[_appendChild](newNode()),
         attrFix = "float,cssFloat",
         fxAlias = ",w,width,h,height,x,left,y,top,l,left,t,top," +
                   "c,color,bgc,backgroundColor,bgcolor,backgroundColor," +
@@ -7822,12 +7861,6 @@ uuready("dom:2", function() {
     for (; v = nodeList[i++]; ) {
         uunodeid(v);
     }
-
-    // backyard
-    backyard.id = "uubackyard";
-    backyard.style.cssText = "position:absolute;top:-9999px;left:-9999px;" +
-                             "margin:0;padding:0;border:0 none";
-    uu.backyard = backyard;
 });
 
 // inner - create camelized hash( { "text-align": "TextAlign", ...}) from getComputedStyle
@@ -8681,7 +8714,7 @@ uu.Class("Slider", {
                                         //  [3][get param] uu.msg.send(*, "getParam") -> { ... }
     handleEvent:    SliderHandleEvent   // handleEvent(evt:Event)
 }, {
-    build:          SliderBuild,        // build(param:Hash, backyard:Node = uu.backyard):Array
+    build:          SliderBuild,        // build(param:Hash, backyard:Node = doc.body):Array
     transform:      SliderTransform,    // transform(node:Node):Array
     isTransform:    SliderIsTransform   // isTransform(node:Node)
 });
@@ -8964,7 +8997,7 @@ function SliderMove(that, // @param this:
 
 // uu.Class.Slider.build
 function SliderBuild(param,      // @param Hash(= {}):
-                     backyard) { // @param Node(= uu.backyard): backyard Node
+                     backyard) { // @param Node(= doc.body): backyard Node
                                  // @return Array: [SliderClassInstance, RailNode]
     param = uu.arg(param, { min: 0, max: 100, size: 100, step: 1, value: 0,
                             vertical: 0, toggle: 0,
@@ -8986,7 +9019,7 @@ function SliderBuild(param,      // @param Hash(= {}):
         grip = rail.firstChild;
 
     // add to backyard
-    uu.add(rail, backyard || uu.backyard);
+    uu.add(rail, backyard || doc.body);
 
     if (param.toggle) {
         param.min  = 0;
