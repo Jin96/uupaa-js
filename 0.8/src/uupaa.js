@@ -29,17 +29,22 @@
 // Opera 10.70
 //      <g buffered-rendering="static">
 // iPhone
-//      Portrait - 320 x 356
-//      Landscape - 480 x 208
-//      /favicon.png -> /apple-touch-icon.png (57x57)
+//      Portrait:
+//          320x480(full), 320x460(with status bar),
+//          320x356(keyboard off), 320x140(with keyboard)
+//      Landscape:
+//          480 x 208
+//      Viewport:
+//          <meta name="viewport" content="width=320, user-scalable=no" />
+//          <meta name="viewport" content="width=device-width, user-scalable=no, inicial-scale=1, maximum-scale=1" />
+//
+//      /favicon.png -> /apple-touch-icon.png (57x57) or (129x129)
 //                      or <link rel="apple-touch-icon" href="{{icon url}}" />
 //      FullScreen Mode (from Home Screen)
 //          <meta name="apple-mobile-web-app-capable" content="yes" />
 //                  content = "yes" / "no"
 //          <meta name="apple-mobile-web-app-status-bar-style" content="black" />
 //                  content = "default" / "black" / "black-translucent"
-//      Viewport
-//          <meta name="viewport" content="width=device-width, user-scalable=no, inicial-scale=1, maximum-scale=1" />
 //      Format-detection:
 //          <meta name="format-detection" content="telephone=no" />
 //      Impl.Font:
@@ -48,6 +53,16 @@
 //          --text-size-adjust:none;
 //      autocapitalize, autocorrect
 //          <input type="text" autocapitalize="off" autocorrect="off">
+//      CSS:
+//          body { -webkit-text-size-adjust: none } // disable auto font size adjust
+//          body { -webkit-touch-callout: none } // disable link action
+//          -webkit-tap-highlight-color: csscolor;
+//          -webkit-user-select: auto / text / none;  node -> DnD / Slider
+//          -webkit-text-size-adjust: none / zoom;
+//          -webkit-appearance: appearance;
+//          setTimeout(scrollTo, 100, 0, 1);
+//      StandAlone(App)
+//          window.navigator.standalone
 
 // === Core ===
 
@@ -6696,13 +6711,10 @@ function uuaudio(src,        // @param URLString:
 
 uu.Class("Audio", {
     init:           AudioInit,      // init(src:URLString, option:Hash, callback:Function)
-    play:           AudioPlay,      // play():Boolean
-    pause:          AudioPause,     // pause()
-    stop:           AudioStop,      // stop(close:Boolean = false)
     attr:           AudioAttr,      // attr(key:String/Hash = void,
                                     //      value:Number/Boolean = void):String/Hash/Number/Boolean
-                                    //  [1][get items] attr() -> { loop, start, volume, current,
-                                    //                             duration, status, src, backend }
+                                    //  [1][get items] attr() -> { src, loop, start, volume,
+                                    //                             backend, current, duration }
                                     //  [2][mix items] attr({ key: value, ... })
                                     //  [3][get item]  attr(key) -> value
                                     //  [4][set item]  attr(key, value)
@@ -6710,6 +6722,13 @@ uu.Class("Audio", {
                                     //      start - Nunber: 0 ~
                                     //      volume - Number: 0.0 ~ 1.0
                                     //      current - Nunber: 0 ~
+    play:           AudioPlay,      // play()
+    seek:           AudioSeek,      // seek(current:Number)
+    stop:           AudioStop,      // stop(close:Boolean = false)
+    pause:          AudioPause,     // pause()
+    state:          AudioState,     // state():Hash - { error, ended, closed, paused,
+                                    //                  playing, condition }
+    isPlaying:      AudioIsPlaying, // isPlaying():Boolean
     bind:           AudioBind,      // bind(eventTypes:String, evaluator:Function)
     unbind:         AudioUnbind,    // unbind(eventTypes:String, evaluator:Function)
     msgbox:         AudioMsgBox,    // msgbox(msg:String, param:Hash):Boolean/Hash/void
@@ -6735,8 +6754,6 @@ function AudioInit(src,        // @param URLString: "http://.../music.mp3", "mus
             N: "NoAudio"
         };
 
-    this.closed = _false;
-
     (config.order || "N").split("").some(function(klass) { // klass = "A"
         klass = backends[klass] || ""; // "HTML5Audio" <- "A"
 
@@ -6758,65 +6775,76 @@ function AudioInit(src,        // @param URLString: "http://.../music.mp3", "mus
 // Audio.attr
 function AudioAttr(key,     // @param String/Hash(= void): key
                    value) { // @param String/Number/Boolean(= void): value
-                            // @return Hash: { loop, start, volume, current,
-                            //                 status, src, backend }
+                            // @return Hash/void: { src, loop, start, volume,
+                            //                      backend, current, duration }
+                            //   src     - String:
                             //   loop    - Boolean:
                             //   start   - Number: start time
                             //   volume  - Number/String: 0.0 ~ 1.0, "+0.1", "-0.1"
+                            //   backend - String: "HTML5Audio"
                             //   current - Number/String: current time, 0 ~, "+10", "-10"
-                            //   status  - String: status text
-                            //   src     - String:
-                            //   backend - String: "HTML5Audio", "FlashAudio"
+                            //   duration- Number:
     var rv = this.ao.attr(), i, val, undef;
 
     switch (uucomplex(key, value)) { // 1: (), 2: (k), 3: (k,v), 4: ({})
     case 1:
-    case 2: rv.closed = this.closed;
-            rv.status = rv.closed ? "closed"
-                      : rv.error  ? "error"
-                      : rv.paused ? "paused"
-                      : rv.ended  ? "ended" : "playing";
-            rv.playing = (rv.status === "playing");
-            break;
+    case 2: return key === undef ? rv : rv[key];
     case 3: key = uupair(key, value);
-    case 4: for (i in key) {
-                val = key[i];
-                switch (i) {
-                case "start":
-                case "current":
-                    val = uunumberexpand(rv[i], val); break;
-                case "volume":
-                    val = uunumberrange(0, uunumberexpand(rv[i], val), 1);
-                }
-                this.ao.attr(i, val); // set(key, value)
-            }
     }
-    return key === undef ? rv : rv[key];
+    for (i in key) {
+        val = key[i];
+        switch (i) {
+        case "start":
+        case "current":
+            val = uunumberexpand(rv[i], val); break;
+        case "volume":
+            val = uunumberrange(0, uunumberexpand(rv[i], val), 1);
+        }
+        this.ao.attr(i, val); // set(key, value)
+    }
+    return;
 }
 
-// Audio.play - toggle play/pause
-function AudioPlay() { // @return Boolean: true is playing
-                       //                  false is paused
-    switch (this.attr().status) {
+// Audio.play
+function AudioPlay() {
+    switch (this.ao.state().condition) {
     case "ended":   this.ao.attr("current", 0);
     case "paused":  this.ao.play();
-                    return _true;
-    case "playing": this.ao.pause();
     }
-    return _false;
 }
 
-// Audio.pause - pause
-function AudioPause() {
-    if (this.attr().status === "playing") {
-        this.ao.pause();
+// AudioSeek
+function AudioSeek(current) { // @param Number: current time
+    var ao = this.ao;
+
+    if (this.isPlaying()) {
+        ao.pause();
+        ao.attr("current", current);
+        ao.play();
+    } else {
+        ao.attr("current", current);
     }
 }
 
 // Audio.stop
 function AudioStop(close) { // @param Boolean(= false):
-    close && (this.closed = _true);
     this.ao.stop(close);
+}
+
+// Audio.pause
+function AudioPause() {
+    this.ao.state().playing && this.ao.pause();
+}
+
+// Audio.state
+function AudioState() { // @return Hash: { error, ended, closed, paused,
+                        //                 playing, condition }
+    return this.ao.state();
+}
+
+// Audio.isPlaying
+function AudioIsPlaying() { // @return Boolean:
+    return this.ao.state().playing;
 }
 
 // Audio.bind
@@ -8766,7 +8794,7 @@ function SliderInit(rail,    // @param Node: rail node. <div class="Slider*">
     param.ox =  param.vertical ? 0 : -parseInt((param.gripWidth  + 1) / 2) + 2;
     param.oy = !param.vertical ? 0 : -parseInt((param.gripHeight + 1) / 2) + 2;
 
-    SliderValue(this, param.value);
+    SliderValue(this, param.value, 0);
 
     // rail drag events
     uu.bind(rail, uu.env.touch ? "touchstart"
@@ -8778,7 +8806,7 @@ function SliderInit(rail,    // @param Node: rail node. <div class="Slider*">
             var key = param.keyCode[uu.event.key(evt).code],
                 shift = evt.shiftKey ? 10 : 1; // x10
 
-            key && SliderValue(that, param.value + key * param.step * shift);
+            key && SliderValue(that, param.value + key * param.step * shift, 0);
         }
     });
 }
@@ -8820,14 +8848,17 @@ function SliderMsgBox(msg,      // @param String:
     //  [5][get value]    uu.msg.post(instance, "value") -> 100
 
     switch (msg) {
-    case "attr":    return this.attr(param1, param2);
-    case "event":   (param1.type === "change") && (this.param.change = +param1.bind);
-                    break;
-    case "value":   if (param1 !== void 0) {
-                        SliderValue(this, param1 || 0, param2 || 0);
-                    } else {
-                        return this.param.value;
-                    }
+    case "attr":
+        return this.attr(param1, param2);
+    case "event":
+        (param1.type === "change") && (this.param.change = +param1.bind);
+        break;
+    case "value":
+        if (param1 !== void 0) {
+            SliderValue(this, param1 || 0, param2 || 0);
+        } else {
+            return this.param.value;
+        }
     }
     return;
 }
@@ -8908,7 +8939,7 @@ function SliderHandleEvent(evt) {
             }
         }
         SliderMove(this, (pageX + param.ox - dragInfo.ox),
-                         (pageY + param.oy - dragInfo.oy));
+                         (pageY + param.oy - dragInfo.oy), 0);
 
         param.mousemove && param.mousemove(evt, rail, param, dragInfo);
         dragInfo.tap = 0;
@@ -8916,7 +8947,7 @@ function SliderHandleEvent(evt) {
         if (rail !== doc.activeElement) {
             rail.focus();
         }
-        SliderValue(this, param.value + evt.wheel * 10);
+        SliderValue(this, param.value + evt.wheel * 10, 0);
     } else if (code >= uu.event.codes.keydown && code <= uu.event.codes.keyup) {
         // keydown, keypress, keyup
         return;
@@ -8933,7 +8964,7 @@ function SliderValue(that,  // @param this:
         var param = that.param, pp = 100 / (param.max - param.min);
 
         value = (value - param.min) * pp * (param.size * 0.01);
-        SliderMove(that, value, value, fx);
+        SliderMove(that, value, value, fx, 0);
     }
     return that.param.value;
 }
@@ -9018,8 +9049,9 @@ function SliderBuild(param,      // @param Hash(= {}):
                       uu.div()),
         grip = rail.firstChild;
 
-    // add to backyard
+    // glue
     uu.add(rail, backyard || doc.body);
+    uu.css.userSelect(rail);
 
     if (param.toggle) {
         param.min  = 0;
@@ -9105,10 +9137,10 @@ uu.ready(function(uu) {
 //{@uislider
     // Slider
     fmt = 'background:url(@) no-repeat @px @px;position:@;width:@px;height:@px';
-    ss.add({ ".SliderH200":  uu.f(fmt, img,  -15,   0, relative, 214,  20),
-             ".SliderH150":  uu.f(fmt, img,  -15, -20, relative, 164,  20),
-             ".SliderH100":  uu.f(fmt, img,  -15, -40, relative, 114,  20),
-             ".SliderH50":   uu.f(fmt, img,  -15, -60, relative,  64,  20),
+    ss.add({ ".SliderH200":  uu.f(fmt, img,  -15,   0, relative, 214,  22),
+             ".SliderH150":  uu.f(fmt, img,  -15, -20, relative, 164,  22),
+             ".SliderH100":  uu.f(fmt, img,  -15, -40, relative, 114,  22),
+             ".SliderH50":   uu.f(fmt, img,  -15, -60, relative,  64,  22),
              ".SliderHGrip": uu.f(fmt, img,    0,   0, absolute,  13,  18),
              ".SliderV200":  uu.f(fmt, img, -230, -15, relative,  20, 214),
              ".SliderV150":  uu.f(fmt, img, -250, -15, relative,  20, 164),

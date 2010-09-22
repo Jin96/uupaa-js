@@ -1,0 +1,170 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8" />
+<title>TinyAudioPlayer - demo</title>
+<style>
+input, div {
+    outline: 1px solid skyblue
+}
+</style>
+<script>
+window.uuconfig = {
+    img: "../../img/"
+}
+</script>
+<script src="../../src/uupaa.js"></script>
+<script src="../../src/audio/audio.js"></script>
+<script>
+var player = {
+    audio: null,
+    auto: false,
+    loop: false,
+    lock: false
+};
+var playList = [
+    "source/Hydrate-Kenny_Beltrey.mp3",
+    "source/Hydrate-Kenny_Beltrey.ogg",
+    "source/Hydrate-Kenny_Beltrey.m4a",
+    "source/dora.mp3",
+    "source/dora.ogg",
+    "source/dora.m4a",
+    "source/dora.wav",
+    "source/bego.mp3",
+    "source/bego.ogg",
+    "source/bego.m4a",
+    "source/bego.wav"
+];
+
+uu.ready(function(uu) {
+    if (uu.env.ie6) {
+        uu.id("source").style.width = "250px";
+    }
+    uu.ui.build();
+
+}, "audio", function(uu, audio) {
+
+    var source = uu.id("source");
+
+    // build <selct><option ...></select>
+    playList.forEach(function(src) {
+        uu.add(uu.option({ value: src }, uu.text(src)), source);
+    });
+
+    changeSource(source);
+
+    // bind
+    uu.change(uu.id("volumeSlider"), function(evt) {
+        var val = parseInt(evt.node.value) * 0.01;
+
+        player.audio.attr("volume", val);
+    });
+
+    // seek current time slider
+    uu.change(uu.id("currentSlider"), function(evt) {
+//uu.log("currentSlider.change @", evt.node.value);
+
+        var val = evt.node.value;
+
+        if (!player.lock) {
+            player.audio.unbind("timeupdate", handleTimeupdate);
+            player.audio.seek(val);
+            player.audio.bind("timeupdate", handleTimeupdate);
+        }
+        player.lock = false; // unlock
+        return false; // uu.event.stop()
+    });
+});
+
+function changeSource(that) {
+    if (player.audio) {
+        player.audio.stop(true); // close
+    }
+    initAudio(that.options[that.selectedIndex].value);
+}
+
+function initAudio(source) {
+    uu.audio(source, { auto: player.auto,
+                       loop: player.loop }, function(audio) {
+        window.player.audio = audio;
+
+        // Backend
+        uu.text(uu.id("backend"), audio.toString());
+
+        // --- Event Trace ---
+        audio.bind("playing,play,error", function(event) {
+//          uu.log({ event: event.type || "", state: player.audio.state().condition });
+            uu.log({ event: event.type || "", state: player.audio.state() + "" });
+        });
+
+        // update currentTimeSlider.max
+        audio.bind("canplay", function(event) {
+            // update slider.max to audio.duration
+            var max = audio.attr("duration") | 0;
+
+            uu.id("currentSlider").max = max;
+            uu.msg.post(uu.ui("Slider")[1], "attr", "max", max);
+//          uu.log({ event: event.type || "", state: player.audio.state().condition });
+            uu.log({ event: event.type || "", state: player.audio.state() + "" });
+        });
+
+        audio.bind("ended,pause", function(event) {
+//          uu.log({ event: event.type || "", state: player.audio.state().condition });
+            uu.log({ event: event.type || "", state: player.audio.state() + "" });
+        });
+
+        audio.bind("timeupdate", handleTimeupdate);
+    });
+}
+
+function handleTimeupdate(evt) {
+    var curt = player.audio.attr("current") | 0;
+    var seek = uu.ui("Slider")[1];
+    var a = Math.round(parseFloat(seek.attr("value")));
+    var b = Math.round(parseFloat(curt));
+
+    player.lock = true;
+//  uu.log("a=@ b=@", a, b);
+
+    // update grip position
+    uu.msg.post(seek, "value", curt, 1);
+}
+
+function togglePlay() {
+    if (player.audio.isPlaying()) {
+        player.audio.pause();
+    } else {
+        player.audio.play();
+    }
+}
+
+function toggleAutoplay(that) {
+    player.auto = !player.auto;
+    that.value = "autoplay " + (player.auto ? "on" : "off");
+}
+
+function toggleLoop(that) {
+    player.loop = !player.loop;
+    that.value = "loop " + (player.loop ? "on" : "off");
+    player.audio.attr("loop", player.loop);
+}
+
+function mute() {
+    uu.msg.post(uu.ui("Slider")[0], "value", 0);
+}
+
+</script></head><body>
+<h1 id="backend" style="text-shadow: gray 3px 3px 3px">Plz Wait...</h1>
+
+<select id="source" onchange="changeSource(this)"></select>
+<input type="button" value="play/pause" onclick="togglePlay()" />
+<input type="button" value="stop" onclick="player.audio.stop()" />
+<input type="button" value="mute" onclick="mute()" />
+<input id="volumeSlider" ui="Slider" type="range" value="50" size="50" />
+
+<input type="button" value="loop off" onclick="toggleLoop(this)" />
+<input type="button" value="autoplay off" onclick="toggleAutoplay(this)" />
+
+<br />
+<input id="currentSlider" ui="Slider" type="range" value="0" size="200" min="0" max="100" />
+
+<hr />
+
+</body></html>

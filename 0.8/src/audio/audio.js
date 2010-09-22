@@ -80,10 +80,13 @@ var _env = uu.env;
 
 uu.Class("HTML5Audio", {
     init:           HTML5AudioInit,     // init(src:String, option:Hash, callback:Function)
-    attr:           HTML5AudioAttr,     // attr()
+    attr:           HTML5AudioAttr,     // attr(key:String/Hash, value:Mix = void):Hash/void
+                                        //      { src, loop, start, volume, backend, current, duration }
     play:           HTML5AudioPlay,     // play()
+    stop:           HTML5AudioStop,     // stop(close:Boolean = false)
     pause:          HTML5AudioPause,    // pause()
-    stop:           HTML5AudioStop      // stop(close:Boolean = false)
+    state:          HTML5AudioState     // state():Hash - { error, ended, closed, paused,
+                                        //                  playing, condition }
 }, {
     ready:          !!HTMLAudioElement,
     isSupport:      function(src) {     // @param String: "music.mp3"
@@ -122,8 +125,14 @@ function HTML5AudioInit(src,        // @param URLString: "music.mp3"
             uu.add(this.audio);
         }
     } else {
-        this.audio = doc.createElement("audio");
-        this.audio.src = src;
+        if (win.Audio) {
+            this.audio = new Audio(src);
+        } else if (win.HTMLAudioElement) {
+            this.audio = doc.createElement("audio");
+            this.audio.src = src;
+        } else {
+            throw new Error("LOGIC_ERROR");
+        }
         uu.add(this.audio);
     }
     this.audio.loop = this._loop = option.loop || false;
@@ -134,8 +143,8 @@ function HTML5AudioInit(src,        // @param URLString: "music.mp3"
 
     var that = this;
 
-    // HTMLAudioElement.getContext():AudioContext
-    this.audio.getContext = function() {
+    // HTMLAudioElement.instance():this
+    this.audio.instance = function() {
         return that;
     };
 
@@ -161,35 +170,22 @@ function HTML5AudioInit(src,        // @param URLString: "music.mp3"
 // HTML5Audio.attr
 function HTML5AudioAttr(key,     // @param String/Hash(= void):
                         value) { // @param Mix(= void):
-                                 // @return Hash/void:
-    function collect(that) {
-        var ended  = that.audio.ended  || false,
-            paused = that.audio.paused || false;
-
-        if (that._lastAction === "stop") {
-            if (paused) {
-                ended  = true;
-                paused = false;
-            }
-        }
-        return {
-            src:        that.audio.src      || "",
-            loop:       that._loop,
-            error:      that.audio.error    || 0,   // 0, 1 ~ 4
-            start:      that._startTime,
-            volume:     that.audio.volume,
-            current:    that.audio.currentTime,
-            duration:   that.audio.duration || 0,
-            ended:      ended,
-            paused:     paused
-        };
-    }
-
-    var i, v;
+                                 // @return Hash/void: { src, loop, start, volume,
+                                 //                      backend, current, duration }
+    var rv, i, v, undef;
 
     switch (uu.complex(key, value)) { // 1: (), 2: (k), 3: (k,v), 4: ({})
-    case 1: return collect(this);
-    case 2: return collect(this)[key];
+    case 1:
+    case 2: rv = {
+                src:        this.audio.src || "",
+                loop:       this._loop,
+                start:      this._startTime,
+                volume:     this.audio.volume,
+                backend:    "HTML5Audio",
+                current:    this.audio.currentTime,
+                duration:   this.audio.duration || 0
+            };
+            return key === undef ? rv : rv[key];
     case 3: key = uu.pair(key, value);
     }
     for (i in key) {
@@ -209,32 +205,10 @@ function HTML5AudioPlay() {
     if (!this._closed) {
         this._lastAction = "play";
 
-        if (uu.env.chrome) { // [CHROME][FIX] volume
-            var that = this, vol = this.audio.volume;
-
-            this.audio.volume = 0;
-            if (!this.audio.paused) {
-                this.attr("current", this._startTime);
-            }
-            this.audio.play();
-
-            setTimeout(function() {
-                that.audio.volume = vol; // [!] delay
-            }, 0);
-            return;
-        }
         if (!this.audio.paused) {
             this.attr("current", this._startTime);
         }
         this.audio.play();
-    }
-}
-
-// HTML5Audio.pause
-function HTML5AudioPause() {
-    if (!this._closed && !this.audio.error) {
-        this._lastAction = "pause";
-        this.audio.pause();
     }
 }
 
@@ -245,13 +219,50 @@ function HTML5AudioStop(close) { // @param Boolean(= false):
         uu.unbind(this.audio, "ended");
         uu.event.fire(this.audio, "ended");
         uu.node.remove(this.audio);
-    } else {
-        if (!this._closed && !this.audio.error) {
-            this._lastAction = "stop";
-            this.audio.pause();
-            this.attr("current", this._startTime);
-        }
+    } else if (this.state().playing) {
+        this._lastAction = "stop";
+        this.audio.pause();
+        this.attr("current", this._startTime); // reset
     }
+}
+
+// HTML5Audio.pause
+function HTML5AudioPause() {
+    if (this.state().playing) {
+        this._lastAction = "pause";
+        this.audio.pause();
+    }
+}
+
+// HTML5Audio.state
+function HTML5AudioState() { // @return Hash: { error, ended, closed, paused,
+                             //                 playing, condition }
+    var error  = this.audio.error,
+        ended  = this.audio.ended  || false,
+        closed = this._closed,
+        paused = this.audio.paused || false,
+        stoped = this._lastAction === "stop",
+        condition;
+
+    if (stoped && paused) {
+        ended  = true;
+        paused = false;
+    }
+    condition = closed ? "closed"
+              : error  ? "error"
+              : paused ? "paused"
+              : ended  ? "ended" : "playing";
+    return {
+        error:      error,
+        ended:      ended,
+        closed:     closed,
+        paused:     paused,
+        playing:    condition === "playing",
+        condition:  condition,
+        toString:   function() {
+            return this.condition;
+        }
+    };
 }
 
 })(this, document, uu, this.HTMLAudioElement);
