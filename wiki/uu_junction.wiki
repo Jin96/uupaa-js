@@ -7,6 +7,7 @@ uu.junction は非同期に発生する複数のイベントを管理し、条�
 = API =
 == uu.junction ==
 uu.junction(_race_:Number, _items_:Number, _callback_:Function):Junction は、パラメタを受け取り、uu.Class.Junction のインスタンスを返します。
+_callback_ は callback(_results_:MixArray, _ok_:Boolean) の形でコールバックします。
 
 == uu.Class.Junction ==
 new uu.Class.Junction(_race_:Number, _items_:Number, _callback_:Function) は終了条件 _race_ と、アイテム数 _items_ を比較し、条件を満たした場合にコールバックする _callback_ を設定し、ジャンクションを初期化します。
@@ -25,9 +26,9 @@ judge() は、ok(), ng() が呼び出された回数で条件を判断し、_cal
 
 || *条件* || *動作* ||
 || uu.junction(1, 1) || ok() か ng() が一度でも呼ばれるとコールバックします ||
-|| uu.junction(1, 2) || 最大で2回まで待ち合わせをします。<br />ok() が1回呼ばれると _callback_(true, _values_) をコールバックします。<br />ng() が2回呼ばれた場合は _callback_(false, _values_) をコールバックします ||
-|| uu.junction(2, 3) || 最大で3回まで待ち合わせをします。<br />ok() が2回呼ばれると _callback_(true, _values_) をコールバックします。<br />1回しかok()が呼ばれないか、ng()が2回以上呼ばれた場合は _callback_(false, _values_) をコールバックします ||
-|| uu.junction(4, 4) || 最大で4回まで待ち合わせをします。<br />ok() が4回呼ばれると _callback_(true, _values_) をコールバックします。<br />1回でもng()が呼ばれた場合は _callback_(false, _values_) をコールバックします ||
+|| uu.junction(1, 2) || 最大で2回まで待ち合わせをします。<br />ok() が1回呼ばれると _callback_(_values_, true) をコールバックします。<br />ng() が2回呼ばれた場合は _callback_(_values_, false) をコールバックします ||
+|| uu.junction(2, 3) || 最大で3回まで待ち合わせをします。<br />ok() が2回呼ばれると _callback_(_values_, true) をコールバックします。<br />1回しかok()が呼ばれないか、ng()が2回以上呼ばれた場合は _callback_(_values_, false) をコールバックします ||
+|| uu.junction(4, 4) || 最大で4回まで待ち合わせをします。<br />ok() が4回呼ばれると _callback_(_values_, true) をコールバックします。<br />1回でもng()が呼ばれた場合は _callback_(_values_, false) をコールバックします ||
 
 コールバックのタイミングは、条件を満たせないことが確定した時点か、条件を全て満たした時点です。
 
