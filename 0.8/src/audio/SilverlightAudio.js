@@ -88,7 +88,7 @@ function init(source,     // @param String: "music.mp3"
 
     var that = this,
         // [ASYNC] initialized notify callback handler
-        onload = "uuAudioSilverlightOnLoad" + uu.guid();
+        onload = "uuAudioSilverlightOnLoad" + uu.number();
 
     // HTMLAudioElement.getContext():AudioContext
     this.audio.getContext = function() {

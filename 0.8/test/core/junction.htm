@@ -32,7 +32,7 @@ uu.ready(function(uu) {
 function run() {
     var nodeArray = uu.klass("box");
 
-    var junc = uu.junction(2, 3, function(ok, values) {
+    var junc = uu.junction(2, 3, function(values, ok) {
         alert("Junction");
         uu.puff(values);
     });
