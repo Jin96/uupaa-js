@@ -1,7 +1,5 @@
 
 // === uu.datauri / window.datauri ===
-//{{{!depend uu.base64
-//}}}!depend
 
 (this.uu || this).datauri || (function(namespace) {
 
