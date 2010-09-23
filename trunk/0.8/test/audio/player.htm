@@ -1,21 +1,18 @@
-<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8" />
+<!doctype html><html lang="ja"><head><meta charset="utf-8" />
 <title>TinyAudioPlayer - demo</title>
 <style>
+/*
 input, div {
     outline: 1px solid skyblue
 }
+ */
 </style>
-<script>
-window.uuconfig = {
-    img: "../../img/"
-}
-</script>
 <script src="../../src/uupaa.js"></script>
 <script src="../../src/audio/audio.js"></script>
 <script>
 var player = {
     audio: null,
-    auto: false,
+    autoplay: false,
     loop: false,
     lock: false
 };
@@ -59,14 +56,20 @@ uu.ready(function(uu) {
 
     // seek current time slider
     uu.change(uu.id("currentSlider"), function(evt) {
-//uu.log("currentSlider.change @", evt.node.value);
-
-        var val = evt.node.value;
+        var val = evt.node.value,
+            backend = player.audio.attr().backend;
 
         if (!player.lock) {
-            player.audio.unbind("timeupdate", handleTimeupdate);
+//            player.audio.unbind("timeupdate", handleTimeupdate);
+
+            if (backend === "HTML5Audio") {
+                // [IE9beta][FIX]
+                uu.ui("Slider")[1].attr("ignoreEvent", uu.env.ie9 ? 2 : 1);
+            } else if (backend === "FlashAudio") {
+                uu.ui("Slider")[1].attr("ignoreEvent", 0);
+            }
             player.audio.seek(val);
-            player.audio.bind("timeupdate", handleTimeupdate);
+//            player.audio.bind("timeupdate", handleTimeupdate);
         }
         player.lock = false; // unlock
         return false; // uu.event.stop()
@@ -81,7 +84,7 @@ function changeSource(that) {
 }
 
 function initAudio(source) {
-    uu.audio(source, { auto: player.auto,
+    uu.audio(source, { autoplay: player.autoplay,
                        loop: player.loop }, function(audio) {
         window.player.audio = audio;
 
@@ -115,13 +118,12 @@ function initAudio(source) {
 }
 
 function handleTimeupdate(evt) {
-    var curt = player.audio.attr("current") | 0;
+    var curt = player.audio.attr("currentTime") | 0;
     var seek = uu.ui("Slider")[1];
     var a = Math.round(parseFloat(seek.attr("value")));
     var b = Math.round(parseFloat(curt));
 
     player.lock = true;
-//  uu.log("a=@ b=@", a, b);
 
     // update grip position
     uu.msg.post(seek, "value", curt, 1);
@@ -136,8 +138,8 @@ function togglePlay() {
 }
 
 function toggleAutoplay(that) {
-    player.auto = !player.auto;
-    that.value = "autoplay " + (player.auto ? "on" : "off");
+    player.autoplay = !player.autoplay;
+    that.value = "autoplay " + (player.autoplay ? "on" : "off");
 }
 
 function toggleLoop(that) {
@@ -152,6 +154,8 @@ function mute() {
 
 </script></head><body>
 <h1 id="backend" style="text-shadow: gray 3px 3px 3px">Plz Wait...</h1>
+
+<input type="button" value="clear" onclick="uu.log.clear()" />
 
 <select id="source" onchange="changeSource(this)"></select>
 <input type="button" value="play/pause" onclick="togglePlay()" />

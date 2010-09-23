@@ -166,8 +166,8 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
 //{@audio
         audio:      {
             disable:_false,         // uu.config.audio.disable(= false) - Boolean:
-            order:  "ASFN"          // uu.config.audio.order(= "ASFN") - String: audio backends and detection order
-                                    //  "A" = <audio>, "S" = SilverlightAudio, "F" = FlashAudio, "N" = NoAudio
+            order:  "AF"            // uu.config.audio.order(= "AF") - String: audio backends and detection order
+                                    //  "A" = <audio>, "F" = FlashAudio
         },
 //}@audio
         img:        "http://uupaa-js.googlecode.com/svn/trunk/0.8/img/"  // image/css path
@@ -423,9 +423,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
     }),
     bind:           uuevent,        // uu.bind() as uu.event()
     unbind:         uueventunbind,  // uu.unbind() as uu.event.unbind()
-//{@junction
     junction:       uujunction,     // uu.junction(race:Number, items:Number, callback:Function):Junction
-//}@junction
     // --- LIVE EVENT ---
 //{@live
     live:     uumix(uulive, {       // uu.live(expr:CSSSelectorExpressionString, eventTypeEx:EventTypeExString,
@@ -640,7 +638,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
 //}@color
     // --- IMAGE ---
 //{@image
-    image:    uumix(uuimage, {      // uu.image(url:String, callback:Function)
+    image:    uumix(uuimage, {      // uu.image(url:URLString/URLStringArray, callback:Function)
         size:       uuimagesize     // uu.image.size(node:HTMLImageElement):Hash - { w, h }
     }),
 //}@image
@@ -873,6 +871,7 @@ uu.msg = new MsgPump();             // uu.msg - MsgPump instance
 // --- Junction class ---
 uuclass("Junction", {
     init:           JunctionInit,   // uu.junction(race:Number, item:Number, callback:Function)
+                                    //   callback(values:MixArray, ok:Boolean)
     ok:             JunctionOK,     // ok(value:Mix = void):this
     ng:             JunctionNG,     // ng(value:Mix = void):this
     judge:          JunctionJudge   // judge():this
@@ -4419,18 +4418,17 @@ function uuunlive(expr,          // @param CSSSelectorExpressionString(= void 0)
 }
 //}@live
 
-//{@junction
 // uu.junction -
 function uujunction(race,       // @param Number: race conditions
                     items,      // @param Number: items
-                    callback) { // @param Function: callback(result, values)
-                                //    result - Boolean: true is pass
+                    callback) { // @param Function: callback(values, ok)
                                 //    values - Array: [value, ...]
+                                //    ok     - Boolean: true is pass
                                 // @throws Error("JUNCTION...")
-    //  [1][some  1/3] uu.junction(1, 3, callback).ng(1).ng(2).ok(3)      -> callback(true,  [1, 2, 3])
-    //  [2][some  2/3] uu.junction(2, 3, callback).ng(1).ng(2).ok(3)      -> callback(false, [1, 2, 3])
-    //  [3][some  2/3] uu.junction(2, 3, callback).ok(1).ng(2).ok( )      -> callback(true,  [1, 2, undefined])
-    //  [4][every 3/3] uu.junction(3, 3, callback).ok(1).ok(2).ok({id:3}) -> callback(true,  [1, 2, {id:3}])
+    //  [1][some  1/3] uu.junction(1, 3, callback).ng(1).ng(2).ok(3)      -> callback([1, 2, 3], true)
+    //  [2][some  2/3] uu.junction(2, 3, callback).ng(1).ng(2).ok(3)      -> callback([1, 2, 3], false)
+    //  [3][some  2/3] uu.junction(2, 3, callback).ok(1).ng(2).ok( )      -> callback([1, 2, undefined], true)
+    //  [4][every 3/3] uu.junction(3, 3, callback).ok(1).ok(2).ok({id:3}) -> callback([1, 2, {id:3}], true)
 
     return new uuclass["Junction"](race, items, callback);
 }
@@ -4467,13 +4465,12 @@ function JunctionJudge() {
             db.ng + db.race >  db.items || // 2 + 3 >  4
             db.ok + db.ng   >= db.items) { // 2 + 2 >= 4
 
-            db.callback(db.ok >= db.race, db.values);
+            db.callback(db.values, db.ok >= db.race); // callback(values, ok)
             db.callback = null;
         }
     }
     return this;
 }
-//}@junction
 
 // --- READY ---
 // uu.ready - hook event
@@ -5822,7 +5819,7 @@ function uulog(log                      // @param Mix: log data
 
     context || uunodeadd(context = uu.ol({ id: "uulog" }));
 
-    uulog.max < uutag("", context).length && (context.innerHTML = "");
+    (uulog.max <= uutag("", context).length) && (context.innerHTML = "");
 
     uunodeadd(uu[/OL|UL/.test(context[_tagName]) ? "li" : "p"](newText(txt)),
               context);
@@ -6398,10 +6395,23 @@ uucoloradd("000000black,888888gray,ccccccsilver,ffffffwhite,ff0000red,ffff00" +
 // --- IMAGE ---
 // uu.image - image loader
 //{@image
-function uuimage(url,        // @param String:
-                 callback) { // @param Function: callback(img, ok)
-                             //     img - Node: <img>
-                             //     ok  - Boolean: true is success
+function uuimage(url,        // @param URLString/URLStringArray:
+                 callback) { // @param Function: callback(imgs, ok)
+                             //     imgs - NodeArray: [<img>, ...]
+                             //     ok   - Boolean: true is success
+    url = uuarray(url);
+    var iz = url.length,
+        junc = uujunction(iz, iz, callback); // callback(imgs, ok)
+
+    url.forEach(function(v, i) {
+        imageLoader(v, function(img, ok) {
+            ok ? junc.ok(img) : junc.ng(img);
+        });
+    });
+}
+
+// inner - image loader
+function imageLoader(url, callback) {
     function after(ok, fn) {
         while ( (fn = uuimage.fn[url].shift()) ) {
             fn(img, ok);
@@ -6693,19 +6703,19 @@ uuready("window", function() {
 //{@audio
 // uu.audio
 function uuaudio(src,        // @param URLString:
-                 option,     // @param Hash: { auto, loop, start, parent, volume }
-                             //     auto - Boolean(= true):
+                 option,     // @param Hash: { loop, parent, volume, autoplay, startTime }
                              //     loop - Boolean(= false):
-                             //     start - Number(= 0): start time
                              //     parent - Node: parent Node
                              //     volume - Number(= 0.5): 0.0 ~ 1.0
+                             //     autoplay - Boolean(= true):
+                             //     startTime - Number(= 0): start time
                  callback) { // @param Function:
     uu("Audio", src, uuarg(option, {
-        auto:       _true,
         loop:       _false,
-        start:      0,
         parent:     doc.body,
-        volume:     0.5
+        volume:     0.5,
+        autoplay:   _true,
+        startTime:  0
     }), callback);
 }
 
@@ -6713,17 +6723,17 @@ uu.Class("Audio", {
     init:           AudioInit,      // init(src:URLString, option:Hash, callback:Function)
     attr:           AudioAttr,      // attr(key:String/Hash = void,
                                     //      value:Number/Boolean = void):String/Hash/Number/Boolean
-                                    //  [1][get items] attr() -> { src, loop, start, volume,
-                                    //                             backend, current, duration }
+                                    //  [1][get items] attr() -> { src, loop, startTime, volume,
+                                    //                             backend, currentTime, duration }
                                     //  [2][mix items] attr({ key: value, ... })
                                     //  [3][get item]  attr(key) -> value
                                     //  [4][set item]  attr(key, value)
                                     //      loop - Boolean: true is loop
-                                    //      start - Nunber: 0 ~
+                                    //      startTime - Nunber: 0 ~
                                     //      volume - Number: 0.0 ~ 1.0
-                                    //      current - Nunber: 0 ~
+                                    //      currentTime - Nunber: 0 ~
     play:           AudioPlay,      // play()
-    seek:           AudioSeek,      // seek(current:Number)
+    seek:           AudioSeek,      // seek(currentTime:Number)
     stop:           AudioStop,      // stop(close:Boolean = false)
     pause:          AudioPause,     // pause()
     state:          AudioState,     // state():Hash - { error, ended, closed, paused,
@@ -6739,22 +6749,24 @@ uu.Class("Audio", {
 
 // Audio.init
 function AudioInit(src,        // @param URLString: "http://.../music.mp3", "music.mp3"
-                   option,     // @param Hash: { auto, loop, start, parent, volume }
-                               //   option.auto - Boolean(= false): auto play
+                   option,     // @param Hash: { autoplay, loop, startTime, parent, volume }
+                               //   option.autoplay - Boolean(= false): auto play
                                //   option.loop - Boolean(= false):
-                               //   option.start - Number(= 0): start time
+                               //   option.startTime - Number(= 0): start time
                                //   option.parent - Node(= <body>): <object> parent node
                                //   option.volume - Number(= 0.5): 0.0 ~ 1.0
                    callback) { // @param Function(= void): callback(this)
-    var that = this, config = uu.config.audio,
+    var that = this,
         backends = {
             A: "HTML5Audio",
-/*{@mb*/    S: "SilverlightAudio",
-            F: "FlashAudio",        /*}@mb*/
-            N: "NoAudio"
+/*{@mb*/    F: "FlashAudio"  /*}@mb*/
         };
 
-    (config.order || "N").split("").some(function(klass) { // klass = "A"
+    (uu.config.audio.order || "N").split("").some(function(klass) { // klass = "A"
+        if (klass === "N") {
+            callback && callback(null);
+            return _false;
+        }
         klass = backends[klass] || ""; // "HTML5Audio" <- "A"
 
         var backendClass = uuclass[klass];
@@ -6775,14 +6787,14 @@ function AudioInit(src,        // @param URLString: "http://.../music.mp3", "mus
 // Audio.attr
 function AudioAttr(key,     // @param String/Hash(= void): key
                    value) { // @param String/Number/Boolean(= void): value
-                            // @return Hash/void: { src, loop, start, volume,
-                            //                      backend, current, duration }
+                            // @return Hash/void: { src, loop, startTime, volume,
+                            //                      backend, currentTime, duration }
                             //   src     - String:
                             //   loop    - Boolean:
-                            //   start   - Number: start time
+                            //   startTime   - Number: start time
                             //   volume  - Number/String: 0.0 ~ 1.0, "+0.1", "-0.1"
                             //   backend - String: "HTML5Audio"
-                            //   current - Number/String: current time, 0 ~, "+10", "-10"
+                            //   currentTime - Number/String: current time, 0 ~, "+10", "-10"
                             //   duration- Number:
     var rv = this.ao.attr(), i, val, undef;
 
@@ -6794,8 +6806,8 @@ function AudioAttr(key,     // @param String/Hash(= void): key
     for (i in key) {
         val = key[i];
         switch (i) {
-        case "start":
-        case "current":
+        case "startTime":
+        case "currentTime":
             val = uunumberexpand(rv[i], val); break;
         case "volume":
             val = uunumberrange(0, uunumberexpand(rv[i], val), 1);
@@ -6808,21 +6820,21 @@ function AudioAttr(key,     // @param String/Hash(= void): key
 // Audio.play
 function AudioPlay() {
     switch (this.ao.state().condition) {
-    case "ended":   this.ao.attr("current", 0);
+    case "ended":
     case "paused":  this.ao.play();
     }
 }
 
 // AudioSeek
-function AudioSeek(current) { // @param Number: current time
+function AudioSeek(currentTime) { // @param Number: current time
     var ao = this.ao;
 
     if (this.isPlaying()) {
         ao.pause();
-        ao.attr("current", current);
+        ao.attr("currentTime", parseFloat(currentTime));
         ao.play();
     } else {
-        ao.attr("current", current);
+        ao.attr("currentTime", parseFloat(currentTime));
     }
 }
 
@@ -8755,6 +8767,7 @@ function SliderInit(rail,    // @param Node: rail node. <div class="Slider*">
                              //                      mousedown, gripWidth, gripHeight }
                              //    caption    - Boolean(= false):
                              //    vertical   - Boolean(= false): true is vertical
+                             //    ignoreEvent- Number(= 0):
                              //    toggle     - Boolean(= false):
                              //    node       - Node(= null): original node
                              //    min        - Number(= 0);
@@ -8785,7 +8798,8 @@ function SliderInit(rail,    // @param Node: rail node. <div class="Slider*">
         mouseup: null,
         mousedown: null,
         gripWidth: 13,
-        gripHeight: 18
+        gripHeight: 18,
+        ignoreEvent: 0
     });
     rail.instance = that;
 
@@ -9021,7 +9035,13 @@ function SliderMove(that, // @param this:
 
         if (param.change) {
             // fire original node.onchange event
-            uu.event.fire(param.node, "change");
+            if (!param.ignoreEvent) {
+//uu.log("fire event");
+                uu.event.fire(param.node, "change");
+            } else {
+//uu.log("ignoreEvent");
+                --param.ignoreEvent;
+            }
         }
     }
 }

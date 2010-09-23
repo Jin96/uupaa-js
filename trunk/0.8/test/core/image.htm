@@ -7,9 +7,9 @@ uu.ready("window", function(uu) {
     // get image natural dimension
     uu.puff( uu.image.size(uu.id("16x16")) ); // 160 x 100
 
-    uu.image("../images/cover01.jpg", function(img, ok) {
+    uu.image("../images/cover01.jpg", function(imgs, ok) {
         if (ok) {
-            uu.body(img);
+            uu.body(imgs[0]);
         }
     });
 
