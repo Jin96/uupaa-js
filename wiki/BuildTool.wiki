@@ -61,7 +61,6 @@ build/upa.php はプリプロセスとMinifyを施し最適化された.jsファ
 || test      || uu.ok(), uu.ng() をコメントアウトします。|| -1.5kB ||
 || fx        || uu.fx() をコメントアウトします。<br />uu.css.show() と uu.css.hide() も利用できなくなります || -6.1kB ||
 || ajax      || uu.ajax(), uu.jsonp() をコメントアウトします。|| -2.8kB ||
-|| junction  || uu.junction() をコメントアウトします。 || -0.4kB ||
 || svg       || uu.svg() をコメントアウトします || -0.2kB ||
 || canvas    || uu.canvas() をコメントアウトします || -59.0kB ||
 || flash     || uu.flash() をコメントアウトします || -0.6kB ||
