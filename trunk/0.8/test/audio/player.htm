@@ -13,8 +13,7 @@ input, div {
 var player = {
     audio: null,
     autoplay: false,
-    loop: false,
-    lock: false
+    loop: false
 };
 var playList = [
     "source/Hydrate-Kenny_Beltrey.mp3",
@@ -46,34 +45,6 @@ uu.ready(function(uu) {
     });
 
     changeSource(source);
-
-    // bind
-    uu.change(uu.id("volumeSlider"), function(evt) {
-        var val = parseInt(evt.node.value) * 0.01;
-
-        player.audio.attr("volume", val);
-    });
-
-    // seek current time slider
-    uu.change(uu.id("currentSlider"), function(evt) {
-        var val = evt.node.value,
-            backend = player.audio.attr().backend;
-
-        if (!player.lock) {
-//            player.audio.unbind("timeupdate", handleTimeupdate);
-
-            if (backend === "HTML5Audio") {
-                // [IE9beta][FIX]
-                uu.ui("Slider")[1].attr("ignoreEvent", uu.env.ie9 ? 2 : 1);
-            } else if (backend === "FlashAudio") {
-                uu.ui("Slider")[1].attr("ignoreEvent", 0);
-            }
-            player.audio.seek(val);
-//            player.audio.bind("timeupdate", handleTimeupdate);
-        }
-        player.lock = false; // unlock
-        return false; // uu.event.stop()
-    });
 });
 
 function changeSource(that) {
@@ -84,32 +55,55 @@ function changeSource(that) {
 }
 
 function initAudio(source) {
+    var ary = uu.ui("Slider"), // [0: volume, 1: seek]
+        volsl = ary[0],
+        seeksl = ary[1];
+
     uu.audio(source, { autoplay: player.autoplay,
+                       volume: volsl.attr().value * 0.01,
                        loop: player.loop }, function(audio) {
+
         window.player.audio = audio;
+
+        // volume.change event handler
+        volsl.bind("change", function(evt, attr) {
+            player.audio.attr("volume", parseInt(attr.value) * 0.01);
+        });
+
+        // volume.change event handler
+        seeksl.bind("mousedown", function(evt, attr) {
+            audio.unbind("timeupdate", handleTimeupdate);
+        });
+        seeksl.bind("mousemove", function(evt, attr) {
+        });
+        seeksl.bind("mouseup",   function(evt, attr) {
+            player.audio.seek(attr.value);
+            audio.bind("timeupdate", handleTimeupdate);
+        });
+
 
         // Backend
         uu.text(uu.id("backend"), audio.toString());
 
         // --- Event Trace ---
         audio.bind("playing,play,error", function(event) {
-//          uu.log({ event: event.type || "", state: player.audio.state().condition });
+            uu.log({ event: event.type || "", state: player.audio.state() + "" });
+        });
+
+        audio.bind("durationchange", function(event) {
+            // update slider.max
+            var max = audio.attr("duration") | 0;
+
+            uu.id("currentSlider").max = max;
+            uu.msg.post(uu.ui("Slider")[1], "attr", "max", max);
             uu.log({ event: event.type || "", state: player.audio.state() + "" });
         });
 
         // update currentTimeSlider.max
         audio.bind("canplay", function(event) {
-            // update slider.max to audio.duration
-            var max = audio.attr("duration") | 0;
-
-            uu.id("currentSlider").max = max;
-            uu.msg.post(uu.ui("Slider")[1], "attr", "max", max);
-//          uu.log({ event: event.type || "", state: player.audio.state().condition });
-            uu.log({ event: event.type || "", state: player.audio.state() + "" });
         });
 
         audio.bind("ended,pause", function(event) {
-//          uu.log({ event: event.type || "", state: player.audio.state().condition });
             uu.log({ event: event.type || "", state: player.audio.state() + "" });
         });
 
@@ -120,10 +114,6 @@ function initAudio(source) {
 function handleTimeupdate(evt) {
     var curt = player.audio.attr("currentTime") | 0;
     var seek = uu.ui("Slider")[1];
-    var a = Math.round(parseFloat(seek.attr("value")));
-    var b = Math.round(parseFloat(curt));
-
-    player.lock = true;
 
     // update grip position
     uu.msg.post(seek, "value", curt, 1);

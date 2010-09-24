@@ -12,6 +12,7 @@
         private var _soundChannel:SoundChannel = null;
         private var _timer:Timer = null;
         private var _lastPosition:Number = 0;
+        private var _updateDuration:Boolean = false;
 
         // attr
         private var _src:String = "";
@@ -45,6 +46,18 @@
         }
 
         private function timerListener(event:TimerEvent):void {
+            handleDurationchange();
+            handleTimeupdate();
+        }
+
+        private function handleDurationchange():void {
+            if (_updateDuration) {
+                _updateDuration = false;
+                ExternalInterface.call("uu.dmz." + _OBJECT_ID + "event", "durationchange");
+            }
+        }
+
+        private function handleTimeupdate():void {
             if (!_soundChannel) {
                 return;
             }
@@ -75,6 +88,10 @@
 
             _error = 4;
             ExternalInterface.call("uu.dmz." + _OBJECT_ID + "event", "error");
+        }
+
+        private function progressHandler(event:Event):void {
+            _updateDuration = true;
         }
 
         public function asFlashAudioPlay():void {
@@ -158,6 +175,7 @@
             _sound.addEventListener(Event.OPEN, openHandler);
             _sound.addEventListener(Event.COMPLETE, completeHandler);
             _sound.addEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler);
+            _sound.addEventListener(ProgressEvent.PROGRESS, progressHandler);
             _sound.load(request);
         }
 

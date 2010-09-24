@@ -67,6 +67,9 @@ function dragHandleEvent(evt) {
 
     switch (code) {
     case uu.event.codes.mousedown:  // mousedown, touchstart, gesturestart
+
+uu.log("mousedown: gesture=@ touches=@", evt.gesture, evt.touches ? evt.touches.length : 0);
+
         if (evt.gesture) {
             uu.unbind(doc, "touchmove+,touchend+", this);
             uu.bind(doc, "gesturechange+,gestureend+", this);
@@ -74,7 +77,10 @@ function dragHandleEvent(evt) {
             uu.bind(uu.ie678 ? this.grip : doc, _moveup, this);
         }
         break;
+
     case uu.event.codes.mouseup:    // mouseup, touchend, gestureend
+
+uu.log("mouseup: gesture=@ touches=@", evt.gesture, evt.touches ? evt.touches.length : 0);
         if (evt.gesture) {
             uu.unbind(doc, "gesturechange+,gestureend+", this);
             uu.bind(doc, "touchmove+,touchend+", this);
