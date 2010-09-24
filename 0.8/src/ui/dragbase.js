@@ -37,7 +37,7 @@ function uuuidragbase(evt,      // @param event:
         grip[_uuuidrag] = dragInfo = {
             tap: 0, ox: 0, oy: 0, trans: [1, 1, 0, 0, 0],
             mode: 0, // 0=zoom, 1=rotate
-            dragging: 0
+            lastPageX: 0, lastPageY: 0, dragging: 0
         };
         dragInfo.trans = uu.css.transform(node).concat();
     }
@@ -59,8 +59,8 @@ function uuuidragbase(evt,      // @param event:
         if (_touch) {
             if (evt.touches) {
                 finger = evt.touches[evt.touches.length - 1];
-                pageX = finger.pageX;
-                pageY = finger.pageY;
+                lastPageX = pageX = finger.pageX;
+                lastPageY = pageY = finger.pageY;
                 identifier = finger.identifier;
             }
         }
@@ -77,6 +77,7 @@ function uuuidragbase(evt,      // @param event:
 
     // mouseup, touchend, gestureend
     } else if (code === uu.event.codes.mouseup && dragInfo.dragging) {
+        dragInfo.dragging = 0;
 
         if (option.transform) {
             if (_touch) {
@@ -89,8 +90,6 @@ function uuuidragbase(evt,      // @param event:
                 uu.css.transform(node, dragInfo.trans = [1, 1, 0, 0, 0]);
             }
         }
-
-        dragInfo.dragging = 0;
 
         opt.mouseup && opt.mouseup(evt, node, option, dragInfo);
 
@@ -114,8 +113,8 @@ function uuuidragbase(evt,      // @param event:
                 while (i--) {
                     finger = touches[i];
                     if (dragInfo.id === finger.identifier) {
-                        pageX = finger.pageX;
-                        pageY = finger.pageY;
+                        lastPageX = pageX = finger.pageX;
+                        lastPageY = pageY = finger.pageY;
                         break;
                     }
                 }

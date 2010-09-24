@@ -26,52 +26,52 @@
 //  interface HTMLMediaElement : HTMLElement {
 //
 //    // error state
-//    readonly attribute MediaError error;              -> state() -> { error }
+//    readonly attribute MediaError error;              -> audio.state().error
 //
 //    // network state
 //             attribute DOMString src;                 -> x
-//    readonly attribute DOMString currentSrc;          -> state() -> { source }
+//    readonly attribute DOMString currentSrc;          -> audio.attr().src
+//    readonly attribute unsigned short networkState;   -> x
 //    const unsigned short NETWORK_EMPTY = 0;
 //    const unsigned short NETWORK_IDLE = 1;
 //    const unsigned short NETWORK_LOADING = 2;
 //    const unsigned short NETWORK_NO_SOURCE = 3;
-//    readonly attribute unsigned short networkState;   -> x
 //             attribute DOMString preload;             -> x
 //    readonly attribute TimeRanges buffered;           -> x
 //    void load();                                      -> x
 //    DOMString canPlayType(in DOMString type);         -> x
 //
 //    // ready state
+//    readonly attribute unsigned short readyState;     -> x
 //    const unsigned short HAVE_NOTHING = 0;
 //    const unsigned short HAVE_METADATA = 1;
 //    const unsigned short HAVE_CURRENT_DATA = 2;
 //    const unsigned short HAVE_FUTURE_DATA = 3;
 //    const unsigned short HAVE_ENOUGH_DATA = 4;
-//    readonly attribute unsigned short readyState;     -> x
 //    readonly attribute boolean seeking;               -> x
 //
 //    // playback state
-//             attribute float currentTime;             -> currentTime()
-//    readonly attribute float startTime;               -> startTime()
-//    readonly attribute float duration;                -> state() -> { duration }
-//    readonly attribute boolean paused;                -> state() -> { paused }
+//             attribute float currentTime;             -> audio.attr().currentTime
+//    readonly attribute float startTime;               -> audio.attr().startTime
+//    readonly attribute float duration;                -> audio.state().duration
+//    readonly attribute boolean paused;                -> audio.state().paused
 //             attribute float defaultPlaybackRate;     -> x
 //             attribute float playbackRate;            -> x
 //    readonly attribute TimeRanges played;             -> x
 //    readonly attribute TimeRanges seekable;           -> x
-//    readonly attribute boolean ended;                 -> state() -> { ended }
-//             attribute boolean autoplay;              -> x  (AudioOptionHash.autoplay)
-//             attribute boolean loop;                  -> loop()
-//    void play();                                      -> play()
-//    void pause();                                     -> pause()
+//    readonly attribute boolean ended;                 -> audio.state().ended
+//             attribute boolean autoplay;              -> uu.audio(src, { audoplay: true })
+//             attribute boolean loop;                  -> audio.attr().loop
+//    void play();                                      -> audio.play()
+//    void pause();                                     -> audio.pause()
 //
 //    // controls
 //             attribute boolean controls;              -> x
-//             attribute float volume;                  -> volume()
-//             attribute boolean muted;                 -> mute()
+//             attribute float volume;                  -> audio.attr.volume
+//             attribute boolean muted;                 -> x (audio.attr.volume === 0)
 //  };
 // --- support events ---
-//  bind("pause,ended,error,play,playing,canplay,timeupdate");
+//  bind("pause,ended,error,play,playing,canplay,timeupdate,durationchange");
 
 // Audio spec: http://www.w3.org/TR/html5/video.html
 (function(win, doc, uu, HTMLAudioElement) {
@@ -92,7 +92,10 @@ uu.Class("HTML5Audio", {
         var env = uu.env, windows = env.os === "windows";
 
         if (/\.mp3$/i.test(src)) { // *.mp3
-            if ((windows && env.safari) || env.chrome) {
+            if ((windows && env.safari) || env.chrome || env.ie9) {
+                return true;
+            }
+            if (env.iPhone) {
                 return true;
             }
         } else if (/\.og\w+$/i.test(src)) { // *.ogg
@@ -114,8 +117,8 @@ uu.Class("HTML5Audio", {
 
 // HTML5Audio.init
 function HTML5AudioInit(src,        // @param URLString: "music.mp3"
-                        option,     // @param Hash:
-                        callback) { // @param Function: callback(this)
+                        option,     // @param Hash: { node, loop, volume, startTime, autoplay }
+                        callback) { // @param Function(= void): callback(this)
     // glue
     this.audio = option.node;
     if (this.audio) {
@@ -287,8 +290,8 @@ uu.Class("FlashAudio", {
 });
 
 // FlashAudio.init
-function FlashAudioInit(src,     // @param String: "music.mp3"
-                        option,     // @param AudioOptionHash(= {}):
+function FlashAudioInit(src,        // @param String: "music.mp3"
+                        option,     // @param Hash: { node, loop, volume, startTime, autoplay }
                         callback) { // @param Function(= void): callback(this)
     // glue
     this.audio = option.node; // event source

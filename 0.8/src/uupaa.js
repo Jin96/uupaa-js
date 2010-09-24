@@ -4052,9 +4052,8 @@ function uueventattach(node,         // @param Node:
         //      <div class="Slider*Grip" />
         // </div>
         //
-        uu.msg.post(node.instance, "event",
-                    { bind: !__detach__, node: node,
-                      type: eventType, callback: evaluator });
+        uu.msg.post(node.instance, __detach__ ? "unbind" : "bind",
+                    { node: node, type: eventType, evaluator: evaluator });
     }
 //}@ui
 }
@@ -8033,7 +8032,8 @@ function detectEnvironment(libraryVersion) { // @param Number: Library version
     rv.touch        = rv.iphone || rv.android;
     rv.jit          = (ie     && browser >= 9)   ||    // IE 9+
                       (gecko  && render  >  1.9) ||    // Firefox 3.5+(1.91)
-                      (webkit && render  >= 528) ||    // Safari 4+, Google Chrome(2+)
+                      (webkit && render  >= 528
+                              && !rv.mobile)     ||    // Safari 4+, Google Chrome(2+)
                       (opera  && browser >= 10.5);     // Opera10.50+
     rv.flash        = detectFlashPlayerVersion(ie, 9); // FlashPlayer 9+
     rv.silverlight  = detectSilverlightVersion(ie, 3); // Silverlight 3+
@@ -8748,6 +8748,8 @@ function otherFunctionFilter(ctx, j, jz, negate, ps, arg) {
 uu.Class("Slider", {
     init:           SliderInit,         // init(rail:Node, grip:Node, param:Hash = {})
     attr:           SliderAttr,         // attr(key:String/Hash = void, value:String/Number/Boolean = void):Mix/void
+    bind:           SliderBind,         // bind(eventType:EventTypeString, evaluator:Function)
+    unbind:         SliderUnbind,       // unbind(eventType:EventTypeString)
     msgbox:         SliderMsgBox,       // msgbox(msg:String, param:Hash = void):Hash
                                         //  [1][get value] uu.msg.send(*, "getValue") -> { value: 50 }
                                         //  [2][set value] uu.msg.post(*, "setValue", { value: 50, fx: false })
@@ -8763,11 +8765,9 @@ uu.Class("Slider", {
 function SliderInit(rail,    // @param Node: rail node. <div class="Slider*">
                     grip,    // @param Node: grip node. <div><div class="Slider*Grip" /></div>
                     param) { // @param Hash(= {}): { caption, vertical, toggle, min, max, size,
-                             //                      step, value, change, mouseup,
-                             //                      mousedown, gripWidth, gripHeight }
+                             //                      step, value, gripWidth, gripHeight }
                              //    caption    - Boolean(= false):
                              //    vertical   - Boolean(= false): true is vertical
-                             //    ignoreEvent- Number(= 0):
                              //    toggle     - Boolean(= false):
                              //    node       - Node(= null): original node
                              //    min        - Number(= 0);
@@ -8775,13 +8775,17 @@ function SliderInit(rail,    // @param Node: rail node. <div class="Slider*">
                              //    size       - Number(= 100): width or height
                              //    step       - Number(= 1):
                              //    value      - Number(= 0):
-                             //    change     - Function(= null):
-                             //    mouseup    - Function(= null):
-                             //    mousedown  - Function(= null):
                              //    gripWidth  - Number(= 13):
                              //    gripHeight - Number(= 18):
     var that = this;
 
+    this.event = {
+        change: null,
+        mouseup: null,
+        mousedown: null,
+        mousemove: null,
+        mousewheel: null
+    };
     this.param = param = uu.arg(param, {
         name: "Slider",
         rail: rail,
@@ -8794,12 +8798,8 @@ function SliderInit(rail,    // @param Node: rail node. <div class="Slider*">
         size: 100,
         step: 1,
         value: 0,
-        change: null,
-        mouseup: null,
-        mousedown: null,
         gripWidth: 13,
-        gripHeight: 18,
-        ignoreEvent: 0
+        gripHeight: 18
     });
     rail.instance = that;
 
@@ -8850,6 +8850,17 @@ function SliderAttr(key,     // @param String/Hash(= void):
     return;
 }
 
+// uu.Class.Slider.bind
+function SliderBind(type,        // @param EventTypeString:
+                    evaluator) { // @param Function
+    this.event[type] = evaluator;
+}
+
+// uu.Class.Slider.unbind
+function SliderUnbind(type) { // @param EventTypeString:
+    this.event[type] = null;
+}
+
 // uu.Class.Slider.msgbox
 function SliderMsgBox(msg,      // @param String:
                       param1,   // @param Mix(= void):
@@ -8862,17 +8873,14 @@ function SliderMsgBox(msg,      // @param String:
     //  [5][get value]    uu.msg.post(instance, "value") -> 100
 
     switch (msg) {
-    case "attr":
-        return this.attr(param1, param2);
-    case "event":
-        (param1.type === "change") && (this.param.change = +param1.bind);
-        break;
-    case "value":
-        if (param1 !== void 0) {
-            SliderValue(this, param1 || 0, param2 || 0);
-        } else {
-            return this.param.value;
-        }
+    case "attr":    return this.attr(param1, param2);
+    case "bind":    this.bind(param1.type, param1.evaluator); break;
+    case "unbind":  this.unbind(param1.type); break;
+    case "value":   if (param1 !== void 0) {
+                        SliderValue(this, param1 || 0, param2 || 0);
+                    } else {
+                        return this.param.value;
+                    }
     }
     return;
 }
@@ -8893,7 +8901,7 @@ function SliderHandleEvent(evt) {
     if (!dragInfo) {
         rail["data-uuuidrag"] = dragInfo = {
             ox: 0, oy: 0, dragging: 0, startValue: 0,
-            id: 0, tap: 0 // for iPhone
+            lastPageX: 0, lastPageY: 0, id: 0, tap: 0 // for iPhone
         };
     }
 
@@ -8901,8 +8909,8 @@ function SliderHandleEvent(evt) {
         if (uu.env.touch) {
             if (evt.touches) {
                 finger = evt.touches[evt.touches.length - 1];
-                pageX = finger.pageX;
-                pageY = finger.pageY;
+                dragInfo.lastPageX = pageX = finger.pageX;
+                dragInfo.lastPageY = pageY = finger.pageY;
                 identifier = finger.identifier;
             }
         }
@@ -8922,9 +8930,20 @@ function SliderHandleEvent(evt) {
         }
         SliderMove(this, pageX + param.ox - dragInfo.ox,
                          pageY + param.oy - dragInfo.oy, 1); // 1: fx
+        this.event.mousedown && this.event.mousedown(evt, param);
 
-        param.mousedown && param.mousedown(evt, rail, param, dragInfo);
     } else if (code === uu.event.codes.mouseup && dragInfo.dragging) {
+        dragInfo.dragging = 0;
+        uu.unbind(uu.ie ? rail : doc, dragEvent, this);
+
+        if (uu.env.touch) {
+            if (evt.touches) {
+                // [FIX]
+                pageX = dragInfo.lastPageX;
+                pageY = dragInfo.lastPageY;
+            }
+        }
+
         if (param.toggle) {
             threshold = param.value >= (param.max - param.min) * 0.5;
             // tap   -> toggle value
@@ -8933,10 +8952,13 @@ function SliderHandleEvent(evt) {
                         dragInfo.tap ? (dragInfo.startValue ? param.min : param.max)
                                      : (threshold ? param.max : param.min), 1);
         }
-        dragInfo.dragging = 0;
-        param.mouseup && param.mouseup(evt, rail, param, dragInfo);
 
-        uu.unbind(uu.ie ? rail : doc, dragEvent, this);
+        SliderMove(this, pageX + param.ox - dragInfo.ox,
+                         pageY + param.oy - dragInfo.oy, 0);
+
+        this.event.mouseup && this.event.mouseup(evt, param);
+        this.event.change  && this.event.change(uu.mix({}, evt, { type: "change" }), param);
+
     } else if (code === uu.event.codes.mousemove && dragInfo.dragging) {
         if (uu.env.touch) {
             touches = evt.touches;
@@ -8945,8 +8967,8 @@ function SliderHandleEvent(evt) {
                 while (i--) {
                     finger = touches[i];
                     if (dragInfo.id === finger.identifier) {
-                        pageX = finger.pageX;
-                        pageY = finger.pageY;
+                        dragInfo.lastPageX = pageX = finger.pageX;
+                        dragInfo.lastPageY = pageY = finger.pageY;
                         break;
                     }
                 }
@@ -8954,14 +8976,17 @@ function SliderHandleEvent(evt) {
         }
         SliderMove(this, (pageX + param.ox - dragInfo.ox),
                          (pageY + param.oy - dragInfo.oy), 0);
-
-        param.mousemove && param.mousemove(evt, rail, param, dragInfo);
+        this.event.mousemove && this.event.mousemove(evt, param);
         dragInfo.tap = 0;
+
     } else if (code === uu.event.codes.mousewheel) {
         if (rail !== doc.activeElement) {
             rail.focus();
         }
         SliderValue(this, param.value + evt.wheel * 10, 0);
+
+        this.event.mousewheel && this.event.mousewheel(evt, param);
+
     } else if (code >= uu.event.codes.keydown && code <= uu.event.codes.keyup) {
         // keydown, keypress, keyup
         return;
@@ -8979,6 +9004,8 @@ function SliderValue(that,  // @param this:
 
         value = (value - param.min) * pp * (param.size * 0.01);
         SliderMove(that, value, value, fx, 0);
+
+        that.event.change && that.event.change({ type: "change" }, param);
     }
     return that.param.value;
 }
@@ -9033,16 +9060,8 @@ function SliderMove(that, // @param this:
         // update original node.value
         param.node.value = param.value;
 
-        if (param.change) {
-            // fire original node.onchange event
-            if (!param.ignoreEvent) {
-//uu.log("fire event");
-                uu.event.fire(param.node, "change");
-            } else {
-//uu.log("ignoreEvent");
-                --param.ignoreEvent;
-            }
-        }
+        // fire original node.onchange event
+        uu.event.fire(param.node, "change");
     }
 }
 
