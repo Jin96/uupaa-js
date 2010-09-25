@@ -9147,16 +9147,19 @@ function otherFunctionFilter(ctx, j, jz, negate, ps, arg) {
 //{@uislider
 (function(doc, uu) {
 
-// uu.Class.Slider - generic Slider Widget manage class
+// uu.Class.Slider - generic Slider class
 uu.Class("Slider", {
     init:           SliderInit,         // init(rail:Node, grip:Node, param:Hash = {})
     attr:           SliderAttr,         // attr(key:String/Hash = void, value:String/Number/Boolean = void):Mix/void
     bind:           SliderBind,         // bind(eventType:EventTypeString, evaluator:Function)
     unbind:         SliderUnbind,       // unbind(eventType:EventTypeString)
     msgbox:         SliderMsgBox,       // msgbox(msg:String, param:Hash = void):Hash
-                                        //  [1][get value] uu.msg.send(*, "getValue") -> { value: 50 }
-                                        //  [2][set value] uu.msg.post(*, "setValue", { value: 50, fx: false })
-                                        //  [3][get param] uu.msg.send(*, "getParam") -> { ... }
+                                        //  [1][get attr]     uu.msg.post(instance, "attr") -> Hash
+                                        //  [2][bind]         uu.msg.post(instance, "bind",   { node, type, callback })
+                                        //  [3][unbind]       uu.msg.post(instance, "unbind", { node, type, callback })
+                                        //  [4][set value]    uu.msg.post(instance, "value", 100)
+                                        //  [5][set value fx] uu.msg.post(instance, "value", 100, 100)
+                                        //  [6][get value]    uu.msg.post(instance, "value") -> 100
     handleEvent:    SliderHandleEvent   // handleEvent(evt:Event)
 }, {
     build:          SliderBuild,        // build(param:Hash, backyard:Node = doc.body):Array
@@ -9269,10 +9272,11 @@ function SliderMsgBox(msg,      // @param String:
                       param2) { // @param Mix(= void):
                                 // @return Hash/void:
     //  [1][get attr]     uu.msg.post(instance, "attr") -> Hash
-    //  [2][bind/unbind]  uu.msg.post(instance, "event", { bind, node, type, callback })
-    //  [3][set value]    uu.msg.post(instance, "value", 100)
-    //  [4][set value fx] uu.msg.post(instance, "value", 100, 100)
-    //  [5][get value]    uu.msg.post(instance, "value") -> 100
+    //  [2][bind]         uu.msg.post(instance, "bind",   { node, type, callback })
+    //  [3][unbind]       uu.msg.post(instance, "unbind", { node, type, callback })
+    //  [4][set value]    uu.msg.post(instance, "value", 100)
+    //  [5][set value fx] uu.msg.post(instance, "value", 100, 100)
+    //  [6][get value]    uu.msg.post(instance, "value") -> 100
 
     switch (msg) {
     case "attr":    return this.attr(param1, param2);
