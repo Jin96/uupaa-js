@@ -1,4 +1,6 @@
-﻿package {
+﻿// http://livedocs.adobe.com/flash/9.0_jp/ActionScriptLangRefV3/flash/media/Sound.html
+
+package {
     import flash.external.*;
     import flash.display.*;
     import flash.events.*;

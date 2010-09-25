@@ -73,7 +73,7 @@ var uu; // window.uu - uupaa.js library namespace
 uu || (function(win, doc, root,
                 toString, isArray, toArray,
                 trimSpace, nodeData, nodeSet,
-                setTimeout, setInterval, XMLHttpRequest,
+                setTimeout, setInterval, XMLHttpRequest, HTMLAudioElement,
                 parseInt, parseFloat, getComputedStyle, JSON) { // quick + minify
 
 isArray || (isArray = Array.isArray = fallbackIsArray); // [FALLBACK]
@@ -6703,6 +6703,79 @@ uuready("window", function() {
 //}@canvas
 
 // --- AUDIO ---
+//  <audio autoplay loop="true">
+//      <source src="hoge.mp3" type="audio/mpeg" />
+//      <source src="audio.ogg" type="audio/ogg; codecs=vorbis">
+//  </audio>
+//
+// +--------------+-------------+-------------+----------+
+// |   Browser    | uu("Audio") | HTML5Audio  |FlashAudio|
+// +--------------+-------------+-------------+----------+
+// |Firefox3.0    | mp3         |      -      |   mp3    |
+// |Firefox3.5+   | mp3,ogg,wav |     ogg,wav |   mp3    |
+// |Safari3.x     | mp3         |      -      |   mp3    |
+// |Safari4+ (win)| mp3,m4a,wav | mp3,m4a,wav |   mp3    |
+// |Safari4+ (mac)| mp3,m4a     |     m4a     |   mp3    |
+// |Chrome4+      | mp3,m4a,ogg | mp3,m4a,ogg |   mp3    |
+// |Opera9x-10.10 | mp3         |      -      |   mp3    |
+// |Opera10.50+   | mp3,ogg,wav |     ogg,wav |   mp3    |
+// |iOS3          |     -       |      -      |    -     |
+// |iOS4          | mp3,m4a     | mp3,m4a     |    -     |
+// |IE6,IE7,IE8   | mp3         |      -      |   mp3    |
+// |IE9beta       | mp3         | mp3         |   mp3    |
+// +--------------+-------------+-------------+----------+
+
+// Audio spec: http://www.w3.org/TR/html5/video.html
+//  interface HTMLMediaElement : HTMLElement {
+//
+//    // error state
+//    readonly attribute MediaError error;              -> audio.state().error
+//
+//    // network state
+//             attribute DOMString src;                 -> x
+//    readonly attribute DOMString currentSrc;          -> audio.attr().src
+//    readonly attribute unsigned short networkState;   -> x
+//    const unsigned short NETWORK_EMPTY = 0;
+//    const unsigned short NETWORK_IDLE = 1;
+//    const unsigned short NETWORK_LOADING = 2;
+//    const unsigned short NETWORK_NO_SOURCE = 3;
+//             attribute DOMString preload;             -> x
+//    readonly attribute TimeRanges buffered;           -> x
+//    void load();                                      -> x
+//    DOMString canPlayType(in DOMString type);         -> x
+//
+//    // ready state
+//    readonly attribute unsigned short readyState;     -> x
+//    const unsigned short HAVE_NOTHING = 0;
+//    const unsigned short HAVE_METADATA = 1;
+//    const unsigned short HAVE_CURRENT_DATA = 2;
+//    const unsigned short HAVE_FUTURE_DATA = 3;
+//    const unsigned short HAVE_ENOUGH_DATA = 4;
+//    readonly attribute boolean seeking;               -> x
+//
+//    // playback state
+//             attribute float currentTime;             -> audio.attr().currentTime
+//    readonly attribute float startTime;               -> audio.attr().startTime
+//    readonly attribute float duration;                -> audio.state().duration
+//    readonly attribute boolean paused;                -> audio.state().paused
+//             attribute float defaultPlaybackRate;     -> x
+//             attribute float playbackRate;            -> x
+//    readonly attribute TimeRanges played;             -> x
+//    readonly attribute TimeRanges seekable;           -> x
+//    readonly attribute boolean ended;                 -> audio.state().ended
+//             attribute boolean autoplay;              -> uu.audio(src, { audoplay: true })
+//             attribute boolean loop;                  -> audio.attr().loop
+//    void play();                                      -> audio.play()
+//    void pause();                                     -> audio.pause()
+//
+//    // controls
+//             attribute boolean controls;              -> x
+//             attribute float volume;                  -> audio.attr.volume
+//             attribute boolean muted;                 -> x (audio.attr.volume === 0)
+//  };
+// --- support events ---
+//  bind("pause,ended,error,play,playing,canplay,timeupdate,durationchange");
+
 //{@audio
 // uu.audio
 function uuaudio(src,        // @param URLString:
@@ -6824,20 +6897,20 @@ function AudioAttr(key,     // @param String/Hash(= void): key
 function AudioPlay() {
     switch (this.ao.state().condition) {
     case "ended":
-    case "paused":  this.ao.play();
+    case "paused": this.ao.play();
     }
 }
 
 // AudioSeek
 function AudioSeek(currentTime) { // @param Number: current time
-    var ao = this.ao;
+    var ao = this.ao, curt = parseFloat(currentTime);
 
     if (this.isPlaying()) {
         ao.pause();
-        ao.attr("currentTime", parseFloat(currentTime));
+        ao.attr("currentTime", curt);
         ao.play();
     } else {
-        ao.attr("currentTime", parseFloat(currentTime));
+        ao.attr("currentTime", curt);
     }
 }
 
@@ -6865,15 +6938,13 @@ function AudioIsPlaying() { // @return Boolean:
 // Audio.bind
 function AudioBind(eventTypes, // @param String:
                    callback) { // @param Function:
-//  this.ao.bind(eventTypes, callback);
-    uu.bind(this.ao.audio, eventTypes, callback);
+    uuevent(this.ao.audio, eventTypes, callback);
 }
 
 // Audio.unbind
 function AudioUnbind(eventTypes, // @param String:
                      callback) { // @param Function:
-//  this.ao.unbind(eventTypes, callback);
-    uu.unbind(this.ao.audio, eventTypes, callback);
+    uueventunbind(this.ao.audio, eventTypes, callback);
 }
 
 // Audio.msgbox
@@ -6894,6 +6965,317 @@ function AudioMsgBox(msg,      // @param String: msg
     }
     return;
 }
+
+uu.Class("HTML5Audio", {
+    init:           HTML5AudioInit,     // init(src:String, option:Hash, callback:Function)
+    attr:           HTML5AudioAttr,     // attr(key:String/Hash, value:Mix = void):Hash/void
+                                        //      { src, loop, volume, backend, duration, startTime, currentTime }
+    play:           HTML5AudioPlay,     // play()
+    stop:           HTML5AudioStop,     // stop(close:Boolean = false)
+    pause:          HTML5AudioPause,    // pause()
+    state:          HTML5AudioState     // state():Hash - { error, ended, closed, paused,
+                                        //                  playing, condition }
+}, {
+    ready:          !!HTMLAudioElement,
+    isSupport:      function(src) {     // @param String: "music.mp3"
+                                        // @return Boolean:
+        var windows = _env.os === "windows";
+
+        if (/\.mp3$/i.test(src)) { // *.mp3
+            if ((windows && _env.safari) || _env.chrome || _env.ie9) {
+                return _true;
+            }
+            if (_env.iphone) {
+                return _true;
+            }
+        } else if (/\.og\w+$/i.test(src)) { // *.ogg
+            if (_gecko || _env.chrome || _opera) {
+                return _true;
+            }
+        } else if (/\.m4a$/i.test(src)) { // *.m4a (AAC)
+            if (_webkit) {
+                return _true;
+            }
+        } else if (/\.wav$/i.test(src)) { // *.wav
+            if ((windows && _env.safari) || _gecko || _opera) {
+                return _true;
+            }
+        }
+        return _false;
+    }
+});
+
+// HTML5Audio.init
+function HTML5AudioInit(src,        // @param URLString: "music.mp3"
+                        option,     // @param Hash: { node, loop, volume, startTime, autoplay }
+                        callback) { // @param Function(= void): callback(this)
+    var that = this, audio;
+
+    // glue
+    audio = option.node;
+    if (audio) {
+        audio.src || (audio.src = src);
+    } else {
+        if (win.Audio) {
+            audio = new Audio();
+        } else if (HTMLAudioElement) {
+            audio = newNode("audio"); // [IE9beta]
+        } else {
+            throw new Error("LOGIC_ERROR");
+        }
+        audio.src = src;
+    }
+    audio.parentNode || uunodeadd(audio);
+    this.audio = audio;
+
+//  [iOS4.1][FIX] http://twitter.com/uupaa/status/25485203353
+//  audio.loop = this._loop = option.loop || false;
+    this._loop = option.loop || _false;
+    audio.volume = option.volume || 0.5;
+    this._closed = _false;
+    this._startTime = option.startTime || 0;
+    this._lastAction = "";
+
+    // HTMLAudioElement.instance():this
+    audio.instance = function() {
+        return that;
+    };
+
+    // audio.loop
+    // [iOS4.1][FIX] http://twitter.com/uupaa/status/25485203353
+    uuevent(audio, "ended", function() {
+        if (that._closed || that._lastAction === "stop") {
+            return;
+        }
+        if (that._loop) {
+            that.attr("currentTime", that._startTime); // rewind
+            that.play();
+        } else {
+            audio.pause(); // ended -> pause
+        }
+    });
+
+    // autoplay
+    if (option.autoplay) {
+        setTimeout(function() {
+            that.play();
+        }, 100);
+    }
+    callback && callback(this);
+}
+
+// HTML5Audio.attr
+function HTML5AudioAttr(key,     // @param String/Hash(= void):
+                        value) { // @param Mix(= void):
+                                 // @return Hash/void: { src, loop, volume, backend, duration,
+                                 //                      startTime, currentTime }
+    var rv, audio = this.audio, i, v, undef;
+
+    switch (uucomplex(key, value)) { // 1: (), 2: (k), 3: (k,v), 4: ({})
+    case 1:
+    case 2: rv = {
+                src:        audio.src || "",
+                loop:       this._loop,
+                volume:     audio.volume,
+                backend:    "HTML5Audio",
+                duration:   audio.duration || 0,
+                startTime:  this._startTime,
+                currentTime: audio.currentTime
+            };
+            return key === undef ? rv : rv[key];
+    case 3: key = uupair(key, value);
+    }
+    for (i in key) {
+        v = key[i];
+        switch (i) {
+//      case "loop":        audio.loop = this._loop = v; break;
+        case "loop":        this._loop = v; break;
+        case "volume":      audio.volume = v; break;
+        case "startTime":   this._startTime = v; break;
+        case "currentTime": audio.currentTime = v;
+        }
+    }
+    return;
+}
+
+// HTML5Audio.play
+function HTML5AudioPlay() {
+    if (!this._closed) {
+        this._lastAction = "play";
+        this.audio.play();
+    }
+}
+
+// HTML5Audio.stop
+function HTML5AudioStop(close) { // @param Boolean(= false):
+    var audio = this.audio;
+
+    if (close) {
+        this._closed = _true;
+        uueventunbind(audio, "ended");
+        uueventfire(audio, "ended");
+        uunoderemove(audio);
+    } else if (this.state().playing) {
+        this._lastAction = "stop";
+        audio.pause();
+        this.attr("currentTime", this._startTime); // reset
+    }
+}
+
+// HTML5Audio.pause
+function HTML5AudioPause() {
+    if (this.state().playing) {
+        this._lastAction = "pause";
+        this.audio.pause();
+    }
+}
+
+// HTML5Audio.state
+function HTML5AudioState() { // @return Hash: { error, ended, closed, paused,
+                             //                 playing, condition }
+    var audio  = this.audio,
+        error  = audio.error,
+        ended  = audio.ended  || _false,
+        closed = this._closed,
+        paused = audio.paused || _false,
+        stoped = this._lastAction === "stop",
+        condition;
+
+    if (stoped && paused) {
+        ended  = _true;
+        paused = _false;
+    }
+    condition = closed ? "closed"
+              : error  ? "error"
+              : paused ? "paused"
+              : ended  ? "ended" : "playing";
+    return {
+        error:      error,
+        ended:      ended,
+        closed:     closed,
+        paused:     paused,
+        playing:    condition === "playing",
+        condition:  condition,
+        toString:   function() {
+            return this.condition;
+        }
+    };
+}
+
+//{@mb
+uu.Class("FlashAudio", {
+    init:           FlashAudioInit,     // init(src:String, option:AudioOptionHash = {}, callback:Function)
+    attr:           FlashAudioAttr,     // attr(key:String/Hash, value:Mix = void):Hash/void
+                                        //      { src, loop, volume, backend, duration, startTime, currentTime }
+    play:           FlashAudioPlay,     // play()
+    stop:           FlashAudioStop,     // stop(close:Boolean = false)
+    pause:          FlashAudioPause,    // pause()
+    state:          FlashAudioState     // state():Hash - { error, ended, closed, paused,
+                                        //                  playing, condition }
+}, {
+    swf:            uu.config.baseDir + "uu.audio.swf",
+    ready:          function() {
+        return _env.flash && uustat(uuclass.FlashAudio.swf);
+    },
+    isSupport:      function(src) {
+        return /\.mp3$/i.test(src);
+    }
+});
+
+// FlashAudio.init
+function FlashAudioInit(src,        // @param String: "music.mp3"
+                        option,     // @param Hash: { node, loop, volume, startTime, autoplay }
+                        callback) { // @param Function(= void): callback(this)
+    var that = this, audio,
+        OBJECT_ID = "externalflashaudio" + uunumber();
+
+    // glue
+    audio = option.node; // event source
+    audio || (audio = newNode());
+    audio.parentNode || uunodeadd(audio);
+    this.audio = audio;
+    this.flash = null; // backend object
+
+    // FlashAudio.instance():this
+    audio.instance = function() {
+        return that;
+    };
+
+    // special event
+    function flashAudioReadyCallbackEvent(eventType, param) {
+        setTimeout(function() {
+            uueventfire(audio, eventType, param);
+        }, 0);
+    }
+    uu.dmz[OBJECT_ID + "event"] = flashAudioReadyCallbackEvent;
+
+    // wait for response from flash initializer
+    function wait() {
+        that.flash.asFlashAudioSetAttr({ src:       src,
+                                         loop:      option.loop   || _false,
+                                         volume:    option.volume || 0.5,
+                                         startTime: option.startTime || 0 });
+        callback && callback(that);
+        option.autoplay && that.play();
+    }
+    this.flash = uuflash(uuclass.FlashAudio.swf,
+                         OBJECT_ID, { width: 1, height: 1 }, wait);
+}
+
+// FlashAudio.attr
+function FlashAudioAttr(key,     // @param String/Hash(= void):
+                        value) { // @param Mix(= void):
+                                 // @return Hash/void: { src, loop, volume, backend, duration,
+                                 //                      startTime, currentTime }
+    var rv, flash = this.flash, undef;
+
+    switch (uucomplex(key, value)) { // 1: (), 2: (k), 3: (k,v), 4: ({})
+    case 1:
+    case 2: rv = flash.asFlashAudioGetAttr();
+            return key === undef ? rv : rv[key];
+    case 3: key = uupair(key, value);
+    }
+    flash.asFlashAudioSetAttr(key);
+    return;
+}
+
+// FlashAudio.play
+function FlashAudioPlay() {
+    this.state().closed || this.flash.asFlashAudioPlay();
+}
+
+// FlashAudio.stop
+function FlashAudioStop(close) { // @param Boolean(= false):
+    var flash = this.flash, attr;
+
+    if (close) {
+        flash.asFlashAudioStop(_true);
+        uunoderemove(this.audio);
+    } else if (this.state().playing) {
+        flash.asFlashAudioStop(_false);
+        attr = flash.asFlashAudioGetAttr();
+        flash.asFlashAudioSetAttr({ currentTime: attr.startTime,
+                                    timeupdate: 1 }); // rewind
+    }
+}
+
+// FlashAudio.pause
+function FlashAudioPause() {
+    this.state().playing && this.flash.asFlashAudioPause();
+}
+
+// FlashAudio.state
+function FlashAudioState() { // @return Hash: { error, ended, closed, paused,
+                             //                 playing, condition }
+    var rv = this.flash.asFlashAudioGetState();
+
+    rv.toString = function() {
+        return this.condition;
+    };
+    return rv;
+}
+//}@mb
+
 // --- initialize ---
 uuready("window", function() {
     uuready.window = uuready.audio = _true;
@@ -8174,7 +8556,7 @@ uuready("dom:2", function() {
 })(this, document, document.documentElement,
    Object.prototype.toString, Array.isArray, Array.prototype.slice,
    /^\s+|\s+$/g, "data-uu", "nodeSet",
-   setTimeout, setInterval, this.XMLHttpRequest,
+   setTimeout, setInterval, this.XMLHttpRequest, this.HTMLAudioElement,
    parseInt, parseFloat, this.getComputedStyle, this.JSON);
 
 // === query.tokenizer, query.selector ===
