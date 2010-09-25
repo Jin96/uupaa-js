@@ -80,6 +80,7 @@ isArray || (isArray = Array.isArray = fallbackIsArray); // [FALLBACK]
 
 // --- minify (http://d.hatena.ne.jp/uupaa/20100730) ---
 var _addEventListener = "addEventListener",
+    _removeAttribute = "removeAttribute",
     _hasOwnProperty = "hasOwnProperty",
     _getAttribute = "getAttribute",
     _setAttribute = "setAttribute",
@@ -716,12 +717,15 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
     }),
     // --- UNIT TEST ---
 //{@test
-    ok:             uuok,           // uu.ok(title:String = void,
-                                    //       lval:Mix = void, operator:String = void, rval:Mix = void,
+    ok:             uuok,           // uu.ok(title:String/Boolean = void,
+                                    //       lval:Mix = void,
+                                    //       operator:String = void,
+                                    //       rval:Mix = void,
                                     //       more:String = void):Hash/void - { ok, ng, ms, total }
                                     //  [1][add separater]  uu.ok("group separater or comment")
                                     //  [2][judge]          uu.ok("test title", 1, "===", 1, "more info")
                                     //  [3][get/show score] uu.ok() -> { ok, ng, ms, total }
+                                    //  [4][get score]      uu.ok(false) -> { ok, ng, ms, total }
     ng:             uung,           // uu.ng(title:String,
                                     //       lval:Mix = void, operator:String = void, rval:Mix = void)
                                     //  [1][assert]         uu.ng("123 == 123", 123, "===", 123)
@@ -1911,12 +1915,26 @@ function uuattr(node,    // @param Node:
 /*{@mb*/    } /*}@mb*/
             return rv;
     case 2: // [IE6] tagindex, colspan is number
-            return (node[_getAttribute](fix[key] || key, 2) || "") + "";
-    case 3: node[_setAttribute](fix[key] || key, value);
-            break;
-    case 4: for (attr in key) {
-                node[_setAttribute](fix[attr] || attr, key[attr]);
+            attr = fix[key] || key;
+            if (_env.ie6 || _env.ie7) { // [IE6][IE7]
+                switch (attr) {
+                case "href":     return node[_getAttribute](attr, 2);
+                case "checked":  return node.checked  ? "checked"  : "";
+                case "disabled": return node.disabled ? "disabled" : "";
+                }
             }
+            return (node[_getAttribute](attr) || "") + "";
+    case 3: key = uupair(key, value);
+    }
+    for (i in key) {
+        attr = fix[i] || i;
+        switch (attr) {
+        case "checked":
+        case "disabled": node[attr] = !!key[i]; // node.disabled = true / false
+            break;
+        default:
+            node[_setAttribute](attr, key[i]);
+        }
     }
     return node;
 }
@@ -4039,23 +4057,6 @@ function uueventattach(node,         // @param Node:
                         : "attachEvent"]("on" + eventType, evaluator);
     }
 //}@mb
-
-//{@ui
-    if (node.instance) {
-        //
-        // uu.bind(<input type="range" instance={uu.Class.Slider} />)
-        //
-        //              | post message
-        //              v
-        //
-        // <div class="Slider**" ui="Slider" instance={uu.Class.Slider}>
-        //      <div class="Slider*Grip" />
-        // </div>
-        //
-        uu.msg.post(node.instance, __detach__ ? "unbind" : "bind",
-                    { node: node, type: eventType, evaluator: evaluator });
-    }
-//}@ui
 }
 
 // uu.event.detach - detach event - Raw Level API wrapper
@@ -5836,9 +5837,9 @@ function uulogclear() {
 //{@test
 
 // uu.ok - unit test
-function uuok(title,    // @param String: title
-              lval,     // @param Mix: left handset
-              operator, // @param String: operator
+function uuok(title,    // @param String/Boolean(= ""): title
+              lval,     // @param Mix(= void): left handset
+              operator, // @param String(= void): operator
               rval,     // @param Mix(= void): right handset
               more) {   // @param String(= void): more info
                         // @return Hash/void: { ok, ng, ms, total }
@@ -5850,10 +5851,11 @@ function uuok(title,    // @param String: title
     //  [1][test]           uu.ok("title", 1, "===", 1, "more info")
     //  [2][add separater]  uu.ok("separater comment")
     //  [3][get/show score] uu.ok() -> { ok, ng, ms, total }
+    //  [4][get score]      uu.ok(false) -> { ok, ng, ms, total }
 
     var rv, r, tm, db = uuok.db, ol, undef;
 
-    if (operator) {
+    if (operator) { // [1]
         tm = +new Date;
         r = uuokjudge(lval, operator, rval);
 //{@debug
@@ -5879,15 +5881,17 @@ function uuok(title,    // @param String: title
                 rval === undef ? "" : uujsonencode(rval, 1),
                 more || ""));
 
-    } else if (isString(title)) {
+    } else if (isString(title)) { // [2]
         db.row.push(
             uuf(uuok.fmt[0] + uuok.fmt[2],
                 uuok.bgc[2 + (db.row.length % 2) * 4], uuentity(title)));
-    } else {
+    } else { // [3][4]
         rv = uuclone(db);
         db.ng && uucss(doc.body, { bgc: uuok.bgc[0] });
-        ol = uuid("uuok") || doc.body[_appendChild](uu.ol("id,uuok"));
-        ol.innerHTML += db.row.join("");
+        if (title === false) { // [4]
+            ol = uuid("uuok") || doc.body[_appendChild](uu.ol("id,uuok"));
+            ol.innerHTML += db.row.join("");
+        }
 
         uuok.db = { ok: 0, ng: 0, total: 0, ms: 0, row: [] }; // reset
         return rv;
@@ -6481,8 +6485,8 @@ function uuimagesize(node) { // @param HTMLImageElement:
             w = node[_width];
             h = node[_height];
 
-            node.removeAttribute(_width);
-            node.removeAttribute(_height);
+            node[_removeAttribute](_width);
+            node[_removeAttribute](_height);
 
             rw = node[_width];
             rh = node[_height];
@@ -7247,7 +7251,7 @@ uu.Class.singleton("IEStorage", {
         if (key === void 0) { // clear all
             idx = idx.split("\t");
             for (; key = idx[i++]; ) {
-                so.removeAttribute(key);
+                so[_removeAttribute](key);
             }
             so[_setAttribute](_storage.index, "");
             so.save(_storage.store);
@@ -7258,7 +7262,7 @@ uu.Class.singleton("IEStorage", {
             if (i.indexOf(tab) >= 0) {
                 so[_setAttribute](_storage.index,
                                   i.replace(new RegExp(tab), "").trim());
-                so.removeAttribute(key);
+                so[_removeAttribute](key);
                 so.save(_storage.store);
             }
         }
@@ -8492,10 +8496,27 @@ function selector(token,     // @param Hash: QueryTokenHash
             case 7: negate = +!negate;                            // [attr != value]
             }
             rex = RegExp(val, attr in _QUERY_CASESENS ? "" : "i"); // ignore case
-            for (; j < jz; ++j) {
-                node = ctx[j];
-                word = node.getAttribute(attr, 2);
-                ((word && rex.test(word)) ^ negate) && (r[++ri] = node);
+
+            if (uu.env.ie6 || uu.env.ie7) { // [IE6][IE7]
+                // IE getAttribute(attr) problem
+                // http://twitter.com/uupaa/status/25501532102
+                // http://twitter.com/uupaa/status/25502149299
+                for (; j < jz; ++j) {
+                    node = ctx[j];
+                    switch (attr) {
+                    case "href":     word = node.getAttribute(attr, 2); break;
+                    case "checked":  word = node.checked  ? "checked"  : ""; break;
+                    case "disabled": word = node.disabled ? "disabled" : ""; break;
+                    default:         word = node.getAttribute(attr);
+                    }
+                    ((word && rex.test(word)) ^ negate) && (r[++ri] = node);
+                }
+            } else {
+                for (; j < jz; ++j) {
+                    node = ctx[j];
+                    word = node.getAttribute(attr);
+                    ((word && rex.test(word)) ^ negate) && (r[++ri] = node);
+                }
             }
             ope === 7 && (negate = +!negate); // restore
             ctx = r;
@@ -8764,12 +8785,10 @@ uu.Class("Slider", {
 // uu.Class.Slider.init
 function SliderInit(rail,    // @param Node: rail node. <div class="Slider*">
                     grip,    // @param Node: grip node. <div><div class="Slider*Grip" /></div>
-                    param) { // @param Hash(= {}): { caption, vertical, toggle, min, max, size,
+                    param) { // @param Hash(= {}): { caption, vertical, min, max, size,
                              //                      step, value, gripWidth, gripHeight }
                              //    caption    - Boolean(= false):
                              //    vertical   - Boolean(= false): true is vertical
-                             //    toggle     - Boolean(= false):
-                             //    node       - Node(= null): original node
                              //    min        - Number(= 0);
                              //    max        - Number(= 100):
                              //    size       - Number(= 100): width or height
@@ -8790,7 +8809,6 @@ function SliderInit(rail,    // @param Node: rail node. <div class="Slider*">
         name: "Slider",
         rail: rail,
         grip: grip,
-        toggle: false,
         caption: 0,
         vertical: 0,
         min: 0,
@@ -8799,7 +8817,9 @@ function SliderInit(rail,    // @param Node: rail node. <div class="Slider*">
         step: 1,
         value: 0,
         gripWidth: 13,
-        gripHeight: 18
+        gripHeight: 18,
+        lastpx: 0,
+        lastpy: 0
     });
     rail.instance = that;
 
@@ -8887,7 +8907,7 @@ function SliderMsgBox(msg,      // @param String:
 
 // uu.Class.Slider.handleEvent
 function SliderHandleEvent(evt) {
-    var code  = evt.code, rect, threshold,
+    var code  = evt.code, rect, threshold, w,
         param = this.param,
         rail  = param.rail,
         pageX = evt.pageX,
@@ -8916,45 +8936,31 @@ function SliderHandleEvent(evt) {
         }
         rect = uu.css.rect(rail, doc.html); // offset from <html>
         threshold = param.value >= (param.max - param.min) * 0.5;
-        dragInfo.ox = rect.x + 3; // 3: magic word
-        dragInfo.oy = rect.y + 3;
+        dragInfo.ox = rect.x + 1;
+        dragInfo.oy = rect.y;
         dragInfo.id = identifier; // touch.identifier
         dragInfo.dragging = 1;
         dragInfo.startValue = threshold ? 1 : 0;
         ++dragInfo.tap;
 
-        uu.bind(uu.ie ? rail : doc, dragEvent, this);
+        uu.bind(uu.ie678 ? rail : doc, dragEvent, this);
 
         if (rail !== doc.activeElement) {
             rail.focus();
         }
+
+        // calc half gripWidth
+        // http://twitter.com/uupaa/status/25483749734
+        w = Math.round(((param.vertical ? param.gripHeight
+                                        : param.gripWidth) + 1) / 2);
         SliderMove(this, pageX + param.ox - dragInfo.ox,
-                         pageY + param.oy - dragInfo.oy, 1); // 1: fx
+                         pageY + param.oy - dragInfo.oy, 1, w, w); // 1: fx
+
         this.event.mousedown && this.event.mousedown(evt, param);
 
     } else if (code === uu.event.codes.mouseup && dragInfo.dragging) {
         dragInfo.dragging = 0;
-        uu.unbind(uu.ie ? rail : doc, dragEvent, this);
-
-        if (uu.env.touch) {
-            if (evt.touches) {
-                // [FIX]
-                pageX = dragInfo.lastPageX;
-                pageY = dragInfo.lastPageY;
-            }
-        }
-
-        if (param.toggle) {
-            threshold = param.value >= (param.max - param.min) * 0.5;
-            // tap   -> toggle value
-            // slide -> magnetic value (1~10 -> 0), (90~99 -> 100)
-            SliderValue(this,
-                        dragInfo.tap ? (dragInfo.startValue ? param.min : param.max)
-                                     : (threshold ? param.max : param.min), 1);
-        }
-
-        SliderMove(this, pageX + param.ox - dragInfo.ox,
-                         pageY + param.oy - dragInfo.oy, 0);
+        uu.unbind(uu.ie678 ? rail : doc, dragEvent, this);
 
         this.event.mouseup && this.event.mouseup(evt, param);
         this.event.change  && this.event.change(uu.mix({}, evt, { type: "change" }), param);
@@ -8975,7 +8981,7 @@ function SliderHandleEvent(evt) {
             }
         }
         SliderMove(this, (pageX + param.ox - dragInfo.ox),
-                         (pageY + param.oy - dragInfo.oy), 0);
+                         (pageY + param.oy - dragInfo.oy), 0, 1, 1);
         this.event.mousemove && this.event.mousemove(evt, param);
         dragInfo.tap = 0;
 
@@ -9000,10 +9006,11 @@ function SliderValue(that,  // @param this:
                      fx) {  // @param Boolean(= false):
                             // @return Number: current value
     if (value !== void 0) {
+//uu.log("SliderValue @ @", value, fx);
         var param = that.param, pp = 100 / (param.max - param.min);
 
-        value = (value - param.min) * pp * (param.size * 0.01);
-        SliderMove(that, value, value, fx, 0);
+        value = Math.round((value - param.min) * pp * (param.size * 0.01));
+        SliderMove(that, value, value, fx, 0, 1, 1);
 
         that.event.change && that.event.change({ type: "change" }, param);
     }
@@ -9011,13 +9018,39 @@ function SliderValue(that,  // @param this:
 }
 
 // inner - move grip
-function SliderMove(that, // @param this:
-                    px,   // @param Number: pixel value
-                    py,   // @param Number: pixel value
-                    fx) { // @param Boolean: true is fx
-    var param = that.param, x = 0, y = 0, w = param.max - param.min,
-        tm = param.size * 0.01, pp = 100 / w,
-        round = param.step * pp * tm, threshold = pp * tm / 2;
+function SliderMove(that,   // @param this:
+                    px,     // @param Number: pixel value
+                    py,     // @param Number: pixel value
+                    fx,     // @param Boolean: true is fx
+                    minus,  // @param Number: minus
+                    plus) { // @param Number: plus
+    var move = 0,
+        param = that.param, x = 0, y = 0, w, tm, pp, round, threshold;
+
+    // http://twitter.com/uupaa/status/25483749734
+    if (param.vertical) {
+        if (param.lastpy - minus >= py ||
+            param.lastpy + plus  <= py) {
+            param.lastpy = py;
+            ++move;
+        }
+    } else {
+        if (param.lastpx - minus >= px ||
+            param.lastpx + plus  <= px) {
+            param.lastpx = px;
+            ++move;
+        }
+    }
+    if (!move) {
+        return;
+    }
+//uu.log("SliderMove @ @ @", px, py, fx);
+
+    w = param.max - param.min;
+    tm = param.size * 0.01;
+    pp = 100 / w;
+    round = param.step * pp * tm;
+    threshold = pp * tm / 2;
 
     if (param.vertical) {
         y = parseInt((py + threshold) / round) * round;
@@ -9033,22 +9066,11 @@ function SliderMove(that, // @param this:
 
 //{@fx
     if (fx) {
-        if (param.toggle) {
-            x = uu.number.range(0, x, tm * 71); // magic number
-
-            uu.fx(param.rail, 150, { stop: 1, bgx: x - 36, bgy: y - 80 }); // magic number
-        } else {
-            uu.fx(param.grip, 150, { stop: 1, x: x, y: y });
-        }
+        uu.fx(param.grip, 150, { stop: 1, x: x, y: y });
     } else {
 //}@fx
-        if (param.toggle) {
-            param.rail.style.backgroundPositionX = (x - 36) + "px";
-            param.rail.style.backgroundPositionY = (y - 80) + "px";
-        } else {
-            param.grip.style.left = x + "px";
-            param.grip.style.top  = y + "px";
-        }
+        param.grip.style.left = x + "px";
+        param.grip.style.top  = y + "px";
 //{@fx
     }
 //}@fx
@@ -9069,40 +9091,36 @@ function SliderMove(that, // @param this:
 function SliderBuild(param,      // @param Hash(= {}):
                      backyard) { // @param Node(= doc.body): backyard Node
                                  // @return Array: [SliderClassInstance, RailNode]
+    var rail, grip, w;
+
     param = uu.arg(param, { min: 0, max: 100, size: 100, step: 1, value: 0,
-                            vertical: 0, toggle: 0,
+                            vertical: 0,
                             gripWidth: 13, gripHeight: 18,
                             change: null, mouseup: null, mousedown: null });
-    if (!param.toggle) {
-        param.gripWidth  = param.vertical ? param.gripHeight : param.gripWidth;
-        param.gripHeight = param.vertical ? param.gripWidth  : param.gripHeight;
+
+    if (param.vertical) {
+        w = param.gripWidth;
+        param.gripWidth  = param.gripHeight;
+        param.gripHeight = w;
     }
 
     // <div class="Slider**" ui="Slider" tabindex="0" instance={uu.Class.Slider}>
     //      <div class="Slider*Grip" />
     // </div>
 
-    var rail = uu.div("ui,Slider,tabindex,0",
-/*{@mb*/              !uu.ready.style.inlineBlock ? "display,inline,zoom,1" : /*}@mb*/ // [IE6][IE7] hasLayout
-                      "display,inline-block,top,6px",
-                      uu.div()),
-        grip = rail.firstChild;
+    rail = uu.div("ui,Slider,tabindex,0",
+/*{@mb*/          !uu.ready.style.inlineBlock ? "display,inline,zoom,1" : /*}@mb*/ // [IE6][IE7] hasLayout
+                  "display,inline-block,top,6px",
+                  uu.div());
+    grip = rail.firstChild;
 
     // glue
     uu.add(rail, backyard || doc.body);
     uu.css.userSelect(rail);
 
-    if (param.toggle) {
-        param.min  = 0;
-        param.max  = 30;
-        param.size = 50;
-        param.step = 1;
-        rail.className = "SliderT50";
-    } else {
-        rail.className = param.vertical ? ("SliderV" + param.size)
-                                        : ("SliderH" + param.size);
-        grip.className = param.vertical ? "SliderVGrip" : "SliderHGrip";
-    }
+    rail.className = param.vertical ? ("SliderV" + param.size)
+                                    : ("SliderH" + param.size);
+    grip.className = param.vertical ? "SliderVGrip" : "SliderHGrip";
 
     uu("Slider", rail, grip, param);
     return rail;
@@ -9169,7 +9187,7 @@ uu.image && uu.image(uu.config.img + "ui.png"); // pre-load
 uu.ready(function(uu) {
     var ss = uu.ss("ui"),
         img = uu.config.img + "ui.png",
-        fmt,
+        fmt, focus,
         relative = "relative",
         absolute = "absolute";
 
@@ -9189,8 +9207,13 @@ uu.ready(function(uu) {
              ".SliderHGrip": uu.f(fmt, img,    0,   0, absolute,  13,  18),
 
              ".SliderT50":   uu.f(fmt, img,  -36, -80, relative,  64,  20) +
-                             ";border:1px solid gray;-webkit-border-radius:5px"
-              });
+                             ";border:1px solid gray;-webkit-border-radius:5px" });
+    // focus outline
+    focus = "outline:1px solid skyblue";
+    ss.add({ ".SliderH200:focus": focus, ".SliderH150:focus": focus,
+             ".SliderH100:focus": focus, ".SliderH50:focus":  focus,
+             ".SliderV200:focus": focus, ".SliderV150:focus": focus,
+             ".SliderV100:focus": focus, ".SliderV50:focus":  focus });
 //}@uislider
 });
 

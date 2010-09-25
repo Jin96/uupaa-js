@@ -1,19 +1,13 @@
-<!doctype html><html lang="ja"><head><meta charset="utf-8" />
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8" />
 <title>TinyAudioPlayer - demo</title>
-<style>
-/*
-input, div {
-    outline: 1px solid skyblue
-}
- */
-</style>
 <script src="../../src/uupaa.js"></script>
 <script src="../../src/audio/audio.js"></script>
 <script>
 var player = {
     audio: null,
+    loop: false,
     autoplay: false,
-    loop: false
+    lastCurrentTime: 0
 };
 var playList = [
     "source/Hydrate-Kenny_Beltrey.mp3",
@@ -28,12 +22,14 @@ var playList = [
     "source/bego.m4a",
     "source/bego.wav"
 ];
+var buttons;
 
 uu.ready(function(uu) {
     if (uu.env.ie6) {
         uu.id("source").style.width = "250px";
     }
     uu.ui.build();
+    buttons = uu("input[type=button][disabled=disabled]");
 
 }, "audio", function(uu, audio) {
 
@@ -50,6 +46,7 @@ uu.ready(function(uu) {
 function changeSource(that) {
     if (player.audio) {
         player.audio.stop(true); // close
+        buttons.attr({ disabled: true });
     }
     initAudio(that.options[that.selectedIndex].value);
 }
@@ -62,6 +59,8 @@ function initAudio(source) {
     uu.audio(source, { autoplay: player.autoplay,
                        volume: volsl.attr().value * 0.01,
                        loop: player.loop }, function(audio) {
+
+        buttons.attr({ disabled: false });
 
         window.player.audio = audio;
 
@@ -76,9 +75,11 @@ function initAudio(source) {
         });
         seeksl.bind("mousemove", function(evt, attr) {
         });
-        seeksl.bind("mouseup",   function(evt, attr) {
+        seeksl.bind("mouseup", function(evt, attr) {
             player.audio.seek(attr.value);
-            audio.bind("timeupdate", handleTimeupdate);
+            setTimeout(function() {
+                audio.bind("timeupdate", handleTimeupdate);
+            }, 100);
         });
 
 
@@ -95,7 +96,7 @@ function initAudio(source) {
             var max = audio.attr("duration") | 0;
 
             uu.id("currentSlider").max = max;
-            uu.msg.post(uu.ui("Slider")[1], "attr", "max", max);
+            uu.msg.post(seeksl, "attr", "max", max);
             uu.log({ event: event.type || "", state: player.audio.state() + "" });
         });
 
@@ -113,10 +114,14 @@ function initAudio(source) {
 
 function handleTimeupdate(evt) {
     var curt = player.audio.attr("currentTime") | 0;
-    var seek = uu.ui("Slider")[1];
 
-    // update grip position
-    uu.msg.post(seek, "value", curt, 1);
+    if (player.lastCurrentTime !== curt) {
+        player.lastCurrentTime = curt;
+
+//uu.log("handleTimeupdate @", curt);
+        // update grip position
+        uu.msg.post(uu.ui("Slider")[1], "value", curt, 0);
+    }
 }
 
 function togglePlay() {
@@ -145,20 +150,19 @@ function mute() {
 </script></head><body>
 <h1 id="backend" style="text-shadow: gray 3px 3px 3px">Plz Wait...</h1>
 
-<input type="button" value="clear" onclick="uu.log.clear()" />
-
 <select id="source" onchange="changeSource(this)"></select>
-<input type="button" value="play/pause" onclick="togglePlay()" />
-<input type="button" value="stop" onclick="player.audio.stop()" />
-<input type="button" value="mute" onclick="mute()" />
+<input type="button" value="play/pause" onclick="togglePlay()" disabled="disabled" />
+<input type="button" value="stop" onclick="player.audio.stop()" disabled="disabled" />
+<input type="button" value="mute" onclick="mute()" disabled="disabled" />
 <input id="volumeSlider" ui="Slider" type="range" value="50" size="50" />
 
-<input type="button" value="loop off" onclick="toggleLoop(this)" />
-<input type="button" value="autoplay off" onclick="toggleAutoplay(this)" />
+<input type="button" value="loop off" onclick="toggleLoop(this)" disabled="disabled" />
+<input type="button" value="autoplay off" onclick="toggleAutoplay(this)" disabled="disabled" />
 
 <br />
 <input id="currentSlider" ui="Slider" type="range" value="0" size="200" min="0" max="100" />
 
 <hr />
+<input type="button" value="log clear" onclick="uu.log.clear()" />
 
 </body></html>
