@@ -80,6 +80,20 @@ function initAudio(source) {
                 audio.bind("timeupdate", handleTimeupdate);
             }, 100);
         });
+        seeksl.bind("mousewheel", function(evt, attr) {
+            audio.unbind("timeupdate", handleTimeupdate);
+            player.audio.seek(attr.value);
+            setTimeout(function() {
+                audio.bind("timeupdate", handleTimeupdate);
+            }, 100);
+        });
+        seeksl.bind("keydown", function(evt, attr) {
+            audio.unbind("timeupdate", handleTimeupdate);
+            player.audio.seek(attr.value);
+            setTimeout(function() {
+                audio.bind("timeupdate", handleTimeupdate);
+            }, 100);
+        });
 
 
         // Backend

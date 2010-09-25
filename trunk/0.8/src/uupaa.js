@@ -6834,8 +6834,8 @@ function AudioInit(src,        // @param URLString: "http://.../music.mp3", "mus
                    callback) { // @param Function(= void): callback(this)
     var that = this,
         backends = {
-            A: "HTML5Audio",
-/*{@mb*/    F: "FlashAudio"  /*}@mb*/
+/*{@mb*/    F: "FlashAudio", /*}@mb*/
+            A: "HTML5Audio"
         };
 
     (uu.config.audio.order || "N").split("").some(function(klass) { // klass = "A"
@@ -9225,7 +9225,13 @@ function SliderInit(rail,    // @param Node: rail node. <div class="Slider*">
             var key = param.keyCode[uu.event.key(evt).code],
                 shift = evt.shiftKey ? 10 : 1; // x10
 
-            key && SliderValue(that, param.value + key * param.step * shift, 0);
+            if (key) {
+                SliderValue(that, param.value + key * param.step * shift, 0);
+
+                that.event.keydown && that.event.keydown(evt, param);
+                that.event.change &&
+                    that.event.change(uu.mix({}, evt, { type: "change" }), param);
+            }
         }
     });
 }
@@ -9293,7 +9299,7 @@ function SliderMsgBox(msg,      // @param String:
 
 // uu.Class.Slider.handleEvent
 function SliderHandleEvent(evt) {
-    var code  = evt.code, rect, threshold, w,
+    var code  = evt.code, rect, threshold, w, change = 0,
         param = this.param,
         rail  = param.rail,
         pageX = evt.pageX,
@@ -9343,15 +9349,18 @@ function SliderHandleEvent(evt) {
                          pageY + param.oy - dragInfo.oy, 1, w, w); // 1: fx
 
         this.event.mousedown && this.event.mousedown(evt, param);
+        ++change;
 
     } else if (code === uu.event.codes.mouseup && dragInfo.dragging) {
         dragInfo.dragging = 0;
         uu.unbind(uu.ie678 ? rail : doc, dragEvent, this);
 
         this.event.mouseup && this.event.mouseup(evt, param);
-        this.event.change  && this.event.change(uu.mix({}, evt, { type: "change" }), param);
+        ++change;
 
     } else if (code === uu.event.codes.mousemove && dragInfo.dragging) {
+        dragInfo.tap = 0;
+
         if (uu.env.touch) {
             touches = evt.touches;
             if (touches) {
@@ -9369,7 +9378,7 @@ function SliderHandleEvent(evt) {
         SliderMove(this, (pageX + param.ox - dragInfo.ox),
                          (pageY + param.oy - dragInfo.oy), 0, 1, 1);
         this.event.mousemove && this.event.mousemove(evt, param);
-        dragInfo.tap = 0;
+        ++change;
 
     } else if (code === uu.event.codes.mousewheel) {
         if (rail !== doc.activeElement) {
@@ -9378,11 +9387,16 @@ function SliderHandleEvent(evt) {
         SliderValue(this, param.value + evt.wheel * 10, 0);
 
         this.event.mousewheel && this.event.mousewheel(evt, param);
+        ++change;
 
     } else if (code >= uu.event.codes.keydown && code <= uu.event.codes.keyup) {
         // keydown, keypress, keyup
         return;
     }
+
+    change && this.event.change &&
+        this.event.change(uu.mix({}, evt, { type: "change" }), param);
+
     return false; // uu.event.stop(evt)
 }
 
@@ -9397,8 +9411,6 @@ function SliderValue(that,  // @param this:
 
         value = Math.round((value - param.min) * pp * (param.size * 0.01));
         SliderMove(that, value, value, fx, 0, 1, 1);
-
-        that.event.change && that.event.change({ type: "change" }, param);
     }
     return that.param.value;
 }
