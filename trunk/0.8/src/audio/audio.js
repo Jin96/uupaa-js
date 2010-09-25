@@ -18,7 +18,7 @@
 // |Opera9x-10.10 | mp3         |       -       |   mp3    |
 // |Opera10.50+   | mp3,ogg,wav |      ogg, wav |   mp3    |
 // |iOS3          |     -       |       -       |    -     |
-// |iOS4          |     ?       |(mp3),m4a, wav |    -     |
+// |iOS4          |     m4a     |(mp3),m4a, wav |    -     |
 // |IE6,IE7,IE8   | mp3         |       -       |   mp3    |
 // |IE9beta       | mp3         |    mp3(buggy) |   mp3    |
 // +--------------+-------------+---------------+----------+
@@ -125,19 +125,21 @@ function HTML5AudioInit(src,        // @param URLString: "music.mp3"
         this.audio.src || (this.audio.src = src);
     } else {
         if (win.Audio) {
-            this.audio = new Audio(src);
+            this.audio = new Audio();
         } else if (HTMLAudioElement) {
             this.audio = doc.createElement("audio"); // [IE9beta]
-            this.audio.src = src;
         } else {
             throw new Error("LOGIC_ERROR");
         }
+        this.audio.src = src;
     }
     if (!this.audio.parentNode) {
         uu.add(this.audio);
     }
 
-    this.audio.loop = this._loop = option.loop || false;
+//  [iOS4.1][FIX] http://twitter.com/uupaa/status/25485203353
+//  this.audio.loop = this._loop = option.loop || false;
+    this._loop = option.loop || false;
     this.audio.volume = option.volume || 0.5;
     this._closed = false;
     this._startTime = option.startTime || 0;
@@ -150,6 +152,8 @@ function HTML5AudioInit(src,        // @param URLString: "music.mp3"
         return that;
     };
 
+    // audio.loop
+    // [iOS4.1][FIX] http://twitter.com/uupaa/status/25485203353
     uu.bind(this.audio, "ended", function() {
         if (that._closed || that._lastAction === "stop") {
             return;
@@ -196,7 +200,8 @@ function HTML5AudioAttr(key,     // @param String/Hash(= void):
     for (i in key) {
         v = key[i];
         switch (i) {
-        case "loop":        this.audio.loop = this._loop = v; break;
+//      case "loop":        this.audio.loop = this._loop = v; break;
+        case "loop":        this._loop = v; break;
         case "volume":      this.audio.volume = v; break;
         case "startTime":   this._startTime = v; break;
         case "currentTime": this.audio.currentTime = v;
