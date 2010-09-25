@@ -8794,8 +8794,8 @@ function SliderInit(rail,    // @param Node: rail node. <div class="Slider*">
                              //    size       - Number(= 100): width or height
                              //    step       - Number(= 1):
                              //    value      - Number(= 0):
-                             //    gripWidth  - Number(= 13):
-                             //    gripHeight - Number(= 18):
+                             //    gripWidth  - Number(= 20):
+                             //    gripHeight - Number(= 20):
     var that = this;
 
     this.event = {
@@ -8816,8 +8816,8 @@ function SliderInit(rail,    // @param Node: rail node. <div class="Slider*">
         size: 100,
         step: 1,
         value: 0,
-        gripWidth: 13,
-        gripHeight: 18,
+        gripWidth: 20,
+        gripHeight: 20,
         lastpx: 0,
         lastpy: 0
     });
@@ -9050,7 +9050,7 @@ function SliderMove(that,   // @param this:
     tm = param.size * 0.01;
     pp = 100 / w;
     round = param.step * pp * tm;
-    threshold = pp * tm / 2;
+    threshold = round / 2;
 
     if (param.vertical) {
         y = parseInt((py + threshold) / round) * round;
@@ -9094,9 +9094,7 @@ function SliderBuild(param,      // @param Hash(= {}):
     var rail, grip, w;
 
     param = uu.arg(param, { min: 0, max: 100, size: 100, step: 1, value: 0,
-                            vertical: 0,
-                            gripWidth: 13, gripHeight: 18,
-                            change: null, mouseup: null, mousedown: null });
+                            vertical: 0, gripWidth: 13, gripHeight: 18 });
 
     if (param.vertical) {
         w = param.gripWidth;
@@ -9156,8 +9154,7 @@ function SliderTransform(node) { // @param Node:
         size:   size,
         node:   node, // original node. <input type="range" />
         step:   parseInt(attrs.step || 1),
-        value:  parseInt(node.value || 0),
-        change: uu.event.evaluator(node, "change").length
+        value:  parseInt(node.value || 0)
     });
     node.style.display = "none";
     node.removeAttribute("ui");

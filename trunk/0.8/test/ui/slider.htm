@@ -18,10 +18,9 @@ function newSlider() {
         max  = +uu.id("maxValue").value,
         size = +uu.id("sizeValue").value,
         step = +uu.id("stepValue").value,
-        dir  = +uu.id("directionValue").value,
-        toggle = +uu.id("toggleValue").value;
+        dir  = +uu.id("directionValue").value;
 
-    uu.add(uu.ui.build("Slider", { vertical: dir, step: step, toggle: toggle,
+    uu.add(uu.ui.build("Slider", { vertical: dir, step: step,
                                    min: min, max: max, size: size, value: min }),
            uu.id("ui-pool"));
 }
@@ -50,11 +49,9 @@ Master: <input id="master" type="range" value="0" onchange="moveMasterSlider(thi
 </p>
 <p>size: <input type="range" value="100" min="50" max="200" step="50" id="sizeValue" ui="Slider" /><span>100</span>
 </p>
-<p>step: <input type="range" value="1" min="1" max="10" id="stepValue" ui="Slider" /><span>1</span>
+<p>step: <input type="range" value="1" min="1" max="50" id="stepValue" ui="Slider" /><span>1</span>
 </p>
 <p>direction: <input type="range" value="0" min="0" max="1" id="directionValue" ui="Slider" /><span>0 (Horizontal)</span>
-</p>
-<p>click to toggle: <input type="range" value="0" min="0" max="1" id="toggleValue" ui="Slider" /><span>0 (no toggle)</span>
 </p>
 <div id="ui-pool">
 </div>
