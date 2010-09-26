@@ -26,8 +26,14 @@
 //      TouchMediaQuery(  @media all and (-moz-touch-enabled) { ... }  )
 //      [Gecko]event.streamId <---> [iOS]event.touches[finger].identifier
 //             event.clientX  <-!->      event.touches[finger].pageX
+//
 // Opera 10.70
 //      <g buffered-rendering="static">
+//
+// IE9beta
+//      opacity, multibg, bg-clip, bg-size, bg-origin,
+//      border-radius, box-shadow, RGBA, HSLA,
+//
 // iPhone
 //      Portrait:
 //          320x480(full), 320x460(with status bar),
@@ -167,8 +173,8 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
 //{@audio
         audio:      {
             disable:_false,         // uu.config.audio.disable(= false) - Boolean:
-            order:  "AF"            // uu.config.audio.order(= "AF") - String: audio backends and detection order
-                                    //  "A" = <audio>, "F" = FlashAudio
+            order:  "AFN"           // uu.config.audio.order(= "AFN") - String: audio backends and detection order
+                                    //  "A" = <audio>, "F" = FlashAudio, "N" = NoAudio
         },
 //}@audio
         img:        "http://uupaa-js.googlecode.com/svn/trunk/0.8/img/"  // image/css path
@@ -618,6 +624,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
         fire:       uureadyfire,    // uu.ready.fire(readyEventType:CaseInsenseString, param:Mix = document)
         dom:        _false,         // true is DOMContentLoaded event fired
         window:     _false,         // true is window.onload event fired
+        svg:        _false,         // true is <svg> ready event fired
         audio:      _false,         // true is <audio> ready event fired
         video:      _false,         // true is <video> ready event fired
         canvas:     _false,         // true is <canvas> ready event fired
@@ -1491,7 +1498,7 @@ function isFunction(search) { // @param Mix: search
     return toString.call(search) === "[object Function]";
 }
 
-// uu.ifFunction - get literal value or call function
+// uu.ifFunction - Function call returns the result. If the literal return it.
 function ifFunction(value,      // @param Mix/Function:
                     var_args) { // @param Arguments(= void): function arguments as [arg, ...]
                                 // @return Mix:
@@ -6665,6 +6672,14 @@ function uusvg(x,        // @param Number: Has no meaning or effect on outermost
                          // @return SVGNode: <svg:svg>
     return uunode("svg:svg", arguments, ["x", "y", "w", "h"], uuattr);
 }
+
+// --- initialize ---
+/*
+uuready("window", function() {
+    uuready.window = uuready.svg = _true;
+    uuready.fire("canvas", uutag("canvas"));
+});
+ */
 //}@svg
 
 // --- CANVAS ---
@@ -6800,7 +6815,7 @@ uu.Class("Audio", {
     attr:           AudioAttr,      // attr(key:String/Hash = void,
                                     //      value:Number/Boolean = void):String/Hash/Number/Boolean
                                     //  [1][get items] attr() -> { src, loop, startTime, volume,
-                                    //                             backend, currentTime, duration }
+                                    //                             currentTime, duration }
                                     //  [2][mix items] attr({ key: value, ... })
                                     //  [3][get item]  attr(key) -> value
                                     //  [4][set item]  attr(key, value)
@@ -6814,10 +6829,12 @@ uu.Class("Audio", {
     pause:          AudioPause,     // pause()
     state:          AudioState,     // state():Hash - { error, ended, closed, paused,
                                     //                  playing, condition }
+    isReady:        AudioIsReady,   // isReady():Boolean
     isPlaying:      AudioIsPlaying, // isPlaying():Boolean
     bind:           AudioBind,      // bind(eventTypes:String, evaluator:Function)
     unbind:         AudioUnbind,    // unbind(eventTypes:String, evaluator:Function)
-    msgbox:         AudioMsgBox,    // msgbox(msg:String, param:Hash):Boolean/Hash/void
+    msgbox:         AudioMsgBox,    // msgbox(msg:String,
+                                    //        param1:Mix = void, param2:Mix = void):Boolean/Hash/void
     toString:       function() {
         return this.ao.name;
     }
@@ -6831,30 +6848,25 @@ function AudioInit(src,        // @param URLString: "http://.../music.mp3", "mus
                                //   option.startTime - Number(= 0): start time
                                //   option.parent - Node(= <body>): <object> parent node
                                //   option.volume - Number(= 0.5): 0.0 ~ 1.0
-                   callback) { // @param Function(= void): callback(this)
+                   callback) { // @param Function: callback(this)
     var that = this,
         backends = {
+            A: "HTML5Audio",
 /*{@mb*/    F: "FlashAudio", /*}@mb*/
-            A: "HTML5Audio"
+            N: "NoAudio"
         };
 
     (uu.config.audio.order || "N").split("").some(function(klass) { // klass = "A"
-        if (klass === "N") {
-            callback && callback(null);
-            return _false;
-        }
-        klass = backends[klass] || ""; // "HTML5Audio" <- "A"
+        if (klass) {
+            klass = backends[klass] || ""; // "HTML5Audio" <- "A"
 
-        var backendClass = uuclass[klass];
-
-        if (backendClass &&
-            ifFunction(backendClass.ready) && backendClass.isSupport(src)) {
-
-            uu(klass, src, option, function(ao) { // @param AudioObjectInstance:
-                that.ao = ao;
-                callback && callback(that);
-            });
-            return _true;
+            if (uuclass[klass] && uuclass[klass].isReady(src)) { // static call
+                uu(klass, src, option, function(ao) { // @param AudioObjectInstance:
+                    that.ao = ao;
+                    callback(that);
+                });
+                return _true;
+            }
         }
         return _false;
     });
@@ -6864,12 +6876,11 @@ function AudioInit(src,        // @param URLString: "http://.../music.mp3", "mus
 function AudioAttr(key,     // @param String/Hash(= void): key
                    value) { // @param String/Number/Boolean(= void): value
                             // @return Hash/void: { src, loop, startTime, volume,
-                            //                      backend, currentTime, duration }
+                            //                      currentTime, duration }
                             //   src     - String:
                             //   loop    - Boolean:
                             //   startTime   - Number: start time
                             //   volume  - Number/String: 0.0 ~ 1.0, "+0.1", "-0.1"
-                            //   backend - String: "HTML5Audio"
                             //   currentTime - Number/String: current time, 0 ~, "+10", "-10"
                             //   duration- Number:
     var rv = this.ao.attr(), i, val, undef;
@@ -6883,10 +6894,8 @@ function AudioAttr(key,     // @param String/Hash(= void): key
         val = key[i];
         switch (i) {
         case "startTime":
-        case "currentTime":
-            val = uunumberexpand(rv[i], val); break;
-        case "volume":
-            val = uunumberrange(0, uunumberexpand(rv[i], val), 1);
+        case "currentTime": val = uunumberexpand(rv[i], val); break;
+        case "volume":      val = uunumberrange(0, uunumberexpand(rv[i], val), 1);
         }
         this.ao.attr(i, val); // set(key, value)
     }
@@ -6930,6 +6939,16 @@ function AudioState() { // @return Hash: { error, ended, closed, paused,
     return this.ao.state();
 }
 
+// Audio.isReady
+function AudioIsReady() { // @return Boolean:
+    if (this.ao) {
+        var state = this.ao.state();
+
+        return !(state.error || state.closed);
+    }
+    return _false;
+}
+
 // Audio.isPlaying
 function AudioIsPlaying() { // @return Boolean:
     return this.ao.state().playing;
@@ -6969,37 +6988,23 @@ function AudioMsgBox(msg,      // @param String: msg
 uu.Class("HTML5Audio", {
     init:           HTML5AudioInit,     // init(src:String, option:Hash, callback:Function)
     attr:           HTML5AudioAttr,     // attr(key:String/Hash, value:Mix = void):Hash/void
-                                        //      { src, loop, volume, backend, duration, startTime, currentTime }
+                                        //      { src, loop, volume, duration, startTime, currentTime }
     play:           HTML5AudioPlay,     // play()
     stop:           HTML5AudioStop,     // stop(close:Boolean = false)
     pause:          HTML5AudioPause,    // pause()
     state:          HTML5AudioState     // state():Hash - { error, ended, closed, paused,
                                         //                  playing, condition }
 }, {
-    ready:          !!HTMLAudioElement,
-    isSupport:      function(src) {     // @param String: "music.mp3"
+    isReady:        function(src) {     // @param String: "music.mp3"
                                         // @return Boolean:
-        var windows = _env.os === "windows";
+        if (HTMLAudioElement) {
+            var macSafari = (_env.os === "mac" && _env.safari);
 
-        if (/\.mp3$/i.test(src)) { // *.mp3
-            if ((windows && _env.safari) || _env.chrome || _env.ie9) {
-                return _true;
-            }
-            if (_env.iphone) {
-                return _true;
-            }
-        } else if (/\.og\w+$/i.test(src)) { // *.ogg
-            if (_gecko || _env.chrome || _opera) {
-                return _true;
-            }
-        } else if (/\.m4a$/i.test(src)) { // *.m4a (AAC)
-            if (_webkit) {
-                return _true;
-            }
-        } else if (/\.wav$/i.test(src)) { // *.wav
-            if ((windows && _env.safari) || _gecko || _opera) {
-                return _true;
-            }
+            return /\.mp3$/i.test(src) ? (!macSafari && (_webkit || _env.ie9)) // mp3
+                 : /\.og.$/i.test(src) ? (_gecko || _env.chrome || _opera)     // ogg, oga, ogx
+                 : /\.m4a$/i.test(src) ? _webkit                               // m4a
+                 : /\.wav$/i.test(src) ? (!macSafari && (_gecko || _opera))    // wav
+                 : _false;
         }
         return _false;
     }
@@ -7008,21 +7013,17 @@ uu.Class("HTML5Audio", {
 // HTML5Audio.init
 function HTML5AudioInit(src,        // @param URLString: "music.mp3"
                         option,     // @param Hash: { node, loop, volume, startTime, autoplay }
-                        callback) { // @param Function(= void): callback(this)
+                        callback) { // @param Function: callback(this)
     var that = this, audio;
 
+    this.audio = null;
     // glue
     audio = option.node;
     if (audio) {
         audio.src || (audio.src = src);
     } else {
-        if (win.Audio) {
-            audio = new Audio();
-        } else if (HTMLAudioElement) {
-            audio = newNode("audio"); // [IE9beta]
-        } else {
-            throw new Error("LOGIC_ERROR");
-        }
+        audio = win.Audio ? new Audio()
+                          : newNode("audio"); // [IE9beta]
         audio.src = src;
     }
     audio.parentNode || uunodeadd(audio);
@@ -7061,13 +7062,13 @@ function HTML5AudioInit(src,        // @param URLString: "music.mp3"
             that.play();
         }, 100);
     }
-    callback && callback(this);
+    callback(this);
 }
 
 // HTML5Audio.attr
 function HTML5AudioAttr(key,     // @param String/Hash(= void):
                         value) { // @param Mix(= void):
-                                 // @return Hash/void: { src, loop, volume, backend, duration,
+                                 // @return Hash/void: { src, loop, volume, duration,
                                  //                      startTime, currentTime }
     var rv, audio = this.audio, i, v, undef;
 
@@ -7077,7 +7078,6 @@ function HTML5AudioAttr(key,     // @param String/Hash(= void):
                 src:        audio.src || "",
                 loop:       this._loop,
                 volume:     audio.volume,
-                backend:    "HTML5Audio",
                 duration:   audio.duration || 0,
                 startTime:  this._startTime,
                 currentTime: audio.currentTime
@@ -7164,37 +7164,36 @@ function HTML5AudioState() { // @return Hash: { error, ended, closed, paused,
 
 //{@mb
 uu.Class("FlashAudio", {
-    init:           FlashAudioInit,     // init(src:String, option:AudioOptionHash = {}, callback:Function)
+    init:           FlashAudioInit,     // init(src:String, option:Hash, callback:Function)
     attr:           FlashAudioAttr,     // attr(key:String/Hash, value:Mix = void):Hash/void
-                                        //      { src, loop, volume, backend, duration, startTime, currentTime }
+                                        //      { src, loop, volume, duration, startTime, currentTime }
     play:           FlashAudioPlay,     // play()
     stop:           FlashAudioStop,     // stop(close:Boolean = false)
     pause:          FlashAudioPause,    // pause()
     state:          FlashAudioState     // state():Hash - { error, ended, closed, paused,
                                         //                  playing, condition }
 }, {
-    swf:            uu.config.baseDir + "uu.audio.swf",
-    ready:          function() {
-        return _env.flash && uustat(uuclass.FlashAudio.swf);
-    },
-    isSupport:      function(src) {
-        return /\.mp3$/i.test(src);
+    isReady:        function(src) {
+        if (/\.mp3$/i.test(src)) {
+            return _env.flash && uustat(uu.config.baseDir + "uu.audio.swf");
+        }
+        return _false;
     }
 });
 
 // FlashAudio.init
 function FlashAudioInit(src,        // @param String: "music.mp3"
                         option,     // @param Hash: { node, loop, volume, startTime, autoplay }
-                        callback) { // @param Function(= void): callback(this)
+                        callback) { // @param Function: callback(this)
     var that = this, audio,
         OBJECT_ID = "externalflashaudio" + uunumber();
 
     // glue
-    audio = option.node; // event source
+    audio = option.node;
     audio || (audio = newNode());
     audio.parentNode || uunodeadd(audio);
-    this.audio = audio;
-    this.flash = null; // backend object
+    this.audio = audio; // event source
+    this.flash = null;  // backend object
 
     // FlashAudio.instance():this
     audio.instance = function() {
@@ -7215,17 +7214,17 @@ function FlashAudioInit(src,        // @param String: "music.mp3"
                                          loop:      option.loop   || _false,
                                          volume:    option.volume || 0.5,
                                          startTime: option.startTime || 0 });
-        callback && callback(that);
+        callback(that);
         option.autoplay && that.play();
     }
-    this.flash = uuflash(uuclass.FlashAudio.swf,
+    this.flash = uuflash(uu.config.baseDir + "uu.audio.swf",
                          OBJECT_ID, { width: 1, height: 1 }, wait);
 }
 
 // FlashAudio.attr
 function FlashAudioAttr(key,     // @param String/Hash(= void):
                         value) { // @param Mix(= void):
-                                 // @return Hash/void: { src, loop, volume, backend, duration,
+                                 // @return Hash/void: { src, loop, volume, duration,
                                  //                      startTime, currentTime }
     var rv, flash = this.flash, undef;
 
@@ -7275,6 +7274,19 @@ function FlashAudioState() { // @return Hash: { error, ended, closed, paused,
     return rv;
 }
 //}@mb
+
+uu.Class("NoAudio", {
+    init:           function(src, option, callback) {
+        callback(this);
+    },
+    attr:           uunop,
+    play:           uunop,
+    stop:           uunop,
+    pause:          uunop,
+    state:          uupao({ closed: _true, toString: uupao("closed") })
+}, {
+    isReady:        uupao(_true)
+});
 
 // --- initialize ---
 uuready("window", function() {
@@ -7430,7 +7442,7 @@ uu.Class.singleton("Storage", {
         (config.order || "M").split("").some(function(klass) { // klass = "L"
             klass = backends[klass] || ""; // "LocalStorage" <- "L"
 
-            if (uuclass[klass] && ifFunction(uuclass[klass].ready)) {
+            if (uuclass[klass] && uuclass[klass].isReady()) {
                 try {
                     uu(klass, function(so) { // @param StorageObjectInstance:
                         that.so = config.space &&
@@ -7523,7 +7535,7 @@ uu.Class.singleton("LocalStorage", {
                        : this.so.removeItem(key + ""); // [IE][FIX] crash care
     }
 }, {
-    ready: !!win.localStorage
+    isReady: uupao(!!win.localStorage)
 });
 
 //{@mb
@@ -7556,7 +7568,8 @@ uu.Class.singleton("FlashStorage", {
     clear: function(key) {
         key === void 0 ? this.so.clear() : this.so.removeItem(key);
     }
-},{ ready: function() {
+}, {
+    isReady: function() {
         return _env.flash && uustat(uu.config.baseDir + "uu.storage.swf");
     }
 });
@@ -7649,7 +7662,9 @@ uu.Class.singleton("IEStorage", {
             }
         }
     }
-},{ ready: _ie });
+}, {
+    isReady: uupao(_ie)
+});
 //}@mb
 
 //{@cookie
@@ -7694,7 +7709,9 @@ uu.Class.singleton("CookieStorage", {
                       (new Date(0)).toUTCString());
         key === void 0 ? (this.so = {}) : delete this.so[key];
     }
-},{ ready: !!navigator.cookieEnabled });
+}, {
+    isReady: uupao(!!navigator.cookieEnabled)
+});
 //}@cookie
 
 uu.Class.singleton("MemStorage", {
@@ -7720,7 +7737,9 @@ uu.Class.singleton("MemStorage", {
     clear: function(key) {
         key === void 0 ? (this.so = {}) : delete this.so[key];
     }
-},{ ready: _true });
+}, {
+    isReady: uupao(_true)
+});
 
 uuready("window", function() {
     uu.config.storage.disable || uu("Storage"); // -> uu.Class.Storage.Init()
@@ -9153,7 +9172,7 @@ uu.Class("Slider", {
     attr:           SliderAttr,         // attr(key:String/Hash = void, value:String/Number/Boolean = void):Mix/void
     bind:           SliderBind,         // bind(eventType:EventTypeString, evaluator:Function)
     unbind:         SliderUnbind,       // unbind(eventType:EventTypeString)
-    msgbox:         SliderMsgBox,       // msgbox(msg:String, param:Hash = void):Hash
+    msgbox:         SliderMsgBox,       // msgbox(msg:String, param1:Mix = void, param2:Mix):Hash/Boolean/void
                                         //  [1][get attr]     uu.msg.post(instance, "attr") -> Hash
                                         //  [2][bind]         uu.msg.post(instance, "bind",   { node, type, callback })
                                         //  [3][unbind]       uu.msg.post(instance, "unbind", { node, type, callback })
@@ -9162,7 +9181,7 @@ uu.Class("Slider", {
                                         //  [6][get value]    uu.msg.post(instance, "value") -> 100
     handleEvent:    SliderHandleEvent   // handleEvent(evt:Event)
 }, {
-    build:          SliderBuild,        // build(param:Hash, backyard:Node = doc.body):Array
+    build:          SliderBuild,        // build(param:Hash, backyard:Node = <body>):Array
     transform:      SliderTransform,    // transform(node:Node):Array
     isTransform:    SliderIsTransform   // isTransform(node:Node)
 });
@@ -9274,9 +9293,9 @@ function SliderUnbind(type) { // @param EventTypeString:
 
 // uu.Class.Slider.msgbox
 function SliderMsgBox(msg,      // @param String:
-                      param1,   // @param Mix(= void):
-                      param2) { // @param Mix(= void):
-                                // @return Hash/void:
+                      param1,   // @param Mix(= void): param1
+                      param2) { // @param Mix(= void): param2
+                                // @return Hash/Boolean/void:
     //  [1][get attr]     uu.msg.post(instance, "attr") -> Hash
     //  [2][bind]         uu.msg.post(instance, "bind",   { node, type, callback })
     //  [3][unbind]       uu.msg.post(instance, "unbind", { node, type, callback })
@@ -9487,7 +9506,7 @@ function SliderMove(that,   // @param this:
 
 // uu.Class.Slider.build
 function SliderBuild(param,      // @param Hash(= {}):
-                     backyard) { // @param Node(= doc.body): backyard Node
+                     backyard) { // @param Node(= <body>): backyard Node
                                  // @return Array: [SliderClassInstance, RailNode]
     var rail, grip, w;
 
