@@ -164,7 +164,10 @@ function toggleLoop(that) {
 }
 
 function mute() {
-    uu.msg.post(uu.ui("Slider")[0], "value", 0);
+    var volsl = uu.ui("Slider")[0]; // [0: volume, 1: seek]
+
+    uu.msg.post(volsl, "value", 0, 1);
+    player.audio.attr("volume", 0);
 }
 
 </script></head><body>
