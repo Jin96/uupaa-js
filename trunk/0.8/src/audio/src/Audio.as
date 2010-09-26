@@ -220,7 +220,7 @@ package {
             }
         }
 
-        public function asFlashAudioGetAttr():Object { // @return Hash: { src, loop, volume, backend, duration,
+        public function asFlashAudioGetAttr():Object { // @return Hash: { src, loop, volume, duration,
                                                        //                 startTime, currentTime }
             var currentTime:Number = 0;
 
@@ -236,7 +236,6 @@ package {
                 src: _src,
                 loop: _loop,
                 volume: _volume,
-                backend: "FlashAudio",
                 duration: _sound.length / 1000,
                 startTime: _startTime,
                 currentTime: currentTime / 1000 // ms -> sec

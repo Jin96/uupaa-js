@@ -45,8 +45,13 @@ uu.ready(function(uu) {
 function changeSource(that) {
     if (player.audio) {
         player.audio.stop(true); // close
-        buttons.attr({ disabled: true });
     }
+
+    // disable button
+    buttons.attr({ disabled: true });
+    // backend name
+    uu.text(uu.id("backend"), "---");
+
     initAudio(that.options[that.selectedIndex].value);
 }
 
@@ -59,7 +64,11 @@ function initAudio(source) {
                        volume: volsl.attr().value * 0.01,
                        loop: player.loop }, function(audio) {
 
+        if (!audio.isReady()) {
+            return false;
+        }
         buttons.attr({ disabled: false });
+        uu.text(uu.id("backend"), audio.toString());
 
         window.player.audio = audio;
 
@@ -96,8 +105,6 @@ function initAudio(source) {
         });
 
 
-        // Backend
-        uu.text(uu.id("backend"), audio.toString());
 
         // --- Event Trace ---
         audio.bind("playing,play,error", function(event) {
