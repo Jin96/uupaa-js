@@ -77,7 +77,6 @@ function initAudio(source) {
             player.audio.attr("volume", parseInt(attr.value) * 0.01);
         });
 
-        // volume.change event handler
         seeksl.bind("mousedown", function(evt, attr) {
             audio.unbind("timeupdate", handleTimeupdate);
         });
@@ -111,6 +110,7 @@ function initAudio(source) {
             uu.log({ event: event.type || "", state: player.audio.state() + "" });
         });
 
+        // update currentTimeSlider.max
         audio.bind("durationchange", function(event) {
             // update slider.max
             var max = audio.attr("duration") | 0;
@@ -120,7 +120,6 @@ function initAudio(source) {
             uu.log({ event: event.type || "", state: player.audio.state() + "" });
         });
 
-        // update currentTimeSlider.max
         audio.bind("canplay", function(event) {
         });
 

@@ -232,7 +232,6 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
     isNumber:       isNumber,       // uu.isNumber(search:Mix):Boolean
     isString:       isString,       // uu.isString(search:Mix):Boolean
     isFunction:     isFunction,     // uu.isFunction(search:Mix):Boolean
-    ifFunction:     ifFunction,     // uu.ifFunction(value:Mix, var_args:Arguments = void):Mix
     // --- HASH / ARRAY ---
     arg:            uuarg,          // uu.arg(arg1:Hash/Function = {}, arg2:Hash, arg3:Hash = void):Hash/Function
     mix:            uumix,          // uu.mix(base:Hash/Function, flavor:Hash, aroma:Hash = void,
@@ -249,8 +248,15 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //  [1][make pair]    uu.pair(1, 2)        -> { 1: 2 }
                                     //  [2][through hash] uu.pair({ 1: 2 }, 3) -> { 1: 2 }
     size:           uusize,         // uu.size(source:Hash/Array):Number
-    calls:          uucalls,        // uu.calls(functionArray:FunctionArray, Arguments/MixArray = void, that:this = void):Array
+    calls:          uucalls,        // uu.calls(source:Hash/Array, Arguments/MixArray = void, that:this = void):Array
+                                    //  [1][call function] uu.calls([uu.nop, "dummy", uu.nop]) -> [undefined, undefined]
+                                    //  [2][call function] uu.calls({ a: uu.nop, b: "dummy", c: uu.nop }) -> [undefined, undefined]
     clone:          uuclone,        // uu.clone(source:Hash/Array):Hash/Array - shallow copy
+    filter:         uufilter,       // uu.filter(source:Hash/Array, evaluator:Function):Array
+                                    //  [1][Function only] uu.filter([uu.nop, 1, "a"], uu.isFunction) -> [uu.nop]
+                                    //  [2][Number only]   uu.filter([uu.nop, 1, "a"], uu.isNumber)   -> [1]
+                                    //  [3][String only]   uu.filter([uu.nop, 1, "a"], uu.isString)   -> ["a"]
+                                    //  [4][Array only]    uu.filter([[1, 2], 1, "a"], Array.isArray) -> [[1, 2]]
     values:         uuvalues,       // uu.values(source:Hash/Array):Array
     indexOf:        uuindexof,      // uu.indexOf(source:Hash/Array, searchValue:Mix):Number/String/void
     hash:           uuhash,         // uu.hash(source:JointString, splitter:String/RegExp = /[,;:]/):Hash
@@ -745,9 +751,11 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //  [3][query Slider and Tab] uu.ui.query(["Slider", "Tab"], <body>) -> [<div>.instance, ...]
                                     //  [4][query expression]     uu.ui.query("#ui>div[ui=Slider]", <body>) -> [<div>.instance, ...]
         bind:       uuuibind,       // uu.ui.bind(uiname:String, callback:Hash)
-        build:      uuuibuild       // uu.ui.build(uiname:String = "", var_args ...):Node/NodeArray
+        build:      uuuibuild       // uu.ui.build(uiname:Node/NodeArray/String = "", var_args ...):Node/NodeArray
                                     //  [1][build]      uu.ui("Slider", { step: 2 }) -> [<div ui="Slider" />]
                                     //  [2][transform]  uu.ui() -> [<div ui="Slider"><input type="range"/></div>, ...]
+                                    //  [3][transform]  uu.ui(Node) -> [node]
+                                    //  [4][transform]  uu.ui(NodeArray) -> [node, ...]
     }),
 //}@ui
     // --- OTHER ---
@@ -1498,15 +1506,6 @@ function isFunction(search) { // @param Mix: search
     return toString.call(search) === "[object Function]";
 }
 
-// uu.ifFunction - Function call returns the result. If the literal return it.
-function ifFunction(value,      // @param Mix/Function:
-                    var_args) { // @param Arguments(= void): function arguments as [arg, ...]
-                                // @return Mix:
-    return isFunction(value) ? (var_args ? value.apply(this, var_args)
-                                         : value())
-                             : value;
-}
-
 // --- hash / array ---
 
 // uu.arg - supply default arguments
@@ -1591,6 +1590,31 @@ function uukeys(source,           // @param Hash/Array: source
         for (i in source) {
             source[_hasOwnProperty](i) &&
                 (rv[++ri] = __enumValues__ ? source[i] : i);
+        }
+    }
+    return rv;
+}
+
+// uu.filter
+function uufilter(source,      // @param Hash/Array: source
+                  evaluator) { // @param Function: evaluator(value):Boolean
+                               // @return Array:
+    //  [1][Function only] uu.filter([uu.nop, 1, "a"], uu.isFunction) -> [uu.nop]
+    //  [2][Number only]   uu.filter([uu.nop, 1, "a"], uu.isNumber)   -> [1]
+    //  [3][String only]   uu.filter([uu.nop, 1, "a"], uu.isString)   -> ["a"]
+    //  [4][Array only]    uu.filter([[1, 2], 1, "a"], Array.isArray) -> [[1, 2]]
+
+    var rv = [], v, i, iz;
+
+    if (isArray(source)) {
+        for (i = 0, iz = source.length; i < iz; ++i) {
+            v = source[i];
+            evaluator(v) && rv.push(v);
+        }
+    } else {
+        for (i in source) {
+            v = source[i];
+            evaluator(v) && rv.push(v);
         }
     }
     return rv;
@@ -1751,13 +1775,21 @@ function uusize(source) { // @param Hash/Array: source
 }
 
 // uu.calls - call functions
-function uucalls(functionArray, // @param FunctionArray:
-                 args,          // @param Arguments/MixArray(= void): [arg, ...]
-                 that) {        // @param this(= void):
-    var rv = [], i = 0, iz = functionArray.length;
+function uucalls(source, // @param Hash/Array: has function
+                 args,   // @param Arguments/MixArray(= void): [arg, ...]
+                 that) { // @param this(= void):
+                         // @return Array: [result, ...]
+
+    //  [1][call function] uu.calls([uu.nop, "dummy", uu.nop]) -> [undefined, undefined]
+    //  [2][call function] uu.calls({ a: uu.nop, b: "dummy", c: uu.nop }) -> [undefined, undefined]
+
+    var rv = [], slow = args || that, fn,
+        ary = uufilter(source), i = 0, iz = ary.length;
 
     for (; i < iz; ++i) {
-        rv.push(functionArray[i].apply(that || null, args || []));
+        fn = ary[i];
+        slow ? rv.push(fn.apply(that || null, args || []))
+             : rv.push(fn());
     }
     return rv;
 }
@@ -3651,7 +3683,7 @@ function uumsgsend(address,  // @param NodeArray/InstanceArray/Array/Mix: addres
                    message,  // @param String: message
                    param1,   // @param Mix(= void): param1
                    param2) { // @param Mix(= void): param2
-                            // @return Arra: [result, ...]
+                             // @return Array: [result, ...]
 
     //  [1][multicast] MsgPump.send([instance, ...], "hello") -> ["world!", ...]
     //  [2][unicast  ] MsgPump.send(instance, "hello") -> ["world!"]
@@ -5895,7 +5927,7 @@ function uuok(title,    // @param String/Boolean(= ""): title
     } else { // [3][4]
         rv = uuclone(db);
         db.ng && uucss(doc.body, { bgc: uuok.bgc[0] });
-        if (title === false) { // [4]
+        if (title !== false) { // [4]
             ol = uuid("uuok") || doc.body[_appendChild](uu.ol("id,uuok"));
             ol.innerHTML += db.row.join("");
         }
@@ -7831,15 +7863,17 @@ function uuuibind(uiname,     // @param String: UI name
 uuuibind.db = {}; // { name+method: callback, ... }
 
 // uu.ui.build - build / transform UI component
-function uuuibuild(uiname                  // @param String(= "")
+function uuuibuild(uiname                  // @param Node/String(= ""):
                    /*, var_args, ... */) { // @param Mix(= void):
                                            // @return Node/NodeArray: <div> or [<div>, ...]
 
     //  [1][build]      uu.ui("Slider", { step: 2 }) -> [<div ui="Slider" />]
     //  [2][transform]  uu.ui() -> [<div ui="Slider"><input type="range"/></div>, ...]
+    //  [3][transform]  uu.ui(Node) -> [node]
+    //  [4][transform]  uu.ui(NodeArray) -> [node, ...]
 
     // [1] build
-    if (uiname) {
+    if (typeof uiname === _string) {
         uiname = uiname + "build";
         if (uiname in uuuibind.db) {
             return uuuibind.db[uiname].apply(null, uuarray(arguments, 1));
@@ -7848,7 +7882,8 @@ function uuuibuild(uiname                  // @param String(= "")
     }
 
     // [2] transform
-    var rv = [], ary = uutag(), i = 0, iz = ary.length,
+    var rv = [], ary = uiname ? uuarray(uiname) : uutag(),
+        i = 0, iz = ary.length,
         fn, ctrl, method,
         db = uuuibind.db;
 
@@ -8220,6 +8255,7 @@ uueach(uuevent._.as, function(eventType) {
 });
 
 //{@mb
+// HTML5 new HTMLElements SHIM. <section>, <summary> ...
 _ie678 && uueach(uutag.html5.split(","), newNode); // [IE6][IE7][IE8]
 
 try {
@@ -8352,7 +8388,7 @@ function detectEnvironment(libraryVersion) { // @param Number: Library version
         try {
             ver = ie ? (new ActiveXObject("ShockwaveFlash.ShockwaveFlash")).
                             GetVariable("$version")[_replace](/,/g, ".")
-                     : navigator.plugins["Shockwave Flash"].description;
+                     : nav.plugins["Shockwave Flash"].description;
             m = /\d+\.\d+/.exec(ver);
             rv = m ? parseFloat(m[0]) : 0;
         } catch(err) {}
@@ -8365,7 +8401,7 @@ function detectEnvironment(libraryVersion) { // @param Number: Library version
 
         try {
             obj = ie ? new ActiveXObject("AgControl.AgControl")
-                     : navigator.plugins["Silverlight Plug-In"];
+                     : nav.plugins["Silverlight Plug-In"];
             if (ie) {
                 while (obj.IsVersionSupported(check + ".0")) { // "3.0" -> "4.0" -> ...
                     rv = check++;
@@ -8388,10 +8424,9 @@ function detectEnvironment(libraryVersion) { // @param Number: Library version
                opera: _false, gecko: _false, webkit: _true,
                chrome: _false, safari: _true, mobile: _true, jit: _true,
                touch: _true, flash: 0, silverlight: 0 },
-        ua = navigator.userAgent,
-//{@mb
-        ie = !!doc.uniqueID, documentMode = doc.documentMode,
-//}@mb
+        nav = navigator,
+        ua = nav.userAgent,
+        ie = !!doc.uniqueID,
         opera = !!win.opera,
         gecko = (!!win.netscape || !!win.Components) && /Gecko\//.test(ua),
         webkit = !ie && !opera && !gecko && /WebKit/.test(ua),
@@ -8404,6 +8439,7 @@ function detectEnvironment(libraryVersion) { // @param Number: Library version
                         : parseFloat((/(?:IE |fox\/|ome\/|ion\/)(\d+\.\d)/.
                                      exec(ua) || [,0])[1]);
 
+    rv.lang         = (nav.language || nav.browserLanguage).split("-", 1)[0];
     rv.render       = render;
     rv.browser      = browser;
     rv.valueOf      = uupao(browser);
@@ -8411,8 +8447,8 @@ function detectEnvironment(libraryVersion) { // @param Number: Library version
     rv.ie           = ie;
     rv.ie6          = ie && browser === 6 && !XMLHttpRequest;
     rv.ie7          = ie && browser === 7 &&  XMLHttpRequest;
-    rv.ie8          = ie && documentMode === 8;
-    rv.ie9          = ie && documentMode === 9;
+    rv.ie8          = ie && doc.documentMode === 8;
+    rv.ie9          = ie && doc.documentMode === 9;
     rv.ie678        = rv.ie6 || rv.ie7 || rv.ie8;
     rv.opera        = opera;
     rv.gecko        = gecko;
@@ -9189,10 +9225,11 @@ uu.Class("Slider", {
 // uu.Class.Slider.init
 function SliderInit(rail,    // @param Node: rail node. <div class="Slider*">
                     grip,    // @param Node: grip node. <div><div class="Slider*Grip" /></div>
-                    param) { // @param Hash(= {}): { caption, vertical, min, max, size,
+                    param) { // @param Hash(= {}): { caption, vertical, disabled, min, max, size,
                              //                      step, value, gripWidth, gripHeight }
                              //    caption    - Boolean(= false):
                              //    vertical   - Boolean(= false): true is vertical
+                             //    disabled   - Boolean(= false): true is disabled
                              //    min        - Number(= 0);
                              //    max        - Number(= 100):
                              //    size       - Number(= 100): width or height
@@ -9215,6 +9252,7 @@ function SliderInit(rail,    // @param Node: rail node. <div class="Slider*">
         grip: grip,
         caption: 0,
         vertical: 0,
+        disabled: 0,
         min: 0,
         max: 100,
         size: 100,
@@ -9227,47 +9265,51 @@ function SliderInit(rail,    // @param Node: rail node. <div class="Slider*">
     });
     rail.instance = that;
 
+    param.disabled = !!param.disabled;
     param.step < 1 && (param.step = 1);
     param.keyCode = param.vertical ? { 38: -1, 40: 1 } : { 37: -1, 39: 1 };
     param.ox =  param.vertical ? 0 : -parseInt((param.gripWidth  + 1) / 2) + 2;
     param.oy = !param.vertical ? 0 : -parseInt((param.gripHeight + 1) / 2) + 2;
 
     SliderValue(this, param.value, 0);
+    SliderState(this, !param.disabled);
+}
+
+// inner -
+function SliderState(that, enable) {
+    var method = enable ? uu.bind : uu.unbind,
+        param = that.param;
 
     // rail drag events
-    uu.bind(rail, uu.env.touch ? "touchstart"
-                               : "mousedown,mousewheel", this);
-
+    method(param.rail, uu.env.touch ? "Slider.touchstart"
+                                    : "Slider.mousedown,Slider.mousewheel", that);
     // key events
-    uu.keydown(doc, function(evt) {
-        if (rail === doc.activeElement) {
-            var key = param.keyCode[uu.event.key(evt).code],
-                shift = evt.shiftKey ? 10 : 1; // x10
+    method(doc, "Slider.keydown", that);
 
-            if (key) {
-                SliderValue(that, param.value + key * param.step * shift, 0);
-
-                that.event.keydown && that.event.keydown(evt, param);
-                that.event.change &&
-                    that.event.change(uu.mix({}, evt, { type: "change" }), param);
-            }
-        }
-    });
+    uu.css.opacity(param.rail, enable ? 1 : 0.3);
+    uu.css.opacity(param.grip, enable ? 1 : 0.5);
 }
 
 // uu.Class.Slider.attr
 function SliderAttr(key,     // @param String/Hash(= void):
                     value) { // @param Mix(= void):
                              // @return Hash/void:
-    var i, v, mem = {};
+    var rv, i, v, mem = {};
 
     switch (uu.complex(key, value)) { // 1: (), 2: (k), 3: (k,v), 4: ({})
-    case 1: return this.param;
-    case 2: return this.param[key];
+    case 1:
+    case 2: rv = uu.mix({}, this.param); // clone
+            return key ? rv[key] : rv;
     case 3: key = uu.pair(key, value);
     case 4: for (i in key) {
                 v = key[i];
                 switch (i) {
+                case "disabled":
+                    if (this.param.disabled !== !!v) { // disable <-> enable
+                        this.param.disabled = !!v;
+                        SliderState(this, !v);
+                    }
+                    break;
                 case "fx":      mem.fx = v; break;
                 case "value":   mem.value = v; break;
                 default:        this.param[i] = v;
@@ -9318,7 +9360,7 @@ function SliderMsgBox(msg,      // @param String:
 
 // uu.Class.Slider.handleEvent
 function SliderHandleEvent(evt) {
-    var code  = evt.code, rect, threshold, w, change = 0,
+    var code  = evt.code, rect, threshold, w, change = 0, key, shift,
         param = this.param,
         rail  = param.rail,
         pageX = evt.pageX,
@@ -9408,9 +9450,18 @@ function SliderHandleEvent(evt) {
         this.event.mousewheel && this.event.mousewheel(evt, param);
         ++change;
 
-    } else if (code >= uu.event.codes.keydown && code <= uu.event.codes.keyup) {
-        // keydown, keypress, keyup
-        return;
+    } else if (code === uu.event.codes.keydown) {
+        if (rail === doc.activeElement) {
+            key = param.keyCode[uu.event.key(evt).code];
+            shift = evt.shiftKey ? 10 : 1; // x10
+
+            if (key) {
+                SliderValue(this, param.value + key * param.step * shift, 0);
+
+                this.event.keydown && this.event.keydown(evt, param);
+                ++change;
+            }
+        }
     }
 
     change && this.event.change &&
@@ -9624,10 +9675,14 @@ uu.ready(function(uu) {
                              ";border:1px solid gray;-webkit-border-radius:5px" });
     // focus outline
     focus = "outline:1px solid skyblue";
-    ss.add({ ".SliderH200:focus": focus, ".SliderH150:focus": focus,
-             ".SliderH100:focus": focus, ".SliderH50:focus":  focus,
-             ".SliderV200:focus": focus, ".SliderV150:focus": focus,
-             ".SliderV100:focus": focus, ".SliderV50:focus":  focus });
+    ss.add({ ".SliderH200:focus": focus,
+             ".SliderH150:focus": focus,
+             ".SliderH100:focus": focus,
+             ".SliderH50:focus":  focus,
+             ".SliderV200:focus": focus,
+             ".SliderV150:focus": focus,
+             ".SliderV100:focus": focus,
+             ".SliderV50:focus":  focus });
 //}@uislider
 });
 
