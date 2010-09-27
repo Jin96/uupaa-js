@@ -30,6 +30,7 @@
   * uu.env.jit - Boolean: IE9+, Firefox3.5+, Safari4+, Google Chrome, Opera10.50+ で true になります。
   * uu.env.browser - Number: ブラウザバージョンを返します。 [http://d.hatena.ne.jp/uupaa/20090603]
   * uu.env.render - Number: レンダリングエンジンのバージョンを返します。[http://d.hatena.ne.jp/uupaa/20090603]
+  * uu.env.lang - String: 表示言語 "en" や "ja" を返します。
 
 == 例 ==
 
