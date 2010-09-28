@@ -76,7 +76,7 @@
 
 var uu; // window.uu - uupaa.js library namespace
 
-uu || (function(win, doc, root,
+uu || (function(win, doc, root, // root as <html>
                 toString, isArray, toArray,
                 trimSpace, nodeData, nodeSet,
                 setTimeout, setInterval, XMLHttpRequest, HTMLAudioElement,
@@ -2086,7 +2086,9 @@ function uucss(node,    // @param Node:
                     if (typeof value === _number) {
                         uucss.care[right] || (value += "px"); // number -> pixel value
                     }
-                    style[right] = value;
+                    // [IE6][IE7][IE8][IE9]
+                    // http://twitter.com/uupaa/status/25788935187
+                    style[right] = value + "";
                 }
             }
     }
@@ -2428,6 +2430,8 @@ function uufxbuild(node, data, queue, option) {
     // fx2 = node.filters, uu.hash.num2hh,
     var rv = 'var style=node.style,t=gain,b,c,d=dur,fx1,fx2,z1,z2,z3,z4;',
         reverseOption = { junction: option.junction,
+                          _before: option["_" + _before],
+                          _after: option["_" + _after],
                           before: option[_before],
                           after: option[_after],
                           back: 1 },
@@ -5822,14 +5826,14 @@ function uuhatch(param) { // @param Hash: { size, unit, color, color2 }
 // uu.glow - glow node
 function uuglow(node) { // @param Node/NodeArray/NodeList/NodeSet/CSSSelectorExpressionString:
 //{@fx
-    var ary = isString(node) ? uuquery(node)
+    var ary = isString(node) ? uuquery(node, doc)
                              : node[nodeSet] ? node[nodeSet]
                                              : node[_nodeType] ? [node]
                                                                : node;
     Array.isArray(ary) || (ary = uuarray(ary));
 
     uueach(ary, function(node) {
-        var bgc = uucssbgcolor(node, "transparent"),
+        var bgc = uucssbgcolor(node, "transparent") + "", // Color.toString() -> "transparent"
             undo = function(node, option, back) {
                 back && uucss(node, { bgc: bgc });
             };
@@ -6217,7 +6221,8 @@ function Color(r,   // @param Number: red   (0 ~ 255)
 }
 Color[_prototype] = {
     toString:   function() { // @return String: "#000000" or "rgba(0,0,0,0)"
-                    return uuready.color.rgba ? this.rgba : this.hex;
+                    return (this.rgba === "rgba(0,0,0,0)") ? "transparent"
+                         : uuready.color.rgba ? this.rgba : this.hex;
                 },
     argb:       function() { // @return String: "#ffffffff"
                     return "#" + _num2hh[(this.a * 255) & 0xff] +
