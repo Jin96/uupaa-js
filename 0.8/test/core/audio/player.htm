@@ -121,6 +121,7 @@ function initAudio(source) {
         });
 
         audio.bind("canplay", function(event) {
+            uu.log({ event: event.type || "", state: player.audio.state() + "" });
         });
 
         audio.bind("ended,pause", function(event) {
@@ -128,6 +129,11 @@ function initAudio(source) {
         });
 
         audio.bind("timeupdate", handleTimeupdate);
+
+        // state
+        setTimeout(function() {
+            uu.log({ state: player.audio.state() + "" });
+        }, 0);
     });
 }
 
