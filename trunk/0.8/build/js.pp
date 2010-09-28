@@ -94,6 +94,14 @@ function preProcess($js,        // @param String: JavaScript source code
     // trim debugger; statement
     $js = preg_replace('/debugger;/', '', $js);
 
+    // Node.* type alias
+    $js = preg_replace('/Node.ELEMENT_NODE/',       '1', $js); // Node.ELEMENT_NODE -> 1
+    $js = preg_replace('/Node.TEXT_NODE/',          '3', $js);
+    $js = preg_replace('/Node.CDATA_SECTION_NODE/', '4', $js);
+    $js = preg_replace('/Node.COMMENT_NODE/',       '8', $js);
+    $js = preg_replace('/Node.DOCUMENT_NODE/',      '9', $js);
+    $js = preg_replace('/Node.DOCUMENT_FRAGMENT_NODE/', '11', $js);
+
     // typeof alias
     $js = preg_replace('/uu\.?type.BOOLEAN/',      '1', $js); // uu.?type.BOOLEAN -> 1
     $js = preg_replace('/uu\.?type.NUMBER/',       '2', $js);

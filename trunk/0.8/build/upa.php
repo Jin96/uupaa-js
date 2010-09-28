@@ -220,6 +220,7 @@ if ($castoff[0] === "all") {
     $castoff = $castoffAll; // copy array
 }
 $castoff[] = "debug";
+$castoff[] = "assert";
 
 include $preprosess;
 
