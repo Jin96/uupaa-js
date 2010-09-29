@@ -15,7 +15,7 @@ $castoffAll  = array(
     "flash", "nodeset", "audio",
     "eventresize", "eventcyclic",
     "live", "cssbox",
-    "codec", "md5", "sha1",
+    "codec", "md5", "sha1", "hmac",
     "sprintf", "url", "font", "cookie", "storage",
     "ui", "uislider",
 );

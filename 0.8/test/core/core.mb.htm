@@ -230,9 +230,9 @@ uu.ready("window", function(uu) {
     uu.ok("uu.array.clean([void 0]) == []", uu.array.clean([void 0]), "==", []);
     uu.ok("uu.array.clean([]) == []", uu.array.clean([]), "==", []);
 
-    uu.ok("uu.array.dump()");
-    uu.ok('uu.array.dump([1, 2, 3]) == "010203"', uu.array.dump([1, 2, 3]), "==", "010203");
-    uu.ok('uu.array.dump([1, 2, 3], "0x", ", 0x") == "0x01, 0x02, 0x03"', uu.array.dump([1, 2, 3], "0x", ", 0x"), "==", "0x01, 0x02, 0x03");
+    uu.ok("uu.byteArray.dump()");
+    uu.ok('uu.byteArray.dump([1, 2, 3]) == "010203"', uu.byteArray.dump([1, 2, 3]), "==", "010203");
+    uu.ok('uu.byteArray.dump([1, 2, 3], "0x", ", 0x") == "0x01, 0x02, 0x03"', uu.byteArray.dump([1, 2, 3], "0x", ", 0x"), "==", "0x01, 0x02, 0x03");
 
     uu.ok("Array.filter()");
     uu.ok("Array.filter([12, 5, 8, 130, 44], function(v) { return v >= 10; }) は [12, 130, 44] を返す",
