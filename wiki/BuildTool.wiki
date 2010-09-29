@@ -73,6 +73,7 @@ build/upa.php はプリプロセスとMinifyを施し最適化された.jsファ
 || codec     || uu.entity(), uu.base64(), <br />uu.utf8(), uu.md5(), uu.sha1() をコメントアウトします。<br />uu.ok() が使用できなくなります。 || -4kB ||
 || md5       || uu.md5() をコメントアウトします || -1.6kB ||
 || sha1      || uu.sha1() をコメントアウトします || -0.7kB ||
+|| hmac      || uu.hmac() をコメントアウトします || --kB ||
 || sprintf   || uu.sf(), uu.sprintf() をコメントアウトします || -0.8kB ||
 || url       || uu.url(), uu.qs() をコメントアウトします || -1.6kB ||
 || ui        || uu.ui() をコメントアウトします || --kB ||
