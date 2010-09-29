@@ -31,8 +31,13 @@
 //      <g buffered-rendering="static">
 //
 // IE9beta
-//      opacity, multibg, background-clip, background-size, background-origin,
-//      border-radius, box-shadow, RGBA, HSLA,
+//      impl:
+//          opacity, multibg, background-clip, background-size, background-origin,
+//          border-radius, box-shadow, RGBA, HSLA,
+//      not impl:
+//          text-shadow, border-image, multiple columns, gradients, transforms,
+//          transitions, outline-offset, resize,
+//          Web Workers, Web Sockets, Geolocation, Offline Cache
 //
 // iPhone
 //      Portrait:
@@ -131,6 +136,7 @@ var _addEventListener = "addEventListener",
     _num2bb = {},                   // uu.hash.num2bb = {    0 : "\00", ...  255 : "\ff" }
     _hh2num = {},                   // uu.hash.hh2num = {  "00":    0 , ...  "ff":  255  }
     _num2hh = { 256: "00" },        // uu.hash.num2hh = {    0 :  "00", ...  255 :  "ff", 256: "00" }
+    _num2nm = {},                   // uu.hash.num2nm = {    0 :    0 , ...  255 :  255  }
 //{@codec
     _num2b64,                       // uu.hash.num2b64 = ["A", "B", ... "/"]
     _b642num,                       // uu.hash.b642num = { "=": 0, "-": 62, "_": 63 }; // URLSafe64 chars("-", "_")
@@ -288,13 +294,18 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //  [3][NodeList to Array]  uu.array(NodeList)  -> [node, ...]
                                     //  [4][arguments to Array] uu.array(arguments) -> [arg, ...]
                                     //  [5][to Array + slice]   uu.array(uu.tag("", document), 1, 3) -> [<head>, <meta>]
-        dump:       uuarraydump,    // uu.array.dump(source:ByteArray, type:String = "HEX"):String
-                                    //  [1][ByteArray dump] uu.array.dump([1, 2, 3]) -> "010203"
-                                    //  [2][ByteArray dump] uu.array.dump([1, 2, 3], "0x", ", 0x") -> "0x01, 0x02, 0x03"
         sort:       uuarraysort,    // uu.array.sort(source:Array, method:String/Function = "A-Z"):Array
         clean:      uuarrayclean,   // uu.array.clean(source:Array):Array
         toHash:     uuarraytohash,  // uu.array.toHash(key:Array, value:Array/Mix, toNumber:Boolean = false):Hash
         unique:     uuarrayunique   // uu.array.unique(source:Array, literalOnly:Boolean = false):Array
+    }),
+    byteArray: uumix(uubyteArray, { // uu.byteArray(source:String):ByteArray
+                                    //  [1][clone ByteArray]     uu.byteArray([1, 2]) -> [1, 2]
+                                    //  [2][String to ByteArray] uu.byteArray("abc") -> [97, 98, 99]
+                                    //  [3][slice]               uu.byteArray("abc", 1, 2) -> [98]
+        dump:       uubyteArraydump // uu.byteArray.dump(source:ByteArray, type:String = "HEX"):String
+                                    //  [1][ByteArray dump] uu.byteArray.dump([1, 2, 3]) -> "010203"
+                                    //  [2][ByteArray dump] uu.byteArray.dump([1, 2, 3], "0x", ", 0x") -> "0x01, 0x02, 0x03"
     }),
     // --- ATTRIBUTE ---
     attr:           uuattr,         // uu.attr(node:Node, key:String/Hash = void,
@@ -610,21 +621,26 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //                endIndex:Number = void):String
     }),
 //{@md5
-    md5:            uumd5,          // uu.md5(ASCIIString/ByteArray):HexString
-                                    //   uu.md5("")              -> "d41d8cd98f00b204e9800998ecf8427e"
-                                    //   uu.md5("hoge")          -> "ea703e7aa1efda0064eaa507d9e8ab7e"
-                                    //   uu.md5("ascii")         -> "5b7f33be48f19c25e1af2f96cffc569f"
-                                    //   uu.md5("user-password") -> "9a3729201fdd376c76ded01f986481b1"
-                                    //   uu.md5(uu.utf8("CJK chars")) -> ...
+    md5:            uumd5,          // uu.md5(data:ASCIIString/ByteArray, toByteArray:Boolean = false):HexString/ByteArray
+                                    //  [1][MD5 test] uu.md5("")              -> "d41d8cd98f00b204e9800998ecf8427e"
+                                    //  [2][MD5 test] uu.md5("hoge")          -> "ea703e7aa1efda0064eaa507d9e8ab7e"
+                                    //  [3][MD5 test] uu.md5("ascii")         -> "5b7f33be48f19c25e1af2f96cffc569f"
+                                    //  [4][MD5 test] uu.md5("user-password") -> "9a3729201fdd376c76ded01f986481b1"
+                                    //  [5][CJK to HexDigestString] uu.md5(uu.utf8("CJK chars")) -> ...
 //}@md5
 //{@sha1
-    sha1:           uusha1,         // uu.sha1(ASCIIString/ByteArray):HexString
-                                    //   uu.sha1("")              -> "da39a3ee5e6b4b0d3255bfef95601890afd80709"
-                                    //   uu.sha1("hoge")          -> "31f30ddbcb1bf8446576f0e64aa4c88a9f055e3c"
-                                    //   uu.sha1("ascii")         -> "51c066b36ea8b32076964c766f8a0324ca4eb4b9"
-                                    //   uu.sha1("user-password") -> "691ca1151748ae7b52b1c82eaaacc60f8d41db82"
-                                    //   uu.sha1(uu.utf8("CJK chars")) -> ...
+    sha1:           uusha1,         // uu.sha1(data:ASCIIString/ByteArray, toByteArray:Boolean = false):HexString/ByteArray
+                                    //  [1][SHA-1 test] uu.sha1("")              -> "da39a3ee5e6b4b0d3255bfef95601890afd80709"
+                                    //  [2][SHA-1 test] uu.sha1("hoge")          -> "31f30ddbcb1bf8446576f0e64aa4c88a9f055e3c"
+                                    //  [3][SHA-1 test] uu.sha1("ascii")         -> "51c066b36ea8b32076964c766f8a0324ca4eb4b9"
+                                    //  [4][SHA-1 test] uu.sha1("user-password") -> "691ca1151748ae7b52b1c82eaaacc60f8d41db82"
+                                    //  [5][CJK to HexDigestString] uu.sha1(uu.utf8("CJK chars")) -> ...
 //}@sha1
+//{@hmac
+    hmac:           uuhmac,         // uu.hmac(key:ASCIIString/ByteArray, data:ASCIIString/ByteArray, hashLib:Function, toByteArray:Boolean = false):HexString/ByteArray
+                                    //  [1][HMAC-SHA1 HexString] uu.hmac("key", "data", uu.sha1)       -> "104152c5bfdca07bc633eebd46199f0255c9f49d"
+                                    //  [2][HMAC-SHA1 ByteArray] uu.hmac("key", "data", uu.sha1, true) -> [16, 65, 82, 197, 191, 220, 160, 123, ...]
+//}@hmac
 //}@codec
     // --- DATE ---
     date:           uudate,         // uu.date(source:DateHash/Date/Number/String = void):DateHash
@@ -991,6 +1007,7 @@ uueach([_true, 0, "", uunop, [], new Date, /0/], function(v, i) {
         _hh2num[v] = n;
         _num2bb[n] = v = String.fromCharCode(n);
         _bb2num[v] = n;
+        _num2nm[n] = n;
     }
     for (i = 100; i < 200; ++i) {
         n = i - 100;
@@ -1884,22 +1901,6 @@ function uuarrayclean(source) { // @param Array: source
     return rv;
 }
 
-// uu.array.dump - dump ByteArray
-function uuarraydump(source,     // @param ByteArray: [0x00, ... 0xff]
-                     prefix,     // @param String(= ""):
-                     splitter) { // @param String(= ""):
-                                 // @return String: "00010203"
-    //  [1][ByteArray dump] uu.array.dump([1, 2, 3]) -> "010203"
-    //  [2][ByteArray dump] uu.array.dump([1, 2, 3], "0x", ", 0x") -> "0x01, 0x02, 0x03"
-
-    var rv = [], i = 0, iz = source.length, num2hh = _num2hh;
-
-    for (; i < iz; ++i) {
-        rv[i] = num2hh[source[i]];
-    }
-    return iz ? (prefix || "") + rv.join(splitter || "") : "";
-}
-
 // uu.array.toHash - make { key: value } pair from array
 function uuarraytohash(key,        // @param Array: key array
                        value,      // @param Array/Mix: value array or a mix value
@@ -1948,6 +1949,50 @@ function uuarrayunique(source,        // @param Array: source
         }
     }
     return rv;
+}
+
+// --- BYTE ARRAY ---
+// uu.byteArray
+function uubyteArray(source,     // @param String/ByteArray:
+                     sliceStart, // @param Number(= void):
+                     sliceEnd) { // @param Number(= void):
+                                 // @return Array+Hash - Array + { first, last }
+    //  [1][clone ByteArray]     uu.byteArray([1, 2]) -> [1, 2]
+    //  [2][String to ByteArray] uu.byteArray("abc") -> [97, 98, 99]
+    //  [3][slice]               uu.byteArray("abc", 1, 2) -> [98]
+
+    var rv, i, iz;
+
+    if (isString(source)) { // isString
+        for (rv = [], i = 0, iz = source.length; i < iz; ++i) {
+            rv[i] = source.charCodeAt(i) & 0xff;
+        }
+    } else { // isArray
+        rv = source[_concat](); // clone
+    }
+    if (sliceStart) {
+        rv = sliceEnd ? rv.slice(sliceStart, sliceEnd)
+                      : rv.slice(sliceStart);
+    }
+    rv.first = rv[0];
+    rv.last  = rv[rv.length - 1];
+    return rv;
+}
+
+// uu.byteArray.dump - dump ByteArray
+function uubyteArraydump(source,     // @param ByteArray: [0x00, ... 0xff]
+                         prefix,     // @param String(= ""):
+                         splitter) { // @param String(= ""):
+                                     // @return String: "00010203"
+    //  [1][ByteArray dump] uu.byteArray.dump([1, 2, 3]) -> "010203"
+    //  [2][ByteArray dump] uu.byteArray.dump([1, 2, 3], "0x", ", 0x") -> "0x01, 0x02, 0x03"
+
+    var rv = [], i = 0, iz = source.length, num2hh = _num2hh;
+
+    for (; i < iz; ++i) {
+        rv[i] = num2hh[source[i]];
+    }
+    return iz ? (prefix || "") + rv.join(splitter || "") : "";
 }
 
 // --- ATTRIBUTE ---
@@ -5552,34 +5597,65 @@ function uuutf8decode(byteArray,  // @param UTF8ByteArray: [ Number(utf8), ... ]
 
 //{@md5
 // uu.md5 - encode
-function uumd5(data) { // @param ASCIIString/ByteArray:
-                       // @return HexString:
-    return calcHash(data, "MD5");
+function uumd5(data,          // @param ASCIIString/ByteArray:
+               toByteArray) { // @param Boolean(= false): true is result ByteArray
+                              //                          false is result HexString
+                              // @return HexString/ByteArray: "ffff.." or [255, 255, ...]
+    return calcHash(data, 5, toByteArray);
 }
 //}@md5
 
 //{@sha1
 // uu.sha1 - encode
-function uusha1(data) { // @param ASCIIString/ByteArray:
-                        // @return HexString:
-    return calcHash(data, "SHA1");
+function uusha1(data,          // @param ASCIIString/ByteArray:
+                toByteArray) { // @param Boolean(= false): true is result ByteArray
+                               //                          false is result HexString
+                               // @return HexString/ByteArray: "ffff.." or [255, 255, ...]
+    return calcHash(data, 1, toByteArray);
 }
 //}@sha1
 
-// inner - calc hash
-function calcHash(data,   // @param ASCIIString/ByteArray:
-                  type) { // @param String: Hash Type
-    var rv = [], hash, i, iz, c, _0xff = 0xff, n2h = _num2hh;
+//{@hmac
+// uu.hmac - encode
+function uuhmac(key,           // @param ASCIIString/ByteArray:
+                data,          // @param ASCIIString/ByteArray:
+                hashLib,       // @param Function:
+                toByteArray) { // @param Boolean(= false): true is result ByteArray
+                               //                          false is result HexString
+                               // @return HexString/ByteArray: "ffff.." or [255, 255, ...]
+    //  [1][HMAC-SHA1 HexString] uu.hmac("key", "data", uu.sha1)       -> "104152c5bfdca07bc633eebd46199f0255c9f49d"
+    //  [2][HMAC-SHA1 ByteArray] uu.hmac("key", "data", uu.sha1, true) -> [16, 65, 82, 197, 191, 220, 160, 123, ...]
 
-    // --- String to ByteArray ---
-    if (isString(data)) {
-        for (i = 0, iz = data.length; i < iz; ++i) {
-            rv[i] = data.charCodeAt(i) & _0xff;
-        }
-    } else {
-        rv = data[_concat](); // clone
+    key  = uubyteArray(key);  // String/ByteArray to ByteArray
+    data = uubyteArray(data); // String/ByteArray to ByteArray
+
+    // http://en.wikipedia.org/wiki/HMAC
+    var blocksize = 64, // magic word(MD5.blocksize = 64, SHA1.blocksize = 64)
+        i = 0, opad, ipad;
+
+    if (key.length > blocksize) {
+        key = hashLib(key, _true);
     }
-    i = rv.length, c = i;
+    opad = key[_concat]();
+    ipad = key[_concat]();
+
+    for (; i < blocksize; ++i) {
+        opad[i] ^= 0x5C; // xor
+        ipad[i] ^= 0x36; // xor
+    }
+    return hashLib(opad[_concat](hashLib(ipad[_concat](data), _true)), toByteArray);
+}
+//}@hmac
+
+// inner - calc hash
+function calcHash(data,          // @param ASCIIString/ByteArray:
+                  type,          // @param Number: Type, 1 is SHA-1, 5 is MD5
+                  toByteArray) { // @param Boolean(= false): true is result ByteArray
+                                 //                          false is result HexString
+                                 // @return HexString/ByteArray:
+    var rv = uubyteArray(data), // String/ByteArray to ByteArray
+        bary, i = rv.length, iz, c = i, _0xff = 0xff,
+        map = toByteArray ? _num2nm : _num2hh;
 
     // --- padding ---
     rv[i++] = 0x80;
@@ -5590,31 +5666,35 @@ function calcHash(data,   // @param ASCIIString/ByteArray:
     c *= 8;
     switch (type) {
 //{@md5
-    case "MD5":
+    case 5: // MD5
         rv.push(c & _0xff, c >> 8 & _0xff, c >> 16 & _0xff, c >> 24 & _0xff,
                 0, 0, 0, 0);
         hash = MD5(rv);
+
+        // ByteArray to HexString/ByteArray
         for (rv = [], i = 0, iz = hash.length; i < iz; ++i) {
-            rv.push(n2h[hash[i]       & _0xff], n2h[hash[i] >>  8 & _0xff],
-                    n2h[hash[i] >> 16 & _0xff], n2h[hash[i] >> 24 & _0xff]);
+            rv.push(map[hash[i]       & _0xff], map[hash[i] >>  8 & _0xff],
+                    map[hash[i] >> 16 & _0xff], map[hash[i] >> 24 & _0xff]);
         }
         break;
 //}@md5
 //{@sha1
-    case "SHA1":
+    case 1: // SHA-1
         rv.push(0, 0, 0, 0,
                 c >> 24 & _0xff, c >> 16 & _0xff, c >> 8 & _0xff, c & _0xff);
         hash = SHA1(rv);
+
+        // ByteArray to HexString/ByteArray
         for (rv = [], i = 0, iz = hash.length; i < iz; ++i) {
-            rv.push(n2h[hash[i] >> 24 & _0xff], n2h[hash[i] >> 16 & _0xff],
-                    n2h[hash[i] >>  8 & _0xff], n2h[hash[i]       & _0xff]);
+            rv.push(map[hash[i] >> 24 & _0xff], map[hash[i] >> 16 & _0xff],
+                    map[hash[i] >>  8 & _0xff], map[hash[i]       & _0xff]);
         }
         break;
 //}@sha1
     default:
         rv = [];
     }
-    return rv.join("");
+    return toByteArray ? rv : rv.join("");
 }
 
 //{@md5
@@ -8354,8 +8434,8 @@ uueach(uuevent._.as, function(eventType) {
 });
 
 //{@mb
-// HTML5 new HTMLElements SHIM. <section>, <summary> ...
-_ie678 && uueach(uutag.html5.split(","), newNode); // [IE6][IE7][IE8]
+// <html5-tags> shim. <section>, <summary> ...
+_ie && uueach(uutag.html5.split(","), newNode); // [IE6][IE7][IE8][IE9 partial]
 
 try {
     // [IE6] flicker fix
@@ -8720,7 +8800,7 @@ uuready("dom:2", function() {
 // -- unsupported :not(), :not(*)                             in WebKit querySelectorAll()
 
 //{@mb
-uu.query.tokenizer || (function(doc, uu, _ie) {
+uu.query.tokenizer || (function(doc, uu, hasAttribute, _ie, _ie678) {
 
 uu.query.tokenizer = tokenizer;
 uu.query.selector  = selector;
@@ -8757,6 +8837,9 @@ var _A_TAG          = 1,  // E               [_A_TAG,         "DIV"]
         enabled:           10, disabled:          11, checked:           12, // formFilter
         link:              13, visited:           14,                        // otherFilter
         empty:             15, root:              16, target:            17, // otherFilter
+/* TODO: test
+        required:          18, optional:          19,                        // otherFilter <input required>
+ */
         // pseudo functions
         "not(":            30,
         "nth-child(":      31, "nth-last-child(": 32,                        // nthFilter
@@ -8975,7 +9058,7 @@ function selector(token,     // @param Hash: QueryTokenHash
                     node = ctx[j][type < 2 ? "firstChild" : "nextSibling"];
                     for (; node; node = node.nextSibling) {
                         if (node.nodeType === Node.ELEMENT_NODE) {
-                            if (_ie && !node.tagName.indexOf("/")) { // fix #25
+                            if (_ie678 && !node.tagName.indexOf("/")) { // fix #25
                                 continue;
                             }
                             if (match || node.tagName === ident) {
@@ -9013,8 +9096,9 @@ function selector(token,     // @param Hash: QueryTokenHash
         case _A_ATTR:           // [_A_ATTR, "ATTR"]
             for (attr = data[++i]; j < jz; ++j) {
                 node = ctx[j];
-                match = _ie ? ((word = node.getAttributeNode(attr)) && word.specified)
-                            : node.hasAttribute(attr);
+                match = hasAttribute
+                      ? node.hasAttribute(attr)
+                      : ((word = node.getAttributeNode(attr)) && word.specified);
                 (match ^ negate) && (r[++ri] = node);
             }
             ctx = r;
@@ -9156,15 +9240,19 @@ function formFilter(ctx, j, jz, negate, ps) {
     return rv;
 }
 
-// inner - 13:link  14:visited  15:empty  16:root  17:target
+// inner - 13:link  14:visited  15:empty  16:root  17:target  18:required  19:optional
 function otherFilter(ctx, j, jz, negate, ps, xmldoc) {
-    var rv = [], ri = -1, node, cn, ok = 0, found, word, rex;
+    var rv = [], ri = -1, node, cn, ok = 0, found, word, rex, attr;
 
     switch (ps) {
     case 13: rex = /^(?:a|area)$/i; break;
     case 14: jz = 0; break;
     case 16: negate || (jz = 0, rv = [doc.html]); break;
-    case 17: (word = location.hash.slice(1)) || (jz = 0);
+    case 17: (word = location.hash.slice(1)) || (jz = 0); break;
+/* TODO: test
+    case 18:
+    case 19: attr = "required";
+ */
     }
 
     for (; j < jz; ok = 0, ++j) {
@@ -9178,7 +9266,14 @@ function otherFilter(ctx, j, jz, negate, ps, xmldoc) {
                  ok = !found && !node[_textContent]; break;
         case 16: ok = node !== doc.html; break;
         case 17: ok = xmldoc ? (node.id === word)
-                             : ((node.id || node.name) === word);
+                             : ((node.id || node.name) === word); break;
+/* TODO: test
+        case 18:
+        case 19: ok = hasAttribute
+                    ? node.hasAttribute(attr)
+                    : ((word = node.getAttributeNode(attr)) && word.specified);
+                 ps === 19 && (ok = !ok);
+ */
         }
         (ok ^ negate) && (rv[++ri] = node);
     }
@@ -9295,7 +9390,7 @@ function otherFunctionFilter(ctx, j, jz, negate, ps, arg) {
     return rv;
 }
 
-})(document, uu, uu.ie);
+})(document, uu, !(uu.env.ie6 || uu.env.ie7), uu.ie, uu.ie678);
 //}@mb
 
 //{@ui
