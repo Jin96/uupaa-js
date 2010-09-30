@@ -49,8 +49,10 @@ build/upa.php はプリプロセスとMinifyを施し最適化された.jsファ
 || `*`.js || JavaScript source code file path || ソースコードファイルパスを指定します。相対パスで指定した場合は -srcdir 以下からファイルを読み取ります ||
 
 == -off ==
- -off オプションに指定可能な文字列の一覧です
-
+ -off オプションに指定可能な文字列の一覧です。複数の ident を指定する場合はスラッシュで連結します。
+{{{
+upa -off color/ui/codec
+}}}
 || *ident*   || 説明 || 削減されるファイルサイズ<br />(Minify適用後の値) ||
 || all       || 以下の機能を一括でコメントアウトします。 || -94.8kB ||
 || form      || uu.value(), NodeSet.value() をコメントアウトします || -0.6kB ||
