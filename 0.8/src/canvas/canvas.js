@@ -1,6 +1,5 @@
 
 // === Canvas ===
-//{@mb
 //{@canvas
 window["CanvasRenderingContext2D"] && (function(uu) {
 
@@ -60,16 +59,24 @@ function canvasDrawRoundRect(x,           // @param Number:
                              y,           // @param Number:
                              width,       // @param Number:
                              height,      // @param Number:
-                             radius,      // @param Array: [top-left, top-right, bottom-right, bottom-left]
+                             radius,      // @param Number/Array: [top-left, top-right, bottom-right, bottom-left]
                              fillColor,   // @param ColorHash(= void 0): fillColor
                              strokeColor, // @param ColorHash(= void 0): strokeColor
                              lineWidth) { // @param Number(= 1): stroke lineWidth
     if (fillColor || strokeColor) {
         var undef,
             lw = lineWidth === undef ? 1 : lineWidth, w = width, h = height,
-            r0 = radius[0], r1 = radius[1], r2 = radius[2], r3 = radius[3],
+            r0, r1, r2, r3,
             w2 = (width  / 2) | 0, h2 = (height / 2) | 0;
 
+        if (typeof radius === "number") {
+            r0 = r1 = r2 = r3 = radius;
+        } else {
+            r0 = radius[0];
+            r1 = radius[1];
+            r2 = radius[2];
+            r3 = radius[3];
+        }
         r0 < 0 && (r0 = 0);
         r1 < 0 && (r1 = 0);
         r2 < 0 && (r2 = 0);
@@ -113,6 +120,7 @@ function canvasDrawRoundRect(x,           // @param Number:
 }
 })(uu);
 
+//{@mb
 // === VMLCanvas / FlashCanvas / SilverlightCanvas ===
 window["CanvasRenderingContext2D"] || (function(doc, uu) {
 
@@ -937,7 +945,7 @@ function drawRoundRect(x,           // @param Number:
                        y,           // @param Number:
                        width,       // @param Number:
                        height,      // @param Number:
-                       radius,      // @param Array: [top-left, top-right, bottom-right, bottom-left]
+                       radius,      // @param Number/Array: [top-left, top-right, bottom-right, bottom-left]
                        fillColor,   // @param ColorHash(= void 0): fillColor
                        strokeColor, // @param ColorHash(= void 0): strokeColor
                        lineWidth) { // @param Number(= 1): stroke lineWidth
@@ -949,6 +957,9 @@ function drawRoundRect(x,           // @param Number:
         var lw = lineWidth === void 0 ? 1 : lineWidth,
             path, fg, ix, iy, iw, ih;
 
+        if (typeof radius === "number") { // Number -> [r, r, r, r]
+            radius = [radius, radius, radius, radius];
+        }
         if (!radius[0]
             && radius[0] === radius[1]
             && radius[0] === radius[2]
@@ -2397,7 +2408,7 @@ function drawRoundRect(x,           // @param Number:
                        y,           // @param Number:
                        width,       // @param Number:
                        height,      // @param Number:
-                       radius,      // @param Array: [top-left, top-right, bottom-right, bottom-left]
+                       radius,      // @param Number/Array: [top-left, top-right, bottom-right, bottom-left]
                        fillColor,   // @param ColorHash(= void 0): fillColor
                        strokeColor, // @param ColorHash(= void 0): strokeColor
                        lineWidth) { // @param Number(= 1): stroke lineWidth
@@ -2409,6 +2420,9 @@ function drawRoundRect(x,           // @param Number:
         var lw = lineWidth === void 0 ? 1 : lineWidth,
             a  = fillColor ? fillColor.a : strokeColor.a, fg, endTag;
 
+        if (typeof radius === "number") { // Number -> [r, r, r, r]
+            radius = [radius, radius, radius, radius];
+        }
         if (radius[0] === radius[1]
             && radius[0] === radius[2]
             && radius[0] === radius[3]) {
@@ -3638,7 +3652,7 @@ function drawRoundRect(x,           // @param Number:
                        y,           // @param Number:
                        width,       // @param Number:
                        height,      // @param Number:
-                       radius,      // @param Array: [top-left, top-right, bottom-right, bottom-left]
+                       radius,      // @param Number/Array: [top-left, top-right, bottom-right, bottom-left]
                        fillColor,   // @param ColorHash(= void 0): fillColor
                        strokeColor, // @param ColorHash(= void 0): strokeColor
                        lineWidth) { // @param Number(= 1): stroke lineWidth
@@ -3653,6 +3667,9 @@ function drawRoundRect(x,           // @param Number:
             s = strokeColor ? (strokeColor.num + "\t" + this.globalAlpha * strokeColor.a)
                             : "0\t0";
 
+        if (typeof radius === "number") { // Number -> [r, r, r, r]
+            radius = [radius, radius, radius, radius];
+        }
         send(this, "X1\t" + x + "\t" + y + "\t" + width + "\t" + height + "\t" +
                             radius[0] + "\t" + radius[1] + "\t" +
                             radius[2] + "\t" + radius[3] + "\t" +

@@ -1,5 +1,5 @@
 <!doctype html><html><head><meta charset="UTF-8" />
-<title>uu.fx test</title>
+<title>uu.junction test</title>
 <style>
 .box {
   background-color: skyblue;
@@ -33,8 +33,8 @@ function run() {
     var nodeArray = uu.klass("box");
 
     var junc = uu.junction(2, 3, function(values, ok) {
-        alert("Junction");
-        uu.puff(values);
+        uu.log("Junction @", ok);
+        uu.log(values);
     });
 
     uu.fx(nodeArray[0], 500, { w: 400, after: function() { junc.ok({id:1}); } });

@@ -1,0 +1,27 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8" />
+<title></title>
+<style></style>
+<script src="../../src/uupaa.js"></script>
+<script src="../../src/canvas/canvas.js"></script>
+<script>
+uu.ready(function(uu, doc) {
+}, "canvas", function(uu, canvasArray) {
+    var ctx = canvasArray[0].getContext("2d");
+
+    ctx.beginPath();
+    ctx.moveTo(100, 100);
+    ctx.lineTo(100, 100);
+    ctx.closePath();
+    ctx.globalAlpha = 0.5;
+    ctx.drawRoundRect(0, 0, 100, 100, 20, uu.color("red"), uu.color("blue"));
+
+    uu.hatch();
+});
+
+</script>
+</head><body>
+
+<canvas></canvas>
+
+
+</body></html>

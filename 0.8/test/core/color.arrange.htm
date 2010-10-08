@@ -32,7 +32,7 @@ uu.ready(function(uu) {
     uu.change(uu.id("range"), function(evt) {
         draw({ h: evt.node.value, s: 100, v: 100, l: 50, a: 1 });
     });
-    uu.ui();
+    uu.ui.build();
 });
 var type = "HSV";
 var method = "toString";
