@@ -492,12 +492,16 @@ uu.ready("window", function(uu) {
             uu.nth({ key: 1, key2: 2 }), "==", ["key", 1]);
     uu.ok("[1, 2] から先頭のpairを配列[0, 1]で取得する",
             uu.nth([1, 2]), "==", [0, 1]);
+    // uu.nth("abc", 0) -> [0, "a"]
+    uu.ok('uu.nth("abc", 0) -> [0, "a"]', uu.nth("abc", 0), "==", [0, "a"]);
 
     uu.ok("uu.nth(last)");
     uu.ok("{ key: 1, key2: 2 } から末尾のpairを配列['key2', 2]で取得する",
             uu.nth({ key: 1, key2: 2 }, -1), "==", ["key2", 2]);
     uu.ok("[1, 2] から末尾のpairを配列[1, 2]で取得する",
             uu.nth([1, 2], -1), "==", [1, 2]);
+    // uu.nth("abc", -1) -> [2, "c"]
+    uu.ok('uu.nth("abc", -1) -> [2, "c"]', uu.nth("abc", -1), "==", [2, "c"]);
 
     uu.ok("uu.array.toHash()");
     uu.ok("['key', 'key2'] と ['1', '2'] から { key: '1', key2: '2' } を生成する",
@@ -1166,21 +1170,33 @@ uu.ready("window", function(uu) {
         result = uu.qs("key=val;key2=val2");
         uu.ok('uu.qs("key=val;key2=val2") -> { key: "val", key2: "val2" }',
                 result, "==", { key: "val", key2: "val2" });
+        result = uu.qs("key=val&key2=val2");
+        uu.ok('uu.qs("key=val&key2=val2") -> { key: "val", key2: "val2" }',
+                result, "==", { key: "val", key2: "val2" });
 
 
-        result = uu.qs({ key: "val",     key2: "val2" });
-        uu.ok('uu.qs({ key: "val",     key2: "val2" }) -> "key=val;key2=val2"',
+        result = uu.qs({ key: "val",     key2: "val2" }, null, ";");
+        uu.ok('uu.qs({ key: "val",     key2: "val2" }, null, ";") -> "key=val;key2=val2"',
                 result, "==", "key=val;key2=val2");
+        result = uu.qs({ key: "val",     key2: "val2" }, null, "&");
+        uu.ok('uu.qs({ key: "val",     key2: "val2" }, null, "&") -> "key=val&key2=val2"',
+                result, "==", "key=val&key2=val2");
 
 
-        result = uu.qs( "key=val",     { key2: "val2" });
-        uu.ok('uu.qs( "key=val",     { key2: "val2" }) -> "key=val;key2=val2"',
+        result = uu.qs( "key=val",     { key2: "val2" }, ";");
+        uu.ok('uu.qs( "key=val",     { key2: "val2" }, ";") -> "key=val;key2=val2"',
                 result, "==", "key=val;key2=val2");
+        result = uu.qs( "key=val",     { key2: "val2" }, "&");
+        uu.ok('uu.qs( "key=val",     { key2: "val2" }, "&") -> "key=val&key2=val2"',
+                result, "==", "key=val&key2=val2");
 
 
-        result = uu.qs({ key: "val" }, { key2: "val2" });
-        uu.ok('uu.qs({ key: "val" }, { key2: "val2" }) -> "key=val;key2=val2"',
+        result = uu.qs({ key: "val" }, { key2: "val2" }, ";");
+        uu.ok('uu.qs({ key: "val" }, { key2: "val2" }, ";") -> "key=val;key2=val2"',
                 result, "==", "key=val;key2=val2");
+        result = uu.qs({ key: "val" }, { key2: "val2" }, "&");
+        uu.ok('uu.qs({ key: "val" }, { key2: "val2" }, "&") -> "key=val&key2=val2"',
+                result, "==", "key=val&key2=val2");
 
 
         uu.ok("boundary");
