@@ -126,8 +126,8 @@ window["CanvasRenderingContext2D"] || (function(doc, uu) {
 
 var _enableFlashCanvas = 0;
 
-if (uu.ie && uu.env.flash > 8) {
-    _enableFlashCanvas = uu.stat(uu.config.baseDir + "uu.canvas.swf");
+if (uu.ie678 && uu.env.flash > 8) {
+    _enableFlashCanvas = uu.stat(uu.config.canvas.swf);
 }
 
 uu.canvas.VML = VMLCanvas;                  // uu.canvas.VML class
@@ -154,7 +154,7 @@ function VMLCanvas(node) { // @param Node: <canvas>
 
 // uu.canvas.init - init canvas
 function uucanvasinit() {
-    uu.ie && uu.env < 9 && uu.each(uu.tag("canvas"), function(node) {
+    uu.ie678 && uu.each(uu.tag("canvas"), function(node) {
         if (!node.getContext) { // already initialized (altcss and other)
             // remove fallback contents
             //      <canvas>fallback contents...</canvas> -> <canvas></canvas>
@@ -195,11 +195,17 @@ function _removeFallback(node) { // @param Node:
     return rv;
 }
 
-// uu.canvas.build - build canvas <canvas class="fl sl vml">
+// uu.canvas.build - build canvas <canvas class="GSFV">
 function uucanvasbuild(node,    // @param Node: <canvas>
-                       order) { // @param SpaceJointString:
+                       order) { // @param SpaceJointString: "GSFV"
                                 // @return Node:
-    var ary = uu.trim(order.toLowerCase()).split(" "), i = -1, v;
+    var ary, i = -1, v, order = uu.trim(order.toLowerCase());
+
+    if (order.indexOf(" ") >= 0) {
+        ary = order.split(" "); // old style "sl fl vml"
+    } else {
+        ary = order.split("");  // new style "GSFV"
+    }
 
     while ( (v = ary[++i]) ) {
         switch (uu.canvas.build.backendOrder[v]) {
@@ -220,26 +226,12 @@ function uucanvasbuild(node,    // @param Node: <canvas>
                                : _enableFlashCanvas ? FlashCanvas
                                                     : VMLCanvas).build(node);
 }
-uucanvasbuild.backendOrder = { svg: 1, sl: 2, silver: 2, silverlight: 2,
-                               fl: 3, flash: 3, vml: 4 };
-
-/*
-// uu.canvas.bgcolor - get canvas background-color
-function uucanvasbgcolor(node) { // @param Node:
-                                 // @return ColorHash:
-    var n = node, color = "transparent",
-        zero = { transparent: 1, "rgba(0, 0, 0, 0)": 1 };
-
-    while (n && n !== doc && zero[color]) {
-        if (uu.ie && !n.currentStyle) {
-            break;
-        }
-        color = uu.css(n).backgroundColor;
-        n = n.parentNode;
-    }
-    return uu.color(zero[color] ? "white" : color);
-}
- */
+uucanvasbuild.backendOrder = {
+    g: 1, svg: 1,
+    s: 2, sl: 2, silver: 2, silverlight: 2,
+    f: 3, fl: 3, flash: 3,
+    v: 4, vml: 4
+};
 
 })(document, uu);
 
@@ -1688,7 +1680,7 @@ function _stroke(ctx) {
 }
 
 // functional collision with uu.css3(altcss) is evaded
-uu.ie && uu.ready("canvas:0", function() {
+uu.ie678 && uu.ready("canvas:0", function() {
     var ss = doc.createStyleSheet(), ns = doc.namespaces;
 
     if (!ns["v"]) {
@@ -3075,14 +3067,14 @@ function _stroke(ctx) {
 }
 
 // add inline XAML source
-uu.ie && uu.env.silverlight && uu.ready(function() {
+uu.ie678 && uu.env.silverlight && uu.ready(function() { // DOMContentLoaded
     uu.id("xaml") || doc.head.appendChild(uu.mix(uu.node("script"), {
             id:   "xaml",
             type: "text/xaml",
             text: '<Canvas xmlns="http://schemas.microsoft.com/client/2007" ' +
                           'xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"></Canvas>'
     }));
-}, "system");
+});
 
 })(this, document, uu);
 //}@canvassl
@@ -3213,7 +3205,7 @@ function build(canvas) { // @param Node: <canvas>
             '<param name="movie" value="@" /></object>',
          ctx._id, canvas.width, canvas.height,
          "clsid:d27cdb6e-ae6d-11cf-96b8-444553540000",
-         uu.config.baseDir + "uu.canvas.swf");
+         uu.config.canvas.swf);
 
     canvas.innerHTML = fragment;
     ctx._view = canvas.firstChild; // <object>
