@@ -1,11 +1,13 @@
 <?php
 
 // --- user setting ---
+$outputDir   = "../js/";        // output dir
 $libraryCore = "uupaa.js";
 $preprosess  = "js.pp";         // pre-processor
 $sourceDir   = "../src/";
 $compiler    = "g";             // default compiler
-$catfood     = "../catfood.js"; // temporary file
+//$catfood     = "../catfood.js"; // temporary file
+$catfood     = $outputDir . "catfood.js"; // temporary file
 $castoff     = array();         // "form,canvas,..."
 $castoffAll  = array(
     "form", "snippet", "image", "color",
@@ -15,7 +17,7 @@ $castoffAll  = array(
     "flash", "nodeset", "audio",
     "eventresize", "eventcyclic",
     "live", "cssbox",
-    "codec", "md5", "sha1", "hmac",
+    "codec", "md5", "sha1", "hmac", "msgpack",
     "sprintf", "url", "font", "cookie", "storage",
     "ui", "uislider",
 );
@@ -127,7 +129,7 @@ function pathNormalize($path) { // @param FilePathString:  "..\dir/file.ext"
 
 function minify() {
     global $compiler, $skipCore, $verbose, $catfood, $mobile, $libraryCore,
-           $loadedFileSize, $perfPoint;
+           $loadedFileSize, $perfPoint, $outputDir;
 
     $command = '';
 
@@ -143,21 +145,21 @@ function minify() {
     case "g":
 //      $options = '--warning_level VERBOSE ';
         $command = 'java -jar tool.g.jar ' . $options . ' --js ' . $catfood
-                 . ' --js_output_file ../' . $outfile;
+                 . ' --js_output_file ' . $outputDir . $outfile;
         break;
     case "G":
         $options = '--compilation_level ADVANCED_OPTIMIZATIONS ';
         $command = 'java -jar tool.g.jar ' . $options . ' --js ' . $catfood
-                 . ' --js_output_file ../' . $outfile;
+                 . ' --js_output_file ' . $outputDir . $outfile;
         break;
 
     case "y":
         $options = '--charset "utf-8" ';
-        $command = 'java -jar tool.y.jar -v ' . $options . ' -o ../'
+        $command = 'java -jar tool.y.jar -v ' . $options . ' -o ' . $outputDir
                  . $outfile . ' ' . $catfood;
         break;
     case "m":
-        $command = 'tool.m.exe -w5 -hc ' . $catfood . ' -o ../'
+        $command = 'tool.m.exe -w5 -hc ' . $catfood . ' -o ' . $outputDir
                  . $outfile;
     }
 
@@ -182,7 +184,7 @@ function minify() {
         shell_exec($command);
     }
     if (1) { // $verbose
-        $fz = filesize('../' . $outfile);
+        $fz = filesize($outputDir . $outfile);
 
         printf("minified: %.02fk(%d)byte / %.02fk(%d)byte = %.02f%%, elapsed: %.02f(sec) \n",
               $fz / 1024, $fz, // minified size
