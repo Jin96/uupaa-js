@@ -252,7 +252,8 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //    { library, lang, render, browser,
                                     //      ie, ie6, ie7, ie8, ie9, ie678,
                                     //      opera, gecko, webkit, chrome, safari,
-                                    //      mobile, ios, retina, android, mbosver, os,
+                                    //      longedge, mobile, ios, ipad, iphone,
+                                    //      slate, retina, android, mbosver, os,
                                     //      touch, jit, flash, silverlight }
     ie:             _ie,            // uu.ie - as uu.env.ie
     ie678:          _ie678,         // uu.ie678 - as uu.env.ie678
@@ -2434,7 +2435,8 @@ function uuviewport() { // @return Hash: { innerWidth, innerHeight,
                         //      pageXOffset - Number:
                         //      pageYOffset - Number:
                         //      orientation - Number: last orientation
-                        //      devicePixelRatio - Number: 2 is iPhone4 Retina dispiay
+                        //      devicePixelRatio - Number: 1 is not Retina display
+                        //                                 2 is iPhone4 Retina dispiay
                         //            0 is Portrait
                         //          -90 is Landscape
                         //           90 is Landscape
@@ -9482,10 +9484,11 @@ function detectEnvironment(libraryVersion) { // @param Number: Library version
                ie: _false, ie6: _false, ie7: _false, ie8: _false, ie9: _false,
                ie678: _false,
                opera: _false, gecko: _false, webkit: _true,
-               chrome: _false, safari: _true, mobile: _true, jit: _true,
+               chrome: _false, safari: _true, jit: _false,
                touch: _true, flash: 0, silverlight: 0 },
         nav = navigator,
         ua = nav.userAgent,
+        vp = uuviewport(),
         ie = !!doc.uniqueID,
         opera = !!win.opera,
         gecko = (!!win.netscape || !!win.Components) && /Gecko\//.test(ua),
@@ -9517,12 +9520,17 @@ function detectEnvironment(libraryVersion) { // @param Number: Library version
     rv.webkit       = webkit;
     rv.chrome       = webkit && test(/Chrome/);
     rv.safari       = webkit && test(/Safari/) && !rv.chrome;
-    rv.mobile       = test(/Mobile/) || test(/Opera Mini/);
 //}@mb
-    rv.ios          = webkit && test(/iPad|iPod|iPhone/);
-    rv.retina       = win.devicePixelRatio > 1;
+    rv.longedge     = Math.max(vp.innerWidth, vp.innerHeight);
+    rv.ipad         = webkit && test(/iPad/);
+    rv.iphone       = webkit && !rv.ipad && test(/iPhone|iPod/);
+    rv.ios          = rv.ipad || rv.iphone;
+    rv.retina       = vp.devicePixelRatio > 1;
     rv.android      = webkit && test(/Android/);
     rv.mbosver      = mbosver ? parseFloat(mbosver[1]) : 0; // mobile os version
+    // slate definition. http://twitter.com/#!/uupaa/status/27301790851
+    rv.slate        = rv.ipad || (rv.android && longedge > 1024);
+    rv.mobile       = rv.ios || rv.android || test(/Opera Mini/);
     rv.os           = rv.ios            ? "ios"     // iPhone OS    -> "ios"
                     : rv.android        ? "android" // Android OS   -> "android"
 //{@mb
