@@ -9523,7 +9523,7 @@ function detectEnvironment(libraryVersion) { // @param Number: Library version
     rv.retina       = win.devicePixelRatio > 1;
     rv.android      = webkit && test(/Android/);
     rv.mbosver      = mbosver ? parseFloat(mbosver[1]) : 0; // mobile os version
-    rv.os           = rv.iphone         ? "ios"     // iPhone OS    -> "ios"
+    rv.os           = rv.ios            ? "ios"     // iPhone OS    -> "ios"
                     : rv.android        ? "android" // Android OS   -> "android"
 //{@mb
                     : test(/CrOS/)      ? "chrome"  // Chrome OS    -> "chrome"
@@ -9533,7 +9533,7 @@ function detectEnvironment(libraryVersion) { // @param Number: Library version
 //}@mb
                     : "";                           // Unknown OS   -> ""
 //{@mb
-    rv.touch        = rv.iphone || rv.android;
+    rv.touch        = rv.ios || rv.android;
     rv.jit          = (ie     && browser >= 9)   ||    // IE 9+
                       (gecko  && render  >  1.9) ||    // Firefox 3.5+(1.91)
                       (webkit && render  >= 528
