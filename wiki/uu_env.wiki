@@ -106,12 +106,10 @@ uu.env と uu.ver は同じものです。uu.ver は廃止予定です。
     }
 }}}
 
-== Slate(iPad や Android端末の一部) で切り分ける ==
+== Slate(iPad や Android端末の一部) 用の処理を行う ==
 {{{
     if (uu.env.slate) {
-        // slate
-    } else {
-        // no slate
+        ...
     }
 }}}
 
