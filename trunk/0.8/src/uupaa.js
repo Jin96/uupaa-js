@@ -249,7 +249,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
     config:         uuconfig,       // uu.config - Hash: user configurations
     // --- ENVIRONMENT ---
     env:            _env,           // uu.env - Hash: environment informations,
-                                    //    { library, lang, render, browser,
+                                    //    { library, ssl, lang, render, browser,
                                     //      ie, ie6, ie7, ie8, ie9, ie678,
                                     //      opera, gecko, webkit, chrome, safari,
                                     //      longedge, mobile, ios, ipad, iphone,
@@ -276,7 +276,10 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
     jsonp:          uujsonp,        // uu.jsonp(url:String, option:Hash, callback:CallbackFunction)
                                     //  [1][async request] uu.jsonp("http://...callback=@", { method: "mycallback" }, callback)
 //}@ajax
-    js:             uujs,           // uu.js(url:String):Node - <script src="url">
+    js:             uujs,           // uu.js(url:String, option:Hash = {}, context:Node = <head>):Node - <script src="url">
+                                    //  [1][async load] uu.js("http://.../hoge.js", { async: true, defer: true }) -> <script>
+                                    //  [2][defer load] uu.js("http://.../hoge.js", { defer: true }) -> <script>
+                                    //  [3][lazy load]  uu.js("http://.../hoge.js") -> <script>
     stat:           uustat,         // uu.stat(url:String):Boolean
     require:        uurequire,      // uu.require(url:String, option:Hash = {}):Hash - { data, option, status, ok }
                                     //  [1][sync request] uu.require("http://...") -> { data, option, status, ok }
@@ -1512,10 +1515,26 @@ function newXHR(url) { // @param String: url
 }
 
 // uujs - Async load JavasScript
-function uujs(url) { // @param String:
-                     // @return Node:
-    var rv = doc.head[_appendChild](uumix(newNode("script"), uujs.attr));
+function uujs(url,       // @param String:
+              option,    // @param Hash(= {}): { async, defer }
+                         //   option.async - Boolean(= false): async load. After loading the script to run.
+                         //                                    The script is executed before window.onload,
+                         //                                    execution order is not guaranteed.
+                         //   option.defer - Boolean(= false): async load. After loading the script to run,
+                         //                                    The script is executed before DOMContentLoaded,
+                         //                                    execution order is guaranteed.
+              context) { // @param Node(= <head>): context (parentNode)
+                         // @return Node: <script>
 
+    //  [1][async load] uu.js("http://.../hoge.js", { async: true, defer: true }) -> <script>
+    //  [2][defer load] uu.js("http://.../hoge.js", { defer: true }) -> <script>
+    //  [3][lazy load]  uu.js("http://.../hoge.js") -> <script>
+
+    var rv = (context || doc.head)[_appendChild](uumix(newNode("script"),
+                                                       uujs.attr));
+
+    option.async && (rv.async = _true);
+    option.defer && (rv.defer = _true);
     rv.src = url;
     return rv;
 }
@@ -8507,6 +8526,7 @@ function uucookiesave(prefix, // @param String: prefix, namespace
 // | Storage Class | Storage Backend     | Min|    Max |Fx  |GC  |IE  |Sa  |iSa |Op   |
 // +---------------+---------------------+----+--------+----+----+----+----+----+-----+
 // | LocalStorage  | HTML5::WebStorage   |1.8M|     5M |  3+|3+  |8+  |  4+| 3.1|10.5+|
+// |               |                     |    |        |5.0M|2.5M|4.7M|2.5M|2.5M|1.8M |
 // | FlashStorage  | Flash::SharedObject |  0 |100k(1M)|   o|   o|   o|   o|  o |  o  |
 // | IEStorage     | IE::userData        |    |    63k |   x|   x|  6+|   x|  x |  x  |
 // | CookieStorage | Cookie              |  0 |   3.8k |   o|   o|   o|   o|  o |  o  |
@@ -9439,7 +9459,7 @@ function createCamelizedHash(rv, props) {
     return rv;
 }
 
-// inner - detect environment and meta informations
+// inner - uu.env - detect environment and meta informations
 function detectEnvironment(libraryVersion) { // @param Number: Library version
                                              // @return Hash:
 //{@mb
@@ -9480,7 +9500,7 @@ function detectEnvironment(libraryVersion) { // @param Number: Library version
         return rex.test(ua);
     }
 
-    var rv = { library: libraryVersion,
+    var rv = { library: libraryVersion, ssl: _false,
                ie: _false, ie6: _false, ie7: _false, ie8: _false, ie9: _false,
                ie678: _false,
                opera: _false, gecko: _false, webkit: _true,
@@ -9504,6 +9524,7 @@ function detectEnvironment(libraryVersion) { // @param Number: Library version
                         : parseFloat((/(?:IE |fox\/|ome\/|ion\/)(\d+\.\d)/.
                                      exec(ua) || [,0])[1]);
 
+    rv.ssl          = location.protocol === "https:";
     rv.lang         = (nav.language || nav.browserLanguage).split("-", 1)[0];
     rv.render       = render;
     rv.browser      = browser;
@@ -9529,7 +9550,7 @@ function detectEnvironment(libraryVersion) { // @param Number: Library version
     rv.android      = webkit && test(/Android/);
     rv.mbosver      = mbosver ? parseFloat(mbosver[1]) : 0; // mobile os version
     // slate definition. http://twitter.com/#!/uupaa/status/27301790851
-    rv.slate        = rv.ipad || (rv.android && longedge > 1024);
+    rv.slate        = rv.ipad || (rv.android && longedge > 961);
     rv.mobile       = rv.ios || rv.android || test(/Opera Mini/);
     rv.os           = rv.ios            ? "ios"     // iPhone OS    -> "ios"
                     : rv.android        ? "android" // Android OS   -> "android"
