@@ -79,6 +79,7 @@ upa -off color/ui/codec
 || sprintf   || uu.sf(), uu.sprintf() をコメントアウトします || -0.8kB ||
 || url       || uu.url(), uu.qs() をコメントアウトします || -1.6kB ||
 || ui        || uu.ui() をコメントアウトします || --kB ||
+|| preload   || 画像のプリロード処理をコメントアウトします || --kB ||
 
 
 = 例 =
