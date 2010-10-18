@@ -28,7 +28,15 @@
     left: auto; top: auto;
 }
 </style>
-<script src="../../uupaa.mb.js"></script>
+<!--
+<script src="../../js/uupaa.mb.js"></script>
+-->
+<script>
+uuconfig = {
+    uiDir: "../../ui/"
+};
+</script>
+<script src="../../js/catfood.js"></script>
 </head><body>
 <div style="display:none">
     <div id="div" class="class" title="title">text</div>
@@ -473,15 +481,15 @@ uu.ready("window", function(uu) {
     uu.ok("{ key: 1, key2: 2 } から値の配列[1,2]を生成する",
             uu.values({ key: 1, key2: 2 }), "==", [1, 2]);
 
-    uu.ok("uu.filter()");
-    uu.ok("uu.filter([uu.nop, 1, 'a'], uu.isFunction).match == [uu.nop]",
-            uu.filter([uu.nop, 1, 'a'], uu.isFunction).match, "==", [uu.nop]);
-    uu.ok("uu.filter([uu.nop, 1, 'a'], uu.isNumber).match == [1]",
-            uu.filter([uu.nop, 1, 'a'], uu.isNumber).match, "==", [1]);
-    uu.ok("uu.filter([uu.nop, 1, 'a'], uu.isString).match ==['a']",
-            uu.filter([uu.nop, 1, 'a'], uu.isString).match, "==", ['a']);
-    uu.ok("uu.filter([[1, 2], 1, 'a'], Array.isArray).match == [[1, 2]]",
-            uu.filter([[1, 2], 1, 'a'], Array.isArray).match, "==", [[1, 2]]);
+    uu.ok("uu.drip()");
+    uu.ok("uu.drip([uu.nop, 1, 'a'], uu.isFunction).result == [uu.nop]",
+            uu.drip([uu.nop, 1, 'a'], uu.isFunction).result, "==", [uu.nop]);
+    uu.ok("uu.drip([uu.nop, 1, 'a'], uu.isNumber).result == [1]",
+            uu.drip([uu.nop, 1, 'a'], uu.isNumber).result, "==", [1]);
+    uu.ok("uu.drip([uu.nop, 1, 'a'], uu.isString).result ==['a']",
+            uu.drip([uu.nop, 1, 'a'], uu.isString).result, "==", ['a']);
+    uu.ok("uu.drip([[1, 2], 1, 'a'], Array.isArray).result == [[1, 2]]",
+            uu.drip([[1, 2], 1, 'a'], Array.isArray).result, "==", [[1, 2]]);
 
     uu.ok("uu.indexOf()");
     uu.ok("uu.indexOf({ a: 1, b: 2, c: 2 }, 2) == 'b'",
@@ -502,6 +510,49 @@ uu.ready("window", function(uu) {
             uu.nth([1, 2], -1), "==", [1, 2]);
     // uu.nth("abc", -1) -> [2, "c"]
     uu.ok('uu.nth("abc", -1) -> [2, "c"]', uu.nth("abc", -1), "==", [2, "c"]);
+
+
+    var someCount = 0;
+
+    uu.ok("uu.some()");
+    uu.ok("uu.some([1, 2], function(v,i){ ++someCount; return v < 3; }) == true",
+           uu.some([1, 2], function(v,i){ ++someCount; return v < 3; }), "==", true); // someCount += 1
+    uu.ok("uu.some([1, 2], function(v,i){ ++someCount; return v > 3; }) == false",
+           uu.some([1, 2], function(v,i){ ++someCount; return v > 3; }), "==", false); // someCount += 2
+
+    uu.ok("uu.some({ 0: 1, 1: 2 }, function(v,i){ ++someCount; return v < 3; }) == true",
+           uu.some({ 0: 1, 1: 2 }, function(v,i){ ++someCount; return v < 3; }), "==", true); // someCount += 1
+    uu.ok("uu.some({ 0: 1, 1: 2 }, function(v,i){ ++someCount; return v > 3; }) == false",
+           uu.some({ 0: 1, 1: 2 }, function(v,i){ ++someCount; return v > 3; }), "==", false); // someCount += 2
+
+    uu.ok("uu.some([12, 5, 8, 130, 44], function(v) { ++someCount; return v < 10; }) は true を返す",
+           uu.some([12, 5, 8, 130, 44], function(v) { ++someCount; return v < 10; }), "is true"); // someCount += 2
+    uu.ok("uu.some([12, 54, 18, 130, 44], function(v) { ++someCount; return v < 10; }) は false を返す",
+           uu.some([12, 54, 18, 130, 44], function(v) { ++someCount; return v < 10; }), "is false"); // someCount += 5
+    uu.ok("上記の uu.some() のテストで実行したループ回数は 13",
+           someCount, "==", 13);
+
+    var eachCount = 0;
+
+    uu.ok("uu.each()");
+    uu.ok("(uu.each([1, 2], function(v,i){ ++eachCount; }), eachCount) == 2",
+           (uu.each([1, 2], function(v,i){ ++eachCount; }), eachCount), "==", 2); // eachCount += 2
+    uu.ok("(uu.each({ a: 1, b: 2 }, function(v,i){ ++eachCount; }), eachCount) == 4",
+           (uu.each({ a: 1, b: 2 }, function(v,i){ ++eachCount; }), eachCount), "==", 4); // eachCount += 2
+    uu.ok("(uu.each(3, function(v,i){ ++eachCount; }), eachCount) == 7",
+           (uu.each(3, function(v,i){ ++eachCount; }), eachCount), "==", 7); // eachCount += 3
+    uu.ok("上記の uu.each() のテストで実行したループ回数は 7",
+           eachCount, "==", 7);
+
+    var mapCount = 0;
+
+    uu.ok("uu.map()");
+    uu.ok("uu.map([1, 2], function(v,i){ ++mapCount; return i; })   ==   [0, 1]",
+           uu.map([1, 2], function(v,i){ ++mapCount; return i; }), "==", [0, 1]); // mapCount += 2
+    uu.ok("uu.map({ a: 1, b: 2 }, function(v,i){ ++mapCount; return i; })   ==   ['a', 'b']",
+           uu.map({ a: 1, b: 2 }, function(v,i){ ++mapCount; return i; }), "==", ['a', 'b']); // mapCount += 2
+    uu.ok("上記の uu.map() のテストで実行したループ回数は 4",
+           mapCount, "==", 4);
 
     uu.ok("uu.array.toHash()");
     uu.ok("['key', 'key2'] と ['1', '2'] から { key: '1', key2: '2' } を生成する",
@@ -1164,51 +1215,140 @@ uu.ready("window", function(uu) {
         uu.ok("uu.url.split('http://example.com/dir/file.ext') -> ['http://example.com/dir/', 'file.ext']",
                 ary, "==", ['http://example.com/dir/', 'file.ext']);
 
+    //  [1][up to dir]          [uu.url.normalize("http://example.com/api/../") -> "http://example.com/"
+    //  [2][current dir]        [uu.url.normalize("http://example.com/api/./")  -> "http://example.com/api/"
+    //  [3][through]            [uu.url.normalize("http://example.com/api/")    -> "http://example.com/api/"
+    //  [4][add tail slash]     [uu.url.normalize("http://example.com/api")     -> "http://example.com/api/"
+    //  [5][boundary condition] [uu.url.normalize("http://example.com/../")     -> "http://example.com/"
+    //  [6][rel path]           [uu.url.normalize("/example.com/api/../")       -> "/example.com/"
+    //  [7][rel path]           [uu.url.normalize("/example.com/../")           -> "/"
+    //  [8][boundary condition] [uu.url.normalize("/../")                       -> "/"
+    //  [9][boundary condition] [uu.url.normalize("/./")                        -> "/"
+    // [10][boundary condition] [uu.url.normalize("/")                          -> "/"
+    // [11][boundary condition] [uu.url.normalize("")                           -> "/"
 
-        uu.ok("uu.qs");
+        uu.ok("uu.url.normalize");
+        uu.ok("uu.url.normalize('http://example.com/api/../js/uupaa.js')   ==   'http://example.com/js/uupaa.js'",
+               uu.url.normalize('http://example.com/api/../js/uupaa.js'), "==", 'http://example.com/js/uupaa.js')
+        uu.ok("uu.url.normalize('http://example.com/api/../js/dir1/dir2/../.././')   ==   'http://example.com/js/'",
+               uu.url.normalize('http://example.com/api/../js/dir1/dir2/../.././'), "==", 'http://example.com/js/')
+        uu.ok("uu.url.normalize('http://example.com/api/../js/dir1/dir2/../.././../../')   ==   'http://example.com/'",
+               uu.url.normalize('http://example.com/api/../js/dir1/dir2/../.././../../'), "==", 'http://example.com/')
+        uu.ok("uu.url.normalize('http://example.com/api/../js/')   ==   'http://example.com/js/'",
+               uu.url.normalize('http://example.com/api/../js/'), "==", 'http://example.com/js/')
+        uu.ok("uu.url.normalize('http://example.com/api/./src/')   ==   'http://example.com/api/src/'",
+               uu.url.normalize('http://example.com/api/./src/'), "==", 'http://example.com/api/src/')
+        uu.ok("uu.url.normalize('http://example.com/api/')      ==   'http://example.com/api/'",
+               uu.url.normalize('http://example.com/api/'),    "==", 'http://example.com/api/')
+        uu.ok("uu.url.normalize('http://example.com/api')       ==   'http://example.com/api'",
+               uu.url.normalize('http://example.com/api'),     "==", 'http://example.com/api')
+        uu.ok("uu.url.normalize('http://example.com/../')       ==   'http://example.com/'",
+               uu.url.normalize('http://example.com/../'),     "==", 'http://example.com/')
+        uu.ok("uu.url.normalize('http://example.com/./')       ==   'http://example.com/'",
+               uu.url.normalize('http://example.com/./'),     "==", 'http://example.com/')
+        uu.ok("uu.url.normalize('http://example.com/.')       ==   'http://example.com/'",
+               uu.url.normalize('http://example.com/.'),     "==", 'http://example.com/')
+        uu.ok("uu.url.normalize('http://example.com/')       ==   'http://example.com/'",
+               uu.url.normalize('http://example.com/'),     "==", 'http://example.com/')
+        uu.ok("uu.url.normalize('http://example.com')       ==   'http://example.com/'",
+               uu.url.normalize('http://example.com'),     "==", 'http://example.com/')
+        uu.ok("uu.url.normalize('https://example.com/dir/../file.ext')       ==   'https://example.com/file.ext'",
+               uu.url.normalize('https://example.com/dir/../file.ext'),     "==", 'https://example.com/file.ext')
+        uu.ok("uu.url.normalize('file://example.com/dir/../file.ext')       ==   'file:///example.com/file.ext'",
+               uu.url.normalize('file://example.com/dir/../file.ext'),     "==", 'file:///example.com/file.ext')
+        uu.ok("uu.url.normalize('file:///c:/example.com/dir/../file.ext')       ==   'file:///c:/example.com/file.ext'",
+               uu.url.normalize('file:///c:/example.com/dir/../file.ext'),     "==", 'file:///c:/example.com/file.ext')
+        uu.ok("uu.url.normalize('smb://example.com/dir/../file.ext')       ==   'smb://example.com/file.ext'",
+               uu.url.normalize('smb://example.com/dir/../file.ext'),     "==", 'smb://example.com/file.ext')
+        uu.ok("uu.url.normalize('ws://example.com/dir/../file.ext')       ==   'ws://example.com/file.ext'",
+               uu.url.normalize('ws://example.com/dir/../file.ext'),     "==", 'ws://example.com/file.ext')
 
-        result = uu.qs("key=val;key2=val2");
-        uu.ok('uu.qs("key=val;key2=val2") -> { key: "val", key2: "val2" }',
+        uu.ok("uu.url.normalize('/example.com/api/../')   ==   '/example.com/'",
+               uu.url.normalize('/example.com/api/../'), "==", '/example.com/')
+        uu.ok("uu.url.normalize('/example.com/../')       ==   '/'",
+               uu.url.normalize('/example.com/../'),     "==", '/')
+        uu.ok("uu.url.normalize('/../')       ==   '/'",
+               uu.url.normalize('/../'),     "==", '/')
+        uu.ok("uu.url.normalize('/./')       ==   '/'",
+               uu.url.normalize('/./'),     "==", '/')
+        uu.ok("uu.url.normalize('/')       ==   '/'",
+               uu.url.normalize('/'),     "==", '/')
+        uu.ok("uu.url.normalize('')       ==   '/'",
+               uu.url.normalize(''),     "==", '/')
+        uu.ok("uu.url.normalize('..')       ==   '/'",
+               uu.url.normalize('..'),     "==", '/')
+        uu.ok("uu.url.normalize('.')       ==   '/'",
+               uu.url.normalize('.'),     "==", '/')
+        uu.ok("uu.url.normalize('example.com/api/./src/')   ==   'example.com/api/src/'",
+               uu.url.normalize('example.com/api/./src/'), "==", 'example.com/api/src/')
+        uu.ok("uu.url.normalize('example.com/api/./src')   ==   'example.com/api/src'",
+               uu.url.normalize('example.com/api/./src'), "==", 'example.com/api/src')
+        uu.ok("uu.url.normalize('example.com/api/../src')   ==   'example.com/src'",
+               uu.url.normalize('example.com/api/../src'), "==", 'example.com/src')
+        uu.ok("uu.url.normalize('example.com/api/../src/file.ext')       ==   'example.com/src/file.ext'",
+               uu.url.normalize('example.com/api/../src/file.ext'),     "==", 'example.com/src/file.ext')
+
+        uu.ok("uu.url.qs");
+
+        result = uu.url.qs("key=val;key2=val2");
+        uu.ok('uu.url.qs("key=val;key2=val2") -> { key: "val", key2: "val2" }',
                 result, "==", { key: "val", key2: "val2" });
-        result = uu.qs("key=val&key2=val2");
-        uu.ok('uu.qs("key=val&key2=val2") -> { key: "val", key2: "val2" }',
+        result = uu.url.qs("key=val&key2=val2");
+        uu.ok('uu.url.qs("key=val&key2=val2") -> { key: "val", key2: "val2" }',
                 result, "==", { key: "val", key2: "val2" });
 
 
-        result = uu.qs({ key: "val",     key2: "val2" }, null, ";");
-        uu.ok('uu.qs({ key: "val",     key2: "val2" }, null, ";") -> "key=val;key2=val2"',
+        result = uu.url.qs({ key: "val",     key2: "val2" }, null, ";");
+        uu.ok('uu.url.qs({ key: "val",     key2: "val2" }, null, ";") -> "key=val;key2=val2"',
                 result, "==", "key=val;key2=val2");
-        result = uu.qs({ key: "val",     key2: "val2" }, null, "&");
-        uu.ok('uu.qs({ key: "val",     key2: "val2" }, null, "&") -> "key=val&key2=val2"',
+        result = uu.url.qs({ key: "val",     key2: "val2" }, null, "&");
+        uu.ok('uu.url.qs({ key: "val",     key2: "val2" }, null, "&") -> "key=val&key2=val2"',
                 result, "==", "key=val&key2=val2");
 
 
-        result = uu.qs( "key=val",     { key2: "val2" }, ";");
-        uu.ok('uu.qs( "key=val",     { key2: "val2" }, ";") -> "key=val;key2=val2"',
+        result = uu.url.qs( "key=val",     { key2: "val2" }, ";");
+        uu.ok('uu.url.qs( "key=val",     { key2: "val2" }, ";") -> "key=val;key2=val2"',
                 result, "==", "key=val;key2=val2");
-        result = uu.qs( "key=val",     { key2: "val2" }, "&");
-        uu.ok('uu.qs( "key=val",     { key2: "val2" }, "&") -> "key=val&key2=val2"',
+        result = uu.url.qs( "key=val",     { key2: "val2" }, "&");
+        uu.ok('uu.url.qs( "key=val",     { key2: "val2" }, "&") -> "key=val&key2=val2"',
                 result, "==", "key=val&key2=val2");
 
 
-        result = uu.qs({ key: "val" }, { key2: "val2" }, ";");
-        uu.ok('uu.qs({ key: "val" }, { key2: "val2" }, ";") -> "key=val;key2=val2"',
+        result = uu.url.qs({ key: "val" }, { key2: "val2" }, ";");
+        uu.ok('uu.url.qs({ key: "val" }, { key2: "val2" }, ";") -> "key=val;key2=val2"',
                 result, "==", "key=val;key2=val2");
-        result = uu.qs({ key: "val" }, { key2: "val2" }, "&");
-        uu.ok('uu.qs({ key: "val" }, { key2: "val2" }, "&") -> "key=val&key2=val2"',
+        result = uu.url.qs({ key: "val" }, { key2: "val2" }, "&");
+        uu.ok('uu.url.qs({ key: "val" }, { key2: "val2" }, "&") -> "key=val&key2=val2"',
                 result, "==", "key=val&key2=val2");
+
+
+        // --- Array support ---
+            // ";"
+        result = uu.url.qs({ key1: "a", key2: "b", key3: [0, 1] }, null, ";");
+        uu.ok('uu.url.qs({ key1: "a", key2: "b", key3: [0, 1] }) -> "key1=a;key2=b;key3=0;key3=1"',
+                result, "==", "key1=a;key2=b;key3=0;key3=1");
+
+            // "&"
+        result = uu.url.qs({ key1: "a", key2: "b", key3: [0, 1] }, null, "&");
+        uu.ok('uu.url.qs({ key1: "a", key2: "b", key3: [0, 1] }) -> "key1=a&key2=b&key3=0&key3=1"',
+                result, "==", "key1=a&key2=b&key3=0&key3=1");
+
+
+        result = uu.url.qs("key1=a;key2=b;key3=0;key3=1");
+        uu.ok('uu.url.qs("key1=a;key2=b;key3=0;key3=1") -> { key1: "a", key2: "b", key3: ["0", "1"] }',
+                result, "==", { key1: "a", key2: "b", key3: ["0", "1"] });
 
 
         uu.ok("boundary");
 
 
         url = 'http://example.com:8080/dir/file.ext?key=val&key2=val2#fragment';
-        uu.ok("uu.qs('http://example.com:8080/dir/file.ext?key=val&key2=val2#fragment') は URL から QueryString を取り出しパース可能",
-                uu.qs(url), "==", { key: "val", key2: "val2" });
+        uu.ok("uu.url.qs('http://example.com:8080/dir/file.ext?key=val&key2=val2#fragment') は URL から QueryString を取り出しパース可能",
+                uu.url.qs(url), "==", { key: "val", key2: "val2" });
 
 
-        uu.ok("uu.qs('key=val&key2=val2#frag') はパースに失敗する",
-                uu.qs('key=val&key2=val2#frag'), "!=", { key: "val", key2: "val2" });
+        uu.ok("uu.url.qs('key=val&key2=val2#frag') はパースに失敗する",
+                uu.url.qs('key=val&key2=val2#frag'), "!=", { key: "val", key2: "val2" });
     })();
 
     uu.ok();
@@ -1273,43 +1413,43 @@ uu.ready("window", function() {
 
     node = uu.query("#selectedTestGroupSize1>select:nth-child(1)");
     uu.ok('<select size="1"><option selected></select> + 実在する値(value3)を指定する -> "value3" が選択される',
-        uu.value(uu.value(node[0], "value3")), "==", "value3");
+        uu.form.value(uu.form.value(node[0], "value3")), "==", "value3");
 
 
     node = uu.query("#selectedTestGroupSize1>select:nth-child(2)");
     uu.ok('<select size="1"><option></select> + 実在する値(value3)を指定する -> "value3" が選択される',
-        uu.value(uu.value(node[0], "value3")), "==", "value3");
+        uu.form.value(uu.form.value(node[0], "value3")), "==", "value3");
 
 
     node = uu.query("#selectedTestGroupSize1>select:nth-child(3)");
     uu.ok('<select size="1"><option selected></select> + 実在しない値(hoge)を指定する -> 初期選択状態になり、上から二番目(value2)が選択される',
-        uu.value(uu.value(node[0], "hoge")), "==", "value2");
+        uu.form.value(uu.form.value(node[0], "hoge")), "==", "value2");
 
 
     node = uu.query("#selectedTestGroupSize1>select:nth-child(4)");
     uu.ok('<select size="1"><option></select> + 実在しない値(hoge)を指定する -> 初期選択状態になり一番上が選択される',
-        uu.value(uu.value(node[0], "hoge")), "==", "value1");
+        uu.form.value(uu.form.value(node[0], "hoge")), "==", "value1");
 
     uu.ok('<select size="3"> phase');
 
     node = uu.query("#selectedTestGroupSize3>select:nth-child(1)");
     uu.ok('<select size="3"><option selected></select> + 実在する値(value3)を指定する -> "value3" が選択される',
-        uu.value(uu.value(node[0], "value3")), "==", "value3");
+        uu.form.value(uu.form.value(node[0], "value3")), "==", "value3");
 
 
     node = uu.query("#selectedTestGroupSize3>select:nth-child(2)");
     uu.ok('<select size="3"><option></select> + 実在する値(value3)を指定する -> "value3" が選択される',
-        uu.value(uu.value(node[0], "value3")), "==", "value3");
+        uu.form.value(uu.form.value(node[0], "value3")), "==", "value3");
 
 
     node = uu.query("#selectedTestGroupSize3>select:nth-child(3)");
     uu.ok('<select size="3"><option selected></select> + 実在しない値(hoge)を指定する -> 初期選択状態になり、上から二番目(value2)が選択される',
-        uu.value(uu.value(node[0], "hoge")), "==", "value2");
+        uu.form.value(uu.form.value(node[0], "hoge")), "==", "value2");
 
 
     node = uu.query("#selectedTestGroupSize3>select:nth-child(4)");
     uu.ok('<select size="3"><option></select> + 実在しない値(hoge)を指定する -> 未選択状態になる',
-        uu.value(uu.value(node[0], "hoge")), "==", "");
+        uu.form.value(uu.form.value(node[0], "hoge")), "==", "");
 
     uu.ok();
 });
@@ -1382,44 +1522,44 @@ uu.ready("window", function(uu) {
 
     node = uu.query("#multipleSelectedTestGroupSize1>select:nth-child(1)");
     uu.ok('<select multiple size="1"><option selected></select> + 実在する値(value3)を指定する -> ["value3"] が選択される',
-        uu.value(uu.value(node[0], "value3")), "==", ["value3"]);
+        uu.form.value(uu.form.value(node[0], "value3")), "==", ["value3"]);
 
 
     node = uu.query("#multipleSelectedTestGroupSize1>select:nth-child(2)");
     uu.ok('<select multiple size="1"><option></select> + 実在する値(value3)を指定する -> ["value3"] が選択される',
-        uu.value(uu.value(node[0], "value3")), "==", ["value3"]);
+        uu.form.value(uu.form.value(node[0], "value3")), "==", ["value3"]);
 
 
     node = uu.query("#multipleSelectedTestGroupSize1>select:nth-child(3)");
     uu.ok('<select multiple size="1"><option selected></select> + 実在しない値(hoge)を指定する -> 未選択状態になる',
-          uu.value(uu.value(node[0], "hoge")), "==", []);
+          uu.form.value(uu.form.value(node[0], "hoge")), "==", []);
 
 
     node = uu.query("#multipleSelectedTestGroupSize1>select:nth-child(4)");
     uu.ok('<select multiple size="1"><option></select> + 実在しない値(hoge)を指定する -> 未選択状態になる',
-          uu.value(uu.value(node[0], "hoge")), "==", []);
+          uu.form.value(uu.form.value(node[0], "hoge")), "==", []);
 
 
     uu.ok('<select multiple size="4"> phase');
 
     node = uu.query("#multipleSelectedTestGroupSize3>select:nth-child(1)");
     uu.ok('<select multiple size="4"><option selected></select> + 実在する値(value3)を指定する -> ["value3"] が選択される',
-        uu.value(uu.value(node[0], "value3")), "==", ["value3"]);
+        uu.form.value(uu.form.value(node[0], "value3")), "==", ["value3"]);
 
 
     node = uu.query("#multipleSelectedTestGroupSize3>select:nth-child(2)");
     uu.ok('<select multiple size="4"><option></select> + 実在する値(value3)を指定する -> ["value3"] が選択される',
-        uu.value(uu.value(node[0], "value3")), "==", ["value3"]);
+        uu.form.value(uu.form.value(node[0], "value3")), "==", ["value3"]);
 
 
     node = uu.query("#multipleSelectedTestGroupSize3>select:nth-child(3)");
     uu.ok('<select multiple size="4"><option selected></select> + 実在しない値(hoge)を指定する -> 未選択状態になる',
-        uu.value(uu.value(node[0], "hoge")), "==", []);
+        uu.form.value(uu.form.value(node[0], "hoge")), "==", []);
 
 
     node = uu.query("#multipleSelectedTestGroupSize3>select:nth-child(4)");
     uu.ok('<select multiple size="4"><option></select> + 実在しない値(hoge)を指定する -> 未選択状態になる',
-        uu.value(uu.value(node[0], "hoge")), "==", []);
+        uu.form.value(uu.form.value(node[0], "hoge")), "==", []);
 });
 </script>
 <script>

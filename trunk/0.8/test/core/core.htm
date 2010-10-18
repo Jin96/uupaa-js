@@ -1280,50 +1280,67 @@ uu.ready("window", function(uu) {
         uu.ok("uu.url.normalize('example.com/api/../src/file.ext')       ==   'example.com/src/file.ext'",
                uu.url.normalize('example.com/api/../src/file.ext'),     "==", 'example.com/src/file.ext')
 
-        uu.ok("uu.qs");
+        uu.ok("uu.url.qs");
 
-        result = uu.qs("key=val;key2=val2");
-        uu.ok('uu.qs("key=val;key2=val2") -> { key: "val", key2: "val2" }',
+        result = uu.url.qs("key=val;key2=val2");
+        uu.ok('uu.url.qs("key=val;key2=val2") -> { key: "val", key2: "val2" }',
                 result, "==", { key: "val", key2: "val2" });
-        result = uu.qs("key=val&key2=val2");
-        uu.ok('uu.qs("key=val&key2=val2") -> { key: "val", key2: "val2" }',
+        result = uu.url.qs("key=val&key2=val2");
+        uu.ok('uu.url.qs("key=val&key2=val2") -> { key: "val", key2: "val2" }',
                 result, "==", { key: "val", key2: "val2" });
 
 
-        result = uu.qs({ key: "val",     key2: "val2" }, null, ";");
-        uu.ok('uu.qs({ key: "val",     key2: "val2" }, null, ";") -> "key=val;key2=val2"',
+        result = uu.url.qs({ key: "val",     key2: "val2" }, null, ";");
+        uu.ok('uu.url.qs({ key: "val",     key2: "val2" }, null, ";") -> "key=val;key2=val2"',
                 result, "==", "key=val;key2=val2");
-        result = uu.qs({ key: "val",     key2: "val2" }, null, "&");
-        uu.ok('uu.qs({ key: "val",     key2: "val2" }, null, "&") -> "key=val&key2=val2"',
+        result = uu.url.qs({ key: "val",     key2: "val2" }, null, "&");
+        uu.ok('uu.url.qs({ key: "val",     key2: "val2" }, null, "&") -> "key=val&key2=val2"',
                 result, "==", "key=val&key2=val2");
 
 
-        result = uu.qs( "key=val",     { key2: "val2" }, ";");
-        uu.ok('uu.qs( "key=val",     { key2: "val2" }, ";") -> "key=val;key2=val2"',
+        result = uu.url.qs( "key=val",     { key2: "val2" }, ";");
+        uu.ok('uu.url.qs( "key=val",     { key2: "val2" }, ";") -> "key=val;key2=val2"',
                 result, "==", "key=val;key2=val2");
-        result = uu.qs( "key=val",     { key2: "val2" }, "&");
-        uu.ok('uu.qs( "key=val",     { key2: "val2" }, "&") -> "key=val&key2=val2"',
+        result = uu.url.qs( "key=val",     { key2: "val2" }, "&");
+        uu.ok('uu.url.qs( "key=val",     { key2: "val2" }, "&") -> "key=val&key2=val2"',
                 result, "==", "key=val&key2=val2");
 
 
-        result = uu.qs({ key: "val" }, { key2: "val2" }, ";");
-        uu.ok('uu.qs({ key: "val" }, { key2: "val2" }, ";") -> "key=val;key2=val2"',
+        result = uu.url.qs({ key: "val" }, { key2: "val2" }, ";");
+        uu.ok('uu.url.qs({ key: "val" }, { key2: "val2" }, ";") -> "key=val;key2=val2"',
                 result, "==", "key=val;key2=val2");
-        result = uu.qs({ key: "val" }, { key2: "val2" }, "&");
-        uu.ok('uu.qs({ key: "val" }, { key2: "val2" }, "&") -> "key=val&key2=val2"',
+        result = uu.url.qs({ key: "val" }, { key2: "val2" }, "&");
+        uu.ok('uu.url.qs({ key: "val" }, { key2: "val2" }, "&") -> "key=val&key2=val2"',
                 result, "==", "key=val&key2=val2");
+
+
+        // --- Array support ---
+            // ";"
+        result = uu.url.qs({ key1: "a", key2: "b", key3: [0, 1] }, null, ";");
+        uu.ok('uu.url.qs({ key1: "a", key2: "b", key3: [0, 1] }) -> "key1=a;key2=b;key3=0;key3=1"',
+                result, "==", "key1=a;key2=b;key3=0;key3=1");
+
+            // "&"
+        result = uu.url.qs({ key1: "a", key2: "b", key3: [0, 1] }, null, "&");
+        uu.ok('uu.url.qs({ key1: "a", key2: "b", key3: [0, 1] }) -> "key1=a&key2=b&key3=0&key3=1"',
+                result, "==", "key1=a&key2=b&key3=0&key3=1");
+
+
+        result = uu.url.qs("key1=a;key2=b;key3=0;key3=1");
+        uu.ok('uu.url.qs("key1=a;key2=b;key3=0;key3=1") -> { key1: "a", key2: "b", key3: ["0", "1"] }',
+                result, "==", { key1: "a", key2: "b", key3: ["0", "1"] });
 
 
         uu.ok("boundary");
 
 
         url = 'http://example.com:8080/dir/file.ext?key=val&key2=val2#fragment';
-        uu.ok("uu.qs('http://example.com:8080/dir/file.ext?key=val&key2=val2#fragment') は URL から QueryString を取り出しパース可能",
-                uu.qs(url), "==", { key: "val", key2: "val2" });
+        uu.ok("uu.url.qs('http://example.com:8080/dir/file.ext?key=val&key2=val2#fragment') は URL から QueryString を取り出しパース可能",
+                uu.url.qs(url), "==", { key: "val", key2: "val2" });
 
 
-        uu.ok("uu.qs('key=val&key2=val2#frag') はパースに失敗する",
-                uu.qs('key=val&key2=val2#frag'), "!=", { key: "val", key2: "val2" });
+        uu.ok("uu.url.qs('key=val&key2=val2#frag') はパースに失敗する",
+                uu.url.qs('key=val&key2=val2#frag'), "!=", { key: "val", key2: "val2" });
     })();
 
     uu.ok();
@@ -1388,43 +1405,43 @@ uu.ready("window", function() {
 
     node = uu.query("#selectedTestGroupSize1>select:nth-child(1)");
     uu.ok('<select size="1"><option selected></select> + 実在する値(value3)を指定する -> "value3" が選択される',
-        uu.value(uu.value(node[0], "value3")), "==", "value3");
+        uu.form.value(uu.form.value(node[0], "value3")), "==", "value3");
 
 
     node = uu.query("#selectedTestGroupSize1>select:nth-child(2)");
     uu.ok('<select size="1"><option></select> + 実在する値(value3)を指定する -> "value3" が選択される',
-        uu.value(uu.value(node[0], "value3")), "==", "value3");
+        uu.form.value(uu.form.value(node[0], "value3")), "==", "value3");
 
 
     node = uu.query("#selectedTestGroupSize1>select:nth-child(3)");
     uu.ok('<select size="1"><option selected></select> + 実在しない値(hoge)を指定する -> 初期選択状態になり、上から二番目(value2)が選択される',
-        uu.value(uu.value(node[0], "hoge")), "==", "value2");
+        uu.form.value(uu.form.value(node[0], "hoge")), "==", "value2");
 
 
     node = uu.query("#selectedTestGroupSize1>select:nth-child(4)");
     uu.ok('<select size="1"><option></select> + 実在しない値(hoge)を指定する -> 初期選択状態になり一番上が選択される',
-        uu.value(uu.value(node[0], "hoge")), "==", "value1");
+        uu.form.value(uu.form.value(node[0], "hoge")), "==", "value1");
 
     uu.ok('<select size="3"> phase');
 
     node = uu.query("#selectedTestGroupSize3>select:nth-child(1)");
     uu.ok('<select size="3"><option selected></select> + 実在する値(value3)を指定する -> "value3" が選択される',
-        uu.value(uu.value(node[0], "value3")), "==", "value3");
+        uu.form.value(uu.form.value(node[0], "value3")), "==", "value3");
 
 
     node = uu.query("#selectedTestGroupSize3>select:nth-child(2)");
     uu.ok('<select size="3"><option></select> + 実在する値(value3)を指定する -> "value3" が選択される',
-        uu.value(uu.value(node[0], "value3")), "==", "value3");
+        uu.form.value(uu.form.value(node[0], "value3")), "==", "value3");
 
 
     node = uu.query("#selectedTestGroupSize3>select:nth-child(3)");
     uu.ok('<select size="3"><option selected></select> + 実在しない値(hoge)を指定する -> 初期選択状態になり、上から二番目(value2)が選択される',
-        uu.value(uu.value(node[0], "hoge")), "==", "value2");
+        uu.form.value(uu.form.value(node[0], "hoge")), "==", "value2");
 
 
     node = uu.query("#selectedTestGroupSize3>select:nth-child(4)");
     uu.ok('<select size="3"><option></select> + 実在しない値(hoge)を指定する -> 未選択状態になる',
-        uu.value(uu.value(node[0], "hoge")), "==", "");
+        uu.form.value(uu.form.value(node[0], "hoge")), "==", "");
 
     uu.ok();
 });
@@ -1497,44 +1514,44 @@ uu.ready("window", function(uu) {
 
     node = uu.query("#multipleSelectedTestGroupSize1>select:nth-child(1)");
     uu.ok('<select multiple size="1"><option selected></select> + 実在する値(value3)を指定する -> ["value3"] が選択される',
-        uu.value(uu.value(node[0], "value3")), "==", ["value3"]);
+        uu.form.value(uu.form.value(node[0], "value3")), "==", ["value3"]);
 
 
     node = uu.query("#multipleSelectedTestGroupSize1>select:nth-child(2)");
     uu.ok('<select multiple size="1"><option></select> + 実在する値(value3)を指定する -> ["value3"] が選択される',
-        uu.value(uu.value(node[0], "value3")), "==", ["value3"]);
+        uu.form.value(uu.form.value(node[0], "value3")), "==", ["value3"]);
 
 
     node = uu.query("#multipleSelectedTestGroupSize1>select:nth-child(3)");
     uu.ok('<select multiple size="1"><option selected></select> + 実在しない値(hoge)を指定する -> 未選択状態になる',
-          uu.value(uu.value(node[0], "hoge")), "==", []);
+          uu.form.value(uu.form.value(node[0], "hoge")), "==", []);
 
 
     node = uu.query("#multipleSelectedTestGroupSize1>select:nth-child(4)");
     uu.ok('<select multiple size="1"><option></select> + 実在しない値(hoge)を指定する -> 未選択状態になる',
-          uu.value(uu.value(node[0], "hoge")), "==", []);
+          uu.form.value(uu.form.value(node[0], "hoge")), "==", []);
 
 
     uu.ok('<select multiple size="4"> phase');
 
     node = uu.query("#multipleSelectedTestGroupSize3>select:nth-child(1)");
     uu.ok('<select multiple size="4"><option selected></select> + 実在する値(value3)を指定する -> ["value3"] が選択される',
-        uu.value(uu.value(node[0], "value3")), "==", ["value3"]);
+        uu.form.value(uu.form.value(node[0], "value3")), "==", ["value3"]);
 
 
     node = uu.query("#multipleSelectedTestGroupSize3>select:nth-child(2)");
     uu.ok('<select multiple size="4"><option></select> + 実在する値(value3)を指定する -> ["value3"] が選択される',
-        uu.value(uu.value(node[0], "value3")), "==", ["value3"]);
+        uu.form.value(uu.form.value(node[0], "value3")), "==", ["value3"]);
 
 
     node = uu.query("#multipleSelectedTestGroupSize3>select:nth-child(3)");
     uu.ok('<select multiple size="4"><option selected></select> + 実在しない値(hoge)を指定する -> 未選択状態になる',
-        uu.value(uu.value(node[0], "hoge")), "==", []);
+        uu.form.value(uu.form.value(node[0], "hoge")), "==", []);
 
 
     node = uu.query("#multipleSelectedTestGroupSize3>select:nth-child(4)");
     uu.ok('<select multiple size="4"><option></select> + 実在しない値(hoge)を指定する -> 未選択状態になる',
-        uu.value(uu.value(node[0], "hoge")), "==", []);
+        uu.form.value(uu.form.value(node[0], "hoge")), "==", []);
 });
 </script>
 <script>
