@@ -10861,7 +10861,9 @@ uu.ui.bind("Slider", { build:       SliderBuild,
 //}@uislider
 
 //{@image
+//{@preload
 uu.config.ui.disable || uu.image(uu.config.ui.img); // pre-load
+//}@preload
 //}@image
 
 uu.config.ui.disable || uu.ready(function(uu) {
