@@ -32,9 +32,9 @@ uu.ready(function(uu) {
 function run() {
     var nodeArray = uu.klass("box");
 
-    var junc = uu.junction(2, 3, function(values, ok) {
-        uu.log("Junction @", ok);
-        uu.log(values);
+    var junc = uu.junction(2, 3, function(resp) {
+        uu.log("Junction @", resp.ok);
+        uu.log(resp.rv);
     });
 
     uu.fx(nodeArray[0], 500, { w: 400, after: function() { junc.ok({id:1}); } });

@@ -533,7 +533,11 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
     }),
     bind:           uuevent,        // uu.bind() as uu.event()
     unbind:         uueventunbind,  // uu.unbind() as uu.event.unbind()
-    junction:       uujunction,     // uu.junction(race:Number, items:Number, callback:CallbackFunction):Junction
+    junction:       uujunction,     // uu.junction(race:Number, items:Number, callback:CallbackFunction = void):Junction
+                                    //  [1][some  1/3] uu.junction(1, 3, callback).ng(1).ng(2).ok(3)      -> callback({ rv: [1, 2, 3], ok: true })
+                                    //  [2][some  2/3] uu.junction(2, 3, callback).ng(1).ng(2).ok(3)      -> callback({ rv: [1, 2, 3], ok: false })
+                                    //  [3][some  2/3] uu.junction(2, 3, callback).ok(1).ng(2).ok( )      -> callback({ rv: [1, 2, undefined], ok: true })
+                                    //  [4][every 3/3] uu.junction(3, 3, callback).ok(1).ok(2).ok({id:3}) -> callback({ rv: [1, 2, {id:3}], ok: true })
     // --- LIVE EVENT ---
 //{@live
     live:     uumix(uulive, {       // uu.live(expr:CSSSelectorExpressionString, eventTypeEx:EventTypeExString,
@@ -793,9 +797,9 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
 //}@color
     // --- IMAGE ---
 //{@image
-    image:    uumix(uuimage, {      // uu.image(url:URLString/URLStringArray, callback:CallbackFunction)
-                                    //  [1][load image]  uu.image(url,        function(images, ok) { ... })
-                                    //  [2][load images] uu.image([url, ...], function(images, ok) { ... })
+    image:    uumix(uuimage, {      // uu.image(url:URLString/URLStringArray, callback:CallbackFunction = void)
+                                    //  [1][load image]  uu.image(url,        function(response) { ... })
+                                    //  [2][load images] uu.image([url, ...], function(response) { ... })
         size:       uuimagesize     // uu.image.size(node:HTMLImageElement):Hash - { w, h }
     }),
 //}@image
@@ -4884,14 +4888,14 @@ function uuunlive(expr,          // @param CSSSelectorExpressionString(= void 0)
 // uu.junction -
 function uujunction(race,       // @param Number: race conditions
                     items,      // @param Number: items
-                    callback) { // @param CallbackFunction: callback(values, ok)
-                                //    values - Array: [value, ...]
-                                //    ok     - Boolean: true is pass
+                    callback) { // @param CallbackFunction(= void): callback(response)
+                                //    response.rv - Array: result value. [value, ...]
+                                //    response.ok - Boolean: true is pass
                                 // @throws Error("JUNCTION...")
-    //  [1][some  1/3] uu.junction(1, 3, callback).ng(1).ng(2).ok(3)      -> callback([1, 2, 3], true)
-    //  [2][some  2/3] uu.junction(2, 3, callback).ng(1).ng(2).ok(3)      -> callback([1, 2, 3], false)
-    //  [3][some  2/3] uu.junction(2, 3, callback).ok(1).ng(2).ok( )      -> callback([1, 2, undefined], true)
-    //  [4][every 3/3] uu.junction(3, 3, callback).ok(1).ok(2).ok({id:3}) -> callback([1, 2, {id:3}], true)
+    //  [1][some  1/3] uu.junction(1, 3, callback).ng(1).ng(2).ok(3)      -> callback({ rv: [1, 2, 3], ok: true })
+    //  [2][some  2/3] uu.junction(2, 3, callback).ng(1).ng(2).ok(3)      -> callback({ rv: [1, 2, 3], ok: false })
+    //  [3][some  2/3] uu.junction(2, 3, callback).ok(1).ng(2).ok( )      -> callback({ rv: [1, 2, undefined], ok: true })
+    //  [4][every 3/3] uu.junction(3, 3, callback).ok(1).ok(2).ok({id:3}) -> callback({ rv: [1, 2, {id:3}], ok: true })
 
     return new uuClass["Junction"](race, items, callback);
 }
@@ -4928,7 +4932,7 @@ function JunctionJudge() {
             db.ng + db.race >  db.items || // 2 + 3 >  4
             db.ok + db.ng   >= db.items) { // 2 + 2 >= 4
 
-            db.callback(db.values, db.ok >= db.race); // callback(values, ok)
+            db.callback({ rv: db.values, ok: db.ok >= db.race }); // callback({ rv: [], ok: bool })
             db.callback = null;
         }
     }
@@ -7532,15 +7536,15 @@ uucoloradd("000000black,888888gray,ccccccsilver,ffffffwhite,ff0000red,ffff00" +
 // uu.image - image loader
 //{@image
 function uuimage(url,        // @param URLString/URLStringArray:
-                 callback) { // @param CallbackFunction: callback(images, ok)
-                             //     images - NodeArray: [<img>, ...]
-                             //     ok     - Boolean: true is success
-    //  [1][load image]  uu.image(url,        function(images, ok) { ... })
-    //  [2][load images] uu.image([url, ...], function(images, ok) { ... })
+                 callback) { // @param CallbackFunction(= void): callback(response)
+                             //     rv - NodeArray: result value. [<img>, ...]
+                             //     ok - Boolean: true is success
+    //  [1][load image]  uu.image(url,        function(response) { ... })
+    //  [2][load images] uu.image([url, ...], function(response) { ... })
 
     url = uuarray(url);
     var iz = url.length,
-        junc = uujunction(iz, iz, callback); // callback(images, ok)
+        junc = uujunction(iz, iz, callback); // callback(response)
 
     uueach(url, function(v) {
         imageLoader(v, function(img, ok) {
