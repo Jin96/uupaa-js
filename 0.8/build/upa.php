@@ -31,6 +31,7 @@ $skipCore    = false;
 $inputFiles  = array($libraryCore);
 $loadedFiles = array(); // avoid duplicate load
 $loadedFileSize = 0;
+$forceOutputFileName = "";
 
 // load source
 function loadFiles($inputFiles) { // @param Array:
@@ -129,7 +130,7 @@ function pathNormalize($path) { // @param FilePathString:  "..\dir/file.ext"
 
 function minify() {
     global $compiler, $skipCore, $verbose, $catfood, $mobile, $libraryCore,
-           $loadedFileSize, $perfPoint, $outputDir;
+           $loadedFileSize, $perfPoint, $outputDir, $forceOutputFileName;
 
     $command = '';
 
@@ -139,6 +140,9 @@ function minify() {
         $outfile .= $skipCore ? '.mb2.js' : '.mb.js';
     } else {
         $outfile .= '.js';
+    }
+    if ($forceOutputFileName) {
+        $outfile = $forceOutputFileName;
     }
 
     switch ($compiler) {
@@ -202,6 +206,7 @@ array_shift($argv);
 
 while ($v = array_shift($argv)) {
     switch ($v) {
+    case "-o":      $forceOutputFileName = array_shift($argv); break;
     case "-g":      $compiler = "g"; break;
     case "-G":      $compiler = "G"; break;
     case "-y":      $compiler = "y"; break;
