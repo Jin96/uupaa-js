@@ -26,6 +26,8 @@
 //      TouchMediaQuery(  @media all and (-moz-touch-enabled) { ... }  )
 //      [Gecko]event.streamId <---> [iOS]event.touches[finger].identifier
 //             event.clientX  <-!->      event.touches[finger].pageX
+//      <textarea resize="none">
+//          none | both | horizontal | vertical | inherit
 //
 // Opera 10.70
 //      <g buffered-rendering="static">
@@ -88,7 +90,10 @@ uu || (function(win, doc, root, // root as <html>
                 toString, isArray, toArray,
                 nodeData, nodeSet,
                 setTimeout, setInterval, XMLHttpRequest, HTMLAudioElement,
-                parseInt, parseFloat, getComputedStyle, JSON, Node) { // quick + minify
+//{@mb
+                Node,
+//}@mb
+                parseInt, parseFloat, getComputedStyle, JSON) { // quick + minify
 
 // --- FALLBACK ---
 isArray || (isArray = Array.isArray = fallbackIsArray); // [IE6][IE7][IE8][ES3 Based Browsers]
@@ -109,7 +114,9 @@ win.console || (win.console = {
 
 // --- MINIFY (http://d.hatena.ne.jp/uupaa/20100730) ---
 var _addEventListener = "addEventListener",
+//{@mb
     _removeAttribute = "removeAttribute",
+//}@mb
     _hasOwnProperty = "hasOwnProperty",
     _getAttribute = "getAttribute",
     _setAttribute = "setAttribute",
@@ -154,7 +161,9 @@ var _addEventListener = "addEventListener",
 //}@codec
     _nodeiddb = {},                 // { nodeid: node, ... }
     _nodeidnum = 0,                 // nodeid counter
+//{@mb
     _tokenCache = {},               // { css-selector-expression: token, ... } for uu.query
+//}@mb
     _guidCounter = 0,               // uu.number
 //{@storage
     _storage = {
@@ -196,7 +205,7 @@ uumix(uuconfig, win.uuconfig || {}, {
     cssDir:         _baseDir + "css/",  // uu.config.cssDir  - String: css directory. "http://example.com/css/"
     imgDir:         _baseDir + "img/",  // uu.config.imgDir  - String: image directory. "http://example.com/img/"
     swfDir:         _baseDir + "swf/",  // uu.config.swfDir  - String: flash directory. "http://example.com/swf/"
-    qsJoint:        ";",
+    qsJoint:        "&",
     storage:        {},
     canvas:         {},
     audio:          {},
@@ -623,19 +632,48 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //  [3][get text]                  uu.text(node)            -> "text"
                                     //  [4][set text]                  uu.text(node, "text")    -> node
                                     //  [5][set formated text]         uu.text(node, "@", "a")  -> node
-    // --- FORM.VALUE ---
+    // --- FORM ---
 //{@form
-    value:          uuvalue,        // uu.value(node:Node, value:String = void):StringArray/Node
-                                    //  [1][get value]            uu.value(node) -> value or [value, ...]
-                                    //  [2][set value]            uu.value(node, "value") -> node
-                                    //  [3][get <textarea>]       uu.value(node) -> "innerText"
-                                    //  [4][get <button>]         uu.value(node) -> "<button value>"
-                                    //  [5][get <option>]         uu.value(node) -> "<option value>" or
+    form:     uumix(uuform, {
+        value:      uuformvalue,    // uu.form.value(node:Node, value:String = void):StringArray/Node
+                                    //  [1][get value]            uu.form.value(node) -> value or [value, ...]
+                                    //  [2][set value]            uu.form.value(node, "value") -> node
+                                    //  [3][get <textarea>]       uu.form.value(node) -> "innerText"
+                                    //  [4][get <button>]         uu.form.value(node) -> "<button value>"
+                                    //  [5][get <option>]         uu.form.value(node) -> "<option value>" or
                                     //                                              "<option>value</option>"
-                                    //  [6][get <selet>]          uu.value(node) -> selected option value
-                                    //  [7][get <selet multiple>] uu.value(node) -> ["value", ...]
-                                    //  [8][get <input checkbox>] uu.value(node) -> ["value", ...]
-                                    //  [9][get <input radio>]    uu.value(node) -> "value"
+                                    //  [6][get <selet>]          uu.form.value(node) -> selected option value
+                                    //  [7][get <selet multiple>] uu.form.value(node) -> ["value", ...]
+                                    //  [8][get <input checkbox>] uu.form.value(node) -> ["value", ...]
+                                    //  [9][get <input radio>]    uu.form.value(node) -> "value"
+        serialize:  uuformserialize // uu.form.serialize(node:Node, toHash:Boolean = false, joint:String = uu.config.qsJoint):URLEncodedQueryString/Hash
+                                    //
+                                    //  <form>
+                                    //    <div>
+                                    //      <input name="name.1" value="a" />                   <!-- name has dot -->
+                                    //      <input name="name2" value="{{hiragana-A}}" />       <!-- value is CJK char -->
+                                    //      <input type="checkbox" name="name3" value="1" />    <!-- single name -->
+                                    //      <input type="checkbox" name="name4[]" value="1" />  <!-- name has [] -->
+                                    //      <input type="checkbox" name="name4[]" value="2" />  <!-- name has [] -->
+                                    //      <textarea name="textareaname" id="textareaid">
+                                    //          hello
+                                    //          world
+                                    //      </textarea>
+                                    //      <input type="image" name="submit" value="submit" /> <!-- IE has bug -->
+                                    //      <input type="submit" name="submit" value="sumbit" />
+                                    //    </div>
+                                    //  </form>
+                                    //
+                                    //  [1][serialized] uu.form.serialize(<form>)
+                                    //          -> "name.1=a&name2=%E3%81%82&name3=1&name4[]=1&name4[]=2"
+                                    //             "&textareaname=\n%20...%20hello\n%20...%20world\n"
+                                    //             "&submit=submit&submit_x=0&submit_y=0"
+                                    //  [2][serialized] uu.form.serialize(<form>, { urlencode: false, hash: true })
+                                    //          -> { "name.1": "a", name2: "{{hiragana-A}}",
+                                    //               name3: "1", "name4[]": ["1", "2"]
+                                    //               textareaname: "\n    hello\n    world\n",
+                                    //               submit: "submit", "submit.x": "0", "submit.y": "0" }
+    }),
 //}@form
     // --- JSON ---
     json:     uumix(uujson, {       // uu.json(source:Mix, alt:Boolean = false):JSONString
@@ -808,6 +846,12 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //  [1][current abs-dir] uu.url() -> "http://example.com/index.htm"
                                     //  [2][parse url]       uu.url("http://example.com/dir/file.ext") -> { schme: "http", ... }
                                     //  [3][build url]       uu.url({ schme: "http", ... }) -> "http://example.com/..."
+        qs:         uuurlqs,        // uu.url.qs(queryString:QueryString/Hash, add:Hash = void, joint:String = uu.config.qsJoint):QueryString/Hash
+                                    //  [1][parse] uu.url.qs("key1=a;key2=b;key3=0;key3=1")    -> { key1: "a", key2: "b", key3: ["0", "1"] }
+                                    //  [2][build] uu.url.qs({ key1: "a", key2: "b",
+                                    //                         key3: ["0", "1"] })             -> "key1=a;key2=b;key3=0;key3=1"
+                                    //  [3][add]   uu.url.qs( "key=val",     { key2: "val2" }) -> "key=val;key2=val2"
+                                    //  [4][add]   uu.url.qs({ key: "val" }, { key2: "val2" }) -> "key=val;key2=val2"
         abs:        uuurlabs,       // uu.url.abs(url:URLString = ".", currentDir = ""):URLString
                                     //  [1][get abs-url]   uu.url.abs("./index.htm") -> "http://example.com/index.htm"
         dir:        uuurldir,       // uu.url.dir(url:URLString/PathString):String
@@ -819,23 +863,18 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
         split:      uuurlsplit,     // uu.url.split(url:URLString/PathString):Array+Hash - { dir, file }
                                     //  [1][split dir | file.ext] uu.url.split("http://example.com/dir/file.ext") -> ["http://example.com/dir/", "file.ext"]
         normalize:  uuurlnormalize  // uu.url.normalize(url:String):String
-                                    //  [1][up to dir]          [uu.url.normalize("http://example.com/api/../") -> "http://example.com/"
-                                    //  [2][current dir]        [uu.url.normalize("http://example.com/api/./")  -> "http://example.com/api/"
-                                    //  [3][through]            [uu.url.normalize("http://example.com/api/")    -> "http://example.com/api/"
-                                    //  [4][add tail slash]     [uu.url.normalize("http://example.com/api")     -> "http://example.com/api/"
-                                    //  [5][boundary condition] [uu.url.normalize("http://example.com/../")     -> "http://example.com/"
-                                    //  [6][rel path]           [uu.url.normalize("/example.com/api/../")       -> "/example.com/"
-                                    //  [7][rel path]           [uu.url.normalize("/example.com/../")           -> "/"
-                                    //  [8][boundary condition] [uu.url.normalize("/../")                       -> "/"
-                                    //  [9][boundary condition] [uu.url.normalize("/./")                        -> "/"
-                                    // [10][boundary condition] [uu.url.normalize("/")                          -> "/"
-                                    // [11][boundary condition] [uu.url.normalize("")                           -> "/"
+                                    //  [1][up to dir]          uu.url.normalize("http://example.com/api/../") -> "http://example.com/"
+                                    //  [2][current dir]        uu.url.normalize("http://example.com/api/./")  -> "http://example.com/api/"
+                                    //  [3][through]            uu.url.normalize("http://example.com/api/")    -> "http://example.com/api/"
+                                    //  [4][add tail slash]     uu.url.normalize("http://example.com/api")     -> "http://example.com/api/"
+                                    //  [5][boundary condition] uu.url.normalize("http://example.com/../")     -> "http://example.com/"
+                                    //  [6][rel path]           uu.url.normalize("/example.com/api/../")       -> "/example.com/"
+                                    //  [7][rel path]           uu.url.normalize("/example.com/../")           -> "/"
+                                    //  [8][boundary condition] uu.url.normalize("/../")                       -> "/"
+                                    //  [9][boundary condition] uu.url.normalize("/./")                        -> "/"
+                                    // [10][boundary condition] uu.url.normalize("/")                          -> "/"
+                                    // [11][boundary condition] uu.url.normalize("")                           -> "/"
     }),
-    qs:             uuqs,           // uu.qs(queryString:QueryString/Hash, add:Hash = void, joint:String = uu.config.qsJoint):QueryString/Hash
-                                    //  [1][parse] uu.qs("key=val;key2=val2")              -> { key: "val", key2: "val2" }
-                                    //  [2][build] uu.qs({ key: "val",     key2: "val2" }) -> "key=val;key2=val2"
-                                    //  [3][add]   uu.qs( "key=val",     { key2: "val2" }) -> "key=val;key2=val2"
-                                    //  [4][add]   uu.qs({ key: "val" }, { key2: "val2" }) -> "key=val;key2=val2"
 //}@url
     // --- DEBUG ---
 //{@canvas
@@ -936,7 +975,7 @@ uueach({
 // NodeSetIter(1) - map methods
 uueach({
 //{@form
-    value:          uuvalue,        // NodeSet.value(value = void)
+    value:          uuformvalue,    // NodeSet.value(value = void)
 //}@form
     attr:           uuattr,         // NodeSet.attr(key:String/Hash = void, value:String = void)
     data:           uudata,         // NodeSet.data(key:String/Hash = void, value:String = void)
@@ -1039,15 +1078,15 @@ function fallbackIsArray(search) { // @param Mix: search
 
 uumix(Array[_prototype], {
 //{@mb
-    map:            ArrayMap,       //         map(evaluator:Function, that:this = void):Array
-    some:           ArraySome,      //        some(evaluator:Function, that:this = void):Boolean
     every:          ArrayEvery,     //       every(evaluator:Function, that:this = void):Boolean
     filter:         ArrayFilter,    //      filter(evaluator:Function, that:this = void):Array
-    forEach:        ArrayForEach,   //     forEach(evaluator:Function, that:this = void)
     indexOf:        ArrayIndexOf,   //     indexOf(search:Mix, fromIndex:Number = 0):Number
     lastIndexOf:                    // lastIndexOf(search:Mix, fromIndex:Number = this.length):Number
                     ArrayLastIndexOf,
 //}@mb
+    map:            ArrayMap,       //         map(evaluator:Function, that:this = void):Array
+    some:           ArraySome,      //        some(evaluator:Function, that:this = void):Boolean
+    forEach:        ArrayForEach,   //     forEach(evaluator:Function, that:this = void)
     reduce:         ArrayReduce,    //      reduce(evaluator:Function, initialValue:Mix = void):Mix
     reduceRight:                    // reduceRight(evaluator:Function, initialValue:Mix = void):Mix
                     ArrayReduceRight
@@ -1283,8 +1322,8 @@ function uuajax(url,        // @param String: url
                 } else  {
                     if (resp.ok) {
                         if (binary) {
-                            resp.data = _ie ? xhr2ByteArrayIE(xhr)
-                                            : binaryString2ByteArray(xhr.responseText);
+                            resp.data = /*{@mb*/ _ie ? xhr2ByteArrayIE(xhr) : /*}@mb*/
+                                        binaryString2ByteArray(xhr.responseText);
                         } else {
                             resp.data = option.xml ? (xhr.responseXML  || "")
                                                    : (xhr.responseText || "");
@@ -1498,8 +1537,8 @@ Function vbstr(b)vbstr=CStr(b.responseBody)+chr(0)End Function</'+'script>');
 //}@ajax
 
 // inner - create XMLHttpRequest object
-function newXHR(url) { // @param String: url
-                       // @return XMLHttpRequest:
+function newXHR( /*{@mb*/ url /*}@mb*/ ) { // @param String: url
+                                           // @return XMLHttpRequest:
 //{@mb
     if (_ie) {
         if (win.ActiveXObject && !url.indexOf("file:")) {
@@ -3906,8 +3945,11 @@ function uuklass(expr,      // @param String/Node: "class", "class1, ..." or Nod
     }
 //}@assert
 
-    var rv, ri, i, iz, m, v, ary, az, rex, nodeList, sp = " ",
-        w = context, n = expr;
+    var rex, m,
+//{@mb
+        rv, ri, i, iz, v, ary, az, nodeList,
+//}@mb
+        sp = " ", w = context, n = expr;
 
     // className accessor [2][3][4][5]
     if (expr[_nodeType]) {
@@ -5017,7 +5059,7 @@ function uunode(node,       // @param Node/SVGNode/TagNameString(= "div"): "div"
     return node;
 }
 
-// uu.node.at - set Node builder callback
+// uu.node.at - set NodeBuilder callback
 function uunodeat(callback) { // @param CallbackFunction: callback
     uunodeat.callback = callback;
 }
@@ -5166,7 +5208,9 @@ function uunodebulk(source,    // @param Node/HTMLFragmentString: source
 //}@assert
 
     var rv = doc.createDocumentFragment(),
+//{@mb
         pad = _false,
+//}@mb
         fragment = source[_nodeType] ? source.outerHTML // [1] node
                                      : source,          // [2] "<p>html</p>"
         placeholder = uunode((context || {})[_tagName]);
@@ -5517,20 +5561,50 @@ function uutext(data,             // @param String/FormatString/Node: "string" o
 }
 
 //{@form
-// uu.value - value accessor
-function uuvalue(node,    // @param Node:
-                 value) { // @param String(= void 0):
-                          // @return String/Node:
-    //  [1][get value]            uu.value(node) -> value or [value, ...]
-    //  [2][set value]            uu.value(node, "value") -> node
-    //  [3][get <textarea>]       uu.value(node) -> "innerText"
-    //  [4][get <button>]         uu.value(node) -> "<button value>"
-    //  [5][get <option>]         uu.value(node) -> "<option value>" or
-    //                                              "<option>value</option>"
-    //  [6][get <selet>]          uu.value(node) -> selected option value
-    //  [7][get <selet multiple>] uu.value(node) -> ["value", ...]
-    //  [8][get <input checkbox>] uu.value(node) -> ["value", ...]
-    //  [9][get <input radio>]    uu.value(node) -> "value"
+// uu.form - create <form> node
+function uuform(/* var_args */) { // @param Mix: var_args
+                                  // @return Node: <form> node
+    return uunode("form", arguments);
+}
+
+// uu.form.serialize
+function uuformserialize(node,    // @param Node: <form>
+                         toHash,  // @param Boolean(= false): true is toHash, false is toString
+                         joint) { // @param String(= uu.config.qsJoint): ";" or "&" or "&amp;"
+                                  // @return URLEncodedQueryString/Hash:
+    var rv = {},
+        ary = uuquery("input,textarea,select,button"),
+        ident, v, i = 0, iz = ary.length;
+
+    for (; i < iz; ++i) {
+        v = ary[i];
+        ident = v.name || v.id; // <input name="..."> or <input id="...">
+        if (ident) {
+            rv[ident] = uuformvalue(v); // "value" or ["value", ...]
+
+            // <input type="image">
+            if (v.type === "image") {
+                rv[ident + ".y"] = rv[ident + ".x"] = 0; // [IE][PHP][FIX]
+            }
+        }
+    }
+    return toHash ? rv : uuurlqs(rv, 0, joint || uuconfig.qsJoint);
+}
+
+// uu.form.value - form node.value accessor
+function uuformvalue(node,    // @param Node:
+                     value) { // @param String(= void 0):
+                              // @return String/Node:
+    //  [1][get value]            uu.form.value(node) -> value or [value, ...]
+    //  [2][set value]            uu.form.value(node, "value") -> node
+    //  [3][get <textarea>]       uu.form.value(node) -> textarea.textContent
+    //  [4][get <button>]         uu.form.value(node) -> <button>.value
+    //  [5][get <option>]         uu.form.value(node) -> <option>.value or
+    //                                                   <option>.textContent
+    //  [6][get <selet>]          uu.form.value(node) -> selected <option>.value
+    //  [7][get <selet multiple>] uu.form.value(node) -> ["value", ...]
+    //  [8][get <input checkbox>] uu.form.value(node) -> ["value", ...]
+    //  [9][get <input radio>]    uu.form.value(node) -> "value"
 
     //
     //  type
@@ -6596,17 +6670,17 @@ function uuurlsplit(url) { // @param URLString/PathString: url or path
 function uuurlnormalize(url) { // @param String:
                                // @return String:
 
-    //  [1][up to dir]          [uu.url.normalize("http://example.com/api/../") -> "http://example.com/"
-    //  [2][current dir]        [uu.url.normalize("http://example.com/api/./")  -> "http://example.com/api/"
-    //  [3][through]            [uu.url.normalize("http://example.com/api/")    -> "http://example.com/api/"
-    //  [4][add tail slash]     [uu.url.normalize("http://example.com/api")     -> "http://example.com/api/"
-    //  [5][boundary condition] [uu.url.normalize("http://example.com/../")     -> "http://example.com/"
-    //  [6][rel path]           [uu.url.normalize("/example.com/api/../")       -> "/example.com/"
-    //  [7][rel path]           [uu.url.normalize("/example.com/../")           -> "/"
-    //  [8][boundary condition] [uu.url.normalize("/../")                       -> "/"
-    //  [9][boundary condition] [uu.url.normalize("/./")                        -> "/"
-    // [10][boundary condition] [uu.url.normalize("/")                          -> "/"
-    // [11][boundary condition] [uu.url.normalize("")                           -> "/"
+    //  [1][up to dir]          uu.url.normalize("http://example.com/api/../") -> "http://example.com/"
+    //  [2][current dir]        uu.url.normalize("http://example.com/api/./")  -> "http://example.com/api/"
+    //  [3][through]            uu.url.normalize("http://example.com/api/")    -> "http://example.com/api/"
+    //  [4][add tail slash]     uu.url.normalize("http://example.com/api")     -> "http://example.com/api/"
+    //  [5][boundary condition] uu.url.normalize("http://example.com/../")     -> "http://example.com/"
+    //  [6][rel path]           uu.url.normalize("/example.com/api/../")       -> "/example.com/"
+    //  [7][rel path]           uu.url.normalize("/example.com/../")           -> "/"
+    //  [8][boundary condition] uu.url.normalize("/../")                       -> "/"
+    //  [9][boundary condition] uu.url.normalize("/./")                        -> "/"
+    // [10][boundary condition] uu.url.normalize("/")                          -> "/"
+    // [11][boundary condition] uu.url.normalize("")                           -> "/"
 
     var rv = [], r, hash = parseURL(url),
         ary = hash.path.split("/"), i = 0, iz = ary.length;
@@ -6622,11 +6696,19 @@ function uuurlnormalize(url) { // @param String:
     return buildURL(hash);
 }
 
-// uu.qs - query string accessor
-function uuqs(queryString, // @param QueryString/Hash:
-              add,         // @param Hash(= void): add pair { key: value, ... }
-              joint) {     // @param String(= uu.config.qsJoint): ";" or "&" or "&amp;"
-                           // @return QueryString/Hash:
+// uu.url.qs - query string accessor
+function uuurlqs(queryString, // @param QueryString/Hash: "key1=a;key2=b;key3=0;key3=1"
+                              //                          { key1: "a", key2: "b", key3: [0, 1] }
+                 add,         // @param Hash(= void): add pair { key: value, ... }
+                 joint) {     // @param String(= uu.config.qsJoint): ";" or "&" or "&amp;"
+                              // @return QueryString/Hash:
+    //  [1][parse] uu.url.qs("key1=a;key2=b;key3=0;key3=1")    -> { key1: "a", key2: "b", key3: ["0", "1"] }
+    //  [2][build] uu.url.qs({ key1: "a", key2: "b",
+    //                         key3: ["0", "1"] })             -> "key1=a;key2=b;key3=0;key3=1"
+    //  [3][add]   uu.url.qs( "key=val",     { key2: "val2" }) -> "key=val;key2=val2"
+    //  [4][add]   uu.url.qs({ key: "val" }, { key2: "val2" }) -> "key=val;key2=val2"
+
+    joint = joint || uuconfig.qsJoint;
     var rv, isstr = isString(queryString), i;
 
     if (add) {
@@ -6640,25 +6722,39 @@ function uuqs(queryString, // @param QueryString/Hash:
 }
 
 // inner - build query string
-function buildQueryString(queryString, // @param Hash: { key: "val", key2: "val2" }
-                          joint) {     // @param String(= uu.config.qsJoint): joint string ";" or "&" or "&amp;"
-                                       // @return QueryString: "key=val;key2=val2"
-    var rv = [], i, fn = encodeURIComponent;
+function buildQueryString(queryString, // @param Hash: { key1: "a", key2: "b", key3: [0, 1] }
+                          joint) {     // @param String: joint string ";" or "&" or "&amp;"
+                                       // @return QueryString: "key1=a;key2=b;key3=0;key3=1"
+    var rv = [], i, j, jz, key, value, fn = encodeURIComponent;
 
     for (i in queryString) {
-        rv.push(fn(i) + "=" + fn(queryString[i]));
+        key   = fn(i);
+        value = queryString[i];
+        if (isArray(value)) { // value is Array
+            for (j = 0, jz = value.length; j < jz; ++j) {
+                rv.push(key + "=" + fn(value[j])); // "key3=0;key3=1"
+            }
+        } else { // value is Literal
+            rv.push(key + "=" + fn(value)); // "key1=a;key2=b"
+        }
     }
-    return rv.join(joint || uuconfig.qsJoint); // "a=b;c=d"
+    return rv.join(joint); // "key1=a;key2=b;key3=0;key3=1"
 }
 
 // inner - parse query string
-function parseQueryString(queryString) { // @param URLString/QueryString: "key=val;key2=val2"
-                                         // @return Hash: { key: value, ... }
-    function _parse(m, key, value) {
-        return rv[fn(key)] = fn(value);
+function parseQueryString(queryString) { // @param URLString/QueryString: "key1=a;key2=b;key3=0;key3=1"
+                                         // @return Hash: { key1: "a", key2: "b", key3: ["0", "1"] }
+    function _parse(matchAll, key, value) {
+        var k = fn(key), v = fn(value);
+
+        rv[k] ? (isArray(rv[k]) ? rv[k].push(v)
+                                : (rv[k] = [rv[k], v]))
+              : (rv[k] = v);
+        return "";
     }
     var rv = {}, fn = decodeURIComponent;
 
+    // chop url. "http://example.com?key=val" -> { key: "val" }
     if (queryString[_indexOf]("?") >= 0) { // [1]
         return parseURL(uuurlabs(queryString)).hash;
     }
@@ -8591,7 +8687,7 @@ uuClassSingleton("LocalStorage", {
                  (this.so.key(index) || "") );
     },
     info: function() {
-        var so = this.so, used = 0, i = 0, iz, remain,
+        var so = this.so, used = 0, i = 0, iz, /*{@mb*/ remain, /*}@mb*/
             limit = _webkit ? 2.5   * 1024 * 1024 - 260 // WebKit      (2.5MB)
 /*{@mb*/          : _gecko  ? 5     * 1024 * 1024 - 260 // Firefox3.5+ (5.0MB)
                   : _opera  ? 1.875 * 1024 * 1024 - 128 // Opera10.50  (1.875MB)
@@ -9033,6 +9129,28 @@ function ArrayEvery(evaluator, // @param Function: evaluator
     return _true;
 }
 
+// Array.prototype.filter
+function ArrayFilter(evaluator, // @param Function: evaluator
+                     that) {    // @param this(= void): evaluator this
+                                // @return Array: [element, ... ]
+    for (var rv = [], ri = -1, v, i = 0, iz = this.length; i < iz; ++i) {
+        i in this && evaluator.call(that, v = this[i], i, this)
+                  && (rv[++ri] = v);
+    }
+    return rv;
+}
+//}@mb
+
+// Array.prototype.map
+function ArrayMap(evaluator, // @param Function: evaluator
+                  that) {    // @param this(= void): evaluator this
+                             // @return Array: [element, ... ]
+    for (var iz = this.length, rv = Array(iz), i = 0; i < iz; ++i) {
+        i in this && (rv[i] = evaluator.call(that, this[i], i, this));
+    }
+    return rv;
+}
+
 // Array.prototype.some
 function ArraySome(evaluator, // @param Function: evaluator
                    that) {    // @param this(= void): evaluator this
@@ -9060,28 +9178,6 @@ function ArrayForEach(evaluator, // @param Function: evaluator
         }
     }
 }
-
-// Array.prototype.map
-function ArrayMap(evaluator, // @param Function: evaluator
-                  that) {    // @param this(= void): evaluator this
-                             // @return Array: [element, ... ]
-    for (var iz = this.length, rv = Array(iz), i = 0; i < iz; ++i) {
-        i in this && (rv[i] = evaluator.call(that, this[i], i, this));
-    }
-    return rv;
-}
-
-// Array.prototype.filter
-function ArrayFilter(evaluator, // @param Function: evaluator
-                     that) {    // @param this(= void): evaluator this
-                                // @return Array: [element, ... ]
-    for (var rv = [], ri = -1, v, i = 0, iz = this.length; i < iz; ++i) {
-        i in this && evaluator.call(that, v = this[i], i, this)
-                  && (rv[++ri] = v);
-    }
-    return rv;
-}
-//}@mb
 
 // Array.prototype.reduce
 function ArrayReduce(evaluator,    // @param Function: evaluator
@@ -9550,7 +9646,7 @@ function detectEnvironment(libraryVersion) { // @param Number: Library version
     rv.android      = webkit && test(/Android/);
     rv.mbosver      = mbosver ? parseFloat(mbosver[1]) : 0; // mobile os version
     // slate definition. http://twitter.com/#!/uupaa/status/27301790851
-    rv.slate        = rv.ipad || (rv.android && longedge > 961);
+    rv.slate        = rv.ipad || (rv.android && rv.longedge > 961);
     rv.mobile       = rv.ios || rv.android || test(/Opera Mini/);
     rv.os           = rv.ios            ? "ios"     // iPhone OS    -> "ios"
                     : rv.android        ? "android" // Android OS   -> "android"
@@ -9591,8 +9687,9 @@ function fakeToArray(fakeArray) { // @param FakeArray: NodeList, Arguments
 //}@mb
 
 function detectFeatures() {
-    var undef, hash = { rgba: _true, hsla: _true, transparent: _true },
+    var hash = { rgba: _true, hsla: _true, transparent: _true },
 //{@mb
+        undef,
         node = newNode(), child, style = node.style,
 //}@mb
         rv = {
@@ -9705,7 +9802,10 @@ uuready("dom:2", function() {
    Object.prototype.toString, Array.isArray, Array.prototype.slice,
    "data-uu", "nodeSet",
    setTimeout, setInterval, this.XMLHttpRequest, this.HTMLAudioElement,
-   parseInt, parseFloat, this.getComputedStyle, this.JSON, this.Node);
+//{@mb
+   this.Node,
+//}@mb
+   parseInt, parseFloat, this.getComputedStyle, this.JSON);
 
 // === query.tokenizer, query.selector ===
 // - query.selector() function limits
@@ -10761,7 +10861,7 @@ uu.config.ui.disable || uu.image(uu.config.ui.img); // pre-load
 //}@image
 
 uu.config.ui.disable || uu.ready(function(uu) {
-    var ss = uu.ss("ui"),
+    var ss = uu.ss("ui"), format = uu.f,
         img = uu.config.ui.img,
         fmt, focus,
         relative = "relative",
@@ -10770,19 +10870,19 @@ uu.config.ui.disable || uu.ready(function(uu) {
 //{@uislider
     // Slider
     fmt = 'background:url(@) no-repeat @px @px;position:@;width:@px;height:@px';
-    ss.add({ ".SliderH200":  uu.f(fmt, img,  -15,   0, relative, 214,  22),
-             ".SliderH150":  uu.f(fmt, img,  -15, -20, relative, 164,  22),
-             ".SliderH100":  uu.f(fmt, img,  -15, -40, relative, 114,  22),
-             ".SliderH50":   uu.f(fmt, img,  -15, -60, relative,  64,  22),
-             ".SliderHGrip": uu.f(fmt, img,    0,   0, absolute,  13,  18),
-             ".SliderV200":  uu.f(fmt, img, -230, -15, relative,  20, 214),
-             ".SliderV150":  uu.f(fmt, img, -250, -15, relative,  20, 164),
-             ".SliderV100":  uu.f(fmt, img, -270, -15, relative,  20, 114),
-             ".SliderV50":   uu.f(fmt, img, -290, -15, relative,  20,  64),
-             ".SliderVGrip": uu.f(fmt, img, -250,   0, absolute,  18,  13),
-             ".SliderHGrip": uu.f(fmt, img,    0,   0, absolute,  13,  18),
+    ss.add({ ".SliderH200":  format(fmt, img,  -15,   0, relative, 214,  22),
+             ".SliderH150":  format(fmt, img,  -15, -20, relative, 164,  22),
+             ".SliderH100":  format(fmt, img,  -15, -40, relative, 114,  22),
+             ".SliderH50":   format(fmt, img,  -15, -60, relative,  64,  22),
+             ".SliderHGrip": format(fmt, img,    0,   0, absolute,  13,  18),
+             ".SliderV200":  format(fmt, img, -230, -15, relative,  20, 214),
+             ".SliderV150":  format(fmt, img, -250, -15, relative,  20, 164),
+             ".SliderV100":  format(fmt, img, -270, -15, relative,  20, 114),
+             ".SliderV50":   format(fmt, img, -290, -15, relative,  20,  64),
+             ".SliderVGrip": format(fmt, img, -250,   0, absolute,  18,  13),
+             ".SliderHGrip": format(fmt, img,    0,   0, absolute,  13,  18),
 
-             ".SliderT50":   uu.f(fmt, img,  -36, -80, relative,  64,  20) +
+             ".SliderT50":   format(fmt, img,  -36, -80, relative,  64,  20) +
                              ";border:1px solid gray;-webkit-border-radius:5px" });
     // focus outline
     focus = "outline:1px solid skyblue";

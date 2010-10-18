@@ -26,7 +26,7 @@ function updateView() {
     var hash = uu.storage.item();
     var info = uu.storage.info();
 
-    uu.value(uu.id("all"), uu.json(hash));
+    uu.form.value(uu.id("all"), uu.json(hash));
     uu.text(uu.id("pairs"), info.pair + " pairs");
 }
 
