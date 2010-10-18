@@ -26,10 +26,12 @@ $castoffAll  = array(
 $perfPoint   = time(); // keep current time
 $slash       = '/';
 $mobile      = false;
+$memento     = false;
 $verbose     = false;
 $skipCore    = false;
 $inputFiles  = array($libraryCore);
 $loadedFiles = array(); // avoid duplicate load
+$compileOption = "";
 $loadedFileSize = 0;
 $forceOutputFileName = "";
 
@@ -130,7 +132,8 @@ function pathNormalize($path) { // @param FilePathString:  "..\dir/file.ext"
 
 function minify() {
     global $compiler, $skipCore, $verbose, $catfood, $mobile, $libraryCore,
-           $loadedFileSize, $perfPoint, $outputDir, $forceOutputFileName;
+           $loadedFileSize, $perfPoint, $outputDir, $forceOutputFileName,
+           $memento, $compileOption;
 
     $command = '';
 
@@ -196,10 +199,22 @@ function minify() {
               ($fz / ($loadedFileSize + 1)) * 100, // size optimization
               time() - $perfPoint); // elapsed time
     }
+
+    if ($memento) {
+        $str = file_get_contents($outputDir . $outfile);
+
+        $fp = fopen($outputDir . $outfile, 'w');
+        fwrite($fp, "// compile option: " . $compileOption . "\n");
+        fwrite($fp, $str . "\n");
+        fclose($fp);
+    }
 }
 
 // --- init ---
 $slash = isWindows() ? '\\' : '/';
+
+// --- memento compile option ---
+$compileOption = implode(" ", $argv);
 
 // --- reading commandline args ---
 array_shift($argv);
@@ -207,6 +222,7 @@ array_shift($argv);
 while ($v = array_shift($argv)) {
     switch ($v) {
     case "-o":      $forceOutputFileName = array_shift($argv); break;
+    case "-memento":$memento = true; break;
     case "-g":      $compiler = "g"; break;
     case "-G":      $compiler = "G"; break;
     case "-y":      $compiler = "y"; break;
