@@ -55,7 +55,7 @@ upa -off color/ui/codec
 }}}
 || *ident*   || 説明 || 削減されるファイルサイズ<br />(Minify適用後の値) ||
 || all       || 以下の機能を一括でコメントアウトします。 || -94.8kB ||
-|| form      || uu.value(), NodeSet.value() をコメントアウトします || -0.6kB ||
+|| form      || uu.form.value(), NodeSet.value() をコメントアウトします || -0.6kB ||
 || snippet   || uu.snippet() をコメントアウトします || -0.7kB ||
 || image     || uu.image() をコメントアウトします || -0.9kB ||
 || color     || uu.color() をコメントアウトします。<br />uu.fx でカラーアニメーションが利用できなくなります || -5.1kB ||
@@ -100,7 +100,7 @@ upa -off color/ui/codec
 == iPhone/iPad用に最小構成でビルドする ==
  * upa src.js -mb -off form/snippet/image/color
  uupaa.mb.js と uupaa.mb2.js の2つのファイルが生成されます。
- この例では uu.value(), uu.snippet(), uu.image(), uu.color() 等が利用できなくなりますが、不要な機能を削減しファイルサイズを最小化できます。
+ この例では uu.form.value(), uu.snippet(), uu.image(), uu.color() 等が利用できなくなりますが、不要な機能を削減しファイルサイズを最小化できます。
 
 == Microsoft Ajax Minifier でビルドする(Windows環境のみ) ==
  * upa src.js -m
