@@ -671,7 +671,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //  [1][serialized] uu.form.serialize(<form>)
                                     //          -> "name.1=a&name2=%E3%81%82&name3=1&name4[]=1&name4[]=2"
                                     //             "&textareaname=\n%20...%20hello\n%20...%20world\n"
-                                    //             "&submit=submit&submit_x=0&submit_y=0"
+                                    //             "&submit=submit&submit_x=1&submit_y=1"
                                     //  [2][serialized] uu.form.serialize(<form>, { urlencode: false, hash: true })
                                     //          -> { "name.1": "a", name2: "{{hiragana-A}}",
                                     //               name3: "1", "name4[]": ["1", "2"]
@@ -5589,7 +5589,7 @@ function uuformserialize(node,    // @param Node: <form>
 
             // <input type="image">
             if (v.type === "image") {
-                rv[ident + ".y"] = rv[ident + ".x"] = 0; // [IE][PHP][FIX]
+                rv[ident + ".y"] = rv[ident + ".x"] = 1; // [IE][PHP][FIX]
             }
         }
     }
