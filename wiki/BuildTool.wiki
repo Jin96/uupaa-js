@@ -2,16 +2,16 @@
 
 <wiki:toc max_depth="3" />
 
-= upa =
+= Build Tool (upa.php) =
 
-build/upa.php はプリプロセスとMinifyを施し最適化された.jsファイルを生成します。
+build/upa.php は 幾つかの JavaScript ソースコードを読み込み、結合、プリプロセスとMinifyを行い、最適化済みの JavaScript 実行ファイルを生成します。
 
-`upa.php [`*-g*` | -m | -y] [-mb] [-v] [-memnto] [-pp file] [-src dir] [-out dir] [-o file] [-core file] [-nocore] [-off ident[/ident[/..]]] [*.js ...]`
+`upa.php [`*-g*` | -m | -y] [-mb] [-v] [-memnto] [-pp file] [-src dir] [-out dir] [-o file] [-lib file] [-nolib] [-off ident[/ident[/..]]] [*.js ...]`
 
 == #include ==
-`#include` _sourcecode_ を見つけるとファイルを読み込みその場に展開します。
+upa.php は JavaScript ソースコード内に、include 文 {{{`#include` _sourcecode_ }}} を見つけるとファイルを読み込みその場に展開します。
 
-#include をそのまま記述すると JavaScript の構文エラーになるため、先頭に一行コメントを追加し以下のように記述して下さい。ソースコードパスが空白や記号を含む場合は、前後にクォートを追加してください。
+#include 文をそのまま記述すると JavaScript の構文エラーになるため、先頭に一行コメントを追加し以下のように記述します。ソースコードパスが空白や記号を含む場合は、前後をクォートて囲ってください。
 {{{
 //#include sourcecode.js
 
