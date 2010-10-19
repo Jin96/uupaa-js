@@ -474,14 +474,14 @@ uu.ready("window", function(uu) {
             uu.values({ key: 1, key2: 2 }), "==", [1, 2]);
 
     uu.ok("uu.drip()");
-    uu.ok("uu.drip([uu.nop, 1, 'a'], uu.isFunction).result == [uu.nop]",
-            uu.drip([uu.nop, 1, 'a'], uu.isFunction).result, "==", [uu.nop]);
-    uu.ok("uu.drip([uu.nop, 1, 'a'], uu.isNumber).result == [1]",
-            uu.drip([uu.nop, 1, 'a'], uu.isNumber).result, "==", [1]);
-    uu.ok("uu.drip([uu.nop, 1, 'a'], uu.isString).result ==['a']",
-            uu.drip([uu.nop, 1, 'a'], uu.isString).result, "==", ['a']);
-    uu.ok("uu.drip([[1, 2], 1, 'a'], Array.isArray).result == [[1, 2]]",
-            uu.drip([[1, 2], 1, 'a'], Array.isArray).result, "==", [[1, 2]]);
+    uu.ok("uu.drip([uu.nop, 1, 'a'], uu.isFunction).rv == [uu.nop]",
+            uu.drip([uu.nop, 1, 'a'], uu.isFunction).rv, "==", [uu.nop]);
+    uu.ok("uu.drip([uu.nop, 1, 'a'], uu.isNumber).rv == [1]",
+            uu.drip([uu.nop, 1, 'a'], uu.isNumber).rv, "==", [1]);
+    uu.ok("uu.drip([uu.nop, 1, 'a'], uu.isString).rv ==['a']",
+            uu.drip([uu.nop, 1, 'a'], uu.isString).rv, "==", ['a']);
+    uu.ok("uu.drip([[1, 2], 1, 'a'], Array.isArray).rv == [[1, 2]]",
+            uu.drip([[1, 2], 1, 'a'], Array.isArray).rv, "==", [[1, 2]]);
 
     uu.ok("uu.indexOf()");
     uu.ok("uu.indexOf({ a: 1, b: 2, c: 2 }, 2) == 'b'",

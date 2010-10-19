@@ -330,11 +330,11 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //  [6][String tail] uunth("abc", -1)            -> [2, "c"]
     map:            uumap,          // uu.map(source:Hash/Array, evaluator:Function):Array
     each:           uueach,         // uu.each(source:Hash/Array/Number, evaluator:Function)
-    drip:           uudrip,         // uu.drip(source:Hash/Array, evaluator:Function):Hash - { result, rest }
-                                    //  [1][Function only] uu.drip([uu.nop, 1, "a"], uu.isFunction) -> { result: [uu.nop], rest: [1, "a"]      }
-                                    //  [2][Number only]   uu.drip([uu.nop, 1, "a"], uu.isNumber)   -> { result: [1],      rest: [uu.nop, "a"] }
-                                    //  [3][String only]   uu.drip([uu.nop, 1, "a"], uu.isString)   -> { result: ["a"],    rest: [uu.nop, 1]   }
-                                    //  [4][Array only]    uu.drip([[1, 2], 1, "a"], Array.isArray) -> { result: [[1, 2]], rest: [1, "a"]      }
+    drip:           uudrip,         // uu.drip(source:Hash/Array, evaluator:Function):Hash - { rv, rest }
+                                    //  [1][Function only] uu.drip([uu.nop, 1, "a"], uu.isFunction) -> { rv: [uu.nop], rest: [1, "a"]      }
+                                    //  [2][Number only]   uu.drip([uu.nop, 1, "a"], uu.isNumber)   -> { rv: [1],      rest: [uu.nop, "a"] }
+                                    //  [3][String only]   uu.drip([uu.nop, 1, "a"], uu.isString)   -> { rv: ["a"],    rest: [uu.nop, 1]   }
+                                    //  [4][Array only]    uu.drip([[1, 2], 1, "a"], Array.isArray) -> { rv: [[1, 2]], rest: [1, "a"]      }
     keys:           uukeys,         // uu.keys(source:Hash/Array):Array
     pair:           uupair,         // uu.pair(key:Number/String/Hash, value:Mix):Hash - { key: value }
                                     //  [1][make pair]    uu.pair(1, 2)        -> { 1: 2 }
@@ -1242,7 +1242,7 @@ function uusnippet(id,    // @param String: snippet id. <script id="...">
             if (node.src) { // <script type="text/html" src="...">
                 xhr = uurequire(node.src);
                 if (xhr.ok) {
-                    js = xhr.data;
+                    js = xhr.rv;
                 }
             } else {
                 js = node.text;
@@ -1299,11 +1299,11 @@ function uuajax(url,        // @param String: url
                             //    option.header  - Hash(= {}): { key: "value", ... }
                             //    option.binary  - CallbackFunction(= void): binary data evaluator, binary(xhr)
                             //    option.before  - CallbackFunction(= void): before({ option }, xhr)
-                            //    option.after   - CallbackFunction(= void): after({ option, ok, data, status }, xhr)
+                            //    option.after   - CallbackFunction(= void): after({ option, ok, rv, status }, xhr)
                 callback) { // @param CallbackFunction: finished(response)
-                            //    response        - Hash: { ok, data, date, cached, option, status }
+                            //    response        - Hash: { ok, rv, date, cached, option, status }
                             //    response.ok     - Boolean(= false): true is 20x, false is 30x, 40x, 50x
-                            //    response.data   - String(= null): xhr.responseText or xhr.responseXML
+                            //    response.rv     - String(= null): result value. xhr.responseText or xhr.responseXML
                             //    response.date   - DateHash(= null): uu.date result (option.lastMode)
                             //    response.cached - Boolean(= false): true is Not Modified(xhr.status = 304)
                             //    response.option - Hash(= option): option argument
@@ -1313,7 +1313,7 @@ function uuajax(url,        // @param String: url
             var status = xhr.status, lastMod,
                 resp = {
                     ok:     !status || (status >= 200 && status < 300),
-                    data:   null,
+                    rv:     null,
                     date:   null,
                     cached: _false,
                     option: option,
@@ -1322,27 +1322,28 @@ function uuajax(url,        // @param String: url
 
             if (!run++) {
                 if (method === "PUT") {
-                    resp.data = resp.ok ? xhr.responseText : "";
+                    resp.rv = resp.ok ? xhr.responseText : "";
                 } else  {
                     if (resp.ok) {
                         if (binary) {
-                            resp.data = /*{@mb*/ _ie ? xhr2ByteArrayIE(xhr) : /*}@mb*/
-                                        binaryString2ByteArray(xhr.responseText);
+                            resp.rv = /*{@mb*/ _ie ? xhr2ByteArrayIE(xhr) : /*}@mb*/
+                                      binaryString2ByteArray(xhr.responseText);
                         } else {
-                            resp.data = option.xml ? (xhr.responseXML  || "")
-                                                   : (xhr.responseText || "");
+                            resp.rv = option.xml ? (xhr.responseXML  || "")
+                                                 : (xhr.responseText || "");
                         }
                         // --- Last-Modified / Not Modified(xhr.status = 304) ---
                         if (option.ifmod) {
                             lastMod = xhr.getResponseHeader("Last-Modified");
                             if (lastMod) {
-                                cache[url] = [uudate(Date.parse(lastMod)), resp.data];
+                                cache[url] = [uudate(Date.parse(lastMod)), resp.rv];
                             }
                         }
-                    } else if (option.ifmod && status === 304 && cache[url] !== void 0) { // has cached data
+                    } else if (option.ifmod && status === 304 && cache[url] !== void 0) {
+                        // has cached result value
                         resp.cached = _true;
                         resp.date = cache[url][0]; // DateHash
-                        resp.data = cache[url][1]; // cached data
+                        resp.rv   = cache[url][1]; // cached result value
                     }
                 }
                 option[_after] && option[_after](resp, xhr); // after callback
@@ -1360,7 +1361,7 @@ function uuajax(url,        // @param String: url
         if (!run++) {
             var resp = {
                 ok: _false,
-                data: null,
+                rv: null,
                 date: null,
                 cached: _false,
                 option: option,
@@ -1428,14 +1429,14 @@ function uuajax(url,        // @param String: url
         ng(); // 400: Bad Request
     }
 }
-uuajax.cache = {}; // { "http://...": [DateHash(lastModified), data], ... }
+uuajax.cache = {}; // { "http://...": [DateHash(lastModified), rv], ... }
 
 // uu.ajax.post - post
 function uuajaxpost(url,        // @param String: url
                     option,     // @param Hash: { xml, data, ifmod, timeout,
                                 //                header, binary, before, after }
                     callback) { // @param CallbackFunction: callback(responce)
-                                //    response - Hash: { ok, data, date, cached, option, status }
+                                //    response - Hash: { ok, rv, date, cached, option, status }. see uu.ajax
     option.method = "POST";
     uuajax(url, option, callback);
 }
@@ -1451,7 +1452,7 @@ function uuajaxbinary(url,        // @param String:
                       option,     // @param Hash: { data, timeout, header, before, after, msgpack }
                                   //    option.msgpack - Boolean(= false): true is msgpack handling
                       callback) { // @param CallbackFunction: callback(responce)
-                                  //    response - Hash: { ok, data, date, cached, option, status }
+                                  //    response - Hash: { ok, rv, date, cached, option, status }. see uu.ajax
     option.ifmode = _false;
     option.method = option.data ? "PUT" : "GET";
     option.binary = _true;
@@ -1462,7 +1463,7 @@ function uuajaxbinary(url,        // @param String:
         } else {
             uuajax(url, option, function(resp) {
                 if (resp.ok) {
-                    resp.data = uumsgpackdecode(resp.data); // msgpack.decode(download())
+                    resp.rv = uumsgpackdecode(resp.rv); // msgpack.decode(download())
                 }
                 callback(resp);
             });
@@ -1595,15 +1596,15 @@ function uurequire(url,      // @param String: url
                              //     option.xml    - Boolean(= false): true is xml.responseXML, false is xml.responseText
                              //     option.stat   - Boolean(= false): check whether a file exists
                              //     option.before - CallbackFunction(= void): before({ option }, xhr)
-                             //     option.after  - CallbackFunction(= void): after({ ok, data, option, status }, xhr)
-                             // @return Hash: response, { ok, data, option, status }
+                             //     option.after  - CallbackFunction(= void): after({ ok, rv, option, status }, xhr)
+                             // @return Hash: response, { ok, rv, option, status }
                              //     response.ok     - Boolean(= false): true is 20x, false is 30x, 40x, 50x
-                             //     response.data   - String(= null): xhr.responseText or xhr.responseXML
+                             //     response.rv     - String(= null): result value. xhr.responseText or xhr.responseXML
                              //     response.option - Hash(= option): option argument
                              //     response.status - Number(= 400): xhr.status
     option = option || {};
 
-    var resp = { ok: _false, data: null, option: option, status: 400 },
+    var resp = { ok: _false, rv: null, option: option, status: 400 },
         xhr = newXHR(url), status;
 
     try {
@@ -1614,8 +1615,8 @@ function uurequire(url,      // @param String: url
         resp.status = status = xhr.status;
         resp.ok = !status || (status >= 200 && status < 300);
         if (!option.stat) {
-            resp.data = option.xml ? xhr.responseXML
-                                   : xhr.responseText;
+            resp.rv = option.xml ? xhr.responseXML
+                                 : xhr.responseText;
         }
 
         option[_after] && option[_after](resp, xhr);
@@ -1632,11 +1633,11 @@ function uujsonp(url,        // @param String: "http://example.com/api?callback=
                              //    option.timeout - Number(= 10):
                              //    option.method  - String(= "callback")
                              //    option.before  - CallbackFunction(= void): before({ option }, <script>)
-                             //    option.after   - CallbackFunction(= void): after({ option, ok, data, status }, <script>)
+                             //    option.after   - CallbackFunction(= void): after({ option, ok, rv, status }, <script>)
                  callback) { // @param CallbackFunction: finished(response)
-                             //    response        - Hash: { ok, data, option, status }
+                             //    response        - Hash: { ok, rv, option, status }
                              //    response.ok     - Boolean(= false): true is 20x, false is 30x, 40x, 50x
-                             //    response.data   - Mix(= null):
+                             //    response.rv     - Mix(= null): result value
                              //    response.option - Hash(= option): option argument
                              //    response.status - Number(= 408): 200 or 408
     var timeout = option.timeout || 10,
@@ -1648,13 +1649,13 @@ function uujsonp(url,        // @param String: "http://example.com/api?callback=
     uujsonp.db[guid] = globalfn;
 
     // build CallbackFunction
-    win[globalfn] = function(data) { // @param Mix(= void): json data
+    win[globalfn] = function(rv) { // @param Mix(= void): json data
         if (!node.run++) {
             var resp = {
-                ok: !!data,
-                data: data || null,
+                ok: !!rv,
+                rv: rv || null,
                 option: option,
-                status: data ? 200 : 408
+                status: rv ? 200 : 408
             };
 
             option[_after] && option[_after](resp, node); // after callback
@@ -1910,29 +1911,29 @@ function uukeys(source,           // @param Hash/Array: source
 // uu.drip
 function uudrip(source,      // @param Hash/Array: source
                 evaluator) { // @param Function: evaluator(value):Boolean
-                             // @return Hash: { result, rest }
-                             //  result - Array: matchedArray
-                             //  rest   - Array: unmatchedArray
+                             // @return Hash: { rv, rest }
+                             //  rv   - Array: result values. matchedArray
+                             //  rest - Array: rest values. unmatchedArray
 
-    //  [1][Function only] uu.drip([uu.nop, 1, "a"], uu.isFunction) -> { result: [uu.nop], rest: [1, "a"]      }
-    //  [2][Number only]   uu.drip([uu.nop, 1, "a"], uu.isNumber)   -> { result: [1],      rest: [uu.nop, "a"] }
-    //  [3][String only]   uu.drip([uu.nop, 1, "a"], uu.isString)   -> { result: ["a"],    rest: [uu.nop, 1]   }
-    //  [4][Array only]    uu.drip([[1, 2], 1, "a"], Array.isArray) -> { result: [[1, 2]], rest: [1, "a"]      }
+    //  [1][Function only] uu.drip([uu.nop, 1, "a"], uu.isFunction) -> { rv: [uu.nop], rest: [1, "a"]      }
+    //  [2][Number only]   uu.drip([uu.nop, 1, "a"], uu.isNumber)   -> { rv: [1],      rest: [uu.nop, "a"] }
+    //  [3][String only]   uu.drip([uu.nop, 1, "a"], uu.isString)   -> { rv: ["a"],    rest: [uu.nop, 1]   }
+    //  [4][Array only]    uu.drip([[1, 2], 1, "a"], Array.isArray) -> { rv: [[1, 2]], rest: [1, "a"]      }
 
-    var result = [], rest = [], v, i, iz;
+    var rv = [], rest = [], v, i, iz;
 
     if (isArray(source)) {
         for (i = 0, iz = source.length; i < iz; ++i) {
             v = source[i];
-            evaluator(v) ? result.push(v) : rest.push(v);
+            evaluator(v) ? rv.push(v) : rest.push(v);
         }
     } else {
         for (i in source) {
             v = source[i];
-            evaluator(v) ? result.push(v) : rest.push(v);
+            evaluator(v) ? rv.push(v) : rest.push(v);
         }
     }
-    return { result: result, rest: rest };
+    return { rv: rv, rest: rest };
 }
 
 // uu.values - enum values
@@ -2138,7 +2139,7 @@ function uucalls(source, // @param Hash/Array: has function
     //  [2][call function] uu.calls({ a: uu.nop, b: "dummy", c: uu.nop }) -> [undefined, undefined]
 
     var rv = [], slow = args || that, fn,
-        ary = uudrip(source, isFunction).result, i = 0, iz = ary.length;
+        ary = uudrip(source, isFunction).rv, i = 0, iz = ary.length;
 
     for (; i < iz; ++i) {
         fn = ary[i];
@@ -6408,10 +6409,10 @@ function msgpackDecoder() { // @return Mix: JavaScript Object
     case 0xc0:  return null;
     case 0xc2:  return _false;
     case 0xc3:  return _true;
-    case 0xca:  rv = msgpackReadByte(that, 4);     // float
-                sign = rv & uumsgpack.sign[32];      //  1bit
-                exp  = (rv >> 23) & 0xff;   //  8bits
-                frac = rv & 0x7fffff;       // 23bits
+    case 0xca:  rv = msgpackReadByte(that, 4);  // float
+                sign = rv & uumsgpack.sign[32]; //  1bit
+                exp  = (rv >> 23) & 0xff;       //  8bits
+                frac = rv & 0x7fffff;           // 23bits
                 if (!rv || rv === 0x80000000) { // 0.0 or -0.0
                     return 0;
                 }
@@ -6420,10 +6421,10 @@ function msgpackDecoder() { // @return Mix: JavaScript Object
                 }
                 return (sign ? -1 : 1) *
                             (frac | 0x800000) * Math.pow(2, exp - 127 - 23); // 127: bias
-    case 0xcb:  rv = msgpackReadByte(that, 4);     // double
-                sign = rv & uumsgpack.sign[32];      //  1bit
-                exp  = (rv >> 20) & 0x7ff;  // 11bits
-                frac = rv & 0xfffff;        // 52bits - 32bits (high word)
+    case 0xcb:  rv = msgpackReadByte(that, 4);  // double
+                sign = rv & uumsgpack.sign[32]; //  1bit
+                exp  = (rv >> 20) & 0x7ff;      // 11bits
+                frac = rv & 0xfffff;            // 52bits - 32bits (high word)
                 if (!rv || rv === 0x80000000) { // 0.0 or -0.0
                     return 0;
                 }
@@ -6431,7 +6432,7 @@ function msgpackDecoder() { // @return Mix: JavaScript Object
                     return frac ? NaN : Infinity;
                 }
                 return (sign ? -1 : 1) *
-                            ((frac | 0x100000)   * Math.pow(2, exp - 1023 - 20) // 1023: bias
+                            ((frac | 0x100000) * Math.pow(2, exp - 1023 - 20) // 1023: bias
                              + msgpackReadByte(that, 4) * Math.pow(2, exp - 1023 - 52));
     case 0xcf:  return msgpackReadByte(that, 4) * Math.pow(2, 32) +
                        msgpackReadByte(that, 4);                    // uint 64
@@ -6450,7 +6451,7 @@ function msgpackDecoder() { // @return Mix: JavaScript Object
                 that.index += size;
                 // utf8.decode
                 for (rv = [], ri = -1, iz = i + size; i < iz; ++i) {
-                    c = data[i]; // first byte
+                    c = data[i];    // first byte
                     if (c < 0x80) { // ASCII(0x00 ~ 0x7f)
                         rv[++ri] = c;
                     } else if (c < 0xe0) {
@@ -6463,14 +6464,14 @@ function msgpackDecoder() { // @return Mix: JavaScript Object
                 return String.fromCharCode.apply(null, rv);
     case 0xdf:  size = msgpackReadByte(that, 4);                       // map 32
     case 0xde:  size === undef && (size = msgpackReadByte(that, 2));   // map 16
-    case 0x80:  for (rv = {}; i < size; ++i) {                  // map
+    case 0x80:  for (rv = {}; i < size; ++i) {                         // map
                     key = that.decode();
                     rv[key] = that.decode(); // key/value pair
                 }
                 return rv;
     case 0xdd:  size = msgpackReadByte(that, 4);                       // array 32
     case 0xdc:  size === undef && (size = msgpackReadByte(that, 2));   // array 16
-    case 0x90:  for (rv = []; i < size; ++i) {                  // array
+    case 0x90:  for (rv = []; i < size; ++i) {                         // array
                     rv.push(that.decode());
                 }
     }

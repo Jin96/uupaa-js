@@ -1,13 +1,12 @@
 <?php
 
 // --- user setting ---
-$outputDir   = "../js/";        // output dir
-$libraryCore = "uupaa.js";
-$preprosess  = "js.pp";         // pre-processor
-$sourceDir   = "../src/";
-$compiler    = "g";             // default compiler
-//$catfood     = "../catfood.js"; // temporary file
-$catfood     = $outputDir . "catfood.js"; // temporary file
+$outputDir   = "../js/";        // output dir (-outdir ...)
+$libraryCore = "uupaa.js";      // library core (-lib ...)
+$preprosess  = "js.pp";         // pre-processor (-pp ...)
+$sourceDir   = "../src/";       // source dir (-srcdir ...)
+$compiler    = "g";             // default compiler (-g / -m / -y)
+$catfood     = "catfood.js";    // temporary file (lazy build)
 $castoff     = array();         // "form,canvas,..."
 $castoffAll  = array(
     "form", "snippet", "image", "color",
@@ -28,10 +27,9 @@ $slash       = '/';
 $mobile      = false;
 $memento     = false;
 $verbose     = false;
-$skipCore    = false;
 $inputFiles  = array($libraryCore);
 $loadedFiles = array(); // avoid duplicate load
-$compileOption = "";
+$compileOption = ""; // compile option (-memento)
 $loadedFileSize = 0;
 $forceOutputFileName = "";
 
@@ -47,7 +45,7 @@ function loadFiles($inputFiles) { // @param Array:
         $js = autoInclude($js);
     }
 
-    // create catfood
+    // create "../js/catfood.js"
     $fp = fopen($catfood, 'w') or die($catfood . " file open fail");
 
     fwrite($fp, $js);
@@ -57,15 +55,11 @@ function loadFiles($inputFiles) { // @param Array:
 
 function loadSource($src) { // @param FilePathString:
                             // @return JavaScriptExpressionString:
-    global $verbose, $skipCore, $libraryCore, $loadedFiles, $slash,
+    global $verbose, $libraryCore, $loadedFiles, $slash,
            $mobile, $castoff, $loadedFileSize;
 
     $src = pathNormalize(trim($src));
 
-    // skip libraryCore file
-    if ($skipCore && preg_match('/' . $libraryCore . '$/', $src)) {
-        return '';
-    }
     // avoid duplicate source
     if (in_array($src, $loadedFiles)) {
         return '';
@@ -80,7 +74,7 @@ function loadSource($src) { // @param FilePathString:
     $loadedFileSize = $loadedFileSize + filesize($src);
     $js = preg_replace('/(\r\n|\r|\n)/m', "\n", file_get_contents($src));
 
-    // #include "source.js"
+    // include "../src/source.js"
     $js = preg_replace_callback('/#include\s+["\'<]?([\w\.\-\+\/]+)[>"\']?/ms',
                                 includeSource, $js);
     // pre-process
@@ -91,18 +85,19 @@ function loadSource($src) { // @param FilePathString:
     return $js;
 }
 
-// "{{{!ident ... }}}!ident" -> ""
 // "{@ident ... }@ident" -> ""
 function stripCodeBlock($js, $mobile, $castoff) {
     $copiedArray = $castoff; // copy array
     if ($mobile) {
         $copiedArray[] = "mb"; // add "mb"
     }
+    // cut off
+    //      {@ident
+    //          ...
+    //      }@ident
     foreach ($copiedArray as $value) {
-        $js = preg_replace('/\{\{\{\!' . $value . '(?:[^\n]*)\}\}\}\!'      . $value . '/',   '', $js);
-        $js = preg_replace('/\{\{\{\!' . $value . '(?:[^\n]*)\n.*?\}\}\}\!' . $value . '/ms', '', $js);
-        $js = preg_replace('/\{@'      . $value . '(?:[^\n]*)\}@'           . $value . '/',   '', $js);
-        $js = preg_replace('/\{@'      . $value . '(?:[^\n]*)\n.*?\}@'      . $value . '/ms', '', $js);
+        $js = preg_replace('/\{@' . $value . '(?:[^\n]*)\}@'      . $value . '/',   '', $js);
+        $js = preg_replace('/\{@' . $value . '(?:[^\n]*)\n.*?\}@' . $value . '/ms', '', $js);
     }
     return $js;
 }
@@ -131,7 +126,7 @@ function pathNormalize($path) { // @param FilePathString:  "..\dir/file.ext"
 }
 
 function minify() {
-    global $compiler, $skipCore, $verbose, $catfood, $mobile, $libraryCore,
+    global $compiler, $verbose, $catfood, $mobile, $libraryCore,
            $loadedFileSize, $perfPoint, $outputDir, $forceOutputFileName,
            $memento, $compileOption;
 
@@ -139,11 +134,8 @@ function minify() {
 
     // strip file extension
     $outfile = preg_replace('/\.[\w\.]+$/', '', $libraryCore);
-    if ($mobile) {
-        $outfile .= $skipCore ? '.mb2.js' : '.mb.js';
-    } else {
-        $outfile .= '.js';
-    }
+    $outfile .= $mobile ? '.mb.js'
+                        :    '.js';
     if ($forceOutputFileName) {
         $outfile = $forceOutputFileName;
     }
@@ -159,7 +151,6 @@ function minify() {
         $command = 'java -jar tool.g.jar ' . $options . ' --js ' . $catfood
                  . ' --js_output_file ' . $outputDir . $outfile;
         break;
-
     case "y":
         $options = '--charset "utf-8" ';
         $command = 'java -jar tool.y.jar -v ' . $options . ' -o ' . $outputDir
@@ -200,7 +191,7 @@ function minify() {
               time() - $perfPoint); // elapsed time
     }
 
-    if ($memento) {
+    if ($memento) { // -memento
         $str = file_get_contents($outputDir . $outfile);
 
         $fp = fopen($outputDir . $outfile, 'w');
@@ -230,32 +221,28 @@ while ($v = array_shift($argv)) {
     case "-mb":     $mobile  = true; break;
     case "-v":      $verbose = true; break;
     case "-pp":     $preprosess = array_shift($argv); break;
-    case "-core":   $libraryCore = array_shift($argv);
+    case "-lib":    $libraryCore = array_shift($argv);
                     $inputFiles = array($libraryCore); break;
-    case "-srcdir": $sourceDir = array_shift($argv); break;
+    case "-src":    $sourceDir  = array_shift($argv); break;
+    case "-out":    $outputDir  = array_shift($argv);
+                    $catfood    = $outputDir . "catfood.js"; // rebuild
+                    break;
     case "-off":    $castoff = explode("/", array_shift($argv)); break;
     default:        if (!in_array($v, $inputFiles)) {
                         $inputFiles[] = $v;
                     }
     }
 }
+$catfood = $outputDir . $catfood; // rebuild
+
 if ($castoff[0] === "all") {
     $castoff = $castoffAll; // copy array
 }
 $castoff[] = "debug";
 $castoff[] = "assert";
 
-include $preprosess;
+include $preprosess; // include js.php
 
-if ($mobile) {
-    loadFiles(array($libraryCore));
-    minify();
-
-    if (count($inputFiles) < 2) {
-        return;
-    }
-    $skipCore = true;
-}
 loadFiles($inputFiles);
 minify();
 
