@@ -6,7 +6,7 @@
 
 build/upa.php は 幾つかの JavaScript ソースコードを読み込み、結合、プリプロセスとMinifyを行い、最適化済みの JavaScript 実行ファイルを生成します。
 
-`upa.php [`*-g*` | -m | -y] [-v] [-memento] [-pp file] [-src dir] [-out dir] [-o file] [-lib file] [-mb] [-off ident[/ident[/..]]] [*.js ...]`
+upa.php `[`*-g* `|` -m `|` -y`] [`-v`] [`-memento`] [`-pp _file_`] [`-src _dir_`] [`-out _dir_`] [`-o _file_`] [`-lib _file_`] [`-mb`] [`-off _ident_`[`/_ident_`[`/..`]]] [`_`*`.js_ ...`]`
 
 == #include ==
 upa.php は JavaScript ソースコード内に、include 文 {{{#include}}} _sourcecode_ を見つけるとファイルを読み込みその場に展開します。
@@ -48,7 +48,7 @@ upa.php は JavaScript ソースコード内に、include 文 {{{#include}}} _so
 || -lib     || library core     || ライブラリの核となるファイルを指定します。デフォルトは "uupaa.js" です。<br /> ビルドで生成するファイル名は -lib または -o(こちらを優先) で指定したファイル名になります ||
 || -mb      || Mobile WebKit Mode       || `{{{`!mb ～ `}}}`!mb を削除します <br /> 生成されるコードは MobileWebKit(iPhone,iPad, iPod, Android)専用になり、拡張子が .mb.js になります ||
 || -off     || castoff          || コメントアウトする機能名をスラッシュで連結し指定します。例: -off form/snippet ||
-|| `*`.js   || JavaScript source code file path || ソースコードのファイルパスを指定します。相対パスで指定した場合は -src 以下からファイルを読み取ります ||
+|| _`*`.js_ || JavaScript source code file path || ソースコードのファイルパスを指定します。相対パスで指定した場合は -src 以下からファイルを読み取ります ||
 
 == -off ==
  -off オプションに指定可能な文字列の一覧です。複数の ident を指定する場合はスラッシュで連結します。
