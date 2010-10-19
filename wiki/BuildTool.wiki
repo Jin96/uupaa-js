@@ -41,7 +41,7 @@ upa.php は JavaScript ソースコード内に、include 文 {{{#include}}} _so
 || -y       || use YUI Compressor       || ||
 || -v       || verbose mode             || ビルド対象一覧を表示します。ビルド結果を表示し一時停止します ||
 || -memento || memento compile option    || 圧縮後のコードの先頭行にコンパイルで使用したコマンドラインオプションを挿入します<br />// compile option: upa.php -v -off all -memento ||
-|| -pp      || preprocessor file        || プロプロセスで使用するPHPコードを指定します。通常のビルドでは指定しません。デフォルトは "js.php" です ||
+|| -pp      || preprocessor file        || プロプロセスで使用するPHPコードを指定します。通常のビルドでは指定しません。デフォルトは "js.pp" です ||
 || -src     || source directory || ソースコードを読み込む基準ディレクトリを指定します。デフォルトは "../src/" です ||
 || -out     || output directory || 出力先ディレクトリを指定します。デフォルトは "../js/" です ||
 || -o       || output file name || 出力するファイル名を指定します。デフォルトは "uupaa.js" です。-lib オプションと同時に指定した場合は -o で指定したファイル名が優先されます ||
