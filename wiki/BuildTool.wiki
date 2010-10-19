@@ -6,7 +6,7 @@
 
 build/upa.php はプリプロセスとMinifyを施し最適化された.jsファイルを生成します。
 
-`upa.php [`*-g*` | -m | -y] [-mb] [-v] [-pp file] [-src dir] [-core file] [-nocore] [-off ident[/ident[/..]]] [*.js ...]`
+`upa.php [`*-g*` | -m | -y] [-mb] [-v] [-memnto] [-pp file] [-src dir] [-out dir] [-o file] [-core file] [-nocore] [-off ident[/ident[/..]]] [*.js ...]`
 
 == #include ==
 `#include` _sourcecode_ を見つけるとファイルを読み込みその場に展開します。
@@ -36,17 +36,20 @@ build/upa.php はプリプロセスとMinifyを施し最適化された.jsファ
   * http://pigs.sourceforge.jp/uupaa.js/build/minifier.zip をダウンロードし(*.exe, *.jar)ファイルを build ディレクトリ以下に設置してください。
   * build ディレクトリに移動し、upa.php -v とタイプしエラーがでなければビルド可能な状態です。
 
-|| *-g*   || use Google Closure Compiler || (default) ||
-|| -m   || use Microsoft Ajax Minifier || ||
-|| -y   || use YUI Compressor || ||
-|| -mb  || Mobile WebKit Mode || `{{{`!mb ～ `}}}`!mb を削除します <br /> 生成されるコードは MobileWebKit(iPhone,iPad, iPod)専用になります。<br /> -core に指定されたファイルを別個にビルドします(最大で2回ビルドします) ||
-|| -v   || verbose mode || ビルド対象一覧を表示します。ビルド結果を表示し一時停止します ||
-|| -pp  || preprocessor file || プロプロセスで使用するPHPコードを指定します。デフォルトは "js.php" です ||
-|| -srcdir || source directory || ソースコードを読み込む基準ディレクトリを指定します。デフォルトは "../src/" です ||
-|| -core || library core || ライブラリの核となるファイルを指定します。デフォルトは "uupaa.js" です。<br /> ビルドで生成するファイル名も -core で指定したファイル名になります ||
-|| -nocore || no library core || ライブラリの核となるファイルをマージせずにビルドします ||
-|| -off || castoff || コメントアウトする機能名をスラッシュで連結し指定します。例: -off form/snippet ||
-|| `*`.js || JavaScript source code file path || ソースコードファイルパスを指定します。相対パスで指定した場合は -srcdir 以下からファイルを読み取ります ||
+|| *-g*     || use Google Closure Compiler || (default) ||
+|| -m       || use Microsoft Ajax Minifier || ||
+|| -y       || use YUI Compressor       || ||
+|| -mb      || Mobile WebKit Mode       || `{{{`!mb ～ `}}}`!mb を削除します <br /> 生成されるコードは MobileWebKit(iPhone,iPad, iPod)専用になり、拡張子が .mb.js になります ||
+|| -v       || verbose mode             || ビルド対象一覧を表示します。ビルド結果を表示し一時停止します ||
+|| -memnto  || memnto compile option    || 圧縮後のコードの先頭行にコンパイルで使用したコマンドラインオプションを挿入します<br />// compile option: upa.php -v -off all -memento ||
+|| -pp      || preprocessor file        || プロプロセスで使用するPHPコードを指定します。通常ビルドでは指定しません。デフォルトは "js.php" です ||
+|| -src     || source directory || ソースコードを読み込む基準ディレクトリを指定します。デフォルトは "../src/" です ||
+|| -out     || output directory || 出力先ディレクトリを指定します。デフォルトは "../js/" です ||
+|| -o       || output file name || 出力するファイル名を指定します。デフォルトは "uupaa.js" です。-lib オプションよりも優先されます ||
+|| -lib     || library core     || ライブラリの核となるファイルを指定します。デフォルトは "uupaa.js" です。<br /> ビルドで生成するファイル名は -lib または -o(こちらを優先) で指定したファイル名になります ||
+|| -nolib   || no library core  || ライブラリの核となるファイルをマージせずにビルドします ||
+|| -off     || castoff          || コメントアウトする機能名をスラッシュで連結し指定します。例: -off form/snippet ||
+|| `*`.js   || JavaScript source code file path || ソースコードファイルパスを指定します。相対パスで指定した場合は -src 以下からファイルを読み取ります ||
 
 == -off ==
  -off オプションに指定可能な文字列の一覧です。複数の ident を指定する場合はスラッシュで連結します。
@@ -85,42 +88,42 @@ upa -off color/ui/codec
 = 例 =
 各オプションの利用方法について説明します。
 
-== JavaScriptソースコードをビルドする ==
- * upa src.js
- src.js を相対パスで指定しているため {$sourceDir}/src.js がロードされます。
-
-
-== 複数のソースコードを結合し一つのファイルにビルドする ==
- * upa a.js b.js c.js
+== uupaa.js に他の複数のライブラリ/プラグインを同梱した状態でビルドする ==
+ * upa lib.js plugin.js
+ 3つのファイル(../src/uupaa.js, ../src/lib.js, ../src/plugin.js) を結合し、../js/uupaa.js を生成します。
 
 == iPhone/iPad用にビルドする ==
- * upa src.js -mb
- uupaa.mb.js と uupaa.mb2.js の2つのファイルが生成されます。
- uupaa.mb.js には uupaa.js を Minify したものが。uupaa.mb2.js にはそれ以外のファイルを結合し Minify したものが格納されています。
+ * upa -mb
+ ../src/uupaa.js を読み込み ../js/uupaa.mb.js を生成します。
 
 == iPhone/iPad用に最小構成でビルドする ==
- * upa src.js -mb -off form/snippet/image/color
- uupaa.mb.js と uupaa.mb2.js の2つのファイルが生成されます。
- この例では uu.form.value(), uu.snippet(), uu.image(), uu.color() 等が利用できなくなりますが、不要な機能を削減しファイルサイズを最小化できます。
+ * upa -mb -off form/snippet/image/color
+ ../src/uupaa.js を読み込み ../js/uupaa.mb.js を生成します。
+ この例では uu.form(), uu.snippet(), uu.image(), uu.color() 等が利用できなくなります。不要な機能を削減しファイルサイズを最小化できます。
+
+== ビルドオプションを記録する ==
+ * upa -v -memento -off canvas/storage a.js
+ ../src/uupaa.js と ../src/a.js を読み込み ../js/uupaa.js を生成します。
+ ../js/uupaa.js の先頭行は
+ {{{ // compile option: upa -v -memento -off canvas/storage a.js }}} になります。
 
 == Microsoft Ajax Minifier でビルドする(Windows環境のみ) ==
- * upa src.js -m
+ * upa -m
 
 == YUI Compressor でビルドする ==
- * upa src.js -y
+ * upa -y
 
-== -core でライブラリコアを指定してビルドする ==
- * upa src.js -core anotherLibrary.js
- 生成されるファイルは anotherLibrary.js という名前になります。
- uupaa.js ライブラリ以外のライブラリやファイルをビルドできます。
+== -lib で uupaa.js 以外のライブラリをビルドする ==
+ * upa -lib prototype.js
+ ../src/prototype.js を読み込み ../js/prototype.js を生成します。
 
 == -pp でプリプロセス用のPHPコードを指定してビルドする ==
  * upa src.js -pp c.pp
 
-== -nocore でコアをマージせずにビルドする ==
- * upa -nocore src.js src2.js
-
+== -nolib でコアをマージせずにビルドする ==
+ * upa -nolib a.js b.js
+ ../src/a.js と ../src/b.js を読み込み ../js/a.js を生成します。
 
 = 中間ファイル(catfood.js) =
-uupaa.js が生成されるディレクトリと同じディレクトリに、各ソースコードを結合し、Minifyを行う直前の状態のファイルが catfood.js という名前で生成されます。
-Minifier が行番号付きでエラーや警告を出した場合は catfood.js の行番号と照らし合わせソースコードを修正してください。
+Minify直前の状態(ソースを結合状態)の中間ファイルを {$out}/catfood.js というファイル名で生成します。
+ビルド時のエラーや警告は catfood.js と対応しています。
