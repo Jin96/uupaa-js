@@ -6,12 +6,12 @@
 
 build/upa.php は 幾つかの JavaScript ソースコードを読み込み、結合、プリプロセスとMinifyを行い、最適化済みの JavaScript 実行ファイルを生成します。
 
-`upa.php [`*-g*` | -m | -y] [-mb] [-v] [-memnto] [-pp file] [-src dir] [-out dir] [-o file] [-lib file] [-nolib] [-off ident[/ident[/..]]] [*.js ...]`
+`upa.php [`*-g*` | -m | -y] [-v] [-memnto] [-pp file] [-src dir] [-out dir] [-o file] [-lib file] [-nolib] [-mb] [-off ident[/ident[/..]]] [*.js ...]`
 
 == #include ==
-upa.php は JavaScript ソースコード内に、include 文 {{{`#include` _sourcecode_ }}} を見つけるとファイルを読み込みその場に展開します。
+upa.php は JavaScript ソースコード内に、include 文 {{{#include}}} _sourcecode_ を見つけるとファイルを読み込みその場に展開します。
 
-#include 文をそのまま記述すると JavaScript の構文エラーになるため、先頭に一行コメントを追加し以下のように記述します。ソースコードパスが空白や記号を含む場合は、前後をクォートて囲ってください。
+#include 文をそのまま記述すると JavaScript の構文エラーになるため、先頭に一行コメントを追加し以下のように記述します。ソースコードパスが空白や記号を含む場合は前後をクォートで囲みます。
 {{{
 //#include sourcecode.js
 
@@ -39,17 +39,17 @@ upa.php は JavaScript ソースコード内に、include 文 {{{`#include` _sou
 || *-g*     || use Google Closure Compiler || (default) ||
 || -m       || use Microsoft Ajax Minifier || ||
 || -y       || use YUI Compressor       || ||
-|| -mb      || Mobile WebKit Mode       || `{{{`!mb ～ `}}}`!mb を削除します <br /> 生成されるコードは MobileWebKit(iPhone,iPad, iPod)専用になり、拡張子が .mb.js になります ||
 || -v       || verbose mode             || ビルド対象一覧を表示します。ビルド結果を表示し一時停止します ||
-|| -memnto  || memnto compile option    || 圧縮後のコードの先頭行にコンパイルで使用したコマンドラインオプションを挿入します<br />// compile option: upa.php -v -off all -memento ||
-|| -pp      || preprocessor file        || プロプロセスで使用するPHPコードを指定します。通常ビルドでは指定しません。デフォルトは "js.php" です ||
+|| -memento || memento compile option    || 圧縮後のコードの先頭行にコンパイルで使用したコマンドラインオプションを挿入します<br />// compile option: upa.php -v -off all -memento ||
+|| -pp      || preprocessor file        || プロプロセスで使用するPHPコードを指定します。通常のビルドでは指定しません。デフォルトは "js.php" です ||
 || -src     || source directory || ソースコードを読み込む基準ディレクトリを指定します。デフォルトは "../src/" です ||
 || -out     || output directory || 出力先ディレクトリを指定します。デフォルトは "../js/" です ||
-|| -o       || output file name || 出力するファイル名を指定します。デフォルトは "uupaa.js" です。-lib オプションよりも優先されます ||
+|| -o       || output file name || 出力するファイル名を指定します。デフォルトは "uupaa.js" です。-lib オプションと同時に指定した場合は -o で指定したファイル名が優先されます ||
 || -lib     || library core     || ライブラリの核となるファイルを指定します。デフォルトは "uupaa.js" です。<br /> ビルドで生成するファイル名は -lib または -o(こちらを優先) で指定したファイル名になります ||
 || -nolib   || no library core  || ライブラリの核となるファイルをマージせずにビルドします ||
+|| -mb      || Mobile WebKit Mode       || `{{{`!mb ～ `}}}`!mb を削除します <br /> 生成されるコードは MobileWebKit(iPhone,iPad, iPod, Android)専用になり、拡張子が .mb.js になります ||
 || -off     || castoff          || コメントアウトする機能名をスラッシュで連結し指定します。例: -off form/snippet ||
-|| `*`.js   || JavaScript source code file path || ソースコードファイルパスを指定します。相対パスで指定した場合は -src 以下からファイルを読み取ります ||
+|| `*`.js   || JavaScript source code file path || ソースコードのファイルパスを指定します。相対パスで指定した場合は -src 以下からファイルを読み取ります ||
 
 == -off ==
  -off オプションに指定可能な文字列の一覧です。複数の ident を指定する場合はスラッシュで連結します。
@@ -57,32 +57,33 @@ upa.php は JavaScript ソースコード内に、include 文 {{{`#include` _sou
 upa -off color/ui/codec
 }}}
 || *ident*   || 説明 || 削減されるファイルサイズ<br />(Minify適用後の値) ||
-|| all       || 以下の機能を一括でコメントアウトします。 || -94.8kB ||
-|| form      || uu.form.value(), NodeSet.value() をコメントアウトします || -0.6kB ||
+|| all       || 以下の機能を一括でコメントアウトします。 || -56.8kB ||
+|| form      || uu.form(), NodeSet.value() をコメントアウトします || -0.9kB ||
 || snippet   || uu.snippet() をコメントアウトします || -0.7kB ||
-|| image     || uu.image() をコメントアウトします || -0.9kB ||
-|| color     || uu.color() をコメントアウトします。<br />uu.fx でカラーアニメーションが利用できなくなります || -5.1kB ||
+|| image     || uu.image() をコメントアウトします || -1.0kB ||
+|| color     || uu.color() をコメントアウトします。<br />uu.fx でカラーアニメーションが利用できなくなります || -6.2kB ||
 || colordict || 色辞書をコメントアウトします。<br />uu.color() は利用可能ですが<br /> "black" や "skyblue" などの W3C Named Color は利用できなくなります || -2.3kB ||
 || test      || uu.ok(), uu.ng() をコメントアウトします。|| -1.5kB ||
-|| fx        || uu.fx() をコメントアウトします。<br />uu.css.show() と uu.css.hide() も利用できなくなります || -6.1kB ||
+|| fx        || uu.fx() をコメントアウトします。<br />uu.css.show() と uu.css.hide() も利用できなくなります || -7.6kB ||
 || ajax      || uu.ajax(), uu.jsonp() をコメントアウトします。|| -2.8kB ||
 || svg       || uu.svg() をコメントアウトします || -0.2kB ||
 || canvas    || uu.canvas() をコメントアウトします || -59.0kB ||
 || flash     || uu.flash() をコメントアウトします || -0.6kB ||
-|| cookie    || uu.cookie(), uu.Class.CookieStorage をコメントアウトします || -0.9kB ||
-|| storage   || uu.Class.Storage をコメントアウトします。<br />uu.storage は null になり利用できなくなります。 || -5.8kB ||
-|| nodeset   || NodeSet I/F 全体をコメントアウトします。<br /> uu("div > p").add("div") などが利用できなくなります || -1.4kB ||
-|| live      || uu.live(), uu.unlive(), NodeSet.live(), NodeSet.unlive() をコメントアウトします || -1.3kB ||
-|| resize    || uu.resize(), uu.unresize() をコメントアウトします || -0.8kB ||
+|| cookie    || uu.cookie(), uu.Class.CookieStorage をコメントアウトします || -1.0kB ||
+|| storage   || uu.Class.Storage をコメントアウトします。<br />uu.storage は null になり利用できなくなります。 || -4.3kB ||
+|| nodeset   || NodeSet I/F 全体をコメントアウトします。<br /> uu("div > p").add("div") などが利用できなくなります || -1.7kB ||
+|| live      || uu.live(), uu.unlive(), NodeSet.live(), NodeSet.unlive() をコメントアウトします || -1.2kB ||
+|| eventresize || uu.event.resize(), uu.event.unresize() をコメントアウトします || -0.8kB ||
+|| eventcyclic || uu.event.cyclic(), uu.event.uncyclic() をコメントアウトします || -0.3kB ||
 || cssbox    || uu.css.box(), uu.css.rect(), <br />uu.css.toStatic(), uu.css.toAbsolute(), uu.css.toRelative() をコメントアウトします || -1.7kB ||
-|| codec     || uu.entity(), uu.base64(), <br />uu.utf8(), uu.md5(), uu.sha1(), uu.hmac() をコメントアウトします。<br />uu.ok() が使用できなくなります。 || -4kB ||
+|| codec     || uu.entity(), uu.base64(), <br />uu.utf8(), uu.md5(), uu.sha1(), uu.hmac() をコメントアウトします。<br />uu.ok() が使用できなくなります。 || -8.0kB ||
 || md5       || uu.md5() をコメントアウトします || -1.6kB ||
 || sha1      || uu.sha1() をコメントアウトします || -0.7kB ||
-|| hmac      || uu.hmac() をコメントアウトします || --kB ||
+|| hmac      || uu.hmac() をコメントアウトします || -0.2kB ||
 || sprintf   || uu.sf(), uu.sprintf() をコメントアウトします || -0.8kB ||
-|| url       || uu.url(), uu.qs() をコメントアウトします || -1.6kB ||
-|| ui        || uu.ui() をコメントアウトします || --kB ||
-|| preload   || 画像のプリロード処理をコメントアウトします || --kB ||
+|| url       || uu.url(), uu.qs() をコメントアウトします || -2.0kB ||
+|| ui        || uu.ui() をコメントアウトします || -7.2kB ||
+|| preload   || 画像のプリロード処理をコメントアウトします || -0.1kB ||
 
 
 = 例 =
