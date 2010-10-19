@@ -119,7 +119,7 @@ upa -off color/ui/codec
  ../src/prototype.js を読み込み ../js/prototype.js を生成します。
 
 == -pp でプリプロセス用のPHPコードを指定してビルドする ==
- * upa cxx.js -pp cxx.pp
+ * upa c.js -pp c.pp
  擬似 c コードを JavaScript のコードにコンバートする
 
 = 中間ファイル(catfood.js) =
