@@ -46,7 +46,6 @@ upa.php は JavaScript ソースコード内に、include 文 {{{#include}}} _so
 || -out     || output directory || 出力先ディレクトリを指定します。デフォルトは "../js/" です ||
 || -o       || output file name || 出力するファイル名を指定します。デフォルトは "uupaa.js" です。-lib オプションと同時に指定した場合は -o で指定したファイル名が優先されます ||
 || -lib     || library core     || ライブラリの核となるファイルを指定します。デフォルトは "uupaa.js" です。<br /> ビルドで生成するファイル名は -lib または -o(こちらを優先) で指定したファイル名になります ||
-|| -nolib   || no library core  || ライブラリの核となるファイルをマージせずにビルドします ||
 || -mb      || Mobile WebKit Mode       || `{{{`!mb ～ `}}}`!mb を削除します <br /> 生成されるコードは MobileWebKit(iPhone,iPad, iPod, Android)専用になり、拡張子が .mb.js になります ||
 || -off     || castoff          || コメントアウトする機能名をスラッシュで連結し指定します。例: -off form/snippet ||
 || `*`.js   || JavaScript source code file path || ソースコードのファイルパスを指定します。相対パスで指定した場合は -src 以下からファイルを読み取ります ||
@@ -120,11 +119,8 @@ upa -off color/ui/codec
  ../src/prototype.js を読み込み ../js/prototype.js を生成します。
 
 == -pp でプリプロセス用のPHPコードを指定してビルドする ==
- * upa src.js -pp c.pp
-
-== -nolib でコアをマージせずにビルドする ==
- * upa -nolib a.js b.js
- ../src/a.js と ../src/b.js を読み込み ../js/a.js を生成します。
+ * upa cxx.js -pp cxx.pp
+ 擬似 c コードを JavaScript のコードにコンバートする
 
 = 中間ファイル(catfood.js) =
 Minify直前の状態(ソースを結合状態)の中間ファイルを {$out}/catfood.js というファイル名で生成します。
