@@ -24,17 +24,20 @@ upa.php は JavaScript ソースコード内に、include 文 {{{#include}}} _so
 == 導入 ==
 
 === Windows でビルドする ===
+  * Java Runtime をインストールします。既にインストールされている場合は不要です。
+  * .NET Framework をインストールします。既にインストールされている場合は不要です。
   * PHP CLI をインストールします。XAMPP を代わりにインストールしてもよいでしょう。
-  * Javaの実行環境をインストールします。既にインストールされている場合は不要です。
-  * http://pigs.sourceforge.jp/uupaa.js/build/minifier.zip をダウンロードし(*.exe, *.jar)ファイルを build ディレクトリ以下に設置してください。
-  * 必要に応じてシステムの環境変数に php へのパスを追加します。
-  * build ディレクトリに移動し、upa -v とタイプしエラーがでなければビルド可能な状態です。
+  * `[コントロールパネル]-[システム]-[詳細設定]-[環境変数]-[システム環境変数]-[Path]`の末尾に C:\xampp\php; を追加します。
+  * build/dos.bat をダブルクリックするとコマンドプロンプトが起動します。 upa -v とタイプしエラーがでなければビルド可能な状態です。
 
 === Mac OS X / Ubuntu でビルドする ===
+  * Java Runtime をインストールします。既にインストールされている場合は不要です。
   * PHP CLI をインストールします。既にインストールされている場合は不要です。
-  * Javaの実行環境をインストールします。既にインストールされている場合は不要です。
-  * http://pigs.sourceforge.jp/uupaa.js/build/minifier.zip をダウンロードし(*.exe, *.jar)ファイルを build ディレクトリ以下に設置してください。
-  * build ディレクトリに移動し、upa.php -v とタイプしエラーがでなければビルド可能な状態です。
+{{{
+  $sudo apt-get update
+  $sudo apt-get install php5-cli
+}}}
+  * ターミナル build ディレクトリに移動し、php -f upa.php -v とタイプしエラーがでなければビルド可能な状態です。
 
 || *-g*     || use Google Closure Compiler || (default) ||
 || -m       || use Microsoft Ajax Minifier || ||
