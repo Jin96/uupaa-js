@@ -141,23 +141,23 @@ function minify() {
     }
 
     switch ($compiler) {
-    case "g":
+    case "g": // http://code.google.com/p/closure-compiler/
 //      $options = '--warning_level VERBOSE ';
-        $command = 'java -jar tool.g.jar ' . $options . ' --js ' . $catfood
+        $command = 'java -jar Google/closure-compiler/compiler.jar ' . $options . ' --js ' . $catfood
                  . ' --js_output_file ' . $outputDir . $outfile;
         break;
     case "G":
         $options = '--compilation_level ADVANCED_OPTIMIZATIONS ';
-        $command = 'java -jar tool.g.jar ' . $options . ' --js ' . $catfood
+        $command = 'java -jar Google/closure-compiler/compiler.jar ' . $options . ' --js ' . $catfood
                  . ' --js_output_file ' . $outputDir . $outfile;
         break;
-    case "y":
+    case "y": // http://developer.yahoo.com/yui/compressor/
         $options = '--charset "utf-8" ';
-        $command = 'java -jar tool.y.jar -v ' . $options . ' -o ' . $outputDir
+        $command = 'java -jar Yahoo/yuicompressor/build/yuicompressor-2.4.2.jar -v ' . $options . ' -o ' . $outputDir
                  . $outfile . ' ' . $catfood;
         break;
-    case "m":
-        $command = 'tool.m.exe -w5 -hc ' . $catfood . ' -o ' . $outputDir
+    case "m": // http://ajaxmin.codeplex.com/
+        $command = 'Microsoft\AjaxMin\AjaxMin.exe -warn:5 ' . $catfood . ' -clobber:True -out ' . $outputDir
                  . $outfile;
     }
 
