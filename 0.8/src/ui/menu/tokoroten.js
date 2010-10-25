@@ -19,7 +19,8 @@ function hoverEvent(evt, hover, node) {
             }
             userHover = hover;
         }
-        uu.klass.toggle(node, "active");
+//      uu.klass.toggle(node, "active");
+        uu.klass("!active", node);
         uu.fx(node, 350, { stop: 1, w: hover ? [width, "OutQuad"] : padding });
 
         lastNode = node;
@@ -39,7 +40,7 @@ arg.auto && setInterval(function() {
             ary = uu.query("#" + arg.id + ">ul>li>a"); // <a>
             lastNode = ary[ary.length - 1];
         }
-        ary = uu.node.array(lastNode.parentNode); // <li>
+        ary = uu.node.bros(lastNode.parentNode); // <li>
         hoverEvent(0, autoHover = 0, lastNode);
         hoverEvent(0, autoHover = 1, (ary.next && ary.next.firstChild) || ary.first.firstChild);
     }
