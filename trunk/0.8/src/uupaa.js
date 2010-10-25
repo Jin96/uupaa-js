@@ -475,7 +475,8 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
 //}@cssbox
         // --- CSS 2 ---
 //{@color
-        bgcolor:    uucssbgcolor,   // uu.css.bgcolor(node:Node):Color
+        bgcolor:    uucssbgcolor,   // uu.css.bgcolor(node:Node,
+                                    //                defaultColor:ColorString= "#fff"):Color
 //}@color
         // --- CSS 3 ---
         opacity:    uucssopacity,   // uu.css.opacity(node:Node, value:Number/String):Number/Node
@@ -3331,7 +3332,7 @@ function uucssbgcolor(node,           // @param Node:
         bgc = uucss(n).backgroundColor;
         n = n[_parentNode];
     }
-    return uucolor(zero[bgc] ? defaultColor : bgc);
+    return uucolor(zero[bgc] ? (defaultColor || "#fff") : bgc);
 }
 //}@color
 
