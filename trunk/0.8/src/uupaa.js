@@ -208,10 +208,10 @@ var _addEventListener = "addEventListener",
     _scheme = /^(https?|file|wss?):/,
     _parse = {
         file: /^(file):\/{2,3}(?:loc\w+\/)?([^ ?#]*)(?:\?([^#]*))?(?:#(.*))?/i, // file
-        //       file://         localhost/ dir/f.ext   ?key=value   #fragment
+        //       file://         localhost/ dir/f.ext   ?key=value   #hash
         //       [1]                            [2]          [3]          [4]
         http: /^(\w+):\/\/([\w:]+@)?([^\/:]+)(?::(\d*))?([^ ?#]*)(?:\?([^#]*))?(?:#(.*))?/i  // http, https, ws, wss, ...
-        //      scheme:// id:pass@   server     : port   /dir/f.ext  ?key=value   #fragment
+        //      scheme:// id:pass@   server     : port   /dir/f.ext  ?key=value   #hash
         //      [1]       [2]        [3]          [4]    [5]          [6]          [7]
     },
     // --- environment ---
@@ -605,8 +605,10 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //                            evaluator:Function,
                                     //                            useCapture:Boolean = false,
                                     //                            traceID:String = "")
-        detach:     uueventdetach   // uu.event.detach(node:Node, eventType:String, evaluator:Function,
-                                    //                                              useCapture:Boolean = false)
+        detach:     uueventdetach   // uu.event.detach(node:Node, eventType:String,
+                                    //                            evaluator:Function,
+                                    //                            useCapture:Boolean = false,
+                                    //                            traceID:String = "")
     }),
     bind:           uuevent,        // uu.bind() as uu.event()
     unbind:         uueventunbind,  // uu.unbind() as uu.event.unbind()
@@ -769,14 +771,19 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //  [3][html-attr to js-attr]    uu.fix("for")              -> "htmlFor"
                                     //  [4][through]                 uu.fix("-webkit-shadow")   -> "-webkit-shadow"
     trim:     uumix(uutrim, {       // uu.trim(source:String, replacement:String = " "):String
-                                    //  [1][trim and inner space] uu.trim("  has  space  ") -> "has  space"
-        tag:        uutrimtag,      // uu.trim.tag("  <h1>A</h1>  B  <p>C</p>  ") -> "A B C"
-                                    //  [1][trim tags]            uu.trim.tag("  <h1>A</h1>  B  <p>C</p>  ") -> "A B C"
-        func:       uutrimfunc,     // uu.trim.func('  url("http://...")  ') -> "http://..."
-                                    //  [1][trim function]        uu.trim.func(' url("http://...") ') -> "http://..."
-                                    //  [2][trim function]        uu.trim.func(' rgb(1, 2, 3) ')      -> "1, 2, 3"
-        quote:      uutrimquote     // uu.trim.quote(' "quote string" ') -> 'quote string'
-                                    //  [1][trim double and single quotes] uu.trim.quote(' "quote string" ') -> 'quote string'
+                                    //  [1][trim inner]    uu.trim("  has  space  ") -> "has  space"
+        tag:        uutrimtag,      // uu.trim.tag(source:HTMLFragmentString):String
+                                    //  [1][trim tags]     uu.trim.tag("  <h1>A</h1>  B  <p>C</p>  ") -> "A B C"
+                                    //  [2][trim tags]     uu.trim.tag("      A       B     C      ") -> "A B C"
+        func:       uutrimfunc,     // uu.trim.func(source:CSSStyleFragmentString):String
+                                    //  [1][trim function] uu.trim.func(' url("http://...") ') -> "http://..."
+                                    //  [2][trim function] uu.trim.func(' rgb(1, 2, 3) ')      -> "1, 2, 3"
+        hash:       uutrimhash,     // uu.trim.hash(source:URLString):String
+                                    //  [1][trim url hash] uu.trim.hash("http://example.com/a.jpg#hash")           -> "http://example.com/a.jpg"
+                                    //  [2][trim url hash] uu.trim.hash("http://example.com/a.jpg?key=value#hash") -> "http://example.com/a.jpg?key=value"
+        quote:      uutrimquote     // uu.trim.quote(source:String):String
+                                    //  [1][trim quotes]   uu.trim.quote(' "quote string" ') -> "quote string"
+                                    //  [2][trim quotes]   uu.trim.quote(" 'quote string' ") -> "quote string"
     }),
     f:              uuf,            // uu.f(format:FormatString, var_args, ...):String
                                     //  [1][placeholder] uu.format("@ dogs and @", 101, "cats") -> "101 dogs and cats"
@@ -1003,7 +1010,12 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
     }),
 //}@ui
     // --- OTHER ---
-    dmz:            {},             // uu.dmz - DeMilitarized Zone(proxy)
+    dmz: {                          // uu.dmz - DeMilitarized Zone(proxy) and STM(short term memory)
+        location: {
+            href:   location.href,  // uu.dmz.location.href - String: keep initial location.href
+            hash:   location.hash   // uu.dmz.location.hash - String: keep initial location.hash
+        }
+    },
     nop:            uunop,          // uu.nop - none operation
     pao:            uupao           // uu.pao - `function-producing` function
                                     //  [1][pao literal ] uu.pao(false)  -> (function() { return false; })
@@ -2462,10 +2474,14 @@ function uuattr(node,    // @param Node:
 }
 // [SVG] w=width,h=height, [DOM] cn=class
 uuattr._ = uuhash(
-//{@mb
-    !uuready[_getAttribute] ? "for,htmlFor,class,className,cn,className" : // [IE6][IE7]
+//{@mb [IE6][IE7]
+    !uuready[_getAttribute] ?
+        "cellspacing,cellSpacing,colspan,colSpan," +
+        "for,htmlFor,frameborder,frameBorder,maxlength,maxLength," +
+        "readonly,readOnly,rowspan,rowSpan,tabindex,tabIndex,usemap,useMap," +
+        "klass,className,class,className,cn,className,w,width,h,height" :
 //}@mb
-    _className + ",class,cn,class,htmlFor,for,w,width,h,height"
+    _className + ",class,klass,class,cn,class,htmlFor,for,w,width,h,height"
 );
 
 // uu.data - node data accessor [HTML5 spec - Embedding custom non-visible data]
@@ -4444,7 +4460,8 @@ function uuevent(node,         // @param Node:
                         eventData.t =
                             eventData.t[_replace]("," + ex + ",", ",");
                     }
-                    uueventdetach(node, eventType, closure, capture);
+                    uueventattach(node, eventType, closure, capture, // detach
+                                  traceID, _true);
                 }
             }
         } else {
@@ -4518,7 +4535,8 @@ uuevent.codes = {
     // HTML5 Events
     online:         50,
     offline:        51,
-    message:        52
+    message:        52,
+    hashchange:     53
 };
 
 // uu.event.fire - fire event / fire custom event(none capture event only)
@@ -4624,6 +4642,18 @@ function uueventattach(node,         // @param Node:
                        useCapture,   // @param Boolean(= false):
                        traceID,      // @param String(= ""): traceID ident
                        __detach__) { // @hidden Boolean(= false): true is detach
+
+//{@eventhashchange
+    function handleHashChange(evt) {
+        if (!evt.oldURL) { // [HTML5 SPEC] oldURL, newURL
+            evt.oldURL = uu.dmz.location.href;
+            evt.newURL = location.href;
+            uu.dmz.location.href = location.href;
+        }
+        evaluator(evt);
+    }
+//}@eventhashchange
+
 //{@assert
     switch (uutype(traceID)) {
     case uutype.STRING:
@@ -4640,6 +4670,10 @@ function uueventattach(node,         // @param Node:
 //{@mb
     eventType = uuevent._.fix[eventType] || eventType;
 //}@mb
+
+    var callback = evaluator,
+        trace = "data-uueventtrace",
+        hash;
 
 /* event log
     if (uu.ready.dom) {
@@ -4659,30 +4693,46 @@ function uueventattach(node,         // @param Node:
     }
  */
 
+    switch (eventType) {
+//{@eventhashchange
+    case "hashchange":
+        if (_env.ie6 || _env.ie7) { // [IE6][IE7]
+            ; // TODO: not impl
+        } else { // [IE8][IE9][Firefox3.6+][WEB STD]
+            callback = handleHashChange;
+        }
+        break;
+//}@eventhashchange
+    default:
+    }
+
 //{@mb
     if (node[_addEventListener]) {
 //}@mb
         node[__detach__ ? "removeEventListener"
-                        : _addEventListener](eventType, evaluator, !!useCapture);
+                        : _addEventListener](eventType, callback, !!useCapture);
 //{@mb
     } else {
         node[__detach__ ? "detachEvent"
-                        : "attachEvent"]("on" + eventType, evaluator);
+                        : "attachEvent"]("on" + eventType, callback);
     }
 //}@mb
     // event trace
-    //   node["data-uueventtrace"] = {{event trace ident}}
+    //   node["data-uueventtrace"][traceID] = Number
     if (traceID) {
-        node["data-uueventtrace"] = __detach__ ? "" : traceID;
+        hash = node[trace] || (node[trace] = {});
+        hash[traceID] || (hash[traceID] = 0);
+        __detach__ ? --hash[traceID] : ++hash[traceID];
     }
 }
 
 // uu.event.detach - detach event - Raw Level API wrapper
-function uueventdetach(node,         // @param Node:
-                       eventType,    // @param String: event type
-                       evaluator,    // @param Function: evaluator
-                       useCapture) { // @param Boolean(= false):
-    uueventattach(node, eventType, evaluator, useCapture, "", _true); // detach
+function uueventdetach(node,       // @param Node:
+                       eventType,  // @param String: event type
+                       evaluator,  // @param Function: evaluator
+                       useCapture, // @param Boolean(= false):
+                       traceID) {  // @param String(= ""): traceID ident
+    uueventattach(node, eventType, evaluator, useCapture, traceID, _true); // detach
 }
 
 // uu.event.key - get key and keyCode (cross browse keyCode)
@@ -6114,25 +6164,45 @@ uufix._ = {}; // { "background-color": "backgroundColor", ... }
 function uutrim(source,        // @param String: " a   b  c "
                 replacement) { // @param String(= " "): replacement
                                // @return String: "a b c"
+    //  [1][trim inner]    uu.trim("  has  space  ") -> "has  space"
+
     return source.trim()[_replace](/\s+/g,
                                    replacement === void 0 ? " " : replacement);
 }
 
 // uu.trim.tag - uu.trim() + strip tags
-function uutrimtag(source) { // @param String:  "  <h1>A</h1>  B  <p>C</p>  "
+function uutrimtag(source) { // @param HTMLFragmentString: "  <h1>A</h1>  B  <p>C</p>  "
                              // @return String: "A B C"
+    //  [1][trim tags]     uu.trim.tag("  <h1>A</h1>  B  <p>C</p>  ") -> "A B C"
+    //  [2][trim tags]     uu.trim.tag("      A       B     C      ") -> "A B C"
+
     return uutrim(source[_replace](/<\/?[^>]+>/g, ""));
 }
 
 // uu.trim.func - uu.trim() + strip "function-name(" ... ")"
-function uutrimfunc(source) { // @param String:   '  url("http://...")  '
+function uutrimfunc(source) { // @param CSSStyleFragmentString: '  url("http://...")  '
                               // @return String:  '"http://..."'
+    //  [1][trim function] uu.trim.func(' url("http://...") ') -> "http://..."
+    //  [2][trim function] uu.trim.func(' rgb(1, 2, 3) ')      -> "1, 2, 3"
+
     return source[_replace](/^[^\(]+\(|\)\s*$/g, ""); // )
+}
+
+// uu.trim.hash - uu.trim() + strip "#hash"
+function uutrimhash(source) { // @param URLString: "http://example.com/a.jpg#hash"
+                              // @return String:   "http://example.com/a.jpg"
+    //  [1][trim url hash] uu.trim.hash("http://example.com/a.jpg#hash")           -> "http://example.com/a.jpg"
+    //  [2][trim url hash] uu.trim.hash("http://example.com/a.jpg?key=value#hash") -> "http://example.com/a.jpg?key=value"
+
+    return source[_replace](/^\s*|#.*$/g, "");
 }
 
 // uu.trim.quote - String.trim() + strip double and single quotes
 function uutrimquote(source) { // @param String:  ' "quote string" '
-                               // @return String: 'quote string'
+                               // @return String: "quote string"
+    //  [1][trim quotes]   uu.trim.quote(' "quote string" ') -> "quote string"
+    //  [2][trim quotes]   uu.trim.quote(" 'quote string' ") -> "quote string"
+
     return source[_replace](/^\s*["']?|["']?\s*$/g, "");
 }
 
@@ -6883,37 +6953,39 @@ function uuurldir(url) { // @param URLString/PathString: url or path
 
 // inner - build URL
 function buildURL(hash) { // @param URLHash:
-                          // @return URLString: "scheme://domain:port/path?qs#fragment"
+                          // @return URLString: "scheme://domain:port/path?qs#hash"
     return [hash.scheme,
             hash.scheme ? (hash.scheme === "file" ? ":///"
                                                   : "://") : "",
             hash.domain,
-            hash.port     ? ":" + hash.port     : "", hash.path || "/",
-            hash.qs       ? "?" + hash.qs       : "",
-            hash.fragment ? "#" + hash.fragment : ""].join("");
+            hash.port ? ":" + hash.port : "",
+            hash.path || "/",
+            hash.qs   ? "?" + hash.qs   : "",
+            hash.hash ? "#" + hash.hash : ""].join("");
 }
 
 // inner - parse URL
 function parseURL(url) { // @param URLString: absurl / relurl,
-                         //                   "http://username:password@example.com:8080/dir1/dir2/file.ext?a=b&c=d#fragment"
-                         // @return URLHash: { url, scheme, domain, port, base, path, dir, file, hash, fragment }
-                         //     url     - String: "http://username:password@example.com:8080/dir1/dir2/file.ext?a=b;c=d#fragment"
-                         //     ssl     - Boolean: false
-                         //     scheme  - String: "http"
-                         //     basic   - String: "username:password"
-                         //     domain  - String: "example.com"
-                         //     port    - String: "8080"
-                         //     base    - String: "http://example.com:8080/dir1/dir2/"
-                         //     path    - String: "/dir1/dir2/file.ext"
-                         //     dir     - String: "/dir1/dir2/"
-                         //     file    - String: "file.ext"
-                         //     hash    - Hash: { a: "b", c: "d" }
-                         //     fragment - String: "fragment"
+                         //                   "http://username:password@example.com:8080/dir1/dir2/file.ext?a=b&c=d#hash"
+                         // @return URLHash: { url, scheme, domain, port, base,
+                         //                    path, dir, file, qs, hash }
+                         //     url    - String: "http://username:password@example.com:8080/dir1/dir2/file.ext?a=b;c=d#hash"
+                         //     ssl    - Boolean: false
+                         //     scheme - String: "http"
+                         //     basic  - String: "username:password"
+                         //     domain - String: "example.com"
+                         //     port   - String: "8080"
+                         //     base   - String: "http://example.com:8080/dir1/dir2/"
+                         //     path   - String: "/dir1/dir2/file.ext"
+                         //     dir    - String: "/dir1/dir2/"
+                         //     file   - String: "file.ext"
+                         //     qs     - String: "a=b&c=d"
+                         //     hash   - String: "hash"
     var m, w = ["/", ""];
 
     if (url) {
         // _parse.file: /^(file):\/\/(?:\/)?(?:lo\w+\/)?([^ ?#]*)(?:\?([^#]*))?(?:#(.*))?/i, // file
-        //                 file://       /     localhost/ dir/f.ext   ?key=value   #fragment
+        //                 file://       /     localhost/ dir/f.ext   ?key=value   #hash
         //                 [1]                            [2]          [3]          [4]
         m = _parse.file.exec(url);
         if (m) {
@@ -6930,13 +7002,12 @@ function parseURL(url) { // @param URLString: absurl / relurl,
                 dir:    w.dir,
                 file:   w.file,
                 qs:     m[3] || "",
-                hash:   m[3] ? parseQueryString(m[3]) : {},
-                fragment: m[4] || ""
+                hash:   m[4] || ""
             };
         }
 
         // _parse.http: /^(\w+):\/\/([\w:]+@)?([^\/:]+)(?::(\d*))?([^ ?#]*)(?:\?([^#]*))?(?:#(.*))?/i  // http, https, ws, wss, ...
-        //                scheme:// id:pass@   server     : port   /dir/f.ext  ?key=value   #fragment
+        //                scheme:// id:pass@   server     : port   /dir/f.ext  ?key=value   #hash
         //                [1]       [2]        [3]          [4]    [5]          [6]          [7]
         m = _parse.http.exec(url);
         if (m) {
@@ -6953,29 +7024,15 @@ function parseURL(url) { // @param URLString: absurl / relurl,
                 dir:    w.dir,
                 file:   w.file,
                 qs:     m[6] || "",
-                hash:   m[6] ? parseQueryString(m[6]) : {},
-                fragment: m[7] || ""
+                hash:   m[7] || ""
             };
         }
     } else {
         url = "/";
     }
     m = uuurlsplit(url);
-    return {
-        url:    url,
-        ssl:    _false,
-        scheme: "",
-        basic:  "",
-        domain: "",
-        port:   "",
-        base:   m.dir,
-        path:   url,
-        dir:    m.dir,
-        file:   m.file,
-        qs:     "",
-        hash:   {},
-        fragment: ""
-    };
+    return { url: url, ssl: _false, scheme: "", basic: "", domain: "", port: "",
+             base: m.dir, path: url, dir: m.dir, file: m.file, qs: "", hash: "" };
 }
 
 // uu.url.split - split dir/file "dir/file.ext" -> ["dir/", "file.ext"]
@@ -7078,7 +7135,7 @@ function parseQueryString(queryString) { // @param URLString/QueryString: "key1=
 
     // chop url. "http://example.com?key=val" -> { key: "val" }
     if (queryString[_indexOf]("?") >= 0) { // [1]
-        return parseURL(uuurlabs(queryString)).hash;
+        queryString = parseURL(uuurlabs(queryString)).qs;
     }
     queryString[_replace](/&amp;|&|;/g, ";") // "&amp;" or "&" or ";" -> ";"
                [_replace](/(?:([^\=]+)\=([^\;]+);?)/g, _parse); // [2]
