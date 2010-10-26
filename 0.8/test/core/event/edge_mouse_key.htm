@@ -1,0 +1,128 @@
+<!doctype html><html><head><title></title>
+<style>
+html,body {
+/*
+    border: 10px solid black;
+ */
+    margin: 0;
+    padding: 0;
+    border: 0px solid black;
+}
+.ans {
+    position: absolute; left: 300px; top: 100px;
+    width: 300px; height: 300px;
+    outline: 1px dotted gray;
+}
+.absolute {
+    position: absolute; left: 100px; top: 100px;
+    width: 50px; height: 50px;
+    margin: 10px;
+    padding: 10px;
+    border: 10px solid red;
+    background-color: orange;
+    outline: 1px dotted gray;
+}
+.relative {
+    position: relative; left: 100px; top: 200px;
+    width: 50px; height: 50px;
+/*
+    margin: 10px;
+ */
+    padding: 10px;
+    border: 10px solid navy;
+    background-color: blue;
+    outline: 1px dotted gray;
+}
+.fixed {
+    position: fixed; left: 200px; top: 200px;
+    width: 50px; height: 50px;
+    margin: 10px;
+    padding: 10px;
+    border: 10px solid yellow;
+    background-color: pink;
+    outline: 1px dotted gray;
+}
+
+</style>
+<script src="../../../src/uupaa.js"></script>
+<script>
+uu.ready(function(uu) {
+
+    uu.Class("Button", {
+        handleEvent: function(event) {
+            uu.text(uu.id("log"),
+                    uu.f("type:@, code:@, button:@",
+                         event.type, event.code, event.button));
+        }
+    });
+
+    uu.Class("MousePosition", {
+        handleEvent: function(event) {
+            uu.event.stop(event);
+            var edge = uu.event.edge(event);
+
+            uu.text(uu.id("log"),
+                    uu.f("paddingEdgeX:@, paddingEdgeY:@, pageX:@, pageY:@",
+                         edge.x, edge.y, event.pageX, event.pageY));
+        }
+    });
+
+    uu.Class("Wheel", {
+        handleEvent: function(event) {
+            uu.text(uu.id("log"),
+                    uu.f("code:@, wheel:@, type:@",
+                         event.code, event.wheel, event.type));
+        }
+    });
+
+    uu.Class("Key", {
+        handleEvent: function(event) {
+            var keyCode = uu.event.key(event);
+
+            uu.text(uu.id("log"),
+                    uu.f("code:@, keyCode:@, key:@, type:@",
+                         event.code, keyCode.code, keyCode.key, event.type));
+        }
+    });
+
+    uu.node.at(function(node, ident) {
+        uu.event(node, "mousedown", uu("Button"));
+        uu.event(node, "mousewheel", uu("Wheel"));
+    });
+
+    uu.body(
+        uu.div("class,ans", "ans",
+            uu.div("class,absolute", "absolute", "@1"),
+            uu.div("class,relative", "relative", "@2"),
+            uu.div("class,fixed",    "fixed",    "@3")));
+
+    uu.event(document.body, "mousemove+", uu("MousePosition"));
+    uu.event(uu.id("box"), "keydown,keypress,keyup", uu("Key"));
+});
+</script>
+</head><body>
+<h1>Cross Browser Event Test</h1>
+<p>
+    Mouse Buttons, Mouse Wheel, Cursor Position, Key and Key Code
+</p>
+<br />
+<br />
+<br />
+<ul id="log"></ul>
+<textarea id="box"></textarea>
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+</body></html>

@@ -1,0 +1,31 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8" />
+<title></title>
+<style>
+.button {
+    border: 3px outset gray
+}
+</style>
+<script src="../../../src/uupaa.js"></script>
+<script>
+uu.ready(function(uu) {
+    uu.event.cyclic(uu.tag("p")[0], "click", function(evt, count) {
+        uu.log("A @", count);
+    }, 3, 0)
+
+    uu.event.cyclic(uu.tag("p")[1], "click", function(evt, count) {
+        uu.log("B @", count);
+    }, 3, 2)
+
+    uu.event.cyclic(uu.tag("p")[2], "click", function(evt, count) {
+        uu.log("C @", count);
+        uu.log("unbind click event");
+        return true;
+    }, 3, 2)
+});
+</script></head><body>
+
+<p class="button">A: infinity click</p>
+<p class="button">B: 3 x 2 click</p>
+<p class="button">C: cancel click</p>
+
+</body></html>

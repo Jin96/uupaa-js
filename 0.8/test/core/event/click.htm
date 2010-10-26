@@ -1,0 +1,27 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8" />
+<title>Click event handler</title>
+<style>
+.button {
+    border: 3px outset gray
+}
+</style>
+<script src="../../../src/uupaa.js"></script>
+<script>
+uu.ready(function() {
+
+    uu.Class.singleton("A1", {
+        handleEvent:  function(evt) {
+            uu.log("clicked");
+            uu.event.unbind(evt.node);
+
+            uu.log("unbind click event");
+            uu.klass(uu.klass("button")[0], "!button");
+        }
+    });
+
+    uu.body(uu.click(uu.div("class,button", "click me"), uu("A1")));
+})
+</script>
+</head><body>
+<div id="trace"></div>
+</body></html>
