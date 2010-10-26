@@ -163,8 +163,8 @@ function preProcess($js,        // @param String: JavaScript source code
     // strip comment line  "\n/*  */" -> ""
     $js = preg_replace('/\n\/\*(?:\s+)?\*\//m', '', $js);
 
-    // strip comment line  "/*  */\n" -> ""
-    $js = preg_replace('/\/\*(?:\s+)?\*\/\n/m', '', $js);
+    // strip comment line  "/*  */\n" -> " "
+    $js = preg_replace('/\/\*(?:\s+)?\*\/\n/m', ' ', $js);
 
     // strip tail space
     $js = preg_replace('/\s+$/m', '', $js);

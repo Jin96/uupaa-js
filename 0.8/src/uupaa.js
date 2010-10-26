@@ -207,8 +207,12 @@ var _addEventListener = "addEventListener",
     _trimSpace = /^\s+|\s+$/g,
     _scheme = /^(https?|file|wss?):/,
     _parse = {
-        file: /^(file):\/\/(?:\/)?(?:loc\w+\/)?([^ ?#]*)(?:\?([^#]*))?(?:#(.*))?/i, // file
-        http: /^(\w+):\/\/([^\/:]+)(?::(\d*))?([^ ?#]*)(?:\?([^#]*))?(?:#(.*))?/i // http, https, ws, wss, ...
+        file: /^(file):\/{2,3}(?:loc\w+\/)?([^ ?#]*)(?:\?([^#]*))?(?:#(.*))?/i, // file
+        //       file://         localhost/ dir/f.ext   ?key=value   #fragment
+        //       [1]                            [2]          [3]          [4]
+        http: /^(\w+):\/\/([\w:]+@)?([^\/:]+)(?::(\d*))?([^ ?#]*)(?:\?([^#]*))?(?:#(.*))?/i  // http, https, ws, wss, ...
+        //      scheme:// id:pass@   server     : port   /dir/f.ext  ?key=value   #fragment
+        //      [1]       [2]        [3]          [4]    [5]          [6]          [7]
     },
     // --- environment ---
     _env = detectEnvironment(0.8),  // as uu.env
@@ -367,6 +371,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //  [2][get item]   uu.complex(key) -> 2
                                     //  [3][set item]   uu.complex(key, value) -> 3
                                     //  [4][set items]  uu.complex({ key: value, ... }) -> 4
+    isURL:          isURL,          // uu.isURL(search:Mix):Boolean
     isNode:         isNode,         // uu.isNode(search:Mix):Boolean
     isNumber:       isNumber,       // uu.isNumber(search:Mix):Boolean
     isString:       isString,       // uu.isString(search:Mix):Boolean
@@ -1828,6 +1833,16 @@ function uucomplex(key,     // @param String/Hash(= void):
     return key === void 0 ? 1
                           : value !== void 0 ? 3
                                              : typeof key === _string ? 2 : 4;
+}
+
+// uu.isURL - is URL
+function isURL(search) { // @param Mix: search
+                         // @return Boolean:
+    if (isString(search) && _scheme.test(search)) {
+        return search.slice(0, 4) === "file" ? _parse.file.test(search)
+                                             : _parse.http.test(search);
+    }
+    return _false;
 }
 
 // uu.isNode - is DOM Node
@@ -6880,10 +6895,12 @@ function buildURL(hash) { // @param URLHash:
 
 // inner - parse URL
 function parseURL(url) { // @param URLString: absurl / relurl,
-                         //                   "http://example.com:8080/dir1/dir2/file.ext?a=b&c=d#fragment"
+                         //                   "http://username:password@example.com:8080/dir1/dir2/file.ext?a=b&c=d#fragment"
                          // @return URLHash: { url, scheme, domain, port, base, path, dir, file, hash, fragment }
-                         //     url     - String: "http://example.com:8080/dir1/dir2/file.ext?a=b;c=d#fragment"
+                         //     url     - String: "http://username:password@example.com:8080/dir1/dir2/file.ext?a=b;c=d#fragment"
+                         //     ssl     - Boolean: false
                          //     scheme  - String: "http"
+                         //     basic   - String: "username:password"
                          //     domain  - String: "example.com"
                          //     port    - String: "8080"
                          //     base    - String: "http://example.com:8080/dir1/dir2/"
@@ -6895,28 +6912,70 @@ function parseURL(url) { // @param URLString: absurl / relurl,
     var m, w = ["/", ""];
 
     if (url) {
-        m = _parse.file.exec(url); // "file:///..."
+        // _parse.file: /^(file):\/\/(?:\/)?(?:lo\w+\/)?([^ ?#]*)(?:\?([^#]*))?(?:#(.*))?/i, // file
+        //                 file://       /     localhost/ dir/f.ext   ?key=value   #fragment
+        //                 [1]                            [2]          [3]          [4]
+        m = _parse.file.exec(url);
         if (m) {
             w = uuurlsplit(m[2]);
-            return { url: url, scheme: m[1], domain: "", port: "",
-                     base: m[1] + ":///" + w.dir, path: m[2], dir: w.dir,
-                     file: w.file, qs: "", hash: m[3] ? parseQueryString(m[3]) : {},
-                     fragment: m[4] || "" };
+            return {
+                url:    url,
+                ssl:    _false,
+                scheme: m[1],
+                basic:  "",
+                domain: "",
+                port:   "",
+                base:   m[1] + ":///" + w.dir,
+                path:   m[2],
+                dir:    w.dir,
+                file:   w.file,
+                qs:     m[3] || "",
+                hash:   m[3] ? parseQueryString(m[3]) : {},
+                fragment: m[4] || ""
+            };
         }
-        m = _parse.http.exec(url); // "http://...", "https://...", "ws://...", "wss://..."
+
+        // _parse.http: /^(\w+):\/\/([\w:]+@)?([^\/:]+)(?::(\d*))?([^ ?#]*)(?:\?([^#]*))?(?:#(.*))?/i  // http, https, ws, wss, ...
+        //                scheme:// id:pass@   server     : port   /dir/f.ext  ?key=value   #fragment
+        //                [1]       [2]        [3]          [4]    [5]          [6]          [7]
+        m = _parse.http.exec(url);
         if (m) {
-            m[4] && (w = uuurlsplit(m[4]));
-            return { url: url, scheme: m[1], domain: m[2], port: m[3] || "",
-                     base: (m[1] + "://" + m[2]) + (m[3] ? ":" + m[3] : "") + w.dir,
-                     path: m[4] || "/", dir: w.dir, file: w.file, qs: m[5] || "",
-                     hash: m[5] ? parseQueryString(m[5]) : {}, fragment: m[6] || "" };
+            m[5] && (w = uuurlsplit(m[5])); // "dir/file.ext" -> { dir, file }
+            return {
+                url:    url,
+                ssl:    m[1] === "https" || m[1] === "wss",
+                scheme: m[1],
+                basic:  m[2] ? m[2].slice(0, -1) : "", // "username:password@" -> "username:password"
+                domain: m[3],
+                port:   m[4] || "",
+                base:   (m[1] + "://" + m[3]) + (m[4] ? ":" + m[4] : "") + w.dir,
+                path:   m[5] || "/",
+                dir:    w.dir,
+                file:   w.file,
+                qs:     m[6] || "",
+                hash:   m[6] ? parseQueryString(m[6]) : {},
+                fragment: m[7] || ""
+            };
         }
     } else {
         url = "/";
     }
     m = uuurlsplit(url);
-    return { url: url, scheme: "", domain: "", port: "", base: m.dir,
-             path: url, dir: m.dir, file: m.file, qs: "", hash: {}, fragment: "" };
+    return {
+        url:    url,
+        ssl:    _false,
+        scheme: "",
+        basic:  "",
+        domain: "",
+        port:   "",
+        base:   m.dir,
+        path:   url,
+        dir:    m.dir,
+        file:   m.file,
+        qs:     "",
+        hash:   {},
+        fragment: ""
+    };
 }
 
 // uu.url.split - split dir/file "dir/file.ext" -> ["dir/", "file.ext"]
@@ -7215,9 +7274,9 @@ function uuok(title,    // @param String/Boolean(= ""): title
             uuf(uuok.fmt.join(""),
                 uuok.bgc[r + (db.row.length % 2) * 4], uuentity(title),
                 tm > 0 ? "<b>(" + tm + " ms)</b>" : "",
-                uujsonencode(lval, 1),
+                uujsonencode(lval, _true, _true), // +esc +space
                 operator,
-                rval === undef ? "" : uujsonencode(rval, 1),
+                rval === undef ? "" : uujsonencode(rval, _true, _true), // +esc +space
                 more || ""));
 
     } else if (isString(title)) { // [2]
