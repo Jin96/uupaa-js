@@ -95,9 +95,9 @@ function stripCodeBlock($js, $mobile, $castoff) {
     //      {@ident
     //          ...
     //      }@ident
-    foreach ($copiedArray as $value) {
-        $js = preg_replace('/\{@' . $value . '(?:[^\n]*)\}@'      . $value . '/',   '', $js);
-        $js = preg_replace('/\{@' . $value . '(?:[^\n]*)\n.*?\}@' . $value . '/ms', '', $js);
+    foreach ($copiedArray as $ident) {
+        $js = preg_replace('/\{@' . $ident . '(?:[^\n]*)\}@'      . $ident . '/',   ' ', $js);
+        $js = preg_replace('/\{@' . $ident . '(?:[^\n]*)\n.*?\}@' . $ident . '/ms', ' ', $js);
     }
     return $js;
 }

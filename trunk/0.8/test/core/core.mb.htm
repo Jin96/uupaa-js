@@ -822,6 +822,74 @@ uu.ready("window", function(uu) {
             dateHash.time, "==", rv.time);
     })();
 
+
+    uu.ok("is...");
+    uu.ok('uu.isURL で url かどうか判別できる uu.isURL("http://example.com")',
+            uu.isURL("http://example.com"), "is true");
+    uu.ok('uu.isURL で url かどうか判別できる uu.isURL("http://example.com/a.jpg")',
+            uu.isURL("http://example.com/a.jpg"), "is true");
+    uu.ok('uu.isURL で url かどうか判別できる uu.isURL("http://example.com/a.jpg?key=value")',
+            uu.isURL("http://example.com/a.jpg?key=value"), "is true");
+    uu.ok('uu.isURL で url かどうか判別できる uu.isURL("http://example.com/a.jpg?key=value#hash")',
+            uu.isURL("http://example.com/a.jpg?key=value#hash"), "is true");
+    uu.ok('uu.isURL で url かどうか判別できる uu.isURL("http://example.com:8080/a.jpg?key=value#hash")',
+            uu.isURL("http://example.com:8080/a.jpg?key=value#hash"), "is true");
+    uu.ok('uu.isURL で url かどうか判別できる(Basic Auth) uu.isURL("http://username:password@example.com:8080/a.jpg?key=value#hash")',
+            uu.isURL("http://username:password@example.com:8080/a.jpg?key=value#hash"), "is true");
+    uu.ok('uu.isURL で url かどうか判別できる(不正なURLをはじく)',
+            uu.isURL("http:/example.com:8080/a.jpg?key=value#hash"), "is false");
+    uu.ok('uu.isURL で url かどうか判別できる uu.isURL("https://example.com")',
+            uu.isURL("https://example.com"), "is true");
+    uu.ok('uu.isURL で url かどうか判別できる uu.isURL("https://example.com/a.jpg")',
+            uu.isURL("https://example.com/a.jpg"), "is true");
+    uu.ok('uu.isURL で url かどうか判別できる uu.isURL("https://example.com/a.jpg?key=value")',
+            uu.isURL("https://example.com/a.jpg?key=value"), "is true");
+    uu.ok('uu.isURL で url かどうか判別できる uu.isURL("https://example.com/a.jpg?key=value#hash")',
+            uu.isURL("https://example.com/a.jpg?key=value#hash"), "is true");
+    uu.ok('uu.isURL で url かどうか判別できる uu.isURL("https://example.com:8080/a.jpg?key=value#hash")',
+            uu.isURL("https://example.com:8080/a.jpg?key=value#hash"), "is true");
+    uu.ok('uu.isURL で url かどうか判別できる uu.isURL("file:///localhost/example.com")',
+            uu.isURL("file:///localhost/example.com"), "is true");
+    uu.ok('uu.isURL で url かどうか判別できる uu.isURL("file:///localhost/example.com/a.jpg")',
+            uu.isURL("file:///localhost/example.com/a.jpg"), "is true");
+    uu.ok('uu.isURL で url かどうか判別できる uu.isURL("file:///localhost/example.com/a.jpg?key=value")',
+            uu.isURL("file:///localhost/example.com/a.jpg?key=value"), "is true");
+    uu.ok('uu.isURL で url かどうか判別できる uu.isURL("file:///localhost/example.com/a.jpg?key=value#hash")',
+            uu.isURL("file:///localhost/example.com/a.jpg?key=value#hash"), "is true");
+    uu.ok('uu.isURL で url かどうか判別できる uu.isURL("file:///localhost/example.com/a.jpg?key=value#hash")',
+            uu.isURL("file:///localhost/example.com/a.jpg?key=value#hash"), "is true");
+    uu.ok('uu.isURL で url かどうか判別できる uu.isURL("file://localhost/example.com")',
+            uu.isURL("file://localhost/example.com"), "is true");
+    uu.ok('uu.isURL で url かどうか判別できる uu.isURL("file://localhost/example.com/a.jpg")',
+            uu.isURL("file://localhost/example.com/a.jpg"), "is true");
+    uu.ok('uu.isURL で url かどうか判別できる uu.isURL("file://localhost/example.com/a.jpg?key=value")',
+            uu.isURL("file://localhost/example.com/a.jpg?key=value"), "is true");
+    uu.ok('uu.isURL で url かどうか判別できる uu.isURL("file://localhost/example.com/a.jpg?key=value#hash")',
+            uu.isURL("file://localhost/example.com/a.jpg?key=value#hash"), "is true");
+    uu.ok('uu.isURL で url かどうか判別できる uu.isURL("file://localhost/example.com/a.jpg?key=value#hash")',
+            uu.isURL("file://localhost/example.com/a.jpg?key=value#hash"), "is true");
+    uu.ok('uu.isURL で url かどうか判別できる uu.isURL("ws://example.com")',
+            uu.isURL("ws://example.com"), "is true");
+    uu.ok('uu.isURL で url かどうか判別できる uu.isURL("ws://example.com/a.jpg")',
+            uu.isURL("ws://example.com/a.jpg"), "is true");
+    uu.ok('uu.isURL で url かどうか判別できる uu.isURL("ws://example.com/a.jpg?key=value")',
+            uu.isURL("ws://example.com/a.jpg?key=value"), "is true");
+    uu.ok('uu.isURL で url かどうか判別できる uu.isURL("ws://example.com/a.jpg?key=value#hash")',
+            uu.isURL("ws://example.com/a.jpg?key=value#hash"), "is true");
+    uu.ok('uu.isURL で url かどうか判別できる uu.isURL("ws://example.com:8080/a.jpg?key=value#hash")',
+            uu.isURL("ws://example.com:8080/a.jpg?key=value#hash"), "is true");
+    uu.ok('uu.isURL で url かどうか判別できる uu.isURL("wss://example.com")',
+            uu.isURL("wss://example.com"), "is true");
+    uu.ok('uu.isURL で url かどうか判別できる uu.isURL("wss://example.com/a.jpg")',
+            uu.isURL("wss://example.com/a.jpg"), "is true");
+    uu.ok('uu.isURL で url かどうか判別できる uu.isURL("wss://example.com/a.jpg?key=value")',
+            uu.isURL("wss://example.com/a.jpg?key=value"), "is true");
+    uu.ok('uu.isURL で url かどうか判別できる uu.isURL("wss://example.com/a.jpg?key=value#hash")',
+            uu.isURL("wss://example.com/a.jpg?key=value#hash"), "is true");
+    uu.ok('uu.isURL で url かどうか判別できる uu.isURL("wss://example.com:8080/a.jpg?key=value#hash")',
+            uu.isURL("wss://example.com:8080/a.jpg?key=value#hash"), "is true");
+
+
     uu.ok("Type");
     uu.ok("null は null 型",                        null,       "is null");
     uu.ok("void 0 は undefined 型(is undefined)",   void 0,     "is undefined");
@@ -1116,14 +1184,12 @@ uu.ready("window", function(uu) {
         uu.ok("uu.url(uu.url()) to URLHash", hash, "is hash");
 
         uu.ok("parse url");
-
-
-
-
-        url = "http://example.com:8080/dir/file.ext?qs=string;more=value#fragment";
+        url = "http://username:password@example.com:8080/dir/file.ext?qs=string;more=value#fragment";
         result = {
-            url:        "http://example.com:8080/dir/file.ext?qs=string;more=value#fragment",
+            url:        "http://username:password@example.com:8080/dir/file.ext?qs=string;more=value#fragment",
+            ssl:        false,
             scheme:     "http",
+            basic:      "username:password",
             domain:     "example.com",
             port:       "8080",
             base:       "http://example.com:8080/dir/",
@@ -1135,30 +1201,147 @@ uu.ready("window", function(uu) {
             fragment:   "fragment"
         };
         hash = uu.url(url);
-        uu.ok("uu.url('http://example.com:8080/dir/file.ext?qs=string;more=value#fragment') - parse url",
+        uu.ok("uu.url('http://username:password@example.com:8080/dir/file.ext?qs=string;more=value#fragment') - parse url",
                 hash, "==", result);
 
+
+
+
+        // FILE SCHEME
+        url = "file:///C:/uupaa/svn/trunk/0.8/test/core/core.htm?qs=string&more=value#fragment";
+        result = {
+            url:        "file:///C:/uupaa/svn/trunk/0.8/test/core/core.htm?qs=string&more=value#fragment",
+            ssl:        false,
+            scheme:     "file",
+            basic:      "",
+            domain:     "",
+            port:       "",
+            base:       "file:///C:/uupaa/svn/trunk/0.8/test/core/",
+            path:       "C:/uupaa/svn/trunk/0.8/test/core/core.htm",
+            dir:        "C:/uupaa/svn/trunk/0.8/test/core/",
+            file:       "core.htm",
+            qs:         "qs=string&more=value",
+            hash:       { qs: "string", more: "value" },
+            fragment:   "fragment"
+        };
+        hash = uu.url(url);
+        uu.ok("uu.url('file:///C:/uupaa/svn/trunk/0.8/test/core/core.htm?qs=string&more=value#fragment') - parse url",
+                hash, "==", result);
+
+
         uu.ok("build url");
-
-
-
         result = "http://example.com:8080/dir/file.ext?qs=string;more=value#fragment";
         hash = {
             url:        "http://example.com:8080/dir/file.ext?qs=string;more=value#fragment",
+            ssl:        false,
             scheme:     "http",
+            basic:      "username:password",
             domain:     "example.com",
             port:       "8080",
             base:       "http://example.com:8080/dir/",
             path:       "/dir/file.ext",
             dir:        "/dir/",
             file:       "file.ext",
-            qs:      "qs=string;more=value",
+            qs:         "qs=string;more=value",
             hash:       { qs: "string", more: "value" },
             fragment:   "fragment"
         };
         url = uu.url(hash);
         uu.ok("uu.url(URLHash) -> build url",
                 url, "==", result);
+
+
+        // SSL
+        result = "https://example.com:8080/dir/file.ext?qs=string;more=value#fragment";
+        hash = {
+            url:        "https://example.com:8080/dir/file.ext?qs=string;more=value#fragment",
+            ssl:        true,
+            scheme:     "https",
+            basic:      "",
+            domain:     "example.com",
+            port:       "8080",
+            base:       "https://example.com:8080/dir/",
+            path:       "/dir/file.ext",
+            dir:        "/dir/",
+            file:       "file.ext",
+            qs:         "qs=string;more=value",
+            hash:       { qs: "string", more: "value" },
+            fragment:   "fragment"
+        };
+        url = uu.url(hash);
+        uu.ok("uu.url(URLHash) -> build url",
+                url, "==", result);
+
+
+        // WebSocket
+        result = "ws://example.com:8080/dir/file.ext?qs=string;more=value#fragment";
+        hash = {
+            url:        "ws://example.com:8080/dir/file.ext?qs=string;more=value#fragment",
+            ssl:        false,
+            scheme:     "ws",
+            basic:      "",
+            domain:     "example.com",
+            port:       "8080",
+            base:       "ws://example.com:8080/dir/",
+            path:       "/dir/file.ext",
+            dir:        "/dir/",
+            file:       "file.ext",
+            qs:         "qs=string;more=value",
+            hash:       { qs: "string", more: "value" },
+            fragment:   "fragment"
+        };
+        url = uu.url(hash);
+        uu.ok("uu.url(URLHash) -> build url",
+                url, "==", result);
+
+
+        // WebSocket + SSL
+        result = "wss://example.com:8080/dir/file.ext?qs=string;more=value#fragment";
+        hash = {
+            url:        "wss://example.com:8080/dir/file.ext?qs=string;more=value#fragment",
+            ssl:        true,
+            scheme:     "wss",
+            basic:      "",
+            domain:     "example.com",
+            port:       "8080",
+            base:       "wss://example.com:8080/dir/",
+            path:       "/dir/file.ext",
+            dir:        "/dir/",
+            file:       "file.ext",
+            qs:         "qs=string;more=value",
+            hash:       { qs: "string", more: "value" },
+            fragment:   "fragment"
+        };
+        url = uu.url(hash);
+        uu.ok("uu.url(URLHash) -> build url",
+                url, "==", result);
+
+
+
+
+        // FILE SCHEME
+        result = "file:///C:/uupaa/svn/trunk/0.8/test/core/core.htm?qs=string&more=value#fragment";
+        hash = {
+            url:        "file:///C:/uupaa/svn/trunk/0.8/test/core/core.htm?qs=string&more=value#fragment",
+            ssl:        false,
+            scheme:     "file",
+            basic:      "",
+            domain:     "",
+            port:       "",
+            base:       "file:///C:/uupaa/svn/trunk/0.8/test/core/",
+            path:       "C:/uupaa/svn/trunk/0.8/test/core/core.htm",
+            dir:        "/uupaa/svn/trunk/0.8/test/core/",
+            file:       "core.htm",
+            qs:         "qs=string&more=value",
+            hash:       { qs: "string", more: "value" },
+            fragment:   "fragment"
+        };
+        url = uu.url(hash);
+        uu.ok("uu.url(URLHash) -> build url",
+                url, "==", result);
+
+
+
 
 
         uu.ok("rebuild url(parse + build)");
