@@ -4675,9 +4675,12 @@ function uueventattach(node,         // @param Node:
                        __detach__) { // @hidden Boolean(= false): true is detach
 //{@eventhashchange
     function handleHashChange(evt) {
+        var hash = location.hash;
+
         // expand event.uu.hash - Array: [oldHash, newHash]
         evt.uuoverride = {
-            hash: [uu.dmz.location.hash, location.hash]
+            hash: [uu.dmz.location.hash,
+                   hash === "#" ? "" : hash] // [IE6][IE7] last location.hash === "#"
         };
         uu.dmz.location.href = location.href;
         uu.dmz.location.hash = location.hash;
@@ -4714,11 +4717,8 @@ function uueventattach(node,         // @param Node:
 //{@eventhashchange
     case "hashchange":
         if (_env.ie6 || _env.ie7) { // [IE6][IE7]
-            if (__detach__) {
-                uu("HashChangeIE").fin();
-            } else {
-                uu("HashChangeIE", handleHashChange);
-            }
+            __detach__ ? uu("HashChangeIE").fin()
+                       : uu("HashChangeIE", handleHashChange);
             return;
         } else if ("onhashchange" in win) { // [IE8][IE9][Firefox3.6+][Opera10.62+][WEB STD]
             callback = handleHashChange;
@@ -4752,41 +4752,44 @@ function uueventdetach(node,         // @param Node:
     uueventattach(node, eventType, evaluator, useCapture, _true); // detach
 }
 
-//{@mb {@oldie
+//{@mb
+//{@oldie
 // [IE6][IE7] fake hashchange event. <iframe> impl.
 uu.Class.singleton("HashChangeIE", {
-    ident: "uuhashchangeie",    // iframe id
-    iframe: null,               // <iframe id="uuhashchangeie">
-    curtHash: location.hash,    // current location.hash
-    fragment: '<iframe id="@" src="javascript:void 0" style="display:none" />',
+    hash: "",               // current location.hash
+    trim: /^#/,             // trim "#"
+    ident: "uuhashchange",  // iframe id
+    iframe: null,           // <iframe id="uuhashchange">
 
     init: function(callback) { // @param CallbackFunction:
         function tick() {
-            var newHash,
-                lHash = location.hash.replace(/^#/, ""),
-                iHash = that.getHash();
+            var ctx = uuid(that.ident).contentWindow.document,
+                curt =     location.hash[_replace](trim, ""),
+                prev = ctx.location.hash[_replace](trim, "");
 
-            if (lHash !== iHash) {
-                if (lHash === that.curtHash) {
-                    // --- [<-] [->] back or forward button fired ---
-                    newHash = iHash;
-                } else {
-                    // --- direct url input or jump from bookmark ---
-                    newHash = lHash;
-                }
-                that.setHash(newHash);
-                callback({
-                    type: "hashchange",
-                    oldURL: that.curtHash,
-                    newURL: newHash
-                });
+            if (curt !== prev) {
+                // [1] [<-] [->] back or forward button fired
+                // [2] direct url input or jump from bookmark
+                curt === that.hash ? (location.hash = that.hash = prev)  // [1]
+                                   :     that.setHash(that.hash = curt); // [2]
+                callback({ type: "hashchange" });
             }
         }
 
-        var that = this;
+        var that = this, iframe = newNode("iframe"),
+            trim = that.trim;
 
-        // <html></html><iframe></iframe>
-        that.iframe = uunodeadd(uuf(this.fragment, this.ident), doc.html);
+        //  <html></html>
+        //  <iframe id="uuhashchange" style="display:none" src="javascript:void 0"></iframe>
+        iframe.id = that.ident;
+        iframe.style[_display] = "none";
+        iframe.src = "javascript:void 0";
+        root[_appendChild](iframe);
+
+        that.iframe = iframe;
+        that.hash = location.hash[_replace](trim, ""); // current location.hash
+        that.setHash(that.hash);
+
         setInterval(tick, 100); // 100ms
     },
     fin: function() {
@@ -4806,11 +4809,6 @@ uu.Class.singleton("HashChangeIE", {
             this.iframe = null;
         }
     },
-    getHash: function() { // @return String: "hash"
-        var ctx = uuid(this.ident).contentWindow.document;
-
-        return (ctx.location.hash).replace(/^#/, "");
-    },
     setHash: function(hash) { // @param String: "hash"
         var ctx = uuid(this.ident).contentWindow.document;
 
@@ -4819,7 +4817,8 @@ uu.Class.singleton("HashChangeIE", {
         ctx.location.hash = hash;
     }
 });
-//}@oldie }@mb
+//}@oldie
+//}@mb
 
 // uu.event.key - get key and keyCode (cross browse keyCode)
 function uueventkey(event) { // @param ExEvent:

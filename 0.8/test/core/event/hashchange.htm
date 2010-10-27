@@ -6,11 +6,13 @@
 }
 </style>
 <script >
-uu.bind(window, "hashchange", function(evt) {
-    uu.log("from #@ -> to #@", evt.uu.hash[0],
-                               evt.uu.hash[1]);
+uu.ready(function() {
+    uu.bind(window, "hashchange", function(evt) {
+        uu.log("from @ -> to @", evt.uu.hash[0],
+                                 evt.uu.hash[1]);
 
-    uu.text(uu.tag("p")[0], location.hash);
+        uu.text(uu.tag("p")[0], location.hash);
+    });
 });
 </script>
 </head><body>
