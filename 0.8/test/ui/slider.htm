@@ -6,15 +6,15 @@ uu.ready(function() {
     uu.each(uu.query("input[type=range]"), function(node) {
         if (node.id === "master") {
             uu.change(node, function(evt) {
-                moveMasterSlider(+evt.node.value); // int cast
+                moveMasterSlider(+evt.uu.node.value); // int cast
             });
         } else if (node.id === "masterdis") {
             uu.change(node, function(evt) {
-                moveMasterDisabledSlider(+evt.node.value); // int cast
+                moveMasterDisabledSlider(+evt.uu.node.value); // int cast
             });
         } else {
             uu.bind(node, "change", function(evt) {
-                range(evt.node, evt.node.id);
+                range(evt.uu.node, evt.uu.node.id);
             });
         }
     });

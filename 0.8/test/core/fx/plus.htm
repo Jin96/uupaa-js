@@ -48,13 +48,13 @@ function moveParts(evt) {
 var toggle = 1;
 function fade(evt) {
     if (toggle) {
-        uu.fx.fade(evt.node, duration, { after: function() {
-            uu.fx(evt.node, 1000, { o: 0.1 });
+        uu.fx.fade(evt.uu.node, duration, { after: function() {
+            uu.fx(evt.uu.node, 1000, { o: 0.1 });
         }});
         toggle = 0;
     } else {
-        uu.fx.fade(evt.node, duration, { before: function() {
-            uu.fx(evt.node, 1000, { o: 1 });
+        uu.fx.fade(evt.uu.node, duration, { before: function() {
+            uu.fx(evt.uu.node, 1000, { o: 1 });
         }});
         toggle = 1;
     }
@@ -65,7 +65,7 @@ function movein(evt) {
     if (degree > 360) {
         degree = 0;
     }
-    uu.fx.movein(evt.node, duration, { degree: degree, range: range });
+    uu.fx.movein(evt.uu.node, duration, { degree: degree, range: range });
 }
 
 function moveout(evt) {
@@ -73,25 +73,25 @@ function moveout(evt) {
     if (degree > 360) {
         degree = 0;
     }
-    uu.fx.moveout(evt.node, duration, { degree: degree, range: range,
+    uu.fx.moveout(evt.uu.node, duration, { degree: degree, range: range,
                                         reverse: 1 });
 }
 
 function flare(evt) {
-    uu.fx.flare(evt.node, duration, { range: range, parts: parts,
+    uu.fx.flare(evt.uu.node, duration, { range: range, parts: parts,
                                       reverse: 1 });
 }
 
 function puff(evt) {
-    uu.fx.puff(evt.node, duration, { reverse: 1 });
+    uu.fx.puff(evt.uu.node, duration, { reverse: 1 });
 }
 
 function shrink(evt) {
-    uu.fx.shrink(evt.node, duration, { reverse: 1 });
+    uu.fx.shrink(evt.uu.node, duration, { reverse: 1 });
 }
 
 function highlight(evt) {
-    uu.fx.highlight(evt.node, duration, { reverse: 1 });
+    uu.fx.highlight(evt.uu.node, duration, { reverse: 1 });
 }
 
 var toggleSlide = false;
@@ -100,17 +100,17 @@ function slide(evt) {
     toggleSlide = !toggleSlide;
 
     if (toggleSlide) {
-        evt.node.innerText = "SlideUp";
-        uu.fx.slide(evt.node, duration);
-        uu.fx(evt.node, 1000);
-        uu.fx.slide(evt.node, 0, { after: function(node) {
+        evt.uu.node.innerText = "SlideUp";
+        uu.fx.slide(evt.uu.node, duration);
+        uu.fx(evt.uu.node, 1000);
+        uu.fx.slide(evt.uu.node, 0, { after: function(node) {
             node.innerText = "Slide";
         }});
     } else {
-        evt.node.innerText = "SlideDown";
-        uu.fx.slide(evt.node, 0);
-        uu.fx(evt.node, 1000);
-        uu.fx.slide(evt.node, duration, { after: function(node) {
+        evt.uu.node.innerText = "SlideDown";
+        uu.fx.slide(evt.uu.node, 0);
+        uu.fx(evt.uu.node, 1000);
+        uu.fx.slide(evt.uu.node, duration, { after: function(node) {
             node.innerText = "Slide";
         }});
     }
@@ -118,9 +118,9 @@ function slide(evt) {
 
 /*
 function slideDown(evt) {
-    uu.fx.slideUp(evt.node, 0);
-    uu.fx(evt.node, 100);
-    uu.fx.slideDown(evt.node, duration);
+    uu.fx.slideUp(evt.uu.node, 0);
+    uu.fx(evt.uu.node, 100);
+    uu.fx.slideDown(evt.uu.node, duration);
 }
  */
 

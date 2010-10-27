@@ -30,7 +30,7 @@ html, body {
 var duration = 300;
 
 function moveDuration(evt) {
-    duration = evt.node.value;
+    duration = evt.uu.node.value;
     uu.text(uu.id("durationValue"), duration);
 }
 
@@ -45,13 +45,13 @@ uu.ready(function() {
     uu.ui.imageSlider.dressup(uu.css.userSelect(uu.id("slide3")), { degree: 90 });
 
     uu.click(uu.id("slide1"), function(evt) {
-        uu.ui.imageSlider(evt.node, duration);
+        uu.ui.imageSlider(evt.uu.node, duration);
     });
     uu.click(uu.id("slide2"), function(evt) {
-        uu.ui.imageSlider(evt.node, duration);
+        uu.ui.imageSlider(evt.uu.node, duration);
     });
     uu.click(uu.id("slide3"), function(evt) {
-        uu.ui.imageSlider(evt.node, duration);
+        uu.ui.imageSlider(evt.uu.node, duration);
     });
 
 
@@ -61,13 +61,13 @@ uu.ready(function() {
     uu.ui.imageSlider.dressup(uu.css.userSelect(uu.id("slideDeny3")), { degree: 90 });
 
     uu.click(uu.id("slideDeny1"), function(evt) {
-        uu.ui.imageSlider(evt.node, duration, { allow: 0 });
+        uu.ui.imageSlider(evt.uu.node, duration, { allow: 0 });
     });
     uu.click(uu.id("slideDeny2"), function(evt) {
-        uu.ui.imageSlider(evt.node, duration, { allow: 0 });
+        uu.ui.imageSlider(evt.uu.node, duration, { allow: 0 });
     });
     uu.click(uu.id("slideDeny3"), function(evt) {
-        uu.ui.imageSlider(evt.node, duration, { allow: 0 });
+        uu.ui.imageSlider(evt.uu.node, duration, { allow: 0 });
     });
 });
 

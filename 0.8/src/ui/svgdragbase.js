@@ -24,7 +24,7 @@ function uuuisvgdragbase(evt,      // @param event:
                                     //  option.tripletap  - Boolean/Function: true is reset
                                     //                                        triple tap callback
     var opt = option, mtx, trans,
-        code = evt.code,
+        code = evt.uu.code,
         pageX = evt.pageX,
         pageY = evt.pageY,
         dragInfo = grip[_uuuidrag],
@@ -90,7 +90,7 @@ function uuuisvgdragbase(evt,      // @param event:
     } else if (code === uu.event.codes.mousemove && dragInfo.dragging) {
 
         if (_touch) {
-            if (evt.gesture) {
+            if (evt.uu.gesture) {
                 dragInfo.scale = evt.scale;
                 dragInfo.rotate = evt.rotation;
                 modMatrix(node, dragInfo, evt.scale, evt.rotation);
@@ -118,9 +118,9 @@ function uuuisvgdragbase(evt,      // @param event:
     // mousewheel
     } else if (code === uu.event.codes.mousewheel) {
         if (evt.shiftKey) {
-            dragInfo.rotate += evt.wheel * 5;  // rotate
+            dragInfo.rotate += evt.uu.wheel * 5;  // rotate
         } else {
-            dragInfo.scale += evt.wheel * 0.1; // scale
+            dragInfo.scale += evt.uu.wheel * 0.1; // scale
             dragInfo.scale < 0.5 && (dragInfo.scale = 0.5);
         }
     }

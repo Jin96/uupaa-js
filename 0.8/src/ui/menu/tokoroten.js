@@ -28,7 +28,7 @@ function hoverEvent(evt, hover, node) {
 
 uu.ready(arg.id, function() {
     uu("#" + arg.id + ">ul>li>a").hover(hoverEvent).click(function(evt) {
-        arg.onclick && arg.onclick(evt, evt.node, uu.data(evt.node, "uueachindex"));
+        arg.onclick && arg.onclick(evt, evt.uu.node, uu.data(evt.uu.node, "uueachindex"));
     });
 });
 
