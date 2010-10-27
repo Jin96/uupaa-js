@@ -62,6 +62,7 @@
 //
 // Opera 10.70
 //      <g buffered-rendering="static">
+//      HTML5 hashchange event
 //
 // IE9beta
 //      impl:
@@ -4692,7 +4693,7 @@ function uueventattach(node,         // @param Node:
     eventType = uuevent._.fix[eventType] || eventType;
 //}@mb
 
-    var callback = evaluator;
+    var /*{@mb*/factory, /*}@mb*/ callback = evaluator;
 
 /* event log
     if (uu.ready.dom) {
@@ -4716,16 +4717,18 @@ function uueventattach(node,         // @param Node:
 //{@oldie
 //{@eventhashchange
     case "hashchange":
-        if (_env.ie6 || _env.ie7) { // [IE6][IE7]
-            __detach__ ? uu("HashChangeIE").fin()
-                       : uu("HashChangeIE", handleHashChange);
-            return;
-        } else if ("onhashchange" in win) { // [IE8][IE9][Firefox3.6+][Opera10.62+][WEB STD]
+//{@mb
+        if ("onhashchange" in win) { // [IE8][IE9][Firefox3.6+][Opera10.70+][HTML5]
+//}@mb
             callback = handleHashChange;
-        } else {
-            ; // TODO: not impl
+            break;
+//{@mb
         }
-        break;
+        factory = _ie ? "HashChangeIE" : "HashChange";
+        __detach__ ? uu(factory).fin()
+                   : uu(factory, handleHashChange);
+        return;
+//}@mb
 //}@eventhashchange
 //}@oldie
     default:
@@ -4760,6 +4763,7 @@ uu.Class.singleton("HashChangeIE", {
     trim: /^#/,             // trim "#"
     ident: "uuhashchange",  // iframe id
     iframe: null,           // <iframe id="uuhashchange">
+    timerID: 0,             // interval timer id
 
     init: function(callback) { // @param CallbackFunction:
         function tick() {
@@ -4790,7 +4794,7 @@ uu.Class.singleton("HashChangeIE", {
         that.hash = location.hash[_replace](trim, ""); // current location.hash
         that.setHash(that.hash);
 
-        setInterval(tick, 100); // 100ms
+        that.timerID = setInterval(tick, 100); // 100ms
     },
     fin: function() {
 //{@assert
@@ -4818,6 +4822,39 @@ uu.Class.singleton("HashChangeIE", {
     }
 });
 //}@oldie
+//}@mb
+
+//{@mb
+// [LEGACY] fake hashchange event.
+uu.Class.singleton("HashChange", {
+    hash: "",   // current location.hash
+    trim: /^#/, // trim "#"
+    timerID: 0, // interval timer id
+
+    init: function(callback) { // @param CallbackFunction:
+        function tick() {
+            var curt = location.hash[_replace](trim, ""),
+                prev = that.hash;
+
+            if (curt !== prev) {
+                that.hash = curt;
+                callback({ type: "hashchange" });
+            }
+        }
+
+        var that = this, trim = that.trim;
+
+        that.hash = location.hash[_replace](trim, ""); // current location.hash
+        that.timerID = setInterval(tick, 100); // 100ms
+    },
+    fin: function() {
+        // clear interval timer
+        if (this.timerID) {
+            clearInterval(this.timerID);
+            this.timerID = 0;
+        }
+    }
+});
 //}@mb
 
 // uu.event.key - get key and keyCode (cross browse keyCode)
