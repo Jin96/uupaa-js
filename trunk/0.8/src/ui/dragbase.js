@@ -25,7 +25,7 @@ function uuuidragbase(evt,      // @param event:
                                 //  option.transform  - Boolean: true is use transform
                                 //  option.shim       - Object: shim object
     var opt = option || {},
-        code = evt.code,
+        code = evt.uu.code,
         pageX = evt.pageX,
         pageY = evt.pageY,
         dragInfo = grip[_uuuidrag],
@@ -47,7 +47,7 @@ function uuuidragbase(evt,      // @param event:
 
         // toggle zoom/rotate mode
         if (option.transform) {
-            if (!_touch && evt.mouse == 1) { // 1 is middle click
+            if (!_touch && evt.uu.mouse == 1) { // 1 is middle click
                 dragInfo.mode = dragInfo.mode ? 0 : 1;
                 if (!uu.ie678) { // [IE] buggy
                     node.style.outline = dragInfo.mode ? "2px solid blue" : "";
@@ -99,7 +99,7 @@ function uuuidragbase(evt,      // @param event:
     } else if (code === uu.event.codes.mousemove && dragInfo.dragging) {
 
         if (_touch) {
-            if (evt.gesture) {
+            if (evt.uu.gesture) {
                 if (option.transform) {
                     scale  = dragInfo.trans[0] + evt.scale - 1,
                     rotate = dragInfo.trans[2] + evt.rotation;
@@ -136,10 +136,10 @@ function uuuidragbase(evt,      // @param event:
     } else if (code === uu.event.codes.mousewheel) {
         if (option.transform) {
             if (evt.shiftKey || dragInfo.mode) {
-                dragInfo.trans[2] += evt.wheel * 5;  // rotate
+                dragInfo.trans[2] += evt.uu.wheel * 5;  // rotate
             } else {
                 scale = dragInfo.trans[0];
-                scale += evt.wheel * 0.1;
+                scale += evt.uu.wheel * 0.1;
                 scale < 0.5 && (scale = 0.5);
                 dragInfo.trans[0] = dragInfo.trans[1] = scale;
             }

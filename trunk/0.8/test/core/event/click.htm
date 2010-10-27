@@ -12,7 +12,7 @@ uu.ready(function() {
     uu.Class.singleton("A1", {
         handleEvent:  function(evt) {
             uu.log("clicked");
-            uu.event.unbind(evt.node);
+            uu.event.unbind(evt.uu.node);
 
             uu.log("unbind click event");
             uu.klass(uu.klass("button")[0], "!button");

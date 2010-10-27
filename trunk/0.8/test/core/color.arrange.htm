@@ -30,7 +30,7 @@ step2. Select Hue(0 ~ 360):
 <script>
 uu.ready(function(uu) {
     uu.change(uu.id("range"), function(evt) {
-        draw({ h: evt.node.value, s: 100, v: 100, l: 50, a: 1 });
+        draw({ h: evt.uu.node.value, s: 100, v: 100, l: 50, a: 1 });
     });
     uu.ui.build();
 });

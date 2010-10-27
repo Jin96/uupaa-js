@@ -49,11 +49,11 @@ if (!usejQuery) { // uupaa.js style
             // bind
                  hover(function(evt, hover) {
                     if (hover) {
-                        useOpacity && uu.fx(evt.node, 400, { o: 1.0 });
-                        uu.fx(evt.node, 500, { w: [ 50, node.title], chain:   1 });
-                        uu.fx(evt.node, 500, { w: [400, node.title], reverse: 1 });
+                        useOpacity && uu.fx(evt.uu.node, 400, { o: 1.0 });
+                        uu.fx(evt.uu.node, 500, { w: [ 50, node.title], chain:   1 });
+                        uu.fx(evt.uu.node, 500, { w: [400, node.title], reverse: 1 });
                     } else {
-                        useOpacity && uu.fx(evt.node, 400, { o: 0.5 });
+                        useOpacity && uu.fx(evt.uu.node, 400, { o: 0.5 });
                     }
                  });
         }
