@@ -11,6 +11,8 @@
 //      cssbox      -> uu.css.box
 //      color       -> uu.color
 //      fx          -> uu.fx
+//      eventhashchange
+//                  -> uu.event("hashchange")
 //      eventhover  -> uu.event.hover
 //      eventresize -> uu.event.resize
 //      eventcyclic -> uu.event.cyclic
@@ -24,7 +26,7 @@
 //      svg         -> uu.svg
 //      flash       -> uu.flash
 //      cookie      -> uu.cookie
-//      url         -> uu.url
+//      url         -> uu.url, uu.event("hashchange")
 //      test        -> uu.ok, uu.ng
 //      nodeset     -> uu("query"), uu.Clas.NodeSet
 //
@@ -122,15 +124,19 @@ uu || (function(win, doc, root, // root as <html>
 /*{@mb*/        Node,                                           /*}@mb*/
                 parseInt, parseFloat, getComputedStyle, JSON) { // quick + minify
 
-// --- FALLBACK ---
-isArray || (isArray = Array.isArray = fallbackIsArray); // [IE6][IE7][IE8][ES3 Based Browsers]
+// --- FALLBACK ( Array.isArray ) ---
+isArray || (isArray = Array.isArray = fallbackIsArray); // [IE6][IE7][IE8][ES3]
 
+// --- FALLBACK ( Node.* ) ---
 //{@mb [IE6][IE7][IE8]
 Node || (win.Node = Node = {
     ELEMENT_NODE: 1, TEXT_NODE:     3, CDATA_SECTION_NODE:      4,
     COMMENT_NODE: 8, DOCUMENT_NODE: 9, DOCUMENT_FRAGMENT_NODE: 11
 });
+//}@mb
 
+// --- FALLBACK ( window.console ) ---
+//{@mb [IE6][IE7]
 win.console || (win.console = {
     log: uunop, debug: uunop, info: uunop, warn: uunop, error: uunop,
     assert: uunop, dir: uunop, dirxml: uunop, trace: uunop, group: uunop,
@@ -139,7 +145,7 @@ win.console || (win.console = {
 });
 //}@mb
 
-// --- MINIFY (http://d.hatena.ne.jp/uupaa/20100730) ---
+// --- MINIFY (create alias, http://d.hatena.ne.jp/uupaa/20100730) ---
 var _addEventListener = "addEventListener",
 //{@mb
     _removeAttribute = "removeAttribute",
@@ -223,12 +229,12 @@ var _addEventListener = "addEventListener",
     _webkit = _env.webkit,          // as uu.webkit (Safari, iPhone, iPad, Google Chrome)
     _baseDir = getBaseDir("uupaa.js"); // base dir. default - directory containing uupaa.js
 
-// --- HTML5 NEXT ---
+// --- HTML5 NEXT ( document.html, document.head ) ---
 // http://www.whatwg.org/specs/web-apps/current-work/multipage/dom.html
 doc.html || (doc.html = root);                   // document.html = <html>
 doc.head || (doc.head = uutag("head", root)[0]); // document.head = <head>
 
-// --- TYPE DETECTION ---
+// --- TYPE DETECTION ( create uu.type.* ) ---
 (function(types, ary, i, iz) {
     for (; i < iz; ++i) {
         uutype[types[i]] = i + 1; // uu.type = { BOOLEAN: 1, NUMBER: 2, ... }
@@ -239,7 +245,7 @@ doc.head || (doc.head = uutag("head", root)[0]); // document.head = <head>
     "REGEXP,UNDEFINED,NULL,HASH,NODE,FAKEARRAY").split(","),
    [_true, 0, "", uunop, [], _perf, /0/], 0, 12);
 
-// --- CONFIGRATION ---
+// --- CONFIGRATION ( window.config.* --marge--> uu.config.* ) ---
 uumix(uuconfig, win.uuconfig || {}, {
     baseDir:        _baseDir,           // uu.config.baseDir - String: base directory. "http://example.com/"
     jsDir:          _baseDir + "js/",   // uu.config.jsDir   - String: JavaScript directory. "http://example.com/js/"
@@ -299,7 +305,7 @@ uumix(uuconfig.ui, {
 }, 0, 0);
 //}@ui
 
-// --- LIBRARY STRUCTURE ---
+// --- LIBRARY STRUCTURE ( build window.uu.* ) ---
 uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNameString/window,
                                     //    arg1:NodeSet/Node/Expression/Mix = void,
                                     //    arg2:Mix = void,
@@ -307,6 +313,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //    arg4:Mix = void):Instance/NodeSet
                                     //  [1][Class factory]   uu("MyClass", arg1, arg2) -> new uu.Class.MyClass(arg1, arg2)
                                     //  [2][NodeSet factory] uu("div>ul>li", <body>) -> NodeSet
+    // --- CONFIGRATION ---
     config:         uuconfig,       // uu.config - Hash: user configurations
     // --- ENVIRONMENT ---
     env:            _env,           // uu.env - Hash: environment informations,
@@ -322,11 +329,11 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
     opera:          _opera,         // uu.opera - as uu.env.opera [ALIAS]
     webkit:         _webkit,        // uu.webkit - as uu.env.webkit [ALIAS]
     ver:            _env,           // uu.ver - Hash: as uu.ver [ALIAS][DEPRECATED]
-    // --- CODE SNIPPET ---
+    // --- CODE SNIPPET / LIGHT WEIGHT TEMPLATE ---
 //{@snippet
     snippet:        uusnippet,      // uu.snippet(id:String, arg:Hash/Array = void):String/Mix
 //}@snippet
-    // --- AJAX / JSONP ---
+    // --- AJAX / JSONP / LAZY JS LOADER / FILE STAT ---
 //{@ajax
     ajax:     uumix(uuajax, {       // uu.ajax(url:String, option:Hash, callback:CallbackFunction)
                                     //  [1][async request] uu.ajax("http://...", { method: "POST", data: ... }, callback)
@@ -351,7 +358,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
     stat:           uustat,         // uu.stat(url:String):Boolean
     require:        uurequire,      // uu.require(url:String, option:Hash = {}):Hash - { data, option, status, ok }
                                     //  [1][sync request] uu.require("http://...") -> { data, option, status, ok }
-    // --- TYPE MATCH AND DETECTION ---
+    // --- TYPE MATCH / TYPE DETECTION ---
     like:           uulike,         // uu.like(lval:Date/Hash/Fake/Array, rval:Date/Hash/Fake/Array):Boolean
     type:           uutype,         // uu.type(mix:Mix):Number
                                     //  uu.type.BOOLEAN      -  1: Boolean
@@ -365,7 +372,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //  uu.type.NULL         -  9: null
                                     //  uu.type.HASH         - 10: Hash (aka Object)
                                     //  uu.type.NODE         - 11: Node (HTMLElement)
-                                    //  uu.type.FAKEARRAY    - 12: FakeArray (Arguments, NodeList, ...)
+                                    //  uu.type.FAKEARRAY    - 12: FakeArray (Arguments, NodeList, HTMLCollection, ...)
     complex:        uucomplex,      // uu.complex(key:String/Hash = void, value:String/Number = void):Number
                                     //  [1][get items]  uu.complex() -> 1
                                     //  [2][get item]   uu.complex(key) -> 2
@@ -376,7 +383,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
     isNumber:       isNumber,       // uu.isNumber(search:Mix):Boolean
     isString:       isString,       // uu.isString(search:Mix):Boolean
     isFunction:     isFunction,     // uu.isFunction(search:Mix):Boolean
-    // --- HASH / ARRAY ---
+    // --- ARRAY / HASH / ITERATION / GENERIC OPERATIONS ---
     arg:            uuarg,          // uu.arg(arg1:Hash/Function = {}, arg2:Hash = void, arg3:Hash = void):Hash/Function
     mix:            uumix,          // uu.mix(base:Hash/Function, flavor:Hash, aroma:Hash = void,
                                     //        override:Number/Boolean = true):Hash/Function
@@ -432,14 +439,14 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //  [1][ByteArray dump] uu.byteArray.dump([1, 2, 3]) -> "010203"
                                     //  [2][ByteArray dump] uu.byteArray.dump([1, 2, 3], "0x", ", 0x") -> "0x01, 0x02, 0x03"
     }),
-    // --- ATTRIBUTE ---
+    // --- DOM NODE ATTRIBUTE ---
     attr:           uuattr,         // uu.attr(node:Node, key:String/Hash = void,
                                     //                    value:String = void):String/Hash/Node
                                     //  [1][get items] uu.attr(node) -> { key: "value", ... }
                                     //  [2][mix items] uu.attr(node, { key: "value", ... }) -> node
                                     //  [3][get item]  uu.attr(node, key) -> "value"
                                     //  [4][set item]  uu.attr(node, key, "value") -> node
-    // --- NODE DATA ---
+    // --- DOM NODE DATA ---
     data:     uumix(uudata, {       // uu.data(node:Node, key:String/Hash = void,
                                     //                    value:Mix: = void):Hash/Mix/Node/undefined
                                     //  [1][get items] uu.data(node) -> { key: value, ... }
@@ -452,7 +459,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
 //      bind:       uudatabind,     // uu.data.bind(key:String, callback:CallbackFunction)
 //      unbind:     undataunbind    // uu.data.unbind(key:String)
     }),
-    // --- CSS / STYLE ---
+    // --- CSS / DOM STYLE ATTRIBUTE ---
     css:      uumix(uucss, {        // uu.css(node:Node, key:String/Hash = void,
                                     //                   value:String = void):Hash/String/Node
                                     //  [1][get computed items]              uu.css(node) -> { key: value, ... }
@@ -478,12 +485,12 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //  [2][to absolute] uu.css.position(<div>, "absolute") -> <div style="position: absolute">
                                     //  [3][to relative] uu.css.position(<div>, "relative") -> <div style="position: relative">
 //}@cssbox
-        // --- CSS 2 ---
+        // --- CSS LEVEL 2 ---
 //{@color
         bgcolor:    uucssbgcolor,   // uu.css.bgcolor(node:Node,
                                     //                defaultColor:ColorString= "#fff"):Color
 //}@color
-        // --- CSS 3 ---
+        // --- CSS LEVEL 3 ---
         opacity:    uucssopacity,   // uu.css.opacity(node:Node, value:Number/String):Number/Node
                                     //  [1][get opacity] uu.css.opacity(node) -> 0.5
                                     //  [2][set opacity] uu.css.opacity(node, 0.5) -> node
@@ -501,7 +508,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //                        orientation, devicePixelRatio }
     // --- TIMER ---
     interval:       uuinterval,     // uu.interval(callback:CallbackFunction, arg:Mix = void):Number
-    // --- EFFECT / ANIMATION ---
+    // --- EFFECT / ANIMATION / EASING ---
 //{@fx
     fx:       uumix(uufx, {         // uu.fx(node:Node, duration:Number, param:Hash/CallbackFunction = void):Node
                                     //  [1][abs]             uu.fx(node, 500, { o: 0.5, x: 200 })
@@ -531,14 +538,14 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
         easing:     {}              // uu.fx.easing - easing functions
     }),
 //}@fx
-    // --- QUERY ---
+    // --- DOM NODE QUERY ---
     id:             uuid,           // uu.id(expr:String, context:Node = document):Node/null
     ids:            uuids,          // uu.ids(expr:CommaJointString, context:Node = document):NodeArray
                                     //  [1] uu.ids("A,B,C") -> [<a id="A">, <li id="B">, <div id="C">]
     tag:            uutag,          // uu.tag(expr:String = "", context:Node = <body>):NodeArray
     match:          uumatch,        // uu.match(expr:CSSSelectorExpressionString, context:Node = <body>):Boolean
     query:          uuquery,        // uu.query(expr:CSSSelectorExpressionString, context:NodeArray/Node = <body>):NodeArray
-    // --- CLASSNAME ---
+    // --- DOM CLASSNAME ATTRIBUTE QUERY / CLASSNAME ACCESSOR ---
     klass:    uumix(uuklass, {      // uu.klass(expr:String/Node, context:String/Node = <body>):NodeArray/Node
                                     //  [1][query  className]  uu.klass("warn", <div>)             -> NodeArray
                                     //  [2][add    className]  uu.klass(<div>,              "A")   -> <div class="A">
@@ -547,7 +554,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //  [5][toggle className]  uu.klass(<div class="A">,   "!A B") -> <div>
         has:        uuklasshas      // uu.klass.has(node:Node, classNames:String):Boolean
     }),
-    // --- OOP ---
+    // --- OOP CLASS ---
     Class:    uumix(uuClass, {      // uu.Class(className:String, protoMember:Hash/Function = void,
                                     //                            staticMember = void)
                                     //  [1][define tiny class]     uu.Class("Class")
@@ -557,7 +564,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
         singleton:  uuClassSingleton// uu.Class.singleton(className:String, proto:Hash/Function = void,
                                     //                                      staticMember = void)
     }),
-    // --- EVENT ---
+    // --- DOM EVENT ---
     event:    uumix(uuevent, {      // uu.event(node:Node, eventTypeEx:EventTypeExString,
                                     //                     evaluator:Function/Instance,
                                     //                     traceID:String = ""):Node
@@ -617,7 +624,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //  [2][some  2/3] uu.junction(2, 3, callback).ng(1).ng(2).ok(3)      -> callback({ rv: [1, 2, 3], ok: false })
                                     //  [3][some  2/3] uu.junction(2, 3, callback).ok(1).ng(2).ok( )      -> callback({ rv: [1, 2, undefined], ok: true })
                                     //  [4][every 3/3] uu.junction(3, 3, callback).ok(1).ok(2).ok({id:3}) -> callback({ rv: [1, 2, {id:3}], ok: true })
-    // --- LIVE EVENT ---
+    // --- DOM LIVE EVENT ---
 //{@live
     live:     uumix(uulive, {       // uu.live(expr:CSSSelectorExpressionString,
                                     //         eventTypeEx:EventTypeExString,
@@ -633,7 +640,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //  [4][unbind namespace all] uu.unlive("selector", "namespace.*")
                                     //  [5][unbind namespace one] uu.unlive("selector", "namespace.click")
 //}@live
-    // --- NODE / NodeList / NodeID ---
+    // --- DOM NODE / DOM NODE LIST ---
     node:     uumix(uunode, {       // uu.node(node:Node/SVGNode/TagNameString = "div",
                                     //         args:Array/Argeumtns = void,
                                     //         typical:StringArray = void,
@@ -717,7 +724,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //  [3][get text]                  uu.text(node)            -> "text"
                                     //  [4][set text]                  uu.text(node, "text")    -> node
                                     //  [5][set formated text]         uu.text(node, "@", "a")  -> node
-    // --- FORM ---
+    // --- HTML FORM ---
 //{@form
     form:     uumix(uuform, {
         value:      uuformvalue,    // uu.form.value(node:Node, value:String = void):StringArray/Node
@@ -854,7 +861,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
         range:      uunumberrange,  // uu.number.range(min:Number, value:Number, max:Number):Number
         expand:     uunumberexpand  // uu.number.expand(current:Number, value:String/Number, fn:Function = parseFloat):Number
     }),
-    // --- EVALUATION ---
+    // --- EVALUATION / FUNCTIONAL STATUS ---
     ready:    uumix(uuready, {      // uu.ready(readyEventType:IgnoreCaseString = "dom", callback:CallbackFunction, ...)
         fire:       uureadyfire,    // uu.ready.fire(readyEventType:CaseInsenseString, param:Mix = document)
         dom:        _false,         // true is DOMContentLoaded event fired
@@ -866,7 +873,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
         storage:    _false,         // true is window.localStorage ready event fired
         reload:     _false          // true is blackout (css3 cache reload)
     }, detectFeatures(_env)),
-    // --- COLOR ---
+    // --- COLOR / COLOR DICTIONARY / COLOR ARRANGE ---
 //{@color
     color:    uumix(uucolor, {      // uu.color(expr:Color/RGBAHash/HSLAHash/HSVAHash/String):Color
                                     //  [1][Color]                               uu.color(Color)               -> Color
@@ -881,7 +888,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //  [1][random color] uu.color.random() -> Color
     }),
 //}@color
-    // --- IMAGE ---
+    // --- IMAGE / LAZY IMAGE LOADER / SIZE DETECTION ---
 //{@image
     image:    uumix(uuimage, {      // uu.image(url:URLString/URLStringArray, callback:CallbackFunction = void)
                                     //  [1][load image]  uu.image(url,        function(response) { ... })
@@ -889,7 +896,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
         size:       uuimagesize     // uu.image.size(node:HTMLImageElement):Hash - { w, h }
     }),
 //}@image
-    // --- FONT ---
+    // --- FONT / FONT DETECTION ---
 //{@font
     font:     uumix(uufont, {       // uu.font(font, embase) -> Hash
         list:       uufontlist,     // uu.font.list(fonts) -> Array
@@ -926,15 +933,15 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
         save:       uucookiesave    // uu.cookie.save(prefix:String, data:Hash, date:UTCDateString/Date = void):Number
     }),
 //}@cookie
-    // --- STORAGE(WebStorage) --
+    // --- STORAGE (WebStorage) ---
 //{@storage
     storage:        null,           // uu.storage - uu.Class.Storage instance
 //}@storage
-    // --- SOCKET(WebSocket) --
+    // --- SOCKET (WebSocket) ---
 //{@socket
     socket:         null,           // uu.socket - uu.Class.Socket instance
 //}@socket
-    // --- URL ---
+    // --- URL / URL ACCESSOR ---
 //{@url
     url:      uumix(uuurl, {        // uu.url(url:URLHash/URLString = ""):URLString/URLHash
                                     //  [1][current abs-dir] uu.url() -> "http://example.com/index.htm"
@@ -954,6 +961,9 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //  [3][chop filename] uu.url.dir("/file.ext")                       -> "/"
                                     //  [4][through]       uu.url.dir("/")                               -> "/"
                                     //  [5][supply slash]  uu.url.dir("")                                -> "/"
+        hash:       uuurlhash,      // uu.url.hash(url:URLString):String
+                                    //  [1][get hash] uu.url.hash("http://example.com/api#hash") -> "hash"
+                                    //  [2][get hash] uu.url.hash("http://example.com/api") -> ""
         split:      uuurlsplit,     // uu.url.split(url:URLString/PathString):Array+Hash - { dir, file }
                                     //  [1][split dir | file.ext] uu.url.split("http://example.com/dir/file.ext") -> ["http://example.com/dir/", "file.ext"]
         normalize:  uuurlnormalize  // uu.url.normalize(url:String):String
@@ -1009,13 +1019,14 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //  [4][transform]  uu.ui(NodeArray) -> [node, ...]
     }),
 //}@ui
-    // --- OTHER ---
-    dmz: {                          // uu.dmz - DeMilitarized Zone(proxy) and STM(short term memory)
-        location: {
+    // --- DMZ ( DeMilitarized Zone ) / PROXY / STM ( short term memory ) ---
+    dmz: {                          // uu.dmz
+        location: {                 // uu.dmz.location
             href:   location.href,  // uu.dmz.location.href - String: keep initial location.href
             hash:   location.hash   // uu.dmz.location.hash - String: keep initial location.hash
         }
     },
+    // --- OTHER ---
     nop:            uunop,          // uu.nop - none operation
     pao:            uupao           // uu.pao - `function-producing` function
                                     //  [1][pao literal ] uu.pao(false)  -> (function() { return false; })
@@ -1792,10 +1803,10 @@ uujsonp.db = {}; // { guid: callbackMethod, ... }
 function uulike(lval,   // @param Date/Hash/Fake/Array: left value
                 rval) { // @param Date/Hash/Fake/Array: right value
                         // @return Boolean:
-    //  [1][literal like literal]    uu.like("abcdef", "abcdef")              -> true
-    //  [2][Date like Date]          uu.like(new Date(123), new Date(123))    -> true
-    //  [3][Hash like Hash]          uu.like({ a: { b: 1 }}, { a: { b: 1 }})  -> true
-    //  [4][Array like Array]        uu.like([1, [2, 3]], [1, [2, 3]])        -> true
+    //  [1][literal like literal]     uu.like("abcdef", "abcdef")             -> true
+    //  [2][Date like Date]           uu.like(new Date(123), new Date(123))   -> true
+    //  [3][Hash like Hash]           uu.like({ a: { b: 1 }}, { a: { b: 1 }}) -> true
+    //  [4][Array like Array]         uu.like([1, [2, 3]], [1, [2, 3]])       -> true
     //  [5][FakeArray like FakeArray] uu.like(document.links, document.links) -> true
 
     var type = uutype(lval);
@@ -4642,7 +4653,7 @@ function uueventattach(node,         // @param Node:
                        useCapture,   // @param Boolean(= false):
                        traceID,      // @param String(= ""): traceID ident
                        __detach__) { // @hidden Boolean(= false): true is detach
-
+//{@url
 //{@eventhashchange
     function handleHashChange(evt) {
         if (!evt.oldURL) { // [HTML5 SPEC] oldURL, newURL
@@ -4653,6 +4664,7 @@ function uueventattach(node,         // @param Node:
         evaluator(evt);
     }
 //}@eventhashchange
+//}@url
 
 //{@assert
     switch (uutype(traceID)) {
@@ -4694,6 +4706,7 @@ function uueventattach(node,         // @param Node:
  */
 
     switch (eventType) {
+//{@url
 //{@eventhashchange
     case "hashchange":
         if (_env.ie6 || _env.ie7) { // [IE6][IE7]
@@ -4703,6 +4716,7 @@ function uueventattach(node,         // @param Node:
         }
         break;
 //}@eventhashchange
+//}@url
     default:
     }
 
@@ -6997,10 +7011,10 @@ function parseURL(url) { // @param URLString: absurl / relurl,
                 basic:  "",
                 domain: "",
                 port:   "",
-                base:   m[1] + ":///" + w.dir,
+                base:   m[1] + ":///" + w[0],
                 path:   m[2],
-                dir:    w.dir,
-                file:   w.file,
+                dir:    w[0],
+                file:   w[1],
                 qs:     m[3] || "",
                 hash:   m[4] || ""
             };
@@ -7019,10 +7033,10 @@ function parseURL(url) { // @param URLString: absurl / relurl,
                 basic:  m[2] ? m[2].slice(0, -1) : "", // "username:password@" -> "username:password"
                 domain: m[3],
                 port:   m[4] || "",
-                base:   (m[1] + "://" + m[3]) + (m[4] ? ":" + m[4] : "") + w.dir,
+                base:   (m[1] + "://" + m[3]) + (m[4] ? ":" + m[4] : "") + w[0],
                 path:   m[5] || "/",
-                dir:    w.dir,
-                file:   w.file,
+                dir:    w[0],
+                file:   w[1],
                 qs:     m[6] || "",
                 hash:   m[7] || ""
             };
@@ -7033,6 +7047,17 @@ function parseURL(url) { // @param URLString: absurl / relurl,
     m = uuurlsplit(url);
     return { url: url, ssl: _false, scheme: "", basic: "", domain: "", port: "",
              base: m.dir, path: url, dir: m.dir, file: m.file, qs: "", hash: "" };
+}
+
+// uu.url.hash - get hash - quickly
+function uuurlhash(url) { // @param URLString: "http://example.com/api#hash"
+                          // @return String: "hash"
+    //  [1][get hash] uu.url.hash("http://example.com/api#hash") -> "hash"
+    //  [2][get hash] uu.url.hash("http://example.com/api") -> ""
+
+    var i = url[_indexOf]("#") + 1; // 0 = not found, 1~ = found
+
+    return i ? url.slice(i) : "";
 }
 
 // uu.url.split - split dir/file "dir/file.ext" -> ["dir/", "file.ext"]
