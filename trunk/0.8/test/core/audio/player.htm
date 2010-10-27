@@ -36,7 +36,10 @@ uu.ready(function(uu) {
 
     // build <selct><option ...></select>
     playList.forEach(function(src) {
-        uu.add(uu.option({ value: src }, uu.text(src)), source);
+        var fileName = uu.text(uu.url.split(src).file);
+
+        uu.add(uu.option({ value: src }, fileName),
+               source);
     });
 
     changeSource(source);
@@ -65,6 +68,8 @@ function initAudio(source) {
                        loop: player.loop }, function(audio) {
 
         if (!audio.isReady()) {
+            uu.log("audio not ready");
+            uu.log("audio swf path @", uu.config.audio.swf);
             return false;
         }
         buttons.attr({ disabled: false });
