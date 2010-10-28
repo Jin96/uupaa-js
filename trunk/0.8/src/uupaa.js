@@ -106,8 +106,9 @@
 //          -webkit-text-size-adjust: none / zoom;
 //          -webkit-appearance: appearance;
 //          setTimeout(scrollTo, 100, 0, 1);
-//      StandAlone(App)
-//          window.navigator.standalone
+//
+//      StandAlone(FullScreen Mode = App Mode)
+//          window.navigator.standalone = true
 //
 // Flash10.1
 //      <param name="hasPriority" value="true" />
@@ -3482,7 +3483,7 @@ function uucsstransform(node,    // @param Node:
     }
 
 //{@mb
-    if (_ie) {
+    if (_ie678) {
         if (uuready.filter) {
             var ident = "DXImageTransform.Microsoft.Matrix",
                 data = nodeData + "transie",
@@ -3530,7 +3531,7 @@ function uucsstransform(node,    // @param Node:
 //{@mb
                    _gecko  ? "MozTransform" :
                    _opera  ? "OTransform" :
-//                 _ie     ? "msTransform" :
+                   _ie     ? "msTransform" :
 //}@mb
                    "transform"] =
             "scale(" + param[0] + "," + param[1] + ") rotate("
