@@ -755,6 +755,16 @@ uu.ready("window", function(uu) {
     uu.ok("uu.trim('  diet  inner  space  ') == 'diet inner space'",
             uu.trim('  diet  inner  space  '), "==", 'diet inner space');
 
+    //  [1][trim both + unite spaces]
+    uu.ok('uu.trim("  has  space  ")   ==   "has space"',
+           uu.trim("  has  space  "), "==", "has space");
+
+    //  [2][trim both + inner spaces]
+    uu.ok('uu.trim("  has  space  ", "")   ==   "hasspace"',
+           uu.trim("  has  space  ", ""), "==", "hasspace");
+
+
+
     uu.ok("uu.trim.tag()");
     uu.ok('uu.trim.tag(" <h1>A</h1>  B  <p>C</p> ") == "A B C"',
             uu.trim.tag(" <h1>A</h1>  B  <p>C</p> "), "==", "A B C");
@@ -787,10 +797,10 @@ uu.ready("window", function(uu) {
 
     uu.ok("uu.trim.quote()");
 
-    uu.ok("uu.trim.quote(\" 'has  space' \") == \"has  space\"",
-        uu.trim.quote(" 'has  space' "), "==", "has  space");
-      uu.ok('uu.trim.quote(\' "has  space" \') == "has  space"',
-        uu.trim.quote(' "has  space" '), "==", "has  space");
+    uu.ok("uu.trim.quote(\" 'has  space' \") == \"has space\"",
+        uu.trim.quote(" 'has  space' "), "==", "has space");
+      uu.ok('uu.trim.quote(\' "has  space" \') == "has space"',
+        uu.trim.quote(' "has  space" '), "==", "has space");
 
 
     var dateHash = uu.date();
@@ -1191,64 +1201,95 @@ uu.ready("window", function(uu) {
         uu.ok("uu.url(uu.url()) to URLHash", hash, "is hash");
 
         uu.ok("parse url");
-        url = "http://username:password@example.com:8080/dir/file.ext?qs=string;more=value#hash";
-        result = {
-            url:        "http://username:password@example.com:8080/dir/file.ext?qs=string;more=value#hash",
-            ssl:        false,
-            scheme:     "http",
-            basic:      "username:password",
-            domain:     "example.com",
-            port:       "8080",
-            base:       "http://example.com:8080/dir/",
-            path:       "/dir/file.ext",
-            dir:        "/dir/",
-            file:       "file.ext",
-            qs:         "qs=string;more=value",
-            hash:       "hash"
-        };
-        hash = uu.url(url);
-        uu.ok("uu.url('http://username:password@example.com:8080/dir/file.ext?qs=string;more=value#hash') - parse url",
-                hash, "==", result);
+        // http scheme
+            url = "http://username:password@example.com:8080/dir/file.ext?query=string;more=value#hash";
+            result = {
+                href:        "http://username:password@example.com:8080/dir/file.ext?query=string;more=value#hash",
+                secure:     false,
+                protocol:   "http:",
+                host:       "username:password@example.com:8080",
+                auth:       "username:password",
+                hostname:   "example.com",
+                port:       "8080",
+                pathname:   "/dir/file.ext",
+                search:     "?query=string;more=value",
+                query:      { query: "string", more: "value" },
+                hash:       "#hash",
+                ok:         true
+            };
+            hash = uu.url(url, true); // parse QueryString
+            uu.ok("uu.url('http://username:password@example.com:8080/dir/file.ext?query=string;more=value#hash') - parse url",
+                    hash, "==", result);
 
-
-
+            url = "http://example.com/dir#hash";
+            result = {
+                href:        "http://example.com/dir#hash",
+                secure:     false,
+                protocol:   "http:",
+                host:       "example.com",
+                auth:       "",
+                hostname:   "example.com",
+                port:       "",
+                pathname:   "/dir",
+                search:     "",
+                query:      {},
+                hash:       "#hash",
+                ok:         true
+            };
+            hash = uu.url(url, true); // parse QueryString
+            uu.ok("uu.url('http://example.com/dir#hash') - parse url",
+                    hash, "==", result);
 
         // FILE SCHEME
-        url = "file:///C:/uupaa/svn/trunk/0.8/test/core/core.htm?qs=string&more=value#hash";
-        result = {
-            url:        "file:///C:/uupaa/svn/trunk/0.8/test/core/core.htm?qs=string&more=value#hash",
-            ssl:        false,
-            scheme:     "file",
-            basic:      "",
-            domain:     "",
-            port:       "",
-            base:       "file:///C:/uupaa/svn/trunk/0.8/test/core/",
-            path:       "C:/uupaa/svn/trunk/0.8/test/core/core.htm",
-            dir:        "C:/uupaa/svn/trunk/0.8/test/core/",
-            file:       "core.htm",
-            qs:         "qs=string&more=value",
-            hash:       "hash"
-        };
-        hash = uu.url(url);
-        uu.ok("uu.url('file:///C:/uupaa/svn/trunk/0.8/test/core/core.htm?qs=string&more=value#hash') - parse url",
-                hash, "==", result);
+            url = "file:///C:/uupaa/svn/trunk/0.8/test/core/core.htm?query=string&more=value#hash";
+            result = {
+                href:       "file:///C:/uupaa/svn/trunk/0.8/test/core/core.htm?query=string&more=value#hash",
+                secure:     false,
+                protocol:   "file:",
+                host:       "",
+                auth:       "",
+                hostname:   "",
+                port:       "",
+                pathname:   "C:/uupaa/svn/trunk/0.8/test/core/core.htm",
+                search:     "?query=string&more=value",
+                query:      { query: "string", more: "value" },
+                hash:       "#hash",
+                ok:         true
+            };
+            hash = uu.url(url, true); // parse QueryString
+            uu.ok("uu.url('file:///C:/uupaa/svn/trunk/0.8/test/core/core.htm?query=string&more=value#hash') - parse url",
+                    hash, "==", result);
+
+            url = "file:///C:/uupaa/svn/trunk/0.8/test/core/";
+            result = {
+                href:       "file:///C:/uupaa/svn/trunk/0.8/test/core/",
+                secure:     false,
+                protocol:   "file:",
+                host:       "",
+                auth:       "",
+                hostname:   "",
+                port:       "",
+                pathname:   "C:/uupaa/svn/trunk/0.8/test/core/",
+                search:     "",
+                query:      {},
+                hash:       "",
+                ok:         true
+            };
+            hash = uu.url(url, true); // parse QueryString
+            uu.ok("uu.url('file:///C:/uupaa/svn/trunk/0.8/test/core/') - parse url",
+                    hash, "==", result);
+
+
 
 
         uu.ok("build url");
-        result = "http://example.com:8080/dir/file.ext?qs=string;more=value#hash";
+        result = "http://username:password@example.com:8080/dir/file.ext?query=string&more=value#hash";
         hash = {
-            url:        "http://example.com:8080/dir/file.ext?qs=string;more=value#hash",
-            ssl:        false,
-            scheme:     "http",
-            basic:      "username:password",
-            domain:     "example.com",
-            port:       "8080",
-            base:       "http://example.com:8080/dir/",
-            path:       "/dir/file.ext",
-            dir:        "/dir/",
-            file:       "file.ext",
-            qs:         "qs=string;more=value",
-            hash:       "hash"
+            protocol:   "http:",
+            host:       "username:password@example.com:8080",
+            pathname:   "/dir/file.ext",
+            search:     "?query=string&more=value",
+            hash:       "#hash"
         };
         url = uu.url(hash);
         uu.ok("uu.url(URLHash) -> build url",
@@ -1256,20 +1297,13 @@ uu.ready("window", function(uu) {
 
 
         // SSL
-        result = "https://example.com:8080/dir/file.ext?qs=string;more=value#hash";
+        result = "https://username:password@example.com:8080/dir/file.ext?query=string&more=value#hash";
         hash = {
-            url:        "https://example.com:8080/dir/file.ext?qs=string;more=value#hash",
-            ssl:        true,
-            scheme:     "https",
-            basic:      "",
-            domain:     "example.com",
-            port:       "8080",
-            base:       "https://example.com:8080/dir/",
-            path:       "/dir/file.ext",
-            dir:        "/dir/",
-            file:       "file.ext",
-            qs:         "qs=string;more=value",
-            hash:       "hash"
+            protocol:   "https:",
+            host:       "username:password@example.com:8080",
+            pathname:   "/dir/file.ext",
+            search:     "?query=string&more=value",
+            hash:       "#hash"
         };
         url = uu.url(hash);
         uu.ok("uu.url(URLHash) -> build url",
@@ -1277,20 +1311,13 @@ uu.ready("window", function(uu) {
 
 
         // WebSocket
-        result = "ws://example.com:8080/dir/file.ext?qs=string;more=value#hash";
+        result = "ws://example.com:8080/dir/file.ext?query=string&more=value#hash";
         hash = {
-            url:        "ws://example.com:8080/dir/file.ext?qs=string;more=value#hash",
-            ssl:        false,
-            scheme:     "ws",
-            basic:      "",
-            domain:     "example.com",
-            port:       "8080",
-            base:       "ws://example.com:8080/dir/",
-            path:       "/dir/file.ext",
-            dir:        "/dir/",
-            file:       "file.ext",
-            qs:         "qs=string;more=value",
-            hash:       "hash"
+            protocol:   "ws:",
+            host:       "example.com:8080",
+            pathname:   "/dir/file.ext",
+            search:     "?query=string&more=value",
+            hash:       "#hash"
         };
         url = uu.url(hash);
         uu.ok("uu.url(URLHash) -> build url",
@@ -1298,20 +1325,13 @@ uu.ready("window", function(uu) {
 
 
         // WebSocket + SSL
-        result = "wss://example.com:8080/dir/file.ext?qs=string;more=value#hash";
+        result = "wss://example.com:8080/dir/file.ext?query=string&more=value#hash";
         hash = {
-            url:        "wss://example.com:8080/dir/file.ext?qs=string;more=value#hash",
-            ssl:        true,
-            scheme:     "wss",
-            basic:      "",
-            domain:     "example.com",
-            port:       "8080",
-            base:       "wss://example.com:8080/dir/",
-            path:       "/dir/file.ext",
-            dir:        "/dir/",
-            file:       "file.ext",
-            qs:         "qs=string;more=value",
-            hash:       "hash"
+            protocol:   "wss:",
+            host:       "example.com:8080",
+            pathname:   "/dir/file.ext",
+            search:     "?query=string&more=value",
+            hash:       "#hash"
         };
         url = uu.url(hash);
         uu.ok("uu.url(URLHash) -> build url",
@@ -1321,20 +1341,13 @@ uu.ready("window", function(uu) {
 
 
         // FILE SCHEME
-        result = "file:///C:/uupaa/svn/trunk/0.8/test/core/core.htm?qs=string&more=value#hash";
+        result = "file:///C:/uupaa/svn/trunk/0.8/test/core/core.htm?query=string&more=value#hash";
         hash = {
-            url:        "file:///C:/uupaa/svn/trunk/0.8/test/core/core.htm?qs=string&more=value#hash",
-            ssl:        false,
-            scheme:     "file",
-            basic:      "",
-            domain:     "",
-            port:       "",
-            base:       "file:///C:/uupaa/svn/trunk/0.8/test/core/",
-            path:       "C:/uupaa/svn/trunk/0.8/test/core/core.htm",
-            dir:        "/uupaa/svn/trunk/0.8/test/core/",
-            file:       "core.htm",
-            qs:         "qs=string&more=value",
-            hash:       "hash"
+            protocol:   "file:",
+            host:       "",
+            pathname:   "C:/uupaa/svn/trunk/0.8/test/core/core.htm",
+            search:     "?query=string&more=value",
+            hash:       "#hash"
         };
         url = uu.url(hash);
         uu.ok("uu.url(URLHash) -> build url",
@@ -1347,15 +1360,15 @@ uu.ready("window", function(uu) {
         uu.ok("rebuild url(parse + build)");
 
 
-        url = "http://example.com:8080/dir/file.ext?qs=string;more=value#hash";
-        uu.ok("uu.url(uu.url('http://example.com:8080/dir/file.ext?qs=string;more=value#hash'))",
+        url = "http://example.com:8080/dir/file.ext?query=string;more=value#hash";
+        uu.ok("uu.url(uu.url('http://example.com:8080/dir/file.ext?query=string;more=value#hash'))",
                 uu.url(uu.url(url)), "==", url);
 
-        uu.ok("get absolute path");
-        uu.ok("uu.url.abs('../dir/file.ext') は 相対URL を絶対URLに変換する",
-                uu.url.abs('../dir/file.ext'), "!=", "../dir/file.ext");
-        uu.ok("uu.url.abs('http://example.com/dir/file.ext') は 絶対URL なのでそのまま",
-                uu.url.abs('http://example.com/dir/file.ext'), "==", 'http://example.com/dir/file.ext');
+        uu.ok("resolve absolute path");
+        uu.ok("uu.url.resolve('../dir/file.ext') は 相対URL を絶対URLに変換する",
+                uu.url.resolve('../dir/file.ext'), "!=", "../dir/file.ext");
+        uu.ok("uu.url.resolve('http://example.com/dir/file.ext') は 絶対URL なのでそのまま",
+                uu.url.resolve('http://example.com/dir/file.ext'), "==", 'http://example.com/dir/file.ext');
 
 
         uu.ok("get directory");
@@ -1463,54 +1476,54 @@ uu.ready("window", function(uu) {
         uu.ok("uu.url.normalize('example.com/api/../src/file.ext')       ==   'example.com/src/file.ext'",
                uu.url.normalize('example.com/api/../src/file.ext'),     "==", 'example.com/src/file.ext')
 
-        uu.ok("uu.url.qs");
+        uu.ok("uu.url.query");
 
-        result = uu.url.qs("key=val;key2=val2");
-        uu.ok('uu.url.qs("key=val;key2=val2") -> { key: "val", key2: "val2" }',
+        result = uu.url.query("key=val;key2=val2");
+        uu.ok('uu.url.query("key=val;key2=val2") -> { key: "val", key2: "val2" }',
                 result, "==", { key: "val", key2: "val2" });
-        result = uu.url.qs("key=val&key2=val2");
-        uu.ok('uu.url.qs("key=val&key2=val2") -> { key: "val", key2: "val2" }',
+        result = uu.url.query("key=val&key2=val2");
+        uu.ok('uu.url.query("key=val&key2=val2") -> { key: "val", key2: "val2" }',
                 result, "==", { key: "val", key2: "val2" });
 
 
-        result = uu.url.qs({ key: "val",     key2: "val2" }, null, ";");
-        uu.ok('uu.url.qs({ key: "val",     key2: "val2" }, null, ";") -> "key=val;key2=val2"',
+        result = uu.url.query({ key: "val",     key2: "val2" }, null, ";");
+        uu.ok('uu.url.query({ key: "val",     key2: "val2" }, null, ";") -> "key=val;key2=val2"',
                 result, "==", "key=val;key2=val2");
-        result = uu.url.qs({ key: "val",     key2: "val2" }, null, "&");
-        uu.ok('uu.url.qs({ key: "val",     key2: "val2" }, null, "&") -> "key=val&key2=val2"',
+        result = uu.url.query({ key: "val",     key2: "val2" }, null, "&");
+        uu.ok('uu.url.query({ key: "val",     key2: "val2" }, null, "&") -> "key=val&key2=val2"',
                 result, "==", "key=val&key2=val2");
 
 
-        result = uu.url.qs( "key=val",     { key2: "val2" }, ";");
-        uu.ok('uu.url.qs( "key=val",     { key2: "val2" }, ";") -> "key=val;key2=val2"',
+        result = uu.url.query( "key=val",     { key2: "val2" }, ";");
+        uu.ok('uu.url.query( "key=val",     { key2: "val2" }, ";") -> "key=val;key2=val2"',
                 result, "==", "key=val;key2=val2");
-        result = uu.url.qs( "key=val",     { key2: "val2" }, "&");
-        uu.ok('uu.url.qs( "key=val",     { key2: "val2" }, "&") -> "key=val&key2=val2"',
+        result = uu.url.query( "key=val",     { key2: "val2" }, "&");
+        uu.ok('uu.url.query( "key=val",     { key2: "val2" }, "&") -> "key=val&key2=val2"',
                 result, "==", "key=val&key2=val2");
 
 
-        result = uu.url.qs({ key: "val" }, { key2: "val2" }, ";");
-        uu.ok('uu.url.qs({ key: "val" }, { key2: "val2" }, ";") -> "key=val;key2=val2"',
+        result = uu.url.query({ key: "val" }, { key2: "val2" }, ";");
+        uu.ok('uu.url.query({ key: "val" }, { key2: "val2" }, ";") -> "key=val;key2=val2"',
                 result, "==", "key=val;key2=val2");
-        result = uu.url.qs({ key: "val" }, { key2: "val2" }, "&");
-        uu.ok('uu.url.qs({ key: "val" }, { key2: "val2" }, "&") -> "key=val&key2=val2"',
+        result = uu.url.query({ key: "val" }, { key2: "val2" }, "&");
+        uu.ok('uu.url.query({ key: "val" }, { key2: "val2" }, "&") -> "key=val&key2=val2"',
                 result, "==", "key=val&key2=val2");
 
 
         // --- Array support ---
             // ";"
-        result = uu.url.qs({ key1: "a", key2: "b", key3: [0, 1] }, null, ";");
-        uu.ok('uu.url.qs({ key1: "a", key2: "b", key3: [0, 1] }) -> "key1=a;key2=b;key3=0;key3=1"',
+        result = uu.url.query({ key1: "a", key2: "b", key3: [0, 1] }, null, ";");
+        uu.ok('uu.url.query({ key1: "a", key2: "b", key3: [0, 1] }) -> "key1=a;key2=b;key3=0;key3=1"',
                 result, "==", "key1=a;key2=b;key3=0;key3=1");
 
             // "&"
-        result = uu.url.qs({ key1: "a", key2: "b", key3: [0, 1] }, null, "&");
-        uu.ok('uu.url.qs({ key1: "a", key2: "b", key3: [0, 1] }) -> "key1=a&key2=b&key3=0&key3=1"',
+        result = uu.url.query({ key1: "a", key2: "b", key3: [0, 1] }, null, "&");
+        uu.ok('uu.url.query({ key1: "a", key2: "b", key3: [0, 1] }) -> "key1=a&key2=b&key3=0&key3=1"',
                 result, "==", "key1=a&key2=b&key3=0&key3=1");
 
 
-        result = uu.url.qs("key1=a;key2=b;key3=0;key3=1");
-        uu.ok('uu.url.qs("key1=a;key2=b;key3=0;key3=1") -> { key1: "a", key2: "b", key3: ["0", "1"] }',
+        result = uu.url.query("key1=a;key2=b;key3=0;key3=1");
+        uu.ok('uu.url.query("key1=a;key2=b;key3=0;key3=1") -> { key1: "a", key2: "b", key3: ["0", "1"] }',
                 result, "==", { key1: "a", key2: "b", key3: ["0", "1"] });
 
 
@@ -1518,12 +1531,12 @@ uu.ready("window", function(uu) {
 
 
         url = 'http://example.com:8080/dir/file.ext?key=val&key2=val2#hash';
-        uu.ok("uu.url.qs('http://example.com:8080/dir/file.ext?key=val&key2=val2#hash') は URL から QueryString を取り出しパース可能",
-                uu.url.qs(url), "==", { key: "val", key2: "val2" });
+        uu.ok("uu.url.query('http://example.com:8080/dir/file.ext?key=val&key2=val2#hash') は URL から QueryString を取り出しパース可能",
+                uu.url.query(url), "==", { key: "val", key2: "val2" });
 
 
-        uu.ok("uu.url.qs('key=val&key2=val2#frag') はパースに失敗する",
-                uu.url.qs('key=val&key2=val2#frag'), "!=", { key: "val", key2: "val2" });
+        uu.ok("uu.url.query('key=val&key2=val2#frag') はパースに失敗する",
+                uu.url.query('key=val&key2=val2#frag'), "!=", { key: "val", key2: "val2" });
     })();
 
     uu.ok();
