@@ -543,6 +543,9 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
 //}@fx
     // --- DOM NODE QUERY ---
     id:             uuid,           // uu.id(expr:String, context:Node = document):Node/null
+    idc:      uumix(uuidc, {        // uu.idc(expr:String, context:Node = document):Node/null
+        clear:      uuidcclear      // uu.idc.clear()
+    }),
     ids:            uuids,          // uu.ids(expr:CommaJointString, context:Node = document):NodeArray
                                     //  [1] uu.ids("A,B,C") -> [<a id="A">, <li id="B">, <div id="C">]
     tag:            uutag,          // uu.tag(expr:String = "", context:Node = <body>):NodeArray
@@ -6210,6 +6213,19 @@ function uuid(expr,      // @param String: id
               context) { // @param Node(= document): query context
                          // @return Node/null:
     return (context || doc).getElementById(expr);
+}
+
+// uu.idc - document.getElementById + cache
+function uuidc(expr,      // @param String: id
+               context) { // @param Node(= document): query context
+                          // @return Node/null:
+    return uuidc._[expr] ||
+          (uuidc._[expr] = (context || doc).getElementById(expr));
+}
+
+// uu.idc.clear - clear idc cache
+function uuidcclear() {
+    uuidc._ = {};
 }
 
 // uu.ids - multiple uu.id
