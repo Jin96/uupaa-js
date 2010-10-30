@@ -214,14 +214,14 @@ var _addEventListener = "addEventListener",
 //}@storage
     // --- RegExp ---
     _trimSpace = /^\s+|\s+$/g,
-    _scheme = /^(https?|file|wss?):/,
+    _protocol = /^(https?|file|wss?):/,
     _parse = {
-        file: /^(file):\/{2,3}(?:loc\w+\/)?([^ ?#]*)(?:\?([^#]*))?(?:#(.*))?/i, // file
-        //       file://         localhost/ dir/f.ext   ?key=value   #hash
-        //       [1]                            [2]          [3]          [4]
-        http: /^(\w+):\/\/([\w:]+@)?([^\/:]+)(?::(\d*))?([^ ?#]*)(?:\?([^#]*))?(?:#(.*))?/i  // http, https, ws, wss, ...
-        //      scheme:// id:pass@   server     : port   /dir/f.ext  ?key=value   #hash
-        //      [1]       [2]        [3]          [4]    [5]          [6]          [7]
+        file: /^(file:)\/{2,3}(?:loc\w+)?([^ ?#]*)(?:(\?[^#]*))?(?:(#.*))?/i,
+        //                     localhost /dir/f.ext  ?key=value    #hash
+        //      [1]                      [2]         [3]           [4]
+        http: /^(\w+:)\/\/((?:([\w:]+)@)?([^\/:]+)(?::(\d*))?)([^ ?#]*)(?:(\?[^#]*))?(?:(#.*))?/i
+        //      https://    user:pass@    server     : port   /dir/f.ext  ?key=value   #hash
+        //      [1]         [3]           [4]          [5]    [6]         [7]          [8]
     },
     // --- environment ---
     _env = detectEnvironment(0.8),  // as uu.env
@@ -257,7 +257,7 @@ uumix(uuconfig, win.uuconfig || {}, {
     cssDir:         _baseDir + "css/",  // uu.config.cssDir  - String: css directory. "http://example.com/css/"
     imgDir:         _baseDir + "img/",  // uu.config.imgDir  - String: image directory. "http://example.com/img/"
     swfDir:         _baseDir + "swf/",  // uu.config.swfDir  - String: flash directory. "http://example.com/swf/"
-    qsJoint:        "&",
+    queryJoint:     "&",                // uu.config.queryJoint - uu.url.query joint char
     storage:        {},
     socket:         {},
     canvas:         {},
@@ -742,7 +742,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //  [7][get <selet multiple>] uu.form.value(node) -> ["value", ...]
                                     //  [8][get <input checkbox>] uu.form.value(node) -> ["value", ...]
                                     //  [9][get <input radio>]    uu.form.value(node) -> "value"
-        serialize:  uuformserialize // uu.form.serialize(node:Node, toHash:Boolean = false, joint:String = uu.config.qsJoint):URLEncodedQueryString/Hash
+        serialize:  uuformserialize // uu.form.serialize(node:Node, toHash:Boolean = false, joint:String = uu.config.queryJoint):URLEncodedQueryString/Hash
                                     //
                                     //  <form>
                                     //    <div>
@@ -782,22 +782,24 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //  [3][html-attr to js-attr]    uu.fix("for")              -> "htmlFor"
                                     //  [4][through]                 uu.fix("-webkit-shadow")   -> "-webkit-shadow"
     trim:     uumix(uutrim, {       // uu.trim(source:String, replacement:String = " "):String
-                                    //  [1][trim inner]    uu.trim("  has  space  ") -> "has  space"
-        tag:        uutrimtag,      // uu.trim.tag(source:HTMLFragmentString):String
+                                    //  [1][trim both + unite spaces] uu.trim("  has  space  ")     -> "has space"
+                                    //  [2][trim both + inner spaces] uu.trim("  has  space  ", "") -> "hasspace"
+        tag:        uutrimtag,      // uu.trim.tag(source:HTMLFragmentString, replacement:String = " "):String
                                     //  [1][trim tags]     uu.trim.tag("  <h1>A</h1>  B  <p>C</p>  ") -> "A B C"
                                     //  [2][trim tags]     uu.trim.tag("      A       B     C      ") -> "A B C"
-        func:       uutrimfunc,     // uu.trim.func(source:CSSStyleFragmentString):String
+        func:       uutrimfunc,     // uu.trim.func(source:CSSStyleFragmentString, replacement:String = " "):String
                                     //  [1][trim function] uu.trim.func(' url("http://...") ') -> "http://..."
                                     //  [2][trim function] uu.trim.func(' rgb(1, 2, 3) ')      -> "1, 2, 3"
-        hash:       uutrimhash,     // uu.trim.hash(source:URLString):String
+        hash:       uutrimhash,     // uu.trim.hash(source:URLString, replacement:String = " "):String
                                     //  [1][trim url hash] uu.trim.hash("http://example.com/a.jpg#hash")           -> "http://example.com/a.jpg"
                                     //  [2][trim url hash] uu.trim.hash("http://example.com/a.jpg?key=value#hash") -> "http://example.com/a.jpg?key=value"
-        quote:      uutrimquote     // uu.trim.quote(source:String):String
-                                    //  [1][trim quotes]   uu.trim.quote(' "quote string" ') -> "quote string"
-                                    //  [2][trim quotes]   uu.trim.quote(" 'quote string' ") -> "quote string"
+        quote:      uutrimquote     // uu.trim.quote(source:String, replacement:String = " "):String
+                                    //  [1][trim quotes]   uu.trim.quote(' "quote  string" ') -> "quote string"
+                                    //  [2][trim quotes]   uu.trim.quote(" 'quote  string' ") -> "quote string"
     }),
     f:              uuf,            // uu.f(format:FormatString, var_args, ...):String
-                                    //  [1][placeholder] uu.format("@ dogs and @", 101, "cats") -> "101 dogs and cats"
+                                    //  [1][replace @] uu.format("@ dogs and @", 101, "cats") -> "101 dogs and cats"
+                                    //  [2][replace #] uu.format(null, "#", "# dogs and #", 101, "cats") -> "101 dogs and cats"
     format:         uuf,            // uu.format(...) as uu.f
 //{@sprintf
     sprintf:        uusprintf,      // uu.sprintf(format:FormatString, var_args ...):String
@@ -947,18 +949,11 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
 //}@socket
     // --- URL / URL ACCESSOR ---
 //{@url
-    url:      uumix(uuurl, {        // uu.url(url:URLHash/URLString = ""):URLString/URLHash
-                                    //  [1][current abs-dir] uu.url() -> "http://example.com/index.htm"
-                                    //  [2][parse url]       uu.url("http://example.com/dir/file.ext") -> { schme: "http", ... }
-                                    //  [3][build url]       uu.url({ schme: "http", ... }) -> "http://example.com/..."
-        qs:         uuurlqs,        // uu.url.qs(queryString:QueryString/Hash, add:Hash = void, joint:String = uu.config.qsJoint):QueryString/Hash
-                                    //  [1][parse] uu.url.qs("key1=a;key2=b;key3=0;key3=1")    -> { key1: "a", key2: "b", key3: ["0", "1"] }
-                                    //  [2][build] uu.url.qs({ key1: "a", key2: "b",
-                                    //                         key3: ["0", "1"] })             -> "key1=a;key2=b;key3=0;key3=1"
-                                    //  [3][add]   uu.url.qs( "key=val",     { key2: "val2" }) -> "key=val;key2=val2"
-                                    //  [4][add]   uu.url.qs({ key: "val" }, { key2: "val2" }) -> "key=val;key2=val2"
-        abs:        uuurlabs,       // uu.url.abs(url:URLString = ".", currentDir = ""):URLString
-                                    //  [1][get abs-url]   uu.url.abs("./index.htm") -> "http://example.com/index.htm"
+    url:      uumix(uuurl, {        // uu.url(url:URLHash/URLString = "", parseQuery:Boolean = false):URLString/URLHash
+                                    //  [1][current abs-dir]   uu.url() -> "http://example.com/index.htm"
+                                    //  [2][parse url]         uu.url("http://example.com/dir/file.ext?a=b") -> { protocol: "http:", query: {}, ... }
+                                    //  [3][parse url + query] uu.url("http://example.com/dir/file.ext?a=b") -> { protocol: "http:", query: { a: "b" } }
+                                    //  [4][build url]         uu.url({ schme: "http", ... }) -> "http://example.com/..."
         dir:        uuurldir,       // uu.url.dir(url:URLString/PathString):String
                                     //  [1][chop filename] uu.url.dir("http://example.com/dir/file.ext") -> "http://example.com/dir/"
                                     //  [2][chop filename] uu.url.dir("/root/dir/file.ext")              -> "/root/dir/"
@@ -970,6 +965,14 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //  [2][get hash] uu.url.hash("http://example.com/api") -> ""
         split:      uuurlsplit,     // uu.url.split(url:URLString/PathString):Array+Hash - { dir, file }
                                     //  [1][split dir | file.ext] uu.url.split("http://example.com/dir/file.ext") -> ["http://example.com/dir/", "file.ext"]
+        query:      uuurlquery,     // uu.url.query(queryString:QueryString/Hash, add:Hash = void, joint:String = uu.config.queryJoint):QueryString/Hash
+                                    //  [1][parse] uu.url.query("key1=a;key2=b;key3=0;key3=1")    -> { key1: "a", key2: "b", key3: ["0", "1"] }
+                                    //  [2][build] uu.url.query({ key1: "a", key2: "b",
+                                    //                         key3: ["0", "1"] })             -> "key1=a;key2=b;key3=0;key3=1"
+                                    //  [3][add]   uu.url.query( "key=val",     { key2: "val2" }) -> "key=val;key2=val2"
+                                    //  [4][add]   uu.url.query({ key: "val" }, { key2: "val2" }) -> "key=val;key2=val2"
+        resolve:    uuurlresolve,   // uu.url.resolve(url:URLString = ".", currentDir = ""):URLString
+                                    //  [1][resolve abs-url] uu.url.resolve("./index.htm") -> "http://example.com/index.htm"
         normalize:  uuurlnormalize  // uu.url.normalize(url:String):String
                                     //  [1][up to dir]          uu.url.normalize("http://example.com/api/../") -> "http://example.com/"
                                     //  [2][current dir]        uu.url.normalize("http://example.com/api/./")  -> "http://example.com/api/"
@@ -1865,7 +1868,7 @@ function uucomplex(key,     // @param String/Hash(= void):
 // uu.isURL - is URL
 function isURL(search) { // @param Mix: search
                          // @return Boolean:
-    if (isString(search) && _scheme.test(search)) {
+    if (isString(search) && _protocol.test(search)) {
         return search.slice(0, 4) === "file" ? _parse.file.test(search)
                                              : _parse.http.test(search);
     }
@@ -2035,7 +2038,7 @@ function uukeys(source,           // @param Hash/Array: source
     return rv;
 }
 
-// uu.drip
+// uu.drip - filter
 function uudrip(source,      // @param Hash/Array: source
                 evaluator) { // @param Function: evaluator(value):Boolean
                              // @return Hash: { rv, rest }
@@ -2072,7 +2075,7 @@ function uuvalues(source) { // @param Hash/Array: source
     return uukeys(source, 1);
 }
 
-// uu.hash - to hash
+// uu.hash - String to Hash
 function uuhash(source,     // @param JointString: "a,1,b,2"
                 splitter) { // @param String/RegExp(= /[,;:]/): splitter
                             // @return Hash: { a: "1", b: "2" }
@@ -2090,7 +2093,7 @@ function uuhash(source,     // @param JointString: "a,1,b,2"
 }
 uuhash._ = /[,;:]/; // default splitter
 
-// uu.array - to array + slice
+// uu.array - Mix to Array + slice
 function uuarray(source,     // @param Array/Mix/NodeList/Arguments: source
                  sliceStart, // @param Number(= void): Array.slice(start, end)
                  sliceEnd) { // @param Number(= void): Array.slice(start, end)
@@ -2116,7 +2119,7 @@ function uuarray(source,     // @param Array/Mix/NodeList/Arguments: source
     return rv;
 }
 
-// uu.has
+// uu.has - A has B
 function uuhas(source,   // @param Hash/Array/Node: context, parentNode
                search) { // @param Hash/Array/Node/String: search element, childNode
                          // @return Boolean:
@@ -2213,7 +2216,7 @@ function uupair(key,     // @param Number/String/Hash: key
     return key; // Hash or Hash Like Object
 }
 
-// inner - get length
+// uu.size - get length
 function uusize(source) { // @param Hash/Array: source
                           // @return Number:
     // [1][Hash.length]   uusize({ a: 1, b: 2 }) -> 2
@@ -2301,11 +2304,11 @@ function uuindexof(source,        // @param Hash/Array: source
         }
     }
 //{@mb
-    return void 0;
+    return _undef;
 //}@mb
 }
 
-// inner - sort array
+// uu.array.sort - sort array
 function uuarraysort(source,   // @param Array: source
                      method) { // @param String/CallbackFunction(= "A-Z"): method
                                //                   sort method or callback-function
@@ -2325,7 +2328,7 @@ function uuarraysort(source,   // @param Array: source
     return (r & 2) ? source.reverse() : source;
 }
 
-// inner - array compaction, trim null and undefined elements
+// uu.array.clean - array compaction, trim null and undefined elements
 function uuarrayclean(source) { // @param Array: source
                                 // @return Array: clean Array
     //  [1][Array.clean]         uuarrayclean([,,1,2,,]) -> [1,2]
@@ -2363,7 +2366,7 @@ function uuarraytohash(key,        // @param Array: key array
     return rv;
 }
 
-// inner - make array from unique element(trim null and undefined elements)
+// uu.array.unique - make array from unique element(trim null and undefined elements)
 function uuarrayunique(source,        // @param Array: source
                        literalOnly) { // @param Boolean(= false): true is literal only(quickly)
                                       // @return Array:
@@ -3664,7 +3667,7 @@ function uucssrect(node,           // @param Node:
 //}@assert
 
     var cs = /*{@mb*/ getComputedStyle ? /*}@mb*/ getComputedStyle(node, 0)
-             /*{@mb*/                  :          node.currentStyle, /*}mb*/
+             /*{@mb*/                  :          node.currentStyle /*}@mb*/,
         position, body = doc.body,
         x = 0,
         y = 0,
@@ -4316,6 +4319,9 @@ function uuevent(node,         // @param Node:
                                // @return Node:
 
 //{@assert
+    if (!isNode(node)) {
+        uung("uu.event", node);
+    }
     switch (uutype(trace)) {
     case uutype.STRING:
     case uutype.UNDEFINED: break;
@@ -4328,11 +4334,16 @@ function uuevent(node,         // @param Node:
     }
 //}@assert
 
-    function eventClosure(event) {
-        if (!event.uu || event.uuoverride) {
-            var fullcode = uuevent.codes[event.type] || 0,
-                tgt = event.target /*{@mb*/ || event.srcElement || doc; /*}@mb*/
+    // [!] event callback
+    function eventClosure(event) { // @param NativeEventObject:
 
+        if (!event.uu ||        // extended?
+            event.uuoverride) { // or force override?
+
+            var fullcode = uuevent.codes[event.type] || 0, // event.type -> fullcode
+                tgt = event.target /*{@mb*/ || event.srcElement || doc; /*}@mb*/ // [IE6][IE7][IE8]
+
+            // bonding event.uu
             event.uu = {
                 at:     (tgt[_nodeType] === Node.TEXT_NODE) ? tgt[_parentNode] : tgt,
                 ns:     ns,                 // last specified namespace
@@ -4347,7 +4358,7 @@ function uuevent(node,         // @param Node:
             event.uuoverride && uumix(event.uu, event.uuoverride);
             event.uuoverride = 0;
 
-//{@deprecated 2010-10-28
+//{@deprecated 2010-10-28 -> end of uupaa.js version 1.0 release
             uumix(event, event.uu);
 //}@deprecated
 
@@ -6039,7 +6050,7 @@ function uuform(/* var_args */) { // @param Mix: var_args
 // uu.form.serialize
 function uuformserialize(node,    // @param Node: <form>
                          toHash,  // @param Boolean(= false): true is toHash, false is toString
-                         joint) { // @param String(= uu.config.qsJoint): ";" or "&" or "&amp;"
+                         joint) { // @param String(= uu.config.queryJoint): ";" or "&" or "&amp;"
                                   // @return URLEncodedQueryString/Hash:
     var rv = {},
         ary = uuquery("input,textarea,select,button"),
@@ -6057,7 +6068,7 @@ function uuformserialize(node,    // @param Node: <form>
             }
         }
     }
-    return toHash ? rv : uuurlqs(rv, 0, joint || uuconfig.qsJoint);
+    return toHash ? rv : uuurlquery(rv, 0, joint || uuconfig.queryJoint);
 }
 
 // uu.form.value - form node.value accessor
@@ -6301,64 +6312,79 @@ function uufix(source) { // @param String: source
 }
 uufix._ = {}; // { "background-color": "backgroundColor", ... }
 
-// uu.trim - trim both side whitespaces and inner whitespaces normalize
-function uutrim(source,        // @param String: " a   b  c "
-                replacement) { // @param String(= " "): replacement
-                               // @return String: "a b c"
-    //  [1][trim inner]    uu.trim("  has  space  ") -> "has  space"
+// uu.trim - trim both side whitespaces and unit inner whitespaces
+function uutrim(source,        // @param String: "  has  space  "
+                replacement) { // @param String(= " "): replacement inner spaces
+                               // @return String: "has space"
+    //  [1][trim both + unite spaces] uu.trim("  has  space  ")     -> "has space"
+    //  [2][trim both + inner spaces] uu.trim("  has  space  ", "") -> "hasspace"
 
-    return source.trim()[_replace](/\s+/g,
-                                   replacement === void 0 ? " " : replacement);
+    return source.trim()[_replace](uutrim._.u,
+                                   replacement === _undef ? " " : replacement);
 }
+uutrim._ = { u: /\s+/g,              // uu.trim()
+             t: /<\/?[^>]+>/g,       // uu.trim.tag()
+             f: /^[^\(]+\(|\)\s*$/g, // uu.trim.func()
+             h: /#.*$/g,             // uu.trim.hash()
+             q: /^["']?|['"]?$/g };  // uu.trim.quote()
 
 // uu.trim.tag - uu.trim() + strip tags
-function uutrimtag(source) { // @param HTMLFragmentString: "  <h1>A</h1>  B  <p>C</p>  "
-                             // @return String: "A B C"
+function uutrimtag(source,        // @param HTMLFragmentString: "  <h1>A</h1>  B  <p>C</p>  "
+                   replacement) { // @param String(= " "): replacement inner spaces
+                                  // @return String: "A B C"
     //  [1][trim tags]     uu.trim.tag("  <h1>A</h1>  B  <p>C</p>  ") -> "A B C"
     //  [2][trim tags]     uu.trim.tag("      A       B     C      ") -> "A B C"
 
-    return uutrim(source[_replace](/<\/?[^>]+>/g, ""));
+    return uutrim(source, replacement)[_replace](uutrim._.t, "");
 }
 
 // uu.trim.func - uu.trim() + strip "function-name(" ... ")"
-function uutrimfunc(source) { // @param CSSStyleFragmentString: '  url("http://...")  '
-                              // @return String:  '"http://..."'
+function uutrimfunc(source,        // @param CSSStyleFragmentString: '  url("http://...")  '
+                    replacement) { // @param String(= " "): replacement inner spaces
+                                   // @return String:  '"http://..."'
     //  [1][trim function] uu.trim.func(' url("http://...") ') -> "http://..."
     //  [2][trim function] uu.trim.func(' rgb(1, 2, 3) ')      -> "1, 2, 3"
 
-    return source[_replace](/^[^\(]+\(|\)\s*$/g, ""); // )
+    return uutrim(source, replacement)[_replace](uutrim._.f, ""); // )
 }
 
 // uu.trim.hash - uu.trim() + strip "#hash"
-function uutrimhash(source) { // @param URLString: "http://example.com/a.jpg#hash"
-                              // @return String:   "http://example.com/a.jpg"
+function uutrimhash(source,        // @param URLString: "http://example.com/a.jpg#hash"
+                    replacement) { // @param String(= " "): replacement inner spaces
+                                   // @return String:   "http://example.com/a.jpg"
     //  [1][trim url hash] uu.trim.hash("http://example.com/a.jpg#hash")           -> "http://example.com/a.jpg"
     //  [2][trim url hash] uu.trim.hash("http://example.com/a.jpg?key=value#hash") -> "http://example.com/a.jpg?key=value"
 
-    return source[_replace](/^\s*|#.*$/g, "");
+    return uutrim(source, replacement)[_replace](uutrim._.h, "");
 }
 
-// uu.trim.quote - String.trim() + strip double and single quotes
-function uutrimquote(source) { // @param String:  ' "quote string" '
-                               // @return String: "quote string"
-    //  [1][trim quotes]   uu.trim.quote(' "quote string" ') -> "quote string"
-    //  [2][trim quotes]   uu.trim.quote(" 'quote string' ") -> "quote string"
+// uu.trim.quote - uu.trim() + strip double and single quotes
+function uutrimquote(source,        // @param String: ' "quote  string" '
+                     replacement) { // @param String(= " "): replacement inner spaces
+                                    // @return String: "quote  string"
+    //  [1][trim quotes]   uu.trim.quote(' "quote  string" ') -> "quote string"
+    //  [2][trim quotes]   uu.trim.quote(" 'quote  string' ") -> "quote string"
 
-    return source[_replace](/^\s*["']?|["']?\s*$/g, "");
+    return uutrim(source, replacement)[_replace](uutrim._.q, "");
 }
 
 // uu.f - placeholder( "@" ) replacement
 function uuf(format) { // @param FormatString: formatted string with "@" placeholder
                        // @return String: "formatted string"
-    //  [1][placeholder] uu.format("@ dogs and @", 101, "cats") -> "101 dogs and cats"
+    //  [1][replace @] uu.format("@ dogs and @", 101, "cats") -> "101 dogs and cats"
+    //  [2][replace #] uu.format(null, "#", "# dogs and #", 101, "cats") -> "101 dogs and cats"
 
-    var i = 0, args = arguments;
+    var i = 0, args = arguments, replacement = uuf.rp; // /@/g
 
-    return format[_replace](uuf.q, function() {
+    // user definition replacement
+    if (format === null && args.length > 3 && typeof args[1] === _string) { // [2]
+        replacement = RegExp(args[1], "g"); // /#/g
+    }
+    return format[_replace](replacement, function() {
         return args[++i];
     });
 }
-uuf.q = /@/g;
+uuf.rp = /@/g; // replacement
 
 //{@sprintf
 // uu.sprintf - sprintf (PHP::sprintf like function)
@@ -7039,32 +7065,36 @@ function msgpackSetType(rv,      // @param ByteArray: result
 // --- URL ---
 //{@url
 // uu.url - url accessor
-function uuurl(url) { // @param URLHash/URLString(= ""): "http://example.com/dir/file.ext?key=value#hash"
-                      // @return URLString/URLHash:
+function uuurl(url,          // @param URLHash/URLString(= ""): "https://..."
+               parseQuery) { // @param Boolean(= false): true is parse QueryString
+                             // @return URLString/URLHash:
 
-    //  [1][current abs-dir] uu.url() -> "http://example.com/index.htm"
-    //  [2][parse url]       uu.url("http://example.com/dir/file.ext") -> { schme: "http", ... }
-    //  [3][build url]       uu.url({ schme: "http", ... }) -> "http://example.com/..."
+    //  [1][current abs-dir]   uu.url() -> "http://example.com/index.htm"
+    //  [2][parse url]         uu.url("http://example.com/dir/file.ext?a=b") -> { protocol: "http:", query: {}, ... }
+    //  [3][parse url + query] uu.url("http://example.com/dir/file.ext?a=b") -> { protocol: "http:", query: { a: "b" } }
+    //  [4][build url]         uu.url({ schme: "http", ... }) -> "http://example.com/..."
 
-    return !url ? uuurlabs.curt // [1]
-                : isString(url) ? parseURL(uuurlabs(url)) // [2]
-                                : buildURL(url);          // [3]
+    return !url ? uuurlresolve.cache // [1]
+                : isString(url) ? parseURL(uuurlresolve(url), parseQuery) // [2][3]
+                                : buildURL(url);                          // [4]
 }
 
-// uu.url.abs - convert relative URL to absolute URL
-function uuurlabs(url,          // @param URLString(= "."): rel/abs URL
-                  currentDir) { // @param URLString(= ""): current dir
-                                // @return URLString: absolute URL
-    return (!url || url === ".") ? uuurlabs.curt : toAbsURL(url, currentDir);
+// uu.url.resolve - convert relative URL to absolute URL
+function uuurlresolve(url,          // @param URLString(= "."): rel/abs URL
+                      currentDir) { // @param URLString(= ""): current dir
+                                    // @return URLString: absolute URL
+    //  [1][resolve abs-url] uu.url.resolve("./index.htm") -> "http://example.com/index.htm"
+
+    return (!url || url === ".") ? uuurlresolve.cache : resolveURL(url, currentDir);
 }
-uuurlabs.curt = toAbsURL("."); // current absolute-url cache
+uuurlresolve.cache = resolveURL("."); // current absolute-url cache
 
 // inner - to absolute url
-function toAbsURL(url,          // @param String:
-                  currentDir) { // @param String:
-                                // @return String:
+function resolveURL(url,          // @param String:
+                    currentDir) { // @param String:
+                                  // @return String:
 /*
-    if (!/^(?:file|https?):/.test(url)) { // no scheme
+    if (!/^(?:file|https?):/.test(url)) { // no protocol
         var div = newNode();
 
         div.innerHTML = '<a href="' + (currentDir || "") + url + '" />';
@@ -7073,7 +7103,7 @@ function toAbsURL(url,          // @param String:
     }
     return url[_replace](/&amp;|&/g, ";"); // "&" -> ";"
  */
-    if (!_scheme.test(url)) { // no scheme
+    if (!_protocol.test(url)) { // no protocol
         // build full path
         var a = newNode("a");
 
@@ -7086,6 +7116,12 @@ function toAbsURL(url,          // @param String:
 // uu.url.dir - absolute path to absolute directory(chop filename)
 function uuurldir(url) { // @param URLString/PathString: url or path
                          // @return String: directory path, has tail "/"
+    //  [1][chop filename] uu.url.dir("http://example.com/dir/file.ext") -> "http://example.com/dir/"
+    //  [2][chop filename] uu.url.dir("/root/dir/file.ext")              -> "/root/dir/"
+    //  [3][chop filename] uu.url.dir("/file.ext")                       -> "/"
+    //  [4][through]       uu.url.dir("/")                               -> "/"
+    //  [5][supply slash]  uu.url.dir("")                                -> "/"
+
     var ary = url.split("/");
 
     ary.pop(); // chop "file.ext"
@@ -7093,87 +7129,95 @@ function uuurldir(url) { // @param URLString/PathString: url or path
 }
 
 // inner - build URL
-function buildURL(hash) { // @param URLHash:
-                          // @return URLString: "scheme://domain:port/path?qs#hash"
-    return [hash.scheme,
-            hash.scheme ? (hash.scheme === "file" ? ":///"
-                                                  : "://") : "",
-            hash.domain,
-            hash.port ? ":" + hash.port : "",
-            hash.path || "/",
-            hash.qs   ? "?" + hash.qs   : "",
-            hash.hash ? "#" + hash.hash : ""].join("");
+function buildURL(hash) { // @param URLHash: { protocol, host, pathname, search, hash }
+                          // @return URLString: "{$protocol}//{$host}{$pathname}{$search}{$hash}"
+    //  [1][build] uu.url({ protocol: "http:",
+    //                      host:     "user:pass@example.com:8080",
+    //                      pathname: "/dir1/dir2/file.ext",
+    //                      search:   "?a=b&c=d",
+    //                      hash:     "#hash" })
+    //              -> "http://user:pass@example.com:8080/dir1/dir2/file.ext?a=b&c=d#hash"
+//{@assert
+    if ("protocol" in hash &&
+        "host"     in hash &&
+        "pathname" in hash &&
+        "search"   in hash &&
+        "hash"     in hash) {
+        ;
+    } else {
+        uung("buildURL", hash);
+    }
+//}@assert
+
+    return [hash.protocol,
+            hash.protocol ? (hash.protocol === "file:" ? "///"
+                                                       : "//") : "",
+            hash.host     || "",
+            hash.pathname || "/",
+            hash.search   || "",
+            hash.hash     || ""].join("");
 }
 
 // inner - parse URL
-function parseURL(url) { // @param URLString: absurl / relurl,
-                         //                   "http://username:password@example.com:8080/dir1/dir2/file.ext?a=b&c=d#hash"
-                         // @return URLHash: { url, scheme, domain, port, base,
-                         //                    path, dir, file, qs, hash }
-                         //     url    - String: "http://username:password@example.com:8080/dir1/dir2/file.ext?a=b;c=d#hash"
-                         //     ssl    - Boolean: false
-                         //     scheme - String: "http"
-                         //     basic  - String: "username:password"
-                         //     domain - String: "example.com"
-                         //     port   - String: "8080"
-                         //     base   - String: "http://example.com:8080/dir1/dir2/"
-                         //     path   - String: "/dir1/dir2/file.ext"
-                         //     dir    - String: "/dir1/dir2/"
-                         //     file   - String: "file.ext"
-                         //     qs     - String: "a=b&c=d"
-                         //     hash   - String: "hash"
-    var m, w = ["/", ""];
+function parseURL(url,          // @param URLString: absurl / relurl,
+                  parseQuery) { // @param Boolean(= false): true is parse QueryString
+                                //                   "http://user:pass@example.com:8080/dir1/dir2/file.ext?a=b&c=d#hash"
+                                // @return URLHash: { href, protocol, secure, host,
+                                //                    auth, hostname, port, pathname,
+                                //                    search, query, hash, ok }
+                                //     href     - String: "http://user:pass@example.com:8080/dir1/dir2/file.ext?a=b;c=d#hash"
+                                //     protocol - String: "http:"
+                                //     secure   - Boolean: false
+                                //     host     - String: "user:pass@example.com:8080". has auth
+                                //     auth     - String: "user:pass"
+                                //     hostname - String: "example.com"
+                                //     port     - String: "8080"
+                                //     pathname - String: "/dir1/dir2/file.ext". has /^\//
+                                //     search   - String: "?a=b&c=d". has /^?/
+                                //     query    - Hash:   { a: "b", c: "d" }
+                                //     hash     - String: "#hash". has /^#/
+                                //     ok       - Boolean: true is valid url
 
-    if (url) {
-        // _parse.file: /^(file):\/\/(?:\/)?(?:lo\w+\/)?([^ ?#]*)(?:\?([^#]*))?(?:#(.*))?/i, // file
-        //                 file://       /     localhost/ dir/f.ext   ?key=value   #hash
-        //                 [1]                            [2]          [3]          [4]
-        m = _parse.file.exec(url);
-        if (m) {
-            w = uuurlsplit(m[2]);
-            return {
-                url:    url,
-                ssl:    _false,
-                scheme: m[1],
-                basic:  "",
-                domain: "",
-                port:   "",
-                base:   m[1] + ":///" + w[0],
-                path:   m[2],
-                dir:    w[0],
-                file:   w[1],
-                qs:     m[3] || "",
-                hash:   m[4] || ""
-            };
-        }
+    // file: /^(file:)\/{2,3}(?:loc\w+)?([^ ?#]*)(?:(\?[^#]*))?(?:(#.*))?/i
+    //                        localhost /dir/f.ext  ?key=value    #hash
+    //         [1]                      [2]         [3]           [4]
+    // http: /^(\w+:)\/\/((?:([\w:]+)@)?([^\/:]+)(?::(\d*))?)([^ ?#]*)(?:(\?[^#]*))?(?:(#.*))?/i
+    //        https://    user:pass     server       port    /dir/f.ext  ?key=value   #hash
+    //        [1]         [3]           [4]          [5]     [6]         [7]          [8]
+    var m = _parse.file.exec(url) || _parse.http.exec(url);
 
-        // _parse.http: /^(\w+):\/\/([\w:]+@)?([^\/:]+)(?::(\d*))?([^ ?#]*)(?:\?([^#]*))?(?:#(.*))?/i  // http, https, ws, wss, ...
-        //                scheme:// id:pass@   server     : port   /dir/f.ext  ?key=value   #hash
-        //                [1]       [2]        [3]          [4]    [5]          [6]          [7]
-        m = _parse.http.exec(url);
-        if (m) {
-            m[5] && (w = uuurlsplit(m[5])); // "dir/file.ext" -> { dir, file }
-            return {
-                url:    url,
-                ssl:    m[1] === "https" || m[1] === "wss",
-                scheme: m[1],
-                basic:  m[2] ? m[2].slice(0, -1) : "", // "username:password@" -> "username:password"
-                domain: m[3],
-                port:   m[4] || "",
-                base:   (m[1] + "://" + m[3]) + (m[4] ? ":" + m[4] : "") + w[0],
-                path:   m[5] || "/",
-                dir:    w[0],
-                file:   w[1],
-                qs:     m[6] || "",
-                hash:   m[7] || ""
-            };
-        }
-    } else {
-        url = "/";
+    if (m) {
+        return m[1] === "file:" ? {
+            href:       url,
+            protocol:   m[1],
+            secure:     _false,
+            host:       "",
+            auth:       "",
+            hostname:   "",
+            port:       "",
+            pathname:   m[2],
+            search:     m[3] || "",
+            query:      parseQuery ? parseQueryString(m[3] || "") : {},
+            hash:       m[4] || "",
+            ok:         _true
+        } : { // http, https, ws, wss
+            href:       url,
+            protocol:   m[1],
+            secure:     m[1] === "https:" || m[1] === "wss:",
+            host:       m[2],
+            auth:       m[3] || "",
+            hostname:   m[4],
+            port:       m[5] || "",
+            pathname:   m[6],
+            search:     m[7] || "",
+            query:      parseQuery ? parseQueryString(m[7] || "") : {},
+            hash:       m[8] || "",
+            ok:         _true
+        };
     }
-    m = uuurlsplit(url);
-    return { url: url, ssl: _false, scheme: "", basic: "", domain: "", port: "",
-             base: m.dir, path: url, dir: m.dir, file: m.file, qs: "", hash: "" };
+    return { href: url, protocol: "", secure: _false, host: "", auth: "",
+             hostname: "", port: "", pathname: url, search: "", query: {},
+             hash: "", ok: _false };
 }
 
 // uu.url.hash - get hash - quickly
@@ -7214,7 +7258,7 @@ function uuurlnormalize(url) { // @param String:
     // [11][boundary condition] uu.url.normalize("")                           -> "/"
 
     var rv = [], r, hash = parseURL(url),
-        ary = hash.path.split("/"), i = 0, iz = ary.length;
+        ary = hash.pathname.split("/"), i = 0, iz = ary.length;
 
     for (; i < iz; ++i) {
         ary[i] === ".." ? rv.pop()
@@ -7223,23 +7267,23 @@ function uuurlnormalize(url) { // @param String:
     r = rv.join("/");
     r || (r = "/");
 
-    hash.path = r;
+    hash.pathname = r;
     return buildURL(hash);
 }
 
-// uu.url.qs - query string accessor
-function uuurlqs(queryString, // @param QueryString/Hash: "key1=a;key2=b;key3=0;key3=1"
-                              //                          { key1: "a", key2: "b", key3: [0, 1] }
-                 add,         // @param Hash(= void): add pair { key: value, ... }
-                 joint) {     // @param String(= uu.config.qsJoint): ";" or "&" or "&amp;"
-                              // @return QueryString/Hash:
-    //  [1][parse] uu.url.qs("key1=a;key2=b;key3=0;key3=1")    -> { key1: "a", key2: "b", key3: ["0", "1"] }
-    //  [2][build] uu.url.qs({ key1: "a", key2: "b",
-    //                         key3: ["0", "1"] })             -> "key1=a;key2=b;key3=0;key3=1"
-    //  [3][add]   uu.url.qs( "key=val",     { key2: "val2" }) -> "key=val;key2=val2"
-    //  [4][add]   uu.url.qs({ key: "val" }, { key2: "val2" }) -> "key=val;key2=val2"
+// uu.url.query - query string accessor
+function uuurlquery(queryString, // @param QueryString/Hash: "key1=a;key2=b;key3=0;key3=1"
+                                 //                          { key1: "a", key2: "b", key3: [0, 1] }
+                    add,         // @param Hash(= void): add pair { key: value, ... }
+                    joint) {     // @param String(= uu.config.queryJoint): ";" or "&" or "&amp;"
+                                 // @return QueryString/Hash:
+    //  [1][parse] uu.url.query("key1=a;key2=b;key3=0;key3=1")    -> { key1: "a", key2: "b", key3: ["0", "1"] }
+    //  [2][build] uu.url.query({ key1: "a", key2: "b",
+    //                            key3: ["0", "1"] })             -> "key1=a;key2=b;key3=0;key3=1"
+    //  [3][add]   uu.url.query( "key=val",     { key2: "val2" }) -> "key=val;key2=val2"
+    //  [4][add]   uu.url.query({ key: "val" }, { key2: "val2" }) -> "key=val;key2=val2"
 
-    joint = joint || uuconfig.qsJoint;
+    joint = joint || uuconfig.queryJoint;
     var rv, isstr = isString(queryString), i;
 
     if (add) {
@@ -7283,11 +7327,11 @@ function parseQueryString(queryString) { // @param URLString/QueryString: "key1=
               : (rv[k] = v);
         return "";
     }
-    var rv = {}, fn = decodeURIComponent;
+    var rv = {}, fn = decodeURIComponent, pos = queryString[_indexOf]("?");
 
-    // chop url. "http://example.com?key=val" -> { key: "val" }
-    if (queryString[_indexOf]("?") >= 0) { // [1]
-        queryString = parseURL(uuurlabs(queryString)).qs;
+    // pickup: "http://example.com?key=val#hash" -> { key: "val" }
+    if (pos >= 0) { // [1]
+        queryString = uutrimhash(queryString.slice(pos + 1));
     }
     queryString[_replace](/&amp;|&|;/g, ";") // "&amp;" or "&" or ";" -> ";"
                [_replace](/(?:([^\=]+)\=([^\;]+);?)/g, _parse); // [2]
