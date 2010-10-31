@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8" />
+<!DOCTYPE html><html id="html" lang="ja"><head id="head"><meta charset="utf-8" />
 <title>uupaa.js - unittest</title>
 <style>
 .absolute {
@@ -29,7 +29,7 @@
 }
 </style>
 <script src="../../src/uupaa.js"></script>
-</head><body>
+</head><body id="body">
 <div style="display:none">
     <div id="div" class="class" title="title">text</div>
 
@@ -158,7 +158,21 @@ uu.ready("window", function() {
     uu.ok();
 });
 
-uu.ready("window", function(uu) {
+uu.ready("window", function(uu, doc) {
+
+
+    uu.ok("uu.id()");
+    uu.ok('uu.id("body") === document.body',
+          uu.id("body"), "==", doc.body);
+
+    uu.ok('uu.idc("body") === document.body',
+          uu.idc("body"), "==", doc.body);
+
+    uu.ok('uu.ids("html,head,body") === [document.html, document.head, document.body]',
+          uu.ids("html,head,body"), "==", [doc.html, doc.head, doc.body]);
+    uu.ok('uu.ids("  html , head , body  ") === [document.html, document.head, document.body]',
+          uu.ids("  html , head , body  "), "==", [doc.html, doc.head, doc.body]);
+
 
     uu.ok("uu.array()");
     (function() {
