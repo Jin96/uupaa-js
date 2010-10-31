@@ -74,7 +74,7 @@ uu.log("mousedown: gesture=@ touches=@", evt.uu.gesture, evt.uu.touches ? evt.uu
             uu.unbind(doc, "touchmove+,touchend+", this);
             uu.bind(doc, "gesturechange+,gestureend+", this);
         } else {
-            uu.bind(uu.ie678 ? this.grip : doc, _moveup, this);
+            uu.bind(uu.ie678 ? this.grip : doc, _moveup, this, "ui.drag.js");
         }
         break;
 
@@ -85,7 +85,7 @@ uu.log("mouseup: gesture=@ touches=@", evt.uu.gesture, evt.uu.touches ? evt.uu.t
             uu.unbind(doc, "gesturechange+,gestureend+", this);
             uu.bind(doc, "touchmove+,touchend+", this);
         } else {
-            uu.unbind(uu.ie678 ? this.grip : doc, _moveup, this);
+            uu.unbind(uu.ie678 ? this.grip : doc, _moveup, this, "ui.drag.js");
         }
         break;
 //  case uu.event.codes.wheel:
