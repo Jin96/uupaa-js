@@ -184,7 +184,7 @@ var _addEventListener = "addEventListener",
     _true = !0,
     _perf = new Date,
 //{@debug
-    _trace = [];
+    _trace = [],
 //}@debug
     _types = { "NaN": 2 },          // type detection
     _dd2num = {},                   // uu.hash.dd2num = {  "00":    0 , ...  "99":   99  }
@@ -585,7 +585,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
     // --- DOM EVENT ---
     event:    uumix(uuevent, {      // uu.event(node:Node, exEventType:ExEventTypeString,
                                     //                     evaluator:Function/Instance,
-                                    //                     trace:String = void):Node
+                                    //                     hint:String = void):Node
                                     //  [1][bind a event]            uu.event(node, "click", fn)             -> node
                                     //  [2][bind multi events]       uu.event(node, "click,dblclick", fn)    -> node
                                     //  [3][bind a capture event]    uu.event(node, "mousemove+", fn)        -> node
@@ -595,13 +595,13 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
         edge:       uueventedge,    // uu.event.edge(event:ExEvent):Hash - { x, y }
         fire:       uueventfire,    // uu.event.fire(node:Node, eventType:String,
                                     //                          param:Mix = void,
-                                    //                          trace:String = void):Node
+                                    //                          hint:String = void):Node
         stop:       uueventstop,    // uu.event.stop(event:Event/ExEvent, stop:Boolean = true,
                                     //                                    prevent:Boolean = true)
 //{@mb
 //{@eventhover
         hover:      uueventhover,   // uu.event.hover(node:Node, expr:CallbackFunction/ClassNameString,
-                                    //                           trace:String = void):Node
+                                    //                           hint:String = void):Node
                                     //  [1][enter/leave callback] uu.event.hover(node, function(enter){}) -> node
                                     //  [2][toggle className]     uu.event.hover(node, "hoverAction") -> node
         unhover:    uueventunhover, // uu.event.unhover(node:Node):Node
@@ -623,7 +623,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //                            callback:CallbackFunction,
                                     //                            cyclic:Number,
                                     //                            loop:Number = 0,
-                                    //                            trace:String = void):Node
+                                    //                            hint:String = void):Node
         uncyclic:   uueventuncyclic,// uu.event.uncyclic(node:Node, exEventType:ExEventTypeString)
 //}@eventcyclic
         evaluator:                  // uu.event.evaluator(node:Node, exEventType:ExEventTypeString):FunctionArray
@@ -648,7 +648,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
     live:     uumix(uulive, {       // uu.live(expr:CSSSelectorExpressionString,
                                     //         exEventType:ExEventTypeString,
                                     //         evaluator:CallbackFunction/Instance,
-                                    //         trace:String= void)
+                                    //         hint:String= void)
                                     //  [1][bind] uu.live("css > selector", "nameSpace.click", callback)
         has:        uulivehas       // uu.live.has(expr:CSSSelectorExpressionString, exEventType:ExEventTypeString):Boolean
     }),
@@ -4368,21 +4368,21 @@ function uumsgunbind(instance) { // @param Instance: class instance
 function uuevent(node,         // @param Node:
                  exEventType,  // @param ExEventTypeString: some EventTypeEx, "click,click+,..."
                  evaluator,    // @param CallbackFunction/Instance: callback function
-                 trace,        // @param String(= void): trace ident
+                 hint,         // @param String(= void): code search hint
                  __unbind__) { // @hidden Boolean(= false): true is unbind, false is bind
                                // @return Node:
 
 //{@debug
-    uutrace(arguments.callee, arguments.length, node, exEventType, evaluator, trace);
+    uutrace(arguments.callee, arguments.length, node, exEventType, evaluator, hint);
 //}@debug
 //{@assert
     if (!isNode(node)) {
         uung("uu.event", node);
     }
-    switch (uutype(trace)) {
+    switch (uutype(hint)) {
     case uutype.STRING:
     case uutype.UNDEFINED: break;
-    default: uung("uu.event", trace);
+    default: uung("uu.event", hint);
     }
     switch (uutype(__unbind__)) {
     case uutype.BOOLEAN:
@@ -4407,7 +4407,7 @@ function uuevent(node,         // @param Node:
                 code:   fullcode & 0xff,    // half code
                 live:   _false,
                 node:   node,
-                trace:  trace,
+                hint:   hint,
                 mouse:  event.button || 0,
                 touch:  fullcode & 0x0200,
                 gesture:fullcode & 0x0400
@@ -4479,7 +4479,12 @@ function uuevent(node,         // @param Node:
 
     // --- init event database ---
     if (!(nodeData + "event" in node)) {
-        node[nodeData + "event"] = { t: ",", c: {}, e: {} }; // t:types, c:closure, e:evaluator
+        node[nodeData + "event"] = {
+            t: ",",     // t:types
+            c: {},      // c:closure
+            e: {},      // e:evaluator
+            hint: ","   // hint
+        };
     }
 
     var exEventTypeArray = exEventType.split(","),
@@ -4504,6 +4509,7 @@ function uuevent(node,         // @param Node:
     //  node["data-uuevent"].t = "," + exEventType + "," // types
     //  node["data-uuevent"].c[exEventType] = closure    // closure db
     //  node["data-uuevent"].e[exEventType] = evaluator  // evaluator db
+    //  node["data-uuevent"].hint = "," + hint + ","     // hints
     //
 
     for (; ex = exEventTypeArray[i++]; ) { // ex = "namespace.click+"
@@ -4542,7 +4548,6 @@ function uuevent(node,         // @param Node:
 
                     eventData.c[ex].splice(pos, 1); // remove closure
                     eventData.e[ex].splice(pos, 1); // remove evaluator
-
                     // removed all handlers in a type
                     if (!eventData.c[ex].length) {
 
@@ -4561,6 +4566,11 @@ function uuevent(node,         // @param Node:
                 eventData.t += ex + ",";
                 eventData.c[ex] = [];
                 eventData.e[ex] = [];
+                if (hint) {
+                    if (eventData.hint.indexOf("," + hint + ",") < 0) { // has not
+                        eventData.hint += hint + ","; // add
+                    }
+                }
             }
             eventData.c[ex].push(closure);
             eventData.e[ex].push(evaluator);
@@ -4632,7 +4642,7 @@ uuevent.codes = {
 // uu.event.fire - fire event / fire custom event(none capture event only)
 function uueventfire(node,      // @param Node: target node
                      eventType, // @param String: "click", "custom"
-                     trace) {   // @param String(= void): trace ident
+                     hint) {    // @param String(= void): code search hint
                                 // @return Node:
     if (uuhas(node, eventType)) {
 
@@ -4649,7 +4659,7 @@ function uueventfire(node,      // @param Node: target node
                 uuoverride: {
                     ns:         token[1],
                     node:       node,
-                    trace:      trace
+                    hint:       hint
                 }
             };
 
@@ -4982,17 +4992,17 @@ function uueventedge(event) { // @param ExEvent:
 // uu.event.hover - bind enter / leave event
 function uueventhover(node,         // @param Node:
                       expr,         // @param CallbackFunction/ClassNameString: enter/leave-callback or toggle-className
-                      trace,        // @param String(= void): trace ident
+                      hint,         // @param String(= void): code search hint
                       __unbind__) { // @hidden Boolean(= false): true is unbind
                                     // @return Node:
 //{@debug
-    uutrace(arguments.callee, arguments.length, node, expr, trace);
+    uutrace(arguments.callee, arguments.length, node, expr, hint);
 //}@debug
 //{@assert
-    switch (uutype(trace)) {
+    switch (uutype(hint)) {
     case uutype.STRING:
     case uutype.UNDEFINED: break;
-    default: uung("uu.event", trace);
+    default: uung("uu.event", hint);
     }
     switch (uutype(__unbind__)) {
     case uutype.BOOLEAN:
@@ -5022,7 +5032,7 @@ function uueventhover(node,         // @param Node:
     }
     handler && uueventunbind(node, type, handler); // already bound? -> unbind -> rebind
 
-    return uuevent(node, type, node[dataset] = hoverEventClosure, trace); // bind(rebind)
+    return uuevent(node, type, node[dataset] = hoverEventClosure, hint); // bind(rebind)
 }
 
 // uu.event.unhover - unbind hover event
@@ -5086,17 +5096,17 @@ function uueventcyclic(node,         // @param Node: target node
                        callback,     // @param CallbackFunction: callback(evt, times)
                        cyclic,       // @param Number: cyclic count
                        loop,         // @param Number(= 0): loops, zero is infinity
-                       trace,        // @param String(= void): trace ident
+                       hint,         // @param String(= void): code search hint
                        __unbind__) { // @hidden Boolean(= false): true is unbind
                                      // @return Node:
 //{@debug
     uutrace(arguments.callee, arguments.length, node, exEventType, callback, cyclic);
 //}@debug
 //{@assert
-    switch (uutype(trace)) {
+    switch (uutype(hint)) {
     case uutype.STRING:
     case uutype.UNDEFINED: break;
-    default: uung("uu.event", trace);
+    default: uung("uu.event", hint);
     }
     switch (uutype(__unbind__)) {
     case uutype.BOOLEAN:
@@ -5232,19 +5242,19 @@ function onresizeagent() {
 function uulive(expr,        // @param CSSSelectorExpressionString "css > selector"
                 exEventType, // @param ExEventTypeString: "nameSpace.click"
                 evaluator,   // @param CallbackFunction/Instance: callback function
-                trace,       // @param String(= void): trace ident
+                hint,        // @param String(= void): code search hint
                 __data__) {  // @hidden Hash: data for recursive call
 
     //  [1][bind] uu.live("css > selector", "nameSpace.click", callback)
 
 //{@debug
-    uutrace(arguments.callee, arguments.length, node, exEventType, evaluator, trace);
+    uutrace(arguments.callee, arguments.length, node, exEventType, evaluator, hint);
 //}@debug
 //{@assert
-    switch (uutype(trace)) {
+    switch (uutype(hint)) {
     case uutype.STRING:
     case uutype.UNDEFINED: break;
-    default: uung("uu.event", trace);
+    default: uung("uu.event", hint);
     }
 //}@assert
 
@@ -5262,7 +5272,7 @@ function uulive(expr,        // @param CSSSelectorExpressionString "css > select
                 code:   fullcode & 0xff, // half code
                 live:   _true,
                 node:   node,
-                trace:  trace,
+                hint:   hint,
                 mouse:  event.button || 0,
                 touch:  fullcode & 0x0200,
                 gesture:fullcode & 0x0400
@@ -5346,7 +5356,7 @@ function uulive(expr,        // @param CSSSelectorExpressionString "css > select
                    expr + " input[type=image]",
                    exEventType[_replace](/submit$/, "click"),
                    evaluator,
-                   trace,
+                   hint,
                    __data__);
 
         } else if (/change$/.test(eventType)) { // "change"
@@ -5355,7 +5365,7 @@ function uulive(expr,        // @param CSSSelectorExpressionString "css > select
                    function(event) {
                        uuevent(event.srcElement, "uulive.change", evaluator);
                    },
-                   trace,
+                   hint,
                    __data__);
 
             uulive(expr,
@@ -5363,7 +5373,7 @@ function uulive(expr,        // @param CSSSelectorExpressionString "css > select
                    function(event) {
                        uueventunbind(event.srcElement, "uulive.change");
                    },
-                   trace,
+                   hint,
                    __data__);
         }
     }
@@ -10234,12 +10244,18 @@ function NodeSetIter(map,       // @param Number: iter type. 0 is forEach, 1 is 
 
 // inner - build DOM Lv2 event handler - uu.click(), ...
 uueach(uuevent._.as, function(eventType) {
-    uu[eventType] = function(node, fn) { // uu.click(node, fn) -> node
-        return uuevent(node, eventType, fn, "DOMLv2");
+    // uu.click(node, fn) -> node
+    uu[eventType] = function(node,      // @param Node:
+                             evaluator, // @param Function/Instance:
+                             hint) {    // @param String(= void):
+        return uuevent(node, eventType, evaluator, hint || "DOMLv2");
     };
 //{@nodeset
-    NodeSet[_prototype][eventType] = function(fn) { // uu("li").click(fn) -> NodeSet
-        return NodeSetIter(0, this, uuevent, [eventType, fn]);
+    // uu("li").click(fn) -> NodeSet
+    NodeSet[_prototype][eventType] = function(evaluator, // @param Function/Instance:
+                                              hint) {    // @param String(= void):
+        return NodeSetIter(0, this, uuevent,
+                           [eventType, evaluator, hint || "DOMLv2"]);
     };
 //}@nodeset
 });
