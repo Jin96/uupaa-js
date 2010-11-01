@@ -266,7 +266,8 @@ uumix(uuconfig, win.uuconfig || {}, {
     socket:         {},
     canvas:         {},
     audio:          {},
-    debug:          {},                 // uu.config.debug
+    trace:          {},                 // uu.config.trace
+    log:            {},                 // uu.config.log
     ui:             {}
 }, 0);
 
@@ -306,10 +307,14 @@ uumix(uuconfig.audio, {
 }, 0, 0);
 //}@audio
 //{@debug
-uumix(uuconfig.debug, {
-    netTrace:       "",             // uu.config.debug.netTrace - String: API trace. eg: "http://localhost/trace?msg="
-    netLog:         "",             // uu.config.debug.netLog   - String: API log.   eg: "http://localhost/log?msg="
-    rollLog:        30              // uu.config.debug.rollLog(= 30) - Number: rollup log
+uumix(uuconfig.log, {
+    disable:        _false,         // uu.config.log.disable(= false) - Boolean:
+    remote:         "",             // uu.config.log.remote(= "") - String: API log.   eg: "http://localhost/log?msg="
+    rollup:         30              // uu.config.log.rollup(= 30) - Number: rollup log
+}, 0, 0);
+uumix(uuconfig.trace, {
+    disable:        _true,          // uu.config.trace.disable(= true) - Boolean:
+    remote:         ""              // uu.config.trace.remote(= "") - String: API trace. eg: "http://localhost/trace?msg="
 }, 0, 0);
 //}@debug
 //{@ui
@@ -7629,6 +7634,10 @@ function uutrace(fn,     // @param Function(= void): arguments.callee
     if (fn === _undef) { // [2]
         return _trace;
     }
+    if (uuconfig.trace.disable) {
+        return;
+    }
+
     var w = fn.name, msg; // Function.name
 
     // pick up function.name [IE6][IE7][IE8][IE9][OPERA9][OPERA10.1x]
@@ -7640,9 +7649,9 @@ function uutrace(fn,     // @param Function(= void): arguments.callee
            uujsonencode(arg3),
            uujsonencode(arg4)].join(",");
 
-    if (uuconfig.debug.netTrace) {
+    if (uuconfig.trace.remote) {
         // <img src="http://localhost/trace?msg=" />
-        (new Image).src = uuconfig.debug.netTrace + encodeURIComponent(msg);
+        (new Image).src = uuconfig.trace.remote + encodeURIComponent(msg);
     } else {
         _trace.push(msg);
     }
@@ -7667,17 +7676,20 @@ function uupuff(source                   // @param Mix/FormatString: source obje
 // uu.log - add log
 function uulog(log                      // @param Mix: log data
                /* , var_args, ... */) { // @param Mix: var_args
+    if (uuconfig.log.disable) {
+        return;
+    }
     var args = arguments, context = uuid("uulog"),
         msg = args.length > 1 || isString(log) ? uuf.apply(this, args)
                                                : uujsonencode(log, 0, 1);
 
-    if (uuconfig.debug.netLog) {
+    if (uuconfig.log.remote) {
         // <img src="http://localhost/log?msg=" />
-        (new Image).src = uuconfig.debug.netLog + encodeURIComponent(msg);
+        (new Image).src = uuconfig.log.remote + encodeURIComponent(msg);
     } else {
         context || uunodeadd(context = uu.ol({ id: "uulog" }));
 
-        uuconfig.debug.rollLog <= uutag("", context).length &&
+        uuconfig.log.rollup <= uutag("", context).length &&
                 (context.innerHTML = "");
 
         uunodeadd(uu[/OL|UL/.test(context[_tagName]) ? "li" : "p"](newText(msg)),
