@@ -5147,7 +5147,7 @@ function uulive(expr,        // @param CSSSelectorExpressionString "css > select
     //  [1][bind] uu.live("css > selector", "nameSpace.click", callback)
 
 //{@debug
-    uutrace(arguments.callee, arguments.length, node, exEventType, evaluator, hint);
+    uutrace(arguments.callee, arguments.length, expr, exEventType, evaluator, hint);
 //}@debug
 //{@assert
     switch (uutype(hint)) {
