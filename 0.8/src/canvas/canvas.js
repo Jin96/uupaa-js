@@ -195,16 +195,16 @@ function _removeFallback(node) { // @param Node:
     return rv;
 }
 
-// uu.canvas.build - build canvas <canvas class="GSFV">
+// uu.canvas.build - build canvas <canvas class="SFV">
 function uucanvasbuild(node,    // @param Node: <canvas>
-                       order) { // @param SpaceJointString: "GSFV"
+                       order) { // @param SpaceJointString: "SFV"
                                 // @return Node:
     var ary, i = -1, v, order = uu.trim(order.toLowerCase());
 
     if (order.indexOf(" ") >= 0) {
         ary = order.split(" "); // old style "sl fl vml"
     } else {
-        ary = order.split("");  // new style "GSFV"
+        ary = order.split("");  // new style "SFV"
     }
 
     while ( (v = ary[++i]) ) {
@@ -952,10 +952,10 @@ function drawRoundRect(x,           // @param Number:
         if (typeof radius === "number") { // Number -> [r, r, r, r]
             radius = [radius, radius, radius, radius];
         }
-        if (!radius[0]
-            && radius[0] === radius[1]
-            && radius[0] === radius[2]
-            && radius[0] === radius[3]) {
+        if (!radius[0] &&
+            radius[0] === radius[1] &&
+            radius[0] === radius[2] &&
+            radius[0] === radius[3]) {
 
             // radius = [0, 0, 0, 0]
             ix = x * 10 - 5;
@@ -3741,9 +3741,10 @@ function putImageData(imagedata,     // @param ImageData:
     dirtyWidth  = dirtyWidth  === undef ? imagedata.width  : dirtyWidth;
     dirtyHeight = dirtyHeight === undef ? imagedata.height : dirtyHeight;
 
-    if (dirtyX !== dirtyX || dirtyY !== dirtyY
-        || dirtyWidth  !== dirtyWidth
-        || dirtyHeight !== dirtyHeight) {
+    if (dirtyX !== dirtyX ||
+        dirtyY !== dirtyY ||
+        dirtyWidth  !== dirtyWidth ||
+        dirtyHeight !== dirtyHeight) {
         throw new Error("NOT_SUPPORTED_ERR");
     }
 
@@ -3914,10 +3915,10 @@ function send(ctx,      // @param Context:
     }
 
     if (bit & 0x4) {
-        if (ctx._shadowBlur !== ctx.shadowBlur
-            || ctx._shadowOffsetX !== ctx.shadowOffsetX
-            || ctx._shadowOffsetY !== ctx.shadowOffsetY
-            || ctx._shadowColor   !== ctx.shadowColor) {
+        if (ctx._shadowBlur !== ctx.shadowBlur ||
+            ctx._shadowOffsetX !== ctx.shadowOffsetX ||
+            ctx._shadowOffsetY !== ctx.shadowOffsetY ||
+            ctx._shadowColor   !== ctx.shadowColor) {
 
             if (ctx._shadowColor !== ctx.shadowColor) {
                 ctx.__shadowColor = uu.color(ctx._shadowColor = ctx.shadowColor);
@@ -3988,7 +3989,7 @@ function clearance(ctx) {
 })(this, document, uu);
 //}@canvasfl
 
-// === uu.matrix2d / window.matrix2d ===
+// === uu.matrix2d ===
 
 
 //  type Matrix2DArray = [m11, m12, m13,     [1, 0, 0,     [m[0], m[1], m[2],

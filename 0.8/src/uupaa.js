@@ -112,6 +112,14 @@
 //
 // Flash10.1
 //      <param name="hasPriority" value="true" />
+//
+// Geo Location API
+//      Firefox 3.5+
+//      Chrome 5+
+//      Safari 5.0+
+//      Opera 10.60+
+//      iOS 3+
+//      Android(ChromeLite) 1+
 
 // === Core ===
 
@@ -267,6 +275,7 @@ uumix(uuconfig, win.uuconfig || {}, {
     canvas:         {},
     audio:          {},
     trace:          {},                 // uu.config.trace
+    geo:            {},                 // uu.config.geo
     log:            {},                 // uu.config.log
     ui:             {}
 }, 0);
@@ -275,7 +284,7 @@ uumix(uuconfig, win.uuconfig || {}, {
 uumix(uuconfig.storage, {
     disable:        _false,         // uu.config.storage.disable(= false) - Boolean:
     order:          "LFICM",        // uu.config.storage.order(= "LFICM") - String: storage backends and detection order
-                                    //  "L" = LocalStorage, "F" = FlashStorage,
+                                    //  "L" = WebStorage Native API(LocalStorage), "F" = FlashStorage,
                                     //  "I" = IEStorage, "C" = CookieStorage, "M" = MemStorage
     space:          0,              // uu.config.storage.space(= 0) - Number: require free space(unit: byte). 0 is no require
     swf:            uuconfig.swfDir + "uu.storage.swf"
@@ -284,16 +293,16 @@ uumix(uuconfig.storage, {
 //{@socket
 uumix(uuconfig.socket, {
     disable:        _false,         // uu.config.socket.disable(= false) - Boolean:
-    order:          "WF",           // uu.config.socket.order(= "WF") - String: socket backends and detection order
-                                    //  "W" = WebSocket, "F" = FlashSocket,
+    order:          "AF",           // uu.config.socket.order(= "AF") - String: socket backends and detection order
+                                    //  "A" = WebSocket Native API, "F" = FlashSocket,
     swf:            uuconfig.swfDir + "uu.socket.swf"
 }, 0, 0);
 //}@socket
 //{@canvas
 uumix(uuconfig.canvas, {
     disable:        _false,         // uu.config.canvas.disable(= false) - Boolean:
-    order:          "GSFV",         // uu.config.canvas.order(= "GSFV") - String: canvas backends and detection order
-                                    //  "G" = SVGCanvas, "S" = SilverlightCanvas
+    order:          "SFV",          // uu.config.canvas.order(= "SFV") - String: canvas backends and detection order
+                                    //  "S" = SilverlightCanvas
                                     //  "F" = FlashCanvas, "V" = VMLCanvas
     swf:            uuconfig.swfDir + "uu.canvas.swf"
 }, 0, 0);
@@ -302,7 +311,7 @@ uumix(uuconfig.canvas, {
 uumix(uuconfig.audio, {
     disable:        _false,         // uu.config.audio.disable(= false) - Boolean:
     order:          "AFN",          // uu.config.audio.order(= "AFN") - String: audio backends and detection order
-                                    //  "A" = <audio>, "F" = FlashAudio, "N" = NoAudio
+                                    //  "A" = HTML5 <audio> Native API, "F" = FlashAudio, "N" = NoAudio
     swf:            uuconfig.swfDir + "uu.audio.swf"
 }, 0, 0);
 //}@audio
@@ -317,6 +326,14 @@ uumix(uuconfig.trace, {
     remote:         ""              // uu.config.trace.remote(= "") - String: API trace. eg: "http://localhost/trace?msg="
 }, 0, 0);
 //}@debug
+//{@geo
+uumix(uuconfig.geo, {
+    disable:        _false,         // uu.config.geo.disable(= false) - Boolean:
+    order:          "FW",           // uu.config.geo.order(= "FW") - String: GeoLocation API backends and detection order
+                                    //  "F" = Flash CS5 GeoLocation API, "W" = WebAPI
+    swf:            uuconfig.swfDir + "uu.geo.swf"
+}, 0, 0);
+//}@geo
 //{@ui
 uumix(uuconfig.ui, {
     disable:        _false,         // uu.config.ui.disable(= false) - Boolean:
@@ -967,6 +984,19 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
 //{@socket
     socket:         null,           // uu.socket - uu.Class.Socket instance
 //}@socket
+//{@geo
+    geo:      uumix(uugeo, {        // uu.geo(callback:CallbackFunction,
+                                    //        option:Hash = { age, timeout, accuracy }):Boolean
+                                    //      age      - Number:
+                                    //      timeout  - Number:
+                                    //      accuracy - Boolean:
+        watch:      uugeowatch,     // uu.geo.watch(callback:CallbackFunction,
+                                    //              option:Hash = { age, timeout, accuracy }):Number
+        stop:       uugeostop,      // uu.geo.stop(watchid:Number) - stop watch
+        lastLocation: {}            // uu.geo.lastLocation - Hash: { ok, latitude, longitude, altitude,
+                                    //                               heading, speed, date, status }
+    }),
+//}@geo
     // --- URL / URL ACCESSOR ---
 //{@url
     url:      uumix(uuurl, {        // uu.url(url:URLHash/URLString = "", parseQuery:Boolean = false):URLString/URLHash
@@ -1177,10 +1207,6 @@ function getBaseDir(libraryCoreFileName) { // @param String: library name. eg: "
 // inner - new node
 function newNode(tag) { // @param TagNameString(= "div"):
                         // @return Node: <div>
-//{@debug [!]
-//  uutrace(arguments.callee, arguments.length, tag);
-//}@debug
-
     return doc.createElement(tag || "div");
 }
 
@@ -1981,25 +2007,6 @@ function uumap(source,      // @param Hash/Array: source
     //  [1][Array#map] uu.map([1, 2],         function(v, i) {...}) -> Array
     //  [2][Hash#map]  uu.map({ a: 1, b: 2 }, function(v, i) {...}) -> Array
 
-//{@debug [!]
-//  uutrace(arguments.callee, arguments.length);
-//}@debug
-//{@assert
-    if (arguments.length > 2) {
-        uung("uu.map", arguments.length);
-    }
-    if (!source || !isFunction(evaluator)) {
-        uung("uu.map", source);
-    }
-    switch (uutype(source)) {
-    case uutype.ARRAY:
-    case uutype.HASH:
-        break;
-    default:
-        uung("uu.map", source);
-    }
-//}@assert
-
     if (isArray(source)) {
         // [uupaa.js + Prototype.js][PROTOTYPE POLLUTION][SAFE]
         return ArrayMap.call(source, evaluator);
@@ -2020,26 +2027,6 @@ function uueach(source,      // @param Hash/Array/Number: source or loop count
     //  [1][Array.forEach]  uu.each([1, 2],         function(v, i) {...})
     //  [2][Hash.forEach ]  uu.each({ a: 1, b: 2 }, function(v, i) {...})
     //  [3][Number.forEach] uu.each(3,              function(v, i) {...})
-
-//{@debug [!]
-//  uutrace(arguments.callee, arguments.length);
-//}@debug
-//{@assert
-    if (arguments.length > 2) {
-        uung("uu.each", arguments.length);
-    }
-    if (!source || !isFunction(evaluator)) {
-        uung("uu.each", source);
-    }
-    switch (uutype(source)) {
-    case uutype.NUMBER:
-    case uutype.ARRAY:
-    case uutype.HASH:
-        break;
-    default:
-        uung("uu.each", source);
-    }
-//}@assert
 
     var i = 0;
 
@@ -2275,25 +2262,6 @@ function uusome(source,      // @param Hash/Array: source
                              // @retrn Boolean:
     //  [1][Array#some] uu.some([1, 2],         function(v, i) {...}) -> Boolean
     //  [2][Hash#some]  uu.some({ a: 1, b: 2 }, function(v, i) {...}) -> Boolean
-
-//{@debug [!]
-//  uutrace(arguments.callee, arguments.length);
-//}@debug
-//{@assert
-    if (arguments.length > 2) {
-        uung("uu.some", arguments.length);
-    }
-    if (!source || !isFunction(evaluator)) {
-        uung("uu.some", source);
-    }
-    switch (uutype(source)) {
-    case uutype.ARRAY:
-    case uutype.HASH:
-        break;
-    default:
-        uung("uu.some", source);
-    }
-//}@assert
 
     if (isArray(source)) { // [1]
         return ArraySome.call(source, evaluator);
@@ -3438,17 +3406,6 @@ function uucssopacity(node,      // @param Node:
                       opacity) { // @param Number/String(= void): Number(0.0 - 1.0) absolute
                                  //                               String("+0.5", "-0.5") relative
                                  // @return Number/Node:
-//{@debug
-    uutrace(arguments.callee, arguments.length, node, opacity);
-//}@debug
-//{@assert judge DOMContentLoaded (has <body>)
-    if (doc && doc.body) {
-        ;
-    } else {
-        uung("uu.css.opacity", "<body>");
-    }
-//}@assert
-
     var style = node.style,
 /*{@mb*/ident = "DXImageTransform.Microsoft.Alpha", tmpParent, /*}@mb*/
         undef;
@@ -3708,17 +3665,6 @@ function uucssrect(node,           // @param Node:
     //  [1][offset from LayoutParentNode] uu.css.rect(<div>)         -> { x: 100, y: 100, w: 100, h: 100, from: <?> }
     //  [2][offset from AncestorNode]     uu.css.rect(<div>, <html>) -> { x: 200, y: 200, w: 100, h: 100, from: <html> }
 
-//{@debug
-    uutrace(arguments.callee, arguments.length, node, ancestorNode);
-//}@debug
-//{@assert judge DOMContentLoaded (has <body>)
-    if (doc && doc.body) {
-        ;
-    } else {
-        uung("uu.css.rect", "<body>");
-    }
-//}@assert
-
     var cs = /*{@mb*/ getComputedStyle ? /*}@mb*/ getComputedStyle(node, 0)
              /*{@mb*/                  :          node.currentStyle /*}@mb*/,
         position, body = doc.body,
@@ -3815,17 +3761,6 @@ function uucssposition(node,  // @param Node:
 function uucssuserSelect(node,    // @param Node(= null):
                          allow) { // @param Boolean(= false):
                                   // @return Node:
-//{@debug
-    uutrace(arguments.callee, arguments.length, node, allow);
-//}@debug
-//{@assert judge DOMContentLoaded (has <body>)
-    if (doc && doc.body) {
-        ;
-    } else {
-        uung("uu.css.userSelect", "<body>");
-    }
-//}@assert
-
     var undef, all = node === undef,
 /*{@mb*/ary, i, iz,/*}@mb*/
         style, val = allow ? "" : "none";
@@ -4145,17 +4080,6 @@ function uuklass(expr,      // @param String/Node: "class", "class1, ..." or Nod
     //  [3][add    className]  uu.klass(<div>,             "+A B") -> <div class="A B">
     //  [4][remove className]  uu.klass(<div class="A B">, "-A B") -> <div>
     //  [5][toggle className]  uu.klass(<div class="A">,   "!A B") -> <div>
-
-//{@debug
-    uutrace(arguments.callee, arguments.length, expr, context);
-//}@debug
-//{@assert judge DOMContentLoaded (has <body>)
-    if (doc && doc.body) {
-        ;
-    } else {
-        uung("uu.klass", "<body>");
-    }
-//}@assert
 
     var rex, m,
 //{@mb
@@ -4528,7 +4452,7 @@ function uuevent(node,         // @param Node:
         token = uuevent._.parse.exec(ex);
         ns        = token[1];
         eventType = token[2]; // "click"
-        capture   = token[3]; // "+"
+        capture   = token[3] || 0; // "+"
         bound     = eventData.t[_indexOf]("," + ex + ",") >= 0;
 
 //{@mb
@@ -4741,7 +4665,8 @@ function uueventunbind(node,          // @param Node: target node
                     }
                 });
             } else { // [2][4]
-                if (exEventType[_indexOf](c + ex + c) >= 0) {
+                if (exEventType[_indexOf](c + ex + c) >= 0 &&
+                    eventData.c[ex] && eventData.c[ex].length) {
                     uueach(eventData.c[ex], function(closure) {
                         uuevent(node, ex, closure, "", _true); // unbind
                     });
@@ -5000,22 +4925,6 @@ function uueventhover(node,         // @param Node:
                       hint,         // @param String(= void): code search hint
                       __unbind__) { // @hidden Boolean(= false): true is unbind
                                     // @return Node:
-//{@debug
-    uutrace(arguments.callee, arguments.length, node, expr, hint);
-//}@debug
-//{@assert
-    switch (uutype(hint)) {
-    case uutype.STRING:
-    case uutype.UNDEFINED: break;
-    default: uung("uu.event", hint);
-    }
-    switch (uutype(__unbind__)) {
-    case uutype.BOOLEAN:
-    case uutype.UNDEFINED: break;
-    default: uung("uu.event", __unbind__);
-    }
-//}@assert
-
     function hoverEventClosure(evt, rel) {
         // ignode mouse transit(mouseover, mouseout) in child node
         toggle ? uuklass(node, "!" + expr) // toggle className
@@ -5104,22 +5013,6 @@ function uueventcyclic(node,         // @param Node: target node
                        hint,         // @param String(= void): code search hint
                        __unbind__) { // @hidden Boolean(= false): true is unbind
                                      // @return Node:
-//{@debug
-    uutrace(arguments.callee, arguments.length, node, exEventType, callback, cyclic);
-//}@debug
-//{@assert
-    switch (uutype(hint)) {
-    case uutype.STRING:
-    case uutype.UNDEFINED: break;
-    default: uung("uu.event", hint);
-    }
-    switch (uutype(__unbind__)) {
-    case uutype.BOOLEAN:
-    case uutype.UNDEFINED: break;
-    default: uung("uu.event", __unbind__);
-    }
-//}@assert
-
     function cyclicEventClosure(evt, rv) {
         //  function callback() {
         //     :
@@ -5636,17 +5529,6 @@ function uuhead(/* var_args */) { // @param Mix: var_args
 // uu.body
 function uubody(/* var_args */) { // @param Mix: var_args
                                   // @return Node: <body> node
-//{@debug
-    uutrace(arguments.callee, arguments.length);
-//}@debug
-//{@assert judge DOMContentLoaded (has <body>)
-    if (doc && doc.body) {
-        ;
-    } else {
-        uung("uu.body", "<body>");
-    }
-//}@assert
-
     return uunode(doc.body, arguments);
 }
 
@@ -5661,30 +5543,6 @@ function uunodeadd(source,     // @param Node/NodeArray/DocumentFragment/HTMLFra
     //  [4][from NodeArray]          uu.node.add([<div>, <div>]) -> <body><div /></body>
     //  [5][from HTMLFragmentString] uu.node.add("<div><p>txt</p></div>") -> <body><div><p>txt</p></div></body>
     //  [6][from DocumentFragment]   uu.node.add(DocumentFragment)        -> <body>{{fragment}}</body>
-
-//{@debug
-    uutrace(arguments.callee, arguments.length, source, context, position);
-//}@debug
-//{@assert judge type
-    if (!source ||                                              // [1] judge empty string
-        isNode(source) ||                                       // [3] judge isNode
-        (isArray(source) && isNode(source[0])) ||               // [4] judge [node, ...]
-        (isString(source) && uunth(source,  0)[1] === "<" &&
-                             uunth(source, -1)[1] === ">") ||   // [5] judge "<tag>...</tag>"
-        (isString(source) && source.charAt(0) !== "<") ||       // [2] judge "div"
-        isNode(source) && source.nodeType === Node.DOCUMENT_FRAGMENT_NODE) { // [6] judge
-        ;
-    } else {
-        uung("uu.node.add", source);
-    }
-//}@assert
-//{@assert judge DOMContentLoaded (has <body>)
-    if (doc && doc.body) {
-        ;
-    } else {
-        uung("uu.node.add", "<body>");
-    }
-//}@assert
 
     context = context || doc.body;
 
@@ -5723,18 +5581,6 @@ function uunodeid(ident) { // @param Node/Number: Node or NodeID
     //  [1][get NodeID by Node]  uu.nodeid(Node)   -> NodeID
     //  [2][get Node by NodeID]  uu.nodeid(NodeID) -> Node
 
-//{@debug
-    uutrace(arguments.callee, arguments.length, ident);
-//}@debug
-//{@assert
-    if (isNumber(ident) || // isNumber
-        isNode(ident)) {   // isNode
-        ;
-    } else {
-        uung("uu.nodeid", ident);
-    }
-//}@assert
-
     var id, data = nodeData + "nodeid";
 
     return ident[_nodeType] ? (ident[data] || (_nodeiddb[id = ++_nodeidnum] = ident,
@@ -5755,17 +5601,6 @@ function uunodebulk(source,    // @param Node/HTMLFragmentString: source
                                // @return DocumentFragment:
     //  [1][clone]  uu.node.bulk(Node) -> DocumentFragment
     //  [2][build]  uu.node.bulk("<p>html</p>") -> DocumentFragment
-
-//{@debug
-    uutrace(arguments.callee, arguments.length, source, context);
-//}@debug
-//{@assert judge type
-    if (isNode(source) || isString(source)) {
-        ;
-    } else {
-        uung("uu.node.bulk", source);
-    }
-//}@assert
 
     var rv = doc.createDocumentFragment(),
 //{@mb
@@ -5812,17 +5647,6 @@ function uunodebulk(source,    // @param Node/HTMLFragmentString: source
 function uunodeglue(node,   // @param Node: target node
                     work) { // @param Function: work(node)
                             // @return Node: node
-//{@debug
-    uutrace(arguments.callee, arguments.length, node, work);
-//}@debug
-//{@assert judge DOMContentLoaded (has <body>)
-    if (doc && doc.body) {
-        ;
-    } else {
-        uung("uu.node.glue", "<body>");
-    }
-//}@assert
-
     var div;
 
     uu.body(div = uu.div({}, "position:absolute;top:-9999px;left:-9999px;" +
@@ -5862,16 +5686,6 @@ function uunodesort(ary,       // @param NodeArray:
                                // @return Hash: { sort, dup }
                                //   sort - Array: SortedNodeArray
                                //   dup  - Array: DuplicatedNodeArray
-//{@debug
-    uutrace(arguments.callee, arguments.length, ary, context);
-//}@debug
-//{@assert judge DOMContentLoaded (has <body>)
-    if (doc && doc.body) {
-        ;
-    } else {
-        uung("uu.node.sort", "<body>");
-    }
-//}@assert
 
     //  [1][sort] uu.node.sort([<body>, <html>, <body>], document) -> { sort: [<html>, <body>], dup: [<body>] }
 
@@ -5942,14 +5756,6 @@ function uunodebros(node) { // @param Node: needle
 // uu.node.clear - clear all children
 function uunodeclear(parent) { // @param Node: parent node
                                // @return Node: parent
-//{@debug
-    uutrace(arguments.callee, arguments.length, parent);
-//}@debug
-//{@assert
-    if (!parent) {
-        uung("uu.node.clear", "parent is undefined");
-    }
-//}@assert
 
     //  [1][clear children]      uu.node.clear(<body>)
 
@@ -6071,17 +5877,6 @@ function uunoderemove(node,           // @param Node:
 function uunodenormalize(parent, // @param Node(= <body>): parent node
                          max) {  // @param Number(= 0): max depth, 0 is infinity
                                  // @return Number: removed node count
-//{@debug
-    uutrace(arguments.callee, arguments.length, parent, max);
-//}@debug
-//{@assert judge DOMContentLoaded (has <body>)
-    if (doc && doc.body) {
-        ;
-    } else {
-        uung("uu.node.normalize", "<body>");
-    }
-//}@assert
-
     // markup blank and comment nodes
     function markup(node, dig, n) {
         for (n = node[_firstChild]; n; n = n[_nextSibling]) {
@@ -6119,15 +5914,6 @@ function uutext(data,             // @param String/FormatString/Node: "string" o
     //  [3][get text]                  uu.text(node)            -> "text"
     //  [4][set text]                  uu.text(node, "text")    -> node
     //  [5][set formated text]         uu.text(node, "@", "a")  -> node
-
-//{@debug
-    uutrace(arguments.callee, arguments.length, data, text);
-//}@debug
-//{@assert
-    if (data == null) { // null or undefined
-        uung("uu.text", "data is null or undefined");
-    }
-//}@assert
 
     var args = arguments, az = args.length, undef;
 
@@ -6282,17 +6068,6 @@ function setNodeValue(node,    // @param Node:
 function uuquery(expr,      // @param CSSSelectorExpressionString: "css > selector"
                  context) { // @param Node(= <body>): query context
                             // @return NodeArray: [Node, ...]
-//{@debug
-    uutrace(arguments.callee, arguments.length, expr, context);
-//}@debug
-//{@assert judge DOMContentLoaded (has <body>)
-    if (doc && doc.body) {
-        ;
-    } else {
-        uung("uu.query", "<body>");
-    }
-//}@assert
-
     context = context || doc.body;
 
 //{@mb
@@ -6321,18 +6096,6 @@ uuquery.ie8ready = /:(?:focus|hover|link|visited)/;
 function uuid(expr,      // @param String: id
               context) { // @param Node(= document): query context
                          // @return Node/null:
-//{@debug
-    uutrace(arguments.callee, arguments.length, expr, context);
-//}@debug
-//{@assert
-    if (arguments.length > 2) {
-        uung("uu.id", "arguments.length = " + arguments.length);
-    } else if (!isString(expr)) {
-        uung("uu.id", "expr = " + expt);
-    } else if (context && !isNode(context)) {
-        uung("uu.id", "context = " + context);
-    }
-//}@assert
     return (context || doc).getElementById(expr);
 }
 
@@ -6340,18 +6103,6 @@ function uuid(expr,      // @param String: id
 function uuidc(expr,      // @param String: id
                context) { // @param Node(= document): query context
                           // @return Node/null:
-//{@debug
-    uutrace(arguments.callee, arguments.length, expr, context);
-//}@debug
-//{@assert
-    if (arguments.length > 2) {
-        uung("uu.idc", "arguments.length = " + arguments.length);
-    } else if (!isString(expr)) {
-        uung("uu.idc", "expr = " + expt);
-    } else if (context && !isNode(context)) {
-        uung("uu.idc", "context = " + context);
-    }
-//}@assert
     return uuidc._[expr] ||
           (uuidc._[expr] = (context || doc).getElementById(expr));
 }
@@ -6359,14 +6110,6 @@ uuidc._ = {};
 
 // uu.idc.clear - clear idc cache
 function uuidcclear() {
-//{@debug
-    uutrace(arguments.callee, arguments.length);
-//}@debug
-//{@assert
-    if (arguments.length) {
-        uung("uu.idc.clear", "arguments.length = " + arguments.length);
-    }
-//}@assert
     uuidc._ = {};
 }
 
@@ -6375,19 +6118,6 @@ function uuids(expr,      // @param CommaJointString: "id1,id2,..."
                context) { // @param Node(= document): query context
                           // @return Node/null:
     //  [1] uu.ids("A,B,C") -> [<a id="A">, <li id="B">, <div id="C">]
-
-//{@debug
-    uutrace(arguments.callee, arguments.length, expr, context);
-//}@debug
-//{@assert
-    if (arguments.length > 2) {
-        uung("uu.ids", "arguments.length = " + arguments.length);
-    } else if (!isString(expr)) {
-        uung("uu.ids", "expr = " + expt);
-    } else if (context && !isNode(context)) {
-        uung("uu.ids", "context = " + context);
-    }
-//}@assert
 
     var rv = [], ary = expr.trim().split(uuids._), i = 0, iz = ary.length,
         ctx = context || doc;
@@ -6403,10 +6133,6 @@ uuids._ = /\s*,\s*/; // split
 function uutag(expr,      // @param String(= ""): tag name, "" is all
                context) { // @param Node(= <body>): query context
                           // @return NodeArray: [Node, ...]
-//{@debug [!]
-//  uutrace(arguments.callee, arguments.length, expr, context);
-//}@debug
-
 //{@mb
     if (!_ie678) { // [WEB STD][IE9]
 //}@mb
@@ -6434,17 +6160,6 @@ function uutag(expr,      // @param String(= ""): tag name, "" is all
 function uumatch(expr,      // @param CSSSelectorExpressionString: "css > selector"
                  context) { // @param Node(= <body>): match context
                             // @return Boolean:
-//{@debug
-    uutrace(arguments.callee, arguments.length, expr, context);
-//}@debug
-//{@assert judge DOMContentLoaded (has <body>)
-    if (doc && doc.body) {
-        ;
-    } else {
-        uung("uu.match", "<body>");
-    }
-//}@assert
-
     context = context || doc.body;
 //{@mb
     if (context.matchesSelector) {
@@ -7311,21 +7026,6 @@ function buildURL(hash) { // @param URLHash: { protocol, host, pathname, search,
     //                      search:   "?a=b&c=d",
     //                      hash:     "#hash" })
     //              -> "http://user:pass@example.com:8080/dir1/dir2/file.ext?a=b&c=d#hash"
-//{@debug [!]
-//  uutrace(arguments.callee, arguments.length, hash);
-//}@debug
-//{@assert
-    if ("protocol" in hash &&
-        "host"     in hash &&
-        "pathname" in hash &&
-        "search"   in hash &&
-        "hash"     in hash) {
-        ;
-    } else {
-        uung("buildURL", hash);
-    }
-//}@assert
-
     return [hash.protocol,
             hash.protocol ? (hash.protocol === "file:" ? "///"
                                                        : "//") : "",
@@ -8626,17 +8326,6 @@ function uucanvas(width,         // @param Number(= 300):
                   order,         // @param String(= uu.config.canvas.order): backend order
                   placeHolder) { // @param Node(= <div>): placeholder Node
                                  // @return Node: <canvas>
-//{@debug
-    uutrace(arguments.callee, arguments.length, width, height, order, placeHolder);
-//}@debug
-//{@assert judge DOMContentLoaded (has <body>)
-    if (doc && doc.body) {
-        ;
-    } else {
-        uung("uu.canvas", "<body>");
-    }
-//}@assert
-
     var canvas = newNode(
 /*{@mb*/                 _ie678 ? "CANVAS" : /*}@mb*/ // [IE6][IE7][IE8][!] need upper case
                          "canvas");
@@ -8649,7 +8338,7 @@ function uucanvas(width,         // @param Number(= 300):
 
 //{@mb
     if (_ie678) {
-        return uucanvas.build(canvas, order || uuconfig.canvas.order); // order = "GSFV"
+        return uucanvas.build(canvas, order || uuconfig.canvas.order); // order = "SFV"
     }
 //}@mb
     return canvas;
@@ -8747,17 +8436,6 @@ function uuaudio(src,        // @param URLString:
                              //     autoplay - Boolean(= true):
                              //     startTime - Number(= 0): start time
                  callback) { // @param CallbackFunction:
-
-//{@debug
-    uutrace(arguments.callee, arguments.length, src, option, callback);
-//}@debug
-//{@assert judge DOMContentLoaded (has <body>)
-    if (doc && doc.body) {
-        ;
-    } else {
-        uung("uu.audio", "<body>");
-    }
-//}@assert
 
     uu("Audio", src, uuarg(option, {
         loop:       _false,
@@ -9030,17 +8708,6 @@ function HTML5AudioAttr(key,     // @param String/Hash(= void):
                         value) { // @param Mix(= void):
                                  // @return Hash/void: { src, loop, volume, duration,
                                  //                      startTime, currentTime }
-//{@debug
-    uutrace(arguments.callee, arguments.length, key, value);
-//}@debug
-//{@assert
-    if (this.audio && this.audio.src !== null) {
-        ;
-    } else {
-        uung("HTML5Audio.attr", audio);
-    }
-//}@assert
-
     var rv, audio = this.audio || {}, i, v, undef;
 
     switch (uucomplex(key, value)) { // 1: (), 2: (k), 3: (k,v), 4: ({})
@@ -9076,17 +8743,6 @@ function HTML5AudioAttr(key,     // @param String/Hash(= void):
 
 // HTML5Audio.play
 function HTML5AudioPlay() {
-//{@debug
-    uutrace(arguments.callee, arguments.length);
-//}@debug
-//{@assert
-    if (this.audio && this.audio.src !== null) {
-        ;
-    } else {
-        uung("HTML5Audio.play", audio);
-    }
-//}@assert
-
     if (!this._closed) {
         this._lastAction = "play";
         this.audio.play();
@@ -9095,17 +8751,6 @@ function HTML5AudioPlay() {
 
 // HTML5Audio.stop
 function HTML5AudioStop(close) { // @param Boolean(= false):
-//{@debug
-    uutrace(arguments.callee, arguments.length, close);
-//}@debug
-//{@assert
-    if (this.audio && this.audio.src !== null) {
-        ;
-    } else {
-        uung("HTML5Audio.stop", audio);
-    }
-//}@assert
-
     var audio = this.audio;
 
     if (close) {
@@ -9122,17 +8767,6 @@ function HTML5AudioStop(close) { // @param Boolean(= false):
 
 // HTML5Audio.pause
 function HTML5AudioPause() {
-//{@debug
-    uutrace(arguments.callee, arguments.length);
-//}@debug
-//{@assert
-    if (this.audio && this.audio.src !== null) {
-        ;
-    } else {
-        uung("HTML5Audio.pause", audio);
-    }
-//}@assert
-
     if (this.state().playing) {
         this._lastAction = "pause";
         this.audio.pause();
@@ -9142,17 +8776,6 @@ function HTML5AudioPause() {
 // HTML5Audio.state
 function HTML5AudioState() { // @return Hash: { error, ended, closed, paused,
                              //                 playing, condition }
-//{@debug
-    uutrace(arguments.callee, arguments.length);
-//}@debug
-//{@assert
-    if (this.audio && this.audio.src !== null) {
-        ;
-    } else {
-        uung("HTML5Audio.state", audio);
-    }
-//}@assert
-
     var audio  = this.audio,
         error  = audio.error,
         ended  = audio.ended  || _false,
@@ -9345,17 +8968,6 @@ function uuflash(url,        // @param String: url
             callback(id);
         }, 0); // lazy
     }
-
-//{@debug
-    uutrace(arguments.callee, arguments.length, url, id, option, callback);
-//}@debug
-//{@assert judge DOMContentLoaded (has <body>)
-    if (doc && doc.body) {
-        ;
-    } else {
-        uung("uu.flash", "<body>");
-    }
-//}@assert
 
     var opt = uuarg(option, { width: "100%", height: "100%" }),
         param = opt.param || {},
@@ -9779,6 +9391,98 @@ uuready("window", function() {
 });
 //}@storage
 
+//{@geo
+// uu.geo - Geo Location, getCurrentPosition()
+function uugeo(callback,   // @param CallbackFunction: callback(response:Hash)
+                           //     response.ok - Boolean: true is success
+                           //     response.option - Hash(= option): option argument
+                           //     response.latitude - Number: response.coords.latitude
+                           //     response.longitude - Number: response.coords.longitude
+                           //     response.altitude - Number/null: response.coords.altitude
+                           //     response.accuracy - Number: response.coords.accuracy, latitude and longitude accuracy(unit: meters)
+                           //     response.altitudeAccuracy - Number: response.coords.altitudeAccuracy, altitude accuracy(unit: meters)
+                           //     response.heading - Number/null/NaN: response.coords.heading, (unit: degrees (0 <= heading < 360), clockwise)
+                           //     response.speed - Number/null: response.coords.speed, meters/sec
+                           //     response.date - DateHash: uu.date(response.timestamp)
+                           //     response.status - Number: status code
+                           //         200 OK (SUCCESS)
+                           //         400 BAD REQUEST (PositionError.POSITION_UNAVAILABLE = 2)
+                           //         405 METHOD NOT ALLOWED (PositionError.PERMISSION_DENIED = 1)
+                           //         408 REQUEST TIMEOUT (PositionError.TIMEOUT = 3)
+                           //         501 NOT IMPLEMENTED (Geo Location API Not Impl)
+               option) {   // @param Hash: { age, timeout, service, accuracy }
+                           //     age - Number(= 0): maximumAge.
+                           //                        0 is immediately attempt to acquire a new position, unit msec
+                           //                        1+ is willing to accept a cached position.
+                           //     timeout - Number(= Infinity): timeout. unit msec
+                           //     service - String(= ""): Geo Location Service API
+                           //     accuracy - Boolean(= false): true is enableHighAccuracy
+                           // @return Boolean: false is not implement or disabled API.
+    return geoimpl(callback, option, 0);
+}
+
+// uu.geo.watch - Geo Location, watchPosition()
+function uugeowatch(callback,   // @param CallbackFunction: callback(response:Hash)
+                    option) {   // @param Hash: { age, timeout, service, accuracy }
+                                // @return Number: watch id, 0 is error
+    return geoimpl(callback, option, 1);
+}
+
+// uu.geo.stop - stop watch
+function uugeostop(watchid) { // @param Number: watch id
+    if (!uuconfig.geo.disable) {
+        var geo = navigator.geolocation;
+
+        if (geo && isNumber(watchid)) {
+            geo.clearWatch(watchid);
+        }
+    }
+}
+
+// inner - Geo Location impl.
+function geoimpl(callback, option, watch) {
+    function handleSuccessCallback(response) {
+        callback(uu.geo.lastLocation = uumix(response.coords, {
+            ok: _true,
+            date: uudate(response.timestamp),
+            option: option,
+            status: 200
+        }));
+    }
+
+    function handleErrorCallback(response) {
+        callback(uu.geo.lastLocation = {
+            ok: _false,
+            date: uudate(), // now
+            option: option,
+            status: { 1: 405, 2: 400, 3: 408 }[response.code] || 500
+        });
+    }
+
+    if (!uuconfig.geo.disable) {
+        option = option || {};
+
+        var geo = navigator.geolocation, opt = {};
+
+        option.age      !== _undef && (opt.maximumAge         = option.age);
+        option.timeout  !== _undef && (opt.timeout            = option.timeout);
+        option.accuracy !== _undef && (opt.enableHighAccuracy = option.accuracy);
+
+        if (geo) {
+            if (watch) {
+                return geo.watchPosition(handleSuccessCallback,
+                                         handleErrorCallback, opt);
+            }
+            geo.getCurrentPosition(handleSuccessCallback,
+                                   handleErrorCallback, opt);
+            return _true;
+        }
+        // [TODO] flash geo location.
+    }
+    return watch ? 0 : _false;
+}
+//}@geo
+
 // --- NUMBER ---
 // uu.number - get unique number
 function uunumber() { // @return Number: unique number, from 1
@@ -9833,17 +9537,6 @@ function uuui(expr,      // @param CSSSelectorExpressionString/StringArray/Strin
     //  [2][query Slider]         uu.ui("Slider", <body>) -> [instance, ...]
     //  [3][query Slider and Tab] uu.ui(["Slider", "Tab"], <body>) -> [instance, ...]
     //  [4][query expression]     uu.ui("#ui>div[ui=Slider]", <body>) -> [instance, ...]
-
-//{@debug
-    uutrace(arguments.callee, arguments.length, expr, context);
-//}@debug
-//{@assert judge DOMContentLoaded (has <body>)
-    if (doc && doc.body) {
-        ;
-    } else {
-        uung("uu.ui", "<body>");
-    }
-//}@assert
 
     var rv = [], ary, v, i = 0, r;
 
