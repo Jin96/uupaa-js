@@ -59,7 +59,7 @@ upa.php は JavaScript ソースコード内に、include 文 {{{#include}}} _so
 upa -off color/ui/codec
 }}}
 || *ident*   || 説明 || 削減されるファイルサイズ<br />(Minify適用後の値) ||
-|| all       || 以下の機能を一括でコメントアウトします。 || -56.8kB ||
+|| all       || 以下の機能を一括でコメントアウトします。 || --- ||
 || form      || uu.form(), NodeSet.value() をコメントアウトします || -0.9kB ||
 || snippet   || uu.snippet() をコメントアウトします || -0.7kB ||
 || image     || uu.image() をコメントアウトします || -1.0kB ||
@@ -69,6 +69,8 @@ upa -off color/ui/codec
 || fx        || uu.fx() をコメントアウトします。<br />uu.css.show() と uu.css.hide() も利用できなくなります || -7.6kB ||
 || ajax      || uu.ajax(), uu.jsonp() をコメントアウトします。|| -2.8kB ||
 || svg       || uu.svg() をコメントアウトします || -0.2kB ||
+|| geo       || uu.geo() をコメントアウトします || -0.7kB ||
+
 || canvas    || uu.canvas() をコメントアウトします || -59.0kB ||
 || flash     || uu.flash() をコメントアウトします || -0.6kB ||
 || cookie    || uu.cookie(), uu.Class.CookieStorage をコメントアウトします || -1.0kB ||
