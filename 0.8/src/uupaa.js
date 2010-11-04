@@ -605,9 +605,10 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //                                      staticMember = void)
     }),
     // --- DOM EVENT ---
-    event:    uumix(uuevent, {      // uu.event(node:Node, exEventType:ExEventTypeString,
-                                    //                     evaluator:Function/Instance,
-                                    //                     hint:String = void):Node
+    event:    uumix(uuevent, {      // uu.event(node:Node/Window,
+                                    //          exEventType:ExEventTypeString,
+                                    //          evaluator:Function/Instance,
+                                    //          hint:String = void):Node
                                     //  [1][bind a event]            uu.event(node, "click", fn)             -> node
                                     //  [2][bind multi events]       uu.event(node, "click,dblclick", fn)    -> node
                                     //  [3][bind a capture event]    uu.event(node, "mousemove+", fn)        -> node
@@ -615,7 +616,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
         has:        uuhas,          // uu.event.has(node:Node, exEventType:ExEventTypeString):Boolean
         key:        uueventkey,     // uu.event.key(event:ExEvent):Hash - { key, code }
         edge:       uueventedge,    // uu.event.edge(event:ExEvent):Hash - { x, y }
-        fire:       uueventfire,    // uu.event.fire(node:Node, eventType:String,
+        fire:       uueventfire,    // uu.event.fire(node:Node/Window, eventType:String,
                                     //                          param:Mix = void,
                                     //                          hint:String = void):Node
         stop:       uueventstop,    // uu.event.stop(event:Event/ExEvent, stop:Boolean = true,
@@ -650,11 +651,11 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
 //}@eventcyclic
         evaluator:                  // uu.event.evaluator(node:Node, exEventType:ExEventTypeString):FunctionArray
                     uueventevaluator,
-        unbind:     uueventunbind,  // uu.event.unbind(node:Node, exEventType:ExEventTypeString = void):Node
-        attach:     uueventattach,  // uu.event.attach(node:Node, eventType:String,
+        unbind:     uueventunbind,  // uu.event.unbind(node:Node/Window, exEventType:ExEventTypeString = void):Node
+        attach:     uueventattach,  // uu.event.attach(node:Node/Window, eventType:String,
                                     //                            evaluator:Function,
                                     //                            useCapture:Boolean = false)
-        detach:     uueventdetach   // uu.event.detach(node:Node, eventType:String,
+        detach:     uueventdetach   // uu.event.detach(node:Node/Window, eventType:String,
                                     //                            evaluator:Function,
                                     //                            useCapture:Boolean = false)
     }),
@@ -4294,7 +4295,7 @@ function uumsgunbind(instance) { // @param Instance: class instance
 // --- event ---
 
 // uu.event - bind event
-function uuevent(node,         // @param Node:
+function uuevent(node,         // @param Node/Window:
                  exEventType,  // @param ExEventTypeString: some EventTypeEx, "click,click+,..."
                  evaluator,    // @param CallbackFunction/Instance: callback function
                  hint,         // @param String(= void): code search hint
@@ -4305,7 +4306,7 @@ function uuevent(node,         // @param Node:
     uutrace(arguments.callee, arguments.length, node, exEventType, evaluator, hint);
 //}@debug
 //{@assert
-    if (!isNode(node)) {
+    if (node !== win && !isNode(node)) {
         uung("uu.event", node);
     }
     switch (uutype(hint)) {
@@ -4569,7 +4570,7 @@ uuevent.codes = {
 };
 
 // uu.event.fire - fire event / fire custom event(none capture event only)
-function uueventfire(node,      // @param Node: target node
+function uueventfire(node,      // @param Node/Window: target node
                      eventType, // @param String: "click", "custom"
                      hint) {    // @param String(= void): code search hint
                                 // @return Node:
@@ -4639,7 +4640,7 @@ function uueventevaluator(node,          // @param Node:
 }
 
 // uu.event.unbind - unbind event
-function uueventunbind(node,          // @param Node: target node
+function uueventunbind(node,          // @param Node/Window: target node
                        exEventType) { // @param ExEventTypeString(= void): namespace and event types, "click,click+,..."
                                       // @return Node:
     //  [1][unbind all]              uu.event.unbind(node) -> node
@@ -4678,7 +4679,7 @@ function uueventunbind(node,          // @param Node: target node
 }
 
 // uu.event.attach - attach event - Raw Level API wrapper
-function uueventattach(node,         // @param Node:
+function uueventattach(node,         // @param Node/Window:
                        eventType,    // @param String: event type
                        evaluator,    // @param Function: evaluator
                        useCapture,   // @param Boolean(= false):
@@ -4757,7 +4758,7 @@ function uueventattach(node,         // @param Node:
 }
 
 // uu.event.detach - detach event - Raw Level API wrapper
-function uueventdetach(node,         // @param Node:
+function uueventdetach(node,         // @param Node/Window:
                        eventType,    // @param String: event type
                        evaluator,    // @param Function: evaluator
                        useCapture) { // @param Boolean(= false):
