@@ -13,7 +13,7 @@ $castoffAll  = array(
     "test", "fx", "ajax",
     "junction",
     "svg", "canvas", "canvasvml", "canvassl", "canvasfl",
-    "flash", "nodeset", "audio",
+    "flash", "nodeset", "audio", "geo",
     "eventresize", "eventcyclic",
     "live", "cssbox",
     "codec", "md5", "sha1", "hmac", "msgpack",
@@ -32,6 +32,17 @@ $loadedFiles = array(); // avoid duplicate load
 $compileOption = ""; // compile option (-memento)
 $loadedFileSize = 0;
 $forceOutputFileName = "";
+
+/*
+ *  loadFiles()
+ *    |
+ *    +--> loadSource()
+ *    |
+ *    +--> autoInclude()
+ *    |
+ *    v
+ *  catfood.js
+ */
 
 // load source
 function loadFiles($inputFiles) { // @param Array:
@@ -73,6 +84,11 @@ function loadSource($src) { // @param FilePathString:
     // normalize line break
     $loadedFileSize = $loadedFileSize + filesize($src);
     $js = preg_replace('/(\r\n|\r|\n)/m', "\n", file_get_contents($src));
+
+
+    // __FILE__
+    $js = preg_replace('/__FILE__/m', '"' . preg_replace('/\\\\/', '/', $src) . '"', $js);
+
 
     // include "../src/source.js"
     $js = preg_replace_callback('/#include\s+["\'<]?([\w\.\-\+\/]+)[>"\']?/ms',
