@@ -175,7 +175,6 @@ uu || (function(win,                // as Global / window
                 toString,           // as Global.Object.prototype.toString
                 isArray,            // as Global.Array.isArray,
                 toArray,            // as Global.Array.prototype.slice,
-                JSON,               // as Global.JSON
                 Node,               // as Global.Node
                 Math,               // as Global.Math
                 parseInt,           // as Global.parseInt
@@ -224,7 +223,6 @@ var _addEventListener = "addEventListener",
     _lastChild = "lastChild",
     _className = "className",
     _prototype = "prototype",
-    _function = "function",
     _nodeType = "nodeType",
     _position = "position",
     _nodeSet = "nodeSet",
@@ -2934,7 +2932,7 @@ function uufxloop(id,     // @param Number: timer id
         q = data.q[0], // fetch current queue
         option = q.option,
         back = !!option.back,
-        tm, finished, mix, i, iz, funcArray;
+        tm, finished, mix;
 
     if (q.tm) { // already running?
         tm = +new Date; // running -> get current time
@@ -7732,9 +7730,9 @@ function uujson(source, // @param Mix:
                 alt) {  // @param Boolean(= false): false is JSON.stringify
                         //                          true is js impl(uu.json.encode)
                         // @return JSONString:
-    return (alt || !JSON) ? uujsonencode(source, 1)
-                          : source === void 0 ? "" // [IE8] undefined -> "undefined" bugfix
-                                              : (JSON.stringify(source) || "");
+    return (alt || !win.JSON) ? uujsonencode(source, 1)
+                              : source === void 0 ? "" // [IE8] undefined -> "undefined" bugfix
+                                                  : (win.JSON.stringify(source) || "");
 }
 uujson.x = [
     /[^,:{}\[\]0-9\.\-+Eaeflnr-u \n\r\t]/,                      // x[0] NGWORDS
@@ -7750,10 +7748,10 @@ function uujsondecode(jsonString, // @param JSONString:
                                   // @return Mix/Boolean: false is error
     var str = jsonString.trim(), x = uujson.x;
 
-    return (alt || !JSON) ? (x[0].test(str[_replace](x[1], ""))
-                                ? _false
-                                : (new Function("return " + str))())
-                          : JSON.parse(str);
+    return (alt || !win.JSON) ? (x[0].test(str[_replace](x[1], ""))
+                                   ? _false
+                                   : (new Function("return " + str))())
+                              : win.JSON.parse(str);
 }
 
 // inner - json inspect
@@ -10574,7 +10572,6 @@ uuready("dom:2", function() {
    Object.prototype.toString,
    Array.isArray,
    Array.prototype.slice,
-   this.JSON,
    this.Node,
    Math,
    parseInt,
