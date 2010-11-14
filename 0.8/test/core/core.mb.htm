@@ -643,8 +643,8 @@ uu.ready("window", function(uu, doc) {
 
 
     uu.ok("uu.node.remove()");
-    uu.ok("uu.node.remove(uu.id('ctx'))",
-            uu.node.remove(uu.id('ctx')), "is node");
+    uu.ok("uu.node.remove(uu.id('ctx'), true)",
+            uu.node.remove(uu.id('ctx'), true), "is node");
 
     uu.ok("uu.data()");
     (function() {
