@@ -11,7 +11,7 @@ uu.ready(function(uu) {
         var node = evt.currentTarget;
 
         if (evt.shiftKey) {
-            uu.node.remove(node);
+            uu.node.remove(node, true); // removeAll
         } else {
             var clonedNode = uu.node.clone(node);
 

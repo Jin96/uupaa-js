@@ -10,7 +10,7 @@
 var compositeTypes = [
     'source-over','source-in','source-out','source-atop',
     'destination-over','destination-in','destination-out','destination-atop',
-    'lighter','darker','copy','xor'];
+    'lighter','copy','xor','darker'];
 
 uu.ready("canvas", function() {
     draw(0, 0);
@@ -141,7 +141,7 @@ function draw(matrix, type){
 var compositeTypes = [
   'source-over','source-in','source-out','source-atop',
   'destination-over','destination-in','destination-out','destination-atop',
-  'lighter','darker','copy','xor'
+  'lighter','copy','xor','darker'
 ];
 function draw(vml) {
   for (var i=0;i&lt;compositeTypes.length;i++){

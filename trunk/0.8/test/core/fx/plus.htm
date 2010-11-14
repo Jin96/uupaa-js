@@ -60,20 +60,28 @@ function fade(evt) {
     }
 }
 
-function movein(evt) {
-    degree += 10;
-    if (degree > 360) {
-        degree = 0;
-    }
-    uu.fx.movein(evt.uu.node, duration, { degree: degree, range: range });
+function fadeIn(evt) {
+    uu.fx.fadeIn(evt.uu.node, duration, { reverse: 1 });
 }
 
-function moveout(evt) {
+function fadeOut(evt) {
+    uu.fx.fadeOut(evt.uu.node, duration, { reverse: 1 });
+}
+
+function moveIn(evt) {
     degree += 10;
     if (degree > 360) {
         degree = 0;
     }
-    uu.fx.moveout(evt.uu.node, duration, { degree: degree, range: range,
+    uu.fx.moveIn(evt.uu.node, duration, { degree: degree, range: range });
+}
+
+function moveOut(evt) {
+    degree += 10;
+    if (degree > 360) {
+        degree = 0;
+    }
+    uu.fx.moveOut(evt.uu.node, duration, { degree: degree, range: range,
                                         reverse: 1 });
 }
 
@@ -94,35 +102,40 @@ function highlight(evt) {
     uu.fx.highlight(evt.uu.node, duration, { reverse: 1 });
 }
 
-var toggleSlide = false;
+var slideToggleSwitch = false;
 
 function slide(evt) {
-    toggleSlide = !toggleSlide;
+    slideToggleSwitch = !slideToggleSwitch;
 
-    if (toggleSlide) {
-        evt.uu.node.innerText = "SlideUp";
+    if (slideToggleSwitch) {
+        evt.uu.node.innerText = "slideUp";
         uu.fx.slide(evt.uu.node, duration);
         uu.fx(evt.uu.node, 1000);
         uu.fx.slide(evt.uu.node, 0, { after: function(node) {
-            node.innerText = "Slide";
+            node.innerText = "slide";
         }});
     } else {
-        evt.uu.node.innerText = "SlideDown";
+        evt.uu.node.innerText = "slideDown";
         uu.fx.slide(evt.uu.node, 0);
         uu.fx(evt.uu.node, 1000);
         uu.fx.slide(evt.uu.node, duration, { after: function(node) {
-            node.innerText = "Slide";
+            node.innerText = "slide";
         }});
     }
 }
 
-/*
-function slideDown(evt) {
-    uu.fx.slideUp(evt.uu.node, 0);
-    uu.fx(evt.uu.node, 100);
-    uu.fx.slideDown(evt.uu.node, duration);
+function slideUp(evt) {
+    uu.fx.slide(evt.uu.node, duration);
+    uu.fx(evt.uu.node, 1000);
+    uu.fx.slide(evt.uu.node, 0, { after: function(node) {
+    }});
 }
- */
+function slideDown(evt) {
+    uu.fx.slide(evt.uu.node, 0);
+    uu.fx(evt.uu.node, 1000);
+    uu.fx.slide(evt.uu.node, duration, { after: function(node) {
+    }});
+}
 
 uu.ready(function(uu) {
     // onchange handler
@@ -140,10 +153,20 @@ uu.ready(function(uu) {
     var margin = 10;
 
     // position: absolute
-    uu.each({ movein: movein, moveout: moveout, flare: flare,
-              fade: fade, puff: puff, shrink: shrink,
-              highlight: highlight, slide: slide }, function(fn, key) {
+    uu.each({ moveIn: moveIn,
+              moveOut: moveOut,
+              flare: flare,
+              fade: fade,
+              fadeIn: fadeIn,
+              fadeOut: fadeOut,
+              puff: puff,
+              shrink: shrink,
+              highlight: highlight,
+              slide: slide,
+              slideUp: slideUp,
+              slideDown: slideDown }, function(fn, key) {
 
+        var div =
         uu.node.add(
             uu.click(
                 uu.div({ cn: "box" }, { x: x, y: y + 40 }, uu.text(key)), fn), uu.id("absolutebox"))
@@ -153,9 +176,16 @@ uu.ready(function(uu) {
             y += 100 + margin;
             x = 0;
         }
+        switch (key) {
+        case "fadeIn":
+        case "fadeOut":
+            uu.css(div, { o: 0.5 });
+        }
     });
     // position: static
-    uu.each({ puff: puff, shrink: shrink, slide: slide }, function(fn, key) {
+    uu.each({ puff: puff, shrink: shrink,
+              slideUp: slideUp,
+              slideDown: slideDown }, function(fn, key) {
 
         uu.node.add(
             uu.click(
