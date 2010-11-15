@@ -3,6 +3,9 @@
 <style>
 html, body {
   overflow: hidden;
+  border: 0 none;
+  padding: 0;
+  margin: 0;
 }
 .box {
   position: absolute;
@@ -22,6 +25,7 @@ html, body {
 .outline10 { outline: 10px solid springgreen; }
 </style>
 <script src="../../../src/uupaa.js"></script>
+<script src="../../../src/canvas/canvas.js"></script>
 <script>
 var duration = 300;
 var range = 200;
@@ -194,7 +198,9 @@ uu.ready(function(uu) {
 
     uu.css.userSelect();
 }, "canvas", function() {
-    uu.hatch();
+    if (!uu.ie678) {
+        uu.hatch();
+    }
 });
 
 function toggleMargin() {
