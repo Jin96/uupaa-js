@@ -1019,8 +1019,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
     // --- CANVAS ---
 //{@canvas
     canvas:         uucanvas,       // uu.canvas(width:Number = 300, height:Number = 150,
-                                    //           order:String = uu.config.canvas.order,
-                                    //           placeHolder:Node = <div>):Node
+                                    //           option:Hash):Node
 //}@canvas
     // --- AUDIO ---
 //{@audio
@@ -7417,28 +7416,31 @@ function uuhatch(param) { // @param Hash: { size, unit, color, color2 }
         ctx.lineWidth = 0.2;
         ctx.textBaseline = "top";
         ctx.font = "bold 12px serif";
-        ctx.shadowBlur = 1;
         ctx.shadowColor = "#111";
         ctx.shadowOffsetX = 1;
         ctx.shadowOffsetY = 1;
         ctx.fillStyle = "white"
 
         for (; x < w; ++i, x += p.size) {
+            ctx.shadowBlur = 0;
             ctx.strokeStyle = (i % p.unit) ? p.color : p.color2;
             ctx.beginPath();
             ctx.moveTo(x, 0);
             ctx.lineTo(x, h);
             ctx.stroke();
             ctx.closePath();
+            ctx.shadowBlur = 1;
             i % p.unit || ctx.fillText(x + "", x, p.size * p.unit);
         }
         for (; y < h; ++j, y += p.size) {
+            ctx.shadowBlur = 0;
             ctx.strokeStyle = (j % p.unit) ? p.color : p.color2;
             ctx.beginPath();
             ctx.moveTo(0, y);
             ctx.lineTo(w, y);
             ctx.stroke();
             ctx.closePath();
+            ctx.shadowBlur = 1;
             j % p.unit || ctx.fillText(y + "", p.size * p.unit, y);
         }
     }
@@ -7462,18 +7464,20 @@ function uuhatch(param) { // @param Hash: { size, unit, color, color2 }
                 h = parseInt(vp.innerHeight),
                 canvas;
 
-            canvas = uucanvas(w, h);
+            canvas = uucanvas(w, h, { order: "V" });
             canvas.style.cssText = "position:absolute;z-index:-100";
             canvas.id = "uuhatch";
-            uunodeadd(canvas, doc.body, "first");
+            uunodeadd(canvas, doc.body, "./first");
             drawHatch(canvas, x, y, w, h);
 
 //{@eventresize
             uueventresize(function() {
-                vp = uuviewport();
-                canvas.width  = w = parseInt(vp.innerWidth);
-                canvas.height = h = parseInt(vp.innerHeight);
-                drawHatch(canvas, x, y, w, h);
+                setTimeout(function() {
+                    vp = uuviewport();
+                    canvas.width  = w = parseInt(vp.innerWidth);
+                    canvas.height = h = parseInt(vp.innerHeight);
+                    drawHatch(canvas, x, y, w, h);
+                }, 100);
             });
 //}@eventresize
             return _true;
@@ -8508,24 +8512,26 @@ uuready("window", function() {
 //{@canvas
 
 // uu.canvas - <canvas>
-function uucanvas(width,         // @param Number(= 300):
-                  height,        // @param Number(= 150):
-                  order,         // @param String(= uu.config.canvas.order): backend order
-                  placeHolder) { // @param Node(= <div>): placeholder Node
-                                 // @return Node: <canvas>
-    var canvas = newNode(
+function uucanvas(width,    // @param Number(= 300):
+                  height,   // @param Number(= 150):
+                  option) { // @param Hash(= {}): { order, node }
+                            //      order - String(= uu.config.canvas.order): backend order
+                            //      node  - Node(= void): placeholder Node
+                            // @return Node: <canvas>
+    var opt = uuarg(option, { order: uuconfig.canvas.order, node: null }),
+        canvas = newNode(
 /*{@mb*/                 _ie678 ? "CANVAS" : /*}@mb*/ // [IE6][IE7][IE8][!] need upper case
                          "canvas");
 
     canvas[_width]  = width  == null ? 300 : width;
     canvas[_height] = height == null ? 150 : height;
 
-    placeHolder || (placeHolder = doc.body[_appendChild](newNode()));
-    placeHolder[_parentNode].replaceChild(canvas, placeHolder);
+    opt.node || (opt.node = doc.body[_appendChild](newNode())); // <body>...<div /></body>
+    opt.node[_parentNode].replaceChild(canvas, opt.node);
 
 //{@mb
     if (_ie678) {
-        return uucanvas.build(canvas, order || uuconfig.canvas.order); // order = "SFV"
+        return uucanvas.build(canvas, opt.order); // order = "SFV"
     }
 //}@mb
     return canvas;
