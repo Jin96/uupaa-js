@@ -91,6 +91,43 @@
     </div>
 </div>
 <script>
+uu.ready(function() {
+    uu.ok("uu.image()");
+    uu.ok("document.images.length = ", document.images.length, "==", 0);
+
+    var url = [
+        "../../img/ie.png",
+        "../../img/ie8.png"
+    ];
+
+    // uu.image()
+    uu.image(url, function(resp) {
+        if (resp.ok) {
+            if (uu.has(resp.rv[0].src, "ie.png")) {
+                uu.ok('uu.image(["../../img/ie.png", "../img/ie8.png"]).response.rv[0].src has "ie.png"',
+                        resp.rv[0].src, "has", "ie.png");
+                uu.ok('uu.image(["../../img/ie.png", "../img/ie8.png"]).response.rv[1].src has "ie8.png"',
+                        resp.rv[1].src, "has", "ie8.png");
+            } else if (uu.has(resp.rv[1].src, "ie.png")) {
+                // ロード順によってはこっちのパスを通る可能性がある
+                uu.ok('uu.image(["../../img/ie.png", "../img/ie8.png"]).response.rv[0].src has "ie8.png"',
+                        resp.rv[0].src, "has", "ie8.png");
+                uu.ok('uu.image(["../../img/ie.png", "../img/ie8.png"]).response.rv[1].src has "ie.png"',
+                            resp.rv[1].src, "has", "ie.png");
+            }
+
+            // uu.image.isCached()
+            uu.image(url, function(resp) {
+                // キャッシュ済みかどうか
+                uu.ok('uu.image.isCached(url[0])', uu.image.isCached("../../img/ie.png"), "is true");
+                uu.ok('uu.image.isCached(url[1])', uu.image.isCached("../../img/ie8.png"), "is true");
+                uu.ok();
+            });
+        }
+    });
+});
+</script>
+<script>
 uu.ready("window", function() {
     var margin = 5 * 2;
     var border = 5 * 2;
