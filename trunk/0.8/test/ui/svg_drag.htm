@@ -1,44 +1,45 @@
-<!doctype html><html><head><meta charset="utf-8" />
-<title></title>
+<!DOCTYPE html><html lang="ja"><head>
+<meta charset="utf-8" />
+<title>uu.svg</title>
 <style>
-svg {
-    background-color: #eee;
-}
+svg { background-color: #eee; }
 </style>
 <script src="../../src/uupaa.js"></script>
 <script src="../../src/svg/svg.js"></script>
 <script src="../../src/ui/svgdragbase.js"></script>
 <script src="../../src/ui/svgdrag.js"></script>
 <script src="../../src/ui/zindex.js"></script>
-<script src="../../src/css/box.js"></script>
-</head><body>
-
-
-
 <script>
-(function(uu, svg) {
+uu.ready("svg", function(uu, svg) {
     var n = [];
-
     uu.body(
-        svg(100, 100, 600, 600,
-            n[0] = svg.g(100, 10,
-                svg.g(
-                    n[1] = svg.circle({ cx: 50, cy: 50, r: 40, fill: "skyblue" }),
-                    n[2] = svg.circle(60, 60, 25, { fill: "springgreen" }),
-                    n[3] = svg.rect(60, 60, 100, 100, 20, 20, { fill: "hotpink" }),
-                    n[4] = svg.text("drag me !", 30, 50, { stroke: "none", fill: "#000" }))),
+      svg(100, 100, 600, 600,
+        n[0] =
+          svg.g(100, 10,
+            svg.g(
+              svg.circle({ cx: 50, cy: 50,
+                           r: 40, fill: "skyblue" }),
+              svg.circle(60, 60, 25,
+                         { fill: "springgreen" }),
+              svg.rect(60, 60, 100, 100,
+                       20, 20, { fill: "hotpink" }),
+              svg.text("drag me !", 30, 50,
+                       { stroke: "none",
+                         fill: "#000" }))),
 
-            svg.g(400, 10,
-                    n[11] = svg.g(0, 0,
-                                svg.circle({ cx: 50, cy: 50, r: 40, fill: "skyblue" })),
-                    n[12] = svg.g(0, 0,
-                                svg.circle(60, 60, 25, { fill: "springgreen" })),
-                    n[13] = svg.g(0, 0,
-                                svg.rect(60, 60, 100, 100, 20, 20,
-                                         { fill: "hotpink" })),
-                    n[14] = svg.g(0, 0,
-                                svg.text("drag me !", 30, 50, { stroke: "none", fill: "#000" })))));
-
+          svg.g(400, 10,
+                n[11] = svg.g(0, 0,
+                          svg.circle({ cx: 50, cy: 50,
+                                       r: 40, fill: "skyblue" })),
+                n[12] = svg.g(0, 0,
+                          svg.circle(60, 60, 25,
+                                     { fill: "springgreen" })),
+                n[13] = svg.g(0, 0,
+                          svg.rect(60, 60, 100, 100, 20, 20,
+                                   { fill: "hotpink" })),
+                n[14] = svg.g(0, 0,
+                          svg.text("drag me !", 30, 50,
+                                   { stroke: "none", fill: "#000" })))));
 
     var option = {
         mousedown: function(evt, node, option, dragInfo) {
@@ -49,18 +50,11 @@ svg {
             uu.fx(node, 400, { o: 0.4 });
         }
     };
-
     uu("SVGDrag", n[0], null, option);
     uu("SVGDrag", n[11], null, option);
     uu("SVGDrag", n[12], null, option);
     uu("SVGDrag", n[13], null, option);
     uu("SVGDrag", n[14], null, option);
-
-
-})(uu, uu.svg);
+});
 </script>
-
-
-
-</body></html>
-
+</head><body></body></html>

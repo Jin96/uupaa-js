@@ -1,15 +1,25 @@
 
 // === Canvas ===
 //{@canvas
+
+// for Gecko, WebKit, Opera, IE9
 window["CanvasRenderingContext2D"] && (function(uu) {
 
 // extend functions and properties
 uu.mix(window["CanvasRenderingContext2D"].prototype, {
-    lock:           canvasLock,
-    clear:          canvasClear,
-    unlock:         uu.nop,
-    drawCircle:     canvasDrawCircle,
-    drawRoundRect:  canvasDrawRoundRect,
+    lock:           canvasLock,             // ctx.lock(clear:Boolean)
+    clear:          canvasClear,            // ctx.clear() - clear all canvas
+    unlock:         uu.nop,                 // ctx.unlock()
+    drawCircle:     canvasDrawCircle,       // ctx.drawCircle(x:Number, y:Number, radius:Number,
+                                            //                fillColor:ColorHash = void,
+                                            //                strokeColor:ColorHash = void,
+                                            //                lineWidth:Number = 1)
+    drawRoundRect:  canvasDrawRoundRect,    // ctx.drawRoundRect(x:Number, y:Number,
+                                            //                   width:Number, height:Number,
+                                            //                   radius:Number,
+                                            //                   fillColor:ColorHash = void,
+                                            //                   strokeColor:ColorHash = void,
+                                            //                   lineWidth:Number = 1)
     xBackend:       "Canvas"
 }, 0, 0);
 
@@ -27,29 +37,23 @@ function canvasClear() {
 function canvasDrawCircle(x,           // @param Number:
                           y,           // @param Number:
                           raduis,      // @param Number: radius
-                          fillColor,   // @param ColorHash(= void 0): fillColor
-                          strokeColor, // @param ColorHash(= void 0): strokeColor
+                          fillColor,   // @param ColorHash(= void): fillColor
+                          strokeColor, // @param ColorHash(= void): strokeColor
                           lineWidth) { // @param Number(= 1): stroke lineWidth
-    if (fillColor || strokeColor) {
-        var undef, lw = lineWidth === undef ? 1 : lineWidth;
+    if (this.globalAlpha && raduis && (fillColor || strokeColor)) {
+        var lw = lineWidth === void 0 ? 1 : lineWidth;
+            fill = !!fillColor,
+            stroke = strokeColor && lw;
 
         this.save();
-        if (fillColor) {
-            this.fillStyle = fillColor.rgba;
-        }
-        if (strokeColor && lw) {
-            this.strokeStyle = strokeColor.rgba;
-            this.lineWidth = lw;
-        }
+        fill   && (this.fillStyle = fillColor.rgba);
+        stroke && (this.strokeStyle = strokeColor.rgba,
+                   this.lineWidth = lw);
         this.beginPath();
         this.arc(x, y, raduis, 0, 2 * Math.PI, true);
         this.closePath();
-        if (fillColor) {
-            this.fill();
-        }
-        if (strokeColor && lw) {
-            this.stroke();
-        }
+        fill   && this.fill();
+        stroke && this.stroke();
         this.restore();
     }
 }
@@ -63,40 +67,34 @@ function canvasDrawRoundRect(x,           // @param Number:
                              fillColor,   // @param ColorHash(= void 0): fillColor
                              strokeColor, // @param ColorHash(= void 0): strokeColor
                              lineWidth) { // @param Number(= 1): stroke lineWidth
-    if (fillColor || strokeColor) {
-        var undef,
-            lw = lineWidth === undef ? 1 : lineWidth, w = width, h = height,
+    if (this.globalAlpha && width && height && (fillColor || strokeColor)) {
+        var lw = lineWidth === void 0 ? 1 : lineWidth,
+            w  = width, h = height,
+            w2 = (w / 2) | 0, h2 = (h / 2) | 0, rmin = Math.min(w2, h2),
             r0, r1, r2, r3,
-            w2 = (width  / 2) | 0, h2 = (height / 2) | 0;
+            fill = !!fillColor,
+            stroke = strokeColor && lw;
 
         if (typeof radius === "number") {
-            r0 = r1 = r2 = r3 = radius;
+            r3 = radius;
+            r3 = r3 < 0 ? 0 : (r3 < w2 && r3 < h2) ? r3 : rmin;
+            r0 = r1 = r2 = r3; // copy radius
         } else {
             r0 = radius[0];
             r1 = radius[1];
             r2 = radius[2];
             r3 = radius[3];
+            r0 = r0 < 0 ? 0 : (r0 < w2 && r0 < h2) ? r0 : rmin;
+            r1 = r1 < 0 ? 0 : (r1 < w2 && r1 < h2) ? r1 : rmin;
+            r2 = r2 < 0 ? 0 : (r2 < w2 && r2 < h2) ? r2 : rmin;
+            r3 = r3 < 0 ? 0 : (r3 < w2 && r3 < h2) ? r3 : rmin;
         }
-        r0 < 0 && (r0 = 0);
-        r1 < 0 && (r1 = 0);
-        r2 < 0 && (r2 = 0);
-        r3 < 0 && (r3 = 0);
-        (r0 >= w2 || r0 >= h2) && (r0 = Math.min(w2, h2) - 2);
-        (r1 >= w2 || r1 >= h2) && (r1 = Math.min(w2, h2) - 2);
-        (r2 >= w2 || r2 >= h2) && (r2 = Math.min(w2, h2) - 2);
-        (r3 >= w2 || r3 >= h2) && (r3 = Math.min(w2, h2) - 2);
-
         this.save();
         this.setTransform(1, 0, 0, 1, 0, 0);
 
-        if (fillColor) {
-            this.fillStyle = fillColor.rgba;
-        }
-        if (strokeColor && lw) {
-            this.strokeStyle = strokeColor.rgba;
-            this.lineWidth = lw;
-        }
-
+        fill   && (this.fillStyle = fillColor.rgba);
+        stroke && (this.strokeStyle = strokeColor.rgba,
+                   this.lineWidth = lw);
         this.beginPath();
         this.moveTo(x, y + h2);
         this.lineTo(x, y + h - r3);
@@ -108,13 +106,8 @@ function canvasDrawRoundRect(x,           // @param Number:
         this.lineTo(x + r0, y);
         this.quadraticCurveTo(x, y, x, y + r0); // top-right
         this.closePath();
-
-        if (fillColor) {
-            this.fill();
-        }
-        if (strokeColor && lw) {
-            this.stroke();
-        }
+        fill   && this.fill();
+        stroke && this.stroke();
         this.restore();
     }
 }
@@ -122,20 +115,15 @@ function canvasDrawRoundRect(x,           // @param Number:
 
 //{@mb
 // === VMLCanvas / FlashCanvas / SilverlightCanvas ===
-window["CanvasRenderingContext2D"] || (function(doc, uu) {
+window["CanvasRenderingContext2D"] || (function(doc, uu, uucanvas) {
 
-var _enableFlashCanvas = 0;
+var _enableFlashCanvas = uu.ie678 ? uu.stat(uu.config.canvas.swf) : 0;
 
-if (uu.ie678 && uu.env.flash > 8) {
-    _enableFlashCanvas = uu.stat(uu.config.canvas.swf);
-}
-
-uu.canvas.VML = VMLCanvas;                  // uu.canvas.VML class
-uu.canvas.Flash = FlashCanvas;              // uu.canvas.Flash class
-uu.canvas.Silverlight = SilverlightCanvas;  // uu.canvas.Silverlight class
-uu.canvas.init = uucanvasinit;
-uu.canvas.build = uucanvasbuild;
-//uu.canvas.bgcolor = uucanvasbgcolor;        // uu.canvas.bgcolor(node:Node):ColorHash [VML][SL]
+uucanvas.VML = VMLCanvas;                  // uu.canvas.VML class
+uucanvas.Flash = FlashCanvas;              // uu.canvas.Flash class
+uucanvas.Silverlight = SilverlightCanvas;  // uu.canvas.Silverlight class
+uucanvas.init = uucanvasinit;
+uucanvas.build = uucanvasbuild;
 
 // class SilverlightCanvas
 function SilverlightCanvas(node) { // @param Node: <canvas>
@@ -199,41 +187,30 @@ function _removeFallback(node) { // @param Node:
 function uucanvasbuild(node,    // @param Node: <canvas>
                        order) { // @param SpaceJointString: "SFV"
                                 // @return Node:
-    var ary, i = -1, v, order = uu.trim(order.toLowerCase());
+    var i = 0, v, order = uu.trim(order.toLowerCase()),
+        sl = uu.env.silverlight, backend,
+        ary = order.split(order.indexOf(" ") >= 0 ? " "  // old style "sl fl vml"
+                                                  : ""); // new style "SFV"
 
-    if (order.indexOf(" ") >= 0) {
-        ary = order.split(" "); // old style "sl fl vml"
-    } else {
-        ary = order.split("");  // new style "SFV"
-    }
-
-    while ( (v = ary[++i]) ) {
-        switch (uu.canvas.build.backendOrder[v]) {
-        case 1: break;
-        case 2: if (uu.env.silverlight) {
-                    return SilverlightCanvas.build(node);
-                }
-                break;
-        case 3: if (_enableFlashCanvas) {
-                    return FlashCanvas.build(node);
-                }
-                break;
-        case 4: return VMLCanvas.build(node);
+    for (; !backend && (v = ary[i++]); ) {
+        switch (uucanvas.build.backendOrder[v]) {
+        case 2: sl && (backend = SilverlightCanvas); break;
+        case 3: _enableFlashCanvas && (backend = FlashCanvas); break;
+        case 4: backend = VMLCanvas;
         }
     }
-    // backend detect order: Silverlight -> Flash -> VML
-    return (uu.env.silverlight ? SilverlightCanvas
-                               : _enableFlashCanvas ? FlashCanvas
-                                                    : VMLCanvas).build(node);
+    return (backend ? backend
+                    : sl ? SilverlightCanvas
+                         : _enableFlashCanvas ? FlashCanvas
+                                              : VMLCanvas).build(node);
 }
 uucanvasbuild.backendOrder = {
-    g: 1, svg: 1,
-    s: 2, sl: 2, silver: 2, silverlight: 2,
+    s: 2, sl: 2, silverlight: 2,
     f: 3, fl: 3, flash: 3,
     v: 4, vml: 4
 };
 
-})(document, uu);
+})(document, uu, uu.canvas);
 
 //{@canvasvml
 // === VML Canvas ===
@@ -581,13 +558,6 @@ function clear() {
     clearAll(this._view);
 }
 
-/*
-function clearAll(that) {
-    while (view.lastChild) {
-        view.removeChild(view.lastChild);
-    }
-}
- */
 function clearAll(view) {
     while (view.lastChild) {
         view.removeChild(view.lastChild);
@@ -606,7 +576,6 @@ function clearRect(x, y, w, h) {
             this.__mix = _COMPOS[this._mix = this.globalCompositeOperation];
         }
 
-//      var color = uu.canvas.bgcolor(this.canvas),
         var color = uu.css.bgcolor(this.canvas),
             zindex = (this.__mix ===  4) ? --this._zindex
                    : (this.__mix === 10) ? (this.clear(), 0) : 0,
@@ -703,11 +672,7 @@ function drawCircle(x,           // @param Number:
                     fillColor,   // @param ColorHash(= void 0): fillColor
                     strokeColor, // @param ColorHash(= void 0): strokeColor
                     lineWidth) { // @param Number(= 1): stroke lineWidth
-    if (this.globalAlpha <= 0) {
-        return;
-    }
-
-    if (fillColor || strokeColor) {
+    if (this.globalAlpha && radius && (fillColor || strokeColor)) {
         var lw = lineWidth === void 0 ? 1 : lineWidth,
             fg = '<v:oval style="position:absolute;left:' + (x - radius) +
                     'px;top:'       + (y - radius) +
@@ -941,13 +906,9 @@ function drawRoundRect(x,           // @param Number:
                        fillColor,   // @param ColorHash(= void 0): fillColor
                        strokeColor, // @param ColorHash(= void 0): strokeColor
                        lineWidth) { // @param Number(= 1): stroke lineWidth
-    if (this.globalAlpha <= 0) {
-        return;
-    }
-
-    if (fillColor || strokeColor) {
+    if (this.globalAlpha && width && height && (fillColor || strokeColor)) {
         var lw = lineWidth === void 0 ? 1 : lineWidth,
-            path, fg, ix, iy, iw, ih;
+            path, fg, ix, iy, iw, ih, w, h;
 
         if (typeof radius === "number") { // Number -> [r, r, r, r]
             radius = [radius, radius, radius, radius];
@@ -969,7 +930,8 @@ function drawRoundRect(x,           // @param Number:
                     "l " + iw + " " + iy +
                     "l " + ix + " " + iy + "x"].join("");
         } else {
-            path = _buildRoundRectPath(this, x, y, width, height, radius);
+            path = _buildRoundRectPath(this, x, y, width, height,
+                                       radius[0], radius[1], radius[2], radius[3]);
         }
 
         fg = '<v:shape style="position:absolute;width:10px;height:10px;z-index:0' +
@@ -994,21 +956,13 @@ function drawRoundRect(x,           // @param Number:
 }
 
 // inner - build round rect paths
-function _buildRoundRectPath(ctx, x, y, width, height, radius) {
-    var w = width,
-        h = height,
-        r0 = radius[0], r1 = radius[1],
-        r2 = radius[2], r3 = radius[3],
-        w2 = (width  / 2) | 0, h2 = (height / 2) | 0;
+function _buildRoundRectPath(ctx, x, y, w, h, r0, r1, r2, r3) {
+    var w2 = (w / 2) | 0, h2 = (h / 2) | 0, rmin = Math.min(w2, h2);
 
-    r0 < 0 && (r0 = 0);
-    r1 < 0 && (r1 = 0);
-    r2 < 0 && (r2 = 0);
-    r3 < 0 && (r3 = 0);
-    (r0 >= w2 || r0 >= h2) && (r0 = Math.min(w2, h2) - 2);
-    (r1 >= w2 || r1 >= h2) && (r1 = Math.min(w2, h2) - 2);
-    (r2 >= w2 || r2 >= h2) && (r2 = Math.min(w2, h2) - 2);
-    (r3 >= w2 || r3 >= h2) && (r3 = Math.min(w2, h2) - 2);
+    r0 = r0 < 0 ? 0 : (r0 < w2 && r0 < h2) ? r0 : rmin;
+    r1 = r1 < 0 ? 0 : (r1 < w2 && r1 < h2) ? r1 : rmin;
+    r2 = r2 < 0 ? 0 : (r2 < w2 && r2 < h2) ? r2 : rmin;
+    r3 = r3 < 0 ? 0 : (r3 < w2 && r3 < h2) ? r3 : rmin;
 
     ctx.save();
     ctx.beginPath();
@@ -1629,7 +1583,6 @@ function _patternFill(ctx, obj, path, fill, zindex) {
 // inner -
 function _clippy(ctx, fg) {
     if (!ctx._clipStyle) {
-//      ctx._clipStyle = uu.canvas.bgcolor(ctx.canvas);
         ctx._clipStyle = uu.css.bgcolor(ctx.canvas);
     }
     return fg + uu.format(_CLIPPY, ctx._clipPath, ctx._clipStyle.hex);
@@ -2089,7 +2042,6 @@ function clearRect(x, y, w, h) {
             this.__mix = _COMPOS[this._mix = this.globalCompositeOperation];
         }
 
-//      var color = uu.canvas.bgcolor(this.canvas),
         var color = uu.css.bgcolor(this.canvas),
             zindex = (this.__mix ===  4) ? --this._zindex
                    : (this.__mix === 10) ? (this.clear(), 0) : 0,

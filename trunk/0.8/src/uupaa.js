@@ -399,7 +399,9 @@ uumix(uuconfig.ui, {
 }, 0, 0);
 //}@ui
 
-// --- LIBRARY STRUCTURE ( build window.uu.* ) ---
+
+
+// --- LIBRARY STRUCTURE ( window.uu.* ) ---
 uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNameString/window,
                                     //    arg1:NodeSet/Node/Expression/Mix = void,
                                     //    arg2:Mix = void,
@@ -417,12 +419,12 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //      longedge, mobile, ios, ipad, iphone,
                                     //      slate, retina, android, mbosver, os,
                                     //      touch, jit, flash, silverlight }
-    ie:             _ie,            // uu.ie - as uu.env.ie [ALIAS]
-    ie678:          _ie678,         // uu.ie678 - as uu.env.ie678 [ALIAS]
-    gecko:          _gecko,         // uu.gecko - as uu.env.gecko [ALIAS]
-    opera:          _opera,         // uu.opera - as uu.env.opera [ALIAS]
+    ie:             _ie,            // uu.ie     - as uu.env.ie     [ALIAS]
+    ie678:          _ie678,         // uu.ie678  - as uu.env.ie678  [ALIAS]
+    gecko:          _gecko,         // uu.gecko  - as uu.env.gecko  [ALIAS]
+    opera:          _opera,         // uu.opera  - as uu.env.opera  [ALIAS]
     webkit:         _webkit,        // uu.webkit - as uu.env.webkit [ALIAS]
-    ver:            _env,           // uu.ver - Hash: as uu.ver [ALIAS][DEPRECATED]
+    ver:            _env,           // uu.ver    - Hash: as uu.ver [ALIAS][DEPRECATED]
     // --- CODE SNIPPET / LIGHT WEIGHT TEMPLATE ---
 //{@snippet
     snippet:        uusnippet,      // uu.snippet(id:String, arg:Hash/Array = void):String/Mix
@@ -482,7 +484,14 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
     arg:            uuarg,          // uu.arg(arg1:Hash/Function = {}, arg2:Hash = void, arg3:Hash = void):Hash/Function
     mix:            uumix,          // uu.mix(base:Hash/Function, flavor:Hash, aroma:Hash = void,
                                     //        override:Number/Boolean = true):Hash/Function
-    has:            uuhas,          // uu.has(source:Hash/Array, search:Hash/Array):Boolean
+    has:            uuhas,          // uu.has(source:Hash/Array/Node/String, search:Hash/Array/Node/String/ExEventType):Boolean
+                                    //  [1][Array has Array]      uuhas([1, 2], [1]) -> true
+                                    //  [2][Hash has Hash]        uuhas({ a: 1, b: 2 }, { a: 1 }) -> true
+                                    //  [3][Node has ExEventType] uuhas(node, "namespace.click") -> true
+                                    //  [4][Node has Node]        uuhas(parentNode, childNode) -> true
+                                    //  [5][Array has Mix]        uuhas([1, 2], 1) -> true
+                                    //  [6][Array has Mix]        uuhas([1, "a"], "a") -> true
+                                    //  [7][String has String]    uuhas("A B C", " ") -> true
     nth:            uunth,          // uu.nth(source:Hash/Array/String, index:Number = 0):Array - [key, value]
                                     //  [1][Hash nth ]   uunth({ a: 1, b: 2 }, 1)    -> ["b", 2]
                                     //  [2][Array nth]   uunth(["a", 100, true], 1)  -> [1, 100]
@@ -1000,6 +1009,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
     image:    uumix(uuimage, {      // uu.image(url:URLString/URLStringArray, callback:CallbackFunction = void)
                                     //  [1][load image]  uu.image(url,        function(response) { ... })
                                     //  [2][load images] uu.image([url, ...], function(response) { ... })
+        isCached:   uuimageiscached,// uu.image(url:URLString):Boolean
         size:       uuimagesize     // uu.image.size(node:HTMLImageElement):Hash - { w, h }
     }),
 //}@image
@@ -1019,7 +1029,8 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
     // --- CANVAS ---
 //{@canvas
     canvas:         uucanvas,       // uu.canvas(width:Number = 300, height:Number = 150,
-                                    //           option:Hash):Node
+                                    //           order:String = uu.config.canvas.order,
+                                    //           placeHolder:Node = void):Node
 //}@canvas
     // --- AUDIO ---
 //{@audio
@@ -1339,6 +1350,10 @@ function fallbackIsArray(search) { // @param Mix: search
                                    // @return Boolean:
     return toString.call(search) === "[object Array]";
 }
+// Date.now - fallback impl.
+function fallbackDateNow() { // @return Number:
+    return +new Date;
+}
 
 uumix(Array[_prototype], {
 //{@mb
@@ -1364,6 +1379,7 @@ uumix(Date[_prototype], {
     toISOString:    DateToISOString,// toISOString():String
     toJSON:         DateToJSON      //      toJSON():String
 }, 0, 0);
+Date.now || (Date.now = fallbackDateNow); // Date.now()
 
 uumix(Number[_prototype], {
     toJSON:         ObjectToJson    //      toJSON():Number
@@ -2262,30 +2278,32 @@ function uuarray(source,     // @param Array/Mix/NodeList/Arguments: source
 }
 
 // uu.has - A has B
-function uuhas(source,   // @param Hash/Array/Node: context, parentNode
-               search) { // @param Hash/Array/Node/String: search element, childNode
+function uuhas(source,   // @param Hash/Array/Node/String: haystack, context, parentNode
+               search) { // @param Hash/Array/Node/String/ExEventType: needle, search element, childNode
                          // @return Boolean:
-    //  [1][Array has Array] uuhas([1, 2], [1]) -> true
-    //  [2][Hash has Hash]   uuhas({ a: 1, b: 2 }, { a: 1 }) -> true
-    //  [3][Node has Event]  uuhas(node, "namespace.click") -> true
-    //  [4][Node has Node]   uuhas(parentNode, childNode) -> true
-    //  [5][Array has Mix]   uuhas([1, 2], 1) -> true
-    //  [6][Array has Mix]   uuhas([1, "a"], "a") -> true
+    //  [1][Array has Array]      uuhas([1, 2], [1]) -> true
+    //  [2][Hash has Hash]        uuhas({ a: 1, b: 2 }, { a: 1 }) -> true
+    //  [3][Node has ExEventType] uuhas(node, "namespace.click") -> true
+    //  [4][Node has Node]        uuhas(parentNode, childNode) -> true
+    //  [5][Array has Mix]        uuhas([1, 2], 1) -> true
+    //  [6][Array has Mix]        uuhas([1, "a"], "a") -> true
+    //  [7][String has String]    uuhas("A B C", " ") -> true
 
     if (source && search) {
         var i = 0, iz;
 
-        if (source[_nodeType]) {
-            if (isString(search)) { // [3] uu.event.has
+        if (source[_nodeType]) { // isNode
+            if (isString(search)) { // [3] Node has ExEventType
                 i = source[_datauu + "event"];
                 return (i ? i.t : "")[_indexOf]("," + search + ",") >= 0;
             }
-            for (i = search; i && i !== source; i = i[_parentNode]) { // [4]
+            for (i = search; i && i !== source; i = i[_parentNode]) { // [4] Node has Node
             }
             return search !== source && i === source;
         }
 
-        if (isArray(source)) { // [1]
+        if (isArray(source)) { // [1] Array has Array
+                               // [5][6] Array has Mix
             search = uuarray(search);
 
             for (iz = search.length; i < iz; ++i) {
@@ -2293,7 +2311,11 @@ function uuhas(source,   // @param Hash/Array/Node: context, parentNode
                     return _false;
                 }
             }
-        } else { // [2]
+        } else if (typeof source === _string) { // [7] String has String
+            if (source[_indexOf](search) < 0) {
+                return _false;
+            }
+        } else { // [2] Hash has Hash
             for (i in search) {
                 if (!(i in source)
                     || (source[i] !== search[i]
@@ -5582,7 +5604,9 @@ function uuready(/* readyEventType, */  // @param CaseInsenseString(= "dom"): re
                     switch (type) {
                     case "canvas":  v(uu, uutag("canvas")); break; // uu.ready(function(uu, uu.tag("canvas")) { ... })
                     case "audio":   v(uu, uutag("audio")); break;  // uu.ready(function(uu, uu.tag("audio")) { ... })
+                    case "video":   v(uu, uutag("video")); break;  // uu.ready(function(uu, uu.tag("video")) { ... })
                     case "storage": v(uu, uu.storage); break;      // uu.ready(function(uu, uu.storage) { ... })
+                    case "svg":     v(uu, uusvg); break;           // uu.ready(function(uu, uu.svg) { ... })
                     default:        v(uu, doc);                    // uu.ready(function(uu, doc) { ... })
                     }
                 } else {
@@ -7464,7 +7488,7 @@ function uuhatch(param) { // @param Hash: { size, unit, color, color2 }
                 h = parseInt(vp.innerHeight),
                 canvas;
 
-            canvas = uucanvas(w, h, { order: "V" });
+            canvas = uucanvas(w, h, "V"); // VML only
             canvas.style.cssText = "position:absolute;z-index:-100";
             canvas.id = "uuhatch";
             uunodeadd(canvas, doc.body, "./first");
@@ -7688,8 +7712,7 @@ function uuokjudge(lval,     // @param Mix: left hand set
         case "<=":  rv = lval <= rval; break;
         case "&&":  rv = !!(lval && rval); break;
         case "||":  rv = !!(lval || rval); break;
-        case "HAS": rv = isString(lval) ? lval[_indexOf](rval) > 0
-                                       : uuhas(lval, rval); break;
+        case "HAS": rv = uuhas(lval, rval); break;
         case "ISNAN":     rv = isNaN(lval); break;
         case "ISTRUE":    rv = !!lval; break;
         case "ISFALSE":   rv =  !lval; break;
@@ -8230,8 +8253,8 @@ uucoloradd("000000black,888888gray,ccccccsilver,ffffffwhite,ff0000red,ffff00" +
 //{@image
 function uuimage(url,        // @param URLString/URLStringArray:
                  callback) { // @param CallbackFunction(= void): callback(response)
-                             //     rv - NodeArray: result value. [<img>, ...]
-                             //     ok - Boolean: true is success
+                             //     response.ok - Boolean: true is success
+                             //     response.rv - NodeArray: image nodes. [<img>, ...]
     //  [1][load image]  uu.image(url,        function(response) { ... })
     //  [2][load images] uu.image([url, ...], function(response) { ... })
 
@@ -8256,7 +8279,7 @@ function imageLoader(url, callback) {
 
     var img = uuimage.db[url];
 
-    if (img) { // cached or scheduled
+    if (img) { // cached or self scheduled
         uuimage.fn[url].push(callback);
         img.ok && after(_true);
     } else {
@@ -8276,8 +8299,13 @@ function imageLoader(url, callback) {
         img[_setAttribute]("src", url);
     }
 }
-uuimage.db = {}; // { url: Image, ... }
+uuimage.db = {}; // { url: <img>, ... }
 uuimage.fn = {}; // { url: [callback, ...] }
+
+// uu.image.isCached - is cached
+function uuimageiscached(url) { // @param URLString
+    return !!uuimage.db[url];
+}
 
 // uu.image.size - get image natural dimension
 function uuimagesize(node) { // @param HTMLImageElement:
@@ -8500,38 +8528,34 @@ function uusvg(x,        // @param Number: Has no meaning or effect on outermost
 }
 
 // --- initialize ---
-/*
 uuready("window", function() {
-    uuready.window = uuready.svg = _true;
-    uureadyfire("svg", uutag("svg"));
+    uuready.svg = _true;
+    uureadyfire("svg", uusvg);
 });
- */
 //}@svg
 
 // --- CANVAS ---
 //{@canvas
 
 // uu.canvas - <canvas>
-function uucanvas(width,    // @param Number(= 300):
-                  height,   // @param Number(= 150):
-                  option) { // @param Hash(= {}): { order, node }
-                            //      order - String(= uu.config.canvas.order): backend order
-                            //      node  - Node(= void): placeholder Node
-                            // @return Node: <canvas>
-    var opt = uuarg(option, { order: uuconfig.canvas.order, node: null }),
-        canvas = newNode(
+function uucanvas(width,         // @param Number(= 300):
+                  height,        // @param Number(= 150):
+                  order,         // @param String(= uu.config.canvas.order): backend order
+                  placeHolder) { // @param Node(= void): placeholder Node
+                                 // @return Node: <canvas>
+    var canvas = newNode(
 /*{@mb*/                 _ie678 ? "CANVAS" : /*}@mb*/ // [IE6][IE7][IE8][!] need upper case
                          "canvas");
 
     canvas[_width]  = width  == null ? 300 : width;
     canvas[_height] = height == null ? 150 : height;
 
-    opt.node || (opt.node = doc.body[_appendChild](newNode())); // <body>...<div /></body>
-    opt.node[_parentNode].replaceChild(canvas, opt.node);
+    placeHolder || (placeHolder = doc.body[_appendChild](newNode())); // <body>...<div /></body>
+    placeHolder[_parentNode].replaceChild(canvas, placeHolder);
 
 //{@mb
     if (_ie678) {
-        return uucanvas.build(canvas, opt.order); // order = "SFV"
+        return uucanvas.build(canvas, order || uuconfig.canvas.order); // order = "SFV"
     }
 //}@mb
     return canvas;
@@ -8540,7 +8564,7 @@ function uucanvas(width,    // @param Number(= 300):
 // --- initialize ---
 uuready("window", function() {
     uucanvas.init && uucanvas.init();
-    uuready.window = uuready.canvas = _true;
+    uuready.canvas = _true;
     uureadyfire("canvas", uutag("canvas"));
 });
 //}@canvas
@@ -9106,7 +9130,7 @@ uu.Class("NoAudio", {
 
 // --- initialize ---
 uuready("window", function() {
-    uuready.window = uuready.audio = _true;
+    uuready.audio = _true;
     uureadyfire("audio", uutag("audio"));
 });
 //}@audio
@@ -9133,7 +9157,7 @@ function uuvideo(src,        // @param URLString:
 }
 // --- initialize ---
 uuready("window", function() {
-    uuready.window = uuready.video = _true;
+    uuready.video = _true;
     uureadyfire("video", uutag("video"));
 });
 //}@video
@@ -9699,6 +9723,12 @@ function uugeostop(watchid) { // @param Number: watch id
 
 // for GeoLocation Service API Entry point
 uugeo.webapi = null;
+
+// --- initialize ---
+uuready("window", function() {
+    uuready.geo = _true;
+    uureadyfire("geo");
+});
 //}@geo
 
 // --- NUMBER ---
