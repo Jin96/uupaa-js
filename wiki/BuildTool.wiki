@@ -85,7 +85,6 @@ upa -off color/ui/codec
 || sha1      || uu.sha1() をコメントアウトします || -0.7kB ||
 || hmac      || uu.hmac() をコメントアウトします || -0.2kB ||
 || sprintf   || uu.sf(), uu.sprintf() をコメントアウトします || -0.8kB ||
-|| url       || uu.url(), uu.qs() をコメントアウトします || -2.0kB ||
 || ui        || uu.ui() をコメントアウトします || -7.2kB ||
 || preload   || 画像のプリロード処理をコメントアウトします || -0.1kB ||
 || assert    || ビルド時に自動的にコメントアウトします || ||
