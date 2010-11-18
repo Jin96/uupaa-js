@@ -17,7 +17,7 @@ $castoffAll  = array(
     "eventresize", "eventcyclic",
     "live", "cssbox",
     "codec", "md5", "sha1", "hmac", "msgpack",
-    "sprintf", "url", "font", "cookie", "storage",
+    "sprintf", "font", "cookie", "storage",
     "ui", "uislider",
 );
 
