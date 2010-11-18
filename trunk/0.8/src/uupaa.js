@@ -582,7 +582,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //  [6][convert pixel]  uu.css.unit(<div>, "auto", false, "borderTopWidth") -> 12
         // --- CSS BOX MODEL ---
 //{@cssbox
-        box:        uucssbox,       // uu.css.box(node:Node, quick:Boolean = false, mbp:Number = 0x7):Hash
+        box:        uucssbox,       // uu.css.box(node:Node, quick:Boolean = false, mbp:Number = 0x7):Hash - { w, h, m, b, p }
         rect:       uucssrect,      // uu.css.rect(node:Node, ancestorNode:Node = null):Hash { x, y, w, h, from }
         position:   uucssposition,  // uu.css.position(node:Node, pos:String = "s"):Node
                                     //  [1][to static]   uu.css.position(<div>, "static")   -> <div style="position: static">
@@ -638,6 +638,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
         slideUp:    uufxslideup,    // uu.fx.slideUp(node:Node, duration:Number, option:Hash = {}):Node
         slideDown:  uufxslidedown,  // uu.fx.slideDown(node:Node, duration:Number, option:Hash = {}):Node
         shrink:     uufxshrink,     // uu.fx.shrink(node:Node, duration:Number, option:Hash = {}):Node
+        scroll:     uufxscroll,     // uu.fx.scroll(node:Node, duration:Number, option:Hash = {}):Node
         moveIn:     uufxmovein,     // uu.fx.moveIn(node:Node, duration:Number, option:Hash = { degree: 0, range: 200 }):Node
         moveOut:    uufxmoveout,    // uu.fx.moveOut(node:Node, duration:Number, option:Hash = { degree: 0, range: 200 }):Node
 //{@color
@@ -652,7 +653,8 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
         clear:      uuidcclear      // uu.idc.clear()
     }),
     ids:            uuids,          // uu.ids(expr:CommaJointString, context:Node = document):NodeArray
-                                    //  [1] uu.ids("A,B,C") -> [<a id="A">, <li id="B">, <div id="C">]
+                                    //  [1][has all]  uu.ids("A,B,C")         -> [<a id="A">, <li id="B">, <div id="C">]
+                                    //  [2][skip one] uu.ids("A,NONEEXIST,C") -> [<a id="A">, <div id="C">]
     tag:            uutag,          // uu.tag(expr:String = "", context:Node = <body>):NodeArray
     match:          uumatch,        // uu.match(expr:CSSSelectorExpressionString, context:Node = <body>):Boolean
     query:          uuquery,        // uu.query(expr:CSSSelectorExpressionString, context:NodeArray/Node = <body>):NodeArray
@@ -1084,7 +1086,6 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
     }),
 //}@geo
     // --- URL / URL ACCESSOR ---
-//{@url
     url:      uumix(uuurl, {        // uu.url(url:URLHash/URLString = "", parseQuery:Boolean = false):URLString/URLHash
                                     //  [1][current abs-dir]   uu.url() -> "http://example.com/index.htm"
                                     //  [2][parse url]         uu.url("http://example.com/dir/file.ext?a=b") -> { protocol: "http:", query: {}, ... }
@@ -1122,7 +1123,6 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     // [10][boundary condition] uu.url.normalize("/")                          -> "/"
                                     // [11][boundary condition] uu.url.normalize("")                           -> "/"
     }),
-//}@url
     // --- DEBUG ---
 //{@canvas
     hatch:          uuhatch,        // uu.hatch(size = 10, unit = 5, color = "skyblue", color2 = "steelblue")
@@ -1184,6 +1184,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
         }
     },
     // --- OTHER ---
+    loopout:        _false,         // uu.loopout - false
     nop:            uunop,          // uu.nop - none operation
     pao:            uupao           // uu.pao - `function-producing` function
                                     //  [1][pao literal ] uu.pao(false)  -> (function() { return false; })
@@ -1286,12 +1287,9 @@ function getBaseDir(libraryCoreFileName) { // @param String: library name. eg: "
     var rv = uutag("script", doc).pop().src[_replace](/[^\/]+$/, function(file) {
                 return file === libraryCoreFileName ? "../" : "";
              });
-//{@url
     // URL Normalize
     // "http://example.com/js/../uupaa.js" -> "http://example.com/uupaa.js"
-    rv = uuurlnormalize(rv);
-//}@url
-    return rv;
+    return uuurlnormalize(rv);
 }
 
 // inner - new node
@@ -1357,42 +1355,44 @@ function fallbackDateNow() { // @return Number:
 
 uumix(Array[_prototype], {
 //{@mb
-    every:          ArrayEvery,     //       every(evaluator:Function, that:this = void):Boolean
-    filter:         ArrayFilter,    //      filter(evaluator:Function, that:this = void):Array
-    indexOf:        ArrayIndexOf,   //     indexOf(search:Mix, fromIndex:Number = 0):Number
-    lastIndexOf:                    // lastIndexOf(search:Mix, fromIndex:Number = this.length):Number
+    every:          ArrayEvery,     // Array#every(evaluator:Function, that:this = void):Boolean
+    filter:         ArrayFilter,    // Array#filter(evaluator:Function, that:this = void):Array
+    indexOf:        ArrayIndexOf,   // Array#indexOf(search:Mix, fromIndex:Number = 0):Number
+    lastIndexOf:                    // Array#lastIndexOf(search:Mix, fromIndex:Number = this.length):Number
                     ArrayLastIndexOf,
 //}@mb
-    map:            ArrayMap,       //         map(evaluator:Function, that:this = void):Array
-    some:           ArraySome,      //        some(evaluator:Function, that:this = void):Boolean
-    forEach:        ArrayForEach,   //     forEach(evaluator:Function, that:this = void)
-    reduce:         ArrayReduce,    //      reduce(evaluator:Function, initialValue:Mix = void):Mix
-    reduceRight:                    // reduceRight(evaluator:Function, initialValue:Mix = void):Mix
+    map:            ArrayMap,       // Array#map(evaluator:Function, that:this = void):Array
+    some:           ArraySome,      // Array#some(evaluator:Function, that:this = void):Boolean
+    forEach:        ArrayForEach,   // Array#forEach(evaluator:Function, that:this = void)
+    reduce:         ArrayReduce,    // Array#reduce(evaluator:Function, initialValue:Mix = void):Mix
+    reduceRight:                    // Array#reduceRight(evaluator:Function, initialValue:Mix = void):Mix
                     ArrayReduceRight
 }, 0, 0);
 
 uumix(Boolean[_prototype], {
-    toJSON:         ObjectToJson    //      toJSON():Boolean
+    toJSON:         ObjectToJson    // Boolean#toJSON
 }, 0, 0);
 
 uumix(Date[_prototype], {
-    toISOString:    DateToISOString,// toISOString():String
-    toJSON:         DateToJSON      //      toJSON():String
+    toISOString:    DateToISOString,// String#toISOString
+    toJSON:         DateToJSON      // String#toJSON
 }, 0, 0);
 Date.now || (Date.now = fallbackDateNow); // Date.now()
 
 uumix(Number[_prototype], {
-    toJSON:         ObjectToJson    //      toJSON():Number
+    toJSON:         ObjectToJson    // Number#toJSON
 }, 0, 0);
 
 uumix(String[_prototype], {
-    trim:           StringTrim,     //        trim():String
-    toJSON:         ObjectToJson    //      toJSON():String
+    trim:           StringTrim,     // String#trim
+    toJSON:         ObjectToJson    // String#toJSON
 }, 0, 0);
 
+/*
 uumix(Function[_prototype], {
-    bind:           FunctionBind    //        bind():Function
+    bind:           FunctionBind    // Function#bind
 }, 0, 0);
+ */
 
 //{@mb
 _gecko && !win.HTMLElement[_prototype].innerText &&
@@ -2037,6 +2037,9 @@ function uutype(mix) { // @param Mix: search literal/object
     }
     if (mix[_nodeType] && mix[_appendChild]) {
         return uutype.NODE;
+    }
+    if (mix.constructor === win.NodeList) { // [fix][Safari5]
+        return uutype.FAKEARRAY;
     }
     return _types[typeof mix] ||
            _types[toString.call(mix)] ||
@@ -2791,7 +2794,7 @@ function uuviewport() { // @return Hash: { innerWidth, innerHeight,
         orientation = "orientation",
         devicePixelRatio = "devicePixelRatio";
 
-    if (!win.innerWidth) { // [IE6][IE7][IE8] CSSOM View Module
+    if (_ie678) { // [IE6][IE7][IE8] CSSOM View Module
         return { innerWidth:  htmlNode.clientWidth,  // [IE9] supported
                  innerHeight: htmlNode.clientHeight, // [IE9] supported
                  pageXOffset: htmlNode.scrollLeft,   // [IE9] supported
@@ -2840,6 +2843,7 @@ function tickIntervalTimer() {
             iz -= 3;
         }
     }
+    ary.length || (clearInterval(uuinterval.base), uuinterval.base = null);
 }
 
 // --- EFFECT / ANIMATION ---
@@ -2848,7 +2852,10 @@ function tickIntervalTimer() {
 //{@fx
 function uufx(node,     // @param Node: animation target node
               duration, // @param Number: duration (unit ms)
-              option) { // @param Hash/CallbackFunction: { key: endValue, key: [endValue, easing], key: callback, ... }
+              option) { // @param Hash/CallbackFunction: { key: endValue,
+                        //                                 key: [endValue, easing],
+                        //                                 key: callback, ...
+                        //                               }
                         //     key      - CSSPropertyString/String: "color", "opacity", "before", "after", ...
                         //     endValue - String/Number: end value, "red", "+0.5", "+100px"
                         //     easing   - String: easing function name, "InOutQuad"
@@ -2987,8 +2994,17 @@ function uufxloop(id,     // @param Number: timer id
     }
     return !!data.id; // return false -> clearInterval
 }
-uufx.props = { opacity: 1, color: 2, backgroundColor: 2,
-               width: 3, height: 3, left: 4, top: 5 };
+uufx.props = {
+    opacity:            1,  // css opacity
+    color:              2,  // css color
+    backgroundColor:    2,  // css background-color
+    width:              3,  // css width
+    height:             3,  // css height
+    pageXOffset:        4,  // window.pageXOffset / document.documentElemenet.scrollLeft [IE6][IE7][IE8]
+    pageYOffset:        5,  // window.pageYOffset / document.documentElemenet.scrollTop  [IE6][IE7][IE8]
+    left:               6,  // css left
+    top:                7   // css top
+};
 
 // uu.fx.easing - easing functions
 uufx.easing = {
@@ -3118,7 +3134,10 @@ function uufxbuild(node, data, queue, option) {
 
     // fx1 = opacity, gain/dur, width, height
     // fx2 = node.filters, uu.hash.num2hh,
-    var rv = 'var style=node.style,t=gain,b,c,d=dur,fx1,fx2,z1,z2,z3,z4;',
+    // z1~z4 = for easing function
+    // sx  = scroll x
+    // sy  = scroll y
+    var rv = 'var style=node.style,t=gain,b,c,d=dur,fx1,fx2,z1,z2,z3,z4,sx,sy;',
         reverseOption = {
             junction: option.junction,
             before:   option.before ? option.before[_concat]() : _undef,
@@ -3126,6 +3145,7 @@ function uufxbuild(node, data, queue, option) {
             back:     1
         },
         i, w, n, opt,
+        vp, // viewport
         ez, // easing function name. eg: "inoutquad"
         sv, // start value
         ev, // end value
@@ -3135,7 +3155,7 @@ function uufxbuild(node, data, queue, option) {
     for (i in option) {
         w = fixdb[i] || i;
 
-        if (w in cs) {
+        if (w in cs || w === "pageXOffset" || w === "pageYOffset") {
             opt = option[i];
             isArray(opt) ? (ev = opt[0], ez = opt[1][_toLowerCase]()) // { left: [100, "linear"] }
                          : (ev = opt,    ez = "inoutquad");           // { left: 100 }
@@ -3203,8 +3223,18 @@ function uufxbuild(node, data, queue, option) {
                     rv += 'fx1=fin?'+ev+':'+ezfn(sv,ev,ez)
                        +  ';fx1=fx1<0?0:fx1;style.'+w+'=(fx1|0)+"px";';
                     break;
+                case 4: // pageXOffset
+                case 5: // pageYOffset
+                    vp = uuviewport();
+                    sv = n === 4 ? vp.pageXOffset : vp.pageYOffset;
+                    ev = uunumberexpand(sv, ev, parseInt);
+                    rv += n === 4 ? "sx" : "sy";
+                    rv += '=((fin?'+ev+':'+ezfn(sv,ev,ez)+')|0);';
+                    rv += n === 4 ? "sx" : "sy";
+                    rv += '!=null&&sy!=null&&(window.scrollTo(sx,sy),sx=sy=null);';
+                    break;
                 default: // top, left, other...
-                    sv = n ? (n > 4 ? node.offsetTop  - parseInt(cs.marginTop)
+                    sv = n ? (n > 6 ? node.offsetTop  - parseInt(cs.marginTop)
                                     : node.offsetLeft - parseInt(cs.marginLeft))
                            : parseInt(cs[w]) || 0;
                     ev = uunumberexpand(sv, ev, parseInt);
@@ -3508,6 +3538,24 @@ function uufxshrink(node,     // @param Node:
                             x: "-" + parseInt(cs[_width])  * 0.5,
                             y: "-" + parseInt(cs[_height]) * 0.5, fs: "*0.5" });
         }}));
+}
+
+// uu.fx.scroll - scroll
+function uufxscroll(node,     // @param Node:
+                    duration, // @param Number: duration
+                    option) { // @param Hash(= {}):
+                              // @return Node:
+    var rect = uu.css.rect(node, doc.body),
+        vp = uuviewport(),
+        iw = vp.innerWidth,
+        ih = vp.innerHeight,
+        sw = Math.max(htmlNode.scrollWidth,  doc.body.scrollWidth),
+        sh = Math.max(htmlNode.scrollHeight, doc.body.scrollHeight);
+
+    return uufx(node, duration, {
+        pageXOffset: rect.x + iw > sw ? sw - iw + 40 : rect.x,
+        pageYOffset: rect.y + ih > sh ? sh - ih + 40 : rect.y
+    });
 }
 
 // uu.fx.moveIn - movein + fadein
@@ -6325,13 +6373,15 @@ function uuidcclear() {
 function uuids(expr,      // @param CommaJointString: "id1,id2,..."
                context) { // @param Node(= document): query context
                           // @return Node/null:
-    //  [1] uu.ids("A,B,C") -> [<a id="A">, <li id="B">, <div id="C">]
+    //  [1][has all]  uu.ids("A,B,C")         -> [<a id="A">, <li id="B">, <div id="C">]
+    //  [2][skip one] uu.ids("A,NONEEXIST,C") -> [<a id="A">, <div id="C">]
 
     var rv = [], ary = expr.trim().split(uuids._), i = 0, iz = ary.length,
-        ctx = context || doc;
+        ctx = context || doc, node;
 
     for (; i < iz; ++i) {
-        rv.push(ctx.getElementById(ary[i]));
+        node = ctx.getElementById(ary[i]);
+        node && rv.push(node); // nonexistent node skips
     }
     return rv;
 }
@@ -7160,7 +7210,6 @@ function msgpackSetType(rv,      // @param ByteArray: result
 //}@codec
 
 // --- URL ---
-//{@url
 // uu.url - url accessor
 function uuurl(url,          // @param URLHash/URLString(= ""): "https://..."
                parseQuery) { // @param Boolean(= false): true is parse QueryString
@@ -7269,34 +7318,23 @@ function parseURL(url,          // @param URLString: absurl / relurl,
     // http: /^(\w+:)\/\/((?:([\w:]+)@)?([^\/:]+)(?::(\d*))?)([^ ?#]*)(?:(\?[^#]*))?(?:(#.*))?/i
     //        https://    user:pass     server       port    /dir/f.ext  ?key=value   #hash
     //        [1]         [3]           [4]          [5]     [6]         [7]          [8]
-    var m = _parse.file.exec(url) || _parse.http.exec(url);
+    var m = _parse.file.exec(url) || _parse.http.exec(url), file, search;
 
     if (m) {
-        return m[1] === "file:" ? {
+        file = m[1] === "file:";
+        search = (file ? m[3] : m[7]) || "";
+        return {
             href:       url,
             protocol:   m[1],
-            secure:     _false,
-            host:       "",
-            auth:       "",
-            hostname:   "",
-            port:       "",
-            pathname:   m[2],
-            search:     m[3] || "",
-            query:      parseQuery ? parseQueryString(m[3] || "") : {},
-            hash:       m[4] || "",
-            ok:         _true
-        } : { // http, https, ws, wss
-            href:       url,
-            protocol:   m[1],
-            secure:     m[1] === "https:" || m[1] === "wss:",
-            host:       m[2],
-            auth:       m[3] || "",
-            hostname:   m[4],
-            port:       m[5] || "",
-            pathname:   m[6],
-            search:     m[7] || "",
-            query:      parseQuery ? parseQueryString(m[7] || "") : {},
-            hash:       m[8] || "",
+            secure:     file ? _false : (m[1] === "https:" || m[1] === "wss:"),
+            host:       file ?     "" :  m[2],
+            auth:       file ?     "" : (m[3] || ""),
+            hostname:   file ?     "" :  m[4],
+            port:       file ?     "" : (m[5] || ""),
+            pathname:   file ?   m[2] :  m[6],
+            search:     search,
+            query:      parseQuery ? parseQueryString(search) : {},
+            hash:       (file ? m[4] : m[8]) || "",
             ok:         _true
         };
     }
@@ -7422,7 +7460,6 @@ function parseQueryString(queryString) { // @param URLString/QueryString: "key1=
                [_replace](/(?:([^\=]+)\=([^\;]+);?)/g, _parse); // [2]
     return rv;
 }
-//}@url
 
 // --- DEBUG ---
 
@@ -7776,8 +7813,8 @@ function uujsondecode(jsonString, // @param JSONString:
     var str = jsonString.trim(), x = uujson.x;
 
     return (alt || !win.JSON) ? (x[0].test(str[_replace](x[1], ""))
-                                   ? _false
-                                   : (new Function("return " + str))())
+                                  ? _false
+                                  : (new Function("return " + str))())
                               : win.JSON.parse(str);
 }
 
@@ -10135,7 +10172,7 @@ function NodeSetEach(evaluator, // @param Function: evaluator
         for (; i < iz; ++i) {
             if (i in ary) {
                 r = evaluator(ary[i], i); // evaluator(value, index)
-                if (r === _false) {
+                if (r === _false) { // return false -> loopout
                     break;
                 }
             }
