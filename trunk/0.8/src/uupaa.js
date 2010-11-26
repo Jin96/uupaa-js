@@ -3568,10 +3568,10 @@ function uufxscroll(node,     // @param Node:
         sw = Math.max(htmlNode.scrollWidth,  doc.body.scrollWidth),
         sh = Math.max(htmlNode.scrollHeight, doc.body.scrollHeight);
 
-    return uufx(node, duration, {
+    return uufx(node, duration, uuarg(option, {
         pageXOffset: rect.x + iw > sw ? sw - iw + 40 : rect.x,
         pageYOffset: rect.y + ih > sh ? sh - ih + 40 : rect.y
-    });
+    }));
 }
 
 // uu.fx.moveIn - movein + fadein
