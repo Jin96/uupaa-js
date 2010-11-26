@@ -162,6 +162,8 @@
 //      iOS 3+
 //      Android(ChromeLite) 1+
 
+// Element Traversal
+//      Gecko, WebKit, Opera, IE9+
 // === Core ===
 
 // * Manual http://code.google.com/p/uupaa-js/w/list
@@ -174,7 +176,7 @@ uu || (function(win,                // as Global / window
                 navigator,          // as window.navigator
                 toString,           // as Global.Object.prototype.toString
                 isArray,            // as Global.Array.isArray,
-                toArray,            // as Global.Array.prototype.slice,
+                toArray,            // as Global.Array.prototype.slice, (x:IE NodeList, o: IE arguments)
                 Node,               // as Global.Node
                 Math,               // as Global.Math
                 parseInt,           // as Global.parseInt
@@ -633,12 +635,14 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
         fadeIn:     uufxfadein,     // uu.fx.fadeIn(node:Node, duration:Number, option:Hash = {}):Node
         fadeOut:    uufxfadeout,    // uu.fx.fadeOut(node:Node, duration:Number, option:Hash = {}):Node
         puff:       uufxpuff,       // uu.fx.puff(node:Node, duration:Number, option:Hash = {}):Node
+//        wave:       uufxwave,       // uu.fx.wave(node:Node, duration:Number, option:Hash = {}):Node
         flare:      uufxflare,      // uu.fx.flare(node:Node, duration:Number, option:Hash = { parts: 10, range: 200 }):Node
         slide:      uufxslide,      // uu.fx.slide(node:Node, duration:Number, option:Hash = {}):Node
         slideUp:    uufxslideup,    // uu.fx.slideUp(node:Node, duration:Number, option:Hash = {}):Node
         slideDown:  uufxslidedown,  // uu.fx.slideDown(node:Node, duration:Number, option:Hash = {}):Node
         shrink:     uufxshrink,     // uu.fx.shrink(node:Node, duration:Number, option:Hash = {}):Node
         scroll:     uufxscroll,     // uu.fx.scroll(node:Node, duration:Number, option:Hash = {}):Node
+//        sunset:     uufxsunset,     // uu.fx.sunset(node:Node, duration:Number, option:Hash = {}):Node
         moveIn:     uufxmovein,     // uu.fx.moveIn(node:Node, duration:Number, option:Hash = { degree: 0, range: 200 }):Node
         moveOut:    uufxmoveout,    // uu.fx.moveOut(node:Node, duration:Number, option:Hash = { degree: 0, range: 200 }):Node
 //{@color
@@ -649,9 +653,10 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
 //}@fx
     // --- DOM NODE QUERY ---
     id:             uuid,           // uu.id(expr:String, context:Node = document):Node/null
-    idc:      uumix(uuidc, {        // uu.idc(expr:String, context:Node = document):Node/null
-        clear:      uuidcclear      // uu.idc.clear()
-    }),
+    idc:            uuidc,          // uu.idc(expr:String = void, context:Node = document):Node/null
+                                    //  [1][find #id]             uu.idc("id") -> Node
+                                    //  [2][find #id with cache]  uu.idc("id") -> Node(cached) so quickly
+                                    //  [3][clear all Node cache] uu.idc()     -> null
     ids:            uuids,          // uu.ids(expr:CommaJointString, context:Node = document):NodeArray
                                     //  [1][has all]  uu.ids("A,B,C")         -> [<a id="A">, <li id="B">, <div id="C">]
                                     //  [2][skip one] uu.ids("A,NONEEXIST,C") -> [<a id="A">, <div id="C">]
@@ -883,8 +888,9 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
     }),
 //}@form
     // --- JSON ---
-    json:     uumix(uujson, {       // uu.json(source:Mix, alt:Boolean = false):JSONString
-        decode:     uujsondecode    // uu.json.decode(jsonString:JSONString, alt:Boolean = false):Mix/Boolean
+    json:     uumix(uujson, {       // uu.json(source:Mix, exjson:Boolean = false):JSONString/ExJSONString
+        decode:     uujsondecode    // uu.json.decode(jsonString:JSONString/ExJSONString,
+                                    //                exjson:Boolean = false):Mix/Boolean
     }),
     // --- STRING ---
     fix:            uufix,          // uu.fix(source:String):String
@@ -1053,7 +1059,9 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
     // --- COOKIE ---
 //{@cookie
     cookie:   uumix(uucookie, {     // uu.cookie(prefix:String):Hash
+                                    //  [1][load cookie] uu.cookie() -> { phpsession: ... , }
         save:       uucookiesave    // uu.cookie.save(prefix:String, data:Hash, date:UTCDateString/Date = void):Number
+                                    //  [1][save cookie] uu.cookie.save()
     }),
 //}@cookie
     // --- STORAGE (WebStorage) ---
@@ -1127,24 +1135,32 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
 //{@canvas
     hatch:          uuhatch,        // uu.hatch(size = 10, unit = 5, color = "skyblue", color2 = "steelblue")
 //}@canvas
+    glow:           uuglow,         // uu.glow(node:Node/NodeArray/NodeList/NodeSet/CSSSelectorExpressionString)
+    puff:           uualert,        // uu.alert alias [DEPRECATED]
+    alert:          uualert,        // uu.alert(mix:Mix/FormatString = void, var_args:Mix, ...)
+                                    //  [1][alert] uu.alert("hello world")                   -> alert('hello world')
+                                    //  [2][alert] uu.alert("@uupaa")                        -> alert('@uupaa')
+                                    //  [3][alert] uu.alert("@ @!", "hello", "world")        -> alert('hello world!')
+                                    //  [4][alert] uu.alert({ key: "value", num: 1 })        -> alert('{ "key": "value", num: 1 }')
+                                    //  [5][alert] uu.alert(document.body.firstElementChild) -> alert('body>div:nth-child(1)')
+                                    //  [6][alert] uu.alert("a", { k: 123 })                 -> alert('"a", { "k": 123 }')
+                                    //  [7][alert] uu.alert()                                -> alert('undefined')
 //{@debug
-    trace:    uumix(uutrace, {      // uu.trace(fn:Function = void,
+    log:            uulog,          // uu.log(var_args:Mix = void, ...)
+                                    //  [1][add(display) log] uu.log("Hello Log")
+                                    //  [2][add remote log]   window.uuconfig = { log: { remote: "http://localhost/log?msg=" }};
+                                    //                        uu.log("Hello Log") -> GET /http://localhost/log?msg=Hello%20Log
+                                    //  [3][clear all log]    uu.log()
+    trace:          uutrace,        // uu.trace(fn:Function = void,
                                     //          length:Number = void,
                                     //          arg1:Mix = void,
                                     //          arg2:Mix = void,
                                     //          arg3:Mix = void,
-                                    //          arg4:Mix = void):Array
-                                    //  [1][add function trace] uu.trace(argument.callee, argument.length, ...)
-                                    //  [2][dump trace]         uu.trace() -> Array
-        clear:      uutraceclear    // uu.trace.clear()
-    }),
-//}@debug
-    glow:           uuglow,         // uu.glow(node:Node/NodeArray/NodeList/NodeSet/CSSSelectorExpressionString)
-    puff:           uupuff,         // uu.puff(source:Mix/FormatString, var_args:Mix, ...)
-//{@debug
-    log:      uumix(uulog, {        // uu.log(log:Mix, var_args:Mix, ...)
-        clear:      uulogclear      // uu.log.clear()
-    }),
+                                    //          arg4:Mix = void):Array/void
+                                    //  [1][add function trace]       uu.trace(argument.callee, argument.length, arg, ...)
+                                    //  [2][add remote trace]         window.uuconfig = { trace: { remote: "http://localhost/trace?msg=" }};
+                                    //                                uu.trace("Hello Trace") -> GET /http://localhost/trace?msg=Hello%20Trace
+                                    //  [3][dump and clear all trace] uu.trace() -> Array
 //}@debug
     // --- UNIT TEST ---
 //{@test
@@ -2314,7 +2330,7 @@ function uuhas(source,   // @param Hash/Array/Node/String: haystack, context, pa
                     return _false;
                 }
             }
-        } else if (typeof source === _string) { // [7] String has String
+        } else if (typeof source === _string) { // [7] String has String fragment
             if (source[_indexOf](search) < 0) {
                 return _false;
             }
@@ -5021,7 +5037,7 @@ function uueventdetach(node,         // @param Node/Window:
 //{@mb
 //{@oldie
 // [IE6][IE7] fake hashchange event. <iframe> impl.
-uu.Class.singleton("HashChangeIE", {
+uuClassSingleton("HashChangeIE", {
     hash: "",               // current location.hash
     trim: /^#/,             // trim "#"
     ident: "uuhashchange",  // iframe id
@@ -5089,7 +5105,7 @@ uu.Class.singleton("HashChangeIE", {
 
 //{@mb
 // [LEGACY] fake hashchange event.
-uu.Class.singleton("HashChange", {
+uuClassSingleton("HashChange", {
     hash: "",   // current location.hash
     trim: /^#/, // trim "#"
     timerID: 0, // interval timer id
@@ -6356,18 +6372,17 @@ function uuid(expr,      // @param String: id
 }
 
 // uu.idc - document.getElementById + cache
-function uuidc(expr,      // @param String: id
+function uuidc(expr,      // @param String(= void): id
                context) { // @param Node(= document): query context
                           // @return Node/null:
-    return uuidc._[expr] ||
-          (uuidc._[expr] = (context || doc).getElementById(expr));
+    //  [1][find #id]             uu.idc("id") -> Node
+    //  [2][find #id with cache]  uu.idc("id") -> Node(cached) so quickly
+    //  [3][clear all Node cache] uu.idc()     -> null
+    return !expr ? (uuidc._ = {}, null)
+                 : (uuidc._[expr] ||
+                    (uuidc._[expr] = (context || doc).getElementById(expr)));
 }
 uuidc._ = {};
-
-// uu.idc.clear - clear idc cache
-function uuidcclear() {
-    uuidc._ = {};
-}
 
 // uu.ids - multiple uu.id
 function uuids(expr,      // @param CommaJointString: "id1,id2,..."
@@ -7570,49 +7585,6 @@ function uuglow(node) { // @param Node/NodeArray/NodeList/NodeSet/CSSSelectorExp
 //}@fx
 }
 
-//{@debug
-// uu.trace - add function trace
-function uutrace(fn,     // @param Function(= void): arguments.callee
-                 length, // @param Number(= void): arguments.length
-                 arg1,   // @param Mix(= void):
-                 arg2,   // @param Mix(= void):
-                 arg3,   // @param Mix(= void):
-                 arg4) { // @param Mix(= void):
-    //  [1][add function trace] uu.trace(argument.callee, argument.length, ...)
-    //  [2][dump trace]         uu.trace() -> Array
-
-    if (fn === _undef) { // [2]
-        return _trace;
-    }
-    if (uuconfig.trace.disable) {
-        return;
-    }
-
-    var w = fn.name, msg; // Function.name
-
-    // pick up function.name [IE6][IE7][IE8][IE9][OPERA9][OPERA10.1x]
-    w || (w = fn + "", w = w.slice(9, w.indexOf("("))); // )
-
-    msg = [w, length,
-           uujsonencode(arg1),
-           uujsonencode(arg2),
-           uujsonencode(arg3),
-           uujsonencode(arg4)].join(",");
-
-    if (uuconfig.trace.remote) {
-        // <img src="http://localhost/trace?msg=" />
-        (new Image).src = uuconfig.trace.remote + encodeURIComponent(msg);
-    } else {
-        _trace.push(msg);
-    }
-}
-
-// uu.trace.clear - clear trace db
-function uutraceclear() {
-    _trace = [];
-}
-//}@debug
-
 // uu.puff - alert( uu.json(mix) )
 function uupuff(source                   // @param Mix/FormatString: source object
                                          //                          or "format @ string"
@@ -7623,36 +7595,96 @@ function uupuff(source                   // @param Mix/FormatString: source obje
                                               : uujsonencode(source, 0, 1));
 }
 
+// uu.alert - alert dialog
+function uualert(/* var_args, ... */) { // @param Mix: var_args
+    //  [1][alert] uu.alert("hello world")                   -> alert('hello world')
+    //  [2][alert] uu.alert("@uupaa")                        -> alert('@uupaa')
+    //  [3][alert] uu.alert("@ @!", "hello", "world")        -> alert('hello world!')
+    //  [4][alert] uu.alert({ key: "value", num: 1 })        -> alert('{ "key": "value", num: 1 }')
+    //  [5][alert] uu.alert(document.body.firstElementChild) -> alert('body>div:nth-child(1)')
+    //  [6][alert] uu.alert("a", { k: 123 })                 -> alert('"a", { "k": 123 }')
+    //  [7][alert] uu.alert(uu)                              -> alert('{ "function": "uufactory", ... }')
+    //  [8][alert] uu.alert(uu.ready)                        -> alert('{ "function": "uuready", ... }')
+    //  [9][alert] uu.alert()                                -> alert('undefined')
+    alert(serializeArgument(toArray.call(arguments)));
+}
+
+// inner - argument serialize
+function serializeArgument(ary) { // @param Array: arguments
+                                   // @return String:
+    return (ary.length < 2 && isString(ary[0])) ? ary[0] // [2]
+           : uuhas(ary[0], "@") ? uuf.apply(this, ary)   // [3]
+           : (toArray.call(ary).map(function(v) {
+                return uujsonencode(v, 0, 1);
+              }).join(", ") || "undefined");             // [1][4-9]
+}
+
+//{@debug
 // uu.log - add log
-function uulog(log                      // @param Mix: log data
-               /* , var_args, ... */) { // @param Mix: var_args
-    if (uuconfig.log.disable) {
-        return;
-    }
-    var args = arguments, context = uuid("uulog"),
-        msg = args.length > 1 || isString(log) ? uuf.apply(this, args)
-                                               : uujsonencode(log, 0, 1);
+function uulog(/* var_args, ... */) { // @param Mix(= void): var_args
+    //  [1][add(display) log] uu.log("Hello Log")
+    //  [2][add remote log]   window.uuconfig = { log: { remote: "http://localhost/log?msg=" }};
+    //                        uu.log("Hello Log") -> GET /http://localhost/log?msg=Hello%20Log
+    //  [3][clear all log]    uu.log()
 
-    if (uuconfig.log.remote) {
-        // <img src="http://localhost/log?msg=" />
-        (new Image).src = uuconfig.log.remote + encodeURIComponent(msg);
-    } else {
-        context || uunodeadd(context = uu.ol({ id: "uulog" }));
+    var box, msg, config = uuconfig.log;
 
-        uuconfig.log.rollup <= uutag("", context).length &&
-                (context.innerHTML = "");
+    if (!config.disable) {
+        if (!arguments.length) { // [3]
+            box = uuidc("uulog");
+            box && (box.innerHTML = "");
+        } else {
+            msg = serializeArgument(toArray.call(arguments));
 
-        uunodeadd(uu[/OL|UL/.test(context[_tagName]) ? "li" : "p"](newText(msg)),
-                  context);
+            if (config.remote) { // [2]
+                (new Image).src = config.remote + encodeURIComponent(msg);
+            } else { // [1]
+                box = uuidc("uulog");
+                box || uunodeadd(box = uu.ol({ id: "uulog" }));
+                config.rollup <= uutag("", box).length && (box.innerHTML = ""); // rollup
+                uunodeadd(uu[/OL|UL/.test(box[_tagName]) ? "li"
+                                                         : "p"](newText(msg)), box);
+            }
+        }
     }
 }
 
-// uu.log.clear
-function uulogclear() {
-    var context = uuid("uulog");
+//{@debug
+// uu.trace - add function trace
+function uutrace(fn,     // @param Function(= void): arguments.callee
+                 length, // @param Number(= void): arguments.length
+                 arg1,   // @param Mix(= void):
+                 arg2,   // @param Mix(= void):
+                 arg3,   // @param Mix(= void):
+                 arg4) { // @param Mix(= void):
+                         // @return Array/void:
+    //  [1][add function trace]       uu.trace(argument.callee, argument.length, arg, ...)
+    //  [2][add remote trace]         window.uuconfig = { trace: { remote: "http://localhost/trace?msg=" }};
+    //                                uu.trace("Hello Trace") -> GET /http://localhost/trace?msg=Hello%20Trace
+    //  [3][dump and clear all trace] uu.trace() -> Array
 
-    context && uunodeclear(context);
+    var rv, config = uuconfig.trace, msg, w = fn.name; // Function.name
+
+    if (!arguments.length) { // [3]
+        msg = _trace.concat(); // clone
+        _trace = [];
+        return msg;
+    } else if (!config.disable) {
+        // pick up function.name [IE6][IE7][IE8][IE9][OPERA9][OPERA10.1x]
+        w || (w = fn + "", w = w.slice(9, w.indexOf("("))); // )
+
+        msg = [w, length,
+               uujsonencode(arg1),
+               uujsonencode(arg2),
+               uujsonencode(arg3),
+               uujsonencode(arg4)].join(",");
+
+        config.remote ? ((new Image).src = config.remote + encodeURIComponent(msg))
+                      : _trace.push(msg);
+    }
+    return;
 }
+//}@debug
 
 // --- UNIT TEST ---
 //{@test
@@ -7790,13 +7822,12 @@ function uung(title,    // @param String: title
 
 // --- JSON ---
 // uu.json - mix to JSONString
-function uujson(source, // @param Mix:
-                alt) {  // @param Boolean(= false): false is JSON.stringify
-                        //                          true is js impl(uu.json.encode)
-                        // @return JSONString:
-    return (alt || !win.JSON) ? uujsonencode(source, 1)
-                              : source === void 0 ? "" // [IE8] undefined -> "undefined" bugfix
-                                                  : (win.JSON.stringify(source) || "");
+function uujson(source,   // @param Mix:
+                exjson) { // @param Boolean(= false): true is js ExJSONString
+                          // @return JSONString/ExJSONString:
+    return (exjson || !win.JSON) ? uujsonencode(source, 1)
+                                 : source === void 0 ? "" // [IE8] undefined -> "undefined" bugfix
+                                                     : (win.JSON.stringify(source) || "");
 }
 uujson.x = [
     /[^,:{}\[\]0-9\.\-+Eaeflnr-u \n\r\t]/,                      // x[0] NGWORDS
@@ -7806,16 +7837,15 @@ uujson.x = [
     /[\x00-\x1f]/g];                                            // x[4] NON-ASCII TO UNICODE ENTITY
 
 // uu.json.decode - decode JSONString
-function uujsondecode(jsonString, // @param JSONString:
-                      alt) {      // @param Boolean(= false): false is JSON.parse
-                                  //                          true is js impl(uu.json.decode)
+function uujsondecode(jsonString, // @param JSONString/ExJSONString:
+                      exjson) {   // @param Boolean(= false): true is ExJSONString
                                   // @return Mix/Boolean: false is error
     var str = jsonString.trim(), x = uujson.x;
 
-    return (alt || !win.JSON) ? (x[0].test(str[_replace](x[1], ""))
-                                  ? _false
-                                  : (new Function("return " + str))())
-                              : win.JSON.parse(str);
+    return (exjson || !win.JSON) ? (x[0].test(str[_replace](x[1], ""))
+                                    ? _false
+                                    : (new Function("return " + str))())
+                                 : win.JSON.parse(str);
 }
 
 // inner - json inspect
@@ -9266,7 +9296,7 @@ function uuflash(url,        // @param String: url
 // uu.cookie - load and parse cookie
 function uucookie(prefix) { // @param String: prefix, namespace
                             // @return Hash: { key: "value", ... }
-    var rv = {}, i = 0, pairs, pair, kv, cut = prefix.length;
+    var rv = {}, i = 0, ary, pair, kv, cut = prefix.length;
 
     if (doc.cookie) {
 
@@ -9274,10 +9304,11 @@ function uucookie(prefix) { // @param String: prefix, namespace
         //      collect: "{{prefix}}key=value"
         //      ignore:  "key=value"
         //
-        pairs = doc.cookie.split("; ");
 
-        for (; pair = pairs[i++]; ) {
-            kv = pair.split("="); // ["{{prefix}}key", "value"]
+        ary = doc.cookie.split("; "); // ["k=v", "k2=v2"] <- "k=v; k2=v2".split("; ")
+
+        for (; pair = ary[i++]; ) {
+            kv = pair.split("="); // ["k", "v"]
 
             if (!kv[0][_indexOf](prefix)) {
                 rv[kv[0].slice(cut)] = decodeURIComponent(kv[1] || "");
@@ -9287,24 +9318,23 @@ function uucookie(prefix) { // @param String: prefix, namespace
     return rv;
 }
 
-//  [1][exipre +3days]    uu.cookie.save("my", { key: value }, +(new Date) + 86400 * 3);
-//  [2][temporary cookie] uu.cookie.save("my", { key: value }, +(new Date) + 86400 * 3);
-
 // uu.cookie.save - save cookie
 function uucookiesave(prefix, // @param String: prefix, namespace
                       data,   // @param Hash: { key: "value", ... }
                       date) { // @param UTCDateString/Date(= void):
                               // @return Number: last KeyValue pair length
+
+//  [1][save exipre +3days]    uu.cookie.save("my", { key: value }, +(new Date) + 86400 * 3);
+//  [2][save temporary cookie] uu.cookie.save("my", { key: value }, +(new Date) + 86400 * 3);
+
     date = date ? "; expires=" + (isString(date) ? date
                                                  : new Date(+date).toUTCString())
                 : "";
     var rv = "", i, secure = "";
 
-//{@mb
     try {
         location.protocol === "https:" && (secure = "; secure"); // [IE][FIX] stand alone
     } catch(err) {}
-//}@mb
 
     for (i in data) {
         rv = prefix + i + "=" + encodeURIComponent(data[i]);
