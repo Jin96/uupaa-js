@@ -1640,7 +1640,7 @@ uu.ie678 && uu.ready("canvas:0", function() {
         ns.add("v", "urn:schemas-microsoft-com:vml",           "#default#VML");
         ns.add("o", "urn:schemas-microsoft-com:office:office", "#default#VML");
     }
-    ss.owningElement.id = "uucss3ignore";
+    ss.owningElement.id = "VMLSETUP";
     ss.cssText =
         "canvas{display:inline-block;text-align:left;width:300px;height:150px}" +
         "v\:oval,v\:shape,v\:stroke,v\:fill,v\:textpath," +
