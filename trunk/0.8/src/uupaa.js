@@ -1970,7 +1970,9 @@ function uujsonp(url,        // @param String: "http://example.com/api?callback=
     var timeout = option.timeout || 10,
         globalfn = option.method || "callback", // global CallbackFunction
         guid = uunumber(),
-        node = uumix(newNode("script"), uujs.attr);
+        node = uumix(newNode("script"),
+                     uuarg(option, { type: "text/javascript",
+                                     charset: "utf-8", run: 0 }));
 
     url = uuf(url, globalfn); // uuf("http://example.com/api?callback=@", option.method)
     uujsonp.db[guid] = globalfn;
