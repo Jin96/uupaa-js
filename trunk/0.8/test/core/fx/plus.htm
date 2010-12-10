@@ -140,6 +140,9 @@ function slideDown(evt) {
     uu.fx.slide(evt.uu.node, duration, { after: function(node) {
     }});
 }
+function swing(evt) {
+    uu.fx.swing(evt.uu.node, duration, { range: range });
+}
 
 uu.ready(function(uu) {
     // onchange handler
@@ -168,7 +171,8 @@ uu.ready(function(uu) {
               highlight: highlight,
               slide: slide,
               slideUp: slideUp,
-              slideDown: slideDown }, function(fn, key) {
+              slideDown: slideDown,
+              swing: swing }, function(fn, key) {
 
         var div =
         uu.node.add(
@@ -176,7 +180,7 @@ uu.ready(function(uu) {
                 uu.div({ cn: "box" }, { x: x, y: y + 40 }, uu.text(key)), fn), uu.id("absolutebox"))
 
         x += 100 + margin;
-        if (x > (100 + margin) * 5) {
+        if (x > (100 + margin) * 6) { // 6 colmuns
             y += 100 + margin;
             x = 0;
         }
@@ -184,6 +188,9 @@ uu.ready(function(uu) {
         case "fadeIn":
         case "fadeOut":
             uu.css(div, { o: 0.5 });
+            break;
+        case "swing":
+            ;
         }
     });
     // position: static
@@ -233,8 +240,8 @@ DURATION: <input id="durationSlider" ui="Slider" type="range" step="50" value="3
             min="0" max="2000" />
     <span id="durationValue">300</span>
     <br />
-RANGE: <input id="rangeSlider" ui="Slider" type="range" step="50" value="200"
-            min="100" max="400" />
+RANGE: <input id="rangeSlider" ui="Slider" type="range" step="10" value="200"
+            min="10" max="400" />
     <span id="rangeValue">200</span>
     <br />
 PARTS: <input id="partsSlider" ui="Slider" type="range" step="1" value="10"

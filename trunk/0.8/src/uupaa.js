@@ -637,11 +637,12 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
         puff:       uufxpuff,       // uu.fx.puff(node:Node, duration:Number, option:Hash = {}):Node
 //        wave:       uufxwave,       // uu.fx.wave(node:Node, duration:Number, option:Hash = {}):Node
         flare:      uufxflare,      // uu.fx.flare(node:Node, duration:Number, option:Hash = { parts: 10, range: 200 }):Node
+        swing:      uufxswing,      // uu.fx.swing(node:Node, duration:Number, option:Hash = { swing: 10 }):Node
         slide:      uufxslide,      // uu.fx.slide(node:Node, duration:Number, option:Hash = {}):Node
         slideUp:    uufxslideup,    // uu.fx.slideUp(node:Node, duration:Number, option:Hash = {}):Node
         slideDown:  uufxslidedown,  // uu.fx.slideDown(node:Node, duration:Number, option:Hash = {}):Node
         shrink:     uufxshrink,     // uu.fx.shrink(node:Node, duration:Number, option:Hash = {}):Node
-        scroll:     uufxscroll,     // uu.fx.scroll(node:Node, duration:Number, option:Hash = {}):Node
+        scroll:     uufxscroll,     // uu.fx.scroll(node:Node, duration:Number, option:Hash = { orientationLock: "" }):Node
 //        sunset:     uufxsunset,     // uu.fx.sunset(node:Node, duration:Number, option:Hash = {}):Node
         moveIn:     uufxmovein,     // uu.fx.moveIn(node:Node, duration:Number, option:Hash = { degree: 0, range: 200 }):Node
         moveOut:    uufxmoveout,    // uu.fx.moveOut(node:Node, duration:Number, option:Hash = { degree: 0, range: 200 }):Node
@@ -1247,6 +1248,7 @@ uueach({
     fadeOut:        uufxfadeout,    // NodeSet.fadeOut(duration, option)
     puff:           uufxpuff,       // NodeSet.puff(duration, option)
     flare:          uufxflare,      // NodeSet.flare(duration, option)
+    swing:          uufxswing,      // NodeSet.swing(duration, option)
     slide:          uufxslide,      // NodeSet.slide(duration, option)
     slideUp:        uufxslideup,    // NodeSet.slideUp(duration, option)
     slideDown:      uufxslidedown,  // NodeSet.slideDown(duration, option)
@@ -3021,7 +3023,8 @@ uufx.props = {
     pageXOffset:        4,  // window.pageXOffset / document.documentElemenet.scrollLeft [IE6][IE7][IE8]
     pageYOffset:        5,  // window.pageYOffset / document.documentElemenet.scrollTop  [IE6][IE7][IE8]
     left:               6,  // css left
-    top:                7   // css top
+    top:                7,  // css top
+    rotate:             8   // transform rotate
 };
 
 // uu.fx.easing - easing functions
@@ -3173,7 +3176,7 @@ function uufxbuild(node, data, queue, option) {
     for (i in option) {
         w = fixdb[i] || i;
 
-        if (w in cs || w === "pageXOffset" || w === "pageYOffset") {
+        if (w in cs || w === "pageXOffset" || w === "pageYOffset" || w === "rotate") {
             opt = option[i];
             isArray(opt) ? (ev = opt[0], ez = opt[1][_toLowerCase]()) // { left: [100, "linear"] }
                          : (ev = opt,    ez = "inoutquad");           // { left: 100 }
@@ -3251,11 +3254,31 @@ function uufxbuild(node, data, queue, option) {
                     rv += n === 4 ? "sx" : "sy";
                     rv += '!=null&&sy!=null&&(window.scrollTo(sx,sy),sx=sy=null);';
                     break;
-                default: // top, left, other...
-                    sv = n ? (n > 6 ? node.offsetTop  - parseInt(cs.marginTop)
-                                    : node.offsetLeft - parseInt(cs.marginLeft))
-                           : parseInt(cs[w]) || 0;
+                case 6: // left
+                case 7: // top
+                    sv = n > 6 ? node.offsetTop  - parseInt(cs.marginTop)
+                               : node.offsetLeft - parseInt(cs.marginLeft);
                     ev = uunumberexpand(sv, ev, parseInt);
+                    rv += 'style.'+w+'=((fin?'+ev+':'+ezfn(sv,ev,ez)+')|0)+"px";';
+                    break;
+                case 8: // rotate(degree)
+                    sv = uucsstransform(node); // get rotate value
+                    ev = uunumberexpand(sv[2], ev, parseFloat);
+                    rv += uuf("@(node,[@,@,@,@,@]);",
+                              "uu.css.transform",
+                              sv[0],  // scaleX
+                              sv[1],  // scaleY
+                              '(fin?' + ev + ':' + ezfn(sv[2], ev, ez) + ')', // rotate
+                              sv[3],  // translateX
+                              sv[4]); // translateY
+                    sv = sv[2];
+                    break;
+                default: // other...
+                    sv = parseInt(cs[w]) || 0;
+                    ev = uunumberexpand(sv, ev, parseInt);
+                    // style.{{word}} = ((fin ? {{ev}} : ezfn({{sv}},{{ev}},{{ez}})) | 0) + "px";
+                    //                    v
+                    // style.top = ((fin ? 0 : easing-expression) | 0) + "px";
                     rv += 'style.'+w+'=((fin?'+ev+':'+ezfn(sv,ev,ez)+')|0)+"px";';
                 }
                 reverseOption[w] = [sv, ez];
@@ -3488,6 +3511,22 @@ function uufxflare(node,     // @param Node:
     }));
 }
 
+// uu.fx.swing - swing elemenet / image
+function uufxswing(node,     // @param Node:
+                   duration, // @param Number: duration
+                   option) { // @param Hash(= { range: 10 }):
+                             //     option.range - Number: degree
+                             // @return Node:
+    var opt = uuarg(option, { range: 10 });
+    if (!opt.range) {
+        uufx(node, duration, { rotate:  opt.range });     // swing left(large)
+        uufx(node, duration, { rotate: -opt.range });     // turn right(large)
+        uufx(node, duration, { rotate:  opt.range / 2 }); // swing left(small)
+        uufx(node, duration, { rotate:  0 });             // stop center
+    }
+    return node;
+}
+
 // uu.fx.slide - toggle slideUp / slideDown
 function uufxslide(node,     // @param Node:
                    duration, // @param Number: duration
@@ -3561,19 +3600,26 @@ function uufxshrink(node,     // @param Node:
 // uu.fx.scroll - scroll
 function uufxscroll(node,     // @param Node:
                     duration, // @param Number: duration
-                    option) { // @param Hash(= {}):
+                    option) { // @param Hash(= { orientationLock: "" }):
+                              //    orientationLock: String: "" or "x" or "y"
                               // @return Node:
     var rect = uu.css.rect(node, doc.body),
         vp = uuviewport(),
         iw = vp.innerWidth,
         ih = vp.innerHeight,
         sw = Math.max(htmlNode.scrollWidth,  doc.body.scrollWidth),
-        sh = Math.max(htmlNode.scrollHeight, doc.body.scrollHeight);
+        sh = Math.max(htmlNode.scrollHeight, doc.body.scrollHeight),
+        opt = uuarg(option, {
+            pageXOffset: rect.x + iw > sw ? sw - iw + 40 : rect.x,
+            pageYOffset: rect.y + ih > sh ? sh - ih + 40 : rect.y
+        });
 
-    return uufx(node, duration, uuarg(option, {
-        pageXOffset: rect.x + iw > sw ? sw - iw + 40 : rect.x,
-        pageYOffset: rect.y + ih > sh ? sh - ih + 40 : rect.y
-    }));
+    if (opt.orientationLock === "x") {
+        delete opt.pageXOffset;
+    } else if (opt.orientationLock === "y") {
+        delete opt.pageYOffset;
+    }
+    return uufx(node, duration, opt);
 }
 
 // uu.fx.moveIn - movein + fadein
@@ -3700,7 +3746,15 @@ function uucssopacity(node,      // @param Node:
 
 //{@mb
     if (!uuready.opacity) {
-        if (!node[_datauu + "opacity"]) {
+        if (!node[_datauu + "opacity"] ||
+            node.style.filter[_indexOf](ident) < 0) { // [FIX][RARE CASE]
+
+            // [RARE CASE]
+            // 1. var node = uu.div();     // node has no parentNode
+            // 1. uu.css.opacity(node, 0);
+            // 2. uu.body(node);           // node has parentNode
+            // 3. uu.css.opacity(node, 1); // node has parentNode,
+                                           // but disappearance filter settings
             if (uuready.filter) {
                 // init opacity
                 node.style.filter += " progid:" + ident + "()";
@@ -3726,19 +3780,27 @@ function uucssopacity(node,      // @param Node:
 //{@mb
     if (!uuready.opacity) { // [IE6][IE7][IE8]
         node[_datauu + "opacity"] = opacity + 1; // (1.0 ~ 2.0)
+
         if (uuready.filter) {
             // http://d.hatena.ne.jp/uupaa/20100819
             if (!node[_parentNode]) {
                 tmpParent = doc.body;
                 tmpParent[_appendChild](node);
             }
-            var filter = node.filters.item(ident);
+            var filters = node.filters, filter;
 
-            if (opacity > 0 && opacity < 1) {
-                filter.Enabled = _true;
-                filter.Opacity = (opacity * 100) | 0;
+            // [FIX] disappearance filter settings
+            if (!filters.length && node.style.filter[_indexOf](ident) > 0) {
+                ; // [TODO][IE][BUGGY]
             } else {
-                filter.Enabled = _false;
+                filter = node.filters.item(ident);
+
+                if (opacity > 0 && opacity < 1) {
+                    filter.Enabled = _true;
+                    filter.Opacity = (opacity * 100) | 0;
+                } else {
+                    filter.Enabled = _false;
+                }
             }
             tmpParent && tmpParent[_removeChild](node);
         }
@@ -3822,7 +3884,7 @@ function uucsstransform(node,    // @param Node:
 //{@mb
     }
 //}@mb
-    node[meta] = param[_concat]();
+    node[meta] = param[_concat](); // clone array
     return node;
 }
 
@@ -8697,7 +8759,7 @@ uuready("window", function() {
 
 //{@audio
 // uu.audio
-function uuaudio(src,        // @param URLString:
+function uuaudio(src,        // @param URLString: url or ""
                  option,     // @param Hash: { loop, parent, volume, autoplay, startTime }
                              //     loop - Boolean(= false):
                              //     parent - Node: parent Node
@@ -8716,6 +8778,8 @@ function uuaudio(src,        // @param URLString:
 }
 
 uuClass("Audio", {
+    _muted:         false,
+    _primaryVolume: 0,  // mute before
     init:           AudioInit,      // init(src:URLString, option:Hash, callback:Function)
     attr:           AudioAttr,      // attr(key:String/Hash = void,
                                     //      value:Number/Boolean = void):String/Hash/Number/Boolean
@@ -8731,10 +8795,13 @@ uuClass("Audio", {
     play:           AudioPlay,      // play()
     seek:           AudioSeek,      // seek(currentTime:Number)
     stop:           AudioStop,      // stop(close:Boolean = false)
+    mute:           AudioMute,      // mute(unmute:Boolean = false)
     pause:          AudioPause,     // pause()
     state:          AudioState,     // state():Hash - { error, ended, closed, paused,
                                     //                  playing, condition }
+    isMuted:        AudioIsMuted,   // isMuted():Boolean
     isReady:        AudioIsReady,   // isReady():Boolean
+    isCanPlay:      AudioIsCanPlay, // isCanPlay():Boolean
     isPlaying:      AudioIsPlaying, // isPlaying():Boolean
     bind:           AudioBind,      // bind(eventTypes:String, evaluator:Function)
     unbind:         AudioUnbind,    // unbind(eventTypes:String, evaluator:Function)
@@ -8746,7 +8813,7 @@ uuClass("Audio", {
 });
 
 // Audio.init
-function AudioInit(src,        // @param URLString: "http://.../music.mp3", "music.mp3"
+function AudioInit(src,        // @param URLString: "http://.../music.mp3", "music.mp3" or ""
                    option,     // @param Hash: { autoplay, loop, startTime, parent, volume }
                                //   option.autoplay - Boolean(= false): auto play
                                //   option.loop - Boolean(= false):
@@ -8780,14 +8847,14 @@ function AudioInit(src,        // @param URLString: "http://.../music.mp3", "mus
 // Audio.attr
 function AudioAttr(key,     // @param String/Hash(= void): key
                    value) { // @param String/Number/Boolean(= void): value
-                            // @return Hash/void: { src, loop, startTime, volume,
-                            //                      currentTime, duration }
-                            //   src     - String:
-                            //   loop    - Boolean:
+                            // @return Hash/void: { src, loop, volume,
+                            //                      duration, startTime, currentTime }
+                            //   src         - String:
+                            //   loop        - Boolean:
+                            //   volume      - Number/String: 0.0 ~ 1.0, "+0.1", "-0.1"
+                            //   duration    - Number:
                             //   startTime   - Number: start time
-                            //   volume  - Number/String: 0.0 ~ 1.0, "+0.1", "-0.1"
                             //   currentTime - Number/String: current time, 0 ~, "+10", "-10"
-                            //   duration- Number:
     var rv = this.ao.attr(), i, val, undef;
 
     switch (uucomplex(key, value)) { // 1: (), 2: (k), 3: (k,v), 4: ({})
@@ -8833,6 +8900,22 @@ function AudioStop(close) { // @param Boolean(= false):
     this.ao.stop(close);
 }
 
+// Audio.mute
+function AudioMute(unmute) { // @param Boolean(= false): true is unmute
+    // [1][toggle mute] audio.mute(audio.isMuted())
+
+    if (unmute) {
+        if (this._muted) {
+            this.attr("volume", this._primaryVolume);
+            this._muted = _false;
+        }
+    } else if (!this._muted) {
+        this._primaryVolume = this.attr("volume");
+        this.attr("volume", 0);
+        this._muted = _true;
+    }
+}
+
 // Audio.pause
 function AudioPause() {
     this.ao.state().playing && this.ao.pause();
@@ -8844,6 +8927,11 @@ function AudioState() { // @return Hash: { error, ended, closed, paused,
     return this.ao.state();
 }
 
+// Audio.isMuted
+function AudioIsMuted() { // @return Boolean:
+    return this._muted;
+}
+
 // Audio.isReady
 function AudioIsReady() { // @return Boolean:
     if (this.ao) {
@@ -8852,6 +8940,11 @@ function AudioIsReady() { // @return Boolean:
         return !(state.error || state.closed);
     }
     return _false;
+}
+
+// Audio.isCanPlay
+function AudioIsCanPlay() { // @return Boolean:
+    return this.ao.isCanPlay();
 }
 
 // Audio.isPlaying
@@ -8897,14 +8990,18 @@ uu.Class("HTML5Audio", {
     play:           HTML5AudioPlay,     // play()
     stop:           HTML5AudioStop,     // stop(close:Boolean = false)
     pause:          HTML5AudioPause,    // pause()
-    state:          HTML5AudioState     // state():Hash - { error, ended, closed, paused,
+    state:          HTML5AudioState,    // state():Hash - { error, ended, closed, paused,
                                         //                  playing, condition }
+    isCanPlay:      HTML5AudioIsCanPlay // isCanPlay():Boolean
 }, {
-    isReady:        function(src) {     // @param String: "music.mp3"
+    isReady:        function(src) {     // @param String: "music.mp3" or ""
                                         // @return Boolean:
         if (win.HTMLAudioElement) {
             var macSafari = (_env.os === "mac" && _env.safari);
 
+            if (src === "") {
+                return _true;
+            }
             return /\.mp3$/i.test(src) ? (!macSafari && (_webkit || _env.ie9)) // mp3
                  : /\.og.$/i.test(src) ? (_gecko || _env.chrome || _opera)     // ogg, oga, ogx
                  : /\.m4a$/i.test(src) ? _webkit                               // m4a
@@ -8916,12 +9013,13 @@ uu.Class("HTML5Audio", {
 });
 
 // HTML5Audio.init
-function HTML5AudioInit(src,        // @param URLString: "music.mp3"
+function HTML5AudioInit(src,        // @param URLString: "music.mp3" or ""
                         option,     // @param Hash: { node, loop, volume, startTime, autoplay }
                         callback) { // @param CallbackFunction: callback(this)
     var that = this, audio;
 
     this.audio = null;
+    this._canplay = _false;
     // glue
     audio = option.node;
     if (audio) {
@@ -8959,9 +9057,15 @@ function HTML5AudioInit(src,        // @param URLString: "music.mp3"
                 audio.pause(); // ended -> pause
             }
         });
+        uuevent(audio, "canplay", function() {
+            that._canplay = _true;
+        });
+        uuevent(audio, "error", function() {
+            that._canplay = _false;
+        });
 
         // autoplay
-        if (option.autoplay) {
+        if (option.autoplay && audio.src) {
             setTimeout(function() {
                 that.play();
             }, 100);
@@ -9022,6 +9126,7 @@ function HTML5AudioStop(close) { // @param Boolean(= false):
 
     if (close) {
         this._closed = _true;
+        this._canplay = _false;
         uueventunbind(audio, "ended");
         uueventfire(audio, "ended");
         uunoderemove(audio, _true); // removeAll
@@ -9073,6 +9178,11 @@ function HTML5AudioState() { // @return Hash: { error, ended, closed, paused,
     };
 }
 
+// HTML5Audio.isCanPlay
+function HTML5AudioIsCanPlay() { // @return Boolean
+    return this._canplay;
+}
+
 //{@mb
 uu.Class("FlashAudio", {
     init:           FlashAudioInit,     // init(src:String, option:Hash, callback:CallbackFunction)
@@ -9081,10 +9191,15 @@ uu.Class("FlashAudio", {
     play:           FlashAudioPlay,     // play()
     stop:           FlashAudioStop,     // stop(close:Boolean = false)
     pause:          FlashAudioPause,    // pause()
-    state:          FlashAudioState     // state():Hash - { error, ended, closed, paused,
+    state:          FlashAudioState,    // state():Hash - { error, ended, closed, paused,
                                         //                  playing, condition }
+    isCanPlay:      FlashAudioIsCanPlay // isCanPlay():Boolean
 }, {
-    isReady:        function(src) {
+    isReady:        function(src) {     // @param String: "music.mp3" or ""
+                                        // @return Boolean:
+        if (src === "") {
+            return _true;
+        }
         if (/\.mp3$/i.test(src)) {
             return _env.flash && uustat(uuconfig.audio.swf); // "uu.audio.swf"
         }
@@ -9093,7 +9208,7 @@ uu.Class("FlashAudio", {
 });
 
 // FlashAudio.init
-function FlashAudioInit(src,        // @param String: "music.mp3"
+function FlashAudioInit(src,        // @param String: "music.mp3" or ""
                         option,     // @param Hash: { node, loop, volume, startTime, autoplay }
                         callback) { // @param CallbackFunction: callback(this)
     var that = this, audio,
@@ -9119,7 +9234,7 @@ function FlashAudioInit(src,        // @param String: "music.mp3"
 
     // wait for response from flash initializer
     function wait() {
-        that.flash.asFlashAudioSetAttr({ src:       src,
+        that.flash.xiFlashAudioSetAttr({ src:       src,
                                          loop:      option.loop   || _false,
                                          volume:    option.volume || 0.5,
                                          startTime: option.startTime || 0 });
@@ -9139,17 +9254,17 @@ function FlashAudioAttr(key,     // @param String/Hash(= void):
 
     switch (uucomplex(key, value)) { // 1: (), 2: (k), 3: (k,v), 4: ({})
     case 1:
-    case 2: rv = flash.asFlashAudioGetAttr();
+    case 2: rv = flash.xiFlashAudioGetAttr();
             return key === undef ? rv : rv[key];
     case 3: key = uupair(key, value);
     }
-    flash.asFlashAudioSetAttr(key);
+    flash.xiFlashAudioSetAttr(key);
     return;
 }
 
 // FlashAudio.play
 function FlashAudioPlay() {
-    this.state().closed || this.flash.asFlashAudioPlay();
+    this.state().closed || this.flash.xiFlashAudioPlay();
 }
 
 // FlashAudio.stop
@@ -9157,31 +9272,37 @@ function FlashAudioStop(close) { // @param Boolean(= false):
     var flash = this.flash, attr;
 
     if (close) {
-        flash.asFlashAudioStop(_true);
+        flash.xiFlashAudioStop(_true);
         uunoderemove(this.audio, _true); // removeAll
     } else if (this.state().playing) {
-        flash.asFlashAudioStop(_false);
-        attr = flash.asFlashAudioGetAttr();
-        flash.asFlashAudioSetAttr({ currentTime: attr.startTime,
+        flash.xiFlashAudioStop(_false);
+        attr = flash.xiFlashAudioGetAttr();
+        flash.xiFlashAudioSetAttr({ currentTime: attr.startTime,
                                     timeupdate: 1 }); // rewind
     }
 }
 
 // FlashAudio.pause
 function FlashAudioPause() {
-    this.state().playing && this.flash.asFlashAudioPause();
+    this.state().playing && this.flash.xiFlashAudioPause();
 }
 
 // FlashAudio.state
 function FlashAudioState() { // @return Hash: { error, ended, closed, paused,
                              //                 playing, condition }
-    var rv = this.flash.asFlashAudioGetState();
+    var rv = this.flash.xiFlashAudioGetState();
 
     rv.toString = function() {
         return this.condition;
     };
     return rv;
 }
+
+// FlashAudio.isCanPlay
+function FlashAudioIsCanPlay() { // @return Boolean
+    return this.flash.xiFlashAudioCanPlay();
+}
+
 //}@mb
 
 uu.Class("NoAudio", {
@@ -9192,7 +9313,8 @@ uu.Class("NoAudio", {
     play:           uunop,
     stop:           uunop,
     pause:          uunop,
-    state:          uupao({ closed: _true, toString: uupao("closed") })
+    state:          uupao({ closed: _true, toString: uupao("closed") }),
+    isCanPlay:      uupao(_false)
 }, {
     isReady:        uupao(_true)
 });

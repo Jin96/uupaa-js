@@ -27,15 +27,17 @@ package {
         private var _ended:Boolean = true;
         private var _closed:Boolean = false;
         private var _paused:Boolean = false;
+        private var _canplay:Boolean = false;
         private var _lastAction:String = "";
 
         public function Audio() {
-            ExternalInterface.addCallback("asFlashAudioPlay", asFlashAudioPlay);
-            ExternalInterface.addCallback("asFlashAudioStop", asFlashAudioStop);
-            ExternalInterface.addCallback("asFlashAudioPause", asFlashAudioPause);
-            ExternalInterface.addCallback("asFlashAudioSetAttr", asFlashAudioSetAttr);
-            ExternalInterface.addCallback("asFlashAudioGetAttr", asFlashAudioGetAttr);
-            ExternalInterface.addCallback("asFlashAudioGetState", asFlashAudioGetState);
+            ExternalInterface.addCallback("xiFlashAudioPlay", xiFlashAudioPlay);
+            ExternalInterface.addCallback("xiFlashAudioStop", xiFlashAudioStop);
+            ExternalInterface.addCallback("xiFlashAudioPause", xiFlashAudioPause);
+            ExternalInterface.addCallback("xiFlashAudioSetAttr", xiFlashAudioSetAttr);
+            ExternalInterface.addCallback("xiFlashAudioGetAttr", xiFlashAudioGetAttr);
+            ExternalInterface.addCallback("xiFlashAudioGetState", xiFlashAudioGetState);
+            ExternalInterface.addCallback("xiFlashAudioCanPlay", xiFlashAudioCanPlay);
 
             _OBJECT_ID = ExternalInterface.objectID;
             trace(_OBJECT_ID);
@@ -44,7 +46,10 @@ package {
             _timer.addEventListener(TimerEvent.TIMER, timerListener);
             _timer.start();
 
-            ExternalInterface.call("uu.dmz." + _OBJECT_ID);
+            try {
+                ExternalInterface.call("uu.dmz." + _OBJECT_ID);
+            } catch(err:Error) {
+            }
         }
 
         private function timerListener(event:TimerEvent):void {
@@ -78,6 +83,8 @@ package {
         }
 
         private function openHandler(event:Event):void {
+            _paused = true;
+            _canplay = true;
             ExternalInterface.call("uu.dmz." + _OBJECT_ID + "event", "canplay");
         }
 
@@ -89,6 +96,7 @@ package {
             trace("ioErrorHandler: " + event);
 
             _error = 4;
+            _canplay = true;
             ExternalInterface.call("uu.dmz." + _OBJECT_ID + "event", "error");
         }
 
@@ -96,7 +104,7 @@ package {
             _updateDuration = true;
         }
 
-        public function asFlashAudioPlay():void {
+        public function xiFlashAudioPlay():void {
             if (_error || _closed) {
                 return;
             }
@@ -136,13 +144,14 @@ package {
             }
         }
 
-        public function asFlashAudioStop(close:Boolean):void {
+        public function xiFlashAudioStop(close:Boolean):void {
             if (_error || _closed) {
                 return;
             }
 
             if (close) {
                 _closed = true;
+                _canplay = true;
             } else {
                 _lastAction = "stop";
             }
@@ -155,7 +164,7 @@ package {
             }
         }
 
-        public function asFlashAudioPause():void {
+        public function xiFlashAudioPause():void {
             if (_error || _closed || _ended || _paused) {
                 return;
             }
@@ -171,7 +180,16 @@ package {
         }
 
         private function setSrc(src:String):void {
+            if (_src) {
+                _sound.removeEventListener(Event.OPEN, openHandler);
+                _sound.removeEventListener(Event.COMPLETE, completeHandler);
+                _sound.removeEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler);
+                _sound.removeEventListener(ProgressEvent.PROGRESS, progressHandler);
+            }
             _src = src;
+            if (src === "") {
+                return;
+            }
             var request:URLRequest = new URLRequest(src);
 
             _sound.addEventListener(Event.OPEN, openHandler);
@@ -204,7 +222,7 @@ package {
             _currentTime = time * 1000; // sec -> ms
         }
 
-        public function asFlashAudioSetAttr(hash:Object):void {
+        public function xiFlashAudioSetAttr(hash:Object):void {
             var i:String;
 
             for (i in hash) {
@@ -220,7 +238,7 @@ package {
             }
         }
 
-        public function asFlashAudioGetAttr():Object { // @return Hash: { src, loop, volume, duration,
+        public function xiFlashAudioGetAttr():Object { // @return Hash: { src, loop, volume, duration,
                                                        //                 startTime, currentTime }
             var currentTime:Number = 0;
 
@@ -242,7 +260,7 @@ package {
             };
         }
 
-        public function asFlashAudioGetState():Object { // @return Hash: { error, ended, closed, paused,
+        public function xiFlashAudioGetState():Object { // @return Hash: { error, ended, closed, paused,
                                                         //                 playing, condition }
             var error:int      = _error,
                 ended:Boolean  = _ended,
@@ -268,6 +286,10 @@ package {
                 playing:    condition === "playing",
                 condition:  condition
             };
+        }
+
+        public function xiFlashAudioCanPlay():Boolean { // @return Boolean
+            return _canplay;
         }
     }
 }
