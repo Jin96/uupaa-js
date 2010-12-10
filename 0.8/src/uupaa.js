@@ -3518,7 +3518,7 @@ function uufxswing(node,     // @param Node:
                              //     option.range - Number: degree
                              // @return Node:
     var opt = uuarg(option, { range: 10 });
-    if (!opt.range) {
+    if (opt.range) {
         uufx(node, duration, { rotate:  opt.range });     // swing left(large)
         uufx(node, duration, { rotate: -opt.range });     // turn right(large)
         uufx(node, duration, { rotate:  opt.range / 2 }); // swing left(small)
