@@ -28,7 +28,8 @@ uu.ready(function(uu) {
         uu.id("source").style.width = "250px";
     }
     uu.ui.build();
-    buttons = uu("input[type=button][disabled=disabled]");
+//    buttons = uu("input[type=button][disabled=disabled]");
+    buttons = uu("input[type=button][disabled]");
 
 }, "audio", function(uu, audio) {
 
@@ -60,12 +61,13 @@ function changeSource(that) {
 
 function initAudio(source) {
     var ary = uu.ui("Slider"), // [0: volume, 1: seek]
-        volsl = ary[0],
+        sliders = ary[0],
         seeksl = ary[1];
 
     uu.audio(source, { autoplay: player.autoplay,
-                       volume: volsl.attr().value * 0.01,
+                       volume: sliders.attr().value * 0.01,
                        loop: player.loop }, function(audio) {
+
 
         if (!audio.isReady()) {
             uu.log("audio not ready");
@@ -78,7 +80,7 @@ function initAudio(source) {
         window.player.audio = audio;
 
         // volume.change event handler
-        volsl.bind("change", function(evt, attr) {
+        sliders.bind("change", function(evt, attr) {
             player.audio.attr("volume", parseInt(attr.value) * 0.01);
         });
 
@@ -178,10 +180,11 @@ function toggleLoop(that) {
 }
 
 function mute() {
-    var volsl = uu.ui("Slider")[0]; // [0: volume, 1: seek]
+    var sliders = uu.ui("Slider")[0]; // [0: volume, 1: seek]
 
-    uu.msg.post(volsl, "value", 0, 1);
-    player.audio.attr("volume", 0);
+//  uu.msg.post(sliders, "value", 0, 1);
+//    player.audio.attr("volume", 0);
+    player.audio.mute(player.audio.isMuted());
 }
 
 </script></head><body>
@@ -200,6 +203,6 @@ function mute() {
 <input id="currentSlider" ui="Slider" type="range" value="0" size="200" min="0" max="100" />
 
 <hr />
-<input type="button" value="log clear" onclick="uu.log.clear()" />
+<input type="button" value="log clear" onclick="uu.log()" />
 
 </body></html>
