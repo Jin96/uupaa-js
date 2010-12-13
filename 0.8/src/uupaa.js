@@ -597,7 +597,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //                defaultColor:ColorString= "#fff"):Color
 //}@color
         // --- CSS LEVEL 3 ---
-        opacity:    uucssopacity,   // uu.css.opacity(node:Node, value:Number/String):Number/Node
+        opacity:    uucssopacity,   // uu.css.opacity(node:Node, value:Number):Number/Node
                                     //  [1][get opacity] uu.css.opacity(node) -> 0.5
                                     //  [2][set opacity] uu.css.opacity(node, 0.5) -> node
         transform:  uucsstransform, // uu.css.transform(node:Node):Node/NumberArray
@@ -1352,12 +1352,23 @@ uuClass("Junction", {
     judge:          JunctionJudge   // judge():this
 });
 
-// --- StyleSheet class ---
+// --- StyleSheet Class ---
 uuClass("StyleSheet", {
     init:           StyleSheetInit, // uu("StyleSheet", id:String = "")
     add:            StyleSheetAdd,  // styleSheet.add(expr:Hash/String, decl:String = void)
                                     //  [1] styleSheet.add({ "div>p": "color:red;font-weight:bold", ... })
     clear:          StyleSheetClear // styleSheet.clear()
+});
+
+// --- SystemStyleSheet Class ---
+uuClassSingleton("SSS", {
+    init:           SSSInit,        // uu("SystemStyleSheet")
+    add:            SSSAdd,         // add(selector:String, declaration:String):Number
+                                    //  [1][add last rule] add("div>p", "color:red;font-weight:bold") -> 0
+    update:         SSSUpdate,      // update(index:Number, selector:String, declaration:String)
+    remove:         SSSRemove,      // remove(index:Number)
+    cssText:        SSSCSSText,     // cssText()
+    clear:          SSSClear        // clear()
 });
 
 // --- ECMAScript-262 5th ---
@@ -3204,16 +3215,18 @@ function uufxbuild(node, data, queue, option) {
                                  + ';fx1=fx1>0.999?1:fx1<0.001?0:fx1;';
 
 //{@mb
-                    if (!uuready.opacity) { // [IE6][IE7][IE8]
-                        if (uuready.filter) {
-                            rv += 'fx2=node.filters.item("DXImageTransform.Microsoft.Alpha");' +
-                                  'fx2.Enabled=true;fx2.Opacity=(fx1*100)|0;' +
-                                  'fin&&uu.css.opacity(node,' + ev + ');';
-                        }
-                    } else {
+                    if (_ie678) { // [IE6][IE7][IE8]
+                        // fin ? uu.css.opacity(node, ${ev})
+                        //     : (style.filter = "alpha(opacity=${fx1}) " +
+                        //        style.filter.replace({$rex}, " "));
+                        rv += uu.f('fin?uu.css.opacity(node,@)' +
+                                      ':(style.filter="alpha(opacity="+@+") "+' +
+                                        'style.filter.replace(@," "));',
+                                   ev, "((fx1*100)|0)", "uu.css.opacity._");
+                        break;
+                    }
 //}@mb
-                        rv += 'style.opacity=fin?' + ev + ':fx1;';
-/*{@mb*/            } /*}@mb*/
+                    rv += 'style.opacity=fin?' + ev + ':fx1;';
                     break;
                 case 2: // color, backgroundColor
 //{@color
@@ -3719,96 +3732,47 @@ function uucssbgcolor(node,           // @param Node:
 //}@color
 
 // --- CSS 3 ---
-// uu.css.opacity
+// uu.css.opacity - accessor
 function uucssopacity(node,      // @param Node:
-                      opacity) { // @param Number/String(= void): Number(0.0 - 1.0) absolute
-                                 //                               String("+0.5", "-0.5") relative
+                      opacity) { // @param Number: Number(0.0 - 1.0) absolute
                                  // @return Number/Node:
-    var style = node.style,
-/*{@mb*/ident = "DXImageTransform.Microsoft.Alpha", tmpParent, /*}@mb*/
-        undef;
-
-    if (opacity === undef) {
 //{@mb
-        if (!uuready.opacity) { // [IE6][IE7][IE8]
-            opacity = node[_datauu + "opacity"]; // undefined or 1.0 ~ 2.0
+    if (_ie678) {
+        var style = node.style, mary,
+            filter = node.parentNode ? node.currentStyle.filter
+                                     : style.filter;
 
-            return opacity ? (opacity - 1): 1;
+        if (opacity === void 0) {
+            mary = uucssopacity._.exec(filter);
+            return mary ? mary[1] / 100 : 1;
         }
-        if (getComputedStyle) {
-//}@mb
-            return parseFloat(getComputedStyle(node, 0).opacity);
-//{@mb
-        }
-        return 1;
-//}@mb
-    }
+        // normalize
+        opacity = (opacity > 0.999) ? 1
+                : (opacity < 0.001) ? 0 : opacity;
 
-//{@mb
-    if (!uuready.opacity) {
-        if (!node[_datauu + "opacity"] ||
-            node.style.filter[_indexOf](ident) < 0) { // [FIX][RARE CASE]
-
-            // [RARE CASE]
-            // 1. var node = uu.div();     // node has no parentNode
-            // 1. uu.css.opacity(node, 0);
-            // 2. uu.body(node);           // node has parentNode
-            // 3. uu.css.opacity(node, 1); // node has parentNode,
-                                           // but disappearance filter settings
-            if (uuready.filter) {
-                // init opacity
-                node.style.filter += " progid:" + ident + "()";
-            }
-            if (_env.ie6 || _env.ie7) { // [FIX][IE6][IE7]
-                if ((node.currentStyle || {})[_width] === "auto") {
-                    style.zoom = 1;
-                }
-            }
-        }
-    }
-//}@mb
-
-    // relative opacity -> absolute opacity
-    if (typeof opacity === _string) { // "+0.1" or "-0.1"
-        opacity = uucssopacity(node) + parseFloat(opacity);
-    }
-
-    // normalize
-    style.opacity = opacity = (opacity > 0.999) ? 1
-                            : (opacity < 0.001) ? 0 : opacity;
-
-//{@mb
-    if (!uuready.opacity) { // [IE6][IE7][IE8]
-        node[_datauu + "opacity"] = opacity + 1; // (1.0 ~ 2.0)
-
-        if (uuready.filter) {
-            // http://d.hatena.ne.jp/uupaa/20100819
-            if (!node[_parentNode]) {
-                tmpParent = doc.body;
-                tmpParent[_appendChild](node);
-            }
-            var filters = node.filters, filter;
-
-            // [FIX] disappearance filter settings
-            if (!filters.length && node.style.filter[_indexOf](ident) > 0) {
-                ; // [TODO][IE][BUGGY]
-            } else {
-                filter = node.filters.item(ident);
-
-                if (opacity > 0 && opacity < 1) {
-                    filter.Enabled = _true;
-                    filter.Opacity = (opacity * 100) | 0;
-                } else {
-                    filter.Enabled = _false;
-                }
-            }
-            tmpParent && tmpParent[_removeChild](node);
-        }
+        style.filter =
+            ((opacity > 0 &&
+              opacity < 1) ? ("alpha(opacity=" + ((opacity * 100) | 0) + ") ")
+                           : "") + filter.replace(uucssopacity._, " ");
         style[_visibility] = opacity ? "visible" : "hidden";
+        if (_env.ie6 || _env.ie7) {
+            style.zoom = 1;
+        }
+        return node;
     }
 //}@mb
+
+    if (opacity === void 0) { // getter
+        return parseFloat(getComputedStyle(node, "").opacity || 1);
+    }
+    // normalize
+    node.style.opacity = opacity = (opacity > 0.999) ? 1
+                                 : (opacity < 0.001) ? 0 : opacity;
     return node;
 }
+//{@mb
+uucssopacity._ = /alpha\(opacity\=(\d+)\)/;
+//}@mb
 
 // uu.css.transform
 function uucsstransform(node,    // @param Node:
@@ -3838,7 +3802,25 @@ function uucsstransform(node,    // @param Node:
                 mtx = [ cos * param[0], sin * param[0], 0,
                        -sin * param[1], cos * param[1], 0,
                               param[3],       param[4], 1],
-                filter, rect, cx, cy;
+                specialClassName = "uucsstransform" + node.uniqueID,
+                currentStyle = node.currentStyle,
+                filter,
+                rect,
+                cx,     // center-x
+                cy,     // center-y
+                mx = currentStyle.marginLeft,
+                my = currentStyle.marginTop,
+                box,    // uu.css.box result
+                sss,    // uu("SSS") instance
+                index;  // uu("SSS").add() -> rule index
+
+            //{@debug
+            mx.indexOf("em") > 0 && console.log(mx + " unsupported");
+            my.indexOf("em") > 0 && console.log(my + " unsupported");
+            //}@debug
+
+            mx = mx.indexOf("px") > 0 ? parseInt(mx) : 0; // auto -> 0, 10px -> 10
+            my = my.indexOf("px") > 0 ? parseInt(my) : 0; // auto -> 0, 10px -> 10
 
             if (!node[meta]) {
                 // init - get center position
@@ -3848,16 +3830,19 @@ function uucsstransform(node,    // @param Node:
 
                 node.style.filter += " progid:" + ident
                                    + "(sizingMethod='auto expand')";
-                node[data] = { cx: cx, cy: cy };
+                node[data] = { cx: cx, cy: cy,
+                               mx: mx, my: my,
+                               sss: sss, index: index };
             }
+
             filter = node.filters.item(ident),
 
             filter.M11 = mtx[0];
             filter.M12 = mtx[1];
             filter.M21 = mtx[3];
             filter.M22 = mtx[4];
-            filter.Dx  = mtx[6];
-            filter.Dy  = mtx[7];
+            filter.Dx  = mtx[6];// + node[data].cx - cx;// + mx;
+            filter.Dy  = mtx[7];// + node[data].cy - cy;// + my;
 
             // recalc center
             rect = node.getBoundingClientRect();
@@ -4144,11 +4129,12 @@ function StyleSheetInit(id) { // @param String(= ""): style sheet id
 
 // StyleSheet.add
 function StyleSheetAdd(expr,   // @param Hash/String: { selector: declaration, ... } or a "selector"
-                       decl) { // @param Hash(= void): "declaration"
+                       decl) { // @param String(= void): "declaration"
     var ss = this.ss,
 /*{@mb*/ary, i, iz, rex, /*}@mb*/
         selector, declaration, pair = uupair(expr, decl);
 
+    // mixin rules
     uumix(this.rules, pair);
 
     for (selector in pair) {
@@ -4161,7 +4147,10 @@ function StyleSheetAdd(expr,   // @param Hash/String: { selector: declaration, .
                           ss.cssRules.length);
 //{@mb
         } else { // [IE]
+            // IE6 unsupported "E+F" "E>F" "E~F"
             rex = _env.ie6 ? /(?:\+>~)/ : 0;
+
+            // split group "E,F" -> "E", "F"
             ary = selector.split(",");
             for (i = 0, iz = ary.length; i < iz; ++i) {
                 if (rex && rex.test(ary[i])) {
@@ -4202,6 +4191,64 @@ function clearAllRules(that) {
 //}@mb
 }
 
+// --- SystemStyleSheet Class ---
+
+// SSS.init
+function SSSInit() {
+    var node = doc.createElement("style");
+
+    _webkit && node.appendChild(doc.createTextNode(" "));
+    doc.head.appendChild(node);
+    this.node = node;
+    this.ss = node.sheet /*{@mb*/ || node.styleSheet /*}@mb */ ; // [IE] node.styleSheet
+}
+
+// SSS.add
+function SSSAdd(selector,      // @param String: selector. "div>p"
+                declaration) { // @param String: declaration. "color:red; font-weight:bold"
+                               // @return Number: index
+//{@mb
+    if (_ie678) {
+        this.ss.addRule(selector, declaration.trim()); // add last // [IE6][IE7][IE8]
+        return this.ss.rules.length - 1;
+    }
+//}@mb
+    return this.ss.insertRule(selector + "{" + declaration + "}", // [WEB STD][IE9]
+                              this.ss.cssRules.length);
+}
+
+// SSS.update - update declaration
+function SSSUpdate(index,         // @param Number: index
+                   selector,      // @param String: selector. "div>p"
+                   declaration) { // @param String: declaration. "color:red; font-weight:bold"
+    this.remove(index);
+    this.add(selector, declaration);
+}
+
+// SSS.remove - remove rule
+function SSSRemove(index) { // @param Number: index
+/*{@mb*/ _ie678 ? this.ss.removeRule(index) : /*}@mb*/ // [IE6][IE7][IE8]
+                  this.ss.deleteRule(index);           // [WEB STD][IE9]
+}
+
+// SSS.cssText - dump cssText
+function SSSCSSText() { // @return String:
+    return this.ss.cssText;
+}
+
+// SSS.clear - clear all rules
+function SSSClear() {
+    var ss = this.ss, i = 0,
+        rules = /*{@mb*/ _ie678 ? ss.rules.length : /*}@mb*/
+                                  ss.cssRules.length;
+
+    for (; i < rules; ++i) {
+/*{@mb*/_ie678 ? ss.removeRule(0) : /*}@mb*/
+                 ss.deleteRule(0);
+    }
+}
+
+// --- CALC CSS UNIT ---
 // uu.css.unit - convert to pixel unit
 function uucssunit(node,   // @param Node: context
                    value,  // @param Number/CSSUnitString: 123, "123", "123px",
@@ -4439,14 +4486,14 @@ function uuklass(expr,      // @param String/Node: "class", "class1, ..." or Nod
 //{@mb
     if (doc.getElementsByClassName) {
 //}@mb
-        return toArray.call((context || doc.body).getElementsByClassName(expr));
+        return toArray.call((context || doc.body || doc).getElementsByClassName(expr));
 //{@mb
     }
 
     ary = uutrim(expr).split(sp);
     az  = ary.length;
     rex = classNameMatcher(ary);
-    nodeList = (context || doc.body).getElementsByTagName("*");
+    nodeList = (context || doc.body || doc).getElementsByTagName("*");
 
     for (rv = [], ri = -1, i = 0, iz = nodeList.length; i < iz; ++i) {
         v = nodeList[i];
@@ -6404,7 +6451,7 @@ function setNodeValue(node,    // @param Node:
 function uuquery(expr,      // @param CSSSelectorExpressionString: "css > selector"
                  context) { // @param Node(= <body>): query context
                             // @return NodeArray: [Node, ...]
-    context = context || doc.body;
+    context = context || doc.body || doc;
 
 //{@mb
     if (context.querySelectorAll) {
@@ -6473,13 +6520,13 @@ function uutag(expr,      // @param String(= ""): tag name, "" is all
 //{@mb
     if (!_ie678) { // [WEB STD][IE9]
 //}@mb
-        return toArray.call((context || doc.body).getElementsByTagName(expr || "*"));
+        return toArray.call((context || doc.body || doc).getElementsByTagName(expr || "*"));
 //{@mb
     }
 
     // [IE6][IE7][IE8]
     var rv = [], ri = -1, v, i = 0, skip = (!expr || expr === "*"),
-        nodeList = (context || doc.body).getElementsByTagName(expr || "*"),
+        nodeList = (context || doc.body || doc).getElementsByTagName(expr || "*"),
         iz = nodeList.length;
 
     // [IE] getElementsByTagName("*") has comment nodes
@@ -6497,7 +6544,7 @@ function uutag(expr,      // @param String(= ""): tag name, "" is all
 function uumatch(expr,      // @param CSSSelectorExpressionString: "css > selector"
                  context) { // @param Node(= <body>): match context
                             // @return Boolean:
-    context = context || doc.body;
+    context = context || doc.body || doc;
 //{@mb
     if (context.matchesSelector) {
         return context.matchesSelector(expr);
@@ -7675,12 +7722,15 @@ function uualert(/* var_args, ... */) { // @param Mix: var_args
 
 // inner - argument serialize
 function serializeArgument(ary) { // @param Array: arguments
-                                   // @return String:
-    return (ary.length < 2 && isString(ary[0])) ? ary[0] // [2]
-           : uuhas(ary[0], "@") ? uuf.apply(this, ary)   // [3]
+                                  // @return String:
+    var a0 = ary[0],
+        rv = (ary.length < 2 && (isString(a0) || isNumber(a0))) ? a0 // [2]
+           : uuhas(a0, "@") ? uuf.apply(this, ary)                   // [3]
            : (toArray.call(ary).map(function(v) {
                 return uujsonencode(v, 0, 1);
-              }).join(", ") || "undefined");             // [1][4-9]
+              }).join(", ") || "undefined");                         // [1][4-9]
+
+    return rv;
 }
 
 //{@debug
