@@ -3441,6 +3441,11 @@ function uufxfade(node,     // @param Node:
                   duration, // @param Number: duration
                   option) { // @param Hash(= {}):
                             // @return Node:
+//{@mb
+    if (!duration && _ie678) {
+        return uucssopacity(node, uucssopacity(node) < 0.5 ? 1 : 0);
+    }
+//}@mb
     return uufx(node, duration, uuarg(option, { init: function(node, option) {
             option.o = uucssopacity(node) < 0.5 ? 1 : 0;
         }}));
@@ -3451,6 +3456,11 @@ function uufxfadein(node,     // @param Node:
                     duration, // @param Number: duration
                     option) { // @param Hash(= {}):
                               // @return Node:
+//{@mb
+    if (!duration && _ie678) {
+        return uucssopacity(node, 1);
+    }
+//}@mb
     return uufx(node, duration, uuarg(option, { init: function(node, option) {
             option.o = 1;
         }}));
@@ -3461,6 +3471,11 @@ function uufxfadeout(node,     // @param Node:
                      duration, // @param Number: duration
                      option) { // @param Hash(= {}):
                                // @return Node:
+//{@mb
+    if (!duration && _ie678) {
+        return uucssopacity(node, 0);
+    }
+//}@mb
     return uufx(node, duration, uuarg(option, { init: function(node, option) {
             option.o = 0;
         }}));
@@ -3802,25 +3817,7 @@ function uucsstransform(node,    // @param Node:
                 mtx = [ cos * param[0], sin * param[0], 0,
                        -sin * param[1], cos * param[1], 0,
                               param[3],       param[4], 1],
-                specialClassName = "uucsstransform" + node.uniqueID,
-                currentStyle = node.currentStyle,
-                filter,
-                rect,
-                cx,     // center-x
-                cy,     // center-y
-                mx = currentStyle.marginLeft,
-                my = currentStyle.marginTop,
-                box,    // uu.css.box result
-                sss,    // uu("SSS") instance
-                index;  // uu("SSS").add() -> rule index
-
-            //{@debug
-            mx.indexOf("em") > 0 && console.log(mx + " unsupported");
-            my.indexOf("em") > 0 && console.log(my + " unsupported");
-            //}@debug
-
-            mx = mx.indexOf("px") > 0 ? parseInt(mx) : 0; // auto -> 0, 10px -> 10
-            my = my.indexOf("px") > 0 ? parseInt(my) : 0; // auto -> 0, 10px -> 10
+                filter, rect, cx, cy;
 
             if (!node[meta]) {
                 // init - get center position
@@ -3830,19 +3827,16 @@ function uucsstransform(node,    // @param Node:
 
                 node.style.filter += " progid:" + ident
                                    + "(sizingMethod='auto expand')";
-                node[data] = { cx: cx, cy: cy,
-                               mx: mx, my: my,
-                               sss: sss, index: index };
+                node[data] = { cx: cx, cy: cy };
             }
-
             filter = node.filters.item(ident),
 
             filter.M11 = mtx[0];
             filter.M12 = mtx[1];
             filter.M21 = mtx[3];
             filter.M22 = mtx[4];
-            filter.Dx  = mtx[6];// + node[data].cx - cx;// + mx;
-            filter.Dy  = mtx[7];// + node[data].cy - cy;// + my;
+            filter.Dx  = mtx[6];
+            filter.Dy  = mtx[7];
 
             // recalc center
             rect = node.getBoundingClientRect();
@@ -5312,6 +5306,7 @@ function uueventhover(node,         // @param Node:
                : _ie ? expr(evt, evt.uu.code === uuevent.codes.mouseenter, node)
                      : node !== (rel = evt.relatedTarget) && !uuhas(node, rel) &&
                        expr(evt, evt.uu.code === uuevent.codes.mouseover, node);
+                       // callback(evt, isHover, node)
         uueventstop(evt);
     }
 
@@ -7954,12 +7949,30 @@ uujson.x = [
 function uujsondecode(jsonString, // @param JSONString/ExJSONString:
                       exjson) {   // @param Boolean(= false): true is ExJSONString
                                   // @return Mix/Boolean: false is error
+/*
     var str = jsonString.trim(), x = uujson.x;
 
     return (exjson || !win.JSON) ? (x[0].test(str[_replace](x[1], ""))
                                     ? _false
                                     : (new Function("return " + str))())
                                  : win.JSON.parse(str);
+ */
+    var str = jsonString.trim(), x = uujson.x;
+
+    if (exjson || !win.JSON) {
+        var unescaped = str[_replace](x[1], "");
+
+        if (x[0].test(unescaped)) {
+            return _false;
+        }
+        try {
+            var evalString = "return " + str;
+            return (new Function(evalString))();
+        } catch(err) {
+            console.log(err + "");
+        }
+    }
+    return win.JSON.parse(str);
 }
 
 // inner - json inspect
@@ -9291,8 +9304,18 @@ function FlashAudioInit(src,        // @param String: "music.mp3" or ""
         callback(that);
         option.autoplay && that.play();
     }
+
+    // create hidden container
+    var container = uu.id("uuAudioContainer");
+
+    if (!container) {
+        container = newNode();
+        container.style.cssText = "position:absolute;top:-9999px;";
+        doc.body.appendChild(container);
+    }
+
     this.flash = uuflash(uuconfig.audio.swf,
-                         OBJECT_ID, { width: 1, height: 1 }, wait);
+                         OBJECT_ID, { width: 1, height: 1, parent: container }, wait);
 }
 
 // FlashAudio.attr
@@ -9322,13 +9345,16 @@ function FlashAudioStop(close) { // @param Boolean(= false):
     var flash = this.flash, attr;
 
     if (close) {
+        flash.xiFlashAudioSetAttr({ volume: 0 }); // puchi noise
         flash.xiFlashAudioStop(_true);
         uunoderemove(this.audio, _true); // removeAll
     } else if (this.state().playing) {
+        attr = flash.xiFlashAudioGetAttr(); // get current volume
+        flash.xiFlashAudioSetAttr({ volume: 0 }); // puchi noise
         flash.xiFlashAudioStop(_false);
-        attr = flash.xiFlashAudioGetAttr();
         flash.xiFlashAudioSetAttr({ currentTime: attr.startTime,
-                                    timeupdate: 1 }); // rewind
+                                    timeupdate: 1, // rewind
+                                    volume: attr.volume }); // volume
     }
 }
 
