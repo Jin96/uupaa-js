@@ -3694,8 +3694,8 @@ function uufxmovein(node,     // @param Node:
                 if (_mobile) {
                     tr = uucsstransform(node);
                     uucsstransform(node,
-                        tr[0], tr[1], tr[2], Math.cos(angle) * range + endX,
-                                             Math.sin(angle) * range + endY, tr[5]);
+                        [tr[0], tr[1], tr[2], Math.cos(angle) * range + endX,
+                                              Math.sin(angle) * range + endY, tr[5]]);
                 } else {
                     style.left = (Math.cos(angle) * range + endX) + "px";
                     style.top  = (Math.sin(angle) * range + endY) + "px";
