@@ -293,6 +293,7 @@ var _addEventListener = "addEventListener",
     _gecko = _env.gecko,            // as uu.gecko (Firefox, ...)
     _opera = _env.opera,            // as uu.opera (Opera, Opera Mini)
     _webkit = _env.webkit,          // as uu.webkit (Safari, iPhone, iPad, Google Chrome)
+    _mobile = _env.mobile,          // as uu.env.mobile (iOS, Android)
     _baseDir = getBaseDir("uupaa.js"); // base dir. default - directory containing uupaa.js
 
 // --- HTML5 NEXT ( document.html, document.head ) ---
@@ -3039,6 +3040,8 @@ uufx.props = {
     scaleX:             8,  // transform scaleX
     scaleY:             9,  // transform scaleY
     rotate:            10,  // transform rotate
+    tx:                _mobile ? 11 : 6,  // transform translateX or left
+    ty:                _mobile ? 12 : 7,  // transform translateY or top
     translateX:        11,  // transform translateX
     translateY:        12,  // transform translateY
     translateZ:        13   // transform translateZ
@@ -3194,6 +3197,7 @@ function uufxbuild(node, data, queue, option) {
         w = fixdb[i] || i;
 
         if (w in cs || w === "pageXOffset" || w === "pageYOffset" ||
+                       w === "tx" || w === "ty" ||
                        w === "scaleX" || w === "scaleY" || w === "rotate" ||
                        w === "translateX" || w === "translateY" || w === "translateZ") {
             opt = option[i];
@@ -3277,6 +3281,7 @@ function uufxbuild(node, data, queue, option) {
                     break;
                 case 6: // left
                 case 7: // top
+                    w = { tx: "left", ty: "top" }[w] || w;
                     sv = n > 6 ? node.offsetTop  - parseInt(cs.marginTop)
                                : node.offsetLeft - parseInt(cs.marginLeft);
                     ev = uunumberexpand(sv, ev, parseInt);
@@ -3504,8 +3509,8 @@ function uufxpuff(node,     // @param Node:
             var cs = uucss(node, "px");
 
             uumix(option, { w: "*1.5", h: "*1.5", o: 0,
-                            x: "-" + parseInt(cs[_width])  * 0.25,
-                            y: "-" + parseInt(cs[_height]) * 0.25 },
+                            tx: "-" + parseInt(cs[_width])  * 0.25,
+                            ty: "-" + parseInt(cs[_height]) * 0.25 },
                   _env.jit ? { fs: "*1.5" } : {});
         }}));
 }
@@ -3539,8 +3544,8 @@ function uufxflare(node,     // @param Node:
                 angle = i * Math.PI / 180;
 
                 uufx(cloneNode, duration, uumix({}, p, {
-                    x: Math.cos(angle) * p.range + x,
-                    y: Math.sin(angle) * p.range + y,
+                    tx: Math.cos(angle) * p.range + x,
+                    ty: Math.sin(angle) * p.range + y,
                     init: function(cloneNode) {
                         uucssopacity(cloneNode, 0.5);
                     },
@@ -3634,8 +3639,8 @@ function uufxshrink(node,     // @param Node:
             var cs = uucss(node, "px");
 
             uumix(option, { w: 0, h: 0, o: 0,
-                            x: "-" + parseInt(cs[_width])  * 0.5,
-                            y: "-" + parseInt(cs[_height]) * 0.5, fs: "*0.5" });
+                            tx: "-" + parseInt(cs[_width])  * 0.5,
+                            ty: "-" + parseInt(cs[_height]) * 0.5, fs: "*0.5" });
         }}));
 }
 
@@ -3673,7 +3678,7 @@ function uufxmovein(node,     // @param Node:
             degree: 0,
             o:      1,
             init:   function(node, option) {
-                var cs = uucss(node, "px"), style = node.style,
+                var cs = uucss(node, "px"), style = node.style, tr,
                     angle, endX, endY, fs, w, h, o, range = option.range || 200;
 
                 angle = option.degree * Math.PI / 180;
@@ -3685,8 +3690,17 @@ function uufxmovein(node,     // @param Node:
                 w = parseInt(cs[_width]);
                 h = parseInt(cs[_height]);
                 o = uucssopacity(node);
-                style.left   = (Math.cos(angle) * range + endX) + "px";
-                style.top    = (Math.sin(angle) * range + endY) + "px";
+
+                if (_mobile) {
+                    tr = uucsstransform(node);
+                    uucsstransform(node,
+                        tr[0], tr[1], tr[2], Math.cos(angle) * range + endX,
+                                             Math.sin(angle) * range + endY, tr[5]);
+                } else {
+                    style.left = (Math.cos(angle) * range + endX) + "px";
+                    style.top  = (Math.sin(angle) * range + endY) + "px";
+                }
+
                 style[_width]  = (w * 1.5) + "px";
                 style[_height] = (h * 1.5) + "px";
                 if (_env.jit) {
@@ -3695,7 +3709,7 @@ function uufxmovein(node,     // @param Node:
                 uucssopacity(node, 0);
 
                 _env.jit && (option.fs = fs);
-                uumix(option, { w: w, h: h, x: endX, y: endY });
+                uumix(option, { w: w, h: h, tx: endX, ty: endY });
             }}));
 }
 
@@ -3712,7 +3726,7 @@ function uufxmoveout(node,     // @param Node:
                 endX = Math.cos(angle) * range + parseInt(cs.left);
                 endY = Math.sin(angle) * range + parseInt(cs.top);
 
-                uumix(option, { w: "*1.5", h: "*1.5", x: endX, y: endY },
+                uumix(option, { w: "*1.5", h: "*1.5", tx: endX, ty: endY },
                       _env.jit ? { fs: "*1.5" } : {});
             }, degree: 0, o: 0 }));
 }
@@ -10783,7 +10797,9 @@ function detectFeatures() {
         node = newNode(), child, style = node.style,
 //}@mb
         rv = {
-            opacity: _true,         // opacity ready
+//          touch: _true,           // touch
+//          transform: _true,       // CSS3 transform ready
+            opacity: _true,         // CSS3 opacity ready
             filter: _false,         // node.filters ready [IE]
             color: uuarg(hash),     // color: rgba, hsla, transparent ready
             border: uuarg(hash),    // border: rgba, hsla, transparent ready
@@ -10815,6 +10831,9 @@ function detectFeatures() {
         rv.border[i] = v[1].test(style.borderTopColor);
         rv.background[i] = v[1].test(style.backgroundColor);
     });
+//  rv.touch = !!window.Touch;
+//  rv.transform = (newNode().style.WebkitTransform !== void 0);
+
     // detect opacity - http://d.hatena.ne.jp/uupaa/20100513
     rv.opacity = style.opacity != undef;
 
