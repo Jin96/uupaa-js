@@ -3186,6 +3186,9 @@ function uufxbuild(node, data, queue, option) {
             back:     1
         },
         i, w, n, opt,
+        transform = uucsstransform(node),
+        transformBuffer = [],
+        transformChanged = 0,
         vp, // viewport
         ez, // easing function name. eg: "inoutquad"
         sv, // start value
@@ -3293,17 +3296,10 @@ function uufxbuild(node, data, queue, option) {
                 case 11: // translateX
                 case 12: // translateY
                 case 13: // translateZ
-                    sv = uucsstransform(node); // get rotate value
-                    ev = uunumberexpand(sv[n - 8], ev, parseFloat);
-                    rv += uuf("@(node,[@,@,@,@,@,@]);",
-                              "uu.css.transform",
-                              n ===  8 ? ('(fin?' + ev + ':' + ezfn(sv[0], ev, ez) + ')') : sv[0],
-                              n ===  9 ? ('(fin?' + ev + ':' + ezfn(sv[1], ev, ez) + ')') : sv[1],
-                              n === 10 ? ('(fin?' + ev + ':' + ezfn(sv[2], ev, ez) + ')') : sv[2],
-                              n === 11 ? ('(fin?' + ev + ':' + ezfn(sv[3], ev, ez) + ')') : sv[3],
-                              n === 12 ? ('(fin?' + ev + ':' + ezfn(sv[4], ev, ez) + ')') : sv[4],
-                              n === 13 ? ('(fin?' + ev + ':' + ezfn(sv[5], ev, ez) + ')') : sv[5]);
-                    sv = sv[n - 8];
+                    sv = transform[n - 8];
+                    ev = uunumberexpand(sv, ev, parseFloat);
+                    transformBuffer[n - 8] = ('(fin?' + ev + ':' + ezfn(sv, ev, ez) + ')');
+                    ++transformChanged;
                     break;
                 default: // other...
                     sv = parseInt(cs[w]) || 0;
@@ -3316,6 +3312,16 @@ function uufxbuild(node, data, queue, option) {
                 reverseOption[w] = [sv, ez];
             }
         }
+    }
+
+    if (transformChanged) {
+        rv += uuf("uu.css.transform(node,[@,@,@,@,@,@]);",
+                  transformBuffer[0] || transform[0],
+                  transformBuffer[1] || transform[1],
+                  transformBuffer[2] || transform[2],
+                  transformBuffer[3] || transform[3],
+                  transformBuffer[4] || transform[4],
+                  transformBuffer[5] || transform[5]);
     }
 
     // add reverse queue
@@ -3693,23 +3699,29 @@ function uufxmovein(node,     // @param Node:
 
                 if (_mobile) {
                     tr = uucsstransform(node);
-                    uucsstransform(node,
-                        [tr[0], tr[1], tr[2], Math.cos(angle) * range + endX,
-                                              Math.sin(angle) * range + endY, tr[5]]);
+                    uucsstransform(node, [tr[0] * 1.5,
+                                          tr[1] * 1.5,
+                                          tr[2],
+                                          (Math.cos(angle) * range + tr[3]) | 0,
+                                          (Math.sin(angle) * range + tr[4]) | 0,
+                                          tr[5] | 0]);
+                    uucssopacity(node, 0);
+
+                    _env.jit && (option.fs = fs);
+                    uumix(option, { scaleX: tr[0], scaleY: tr[1], tx: tr[3], ty: tr[4] });
                 } else {
                     style.left = (Math.cos(angle) * range + endX) + "px";
                     style.top  = (Math.sin(angle) * range + endY) + "px";
-                }
+                    style[_width]  = (w * 1.5) + "px";
+                    style[_height] = (h * 1.5) + "px";
+                    if (_env.jit) {
+                        style.fontSize = (fs * 1.5) + "px";
+                    }
+                    uucssopacity(node, 0);
 
-                style[_width]  = (w * 1.5) + "px";
-                style[_height] = (h * 1.5) + "px";
-                if (_env.jit) {
-                    style.fontSize = (fs * 1.5) + "px";
+                    _env.jit && (option.fs = fs);
+                    uumix(option, { w: w, h: h, tx: endX, ty: endY });
                 }
-                uucssopacity(node, 0);
-
-                _env.jit && (option.fs = fs);
-                uumix(option, { w: w, h: h, tx: endX, ty: endY });
             }}));
 }
 
@@ -3886,13 +3898,15 @@ function uucsstransform(node,    // @param Node:
                        "transform"] =
                 "scale(" + param[0] + "," + param[1] + ") rotate("
                          + param[2] + "deg) translate(" // 2d
-                         + param[3] + "px," + param[4] + "px)";
+                         + (param[3] | 0) + "px," +
+                           (param[4] | 0) + "px)";
         } else {
 //}@mb
             node.style.webkitTransform =
                 "scale(" + param[0] + "," + param[1] + ") rotate("
                      + param[2] + "deg) translate3d(" // 3d
-                     + param[3] + "px," + param[4] + "px," + param[5] + "px)";
+                     + (param[3] | 0) + "px," + (param[4] | 0) +
+                                        "px," + (param[5] | 0) + "px)";
 //{@mb
         }
     }
