@@ -433,23 +433,23 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
 //}@snippet
     // --- AJAX / JSONP / LAZY JS LOADER / FILE STAT ---
 //{@ajax
-    ajax:     uumix(uuajax, {       // uu.ajax(url:String, option:Hash, callback:CallbackFunction)
+    ajax:     uumix(uuajax, {       // uu.ajax(url:String, option:Hash, callback:CallbackFunction = void)
                                     //  [1][async request] uu.ajax("http://...", { method: "POST", data: ... }, callback)
-        post:       uuajaxpost,     // uu.ajax.post(url:String, option:Hash, callback:CallbackFunction)
+        post:       uuajaxpost,     // uu.ajax.post(url:String, option:Hash, callback:CallbackFunction = void)
                                     //  [1][post] uu.ajax.post("http://example.com/api?id=a", { data: uu.form.serialize(uu.id("#form")) }, callback)
         clear:      uuajaxclear,    // uu.ajax.clear(url:String = "") - clear "If-Modified-Since" cache
                                     //  [1][clear all]   uu.ajax.clear()
                                     //  [2][clear a url] uu.ajax.clear("http://example.com/api")
-        binary:     uuajaxbinary    // uu.ajax.binary(url:String, option:Hash, callback:CallbackFunction)
+        binary:     uuajaxbinary    // uu.ajax.binary(url:String, option:Hash, callback:CallbackFunction = void)
                                     //  [1][get binary]       uu.ajax.binary("http://example.com/api", {}, callback)
                                     //  [2][post binary]      uu.ajax.binary("http://example.com/api", { data: byteArray }, callback)
                                     //  [3][get MessagePack]  uu.ajax.binary("http://example.com/api", { msgpack: true }, callback)
                                     //  [4][post MessagePack] uu.ajax.binary("http://example.com/api", { msgpack: true, data: JavaScriptMixObject }, callback)
     }),
-    jsonp:          uujsonp,        // uu.jsonp(url:String, option:Hash, callback:CallbackFunction)
+    jsonp:          uujsonp,        // uu.jsonp(url:String, option:Hash, callback:CallbackFunction = void)
                                     //  [1][async request] uu.jsonp("http://...callback=@", { method: "mycallback" }, callback)
 //}@ajax
-    js:             uujs,           // uu.js(url:String, option:Hash = { async, defer, type, charset }, callback:CallbackFunction)
+    js:             uujs,           // uu.js(url:String, option:Hash = { async, defer, type, charset }, callback:CallbackFunction = void)
                                     //  [1][async load] uu.js("http://.../hoge.js", { async: true, defer: true })
                                     //  [2][defer load] uu.js("http://.../hoge.js", { defer: true })
                                     //  [3][lazy load]  uu.js("http://.../hoge.js")
@@ -601,8 +601,8 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //  [1][get opacity] uu.css.opacity(node) -> 0.5
                                     //  [2][set opacity] uu.css.opacity(node, 0.5) -> node
         transform:  uucsstransform, // uu.css.transform(node:Node):Node/NumberArray
-                                    //  [1][get transform] uu.css.transform(node) -> [scaleX, scaleY, rotate, translateX, translateY ]
-                                    //  [2][set transform] uu.css.transform(node, 1, 1, 0, 0, 0) -> node
+                                    //  [1][get transform] uu.css.transform(node) -> [scaleX, scaleY, rotate, translateX, translateY, translateZ]
+                                    //  [2][set transform] uu.css.transform(node, 1, 1, 0, 0, 0, 0) -> node
         userSelect: uucssuserSelect // uu.css.userSelect(node:Node, allow:Boolean = false):Node
     }),
     // --- STYLESHEET ---
@@ -1599,7 +1599,7 @@ function uuajax(url,        // @param String: url
                             //    option.binary  - Boolean(= false): true is binary data
                             //    option.before  - CallbackFunction(= void): before({ option }, xhr)
                             //    option.after   - CallbackFunction(= void): after({ option, ok, rv, status }, xhr)
-                callback) { // @param CallbackFunction: callback(response)
+                callback) { // @param CallbackFunction(= void): callback(response)
                             //    response        - Hash: { ok, rv, date, cached, option, status }
                             //    response.ok     - Boolean(= false): true is status = 20x, false is status = 30x, 40x, 50x
                             //    response.rv     - String(= null): result value. xhr.responseText or xhr.responseXML
@@ -1646,7 +1646,7 @@ function uuajax(url,        // @param String: url
                     }
                 }
                 option.after && option.after(resp, xhr); // after callback
-                callback(resp); // finished callback
+                callback && callback(resp); // finished callback
                 gc();
             }
         }
@@ -1668,7 +1668,7 @@ function uuajax(url,        // @param String: url
             };
 
             option.after && option.after(resp, xhr); // after callback
-            callback(resp); // finished callback
+            callback && callback(resp); // finished callback
             gc(abort);
         }
     }
@@ -1734,11 +1734,12 @@ uuajax.cache = {}; // { "http://...": [DateHash(lastModified), rv], ... }
 function uuajaxpost(url,        // @param String: url
                     option,     // @param Hash: { xml, data, ifmod, timeout,
                                 //                header, binary, before, after }
-                    callback) { // @param CallbackFunction: callback(responce)
+                    callback) { // @param CallbackFunction(= void): callback(responce)
                                 //    response - Hash: { ok, rv, date, cached, option, status }. see uu.ajax
 
     //  [1][post] uu.ajax.post("http://example.com/api?id=a", { data: uu.form.serialize(uu.id("#form")) }, callback)
 
+    option = option || {};
     option.method = "POST";
     uuajax(url, option, callback);
 }
@@ -1757,7 +1758,7 @@ function uuajaxclear(url) { // @param String(= ""): "" is clear all cache
 function uuajaxbinary(url,        // @param String:
                       option,     // @param Hash: { data, timeout, header, before, after, msgpack }
                                   //    option.msgpack - Boolean(= false): true is msgpack handling
-                      callback) { // @param CallbackFunction: callback(responce)
+                      callback) { // @param CallbackFunction(= void): callback(responce)
                                   //    response - Hash: { ok, rv, date, cached, option, status }. see uu.ajax
 
     //  [1][get  binary]      uu.ajax.binary("http://example.com/api", {}, callback)
@@ -1777,7 +1778,7 @@ function uuajaxbinary(url,        // @param String:
                 if (resp.ok) {
                     resp.rv = uumsgpackdecode(resp.rv); // msgpack.decode(download())
                 }
-                callback(resp);
+                callback && callback(resp);
             });
             return;
         }
@@ -1881,7 +1882,7 @@ function uujs(url,        // @param String:
                           //                                    execution order is guaranteed.
                           //   option.type - String(= "text/javascript"):
                           //   option.charset - String(= "utf-8"):
-              callback) { // @param CallbackFunction: callback(response)
+              callback) { // @param CallbackFunction(= void): callback(response)
                           //     response.ok     - Boolean:
                           //     response.rv     - Node: <script>
                           //     response.node   - Node: <script>
@@ -1903,7 +1904,7 @@ function uujs(url,        // @param String:
                 node.onload = node.onreadystatechange = null; // [IE] avoid mem leak
                 // [!][IE] lazy
                 setTimeout(function() {
-                    callback({
+                    callback && callback({
                         ok: true,
                         rv: node,
                         node: node,
@@ -1974,7 +1975,7 @@ function uujsonp(url,        // @param String: "http://example.com/api?callback=
                              //    option.method  - String(= "callback"): callback method name
                              //    option.before  - CallbackFunction(= void): before({ option }, <script>)
                              //    option.after   - CallbackFunction(= void): after({ option, ok, rv, status }, <script>)
-                 callback) { // @param CallbackFunction: callback(response)
+                 callback) { // @param CallbackFunction(= void): callback(response)
                              //    response        - Hash: { ok, rv, option, status }
                              //    response.ok     - Boolean(= false): true is status = 20x, false is status = 30x, 40x, 50x
                              //    response.rv     - Mix(= null): result value
@@ -2001,7 +2002,7 @@ function uujsonp(url,        // @param String: "http://example.com/api?callback=
             };
 
             option.after && option.after(resp, node); // after callback
-            callback(resp); // finished
+            callback && callback(resp); // finished
 
             setTimeout(function() {
                 uunoderemove(node);
@@ -3035,7 +3036,12 @@ uufx.props = {
     pageYOffset:        5,  // window.pageYOffset / document.documentElemenet.scrollTop  [IE6][IE7][IE8]
     left:               6,  // css left
     top:                7,  // css top
-    rotate:             8   // transform rotate
+    scaleX:             8,  // transform scaleX
+    scaleY:             9,  // transform scaleY
+    rotate:            10,  // transform rotate
+    translateX:        11,  // transform translateX
+    translateY:        12,  // transform translateY
+    translateZ:        13   // transform translateZ
 };
 
 // uu.fx.easing - easing functions
@@ -3187,7 +3193,9 @@ function uufxbuild(node, data, queue, option) {
     for (i in option) {
         w = fixdb[i] || i;
 
-        if (w in cs || w === "pageXOffset" || w === "pageYOffset" || w === "rotate") {
+        if (w in cs || w === "pageXOffset" || w === "pageYOffset" ||
+                       w === "scaleX" || w === "scaleY" || w === "rotate" ||
+                       w === "translateX" || w === "translateY" || w === "translateZ") {
             opt = option[i];
             isArray(opt) ? (ev = opt[0], ez = opt[1][_toLowerCase]()) // { left: [100, "linear"] }
                          : (ev = opt,    ez = "inoutquad");           // { left: 100 }
@@ -3274,17 +3282,23 @@ function uufxbuild(node, data, queue, option) {
                     ev = uunumberexpand(sv, ev, parseInt);
                     rv += 'style.'+w+'=((fin?'+ev+':'+ezfn(sv,ev,ez)+')|0)+"px";';
                     break;
-                case 8: // rotate(degree)
+                case 8:  // scaleX
+                case 9:  // scaleY
+                case 10: // rotate(degree)
+                case 11: // translateX
+                case 12: // translateY
+                case 13: // translateZ
                     sv = uucsstransform(node); // get rotate value
-                    ev = uunumberexpand(sv[2], ev, parseFloat);
-                    rv += uuf("@(node,[@,@,@,@,@]);",
+                    ev = uunumberexpand(sv[n - 8], ev, parseFloat);
+                    rv += uuf("@(node,[@,@,@,@,@,@]);",
                               "uu.css.transform",
-                              sv[0],  // scaleX
-                              sv[1],  // scaleY
-                              '(fin?' + ev + ':' + ezfn(sv[2], ev, ez) + ')', // rotate
-                              sv[3],  // translateX
-                              sv[4]); // translateY
-                    sv = sv[2];
+                              n ===  8 ? ('(fin?' + ev + ':' + ezfn(sv[0], ev, ez) + ')') : sv[0],
+                              n ===  9 ? ('(fin?' + ev + ':' + ezfn(sv[1], ev, ez) + ')') : sv[1],
+                              n === 10 ? ('(fin?' + ev + ':' + ezfn(sv[2], ev, ez) + ')') : sv[2],
+                              n === 11 ? ('(fin?' + ev + ':' + ezfn(sv[3], ev, ez) + ')') : sv[3],
+                              n === 12 ? ('(fin?' + ev + ':' + ezfn(sv[4], ev, ez) + ')') : sv[4],
+                              n === 13 ? ('(fin?' + ev + ':' + ezfn(sv[5], ev, ez) + ')') : sv[5]);
+                    sv = sv[n - 8];
                     break;
                 default: // other...
                     sv = parseInt(cs[w]) || 0;
@@ -3793,16 +3807,17 @@ uucssopacity._ = /alpha\(opacity\=(\d+)\)/;
 function uucsstransform(node,    // @param Node:
                         param) { // @param NumberArray(= void): [scaleX, scaleY,
                                  //                              rotate(degree),
-                                 //                              translateX, translateY]
+                                 //                              translateX, translateY,
+                                 //                              translateZ]
                                  // @return Node/NumberArray:
     //  [1][get transform] uu.css.transform(node) -> [scaleX, scaleY, rotate,
-    //                                                translateX, translateY]
-    //  [2][set transform] uu.css.transform(node, 1, 1, 0, 0, 0) -> node
+    //                                                translateX, translateY, translateZ]
+    //  [2][set transform] uu.css.transform(node, 1, 1, 0, 0, 0, 0) -> node
 
     var meta = _datauu + "trans"; // node["data-uutrans"]
 
     if (!param) {
-        return node[meta] || [1, 1, 0, 0, 0];
+        return node[meta] || [1, 1, 0, 0, 0, 0];
     }
 
 //{@mb
@@ -3849,18 +3864,23 @@ function uucsstransform(node,    // @param Node:
     } else {
 //}@mb
 
-    //  node.style.webkitTransformOrigin = ""
-        node.style[_webkit ? "webkitTransform" :
 //{@mb
-                   _gecko  ? "MozTransform" :
-                   _opera  ? "OTransform" :
-                   _ie     ? "msTransform" :
+        if (!_webkit) {
+            node.style[_gecko  ? "MozTransform" :
+                       _opera  ? "OTransform" :
+                       _ie     ? "msTransform" :
+                       "transform"] =
+                "scale(" + param[0] + "," + param[1] + ") rotate("
+                         + param[2] + "deg) translate(" // 2d
+                         + param[3] + "px," + param[4] + "px)";
+        } else {
 //}@mb
-                   "transform"] =
-            "scale(" + param[0] + "," + param[1] + ") rotate("
-                     + param[2] + "deg) translate("
-                     + param[3] + "," + param[4] + ")";
+            node.style.webkitTransform =
+                "scale(" + param[0] + "," + param[1] + ") rotate("
+                     + param[2] + "deg) translate3d(" // 3d
+                     + param[3] + "px," + param[4] + "px," + param[5] + "px)";
 //{@mb
+        }
     }
 //}@mb
     node[meta] = param[_concat](); // clone array
@@ -4940,7 +4960,7 @@ uuevent.codes = {
     online:         50,
     offline:        51,
     message:        52,
-    hashchange:     53
+    hashchange:     53 // Opera11+
 };
 
 // uu.event.fire - fire event / fire custom event(none capture event only)
