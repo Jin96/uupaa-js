@@ -70,7 +70,6 @@ upa -off color/ui/codec
 || ajax      || uu.ajax(), uu.jsonp() をコメントアウトします。|| -2.8kB ||
 || svg       || uu.svg() をコメントアウトします || -0.2kB ||
 || geo       || uu.geo() をコメントアウトします || -0.7kB ||
-
 || canvas    || uu.canvas() をコメントアウトします || -59.0kB ||
 || flash     || uu.flash() をコメントアウトします || -0.6kB ||
 || cookie    || uu.cookie(), uu.Class.CookieStorage をコメントアウトします || -1.0kB ||
