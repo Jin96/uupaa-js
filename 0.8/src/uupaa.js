@@ -161,9 +161,24 @@
 //      Opera 10.60+
 //      iOS 3+
 //      Android(ChromeLite) 1+
-
+//
 // Element Traversal
 //      Gecko, WebKit, Opera, IE9+
+//
+// +--------------+--------+---------+---------+---------+
+// | Typed Array  | Chrome | Firefox | iOS     | Android |
+// |              |        |         |  Safari |  WebKit |
+// +--------------+--------+---------+---------+---------+
+// | Uint8Array   |   9+   |    4+   |   4.2+  |
+// | Uint16Array  |   9+   |    4+   |   4.2+  |
+// | Uint32Array  |   9+   |    4+   |   4.2+  |
+// | Int8Array    |   9+   |    4+   |   4.2+  |
+// | Int16Array   |   9+   |    4+   |   4.2+  |
+// | Int32Array   |  ---   |   ---   |   ---   |
+// | Float32Array |   9+   |    4+   |   4.2+  |
+// | Float64Array |  ---   |   ---   |   ---   |
+// +--------------+--------+---------+---------+
+
 // === Core ===
 
 // * Manual http://code.google.com/p/uupaa-js/w/list
@@ -172,7 +187,7 @@ var uu; // window.uu - uupaa.js library namespace
 
 uu || (function(win,                // as Global / window
                 doc,                // as document
-                htmlNode,           // as document.documentElement / <html>
+                htmlNode,           // as document.documentElement as <html>
                 navigator,          // as window.navigator
                 toString,           // as Global.Object.prototype.toString
                 isArray,            // as Global.Array.isArray,
@@ -412,6 +427,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //    arg4:Mix = void):Instance/NodeSet
                                     //  [1][Class factory]   uu("MyClass", arg1, arg2) -> new uu.Class.MyClass(arg1, arg2)
                                     //  [2][NodeSet factory] uu("div>ul>li", <body>) -> NodeSet
+                                    //  [3][NodeSet forEach] uu("div>ul>li", function(node, index) { ... }) -> NodeSet
     // --- CONFIGRATION ---
     config:         uuconfig,       // uu.config - Hash: user configurations
     // --- ENVIRONMENT ---
@@ -420,7 +436,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //      ie, ie6, ie7, ie8, ie9, ie678,
                                     //      opera, gecko, webkit, chrome, safari,
                                     //      longedge, mobile, ios, ipad, iphone,
-                                    //      slate, retina, android, mbosver, os,
+                                    //      retina, android, mbosver, os,
                                     //      touch, jit, flash, silverlight }
     ie:             _ie,            // uu.ie     - as uu.env.ie     [ALIAS]
     ie678:          _ie678,         // uu.ie678  - as uu.env.ie678  [ALIAS]
@@ -628,6 +644,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //  [8][revert]          uu.fx(node, 500, { o: 1, r: 1 })
         skip:       uufxskip,       // uu.fx.skip(node:Node = null, skipAll:Boolean = false, invisible:Boolean = false):NodeArray
         stop:       uufxstop,       // uu.fx.stop(node:Node):Node
+        kill:       uufxkill,       // uu.fx.kill(node:Node = null):NodeArray
         isBusy:     uufxisbusy,     // uu.fx.isBusy(node:Node):Boolean
         isHide:     uufxishide,     // uu.fx.isHide(node:Node):Boolean
         hide:       uufxhide,       // uu.fx.hide(node:Node, duration:Number = 0):Node
@@ -672,6 +689,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //  [3][add    className]  uu.klass(<div>,             "+A B") -> <div class="A B">
                                     //  [4][remove className]  uu.klass(<div class="A B">, "-A B") -> <div>
                                     //  [5][toggle className]  uu.klass(<div class="A">,   "!A B") -> <div>
+                                    //  [6][remove className]  uu.klass(<div class="A B">, /(A|B)/) -> <div>
         has:        uuklasshas      // uu.klass.has(node:Node, classNames:String):Boolean
     }),
     // --- OOP CLASS ---
@@ -1135,7 +1153,9 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
     }),
     // --- DEBUG ---
 //{@canvas
-    hatch:          uuhatch,        // uu.hatch(size = 10, unit = 5, color = "skyblue", color2 = "steelblue")
+    hatch:          uuhatch,        // uu.hatch(param:Hash):Boolean
+                                    //  [1][draw hatch pattern]       uu.hatch()
+                                    //  [2][draw large hatch pattern] uu.hatch({ size: 20, color: red })
 //}@canvas
     glow:           uuglow,         // uu.glow(node:Node/NodeArray/NodeList/NodeSet/CSSSelectorExpressionString)
     puff:           uualert,        // uu.alert alias [DEPRECATED]
@@ -1301,7 +1321,7 @@ function uupao(arg) { // @param Mix:
     };
 }
 
-// inner - get base directory
+// inner - get base directory and URL Normalize
 function getBaseDir(libraryCoreFileName) { // @param String: library name. eg: "uupaa.js"
     var rv = uutag("script", doc).pop().src[_replace](/[^\/]+$/, function(file) {
                 return file === libraryCoreFileName ? "../" : "";
@@ -1860,7 +1880,7 @@ function newXHR( /*{@mb*/ url /*}@mb*/ ) { // @param String: url
                                            // @return XMLHttpRequest:
 //{@mb
     if (_ie) {
-        if (win.ActiveXObject && !url.indexOf("file:")) {
+        if (win.ActiveXObject) {
             try {
                 // http:// or https:// -> "Msxml2.XMLHTTP"
                 // file://             -> "Microsoft.XMLHTTP"
@@ -2934,7 +2954,8 @@ function uufx(node,     // @param Node: animation target node
     //      "reverse"   - Number/Boolean: truly is reverse
     //      "chain"     - Number/Boolean: truly is reverse-chain
     //      "deny"      - Number/Boolean:
-    //      "stop"      - Number/Boolean: before uu.fx.stop()
+    //      "stop"      - Number/Boolean: call uu.fx.stop(node)
+    //      "kill"      - Number/Boolean: call uu.fx.kill(node)
     //      "back"      - Number/Boolean: backward (system)
     //      "cssCache"  - Hash: cached css (system)
     //      "junction"  - Instance: uu.Class.Junction
@@ -2957,8 +2978,10 @@ function uufx(node,     // @param Node: animation target node
         return node;
     }
 
-    // before stop
+    // call stop
     option.stop && uufxstop(node);
+    // call kill
+    option.kill && uufxkill(node);
 
     // add queue
     data.q.push({
@@ -3218,22 +3241,10 @@ function uufxbuild(node, data, queue, option) {
                                         node.style[_visibility] = "visible"); // [FIX]
 //}@mb
                     ev = uunumberexpand(sv, ev);
-                    /*
-                     *  b = sv;
-                     *  c = ev - sv;
-                     *  fx1 = c * t / d + b;
-                     *  fx1 = (fx1 > 0.999) ? 1
-                     *      : (fx1 < 0.001) ? 0
-                     *      : fx1;
-                     */
                     rv += 'fx1=' + ezfn(sv, ev, ez)
                                  + ';fx1=fx1>0.999?1:fx1<0.001?0:fx1;';
-
 //{@mb
                     if (_ie678) { // [IE6][IE7][IE8]
-                        // fin ? uu.css.opacity(node, ${ev})
-                        //     : (style.filter = "alpha(opacity=${fx1}) " +
-                        //        style.filter.replace({$rex}, " "));
                         rv += uu.f('fin?uu.css.opacity(node,@)' +
                                       ':(style.filter="alpha(opacity="+@+") "+' +
                                         'style.filter.replace(@," "));',
@@ -3397,6 +3408,40 @@ function uufxstop(node) { // @param Node:
         q.tm = 1;     // past time
     }
     return node;
+}
+
+// uu.fx.kill - kill animation, clear queue
+function uufxkill(node) { // @param Node(= null): null is all node
+                          // @return NodeArray:
+    function removeQueue(queue, node, back) {
+        var i = 0, iz = queue.length, j, jz, q, ary;
+
+        for (; i < iz; ++i) {
+            q = queue[i];
+            ary = q.option.after;
+            if (ary) {
+                ary = isArray(ary) ? ary : [ary];
+                for (j = 0, jz = ary.length; j < jz; ++j) {
+                    ary[j](node, q.option, back);
+                }
+            }
+            q.option.junction && q.option.junction.ok();
+            queue.shift();
+        }
+    }
+
+    var ary = node ? [node] : uutag(), i = 0, iz = ary.length, data,
+        option = uuarg(option, { freeze: true, clear: true });
+
+    for (; i < iz; ++i) {
+        data = ary[i][_datauu + "fx"];
+
+        if (data && data.id) { // running
+            removeQueue(data.q,  node, _false); // queue
+            removeQueue(data.rq, node, _true);  // reverse queue
+        }
+    }
+    return ary;
 }
 
 // uu.fx.isBusy
@@ -4503,25 +4548,31 @@ function uuklass(expr,      // @param String/Node: "class", "class1, ..." or Nod
     //  [3][add    className]  uu.klass(<div>,             "+A B") -> <div class="A B">
     //  [4][remove className]  uu.klass(<div class="A B">, "-A B") -> <div>
     //  [5][toggle className]  uu.klass(<div class="A">,   "!A B") -> <div>
+    //  [6][remove className]  uu.klass(<div class="A B">, /(A|B)/) -> <div>
 
     var rex, m,
 //{@mb
         rv, ri, i, iz, v, ary, az, nodeList,
 //}@mb
-        sp = " ", w = context, n = expr;
+        sp = " ", word = context, node = expr;
 
-    // className accessor [2][3][4][5]
-    if (expr[_nodeType]) {
-        switch ({ "+": 3, "-": 4, "!": 5 }[w.charAt(0)] || 2) {
-        case 2: n[_className] += sp + w; break;          //  add
-        case 3: n[_className] += sp + w.slice(1); break; // +add
-        case 4: rex = classNameMatcher(uutrim(w.slice(1)).split(sp)); // -remove
-                n[_className] = uutrim(n[_className][_replace](rex, ""));
-                break;
-        case 5: m = uuklasshas(n, w = w.slice(1)) ? "-" : "+"; // !toggle
-                uuklass(n, m + w);
+    // className accessor [2][3][4][5][6]
+    if (node[_nodeType]) {
+        if (word.exec) { // isRegExp [6]
+            node[_className] = node[_className].replace(word, "").trim();
+            return node;
         }
-        return n;
+        // [2][3][4][5]
+        switch ({ "+": 3, "-": 4, "!": 5 }[word.charAt(0)] || 2) {
+        case 2: node[_className] += sp + word; break;          //  add
+        case 3: node[_className] += sp + word.slice(1); break; // +add
+        case 4: rex = classNameMatcher(uutrim(word.slice(1)).split(sp)); // -remove
+                node[_className] = uutrim(node[_className][_replace](rex, ""));
+                break;
+        case 5: m = uuklasshas(node, word = word.slice(1)) ? "-" : "+"; // !toggle
+                uuklass(node, m + word);
+        }
+        return node;
     }
 
     // query.class [1]
@@ -4539,7 +4590,7 @@ function uuklass(expr,      // @param String/Node: "class", "class1, ..." or Nod
 
     for (rv = [], ri = -1, i = 0, iz = nodeList.length; i < iz; ++i) {
         v = nodeList[i];
-        (w = v[_className]) && ((m = w.match(rex)) && m.length >= az)
+        (word = v[_className]) && ((m = word.match(rex)) && m.length >= az)
                             && (rv[++ri] = v);
     }
     return rv;
@@ -4582,7 +4633,7 @@ function uuClass(className,      // @param String: "Class"
         protoIsFunction = protoMember && isFunction(protoMember),
         tmp, i, classPrototype;
 
-    uuClass[Class] = function() {
+    uuClass[Class] = function() { // uu("CLASSNAME", arg, ...)
         var that = this,
             args = arguments,
             Super = that.superClass || 0;
@@ -9113,6 +9164,9 @@ uu.Class("HTML5Audio", {
             if (src === "") {
                 return _true;
             }
+            if (_webkit && /\.mp3$/i.test(src)) {
+                return _env.browser > 4; // Safari4=WebKit533, Safari5=WebKit534
+            }
             return /\.mp3$/i.test(src) ? (!macSafari && (_webkit || _env.ie9)) // mp3
                  : /\.og.$/i.test(src) ? (_gecko || _env.chrome || _opera)     // ogg, oga, ogx
                  : /\.m4a$/i.test(src) ? _webkit                               // m4a
@@ -9516,21 +9570,25 @@ function uuflash(url,        // @param String: url
     // add <param name="allowScriptAccess" value="always" />
     param.allowScriptAccess || (param.allowScriptAccess = "always");
 
-    // add <param name="movie" value="{{url}}" />
-    param.movie = url;
+    if (_ie) {
+        // add <param name="movie" value="{{url}}" />
+        param.movie = url;
 
-    for (i in param) {
-        paramArray.push(uuf(_ie ? '<param name="@" value="@" />'
-                                : '@="@"', i, param[i]));
+        for (i in param) {
+            paramArray.push(uuf('<param name="@" value="@" />', i, param[i]));
+        }
+        fragment =
+            uuf('<object id="@" width="@" height="@" classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000">@</object>',
+                id, opt[_width], opt[_height], paramArray.join(""));
+    } else {
+        for (i in param) {
+            paramArray.push(uuf('@="@"', i, param[i]));
+        }
+        var nocache = true;
+        fragment =
+            uuf('<embed id="@" name="@" width="@" height="@" type="application/x-shockwave-flash" src="@@" @ />',
+                id, id, opt[_width], opt[_height], url, nocache ? ("?" + +new Date) : "", paramArray.join(" "));
     }
-    fragment = uuf(
-        _ie ? '<object id="@" width="@" height="@" classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000"@>@</object>'
-            : '<embed name="@" width="@" height="@" type="application/x-shockwave-flash" src="@" @ />',
-        id,
-        opt[_width],
-        opt[_height],
-        _ie ? "" : url,
-        paramArray.join(_ie ? "" : " "));
 
     div = (opt.parent || doc.body)[_appendChild](newNode());
     div.innerHTML = fragment;
@@ -10378,17 +10436,25 @@ function outerHTMLSetter(html) {
 // NodeSet class
 //{@nodeset
 function NodeSet(expr,      // @param NodeSet/Node/NodeArray/String/window:
-                 context) { // @param NodeSet/Node(= void): context
+                 context,     // @param Function/NodeSet/Node(= void): context or forEach evaluator
+                 evaluator) { // @param Function(= void): forEach evaluator
     this.stack = [[]]; // [NodeSet, ...]
 
-    var ary, ctx;
+    var ary, ctx, eva;
+
+    if (typeof context === "function") {
+        ctx = null;
+        eva = context;
+    } else {
+        ctx = context || null;
+        eva = evaluator || null;
+    }
 
     if (expr) {
         if (typeof expr === _string) {
             if (expr.charAt(0) === "<") { // <div> -> fragment
                 ary = [uunodebulk(expr)];
             } else {
-                ctx = context;
                 ary = uuquery(expr,
                               ctx && ctx[_nodeSet] ? ctx[_nodeSet][_concat]()
                                                    : ctx);
@@ -10400,6 +10466,11 @@ function NodeSet(expr,      // @param NodeSet/Node/NodeArray/String/window:
         }
     }
     this[_nodeSet] = ary || [];
+
+    // forEach evaluator
+    if (eva) {
+        this[_nodeSet].forEach(eva);
+    }
 }
 
 // NodeSet.push - push stack
@@ -10762,7 +10833,7 @@ function detectEnvironment(libraryVersion) { // @param Number: Library version
     rv.android      = webkit && test(/Android/);
     rv.mbosver      = mbosver ? parseFloat(mbosver[1]) : 0; // mobile os version
     // slate definition. http://twitter.com/#!/uupaa/status/27301790851
-    rv.slate        = rv.ipad || (rv.android && rv.longedge > 961);
+//  rv.slate        = rv.ipad || (rv.android && rv.longedge > 961);
     rv.mobile       = rv.ios || rv.android || test(/Opera Mini/);
     rv.os           = rv.ios            ? "ios"     // iPhone OS    -> "ios"
                     : rv.android        ? "android" // Android OS   -> "android"
@@ -11835,7 +11906,7 @@ function SliderMove(that,   // @param this:
                     fx,     // @param Boolean: true is fx
                     minus,  // @param Number: minus
                     plus) { // @param Number: plus
-    var move = 0,
+    var move = 0, transform,
         param = that.param, x = 0, y = 0, w, tm, pp, round, threshold;
 
     // http://twitter.com/uupaa/status/25483749734
@@ -11877,11 +11948,23 @@ function SliderMove(that,   // @param this:
 
 //{@fx
     if (fx) {
-        uu.fx(param.grip, 150, { stop: 1, x: x, y: y });
+//      uu.fx(param.grip, 150, { stop: 1, tx: x, ty: y });
+//        uu.fx(param.grip, 150, { stop: true, mbtx: x, mbty: y });
+        uu.fx(param.grip, 150, { stop: 1, tx: x, ty: y });
     } else {
 //}@fx
+/*
         param.grip.style.left = x + "px";
         param.grip.style.top  = y + "px";
+ */
+        if (uu.env.mobile) {
+//            uu.fx(param.grip, 0, { stop: true, tx: x, ty: y });
+//            uu.css.transform(param.grip, { mbtx: x, mbty: y });
+            uu.css.transform(param.grip, { tx: x, ty: y });
+        } else {
+            param.grip.style.left = x + "px";
+            param.grip.style.top  = y + "px";
+        }
 //{@fx
     }
 //}@fx
