@@ -1,6 +1,9 @@
 /*!{id:"uupaa.js",ver:0.8,license:"MIT",author:"uupaa.js@gmail.com"}*/
 
-// -off
+// upa -off {ident}
+//
+//      {ident}      | disable function
+//      -------------+------------------
 //      storage     -> uu.storage
 //      canvas      -> uu.canvas
 //      socket      -> uu.socket
@@ -617,9 +620,9 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
         opacity:    uucssopacity,   // uu.css.opacity(node:Node, value:Number):Number/Node
                                     //  [1][get opacity] uu.css.opacity(node) -> 0.5
                                     //  [2][set opacity] uu.css.opacity(node, 0.5) -> node
-        transform:  uucsstransform, // uu.css.transform(node:Node):Node/NumberArray
-                                    //  [1][get transform] uu.css.transform(node) -> [scaleX, scaleY, rotate, translateX, translateY, translateZ]
-                                    //  [2][set transform] uu.css.transform(node, 1, 1, 0, 0, 0, 0) -> node
+        transform:  uucsstransform, // uu.css.transform(node:Node, param:Hash = void):Node/Hash
+                                    //  [1][get transform] uu.css.transform(node) -> { scaleX, scaleY, rotate, translateX, translateY, translateZ }
+                                    //  [2][set transform] uu.css.transform(node, { rotate: 30 }) -> node
         userSelect: uucssuserSelect // uu.css.userSelect(node:Node, allow:Boolean = false):Node
     }),
     // --- STYLESHEET ---
@@ -3210,7 +3213,7 @@ function uufxbuild(node, data, queue, option) {
         },
         i, w, n, opt,
         transform = uucsstransform(node),
-        transformBuffer = [],
+        transformBuffer = {},
         transformChanged = 0,
         vp, // viewport
         ez, // easing function name. eg: "inoutquad"
@@ -3307,9 +3310,15 @@ function uufxbuild(node, data, queue, option) {
                 case 11: // translateX
                 case 12: // translateY
                 case 13: // translateZ
-                    sv = transform[n - 8];
+                    if (w === "tx") {
+                        w = "translateX";
+                    }
+                    if (w === "ty") {
+                        w = "translateY";
+                    }
+                    sv = transform[w];
                     ev = uunumberexpand(sv, ev, parseFloat);
-                    transformBuffer[n - 8] = ('(fin?' + ev + ':' + ezfn(sv, ev, ez) + ')');
+                    transformBuffer[w] = ('(fin?' + ev + ':' + ezfn(sv, ev, ez) + ')');
                     ++transformChanged;
                     break;
                 default: // other...
@@ -3326,13 +3335,13 @@ function uufxbuild(node, data, queue, option) {
     }
 
     if (transformChanged) {
-        rv += uuf("uu.css.transform(node,[@,@,@,@,@,@]);",
-                  transformBuffer[0] || transform[0],
-                  transformBuffer[1] || transform[1],
-                  transformBuffer[2] || transform[2],
-                  transformBuffer[3] || transform[3],
-                  transformBuffer[4] || transform[4],
-                  transformBuffer[5] || transform[5]);
+        rv += uuf("uu.css.transform(node,{scaleX:@,scaleY:@,rotate:@,translateX:@,translateY:@,translateZ:@});",
+                  transformBuffer.scaleX     || transform.scaleX,
+                  transformBuffer.scaleY     || transform.scaleY,
+                  transformBuffer.rotate     || transform.rotate,
+                  transformBuffer.translateX || transform.translateX,
+                  transformBuffer.translateY || transform.translateY,
+                  transformBuffer.translateZ || transform.translateZ);
     }
 
     // add reverse queue
@@ -3579,7 +3588,7 @@ function uufxflare(node,     // @param Node:
             var cs = uucss(node, "px"), // get pixel unit
                 x = parseInt(cs.left),
                 y = parseInt(cs.top),
-                cloneNode, i = 0, angle,
+                cloneNode, i = 0, angle, tr,
                 p = uumix({}, option, {
                     w: parseInt(cs[_width])  * 1.5,
                     h: parseInt(cs[_height]) * 1.5,
@@ -3589,7 +3598,11 @@ function uufxflare(node,     // @param Node:
                 parts = (360 / p.parts) | 0;
 
             _env.jit && (p.fs = parseInt(cs.fontSize) * 1.5);
-
+            if (_mobile) {
+                tr = uucsstransform(node);
+                x = tr.translateX;
+                y = tr.translateY;
+            }
             for (; i < 360; i += parts) {
                 cloneNode = node[_parentNode][_appendChild](uunodeclone(node, _true));
                 angle = i * Math.PI / 180;
@@ -3744,16 +3757,19 @@ function uufxmovein(node,     // @param Node:
 
                 if (_mobile) {
                     tr = uucsstransform(node);
-                    uucsstransform(node, [tr[0] * 1.5,
-                                          tr[1] * 1.5,
-                                          tr[2],
-                                          (Math.cos(angle) * range + tr[3]) | 0,
-                                          (Math.sin(angle) * range + tr[4]) | 0,
-                                          tr[5] | 0]);
+                    uucsstransform(node, {
+                        translateX: Math.cos(angle) * range + tr.translateX + endX,
+                        translateY: Math.sin(angle) * range + tr.translateY + endY,
+                        scaleX: tr.scaleX * 1.5,
+                        scaleY: tr.scaleY * 1.5 });
                     uucssopacity(node, 0);
 
                     _env.jit && (option.fs = fs);
-                    uumix(option, { scaleX: tr[0], scaleY: tr[1], tx: tr[3], ty: tr[4] });
+                    uumix(option, {
+                        tx: tr.translateX,
+                        ty: tr.translateY,
+                        scaleX: tr.scaleX,
+                        scaleY: tr.scaleY });
                 } else {
                     style.left = (Math.cos(angle) * range + endX) + "px";
                     style.top  = (Math.sin(angle) * range + endY) + "px";
@@ -3765,7 +3781,7 @@ function uufxmovein(node,     // @param Node:
                     uucssopacity(node, 0);
 
                     _env.jit && (option.fs = fs);
-                    uumix(option, { w: w, h: h, tx: endX, ty: endY });
+                    uumix(option, { left: endX, top: endY, w: w, h: h });
                 }
             }}));
 }
@@ -3876,43 +3892,74 @@ uucssopacity._ = /alpha\(opacity\=(\d+)\)/;
 
 // uu.css.transform
 function uucsstransform(node,    // @param Node:
-                        param) { // @param NumberArray(= void): [scaleX, scaleY,
-                                 //                              rotate(degree),
-                                 //                              translateX, translateY,
-                                 //                              translateZ]
-                                 // @return Node/NumberArray:
-    //  [1][get transform] uu.css.transform(node) -> [scaleX, scaleY, rotate,
-    //                                                translateX, translateY, translateZ]
-    //  [2][set transform] uu.css.transform(node, 1, 1, 0, 0, 0, 0) -> node
+                        param) { // @param Hash(= void): { scaleX, scaleY, rotate,
+                                 //                        translateX, translateY, translateZ }
+                                 //     param.scaleX - Number: scale x (default: 1)
+                                 //     param.scaleY - Number: scale y (default: 1)
+                                 //     param.rotate - Number: rotate (unit: degree)(0~360)(default: 0)
+                                 //     param.translateX - Number: translate x (default: 0)
+                                 //     param.translateY - Number: translate y (default: 0)
+                                 //     param.translateZ - Number: translate z (default: 0)
+                                 // @return Node/Hash:
+    //  [1][get transform] uu.css.transform(node) -> { scaleX, scaleY, rotate, translateX, translateY, translateZ }
+    //  [2][set transform] uu.css.transform(node, { rotate: 30 }) -> node
 
-    var meta = _datauu + "trans"; // node["data-uutrans"]
+    var undef, str, dataid = _datauu + "trans", // node["data-uutrans"]
+        meta = node[dataid], keyword = uuready.transform,
+        scaleX = 1, scaleY = 1, rotate = 0,
+        translateX = 0, translateY = 0, translateZ = 0;
 
-    if (!param) {
-        return node[meta] || [1, 1, 0, 0, 0, 0];
+    if (!meta) { // init
+        node.style[keyword].replace(uucsstransform._.scale, function(_, x, y) {
+            scaleX = x;
+            scaleY = y;
+        }).replace(uucsstransform._.rotate, function(_, r) {
+            rotate = r;
+        }).replace(uucsstransform._.translate, function(_, x, y, z) {
+            translateX = x;
+            translateY = y;
+            translateZ = z !== void 0 ? z : 0
+        });
+        node[dataid] = meta = { scaleX: scaleX,
+                                scaleY: scaleY,
+                                rotate: rotate,
+                                translateX: translateX | 0,
+                                translateY: translateY | 0,
+                                translateZ: translateZ | 0 };
     }
+    if (!param) {
+        return meta;
+    }
+    node[dataid] = meta = {
+        scaleX:     param.scaleX     === undef ? meta.scaleX     : param.scaleX,
+        scaleY:     param.scaleY     === undef ? meta.scaleY     : param.scaleY,
+        rotate:     param.rotate     === undef ? meta.rotate     : param.rotate,
+        translateX: param.translateX === undef ? meta.translateX : param.translateX | 0,
+        translateY: param.translateY === undef ? meta.translateY : param.translateY | 0,
+        translateZ: param.translateZ === undef ? meta.translateZ : param.translateZ | 0
+    };
 
 //{@mb
     if (_ie678) {
         if (uuready.filter) {
-            var ident = "DXImageTransform.Microsoft.Matrix",
-                data = _datauu + "transie",
-                rotate = param[2] * Math.PI / 180, // deg2rad
+            var ident  = "DXImageTransform.Microsoft.Matrix",
+                data   = _datauu + "transie", // node["data-uutransie"]
+                rotate = meta.rotate * Math.PI / 180, // deg2rad
                 cos = Math.cos(-rotate),
                 sin = Math.sin(-rotate),
                 // scale * rotate * translate
-                mtx = [ cos * param[0], sin * param[0], 0,
-                       -sin * param[1], cos * param[1], 0,
-                              param[3],       param[4], 1],
+                mtx = [ cos * meta.scaleX, sin * meta.scaleX, 0,
+                       -sin * meta.scaleY, cos * meta.scaleY, 0,
+                          meta.translateX,   meta.translateY, 1],
                 filter, rect, cx, cy;
 
-            if (!node[meta]) {
+            if (!node[dataid]) {
                 // init - get center position
                 rect = node.getBoundingClientRect();
                 cx = (rect.right  - rect.left) / 2; // center x
                 cy = (rect.bottom - rect.top)  / 2; // center y
-
-                node.style.filter += " progid:" + ident
-                                   + "(sizingMethod='auto expand')";
+                node.style.filter += " progid:" + ident +
+                                     "(sizingMethod='auto expand')";
                 node[data] = { cx: cx, cy: cy };
             }
             filter = node.filters.item(ident),
@@ -3933,32 +3980,32 @@ function uucsstransform(node,    // @param Node:
             node.style.marginTop  = node[data].cy - cy + "px";
         }
     } else {
-//}@mb
+        if (uuready.transform) {
+            str = "scale(" + meta.scaleX + "," + meta.scaleY + ") " +
+                  "rotate(" + meta.rotate + "deg) " +
+                  "translate";
 
-//{@mb
-        if (!_webkit) {
-            node.style[_gecko  ? "MozTransform" :
-                       _opera  ? "OTransform" :
-                       _ie     ? "msTransform" :
-                       "transform"] =
-                "scale(" + param[0] + "," + param[1] + ") rotate("
-                         + param[2] + "deg) translate(" // 2d
-                         + (param[3] | 0) + "px," +
-                           (param[4] | 0) + "px)";
-        } else {
+            if (!uu.ready.translate3d) {
+                str += "(" + (meta.translateX | 0) + "px," +
+                             (meta.translateY | 0) + "px)";
+            } else {
 //}@mb
-            node.style.webkitTransform =
-                "scale(" + param[0] + "," + param[1] + ") rotate("
-                     + param[2] + "deg) translate3d(" // 3d
-                     + (param[3] | 0) + "px," + (param[4] | 0) +
-                                        "px," + (param[5] | 0) + "px)";
+                str += "3d(" + (meta.translateX | 0) + "px," +
+                               (meta.translateY | 0) + "px," +
+                               (meta.translateZ | 0) + "px)";
 //{@mb
+            }
+            node.style[uuready.transform] = str;
         }
     }
 //}@mb
-    node[meta] = param[_concat](); // clone array
     return node;
 }
+uucsstransform._ = {
+    scale:      /scale\(([\d\.]+), ([\d\.]+)\)/,
+    rotate:     /rotate\(([\d\.]+)\)/,
+    translate:  /translate(?:3d)?\(([\d\.]+), ([\d\.]+)(?:, ([\d\.]+))?\)/
+};
 
 // --- CSS BOX MODEL ---
 
@@ -10882,8 +10929,9 @@ function detectFeatures() {
         node = newNode(), child, style = node.style,
 //}@mb
         rv = {
-//          touch: _true,           // touch
-//          transform: _true,       // CSS3 transform ready
+            touch: "",              // touch keyword (window.Touch)
+            transform: "",          // CSS3 transform keyword (style.transform)
+            translate3d: _true,     // CSS3 transform.translate3d ready
             opacity: _true,         // CSS3 opacity ready
             filter: _false,         // node.filters ready [IE]
             color: uuarg(hash),     // color: rgba, hsla, transparent ready
@@ -10916,9 +10964,14 @@ function detectFeatures() {
         rv.border[i] = v[1].test(style.borderTopColor);
         rv.background[i] = v[1].test(style.backgroundColor);
     });
-//  rv.touch = !!window.Touch;
-//  rv.transform = (newNode().style.WebkitTransform !== void 0);
-
+    rv.touch = (window.Touch !== void 0) ? "Touch" : "";
+    rv.transform = (style.WebkitTransform !== void 0) ? "WebkitTransform"
+                 : (style.MozTransform    !== void 0) ? "MozTransform"
+                 : (style.OTransform      !== void 0) ? "OTransform"
+                 : (style.msTransform     !== void 0) ? "msTransform"
+                 : (style.transform       !== void 0) ? "transform" : "";
+    // gecko translate3d was not supported (in Firefox4.0beta)
+    rv.translate3d = !_gecko;
     // detect opacity - http://d.hatena.ne.jp/uupaa/20100513
     rv.opacity = style.opacity != undef;
 
@@ -11948,19 +12001,11 @@ function SliderMove(that,   // @param this:
 
 //{@fx
     if (fx) {
-//      uu.fx(param.grip, 150, { stop: 1, tx: x, ty: y });
-//        uu.fx(param.grip, 150, { stop: true, mbtx: x, mbty: y });
-        uu.fx(param.grip, 150, { stop: 1, tx: x, ty: y });
+        uu.fx(param.grip, 150, { kill: 1, tx: x, ty: y });
     } else {
 //}@fx
-/*
-        param.grip.style.left = x + "px";
-        param.grip.style.top  = y + "px";
- */
         if (uu.env.mobile) {
-//            uu.fx(param.grip, 0, { stop: true, tx: x, ty: y });
-//            uu.css.transform(param.grip, { mbtx: x, mbty: y });
-            uu.css.transform(param.grip, { tx: x, ty: y });
+            uu.css.transform(param.grip, { translateX: x, translateY: y });
         } else {
             param.grip.style.left = x + "px";
             param.grip.style.top  = y + "px";
