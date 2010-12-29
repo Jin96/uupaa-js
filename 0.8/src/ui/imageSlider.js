@@ -106,6 +106,10 @@ function uuuiimagesliderdressup(node,     // @param Node:
         node.style.visibility = "visible";
         node.style.overflow = "hidden";
 
+        if (uu.env.ie6 || uu.env.ie7) { // [CSS BUG][FIX][IE6][IE7]
+            node.style.position = "relative"; // overflow:hidden -> need parentNode.style.position = "relative" or "absolute"
+        }
+
         w = data.w;
         h = data.h;
 

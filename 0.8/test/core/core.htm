@@ -483,6 +483,22 @@ uu.ready("window", function(uu, doc) {
             uu.id('div').className, "==", 'A1 B1 A2 B2');
     })();
 
+    uu.ok("uu.klass() remove className RegExp");
+    (function() {
+        uu.id('div').className = "A1 A2 A3 A4 A1";
+
+        uu.klass(uu.id('div'), /(A1|A4)/g);
+        uu.ok("uu.klass(uu.id('div')) ( 'A1 A2 A3 A4 A1' )から( /(A1|A4)/g )を引くと 'A2 A3' になる",
+            uu.id('div').className, "==", 'A2 A3');
+
+
+        uu.id('div').className = "B1 B2";
+        uu.klass(uu.id('div'), /(A1|A2|A3|A4)/g);
+        uu.ok("uu.klass(uu.id('div')) ( 'B1 B2' )から 存在しないクラス( /(A1|A2|A3|A4)/g )を引いてもエラーにならない",
+            uu.id('div').className, "==", 'B1 B2');
+    })();
+
+
     uu.ok("uu.hash()");
     (function() {
         uu.ok("uu.hash('a,b,c,d') は文字列をパースし { a: 'b', c: 'd' } を返す", uu.hash('a,b,c,d'), "==", { a: 'b', c: 'd' });
@@ -732,67 +748,56 @@ uu.ready("window", function(uu, doc) {
     })();
 
 
-    uu.ok("uu.fix()");
-    uu.ok('uu.fix("-webkit-shadow") == "-webkit-shadow"',
-            uu.fix("-webkit-shadow"), "==", "-webkit-shadow");
+    uu.ok("uu.attr.fix(), uu.css.fix()");
+    uu.ok('uu.css.fix("-webkit-shadow") == "-webkit-shadow"',
+            uu.css.fix("-webkit-shadow"), "==", "-webkit-shadow");
     if (uu.webkit) {
-        uu.ok('uu.fix("-webkit-box-shadow") == "WebkitBoxShadow"',
-                uu.fix("-webkit-box-shadow"), "==", "WebkitBoxShadow");
+        uu.ok('uu.css.fix("-webkit-box-shadow") == "WebkitBoxShadow"',
+                uu.css.fix("-webkit-box-shadow"), "==", "WebkitBoxShadow");
     }
     if (uu.gecko) {
-        uu.ok('uu.fix("-moz-appearance") == "MozAppearance"',
-                uu.fix("-moz-appearance"), "==", "MozAppearance");
+        uu.ok('uu.css.fix("-moz-appearance") == "MozAppearance"',
+                uu.css.fix("-moz-appearance"), "==", "MozAppearance");
     }
     if (uu.ie && uu.env >= 8) {
-        uu.ok('uu.fix("-ms-block-progression") == "msBlockProgression"',
-                uu.fix("-ms-block-progression"), "==", "msBlockProgression");
+        uu.ok('uu.css.fix("-ms-block-progression") == "msBlockProgression"',
+                uu.css.fix("-ms-block-progression"), "==", "msBlockProgression");
     }
     if (uu.opera && uu.env >= 10.50) {
-        uu.ok('uu.fix("-o-transition-property") == "OTransitionProperty"',
-                uu.fix("-o-transition-property"), "==", "OTransitionProperty");
+        uu.ok('uu.css.fix("-o-transition-property") == "OTransitionProperty"',
+                uu.css.fix("-o-transition-property"), "==", "OTransitionProperty");
     }
 
-    uu.ok('uu.fix("background-color") == "backgroundColor"',
-            uu.fix("background-color"), "==", "backgroundColor");
-    uu.ok('uu.fix("float") == "cssFloat" or "styleFloat"(IE6, IE7)',
-            uu.fix("float"), "==", uu.ie && uu.env < 8 ? "styleFloat" : "cssFloat")
+    uu.ok('uu.css.fix("background-color") == "backgroundColor"',
+            uu.css.fix("background-color"), "==", "backgroundColor");
+
+    uu.ok('uu.css.fix("float") == "cssFloat" or "styleFloat"(IE6, IE7, IE8)',
+            uu.css.fix("float"), "==", uu.ie && uu.env < 9 ? "styleFloat" : "cssFloat")
 
     if (uu.env.ie6 || uu.env.ie7) {
-        uu.ok('uu.fix("for") == "for"',
-                uu.fix("for"), "!=", "for");
+        uu.ok('uu.attr.fix("for") == "htmlFor"',
+                uu.attr.fix("for"), "==", "htmlFor");
     } else {
-        uu.ok('uu.fix("for") == "for"',
-                uu.fix("for"), "==", "for");
+        uu.ok('uu.attr.fix("htmlFor") == "for"',
+                uu.attr.fix("htmlFor"), "==", "for");
     }
 
-    if (uu.env.ie6 || uu.env.ie7) {
-        uu.ok('uu.fix("htmlFor") == "for"',
-                uu.fix("htmlFor"), "!=", "for");
-    } else {
-        uu.ok('uu.fix("htmlFor") == "for"',
-                uu.fix("htmlFor"), "==", "for");
-    }
-
-    uu.ok('uu.fix("w") == "width"',
-            uu.fix("w"), "==", "width");
-    uu.ok('uu.fix("h") == "height"',
-            uu.fix("h"), "==", "height");
-    uu.ok('uu.fix("x") == "left"',
-            uu.fix("x"), "==", "left");
-    uu.ok('uu.fix("l") == "left"',
-            uu.fix("l"), "==", "left");
-    uu.ok('uu.fix("y") == "top"',
-            uu.fix("y"), "==", "top");
-    uu.ok('uu.fix("t") == "top"',
-            uu.fix("t"), "==", "top");
-    uu.ok('uu.fix("o") == "opacity"',
-            uu.fix("o"), "==", "opacity");
-    uu.ok('uu.fix("c") == "color"',
-            uu.fix("c"), "==", "color");
-    uu.ok('uu.fix("bgc") == "backgroundColor"',
-            uu.fix("bgc"), "==", "backgroundColor");
-    uu.ok('uu.fix("fs") == "fontSize"',
-            uu.fix("fs"), "==", "fontSize");
+    uu.ok('uu.css.fix("w") == "width"',
+            uu.css.fix("w"), "==", "width");
+    uu.ok('uu.css.fix("h") == "height"',
+            uu.css.fix("h"), "==", "height");
+    uu.ok('uu.css.fix("x") == "left"',
+            uu.css.fix("x"), "==", "left");
+    uu.ok('uu.css.fix("y") == "top"',
+            uu.css.fix("y"), "==", "top");
+    uu.ok('uu.css.fix("o") == "opacity"',
+            uu.css.fix("o"), "==", "opacity");
+    uu.ok('uu.css.fix("c") == "color"',
+            uu.css.fix("c"), "==", "color");
+    uu.ok('uu.css.fix("bgc") == "backgroundColor"',
+            uu.css.fix("bgc"), "==", "backgroundColor");
+    uu.ok('uu.css.fix("fs") == "fontSize"',
+            uu.css.fix("fs"), "==", "fontSize");
 
     uu.ok("uu.trim()");
     uu.ok("uu.trim('nospace') == 'nospace'",

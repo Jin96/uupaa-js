@@ -168,6 +168,11 @@
 // Element Traversal
 //      Gecko, WebKit, Opera, IE9+
 //
+// |                       | WebKit   | Opera | Firefox   |   IE   |
+// | transform.translate3d | Safari4+ |  11+  | x 4.0beta | x 9pp7 |
+// |                       | Chrome   |
+//
+//
 // +--------------+--------+---------+---------+---------+
 // | Typed Array  | Chrome | Firefox | iOS     | Android |
 // |              |        |         |  Safari |  WebKit |
@@ -312,7 +317,7 @@ var _addEventListener = "addEventListener",
     _opera = _env.opera,            // as uu.opera (Opera, Opera Mini)
     _webkit = _env.webkit,          // as uu.webkit (Safari, iPhone, iPad, Google Chrome)
     _mobile = _env.mobile,          // as uu.env.mobile (iOS, Android)
-    _baseDir = getBaseDir("uupaa.js"); // base dir. default - directory containing uupaa.js
+    _baseDir = getBaseDir();        // base dir. default - directory containing uupaa.js
 
 // --- HTML5 NEXT ( document.html, document.head ) ---
 // http://www.whatwg.org/specs/web-apps/current-work/multipage/dom.html
@@ -1328,10 +1333,17 @@ function uupao(arg) { // @param Mix:
 }
 
 // inner - get base directory and URL Normalize
-function getBaseDir(libraryCoreFileName) { // @param String: library name. eg: "uupaa.js"
-    var rv = uutag("script", doc).pop().src[_replace](/[^\/]+$/, function(file) {
-                return file === libraryCoreFileName ? "../" : "";
+function getBaseDir(rex) { // @param RegExp(= /uupaa(\-\d+)?\.js/): library name pattern
+    rex = rex || /uupaa(\-\d+)?\.js/;
+    var ary = location.href.split("/"),
+        rv = uutag("script", doc).pop().src[_replace](/[^\/]+$/, function(file) {
+                return rex.test(file) ? "../" : "";
              });
+
+    // [IE6][IE7][FIX] rel -> abs
+    ary.pop();
+    rv = ary.join("/") + "/" + rv;
+
     // URL Normalize
     // "http://example.com/js/../uupaa.js" -> "http://example.com/uupaa.js"
     return uuurlnormalize(rv);
@@ -1347,6 +1359,59 @@ function newNode(tag) { // @param TagNameString(= "div"):
 function newText(text) { // @param String:
                          // @return TextNode: <textNode>text</textNode>
     return doc.createTextNode(text);
+}
+
+// --- READY ---
+// uu.ready - bind DOMContentLoaded/WindowOnLoad/StorageReady/CanvasReady/AudioReady/SVGReady event
+function uuready(/* readyEventType, */  // @param CaseInsenseString(= "dom"): readyEventType
+                 /* callback, ... */) { // @param CallbackFunction: callback functions
+    var mix, // String or Function
+        i = 0, iz = arguments.length, ary,
+        db = uuready.uudb, // alias
+        type = "dom",      // default type
+        order = 0;         // callback order
+
+    if (!uuready.reload) {
+        for (; i < iz; ++i) {
+            mix = arguments[i]; // String("window:2"), or Function(callback)
+            if (isString(mix)) {
+                ary = (mix.indexOf(":") > 0 ? mix : mix + ":0").split(":"); // supply
+                type = ary[0];   // "window:2" -> "window"
+                order = +ary[1]; // "window:2" -> 2
+            } else {
+                if (uuready[type]) { // already? -> fire
+                    switch (type) {
+                    case "canvas":  mix(uu, uutag("canvas")); break; // uu.ready(function(uu, uu.tag("canvas")) { ... })
+                    case "storage": mix(uu, uu.storage); break;      // uu.ready(function(uu, uu.storage) { ... })
+                    case "svg":     mix(uu, uusvg); break;           // uu.ready(function(uu, uu.svg) { ... })
+                    default:        mix(uu, doc);                    // uu.ready(function(uu, doc) { ... })
+                    }
+                } else {
+                    db[type] || (db[type] = [[], [], []]); // init [order0, order1, order2]
+                    db[type][order].push(mix);
+                }
+            }
+        }
+    }
+}
+uuready.uudb = {}; // { readyEventType: [[low order], [mid order], [high order]], ... }
+
+// uu.ready.fire
+function uureadyfire(readyEventType, // @param CaseInsenseString: readyEventType
+                     param) {        // @param Mix(= document): callback(uu, param)
+    var type = readyEventType[_toLowerCase](),
+        db = uuready.uudb[type], ary, callback, i = 0;
+
+    if (db) {
+        ary = db[2][_concat](db[1], db[0]); // join order: ary = [2] + [1] + [0]
+        uuready.uudb[type] = null; // clear order array
+
+        for (; callback = ary[i++]; ) {
+            callback(uu, param || doc); // uu.ready(function(uu, doc) { ... });
+                                        // uu.ready("canvas", function(uu, uu.tag("canvas")) { ... });
+                                        // uu.ready("audio", function(uu, that) { ... });
+        }
+    }
 }
 
 // --- MsgPump class ---
@@ -2709,23 +2774,31 @@ function uuattrfix(source) { // @param String:
     return uuattrfix.db[source] || source;
 }
 uuattrfix.db = {
+    cn:             "class", // [DEPRECATED]
+    klass:          "class",
+    className:      "class",        // node.getAttribute("class")
+    w:              "width",
+    h:              "height",
+    htmlFor:        "for"           // node.getAttribute("for")
+};
+//{@mb
+!uuready[_getAttribute] && uumix(uuattrfix.db, { // [IE6][IE7]
     cellspacing:    "cellSpacing",
     colspan:        "colSpan",
-    "for":          "htmlFor",
+    "for":          "htmlFor",      // node.getAttribute("htmlFor")
+    htmlFor:        "htmlFor",      // override
     frameborder:    "frameBorder",
     maxlength:      "maxLength",
     readonly:       "readOnly",
     rowspan:        "rowSpan",
     tabindex:       "tabIndex",
     usemap:         "useMap",
-    cn:             _ie678 ? "className" : "class", // [DEPRECATED]
-    klass:          _ie678 ? "className" : "class",
-    "class":        _ie678 ? "className" : "class",
-    className:      _ie678 ? "className" : "class",
-    w:              "width",
-    h:              "height",
-    htmlFor:        "for"
-};
+    cn:             "className",    // override [DEPRECATED]
+    klass:          "className",    // override
+    "class":        "className",    // override node.getAttribute("className")
+    className:      "className"     // override
+});
+//}@mb
 
 // uu.data - node data accessor [HTML5 spec - Embedding custom non-visible data]
 function uudata(node,    // @param Node:
@@ -2807,7 +2880,7 @@ function uucss(node,    // @param Node:
 /*{@mb*/        }
                 return key ? getComputedStyleIE(node) : node.currentStyle; /*}@mb*/
             }
-            right = fixdb[key] || key;
+            right = fixdb[key];
 /*{@mb*/    if (getComputedStyle) { /*}@mb*/
                 return getComputedStyle(node, 0)[right] || "";
 //{@mb
@@ -2820,7 +2893,7 @@ function uucss(node,    // @param Node:
     case 3: key = uupair(key, value);
     case 4: for (fuzzy in key) {
                 value = key[fuzzy];
-                right = fixdb[fuzzy] || fuzzy;
+                right = fixdb[fuzzy];
 
                 if (right === opacity) {
                     uucssopacity(node, +value);
@@ -2848,10 +2921,6 @@ function uucssfix(source) { // @param String:
     return uucssfix.db[source] || source;
 }
 uucssfix.db = {
-    "float":    _ie678 ? "styleFloat"
-                       : "cssFloat",
-    "cssFloat": _ie678 ? "styleFloat"
-                       : "cssFloat",
     b:          "border",
     c:          "color",
     h:          "height",
@@ -2862,7 +2931,6 @@ uucssfix.db = {
     w:          "width",
     x:          "left",
     y:          "top",
-    fontSize:   "fontSize",
     fs:         "fontSize",
     sx:         "scaleX",       // transform.scaleX
     sy:         "scaleY",       // transform.scaleY
@@ -2882,6 +2950,50 @@ uucssfix.db = {
     translateY: "translateY",
     translateZ: "translateZ"
 };
+uucssfix.more = {
+    opacity:    "opacity",  // [IE6][IE7][IE8]
+    "float":    _ie678 ? "styleFloat"
+                       : "cssFloat",
+    "cssFloat": _ie678 ? "styleFloat"
+                       : "cssFloat"
+};
+
+
+// inner - prebuild camelized hash - http://handsout.jp/slide/1894
+//          { width: "width", "text-align": "TextAlign", ... }
+uuready("dom:2", function() {
+    var fixdb = uucssfix.db,
+/*{@mb*/DECAMELIZE = /([a-z])([A-Z])/g, /*}@mb*/
+        props = _webkit ? getComputedStyle(htmlNode, 0) : htmlNode.style,
+        k, v;
+
+    for (k in props) {
+        if (typeof props[k] === _string) {
+//{@mb
+            if (_webkit) {
+//}@mb
+                k = v = props.item(k); // k = "-webkit-...", "z-index"
+                k[_indexOf]("-") >= 0 && (v = k[_replace](/-[a-z]/g, function(m) {
+                    return m[1].toUpperCase();
+                }));
+                fixdb[k] = v; // { "z-index": "zIndex" }
+                fixdb[v] = v; // {   zIndex : "zIndex" }
+//{@mb
+            } else {
+                v = ((_gecko && !k[_indexOf]("Moz")) ? "-moz" + k.slice(3) :
+                     (_ie    && !k[_indexOf]("ms"))  ? "-ms"  + k.slice(2) :
+                     (_opera && !k[_indexOf]("O"))   ? "-o"   + k.slice(1) : k)
+                    [_replace](DECAMELIZE, function(m, c, C) {
+                        return c + "-" + C[_toLowerCase]();
+                    });
+                fixdb[v] = k; // { "z-index": "zIndex" }
+                fixdb[k] = k; // {   zIndex : "zIndex" }
+            }
+//}@mb
+        }
+    }
+    uumix(uucssfix.db, uucssfix.more);
+});
 
 // --- Style Sheet ---
 function uuss(id) { // @param StyleSheetIDString(= ""):
@@ -3085,9 +3197,8 @@ function uufxloop(id,     // @param Number: timer id
         // uu.fx.kill() after route
         data.id = 0;
     } else {
-        option = q.option,
-        back = !!option.back,
-        tm, finished, mix;
+        option = q.option;
+        back = !!option.back;
 
         if (q.tm) { // already running?
             tm = +new Date; // running -> get current time
@@ -3269,13 +3380,12 @@ function uufxbuild(node, data, queue, option) {
         ez, // easing function name. eg: "inoutquad"
         sv, // start value
         ev, // end value
-        cs = option.cssCache || uucss(node, "px"), // current style
+        cs = option.cssCache || uucss(node, "px"), // current style (pixel based)
         fixdb = uucssfix.db;
 
     for (key in option) {
-        if (key in fixdb) {
-            w = fixdb[key] || key;
-
+        w = fixdb[key];
+        if (w) {
             opt = option[key];
             isArray(opt) ? (ev = opt[0], ez = opt[1][_toLowerCase]()) // { left: [100, "linear"] }
                          : (ev = opt,    ez = "inoutquad");           // { left: 100 }
@@ -3960,16 +4070,18 @@ function uucsstransform(node,    // @param Node:
         translateX = 0, translateY = 0, translateZ = 0;
 
     if (!meta) { // init
-        node.style[keyword].replace(uucsstransform._.scale, function(_, x, y) {
-            scaleX = x;
-            scaleY = y;
-        }).replace(uucsstransform._.rotate, function(_, r) {
-            rotate = r;
-        }).replace(uucsstransform._.translate, function(_, x, y, z) {
-            translateX = x;
-            translateY = y;
-            translateZ = z !== void 0 ? z : 0
-        });
+        if (!_ie678 && keyword) { // pickup current transform value
+            node.style[keyword].replace(uucsstransform._.scale, function(_, x, y) {
+                scaleX = x;
+                scaleY = y;
+            }).replace(uucsstransform._.rotate, function(_, r) {
+                rotate = r;
+            }).replace(uucsstransform._.translate, function(_, x, y, z) {
+                translateX = x;
+                translateY = y;
+                translateZ = z !== void 0 ? z : 0
+            });
+        }
         node[dataid] = meta = { scaleX: scaleX,
                                 scaleY: scaleY,
                                 rotate: rotate,
@@ -3993,7 +4105,7 @@ function uucsstransform(node,    // @param Node:
     if (_ie678) {
         if (uuready.filter) {
             var ident  = "DXImageTransform.Microsoft.Matrix",
-                data   = _datauu + "transie", // node["data-uutransie"]
+                dataie = _datauu + "transie", // node["data-uutransie"]
                 rotate = meta.rotate * Math.PI / 180, // deg2rad
                 cos = Math.cos(-rotate),
                 sin = Math.sin(-rotate),
@@ -4003,14 +4115,14 @@ function uucsstransform(node,    // @param Node:
                           meta.translateX,   meta.translateY, 1],
                 filter, rect, cx, cy;
 
-            if (!node[dataid]) {
+            if (!node[dataie]) {
                 // init - get center position
                 rect = node.getBoundingClientRect();
                 cx = (rect.right  - rect.left) / 2; // center x
                 cy = (rect.bottom - rect.top)  / 2; // center y
                 node.style.filter += " progid:" + ident +
                                      "(sizingMethod='auto expand')";
-                node[data] = { cx: cx, cy: cy };
+                node[dataie] = { cx: cx, cy: cy };
             }
             filter = node.filters.item(ident),
 
@@ -4026,8 +4138,8 @@ function uucsstransform(node,    // @param Node:
             cx = (rect.right  - rect.left) / 2;
             cy = (rect.bottom - rect.top)  / 2;
 
-            node.style.marginLeft = node[data].cx - cx + "px";
-            node.style.marginTop  = node[data].cy - cy + "px";
+            node.style.marginLeft = node[dataie].cx - cx + "px";
+            node.style.marginTop  = node[dataie].cy - cy + "px";
         }
     } else {
         if (uuready.transform) {
@@ -5947,62 +6059,6 @@ function JunctionJudge() {
     return this;
 }
 
-// --- READY ---
-// uu.ready - bind DOMContentLoaded/WindowOnLoad/StorageReady/CanvasReady/AudioReady/SVGReady event
-function uuready(/* readyEventType, */  // @param CaseInsenseString(= "dom"): readyEventType
-                 /* callback, ... */) { // @param CallbackFunction: callback functions
-    var args = arguments, v, i = 0, iz = args.length, db = uuready.uudb,
-        type = "dom", // default type
-        m, order = 0, rex = /^([^\:]+)(\:[0-2])?$/; // "dom", "dom:1", "dom:2"
-
-    if (!uuready.reload) {
-        for (; i < iz; ++i) {
-            v = args[i]; // v = "dom:n", "window:n", "canvas:n", "audio:n", ...
-                         //   or function
-            if (isString(v)) {
-                m = rex.exec(v);
-                if (m) {
-                    type = m[1][_toLowerCase]();
-                    order = +m[2] || 0;
-                }
-            } else {
-                if (uuready[type]) { // already? -> fire
-                    switch (type) {
-                    case "canvas":  v(uu, uutag("canvas")); break; // uu.ready(function(uu, uu.tag("canvas")) { ... })
-                    case "audio":   v(uu, uutag("audio")); break;  // uu.ready(function(uu, uu.tag("audio")) { ... })
-                    case "video":   v(uu, uutag("video")); break;  // uu.ready(function(uu, uu.tag("video")) { ... })
-                    case "storage": v(uu, uu.storage); break;      // uu.ready(function(uu, uu.storage) { ... })
-                    case "svg":     v(uu, uusvg); break;           // uu.ready(function(uu, uu.svg) { ... })
-                    default:        v(uu, doc);                    // uu.ready(function(uu, doc) { ... })
-                    }
-                } else {
-                    db[type] || (db[type] = [[], [], []]);
-                    db[type][order].push(v);
-                }
-            }
-        }
-    }
-}
-uuready.uudb = {}; // { readyEventType: [[low order], [mid order], [high order]], ... }
-
-// uu.ready.fire
-function uureadyfire(readyEventType, // @param CaseInsenseString: readyEventType
-                     param) {        // @param Mix(= document): callback(uu, param)
-    var type = readyEventType[_toLowerCase](),
-        db = uuready.uudb[type], ary, callback, i = 0;
-
-    if (db) {
-        ary = db[2][_concat](db[1], db[0]); // join order: ary = [2] + [1] + [0]
-        uuready.uudb[type] = null; // clear order array
-
-        for (; callback = ary[i++]; ) {
-            callback(uu, param || doc); // uu.ready(function(uu, doc) { ... });
-                                        // uu.ready("canvas", function(uu, uu.tag("canvas")) { ... });
-                                        // uu.ready("audio", function(uu, that) { ... });
-        }
-    }
-}
-
 // --- node ---
 
 // uu.node - node builder
@@ -6161,6 +6217,16 @@ function uunodeid(ident) { // @param Node/Number: Node or NodeID
                                                ident[data] = id))
                             : _nodeiddb[ident];
 }
+
+// inner - prebuild nodeid
+uuready("dom:2", function() {
+    var nodeList = uutag("", htmlNode), v, i = 0;
+
+    uunodeid(htmlNode);
+    for (; v = nodeList[i++]; ) {
+        uunodeid(v);
+    }
+});
 
 // uu.nodeid.remove - remove NodeID
 function uunodeidremove(nodeid) { // @param Number: NodeID
@@ -9584,7 +9650,7 @@ uu.Class("NoAudio", {
 // --- initialize ---
 uuready("window", function() {
     uuready.audio = _true;
-    uureadyfire("audio", uutag("audio"));
+    uureadyfire("audio");
 });
 //}@audio
 
@@ -9611,7 +9677,7 @@ function uuvideo(src,        // @param URLString:
 // --- initialize ---
 uuready("window", function() {
     uuready.video = _true;
-    uureadyfire("video", uutag("video"));
+    uureadyfire("video");
 });
 //}@video
 
@@ -10766,51 +10832,6 @@ function _windowonunload() {
 _ie678 && uueventdetach(win, "onunload", _windowonunload);
 //}@mb
 
-// inner - init
-// 1. prebuild camelized hash - http://handsout.jp/slide/1894
-// 2. prebuild nodeid
-uuready("dom:2", function() {
-    var nodeList = uutag("", htmlNode), v, i = 0;
-
-    mixCamelizedStyle();
-    uunodeid(htmlNode);
-    for (; v = nodeList[i++]; ) {
-        uunodeid(v);
-    }
-});
-
-// inner - create camelized hash( { "text-align": "TextAlign", ...}) from getComputedStyle
-function mixCamelizedStyle() {
-    var fixdb = uucssfix.db,
-/*{@mb*/DECAMELIZE = /([a-z])([A-Z])/g, /*}@mb*/
-        props = _webkit ? getComputedStyle(htmlNode, 0) : htmlNode.style,
-        k, v;
-
-    for (k in props) {
-        if (typeof props[k] === _string) {
-//{@mb
-            if (_webkit) {
-//}@mb
-                k = v = props.item(k); // k = "-webkit-...", "z-index"
-                k[_indexOf]("-") >= 0 && (v = k[_replace](/-[a-z]/g, function(m) {
-                    return m[1].toUpperCase();
-                }));
-                fixdb[k] = v;
-//{@mb
-            } else {
-                v = ((_gecko && !k[_indexOf]("Moz")) ? "-moz" + k.slice(3) :
-                     (_ie    && !k[_indexOf]("ms"))  ? "-ms"  + k.slice(2) :
-                     (_opera && !k[_indexOf]("O"))   ? "-o"   + k.slice(1) : k)
-                    [_replace](DECAMELIZE, function(m, c, C) {
-                        return c + "-" + C[_toLowerCase]();
-                    });
-                fixdb[v] = k;
-            }
-//}@mb
-        }
-    }
-}
-
 // inner - uu.env - detect environment and meta informations
 function detectEnvironment(libraryVersion) { // @param Number: Library version
                                              // @return Hash:
@@ -10960,8 +10981,8 @@ function detectFeatures() {
             color: uuarg(hash),     // color: rgba, hsla, transparent ready
             border: uuarg(hash),    // border: rgba, hsla, transparent ready
             background: uuarg(hash),// background: rgba, hsla, transparent ready
-            ArraySlice: _true,      // Array.prototype.slice.call(FakeArray) ready [!IE6][!IE7][!IE8]
-            getAttribute: _true,    // getAttribute("href"), getAttribute("class") ready
+            ArraySlice: _true,      // Array.prototype.slice.call(FakeArray) ready [IE9+]
+            getAttribute: _true,    // getAttribute("href"), getAttribute("class") ready [IE8+]
             StringIndexer: _true,   // String[indexer] ready
             style: {                // style
                 inlineBlock: _true  //  style.inlineBlock ready
@@ -10993,8 +11014,11 @@ function detectFeatures() {
                  : (style.OTransform      !== void 0) ? "OTransform"
                  : (style.msTransform     !== void 0) ? "msTransform"
                  : (style.transform       !== void 0) ? "transform" : "";
-    // gecko translate3d was not supported (in Firefox4.0beta)
-    rv.translate3d = !_gecko;
+    // translate3d supporte
+    //  ok: WebKit, Opera11
+    //  ng: Firefox4.0beta, IE9pp7
+    rv.translate3d = _webkit || _opera;
+
     // detect opacity - http://d.hatena.ne.jp/uupaa/20100513
     rv.opacity = style.opacity != undef;
 
@@ -11982,7 +12006,7 @@ function SliderMove(that,   // @param this:
                     fx,     // @param Boolean: true is fx
                     minus,  // @param Number: minus
                     plus) { // @param Number: plus
-    var move = 0, transform,
+    var move = 0,
         param = that.param, x = 0, y = 0, w, tm, pp, round, threshold;
 
     // http://twitter.com/uupaa/status/25483749734
