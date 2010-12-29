@@ -1,4 +1,4 @@
-<!doctype html><html><head><meta charset="utf-8" />
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8" />
 <title>uu.fx demo</title>
 <style>
 html, body {
@@ -219,14 +219,6 @@ uu.ready(function(uu) {
 
 function toggleMargin() {
     uu("div.box").klass("!margin10");
-
-    // reset margin - uu.css.transform sets style.margin
-/*
-    if (uu.ie678) {
-        uu.id("swing").style.marginTop = "";
-        uu.id("swing").style.marginLeft = "";
-    }
- */
 }
 function togglePadding() {
     uu("div.box").klass("!padding10");
@@ -243,16 +235,13 @@ function toggleOutline() {
 <div>
   <div>
     TOGGLE:
-    <input type="button" value="cssText" onclick="alert(uu('SSS').cssText());uu.puff(uu.id('swing').currentStyle.marginTop);" />
-
     <input type="button" value="margin" onclick="toggleMargin()" />
     <input type="button" value="padding" onclick="togglePadding()" />
     <input type="button" value="border" onclick="toggleBorder()" />
     <input type="button" value="outline" onclick="toggleOutline()" /> |
   </div>
 </div>
-
-
+<div>
 DURATION: <input id="durationSlider" ui="Slider" type="range" step="50" value="300"
             min="0" max="2000" />
     <span id="durationValue">300</span>
@@ -264,14 +253,15 @@ RANGE: <input id="rangeSlider" ui="Slider" type="range" step="10" value="200"
 PARTS: <input id="partsSlider" ui="Slider" type="range" step="1" value="10"
             min="1" max="20" />
     <span id="partsValue">10</span>
+</div>
 
 
-<div id="absolutebox" style="position:absolute;top:120px;left:100px">
+<div id="absolutebox" style="position:absolute;top:130px;left:100px">
     <p><b>position:absolute</b></p>
 </div>
 
 
-<div style="position:absolute;top:360px;left:100px">
+<div style="position:absolute;top:380px;left:100px">
     <p id="staticbox"><b>position:static</b></p>
 
 </div>

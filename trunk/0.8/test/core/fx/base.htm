@@ -27,45 +27,63 @@ uu.ready(function(uu) {
     var i, iz = 1;
 
     for (i = 0; i < iz; ++i) {
-        uu.body(uu.div({ cn: "tgt1" }, { x: (i * 5) + "px" }, uu.text("tgt1")),
-                uu.div({ cn: "tgt2" }, { x: (i * 5) + "px" }, uu.text("tgt2")),
-                uu.div({ cn: "tgt3" }, { x: (i * 5) + "px" }, uu.text("tgt3")),
-                uu.div({ cn: "tgt4" }, { x: (i * 5) + "px" }, uu.text("tgt4")));
+        uu.body(uu.div({ cn: "tgt1" }, uu.text("tgt1")),
+                uu.div({ cn: "tgt2" }, uu.text("tgt2")),
+                uu.div({ cn: "tgt3" }, uu.text("tgt3")),
+                uu.div({ cn: "tgt4" }, uu.text("tgt4")));
     }
 });
+function xStop() {
+//  uu(".tgt1, .tgt2, .tgt3, .tgt4").each(function(node) {
+//      uu.fx.stop(node);
+//  });
+//                V  more short cording
+    uu(".tgt1, .tgt2, .tgt3, .tgt4", uu.fx.stop);
+}
+function xKill() {
+    uu.fx.kill();
+}
 function xaddqueue() {
     var color = [uu.color.random().hex,
                  uu.color.random().hex,
                  uu.color.random().hex,
                  uu.color.random().hex];
 
-    uu(".tgt1").fx(2000, { x: [400, "OutBack"],
-                              y: 400,
-                              w: 200,
-                              bgc: "skyblue",
-                              o: 0.5,
-                              fs: 36 });
-
+    uu(".tgt1").fx(2000, { mbtx: [400, "OutBack"],
+                           mbty: 400,
+                           w: 200,
+                           bgc: "skyblue",
+                           o: 0.5,
+                           fs: 36 });
     uu(".tgt2").css({ o: 0.2 }).
-        fx(1000, { x: ["+400", "InBack"], y: "+400", o: 1.0, w: 50, h: [50, "OutBack"] }).
-        fx(1000, { x: ["-400", "InBack"], y: "-400", o: 0.2, w: 100, h: [100, "OutBack"] });
+        fx(1000, { mbtx: ["+400", "InBack"], mbty: "+400", o: 1.0, w: 50, h: [50, "OutBack"] }).
+        fx(1000, { mbtx: ["-400", "InBack"], mbty: "-400", o: 0.2, w: 100, h: [100, "OutBack"] });
 
     uu(".tgt3").css({ o: 1   }).
-        fx(2000, { x: "+500px", y: "+500px", o: "-0.9" ,bgc: "rgb(0,255,100)" }).
+        fx(2000, { mbtx: "+500", mbty: "+500", o: "-0.9" ,bgc: "rgb(0,255,100)" }).
         fx(400, uu.nop). // standby
-        fx(2000, { x: "-500px", y: "-500px", o: 0.5 ,w: 300 ,bgc: "rgb(0,0,0)" });
+        fx(2000, { mbtx: "-500", mbty: "-500", o: 0.5 ,w: 300 ,bgc: "rgb(0,0,0)" });
 
     uu(".tgt4").css({ o: 1.0 }).
-        fx(1000, { x: ["+400", "InBack"], y: ["+230", "InBack"], o: 0.2, w:  10, h: [100, "OutBack"], bgc: color[0] }).
-        fx(1000, { x: ["+30",  "InBack"], y: ["-100", "InBack"], o: 1.0, w:  50, h: [ 10, "OutBack"], bgc: color[1] }).
-        fx(1000, { x: ["-400", "InBack"], y: ["-30",  "InBack"], o: 0.2, w:  10, h: [ 50, "OutBack"], bgc: color[2] }).
-        fx(1000, { x: ["-20",  "InBack"], y: ["-100", "InBack"], o: 1.0, w: 200, h: [200, "OutBack"], bgc: color[3] });
+        fx(1000, { mbtx: ["+400", "InBack"], mbty: ["+230", "InBack"], o: 0.2, w:  10, h: [100, "OutBack"], bgc: color[0] }).
+        fx(1000, { mbtx: ["+30",  "InBack"], mbty: ["-100", "InBack"], o: 1.0, w:  50, h: [ 10, "OutBack"], bgc: color[1] }).
+        fx(1000, { mbtx: ["-400", "InBack"], mbty: ["-30",  "InBack"], o: 0.2, w:  10, h: [ 50, "OutBack"], bgc: color[2] }).
+        fx(1000, { mbtx: ["-20",  "InBack"], mbty: ["-100", "InBack"], o: 1.0, w: 200, h: [200, "OutBack"], bgc: color[3] });
 }
 
 </script>
 </head><body>
-<input type="button" value="uu.fx() - add queue" onclick="xaddqueue()" />
-<input type="button" value="uu.fx.skip() - skip" onclick="uu.fx.skip()" />
-<input type="button" value="uu.fx.skip(0, true, true) - skip all + invisible" onclick="uu.fx.skip(0, true, true)" />
+<div>
+    <input type="button" value="uu.fx()" onclick="xaddqueue()" /> - add queue
+</div>
+<div>
+    <input type="button" value="uu.fx.kill()" onclick="xKill()" /> - clear all queue + kill animation
+</div>
+<div>
+    <input type="button" value="uu.fx.skip()" onclick="uu.fx.skip()" /> - skip a queue
+</div>
+<div>
+    <input type="button" value="uu.fx.skip(null, true, true)" onclick="uu.fx.skip(null, true, true)" /> - skip all queue + invisible
+</div>
 
 </body></html>
