@@ -1335,18 +1335,13 @@ function uupao(arg) { // @param Mix:
 // inner - get base directory and URL Normalize
 function getBaseDir(rex) { // @param RegExp(= /uupaa(\-\d+)?\.js/): library name pattern
     rex = rex || /uupaa(\-\d+)?\.js/;
-    var ary = location.href.split("/"),
-        rv = uutag("script", doc).pop().src[_replace](/[^\/]+$/, function(file) {
+    var rv = uutag("script", doc).pop().src[_replace](/[^\/]+$/, function(file) {
                 return rex.test(file) ? "../" : "";
              });
 
-    // [IE6][IE7][FIX] rel -> abs
-    ary.pop();
-    rv = ary.join("/") + "/" + rv;
-
     // URL Normalize
     // "http://example.com/js/../uupaa.js" -> "http://example.com/uupaa.js"
-    return uuurlnormalize(rv);
+    return uuurlnormalize(resolveURL(rv));
 }
 
 // inner - new node
