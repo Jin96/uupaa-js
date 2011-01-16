@@ -35,11 +35,20 @@ function uuuidragbase(evt,      // @param event:
     // init drag information
     if (!dragInfo) {
         grip[_uuuidrag] = dragInfo = {
-            tap: 0, ox: 0, oy: 0, trans: [1, 1, 0, 0, 0],
+//          tap: 0, ox: 0, oy: 0, trans: [1, 1, 0, 0, 0],
+            tap: 0, ox: 0, oy: 0,
+            trans2d: {
+                scaleX: 1,
+                scaleY: 1,
+                rotate: 0,
+                translateX: 0,
+                translateY: 0
+            },
             mode: 0, // 0=zoom, 1=rotate
             lastPageX: 0, lastPageY: 0, dragging: 0
         };
-        dragInfo.trans = uu.css.transform(node).concat();
+//      dragInfo.trans = uu.css.transform2d(node).concat();
+        dragInfo.trans2d = uu.mix({}, uu.css.transform2d(node)); // clone
     }
 
     // mousedown, touchstart, gesturestart
@@ -82,12 +91,20 @@ function uuuidragbase(evt,      // @param event:
         if (option.transform) {
             if (_touch) {
                 // store current state
-                dragInfo.trans = uu.css.transform(node).concat();
+//              dragInfo.trans = uu.css.transform2d(node).concat();
+                dragInfo.trans2d = uu.mix({}, uu.css.transform2d(node));
             }
             // triple tap -> reset transform matrix
             if (dragInfo.tap > 2) {
                 dragInfo.tap = 0;
-                uu.css.transform(node, dragInfo.trans = [1, 1, 0, 0, 0]);
+//              uu.css.transform2d(node, dragInfo.trans = [1, 1, 0, 0, 0]);
+                uu.css.transform2d(node, dragInfo.trans2d = {
+                    scaleX: 1,
+                    scaleY: 1,
+                    rotate: 0,
+                    translateX: 0,
+                    translateY: 0
+                });
             }
         }
 
@@ -101,9 +118,20 @@ function uuuidragbase(evt,      // @param event:
         if (_touch) {
             if (evt.uu.gesture) {
                 if (option.transform) {
+/*
                     scale  = dragInfo.trans[0] + evt.scale - 1,
                     rotate = dragInfo.trans[2] + evt.rotation;
-                    uu.css.transform(node, [scale, scale, rotate, 0, 0]);
+                    uu.css.transform2d(node, [scale, scale, rotate, 0, 0]);
+ */
+                    scale  = dragInfo.trans2d.scaleX + evt.scale - 1,
+                    rotate = dragInfo.trans2d.rotate + evt.rotation;
+                    uu.css.transform2d(node, {
+                        scaleX: scale,
+                        scaleY: scale,
+                        rotate: rotate,
+                        translateX: 0,
+                        translateY: 0
+                    });
                 }
                 return;
             }
@@ -136,14 +164,17 @@ function uuuidragbase(evt,      // @param event:
     } else if (code === uu.event.codes.mousewheel) {
         if (option.transform) {
             if (evt.shiftKey || dragInfo.mode) {
-                dragInfo.trans[2] += evt.uu.wheel * 5;  // rotate
+//              dragInfo.trans[2] += evt.uu.wheel * 5;  // rotate
+                dragInfo.trans2d.rotate += evt.uu.wheel * 5;  // rotate
             } else {
-                scale = dragInfo.trans[0];
+//              scale = dragInfo.trans[0];
+                scale = dragInfo.trans2d.scaleX;
                 scale += evt.uu.wheel * 0.1;
                 scale < 0.5 && (scale = 0.5);
-                dragInfo.trans[0] = dragInfo.trans[1] = scale;
+//              dragInfo.trans[0] = dragInfo.trans[1] = scale;
+                dragInfo.trans2d.scaleX = dragInfo.trans2d.scaleY = scale;
             }
-            uu.css.transform(node, dragInfo.trans);
+            uu.css.transform2d(node, dragInfo.trans2d);
         }
     }
 }
