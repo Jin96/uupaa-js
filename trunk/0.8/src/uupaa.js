@@ -130,6 +130,7 @@
 //      |Safari 3       |H264         |      -      |   H264   |
 //      |Safari 4+      |H264         |H264         |   H264   |
 //      |Chrome 6+      |H264,Ogg,WebM|H264,Ogg,WebM|   H264   |
+//      |Chrome 10+     |H264,Ogg,WebM|     Ogg,WebM|   H264   |
 //      |Opera 9x-10.10 |H264         |      -      |   H264   |
 //      |Opera 10.50    |H264,Ogg     |     Ogg     |   H264   |
 //      |Opera 10.60+   |H264,Ogg,WebM|     Ogg,WebM|   H264   |
@@ -168,10 +169,12 @@
 // Element Traversal
 //      Gecko, WebKit, Opera, IE9+
 //
-// |                       | WebKit   | Opera | Firefox   |   IE   |
-// | transform.translate3d | Safari4+ |  11+  | x 4.0beta | x 9pp7 |
-// |                       | Chrome   |
-//
+// style.transform = "translate3d()"
+// +-------------+----------+-------+-----------+--------+
+// |             | WebKit   | Opera | Firefox   |   IE   |
+// | translate3d | Safari4+ |  11+  | x 4.0beta | x 9pp7 |
+// |             | Chrome   |       |           |        |
+// +-------------+----------+-------+-----------+--------+
 //
 // +--------------+--------+---------+---------+---------+
 // | Typed Array  | Chrome | Firefox | iOS     | Android |
@@ -199,7 +202,7 @@ uu || (function(win,                // as Global / window
                 navigator,          // as window.navigator
                 toString,           // as Global.Object.prototype.toString
                 isArray,            // as Global.Array.isArray,
-                toArray,            // as Global.Array.prototype.slice, (x:IE NodeList, o: IE arguments)
+                toArray,            // as Global.Array.prototype.slice, (x: IE NodeList, o: IE arguments)
                 Node,               // as Global.Node
                 Math,               // as Global.Math
                 parseInt,           // as Global.parseInt
@@ -633,9 +636,10 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
         opacity:    uucssopacity,   // uu.css.opacity(node:Node, value:Number):Number/Node
                                     //  [1][get opacity] uu.css.opacity(node) -> 0.5
                                     //  [2][set opacity] uu.css.opacity(node, 0.5) -> node
-        transform:  uucsstransform, // uu.css.transform(node:Node, param:Hash = void):Node/Hash
-                                    //  [1][get transform] uu.css.transform(node) -> { scaleX, scaleY, rotate, translateX, translateY, translateZ }
-                                    //  [2][set transform] uu.css.transform(node, { rotate: 30 }) -> node
+        transform2d:                // uu.css.transform2d(node:Node, param:Hash = void):Node/Hash
+                    uucsstransform2d,
+                                    //  [1][get transform] uu.css.transform2d(node) -> { scaleX, scaleY, rotate, translateX, translateY }
+                                    //  [2][set transform] uu.css.transform2d(node, { rotate: 30 }) -> node
         userSelect: uucssuserSelect // uu.css.userSelect(node:Node, allow:Boolean = false):Node
     }),
     // --- STYLESHEET ---
@@ -1036,8 +1040,8 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //  [3][W3CNamedColor to Color]              uu.color("black")             -> Color
                                     //  [4]["#000..." to Color]                  uu.color("#000")              -> Color
                                     //  [5]["rgba(,,,,)" to Color]               uu.color("rgba(0,0,0,1)")     -> Color
-                                    //  [6]["hsla(,,,,) to Color]                uu.color("hsla(360,1%,1%,1)") -> Color
-                                    //  [7]["hsva(,,,,) to Color]                uu.color("hsva(360,1%,1%,1)") -> Color
+                                    //  [6]["hsla(,,,,)" to Color]               uu.color("hsla(360,1%,1%,1)") -> Color
+                                    //  [7]["hsva(,,,,)" to Color]               uu.color("hsva(360,1%,1%,1)") -> Color
         add:        uucoloradd,     // uu.color.add(source:String)
         random:     uucolorrandom   // uu.color.random(a:Number = 1):Color
                                     //  [1][random color] uu.color.random() -> Color
@@ -2931,7 +2935,6 @@ uucssfix.db = {
     sy:         "scaleY",       // transform.scaleY
     tx:         "translateX",   // transform.translateX
     ty:         "translateY",   // transform.translateY
-    tz:         "translateZ",   // transform.translateZ
     bgc:        "backgroundColor",
     bgcolor:    "backgroundColor",
     bgx:        "backgroundPositionX",
@@ -3190,7 +3193,7 @@ function uufxloop(id,     // @param Number: timer id
 
     if (!q) {
         // uu.fx.kill() after route
-        data.id = 0;
+        data.id = data.ri = 0;
     } else {
         option = q.option;
         back = !!option.back;
@@ -3368,7 +3371,7 @@ function uufxbuild(node, data, queue, option) {
             back:     1
         },
         key, w, opt,
-        transform = uucsstransform(node),
+        transform = uucsstransform2d(node),
         transformBuffer = {},
         transformChanged = 0,
         vp, // viewport
@@ -3469,7 +3472,6 @@ function uufxbuild(node, data, queue, option) {
                 case "rotate":
                 case "translateX":
                 case "translateY":
-                case "translateZ":
                     sv = transform[w];
                     ev = uunumberexpand(sv, ev, parseFloat);
                     transformBuffer[w] = ('(fin?' + ev + ':' + ezfn(sv, ev, ez) + ')');
@@ -3489,13 +3491,12 @@ function uufxbuild(node, data, queue, option) {
     }
 
     if (transformChanged) {
-        rv += uuf("uu.css.transform(node,{scaleX:@,scaleY:@,rotate:@,translateX:@,translateY:@,translateZ:@});",
+        rv += uuf("uu.css.transform2d(node,{scaleX:@,scaleY:@,rotate:@,translateX:@,translateY:@});",
                   transformBuffer.scaleX     || transform.scaleX,
                   transformBuffer.scaleY     || transform.scaleY,
                   transformBuffer.rotate     || transform.rotate,
                   transformBuffer.translateX || transform.translateX,
-                  transformBuffer.translateY || transform.translateY,
-                  transformBuffer.translateZ || transform.translateZ);
+                  transformBuffer.translateY || transform.translateY);
     }
 
     // add reverse queue
@@ -3754,7 +3755,7 @@ function uufxflare(node,     // @param Node:
 
             _env.jit && (p.fs = parseInt(cs.fontSize) * 1.5);
             if (_mobile) {
-                tr = uucsstransform(node);
+                tr = uucsstransform2d(node);
                 x = tr.translateX;
                 y = tr.translateY;
             }
@@ -3911,8 +3912,8 @@ function uufxmovein(node,     // @param Node:
                 o = uucssopacity(node);
 
                 if (_mobile) {
-                    tr = uucsstransform(node);
-                    uucsstransform(node, {
+                    tr = uucsstransform2d(node);
+                    uucsstransform2d(node, {
                         translateX: Math.cos(angle) * range + tr.translateX + endX,
                         translateY: Math.sin(angle) * range + tr.translateY + endY,
                         scaleX: tr.scaleX * 1.5,
@@ -4045,44 +4046,42 @@ function uucssopacity(node,      // @param Node:
 uucssopacity._ = /alpha\(opacity\=(\d+)\)/;
 //}@mb
 
-// uu.css.transform
-function uucsstransform(node,    // @param Node:
-                        param) { // @param Hash(= void): { scaleX, scaleY, rotate,
-                                 //                        translateX, translateY, translateZ }
-                                 //     param.scaleX - Number: scale x (default: 1)
-                                 //     param.scaleY - Number: scale y (default: 1)
-                                 //     param.rotate - Number: rotate (unit: degree)(0~360)(default: 0)
-                                 //     param.translateX - Number: translate x (default: 0)
-                                 //     param.translateY - Number: translate y (default: 0)
-                                 //     param.translateZ - Number: translate z (default: 0)
-                                 // @return Node/Hash:
-    //  [1][get transform] uu.css.transform(node) -> { scaleX, scaleY, rotate, translateX, translateY, translateZ }
-    //  [2][set transform] uu.css.transform(node, { rotate: 30 }) -> node
+// uu.css.transform2d
+function uucsstransform2d(node,    // @param Node:
+                          param) { // @param Hash(= void): { scaleX, scaleY, rotate,
+                                   //                        translateX, translateY, translateZ }
+                                   //     param.scaleX - Number: scale x (default: 1)
+                                   //     param.scaleY - Number: scale y (default: 1)
+                                   //     param.rotate - Number: rotate (unit: degree)(0~360)(default: 0)
+                                   //     param.translateX - Number: translate x (default: 0)
+                                   //     param.translateY - Number: translate y (default: 0)
+                                   //     param.translateZ - Number: translate z (default: 0)
+                                   // @return Node/Hash:
+    //  [1][get transform] uu.css.transform2d(node) -> { scaleX, scaleY, rotate, translateX, translateY, translateZ }
+    //  [2][set transform] uu.css.transform2d(node, { rotate: 30 }) -> node
 
-    var undef, str, dataid = _datauu + "trans", // node["data-uutrans"]
+    var undef, dataid = _datauu + "trans", // node["data-uutrans"]
         meta = node[dataid], keyword = uuready.transform,
         scaleX = 1, scaleY = 1, rotate = 0,
-        translateX = 0, translateY = 0, translateZ = 0;
+        translateX = 0, translateY = 0;
 
     if (!meta) { // init
         if (!_ie678 && keyword) { // pickup current transform value
-            node.style[keyword].replace(uucsstransform._.scale, function(_, x, y) {
+            node.style[keyword].replace(uucsstransform2d._.scale, function(_, x, y) {
                 scaleX = x;
                 scaleY = y;
-            }).replace(uucsstransform._.rotate, function(_, r) {
+            }).replace(uucsstransform2d._.rotate, function(_, r) {
                 rotate = r;
-            }).replace(uucsstransform._.translate, function(_, x, y, z) {
+            }).replace(uucsstransform2d._.translate, function(_, x, y) {
                 translateX = x;
                 translateY = y;
-                translateZ = z !== void 0 ? z : 0
             });
         }
         node[dataid] = meta = { scaleX: scaleX,
                                 scaleY: scaleY,
                                 rotate: rotate,
                                 translateX: translateX | 0,
-                                translateY: translateY | 0,
-                                translateZ: translateZ | 0 };
+                                translateY: translateY | 0 };
     }
     if (!param) {
         return meta;
@@ -4092,8 +4091,7 @@ function uucsstransform(node,    // @param Node:
         scaleY:     param.scaleY     === undef ? meta.scaleY     : param.scaleY,
         rotate:     param.rotate     === undef ? meta.rotate     : param.rotate,
         translateX: param.translateX === undef ? meta.translateX : param.translateX | 0,
-        translateY: param.translateY === undef ? meta.translateY : param.translateY | 0,
-        translateZ: param.translateZ === undef ? meta.translateZ : param.translateZ | 0
+        translateY: param.translateY === undef ? meta.translateY : param.translateY | 0
     };
 
 //{@mb
@@ -4138,30 +4136,24 @@ function uucsstransform(node,    // @param Node:
         }
     } else {
         if (uuready.transform) {
-            str = "scale(" + meta.scaleX + "," + meta.scaleY + ") " +
-                  "rotate(" + meta.rotate + "deg) " +
-                  "translate";
-
-            if (!uu.ready.translate3d) {
-                str += "(" + (meta.translateX | 0) + "px," +
-                             (meta.translateY | 0) + "px)";
-            } else {
 //}@mb
-                str += "3d(" + (meta.translateX | 0) + "px," +
-                               (meta.translateY | 0) + "px," +
-                               (meta.translateZ | 0) + "px)";
+            // node.style.WebkitTransform =
+            //  "scale({$sx},{$sy}) rotate({$r}deg) translate({$tx}px,{$ty}px)"
+            node.style[uuready.transform] =
+                "scale(" + meta.scaleX + "," + meta.scaleY + ") " +
+                "rotate(" + meta.rotate + "deg) " +
+                "translate(" + (meta.translateX | 0) + "px," +
+                               (meta.translateY | 0) + "px)";
 //{@mb
-            }
-            node.style[uuready.transform] = str;
         }
     }
 //}@mb
     return node;
 }
-uucsstransform._ = {
+uucsstransform2d._ = {
     scale:      /scale\(([\d\.]+), ([\d\.]+)\)/,
     rotate:     /rotate\(([\d\.]+)\)/,
-    translate:  /translate(?:3d)?\(([\d\.]+), ([\d\.]+)(?:, ([\d\.]+))?\)/
+    translate:  /translate\(([\d\.]+), ([\d\.]+)\)/
 };
 
 // --- CSS BOX MODEL ---
@@ -5742,7 +5734,7 @@ function uueventresize(evaluator) { // @param CallbackFunction: callback functio
     if (!db.fn.length) { // init
 //{@mb
         uueventresize.unsafe ? (db.vp = uuviewport(),
-                                db.tm = setInterval(onresizeagent, db.delay)) : // [IE6][IE7][IE8]
+                                db.tm = setInterval(handleResizeAgent, db.delay)) : // [IE6][IE7][IE8]
 //}@mb
                                uueventattach(win, "resize", onresize);          // [W3C]
     }
@@ -5764,12 +5756,12 @@ function uueventunresize() {
 //{@mb
     uueventresize.unsafe ? (db.tm && (clearInterval(db.tm), db.tm = 0)) : // [IE6][IE7][IE8]
 //}@mb
-                           uueventdetach(win, "resize", onresize);        // [W3C]
+                           uueventdetach(win, "resize", handleResize);        // [W3C]
     db.lock = 0;
 }
 
 // inner - resize event handler
-function onresize(event) {
+function handleResize(event) {
     var db = uueventresize.db,
         evt = uumix(event, { node: win, code: uuevent.codes.resize, at: win });
 
@@ -5787,7 +5779,7 @@ function onresize(event) {
 
 // inner - resize handler(resize agent) for unsafe browser
 //{@mb
-function onresizeagent() {
+function handleResizeAgent() {
     var db = uueventresize.db, i = 0, iz, vp,
         evt = { node: win, code: uuevent.codes.resize, at: win };
 
@@ -8462,8 +8454,8 @@ function uucolor(expr) { // @parem Color/RGBAHash/HSLAHash/HSVAHash/String: "bla
     //  [3][W3CNamedColor to Color]              uu.color("black")             -> Color
     //  [4]["#000..." to Color]                  uu.color("#000")              -> Color
     //  [5]["rgba(,,,,)" to Color]               uu.color("rgba(0,0,0,1)")     -> Color
-    //  [6]["hsla(,,,,) to Color]                uu.color("hsla(360,1%,1%,1)") -> Color
-    //  [7]["hsva(,,,,) to Color]                uu.color("hsva(360,1%,1%,1)") -> Color
+    //  [6]["hsla(,,,,)" to Color]               uu.color("hsla(360,1%,1%,1)") -> Color
+    //  [7]["hsva(,,,,)" to Color]               uu.color("hsva(360,1%,1%,1)") -> Color
 
     var rv, m, n, r, g, b, a = 1;
 
@@ -11164,7 +11156,7 @@ var _A_TAG          = 1,  // E               [_A_TAG,         "DIV"]
     _uuqid          = "data-uuqueryid",
     _uudoctype      = "data-uudoctype", // 1: XMLDocument, 2: HTMLDocument
     _nodeCount      = 0,
-    _textContent    = uu.ie678 ? "innerText" : "textContent";
+    _textContent    = _ie678 ? "innerText" : "textContent";
 
 // uu.query.tokenizer
 function tokenizer(expr) { // @param CSSSelectorExpressionString: "E > F"
@@ -11180,7 +11172,9 @@ function tokenizer(expr) { // @param CSSSelectorExpressionString: "E > F"
     // --- QUICK PHASE ---
     (m = _QUICK.E.exec(expr))  ? (data.push(_A_TAG, m[0])) :
     (m = _QUICK.ID.exec(expr)) ? (data.push(_A_QUICK_ID, m[1] === "#", m[2])) :
-    ((m = _QUICK.EFG.exec(expr)) && m[1] !== m[2] && m[1] !== m[3] && m[2] !== m[3])
+    ((m = _QUICK.EFG.exec(expr)) && m[1] !== m[2]  // E !== F
+                                 && m[1] !== m[3]  // E !== G
+                                 && m[2] !== m[3]) // F !== G
                                ? (data.push(_A_QUICK_EFG, m[3] ? [m[1], m[2], m[3]]
                                                                : [m[1], m[2]])) :
     _TOKEN_ERROR.test(expr)    ? (rv.msg = expr) : 0;
@@ -11258,12 +11252,12 @@ function innerLoop(expr, rv, not) {
                             m || rv.msg || (rv.msg = ":not()");
                         }
                     }
-                } else { // pseudo nth-functions
+                } else { // pseudo functions
                     data.push(num < 35 ? _A_PSEUDO_NTH : _A_PSEUDO_FUNC, num);
                     expr = expr.slice(m[0].length);
                     m = _TOKEN_PSEUDO.FUNC.exec(expr);
                     if (m) {
-                        if (num < 35) {
+                        if (num < 35) { // pseudo nth-functions
                             mm = _TOKEN_NTH.exec(m[1]);
                             if (mm) {
                                 if (mm[1]) { // :nth(even) or :nth(odd)
@@ -11279,7 +11273,7 @@ function innerLoop(expr, rv, not) {
                                     anb = { a: c ? 0 : a, b: b, k: c ? a + 1 : 3 };
                                 }
                             }
-                            anb ? data.push(anb)  // pseudo function arg
+                            anb ? data.push(anb) // pseudo function arg
                                 : rv.msg ? 0 : (rv.msg = m[0]);
                         } else { // :lang
                             m ? data.push(m[1]) // pseudo function arg
@@ -12047,7 +12041,7 @@ function SliderMove(that,   // @param this:
     } else {
 //}@fx
         if (uu.env.mobile) {
-            uu.css.transform(param.grip, { translateX: x, translateY: y });
+            uu.css.transform2d(param.grip, { translateX: x, translateY: y });
         } else {
             param.grip.style.left = x + "px";
             param.grip.style.top  = y + "px";

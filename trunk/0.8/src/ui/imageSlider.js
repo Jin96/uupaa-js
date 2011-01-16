@@ -41,7 +41,7 @@ function uuuiimageslider(node,     // @param Node:
                          duration, // @param Number: duration
                          option) { // @param Hash(= { allow: 1 }):
                                    // @return Node:
-    var data = node[_dataset], x = null, y = null,
+    var data = node[_dataset], x = 0, y = 0,
         opt = uu.arg(option, { allow: 1 });
 
     if (data) {
@@ -52,8 +52,13 @@ function uuuiimageslider(node,     // @param Node:
                 data.degree < 90 && (x = -(data.w * data.moved));
                 data.degree >  0 && (y = -(data.h * data.moved));
             }
-            uu.fx(data.target, duration,
-                  uu.arg(option, { marginLeft: x, marginTop: y }));
+            if (uu.env.mobile) {
+                uu.fx(data.target, duration,
+                      uu.arg(option, { tx: x, ty: y }));
+            } else {
+                uu.fx(data.target, duration,
+                      uu.arg(option, { marginLeft: x, marginTop: y }));
+            }
         }
     }
     return node;
