@@ -189,6 +189,23 @@
 // | Float32Array |   9+   |    4+   |   4.2+  |
 // | Float64Array |  ---   |   ---   |   ---   |
 // +--------------+--------+---------+---------+
+//
+//
+//
+// o    CSS3 2D Transforms
+// o        css: -moz-transform: scale(), scaleX(), scaleY()
+// o        css: -moz-transform: rotate()
+// o        css: -moz-transform: translate(), translateX(), translateY()
+// o        css: -mox:transform: matrix()
+// o        js: style.MozTransform = "scale()"
+// o        js: style.MozTransform = "rotate()"
+// o        js: style.MozTransform = "translate()"
+// o        js: style.MozTransform = "matrix()" // matrix({$a},{$b},{$c},{$d},{$e}px,{$f}px)
+//
+// navigator.userAgent
+//      Windows Phone 7 - "Mozilla/4.0 (compatible; MSIE 7.0; Windows Phone OS 7.0; Trident/3.1; IEMobile/7.0)"
+//
+
 
 // === Core ===
 
@@ -1019,8 +1036,11 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
         range:      uunumberrange,  // uu.number.range(min:Number, value:Number, max:Number):Number
         expand:     uunumberexpand  // uu.number.expand(current:Number, value:String/Number, fn:Function = parseFloat):Number
     }),
-    // --- EVALUATION / FUNCTIONAL STATUS ---
-    ready:    uumix(uuready, {      // uu.ready(readyEventType:IgnoreCaseString = "dom", callback:CallbackFunction, ...)
+    // --- EVALUATION / FUNCTIONAL STATUS / URL DISPATCHER ---
+    ready:    uumix(uuready, {      // uu.ready(readyEventType:RegExp/IgnoreCaseString = "dom", callback:CallbackFunction, ...)
+                                    //  [1][DOMContentLoaded] uu.ready("dom:2", callback)
+                                    //  [2][window.onload]    uu.ready("window", "callback)
+                                    //  [3][URL Dispacher]    uu.ready(/\/event\/xmax/, callback)
         fire:       uureadyfire,    // uu.ready.fire(readyEventType:CaseInsenseString, param:Mix = document)
         dom:        _false,         // true is DOMContentLoaded event fired
         window:     _false,         // true is window.onload event fired
@@ -1362,8 +1382,13 @@ function newText(text) { // @param String:
 
 // --- READY ---
 // uu.ready - bind DOMContentLoaded/WindowOnLoad/StorageReady/CanvasReady/AudioReady/SVGReady event
-function uuready(/* readyEventType, */  // @param CaseInsenseString(= "dom"): readyEventType
+function uuready(/* readyEventType, */  // @param RegExp/CaseInsenseString(= "dom"): readyEventType
                  /* callback, ... */) { // @param CallbackFunction: callback functions
+
+    //  [1][DOMContentLoaded] uu.ready("dom:2", callback)
+    //  [2][window.onload]    uu.ready("window", "callback)
+    //  [3][URL Dispacher]    uu.ready(/\/event\/xmax/, callback)
+
     var mix, // String or Function
         i = 0, iz = arguments.length, ary,
         db = uuready.uudb, // alias
@@ -1373,7 +1398,14 @@ function uuready(/* readyEventType, */  // @param CaseInsenseString(= "dom"): re
     if (!uuready.reload) {
         for (; i < iz; ++i) {
             mix = arguments[i]; // String("window:2"), or Function(callback)
-            if (isString(mix)) {
+            if (mix.exec) { // isRegExp -> URL Dispatcher
+                order = 0;
+                if (mix.test(location.href)) { // "http://example.com:port/path/file.ext?key=val#hash"
+                    type = "#url#";
+                } else {
+                    type = ""; // skip uu.ready(/MissMatchURL/, callbackFunction)
+                }
+            } else if (isString(mix)) {
                 ary = (mix.indexOf(":") > 0 ? mix : mix + ":0").split(":"); // supply
                 type = ary[0];   // "window:2" -> "window"
                 order = +ary[1]; // "window:2" -> 2
@@ -1383,11 +1415,15 @@ function uuready(/* readyEventType, */  // @param CaseInsenseString(= "dom"): re
                     case "canvas":  mix(uu, uutag("canvas")); break; // uu.ready(function(uu, uu.tag("canvas")) { ... })
                     case "storage": mix(uu, uu.storage); break;      // uu.ready(function(uu, uu.storage) { ... })
                     case "svg":     mix(uu, uusvg); break;           // uu.ready(function(uu, uu.svg) { ... })
-                    default:        mix(uu, doc);                    // uu.ready(function(uu, doc) { ... })
+                    case "dom":     mix(uu, doc);                    // uu.ready(function(uu, doc) { ... })
                     }
                 } else {
-                    db[type] || (db[type] = [[], [], []]); // init [order0, order1, order2]
-                    db[type][order].push(mix);
+                    if (type === "#url#") {
+                        mix(uu, doc); // URL Dispatcher
+                    } else if (type) {
+                        db[type] || (db[type] = [[], [], []]); // init [order0, order1, order2]
+                        db[type][order].push(mix);
+                    }
                 }
             }
         }
@@ -4100,8 +4136,8 @@ function uucsstransform2d(node,    // @param Node:
             var ident  = "DXImageTransform.Microsoft.Matrix",
                 dataie = _datauu + "transie", // node["data-uutransie"]
                 rotate = meta.rotate * Math.PI / 180, // deg2rad
-                cos = Math.cos(-rotate),
-                sin = Math.sin(-rotate),
+                cos = Math.cos(rotate),
+                sin = Math.sin(rotate),
                 // scale * rotate * translate
                 mtx = [ cos * meta.scaleX, sin * meta.scaleX, 0,
                        -sin * meta.scaleY, cos * meta.scaleY, 0,
@@ -4117,8 +4153,7 @@ function uucsstransform2d(node,    // @param Node:
                                      "(sizingMethod='auto expand')";
                 node[dataie] = { cx: cx, cy: cy };
             }
-            filter = node.filters.item(ident),
-
+            filter = node.filters.item(ident);
             filter.M11 = mtx[0];
             filter.M12 = mtx[1];
             filter.M21 = mtx[3];
