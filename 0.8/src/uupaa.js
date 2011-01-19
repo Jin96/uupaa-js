@@ -1037,10 +1037,28 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
         expand:     uunumberexpand  // uu.number.expand(current:Number, value:String/Number, fn:Function = parseFloat):Number
     }),
     // --- EVALUATION / FUNCTIONAL STATUS / URL DISPATCHER ---
-    ready:    uumix(uuready, {      // uu.ready(readyEventType:RegExp/IgnoreCaseString = "dom", callback:CallbackFunction, ...)
-                                    //  [1][DOMContentLoaded] uu.ready("dom:2", callback)
-                                    //  [2][window.onload]    uu.ready("window", "callback)
-                                    //  [3][URL Dispacher]    uu.ready(/\/event\/xmax/, callback)
+    ready:    uumix(uuready, {      // uu.ready(readyEventType:String/IgnoreCaseString = "dom", callback:CallbackFunction, ...)
+                                    //  [1][DOMReady]                          uu.ready(DOMContentReadyCallback, ...)
+                                    //  [2][DOMReady]                          uu.ready("dom", DOMContentReadyCallback, ...)
+                                    //  [3][WindowReady (window.onload)]       uu.ready("window", WindowReadyCallbacK, ...)
+                                    //  [4][StorageReady]                      uu.ready("storage", StorageReadyCallback, ...)
+                                    //  [5][CanvasReady]                       uu.ready("canvas", CanvasReadyCallback, ...)
+                                    //  [6][AudioReady]                        uu.ready("audio", AudioReadyCallback, ...)
+                                    //  [7][VideoReady]                        uu.ready("video", VideoReadyCallback, ...)
+                                    //  [8][SVGReady]                          uu.ready("canvas", SVGReadyCallback, ...)
+                                    //  [9][URLReady (/url dispatcher/)]       uu.ready(/\/event\/xmax/, URLMatchedCallback, ...)
+                                    //  [10][URLReady ("Slash/Has/String")]    uu.ready("/event/xmax", URLMatchedCallback, ...)
+                                    //  [11][User defined ident callback]      uu.ready("MyIdent", UserDefinedCallback); uu.ready.fire("MyIdent")
+                                    //  [12][User level(low order) callback]   uu.ready("ident", UserLevelCallback, ...)
+                                    //  [13][User level(low order) callback]   uu.ready("ident:0", UserLevelCallback, ...)
+                                    //  [14][App level(high order) callback]   uu.ready("ident:1", AppLevelCallback, ...)
+                                    //  [15][System level(top order) callback] uu.ready("ident:2", SystemLevelCallback, ...)
+                                    //  [16][multiple callback]                uu.ready(UserLevelDOMContentReadyCallback,
+                                    //                                           "dom:2", SystemLevelDOMContentReadyCallback,
+                                    //                                           "window", UserLevelWindowReadyCallbacK,
+                                    //                                           "window:2", SystemLevelWindowReadyCallbacK,
+                                    //                                           "storage", UserLevelStorageReadyCallback,
+                                    //                                                      UserLevelStorageReadyCallback)
         fire:       uureadyfire,    // uu.ready.fire(readyEventType:CaseInsenseString, param:Mix = document)
         dom:        _false,         // true is DOMContentLoaded event fired
         window:     _false,         // true is window.onload event fired
@@ -1382,14 +1400,32 @@ function newText(text) { // @param String:
 
 // --- READY ---
 // uu.ready - bind DOMContentLoaded/WindowOnLoad/StorageReady/CanvasReady/AudioReady/SVGReady event
-function uuready(/* readyEventType, */  // @param RegExp/CaseInsenseString(= "dom"): readyEventType
+function uuready(/* readyEventType, */  // @param String/CaseInsenseString(= "dom"): readyEventType
                  /* callback, ... */) { // @param CallbackFunction: callback functions
 
-    //  [1][DOMContentLoaded] uu.ready("dom:2", callback)
-    //  [2][window.onload]    uu.ready("window", "callback)
-    //  [3][URL Dispacher]    uu.ready(/\/event\/xmax/, callback)
+    //  [1][DOMReady]                          uu.ready(DOMContentReadyCallback, ...)
+    //  [2][DOMReady]                          uu.ready("dom", DOMContentReadyCallback, ...)
+    //  [3][WindowReady (window.onload)]       uu.ready("window", WindowReadyCallbacK, ...)
+    //  [4][StorageReady]                      uu.ready("storage", StorageReadyCallback, ...)
+    //  [5][CanvasReady]                       uu.ready("canvas", CanvasReadyCallback, ...)
+    //  [6][AudioReady]                        uu.ready("audio", AudioReadyCallback, ...)
+    //  [7][VideoReady]                        uu.ready("video", VideoReadyCallback, ...)
+    //  [8][SVGReady]                          uu.ready("canvas", SVGReadyCallback, ...)
+    //  [9][URL Dispatcher]                    uu.ready("href:/event/xmas", LocationHrefRegExpMatchedCallback, ...)
+    //  [10][User defined ident callback]      uu.ready("MyIdent", UserDefinedCallback); uu.ready.fire("MyIdent")
+    //  [11][User level(low order) callback]   uu.ready("ident", UserLevelCallback, ...)
+    //  [12][User level(low order) callback]   uu.ready("ident:0", UserLevelCallback, ...)
+    //  [13][App level(high order) callback]   uu.ready("ident:1", AppLevelCallback, ...)
+    //  [14][System level(top order) callback] uu.ready("ident:2", SystemLevelCallback, ...)
+    //  [15][multiple callback]                uu.ready(UserLevelDOMContentReadyCallback,
+    //                                           "dom:2", SystemLevelDOMContentReadyCallback,
+    //                                           "window", UserLevelWindowReadyCallbacK,
+    //                                           "window:2", SystemLevelWindowReadyCallbacK,
+    //                                           "href:/event/xmas", LocationHrefRegExpMatchedCallback,
+    //                                           "storage", UserLevelStorageReadyCallback,
+    //                                                      UserLevelStorageReadyCallback)
 
-    var mix, // String or Function
+    var mix, // String("ident") or Function(callback)
         i = 0, iz = arguments.length, ary,
         db = uuready.uudb, // alias
         type = "dom",      // default type
@@ -1397,28 +1433,33 @@ function uuready(/* readyEventType, */  // @param RegExp/CaseInsenseString(= "do
 
     if (!uuready.reload) {
         for (; i < iz; ++i) {
-            mix = arguments[i]; // String("window:2"), or Function(callback)
-            if (mix.exec) { // isRegExp -> URL Dispatcher
-                order = 0;
-                if (mix.test(location.href)) { // "http://example.com:port/path/file.ext?key=val#hash"
-                    type = "#url#";
-                } else {
-                    type = ""; // skip uu.ready(/MissMatchURL/, callbackFunction)
+            mix = arguments[i]; // String("href:...") / String("window:2") / Function(callback)
+
+            if (isString(mix)) {
+                if (!mix.indexOf("href:")) { // String("href:...") -> URL Dispatcher
+                    if (RegExp(mix.slice(5)).test(location.href)) { // "http://example.com:port/path/file.ext?key=val#hash"
+                        order = 0;
+                        type = "#href#";
+                    } else {
+                        type = "#avoid#"; // url miss matched -> clear type -> avoid next callback function
+                    }
+                } else { // String("window:2") -> window.onload, String("MyIdent") -> User callback
+                    ary = (mix.indexOf(":") > 0 ? mix : mix + ":0").split(":"); // supply
+                    type = ary[0];   // "window:2" -> "window"
+                    order = +ary[1]; // "window:2" -> 2
                 }
-            } else if (isString(mix)) {
-                ary = (mix.indexOf(":") > 0 ? mix : mix + ":0").split(":"); // supply
-                type = ary[0];   // "window:2" -> "window"
-                order = +ary[1]; // "window:2" -> 2
-            } else {
+            } else { // isFunction(mix)
                 if (uuready[type]) { // already? -> fire
                     switch (type) {
-                    case "canvas":  mix(uu, uutag("canvas")); break; // uu.ready(function(uu, uu.tag("canvas")) { ... })
-                    case "storage": mix(uu, uu.storage); break;      // uu.ready(function(uu, uu.storage) { ... })
-                    case "svg":     mix(uu, uusvg); break;           // uu.ready(function(uu, uu.svg) { ... })
-                    case "dom":     mix(uu, doc);                    // uu.ready(function(uu, doc) { ... })
+                    case "canvas":  mix(uu, uutag("canvas")); break; // uu.ready("canvas", function(uu, uu.tag("canvas")) { ... })
+                    case "storage": mix(uu, uu.storage); break;      // uu.ready("storage", function(uu, uu.storage) { ... })
+                    case "svg":     mix(uu, uusvg); break;           // uu.ready("svg", function(uu, uu.svg) { ... })
+                    case "#avoid#": break;                           // uu.ready("href:missmatched", function(){}) -> avoid callback
+                    default:        mix(uu, doc);                    // uu.ready("dom", function(uu, doc) { ... })
+                                                                     // uu.ready("MyIdent", function(uu, doc) { ... })
                     }
                 } else {
-                    if (type === "#url#") {
+                    if (type === "#href#") {
                         mix(uu, doc); // URL Dispatcher
                     } else if (type) {
                         db[type] || (db[type] = [[], [], []]); // init [order0, order1, order2]
