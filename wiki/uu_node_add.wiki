@@ -88,3 +88,45 @@ uu.ready(function(uu, doc) {
 
 </body></html>
 }}}
+
+{{{
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8" />
+<title>uu.node.add(NodeArray)</title>
+<style>
+.div1 { background-color: #111; color: white; }
+.div2 { background-color: #333; color: white; }
+.div3 { background-color: #555; color: white; }
+#contextNode { background-color: blue; }
+</style>
+<script src="../../src/uupaa.js"></script>
+<script>
+uu.ready(function(uu, doc) {
+    var nodeArray = [uu.div({ "class": "div1" }, "div1"),
+                     uu.div({ "class": "div2" }, "div2"),
+                     uu.div({ "class": "div3" }, "div3")];
+    var ctx = uu.id("contextNode");
+
+    var pos = [
+        "first", "prev", "./first", "./last", "next", "last"
+    ];
+
+//    uu.add(nodeArray, ctx, pos[3]);
+    uu.add(nodeArray, ctx, 4);
+});
+</script></head><body>
+
+<div id="parentNode">
+
+    <div id="firstSibling">    first(0)   </div>
+    <div id="prevSibling">     prev(1)    </div>
+    <ul id="contextNode">(2)
+        <li id="firstChild">  ./first(.0) </li>
+        <li>(.1)</li>
+        <li id="lastChild">   ./last(.2)  </li>
+    </ul>
+    <div id="nextSibling">     next(3)    </div>
+    <div id="lastSibling">     last(4)    </div>
+
+</div>
+</body></html>
+}}}
