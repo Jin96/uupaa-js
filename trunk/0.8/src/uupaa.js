@@ -885,6 +885,10 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
         has:        uuhas,          // uu.node.has(parent:Node, child:Node):Boolean
         bros:       uunodebros,     // uu.node.bros(node:Node):NodeArray+Hash - [node, ...] + { first, prev, next, last, index }
         bulk:       uunodebulk,     // uu.node.bulk(source:Node/HTMLFragmentString, context:Node = <div>):DocumentFragment
+                                    //  [1][clone]                         uu.node.bulk(Node) -> DocumentFragment
+                                    //  [2][build]                         uu.node.bulk("<p>html</p>") -> DocumentFragment
+                                    //  [3][TableHTMLFragment unsupported] uu.node.bulk("<tr>...</tr>") -> throw Error, use insertRow()
+                                    //  [4][TableHTMLFragment unsupported] uu.node.bulk("<td>...</td>") -> throw Error, use insertCell()
         glue:       uunodeglue,     // uu.node.glue(node:Node, work:Function):Node
         path:       uunodepath,     // uu.node.path(node:Node):CSSQueryString
                                     //  [1][get CSSQueryString] uu.node.path(<div>) -> "body>div"
@@ -6425,8 +6429,10 @@ function uunodeidremove(nodeid) { // @param Number: NodeID
 function uunodebulk(source,    // @param Node/HTMLFragmentString: source
                     context) { // @param Node(= <div>): context
                                // @return DocumentFragment:
-    //  [1][clone]  uu.node.bulk(Node) -> DocumentFragment
-    //  [2][build]  uu.node.bulk("<p>html</p>") -> DocumentFragment
+    //  [1][clone]                         uu.node.bulk(Node) -> DocumentFragment
+    //  [2][build]                         uu.node.bulk("<p>html</p>") -> DocumentFragment
+    //  [3][TableHTMLFragment unsupported] uu.node.bulk("<tr>...</tr>") -> throw Error, use insertRow()
+    //  [4][TableHTMLFragment unsupported] uu.node.bulk("<td>...</td>") -> throw Error, use insertCell()
 
     var rv = doc.createDocumentFragment(),
 //{@mb
@@ -6446,6 +6452,11 @@ function uunodebulk(source,    // @param Node/HTMLFragmentString: source
         }
     }
 //}@mb
+
+    // bad case
+    if (!fragment.indexOf("<tr") || !fragment.indexOf("<td")) {
+        uung("uu.node.bulk", fragment)
+    }
 
     placeholder.innerHTML = fragment;
 
@@ -10865,18 +10876,18 @@ function NodeSetNth(index,       // @param Number(= 0): index,
 function NodeSetEach(evaluator, // @param Function: evaluator
                      loopout) { // @param Boolean(= false): loop-out of "return false"
                                 // @return NodeSet:
-    if (loopout) {
+    if (loopout) { // use loopout -> slow!
         var ary = this[_nodeSet], i = 0, iz = ary.length, r;
 
         for (; i < iz; ++i) {
             if (i in ary) {
                 r = evaluator(ary[i], i); // evaluator(value, index)
-                if (r === _false) { // return false -> loopout
+                if (r === _false) { // evaluator() -> false -> loopout
                     break;
                 }
             }
         }
-    } else {
+    } else { // no loopout -> quick!
         uueach(this[_nodeSet], evaluator); // evaluator(value, index)
     }
     return this;
@@ -10905,10 +10916,10 @@ function NodeSetAdd(source,     // @param Node/DocumentFragment/HTMLFragmentStri
     var ary = this[_nodeSet], context, i = 0;
 
     if (ary.length === 1) {
-        uunodeadd(source, ary[0], position);
+        uunodeadd(source, ary[0], position); // add original node
     } else {
         for (; context = ary[i++]; ) {
-            uunodeadd(uunodebulk(source), context, position); // clone node
+            uunodeadd(uunodebulk(source), context, position); // add cloned node
         }
     }
     return this;
