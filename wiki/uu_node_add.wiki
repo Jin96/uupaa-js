@@ -9,6 +9,7 @@ uu.node.add は指定されたコンテキスト(ノード)にノードを追加
 = API =
 
 == uu.node.add ==
+== uu.add ==
 uu.node.add(_source_:Node/NodeArray/DocumentFragment/HTMLFragmentString/TagName = "div", _context_:Node = `<body>`, _position_:Number/String = "./last"):Node は、_source_ で指定されたノードを _context_ ノードに追加し、追加したノードを返します(複数のノードを一度に追加した場合は、最初に追加したノード(先頭のノード)を返します)。追加する位置は、_position_ で指定します。
 
 _source_ に NodeArray を指定すると、指定されたノードを全て追加します。
