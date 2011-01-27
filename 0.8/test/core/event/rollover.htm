@@ -59,26 +59,26 @@ function toggleState(on) {
 <p>Debug friendly な ON/OFF できるロールオーバー機能の実装</p>
 
 <table>
-<tr><td><input type="button" value="uu.rollover()" onclick="bind()" />
+<tr><td><input type="button" value="uu.event.rollover()" onclick="bind()" />
     </td>
     <td><b>まずはこのボタンをクリック</b><br />
         rollover ハンドラを設定し有効にします<br />
         ハンドラ設定後に、button1 ～ 4にマウスを重ねると、outline が描画されるようになります。
     </td>
 </tr>
-<tr><td><input type="button" value="uu.unrollover()" onclick="unbind()" />
+<tr><td><input type="button" value="uu.event.unrollover()" onclick="unbind()" />
     </td>
     <td>rollover ハンドラを解除し無効にします<br />
         ハンドラを解除すると、マウスを重ねてもイベントは発生せず outline も描画されなくなります。
     </td>
 </tr>
-<tr><td><input type="button" value="uu.rollover.disable()" onclick="toggleState(false)" />
+<tr><td><input type="button" value="uu.event.rollover.disable()" onclick="toggleState(false)" />
     </td>
     <td>rollover ハンドラを無効に(一時的に解除)します
         マウスを重ねてもイベントは発生せず outline も描画されません。
     </td>
 </tr>
-<tr><td><input type="button" value="uu.rollover.enable()" onclick="toggleState(true)" />
+<tr><td><input type="button" value="uu.event.rollover.enable()" onclick="toggleState(true)" />
     </td>
     <td>rollover ハンドラを有効に(解除を元に戻す)します<br />
         一時的に解除していたハンドラを元に戻します。
