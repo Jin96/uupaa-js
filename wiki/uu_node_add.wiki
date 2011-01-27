@@ -10,20 +10,20 @@ uu.node.add は指定されたコンテキスト(ノード)にノードを追加
 
 == uu.node.add ==
 == uu.add ==
-uu.node.add(_source_:Node/NodeArray/DocumentFragment/HTMLFragmentString/TagName = "div", _context_:Node = `<body>`, _position_:Number/String = "./last"):Node は、_source_ で指定されたノードを _context_ ノードに追加し、追加したノードを返します(複数のノードを一度に追加した場合は、最初に追加したノード(先頭のノード)を返します)。追加する位置は、_position_ で指定します。
+uu.node.add(_source_:Node/NodeArray/DocumentFragment/HTMLFragmentString/TagName = "div", _context_:Node = `<body>`, _position_:Number/String = "./last"):Node は、_source_ で指定されたノードを _context_ ノードに追加(または挿入)し、追加したノードを返します(複数のノードを一度に追加した場合は、最初に追加したノード(先頭のノード)を返します)。追加する位置は、_position_ で指定します。
 
 _source_ に NodeArray を指定すると、指定されたノードを全て追加します。
 _source_ に DocumentFragment を指定すると、DocumentFragment 内の全てのノードを追加します。
 _source_ に文字列( HTMLFragmentString )を指定すると、文字列からノードを生成し追加します。
 _source_ にタグ文字列を `<` と `>` なしで指定すると、指定されたタグ(要素)を生成し追加します。
 _context_ を省略すると `<body>` に要素を追加します。
-_position_ には数値または文字列で追加/挿入位置を指定します。
+_position_ には数値または文字列で挿入位置を指定します。
 || 1 または "first"   || contextNode と同じ階層の先頭(firstSibling)に _source_ を挿入します(長男にします) ||
 || 2 または "prev"    || contextNode の前(prevSibling)に _source_ を挿入します(一つ兄にします) ||
 || 3 または "next"    || contextNode の次(nextSibling)に _source_ を挿入します(一つ弟にします) ||
 || 4 または "last"    || contextNode と同じ階層の末尾(lastSibling)に _source_ を追加します(末弟にします) ||
 || 5 または "./first" || contextNode の最初の子として _source_ を挿入します ||
-|| 8 または "./last"  || contextNode の最後の子として _source_ を挿入します ||
+|| 8 または "./last"  || contextNode の最後の子として _source_ を追加します ||
 
 {{{
 <div id="parentNode">
