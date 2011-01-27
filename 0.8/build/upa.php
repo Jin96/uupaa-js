@@ -14,7 +14,7 @@ $castoffAll  = array(
     "junction",
     "svg", "canvas", "canvasvml", "canvassl", "canvasfl",
     "flash", "nodeset", "audio", "geo",
-    "eventresize", "eventcyclic",
+    "eventresize", "eventcyclic", "eventhover", "eventrollback",
     "live", "cssbox",
     "codec", "md5", "sha1", "hmac", "msgpack",
     "sprintf", "font", "cookie", "storage",

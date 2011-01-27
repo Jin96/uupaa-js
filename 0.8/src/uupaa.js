@@ -19,6 +19,8 @@
 //      eventhashchange
 //                  -> uu.event(, "hashchange")
 //      eventhover  -> uu.event.hover
+//      eventrollback
+//                  -> uu.event.rollback
 //      eventresize -> uu.event.resize
 //      eventcyclic -> uu.event.cyclic
 //      live        -> uu.live
@@ -35,8 +37,13 @@
 //      test        -> uu.ok, uu.ng
 //      nodeset     -> uu("query"), uu.Clas.NodeSet
 //
-
-// Firefox 3.5(end of 2010-08)
+// CSS3 Selector Browser Implementation
+//      Google("CSS Compatibility and Internet Explorer")
+//          -> http://msdn.microsoft.com/en-us/library/cc351024(v=vs.85).aspx
+//
+// Firefox 2.0(Gecko 1.8.1 end of 2008-12)
+// Firefox 3.0(Gecko 1.9.0 end of 2010-03)
+// Firefox 3.5(Gecko 1.9.1 end of 2010-08)
 //      <audio>, <video>, offline, DnD API, @font-face, MediaQuery,
 //      text-shadow:, word-wrap: box-shadow:, box-image:,
 //      column-rule:, CSS Transforms, localStorage, Web Workers,
@@ -202,10 +209,6 @@
 // o        js: style.MozTransform = "translate()"
 // o        js: style.MozTransform = "matrix()" // matrix({$a},{$b},{$c},{$d},{$e}px,{$f}px)
 //
-// navigator.userAgent
-//      Windows Phone 7 - "Mozilla/4.0 (compatible; MSIE 7.0; Windows Phone OS 7.0; Trident/3.1; IEMobile/7.0)"
-//
-
 
 // === Core ===
 
@@ -213,19 +216,19 @@
 
 var uu; // window.uu - uupaa.js library namespace
 
-uu || (function(win,                // as Global / window
+uu || (function(win,                // as global / window
                 doc,                // as document
                 htmlNode,           // as document.documentElement as <html>
                 navigator,          // as window.navigator
-                toString,           // as Global.Object.prototype.toString
-                isArray,            // as Global.Array.isArray,
-                toArray,            // as Global.Array.prototype.slice, (x: IE NodeList, o: IE arguments)
-                Node,               // as Global.Node
-                Math,               // as Global.Math
-                parseInt,           // as Global.parseInt
-                parseFloat,         // as Global.parseFloat
-                setTimeout,         // as Global.setTimeout
-                setInterval,        // as Global.setInterval
+                toString,           // as global.Object.prototype.toString
+                isArray,            // as global.Array.isArray,
+                toArray,            // as global.Array.prototype.slice, (x: IE NodeList, o: IE arguments)
+                Node,               // as global.Node
+                Math,               // as global.Math
+                parseInt,           // as global.parseInt
+                parseFloat,         // as global.parseFloat
+                setTimeout,         // as global.setTimeout
+                setInterval,        // as global.setInterval
                 getComputedStyle) { // as window.getComputedStyle
 
 // --- FALLBACK ( Array.isArray ) ---
@@ -332,6 +335,7 @@ var _addEventListener = "addEventListener",
     // --- ENVIRONMENT ---
     _env = detectEnvironment(0.8),  // as uu.env
     _ie = _env.ie,                  // as uu.ie
+    _ie67 = _ie && _env < 8,        // as uu.ie67
     _ie678 = _ie && _env < 9,       // as uu.ie678
     _gecko = _env.gecko,            // as uu.gecko (Firefox, ...)
     _opera = _env.opera,            // as uu.opera (Opera, Opera Mini)
@@ -461,12 +465,13 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
     // --- ENVIRONMENT ---
     env:            _env,           // uu.env - Hash: environment informations,
                                     //    { library, ssl, lang, render, browser,
-                                    //      ie, ie6, ie7, ie8, ie9, ie678,
+                                    //      ie, ie6, ie7, ie8, ie9, ie67, ie678,
                                     //      opera, gecko, webkit, chrome, safari,
                                     //      longedge, mobile, ios, ipad, iphone,
                                     //      retina, android, mbosver, os,
                                     //      touch, jit, flash, silverlight }
     ie:             _ie,            // uu.ie     - as uu.env.ie     [ALIAS]
+    ie67:           _ie67,          // uu.ie67   - as uu.env.ie67   [ALIAS]
     ie678:          _ie678,         // uu.ie678  - as uu.env.ie678  [ALIAS]
     gecko:          _gecko,         // uu.gecko  - as uu.env.gecko  [ALIAS]
     opera:          _opera,         // uu.opera  - as uu.env.opera  [ALIAS]
@@ -760,10 +765,22 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
 //{@eventhover
         hover:      uueventhover,   // uu.event.hover(node:Node, expr:CallbackFunction/ClassNameString,
                                     //                           hint:String = void):Node
-                                    //  [1][enter/leave callback] uu.event.hover(node, function(enter){}) -> node
-                                    //  [2][toggle className]     uu.event.hover(node, "hoverAction") -> node
+                                    //  [1][enter/leave callback] uu.event.hover(node, function callback(evt, isHover, node){ ... }) -> node
+                                    //                                  hover event   -> callback(evt, true, node)
+                                    //                                  unhover event -> callback(evt, false, node)
+                                    //  [2][toggle className]     uu.event.hover(node, "hoverActionClass") -> node
+                                    //                                  hover event   -> node.className += " hoverActionClass"
+                                    //                                  unhover event -> node.className -= " hoverActionClass"
         unhover:    uueventunhover, // uu.event.unhover(node:Node):Node
+                                    //  [1][unbind] uu.event.unhover(node) -> node
 //}@eventhover
+//{@eventrollover
+        rollover: uumix(uueventrollover, {       // uu.event.rollover(node:Node/NodeArray, roll:ClassNameString/CallbackFunction):NodeArray
+            enable:     uueventrolloverenable,   // uu.event.rollover.enable()
+            disable:    uueventrolloverdisable   // uu.event.rollover.disable()
+        }),
+        unrollover:     uueventunrollover,       // uu.event.unrollover(node:NodeArray/Node = void):NodeArray
+//}@eventrollover
 //}@mb
 /* TODO: test
 //{@eventscroll
@@ -2819,7 +2836,7 @@ function uuattr(node,    // @param Node:
             return rv;
     case 2: // [IE6] tagindex, colspan is number
             attr = fixdb[key] || key;
-            if (_env.ie6 || _env.ie7) { // [IE6][IE7]
+            if (_ie67) { // [IE6][IE7]
                 switch (attr) {
                 case "href":     return node[_getAttribute](attr, 2);
                 case "checked":  return node.checked  ? "checked"  : "";
@@ -3104,8 +3121,8 @@ function uuviewport() { // @return Hash: { innerWidth, innerHeight,
                  innerHeight: htmlNode.clientHeight, // [IE9] supported
                  pageXOffset: htmlNode.scrollLeft,   // [IE9] supported
                  pageYOffset: htmlNode.scrollTop,    // [IE9] supported
-                 orientation: 0,                     // [IPHONE] only
-                 devicePixelRatio: 1 };              // [IPHONE] only
+                 orientation: 0,                     // [WebKit/iPhone/Android] only
+                 devicePixelRatio: 1 };              // [WebKit/iPhone/Android] only
     }
     win[orientation] === undef && (win[orientation] = 0);
     win[devicePixelRatio] === undef && (win[devicePixelRatio] = 1);
@@ -4104,7 +4121,7 @@ function uucssopacity(node,      // @param Node:
               opacity < 1) ? ("alpha(opacity=" + ((opacity * 100) | 0) + ") ")
                            : "") + filter.replace(uucssopacity._, " ");
         style[_visibility] = opacity ? "visible" : "hidden";
-        if (_env.ie6 || _env.ie7) {
+        if (_ie67) { // [IE6][IE7]
             style.zoom = 1;
         }
         return node;
@@ -4326,7 +4343,7 @@ uucssbox.prop = ("marginTop,marginLeft,marginRight,marginBottom," +
                  "borderTopWidth,borderLeftWidth," +
                  "borderRightWidth,borderBottomWidth").split(",");
 uucssbox.bw = { // border-width
-    thin: 1, medium: 3, thick: (_env.ie6 || _env.ie7 || _opera) ? 6 : 5
+    thin: 1, medium: 3, thick: (_ie67 || _opera) ? 6 : 5
 };
 
 // uu.css.rect - get offset from AncestorNode/LayoutParentNode
@@ -4728,7 +4745,7 @@ function getComputedStyleIE(node) { // @param Node:
         boxProperties = getComputedStyleIE.boxs,
         cache = { "0px": "0px", "1px": "1px", "2px": "2px", "5px": "5px",
                   thin: "1px", medium: "3px",
-                  thick: _env.ie8 ? "5px" : "6px" }; // [IE6][IE7] thick = "6px"
+                  thick: _ie67 ? "6px" : "5px" }; // [IE6][IE7] thick = "6px"
 
     rv = getComputedStyleIE.getProps(currentStyle);
 
@@ -5073,9 +5090,9 @@ function uuevent(node,         // @param Node/Window:
             event.uuoverride) { // or force override?
 
             var fullcode = uuevent.codes[event.type] || 0, // event.type -> fullcode
-                tgt = event.target /*{@mb*/ || event.srcElement || doc; /*}@mb*/ // [IE6][IE7][IE8]
+                tgt = event.target /*{@mb*/ || event.srcElement || doc /*}@mb*/; // [IE6][IE7][IE8]
 
-            // bonding event.uu
+            // bonding event.uu = {...}
             event.uu = {
                 at:     (tgt[_nodeType] === Node.TEXT_NODE) ? tgt[_parentNode] : tgt,
                 ns:     ns,                 // last specified namespace
@@ -5671,20 +5688,37 @@ function uueventhover(node,         // @param Node:
                       hint,         // @param String(= void): code search hint
                       __unbind__) { // @hidden Boolean(= false): true is unbind
                                     // @return Node:
-    function hoverEventClosure(evt, rel) {
-        // ignode mouse transit(mouseover, mouseout) in child node
-        toggle ? uuklass(node, "!" + expr) // toggle className
-               : _ie ? expr(evt, evt.uu.code === uuevent.codes.mouseenter, node)
-                     : node !== (rel = evt.relatedTarget) && !uuhas(node, rel) &&
-                       expr(evt, evt.uu.code === uuevent.codes.mouseover, node);
-                       // callback(evt, isHover, node)
+
+    //  [1][enter/leave callback] uu.event.hover(node, function callback(evt, isHover, node){ ... }) -> node
+    //                                  hover event   -> callback(evt, true, node)
+    //                                  unhover event -> callback(evt, false, node)
+    //  [2][toggle className]     uu.event.hover(node, "hoverActionClass") -> node
+    //                                  hover event   -> node.className += " hoverActionClass"
+    //                                  unhover event -> node.className -= " hoverActionClass"
+
+    function hoverEventClosure(evt) {
+        if (toggle) {
+            uuklass(node, "!" + expr); // uu.klass("!className") -> toggle className
+        } else if (_ie) {
+            // callback(evt:EventObject, isHover:Boolean, node:Node)
+            expr(evt, evt.uu.code === uuevent.codes.mouseenter, node)
+        } else {
+            var rel = evt.relatedTarget;
+
+            // ignode mouse transit(mouseover, mouseout) in child node
+            if (node !== rel && !uuhas(node, rel)) {
+                // callback(evt:EventObject, isHover:Boolean, node:Node)
+                expr(evt, evt.uu.code === uuevent.codes.mouseover, node);
+            }
+        }
         uueventstop(evt);
     }
 
     var type = _ie ? "mouseenter,mouseleave"
                    : "mouseover+,mouseout+",
         toggle = isString(expr),
-        dataset = "uu-eventhover", handler = node[dataset];
+        dataset = "data-uueventhover",
+        handler = node[dataset];   // node["data-uueventhover"]
 
     if (__unbind__) {
         uueventunbind(node, type, handler);
@@ -5699,9 +5733,91 @@ function uueventhover(node,         // @param Node:
 // uu.event.unhover - unbind hover event
 function uueventunhover(node) { // @param Node:
                                 // @return Node:
+
+    //  [1][unbind] uu.event.unhover(node) -> node
+
     return uueventhover(node, "", "", _true); // unhover
 }
 //}@eventhover
+
+//{@eventrollover
+// uu.event.rollover - bind rollover action handler
+function uueventrollover(node,   // @param NodeArray/Node:
+                         roll) { // @param ClassNameString/CallbackFunction:
+                                 // @return NodeArray:
+
+    //  [1][bind rollover className] uu.event.rollover(uu.query("button"), "rollover") -> [<button>, ...]
+    //                                  hover   -> node.className += " rollover"
+    //                                  unhover -> node.className -= " rollover"
+    //  [2][bind rollover handler]   uu.event.rollover(uu.query("button"),
+    //                                           function callback(evt, isHover, node){...}) -> [<button>, ...]
+    //                                  hover   -> callback(evt, true,  <button>)
+    //                                  unhover -> callback(evt, false, <button>)
+
+    var db = uueventrollover._,
+        rv = node[_nodeType] ? [node] : node, // toArray
+        i = 0, iz = rv.length;
+
+    for (; i < iz; ++i) {
+        uueventhover(rv[i], roll, "rollover"); // hint("rollover")
+        db.node.push(rv[i]);
+        db.roll.push(roll);
+        db.disable.push(_false);
+    }
+    return rv;
+}
+// inner - rollover db
+uueventrollover._ = {
+    node: [],   // RolloverHandlerNodeArray: [Node, ...]
+    roll: [],   // RolloverActionArray: [ClassNameString or CallbackFunction, ...]
+    disable: [] // RolloverStateArray: [Boolean, ...]
+};
+
+// inner - rollover update state
+function uueventrolloverupdate(enable) { // @param Boolean: true -> hover, false -> unhover
+    var db = uueventrollover._,
+        ary = db.node,
+        i = 0, iz = ary.length, j, jz,
+        fn = enable ? uueventhover : uueventunhover;
+
+    for (; i < iz; ++i) {
+        if (enable === db.disable[i]) {
+            fn(ary[i], db.roll[i], "rollover"); // bind / unbind
+            db.disable[i] = !enable; // toggle state
+        }
+    }
+}
+
+// uu.rollover.enable
+function uueventrolloverenable() {
+    uueventrolloverupdate(_true);
+}
+
+// uu.rollover.disable
+function uueventrolloverdisable() {
+    uueventrolloverupdate(_false);
+}
+
+// uu.event.unrollover - unbind rollover handler
+function uueventunrollover(node) { // @param NodeArray/Node(= void):
+                                   // @return NodeArray:
+    var db = uueventrollover._,
+        rv = node ? (node[_nodeType] ? [node] : node) // toArray
+                  : db.node[_concat](), // cloneArray
+        i = 0, iz = rv.length, pos;
+
+    for (; i < iz; ++i) {
+        pos = db.node[_indexOf](rv[i]); // ECMA5 Array#indexOf
+        if (pos >= 0) {
+            uueventunhover(rv[i]);
+            db.node.splice(pos, 1); // remove
+            db.roll.splice(pos, 1);
+            db.disable.splice(pos, 1);
+        }
+    }
+    return rv;
+}
+//}@eventrollover
 //}@mb
 
 /* TODO: test
@@ -5729,14 +5845,21 @@ function uueventscroll(nameSpace,   // @param String: namespace
             scrollDelta: Math.sqrt(dx * dx + dy * dy),  // v/ x^2 + y^2
 
             // scroll direction
-            scroll: (opx === px && opy === py) ? 0      // o
-                  : (opx === px && opy  >  py) ? 1      // ^
-                  : (opx  <  px && opy  >  py) ? 2      // /
-                  : (opx  <  px && opy === py) ? 3      // -
-                  : (opx  <  px && opy  <  py) ? 4      // \
-                  : (opx === px && opy  <  py) ? 5      // |
-                  : (opx  >  px && opy  <  py) ? 6      // /
-                  : (opx  >  px && opy === py) ? 7 : 8  // - \
+            //
+            //          1
+            //       8     2
+            //     7   (0)   3
+            //       6     4
+            //          5
+            //
+            scroll: (opx === px && opy === py) ? 0
+                  : (opx === px && opy  >  py) ? 1
+                  : (opx  <  px && opy  >  py) ? 2
+                  : (opx  <  px && opy === py) ? 3
+                  : (opx  <  px && opy  <  py) ? 4
+                  : (opx === px && opy  <  py) ? 5
+                  : (opx  >  px && opy  <  py) ? 6
+                  : (opx  >  px && opy === py) ? 7 : 8
         };
 
         evaluator(evt);
@@ -6198,8 +6321,8 @@ function uunodeat(callback) { // @param CallbackFunction: callback
 }
 
 // HTML4(a ~ ul) exclude <html><head><body>
-uutag.html4 = "a,b,br,dd,div,dl,dt,form,h1,h2,h3,h4,h5,h6,i,img,iframe," +
-              "input,li,ol,option,p,pre,select,span,table,tbody,tr," +
+uutag.html4 = "a,b,br,button,dd,div,dl,dt,form,h1,h2,h3,h4,h5,h6,i,img," +
+              "iframe,input,li,ol,option,p,pre,select,span,table,tbody,tr," +
               "td,th,thead,tfoot,textarea,u,ul";
 // HTML5(abbr ~ video)
 uutag.html5 = "abbr,article,aside,audio,canvas,datalist," +
@@ -6777,8 +6900,9 @@ function uuquery(expr,      // @param CSSSelectorExpressionString: "css > select
     if (context.querySelectorAll) {
         if (!_ie || (_env.ie8 && expr[_indexOf](":") < 0)
                  || (_env.ie8 && uuquery.ie8ready.test(expr))) { // IE8 unsupported CSS3 pseudo-class
-            if (!uuquery.ngword.test(expr)) {
+            if (!uuquery.extras.test(expr)) {
 //}@mb
+                // [IE8][IE9]
                 return fakeToArray(context.querySelectorAll(expr));
 //{@mb
             }
@@ -6791,8 +6915,11 @@ function uuquery(expr,      // @param CSSSelectorExpressionString: "css > select
 //}@mb
 }
 //{@mb
-uuquery.ngword = /\!\=|\:con/;
-uuquery.ie8ready = /:(?:focus|hover|link|visited)/;
+// CSS3 Selector Browser Implementation
+//      Google("CSS Compatibility and Internet Explorer")
+//          -> http://msdn.microsoft.com/en-us/library/cc351024(v=vs.85).aspx
+uuquery.extras = /\!\=|\:con/;                      // [IE8] Extras function "E[Attr!=Val]", "E:contains(...)"
+uuquery.ie8ready = /:(?:focus|hover|link|visited)/; // [IE8] IE8 Unsupported CSS3 pseudo-class
 //}@mb
 
 // uu.id - as document.getElementById
@@ -7082,8 +7209,11 @@ function uubase64decode(data,          // @param Base64String/URLSafe64String:
         c = (b642num[ary[++i]] << 18) // 111111  |        |
           | (b642num[ary[++i]] << 12) //       11|1111    |
           | (b642num[ary[++i]] <<  6) //         |    1111|11
-          |  b642num[ary[++i]]        //         |        |  111111
-        rv.push((c >> 16) & 0xff, (c >> 8) & 0xff, c & 0xff);
+          |  b642num[ary[++i]];       //         |        |  111111
+                                      //    v        v        v
+                            rv.push((c>>16)&0xff,
+                                                 (c>>8)&0xff,
+                                                             c&0xff);
     }
     rv.length -= [0, 0, 2, 1][data[_replace](/\=+$/, "").length % 4]; // cut tail
 
@@ -8269,16 +8399,16 @@ function uujsondecode(jsonString, // @param JSONString/ExJSONString:
                                     : (new Function("return " + str))())
                                  : win.JSON.parse(str);
  */
-    var str = jsonString.trim(), x = uujson.x;
+    var str = jsonString.trim(), x = uujson.x, unescaped, evalString;
 
     if (exjson || !win.JSON) {
-        var unescaped = str[_replace](x[1], "");
+        unescaped = str[_replace](x[1], "");
 
         if (x[0].test(unescaped)) {
             return _false;
         }
         try {
-            var evalString = "return " + str;
+            evalString = "return " + str;
             return (new Function(evalString))();
         } catch(err) {
             console.log(err + "");
@@ -9143,6 +9273,7 @@ function uuaudio(src,        // @param URLString: url or ""
                              //     startTime - Number(= 0): start time
                  callback) { // @param CallbackFunction:
 
+    // create uu.Class.Audio instance
     uu("Audio", src, uuarg(option, {
         loop:       _false,
         parent:     doc.body,
@@ -9174,6 +9305,12 @@ uuClass("Audio", {
     pause:          AudioPause,     // pause()
     state:          AudioState,     // state():Hash - { error, ended, closed, paused,
                                     //                  playing, condition }
+                                    //  error - Boolean:
+                                    //  ended - Boolean:
+                                    //  closed - Boolean:
+                                    //  paused - Boolean:
+                                    //  playing - Boolean:
+                                    //  condition - String: "error", "closed", "paused", "playing"
     isMuted:        AudioIsMuted,   // isMuted():Boolean
     isReady:        AudioIsReady,   // isReady():Boolean
     isCanPlay:      AudioIsCanPlay, // isCanPlay():Boolean
@@ -10648,7 +10785,7 @@ function outerHTMLSetter(html) {
 // --- NodeSet ---
 // NodeSet class
 //{@nodeset
-function NodeSet(expr,      // @param NodeSet/Node/NodeArray/String/window:
+function NodeSet(expr,        // @param NodeSet/Node/NodeArray/String/window:
                  context,     // @param Function/NodeSet/Node(= void): context or forEach evaluator
                  evaluator) { // @param Function(= void): forEach evaluator
     this.stack = [[]]; // [NodeSet, ...]
@@ -10889,10 +11026,10 @@ function _windowonunload() {
         } catch (err) {}
     }
     doc.html = doc.head = null;
-    uueventdetach(win, "onload",   _windowonload);
-    uueventdetach(win, "onunload", _windowonunload);
+    uueventdetach(win, "load",   _windowonload);
+    uueventdetach(win, "unload", _windowonunload);
 }
-_ie678 && uueventdetach(win, "onunload", _windowonunload);
+_ie678 && uueventattach(win, "unload", _windowonunload);
 //}@mb
 
 // inner - uu.env - detect environment and meta informations
@@ -10938,27 +11075,45 @@ function detectEnvironment(libraryVersion) { // @param Number: Library version
 
     var rv = { library: libraryVersion, ssl: _false,
                ie: _false, ie6: _false, ie7: _false, ie8: _false, ie9: _false,
-               ie678: _false,
+               ie67: _false, ie678: _false,
                opera: _false, gecko: _false, webkit: _true,
                chrome: _false, safari: _true, jit: _false,
                touch: _true, flash: 0, silverlight: 0 },
         ua = navigator.userAgent,
-        vp = uuviewport(),
         ie = !!doc.uniqueID,
         opera = !!win.opera,
         gecko = (!!win.netscape || !!win.Components) && /Gecko\//.test(ua),
         webkit = !ie && !opera && !gecko && /WebKit/.test(ua),
 /*{@mb*/docMode = doc.documentMode || 0, /*}@mb*/ // [IE]
-        // http://d.hatena.ne.jp/uupaa/20090603
-        rennum = ((/(?:rv\:|Kit\/|sto\/)(\d+\.\d+(\.\d+)?)/.exec(ua)
-                   || [,0])[1]).toString(),
-        render = parseFloat(rennum[_replace](/[^\d\.]/g, "")
-                            [_replace](/^(\d+\.\d+)(\.(\d+))?$/,"$1$3")),
         mbosver = /(?:Android|OS) ([a-z\d\.]+)/.exec(
                         ua[_replace](/(\d+)_(\d+)(?:_(\d+))?/, "$1.$2$3")), // [, ver]
         browser = opera ? +(win.opera.version()[_replace](/\d$/, ""))
                         : parseFloat((/(?:IE |fox\/|ome\/|ion\/)(\d+\.\d)/.
                                      exec(ua) || [,0])[1]);
+
+    // --- Windows 7 x64 UserAgent and Render Version ---
+    // Firefox 4.0 beta 9 -> "Mozilla/5.0 (Windows NT 6.1; rv:2.0b9) Gecko/20100101 Firefox/4.0b9"
+    //                                                        ~~~~~
+    // Chrome 9.0.597.67  -> "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US) AppleWebKit/534.13 (KHTML, like Gecko) Chrome/9.0.597.67 Safari/534.13"
+    //                                                                                    ~~~~~~
+    // Safari 5.0.3       -> "Mozilla/5.0 (Windows; U; Windows NT 6.1; ja-JP) AppleWebKit/533.19.4 (KHTML, like Gecko) Version/5.0.3 Safari/533.19.4"
+    //                                                                                    ~~~~~~~~
+    // WebKit r74232      -> "Mozilla/5.0 (Windows; U; Windows NT 6.1; ja-JP) AppleWebKit/533+ (KHTML, like Gecko) Version/5.0.3 Safari/533.19.4"
+    //                                                                                    ~~~
+    // Opera 11           -> "Opera/9.80 (Windows NT 6.1; U; ja) Presto/2.7.62 Version/11.00"
+    //                                                                  ~~~~~~
+    // IE9pp7             -> "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0)"
+    //                                                                                   ~~~
+    // IE8                -> "Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; Trident/4.0)"
+    //                                                                                   ~~~
+    // Windows Phone 7    -> "Mozilla/4.0 (compatible; MSIE 7.0; Windows Phone OS 7.0; Trident/3.1; IEMobile/7.0)"
+    //                                                                                         ~~~
+    //
+    // http://d.hatena.ne.jp/uupaa/20090603
+    num = ((/(?:rv\:|WebKit\/|Presto\/|Trident\/)(\d+\.\d+(\.\d+)?)/.exec(ua) ||
+            [,0])[1]).toString();
+    render = parseFloat(num[_replace](/[^\d\.]/g, "")
+                           [_replace](/^(\d+\.\d+)(\.(\d+))?$/,"$1$3"));
 
     rv.ssl          = location.protocol === "https:";
     rv.lang         = (navigator.language ||
@@ -10972,18 +11127,22 @@ function detectEnvironment(libraryVersion) { // @param Number: Library version
     rv.ie7          = ie && browser === 7 && !!win.XMLHttpRequest;
     rv.ie8          = ie && browser === 8 &&  !getComputedStyle && docMode === 8;
     rv.ie9          = ie && browser === 9 && !!getComputedStyle && docMode === 9;
-    rv.ie678        = rv.ie6 || rv.ie7 || rv.ie8;
+    rv.ie67         = rv.ie6  || rv.ie7;
+    rv.ie678        = rv.ie67 || rv.ie8;
     rv.opera        = opera;
     rv.gecko        = gecko;
     rv.webkit       = webkit;
     rv.chrome       = webkit && test(/Chrome/);
     rv.safari       = webkit && test(/Safari/) && !rv.chrome;
 //}@mb
-    rv.longedge     = Math.max(vp.innerWidth, vp.innerHeight);
+    rv.longedge     = /*{@mb*/
+                      rv.ie678 ? Math.max(htmlNode.clientWidth,
+                                          htmlNode.clientHeight) : /*}@mb*/
+                                 Math.max(win.innerWidth, win.innerHeight);
     rv.ipad         = webkit && test(/iPad/);
     rv.iphone       = webkit && !rv.ipad && test(/iPhone|iPod/);
     rv.ios          = rv.ipad || rv.iphone;
-    rv.retina       = vp.devicePixelRatio > 1;
+    rv.retina       = webkit && win.devicePixelRatio >= 2;
     rv.android      = webkit && test(/Android/);
     rv.mbosver      = mbosver ? parseFloat(mbosver[1]) : 0; // mobile os version
     // slate definition. http://twitter.com/#!/uupaa/status/27301790851
@@ -11172,30 +11331,35 @@ uuready("dom:2", function() {
 
 // === query.tokenizer, query.selector ===
 // - query.selector() function limits
-// -- unsupported Impossible rules ( :root:first-child, etc ) in W3C Test Suite - css3_id27a
-// -- unsupported Impossible rules ( * html, * :root )        in W3C Test Suite - css3_id27b
-// -- unsupported Case sensitivity '.cs P'                    in W3C Test Suite - css3_id181
-// -- unsupported :not(), :not(*)                             in WebKit querySelectorAll()
+// -- unsupported impossible rules ( ":root:first-child", etc ) in W3C Test Suite - css3_id27a
+// -- unsupported impossible rules ( "* html"), "* :root"     ) in W3C Test Suite - css3_id27b
+// -- unsupported case sensitivity ( ".cs P" )                  in W3C Test Suite - css3_id181
+// -- unsupported ":not()", ":not(*)"                           in WebKit querySelectorAll()
 
 //{@mb
-uu.query.tokenizer || (function(doc, uu, hasAttribute, _ie, _ie678) {
+uu.query.tokenizer || (function(uu,    // as window.uu
+                                doc) { // as window.document
 
 uu.query.tokenizer = tokenizer;
 uu.query.selector  = selector;
 
-var _A_TAG          = 1,  // E               [_A_TAG,         "DIV"]
-    _A_COMBINATOR   = 2,  // E > F           [_A_COMBINATOR,  ">", _A_TAG, "DIV"]
-    _A_ID           = 3,  // #ID             [_A_ID,          "ID"]
-    _A_CLASS        = 4,  // .CLASS          [_A_CLASS,       "CLASS"]
-    _A_ATTR         = 5,  // [ATTR]          [_A_ATTR,        "ATTR"]
-    _A_ATTR_VALUE   = 6,  // [ATTR="VALUE"]  [_A_ATTR_VALUE,  "ATTR", 1~6, "VALUE"]
-    _A_PSEUDO       = 7,  // :target         [_A_PSEUDO,      1~29]
-    _A_PSEUDO_NTH   = 8,  // :nth-child(...) [_A_PSEUDO_FUNC, 31~34, { a,b,k }]
-    _A_PSEUDO_FUNC  = 9,  // :lang(...)      [_A_PSEUDO_FUNC, 35~99, arg]
-    _A_PSEUDO_NOT   = 10, // :not(...)       [_A_PSEUDO_NOT,  _A_ID/_A_CLASS/_ATTR/_A_PSEUDO/_A_PSEUDO_FUNC, ...]
-    _A_GROUP        = 11, // E,F             [_A_GROUP]
-    _A_QUICK_ID     = 12, // #ID             [_A_QUICK_ID,    true or false, "ID" or "CLASS"]
-    _A_QUICK_EFG    = 13, // E,F or E,F,G    [_A_QUICK_EFG,   ["E", "F"] or ["E", "F", "G"]]
+                          //  +-----------------+-----------------------------
+                          //  | EXPRESSION      | RESULT
+                          //  +-----------------+-----------------------------
+var _A_TAG          = 1,  //  | E               | [ _A_TAG, "E" ]
+    _A_COMBINATOR   = 2,  //  | E > F           | [ _A_COMBINATOR, ">", _A_TAG, "E" ]
+    _A_ID           = 3,  //  | #ID             | [ _A_ID, "ID" ]
+    _A_CLASS        = 4,  //  | .CLASS          | [ _A_CLASS, "CLASS" ]
+    _A_ATTR         = 5,  //  | [ATTR]          | [ _A_ATTR, "ATTR" ]
+    _A_ATTR_VALUE   = 6,  //  | [ATTR="VALUE"]  | [ _A_ATTR_VALUE, "ATTR", 1~7, "VALUE" ]
+    _A_PSEUDO       = 7,  //  | :target         | [ _A_PSEUDO,      1~29 ]
+    _A_PSEUDO_NTH   = 8,  //  | :nth-child(...) | [ _A_PSEUDO_FUNC, 31~34, { a,b,k } ]
+    _A_PSEUDO_FUNC  = 9,  //  | :lang(...)      | [ _A_PSEUDO_FUNC, 35~99, arg ]
+    _A_PSEUDO_NOT   = 10, //  | :not(...)       | [ _A_PSEUDO_NOT,  _A_ID or _A_CLASS or _ATTR or _A_PSEUDO or _A_PSEUDO_FUNC, ... ]
+    _A_GROUP        = 11, //  | E,F             | [ _A_GROUP ]
+    _A_QUICK_ID     = 12, //  | #ID             | [ _A_QUICK_ID,    true or false, "ID" or "CLASS" ]
+    _A_QUICK_EFG    = 13, //  | E,F or E,F,G    | [ _A_QUICK_EFG,   ["E", "F"] or ["E", "F", "G"] ]
+                          //  +-----------------+-----------------------------
     _TOKEN_COMB     = /^\s*(?:([>+~])\s*)?(\*|\w*)/, // "E > F"  "E + F"  "E ~ F"  "E"  "E F" "*"
     _TOKEN_ATTR     = /^\[\s*(?:([^~\^$*|=!\s]+)\s*([~\^$*|!]?\=)\s*((["'])?.*?\4)|([^\]\s]+))\s*\]/,
     _TOKEN_NTH      = /^(?:(even|odd)|(1n\+0|n\+0|n)|(\d+)|(?:(-?\d*)n([+\-]?\d*)))$/,
@@ -11230,15 +11394,17 @@ var _A_TAG          = 1,  // E               [_A_TAG,         "DIV"]
     _QUERY_FORM     = /^(input|button|select|option|textarea)$/i,
     _QUERY_CASESENS = { title: 0, id: 0, name: 0, "class": 0, "for": 0 },
     _uuqid          = "data-uuqueryid",
-    _uudoctype      = "data-uudoctype", // 1: XMLDocument, 2: HTMLDocument
+    _uudoctype      = "data-uudoctype", // doctype=1: XMLDocument, doctype=2: HTMLDocument
     _nodeCount      = 0,
+    _ie67           = uu.ie67,  // as [IE6][IE7] -> hasAttribute not impl
+    _ie678          = uu.ie678, // as [IE6][IE7][IE8]
     _textContent    = _ie678 ? "innerText" : "textContent";
 
-// uu.query.tokenizer
+// uu.query.tokenizer - CSS3 Selectors Expression tokenizer
 function tokenizer(expr) { // @param CSSSelectorExpressionString: "E > F"
                            // @return QueryTokenHash: { data, group, err, msg, expr }
                            //   data  - Array:   [_A_TOKEN, data, ...]
-                           //   group - Number:  groups from 1
+                           //   group - Number:  expression group count, from 1. uu.query("E,F,G") -> group=3
                            //   err   - Boolean: true is error
                            //   msg   - String:  error message
                            //   expr  - String:  expression
@@ -11246,13 +11412,11 @@ function tokenizer(expr) { // @param CSSSelectorExpressionString: "E > F"
         data = rv.data, m, outer, inner;
 
     // --- QUICK PHASE ---
-    (m = _QUICK.E.exec(expr))  ? (data.push(_A_TAG, m[0])) :
-    (m = _QUICK.ID.exec(expr)) ? (data.push(_A_QUICK_ID, m[1] === "#", m[2])) :
-    ((m = _QUICK.EFG.exec(expr)) && m[1] !== m[2]  // E !== F
-                                 && m[1] !== m[3]  // E !== G
-                                 && m[2] !== m[3]) // F !== G
-                               ? (data.push(_A_QUICK_EFG, m[3] ? [m[1], m[2], m[3]]
-                                                               : [m[1], m[2]])) :
+    (m = _QUICK.E.exec(expr))  ? data.push(_A_TAG, m[0]) :
+    (m = _QUICK.ID.exec(expr)) ? data.push(_A_QUICK_ID, m[1] === "#", m[2]) :
+    ((m = _QUICK.EFG.exec(expr)) && m[1] !== m[2] && m[1] !== m[3] && m[2] !== m[3]) // E !== F !== G
+                               ? data.push(_A_QUICK_EFG, m[3] ? [m[1], m[2], m[3]]
+                                                              : [m[1], m[2]]) :
     _TOKEN_ERROR.test(expr)    ? (rv.msg = expr) : 0;
 
     // --- GENERIC PHASE ---
@@ -11261,7 +11425,7 @@ function tokenizer(expr) { // @param CSSSelectorExpressionString: "E > F"
             m = _TOKEN_COMB.exec(outer = expr);
             if (m) {
                 m[1] && data.push(_A_COMBINATOR, m[1]); // >+~
-                        data.push(_A_TAG, m[2] || "*"); // "DIV" or "*"
+                        data.push(_A_TAG, m[2] || "*"); // E or "*"
                 expr = expr.slice(m[0].length);
             }
             while (!rv.msg && expr && inner !== expr) { // inner loop
@@ -11281,7 +11445,10 @@ function tokenizer(expr) { // @param CSSSelectorExpressionString: "E > F"
 }
 
 // inner -
-function innerLoop(expr, rv, not) {
+function innerLoop(expr,  // @param String: CSS3 Selector Expression
+                   rv,    // @param Hash: { data, group, err, msg, expr }
+                   not) { // @param Boolean(= false): true is negate evaluation
+                          // @return String: remain expression
     var data = rv.data, m, num, mm, anb, a, b, c;
 
     switch (_TOKEN_KIND[expr.charAt(0)] || 0) {
@@ -11294,7 +11461,9 @@ function innerLoop(expr, rv, not) {
                                     m[1], num = _TOKEN_OPERATOR[m[2]], m[3]);
                 m[5] || num || (rv.msg = m[0]);
                 // [FIX] Attribute multivalue selector. css3_id7b.html
+                //
                 //  <p title="hello world"></p> -> query('[title~="hello world"]') -> unmatch
+                //            ~~~~~~~~~~~
                 num === 5 && m[3].indexOf(" ") >= 0 && (rv.msg = m[0]);
             }
             break;
@@ -11313,17 +11482,17 @@ function innerLoop(expr, rv, not) {
                                           _A_PSEUDO_NTH, 34, _TOKEN_NTH_1) :
                                 data.push(_A_PSEUDO, num);
                 } else if (num === 30) { // :not   (30 is magic number)
-                    (not || expr === ":not()"
-                         || expr === ":not(*)") && (rv.msg = ":not()");
-
-                    if (!rv.msg) {
+                    // ":not(:not(...))", ":not()", ":not(*)" -> ERROR
+                    if (not || expr === ":not()" || expr === ":not(*)") {
+                        rv.msg = ":not()";
+                    } else {
                         data.push(_A_PSEUDO_NOT);
                         expr = expr.slice(m[0].length);
                         m = _TOKEN_PSEUDO.E.exec(expr);
                         if (m) {
                             data.push(_A_TAG, m[1].toUpperCase()); // "DIV"
                         } else {
-                            expr = innerLoop(expr, rv, 1); // :not(simple selector)
+                            expr = innerLoop(expr, rv, true); // :not(simple selector)
                             m = _TOKEN_PSEUDO.END.exec(expr);
                             m || rv.msg || (rv.msg = ":not()");
                         }
@@ -11367,7 +11536,7 @@ function innerLoop(expr, rv, not) {
     return expr;
 }
 
-// uu.query.selector
+// uu.query.selector - CSS3 Selectors Evaluator
 function selector(token,     // @param Hash: QueryTokenHash
                   context) { // @param Node: context
                              // @return NodeArray: [node, ...]
@@ -11384,7 +11553,7 @@ function selector(token,     // @param Hash: QueryTokenHash
         r = [], ri = -1, j = type = 0;
 
         switch (data[i]) {
-        case _A_QUICK_ID:       // [_A_QUICK_ID, true or false, "ID" or "CLASS"]
+        case _A_QUICK_ID: // [ _A_QUICK_ID, true or false, "ID" or "CLASS" ]
             if (data[++i]) { // ID
                 node = doc.getElementById(data[++i]);
                 return node ? [node] : [];
@@ -11397,19 +11566,19 @@ function selector(token,     // @param Hash: QueryTokenHash
                                          && (r[++ri] = node);
             }
             return r;
-        case _A_QUICK_EFG:      // [_A_QUICK_EFG, ["E", "F"] or ["E", "F", "G"]]
+        case _A_QUICK_EFG: // [ _A_QUICK_EFG, ["E", "F"] or ["E", "F", "G"] ]
             ary = data[++i];
             return uu.node.sort(
                         uu.tag(ary[0], context).concat(
                             uu.tag(ary[1], context),
                             ary[2] ? uu.tag(ary[2], context) : [])).sort;
-        case _A_COMBINATOR:     // [_A_COMBINATOR, ">", _A_TAG, "DIV"]
+        case _A_COMBINATOR: // [ _A_COMBINATOR, ">", _A_TAG, "DIV" ]
             type = _QUERY_COMB[data[++i]];
             ++i;
-        case _A_TAG:            // [_A_TAG, "DIV"]
+        case _A_TAG: // [ _A_TAG, "DIV" ]
             ident = data[++i]; // "DIV" or "*"
             match = ident === "*";
-            xmldoc || (ident = ident.toUpperCase());
+            xmldoc || (ident = ident.toUpperCase()); // if HTMLDocument -> "div" -> "DIV"
 
             if (!type) { // TAG
                 if (negate) {
@@ -11460,14 +11629,14 @@ function selector(token,     // @param Hash: QueryTokenHash
             }
             ctx = r;
             break;
-        case _A_ID:             // [_A_ID, "ID"]
+        case _A_ID: // [ _A_ID, "ID" ]
             type = 1;
-        case _A_CLASS:          // [_A_CLASS, "CLASS"]
+        case _A_CLASS: // [ _A_CLASS, "CLASS" ]
             ident = type ? data[++i] : (" " + data[++i] + " "); // "ID" or " CLASS "
             for (; j < jz; ++j) {
                 node = ctx[j];
                 if (type) { // ID
-                    word  = xmldoc ? node.id : (node.id || node.name); // XHTML is id only
+                    word  = xmldoc ? node.id : (node.id || node.name); // XHTML is id only, HTML is id or name
                     match = word && word === ident;
                 } else {    // CLASS
                     word  = node.className;
@@ -11477,21 +11646,22 @@ function selector(token,     // @param Hash: QueryTokenHash
             }
             ctx = r;
             break;
-        case _A_ATTR:           // [_A_ATTR, "ATTR"]
+        case _A_ATTR: // [ _A_ATTR, "ATTR" ]
             for (attr = data[++i]; j < jz; ++j) {
                 node = ctx[j];
-                match = hasAttribute
-                      ? node.hasAttribute(attr)
-                      : ((word = node.getAttributeNode(attr)) && word.specified);
+                // [IE6][IE7] node.hasAttribute() not impl
+                match = _ie67
+                      ? ((word = node.getAttributeNode(attr)) && word.specified)
+                      : node.hasAttribute(attr);
                 (match ^ negate) && (r[++ri] = node);
             }
             ctx = r;
             break;
-        case _A_ATTR_VALUE:     // [_A_ATTR_VALUE, "ATTR", "OPERATOR", "VALUE"]
+        case _A_ATTR_VALUE: // [ _A_ATTR_VALUE, "ATTR", "OPERATOR", "VALUE" ]
             attr = data[++i];
             ope  = data[++i];
-            val  = uu.trim.quote(data[++i]);
-            uu.ready.getAttribute || (attr = uu.attr._[attr] || attr);
+            val  = uu.trim.quote(data[++i]); // '"quote"' -> "quote"
+            uu.ready.getAttribute || (attr = uu.attr._[attr] || attr); // [IE] fix attr name
             switch (ope) {
             case 1: val = "^" + val + "$"; break;                 // [attr  = value]
             case 3: val = "^" + val;       break;                 // [attr ^= value]
@@ -11502,7 +11672,7 @@ function selector(token,     // @param Hash: QueryTokenHash
             }
             rex = RegExp(val, attr in _QUERY_CASESENS ? "" : "i"); // ignore case
 
-            if (uu.env.ie6 || uu.env.ie7) { // [IE6][IE7]
+            if (_ie67) { // [IE6][IE7]
                 // IE getAttribute(attr) problem
                 // http://twitter.com/uupaa/status/25501532102
                 // http://twitter.com/uupaa/status/25502149299
@@ -11516,7 +11686,7 @@ function selector(token,     // @param Hash: QueryTokenHash
                     }
                     ((word && rex.test(word)) ^ negate) && (r[++ri] = node);
                 }
-            } else {
+            } else { // [IE8][IE9][Gecko][WebKit][Opera]
                 for (; j < jz; ++j) {
                     node = ctx[j];
                     word = node.getAttribute(attr);
@@ -11526,23 +11696,23 @@ function selector(token,     // @param Hash: QueryTokenHash
             ope === 7 && (negate = +!negate); // restore
             ctx = r;
             break;
-        case _A_PSEUDO:         // [_A_PSEUDO, 1~29]
+        case _A_PSEUDO: // [ _A_PSEUDO, 1~29 ]
             type = data[++i];
             ctx = (type < 4  ? childFilter
                  : type < 10 ? actionFilter
                  : type < 13 ? formFilter
                              : otherFilter)(ctx, j, jz, negate, type, xmldoc);
             break;
-        case _A_PSEUDO_NTH:     // [_A_PSEUDO_FUNC, 31~34, { a,b,k }]
+        case _A_PSEUDO_NTH: // [ _A_PSEUDO_FUNC, 31~34, { a,b,k } ]
             type = data[++i];
             ctx = (type < 33 ? nthFilter
                              : nthTypeFilter)(ctx, j, jz, negate, type, data[++i], xmldoc);
             break;
-        case _A_PSEUDO_FUNC:    // [_A_PSEUDO_FUNC, 31~99, arg]
+        case _A_PSEUDO_FUNC: // [ _A_PSEUDO_FUNC, 31~99, arg ]
             type = data[++i];
             ctx = otherFunctionFilter(ctx, j, jz, negate, type, data[++i]);
             break;
-        case _A_PSEUDO_NOT:     // [_A_PSEUDO_NOT, _A_ID/_A_CLASS/_ATTR/_A_PSEUDO/_A_PSEUDO_FUNC, ...]
+        case _A_PSEUDO_NOT: // [ _A_PSEUDO_NOT, _A_ID/_A_CLASS/_ATTR/_A_PSEUDO/_A_PSEUDO_FUNC, ... ]
             negate = 2;
             break;
         case _A_GROUP:
@@ -11593,7 +11763,7 @@ function childFilter(ctx, j, jz, negate, ps) {
 // inner - 7:hover  8:focus  x:active
 function actionFilter(ctx, j, jz, negate, ps) {
     var rv = [], ri = -1, node, ok, cs,
-        decl = _ie ? "ruby-align:center" : "outline:0 solid #000",
+        decl = uu.ie ? "ruby-align:center" : "outline:0 solid #000",
         ss = uu.ss("uuquery2"); // StyleSheetObject
 
     // http://d.hatena.ne.jp/uupaa/20080928
@@ -11601,7 +11771,7 @@ function actionFilter(ctx, j, jz, negate, ps) {
 
     for (; j < jz; ++j) {
         node = ctx[j];
-        ok = _ie ? node.currentStyle.rubyAlign === "center" :
+        ok = uu.ie ? node.currentStyle.rubyAlign === "center" :
                    (cs = uu.css(node),
                     (cs.outlineWidth + cs.outlineStyle) === "0pxsolid");
         (ok ^ negate) && (rv[++ri] = node);
@@ -11634,8 +11804,8 @@ function otherFilter(ctx, j, jz, negate, ps, xmldoc) {
     case 16: negate || (jz = 0, rv = [doc.html]); break;
     case 17: (word = location.hash.slice(1)) || (jz = 0); break;
 /* TODO: test
-    case 18:
-    case 19: attr = "required";
+    case 18: attr = "required"; break;
+    case 19: attr = "optional";
  */
     }
 
@@ -11653,10 +11823,12 @@ function otherFilter(ctx, j, jz, negate, ps, xmldoc) {
                              : ((node.id || node.name) === word); break;
 /* TODO: test
         case 18:
-        case 19: ok = hasAttribute
-                    ? node.hasAttribute(attr)
-                    : ((word = node.getAttributeNode(attr)) && word.specified);
-                 ps === 19 && (ok = !ok);
+        case 19:
+                // [IE6][IE7] node.hasAttribute() not impl
+                ok = _ie67
+                   ? ((word = node.getAttributeNode(attr)) && word.specified)
+                   : node.hasAttribute(attr);
+                ps === 19 && (ok = !ok);
  */
         }
         (ok ^ negate) && (rv[++ri] = node);
@@ -11774,7 +11946,7 @@ function otherFunctionFilter(ctx, j, jz, negate, ps, arg) {
     return rv;
 }
 
-})(document, uu, !(uu.env.ie6 || uu.env.ie7), uu.ie, uu.ie678);
+})(uu, document);
 //}@mb
 
 //{@ui
