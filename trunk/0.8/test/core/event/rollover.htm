@@ -1,0 +1,90 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8" />
+<title>uu.event.rollover test</title>
+<style>
+td {
+    padding: 10px;
+}
+.rollover {
+    outline: 5px solid green;
+}
+.rolloverie67 { /* [IE6][IE7] */
+    border: 0px solid green;
+}
+button {
+    background-color: white;
+    color: black;
+}
+</style>
+<script src="../../../src/uupaa.js"></script>
+<script>
+
+uu.ready(function(uu, doc) {
+    uu.add([
+        uu.click(uu.button("rollover target button1"), fire),
+        uu.click(uu.button("rollover target button2"), fire),
+        uu.click(uu.button("rollover target button3"), fire),
+        uu.click(uu.button("rollover target button4"), fire)
+    ]);
+
+});
+
+function fire(evt) {
+    alert("ボタン [" + (evt.uu.node.innerText ||
+                        evt.uu.node.textContent) + "] がクリックされました");
+}
+
+function bind() {
+    uu.event.rollover(uu.query("button"), uu.ie67 ? "rolloverie67" : "rollover");
+}
+function unbind() {
+    uu.event.unrollover();
+}
+
+function toggleState(on) {
+    if (!uu.event.rollover._.node.length) {
+        alert('ハンドラが設定されていません');
+    } else {
+        if (on) {
+            uu.event.rollover.enable();
+            alert('ハンドラを有効にしました')
+        } else {
+            uu.event.rollover.disable();
+            alert('ハンドラを一時無効にしました')
+        }
+    }
+}
+
+</script>
+</head><body>
+<p>Debug friendly な ON/OFF できるロールオーバー機能の実装</p>
+
+<table>
+<tr><td><input type="button" value="uu.rollover()" onclick="bind()" />
+    </td>
+    <td><b>まずはこのボタンをクリック</b><br />
+        rollover ハンドラを設定し有効にします<br />
+        ハンドラ設定後に、button1 ～ 4にマウスを重ねると、outline が描画されるようになります。
+    </td>
+</tr>
+<tr><td><input type="button" value="uu.unrollover()" onclick="unbind()" />
+    </td>
+    <td>rollover ハンドラを解除し無効にします<br />
+        ハンドラを解除すると、マウスを重ねてもイベントは発生せず outline も描画されなくなります。
+    </td>
+</tr>
+<tr><td><input type="button" value="uu.rollover.disable()" onclick="toggleState(false)" />
+    </td>
+    <td>rollover ハンドラを無効に(一時的に解除)します
+        マウスを重ねてもイベントは発生せず outline も描画されません。
+    </td>
+</tr>
+<tr><td><input type="button" value="uu.rollover.enable()" onclick="toggleState(true)" />
+    </td>
+    <td>rollover ハンドラを有効に(解除を元に戻す)します<br />
+        一時的に解除していたハンドラを元に戻します。
+    </td>
+</tr>
+<hr />
+
+
+</body></html>
