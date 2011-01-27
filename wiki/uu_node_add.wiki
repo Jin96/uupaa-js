@@ -74,7 +74,7 @@ uu.ready(function(uu, doc) {
     var tr = uu.id("xx"); // <tbody><tr id='xx'>...</tr></tbody>
 
 
-    // uu.add("<tr><td>A</td><td>B</td></tr>", tr, "prev"); → エラー
+ // uu.add("<tr><td>A</td><td>B</td></tr>", tr, "prev"); → エラー
     uu.add(uu.tr(uu.td("A"), uu.td("B")), tr, "prev");
 });
 </script>
