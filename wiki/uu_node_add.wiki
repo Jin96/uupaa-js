@@ -18,25 +18,27 @@ _source_ に文字列( HTMLFragmentString )を指定すると、文字列から�
 _source_ にタグ文字列を `<` と `>` なしで指定すると、指定されたタグ(要素)を生成し追加します。
 _context_ を省略すると `<body>` に要素を追加します。
 _position_ には数値または文字列で挿入位置を指定します。
-|| 1 または "first"   || contextNode と同じ階層の先頭(firstSibling)に _source_ を挿入します(長男にします) ||
-|| 2 または "prev"    || contextNode の前(prevSibling)に _source_ を挿入します(一つ兄にします) ||
-|| 3 または "next"    || contextNode の次(nextSibling)に _source_ を挿入します(一つ弟にします) ||
-|| 4 または "last"    || contextNode と同じ階層の末尾(lastSibling)に _source_ を追加します(末弟にします) ||
-|| 5 または "./first" || contextNode の最初の子として _source_ を挿入します ||
-|| 8 または "./last"  || contextNode の最後の子として _source_ を追加します ||
+|| "first"   || contextNode と同じ階層の先頭(firstSibling)に _source_ を挿入します(長男にします) ||
+|| "prev"    || contextNode の前(prevSibling)に _source_ を挿入します(一つ兄にします) ||
+|| "next"    || contextNode の次(nextSibling)に _source_ を挿入します(一つ弟にします) ||
+|| "last"    || contextNode と同じ階層の末尾(lastSibling)に _source_ を追加します(末弟にします) ||
+|| "./first" || contextNode の最初の子として _source_ を挿入します ||
+|| "./last"  || contextNode の最後の子として _source_ を追加します ||
+
+数値を指定した場合は、_source_ が、contextNodeと同じ階層にある _position_ 番目の要素になります(コメントノードはカウントしません)。指定した数値が children.length より大きな場合は、末尾に要素を追加します(appendChild)。
 
 {{{
 <div id="parentNode">
 
-    <div id="firstSibling">    (1) first  </div>
-    <div id="prevSibling">     (2) prev   </div>
-    <div id="contextNode">
-        <div id="firstChild">  (5) ./first </div>
-        <div />
-        <div id="lastChild">   (8) ./last  </div>
-    </div>
-    <div id="nextSibling">     (3) next   </div>
-    <div id="lastSibling">     (4) last   </div>
+    <div id="firstSibling">    first(0)   </div>
+    <div id="prevSibling">     prev(1)    </div>
+    <ul id="contextNode">(2)
+        <li id="firstChild">  ./first(./0) </li>
+        <li>(./1)</li>
+        <li id="lastChild">   ./last(./2)  </li>
+    </ul>
+    <div id="nextSibling">     next(3)    </div>
+    <div id="lastSibling">     last(4)    </div>
 
 </div>
 }}}
