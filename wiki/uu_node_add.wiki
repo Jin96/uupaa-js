@@ -59,7 +59,7 @@ _position_ には数値または文字列で追加/挿入位置を指定しま�
 }}}
 
 7番目の例は、uu.node.add() で `<tr><td>A</td><td>B</td></tr>` を追加する例です。
-uu.node.bulk() は テーブルの行の作成をサポートしていないため uu.node.bulk(`<tr><td>A</td><td>B</td></tr>`) とすると例外が発生します、uu.node.add() と uu.tr(), uu.td() を使ってください。
+同様の機能にuu.node.bulk() がありますが、uu.node.bulk() は tr や td を文字列から作成できないため uu.node.add() と uu.tr(), uu.td() を利用します。
 
 
 = Test Code =
