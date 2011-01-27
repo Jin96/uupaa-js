@@ -42,12 +42,12 @@ _position_ には数値または文字列で挿入位置を指定します。
 }}}
 = 用例 =
 {{{
-[1][add div node to body]     uu.node.add()         -> <body><div /></body>
-[2][add p tag to body]        uu.node.add("p")      -> <body><p /></body>
-[3][add Node to body]         uu.node.add(uu.div()) -> <body><div /></body>
-[4][add NodeArray to context] uu.node.add([<link>, <link>], document.head) -> <head>...<link/><link/></head>
-[5][add HTMLFragmentString]   uu.node.add("<div><p>txt</p></div>") -> <body><div><p>txt</p></div></body>
-[6][add DocumentFragment]     uu.node.add(DocumentFragment)        -> <body>{{fragment}}</body>
+[1][add div node to body]     uu.node.add()         -> <div />  (div.parentNode = <body>)
+[2][add p tag to body]        uu.node.add("p")      -> <p />    (p.parentNode = <body>)
+[3][add Node to body]         uu.node.add(uu.div()) -> <div />  (div.parentNode = <body>)
+[4][add NodeArray to context] uu.node.add([<link>, <link>], document.head) -> <link/> (link.parentNode = <head>)
+[5][add HTMLFragmentString]   uu.node.add("<div><p>txt</p></div>") -> <div> (div.parentNode = <body>)
+[6][add DocumentFragment]     uu.node.add(DocumentFragment)        -> <?>
 [7][insert tr and tds]        uu.node.add(uu.tr(uu.td("A"), uu.td("B")), uu.id("ctx"), "prev") -> <tr>
             <table>
                 <tr id="ctx"><td>C></td><td>D</td></tr>
