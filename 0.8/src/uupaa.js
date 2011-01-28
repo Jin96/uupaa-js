@@ -73,6 +73,10 @@
 //          none | both | horizontal | vertical | inherit
 //      canvas.mozGetAsFile()
 //
+// Chrome 9
+//      WebGL getContext("experimental-webgl")
+//          --enable-accelerated-layers option ???
+//
 // Opera 10.70
 //      <g buffered-rendering="static">
 //      HTML5 hashchange event
@@ -755,6 +759,9 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //  [4][bind a namespace.event]  uu.event(node, "MyNameSpace.click", fn) -> node
         has:        uuhas,          // uu.event.has(node:Node, exEventType:ExEventTypeString):Boolean
         key:        uueventkey,     // uu.event.key(event:ExEvent):Hash - { key, code }
+        one:        uueventone,     // uu.event.one(node:Node, exEventType:ExEventTypeString,
+                                    //              callback:CallbackFunction, hint:String = "one"):Node
+                                    //  [1]
         edge:       uueventedge,    // uu.event.edge(event:ExEvent):Hash - { x, y }
         fire:       uueventfire,    // uu.event.fire(node:Node/Window, eventType:String,
                                     //                          param:Mix = void,
@@ -811,6 +818,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //                            evaluator:Function,
                                     //                            useCapture:Boolean = false)
     }),
+    one:            uueventone,     // uu.one() as uu.event.one()
     bind:           uuevent,        // uu.bind() as uu.event()
     unbind:         uueventunbind,  // uu.unbind() as uu.event.unbind()
     junction:       uujunction,     // uu.junction(race:Number, items:Number, callback:CallbackFunction = void):Junction
@@ -861,13 +869,22 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //  [1][set   callback] uu.node.at(callback(node, idnet))
                                     //  [2][clear callback] uu.node.at(null)
         add:        uunodeadd,      // uu.node.add(source:Node/NodeArray/DocumentFragment/HTMLFragmentString/TagName = "div",
-                                    //             context:Node = <body>, position:String = "./last"):Node
-                                    //  [1][add div node]            uu.node.add()         -> <body><div /></body>
-                                    //  [2][from tagName]            uu.node.add("p")      -> <body><p /></body>
-                                    //  [3][from Node]               uu.node.add(uu.div()) -> <body><div /></body>
-                                    //  [4][from NodeArray]          uu.node.add([<div>, <div>]) -> <body><div /></body>
-                                    //  [5][from HTMLFragmentString] uu.node.add("<div><p>txt</p></div>") -> <body><div><p>txt</p></div></body>
-                                    //  [6][from DocumentFragment]   uu.node.add(DocumentFragment)        -> <body>{{fragment}}</body>
+                                    //             context:Node = <body>, position:Number/String = "./last"):Node
+                                    //  [1][add div node to body]     uu.node.add()         -> <div />  (div.parentNode = <body>)
+                                    //  [2][add p tag to body]        uu.node.add("p")      -> <p />    (p.parentNode = <body>)
+                                    //  [3][add Node to body]         uu.node.add(uu.div()) -> <div />  (div.parentNode = <body>)
+                                    //  [4][add NodeArray to context] uu.node.add([<link>, <link>], document.head) -> <link/> (link.parentNode = <head>)
+                                    //  [5][add HTMLFragmentString]   uu.node.add("<div><p>txt</p></div>") -> <div> (div.parentNode = <body>)
+                                    //  [6][add DocumentFragment]     uu.node.add(DocumentFragment)        -> <?>
+                                    //  [7][insert tr and tds]        uu.node.add(uu.tr(uu.td("A"), uu.td("B")), uu.id("ctx"), "prev") -> <tr>
+                                    //              <table>
+                                    //                  <tr id="ctx"><td>C></td><td>D</td></tr>
+                                    //              </table>
+                                    //                     v
+                                    //              <table>
+                                    //                  <tr><td>A></td><td>B</td></tr>
+                                    //                  <tr id="ctx"><td>C></td><td>D</td></tr>
+                                    //              </table>
                                     //   --- uu.node.add ---
                                     //    <div id="parentNode">
                                     //
@@ -5633,6 +5650,15 @@ uuClassSingleton("HashChange", {
 });
 //}@mb
 
+// uu.event.one - one time event
+function uueventone(node,        // @param Node: target node
+                    exEventType, // @param ExEventTypeString: "click,..."
+                    callback,    // @param CallbackFunction: callback(evt, times)
+                    hint) {      // @param String(= "one"): code search hint
+                                 // @return Node:
+    return uueventcyclic(node, exEventType, callback, 1, 1, hint || "one");
+}
+
 // uu.event.key - get key and keyCode (cross browse keyCode)
 function uueventkey(event) { // @param ExEvent:
                              // @return Hash: { key, code }
@@ -5884,7 +5910,7 @@ function uueventcyclic(node,         // @param Node: target node
                        callback,     // @param CallbackFunction: callback(evt, times)
                        cyclic,       // @param Number: cyclic count
                        loop,         // @param Number(= 0): loops, zero is infinity
-                       hint,         // @param String(= void): code search hint
+                       hint,         // @param String(= "cyclic"): code search hint
                        __unbind__) { // @hidden Boolean(= false): true is unbind
                                      // @return Node:
     function cyclicEventClosure(evt, rv) {
@@ -5908,7 +5934,7 @@ function uueventcyclic(node,         // @param Node: target node
         return rv;
     }
 
-    var dataset = "uu-eventcyclic", data = node[dataset], count = 0;
+    var dataset = "data-uueventcyclic", data = node[dataset], count = 0;
 
     if (__unbind__) {
         uueventunbind(node, exEventType, data[exEventType]);
@@ -5919,7 +5945,7 @@ function uueventcyclic(node,         // @param Node: target node
 
     node[dataset] || (node[dataset] = {});
     node[dataset][exEventType] = cyclicEventClosure;
-    return uuevent(node, exEventType, cyclicEventClosure); // bind(rebind)
+    return uuevent(node, exEventType, cyclicEventClosure, hint || "cyclic"); // bind(rebind)
 }
 
 // uu.event.uncyclic - unbind cyclic event
@@ -6325,7 +6351,7 @@ function uunodeat(callback) { // @param CallbackFunction: callback
 }
 
 // HTML4(a ~ ul) exclude <html><head><body>
-uutag.html4 = "a,b,br,button,dd,div,dl,dt,form,h1,h2,h3,h4,h5,h6,i,img," +
+uutag.html4 = "a,b,br,button,dd,div,dl,dt,form,h1,h2,h3,h4,h5,h6,hr,i,img," +
               "iframe,input,li,ol,option,p,pre,select,span,table,tbody,tr," +
               "td,th,thead,tfoot,textarea,u,ul";
 // HTML5(abbr ~ video)
@@ -6355,14 +6381,23 @@ function uubody(/* var_args */) { // @param Mix: var_args
 // uu.node.add - add/insert node
 function uunodeadd(source,     // @param Node/NodeArray/DocumentFragment/HTMLFragmentString/TagName(= "div"):
                    context,    // @param Node(= <body>): add to context
-                   position) { // @param String(= "./last"): insert position
+                   position) { // @param Number/String(= "./last"): insert position
                                // @return Node: node
-    //  [1][add div node]            uu.node.add()         -> <body><div /></body>
-    //  [2][from tagName]            uu.node.add("p")      -> <body><p /></body>
-    //  [3][from Node]               uu.node.add(uu.div()) -> <body><div /></body>
-    //  [4][from NodeArray]          uu.node.add([<div>, <div>]) -> <body><div /></body>
-    //  [5][from HTMLFragmentString] uu.node.add("<div><p>txt</p></div>") -> <body><div><p>txt</p></div></body>
-    //  [6][from DocumentFragment]   uu.node.add(DocumentFragment)        -> <body>{{fragment}}</body>
+    //  [1][add div node to body]     uu.node.add()         -> <div />  (div.parentNode = <body>)
+    //  [2][add p tag to body]        uu.node.add("p")      -> <p />    (p.parentNode = <body>)
+    //  [3][add Node to body]         uu.node.add(uu.div()) -> <div />  (div.parentNode = <body>)
+    //  [4][add NodeArray to context] uu.node.add([<link>, <link>], document.head) -> <link/> (link.parentNode = <head>)
+    //  [5][add HTMLFragmentString]   uu.node.add("<div><p>txt</p></div>") -> <div> (div.parentNode = <body>)
+    //  [6][add DocumentFragment]     uu.node.add(DocumentFragment)        -> <?>
+    //  [7][insert tr and tds]        uu.node.add(uu.tr(uu.td("A"), uu.td("B")), uu.id("ctx"), "prev") -> <tr>
+    //              <table>
+    //                  <tr id="ctx"><td>C></td><td>D</td></tr>
+    //              </table>
+    //                     v
+    //              <table>
+    //                  <tr><td>A></td><td>B</td></tr>
+    //                  <tr id="ctx"><td>C></td><td>D</td></tr>
+    //              </table>
 
     context = context || doc.body;
 
@@ -6372,27 +6407,37 @@ function uunodeadd(source,     // @param Node/NodeArray/DocumentFragment/HTMLFra
               : !source[_indexOf]("<") ? [uunodebulk(source, context)]
                                              // [5] uu.node.add(HTMLFragmentString)
               : [newNode(source)],           // [2] uu.node.add("p")
-        reference = null, i = 0, iz = nodes.length, node, rv;
+        reference = null, i = 0, iz = nodes.length, node, rv,
+        parent = context[_parentNode], pos;
 
     rv = (nodes[0][_nodeType] === Node.DOCUMENT_FRAGMENT_NODE)
        ? nodes[0][_firstChild]
        : nodes[0];
 
-    for (; i < iz; ++i) {
-        node = nodes[i];
+    if (isNumber(position)) {
+        reference = parent.children[position] || null; // [Firefox3.5+] Element.children
+        for (; i < iz; ++i) {
+            parent.insertBefore(nodes[i], reference);
+        }
+    } else {
+        pos = position || "./last";
+        (pos === "first" || pos === "./first") && nodes.reverse();
 
-        switch (uunodeadd.pos[position] || 8) {
-        case 1: reference = context[_parentNode][_firstChild];
-        case 2: reference || (reference = context);
-        case 3: reference || (reference = context[_nextSibling]);
-        case 4: context[_parentNode].insertBefore(node, reference); break;
-        case 5: reference = context[_firstChild];
-        case 8: context.insertBefore(node, reference);
+        for (; i < iz; ++i) {
+            node = nodes[i];
+
+            switch (pos) {
+            case "first":   reference = parent[_firstChild];
+            case "prev":    reference || (reference = context);
+            case "next":    reference || (reference = context[_nextSibling]);
+            case "last":    parent.insertBefore(node, reference); break;
+            case "./first": reference = context[_firstChild];
+            case "./last":  context.insertBefore(node, reference);
+            }
         }
     }
     return rv;
 }
-uunodeadd.pos = { first: 1, prev: 2, next: 3, last: 4, "./first": 5, "./last": 8 };
 
 // uu.nodeid - Node <-> NodeID
 function uunodeid(ident) { // @param Node/Number: Node or NodeID

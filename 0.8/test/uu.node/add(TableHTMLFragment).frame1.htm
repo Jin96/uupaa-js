@@ -1,0 +1,21 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8" />
+<title></title>
+<style></style>
+<script src="../../src/uupaa.js"></script>
+<script>
+uu.ready(function(uu, doc) {
+    var tr = uu.id("xx"); // <tbody><tr id='xx'>...</tr></tbody>
+
+    uu.add(uu.tr(uu.td("A"), uu.td("B")), tr, "prev");
+});
+</script>
+</head><body>
+<p>
+uu.add(uu.tr(uu.td("A"), uu.td("B")), tr, "prev")
+</p>
+
+<table>
+<tr id='xx'><td>C</td><td>D</td></tr>
+</table>
+
+</body></html>
