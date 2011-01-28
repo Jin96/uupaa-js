@@ -1,0 +1,24 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8" />
+<title></title>
+<style></style>
+<script src="../../src/uupaa.js"></script>
+<script>
+uu.ready(function(uu, doc) {
+    try {
+        uu("#xx").add("<tr><td>A</td><td>B</td></tr>", "prev");
+    } catch (err) {
+        uu.log('uu.node.add("<tr><td>A</td><td>B</td></tr>") はサポートしていません');
+        uu.log('uu.node.add(uu.tr(uu.td("A"), uu.td("B")), tr, "prev") を使ってください');
+    }
+});
+</script>
+</head><body>
+<p>
+uu("#xx").add("<tr><td>A</td><td>B</td></tr>", "prev")
+</p>
+
+<table>
+<tr id='xx'><td>C</td><td>D</td></tr>
+</table>
+
+</body></html>
