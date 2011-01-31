@@ -336,6 +336,7 @@ var _addEventListener = "addEventListener",
         //      https://    user:pass@    server     : port   /dir/f.ext  ?key=value   #hash
         //      [1]         [3]           [4]          [5]    [6]         [7]          [8]
     },
+    _unit = { px: /px$/, pt: /pt$/, em: /em$/ },
     // --- ENVIRONMENT ---
     _env = detectEnvironment(0.8),  // as uu.env
     _ie = _env.ie,                  // as uu.ie
@@ -635,18 +636,16 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //  [1][css-prop to cssProp] uu.css.fix("background-color") -> "backgroundColor"
                                     //  [2][std-name to ie-name] uu.css.fix("float")            -> "cssFloat"(WEB STD) or "styleFloat"(IE)
                                     //  [3][through]             uu.css.fix("-webkit-shadow")   -> "-webkit-shadow"
-        unit:       uucssunit,      // uu.css.unit(node:Node, value:Number/CSSUnitString,
-                                    //             quick:Boolean = false,
-                                    //             prop:String = "left"):Number
-                                    //  [1][convert pixel]  uu.css.unit(<div>,  123  ) -> 123
-                                    //  [2][convert pixel]  uu.css.unit(<div>, "12px") -> 12
-                                    //  [3][convert pixel]  uu.css.unit(<div>, "12em") -> 192
-                                    //  [4][convert pixel]  uu.css.unit(<div>, "12pt") -> 16
-                                    //  [5][convert pixel]  uu.css.unit(<div>, "auto") -> 100
-                                    //  [6][convert pixel]  uu.css.unit(<div>, "auto", false, "borderTopWidth") -> 12
+        unit:       uucssunit,      // uu.css.unit(node:Node, value:Number/CSSUnitString):Number
+                                    //  [1][to pixel] uu.css.unit(<div>,  12   ) -> 12
+                                    //  [2][to pixel] uu.css.unit(<div>, "12"  ) -> 12
+                                    //  [3][to pixel] uu.css.unit(<div>, "12px") -> 12
+                                    //  [4][to pixel] uu.css.unit(<div>, "12pt") -> 16
+                                    //  [5][to pixel] uu.css.unit(<div>, "12em") -> 192
+                                    //  [6][to pixel] uu.css.unit(<div>, "auto") -> 100
         // --- CSS BOX MODEL ---
 //{@cssbox
-        box:        uucssbox,       // uu.css.box(node:Node, quick:Boolean = false, mbp:Number = 0x7):Hash - { w, h, m, b, p }
+        box:        uucssbox,       // uu.css.box(node:Node, recalc:Boolean = false):Hash - { w, h, m, b, p }
         rect:       uucssrect,      // uu.css.rect(node:Node, ancestorNode:Node = null):Hash { x, y, w, h, from }
         position:   uucssposition,  // uu.css.position(node:Node, pos:String = "s"):Node
                                     //  [1][to static]   uu.css.position(<div>, "static")   -> <div style="position: static">
@@ -2973,7 +2972,7 @@ function uudataclear(node,  // @param Node:
 
 // uu.css - css and StyleSheet accessor
 function uucss(node,    // @param Node:
-               key,     // @param String/Hash(= void): key
+               key,     // @param String/Hash(= void): CSS Property Keyword or "px"
                value) { // @param String(= void): value
                         // @return Hash/String/Node:
     //  [1][get computed items]              uu.css(node) -> { key: value, ... }
@@ -4298,72 +4297,89 @@ uucsstransform2d._ = {
 
 //{@cssbox
 
-// uu.css.box - get box size(margin, padding, border, width, height)
-function uucssbox(node,  // @param Node:
-                  quick, // @param Boolean(= false): false is use-cache, true is quick-mode
-                  mbp) { // @param Number(= 0x7): select properties, 0x7 is all,
-                         //                       0x4 is margin only,
-                         //                       0x2 is border only,
-                         //                       0x1 is padding only
-                         // @return Hash: { w: style.width,
-                         //                 h: style.height,
-                         //                 m: { t, l, r, b },  // margin:  { top, left, right, bottom }
-                         //                 b: { t, l, r, b },  // border:  { top, left, right, bottom }
-                         //                 p: { t, l, r, b } } // padding: { top, left, right, bottom }
-    var meta = _datauu + "cssbox", // node["data-uucssbox"]
-        rv = node[meta];
-
-    if (!rv || !quick) {
-        mbp = mbp || 0x7;
-
-        var zero = "0px", bw = uucssbox.bw, prop = uucssbox.prop,
-            ns = uucss(node, "px"), // computed pixel unit
-            mt = ns[prop[0]],   // ns.marginTop
-            ml = ns[prop[1]],   // ns.marginLeft
-            mr = ns[prop[2]],   // ns.marginRight
-            mb = ns[prop[3]],   // ns.marginBottom
-            pt = ns[prop[4]],   // ns.paddingTop
-            pl = ns[prop[5]],   // ns.paddingLeft
-            pr = ns[prop[6]],   // ns.paddingRight
-            pb = ns[prop[7]],   // ns.paddingBottom
-            bt = ns[prop[8]],   // ns.borderTopWidth
-            bl = ns[prop[9]],   // ns.borderLeftWidth
-            br = ns[prop[10]],  // ns.borderRightWidth
-            bb = ns[prop[11]];  // ns.borderBottomWidth
-
-        if (mbp & 0x4) { // margin
-            mt = mt === zero ? 0 : uucssunit(node, mt, 1);
-            ml = ml === zero ? 0 : uucssunit(node, ml, 1);
-            mr = mr === zero ? 0 : uucssunit(node, mr, 1);
-            mb = mb === zero ? 0 : uucssunit(node, mb, 1);
-        }
-        if (mbp & 0x2) { // border
-            bt = bw[bt] || (bt === zero ? 0 : uucssunit(node, bt, 1));
-            bl = bw[bl] || (bl === zero ? 0 : uucssunit(node, bl, 1));
-            br = bw[br] || (br === zero ? 0 : uucssunit(node, br, 1));
-            bb = bw[bb] || (bb === zero ? 0 : uucssunit(node, bb, 1));
-        }
-        if (mbp & 0x1) { // padding
-            pt = pt === zero ? 0 : uucssunit(node, pt, 1);
-            pl = pl === zero ? 0 : uucssunit(node, pl, 1);
-            pr = pr === zero ? 0 : uucssunit(node, pr, 1);
-            pb = pb === zero ? 0 : uucssunit(node, pb, 1);
-        }
-        rv = node[meta] = {
-            w: ns[_width],
-            h: ns[_height],
-            m: { t: mt, l: ml, r: mr, b: mb },
-            b: { t: bt, l: bl, r: br, b: bb },
-            p: { t: pt, l: pl, r: pr, b: pb }
-        };
+// uu.css.box - calculate box size(margin, padding, border, width, height)
+function uucssbox(node,     // @param Node:
+                  recalc) { // @param Boolean(= false): false is use-cache, true is recalc
+                            // @return Hash: { w, h, m:{ t,l,r,b }, b:{ t,l,r,b }, p:{ t,l,r,b } }
+                            //  w - Number:
+                            //  h - Number:
+                            //  m.t - Number: margin top
+                            //  m.l - Number: margin left
+                            //  m.r - Number: margin right
+                            //  m.b - Number: margin bottom
+                            //  p.t - Number: padding top
+                            //  p.l - Number: padding left
+                            //  p.r - Number: padding right
+                            //  p.b - Number: padding bottom
+                            //  b.t - Number: border top width
+                            //  b.l - Number: border left width
+                            //  b.r - Number: border right width
+                            //  b.b - Number: border bottom width
+    if (!recalc && node[_datauu + "cssbox"]) { // node["data-uucssbox"]
+        return node[_datauu + "cssbox"];
     }
-    return rv;
+    var cs = /*{@mb*/
+             !getComputedStyle ? node.currentStyle : /*}@mb*/ // [IE6][IE7][IE8]
+                                 getComputedStyle(node, 0),
+        mt = cs.marginTop,
+        ml = cs.marginLeft,
+        mr = cs.marginRight,
+        mb = cs.marginBottom,
+        bt = cs.borderTopWidth,
+        bl = cs.borderLeftWidth,
+        br = cs.borderRightWidth,
+        bb = cs.borderBottomWidth,
+        pt = cs.paddingTop,
+        pl = cs.paddingLeft,
+        pr = cs.paddingRight,
+        pb = cs.paddingBottom,
+        db = uucssbox._, n, undef, rect, none = 0, auto = "auto",
+        w = cs.width,  // "123px", "auto"
+        h = cs.height;
+
+    mt = ((n = db[mt]) === undef) ? uucssunit(node, mt) : n;
+    ml = ((n = db[ml]) === undef) ? uucssunit(node, ml) : n;
+    mr = ((n = db[mr]) === undef) ? uucssunit(node, mr) : n;
+    mb = ((n = db[mb]) === undef) ? uucssunit(node, mb) : n;
+    // border: auto -> invalid value -> 0
+    bt = ((n = db[bt]) === undef) ? bt === auto ? 0 : uucssunit(node, bt) : n;
+    bl = ((n = db[bl]) === undef) ? bl === auto ? 0 : uucssunit(node, bl) : n;
+    br = ((n = db[br]) === undef) ? br === auto ? 0 : uucssunit(node, br) : n;
+    bb = ((n = db[bb]) === undef) ? bb === auto ? 0 : uucssunit(node, bb) : n;
+    // padding: auto -> invalid value -> 0
+    pt = ((n = db[pt]) === undef) ? pt === auto ? 0 : uucssunit(node, pt) : n;
+    pl = ((n = db[pl]) === undef) ? pl === auto ? 0 : uucssunit(node, pl) : n;
+    pr = ((n = db[pr]) === undef) ? pr === auto ? 0 : uucssunit(node, pr) : n;
+    pb = ((n = db[pb]) === undef) ? pb === auto ? 0 : uucssunit(node, pb) : n;
+
+    // display:none -> display:block -> recalc width/height
+    if (cs.display === "none") {
+        ++none;
+        node.style.display = "block";
+    }
+    rect = node.getBoundingClientRect(); // [Firefox3+][IE6+][WebKit][Opera]
+    w = (node.offsetWidth || rect.right - rect.left)
+        - parseInt(bl) - parseInt(br)
+        - parseInt(pl) - parseInt(pr);
+    w = w > 0 ? w : 0;
+
+    h = (node.offsetHeight || rect.bottom - rect.top)
+        - parseInt(bt) - parseInt(bb)
+        - parseInt(pt) - parseInt(pb);
+    h = h > 0 ? h : 0;
+
+    none && (node.style.display = "none");
+
+    return node[_datauu + "cssbox"] = { // cache
+        w: w,
+        h: h,
+        m: { t: mt, l: ml, r: mr, b: mb },
+        b: { t: bt, l: bl, r: br, b: bb },
+        p: { t: pt, l: pl, r: pr, b: pb }
+    };
 }
-uucssbox.prop = ("marginTop,marginLeft,marginRight,marginBottom," +
-                 "paddingTop,paddingLeft,paddingRight,paddingBottom," +
-                 "borderTopWidth,borderLeftWidth," +
-                 "borderRightWidth,borderBottomWidth").split(",");
-uucssbox.bw = { // border-width
+uucssbox._ = {
+    "0px": 0, "1px": 1, "2px": 2, "3px": 3,
     thin: 1, medium: 3, thick: (_ie67 || _opera) ? 6 : 5
 };
 
@@ -4457,7 +4473,7 @@ function uucssposition(node,  // @param Node:
     switch ((pos || "s").charAt(0)) {
     case "s":   ns[_position] = "static"; break;
     case "a":   rect = uucssrect(node); // offset from foster
-                box = uucssbox(node, _false, 0x4); // margin only
+                box = uucssbox(node, _true); // recalc margin
                 ns.left = (rect.x - box.m.l) + "px"; // margin.left
                 ns.top  = (rect.y - box.m.t) + "px"; // margin.top
                 ns[_position] = "absolute";
@@ -4647,47 +4663,43 @@ function SSSClear() {
 
 // --- CALC CSS UNIT ---
 // uu.css.unit - convert to pixel unit
-function uucssunit(node,   // @param Node: context
-                   value,  // @param Number/CSSUnitString: 123, "123", "123px",
-                           //                              "123em", "123pt", "auto"
-                   quick,  // @param Boolean(= false): true is quick mode
-                   prop) { // @param String(= "left"): property
-    prop = prop || "left";
+function uucssunit(node,    // @param Node: context
+                   value) { // @param Number/CSSUnitString: 12, "12", "12px",
+                            //                             "12pt", "12em", "auto"
+                            // @return Number: pixel value
+    //  [1][to pixel] uu.css.unit(<div>,  12   ) -> 12
+    //  [2][to pixel] uu.css.unit(<div>, "12"  ) -> 12
+    //  [3][to pixel] uu.css.unit(<div>, "12px") -> 12
+    //  [4][to pixel] uu.css.unit(<div>, "12pt") -> 16
+    //  [5][to pixel] uu.css.unit(<div>, "12em") -> 192
+    //  [6][to pixel] uu.css.unit(<div>, "auto") -> 100
 
-    var fontSize, ratio, _float = parseFloat;
-
-    if (typeof value === _number) {
-        return value;
+    if (isFinite(value)) { // [1][2] 12 or "12"
+        return +value;
     }
-
-    // "123px" -> 123
-    if (uucssunit.px.test(value)) {
+    if (_unit.px.test(value)) { // [3] "12px"
         return parseInt(value) || 0;
     }
-    if (value === "auto") {
-        if (!prop[_indexOf]("bor") || !prop[_indexOf]("pad")) { // /^border|^padding/g
-            return 0;
-        }
+    if (_unit.pt.test(value)) { // [4] "12pt"
+        return (parseFloat(value) * 4 / 3) | 0; // 12pt * 1.333 = 16px
+    } else if (_unit.em.test(value)) { // [5] "12em"
+        var fontSize = getComputedStyle ? getComputedStyle(node, 0).fontSize
+                                        : node.currentStyle.fontSize
+
+        return (parseFloat(value) *
+                parseFloat(fontSize) *
+                (_unit.pt.test(fontSize) ? 4 / 3 : 1)) | 0;
     }
-    if (!quick) {
-        return uucssunit.calc(node, prop, value);
-    }
-    if (uucssunit.pt.test(value)) {
-        return (_float(value) * 4 / 3) | 0; // 12pt * 1.333 = 16px
-    } else if (uucssunit.em.test(value)) {
-        fontSize = uucss(node).fontSize;
-        ratio = uucssunit.pt.test(fontSize) ? 4 / 3 : 1;
-        return (_float(value) * _float(fontSize) * ratio) | 0;
-    }
-    return parseInt(value) || 0;
+    // [6] auto
+    return (getComputedStyle ? calcPixel
+                             : calcPixelIE)(node, value, "left");
 }
-uumix(uucssunit, { px: /px$/, pt: /pt$/, em: /em$/, calc: calcPixel });
 
 // inner - convert CSS unit
-function calcPixel(node,    // @param Node:
-                   prop,    // @param String: property, "left", "width", ...
-                   value) { // @param CSSUnitString: "10em", "10pt", "10px", "auto"
-                            // @return Number: pixel value
+function calcPixel(node,   // @param Node:
+                   value,  // @param CSSUnitString: "10em", "10pt", "10px", "auto"
+                   prop) { // @param String: property, "left", "width", ...
+                           // @return Number: pixel value
     var style = node.style, mem = [style.left, 0, 0], // [left, position, display]
         important = "important",
         setProperty = "setProperty",
@@ -4725,10 +4737,10 @@ function calcPixel(node,    // @param Node:
 
 //{@mb
 // inner - convert CSS unit
-function calcPixelIE(node,    // @param Node:
-                     prop,    // @param String: property, "left", "width", ...
-                     value) { // @param CSSUnitString: "10em", "10pt", "10px", "auto"
-                              // @return Number: pixel value
+function calcPixelIE(node,   // @param Node:
+                     value,  // @param CSSUnitString: "10em", "10pt", "10px", "auto"
+                     prop) { // @param String: property, "left", "width", ...
+                             // @return Number: pixel value
     var style = node.style,
         runtimeStyle = node.runtimeStyle,
         mem = [style[prop], runtimeStyle[prop]]; // keep !important value
@@ -4747,22 +4759,17 @@ function calcPixelIE(node,    // @param Node:
     return value || 0;
 }
 
-if (!getComputedStyle) {
-    uucssunit.calc = calcPixelIE;
-}
-
 // inner - emulate getComputedStyle [IE6][IE7][IE8]
 function getComputedStyleIE(node) { // @param Node:
                                     // @return Hash: { width: "123px", ... }
     // http://d.hatena.ne.jp/uupaa/20091212
-    var rv, rect, ut, v, w, x, i = 0, mem,
+    var rv, rect, i = 0, left1, left2, mixVal, prop,
         style = node.style,
         currentStyle = node.currentStyle,
         runtimeStyle = node.runtimeStyle,
-        UNITS = { m: 1, t: 2, "%": 3, o: 3 }, // em, pt, %, auto,
         RECTANGLE = { top: 1, left: 2, width: 3, height: 4 },
         fontSize = currentStyle.fontSize,
-        em = parseFloat(fontSize) * (uucssunit.pt.test(fontSize) ? 4 / 3 : 1),
+        em = parseFloat(fontSize) * (_unit.pt.test(fontSize) ? 4 / 3 : 1),
         boxProperties = getComputedStyleIE.boxs,
         cache = { "0px": "0px", "1px": "1px", "2px": "2px", "5px": "5px",
                   thin: "1px", medium: "3px",
@@ -4771,53 +4778,58 @@ function getComputedStyleIE(node) { // @param Node:
     rv = getComputedStyleIE.getProps(currentStyle);
 
     // calc: border***Width, padding***, margin***
-    for (; w = boxProperties[i++]; ) {
-        v = currentStyle[w];
-        if (!(v in cache)) {
-            x = v;
-            switch (ut = UNITS[v.slice(-1)]) {
-            case 1: x = parseFloat(v) * em; break;    // "12em"
-            case 2: x = parseFloat(v) * 4 / 3; break; // "12pt"
-            case 3: // %, auto
-                    mem = [style.left, runtimeStyle.left];
-                    runtimeStyle.left = currentStyle.left;
-                    style.left = v;
-                    x = style.pixelLeft;
-                    style.left = mem[0];
-                    runtimeStyle.left = mem[1];
+    for (; prop = boxProperties[i++]; ) {
+        mixVal = currentStyle[prop]; // "12px" or "12pt" or "12%" or "auto"
+
+        if (!(mixVal in cache)) { // cached ?
+            // mix value -> pixel value
+            switch (mixVal.slice(-2)) {
+            case "px": cache[mixVal] = mixVal; break;
+            case "em": cache[mixVal] = (parseFloat(mixVal) * em) + "px"; break;
+            case "pt": cache[mixVal] = (parseFloat(mixVal) * 4 / 3) + "px"; break;
+            default: // "%", "auto", etc...
+                left1 = style.left;
+                left2 = runtimeStyle.left;
+                runtimeStyle.left = currentStyle.left;
+                style.left = mixVal;
+                cache[mixVal] = style.pixelLeft + "px";
+                style.left = left1;
+                runtimeStyle.left = left2;
             }
-            cache[v] = ut ? (x + "px") : x;
         }
-        rv[w] = cache[v];
+        rv[prop] = cache[mixVal];
     }
+
     // calc: top, left, width, height
-    for (w in RECTANGLE) {
-        v = currentStyle[w];
-        switch (ut = UNITS[v.slice(-1)]) {
-        case 1: v = parseFloat(v) * em; break;    // "12em"
-        case 2: v = parseFloat(v) * 4 / 3; break; // "12pt"
-        case 3: // %, auto
-            switch (RECTANGLE[w]) {
-            case 1: v = node.offsetTop; break;  // style.top
-            case 2: v = node.offsetLeft; break; // style.left
+    for (prop in RECTANGLE) { // RECTANGLE = { top: 1, left: 2, width: 3, height: 4 }
+        mixVal = currentStyle[prop]; // "12px" or "12pt" or "12%" or "auto"
+
+        // mix value -> pixel value
+        switch (mixVal.slice(-2)) {
+        case "px": rv[prop] = mixVal; break;
+        case "em": rv[prop] = (parseFloat(mixVal) * em) + "px"; break;
+        case "pt": rv[prop] = (parseFloat(mixVal) * 4 / 3) + "px"; break;
+        default:
+            switch (RECTANGLE[prop]) {
+            case 1: rv[prop] = node.offsetTop  + "px"; break; // style.top
+            case 2: rv[prop] = node.offsetLeft + "px"; break; // style.left
             case 3: rect || (rect = node.getBoundingClientRect());
-                    v = (node.offsetWidth  || rect.right - rect.left) // style.width
-                      - parseInt(rv.borderLeftWidth)
-                      - parseInt(rv.borderRightWidth)
-                      - parseInt(rv.paddingLeft)
-                      - parseInt(rv.paddingRight);
-                    v = v > 0 ? v : 0;
+                    mixVal = (node.offsetWidth  || rect.right - rect.left) // style.width
+                        - parseInt(rv.borderLeftWidth)
+                        - parseInt(rv.borderRightWidth)
+                        - parseInt(rv.paddingLeft)
+                        - parseInt(rv.paddingRight);
+                    rv[prop] = mixVal > 0 ? (mixVal + "px") : "0px";
                     break;
             case 4: rect || (rect = node.getBoundingClientRect());
-                    v = (node.offsetHeight || rect.bottom - rect.top) // style.height
-                      - parseInt(rv.borderTopWidth)
-                      - parseInt(rv.borderBottomWidth)
-                      - parseInt(rv.paddingTop)
-                      - parseInt(rv.paddingBottom);
-                    v = v > 0 ? v : 0;
+                    mixVal = (node.offsetHeight || rect.bottom - rect.top) // style.height
+                        - parseInt(rv.borderTopWidth)
+                        - parseInt(rv.borderBottomWidth)
+                        - parseInt(rv.paddingTop)
+                        - parseInt(rv.paddingBottom);
+                    rv[prop] = mixVal > 0 ? (mixVal + "px") : "0px";
             }
         }
-        rv[w] = ut ? (v + "px") : v;
     }
     rv.opacity = uucssopacity(node);
     rv.fontSize = em + "px";
@@ -5807,7 +5819,7 @@ uueventrollover._ = {
 function uueventrolloverupdate(enable) { // @param Boolean: true -> hover, false -> unhover
     var db = uueventrollover._,
         ary = db.node,
-        i = 0, iz = ary.length, j, jz,
+        i = 0, iz = ary.length,
         fn = enable ? uueventhover : uueventunhover;
 
     for (; i < iz; ++i) {
@@ -8548,7 +8560,7 @@ function uujsonencode(mix,     // @param Mix: value
 
 // uu.date - date accessor
 function uudate(source) { // @param DateHash/Date/Number/String(= void):
-                          // @return DateHash:
+                          // @return DateHash: { Y,M,D,h,m,s,ms,time,ISO(),GMT() }
     //  [1][get now]                 uu.date() -> DateHash
     //  [2][DateHash]                uu.date(DateHash) -> cloned DateHash
     //  [2][date to hash]            uu.date(Date) -> DateHash
@@ -9957,6 +9969,7 @@ function uuflash(url,        // @param String: url
                              //   option.width - String/Number(= "100%"):
                              //   option.height - String/Number(= "100%"):
                              //   option.parent - Node(= <body>): <object> parent node
+                             //   option.nocache - Boolean(= false):
                  callback) { // @param CallbackFunction: callback()
                              // @return Node: <object>
     // wait for response from flash initializer
@@ -9990,10 +10003,11 @@ function uuflash(url,        // @param String: url
         for (i in param) {
             paramArray.push(uuf('@="@"', i, param[i]));
         }
-        var nocache = true;
         fragment =
             uuf('<embed id="@" name="@" width="@" height="@" type="application/x-shockwave-flash" src="@@" @ />',
-                id, id, opt[_width], opt[_height], url, nocache ? ("?" + +new Date) : "", paramArray.join(" "));
+                id, id, opt[_width], opt[_height], url,
+                opt.nocache ? ("?" + +new Date) : "",
+                paramArray.join(" "));
     }
 
     div = (opt.parent || doc.body)[_appendChild](newNode());
@@ -11134,7 +11148,7 @@ function detectEnvironment(libraryVersion) { // @param Number: Library version
                ie67: _false, ie678: _false,
                opera: _false, gecko: _false, webkit: _true,
                chrome: _false, safari: _true, jit: _false,
-               touch: _true, flash: 0, silverlight: 0 },
+               touch: _true, flash: 0, silverlight: 0 }, num, render,
         ua = navigator.userAgent,
         ie = !!doc.uniqueID,
         opera = !!win.opera,
