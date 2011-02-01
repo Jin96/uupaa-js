@@ -36,6 +36,8 @@
 //      url         -> uu.url, uu.event(, "hashchange")
 //      test        -> uu.ok, uu.ng
 //      nodeset     -> uu("query"), uu.Clas.NodeSet
+//      ie6         -> IE6 special functions
+//      ie67        -> IE6 and IE7 special functions
 //
 // CSS3 Selector Browser Implementation
 //      Google("CSS Compatibility and Internet Explorer")
@@ -248,12 +250,14 @@ Node || (win.Node = Node = {
 
 // --- FALLBACK ( window.console ) ---
 //{@mb [IE6][IE7]
+//{@ie67
 win.console || (win.console = {
     log: uunop, debug: uunop, info: uunop, warn: uunop, error: uunop,
     assert: uunop, dir: uunop, dirxml: uunop, trace: uunop, group: uunop,
     groupEnd: uunop, time: uunop, timeend: uunop, profile: uunop,
     profileEnd: uunop, count: uunop
 });
+//}@ie67
 //}@mb
 
 // --- MINIFY (create alias, http://d.hatena.ne.jp/uupaa/20100730) ---
@@ -2836,20 +2840,25 @@ function uuattr(node,    // @param Node:
     // [WEB STD]  htmlFor -> for       className -> class
     switch (uucomplex(key, value)) { // 1: (), 2: (k), 3: (k,v), 4: ({})
     case 1:
-/*{@mb*/    if (!uuready[_getAttribute]) { // [IE6][IE7][IE8]
+//{@mb
+            if (!uuready[_getAttribute]) { // [IE6][IE7][IE8]
                 for (ary = node.attributes; attr = ary[i++]; ) {
                     if (attr.specified && attr.name[_indexOf](_datauu)) {
                         rv[attr.name] = attr.value;
                     }
                 }
-            } else { /*}@mb */
+            } else {
+//}@mb
                 for (ary = node.attributes; attr = ary[i++]; ) {
                     rv[attr.name] = attr.value;
                 }
-/*{@mb*/    } /*}@mb*/
+//{@mb
+            }
+//}@mb
             return rv;
     case 2: // [IE6] tagindex, colspan is number
             attr = fixdb[key] || key;
+//{@ie67
             if (_ie67) { // [IE6][IE7]
                 switch (attr) {
                 case "href":     return node[_getAttribute](attr, 2);
@@ -2857,6 +2866,7 @@ function uuattr(node,    // @param Node:
                 case "disabled": return node.disabled ? "disabled" : "";
                 }
             }
+//}@ie67
             return (node[_getAttribute](attr) || "") + "";
     case 3: key = uupair(key, value);
     }
@@ -2889,6 +2899,7 @@ uuattrfix.db = {
     htmlFor:        "for"           // node.getAttribute("for")
 };
 //{@mb
+//{@ie67
 !uuready[_getAttribute] && uumix(uuattrfix.db, { // [IE6][IE7]
     cellspacing:    "cellSpacing",
     colspan:        "colSpan",
@@ -2905,6 +2916,7 @@ uuattrfix.db = {
     "class":        "className",    // override node.getAttribute("className")
     className:      "className"     // override
 });
+//}@ie67
 //}@mb
 
 // uu.data - node data accessor [HTML5 spec - Embedding custom non-visible data]
@@ -2988,7 +3000,9 @@ function uucss(node,    // @param Node:
                 return key ? getComputedStyleIE(node) : node.currentStyle; /*}@mb*/
             }
             right = fixdb[key];
-/*{@mb*/    if (getComputedStyle) { /*}@mb*/
+//{@mb
+            if (getComputedStyle) {
+//}@mb
                 return getComputedStyle(node, 0)[right] || "";
 //{@mb
             }
@@ -3961,7 +3975,9 @@ function uufxshrink(node,     // @param Node:
                     option) { // @param Hash(= {}):
                               // @return Node:
 //{@mb
+//{@ie6
     _env.ie6 && (node.style.overflow = "hidden"); // [IE6]
+//}@ie6
 //}@mb
     return uufx(node, duration, uuarg(option, { init: function(node, option) {
             var cs = uucss(node, "px");
@@ -4135,9 +4151,11 @@ function uucssopacity(node,      // @param Node:
               opacity < 1) ? ("alpha(opacity=" + ((opacity * 100) | 0) + ") ")
                            : "") + filter.replace(uucssopacity._, " ");
         style[_visibility] = opacity ? "visible" : "hidden";
+//{@ie67
         if (_ie67) { // [IE6][IE7]
             style.zoom = 1;
         }
+//}@ie67
         return node;
     }
 //}@mb
@@ -5408,10 +5426,12 @@ function uueventstop(event,     // @param Event/ExEvent:
         if (prevent) {
             event.returnValue  = _false;
             // [IE6][FIX]
+//{@ie6
             if (_env.ie6 && (event.type === "mouseover" ||
                              event.type === "mouseout")) {
                 event.returnValue = _true; // preventDefault
             }
+//}@ie6
         }
     }
 //}@mb
@@ -5513,7 +5533,7 @@ function uueventattach(node,         // @param Node/Window:
  */
 
     switch (eventType) {
-//{@oldie
+//{@ie67
 //{@eventhashchange
     case "hashchange":
 //{@mb
@@ -5529,7 +5549,7 @@ function uueventattach(node,         // @param Node/Window:
         return;
 //}@mb
 //}@eventhashchange
-//}@oldie
+//}@ie67
     default:
     }
 
@@ -5555,7 +5575,7 @@ function uueventdetach(node,         // @param Node/Window:
 }
 
 //{@mb
-//{@oldie
+//{@ie67
 // [IE6][IE7] fake hashchange event. <iframe> impl.
 uuClassSingleton("HashChangeIE", {
     hash: "",               // current location.hash
@@ -5620,7 +5640,7 @@ uuClassSingleton("HashChangeIE", {
         ctx.location.hash = hash;
     }
 });
-//}@oldie
+//}@ie67
 //}@mb
 
 //{@mb
@@ -11026,10 +11046,12 @@ uueach(uuevent._.as, function(eventType) {
 // <html5-tags> shim. <section>, <summary> ...
 _ie && uueach(uutag.html5.split(","), newNode); // [IE6][IE7][IE8][IE9 partial]
 
+//{@ie6
 try {
     // [IE6] flicker fix
     _env.ie6 && doc.execCommand("BackgroundImageCache", _false, _true);
 } catch(err) {} // ignore error(IETester / stand alone IE too)
+//}@ie6
 //}@mb
 
 // --- window.onload handler ---
@@ -11704,9 +11726,11 @@ function selector(token,     // @param Hash: QueryTokenHash
             for (attr = data[++i]; j < jz; ++j) {
                 node = ctx[j];
                 // [IE6][IE7] node.hasAttribute() not impl
-                match = _ie67
-                      ? ((word = node.getAttributeNode(attr)) && word.specified)
-                      : node.hasAttribute(attr);
+                match =
+//{@ie67
+                    _ie67 ? ((word = node.getAttributeNode(attr)) && word.specified) :
+//}@ie67
+                            node.hasAttribute(attr);
                 (match ^ negate) && (r[++ri] = node);
             }
             ctx = r;
@@ -11726,6 +11750,7 @@ function selector(token,     // @param Hash: QueryTokenHash
             }
             rex = RegExp(val, attr in _QUERY_CASESENS ? "" : "i"); // ignore case
 
+//{@ie67
             if (_ie67) { // [IE6][IE7]
                 // IE getAttribute(attr) problem
                 // http://twitter.com/uupaa/status/25501532102
@@ -11741,12 +11766,15 @@ function selector(token,     // @param Hash: QueryTokenHash
                     ((word && rex.test(word)) ^ negate) && (r[++ri] = node);
                 }
             } else { // [IE8][IE9][Gecko][WebKit][Opera]
+//}@ie67
                 for (; j < jz; ++j) {
                     node = ctx[j];
                     word = node.getAttribute(attr);
                     ((word && rex.test(word)) ^ negate) && (r[++ri] = node);
                 }
+//{@ie67
             }
+//}@ie67
             ope === 7 && (negate = +!negate); // restore
             ctx = r;
             break;
@@ -12384,7 +12412,11 @@ function SliderBuild(param,      // @param Hash(= {}):
     // </div>
 
     rail = uu.div("ui,Slider,tabindex,0",
-/*{@mb*/          !uu.ready.style.inlineBlock ? "display,inline,zoom,1" : /*}@mb*/ // [IE6][IE7] hasLayout
+//{@mb
+//{@ie67
+                  !uu.ready.style.inlineBlock ? "display,inline,zoom,1" : // [IE6][IE7] hasLayout
+//}@ie67
+//}@mb
                   "display,inline-block,top,6px",
                   uu.div());
     grip = rail.firstChild;
