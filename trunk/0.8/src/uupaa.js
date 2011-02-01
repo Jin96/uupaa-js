@@ -258,9 +258,6 @@ win.console || (win.console = {
 
 // --- MINIFY (create alias, http://d.hatena.ne.jp/uupaa/20100730) ---
 var _addEventListener = "addEventListener",
-//{@mb
-    _removeAttribute = "removeAttribute",
-//}@mb
     _hasOwnProperty = "hasOwnProperty",
     _getAttribute = "getAttribute",
     _setAttribute = "setAttribute",
@@ -1622,11 +1619,9 @@ uumix(String[_prototype], {
     toJSON:         ObjectToJson    // String#toJSON
 }, 0, 0);
 
-/*
 uumix(Function[_prototype], {
     bind:           FunctionBind    // Function#bind
 }, 0, 0);
- */
 
 //{@mb
 _gecko && !win.HTMLElement[_prototype].innerText &&
@@ -1899,7 +1894,7 @@ function uuajax(url,        // @param String: url
         binary = option.binary,
         cache = uuajax.cache,
         data = option.data || null,
-        xhr = newXHR(url),
+        xhr = newXHR(),
         run = 0, i,
         overrideMimeType = "overrideMimeType",
         setRequestHeader = "setRequestHeader",
@@ -2060,8 +2055,7 @@ Function vbstr(b)vbstr=CStr(b.responseBody)+chr(0)End Function</'+'script>');
 //}@ajax
 
 // inner - create XMLHttpRequest object
-function newXHR( /*{@mb*/ url /*}@mb*/ ) { // @param String: url
-                                           // @return XMLHttpRequest:
+function newXHR() { // @return XMLHttpRequest:
 //{@mb
     if (_ie) {
         if (win.ActiveXObject) {
@@ -2151,7 +2145,7 @@ function uurequire(url,      // @param String: url
     option = option || {};
 
     var resp = { ok: _false, rv: null, option: option, status: 400 },
-        xhr = newXHR(url), status;
+        xhr = newXHR(), status;
 
     try {
         xhr.open("GET", url, _false); // open(,,false) is sync request
@@ -4175,6 +4169,7 @@ function uucsstransform2d(node,    // @param Node:
     //  [2][set transform] uu.css.transform2d(node, { rotate: 30 }) -> node
 
     var undef, dataid = _datauu + "trans", // node["data-uutrans"]
+/*{@mb*/ident, dataie, cos, sin, mtx, filter, rect, cx, cy, /*}@mb*/
         meta = node[dataid], keyword = uuready.transform,
         scaleX = 1, scaleY = 1, rotate = 0,
         translateX = 0, translateY = 0;
@@ -4211,16 +4206,15 @@ function uucsstransform2d(node,    // @param Node:
 //{@mb
     if (_ie678) {
         if (uuready.filter) {
-            var ident  = "DXImageTransform.Microsoft.Matrix",
-                dataie = _datauu + "transie", // node["data-uutransie"]
-                rotate = meta.rotate * Math.PI / 180, // deg2rad
-                cos = Math.cos(rotate),
-                sin = Math.sin(rotate),
-                // scale * rotate * translate
-                mtx = [ cos * meta.scaleX, sin * meta.scaleX, 0,
-                       -sin * meta.scaleY, cos * meta.scaleY, 0,
-                          meta.translateX,   meta.translateY, 1],
-                filter, rect, cx, cy;
+            ident  = "DXImageTransform.Microsoft.Matrix";
+            dataie = _datauu + "transie"; // node["data-uutransie"]
+            rotate = meta.rotate * Math.PI / 180; // deg2rad
+            cos    = Math.cos(rotate);
+            sin    = Math.sin(rotate);
+            // scale * rotate * translate
+            mtx    = [ cos * meta.scaleX, sin * meta.scaleX, 0,
+                      -sin * meta.scaleY, cos * meta.scaleY, 0,
+                         meta.translateX,   meta.translateY, 1];
 
             if (!node[dataie]) {
                 // init - get center position
@@ -5977,7 +5971,7 @@ function uueventresize(evaluator) { // @param CallbackFunction: callback functio
         uueventresize.unsafe ? (db.vp = uuviewport(),
                                 db.tm = setInterval(handleResizeAgent, db.delay)) : // [IE6][IE7][IE8]
 //}@mb
-                               uueventattach(win, "resize", onresize);          // [W3C]
+                               uueventattach(win, "resize", handleResize); // [W3C]
     }
     db.fn.push(evaluator);
 }
@@ -5997,7 +5991,7 @@ function uueventunresize() {
 //{@mb
     uueventresize.unsafe ? (db.tm && (clearInterval(db.tm), db.tm = 0)) : // [IE6][IE7][IE8]
 //}@mb
-                           uueventdetach(win, "resize", handleResize);        // [W3C]
+                           uueventdetach(win, "resize", handleResize); // [W3C]
     db.lock = 0;
 }
 
@@ -8201,16 +8195,6 @@ function uuglow(node) { // @param Node/NodeArray/NodeList/NodeSet/CSSSelectorExp
 //}@fx
 }
 
-// uu.puff - alert( uu.json(mix) )
-function uupuff(source                   // @param Mix/FormatString: source object
-                                         //                          or "format @ string"
-                /* , var_args, ... */) { // @param Mix: var_args
-    var args = arguments;
-
-    alert(args.length > 1 || isString(source) ? uuf.apply(this, args)
-                                              : uujsonencode(source, 0, 1));
-}
-
 // uu.alert - alert dialog
 function uualert(/* var_args, ... */) { // @param Mix: var_args
     //  [1][alert] uu.alert("hello world")                   -> alert('hello world')
@@ -8479,7 +8463,7 @@ function uujsondecode(jsonString, // @param JSONString/ExJSONString:
             evalString = "return " + str;
             return (new Function(evalString))();
         } catch(err) {
-            console.log(err + "");
+            win.console && win.console.log(err + "");
         }
     }
     return win.JSON.parse(str);
@@ -9050,8 +9034,8 @@ function uuimagesize(node) { // @param HTMLImageElement:
             w = node[_width];
             h = node[_height];
 
-            node[_removeAttribute](_width);
-            node[_removeAttribute](_height);
+            node.removeAttribute(_width);
+            node.removeAttribute(_height);
 
             rw = node[_width];
             rh = node[_height];
@@ -9794,7 +9778,7 @@ uu.Class("FlashAudio", {
 function FlashAudioInit(src,        // @param String: "music.mp3" or ""
                         option,     // @param Hash: { node, loop, volume, startTime, autoplay }
                         callback) { // @param CallbackFunction: callback(this)
-    var that = this, audio,
+    var that = this, audio, container,
         OBJECT_ID = "externalflashaudio" + uunumber();
 
     // glue
@@ -9826,7 +9810,7 @@ function FlashAudioInit(src,        // @param String: "music.mp3" or ""
     }
 
     // create hidden container
-    var container = uu.id("uuAudioContainer");
+    container = uu.id("uuAudioContainer");
 
     if (!container) {
         container = newNode();
@@ -10308,7 +10292,7 @@ uuClassSingleton("IEStorage", {
         if (key === void 0) { // clear all
             idx = idx.split("\t");
             for (; key = idx[i++]; ) {
-                so[_removeAttribute](key);
+                so.removeAttribute(key);
             }
             so[_setAttribute](_storage.index, "");
             so.save(_storage.store);
@@ -10319,7 +10303,7 @@ uuClassSingleton("IEStorage", {
             if (i[_indexOf](tab) >= 0) {
                 so[_setAttribute](_storage.index,
                                   i[_replace](new RegExp(tab), "").trim());
-                so[_removeAttribute](key);
+                so.removeAttribute(key);
                 so.save(_storage.store);
             }
         }
