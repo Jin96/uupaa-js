@@ -205,10 +205,10 @@ uu.ready("window", function(uu, doc) {
     uu.ok('uu.idc("body") === document.body',
           uu.idc("body"), "==", doc.body);
 
-    uu.ok('uu.ids("html,head,body") === [document.html, document.head, document.body]',
-          uu.ids("html,head,body"), "==", [doc.html, doc.head, doc.body]);
-    uu.ok('uu.ids("  html , head , body  ") === [document.html, document.head, document.body]',
-          uu.ids("  html , head , body  "), "==", [doc.html, doc.head, doc.body]);
+    uu.ok('uu.ids("head,body") === [document.head, document.body]',
+          uu.ids("head,body"), "==", [doc.head, doc.body]);
+    uu.ok('uu.ids("  head , body  ") === [document.head, document.body]',
+          uu.ids("  head , body  "), "==", [doc.head, doc.body]);
 
 
     uu.ok("uu.array()");

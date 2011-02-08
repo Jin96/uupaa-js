@@ -932,6 +932,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
     // --- NODE BUILDER ---
     head:           uuhead,         // uu.head(/* var_args(node,attr,css,buildid) */):<head>
     body:           uubody,         // uu.body(/* var_args(node,attr,css,buildid) */):<body>
+    style:          uustyle,        // uu.style(css:CSSString):<style>
     text:           uutext,         // uu.text(data:String/FormatString/Node,
                                     //         text:String/Mix(= void), var_args:Mix, ...):String/Node
                                     //  [1][create text node]          uu.text("text")          -> createTextNode("text")
@@ -1128,6 +1129,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
     image:    uumix(uuimage, {      // uu.image(url:URLString/URLStringArray, callback:CallbackFunction = void)
                                     //  [1][load image]  uu.image(url,        function(response) { ... })
                                     //  [2][load images] uu.image([url, ...], function(response) { ... })
+                                    //      respone = { ok, rv }
         isCached:   uuimageiscached,// uu.image(url:URLString):Boolean
         size:       uuimagesize     // uu.image.size(node:HTMLImageElement):Hash - { w, h }
     }),
@@ -1162,9 +1164,12 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
     // --- FLASH ---
 //{@flash
 //{@mb
-    flash:          uuflash,        // uu.flash(url:String, id:String,
+    flash:    uumix(uuflash, {      // uu.flash(url:String, id:String,
                                     //          option:Hash = { allowScriptAccess: "always" },
                                     //          callback:CallbackFunction):Node
+        fragment:   uuflashfragment // uu.flash.fragment(url:String, id:String,
+                                    //                   option:Hash = { allowScriptAccess: "always" }):HTMLObjectFragmentString
+    }),
 //}@mb
 //}@flash
     // --- COOKIE ---
@@ -3485,12 +3490,25 @@ function uufxbuild(node, data, queue, option) {
     // z1~z4 = for easing function
     // sx  = scroll x
     // sy  = scroll y
-    var rv = 'var style=node.style,t=gain,b,c,d=dur,fx1,fx2,z1,z2,z3,z4,sx,sy;',
+    var rv = 'var style=node.style,t=gain,b,c,d=dur,fx1,fx2,z1,z2,z3,z4,scx,scy;',
         reverseOption = {
             junction: option.junction,
             before:   option.before ? option.before[_concat]() : _undef,
             after:    option.after  ? option.after[_concat]()  : _undef,
             back:     1
+        },
+        reservedWordHash = {
+            init:       1,
+            after:      1,
+            before:     1,
+            reverse:    1,
+            chain:      1,
+            deny:       1,
+            stop:       1,
+            kill:       1,
+            back:       1,
+            cssCache:   1,
+            junction:   1
         },
         key, w, opt,
         transform = uucsstransform2d(node),
@@ -3504,8 +3522,9 @@ function uufxbuild(node, data, queue, option) {
         fixdb = uucssfix.db;
 
     for (key in option) {
-        w = fixdb[key];
-        if (w) {
+        w = fixdb[key] || key;
+        if (!(w in reservedWordHash)) { // avoid ReservedWord
+
             opt = option[key];
             isArray(opt) ? (ev = opt[0], ez = opt[1][_toLowerCase]()) // { left: [100, "linear"] }
                          : (ev = opt,    ez = "inoutquad");           // { left: 100 }
@@ -4544,9 +4563,11 @@ function uucssuserSelect(node,    // @param Node(= null):
 
 // StyleSheet.init
 function StyleSheetInit(id) { // @param String(= ""): style sheet id
-    var node;
+    var node = doc.createElement("style");
 
-    uuhead(node = uunode("style", [{ id: id || "" }, _webkit ? " " : null]));
+    node.id = id || "";
+    _webkit && node.appendChild(doc.createTextNode(" "));
+    doc.head.appendChild(node);
 
     this.ss = node.sheet /*{@mb*/ || node.styleSheet /*}@mb */ ; // [IE] node.styleSheet
     this.rules = {};
@@ -4886,7 +4907,7 @@ function uuklass(expr,      // @param String/Node: "class", "class1, ..." or Nod
 
     var rex, m,
 //{@mb
-        rv, ri, i, iz, v, ary, az, nodeList,
+        rv, ri, i, iz, node, ary, az, nodeList,
 //}@mb
         sp = " ", word = context, node = expr;
 
@@ -4911,24 +4932,24 @@ function uuklass(expr,      // @param String/Node: "class", "class1, ..." or Nod
 
     // query.class [1]
 //{@mb
-    if (doc.getElementsByClassName) {
-//}@mb
-        return toArray.call((context || doc.body || doc).getElementsByClassName(expr));
-//{@mb
-    }
+    if (!doc.getElementsByClassName) { // [IE6][IE7][IE8]
+        ary = uutrim(expr).split(sp);
+        az  = ary.length;
+        rex = classNameMatcher(ary);
+        nodeList = (context || doc.body || doc).getElementsByTagName("*");
 
-    ary = uutrim(expr).split(sp);
-    az  = ary.length;
-    rex = classNameMatcher(ary);
-    nodeList = (context || doc.body || doc).getElementsByTagName("*");
-
-    for (rv = [], ri = -1, i = 0, iz = nodeList.length; i < iz; ++i) {
-        v = nodeList[i];
-        (word = v[_className]) && ((m = word.match(rex)) && m.length >= az)
-                            && (rv[++ri] = v);
+        for (rv = [], ri = 0, i = 0, iz = nodeList.length; i < iz; ++i) {
+            node = nodeList[i];
+            if ((word = node[_className]) &&
+                ((m = word.match(rex)) && m.length >= az)) {
+                rv[ri++] = node;
+            }
+        }
+        return rv;
     }
-    return rv;
 //}@mb
+    // [WEB STD][IE9]
+    return toArray.call((context || doc.body || doc).getElementsByClassName(expr));
 }
 
 // uu.klass.has - has className
@@ -6395,13 +6416,18 @@ uueach((uutag.html4 + "," + uutag.html5).split(","), function(tag) {
 // uu.head
 function uuhead(/* var_args */) { // @param Mix: var_args
                                   // @return Node: <head> node
-    return uunode(doc.head, arguments);
+    return arguments.length ? uunode(doc.head, arguments) : doc.head;
 }
 
 // uu.body
 function uubody(/* var_args */) { // @param Mix: var_args
                                   // @return Node: <body> node
-    return uunode(doc.body, arguments);
+    return arguments.length ? uunode(doc.body, arguments) : doc.body;
+}
+
+// uu.style
+function uustyle(css) { // @param CSSString:
+    return uunodebulk("<style>" + css + "</style>");
 }
 
 // uu.node.add - add/insert node
@@ -6430,7 +6456,7 @@ function uunodeadd(source,     // @param Node/NodeArray/DocumentFragment/HTMLFra
     var nodes = !source ? [newNode()]        // [1] uu.node.add()
               : isArray(source) ? source     // [4] uu.node.add([<div>, <div>])
               : source[_nodeType] ? [source] // [3][6] uu.node.add(Node or DocumentFragment)
-              : !source[_indexOf]("<") ? [uunodebulk(source, context)]
+              : !source[_indexOf]("<") ? [uunodebulk(source)]
                                              // [5] uu.node.add(HTMLFragmentString)
               : [newNode(source)],           // [2] uu.node.add("p")
         reference = null, i = 0, iz = nodes.length, node, rv,
@@ -6497,43 +6523,46 @@ function uunodeidremove(nodeid) { // @param Number: NodeID
 }
 
 // uu.node.bulk - convert HTMLString into DocumentFragment
-function uunodebulk(source,    // @param Node/HTMLFragmentString: source
-                    context) { // @param Node(= <div>): context
-                               // @return DocumentFragment:
-    //  [1][clone]                         uu.node.bulk(Node) -> DocumentFragment
+function uunodebulk(source) { // @param Node/HTMLFragmentString: source
+                              // @return Node/DocumentFragment:
+    //  [1][clone]                         uu.node.bulk(Node) -> Node
     //  [2][build]                         uu.node.bulk("<p>html</p>") -> DocumentFragment
     //  [3][TableHTMLFragment unsupported] uu.node.bulk("<tr>...</tr>") -> throw Error, use insertRow()
     //  [4][TableHTMLFragment unsupported] uu.node.bulk("<td>...</td>") -> throw Error, use insertCell()
 
+
     var rv = doc.createDocumentFragment(),
-//{@mb
-        pad = _false,
-//}@mb
-        fragment = source[_nodeType] ? source.outerHTML // [1] node
-                                     : source,          // [2] "<p>html</p>"
-        placeholder = uunode((context || {})[_tagName]);
+        fragment = source.nodeType ? source.outerHTML // [1] node
+                                   : source,          // [2] "<p>html</p>"
+        placeholder = doc.createElement("div");
 
-//{@mb
-    // [IE][FIX] node.innerHTML = "<style></style>" neglect
-    // http://twitter.com/uupaa/status/20443869519
-    if (/^<style/i.test(fragment)) {
-        if (!uu.ready.innerHTML.style && uu.ready.innerHTML.padStyle) { // [IE]
-            fragment = "<br/>" + fragment; // <br/><style>...</style>...
-            ++pad;
-        }
-    }
-//}@mb
-
+//{@assert
     // bad case
+    //      "<tr>...</tr>"
+    //      "<td>...</td>"
     if (!fragment.indexOf("<tr") || !fragment.indexOf("<td")) {
-        uung("uu.node.bulk", fragment)
+        uung("uu.node.bulk", fragment);
     }
-
-    placeholder.innerHTML = fragment;
+//}@assert
 
 //{@mb
-    if (pad) {
-        placeholder[_removeChild](placeholder[_firstChild]);
+    if (_ie678) {
+        // [IE][FIX] node.innerHTML = "<style></style>" neglect
+        // http://twitter.com/uupaa/status/20443869519
+        // [IE6][IE7][IE8][FIX] HTML5 tag + innerHTML bug
+        // http://d.hatena.ne.jp/uupaa/20110207
+
+        placeholder.style.display = "none";
+        doc.body.appendChild(placeholder);
+
+        placeholder.innerHTML = "*<div>" + fragment + "</div>"; // wrap
+        doc.body.removeChild(placeholder);
+
+        placeholder = placeholder.lastChild; // unwrap
+    } else {
+//}@mb
+        placeholder.innerHTML = fragment;
+//{@mb
     }
 //}@mb
 
@@ -6545,7 +6574,7 @@ function uunodebulk(source,    // @param Node/HTMLFragmentString: source
     if (isNode(rv) && rv.nodeType === Node.DOCUMENT_FRAGMENT_NODE) {
         ;
     } else {
-        uung("uu.node.bulk", rv);
+        uung("uu.node.bulk", fragment);
     }
 //}@assert
     return rv;
@@ -7017,7 +7046,7 @@ function uuidc(expr,      // @param String(= void): id
                           // @return Node/null:
     //  [1][find #id]             uu.idc("id") -> Node
     //  [2][find #id with cache]  uu.idc("id") -> Node(cached) so quickly
-    //  [3][clear all Node cache] uu.idc()     -> null
+    //  [3][clear cache]          uu.idc()     -> null
     return !expr ? (uuidc._ = {}, null)
                  : (uuidc._[expr] ||
                     (uuidc._[expr] = (context || doc).getElementById(expr)));
@@ -9984,11 +10013,29 @@ function uuflash(url,        // @param String: url
         }, 0); // lazy
     }
 
-    var opt = uuarg(option, { width: "100%", height: "100%" }),
-        param = opt.param || {},
-        paramArray = [], i, div, fragment;
-
     uu.dmz[id] = flashCallback;
+
+    var fragment = uuflashfragment(url, id, option);
+
+    div = (option.parent || option.body).appendChild(newNode());
+    div.innerHTML = fragment;
+    return div[_firstChild]; // <object>
+}
+
+// uu.flash.fragment - create HTMLObjectFragmentString
+function uuflashfragment(url,      // @param String: url
+                         id,       // @param String: unique id. eg: "external" + guid
+                         option) { // @param Hash(= { allowScriptAccess: "always" }):
+                                   //   option.allowScriptAccess - String:
+                                   //   option.width - String/Number(= "100%"):
+                                   //   option.height - String/Number(= "100%"):
+                                   //   option.parent - Node(= <body>): <object> parent node
+                                   //   option.nocache - Boolean(= false):
+                                   // @return HTMLObjectFragmentString:
+
+    var rv, opt = uuarg(option, { width: "100%", height: "100%" }),
+        param = opt.param || {},
+        paramArray = [], i;
 
     // add <param name="allowScriptAccess" value="always" />
     param.allowScriptAccess || (param.allowScriptAccess = "always");
@@ -10000,23 +10047,20 @@ function uuflash(url,        // @param String: url
         for (i in param) {
             paramArray.push(uuf('<param name="@" value="@" />', i, param[i]));
         }
-        fragment =
-            uuf('<object id="@" width="@" height="@" classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000">@</object>',
-                id, opt[_width], opt[_height], paramArray.join(""));
+        rv = uuf('<object id="@" width="@" height="@" ' +
+                 'classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000">@</object>',
+                id, opt.width, opt.height, paramArray.join(""));
     } else {
         for (i in param) {
             paramArray.push(uuf('@="@"', i, param[i]));
         }
-        fragment =
-            uuf('<embed id="@" name="@" width="@" height="@" type="application/x-shockwave-flash" src="@@" @ />',
-                id, id, opt[_width], opt[_height], url,
+        rv = uuf('<embed id="@" name="@" width="@" height="@" ' +
+                 'type="application/x-shockwave-flash" src="@@" @ />',
+                 id, id, opt.width, opt.height, url,
                 opt.nocache ? ("?" + +new Date) : "",
                 paramArray.join(" "));
     }
-
-    div = (opt.parent || doc.body)[_appendChild](newNode());
-    div.innerHTML = fragment;
-    return div[_firstChild]; // <object>
+    return rv;
 }
 //}@mb
 //}@flash
@@ -11625,7 +11669,22 @@ function selector(token,     // @param Hash: QueryTokenHash
         i = 0, iz = data.length, j, jz = 1, k, kz, r, ri,
         ident, nid, type, attr, ope, val, rex;
 
-    for (; i < iz && jz; jz = ctx.length, ++i) {
+    for (; i < iz; ++i) {
+
+        jz = ctx.length;
+        if (!jz) {
+            if (result.length < token.group - 1) {
+                // skip to next group
+                for (; i < iz; ++i) {
+                    if (data[i] === _A_GROUP) {
+                        break;
+                    }
+                }
+            } else {
+                break;
+            }
+        }
+
         r = [], ri = -1, j = type = 0;
 
         switch (data[i]) {
