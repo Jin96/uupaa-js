@@ -1164,11 +1164,38 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
     // --- FLASH ---
 //{@flash
 //{@mb
-    flash:    uumix(uuflash, {      // uu.flash(url:String, id:String,
-                                    //          option:Hash = { allowScriptAccess: "always" },
+    flash:    uumix(uuflash, {      // uu.flash(url:String, param:Hash,
                                     //          callback:CallbackFunction):Node
-        fragment:   uuflashfragment // uu.flash.fragment(url:String, id:String,
-                                    //                   option:Hash = { allowScriptAccess: "always" }):HTMLObjectFragmentString
+                                    //
+                                    //   param.xid - String(= "external{{uniqueID}}"): ExternalInterface.objectID
+                                    //   param.width - String/Number(= "100%"):
+                                    //   param.height - String/Number(= "100%"):
+                                    //   param.parent - Node(= <body>): <object> parent node
+                                    //   param.nowrap - Boolean(= false): false is wrap <div>, true is nowrap
+                                    //   param.nocache - Boolean(= false): false is cache, true is nocache
+                                    //   param.wmode - String(= ""): "transparent", "opaque", ...
+                                    //   param.quality - String(= ""): "high", ...
+                                    //   param.flashVars - String(= ""): "key=value&key=value..."
+                                    //   param.allowScriptAccess - String(= "always"): "always", "sameDomain", "never"
+                                    //
+                                    //  [1][div wrapped] uu.flash("a.swf")  -> <body><div>{{<object />}}</div></body>
+                                    //                                               ~~~~~              ~~~~~~ <- wrapped new <div>
+                                    //  [2][nowrap]      uu.flash("a.swf", { parent: <canvas>, nowrap: true })
+                                    //                                      -> <canvas>{{<object />}}</canvas>
+                                    //  [3][nocache]     uu.flash("a.swf", { nocache: true })
+                                    //                                      -> <body><div>{{<object><param name="movie" value="a.swf?12345" /></object>}}</div></body>
+                                    //                                                                                              ~~~~~~
+                                    //  [4][with xid]    uu.flash("a.swf", { xid: "externalAudio1" })
+                                    //                                      -> <body><div>{{<object id="externalAudio1" />}}</div></body>
+                                    //                                                              ~~~~~~~~~~~~~~~~~~~
+                                    //  [5][callback]    uu.flash("a.swf", { xid: "externalAudio1" }, callback)
+                                    //                                      -> <body><div>{{<object id="externalAudio1" />}}</div></body>
+                                    //                                          callback("externalAudio1", "init")
+                                    //                                          callback("externalAudio1", "play")
+                                    //                                          callback("externalAudio1", "playing")
+        fragment:   uuflashfragment // uu.flash.fragment(url:String, xid:String,
+                                    //                   width:Number/String, height:Number/String,
+                                    //                   param:Hash):HTMLObjectFragmentString
     }),
 //}@mb
 //}@flash
@@ -9827,8 +9854,26 @@ uu.Class("FlashAudio", {
 function FlashAudioInit(src,        // @param String: "music.mp3" or ""
                         option,     // @param Hash: { node, loop, volume, startTime, autoplay }
                         callback) { // @param CallbackFunction: callback(this)
-    var that = this, audio, container,
-        OBJECT_ID = "externalflashaudio" + uunumber();
+
+    // response from flash
+    function handleEvent(xid, eventType, param) {
+        switch (eventType) {
+        case "init":
+            that.flash.xiFlashAudioSetAttr({
+                src:       src,
+                loop:      option.loop   || _false,
+                volume:    option.volume || 0.5,
+                startTime: option.startTime || 0
+            });
+            callback(that);
+            option.autoplay && that.play();
+            break;
+        default:
+            uueventfire(audio, eventType, param);
+        }
+    }
+
+    var that = this, audio, container;
 
     // glue
     audio = option.node;
@@ -9840,24 +9885,6 @@ function FlashAudioInit(src,        // @param String: "music.mp3" or ""
     // FlashAudio.instance
     audio.instance = this;
 
-    // special event
-    function flashAudioReadyCallbackEvent(eventType, param) {
-        setTimeout(function() {
-            uueventfire(audio, eventType, param);
-        }, 0);
-    }
-    uu.dmz[OBJECT_ID + "event"] = flashAudioReadyCallbackEvent;
-
-    // wait for response from flash initializer
-    function wait() {
-        that.flash.xiFlashAudioSetAttr({ src:       src,
-                                         loop:      option.loop   || _false,
-                                         volume:    option.volume || 0.5,
-                                         startTime: option.startTime || 0 });
-        callback(that);
-        option.autoplay && that.play();
-    }
-
     // create hidden container
     container = uu.id("uuAudioContainer");
 
@@ -9868,7 +9895,8 @@ function FlashAudioInit(src,        // @param String: "music.mp3" or ""
     }
 
     this.flash = uuflash(uuconfig.audio.swf,
-                         OBJECT_ID, { width: 1, height: 1, parent: container }, wait);
+                         { width: 1, height: 1, parent: container },
+                         handleEvent);
 }
 
 // FlashAudio.attr
@@ -9983,84 +10011,125 @@ uuready("window", function() {
 //}@video
 
 // --- FLASH ---
-//  <object id="external..." width="..." height="..." data="*.swf" classid="...">
-//      <param name="allowScriptAccess" value="always" />
-//      <param name="movie" value="*.swf" />
-//  </object>
-//
-//  <embed name="external..." src="*.swf" width="..." height="..."
-//      type="application/x-shockwave-flash" allowScriptAccess="always">
-//  </embed>
-//
 // uu.flash - create flash <object> node
 //{@flash
 //{@mb
-function uuflash(url,        // @param String: url
-                 id,         // @param String: unique id. eg: "external" + guid
-                 option,     // @param Hash(= { allowScriptAccess: "always" }):
-                             //   option.allowScriptAccess - String:
-                             //   option.width - String/Number(= "100%"):
-                             //   option.height - String/Number(= "100%"):
-                             //   option.parent - Node(= <body>): <object> parent node
-                             //   option.nocache - Boolean(= false):
-                 callback) { // @param CallbackFunction: callback()
+function uuflash(url,        // @param String: url, eg: "example.swf"
+                 param,      // @param Hash(= { xid, width, height, parent, nowrap, nocache,
+                             //                 wmode, quality, flashVars, allowScriptAccess, ... });
+                             //   param.xid - String(= "external{{uniqueID}}"): ExternalInterface.objectID
+                             //   param.width - String/Number(= "100%"):
+                             //   param.height - String/Number(= "100%"):
+                             //   param.parent - Node(= <body>): <object> parent node
+                             //   param.nowrap - Boolean(= false): false is wrap <div>, true is nowrap
+                             //   param.nocache - Boolean(= false): false is cache, true is nocache
+                             //   param.wmode - String(= ""): "transparent", "opaque", ...
+                             //   param.quality - String(= ""): "low", "medium", "high", "best", "autolow", "autohigh"
+                             //   param.flashVars - String(= ""): "key=value&key=value..."
+                             //   param.allowScriptAccess - String(= "always"): "always", "sameDomain", "never"
+                 callback) { // @param CallbackFunction(= void): callback(xid, eventType, param)
+                             //   argument.xid - String: xid is ExternalInterface.objectID
+                             //   argument.eventType - CustomEventTypeString: eg: "init", "loadend", "canplay", ...
+                             //   argument.param - Mix(= void): callback param
                              // @return Node: <object>
-    // wait for response from flash initializer
-    function flashCallback(id) { // @param String: ExternalInterface.objectID
-        setTimeout(function() {
-            uu.dmz[id] = null; // clear
-            callback(id);
-        }, 0); // lazy
+
+    //  [1][div wrapped] uu.flash("a.swf")  -> <body><div>{{<object />}}</div></body>
+    //                                               ~~~~~              ~~~~~~ <- wrapped new <div>
+    //  [2][nowrap]      uu.flash("a.swf", { parent: <canvas>, nowrap: true })
+    //                                      -> <canvas>{{<object />}}</canvas>
+    //  [3][nocache]     uu.flash("a.swf", { nocache: true })
+    //                                      -> <body><div>{{<object><param name="movie" value="a.swf?12345" /></object>}}</div></body>
+    //                                                                                              ~~~~~~
+    //  [4][with xid]    uu.flash("a.swf", { xid: "externalAudio1" })
+    //                                      -> <body><div>{{<object id="externalAudio1" />}}</div></body>
+    //                                                              ~~~~~~~~~~~~~~~~~~~
+    //  [5][callback]    uu.flash("a.swf", { xid: "externalAudio1" }, callback)
+    //                                      -> <body><div>{{<object id="externalAudio1" />}}</div></body>
+    //                                          callback("externalAudio1", "init")
+    //                                          callback("externalAudio1", "play")
+    //                                          callback("externalAudio1", "playing")
+
+    // callback from ExternalInterface.call()
+    function handleEvent(eventType, // @param CustomEventTypeString: "init", "error", "click", ...
+                         param,     // @param Mix(= void):
+                         sync) {    // @param Boolean(= false): true is sync, false is async
+                                    // @return Mix/undefine: callback result (sync only)
+        if (sync) {
+            return callback(xid, eventType, param); // sync
+        } else {
+            setTimeout(function() {
+                callback(xid, eventType, param); // async
+            }, 0);
+        }
     }
 
-    uu.dmz[id] = flashCallback;
+    var pm = uuarg(param, { width: "100%", height: "100%",
+                            xid: "external" + uunumber(),
+                            allowScriptAccess: "always" }),
+        xid = pm.xid, node, fragment,
+        parent = pm.parent || doc.body;
 
-    var fragment = uuflashfragment(url, id, option);
+    if (pm.nocache) {
+        url += /\?/.test(url) ? "&" : "?";
+        url += +new Date;
+    }
 
-    div = (option.parent || option.body).appendChild(newNode());
-    div.innerHTML = fragment;
-    return div[_firstChild]; // <object>
+    fragment = uuflashfragment(url, xid, pm.width, pm.height, pm);
+
+    callback && (uu.dmz[xid] = handleEvent); // uu.dmz[xid] = handler
+
+    if (pm.nowrap) {
+        parent.innerHTML = fragment; // <canvas><object /></canvas>
+        return parent[_firstChild];  // return <object> or <embed> node
+    }
+    node = parent.appendChild(newNode());
+    node.innerHTML = fragment; // <body><div><object /></div></body>
+    return node[_firstChild];  // return <object> or <embed> node
 }
 
-// uu.flash.fragment - create HTMLObjectFragmentString
-function uuflashfragment(url,      // @param String: url
-                         id,       // @param String: unique id. eg: "external" + guid
-                         option) { // @param Hash(= { allowScriptAccess: "always" }):
-                                   //   option.allowScriptAccess - String:
-                                   //   option.width - String/Number(= "100%"):
-                                   //   option.height - String/Number(= "100%"):
-                                   //   option.parent - Node(= <body>): <object> parent node
-                                   //   option.nocache - Boolean(= false):
-                                   // @return HTMLObjectFragmentString:
+// uu.flash.fragment - build HTMLObjectFragmentString
+function uuflashfragment(url,     // @param String: url
+                         xid,     // @param String: ExternalInterface.objectID
+                         width,   // @param Number/String:
+                         height,  // @param Number/String:
+                         param) { // @param Hash:
+                                  // @return HTMLObjectFragmentString: "<object...>" or "<embed ...>"
 
-    var rv, opt = uuarg(option, { width: "100%", height: "100%" }),
-        param = opt.param || {},
-        paramArray = [], i;
+    //  <object id="{{xid}}" width="{{width}}" height="{{height}}" classid="clsid:d27...">
+    //      <param name="movie" value="{{url}}" />
+    //      <param name="allowScriptAccess" value="{{param.allowScriptAccess}}" />
+    //      <param name="{{param.key}}" value="{{param.value}}" />...
+    //  </object>
+    //
+    //  <embed id="{{xid}}" name="{{xid}}" width="{{width}}" height="{{height}}"
+    //          type="application/x-shockwave-flash" src="{{url}}"
+    //          allowScriptAccess="{{param.allowScriptAccess}}"
+    //          {{param.key}}="{{param.value}}" ...>
+    //  </embed>
 
-    // add <param name="allowScriptAccess" value="always" />
-    param.allowScriptAccess || (param.allowScriptAccess = "always");
+    var paramArray = [], i,
+        ignore = { xid: 1, width: 1, height: 1, parent: 1, nowrap: 1, nocache: 1 };
 
     if (_ie) {
         // add <param name="movie" value="{{url}}" />
         param.movie = url;
 
         for (i in param) {
-            paramArray.push(uuf('<param name="@" value="@" />', i, param[i]));
+            i in ignore ||
+                paramArray.push(uuf('<param name="@" value="@" />', i, param[i]));
         }
-        rv = uuf('<object id="@" width="@" height="@" ' +
-                 'classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000">@</object>',
-                id, opt.width, opt.height, paramArray.join(""));
-    } else {
-        for (i in param) {
-            paramArray.push(uuf('@="@"', i, param[i]));
-        }
-        rv = uuf('<embed id="@" name="@" width="@" height="@" ' +
-                 'type="application/x-shockwave-flash" src="@@" @ />',
-                 id, id, opt.width, opt.height, url,
-                opt.nocache ? ("?" + +new Date) : "",
-                paramArray.join(" "));
+        return uuf('<object id="@" width="@" height="@" ' +
+                    'classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000">@</object>',
+                    xid, width, height, paramArray.join(""));
     }
-    return rv;
+    for (i in param) {
+        i in ignore ||
+            paramArray.push(uuf('@="@"', i, param[i]));
+    }
+    return uuf('<embed id="@" name="@" width="@" height="@" ' +
+                'type="application/x-shockwave-flash" src="@" @ />',
+                xid, xid, width, height, url,
+                paramArray.join(" "));
 }
 //}@mb
 //}@flash
@@ -10250,16 +10319,19 @@ uuClassSingleton("LocalStorage", {
 
 //{@mb
 uuClassSingleton("FlashStorage", {
-    init: function(callback, id) {
+    init: function(callback) {
         var that = this;
 
-        // wait for response from flash initializer
-        function wait(id) { // @param String: ExternalInterface.objectID
-            callback(that, id);
+        // callback from ExternalInterface.call()
+        function handleEvent(xid, eventType, param) {
+            switch (eventType) {
+            case "init":
+                callback(that);
+                break;
+            }
         }
-        this.so = uuflash(uuconfig.storage.swf, // "uu.storage.swf"
-                          id || "externalflashstorage",
-                          { width: 1, height: 1 }, wait);
+        this.so = uuflash(uuconfig.storage.swf,
+                          { width: 1, height: 1 }, handleEvent);
     },
     key: function(index) {
         return this.so.key(index) || "";
@@ -11798,7 +11870,7 @@ function selector(token,     // @param Hash: QueryTokenHash
             attr = data[++i];
             ope  = data[++i];
             val  = uu.trim.quote(data[++i]); // '"quote"' -> "quote"
-            uu.ready.getAttribute || (attr = uu.attr._[attr] || attr); // [IE] fix attr name
+            uu.ready.getAttribute || (attr = uu.attr.fix.db[attr] || attr); // [IE] fix attr name
             switch (ope) {
             case 1: val = "^" + val + "$"; break;                 // [attr  = value]
             case 3: val = "^" + val;       break;                 // [attr ^= value]

@@ -5,24 +5,43 @@
     import flash.net.*;
 
     public class Storage extends Sprite {
+        private var _xiCallback:String = "";
         private var _DISK_SPACE:uint = 0;
 
         public function Storage() {
-            ExternalInterface.addCallback("key", ex_key);
-            ExternalInterface.addCallback("info", ex_info);
-            ExternalInterface.addCallback("clear", ex_clear);
-            ExternalInterface.addCallback("allItem", ex_allItem);
-            ExternalInterface.addCallback("getItem", ex_getItem);
-            ExternalInterface.addCallback("setItem", ex_setItem);
-            ExternalInterface.addCallback("removeItem", ex_removeItem);
+            var xi:Object = ExternalInterface;
+
+            if (!xi.available) {
+                trace("ExternalInterface not available");
+                return;
+            }
+            trace("ExternalInterface.objectID: " + xi.objectID);
+
+            // flashVars.callback: String をコールバックメソッド名として取り出す
+            // デフォルトのメソッド名は window.uu.dmz[ExternalInterface.objectID]
+            // コールバック引数は、第一引数に文字列を、第ニ引数に値を渡す
+            var flashVars:Object = LoaderInfo(this.root.loaderInfo).parameters;
+
+            _xiCallback = flashVars["callback"] ? flashVars["callback"]
+                                                : ("uu.dmz." + xi.objectID);
+
+            xi.addCallback("key", ex_key);
+            xi.addCallback("info", ex_info);
+            xi.addCallback("clear", ex_clear);
+            xi.addCallback("allItem", ex_allItem);
+            xi.addCallback("getItem", ex_getItem);
+            xi.addCallback("setItem", ex_setItem);
+            xi.addCallback("removeItem", ex_removeItem);
 
             _DISK_SPACE = this.detectDiskSpace();
 trace("DISK_SPACE = " + _DISK_SPACE);
 
-            trace(ExternalInterface.objectID);
+            try {
+                xi.call(_xiCallback, "init");
 
-            ExternalInterface.call("uu.dmz." + ExternalInterface.objectID,
-                                   ExternalInterface.objectID);
+            } catch(err:Error) {
+                trace("callback(init) fail");
+            }
         }
 
         private function detectDiskSpace():uint {

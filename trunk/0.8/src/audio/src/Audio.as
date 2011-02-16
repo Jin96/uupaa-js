@@ -9,7 +9,7 @@ package {
     import flash.net.*;
 
     public class Audio extends Sprite {
-        private var _OBJECT_ID:String = "";
+        private var _xiCallback:String = "";
         private var _sound:Sound = new Sound();
         private var _soundChannel:SoundChannel = null;
         private var _timer:Timer = null;
@@ -31,24 +31,38 @@ package {
         private var _lastAction:String = "";
 
         public function Audio() {
-            ExternalInterface.addCallback("xiFlashAudioPlay", xiFlashAudioPlay);
-            ExternalInterface.addCallback("xiFlashAudioStop", xiFlashAudioStop);
-            ExternalInterface.addCallback("xiFlashAudioPause", xiFlashAudioPause);
-            ExternalInterface.addCallback("xiFlashAudioSetAttr", xiFlashAudioSetAttr);
-            ExternalInterface.addCallback("xiFlashAudioGetAttr", xiFlashAudioGetAttr);
-            ExternalInterface.addCallback("xiFlashAudioGetState", xiFlashAudioGetState);
-            ExternalInterface.addCallback("xiFlashAudioCanPlay", xiFlashAudioCanPlay);
+            var xi:Object = ExternalInterface;
 
-            _OBJECT_ID = ExternalInterface.objectID;
-            trace(_OBJECT_ID);
+            if (!xi.available) {
+                trace("ExternalInterface not available");
+                return;
+            }
+            trace("ExternalInterface.objectID: " + xi.objectID);
 
-            _timer = new Timer(1000, 0);
-            _timer.addEventListener(TimerEvent.TIMER, timerListener);
-            _timer.start();
+            // flashVars.callback: String をコールバックメソッド名として取り出す
+            // デフォルトのメソッド名は window.uu.dmz[ExternalInterface.objectID]
+            // コールバック引数は、第一引数に文字列を、第ニ引数に値を渡す
+            var flashVars:Object = LoaderInfo(this.root.loaderInfo).parameters;
+
+            _xiCallback = flashVars["callback"] ? flashVars["callback"]
+                                                : ("uu.dmz." + xi.objectID);
+
+            xi.addCallback("xiFlashAudioPlay", xiFlashAudioPlay);
+            xi.addCallback("xiFlashAudioStop", xiFlashAudioStop);
+            xi.addCallback("xiFlashAudioPause", xiFlashAudioPause);
+            xi.addCallback("xiFlashAudioSetAttr", xiFlashAudioSetAttr);
+            xi.addCallback("xiFlashAudioGetAttr", xiFlashAudioGetAttr);
+            xi.addCallback("xiFlashAudioGetState", xiFlashAudioGetState);
+            xi.addCallback("xiFlashAudioCanPlay", xiFlashAudioCanPlay);
 
             try {
-                ExternalInterface.call("uu.dmz." + _OBJECT_ID);
+                xi.call(_xiCallback, "init");
+
+                _timer = new Timer(1000, 0);
+                _timer.addEventListener(TimerEvent.TIMER, timerListener);
+                _timer.start();
             } catch(err:Error) {
+                trace("callback(init) fail");
             }
         }
 
@@ -60,7 +74,7 @@ package {
         private function handleDurationchange():void {
             if (_updateDuration) {
                 _updateDuration = false;
-                ExternalInterface.call("uu.dmz." + _OBJECT_ID + "event", "durationchange");
+                ExternalInterface.call(_xiCallback, "durationchange");
             }
         }
 
@@ -79,17 +93,17 @@ package {
             }
             _lastPosition = pos;
 
-            ExternalInterface.call("uu.dmz." + _OBJECT_ID + "event", "timeupdate");
+            ExternalInterface.call(_xiCallback, "timeupdate");
         }
 
         private function openHandler(event:Event):void {
             _paused = true;
             _canplay = true;
-            ExternalInterface.call("uu.dmz." + _OBJECT_ID + "event", "canplay");
+            ExternalInterface.call(_xiCallback, "canplay");
         }
 
         private function completeHandler(event:Event):void {
-            ExternalInterface.call("uu.dmz." + _OBJECT_ID + "event", "loadend");
+            ExternalInterface.call(_xiCallback, "loadend");
         }
 
         private function ioErrorHandler(event:Event):void {
@@ -97,7 +111,7 @@ package {
 
             _error = 4;
             _canplay = true;
-            ExternalInterface.call("uu.dmz." + _OBJECT_ID + "event", "error");
+            ExternalInterface.call(_xiCallback, "error");
         }
 
         private function progressHandler(event:Event):void {
@@ -110,7 +124,7 @@ package {
             }
             if (_paused || _ended) {
                 _lastAction = "play";
-                ExternalInterface.call("uu.dmz." + _OBJECT_ID + "event", "play");
+                ExternalInterface.call(_xiCallback, "play");
 
                 play(_currentTime);
             }
@@ -128,16 +142,16 @@ package {
             _ended = false;
             _paused = false;
 
-            ExternalInterface.call("uu.dmz." + _OBJECT_ID + "event", "playing");
+            ExternalInterface.call(_xiCallback, "playing");
         }
 
         private function endedHander(event:Event):void {
             _ended = true;
 
             // update final position
-            ExternalInterface.call("uu.dmz." + _OBJECT_ID + "event", "timeupdate");
+            ExternalInterface.call(_xiCallback, "timeupdate");
 
-            ExternalInterface.call("uu.dmz." + _OBJECT_ID + "event", "ended");
+            ExternalInterface.call(_xiCallback, "ended");
 
             if (_loop) {
                 play(_startTime);
@@ -175,7 +189,7 @@ package {
                 _paused = true;
                 _currentTime = _soundChannel.position; // unit: ms
 
-                ExternalInterface.call("uu.dmz." + _OBJECT_ID + "event", "pause");
+                ExternalInterface.call(_xiCallback, "pause");
             }
         }
 
@@ -233,7 +247,7 @@ package {
                 case "startTime": this.setStartTime(hash[i]); break;
                 case "currentTime": this.setCurrentTime(hash[i]); break;
                 case "timeupdate":
-                    ExternalInterface.call("uu.dmz." + _OBJECT_ID + "event", "timeupdate");
+                    ExternalInterface.call(_xiCallback, "timeupdate");
                 }
             }
         }

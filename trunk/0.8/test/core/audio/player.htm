@@ -114,9 +114,6 @@ function initAudio(source) {
 
         // --- Event Trace ---
         audio.bind("error", function(event) {
-            uu.log({ event: event.type || "", state: player.audio.state() + "" });
-        });
-        audio.bind("error", function(event) {
             uu.log({ event: event.type || "", state: player.audio.state() + "",
                      error: player.audio.error });
         });

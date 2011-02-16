@@ -85,16 +85,33 @@ package {
         private var _loadingImage:Array = [];        // [url, ... ]
         // --- copy canvas ---
         private var _copyCanvas:Array = []; // [canvasid, ... ]
+        private var _xiCallback:String = "";
 
         public function Canvas() {
-            ExternalInterface.addCallback("initCanvas", initCanvas);
-            ExternalInterface.addCallback("msg", msg);
-            ExternalInterface.addCallback("loadImage", loadImage);
-//            ExternalInterface.addCallback("copyCanvas", copyCanvas);
-            ExternalInterface.addCallback("toDataURL", toDataURL);
-            ExternalInterface.addCallback("getImageData", getImageData);
-            ExternalInterface.addCallback("isPointInPath", isPointInPath);
-            ExternalInterface.addCallback("addJsCallback", addJsCallback);
+            var xi:Object = ExternalInterface;
+
+            if (!xi.available) {
+                trace("ExternalInterface not available");
+                return;
+            }
+            trace("ExternalInterface.objectID: " + xi.objectID);
+
+            // flashVars.callback: String をコールバックメソッド名として取り出す
+            // デフォルトのメソッド名は window.uu.dmz[ExternalInterface.objectID]
+            // コールバック引数は、第一引数に文字列を、第ニ引数に値を渡す
+            var flashVars:Object = LoaderInfo(this.root.loaderInfo).parameters;
+
+            _xiCallback = flashVars["callback"] ? flashVars["callback"]
+                                                : ("uu.dmz." + xi.objectID);
+
+            xi.addCallback("initCanvas", initCanvas);
+            xi.addCallback("msg", msg);
+            xi.addCallback("loadImage", loadImage);
+//          xi.addCallback("copyCanvas", copyCanvas);
+            xi.addCallback("toDataURL", toDataURL);
+            xi.addCallback("getImageData", getImageData);
+            xi.addCallback("isPointInPath", isPointInPath);
+            xi.addCallback("addJsCallback", addJsCallback);
 
             _shape = new Shape();
             _gfx = _shape.graphics;
@@ -112,8 +129,11 @@ package {
 //          canvasCopy  = new CanvasCopy(this);
             canvasDrawImage = new CanvasDrawImage(this);
 
-            // send "initialized" message
-            ExternalInterface.call("uu.dmz." + ExternalInterface.objectID);
+            try {
+                xi.call(_xiCallback, "init");
+            } catch(err:Error) {
+                trace("callback(init) fail");
+            }
         }
 
         public function get bitmapData():BitmapData {
@@ -306,7 +326,8 @@ package {
                             ++loopout;
                             break;
                 default:    trace("[!] unknown command trap: " + a[i]);
-                            ExternalInterface.call("uu.flash.alert", "Unknown command=" + a[i]);
+//                          ExternalInterface.call("uu.flash.alert", "Unknown command=" + a[i]);
+                            ExternalInterface.call(_xiCallback, "error", "unknown command=" + a[i]);
                             ++loopout;
                 }
             }
