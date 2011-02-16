@@ -4932,14 +4932,15 @@ function uuklass(expr,      // @param String/Node: "class", "class1, ..." or Nod
     //  [5][toggle className]  uu.klass(<div class="A">,   "!A B") -> <div>
     //  [6][remove className]  uu.klass(<div class="A B">, /(A|B)/) -> <div>
 
-    var rex, m,
+    var rex, m, node,
 //{@mb
-        rv, ri, i, iz, node, ary, az, nodeList,
+        rv, ri, i, iz, ary, az, nodeList,
 //}@mb
-        sp = " ", word = context, node = expr;
+        sp = " ", word = context;
 
     // className accessor [2][3][4][5][6]
-    if (node[_nodeType]) {
+    if (expr[_nodeType]) {
+        node = expr;
         if (word.exec) { // isRegExp [6]
             node[_className] = node[_className].replace(word, "").trim();
             return node;
@@ -10323,7 +10324,7 @@ uuClassSingleton("FlashStorage", {
         var that = this;
 
         // callback from ExternalInterface.call()
-        function handleEvent(xid, eventType, param) {
+        function handleEvent(xid, eventType /*, param */) {
             switch (eventType) {
             case "init":
                 callback(that);
