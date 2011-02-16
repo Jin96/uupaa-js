@@ -3101,7 +3101,7 @@ function init(ctx, node) { // @param Node: <canvas>
 // uu.canvas.Flash.build
 function build(canvas) { // @param Node: <canvas>
                          // @return Node:
-    var ctx, fragment;
+    var ctx;
 
     // CanvasRenderingContext.getContext
     canvas.getContext = function() {
@@ -3131,11 +3131,10 @@ function build(canvas) { // @param Node: <canvas>
     ctx = new uu.canvas.Flash(canvas);
     ctx._id = "external" + uu.number() + "x" + (+new Date).toString(16);
 
-    uu.dmz[ctx._id] = flashCanvasReadyCallback;
-
-    // wait for response from flash initializer
-    function flashCanvasReadyCallback() {
-        setTimeout(function() {
+    // callback from ExternalInterface.call()
+    function handleEvent(xid, eventType, param) {
+        switch (eventType) {
+        case "init":
             // [SYNC] ExternalInterface.initCanvas
             ctx._view.initCanvas(ctx.canvas.width, ctx.canvas.height,
                                  false, ctx.xFlyweight);
@@ -3146,21 +3145,31 @@ function build(canvas) { // @param Node: <canvas>
                 ctx._stock.push("rt");
             }
             send(ctx, "XX", 0xf); // send all state
-        }, 0);
+//          break;
+//      case "error":
+//          break;
+        }
     }
 
     // create swf <object>
-    fragment = uu.f(
-        '<object id="@" width="@" height="@" classid="@">' +
-            '<param name="allowScriptAccess" value="always" />' +
-            '<param name="wmode" value="transparent" />' +
-            '<param name="movie" value="@" /></object>',
-         ctx._id, canvas.width, canvas.height,
-         "clsid:d27cdb6e-ae6d-11cf-96b8-444553540000",
-         uu.config.canvas.swf);
-
-    canvas.innerHTML = fragment;
-    ctx._view = canvas.firstChild; // <object>
+    //  <?>
+    //      <canvas>
+    //          <object id="{{xid}}" width="{{width}}" height="{{height}}"
+    //                  classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000">
+    //              <param name="movie" value="{{uu.config.canvas.swf}}" />
+    //              <param name="wmode" value="transparent" />
+    //              <param name="allowScriptAccess" value="always" />
+    //          </object>
+    //      </canvas>
+    //  </?>
+    ctx._view = uu.flash(uu.config.canvas.swf, { // ctx._view is <object>
+                            xid:    ctx._id,
+                            parent: canvas,
+                            nowrap: true,
+                            width:  canvas.width,
+                            height: canvas.height,
+                            wmode:  "transparent"
+                         }, handleEvent);
 
     // uncapture key events(release focus)
     function onFocus(evt) {
