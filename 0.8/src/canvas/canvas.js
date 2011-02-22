@@ -3132,8 +3132,8 @@ function build(canvas) { // @param Node: <canvas>
     ctx._id = "external" + uu.number() + "x" + (+new Date).toString(16);
 
     // callback from ExternalInterface.call()
-    function handleEvent(xid, eventType, param) {
-        switch (eventType) {
+    function handleFlash(xid, msg, param) {
+        switch (msg) {
         case "init":
             // [SYNC] ExternalInterface.initCanvas
             ctx._view.initCanvas(ctx.canvas.width, ctx.canvas.height,
@@ -3169,7 +3169,7 @@ function build(canvas) { // @param Node: <canvas>
                             width:  canvas.width,
                             height: canvas.height,
                             wmode:  "transparent"
-                         }, handleEvent);
+                         }, handleFlash);
 
     // uncapture key events(release focus)
     function onFocus(evt) {
