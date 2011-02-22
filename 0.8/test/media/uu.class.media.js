@@ -1,33 +1,61 @@
-var _media;
-
-(function(uu) {
+uu.ready(function(uu) {
 
 uu.Class("MediaPlayer", {
     _lastID: 0, // current playing itemID
     _itemID: [],
     _index: 0,
+    _position: 0,
+    _ignoreTimeupdate: false,
     _mp3: [
+        "../../media/Hydrate-Kenny_Beltrey.mp3",
         "../../media/bego.mp3",
-        "../../media/dora.mp3",
-        "../../media/Hydrate-Kenny_Beltrey.mp3"
+        "../../media/dora.mp3"
     ],
-
     init: function() {
+        function doSeek(evt, attr) { // attr.value = 0~100
+            that._ignoreTimeupdate = true;
+            that.seek(parseFloat(attr.value));
+
+            setTimeout(function() {
+                that._ignoreTimeupdate = false;
+            }, 100);
+        }
+
+        var that = this;
+
         this._swf = uu.flash.call(this, "../../swf/uu.media.swf",
-                                  { width: 300, height: 300, nocache: true },
+                                  { width: 300, height: 100, nocache: true },
                                   this.handleFlash);
+        // slider settings
+        var ary = uu.ui("Slider"); // [0: volume, 1: seek]
+
+        seekBar   = ary[0];
+        volumeBar = ary[1];
+
+        // volume.change event handler
+        volumeBar.bind("change", function(evt, attr) { // attr.value 0~100
+            that.volume(parseFloat(attr.value) * 0.01);
+        });
+        seekBar.bind("mousedown", function(evt, attr) {
+            that._ignoreTimeupdate = true;
+        });
+        seekBar.bind("mouseup", doSeek);
+        seekBar.bind("mousewheel", doSeek);
+        seekBar.bind("keydown", doSeek);
     },
     handleFlash: function(xid, msg, itemID, state) {
         var swf = this._swf, id;
 
         if (state) {
-            switch (state.audioState) {
-            case 0: uu.form.value(uu.id("playbtn"), "停止中"); break;
-            case 1: uu.form.value(uu.id("playbtn"), "再生中"); break;
-            case 2: uu.form.value(uu.id("playbtn"), "一時停止中");
+            if (this._lastID === itemID) {
+                switch (state.audioState) {
+                case 0: uu.text(uu.id("playButtonState"), "STOPPED"); break;
+                case 1: uu.text(uu.id("playButtonState"), "PLAYING"); break;
+                case 2: uu.text(uu.id("playButtonState"), "PAUSED");
+                }
+                uu.text(uu.id("audioSource"), state.audioSource);
             }
-
-            uu.log("xid=@, msg=@, itemID=@, state=@", xid, msg, itemID, uu.json(state));
+            uu.log("msg=@, itemID=@, state=@", msg, itemID, uu.json(state));
         }
 
         switch (msg) {
@@ -56,16 +84,21 @@ uu.Class("MediaPlayer", {
             this._itemID.push(id);
             swf.xiSetAudioSource(id, this._mp3[2]);
             break;
-        case "durationchange":
-            uu.log("durationchange, itemID=@, duration=@", itemID, state.duration);
-            break;
         case "timeupdate":
-            uu.log("timeupdate, itemID=@, duration=@", itemID, state.currentTime);
-            break;
-        case "changeState":
-            uu.log("changeState, itemID=@, duration=@", itemID, state);
-            break;
+            if (this._ignoreTimeupdate) {
+                break;
+            }
+            var position = state.position;
+
+            if (this._position !== position) {
+                this._position = position;
+                // update grip position
+                uu.msg.post(seekBar, "value", position, 0);
+            }
         }
+    },
+    volume: function(volume) {
+        this._swf.xiVolume(this._lastID, volume);
     },
     togglePlay: function() {
         this._swf.xiTogglePlay(this._lastID);
@@ -75,6 +108,9 @@ uu.Class("MediaPlayer", {
     },
     pause: function() {
         this._swf.xiPause(this._lastID);
+    },
+    seek: function(position) { // 0~100
+        this._swf.xiSeek(this._lastID, position);
     },
     stop: function() {
         this._swf.xiStop(this._lastID);
@@ -97,29 +133,19 @@ uu.Class("MediaPlayer", {
     }
 });
 
-uu.ready(function() {
-    _media = uu("MediaPlayer");
-});
+// activate slider
+uu.ui.build();
 
-})(uu);
+var _media = uu("MediaPlayer");
 
 // outer I/F
-function playAudio() {
-    _media.play();
-}
-function pauseAudio() {
-    _media.pause();
-}
-function stopAudio() {
-    _media.stop();
-}
-function nextAudio() {
-    _media.next();
-}
-function prevAudio() {
-    _media.prev();
-}
-function togglePlayAudio() {
-    _media.togglePlay();
-}
+window.playAudio  = function() { _media.play(); };
+window.pauseAudio = function() { _media.pause(); };
+window.stopAudio  = function() { _media.stop(); };
+window.nextAudio  = function() { _media.next(); };
+window.prevAudio  = function() { _media.prev(); };
+window.volumeAudio = function(n) { _media.volume(n); };
+window.togglePlayAudio = function() { _media.togglePlay(); };
+
+});
 

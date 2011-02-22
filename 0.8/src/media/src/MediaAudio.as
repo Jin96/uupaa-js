@@ -31,8 +31,8 @@ package {
         private var _audioState:uint = AUDIO_STATE_STOPPED;
         private var _streamState:uint = STREAM_STATE_CLOSED;
         private var _streamLoaded:Boolean = false;
-        // attr
         private var _loop:Boolean = false;
+        private var _mute:Boolean = false;
         private var _volume:Object = {
                         current: 1,             // 0~1
                         future: 1,              // 0~1
@@ -53,15 +53,11 @@ package {
             _timer.addEventListener(TimerEvent.TIMER, handleTimer);
             _timer.start();
 
-            _fadeTimer.addEventListener(TimerEvent.TIMER,
-                                        handleFadeTimer);
-            _fadeTimer.addEventListener(TimerEvent.TIMER_COMPLETE,
-                                        handleFadeComplete);
+            _fadeTimer.addEventListener(TimerEvent.TIMER, handleFadeTimer);
+            _fadeTimer.addEventListener(TimerEvent.TIMER_COMPLETE, handleFadeComplete);
         }
 
         public function load(callback:Function = null):void {
-            // callback(ok:Boolean)
-
             if (!_audioSource.current) {
                 trace(_itemID, "load() fail. audio source was empty")
                 callback(false); // fail
@@ -175,18 +171,32 @@ package {
             }
         }
 
-        public function seek(position:Number):void {
-            if (_streamState === STREAM_STATE_CAN_PLAY) {
+        public function seek(position:Number):void { // @param Number: 0~100
+            if (_sound &&
+                _streamState === STREAM_STATE_CAN_PLAY) {
+
+                // map 0~100 to 0~duration
+                var realPositon:Number = position * _sound.length / 100;
+
                 switch (_audioState) {
                 case AUDIO_STATE_STOPPED: // stopeed + seek
-                    _currentTime = position;
+                    _currentTime = realPositon;
                     break;
                 case AUDIO_STATE_PLAYING:
                 case AUDIO_STATE_PAUSED:
                     _boss.postMessage("seeking", _itemID); // W3C NamedEvent
-                    closeSoundChannel();
-                    _currentTime = position; // overwirte
-                    openSoundChannel(position);
+
+                    var soundTransform:SoundTransform = _soundChannel.soundTransform;
+
+                    _soundChannel.stop();
+                    _soundChannel.removeEventListener(Event.SOUND_COMPLETE, handleSoundChannelComplete);
+                    _soundChannel = null;
+
+                    _soundChannel = _sound.play(realPositon, 0, soundTransform);
+                    _soundChannel.addEventListener(Event.SOUND_COMPLETE, handleSoundChannelComplete);
+
+                    _audioState = AUDIO_STATE_PLAYING;
+
                     _boss.postMessage("seekend", _itemID); // W3C NamedEvent
                     _boss.postMessage("playing", _itemID); // W3C NamedEvent
                 }
@@ -241,12 +251,13 @@ package {
             }
             return {
                 loop: _loop,
+                mute: _mute,
                 volume: _volume.current,
-                duration: duration / 1000,
-                progress: _progress, // 0~100
-                position: duration ? Math.round(currentTime / duration * 100) : 0, // 0~1
+                duration: duration,
+                progress: _progress,
+                position: duration ? Math.round(currentTime / duration * 100) : 0, // 0~100
                 startTime: _startTime,
-                currentTime: currentTime / 1000, // ms -> sec
+                currentTime: currentTime, // ms
                 audioSource: _audioSource.current,
                 videoSource: "",
                 imageSource: "",
@@ -263,16 +274,24 @@ package {
 
         public function setVolume(volume:Number):void {
             if (_volume.future !== volume) {
-                fadeVolume(volume);
+                _volume.past = volume;
+                _volume.future = volume;
+                _volume.current = volume;
+                updateVolume(true);
             }
         }
 
-        public function setStartTime(time:int):void {
-            _startTime = time * 1000; // sec -> ms
+        public function setMute(mute:Boolean):void {
+            _mute = mute;
+            updateVolume(true);
+        }
+
+        public function setStartTime(time:Number):void {
+            _startTime = time; // ms
         }
 
         public function setCurrentTime(time:Number):void {
-            _currentTime = time * 1000; // sec -> ms
+            _currentTime = time; // ms
         }
 
         public function setAudioSource(source:String):void {
@@ -311,8 +330,7 @@ package {
 
                         if (_lastPosition !== pos) {
                             _lastPosition = pos;
-                            _boss.postMessage("timeupdate", _itemID, // W3C NamedEvent
-                                              pos / 1000);
+                            _boss.postMessage("timeupdate", _itemID, pos); // W3C NamedEvent
                         }
                     }
                 }
@@ -332,8 +350,7 @@ package {
                         _volume.current = _volume.future;
                     }
                 }
-                _updateVolume = true;
-                updateVolume();
+                updateVolume(true);
             }
         }
 
@@ -341,8 +358,7 @@ package {
             var callback:Function;
 
             _volume.current = _volume.past; // resume volume
-            _updateVolume = true;
-            updateVolume();
+            updateVolume(true);
 
             while (callback = _fadeCompleteCallback.shift()) {
                 callback.call(this);
@@ -395,7 +411,7 @@ package {
                 pos = _lastPosition = _soundChannel.position;
             }
             // update final position
-            _boss.postMessage("timeupdate", _itemID, pos / 1000); // W3C NamedEvent
+            _boss.postMessage("timeupdate", _itemID, pos); // W3C NamedEvent
             _boss.postMessage("ended", _itemID); // W3C NamedEvent
 
             if (_loop) {
@@ -406,16 +422,18 @@ package {
             }
         }
 
-        private function updateVolume():void {
-            if (_updateVolume && _soundChannel) {
-                _updateVolume = false;
+        private function updateVolume(forceUpdate:Boolean = false):void {
+            if (_soundChannel) {
+                if (_updateVolume || forceUpdate) {
+                    _updateVolume = false;
 
-                var soundTransform:SoundTransform = _soundChannel.soundTransform;
+                    var soundTransform:SoundTransform = _soundChannel.soundTransform;
 
-                soundTransform.volume = _volume.current;
-                _soundChannel.soundTransform = soundTransform;
+                    soundTransform.volume = _mute ? 0 : _volume.current;
+                    _soundChannel.soundTransform = soundTransform;
 
-                _boss.postMessage("volumechange", _itemID); // W3C NamedEvent
+                    _boss.postMessage("volumechange", _itemID); // W3C NamedEvent
+                }
             }
         }
     }

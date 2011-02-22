@@ -57,8 +57,10 @@ package {
             xi.addCallback("xiAutoPlay",                  xiAutoPlay);
             xi.addCallback("xiPlay",                      xiPlay);
             xi.addCallback("xiPause",                     xiPause);
-            xi.addCallback("xiStop",                      xiStop);
             xi.addCallback("xiSeek",                      xiSeek);
+            xi.addCallback("xiStop",                      xiStop);
+            xi.addCallback("xiClose",                     xiClose);
+            xi.addCallback("xiVolume",                    xiVolume);
 /*
             xi.addCallback("xiState",         xiState);
             xi.addCallback("xiAttr",          xiAttr);
@@ -133,7 +135,7 @@ package {
                 }
                 break;
             case "pause":   obj.pause(); break;
-            case "seek":    obj.seek(queue.param1); break;
+            case "seek":    obj.seek(queue.param1); break; // 0~100
             case "stop":    obj.stop(); break;
             case "close":   obj.close(); break;
             case "volume":  obj.setVolume(queue.param1);
@@ -166,7 +168,14 @@ package {
             _queue.push({ itemID: itemID, action: "toggleplay" });
         }
 
-        public function xiSeek(itemID:Number, position:Number): void {
+        public function xiSeek(itemID:Number,
+                               position:Number): void { // @param Number: ms
+            // position 0 ~ 100
+            if (position > 100) {
+                position = 100;
+            } else if (position < 0) {
+                position = 0;
+            }
             _queue.push({ itemID: itemID, action: "seek", param1: position });
         }
 
@@ -179,6 +188,12 @@ package {
         }
 
         public function xiVolume(itemID:Number, volume:Number): void {
+            // volume = 0 ~ 1
+            if (volume > 1) {
+                volume = 1;
+            } else if (volume < 0) {
+                volume = 0;
+            }
             _queue.push({ itemID: itemID, action: "volume", param1: volume });
         }
 
