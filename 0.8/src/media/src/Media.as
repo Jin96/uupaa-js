@@ -8,14 +8,20 @@ package {
     import flash.net.*;
 
     public class Media extends Sprite {
+        // for ExternalInterface
         private var _xiCallback:String = "";
-        private var _timer:Timer = new Timer(64, 0);
-        private var _exportMessage:Boolean = true;
-        private var _itemObj:Object = {}; // itemID: obj
-        private var _lastItemID:Number = 0;
+
+        // for Message Queue
+        private var _timer:Timer = new Timer(50, 0); // 20fps
         private var _queue:Array = [];
-        private var _lastPlayItemID:uint = 0; // 1 ~
-        private var _xiLock:uint = 0;
+
+        // for List Management
+        private var _list:Array = [null]; // [null, MediaAudio, ...]
+        private var _playID:Number = 0; // playing id: 1 ~
+        private var _lastID:Number = 0; // last inserted id: 1 ~
+
+        // for Message Exports
+        private var _xiLock:Number = 0;
         private var _xiMessagePool:Array = [];
 
         public function Media():void {
@@ -33,43 +39,32 @@ package {
             }
             trace("ExternalInterface.objectID: " + xi.objectID);
 
-            // flashVars.callback: String をコールバックメソッド名として取り出す
-            // デフォルトのメソッド名は window.uu.dmz[ExternalInterface.objectID]
-            // コールバック引数は、第一引数に文字列を、第ニ引数に値を渡す
+            // get callback function name
             var flashVars:Object = LoaderInfo(this.root.loaderInfo).parameters;
 
+            // { flashVars.callback = "" }
+            // or window.uu.dmz[ExternalInterface.objectID]
             _xiCallback = flashVars["callback"] ? flashVars["callback"]
                                                 : ("uu.dmz." + xi.objectID);
 
-            xi.addCallback("xiSetAudioSource",          xiSetAudioSource);
-/*
-            xi.addCallback("xiSetVideoSource",          xiSetVideoSource);
-            xi.addCallback("xiSetImageSource",          xiSetImageSource);
- */
-            xi.addCallback("xiListAddItemAudio",          xiListAddItemAudio);
+            // --- ExternalInterface definitions ---
+            xi.addCallback("xiListAddAudio",            xiListAddAudio);
 //            xi.addCallback("xiListAddItemImageAudio",     xiListAddItemImageAudio);
 //            xi.addCallback("xiListAddItemImageAudiox2",   xiListAddItemImageAudiox2);
 //            xi.addCallback("xiListAddItemVideoAudio",     xiListAddItemVideoAudio);
-            xi.addCallback("xiListClearItem",             xiListClearItem);
-            xi.addCallback("xiGetLastItemID",             xiGetLastItemID);
-            xi.addCallback("xiGetState",                  xiGetState);
-            xi.addCallback("xiTogglePlay",                xiTogglePlay);
-            xi.addCallback("xiAutoPlay",                  xiAutoPlay);
-            xi.addCallback("xiPlay",                      xiPlay);
-            xi.addCallback("xiPause",                     xiPause);
-            xi.addCallback("xiSeek",                      xiSeek);
-            xi.addCallback("xiStop",                      xiStop);
-            xi.addCallback("xiClose",                     xiClose);
-            xi.addCallback("xiVolume",                    xiVolume);
+            xi.addCallback("xiListClear",               xiListClear);
+            xi.addCallback("xiGetState",                xiGetState);
+            xi.addCallback("xiTogglePlay",              xiTogglePlay);
+            xi.addCallback("xiAutoPlay",                xiAutoPlay);
+            xi.addCallback("xiPlay",                    xiPlay);
+            xi.addCallback("xiPause",                   xiPause);
+            xi.addCallback("xiSeek",                    xiSeek);
+            xi.addCallback("xiStop",                    xiStop);
+            xi.addCallback("xiClose",                   xiClose);
+            xi.addCallback("xiSetVolume",               xiSetVolume);
+            xi.addCallback("xiPrevAutoPlay",            xiPrevAutoPlay);
+            xi.addCallback("xiNextAutoPlay",            xiNextAutoPlay);
 /*
-            xi.addCallback("xiState",         xiState);
-            xi.addCallback("xiAttr",          xiAttr);
-            xi.addCallback("xiIsReady",       xiIsReady);
-            xi.addCallback("xiIsPlaying",     xiIsPlaying);
-            xi.addCallback("xiIsLoaded",      xiIsLoaded);
-            xi.addCallback("xiIsClosed",      xiIsClosed);
-            xi.addCallback("xiIsStopped",     xiIsStopped);
-            xi.addCallback("xiIsError",       xiIsError);
             xi.addCallback("xiBeforeUnload",  xiBeforeUnload);
  */
 /*
@@ -79,7 +74,7 @@ package {
 //            stage.scaleMode = StageScaleMode.EXACT_FIT; // 画面サイズにフィットさせる(縦横比は維持されない)
 
             try {
-                xi.call(_xiCallback, "init", 0); // itemID = 0
+                xi.call(_xiCallback, "init", 0); // id = 0
             } catch(err:Error) {
                 trace("callback(init) fail");
             }
@@ -93,16 +88,14 @@ package {
             if (!queue) {
                 return;
             }
-            if (!(queue.itemID in _itemObj)) {
-                trace(queue.itemID, "is unknown");
-                return; // u
+            if (!(queue.id in _list) || !queue.id) {
+                trace(queue.id, "is unknown");
+                return; // skip
             }
-            var obj:Object = _itemObj[queue.itemID];
+
+            var obj:Object = _list[queue.id];
 
             switch (queue.action) {
-            case "setAudioSource":
-                obj.setAudioSource(queue.param1);
-                break;
             case "toggleplay":
                 var state:Object = obj.getState();
 
@@ -111,26 +104,23 @@ package {
                     obj.pause();
                     return;
                 case 2: // obj.AUDIO_STATE_PAUSED -> play
-                    _lastPlayItemID = 0;
+                    _lastID = 0;
                 case 0: // obj.AUDIO_STATE_STOPPED -> autoplay
                 }
             case "autoplay":
-                if (_lastPlayItemID && queue.itemID !== _lastPlayItemID) {
-                    if (_lastPlayItemID in _itemObj) {
-                        _itemObj[_lastPlayItemID].close(); // auto close
+                if (_lastID && _lastID !== queue.id) {
+                    if (_lastID in _list) {
+                        _list[_lastID].close(); // auto close
                     }
                 }
             case "play":
-                _lastPlayItemID = queue.itemID;
+                _lastID = queue.id;
                 if (obj.isCanPlay()) {
                     obj.play();
                 } else {
                     obj.load(function(ok:Boolean):void {
-                        if (ok) {
-                            obj.play();
-                        } else {
-                            postMessage("error", queue.itemID);
-                        }
+                        ok ? obj.play()
+                           : postMessage("error", queue.id);
                     });
                 }
                 break;
@@ -142,71 +132,76 @@ package {
             }
         }
 
-        public function xiSetAudioSource(itemID:Number, url:String):void {
-            _queue.push({ itemID: itemID, action: "setAudioSource", param1: url });
+        public function xiAutoPlay(id:Number):void {
+            _queue.push({ id: id, action: "autoplay" });
         }
 
-        public function xiAutoPlay(itemID:Number):void {
-            _queue.push({ itemID: itemID, action: "autoplay" });
+        public function xiGetState(id:Number):Object {
+            return _list[id] ? _list[id].getState() : {};
         }
 
-        public function xiGetState(itemID:Number):Object {
-            var obj:Object = _itemObj[itemID];
-
-            return obj ? obj.getState() : {};
+        public function xiPlay(id:Number):void {
+            _queue.push({ id: id, action: "play" });
         }
 
-        public function xiPlay(itemID:Number): void {
-            _queue.push({ itemID: itemID, action: "play" });
+        public function xiPause(id:Number):void {
+            _queue.push({ id: id, action: "pause" });
         }
 
-        public function xiPause(itemID:Number): void {
-            _queue.push({ itemID: itemID, action: "pause" });
+        public function xiTogglePlay(id:Number):void {
+            _queue.push({ id: id, action: "toggleplay" });
         }
 
-        public function xiTogglePlay(itemID:Number): void {
-            _queue.push({ itemID: itemID, action: "toggleplay" });
-        }
-
-        public function xiSeek(itemID:Number,
-                               position:Number): void { // @param Number: ms
+        public function xiSeek(id:Number,
+                               position:Number):void { // @param Number: ms
             // position 0 ~ 100
-            if (position > 100) {
-                position = 100;
-            } else if (position < 0) {
-                position = 0;
-            }
-            _queue.push({ itemID: itemID, action: "seek", param1: position });
+            position = position > 100 ? 100
+                     : position < 0   ? 0
+                     : position;
+            _queue.push({ id: id, action: "seek", param1: position });
         }
 
-        public function xiStop(itemID:Number): void {
-            _queue.push({ itemID: itemID, action: "stop" });
+        public function xiStop(id:Number):void {
+            _queue.push({ id: id, action: "stop" });
         }
 
-        public function xiClose(itemID:Number): void {
-            _queue.push({ itemID: itemID, action: "close" });
+        public function xiClose(id:Number):void {
+            _queue.push({ id: id, action: "close" });
         }
 
-        public function xiVolume(itemID:Number, volume:Number): void {
+        public function xiSetVolume(id:Number, volume:Number):void {
             // volume = 0 ~ 1
-            if (volume > 1) {
-                volume = 1;
-            } else if (volume < 0) {
-                volume = 0;
+            volume = volume > 1 ? 1
+                   : volume < 0 ? 0
+                   : volume;
+            _queue.push({ id: id, action: "volume", param1: volume });
+        }
+
+        public function xiPrevAutoPlay():Number {
+            var id:Number = _lastID;
+
+            if (--id < 1) {
+                id = _list.length - 1;
             }
-            _queue.push({ itemID: itemID, action: "volume", param1: volume });
+            _queue.push({ id: id, action: "autoplay" });
+            return id;
         }
 
-        public function xiGetLastItemID():Number {
-            return _lastItemID;
+        public function xiNextAutoPlay():Number {
+            var id:Number = _lastID;
+
+            if (++id >= _list.length) {
+                id = 1;
+            }
+            _queue.push({ id: id, action: "autoplay" });
+            return id;
         }
 
-        public function xiListAddItemAudio():Number {
+        public function xiListAddAudio(url:String):Number {
             ++_xiLock;
-            ++_lastItemID;
-            _itemObj[_lastItemID] = new MediaAudio(this, _lastItemID);
+            _list.push(new MediaAudio(this, _list.length, url));
             --_xiLock;
-            return _lastItemID;
+            return _list.length - 1;
         }
 /*
         public function xiListAddItemImageAudio(preload:Boolean,
@@ -226,46 +221,42 @@ package {
         }
  */
 
-        public function xiListClearItem():void {
-            var i:String;
-
-            for (i in _itemObj) {
-                _itemObj[i].close();
-            }
-            _itemObj = {};
-            _lastItemID = 0;
-            _lastPlayItemID = 0;
+        public function xiListClear():void {
+            _list.forEach(function(obj:Object, i:int, ary:Array):void {
+                obj.close();
+            });
+            _list = [null];
+            _playID = 0;
+            _lastID = 0;
         }
 
-        public function postMessage(msg:String, itemID:uint = 0, param:* = undefined):void {
-trace("postMessage", msg, itemID, param);
+        public function postMessage(msg:String, id:Number = 0, param:* = undefined):void {
+trace("postMessage", msg, id, param);
             var that:* = this;
 
-            if (_exportMessage) {
-                if (_xiLock) { // lock -> stock
-                    _xiMessagePool.push({ msg: msg, itemID: itemID });
-                } else {
-                    _xiMessagePool.forEach(function(e:Object, i:int, ary:Array):void {
-                        postMessageToJavaScript.call(that, e.msg, e.itemID);
-                    });
-                    postMessageToJavaScript(msg, itemID);
-                }
+            if (_xiLock) { // lock -> stock
+                _xiMessagePool.push({ msg: msg, id: id });
+            } else {
+                _xiMessagePool.forEach(function(obj:Object, i:int, ary:Array):void {
+                    postMessageToJavaScript.call(that, obj.msg, obj.id);
+                });
+                postMessageToJavaScript(msg, id);
             }
         }
 
         // to js
-        private function postMessageToJavaScript(msg:String, itemID:uint = 0):void {
-            if (_itemObj[itemID]) {
-                var state:Object = _itemObj[itemID].getState();
+        private function postMessageToJavaScript(msg:String, id:Number = 0):void {
+            if (id in _list) {
+                var state:Object = _list[id].getState();
 
                 switch (msg) {
                 case "durationchange":
                 case "timeupdate":
                 case "progress":
-                    ExternalInterface.call(_xiCallback, msg, itemID, state, true);
+                    ExternalInterface.call(_xiCallback, msg, id, state, true);
                     break;
                 default:
-                    ExternalInterface.call(_xiCallback, msg, itemID, state, true);
+                    ExternalInterface.call(_xiCallback, msg, id, state, true);
                 }
             }
         }
