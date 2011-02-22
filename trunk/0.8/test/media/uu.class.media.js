@@ -95,6 +95,9 @@ uu.Class("MediaPlayer", {
                 // update grip position
                 uu.msg.post(seekBar, "value", position, 0);
             }
+            break;
+        case "ended":
+            this.next();
         }
     },
     volume: function(volume) {
