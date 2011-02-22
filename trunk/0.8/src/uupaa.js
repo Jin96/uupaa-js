@@ -1291,11 +1291,13 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //  [6][alert] uu.alert("a", { k: 123 })                 -> alert('"a", { "k": 123 }')
                                     //  [7][alert] uu.alert()                                -> alert('undefined')
 //{@debug
-    log:            uulog,          // uu.log(var_args:Mix = void, ...)
+    log:      uumix(uulog, {        // uu.log(var_args:Mix = void, ...)
                                     //  [1][add(display) log] uu.log("Hello Log")
                                     //  [2][add remote log]   window.uuconfig = { log: { remote: "http://localhost/log?msg=" }};
                                     //                        uu.log("Hello Log") -> GET /http://localhost/log?msg=Hello%20Log
                                     //  [3][clear all log]    uu.log()
+        clear:      uulogclear      // uu.log.clear()
+    }),
     trace:          uutrace,        // uu.trace(fn:Function = void,
                                     //          length:Number = void,
                                     //          arg1:Mix = void,
@@ -8329,6 +8331,11 @@ function uulog(/* var_args, ... */) { // @param Mix(= void): var_args
     }
 }
 
+// uu.log.clear
+function uulogclear() {
+    uulog();
+}
+
 //{@debug
 // uu.trace - add function trace
 function uutrace(fn,     // @param Function(= void): arguments.callee
@@ -10739,10 +10746,10 @@ function uuuibuild(uiname                  // @param Node/String(= ""):
                    /*, var_args, ... */) { // @param Mix(= void):
                                            // @return Node/NodeArray: <div> or [<div>, ...]
 
-    //  [1][build]      uu.ui("Slider", { step: 2 }) -> [<div ui="Slider" />]
-    //  [2][transform]  uu.ui() -> [<div ui="Slider"><input type="range"/></div>, ...]
-    //  [3][transform]  uu.ui(Node) -> [node]
-    //  [4][transform]  uu.ui(NodeArray) -> [node, ...]
+    //  [1][build]      uu.ui.build("Slider", { step: 2 }) -> [<div ui="Slider" />]
+    //  [2][transform]  uu.ui.build() -> [<div ui="Slider"><input type="range"/></div>, ...]
+    //  [3][transform]  uu.ui.build(Node) -> [node]
+    //  [4][transform]  uu.ui.build(NodeArray) -> [node, ...]
 
     // [1] build
     if (typeof uiname === _string) {
@@ -12245,17 +12252,16 @@ function SliderInit(rail,    // @param Node: rail node. <div class="Slider*">
 
 // inner -
 function SliderState(that, enable) {
-    var method = enable ? uu.bind : uu.unbind,
-        param = that.param;
+    var method = enable ? uu.bind : uu.unbind;
 
     // rail drag events
-    method(param.rail, uu.env.touch ? "Slider.touchstart"
-                                    : "Slider.mousedown,Slider.mousewheel", that);
+    method(that.param.rail, uu.env.touch ? "Slider.touchstart"
+                                         : "Slider.mousedown,Slider.mousewheel", that);
     // key events
     method(doc, "Slider.keydown", that);
 
-    uu.css.opacity(param.rail, enable ? 1 : 0.3);
-    uu.css.opacity(param.grip, enable ? 1 : 0.5);
+    uu.css.opacity(that.param.rail, enable ? 1 : 0.3);
+    uu.css.opacity(that.param.grip, enable ? 1 : 0.5);
 }
 
 // uu.Class.Slider.attr
@@ -12444,7 +12450,6 @@ function SliderValue(that,  // @param this:
                      fx) {  // @param Boolean(= false): true is uu.fx
                             // @return Number: current value
     if (value !== void 0) {
-//uu.log("SliderValue @ @", value, fx);
         var param = that.param, pp = 100 / (param.max - param.min);
 
         value = Math.round((value - param.min) * pp * (param.size * 0.01));
@@ -12480,7 +12485,6 @@ function SliderMove(that,   // @param this:
     if (!move) {
         return;
     }
-//uu.log("SliderMove @ @ @", px, py, fx);
 
     w = param.max - param.min;
     tm = param.size * 0.01;
@@ -12598,7 +12602,8 @@ function SliderTransform(node) { // @param Node:
         size:   size,
         node:   node, // original node. <input type="range" />
         step:   parseInt(attrs.step || 1),
-        value:  parseInt(node.value || 0)
+        value:  parseInt(node.value || 0),
+        vertical: !!attrs.vertical
     });
     node.style.display = "none";
     node.removeAttribute("ui");
