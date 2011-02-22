@@ -5024,7 +5024,7 @@ function uuClass(className,      // @param String: "Class"
         that.name = Class;        // class name
         that.uuguid = uunumber(); // instance guid
         that.msgbox || (that.msgbox = uunop);
-        uu.msg.bind(that);       // bind MsgPump
+        uu.msg.bind(that);        // bind MsgPump
 
         // constructor(Super -> that)
         Super && Super.init && Super.init.apply(that, args);
@@ -9856,9 +9856,9 @@ function FlashAudioInit(src,        // @param String: "music.mp3" or ""
                         option,     // @param Hash: { node, loop, volume, startTime, autoplay }
                         callback) { // @param CallbackFunction: callback(this)
 
-    // response from flash
-    function handleEvent(xid, eventType, param) {
-        switch (eventType) {
+    // callback from ExternalInterface.call()
+    function handleFlash(xid, msg, param1, param2) {
+        switch (msg) {
         case "init":
             that.flash.xiFlashAudioSetAttr({
                 src:       src,
@@ -9870,7 +9870,7 @@ function FlashAudioInit(src,        // @param String: "music.mp3" or ""
             option.autoplay && that.play();
             break;
         default:
-            uueventfire(audio, eventType, param);
+            uueventfire(audio, msg, param1, param2);
         }
     }
 
@@ -9897,7 +9897,7 @@ function FlashAudioInit(src,        // @param String: "music.mp3" or ""
 
     this.flash = uuflash(uuconfig.audio.swf,
                          { width: 1, height: 1, parent: container },
-                         handleEvent);
+                         handleFlash);
 }
 
 // FlashAudio.attr
@@ -10027,10 +10027,11 @@ function uuflash(url,        // @param String: url, eg: "example.swf"
                              //   param.wmode - String(= ""): "transparent", "opaque", ...
                              //   param.quality - String(= ""): "low", "medium", "high", "best", "autolow", "autohigh"
                              //   param.flashVars - String(= ""): "key=value&key=value..."
+                             //   param.allowNetworking - String(= ""): see AS3 spec
                              //   param.allowScriptAccess - String(= "always"): "always", "sameDomain", "never"
-                 callback) { // @param CallbackFunction(= void): callback(xid, eventType, param)
+                 callback) { // @param CallbackFunction(= void): ExternalInterface callback(xid, action, param)
                              //   argument.xid - String: xid is ExternalInterface.objectID
-                             //   argument.eventType - CustomEventTypeString: eg: "init", "loadend", "canplay", ...
+                             //   argument.msg - String: eg: "init", "loadend", "canplay", ...
                              //   argument.param - Mix(= void): callback param
                              // @return Node: <object>
 
@@ -10051,20 +10052,22 @@ function uuflash(url,        // @param String: url, eg: "example.swf"
     //                                          callback("externalAudio1", "playing")
 
     // callback from ExternalInterface.call()
-    function handleEvent(eventType, // @param CustomEventTypeString: "init", "error", "click", ...
-                         param,     // @param Mix(= void):
-                         sync) {    // @param Boolean(= false): true is sync, false is async
-                                    // @return Mix/undefine: callback result (sync only)
-        if (sync) {
-            return callback(xid, eventType, param); // sync
-        } else {
+    function handleFlash(msg,     // @param String: "init", "error", "click", ...
+                         param1,  // @param Mix(= void):
+                         param2,  // @param Mix(= void):
+                         async) { // @param Boolean(= false): true is async, false is sync
+                                 // @return Mix/undefine: callback result (sync only)
+        if (async) {
             setTimeout(function() {
-                callback(xid, eventType, param); // async
+                callback.call(that, xid, msg, param1, param2); // async
             }, 0);
+        } else {
+            return callback.call(that, xid, msg, param1, param2); // sync
         }
     }
 
-    var pm = uuarg(param, { width: "100%", height: "100%",
+    var that = this,
+        pm = uuarg(param, { width: "100%", height: "100%",
                             xid: "external" + uunumber(),
                             allowScriptAccess: "always" }),
         xid = pm.xid, node, fragment,
@@ -10077,7 +10080,7 @@ function uuflash(url,        // @param String: url, eg: "example.swf"
 
     fragment = uuflashfragment(url, xid, pm.width, pm.height, pm);
 
-    callback && (uu.dmz[xid] = handleEvent); // uu.dmz[xid] = handler
+    callback && (uu.dmz[xid] = handleFlash); // uu.dmz[xid] = handler
 
     if (pm.nowrap) {
         parent.innerHTML = fragment; // <canvas><object /></canvas>
@@ -10324,15 +10327,15 @@ uuClassSingleton("FlashStorage", {
         var that = this;
 
         // callback from ExternalInterface.call()
-        function handleEvent(xid, eventType /*, param */) {
-            switch (eventType) {
+        function handleFlash(xid, msg /*, param1, param2 */) {
+            switch (msg) {
             case "init":
                 callback(that);
                 break;
             }
         }
         this.so = uuflash(uuconfig.storage.swf,
-                          { width: 1, height: 1 }, handleEvent);
+                          { width: 1, height: 1 }, handleFlash);
     },
     key: function(index) {
         return this.so.key(index) || "";

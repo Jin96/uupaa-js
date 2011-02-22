@@ -110,7 +110,7 @@ package {
             trace("ioErrorHandler: " + event);
 
             _error = 4;
-            _canplay = true;
+            _canplay = false;
             ExternalInterface.call(_xiCallback, "error");
         }
 
@@ -165,7 +165,7 @@ package {
 
             if (close) {
                 _closed = true;
-                _canplay = true;
+                _canplay = false;
             } else {
                 _lastAction = "stop";
             }

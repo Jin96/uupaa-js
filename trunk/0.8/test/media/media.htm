@@ -1,0 +1,25 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8" />
+<title></title>
+<style></style>
+<script>
+window.uuconfig = {
+    log: {
+        rollup: 1000
+    }
+};
+</script>
+<script src="../../src/uupaa.js"></script>
+<script src="uu.class.media.js"></script>
+</head><body>
+<input type="button" value="▲" onclick="prevAudio()" /><br />
+<input type="button" value="■" onclick="stopAudio()" />
+<input type="button" value="||" onclick="pauseAudio()" />
+<input type="button" value="→" onclick="playAudio()" /><br />
+<input type="button" value="▼" onclick="nextAudio()" />
+
+<hr />
+<input type="button" value="▲" onclick="prevAudio()" /><br />
+<input type="button" id="playbtn" value="再生" onclick="togglePlayAudio()" /><br />
+<input type="button" value="▼" onclick="nextAudio()" />
+
+</body></html>
