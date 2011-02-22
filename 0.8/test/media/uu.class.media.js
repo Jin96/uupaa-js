@@ -13,7 +13,7 @@ uu.Class("MediaPlayer", {
     ],
 
     init: function() {
-        this._swf = uu.flash.call(this, "uu.media.swf",
+        this._swf = uu.flash.call(this, "../../swf/uu.media.swf",
                                   { width: 300, height: 300, nocache: true },
                                   this.handleFlash);
     },
