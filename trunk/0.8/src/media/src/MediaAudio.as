@@ -15,7 +15,7 @@ package {
         public static var STREAM_STATE_CAN_PLAY:uint = 2;
         public static var STREAM_STATE_ERROR:uint    = 3;
         private var _boss:Media;
-        private var _itemID:uint;
+        private var _id:Number = 0;
         // inner
         private var _sound:Sound = null;
         private var _soundChannel:SoundChannel = null;
@@ -39,39 +39,43 @@ package {
                         past: 1                 // 0~1
                     };
         private var _keepVolume:Number = 1;     // 0~1
-        private var _startTime:int = 0;         // unit: ms
+        private var _startTime:Number = 0;      // unit: ms
         private var _currentTime:Number = 0;    // unit: ms
         private var _audioSource:Object = {
                         loaded: "",
                         current: ""
                     };
 
-        public function MediaAudio(boss:Media, itemID:uint) {
+        public function MediaAudio(boss:Media,
+                                   id:Number,
+                                   url:String) {
             _boss = boss;
-            _itemID = itemID;
+            _id = id;
+            _audioSource.current = url;
 
             _timer.addEventListener(TimerEvent.TIMER, handleTimer);
             _timer.start();
 
             _fadeTimer.addEventListener(TimerEvent.TIMER, handleFadeTimer);
             _fadeTimer.addEventListener(TimerEvent.TIMER_COMPLETE, handleFadeComplete);
+
         }
 
         public function load(callback:Function = null):void {
             if (!_audioSource.current) {
-                trace(_itemID, "load() fail. audio source was empty")
+                trace(_id, "load() fail. audio source was empty")
                 callback(false); // fail
                 return;
             }
             if (_audioSource.loaded === _audioSource.current) {
                 if (isCanPlay()) {
-                    _boss.postMessage("canplay", _itemID); // W3C NamedEvent
+                    _boss.postMessage("canplay", _id); // W3C NamedEvent
                     callback(true); // success
                     return;
                 }
             }
             if (!_audioSource.loaded) { // at first time (or error occurred)
-                trace(_itemID, "load() at first time");
+                trace(_id, "load() at first time");
                 openSound(callback);
             } else {
                 fadeVolume(0, function():void {
@@ -119,7 +123,7 @@ package {
                     try {
                         _sound.close();
                     } catch(err:Error) {
-                        trace(_itemID, "sound.close() fail." + err);
+                        trace(_id, "sound.close() fail." + err);
                     }
                 }
                 _sound.removeEventListener(Event.OPEN, handleOpen);
@@ -162,12 +166,12 @@ package {
             if (_streamState === STREAM_STATE_CAN_PLAY &&
                 _audioState !== AUDIO_STATE_PLAYING) {
 
-                _boss.postMessage("play", _itemID); // W3C NamedEvent
+                _boss.postMessage("play", _id); // W3C NamedEvent
 
                 closeSoundChannel();
                 openSoundChannel(_currentTime);
 
-                _boss.postMessage("playing", _itemID); // W3C NamedEvent
+                _boss.postMessage("playing", _id); // W3C NamedEvent
             }
         }
 
@@ -184,7 +188,7 @@ package {
                     break;
                 case AUDIO_STATE_PLAYING:
                 case AUDIO_STATE_PAUSED:
-                    _boss.postMessage("seeking", _itemID); // W3C NamedEvent
+                    _boss.postMessage("seeking", _id); // W3C NamedEvent
 
                     var soundTransform:SoundTransform = _soundChannel.soundTransform;
 
@@ -197,8 +201,8 @@ package {
 
                     _audioState = AUDIO_STATE_PLAYING;
 
-                    _boss.postMessage("seekend", _itemID); // W3C NamedEvent
-                    _boss.postMessage("playing", _itemID); // W3C NamedEvent
+                    _boss.postMessage("seekend", _id); // W3C NamedEvent
+                    _boss.postMessage("playing", _id); // W3C NamedEvent
                 }
             }
         }
@@ -209,7 +213,7 @@ package {
 
                 _currentTime = closeSoundChannel(); // keep current position
                 _audioState = AUDIO_STATE_PAUSED; // overwrite
-                _boss.postMessage("pause", _itemID); // W3C NamedEvent
+                _boss.postMessage("pause", _id); // W3C NamedEvent
             }
         }
 
@@ -220,7 +224,7 @@ package {
                 if (_audioState !== AUDIO_STATE_STOPPED) {
                     closeSoundChannel();
                     _currentTime = 0;
-                    _boss.postMessage("stop", _itemID); // NOT W3C NamedEvent
+                    _boss.postMessage("stop", _id); // NOT W3C NamedEvent
                 }
             }
         }
@@ -230,7 +234,7 @@ package {
                 closeSoundChannel();
                 _currentTime = 0;
                 closeSound();
-                _boss.postMessage("close", _itemID); // NOT W3C NamedEvent
+                _boss.postMessage("close", _id); // NOT W3C NamedEvent
             });
         }
 
@@ -294,10 +298,6 @@ package {
             _currentTime = time; // ms
         }
 
-        public function setAudioSource(source:String):void {
-            _audioSource.current = source;
-        }
-
         public function isOpen():Boolean {
             return _streamState === STREAM_STATE_OPEN;
         }
@@ -320,7 +320,7 @@ package {
                 // fire duration change event
                 if (_updateDuration) {
                     _updateDuration = false;
-                    _boss.postMessage("durationchange", _itemID); // W3C NamedEvent
+                    _boss.postMessage("durationchange", _id); // W3C NamedEvent
                 }
 
                 if (_streamState === STREAM_STATE_CAN_PLAY) {
@@ -330,7 +330,7 @@ package {
 
                         if (_lastPosition !== pos) {
                             _lastPosition = pos;
-                            _boss.postMessage("timeupdate", _itemID, pos); // W3C NamedEvent
+                            _boss.postMessage("timeupdate", _id, pos); // W3C NamedEvent
                         }
                     }
                 }
@@ -367,20 +367,20 @@ package {
 
         private function handleOpen(event:Event):void {
             _streamState = STREAM_STATE_OPEN;
-            _boss.postMessage("loadstart", _itemID); // W3C NamedEvent
+            _boss.postMessage("loadstart", _id); // W3C NamedEvent
         }
 
         private function handleComplete(event:Event):void {
             _streamLoaded = true;
-            _boss.postMessage("loadend", _itemID); // NOT W3C NamedEvent
+            _boss.postMessage("loadend", _id); // NOT W3C NamedEvent
         }
 
         private function handleIOError(event:IOErrorEvent):void {
-            trace(_itemID, "handleIOError: " + event);
+            trace(_id, "handleIOError: " + event);
 
             _streamState = STREAM_STATE_ERROR;
             _audioSource.loaded = "";
-            _boss.postMessage("error", _itemID); // W3C NamedEvent
+            _boss.postMessage("error", _id); // W3C NamedEvent
         }
 
         private function handleProgress(event:ProgressEvent):void {
@@ -392,13 +392,13 @@ package {
                 while (callback = _canPlayedCallback.shift()) {
                     callback(true); // openSound(ok:Boolean);
                 }
-                _boss.postMessage("canplay", _itemID); // W3C NamedEvent
+                _boss.postMessage("canplay", _id); // W3C NamedEvent
             }
             var loadTime:Number = event.bytesLoaded / event.bytesTotal;
             _progress = Math.round(100 * loadTime);
 
             _updateDuration = true;
-            _boss.postMessage("progress", _itemID); // W3C NamedEvent
+            _boss.postMessage("progress", _id); // W3C NamedEvent
         }
 
         private function handleSoundChannelComplete(event:Event):void {
@@ -411,14 +411,14 @@ package {
                 pos = _lastPosition = _soundChannel.position;
             }
             // update final position
-            _boss.postMessage("timeupdate", _itemID, pos); // W3C NamedEvent
-            _boss.postMessage("ended", _itemID); // W3C NamedEvent
+            _boss.postMessage("timeupdate", _id, pos); // W3C NamedEvent
+            _boss.postMessage("ended", _id); // W3C NamedEvent
 
             if (_loop) {
                 closeSoundChannel();
                 _currentTime = _startTime; // overwirte
                 openSoundChannel(_startTime); // rewind
-                _boss.postMessage("playing", _itemID); // W3C NamedEvent
+                _boss.postMessage("playing", _id); // W3C NamedEvent
             }
         }
 
@@ -432,7 +432,7 @@ package {
                     soundTransform.volume = _mute ? 0 : _volume.current;
                     _soundChannel.soundTransform = soundTransform;
 
-                    _boss.postMessage("volumechange", _itemID); // W3C NamedEvent
+                    _boss.postMessage("volumechange", _id); // W3C NamedEvent
                 }
             }
         }
