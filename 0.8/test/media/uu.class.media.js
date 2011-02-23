@@ -1,16 +1,17 @@
 // case "http://localhost:8080/0.8/test/media/media.htm"
 
 uu.Class("MediaPlayer", {
-    _source: [],
+    _data: [],
     _lastID: 0, // current playing itemID
     _seekPosition: 0,
     _volumePosition: 0,
     _ignoreSeekUpdate: false,
     _ignoreVolumeUpdate: false,
 
-    init: function(seekSlider,    // @param UISlider:
-                   volumeSlider,  // @param UISlider:
-                   sourceArray) { // @param Array:
+    init: function(seekSlider,   // @param UISlider:
+                   volumeSlider, // @param UISlider:
+                   data,         // @param Array:
+                   option) {     // @param Hash: { width: "100%", height: "100%" }
 
         function doSeek(evt, attr) { // attr.value = 0~100
             that._ignoreSeekUpdate = true;
@@ -22,7 +23,7 @@ uu.Class("MediaPlayer", {
         }
         function doVolume(evt, attr) { // attr.value = 0~100
             that._ignoreVolumeUpdate = true;
-            that.volume(parseFloat(attr.value) / 100);
+            that.setMasterVolume(parseFloat(attr.value) / 100);
 
             setTimeout(function() {
                 that._ignoreVolumeUpdate = false;
@@ -31,12 +32,13 @@ uu.Class("MediaPlayer", {
 
         var that = this;
 
+        var swfOption = uu.arg(option, { width: "100%", height: "100%" });
+
         this._seekSlider = seekSlider;
         this._volumeSlider = volumeSlider;
-        this._source = sourceArray;
+        this._data = data;
         this._swf = uu.flash.call(this, "../../swf/uu.media.swf",
-                                  { width: 300, height: 100, nocache: true },
-                                  this.handleFlash);
+                                  swfOption, this.handleFlash);
         // volume event handler
         volumeSlider.bind("mousedown", function(evt, attr) {
             that._ignoreVolumeUpdate = true;
@@ -71,13 +73,12 @@ uu.Class("MediaPlayer", {
         switch (msg) {
         case "init":
             this.setFinalizer();
-            this._source.forEach(function(src) {
-//              that._swf.xiListAddAudio(src);
-                that._swf.xiListAddImageAudio(src, "");
+            this._data.forEach(function(hash, index) {
+                that._swf.xiAdd(hash.type, hash.audio, hash.video, hash.image, hash.comment);
             });
             this._lastID = 1;
+            this.setMasterVolume(1);
             this._swf.xiAutoPlay(this._lastID);
-            this.volume(1, true);
             break;
         case "timeupdate":
             // update grip position
@@ -105,11 +106,17 @@ uu.Class("MediaPlayer", {
             this.next();
         }
     },
+    setMasterVolume: function(volume) {
+        this._swf.xiSetMasterVolume(volume);
+    },
     volume: function(volume, force) {
         this._swf.xiSetVolume(this._lastID, volume, force);
     },
     togglePlay: function() {
         this._swf.xiTogglePlay(this._lastID);
+    },
+    toggleMasterMute: function() {
+        this._swf.xiToggleMasterMute();
     },
     play: function() {
         this._swf.xiAutoPlay(this._lastID);

@@ -25,6 +25,10 @@ package {
         private var _xiLock:Number = 0;
         private var _xiMessagePool:Array = [];
 
+        // state
+        private var _masterMute:Boolean = false;
+        private var _masterVolume:Number = 0;
+
         public function Media():void {
             stage ? init() : addEventListener(Event.ADDED_TO_STAGE, init);
         }
@@ -49,28 +53,24 @@ package {
                                                 : ("uu.dmz." + xi.objectID);
 
             // --- ExternalInterface definitions ---
-            xi.addCallback("xiBeforeUnload",            xiBeforeUnload);
-            xi.addCallback("xiListAddAudio",            xiListAddAudio);
-            xi.addCallback("xiListAddImageAudio",       xiListAddImageAudio);
-//            xi.addCallback("xiListAddItemImageAudiox2",   xiListAddItemImageAudiox2);
-//            xi.addCallback("xiListAddItemVideoAudio",     xiListAddItemVideoAudio);
-            xi.addCallback("xiListClear",               xiListClear);
-            xi.addCallback("xiGetState",                xiGetState);
-            xi.addCallback("xiTogglePlay",              xiTogglePlay);
-            xi.addCallback("xiAutoPlay",                xiAutoPlay);
-            xi.addCallback("xiPlay",                    xiPlay);
-            xi.addCallback("xiPause",                   xiPause);
-            xi.addCallback("xiSeek",                    xiSeek);
-            xi.addCallback("xiStop",                    xiStop);
-            xi.addCallback("xiClose",                   xiClose);
-            xi.addCallback("xiSetVolume",               xiSetVolume);
-            xi.addCallback("xiPrevAutoPlay",            xiPrevAutoPlay);
-            xi.addCallback("xiNextAutoPlay",            xiNextAutoPlay);
-/*
-            xi.addCallback("xiClearScreen", xiClearScreen);
-            xi.addCallback("xiSetScreenSize", xiSetScreenSize);
- */
-//            stage.scaleMode = StageScaleMode.EXACT_FIT; // 画面サイズにフィットさせる(縦横比は維持されない)
+            xi.addCallback("xiAdd",             xiAdd);
+            xi.addCallback("xiClear",           xiClear);
+            xi.addCallback("xiGetState",        xiGetState);
+            xi.addCallback("xiTogglePlay",      xiTogglePlay);
+            xi.addCallback("xiAutoPlay",        xiAutoPlay);
+            xi.addCallback("xiPlay",            xiPlay);
+            xi.addCallback("xiPause",           xiPause);
+            xi.addCallback("xiSeek",            xiSeek);
+            xi.addCallback("xiStop",            xiStop);
+            xi.addCallback("xiClose",           xiClose);
+            xi.addCallback("xiSetMute",         xiSetMute);
+            xi.addCallback("xiSetMasterMute",   xiSetMasterMute);
+            xi.addCallback("xiToggleMasterMute",xiToggleMasterMute);
+            xi.addCallback("xiSetVolume",       xiSetVolume);
+            xi.addCallback("xiSetMasterVolume", xiSetMasterVolume);
+            xi.addCallback("xiPrevAutoPlay",    xiPrevAutoPlay);
+            xi.addCallback("xiNextAutoPlay",    xiNextAutoPlay);
+            xi.addCallback("xiBeforeUnload",    xiBeforeUnload);
 
             try {
                 xi.call(_xiCallback, "init", 0); // id = 0
@@ -79,6 +79,11 @@ package {
             }
             _timer.addEventListener(TimerEvent.TIMER, handleTimer);
             _timer.start();
+
+            trace("stage.stageWidth",  stage.stageWidth);
+            trace("stage.stageHeight", stage.stageHeight);
+
+            stage.scaleMode = StageScaleMode.NO_BORDER;
         }
 
         private function handleTimer(event:TimerEvent):void {
@@ -127,15 +132,45 @@ package {
             case "seek":    obj.seek(queue.param1); break; // 0~100
             case "stop":    obj.stop(); break;
             case "close":   obj.close(); break;
+            case "mute":    obj.setMute(queue.param1); break;
             case "volume":  obj.setVolume(queue.param1, queue.param2);
             }
         }
 
-        public function xiBeforeUnload():void {
-            trace("xiBeforeUnload");
+        public function xiAdd(type:String,
+                              audioSource:Array,
+                              videoSource:Array,
+                              imageSource:Array,
+                              comment:Array):Number {
+            ++_xiLock;
+            switch (type) {
+            case "MediaAudio":
+                _list.push(new MediaAudio(this, _list.length,
+                                          audioSource));
+                break;
+            case "MediaImageAudio":
+                _list.push(new MediaImageAudio(this, _list.length,
+                                               audioSource,
+                                               imageSource));
+                break;
+            case "MediaImageAudiox2":
+            case "MediaVideoAudio":
+            default:
+                trace("ERROR", type);
+            }
+            --_xiLock;
+            return _list.length - 1;
+        }
 
-            _xiExportMessage = false; // export prohibit
-            xiListClear();
+        public function xiClear():void {
+            var i:int = 1, iz:int = _list.length;
+
+            for (; i < iz; ++i) {
+                _list[i].close();
+            }
+            _list = [null];
+            _playID = 0;
+            _lastID = 0;
         }
 
         public function xiAutoPlay(id:Number):void {
@@ -175,6 +210,36 @@ package {
             _queue.push({ id: id, action: "close" });
         }
 
+        public function xiSetMute(id:Number, unmute:Boolean = false):void {
+            _queue.push({ id: id, action: "mute", param1: unmute });
+        }
+
+        public function xiSetMasterMute(unmute:Boolean = false):void {
+            if (unmute) {
+                _masterMute = false;
+            } else {
+                _masterMute = true;
+            }
+            var i:int = 1, iz:int = _list.length;
+
+            for (; i < iz; ++i) {
+                _list[i].setMute(!_masterMute);
+            }
+        }
+
+        public function xiToggleMasterMute():void {
+            if (_masterMute) {
+                _masterMute = false;
+            } else {
+                _masterMute = true;
+            }
+            var i:int = 1, iz:int = _list.length;
+
+            for (; i < iz; ++i) {
+                _list[i].setMute(!_masterMute);
+            }
+        }
+
         public function xiSetVolume(id:Number,
                                     volume:Number,
                                     force:Boolean = false):void {
@@ -183,6 +248,19 @@ package {
                    : volume < 0 ? 0
                    : volume;
             _queue.push({ id: id, action: "volume", param1: volume, param2: force });
+        }
+
+        public function xiSetMasterVolume(volume:Number):void {
+            // volume = 0 ~ 1
+            _masterVolume = volume > 1 ? 1
+                          : volume < 0 ? 0
+                          : volume;
+
+            var i:int = 1, iz:int = _list.length;
+
+            for (; i < iz; ++i) {
+                _list[i].setVolume(_masterVolume, true);
+            }
         }
 
         public function xiPrevAutoPlay():Number {
@@ -205,49 +283,11 @@ package {
             return id;
         }
 
-        public function xiListAddAudio(audioSource:String):Number {
-            ++_xiLock;
-            _list.push(new MediaAudio(this, _list.length, audioSource));
-            --_xiLock;
-            return _list.length - 1;
-        }
+        public function xiBeforeUnload():void {
+            trace("xiBeforeUnload");
 
-        public function xiListAddImageAudio(audioSource:String,
-                                            imageSource:String):Number {
-            ++_xiLock;
-            _list.push(new MediaImageAudio(this, _list.length,
-                                           audioSource, imageSource));
-            --_xiLock;
-            return _list.length - 1;
-        }
-/*
-
-        public function xiListAddItemImageAudio(preload:Boolean,
-                                                          imageURL:String,
-                                                          audioURL:String):void {
-        }
-
-        public function xiListAddItemImageAudiox2(preload:Boolean,
-                                                            imageURL:String,
-                                                            audioURL1:String,
-                                                            audioURL2:String):void {
-        }
-
-        public function xiListAddItemVideoAudio(preload:Boolean,
-                                                          videoURL:String,
-                                                          audioURL:String):void {
-        }
- */
-
-        public function xiListClear():void {
-            var i:int = 1, iz:int = _list.length;
-
-            for (; i < iz; ++i) {
-                _list[i].close();
-            }
-            _list = [null];
-            _playID = 0;
-            _lastID = 0;
+            _xiExportMessage = false; // export prohibit
+            xiClear();
         }
 
         public function postMessage(msg:String, id:Number = 0, param:* = undefined):void {
@@ -270,6 +310,9 @@ trace("postMessage", msg, id, param);
         private function postMessageToJavaScript(msg:String, id:Number = 0):void {
             if (id in _list) {
                 var state:Object = _list[id].getState();
+
+                state.masterMute = _masterMute; // join
+                state.masterVolume = _masterVolume; // join
 
                 switch (msg) {
                 case "durationchange":

@@ -12,14 +12,15 @@ window.uuconfig = {
 <script src="uu.class.media.js"></script>
 <script>
 uu.Class("MyMediaPlayer:MediaPlayer", {
-    init: function(seekSlider, volumeSlider, sourceArray) {},
+    init: function(seekSlider, volumeSlider, data) {},
     play: function() { this.superMethod("play"); },
     pause: function() { this.superMethod("pause"); },
     stop: function() { this.superMethod("stop"); },
     next: function() { this.superMethod("next"); },
     prev: function() { this.superMethod("prev"); },
-    volume: function(vol, force) { this.superMethod("volume", vol, force); },
-    togglePlay: function() { this.superMethod("togglePlay"); }
+    setMasterVolume: function(vol) { this.superMethod("setMasterVolume", vol); },
+    togglePlay: function() { this.superMethod("togglePlay"); },
+    toggleMasterMute: function() { this.superMethod("toggleMasterMute"); }
 });
 
 var media;
@@ -29,12 +30,27 @@ uu.ready(function(uu) {
     uu.ui.build();
 
     var ary = uu.ui("Slider"); // [0: seek, 1: volume]
+    var data = [
+        {   type: "MediaImageAudio",
+            audio: ["data/bego.mp3"],
+            video: [],
+            image: ["../../img/longupapa.jpg"],
+            comment: [] },
+        {   type: "MediaImageAudio",
+            audio: ["data/Hydrate-Kenny_Beltrey.mp3"],
+            video: [],
+            image: ["../../img/3ddf9d69e48da1ab171ad64a80a915a73c871cd2.jpg"],
+            comment: [] },
+        {   type: "MediaImageAudio",
+            audio: ["data/dora.mp3"],
+            video: [],
+            image: ["../../img/chrome.png"],
+            comment: [] }
+    ];
 
-    media = uu("MyMediaPlayer", ary[0], ary[1], [
-        "data/Hydrate-Kenny_Beltrey.mp3",
-        "data/bego.mp3",
-        "data/dora.mp3"
-    ]);
+    media = uu("MyMediaPlayer", ary[0], ary[1], data,
+               { width: 224, height: 168, nocache: true });
+//               { width: "100%", height: "100%", nocache: true });
 });
 </script>
 </head><body>
@@ -46,12 +62,10 @@ uu.ready(function(uu) {
 <input type="button" value="NEXT" onclick="media.next()" />
 <input type="button" value="STOP" onclick="media.stop()" />
 <input type="button" value="PAUSE" onclick="media.pause()" />
-<input type="button" value="VOLUME 0.1" onclick="media.volume(0.1)" />
-<input type="button" value="VOLUME 0.5" onclick="media.volume(0.5)" />
-<input type="button" value="VOLUME 0.9" onclick="media.volume(0.9)" />
 <input id="seekBar" ui="Slider" type="range" value="0" size="200" min="0" max="100" />
+<input type="button" value="MUTE" onclick="media.toggleMasterMute()" />
 <input id="volumeBar" ui="Slider" type="range" value="0" size="50" min="0" max="100" /> <!--  vertical="vertical" -->
 <br />
-<input type="button" value="clear log" onclick="uu.log.clear()" />
+<input type="button" value="CLEAR LOG" onclick="uu.log.clear()" />
 
 </body></html>
