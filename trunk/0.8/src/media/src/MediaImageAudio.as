@@ -7,7 +7,7 @@ package {
     import flash.utils.*;
     import flash.net.*;
 
-    public class MediaAudio extends Sprite {
+    public class MediaImageAudio extends MediaAudio {
         public static var AUDIO_STATE_STOPPED:uint   = 0;
         public static var AUDIO_STATE_PLAYING:uint   = 1;
         public static var AUDIO_STATE_PAUSED:uint    = 2;
@@ -15,54 +15,17 @@ package {
         public static var STREAM_STATE_OPEN:uint     = 1;
         public static var STREAM_STATE_CAN_PLAY:uint = 2;
         public static var STREAM_STATE_ERROR:uint    = 3;
-        protected var _boss:Media;
-        protected var _id:Number = 0;
-        // inner
-        protected var _sound:Sound = null;
-        protected var _soundChannel:SoundChannel = null;
-        protected var _timer:Timer = new Timer(200, 0);
-        protected var _fadeTimer:Timer = new Timer(80, 20); // 80msec * 20 = 1.6sec
-        protected var _fadeCompleteCallback:Array = [];
-        protected var _canPlayedCallback:Array = [];
-        protected var _lastPosition:Number = 0;
-        protected var _updateDuration:Boolean = false;
-        protected var _updateVolume:Boolean = false;
-        protected var _progress:Number = 0; // 0 ~ 100
-        // state
-        protected var _audioState:uint = AUDIO_STATE_STOPPED;
-        protected var _streamState:uint = STREAM_STATE_CLOSED;
-        protected var _streamLoaded:Boolean = false;
-        protected var _loop:Boolean = false;
-        protected var _mute:Boolean = false;
-        protected var _volume:Object = {
-                        current: 1,             // 0~1
-                        future: 1,              // 0~1
-                        past: 1                 // 0~1
-                    };
-        protected var _keepVolume:Number = 1;     // 0~1
-        protected var _startTime:Number = 0;      // unit: ms
-        protected var _currentTime:Number = 0;    // unit: ms
-        protected var _audioSource:Object = {
-                        loaded: "",
-                        current: ""
-                    };
+        protected var _imageSource:String = "";
 
-        public function MediaAudio(boss:Media,
-                                   id:Number,
-                                   audioSource:String) {
-            _boss = boss;
-            _id = id;
-            _audioSource.current = audioSource;
-
-            _timer.addEventListener(TimerEvent.TIMER, handleTimer);
-            _timer.start();
-
-            _fadeTimer.addEventListener(TimerEvent.TIMER, handleFadeTimer);
-            _fadeTimer.addEventListener(TimerEvent.TIMER_COMPLETE, handleFadeComplete);
-
+        public function MediaImageAudio(boss:Media,
+                                        id:Number,
+                                        audioSource:String,
+                                        imageSource:String) {
+            super(boss, id, audioSource);
+            _imageSource = imageSource;
         }
 
-        public function load(callback:Function = null):void {
+        override public function load(callback:Function = null):void {
             if (!_audioSource.current) {
                 trace(_id, "load() fail. audio source was empty")
                 callback(false); // fail
@@ -89,7 +52,7 @@ package {
         }
 
         // fadein/fadeout volume
-        protected function fadeVolume(volume:Number,
+        override protected function fadeVolume(volume:Number,
                                     callback:Function = null):void {
             if (!_soundChannel) {
                 callback && callback.call(this);
@@ -103,7 +66,7 @@ package {
             _fadeTimer.start();
         }
 
-        protected function openSound(callback:Function = null):void {
+        override protected function openSound(callback:Function = null):void {
             _sound = new Sound();
             _sound.addEventListener(Event.OPEN, handleOpen);
             _sound.addEventListener(Event.COMPLETE, handleComplete);
@@ -118,7 +81,7 @@ package {
             }
         }
 
-        protected function closeSound():void {
+        override protected function closeSound():void {
             if (_sound) {
                 if (!_streamLoaded) { // abort
                     try {
@@ -136,7 +99,7 @@ package {
             _streamState = STREAM_STATE_CLOSED;
         }
 
-        protected function openSoundChannel(position:Number):void {
+        override protected function openSoundChannel(position:Number):void {
             var soundTransform:SoundTransform = new SoundTransform(_volume.current);
 
             _audioState = AUDIO_STATE_PLAYING;
@@ -145,7 +108,7 @@ package {
             _lastPosition = _soundChannel.position;
         }
 
-        protected function closeSoundChannel():Number {
+        override protected function closeSoundChannel():Number {
             var rv:Number = _currentTime;
 
             if (_soundChannel) {
@@ -164,7 +127,7 @@ package {
             return rv;
         }
 
-        public function play():void {
+        override public function play():void {
             if (_streamState === STREAM_STATE_CAN_PLAY &&
                 _audioState !== AUDIO_STATE_PLAYING) {
 
@@ -177,7 +140,7 @@ package {
             }
         }
 
-        public function seek(position:Number):void { // @param Number: 0~100
+        override public function seek(position:Number):void { // @param Number: 0~100
             if (_sound &&
                 _streamState === STREAM_STATE_CAN_PLAY) {
 
@@ -209,7 +172,7 @@ package {
             }
         }
 
-        public function pause():void {
+        override public function pause():void {
             if (_streamState === STREAM_STATE_CAN_PLAY &&
                 _audioState === AUDIO_STATE_PLAYING) {
 
@@ -219,7 +182,7 @@ package {
             }
         }
 
-        public function stop():void {
+        override public function stop():void {
             if (_streamState === STREAM_STATE_OPEN ||
                 _streamState === STREAM_STATE_CAN_PLAY) {
 
@@ -231,7 +194,7 @@ package {
             }
         }
 
-        public function close():void {
+        override public function close():void {
             fadeVolume(0, function():void {
                 closeSoundChannel();
                 _currentTime = 0;
@@ -240,7 +203,7 @@ package {
             });
         }
 
-        public function getState():Object { // @return Hash: { loop, volume, duration,
+        override public function getState():Object { // @return Hash: { loop, volume, duration,
                                             //                 startTime, currentTime,
                                             //                 audioSource, videoSource, imageSource,
                                             //                 audioState, videoState, imageState, streamState }
@@ -274,11 +237,11 @@ package {
             };
         }
 
-        public function setLoop(loop:Boolean):void {
+        override public function setLoop(loop:Boolean):void {
             _loop = loop;
         }
 
-        public function setVolume(volume:Number,
+        override public function setVolume(volume:Number,
                                   force:Boolean = false):void {
             if (_volume.future !== volume || force) {
                 _volume.past = volume;
@@ -288,33 +251,33 @@ package {
             }
         }
 
-        public function setMute(mute:Boolean):void {
+        override public function setMute(mute:Boolean):void {
             _mute = mute;
             updateVolume(true);
         }
 
-        public function setStartTime(time:Number):void {
+        override public function setStartTime(time:Number):void {
             _startTime = time; // ms
         }
 
-        public function setCurrentTime(time:Number):void {
+        override public function setCurrentTime(time:Number):void {
             _currentTime = time; // ms
         }
 
-        public function isOpen():Boolean {
+        override public function isOpen():Boolean {
             return _streamState === STREAM_STATE_OPEN;
         }
 
-        public function isCanPlay():Boolean {
+        override public function isCanPlay():Boolean {
             return _streamState === STREAM_STATE_CAN_PLAY;
         }
 
-        public function isPlaying():Boolean {
+        override public function isPlaying():Boolean {
             return _audioState === AUDIO_STATE_PLAYING;
         }
 
         // ---------------------------------------
-        protected function handleTimer(event:TimerEvent):void {
+        override protected function handleTimer(event:TimerEvent):void {
             if (_streamState === STREAM_STATE_OPEN ||
                 _streamState === STREAM_STATE_CAN_PLAY) {
 
@@ -342,7 +305,7 @@ package {
             }
         }
 
-        protected function handleFadeTimer(event:TimerEvent):void {
+        override protected function handleFadeTimer(event:TimerEvent):void {
             if (_volume.current !== _volume.future) {
                 if (_volume.current > _volume.future) {
                     _volume.current -= 0.05;
@@ -359,7 +322,7 @@ package {
             }
         }
 
-        protected function handleFadeComplete(event:TimerEvent):void {
+        override protected function handleFadeComplete(event:TimerEvent):void {
             var callback:Function;
 
             _volume.current = _volume.past; // resume volume
@@ -370,17 +333,17 @@ package {
             }
         }
 
-        protected function handleOpen(event:Event):void {
+        override protected function handleOpen(event:Event):void {
             _streamState = STREAM_STATE_OPEN;
             _boss.postMessage("loadstart", _id); // W3C NamedEvent
         }
 
-        protected function handleComplete(event:Event):void {
+        override protected function handleComplete(event:Event):void {
             _streamLoaded = true;
             _boss.postMessage("loadend", _id); // NOT W3C NamedEvent
         }
 
-        protected function handleIOError(event:IOErrorEvent):void {
+        override protected function handleIOError(event:IOErrorEvent):void {
             trace(_id, "handleIOError: " + event);
 
             _streamState = STREAM_STATE_ERROR;
@@ -388,7 +351,7 @@ package {
             _boss.postMessage("error", _id); // W3C NamedEvent
         }
 
-        protected function handleProgress(event:ProgressEvent):void {
+        override protected function handleProgress(event:ProgressEvent):void {
             if (_streamState === STREAM_STATE_OPEN) {
                 _streamState = STREAM_STATE_CAN_PLAY;
 
@@ -406,7 +369,7 @@ package {
             _boss.postMessage("progress", _id); // W3C NamedEvent
         }
 
-        protected function handleSoundChannelComplete(event:Event):void {
+        override protected function handleSoundChannelComplete(event:Event):void {
             _audioState = AUDIO_STATE_STOPPED;
 
             var pos:Number = 0;
@@ -427,7 +390,7 @@ package {
             }
         }
 
-        protected function updateVolume(forceUpdate:Boolean = false):void {
+        override protected function updateVolume(forceUpdate:Boolean = false):void {
             if (_soundChannel) {
                 if (_updateVolume || forceUpdate) {
                     _updateVolume = false;
