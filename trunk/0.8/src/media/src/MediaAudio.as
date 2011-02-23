@@ -19,8 +19,8 @@ package {
         // inner
         private var _sound:Sound = null;
         private var _soundChannel:SoundChannel = null;
-        private var _timer:Timer = new Timer(1000, 0);
-        private var _fadeTimer:Timer = new Timer(80, 16); // 1.3sec
+        private var _timer:Timer = new Timer(200, 0);
+        private var _fadeTimer:Timer = new Timer(80, 20); // 80msec * 20 = 1.6sec
         private var _fadeCompleteCallback:Array = [];
         private var _canPlayedCallback:Array = [];
         private var _lastPosition:Number = 0;
@@ -141,6 +141,7 @@ package {
             _audioState = AUDIO_STATE_PLAYING;
             _soundChannel = _sound.play(position, 0, soundTransform);
             _soundChannel.addEventListener(Event.SOUND_COMPLETE, handleSoundChannelComplete);
+            _lastPosition = _soundChannel.position;
         }
 
         private function closeSoundChannel():Number {
@@ -256,7 +257,7 @@ package {
             return {
                 loop: _loop,
                 mute: _mute,
-                volume: _volume.current,
+                volume: _volume.current, // 0~1
                 duration: duration,
                 progress: _progress,
                 position: duration ? Math.round(currentTime / duration * 100) : 0, // 0~100
@@ -276,8 +277,9 @@ package {
             _loop = loop;
         }
 
-        public function setVolume(volume:Number):void {
-            if (_volume.future !== volume) {
+        public function setVolume(volume:Number,
+                                  force:Boolean = false):void {
+            if (_volume.future !== volume || force) {
                 _volume.past = volume;
                 _volume.future = volume;
                 _volume.current = volume;
@@ -329,8 +331,10 @@ package {
                         var pos:Number = _soundChannel.position;
 
                         if (_lastPosition !== pos) {
-                            _lastPosition = pos;
-                            _boss.postMessage("timeupdate", _id, pos); // W3C NamedEvent
+                            if (_lastPosition + 1000 < pos) { // over 1sec
+                                _lastPosition = pos;
+                                _boss.postMessage("timeupdate", _id, pos); // W3C NamedEvent
+                            }
                         }
                     }
                 }

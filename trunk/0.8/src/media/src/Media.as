@@ -10,6 +10,7 @@ package {
     public class Media extends Sprite {
         // for ExternalInterface
         private var _xiCallback:String = "";
+        private var _xiExportMessage:Boolean = true;
 
         // for Message Queue
         private var _timer:Timer = new Timer(50, 0); // 20fps
@@ -48,6 +49,7 @@ package {
                                                 : ("uu.dmz." + xi.objectID);
 
             // --- ExternalInterface definitions ---
+            xi.addCallback("xiBeforeUnload",            xiBeforeUnload);
             xi.addCallback("xiListAddAudio",            xiListAddAudio);
 //            xi.addCallback("xiListAddItemImageAudio",     xiListAddItemImageAudio);
 //            xi.addCallback("xiListAddItemImageAudiox2",   xiListAddItemImageAudiox2);
@@ -64,9 +66,6 @@ package {
             xi.addCallback("xiSetVolume",               xiSetVolume);
             xi.addCallback("xiPrevAutoPlay",            xiPrevAutoPlay);
             xi.addCallback("xiNextAutoPlay",            xiNextAutoPlay);
-/*
-            xi.addCallback("xiBeforeUnload",  xiBeforeUnload);
- */
 /*
             xi.addCallback("xiClearScreen", xiClearScreen);
             xi.addCallback("xiSetScreenSize", xiSetScreenSize);
@@ -128,8 +127,15 @@ package {
             case "seek":    obj.seek(queue.param1); break; // 0~100
             case "stop":    obj.stop(); break;
             case "close":   obj.close(); break;
-            case "volume":  obj.setVolume(queue.param1);
+            case "volume":  obj.setVolume(queue.param1, queue.param2);
             }
+        }
+
+        public function xiBeforeUnload():void {
+            trace("xiBeforeUnload");
+
+            _xiExportMessage = false; // export prohibit
+            xiListClear();
         }
 
         public function xiAutoPlay(id:Number):void {
@@ -169,12 +175,14 @@ package {
             _queue.push({ id: id, action: "close" });
         }
 
-        public function xiSetVolume(id:Number, volume:Number):void {
+        public function xiSetVolume(id:Number,
+                                    volume:Number,
+                                    force:Boolean = false):void {
             // volume = 0 ~ 1
             volume = volume > 1 ? 1
                    : volume < 0 ? 0
                    : volume;
-            _queue.push({ id: id, action: "volume", param1: volume });
+            _queue.push({ id: id, action: "volume", param1: volume, param2: force });
         }
 
         public function xiPrevAutoPlay():Number {
@@ -222,25 +230,29 @@ package {
  */
 
         public function xiListClear():void {
-            _list.forEach(function(obj:Object, i:int, ary:Array):void {
-                obj.close();
-            });
+            var i:int = 1, iz:int = _list.length;
+
+            for (; i < iz; ++i) {
+                _list[i].close();
+            }
             _list = [null];
             _playID = 0;
             _lastID = 0;
         }
 
         public function postMessage(msg:String, id:Number = 0, param:* = undefined):void {
-trace("postMessage", msg, id, param);
             var that:* = this;
 
-            if (_xiLock) { // lock -> stock
-                _xiMessagePool.push({ msg: msg, id: id });
-            } else {
-                _xiMessagePool.forEach(function(obj:Object, i:int, ary:Array):void {
-                    postMessageToJavaScript.call(that, obj.msg, obj.id);
-                });
-                postMessageToJavaScript(msg, id);
+            if (_xiExportMessage) {
+trace("postMessage", msg, id, param);
+                if (_xiLock) { // lock -> stock
+                    _xiMessagePool.push({ msg: msg, id: id });
+                } else {
+                    _xiMessagePool.forEach(function(obj:Object, i:int, ary:Array):void {
+                        postMessageToJavaScript.call(that, obj.msg, obj.id);
+                    });
+                    postMessageToJavaScript(msg, id);
+                }
             }
         }
 

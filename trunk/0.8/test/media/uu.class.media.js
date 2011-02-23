@@ -1,44 +1,57 @@
-uu.ready(function(uu) {
+// case "http://localhost:8080/0.8/test/media/media.htm"
 
 uu.Class("MediaPlayer", {
     _source: [],
     _lastID: 0, // current playing itemID
-    _position: 0,
-    _ignoreTimeupdate: false,
+    _seekPosition: 0,
+    _volumePosition: 0,
+    _ignoreSeekUpdate: false,
+    _ignoreVolumeUpdate: false,
 
-    init: function(sourceArray) {
-        this._source = sourceArray;
+    init: function(seekSlider,    // @param UISlider:
+                   volumeSlider,  // @param UISlider:
+                   sourceArray) { // @param Array:
 
         function doSeek(evt, attr) { // attr.value = 0~100
-            that._ignoreTimeupdate = true;
+            that._ignoreSeekUpdate = true;
             that.seek(parseFloat(attr.value));
 
             setTimeout(function() {
-                that._ignoreTimeupdate = false;
-            }, 100);
+                that._ignoreSeekUpdate = false;
+            }, 150);
+        }
+        function doVolume(evt, attr) { // attr.value = 0~100
+            that._ignoreVolumeUpdate = true;
+            that.volume(parseFloat(attr.value) / 100);
+
+            setTimeout(function() {
+                that._ignoreVolumeUpdate = false;
+            }, 150);
         }
 
         var that = this;
 
+        this._seekSlider = seekSlider;
+        this._volumeSlider = volumeSlider;
+        this._source = sourceArray;
         this._swf = uu.flash.call(this, "../../swf/uu.media.swf",
                                   { width: 300, height: 100, nocache: true },
                                   this.handleFlash);
-        // slider settings
-        var ary = uu.ui("Slider"); // [0: volume, 1: seek]
-
-        seekBar   = ary[0];
-        volumeBar = ary[1];
-
-        // volume.change event handler
-        volumeBar.bind("change", function(evt, attr) { // attr.value 0~100
-            that.volume(parseFloat(attr.value) * 0.01);
+        // volume event handler
+        volumeSlider.bind("mousedown", function(evt, attr) {
+            that._ignoreVolumeUpdate = true;
         });
-        seekBar.bind("mousedown", function(evt, attr) {
-            that._ignoreTimeupdate = true;
+        volumeSlider.bind("mouseup", doVolume);
+        volumeSlider.bind("mousewheel", doVolume);
+        volumeSlider.bind("keydown", doVolume);
+
+        // seek event handler
+        seekSlider.bind("mousedown", function(evt, attr) {
+            that._ignoreSeekUpdate = true;
         });
-        seekBar.bind("mouseup", doSeek);
-        seekBar.bind("mousewheel", doSeek);
-        seekBar.bind("keydown", doSeek);
+        seekSlider.bind("mouseup", doSeek);
+        seekSlider.bind("mousewheel", doSeek);
+        seekSlider.bind("keydown", doSeek);
     },
     handleFlash: function(xid, msg, id, state) {
         var that = this;
@@ -57,27 +70,42 @@ uu.Class("MediaPlayer", {
 
         switch (msg) {
         case "init":
+            this.setFinalizer();
             this._source.forEach(function(src) {
                 that._swf.xiListAddAudio(src);
             });
             this._lastID = 1;
             this._swf.xiAutoPlay(this._lastID);
+            this.volume(1, true);
             break;
         case "timeupdate":
             // update grip position
-            if (!this._ignoreTimeupdate &&
-                this._position !== state.position) {
+            if (this._lastID === id) {
+                if (!this._ignoreSeekUpdate &&
+                    this._seekPosition !== state.position) {
 
-                this._position = state.position;
-                uu.msg.post(seekBar, "value", state.position, 0);
+                    this._seekPosition = state.position;
+                    uu.msg.post(this._seekSlider, "value", state.position, 0);
+                }
+            }
+            break;
+        case "volumechange":
+            // upate volume slider position
+            if (this._lastID === id) {
+                if (!this._ignoreVolumeUpdate &&
+                    this._volumePosition != state.volume) {
+
+                    this._volumePosition = state.volume;
+                    uu.msg.post(this._volumeSlider, "value", state.volume * 100, 0);
+                }
             }
             break;
         case "ended":
             this.next();
         }
     },
-    volume: function(volume) {
-        this._swf.xiSetVolume(this._lastID, volume);
+    volume: function(volume, force) {
+        this._swf.xiSetVolume(this._lastID, volume, force);
     },
     togglePlay: function() {
         this._swf.xiTogglePlay(this._lastID);
@@ -99,26 +127,19 @@ uu.Class("MediaPlayer", {
     },
     prev: function() {
         this._lastID = this._swf.xiPrevAutoPlay();
+    },
+    setFinalizer: function() {
+        var swf = this._swf;
+
+        // close window / close tab
+        if (window.addEventListener) {
+            window.addEventListener("beforeunload", function(evt) {
+                swf.xiBeforeUnload();
+            }, false);
+        } else if (window.attachEvent) {
+            window.attachEvent("beforeunload", function(evt) {
+                swf.xiBeforeUnload();
+            });
+        }
     }
 });
-
-// activate slider
-uu.ui.build();
-
-var _media = uu("MediaPlayer", [
-    "../../media/Hydrate-Kenny_Beltrey.mp3",
-    "../../media/bego.mp3",
-    "../../media/dora.mp3"
-]);
-
-// outer I/F
-window.playAudio  = function() { _media.play(); };
-window.pauseAudio = function() { _media.pause(); };
-window.stopAudio  = function() { _media.stop(); };
-window.nextAudio  = function() { _media.next(); };
-window.prevAudio  = function() { _media.prev(); };
-window.volumeAudio = function(n) { _media.volume(n); };
-window.togglePlayAudio = function() { _media.togglePlay(); };
-
-});
-
