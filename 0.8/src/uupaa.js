@@ -127,7 +127,7 @@
 //          setTimeout(scrollTo, 100, 0, 1);
 //
 //      StandAlone(FullScreen Mode = App Mode)
-//          window.navigator.standalone = true
+//          window.navigator.standalone = true; (MobileWebKit)
 //
 // Flash10.1
 //      <param name="hasPriority" value="true" />
@@ -1085,17 +1085,17 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //  [6][AudioReady]                        uu.ready("audio", AudioReadyCallback, ...)
                                     //  [7][VideoReady]                        uu.ready("video", VideoReadyCallback, ...)
                                     //  [8][SVGReady]                          uu.ready("canvas", SVGReadyCallback, ...)
-                                    //  [9][URLReady (/url dispatcher/)]       uu.ready(/\/event\/xmax/, URLMatchedCallback, ...)
-                                    //  [10][URLReady ("Slash/Has/String")]    uu.ready("/event/xmax", URLMatchedCallback, ...)
-                                    //  [11][User defined ident callback]      uu.ready("MyIdent", UserDefinedCallback); uu.ready.fire("MyIdent")
-                                    //  [12][User level(low order) callback]   uu.ready("ident", UserLevelCallback, ...)
-                                    //  [13][User level(low order) callback]   uu.ready("ident:0", UserLevelCallback, ...)
-                                    //  [14][App level(high order) callback]   uu.ready("ident:1", AppLevelCallback, ...)
-                                    //  [15][System level(top order) callback] uu.ready("ident:2", SystemLevelCallback, ...)
-                                    //  [16][multiple callback]                uu.ready(UserLevelDOMContentReadyCallback,
+                                    //  [9][URL Dispatcher]                    uu.ready("href:/event/xmas", LocationHrefRegExpMatchedCallback, ...)
+                                    //  [10][User defined ident callback]      uu.ready("MyIdent", UserDefinedCallback); uu.ready.fire("MyIdent")
+                                    //  [11][User level(low order) callback]   uu.ready("ident", UserLevelCallback, ...)
+                                    //  [12][User level(low order) callback]   uu.ready("ident:0", UserLevelCallback, ...)
+                                    //  [13][App level(high order) callback]   uu.ready("ident:1", AppLevelCallback, ...)
+                                    //  [14][System level(top order) callback] uu.ready("ident:2", SystemLevelCallback, ...)
+                                    //  [15][multiple callback]                uu.ready(UserLevelDOMContentReadyCallback,
                                     //                                           "dom:2", SystemLevelDOMContentReadyCallback,
                                     //                                           "window", UserLevelWindowReadyCallbacK,
                                     //                                           "window:2", SystemLevelWindowReadyCallbacK,
+                                    //                                           "href:/event/xmas", LocationHrefRegExpMatchedCallback,
                                     //                                           "storage", UserLevelStorageReadyCallback,
                                     //                                                      UserLevelStorageReadyCallback)
         fire:       uureadyfire,    // uu.ready.fire(readyEventType:CaseInsenseString, param:Mix = document)
@@ -5041,14 +5041,14 @@ function uuClass(className,      // @param String: "Class"
 
     if (Super && protoMember && !protoIsFunction) { // [2]
         tmp = function() {};
-        tmp[_prototype] = uu.Class[Super][_prototype];
-        classPrototype = uuClass[Class][_prototype] = new tmp;
+        tmp[_prototype] = uuClass[Super][_prototype];
+        classPrototype  = uuClass[Class][_prototype] = new tmp;
 
         for (i in protoMember) {
             classPrototype[i] = protoMember[i];
         }
         classPrototype.constructor = uuClass[Class];
-        classPrototype.superClass = uu.Class[Super][_prototype];
+        classPrototype.superClass  = uuClass[Super][_prototype];
         classPrototype.superMethod = superMethod;
     }
 
@@ -5153,6 +5153,7 @@ function uumsgunbind(instance) { // @param Instance: class instance
 // --- event ---
 
 // uu.event - bind event
+//   window.onbeforeunload unsupported
 function uuevent(node,         // @param Node/Window:
                  exEventType,  // @param ExEventTypeString: some EventTypeEx, "click,click+,..."
                  evaluator,    // @param CallbackFunction/Instance: callback function
@@ -5166,6 +5167,9 @@ function uuevent(node,         // @param Node/Window:
 //{@assert
     if (node !== win && !isNode(node)) {
         uung("uu.event", node);
+    }
+    if (evaluator == null) { // null or undefined
+        uung("uu.event", "evaluator does not function");
     }
     switch (uutype(hint)) {
     case uutype.STRING:

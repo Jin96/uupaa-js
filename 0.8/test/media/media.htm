@@ -10,18 +10,45 @@ window.uuconfig = {
 </script>
 <script src="../../src/uupaa.js"></script>
 <script src="uu.class.media.js"></script>
+<script>
+uu.Class("MyMediaPlayer:MediaPlayer", {
+    init: function(seekSlider, volumeSlider, sourceArray) {},
+    play: function() { this.superMethod("play"); },
+    pause: function() { this.superMethod("pause"); },
+    stop: function() { this.superMethod("stop"); },
+    next: function() { this.superMethod("next"); },
+    prev: function() { this.superMethod("prev"); },
+    volume: function(vol, force) { this.superMethod("volume", vol, force); },
+    togglePlay: function() { this.superMethod("togglePlay"); }
+});
+
+var media;
+
+// slider activate
+uu.ready(function(uu) {
+    uu.ui.build();
+
+    var ary = uu.ui("Slider"); // [0: seek, 1: volume]
+
+    media = uu("MyMediaPlayer", ary[0], ary[1], [
+        "data/Hydrate-Kenny_Beltrey.mp3",
+        "data/bego.mp3",
+        "data/dora.mp3"
+    ]);
+});
+</script>
 </head><body>
 <p>STATUS: <span id="playButtonState">STOPPED</span></p>
 <p>AUDIO: <span id="audioSource">...</span></p>
 <p>VIDEO: <span id="videoSource">...</span></p>
-<input type="button" value="PREV" onclick="prevAudio()" />
-<input type="button" value="PLAY / PAUSE" onclick="togglePlayAudio()" />
-<input type="button" value="NEXT" onclick="nextAudio()" />
-<input type="button" value="STOP" onclick="stopAudio()" />
-<input type="button" value="PAUSE" onclick="pauseAudio()" />
-<input type="button" value="VOLUME 0.1" onclick="volumeAudio(0.1)" />
-<input type="button" value="VOLUME 0.5" onclick="volumeAudio(0.5)" />
-<input type="button" value="VOLUME 0.9" onclick="volumeAudio(0.9)" />
+<input type="button" value="PREV" onclick="media.prev()" />
+<input type="button" value="PLAY / PAUSE" onclick="media.togglePlay()" />
+<input type="button" value="NEXT" onclick="media.next()" />
+<input type="button" value="STOP" onclick="media.stop()" />
+<input type="button" value="PAUSE" onclick="media.pause()" />
+<input type="button" value="VOLUME 0.1" onclick="media.volume(0.1)" />
+<input type="button" value="VOLUME 0.5" onclick="media.volume(0.5)" />
+<input type="button" value="VOLUME 0.9" onclick="media.volume(0.9)" />
 <input id="seekBar" ui="Slider" type="range" value="0" size="200" min="0" max="100" />
 <input id="volumeBar" ui="Slider" type="range" value="0" size="50" min="0" max="100" /> <!--  vertical="vertical" -->
 <br />
