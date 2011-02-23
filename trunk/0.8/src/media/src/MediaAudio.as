@@ -49,7 +49,7 @@ package {
 
         public function MediaAudio(boss:Media,
                                    id:Number,
-                                   audioSource:String) {
+                                   audioSource:Array) {
             _boss = boss;
             _id = id;
             _audioSource.current = audioSource;
@@ -278,6 +278,11 @@ package {
             _loop = loop;
         }
 
+        public function setMute(unmute:Boolean):void {
+            _mute = unmute ? false : true;
+            updateVolume(true);
+        }
+
         public function setVolume(volume:Number,
                                   force:Boolean = false):void {
             if (_volume.future !== volume || force) {
@@ -286,11 +291,6 @@ package {
                 _volume.current = volume;
                 updateVolume(true);
             }
-        }
-
-        public function setMute(mute:Boolean):void {
-            _mute = mute;
-            updateVolume(true);
         }
 
         public function setStartTime(time:Number):void {
@@ -438,7 +438,11 @@ package {
                     _soundChannel.soundTransform = soundTransform;
 
                     _boss.postMessage("volumechange", _id); // W3C NamedEvent
+                    return;
                 }
+            }
+            if (forceUpdate) {
+                _boss.postMessage("volumechange", _id); // W3C NamedEvent
             }
         }
     }
