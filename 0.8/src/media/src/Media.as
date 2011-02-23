@@ -51,7 +51,7 @@ package {
             // --- ExternalInterface definitions ---
             xi.addCallback("xiBeforeUnload",            xiBeforeUnload);
             xi.addCallback("xiListAddAudio",            xiListAddAudio);
-//            xi.addCallback("xiListAddItemImageAudio",     xiListAddItemImageAudio);
+            xi.addCallback("xiListAddImageAudio",       xiListAddImageAudio);
 //            xi.addCallback("xiListAddItemImageAudiox2",   xiListAddItemImageAudiox2);
 //            xi.addCallback("xiListAddItemVideoAudio",     xiListAddItemVideoAudio);
             xi.addCallback("xiListClear",               xiListClear);
@@ -205,13 +205,23 @@ package {
             return id;
         }
 
-        public function xiListAddAudio(url:String):Number {
+        public function xiListAddAudio(audioSource:String):Number {
             ++_xiLock;
-            _list.push(new MediaAudio(this, _list.length, url));
+            _list.push(new MediaAudio(this, _list.length, audioSource));
+            --_xiLock;
+            return _list.length - 1;
+        }
+
+        public function xiListAddImageAudio(audioSource:String,
+                                            imageSource:String):Number {
+            ++_xiLock;
+            _list.push(new MediaImageAudio(this, _list.length,
+                                           audioSource, imageSource));
             --_xiLock;
             return _list.length - 1;
         }
 /*
+
         public function xiListAddItemImageAudio(preload:Boolean,
                                                           imageURL:String,
                                                           audioURL:String):void {

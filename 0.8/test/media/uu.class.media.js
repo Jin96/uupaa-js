@@ -72,7 +72,8 @@ uu.Class("MediaPlayer", {
         case "init":
             this.setFinalizer();
             this._source.forEach(function(src) {
-                that._swf.xiListAddAudio(src);
+//              that._swf.xiListAddAudio(src);
+                that._swf.xiListAddImageAudio(src, "");
             });
             this._lastID = 1;
             this._swf.xiAutoPlay(this._lastID);
