@@ -16,27 +16,31 @@ package {
         public static var STREAM_STATE_CAN_PLAY:uint = 0x2;
         public static var STREAM_STATE_LOADED:uint   = 0x3;
         public static var STREAM_STATE_ERROR:uint    = 0x4;
+        // Identity
         protected var _boss:Media;
         protected var _id:Number = 0;
-
-        // inner
+        // Audio
         protected var _sound:Sound = null;
         protected var _soundChannel:SoundChannel = null;
-        protected var _timer:Timer = new Timer(200, 0);
-        protected var _lastPosition:Number = 0;
-        protected var _updateDuration:Boolean = false;
+        protected var _audioSource:Array = [];  // [audioURL, ...]
+        // Image
+        protected var _imageSource:Array = [];  // [imageURL, ...]
+        protected var _imageLoader:Array = [];  // [Loadedr, ...]
+        protected var _sprite:Sprite = null;
+        // Internal Structure
+        protected var _messageTimer:Timer = new Timer(200, 0);
+        protected var _lastPosition:Number = 0; // unit: ms
+        protected var _lastProgress:Number = 0; // 0 ~ 100
         protected var _updateVolume:Boolean = false;
-        protected var _progress:Number = 0; // 0 ~ 100
+        protected var _updateDuration:Boolean = false;
         protected var _autoLoad:Boolean = false;
-
-        // fade
+        // FadeIn/FadeOut
         protected var _fadeDelta:Number = 0.1;
         protected var _fadeSpeed:Number = 32; // msec
         protected var _fadeTimer:Timer = new Timer(_fadeSpeed, 20); // 32msec * 20 = 0.64sec
         protected var _fadeStepCallback:Array = [];
         protected var _fadeCompleteCallback:Array = [];
-
-        // state
+        // State
         protected var _audioState:uint = AUDIO_STATE_STOPPED;
         protected var _streamState:uint = STREAM_STATE_CLOSED;
         protected var _loop:Boolean = false;
@@ -46,10 +50,6 @@ package {
                                          past:    1 }; // 0~1
         protected var _startTime:Number = 0;    // unit: ms
         protected var _currentTime:Number = 0;  // unit: ms
-        protected var _audioSource:Array = [];  // [audioURL, ...]
-        protected var _imageSource:Array = [];  // [imageURL, ...]
-        protected var _imageLoader:Array = [];  // [Loadedr, ...]
-        protected var _sprite:Sprite = null;
 
         public function MediaAudio(boss:Media,
                                    id:Number,
@@ -60,8 +60,8 @@ package {
             _audioSource = audioSource.concat();
             _imageSource = imageSource.concat();
 
-            _timer.addEventListener(TimerEvent.TIMER, handleTimer);
-            _timer.start();
+            _messageTimer.addEventListener(TimerEvent.TIMER, handleMessageTimer);
+            _messageTimer.start();
 
             _fadeTimer.addEventListener(TimerEvent.TIMER, handleFadeTimer);
             _fadeTimer.addEventListener(TimerEvent.TIMER_COMPLETE, handleFadeComplete);
@@ -303,7 +303,7 @@ package {
                 mute: _mute,
                 volume: _volume.current, // 0~1
                 duration: duration,
-                progress: _progress,
+                progress: _lastProgress,
                 position: duration ? Math.round(currentTime / duration * 100) : 0, // 0~100
                 startTime: _startTime, // ms
                 currentTime: currentTime, // ms
@@ -353,7 +353,7 @@ package {
         }
 
         // ---------------------------------------
-        protected function handleTimer(event:TimerEvent):void {
+        protected function handleMessageTimer(event:TimerEvent):void {
             if (_streamState === STREAM_STATE_OPEN ||
                 _streamState === STREAM_STATE_CAN_PLAY ||
                 _streamState === STREAM_STATE_LOADED) {
@@ -445,7 +445,7 @@ package {
                 }
             }
             var loadTime:Number = event.bytesLoaded / event.bytesTotal;
-            _progress = Math.round(100 * loadTime);
+            _lastProgress = Math.round(100 * loadTime);
 
             _updateDuration = true;
             _boss.postMessage("progress", _id); // W3C NamedEvent
