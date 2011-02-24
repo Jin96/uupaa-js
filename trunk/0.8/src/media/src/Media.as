@@ -63,7 +63,6 @@ package {
             xi.addCallback("xiSeek",            xiSeek);
             xi.addCallback("xiStop",            xiStop);
             xi.addCallback("xiClose",           xiClose);
-            xi.addCallback("xiSetMute",         xiSetMute);
             xi.addCallback("xiSetMasterMute",   xiSetMasterMute);
             xi.addCallback("xiToggleMasterMute",xiToggleMasterMute);
             xi.addCallback("xiSetVolume",       xiSetVolume);
@@ -119,20 +118,14 @@ package {
                 }
             case "play":
                 _lastID = queue.id;
-                if (obj.isCanPlay()) {
-                    obj.play();
-                } else {
-                    obj.load(function(ok:Boolean):void {
-                        ok ? obj.play()
-                           : postMessage("error", queue.id);
-                    });
-                }
+                _masterMute && obj.setMute(true);
+                obj.play(true);
                 break;
             case "pause":   obj.pause(); break;
             case "seek":    obj.seek(queue.param1); break; // 0~100
             case "stop":    obj.stop(); break;
             case "close":   obj.close(); break;
-            case "mute":    obj.setMute(queue.param1); break;
+//          case "mute":    obj.setMute(queue.param1); break;
             case "volume":  obj.setVolume(queue.param1, queue.param2);
             }
         }
@@ -146,15 +139,17 @@ package {
             switch (type) {
             case "MediaAudio":
                 _list.push(new MediaAudio(this, _list.length,
-                                          audioSource));
+                                          audioSource,
+                                          imageSource));
                 break;
-            case "MediaImageAudio":
-                _list.push(new MediaImageAudio(this, _list.length,
-                                               audioSource,
-                                               imageSource));
+/*
+            case "MediaAudiox2":
+                _list.push(new MediaAudiox2(this, _list.length,
+                                            audioSource,
+                                            imageSource));
                 break;
-            case "MediaImageAudiox2":
-            case "MediaVideoAudio":
+            case "MediaAudioVideo":
+ */
             default:
                 trace("ERROR", type);
             }
@@ -210,33 +205,21 @@ package {
             _queue.push({ id: id, action: "close" });
         }
 
-        public function xiSetMute(id:Number, unmute:Boolean = false):void {
-            _queue.push({ id: id, action: "mute", param1: unmute });
-        }
-
-        public function xiSetMasterMute(unmute:Boolean = false):void {
-            if (unmute) {
-                _masterMute = false;
-            } else {
-                _masterMute = true;
-            }
+        public function xiSetMasterMute(mute:Boolean = true):void {
+            _masterMute = mute;
             var i:int = 1, iz:int = _list.length;
 
             for (; i < iz; ++i) {
-                _list[i].setMute(!_masterMute);
+                _list[i].setMute(_masterMute);
             }
         }
 
         public function xiToggleMasterMute():void {
-            if (_masterMute) {
-                _masterMute = false;
-            } else {
-                _masterMute = true;
-            }
+            _masterMute = _masterMute ? false : true;
             var i:int = 1, iz:int = _list.length;
 
             for (; i < iz; ++i) {
-                _list[i].setMute(!_masterMute);
+                _list[i].setMute(_masterMute);
             }
         }
 
@@ -294,7 +277,7 @@ package {
             var that:* = this;
 
             if (_xiExportMessage) {
-trace("postMessage", msg, id, param);
+// trace("postMessage", msg, id, param);
                 if (_xiLock) { // lock -> stock
                     _xiMessagePool.push({ msg: msg, id: id });
                 } else {
@@ -324,6 +307,27 @@ trace("postMessage", msg, id, param);
                     ExternalInterface.call(_xiCallback, msg, id, state, true);
                 }
             }
+        }
+
+        public function waitForObject(evaluate:Function,
+                                      args:Array,
+                                      that:*,
+                                      callback:Function,
+                                      msec:Number):void {
+            setTimeout(function tick():void {
+                var r:* = evaluate.apply(that, args);
+                // return false is callback(false)
+                // return true is callback(true)
+
+                if (r === true) {
+                    callback(true);
+                    return;
+                } else if (r === false) {
+                    callback(false);
+                    return;
+                }
+                setTimeout(tick, msec);
+            }, msec);
         }
     }
 }

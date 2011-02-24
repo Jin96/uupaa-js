@@ -60,7 +60,7 @@ uu.Class("MediaPlayer", {
 
         if (state) {
             if (this._lastID === id) {
-                switch (state.audioState) {
+                switch (state.audioState & 0xf) {
                 case 0: uu.text(uu.id("playButtonState"), "STOPPED"); break;
                 case 1: uu.text(uu.id("playButtonState"), "PLAYING"); break;
                 case 2: uu.text(uu.id("playButtonState"), "PAUSED");
@@ -115,7 +115,10 @@ uu.Class("MediaPlayer", {
     togglePlay: function() {
         this._swf.xiTogglePlay(this._lastID);
     },
-    toggleMasterMute: function() {
+    mute: function(amute) { // @param Boolean(= true):
+        this._swf.xiSetMasterMute(amute == null ? true : amute);
+    },
+    toggleMute: function() {
         this._swf.xiToggleMasterMute();
     },
     play: function() {

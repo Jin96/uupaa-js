@@ -31,17 +31,17 @@ uu.ready(function(uu) {
 
     var ary = uu.ui("Slider"); // [0: seek, 1: volume]
     var data = [
-        {   type: "MediaImageAudio",
-            audio: ["data/bego.mp3"],
-            video: [],
-            image: ["../../img/longupapa.jpg"],
-            comment: [] },
-        {   type: "MediaImageAudio",
+        {   type: "MediaAudio",
             audio: ["data/Hydrate-Kenny_Beltrey.mp3"],
             video: [],
             image: ["../../img/3ddf9d69e48da1ab171ad64a80a915a73c871cd2.jpg"],
             comment: [] },
-        {   type: "MediaImageAudio",
+        {   type: "MediaAudio",
+            audio: ["data/bego.mp3"],
+            video: [],
+            image: ["../../img/longupapa.jpg"],
+            comment: [] },
+        {   type: "MediaAudio",
             audio: ["data/dora.mp3"],
             video: [],
             image: ["../../img/chrome.png"],
@@ -63,7 +63,7 @@ uu.ready(function(uu) {
 <input type="button" value="STOP" onclick="media.stop()" />
 <input type="button" value="PAUSE" onclick="media.pause()" />
 <input id="seekBar" ui="Slider" type="range" value="0" size="200" min="0" max="100" />
-<input type="button" value="MUTE" onclick="media.toggleMasterMute()" />
+<input type="button" value="MUTE" onclick="media.toggleMute()" />
 <input id="volumeBar" ui="Slider" type="range" value="0" size="50" min="0" max="100" /> <!--  vertical="vertical" -->
 <br />
 <input type="button" value="CLEAR LOG" onclick="uu.log.clear()" />
