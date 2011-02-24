@@ -100,19 +100,13 @@ package {
         protected function fadeVolume(volume:Number,
                                       stepCallback:Function,
                                       completeCallback:Function):void {
-//            if (_audioState === AUDIO_STATE_PLAYING) {
-                _volume.past = _volume.current; // save
-                _volume.future = volume;
+            _volume.past = _volume.current; // save
+            _volume.future = volume;
 
-                stepCallback && _fadeStepCallback.push(stepCallback);
-                completeCallback && _fadeCompleteCallback.push(completeCallback);
-                _fadeTimer.reset();
-                _fadeTimer.start();
-/*
-            } else {
-                completeCallback && completeCallback.call(this);
-            }
- */
+            stepCallback && _fadeStepCallback.push(stepCallback);
+            completeCallback && _fadeCompleteCallback.push(completeCallback);
+            _fadeTimer.reset();
+            _fadeTimer.start();
         }
 
         public function openSoundChannel(position:Number):void {
