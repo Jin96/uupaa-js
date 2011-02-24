@@ -44,7 +44,7 @@ package {
             _sprite.addChild(event.target.loader);
         }
 
-        override public function play():void {
+        override public function play(autoLoad:Boolean = true):void {
             _sprite.visible = true;
             super.play();
         }
