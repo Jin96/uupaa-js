@@ -343,9 +343,9 @@ var _addEventListener = "addEventListener",
     _ie = _env.ie,                  // as uu.ie
     _ie67 = _ie && _env < 8,        // as uu.ie67
     _ie678 = _ie && _env < 9,       // as uu.ie678
-    _gecko = _env.gecko,            // as uu.gecko (Firefox, ...)
+    _gecko = _env.gecko,            // as uu.gecko (Firefox and Gecko Based Browsers)
     _opera = _env.opera,            // as uu.opera (Opera, Opera Mini)
-    _webkit = _env.webkit,          // as uu.webkit (Safari, iPhone, iPad, Google Chrome)
+    _webkit = _env.webkit,          // as uu.webkit (Safari, iPhone, iPad, iPod, Google Chrome)
     _mobile = _env.mobile,          // as uu.env.mobile (iOS, Android)
     _baseDir = getBaseDir();        // base dir. default - directory containing uupaa.js
 

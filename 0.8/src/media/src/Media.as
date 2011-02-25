@@ -142,12 +142,12 @@ package {
                                           audioSource,
                                           imageSource));
                 break;
-/*
             case "MediaAudiox2":
                 _list.push(new MediaAudiox2(this, _list.length,
                                             audioSource,
                                             imageSource));
                 break;
+/*
             case "MediaAudioVideo":
  */
             default:
@@ -276,6 +276,17 @@ package {
         public function postMessage(msg:String, id:Number = 0, param:* = undefined):void {
             var that:* = this;
 
+            if (!_list[id]) {
+                return;
+            }
+/*
+            switch (msg) {
+            case "ended":
+                if (_list[id].getState().multipleSource) {
+                    _list[id].stop(); // stop all
+                }
+            }
+ */
             if (_xiExportMessage) {
 // trace("postMessage", msg, id, param);
                 if (_xiLock) { // lock -> stock
@@ -291,7 +302,8 @@ package {
 
         // to js
         private function postMessageToJavaScript(msg:String, id:Number = 0):void {
-            if (id in _list) {
+            // id = 0 -> null
+            if (_list[id]) {
                 var state:Object = _list[id].getState();
 
                 state.masterMute = _masterMute; // join
@@ -301,33 +313,17 @@ package {
                 case "durationchange":
                 case "timeupdate":
                 case "progress":
+/*
+                case "play":
+                case "playing":
+                case "ended":
+ */
                     ExternalInterface.call(_xiCallback, msg, id, state, true);
                     break;
                 default:
                     ExternalInterface.call(_xiCallback, msg, id, state, true);
                 }
             }
-        }
-
-        public function waitForObject(evaluate:Function,
-                                      args:Array,
-                                      that:*,
-                                      callback:Function,
-                                      msec:Number):void {
-            setTimeout(function tick():void {
-                var r:* = evaluate.apply(that, args);
-                // return false is callback(false)
-                // return true is callback(true)
-
-                if (r === true) {
-                    callback(true);
-                    return;
-                } else if (r === false) {
-                    callback(false);
-                    return;
-                }
-                setTimeout(tick, msec);
-            }, msec);
         }
     }
 }
