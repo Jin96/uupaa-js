@@ -193,20 +193,27 @@ package {
                     break;
                 case AUDIO_STATE_PLAYING:
                 case AUDIO_STATE_PAUSED:
-                    _boss.postMessage("seeking", _id); // W3C NamedEvent
+                    try {
+                        _boss.postMessage("seeking", _id); // W3C NamedEvent
 
-                    var soundTransform:SoundTransform = _soundChannel.soundTransform;
+                        var soundTransform:SoundTransform = _soundChannel.soundTransform;
 
-                    _soundChannel.removeEventListener(Event.SOUND_COMPLETE, handleSoundChannelComplete);
-                    _soundChannel.stop();
-                    _soundChannel = null;
-                    _soundChannel = _sound.play(realPositon, 0, soundTransform);
-                    _soundChannel.addEventListener(Event.SOUND_COMPLETE, handleSoundChannelComplete);
+                        _soundChannel.removeEventListener(Event.SOUND_COMPLETE, handleSoundChannelComplete);
+                        _soundChannel.stop();
+                        _soundChannel = null;
+                        _soundChannel = _sound.play(realPositon, 0, soundTransform);
+                        _soundChannel.addEventListener(Event.SOUND_COMPLETE, handleSoundChannelComplete);
 
-                    _audioState = AUDIO_STATE_PLAYING;
+                        _audioState = AUDIO_STATE_PLAYING;
 
-                    _boss.postMessage("seekend", _id); // W3C NamedEvent
-                    _boss.postMessage("playing", _id); // W3C NamedEvent
+                        _boss.postMessage("seekend", _id); // W3C NamedEvent
+                        _boss.postMessage("playing", _id); // W3C NamedEvent
+                    } catch(err:Error) {
+                        // maybe: net disconnected / connection reset
+                        trace("seek", err);
+                        _audioState = AUDIO_STATE_STOPPED;
+                        _streamState = STREAM_STATE_ERROR;
+                    }
                 }
             }
         }
