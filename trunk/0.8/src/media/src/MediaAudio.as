@@ -33,7 +33,7 @@ package {
         protected var _lastProgress:Number = 0; // 0 ~ 100
         protected var _updateVolume:Boolean = false;
         protected var _updateDuration:Boolean = false;
-        protected var _autoLoad:Boolean = false;
+        protected var _autoPlay:Boolean = false;
         // FadeIn/FadeOut
         protected var _fadeDelta:Number = 0.1;
         protected var _fadeSpeed:Number = 32; // msec
@@ -54,11 +54,11 @@ package {
         public function MediaAudio(boss:Media,
                                    id:Number,
                                    audioSource:Array,
-                                   imageSource:Array) {
+                                   imageSource:Array = null) {
             _boss = boss;
             _id = id;
             _audioSource = audioSource.concat();
-            _imageSource = imageSource.concat();
+            _imageSource = imageSource ? imageSource.concat() : [];
 
             _messageTimer.addEventListener(TimerEvent.TIMER, handleMessageTimer);
             _messageTimer.start();
@@ -81,7 +81,7 @@ package {
 
             // load images
             _imageSource.forEach(function(url:String, index:int, ary:Array):void {
-                trace("MediaAudio", url);
+                trace(_id, "MediaAudio", url);
 
                 var loader:Loader = new Loader();
 
@@ -110,15 +110,11 @@ package {
         }
 
         public function openSoundChannel(position:Number):void {
-            _boss.postMessage("play", _id); // W3C NamedEvent
-
             _soundChannel = _sound.play(position, 0,
                                         new SoundTransform(_mute ? 0 : _volume.current));
             _lastPosition = _soundChannel.position;
             _audioState   = AUDIO_STATE_PLAYING;
             _soundChannel.addEventListener(Event.SOUND_COMPLETE, handleSoundChannelComplete);
-
-            _boss.postMessage("playing", _id); // W3C NamedEvent
         }
 
         public function closeSoundChannel():Number {
@@ -135,12 +131,12 @@ package {
             return rv;
         }
 
-        public function play(autoLoad:Boolean = true):void {
+        public function play(autoPlay:Boolean = false):void {
             switch (_streamState) {
             case STREAM_STATE_CLOSED:
                 _audioState = AUDIO_STATE_STOPPED;
                 _currentTime = _startTime;
-                autoLoad && (_autoLoad = true);
+                autoPlay && (_autoPlay = true);
 
                 // show poster image
                 if (_sprite) {
@@ -169,15 +165,18 @@ package {
                 _sound.addEventListener(IOErrorEvent.IO_ERROR, handleIOError);
                 _sound.addEventListener(ProgressEvent.PROGRESS, handleProgress);
                 _sound.load(new URLRequest(_audioSource[0]));
+                trace(_id, "MediaAudio", _audioSource[0]);
             case STREAM_STATE_OPEN:
-                autoLoad && (_autoLoad = true);
+                autoPlay && (_autoPlay = true);
                 break;
             case STREAM_STATE_CAN_PLAY:
             case STREAM_STATE_LOADED:
                 switch (_audioState) {
                 case AUDIO_STATE_STOPPED:
                 case AUDIO_STATE_PAUSED:
+                    _boss.postMessage("play", _id); // W3C NamedEvent
                     openSoundChannel(_currentTime);
+                    _boss.postMessage("playing", _id); // W3C NamedEvent
                 }
             }
         }
@@ -190,6 +189,7 @@ package {
                 switch (_audioState) {
                 case AUDIO_STATE_STOPPED: // stopped + seek
                     _currentTime = realPositon;
+                    _lastPosition = realPositon;
                     break;
                 case AUDIO_STATE_PLAYING:
                 case AUDIO_STATE_PAUSED:
@@ -203,7 +203,7 @@ package {
                         _soundChannel = null;
                         _soundChannel = _sound.play(realPositon, 0, soundTransform);
                         _soundChannel.addEventListener(Event.SOUND_COMPLETE, handleSoundChannelComplete);
-
+                        _lastPosition = realPositon;
                         _audioState = AUDIO_STATE_PLAYING;
 
                         _boss.postMessage("seekend", _id); // W3C NamedEvent
@@ -213,6 +213,8 @@ package {
                         trace("seek", err);
                         _audioState = AUDIO_STATE_STOPPED;
                         _streamState = STREAM_STATE_ERROR;
+                        _currentTime = 0;
+                        _lastPosition = 0;
                     }
                 }
             }
@@ -304,6 +306,7 @@ package {
 
             currentTime = _audioState === AUDIO_STATE_PLAYING ? _soundChannel.position
                         : _audioState === AUDIO_STATE_PAUSED  ? _currentTime
+                        : _audioState === AUDIO_STATE_STOPPED ? _currentTime
                         : 0;
             return {
                 loop: _loop,
@@ -319,17 +322,10 @@ package {
                 imageSource: "",
                 audioState: _audioState,
                 videoState: 0,
-                imageState: 0,
-                streamState: _streamState
+                imageState: _sprite && _sprite.alpha > 0 ? 1 : 0,
+                streamState: _streamState,
+                multipleSource: false
             };
-        }
-
-        public function getAudioState():uint {
-            return _audioState;
-        }
-
-        public function getStreamState():uint {
-            return _streamState;
         }
 
         public function setLoop(loop:Boolean):void {
@@ -426,7 +422,7 @@ package {
 
             _streamState = STREAM_STATE_ERROR;
             _audioState = AUDIO_STATE_STOPPED;
-            _autoLoad = false;
+            _autoPlay = false;
             _currentTime = 0;
             try {
                 _soundChannel && _soundChannel.stop();
@@ -446,9 +442,11 @@ package {
                 _streamState = STREAM_STATE_CAN_PLAY;
 
                 _boss.postMessage("canplay", _id); // W3C NamedEvent
-                if (_autoLoad) {
-                    _autoLoad = false;
+                if (_autoPlay) {
+                    _autoPlay = false;
+                    _boss.postMessage("play", _id); // W3C NamedEvent
                     openSoundChannel(_currentTime);
+                    _boss.postMessage("playing", _id); // W3C NamedEvent
                 }
             }
             var loadTime:Number = event.bytesLoaded / event.bytesTotal;
@@ -461,7 +459,7 @@ package {
         protected function handleSoundChannelComplete(event:Event):void {
             _audioState = AUDIO_STATE_STOPPED;
 
-            var position:Number = _soundChannel.position;
+            var position:Number = _soundChannel ? _soundChannel.position : 0;
 
             // update last position
             _lastPosition = position;
@@ -471,6 +469,7 @@ package {
             if (_loop) {
                 closeSoundChannel();
                 _currentTime = _startTime; // overwirte
+                _boss.postMessage("play", _id); // W3C NamedEvent
                 openSoundChannel(_startTime); // rewind
                 _boss.postMessage("playing", _id); // W3C NamedEvent
             }
