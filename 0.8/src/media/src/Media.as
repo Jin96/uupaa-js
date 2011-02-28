@@ -102,7 +102,7 @@ package {
             case "toggleplay":
                 var state:Object = obj.getState();
 
-                switch (state.audioState) {
+                switch (state.audioState & 0xf) {
                 case 1: // obj.AUDIO_STATE_PLAYING -> pause
                     obj.pause();
                     return;
