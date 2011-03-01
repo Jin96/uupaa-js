@@ -22,7 +22,7 @@ package {
         // Audio
         protected var _sound:Sound = null;
         protected var _soundChannel:SoundChannel = null;
-        protected var _mediaSource:Array = [];      // [audioURL, ...]
+        protected var _mediaSource:Array = [];      // [audio, audio]
         protected var _media1:MediaAudio = null;    // front audio
         protected var _media2:MediaAudio = null;    // rear audio
         // Image
@@ -34,7 +34,7 @@ package {
                                      imageSource:Array = null) {
             _boss = boss;
             _id = id;
-            _mediaSource = audioSource.concat();
+            _mediaSource = [audioSource[0], audioSource[1]];
             _imageSource = imageSource ? imageSource.concat() : [];
 
             _media1 = new MediaAudio(boss, _id, [audioSource[0]], imageSource);
@@ -57,8 +57,8 @@ package {
             if (stream1 === STREAM_STATE_CLOSED || stream1 === STREAM_STATE_OPEN ||
                 stream2 === STREAM_STATE_CLOSED || stream2 === STREAM_STATE_OPEN) {
 
-                _media1.play(waitForCanPlay); // wait
                 _media2.play(waitForCanPlay); // wait
+                _media1.play(waitForCanPlay); // wait
                 return;
             }
             if (stream1 === STREAM_STATE_CAN_PLAY || stream1 === STREAM_STATE_LOADED ||
@@ -75,15 +75,15 @@ package {
             case 0: break;
             case 1: _media1.openSoundChannel(state1.currentTime); break;
             case 2: _media2.openSoundChannel(state2.currentTime); break;
-            case 3: _media1.openSoundChannel(state1.currentTime);
-                    _media2.openSoundChannel(state2.currentTime);
+            case 3: _media2.openSoundChannel(state2.currentTime);
+                    _media1.openSoundChannel(state1.currentTime);
             }
             doPlay && _boss.postMessage("playing", _id); // W3C NamedEvent
         }
 
         protected function waitForCanPlay(dummyID:Number):void {
-            var state1:Object = _media1.getState(),
-                state2:Object = _media2.getState(),
+            var state2:Object = _media2.getState(),
+                state1:Object = _media1.getState(),
                 stream1:uint = state1.streamState[0],
                 stream2:uint = state2.streamState[0],
                 doPlay:Number = 0;
@@ -104,35 +104,35 @@ package {
             if (doPlay) {
                 _boss.postMessage("play", _id); // W3C NamedEvent
                 // sync play
-                _media1.openSoundChannel(state1.currentTime);
                 _media2.openSoundChannel(state2.currentTime);
+                _media1.openSoundChannel(state1.currentTime);
                 _boss.postMessage("playing", _id); // W3C NamedEvent
             }
         }
 
         public function seek(position:Number):void {
-            _media1.seek(position);
             _media2.seek(position);
+            _media1.seek(position);
         }
 
         public function pause():void {
-            _media1.pause();
             _media2.pause();
+            _media1.pause();
         }
 
         public function stop():void {
-            _media1.stop();
             _media2.stop();
+            _media1.stop();
         }
 
         public function close():void {
-            _media1.close();
             _media2.close();
+            _media1.close();
         }
 
         public function getState():Object {
-            var state1:Object = _media1.getState(),
-                state2:Object = _media2.getState(),
+            var state2:Object = _media2.getState(),
+                state1:Object = _media1.getState(),
                 m0:uint = _boss.judgeMultipleMediaState(state1.mediaState[0],
                                                         state2.mediaState[0]),
                 s0:uint = _boss.judgeMultipleStreamState(state1.streamState[0],
@@ -140,34 +140,35 @@ package {
 
             state1.name = "MediaAudiox2";
             state1.mediaState = [m0, state1.mediaState[0], state2.mediaState[0]];
+            state1.mediaSource = _mediaSource;
             state1.streamState = [s0, state1.streamState[0], state2.streamState[0]];
             return state1;
         }
 
         public function setLoop(loop:Boolean):void {
-            _media1.setLoop(loop);
             _media2.setLoop(loop);
+            _media1.setLoop(loop);
         }
 
         public function setMute(mute:Boolean):void {
-            _media1.setMute(mute);
             _media2.setMute(mute);
+            _media1.setMute(mute);
         }
 
         public function setVolume(volume:Number,
                                   force:Boolean = false):void {
-            _media1.setVolume(volume);
             _media2.setVolume(volume);
+            _media1.setVolume(volume);
         }
 
         public function setStartTime(time:Number):void {
-            _media1.setStartTime(time);
             _media2.setStartTime(time);
+            _media1.setStartTime(time);
         }
 
         public function setCurrentTime(time:Number):void {
-            _media1.setCurrentTime(time);
             _media2.setCurrentTime(time);
+            _media1.setCurrentTime(time);
         }
     }
 }

@@ -189,32 +189,30 @@ package {
                               imageSource:Array,
                               comment:Array):Number {
             ++_xiLock;
+            var id:Number = _list.length;
+
             switch (type) {
             case "MediaAudio":
-                _list.push(new MediaAudio(this, _list.length,
-                                          audioSource,
-                                          imageSource));
+                _list.push(new MediaAudio(this, id, audioSource,
+                                                    imageSource));
                 break;
             case "MediaAudiox2":
-                _list.push(new MediaAudiox2(this, _list.length,
-                                            audioSource,
-                                            imageSource));
+                _list.push(new MediaAudiox2(this, id, audioSource,
+                                                      imageSource));
                 break;
             case "MediaVideo":
-                _list.push(new MediaVideo(this, _list.length,
-                                          videoSource));
+                _list.push(new MediaVideo(this, id, videoSource));
                 break;
             case "MediaAudioVideo":
-                _list.push(new MediaAudioVideo(this, _list.length,
-                                               audioSource,
-                                               videoSource,
-                                               imageSource));
+                _list.push(new MediaAudioVideo(this, id, audioSource,
+                                                         videoSource,
+                                                         imageSource));
                 break;
             default:
                 trace("ERROR", type);
             }
             --_xiLock;
-            return _list.length - 1;
+            return id - 1;
         }
 
         public function xiClear():void {
@@ -267,20 +265,22 @@ package {
 
         public function xiSetMasterMute(mute:Boolean = true):void {
             _masterMute = mute;
-            var i:int = 1, iz:int = _list.length;
+            var i:int = 1, iz:int = _list.length,
+                ex:Boolean = _xiExportMessage;
+
+            _xiExportMessage = false;
 
             for (; i < iz; ++i) {
                 _list[i].setMute(_masterMute);
             }
+
+            _xiExportMessage = ex;
+
+            _lastID && _list[_lastID].setMute(_masterMute);
         }
 
         public function xiToggleMasterMute():void {
-            _masterMute = _masterMute ? false : true;
-            var i:int = 1, iz:int = _list.length;
-
-            for (; i < iz; ++i) {
-                _list[i].setMute(_masterMute);
-            }
+            xiSetMasterMute(_masterMute ? false : true);
         }
 
         public function xiSetVolume(id:Number,
@@ -299,11 +299,19 @@ package {
                           : volume < 0 ? 0
                           : volume;
 
-            var i:int = 1, iz:int = _list.length;
+            var i:int = 1, iz:int = _list.length,
+                ex:Boolean = _xiExportMessage;
+
+            _xiExportMessage = false;
 
             for (; i < iz; ++i) {
-                _list[i].setVolume(_masterVolume, true);
+                if (i !== _lastID) {
+                    _list[i].setVolume(_masterVolume, true);
+                }
             }
+
+            _xiExportMessage = ex;
+            _lastID && _list[_lastID].setVolume(_masterVolume, true);
         }
 
         public function xiPrevAutoPlay():Number {

@@ -79,45 +79,30 @@ package {
                 _streamState = STREAM_STATE_OPEN;
 
                 _netStream = new NetStream(_netConnection);
-                _netStream.addEventListener(AsyncErrorEvent.ASYNC_ERROR, handleAsyncError);
                 _netStream.addEventListener(IOErrorEvent.IO_ERROR, handleIOError);
                 _netStream.addEventListener(NetStatusEvent.NET_STATUS, handleNetStatus);
+                _netStream.addEventListener(AsyncErrorEvent.ASYNC_ERROR, handleAsyncError);
                 _netStream.client = this;
                 _video.attachNetStream(_netStream);
                 _netStream.play(_mediaSource[0]); // 1st play() -> pause() -> seek(0)
                 break;
             case "NetStream.Play.Start":
+                _mediaState = MEDIA_STATE_PLAYING;
                 if (_streamState === STREAM_STATE_OPEN) { // 1st play
                     _netStream.pause();
-                    _netStream.seek(0);
+                    _netStream.seek(_currentTime / 1000); // (msec / 1000) -> sec
                     _streamState = STREAM_STATE_CAN_PLAY;
                     _mediaState = MEDIA_STATE_STOPPED;
+
                     while (fn = _canPlayCallback.shift()) {
                         fn(_id); // callback -> this.playback() -> play
                     }
-                } else {
-                    _mediaState = MEDIA_STATE_PLAYING;
                 }
                 break;
-            case "NetStream.Play.Stop":
-                _mediaState = MEDIA_STATE_STOPPED;
-                break;
-            case "NetStream.Seek.Failed":
-                trace(_id, "NetStream.Seek.Failed", event);
-                _mediaState = MEDIA_STATE_STOPPED;
-                _streamState = STREAM_STATE_ERROR;
-                _currentTime = 0;
-                break;
-            case "NetStream.Seek.InvalidTime":
-                trace(_id, "NetStream.Seek.InvalidTime", event);
-                _mediaState = MEDIA_STATE_STOPPED;
-                _streamState = STREAM_STATE_ERROR;
-                _currentTime = 0;
-                break;
-            case "NetStream.Seek.Notify": // seek end
-                _boss.postMessage("seekend", _id); // W3C NamedEvent
-                break;
             case "NetStream.Play.StreamNotFound":
+                _mediaState = MEDIA_STATE_STOPPED;
+                _streamState = STREAM_STATE_ERROR;
+
                 trace("Unable to locate video: " + _mediaSource[0]);
             }
         }
@@ -176,6 +161,12 @@ package {
             _boss.postMessage("error", _id); // W3C NamedEvent
         }
 
+        public function playback():void {
+            _boss.postMessage("play", _id); // W3C NamedEvent
+            _netStream.play(_mediaSource[0]);
+            _boss.postMessage("playing", _id); // W3C NamedEvent
+        }
+
         public function play(callback:Function = null):void {
             switch (_streamState) {
             case STREAM_STATE_CLOSED:
@@ -202,6 +193,7 @@ package {
                     }
                     _video.alpha = alpha;
                 }, 40);
+
                 _netConnection = new NetConnection();
                 _netConnection.addEventListener(NetStatusEvent.NET_STATUS, handleNetStatus);
                 _netConnection.addEventListener(SecurityErrorEvent.SECURITY_ERROR, handleSecurityError);
@@ -212,69 +204,64 @@ package {
                 case MEDIA_STATE_STOPPED:
                     _boss.postMessage("play", _id); // W3C NamedEvent
 
-trace("_currentTime", _currentTime);
-trace("_netStream.time", _netStream.time);
-
-                    if (_currentTime !== _netStream.time * 1000) {
-                        _netStream.seek(_currentTime / 1000);
+                    if (_currentTime !== _netStream.time * 1000) { // msec !== sec * 1000
+                        _netStream.seek(_currentTime / 1000); // (msec / 1000) -> sec
                     }
                     _netStream.play(_mediaSource[0]);
                     _boss.postMessage("playing", _id); // W3C NamedEvent
                     break;
                 case MEDIA_STATE_PAUSED:
-                    _boss.postMessage("play", _id); // W3C NamedEvent
+                    if (_currentTime !== _netStream.time * 1000) { // msec !== sec * 1000
+                        _netStream.seek(_currentTime / 1000); // (msec / 1000) -> sec
+                        _netStream.togglePause();
 
-trace("_currentTime", _currentTime);
-trace("_netStream.time", _netStream.time);
-
-                    if (_currentTime !== _netStream.time * 1000) {
-                        _netStream.seek(_currentTime / 1000);
+                        _boss.postMessage("play", _id); // W3C NamedEvent
+                        _mediaState = MEDIA_STATE_PLAYING;
+                        _boss.postMessage("playing", _id); // W3C NamedEvent
+                    } else {
+                        _boss.postMessage("play", _id); // W3C NamedEvent
+                        _mediaState = MEDIA_STATE_PLAYING;
+                        _netStream.resume();
+                        _boss.postMessage("playing", _id); // W3C NamedEvent
                     }
-                    _netStream.resume();
-                    _boss.postMessage("playing", _id); // W3C NamedEvent
                 }
             }
         }
 
-        public function playback():void {
-            _netStream.play(_mediaSource[0]);
-        }
-
         public function seek(position:Number):void { // @param Number: 0~100
             // map 0~100 to 0~duration
-            var realPositon:Number = position * _netStream.time / 100;
-trace("realPositon", realPositon);
+            var realPositon:Number = ((position * _lastDuration) / 100) * 1000; // ((0~100) * sec) / 100
 
             switch (_mediaState) {
             case MEDIA_STATE_STOPPED: // stopped + seek
+            case MEDIA_STATE_PAUSED:
                 _currentTime = realPositon;
                 break;
             case MEDIA_STATE_PLAYING:
-            case MEDIA_STATE_PAUSED:
                 _boss.postMessage("seeking", _id); // W3C NamedEvent
 
-                _netStream.seek(realPositon);
-                // -> NetStream.Seek.Failed
-                // -> NetStream.Seek.InvalidTime
-                // -> NetStream.Seek.Notify
+                _netStream.seek(realPositon / 1000); // (msec / 1000) -> sec
+
+                _boss.postMessage("seekend", _id); // W3C NamedEvent
+                _boss.postMessage("playing", _id); // W3C NamedEvent
             }
         }
 
         public function pause():void {
             if (_mediaState === MEDIA_STATE_PLAYING) {
                 _netStream.pause();
-                _currentTime = _netStream.time * 1000;
-                _mediaState = MEDIA_STATE_PAUSED;
+                _currentTime = _netStream.time * 1000; // sec -> msec
 
+                _mediaState = MEDIA_STATE_PAUSED;
                 _boss.postMessage("pause", _id); // W3C NamedEvent
             }
         }
 
         public function stop():void {
-
             if (_mediaState === MEDIA_STATE_PLAYING) {
                 _netStream.pause();
-                _netStream.seek(_startTime); // rewind (sec)
+                _currentTime = _startTime; // rewind (msec)
+
                 _mediaState = MEDIA_STATE_STOPPED;
                 _boss.postMessage("stop", _id); // NOT W3C NamedEvent
             }
@@ -329,9 +316,9 @@ trace("realPositon", realPositon);
                 _video.clear();
                 _video.attachNetStream(null); // detach
                 if (_netStream) {
-                    _netStream.removeEventListener(AsyncErrorEvent.ASYNC_ERROR, handleAsyncError);
                     _netStream.removeEventListener(IOErrorEvent.IO_ERROR, handleIOError);
                     _netStream.removeEventListener(NetStatusEvent.NET_STATUS, handleNetStatus);
+                    _netStream.removeEventListener(AsyncErrorEvent.ASYNC_ERROR, handleAsyncError);
                     _netStream.close();
                     _netStream = null;
                 }
@@ -343,7 +330,6 @@ trace("realPositon", realPositon);
                 }
             }
             _mediaState = MEDIA_STATE_STOPPED;
-
             _streamState = STREAM_STATE_CLOSED;
             _currentTime = _startTime; // rewind
             _boss.postMessage("close", _id); // NOT W3C NamedEvent

@@ -43,16 +43,10 @@ package {
         }
 
         public function play(dummyCallback:Function = null):void {
-trace("MediaAudioVideo.in");
             var state1:Object = _media1.getState(),
                 state2:Object = _media2.getState(),
                 stream1:uint = state1.streamState[0],
                 stream2:uint = state2.streamState[0];
-
-trace("stream1", stream1);
-trace("stream2", stream2);
-trace("state1.mediaState", state1.mediaState);
-trace("state2.mediaState", state2.mediaState);
 
             if (stream1 === STREAM_STATE_ERROR ||
                 stream2 === STREAM_STATE_ERROR) {
@@ -60,67 +54,63 @@ trace("state2.mediaState", state2.mediaState);
                 _boss.postMessage("error", _id); // W3C NamedEvent
                 return;
             }
-            if (stream1 === STREAM_STATE_CLOSED || stream1 === STREAM_STATE_OPEN ||
-                stream2 === STREAM_STATE_CLOSED || stream2 === STREAM_STATE_OPEN) {
-trace("同時再生待ち開始 audio.play(), video.play()");
-                _media1.play(waitForCanPlay); // wait
+            if ((stream1 === STREAM_STATE_CLOSED || stream1 === STREAM_STATE_OPEN) &&
+                (stream2 === STREAM_STATE_CLOSED || stream2 === STREAM_STATE_OPEN)) {
                 _media2.play(waitForCanPlay); // wait
+                _media1.play(waitForCanPlay); // wait
                 return;
             }
-            if (stream1 === STREAM_STATE_CAN_PLAY || stream1 === STREAM_STATE_LOADED ||
-                stream2 === STREAM_STATE_CAN_PLAY || stream2 === STREAM_STATE_LOADED) {
-                // [1] MEDIA_STATE_STOPPED + MEDIA_STATE_STOPPED -> REWIND -> A/V PLAY
-                // [2] MEDIA_STATE_STOPPED + MEDIA_STATE_PLAYING -> NOP
-                // [3] MEDIA_STATE_STOPPED + MEDIA_STATE_PAUSED  -> V PLAY
-                // [4] MEDIA_STATE_PLAYING + MEDIA_STATE_STOPPED -> NOP
-                // [5] MEDIA_STATE_PLAYING + MEDIA_STATE_PLAYING -> A/V PAUSE
-                // [6] MEDIA_STATE_PLAYING + MEDIA_STATE_PAUSED  -> V PLAY
-                // [7] MEDIA_STATE_PAUSED  + MEDIA_STATE_STOPPED -> A PLAY
-                // [8] MEDIA_STATE_PAUSED  + MEDIA_STATE_PLAYING -> A PLAY
-                // [9] MEDIA_STATE_PAUSED  + MEDIA_STATE_PAUSED  -> A/V PLAY
-                switch (state1.mediaState) {
+            if ((stream1 === STREAM_STATE_CAN_PLAY || stream1 === STREAM_STATE_LOADED) &&
+                (stream2 === STREAM_STATE_CAN_PLAY || stream2 === STREAM_STATE_LOADED)) {
+                // [1] STOPPED + STOPPED -> REWIND -> A/V PLAY
+                // [2] STOPPED + PLAYING -> NOP
+                // [3] STOPPED + PAUSED  -> V PLAY
+                // [4] PLAYING + STOPPED -> NOP
+                // [5] PLAYING + PLAYING -> A/V PAUSE
+                // [6] PLAYING + PAUSED  -> V PLAY
+                // [7] PAUSED  + STOPPED -> A PLAY
+                // [8] PAUSED  + PLAYING -> A PLAY
+                // [9] PAUSED  + PAUSED  -> A/V PLAY
+                switch (state1.mediaState[0]) {
                 case MEDIA_STATE_STOPPED:
-                    switch (state2.mediaState) {
-                    case MEDIA_STATE_STOPPED:   stop();
-                                                _media1.play(waitForCanPlay);
+                    switch (state2.mediaState[0]) {
+                    case MEDIA_STATE_STOPPED:   // [1]
                                                 _media2.play(waitForCanPlay);
-                                                break; // [1]
+                                                _media1.play(waitForCanPlay);
+                                                break;
                     case MEDIA_STATE_PLAYING:   break; // [2]
                     case MEDIA_STATE_PAUSED:    _media2.playback(); // [3]
                     }
                     break;
                 case MEDIA_STATE_PLAYING:
-                    switch (state2.mediaState) {
+                    switch (state2.mediaState[0]) {
                     case MEDIA_STATE_STOPPED:   break; // [4]
                     case MEDIA_STATE_PLAYING:   pause(); break; // [5]
                     case MEDIA_STATE_PAUSED:    _media2.playback(); // [6]
                     }
                     break;
                 case MEDIA_STATE_PAUSED:
-                    switch (state2.mediaState) {
+                    switch (state2.mediaState[0]) {
                     case MEDIA_STATE_STOPPED:   // [7]
                     case MEDIA_STATE_PLAYING:   _media1.openSoundChannel(state1.currentTime); break; // [8]
-                    case MEDIA_STATE_PAUSED:    _media1.play(waitForCanPlay); // [9]
+                    case MEDIA_STATE_PAUSED:    // [9]
                                                 _media2.play(waitForCanPlay);
+                                                _media1.play(waitForCanPlay); 
                     }
                 }
             }
         }
 
         protected function waitForCanPlay(dummyID:Number):void {
-trace( "waitForCanPlay in" );
             var state1:Object = _media1.getState(),
                 state2:Object = _media2.getState(),
                 stream1:uint = state1.streamState[0],
                 stream2:uint = state2.streamState[0],
                 doPlay:Number = 0;
 
-trace("stream1", stream1);
-trace("stream2", stream2);
             if (stream1 === STREAM_STATE_ERROR ||
                 stream2 === STREAM_STATE_ERROR) {
 
-trace("STREAM_STATE_ERROR");
                 _boss.postMessage("error", _id); // W3C NamedEvent
                 return;
             }
@@ -129,49 +119,42 @@ trace("STREAM_STATE_ERROR");
                 if (stream2 === STREAM_STATE_CAN_PLAY ||
                     stream2 === STREAM_STATE_LOADED) {
                     ++doPlay;
-trace("doPlay", ++doPlay);
                 }
             }
             if (doPlay) {
                 _boss.postMessage("play", _id); // W3C NamedEvent
                 // sync play
-trace("同時再生開始");
-trace("state1.currentTime", state1.currentTime);
-                _media1.openSoundChannel(state1.currentTime);
                 _media2.playback();
+                _media1.openSoundChannel(state1.currentTime);
                 _boss.postMessage("playing", _id); // W3C NamedEvent
             } else {
-trace("どちらかの準備がまだ");
+                trace("wait...");
             }
         }
 
         public function seek(position:Number):void {
-trace("MediaAudioVideo.seek", position);
-            _media1.seek(position);
             _media2.seek(position);
+            _media1.seek(position);
         }
 
         public function pause():void {
-trace("MediaAudioVideo.pause");
-            _media1.pause();
             _media2.pause();
+            _media1.pause();
         }
 
         public function stop():void {
-trace("MediaAudioVideo.stop");
-            _media1.stop();
             _media2.stop();
+            _media1.stop();
         }
 
         public function close():void {
-trace("MediaAudioVideo.close");
-            _media1.close();
             _media2.close();
+            _media1.close();
         }
 
         public function getState():Object {
-            var state1:Object = _media1.getState(),
-                state2:Object = _media2.getState(),
+            var state2:Object = _media2.getState(),
+                state1:Object = _media1.getState(),
                 m0:uint = _boss.judgeMultipleMediaState(state1.mediaState[0],
                                                         state2.mediaState[0]),
                 s0:uint = _boss.judgeMultipleStreamState(state1.streamState[0],
@@ -185,29 +168,29 @@ trace("MediaAudioVideo.close");
         }
 
         public function setLoop(loop:Boolean):void {
-            _media1.setLoop(loop);
             _media2.setLoop(loop);
+            _media1.setLoop(loop);
         }
 
         public function setMute(mute:Boolean):void {
-            _media1.setMute(mute);
             _media2.setMute(mute);
+            _media1.setMute(mute);
         }
 
         public function setVolume(volume:Number,
                                   force:Boolean = false):void {
-            _media1.setVolume(volume);
             _media2.setVolume(volume);
+            _media1.setVolume(volume);
         }
 
         public function setStartTime(time:Number):void {
-            _media1.setStartTime(time);
             _media2.setStartTime(time);
+            _media1.setStartTime(time);
         }
 
         public function setCurrentTime(time:Number):void {
-            _media1.setCurrentTime(time);
             _media2.setCurrentTime(time);
+            _media1.setCurrentTime(time);
         }
     }
 }
