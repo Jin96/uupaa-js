@@ -14,7 +14,7 @@ window.uuconfig = {
 uu.Class("MyMediaPlayer:MediaPlayer", {
     init: function(seekSlider, volumeSlider, data) {},
     play: function() { this.superMethod("play"); },
-    pause: function() { this.superMethod("pause"); },
+    pause:function() { this.superMethod("pause"); },
     stop: function() { this.superMethod("stop"); },
     next: function() { this.superMethod("next"); },
     prev: function() { this.superMethod("prev"); },
@@ -31,6 +31,12 @@ uu.ready(function(uu) {
 
     var ary = uu.ui("Slider"); // [0: seek, 1: volume]
     var data = [
+        {   type: "MediaVideo",
+            audio: [],
+            video: ["http://localhost:8080/0.8/test/media/data/ai.flv"],
+            image: [],
+            comment: [] }
+/*
         {   type: "MediaAudio",
             audio: ["data/Hydrate-Kenny_Beltrey.mp3"],
             video: [],
@@ -41,6 +47,7 @@ uu.ready(function(uu) {
             video: [],
             image: ["../../img/safari.png"],
             comment: [] },
+ */
 /*
         {   type: "MediaAudio",
             audio: ["data/bego.mp3"],
@@ -48,11 +55,13 @@ uu.ready(function(uu) {
             image: ["../../img/longupapa.jpg"],
             comment: [] },
  */
+/*
         {   type: "MediaAudio",
             audio: ["data/dora.mp3"],
             video: [],
             image: ["../../img/chrome.png"],
             comment: [] }
+ */
     ];
 
     media = uu("MyMediaPlayer", ary[0], ary[1], data,

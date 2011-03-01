@@ -96,19 +96,6 @@ package {
             _sprite.addChild(event.target.loader);
         }
 
-        // fadein/fadeout volume
-        protected function fadeVolume(volume:Number,
-                                      stepCallback:Function,
-                                      completeCallback:Function):void {
-            _volume.past = _volume.current; // save
-            _volume.future = volume;
-
-            stepCallback && _fadeStepCallback.push(stepCallback);
-            completeCallback && _fadeCompleteCallback.push(completeCallback);
-            _fadeTimer.reset();
-            _fadeTimer.start();
-        }
-
         public function openSoundChannel(position:Number):void {
             _soundChannel = _sound.play(position, 0,
                                         new SoundTransform(_mute ? 0 : _volume.current));
@@ -239,6 +226,19 @@ package {
         public function close():void {
             fadeVolume(0, handleFadeStepCallback,
                           handleFadeCompleteCallback);
+        }
+
+        // fadein/fadeout volume
+        protected function fadeVolume(volume:Number,
+                                      stepCallback:Function,
+                                      completeCallback:Function):void {
+            _volume.past = _volume.current; // save
+            _volume.future = volume;
+
+            stepCallback && _fadeStepCallback.push(stepCallback);
+            completeCallback && _fadeCompleteCallback.push(completeCallback);
+            _fadeTimer.reset();
+            _fadeTimer.start();
         }
 
         protected function handleFadeStepCallback():void {
