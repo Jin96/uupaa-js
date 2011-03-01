@@ -119,7 +119,8 @@ package {
             case "play":
                 _lastID = queue.id;
                 _masterMute && obj.setMute(true);
-                obj.play(true);
+//                obj.play(true);
+                obj.play(handleCanPlayCallback);
                 break;
             case "pause":   obj.pause(); break;
             case "seek":    obj.seek(queue.param1); break; // 0~100
@@ -128,6 +129,12 @@ package {
 //          case "mute":    obj.setMute(queue.param1); break;
             case "volume":  obj.setVolume(queue.param1, queue.param2);
             }
+        }
+
+        public function handleCanPlayCallback(id:Number):void {
+            var obj:Object = _list[id];
+
+            obj && obj.playback();
         }
 
         public function xiAdd(type:String,
@@ -147,8 +154,15 @@ package {
                                             audioSource,
                                             imageSource));
                 break;
+            case "MediaVideo":
+                _list.push(new MediaVideo(this, _list.length,
+                                          videoSource));
 /*
             case "MediaAudioVideo":
+                _list.push(new MediaAudiox2(this, _list.length,
+                                            audioSource,
+                                            imageSource));
+                break;
  */
             default:
                 trace("ERROR", type);
