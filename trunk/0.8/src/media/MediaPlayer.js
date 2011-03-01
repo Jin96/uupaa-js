@@ -80,7 +80,11 @@ uu.Class("MediaPlayer", {
             delete state.volume;
             delete state.progress;
 
-            uu.id("log").innerText = uu.f("@: @", msg, uu.json(state));
+            if (uu.id("log")) {
+                uu.id("log").innerText = uu.f("@: @", msg, uu.json(state));
+            } else {
+                uu.log("@: @", msg, uu.json(state));
+            }
         }
 
         switch (msg) {

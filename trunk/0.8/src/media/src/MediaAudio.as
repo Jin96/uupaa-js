@@ -49,7 +49,7 @@ package {
                                          future:  1,   // 0~1
                                          past:    1 }; // 0~1
         protected var _startTime:Number = 0;    // unit: ms
-        protected var _currentTime:Number = 0;  // unit: ms
+        protected var _currentTime:Number = 0;  // unit: ms, 1000 -> 1sec
 
         public function MediaAudio(boss:Media,
                                    id:Number,
@@ -182,20 +182,21 @@ package {
 
                 switch (_mediaState) {
                 case MEDIA_STATE_STOPPED: // stopped + seek
+                case MEDIA_STATE_PAUSED:  // paused + seek
                     _currentTime = realPositon;
                     _lastPosition = realPositon;
                     break;
                 case MEDIA_STATE_PLAYING:
-                case MEDIA_STATE_PAUSED:
                     try {
                         _boss.postMessage("seeking", _id); // W3C NamedEvent
 
-                        var soundTransform:SoundTransform = _soundChannel.soundTransform;
-
-                        _soundChannel.removeEventListener(Event.SOUND_COMPLETE, handleSoundChannelComplete);
-                        _soundChannel.stop();
-                        _soundChannel = null;
-                        _soundChannel = _sound.play(realPositon, 0, soundTransform);
+                        if (_soundChannel) {
+                            _soundChannel.removeEventListener(Event.SOUND_COMPLETE, handleSoundChannelComplete);
+                            _soundChannel.stop();
+                            _soundChannel = null;
+                        }
+                        _soundChannel = _sound.play(realPositon, 0,
+                                                    new SoundTransform(_mute ? 0 : _volume.current));
                         _soundChannel.addEventListener(Event.SOUND_COMPLETE, handleSoundChannelComplete);
                         _lastPosition = realPositon;
                         _mediaState = MEDIA_STATE_PLAYING;
@@ -204,7 +205,7 @@ package {
                         _boss.postMessage("playing", _id); // W3C NamedEvent
                     } catch(err:Error) {
                         // maybe: net disconnected / connection reset
-                        trace("seek", err);
+                        trace("MediaAudio.seek", err);
                         _mediaState = MEDIA_STATE_STOPPED;
                         _streamState = STREAM_STATE_ERROR;
                         _currentTime = 0;
@@ -218,6 +219,7 @@ package {
             if (_mediaState === MEDIA_STATE_PLAYING) {
                 _currentTime = closeSoundChannel(); // keep current position
                 _mediaState = MEDIA_STATE_PAUSED; // STOPPED -> PAUSED
+
                 _boss.postMessage("pause", _id); // W3C NamedEvent
             }
         }
@@ -483,10 +485,9 @@ package {
                 if (_updateVolume || forceUpdate) {
                     _updateVolume = false;
 
-                    var soundTransform:SoundTransform = _soundChannel.soundTransform;
+                    _soundChannel.soundTransform =
+                            new SoundTransform(_mute ? 0 : _volume.current);
 
-                    soundTransform.volume = _mute ? 0 : _volume.current;
-                    _soundChannel.soundTransform = soundTransform;
                     forceUpdate = true;
                 }
             }
