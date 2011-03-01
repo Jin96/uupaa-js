@@ -37,7 +37,7 @@ uu.Class("MediaPlayer", {
         this._seekSlider = seekSlider;
         this._volumeSlider = volumeSlider;
         this._data = data;
-        this._swf = uu.flash.call(this, "../../swf/uu.media.swf",
+        this._swf = uu.flash.call(this, uu.config.media.swf,
                                   swfOption, this.handleFlash);
         // volume event handler
         volumeSlider.bind("mousedown", function(evt, attr) {
@@ -60,14 +60,27 @@ uu.Class("MediaPlayer", {
 
         if (state) {
             if (this._lastID === id) {
-                switch (state.audioState & 0xf) {
+                switch (state.mediaState[0]) {
                 case 0: uu.text(uu.id("playButtonState"), "STOPPED"); break;
                 case 1: uu.text(uu.id("playButtonState"), "PLAYING"); break;
                 case 2: uu.text(uu.id("playButtonState"), "PAUSED");
                 }
-                uu.text(uu.id("audioSource"), state.audioSource);
+                uu.text(uu.id("mediaSource"), state.mediaSource.join(","));
             }
-            uu.log("msg=@, id=@, state=@", msg, id, uu.json(state));
+            delete state.masterMute;
+            delete state.masterVolume;
+            delete state.mediaSource;
+            delete state.imageSource;
+            delete state.imageState;
+            delete state.loop;
+            delete state.mute;
+            delete state.startTime;
+            delete state.mediaSource;
+            delete state.duration;
+            delete state.volume;
+            delete state.progress;
+
+            uu.id("log").innerText = uu.f("@: @", msg, uu.json(state));
         }
 
         switch (msg) {

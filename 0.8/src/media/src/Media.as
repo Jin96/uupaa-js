@@ -8,6 +8,15 @@ package {
     import flash.net.*;
 
     public class Media extends Sprite {
+        public static var MEDIA_STATE_STOPPED:uint   = 0x0;
+        public static var MEDIA_STATE_PLAYING:uint   = 0x1;
+        public static var MEDIA_STATE_PAUSED:uint    = 0x2;
+        public static var STREAM_STATE_CLOSED:uint   = 0x0;
+        public static var STREAM_STATE_OPEN:uint     = 0x1;
+        public static var STREAM_STATE_CAN_PLAY:uint = 0x2;
+        public static var STREAM_STATE_LOADED:uint   = 0x3;
+        public static var STREAM_STATE_ERROR:uint    = 0x4;
+
         // for ExternalInterface
         private var _xiCallback:String = "";
         private var _xiExportMessage:Boolean = true;
@@ -96,38 +105,75 @@ package {
                 return; // skip
             }
 
-            var obj:Object = _list[queue.id];
+            var obj:Object = _list[queue.id],
+                state:Object, m1:uint, m2:uint;
 
             switch (queue.action) {
-            case "toggleplay":
-                var state:Object = obj.getState();
-
-                switch (state.audioState & 0xf) {
-                case 1: // obj.AUDIO_STATE_PLAYING -> pause
-                    obj.pause();
-                    return;
-                case 2: // obj.AUDIO_STATE_PAUSED -> play
-                    _lastID = 0;
-                case 0: // obj.AUDIO_STATE_STOPPED -> autoplay
-                }
-            case "autoplay":
-                if (_lastID && _lastID !== queue.id) {
-                    if (_lastID in _list) {
-                        _list[_lastID].close(); // auto close
-                    }
-                }
-            case "play":
-                _lastID = queue.id;
-                _masterMute && obj.setMute(true);
-//                obj.play(true);
-                obj.play(handleCanPlayCallback);
-                break;
             case "pause":   obj.pause(); break;
             case "seek":    obj.seek(queue.param1); break; // 0~100
             case "stop":    obj.stop(); break;
             case "close":   obj.close(); break;
 //          case "mute":    obj.setMute(queue.param1); break;
-            case "volume":  obj.setVolume(queue.param1, queue.param2);
+            case "volume":  obj.setVolume(queue.param1, queue.param2); break;
+            case "toggleplay":
+                state = obj.getState();
+
+                switch (state.name) {
+                case "MediaAudio":
+                case "MediaVideo":
+                    switch (state.mediaState[0]) {
+                    case 1: obj.pause(); return;    // MEDIA_STATE_PLAYING -> pause
+                    case 2: _lastID = 0;            // MEDIA_STATE_PAUSED  -> play
+                    case 0:                         // MEDIA_STATE_STOPPED -> autoplay
+                    }
+                    break;
+                // [1] STOPPED + STOPPED -> AUTO PLAY/AUTO PLAY
+                // [2] STOPPED + PLAYING -> STOP -> REWIND -> PLAY/PLAY
+                // [3] STOPPED + PAUSED  -> STOP -> REWIND -> PLAY/PLAY
+                // [4] PLAYING + STOPPED -> STOP -> REWIND -> PLAY/PLAY
+                // [5] PLAYING + PLAYING -> PAUSE/PAUSE
+                // [6] PLAYING + PAUSED  -> STOP -> REWIND -> PLAY/PLAY (ERROR CASE)
+                // [7] PAUSED  + STOPPED -> STOP -> REWIND -> PLAY/PLAY
+                // [8] PAUSED  + PLAYING -> STOP -> REWIND -> PLAY/PLAY (ERROR CASE)
+                // [9] PAUSED  + PAUSED  -> PLAY/PLAY
+                case "MediaAudiox2":
+                case "MediaAudioVideo":
+                    m1 = state.mediaState[1];
+                    m2 = state.mediaState[2];
+                    if (m1 === m2) {
+                        switch (m1) {
+                        case MEDIA_STATE_STOPPED: // [1] AUTO PLAY/AUTO PLAY
+                            if (_lastID && _lastID !== queue.id) {
+                                (_lastID in _list) && _list[_lastID].close(); // auto close
+                            }
+                            _lastID = queue.id;
+                            _masterMute && obj.setMute(true);
+                            obj.play(handleCanPlayCallback);
+                            break;
+                        case MEDIA_STATE_PLAYING: // [5]
+                            obj.pause();
+                            break;
+                        case MEDIA_STATE_PAUSED: // [9]
+                            _lastID = queue.id;
+                            _masterMute && obj.setMute(true);
+                            obj.play(handleCanPlayCallback);
+                        }
+                    } else {
+                        obj.stop();
+                        _lastID = queue.id;
+                        _masterMute && obj.setMute(true);
+                        obj.play(handleCanPlayCallback);
+                    }
+                    return;
+                }
+            case "autoplay":
+                if (_lastID && _lastID !== queue.id) {
+                    (_lastID in _list) && _list[_lastID].close(); // auto close
+                }
+            case "play":
+                _lastID = queue.id;
+                _masterMute && obj.setMute(true);
+                obj.play(handleCanPlayCallback);
             }
         }
 
@@ -157,13 +203,13 @@ package {
             case "MediaVideo":
                 _list.push(new MediaVideo(this, _list.length,
                                           videoSource));
-/*
-            case "MediaAudioVideo":
-                _list.push(new MediaAudiox2(this, _list.length,
-                                            audioSource,
-                                            imageSource));
                 break;
- */
+            case "MediaAudioVideo":
+                _list.push(new MediaAudioVideo(this, _list.length,
+                                               audioSource,
+                                               videoSource,
+                                               imageSource));
+                break;
             default:
                 trace("ERROR", type);
             }
@@ -293,14 +339,6 @@ package {
             if (!_list[id]) {
                 return;
             }
-/*
-            switch (msg) {
-            case "ended":
-                if (_list[id].getState().multipleSource) {
-                    _list[id].stop(); // stop all
-                }
-            }
- */
             if (_xiExportMessage) {
 // trace("postMessage", msg, id, param);
                 if (_xiLock) { // lock -> stock
@@ -338,6 +376,68 @@ package {
                     ExternalInterface.call(_xiCallback, msg, id, state, true);
                 }
             }
+        }
+
+        public function judgeMultipleMediaState(s1:uint, s2:uint):uint {
+            // STOPPED > PAUSED > PLAYING
+            // -----------------------------------------
+            // STOPPED + STOPPED -> STOPPED
+            // STOPPED + PAUSED  -> PAUSED
+            // STOPPED + PLAYING -> PLAYING
+            // PAUSED  + STOPPED -> PAUSED
+            // PAUSED  + PAUSED  -> PAUSED
+            // PAUSED  + PLAYING -> PLAYING
+            // PLAYING + STOPPED -> PLAYING
+            // PLAYING + PAUSED  -> PLAYING
+            // PLAYING + PLAYING -> PLAYING
+            if (s1 === MEDIA_STATE_PLAYING ||
+                s2 === MEDIA_STATE_PLAYING) {
+                return MEDIA_STATE_PLAYING;
+            } else if (s1 === MEDIA_STATE_PAUSED ||
+                       s2 === MEDIA_STATE_PAUSED) {
+                return MEDIA_STATE_PAUSED;
+            }
+            return MEDIA_STATE_STOPPED;
+        }
+
+        public function judgeMultipleStreamState(s1:uint, s2:uint):uint {
+            // ERROR > CLOSED > OPEN > CAN_PLAY > LOADED
+            // -----------------------------------------
+            // ERROR    + ANY      -> ERROR
+            // ANY      + ERROR    -> ERROR
+            // CLOSED   + CLOSED   -> CLOSED
+            // CLOSED   + OPEN     -> CLOSED
+            // CLOSED   + CAN_PLAY -> CLOSED
+            // CLOSED   + LOADED   -> CLOSED
+            // OPEN     + CLOSED   -> CLOSED
+            // OPEN     + OPEN     -> OPEN
+            // OPEN     + CAN_PLAY -> OPEN
+            // OPEN     + LOADED   -> OPEN
+            // CAN_PLAY + CLOSED   -> CLOSED
+            // CAN_PLAY + OPEN     -> OPEN
+            // CAN_PLAY + CAN_PLAY -> CAN_PLAY
+            // CAN_PLAY + LOADED   -> CAN_PLAY
+            // LOADED   + CLOSED   -> CLOSED
+            // LOADED   + OPEN     -> OPEN
+            // LOADED   + CAN_PLAY -> CAN_PLAY
+            // LOADED   + LOADED   -> LOADED
+            if (s1 === STREAM_STATE_ERROR ||
+                s2 === STREAM_STATE_ERROR) {
+                return STREAM_STATE_ERROR;
+            }
+            if (s1 === STREAM_STATE_CLOSED ||
+                s2 === STREAM_STATE_CLOSED) {
+                return STREAM_STATE_CLOSED;
+            }
+            if (s1 === STREAM_STATE_OPEN ||
+                s2 === STREAM_STATE_OPEN) {
+                return STREAM_STATE_OPEN;
+            }
+            if (s1 === STREAM_STATE_CAN_PLAY ||
+                s2 === STREAM_STATE_CAN_PLAY) {
+                return STREAM_STATE_CAN_PLAY;
+            }
+            return STREAM_STATE_LOADED;
         }
     }
 }

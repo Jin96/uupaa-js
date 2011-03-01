@@ -380,6 +380,7 @@ uumix(uuconfig, win.uuconfig || {}, {
     canvas:         {},                 // uu.config.canvas - <canvas>
     audio:          {},                 // uu.config.audio - <audio>
     video:          {},                 // uu.config.video - <video>
+    media:          {},                 // uu.config.media - <video> and <audio>
     trace:          {},                 // uu.config.trace - API Trace / NetTrace
     geo:            {},                 // uu.config.geo - Geo Location
     log:            {},                 // uu.config.log - API Log / NetLog
@@ -429,6 +430,14 @@ uumix(uuconfig.video, {
     swf:            uuconfig.swfDir + "uu.video.swf"
 }, 0, 0);
 //}@video
+//{@media
+uumix(uuconfig.media, {
+    disable:        _false,         // uu.config.media.disable(= false) - Boolean:
+    order:          "FHN",          // uu.config.media.order(= "FHN") - String: media backends and detection order
+                                    //  "F" = Flash, "H" = HTML5 <audio><video> Native API, "N" = NoMedia
+    swf:            uuconfig.swfDir + "uu.media.swf"
+}, 0, 0);
+//}@media
 //{@debug
 uumix(uuconfig.log, {
     disable:        _false,         // uu.config.log.disable(= false) - Boolean:
