@@ -8,9 +8,9 @@ package {
     import flash.net.*;
 
     public class MediaAudio extends Sprite {
-        public static var AUDIO_STATE_STOPPED:uint   = 0x0;
-        public static var AUDIO_STATE_PLAYING:uint   = 0x1;
-        public static var AUDIO_STATE_PAUSED:uint    = 0x2;
+        public static var MEDIA_STATE_STOPPED:uint   = 0x0;
+        public static var MEDIA_STATE_PLAYING:uint   = 0x1;
+        public static var MEDIA_STATE_PAUSED:uint    = 0x2;
         public static var STREAM_STATE_CLOSED:uint   = 0x0;
         public static var STREAM_STATE_OPEN:uint     = 0x1;
         public static var STREAM_STATE_CAN_PLAY:uint = 0x2;
@@ -22,7 +22,8 @@ package {
         // Audio
         protected var _sound:Sound = null;
         protected var _soundChannel:SoundChannel = null;
-        protected var _audioSource:Array = [];  // [audioURL, ...]
+        protected var _mediaSource:Array = [];  // [audioURL, ...]
+        protected var _canPlayCallback:Array = [];
         // Image
         protected var _imageSource:Array = [];  // [imageURL, ...]
         protected var _imageLoader:Array = [];  // [Loadedr, ...]
@@ -33,7 +34,6 @@ package {
         protected var _lastProgress:Number = 0; // 0 ~ 100
         protected var _updateVolume:Boolean = false;
         protected var _updateDuration:Boolean = false;
-        protected var _autoPlay:Boolean = false;
         // FadeIn/FadeOut
         protected var _fadeDelta:Number = 0.1;
         protected var _fadeSpeed:Number = 32; // msec
@@ -41,7 +41,7 @@ package {
         protected var _fadeStepCallback:Array = [];
         protected var _fadeCompleteCallback:Array = [];
         // State
-        protected var _audioState:uint = AUDIO_STATE_STOPPED;
+        protected var _mediaState:uint = MEDIA_STATE_STOPPED;
         protected var _streamState:uint = STREAM_STATE_CLOSED;
         protected var _loop:Boolean = false;
         protected var _mute:Boolean = false;
@@ -57,7 +57,7 @@ package {
                                    imageSource:Array = null) {
             _boss = boss;
             _id = id;
-            _audioSource = audioSource.concat();
+            _mediaSource = audioSource.concat();
             _imageSource = imageSource ? imageSource.concat() : [];
 
             _messageTimer.addEventListener(TimerEvent.TIMER, handleMessageTimer);
@@ -100,30 +100,36 @@ package {
             _soundChannel = _sound.play(position, 0,
                                         new SoundTransform(_mute ? 0 : _volume.current));
             _lastPosition = _soundChannel.position;
-            _audioState   = AUDIO_STATE_PLAYING;
+            _mediaState   = MEDIA_STATE_PLAYING;
             _soundChannel.addEventListener(Event.SOUND_COMPLETE, handleSoundChannelComplete);
         }
 
         public function closeSoundChannel():Number {
             var rv:Number = _currentTime;
 
-            if (_audioState === AUDIO_STATE_PLAYING) {
+            if (_mediaState === MEDIA_STATE_PLAYING) {
                 rv = _soundChannel.position; // unit: ms
 
                 _soundChannel.removeEventListener(Event.SOUND_COMPLETE, handleSoundChannelComplete);
                 _soundChannel.stop();
                 _soundChannel = null;
             }
-            _audioState = AUDIO_STATE_STOPPED;
+            _mediaState = MEDIA_STATE_STOPPED;
             return rv;
         }
 
-        public function play(autoPlay:Boolean = false):void {
+        public function playback():void {
+            _boss.postMessage("play", _id); // W3C NamedEvent
+            openSoundChannel(_currentTime);
+            _boss.postMessage("playing", _id); // W3C NamedEvent
+        }
+
+        public function play(callback:Function = null):void {
             switch (_streamState) {
             case STREAM_STATE_CLOSED:
-                _audioState = AUDIO_STATE_STOPPED;
+                _mediaState = MEDIA_STATE_STOPPED;
                 _currentTime = _startTime;
-                autoPlay && (_autoPlay = true);
+                callback && _canPlayCallback.push(callback);
 
                 // show poster image
                 if (_sprite) {
@@ -151,16 +157,17 @@ package {
                 _sound.addEventListener(Event.COMPLETE, handleComplete);
                 _sound.addEventListener(IOErrorEvent.IO_ERROR, handleIOError);
                 _sound.addEventListener(ProgressEvent.PROGRESS, handleProgress);
-                _sound.load(new URLRequest(_audioSource[0]));
-                trace(_id, "MediaAudio", _audioSource[0]);
+                _sound.load(new URLRequest(_mediaSource[0]));
+                trace(_id, "MediaAudio", _mediaSource[0]);
+                break;
             case STREAM_STATE_OPEN:
-                autoPlay && (_autoPlay = true);
+                callback && _canPlayCallback.push(callback);
                 break;
             case STREAM_STATE_CAN_PLAY:
             case STREAM_STATE_LOADED:
-                switch (_audioState) {
-                case AUDIO_STATE_STOPPED:
-                case AUDIO_STATE_PAUSED:
+                switch (_mediaState) {
+                case MEDIA_STATE_STOPPED:
+                case MEDIA_STATE_PAUSED:
                     _boss.postMessage("play", _id); // W3C NamedEvent
                     openSoundChannel(_currentTime);
                     _boss.postMessage("playing", _id); // W3C NamedEvent
@@ -173,13 +180,13 @@ package {
                 // map 0~100 to 0~duration
                 var realPositon:Number = position * _sound.length / 100;
 
-                switch (_audioState) {
-                case AUDIO_STATE_STOPPED: // stopped + seek
+                switch (_mediaState) {
+                case MEDIA_STATE_STOPPED: // stopped + seek
                     _currentTime = realPositon;
                     _lastPosition = realPositon;
                     break;
-                case AUDIO_STATE_PLAYING:
-                case AUDIO_STATE_PAUSED:
+                case MEDIA_STATE_PLAYING:
+                case MEDIA_STATE_PAUSED:
                     try {
                         _boss.postMessage("seeking", _id); // W3C NamedEvent
 
@@ -191,14 +198,14 @@ package {
                         _soundChannel = _sound.play(realPositon, 0, soundTransform);
                         _soundChannel.addEventListener(Event.SOUND_COMPLETE, handleSoundChannelComplete);
                         _lastPosition = realPositon;
-                        _audioState = AUDIO_STATE_PLAYING;
+                        _mediaState = MEDIA_STATE_PLAYING;
 
                         _boss.postMessage("seekend", _id); // W3C NamedEvent
                         _boss.postMessage("playing", _id); // W3C NamedEvent
                     } catch(err:Error) {
                         // maybe: net disconnected / connection reset
                         trace("seek", err);
-                        _audioState = AUDIO_STATE_STOPPED;
+                        _mediaState = MEDIA_STATE_STOPPED;
                         _streamState = STREAM_STATE_ERROR;
                         _currentTime = 0;
                         _lastPosition = 0;
@@ -208,15 +215,15 @@ package {
         }
 
         public function pause():void {
-            if (_audioState === AUDIO_STATE_PLAYING) {
+            if (_mediaState === MEDIA_STATE_PLAYING) {
                 _currentTime = closeSoundChannel(); // keep current position
-                _audioState = AUDIO_STATE_PAUSED; // STOPPED -> PAUSED
+                _mediaState = MEDIA_STATE_PAUSED; // STOPPED -> PAUSED
                 _boss.postMessage("pause", _id); // W3C NamedEvent
             }
         }
 
         public function stop():void {
-            if (_audioState === AUDIO_STATE_PLAYING) {
+            if (_mediaState === MEDIA_STATE_PLAYING) {
                 closeSoundChannel();
                 _currentTime = _startTime; // rewind
                 _boss.postMessage("stop", _id); // NOT W3C NamedEvent
@@ -304,11 +311,12 @@ package {
             var duration:Number = _sound ? _sound.length : 0,
                 currentTime:Number = 0;
 
-            currentTime = _audioState === AUDIO_STATE_PLAYING ? _soundChannel.position
-                        : _audioState === AUDIO_STATE_PAUSED  ? _currentTime
-                        : _audioState === AUDIO_STATE_STOPPED ? _currentTime
+            currentTime = _mediaState === MEDIA_STATE_PLAYING ? _soundChannel.position
+                        : _mediaState === MEDIA_STATE_PAUSED  ? _currentTime
+                        : _mediaState === MEDIA_STATE_STOPPED ? _currentTime
                         : 0;
             return {
+                name: "MediaAudio",
                 loop: _loop,
                 mute: _mute,
                 volume: _volume.current, // 0~1
@@ -317,14 +325,11 @@ package {
                 position: duration ? Math.round(currentTime / duration * 100) : 0, // 0~100
                 startTime: _startTime, // ms
                 currentTime: currentTime, // ms
-                audioSource: _audioSource.join(","),
-                videoSource: "",
-                imageSource: "",
-                audioState: _audioState,
-                videoState: 0,
-                imageState: _sprite && _sprite.alpha > 0 ? 1 : 0,
-                streamState: _streamState,
-                multipleSource: false
+                mediaState: [_mediaState],
+                mediaSource: _mediaSource,
+                streamState: [_streamState],
+                imageSource: [],
+                imageState: _sprite && _sprite.alpha > 0 ? 1 : 0
             };
         }
 
@@ -372,7 +377,7 @@ package {
                 if (_streamState === STREAM_STATE_CAN_PLAY ||
                     _streamState === STREAM_STATE_LOADED) {
                     // fire timeupdate event
-                    if (_audioState === AUDIO_STATE_PLAYING) {
+                    if (_mediaState === MEDIA_STATE_PLAYING) {
                         var position:Number = _soundChannel.position;
 
                         if (_lastPosition !== position) {
@@ -421,8 +426,7 @@ package {
             trace(_id, "handleIOError", event + "");
 
             _streamState = STREAM_STATE_ERROR;
-            _audioState = AUDIO_STATE_STOPPED;
-            _autoPlay = false;
+            _mediaState = MEDIA_STATE_STOPPED;
             _currentTime = 0;
             try {
                 _soundChannel && _soundChannel.stop();
@@ -442,11 +446,10 @@ package {
                 _streamState = STREAM_STATE_CAN_PLAY;
 
                 _boss.postMessage("canplay", _id); // W3C NamedEvent
-                if (_autoPlay) {
-                    _autoPlay = false;
-                    _boss.postMessage("play", _id); // W3C NamedEvent
-                    openSoundChannel(_currentTime);
-                    _boss.postMessage("playing", _id); // W3C NamedEvent
+                var fn:Function;
+
+                while (fn = _canPlayCallback.shift()) {
+                    fn(_id);
                 }
             }
             var loadTime:Number = event.bytesLoaded / event.bytesTotal;
@@ -457,7 +460,7 @@ package {
         }
 
         protected function handleSoundChannelComplete(event:Event):void {
-            _audioState = AUDIO_STATE_STOPPED;
+            _mediaState = MEDIA_STATE_STOPPED;
 
             var position:Number = _soundChannel ? _soundChannel.position : 0;
 
@@ -476,7 +479,7 @@ package {
         }
 
         protected function updateVolume(forceUpdate:Boolean = false):void {
-            if (_audioState === AUDIO_STATE_PLAYING) {
+            if (_mediaState === MEDIA_STATE_PLAYING) {
                 if (_updateVolume || forceUpdate) {
                     _updateVolume = false;
 
