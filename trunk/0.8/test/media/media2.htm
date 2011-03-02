@@ -1,0 +1,107 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8" />
+<title>Media Player test</title>
+<style></style>
+<script>
+window.uuconfig = {
+    log: {
+        rollup: 1000
+    }
+};
+</script>
+<script src="../../src/uupaa.js"></script>
+<script src="../../src/media/MediaPlayer.js"></script>
+<script>
+uu.Class("MyMediaPlayer:MediaPlayer", {
+    init: function(data, option, swfOption) {
+    },
+    handleTrace: function(xid, msg, state, targetID, currentID) {
+        if (targetID === currentID) {
+            switch (state.mediaState[0]) {
+            case 0: uu.text(uu.id("playButtonState"), "STOPPED"); break;
+            case 1: uu.text(uu.id("playButtonState"), "PLAYING"); break;
+            case 2: uu.text(uu.id("playButtonState"), "PAUSED");
+            }
+            uu.text(uu.id("mediaSource"), state.mediaSource.join(","));
+        }
+        delete state.mediaSource;
+        delete state.imageSource;
+        delete state.imageState;
+        delete state.loop;
+        delete state.mute;
+        delete state.startTime;
+        delete state.duration;
+        delete state.progress;
+
+        if (uu.id("log")) {
+            uu.id("log").innerText = uu.f("@: @", msg, uu.json(state));
+        } else {
+            uu.log("@: @", msg, uu.json(state));
+        }
+    }
+});
+
+var media;
+
+// slider activate
+uu.ready(function(uu) {
+    uu.ui.build();
+
+    var ary = uu.ui("Slider"); // [0: seek, 1: volume]
+    var data = [
+// 残酷な天使のテーゼ
+        {   type: "MediaAudioVideo",
+            audio: ["http://koebu.s3.amazonaws.com/mp3/a/a1/a15f/a15f9614c3469a7014dcf057fe444dcedf814b1e.mp3"],
+            video: ["http://koebu.com/static/flv/event/award2010/zankokuna.flv"] },
+        {   type: "MediaAudioVideo",
+            audio: ["http://koebu.s3.amazonaws.com/mp3/6/6b/6be8/6be85304d2bf0710065683f5cb53c049e57f9adb.mp3"],
+            video: ["http://koebu.com/static/flv/event/award2010/zankokuna.flv"] },
+        {   type: "MediaAudioVideo",
+            audio: ["http://koebu.s3.amazonaws.com/mp3/2/20/20d0/20d0e854a0e39da37f54745050d169042e994bd6.mp3"],
+            video: ["http://koebu.com/static/flv/event/award2010/zankokuna.flv"] },
+// 天体観測
+        {   type: "MediaAudioVideo",
+            audio: ["http://koebu.s3.amazonaws.com/mp3/5/54/54fe/54fe15d9923b4b52e8f3c125f9ede756ef18f486.mp3"],
+            video: ["http://koebu.com/static/flv/event/award2010/tentaikansoku.flv"] },
+        {   type: "MediaAudioVideo",
+            audio: ["http://koebu.s3.amazonaws.com/mp3/1/14/147d/147df930670387874790f4260b0f62441c9362b5.mp3"],
+            video: ["http://koebu.com/static/flv/event/award2010/tentaikansoku.flv"] },
+        {   type: "MediaAudioVideo",
+            audio: ["http://koebu.s3.amazonaws.com/mp3/b/be/be37/be37c897e1e7dda6cee98f911fcc43b9f57c30e3.mp3"],
+            video: ["http://koebu.com/static/flv/event/award2010/tentaikansoku.flv"] },
+// Love so sweet
+        {   type: "MediaAudioVideo",
+            audio: ["http://koebu.s3.amazonaws.com/mp3/3/32/326c/326c37345e6422fbfcfd1790fc4d8ab0ee421dc0.mp3"],
+            video: ["http://koebu.com/static/flv/event/award2010/lovesosweet.flv"] },
+        {   type: "MediaAudioVideo",
+            audio: ["http://koebu.s3.amazonaws.com/mp3/a/a6/a6e1/a6e1a08f93150db3ea861e18ceb5ccb0d5c12fe9.mp3"],
+            video: ["http://koebu.com/static/flv/event/award2010/lovesosweet.flv"] },
+        {   type: "MediaAudioVideo",
+            audio: ["http://koebu.s3.amazonaws.com/mp3/2/23/23e8/23e846b32db513ccd486242ec46fb9d7ed4bb0ff.mp3"],
+            video: ["http://koebu.com/static/flv/event/award2010/lovesosweet.flv"] }
+    ];
+
+    media = uu("MyMediaPlayer", data,
+               { seekSlider: ary[0], volumeSlider: ary[1],
+                 autoplay: true, nextplay: true },
+               { width: 224, height: 168, nocache: true });
+
+});
+</script>
+</head><body>
+<p>STATUS: <span id="playButtonState">STOPPED</span></p>
+<p>MEDIA: <span id="mediaSource">...</span></p>
+<input type="button" value="PREV" onclick="media.prev()" />
+<input type="button" value="PLAY / PAUSE" onclick="media.play()" />
+<input type="button" value="NEXT" onclick="media.next()" />
+<input type="button" value="STOP" onclick="media.stop()" />
+<input id="seekBar" ui="Slider" type="range" value="0" size="200" min="0" max="100" />
+<input type="button" value="MUTE" onclick="media.mute()" />
+<input id="volumeBar" ui="Slider" type="range" value="0" size="50" min="0" max="100" /> <!--  vertical="vertical" -->
+<br />
+<input type="button" value="CLEAR LOG" onclick="uu.log.clear()" />
+<!--
+<pre id="log" style="white-space:pre-wrap;">
+</pre>
+ -->
+
+</body></html>
