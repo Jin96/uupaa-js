@@ -1,5 +1,5 @@
 <!DOCTYPE html><html lang="ja"><head><meta charset="utf-8" />
-<title>Media Player</title>
+<title>Media Player test</title>
 <style></style>
 <script>
 window.uuconfig = {
@@ -12,15 +12,32 @@ window.uuconfig = {
 <script src="../../src/media/MediaPlayer.js"></script>
 <script>
 uu.Class("MyMediaPlayer:MediaPlayer", {
-    init: function(seekSlider, volumeSlider, data) {},
-    play: function() { this.superMethod("play"); },
-    pause:function() { this.superMethod("pause"); },
-    stop: function() { this.superMethod("stop"); },
-    next: function() { this.superMethod("next"); },
-    prev: function() { this.superMethod("prev"); },
-    setMasterVolume: function(vol) { this.superMethod("setMasterVolume", vol); },
-    togglePlay: function() { this.superMethod("togglePlay"); },
-    toggleMasterMute: function() { this.superMethod("toggleMasterMute"); }
+    init: function(data, option, swfOption) {
+    },
+    handleTrace: function(xid, msg, state, targetID, currentID) {
+        if (targetID === currentID) {
+            switch (state.mediaState[0]) {
+            case 0: uu.text(uu.id("playButtonState"), "STOPPED"); break;
+            case 1: uu.text(uu.id("playButtonState"), "PLAYING"); break;
+            case 2: uu.text(uu.id("playButtonState"), "PAUSED");
+            }
+            uu.text(uu.id("mediaSource"), state.mediaSource.join(","));
+        }
+        delete state.mediaSource;
+        delete state.imageSource;
+        delete state.imageState;
+        delete state.loop;
+        delete state.mute;
+        delete state.startTime;
+        delete state.duration;
+        delete state.progress;
+
+        if (uu.id("log")) {
+            uu.id("log").innerText = uu.f("@: @", msg, uu.json(state));
+        } else {
+            uu.log("@: @", msg, uu.json(state));
+        }
+    }
 });
 
 var media;
@@ -77,20 +94,22 @@ uu.ready(function(uu) {
  */
     ];
 
-    media = uu("MyMediaPlayer", ary[0], ary[1], data,
+    media = uu("MyMediaPlayer", data,
+               { seekSlider: ary[0], volumeSlider: ary[1],
+                 autoplay: true, nextplay: true },
                { width: 224, height: 168, nocache: true });
-//               { width: "100%", height: "100%", nocache: true });
+
 });
 </script>
 </head><body>
 <p>STATUS: <span id="playButtonState">STOPPED</span></p>
 <p>MEDIA: <span id="mediaSource">...</span></p>
 <input type="button" value="PREV" onclick="media.prev()" />
-<input type="button" value="PLAY / PAUSE" onclick="media.togglePlay()" />
+<input type="button" value="PLAY / PAUSE" onclick="media.play()" />
 <input type="button" value="NEXT" onclick="media.next()" />
 <input type="button" value="STOP" onclick="media.stop()" />
 <input id="seekBar" ui="Slider" type="range" value="0" size="200" min="0" max="100" />
-<input type="button" value="MUTE" onclick="media.toggleMute()" />
+<input type="button" value="MUTE" onclick="media.mute()" />
 <input id="volumeBar" ui="Slider" type="range" value="0" size="50" min="0" max="100" /> <!--  vertical="vertical" -->
 <br />
 <input type="button" value="CLEAR LOG" onclick="uu.log.clear()" />
