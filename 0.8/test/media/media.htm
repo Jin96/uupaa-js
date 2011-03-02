@@ -15,6 +15,8 @@ uu.Class("MyMediaPlayer:MediaPlayer", {
     init: function(data, option, swfOption) {
     },
     handleTrace: function(xid, msg, state, targetID, currentID) {
+        return;
+
         if (targetID === currentID) {
             switch (state.mediaState[0]) {
             case 0: uu.text(uu.id("playButtonState"), "STOPPED"); break;
@@ -40,7 +42,7 @@ uu.Class("MyMediaPlayer:MediaPlayer", {
     }
 });
 
-var media;
+var mediaPlayer;
 
 // slider activate
 uu.ready(function(uu) {
@@ -94,7 +96,7 @@ uu.ready(function(uu) {
  */
     ];
 
-    media = uu("MyMediaPlayer", data,
+    mediaPlayer = uu("MyMediaPlayer", data,
                { seekSlider: ary[0], volumeSlider: ary[1],
                  autoplay: true, nextplay: true },
                { width: 224, height: 168, nocache: true });
@@ -104,12 +106,12 @@ uu.ready(function(uu) {
 </head><body>
 <p>STATUS: <span id="playButtonState">STOPPED</span></p>
 <p>MEDIA: <span id="mediaSource">...</span></p>
-<input type="button" value="PREV" onclick="media.prev()" />
-<input type="button" value="PLAY / PAUSE" onclick="media.play()" />
-<input type="button" value="NEXT" onclick="media.next()" />
-<input type="button" value="STOP" onclick="media.stop()" />
+<input type="button" value="PREV" onclick="mediaPlayer.prev()" />
+<input type="button" value="PLAY / PAUSE" onclick="mediaPlayer.play()" />
+<input type="button" value="NEXT" onclick="mediaPlayer.next()" />
+<input type="button" value="STOP" onclick="mediaPlayer.stop()" />
 <input id="seekBar" ui="Slider" type="range" value="0" size="200" min="0" max="100" />
-<input type="button" value="MUTE" onclick="media.mute()" />
+<input type="button" value="MUTE" onclick="mediaPlayer.mute()" />
 <input id="volumeBar" ui="Slider" type="range" value="0" size="50" min="0" max="100" /> <!--  vertical="vertical" -->
 <br />
 <input type="button" value="CLEAR LOG" onclick="uu.log.clear()" />
