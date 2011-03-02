@@ -5,7 +5,7 @@
     <movie disabled="False" />
     <movie input="" />
     <movie path="..\..\swf\uu.media.swf" />
-    <movie fps="30" />
+    <movie fps="60" />
     <movie width="224" />
     <movie height="168" />
     <movie version="10" />

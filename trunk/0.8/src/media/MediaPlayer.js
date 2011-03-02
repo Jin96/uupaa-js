@@ -42,7 +42,7 @@ uu.Class("MediaPlayer", {
         var that = this, volumeSlider, seekSlider;
 
         this._data = data.concat(); // clone
-        this._option = uu.arg(option, { next: true, volume: 0.5, });
+        this._option = uu.arg(option, { next: true, volume: 0.5 });
         this._swfOption = uu.arg(swfOption, { width: "100%", height: "100%" });
         this._seekSlider = option.seekSlider || null;
         this._volumeSlider = option.volumeSlider || null;
