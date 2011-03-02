@@ -84,6 +84,8 @@ package {
                 _netStream.addEventListener(AsyncErrorEvent.ASYNC_ERROR, handleAsyncError);
                 _netStream.client = this;
                 _video.attachNetStream(_netStream);
+                _netStream.soundTransform =
+                        new SoundTransform(_mute ? 0 : _volume.current);
                 _netStream.play(_mediaSource[0]); // 1st play() -> pause() -> seek(0)
                 break;
             case "NetStream.Play.Start":
@@ -163,6 +165,8 @@ package {
 
         public function playback():void {
             _boss.postMessage("play", _id); // W3C NamedEvent
+            _netStream.soundTransform =
+                    new SoundTransform(_mute ? 0 : _volume.current);
             _netStream.play(_mediaSource[0]);
             _boss.postMessage("playing", _id); // W3C NamedEvent
         }
@@ -207,6 +211,8 @@ package {
                     if (_currentTime !== _netStream.time * 1000) { // msec !== sec * 1000
                         _netStream.seek(_currentTime / 1000); // (msec / 1000) -> sec
                     }
+                    _netStream.soundTransform =
+                            new SoundTransform(_mute ? 0 : _volume.current);
                     _netStream.play(_mediaSource[0]);
                     _boss.postMessage("playing", _id); // W3C NamedEvent
                     break;
@@ -347,6 +353,7 @@ package {
                         : _mediaState === MEDIA_STATE_STOPPED ? _currentTime
                         : 0;
             return {
+                id: _id,
                 name: "MediaVideo",
                 loop: _loop,
                 mute: _mute,
@@ -437,16 +444,14 @@ package {
         }
 
         protected function updateVolume(forceUpdate:Boolean = false):void {
-            if (_mediaState === MEDIA_STATE_PLAYING) {
-                if (_updateVolume || forceUpdate) {
-                    _updateVolume = false;
+            if (_updateVolume || forceUpdate) {
+                _updateVolume = false;
 
-                    if (_netStream) {
-                        _netStream.soundTransform =
-                                new SoundTransform(_mute ? 0 : _volume.current);
-                    }
-                    forceUpdate = true;
+                if (_netStream) {
+                    _netStream.soundTransform =
+                            new SoundTransform(_mute ? 0 : _volume.current);
                 }
+                forceUpdate = true;
             }
             if (forceUpdate) {
                 _boss.postMessage("volumechange", _id); // W3C NamedEvent

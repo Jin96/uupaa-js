@@ -1,17 +1,26 @@
-// case "http://localhost:8080/0.8/test/media/media.htm"
 
 uu.Class("MediaPlayer", {
-    _data: [],
-    _lastID: 0, // current playing itemID
+    _id: 0, // current item id
+    _data: [], // list data
+    _option: null,
+    _swfOption: null,
     _seekPosition: 0,
     _volumePosition: 0,
     _ignoreSeekUpdate: false,
     _ignoreVolumeUpdate: false,
 
-    init: function(seekSlider,   // @param UISlider:
-                   volumeSlider, // @param UISlider:
-                   data,         // @param Array:
-                   option) {     // @param Hash: { width: "100%", height: "100%" }
+    init: function(data,        // @param Array:
+                   option,      // @param Hash: { debug, volume, autoplay, nextplay,
+                                //                seekSlider, volumeSlider }
+                                //      debug - Boolean(= false):
+                                //      volume - Number(= 0.5): start volume
+                                //      autoplay - Boolean(= false): auto play
+                                //      nextplay - Boolean(= true): play -> ended -> next play
+                                //      seekSlider - UISlider(= undefined): seek slider
+                                //      volumeSlider - UISlider(= undefined): volume slider
+                   swfOption) { // @param Hash: { width, height, ... }
+                                //      width - Number/String(= "100%"): swf width
+                                //      height - Number/String(= "100%"): swf height
 
         function doSeek(evt, attr) { // attr.value = 0~100
             that._ignoreSeekUpdate = true;
@@ -23,151 +32,144 @@ uu.Class("MediaPlayer", {
         }
         function doVolume(evt, attr) { // attr.value = 0~100
             that._ignoreVolumeUpdate = true;
-            that.setMasterVolume(parseFloat(attr.value) / 100);
+            that.volume(parseFloat(attr.value) / 100);
 
             setTimeout(function() {
                 that._ignoreVolumeUpdate = false;
             }, 150);
         }
 
-        var that = this;
+        var that = this, volumeSlider, seekSlider;
 
-        var swfOption = uu.arg(option, { width: "100%", height: "100%" });
-
-        this._seekSlider = seekSlider;
-        this._volumeSlider = volumeSlider;
-        this._data = data;
+        this._data = data.concat(); // clone
+        this._option = uu.arg(option, { next: true, volume: 0.5, });
+        this._swfOption = uu.arg(swfOption, { width: "100%", height: "100%" });
+        this._seekSlider = option.seekSlider || null;
+        this._volumeSlider = option.volumeSlider || null;
         this._swf = uu.flash.call(this, uu.config.media.swf,
-                                  swfOption, this.handleFlash);
+                                  this._swfOption, this.handleFlash);
         // volume event handler
-        volumeSlider.bind("mousedown", function(evt, attr) {
-            that._ignoreVolumeUpdate = true;
-        });
-        volumeSlider.bind("mouseup", doVolume);
-        volumeSlider.bind("mousewheel", doVolume);
-        volumeSlider.bind("keydown", doVolume);
+        if (option.volumeSlider) {
+            volumeSlider = option.volumeSlider;
+            volumeSlider.bind("mousedown", function(evt, attr) {
+                that._ignoreVolumeUpdate = true;
+            });
+            volumeSlider.bind("mouseup", doVolume);
+            volumeSlider.bind("mousewheel", doVolume);
+            volumeSlider.bind("keydown", doVolume);
+        }
 
         // seek event handler
-        seekSlider.bind("mousedown", function(evt, attr) {
-            that._ignoreSeekUpdate = true;
-        });
-        seekSlider.bind("mouseup", doSeek);
-        seekSlider.bind("mousewheel", doSeek);
-        seekSlider.bind("keydown", doSeek);
+        if (option.seekSlider) {
+            seekSlider = option.seekSlider;
+            seekSlider.bind("mousedown", function(evt, attr) {
+                that._ignoreSeekUpdate = true;
+            });
+            seekSlider.bind("mouseup", doSeek);
+            seekSlider.bind("mousewheel", doSeek);
+            seekSlider.bind("keydown", doSeek);
+        }
+    },
+    getCurrentID: function() {
+        return this._id;
     },
     handleFlash: function(xid, msg, id, state) {
         var that = this;
 
-        if (state) {
-            if (this._lastID === id) {
-                switch (state.mediaState[0]) {
-                case 0: uu.text(uu.id("playButtonState"), "STOPPED"); break;
-                case 1: uu.text(uu.id("playButtonState"), "PLAYING"); break;
-                case 2: uu.text(uu.id("playButtonState"), "PAUSED");
-                }
-                uu.text(uu.id("mediaSource"), state.mediaSource.join(","));
-            }
-            delete state.masterMute;
-            delete state.masterVolume;
-            delete state.mediaSource;
-            delete state.imageSource;
-            delete state.imageState;
-            delete state.loop;
-            delete state.mute;
-            delete state.startTime;
-            delete state.mediaSource;
-            delete state.duration;
-            delete state.volume;
-            delete state.progress;
-
-            if (uu.id("log")) {
-                uu.id("log").innerText = uu.f("@: @", msg, uu.json(state));
-            } else {
-                uu.log("@: @", msg, uu.json(state));
-            }
-        }
-
         switch (msg) {
         case "init":
-            this.setFinalizer();
+            // --- attach window.onunload event ---
+            if (window.addEventListener) {
+                window.addEventListener("beforeunload", function(evt) {
+                    that._swf.xiBeforeUnload();
+                }, false);
+            } else if (window.attachEvent) {
+                window.attachEvent("beforeunload", function(evt) {
+                    that._swf.xiBeforeUnload();
+                });
+            }
+            // --- init callback ---
+            if (this.initCallback) {
+                this.initCallback();
+            }
+            // --- add list item ---
             this._data.forEach(function(hash, index) {
-                that._swf.xiAdd(hash.type, hash.audio, hash.video, hash.image, hash.comment);
+                that._swf.xiAdd(hash.type,
+                                hash.audio   || [],
+                                hash.video   || [],
+                                hash.image   || [],
+                                hash.comment || []);
             });
-            this._lastID = 1;
-            this.setMasterVolume(1);
-            this._swf.xiAutoPlay(this._lastID);
-            break;
+            // --- initial volume ---
+            this.volume(this._option.volume);
+            // --- auto play ---
+            this._option.autoplay && (this._id = that._swf.xiPlay());
+            return;
         case "timeupdate":
             // update grip position
-            if (this._lastID === id) {
-                if (!this._ignoreSeekUpdate &&
-                    this._seekPosition !== state.position) {
+            if (this._option.seekSlider) {
+                if (this._id === id) {
+                    if (!this._ignoreSeekUpdate &&
+                        this._seekPosition !== state.position) {
 
-                    this._seekPosition = state.position;
-                    uu.msg.post(this._seekSlider, "value", state.position, 0);
+                        this._seekPosition = state.position;
+                        uu.msg.post(this._seekSlider, "value", state.position, 0);
+                    }
                 }
             }
             break;
         case "volumechange":
             // upate volume slider position
-            if (this._lastID === id) {
-                if (!this._ignoreVolumeUpdate &&
-                    this._volumePosition != state.volume) {
+            if (this._option.volumeSlider) {
+                if (this._id === id) {
+                    if (!this._ignoreVolumeUpdate &&
+                        this._volumePosition != state.volume) {
 
-                    this._volumePosition = state.volume;
-                    uu.msg.post(this._volumeSlider, "value", state.volume * 100, 0);
+                        this._volumePosition = state.volume;
+                        uu.msg.post(this._volumeSlider, "value", state.volume * 100, 0);
+                    }
                 }
             }
             break;
         case "ended":
-            this.next();
+            // --- next play ---
+            this._option.nextplay && this.next();
+        }
+        // --- trace callback ---
+        if (this.handleTrace) {
+            this.handleTrace(xid, msg, state, id, this._id);
         }
     },
-    setMasterVolume: function(volume) {
-        this._swf.xiSetMasterVolume(volume);
-    },
-    volume: function(volume, force) {
-        this._swf.xiSetVolume(this._lastID, volume, force);
-    },
-    togglePlay: function() {
-        this._swf.xiTogglePlay(this._lastID);
-    },
-    mute: function(amute) { // @param Boolean(= true):
-        this._swf.xiSetMasterMute(amute == null ? true : amute);
-    },
-    toggleMute: function() {
-        this._swf.xiToggleMasterMute();
-    },
-    play: function() {
-        this._swf.xiAutoPlay(this._lastID);
-    },
-    pause: function() {
-        this._swf.xiPause(this._lastID);
-    },
-    seek: function(position) { // 0~100
-        this._swf.xiSeek(this._lastID, position);
-    },
-    stop: function() {
-        this._swf.xiStop(this._lastID);
+    //  [1][toggle play] play()
+    //  [2][play]        play(playing id)
+    //  [3][play]        play(other id)
+    play: function(id) { // @param Number/String(= undefined): id
+                         // @return Number: current item id
+        return this._id = this._swf.xiPlay(id);
     },
     next: function() {
-        this._lastID = this._swf.xiNextAutoPlay();
+        return this._id = this._swf.xiPlay("next");
     },
     prev: function() {
-        this._lastID = this._swf.xiPrevAutoPlay();
+        return this._id = this._swf.xiPlay("prev");
     },
-    setFinalizer: function() {
-        var swf = this._swf;
-
-        // close window / close tab
-        if (window.addEventListener) {
-            window.addEventListener("beforeunload", function(evt) {
-                swf.xiBeforeUnload();
-            }, false);
-        } else if (window.attachEvent) {
-            window.attachEvent("beforeunload", function(evt) {
-                swf.xiBeforeUnload();
-            });
-        }
+    //  [1][toggle mute] mute()
+    //  [2][mute]        mute(true)
+    //  [3][unmute]      mute(false)
+    mute: function(state) { // @param Boolean(= undefined):
+                            //      undefined -> toggle mute
+                            //      true      -> mute
+                            //      false     -> unmute
+        this._swf.xiMute(state);
+    },
+    volume: function(volume,  // @param Number: 0 ~ 1
+                     force) { // @param Boolean(= false): force update
+        this._swf.xiVolume(volume, force);
+    },
+    seek: function(position) { // @param Number: 0 ~ 100
+        this._swf.xiSeek(this._id, position);
+    },
+    stop: function() {
+        this._swf.xiStop(this._id);
     }
 });

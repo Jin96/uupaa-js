@@ -318,6 +318,7 @@ package {
                         : _mediaState === MEDIA_STATE_STOPPED ? _currentTime
                         : 0;
             return {
+                id: _id,
                 name: "MediaAudio",
                 loop: _loop,
                 mute: _mute,
@@ -481,15 +482,14 @@ package {
         }
 
         protected function updateVolume(forceUpdate:Boolean = false):void {
-            if (_mediaState === MEDIA_STATE_PLAYING) {
-                if (_updateVolume || forceUpdate) {
-                    _updateVolume = false;
+            if (_updateVolume || forceUpdate) {
+                _updateVolume = false;
 
+                if (_soundChannel) {
                     _soundChannel.soundTransform =
                             new SoundTransform(_mute ? 0 : _volume.current);
-
-                    forceUpdate = true;
                 }
+                forceUpdate = true;
             }
             if (forceUpdate) {
                 _boss.postMessage("volumechange", _id); // W3C NamedEvent

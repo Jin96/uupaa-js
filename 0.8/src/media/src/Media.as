@@ -27,16 +27,15 @@ package {
 
         // for List Management
         private var _list:Array = [null]; // [null, MediaAudio, ...]
-        private var _playID:Number = 0; // playing id: 1 ~
-        private var _lastID:Number = 0; // last inserted id: 1 ~
+        private var _id:Number = 0; // last inserted id: 1 ~
 
         // for Message Exports
         private var _xiLock:Number = 0;
         private var _xiMessagePool:Array = [];
 
         // state
-        private var _masterMute:Boolean = false;
-        private var _masterVolume:Number = 0;
+        private var _lastMute:Boolean = false;
+        private var _lastVolume:Number = 0.5; // 0~1
 
         public function Media():void {
             stage ? init() : addEventListener(Event.ADDED_TO_STAGE, init);
@@ -62,22 +61,16 @@ package {
                                                 : ("uu.dmz." + xi.objectID);
 
             // --- ExternalInterface definitions ---
-            xi.addCallback("xiAdd",             xiAdd);
-            xi.addCallback("xiClear",           xiClear);
-            xi.addCallback("xiGetState",        xiGetState);
-            xi.addCallback("xiTogglePlay",      xiTogglePlay);
-            xi.addCallback("xiAutoPlay",        xiAutoPlay);
-            xi.addCallback("xiPlay",            xiPlay);
-            xi.addCallback("xiPause",           xiPause);
-            xi.addCallback("xiSeek",            xiSeek);
-            xi.addCallback("xiStop",            xiStop);
-            xi.addCallback("xiClose",           xiClose);
-            xi.addCallback("xiSetMasterMute",   xiSetMasterMute);
-            xi.addCallback("xiToggleMasterMute",xiToggleMasterMute);
-            xi.addCallback("xiSetVolume",       xiSetVolume);
-            xi.addCallback("xiSetMasterVolume", xiSetMasterVolume);
-            xi.addCallback("xiPrevAutoPlay",    xiPrevAutoPlay);
-            xi.addCallback("xiNextAutoPlay",    xiNextAutoPlay);
+            xi.addCallback("xiAdd",             xiAdd);    // add list
+            xi.addCallback("xiClear",           xiClear);  // clear list
+            xi.addCallback("xiState",           xiState);  // get state
+            xi.addCallback("xiPlay",            xiPlay);   // toggle play / play / pause
+            xi.addCallback("xiPause",           xiPause);  // pause
+            xi.addCallback("xiSeek",            xiSeek);   // seek
+            xi.addCallback("xiStop",            xiStop);   // stop
+            xi.addCallback("xiClose",           xiClose);  // close
+            xi.addCallback("xiMute",            xiMute);   // toggle mute / mute / unmute
+            xi.addCallback("xiVolume",          xiVolume); // volume
             xi.addCallback("xiBeforeUnload",    xiBeforeUnload);
 
             try {
@@ -106,15 +99,18 @@ package {
             }
 
             var obj:Object = _list[queue.id],
-                state:Object, m1:uint, m2:uint;
+                state:Object,
+                play:Boolean = false,
+                close:Boolean = false;
 
             switch (queue.action) {
             case "pause":   obj.pause(); break;
             case "seek":    obj.seek(queue.param1); break; // 0~100
             case "stop":    obj.stop(); break;
             case "close":   obj.close(); break;
-//          case "mute":    obj.setMute(queue.param1); break;
+            case "mute":    obj.setMute(queue.param1); break;
             case "volume":  obj.setVolume(queue.param1, queue.param2); break;
+            case "play":    play = true; close = true; break;
             case "toggleplay":
                 state = obj.getState();
 
@@ -122,9 +118,9 @@ package {
                 case "MediaAudio":
                 case "MediaVideo":
                     switch (state.mediaState[0]) {
-                    case 1: obj.pause(); return;    // MEDIA_STATE_PLAYING -> pause
-                    case 2: _lastID = 0;            // MEDIA_STATE_PAUSED  -> play
-                    case 0:                         // MEDIA_STATE_STOPPED -> autoplay
+                    case MEDIA_STATE_PLAYING: obj.pause(); break; // PLAYING -> pause
+                    case MEDIA_STATE_STOPPED: close = true;       // STOPPED -> autoplay -> close -> play
+                    case MEDIA_STATE_PAUSED:  play = true;        // PAUSED  -> play
                     }
                     break;
                 // [1] STOPPED + STOPPED -> AUTO PLAY/AUTO PLAY
@@ -138,41 +134,30 @@ package {
                 // [9] PAUSED  + PAUSED  -> PLAY/PLAY
                 case "MediaAudiox2":
                 case "MediaAudioVideo":
-                    m1 = state.mediaState[1];
-                    m2 = state.mediaState[2];
-                    if (m1 === m2) {
-                        switch (m1) {
-                        case MEDIA_STATE_STOPPED: // [1] AUTO PLAY/AUTO PLAY
-                            if (_lastID && _lastID !== queue.id) {
-                                (_lastID in _list) && _list[_lastID].close(); // auto close
-                            }
-                            _lastID = queue.id;
-                            _masterMute && obj.setMute(true);
-                            obj.play(handleCanPlayCallback);
-                            break;
-                        case MEDIA_STATE_PLAYING: // [5]
-                            obj.pause();
-                            break;
-                        case MEDIA_STATE_PAUSED: // [9]
-                            _lastID = queue.id;
-                            _masterMute && obj.setMute(true);
-                            obj.play(handleCanPlayCallback);
+                    if (state.mediaState[1] === state.mediaState[2]) {
+                        switch (state.mediaState[1]) {
+                        case MEDIA_STATE_PLAYING: obj.pause(); break; // [5] PLAYING -> pause
+                        case MEDIA_STATE_STOPPED: close = true;       // [1] STOPPED -> autoplay -> close -> play
+                        case MEDIA_STATE_PAUSED:  play = true;        // [9] PAUSED  -> play
                         }
                     } else {
                         obj.stop();
-                        _lastID = queue.id;
-                        _masterMute && obj.setMute(true);
-                        obj.play(handleCanPlayCallback);
+                        play = true;
                     }
-                    return;
                 }
-            case "autoplay":
-                if (_lastID && _lastID !== queue.id) {
-                    (_lastID in _list) && _list[_lastID].close(); // auto close
+            }
+
+            if (close) { // auto close
+                if (_id && _id !== queue.id) {
+                    if (_id in _list) {
+                        _list[_id].close(); // current item close
+                    }
                 }
-            case "play":
-                _lastID = queue.id;
-                _masterMute && obj.setMute(true);
+            }
+            if (play) { // auto play
+                _id = queue.id;
+                obj.setVolume(_lastVolume);
+                obj.setMute(_lastMute);
                 obj.play(handleCanPlayCallback);
             }
         }
@@ -219,31 +204,56 @@ package {
             var i:int = 1, iz:int = _list.length;
 
             for (; i < iz; ++i) {
-                _list[i].close();
+                if (_id !== i) {
+                    _list[i].close();
+                }
             }
+            _id && _list[_id].close();
             _list = [null];
-            _playID = 0;
-            _lastID = 0;
+            _id = 0;
         }
 
-        public function xiAutoPlay(id:Number):void {
-            _queue.push({ id: id, action: "autoplay" });
-        }
-
-        public function xiGetState(id:Number):Object {
+        public function xiState(id:Number):Object {
             return _list[id] ? _list[id].getState() : {};
         }
 
-        public function xiPlay(id:Number):void {
-            _queue.push({ id: id, action: "play" });
+        //  [1][toggle play] xiPlay()
+        //  [2][play]        xiPlay(playing id)
+        //  [3][play]        xiPlay(other id)
+        //  [4][prev]        xiPlay("prev")
+        //  [5][next]        xiPlay("next")
+        public function xiPlay(id:* = undefined):Number { // @param Number/String/undefined:
+                                                          // @return Number: next id
+                                                          //                 0 is ERROR
+            var r:Number = _id;
+
+            if (id == null) { // [1]
+                if (!_id) {
+                    _id = 1;
+                }
+                _queue.push({ id: _id, action: "toggleplay" });
+                return _id;
+            } else if (typeof id === "number") {
+                r = id;
+            } else if (id === "prev") {
+                if (--r < 1) {
+                    r = _list.length - 1;
+                }
+            } else if (id === "next") {
+                if (++r >= _list.length) {
+                    r = 1;
+                }
+            }
+            if (isValidID(r)) {
+                _queue.push({ id: r, action: "play" });
+                return r;
+            }
+            trace("xiAutoPlay fail. invalid id", id);
+            return 0; // ERROR
         }
 
         public function xiPause(id:Number):void {
             _queue.push({ id: id, action: "pause" });
-        }
-
-        public function xiTogglePlay(id:Number):void {
-            _queue.push({ id: id, action: "toggleplay" });
         }
 
         public function xiSeek(id:Number,
@@ -263,75 +273,30 @@ package {
             _queue.push({ id: id, action: "close" });
         }
 
-        public function xiSetMasterMute(mute:Boolean = true):void {
-            _masterMute = mute;
-            var i:int = 1, iz:int = _list.length,
-                ex:Boolean = _xiExportMessage;
-
-            _xiExportMessage = false;
-
-            for (; i < iz; ++i) {
-                _list[i].setMute(_masterMute);
+        //  [1][toggle mute] xiMute()
+        //  [2][mute]        xiMute(true)
+        //  [3][unmute]      xiMute(false)
+        public function xiMute(mute:* = undefined):void { // @param Boolean/undefined:
+            if (mute == null) { // null or undefined -> toggle
+                _lastMute = _lastMute ? false : true;
+            } else {
+                _lastMute = mute;
             }
-
-            _xiExportMessage = ex;
-
-            _lastID && _list[_lastID].setMute(_masterMute);
+            if (isValidID(_id)) {
+                _queue.push({ id: _id, action: "mute", param1: _lastMute });
+            }
         }
 
-        public function xiToggleMasterMute():void {
-            xiSetMasterMute(_masterMute ? false : true);
-        }
-
-        public function xiSetVolume(id:Number,
-                                    volume:Number,
-                                    force:Boolean = false):void {
+        public function xiVolume(volume:Number,
+                                 force:Boolean = false):void {
             // volume = 0 ~ 1
-            volume = volume > 1 ? 1
-                   : volume < 0 ? 0
-                   : volume;
-            _queue.push({ id: id, action: "volume", param1: volume, param2: force });
-        }
-
-        public function xiSetMasterVolume(volume:Number):void {
-            // volume = 0 ~ 1
-            _masterVolume = volume > 1 ? 1
-                          : volume < 0 ? 0
-                          : volume;
-
-            var i:int = 1, iz:int = _list.length,
-                ex:Boolean = _xiExportMessage;
-
-            _xiExportMessage = false;
-
-            for (; i < iz; ++i) {
-                if (i !== _lastID) {
-                    _list[i].setVolume(_masterVolume, true);
-                }
+            _lastVolume = volume > 1 ? 1
+                        : volume < 0 ? 0
+                        : volume;
+            if (isValidID(_id)) {
+                _queue.push({ id: _id, action: "volume",
+                              param1: _lastVolume, param2: force });
             }
-
-            _xiExportMessage = ex;
-            _lastID && _list[_lastID].setVolume(_masterVolume, true);
-        }
-
-        public function xiPrevAutoPlay():Number {
-            var id:Number = _lastID;
-
-            if (--id < 1) {
-                id = _list.length - 1;
-            }
-            _queue.push({ id: id, action: "autoplay" });
-            return id;
-        }
-
-        public function xiNextAutoPlay():Number {
-            var id:Number = _lastID;
-
-            if (++id >= _list.length) {
-                id = 1;
-            }
-            _queue.push({ id: id, action: "autoplay" });
-            return id;
         }
 
         public function xiBeforeUnload():void {
@@ -341,33 +306,33 @@ package {
             xiClear();
         }
 
-        public function postMessage(msg:String, id:Number = 0, param:* = undefined):void {
+        public function isValidID(id:Number):Boolean {
+            return id > 0 && id < _list.length && _list[id];
+        }
+
+        public function postMessage(msg:String, id:Number = 0,
+                                    param:* = undefined):void {
             var that:* = this;
 
-            if (!_list[id]) {
+            if (!_list[id] || !_xiExportMessage) {
                 return;
             }
-            if (_xiExportMessage) {
-// trace("postMessage", msg, id, param);
-                if (_xiLock) { // lock -> stock
-                    _xiMessagePool.push({ msg: msg, id: id });
-                } else {
-                    _xiMessagePool.forEach(function(obj:Object, i:int, ary:Array):void {
-                        postMessageToJavaScript.call(that, obj.msg, obj.id);
-                    });
-                    postMessageToJavaScript(msg, id);
-                }
+
+            // trace("postMessage", msg, id, param);
+            if (_xiLock) { // lock -> stock
+                _xiMessagePool.push({ msg: msg, id: id });
+            } else {
+                _xiMessagePool.forEach(function(obj:Object, i:int, ary:Array):void {
+                    postMessageToJavaScript.call(that, obj.msg, obj.id);
+                });
+                postMessageToJavaScript(msg, id);
             }
         }
 
-        // to js
+        // AS -> JS
         private function postMessageToJavaScript(msg:String, id:Number = 0):void {
-            // id = 0 -> null
-            if (_list[id]) {
+            if (_list[id]) { // ignore _list[0]
                 var state:Object = _list[id].getState();
-
-                state.masterMute = _masterMute; // join
-                state.masterVolume = _masterVolume; // join
 
                 switch (msg) {
                 case "durationchange":
