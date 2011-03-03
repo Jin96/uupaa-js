@@ -13,31 +13,32 @@ package {
         public static var MEDIA_STATE_PAUSED:uint    = 0x2;
         public static var STREAM_STATE_CLOSED:uint   = 0x0;
         public static var STREAM_STATE_OPEN:uint     = 0x1;
-        public static var STREAM_STATE_CAN_PLAY:uint = 0x2;
-        public static var STREAM_STATE_LOADED:uint   = 0x3;
-        public static var STREAM_STATE_ERROR:uint    = 0x4;
+        public static var STREAM_STATE_BUFFERING:uint= 0x2;
+        public static var STREAM_STATE_CAN_PLAY:uint = 0x3;
+        public static var STREAM_STATE_LOADED:uint   = 0x4;
+        public static var STREAM_STATE_ERROR:uint    = 0x5;
         // Identity
         protected var _boss:Media;
         protected var _id:Number = 0;
-        // Audio
-        protected var _sound:Sound = null;
+        // Media
+        protected var _media:Sound = null;
+        protected var _mediaSource:String = "";
         protected var _soundChannel:SoundChannel = null;
-        protected var _mediaSource:Array = [];  // [audioURL, ...]
         protected var _canPlayCallback:Array = [];
-        // Image
-        protected var _imageSource:Array = [];  // [imageURL, ...]
-        protected var _imageLoader:Array = [];  // [Loadedr, ...]
+        // Poster
+        protected var _poster:String = "";
         protected var _sprite:Sprite = null;
         // Internal Structure
         protected var _messageTimer:Timer = new Timer(200, 0);
-        protected var _lastPosition:Number = 0; // unit: ms
-        protected var _lastProgress:Number = 0; // 0 ~ 100
         protected var _updateVolume:Boolean = false;
-        protected var _updateDuration:Boolean = false;
+        protected var _buffringProgress:Number = 0.0001; // unit: %, 0.01 = 1%
+        protected var _duration:Number = 0; // unit: ms
+        protected var _position:Number = 0; // unit: ms, last position
+        protected var _progress:Number = 0; // 0 ~ 1 (dataLoadedByte / dataTotalByte)
         // FadeIn/FadeOut
         protected var _fadeDelta:Number = 0.1;
-        protected var _fadeSpeed:Number = 32; // msec
-        protected var _fadeTimer:Timer = new Timer(_fadeSpeed, 20); // 32msec * 20 = 0.64sec
+        protected var _fadeSpeed:Number = 32; // ms
+        protected var _fadeTimer:Timer = new Timer(_fadeSpeed, 20); // 32ms * 20 = 0.64sec
         protected var _fadeStepCallback:Array = [];
         protected var _fadeCompleteCallback:Array = [];
         // State
@@ -53,12 +54,15 @@ package {
 
         public function MediaAudio(boss:Media,
                                    id:Number,
-                                   audioSource:Array,
-                                   imageSource:Array = null) {
+                                   media:Array,
+                                   poster:String = "") {
             _boss = boss;
             _id = id;
-            _mediaSource = audioSource.concat();
-            _imageSource = imageSource ? imageSource.concat() : [];
+            _mediaSource = media[0];
+            _duration = (media[1] || 0) * 1000; // sec -> ms;
+            _poster = poster;
+
+            trace("MediaAudio", _id, _mediaSource, _duration, _poster);
 
             _messageTimer.addEventListener(TimerEvent.TIMER, handleMessageTimer);
             _messageTimer.start();
@@ -66,30 +70,16 @@ package {
             _fadeTimer.addEventListener(TimerEvent.TIMER, handleFadeTimer);
             _fadeTimer.addEventListener(TimerEvent.TIMER_COMPLETE, handleFadeComplete);
 
-            // image container
-            if (_imageSource.length) {
+            if (_poster) {
                 _sprite = new Sprite();
                 _sprite.alpha = 0;
                 boss.stage.addChild(_sprite);
 
-                imageLoader();
-            }
-        }
-
-        protected function imageLoader():void {
-            var that:* = this;
-
-            // load images
-            _imageSource.forEach(function(url:String, index:int, ary:Array):void {
-                trace(_id, "MediaAudio", url);
-
                 var loader:Loader = new Loader();
 
                 loader.contentLoaderInfo.addEventListener(Event.COMPLETE, handleImageLoadComplete);
-                loader.load(new URLRequest(url));
-
-                that._imageLoader.push(loader);
-            });
+                loader.load(new URLRequest(_poster));
+            }
         }
 
         protected function handleImageLoadComplete(event:Event):void {
@@ -97,10 +87,10 @@ package {
         }
 
         public function openSoundChannel(position:Number):void {
-            _soundChannel = _sound.play(position, 0,
-                                        new SoundTransform(_mute ? 0 : _volume.current));
-            _lastPosition = _soundChannel.position;
-            _mediaState   = MEDIA_STATE_PLAYING;
+            _soundChannel = _media.play(position, 0,
+                                        new SoundTransform(getContextualVolume()));
+            _position = _soundChannel.position;
+            _mediaState = MEDIA_STATE_PLAYING;
             _soundChannel.addEventListener(Event.SOUND_COMPLETE, handleSoundChannelComplete);
         }
 
@@ -119,12 +109,16 @@ package {
         }
 
         public function playback():void {
-            _boss.postMessage("play", _id); // W3C NamedEvent
+            trace("MediaAudio::playback()", _streamState, _mediaState);
+
             openSoundChannel(_currentTime);
-            _boss.postMessage("playing", _id); // W3C NamedEvent
+//            _boss.postMessage("play", _id); // W3C NamedEvent
+//            _boss.postMessage("playing", _id); // W3C NamedEvent
         }
 
         public function play(callback:Function = null):void {
+            trace("MediaAudio::play()", _streamState, _mediaState);
+
             switch (_streamState) {
             case STREAM_STATE_CLOSED:
                 _mediaState = MEDIA_STATE_STOPPED;
@@ -152,13 +146,13 @@ package {
                         _sprite.alpha = alpha;
                     }, 40);
                 }
-                _sound = new Sound();
-                _sound.addEventListener(Event.OPEN, handleOpen);
-                _sound.addEventListener(Event.COMPLETE, handleComplete);
-                _sound.addEventListener(IOErrorEvent.IO_ERROR, handleIOError);
-                _sound.addEventListener(ProgressEvent.PROGRESS, handleProgress);
-                _sound.load(new URLRequest(_mediaSource[0]));
-                trace(_id, "MediaAudio", _mediaSource[0]);
+                _media = new Sound();
+                _media.addEventListener(Event.OPEN, handleOpen);
+                _media.addEventListener(Event.COMPLETE, handleComplete);
+                _media.addEventListener(IOErrorEvent.IO_ERROR, handleIOError);
+                _media.addEventListener(ProgressEvent.PROGRESS, handleProgress);
+                _media.load(new URLRequest(_mediaSource));
+                trace("MediaAudio::play() Sound.load", _mediaSource);
                 break;
             case STREAM_STATE_OPEN:
                 callback && _canPlayCallback.push(callback);
@@ -168,23 +162,27 @@ package {
                 switch (_mediaState) {
                 case MEDIA_STATE_STOPPED:
                 case MEDIA_STATE_PAUSED:
-                    _boss.postMessage("play", _id); // W3C NamedEvent
                     openSoundChannel(_currentTime);
-                    _boss.postMessage("playing", _id); // W3C NamedEvent
+//                    _boss.postMessage("play", _id); // W3C NamedEvent
+//                    _boss.postMessage("playing", _id); // W3C NamedEvent
                 }
             }
         }
 
         public function seek(position:Number):void { // @param Number: 0~100
-            if (_sound) {
+            trace("MediaAudio::seek()", _streamState, _mediaState, position);
+
+            if (_media) {
+                var realPositon:Number;
+
                 // map 0~100 to 0~duration
-                var realPositon:Number = position * _sound.length / 100;
+                realPositon = position * _duration / 100; // 50 * 22.44 / 100
 
                 switch (_mediaState) {
                 case MEDIA_STATE_STOPPED: // stopped + seek
                 case MEDIA_STATE_PAUSED:  // paused + seek
                     _currentTime = realPositon;
-                    _lastPosition = realPositon;
+                    _position = realPositon;
                     break;
                 case MEDIA_STATE_PLAYING:
                     try {
@@ -195,21 +193,21 @@ package {
                             _soundChannel.stop();
                             _soundChannel = null;
                         }
-                        _soundChannel = _sound.play(realPositon, 0,
-                                                    new SoundTransform(_mute ? 0 : _volume.current));
+                        _soundChannel = _media.play(realPositon, 0,
+                                                    new SoundTransform(getContextualVolume()));
                         _soundChannel.addEventListener(Event.SOUND_COMPLETE, handleSoundChannelComplete);
-                        _lastPosition = realPositon;
+                        _position = realPositon;
                         _mediaState = MEDIA_STATE_PLAYING;
 
                         _boss.postMessage("seekend", _id); // W3C NamedEvent
-                        _boss.postMessage("playing", _id); // W3C NamedEvent
+//                        _boss.postMessage("playing", _id); // W3C NamedEvent
                     } catch(err:Error) {
                         // maybe: net disconnected / connection reset
                         trace("MediaAudio.seek", err);
                         _mediaState = MEDIA_STATE_STOPPED;
                         _streamState = STREAM_STATE_ERROR;
                         _currentTime = 0;
-                        _lastPosition = 0;
+                        _position = 0;
                     }
                 }
             }
@@ -218,8 +216,8 @@ package {
         public function pause():void {
             if (_mediaState === MEDIA_STATE_PLAYING) {
                 _currentTime = closeSoundChannel(); // keep current position
-                _mediaState = MEDIA_STATE_PAUSED; // STOPPED -> PAUSED
 
+                _mediaState = MEDIA_STATE_PAUSED; // STOPPED -> PAUSED
                 _boss.postMessage("pause", _id); // W3C NamedEvent
             }
         }
@@ -227,7 +225,9 @@ package {
         public function stop():void {
             if (_mediaState === MEDIA_STATE_PLAYING) {
                 closeSoundChannel();
-                _currentTime = _startTime; // rewind
+                _currentTime = _startTime; // rewind (ms)
+
+                _mediaState = MEDIA_STATE_STOPPED;
                 _boss.postMessage("stop", _id); // NOT W3C NamedEvent
             }
         }
@@ -282,7 +282,7 @@ package {
 
             if (_streamState !== STREAM_STATE_CLOSED) {
                 // OPEN, CAN_PLAY, LOADED, ERROR
-                if (_sound) {
+                if (_media) {
                     try {
                         // hide poster image
                         if (_sprite) {
@@ -290,16 +290,16 @@ package {
                         }
                         if (_streamState !== STREAM_STATE_LOADED) {
                             // OPEN, CAN_PLAY, ERROR
-                            _sound.close();
+                            _media.close();
                         }
                     } catch(err:Error) {
                         trace(_id, "sound.close() fail.", err + "");
                     }
-                    _sound.removeEventListener(Event.OPEN, handleOpen);
-                    _sound.removeEventListener(Event.COMPLETE, handleComplete);
-                    _sound.removeEventListener(IOErrorEvent.IO_ERROR, handleIOError);
-                    _sound.removeEventListener(ProgressEvent.PROGRESS, handleProgress);
-                    _sound = null;
+                    _media.removeEventListener(Event.OPEN, handleOpen);
+                    _media.removeEventListener(Event.COMPLETE, handleComplete);
+                    _media.removeEventListener(IOErrorEvent.IO_ERROR, handleIOError);
+                    _media.removeEventListener(ProgressEvent.PROGRESS, handleProgress);
+                    _media = null;
                 }
                 _streamState = STREAM_STATE_CLOSED;
             }
@@ -310,8 +310,7 @@ package {
                                             //                 startTime, currentTime,
                                             //                 audioSource, videoSource, imageSource,
                                             //                 audioState, videoState, imageState, streamState }
-            var duration:Number = _sound ? _sound.length : 0,
-                currentTime:Number = 0;
+            var currentTime:Number = 0;
 
             currentTime = _mediaState === MEDIA_STATE_PLAYING ? _soundChannel.position
                         : _mediaState === MEDIA_STATE_PAUSED  ? _currentTime
@@ -323,9 +322,9 @@ package {
                 loop: _loop,
                 mute: _mute,
                 volume: _volume.current, // 0~1
-                duration: duration,
-                progress: _lastProgress,
-                position: duration ? Math.round(currentTime / duration * 100) : 0, // 0~100
+                duration: _duration,
+                progress: _progress, // 0~1
+                position: _duration ? Math.round(currentTime / _duration * 100) : 0, // 0~100
                 startTime: _startTime, // ms
                 currentTime: currentTime, // ms
                 mediaState: [_mediaState],
@@ -366,16 +365,11 @@ package {
         // ---------------------------------------
         protected function handleMessageTimer(event:TimerEvent):void {
             if (_streamState === STREAM_STATE_OPEN ||
+                _streamState === STREAM_STATE_BUFFERING ||
                 _streamState === STREAM_STATE_CAN_PLAY ||
                 _streamState === STREAM_STATE_LOADED) {
 
                 updateVolume();
-
-                // fire duration change event
-                if (_updateDuration) {
-                    _updateDuration = false;
-                    _boss.postMessage("durationchange", _id); // W3C NamedEvent
-                }
 
                 if (_streamState === STREAM_STATE_CAN_PLAY ||
                     _streamState === STREAM_STATE_LOADED) {
@@ -383,9 +377,9 @@ package {
                     if (_mediaState === MEDIA_STATE_PLAYING) {
                         var position:Number = _soundChannel.position;
 
-                        if (_lastPosition !== position) {
-                            if (_lastPosition + 1000 < position) { // over 1sec
-                                _lastPosition = position;
+                        if (_position !== position) {
+                            if (_position + 1000 < position) { // over 1sec
+                                _position = position;
                                 _boss.postMessage("timeupdate", _id, position); // W3C NamedEvent
                             }
                         }
@@ -437,28 +431,79 @@ package {
                 trace("handleIOError SoundChannel.stop()", err + "");
             }
             try {
-                _sound && _sound.close();
+                _media && _media.close();
             } catch(err:Error) {
                 trace("handleIOError Sound.close()", err + "");
             }
             _boss.postMessage("error", _id); // W3C NamedEvent
         }
 
+        // data load progress
         protected function handleProgress(event:ProgressEvent):void {
+/*
+            trace("MediaAudio::handleProgress()", _streamState, _mediaState,
+                                                  event.bytesLoaded, event.bytesTotal,
+                                                  _buffringProgress);
+ */
+
+            _progress = event.bytesLoaded / event.bytesTotal; // 0 ~ 1
+            trace("MediaAudio::handleProgress()", "_progress", _progress);
+
+            // OPEN -> BUFFERING
             if (_streamState === STREAM_STATE_OPEN) {
-                _streamState = STREAM_STATE_CAN_PLAY;
+                trace("MediaAudio::handleProgress()", "OPEN -> BUFFERING");
 
-                _boss.postMessage("canplay", _id); // W3C NamedEvent
-                var fn:Function;
+                _streamState = STREAM_STATE_BUFFERING;
 
-                while (fn = _canPlayCallback.shift()) {
-                    fn(_id);
+// TEST!! AUDIO NO BUFFRGING
+
+                    trace("MediaAudio::handleProgress()", "BUFFERING -> CAN_PLAY");
+
+                    _currentTime = _startTime;
+                    if (_soundChannel) {
+                        _soundChannel.removeEventListener(Event.SOUND_COMPLETE,
+                                                          handleSoundChannelComplete);
+                        _soundChannel.stop();
+                        _soundChannel = null;
+                    }
+                    _streamState = STREAM_STATE_CAN_PLAY;
+                    _mediaState = MEDIA_STATE_STOPPED;
+
+                    _boss.postMessage("canplay", _id); // W3C NamedEvent
+                    var fn:Function;
+
+                    while (fn = _canPlayCallback.shift()) {
+                        fn(_id);
+                    }
+
+
+            } else if (_streamState === STREAM_STATE_BUFFERING) {
+/*
+                trace("MediaAudio::handleProgress()", "BUFFERING...");
+
+                // BUFFERING 3% -> CAN_PLAY
+                if (_progress >= _buffringProgress) {
+                    trace("MediaAudio::handleProgress()", "BUFFERING -> CAN_PLAY");
+
+                    _currentTime = _startTime;
+                    if (_soundChannel) {
+                        _soundChannel.removeEventListener(Event.SOUND_COMPLETE,
+                                                          handleSoundChannelComplete);
+                        _soundChannel.stop();
+                        _soundChannel = null;
+                    }
+                    _streamState = STREAM_STATE_CAN_PLAY;
+                    _mediaState = MEDIA_STATE_STOPPED;
+
+                    _boss.postMessage("canplay", _id); // W3C NamedEvent
+                    var fn:Function;
+
+                    while (fn = _canPlayCallback.shift()) {
+                        fn(_id);
+                    }
                 }
+ */
             }
-            var loadTime:Number = event.bytesLoaded / event.bytesTotal;
-            _lastProgress = Math.round(100 * loadTime);
-
-            _updateDuration = true;
             _boss.postMessage("progress", _id); // W3C NamedEvent
         }
 
@@ -468,16 +513,16 @@ package {
             var position:Number = _soundChannel ? _soundChannel.position : 0;
 
             // update last position
-            _lastPosition = position;
+            _position = position;
 
             _boss.postMessage("timeupdate", _id, position); // W3C NamedEvent
             _boss.postMessage("ended", _id); // W3C NamedEvent
             if (_loop) {
                 closeSoundChannel();
                 _currentTime = _startTime; // overwirte
-                _boss.postMessage("play", _id); // W3C NamedEvent
                 openSoundChannel(_startTime); // rewind
-                _boss.postMessage("playing", _id); // W3C NamedEvent
+//                _boss.postMessage("play", _id); // W3C NamedEvent
+//                _boss.postMessage("playing", _id); // W3C NamedEvent
             }
         }
 
@@ -487,13 +532,30 @@ package {
 
                 if (_soundChannel) {
                     _soundChannel.soundTransform =
-                            new SoundTransform(_mute ? 0 : _volume.current);
+                            new SoundTransform(getContextualVolume());
                 }
                 forceUpdate = true;
             }
             if (forceUpdate) {
                 _boss.postMessage("volumechange", _id); // W3C NamedEvent
             }
+        }
+
+        protected function getContextualVolume():Number {
+            var rv:Number = _mute ? 0 : _volume.current;
+
+            switch (_streamState) {
+            case STREAM_STATE_CLOSED:
+            case STREAM_STATE_OPEN:
+            case STREAM_STATE_BUFFERING:
+            case STREAM_STATE_ERROR:
+                rv = 0; // force mute
+            }
+            return rv;
+        }
+
+        public function isBusy():Boolean {
+            return _streamState === STREAM_STATE_BUFFERING;
         }
     }
 }

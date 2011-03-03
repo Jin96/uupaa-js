@@ -13,29 +13,29 @@ package {
         public static var MEDIA_STATE_PAUSED:uint    = 0x2;
         public static var STREAM_STATE_CLOSED:uint   = 0x0;
         public static var STREAM_STATE_OPEN:uint     = 0x1;
-        public static var STREAM_STATE_CAN_PLAY:uint = 0x2;
-//      public static var STREAM_STATE_LOADED:uint   = 0x3;
-        public static var STREAM_STATE_ERROR:uint    = 0x4;
+        public static var STREAM_STATE_BUFFERING:uint= 0x2;
+        public static var STREAM_STATE_CAN_PLAY:uint = 0x3;
+        public static var STREAM_STATE_LOADED:uint   = 0x4; // dummy
+        public static var STREAM_STATE_ERROR:uint    = 0x5;
         // Identity
         protected var _boss:Media;
         protected var _id:Number = 0;
-        // Video
-        protected var _netConnection:NetConnection = null;
+        // Media
+        protected var _media:Video = null;
+        protected var _mediaSource:String = "";
         protected var _netStream:NetStream = null;
-        protected var _video:Video = null;
-        protected var _mediaSource:Array = [];  // [videoURL, ...]
+        protected var _netConnection:NetConnection = null;
         protected var _canPlayCallback:Array = [];
-
         // Internal Structure
         protected var _messageTimer:Timer = new Timer(200, 0);
-        protected var _lastProgress:Number = 0; // 0 ~ 100
-        protected var _lastDuration:Number = 0; // 0 ~ 100
         protected var _updateVolume:Boolean = false;
-        protected var _updateDuration:Boolean = false;
+        protected var _buffringProgress:Number = 0.0001; // unit: %, 0.01 = 1%
+        protected var _duration:Number = 0; // unit: ms
+        protected var _progress:Number = 0; // 0 ~ 1 (dataLoadedByte / dataTotalByte)
         // FadeIn/FadeOut
         protected var _fadeDelta:Number = 0.1;
-        protected var _fadeSpeed:Number = 32; // msec
-        protected var _fadeTimer:Timer = new Timer(_fadeSpeed, 20); // 32msec * 20 = 0.64sec
+        protected var _fadeSpeed:Number = 32; // ms
+        protected var _fadeTimer:Timer = new Timer(_fadeSpeed, 20); // 32ms * 20 = 0.64sec
         protected var _fadeStepCallback:Array = [];
         protected var _fadeCompleteCallback:Array = [];
         // State
@@ -47,14 +47,18 @@ package {
                                          future:  1,   // 0~1
                                          past:    1 }; // 0~1
         protected var _startTime:Number = 0;    // unit: ms
-        protected var _currentTime:Number = 0;  // unit: ms
+        protected var _currentTime:Number = 0;  // unit: ms, 1000 -> 1sec
 
         public function MediaVideo(boss:Media,
                                    id:Number,
-                                   videoSource:Array) {
+                                   media:Array,
+                                   poster:String = "") {
             _boss = boss;
             _id = id;
-            _mediaSource = videoSource.concat();
+            _mediaSource = media[0];
+            _duration = (media[1] || 0) * 1000; // sec -> ms;
+
+            trace("MediaVideo", _id, _mediaSource, _duration, poster);
 
             _messageTimer.addEventListener(TimerEvent.TIMER, handleMessageTimer);
             _messageTimer.start();
@@ -63,15 +67,21 @@ package {
             _fadeTimer.addEventListener(TimerEvent.TIMER_COMPLETE, handleFadeComplete);
 
             // video setting
-            _video = new Video(_boss.stage.stageWidth,
+            _media = new Video(_boss.stage.stageWidth,
                                _boss.stage.stageHeight);
-            _video.alpha = 0;
-            _video.smoothing = true;
-            _boss.stage.addChild(_video);
+            _media.alpha = 0;
+            _media.smoothing = true;
+            _boss.stage.addChild(_media);
         }
 
         protected function handleNetStatus(event:NetStatusEvent):void {
-            var fn:Function;
+            trace("MediaVideo::handleNetStatus()",
+                  event.info.code, _streamState, _mediaState);
+
+            if (_netStream) {
+                _progress = _netStream.bytesLoaded / _netStream.bytesTotal; // (sec / sec) -> 0 ~ 1
+                trace("MediaVideo::handleNetStatus()", "_progress", _progress);
+            }
 
             switch (event.info.code) {
             case "NetConnection.Connect.Success":
@@ -82,30 +92,32 @@ package {
                 _netStream.addEventListener(IOErrorEvent.IO_ERROR, handleIOError);
                 _netStream.addEventListener(NetStatusEvent.NET_STATUS, handleNetStatus);
                 _netStream.addEventListener(AsyncErrorEvent.ASYNC_ERROR, handleAsyncError);
+
+//trace("default.bufferTime", _netStream.bufferTime);
+
+//                _netStream.bufferTime = _buffringProgress + 0.0001;
+
+trace("attached.bufferTime", _netStream.bufferTime);
+
                 _netStream.client = this;
-                _video.attachNetStream(_netStream);
-                _netStream.soundTransform =
-                        new SoundTransform(_mute ? 0 : _volume.current);
-                _netStream.play(_mediaSource[0]); // 1st play() -> pause() -> seek(0)
+                _media.attachNetStream(_netStream);
+                // force volume = zero
+//                _netStream.soundTransform = new SoundTransform(0);
+                _netStream.soundTransform = new SoundTransform(1);
+                _netStream.play(_mediaSource); // buffering
                 break;
             case "NetStream.Play.Start":
-                _mediaState = MEDIA_STATE_PLAYING;
-                if (_streamState === STREAM_STATE_OPEN) { // 1st play
-                    _netStream.pause();
-                    _netStream.seek(_currentTime / 1000); // (msec / 1000) -> sec
-                    _streamState = STREAM_STATE_CAN_PLAY;
-                    _mediaState = MEDIA_STATE_STOPPED;
+                if (_streamState === STREAM_STATE_OPEN) {
+                    trace("MediaVideo::handleNetStatus()", "OPEN -> BUFFERING");
 
-                    while (fn = _canPlayCallback.shift()) {
-                        fn(_id); // callback -> this.playback() -> play
-                    }
+                    _streamState = STREAM_STATE_BUFFERING;
                 }
                 break;
             case "NetStream.Play.StreamNotFound":
                 _mediaState = MEDIA_STATE_STOPPED;
                 _streamState = STREAM_STATE_ERROR;
 
-                trace("Unable to locate video: " + _mediaSource[0]);
+                trace("Unable to locate video: " + _mediaSource);
             }
         }
 
@@ -119,7 +131,8 @@ package {
             trace("height", data.height);
             trace("width", data.width);
 
-            _lastDuration = data.duration || 0;
+            _duration = (data.duration || 0) * 1000;
+            trace("□ ", _duration);
         }
         public function onXMPData(data:Object):void {
             trace("onXMPData");
@@ -164,14 +177,18 @@ package {
         }
 
         public function playback():void {
-            _boss.postMessage("play", _id); // W3C NamedEvent
+            trace("MediaVideo::playback()", _streamState, _mediaState);
+
             _netStream.soundTransform =
-                    new SoundTransform(_mute ? 0 : _volume.current);
-            _netStream.play(_mediaSource[0]);
-            _boss.postMessage("playing", _id); // W3C NamedEvent
+                    new SoundTransform(getContextualVolume());
+            _netStream.play(_mediaSource);
+//            _boss.postMessage("play", _id); // W3C NamedEvent
+//            _boss.postMessage("playing", _id); // W3C NamedEvent
         }
 
         public function play(callback:Function = null):void {
+            trace("MediaVideo::play()", _streamState, _mediaState);
+
             switch (_streamState) {
             case STREAM_STATE_CLOSED:
                 _mediaState = MEDIA_STATE_STOPPED;
@@ -180,22 +197,22 @@ package {
 
                 // show poster image
                 // move to top layer
-                _boss.stage.setChildIndex(_video, _boss.stage.numChildren - 1);
+                _boss.stage.setChildIndex(_media, _boss.stage.numChildren - 1);
 
                 // fadein
-                _video.alpha = 0;
+                _media.alpha = 0;
 
                 var i:int = 0;
                 var timerID:Number = setInterval(function():void {
 
-                    var alpha:Number = _video.alpha;
+                    var alpha:Number = _media.alpha;
 
                     alpha += _fadeDelta;
                     if (alpha >= 1) {
                         alpha = 1;
                         clearInterval(timerID);
                     }
-                    _video.alpha = alpha;
+                    _media.alpha = alpha;
                 }, 40);
 
                 _netConnection = new NetConnection();
@@ -203,22 +220,24 @@ package {
                 _netConnection.addEventListener(SecurityErrorEvent.SECURITY_ERROR, handleSecurityError);
                 _netConnection.connect(null); // -> STREAM_STATE_OPEN
                 break;
+            case STREAM_STATE_BUFFERING:
+                break;
             case STREAM_STATE_CAN_PLAY:
                 switch (_mediaState) {
                 case MEDIA_STATE_STOPPED:
                     _boss.postMessage("play", _id); // W3C NamedEvent
 
-                    if (_currentTime !== _netStream.time * 1000) { // msec !== sec * 1000
-                        _netStream.seek(_currentTime / 1000); // (msec / 1000) -> sec
+                    if (_currentTime !== _netStream.time * 1000) { // ms !== sec * 1000
+                        _netStream.seek(_currentTime / 1000); // (ms / 1000) -> sec
                     }
                     _netStream.soundTransform =
-                            new SoundTransform(_mute ? 0 : _volume.current);
-                    _netStream.play(_mediaSource[0]);
+                            new SoundTransform(getContextualVolume());
+                    _netStream.play(_mediaSource);
                     _boss.postMessage("playing", _id); // W3C NamedEvent
                     break;
                 case MEDIA_STATE_PAUSED:
-                    if (_currentTime !== _netStream.time * 1000) { // msec !== sec * 1000
-                        _netStream.seek(_currentTime / 1000); // (msec / 1000) -> sec
+                    if (_currentTime !== _netStream.time * 1000) { // ms !== sec * 1000
+                        _netStream.seek(_currentTime / 1000); // (ms / 1000) -> sec
                         _netStream.togglePause();
 
                         _boss.postMessage("play", _id); // W3C NamedEvent
@@ -235,30 +254,34 @@ package {
         }
 
         public function seek(position:Number):void { // @param Number: 0~100
+            trace("MediaVideo::seek()", _streamState, _mediaState, position);
+
+            var realPositon:Number;
+
             // map 0~100 to 0~duration
-            var realPositon:Number = ((position * _lastDuration) / 100) * 1000; // ((0~100) * sec) / 100
+            realPositon = position * _duration / 100; // 50 * 22440 / 100, ms
 
             switch (_mediaState) {
             case MEDIA_STATE_STOPPED: // stopped + seek
-            case MEDIA_STATE_PAUSED:
+            case MEDIA_STATE_PAUSED:  // paused + seek
                 _currentTime = realPositon;
                 break;
             case MEDIA_STATE_PLAYING:
                 _boss.postMessage("seeking", _id); // W3C NamedEvent
 
-                _netStream.seek(realPositon / 1000); // (msec / 1000) -> sec
+                _netStream.seek(realPositon / 1000); // (ms / 1000) -> sec
 
                 _boss.postMessage("seekend", _id); // W3C NamedEvent
-                _boss.postMessage("playing", _id); // W3C NamedEvent
+//                _boss.postMessage("playing", _id); // W3C NamedEvent
             }
         }
 
         public function pause():void {
             if (_mediaState === MEDIA_STATE_PLAYING) {
                 _netStream.pause();
-                _currentTime = _netStream.time * 1000; // sec -> msec
+                _currentTime = _netStream.time * 1000; // sec -> ms
 
-                _mediaState = MEDIA_STATE_PAUSED;
+                _mediaState = MEDIA_STATE_PAUSED; // PAUSED
                 _boss.postMessage("pause", _id); // W3C NamedEvent
             }
         }
@@ -266,7 +289,7 @@ package {
         public function stop():void {
             if (_mediaState === MEDIA_STATE_PLAYING) {
                 _netStream.pause();
-                _currentTime = _startTime; // rewind (msec)
+                _currentTime = _startTime; // rewind (ms)
 
                 _mediaState = MEDIA_STATE_STOPPED;
                 _boss.postMessage("stop", _id); // NOT W3C NamedEvent
@@ -294,10 +317,10 @@ package {
         protected function handleFadeStepCallback():void {
             var alpha:Number;
 
-            alpha = _video.alpha;
+            alpha = _media.alpha;
             if (alpha) {
                 alpha -= _fadeDelta;
-                _video.alpha = alpha < 0 ? 0 : alpha;
+                _media.alpha = alpha < 0 ? 0 : alpha;
             }
             if (_volume.current !== _volume.future) {
                 if (_volume.current > _volume.future) {
@@ -318,9 +341,9 @@ package {
         protected function handleFadeCompleteCallback():void {
             if (_streamState !== STREAM_STATE_CLOSED) {
                 // OPEN, CAN_PLAY, LOADED, ERROR
-                _video.alpha = 0;
-                _video.clear();
-                _video.attachNetStream(null); // detach
+                _media.alpha = 0;
+                _media.clear();
+                _media.attachNetStream(null); // detach
                 if (_netStream) {
                     _netStream.removeEventListener(IOErrorEvent.IO_ERROR, handleIOError);
                     _netStream.removeEventListener(NetStatusEvent.NET_STATUS, handleNetStatus);
@@ -345,11 +368,10 @@ package {
                                             //                 startTime, currentTime,
                                             //                 audioSource, videoSource, imageSource,
                                             //                 audioState, videoState, imageState, streamState }
-            var duration:Number = _lastDuration,
-                currentTime:Number = 0;
+            var currentTime:Number = 0;
 
-            currentTime = _mediaState === MEDIA_STATE_PLAYING ? _netStream.time
-                        : _mediaState === MEDIA_STATE_PAUSED  ? _netStream.time
+            currentTime = _mediaState === MEDIA_STATE_PLAYING ? (_netStream.time * 1000)
+                        : _mediaState === MEDIA_STATE_PAUSED  ? (_netStream.time * 1000)
                         : _mediaState === MEDIA_STATE_STOPPED ? _currentTime
                         : 0;
             return {
@@ -358,16 +380,16 @@ package {
                 loop: _loop,
                 mute: _mute,
                 volume: _volume.current, // 0~1
-                duration: duration,
-                progress: _lastProgress,
-                position: duration ? Math.round(currentTime / duration * 100) : 0, // 0~100
+                duration: _duration,
+                progress: _progress, // 0~1
+                position: _duration ? Math.round(currentTime / _duration * 100) : 0, // 0~100
                 startTime: _startTime, // ms
                 currentTime: currentTime, // ms
                 mediaState: [_mediaState],
                 mediaSource: _mediaSource,
                 streamState: [_streamState],
                 imageSource: [],
-                imageState: _video && _video.alpha > 0 ? 1 : 0
+                imageState: _media && _media.alpha > 0 ? 1 : 0
             };
         }
 
@@ -391,32 +413,58 @@ package {
         }
 
         public function setStartTime(time:Number):void {
-            _startTime = time / 1000; // ms -> sec
+            _startTime = time; // ms
         }
 
         public function setCurrentTime(time:Number):void {
-            _currentTime = time / 1000; // ms -> sec
+            _currentTime = time; // ms
         }
 
         // ---------------------------------------
         protected function handleMessageTimer(event:TimerEvent):void {
             if (_streamState === STREAM_STATE_OPEN ||
-                _streamState === STREAM_STATE_CAN_PLAY) {
+                _streamState === STREAM_STATE_BUFFERING ||
+                _streamState === STREAM_STATE_CAN_PLAY ||
+                _streamState === STREAM_STATE_LOADED) {
 
                 updateVolume();
 
-                // fire duration change event
-                if (_updateDuration) {
-                    _updateDuration = false;
-                    _boss.postMessage("durationchange", _id); // W3C NamedEvent
-                }
-
-                if (_streamState === STREAM_STATE_CAN_PLAY) {
+                if (_streamState === STREAM_STATE_CAN_PLAY ||
+                    _streamState === STREAM_STATE_LOADED) {
                     // fire timeupdate event
                     if (_mediaState === MEDIA_STATE_PLAYING) {
                         var position:Number = _netStream.time;
 
                         _boss.postMessage("timeupdate", _id, position); // W3C NamedEvent
+                    }
+                }
+            }
+
+            if (_netStream) {
+                if (_streamState === STREAM_STATE_BUFFERING) {
+                    trace("MediaVideo::handleMessageTimer()", "BUFFERING...", _progress, _buffringProgress);
+
+                    // BUFFERING 3% -> CAN_PLAY
+                    if (_progress >= _buffringProgress) {
+
+                        trace("MediaVideo::handleMessageTimer()", "BUFFERING -> CAN_PLAY");
+
+                        _streamState = STREAM_STATE_CAN_PLAY;
+                        _mediaState = MEDIA_STATE_STOPPED;
+
+                        // buffering
+                        _netStream.pause();
+                        _netStream.seek(_startTime / 1000); // (ms / 1000) -> sec
+
+                        setTimeout(function():void {
+                            var fn:Function;
+
+                            while (fn = _canPlayCallback.shift()) {
+trace("MediaVideo::_canPlayCallback");
+
+                                fn(_id); // callback -> this.playback() -> play
+                            }
+                        }, 0);
                     }
                 }
             }
@@ -449,13 +497,30 @@ package {
 
                 if (_netStream) {
                     _netStream.soundTransform =
-                            new SoundTransform(_mute ? 0 : _volume.current);
+                            new SoundTransform(getContextualVolume());
                 }
                 forceUpdate = true;
             }
             if (forceUpdate) {
                 _boss.postMessage("volumechange", _id); // W3C NamedEvent
             }
+        }
+
+        protected function getContextualVolume():Number {
+            var rv:Number = _mute ? 0 : _volume.current;
+
+            switch (_streamState) {
+            case STREAM_STATE_CLOSED:
+            case STREAM_STATE_OPEN:
+            case STREAM_STATE_BUFFERING:
+            case STREAM_STATE_ERROR:
+                rv = 0; // force mute
+            }
+            return rv;
+        }
+
+        public function isBusy():Boolean {
+            return _streamState === STREAM_STATE_BUFFERING;
         }
     }
 }

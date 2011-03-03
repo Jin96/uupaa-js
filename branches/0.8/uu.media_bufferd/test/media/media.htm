@@ -49,51 +49,35 @@ uu.ready(function(uu) {
     uu.ui.build();
 
     var ary = uu.ui("Slider"); // [0: seek, 1: volume]
-    var data = [
-        {   type: "MediaAudioVideo",
-            audio: ["data/ai.mp3"],
-            video: ["http://localhost:8080/0.8/test/media/data/ai.flv"],
-            image: [],
-            comment: [] },
-        {   type: "MediaAudioVideo",
-            audio: ["data/ai.mp3"],
-            video: ["http://localhost:8080/0.8/test/media/data/t.flv"],
-            image: [],
-            comment: [] },
-
-/*
-        {   type: "MediaAudio",
-            audio: ["data/Hydrate-Kenny_Beltrey.mp3"],
-            video: [],
-            image: ["../../img/3ddf9d69e48da1ab171ad64a80a915a73c871cd2.jpg"],
-            comment: [] },
- */
-        {   type: "MediaAudiox2",
-            audio: ["data/ai.mp3", "data/Hydrate-Kenny_Beltrey.mp3"],
-            video: [],
-            image: ["../../img/safari.png"],
-            comment: [] }
-/*
-        {   type: "MediaVideo",
-            audio: [],
-            video: ["http://localhost:8080/0.8/test/media/data/ai.flv"],
-            image: [],
-            comment: [] }
- */
-/*
-        {   type: "MediaAudio",
-            audio: ["data/bego.mp3"],
-            video: [],
-            image: ["../../img/longupapa.jpg"],
-            comment: [] },
- */
-/*
-        {   type: "MediaAudio",
-            audio: ["data/dora.mp3"],
-            video: [],
-            image: ["../../img/chrome.png"],
-            comment: [] }
- */
+    var data = [{
+            type: "MediaAudioVideo",
+            media: ["data/ai.mp3", 21,
+                    "http://localhost:8080/0.8/test/media/data/ai.flv", 22.44]
+        }, {
+            type: "MediaAudioVideo",
+            media: ["data/ai.mp3", 21,
+                    "http://localhost:8080/0.8/test/media/data/t.flv", 15]
+        }, {
+            type: "MediaAudiox2",
+            media: ["data/ai.mp3", 21,
+                    "data/Hydrate-Kenny_Beltrey.mp3", 264],
+            poster: "../../img/safari.png"
+        }, {
+            type: "MediaAudio",
+            media: ["data/Hydrate-Kenny_Beltrey.mp3", 264],
+            poster: "../../img/3ddf9d69e48da1ab171ad64a80a915a73c871cd2.jpg"
+        }, {
+            type: "MediaVideo",
+            media: ["http://localhost:8080/0.8/test/media/data/ai.flv", 22.44]
+        }, {
+            type: "MediaAudio",
+            media: ["data/bego.mp3", 1],
+            poster: "../../img/longupapa.jpg"
+        }, {
+            type: "MediaAudio",
+            media: ["data/dora.mp3", 8],
+            poster: "../../img/chrome.png"
+        }
     ];
 
     mediaPlayer = uu("MyMediaPlayer", data,
