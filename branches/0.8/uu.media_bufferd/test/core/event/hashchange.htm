@@ -1,0 +1,24 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8" />
+<script src="../../../src/uupaa.js"></script>
+<style>
+.button {
+    border: 3px outset gray
+}
+</style>
+<script >
+uu.ready(function() {
+    uu.bind(window, "hashchange", function(evt) {
+        uu.log("from @ -> to @", evt.uu.hash[0],
+                                 evt.uu.hash[1]);
+
+        uu.text(uu.tag("p")[0], location.hash);
+    });
+});
+</script>
+</head><body>
+<p>current hash</p>
+<a href="#link1" class="button">link1</a>
+<a href="#link2" class="button">link2</a>
+<a href="#link3" class="button">link3</a>
+<a href="#link4" class="button">link4</a>
+</body></html>

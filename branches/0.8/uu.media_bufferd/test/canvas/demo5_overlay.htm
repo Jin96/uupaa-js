@@ -1,0 +1,156 @@
+<!DOCTYPE html><html lang="ja"><head id="head"><meta charset="utf-8" />
+<title>Overlay animation</title>
+<style>
+canvas { border: 1px solid gray; border-top-width: 20px; }
+</style>
+<script src="../../src/uupaa.js"></script>
+<script src="../../src/canvas/canvas.js"></script>
+<script>
+var offsetX = 10;
+var offsetY = 50;
+
+var points = [];
+var startTime = Date.now();
+
+function addPointAtEvent(e) {
+  var x = e.pageX - offsetX;
+  var y = e.pageY - offsetY;
+
+  if (!isNaN(x) && !isNaN(y)) {
+    points.push([x, y, Date.now()]);
+  }
+  if (points.length == 1) {
+    draw();
+  }
+}
+
+var AGE_TO_LIVE = 1500;
+
+// calc fps
+var begin = +new Date;
+var fpscount = 0;
+// use ctx.lock()
+var uselock = 1;
+var mode = 0;
+
+function draw() {
+    var ctx = document.getElementById('c').getContext('2d');
+    ctx.xFlyweight = 1;
+
+    uselock ? ctx.lock(1)
+            : ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+    var now = Date.now();
+    var itemsToRemove = 0;
+    for (var i = 0; i < points.length; i++) {
+        var x = points[i][0];
+        var y = points[i][1];
+        var createTime = points[i][2];
+        var age = now - createTime;
+
+        if (age > AGE_TO_LIVE) {
+            itemsToRemove++;
+        } else {
+            var d = (AGE_TO_LIVE - age) / AGE_TO_LIVE;
+            var r = d * 50;
+            var hue = (createTime - startTime) / 10 % 360;
+
+            ctx.globalAlpha = 0.5 * d;
+
+            switch (mode) {
+            case 0: ctx.drawCircle(x, y, 80 - r, uu.color('hsl(' + hue + ',100%,50%)'),
+                                            uu.color('hsl(' + hue + ',80%,30%)'), 2);
+                    break;
+            case 1: ctx.drawCircle(x, y, 80 - r, uu.color('hsl(' + hue + ',100%,50%)'));
+                    break;
+            case 2: ctx.drawCircle(x, y, 80 - r, void 0, uu.color('hsl(' + hue + ',100%,50%)'), 1);
+                    break;
+            case 3:
+                    ctx.drawRoundRect(x - r / 2, y - r / 2, 80 - r, 80 - r,
+                                      [0, 50, 0, 50],
+                                      uu.color('hsl(' + hue + ',100%,50%)'),
+                                      uu.color('hsl(' + hue + ',80%,30%)'), 2);
+                    break;
+            case 4: ctx.drawRoundRect(x - r / 2, y - r / 2, 80 - r, 80 - r,
+                                      [0, 50, 0, 50],
+                                      uu.color('hsl(' + hue + ',100%,50%)'));
+                    break;
+            case 5: ctx.drawRoundRect(x - r / 2, y - r / 2, 80 - r, 80 - r,
+                                      [20, 20, 20, 20],
+                                      void 0, uu.color('hsl(' + hue + ',100%,50%)'), 1);
+                    break;
+            }
+        }
+    }
+
+    if (uselock) {
+        ctx.unlock();
+    }
+    // fps
+    if ((++fpscount & 0x3f) === 0x3f) {
+        var fps = fpscount / (((+new Date) - begin))
+        window.status = "fps = " + ((fps * 1000) | 0) + (uselock ? " boost" : " off");
+    }
+
+    if (itemsToRemove) {
+        points = points.slice(itemsToRemove);
+    }
+
+    if (points.length) {
+        window.setTimeout(draw, 10);
+    }
+  }
+
+uu.ready(function(uu) {
+    uu.id("c").className = window.name || "sl";
+}, "canvas", function(uu, canvases) {
+    var ctx = canvases[0].getContext("2d");
+
+    canvases[0].onclick = switchStyle;
+
+    ctx.xFlyweight = 1;
+
+    document.title = "Backend: " + (ctx.xBackend || "Canvas");
+
+    uu.bind(document.body, "mousemove", addPointAtEvent);
+})
+function boost() {
+    begin = +new Date; // reset
+    fpscount = 0; // reset
+    uselock = !uselock; // toggle
+}
+function switchStyle() {
+    ++mode;
+    if (mode > 5) {
+        mode = 0;
+    }
+}
+function switchBackend() {
+    var n = window.name || "";
+
+    if (!n) {
+        window.name = "flash";
+    } else {
+        switch (n) {
+        case "sl":      window.name = "flash"; break;
+        case "flash":   window.name = "vml"; break;
+        case "vml":     window.name = "sl"; break;
+        }
+    }
+    location.reload(false);
+}
+
+
+</script>
+</head>
+<body>
+<input type="button" value="boost/off" onclick="boost()" />
+<input type="button" value="Silverlight/Flash/VML" onclick="switchBackend()" />
+<input type="button" value="fill/stroke" onclick="switchStyle()" />
+<br />
+
+<canvas style="position:absolute;left:10px;top:50px"
+        id="c" width="500" height="400"></canvas>
+
+</body>
+</html>

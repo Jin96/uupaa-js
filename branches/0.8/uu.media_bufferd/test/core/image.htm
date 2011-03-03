@@ -1,0 +1,22 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8" />
+<title>uu.image</title>
+<style></style>
+<script src="../../src/uupaa.js"></script>
+<script>
+uu.ready("window", function(uu) {
+    // get image natural dimension
+    uu.alert( uu.image.size(uu.id("16x16")) ); // 160 x 100
+
+    uu.image("../images/cover01.jpg", function(resp) {
+        if (resp.rv) {
+            uu.body(resp.rv[0]);
+        }
+    });
+
+
+});
+</script></head><body>
+
+<img id="16x16" src="../images/upapa.jpg" width="16" height="16" />
+
+</body></html>

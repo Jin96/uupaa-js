@@ -1,0 +1,59 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8" />
+<title></title>
+<script>
+var imagez = parseInt(window.name || 7);
+var auto = /true/.test(window.name || "");
+
+document.title = "images: " + imagez + " auto: " + auto;
+
+function switchImages() {
+    window.name = (imagez >= 10 ? 1 : ++imagez) + ":" + auto;
+    location.reload(false);
+}
+function switchAuto() {
+    window.name = imagez + ":" + (auto ? "false" : "true");
+    location.reload(false);
+}
+</script>
+<script src="../../../src/uupaa.js"></script>
+<script src="../../../src/ui/menu/tokoroten.js" id="tokoroten" type="text/html"></script>
+<script>
+uu.ready(function() {
+    var arg = {
+        id:     "tokoroten" + uu.number(),
+        auto:   auto ? 4000 : 0,
+        image:  { width: 160, height: 160, padding: 50, border: 2 },
+        list:   {
+            key:    "classA,classB,classC,classD,classE,classF,classG,classH,classI,classJ".split(","),
+            href:   "#",
+            text:   "",
+            src:    ["../../images/cover01.jpg",
+                     "../../images/cover02.jpg",
+                     "../../images/cover03.jpg",
+                     "../../images/cover04.jpg",
+                     "../../images/cover05.jpg",
+                     "../../images/cover06.jpg",
+                     "../../images/cover07.jpg",
+                     "../../images/cover08.jpg",
+                     "../../images/cover09.jpg",
+                     "../../images/cover10.jpg"]
+        },
+        onclick:  function(evt, node, index) {
+            uu.log("click : " + index);
+        }
+    };
+    while (arg.list.key.length > imagez) {
+        arg.list.key.pop();
+    }
+
+    // build snippet
+    uu.body(uu.snippet("tokoroten", arg));
+    // activate
+    uu.ready.fire(arg.id);
+});
+</script>
+</head><body>
+    <input type="button" value="++image" onclick="switchImages()" />
+    <input type="button" value="switch auto" onclick="switchAuto()" />
+
+</body></html>

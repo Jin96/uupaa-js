@@ -1,0 +1,45 @@
+<!doctype html><html><head><meta charset="utf-8" />
+<title>uu.fx.show / uu.fx.hide test</title>
+<style>
+.nodisp {
+    display: none;
+}
+.hidden {
+    visibility: hidden;
+}
+.opacity0 {
+    opacity: 0;
+}
+div {
+    position: absolute;
+    left: 100px;
+    top: 100px;
+    width: 120px;
+    height: 60px;
+    color: white;
+    background-color: gray;
+}
+</style>
+
+<script src="../../../src/uupaa.js"></script>
+
+
+<script>
+uu.ready(function(uu) {
+    uu("div").nth(3, function(node, i) {
+        uu.css.opacity(node, 0);
+    }).each(function(node, i) {
+        uu.fx(node, 1000, { x: i * 120, y: i * 60 });
+    }).hide(1000).show(1000).hide(1000).show();
+});
+</script></head><body>
+
+<div> shown </div>
+<div class="nodisp"> display: none; </div>
+<div class="hidden"> visibility: hidden; </div>
+<div class="opacity0"> opacity: 0; </div>
+<div class="nodisp hidden"> display: none; visibility: hidden;</div>
+<div class="nodisp opacity0"> display: none; opacity: 0;</div>
+<div class="hidden opacity0"> visibility: hidden; opacity: 0;</div>
+
+</body></html>

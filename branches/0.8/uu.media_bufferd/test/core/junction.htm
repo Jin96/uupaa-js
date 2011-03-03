@@ -1,0 +1,48 @@
+<!doctype html><html><head><meta charset="UTF-8" />
+<title>uu.junction test</title>
+<style>
+.box {
+  background-color: skyblue;
+  position: absolute;
+  width: 100px;
+  height: 15px;
+  overflow: hidden;
+}
+</style>
+<script src="../../src/uupaa.js"></script>
+<script>
+var easing = ("linear").split(",");
+
+uu.ready(function(uu) {
+    function creator(ezfn, i) {
+        var node;
+
+        // create node
+        uu.body(node = uu.div("class,box,title," + ezfn, ezfn));
+
+        // style
+        uu.css(node, { o: 0.5 });
+        uu.css(node, { x: offX, y: offY + i * 20 });
+    }
+
+    var offX = 20, offY = 50;
+
+    uu.each(easing, creator);
+});
+function run() {
+    var nodeArray = uu.klass("box");
+
+    var junc = uu.junction(2, 3, function(resp) {
+        uu.log("Junction @", resp.ok);
+        uu.log(resp.rv);
+    });
+
+    uu.fx(nodeArray[0], 500, { w: 400, after: function() { junc.ok({id:1}); } });
+    uu.fx(nodeArray[0], 500, { h: 400, after: function() { junc.ng({id:2}); } });
+    uu.fx(nodeArray[0], 500, { o: 0.0, after: function() { junc.ok({id:3}); } });
+}
+
+</script>
+</head><body>
+    <input type="button" value="run" onclick="run()" />
+</body></html>

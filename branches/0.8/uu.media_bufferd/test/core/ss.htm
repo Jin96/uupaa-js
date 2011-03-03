@@ -1,0 +1,26 @@
+<!doctype html><html><head><meta charset="utf-8" />
+<title></title>
+<script src="../../src/uupaa.js"></script>
+<script>
+uu.ready(function(uu) {
+    var ss1 = uu.ss("ss1"),
+        ss2 = uu.ss("ss2");
+
+    ss1.add({ "h1,h2": "background-color: red" });
+    ss2.add({ "div p": "background-color: green" });
+
+    alert("clear rules");
+
+    ss1.clear();
+    ss2.clear();
+});
+</script></head><body>
+<h1>uu.ss test</h1>
+<h2>uu.ss test</h2>
+<div>
+    div
+    <p>
+        div &gt; p
+    </p>
+</div>
+</body></html>

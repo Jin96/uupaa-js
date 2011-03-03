@@ -1,0 +1,32 @@
+<!doctype html><html><head><title></title>
+<script src="../../src/uupaa.js"></script>
+<script>
+uu.ready(function(uu) {
+    var beforeNode = uu.text(document.body.outerHTML);
+
+    var removed = uu.node.normalize(document.body, 10);
+
+    var afterNode = uu.text(document.body.outerHTML);
+
+    uu.body( uu.br(), "--------------------", uu.br() );
+    uu.body( uu.h1("before"), beforeNode );
+    uu.body( uu.br(), "--------------------", uu.br() );
+    uu.body( uu.h1("after"), afterNode );
+    uu.body( uu.h2("removed node count=" + removed) );
+});
+</script>
+</head><body>
+<!-- first comment node -->
+<h1>H1</h1>
+<!-- second comment node -->
+<p>
+</p>
+<div>
+    <p>
+        a
+    </p>
+
+    <p> b
+    </p>
+</div>
+</body></html>

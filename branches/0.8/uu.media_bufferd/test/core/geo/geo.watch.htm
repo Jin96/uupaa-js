@@ -1,0 +1,32 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8" />
+<title>uu.geo.watch</title>
+<style>
+html,body { height: 100%; margin: 0px; padding: 0px; }
+#map { width: 100%; height: 100%; }
+</style>
+<script src="http://maps.google.com/maps/api/js?v=3&sensor=true"></script>
+<script src="../../../src/uupaa.js"></script>
+<script src="../../../src/geo/geoip.js"></script>
+<script>
+uu.ready("window", function(uu, doc) {
+    var node = uu.id("map");
+    var latlng = new google.maps.LatLng(35.5, 139.8);
+    var map = new google.maps.Map(node, {
+            zoom: 12,
+            center: latlng,
+            mapTypeId: google.maps.MapTypeId.ROADMAP
+        });
+
+    map.setCenter(latlng);
+
+    var watchid = uu.geo.watch(function(resp) {
+        if (resp.ok) {
+            latlng = new google.maps.LatLng(resp.latitude,
+                                            resp.longitude);
+            map.setZoom(19);
+            map.setCenter(latlng);
+        }
+    });
+});
+</script>
+</head><body><div id="map"></div></body></html>

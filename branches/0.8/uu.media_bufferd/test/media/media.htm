@@ -1,0 +1,123 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8" />
+<title>Media Player test</title>
+<style></style>
+<script>
+window.uuconfig = {
+    log: {
+        rollup: 1000
+    }
+};
+</script>
+<script src="../../src/uupaa.js"></script>
+<script src="../../src/media/MediaPlayer.js"></script>
+<script>
+uu.Class("MyMediaPlayer:MediaPlayer", {
+    init: function(data, option, swfOption) {
+    },
+    handleTrace: function(xid, msg, state, targetID, currentID) {
+        return;
+
+        if (targetID === currentID) {
+            switch (state.mediaState[0]) {
+            case 0: uu.text(uu.id("playButtonState"), "STOPPED"); break;
+            case 1: uu.text(uu.id("playButtonState"), "PLAYING"); break;
+            case 2: uu.text(uu.id("playButtonState"), "PAUSED");
+            }
+            uu.text(uu.id("mediaSource"), state.mediaSource.join(","));
+        }
+        delete state.mediaSource;
+        delete state.imageSource;
+        delete state.imageState;
+        delete state.loop;
+        delete state.mute;
+        delete state.startTime;
+        delete state.duration;
+        delete state.progress;
+
+        if (uu.id("log")) {
+            uu.id("log").innerText = uu.f("@: @", msg, uu.json(state));
+        } else {
+            uu.log("@: @", msg, uu.json(state));
+        }
+    }
+});
+
+var mediaPlayer;
+
+// slider activate
+uu.ready(function(uu) {
+    uu.ui.build();
+
+    var ary = uu.ui("Slider"); // [0: seek, 1: volume]
+    var data = [
+        {   type: "MediaAudioVideo",
+            audio: ["data/ai.mp3"],
+            video: ["http://localhost:8080/0.8/test/media/data/ai.flv"],
+            image: [],
+            comment: [] },
+        {   type: "MediaAudioVideo",
+            audio: ["data/ai.mp3"],
+            video: ["http://localhost:8080/0.8/test/media/data/t.flv"],
+            image: [],
+            comment: [] },
+
+/*
+        {   type: "MediaAudio",
+            audio: ["data/Hydrate-Kenny_Beltrey.mp3"],
+            video: [],
+            image: ["../../img/3ddf9d69e48da1ab171ad64a80a915a73c871cd2.jpg"],
+            comment: [] },
+ */
+        {   type: "MediaAudiox2",
+            audio: ["data/ai.mp3", "data/Hydrate-Kenny_Beltrey.mp3"],
+            video: [],
+            image: ["../../img/safari.png"],
+            comment: [] }
+/*
+        {   type: "MediaVideo",
+            audio: [],
+            video: ["http://localhost:8080/0.8/test/media/data/ai.flv"],
+            image: [],
+            comment: [] }
+ */
+/*
+        {   type: "MediaAudio",
+            audio: ["data/bego.mp3"],
+            video: [],
+            image: ["../../img/longupapa.jpg"],
+            comment: [] },
+ */
+/*
+        {   type: "MediaAudio",
+            audio: ["data/dora.mp3"],
+            video: [],
+            image: ["../../img/chrome.png"],
+            comment: [] }
+ */
+    ];
+
+    mediaPlayer = uu("MyMediaPlayer", data,
+               { seekSlider: ary[0], volumeSlider: ary[1],
+                 autoplay: true, nextplay: true },
+               { width: 224, height: 168, nocache: true });
+
+});
+</script>
+</head><body>
+<p>STATUS: <span id="playButtonState">STOPPED</span></p>
+<p>MEDIA: <span id="mediaSource">...</span></p>
+<input type="button" value="PREV" onclick="mediaPlayer.prev()" />
+<input type="button" value="PLAY / PAUSE" onclick="mediaPlayer.play()" />
+<input type="button" value="NEXT" onclick="mediaPlayer.next()" />
+<input type="button" value="STOP" onclick="mediaPlayer.stop()" />
+<input id="seekBar" ui="Slider" type="range" value="0" size="200" min="0" max="100" />
+<input type="button" value="MUTE" onclick="mediaPlayer.mute()" />
+<input id="volumeBar" ui="Slider" type="range" value="0" size="50" min="0" max="100" /> <!--  vertical="vertical" -->
+<br />
+<input type="button" value="CLEAR LOG" onclick="uu.log.clear()" />
+<!--
+<pre id="log" style="white-space:pre-wrap;">
+</pre>
+ -->
+
+</body></html>

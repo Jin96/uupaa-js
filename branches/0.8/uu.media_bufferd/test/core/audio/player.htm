@@ -1,0 +1,205 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8" />
+<title>TinyAudioPlayer - demo</title>
+<script src="../../../src/uupaa.js"></script>
+<script>
+var player = {
+    audio: null,
+    loop: false,
+    autoplay: false,
+    lastCurrentTime: 0
+};
+var playList = [
+    "source/Hydrate-Kenny_Beltrey.mp3",
+    "source/Hydrate-Kenny_Beltrey.ogg",
+    "source/Hydrate-Kenny_Beltrey.m4a",
+    "source/dora.mp3",
+    "source/dora.ogg",
+    "source/dora.m4a",
+    "source/dora.wav",
+    "source/bego.mp3",
+    "source/bego.ogg",
+    "source/bego.m4a",
+    "source/bego.wav"
+];
+var buttons;
+
+uu.ready(function(uu) {
+    if (uu.env.ie6) {
+        uu.id("source").style.width = "250px";
+    }
+    uu.ui.build();
+//    buttons = uu("input[type=button][disabled=disabled]");
+    buttons = uu("input[type=button][disabled]");
+
+}, "audio", function(uu, audio) {
+
+    var source = uu.id("source");
+
+    // build <selct><option ...></select>
+    playList.forEach(function(src) {
+        var fileName = uu.text(uu.url.split(src).file);
+
+        uu.add(uu.option({ value: src }, fileName),
+               source);
+    });
+
+    changeSource(source);
+});
+
+function changeSource(that) {
+    if (player.audio) {
+        player.audio.stop(true); // close
+    }
+
+    // disable button
+    buttons.attr({ disabled: true });
+    // backend name
+    uu.text(uu.id("backend"), "---");
+
+    initAudio(that.options[that.selectedIndex].value);
+}
+
+function initAudio(source) {
+    var ary = uu.ui("Slider"), // [0: volume, 1: seek]
+        volumeBar = ary[0],
+        seekBar = ary[1];
+
+    uu.audio(source, { autoplay: player.autoplay,
+                       volume: volumeBar.attr().value * 0.01,
+                       loop: player.loop }, function(audio) {
+
+
+        if (!audio.isReady()) {
+            uu.log("audio not ready");
+            uu.log("audio swf path @", uu.config.audio.swf);
+            return false;
+        }
+        buttons.attr({ disabled: false });
+        uu.text(uu.id("backend"), audio.toString());
+
+        window.player.audio = audio;
+
+        // volume.change event handler
+        volumeBar.bind("change", function(evt, attr) {
+            player.audio.attr("volume", parseInt(attr.value) * 0.01);
+        });
+
+        seekBar.bind("mousedown", function(evt, attr) {
+            audio.unbind("timeupdate", handleTimeupdate);
+        });
+        seekBar.bind("mousemove", function(evt, attr) {
+        });
+        seekBar.bind("mouseup", function(evt, attr) {
+            player.audio.seek(attr.value);
+            setTimeout(function() {
+                audio.bind("timeupdate", handleTimeupdate);
+            }, 100);
+        });
+        seekBar.bind("mousewheel", function(evt, attr) {
+            audio.unbind("timeupdate", handleTimeupdate);
+            player.audio.seek(attr.value);
+            setTimeout(function() {
+                audio.bind("timeupdate", handleTimeupdate);
+            }, 100);
+        });
+        seekBar.bind("keydown", function(evt, attr) {
+            audio.unbind("timeupdate", handleTimeupdate);
+            player.audio.seek(attr.value);
+            setTimeout(function() {
+                audio.bind("timeupdate", handleTimeupdate);
+            }, 100);
+        });
+
+
+
+        // --- Event Trace ---
+        audio.bind("error", function(event) {
+            uu.log({ event: event.type || "", state: player.audio.state() + "",
+                     error: player.audio.error });
+        });
+
+        // update currentTimeSlider.max
+        audio.bind("durationchange", function(event) {
+            // update slider.max
+            var max = audio.attr("duration") | 0;
+
+            uu.id("currentSlider").max = max;
+            uu.msg.post(seekBar, "attr", "max", max);
+            uu.log({ event: event.type || "", state: player.audio.state() + "" });
+        });
+
+        audio.bind("canplay", function(event) {
+            uu.log({ event: event.type || "", state: player.audio.state() + "" });
+        });
+
+        audio.bind("ended,pause", function(event) {
+            uu.log({ event: event.type || "", state: player.audio.state() + "" });
+        });
+
+        audio.bind("timeupdate", handleTimeupdate);
+
+        // state
+        setTimeout(function() {
+            uu.log({ state: player.audio.state() + "" });
+        }, 0);
+    });
+}
+
+function handleTimeupdate(evt) {
+    var curt = player.audio.attr("currentTime") | 0;
+
+    if (player.lastCurrentTime !== curt) {
+        player.lastCurrentTime = curt;
+
+//uu.log("handleTimeupdate @", curt);
+        // update grip position
+        uu.msg.post(uu.ui("Slider")[1], "value", curt, 0);
+    }
+}
+
+function togglePlay() {
+    if (player.audio.isPlaying()) {
+        player.audio.pause();
+    } else {
+        player.audio.play();
+    }
+}
+
+function toggleAutoplay(that) {
+    player.autoplay = !player.autoplay;
+    that.value = "autoplay " + (player.autoplay ? "on" : "off");
+}
+
+function toggleLoop(that) {
+    player.loop = !player.loop;
+    that.value = "loop " + (player.loop ? "on" : "off");
+    player.audio.attr("loop", player.loop);
+}
+
+function mute() {
+    var volumeBar = uu.ui("Slider")[0]; // [0: volume, 1: seek]
+
+//  uu.msg.post(volumeBar, "value", 0, 1);
+//    player.audio.attr("volume", 0);
+    player.audio.mute(player.audio.isMuted());
+}
+
+</script></head><body>
+<h1 id="backend" style="text-shadow: gray 3px 3px 3px">Plz Wait...</h1>
+
+<select id="source" onchange="changeSource(this)"></select>
+<input type="button" value="play/pause" onclick="togglePlay()" disabled="disabled" />
+<input type="button" value="stop" onclick="player.audio.stop()" disabled="disabled" />
+<input type="button" value="mute" onclick="mute()" disabled="disabled" />
+<input id="volumeSlider" ui="Slider" type="range" value="50" size="50" />
+
+<input type="button" value="loop off" onclick="toggleLoop(this)" disabled="disabled" />
+<input type="button" value="autoplay off" onclick="toggleAutoplay(this)" disabled="disabled" />
+
+<br />
+<input id="currentSlider" ui="Slider" type="range" value="0" size="200" min="0" max="100" />
+
+<hr />
+<input type="button" value="log clear" onclick="uu.log()" />
+
+</body></html>

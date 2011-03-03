@@ -1,0 +1,137 @@
+<!DOCTYPE html><html><head>
+    <title>A canvas globalCompositeOperation stroke example</title>
+    <meta name="DC.creator" content="Kamiel Martinet, http://www.martinet.nl/">
+    <meta name="DC.publisher" content="Mozilla Developer Center, http://developer.mozilla.org">
+
+<script src="../../src/uupaa.js"></script>
+<script src="../../src/canvas/canvas.js"></script>
+
+<script>
+var compositeTypes = [
+    'source-over','source-in','source-out','source-atop',
+    'destination-over','destination-in','destination-out','destination-atop',
+    'lighter','darker','copy','xor'
+];
+
+uu.ready("canvas", function() {
+    draw(0);
+    draw(1);
+});
+
+function draw(vml) {
+    for (var i=0;i<compositeTypes.length;i++) {
+          var label = document.createTextNode(compositeTypes[i]);
+          if (!vml) {
+            document.getElementById('lab'+i).appendChild(label);
+            var ctx = document.getElementById('tut'+i).getContext('2d');
+          } else {
+            document.getElementById('vmllab'+i).appendChild(label);
+            var ctx = document.getElementById('vmltut'+i).getContext('2d');
+          }
+
+          // draw rectangle
+          ctx.lineWidth = 10;
+          ctx.strokeStyle = "#09f";
+          ctx.strokeRect(15,15,70,70);
+
+          // set composite property
+          ctx.globalCompositeOperation = compositeTypes[i];
+
+          // draw circle
+          ctx.strokeStyle = "#f30";
+          ctx.beginPath();
+          ctx.arc(75,75,35,0,Math.PI*2,true);
+          ctx.stroke();
+    }
+}
+    </script>
+    <style type="text/css">
+      body { margin: 20px; font-family: arial,verdana,helvetica; background: #fff;}
+      h1 { font-size: 140%; font-weight:normal; color: #036; border-bottom: 1px solid #ccc; }
+      canvas { border: 2px solid #000; margin-bottom: 5px; }
+      td { padding: 7px; }
+      pre { float:left; display:block; background: rgb(238,238,238); border: 1px dashed #666; padding: 15px 20px; margin: 0 0 10px 0; }
+    </style>
+  </head>
+  <body>
+    <h1>A canvas <code>globalCompositeOperation</code> stroke example</h1>
+    <div>
+      <table>
+        <caption>Silverlight</caption>
+        <tr>
+          <td><canvas id="tut0" width="125" height="125"></canvas><br/><label id="lab0"></label></td>
+          <td><canvas id="tut1" width="125" height="125"></canvas><br/><label id="lab1"></label></td>
+          <td><canvas id="tut2" width="125" height="125"></canvas><br/><label id="lab2"></label></td>
+          <td><canvas id="tut3" width="125" height="125"></canvas><br/><label id="lab3"></label></td>
+        </tr>
+        <tr>
+          <td><canvas id="tut4" width="125" height="125"></canvas><br/><label id="lab4"></label></td>
+          <td><canvas id="tut5" width="125" height="125"></canvas><br/><label id="lab5"></label></td>
+          <td><canvas id="tut6" width="125" height="125"></canvas><br/><label id="lab6"></label></td>
+          <td><canvas id="tut7" width="125" height="125"></canvas><br/><label id="lab7"></label></td>
+        </tr>
+        <tr>
+          <td><canvas id="tut8" width="125" height="125"></canvas><br/><label id="lab8"></label></td>
+          <td><canvas id="tut9" width="125" height="125"></canvas><br/><label id="lab9"></label></td>
+          <td><canvas id="tut10" width="125" height="125"></canvas><br/><label id="lab10"></label></td>
+          <td><canvas id="tut11" width="125" height="125"></canvas><br/><label id="lab11"></label></td>
+        </tr>
+      </table>
+      <br />
+      <table>
+        <caption>VML</caption>
+        <tr>
+          <td><canvas id="vmltut0" class="vml" width="125" height="125"></canvas><br/><label id="vmllab0"></label></td>
+          <td><canvas id="vmltut1" class="vml" width="125" height="125"></canvas><br/><label id="vmllab1"></label></td>
+          <td><canvas id="vmltut2" class="vml" width="125" height="125"></canvas><br/><label id="vmllab2"></label></td>
+          <td><canvas id="vmltut3" class="vml" width="125" height="125"></canvas><br/><label id="vmllab3"></label></td>
+        </tr>
+        <tr>
+          <td><canvas id="vmltut4" class="vml" width="125" height="125"></canvas><br/><label id="vmllab4"></label></td>
+          <td><canvas id="vmltut5" class="vml" width="125" height="125"></canvas><br/><label id="vmllab5"></label></td>
+          <td><canvas id="vmltut6" class="vml" width="125" height="125"></canvas><br/><label id="vmllab6"></label></td>
+          <td><canvas id="vmltut7" class="vml" width="125" height="125"></canvas><br/><label id="vmllab7"></label></td>
+        </tr>
+        <tr>
+          <td><canvas id="vmltut8" class="vml" width="125" height="125"></canvas><br/><label id="vmllab8"></label></td>
+          <td><canvas id="vmltut9" class="vml" width="125" height="125"></canvas><br/><label id="vmllab9"></label></td>
+          <td><canvas id="vmltut10" class="vml" width="125" height="125"></canvas><br/><label id="vmllab10"></label></td>
+          <td><canvas id="vmltut11" class="vml" width="125" height="125"></canvas><br/><label id="vmllab11"></label></td>
+        </tr>
+      </table>
+      <pre>
+var compositeTypes = [
+  'source-over','source-in','source-out','source-atop',
+  'destination-over','destination-in','destination-out','destination-atop',
+  'lighter','darker','copy','xor'
+];
+function draw(vml) {
+  for (var i=0;i&lt;compositeTypes.length;i++){
+    var label = document.createTextNode(compositeTypes[i]);
+    if (!vml) {
+      document.getElementById('lab'+i).appendChild(label);
+      var ctx = document.getElementById('tut'+i).getContext('2d');
+    } else {
+      document.getElementById('vmllab'+i).appendChild(label);
+      var ctx = document.getElementById('vmltut'+i).getContext('2d');
+    }
+
+    // draw rectangle
+    ctx.lineWidth = 10;
+    ctx.strokeStyle = "#09f";
+    ctx.strokeRect(15,15,70,70);
+
+    // set composite property
+    ctx.globalCompositeOperation = compositeTypes[i];
+
+    // draw circle
+    ctx.strokeStyle = "#f30";
+    ctx.beginPath();
+    ctx.arc(75,75,35,0,Math.PI*2,true);
+    ctx.stroke();
+  }
+}
+      </pre>
+    </div>
+  </body>
+</html>

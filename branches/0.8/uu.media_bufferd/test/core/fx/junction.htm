@@ -1,0 +1,85 @@
+<!doctype html><html><head><meta charset="UTF-8" />
+<title>uu.fx test</title>
+<style>
+.box {
+  background-color: skyblue;
+  position: absolute;
+  width: 100px;
+  height: 15px;
+  overflow: hidden;
+}
+</style>
+<script>
+var useOpacity = (window.name + "") === "useOpacity";
+
+document.title = useOpacity ? "useOpacity" : "noOpacity";
+
+function switchOpacity() {
+    window.name = useOpacity ? "noOpacity" : "useOpacity";
+    location.reload(false);
+}
+</script>
+<script src="../../../src/uupaa.js"></script>
+<script>
+/*
+var easing = ("linear,inquad,outquad,inoutquad,incubic,outcubic,inoutcubic," +
+              "outincubic,inquart,outquart,inoutquart,outinquart,inback," +
+              "outback,inoutback,outinback,inbounce,outbounce").split(",");
+ */
+var easing = ("linear,linear,linear").split(",");
+
+uu.ready(function(uu) {
+    function creator(ezfn, i) {
+        var node;
+
+        // create node
+        uu.body(node = uu.div("class,box,title," + ezfn, ezfn));
+
+        // style
+        useOpacity && uu.css(node, { o: 0.5 });
+        uu.css(node, { x: offX, y: offY + i * 20 });
+
+        // bind
+        uu.event.hover(node, function(evt, hover) {
+            if (hover) {
+                useOpacity && uu.fx(node, 400, { o: 1.0 });
+                uu.fx(node, 500, { w: [ 50, node.title], chain:   1 });
+                uu.fx(node, 500, { w: [400, node.title], reverse: 1 });
+            } else {
+                useOpacity && uu.fx(node, 400, { o: 0.5 });
+            }
+        });
+    }
+
+    var offX = 20, offY = 50;
+
+    uu.each(easing, creator);
+
+//  offX = 420;
+//  uu.each(easing, creator);
+});
+function run() {
+    // skip all
+    uu.fx.skip(null, true);
+
+
+    var nodeArray = uu.klass("box");
+
+    // junction
+    var junc = uu.junction(3, 3, function(resp) {
+        alert("Junction");
+    });
+
+    uu.each(nodeArray, function(node, i) {
+
+//      uu.fx(node, 500 + i * 200, { w: [400, node.title], reverse: 1, junction: junc });
+        uu.fx(node, 500 + i * 200, { w: [400, node.title], junction: junc });
+    });
+
+}
+
+</script>
+</head><body>
+    <input type="button" value="switch opacity" onclick="switchOpacity()" />
+    <input type="button" value="run" onclick="run()" />
+</body></html>

@@ -1,0 +1,90 @@
+<!doctype html><html><head><meta charset="utf-8" />
+<title></title>
+<style></style>
+<script src="../../src/uupaa.js"></script>
+<script src="../../src/canvas/canvas.js"></script>
+
+<script>
+var globalAlpha = 1.0
+var shadowBlur = 5;
+
+uu.ready("canvas", function(uu, canvasNodes) {
+    var ctx  = canvasNodes[0].getContext("2d");
+    var ctx2 = canvasNodes[1].getContext("2d");
+    var ctx3 = canvasNodes[2].getContext("2d");
+
+
+    ctx.clear();
+/*
+    if (matrix) {
+        ctx.translate(-10, 5);
+        ctx.scale(1.2, 0.8);
+        ctx.rotate(5 * Math.PI / 180);
+    }
+ */
+    ctx.shadowBlur = shadowBlur;
+    ctx.shadowOffsetX = 10;
+    ctx.shadowOffsetY = 10;
+    ctx.shadowColor = "gray";
+    ctx.lineWidth = 3;
+    ctx.globalAlpha = globalAlpha;
+
+
+    // Create gradients
+    var radgrad = ctx.createRadialGradient(45,45,10,52,50,30);
+    radgrad.addColorStop(0, '#A7D30C');
+    radgrad.addColorStop(0.9, '#019F62');
+    radgrad.addColorStop(1, 'rgba(1,159,98,0)');
+    var radgrad2 = ctx.createRadialGradient(105,105,20,112,120,50);
+    radgrad2.addColorStop(0, '#FF5F98');
+    radgrad2.addColorStop(0.75, '#FF0188');
+    radgrad2.addColorStop(1, 'rgba(255,1,136,0)');
+
+    var radgrad3 = ctx.createRadialGradient(95,15,15,102,20,40);
+    radgrad3.addColorStop(0, '#00C9FF');
+    radgrad3.addColorStop(0.8, '#00B5E2');
+    radgrad3.addColorStop(1, 'rgba(0,201,255,0)');
+
+    var radgrad4 = ctx.createRadialGradient(0,150,50,0,140,90);
+    radgrad4.addColorStop(0, '#F4F201');
+    radgrad4.addColorStop(0.8, '#E4C700');
+    radgrad4.addColorStop(1, 'rgba(228,199,0,0)');
+
+    // draw shapes
+    ctx.fillStyle = radgrad4;
+    ctx.fillRect(0,0,150,150);
+    ctx.fillStyle = radgrad3;
+    ctx.fillRect(0,0,150,150);
+    ctx.fillStyle = radgrad2;
+    ctx.fillRect(0,0,150,150);
+    ctx.fillStyle = radgrad;
+    ctx.fillRect(0,0,150,150);
+
+    if (1) {
+        ctx2.globalAlpha = 0.7;
+        ctx2.scale(-1, 1);
+        ctx2.drawImage(ctx.canvas, -150, 0);
+    }
+
+    if (1) {
+        // [!] Flash backend need setTimeout(fn, delay)
+        // http://twitter.com/uupaa/status/10410663731
+        // http://twitter.com/uupaa/status/10410771786
+        // http://twitter.com/uupaa/status/10411270931
+        setTimeout(function() {
+
+            var imagedata = ctx2.getImageData(10, 10, 130, 130);
+
+            ctx3.fillStyle = "pink";
+            ctx3.fillRect(0, 0, 150, 150);
+            ctx3.putImageData(imagedata, 10, 10);
+        }, 1000);
+
+    }
+});
+</script></head><body>
+<canvas id="flashcanvas" class="flash" width="150" height="150" style="border:1px solid green"></canvas>
+<canvas id="flashcanvas2" class="flash" width="150" height="150" style="border:1px solid blue"></canvas>
+<canvas id="flashcanvas3" class="flash" width="150" height="150" style="border:1px solid gray"></canvas>
+
+</body></html>

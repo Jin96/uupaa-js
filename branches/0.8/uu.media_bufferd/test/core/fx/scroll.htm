@@ -1,0 +1,201 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8" />
+<title></title>
+<style>
+#p1x1 { position: absolute; left:  100px; top:  100px; border: 1px solid gray; width: 300px }
+#p1x2 { position: absolute; left:  100px; top:  600px; border: 1px solid gray; width: 300px }
+#p1x3 { position: absolute; left:  100px; top: 1100px; border: 1px solid gray; width: 300px }
+#p2x1 { position: absolute; left:  600px; top:  100px; border: 1px solid gray; width: 300px }
+#p2x2 { position: absolute; left:  600px; top:  600px; border: 1px solid gray; width: 300px }
+#p2x3 { position: absolute; left:  600px; top: 1100px; border: 1px solid gray; width: 300px }
+#p3x1 { position: absolute; left: 1100px; top:  100px; border: 1px solid gray; width: 300px }
+#p3x2 { position: absolute; left: 1100px; top:  600px; border: 1px solid gray; width: 300px }
+#p3x3 { position: absolute; left: 1100px; top: 1100px; border: 1px solid gray; width: 300px }
+</style>
+<script src="../../../src/uupaa.js"></script>
+<script>
+uu.ready(function(uu) {
+    uu("a").click(function(evt) {
+        var href = uu.attr(evt.node, "href");
+
+        if (/^#\w+/.test(href)) {
+            // query(a"#hash,[name=hash]")
+            var ary = uu.query(href + ",[name=" + href.slice(1) + "]");
+
+            return uu.some(ary, function(node) {
+                uu.fx.scroll(node, 1000);
+                return uu.loopout;
+            });
+        }
+        return true;
+    }, "HINT");
+});
+</script>
+</head><body>
+<div id="aaa" data-hoge="hoge">
+</div>
+<header>
+    <a name="header">header</a>
+    <a href="#footer">to footer</a>
+    <a href="#p1x1">1x1</a>
+    <a href="#p1x2">1x2</a>
+    <a href="#p1x3">1x3</a>
+    <a href="#p1x1">2x1</a>
+    <a href="#p1x2">2x2</a>
+    <a href="#p1x3">2x3</a>
+    <a href="#p1x1">3x1</a>
+    <a href="#p1x2">3x2</a>
+    <a href="#p1x3">3x3</a>
+</header>
+<div class="container">
+  <nav>
+
+  </nav>
+  <section>
+    <article>
+
+    </article>
+  </section>
+  <aside>
+
+  </aside>
+</div>
+<p>a</p>
+<p>a</p>
+<p>a</p>
+<p>a</p>
+<p>a</p>
+<p>a</p>
+<p>a</p>
+<p>a</p>
+<p>a</p>
+<p>a</p>
+<p>a</p>
+<p>a</p>
+<p>a</p>
+<p>a</p>
+<p>a</p>
+<p>a</p>
+    <p id="p1x1">1x1
+        <a href="#p1x1">1x1</a>
+        <a href="#p1x2">1x2</a>
+        <a href="#p1x3">1x3</a>
+        <a href="#p2x1">2x1</a>
+        <a href="#p2x2">2x2</a>
+        <a href="#p2x3">2x3</a>
+        <a href="#p3x1">3x1</a>
+        <a href="#p3x2">3x2</a>
+        <a href="#p3x3">3x3</a>
+    </p>
+<p>a</p>
+<p>a</p>
+    <p id="p1x2">1x2
+        <a href="#p1x1">1x1</a>
+        <a href="#p1x2">1x2</a>
+        <a href="#p1x3">1x3</a>
+        <a href="#p2x1">2x1</a>
+        <a href="#p2x2">2x2</a>
+        <a href="#p2x3">2x3</a>
+        <a href="#p3x1">3x1</a>
+        <a href="#p3x2">3x2</a>
+        <a href="#p3x3">3x3</a>
+    </p>
+<p>a</p>
+<p>a</p>
+    <p id="p1x3">1x3
+        <a href="#p1x1">1x1</a>
+        <a href="#p1x2">1x2</a>
+        <a href="#p1x3">1x3</a>
+        <a href="#p2x1">2x1</a>
+        <a href="#p2x2">2x2</a>
+        <a href="#p2x3">2x3</a>
+        <a href="#p3x1">3x1</a>
+        <a href="#p3x2">3x2</a>
+        <a href="#p3x3">3x3</a>
+    </p>
+<p>a</p>
+<p>a</p>
+    <p id="p2x1">2x1
+        <a href="#p1x1">1x1</a>
+        <a href="#p1x2">1x2</a>
+        <a href="#p1x3">1x3</a>
+        <a href="#p2x1">2x1</a>
+        <a href="#p2x2">2x2</a>
+        <a href="#p2x3">2x3</a>
+        <a href="#p3x1">3x1</a>
+        <a href="#p3x2">3x2</a>
+        <a href="#p3x3">3x3</a>
+    </p>
+<p>a</p>
+<p>a</p>
+    <p id="p2x2">2x2
+        <a href="#p1x1">1x1</a>
+        <a href="#p1x2">1x2</a>
+        <a href="#p1x3">1x3</a>
+        <a href="#p2x1">2x1</a>
+        <a href="#p2x2">2x2</a>
+        <a href="#p2x3">2x3</a>
+        <a href="#p3x1">3x1</a>
+        <a href="#p3x2">3x2</a>
+        <a href="#p3x3">3x3</a>
+    </p>
+<p>a</p>
+<p>a</p>
+    <p id="p2x3">2x3
+        <a href="#p1x1">1x1</a>
+        <a href="#p1x2">1x2</a>
+        <a href="#p1x3">1x3</a>
+        <a href="#p2x1">2x1</a>
+        <a href="#p2x2">2x2</a>
+        <a href="#p2x3">2x3</a>
+        <a href="#p3x1">3x1</a>
+        <a href="#p3x2">3x2</a>
+        <a href="#p3x3">3x3</a>
+    </p>
+<p>a</p>
+<p>a</p>
+    <p id="p3x1">3x1
+        <a href="#p1x1">1x1</a>
+        <a href="#p1x2">1x2</a>
+        <a href="#p1x3">1x3</a>
+        <a href="#p2x1">2x1</a>
+        <a href="#p2x2">2x2</a>
+        <a href="#p2x3">2x3</a>
+        <a href="#p3x1">3x1</a>
+        <a href="#p3x2">3x2</a>
+        <a href="#p3x3">3x3</a>
+    </p>
+<p>a</p>
+<p>a</p>
+    <p id="p3x2">3x2
+        <a href="#p1x1">1x1</a>
+        <a href="#p1x2">1x2</a>
+        <a href="#p1x3">1x3</a>
+        <a href="#p2x1">2x1</a>
+        <a href="#p2x2">2x2</a>
+        <a href="#p2x3">2x3</a>
+        <a href="#p3x1">3x1</a>
+        <a href="#p3x2">3x2</a>
+        <a href="#p3x3">3x3</a>
+    </p>
+<p>a</p>
+<p>a</p>
+    <p id="p3x3">3x3
+        <a href="#p1x1">1x1</a>
+        <a href="#p1x2">1x2</a>
+        <a href="#p1x3">1x3</a>
+        <a href="#p2x1">2x1</a>
+        <a href="#p2x2">2x2</a>
+        <a href="#p2x3">2x3</a>
+        <a href="#p3x1">3x1</a>
+        <a href="#p3x2">3x2</a>
+        <a href="#p3x3">3x3</a>
+    </p>
+<p>a</p>
+<p>a</p>
+<p>a</p>
+<p>a</p>
+<footer>
+    <a id="footer">id=footer</a>
+    <a href="#header">to header</a>
+</footer>
+</body></html>

@@ -1,0 +1,129 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8" />
+<title>uu.css.box test</title>
+<style>
+#b0 { border: 0px solid red; }
+#b1 { border: 1px solid red; }
+#b2 { border: 2px solid red; }
+#b3 { border: 3px solid red; }
+#b4 { border: 4px solid red; }
+#b5 { border: thin solid red; }
+#b6 { border: medium solid red; }
+#b7 { border: thick solid red; }
+/* #b8 { border: auto solid red; } */
+#m0 { margin: 0px; }
+#m1 { margin: 1px; }
+#m2 { margin: 2px; }
+#m3 { margin: 3px; }
+#m4 { margin: 4px; }
+#m5 { margin: thin; }
+#m6 { margin: medium; }
+#m7 { margin: thick; }
+#m8 { margin: auto; }
+#p0 { padding: 0px; }
+#p1 { padding: 1px; }
+#p2 { padding: 2px; }
+#p3 { padding: 3px; }
+#p4 { padding: 4px; }
+#p5 { padding: thin; }
+#p6 { padding: medium; }
+#p7 { padding: thick; }
+#p8 { padding: auto; }
+</style>
+<script src="../../src/uupaa.js"></script>
+<script>
+uu.ready(function() {
+    uu.ok("#b0 { border: 0px solid red; }", uu.css.box(uu.id("b0")).b.t, "==", 0);
+    uu.ok("#b1 { border: 1px solid red; }", uu.css.box(uu.id("b1")).b.t, "==", 1);
+    uu.ok("#b2 { border: 2px solid red; }", uu.css.box(uu.id("b2")).b.t, "==", 2);
+    uu.ok("#b3 { border: 3px solid red; }", uu.css.box(uu.id("b3")).b.t, "==", 3);
+    uu.ok("#b4 { border: 4px solid red; }", uu.css.box(uu.id("b4")).b.t, "==", 4);
+    uu.ok("#b5 { border: thin solid red; }", uu.css.box(uu.id("b5")).b.t, "==", 1);
+    uu.ok("#b6 { border: medium solid red; }", uu.css.box(uu.id("b6")).b.t, "==", 3);
+    uu.ok("#b7 { border: thick solid red; }", uu.css.box(uu.id("b7")).b.t, "==", uu.opera ? 6 : 5);
+//  uu.ok("#b8 { border: auto solid red; }", uu.css.box(uu.id("b8")).b.t, "==", 0);
+    uu.ok("#m0 { margin: 0px; }", uu.css.box(uu.id("m0")).m.t, "==", 0);
+    uu.ok("#m1 { margin: 1px; }", uu.css.box(uu.id("m1")).m.t, "==", 1);
+    uu.ok("#m2 { margin: 2px; }", uu.css.box(uu.id("m2")).m.t, "==", 2);
+    uu.ok("#m3 { margin: 3px; }", uu.css.box(uu.id("m3")).m.t, "==", 3);
+    uu.ok("#m4 { margin: 4px; }", uu.css.box(uu.id("m4")).m.t, "==", 4);
+    uu.ok("#m5 { margin: thin; }", uu.css.box(uu.id("m5")).m.t, "==", 0);
+    uu.ok("#m6 { margin: medium; }", uu.css.box(uu.id("m6")).m.t, "==", 0);
+    uu.ok("#m7 { margin: thick; }", uu.css.box(uu.id("m7")).m.t, "==", 0);
+    uu.ok("#m8 { margin: auto; }", uu.css.box(uu.id("m8")).m.t, "==", 0);
+    uu.ok("#p0 { padding: 0px; }", uu.css.box(uu.id("p0")).p.t, "==", 0);
+    uu.ok("#p1 { padding: 1px; }", uu.css.box(uu.id("p1")).p.t, "==", 1);
+    uu.ok("#p2 { padding: 2px; }", uu.css.box(uu.id("p2")).p.t, "==", 2);
+    uu.ok("#p3 { padding: 3px; }", uu.css.box(uu.id("p3")).p.t, "==", 3);
+    uu.ok("#p4 { padding: 4px; }", uu.css.box(uu.id("p4")).p.t, "==", 4);
+    uu.ok("#p5 { padding: thin; }", uu.css.box(uu.id("p5")).p.t, "==", 0);
+    uu.ok("#p6 { padding: medium; }", uu.css.box(uu.id("p6")).p.t, "==", 0);
+    uu.ok("#p7 { padding: thick; }", uu.css.box(uu.id("p7")).p.t, "==", 0);
+    uu.ok("#p8 { padding: auto; }", uu.css.box(uu.id("p8")).p.t, "==", 0);
+
+    uu.ok();
+
+    uu.log("borderTopWidth");
+    uu.log( uu.css(uu.id("b0"), "px").borderTopWidth + " " + uu.css.box(uu.id("b0")).b.t);
+    uu.log( uu.css(uu.id("b1"), "px").borderTopWidth + " " + uu.css.box(uu.id("b1")).b.t);
+    uu.log( uu.css(uu.id("b2"), "px").borderTopWidth + " " + uu.css.box(uu.id("b2")).b.t);
+    uu.log( uu.css(uu.id("b3"), "px").borderTopWidth + " " + uu.css.box(uu.id("b3")).b.t);
+    uu.log( uu.css(uu.id("b4"), "px").borderTopWidth + " " + uu.css.box(uu.id("b4")).b.t);
+    uu.log( uu.css(uu.id("b5"), "px").borderTopWidth + " " + uu.css.box(uu.id("b5")).b.t);
+    uu.log( uu.css(uu.id("b6"), "px").borderTopWidth + " " + uu.css.box(uu.id("b6")).b.t);
+    uu.log( uu.css(uu.id("b7"), "px").borderTopWidth + " " + uu.css.box(uu.id("b7")).b.t);
+//  uu.log( uu.css(uu.id("b8"), "px").borderTopWidth + " " + uu.css.box(uu.id("b8")).b.t);
+
+    uu.log("marginTop");
+    uu.log( uu.css(uu.id("m0"), "px").marginTop + " " + uu.css.box(uu.id("m0")).m.t);
+    uu.log( uu.css(uu.id("m1"), "px").marginTop + " " + uu.css.box(uu.id("m1")).m.t);
+    uu.log( uu.css(uu.id("m2"), "px").marginTop + " " + uu.css.box(uu.id("m2")).m.t);
+    uu.log( uu.css(uu.id("m3"), "px").marginTop + " " + uu.css.box(uu.id("m3")).m.t);
+    uu.log( uu.css(uu.id("m4"), "px").marginTop + " " + uu.css.box(uu.id("m4")).m.t);
+    uu.log( uu.css(uu.id("m5"), "px").marginTop + " " + uu.css.box(uu.id("m5")).m.t);
+    uu.log( uu.css(uu.id("m6"), "px").marginTop + " " + uu.css.box(uu.id("m6")).m.t);
+    uu.log( uu.css(uu.id("m7"), "px").marginTop + " " + uu.css.box(uu.id("m7")).m.t);
+    uu.log( uu.css(uu.id("m8"), "px").marginTop + " " + uu.css.box(uu.id("m8")).m.t);
+
+    uu.log("paddingTop");
+    uu.log( uu.css(uu.id("p0"), "px").paddingTop + " " + uu.css.box(uu.id("p0")).p.t);
+    uu.log( uu.css(uu.id("p1"), "px").paddingTop + " " + uu.css.box(uu.id("p1")).p.t);
+    uu.log( uu.css(uu.id("p2"), "px").paddingTop + " " + uu.css.box(uu.id("p2")).p.t);
+    uu.log( uu.css(uu.id("p3"), "px").paddingTop + " " + uu.css.box(uu.id("p3")).p.t);
+    uu.log( uu.css(uu.id("p4"), "px").paddingTop + " " + uu.css.box(uu.id("p4")).p.t);
+    uu.log( uu.css(uu.id("p5"), "px").paddingTop + " " + uu.css.box(uu.id("p5")).p.t);
+    uu.log( uu.css(uu.id("p6"), "px").paddingTop + " " + uu.css.box(uu.id("p6")).p.t);
+    uu.log( uu.css(uu.id("p7"), "px").paddingTop + " " + uu.css.box(uu.id("p7")).p.t);
+    uu.log( uu.css(uu.id("p8"), "px").paddingTop + " " + uu.css.box(uu.id("p8")).p.t);
+});
+</script></head><body>
+<div id="uucssbox_test" style="display:none; margin: 1px; padding: 1px; border: 1px solid black">
+    <div id="b0">b0</div>
+    <div id="b1">b1</div>
+    <div id="b2">b2</div>
+    <div id="b3">b3</div>
+    <div id="b4">b4</div>
+    <div id="b5">b5</div>
+    <div id="b6">b6</div>
+    <div id="b7">b7</div>
+    <div id="b8">b8</div>
+    <div id="m0">m0</div>
+    <div id="m1">m1</div>
+    <div id="m2">m2</div>
+    <div id="m3">m3</div>
+    <div id="m4">m4</div>
+    <div id="m5">m5</div>
+    <div id="m6">m6</div>
+    <div id="m7">m7</div>
+    <div id="m8">m8</div>
+    <div id="p0">p0</div>
+    <div id="p1">p1</div>
+    <div id="p2">p2</div>
+    <div id="p3">p3</div>
+    <div id="p4">p4</div>
+    <div id="p5">p5</div>
+    <div id="p6">p6</div>
+    <div id="p7">p7</div>
+    <div id="p8">p8</div>
+</div>
+
+</body></html>

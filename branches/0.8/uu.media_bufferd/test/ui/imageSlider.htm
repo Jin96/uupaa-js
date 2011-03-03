@@ -1,0 +1,142 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8" />
+<title>uu.ui.imageSlider test</title>
+<style>
+/*
+html, body {
+  overflow: hidden;
+}
+ */
+.box {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  outline: 0px silver solid;
+  background-color: #ff4100;
+  color: white;
+  text-align: center;
+}
+.static {
+  position: static;
+}
+.margin10  { margin:  10px; }
+.padding10 { padding: 10px; }
+.border10  { border:  10px double turquoise; }
+.outline10 { outline: 10px solid springgreen; }
+</style>
+<script src="../../src/uupaa.js"></script>
+<script src="../../src/ui/imageSlider.js"></script>
+
+<script>
+var duration = 300;
+
+function moveDuration(evt) {
+    duration = evt.uu.node.value;
+    uu.text(uu.id("durationValue"), duration);
+}
+
+uu.ready(function() {
+    uu.bind(uu.id("durationSlider"), "change", moveDuration);
+    uu.ui.build();
+
+
+    // --- init ---
+    uu.ui.imageSlider.dressup(uu.css.userSelect(uu.id("slide1")), { degree: 0  });
+    uu.ui.imageSlider.dressup(uu.css.userSelect(uu.id("slide2")), { degree: 45 });
+    uu.ui.imageSlider.dressup(uu.css.userSelect(uu.id("slide3")), { degree: 90 });
+
+    uu.click(uu.id("slide1"), function(evt) {
+        uu.ui.imageSlider(evt.uu.node, duration);
+    });
+    uu.click(uu.id("slide2"), function(evt) {
+        uu.ui.imageSlider(evt.uu.node, duration);
+    });
+    uu.click(uu.id("slide3"), function(evt) {
+        uu.ui.imageSlider(evt.uu.node, duration);
+    });
+
+
+    // --- init ---
+    uu.ui.imageSlider.dressup(uu.css.userSelect(uu.id("slideDeny1")), { degree: 0  });
+    uu.ui.imageSlider.dressup(uu.css.userSelect(uu.id("slideDeny2")), { degree: 45 });
+    uu.ui.imageSlider.dressup(uu.css.userSelect(uu.id("slideDeny3")), { degree: 90 });
+
+    uu.click(uu.id("slideDeny1"), function(evt) {
+        uu.ui.imageSlider(evt.uu.node, duration, { allow: 0 });
+    });
+    uu.click(uu.id("slideDeny2"), function(evt) {
+        uu.ui.imageSlider(evt.uu.node, duration, { allow: 0 });
+    });
+    uu.click(uu.id("slideDeny3"), function(evt) {
+        uu.ui.imageSlider(evt.uu.node, duration, { allow: 0 });
+    });
+});
+
+</script>
+</head><body id="body">
+DURATION: <input id="durationSlider" ui="Slider" type="range" step="50" value="300" min="0" max="2000" />
+    <span id="durationValue">300</span>
+    <br />
+
+
+<p>動作中に連続クリック可能<br />
+    先行入力を<b>受け付ける</b>
+    uu.ui.imageSlider(node, duration, { <b>allow: 1</b> })</p>
+<div>
+    <div id="slide1" style="float:left;visibility:hidden">
+        <div>
+            <img src="../images/cover01.jpg" />
+            <img src="../images/cover02.jpg" />
+            <img src="../images/cover03.jpg" />
+            <img src="../images/cover04.jpg" />
+        </div>
+    </div>
+    <div id="slide2" style="float:left;visibility:hidden">
+        <div>
+            <img src="../images/cover05.jpg" />
+            <img src="../images/cover06.jpg" />
+            <img src="../images/cover07.jpg" />
+            <img src="../images/cover08.jpg" />
+        </div>
+    </div>
+    <div id="slide3" style="float:left;visibility:hidden">
+        <div>
+            <img src="../images/cover09.jpg" />
+            <img src="../images/cover10.jpg" />
+            <img src="../images/cover11.jpg" />
+            <img src="../images/cover12.jpg" />
+        </div>
+    </div>
+    <div style="clear:both"></div>
+</div>
+
+<p>動作中にクリックしてもスライドは連続で動作しない<br />
+    先行入力を<b>受け付けない</b><br />
+    uu.ui.imageSlider(node, duration, { <b>allow: 0</b> })</p>
+<div>
+    <div id="slideDeny1" style="float:left;visibility:hidden">
+        <div>
+            <img src="../images/cover01.jpg" />
+            <img src="../images/cover02.jpg" />
+            <img src="../images/cover03.jpg" />
+            <img src="../images/cover04.jpg" />
+        </div>
+    </div>
+    <div id="slideDeny2" style="float:left;visibility:hidden">
+        <div>
+            <img src="../images/cover05.jpg" />
+            <img src="../images/cover06.jpg" />
+            <img src="../images/cover07.jpg" />
+            <img src="../images/cover08.jpg" />
+        </div>
+    </div>
+    <div id="slideDeny3" style="float:left;visibility:hidden">
+        <div>
+            <img src="../images/cover09.jpg" />
+            <img src="../images/cover10.jpg" />
+            <img src="../images/cover11.jpg" />
+            <img src="../images/cover12.jpg" />
+        </div>
+    </div>
+</div>
+
+</body></html>

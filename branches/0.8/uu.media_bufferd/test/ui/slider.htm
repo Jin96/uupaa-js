@@ -1,0 +1,76 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8" />
+<title>Slider demo</title>
+<script src="../../src/uupaa.js"></script>
+<script>
+uu.ready(function() {
+    uu.each(uu.query("input[type=range]"), function(node) {
+        if (node.id === "master") {
+            uu.change(node, function(evt) {
+                moveMasterSlider(+evt.uu.node.value); // int cast
+            });
+        } else if (node.id === "masterdis") {
+            uu.change(node, function(evt) {
+                moveMasterDisabledSlider(+evt.uu.node.value); // int cast
+            });
+        } else {
+            uu.bind(node, "change", function(evt) {
+                range(evt.uu.node, evt.uu.node.id);
+            });
+        }
+    });
+});
+
+function newSlider() {
+    var rv,
+        min  = +uu.id("minValue").value,
+        max  = +uu.id("maxValue").value,
+        size = +uu.id("sizeValue").value,
+        step = +uu.id("stepValue").value,
+        dis  = +uu.id("disabledValue").value,
+        dir  = +uu.id("directionValue").value;
+
+    uu.add(uu.ui.build("Slider", { vertical: dir, step: step, disabled: dis,
+                                   min: min, max: max, size: size, value: min }),
+           uu.id("ui-pool"));
+}
+
+function range(that, id) {
+    var val = +that.value;
+
+    if (id === "directionValue") {
+        uu.id(id).nextSibling.innerText = val ? "1 (Vertical)" : "0 (Horizontal)";
+    } else if (id === "disabledValue") {
+        uu.id(id).nextSibling.innerText = val ? "disabled" : "";
+    } else {
+        uu.id(id).nextSibling.innerText = val;
+    }
+}
+function moveMasterSlider(value) {
+    uu.msg.post(uu.ui("#ui-pool>[ui=Slider]"), "value", value);
+}
+function moveMasterDisabledSlider(value) {
+    uu.msg.post(uu.ui("#ui-pool>[ui=Slider]"), "attr", "disabled", !!value);
+}
+</script>
+</head><body>
+<input type="button" value="HTML5 Formnize" onclick="uu.ui.build()" />
+<input type="button" value="new Slider" onclick="newSlider()" />
+Master: <input id="master" type="range" value="0" ui="Slider" />
+Disabled: <input id="masterdis" type="range" value="0" min="0" max="1" ui="Slider" />
+
+<p>min: <input type="range" value="0" min="0" max="10" id="minValue" ui="Slider" /><span>0</span>
+</p>
+<p>max: <input type="range" value="100" min="90" max="100" id="maxValue" ui="Slider" /><span>100</span>
+</p>
+<p>size: <input type="range" value="100" min="50" max="200" step="50" id="sizeValue" ui="Slider" /><span>100</span>
+</p>
+<p>step: <input type="range" value="1" min="1" max="50" id="stepValue" ui="Slider" /><span>1</span>
+</p>
+<p>disabled: <input type="range" value="0" min="0" max="1" id="disabledValue" ui="Slider" /><span></span>
+</p>
+<p>direction: <input type="range" value="0" min="0" max="1" id="directionValue" ui="Slider" /><span>0 (Horizontal)</span>
+</p>
+<div id="ui-pool">
+</div>
+
+</body></html>

@@ -1,0 +1,24 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8" />
+<title>uu.event.one</title>
+<style>
+.button {
+    border: 3px outset gray
+}
+</style>
+<script src="../../src/uupaa.js"></script>
+<script>
+uu.ready(function(uu) {
+    uu.event.one(uu.tag("p")[0], "mouseover", function(evt) {
+        uu.log("一度発火したハンドラ(mouseover)は自動的に解除されます");
+    });
+
+    uu.event.one(uu.tag("p")[1], "click", function(evt) {
+        uu.log("一度発火したハンドラ(click)は自動的に解除されます");
+    });
+});
+</script></head><body>
+
+<p class="button">hover me! uu.event.one(this.node, "mouseover")</p>
+<p class="button">click me! uu.event.one(this.node, "click")</p>
+
+</body></html>

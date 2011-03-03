@@ -1,0 +1,30 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8" />
+<title>uu.ready("href:URL/Dispatcher", callback...) test code</title>
+<script src="../../../src/uupaa.js"></script>
+<script>
+uu.ready("href:http://localhost/", function(uu, doc) {
+    alert("NG - http://localhost/...");
+}, function() {
+    alert("NG - http://localhost/...");
+}, "href:http://localhost:8080/", function(uu, doc) {
+    alert("OK1 - http://localhost:8080/...");
+}, "href:http://localhost:8080/", function(uu, doc) {
+    alert("OK2 - http://localhost:8080/...");
+}, function() {
+    alert("OK3 - http://localhost:8080/...");
+}, "dom", function(uu, doc) {
+    alert("DOMContentLoaded");
+}, "window", function(uu, doc) {
+    alert("WindowReady");
+}, "storage", function(uu, storage) {
+    alert("StorageReady");
+}, "audio", function(uu, doc) {
+    alert("AudioReady");
+}, "canvas", function(uu) {
+    alert("CanvasReady");
+}, "svg", function(uu) {
+    alert("SVGReady");
+});
+</script>
+</script>
+</head><body></body></html>

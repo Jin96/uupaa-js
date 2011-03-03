@@ -1,0 +1,269 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8" />
+<title>uu.fx demo</title>
+<style>
+html, body {
+  overflow: hidden;
+  border: 0 none;
+  padding: 0;
+  margin: 0;
+}
+.box {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  outline: 0px silver solid;
+  background-color: #ff4100;
+  color: white;
+  text-align: center;
+}
+.static {
+  position: static;
+}
+.margin10  { margin:  10px; }
+.padding10 { padding: 10px; }
+.border10  { border:  10px double turquoise; }
+.outline10 { outline: 10px solid springgreen; }
+</style>
+<script src="../../../src/uupaa.js"></script>
+<script src="../../../src/canvas/canvas.js"></script>
+<script>
+var duration = 300;
+var range = 200;
+var parts = 10;
+var degree = 270;
+var bgcolor = uu.color("#ff4100");
+
+function moveDuration(evt) {
+    duration = (evt.target || evt.srcElement).value
+    uu.text(uu.id("durationValue"), duration);
+    bgcolor = bgcolor.arrange(3, 0, 0);
+
+    uu("div.box").css("bgc", bgcolor + "");
+}
+function moveRange(evt) {
+    range = (evt.target || evt.srcElement).value
+    uu.text(uu.id("rangeValue"), range);
+}
+function moveParts(evt) {
+    parts = (evt.target || evt.srcElement).value
+    uu.text(uu.id("partsValue"), parts);
+}
+
+var toggle = 1;
+function fade(evt) {
+    if (toggle) {
+        uu.fx.fade(evt.uu.node, duration, { after: function() {
+            uu.fx(evt.uu.node, 1000, { o: 0.1 });
+        }});
+        toggle = 0;
+    } else {
+        uu.fx.fade(evt.uu.node, duration, { before: function() {
+            uu.fx(evt.uu.node, 1000, { o: 1 });
+        }});
+        toggle = 1;
+    }
+}
+
+function fadeIn(evt) {
+    uu.fx.fadeIn(evt.uu.node, duration, { reverse: 1 });
+}
+
+function fadeOut(evt) {
+    uu.fx.fadeOut(evt.uu.node, duration, { reverse: 1 });
+}
+
+function moveIn(evt) {
+    degree += 10;
+    if (degree > 360) {
+        degree = 0;
+    }
+    uu.fx.moveIn(evt.uu.node, duration, { degree: degree, range: range });
+}
+
+function moveOut(evt) {
+    degree += 10;
+    if (degree > 360) {
+        degree = 0;
+    }
+    uu.fx.moveOut(evt.uu.node, duration, { degree: degree, range: range,
+                                        reverse: 1 });
+}
+
+function flare(evt) {
+    uu.fx.flare(evt.uu.node, duration, { range: range, parts: parts,
+                                      reverse: 1 });
+}
+
+function puff(evt) {
+    uu.fx.puff(evt.uu.node, duration, { reverse: 1 });
+}
+
+function shrink(evt) {
+    uu.fx.shrink(evt.uu.node, duration, { reverse: 1 });
+}
+
+function highlight(evt) {
+    uu.fx.highlight(evt.uu.node, duration, { reverse: 1 });
+}
+
+var slideToggleSwitch = false;
+
+function slide(evt) {
+    slideToggleSwitch = !slideToggleSwitch;
+
+    if (slideToggleSwitch) {
+        evt.uu.node.innerText = "slideUp";
+        uu.fx.slide(evt.uu.node, duration);
+        uu.fx(evt.uu.node, 1000);
+        uu.fx.slide(evt.uu.node, 0, { after: function(node) {
+            node.innerText = "slide";
+        }});
+    } else {
+        evt.uu.node.innerText = "slideDown";
+        uu.fx.slide(evt.uu.node, 0);
+        uu.fx(evt.uu.node, 1000);
+        uu.fx.slide(evt.uu.node, duration, { after: function(node) {
+            node.innerText = "slide";
+        }});
+    }
+}
+
+function slideUp(evt) {
+    uu.fx.slide(evt.uu.node, duration);
+    uu.fx(evt.uu.node, 1000);
+    uu.fx.slide(evt.uu.node, 0, { after: function(node) {
+    }});
+}
+function slideDown(evt) {
+    uu.fx.slide(evt.uu.node, 0);
+    uu.fx(evt.uu.node, 1000);
+    uu.fx.slide(evt.uu.node, duration, { after: function(node) {
+    }});
+}
+function swing(evt) {
+    uu.fx.swing(evt.uu.node, duration, { range: range });
+}
+
+uu.ready(function(uu) {
+    // onchange handler
+    var nodes = uu.ids("durationSlider,rangeSlider,partsSlider")
+
+    uu.bind(nodes[0], "change", moveDuration);
+    uu.bind(nodes[1], "change", moveRange);
+    uu.bind(nodes[2], "change", moveParts);
+
+    // Slider activate
+    uu.ui.build();
+
+    var x = 0;
+    var y = 0;
+    var margin = 10;
+
+    // position: absolute
+    uu.each({ moveIn: moveIn,
+              moveOut: moveOut,
+              flare: flare,
+              fade: fade,
+              fadeIn: fadeIn,
+              fadeOut: fadeOut,
+              puff: puff,
+              shrink: shrink,
+              highlight: highlight,
+              slide: slide,
+              slideUp: slideUp,
+              slideDown: slideDown,
+              swing: swing }, function(fn, key) {
+
+        var div =
+            uu.node.add(
+                uu.click(
+                    uu.div({ "class": "box" },   // attr
+                           { x: x, y: y + 40 },  // style
+                           uu.text(key)),        // text
+                    fn),  // click.callback
+                        uu.id("absolutebox"));   // node.add context
+
+        x += 100 + margin;
+        if (x > (100 + margin) * 6) { // 6 colmuns
+            y += 100 + margin;
+            x = 0;
+        }
+        switch (key) {
+        case "fadeIn":
+        case "fadeOut":
+            uu.css(div, { o: 0.5 });
+            break;
+        case "swing":
+            div.id = "swing";
+            break;
+        }
+    });
+    // position: static
+    uu.each({ puff: puff, shrink: shrink,
+              slideUp: slideUp,
+              slideDown: slideDown }, function(fn, key) {
+
+        uu.node.add(
+            uu.click(
+                uu.div({ "class": "box static" },
+                       { cssFloat: "left" },
+                       uu.text(key)), fn), uu.id("staticbox"));
+    });
+
+    uu.css.userSelect();
+}, "canvas", function() {
+    if (!uu.ie678) {
+        uu.hatch();
+    }
+});
+
+function toggleMargin() {
+    uu("div.box").klass("!margin10");
+}
+function togglePadding() {
+    uu("div.box").klass("!padding10");
+}
+function toggleBorder() {
+    uu("div.box").klass("!border10");
+}
+function toggleOutline() {
+    uu("div.box").klass("!outline10");
+}
+
+</script>
+</head><body id="body">
+<div>
+  <div>
+    TOGGLE:
+    <input type="button" value="margin" onclick="toggleMargin()" />
+    <input type="button" value="padding" onclick="togglePadding()" />
+    <input type="button" value="border" onclick="toggleBorder()" />
+    <input type="button" value="outline" onclick="toggleOutline()" /> |
+  </div>
+</div>
+<div style="margin:5px">
+DURATION: <input id="durationSlider" ui="Slider" type="range" step="50" value="300"
+            min="0" max="2000" />
+    <span id="durationValue">300</span>
+    <br />
+RANGE: <input id="rangeSlider" ui="Slider" type="range" step="10" value="200"
+            min="10" max="400" />
+    <span id="rangeValue">200</span>
+    <br />
+PARTS: <input id="partsSlider" ui="Slider" type="range" step="1" value="10"
+            min="1" max="20" />
+    <span id="partsValue">10</span>
+</div>
+
+
+<div id="absolutebox" style="position:absolute;top:130px;left:100px">
+    <p><b>position:absolute</b></p>
+</div>
+
+
+<div style="position:absolute;top:380px;left:100px">
+    <p id="staticbox"><b>position:static</b></p>
+
+</div>
+
+</body></html>

@@ -1,0 +1,99 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8" />
+<title>canvas - demo</title>
+</head><body>
+
+<h1>Animation demos</h1>
+
+<ul style="float:left">
+    <li><a href="demo1_jump-dots.htm">Jump dots</a> ( <a href="http://code.google.com/p/explorercanvas/">original</a> )</li>
+    <li><a href="demo2_cube.htm">Cube</a> ( <a href="http://code.google.com/p/explorercanvas/">original</a> )</li>
+    <li><a href="demo3_meta-tunnel.htm">Meta tunnel</a> ( <a href="http://www.pouet.net/prod.php?which=52777">original</a> )</li>
+    <li><a href="demo4_canvascape.htm">Canvascape</a> ( <a href="http://www.benjoffe.com/code/demos/canvascape/">original</a> )</li>
+    <li><a href="demo5_overlay.htm">Overlay</a> ( <a href="http://code.google.com/p/explorercanvas/">original</a> )</li>
+    <li><a href="demo6_kaleidoscope.htm">Kaleidoscope</a> ( <a href="http://www.chiptune.com/kaleidoscope/">original</a> )</li>
+</ul>
+<ul style="float:left">
+    <li><a href="demo7_spread.htm">Spread</a> ( <a href="http://www.canvasdemos.com/2009/10/16/spread/">original</a> )</li>
+    <li><a href="demo8_sphere.htm">Sphere</a> ( <a href="http://www.canvasdemos.com/2010/02/06/canvas-sphere/">original</a> )</li>
+    <li><a href="demo9_waves.htm">Waves</a> ( <a href="http://www.canvasdemos.com/2009/10/26/canvas-waves/">original</a> )</li>
+    <li><a href="demo10_colors.htm">Colors</a> ( <a href="http://code.google.com/p/explorercanvas/">original</a> )</li>
+    <li><a href="demo11_clock.htm">Clock</a> ( <a href="https://developer.mozilla.org/en/Canvas_tutorial">original</a> )</li>
+</ul>
+<div style="clear:both"></div>
+
+
+<h1><a href="https://developer.mozilla.org/en/Canvas_tutorial">Basic functions</a></h1>
+
+<ul style="float:left">
+<!--
+  <li><a href="1_1_canvas_remove_fallback.htm">1.1 Remove fallback content</a></li>
+ -->
+  <li><a href="1_2_canvas_resize.htm">1.2 Resize canvas</a></li>
+  <li><a href="2_1_canvas_rect.htm">2.1 rect(), clearRect()</a></li>
+  <li><a href="2_2_canvas_moveto.htm">2.2 moveTo()</a></li>
+  <li><a href="2_3_canvas_lineto.htm">2.3 lineTo()</a></li>
+  <li><a href="2_4_canvas_arc.htm">2.4 arc()</a></li>
+  <li><a href="2_5_canvas_quadraticcurveto.htm">2.5 quadraticCurveTo</a></li>
+  <li><a href="2_6_canvas_beziercurveto.htm">2.6 bezierCurveTo</a></li>
+  <li><a href="2_7_canvas_combined.htm">2.7 Combined</a></li>
+  <li><a href="2_8_canvas_clearRect.htm">2.8 clearRect()</a></li>
+  <li><a href="3_1_canvas_drawimage.htm">3.1 drawImage</a></li>
+  <li><a href="3_1_canvas_drawimage+scale.htm">3.1 drawImage + scale</a></li>
+  <li><a href="3_2_canvas_drawimage.htm">3.2 drawImage + tile</a></li>
+  <li><a href="3_3_canvas_drawimage+clip.htm">3.3 drawImage + clip</a></li>
+  <li><a href="3_3_canvas_drawimage.htm">3.3 drawImage + arg9</a></li>
+  <li><a href="3_4_canvas_gallery.htm">3.4 Gallery</a></li>
+  <li><a href="3_5_canvas_drawimage_canvas.htm">3.5 copy canvas</a></li>
+  <li><a href="4_1_canvas_fillstyle.htm">4.1 fillStyle</a></li>
+  <li><a href="4_2_canvas_strokestyle.htm">4.2 strokeStyle</a></li>
+  <li><a href="4_3_canvas_globalalpha.htm">4.3 globalAlpha</a></li>
+  <li><a href="4_4_canvas_rgba.htm">4.4 rgba(255,255,255,1)</a></li>
+  <li><a href="4_4_1_canvas_rgba.htm">4.4 rgba(100%,100%,100%,1)</a></li>
+  <li><a href="4_5_canvas_linewidth.htm">4.5 lineWidth</a></li>
+  <li><a href="4_6_canvas_linecap.htm">4.6 lineCap</a></li>
+  <li><a href="4_7_canvas_linejoin.htm">4.7 lineJoin</a></li>
+  <li><a href="4_8_canvas_miterlimit.htm">4.8 miterLimit</a></li>
+  <li><a href="4_9_canvas_lineargradient.htm">4.9 createLinearGradient()</a></li>
+  <li><a href="4_10_canvas_radialgradient.htm">4.10 createRadialGradient()</a></li>
+  <li><a href="4_10_canvas_radialgradient+stroke.htm">4.10 createRadialGradient() + stroke</a></li>
+  <li><a href="4_11_canvas_createpattern.htm">4.11 createPattern()</a></li>
+  <li><a href="4_11_canvas_createpattern+path.htm">4.11 createPattern() + path</a></li>
+  <li><a href="4_11_canvas_createpattern+stroke.htm">4.11 createPattern() + stroke</a></li>
+  <li><a href="4_12_canvas_gradients.htm">4.12 Gradient + Pattern</a></li>
+</ul>
+<ul style="float:left">
+  <li><a href="5_1_canvas_savestate.htm">5.1 save() + restore()</a></li>
+  <li><a href="5_1_canvas_savestate+shadow.htm">5.1 save() + restore() + Text Shadow</a></li>
+  <li><a href="5_2_canvas_translate.htm">5.2 translate()</a></li>
+  <li><a href="5_3_canvas_rotate.htm">5.3 rotate()</a></li>
+  <li><a href="5_4_canvas_scale.htm">5.4 scale()</a></li>
+  <li><a href="5_5_canvas_transform.htm">5.5 transform()</a></li>
+  <li><a href="6_1_canvas_composite.htm">6.1 globalCompositeOperation</a></li>
+  <li><a href="6_1_canvas_composite_gradients.htm">6.1 globalCompositeOperation</a></li>
+  <li><a href="6_1_canvas_composite_multigradients.htm">6.1 globalCompositeOperation</a></li>
+  <li><a href="6_1_canvas_composite_stroke.htm">6.1 globalCompositeOperation</a></li>
+  <li><a href="6_2_canvas_clipping.htm">6.2 clipping</a></li>
+  <li><a href="6_2_canvas_clipping+resize.htm">6.2 clipping + resize</a></li>
+  <li><a href="8_1_canvas_fillText_strokeText.htm">8.1 fillText() + strokeText()</a></li>
+  <li><a href="8_2_canvas_measureText.htm">8.2 measureText()</a></li>
+  <li><a href="8_3_canvas_textAlign.htm">8.3 textAlign</a></li>
+  <li><a href="8_3_canvas_textAlign+rtl.htm">8.3 textAlign + direction</a></li>
+  <li><a href="8_4_canvas_textBaseline.htm">8.4 textBaseline</a></li>
+  <li><a href="8_5_canvas_fontSize_fillText.htm">8.5 fillText() + font</a></li>
+  <li><a href="8_6_canvas_fontSize_strokeText.htm">8.6 strokeText() + font</a></li>
+  <li><a href="8_7_canvas_fontFamily.htm">8.7 font, fontFamily</a></li>
+  <li><a href="9_1_canvas_shadow_text.htm">9.1 TextShadow</a></li>
+  <li><a href="9_1_canvas_shadow_text_direction.htm">9.1 TextShadow + direction</a></li>
+  <li><a href="9_1_canvas_shadow_text_linearGradient.htm">9.1 TextShadow + linearGradient</a></li>
+  <li><a href="9_1_canvas_shadow_text_radialGradient.htm">9.1 TextShadow + radialGradient</a></li>
+  <li><a href="9_1_canvas_shadow_text_pattern.htm">9.1 TextShadow + pattern</a></li>
+  <li><a href="9_2_canvas_shadow_path.htm">9.2 PathShadow</a></li>
+  <li><a href="9_3_canvas_shadow_stroke.htm">9.3 PathShadow + stroke</a></li>
+  <li><a href="9_4_canvas_image_shadow.htm">9.4 ImageShadow</a></li>
+  <li><a href="9_4_canvas_image_shadow+pattern.htm">9.4 ImageShadow + pattern</a></li>
+  <li><a href="10_1_canvas_shadow_param.htm">10.1 Shadow param</a></li>
+  <li><a href="10_2_canvas_long_shadow.htm">10.2 Long TextShadow</a></li>
+</ul>
+
+</body></html>
+

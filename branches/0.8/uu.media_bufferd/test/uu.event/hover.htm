@@ -1,0 +1,56 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8" />
+<title>uu.event.hover(mouseenter / mouseleave)</title>
+<script src="../../src/uupaa.js"></script>
+<style>
+#A {
+    color:#fff;
+    background-color:blue;
+    border:1px solid #000;
+    width:300px;
+    height:200px;
+    position:relative;
+}
+
+#B {
+    color:#fff;
+    background-color:red;
+    border:1px solid #000;
+    width:200px;
+    height:100px;
+    position:absolute;
+    bottom:0;
+    right:0;
+}
+#debug p {
+     margin:0;
+     line-height:110%;
+     font-size:9pt;
+}
+div {
+    background-color: lime;
+}
+.hoverActivate {
+    color: white;
+}
+</style>
+<script>
+uu.ready(function(uu) {
+    var B = uu.id("B");
+
+    uu("#A").hover(function(evt, enter) {
+        if (enter) {
+            uu("#debug").add("<p>A: mouseenter</p>");
+            uu("#A").add(B);
+        } else {
+            uu("#debug").add("<p>A: mouseleave</p>");
+            uu.body(B);
+        }
+    });
+    uu.event.hover(uu.id("debug"), "hoverActivate");
+});
+</script>
+</head><body>
+<div id="A">A</div>
+<div id="B">B</div>
+<div id="debug"></div>
+</body></html>

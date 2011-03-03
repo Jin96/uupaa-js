@@ -1,0 +1,64 @@
+<!doctype html><html><head><title></title>
+<style>
+#p, #checkbox, #radio, #password, #text {
+    border: outset 3px #ccc;
+}
+</style>
+<script src="../../src/uupaa.js"></script>
+<script>
+uu.ready(function(uu) {
+    function handler(evt) {
+        var node = evt.currentTarget;
+
+        if (evt.shiftKey) {
+            uu.node.remove(node, true); // removeAll
+        } else {
+            var clonedNode = uu.node.clone(node);
+
+            node.parentNode.appendChild(clonedNode);
+            var colorHash = uu.color.random();
+            clonedNode.style.backgroundColor = colorHash.hex;
+            clonedNode.style.color = colorHash.comple().hex;
+            clonedNode.firstChild.nodeValue = clonedNode.uniqueID || uu.number();
+
+        }
+    }
+
+    uu.event(uu.id("selectbox"), "click", handler);
+    uu.event(uu.id("multiple-selectbox"), "click", handler);
+    uu.event(uu.id("p"), "click", handler);
+    uu.event(uu.id("checkbox"), "click", handler);
+    uu.event(uu.id("radio"), "click", handler);
+    uu.event(uu.id("password"), "click", handler);
+    uu.event(uu.id("text"), "click", handler);
+});
+</script>
+</head><body>
+<h1>cloneNode test</h1>
+<p>"click" -> cloneNode</p>
+<p>shift + "click" -> removeNode</p>
+
+<p id="p">click me</p>
+
+<div id="selectbox">clickme
+    <select>
+    <option value="1">1</option>
+    <option value="2" selected="selected">2</option>
+    <option value="3">3</option>
+    </select>
+</div>
+<div id="multiple-selectbox">clickme
+    <select multiple="multiple" size="3">
+    <option value="1" selected="selected">1</option>
+    <option value="2" selected="selected">2</option>
+    <option value="3">3</option>
+    </select>
+</div>
+
+<div id="checkbox">click me<input name="a" type="checkbox" value="1" /></div>
+<div id="radio">click me<input name="b" type="radio" value="1" /><input name="b" type="radio" value="1" /></div>
+<div id="password">click me(readonly)<input name="c" type="password" value="1" readonly="readonly" /></div>
+<div id="text">click me(read/write)<input name="c" type="text" value="1" /></div>
+<div id="text">click me(disabled)<input name="c" type="text" value="1" disabled="disabled" /></div>
+
+</body></html>
