@@ -13,9 +13,10 @@ package {
         public static var MEDIA_STATE_PAUSED:uint    = 0x2;
         public static var STREAM_STATE_CLOSED:uint   = 0x0;
         public static var STREAM_STATE_OPEN:uint     = 0x1;
-        public static var STREAM_STATE_CAN_PLAY:uint = 0x2;
-        public static var STREAM_STATE_LOADED:uint   = 0x3;
-        public static var STREAM_STATE_ERROR:uint    = 0x4;
+        public static var STREAM_STATE_BUFFERING:uint= 0x2;
+        public static var STREAM_STATE_CAN_PLAY:uint = 0x3;
+        public static var STREAM_STATE_LOADED:uint   = 0x4;
+        public static var STREAM_STATE_ERROR:uint    = 0x5;
 
         // for ExternalInterface
         private var _xiCallback:String = "";
@@ -61,7 +62,7 @@ package {
                                                 : ("uu.dmz." + xi.objectID);
 
             // --- ExternalInterface definitions ---
-            xi.addCallback("xiAdd",             xiAdd);    // add list
+            xi.addCallback("xiAddList",         xiAddList);// add lists
             xi.addCallback("xiClear",           xiClear);  // clear list
             xi.addCallback("xiState",           xiState);  // get state
             xi.addCallback("xiPlay",            xiPlay);   // toggle play / play / pause
@@ -88,14 +89,21 @@ package {
         }
 
         private function handleTimer(event:TimerEvent):void {
-            var queue:Object = _queue.shift();
+            var queue:Object;
 
-            if (!queue) {
+            if (!_queue.length) {
+                return; // empty
+            }
+            if (!_queue[0].id || !(_queue[0].id in _list)) {
+                _queue.shift(); // skip
+                trace("Media::handleTimer", _queue[0].id, "is unknown");
                 return;
             }
-            if (!(queue.id in _list) || !queue.id) {
-                trace(queue.id, "is unknown");
-                return; // skip
+
+            queue = _queue.shift();
+            if (_list[queue.id].isBusy()) {
+                trace("Media::handleTimer", "isBusy() false. queue.length = ", _queue.length);
+                return; // busy -> skip
             }
 
             var obj:Object = _list[queue.id],
@@ -168,36 +176,43 @@ package {
             obj && obj.playback();
         }
 
-        public function xiAdd(type:String,
-                              audioSource:Array,
-                              videoSource:Array,
-                              imageSource:Array,
-                              comment:Array):Number {
+        public function xiAddList(data:Array,
+                                  formatVersion:Number = 1):Array {
             ++_xiLock;
-            var id:Number = _list.length;
 
-            switch (type) {
-            case "MediaAudio":
-                _list.push(new MediaAudio(this, id, audioSource,
-                                                    imageSource));
-                break;
-            case "MediaAudiox2":
-                _list.push(new MediaAudiox2(this, id, audioSource,
-                                                      imageSource));
-                break;
-            case "MediaVideo":
-                _list.push(new MediaVideo(this, id, videoSource));
-                break;
-            case "MediaAudioVideo":
-                _list.push(new MediaAudioVideo(this, id, audioSource,
-                                                         videoSource,
-                                                         imageSource));
-                break;
-            default:
-                trace("ERROR", type);
+            var rv:Array = [],
+                item:Object, type:String, media:Array, poster:String,
+                i:Number = 0, iz:Number = data.length,
+                id:Number = _list.length;
+
+            for (; i < iz; ++id, ++i) {
+                item = data[i];
+                type = item.type || "MediaAudio";
+                media = item.media;
+                poster = item.poster || "";
+                switch (type) {
+                case "MediaAudio":
+                    // audioSource
+                    _list.push(new MediaAudio(this, id, media, poster));
+                    break;
+                case "MediaAudiox2":
+                    _list.push(new MediaAudiox2(this, id, media, poster));
+                    break;
+                case "MediaVideo":
+                    _list.push(new MediaVideo(this, id, media, poster));
+                    break;
+                case "MediaAudioVideo":
+                    _list.push(new MediaAudioVideo(this, id, media, poster));
+                    break;
+                default:
+                    trace("ERROR", type);
+                    --_xiLock;
+                    return rv;
+                }
+                rv.push(id);
             }
             --_xiLock;
-            return id - 1;
+            return rv;
         }
 
         public function xiClear():void {
@@ -374,24 +389,33 @@ package {
         }
 
         public function judgeMultipleStreamState(s1:uint, s2:uint):uint {
-            // ERROR > CLOSED > OPEN > CAN_PLAY > LOADED
+            // ERROR > CLOSED > OPEN > BUFFERING > CAN_PLAY > LOADED
             // -----------------------------------------
             // ERROR    + ANY      -> ERROR
             // ANY      + ERROR    -> ERROR
             // CLOSED   + CLOSED   -> CLOSED
             // CLOSED   + OPEN     -> CLOSED
+            // CLOSED   + BUFFERING-> CLOSED
             // CLOSED   + CAN_PLAY -> CLOSED
             // CLOSED   + LOADED   -> CLOSED
             // OPEN     + CLOSED   -> CLOSED
             // OPEN     + OPEN     -> OPEN
+            // OPEN     + BUFFERING-> OPEN
             // OPEN     + CAN_PLAY -> OPEN
             // OPEN     + LOADED   -> OPEN
+            // BUFFERING+ CLOSED   -> CLOSED
+            // BUFFERING+ OPEN     -> OPEN
+            // BUFFERING+ BUFFERING-> BUFFERING
+            // BUFFERING+ CAN_PLAY -> BUFFERING
+            // BUFFERING+ LOADED   -> BUFFERING
             // CAN_PLAY + CLOSED   -> CLOSED
             // CAN_PLAY + OPEN     -> OPEN
+            // CAN_PLAY + BUFFERING-> BUFFERING
             // CAN_PLAY + CAN_PLAY -> CAN_PLAY
             // CAN_PLAY + LOADED   -> CAN_PLAY
             // LOADED   + CLOSED   -> CLOSED
             // LOADED   + OPEN     -> OPEN
+            // LOADED   + BUFFERING-> BUFFERING
             // LOADED   + CAN_PLAY -> CAN_PLAY
             // LOADED   + LOADED   -> LOADED
             if (s1 === STREAM_STATE_ERROR ||
@@ -405,6 +429,10 @@ package {
             if (s1 === STREAM_STATE_OPEN ||
                 s2 === STREAM_STATE_OPEN) {
                 return STREAM_STATE_OPEN;
+            }
+            if (s1 === STREAM_STATE_BUFFERING ||
+                s2 === STREAM_STATE_BUFFERING) {
+                return STREAM_STATE_BUFFERING;
             }
             if (s1 === STREAM_STATE_CAN_PLAY ||
                 s2 === STREAM_STATE_CAN_PLAY) {
