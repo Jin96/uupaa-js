@@ -19,49 +19,45 @@ package {
         // Identity
         protected var _boss:Media;
         protected var _id:Number = 0;
-        // Audio
-        protected var _sound:Sound = null;
-        protected var _soundChannel:SoundChannel = null;
-        protected var _mediaSource:Array = [];      // [audio, video]
-        protected var _media1:MediaAudio = null;    // front audio
-        protected var _media2:MediaVideo = null;    // rear video
-        // Image
-        protected var _imageSource:Array = [];      // [imageURL, ...]
+        // Media
+        protected var _frontMedia:MediaAudio = null;
+        protected var _rearMedia:MediaVideo = null;
 
         public function MediaAudioVideo(boss:Media,
                                         id:Number,
-                                        audioSource:Array,
-                                        videoSource:Array,
-                                        imageSource:Array = null) {
+                                        media:Array,
+                                        poster:String = "") {
             _boss = boss;
             _id = id;
-            _mediaSource = [audioSource[0], videoSource[0]];
-            _imageSource = imageSource ? imageSource.concat() : [];
-
-            _media1 = new MediaAudio(boss, _id, [audioSource[0]], []);
-            _media2 = new MediaVideo(boss,   0, [videoSource[0]]);
+            _frontMedia = new MediaAudio(boss, _id, [media[0], media[1]]);
+            _rearMedia  = new MediaVideo(boss,   0, [media[2], media[3]]);
         }
 
         public function play(dummyCallback:Function = null):void {
-            var state1:Object = _media1.getState(),
-                state2:Object = _media2.getState(),
-                stream1:uint = state1.streamState[0],
-                stream2:uint = state2.streamState[0];
+            var frontState:Object = _frontMedia.getState(),
+                rearState:Object = _rearMedia.getState(),
+                frontStream:uint = frontState.streamState[0],
+                rearStream:uint = rearState.streamState[0];
 
-            if (stream1 === STREAM_STATE_ERROR ||
-                stream2 === STREAM_STATE_ERROR) {
+            if (frontStream === STREAM_STATE_ERROR ||
+                rearStream === STREAM_STATE_ERROR) {
 
                 _boss.postMessage("error", _id); // W3C NamedEvent
                 return;
             }
-            if ((stream1 === STREAM_STATE_CLOSED || stream1 === STREAM_STATE_OPEN) &&
-                (stream2 === STREAM_STATE_CLOSED || stream2 === STREAM_STATE_OPEN)) {
-                _media2.play(waitForCanPlay); // wait
-                _media1.play(waitForCanPlay); // wait
+            if ((frontStream === STREAM_STATE_CLOSED ||
+                 frontStream === STREAM_STATE_OPEN) &&
+                (rearStream === STREAM_STATE_CLOSED ||
+                 rearStream === STREAM_STATE_OPEN)) {
+
+                _rearMedia.play(waitForCanPlay); // wait
+                _frontMedia.play(waitForCanPlay); // wait
                 return;
             }
-            if ((stream1 === STREAM_STATE_CAN_PLAY || stream1 === STREAM_STATE_LOADED) &&
-                (stream2 === STREAM_STATE_CAN_PLAY || stream2 === STREAM_STATE_LOADED)) {
+            if ((frontStream === STREAM_STATE_CAN_PLAY ||
+                 frontStream === STREAM_STATE_LOADED) &&
+                (rearStream === STREAM_STATE_CAN_PLAY ||
+                 rearStream === STREAM_STATE_LOADED)) {
                 // [1] STOPPED + STOPPED -> REWIND -> A/V PLAY
                 // [2] STOPPED + PLAYING -> NOP
                 // [3] STOPPED + PAUSED  -> V PLAY
@@ -71,126 +67,135 @@ package {
                 // [7] PAUSED  + STOPPED -> A PLAY
                 // [8] PAUSED  + PLAYING -> A PLAY
                 // [9] PAUSED  + PAUSED  -> A/V PLAY
-                switch (state1.mediaState[0]) {
+                switch (frontState.mediaState[0]) {
                 case MEDIA_STATE_STOPPED:
-                    switch (state2.mediaState[0]) {
+                    switch (rearState.mediaState[0]) {
                     case MEDIA_STATE_STOPPED:   // [1]
-                                                _media2.play(waitForCanPlay);
-                                                _media1.play(waitForCanPlay);
+                                                _rearMedia.play(waitForCanPlay);
+                                                _frontMedia.play(waitForCanPlay);
                                                 break;
                     case MEDIA_STATE_PLAYING:   break; // [2]
-                    case MEDIA_STATE_PAUSED:    _media2.playback(); // [3]
+                    case MEDIA_STATE_PAUSED:    _rearMedia.playback(); // [3]
                     }
                     break;
                 case MEDIA_STATE_PLAYING:
-                    switch (state2.mediaState[0]) {
+                    switch (rearState.mediaState[0]) {
                     case MEDIA_STATE_STOPPED:   break; // [4]
                     case MEDIA_STATE_PLAYING:   pause(); break; // [5]
-                    case MEDIA_STATE_PAUSED:    _media2.playback(); // [6]
+                    case MEDIA_STATE_PAUSED:    _rearMedia.playback(); // [6]
                     }
                     break;
                 case MEDIA_STATE_PAUSED:
-                    switch (state2.mediaState[0]) {
+                    switch (rearState.mediaState[0]) {
                     case MEDIA_STATE_STOPPED:   // [7]
-                    case MEDIA_STATE_PLAYING:   _media1.openSoundChannel(state1.currentTime); break; // [8]
+                    case MEDIA_STATE_PLAYING:   _frontMedia.playback(); break; // [8]
                     case MEDIA_STATE_PAUSED:    // [9]
-                                                _media2.play(waitForCanPlay);
-                                                _media1.play(waitForCanPlay); 
+                                                _rearMedia.play(waitForCanPlay);
+                                                _frontMedia.play(waitForCanPlay); 
                     }
                 }
             }
         }
 
         protected function waitForCanPlay(dummyID:Number):void {
-            var state1:Object = _media1.getState(),
-                state2:Object = _media2.getState(),
-                stream1:uint = state1.streamState[0],
-                stream2:uint = state2.streamState[0],
+            var rearState:Object = _rearMedia.getState(),
+                frontState:Object = _frontMedia.getState(),
+                frontStream:uint = frontState.streamState[0],
+                rearStream:uint = rearState.streamState[0],
                 doPlay:Number = 0;
 
-            if (stream1 === STREAM_STATE_ERROR ||
-                stream2 === STREAM_STATE_ERROR) {
+            trace("MediaAudioVideo::waitForCanPlay",
+                        frontState.streamState[0], rearState.streamState[0],
+                        frontState.mediaState[0], rearState.mediaState[0]);
+
+            if (frontStream === STREAM_STATE_ERROR ||
+                rearStream  === STREAM_STATE_ERROR) {
 
                 _boss.postMessage("error", _id); // W3C NamedEvent
                 return;
             }
-            if (stream1 === STREAM_STATE_CAN_PLAY ||
-                stream1 === STREAM_STATE_LOADED) {
-                if (stream2 === STREAM_STATE_CAN_PLAY ||
-                    stream2 === STREAM_STATE_LOADED) {
+            if (frontStream === STREAM_STATE_CAN_PLAY ||
+                frontStream === STREAM_STATE_LOADED) {
+                if (rearStream === STREAM_STATE_CAN_PLAY ||
+                    rearStream === STREAM_STATE_LOADED) {
                     ++doPlay;
                 }
             }
             if (doPlay) {
-                _boss.postMessage("play", _id); // W3C NamedEvent
-                // sync play
-                _media2.playback();
-                _media1.openSoundChannel(state1.currentTime);
-                _boss.postMessage("playing", _id); // W3C NamedEvent
+                trace("MediaAudioVideo::waitForCanPlay() sync play...");
+
+                _rearMedia.playback();
+                _frontMedia.playback();
+
+//                _boss.postMessage("play", _id); // W3C NamedEvent
+//                _boss.postMessage("playing", _id); // W3C NamedEvent
             } else {
-                trace("wait...");
+                trace("MediaAudioVideo::waitForCanPlay() wait...");
             }
         }
 
         public function seek(position:Number):void {
-            _media2.seek(position);
-            _media1.seek(position);
+            _rearMedia.seek(position);
+            _frontMedia.seek(position);
         }
 
         public function pause():void {
-            _media2.pause();
-            _media1.pause();
+            _rearMedia.pause();
+            _frontMedia.pause();
         }
 
         public function stop():void {
-            _media2.stop();
-            _media1.stop();
+            _rearMedia.stop();
+            _frontMedia.stop();
         }
 
         public function close():void {
-            _media2.close();
-            _media1.close();
+            _rearMedia.close();
+            _frontMedia.close();
         }
 
         public function getState():Object {
-            var state2:Object = _media2.getState(),
-                state1:Object = _media1.getState(),
-                m0:uint = _boss.judgeMultipleMediaState(state1.mediaState[0],
-                                                        state2.mediaState[0]),
-                s0:uint = _boss.judgeMultipleStreamState(state1.streamState[0],
-                                                         state2.streamState[0]);
+            var rearState:Object = _rearMedia.getState(),
+                frontState:Object = _frontMedia.getState(),
+                m0:uint = _boss.judgeMultipleMediaState(frontState.mediaState[0],
+                                                        rearState.mediaState[0]),
+                s0:uint = _boss.judgeMultipleStreamState(frontState.streamState[0],
+                                                         rearState.streamState[0]);
 
-            state1.name = "MediaAudioVideo";
-            state1.mediaState = [m0, state1.mediaState[0], state2.mediaState[0]];
-            state1.mediaSource = _mediaSource;
-            state1.streamState = [s0, state1.streamState[0], state2.streamState[0]];
-            return state1;
+            frontState.name = "MediaAudioVideo";
+            frontState.mediaState = [m0, frontState.mediaState[0],
+                                         rearState.mediaState[0]];
+            frontState.mediaSource = [frontState.mediaSource,
+                                      rearState.mediaSource];
+            frontState.streamState = [s0, frontState.streamState[0],
+                                          rearState.streamState[0]];
+            return frontState;
         }
 
         public function setLoop(loop:Boolean):void {
-            _media2.setLoop(loop);
-            _media1.setLoop(loop);
+            _rearMedia.setLoop(loop);
+            _frontMedia.setLoop(loop);
         }
 
         public function setMute(mute:Boolean):void {
-            _media2.setMute(mute);
-            _media1.setMute(mute);
+            _rearMedia.setMute(mute);
+            _frontMedia.setMute(mute);
         }
 
         public function setVolume(volume:Number,
                                   force:Boolean = false):void {
-            _media2.setVolume(volume);
-            _media1.setVolume(volume);
+            _rearMedia.setVolume(volume);
+            _frontMedia.setVolume(volume);
         }
 
         public function setStartTime(time:Number):void {
-            _media2.setStartTime(time);
-            _media1.setStartTime(time);
+            _rearMedia.setStartTime(time);
+            _frontMedia.setStartTime(time);
         }
 
         public function setCurrentTime(time:Number):void {
-            _media2.setCurrentTime(time);
-            _media1.setCurrentTime(time);
+            _rearMedia.setCurrentTime(time);
+            _frontMedia.setCurrentTime(time);
         }
     }
 }

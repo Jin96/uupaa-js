@@ -61,7 +61,7 @@ package {
                                                 : ("uu.dmz." + xi.objectID);
 
             // --- ExternalInterface definitions ---
-            xi.addCallback("xiAdd",             xiAdd);    // add list
+            xi.addCallback("xiAddList",         xiAddList);// add lists
             xi.addCallback("xiClear",           xiClear);  // clear list
             xi.addCallback("xiState",           xiState);  // get state
             xi.addCallback("xiPlay",            xiPlay);   // toggle play / play / pause
@@ -88,15 +88,18 @@ package {
         }
 
         private function handleTimer(event:TimerEvent):void {
-            var queue:Object = _queue.shift();
+            var queue:Object;
 
-            if (!queue) {
+            if (!_queue.length) {
+                return; // empty
+            }
+            if (!_queue[0].id || !(_queue[0].id in _list)) {
+                _queue.shift(); // skip
+                trace("Media::handleTimer", _queue[0].id, "is unknown");
                 return;
             }
-            if (!(queue.id in _list) || !queue.id) {
-                trace(queue.id, "is unknown");
-                return; // skip
-            }
+
+            queue = _queue.shift();
 
             var obj:Object = _list[queue.id],
                 state:Object,
@@ -168,36 +171,43 @@ package {
             obj && obj.playback();
         }
 
-        public function xiAdd(type:String,
-                              audioSource:Array,
-                              videoSource:Array,
-                              imageSource:Array,
-                              comment:Array):Number {
+        public function xiAddList(data:Array,
+                                  formatVersion:Number = 1):Array {
             ++_xiLock;
-            var id:Number = _list.length;
 
+            var rv:Array = [],
+                item:Object, type:String, media:Array, poster:String,
+                i:Number = 0, iz:Number = data.length,
+                id:Number = _list.length;
+
+            for (; i < iz; ++id, ++i) {
+                item = data[i];
+                type = item.type || "MediaAudio";
+                media = item.media;
+                poster = item.poster || "";
             switch (type) {
             case "MediaAudio":
-                _list.push(new MediaAudio(this, id, audioSource,
-                                                    imageSource));
+                    // audioSource
+                    _list.push(new MediaAudio(this, id, media, poster));
                 break;
             case "MediaAudiox2":
-                _list.push(new MediaAudiox2(this, id, audioSource,
-                                                      imageSource));
+                    _list.push(new MediaAudiox2(this, id, media, poster));
                 break;
             case "MediaVideo":
-                _list.push(new MediaVideo(this, id, videoSource));
+                    _list.push(new MediaVideo(this, id, media, poster));
                 break;
             case "MediaAudioVideo":
-                _list.push(new MediaAudioVideo(this, id, audioSource,
-                                                         videoSource,
-                                                         imageSource));
+                    _list.push(new MediaAudioVideo(this, id, media, poster));
                 break;
             default:
-                trace("ERROR", type);
+                trace("Media::xiAddList()", "ERROR", type);
+                    --_xiLock;
+                    return rv;
+                }
+                rv.push(id);
             }
             --_xiLock;
-            return id - 1;
+            return rv;
         }
 
         public function xiClear():void {
