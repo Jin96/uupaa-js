@@ -93,13 +93,8 @@ uu.Class("MediaPlayer", {
                 this.initCallback();
             }
             // --- add list item ---
-            this._data.forEach(function(hash, index) {
-                that._swf.xiAdd(hash.type,
-                                hash.audio   || [],
-                                hash.video   || [],
-                                hash.image   || [],
-                                hash.comment || []);
-            });
+            that._swf.xiAddList(this._data);
+
             // --- initial volume ---
             this.volume(this._option.volume);
             // --- auto play ---
