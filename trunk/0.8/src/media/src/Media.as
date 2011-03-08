@@ -115,7 +115,7 @@ package {
             case "volume":  obj.setVolume(queue.param1, queue.param2); break;
             case "play":    play = true; close = true; break;
             case "toggleplay":
-                state = obj.getState();
+                state = obj.getState(false);
 
                 switch (state.name) {
                 case "MediaAudio":
@@ -224,7 +224,7 @@ package {
         }
 
         public function xiState(id:Number):Object {
-            return _list[id] ? _list[id].getState() : {};
+            return _list[id] ? _list[id].getState(true) : {};
         }
 
         //  [1][toggle play] xiPlay()
@@ -342,7 +342,7 @@ package {
         // AS -> JS
         private function postMessageToJavaScript(msg:String, id:Number = 0):void {
             if (_list[id]) { // ignore _list[0]
-                var state:Object = _list[id].getState();
+                var state:Object = _list[id].getState(true);
 
                 switch (msg) {
                 case "durationchange":

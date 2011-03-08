@@ -33,9 +33,9 @@ package {
             _rearMedia  = new MediaVideo(boss,   0, [media[2], media[3]]);
         }
 
-        public function play(dummyCallback:Function = null):void {
-            var frontState:Object = _frontMedia.getState(),
-                rearState:Object = _rearMedia.getState(),
+        public function play(dummyCallback:Function):void {
+            var frontState:Object = _frontMedia.getState(false),
+                rearState:Object = _rearMedia.getState(false),
                 frontStream:uint = frontState.streamState[0],
                 rearStream:uint = rearState.streamState[0];
 
@@ -98,8 +98,8 @@ package {
         }
 
         protected function waitForCanPlay(dummyID:Number):void {
-            var rearState:Object = _rearMedia.getState(),
-                frontState:Object = _frontMedia.getState(),
+            var rearState:Object = _rearMedia.getState(false),
+                frontState:Object = _frontMedia.getState(false),
                 frontStream:uint = frontState.streamState[0],
                 rearStream:uint = rearState.streamState[0],
                 doPlay:Number = 0;
@@ -155,8 +155,8 @@ package {
         }
 
         public function getState():Object {
-            var rearState:Object = _rearMedia.getState(),
-                frontState:Object = _frontMedia.getState(),
+            var rearState:Object = _rearMedia.getState(true),
+                frontState:Object = _frontMedia.getState(true),
                 m0:uint = _boss.judgeMultipleMediaState(frontState.mediaState[0],
                                                         rearState.mediaState[0]),
                 s0:uint = _boss.judgeMultipleStreamState(frontState.streamState[0],

@@ -80,7 +80,7 @@ package {
                   event.info.code, _streamState, _mediaState);
  */
 
-            var fn:Function, currentProgress:Number;
+            var callback:Function, currentProgress:Number;
 
             if (_netStream) {
                 currentProgress = _netStream.bytesLoaded / _netStream.bytesTotal; // (sec / sec) -> 0 ~ 1
@@ -92,6 +92,7 @@ package {
 
             switch (event.info.code) {
             case "NetConnection.Connect.Success":
+                trace("MediaVideo::NetConnection.Connect.Success");
                 // play() -> NetConnection.connect() -> new NetStream()
                 _streamState = STREAM_STATE_OPEN;
 
@@ -106,6 +107,7 @@ package {
                 _netStream.play(_mediaSource); // 1st play() -> pause() -> seek(0)
                 break;
             case "NetStream.Play.Start":
+                trace("MediaVideo::NetStream.Play.Start");
                 _mediaState = MEDIA_STATE_PLAYING;
                 if (_streamState === STREAM_STATE_OPEN) { // 1st play
                     _netStream.pause();
@@ -113,8 +115,11 @@ package {
                     _streamState = STREAM_STATE_CAN_PLAY;
                     _mediaState = MEDIA_STATE_STOPPED;
 
-                    while (fn = _canPlayCallback.shift()) {
-                        fn(_id); // callback -> this.playback() -> play
+                    // callback MediaVideo::playback()
+                    //      or
+                    // callback MediaAudioVideo::waitForCanPlay()
+                    while (callback = _canPlayCallback.shift()) {
+                        callback(_id);
                     }
                 }
                 break;
@@ -194,7 +199,7 @@ package {
 //            _boss.postMessage("playing", _id); // W3C NamedEvent
         }
 
-        public function play(callback:Function = null):void {
+        public function play(callback:Function):void {
             trace("MediaVideo::play()", _streamState, _mediaState);
 
             switch (_streamState) {
@@ -371,10 +376,18 @@ package {
             _boss.postMessage("close", _id); // NOT W3C NamedEvent
         }
 
-        public function getState():Object { // @return Hash: { loop, volume, duration,
-                                            //                 startTime, currentTime,
-                                            //                 audioSource, videoSource, imageSource,
-                                            //                 audioState, videoState, imageState, streamState }
+        public function getState(all:Boolean = false):Object { // @return Hash: { id, name, loop, mute, volume, duration,
+                                                               //                 position, startTime, currentTime,
+                                                               //                 mediaState, mediaSource, streamState,
+                                                               //                 imageSource, imageState }
+            if (!all) {
+                return {
+                    id: _id,
+                    name: "MediaVideo",
+                    media: [_mediaState],
+                    stream: [_streamState]
+                };
+            }
             var currentTime:Number = 0;
 
             currentTime = _mediaState === MEDIA_STATE_PLAYING ? (_netStream.time * 1000)

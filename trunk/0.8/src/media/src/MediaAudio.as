@@ -116,7 +116,7 @@ package {
 //            _boss.postMessage("playing", _id); // W3C NamedEvent
         }
 
-        public function play(callback:Function = null):void {
+        public function play(callback:Function):void {
             trace("MediaAudio::play()", _streamState, _mediaState);
 
             switch (_streamState) {
@@ -313,10 +313,19 @@ package {
             _boss.postMessage("close", _id); // NOT W3C NamedEvent
         }
 
-        public function getState():Object { // @return Hash: { loop, volume, duration,
-                                            //                 startTime, currentTime,
-                                            //                 audioSource, videoSource, imageSource,
-                                            //                 audioState, videoState, imageState, streamState }
+        public function getState(all:Boolean = false):Object { // @return Hash: { id, name, loop, mute, volume, duration,
+                                                               //                 position, startTime, currentTime,
+                                                               //                 mediaState, mediaSource, streamState,
+                                                               //                 imageSource, imageState }
+            if (!all) {
+                return {
+                    id: _id,
+                    name: "MediaAudio",
+                    media: [_mediaState],
+                    stream: [_streamState]
+                };
+            }
+
             var currentTime:Number = 0;
 
             currentTime = _mediaState === MEDIA_STATE_PLAYING ? _soundChannel.position
@@ -405,7 +414,7 @@ package {
                 i:int = 0, iz:int = _fadeStepCallback.length;
 
             for (; i < iz; ++i) {
-                _fadeStepCallback[i].call(this);
+                _fadeStepCallback[i].call(this); // stepCallback.call(this)
             }
         }
 
@@ -417,7 +426,7 @@ package {
 
             _fadeStepCallback = []; // clear
             while (callback = _fadeCompleteCallback.shift()) {
-                callback.call(this);
+                callback.call(this); // completeCallback.call(this)
             }
         }
 
@@ -451,6 +460,8 @@ package {
         }
 
         protected function handleProgress(event:ProgressEvent):void {
+
+            var callback:Function;
 /*
             trace("MediaAudio::handleProgress()", _streamState, _mediaState,
                                                   event.bytesLoaded, event.bytesTotal);
@@ -460,13 +471,18 @@ package {
 //          trace("MediaAudio::handleProgress()", "_progress", _progress);
 
             if (_streamState === STREAM_STATE_OPEN) {
+                trace("MediaAudio::handleProgress()", "STREAM_STATE_CAN_PLAY");
                 _streamState = STREAM_STATE_CAN_PLAY;
 
                 _boss.postMessage("canplay", _id); // W3C NamedEvent
-                var fn:Function;
 
-                while (fn = _canPlayCallback.shift()) {
-                    fn(_id);
+                // callback MediaAudio::playback()
+                //      or
+                // callback MediaAudioVideo::waitForCanPlay()
+                //      or
+                // callback MediaAudiox2::waitForCanPlay()
+                while (callback = _canPlayCallback.shift()) {
+                    callback(_id);
                 }
             }
 
