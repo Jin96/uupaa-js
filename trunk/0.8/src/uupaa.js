@@ -708,7 +708,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
         fadeIn:     uufxfadein,     // uu.fx.fadeIn(node:Node, duration:Number, option:Hash = {}):Node
         fadeOut:    uufxfadeout,    // uu.fx.fadeOut(node:Node, duration:Number, option:Hash = {}):Node
         puff:       uufxpuff,       // uu.fx.puff(node:Node, duration:Number, option:Hash = {}):Node
-//        wave:       uufxwave,       // uu.fx.wave(node:Node, duration:Number, option:Hash = {}):Node
+//      wave:       uufxwave,       // uu.fx.wave(node:Node, duration:Number, option:Hash = {}):Node
         flare:      uufxflare,      // uu.fx.flare(node:Node, duration:Number, option:Hash = { parts: 10, range: 200 }):Node
         swing:      uufxswing,      // uu.fx.swing(node:Node, duration:Number, option:Hash = { swing: 10 }):Node
         slide:      uufxslide,      // uu.fx.slide(node:Node, duration:Number, option:Hash = {}):Node
@@ -716,7 +716,7 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
         slideDown:  uufxslidedown,  // uu.fx.slideDown(node:Node, duration:Number, option:Hash = {}):Node
         shrink:     uufxshrink,     // uu.fx.shrink(node:Node, duration:Number, option:Hash = {}):Node
         scroll:     uufxscroll,     // uu.fx.scroll(node:Node, duration:Number, option:Hash = { orientationLock: "" }):Node
-//        sunset:     uufxsunset,     // uu.fx.sunset(node:Node, duration:Number, option:Hash = {}):Node
+//      sunset:     uufxsunset,     // uu.fx.sunset(node:Node, duration:Number, option:Hash = {}):Node
         moveIn:     uufxmovein,     // uu.fx.moveIn(node:Node, duration:Number, option:Hash = { degree: 0, range: 200 }):Node
         moveOut:    uufxmoveout,    // uu.fx.moveOut(node:Node, duration:Number, option:Hash = { degree: 0, range: 200 }):Node
 //{@color
@@ -1014,6 +1014,9 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //  [1][trim quotes]   uu.trim.quote(' "quote  string" ') -> "quote string"
                                     //  [2][trim quotes]   uu.trim.quote(" 'quote  string' ") -> "quote string"
     }),
+    truncate:       uutruncate,     // uu.truncate(source:String, wordCount:Number = 80, omit:String = "..."):String
+                                    //  [1][truncate]  uu.truncate("hello world", 3)        -> "hel..."
+                                    //  [2][truncate]  uu.truncate("hello world", 3, "***") -> "hel***"
     f:              uuf,            // uu.f(format:FormatString, var_args, ...):String
                                     //  [1][replace @] uu.format("@ dogs and @", 101, "cats") -> "101 dogs and cats"
                                     //  [2][replace #] uu.format(null, "#", "# dogs and #", 101, "cats") -> "101 dogs and cats"
@@ -1024,10 +1027,12 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
     // --- CODEC ---
 //{@codec
     entity:   uumix(uuentity, {     // uu.entity(str:String):String
-                                    //  [1][to Entity]           uu.entity("<html>") -> "&lt;html&gt;"
+                                    //  [1][to Entity] uu.entity("<html>") -> "&lt;html&gt;"
+                                    //  [2][to Entity] uu.entity('&<>"')   -> "&amp;&lt;&gt;&quot;"
         decode:     uuentitydecode  // uu.entity.decode(str:String):String
-                                    //  [1][from Entity]         uu.entity.decode("&lt;html&gt;") -> "<html>"
-                                    //  [2][from UNICODE Entity] uu.entity.decode("\u0041\u0042") -> "AB"
+                                    //  [1][from Entity]         uu.entity.decode("&lt;html&gt;")        -> "<html>"
+                                    //  [2][from Entity]         uu.entity.decode("&amp;&lt;&gt;&quot;") -> '&<>"'
+                                    //  [3][from UNICODE Entity] uu.entity.decode("\u0041\u0042")        -> "AB"
     }),
     base64:   uumix(uubase64, {     // uu.base64(data:String/ByteArray,
                                     //           toURLSafe64:Boolean = false):Base64String/URLSafe64String
@@ -1079,10 +1084,30 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     // DateHash - { Y: 2010, M: 12, D: 31,
                                     //              h: 23, m: 59, s: 59, ms: 999,
                                     //              time: unix_time, ISO(), GMT() }
+                                    //
+                                    //  [7][DateHash to ISO Date String]   uu.date().ISO() -> "2000-01-01T00:00:00.000Z"
+                                    //  [8][DateHash to GMT Date String]   uu.date().GMT() -> "Wed, 16 Sep 2009 16:18:14 GMT"
+                                    //  [9][DateHash to RFC1123DateString] uu.date().GMT() -> "Wed, 16 Sep 2009 16:18:14 GMT"
+                                    //  [10][DateHash to Formated Date]    uu.date().ISO().slice(0, 19).replace("T", " "); -> "2011-03-07 14:10:12"
     // --- NUMBER ---
     number:   uumix(uunumber, {     // uu.number():Number - unique number(guid)
+        pad:        uunumberpad,    // uu.number.pad(source:Number, digits:Number = 2, pad = "0"):String
+                                    //  [1][zero padding] uu.number.fillZero(9)     -> "09"
+                                    //  [2][zero padding] uu.number.fillZero(99)    -> "99"
+                                    //  [3][zero padding] uu.number.fillZero(99, 4) -> "0099"
+                                    //  [4][char padding] uu.number.fillZero(99, 4, "*") -> "**99"
         range:      uunumberrange,  // uu.number.range(min:Number, value:Number, max:Number):Number
+                                    //  [1][clipping range] uu.number.range(0, 123, 100) -> 100
+                                    //  [2][clipping range] uu.number.range(100, 123, 200) -> 123
         expand:     uunumberexpand  // uu.number.expand(current:Number, value:String/Number, fn:Function = parseFloat):Number
+                                    //  [1][through]           uu.number.expand(10, 20)    -> 20
+                                    //  [2][base + value]      uu.number.expand(10, "+10") ->  20
+                                    //  [3][base - value]      uu.number.expand(10, "-10") ->   0
+                                    //  [4][base * value]      uu.number.expand(10, "*10") -> 100
+                                    //  [5][base / value]      uu.number.expand(10, "/10") ->   1
+                                    //  [6][parseInt   effect] uu.number.expand(0, 1.234, parseInt) -> 1
+                                    //  [7][parseFloat effect] uu.number.expand(0, 1.234, parseFloat) -> 1.234
+                                    //  [8][parseFloat effect] uu.number.expand(0, 1.234)             -> 1.234
     }),
     // --- EVALUATION / FUNCTIONAL STATUS / URL DISPATCHER ---
     ready:    uumix(uuready, {      // uu.ready(readyEventType:String/IgnoreCaseString = "dom", callback:CallbackFunction, ...)
@@ -7230,6 +7255,20 @@ function uutrimquote(source,        // @param String: ' "quote  string" '
     return uutrim(source, replacement)[_replace](uutrim._.q, "");
 }
 
+// uu.truncate - truncate string
+function uutruncate(source,    // @param String:
+                    wordCount, // @param Number(= 80):
+                    omit) {    // @param String(= "..."):
+                               // @return String:
+    //  [1][truncate]  uu.truncate("hello world", 3)        -> "hel..."
+    //  [2][truncate]  uu.truncate("hello world", 3, "***") -> "hel***"
+
+    wordCount = wordCount || 80;
+    omit = omit || "...";
+    return source.length > wordCount ? source.slice(0, wordCount) + omit
+                                     : source;
+}
+
 // uu.f - placeholder( "@" ) replacement
 function uuf(format) { // @param FormatString: formatted string with "@" placeholder
                        // @return String: "formatted string"
@@ -7297,6 +7336,10 @@ uusprintf.format = /%(?:(\d+)\$)?(#|0)?(\d+)?(?:\.(\d+))?(l)?([%iduoxXfcsj])/g;
 // uu.entity - encode String to HTML Entity
 function uuentity(str) { // @param String:
                          // @return String:
+
+    //  [1][to Entity] uu.entity("<html>") -> "&lt;html&gt;"
+    //  [2][to Entity] uu.entity('&<>"')   -> "&amp;&lt;&gt;&quot;"
+
     return str[_replace](uuentity.to, toEntityHash);
 }
 uumix(uuentity, {
@@ -7309,6 +7352,11 @@ uumix(uuentity, {
 // uu.entity.decode - decode String from HTML Entity
 function uuentitydecode(str) { // @param String:
                                // @return String:
+
+    //  [1][from Entity]         uu.entity.decode("&lt;html&gt;")        -> "<html>"
+    //  [2][from Entity]         uu.entity.decode("&amp;&lt;&gt;&quot;") -> '&<>"'
+    //  [3][from UNICODE Entity] uu.entity.decode("\u0041\u0042")        -> "AB"
+
     return str[_replace](uuentity.from, toEntityHash)
               [_replace](uuentity.uffff, function(m, hex) {
         return String.fromCharCode(parseInt(hex, 16));
@@ -8649,6 +8697,10 @@ function uudate(source) { // @param DateHash/Date/Number/String(= void):
     //  [4][DateString to hash]      uu.date("2000-01-01T00:00:00[.000]Z") -> DateHash
     //  [5][ISO8601String to hash]   uu.date("2000-01-01T00:00:00[.000]Z") -> DateHash
     //  [6][RFC1123String to hash]   uu.date("Wed, 16 Sep 2009 16:18:14 GMT") -> DateHash
+    //  [7][DateHash to ISO Date String]   uu.date().ISO() -> "2000-01-01T00:00:00.000Z"
+    //  [8][DateHash to GMT Date String]   uu.date().GMT() -> "Wed, 16 Sep 2009 16:18:14 GMT"
+    //  [9][DateHash to RFC1123DateString] uu.date().GMT() -> "Wed, 16 Sep 2009 16:18:14 GMT"
+    //  [10][DateHash to Formated Date]    uu.date().ISO().slice(0, 19).replace("T", " "); -> "2011-03-07 14:10:12"
 
     return source === void 0              ? _date2hash(new Date())       // [1] uu.date()
          : uutype(source) === uutype.DATE ? _date2hash(source)           // [3] uu.date(new Date())
@@ -10674,11 +10726,33 @@ function uunumber() { // @return Number: unique number, from 1
     return ++_guidCounter;
 }
 
+// uu.number.pad - zero padding
+function uunumberpad(source,   // @param Number:
+                     digits,   // @param Number(= 2):
+                     pad) {    // @param String(= "0"):
+                               // @return String:
+
+    //  [1][zero padding] uu.number.fillZero(9)     -> "09"
+    //  [2][zero padding] uu.number.fillZero(99)    -> "99"
+    //  [3][zero padding] uu.number.fillZero(99, 4) -> "0099"
+    //  [4][char padding] uu.number.fillZero(99, 4, "*") -> "**99"
+
+    var rv = source + "";
+
+    digits = digits || 2;
+    return rv.length < digits ? (Array(digits - rv.length + 1).join(pad || "0") + rv)
+                              : rv;
+}
+
 // uu.number.range - clipping value
 function uunumberrange(min,   // @param Number: min
                        value, // @param Number: value
                        max) { // @param Number: max
                               // @return Number:
+
+    //  [1][clipping range] uu.number.range(0, 123, 100) -> 100
+    //  [2][clipping range] uu.number.range(100, 123, 200) -> 123
+
     return value < min ? min :
            value > max ? max : value;
 }
@@ -10689,6 +10763,7 @@ function uunumberexpand(base,        // @param Number: base / current value
                                      //     operator - String: "+" or "-" or "*" or "/"
                         effect) {    // @param Function(= parseFloat):
                                      // @return Number:
+
     //  [1][through]           uu.number.expand(10, 20)    -> 20
     //  [2][base + value]      uu.number.expand(10, "+10") ->  20
     //  [3][base - value]      uu.number.expand(10, "-10") ->   0
