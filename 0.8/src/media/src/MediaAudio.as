@@ -175,15 +175,19 @@ package {
             }
         }
 
-        public function seek(position:Number):void { // @param Number: 0~100
-            trace("MediaAudio::seek()", _streamState, _mediaState, position);
+        public function seek(position:Number,             // @param Number: relative position(0~100) or real position (ms)
+                             real:Boolean = false):void { // @param Boolean: true is real position
+            trace("MediaAudio::seek()", _streamState, _mediaState, position, real);
 
             if (_media) {
                 var realPositon:Number;
 
                 // map 0~100 to 0~duration
-//              var realPositon:Number = position * _sound.length / 100;
-                realPositon = position * _duration / 100; // 50 * 22.44 / 100
+                if (real) {
+                    realPositon = position;
+                } else {
+                    realPositon = position * _duration / 100; // 50 * 22.44 / 100 (unit:ms)
+                }
 
                 switch (_mediaState) {
                 case MEDIA_STATE_STOPPED: // stopped + seek
@@ -313,16 +317,35 @@ package {
             _boss.postMessage("close", _id); // NOT W3C NamedEvent
         }
 
-        public function getState(all:Boolean = false):Object { // @return Hash: { id, name, loop, mute, volume, duration,
-                                                               //                 position, startTime, currentTime,
-                                                               //                 mediaState, mediaSource, streamState,
-                                                               //                 imageSource, imageState }
+        public function getState(all:Boolean):Object { // @return Hash:
+                                                       //   { id, name, mediaState, streamState }
+                                                       //           or
+                                                       //   { id, name, loop, mute, volume, duration,
+                                                       //     position, startTime, currentTime,
+                                                       //     mediaState, mediaSource, streamState,
+                                                       //     imageSource, imageState }
+                                                       //
+                                                       //   id - Number: 1 ~
+                                                       //   name - String: "MediaAudio"
+                                                       //   loop - Boolean:
+                                                       //   mute - Boolean:
+                                                       //   volume - Number: 0 ~ 1
+                                                       //   duration - Number: 0 ~
+                                                       //   progress - Number: 0 ~ 1
+                                                       //   position - Number: 0 ~ 100
+                                                       //   startTime - Number: ms
+                                                       //   currentTime - Number: ms
+                                                       //   mediaState - Array: [mediaState:Number]
+                                                       //   mediaSource - Array: [mediaSource:String]
+                                                       //   streamState - Array: [streamState:Number]
+                                                       //   imageSource - Array:
+                                                       //   imageState - Number: 0 or 1
             if (!all) {
                 return {
                     id: _id,
                     name: "MediaAudio",
-                    media: [_mediaState],
-                    stream: [_streamState]
+                    mediaState: [_mediaState],
+                    streamState: [_streamState]
                 };
             }
 
