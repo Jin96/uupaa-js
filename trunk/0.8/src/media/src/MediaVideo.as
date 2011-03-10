@@ -269,11 +269,18 @@ package {
             }
         }
 
-        public function seek(position:Number):void { // @param Number: 0~100
-            // map 0~100 to 0~duration
-            var realPositon:Number = position * _duration / 100; // 50 * 22440 / 100, ms
+        public function seek(position:Number,             // @param Number: relative position(0~100) or real position (ms)
+                             real:Boolean = false):void { // @param Boolean: true is real position
+            var realPositon:Number;
 
-            trace("MediaVideo::seek()", _streamState, _mediaState, position,
+            // map 0~100 to 0~duration
+            if (real) {
+                realPositon = position;
+            } else {
+                realPositon = position * _duration / 100; // 50 * 22.44 / 100 (unit:ms)
+            }
+
+            trace("MediaVideo::seek()", _streamState, _mediaState, position, real,
                                         realPositon, _currentTime);
 
             switch (_mediaState) {
@@ -376,18 +383,38 @@ package {
             _boss.postMessage("close", _id); // NOT W3C NamedEvent
         }
 
-        public function getState(all:Boolean = false):Object { // @return Hash: { id, name, loop, mute, volume, duration,
-                                                               //                 position, startTime, currentTime,
-                                                               //                 mediaState, mediaSource, streamState,
-                                                               //                 imageSource, imageState }
+        public function getState(all:Boolean):Object { // @return Hash:
+                                                       //   { id, name, mediaState, streamState }
+                                                       //           or
+                                                       //   { id, name, loop, mute, volume, duration,
+                                                       //     position, startTime, currentTime,
+                                                       //     mediaState, mediaSource, streamState,
+                                                       //     imageSource, imageState }
+                                                       //
+                                                       //   id - Number: 1 ~
+                                                       //   name - String: "MediaVideo"
+                                                       //   loop - Boolean:
+                                                       //   mute - Boolean:
+                                                       //   volume - Number: 0 ~ 1
+                                                       //   duration - Number: 0 ~
+                                                       //   progress - Number: 0 ~ 1
+                                                       //   position - Number: 0 ~ 100
+                                                       //   startTime - Number: ms
+                                                       //   currentTime - Number: ms
+                                                       //   mediaState - Array: [mediaState:Number]
+                                                       //   mediaSource - Array: [mediaSource:String]
+                                                       //   streamState - Array: [streamState:Number]
+                                                       //   imageSource - Array:
+                                                       //   imageState - Number: 0 or 1
             if (!all) {
                 return {
                     id: _id,
                     name: "MediaVideo",
-                    media: [_mediaState],
-                    stream: [_streamState]
+                    mediaState: [_mediaState],
+                    streamState: [_streamState]
                 };
             }
+
             var currentTime:Number = 0;
 
             currentTime = _mediaState === MEDIA_STATE_PLAYING ? (_netStream.time * 1000)

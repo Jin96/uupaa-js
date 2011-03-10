@@ -4394,8 +4394,8 @@ uucsstransform2d._ = {
 function uucssbox(node,     // @param Node:
                   recalc) { // @param Boolean(= false): false is use-cache, true is recalc
                             // @return Hash: { w, h, m:{ t,l,r,b }, b:{ t,l,r,b }, p:{ t,l,r,b } }
-                            //  w - Number:
-                            //  h - Number:
+                            //  w - Number: node.style.width  (without border and padding)
+                            //  h - Number: node.style.height (without border and padding)
                             //  m.t - Number: margin top
                             //  m.l - Number: margin left
                             //  m.r - Number: margin right

@@ -91,7 +91,7 @@ package {
                     case MEDIA_STATE_PLAYING:   _frontMedia.playback(); break; // [8]
                     case MEDIA_STATE_PAUSED:    // [9]
                                                 _rearMedia.play(waitForCanPlay);
-                                                _frontMedia.play(waitForCanPlay); 
+                                                _frontMedia.play(waitForCanPlay);
                     }
                 }
             }
@@ -135,8 +135,12 @@ package {
         }
 
         public function seek(position:Number):void {
-            _rearMedia.seek(position);
-            _frontMedia.seek(position);
+            // seek position synchronization
+            var frontDuration:Number = _frontMedia.getState(true).duration;
+            var realPositon:Number = position * frontDuration / 100; // ms
+
+            _rearMedia.seek(realPositon, true);  // seek real positon
+            _frontMedia.seek(realPositon, true); // seek real positon
         }
 
         public function pause():void {
@@ -154,13 +158,56 @@ package {
             _frontMedia.close();
         }
 
-        public function getState():Object {
-            var rearState:Object = _rearMedia.getState(true),
-                frontState:Object = _frontMedia.getState(true),
-                m0:uint = _boss.judgeMultipleMediaState(frontState.mediaState[0],
-                                                        rearState.mediaState[0]),
-                s0:uint = _boss.judgeMultipleStreamState(frontState.streamState[0],
-                                                         rearState.streamState[0]);
+        public function getState(all:Boolean):Object { // @return Hash:
+                                                       //   { id, name, mediaState, streamState }
+                                                       //           or
+                                                       //   { id, name, loop, mute, volume, duration,
+                                                       //     position, startTime, currentTime,
+                                                       //     mediaState, mediaSource, streamState,
+                                                       //     imageSource, imageState }
+                                                       //
+                                                       //   id - Number: 1 ~
+                                                       //   name - String: "MediaAudiox2"
+                                                       //   loop - Boolean:
+                                                       //   mute - Boolean:
+                                                       //   volume - Number: 0 ~ 1
+                                                       //   duration - Number: 0 ~
+                                                       //   progress - Number: 0 ~ 1
+                                                       //   position - Number: 0 ~ 100
+                                                       //   startTime - Number: ms
+                                                       //   currentTime - Number: ms
+                                                       //   mediaState - Array: [mediaState:Number]
+                                                       //   mediaSource - Array: [mediaSource:String]
+                                                       //   streamState - Array: [streamState:Number]
+                                                       //   imageSource - Array:
+                                                       //   imageState - Number: 0 or 1
+            var rearState:Object,
+                frontState:Object,
+                m0:uint, s0:uint;
+
+            if (!all) {
+                rearState  = _rearMedia.getState(false);
+                frontState = _frontMedia.getState(false);
+                m0 = _boss.judgeMultipleMediaState(frontState.mediaState[0],
+                                                   rearState.mediaState[0]);
+                s0 = _boss.judgeMultipleStreamState(frontState.streamState[0],
+                                                    rearState.streamState[0]);
+                return {
+                    id: _id,
+                    name: "MediaAudioVideo",
+                    mediaState: [m0, frontState.mediaState[0],
+                                     rearState.mediaState[0]],
+                    streamState: [s0, frontState.streamState[0],
+                                      rearState.streamState[0]]
+                };
+            }
+
+            rearState  = _rearMedia.getState(true);
+            frontState = _frontMedia.getState(true);
+            m0 = _boss.judgeMultipleMediaState(frontState.mediaState[0],
+                                               rearState.mediaState[0]);
+            s0 = _boss.judgeMultipleStreamState(frontState.streamState[0],
+                                                rearState.streamState[0]);
 
             frontState.name = "MediaAudioVideo";
             frontState.mediaState = [m0, frontState.mediaState[0],
