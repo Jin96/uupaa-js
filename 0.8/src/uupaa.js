@@ -492,6 +492,8 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
     opera:          _opera,         // uu.opera  - as uu.env.opera  [ALIAS]
     webkit:         _webkit,        // uu.webkit - as uu.env.webkit [ALIAS]
     ver:            _env,           // uu.ver    - Hash: as uu.ver [ALIAS][DEPRECATED]
+    // --- UNLIMIT ---
+    unlimit:        uuunlimit,      // uu.unlimit()
     // --- CODE SNIPPET / LIGHT WEIGHT TEMPLATE ---
 //{@snippet
     snippet:        uusnippet,      // uu.snippet(id:String, arg:Hash/Array = void):String/Mix
@@ -852,31 +854,20 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //  [5][unbind namespace one] uu.unlive("selector", "namespace.click")
 //}@live
     // --- DOM NODE / DOM NODE LIST ---
-    node:     uumix(uunode, {       // uu.node(node:Node/SVGNode/TagNameString = "div",
-                                    //         args:Array/Argeumtns = void,
-                                    //         typical:StringArray = void,
-                                    //         callback:CallbackFunction = void):Node
-                                    //  [1][add node]            uu.div(uu.div())         -> <div><div></div></div>
-                                    //  [2][add text node]       uu.div(uu.text("hello")) -> <div>hello</div>
-                                    //  [2][add text by string]  uu.div("hello")          -> <div>hello</div>
-                                    //  [4][set attr by string]  uu.div("class,hello")    -> <div class="hello"></div>
-                                    //  [5][set attr by hash]    uu.div({ cn: "hello" })  -> <div class="hello"></div>
-                                    //  [6][set css by string]   uu.div("", "color,red")  -> <div style="color:red"></div>
-                                    //  [7][set css by hash]     uu.div("", { c: "red" }) -> <div style="color:red"></div>
-                                    //  [8][callback]            uu.node.builder(callback)
-                                    //                           uu.div("@123")           -> callback(<div>, "123")
-                                    //  [9][add SVGNode]         uu.svg.svg(uu.svg.g())       -> <svg:svg><svg:g></svg:g></svg:svg>
-                                    //  [10][add SVGText node]   uu.svg.svg(uu.svg.text("!")) -> <svg:svg><svg:text>!</svg:text></svg:svg>
-                                    //  [11][set attr by string] uu.svg.svg("class,hello")    -> <svg:svg class="hello"></svg:svg>
-                                    //  [12][set attr by hash]   uu.svg.svg({ cn: "hello" })  -> <svg:svg class="hello"></svg:svg>
-                                    //  [13][set typical attr]   uu.svg.svg(100, 100)         -> <svg:svg x="100" y="100"></svg:svg>
-                                    //  [14][set css by string]  uu.svg.svg("", "color,red")  -> <svg:svg style="color:red"></svg:svg>
-                                    //  [15][set css by hash]    uu.svg.svg("", { c: "red" }) -> <svg:svg style="color:red"></svg:svg>
-                                    //  [16][callback]           uu.node.builder(callback)
-                                    //                           uu.svg.svg("@123")           -> callback(<svg:svg>, "123")
-        at:         uunodeat,       // uu.node.at(callback:CallbackFunction)
-                                    //  [1][set   callback] uu.node.at(callback(node, idnet))
-                                    //  [2][clear callback] uu.node.at(null)
+    node:     uumix(uunode, {       // uu.node(node:Node/TagNameString,
+                                    //         args:Array/Argeumtns = void):Node
+                                    //  [1][Node]               uu.div(uu.p())                          -> <div><p></p></div>
+                                    //  [2][TextNode]           uu.div(uu.text("hello"))                -> <div>hello</div>
+                                    //  [3][TextNode]           uu.div("hello")                         -> <div>hello</div>
+                                    //  [4][TextNode atmark]    uu.div("format @ @", "hello", "world")  -> <div>format hello world</div>
+                                    //  [5][attr]               uu.div("id:a,class:hello")              -> <div id="a" class="hello"></div>
+                                    //  [6][attr]               uu.div({id:"a","class":"hello"})        -> <div id="a" class="hello"></div>
+                                    //  [7][attr atmark]        uu.div("id:@", "a")                     -> <div id="a"></div>
+                                    //  [8][css]                uu.div(null, "color:red;float:left")    -> <div style="color:red;float:left"></div>
+                                    //  [9][css]                uu.div(null, {color:"red",float:"left"})-> <div style="color:red;float:left"></div>
+                                    //  [10][css atmark]        uu.div(null, "color:@", "red")          -> <div style="color:red"></div>
+                                    //  [11][complex]           uu.div("id:@", "a", {color:"red"}, "@ @", "hello", "world")
+                                    //                                                                  -> <div id="a" style="color:red">hello world</div>
         add:        uunodeadd,      // uu.node.add(source:Node/NodeArray/DocumentFragment/HTMLFragmentString/TagName = "div",
                                     //             context:Node = <body>, position:Number/String = "./last"):Node
                                     //  [1][add div node to body]     uu.node.add()         -> <div />  (div.parentNode = <body>)
@@ -998,32 +989,38 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
                                     //                exjson:Boolean = false):Mix/Boolean
     }),
     // --- STRING ---
-    trim:     uumix(uutrim, {       // uu.trim(source:String, replacement:String = " "):String
-                                    //  [1][trim both + unite spaces] uu.trim("  has  space  ")     -> "has space"
-                                    //  [2][trim both + inner spaces] uu.trim("  has  space  ", "") -> "hasspace"
-        tag:        uutrimtag,      // uu.trim.tag(source:HTMLFragmentString, replacement:String = " "):String
-                                    //  [1][trim tags]     uu.trim.tag("  <h1>A</h1>  B  <p>C</p>  ") -> "A B C"
-                                    //  [2][trim tags]     uu.trim.tag("      A       B     C      ") -> "A B C"
-        func:       uutrimfunc,     // uu.trim.func(source:CSSStyleFragmentString, replacement:String = " "):String
-                                    //  [1][trim function] uu.trim.func(' url("http://...") ') -> "http://..."
-                                    //  [2][trim function] uu.trim.func(' rgb(1, 2, 3) ')      -> "1, 2, 3"
-        hash:       uutrimhash,     // uu.trim.hash(source:URLString, replacement:String = " "):String
-                                    //  [1][trim url hash] uu.trim.hash("http://example.com/a.jpg#hash")           -> "http://example.com/a.jpg"
-                                    //  [2][trim url hash] uu.trim.hash("http://example.com/a.jpg?key=value#hash") -> "http://example.com/a.jpg?key=value"
-        quote:      uutrimquote     // uu.trim.quote(source:String, replacement:String = " "):String
-                                    //  [1][trim quotes]   uu.trim.quote(' "quote  string" ') -> "quote string"
-                                    //  [2][trim quotes]   uu.trim.quote(" 'quote  string' ") -> "quote string"
-    }),
-    truncate:       uutruncate,     // uu.truncate(source:String, wordCount:Number = 80, omit:String = "..."):String
-                                    //  [1][truncate]  uu.truncate("hello world", 3)        -> "hel..."
-                                    //  [2][truncate]  uu.truncate("hello world", 3, "***") -> "hel***"
-    f:              uuf,            // uu.f(format:FormatString, var_args, ...):String
-                                    //  [1][replace @] uu.format("@ dogs and @", 101, "cats") -> "101 dogs and cats"
-                                    //  [2][replace #] uu.format(null, "#", "# dogs and #", 101, "cats") -> "101 dogs and cats"
-    format:         uuf,            // uu.format(...) as uu.f
+    string: uumix({
+        trim: uumix(uustringtrim, { // uu.string.trim(source:String, replacement:String = " "):String
+                                    //  [1][trim both + unite spaces] uu.string.trim("  has  space  ")     -> "has space"
+                                    //  [2][trim both + inner spaces] uu.string.trim("  has  space  ", "") -> "hasspace"
+            tag:    uustringtrimtag,// uu.string.trim.tag(source:HTMLFragmentString, replacement:String = " "):String
+                                    //  [1][trim tags]     uu.string.trim.tag("  <h1>A</h1>  B  <p>C</p>  ") -> "A B C"
+                                    //  [2][trim tags]     uu.string.trim.tag("      A       B     C      ") -> "A B C"
+            func:   uustringtrimfunc,
+                                    // uu.string.trim.func(source:CSSStyleFragmentString, replacement:String = " "):String
+                                    //  [1][trim function] uu.string.trim.func(' url("http://...") ') -> "http://..."
+                                    //  [2][trim function] uu.string.trim.func(' rgb(1, 2, 3) ')      -> "1, 2, 3"
+            hash:   uustringtrimhash,
+                                    // uu.string.trim.hash(source:URLString, replacement:String = " "):String
+                                    //  [1][trim url hash] uu.string.trim.hash("http://example.com/a.jpg#hash")           -> "http://example.com/a.jpg"
+                                    //  [2][trim url hash] uu.string.trim.hash("http://example.com/a.jpg?key=value#hash") -> "http://example.com/a.jpg?key=value"
+            quote:  uustringtrimquote
+                                    // uu.string.trim.quote(source:String, replacement:String = " "):String
+                                    //  [1][trim quotes]   uu.string.trim.quote(' "quote  string" ') -> "quote string"
+                                    //  [2][trim quotes]   uu.string.trim.quote(" 'quote  string' ") -> "quote string"
+        }),
+        format:     uustringformat, // uu.string.format(format:FormatString/Array, var_args, ...):String
+                                    //  [1][replace @] uu.string.format("@ dogs and @", 101, "cats") -> "101 dogs and cats"
+                                    //  [2][replace #] uu.string.format(null, "#", "# dogs and #", 101, "cats") -> "101 dogs and cats"
 //{@sprintf
-    sprintf:        uusprintf,      // uu.sprintf(format:FormatString, var_args ...):String
+        sprintf:    uustringsprintf,// uu.string.sprintf(format:FormatString, var_args ...):String
 //}@sprintf
+        truncate:                   // uu.string.truncate(source:String, wordCount:Number = 80, omit:String = "..."):String
+                    uustringtruncate
+                                    //  [1][truncate]  uu.string.truncate("hello world", 3)        -> "hel..."
+                                    //  [2][truncate]  uu.string.truncate("hello world", 3, "***") -> "hel***"
+    }),
+    f:              uustringformat, // [ALIAS] uu.f(...) as uu.string.format
     // --- CODEC ---
 //{@codec
     entity:   uumix(uuentity, {     // uu.entity(str:String):String
@@ -1176,11 +1173,6 @@ uu = uumix(uufactory, {             // uu(expr:NodeSet/Node/NodeArray/OOPClassNa
         metric:     uufontmetric    // uu.font.text(font, text) -> { w, h }
     }),
 //}@font
-    // --- SVG ---
-//{@svg
-    svg:            uusvg,          // uu.svg(x:Number, y:Number, width:Number, height:Number,
-                                    //        *attr:Hash, *css:Hash):<svg:svg>
-//}@svg
     // --- CANVAS ---
 //{@canvas
     canvas:         uucanvas,       // uu.canvas(width:Number = 300, height:Number = 150,
@@ -1460,6 +1452,12 @@ uueach({
 });
 //}@nodeset
 
+// --- DEPRECATED API ---
+uu.trim     = uustringtrim;         // uu.trim     as uu.string.trim        [ALIAS][DEPRECATED]
+uu.format   = uustringformat;       // uu.format   as uu.string.format      [ALIAS][DEPRECATED]
+uu.sprintf  = uustringsprintf;      // uu.sprintf  as uu.string.sprintf     [ALIAS][DEPRECATED]
+uu.truncate = uustringtruncate;     // uu.truncate as uu.string.truncate    [ALIAS][DEPRECATED]
+
 // =========================================================
 // uu.config - configuration
 function uuconfig() {
@@ -1559,7 +1557,7 @@ function uuready(/* readyEventType, */  // @param String/CaseInsenseString(= "do
                     switch (type) {
                     case "canvas":  mix(uu, uutag("canvas")); break; // uu.ready("canvas", function(uu, uu.tag("canvas")) { ... })
                     case "storage": mix(uu, uu.storage); break;      // uu.ready("storage", function(uu, uu.storage) { ... })
-                    case "svg":     mix(uu, uusvg); break;           // uu.ready("svg", function(uu, uu.svg) { ... })
+                    case "svg":     mix(uu, uu.svg); break;          // uu.ready("svg", function(uu, uu.svg) { ... })
                     case "#avoid#": break;                           // uu.ready("href:missmatched", function(){}) -> avoid callback
                     default:        mix(uu, doc);                    // uu.ready("dom", function(uu, doc) { ... })
                                                                      // uu.ready("MyIdent", function(uu, doc) { ... })
@@ -2259,7 +2257,7 @@ function uujsonp(url,        // @param String: "http://example.com/api?callback=
                      uuarg(option, { type: "text/javascript",
                                      charset: "utf-8", run: 0 }));
 
-    url = uuf(url, globalfn); // uuf("http://example.com/api?callback=@", option.method)
+    url = uustringformat(url, globalfn); // uustringformat("http://example.com/api?callback=@", option.method)
     uujsonp.db[guid] = globalfn;
 
     // build CallbackFunction
@@ -3695,12 +3693,13 @@ function uufxbuild(node, data, queue, option) {
     }
 
     if (transformChanged) {
-        rv += uuf("uu.css.transform2d(node,{scaleX:@,scaleY:@,rotate:@,translateX:@,translateY:@});",
-                  transformBuffer.scaleX     || transform.scaleX,
-                  transformBuffer.scaleY     || transform.scaleY,
-                  transformBuffer.rotate     || transform.rotate,
-                  transformBuffer.translateX || transform.translateX,
-                  transformBuffer.translateY || transform.translateY);
+        rv += uustringformat(
+                    "uu.css.transform2d(node,{scaleX:@,scaleY:@,rotate:@,translateX:@,translateY:@});",
+                    transformBuffer.scaleX     || transform.scaleX,
+                    transformBuffer.scaleY     || transform.scaleY,
+                    transformBuffer.rotate     || transform.rotate,
+                    transformBuffer.translateX || transform.translateX,
+                    transformBuffer.translateY || transform.translateY);
     }
 
     // add reverse queue
@@ -4985,8 +4984,8 @@ function uuklass(expr,      // @param String/Node: "class", "class1, ..." or Nod
         switch ({ "+": 3, "-": 4, "!": 5 }[word.charAt(0)] || 2) {
         case 2: node[_className] += sp + word; break;          //  add
         case 3: node[_className] += sp + word.slice(1); break; // +add
-        case 4: rex = classNameMatcher(uutrim(word.slice(1)).split(sp)); // -remove
-                node[_className] = uutrim(node[_className][_replace](rex, ""));
+        case 4: rex = classNameMatcher(uustringtrim(word.slice(1)).split(sp)); // -remove
+                node[_className] = uustringtrim(node[_className][_replace](rex, ""));
                 break;
         case 5: m = uuklasshas(node, word = word.slice(1)) ? "-" : "+"; // !toggle
                 uuklass(node, m + word);
@@ -4997,7 +4996,7 @@ function uuklass(expr,      // @param String/Node: "class", "class1, ..." or Nod
     // query.class [1]
 //{@mb
     if (!doc.getElementsByClassName) { // [IE6][IE7][IE8]
-        ary = uutrim(expr).split(sp);
+        ary = uustringtrim(expr).split(sp);
         az  = ary.length;
         rex = classNameMatcher(ary);
         nodeList = (context || doc.body || doc).getElementsByTagName("*");
@@ -5020,7 +5019,7 @@ function uuklass(expr,      // @param String/Node: "class", "class1, ..." or Nod
 function uuklasshas(node,         // @param Node:
                     classNames) { // @param String: "class1 class2 ..." (joint space)
                                   // @return Boolean:
-    var m, w = node[_className], ary = uutrim(classNames).split(" ");
+    var m, w = node[_className], ary = uustringtrim(classNames).split(" ");
 
     return w ? ((m = w.match(classNameMatcher(ary))) && (m.length >= ary.length))
              : _false;
@@ -6356,7 +6355,7 @@ function JunctionInit(race, items, callback) {
     this.db = { ok: 0, ng: 0, race: race, items: items,
                 values: [], callback: callback };
     if (!race || !items || race > items) {
-        throw new Error(uuf("JUNCTION @ @", race, items));
+        throw new Error(uustringformat("JUNCTION @ @", race, items));
     }
 }
 
@@ -6393,77 +6392,66 @@ function JunctionJudge() {
 // --- node ---
 
 // uu.node - node builder
-function uunode(node,       // @param Node/SVGNode/TagNameString(= "div"): "div" or "svg:svg"
-                args,       // @param Array/Arguments(= void): [Node/String/Number/Hash, ...]
-                typical,    // @param StringArray(= void): ["x", "y"]
-                callback) { // @param CallbackFunction(= void):
-                            // @return Node/SVGNode:
-    //  [1][add node]            uu.div(uu.div())         -> <div><div></div></div>
-    //  [2][add text node]       uu.div(uu.text("hello")) -> <div>hello</div>
-    //  [2][add text by string]  uu.div("hello")          -> <div>hello</div>
-    //  [4][set attr by string]  uu.div("class,hello")    -> <div class="hello"></div>
-    //  [5][set attr by hash]    uu.div({ cn: "hello" })  -> <div class="hello"></div>
-    //  [6][set css by string]   uu.div("", "color,red")  -> <div style="color:red"></div>
-    //  [7][set css by hash]     uu.div("", { c: "red" }) -> <div style="color:red"></div>
-    //  [8][callback]            uu.node.at(callback)
-    //                           uu.div("@123")           -> callback(<div>, "123")
-    //  [9][add SVGNode]         uu.svg.svg(uu.svg.g())       -> <svg:svg><svg:g></svg:g></svg:svg>
-    //  [10][add SVGText node]   uu.svg.svg(uu.svg.text("!")) -> <svg:svg><svg:text>!</svg:text></svg:svg>
-    //  [11][set attr by string] uu.svg.svg("class,hello")    -> <svg:svg class="hello"></svg:svg>
-    //  [12][set attr by hash]   uu.svg.svg({ cn: "hello" })  -> <svg:svg class="hello"></svg:svg>
-    //  [13][set typical attr]   uu.svg.svg(100, 100)         -> <svg:svg x="100" y="100"></svg:svg>
-    //  [14][set css by string]  uu.svg.svg("", "color,red")  -> <svg:svg style="color:red"></svg:svg>
-    //  [15][set css by hash]    uu.svg.svg("", { c: "red" }) -> <svg:svg style="color:red"></svg:svg>
-    //  [16][callback]           uu.node.at(callback)
-    //                           uu.svg.svg("@123")           -> callback(<svg:svg>, "123")
+function uunode(node,   // @param Node/TagNameString: Node or TagName, eg: <div>, "div"
+                args) { // @param Array/Arguments(= void): [Node/String/Number/Hash/null, ...]
+                        // @return Node:
 
-    node || (node = "div");
-    node[_nodeType] || (node = node[_indexOf]("svg:")
-                            ? newNode(node) // "div" -> <div>
-                            : doc.createElementNS("http://www.w3.org/2000/svg",
-                                                  node.slice(4))); // "svg:g" -> <svg:g>
+    //  [1][Node]               uu.div(uu.p())                          -> <div><p></p></div>
+    //  [2][TextNode]           uu.div(uu.text("hello"))                -> <div>hello</div>
+    //  [3][TextNode]           uu.div("hello")                         -> <div>hello</div>
+    //  [4][TextNode atmark]    uu.div("format @ @", "hello", "world")  -> <div>format hello world</div>
+    //  [5][attr]               uu.div("id:a,class:hello")              -> <div id="a" class="hello"></div>
+    //  [6][attr]               uu.div({id:"a","class":"hello"})        -> <div id="a" class="hello"></div>
+    //  [7][attr atmark]        uu.div("id:@", "a")                     -> <div id="a"></div>
+    //  [8][css]                uu.div(null, "color:red;float:left")    -> <div style="color:red;float:left"></div>
+    //  [9][css]                uu.div(null, {color:"red",float:"left"})-> <div style="color:red;float:left"></div>
+    //  [10][css atmark]        uu.div(null, "color:@", "red")          -> <div style="color:red"></div>
+    //  [11][complex]           uu.div("id:@", "a", {color:"red"}, "@ @", "hello", "world")
+    //                                                                  -> <div id="a" style="color:red">hello world</div>
+
+    node.nodeType || (node = newNode(node)); // "div" -> <div>
 
     if (args) {
-        var arg, i = 0, iz = args.length, token = 0, type, isstr, ident,
-            ai = 0, hash = {};
+        var arg, i = 0, iz = args.length, token = 0, match, type,
+            split = uunode._.split, at = uunode._.at;
 
         for (; i < iz; ++i) {
             arg = args[i];
-            if (arg != null) { // null or undefined
-                if (arg[_nodeType]) { // node -> appendChild(node)
-                    node[_appendChild](arg);
-                } else {
-                    isstr = (type = typeof arg) === _string;
+            type = arg == null ? 0 // null or undefined
+                 : arg.nodeType ? 1 // Node
+                 : typeof arg === "string" ? 2 : 3;
 
-                    if (isstr && !arg[_indexOf]("@")) { // "@ident" -> callback(node, "ident")
-                        ident = arg.slice(1);
-                    } else {
-                        // typical arguments(Number, String)
-                        if (type === _number || (isstr && arg[_indexOf](",") < 0)) {
-                            if (typical) {
-                                hash[typical[ai++]] = arg; // uu.svg(100, 100)
-                            } else if (arg !== "") {
-                                node[_appendChild](newText(arg)); // uu.div("text")
-                            }
-                        } else if (++token < 3) {
-                            (token < 2 ? uuattr
-                                       : uucss)(node, isstr ? uuhash(arg) : arg);
-                        }
-                    }
+            switch (type) {
+            case 0: ++token; break; // skip
+            case 1: node.appendChild(arg); break; // arg is Node -> appendChild(node)
+            case 2:
+                // uu.node("id:@", "a")     -> uu.node(uu.string.format("id:@", "a"))
+                // uu.node("@ @", "a", "b") -> uu.node(uu.string.format("@ @", "a", "b"))
+                if (arg.indexOf("@") >= 0) {
+                    match = arg.match(at).length;
+                    arg = uustringformat(uuarray(args, i, i + match + 1));
+                    i += match; // skip args
+                }
+                if (!split.test(arg)) { // uu.node("text") -> uu.node(uu.text("text"))
+                    node.appendChild(newText(arg));
+                    break;
+                }
+            case 3: // uu.node({id:"a"},{color:"red"}) -> uu.attr({id:"a"}), uu.css({color:"red"})
+                    // uu.node("id:a","color:red")     -> uu.attr({id:"a"}), uu.css({color:"red"})
+                switch (token++) {
+                case 0: uuattr(node, type === 2 ? uuhash(arg, split) : arg); break;
+                case 1:  uucss(node, type === 2 ? uuhash(arg, split) : arg); break;
+                default: uung("uu.node", arg);
                 }
             }
         }
-        ident && uunodeat.callback
-              && uunodeat.callback(node, ident);
-        callback && ai && callback(node, hash);
     }
     return node;
 }
-
-// uu.node.at - set NodeBuilder callback
-function uunodeat(callback) { // @param CallbackFunction: callback
-    uunodeat.callback = callback;
-}
+uunode._ = {
+    split:  /[,;:]/,    // split text
+    at:     /@/g        // at mark count
+};
 
 // HTML4(a ~ ul) exclude <html><head><body>
 uutag.html4 = "a,b,br,button,dd,div,dl,dt,form,h1,h2,h3,h4,h5,h6,hr,i,img," +
@@ -6649,16 +6637,18 @@ function uunodebulk(source) { // @param Node/HTMLFragmentString: source
 }
 
 // uu.node.glue - temporarily glued to <body>
-function uunodeglue(node,   // @param Node: target node
-                    work) { // @param Function: work(node)
-                            // @return Node: node
+function uunodeglue(node,       // @param Node/String: Node or HTMLFragmentString
+                    callback) { // @param CallbackFunction: callback(Node)
+                                // @return Node: node
     var div;
 
-    uu.body(div = uu.div({}, "position:absolute;top:-9999px;left:-9999px;" +
-                             "margin:0;padding:0;border:0 none", node));
-    work(node);
-    doc.body[_removeChild](node);
-    return node;
+    node = isString(node) ? uunodebulk(node) : node;
+
+    uu.body(div = uu.div(null, "position:absolute;top:-9999px;left:-9999px;" +
+                               "margin:0;padding:0;border:0 none", node));
+    callback(div.firstChild);
+    doc.body[_removeChild](div);
+    return div.firstChild;
 }
 
 // uu.node.path - get CSSQueryString fro node
@@ -7199,67 +7189,67 @@ function uumatch(expr,      // @param CSSSelectorExpressionString: "css > select
 }
 
 // --- STRING ---
-// uu.trim - trim both side whitespaces and unit inner whitespaces
-function uutrim(source,        // @param String: "  has  space  "
-                replacement) { // @param String(= " "): replacement inner spaces
-                               // @return String: "has space"
-    //  [1][trim both + unite spaces] uu.trim("  has  space  ")     -> "has space"
-    //  [2][trim both + inner spaces] uu.trim("  has  space  ", "") -> "hasspace"
+// uu.stringtrim - trim both side whitespaces and unit inner whitespaces
+function uustringtrim(source,        // @param String: "  has  space  "
+                      replacement) { // @param String(= " "): replacement inner spaces
+                                     // @return String: "has space"
+    //  [1][trim both + unite spaces] uu.string.trim("  has  space  ")     -> "has space"
+    //  [2][trim both + inner spaces] uu.string.trim("  has  space  ", "") -> "hasspace"
 
-    return source.trim()[_replace](uutrim._.u,
+    return source.trim()[_replace](uustringtrim._.u,
                                    replacement === _undef ? " " : replacement);
 }
-uutrim._ = { u: /\s+/g,              // uu.trim()
-             t: /<\/?[^>]+>/g,       // uu.trim.tag()
-             f: /^[^\(]+\(|\)\s*$/g, // uu.trim.func()
-             h: /#.*$/g,             // uu.trim.hash()
-             q: /^["']?|['"]?$/g };  // uu.trim.quote()
+uustringtrim._ = { u: /\s+/g,              // uu.string.trim()
+                   t: /<\/?[^>]+>/g,       // uu.string.trim.tag()
+                   f: /^[^\(]+\(|\)\s*$/g, // uu.string.trim.func()
+                   h: /#.*$/g,             // uu.string.trim.hash()
+                   q: /^["']?|['"]?$/g };  // uu.string.trim.quote()
 
-// uu.trim.tag - uu.trim() + strip tags
-function uutrimtag(source,        // @param HTMLFragmentString: "  <h1>A</h1>  B  <p>C</p>  "
-                   replacement) { // @param String(= " "): replacement inner spaces
-                                  // @return String: "A B C"
-    //  [1][trim tags]     uu.trim.tag("  <h1>A</h1>  B  <p>C</p>  ") -> "A B C"
-    //  [2][trim tags]     uu.trim.tag("      A       B     C      ") -> "A B C"
+// uu.string.trim.tag - uu.string.trim() + strip tags
+function uustringtrimtag(source,        // @param HTMLFragmentString: "  <h1>A</h1>  B  <p>C</p>  "
+                         replacement) { // @param String(= " "): replacement inner spaces
+                                        // @return String: "A B C"
+    //  [1][trim tags]     uu.string.trim.tag("  <h1>A</h1>  B  <p>C</p>  ") -> "A B C"
+    //  [2][trim tags]     uu.string.trim.tag("      A       B     C      ") -> "A B C"
 
-    return uutrim(source, replacement)[_replace](uutrim._.t, "");
+    return uustringtrim(source, replacement)[_replace](uustringtrim._.t, "");
 }
 
-// uu.trim.func - uu.trim() + strip "function-name(" ... ")"
-function uutrimfunc(source,        // @param CSSStyleFragmentString: '  url("http://...")  '
-                    replacement) { // @param String(= " "): replacement inner spaces
-                                   // @return String:  '"http://..."'
-    //  [1][trim function] uu.trim.func(' url("http://...") ') -> "http://..."
-    //  [2][trim function] uu.trim.func(' rgb(1, 2, 3) ')      -> "1, 2, 3"
+// uu.string.trim.func - uu.string.trim() + strip "function-name(" ... ")"
+function uustringtrimfunc(source,        // @param CSSStyleFragmentString: '  url("http://...")  '
+                          replacement) { // @param String(= " "): replacement inner spaces
+                                         // @return String:  '"http://..."'
+    //  [1][trim function] uu.string.trim.func(' url("http://...") ') -> "http://..."
+    //  [2][trim function] uu.string.trim.func(' rgb(1, 2, 3) ')      -> "1, 2, 3"
 
-    return uutrim(source, replacement)[_replace](uutrim._.f, ""); // )
+    return uustringtrim(source, replacement)[_replace](uustringtrim._.f, ""); // )
 }
 
-// uu.trim.hash - uu.trim() + strip "#hash"
-function uutrimhash(source,        // @param URLString: "http://example.com/a.jpg#hash"
-                    replacement) { // @param String(= " "): replacement inner spaces
-                                   // @return String:   "http://example.com/a.jpg"
-    //  [1][trim url hash] uu.trim.hash("http://example.com/a.jpg#hash")           -> "http://example.com/a.jpg"
-    //  [2][trim url hash] uu.trim.hash("http://example.com/a.jpg?key=value#hash") -> "http://example.com/a.jpg?key=value"
+// uu.stringtrim.hash - uu.stringtrim() + strip "#hash"
+function uustringtrimhash(source,        // @param URLString: "http://example.com/a.jpg#hash"
+                          replacement) { // @param String(= " "): replacement inner spaces
+                                         // @return String:   "http://example.com/a.jpg"
+    //  [1][trim url hash] uu.string.trim.hash("http://example.com/a.jpg#hash")           -> "http://example.com/a.jpg"
+    //  [2][trim url hash] uu.string.trim.hash("http://example.com/a.jpg?key=value#hash") -> "http://example.com/a.jpg?key=value"
 
-    return uutrim(source, replacement)[_replace](uutrim._.h, "");
+    return uustringtrim(source, replacement)[_replace](uustringtrim._.h, "");
 }
 
-// uu.trim.quote - uu.trim() + strip double and single quotes
-function uutrimquote(source,        // @param String: ' "quote  string" '
-                     replacement) { // @param String(= " "): replacement inner spaces
-                                    // @return String: "quote  string"
-    //  [1][trim quotes]   uu.trim.quote(' "quote  string" ') -> "quote string"
-    //  [2][trim quotes]   uu.trim.quote(" 'quote  string' ") -> "quote string"
+// uu.string.trim.quote - uu.string.trim() + strip double and single quotes
+function uustringtrimquote(source,        // @param String: ' "quote  string" '
+                           replacement) { // @param String(= " "): replacement inner spaces
+                                          // @return String: "quote  string"
+    //  [1][trim quotes]   uu.string.trim.quote(' "quote  string" ') -> "quote string"
+    //  [2][trim quotes]   uu.string.trim.quote(" 'quote  string' ") -> "quote string"
 
-    return uutrim(source, replacement)[_replace](uutrim._.q, "");
+    return uustringtrim(source, replacement)[_replace](uustringtrim._.q, "");
 }
 
-// uu.truncate - truncate string
-function uutruncate(source,    // @param String:
-                    wordCount, // @param Number(= 80):
-                    omit) {    // @param String(= "..."):
-                               // @return String:
+// uu.string.truncate - truncate string
+function uustringtruncate(source,    // @param String:
+                          wordCount, // @param Number(= 80):
+                          omit) {    // @param String(= "..."):
+                                     // @return String:
     //  [1][truncate]  uu.truncate("hello world", 3)        -> "hel..."
     //  [2][truncate]  uu.truncate("hello world", 3, "***") -> "hel***"
 
@@ -7269,13 +7259,20 @@ function uutruncate(source,    // @param String:
                                      : source;
 }
 
-// uu.f - placeholder( "@" ) replacement
-function uuf(format) { // @param FormatString: formatted string with "@" placeholder
-                       // @return String: "formatted string"
-    //  [1][replace @] uu.format("@ dogs and @", 101, "cats") -> "101 dogs and cats"
-    //  [2][replace #] uu.format(null, "#", "# dogs and #", 101, "cats") -> "101 dogs and cats"
+// uu.string.format - placeholder( "@" ) replacement
+function uustringformat(format) { // @param FormatString/Array: formatted string with "@" placeholder
+                                  // @return String: "formatted string"
+
+    //  [1][replace @]  uu.format("@ dogs and @", 101, "cats") -> "101 dogs and cats"
+    //  [2][replace #]  uu.format(null, "#", "# dogs and #", 101, "cats") -> "101 dogs and cats"
+    //  [3][from array] uu.format(["@ dogs and @", 101, "cats"]) -> "101 dogs and cats"
 
     var i = 0, args = arguments, replacement = _format; // /@/g
+
+    if (isArray(format)) {
+        args = toArray.call(format);
+        format = format[0];
+    }
 
     // user definition replacement
     if (format === null && args.length > 3 && typeof args[1] === _string) { // [2]
@@ -7287,10 +7284,10 @@ function uuf(format) { // @param FormatString: formatted string with "@" placeho
 }
 
 //{@sprintf
-// uu.sprintf - sprintf (PHP::sprintf like function)
-function uusprintf(format            // @param String: sprintf format string
-                   /* var_args */) { // @param Mix: sprintf var_args
-                                     // @return String: "formatted string"
+// uu.string.sprintf - sprintf (PHP::sprintf like function)
+function uustringsprintf(format            // @param String: sprintf format string
+                         /* var_args */) { // @param Mix: sprintf var_args
+                                           // @return String: "formatted string"
     // http://d.hatena.ne.jp/uupaa/20091214
     function parse(m, argidx, flag, width, prec, size, types) {
         if (types === "%") {
@@ -7298,7 +7295,7 @@ function uusprintf(format            // @param String: sprintf format string
         }
         idx = argidx ? parseInt(argidx) : next++;
 
-        var w = uusprintf.bits[types], ovf, pad, undef,
+        var w = uustringsprintf.bits[types], ovf, pad, undef,
             v = (av[idx] === undef) ? "" : av[idx];
 
         w & 3 && (v = w & 1 ? parseInt(v) : parseFloat(v), v = isNaN(v) ? "": v);
@@ -7324,11 +7321,11 @@ function uusprintf(format            // @param String: sprintf format string
 
     var next = 1, idx = 0, av = arguments;
 
-    return format[_replace](uusprintf.format, parse);
+    return format[_replace](uustringsprintf.format, parse);
 }
-uusprintf.bits = { i: 0x8011, d: 0x8011, u: 0x8021, o: 0x8161, x: 0x8261,
-                   X: 0x9261, f: 0x92, c: 0x2800, s: 0x84, j: 0xC00 };
-uusprintf.format = /%(?:(\d+)\$)?(#|0)?(\d+)?(?:\.(\d+))?(l)?([%iduoxXfcsj])/g;
+uustringsprintf.bits = { i: 0x8011, d: 0x8011, u: 0x8021, o: 0x8161, x: 0x8261,
+                         X: 0x9261, f: 0x92, c: 0x2800, s: 0x84, j: 0xC00 };
+uustringsprintf.format = /%(?:(\d+)\$)?(#|0)?(\d+)?(?:\.(\d+))?(l)?([%iduoxXfcsj])/g;
 //}@sprintf
 
 // --- CODEC ---
@@ -8219,7 +8216,7 @@ function parseQueryString(queryString) { // @param URLString/QueryString: "key1=
 
     // pickup: "http://example.com?key=val#hash" -> { key: "val" }
     if (pos >= 0) { // [1]
-        queryString = uutrimhash(queryString.slice(pos + 1));
+        queryString = uustringtrimhash(queryString.slice(pos + 1));
     }
     queryString[_replace](/&amp;|&|;/g, ";") // "&amp;" or "&" or ";" -> ";"
                [_replace](/(?:([^\=]+)\=([^\;]+);?)/g, _parse); // [2]
@@ -8396,6 +8393,7 @@ function uulog(/* var_args, ... */) { // @param Mix(= void): var_args
 function uulogclear() {
     uulog();
 }
+//}@debug
 
 //{@debug
 // uu.trace - add function trace
@@ -8458,7 +8456,7 @@ function uuok(title,    // @param String/Boolean(= ""): title
 
     if (operator) { // [1]
         tm = +new Date;
-        r = uuokjudge(lval, operator, rval);
+        r = uuokjudge(lval, operator, rval); // 0 is false, 1 is true
 //{@debug
         if (!r) {
             debugger;
@@ -8474,17 +8472,17 @@ function uuok(title,    // @param String/Boolean(= ""): title
         //      <span>more</span>
         //  </li>
         db.row.push(
-            uuf(uuok.fmt.join(""),
+            uustringformat(uuok.fmt.join(""),
                 uuok.bgc[r + (db.row.length % 2) * 4], uuentity(title),
                 tm > 0 ? "<b>(" + tm + " ms)</b>" : "",
                 uujsonencode(lval, _true, _true), // +esc +space
                 operator,
                 rval === undef ? "" : uujsonencode(rval, _true, _true), // +esc +space
-                more || ""));
+                !r ? "ERROR" : (more || "")));
 
     } else if (isString(title)) { // [2]
         db.row.push(
-            uuf(uuok.fmt[0] + uuok.fmt[2],
+            uustringformat(uuok.fmt[0] + uuok.fmt[2],
                 uuok.bgc[2 + (db.row.length % 2) * 4], uuentity(title)));
     } else { // [3][4]
         rv = uuclone(db);
@@ -8511,7 +8509,7 @@ function uuokjudge(lval,     // @param Mix: left hand set
                    rval) {   // @param Mix(= void): right hand set
                              // @return Number: 0 is false, 1 is true
                              // @throws Error("BAD_OPERATOR")
-    var rv, ope = uutrim(operator.toUpperCase(), "");
+    var rv, ope = uustringtrim(operator.toUpperCase(), "");
 
     if (ope === "===") {
         rv = lval.valueOf() == rval.valueOf();
@@ -8561,7 +8559,7 @@ function uung(title,    // @param String: title
         debugger;
         doc.body && (doc.body.style.backgroundColor = "red");
 //}@debug
-        throw new Error(uuf("@: @ @ @", title,
+        throw new Error(uustringformat("@: @ @ @", title,
                             uujsonencode(lval, 1), operator,
                             rval ? uujsonencode(rval, 1) : ""));
     }
@@ -8761,7 +8759,7 @@ function _str2date(str) { // @param ISO8601DateString/RFC1123DateString:
 function datehashiso() { // @return ISO8601DateString: "2000-01-01T00:00:00.000Z"
     var that = this;
 
-    return uuf("@-@-@T@:@:@.@Z",
+    return uustringformat("@-@-@T@:@:@.@Z",
                that.Y, _num2dd[that.M], _num2dd[that.D],
                _num2dd[that.h], _num2dd[that.m],
                _num2dd[that.s], ("00" + that.ms).slice(-3));
@@ -8890,7 +8888,7 @@ function uucolor(expr) { // @parem Color/RGBAHash/HSLAHash/HSVAHash/String: "bla
                                parseInt(m[0]+m[0] + m[1]+m[1] + m[2]+m[2], 16));
         r = n >> 16, g = (n >> 8) & 255, b = n & 255;
     } else {
-        m = uucolor.rex.rgba.exec(uutrim(expr, "")); // [5][6][7]
+        m = uucolor.rex.rgba.exec(uustringtrim(expr, "")); // [5][6][7]
         if (m) {
             n = m[1] === "rgb" ? 2.555 : 1;
             r = m[3] ? m[2] * n : m[2];
@@ -9346,30 +9344,6 @@ function uufontmetric(font,   // @param CSSFronString: "12pt Arial"
 }
 uufontmetric.cache = 0; // [lazy] measure node
 //}@font
-
-// --- SVG ---
-// uu.svg - <svg:svg>
-//{@svg
-function uusvg(x,        // @param Number: Has no meaning or effect on outermost 'svg' elements
-               y,        // @param Number: Has no meaning or effect on outermost 'svg' elements
-               width,    // @param Number: For outermost 'svg' elements, the intrinsic
-                         //                 width of the SVG document fragment.
-                         //                For embedded 'svg' elements, the width of
-                         //                 the rectangular region into which the 'svg' element is placed.
-               height) { // @param Number: For outermost 'svg' elements, the intrinsic
-                         //                 height of the SVG document fragment.
-                         //                For embedded 'svg' elements, the height of
-                         //                 the rectangular region into which the 'svg' element is placed.
-                         // @return SVGNode: <svg:svg>
-    return uunode("svg:svg", arguments, ["x", "y", "w", "h"], uuattr);
-}
-
-// --- initialize ---
-uuready("window", function() {
-    uuready.svg = _true;
-    uureadyfire("svg", uusvg);
-});
-//}@svg
 
 // --- CANVAS ---
 //{@canvas
@@ -10192,17 +10166,17 @@ function uuflashfragment(url,     // @param String: url
 
         for (i in param) {
             i in ignore ||
-                paramArray.push(uuf('<param name="@" value="@" />', i, param[i]));
+                paramArray.push(uustringformat('<param name="@" value="@" />', i, param[i]));
         }
-        return uuf('<object id="@" width="@" height="@" ' +
+        return uustringformat('<object id="@" width="@" height="@" ' +
                     'classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000">@</object>',
                     xid, width, height, paramArray.join(""));
     }
     for (i in param) {
         i in ignore ||
-            paramArray.push(uuf('@="@"', i, param[i]));
+            paramArray.push(uustringformat('@="@"', i, param[i]));
     }
-    return uuf('<embed id="@" name="@" width="@" height="@" ' +
+    return uustringformat('<embed id="@" name="@" width="@" height="@" ' +
                 'type="application/x-shockwave-flash" src="@" @ />',
                 xid, xid, width, height, url,
                 paramArray.join(" "));
@@ -11605,6 +11579,10 @@ uuready("dom:2", function() {
 });
 //}@mb
 
+function uuunlimit() {
+    // TODO: impl.
+}
+
 })(this,
    document,
    document.documentElement,
@@ -11968,7 +11946,7 @@ function selector(token,     // @param Hash: QueryTokenHash
         case _A_ATTR_VALUE: // [ _A_ATTR_VALUE, "ATTR", "OPERATOR", "VALUE" ]
             attr = data[++i];
             ope  = data[++i];
-            val  = uu.trim.quote(data[++i]); // '"quote"' -> "quote"
+            val  = uu.string.trim.quote(data[++i]); // '"quote"' -> "quote"
             uu.ready.getAttribute || (attr = uu.attr.fix.db[attr] || attr); // [IE] fix attr name
             switch (ope) {
             case 1: val = "^" + val + "$"; break;                 // [attr  = value]
