@@ -187,7 +187,7 @@ function _removeFallback(node) { // @param Node:
 function uucanvasbuild(node,    // @param Node: <canvas>
                        order) { // @param SpaceJointString: "SFV"
                                 // @return Node:
-    var i = 0, v, order = uu.trim(order.toLowerCase()),
+    var i = 0, v, order = uu.string.trim(order.toLowerCase()),
         sl = uu.env.silverlight, backend,
         ary = order.split(order.indexOf(" ") >= 0 ? " "  // old style "sl fl vml"
                                                   : ""); // new style "SFV"
