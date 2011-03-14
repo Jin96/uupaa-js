@@ -21,6 +21,10 @@ package {
         private var _xiCallback:String = "";
         private var _xiExportMessage:Boolean = true;
 
+        // for Message Exports
+        private var _xiLock:Number = 0;
+        private var _xiMessagePool:Array = [];
+
         // for Message Queue
         private var _timer:Timer = new Timer(50, 0); // 20fps
         private var _queue:Array = [];
@@ -29,13 +33,12 @@ package {
         private var _list:Array = [null]; // [null, MediaAudio, ...]
         private var _id:Number = 0; // last inserted id: 1 ~
 
-        // for Message Exports
-        private var _xiLock:Number = 0;
-        private var _xiMessagePool:Array = [];
-
         // state
         private var _lastMute:Boolean = false;
         private var _lastVolume:Number = 0.5; // 0~1
+
+        // for Ad
+        private var _AdPlate:AdPlate = null;
 
         public function Media():void {
             stage ? init() : addEventListener(Event.ADDED_TO_STAGE, init);
@@ -61,16 +64,18 @@ package {
                                                 : ("uu.dmz." + xi.objectID);
 
             // --- ExternalInterface definitions ---
-            xi.addCallback("xiAddList",         xiAddList);// add lists
-            xi.addCallback("xiClear",           xiClear);  // clear list
-            xi.addCallback("xiState",           xiState);  // get state
-            xi.addCallback("xiPlay",            xiPlay);   // toggle play / play / pause
-            xi.addCallback("xiPause",           xiPause);  // pause
-            xi.addCallback("xiSeek",            xiSeek);   // seek
-            xi.addCallback("xiStop",            xiStop);   // stop
-            xi.addCallback("xiClose",           xiClose);  // close
-            xi.addCallback("xiMute",            xiMute);   // toggle mute / mute / unmute
-            xi.addCallback("xiVolume",          xiVolume); // volume
+            // --- LIST I/F ---
+            xi.addCallback("xiAddList",         xiAddList); // add lists
+            xi.addCallback("xiClear",           xiClear);   // clear list
+            // --- Media I/F ---
+            xi.addCallback("xiState",           xiState);   // get state
+            xi.addCallback("xiPlay",            xiPlay);    // toggle play / play / pause
+            xi.addCallback("xiPause",           xiPause);   // pause
+            xi.addCallback("xiSeek",            xiSeek);    // seek
+            xi.addCallback("xiStop",            xiStop);    // stop
+            xi.addCallback("xiClose",           xiClose);   // close
+            xi.addCallback("xiMute",            xiMute);    // toggle mute / mute / unmute
+            xi.addCallback("xiVolume",          xiVolume);  // volume
             xi.addCallback("xiBeforeUnload",    xiBeforeUnload);
 
             try {
@@ -101,7 +106,7 @@ package {
 
             queue = _queue.shift();
 
-            var obj:Object = _list[queue.id],
+            var obj:Object = _list[queue.id], // media instance
                 state:Object,
                 play:Boolean = false,
                 close:Boolean = false;
@@ -177,6 +182,7 @@ package {
 
             var rv:Array = [],
                 item:Object, type:String, media:Array, poster:String,
+                ad:Array = [],
                 i:Number = 0, iz:Number = data.length,
                 id:Number = _list.length;
 
@@ -185,27 +191,43 @@ package {
                 type = item.type || "MediaAudio";
                 media = item.media;
                 poster = item.poster || "";
-            switch (type) {
-            case "MediaAudio":
+
+                switch (type) {
+                case "MediaAudio":
                     // audioSource
                     _list.push(new MediaAudio(this, id, media, poster));
-                break;
-            case "MediaAudiox2":
+                    break;
+                case "MediaAudiox2":
                     _list.push(new MediaAudiox2(this, id, media, poster));
-                break;
-            case "MediaVideo":
+                    break;
+                case "MediaVideo":
                     _list.push(new MediaVideo(this, id, media, poster));
-                break;
-            case "MediaAudioVideo":
+                    break;
+                case "MediaAudioVideo":
                     _list.push(new MediaAudioVideo(this, id, media, poster));
-                break;
-            default:
-                trace("Media::xiAddList()", "ERROR", type);
+                    break;
+                case "Ad":
+                    ad.push(item.image[1], item.image[0], item.open);
+                    break;
+                default:
+                    trace("Media::xiAddList()", "ERROR", type);
                     --_xiLock;
                     return rv;
                 }
                 rv.push(id);
             }
+
+            // --- Ad ---
+            // @param URLStringArray: [<ratio, imageURL, openURL>, ...]
+            //      rario    - Number: view ratio. 0 ~ 100
+            //      imageURL - String: Image URLString
+            //      openURL  - String: Open URLString
+            if (!_AdPlate) {
+                if (ad.length) {
+                    _AdPlate = new AdPlate(this, ad);
+                }
+            }
+
             --_xiLock;
             return rv;
         }
@@ -422,5 +444,17 @@ package {
             }
             return STREAM_STATE_LOADED;
         }
+
+        public function moveToTopLayer(layer:*):void { // @param Splite/Video: layer
+            if (_AdPlate) {
+                _AdPlate.next(function(splite:Sprite):void {
+                    stage.setChildIndex(layer, stage.numChildren - 2);
+                    stage.setChildIndex(splite, stage.numChildren - 1);
+                });
+            } else {
+                stage.setChildIndex(layer, stage.numChildren - 1);
+            }
+        }
+
     }
 }
