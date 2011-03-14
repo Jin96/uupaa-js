@@ -219,7 +219,7 @@ package {
 
                 // show poster image
                 // move to top layer
-                _boss.stage.setChildIndex(_media, _boss.stage.numChildren - 1);
+                _boss.moveToTopLayer(_media);
 
                 _fadeIntervalTimerID = setInterval(function():void {
                     var alpha:Number = _media.alpha;

@@ -90,7 +90,7 @@ package {
             _soundChannel = _media.play(position, 0,
                                         new SoundTransform(_mute ? 0 : _volume.current));
             _position = _soundChannel.position;
-            _mediaState   = MEDIA_STATE_PLAYING;
+            _mediaState = MEDIA_STATE_PLAYING;
             _soundChannel.addEventListener(Event.SOUND_COMPLETE, handleSoundChannelComplete);
         }
 
@@ -137,7 +137,7 @@ package {
                     _sprite.alpha = 0;
 
                     // move to top layer
-                    _boss.stage.setChildIndex(_sprite, _boss.stage.numChildren - 1);
+                    _boss.moveToTopLayer(_sprite);
 
 
                     _fadeIntervalTimerID = setInterval(function():void {
