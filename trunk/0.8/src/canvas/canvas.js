@@ -296,7 +296,7 @@ uu.canvas.VML.build = build;
 function init(ctx, node) { // @param Node: <canvas>
     initSurface(ctx);
     ctx.canvas = node;
-    ctx._view = node.appendChild(uu.node());
+    ctx._view = node.appendChild(uu.div());
     ctx._view.uuCanvasDirection = node.currentStyle.direction;
     ctx._view.style.cssText     = "overflow:hidden;position:absolute;direction:ltr";
     ctx._view.style.pixelWidth  = node.width;

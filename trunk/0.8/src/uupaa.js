@@ -179,6 +179,9 @@
 //      iOS 3+
 //      Android(ChromeLite) 1+
 //
+// WebSockets
+//      iOS4.2+, Firefox4.0+, Opera11+(but disabled), Chrome,
+//
 // Element Traversal
 //      Gecko, WebKit, Opera, IE9+
 //
