@@ -1,6 +1,6 @@
 <!DOCTYPE html><html lang="ja"><head><meta charset="utf-8" />
 <title>TinyAudioPlayer - demo</title>
-<script src="../../../src/uupaa.js"></script>
+<script src="../../src/uupaa.js"></script>
 <script>
 var player = {
     audio: null,
@@ -61,11 +61,11 @@ function changeSource(that) {
 
 function initAudio(source) {
     var ary = uu.ui("Slider"), // [0: volume, 1: seek]
-        volumeBar = ary[0],
-        seekBar = ary[1];
+        sliders = ary[0],
+        seeksl = ary[1];
 
     uu.audio(source, { autoplay: player.autoplay,
-                       volume: volumeBar.attr().value * 0.01,
+                       volume: sliders.attr().value * 0.01,
                        loop: player.loop }, function(audio) {
 
 
@@ -80,29 +80,29 @@ function initAudio(source) {
         window.player.audio = audio;
 
         // volume.change event handler
-        volumeBar.bind("change", function(evt, attr) {
+        sliders.bind("change", function(evt, attr) {
             player.audio.attr("volume", parseInt(attr.value) * 0.01);
         });
 
-        seekBar.bind("mousedown", function(evt, attr) {
+        seeksl.bind("mousedown", function(evt, attr) {
             audio.unbind("timeupdate", handleTimeupdate);
         });
-        seekBar.bind("mousemove", function(evt, attr) {
+        seeksl.bind("mousemove", function(evt, attr) {
         });
-        seekBar.bind("mouseup", function(evt, attr) {
+        seeksl.bind("mouseup", function(evt, attr) {
             player.audio.seek(attr.value);
             setTimeout(function() {
                 audio.bind("timeupdate", handleTimeupdate);
             }, 100);
         });
-        seekBar.bind("mousewheel", function(evt, attr) {
+        seeksl.bind("mousewheel", function(evt, attr) {
             audio.unbind("timeupdate", handleTimeupdate);
             player.audio.seek(attr.value);
             setTimeout(function() {
                 audio.bind("timeupdate", handleTimeupdate);
             }, 100);
         });
-        seekBar.bind("keydown", function(evt, attr) {
+        seeksl.bind("keydown", function(evt, attr) {
             audio.unbind("timeupdate", handleTimeupdate);
             player.audio.seek(attr.value);
             setTimeout(function() {
@@ -124,7 +124,7 @@ function initAudio(source) {
             var max = audio.attr("duration") | 0;
 
             uu.id("currentSlider").max = max;
-            uu.msg.post(seekBar, "attr", "max", max);
+            uu.msg.post(seeksl, "attr", "max", max);
             uu.log({ event: event.type || "", state: player.audio.state() + "" });
         });
 
@@ -177,9 +177,9 @@ function toggleLoop(that) {
 }
 
 function mute() {
-    var volumeBar = uu.ui("Slider")[0]; // [0: volume, 1: seek]
+    var sliders = uu.ui("Slider")[0]; // [0: volume, 1: seek]
 
-//  uu.msg.post(volumeBar, "value", 0, 1);
+//  uu.msg.post(sliders, "value", 0, 1);
 //    player.audio.attr("volume", 0);
     player.audio.mute(player.audio.isMuted());
 }
