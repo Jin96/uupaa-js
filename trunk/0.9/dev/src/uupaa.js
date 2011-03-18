@@ -1,4 +1,4 @@
-/*!{id:"uupaa.js",ver:0.8,license:"MIT",author:"uupaa.js@gmail.com"}*/
+/*!{id:"uupaa.js",ver:0.9,license:"MIT",author:"uupaa.js@gmail.com"}*/
 
 // upa -off {ident}
 //
@@ -371,12 +371,12 @@ doc.head || (doc.head = uutag("head", htmlNode)[0]); // document.head = <head>
 // --- CONFIGRATION ( window.config.* --marge--> uu.config.* ) ---
 uumix(uuconfig, win.uuconfig || {}, {
     baseDir:        _baseDir,           // uu.config.baseDir - String: base directory. "http://example.com/"
-    jsDir:          _baseDir + "js/",   // uu.config.jsDir   - String: JavaScript directory. "http://example.com/js/"
-    uiDir:          _baseDir + "ui/",   // uu.config.uiDir   - String: UI parts(images/css/etc...) directory. "http://example.com/ui/"
+    jsDir:          _baseDir + "res/",   // uu.config.jsDir   - String: JavaScript directory. "http://example.com/js/"
+    uiDir:          _baseDir + "res/",   // uu.config.uiDir   - String: UI parts(images/css/etc...) directory. "http://example.com/ui/"
                                         //                             "http://uupaa-js.googlecode.com/svn/trunk/0.8/img/"
-    cssDir:         _baseDir + "css/",  // uu.config.cssDir  - String: css directory. "http://example.com/css/"
-    imgDir:         _baseDir + "img/",  // uu.config.imgDir  - String: image directory. "http://example.com/img/"
-    swfDir:         _baseDir + "swf/",  // uu.config.swfDir  - String: flash directory. "http://example.com/swf/"
+    cssDir:         _baseDir + "res/",  // uu.config.cssDir  - String: css directory. "http://example.com/css/"
+    imgDir:         _baseDir + "res/",  // uu.config.imgDir  - String: image directory. "http://example.com/img/"
+    swfDir:         _baseDir + "res/",  // uu.config.swfDir  - String: flash directory. "http://example.com/swf/"
     queryJoint:     "&",                // uu.config.queryJoint - uu.url.query joint char
     storage:        {},                 // uu.config.storage - Web Storage
     socket:         {},                 // uu.config.socket - Web Socket
