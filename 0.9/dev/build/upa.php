@@ -1,7 +1,7 @@
 <?php
 
 // --- user setting ---
-$outputDir   = "../js/";        // output dir (-outdir ...)
+$outputDir   = "../../";        // output dir (-outdir ...)
 $libraryCore = "uupaa.js";      // library core (-lib ...)
 $preprosess  = "js.pp";         // pre-processor (-pp ...)
 $sourceDir   = "../src/";       // source dir (-srcdir ...)
@@ -32,6 +32,33 @@ $loadedFiles = array(); // avoid duplicate load
 $compileOption = ""; // compile option (-memento)
 $loadedFileSize = 0;
 $forceOutputFileName = "";
+
+/* copy resource files
+ *  copy 0.9/dev/res/ui.png -> 0.9/res/ui.png
+ *  copy 0.9/dev/res/*.swf -> 0.9/res/*.swf
+ */
+function copyResourceFiles() {
+    $res = array(
+        "../res/ui.png"
+    );
+
+    foreach ($res as $fileName) {
+        $fname = basename($fileName);
+
+        if (!copy($fileName, "../../res/{$fname}")) {
+            echo "Error: copy {$fileName} to ../../res/{$fname}\n";
+        }
+    }
+
+    // find "dev/res/*.swf"
+    foreach (glob("../res/*.swf") as $fileName) {
+        $fname = basename($fileName);
+
+        if (!copy($fileName, "../../res/{$fname}")) {
+            echo "Error: copy {$fileName} to ../../res/{$fname}\n";
+        }
+    }
+}
 
 /*
  *  loadFiles()
@@ -260,6 +287,9 @@ $castoff[] = "assert";
 include $preprosess; // include js.php
 
 loadFiles($inputFiles);
+
+copyResourceFiles();
+
 minify();
 
 ?>
