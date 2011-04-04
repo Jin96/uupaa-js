@@ -19,7 +19,7 @@ var _mac      = false,  // Boolean: Mac OS X
     _titanium = false;  // Boolean: runs Titanium
 
 // --- detect runs ---
-if (this.document && global.locate) { // Browser
+if (this.document && global.location) { // Browser
 
     _browser = true;
     _ident = global.navigator.userAgent;
@@ -56,9 +56,9 @@ if (_browser || _worker || _titanium) {
 
     // --- detect OS version ---
     if (_titanium) {
-        _osVersion = global.Titanium.Platform.version;
+        _version = global.Titanium.Platform.version;
     } else if (_ios || _android) {
-        _osVersion = parseFloat(
+        _version = parseFloat(
                 _ident.split(/OS |Android /)[1].replace("_", "."));
     }
 }
@@ -72,7 +72,7 @@ lib.runs = {
         android:    _android,   // Boolean: Android OS. Nexus One, ...
         windows:    _windows,   // Boolean: Windows OS
         chromeos:   _chromeos,  // Boolean: Chrome OS
-        version:    _osVersion  // Number: OS Version (iOS / Android)
+        version:    _version    // Number: OS Version (iOS / Android)
     },
     ident:      _ident,         // String: UserAgent String
     nodejs:     _nodejs,        // Boolean: runs Node.js
