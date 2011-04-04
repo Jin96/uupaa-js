@@ -1,4 +1,4 @@
-#UserAgent user agent string
+#summary user agent string
 
 
 || IE9                || Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0) ||
