@@ -1,5 +1,13 @@
 <?php
 
+/*
+    http://code.google.com/p/uupaa-js/wiki/BuildTool
+
+    usage: upa.php [-g | -m | -y] [-v] [-memento] [-pp file]
+                   [-src dir] [-out dir] [-o file] [-lib file]
+                   [-mb] [-off ident[/ident[/..]]] [*.js ...]
+ */
+
 // --- user setting ---
 $outputDir   = "../../";        // output dir (-outdir ...)
 $libraryCore = "uupaa.js";      // library core (-lib ...)
