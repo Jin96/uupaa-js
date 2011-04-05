@@ -1,139 +1,220 @@
-// runs and client side environment detection
-//#include("runs.js")
+// environment detection
 
-// user agent strings - http://code.google.com/p/uupaa-js/wiki/UserAgent
-// Titanium.Platform - http://code.google.com/p/uupaa-js/wiki/TitaniumPlatform
+// see: user agent strings - http://code.google.com/p/uupaa-js/wiki/UserAgent
+// see: Titanium.Platform - http://code.google.com/p/uupaa-js/wiki/TitaniumPlatform
 
 (function(global,     // @param GlobalObject:
           lib,        // @param LibraryRootObject/undefined:
           document) { // @param DocumentObject/undefined:
 
-var _ident      = lib.runs.ident,
-    _os         = lib.runs.os,
-    _jit        = false,
-    _lang       = "en",
-    _secure     = false,
-    _ie         = false,    // IE6+
-    _gecko      = false,
-    _opera      = false,
-    _chrome     = false,
-    _safari     = false,
-    _webkit     = false,
-    _netfront   = false,
-    _engine     = 0,        // Browser Engine
-    _version    = 0,        // Browser Version
-    _longEdge   = 0,        // device long edge
-    _touch      = false,
-    _retina     = false,
-    _iphone     = false,    // iPhone3+, iPod
-    _iphone3    = false,    // iPhone3
-    _iphone4    = false,    // iPhone4
-    _ipad       = false,    // iPad1, iPad2
-    _ie6        = false,
-    _ie7        = false,
-    _ie8        = false,
-    _ie9        = false,
-    _ie678      = false;
+var _ios        = 0,        // Number: iOS Version
+    _mac        = 0,        // Number: Mac OS X Version
+    _cros       = 0,        // Number: Chrome OS Version
+    _unix       = 0,        // Number: Unix OS Version
+    _android    = 0,        // Number: Android OS Version
+    _windows    = 0,        // Number: Windows OS Version
+    _nodejs     = false,    // Boolean: runs Node.js
+    _worker     = false,    // Boolean: runs WebWorkers
+    _browser    = false,    // Boolean: runs Browser
+    _titanium   = false,    // Boolean: runs Titanium
+    _secure     = false,    // Boolean: SSL
+    _jit        = false,    // Boolean: JIT
+    _lang       = "en",     // String: Browser Language
+    _ident      = "",       // String: UserAgent String
+    _ie         = 0,        // Number: IE Version
+    _gecko      = 0,        // Number: Gecko Engine Version
+    _opera      = 0,        // Number: Opera Version
+    _chrome     = 0,        // Number: Chrome Version
+    _safari     = 0,        // Number: Safari Version
+    _webkit     = 0,        // Number: WebKit Engine Version
+    _netfront   = 0,        // Number: NetFront Engine Version
+    _longedge   = 0,        // Number: device long edge (w:800 x h:600) -> 800
+    _retina     = false,    // Boolean: Retina display
+    _iphone     = false,    // Boolean: iPhone or iPod
+    _ipad       = false,    // Boolean: iPad
+    _flash      = 0,        // Number: FlashPlayer Version(9+)
+    _silver     = 0;        // Number: Silverlight Version(3+)
+
+// --- detect runs ---
+if (document && global.location) {
+    _browser = true;
+    _ident = global.navigator.userAgent;
+} else if (global.self && global.self.importScripts) {
+    _worker = true;
+    _ident = global.navigator.userAgent;
+} else if (global.Titanium) {
+    _titanium = true;
+    _ident = global.Titanium.userAgent;
+} else if (global.require && global.process) {
+    _nodejs = true;
+}
 
 //{@node
 //{@ti
-if (lib.runs.browser) {
-    (document.documentID         ? (_ie       = true) :
-     /netfront/i.test(_ident)    ? (_netfront = true) :
-     /playstation/i.test(_ident) ? 0 :
-     global.opera                ? (_opera    = true) :
-     global.netscape             ? (_gecko    = true) :
-     /WebKit/.test(_ident)       ? (_webkit   = true) : 0);
+// --- detect os ---
+if (_browser || _worker) {
+    if (/Win/.test(_ident)) {
+        _windows = parseFloat(_ident.split(/Windows NT /)[1]) || 1;
+    } else if (/iPhone|iP[ao]d/i.test(_ident)) {
+        _ios = parseFloat(_ident.split(/OS /)[1].replace("_", ".")) || 1;
+    } else if (/Mac/.test(_ident)) {
+        _mac = parseFloat(_ident.split(/Mac OS X /)[1].replace("_", ".")) || 1;
+    } else if (/Android/i.test(_ident)) {
+        _android = parseFloat(_ident.split(/Android /)[1]) || 1;
+    } else if (/CrOS/.test(_ident)) {
+        _cros = 1; // TODO
+    } else if (/X11|Linux/.test(_ident)) {
+        _unix = 1;
+    }
+}
+//}@ti
+//}@node
 
-    _version = parseFloat(
-                    _ident.split(/MSIE |Version\/|Firefox\/|Chrome\//)[1]);
-    _engine  = parseFloat(
-                    _ident.split(/Trident\/|Presto\/|rv\:\/|AppleWebKit\//)[1]);
-
-    if (_ie) { // IE version re-detection
-        _version = global.WebSocket ? 10 :
-                   global.getComputedStyle ? 9 :
-                   global.document.documentMode === 8 ? 8 :
-                   global.XMLHttpRequest ? 7 : 6;
-        _ie6 = _version === 6;
-        _ie7 = _version === 7;
-        _ie8 = _version === 8;
-        _ie9 = _version === 9;
-        _ie678 = _ie6 || _ie7 || _ie8;
+//{@node
+//{@ti
+// --- detect browser environment ---
+if (_browser || _worker) {
+    if (document.documentID) {
+        _ie = global.WebSocket ? 10 :
+              global.getComputedStyle ? 9 :
+              document.documentMode === 8 ? 8 :
+              global.XMLHttpRequest ? 7 : 6;
+    } else if (global.netscape) {
+        _gecko = parseFloat(_ident.split(/rv\:\//)[1]);
+    } else if (/WebKit/.test(_ident)) {
+        _webkit = parseFloat(_ident.split(/AppleWebKit\//)[1]);
+        if (/Chrome/.test(_ident)) {
+            _chrome = parseFloat(_ident.split(/Chrome\//)[1]);
+        } else {
+            _safari = parseFloat(_ident.split(/Version\//)[1]);
+        }
+    } else if (global.opera) {
+        _opera = parseFloat(global.opera.version());
+    } else if (/netfront/i.test(_ident)) {
+        _netfront = parseFloat(_ident.split(/NetFront\//)[1]);
     }
 
-    if (_webkit) {
-        (/Chrome/.test(_ident) ? (_chrome = true)
-                               : (_safari = true));
+    if (/iPhone|iPod/.test(_ident)) {
+        _iphone = true;
+    } else if (/iPad/.test(_ident)) {
+        _ipad = true;
+    }
+    if (_ios) {
+        _retina = (global.devicePixelRatio || 1) >= 2;
     }
 
-    _jit = (_ie     && _version >= 9)    || // IE 9+
-           (_gecko  && _engine  >= 1.91) || // Firefox 3.5+(Geko 1.91+)
-           (_webkit && _engine  >= 528)  || // Safari 4+, Google Chrome 2+
-           (_opera  && _version >= 10.5);   // Opera 10.50+
-    ((_os.ios || _os.android) && (_jit = false));
+    _jit = (_ie     >= 9)    || // IE 9+
+           (_gecko  >= 1.91) || // Firefox 3.5+(Geko 1.91+)
+           (_webkit >= 528)  || // Safari 4+, Google Chrome 2+
+           (_opera  >= 10.5);   // Opera 10.50+
+    ((_ios || _android) && (_jit = false));
 
     // "en-us" -> "en"
-    _lang = (global.navigator.language ||
-             global.navigator.browserLanguage).split("-", 1)[0];
-
-    // iOS has window.Touch
-    _touch = _os.ios || _os.android || !!global.Touch;
-    _secure = global.location.protocol === "https:";
-
-    if (_os.ios) {
-        if (global.navigator.platform === "iPad") {
-            _ipad = true;
-        } else {
-            _iphone = true;
-            if (global.devicePixelRatio >= 2) {
-                _retina = true;
-                _iphone4 = true;
-            } else {
-                _iphone3 = true;
-            }
-        }
+    if (global.navigator) {
+        _lang = (global.navigator.language ||
+                 global.navigator.browserLanguage || "").split("-", 1)[0];
     }
 
-    if (_os.ios) {
+    if (global.location) {
+        _secure = global.location.protocol === "https:";
+    }
+
+    if (global.screen && global.screen.width) {
         _longEdge = Math.max(global.screen.width, global.screen.height);
-    } else if (_ie && _version < 9) {
+    } else if (_ie && _ie < 9 && document.documentElement) {
         _longEdge = Math.max(document.documentElement.clientWidth,
                              document.documentElement.clientHeight);
-    } else {
+    } else if (global.innerWidth) {
         _longEdge = Math.max(global.innerWidth, global.innerHeight);
     }
 }
 //}@ti
 //}@node
 
+//{@node
+//{@ti
+//{@mb
+// --- detect plugin ---
+if (_browser) {
+    _flash = detectFlashPlayerVersion(9);
+    _silver = detectSilverlightVersion(3);
+}
+//}@mb
+//}@ti
+//}@node
+
 // --- export ---
-// client side environment
 lib.env = {
-    jit:        _jit,       // Boolean: IE9+, Firefox 3.5+ (Gecko 1.91), Safari 4+, Chrome 2+, Opera 10.50+
-    lang:       _lang,      // String: Lang
+    ios:        _ios,       // Number: iOS Version
+    mac:        _mac,       // Number: Mac OS X Version
+    cros:       _cros,      // Number: Chrome OS Version
+    unix:       _unix,      // Number: Unix OS Version
+    android:    _android,   // Number: Android OS Version
+    windows:    _windows,   // Number: Windows OS Version
+    nodejs:     _nodejs,    // Boolean: runs Node.js
+    worker:     _worker,    // Boolean: runs WebWorkers
+    browser:    _browser,   // Boolean: runs Browser
+    titanium:   _titanium,  // Boolean: runs Titanium
     secure:     _secure,    // Boolean: SSL
-    ie:         _ie,        // Boolean: IE 6+
-    ie6:        _ie6,       // Boolean: IE 6
-    ie7:        _ie7,       // Boolean: IE 7
-    ie8:        _ie8,       // Boolean: IE 8
-    ie9:        _ie9,       // Boolean: IE 9
-    ie678:      _ie678,     // Boolean: IE 6 / IE 7 / IE 8
-    gecko:      _gecko,     // Boolean: Gecko Based Browser. Firefox, ...
-    opera:      _opera,     // Boolean: Opera Based Browser. Opera Mini, Opera Mobile
-    chrome:     _chrome,    // Boolean: Chrome Based Browser. Google Chrome, ChromeLite(Android)
-    safari:     _safari,    // Boolean: Safari Based Browser. Safari, MobileSafari(iOS), ...
-    webkit:     _webkit,    // Boolean: WebKit Based Browser. Chrome, Safari, MobileSafari, ChromeLite
-    engine:     _engine,    // Number: Engine Version. Gecko(2), WebKit(534.13), Trident(5), Presto(2.7)
-    version:    _version,   // Number: Browser Version. IE(9), Firefox(4), Chrome(11), Opera(11), Safari(5)
-    touch:      _touch,     // Boolean: iOS, Android, Chrome OS
+    jit:        _jit,       // Boolean: JIT
+    lang:       _lang,      // String: Language. "en", "ja"
+    ident:      _ident,     // String: UserAgent String
+    ie:         _ie,        // Number: IE Version
+    gecko:      _gecko,     // Number: Gecko Engine Version
+    opera:      _opera,     // Number: Opera Version
+    chrome:     _chrome,    // Number: Chrome Version
+    safari:     _safari,    // Number: Safari Version
+    webkit:     _webkit,    // Number: WebKit Engine Version
+    netfront:   _netfront,  // Number: NetFront Engine Version
+    longedge:   _longedge,  // Number: device long edge (w:800 x h:600) -> 800
+    retina:     _retina,    // Boolean: Retina display
     iphone:     _iphone,    // Boolean: iPhone
-    iphone3:    _iphone3,   // Boolean: iPhone3
-    iphone4:    _iphone4,   // Boolean: iPhone4
     ipad:       _ipad,      // Boolean: iPad
-    retina:     _retina,    // Boolean: Retina Display. iPhone5, iPod touch
-    longEdge:   _longEdge   // Number: device long edge (w:800 x h:600) -> 800
+    flash:      _flash,     // Number: FlashPlayer Version(9+)
+    silver:     _silver     // Number: Silverlight Version(3+)
 };
+
+//{@node
+//{@ti
+//{@mb
+
+// inner - detect FlashPlayer version
+function detectFlashPlayerVersion(minimumVersion) {
+    var rv = 0, ver, match,
+        ie = !!global.ActiveXObject;
+
+    try {
+        ver = ie ? (new global.ActiveXObject("ShockwaveFlash.ShockwaveFlash")).
+                    GetVariable("$version").replace(/,/g, ".")
+                 : global.navigator.plugins["Shockwave Flash"].description;
+        match = /\d+\.\d+/.exec(ver);
+        rv = match ? parseFloat(match[0]) : 0;
+    } catch(err) {}
+    return rv < minimumVersion ? 0 : rv;
+}
+
+// inner - detect Silverlight version
+function detectSilverlightVersion(minimumVersion) {
+    var rv = 0, obj, check = minimumVersion,
+        ie = !!global.ActiveXObject;
+
+    try {
+        obj = ie ? new global.ActiveXObject("AgControl.AgControl")
+                 : global.navigator.plugins["Silverlight Plug-In"];
+        if (ie) {
+            // try "3.0" -> "4.0" -> "5.0" ...
+            while (obj.IsVersionSupported(check + ".0")) {
+                rv = check++;
+            }
+        } else {
+            rv = parseInt(/\d+\.\d+/.exec(obj.description)[0], 10);
+        }
+    } catch(err) {}
+    return rv < minimumVersion ? 0 : rv;
+}
+//}@mb
+//}@ti
+//}@node
 
 })(this, this.uu || this, this.document);
 
