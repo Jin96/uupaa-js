@@ -31,9 +31,7 @@ var _ios        = 0,        // Number: iOS Version
     _longedge   = 0,        // Number: device long edge (w:800 x h:600) -> 800
     _retina     = false,    // Boolean: Retina display
     _iphone     = false,    // Boolean: iPhone or iPod
-    _ipad       = false,    // Boolean: iPad
-    _flash      = 0,        // Number: FlashPlayer Version(9+)
-    _silver     = 0;        // Number: Silverlight Version(3+)
+    _ipad       = false;    // Boolean: iPad
 
 // --- detect runs ---
 if (document && global.location) {
@@ -131,18 +129,6 @@ if (_browser || _worker) {
 //}@ti
 //}@node
 
-//{@node
-//{@ti
-//{@mb
-// --- detect plugin ---
-if (_browser) {
-    _flash = detectFlashPlayerVersion(9);
-    _silver = detectSilverlightVersion(3);
-}
-//}@mb
-//}@ti
-//}@node
-
 // --- export ---
 lib.env = {
     ios:        _ios,       // Number: iOS Version
@@ -170,8 +156,8 @@ lib.env = {
     retina:     _retina,    // Boolean: Retina display
     iphone:     _iphone,    // Boolean: iPhone
     ipad:       _ipad,      // Boolean: iPad
-    flash:      _flash,     // Number: FlashPlayer Version(9+)
-    silver:     _silver     // Number: Silverlight Version(3+)
+    flash:      0,          // Number: FlashPlayer Version(9+)
+    silver:     0           // Number: Silverlight Version(3+)
 };
 
 //{@node
@@ -212,6 +198,13 @@ function detectSilverlightVersion(minimumVersion) {
     } catch(err) {}
     return rv < minimumVersion ? 0 : rv;
 }
+
+// --- detect plugin ---
+if (_browser) {
+    lib.env.flash = detectFlashPlayerVersion(9);
+    lib.env.silver = detectSilverlightVersion(3);
+}
+
 //}@mb
 //}@ti
 //}@node
