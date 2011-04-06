@@ -8,8 +8,10 @@ var _toString = Object.prototype.toString,
 // inner - mixin
 function mixin(src,    // @param Hash:
                dest) { // @param Hash:
-    for (var i in dest) {
-        (i in src || (src[i] = dest[i]));
+    for (var key in dest) {
+        if (!(key in src)) {
+            src[key] = dest[key];
+        }
     }
 }
 
@@ -28,8 +30,10 @@ function ArrayIndexOf(search,      // @param Mix: search element
 
     i = (i < 0) ? i + iz : i;
     for (; i < iz; ++i) {
-        if (i in this && this[i] === search) {
-            return i;
+        if (i in this) {
+            if (this[i] === search) {
+                return i;
+            }
         }
     }
     return -1;
@@ -45,8 +49,10 @@ function ArrayLastIndexOf(search,      // @param Mix: search element
 
     i = (i < 0) ? i + iz + 1 : iz;
     while (--i >= 0) {
-        if (i in this && this[i] === search) {
-            return i;
+        if (i in this) {
+            if (this[i] === search) {
+                return i;
+            }
         }
     }
     return -1;
@@ -59,8 +65,10 @@ function ArrayEvery(evaluator, // @param Function: evaluator
                     that) {    // @param this(= void): evaluator this
                                // @return Boolean:
     for (var i = 0, iz = this.length; i < iz; ++i) {
-        if (i in this && !evaluator.call(that, this[i], i, this)) {
-            return false;
+        if (i in this) {
+            if (!evaluator.call(that, this[i], i, this)) {
+                return false;
+            }
         }
     }
     return true;
@@ -72,9 +80,12 @@ function ArrayEvery(evaluator, // @param Function: evaluator
 function ArrayFilter(evaluator, // @param Function: evaluator
                      that) {    // @param this(= void): evaluator this
                                 // @return Array: [element, ... ]
-    for (var rv = [], ri = -1, v, i = 0, iz = this.length; i < iz; ++i) {
-        i in this && evaluator.call(that, v = this[i], i, this)
-                  && (rv[++ri] = v);
+    for (var rv = [], ri = 0, v, i = 0, iz = this.length; i < iz; ++i) {
+        if (i in this) {
+            if (evaluator.call(that, v = this[i], i, this)) {
+                rv[ri++] = v;
+            }
+        }
     }
     return rv;
 }
@@ -85,7 +96,9 @@ function ArrayMap(evaluator, // @param Function: evaluator
                   that) {    // @param this(= void): evaluator this
                              // @return Array: [element, ... ]
     for (var iz = this.length, rv = Array(iz), i = 0; i < iz; ++i) {
-        i in this && (rv[i] = evaluator.call(that, this[i], i, this));
+        if (i in this) {
+            rv[i] = evaluator.call(that, this[i], i, this);
+        }
     }
     return rv;
 }
@@ -95,8 +108,10 @@ function ArraySome(evaluator, // @param Function: evaluator
                    that) {    // @param this(= void): evaluator this
                               // @return Boolean:
     for (var i = 0, iz = this.length; i < iz; ++i) {
-        if (i in this && evaluator.call(that, this[i], i, this)) {
-            return true;
+        if (i in this) {
+            if (evaluator.call(that, this[i], i, this)) {
+                return true;
+            }
         }
     }
     return false;
@@ -109,11 +124,15 @@ function ArrayForEach(evaluator, // @param Function: evaluator
 
     if (that) {
         for (; i < iz; ++i) {
-            i in this && evaluator.call(that, this[i], i, this);
+            if (i in this) {
+                evaluator.call(that, this[i], i, this);
+            }
         }
     } else {
         for (; i < iz; ++i) {
-            i in this && evaluator(this[i], i, this);
+            if (i in this) {
+                evaluator(this[i], i, this);
+            }
         }
     }
 }
@@ -123,15 +142,27 @@ function ArrayReduce(evaluator,    // @param Function: evaluator
                      initialValue, // @param Mix(= void): initial value
                      __right__) {  // @hidden Number(= 0): 1 is right
                                    // @return Mix:
-    var that = this, r = !!__right__, undef, f = 0,
-        rv = initialValue === undef ? undef : (++f, initialValue),
-        iz = that.length, i = r ? --iz : 0;
+    var that = this, rv, undef,
+        back = !!__right__,
+        usedInitialValue = 0,
+        iz = that.length, i = back ? --iz : 0;
 
-    for (; r ? i >= 0 : i < iz; r ? --i : ++i) {
-        i in that && (rv = f ? evaluator(rv, that[i], i, that)
-                             : (++f, that[i]));
+    if (initialValue === undef) {
+        rv = initialValue;
+        ++usedInitialValue;
     }
-    if (!f) {
+
+    for (; (back ? i >= 0 : i < iz); (back ? --i : ++i)) {
+        if (i in that) {
+            if (usedInitialValue) {
+                rv = evaluator(rv, that[i], i, that);
+            } else {
+                rv = that[i];
+                ++usedInitialValue;
+            }
+        }
+    }
+    if (!usedInitialValue) {
         throw new Error("BAD_PARAM");
     }
     return rv;
@@ -174,7 +205,7 @@ function implDateToJSON(date) { // @param DateObject:
 
 // Date.now
 function DateNow() { // @return Number:
-    return +new Date;
+    return +new Date();
 }
 
 // Boolean.prototype.toJSON
@@ -212,7 +243,9 @@ function ObjectKeys(object) { // @param Object:
     var rv = [], key, ri = 0;
 
     for (key in object) {
-        (object.hasOwnProperty(key) && (rv[ri++] = object[key]));
+        if (object.hasOwnProperty(key)) {
+            rv[ri++] = object[key];
+        }
     }
     return rv;
 }
