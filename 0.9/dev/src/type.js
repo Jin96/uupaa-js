@@ -4,7 +4,20 @@
           lib) {  // @param LibraryRootObject:
 
 var _toString = Object.prototype.toString,
-    _types = { "NaN": 2 },
+    _types = {
+        "boolean":          1,
+        "number":           2,
+        "NaN":              2,
+        "string":           3,
+        "function":         4,
+        "[object Boolean]": 1,
+        "[object Number]":  2,
+        "[object String]":  3,
+        "[object Function]":4,
+        "[object Array]":   5,
+        "[object Date]":    6,
+        "[object RegExp]":  7
+    },
     _protocol = /^(https?|file|wss?):/,
     //         [1]                      [2]         [3]           [4]
     //                        localhost /dir/f.ext  ?key=value    #hash
@@ -24,10 +37,10 @@ function isMatch(a,   // @param Mix: value a
     }
 
     switch (typeA) {
-    case _types.NODE:
-    case _types.FAKEARRAY:
+    case lib.type.NODE:
+    case lib.type.FAKEARRAY:
         return false;
-    case _types.HASH:
+    case lib.type.HASH:
         if (Object.keys(a).length !== Object.keys(b).length) {
             return false;
         }
@@ -36,18 +49,13 @@ function isMatch(a,   // @param Mix: value a
                 return false;
             }
         }
-        break;
-    case _types.DATE:
-        if ((a.getMilliseconds() !== b.getMilliseconds())) {
-            return false;
-        }
-        // break;
-    default:
-        if (a + "" !== b + "") {
+        return true;
+    case lib.type.DATE:
+        if (a.getMilliseconds() !== b.getMilliseconds()) {
             return false;
         }
     }
-    return true;
+    return (a + "") === (b + "");
 }
 
 // uu.type - type detection
@@ -79,8 +87,8 @@ function uutype(mix) { // @param Mix: search literal/object
 function isURL(search) { // @param Mix: search
                          // @return Boolean:
     if (isString(search) && _protocol.test(search)) {
-        return search.slice(0, 4) === "file" ? _parse.file.test(search)
-                                             : _parse.http.test(search);
+        return search.slice(0, 4) === "file" ? _file.test(search)
+                                             : _http.test(search);
     }
     return false;
 }
@@ -109,38 +117,21 @@ function isFunction(search) { // @param Mix: search
     return _toString.call(search) === "[object Function]";
 }
 
-// --- type sampling ---
-(function() {
-    var i = 0, iz = 12,
-        types = [
-            "BOOLEAN", "NUMBER", "STRING", "FUNCTION",
-            "ARRAY", "DATE", "REGEXP", "UNDEFINED",
-            "NULL", "HASH", "NODE", "FAKEARRAY"
-        ],
-        samples = [true, 0, "", detectTypes, [], new Date, /0/];
-
-    for (; i < iz; ++i) {
-        lib.type[types[i]] = i + 1; // { BOOLEAN: 1, NUMBER: 2, ... }
-        i < 4 && (_types[typeof         samples[i] ] = i + 1);
-        i < 7 && (_types[_toString.call(samples[i])] = i + 1);
-    }
-})();
-
 // --- export ---
 lib.type = uutype;          // uu.type(mix:Mix):Number
-                            //  uu.type.BOOLEAN   -  1: Boolean
-                            //  uu.type.NUMBER    -  2: Number
-                            //  uu.type.STRING    -  3: String
-                            //  uu.type.FUNCTION  -  4: Function
-                            //  uu.type.ARRAY     -  5: Array
-                            //  uu.type.DATE      -  6: Date
-                            //  uu.type.REGEXP    -  7: RegExp
-                            //  uu.type.UNDEFINED -  8: undefined
-                            //  uu.type.NULL      -  9: null
-                            //  uu.type.HASH      - 10: Hash (aka Object)
-                            //  uu.type.NODE      - 11: Node (HTMLElement)
-                            //  uu.type.FAKEARRAY - 12: FakeArray
-                            //          (Arguments, NodeList, HTMLCollection)
+lib.type.BOOLEAN    = 1;    // uu.type.BOOLEAN   -  1: Boolean
+lib.type.NUMBER     = 2;    // uu.type.NUMBER    -  2: Number
+lib.type.STRING     = 3;    // uu.type.STRING    -  3: String
+lib.type.FUNCTION   = 4;    // uu.type.FUNCTION  -  4: Function
+lib.type.ARRAY      = 5;    // uu.type.ARRAY     -  5: Array
+lib.type.DATE       = 6;    // uu.type.DATE      -  6: Date
+lib.type.REGEXP     = 7;    // uu.type.REGEXP    -  7: RegExp
+lib.type.UNDEFINED  = 8;    // uu.type.UNDEFINED -  8: undefined
+lib.type.NULL       = 9;    // uu.type.NULL      -  9: null
+lib.type.HASH       = 10;   // uu.type.HASH      - 10: Hash (aka Object)
+lib.type.NODE       = 11;   // uu.type.NODE      - 11: Node (HTMLElement)
+lib.type.FAKEARRAY  = 12;   // uu.type.FAKEARRAY - 12: FakeArray
+                            //         (Arguments, NodeList, HTMLCollection)
 lib.isURL = isURL;          // uu.isURL(search:Mix):Boolean
 lib.isNode = isNode;        // uu.isNode(search:Mix):Boolean
 lib.isMatch = isMatch;      // uu.isMatch(search:Mix):Boolean

@@ -1,4 +1,4 @@
-// Hash Table
+// Dictionary
 
 (function(global, // @param GlobalObject:
           lib) {  // @param LibraryRootObject:
@@ -12,7 +12,7 @@ var _dd2n   = {},   // {  "00":    0 , ...  "99":   99  }
     _n2n    = {},   // {    0 :    0 , ...  255 :  255  }
     _bit2n  = {};   // { "00000000": 0, ... "11111111": 255 }
 
-// --- CREATE HASH TABLES ---
+// --- create Number <=> String dictionary ---
 var i = 0x100, n, v;
 
 // 0x00 ~ 0xff
@@ -38,15 +38,16 @@ for (i = 100; i < 200; ++i) {
 }
 
 // --- export ---
-(lib.hash || (lib.hash = {}));
+(lib.dict || (lib.dict = {}));
 
-lib.hash.dd2n  = _dd2n;  // {  "00":    0 , ...  "99":   99  }
-lib.hash.n2dd  = _n2dd;  // {    0 :  "00", ...   99 :  "99" }
-lib.hash.bin2n = _bin2n; // { "\00":    0 , ... "\ff":  255  }
-lib.hash.n2bin = _n2bin; // {    0 : "\00", ...  255 : "\ff" }
-lib.hash.hh2n  = _hh2n;  // {  "00":    0 , ...  "ff":  255  }
-lib.hash.n2hh  = _n2hh;  // {    0 :  "00", ...  255 :  "ff" }
-lib.hash.n2n   = _n2n;   // {    0 :    0 , ...  255 :  255  }
-lib.hash.bit2n = _bit2n; // { "00000000": 0, ... "11111111": 255 }
+// Number <=> String Dictionary
+lib.dict.dd2n  = _dd2n;  // {  "00":    0 , ...  "99":   99  }
+lib.dict.n2dd  = _n2dd;  // {    0 :  "00", ...   99 :  "99" }
+lib.dict.bin2n = _bin2n; // { "\00":    0 , ... "\ff":  255  }
+lib.dict.n2bin = _n2bin; // {    0 : "\00", ...  255 : "\ff" }
+lib.dict.hh2n  = _hh2n;  // {  "00":    0 , ...  "ff":  255  }
+lib.dict.n2hh  = _n2hh;  // {    0 :  "00", ...  255 :  "ff" }
+lib.dict.n2n   = _n2n;   // {    0 :    0 , ...  255 :  255  }
+lib.dict.bit2n = _bit2n; // { "00000000": 0, ... "11111111": 255 }
 
 })(this, this.uu || this);
