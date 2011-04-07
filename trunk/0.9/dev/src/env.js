@@ -211,5 +211,5 @@ if (_browser) {
 //}@node
 //}@worker
 
-})(this, this.uu || this, this.document);
+})(this, this.lib || this, this.document);
 

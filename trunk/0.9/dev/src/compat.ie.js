@@ -4,10 +4,10 @@
 //{@node
 //{@ti
 //{@mb
-if (!(this.uu || this).env) {
+if (!(this.lib || this).env) {
     throw new Error("Compile Error: Need env.js");
 }
-if (!(this.uu || this).env.browser) {
+if (!(this.lib || this).env.browser) {
     throw new Error("Compile Error: Excluding compat.ie.js");
 }
 
@@ -333,14 +333,13 @@ if (lib.env.ie < 9) {
     vmlshiv();
 }
 
-(lib.impl || (lib.impl = {}));
-lib.impl.getComputedStyleIE678 = getComputedStyleIE678;
-lib.impl.getOpacityIE678       = getOpacityIE678;
-lib.impl.setOpacityIE678       = setOpacityIE678;
-lib.impl.setTransform2DIE678   = setTransform2DIE678;
-lib.impl.getTransform2DIE678   = getTransform2DIE678;
+lib.getComputedStyleIE678 = getComputedStyleIE678;
+lib.getOpacityIE678       = getOpacityIE678;
+lib.setOpacityIE678       = setOpacityIE678;
+lib.setTransform2DIE678   = setTransform2DIE678;
+lib.getTransform2DIE678   = getTransform2DIE678;
 
-})(this, this.uu || this, this.document);
+})(this, this.lib || this, this.document);
 
 //}@mb
 //}@ti

@@ -11,10 +11,10 @@
 //{@node
 //{@ti
 //{@mb
-if (!(this.uu || this).env) {
+if (!(this.lib || this).env) {
     throw new Error("Compile Error: Need env.js");
 }
-if (!(this.uu || this).env.browser) {
+if (!(this.lib || this).env.browser) {
     throw new Error("Compile Error: Excluding compat.gecko.js");
 }
 
@@ -94,8 +94,8 @@ var _A_TAG          = 1,  //  | E               | [ _A_TAG, "E" ]
     _QUERY_FORM     = /^(input|button|select|option|textarea)$/i,
     _QUERY_CASESENS = { title: 0, id: 0, name: 0, "class": 0, "for": 0 },
     _tokenCache     = {}, // { css-selector-expression: token, ... } for querySelectorAll
-    _uuqid          = "data-uuqueryid",
-    _uudoctype      = "data-uudoctype", // doctype=1: XMLDocument, doctype=2: HTMLDocument
+    _libqid         = "data-libqueryid",
+    _libdoctype     = "data-libdoctype", // doctype=1: XMLDocument, doctype=2: HTMLDocument
     _nodeCount      = 0,
     _trimQuote      = /^["']?|['"]?$/g,
 //{@mb
@@ -324,9 +324,9 @@ function queryTokenEvaluator(token,     // @param Hash: QueryTokenHash
                              context) { // @param Node: context
                                         // @return NodeArray: [node, ...]
     var node = context.ownerDocument || document, // owner node
-        xmldoc = !((node[_uudoctype] ||
-                   (node[_uudoctype] = (node.createElement("a").tagName ===
-                                        node.createElement("A").tagName) ? 2 : 1)) - 1),
+        xmldoc = !((node[_libdoctype] ||
+                   (node[_libdoctype] = (node.createElement("a").tagName ===
+                                         node.createElement("A").tagName) ? 2 : 1)) - 1),
         ctx = [context], result = [], ary,
         lock, word, match, negate = 0, data = token.data,
         i = 0, iz = data.length, j, jz = 1, k, kz, r, ri,
@@ -405,7 +405,7 @@ function queryTokenEvaluator(token,     // @param Hash: QueryTokenHash
                         if ((match && node.nodeType === Node.ELEMENT_NODE) ||
                             node.tagName === ident) {
 
-                            nid = (node[_uuqid] || (node[_uuqid] = ++_nodeCount));
+                            nid = (node[_libqid] || (node[_libqid] = ++_nodeCount));
 /*
                             (lock[nid] || (r[++ri] = node, lock[nid] = 1));
  */
@@ -426,7 +426,7 @@ function queryTokenEvaluator(token,     // @param Hash: QueryTokenHash
                             }
                             if (match || node.tagName === ident) {
                                 if (type > 2) {
-                                    nid = node[_uuqid] || (node[_uuqid] = ++_nodeCount);
+                                    nid = node[_libqid] || (node[_libqid] = ++_nodeCount);
                                     if (lock[nid]) {
                                         break;
                                     }
@@ -555,7 +555,7 @@ function queryTokenEvaluator(token,     // @param Hash: QueryTokenHash
             ctx = result[i];
             for (j = 0, jz = ctx.length; j < jz; ++j) {
                 node = ctx[j];
-                nid = node[_uuqid] || (node[_uuqid] = ++_nodeCount);
+                nid = node[_libqid] || (node[_libqid] = ++_nodeCount);
                 if (!lock[nid]) {
                     r[++ri] = node;
                     lock[nid] = 1;
@@ -729,7 +729,7 @@ function nthFilter(ctx, j, jz, negate, ps, anb, xmldoc) {
 
     for (; j < jz; ++j) {
         parent = ctx[j].parentNode;
-        nid = parent[_uuqid] || (parent[_uuqid] = ++_nodeCount);
+        nid = parent[_libqid] || (parent[_libqid] = ++_nodeCount);
         if (!lock[nid]) {
             lock[nid] = 1;
             for (idx = 0, cn = parent[iter1]; cn; cn = cn[iter2]) {
@@ -765,8 +765,8 @@ function nthTypeFilter(ctx, j, jz, negate, ps, anb) {
         node = ctx[j];
         tag = node.tagName;
         parent = node.parentNode;
-        parentnid = parent[_uuqid] || (parent[_uuqid] = ++_nodeCount);
-              nid =   node[_uuqid] || (  node[_uuqid] = ++_nodeCount);
+        parentnid = parent[_libqid] || (parent[_libqid] = ++_nodeCount);
+              nid =   node[_libqid] || (  node[_libqid] = ++_nodeCount);
 
         if (tagdb[parentnid][nid].tag === tag) {
             idx = tagdb[parentnid][nid].pos;
@@ -795,7 +795,7 @@ function createTagDB(ctx, j, jz, reverse) { // @param NodeArray:
     for (; j < jz; ++j) {
         node = ctx[j];
         parent = ctx[j].parentNode;
-        parentnid = parent[_uuqid] || (parent[_uuqid] = ++_nodeCount);
+        parentnid = parent[_libqid] || (parent[_libqid] = ++_nodeCount);
 
         if (!rv[parentnid]) {
             rv[parentnid] = {};
@@ -805,7 +805,7 @@ function createTagDB(ctx, j, jz, reverse) { // @param NodeArray:
                     tag = cn.tagName;
                     pos = tagcount[tag] ? ++tagcount[tag] : (tagcount[tag] = 1);
 
-                    nid = cn[_uuqid] || (cn[_uuqid] = ++_nodeCount);
+                    nid = cn[_libqid] || (cn[_libqid] = ++_nodeCount);
                     rv[parentnid][nid] = { tag: tag, pos: pos };
                 }
             }
@@ -1033,21 +1033,20 @@ function sortNode(ary,       // @param NodeArray:
 }
 
 // --- export ---
-(lib.impl || (lib.impl = {}));
-lib.impl.querySelectorAll       = querySelectorAll;     // querySelectorAll(expr:CSSSelectorExpressionString, context:NodeArray/Node = <body>):NodeArray
-lib.impl.queryTokenizer         = queryTokenizer;
-lib.impl.queryTokenEvaluator    = queryTokenEvaluator;
-lib.impl.getElementById         = getElementById;       // getElementById(expr:String, context:Node = document):Node/null
-lib.impl.getElementsById        = getElementsById;      // getElementsById(expr:CommaJointString, context:Node = document):NodeArray
-                                                        //  [1][has all]  getElementsById("A,B,C")         -> [<a id="A">, <li id="B">, <div id="C">]
-                                                        //  [2][skip one] getElementsById("A,NONEEXIST,C") -> [<a id="A">, <div id="C">]
-lib.impl.getElementsByTagName   = getElementsByTagName; // getElementsByTagName(expr:String = "", context:Node = <body>):NodeArray
-lib.impl.getElementsByClassName = getElementsByClassName; // domQueryClassName(expr:String/Node, context:String/Node = <body>):NodeArray/Node
-lib.impl.matchesSelector        = matchesSelector;      // matchesSelector(expr:CSSSelectorExpressionString, context:Node = <body>):Boolean
-lib.impl.sortNode               = sortNode;             // sortNode(ary:NodeArray, context:Node = <body>):Hash - { sort, dup }
-                                                        //  [1][sort] sortNode([<body>, <html>, <body>], document) -> { sort: [<html>, <body>], dup: [<body>] }
+lib.querySelectorAll       = querySelectorAll;      // querySelectorAll(expr:CSSSelectorExpressionString, context:NodeArray/Node = <body>):NodeArray
+lib.queryTokenizer         = queryTokenizer;
+lib.queryTokenEvaluator    = queryTokenEvaluator;
+lib.getElementById         = getElementById;        // getElementById(expr:String, context:Node = document):Node/null
+lib.getElementsById        = getElementsById;       // getElementsById(expr:CommaJointString, context:Node = document):NodeArray
+                                                    //  [1][has all]  getElementsById("A,B,C")         -> [<a id="A">, <li id="B">, <div id="C">]
+                                                    //  [2][skip one] getElementsById("A,NONEEXIST,C") -> [<a id="A">, <div id="C">]
+lib.getElementsByTagName   = getElementsByTagName;  // getElementsByTagName(expr:String = "", context:Node = <body>):NodeArray
+lib.getElementsByClassName = getElementsByClassName;// domQueryClassName(expr:String/Node, context:String/Node = <body>):NodeArray/Node
+lib.matchesSelector        = matchesSelector;       // matchesSelector(expr:CSSSelectorExpressionString, context:Node = <body>):Boolean
+lib.sortNode               = sortNode;              // sortNode(ary:NodeArray, context:Node = <body>):Hash - { sort, dup }
+                                                    //  [1][sort] sortNode([<body>, <html>, <body>], document) -> { sort: [<html>, <body>], dup: [<body>] }
 
-})(this, this.uu || this, this.document, Array.prototype.slice);
+})(this, this.lib || this, this.document, Array.prototype.slice);
 
 //}@mb
 //}@ti

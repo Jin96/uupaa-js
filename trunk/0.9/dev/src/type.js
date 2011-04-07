@@ -26,11 +26,11 @@ var _toString = Object.prototype.toString,
     //          https://    user:pass@    server     : port   /dir/f.ext  ?key=value   #hash
     _http = /^(\w+:)\/\/((?:([\w:]+)@)?([^\/:]+)(?::(\d*))?)([^ ?#]*)(?:(\?[^#]*))?(?:(#.*))?/i;
 
-// uu.isMatch - A is B
+// isMatch - A is B
 function isMatch(a,   // @param Mix: value a
                  b) { // @param Mix: value b
                       // @return Boolean:
-    var typeA = uutype(a), typeB = uutype(b), key;
+    var typeA = typeDetection(a), typeB = typeDetection(b), key;
 
     if (typeA !== typeB) { // type missmatch
         return false;
@@ -58,32 +58,32 @@ function isMatch(a,   // @param Mix: value a
     return (a + "") === (b + "");
 }
 
-// uu.type - type detection
-function uutype(mix) { // @param Mix: search literal/object
-                       // @return Number: uu.types
-    //  [1][typeof] uu.type("str")          -> uu.type.STRING
-    //  [2][typeof] uu.type(Node)           -> uu.type.NODE
-    //  [3][typeof] uu.type(document.links) -> uu.type.FAKEARRAY
+// typeDetection - type detection
+function typeDetection(mix) { // @param Mix: search literal/object
+                              // @return Number: see lib.types
+    //  [1][typeof] typeDetection("str")          -> STRING
+    //  [2][typeof] typeDetection(Node)           -> NODE
+    //  [3][typeof] typeDetection(document.links) -> FAKEARRAY
 
     if (mix == null) {
-        return mix === null ? uutype.NULL : uutype.UNDEFINED;
+        return mix === null ? typeDetection.NULL : typeDetection.UNDEFINED;
     }
     if (mix === global) {
-        return uutype.HASH;
+        return typeDetection.HASH;
     }
     if (mix.nodeType && mix.appendChild) {
-        return uutype.NODE;
+        return typeDetection.NODE;
     }
     if (mix.constructor === global.NodeList) { // [fix][Safari5]
-        return uutype.FAKEARRAY;
+        return typeDetection.FAKEARRAY;
     }
     return _types[typeof mix] ||
            _types[_toString.call(mix)] ||
-           ((mix.callee || mix.item) ? uutype.FAKEARRAY
-                                     : uutype.HASH);
+           ((mix.callee || mix.item) ? typeDetection.FAKEARRAY
+                                     : typeDetection.HASH);
 }
 
-// uu.isURL - is URL
+// isURL - is URL
 function isURL(search) { // @param Mix: search
                          // @return Boolean:
     if (isString(search) && _protocol.test(search)) {
@@ -93,50 +93,50 @@ function isURL(search) { // @param Mix: search
     return false;
 }
 
-// uu.isNode - is DOM Node
+// isNode - is DOM Node
 function isNode(search) { // @param Mix: search
                           // @return Boolean:
     return !!(search && search.nodeType);
 }
 
-// uu.isNumber - is number
+// isNumber - is number
 function isNumber(search) { // @param Mix: search
                             // @return Boolean:
     return typeof search === "number";
 }
 
-// uu.isString - is string
+// isString - is string
 function isString(search) { // @param Mix: search
                             // @return Boolean:
     return typeof search === "string";
 }
 
-// uu.isFunction - is function
+// isFunction - is function
 function isFunction(search) { // @param Mix: search
                               // @return Boolean:
     return _toString.call(search) === "[object Function]";
 }
 
 // --- export ---
-lib.type = uutype;          // uu.type(mix:Mix):Number
-lib.type.BOOLEAN    = 1;    // uu.type.BOOLEAN   -  1: Boolean
-lib.type.NUMBER     = 2;    // uu.type.NUMBER    -  2: Number
-lib.type.STRING     = 3;    // uu.type.STRING    -  3: String
-lib.type.FUNCTION   = 4;    // uu.type.FUNCTION  -  4: Function
-lib.type.ARRAY      = 5;    // uu.type.ARRAY     -  5: Array
-lib.type.DATE       = 6;    // uu.type.DATE      -  6: Date
-lib.type.REGEXP     = 7;    // uu.type.REGEXP    -  7: RegExp
-lib.type.UNDEFINED  = 8;    // uu.type.UNDEFINED -  8: undefined
-lib.type.NULL       = 9;    // uu.type.NULL      -  9: null
-lib.type.HASH       = 10;   // uu.type.HASH      - 10: Hash (aka Object)
-lib.type.NODE       = 11;   // uu.type.NODE      - 11: Node (HTMLElement)
-lib.type.FAKEARRAY  = 12;   // uu.type.FAKEARRAY - 12: FakeArray
-                            //         (Arguments, NodeList, HTMLCollection)
-lib.isURL = isURL;          // uu.isURL(search:Mix):Boolean
-lib.isNode = isNode;        // uu.isNode(search:Mix):Boolean
-lib.isMatch = isMatch;      // uu.isMatch(search:Mix):Boolean
-lib.isNumber = isNumber;    // uu.isNumber(search:Mix):Boolean
-lib.isString = isString;    // uu.isString(search:Mix):Boolean
-lib.isFunction = isFunction;// uu.isFunction(search:Mix):Boolean
+lib.typeDetection = typeDetection;  // typeDetection(mix:Mix):Number
+lib.typeDetection.BOOLEAN    = 1;   // typeDetection.BOOLEAN   -  1: Boolean
+lib.typeDetection.NUMBER     = 2;   // typeDetection.NUMBER    -  2: Number
+lib.typeDetection.STRING     = 3;   // typeDetection.STRING    -  3: String
+lib.typeDetection.FUNCTION   = 4;   // typeDetection.FUNCTION  -  4: Function
+lib.typeDetection.ARRAY      = 5;   // typeDetection.ARRAY     -  5: Array
+lib.typeDetection.DATE       = 6;   // typeDetection.DATE      -  6: Date
+lib.typeDetection.REGEXP     = 7;   // typeDetection.REGEXP    -  7: RegExp
+lib.typeDetection.UNDEFINED  = 8;   // typeDetection.UNDEFINED -  8: undefined
+lib.typeDetection.NULL       = 9;   // typeDetection.NULL      -  9: null
+lib.typeDetection.HASH       = 10;  // typeDetection.HASH      - 10: Hash (aka Object)
+lib.typeDetection.NODE       = 11;  // typeDetection.NODE      - 11: Node (HTMLElement)
+lib.typeDetection.FAKEARRAY  = 12;  // typeDetection.FAKEARRAY - 12: FakeArray
+                                    //         (Arguments, NodeList, HTMLCollection)
+lib.isURL       = isURL;            // isURL(search:Mix):Boolean
+lib.isNode      = isNode;           // isNode(search:Mix):Boolean
+lib.isMatch     = isMatch;          // isMatch(search:Mix):Boolean
+lib.isNumber    = isNumber;         // isNumber(search:Mix):Boolean
+lib.isString    = isString;         // isString(search:Mix):Boolean
+lib.isFunction  = isFunction;       // isFunction(search:Mix):Boolean
 
-})(this, this.uu || this);
+})(this, this.lib || this);
