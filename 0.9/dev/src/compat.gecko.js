@@ -7,10 +7,10 @@
 //{@node
 //{@ti
 //{@mb
-if (!(this.uu || this).env) {
+if (!(this.lib || this).env) {
     throw new Error("Compile Error: Need env.js");
 }
-if (!(this.uu || this).env.browser) {
+if (!(this.lib || this).env.browser) {
     throw new Error("Compile Error: Excluding compat.gecko.js");
 }
 

@@ -50,4 +50,4 @@ lib.dict.n2hh  = _n2hh;  // {    0 :  "00", ...  255 :  "ff" }
 lib.dict.n2n   = _n2n;   // {    0 :    0 , ...  255 :  255  }
 lib.dict.bit2n = _bit2n; // { "00000000": 0, ... "11111111": 255 }
 
-})(this, this.uu || this);
+})(this, this.lib || this);

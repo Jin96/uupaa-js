@@ -4,8 +4,8 @@
 (function(global, // @param GlobalObject:
           lib) {  // @param LibraryRootObject:
 
-// uu.test
-function uutest() {
+// lib.test
+function libtest() {
     var i = 0, iz = lib.test.length;
 
     for (; i < iz; ++i) {
@@ -17,8 +17,8 @@ function uutest() {
 }
 
 // --- export ---
-lib.test = uutest;
+lib.test = libtest;
 
-})(this, this.uu || this);
+})(this, this.lib || this);
 
 //}@test
