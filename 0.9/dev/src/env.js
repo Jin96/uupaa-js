@@ -160,6 +160,7 @@ lib.env = {
     silver:     0           // Number: Silverlight Version(3+)
 };
 
+//{@worker
 //{@node
 //{@ti
 //{@mb
@@ -208,6 +209,7 @@ if (_browser) {
 //}@mb
 //}@ti
 //}@node
+//}@worker
 
 })(this, this.uu || this, this.document);
 

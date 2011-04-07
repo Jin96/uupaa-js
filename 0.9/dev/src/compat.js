@@ -1,72 +1,30 @@
-// IE compat
+// Browser Compatibility
 
-// --- for Gecko ---
-// HTMLElement#innerText
-// HTMLElement#outerHTML
-
+//{@worker
 //{@node
 //{@ti
 //{@mb
-this.HTMLElement && this.netscape && (function(global) { // @param GlobalObject:
-
-var document = global.document,
-    prototype = global.HTMLElement.prototype;
-
-// --- HTMLElement.prototype ---
-// HTMLElement.prototype.innerText getter
-function innerTextGetter() {
-    return this.textContent;
+if (!(this.uu || this).env) {
+    throw new Error("Compile Error: Need env.js");
+}
+if (!(this.uu || this).env.browser) {
+    throw new Error("Compile Error: Excluding compat.js");
 }
 
-// HTMLElement.prototype.innerText setter
-function innerTextSetter(text) {
-    while (this.hasChildNodes()) {
-        this.removeChild(this.lastChild);
-    }
-    this.appendChild(document.createTextNode(text));
+(function(global,     // @param GlobalObject:
+          lib,        // @param LibraryRootObject:
+          document) { // @param Document/BlankObject: document or {}
+
+// HTML5 document.head
+// http://www.whatwg.org/specs/web-apps/current-work/multipage/dom.html
+if (!document.head) {
+    document.head = document.getElementsByTagName("head")[0];
 }
 
-// HTMLElement.prototype.outerHTML getter
-function outerHTMLGetter() {
-    var rv,
-        parentNode = this.parentNode,
-        range = document.createRange(),
-        div = document.createElement("div");
-
-    if (!parentNode) { // orphan
-        document.body.appendChild(this);
-    }
-    range.selectNode(this);
-    div.appendChild(range.cloneContents());
-    rv = div.innerHTML;
-    if (!parentNode) {
-        this.parentNode.removeChild(this);
-    }
-    return rv;
-}
-
-// HTMLElement.prototype.outerHTML setter
-function outerHTMLSetter(html) {
-    var range = document.createRange();
-
-    range.setStartBefore(this);
-    this.parentNode.replaceChild(
-            range.createContextualFragment(html), this);
-}
-
-// --- export ---
-if (!prototype.innerText) {
-    prototype.__defineGetter__("innerText", innerTextGetter);
-    prototype.__defineSetter__("innerText", innerTextSetter);
-}
-if (!prototype.outerHTML) {
-    prototype.__defineGetter__("outerHTML", outerHTMLGetter);
-    prototype.__defineSetter__("outerHTML", outerHTMLSetter);
-}
-
-})(this);
+})(this, this.uu || this, this.document);
 
 //}@mb
 //}@ti
 //}@node
+//}@worker
 
