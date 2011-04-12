@@ -6917,7 +6917,7 @@ function uutext(data,             // @param String/FormatString/Node: "string" o
 
     if (isString(data)) {
         return newText(az < 2 ? data // [1]
-                              : uuf.apply(this, args)); // [2]
+                              : uustringformat.apply(this, args)); // [2]
     }
     if (text === undef) { // [3]
 //{@mb
@@ -6928,7 +6928,7 @@ function uutext(data,             // @param String/FormatString/Node: "string" o
         return data.textContent; // [WEB STD][IE9]
     }
     uunodeadd(newText(az < 3 ? text // [4]
-                             : uuf.apply(this, uuarray(args, 1))), // [5]
+                             : uustringformat.apply(this, uuarray(args, 1))), // [5]
               uunodeclear(data));
     return data;
 }
@@ -8354,7 +8354,7 @@ function serializeArgument(ary) { // @param Array: arguments
                                   // @return String:
     var a0 = ary[0],
         rv = (ary.length < 2 && (isString(a0) || isNumber(a0))) ? a0 // [2]
-           : uuhas(a0, "@") ? uuf.apply(this, ary)                   // [3]
+           : uuhas(a0, "@") ? uustringformat.apply(this, ary)        // [3]
            : (toArray.call(ary).map(function(v) {
                 return uujsonencode(v, 0, 1);
               }).join(", ") || "undefined");                         // [1][4-9]
