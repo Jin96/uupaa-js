@@ -1,0 +1,146 @@
+<!DOCTYPE html><html lang="ja"><head>
+<title></title>
+<style>
+body {
+  margin:0;
+  padding:0;
+  overflow:hidden;
+  background:#333;
+}
+canvas{
+  background:#000;
+  position:absolute;
+  top:30px;
+  left:30px;
+}
+#fps{
+  background:black;
+  color:white;
+  padding:.5em;
+  display:inline-block;
+  font-size:80%;
+  width:5em;
+  text-align:center;
+  border-radius:5px;
+  position:absolute;
+  top:0;
+  left:0;
+}
+</style>
+</head>
+<body>
+<canvas id="world" width="400" height="400"></canvas><div id="fps"></div>
+<script>
+// forked from uupaa's "forked from: Particle 30000" http://jsdo.it/uupaa/wfAT
+// 2010/12/23 update
+
+// forked from uupaa's "Particle 30000" http://jsdo.it/uupaa/f90Y
+// forked from http://wonderfl.net/c/436W/
+// forked from os0x's "Particle 10000" http://jsdo.it/os0x/30Pg
+
+// 3万にしてみた。色々手を入れるうちに原型が旅に出てしまった
+// 覚えている箇所に【最適化】コメント入れた
+
+var _particles = 30000;
+
+if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+    _particles = 5000;
+}
+
+var _canvas = document.getElementById("world");
+var _ctx = _canvas.getContext("2d");
+var _width = _canvas.width;
+var _height = _canvas.height;
+if (1) {
+    var _particle = window.Float32Array ? new Float32Array(_particles * 4)
+                                        : new Array(_particles * 4);
+} else {
+    var _particle = new Array(_particles * 4);
+}
+var _pixels = _ctx.getImageData(0, 0, _width, _height);
+
+// 【最適化】リンクリストを止めてArrayに(初期化速度と処理速度の向上)
+for (var i = 0, iz = _particles * 4; i < iz; i += 4) {
+    _particle[i    ] = Math.random() * _width;
+    _particle[i + 1] = Math.random() * _height;
+    _particle[i + 2] = 0;
+    _particle[i + 3] = 0;
+}
+
+var _mouseOffset = _canvas.getBoundingClientRect();
+var _mouse = { x: 0, y: 0 };
+
+// 【最適化】毎回getBoundingClientRectを呼ばずに事前計算(追従性向上)
+_canvas.onmousemove = function(e) {
+    _mouse.x = e.pageX - _mouseOffset.left;
+    _mouse.y = e.pageY - _mouseOffset.top;
+};
+
+setInterval(function() {
+    var particle = _particle,
+        height = _height,
+        width = _width,
+        data = _pixels.data,
+        mx = _mouse.x,
+        my = _mouse.y,
+        i, iz, j, x, y, vx, vy, dx, dy, acc;
+
+// 【最適化】Alphaを半分にすることで「canvas全体クリア」ステップを省略
+// 【最適化】ループ展開でfps +5～10ぐらい稼いでる
+
+    // poormans-effect (alpha effect)
+    for (i = 3, iz = data.length; i < iz; i += 32) {
+        data[i     ] >>= 2;
+        data[i +  4] >>= 2;
+        data[i +  8] >>= 2;
+        data[i + 12] >>= 2;
+        data[i + 16] >>= 2;
+        data[i + 20] >>= 2;
+        data[i + 24] >>= 2;
+        data[i + 28] >>= 2;
+    }
+
+    for (i = 0, iz = particle.length; i < iz; i += 4) {
+
+// 【最適化】変数アクセスの軽減(なんか見づらいね)
+
+        vx = particle[i + 2];
+        vy = particle[i + 3];
+        dx = mx - (x = particle[i    ]) | 0;
+        dy = my - (y = particle[i + 1]) | 0;
+
+        acc = 50 / (dx * dx + dy * dy);
+        x += (vx += acc * dx);
+        y += (vy += acc * dy);
+
+        particle[i    ] = x = x > width  ? 0 : x < 0 ? width  - 1 : x,
+        particle[i + 1] = y = y > height ? 0 : y < 0 ? height - 1 : y,
+        particle[i + 2] = vx * 0.96;
+        particle[i + 3] = vy * 0.96;
+
+// 【最適化】紫のドットを打つ, alpha=200 は適当
+        j = ((x | 0) + (y | 0) * width) * 4;
+        data[j] = data[j + 2] = 230;
+        data[j + 3] = 200;
+    }
+
+    ++fpsCount === 60 && updatefps();
+
+    _ctx.putImageData(_pixels, 0, 0);
+}, 0);
+
+var fpsCount = 0;
+var fps = {
+    view: document.getElementById('fps'),
+    last: +new Date
+};
+function updatefps() {
+    var last = fps.last;
+
+    fps.last = +new Date;
+    fps.view.innerHTML = 'FPS '+ (1000 / ((fps.last - last) / fpsCount)).toFixed(2);
+    fpsCount = 0;
+}
+</script>
+</body>
+</html>
