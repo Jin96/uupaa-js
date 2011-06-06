@@ -5073,7 +5073,7 @@ function uuClass(className,      // @param String: "Class"
     };
     uuClass[Class][_prototype] = protoIsFunction ? { init: protoMember }
                                                  : protoMember || {};
-    staticMember && uumix(uuClass[className], staticMember);
+    staticMember && uumix(uuClass[Class], staticMember);
 
     if (Super && protoMember && !protoIsFunction) { // [2]
         tmp = function() {};
