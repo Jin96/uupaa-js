@@ -9,6 +9,7 @@ $compiler    = "g";             // default compiler (-g / -m / -y)
 $catfood     = "catfood.js";    // temporary file (lazy build)
 $castoff     = array();         // "form,canvas,..."
 $castoffAll  = array(
+    // -off form/snipper/image/color/...
     "form", "snippet", "image", "color",
     "test", "fx", "ajax",
     "junction",
@@ -112,8 +113,10 @@ function stripCodeBlock($js, $mobile, $castoff) {
     //          ...
     //      }@ident
     foreach ($copiedArray as $ident) {
-        $js = preg_replace('/\{@' . $ident . '(?:[^\n]*)\}@'      . $ident . '/',   ' ', $js);
-        $js = preg_replace('/\{@' . $ident . '(?:[^\n]*)\n.*?\}@' . $ident . '/ms', ' ', $js);
+//      $js = preg_replace('/\{@' . $ident . '(?:[^\n]*)\}@'      . $ident . '/',   ' ', $js);
+//      $js = preg_replace('/\{@' . $ident . '(?:[^\n]*)\n.*?\}@' . $ident . '/ms', ' ', $js);
+        $js = preg_replace('/\{@' . $ident . '[\s|\n](?:[^\n]*)\}@'      . $ident . '[\s|\n]/',   ' ', $js);
+        $js = preg_replace('/\{@' . $ident . '[\s|\n](?:[^\n]*)\n.*?\}@' . $ident . '[\s|\n]/ms', ' ', $js);
     }
     return $js;
 }
