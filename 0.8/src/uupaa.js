@@ -12722,8 +12722,6 @@ uu.config.ui.disable || uu.ready(function(uu) {
              ".SliderV100":  format(fmt, img, -270, -15, relative,  20, 114),
              ".SliderV50":   format(fmt, img, -290, -15, relative,  20,  64),
              ".SliderVGrip": format(fmt, img, -250,   0, absolute,  18,  13),
-             ".SliderHGrip": format(fmt, img,    0,   0, absolute,  13,  18),
-
              ".SliderT50":   format(fmt, img,  -36, -80, relative,  64,  20) +
                              ";border:1px solid gray;-webkit-border-radius:5px" });
     // focus outline
