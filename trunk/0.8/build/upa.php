@@ -113,10 +113,8 @@ function stripCodeBlock($js, $mobile, $castoff) {
     //          ...
     //      }@ident
     foreach ($copiedArray as $ident) {
-//      $js = preg_replace('/\{@' . $ident . '(?:[^\n]*)\}@'      . $ident . '/',   ' ', $js);
-//      $js = preg_replace('/\{@' . $ident . '(?:[^\n]*)\n.*?\}@' . $ident . '/ms', ' ', $js);
-        $js = preg_replace('/\{@' . $ident . '[\s|\n](?:[^\n]*)\}@'      . $ident . '[\s|\n]/',   ' ', $js);
-        $js = preg_replace('/\{@' . $ident . '[\s|\n](?:[^\n]*)\n.*?\}@' . $ident . '[\s|\n]/ms', ' ', $js);
+        $js = preg_replace('/\{@' . $ident . '\b(?:[^\n]*)\}@'      . $ident . '\b/',   ' ', $js);
+        $js = preg_replace('/\{@' . $ident . '\b(?:[^\n]*)\n.*?\}@' . $ident . '\b/ms', ' ', $js);
     }
     return $js;
 }
