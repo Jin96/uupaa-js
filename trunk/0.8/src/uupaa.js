@@ -5182,7 +5182,7 @@ function uumsgbind(instance) { // @param Instance: class instance
 
 // MsgPump.unbind
 function uumsgunbind(instance) { // @param Instance: class instance
-    delete this.db[instance.uuguid];
+    delete this.addr[instance.uuguid];
     this.cast = uukeys(this.addr);
 }
 
