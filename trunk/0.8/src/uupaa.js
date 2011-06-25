@@ -1621,7 +1621,6 @@ uu.msg = new MsgPump();             // uu.msg - MsgPump instance
 // --- Junction class ---
 uuClass("Junction", {
     init:           JunctionInit,   // uu.junction(race:Number, item:Number, callback:CallbackFunction)
-                                    //   callback(values:MixArray, ok:Boolean)
     ok:             JunctionOK,     // ok(value:Mix = void):this
     ng:             JunctionNG,     // ng(value:Mix = void):this
     judge:          JunctionJudge   // judge():this
