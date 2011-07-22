@@ -43,7 +43,7 @@ System Event の発火状態を保持するプロパティの一覧です。
 || *uu.ready.getAttribute*      <br />right getAttribute                    ||       ||       || o     || o        || o         || o        || o        ||
 || *uu.ready.!StringIndexer*    <br />String`[`indexer`]` ready             ||       ||       || o     || o        || o         || o        || o        ||
 || *uu.ready.style.inlineBlock* <br />style.inlineBlock ready               ||       ||       || o     || o        || o         || o        || o        ||
-|| *uu.ready.innerHTML.style*   <br />hasNoParentNode.innerHTML = `"<style></style>"` ready || || ||   || ?        || o         || o        || o        ||
+|| *uu.ready.innerHTML.style*   <br />hasNoParentNode.innerHTML = `"<style></style>"` ready || || ||   || o        || o         || o        || o        ||
 || *uu.ready.cloneNode.attr*    <br />ref attribute                         ||       ||       ||       ||          ||           ||          ||          ||
 || *uu.ready.cloneNode.data*    <br />ref node["data-`*`"]                  || o     || o     || o     ||          ||           ||          ||          ||
 || *uu.ready.cloneNode.event*   <br />ref DOM Event                         || o     || o     || o     ||          ||           ||          ||          ||
