@@ -27,7 +27,7 @@ System Event の発火状態を保持するプロパティの一覧です。
 全て Boolean 型です。機能が利用可能なら true になり、利用できない場合は false になります。
 
 # o = true, space = false
-||                                                                          || *IE6* || *IE7* || *IE8* || *IE9pp4* || *Gecko1.9.0+* || *!WebKit525+* || *Opera9.5+* ||
+||                                                                          || *IE6* || *IE7* || *IE8* || *IE9*    || *Gecko1.9.0+* || *!WebKit525+* || *Opera9.5+* ||
 || *uu.ready.color.rgba*  <br/>{ color: rgba(0,0,0,0) } ready               ||       ||       ||       || o        || o         || o        || o(10+)   ||
 || *uu.ready.color.hsla*  <br/>{ color: hsla(0,0%,0%,0) } ready             ||       ||       ||       ||          || o         || o        || o(10+)   ||
 || *uu.ready.color.transparent*  <br/>{ color: transparent } ready          ||       ||       ||       || o        || o         || o        || o(10+)   ||
@@ -44,9 +44,9 @@ System Event の発火状態を保持するプロパティの一覧です。
 || *uu.ready.!StringIndexer*    <br />String`[`indexer`]` ready             ||       ||       || o     || o        || o         || o        || o        ||
 || *uu.ready.style.inlineBlock* <br />style.inlineBlock ready               ||       ||       || o     || o        || o         || o        || o        ||
 || *uu.ready.innerHTML.style*   <br />hasNoParentNode.innerHTML = `"<style></style>"` ready || || ||   || ?        || o         || o        || o        ||
-|| *uu.ready.cloneNode.attr*    <br />ref attribute                         ||       ||       ||       || o        ||           ||          ||          ||
-|| *uu.ready.cloneNode.data*    <br />ref node["data-`*`"]                  || o     || o     || o     || o        ||           ||          ||          ||
-|| *uu.ready.cloneNode.event*   <br />ref DOM Event                         || o     || o     || o     || o        ||           ||          ||          ||
+|| *uu.ready.cloneNode.attr*    <br />ref attribute                         ||       ||       ||       ||          ||           ||          ||          ||
+|| *uu.ready.cloneNode.data*    <br />ref node["data-`*`"]                  || o     || o     || o     ||          ||           ||          ||          ||
+|| *uu.ready.cloneNode.event*   <br />ref DOM Event                         || o     || o     || o     ||          ||           ||          ||          ||
 
   * uu.ready.filter - スタンドアローン版のIEや、正規の手順以外でインストールされたIEではfalseになる可能性があります。
   * uu.ready.!ArraySlice - Array.prototype.slice.call(_!FakeArray_) が利用可能なら true になります。
