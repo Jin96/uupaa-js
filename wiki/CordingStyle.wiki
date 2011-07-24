@@ -41,6 +41,15 @@ uupaa.js は [http://webkit.org/coding/coding-style.html WebKit]のコーディ�
   * !NumberArray は数値だけを要素に持つ配列です。`[` 123, ... `]`
   * !IgnoreCaseString は大小文字を区別しない文字列です。
   * 上記以外にも多くの型が存在します。ほとんどのケースで 形容詞 + 基本型 + コレクション型の形をとっており、CSSSelectorExpressionString は CSSセレクタ式の文字列、TimerIDArray は幾つかの タイマーID を入れるための配列 となります。
+{{{
+    var stringArray = ["a", "b", "c"],
+        numberArray = [0, 1, 2],
+        callback = funtion() {},
+        timerIDArray = [];
+
+    timerIDArray.push(setTimeout(callback, 100));
+    timerIDArray.push(setTimeout(callback, 200));
+}}}
 
 == 演算子の後ろで改行する ==
 JavaScriptは行末のセミコロンを自動的に補完するため、
