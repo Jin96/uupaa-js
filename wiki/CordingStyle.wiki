@@ -177,12 +177,12 @@ IE6 や IE7 のデバッガ( [http://blogs.msdn.com/b/ie/archive/2004/10/26/2479
     // good
     function() {
 
-        var withCRLF; // 改行を一つ入れてから書き始める
+        var withLF; // 改行を一つ入れてから書き始める
     }
 
     // wrong
     function() {
-        var noCRLF; // 改行なしで書き始める
+        var noLF; // 改行なしで書き始める
     }
 }}}
 
