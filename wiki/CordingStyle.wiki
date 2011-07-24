@@ -14,6 +14,8 @@ uupaa.js は [http://webkit.org/coding/coding-style.html WebKit]のコーディ�
 {{{
     function uuhash(key,     // @param Hash/String: key
                     value) { // @param Mix(= void): value
+
+        ...
     }
 }}}
   * void は undefined の別名です。
@@ -33,6 +35,7 @@ uupaa.js は [http://webkit.org/coding/coding-style.html WebKit]のコーディ�
   * !FakeArray は !NodeList や arguments などを総称する型です。!FakeArray は Array ではありませんが、 !FakeArray`[`indexer`]` でアクセスが可能で length プロパティを持ちます。uu.array(!FakeArray) で Array に変換できます。!FakeArray は Array Like とも呼ばれます。
 {{{
     function() {
+
         var fakeArray1 = arguments, // Arguments型 かつ FakeArray型
             fakeArray2 = document.getElementByTagName("*"); // NodeList型 かつ FakeArray型
     }
@@ -92,10 +95,10 @@ JavaScriptは行末のセミコロンを自動的に補完するため、
 
 
 == if や for のブレス( {} )は省略禁止 ==
-文法レベルでコードを短縮するのは Minifier の仕事であり、
-コードの修正でバグが入り込む危険性を予め埋めこむことにもなり、修正に対する耐久性が低い"ナイーブ"なコードになります。
+文法レベルでコードを短縮するのは Minifier の仕事です。
+うかつに { } を省略すると、コードのメンテナンスでバグが入り込む余地を前もって提供する事になり、修正に対する耐久性が低い"ナイーブ"なコードになります。
 
-ブレスを省略すると、狙ったポイントにブレークポイントが貼れなくなり、デバッグ効率も低下します。
+ブレスを省略すると、狙ったポイントにブレークポイントも貼れなくなります。デバッグ効率も低下します。
 
 {{{
     // good
@@ -125,6 +128,7 @@ function のブレス( { ) は、理由が無い限り function と同じ行に�
 {{{
     // good
     function() {
+
         ...
     }
 
@@ -136,6 +140,22 @@ function のブレス( { ) は、理由が無い限り function と同じ行に�
 
     // wrong
     function() { ... }
+}}}
+
+== function() { の後ろで改行する ==
+IE6 や IE7 のデバッグツールは、function() { の後に改行コードが存在しないとブレークポイントを貼れません。圧縮されたコードが IE6 や IE7 でデバッグできない(ブレークポイントが貼れない)のもこれが理由です。
+
+{{{
+    // good
+    function() {
+
+        var withCRLF; // 改行を一つ入れてから書き始める
+    }
+
+    // wrong
+    function() {
+        var noCRLF; // 改行なしで書き始める
+    }
 }}}
 
 == 厳密比較演算子を使う ==
@@ -176,6 +196,7 @@ function のブレス( { ) は、理由が無い限り function と同じ行に�
 {{{
     // good
     function() {
+
         var nodeList, node, i = -1;
         
         nodeList = document.getElementByTagName("*");
@@ -186,6 +207,7 @@ function のブレス( { ) は、理由が無い限り function と同じ行に�
 
     // bad
     function() {
+
         var nodeList;
 
         nodeList = document.getElementByTagName("*");
@@ -221,6 +243,7 @@ var の後ろには一つ以上の空行をおきます。
      var hit = false;
 
      function eventHandler(evt) {
+
          if (evt.target === node) {
              hit = true;
          } else {
@@ -230,6 +253,7 @@ var の後ろには一つ以上の空行をおきます。
 
      // bad
      function eventHandler(evt) {
+
          if (evt.target === node) {
              node.className += " hit ";
          } else {
