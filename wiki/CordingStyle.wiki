@@ -227,10 +227,10 @@ IE6 や IE7 のデバッガ( [http://blogs.msdn.com/b/ie/archive/2004/10/26/2479
     // good
     function() {
 
-        var nodeList, node, i = -1;
-        
-        nodeList = document.getElementByTagName("*");
-        while ( (node = nodeList[++i]) ) {
+        var node, i = 0,
+            nodeList = document.getElementByTagName("*");
+
+        while ( (node = nodeList[i++]) ) {
             ...
         } 
     }
