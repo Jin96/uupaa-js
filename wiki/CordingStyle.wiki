@@ -267,7 +267,7 @@ var の後ろには一つ以上の空行をおきます。
 }}}
 
 == 状態をnode.classNameに保存しない ==
-内部的な状態を node.className に保存することを禁止します。変数を使ってください。
+内部的な状態を node.className に保存することを禁止します。node["data-***"] を使うか、変数を使ってください。
 {{{
      // good
      var hit = false;
