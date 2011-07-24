@@ -63,8 +63,8 @@ uupaa.js は [http://webkit.org/coding/coding-style.html WebKit]のコーディ�
     function handleEvent(evt) { // DOM標準のあらゆるイベントを受け取るハンドラ
     }
 
-    // wrong
-    function onevent(e) { // DOM非標準なオレオレ命名による、何かを受け取るハンドラ
+    // bad
+    function onevent(e) { // DOM非標準な命名による、何かを受け取るハンドラ
     }
 
 
