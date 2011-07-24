@@ -53,6 +53,9 @@ uupaa.js は [http://webkit.org/coding/coding-style.html WebKit]のコーディ�
     timerIDArray.push(setTimeout(callback, 100));
     timerIDArray.push(setTimeout(callback, 200));
 }}}
+  * DOM Element は省略せず node とします。
+  * DOM Event は event または evt と省略します。Event や Element を e と一文字に省略するのは禁止です。e は最も多用される文字であり、視認性が悪いうえに一括置換漏れといったミスも誘発します。 
+
 
 == 演算子の後ろで改行する ==
 JavaScriptは行末のセミコロンを自動的に補完するため、
