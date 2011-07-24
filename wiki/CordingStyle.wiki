@@ -21,14 +21,15 @@ uupaa.js は [http://webkit.org/coding/coding-style.html WebKit]のコーディ�
 {{{
     var hash = { key: "value" };
 }}}
+  * !NodeList は document.getElementsByTagName() などが返す 動的な(liveな)ノードリストです。
+  * !NodeArray は uu.tag(), uu.klass(), uu.query() などが返す 静的な(staticな)ノードの配列です。
   * Element は配列の要素を意味します。DOM Element は Node と呼び、配列の要素(Array Elements)とは区別します。
 {{{
-    var node = document.getElementsByTagName("head")[0];
+    var nodeList = document.getElementsByTagName("head");
+    var node = nodeList[0];
     var nodeArray = uu.tag("*");
     var element = [0, 1, 2][0];
 }}}
-  * !NodeList は document.getElementsByTagName() などが返す 動的な(liveな)ノードリストです。
-  * !NodeArray は uu.tag(), uu.klass(), uu.query() などが返す 静的な(staticな)ノードの配列です。
   * !FakeArray は !NodeList や arguments などを総称する型です。!FakeArray は Array ではありませんが、 !FakeArray`[`indexer`]` でアクセスが可能で length プロパティを持ちます。uu.array(!FakeArray) で Array に変換できます。!FakeArray は Array Like とも呼ばれます。
 {{{
     function() {
