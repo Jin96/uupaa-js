@@ -6,6 +6,7 @@ uupaa.js は [http://webkit.org/coding/coding-style.html WebKit]のコーディ�
 
 = 独自ルール =
 以下は uupaa.js の独自ルールです。
+このルールは、多様なバックボーンを持つ開発者が気持ちよく作業できるように。また、コードのクオリティを向上させる最低限のヒントを明文化したものです。
 
 == 語彙(ボキャブラリ) ==
 以下の用語があります。
@@ -53,9 +54,10 @@ uupaa.js は [http://webkit.org/coding/coding-style.html WebKit]のコーディ�
     timerIDArray.push(setTimeout(callback, 100));
     timerIDArray.push(setTimeout(callback, 200));
 }}}
-  * イベントを受け取るコールバックはイベントハンドラ(event handler)と呼びます。あらゆるイベントを受け取るイベントハンドラは handlerEvent とします。これはDOM標準の名前です。特定のイベントを受け取るためにユーザが用意するハンドラは、handle + イベント名 とします。
+  * イベントを受け取るコールバックをイベントハンドラ(event handler)と呼びます。あらゆるイベントを受け取るイベントハンドラはDOM標準に従い handlerEvent とします。特定のイベントを受け取る場合は handle + イベント名 とします。
   * DOM Element は省略せず node とします。
-  * DOM Event は event または evt と省略します。Event や Element を e と一文字に省略するのは禁止です。e は最も多用される文字であり、視認性が悪いうえに一括置換漏れといったミスも誘発します。 
+  * DOM Event は event または evt と省略します。
+  * Event や Element を e などのように一文字に省略するのは禁止です。e などは最も多用される文字であり、視認性が悪いうえに一括置換漏れといったミスを誘発します。 
 {{{
     // good
     function handleEvent(evt) { // DOM標準のあらゆるイベントを受け取るハンドラ
