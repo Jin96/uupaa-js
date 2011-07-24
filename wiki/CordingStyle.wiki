@@ -53,7 +53,7 @@ uupaa.js は [http://webkit.org/coding/coding-style.html WebKit]のコーディ�
     timerIDArray.push(setTimeout(callback, 100));
     timerIDArray.push(setTimeout(callback, 200));
 }}}
-  * イベントを受け取るコールバックはイベントハンドラ(event handler)と呼びます。DOMの仕様では、あらゆるイベントを受け取るハンドラには handlerEvent という名前が利用できます。特定のイベントを受け取るためにユーザが用意する場合は handle + イベント名といった命名にします。
+  * イベントを受け取るコールバックはイベントハンドラ(event handler)と呼びます。あらゆるイベントを受け取るイベントハンドラは handlerEvent とします。これはDOM標準の名前です。特定のイベントを受け取るためにユーザが用意するハンドラは、handle + イベント名 とします。
   * DOM Element は省略せず node とします。
   * DOM Event は event または evt と省略します。Event や Element を e と一文字に省略するのは禁止です。e は最も多用される文字であり、視認性が悪いうえに一括置換漏れといったミスも誘発します。 
 {{{
