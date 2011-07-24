@@ -1,4 +1,4 @@
-#summary JavaScript Cording Style Guide
+#summary JavaScript Coding Style Guide
 
 <wiki:toc max_depth="2" />
 
