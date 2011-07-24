@@ -173,7 +173,7 @@ function のブレス( { ) は、理由が無い限り function と同じ行に�
 }}}
 
 == function() の後ろに改行を入れる ==
-IE6 や IE7 のデバッガ( [http://blogs.msdn.com/b/ie/archive/2004/10/26/247912.aspx Miscrosoft Script Debugger] )は、function() { の後に改行コードが存在しないとブレークポイントを貼れません。圧縮されたコードが IE6 や IE7 でデバッグできない(ブレークポイントが貼れない)のもこれが理由です。IE6 や IE7 と無関係でいられるコードでは、このルールに従う必要はありません。
+IE6 や IE7 のデバッガ( [http://blogs.msdn.com/b/ie/archive/2004/10/26/247912.aspx Miscrosoft Script Debugger] )は、function() { の後に改行コードが存在しないとブレークポイントが設定できません。圧縮されたコードが IE6 や IE7 でデバッグできない(ブレークポイントが設定できない)のもこれが理由です。IE6 や IE7 と無関係でいられるコードでは、このルールに従う必要はありません。
 
 {{{
     // good
