@@ -1,6 +1,6 @@
 #summary JavaScript Coding Style Guide
 
-<wiki:toc max_depth="2" />
+<wiki:toc max_depth="3" />
 
 uupaa.js は [http://webkit.org/coding/coding-style.html WebKit]のコーディングスタイルをベースにしています。
 
