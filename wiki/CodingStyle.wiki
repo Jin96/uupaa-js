@@ -16,8 +16,8 @@ WEB+DB PRESS VOL.57 ～ VOL.61 の連載でも、以下のルールとほぼ同�
 
   * Mix はあらゆる型を意味します。
 {{{
-    function uuhash(key,     // @param Hash/String: key
-                    value) { // @param Mix(= void): value
+    function hash(key,     // @param Hash/String: key
+                  value) { // @param Mix(= void): value
 
         ...
     }
