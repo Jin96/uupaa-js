@@ -16,13 +16,12 @@ WEB+DB PRESS VOL.57 ～ VOL.61 の連載でも、以下のルールとほぼ同�
 
   * Mix はあらゆる型を意味します。
 {{{
-    function hash(key,     // @param Hash/String: key
-                  value) { // @param Mix(= void): value
+    function hash(key,     // @arg Hash/String: key
+                  value) { // @arg Mix(= undefined): value
 
         ...
     }
 }}}
-  * void は undefined の別名です。
   * Hash は key/value ストアに特化した Object の別名です。データの入れ物として意識する場合に Hash と呼びます。
 {{{
     var hash = { key: "value" };
