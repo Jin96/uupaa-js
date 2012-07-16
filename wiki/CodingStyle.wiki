@@ -27,15 +27,15 @@ WEB+DB PRESS VOL.57 ～ VOL.61 の連載でも、以下のルールとほぼ同�
     var hash = { key: "value" };
 }}}
   * !NodeList は document.getElementsByTagName() などが返す 動的な(liveな)ノードリストです。
-  * !NodeArray は uu.tag(), uu.klass(), uu.query() などが返す 静的な(staticな)ノードの配列です。
+  * !NodeArray は uu.query() などが返す 静的な(staticな)ノードの配列です。
   * Element は配列の要素を意味します。DOM Element は Node と呼び、配列の要素(Array Elements)とは区別します。
 {{{
     var nodeList = document.getElementsByTagName("head"),
         node = nodeList[0],
-        nodeArray = uu.tag("*"),
+        nodeArray = uu.query("div"),
         element = [0, 1, 2][0];
 }}}
-  * !FakeArray は !NodeList や arguments などを総称する型です。!FakeArray は Array ではありませんが、 !FakeArray`[`indexer`]` でアクセスが可能で length プロパティを持ちます。uu.array(!FakeArray) で Array に変換できます。!FakeArray は Array Like とも呼ばれます。
+  * !FakeArray は !NodeList や arguments などを総称する型です。!FakeArray は Array ではありませんが、 !FakeArray`[`indexer`]` でアクセスが可能で length プロパティを持ちます。!FakeArray は Array Like とも呼ばれます。
 {{{
     function() {
 
@@ -58,11 +58,11 @@ WEB+DB PRESS VOL.57 ～ VOL.61 の連載でも、以下のルールとほぼ同�
 }}}
   * イベントを受け取るコールバックをイベントハンドラ(event handler)と呼びます。あらゆるイベントを受け取るイベントハンドラはDOM標準に従い handlerEvent とします。特定のイベントを受け取る場合は handle + イベント名 とします。
   * DOM Element は省略せず node とします。
-  * DOM Event は event または evt と省略します。
+  * DOM Event は event または ev と省略します。
   * Event や Element を e などのように一文字に省略するのは禁止です。e などは最も多用される文字であり、視認性が悪いうえに一括置換漏れといったミスを誘発します。 
 {{{
     // good
-    function handleEvent(evt) { // DOM標準のあらゆるイベントを受け取るハンドラ
+    function handleEvent(ev) { // DOM標準のあらゆるイベントを受け取るハンドラ
     }
 
     // bad
@@ -71,9 +71,9 @@ WEB+DB PRESS VOL.57 ～ VOL.61 の連載でも、以下のルールとほぼ同�
 
 
     // good 
-    function handleClick(evt) { // click イベントを受け取るハンドラ
+    function handleClick(ev) { // click イベントを受け取るハンドラ
 
-        var node = evt.target;
+        var node = ev.target;
     }
 
     // bad
@@ -203,7 +203,7 @@ IE6 や IE7 のデバッガ( [http://blogs.msdn.com/b/ie/archive/2004/10/26/2479
 }}}
 
 
-以下のようなケースでは == の利用も合法です。== を利用する場合はその理由をコメントで記述してください。コメントが無い == の利用は禁止します。
+以下のようなケースでは == の利用も合法です。== を利用する場合はその理由をコメントで記述してください。コメントを伴わない == の利用は禁止します。
 {{{
     // good, null または undefined かを調べる
     if (a == null) { // null or undefined
@@ -216,7 +216,7 @@ IE6 や IE7 のデバッガ( [http://blogs.msdn.com/b/ie/archive/2004/10/26/2479
     }
 }}}
 
-なお、ショートコードを目的とした == の利用も合法です。
+なお、ショートコード(コードgolf)を目的とした == の利用は合法です。
 
 == var はスコープ内に一つだけ ==
 基本的に var はスコープ内に1つだけ設置できます。コードサイズや速度的な理由がある場合はもう1つだけ設置できます(最大で2つまで)。
@@ -225,7 +225,6 @@ IE6 や IE7 のデバッガ( [http://blogs.msdn.com/b/ie/archive/2004/10/26/2479
 {{{
     // good
     function() {
-
         var node, i = 0,
             nodeList = document.getElementByTagName("*");
 
@@ -234,9 +233,9 @@ IE6 や IE7 のデバッガ( [http://blogs.msdn.com/b/ie/archive/2004/10/26/2479
         } 
     }
 
+
     // bad
     function() {
-
         var nodeList;
 
         nodeList = document.getElementByTagName("*");
@@ -266,14 +265,14 @@ var の後ろには一つ以上の空行をおきます。
 }}}
 
 == 状態をnode.classNameに保存しない ==
-内部的な状態を node.className に保存することを禁止します。Node と強く関係するものであれば、uu.data() を使って Node 自体にデータを保存するか、Node と強く関係しない場合は、オブジェクトや変数にデータを格納してください。
+内部的な状態を node.className に保存することを禁止します。
 {{{
      // good
      var hit = false;
 
-     function eventHandler(evt) {
+     function eventHandler(ev) {
 
-         if (evt.target === node) {
+         if (ev.target === node) {
              hit = true;
          } else {
              hit = false;
@@ -281,9 +280,9 @@ var の後ろには一つ以上の空行をおきます。
      }
 
      // bad
-     function eventHandler(evt) {
+     function eventHandler(ev) {
 
-         if (evt.target === node) {
+         if (ev.target === node) {
              node.className += " hit ";
          } else {
              node.className = (" " + node.className + " ").replace(/ hit /, "");
@@ -301,3 +300,4 @@ Strict Mode セーフなコードを記述してください。
 
 == uu や data-uu で始まる識別子は予約語 ==
 uu や data-uu で始まる識別子は uupaa.js の予約語です。
+mm や data-mm で始まる識別子は mofmof.js の予約語です。
