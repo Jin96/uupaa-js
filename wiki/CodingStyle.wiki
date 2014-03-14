@@ -14,10 +14,10 @@ WEB+DB PRESS VOL.57 ～ VOL.61 の連載でも、以下のルールとほぼ同�
 == 語彙(ボキャブラリ) ==
 以下の用語があります。
 
-  * Mix はあらゆる型を意味します。
+  * Mix または Any はあらゆる型を意味します。
 {{{
     function hash(key,     // @arg Hash/String: key
-                  value) { // @arg Mix(= undefined): value
+                  value) { // @arg Any(= undefined): value
 
         ...
     }
@@ -59,7 +59,7 @@ WEB+DB PRESS VOL.57 ～ VOL.61 の連載でも、以下のルールとほぼ同�
   * イベントを受け取るコールバックをイベントハンドラ(event handler)と呼びます。あらゆるイベントを受け取るイベントハンドラはDOM標準に従い handlerEvent とします。特定のイベントを受け取る場合は handle + イベント名 とします。
   * DOM Element は省略せず node とします。
   * DOM Event は event または ev と省略します。
-  * Event や Element を e などのように一文字に省略するのは禁止です。e などは最も多用される文字であり、視認性が悪いうえに一括置換漏れといったミスを誘発します。 
+  * Event や Element を e の一文字に省略するのは禁止です。e は多用されるため一括置換漏れといったミスを誘発します。 
 {{{
     // good
     function handleEvent(ev) { // DOM標準のあらゆるイベントを受け取るハンドラ
@@ -216,38 +216,6 @@ IE6 や IE7 のデバッガ( [http://blogs.msdn.com/b/ie/archive/2004/10/26/2479
     }
 }}}
 
-== var はスコープ内に一つだけ ==
-基本的に var はスコープ内に1つだけ設置できます。コードサイズや速度的な理由がある場合はもう1つだけ設置できます(最大で2つまで)。
-
-場当たり的な変数宣言は低錬度なソースコードの特徴の一つです。工夫してください。
-{{{
-    // good
-    function() {
-        var node, i = 0,
-            nodeList = document.getElementByTagName("*");
-
-        while ( (node = nodeList[i++]) ) {
-            ...
-        } 
-    }
-
-
-    // bad
-    function() {
-        var nodeList;
-
-        nodeList = document.getElementByTagName("*");
-
-        var i = 0;
-        var length = nodeList.length;
-       
-        for (; i < length; i++) {
-            var node = nodeList[i];
-            
-            ...
-        }  
-    }
-}}}
 
 == var の後ろには空行を置く ==
 var の後ろには一つ以上の空行をおきます。
@@ -295,7 +263,3 @@ Strict Mode セーフなコードを記述してください。
     // bad
     var a = 3 * 200
 }}}
-
-== uu や data-uu で始まる識別子は予約語 ==
-uu や data-uu で始まる識別子は uupaa.js の予約語です。
-mm や data-mm で始まる識別子は mofmof.js の予約語です。
