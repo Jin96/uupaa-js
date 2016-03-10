@@ -1,0 +1,1 @@
+see: [CodingStyle](http://code.google.com/p/uupaa-js/wiki/CodingStyle)
